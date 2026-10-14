@@ -1,50 +1,47 @@
-# Consigne du jour – le nouveau texte « À propos » de l'accueil
+# Consigne du jour – préparer la clôture de l'hiver 2026 et l'archivage de ses copies
 
-> Écrite par Cowork le 14 octobre 2026 à 10 h 24 (Toronto, mesurée par `date`). L'ancienne consigne est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-12-lots-20-a-24.md`. Tu peux commiter ce fichier et le déplacement.
+> Écrite par Cowork le 14 octobre 2026 à 10 h 41 (Toronto, mesurée par `date`). L'ancienne consigne (le texte « À propos », avec le verdict de Cowork de 10 h 37) est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-14-accueil-a-propos.md`. Commite ce fichier et le déplacement avec ton lot.
 
 ## Où on en est
 
-1.200.0 en ligne depuis le 12 oct. ; `main` à `c03969bb` au moment de l'écriture. **Remesure avant de toucher.**
+`main` à `92f63708` au moment de l'écriture : le lot « À propos », relu par Cowork, conforme, non poussé ; le rouge Vitest de la sentinelle anti-cache est attendu jusqu'à la release du soir. **Remesure avant de toucher.** Une autre session écrit en parallèle le temps 3 de l'observation (`plans de travail/observation/`) : n'y touche pas.
 
-## Le mandat : un seul lot, du texte
+## La décision de Grégoire (14 oct. 2026, 10 h 39)
 
-Grégoire a réécrit le texte de présentation de la page d'accueil (l'encadré repliable rendu par `genererBanniereBienvenue()` dans `js/accueil.js`). **Les mots ci-dessous sont arrêtés par lui le 14 oct. 2026 : tu les recopies tels quels**, sans retouche de style. Seules libertés : apostrophes typographiques (’) comme le reste du fichier, et les espaces devant ? ! : « » selon la convention déjà en usage dans ce fichier.
+Question 1 du groupe 1 des décisions (`plans de travail/DECISIONS-A-PRENDRE-2026-10-11.md`, resté sur la branche `origin/claude/inspiring-mccarthy-99htj8`, absent de `main`) : son codex approche la limite de 2 Go (#992 : 1,33 Go le 29 sept. ; borne estimée début à mi-novembre, sur deux points). **Il clôt l'hiver 2026 pour pouvoir en archiver les copies** (#1028, en ligne depuis 1.186.0), en gardant toutes les données du trimestre. C'est une levée du moratoire sur la clôture (#622) **pour ce trimestre-là seulement** ; les autres trimestres restent sous moratoire tant que #622 n'est pas traité.
 
-### Ce qui change
+**Les gestes sur ses vraies données sont les siens** : mettre à jour son codex, clore, archiver le trimestre, vérifier, archiver les copies. Ton lot les prépare et les éprouve ailleurs ; il n'en fait aucun.
 
-1. **Le titre de la barre repliable** (`.banniere-bienvenue-titre`, dans le `<button>`) devient : `À propos`
-2. **Le corps** (`#banniere-bienvenue-corps`) est remplacé, de son début jusqu'à `${paragrapheCommunaute}` exclu, par ce qui suit, dans cet ordre. Le gras est indiqué par `**…**`.
+## Le mandat : un lot, trois parties
 
-- Ligne de tête, rendue comme « Par où commencer ? » (même classe) : **Bienvenue dans Labo Codex !**
-- Paragraphe : Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.
-- Paragraphe : L’application te propose de numériser ton travail et de traiter les micro-données que tu crées et recueilles dans ton enseignement et elle les rend visibles et interprétables. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.
-- Paragraphe : Il n’y a aucune intelligence artificielle dans l’application. Aucune décision n’est prise à ta place. L’outil ne fait que t’éclairer et ton jugement professionnel est souverain.
-- Paragraphe : Labo Codex n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.
-- Paragraphe : Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que d’habitude, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !
-- Ligne de tête (inchangée) : **Par où commencer ?**
-- Liste numérotée (même `<ol>` qu'aujourd'hui) :
-  1. **Pose ton cadre.** Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les crées une fois et l’application s’en sert par la suite.
-  2. **Conçois tes productions et tes évaluations.** Tu peux les élaborer seul·e ou les partager avec tes collègues.
-  3. **Apprends pas à pas.** Les tutoriels de Labo Codex, sur le blogue Codex Numeris, te montrent chaque étape en images.
-- Paragraphe (inchangé, garde la constante `QUESTION_ORTHOPEDAGOGUE`) : **Tu es orthopédagogue ?** Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.
-- Paragraphe (inchangé) : **Certains concepts sont nouveaux ?** Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».
-- Paragraphe, **sans** amorce en gras (l'ancienne « Ton courriel, une fois par mois. » disparaît) : Tu entres ton adresse de courriel, tu reçois un code et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à redemander de code. Tes données restent sur ton appareil. Il n’y a pas de commerce. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).
+### 1. Mesure en lecture seule : ce que pèsent les copies de l'hiver 2026
 
-### Ce qui ne change pas
+- Dans son dernier codex : le poids des copies de l'hiver 2026, celui des autres trimestres, le total. Lecture seule de l'archive (liste des entrées et de leurs tailles) : jamais d'ouverture dans l'application, jamais de copie du fichier. Si tu ne trouves pas le fichier, demande-lui où il est, en une seule question.
+- ⚠ Confidentialité : le rapport ne cite aucun nom de fichier ni d'élève, seulement des sommes par trimestre (règle 6 de `CLAUDE.md`).
+- Où vivent ces copies : dans le navigateur, ou dans son dossier sur disque ? Ce que le codex en emporte dans chaque cas, donc ce que l'archivage des copies allégera réellement.
+- La marge qui restera après : en Mo, et en semaines au rythme mesuré (dis sur combien de points repose le rythme).
 
-`paragrapheCommunaute` (l'encadré AQPC), les trois boutons, la mécanique de repli (`basculerBanniereBienvenue`, préférence `banniereAccueilRepliee`), l'`id` et les classes de la bannière, la carte de l'orthopédagogue en dessous.
+### 2. Le chemin complet, éprouvé au banc sur un trimestre fictif
 
-### À tenir à jour dans le même lot
+Dans l'ordre que l'écran impose : codex à jour → « Clore » → « Archiver le trimestre » → « Vérifier » → « Archiver les copies » → codex mis à jour, plus léger → « Rouvrir », puis « Clore » de nouveau, pour prouver que la clôture se reprend. Pour chaque étape : ce qui s'écrit (clés, champs), ce qui est refusé et pourquoi (`creerSnapshotRessources` qui refuse sur des cartouches non migrées, `refusImmediat`, trimestre actif…), ce que l'écran dit. Noms manifestement fictifs.
 
-- Le JSDoc de `genererBanniereBienvenue()` : son titre cite « Bienvenue dans Labo Codex » ; ajoute une ligne d'historique datée du 14 oct. 2026 (texte réécrit par Grégoire, titre « À propos »).
-- `tests/unit/sentinelle-accueil-porte-ortho-et-champ2-846.test.js` : `MOTS_BANDEAU` épingle l'ancien texte. Remplace-le par les mots ci-dessus (titre « À propos » compris), commentaire daté du 14 oct. Break-test : remets un mot de l'ancien texte dans le rendu, le test doit rougir.
-- Le bloc de jetons d'`index.html` (changement dans `js/`).
-- Si un document de `docs/` cite l'ancien texte : ne le touche pas, liste-le dans la demande de relecture sous « Documents à mettre à jour ».
+- Au passage : `archiverTrimestre` (`js/trimestres.js`) écrit `dateFin` à la date du jour. Cowork a lu que le calendrier se sert de `cadreCalendrier.dateFin`, pas de ce champ ; confirme qu'aucun écran ni calcul ne lit `trimestre.dateFin` comme la fin du trimestre.
+- Ce qui pourrait empêcher la clôture de l'hiver 2026 chez lui et se lit dans le code sans ses données : liste-le, avec le geste qui le lève.
+
+### 3. Ce qui se corrige sans lui, dans le même lot
+
+- « Clore » et « Rouvrir » parlent encore par `confirm()` et `alert()` (`js/trimestre-v2-liste.js`, `confirmerArchivage`, `confirmerDesarchivage`), laissés tels quels « à cause du moratoire » (#1037). Passe-les aux fenêtres et notifications de l'application, **avec les mots d'aujourd'hui, sans retouche** : un mot changé remonterait à Grégoire.
+- « La copie de sauvegarde que rien ne relit » (#622, selon la remesure du 11 oct.) : mesure ce qu'elle est ; si elle est morte, applique les trois issues de `CLAUDE.md`.
+- Rien d'autre. Toute trouvaille hors de ce chemin : issue 2, inscrire et continuer.
 
 ### Source ou stock
 
-Source seulement : du texte rendu, rien n'est écrit chez l'utilisateur. Une personne qui avait replié l'encadré le retrouve replié, sous son nouveau titre : c'est voulu.
+Source seulement : aucune donnée déjà écrite n'est réécrite. Les gestes sur l'hiver 2026 viendront après, de sa main.
+
+## Le livrable pour Grégoire : une porte terrain
+
+Skill `portes-terrain` : le markdown `plans de travail/PORTE-2026-10-14-clore-et-alleger-l-hiver-2026.md`, en gestes d'utilisateur, dans l'ordre, chacun avec ce qu'il doit voir et ce qui l'arrête (un refus, une différence à la vérification). Première rangée : mettre à jour son codex avant de toucher à quoi que ce soit. Dis sur quel appareil et dans quel navigateur la porte se passe (là où vit son espace réel). Cowork publie l'artefact jumeau.
 
 ## La méthode
 
-Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-14-accueil-a-propos.md` avec la ligne de changelog que tu proposes (les mots de la ligne « Nouvelles » remontent à Grégoire). **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire en gestes d'utilisateur : ce qu'il verra en ouvrant l'accueil.
+Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-14-clore-l-hiver-2026.md`. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire en gestes d'utilisateur : ce qu'il aura à faire, combien de temps cela prend, et combien de marge cela lui donne.

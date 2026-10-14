@@ -127,7 +127,8 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
         // #1018 (lot 8, 11 oct. 2026) : « Clore » n'est plus offert sur le trimestre actif (il y était
         // toujours refusé) ; il reste sur le trimestre disponible, une seule fois.
         expect(liste.match(/\{ label: 'Clore', action: 'confirmerArchivage'/g)).toHaveLength(1);
-        expect(liste).toContain('{ label: \'Rouvrir\', action: \'desarchiverTrimestre\'');
+        // 14 oct. 2026 : « Rouvrir » passe de nouveau par sa confirmation (sentinelle-1037).
+        expect(liste).toContain('{ label: \'Rouvrir\', action: \'confirmerDesarchivage\'');
     });
 
     it('nulle part un texte lu ne dit « désarchiver » (hors Nouvelles publiées)', () => {
@@ -210,17 +211,18 @@ describe('#1002 — clore ne télécharge plus de fichier (vrai choix 2)', () =>
 });
 
 describe('#1002 — un refus de clôture dit son motif, pas « undefined »', () => {
-    it('confirmerArchivage affiche le message du refus', () => {
+    it('confirmerArchivage affiche le message du refus', async () => {
         const alertes = [];
         const motif = 'Clôture refusée : les cartouches de 1 grille(s) (G1) n\'ont pas encore été migrées. Recharge l\'application, puis réessaie.';
         const win = chargerScript('js/trimestre-v2-liste.js', {
             obtenirTrimestres: () => [{ id: 'a2025', nom: 'Automne 2025' }],
             archiverTrimestre: () => ({ success: false, refus: 'cartouches-non-migrees', message: motif }),
-            confirm: () => true,
-            alert: (m) => alertes.push(m)
+            // 14 oct. 2026 : la fenêtre et la notification de l'application, plus confirm/alert.
+            uiDialogues: { confirmerAction: async () => true },
+            notifications: { erreur: (m) => alertes.push(m), succes() {} }
         });
 
-        win.confirmerArchivage('a2025');
+        await win.confirmerArchivage('a2025');
 
         expect(alertes).toEqual(['Erreur: ' + motif]);
     });

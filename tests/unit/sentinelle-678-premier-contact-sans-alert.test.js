@@ -10,9 +10,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 // les présences. Remesuré : 40 `alert()` dans les huit fichiers du parcours. Les 23 qu'un geste
 // atteint passent par les notifications de l'application (ou, pour le refus de supprimer un
 // cours, qui énumère ce qui s'y rattache, par sa fenêtre d'information) ; mots gardés.
-// Les 17 qui restent sont NOMMÉS ici, fonction par fonction, avec leur raison :
-//   trimestre-v2-liste.js ×7 — « Clore », « Rouvrir », archiverTrimestreActif : moratoire de
-//     l'archivage (#622), comme au lot 17 (#1037) ;
+// Les 17 qui restaient sont NOMMÉS ici, fonction par fonction, avec leur raison (10 depuis le
+// 14 oct. 2026 : les 7 de trimestre-v2-liste.js — « Clore », « Rouvrir », archiverTrimestreActif,
+// gardés au moratoire de l'archivage #622 — sont partis avec la clôture de l'hiver 2026) :
 //   trimestre-v2-cours.js ×5 — modifier/dupliquer un cours (aucun déclencheur, mesuré le 1er sept.
 //     et remesuré) ; supprimerCoursV2 : garde de repli, ne parle que si cours.js manque ;
 //   trimestre-v2-horaires.js ×3 — confirmerSeanceV2 : aucun appelant, et son bouton
@@ -44,7 +44,7 @@ describe('#678 · A — les alertes restantes du parcours sont toutes nommées',
         'js/cours.js': {},
         'js/trimestre-v2-init.js': {},
         'js/saisie-presences.js': {},
-        'js/trimestre-v2-liste.js': { confirmerArchivage: 3, confirmerDesarchivage: 3, archiverTrimestreActif: 1 },
+        'js/trimestre-v2-liste.js': {},
         'js/trimestre-v2-cours.js': { supprimerCoursV2: 1, modifierCoursSelectionneV2: 2, dupliquerCoursSelectionneV2: 2 },
         'js/trimestre-v2-horaires.js': { confirmerSeanceV2: 3 },
         'js/trimestre-v2-etudiants.js': { sauvegarderGroupeEtudiantsV2: 1 },

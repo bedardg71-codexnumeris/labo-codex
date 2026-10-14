@@ -97,58 +97,81 @@ function populerDropdownTrimestreV2() {
 }
 
 /**
- * Confirme et archive un trimestre
+ * Confirme et clôt un trimestre (« Clore », menu ⋮ d'un trimestre disponible).
+ *
+ * 14 oct. 2026 (consigne de Cowork, décision de Grégoire de clore l'hiver 2026) : « Clore » et
+ * « Rouvrir » parlent par les fenêtres et les notifications de l'application, plus par
+ * confirm/alert — les derniers de #1037, laissés au moratoire #622. Les mots sont ceux d'avant,
+ * sans retouche ; le bouton de confirmation porte le nom du geste du menu.
  */
-function confirmerArchivage(id) {
+async function confirmerArchivage(id) {
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
     const trimestre = trimestres.find(t => t.id === id);
 
     if (!trimestre) {
-        alert('Trimestre non trouvé');
+        notifications.erreur('Trimestre non trouvé');
         return;
     }
 
-    const confirme = confirm(
-        `Clore le trimestre "${trimestre.nom}" ?\n\n` +
-        `Un trimestre clos passe en lecture seule et ne peut plus être modifié.\n` +
-        `Cette action est réversible par le bouton « Rouvrir ».`
-    );
+    const confirme = await uiDialogues.confirmerAction({
+        titre: `Clore le trimestre "${trimestre.nom}" ?`,
+        message: `Un trimestre clos passe en lecture seule et ne peut plus être modifié.\n` +
+            `Cette action est réversible par le bouton « Rouvrir ».`,
+        preformate: true,
+        texteConfirmer: 'Clore'
+    });
 
     if (confirme) {
         const result = archiverTrimestre(id);
         if (result.success) {
-            alert(`Trimestre "${trimestre.nom}" clos.`);
+            notifications.succes(`Trimestre "${trimestre.nom}" clos.`);
+            rafraichirBibliothequeTrimestres();
         } else {
             // Un refus de clôture remplit `message`, pas `error` (#1002).
-            alert(`Erreur: ${result.error || result.message}`);
+            notifications.erreur(`Erreur: ${result.error || result.message}`);
         }
     }
 }
 
 /**
- * Confirme et désarchive un trimestre
+ * Confirme et rouvre un trimestre clos (« Rouvrir », bouton de la carte close).
+ *
+ * 14 oct. 2026 : le bouton menait à `desarchiverTrimestre` sans passer par ici — il rouvrait sans
+ * rien demander ni rien dire, et la carte restait « Clos » jusqu'à la réouverture de la
+ * bibliothèque ; cette confirmation n'avait plus d'appelant. Il y mène de nouveau.
  */
-function confirmerDesarchivage(id) {
+async function confirmerDesarchivage(id) {
     const trimestres = typeof obtenirTrimestres === 'function' ? obtenirTrimestres() : [];
     const trimestre = trimestres.find(t => t.id === id);
 
     if (!trimestre) {
-        alert('Trimestre non trouvé');
+        notifications.erreur('Trimestre non trouvé');
         return;
     }
 
-    const confirme = confirm(
-        `Rouvrir le trimestre "${trimestre.nom}" ?\n\n` +
-        `Cela permettra de modifier à nouveau les données de ce trimestre.`
-    );
+    const confirme = await uiDialogues.confirmerAction({
+        titre: `Rouvrir le trimestre "${trimestre.nom}" ?`,
+        message: `Cela permettra de modifier à nouveau les données de ce trimestre.`,
+        texteConfirmer: 'Rouvrir'
+    });
 
     if (confirme) {
         const result = desarchiverTrimestre(id);
         if (result.success) {
-            alert(`Trimestre "${trimestre.nom}" rouvert.`);
+            notifications.succes(`Trimestre "${trimestre.nom}" rouvert.`);
+            rafraichirBibliothequeTrimestres();
         } else {
-            alert(`Erreur: ${result.error}`);
+            notifications.erreur(`Erreur: ${result.error}`);
         }
+    }
+}
+
+/** La bibliothèque ouverte se redessine après un geste (même geste que « Supprimer… »). */
+function rafraichirBibliothequeTrimestres() {
+    populerDropdownTrimestreV2();
+    if (document.getElementById('modalBibliothequeTrimestres')) {
+        fermerModalBibliothequeTrimestres();
+        ouvrirBibliothequeTrimestreV2();
     }
 }
 
@@ -198,7 +221,7 @@ function ouvrirBibliothequeTrimestreV2() {
         let primaire = null;
         const actions = [];
         if (estArchive) {
-            primaire = { label: 'Rouvrir', action: 'desarchiverTrimestre', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
+            primaire = { label: 'Rouvrir', action: 'confirmerDesarchivage', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
             // E1 (#1022) : archiver un trimestre clos entier, hors du navigateur (mots dans ReserveTrimestre.MOTS)
             if (window.ReserveTrimestre) {
                 actions.push({ label: ReserveTrimestre.MOTS.menu, action: ReserveTrimestre.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveTrimestre.MOTS.menuTitre });
@@ -276,20 +299,8 @@ function fermerModalBibliothequeTrimestres() {
     BibliothequeUI.fermerModal('modalBibliothequeTrimestres');
 }
 
-/**
- * Archive le trimestre actuellement actif
- * 🆕 BETA 95.2
- */
-function archiverTrimestreActif() {
-    const trimestreActif = typeof obtenirTrimestreActif === 'function' ? obtenirTrimestreActif() : null;
-
-    if (!trimestreActif) {
-        alert('Aucun trimestre actif à clore.');
-        return;
-    }
-
-    confirmerArchivage(trimestreActif.id);
-}
+// 14 oct. 2026 : `archiverTrimestreActif` est retiré — aucun appelant (ni bouton, ni module), et
+// son seul geste, clore le trimestre ACTIF, est toujours refusé par `archiverTrimestre` (#1018).
 
 /**
  * 🆕 #361 (2 juillet 2026) : parcours de suppression DÉFINITIVE d'un trimestre.
@@ -312,7 +323,7 @@ async function confirmerSuppressionTrimestre(id) {
 
     // #1037 (11 oct. 2026) — « Supprimer… » parle par les fenêtres et les notifications de
     // l'application, plus par alert/confirm/prompt ; les mots sont ceux d'avant. « Clore » et
-    // « Rouvrir » gardent les leurs : l'archivage est sous moratoire (#622).
+    // « Rouvrir » ont suivi le 14 oct. 2026.
     if (!trimestre) {
         notifications.erreur('Trimestre non trouvé');
         return;
@@ -359,12 +370,7 @@ async function confirmerSuppressionTrimestre(id) {
     supprimerTrimestre(id).then(function(result) {
         if (result.success) {
             notifications.succes(`Trimestre « ${trimestre.nom} » supprimé (${result.nbCles} clés de données effacées).`);
-            populerDropdownTrimestreV2();
-            // Rafraîchir la modale bibliothèque si elle est ouverte
-            if (document.getElementById('modalBibliothequeTrimestres')) {
-                fermerModalBibliothequeTrimestres();
-                ouvrirBibliothequeTrimestreV2();
-            }
+            rafraichirBibliothequeTrimestres();
         } else {
             notifications.erreur(`Erreur : ${result.error}`);
         }
@@ -515,7 +521,6 @@ window.confirmerDesarchivage = confirmerDesarchivage;
 window.afficherFormulaireTrimestreActif = afficherFormulaireTrimestreActif;
 window.ouvrirBibliothequeTrimestreV2 = ouvrirBibliothequeTrimestreV2;
 window.fermerModalBibliothequeTrimestres = fermerModalBibliothequeTrimestres;
-window.archiverTrimestreActif = archiverTrimestreActif;
 window.confirmerSuppressionTrimestre = confirmerSuppressionTrimestre;
 window.changerTrimestreActifV2 = changerTrimestreActifV2;
 

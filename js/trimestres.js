@@ -814,6 +814,10 @@
     function creerSnapshotRessources(trimestreId) {
         try {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            // 14 oct. 2026 (#622, remesuré) : cette copie n'a toujours AUCUN lecteur (grep de `snapshot_`
+            // et `snapshotRessources` dans js/) ; chaque « Clore » en pose une de plus, que « Rouvrir »
+            // laisse. Borne haute pour l'hiver 2026 réel : 768 Ko (codex du 8 oct.). Gardée telle
+            // quelle : sans effet observable, et le refus des cartouches non migrées vit dans cette fonction.
             const cleSnapshot = `snapshot_${trimestreId}_${timestamp}`;
 
             // ✅ AJOUT (28 jan 2026) : Identifier les templates utilisés
@@ -913,6 +917,10 @@
                     `cartouches. Recharger l'application (la migration s'exécute au ` +
                     `démarrage), puis réessayer.`
                 );
+                // 14 oct. 2026 : « Recharge l'application » ne lève ce refus que si la migration n'a
+                // pas encore posé son drapeau (`migration_cartouches_namespacees_done`, main.js) ; une
+                // clé nue revenue APRÈS le drapeau resterait refusée à chaque essai. Absent chez Grégoire
+                // au 8 oct. (aucune grille de l'hiver 2026 dans ce cas) : noté, non corrigé.
                 return {
                     success: false,
                     refus: 'cartouches-non-migrees',
