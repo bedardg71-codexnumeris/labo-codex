@@ -388,9 +388,12 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             await page.evaluate(() => ouvrirBibliothequeTrimestreV2());
             const modale = page.locator('#modalBibliothequeTrimestres');
             await expect(modale).toBeVisible();
-            const rouvrir = modale.locator('[data-action="desarchiverTrimestre"][data-param="h2032"]');
+            // 14 oct. 2026 : « Rouvrir » passe par sa confirmation, dans la fenêtre de l'application.
+            const rouvrir = modale.locator('[data-action="confirmerDesarchivage"][data-param="h2032"]');
             await expect(rouvrir).toHaveText('Rouvrir');
             await rouvrir.click();
+            f = await attendreFenetre(page, 'Rouvrir le trimestre "Hiver 2032" ?');
+            await f.fenetre.locator('.modal-actions button', { hasText: 'Rouvrir' }).click();
             await expect.poll(() => page.evaluate(() => obtenirTrimestres().find((t) => t.id === 'h2032').archive)).toBe(false);
             await page.evaluate(() => db.flush());
             const rouvert = await photo(page);

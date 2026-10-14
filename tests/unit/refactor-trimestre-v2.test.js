@@ -165,7 +165,7 @@ describe('trimestre-v2 — régression refactoring 2026-mai (canari + sentinelle
             // Zone 2 — Liste trimestres + archivage
             'populerDropdownTrimestreV2',
             'changerTrimestreActifV2',
-            'archiverTrimestreActif',
+            'confirmerArchivage', // 14 oct. 2026 : archiverTrimestreActif, sans appelant, retiré
             // Zone 3 — Cours CRUD
             'chargerDropdownCoursV2',
             'sauvegarderCoursV2',
