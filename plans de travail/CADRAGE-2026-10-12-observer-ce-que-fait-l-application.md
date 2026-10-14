@@ -29,6 +29,9 @@ Le résultat est copié dans « plans de travail/observation/2-observation-aveug
 ### Temps 3 : comparer sans interpréter
 Un analyste qui ne lit que les deux textes les met côte à côte et classe chaque écart : fait sans être prévu ; prévu mais pas fait ; fait autrement. Il n'interprète pas et ne propose aucun correctif. Résultat dans « plans de travail/observation/3-ecarts.md ». L'interprétation revient à Grégoire.
 
+## Temps 4 : déduire la finalité
+Deux analystes indépendants, isolés comme au temps 2, lisent seulement le document d'observation aveugle, dans sa version d'avant la comparaison et les correctifs (« lecture/observation.md » du dépôt programme-a-observer). Ils ne lisent ni les intentions, ni la comparaison, ni le code. Chacun en déduit ce que fait l'application dans son ensemble et quelle finalité ses comportements révèlent, indépendamment des intentions de Grégoire (préparation : « plans de travail/observation/4-preparation-lecture.md »).
+
 ## Limites assumées
 - Aveuglement partiel : noms et textes d'écran restent visibles.
 - L'analyste arrive avec ses propres attentes sur ce que fait une application pédagogique.
