@@ -7,7 +7,25 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 12 OCT. 2026, 16 h 17 : **1.200.0 (MOINS DE FENÊTRES QUI BLOQUENT ; LOTS 20 À 24) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 14 OCT. 2026, 19 h 40 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) COMMITÉE SUR `main` ; VERDICT PLAYWRIGHT PUIS PUSH CE SOIR**
+
+**Contenu** : lot « À propos » (`92f63708`, texte de l'accueil réécrit par Grégoire) et préparation de la clôture de l'hiver 2026
+(`1db00842`, « Clore » et « Rouvrir » par les fenêtres de l'application ; « Rouvrir » rebranché sur sa confirmation ; la bibliothèque
+se redessine). Les deux relus par Cowork, acceptés sans correction (verdicts à la fin de `plans de travail/CONSIGNE-DU-JOUR.md`).
+Nouvelles : deux items arrêtés par Grégoire, posés tels quels ; le titre « À propos, clore et rouvrir » est de Claude Code.
+**Si ce relais dit encore « commitée » et qu'origin/main n'a pas 1.201.0** : le verdict ou le push n'a pas abouti ; lire
+`scripts/.verdict-playwright.json` avant toute autre chose.
+**Porte « Clore l'hiver 2026 »** : passée par Grégoire le 14 oct. à 19 h 25, douze rangées sur douze, **sur 1.200.0** (donc sans les
+fenêtres neuves de « Clore ») ; la carte restée dans « disponibles » après « Clore » était le défaut que `1db00842` corrige. L'hiver
+2026 est clos, archivé, vérifié, ses copies sont aux archives ; codex de 1,36 Go à 254,7 Mo (Finder). Lignes posées dans #622 et #992.
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.200.0 → 1.201.0) : fichiers de plus de 1 000 lignes 35 → 35, leurs lignes
+85 992 → 86 001 (Δ +9, commentaires de `js/trimestres.js`) ; au-dessus de 15 : 455 → 455 (Δ 0) ; au-dessus de 30 : 89 → 89 (Δ 0) ;
+somme au-dessus de 15 : 11 482 → 11 482 (Δ 0).
+**Suite** : la prochaine consigne de Cowork, dans `plans de travail/CONSIGNE-DU-JOUR.md`.
+
+---
+
+## (relais précédent) 12 OCT. 2026, 16 h 17 : **1.200.0 (MOINS DE FENÊTRES QUI BLOQUENT ; LOTS 20 À 24) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify, Claude Code, 12 oct.) : déploiement `6acd3140`, `commit_ref` `239de979`, `state: ready`,
 publié à 19:13:16 Z (15 h 13, Toronto). Release `df8f386f` (build 1012-1211).

@@ -45,3 +45,11 @@ Skill `portes-terrain` : le markdown `plans de travail/PORTE-2026-10-14-clore-et
 ## La méthode
 
 Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-14-clore-l-hiver-2026.md`. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire en gestes d'utilisateur : ce qu'il aura à faire, combien de temps cela prend, et combien de marge cela lui donne.
+
+## Verdict de Cowork, 14 oct. 2026 à 11 h 01 (Toronto, mesuré par `date`)
+
+**Relu sur `1db00842` : accepté, sans correction.** Les mots de « Clore » et « Rouvrir » sont ceux d'avant, lus dans le diff (titres, messages, refus) ; le fichier n'a plus de dialogue natif. Les cinq décisions du § 3 de la demande sont acceptées, dont « Rouvrir » rebranché sur sa confirmation : c'est un garde-fou perdu qu'on retrouve, pas un mot neuf. Les trois trouvailles en issue 3 sont acceptées.
+
+- La mesure du § 1 corrige l'échéance de #992 : environ douze semaines de marge sans le geste (sept codex), au lieu de « début à mi-novembre » (deux points). À reporter dans #992 avec la ligne de #622 du § 7, au prochain passage au BACKLOG.
+- La porte est publiée par Cowork (artefact « Porte · Clore l'hiver 2026 »), douze rangées, à passer après la version du soir.
+- La ligne « Nouvelles » du § 6 sera soumise à Grégoire avec celle du lot « À propos », à la release du soir.
