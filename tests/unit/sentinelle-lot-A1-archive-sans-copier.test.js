@@ -602,7 +602,7 @@ describe('lot A1 · (e) l\'écriture : l\'adresse reste, et c\'est l\'usager qui
         expect(fenetre.fenetre).toBe('Téléchargement lancé');
         expect(fenetre.boutons).toEqual(['Il y est', 'Il n\'y est pas']);
         expect(fenetre.message).toContain('archive-' + DOSSIER + '-');
-        expect(fenetre.message).toMatch(/\(environ 9 Mo\)/);
+        expect(fenetre.message).toMatch(/\(environ 10 Mo\)/);
         // Au moment où la fenêtre se pose : le fichier est parti, rien n'est inscrit, rien n'est annoncé.
         expect(fenetre.telechargements).toBe(1);
         expect(fenetre.registre).toEqual([]);
@@ -624,7 +624,7 @@ describe('lot A1 · (e) l\'écriture : l\'adresse reste, et c\'est l\'usager qui
         expect(journal.notifications).toEqual([]);
         expect(journal.fenetres.map((f) => f.fenetre)).toEqual(['Téléchargement lancé', 'Groupe non archivé']);
         expect(journal.fenetres[1].boutons).toEqual(['Réessayer']);
-        expect(journal.fenetres[1].message).toBe('Le fichier (environ 9 Mo) n\'a pas été enregistré. Tes données restent dans l\'application.');
+        expect(journal.fenetres[1].message).toBe('Le fichier (environ 10 Mo) n\'a pas été enregistré. Tes données restent dans l\'application.');
         // Aucun des mots vus ne dit « archivé » comme un fait accompli.
         expect(journal.fenetres.map((f) => f.fenetre + ' ' + f.message).join(' ')).not.toMatch(/Groupe archivé|archive prête/i);
     }, 30000);
@@ -678,16 +678,16 @@ describe('lot A1 · (e) l\'écriture : l\'adresse reste, et c\'est l\'usager qui
 
     it('TÉMOIN — une archive inscrite dès le téléchargement est vue par la fenêtre', async () => {
         const { journal } = await produire({
-            muter: (s) => s.replace('var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size);',
-                'var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size); _upsertEntreeManifesteLocal(dossier, patch.patch);')
+            muter: (s) => s.replace('var tailleDite = window.TailleFichier.dire(zipBlob.size, { environ: true });',
+                'var tailleDite = window.TailleFichier.dire(zipBlob.size, { environ: true }); _upsertEntreeManifesteLocal(dossier, patch.patch);')
         });
         expect(journal.fenetres[0].registre).toEqual([DOSSIER]);
     }, 30000);
 
     it('TÉMOIN — une réussite annoncée d\'office est vue par la fenêtre', async () => {
         const { journal } = await produire({
-            muter: (s) => s.replace('var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size);',
-                "var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size); notifications.succes('Groupe archivé : fichier téléchargé', '');")
+            muter: (s) => s.replace('var tailleDite = window.TailleFichier.dire(zipBlob.size, { environ: true });',
+                "var tailleDite = window.TailleFichier.dire(zipBlob.size, { environ: true }); notifications.succes('Groupe archivé : fichier téléchargé', '');")
         });
         expect(journal.fenetres[0].succes).toBe(1);
     }, 30000);

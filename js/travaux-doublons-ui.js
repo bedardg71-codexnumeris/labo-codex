@@ -287,7 +287,7 @@
                     { dateStyle: 'short', timeStyle: 'short' });
             } catch (e) { dateAff = String(f.dateModification); }
         }
-        var taille = f.tailleKo ? f.tailleKo + ' Ko' : '?';
+        var taille = f.tailleOctets ? window.TailleFichier.dire(f.tailleOctets, { decimales: { Ko: 0, Mo: 1, Go: 2 } }) : '?';
         var typeAff = (f.typeMIME || '?')
             .replace('application/', '').replace('image/', '');
         var statutAff = f.statutWorkflow || 'importé';

@@ -22,11 +22,10 @@
 (function () {
     'use strict';
 
+    /** La taille d'une entrée (taille-fichier.js, #993) ; vide si inconnue. */
     function _formaterTaille(octets) {
         if (!octets || octets < 0) return '';
-        if (octets < 1024) return octets + ' o';
-        if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-        return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
+        return window.TailleFichier.dire(octets);
     }
 
     function _construireListeZip(zip) {

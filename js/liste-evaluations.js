@@ -1799,7 +1799,7 @@ function ouvrirProprieteFichier(fichierId) {
     var etiquetteType = extension ? extension.toUpperCase() : (/pdf/i.test(fichier.typeMIME || '') ? 'PDF' : 'IMG');
     var meta = [];
     if (fichier.nombrePages) meta.push(fichier.nombrePages + (fichier.nombrePages > 1 ? ' pages' : ' page'));
-    if (fichier.tailleFichier && typeof travauxStockage.formaterTaille === 'function') meta.push(travauxStockage.formaterTaille(fichier.tailleFichier));
+    if (fichier.tailleFichier && window.TailleFichier) meta.push(window.TailleFichier.dire(fichier.tailleFichier, { decimales: 1 }));
     var apercuHTML =
         '<div class="prop-fichier-apercu">' +
             (vignette

@@ -43,6 +43,7 @@
      - db.js (window.db) : les fiches de copie du groupe, pour la couverture
      - progression.js, ui-dialogues.js, utils-notifications.js
      - crypto.subtle (SHA-256), DecompressionStream (les textes compressés d'un ZIP)
+     - taille-fichier.js (window.TailleFichier.dire : #993)
      Pas de JSZip : ce module ne charge jamais un fichier entier.
    =============================== */
 
@@ -110,7 +111,11 @@ var MOTS = {
         repertoireTropLourd: 'Le répertoire de ce ZIP est trop lourd pour être lu.',
         repertoireHors: 'Le répertoire de ce ZIP pointe hors du fichier : il est tronqué ou altéré.',
         nomSuspect: 'Entrée suspecte dans le ZIP : ',
-        entreeTropGrosse: 'Une entrée de l\'archive dépasse ce que l\'application accepte de lire (1 Go).',
+        // #993 : la limite (LIMITE_ENTREE_OCTETS) dite comme le système de la personne la compte.
+        entreeTropGrosse: function() {
+            return 'Une entrée de l\'archive dépasse ce que l\'application accepte de lire (' +
+                window.TailleFichier.dire(LIMITE_ENTREE_OCTETS, { decimales: 0 }) + ').';
+        },
         methodeInconnue: 'Une entrée de l\'archive emploie une compression inconnue.',
         sansGonflage: 'Ce navigateur ne sait pas lire les textes compressés de l\'archive.',
         sansMeta: 'Cette archive n\'a pas de meta.json : elle n\'est pas une archive de l\'application.',
@@ -138,11 +143,6 @@ var COMMENTAIRE_ZIP_MAX = 0xFFFF;
 
 function _versionApp() {
     return typeof window.VERSION_MAJEURE === 'string' ? window.VERSION_MAJEURE : 'inconnue';
-}
-
-/** La taille, au format de tout l'écran des archives (reserve.js). */
-function _formaterTaille(octets) {
-    return window.Reserve.formaterTaille(octets);
 }
 
 function _jour(iso) {
@@ -292,7 +292,7 @@ async function _gonfler(blob, tailleAttendue) {
  */
 async function _octetsDeLEntree(fichier, e) {
     if (e.tailleReelle > LIMITE_ENTREE_OCTETS || e.tailleComp > LIMITE_ENTREE_OCTETS) {
-        throw new Error(MOTS.erreurs.entreeTropGrosse);
+        throw new Error(MOTS.erreurs.entreeTropGrosse());
     }
     var blob = await _blobDeLEntree(fichier, e);
     if (!blob) return null;
@@ -395,7 +395,7 @@ function sourceDossier(handleRacine, dossier) {
             var h = fichiersTravaux.get(nom);
             if (!h) return { probleme: 'absente' };
             var f = await h.getFile();
-            if (f.size > LIMITE_ENTREE_OCTETS) throw new Error(MOTS.erreurs.entreeTropGrosse);
+            if (f.size > LIMITE_ENTREE_OCTETS) throw new Error(MOTS.erreurs.entreeTropGrosse());
             return { octets: await _octets(f) };
         }
     };
@@ -627,7 +627,7 @@ function compteRendu(rapport) {
         return { titre: MOTS.reussite.titre, message: T ? T.reussite(rapport.total) : MOTS.reussite.texte(rapport.total) };
     }
     if (rapport.etat === 'a_refaire') {
-        return { titre: MOTS.sansEmpreintes.titre, message: (T ? T.sansEmpreintes : MOTS.sansEmpreintes.texte) + '\n' + MOTS.aRefaireDetail(rapport.nombreFichiers, _formaterTaille(rapport.tailleFichiers)) };
+        return { titre: MOTS.sansEmpreintes.titre, message: (T ? T.sansEmpreintes : MOTS.sansEmpreintes.texte) + '\n' + MOTS.aRefaireDetail(rapport.nombreFichiers, window.TailleFichier.dire(rapport.tailleFichiers)) };
     }
     if (rapport.etat === 'autre_archive') {
         return { titre: MOTS.autreArchive.titre, message: MOTS.autreArchive.texte };

@@ -10,6 +10,7 @@
    - travaux-annotation.js
    - travaux-outils.js
    - travaux-archivage.js
+   - taille-fichier.js (window.TailleFichier.dire : #993)
    =============================== */
 
 (function() {
@@ -972,7 +973,7 @@
                         <button class="btn-aide-contextuelle" data-aide="evaluations-importer" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                     </h3>
                     <div class="pipeline-stats">
-                        ${queue.length > 0 ? `${queue.length} ${window.pluriel(queue.length, 'fichier', 'fichiers')} en file — ${travauxStockage.formaterTaille(queue.reduce((s, f) => s + f.tailleFichier, 0))}` : ''}
+                        ${queue.length > 0 ? `${queue.length} ${window.pluriel(queue.length, 'fichier', 'fichiers')} en file — ${window.TailleFichier.dire(queue.reduce((s, f) => s + f.tailleFichier, 0), { decimales: 1 })}` : ''}
                     </div>
                 </div>
 
@@ -1284,9 +1285,7 @@
         const dasActifs = new Set(fichiersTravaux.map(f => f.etudiantDA).filter(Boolean));
         const etudiants = tousEtudiants.filter(e => dasActifs.has(e.da));
         const tailleFiltree = fichiersTravaux.reduce((acc, f) => acc + (f.tailleFichier || 0), 0);
-        const tailleFormatee = tailleFiltree >= 1048576
-            ? (tailleFiltree / 1048576).toFixed(1) + ' Mo'
-            : (tailleFiltree / 1024).toFixed(1) + ' Ko';
+        const tailleFormatee = window.TailleFichier.dire(tailleFiltree);
 
         conteneur.innerHTML = `
             <h3>Exporter et archiver <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
@@ -1712,7 +1711,7 @@
                     : `${dims.w} x ${dims.h}`;
             }
             if (tailleEl) {
-                tailleEl.textContent = travauxStockage.formaterTaille(tailleEst);
+                tailleEl.textContent = window.TailleFichier.dire(tailleEst, { decimales: 1 });
             }
 
             // Generer la thumbnail originale (colonne gauche)
@@ -1890,7 +1889,7 @@
             } else {
                 resolution = 'Dimensions inconnues';
             }
-            const poids = travauxStockage.formaterTaille(f.tailleFichier);
+            const poids = window.TailleFichier.dire(f.tailleFichier, { decimales: 1 });
             const selectionne = (index === fichierSelectionneIndex);
 
             // Debut d'un groupe multi-fichiers
@@ -2107,7 +2106,7 @@
                     ${badgeSpecifique}
                     ${nomEtudiant ? `<span class="pipeline-meta-nom">${nomEtudiant}</span>` : ''}
                     <span class="pipeline-meta-resolution" id="pipeline-res-cible-${index}">${resCible}</span>
-                    <span class="pipeline-meta-taille" id="pipeline-taille-cible-${index}">${travauxStockage.formaterTaille(tailleEst)}</span>
+                    <span class="pipeline-meta-taille" id="pipeline-taille-cible-${index}">${window.TailleFichier.dire(tailleEst, { decimales: 1 })}</span>
                 </div>
             </div>`;
         });
@@ -3760,7 +3759,7 @@
             if (travauxResolution.trouverEvaluationPourFichier(f)) nbEvaluees++;
             return `<li data-fichier-id="${echapperHtml(f.id)}">
                     <span><strong>${echapperHtml(nomEleve)}</strong> · ${echapperHtml(nomProduction)}</span>
-                    <span class="texte-muted">${echapperHtml(travauxStockage.formaterTaille(f.tailleFichier || 0))} · exportée le ${echapperHtml(exporteeLe)}</span>
+                    <span class="texte-muted">${echapperHtml(window.TailleFichier.dire(f.tailleFichier || 0, { decimales: 1 }))} · exportée le ${echapperHtml(exporteeLe)}</span>
                 </li>`;
         }).join('');
 
@@ -3769,7 +3768,7 @@
             : `<p>${nbEvaluees} de ces copies sont évaluées. Leur évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la copie annotée ne s'ouvrira plus ici.</p>`);
 
         const n = aRetirer.length;
-        const taille = travauxStockage.formaterTaille(aRetirer.reduce((acc, f) => acc + (f.tailleFichier || 0), 0));
+        const taille = window.TailleFichier.dire(aRetirer.reduce((acc, f) => acc + (f.tailleFichier || 0), 0), { decimales: 1 });
         const intro = n === 1
             ? 'Cette copie a déjà été exportée : son fichier existe ailleurs, sur ton ordinateur. La retirer d\'ici libère de l\'espace tout de suite. Les copies qui n\'ont pas encore été exportées ne sont jamais proposées.'
             : 'Ces copies ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur. Les retirer d\'ici libère de l\'espace tout de suite. Les copies qui n\'ont pas encore été exportées ne sont jamais proposées.';

@@ -113,6 +113,15 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
         };
     }
 
+    // #993 (15 oct. 2026) — `js/taille-fichier.js` est chargé par index.html avant tout module
+    // qui dit une taille de fichier : le VRAI est posé ici, une fois par sandbox, quand le
+    // harnais n'en fournit pas. Son `navigator` est celui de Node (base 1000), sauf si le banc
+    // pose `fauxWindow.navigator`.
+    if (!fauxWindow.TailleFichier) {
+        new Function('window', '"use strict";\n' +
+            readFileSync(path.join(racineProjet, 'js/taille-fichier.js'), 'utf8'))(fauxWindow);
+    }
+
     const fauxDocument = {
         addEventListener: () => {},
         removeEventListener: () => {},

@@ -35,7 +35,8 @@ const patternsAttendus = [
 const T = 'a2030';
 const NOM = 'Automne 2030 (banc)';
 const TITRE = 'Avant de supprimer, un codex à part';
-const SUITE = 'L\'application va d\'abord écrire un codex à part, sous un autre nom. Tes prochaines mises à jour n\'y toucheront pas : il te permettra de revenir en arrière.';
+// #1020 : mots acceptés par Grégoire le 15 oct. 2026 (9 h 23).
+const SUITE = 'L\'application va d\'abord écrire un codex à part, sous un autre nom. Tes prochaines mises à jour n\'y toucheront pas. Le rouvrir ramènerait ce que tu supprimes, mais remettrait aussi le reste de tes données dans leur état d\'aujourd\'hui : des changements faits entre-temps pourraient être perdus.';
 const PHRASE_X1 = 'Supprimer le trimestre « ' + NOM + ' » efface pour de bon ses étudiant·es, ses évaluations, ses présences, ses productions, ses captures et ses modèles.';
 // #1037 (11 oct. 2026) : la question et la ressaisie du nom sont des fenêtres de l'application, plus
 // des `confirm`/`prompt` natifs ; mêmes mots, le titre et le message séparés.
@@ -355,7 +356,7 @@ test.describe('#1007 — avant de supprimer, un codex à part', () => {
         await verifierFenetreDuCodexAPart(page, PHRASE_X1);
         await cliquerDansFenetre(page, 'Écrire le codex à part');
         const echec = await attendreFenetre(page, 'Codex à part non écrit');
-        expect(echec.texte).toMatch(/^Le fichier \(environ \d+ (Ko|Mo)\) n'a pas été enregistré : rien n'a été supprimé\. Si ton appareil manque d'espace, libères-en, puis réessaie\.$/);
+        expect(echec.texte).toMatch(/^Le fichier \(environ \d+ (Ko|Mo)\) n'a pas été enregistré : rien n'a été supprimé\. Si ça se répète, utilise « Signaler un bug » : le détail y sera\.$/);
         expect(echec.boutons).toEqual(['Fermer', 'Télécharger à la place', 'Réessayer']);
         await cliquerDansFenetre(page, 'Fermer');
         await aucuneFenetre(page);

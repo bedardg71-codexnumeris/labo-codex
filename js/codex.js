@@ -12,7 +12,8 @@
    - travaux-stockage.js (recupererBlob, stockerBlob)
    - JSZip (libs/jszip.min.js)
    - fichier-sortant.js (assemblerZip, entreesDuZip, telecharger,
-     confirmerTelechargement, tailleEnviron)
+     confirmerTelechargement)
+   - taille-fichier.js (TailleFichier.dire : toute taille dite à l'usager, #993)
    - reserve-verifier.js (lireRepertoireZip : reconnaître un codex sans le lire
      en entier, estUnFichierDeCodex)
    =============================== */
@@ -551,7 +552,7 @@ async function genererCodex(options = {}) {
                 _prog(
                     20 + Math.round((j / fichiers.length) * 50),
                     'Ajout des fichiers travaux…',
-                    nbBlobs + '/' + fichiers.length + ' fichiers (' + _formaterTaille(tailleTotale) + ')'
+                    nbBlobs + '/' + fichiers.length + ' fichiers (' + window.TailleFichier.dire(tailleTotale) + ')'
                 );
                 await _yield();
             }
@@ -568,7 +569,7 @@ async function genererCodex(options = {}) {
             return null;
         }
         _afficherProgression('Génération du codex');
-        _prog(70, 'Préparation du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + _formaterTaille(tailleTotale));
+        _prog(70, 'Préparation du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + window.TailleFichier.dire(tailleTotale));
     }
 
     // 3. Le snapshot de référence pour la fusion 3-way n'est plus écrit ici : il décrit
@@ -622,18 +623,18 @@ async function genererCodex(options = {}) {
     // attend dans le noir pendant generateAsync.
     if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
-        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(window.FichierSortant.entreesDuZip(zip, copies, DOSSIER_TRAVAUX + '/'), 'codex', { taille: window.FichierSortant.tailleEnviron(tailleEstimee) });
+        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(window.FichierSortant.entreesDuZip(zip, copies, DOSSIER_TRAVAUX + '/'), 'codex', { taille: window.TailleFichier.dire(tailleEstimee, { environ: true }) });
         if (!ok) {
             return null;
         }
         // Recréer l'overlay pour la phase compression (peut être longue).
         _afficherProgression('Génération du codex');
-        _prog(70, 'Compression du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + _formaterTaille(tailleTotale));
+        _prog(70, 'Compression du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + window.TailleFichier.dire(tailleTotale));
     }
 
     // 5. Générer le blob ZIP
     if (options.suivreTentative) _noterTentative({ etape: 'compression' });
-    _prog(70, 'Compression du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + _formaterTaille(tailleTotale));
+    _prog(70, 'Compression du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + window.TailleFichier.dire(tailleTotale));
     const zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
         _prog(
             70 + Math.round(pourcent * 0.28),
@@ -649,7 +650,7 @@ async function genererCodex(options = {}) {
 
     const duree = Math.round(performance.now() - debut);
 
-    _prog(100, 'Codex prêt !', _formaterTaille(zipBlob.size));
+    _prog(100, 'Codex prêt !', window.TailleFichier.dire(zipBlob.size));
 
     // Pause brève pour que l'utilisateur voie "100%"
     await new Promise(function(r) { setTimeout(r, 500); });
@@ -712,7 +713,7 @@ async function chargerCodex(fichierZip) {
 
     const debut = performance.now();
     _afficherProgression('Ouverture du codex', fichierZip && fichierZip.name);
-    _majProgression(0, 'Validation du fichier…', _formaterTaille(fichierZip.size));
+    _majProgression(0, 'Validation du fichier…', window.TailleFichier.dire(fichierZip.size));
     await _yield(); // laisser le navigateur peindre l'overlay
 
     try {
@@ -781,9 +782,9 @@ async function chargerCodex(fichierZip) {
         // sans nommer de navigateur ; le chemin de l'iPad est dans le texte même,
         // sans détection d'appareil (un iPad se présente souvent comme un Mac).
         var msgPrevol = 'Espace insuffisant pour ouvrir ce codex. Il a besoin d\'environ ' +
-            _formaterTaille(prevol.besoin) + ', mais le navigateur n\'accorde que ' +
-            _formaterTaille(prevol.disponible) + ' à l\'application. ' +
-            'Libère environ ' + _formaterTaille(prevol.manque * 2) +
+            window.TailleFichier.dire(prevol.besoin) + ', mais le navigateur n\'accorde que ' +
+            window.TailleFichier.dire(prevol.disponible) + ' à l\'application. ' +
+            'Libère environ ' + window.TailleFichier.dire(prevol.manque * 2) +
             ' sur l\'appareil, puis réessaie. ' +
             'Sur un iPad : Réglages → Général → Stockage iPad.';
         if (prevol.quotaFaible) {
@@ -3042,16 +3043,6 @@ function _obtenirAuteur() {
     return '';
 }
 
-/**
- * Formate une taille en octets de façon lisible
- */
-function _formaterTaille(octets) {
-    if (octets < 1024) return octets + ' o';
-    if (octets < 1024 * 1024) return (octets / 1024).toFixed(1) + ' Ko';
-    if (octets < 1024 * 1024 * 1024) return (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    return (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
-}
-
 /* ===============================
    INDICATEUR EN-TÊTE
    =============================== */
@@ -3318,7 +3309,7 @@ async function _ouvrirLeFichierChoisi(fichier, poignee) {
         // incomplet, le bilan conseille de rouvrir le même codex.
         var msgReload = bilan
             ? bilan.message
-            : 'Codex chargé depuis « ' + fichier.name + ' » (' + _formaterTaille(fichier.size) +
+            : 'Codex chargé depuis « ' + fichier.name + ' » (' + window.TailleFichier.dire(fichier.size) +
               ').\n\nTon fichier de codex n\'a pas changé : garde-le, c\'est ta copie hors de ' +
               'l\'application. Recharger la page pour appliquer les données ?';
         if (await uiDialogues.confirmerAction({
@@ -3448,6 +3439,9 @@ function _afficherAttentePartage(taille) {
     if (piste) piste.classList.add('u-hide');
 }
 
+/** #994 : seulement quand le navigateur signale lui-même un manque d'espace (`QuotaExceededError`). */
+var MOTS_MANQUE_D_ESPACE = 'Ton appareil manque d\'espace : libères-en, puis réessaie.';
+
 function _direNonMisAJour(raison) {
     if (window.temoinEnregistrement) {
         window.temoinEnregistrement.nonEnregistre(raison, undefined, CLE_TEMOIN_CODEX, 'Codex non mis à jour');
@@ -3492,12 +3486,13 @@ function _avertissementDesCopies() {
  * @param {Object} reglage
  * @param {boolean} reglage.forcerDialogue - demander où écrire, même si un fichier est tenu
  * @param {boolean} reglage.sansAdoption - la destination choisie n'est pas tenue ensuite
- * @param {function(string): {titre: string, message: string}} reglage.echec - les mots de
- *   l'échec, selon la taille dite ; appelée quand aucun fichier n'a été écrit
+ * @param {function(string, boolean): {titre: string, message: string}} reglage.echec - les mots
+ *   de l'échec, selon la taille dite et selon que le navigateur a signalé lui-même un manque
+ *   d'espace (#994) ; appelée quand aucun fichier n'a été écrit
  * @returns {Promise<{ecrit: boolean, methode?: string}>}
  */
 async function _ecrireLeCodexPrepare(resultat, reglage) {
-    var taille = window.FichierSortant.tailleEnviron(resultat.blob.size);
+    var taille = window.TailleFichier.dire(resultat.blob.size, { environ: true });
     // Lot J0 bis (#988) : la fenêtre du toucher frais. Mots acceptés par Grégoire le
     // 30 sept. 2026 ; « Touche » devenu « Appuie sur » le 11 oct. (décision de Grégoire : depuis
     // #995, la fenêtre se voit aussi à la souris). « Enregistrer » résout dans son clic : le
@@ -3558,7 +3553,11 @@ async function _ecrireLeCodexPrepare(resultat, reglage) {
 
         // Aucun fichier écrit : on le dit, et on propose de réessayer.
         _finirTentative(sauvegarde.methode === 'download' ? 'téléchargement non trouvé par l\'usager' : 'échec de l\'écriture du fichier', sauvegarde.erreur);
-        var echec = reglage.echec(taille);
+        // #994 (décision de Grégoire, 15 oct. 2026, 9 h 18) : l'espace n'est nommé que si le
+        // navigateur le signale lui-même. Les autres refus (fenêtre de choix, partage,
+        // téléchargement dit absent) ne disent pas leur cause : le message ne la devine pas.
+        var manqueEspace = !!(sauvegarde.erreur && sauvegarde.erreur.name === 'QuotaExceededError');
+        var echec = reglage.echec(taille, manqueEspace);
         var geste = await uiDialogues.demanderAction({
             titre: echec.titre,
             message: echec.message,
@@ -3617,13 +3616,16 @@ async function _mettreAJourLeCodex(forcerDialogue) {
     var ecriture = await _ecrireLeCodexPrepare(resultat, {
         forcerDialogue: demanderOuEcrire,
         sansAdoption: copiesManquent,
-        echec: function(taille) {
+        echec: function(taille, manqueEspace) {
             // Le témoin le dit et reste ; le menu garde « pas à jour ».
             _direNonMisAJour('le fichier (' + taille + ') n\'a pas été enregistré. Tes données restent dans l\'application.');
+            // Mots acceptés par Grégoire le 15 oct. 2026 (9 h 18, #994).
             return {
                 titre: 'Codex non mis à jour',
-                message: 'Le fichier (' + taille + ') n\'a pas été enregistré. Si ton appareil manque d\'espace, ' +
-                         'libères-en, puis réessaie. Tes données restent dans l\'application.'
+                message: 'Le fichier (' + taille + ') n\'a pas été enregistré. ' +
+                         (manqueEspace ? MOTS_MANQUE_D_ESPACE + ' ' : '') +
+                         'Tes données restent dans l\'application. ' +
+                         'Si ça se répète, utilise « Signaler un bug » : le détail y sera.'
             };
         }
     });
@@ -3634,7 +3636,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
     var methodeLabel = avaitHandle ? 'même fichier' :
                        ecriture.methode === 'fsapi' ? (forcerDialogue ? 'nouveau fichier' : 'fichier choisi') :
                        ecriture.methode === 'share' ? 'Fichiers' : 'Téléchargements';
-    notifications.succes('Codex mis à jour', _formaterTaille(resultat.blob.size) + ' – ' + methodeLabel);
+    notifications.succes('Codex mis à jour', window.TailleFichier.dire(resultat.blob.size) + ' – ' + methodeLabel);
     return true;
 }
 
@@ -3646,7 +3648,7 @@ async function _mettreAJourLeCodex(forcerDialogue) {
    toutes les données ». Décision de Grégoire (2 oct. 2026) : ils EXIGENT un fichier à part,
    sous un autre nom, écrit sans être adopté (la mise à jour suivante n'y touche pas),
    confirmé avant que la suppression puisse se faire. Une seule fonction pour les cinq.
-   Mots de la fenêtre acceptés par Grégoire le 2 oct. 2026 (20 h 28).
+   Mots de la fenêtre acceptés par Grégoire le 15 oct. 2026 (9 h 23, #1020).
    =============================== */
 
 /** Le nom du codex à part : le nom habituel, suivi de « avant-suppression » (la date suit, `_genererNomFichier`). */
@@ -3667,7 +3669,9 @@ async function ecrireCodexAPartAvantSuppression(premierePhrase) {
         titre: 'Avant de supprimer, un codex à part',
         message: premierePhrase + '\n' +
             'L\'application va d\'abord écrire un codex à part, sous un autre nom. ' +
-            'Tes prochaines mises à jour n\'y toucheront pas : il te permettra de revenir en arrière.',
+            'Tes prochaines mises à jour n\'y toucheront pas. ' +
+            'Le rouvrir ramènerait ce que tu supprimes, mais remettrait aussi le reste de tes données ' +
+            'dans leur état d\'aujourd\'hui : des changements faits entre-temps pourraient être perdus.',
         texteAnnuler: 'Annuler',
         texteConfirmer: 'Écrire le codex à part',
         variante: 'danger',   // « Annuler » a le focus : une touche Entrée réflexe n'écrit rien
@@ -3700,11 +3704,13 @@ async function ecrireCodexAPartAvantSuppression(premierePhrase) {
     var ecriture = await _ecrireLeCodexPrepare(resultat, {
         forcerDialogue: true,
         sansAdoption: true,
-        echec: function(taille) {
+        echec: function(taille, manqueEspace) {
+            // Mots acceptés par Grégoire le 15 oct. 2026 (9 h 18, #994).
             return {
                 titre: 'Codex à part non écrit',
                 message: 'Le fichier (' + taille + ') n\'a pas été enregistré : rien n\'a été supprimé. ' +
-                         'Si ton appareil manque d\'espace, libères-en, puis réessaie.'
+                         (manqueEspace ? MOTS_MANQUE_D_ESPACE + ' ' : '') +
+                         'Si ça se répète, utilise « Signaler un bug » : le détail y sera.'
             };
         }
     });
@@ -3897,7 +3903,7 @@ function actionDetails() {
         '\nContenu :\n' +
         '  ' + (m.contenu.cles ? m.contenu.cles.length : '?') + ' clés de données\n' +
         '  ' + (m.contenu.nombreFichiersTravaux || 0) + ' fichiers travaux\n' +
-        '  ' + _formaterTaille(m.contenu.tailleTotaleOctets || 0) +
+        '  ' + window.TailleFichier.dire(m.contenu.tailleTotaleOctets || 0) +
         noteFsapi;
 
     uiDialogues.informer({ titre: 'Détails du codex', message: details, preformate: true });
@@ -4571,7 +4577,7 @@ async function actionExporterSelection() {
 
         notifications.succes(
             'Export sélectif terminé',
-            nomsTrimestres + ' — ' + _formaterTaille(zipBlob.size)
+            nomsTrimestres + ' — ' + window.TailleFichier.dire(zipBlob.size)
         );
     }
 

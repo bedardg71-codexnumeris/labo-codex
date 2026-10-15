@@ -49,10 +49,10 @@ function _formaterDate(iso) {
     }
 }
 
-/** La taille, au format de tout l'écran des archives (reserve.js) ; « — » quand la liste ne la connaît pas. */
-function _formaterTaille(octets) {
+/** La taille (taille-fichier.js, #993) ; « — » quand la liste ne la connaît pas. */
+function _tailleOuTiret(octets) {
     if (!octets || octets <= 0) return '—';
-    return window.Reserve.formaterTaille(octets);
+    return window.TailleFichier.dire(octets);
 }
 
 /** Lot A2 : ce que la liste dit de la vérification d'une archive (mots dans ReserveVerifier.MOTS). */
@@ -281,7 +281,7 @@ function _rendreTableau() {
         var libelleGroupe = e.groupe ? 'gr' + _echapper(e.groupe) : '—';
         var libelleEtud = (e.nombre_etudiants != null) ? e.nombre_etudiants : '—';
         var libelleFich = (e.nombre_fichiers_travaux != null) ? e.nombre_fichiers_travaux : '—';
-        var taille = _formaterTaille(e.taille_travaux_totale);
+        var taille = _tailleOuTiret(e.taille_travaux_totale);
 
         return '' +
             '<tr>' +

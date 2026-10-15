@@ -4550,7 +4550,7 @@ function genererSectionTravaux(da) {
                 <div class="travaux-grille-info">
                     <div class="travaux-grille-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}</div>
                     ${nomProd ? `<div class="travaux-grille-etudiant">${nomProd}</div>` : ''}
-                    <div class="travaux-grille-etudiant">${travauxStockage.formaterTaille(f.tailleFichier)}</div>
+                    <div class="travaux-grille-etudiant">${window.TailleFichier.dire(f.tailleFichier, { decimales: 1 })}</div>
                 </div>
             </div>`;
     });

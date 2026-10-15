@@ -8,6 +8,7 @@
    DEPENDANCES:
    - db.js (Database, IndexedDB)
    - trimestres.js (cle() pour namespacing)
+   - taille-fichier.js (window.TailleFichier.dire : #993)
    =============================== */
 
 (function() {
@@ -885,8 +886,8 @@
                 total: estimation.quota || 0,
                 pourcentage: estimation.quota ? (estimation.usage / estimation.quota) : 0,
                 alerteQuota: estimation.quota ? (estimation.usage / estimation.quota) >= SEUIL_ALERTE_QUOTA : false,
-                utiliseFormate: formaterTaille(estimation.usage || 0),
-                totalFormate: formaterTaille(estimation.quota || 0)
+                utiliseFormate: window.TailleFichier.dire(estimation.usage || 0, { decimales: 1 }),
+                totalFormate: window.TailleFichier.dire(estimation.quota || 0, { decimales: 1 })
             };
         }
 
@@ -895,18 +896,6 @@
             alerteQuota: false,
             utiliseFormate: 'Inconnu', totalFormate: 'Inconnu'
         };
-    }
-
-    /**
-     * Formate une taille en bytes vers une chaine lisible
-     * @param {number} bytes - Taille en bytes
-     * @returns {string} Taille formatee
-     */
-    function formaterTaille(bytes) {
-        if (bytes === 0) return '0 o';
-        const unites = ['o', 'Ko', 'Mo', 'Go'];
-        const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + unites[i];
     }
 
     /**
@@ -920,7 +909,7 @@
         return {
             nombre: fichiers.length,
             tailleTotale: tailleTotale,
-            tailleFormatee: formaterTaille(tailleTotale)
+            tailleFormatee: window.TailleFichier.dire(tailleTotale, { decimales: 1 })
         };
     }
 
@@ -1423,7 +1412,6 @@
         prechargerThumbnails: prechargerThumbnails,
         // Quota
         estimerQuota: estimerQuota,
-        formaterTaille: formaterTaille,
         statistiquesFichiers: statistiquesFichiers,
         // Annotations
         obtenirAnnotations: obtenirAnnotations,

@@ -1,55 +1,55 @@
-# Consigne du jour – préparer la clôture de l'hiver 2026 et l'archivage de ses copies
+# Consigne du jour – « Ton codex dit vrai » : trois corrections de mots (#994, #993, #1020)
 
-> Écrite par Cowork le 14 octobre 2026 à 10 h 41 (Toronto, mesurée par `date`). L'ancienne consigne (le texte « À propos », avec le verdict de Cowork de 10 h 37) est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-14-accueil-a-propos.md`. Commite ce fichier et le déplacement avec ton lot.
+> Écrite par Cowork le 15 octobre 2026 à 9 h 25 (Toronto, mesurée par `date`). L'ancienne consigne (préparer la clôture de l'hiver 2026, avec le verdict de Cowork du 14 à 11 h 01) est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-14-clore-l-hiver-2026.md`. Commite ce fichier, ce déplacement et `DECISIONS-2026-10-15-ton-codex-dit-vrai.md` avec ton lot.
 
 ## Où on en est
 
-`main` à `92f63708` au moment de l'écriture : le lot « À propos », relu par Cowork, conforme, non poussé ; le rouge Vitest de la sentinelle anti-cache est attendu jusqu'à la release du soir. **Remesure avant de toucher.** Une autre session écrit en parallèle le temps 3 de l'observation (`plans de travail/observation/`) : n'y touche pas.
+`main` à `ee49f035` au moment de l'écriture : 1.201.0 en ligne depuis 9 h 06 (ton rapport). **Remesure avant de toucher.** Une autre session écrit l'observation sous `plans de travail/observation/` : n'y touche pas.
 
-## La décision de Grégoire (14 oct. 2026, 10 h 39)
+## Les décisions de Grégoire (15 oct. 2026, de 9 h 18 à 9 h 23)
 
-Question 1 du groupe 1 des décisions (`plans de travail/DECISIONS-A-PRENDRE-2026-10-11.md`, resté sur la branche `origin/claude/inspiring-mccarthy-99htj8`, absent de `main`) : son codex approche la limite de 2 Go (#992 : 1,33 Go le 29 sept. ; borne estimée début à mi-novembre, sur deux points). **Il clôt l'hiver 2026 pour pouvoir en archiver les copies** (#1028, en ligne depuis 1.186.0), en gardant toutes les données du trimestre. C'est une levée du moratoire sur la clôture (#622) **pour ce trimestre-là seulement** ; les autres trimestres restent sous moratoire tant que #622 n'est pas traité.
-
-**Les gestes sur ses vraies données sont les siens** : mettre à jour son codex, clore, archiver le trimestre, vérifier, archiver les copies. Ton lot les prépare et les éprouve ailleurs ; il n'en fait aucun.
+Toutes dans `plans de travail/DECISIONS-2026-10-15-ton-codex-dit-vrai.md`, mots d'écran compris. **Recopie les mots tels quels**, apostrophes et guillemets compris ; un mot qui ne tient pas dans l'écran remonte à Cowork, il ne se retouche pas en chemin.
 
 ## Le mandat : un lot, trois parties
 
-### 1. Mesure en lecture seule : ce que pèsent les copies de l'hiver 2026
+### 1. #994 – l'échec d'écriture du codex ne devine plus la cause
 
-- Dans son dernier codex : le poids des copies de l'hiver 2026, celui des autres trimestres, le total. Lecture seule de l'archive (liste des entrées et de leurs tailles) : jamais d'ouverture dans l'application, jamais de copie du fichier. Si tu ne trouves pas le fichier, demande-lui où il est, en une seule question.
-- ⚠ Confidentialité : le rapport ne cite aucun nom de fichier ni d'élève, seulement des sommes par trimestre (règle 6 de `CLAUDE.md`).
-- Où vivent ces copies : dans le navigateur, ou dans son dossier sur disque ? Ce que le codex en emporte dans chaque cas, donc ce que l'archivage des copies allégera réellement.
-- La marge qui restera après : en Mo, et en semaines au rythme mesuré (dis sur combien de points repose le rythme).
+- `_ecrireLeCodexPrepare` (`js/codex.js`) : `reglage.echec` ne reçoit aujourd'hui que la taille. Il lui faut savoir si le navigateur a signalé lui-même un manque d'espace (`QuotaExceededError` dans `sauvegarde.erreur`). Les deux appelants, `_mettreAJourLeCodex` et `ecrireCodexAPartAvantSuppression`, prennent les mots de la question 1.
+- Mesure, et dis-le dans la demande de relecture : quelles erreurs `sauvegarderVersDestination` peut rendre sur chaque chemin (fenêtre de choix, partage, téléchargement dit absent), et si l'une d'elles dit l'espace sous un autre nom que `QuotaExceededError`. N'en ajoute aucune à la règle sans le dire.
+- Le témoin (`_direNonMisAJour`) est déjà neutre : n'y touche pas. Les boutons « Réessayer » et « Télécharger à la place » ne changent pas.
 
-### 2. Le chemin complet, éprouvé au banc sur un trimestre fictif
+### 2. #993 – une seule façon de dire une taille de fichier
 
-Dans l'ordre que l'écran impose : codex à jour → « Clore » → « Archiver le trimestre » → « Vérifier » → « Archiver les copies » → codex mis à jour, plus léger → « Rouvrir », puis « Clore » de nouveau, pour prouver que la clôture se reprend. Pour chaque étape : ce qui s'écrit (clés, champs), ce qui est refusé et pourquoi (`creerSnapshotRessources` qui refuse sur des cartouches non migrées, `refusImmediat`, trimestre actif…), ce que l'écran dit. Noms manifestement fictifs.
+- Une seule fonction (son emplacement : à toi). Base 1000, sauf sous Windows (1024). Unités « Ko », « Mo », « Go ». La détection du système : à toi ; dis laquelle, et ce qu'elle rend sur un iPad (Safari s'y déclare souvent Mac : même base, sans conséquence).
+- Tous les écrans qui disent une taille de fichier à l'usager passent par elle. L'inventaire de la question 2 est un point de départ : **remesure-le** (`1024`, `1048576`, `Math.log(1024)`…), et liste dans la demande de relecture ceux que tu laisses, avec leur motif. Les « K car. » de `db.js` sont hors champ (des caractères, pas des octets).
+- Les limites gardent leur valeur en octets ; seul leur affichage suit la règle. ⚠ Là où un texte écrit la limite en dur (« Limite : 2 Go », « Limite : 50 Mo »), il doit dire le même nombre que la fonction pour la même valeur : mesure, et dis ce que chaque limite affichera sous Windows et ailleurs.
+- « environ » reste là où il est aujourd'hui, et seulement là. Les fonctions remplacées sont retirées (zéro-dette), pas laissées en alias.
 
-- Au passage : `archiverTrimestre` (`js/trimestres.js`) écrit `dateFin` à la date du jour. Cowork a lu que le calendrier se sert de `cadreCalendrier.dateFin`, pas de ce champ ; confirme qu'aucun écran ni calcul ne lit `trimestre.dateFin` comme la fin du trimestre.
-- Ce qui pourrait empêcher la clôture de l'hiver 2026 chez lui et se lit dans le code sans ses données : liste-le, avec le geste qui le lève.
+### 3. #1020 – la fenêtre du codex à part dit ce que fera sa réouverture
 
-### 3. Ce qui se corrige sans lui, dans le même lot
+- `ecrireCodexAPartAvantSuppression` : la phrase qui suit la première devient celle de la question 3 ; mets à jour le commentaire qui date les mots (2 oct. 2026, 20 h 28 → 15 oct. 2026, 9 h 23).
+- Le reste de #1020 (après réouverture, les mises à jour s'écriraient sous le nom « … avant-suppression ») n'est pas dans ce lot.
 
-- « Clore » et « Rouvrir » parlent encore par `confirm()` et `alert()` (`js/trimestre-v2-liste.js`, `confirmerArchivage`, `confirmerDesarchivage`), laissés tels quels « à cause du moratoire » (#1037). Passe-les aux fenêtres et notifications de l'application, **avec les mots d'aujourd'hui, sans retouche** : un mot changé remonterait à Grégoire.
-- « La copie de sauvegarde que rien ne relit » (#622, selon la remesure du 11 oct.) : mesure ce qu'elle est ; si elle est morte, applique les trois issues de `CLAUDE.md`.
-- Rien d'autre. Toute trouvaille hors de ce chemin : issue 2, inscrire et continuer.
+### Les lignes à poser au BACKLOG
+
+Coche #994 et #993 une fois le lot fait ; #1020 reste ouverte. Sous chaque fiche, cette ligne, telle quelle :
+
+- #994 : `**Décidé par Grégoire le 15 oct. 2026 à 9 h 18** : le message ne devine plus la cause ; l'espace n'est nommé que si le navigateur signale lui-même un manque d'espace. Mots : plans de travail/DECISIONS-2026-10-15-ton-codex-dit-vrai.md, question 1.`
+- #993 : `**Décidé par Grégoire le 15 oct. 2026 à 9 h 22** : l'application compte comme le système de la personne, base 1000 sur Mac et iPad, 1024 sous Windows, partout où elle dit une taille de fichier. Détail : plans de travail/DECISIONS-2026-10-15-ton-codex-dit-vrai.md, question 2.`
+- #1020 : `**Décidé par Grégoire le 15 oct. 2026 à 9 h 23** : la fenêtre du codex à part dit que le rouvrir remet aussi le reste des données dans leur état du jour (mots : même fichier, question 3) ; fait au lot « Ton codex dit vrai ». Reste ouvert : après la réouverture, les mises à jour s'écrivent sous le nom « … avant-suppression ».`
 
 ### Source ou stock
 
-Source seulement : aucune donnée déjà écrite n'est réécrite. Les gestes sur l'hiver 2026 viendront après, de sa main.
+Source seulement : des mots et un calcul d'affichage. Rien n'est écrit dans les données de personne.
 
-## Le livrable pour Grégoire : une porte terrain
+## Pas de porte terrain
 
-Skill `portes-terrain` : le markdown `plans de travail/PORTE-2026-10-14-clore-et-alleger-l-hiver-2026.md`, en gestes d'utilisateur, dans l'ordre, chacun avec ce qu'il doit voir et ce qui l'arrête (un refus, une différence à la vérification). Première rangée : mettre à jour son codex avant de toucher à quoi que ce soit. Dis sur quel appareil et dans quel navigateur la porte se passe (là où vit son espace réel). Cowork publie l'artefact jumeau.
+Une machine peut répondre. Les bancs le prouvent, chaque essai neuf avec son break-test : la fonction de taille (254 700 000 octets → « 255 Mo » hors Windows, « 243 Mo » sous Windows, à la précision que chaque écran emploie aujourd'hui) ; la fenêtre d'échec avec et sans `QuotaExceededError`, pour la mise à jour et pour le codex à part ; la phrase du codex à part.
+
+## La ligne des Nouvelles
+
+Propose-la dans la demande de relecture, en mots d'utilisateur ; Cowork la soumettra à Grégoire avec la version du soir.
 
 ## La méthode
 
-Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-14-clore-l-hiver-2026.md`. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire en gestes d'utilisateur : ce qu'il aura à faire, combien de temps cela prend, et combien de marge cela lui donne.
-
-## Verdict de Cowork, 14 oct. 2026 à 11 h 01 (Toronto, mesuré par `date`)
-
-**Relu sur `1db00842` : accepté, sans correction.** Les mots de « Clore » et « Rouvrir » sont ceux d'avant, lus dans le diff (titres, messages, refus) ; le fichier n'a plus de dialogue natif. Les cinq décisions du § 3 de la demande sont acceptées, dont « Rouvrir » rebranché sur sa confirmation : c'est un garde-fou perdu qu'on retrouve, pas un mot neuf. Les trois trouvailles en issue 3 sont acceptées.
-
-- La mesure du § 1 corrige l'échéance de #992 : environ douze semaines de marge sans le geste (sept codex), au lieu de « début à mi-novembre » (deux points). À reporter dans #992 avec la ligne de #622 du § 7, au prochain passage au BACKLOG.
-- La porte est publiée par Cowork (artefact « Porte · Clore l'hiver 2026 »), douze rangées, à passer après la version du soir.
-- La ligne « Nouvelles » du § 6 sera soumise à Grégoire avec celle du lot « À propos », à la release du soir.
+Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-15-ton-codex-dit-vrai.md`. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire en gestes d'utilisateur.

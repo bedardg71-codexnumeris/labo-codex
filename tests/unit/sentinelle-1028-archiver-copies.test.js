@@ -304,7 +304,7 @@ describe('#1028 · (a) l\'aller-retour : archiver les copies, faire évoluer les
         const f = RC.fenetreIdentique(res);
         expect(f.titre).toBe('Archiver les copies de Hiver 2032 ?');
         const l = f.message.split('\n');
-        expect(l[0]).toBe('4 copies quitteront l\'application, environ 80,0 Ko.');
+        expect(l[0]).toBe('4 copies quitteront l\'application, environ 81,9 Ko.');
         expect(l[1]).toMatch(/^Son archive, vérifiée le .+, les garde telles quelles : « Faire revenir » les ramènera\.$/);
         expect(l.slice(2)).toEqual([
             'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.',
@@ -314,7 +314,7 @@ describe('#1028 · (a) l\'aller-retour : archiver les copies, faire évoluer les
         const bilan = await RC.retirer(res);
         expect(RC.compteRendu(res, bilan)).toEqual({
             titre: 'Les copies de Hiver 2032 sont aux archives',
-            message: '4 copies retirées. Ton prochain codex sera plus léger d\'environ 80,0 Ko.\n' +
+            message: '4 copies retirées. Ton prochain codex sera plus léger d\'environ 81,9 Ko.\n' +
                 'Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.\n' +
                 'Pour faire revenir les copies : Réglages › Données › Archives, ligne de Hiver 2032, « Faire revenir ».'
         });

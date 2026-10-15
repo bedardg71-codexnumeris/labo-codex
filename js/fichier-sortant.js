@@ -15,13 +15,14 @@
    Dépendances
      - JSZip : seulement par l'objet que l'appelant passe à `assemblerZip`
      - ui-dialogues.js (window.uiDialogues.confirmerAction)
+     - taille-fichier.js (window.TailleFichier.dire : la limite du format ZIP, dite)
 
    API : window.FichierSortant
      - assemblerZip(zipTextes, copies, surProgression) → Promise<Blob>
      - entreesDuZip(zipTextes, copies, dossierDesCopies) → { forEach }
      - telecharger(blob, nomFichier) → { methode, strategie }
      - confirmerTelechargement(nomFichier, taille) → Promise<boolean>
-     - tailleEnviron(octets) → string
+   La taille dite à l'usager : window.TailleFichier (taille-fichier.js, #993).
    =============================== */
 
 (function() {
@@ -129,7 +130,8 @@ async function assemblerZip(zipTextes, copies, surProgression) {
         tailleFinale += 30 + 46 + 2 * noms[t].length + copies[t].blob.size;
     }
     if (tailleFinale > LIMITE_ZIP_OCTETS) {
-        throw new Error('Le fichier dépasse ce que le format ZIP peut contenir (4 Go).');
+        throw new Error('Le fichier dépasse ce que le format ZIP peut contenir (' +
+            window.TailleFichier.dire(LIMITE_ZIP_OCTETS, { decimales: 0 }) + ').');
     }
 
     var morceaux = [textes.subarray(0, debutRepertoire)];
@@ -253,23 +255,11 @@ async function confirmerTelechargement(nomFichier, taille) {
     }) === true;
 }
 
-/**
- * « environ 1,0 Go », « environ 350 Mo » : la taille dite à l'usager.
- */
-// Juste sous 1 Go, peut dire « environ 1024 Mo » : cosmétique, sans suite (relecture de Cowork, lot G, issue 3).
-function tailleEnviron(octets) {
-    var go = 1024 * 1024 * 1024, mo = 1024 * 1024;
-    if (octets >= go) return 'environ ' + (octets / go).toFixed(1).replace('.', ',') + ' Go';
-    if (octets >= mo) return 'environ ' + Math.round(octets / mo) + ' Mo';
-    return 'environ ' + Math.max(1, Math.round(octets / 1024)) + ' Ko';
-}
-
 window.FichierSortant = {
     assemblerZip: assemblerZip,
     entreesDuZip: entreesDuZip,
     telecharger: telecharger,
-    confirmerTelechargement: confirmerTelechargement,
-    tailleEnviron: tailleEnviron
+    confirmerTelechargement: confirmerTelechargement
 };
 
 })();

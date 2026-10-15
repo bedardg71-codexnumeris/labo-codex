@@ -7,6 +7,7 @@
    - travaux-stockage.js (stockerBlob, ajouterFichierTravail, etc.)
    - trimestres.js (cle())
    - config.js (echapperHtml)
+   - taille-fichier.js (window.TailleFichier.dire : #993)
    =============================== */
 
 (function() {
@@ -1534,7 +1535,7 @@
                 : (f.etudiantDA ? `DA: ${echapperHtml(f.etudiantDA)}` : 'Non associe');
 
             const icone = f.estPDF ? '&#x1F4C4;' : '&#x1F5BC;';
-            const taille = travauxStockage.formaterTaille(f.tailleFichier);
+            const taille = window.TailleFichier.dire(f.tailleFichier, { decimales: 1 });
             const statutClass = f.statut === 'erreur' ? 'statut-erreur' : '';
 
             html += `
