@@ -664,7 +664,8 @@ test.describe('#476 volet 2 · caractérisation — productions', () => {
         expect(r.copie.auteur).toBe('Inconnu');
         expect(r.copie.isDemo).toBe(false);
         expect(r.copie.inspireDe).toEqual(['auteur', 'date', 'nom', 'sourceId']);
-        expect(r.copie.verrouille).toBe(false);
+        // #489 (15 oct. 2026) : le verrou d'une production entière est retiré, la copie ne porte plus le champ.
+        expect(r.copie.verrouille).toBeUndefined();
         expect(r.copie.metadata_cc).toBe('absent');
         expect(r.copie.aDateCreation).toBe(false);
         // ⚠ Le message nomme l'ACTIVITÉ d'apprentissage, pas le titre : c'est le

@@ -156,7 +156,9 @@ test('(P-b) nouvelle production : rien avant « Créer la production » ; « Fer
     await pause(page, 600);
     const creee = (await productions(page)).find(p => p.titre === 'Journal fictif banc E3');
     expect(creee, 'créée au clic').toBeTruthy();
-    expect(creee).toMatchObject({ type: 'travail', ponderation: 10, verrouille: false });
+    expect(creee).toMatchObject({ type: 'travail', ponderation: 10 });
+    // #489 (15 oct. 2026) : le verrou d'une production entière est retiré, la création n'écrit plus le champ.
+    expect(creee.verrouille).toBeUndefined();
     expect(await page.evaluate(() => window.__toasts.some(t => t.includes('Production « Journal fictif banc E3 » créée.')))).toBe(true);
     expect(await visible(page, '#btnCreerProduction'), 'elle existe : « Fermer » seul').toBe(false);
     expect(await visible(page, '#btnDupliquerProduction')).toBe(true);
