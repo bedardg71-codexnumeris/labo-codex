@@ -1,6 +1,6 @@
 # Confrontation des 710 « prévu mais pas fait » : préparation
 
-*15 octobre 2026. Suite de l'audit « observer ce que fait réellement l'application » (rapport : `9-rapport-audit.md`, §8, point 2). Préparé par Claude Code ; l'entrevue avec Grégoire et les dispositions suivront dans ce même fichier.*
+*15 octobre 2026. Suite de l'audit « observer ce que fait réellement l'application » (rapport : `9-rapport-audit.md`, §8, point 2). Préparé par Claude Code ; entrevue avec Grégoire le même jour, de 14 h 53 à 15 h 14 UTC ; dispositions dans ce même fichier.*
 
 ## Pourquoi ce tri
 
@@ -29,6 +29,44 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 
 **Ce que cela dit de l'audit** : sur 710 intentions que l'observation n'avait pas vues, 569 sont pourtant dans le code. Le silence de l'observation tenait surtout à sa couverture, non à des manques de l'application. Les « voulu mais invisible » possibles se réduisent aux 131 entrées ci-dessous.
 
+## Déroulement de l'entrevue et dispositions
+
+**Ce qui s'est passé.** L'entrevue devait passer les 131 entrées une à une, partie par partie. Grégoire a répondu pour les parties 1 à 4, chaque fois d'un seul trait (« 1 à 11 : toujours voulu », puis « 1 à 12 », « 1 à 13 », « 1 à 28 »). La partie 5 présentée, il a dit (recopié tel quel) :
+
+> « Ici, je dois avouer que le travail en cours est extrêmement détaillé, minutieux et très long. Il me demande beaucoup euh, sur le plan cognitif. Euh, j'ai tendance à répondre euh, une réponse par défaut qui est d'accepter telle quelle. Euh, je crois que j'aurais besoin de recommandations pour... ces dizaines et ces dizaines de propositions, je ne peux pas en faire autant. Je suis épuisé après quelques minutes. »
+
+**Ce qui a changé.** L'entrevue entrée par entrée s'est arrêtée là. Claude Code a trié les 131 entrées selon la règle de `CLAUDE.md` (« ce qui remonte jusqu'à Grégoire ») : les entrées techniques, qu'il tranche lui-même ; les entrées probablement périmées, à confirmer d'un mot ; cinq questions qui reviennent à Grégoire. Les réponses des parties 1 à 4 sont gardées, avec la mention qu'elles ont été données par défaut, et elles sont passées par le même tri. Grégoire a accepté (« oui, fais le tri. »), puis a répondu aux cinq questions :
+
+| Question | Entrées | Réponse de Grégoire (telle quelle) | Suite |
+|---|---|---|---|
+| 1. L'arrondi de la note | 4.72, 5.184 | « on arrondit au dixème partout. » | #1076 ; remplace la règle « ,5 vers le haut » de 5.184 |
+| 2. Les fichiers des copies d'un trimestre parti | 2.35 | « on propose de tout nettoyer » | #1077 : tarir la source, proposer le nettoyage du stock, jamais d'office |
+| 3. La colonne « Mobilisation » | 6.16, 6.46 | « c'est un reliquat de la moyenne (A+C)/2. c'est abandonné. » | périmé ; le code qui en reste est retiré (#1083) |
+| 4. L'écran Labo › Données | 8.56 à 8.58 | « non, il est dans Réglages > données » | périmé |
+| 5. Dupliquer un cours ou un service | 2.105, 2.106 | « il faudrait créer le bouton. » | #1079 |
+
+Pour la liste des périmées et le tri technique : « Je suis d'accord avec tout le reste, merci. »
+
+**Décidé par Claude Code après le tri, sans le soumettre de nouveau** (règle « décide, puis dis-le ») : quatre entrées techniques sont refusées plutôt qu'inscrites, parce que le code y fait déjà ce que vise l'intention, sous une autre forme (1.161, 3.42, 4.84, 5.182, motifs à leur fiche) ; une partie de 4.31 tombe pour la même raison ; 6.6 rejoint 1.117, son double, dans #1078.
+
+**Bilan des 131 entrées**
+
+| Disposition | Entrées |
+|---|---:|
+| inscrit, #1075 à #1086 | 111 |
+| en partie périmé, en partie inscrit (6.100) | 1 |
+| déjà inscrit (#291, 4.181) | 1 |
+| périmé | 14 |
+| refusé | 4 |
+| **Total** | **131** |
+
+Fiches : #1075, protection et intégrité des données (12 entrées, prioritaire) ; #1076, arrondi au dixième (2) ; #1077, fichiers d'un trimestre supprimé (1) ; puis une fiche par partie de l'intention, #1078 à #1085 (10, 10, 8, 21, 18, 9, 9, 9), et #1086 pour l'annexe (3).
+
+**Ce que ce déroulement ne garantit pas.**
+- Les réponses des parties 1 à 4 ont été données par défaut, de l'aveu de Grégoire. Trois de ces entrées (1.6, 4.52, 4.70) ont reçu « toujours voulu », puis « périmé » au tri : c'est le second avis qui compte, parce que Grégoire l'a donné sur une recommandation argumentée.
+- L'approbation du tri est globale. Elle valide une méthode et une liste ; elle ne vaut pas un examen de chaque entrée par Grégoire. Le risque est celui que le cadrage visait : Claude Code a classé, et l'approbation par fatigue tend à confirmer ce classement. Ce qui le contient : les fiches citent chaque entrée et sa preuve, et chacune sera revue au code de `main` avant correction.
+- Les dix entrées indécidables (section suivante) n'ont pas encore de destination.
+
 ## Ce qui revient à Grégoire : 131 entrées
 
 *Les « pas fait » et les « en partie », plus les entrées que le second tri range dans l'une de ces cases (A.58). Pour chacune, trois réponses : **toujours voulu** (une fiche est créée) ; **plus voulu** (l'intention est périmée) ; **refusé** (avec motif). Rangées par partie de l'intention.*
@@ -41,8 +79,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 168) : « au premier lancement, l'application propose la démonstration »
 - **Ce que fait le code** : La démo est offerte en tout temps par une case de l'Accueil, mais aucune proposition propre au premier lancement (question à accepter ou refuser) n'existe : rien n'appelle activerModeDemo hors de la case (js/accueil.js:339-350).
 - **Preuve** : js/accueil.js:263-271 : carte permanente « Données démo » (« Cours fictif déjà configuré ») sur l'Accueil ; js/main.js:368 : la fenêtre de bienvenue (modal-bienvenue) est retirée
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : périmé (fenêtre de bienvenue retirée ; la case « Données démo » de l'Accueil la remplace)
 
 #### 1.91 · en partie
 *Écran* : Écran 4 · En-tête › menu Codex · *Geste* : Sans geste
@@ -50,8 +88,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 335) : « le menu attend que le stockage soit prêt avant de dire « Aucun codex actif » »
 - **Ce que fait le code** : Le menu ouvert avant que le stockage soit prêt dit encore « Aucun codex actif » ; il est corrigé après coup, il n'attend pas.
 - **Preuve** : js/codex.js:256-273 : si l'état n'est pas lisible au démarrage, il est relu après db-ready ; mais js/codex.js:3134-3166 (_actualiserMenu) affiche « Aucun codex actif » dès que _etat.actif est faux, sans attendre db-ready
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.117 · en partie
 *Écran* : Écran 8 · Témoin « Enregistré » (tous les écrans) · *Geste* : Sans geste (après chaque écriture)
@@ -59,8 +97,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 407) : « reste affiché jusqu'à la prochaine écriture réussie ou jusqu'à ce qu'on le ferme »
 - **Ce que fait le code** : La règle diffère : une écriture réussie d'une autre clé ne le retire pas, contrairement à « la prochaine écriture réussie ».
 - **Preuve** : js/temoin-enregistrement.js:155 et 178-185 : le « Non enregistré » ne s'efface que sur une écriture réussie de LA MÊME clé, ou par « Fermer » (bouton js/temoin-enregistrement.js:88-94)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.129 · en partie
 *Écran* : Écran 10 · Numéro de version, bandeau de nouvelle version, fenêtre des Nouveautés · *Geste* : Geste : ouvrir les Nouveautés (carte de l'Accueil ou bouton du bandeau)
@@ -68,8 +106,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 440) : « la fenêtre liste les versions, une entrée par version mineure »
 - **Ce que fait le code** : La fenêtre n'est pas vide en 1.199.0 et suit la règle une entrée par mineure ; mais 1.7, 1.8, 1.9, 1.12, 1.13, 1.15 à 1.17, 1.22 à 1.24, 1.70 et 1.82 n'ont aucune entrée sans explication (seules 1.62 et 1.32 à 1.47 sont justifiées, js/changelog-data.js:10-17 et 1827).
 - **Preuve** : js/changelog-data.js:22-2330 : 175 entrées, une par version mineure, rendues par genererChangelogHTML (js/changelog-data.js:2334-2348) dans #changelog-contenu (js/init-inline.js:362-365)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.130 · en partie
 *Écran* : Écran 10 · Numéro de version, bandeau de nouvelle version, fenêtre des Nouveautés · *Geste* : Geste : ouvrir les Nouveautés (carte de l'Accueil ou bouton du bandeau)
@@ -77,8 +115,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 441) : « les Nouvelles passées sont un historique daté auquel on ne touche pas »
 - **Ce que fait le code** : Les Nouvelles passées ne sont pas réécrites, mais l'historique n'est pas daté : aucune date n'est stockée ni affichée.
 - **Preuve** : js/changelog-data.js:430-437 : l'entrée 1.168 garde ses mots d'alors (« copie de secours ») ; js/changelog-data.js:7 : « Pas de dates » ; js/changelog-data.js:2334-2348 : seuls version et titre sont affichés
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.132 · en partie
 *Écran* : Écran 11 · En-tête › « Soutenir Labo Codex » (le cœur) · *Geste* : Geste : ouvrir la fenêtre « Soutenir Labo Codex »
@@ -86,8 +124,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 448) : « le bleu ne sert qu'aux liens »
 - **Ce que fait le code** : Le bleu des liens sert aussi au titre de la fenêtre.
 - **Preuve** : styles.css:5452-5457 et 5474-5478 : titres de bloc et libellés sans lien en couleur de texte ; styles.css:5480-5483 et 5503-5506 : liens en var(--accent-primaire) ; mais styles.css:5376-5379 : le titre « Soutenir Labo Codex » (.modal-titre, js/modal-soutien.js:40) est aussi en var(--accent-primaire)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.133 · en partie
 *Écran* : Écran 11 · En-tête › « Soutenir Labo Codex » (le cœur) · *Geste* : Geste : ouvrir la fenêtre « Soutenir Labo Codex »
@@ -95,8 +133,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 449) : « l'abonnement gratuit et l'abonnement de soutien sont deux niveaux du même abonnement, et c'est lui qui finance Labo Codex »
 - **Ce que fait le code** : Le financement est dit, mais aucun texte affiché ne dit que l'abonnement gratuit et l'abonnement de soutien sont deux niveaux du même abonnement : seul un commentaire du code le dit (js/modal-soutien.js:31-34).
 - **Preuve** : js/modal-soutien.js:81 : « C'est cet abonnement qui finance Labo Codex. » ; js/modal-soutien.js:69 et 80 : les deux abonnements nomment le blogue
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.149 · en partie
 *Écran* : Écran 14 · Aide · *Geste* : Geste : lire Aide › Codex
@@ -104,8 +142,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 489) : « Aide › Codex ne contient que le flux de travail, les fonctions du menu et la section « Ton codex est-il à jour ? » »
 - **Ce que fait le code** : Les trois parties voulues sont là, mais pas seules.
 - **Preuve** : index.html:14073-14088 : la carte contient aussi une ligne « Navigation », un paragraphe de présentation et l'encadré « Qu'est-ce qu'un Codex ? », en plus du flux (14090-14096), des fonctions (14098-14109) et de « Ton codex est-il à jour ? » (14111)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.160 · en partie
 *Écran* : Écran 14 · Aide · *Geste* : Geste : lire les autres pages de l'Aide
@@ -113,8 +151,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 520) : « les exemples tirés de la pratique de Grégoire (601-101, SRPNF, échelle IDME) restent présentés comme des exemples »
 - **Ce que fait le code** : SRPNF et 601-101 sont donnés en exemple ; IDME ne l'est pas partout.
 - **Preuve** : index.html:10020, 10263, 13989-13990 : SRPNF présenté comme « l'exemple SRPNF fourni », « Grille d'exemple […] et non une structure du logiciel » ; mais index.html:10131, 13000 et 13172 présentent l'échelle IDME comme la mesure de l'application (« Performance IDME », « Score : Pourcentage selon l'échelle IDME », « Le seuil critique est M »)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 #### 1.161 · en partie
 *Écran* : Écran 14 · Aide · *Geste* : Geste : lire les autres pages de l'Aide
@@ -122,8 +160,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 521) : « Aide › Exporter et archiver les travaux décrit les trois exports que l'écran offre vraiment »
 - **Ce que fait le code** : L'Aide décrit bien ce que l'écran offre, mais ce sont deux exports et non trois.
 - **Preuve** : index.html:11711-11715 : « Deux façons d'exporter : » « Exporter des travaux » et « Export Léa » ; js/travaux-ui.js:1298-1340 : l'écran n'offre que ces deux cartes
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : refusé (l'Aide décrit les deux exports que l'écran offre vraiment ; c'est l'intention qui en comptait trois)
 
 #### 1.162 · en partie
 *Écran* : Écran 14 · Aide · *Geste* : Geste : lire les autres pages de l'Aide
@@ -131,8 +169,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 522) : « l'Aide décrit les trois types de grille (holistique, analytique, algorithmique) et la note différée »
 - **Ce que fait le code** : La note différée n'est décrite nulle part dans l'Aide : elle n'existe que comme réglage (index.html:8875, js/preferences.js:590-594).
 - **Preuve** : index.html:10859 : l'Aide nomme les types Holistique, Analytique, Algorithmique ; index.html:11015-11050 : le critère algorithmique est détaillé
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1078
 
 ### Partie 2 (12)
 
@@ -142,8 +180,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 568) : « pour l'élève « Cet·te étudiant·e n'est pas encore ajouté·e. »), avec « Rester » […] ou « Quitter sans ajouter » »
 - **Ce que fait le code** : Les mots et la fenêtre existent, mais le formulaire d'ajout n'a pas de « Fermer » (index.html:7036, bouton caché hors modification) : la question ne vient qu'en ouvrant une autre fiche ; au rechargement, seule la question native du navigateur paraît (ui-dialogues.js:462-471), sans ces mots.
 - **Preuve** : ui-dialogues.js:435, :442 et :454-457 : titre « Cet·te étudiant·e n'est pas encore ajouté·e. », boutons « Rester » et « Quitter sans ajouter » ; trimestre-v2-etudiants.js:636 et :917 : la question est posée quand on ouvre une autre fiche par « Modifier » alors que le formulaire d'ajout porte une saisie
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.11 · en partie
 *Écran* : Écran 17 · Cadre › Trimestre (la fiche du trimestre) · *Geste* : Geste : créer un trimestre
@@ -151,8 +189,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 586) : « éditeurs ouverts refermés »
 - **Ce que fait le code** : Le chemin complet de la bascule est bien pris. Mais pour la grille, l'échelle, la cartouche et la pratique, seuls le pointeur d'édition et le tampon sont vidés (grilles.js:2121, echelles.js:3748, cartouches.js:3125, pratiques-gestion.js:2901) : rien ne masque l'éditeur affiché ; seule la journée sans cours est refermée à l'écran (trimestre-v2-init.js:812-816).
 - **Preuve** : trimestre-v2-init.js:386-390 : « Créer le trimestre » rejoue changerTrimestreActifV2 quand un trimestre était actif ; trimestre-v2-liste.js:465-479 : ce chemin ferme le formulaire de journée sans cours et remet à zéro les pointeurs des quatre éditeurs de Conception
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.21 · en partie
 *Écran* : Écran 17 · Cadre › Trimestre (la fiche du trimestre) · *Geste* : Geste : changer de trimestre actif (menu « Trimestre actif »)
@@ -160,8 +198,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 630) : « éditeurs ouverts (journée sans cours, grille, échelle, cartouche, pratique) refermés »
 - **Ce que fait le code** : Le contexte de l'ancien trimestre est remis à zéro, mais seule la journée sans cours est refermée à l'écran ; l'éditeur de grille, d'échelle, de cartouche ou de pratique n'est pas masqué, et la réinitialisation de la section à son affichage (navigation.js:219-245, grilles.js initialiserModuleGrilles) ne le masque pas non plus.
 - **Preuve** : trimestre-v2-liste.js:461-479 : au changement de trimestre, le formulaire de journée sans cours est fermé (annulerFormEvenementV2) et les quatre éditeurs de Conception sont réinitialisés ; grilles.js:2121-2124, echelles.js:3748-3752, cartouches.js:3125, pratiques-gestion.js:2901 : ces réinitialisations ne vident que le pointeur d'édition et le tampon
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.27 · pas fait
 *Écran* : Écran 17 · Cadre › Trimestre (la fiche du trimestre) · *Geste* : Sans geste
@@ -170,8 +208,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : Rien ne détecte qu'un nouveau calendrier change la semaine d'une production, ni ne le signale ; l'échéance n'est pas déplacée, mais le changement n'est pas dit.
 - **Preuve** : productions.js:1261-1300 : la semaine d'une échéance est seulement relue du calendrier à l'affichage, sans comparaison avec une semaine antérieure ; trimestre.js:55 (genererCalendrierComplet) ne lit pas les productions
 - **Note** : Vérification en 1.201.0 : un signal voisin existe (« La carte situe cette remise le … », js/productions.js:1361-1376) ; il ne parle pas de semaine et ne se voit qu'à l'ouverture de la fiche.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.28 · en partie
 *Écran* : Écran 18 · Cadre › Trimestre › Bibliothèque (la bibliothèque des trimestres) · *Geste* : Geste : ouvrir un trimestre depuis la bibliothèque
@@ -179,8 +217,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 658) : « un trimestre clos s'ouvre en lecture seule »
 - **Ce que fait le code** : Ouvrir un trimestre clos en lecture seule n'est possible que par le menu « Trimestre actif » (trimestre-v2-liste.js:57-90, qui liste aussi les clos ; bandeau d'archive trimestres.js:1834) ; depuis la bibliothèque, le seul geste offert le rend modifiable.
 - **Preuve** : trimestre-v2-liste.js:200-201 : dans la bibliothèque, un trimestre clos n'offre que « Rouvrir » (desarchiverTrimestre, trimestres.js : retire le statut clos sans l'activer) ; seul un trimestre non clos a « Activer » (:217)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.33 · en partie
 *Écran* : Écran 18 · Cadre › Trimestre › Bibliothèque (la bibliothèque des trimestres) · *Geste* : Geste : rouvrir un trimestre clos
@@ -188,8 +226,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 673) : « infobulle « Rouvrir pour permettre les modifications » »
 - **Ce que fait le code** : L'infobulle existe mais son texte diffère ; « Rouvrir pour permettre les modifications » n'apparaît nulle part.
 - **Preuve** : trimestre-v2-liste.js:201 : le bouton « Rouvrir » a pour infobulle « Restaurer ce trimestre comme actif »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.35 · pas fait
 *Écran* : Écran 18 · Cadre › Trimestre › Bibliothèque (la bibliothèque des trimestres) · *Geste* : Geste : supprimer un trimestre (« Supprimer… »)
@@ -197,8 +235,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 685) : « les fichiers des copies du trimestre partent avec lui »
 - **Ce que fait le code** : La liste <trimestre>_fichiersTravaux part avec les autres clés, mais les fichiers des copies eux-mêmes restent dans le magasin.
 - **Preuve** : trimestres.js:1444-1500 : supprimerTrimestre efface les clés du magasin keyvalue, de localStorage et du cache mémoire (:1479-1481), jamais le magasin IndexedDB « fichiers » des copies (db.js:490) ; reserve-emprunter.js:21-22 le constate : « supprimerTrimestre laisse … les fichiers des copies »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (par défaut), puis question 2 : « on propose de tout nettoyer »
+- Disposition : inscrit #1077
 
 #### 2.92 · pas fait
 *Écran* : Écran 19 · Cadre › Trimestre › Groupe d'étudiant·es (liste du groupe) et fiche d'un·e élève · *Geste* : Geste : importer des étudiant·es (coller ou déposer un fichier)
@@ -206,8 +244,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 808) : « l'ancienne colonne « CAF » est lue comme « Mesure d'aide » »
 - **Ce que fait le code** : La fiche importée n'a pas de champ caf ; seule l'aide (index.html:10715) affirme que les fichiers à l'ancien en-tête restent lisibles. Une valeur de sixième colonne serait même lue comme SA.
 - **Preuve** : trimestre-v2-etudiants.js:1290-1315 : analyserListeEtudiantsCollee lit les colonnes par position (DA, groupe, nom, prénom, programme, puis SA en sixième ou septième colonne, :1302) et ne lit aucune colonne CAF ni Mesure d'aide
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.105 · pas fait
 *Écran* : Écran 20 · Cadre › Trimestre › Cours et services (et la Bibliothèque de cours) · *Geste* : Geste : dupliquer un cours ou un service
@@ -216,8 +254,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : Le geste n'est pas offert ; même appelée, la fonction ne trouverait pas son formulaire et ne créerait ni fiche ni message.
 - **Preuve** : trimestre-v2-cours.js:627-670 : dupliquerCoursSelectionneV2 existe, mais aucun bouton ni entrée de menu ne l'appelle, et elle vise des éléments absents de la page (v2-formulaireCours, v2-apercuCours, v2-btnTexteCours)
 - **Note** : Vérification en 1.201.0 : le formulaire v2-formulaireCours existe (index.html:6417 en 1.199.0) ; aucun bouton ni menu n'offre le geste.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (par défaut), puis question 5 : « il faudrait créer le bouton. »
+- Disposition : inscrit #1079
 
 #### 2.106 · pas fait
 *Écran* : Écran 20 · Cadre › Trimestre › Cours et services (et la Bibliothèque de cours) · *Geste* : Geste : dupliquer un cours ou un service
@@ -225,8 +263,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 848) : « sur un service, le formulaire dit « Dupliquer le service » »
 - **Ce que fait le code** : Sans geste de duplication offert, le formulaire ne dit jamais « Dupliquer le service ».
 - **Preuve** : mots-nature.js:75 : le mot « Dupliquer le service » existe, mais il n'est lu que par _titrerFormCoursV2('dupliquer') depuis dupliquerCoursSelectionneV2 (trimestre-v2-cours.js:657), que rien n'appelle
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (par défaut), puis question 5 : « il faudrait créer le bouton. »
+- Disposition : inscrit #1079
 
 #### 2.115 · en partie
 *Écran* : Écran 21 · Cadre › Trimestre › Enseignant·e (« mon profil ») · *Geste* : Geste : modifier un profil
@@ -234,8 +272,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 890) : « sans profil, l'auteur par défaut est « Utilisateur de Labo Codex » »
 - **Ce que fait le code** : cc-license.js étant chargé (index.html:14404), l'auteur par défaut d'un document partagé est « Inconnu », pas « Utilisateur de Labo Codex ».
 - **Preuve** : cc-license.js:111-114 : sans profil, obtenirIdentiteCCUtilisateur rend « Inconnu » ; partage-format.js:262-265 et codex-data.js:74-78 n'emploient « Utilisateur de Labo Codex » que si cette fonction est absente
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1079
 
 #### 2.116 · pas fait
 *Écran* : Écran 21 · Cadre › Trimestre › Enseignant·e (« mon profil ») · *Geste* : Geste : supprimer un profil
@@ -243,8 +281,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 896) : « supprimer le profil marqué « mon profil » efface aussi cette marque ; il ne revient pas au chargement suivant »
 - **Ce que fait le code** : La marque « mon profil » survit à la suppression, et le profil revient au chargement suivant.
 - **Preuve** : trimestre-v2-enseignants.js:413-454 : supprimerProfilEnseignantV2 retire le profil de enseignants mais ne touche pas la copie profilEnseignant ; trimestre-v2-enseignants.js:36-57 : au chargement suivant, cette copie est réinjectée dans enseignants quand aucun profil ne porte son courriel
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1075
 
 ### Partie 3 (13)
 
@@ -254,8 +292,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1020) : « si des évaluations ou des productions emploient l'homonyme, refus et rien n'est modifié »
 - **Ce que fait le code** : Le refus d'écraser un homonyme employé est fait pour les trois modèles (grille, échelle, cartouche), ce que couvre la source (changelog 1.190). Sur l'écran Productions, « Remplacer l'existante » retire une production homonyme même si des évaluations la nomment : aucun compte, aucun refus.
 - **Preuve** : js/modal-doublon.js:281-288 : sur « ecraser », compte les porteurs des homonymes et refuse (alert, retour null, rien d'écrit) ; branché pour la grille (js/grilles.js:691-693), l'échelle (js/echelles.js:3544-3546) et la cartouche (js/cartouches.js:982-983). Mais js/productions.js:1916 appelle verifierEtGererDoublon sans porteursHomonymes, et js/productions.js:1928-1929 retire l'homonyme
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1075
 
 #### 3.17 · en partie
 *Écran* : Écran 25 · Conception (commun aux trois écrans) · *Geste* : Geste : dupliquer une fiche (grille, échelle, production)
@@ -263,8 +301,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1046) : « sur un échec, le témoin nomme le geste réel (« Dupliquer la grille », « Dupliquer l'échelle ») »
 - **Ce que fait le code** : Fait pour la grille et l'échelle. Pour la production (le troisième écran du geste), un échec d'écriture n'est pas dit par le témoin et ne nomme aucun geste.
 - **Preuve** : js/grilles.js:5386 (geste « Dupliquer la grille ») et js/echelles.js:3187 (geste « Dupliquer l'échelle ») passent par modifierEtAnnoncer, dont l'échec dit le geste (js/modes.js:1277) ; js/productions-liste.js:328 duplique une production par db.modifier sans geste ni témoin
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 #### 3.19 · en partie
 *Écran* : Écran 25 · Conception (commun aux trois écrans) · *Geste* : Geste : changer de trimestre pendant qu'un éditeur est ouvert
@@ -272,8 +310,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1055) : « les éditeurs ouverts se referment ; les critères ou niveaux d'une fiche en création ne suivent pas dans le nouveau trimestre »
 - **Ce que fait le code** : Les critères et niveaux d'une fiche en création ne suivent pas dans le nouveau trimestre. Mais rien ne referme les éditeurs : aucune de ces fonctions ne masque conteneurEditionGrille ou conteneurEditionEchelle, et la production ouverte (productionEnEdition) n'est pas dans la liste réinitialisée.
 - **Preuve** : js/trimestre-v2-liste.js:474-479 appelle les réinitialisations ; js/grilles.js:2121-2124 vide grilleTemplateActuelle et tempCriteres ; js/echelles.js:3748-3752 vide l'échelle courante, les niveaux et repères en création
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 #### 3.20 · en partie
 *Écran* : Écran 25 · Conception (commun aux trois écrans) · *Geste* : Geste : changer de trimestre pendant qu'un éditeur est ouvert
@@ -281,8 +319,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1056) : « modifier une fiche restée à cheval sur la bascule est refusé à voix haute, rien n'est écrit au mauvais endroit »
 - **Ce que fait le code** : Rien n'est écrit au mauvais endroit. Le refus est dit pour une production restée ouverte (son pointeur survit) ; pour une grille ou une échelle restée affichée, la modification est ignorée en silence au lieu d'être refusée à voix haute.
 - **Preuve** : js/grilles.js:801-807, js/echelles.js:610-620, js/productions.js:2156-2158 : refus à voix haute quand la fiche n'est plus dans le trimestre actif ; mais après la bascule, js/grilles.js:2121-2124 et js/echelles.js:3748-3752 mettent le pointeur à null, et js/grilles.js:864-868 (sauvegarderNomGrille) comme js/echelles.js:574-578 ne font alors plus rien, sans un mot
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 #### 3.42 · en partie
 *Écran* : Écran 26 · Conception › Productions étudiantes · *Geste* : Geste : choisir la grille, l'échelle et la cartouche de la production
@@ -290,8 +328,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1109) : « s'affiche « ⚠ introuvable », et l'enregistrement ne l'efface pas »
 - **Ce que fait le code** : La référence est préservée à l'enregistrement, mais le texte affiché est « ⚠ ‹type› introuvable (‹id›) », pas « ⚠ introuvable ».
 - **Preuve** : js/productions.js:1513-1524 : poserReferenceSelect réinjecte l'id non résolu comme option sélectionnée, texte « ⚠ grille introuvable (‹id›) » (ou échelle, cartouche) ; l'enregistrement relit cette valeur et ne l'efface pas
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : refusé (le libellé du code, « ⚠ ‹type› introuvable (‹id›) », dit en plus le type et l'identifiant ; la référence est préservée comme voulu)
 
 #### 3.48 · pas fait
 *Écran* : Écran 26 · Conception › Productions étudiantes · *Geste* : Geste : supprimer une production
@@ -300,8 +338,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : Aucun chemin de suppression d'une production ne compte ses évaluations ou ses copies, ni ne refuse ; la grille, elle, refuse (js/grilles.js:2962-2967).
 - **Preuve** : js/productions.js:3450-3466 (supprimerProduction) et js/productions-liste.js:399-415 (supprimerProductionActive) : codex, confirmation, puis retrait sans compter évaluations ni copies
 - **Note** : Vérification en 1.201.0 : un refus « Utilisée par N évaluation(s) » existe déjà dans Réglages › Données › Gestion avancée des ressources (js/donnees-v2.js:1162-1182, présent en 1.199.0) ; il ne compte pas les copies et ne s'applique pas à la suppression depuis la Conception.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1075
 
 #### 3.52 · en partie
 *Écran* : Écran 26 · Conception › Productions étudiantes · *Geste* : Sans geste
@@ -309,8 +347,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1138) : « Une production de démonstration s'ouvre en lecture seule ; elle n'écrit rien »
 - **Ce que fait le code** : La lecture seule désactive les champs, pas les boutons : déplacer ou retirer un bloc (ou « + Nouveau champ », qui redessine des champs actifs) écrit dans la production de démonstration.
 - **Preuve** : js/productions-liste.js:200-201 et js/bibliotheque-ui.js:325-337 : une production démo ouvre en lecture seule (input, select, textarea désactivés, bandeau) ; mais les boutons des blocs de consignes restent actifs, et js/productions.js:809 (déplacer un bloc) et 794 (retirer un bloc) écrivent par enregistrerProductionModifiee, qui n'a aucune garde démo
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1075
 
 #### 3.66 · en partie
 *Écran* : Écran 27 · Conception › Grilles de critères · *Geste* : Geste : renseigner un critère (nom, descripteur, pondération, type, complexité SOLO)
@@ -318,8 +356,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1182) : « aide sous le menu : « “Aucun” retire le critère de la lecture SOLO »
 - **Ce que fait le code** : Le texte arrêté existe, mais il s'ouvre par l'icône d'aide à côté du libellé, pas comme aide sous le menu.
 - **Preuve** : js/accompagnement-contenu-popup.js:1138 : le texte « “Aucun” retire le critère de la lecture SOLO : il compte dans la note comme les autres, mais le dépistage des fondations ne le surveille pas et aucune étiquette ne l'accompagne dans les exports. » vit dans la fenêtre d'aide ; js/grilles.js:3569-3578 : rien sous le menu
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 #### 3.77 · en partie
 *Écran* : Écran 27 · Conception › Grilles de critères · *Geste* : Geste : gérer les sous-critères comme codes d'annotation
@@ -327,8 +365,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1215) : « dans le gabarit algorithmique, on parle d'« observation », jamais de « rétroaction » »
 - **Ce que fait le code** : Les sous-critères parlent d'observation, mais deux phrases du gabarit algorithmique disent encore « rétroaction ».
 - **Preuve** : js/grilles.js:4507 : le texte du code s'intitule « Observation » ; mais js/grilles.js:3683 (carte Formule : « Le nombre de mots reste saisi pour la rétroaction. ») et js/grilles.js:4177 (carte « Ce que l'élève lit » : « L'aperçu ne montre pas la rétroaction du sous-critère dominant ») emploient encore « rétroaction »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 #### 3.108 · pas fait
 *Écran* : Écran 27 · Conception › Grilles de critères · *Geste* : Geste : supprimer une grille
@@ -336,8 +374,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1271) : « supprimer la grille de départ dans un trimestre ne la retire que de ce trimestre ; les autres trimestres, et ceux à venir, la reçoivent encore »
 - **Ce que fait le code** : Le code fait l'inverse : supprimer la grille de départ dans un trimestre pose une marque globale, et ni les autres trimestres ni ceux à venir ne la reçoivent plus.
 - **Preuve** : js/grilles.js:3083-3086 : supprimer GRILLE_GENERIQUE appelle marquerRessourceSupprimee ; js/main.js:139-145 l'inscrit dans la clé globale « ressourcesSupprimees » (non préfixée par trimestre) ; js/grilles.js:1622 : assurerGrilleDeDepart ne sème plus si l'id y figure
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1075
 
 #### 3.114 · pas fait
 *Écran* : Écran 28 · Conception › Échelles de performance · *Geste* : Geste : corriger une échelle déjà employée (sans la supprimer)
@@ -345,8 +383,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1315) : « le recalcul des évaluations touchées doit être possible ; il est PROPOSÉ, jamais automatique, et la proposition nomme le compte avant le geste ; refusé dans un trimestre clos ou archivé »
 - **Ce que fait le code** : Corriger une échelle employée s'enregistre champ par champ ; aucune proposition de recalcul, aucun compte, aucun refus en trimestre clos sur ce geste.
 - **Preuve** : js/echelles.js:2858-2904 (modifierNiveauEchelle) écrit le champ sans rien proposer ; aucun code ne propose de recalculer les évaluations d'une échelle corrigée
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 #### 3.115 · en partie
 *Écran* : Écran 28 · Conception › Échelles de performance · *Geste* : Geste : renommer une échelle
@@ -354,8 +392,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1326) : « une échelle hors du trimestre actif ne s'écrit pas, et le refus le dit »
 - **Ce que fait le code** : Rien n'est écrit hors du trimestre actif. Le refus dit existe, mais dans le cas réel (échelle restée affichée après un changement de trimestre), le renommage est ignoré en silence.
 - **Preuve** : js/echelles.js:610-620 : si l'échelle éditée n'est pas dans le trimestre actif, rien n'est écrit et une erreur le dit ; mais après une bascule js/echelles.js:3748-3752 met le pointeur à null, et js/echelles.js:574-578 ne fait alors plus rien, sans message
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 #### 3.119 · en partie
 *Écran* : Écran 28 · Conception › Échelles de performance · *Geste* : Geste : supprimer une échelle
@@ -363,8 +401,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1339) : « dans un trimestre terminé ou archivé, refus, en disant que le remplacement toucherait des notes déjà remises »
 - **Ce que fait le code** : Le refus est fait pour un trimestre archivé ; un trimestre terminé mais pas archivé n'est pas détecté et le remplacement y est proposé.
 - **Preuve** : js/echelles.js:3436-3438 : refus « Ce trimestre est clos : remplacer l'échelle … toucherait …, dont des notes déjà remises. » ; mais la garde est estTrimestreArchive (js/trimestres.js:1385-1388), qui ne lit que archive === true
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1080
 
 ### Partie 4 (28)
 
@@ -374,8 +412,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1369) : « une grille, une échelle ou une cartouche introuvable s'affiche « ⚠ introuvable » au lieu de « Aucune », et enregistrer ne l'efface pas »
 - **Ce que fait le code** : Fait dans le formulaire de production, avec le libellé « ⚠ <type> introuvable (<id>) » et non « ⚠ introuvable ». L'éditeur de cartouche, où l'intention est placée, ne le fait pas : populerDropdownsCartouche (cartouches.js:3419-3451) n'affiche rien de tel quand la grille ou l'échelle n'existe plus ; le menu retombe sur « -- Grille -- ».
 - **Preuve** : js/productions.js:1513-1524 : poserReferenceSelect réinjecte l'id non résolu comme option « ⚠ grille introuvable (id) » (idem échelle, cartouche) au lieu de retomber sur « Aucune »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.22 · en partie
 *Écran* : Écran 29 · Conception › Rétroactions (cartouches) · *Geste* : Sans geste
@@ -383,8 +421,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1434) : « Changer de trimestre referme l'éditeur de cartouche resté ouvert »
 - **Ce que fait le code** : Le pointeur d'édition est purgé, mais le formulaire #infoCartouche n'est pas masqué : annulerFormCartouche (cartouches.js:2856) n'est pas appelée, et initialiserModuleCartouches (cartouches.js:118-152), relancé au retour dans la sous-section, ne cache pas non plus l'éditeur. La fiche de l'ancien trimestre reste donc affichée.
 - **Preuve** : js/trimestre-v2-liste.js:474-479 et js/cartouches.js:3125 : à la bascule, reinitialiserEditeurCartouchesApresBascule remet seulement cartoucheActuel à null
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.23 · en partie
 *Écran* : Écran 29 · Conception › Rétroactions (cartouches) · *Geste* : Sans geste
@@ -393,8 +431,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : La suppression ne vide que la collection du trimestre actif, donc les trimestres qui ont déjà la cartouche la gardent. Mais le marqueur est global : aucun autre trimestre qui ne l'a pas encore, ni aucun trimestre à venir, ne la reçoit plus.
 - **Preuve** : js/cartouches.js:1741-1743 : supprimer CART_GENERIQUE appelle marquerRessourceSupprimee ; js/main.js:134-146 : ce marqueur vit dans la clé globale 'ressourcesSupprimees' (non préfixée par trimestre) ; cartouches.js:169 : assurerCartoucheDeDepart sort si le marqueur existe
 - **Second tri** : pas fait ; Supprimer la cartouche de départ dans un trimestre empêche de la semer dans les autres trimestres et dans ceux à venir, à l'inverse de l'intention.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1075
 
 #### 4.26 · en partie
 *Écran* : Écran 30 · Conception › Rétroactions › « Consulter la bibliothèque » (cartouches) · *Geste* : Geste : Retirer une cartouche de la bibliothèque partagée (seconde section)
@@ -402,8 +440,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1447) : « sinon « Supprimer définitivement «X» de la bibliothèque partagée ? » »
 - **Ce que fait le code** : Le cas sans ancrage dans la grille existe, mais le texte dit « de la Bibliothèque » et non « de la bibliothèque partagée ».
 - **Preuve** : js/cartouches.js:4686 : question « Supprimer définitivement «X» de la Bibliothèque ? » suivie de « Cette action est irréversible. »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.29 · pas fait
 *Écran* : Écran 31 · Conception › Pratiques de notation (barre latérale, carte d'une pratique, éditeur) · *Geste* : Geste : Modifier une pratique existante dans l'éditeur
@@ -411,8 +449,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1464) : « « Annuler » devient « Fermer » »
 - **Ce que fait le code** : L'éditeur de pratique n'a ni « Annuler » ni « Fermer » : le bouton d'enregistrement a été retiré (index.html:6093-6094) sans qu'un « Fermer » soit posé, contrairement aux fiches grille, échelle et cartouche (index.html:4920, 5116, 5245).
 - **Preuve** : index.html:5465-6100 (conteneurEditionPratique) : seuls « Dupliquer », « Supprimer » et « Appliquer au cours actif » ; aucun bouton « Fermer »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.31 · en partie
 *Écran* : Écran 31 · Conception › Pratiques de notation (barre latérale, carte d'une pratique, éditeur) · *Geste* : Geste : Modifier une pratique existante dans l'éditeur
@@ -420,8 +458,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1467) : « le témoin dit « Enregistré » ou « Non enregistré : ‹raison› » »
 - **Ce que fait le code** : Le témoin dit bien « Enregistré », mais l'échec s'écrit avec le geste intercalé (tous les appels de pratiques-gestion.js passent geste: 'Modifier la pratique'), et non « Non enregistré : ‹raison› ». Le refus « aucune cible » passe par notifications.erreur (pratiques-gestion.js:1576-1578), pas par le témoin.
 - **Preuve** : js/modes.js:1248-1279 : modifierEtAnnoncer dit « Enregistré » après écriture ; en échec, temoinEnregistrement.nonEnregistre(raison, 'Modifier la pratique', …) ; js/temoin-enregistrement.js:171-174 : forme « Non enregistré – Modifier la pratique : ‹raison› »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.33 · en partie
 *Écran* : Écran 31 · Conception › Pratiques de notation (barre latérale, carte d'une pratique, éditeur) · *Geste* : Geste : Régler les jetons d'une pratique
@@ -429,8 +467,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1473) : « la carte de la pratique affiche « N jetons » quand des jetons sont réglés »
 - **Ce que fait le code** : Les jetons réglés par l'assistant vivent dans configuration.jetons (wizard-pratique-v2.js:2694-2711 ; pratiques-gestion.js:1367-1370) et ne produisent pas le badge : une pratique par spécifications à jetons créée par l'assistant n'affiche pas « N jetons ».
 - **Preuve** : js/pratiques-gestion.js:229-232 : le badge « ${nbJetons} jetons » n'est posé que si pratique.jetons?.actif (bloc plat du formulaire)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.36 · en partie
 *Écran* : Écran 31 · Conception › Pratiques de notation (barre latérale, carte d'une pratique, éditeur) · *Geste* : Geste : Choisir l'affichage de la note (« note en lettre »)
@@ -438,8 +476,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1483) : « le PDF remis à l'élève le respecte »
 - **Ce que fait le code** : Le PDF respecte « Niveau de performance » pour la note provisoire d'une pratique à portfolio, mais pas pour une sommative : construireNoteSommative (l.1218-1265) reçoit seule la main et écrit la moyenne et les notes chiffrées sans lire ce réglage.
 - **Preuve** : js/synthese-retroaction-data.js:1197-1206 : affichageNiveauxSeulement lit le choix de l'évaluation puis celui de la pratique ; l.810 et 1403-1420 : le bloc de note portfolio retire tous les chiffres
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.45 · pas fait
 *Écran* : Écran 31 · Conception › Pratiques de notation (barre latérale, carte d'une pratique, éditeur) · *Geste* : Geste : Dupliquer une pratique, ou en dériver une variante
@@ -447,8 +485,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1513) : « une retouche de l'échelle ne recalcule pas ses notes d'office : le recalcul est proposé, comme pour une échelle déjà employée »
 - **Ce que fait le code** : Rien ne relie une pratique ancienne à une échelle de référence ni ne propose un recalcul : la seule question liée à l'emploi d'une échelle porte sur sa suppression ou son remplacement (echelles.js:3426-3479).
 - **Preuve** : js/echelles.js : aucune proposition de recalcul à la retouche d'une échelle ; aucun lien d'une pratique ancienne vers une « échelle de référence »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.49 · pas fait
 *Écran* : Écran 31 · Conception › Pratiques de notation (barre latérale, carte d'une pratique, éditeur) · *Geste* : Énoncé 4, côté pratiques
@@ -456,8 +494,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1524) : « l'idée « l'algorithme propose, le jugement tranche » est présentée comme inspirée de Bruno Voisard, « La machine à produire des notes », Substack, 4 mai 2026 (section « En guise de conclusion : quelques pistes de solution »), sans guillemets de citation »
 - **Ce que fait le code** : L'idée apparaît, mais citée entre guillemets et sans être présentée comme inspirée de Bruno Voisard ni de son texte Substack ; le nom n'apparaît que dans des références sans lien avec cette idée (index.html:9866, 9872, 14127).
 - **Preuve** : js/wizard-pratique-v2.js:261 : « L'algorithme propose, le jugement tranche » entre guillemets, sans source ; js/guides-pedagogiques.js:341 : l'idée sans attribution
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.52 · pas fait
 *Écran* : Écran 32 · Assistant de pratique · *Geste* : Geste : Ouvrir l'assistant et choisir une porte
@@ -465,8 +503,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1540) : « au-delà d'environ 15 objectifs, une alerte non bloquante »
 - **Ce que fait le code** : L'alerte non bloquante au-delà d'environ 15 objectifs n'existe plus dans l'assistant (l'étape par objectifs a été retirée) ; aucune condition sur un nombre d'objectifs n'est évaluée.
 - **Preuve** : js/wizard-pratique-v2.js:1175 et 1449 : seuls des commentaires mentionnent le garde-fou « >15 objectifs » ; aucun champ nbObjectifs ni alerte
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : périmé (étape par objectifs retirée de l'assistant)
 
 #### 4.53 · en partie
 *Écran* : Écran 32 · Assistant de pratique · *Geste* : Geste : Configurer une sommative
@@ -474,8 +512,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1547) : « le seuil, les jetons »
 - **Ce que fait le code** : Le seuil est là, mais le parcours sommatif ne propose aucun jeton : utiliserJetons n'existe qu'à l'étape config-specifications (l.783) et l'assistant n'écrit des jetons que pour une spécification (l.2689-2711 ; construction-attributs.js:35-38).
 - **Preuve** : js/wizard-pratique-v2.js:583-620 : config-sommative-regles propose, pour le verrou, le seuil minimum (seuilVerrou) et le plafond ; options de regles-sommative l.476-492 : verrou, portfolio, aucune
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.70 · pas fait
 *Écran* : Écran 33 · Conception › Pratiques de notation › « Partir d'un modèle » et bibliothèque des pratiques · *Geste* : Geste : Parcourir les modèles offerts
@@ -485,8 +523,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Preuve** : js/pratiques-bibliotheque.js:727-741 : le texte « Aucun modèle « ${badge.label} » fourni : enregistre le tien » n'existe que dans genererSelecteurModelesPratiques, rendu dans #v2-spec-dropdown-modeles, élément absent de index.html (l.752, 766)
 - **Second tri** : en partie ; La famille est bien nommée, mais le message ajoute « enregistre le tien » : le texte exact diffère de l'intention.
 - **Note** : Vérification en 1.201.0 : le texte « Aucun modèle « Sommative » fourni » vivait en code mort, retiré depuis (commit 7aa1e7d7).
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : périmé (message en code mort, retiré depuis (7aa1e7d7))
 
 #### 4.72 · en partie
 *Écran* : Écran 33 · Conception › Pratiques de notation › « Partir d'un modèle » et bibliothèque des pratiques · *Geste* : Geste : Adopter un modèle Standards (« N meilleures » ou « N plus récentes »)
@@ -494,8 +532,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1594) : « la note de l'élève est la même au profil, à l'export et au Comparateur »
 - **Ce que fait le code** : Les trois écrans tirent la note du même moteur, mais l'export écrit la note arrondie à l'entier (export-resultats-finaux.js:68-75, en-tête « Note finale (arrondie à l'entier) ») alors que le profil l'affiche au dixième ; le Comparateur ne lit les vraies données qu'en source « réel ».
 - **Preuve** : js/portfolio.js:540-560 : simulerIndices passe par calculerDetailsNoteFinale (profil-etudiant-actions.js:379) pour une Standards ; js/export-resultats-finaux.js:186 et js/comparateur-pratiques.js:335-336 lisent simulerIndices
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (par défaut), puis question 1 : « on arrondit au dixème partout. »
+- Disposition : inscrit #1076
 
 #### 4.84 · en partie
 *Écran* : Écran 34 · Conception › Carte d'alignement › canevas · *Geste* : Geste : Cocher les objectifs vérifiés d'une évaluation
@@ -503,8 +541,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1643) : « infobulle de l'activité d'évaluation : « Vérification : l'évaluation ferme la boucle »
 - **Ce que fait le code** : La phrase de l'intention y figure mot pour mot, mais l'infobulle continue avec deux phrases de plus (« Le menu de son en-tête choisit sa visée… », « Tant que tu n'as rien choisi, tes exports écrivent « Évaluation », comme avant. »).
 - **Preuve** : js/accompagnement-contenu-hover.js:617-618 : infobulle 'planif-design-apprentissages' de la famille « Vérification » de la palette (index.html:4350), qui ne contient que le bloc Évaluation
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : refusé (la phrase voulue y est mot pour mot ; les deux phrases qui suivent expliquent le menu de visée, et rien ne dit que l'intention les excluait)
 
 #### 4.111 · en partie
 *Écran* : Écran 34 · Conception › Carte d'alignement › canevas · *Geste* : Sans geste
@@ -512,8 +550,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1708) : « Liens déjà tracés d'une connaissance vers une Ouverture ou une Révision passent de « s'acquiert par » à « se réactive dans » à l'ouverture de la carte ; un message dit combien, et lesquels »
 - **Ce que fait le code** : La bascule et le compte sont faits ; la liste des liens concernés ne part que dans la console (console.warn), pas dans le message montré à l'utilisateur.
 - **Preuve** : js/planification-carte.js:6527-6532 : à l'ouverture, un lien « s'acquiert par » dont le couple résout « se réactive dans » est basculé ; js/planification-carte.js:6559-6568 : le toast dit seulement « N lien(s) mis à jour : « se réactive dans » »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.114 · en partie
 *Écran* : Écran 35 · Conception › Carte d'alignement › barre et menus · *Geste* : Geste : Lire la barre
@@ -521,8 +559,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1719) : « de gauche à droite : « Consulter la bibliothèque », la liste des cartes, « Actions ▾ », « Annuler », « Rétablir » ; la recherche ; « Nœuds », « Planificateur », « Vue ▾ », « Inspecteur », « Guide » ; plus aucune icône seule »
 - **Ce que fait le code** : L'ordre et les mots sont ceux de l'intention, mais le bouton d'effacement de la recherche (index.html:4233-4236, icône icon-close-window seule) reste une icône sans mot dans la barre, visible dès qu'on tape.
 - **Preuve** : index.html:4187-4216 puis 4227-4237 puis 4239-4292 : Consulter la bibliothèque, liste des cartes, Actions ▾, Annuler, Rétablir ; la recherche ; Nœuds, Planificateur, Vue ▾, Inspecteur, Guide
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.115 · en partie
 *Écran* : Écran 35 · Conception › Carte d'alignement › barre et menus · *Geste* : Geste : Lire la barre
@@ -530,8 +568,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1720) : « les boutons de la barre sont à 44 px au doigt »
 - **Ce que fait le code** : Les boutons principaux montent à 44 px au doigt, mais le bouton d'effacement de la recherche reste à 28 × 28 px sur iPad (styles.css:20584) et le champ de recherche à 32 px (styles.css:20582).
 - **Preuve** : styles.css:22454-22459 : sous pointer: coarse, Vue ▾, Nœuds, Planificateur, Inspecteur, Guide, Actions, Annuler, Rétablir à min-height 44px ; styles.css:22464-22466 : liste des cartes à 44px ; styles.css:24337-24339 et 27686-27690 : le .btn de la bibliothèque à 44px
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.142 · en partie
 *Écran* : Écran 36 · Conception › Carte d'alignement › Planificateur · *Geste* : Sans geste
@@ -539,8 +577,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1815) : « À la rentrée, un planificateur vide propose de reprendre la carte du même cours de la session précédente, en un clic »
 - **Ce que fait le code** : Avec un seul candidat, la reprise se fait en un clic ; avec plusieurs, le bouton ouvre la Bibliothèque pour choisir (11109-11116), et le code ne désigne pas la session précédente (aucun tri chronologique, planification-donnees.js:450-455).
 - **Preuve** : js/planification-carte.js:10326-10329 et 11086-11121 : un planificateur vide affiche « Reprendre « X » (trimestre) », qui reprend la carte en un clic quand il n'y a qu'un candidat ; js/planification-donnees.js:458-469 liste les cartes du même cours dans les autres trimestres
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.154 · en partie
 *Écran* : Écran 38 · Conception › Carte d'alignement › Guide · *Geste* : Geste : Lire le guide de la carte
@@ -548,8 +586,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1843) : « tous les guides partagent la même présentation »
 - **Ce que fait le code** : Le corps du texte est unifié, mais la navigation diffère (guide de la carte : boutons de 28 px et points de 7 px, styles.css:22590-22611 ; guides pédagogiques : boutons de 44 px, styles.css:23214-23225) et les références aussi (.guide-pedagogique-ref en italique avec filet, styles.css:23196-23204, contre .planif-guide-ref à opacité 0,7, styles.css:22575-22578).
 - **Preuve** : styles.css:23151-23188 : même taille de texte, mêmes listes et mêmes encadrés pour .planif-guide-corps et .guide-pedagogique-corps
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.163 · en partie
 *Écran* : Écran 40 · Barre latérale de la Conception et bibliothèques partagées (cinq familles) · *Geste* : Geste : Ajouter un élément de la bibliothèque à sa sélection (barre latérale)
@@ -557,8 +595,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1871) : « le refus nomme l'exemplaire présent : « « X » est déjà dans ta sélection. » et propose « Dupliquer » »
 - **Ce que fait le code** : Le refus nomme l'exemplaire et renvoie à « Dupliquer » par une phrase, sans bouton ; pour une pratique déjà présente sous le même id, le message reste « Cette pratique est déjà dans ta sélection. » sans nom ni renvoi (js/pratiques-gestion.js:899-901).
 - **Preuve** : js/grilles.js:2688, js/echelles.js:1387, js/cartouches.js:4547 (alert), js/productions-bibliotheque-ui.js:356-358 et js/pratiques-gestion.js:904-906 (notification) : « « X » est déjà dans ta sélection. » suivi de « Pour en avoir un second exemplaire, utilise « Dupliquer ». »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.169 · en partie
 *Écran* : Écran 40 · Barre latérale de la Conception et bibliothèques partagées (cinq familles) · *Geste* : Geste : Supprimer un élément
@@ -566,8 +604,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1883) : « la corbeille remplace le « ✕ » rouge, les chevrons à côté du nom remplacent la colonne « Ordre » »
 - **Ce que fait le code** : La corbeille remplace le ✕ et les chevrons remplacent la colonne « Ordre », mais ils sont placés dans le bloc d'outils en coin (bloc-coin-outils), pas à côté du nom ; et deux tableaux du matériel gardent un bouton rouge plein (js/pratiques-gestion.js:1886, 2033).
 - **Preuve** : js/ui-blocs.js:69-86 : boutonRetirerBloc rend une corbeille (icons8-trash.svg), utilisée dans la bibliothèque (js/bibliotheque-ui.js:1583) et l'éditeur d'échelles (js/echelles.js:1978, 2458) ; js/echelles.js:1970-1977 et 2450-2456 : chevrons à la place de la cellule « Ordre »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.178 · en partie
 *Écran* : Écran 40 · Barre latérale de la Conception et bibliothèques partagées (cinq familles) · *Geste* : Geste : Lire le bandeau des doublons
@@ -575,8 +613,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1907) : « chaque ligne porte le nom, l'identifiant court, la date de modification, et « Dans ta barre latérale » ou « Bibliothèque partagée » ; un groupe mixte est classé « Copies » avec un numéro de lignée ; tous les groupes sont dépliés »
 - **Ce que fait le code** : Tout est là et aucun groupe n'est replié, mais la seconde étiquette dit « Bibliothèque » et non « Bibliothèque partagée » (js/bibliotheque-ui.js:1198).
 - **Preuve** : js/bibliotheque-ui.js:1192-1199 : chaque ligne porte le nom, la puce d'identifiant court, « modifié le » et la date, puis « Dans ta barre latérale » ou « Bibliothèque » ; js/identite-item.js:188-209 classe un groupe mixte en « copie » ; js/bibliotheque-ui.js:1147 et 1184-1186 numérotent les lignées
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.181 · pas fait
 *Écran* : Écran 40 · Barre latérale de la Conception et bibliothèques partagées (cinq familles) · *Geste* : Geste : Lire le bandeau des doublons
@@ -584,8 +622,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1910) : « les doublons se comparent côte à côte, et « Tout fusionner » les réunit en un seul »
 - **Ce que fait le code** : Aucune vue de comparaison côte à côte des doublons ni de commande « Tout fusionner » dans le code ; le bandeau ne propose que Voir, Retirer et Supprimer.
 - **Preuve** : « Tout fusionner », « fusionner », « côte à côte », « comparer » dans js/bibliotheque-ui.js, js/identite-item.js, js/grilles.js, js/echelles.js, js/cartouches.js, js/productions-bibliotheque-ui.js, js/pratiques-gestion.js, js/modal-doublon.js ; grep -rln fusionner sur js/ (seulement fusion de données ailleurs)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : déjà inscrit #291 (reliquat « Tout fusionner », plan `PLAN-291-476-gestion-des-doublons.md`)
 
 #### 4.183 · en partie
 *Écran* : Écran 40 · Barre latérale de la Conception et bibliothèques partagées (cinq familles) · *Geste* : Sans geste
@@ -593,8 +631,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1920) : « (une puce grise), complet au survol, lisible sur iPad sans zoomer et en mode clair »
 - **Ce que fait le code** : La puce et l'identifiant complet au survol existent, mais la puce est teintée de bleu et non grise (styles.css:89-91 et 492-494), et les cartes « Partagés par des collègues » n'en portent pas (js/partage-section.js:651-680, sans afficherId) ; la lisibilité sur iPad reste à voir à l'écran.
 - **Preuve** : js/bibliotheque-ui.js:42-47 : puce « #xxxxxx » avec title « Identifiant complet : … » ; styles.css:4611-4629 : 0.875rem, chasse fixe ; affichée sur les cartes des cinq familles (afficherId: true, ex. js/grilles.js:2265, 2303)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.184 · en partie
 *Écran* : Écran 40 · Barre latérale de la Conception et bibliothèques partagées (cinq familles) · *Geste* : Sans geste
@@ -602,8 +640,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1921) : « la carte importée est amenée à l'écran et mise en évidence, dans les cinq familles ; si un filtre la masque, la notification le dit »
 - **Ce que fait le code** : La mise en évidence est faite dans les cinq familles, mais la notification ne dit qu'une carte est masquée que si c'est la case « Masquer… » (ou le filtre démo des grilles) ; un dossier replié ou un autre filtre la laisse muette (js/bibliotheque-ui.js:1334-1339), et rien ne se passe si la bibliothèque est fermée.
 - **Preuve** : js/bibliotheque-ui.js:1326-1340 : conduireAuxImportes redessine la bibliothèque ouverte, fait défiler jusqu'aux cartes importées et les entoure (pointerVersItems, 1280-1306) ; appelé par les cinq familles (grilles.js:2076, echelles.js:1043, cartouches.js:2100, productions-import-export.js:343, pratiques-gestion.js:2537)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.186 · en partie
 *Écran* : Écran 41 · Partage entre collègues · *Geste* : Geste : Exporter pour partager
@@ -611,8 +649,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1929) : « licence CC BY-NC-SA 4.0, attribution, et exactement ce que le fichier contiendra »
 - **Ce que fait le code** : La licence et l'attribution sont récapitulées, mais le contenu n'est donné que par un compte avec une parenthèse générique « (grille et cartouches associées) », pas la liste exacte de ce que le fichier contiendra.
 - **Preuve** : js/partage-export.js:275-279 : la fenêtre dit la licence (« sous licence CC BY-NC-SA 4.0 ») et l'attribution ; js/partage-export.js:238-250 : l'item principal et un nombre de ressources liées
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1081
 
 #### 4.195 · en partie
 *Écran* : Écran 41 · Partage entre collègues · *Geste* : Geste : Importer un partage (.lcz)
@@ -620,8 +658,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 1947) : « un paquet de pratique emporte son échelle ; à l'import, la pratique suit cette échelle, même si celle-ci change d'identifiant »
 - **Ce que fait le code** : La pratique suit son échelle quand l'échelle change d'identifiant dans ces deux chemins, mais un paquet .lcz de pratique n'emporte pas son échelle : rassemblerDependances n'ajoute aucune dépendance pour une pratique (js/partage-format.js:40-41 et 241).
 - **Preuve** : js/import-export.js:137-150 et 3395 : rebrancherEchellePratique fait suivre à une pratique son échelle renommée, à l'import sélectif et à la réouverture d'archive (js/reserve-ouvrir.js:1155)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : « toujours voulu » (réponse groupée de la partie, donnée par défaut de son propre aveu : voir « Déroulement »), puis tri de Claude Code approuvé
+- Disposition : inscrit #1075
 
 ### Partie 5 (24)
 
@@ -631,8 +669,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2012) : « En mode anonymisation, on travaille normalement et tout s'enregistre ; seul l'affichage protège l'identité ; aucune valeur de substitution (« Élève 32 », DA masqué) n'est écrite dans les données réelles ; rien d'identifiant ne s'affiche »
 - **Ce que fait le code** : L'écriture est faite comme dit. L'affichage n'est pas entièrement protégé : anonymiserDonnees (js/modes.js:1386-1407) garde le vrai DA dans « da » et met le masque dans « daAffichage », que ces deux menus ne lisent pas ; le DA réel s'affiche donc même quand l'option de DA masqué est active.
 - **Preuve** : js/modes.js:1185-1187 et 927-983 : en anonymisation on écrit comme en mode normal, après retrait des substitutions (« Élève N », DA masqué, groupe « Gr. A ») ; mais js/liste-evaluations.js:1827 affiche le vrai DA (e.da) dans le menu Étudiant·e de « Propriétés du fichier », et js/travaux-import.js:1550 aussi
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1075
 
 #### 5.18 · en partie
 *Écran* : Écran 44 · Évaluation › Liste des évaluations · *Geste* : Geste : Lire et trier la liste
@@ -640,8 +678,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2027) : « son infobulle propose de filtrer par statut (« …annotée, évaluée, non verrouillée (ne compte pas encore dans la note) ») ou par type de jeton »
 - **Ce que fait le code** : L'infobulle existe et propose bien statut ou type de jeton, mais au masculin (« annoté, évalué ») là où l'intention cite « annotée, évaluée ».
 - **Preuve** : js/accompagnement-contenu-hover.js:317-318 : l'infobulle eval-filtre-statut dit « Filtre par statut de progression : non reçu, reçu, importé, annoté, évalué, non verrouillée (ne compte pas encore dans la note) ... ou par type de jeton. »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.20 · en partie
 *Écran* : Écran 44 · Évaluation › Liste des évaluations · *Geste* : Geste : Lire et trier la liste
@@ -649,8 +687,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2028) : « le filtre Statut offre, dans cet ordre : « Toutes », « Non reçue », « Reçue », « Importée », « Annotée », « Évaluée », « Non verrouillée », « Non évaluée », « Non associée », « Jeton de délai », « Jeton de reprise », « Jeton de reprise ciblée », « Tous les jetons », « Remplacée » »
 - **Ce que fait le code** : L'ordre est celui de l'intention, mais les libellés ne sont pas accordés au féminin (« Tous » au lieu de « Toutes », « Non reçu », « Reçu », « Importé », « Annoté », « Évalué », « Non évalué », « Non associé »). Aucun code JS ne réécrit ces options.
 - **Preuve** : index.html:8257-8271 : les options du filtre Statut sont, dans l'ordre : « Tous », « Non reçu », « Reçu », « Importé », « Annoté », « Évalué », « Non verrouillée », « Non évalué », « Non associé », « Jeton de délai », « Jeton de reprise », « Jeton de reprise ciblée », « Tous les jetons », « Remplacée »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.23 · en partie
 *Écran* : Écran 44 · Évaluation › Liste des évaluations · *Geste* : Geste : Lire et trier la liste
@@ -658,8 +696,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2030) : « la mention « Fichier sous… » ne paraît que lorsqu'elle est la seule trace du fichier, jamais sur les travaux à venir »
 - **Ce que fait le code** : Le cas des fichiers visibles ailleurs dans le tableau est réglé. Il reste un cas : un fichier sous le portfolio fait paraître « Fichier sous … » sur chaque ligne sans fichier de cet élève, travaux à venir compris, car aucune condition ne porte sur la date ou la remise.
 - **Preuve** : js/liste-evaluations.js:105-121 : la mention n'est posée que pour un fichier rangé sous une production qui n'a pas de ligne (productionGenereUneLigne, :30-32, écarte le portfolio), donc quand elle est la seule trace ; mais elle est alors posée sur toutes les lignes sans copie de l'élève
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.26 · en partie
 *Écran* : Écran 44 · Évaluation › Liste des évaluations · *Geste* : Geste : Choisir « Évaluer » dans le menu « Actions… »
@@ -667,8 +705,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2036) : « si la copie est importée, elle s'ouvre directement en mode Évaluer, annotée ou non, et « Annoter » reste à un clic »
 - **Ce que fait le code** : L'ouverture directe en mode Évaluer est faite. « Annoter » demande deux clics (ouvrir le menu, puis choisir), et non un seul.
 - **Preuve** : js/evaluation.js:216-229 : evaluerProduction ouvre la copie importée (travauxUI.ouvrirFichier) puis bascule en mode Évaluer (basculerMode('evaluer')), qu'elle soit annotée ou non ; js/travaux-ui.js:1180-1183 : « Annoter » est un article du menu déroulant « Évaluer ▾ »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.28 · en partie
 *Écran* : Écran 44 · Évaluation › Liste des évaluations · *Geste* : Geste : Choisir « Consulter »
@@ -676,8 +714,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2042) : « sur un trimestre en lecture seule, en lecture seule »
 - **Ce que fait le code** : La lecture seule d'un trimestre clos repose sur une règle CSS : les boutons qu'elle vise sont ceux à onclick (index.html:1153-1156), qui n'existent plus ; les boutons data-action (cadenas, Enregistrer, outils d'annotation) restent actifs, et sauvegarderDonneesSelonMode (js/modes.js:1178) ne refuse pas d'écrire dans un trimestre archivé. Une évaluation non verrouillée n'y est donc pas en lecture seule complète.
 - **Preuve** : js/evaluation.js:1603-1611 : une évaluation verrouillée se charge avec desactiverFormulaireEvaluation(true) ; index.html:1150-1167 : en trimestre archivé, body.mode-archive coupe le pointeur sur input, textarea et select
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1075
 
 #### 5.45 · en partie
 *Écran* : Écran 44 · Évaluation › Liste des évaluations · *Geste* : Geste : Supprimer une évaluation (« Supprimer l'évaluation »)
@@ -685,8 +723,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2081) : « le même geste se comporte de la même façon depuis la Liste, le profil ou le panneau d'évaluation »
 - **Ce que fait le code** : Seule la Liste offre le geste. Le panneau d'évaluation et le profil n'ont pas de déclencheur ; la banque d'évaluations a sa propre suppression (js/evaluation.js:2543-2562) avec une autre confirmation, sans proposition de codex ni retour de l'originale.
 - **Preuve** : js/liste-evaluations.js:1670-1671 : la Liste appelle supprimerEvaluation (:2222) ; js/evaluation.js:3081-3090 : confirmerSuppressionEvaluationSidebar appelle la même fonction mais aucun bouton ne la déclenche ; js/profil-etudiant-actions.js:753-756 : le geste du profil a été retiré
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.49 · pas fait
 *Écran* : Écran 44 · Évaluation › Liste des évaluations · *Geste* : Geste : Ouvrir la corbeille et supprimer définitivement une copie
@@ -694,8 +732,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2095) : « quand d'autres fichiers du même couple restent (une reprise encore active), la question le dit : ils restent, mais sans évaluation »
 - **Ce que fait le code** : La question ne dit jamais que d'autres fichiers du couple (une reprise encore active) restent, sans évaluation.
 - **Preuve** : js/liste-evaluations.js:2928-2930 : la question n'a que deux formes, avec ou sans évaluations du couple ; rien ne compte ni ne nomme les autres fichiers du même couple qui restent
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.64 · en partie
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Geste : Laisser l'import assembler les pages d'une remise
@@ -703,8 +741,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2126) : « rangé par date »
 - **Ce que fait le code** : Le document assemblé est rangé par date, mais l'aperçu ne l'est pas ; et l'ordre fait à la main dans l'aperçu (Monter, Descendre, js/travaux-import.js:1825-1843) est retrié par date à l'assemblage (js/travaux-ui.js:4653) dès que les fichiers portent une date.
 - **Preuve** : js/travaux-import.js:1338-1352 : à l'assemblage, les pages sont triées par numéro de page, puis par date de remise ; js/travaux-ui.js:1865 : l'aperçu montre la file dans l'ordre du dépôt
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.69 · en partie
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Geste : Résoudre un doublon à l'import (remplacer, ou appliquer un jeton de reprise)
@@ -712,8 +750,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2136) : « et jamais pour un fichier sans élève »
 - **Ce que fait le code** : La vérification porte sur l'élève du fichier existant, pas sur celui du nouveau : dans un doublon « même nom et même taille » (js/travaux-import.js:826-841), un nouveau fichier sans DA face à un existant rattaché à un élève se voit offrir le jeton.
 - **Preuve** : js/travaux-ui.js:4243 et 4297-4304 : le bouton n'est offert que si _jetonRepriseOffrable rend vrai (jetons restants et maximum par production), et jamais si le fichier EXISTANT n'a pas d'élève
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.70 · en partie
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Geste : Résoudre un doublon à l'import (remplacer, ou appliquer un jeton de reprise)
@@ -721,8 +759,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2137) : « si le jeton ne peut pas être appliqué, une erreur explicite dit que le fichier est importé comme reprise et qu'aucun jeton n'est consommé »
 - **Ce que fait le code** : Fait pour le choix « Appliquer comme jeton de reprise » de la fenêtre de doublon. Le balayage d'après import (mode « Jeton de reprise » du sélecteur) se tait quand le maximum est atteint (js/travaux-ui.js:4543-4547, « Ne pas notifier si c'est juste une limite »).
 - **Preuve** : js/travaux-ui.js:4366-4377 : dans la fenêtre de doublon, un jeton refusé donne l'erreur « Jeton non appliqué : Le fichier de … est importé comme reprise, mais aucun jeton n'a été consommé (maximum de reprises atteint pour cette production). »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.72 · en partie
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Geste : Résoudre un doublon à l'import (remplacer, ou appliquer un jeton de reprise)
@@ -730,8 +768,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2138) : « codex proposé après le choix « Remplacer l'existante », avant le remplacement, s'il n'est pas à jour »
 - **Ce que fait le code** : C'est fait pour la fenêtre « Conflit de nom » des modèles (grilles, échelles, cartouches). Dans la fenêtre « Doublon détecté » des copies à l'import, le bouton s'appelle « Remplacer l'existant » et ne propose pas le codex (js/travaux-ui.js:4394-4419) ; l'ancienne copie y va à la corbeille.
 - **Preuve** : js/modal-doublon.js:290-293 : après « Remplacer l'existante » et avant le remplacement, Codex.proposerAvantSuppression('remplacement') est demandé
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1075
 
 #### 5.77 · en partie
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Geste : Régler une copie dans le poste de préparation (résolution, balance, « + Ajouter des pages »)
@@ -739,8 +777,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2151) : « le sélecteur global « Production » n'écrase pas une correction faite sur un fichier précis par « Modifier », et l'écran explique la différence »
 - **Ce que fait le code** : Fait pour le choix d'une production. Le choix « Jeton de reprise » du même sélecteur remet à vide la production de tous les fichiers de la file, corrections à la main comprises (js/travaux-ui.js:2490-2497).
 - **Preuve** : js/travaux-ui.js:2505-2509 : le sélecteur global saute un fichier corrigé à la main (productionIdParFichier) ; js/travaux-ui.js:1942 : l'écran dit « S'applique à tout le lot. Une correction faite via « Modifier » sur un fichier est conservée. »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.79 · pas fait
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Geste : Modifier les pages d'une copie (éditeur de pages)
@@ -748,8 +786,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2155) : « une page retirée emporte ses annotations »
 - **Ce que fait le code** : Les annotations sont rangées par numéro de page (js/travaux-annotation.js:350-362) ; aucune ne part avec la page retirée, ni n'est renumérotée.
 - **Preuve** : js/travaux-ui.js:6441-6449 (supprimerPageEditeur) retire la page de editionPages ; js/travaux-ui.js:6645-6727 (sauvegarderEdition) réécrit le fichier sans toucher aux annotations
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1075
 
 #### 5.85 · en partie
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Geste : Choisir le rangement des copies sur disque
@@ -757,8 +795,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2168) : « et quels navigateurs le permettent »
 - **Ce que fait le code** : Le texte visible ne dit ni que c'est un réglage de sécurité ni quels navigateurs le permettent ; l'infobulle le dit en partie, par la négative, sans nommer les navigateurs qui le permettent.
 - **Preuve** : js/travaux-ui.js:895-903 : sous le bouton, « L'accès au dossier sera redemandé à chaque démarrage. Pour le mémoriser : Réglages > Préférences > Sécurité. » ; js/accompagnement-contenu-hover.js:404-405 : l'infobulle dit que c'est un choix de sécurité et que le stockage n'existe « ni dans Safari, ni dans Firefox, ni dans aucun navigateur de tablette »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.88 · en partie
 *Écran* : Écran 45 · Évaluation › Préparer et importer · *Geste* : Sans geste
@@ -766,8 +804,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2178) : « un cercle barré quand il n'y a rien à lire, des points pendant le calcul »
 - **Ce que fait le code** : Pour une photo, cercle barré et points sont faits. Pour un PDF, ni le cercle barré ni les points ne paraissent : l'icône de page s'affiche quel que soit l'état.
 - **Preuve** : js/travaux-ui.js:1544-1548 : absent → icons/icon-unavailable.svg (cercle barré), attente → points de suspension ; mais js/travaux-ui.js:1565 : pour un PDF hors échec, le signe est toujours 📄
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.117 · pas fait
 *Écran* : Écran 46 · Évaluation › Annoter et évaluer · *Geste* : Geste : Chronométrer l'évaluation
@@ -775,8 +813,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2238) : « sans copie, donc sans annotation, l'enseignant le lance lui-même »
 - **Ce que fait le code** : Aucun bouton ni geste ne permet à l'enseignant de lancer lui-même le chronomètre ; le chronomètre vit dans la barre de la visionneuse (travaux-ui.js:1220), absente du formulaire sans copie.
 - **Preuve** : js/travaux-annotation.js:468-471 : seul appel de demarrerChrono, à la première annotation ; js/travaux-ui.js:80-84 : le bouton chrono-btn-pause reste caché tant que le chronomètre n'est pas lancé et ne fait que pause et reprise (:143-146)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.146 · en partie
 *Écran* : Écran 46 · Évaluation › Annoter et évaluer · *Geste* : Geste : Appliquer ou retirer un jeton (délai, reprise)
@@ -784,8 +822,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2307) : « « Choisis d'abord un niveau : l'évaluation n'existe pas encore. » »
 - **Ce que fait le code** : Le message existe mot pour mot, mais seulement pour la reprise ; le jeton de délai sans évaluation suit une autre règle, silencieuse.
 - **Preuve** : js/evaluation-sauvegarde.js:924-929 : le message exact « Choisis d'abord un niveau : l'évaluation n'existe pas encore. » pour le jeton de reprise ; js/evaluation-sauvegarde.js:891-900 et :288-296 : pour le délai, sans évaluation, la case reste cochée sans message et le jeton s'applique au verrouillage
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.156 · en partie
 *Écran* : Écran 46 · Évaluation › Annoter et évaluer · *Geste* : Geste : Verrouiller l'évaluation (bouton ou cadenas), ou la déverrouiller
@@ -793,8 +831,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2320) : « profil et bilan : « évaluation non verrouillée, non comptée » »
 - **Ce que fait le code** : Le profil a les mots exacts ; le récit des résultats les écrit avec un point médian au lieu de la virgule, et aucun « bilan » portant la tournure exacte n'a été trouvé hors du profil.
 - **Preuve** : js/profil-etudiant-sections-affichage.js:3013 et :4008 : « évaluation non verrouillée, non comptée » (et son pluriel) au profil ; js/profil-etudiant-actions.js:607 : le récit des résultats écrit « évaluation non verrouillée · non comptée »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.182 · en partie
 *Écran* : Écran 47 · Évaluation › Exporter et archiver · *Geste* : Geste : Lancer l'export pour Léa
@@ -802,8 +840,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2381) : « un élève en échec n'avorte pas le lot ; un bilan final dit « N réussis, M échoués : … » »
 - **Ce que fait le code** : Le lot n'avorte pas et la copie sans page de synthèse est signalée (:791-797), mais le bilan n'a pas la forme « N réussis, M échoués : … ».
 - **Preuve** : js/travaux-archivage.js:457-492 : un élève en échec est attrapé et la boucle continue ; js/travaux-archivage.js:786-789 : le bilan dit « N exporté(s) sur T, M en échec : » et ne paraît que s'il y a un échec ou une copie sans synthèse
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : refusé (le bilan dit déjà le compte des réussis et des échecs (« N exporté(s) sur T, M en échec : ») ; seul le libellé diffère)
 
 #### 5.184 · en partie
 *Écran* : Écran 47 · Évaluation › Exporter et archiver · *Geste* : Geste : Lancer l'export pour Léa
@@ -811,8 +849,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2383) : « une note en ,5 s'arrondit vers le haut »
 - **Ce que fait le code** : La règle existe, mais là où le changelog 1.152 la place ; les PDF de l'export Léa n'arrondissent pas à l'entier, donc la règle n'y joue pas.
 - **Preuve** : js/portfolio.js:307-309 : arrondirIndiceSurCent fait monter une note exactement en ,5 (57,5 donne 58), pour le fichier des résultats finaux destiné à Léa (js/export-resultats-finaux.js:70-75), le profil et le Comparateur ; js/synthese-retroaction-data.js:1261 et js/synthese-retroaction-rendu.js:707 : les PDF de l'export Léa écrivent les notes au dixième
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : question 1 : « on arrondit au dixème partout. »
+- Disposition : inscrit #1076 ; la règle « ,5 vers le haut » à l'entier est remplacée par l'arrondi au dixième
 
 #### 5.208 · en partie
 *Écran* : Écran 47 · Évaluation › Exporter et archiver · *Geste* : Geste : Lire l'aide « Exporter et archiver les travaux »
@@ -820,8 +858,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2424) : « la fiche « i » s'intitule « Deux modes d'archivage » »
 - **Ce que fait le code** : Les mots sont là, mais comme intertitre de la liste à l'intérieur de la fiche, pas comme titre de la fiche.
 - **Preuve** : js/accompagnement-contenu-popup.js:510-524 : la fiche « i » archiver-travaux s'intitule « Exporter et archiver » ; « Deux modes d'archivage » est le titre de sa liste (:519)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.214 · en partie
 *Écran* : Écran 48 · Sortie commune : le PDF de rétroaction de l'élève (Dossier PDF, export Léa, page de synthèse) · *Geste* : Geste : Produire le PDF de rétroaction d'une copie (ou la synthèse seule)
@@ -829,8 +867,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2442) : « la colonne « Observations » liste les tampons, une colonne par catégorie utilisée »
 - **Ce que fait le code** : Les tampons sont listés par catégorie en colonnes, mais la section porte le titre « Commentaires ciblés (tampons) » et non « Observations ».
 - **Preuve** : js/synthese-retroaction-rendu.js:500-513 : une colonne par catégorie de tampons utilisée, dans une grille de colonnes, sous l'intertitre « Commentaires ciblés (tampons) »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 #### 5.220 · en partie
 *Écran* : Écran 48 · Sortie commune : le PDF de rétroaction de l'élève (Dossier PDF, export Léa, page de synthèse) · *Geste* : Geste : Produire le PDF de rétroaction d'une copie (ou la synthèse seule)
@@ -838,8 +876,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2454) : « « Cette copie n'a pas de note ni de niveau général : ‹critère› (‹pondération›) reste à évaluer. » »
 - **Ce que fait le code** : Il manque « de note ni » : le texte de la version observée est celui du 2 sept., pas celui de l'intention.
 - **Preuve** : js/synthese-retroaction-rendu.js:410 et :414-417 : la phrase imprimée est « Cette copie n'a pas de niveau général : ‹critère› (‹pondération›) reste à évaluer. »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1082
 
 ### Partie 6 (14)
 
@@ -849,8 +887,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2491) : « Tout ce qui s'enregistre le dit par un même témoin en bas de l'écran »
 - **Ce que fait le code** : Le témoin commun existe et la plupart des écrivains passent par lui (modes.js:1128-1150). Certains gestes de l'usager écrivent pourtant en silence, par exemple les préférences du rapport du profil (cocherSectionRapport → sauvegarderPreferencesRapport).
 - **Preuve** : js/temoin-enregistrement.js:60-160 et styles.css:6138-6146 : un témoin unique en bas à gauche ; mais js/profil-etudiant-rapport.js:496-507 écrit les cases « Inclure… » par db.setSync sans annonce
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083
 
 #### 6.6 · en partie
 *Écran* : Écran 49 · Suivi (commun aux quatre écrans de cette partie) · *Geste* : Sans geste
@@ -858,8 +896,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2491) : « « Non enregistré » et la raison en cas d'échec, qui reste affiché jusqu'à la prochaine écriture réussie »
 - **Ce que fait le code** : Le message et la raison s'affichent et ne s'effacent avec aucun délai, mais la règle diffère : une écriture réussie d'une autre clé ne l'efface pas, et l'usager peut le fermer à la main.
 - **Preuve** : js/temoin-enregistrement.js:151-167 et 129-140 : « Non enregistré : ‹raison› » reste affiché jusqu'à une écriture réussie de LA MÊME clé, ou jusqu'au bouton Fermer (×)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1078
 
 #### 6.16 · en partie
 *Écran* : Écran 50 · Suivi : les indices A, C, P (règles lues par les quatre écrans) · *Geste* : Sans geste
@@ -867,8 +905,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2516) : « colorent les colonnes A, C, P et Mobilisation de la Liste »
 - **Ce que fait le code** : Les seuils d'interprétation colorent bien A, C et P de la Liste, mais aucune colonne Mobilisation n'existe (obtenirCouleurMobilisation, js/etudiants.js:1544, ne sert à aucune colonne).
 - **Preuve** : js/etudiants.js:1187-1205 : A, C et P sont colorés par obtenirCouleurSelonSeuils (js/contexte-qualification.js:217-230) ; index.html:7745-7781 : la Liste n'a pas de colonne Mobilisation
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : question 3 : « c'est un reliquat de la moyenne (A+C)/2. c'est abandonné. »
+- Disposition : périmé (colonne « Mobilisation » abandonnée, reliquat de la moyenne (A+C)/2 (Grégoire))
 
 #### 6.37 · en partie
 *Écran* : Écran 52 · Suivi › Suivi du groupe · *Geste* : Geste : lire « Observation globale des besoins d'intervention »
@@ -876,8 +914,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2594) : « Sortie : la barre RàI du groupe et la carte Contexte disent « En attente » tant qu'aucun travail n'est dû et qu'aucune copie du groupe n'est évaluée »
 - **Ce que fait le code** : La barre RàI du groupe suit la règle (niveau 0 « En attente » tant que rien n'est dû ou évalué), avec un libellé un peu différent. Aucune « carte Contexte » du Suivi du groupe n'applique cette règle : la carte Contexte d'apprentissage du profil dit « En attente » selon les remises de l'élève lui-même (js/profil-etudiant-calculs.js:1937-1952), pas selon le groupe.
 - **Preuve** : js/tableau-bord-apercu.js:2586-2597 : la barre RàI dit « En attente de données pour N étudiant(s). » quand tous sont au niveau 0 ; règle travail dû et copie évaluée : js/profil-etudiant-calculs.js:1726-1755 et 1799-1832
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083
 
 #### 6.40 · en partie
 *Écran* : Écran 52 · Suivi › Suivi du groupe · *Geste* : Geste : lire la barre « Structure des apprentissages fondamentaux »
@@ -885,8 +923,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2600) : « Sortie : la phrase écrit « difficulté récente » (une seule production récente sous le seuil) et non « émergente » »
 - **Ce que fait le code** : Le mot « émergente » a quitté la phrase, mais elle n'écrit pas « difficulté récente » d'un tenant : elle dit « en difficulté sur les fondamentaux (N récente) ».
 - **Preuve** : js/tableau-bord-apercu.js:1475-1483 : la phrase écrit « N (x %) en difficulté sur les fondamentaux (1 récente, …) » ; js/profil-etudiant-calculs.js:1230-1232 : diagnostic « Difficulté récente » pour IPB = 1
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083
 
 #### 6.46 · en partie
 *Écran* : Écran 53 · Suivi › Liste des étudiant·es · *Geste* : Geste : ouvrir la Liste
@@ -894,8 +932,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2627) : « Sortie : les colonnes A, C, P et Mobilisation sont colorées selon les seuils d'interprétation »
 - **Ce que fait le code** : Trois des quatre colonnes nommées sont colorées selon les seuils ; la colonne Mobilisation n'existe pas.
 - **Preuve** : js/etudiants.js:1187-1205 : A, C, P colorés selon seuilsInterpretation ; index.html:7745-7781 : aucune colonne Mobilisation dans la Liste
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : question 3 : « c'est un reliquat de la moyenne (A+C)/2. c'est abandonné. »
+- Disposition : périmé (idem 6.16)
 
 #### 6.53 · en partie
 *Écran* : Écran 54 · Suivi › Profils individuels (le profil d'un élève) · *Geste* : Geste : ouvrir le profil d'un élève (sélecteur, Liste ou Suivi du groupe)
@@ -903,8 +941,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2667) : « un élève qui n'est plus dans le groupe : « N'est plus dans le groupe », sans calcul »
 - **Ce que fait le code** : « Sans calcul » est fait, mais aucun écran n'écrit « N'est plus dans le groupe » ; horsGroupe n'est lu nulle part.
 - **Preuve** : js/indices.js:536-540 : un DA hors du groupe n'est pas calculé (horsGroupe: true) ; js/profil-etudiant-sections-affichage.js:2530-2533 : le profil répond par alert('Étudiant·e introuvable')
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083
 
 #### 6.64 · en partie
 *Écran* : Écran 54 · Suivi › Profils individuels (le profil d'un élève) · *Geste* : Geste : lire la section Productions (productions et évaluations)
@@ -912,8 +950,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2686) : « le profil dit combien d'évaluations ont été écartées (ex. « 2 évaluations en brouillon, non comptées ») »
 - **Ce que fait le code** : Le profil dit bien combien d'évaluations sont écartées, mais avec « non verrouillée » au lieu de « en brouillon » (mot de la décision suivante, voir 6.67).
 - **Preuve** : js/profil-etudiant-sections-affichage.js:4003-4017 : « N évaluation(s) non verrouillée(s), non comptée(s) » et « N évaluation(s) sans critère évalué, non comptée(s) » ; affiché 1173-1175, 3139, 3209
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : périmé (« en brouillon » remplacé par « non verrouillée » (décision du 5 sept.))
 
 #### 6.65 · en partie
 *Écran* : Écran 54 · Suivi › Profils individuels (le profil d'un élève) · *Geste* : Geste : lire la section Productions (productions et évaluations)
@@ -921,8 +959,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2687) : « un travail diagnostique ne compte pas parmi les travaux évalués du profil »
 - **Ce que fait le code** : Le décompte « N évaluées » de la note exclut le diagnostique ; le « sur N » de la section Accompagnement le compte encore (evaluationEntreDansLaNote, js/pratiques/pratique-registre.js:842-849, ne regarde pas le diagnostique).
 - **Preuve** : js/profil-etudiant-actions.js:452-461 : la note (calculerDetailsNoteFinale) retire les productions diagnostiques ; mais js/profil-etudiant-sections-affichage.js:954 : le « (sur N) » de la carte RàI compte les évaluations sans ce filtre
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083
 
 #### 6.75 · en partie
 *Écran* : Écran 54 · Suivi › Profils individuels (le profil d'un élève) · *Geste* : Geste : lire la section Développement des habiletés (onglets Critères, Forces et défis, Gestes cognitifs)
@@ -931,8 +969,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : Le seuil agit sur le défi principal ; l'onglet Forces et défis montre des barres sur le dégradé de l'échelle (3683-3714), sans badge coloré par ce seuil.
 - **Preuve** : js/profil-etudiant-calculs.js:1272-1276 : le seuil defiSpecifique décide du défi principal de la carte RàI ; mais js/profil-etudiant-sections-affichage.js:4184-4192 : obtenirCouleurBadge, qui lit ce seuil, n'est appelée nulle part
 - **Second tri** : fait ; Le même seuil réglé dans le Labo décide du vert des badges Forces et défis et du critère retenu comme « Défi principal » de la carte RàI.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083, à revérifier d'abord (le second tri la juge faite)
 
 #### 6.94 · pas fait
 *Écran* : Écran 54 · Suivi › Profils individuels (le profil d'un élève) · *Geste* : Geste : cocher des artefacts dans le panneau Portfolio
@@ -940,8 +978,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2754) : « les cases cochées automatiquement suivent le mode choisi (« N derniers », meilleurs, hybride avec le bloc Obligatoires) ; en hybride, on peut cocher à la main autant d'artefacts que la note en compte ; la note du cours n'en dépend pas »
 - **Ce que fait le code** : Il n'y a pas, en 1.199.0, de panneau Portfolio avec des cases à cocher dans le profil.
 - **Preuve** : js/portfolio.js:139-144 : chargerPortfolioEleveDetail et toggleArtefactPortfolio retirées (#722), leur conteneur #portfolioEleveDetail n'existe pas ; selectionnerArtefactsSelonModalite (78) n'a plus d'appelant
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : périmé (panneau Portfolio retiré (#722))
 
 #### 6.100 · en partie
 *Écran* : Écran 54 · Suivi › Profils individuels (le profil d'un élève) · *Geste* : Geste : lire une note par travail avec la note différée active
@@ -949,8 +987,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2764) : « un repère « note différée » remplace la note chiffrée de chaque travail (Engagement, Productions, Complétion, Portfolio) »
 - **Ce que fait le code** : Le repère existe pour Engagement et Productions ; genererSectionCompletion (3472), qui le portait, n'est appelée nulle part, et le Portfolio n'a plus de panneau. Au passage, 3975 masque aussi la note de session sommative.
 - **Preuve** : badgeNoteDifferee remplace la note par travail dans Engagement (js/profil-etudiant-sections-affichage.js:775, 829) et Productions (2871-2872, 3000-3009, 3950) ; pas de panneau Portfolio (js/portfolio.js:139-144) et la carte Complétion ne montre aucune note
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : en partie périmé (le panneau Portfolio a été retiré, #722) ; le reste inscrit #1083 (code mort de la Complétion ; ce que la note différée cache revient à Grégoire)
 
 #### 6.107 · en partie
 *Écran* : Écran 55 · Suivi › Saisie des présences · *Geste* : Geste : marquer une absence ou un nombre de périodes (demi-période possible), ou taper une note
@@ -958,8 +996,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2788) : « ce qui est en attente d'écriture part avant tout changement de séance, de sous-groupe, de tri, d'onglet »
 - **Ce que fait le code** : Quitter l'onglet pour une autre section ne vide rien sur-le-champ : seule la minuterie de 1,5 s (1096) écrit ensuite.
 - **Preuve** : js/saisie-presences.js:1251-1254 : initialiserSaisiePresences vide l'écriture en attente, et le changement de date, de sous-groupe ou de tri l'appelle (index.html:7879, 7888-7896) ; 1166-1179 : Fermer, pagehide, beforeunload, visibilitychange
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083
 
 #### 6.119 · en partie
 *Écran* : Écran 55 · Suivi › Saisie des présences · *Geste* : Geste : cliquer « Rapport » (grille imprimable des présences)
@@ -967,8 +1005,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2825) : « le bouton « Rapport » est dans la barre d'actions de la saisie des présences, juste à gauche de « Confirmer la séance » »
 - **Ce que fait le code** : Quand la séance n'est pas saisie, l'état de la séance s'affiche entre « Rapport » et « Confirmer la séance » ; le bouton n'est donc pas juste à gauche.
 - **Preuve** : index.html:7932-7934 : « Rapport » est dans #actions-presences-bar, devant « Confirmer la séance », mais le span #etat-seance-presences (« Séance non saisie ») se place entre les deux
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1083
 
 ### Partie 7 (9)
 
@@ -978,8 +1016,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2867) : « le tableau de l'Aide « Comment interpréter les diagnostics ? » n'a plus de colonne « Niveau RàI » et porte la ligne « En consolidation » »
 - **Ce que fait le code** : La colonne « Niveau RàI » est bien absente, mais la ligne « En consolidation » n'existe pas : le tableau porte « Progression lente » à sa place.
 - **Preuve** : index.html:10215-10235 : le tableau « Comment interpréter les diagnostics ? » a trois colonnes (IPB, Direction, Diagnostic), sans « Niveau RàI » ; mais sa ligne « ≥ 3 / ↗ » dit encore « Progression lente » (index.html:10232)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 #### 7.14 · en partie
 *Écran* : Écran 56 · Le dépistage : ce qu'il calcule (transversal, lu dans le Suivi) · *Geste* : Sans geste
@@ -988,8 +1026,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : La catégorie existe sous l'ancien libellé « Progression lente » ; « En consolidation » n'est écrit nulle part (ni diagnostic, ni bilan « 1 en consolidation », ni Aide).
 - **Preuve** : js/profil-etudiant-calculs.js:1242-1245 : le cas IPB ≥ 3 avec direction ↗ existe mais se nomme « Progression lente » ; js/tableau-bord-apercu.js:1450-1452 : ce cas n'entre dans aucune phrase du bilan
 - **Second tri** : pas fait ; Aucun code n'écrit « En consolidation » pour un critère resté sous le seuil dont les résultats montent ; l'ancien libellé est en place.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 #### 7.19 · en partie
 *Écran* : Écran 57 · Suivi › Profils individuels › Accompagnement : la carte RàI et les niveaux RàI · *Geste* : Sans geste
@@ -997,8 +1035,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2882) : « quand la fiche porte la remarque « Décrochage », la cible d'intervention de l'élève le nomme comme cause »
 - **Ce que fait le code** : La donnée est produite, mais aucun écran ne lit le champ « cible » : le seul appelant (js/tableau-bord-apercu.js:3003) ne lit que .pattern et .niveau, et js/profil-etudiant-sections-affichage.js:1010-1025 dit que le profil n'appelle plus cette fonction ; la cause n'est donc nommée nulle part à l'écran.
 - **Preuve** : js/profil-etudiant-calculs.js:2106-2113 : determinerCibleIntervention lit la remarque de la fiche (statut « décrochage », choisie dans js/trimestre-v2-etudiants.js:413) et rend cible « Décrochage »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 #### 7.37 · pas fait
 *Écran* : Écran 59 · Le dépistage du français en semaine 1 : le travail diagnostique et son signalement · *Geste* : Geste : Cocher « ce palier lève un signalement » sur un palier de projection, et écrire la phrase du signalement
@@ -1006,8 +1044,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2926) : « le gabarit d'exemple « critères EUF » coche « Risqué » et « Échec » et porte la phrase « Aide en français recommandée » »
 - **Ce que fait le code** : Aucun gabarit d'exemple ne coche « Risqué » et « Échec » ni ne porte la phrase « Aide en français recommandée » ; cette phrase n'apparaît que comme exemple dans le texte d'aide du champ (l. 386).
 - **Preuve** : js/evaluation-projection.js:306-320 : PALIERS_GABARIT_NEUF recopie les paliers sans aucun leveSignalement ; l. 383-390 : libelleSignalement a pour défaut une chaîne vide
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 #### 7.49 · en partie
 *Écran* : Écran 60 · Suivi › Interventions · *Geste* : Sans geste
@@ -1016,8 +1054,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : Une rencontre individuelle paraît bien « Hors classe » et « Niveau 3 » (deux badges séparés) ; une rencontre en sous-groupe (niveau 2, contexte « hors-classe » posé à la l. 1534) paraît « Groupe » et « Niveau 2 ».
 - **Preuve** : js/interventions.js:468-476 : dans la vue Interventions, une intervention individuelle ou de niveau 3 reçoit les badges « Hors classe » et « Niveau 3 »
 - **Second tri** : fait ; Une rencontre de service « Individuelle » (niveauRai 3) qui paraît sous Suivi › Interventions porte deux badges côte à côte, « Hors classe » et « Niveau 3 » ; le point médian de l'intention transcrit ces deux badges. Le filtre interventionsDuContexteActif (l. 535-539) la laisse visible quand le contexte l'accepte.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084, à revérifier d'abord (le second tri la juge faite)
 
 #### 7.65 · pas fait
 *Écran* : Écran 60 · Suivi › Interventions · *Geste* : Geste : Marquer une intervention « Complétée »
@@ -1025,8 +1063,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 2991) : « quand on ajoute un participant à une intervention complétée, ou qu'on corrige sa date, l'application explique le report des présences et demande s'il faut le faire »
 - **Ce que fait le code** : Ajouter un participant ou corriger la date d'une intervention déjà complétée enregistre le champ sans question ni explication du report.
 - **Preuve** : js/interventions.js:1751-1762 : surChangementFicheIntervention ne pose la question de report qu'au passage du statut à « Complétée » ; l. 1690 : le report n'a lieu qu'à ce passage
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 #### 7.88 · en partie
 *Écran* : Écran 61 · Suivi › Rencontres · *Geste* : Ce qui reste manuel, et ce qui n'est pas tranché
@@ -1034,8 +1072,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3068) : « sur un service, l'assiduité et la complétion restent muettes et la carte RàI ne s'affiche pas »
 - **Ce que fait le code** : A et C se taisent sur un service par l'effet général (pas d'horaire, pas de pratique), mais aucun code ne masque la carte RàI sur un service : aucune branche contexteActifEstService dans les modules du profil.
 - **Preuve** : js/indices.js:229 et 555-580 : sans séance l'assiduité vaut null et sans pratique la complétion vaut null, ce qui les rend muettes ; mais js/profil-etudiant-sections-affichage.js:912-918 (sans données) et 1075 (avec données) rendent toujours la carte « Modèle de la Réponse à l'intervention (RàI) »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 #### 7.89 · pas fait
 *Écran* : Écran 61 · Suivi › Rencontres · *Geste* : Ce qui reste manuel, et ce qui n'est pas tranché
@@ -1043,8 +1081,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3069) : « sur un service, un rendez-vous manqué vaut une absence »
 - **Ce que fait le code** : Un élève non coché à une rencontre de service ne reçoit aucune absence.
 - **Preuve** : js/interventions.js:1774-1830 : transfererPresencesVersModule n'écrit une absence que pour un rattrapage (marquerNonParticipantsMotives), contexte jamais posé sur un service (l. 1534 : « hors-classe »)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 #### 7.92 · pas fait
 *Écran* : Écran 61 · Suivi › Rencontres · *Geste* : Ce qui reste manuel, et ce qui n'est pas tranché
@@ -1052,8 +1090,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3073) : « le calendrier du trimestre montre, par date, les rencontres d'un service, en vue mensuelle »
 - **Ce que fait le code** : Les rencontres d'un service n'apparaissent pas dans le calendrier du trimestre.
 - **Preuve** : js/calendrier-vue.js:258-300 et 474 : le calendrier mensuel ne place que le calendrier du trimestre et les échéances des productions (construireMapEcheancesProductions)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1084
 
 ### Partie 8 (14)
 
@@ -1063,8 +1101,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3121) : « L'écran « Labo › Démo » est décrit avec le mode démonstration, dans la partie 1. »
 - **Ce que fait le code** : Aucun écran « Labo › Démo » n'existe ; la démonstration s'active depuis l'accueil et se décrit dans Aide › Formation et démonstration (index.html:11282-11313).
 - **Preuve** : js/config.js:79-87 : le Labo a sept sous-onglets (Outils d'observation, Modélisation, Exploration des pratiques, Rythme de travail, Études, Bilan réflexif, Suivi longitudinal), sans « Démo »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : périmé (renvoi ; l'écran Labo › Démo n'existe pas)
 
 #### 8.2 · en partie
 *Écran* : Écran 63 · Labo › Outils d'observation · *Geste* : Sans geste
@@ -1072,8 +1110,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3127) : « aucun bloc repliable, les trois cartes ne se referment pas, un sommaire « Sur cette page » en tête, deux réglages par rangée »
 - **Ce que fait le code** : Rien ne se replie et le sommaire existe, mais les champs chiffrés ne sont pas deux par rangée : quatre paramètres d'analyse et trois seuils d'interprétation par rangée sur grand écran (styles.css:11760-11772).
 - **Preuve** : index.html:8683-8688 : sommaire « Sur cette page » en tête ; l. 8699, 8829 et 8926 : les trois cartes sont .carte-pilier, sans classe accordeon ; l. 8707, 8837 et 8934 : options en .grille-2col ; mais l. 8768 (.grille-4col-form) et 8897 (.grille-3col-form)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.3 · en partie
 *Écran* : Écran 63 · Labo › Outils d'observation · *Geste* : Sans geste
@@ -1081,8 +1119,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3128) : « Sous chaque réglage, de petites étiquettes nomment l'écran où son effet se voit ; en ambre, celles qui agissent hors de Suivi : palette d'annotation, liste des évaluations, badge de grille, export recherche »
 - **Ce que fait le code** : Les étiquettes ambre sont les quatre de l'intention, mais les champs chiffrés n'ont pas chacun leurs étiquettes : une seule rangée d'étiquettes par bloc (index.html:8763 et 8889).
 - **Preuve** : index.html:8717, 8739, 8755 et 8881 : chaque option porte ses étiquettes .etiquette-effet ; .etiquette-effet-hors (couleur ambre, styles.css:2647-2650) marque Annotation › palette, Évaluation › Liste des évaluations, Conception › Grilles › badge « dépistage » et Réglages › Données › export recherche
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.5 · en partie
 *Écran* : Écran 63 · Labo › Outils d'observation · *Geste* : Sans geste
@@ -1090,8 +1128,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3131) : « « collecte » remplace « cueillette », dans l'introduction et dans la case du bloc Micro-données ACP »
 - **Ce que fait le code** : « cueillette » a disparu de tout le code servi et la case dit « collecte », mais l'introduction n'emploie pas le mot « collecte ».
 - **Preuve** : index.html:8842 : la case du bloc Micro-données ACP dit « Activer la collecte des données… » ; index.html:8680-8682 : l'introduction ne contient ni « collecte » ni « cueillette »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.8 · en partie
 *Écran* : Écran 63 · Labo › Outils d'observation · *Geste* : Sans geste
@@ -1099,8 +1137,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3137) : « Sous chaque champ chiffré, la plage permise en mots (« De 5 (sensible) à 20 (moins sensible) ») »
 - **Ce que fait le code** : Trois champs chiffrés sur sept portent leur plage en mots ; la Fenêtre d'analyse dit seulement « Valeur basse = détection précoce | Valeur élevée = détection plus fiable », et les trois seuils d'interprétation n'ont aucune aide.
 - **Preuve** : index.html:8790, 8802 et 8814 : la plage en mots est écrite sous Progression des artefacts (« De 5 (sensible) à 20 (moins sensible). »), Sensibilité des flèches et Seuil de défi ; index.html:8778 et 8897-8918 : rien de tel sous la Fenêtre d'analyse ni sous Fragile, Acceptable, Bon
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.24 · en partie
 *Écran* : Écran 63 · Labo › Outils d'observation · *Geste* : Geste : Lire les aides de l'écran
@@ -1108,8 +1146,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3182) : « l'aide « Indicateurs visuels des seuils » dit « Lignes pointillées et étiquettes des niveaux de ton échelle sur les graphiques de progression du profil individuel. » »
 - **Ce que fait le code** : Le texte diffère de celui de l'intention (« sur les graphiques de progression du profil individuel ») ; l'infobulle js/accompagnement-contenu-hover.js:180 dit encore autre chose.
 - **Preuve** : index.html:8867 : l'aide dit « Lignes pointillées et étiquettes des niveaux de ton échelle sur le graphique par critère du profil individuel et sur les trajectoires du Suivi du groupe, en mode Habiletés. »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.30 · en partie
 *Écran* : Écran 63 · Labo › Outils d'observation · *Geste* : Geste : Masquer les notes par travail (note différée)
@@ -1117,8 +1155,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3203) : « le repère renvoie à Labo › Outils d'observation »
 - **Ce que fait le code** : Le repère nomme l'écran dans son infobulle, mais il n'a ni lien ni data-action qui y mène.
 - **Preuve** : js/preferences.js:597 : le repère est un <span> dont le titre dit « Réglage dans Labo › Outils d'observation. »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.36 · pas fait
 *Écran* : Écran 64 · Labo › Suivi longitudinal · *Geste* : Sans geste
@@ -1126,8 +1164,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3222) : « l'aide de l'écran dit que le R des pseudonymes vient de « registre » »
 - **Ce que fait le code** : Aucune aide de l'écran ne dit que le R vient de « registre ».
 - **Preuve** : js/registre-longitudinal.js:160 : le pseudonyme « Élève R‹rang› » est fabriqué sans qu'aucun texte de l'écran l'explique ; index.html:9220-9224 : la sous-section n'a pas de bouton d'aide
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.53 · en partie
 *Écran* : Écran 65 · Labo › Exploration des pratiques (le Comparateur de pratiques) · *Geste* : Geste : Créer, dériver, adopter ou jeter une maquette
@@ -1135,8 +1173,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3296) : « elle reste hors du sélecteur de pratique active tant qu'elle n'est pas adoptée »
 - **Ce que fait le code** : Une maquette porte dansBibliotheque: true (js/pratiques.js:869) et apparaît donc dans le menu du Cadre où se choisit la pratique d'un groupe-cours.
 - **Preuve** : js/pratiques-gestion.js:118 et 336-344 : la barre latérale et la bibliothèque filtrent les maquettes (filtrerParMaquette) ; mais js/trimestre-v2.js:375-388 : le menu de pratique du groupe-cours (v2-gc-pratique) ne filtre que dansBibliotheque et isDemo
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 #### 8.55 · en partie
 *Écran* : Écran 65 · Labo › Exploration des pratiques (le Comparateur de pratiques) · *Geste* : Geste : Exporter la comparaison (CSV)
@@ -1144,8 +1182,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3306) : « en anonymisation, le nom et le DA exportés sont anonymisés »
 - **Ce que fait le code** : En anonymisation, le nom exporté est anonymisé mais le DA exporté reste le vrai DA : daAffichage n'est pas utilisé.
 - **Preuve** : js/comparateur-pratiques.js:321-326 et 1113 : le CSV écrit prof.label (e.nom, anonymisé par js/modes.js:1403) et prof.da (e.da, que l'anonymisation laisse réel : js/modes.js:1400-1402)
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1075
 
 #### 8.56 · pas fait
 *Écran* : Écran 66 · Labo › Données · *Geste* : Sans geste
@@ -1153,8 +1191,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3313) : « Affiche les comptes des données de l'application, dont le nombre d'interventions »
 - **Ce que fait le code** : L'écran Labo › Données n'existe pas ; le seul compte d'interventions affiché ailleurs est celui des captures (Réglages › Données, js/donnees-v2.js:117) ou celui d'une archive ouverte (js/reserve-ouvrir.js:831).
 - **Preuve** : js/config.js:79-87 : le Labo n'a pas de sous-onglet « Données » ; index.html:8673-9224 : aucune sous-section labo-donnees
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : question 4 : « non, il est dans Réglages > données »
+- Disposition : périmé (l'écran vit dans Réglages › Données (Grégoire))
 
 #### 8.57 · pas fait
 *Écran* : Écran 66 · Labo › Données · *Geste* : Sans geste
@@ -1162,8 +1200,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3314) : « Lit les données telles qu'elles sont rangées : un ancien brouillon peut y être compté »
 - **Ce que fait le code** : Sans écran Labo › Données, aucune lecture brute des données (brouillons compris) n'y est faite.
 - **Preuve** : js/config.js:79-87 : aucun sous-onglet « Données » dans le Labo
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : question 4 : « non, il est dans Réglages > données »
+- Disposition : périmé (idem 8.56)
 
 #### 8.58 · pas fait
 *Écran* : Écran 66 · Labo › Données · *Geste* : Sans geste
@@ -1171,8 +1209,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3315) : « l'écran est en lecture seule : on n'y fait aucun geste, il ne fait qu'afficher les comptes »
 - **Ce que fait le code** : L'écran en lecture seule décrit n'existe pas.
 - **Preuve** : js/config.js:79-87 : aucun sous-onglet « Données » dans le Labo
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : question 4 : « non, il est dans Réglages > données »
+- Disposition : périmé (idem 8.56)
 
 #### 8.65 · en partie
 *Écran* : Écran 70 · Labo › Rythme de travail · *Geste* : Sans geste
@@ -1180,8 +1218,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3356) : « que sa case « Consignes transmises » soit cochée ou non »
 - **Ce que fait le code** : La case n'écarte plus aucune production, mais une production n'est estimée que si son activité a des durées mesurées (js/rythme.js:185-186 et 304-312) ; des copies seulement importées, sans durée dans l'activité, ne la font pas paraître.
 - **Preuve** : js/rythme.js:199-215 : estimerCharge ne lit plus la case « Consignes transmises » et garde tout lot qui a une échéance, estimerPourLot ne rendant null que sans copie ni évaluation
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1085
 
 ### Annexe (6)
 
@@ -1191,8 +1229,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3652) : « La visionneuse ne pose plus la cartouche ou l'échelle d'une autre copie »
 - **Ce que fait le code** : La visionneuse ne pose plus la grille, l'échelle ou la cartouche d'une autre copie sur une copie déjà évaluée (#947, changelog 1.159.7) ; sur une copie non évaluée, elle pré-remplit toujours avec les choix faits sur une autre copie.
 - **Preuve** : js/travaux-ui.js:5202-5211 : la mémoire des derniers choix n'est pas appliquée à une copie évaluée ; :5213-5233 : elle l'est encore à une copie sans évaluation
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : périmé (la règle de #947 ne vise que les copies évaluées)
 
 #### A.36 · en partie
 *Écran* : Notés par l'analyste « Conception II » · *Geste* : (annexe)
@@ -1200,8 +1238,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3660) : « Sans pratique assignée, profil, Suivi et export écrivent un tiret au lieu d'une note »
 - **Ce que fait le code** : Sans pratique assignée (portfolio.js:408-433, noteConstructible false), le profil et le Suivi écrivent un tiret ; l'export des résultats n'écrit pas de tiret mais une note vide avec un statut, et l'export recherche écrit null (trimestres.js:2287).
 - **Preuve** : Écrans : js/profil-etudiant-sections-affichage.js:732-734 et js/tableau-bord-apercu.js:548, :568-573 affichent le tiret ; export : js/export-resultats-finaux.js:93-97 écrit une cellule vide et le statut « non constructible »
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1086
 
 #### A.52 · en partie
 *Écran* : Notés par l'analyste « Évaluation » · *Geste* : (annexe)
@@ -1209,8 +1247,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3682) : « son aide sur les indices C et P »
 - **Ce que fait le code** : La case existe, et une aide nomme la case et les indices C et P, mais elle est attachée à la date d'échéance ; la note propre à la case (productions.js:930) ne parle pas de C ni de P.
 - **Preuve** : Case : js/productions.js:911-930 ; aide C et P : js/accompagnement-contenu-popup.js:982-992 ('echeance-indices') et js/accompagnement-contenu-hover.js:251, rattachées au champ de date
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1086
 
 #### A.58 · indécidable
 *Écran* : Notés par l'analyste « Suivi I » · *Geste* : (annexe)
@@ -1219,8 +1257,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Ce que fait le code** : Le chemin depuis l'Accueil recharge bien le Suivi du groupe, mais que les bulles des barres soient visibles relève du rendu à l'écran.
 - **Preuve** : js/accueil.js:55-57 (carte « Observer le groupe ») mène à navigation.js:261-263 (chargerTableauBordApercu)
 - **Second tri** : en partie ; Les barres à bulles ne s'affichent pas sur l'Accueil lui-même ; on y accède depuis l'Accueil par une carte qui ouvre le Suivi du groupe.
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : inscrit #1086, à vérifier à l'écran d'abord
 
 #### A.66 · en partie
 *Écran* : Notés par l'analyste « Suivi II » · *Geste* : (annexe)
@@ -1228,8 +1266,8 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3709) : « « Par où commencer ? » à deux branches »
 - **Ce que fait le code** : « Par où commencer ? » donne maintenant trois étapes numérotées (sans nommer l'enseignant·e), puis un paragraphe à part « Tu es orthopédagogue ? » ; les deux chemins existent, mais pas sous la forme de deux branches d'une même réponse.
 - **Preuve** : js/accueil.js:93-99
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : périmé (Accueil remanié le 12 sept. pour les deux métiers)
 
 #### A.72 · pas fait
 *Écran* : Notés par l'analyste « Suivi II » · *Geste* : (annexe)
@@ -1237,12 +1275,12 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 - **Intention** (l. 3714) : « formule « taux de repérage » pour la grille de l'orthopédagogue »
 - **Ce que fait le code** : Aucune formule « taux de repérage » n'est offerte aux grilles ; l'intention elle-même la dit non livrée.
 - **Preuve** : js/evaluation-formules.js:88, :114, :147 : seuls penalite_normalisee, ratio_cible et penalite_par_erreur existent
-- Réponse de Grégoire :
-- Disposition :
+- Réponse de Grégoire : pas de réponse entrée par entrée ; tri de Claude Code approuvé (« Je suis d'accord avec tout le reste, merci. »)
+- Disposition : périmé (formule refusée le 11 sept. (#835))
 
 ## Indécidables au code : 10
 
-*Seul un essai réel peut trancher. Destination à décider : porte terrain (iPad, Safari, largeurs d'écran) ou mise de côté.*
+*Seul un essai réel peut trancher. Destination à décider : porte terrain (iPad, Safari, largeurs d'écran) ou mise de côté. Pas encore soumises à Grégoire (15 oct.) : ce sont les seules entrées des 710 sans disposition.*
 
 - **1.22** (Écran 3 · Mode démonstration (case « Données démo » de l'Accueil, et Labo › Démo)) : « une question peut paraître, à accepter ». L'intention ne nomme aucune question (« une question peut paraître ») : c'est une consigne de banc, pas un comportement. Le code ne pose aucune question à l'entrée, donc rien à accepter.
 - **1.121** (Écran 8 · Témoin « Enregistré » (tous les écrans)) : « le témoin s'affiche au-dessus du clavier ». Le code existe, mais seul un essai sur iPad, clavier ouvert, en vertical et en horizontal, peut dire que le témoin est bien au-dessus du clavier.
@@ -1257,7 +1295,7 @@ Le temps 3 (`3-ecarts.md`) a rangé 710 entrées en catégorie 2, « prévu mais
 
 ## Annexe A : faits dans le code, non vus par l'observation (569)
 
-*Repère, écran, et la localisation qui le réalise dans la 1.199.0.*
+*Repère, écran, et la localisation qui le réalise dans la 1.199.0. Disposition commune : **périmé**, l'écart « prévu mais pas fait » n'existe pas dans le code, sous la limite de la contre-vérification (section « Résultats »).*
 
 - **1.8** (Écran 2 · Accueil) : js/accueil.js:93-98 : « Par où commencer ? » puis une liste <ol> de trois étapes (« Pose ton cadre. », « Conçois tes productions et tes évaluations. », « Apprends geste par geste. »)
 - **1.9** (Écran 2 · Accueil) : js/accueil.js:77-114 : le bandeau et son encadré CoP ne contiennent aucun tiret cadratin (ni le caractère U+2014, ni l'entité &mdash;, ni l'échappement \u2014)
