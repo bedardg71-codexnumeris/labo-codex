@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-⏳ **COMMITÉ LE 15 OCTOBRE 2026, PAS ENCORE EN LIGNE** (en ligne : 1.201.0, envoyée ce matin ; tout ce qui suit part avec la version du soir, après le verdict complet). *Écrit par Claude Code le 15 oct. à 16 h 08 (mesuré par `date`).* **Version en ligne ce soir : — (à compléter après l'envoi).**
+✅ **EN LIGNE LE 15 OCTOBRE 2026 AU SOIR** (tout ce qui suit est parti avec la version du soir, après le verdict complet). *Écrit par Claude Code le 15 oct. à 16 h 08 (mesuré par `date`).* **Version en ligne ce soir : 1.202.0** — constatée chez Netlify par le connecteur le 15 oct. à 19 h 50 : déploiement de production « ready » à 19 h 41, `commit_ref` `0c142077`.
 
 **Ce que tu verras** :
 - **Ton codex dit vrai** : les tailles de fichier s'affichent comme sur ton appareil ; quand le codex ne s'enregistre pas, le message ne suppose plus un manque d'espace (#994, #993, #1020).
