@@ -1878,6 +1878,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
 - [x] **#620 — S2 · Audit ciblé Z2 : politique de suppression et intégrité référentielle** (constats S1, S2, S6, M7). Lecture seule. ✅ **LIVRÉ le 30 août 2026** (`3f9edcd1`) — `Rapports/AUDIT-conception-Z2-suppressions-integrite-2026-08-30.md`, 917 lignes, 1 BLOQUANT et 5 SÉRIEUX. ⏳ T2.2 (diagnostic console) en attente de Grégoire.
 - [x] **#621 — S3 · Audit ciblé Z3 : le legacy vivant des quatre sections** (constats S4, S5, S9). ✅ **LIVRÉ le 30 août 2026** (`e766339a`) — `Rapports/AUDIT-conception-Z3-legacy-2026-08-30.md`. **Aucune instrumentation n'a été nécessaire** : la question se répond statiquement. ⚠ Renverse la prémisse de S10 — les 26 identifiants sont lus par du code atteignable, aucun bloc n'est mort.
 - [ ] **#622 — S4 · Archivage de trimestre** (constat B1). Après S1. ⚠ D1 = A : moratoire actif sur « Archiver un trimestre » jusqu'à la livraison de cet item. ↻ *Tri du 12 sept. 2026 : n'empêche aucun des huit énoncés — après la cohorte (`plans de travail/TRI-2026-09-12-fiches-ouvertes-audits.md`).*
+  - **15 oct. 2026 — moratoire levé pour tous les trimestres** (décision de Grégoire, 11 h 05), après l'essai réel du 14 sur l'hiver 2026. Le moratoire n'existait que dans les consignes. Détail : plans de travail/DECISIONS-2026-10-15-groupe-3.md.
   ⮕ **14 oct. 2026 — moratoire levé pour h2026** (décision de Grégoire, 10 h 39) ; Clore/Rouvrir sous fenêtres de l'application (lot du 14 oct., `1db00842`, en 1.201.0) ; snapshot sans lecteur, laissé (issue 3). **Porte « Clore l'hiver 2026 » passée par Grégoire le 14 oct. à 19 h 25, douze rangées sur douze, sur 1.200.0** — donc sans les fenêtres neuves de « Clore » ; la carte qui restait dans « disponibles » après « Clore » était le défaut que `1db00842` corrige. L'hiver 2026 est clos, archivé, vérifié, ses copies sont aux archives. Les autres trimestres restent sous moratoire.
   ⮕ **CODE LIVRÉ ET COMMITÉ le 31 août 2026** (`b888d6b2`, `kuekatsheu-f3`) — §6.1 (B1+B3) et §6.2 (B2) du rapport Z1,
   plus le troisième défaut de B1 relevé au plan. Archiver un trimestre est désormais une **LECTURE** : les trois
@@ -2297,7 +2298,8 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   rend la ligne 1440. Témoin : `grep -rn "critereNom" js/ | wc -l` rend non-zéro sur plusieurs modules,
   donc le champ est bien un porteur établi, pas une trouvaille isolée.
 
-- [ ] **#684 — Le renommage du §3 est un SCRIPT, pas une migration : il n'a atteint qu'une personne**.
+- [x] **#684 — Le renommage du §3 est un SCRIPT, pas une migration : il n'a atteint qu'une personne**.
+  - **Décidé par Grégoire le 15 oct. 2026 à 11 h 20 : issue (A).** Une migration au chargement, une seule fois, remplace les cinq anciens libellés du matériel de départ, seulement s'ils sont intacts au caractère près ; tout nom modifié par l'usager reste. Détail : plans de travail/DECISIONS-2026-10-15-groupe-3.md.
   Inscrit le 1er septembre 2026, **à trancher avant la cohorte 1**.
   ▣ **LE FAIT.** #682 a renommé les cinq libellés de Grégoire, par un script qu'il a collé lui-même
   dans sa console. **Les utilisateurs déjà en place gardent les anciens noms** — « Grille générique
@@ -2322,7 +2324,9 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   qu'un enseignant de la cohorte 1 lira une capture ou une chronique qui ne correspond pas à son écran.
   ⏳ **Décision de Grégoire.** Rien n'est codé.
 
-- [ ] **#683 — Le matériel semé n'est PAS dans tous les trimestres : deux mécanismes, un seul symptôme**.
+- [x] **#683 — Le matériel semé n'est PAS dans tous les trimestres : deux mécanismes, un seul symptôme**.
+  - **Décidé par Grégoire le 15 oct. 2026 à 11 h 04 : une suppression du matériel de départ ne vaut que pour son trimestre.** Les suppressions déjà faites gardent leur portée (rien ne réapparaît). La bascule de trimestre sème le matériel de départ, sans décision. Détail : plans de travail/DECISIONS-2026-10-15-groupe-3.md.
+  - **Inscrit le 15 oct. 2026 (issue 2, hors du lot)** : dans un trimestre ARCHIVÉ, le chargement s'abstient de semer la grille et l'échelle de départ, mais pas la cartouche (`initialiserModuleCartouches`, cartouches.js, n'a pas la garde d'archive) ; la bascule fait désormais exactement pareil. Effet seulement si la grille de départ est dans la copie d'archive. Rien n'est élargi ici.
   Inscrit le 1er septembre 2026. **Trouvé par la colonne « où » de la sonde #682** — c'est elle qui a
   montré que `GRILLE_GENERIQUE` vit dans h2026 SEULEMENT, `ECHELLE_IDME_DEPART` dans a2026 seulement, et
   `CART_GENERIQUE` dans les trois. **Notre hypothèse du tombstone était fausse** : la grille n'est pas
@@ -4547,7 +4551,8 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   le NOM d'un critère et contredit le champ configuré), pas 5 (trancher le devenir des seuils
   `idme.*`).
 
-- [ ] **#546 — Le « jugement suspendu » n'est plus saisissable : #526 a fermé la porte que le plan SOLO suppose ouverte.**
+- [x] **#546 — Le « jugement suspendu » n'est plus saisissable : #526 a fermé la porte que le plan SOLO suppose ouverte.**
+  - **Close le 15 oct. 2026, décision de Grégoire (11 h 17) : pas de niveau hors calcul.** Le seul cas réel, le plagiat soupçonné, porte sur la copie entière et l'application le traite déjà (« Non recevable », exclue des calculs, reprise par jeton). Le refus de #526 reste. Détail : plans de travail/DECISIONS-2026-10-15-groupe-3.md.
   Créé le 26 août 2026 (soirée) pendant le lot 2 de #542. **Deux exigences de Grégoire, posées le même jour,
   se contredisent — et aucune n'est fautive :**
   - **#526 (26 août)** a étendu `refusChampNiveau` (`echelles.js`) : `min`, `max` **et
@@ -8606,7 +8611,8 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   - ✅ **DÉCISION PRISE — 11 août 2026, porte 3.2 : le MENU ⋮ portant les deux actions.** Chaque fiche de la bibliothèque reçoit un menu ⋮ avec « Retirer de ma sélection » (réversible) et « Supprimer la fiche » (définitif, tous trimestres). ⮕ Le second ouvre l'avertissement qui **LISTE ce qui pend au cours** — les deux conditions ci-dessus sont tenues dans le même geste, elles ne se négocient pas séparément. Le libellé doit porter le « tous trimestres » : c'est ce que le magasin global rend vrai et que rien à l'écran ne dit aujourd'hui.
   - ⮕ Vérifier au passage si `retirerCoursDeBibliotheque` (qui pose aussi `actif=false`) doit rester tel quel une fois la suppression disponible au même endroit.
 
-- [ ] **#450** ⚠️ **ACTION GRÉGOIRE** — renommer les deux échelles « IDME et niv 0 » d'a2025 — créé 11 août 2026 (porte 3.3 tranchée).
+- [x] **#450** ⚠️ **ACTION GRÉGOIRE** — renommer les deux échelles « IDME et niv 0 » d'a2025 — créé 11 août 2026 (porte 3.3 tranchée).
+  - **Close le 15 oct. 2026, décision de Grégoire (11 h 22) : renommage abandonné.** Les deux échelles sont distinguées par leur identité depuis 1.92.0 ; elles vivent dans a2025. Détail : plans de travail/DECISIONS-2026-10-15-groupe-3.md.
   - **Ce ne sont pas des doublons** : ids différents, et **toutes deux réellement référencées**. ✅ **Confirmé au relevé du 11 août** (`diag448()` sur ses données Safari) : **344 et 72 citations**. La décision de RENOMMER plutôt que fusionner est donc la bonne — une fusion aurait eu 72 références à repointer, pas 4. Un script ne tranche jamais ça ; c'est pourquoi la porte existait.
   - ✅ **Décision du 11 août : RENOMMER LES DEUX**, distinctement. Aucune référence n'est touchée : le renommage ne change que le libellé, pas l'id. La fusion aurait exigé de repointer 4 (ou 6) citations — migration de données, écartée pour un problème d'affichage.
   - ⮕ Geste d'interface, aucun code. À faire dans a2025, dans **les deux navigateurs** (les magasins sont des îles — cf. #346).
@@ -9330,7 +9336,8 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   - **À concevoir (hors Lot 3, acté)** : le modèle de consommation des reprises — politique de recalcul (meilleure tentative ? dernière ? plafond ?), interaction avec le mode `limite` (nombre max, où le configurer : « configurer après » renvoie à quel écran ?), articulation avec les jetons de reprise existants (`js/codex.js`, badges « À réévaluer »). Décision conceptuelle requise avant code. Ne pas inventer de calcul tant que le modèle n'est pas validé.
   - **Périmètre probable** : `js/pratiques/*.js` (calcul), `pratique-configurable.js`, et l'écran de config détaillée post-création. Sentinelle de persistance déjà posée au Lot 3 (la valeur survit au round-trip d'édition).
 
-- [ ] 📐 🟡 **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
+- [x] 📐 🟡 **#279** Ajouter 3 champs au formulaire de production : DESCRIPTION DÉTAILLÉE des consignes, FORMAT ET MISE EN PAGE, REMISE
+  - **Close le 15 oct. 2026 par la mesure (Cowork) : déjà faite par #499 et #500 (25 août).** « + Nouveau champ » crée des blocs de consignes nommés par l'enseignant (« Format et mise en page », « Remise du travail »…). Détail : plans de travail/DECISIONS-2026-10-15-groupe-3.md.
   - Refactor `refactor/productions` mergé le 17 mai. Chantier prêt dès qu'une capture de référence est fournie par Grégoire (placement exact, type d'input).
   - Impact : `afficherFormProduction`, `lireDonneesFormulaireProduction`, `construireProductionData`, `prerenseignerFormulaireProduction` + affichage côté consultation.
 
@@ -9494,6 +9501,7 @@ Huit flux tracés en bac à sable (banc `tests/unit/audit-onglet-suivi-2026-09-0
   - **Visée double** : valider flux bout-en-bout + servir d'exemples concrets aux nouveaux utilisateurs (AQPC 3 juin et après).
 
 - [ ] 🟢 **#274** Produire des cartes mentales démo pour le matériel pédagogique (été 2026)
+  - **15 oct. 2026 : Grégoire demande la trame à un ou deux collègues de la CoP**, en principe le 19 oct. ; le montage suit leur réponse. Détail : plans de travail/DECISIONS-2026-10-15-groupe-3.md.
   - 2-3 cartes complètes couvrant différentes disciplines. Utile pour la cohorte CoP (Rencontre 5 « Aligner sa pratique », janvier 2027).
   - Période cible : été 2026 (préparation pendant la phase expérimentateurs juin-août).
 

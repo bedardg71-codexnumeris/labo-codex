@@ -3075,6 +3075,7 @@ window.composerModeleCartouche = composerModeleCartouche;                   // #
 window.telechargerModeleCartouche = telechargerModeleCartouche;             // #531
 window.importerCommentaires = importerCommentaires;
 window.initialiserModuleCartouches = initialiserModuleCartouches;
+window.assurerCartoucheDeDepart = assurerCartoucheDeDepart;   // #683 : la bascule de trimestre sème (trimestre-v2-liste.js)
 
 // Nouvelles fonctions Beta 80.2 (interface unifiée)
 window.afficherBanqueCartouches = afficherBanqueCartouches;
