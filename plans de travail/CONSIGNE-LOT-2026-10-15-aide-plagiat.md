@@ -49,3 +49,14 @@ Avec ce commit : recopie sous #668 et sous #333 les deux lignes de `DECISIONS-20
 
 1. **La ligne « Décomposition de l'indice M : M = (A + C) / 2 = … » sort de la carte Mobilisation** (`profil-etudiant-sections-affichage.js`). Grégoire, le 15 oct. : « c'est un reliquat de la moyenne (A+C)/2. c'est abandonné. » Retire aussi le calcul qui ne sert plus qu'à elle (zéro dette), et note-le sous #1083 (6.46). Si d'autres écrans affichent M, liste-les dans la demande sans y toucher.
 2. **Une fiche au BACKLOG : « L'application ne prescrit pas »** — le principe de Grégoire du 15 oct. (15 h 27) : « L'application ne doit pas être prescriptive. Elle doit parler au conditionnel, du genre : “À la lumière de ces données, il pourrait être pertinent de…” ». Reprends le tableau du § 6 de `DEMANDE-RELECTURE-2026-10-15-textes-relus.md` (carte RàI du profil, fenêtre d'aide RàI, guide RàI, cibles d'intervention jamais affichées) ; sans code ici.
+
+## Verdict de Cowork, 15 oct. 2026 à 16 h 02 (Toronto, mesuré par `date`) : accepté
+
+**Relu sur `052b34a1` et `fdeaa55e` : accepté.** Le diff ne touche que l'Aide, une bulle, la carte Mobilisation et deux bancs ; aucune écriture dans les données. Vitest non relancé par Cowork : ta suite verte (8 909 sur 8 909) et les 13 ablations font foi.
+
+Trois choses encore, dans cet ordre :
+1. **L'indicateur M en tête de la carte Mobilisation sort aussi.** Décision de Cowork, d'après les mots de Grégoire sur (A+C)/2 : « c'est abandonné ». La carte garde A, C et la phrase qui décrit ; les branches de la prose (qui lisent A et C) ne bougent pas. Retire ce qui ne sert plus qu'à M, note-le sous #1083, un banc, break-test. Si `interpreterMobilisation` a d'autres lecteurs, garde-la et dis-le.
+2. **`OU-EN-EST-ON.md` maintenant**, en gestes d'utilisateur, avec tout ce qui est commité aujourd'hui ; après l'envoi en ligne de ce soir, une ligne pour le numéro de version.
+3. **Puis `CONSIGNE-LOT-2026-10-15-avant-la-purge.md`** (aucun fichier de `js/`).
+
+Aucun push, aucune release, aucun verdict Playwright avant le signal du soir.

@@ -102,8 +102,8 @@ describe('lot D · #743 — l\'assiduité inconnue', () => {
         const b = monter({ dateArrivee: '2026-11-15' });
         expect(b.win.calculerAssiduite(TARDIF, '2026-12-01').indice).toBeNull();
         b.store.test_indicesAssiduite = { sommatif: { [TARDIF]: b.win.calculerAssiduite(TARDIF, '2026-12-01'), [ANCIEN]: b.win.calculerAssiduite(ANCIEN, '2026-12-01') } };
-        expect(b.win.calculerTousLesIndices(TARDIF)).toMatchObject({ A: null, M: null, C: 60, P: 65 });
-        expect(b.win.calculerTousLesIndices(ANCIEN)).toMatchObject({ A: 100, C: 80, P: 70, M: 0.9 });
+        expect(b.win.calculerTousLesIndices(TARDIF)).toMatchObject({ A: null, C: 60, P: 65 });   // 15 oct. 2026 : plus d'indice M (#1083, 6.46)
+        expect(b.win.calculerTousLesIndices(ANCIEN)).toMatchObject({ A: 100, C: 80, P: 70 });
         expect(b.win.calculerIndicesEtudiant(TARDIF).sommatif).toMatchObject({ assiduite: null, nombreSeances: 0 });
         expect(b.win.calculerIndicesEtudiant(ANCIEN).sommatif).toMatchObject({ assiduite: 1, nombreSeances: 10 });
     });

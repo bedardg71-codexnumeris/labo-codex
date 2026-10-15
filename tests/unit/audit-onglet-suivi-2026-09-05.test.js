@@ -756,7 +756,7 @@ describe('D · quel palier pour celui dont on ne sait rien', () => {
         const enrichis = b.win.calculerEtudiantsPrioritaires.call(null); b.interne['tableau-bord-apercu.js']._tousEtudiantsEnrichis;
         const dansGroupe = b.interne['tableau-bord-apercu.js']._tousEtudiantsEnrichis.some(e => e.da === DA.INCOHERENT);
         noter('D5', { A: indices.A, C: indices.C, P: indices.P, nbArtefactsDepistage: n3.nbArtefacts, performance3: r3(n3.performance), moyStructure: r3(moy.structure), dansTableauDeBord: dansGroupe, enrichis: enrichis.length });
-        expect(indices).toEqual({ A: null, C: null, P: null, M: null, pratique: 'SOM', noteConstructible: false, horsGroupe: true });
+        expect(indices).toEqual({ A: null, C: null, P: null, pratique: 'SOM', noteConstructible: false, horsGroupe: true });   // 15 oct. 2026 : plus d'indice M (#1083, 6.46)
         expect(n3).toMatchObject({ nbArtefacts: 1, performance: 0.7 });   // le dépistage l'écarte
         expect(r3(moy.structure)).toBe(r3((0.65 + 1.0) / 2));   // mais les moyennes par critère la comptent
         expect(dansGroupe).toBe(false);
@@ -1093,7 +1093,7 @@ describe('I · groupe-cours sans pratique assignée (lot N1b)', () => {
         expect(stock).toMatchObject({ pratique: null, C: 0, P: 0, noteConstructible: false, completionConstructible: false });
         expect(indices.A).toBe(100);            // l'assiduité ne dépend d'aucune pratique
         expect(indices.C).toBeNull();
-        expect(indices.M).toBeNull();
+        expect(indices, 'l\'indice composite M est retiré le 15 oct. 2026 (#1083, 6.46)').not.toHaveProperty('M');
         expect(indices.noteConstructible).toBe(false);
         expect(indices.completionConstructible).toBe(false);
         // Le bloc du tableau de bord (barres du groupe) : complétion inconnue, pas 0.

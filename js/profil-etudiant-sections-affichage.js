@@ -1663,13 +1663,9 @@ function genererSectionMobilisation(da) {
                     <strong class="profil-indicateur-valeur">${indices.C}%</strong>
                 </div>
             </div>
-            <div class="profil-indicateur profil-indicateur-accent-gauche" style="color: ${interpM.couleur};">
-                <div class="profil-indicateur-contenu">
-                    <span class="profil-indicateur-label">Mobilisation (M)</span>
-                    <strong class="profil-indicateur-valeur">${indices.M}</strong>
-                </div>
-            </div>
         </div>
+        <!-- 15 oct. 2026 (verdict de Cowork de 16 h 02, #1083 6.46) : l'indicateur « Mobilisation (M) »
+             est retiré avec la décomposition ; la carte garde A, C et la phrase qui décrit. -->
 
         <!-- INTERPRÉTATION QUALITATIVE -->
         <div class="profil-interpretation" style="background: linear-gradient(to right, ${interpM.couleur}22, ${interpM.couleur}11); border-left-color: ${interpM.couleur};">
