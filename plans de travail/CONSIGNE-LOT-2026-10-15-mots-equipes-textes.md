@@ -47,3 +47,27 @@ Les lignes « à poser » des fichiers de décisions, telles quelles, sous leur 
 ## La méthode
 
 Commit (A puis B), Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-15-mots-equipes-textes.md`. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Propose la ligne des Nouvelles pour A. Rapport court à Grégoire, en gestes d'utilisateur.
+
+## Verdict de Cowork (session de relecture), 15 oct. 2026 à 14 h 02 (Toronto, mesuré par `date`)
+
+**Relu sur `a43513d7`…`8532dfe0` : accepté, sans correction de code.** Lu au diff et dans `DEMANDE-RELECTURE-2026-10-15-mots-equipes-textes.md` ; Vitest non relancé par Cowork (ta suite verte, 8 826 sur 8 826, fait foi). Les specs Playwright retouchées vont au verdict du soir.
+
+Mesuré par Cowork :
+- `js/config.js` : une seule ligne changée, le libellé autorisé par Grégoire à 13 h 34.
+- `contexte-qualification.js` : les bornes et les couleurs sont les mêmes ; les branches sont réécrites en `return`, sans seuil déplacé.
+- `equipes.js` : `agrandirPlafonne` applique la décision à la lettre (au plus une personne de plus par équipe, sinon une équipe plus petite). 5 en équipes de 3 → 3 et 2 en découle : accepté, ce n'est pas un écart à la décision.
+- Les trois phrases d'A2 dont le sens changeait sont posées (guide de la démo, infobulle du sous-onglet, infobulle `travaux-archivage-production`) : acceptées, elles disent ce que l'écran fait.
+
+Tranché par Cowork :
+- **« l'originale » des jetons** (`evaluation-jetons.js` ~726, 765, 785) : on n'y touche pas. « L'originale » y désigne l'évaluation originale, au féminin juste ; le mot « archiv » n'y est pas, la décision ne le vise pas.
+- **Le badge vert et la phrase « Quelques absences »** (A = 76 %) : accepté tel quel. Deux échelles coexistent parce que le gel d'octobre interdit de bouger les bornes ; les deux disent vrai.
+- **Code mort relevé** (`genererSectionCompletion`, `genererSectionAssiduiteLegacy`, variables non lues) : issue 3.
+
+### Pour la session Cowork qui tient les décisions : trois ajouts à la page des textes
+
+Ce sont des mots d'écran ou des promesses d'écran ; ils reviennent à Grégoire, avec les six blocs de `TEXTES-A-RELIRE-2026-10-15.md` :
+1. **Les recommandations des cartes « Contexte d'apprentissage » et « Mobilisation »**, listées dans la demande de relecture (§ A1) : elles disent encore « critique », « fragile », « Excellent engagement », juste sous la nouvelle phrase qui décrit.
+2. **Le réglage des seuils** (Labo › Outils d'observation : « Fragile si inférieur à », « Acceptable… », « Bon… ») et les tableaux de l'Aide qui gardent l'ancien vocabulaire : le vocabulaire qui décrit s'y étend-il ?
+3. **Deux étapes de l'assistant de pratique qui ne font rien** : « Nombre d'évaluations » (aucun lecteur visible) et « Tes seuils personnels », qui annonce servir au dépistage alors que rien ne les lit. Une bulle ne peut pas les décrire tant que Grégoire n'a pas dit s'il faut les retirer, les brancher, ou dire qu'elles ne servent pas encore.
+
+Rien à faire de ton côté, Claude Code, pour ce lot.

@@ -71,3 +71,7 @@ Choix de Cowork : la première des deux voies, sans mot neuf. La terminale n'est
 - Commite aussi `plans de travail/CONSIGNE-DU-JOUR.md` (verdict de 13 h 10) et ce fichier. `DECISIONS-2026-10-15-groupe-6.md` n'est pas à toi : laisse-le.
 - Les deux lignes des Nouvelles proposées seront soumises à Grégoire avec la version du soir. Si le point 3 change l'écran, ajoute-le à la première (« … elle n'est plus proposée parmi les obligatoires »), proposé, non posé.
 - Pas de nouvelle demande de relecture : rapport court à Grégoire, et le hash du commit.
+
+### Relecture de `bb7cc770` (Cowork, 13 h 38) : conforme, lot clos
+
+Lu au diff : l'aide porte la phrase de Grégoire ; la terminale sort de la liste des obligatoires et du compte de l'écran, par la même source que la note (`identifierProductionTerminale`) ; rien n'est réécrit. **Issue 3, sans fiche** : la terminale reste proposée dans la liste « Sélection », où elle est tout aussi inerte (sa copie n'entre jamais dans le pool) ; le seul effet visible serait un « (N dans le pool) » qui compte un de trop si on l'y coche. La pondération unitaire de la Sélection, elle, ne dépend pas de ce compte.

@@ -47,3 +47,25 @@ C'est la règle du 7 septembre (`js/entites/production-diagnostique.js`, les qua
 ## La méthode
 
 Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-15-diagnostique.md` : l'inventaire de la partie 2 (surface, disposition), le choix de la partie 1, les chiffres qui bougent, la ligne des Nouvelles, le markdown de la porte. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire, en gestes d'utilisateur.
+
+## Verdict de Cowork, 15 oct. 2026 à 15 h 07 (Toronto, mesuré par `date`)
+
+**Relu sur `7543b298` et `56d2b318` : accepté.** Relu par sondage, pas ligne à ligne. Vérifié : la marque est une constante de l'entité (`marqueHTML` ne rend que `MARQUE_HTML` ou une chaîne vide), d'où l'ajout de `ligne.marque` à la liste blanche de #562, sans donnée d'utilisateur ; la complexité baisse (455 → 454) ; aucune écriture dans les données (aucun `db.modifier`, `setItem` ni `remove` ajouté) ; aucun `onclick=` ni script inline. Vitest non relancé par Cowork : ta suite verte (8 884 sur 8 884) et les 25 ablations font foi.
+
+### Le § 4 a, tranché par Cowork : on exclut le diagnostic des moyennes par critère en sommative
+
+Ce n'est pas une question neuve : deux décisions de Grégoire la tranchent déjà. Le 7 septembre, le diagnostic ne compte « ni dans le palier RàI » (motif : un seul critère ne peut pas décider d'un palier) ; le 15 octobre à 14 h 00, il n'apparaît pas « dans l'évolution de la progression étudiante dans le profil », et la liste « Progression par critère » en fait partie. Le ⛔ de la consigne sur le palier RàI visait à ne pas déplacer la règle des paliers ; ici, c'est une fuite du diagnostic qui le fait entrer dans le palier par le défi. Grégoire en est informé et peut renverser.
+
+- `calculerMoyennesCriteres` (`profil-etudiant-calculs.js`) passe par `ProductionDiagnostique`, comme `calculerMoyennesCriteresRecents` en standards (porte 2). Rien d'autre ne bouge dans la règle des paliers.
+- Mesure sur la démo, avec un artefact marqué : les forces, les défis, le pattern et le palier, avant et après, élève par élève. Mets les changements dans la demande de relecture.
+- Un essai par branche, break-test. Commit à part, puis une ligne à ajouter au § 4 de `DEMANDE-RELECTURE-2026-10-15-diagnostique.md`.
+
+### Le § 4 b : l'export de recherche reste tel quel
+
+Il ira avec l'export anonymisé (#1060, #1074), qui attend Grégoire. Ajoute la phrase sous #1074, sans rien coder.
+
+### Les issues 2 et 3 du tableau : acceptées telles que tu les as rangées.
+
+### L'ordre
+
+Ce correctif d'abord, puis `CONSIGNE-LOT-2026-10-15-aide-plagiat.md`. Aucun push, aucune release, aucun verdict Playwright avant le signal du soir. La porte terrain est publiée par Cowork ; elle se passe après la version du soir.
