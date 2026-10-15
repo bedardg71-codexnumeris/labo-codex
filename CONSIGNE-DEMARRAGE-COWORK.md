@@ -9,6 +9,15 @@
 
 ---
 
+## 0 · LE 16 OCTOBRE 2026 — À LIRE AVANT LE RESTE (ajouté le 15 oct. à 16 h 05 par la session du tri des fiches « à toi » ; le reste de ce fichier date du 7 oct.)
+
+- Le 15, de 14 h 49 à 15 h 30, Grégoire a tranché avec Cowork les 33 fiches « à toi » : `plans de travail/LOTS-2026-10-15-fiches-a-toi.md` (décisions, lots B à H, lignes à poser au backlog). Il n'en reste que 4, qui attendent l'extérieur (Loi 25 ; rencontre du 19 oct.).
+- Le lot « avant la purge » (#694) part le 15 au soir : `plans de travail/CONSIGNE-LOT-2026-10-15-avant-la-purge.md`. Vérifier qu'il a été exécuté et relu AVANT la purge du 16 au matin (#781).
+- Le plan de la journée du 16, voulu par Grégoire : la purge, puis les laborieuses, dans l'ordre de `plans de travail/ORDRE-2026-10-16-les-laborieuses.md`.
+- Ce fichier lui-même est à réécrire en entier à la fin de la journée du 16.
+
+---
+
 ## 1 · CE QUE TU ES, ET CE QUE TU N'ES PAS
 
 **Le dispositif est à trois, et les canaux ne se croisent pas.** Grégoire décide, relaie, et fait tourner l'application sur ses vraies
