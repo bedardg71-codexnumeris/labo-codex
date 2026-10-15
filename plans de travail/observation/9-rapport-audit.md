@@ -7,7 +7,7 @@
 - **But** : décrire ce que l'application fait réellement, indépendamment de ce que Grégoire voulait qu'elle fasse, en se protégeant du biais de confirmation (cadrage du 12 octobre).
 - **Méthode** : les intentions sont scellées avant toute observation ; une session isolée observe une copie de l'application sans commentaires ni documentation ; une troisième met les deux textes côte à côte. Deux lectures indépendantes en déduisent la finalité ; Grégoire réagit à chaud, avant de voir la suite ; une vérification croisée isole les conclusions solides ; Grégoire les confronte à ses intentions.
 - **Résultat principal** : les deux lectures décrivent un poste de travail enseignant, local et fermé, qui convertit des saisies par élève en notes, rétroactions et indices de besoin, et qui conserve plus qu'il ne fait circuler. Grégoire reconnaît les deux formulations et les onze autres finalités proposées. Sur les 122 conclusions solides, il en classe **103 « voulu et fait »**, **11 « fait sans être voulu »** (toutes des bugs) et **aucune « voulu mais invisible »** ; 8 décrivent ce que l'observation ne permet pas de savoir.
-- **Suites** : 20 fiches créées au BACKLOG : #1055 à #1067 au temps 3, #1068 à #1074 à l'interprétation. S'y ajoute #1054, qui existait déjà et a été élargie. L'interprétation a aussi réutilisé six de ces fiches : #1054, #1057, #1060, #1061, #1064 et #1065.
+- **Suites** : 32 fiches créées au BACKLOG : #1055 à #1067 au temps 3, #1068 à #1074 à l'interprétation, #1075 à #1086 à la confrontation des « prévu mais pas fait ». S'y ajoute #1054, qui existait déjà et a été élargie. L'interprétation a aussi réutilisé six de ces fiches : #1054, #1057, #1060, #1061, #1064 et #1065.
 - **Ce qui reste ouvert** : voir §8. L'audit n'est pas fermé au sens de CLAUDE.md tant que ces points n'ont pas reçu leur disposition.
 
 ## 2. Principe
@@ -30,7 +30,8 @@ Le cadrage reprend un principe de Stafford Beer : la finalité d'un système, c'
 | Étape 1 | Réaction de Grégoire en entrevue, scellée avant toute suite | `6-reaction-scellee.md` | `29c802ca` | 14 oct. |
 | Étapes 2 et 3 | Convergence et appuis (session C) ; contrepoids (session D) | `7-convergence.md`, `7-contrepoids.md` | `3d896612` | 14 oct. |
 | Étapes 5 et 6 | Confrontation avec les intentions et dispositions, en entrevue | `8-interpretation.md` | `3c8bfb2e`, corrigé ensuite | 15 oct. |
-| Synthèse | Ce rapport ; la description consolidée | `9-rapport-audit.md`, `10-description-application.md` | ce commit | 15 oct. |
+| Synthèse | Ce rapport ; la description consolidée | `9-rapport-audit.md`, `10-description-application.md` | `a393b30e` | 15 oct. |
+| Temps 3, catégorie 2 | Les 710 « prévu mais pas fait » triés au code par dix sous-agents, contre-vérifiés à l'aveugle ; entrevue, puis tri de Claude Code approuvé ; 12 fiches inscrites | `11-confrontation-prevu-pas-fait.md` | `878627cb`, puis le commit des dispositions | 15 oct. |
 
 *Le fichier `4-dispositions.md` porte « temps 4 » dans son titre, mais il traite les suites du temps 3 ; le temps 4 proprement dit commence avec `4-preparation-lecture.md`.*
 
@@ -89,7 +90,7 @@ Le tri des 199 « fait autrement » a été vérifié au code : 24 confirmés, 4
   - Les lectures, comme la conclusion solide Q5-28, disent que le programme classe des personnes (bandes, patterns, niveaux RàI, priorités).
   - Grégoire tient à « classement de niveau de besoins » et refuse « classer les élèves », tout en classant Q5-28 « voulu et fait ».
   - Les deux énoncés ne portent pas sur la même chose : l'un décrit ce que le calcul range, l'autre ce que l'enseignant·e en fait. Le rapport ne les concilie pas.
-- **Aucun « voulu mais invisible » ne veut pas dire que tout ce qui était voulu est fait.** Par construction, les conclusions solides décrivent des comportements observés : elles ne peuvent guère révéler une intention absente du comportement. C'est le temps 3 qui mesure ce manque : 710 « prévu mais pas fait », dont 690 sans aucune mention dans l'observation. L'audit n'a pas encore confronté ces entrées.
+- **Aucun « voulu mais invisible » ne veut pas dire que tout ce qui était voulu est fait.** Par construction, les conclusions solides décrivent des comportements observés : elles ne peuvent guère révéler une intention absente du comportement. C'est le temps 3 qui mesure ce manque : 710 « prévu mais pas fait », dont 690 sans aucune mention dans l'observation. Confrontées au code le 15 oct. (`11-confrontation-prevu-pas-fait.md`), 569 s'y trouvent : l'observation ne les avait pas vues. 130 manquent en tout ou en partie (29 pas faites, 101 en partie). Des 131 soumises à Grégoire (ces 130 et une indécidable), retirées les intentions qu'il déclare périmées et les entrées refusées, 113 restent voulues : ce sont les « voulu mais invisible » que les conclusions solides ne pouvaient pas montrer.
 - **Le dispositif a changé la description de la finalité, sans en changer le noyau.** Les deux lectures et le contrepoids nomment ce que les intentions mettent moins en avant : la conservation plus que la circulation, et le classement automatique de personnes. Grégoire les reconnaît en corrigeant les mots.
 
 ## 7. Limites
@@ -99,7 +100,9 @@ Le tri des 199 « fait autrement » a été vérifié au code : 24 confirmés, 4
 - **Isolement.** Il n'est garanti qu'en partie (§4).
 - **Lectures liées.** A, B, C et D lisent le même document : une erreur de l'observation se propage à toutes.
 - **Usage réel inconnu.** Qui utilise l'application, comment, et avec quels effets sur les élèves et les enseignant·es : l'observation ne le dit pas, et Grégoire assume que l'application n'en garde aucune trace.
-- **Fiches non revérifiées.** Les fiches #1068 à #1074 n'ont pas été revérifiées dans le code de `main` ; chacune le dit.
+- **Fiches non revérifiées.** Les fiches #1068 à #1074 n'ont pas été revérifiées dans le code de `main` ; chacune le dit. Celles de #1075 à #1086 citent la 1.199.0 : leurs « pas fait » sont revérifiés en 1.201.0, pas leurs « en partie ».
+- **Tri des « prévu mais pas fait » au code.** Il repose sur des sous-agents ; la contre-vérification à l'aveugle accorde 87 %, et ses 15 « fait » confirmés laissent possible jusqu'à environ 20 % d'erreur parmi les 569 « fait ».
+- **Approbation par fatigue.** Pour les 131 entrées qui lui revenaient, Grégoire a répondu d'abord par défaut, de son propre aveu, puis il a approuvé en bloc le tri de Claude Code. Une approbation globale valide une méthode et une liste, pas chaque entrée : le biais que l'audit voulait contenir y trouve une porte (`11-confrontation-prevu-pas-fait.md`, « Déroulement »).
 - **Rangement de la description.** Il est mécanique : chaque conclusion est rangée sous l'écran de son premier appui.
 
 ## 8. Ce qui reste ouvert
@@ -107,7 +110,7 @@ Le tri des 199 « fait autrement » a été vérifié au code : 24 confirmés, 4
 Chaque point appelle une disposition (inscrit, refusé ou périmé) que l'audit n'a pas encore reçue.
 
 1. **Temps 3, catégorie 1** : les 351 « fait sans être prévu » n'ont pas été triées (`4-dispositions.md`). *Ouvert, à Grégoire.*
-2. **Temps 3, catégorie 2** : les 710 « prévu mais pas fait », dont 690 sans aucune mention, n'ont pas été confrontées. Ce sont les seules qui peuvent révéler un « voulu mais invisible ». *Ouvert, à Grégoire.*
+2. **Temps 3, catégorie 2** : les 710 « prévu mais pas fait », dont 690 sans aucune mention. *Fait le 15 oct. 2026, sauf 10 entrées* (`11-confrontation-prevu-pas-fait.md`) : triées au code de la 1.199.0, 569 sont faites (périmé), 101 en partie, 29 pas faites, 11 indécidables. Des 131 soumises à Grégoire, 111 sont inscrites (#1075 à #1086), une en partie, une l'était déjà (#291), 14 sont périmées et 4 refusées. Grégoire, épuisé par l'entrevue entrée par entrée, a approuvé le tri de Claude Code et répondu à cinq questions. *Reste ouvert, à Grégoire* : la destination des 10 indécidables (porte terrain ou mise de côté).
 3. **Temps 3, questions de règle** : environ 13 entrées « question de règle », et les lots sans fiche (cohérence de l'interface, lot des mots). *Ouvert, à Grégoire (`4-dispositions.md`, « Ce qui reste à faire »).*
 4. **Conclusions non confrontées** : les 19 « en partie », les 2 « introuvables », les 113 affirmations d'une seule lecture et la contradiction entre A et B. *Ouvert : à confronter ou à déclarer hors de portée.*
 5. **#1074** : décider ce que l'export « anonymisé » doit retirer. Cela touche les données des élèves, donc *à Grégoire*.
