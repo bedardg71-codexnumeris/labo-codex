@@ -2703,24 +2703,39 @@ async function chargerProductionsPourCategories() {
     );
 
     // Générer HTML pour chaque liste
-    listeSelection.innerHTML = genererCheckboxesCategorie(productionsFiltrables, 'selection');
-    listeObligatoires.innerHTML = genererCheckboxesCategorie(productionsFiltrables, 'obligatoire');
+    // #339 (15 oct. 2026, verdict de Cowork) : la terminale n'est plus proposée parmi les obligatoires — sa copie
+    // n'entre jamais dans le pool et elle garde sa propre pondération (`_selectionnerArtefactsHybride`).
+    const terminalId = _idTerminaleDesCategories(productionsFiltrables);
+    listeSelection.innerHTML = genererCheckboxesCategorie(productionsFiltrables, 'selection', terminalId);
+    listeObligatoires.innerHTML = genererCheckboxesCategorie(productionsFiltrables.filter(p => p.id !== terminalId), 'obligatoire', terminalId);
 
     // Recalculer les pondérations unitaires
     recalculerPonderationsUnitaires();
 }
 
 /**
+ * #339 (15 oct. 2026) — l'id de la terminale, par la même source que la note (`identifierProductionTerminale`,
+ * pratique-registre.js). Sa marque « obligatoire » déjà posée reste en base, inerte pour l'écran comme pour le calcul.
+ */
+function _idTerminaleDesCategories(productions) {
+    const terminale = (typeof window.identifierProductionTerminale === 'function')
+        ? window.identifierProductionTerminale(productions) : null;
+    return terminale ? terminale.id : null;
+}
+
+/**
  * 🆕 Beta 95.4 : Génère le HTML des checkboxes pour une catégorie
  */
-function genererCheckboxesCategorie(productions, categorie) {
+function genererCheckboxesCategorie(productions, categorie, terminalId = null) {
     if (productions.length === 0) {
         return '<p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Aucune production</p>';
     }
 
     return productions.map(prod => {
-        const checked = prod.categorie === categorie ? 'checked' : '';
-        const estDansAutre = prod.categorie && prod.categorie !== categorie;
+        // #339 : la marque « obligatoire » d'une terminale est inerte — elle ne la grise pas dans la Sélection.
+        const marque = (prod.id === terminalId && prod.categorie === 'obligatoire') ? null : prod.categorie;
+        const checked = marque === categorie ? 'checked' : '';
+        const estDansAutre = marque && marque !== categorie;
         const opacite = estDansAutre ? '0.4' : '1';
         const colorCategorie = categorie === 'selection' ? 'var(--accent-primaire)' : 'var(--orange-principal, #e67e22)';
 
@@ -2736,7 +2751,7 @@ function genererCheckboxesCategorie(productions, categorie) {
                 <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem;">
                     ${echapperHtml(prod.titre || 'Sans titre')}
                 </span>
-                ${estDansAutre ? `<small style="color: var(--gris-moyen); white-space: nowrap;">(${prod.categorie === 'selection' ? 'Sélection' : 'Obligatoire'})</small>` : ''}
+                ${estDansAutre ? `<small style="color: var(--gris-moyen); white-space: nowrap;">(${marque === 'selection' ? 'Sélection' : 'Obligatoire'})</small>` : ''}
             </label>
         `;
     }).join('');
@@ -2777,7 +2792,9 @@ async function recalculerPonderationsUnitaires() {
         !p.type?.endsWith('-formatif')
     );
     const nbSelection = productionsFiltrables.filter(p => p.categorie === 'selection').length;
-    const nbObligatoires = productionsFiltrables.filter(p => p.categorie === 'obligatoire').length;
+    // #339 : la terminale ne compte pas parmi les obligatoires, même cochée par une configuration d'avant (le calcul l'écarte).
+    const terminalId = _idTerminaleDesCategories(productionsFiltrables);
+    const nbObligatoires = productionsFiltrables.filter(p => p.categorie === 'obligatoire' && p.id !== terminalId).length;
 
     // Lire pondérations globales
     const pondSelection = parseInt(document.getElementById('mat-selection-ponderation')?.value) || 0;
