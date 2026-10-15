@@ -31,6 +31,7 @@
      - ui-dialogues.js (window.uiDialogues.demanderAction)
      - import-export.js (window.estRessourceDemo / filtrerRessourcesNonDemo)
      - progression.js (window.afficherProgression / majProgression / masquerProgression)
+     - taille-fichier.js (window.TailleFichier.dire : #993)
 
    Pas de couplage avec codex.js ni import-export.js (au-delà des helpers démo).
    =============================== */
@@ -515,20 +516,6 @@ async function _statutHandleReserve() {
    UTILITAIRES
    =============================== */
 
-/**
- * La taille, telle que tout l'écran des archives la dit (une seule fonction : reserve-trimestre,
- * -verifier, -reglages et -renvoyer s'en servent). Virgule décimale (« 1,08 Go », « 80,0 Ko »),
- * décision de Grégoire du 5 oct. 2026 (mots d'E3).
- */
-function _formaterTaille(octets) {
-    if (!octets) return '0 o';
-    var texte;
-    if (octets < 1024) texte = octets + ' o';
-    else if (octets < 1024 * 1024) texte = (octets / 1024).toFixed(1) + ' Ko';
-    else if (octets < 1024 * 1024 * 1024) texte = (octets / (1024 * 1024)).toFixed(1) + ' Mo';
-    else texte = (octets / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
-    return texte.replace('.', ',');
-}
 
 function _normaliserGroupe(g) {
     return String(g || '').padStart(5, '0');
@@ -979,7 +966,7 @@ async function _collecterBlobs(donnees, trimestre, onProg) {
         if (j % 5 === 0) {
             onProg(40 + Math.round((j / fichiers.length) * 30),
                 'Collecte des fichiers travaux…',
-                blobs.length + ' / ' + fichiers.length + ' (' + _formaterTaille(tailleTotale) + ')');
+                blobs.length + ' / ' + fichiers.length + ' (' + window.TailleFichier.dire(tailleTotale) + ')');
             await _yield();
         }
     }
@@ -1508,7 +1495,7 @@ async function _deposerArchive(o) {
     var nomFichier = 'archive-' + dossier + '-' + _dateAujourdhui() + EXTENSION_ARCHIVE;
 
     // Le fichier est assemblé ; il n'est pas encore écrit.
-    _prog(100, 'Archive prête !', _formaterTaille(zipBlob.size));
+    _prog(100, 'Archive prête !', window.TailleFichier.dire(zipBlob.size));
     await new Promise(function(r) { setTimeout(r, 600); });
     _progHide();
 
@@ -1519,7 +1506,7 @@ async function _deposerArchive(o) {
     // d'office, c'est l'usager qui dit si le fichier est là. Sans son « Il y est », rien
     // n'entre au registre et l'écran ne dit pas « archivé ». L'adresse du fichier n'est
     // plus libérée aussitôt (`FichierSortant.telecharger`).
-    var tailleDite = window.FichierSortant.tailleEnviron(zipBlob.size);
+    var tailleDite = window.TailleFichier.dire(zipBlob.size, { environ: true });
     while (true) {
         window.FichierSortant.telecharger(zipBlob, nomFichier);
         if (await window.FichierSortant.confirmerTelechargement(nomFichier, tailleDite)) break;
@@ -1539,7 +1526,7 @@ async function _deposerArchive(o) {
     try { _upsertEntreeManifesteLocal(dossier, patch.patch); }
     catch (eLoc) { console.warn('[Archives] Upsert manifeste local échoué', eLoc.message || eLoc); }
 
-    var annonceZip = mots.telecharge(o.stats, _formaterTaille(zipBlob.size));
+    var annonceZip = mots.telecharge(o.stats, window.TailleFichier.dire(zipBlob.size));
     notifications.succes(annonceZip.titre, annonceZip.texte);
 
     return {
@@ -1794,7 +1781,7 @@ async function _afficherEstimation() {
             '<div><strong>Étudiants :</strong> ' + est.nombreEtudiants + '</div>' +
             '<div><strong>Clés trimestre :</strong> ' + est.nombreCles + '</div>' +
             '<div><strong>Fichiers travaux :</strong> ' + est.nombreFichiers +
-                ' (~' + _echapper(_formaterTaille(est.tailleEstimee)) + ')</div>';
+                ' (~' + _echapper(window.TailleFichier.dire(est.tailleEstimee)) + ')</div>';
     } catch (e) {
         console.warn('[Archives] Erreur estimation:', e);
         apercu.innerHTML = '<span style="color: var(--rouge);">Erreur : ' + _echapper(e.message || e) + '</span>';
@@ -2022,7 +2009,6 @@ window.Reserve = {
     // E1 (#1022) : l'archive d'un trimestre entier (reserve-trimestre.js) passe par le même
     // dépôt et les mêmes empreintes.
     deposerArchive: _deposerArchive,
-    formaterTaille: _formaterTaille,
     empreinteDeLaCopie: _empreinteDeLaCopie,
     empreinteDuTexte: _calculerSHA256,
     extensionDuNom: _extensionDepuisNomFichier,

@@ -260,7 +260,7 @@ async function importerFichier(event) {
 
     try {
         if (file.size > TAMPONS_FICHIER_TAILLE_MAX_OCTETS) {
-            notifications.erreur('Fichier trop volumineux', 'Limite : ' + Math.round(TAMPONS_FICHIER_TAILLE_MAX_OCTETS / (1024 * 1024)) + ' Mo.');
+            notifications.erreur('Fichier trop volumineux', 'Limite : ' + window.TailleFichier.dire(TAMPONS_FICHIER_TAILLE_MAX_OCTETS, { decimales: 0 }) + '.');
             event.target.value = '';
             return;
         }

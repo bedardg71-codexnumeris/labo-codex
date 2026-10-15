@@ -216,7 +216,7 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         await attendreModale(page, 'Codex non mis à jour');
         const generationsAvant = await page.evaluate(() => window.__generations);
         const modale = await lireModale(page);
-        expect(modale.message).toMatch(/^Le fichier \(environ \d+ (Ko|Mo)\) n'a pas été enregistré\. Si ton appareil manque d'espace, libères-en, puis réessaie\. Tes données restent dans l'application\.$/);
+        expect(modale.message).toMatch(/^Le fichier \(environ \d+ (Ko|Mo)\) n'a pas été enregistré\. Tes données restent dans l'application\. Si ça se répète, utilise « Signaler un bug » : le détail y sera\.$/);
         expect(modale.boutons).toEqual(['Fermer', 'Télécharger à la place', 'Réessayer']);
         let etat = await lireEtat(page);
         expect(etat.menu).toBe(PAS_A_JOUR);

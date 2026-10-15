@@ -318,7 +318,7 @@ describe('E3 · (a) l\'aller-retour : renvoyer, faire évoluer l\'espace, faire 
         const f = banc.win.ReserveRenvoyer.fenetreIdentique(res);
         expect(f.titre).toBe('Renvoyer Hiver 2032 aux archives ?');
         const jour = new Date(banc.win.Reserve.lireManifesteLocal().archives[DOSSIER].verification.date).toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
-        expect(f.message).toBe('Hiver 2032 quittera l\'application : 3 étudiant·es, 4 copies, environ 80,0 Ko.\n' +
+        expect(f.message).toBe('Hiver 2032 quittera l\'application : 3 étudiant·es, 4 copies, environ 81,9 Ko.\n' +
             'Son archive, vérifiée le ' + jour + ', le garde tel quel : « Faire revenir » le ramènera.\n' +
             'Garde bien cette archive : c\'est elle qui le conserve.\n' +
             'Les autres trimestres, les cours et les réglages ne sont pas touchés.');
@@ -329,7 +329,7 @@ describe('E3 · (a) l\'aller-retour : renvoyer, faire évoluer l\'espace, faire 
             titre: 'Hiver 2032 est renvoyé aux archives',
             message: 'Il n\'est plus dans l\'application ; son archive le garde.\n' +
                 'Pour le faire revenir : Réglages › Données › Archives, « Faire revenir ».\n' +
-                '4 copies retirées. Ton prochain codex sera plus léger d\'environ 80,0 Ko.'
+                '4 copies retirées. Ton prochain codex sera plus léger d\'environ 81,9 Ko.'
         });
     });
 });
@@ -346,13 +346,17 @@ describe('E3 · les mots tranchés par Grégoire (5 oct.)', () => {
         expect(RR.MOTS.refus.sansEmpreintes).toBe('Cette archive est trop ancienne pour un renvoi. Archive le trimestre de nouveau.');
     });
 
+    // #993 (15 oct. 2026) : la fonction unique est TailleFichier.dire (taille-fichier.js), pour
+    // toute l'application ; ici, en base 1000 (Node ne se dit pas Windows).
     it('la virgule décimale, une seule fonction pour tout l\'écran des archives', () => {
         const db = creerDb();
-        const R = monter(db, creerMagasin(db)).win.Reserve;
-        expect(R.formaterTaille(1.08 * 1024 * 1024 * 1024)).toBe('1,08 Go');
-        expect(R.formaterTaille(80 * 1024)).toBe('80,0 Ko');
-        expect(R.formaterTaille(512)).toBe('512 o');
-        for (const f of ['js/reserve-trimestre.js', 'js/reserve-verifier.js', 'js/reserve-reglages.js', 'js/reserve-renvoyer.js']) {
+        const banc = monter(db, creerMagasin(db));
+        const T = banc.win.TailleFichier;
+        expect(T.dire(1.08e9)).toBe('1,08 Go');
+        expect(T.dire(80000)).toBe('80,0 Ko');
+        expect(T.dire(512)).toBe('512 o');
+        expect(banc.win.Reserve.formaterTaille).toBeUndefined();
+        for (const f of ['js/reserve.js', 'js/reserve-trimestre.js', 'js/reserve-verifier.js', 'js/reserve-reglages.js', 'js/reserve-renvoyer.js']) {
             expect([f, /toFixed\(/.test(readFileSync(path.join(racine, f), 'utf8'))]).toEqual([f, false]);
         }
     });

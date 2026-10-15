@@ -67,13 +67,10 @@ function _formaterDate(iso) {
     }
 }
 
+/** La taille d'un fichier choisi (taille-fichier.js, #993), à la précision de cet écran ; vide si inconnue. */
 function _formaterTaille(octets) {
     if (!octets || octets <= 0) return '';
-    var ko = octets / 1024;
-    if (ko < 1024) return Math.round(ko) + ' Ko';
-    var mo = ko / 1024;
-    if (mo < 1024) return mo.toFixed(1) + ' Mo';
-    return (mo / 1024).toFixed(2) + ' Go';
+    return window.TailleFichier.dire(octets, { decimales: { Ko: 0, Mo: 1, Go: 2 } });
 }
 
 function _toggleHide(el, masque) {

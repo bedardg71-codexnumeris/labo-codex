@@ -38,6 +38,7 @@
      - obtenirIdentiteCCUtilisateur (window.obtenirIdentiteCCUtilisateur, cc-license.js)
      - Reserve (window.Reserve : lireManifesteLocal, obtenirHandle, supporteFSAPI)
      - VERSION_MAJEURE (window.VERSION_MAJEURE, init-inline.js)
+     - taille-fichier.js (window.TailleFichier.dire : #993)
 */
 
 (function() {
@@ -350,11 +351,11 @@ async function _construireCodexData(lectures, options) {
     var tailleOctets = new Blob([jsonAvantIntegrite]).size;
     if (tailleOctets > TAILLE_MAX_OCTETS) {
         throw new Error('Codex data trop volumineux (' +
-            (tailleOctets / 1024 / 1024).toFixed(1) + ' Mo). Limite : ' +
-            (TAILLE_MAX_OCTETS / 1024 / 1024) + ' Mo.');
+            window.TailleFichier.dire(tailleOctets, { decimales: 1 }) + '). Limite : ' +
+            window.TailleFichier.dire(TAILLE_MAX_OCTETS, { decimales: 0 }) + '.');
     }
 
-    if (_hasProg) window.majProgression(95, 'Calcul du hash d\'intégrité...', (tailleOctets / 1024 / 1024).toFixed(1) + ' Mo');
+    if (_hasProg) window.majProgression(95, 'Calcul du hash d\'intégrité...', window.TailleFichier.dire(tailleOctets, { decimales: 1 }));
     var hash = await _calculerSHA256(jsonAvantIntegrite);
 
     codexData.integrite = {
@@ -666,8 +667,8 @@ async function chargerDepuisFichier(file) {
     var taille = file.size || 0;
     if (taille > TAILLE_MAX_OCTETS) {
         throw new Error('Fichier trop volumineux (' +
-            (taille / 1024 / 1024).toFixed(1) + ' Mo). Limite : ' +
-            (TAILLE_MAX_OCTETS / 1024 / 1024) + ' Mo.');
+            window.TailleFichier.dire(taille, { decimales: 1 }) + '). Limite : ' +
+            window.TailleFichier.dire(TAILLE_MAX_OCTETS, { decimales: 0 }) + '.');
     }
 
     var texte = await file.text();

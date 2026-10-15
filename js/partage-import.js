@@ -390,7 +390,8 @@
         }
         if (fichier.size > TAILLE_MAX_FICHIER) {
             return Promise.reject(new Error('Fichier trop volumineux ('
-                + Math.round(fichier.size / 1024 / 1024) + ' Mo). Un package de partage fait au plus 10 Mo.'));
+                + window.TailleFichier.dire(fichier.size, { decimales: 0 }) + '). Un package de partage fait au plus '
+                + window.TailleFichier.dire(limites.tailleMaxPackageOctets, { decimales: 0 }) + '.'));
         }
         return fichier.arrayBuffer().then(function (buffer) {
             if (!partageImport.verifierMagicBytesZip(buffer)) {
@@ -414,12 +415,14 @@
             // Garde anti-bombe ciblée : taille décompressée déclarée du
             // package, quand JSZip l'expose.
             if (entree._data && entree._data.uncompressedSize > limites.tailleMaxPackageOctets) {
-                throw new Error('package.json dépasse la taille maximale d\'un package (10 Mo).');
+                throw new Error('package.json dépasse la taille maximale d\'un package ('
+                    + window.TailleFichier.dire(limites.tailleMaxPackageOctets, { decimales: 0 }) + ').');
             }
             return entree.async('string');
         }).then(function (texte) {
             if (texte.length > limites.tailleMaxPackageOctets) {
-                throw new Error('package.json dépasse la taille maximale d\'un package (10 Mo).');
+                throw new Error('package.json dépasse la taille maximale d\'un package ('
+                    + window.TailleFichier.dire(limites.tailleMaxPackageOctets, { decimales: 0 }) + ').');
             }
             try {
                 return JSON.parse(texte);

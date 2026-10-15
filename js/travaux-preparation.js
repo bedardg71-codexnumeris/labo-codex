@@ -9,7 +9,7 @@
 
    DEPENDANCES:
    - travaux-import.js (fichiersEnAttente)
-   - travaux-stockage.js (formaterTaille)
+   - travaux-stockage.js (obtenirThumbnailSync)
    =============================== */
 
 (function() {

@@ -45,8 +45,10 @@ function validerZipSecurite(zip) {
     if (tailleDecompressee > TAILLE_MAX_DECOMPRESSEE) {
         return {
             valide: false,
+            // #993 : la taille et la limite dites comme le système de la personne les compte.
             erreur: 'ZIP trop volumineux une fois décompressé (' +
-                (tailleDecompressee / 1024 / 1024 / 1024).toFixed(1) + ' Go). Limite : 2 Go.',
+                window.TailleFichier.dire(tailleDecompressee, { decimales: 1 }) + '). Limite : ' +
+                window.TailleFichier.dire(TAILLE_MAX_DECOMPRESSEE, { decimales: 0 }) + '.',
             tailleDecompressee: tailleDecompressee
         };
     }
@@ -1442,7 +1444,7 @@ async function previsualiserImport(event) {
         : TAILLE_MAX_IMPORT_OCTETS;
 
     if (fichier.size > limiteOctets) {
-        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : ${(limiteOctets / 1024 / 1024).toFixed(0)} Mo.`);
+        alert(`Fichier trop volumineux (${window.TailleFichier.dire(fichier.size, { decimales: 1 })}).\n\nLimite : ${window.TailleFichier.dire(limiteOctets, { decimales: 0 })}.`);
         return;
     }
 
@@ -2020,9 +2022,9 @@ function previsualiserConfigComplete(event) {
     const fichier = event.target.files[0];
     if (!fichier) return;
 
-    // Limite de taille (50 Mo)
+    // Limite de taille (TAILLE_MAX_IMPORT_OCTETS, dite par TailleFichier : #993)
     if (fichier.size > TAILLE_MAX_IMPORT_OCTETS) {
-        alert(`Fichier trop volumineux (${(fichier.size / 1024 / 1024).toFixed(1)} Mo).\n\nLimite : 50 Mo.`);
+        alert(`Fichier trop volumineux (${window.TailleFichier.dire(fichier.size, { decimales: 1 })}).\n\nLimite : ${window.TailleFichier.dire(TAILLE_MAX_IMPORT_OCTETS, { decimales: 0 })}.`);
         return;
     }
 

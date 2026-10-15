@@ -46,7 +46,8 @@
    Dépendances
      - reserve-renvoyer.js (window.ReserveRenvoyer) : refusImmediat, entreeArchive, relireArchive, MOTS.refus
      - reserve-verifier.js (window.ReserveVerifier) : sources, empreintes
-     - reserve.js (window.Reserve) : formaterTaille, supporteFSAPI, obtenirHandle
+     - reserve.js (window.Reserve) : supporteFSAPI, obtenirHandle
+     - taille-fichier.js (window.TailleFichier.dire)
      - travaux-stockage.js (window.travauxStockage) : recupererBlob, supprimerBlob, supprimerThumbnail
      - import-export.js (window.dasElevesEcartes)
      - db.js, progression.js, ui-dialogues.js, utils-notifications.js
@@ -65,10 +66,6 @@ var SAISONS = { a: 'Automne', h: 'Hiver', e: 'Été' };
    que les annotations se voient sans leur copie.
    =============================== */
 function _pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
-
-function _formaterTaille(octets) {
-    return window.Reserve.formaterTaille(octets);
-}
 
 function _jour(iso) {
     if (!iso) return '?';
@@ -91,7 +88,7 @@ var MOTS = {
         titre: function(nom) { return 'Archiver les copies de ' + nom + ' ?'; },
         texte: function(c) {
             var lignes = [
-                _pluriel(c.copies, 'copie quittera', 'copies quitteront') + ' l\'application, environ ' + _formaterTaille(c.taille) + '.',
+                _pluriel(c.copies, 'copie quittera', 'copies quitteront') + ' l\'application, environ ' + window.TailleFichier.dire(c.taille) + '.',
                 'Son archive, vérifiée le ' + _jour(c.dateVerification) + ', les garde telles quelles : « Faire revenir » les ramènera.',
                 'Toutes les données de ' + c.nom + ' restent dans l\'application : ' + DONNEES + '. ' + ANNOTATIONS,
                 'Garde bien cette archive : c\'est elle qui conserve les copies.'
@@ -116,7 +113,7 @@ var MOTS = {
     bilan: {
         titre: function(nom) { return 'Les copies de ' + nom + ' sont aux archives'; },
         texte: function(b) {
-            return _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.' + (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + _formaterTaille(b.taille) + '.' : '') + '\n' +
+            return _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.' + (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + window.TailleFichier.dire(b.taille) + '.' : '') + '\n' +
                 'Toutes les données de ' + b.nom + ' restent dans l\'application : ' + DONNEES + '. ' + ANNOTATIONS + '\n' +
                 'Pour faire revenir les copies : ' + _revenir(b.nom) + '.';
         }

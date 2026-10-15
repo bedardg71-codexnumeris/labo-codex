@@ -36,6 +36,7 @@
      - travaux-stockage.js (window.travauxStockage.recupererBlob)
      - reserve-copies.js (window.ReserveCopies, #1028) : refus tant que des copies sont aux archives
      - ui-dialogues.js, progression.js, utils-notifications.js
+     - taille-fichier.js (window.TailleFichier.dire : #993)
    =============================== */
 
 (function() {
@@ -93,11 +94,6 @@ function _prog(pct, detail, stats) {
 
 function _yield() {
     return new Promise(function(resolve) { setTimeout(resolve, 0); });
-}
-
-/** La taille, au format de tout l'écran des archives (reserve.js). */
-function _formaterTaille(octets) {
-    return window.Reserve.formaterTaille(octets);
 }
 
 function _entreeRegistre(trimestre) {
@@ -208,7 +204,7 @@ async function collecterCopies(donnees, trimestre) {
         }
         if (j % 5 === 0) {
             _prog(30 + Math.round((j / fiches.length) * 40), 'Empreintes des copies…',
-                blobs.length + ' / ' + fiches.length + ' (' + _formaterTaille(tailleTotale) + ')');
+                blobs.length + ' / ' + fiches.length + ' (' + window.TailleFichier.dire(tailleTotale) + ')');
             await _yield();
         }
     }
@@ -287,7 +283,7 @@ async function archiverTrimestre(trimestre, options) {
                 groupes: _idsGroupes(trimestre).length,
                 copies: Object.keys(ids).length,
                 corbeille: corbeille,
-                taille: _formaterTaille(taille)
+                taille: window.TailleFichier.dire(taille)
             }),
             texteConfirmer: MOTS.confirmation.bouton,
             preformate: true

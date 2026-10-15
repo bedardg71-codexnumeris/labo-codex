@@ -53,6 +53,7 @@
      - reserve.js (window.Reserve) : lireManifesteLocal, supporteFSAPI, obtenirHandle
      - travaux-stockage.js (window.travauxStockage) : recupererBlob, supprimerBlob, supprimerThumbnail
      - db.js, progression.js, ui-dialogues.js, utils-notifications.js
+     - taille-fichier.js (window.TailleFichier.dire : #993)
    =============================== */
 
 (function() {
@@ -65,11 +66,6 @@
    (l'ancien mot provisoire écarté) ; virgule décimale ; une seule date dans la fenêtre.
 */
 function _pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
-
-/** La taille, au format de tout l'écran des archives (reserve.js). */
-function _formaterTaille(octets) {
-    return window.Reserve.formaterTaille(octets);
-}
 
 function _jour(iso) {
     if (!iso) return '?';
@@ -88,7 +84,7 @@ var MOTS = {
         texte: function(c) {
             return c.nom + ' quittera l\'application : ' +
                 _pluriel(c.etudiants, 'étudiant·e', 'étudiant·es') + ', ' +
-                _pluriel(c.copies, 'copie', 'copies') + ', environ ' + _formaterTaille(c.taille) + '.\n' +
+                _pluriel(c.copies, 'copie', 'copies') + ', environ ' + window.TailleFichier.dire(c.taille) + '.\n' +
                 'Son archive, vérifiée le ' + _jour(c.dateVerification) + ', le garde tel quel : « Faire revenir » le ramènera.\n' +
                 'Garde bien cette archive : c\'est elle qui le conserve.\n' +
                 'Les autres trimestres, les cours et les réglages ne sont pas touchés.';
@@ -120,7 +116,7 @@ var MOTS = {
             return 'Il n\'est plus dans l\'application ; son archive le garde.\n' +
                 'Pour le faire revenir : Réglages › Données › Archives, « Faire revenir ».\n' +
                 _pluriel(b.copies, 'copie retirée', 'copies retirées') + '.' +
-                (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + _formaterTaille(b.taille) + '.' : '');
+                (b.taille ? ' Ton prochain codex sera plus léger d\'environ ' + window.TailleFichier.dire(b.taille) + '.' : '');
         }
     },
     interrompu: {
