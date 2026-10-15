@@ -2019,7 +2019,9 @@ function detruireGraphique(chart) {
 function obtenirDonneesCriteres(da) {
     try {
         // Récupérer les évaluations de l'étudiant
-        const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+        // #1055 : sans le travail diagnostique — il ne trace pas la progression de l'élève.
+        const evaluations = window.ProductionDiagnostique.filtrerEvaluations(
+            obtenirDonneesSelonMode('evaluationsSauvegardees') || [], obtenirDonneesSelonMode('productions') || []);
         const evaluationsEtudiant = evaluations.filter(e =>
             e.etudiantDA === da &&
             !e.remplaceeParId &&
@@ -3521,6 +3523,8 @@ function chargerProductionsTrajectoires() {
     let productions = (typeof obtenirDonneesSelonMode === 'function')
         ? (obtenirDonneesSelonMode('productions') || [])
         : (db.getSync(cle('productions'), []) || []);
+    // #1055 : une production diagnostique n'est pas une étape de la trajectoire.
+    productions = window.ProductionDiagnostique.filtrerProductions(productions);
 
     const vues = new Set();
     const artefacts = productions.filter(p => {

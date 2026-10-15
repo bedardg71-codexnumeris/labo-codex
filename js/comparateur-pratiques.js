@@ -137,9 +137,12 @@
         var lire = (typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode
             : function() { return []; };
+        // #1055 : la colonne « Niveau atteint » et la fiche ne lisent pas le travail diagnostique
+        // (les notes, elles, passent par les familles, qui l'écartent déjà).
+        var productions = lire('productions') || [];
         return {
-            productions: lire('productions') || [],
-            evaluations: lire('evaluationsSauvegardees') || [],
+            productions: productions,
+            evaluations: window.ProductionDiagnostique.filtrerEvaluations(lire('evaluationsSauvegardees') || [], productions),
             echelles: echelles
         };
     }

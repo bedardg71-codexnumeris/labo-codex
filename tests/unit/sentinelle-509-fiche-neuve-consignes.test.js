@@ -43,7 +43,8 @@ function champ() {
         value: '', textContent: '', innerHTML: '',
         classList: { add() {}, remove() {}, contains: () => false, toggle: () => false },
         setAttribute() {}, getAttribute: () => null, addEventListener() {},
-        querySelectorAll: () => [], querySelector: () => null, style: {}
+        querySelectorAll: () => [], querySelector: () => null, style: {},
+        closest: () => null   // #1055 : `gererChangementTypeProduction` le demande (remise à neuf commune)
     };
 }
 
@@ -77,7 +78,9 @@ function charger() {
 
     // #504 — `ui-blocs.js` d'abord : le rendu des blocs appelle ses helpers.
     const win = chargerScript('js/ui-blocs.js', globaux);
-    chargerScript('js/productions.js', globaux, win);
+    // #1055 : « + Nouvelle production » passe par `reinitialiserFormulaireProduction`, qui vit
+    // dans productions.js et y remet `productionEnEdition` (un global de config.js) à null.
+    chargerScript('js/productions.js', { ...globaux, productionEnEdition: null }, win);
 
     // ⚠ `productions-liste.js` est une IIFE : ce qu'il appelle hors de son
     // corps se résout dans le scope global du sandbox, et le sandbox de
@@ -173,12 +176,17 @@ describe('#509 · AC — les deux chemins de remise à neuf vident la même zone
     const appellePeuplement = (corps) =>
         /peupler(BlocsConsignes|ChampsPersonnalises)\(null\)/.test(corps);
 
-    it('AC.a « + Nouvelle production » (productions-liste.js) appelle le peuplement', () => {
+    it('AC.a « + Nouvelle production » (productions-liste.js) passe par le réinitialiseur commun', () => {
+        // #1055 (15 oct. 2026) : ce chemin n'a plus sa propre liste de champs ; il délègue
+        // à `reinitialiserFormulaireProduction`, que AC.b vérifie. Une liste à lui rouvrirait
+        // le défaut : elle a déjà oublié les consignes (#509), les échéances (#468) et la
+        // case « Diagnostique » (#1055).
         const source = lire('productions-liste.js');
         const debut = source.indexOf('function creerNouvelleProduction()');
         expect(debut).toBeGreaterThan(-1);
         const corps = source.slice(debut, source.indexOf('\nfunction ', debut + 10));
-        expect(appellePeuplement(corps)).toBe(true);
+        expect(corps).toContain('window.reinitialiserFormulaireProduction()');
+        expect(corps, 'une liste de champs propre à ce chemin est revenue').not.toMatch(/getElementById\('production(Titre|Activite|Type|Ponderation)'\)\.value = ''/);
     });
 
     it('AC.b le réinitialiseur commun (productions.js) l\'appelle aussi', () => {

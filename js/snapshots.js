@@ -236,7 +236,11 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
         const cadreHist = db.getSync(cle('cadreCalendrier'), null);
         if (cadreHist && cadreHist.dateDebut) dateDebutTrimestreHist = cadreHist.dateDebut;
     } catch (e) { console.warn('[Snapshots] cadreCalendrier read skipped:', e.message || e); }
-    const productionsDues = productions.filter(production => {
+    // #1055 (15 oct. 2026) : une production diagnostique n'est jamais « due » pour la complétion
+    // historique, comme pour le C du jour (porte 3 de l'entité). Le P historique, lui, passe par
+    // `calculerNoteDuCours`, donc par les familles, qui l'écartent déjà.
+    // ⚠ TARIR N'EST PAS RÉPARER : une capture déjà écrite garde son C jusqu'à « Recalculer les captures ».
+    const productionsDues = window.ProductionDiagnostique.filtrerProductions(productions).filter(production => {
         if (production.facultatif) return false;
         if (production.type === 'portfolio') return false;
 
@@ -468,7 +472,9 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             const cadreSnap = db.getSync(cle('cadreCalendrier'), null);
             if (cadreSnap && cadreSnap.dateDebut) dateDebutTrimestreSnap = cadreSnap.dateDebut;
         } catch (e) { console.warn('[Snapshots] cadreCalendrier read skipped:', e.message || e); }
-        const productionsDues = productions.filter(p => {
+        // #1055 : le « dernier travail dû » n'est jamais un travail diagnostique — en semaine 1, c'est
+        // souvent le seul dû, et le C du groupe aurait été son taux de remise.
+        const productionsDues = window.ProductionDiagnostique.filtrerProductions(productions).filter(p => {
             if (p.facultatif || p.type === 'portfolio') return false;
             const { date, assignee } = obtenirEcheanceEffective(p, gcIdSnapshot);
             if (!assignee) return false;

@@ -907,7 +907,8 @@ function afficherListeEtudiantsConsultation() {
 
     // Compter les évaluations par étudiant (artefacts-portfolio évalués)
     // Pré-indexé par DA pour éviter O(N*M) — une seule passe sur les évaluations
-    const productionsTab = obtenirDonneesSelonMode('productions') || [];
+    // #1055 : une production diagnostique n'entre pas dans le compte « ≥ Min. ».
+    const productionsTab = window.ProductionDiagnostique.filtrerProductions(obtenirDonneesSelonMode('productions') || []);
     const artefactIds = new Set(productionsTab.filter(p => p.type === 'artefact-portfolio').map(p => p.id));
     const evaluationsTab = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 

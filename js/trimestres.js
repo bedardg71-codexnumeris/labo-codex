@@ -2307,7 +2307,9 @@
                         };
                     }),
 
-                    performance_par_critere: calculerPerformanceParCritere(etudiantsActifs, evaluations, daVersAnonyme, grilleRef)
+                    // #1055 : la distribution par critère ne compte pas le travail diagnostique.
+                    performance_par_critere: calculerPerformanceParCritere(etudiantsActifs,
+                        window.ProductionDiagnostique.filtrerEvaluations(evaluations, productions), daVersAnonyme, grilleRef)
                 }
             };
 

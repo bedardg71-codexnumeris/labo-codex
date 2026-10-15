@@ -397,7 +397,8 @@ function genererSectionMobilisationEngagement(da) {
     const aucuneDonneeAssiduite = periodesOffertes === 0;
 
     // Sources de données (respectent le mode actuel via obtenirDonneesSelonMode)
-    const productions = obtenirDonneesSelonMode('productions') || [];
+    // #1055 : une production diagnostique ne compte ni dans les artefacts remis ni dans les retenus.
+    const productions = window.ProductionDiagnostique.filtrerProductions(obtenirDonneesSelonMode('productions') || []);
     const portfolio = productions.find(p => p.type === 'portfolio');
     const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
 
@@ -965,7 +966,10 @@ function genererSectionAccompagnement(da) {
     // #360 — exclure les évals remplacées (reprises archivées ET doublons réconciliés) :
     // le « (sur N) » doit refléter le pool réellement compté par le moteur, pas les exclues.
     // Lot A (16 sept. 2026) — le « (sur N) » compte les copies qui comptent, comme les moyennes qu'il qualifie.
-    const evaluationsDA = (obtenirDonneesSelonMode('evaluationsSauvegardees') || []).filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
+    // #1055 (entrée 6.65 de #1083) : sans le travail diagnostique, que les moyennes qualifiées ne lisent pas.
+    const copiesSansDiagnostique = window.ProductionDiagnostique.filtrerEvaluations(
+        obtenirDonneesSelonMode('evaluationsSauvegardees') || [], obtenirDonneesSelonMode('productions'));
+    const evaluationsDA = copiesSansDiagnostique.filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
     const nbTotalArtefacts = evaluationsDA.length;
 
     // Construire le texte de progression au format du rapport (basé sur les critères)
@@ -2197,7 +2201,8 @@ function calculerDirectionsCriteres(da) {
 
     // Les copies qui COMPTENT (#737, lot A du 16 sept. 2026 : la règle unique #706 — un brouillon ne
     // compte nulle part ; #730 — sans les remplacées) et qui portent des critères structurés.
-    const evaluationsEleve = evaluations.filter(e =>
+    // #1055 : sans le travail diagnostique — il ne trace pas la progression de l'élève.
+    const evaluationsEleve = window.ProductionDiagnostique.filtrerEvaluations(evaluations, obtenirDonneesSelonMode('productions') || []).filter(e =>
         e.etudiantDA === da &&
         window.evaluationEntreDansLaNote(e) &&
         e.criteres && Array.isArray(e.criteres) && e.criteres.length > 0
@@ -2878,6 +2883,7 @@ function _construireLigneProductionEvaluee(production, evaluation, indexArtefact
     const estNonRecevable = statutIntegrite === 'plagiat' || statutIntegrite === 'ia';
     return {
         production: production.titre,
+        marque: window.ProductionDiagnostique.marqueHTML(production),   // #1055
         description: production.activiteApprentissage || production.description || production.titre,
         // #941 lot S1 — sans niveau affichable (copie en points), la note seule.
         note: (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
@@ -2899,6 +2905,7 @@ function _construireLigneProductionEvaluee(production, evaluation, indexArtefact
 function _construireLigneProductionNonRemise(production, indexArtefact) {
     return {
         production: production.titre,
+        marque: window.ProductionDiagnostique.marqueHTML(production),   // #1055
         description: production.activiteApprentissage || production.description || production.titre,
         note: null,
         date: _calculerEcheanceFormateeProduction(production),
@@ -3264,7 +3271,7 @@ function genererSectionProductions(da) {
                             return `
                             <tr style="border-bottom: 1px solid var(--bordure-claire);">
                                 <td class="profil-tableau-cellule-p12">
-                                    ${echapperHtml(ligne.production)}
+                                    ${echapperHtml(ligne.production)}${ligne.marque}
                                 </td>
                                 <td style="padding: 12px; color: var(--gris-moyen);">${echapperHtml(ligne.description)}</td>
                                 <td class="profil-tableau-cellule-p12">
@@ -3799,7 +3806,9 @@ function _genererGraphiqueCriteresHTML(da) {
         return '';
     }
     const canvasIdCriteres = `graphique-criteres-${da}`;
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    // #1055 : sans le travail diagnostique — il ne trace pas la progression de l'élève.
+    const evaluations = window.ProductionDiagnostique.filtrerEvaluations(
+        obtenirDonneesSelonMode('evaluationsSauvegardees') || [], obtenirDonneesSelonMode('productions') || []);
     const evaluationsAvecCriteres = evaluations.filter(e =>
         e.etudiantDA === da &&
         !e.remplaceeParId &&
@@ -4549,7 +4558,7 @@ function genererSectionTravaux(da) {
         const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
         const icone = f.typeMIME === 'application/pdf' ? '&#x1F4C4;' : '&#x1F5BC;';
         const production = productions.find(p => p.id === f.productionId);
-        const nomProd = production ? echapperHtml(production.titre || production.nom || '') : '';
+        const nomProd = production ? echapperHtml(production.titre || production.nom || '') + window.ProductionDiagnostique.marqueHTML(production) : '';   // #1055 : la marque
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
         const aAnnotations = annotation && travauxUI.annotationContientDuContenu(annotation);
 

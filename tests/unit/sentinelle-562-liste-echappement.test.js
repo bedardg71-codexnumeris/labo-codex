@@ -85,7 +85,10 @@ describe('#562 · B — cliquet : aucune interpolation non échappée hors liste
     const LOCAUX_HTML = new Set([
         // construits dans la fonction à partir de constantes ou de valeurs déjà échappées
         'classeRemplacee', 'badgeJeton', 'affichageNiveau', 'affichageNoteChiffree', 'boutons',
-        'labelAssoc', 'label', "options.join('')"
+        'labelAssoc', 'label', "options.join('')",
+        // #1055 : la marque « Diagnostique », constante de l'entité (`ProductionDiagnostique.marqueHTML`),
+        // posée par le constructeur de la ligne ; aucune donnée d'utilisateur n'y entre.
+        'ligne.marque'
     ]);
     function corps(src, nom) {
         const i = src.indexOf('function ' + nom + '(');
