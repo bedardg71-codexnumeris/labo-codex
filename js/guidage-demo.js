@@ -53,8 +53,8 @@ const GUIDAGE_TEXTES = {
         texte: 'Annoter les copies directement à l\u2019écran, apposer des tampons de rétroaction et évaluer selon la grille de critères.'
     },
     'evaluations-exporter': {
-        titre: 'Exporter et archiver',
-        texte: 'Exporter les PDF annotés aux étudiants et archiver le semestre.'
+        titre: 'Exporter les travaux',
+        texte: 'Exporter les PDF annotés aux étudiants.'
     },
     'conception-grille-criteres': {
         titre: 'Grilles de crit\u00e8res',

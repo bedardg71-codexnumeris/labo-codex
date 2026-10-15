@@ -56,7 +56,7 @@ test('#893 · l\'aide nomme les deux cartes que l\'écran rend, et son bloc d\'e
     // #895 : « Trimestre complet » est fondu dans « Exporter des travaux ».
     expect(aide.modes).toEqual(['Exporter des travaux', 'Export Léa']);
     expect(aide.texte).toContain('« Reprises seulement »');
-    expect(aide.texte).toContain("« Compresser l'archive »");
+    expect(aide.texte).toContain("« Compresser le ZIP »");
     expect(aide.texte).not.toMatch(/Inclure annotés|Inclure évaluations|All[èe]gement|fac-simil/i);
 
     // 2. L'écran lui-même : ses cartes, ses cases, son bloc d'espace.
@@ -76,7 +76,7 @@ test('#893 · l\'aide nomme les deux cartes que l\'écran rend, et son bloc d\'e
         };
     });
     expect(ecran.titres, 'l\'aide et l\'écran disent la même chose').toEqual(aide.modes);
-    expect(ecran.cases).toEqual(["Compresser l'archive", 'Reprises seulement']);
+    expect(ecran.cases).toEqual(["Compresser le ZIP", 'Reprises seulement']);
     expect(ecran.quotaApresCartes, 'le bloc d\'espace est au bas de l\'écran, comme le dit l\'aide').toBe(true);
     expect(ecran.quota).toMatch(/utilisés sur .+ \(\d+\s%\)/);
     expect(ecran.quota).toMatch(/\d+ fichiers? de travaux/);

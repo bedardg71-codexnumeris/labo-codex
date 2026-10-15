@@ -420,7 +420,7 @@ const TOOLTIPS = {
     'travaux-archivage-etudiant':
         'Télécharge un ZIP contenant tous les travaux d\'un·e étudiant·e. Utile pour remettre un dossier complet en fin de session.',
     'travaux-archivage-production':
-        'Télécharge un ZIP regroupant tous les travaux d\'une production. Pratique pour archiver une évaluation complète.',
+        'Télécharge un ZIP regroupant tous les travaux d\'une production. Pratique pour garder une copie d\'une évaluation complète.',
     'travaux-archivage-inclure-annotes':
         'Ajoute les versions annotées (avec surlignage, commentaires et tampons) au ZIP. Décoche pour n\'exporter que les originaux.',
     'travaux-archivage-inclure-evals':
@@ -691,7 +691,7 @@ const TOOLTIPS = {
     'nav-eval-annoter':
         'Annote les copies et évalue selon la grille de critères, sur le même document.',
     'nav-eval-exporter':
-        'Exporte les PDF annotés aux étudiant·es, archive le trimestre et allège le stockage.',
+        'Exporte les PDF annotés aux étudiant·es et allège le stockage.',
 
     // --- Présences ---
 

@@ -173,7 +173,7 @@ test('#892 · aucune copie exportée : l\'écran n\'offre aucun retrait et mène
     expect(modale.titre).toBe('Rien à retirer sans risque');
     expect(modale.lignes).toEqual([]);
     expect(modale.boutons).toEqual(['Fermer']);
-    expect(modale.texte).toContain('Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter et archiver », puis reviens ici.');
+    expect(modale.texte).toContain('Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter les travaux », puis reviens ici.');
     expect(modale.texte).toContain('1 copie porte une marque d\'exportation antérieure au 16 septembre 2026');
 
     await page.locator('#pipeline-modal-overlay .modal-actions button', { hasText: 'Fermer' }).click();

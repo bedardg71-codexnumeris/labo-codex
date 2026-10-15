@@ -159,7 +159,7 @@
      * `travaux-export-pdf.js`) au lieu d'être sauté en silence : l'appelant
      * l'attrape, le nomme dans son bilan (#565) et passe au fichier suivant.
      * C'est la seule fonction qui écrit un fichier de copie dans un ZIP — les
-     * trois exports de l'écran « Exporter et archiver » et celui du profil
+     * trois exports de l'écran « Exporter les travaux » et celui du profil
      * passent ici, donc un fichier illisible y est traité de la même façon.
      *
      * @param {Object} conteneur - `JSZip` ou un `zip.folder(...)`
@@ -609,7 +609,7 @@
         const _hasProg = typeof window.afficherProgression === 'function';
         if (_hasProg) {
             window.afficherProgression('Export des travaux');
-            window.majProgression(20, 'Compression de l\'archive…');
+            window.majProgression(20, 'Compression du ZIP…');
         }
         try {
             const { blob, echecs, nbFichiers, exportes } = await exporterParEtudiant(da, options);

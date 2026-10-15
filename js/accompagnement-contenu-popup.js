@@ -508,17 +508,17 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'archiver-travaux': {
-        titre: 'Exporter et archiver',
+        titre: 'Exporter les travaux',
         sections: [
             {
                 type: 'texte',
-                contenu: 'Le panneau d\'archivage rassemble l\'inventaire des fichiers de travaux déjà importés (originaux PDF/image, copies annotées) et propose plusieurs modes d\'export pour les sortir hors de l\'application.'
+                contenu: 'Le panneau d\'export rassemble l\'inventaire des fichiers de travaux déjà importés (originaux PDF/image, copies annotées) et propose plusieurs modes d\'export pour les sortir hors de l\'application.'
             },
             {
                 type: 'liste',
-                titre: 'Deux modes d\'archivage',
+                titre: 'Deux modes d\'export',
                 items: [
-                    '<strong>Exporter des travaux</strong> : productions en PDF + évaluations en JSON. « Toutes » et « Tous » donnent l\'archive de tout le groupe, idéale en fin de session ; sinon, filtre par production et/ou étudiant·e.',
+                    '<strong>Exporter des travaux</strong> : productions en PDF + évaluations en JSON. « Toutes » et « Tous » donnent l\'export de tout le groupe, idéal en fin de session ; sinon, filtre par production et/ou étudiant·e.',
                     '<strong>Export Léa</strong> : production annotée + évaluation (note et rétroaction) en PDF prêts à téléverser dans Léa.'
                 ]
             },
