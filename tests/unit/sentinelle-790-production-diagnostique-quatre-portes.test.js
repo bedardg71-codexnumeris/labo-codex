@@ -302,6 +302,6 @@ describe('#790 · le formulaire — cocher, rouvrir, et ne jamais décocher par 
         expect(aLaCreation.diagnostique).toBe(true);
         // Et la garde de #346 tient toujours : les champs d'état, eux, restent hors modification.
         expect('verrouille' in enModification).toBe(false);
-        expect(aLaCreation.verrouille).toBe(false);
+        expect(aLaCreation.dansBibliotheque).toBe(true);   // #489 : `verrouille` n'est plus posé, même à la création
     });
 });

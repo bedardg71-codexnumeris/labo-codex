@@ -221,7 +221,7 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             'modifierEvaluation',
             'naviguerEtudiantPrecedent',
             'naviguerEtudiantSuivant',
-            // Zone Verrouillage + suppression + banque (L5976-6850) — 5 exports
+            // Zone Verrouillage (la Banque et ses verrous, sans appelant, retirés par #489, 15 oct. 2026)
             // ⮕ `supprimerEvaluation` est RETIRÉ le 28 août 2026 (#557), pour la
             //   même raison que les deux doublons de #575 ci-dessus : il en
             //   existait une seconde définition dans `liste-evaluations.js`,
@@ -231,13 +231,8 @@ describe('evaluation — régression refactoring 2026-mai (pré-refactor, 7 test
             //   qui gagnait `window` — donc tous les appels venus du profil
             //   étudiant et du sidebar. La définition unique vit désormais dans
             //   `liste-evaluations.js` ; ce module l'appelle par le global.
-            'basculerVerrouillageEvaluation',
             'basculerVerrouillageEvaluationCourante',
-            'chargerEvaluationDepuisBanque',
-            'appliquerJetonRepriseDepuisBanque',
-            'supprimerEvaluationBanque',
             // Zone Banque jetons + recherche + édition (L6851-7348) — 4 exports
-            'retirerJeton',
             'copierCriteresSRPN',
             'copierCriteresSRPNF',
             'editerFichierDepuisEvaluation',

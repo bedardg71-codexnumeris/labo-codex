@@ -347,9 +347,9 @@ async function dupliquerProduction(id) {
             titre: nommerCopie(production.titre, productions),
             auteur: BibliothequeUI.obtenirAuteurActif(),
             isDemo: false,
-            inspireDe: BibliothequeUI.forgerInspireDe(production),
-            verrouille: false
+            inspireDe: BibliothequeUI.forgerInspireDe(production)
         };
+        delete copie.verrouille;   // #489 : le verrou d'une production n'existe plus, la copie ne le porte pas
         delete copie.metadata_cc;
         delete copie.auteurOriginal;
         delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source

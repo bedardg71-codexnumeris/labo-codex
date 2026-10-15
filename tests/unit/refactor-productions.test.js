@@ -124,7 +124,6 @@ describe('productions — régression refactoring 2026-mai (pures publiques)', (
             'annulerFormProduction',
             'modifierProduction',
             'supprimerProduction',
-            'verrouillerEvaluation',
             'monterEvaluation',
             'descendreEvaluation',
             'gererChangementTypeProduction',

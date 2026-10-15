@@ -1660,6 +1660,8 @@ async function sauvegarderVersDestination(blob, nomFichier, options) {
             return { methode: 'fsapi', strategie: 'fichier tenu (FSAPI)' };
         } catch (e) {
             // Handle invalide (fichier déplacé, clé USB retirée, etc.)
+            // Issue 3 assumée (15 oct. 2026) : la cause de ce premier échec ne parvient pas au message ;
+            // le second échec, par la fenêtre de choix, porte la sienne (seule son annulation la perd).
             console.warn('📂 Handle FSAPI invalide, on redemande...', e.message);
             _fileHandle = null;
         }

@@ -129,7 +129,7 @@ d'apprendre, pas seulement d'être noté.
 **À l'écran :** « Productions étudiantes ».
 **Dans le code :** `productions` (par trimestre), propriétaire `js/productions.js`.
 **Attention :** dans `js/productions.js`, des fonctions protégées s'appellent
-`verrouillerEvaluation`, `monterEvaluation`… alors qu'elles agissent sur des **productions**.
+`monterEvaluation`, `descendreEvaluation`… alors qu'elles agissent sur des **productions**.
 « Les pondérations totalisent 100 % » n'est vrai qu'en notation sommative.
 
 ### Travail diagnostique

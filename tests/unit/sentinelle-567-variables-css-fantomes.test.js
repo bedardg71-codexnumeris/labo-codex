@@ -116,8 +116,8 @@ const TOLEREES = {
     "--vert-positif": 6,
     "--vert-principal": 7,
     "--vert-valide": 1,
-    "--violet-jeton": 3,
-    "--violet-pale": 1
+    "--violet-jeton": 3
+    // "--violet-pale" : son seul usage était la Banque d'évaluations, retirée par #489 (15 oct. 2026).
 };
 
 describe('#567 · les quatre variables de l\'audit n\'existent plus nulle part', () => {

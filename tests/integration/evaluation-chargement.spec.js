@@ -101,7 +101,6 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
         afficherGestionJetons: typeof window.afficherGestionJetons,       // promotion §5.6 session B 3e
         // Zone Modification + Banque
         supprimerEvaluation: typeof window.supprimerEvaluation,
-        chargerEvaluationDepuisBanque: typeof window.chargerEvaluationDepuisBanque,
         evaluerProduction: typeof window.evaluerProduction,
         editerFichierDepuisEvaluation: typeof window.editerFichierDepuisEvaluation,
         // État pivot (PAS initialisé au chargement — créé à la 1re sauvegarde)
@@ -132,7 +131,6 @@ test('Défense refactor · sentinelle exports browser evaluation', async ({ page
     expect(surface.afficherBadgesJetons).toBe('function');
     expect(surface.afficherGestionJetons).toBe('function');
     expect(surface.supprimerEvaluation).toBe('function');
-    expect(surface.chargerEvaluationDepuisBanque).toBe('function');
     expect(surface.evaluerProduction).toBe('function');
     expect(surface.editerFichierDepuisEvaluation).toBe('function');
     expect(surface.evaluationEnCoursEstUndefined).toBe(true);
