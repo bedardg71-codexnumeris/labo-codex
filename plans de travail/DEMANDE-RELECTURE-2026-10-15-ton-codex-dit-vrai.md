@@ -132,3 +132,7 @@ Bancs existants ajustés aux nouveaux nombres : 80 × 1024 octets font « 81,9 K
 
 - #994 et #993 sont cochées ; #1020 reste ouverte.
 - Les trois lignes de la consigne sont posées telles quelles, chacune sous sa fiche.
+
+## Commit
+
+`69fdd026` (le lot), sur `main`, non poussé. Jetons anti-cache posés dans `index.html` par le garde (#547), au jour du build (20261014).
