@@ -150,6 +150,12 @@ describe('Blocs 6, 7, 8 — le profil et le réglage décrivent, ils ne prescriv
         }
     });
 
+    it('7 bis : la carte Mobilisation n\'affiche plus la décomposition M = (A + C) / 2 (« c\'est abandonné »)', () => {
+        const carte = tranche(lire('js/profil-etudiant-sections-affichage.js'), 'function genererSectionMobilisation(da) {', '\nfunction ');
+        expect(carte).not.toContain("Décomposition de l'indice M\n");
+        expect(carte).not.toMatch(/M = \(A \+ C\) \/ 2 = \(\$\{indices\.A\}/);
+    });
+
     it('8 : le réglage des seuils prend les mots de la table, lus à leur source', () => {
         const reglage = tranche(INDEX, '<label for="v2-seuil-fragile"', '<!-- ╔', { longueurMin: 200 });
         // Les trois champs fixent le bas des paliers 2, 1 et 0 (70, 80, 85 par défaut).

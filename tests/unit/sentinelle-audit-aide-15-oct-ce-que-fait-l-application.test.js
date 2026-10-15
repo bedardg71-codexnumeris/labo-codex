@@ -321,3 +321,46 @@ describe('Les gestes décrits sont ceux du code', () => {
         expect(AIDE).not.toMatch(/Ce module (GÉNÈRE|LIT) (les )?indices/);
     });
 });
+
+describe('Une copie non recevable dans la note, famille par famille (décisions de Grégoire, 15 oct., 14 h 36 et 15 h 30)', () => {
+    const CARTE = tranche(AIDE, 'Travail NON RECEVABLE', 'Travail SOUPÇONNÉ');
+    const ACTIONS = lire('js/profil-etudiant-actions.js');
+
+    it('sommative : elle vaut 0 (critères à « 0 - Aucun ») et la note la lit comme une autre ; la reprise la remplace', () => {
+        const statut = corps(lire('js/evaluation-sauvegarde.js'), 'changerStatutIntegrite');
+        expect(statut).toMatch(/statut === 'plagiat' \|\| statut === 'ia'/);
+        expect(statut).toContain("select.value = '0'");
+        expect(corps(lire('js/pratiques/pratique-sommative.js').replace(/^    calculerPerformance\(/m, 'function calculerPerformance('), 'calculerPerformance')).not.toContain('statutIntegrite');
+        expect(corps(lire('js/pratiques/pratique-registre.js'), 'evaluationEntreDansLaNote')).toContain('if (evaluation.remplaceeParId) return false;');
+        expect(CARTE).toContain('<li>en sommative, elle vaut 0, sauf si une reprise la remplace ;</li>');
+        expect(CARTE, 'la clause des meilleures productions ne joue jamais en sommative').not.toMatch(/meilleures productions/);
+    });
+
+    it('spécifications : un travail non satisfaisant (sa note 0 reste sous le seuil)', () => {
+        const spe = lire('js/pratiques/pratique-pan-specifications.js');
+        expect(tranche(spe, '_estTravailAcceptable(evaluation, typeTravail) {', '\n    }')).toContain('return evaluation.noteFinale >= seuil;');
+        expect(CARTE).toContain('<li>en spécifications, elle compte comme un travail non satisfaisant ;</li>');
+    });
+
+    it('standards : hors du portfolio ; la terminale, et l\'obligatoire en hybride avec les notes finales, valent 0', () => {
+        expect(corps(ACTIONS, '_filtrerEvaluationsArtefactsValides')).toMatch(/statutIntegrite === 'plagiat' \|\| statutIntegrite === 'ia'\) return false/);
+        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).not.toContain('statutIntegrite');
+        const hybride = corps(ACTIONS, '_selectionnerArtefactsHybride');
+        expect(hybride).toContain('const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;');
+        expect(hybride).toMatch(/const nombreObligatoiresTotal = productionsNonPortfolio\s*\.filter\(p => p\.categorie === 'obligatoire' && p\.id !== terminalId\)\.length;/);
+        expect(CARTE).toContain("<li>en standards, elle sort du portfolio : la compétence n'est jugée qu'à la reprise. Exceptions : une terminale non recevable vaut 0, et, en mode hybride une fois les notes finales cochées, une obligatoire non recevable aussi, comme une obligatoire non remise ;</li>");
+    });
+
+    it('dénotation : la note est le jugement saisi, aucune copie n\'y entre par calcul', () => {
+        const den = tranche(lire('js/pratiques/pratique-configurable.js'), '_calculerPerformanceDenotation(da) {', '\n    }');
+        expect(den).toContain('lireJugementDenotation(pratiqueId, da)');
+        expect(den).not.toMatch(/evaluationsSauvegardees|_lireEvaluations/);
+        expect(CARTE).toContain("<li>en dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.</li>");
+    });
+
+    it('les anciennes affirmations ne reviennent ni dans la carte ni dans l\'infobulle', () => {
+        expect(CARTE).not.toMatch(/Exclu du calcul de la moyenne|n'est pas une note de 0|absence d'évaluation/);
+        expect(bulle('eval-integrite')).not.toMatch(/exclus des calculs de moyenne et de l\\'indice P/);
+        expect(bulle('eval-integrite')).toContain('compte comme non remise dans la complétion');
+    });
+});
