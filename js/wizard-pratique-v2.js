@@ -2690,7 +2690,8 @@ async function creerPratiqueV2() {
         pratique.configuration = {
             // #935 (lot N6) : UN nom, celui que le moteur lit — `seuilAcceptable`. La réponse de
             // l'assistant garde son id d'étape (`seuilAcceptabilite`) ; seul le champ écrit change.
-            seuilAcceptable: parseInt(r.seuilAcceptabilite) || 100,
+            // #935 (15 oct. 2026) : un 0 écrit reste 0 ; sans réponse, 100.
+            seuilAcceptable: Number.isFinite(parseInt(r.seuilAcceptabilite)) ? parseInt(r.seuilAcceptabilite) : 100,
             jetons: {
                 activer: r.utiliserJetons || false
             }

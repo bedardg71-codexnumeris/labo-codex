@@ -121,7 +121,7 @@ describe('lot N6 · #900 — aucun écrivain frais des champs sans lecteur', () 
 
 describe('lot N6 · #935 — un réglage, un nom', () => {
     it('l\'assistant écrit `seuilAcceptable` ; aucun écrivain de `seuilAcceptabilite` dans js/', () => {
-        expect(CODE['js/wizard-pratique-v2.js']).toContain('seuilAcceptable: parseInt(r.seuilAcceptabilite) || 100,');
+        expect(CODE['js/wizard-pratique-v2.js']).toContain('seuilAcceptable: Number.isFinite(parseInt(r.seuilAcceptabilite)) ? parseInt(r.seuilAcceptabilite) : 100,');   // ↻ #935 (15 oct.) : un 0 reste 0
         // Deux exceptions nommées, qui ne sont pas des écrivains de la pratique : la réponse de l'assistant garde son
         // id d'étape, et la pratique configurable TRANSMET au moteur la valeur que la pratique porte (lecture).
         expect(occurrences(/(?<![.\w])seuilAcceptabilite\s*:|\.seuilAcceptabilite\s*=(?!=)/)).toEqual([

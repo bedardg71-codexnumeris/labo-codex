@@ -138,20 +138,8 @@ class PratiquePANStandards {
         // portant encore `varianteCalcul: 'par-objectifs'` tombe désormais dans
         // le calcul portfolio ci-dessous — qui, lui, calcule.
 
-        // 🆕 Beta 95.4 : Vérifier si les catégories Sélection/Obligatoires sont actives
-        const configCategories = typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null;
-        if (configCategories && configCategories.actif) {
-            // Utiliser le calcul avec catégories
-            const resultat = typeof calculerNoteAvecCategories === 'function'
-                ? calculerNoteAvecCategories(da, configCategories)
-                : null;
-
-            if (resultat && resultat.valide) {
-                // Convertir en indice 0-1
-                return resultat.noteFinale / 100;
-            }
-            // Si le calcul avec catégories échoue, continuer avec la logique standard
-        }
+        // #339 (15 oct. 2026) : le détour par `calculerNoteAvecCategories` (Sélection/Obligatoires) est retiré
+        // avec la fonction — la note hybride n'a plus qu'un moteur, celui du profil (`calculerDetailsNoteFinale`).
 
         // Lire configuration
         const config = this._lireConfiguration();

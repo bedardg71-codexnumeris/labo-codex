@@ -1587,8 +1587,11 @@ function _poserFormulaireSurIntervention(intervention) {
                     if (typeof moyennesSnap[k] === 'number') criteresSnap[k] = moyennesSnap[k];
                 });
             }
+            // #777 (15 oct. 2026) : une note non constructible s'écrit `null` (« non calculable »), plus le 0 que
+            // `calculerTousLesIndices` rend avec `noteConstructible: false` (#394). Aucun écran ne lit ce P aujourd'hui
+            // (le bilan lit `criteres`) ; ce qui est déjà écrit reste tel quel.
             intervention.snapshotAvant[da] = {
-                P: indicesSnap ? indicesSnap.P : null,
+                P: (indicesSnap && indicesSnap.noteConstructible !== false) ? indicesSnap.P : null,
                 criteres: criteresSnap
             };
         }
