@@ -181,3 +181,35 @@ Vérifié : chaque famille rend déjà ces nombres dans son récit (`synthese.fo
 > Au plus une personne de plus par équipe : il en reste trop, une équipe sera de 3.
 
 Pourquoi : elle dit ce qui arrive (une équipe plus petite) et pourquoi, en une ligne. Le chiffre est calculé. Variante plus courte, si tu préfères : « Une équipe de 3 : il manque de monde pour en agrandir chacune. »
+
+---
+
+## 7 à 9. Trois ajouts, tirés du verdict de Cowork (14 h 02)
+
+> Ajoutés par Claude Code le 15 octobre 2026 à 14 h 24 (Toronto, mesuré par `date`), sur le verdict écrit à la fin de `CONSIGNE-LOT-2026-10-15-mots-equipes-textes.md`. Ce sont des questions, pas encore des textes : chacune dit ce qui s'affiche aujourd'hui et ce qu'il faut trancher.
+
+### 7. Les recommandations des cartes « Contexte d'apprentissage » et « Mobilisation »
+
+**Où** : au profil d'un élève, juste sous la phrase qui décrit (« Absences rares, quelques travaux manquants »).
+
+**Aujourd'hui**, carte « Contexte d'apprentissage » (`js/contexte-qualification.js`, `qualifierContexteApprentissage`) : « Les interventions peuvent se concentrer sur le développement des habiletés et compétences. » (deux paliers du haut) ; « Suivi régulier recommandé pour maintenir l'engagement et éviter une baisse de performance. » ; « Interventions recommandées : Rencontrer l'étudiant·e pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s'il y a des obstacles (emploi, santé, etc.). »
+
+Carte « Mobilisation » (`js/profil-etudiant-sections-affichage.js`, l. 1681-1693 et 1724-1750), par exemple : « Situation critique : présence ET remise des travaux sous 70 %. Intervention RàI niveau 3 immédiate requise. » ; « Excellent engagement comportemental. Assiduité et complétion ≥ 90 %. Maintenir cette dynamique positive. » ; les encadrés « Recommandations d'intervention (niveau critique) » et « Recommandations préventives (niveau fragile) ».
+
+**À trancher** : a) on les garde telles quelles ; b) on les réécrit dans le vocabulaire qui décrit (je te propose les phrases, carte par carte) ; c) on les retire et la phrase qui décrit reste seule.
+
+### 8. Le vocabulaire du réglage des seuils
+
+**Où** : Labo › Outils d'observation (`index.html`, l. 8902-8916) : « Fragile si inférieur à » (70), « Acceptable si inférieur à » (80), « Bon si supérieur ou égal à » (85).
+
+**Ce qui a changé depuis le verdict** : le lot de l'Aide (`CONSIGNE-LOT-2026-10-15-aide-face-a-l-audit.md`) ne garde plus qu'une table de ces seuils dans l'Aide, et elle parle avec tes mots du 15 oct. (« Aucune absence ou presque » … « Absences très fréquentes »). Le réglage, lui, dit encore « Fragile », « Acceptable », « Bon ».
+
+**À trancher** : a) le réglage garde ses mots (ils nomment des bornes, pas des élèves) ; b) le réglage prend les mots qui décrivent (par exemple « Quelques absences sous », « Absences rares sous », « Aucune absence ou presque à partir de »).
+
+### 9. Deux étapes de l'assistant de pratique qui ne font rien
+
+**Où** : l'assistant de pratique de notation (`js/wizard-pratique-v2.js`).
+- « Tes seuils personnels » (l. 527) : « Ces seuils servent au dépistage automatique des étudiant·es en difficulté. » Ses trois champs (« Ça va bien à partir de », 75 ; 65 ; 55) s'enregistrent dans la pratique, mais rien ne les lit (mesure de Cowork) ; le dépistage, lui, lit les seuils du Labo.
+- « Nombre d'évaluations » (l. 2607, `nbEvaluationsPrevues`) : enregistré, aucun lecteur visible (mesure de Cowork).
+
+**À trancher** : a) on les retire de l'assistant ; b) on les branche (chantier, hors de ce lot) ; c) on dit à l'écran qu'elles ne servent pas encore. Aucune bulle ne peut les décrire avant ta réponse.
