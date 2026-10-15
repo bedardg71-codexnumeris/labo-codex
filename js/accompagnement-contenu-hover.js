@@ -20,9 +20,9 @@ const TOOLTIPS = {
     // --- Bandeau d'identification ---
 
     'entete-mode-affichage':
-        'Masque les noms réels de tes étudiant·es (noms fictifs ou numéros). Utile quand tu présentes ton écran en réunion ou en formation.',
+        'Remplace les noms réels de tes étudiant·es par « Élève 1 », « Élève 2 »… Utile quand tu présentes ton écran en réunion ou en formation.',
     'entete-signaler-bug':
-        'Signale un problème technique OU envoie un commentaire sur l\'application — la fenêtre porte les deux modes. Le numéro de build part automatiquement avec ton message.',
+        'Signale un problème technique OU envoie un commentaire sur l\'application — la fenêtre porte les deux modes. Le rapport, affiché avant l’envoi, porte la version, l’appareil et le navigateur, le nombre d’étudiant·es, de cours et de productions, tes 20 dernières actions et les 20 dernières erreurs. Une action garde le début du texte cliqué : relis le rapport avant de l’envoyer.',
 
     // --- Groupe-cours ---
 
@@ -206,7 +206,7 @@ const TOOLTIPS = {
     'donnees-reconstruire':
         'Recalcule l\'historique des captures depuis le début. Utile après un changement de paramètres de dépistage.',
     'donnees-reinitialiser':
-        'Efface toutes les données et revient à l\'état initial. Triple confirmation et mot de passe requis. Irréversible.',
+        'Efface toutes les données et revient à l\'état initial. Un codex à part d’abord, deux confirmations, puis la saisie de « EFFACER ». Irréversible.',
     'donnees-snapshots':
         'Enregistre l\'état des indices A-C-P à des moments clés pour suivre l\'évolution de ton groupe dans le temps.',
     'donnees-supprimer-captures':
@@ -478,9 +478,9 @@ const TOOLTIPS = {
     // --- Patterns et RàI ---
 
     'tdb-patterns':
-        'Progression sur les critères multistructurels (fondations SOLO) identifiés dans ta grille. Complémentaire au modèle RàI, qui regarde spécifiquement la performance globale et certains aspects comportementaux (mobilisation observée).',
+        'Progression sur les critères multistructurels (fondations SOLO) identifiés dans ta grille. Complémentaire au niveau RàI, qui se décide d’après la performance P et le pattern des derniers artefacts.',
     'tdb-rai':
-        'Niveau d\'intervention selon la performance globale (indice P, tous critères). Complémentaire au suivi des fondamentaux, qui cible uniquement les critères multistructurels.',
+        'Niveau d\'intervention d’après la performance P, quand la note existe, et le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de ta grille de référence sauf ceux marqués « Aucun ». Complémentaire au suivi des fondamentaux, qui cible uniquement les critères multistructurels.',
     'tdb-intervenir':
         'Suivi de l\'apprentissage des fondamentaux (taxonomie SOLO) et répartition par niveaux d\'intervention RàI.',
     'tdb-interventions-rai':
@@ -499,7 +499,7 @@ const TOOLTIPS = {
     'liste-filtre-rai':
         'Filtre par niveau d\'intervention : Tous, Niveau 1 (universel), Niveau 2 (préventif), Niveau 3 (intensif).',
     'liste-filtre-pattern':
-        'Filtre par trajectoire détectée : progression stable, défi spécifique, difficulté émergente ou persistante.',
+        'Filtre par trajectoire détectée : progression stable, défi spécifique, difficulté émergente, difficulté persistante, non-participation (présent·e, rien de remis), ou données insuffisantes (rien encore de jugeable).',
     'liste-recherche':
         'Recherche un·e étudiant·e par nom, prénom ou numéro d\'admission (DA).',
     'liste-col-sa':
@@ -813,7 +813,7 @@ const TOOLTIPS = {
     'presences-total-periodes':
         'Nombre de périodes (ou d’heures) de présence comptées pour l’étudiant·e à cette séance.',
     'presences-assiduite-col':
-        'Taux de présence cumulé de l’étudiant·e depuis le début du trimestre.'
+        'Taux de présence de l’étudiant·e sur les seules séances saisies. Une séance « non saisie » n’y entre pas ; tant qu’aucune séance ne compte, l’assiduité est inconnue.'
 
 };
 

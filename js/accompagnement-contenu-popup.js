@@ -262,7 +262,7 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Les trois niveaux",
                 items: [
                     "<strong>Niveau 1 — Universel</strong>\u00a0: enseignement de qualité pour tout le groupe.",
-                    "<strong>Niveau 2 — Ciblé</strong>\u00a0: interventions préventives pour les étudiant·es en difficulté émergente.",
+                    "<strong>Niveau 2 — Préventif</strong>\u00a0: interventions préventives pour les étudiant·es en difficulté émergente.",
                     "<strong>Niveau 3 — Intensif</strong>\u00a0: soutien individualisé pour les difficultés persistantes."
                 ]
             },
@@ -785,7 +785,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Choisis le format qui correspond à ton horaire réel\u00a0: 2×2h (deux périodes séparées dans la semaine, ex.\u00a0: lundi et jeudi), 1×4h (cours intensif en une seule période continue) ou 1×3h (une seule période continue).'
+                contenu: 'Indique tes séances de la semaine (de 1 à 5)\u00a0: pour chacune, le jour, les heures et le nombre de périodes. Le nombre de périodes est exigé\u00a0: c’est lui qui compte dans l’assiduité.'
             },
             {
                 type: 'exemple',
