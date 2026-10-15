@@ -1,0 +1,305 @@
+[
+ {
+  "id": "4.53",
+  "verdict": "en partie",
+  "preuve": "js/wizard-pratique-v2.js:594-620 : la branche sommative propose le verrou (nom de l'évaluation, « Seuil minimum requis (%) », plafond) ; js/wizard-pratique-v2.js:783-830 : les jetons ne sont proposés que dans la branche spécifications (config-specifications, config-jetons)",
+  "explication": "Le verrou et son seuil restent dans l'assistant sommatif, et le plafonnement, le remplacement et les reprises en sont retirés (l. 79). Les jetons, eux, ne sont plus proposés pour une sommative : le parcours regles-sommative, nb-evaluations, seuils-personnels, config-sommative-regles n'a aucune étape jetons ; un bloc jetons déjà enregistré est seulement conservé à la réédition (l. 2925-2933).",
+  "recherches": "utiliserJetons, config-jetons, jetons, seuilVerrou dans js/wizard-pratique-v2.js"
+ },
+ {
+  "id": "7.49",
+  "verdict": "fait",
+  "preuve": "js/interventions.js:472 et 476-486 : une intervention individuelle ou de niveau 3 reçoit le badge « Hors classe » suivi du badge « Niveau 3 » hors de la vue Rencontres",
+  "explication": "Une rencontre de service « Individuelle » (niveauRai 3) qui paraît sous Suivi › Interventions porte deux badges côte à côte, « Hors classe » et « Niveau 3 » ; le point médian de l'intention transcrit ces deux badges. Le filtre interventionsDuContexteActif (l. 535-539) la laisse visible quand le contexte l'accepte."
+ },
+ {
+  "id": "1.22",
+  "verdict": "indécidable",
+  "preuve": "js/accueil.js:339-350 et js/demo-activation.js:235-387 : le chemin d'entrée dans la démo ne pose aucune question (aucun confirm ni dialogue)",
+  "explication": "L'intention ne dit pas quelle question peut paraître ni quand ; elle reprend la consigne conditionnelle d'une porte terrain (« Si une question paraît, accepte-la »). Le code de l'application n'en pose pas ; une question du navigateur ne se tranche qu'à l'essai.",
+  "recherches": "confirm, confirmerAction, question dans js/demo-activation.js, js/accueil.js ; storage.persist dans js/codex.js ; js/guidage-demo.js"
+ },
+ {
+  "id": "1.147",
+  "verdict": "fait",
+  "preuve": "index.html:14111-14112 : la carte Aide › Codex porte le titre « Ton codex est-il à jour ? » suivi de son paragraphe",
+  "explication": "La section existe telle que nommée, après le flux de travail et les fonctions du menu, et le codex y est décrit comme un fichier .zip (l. 14079)."
+ },
+ {
+  "id": "5.18",
+  "verdict": "en partie",
+  "preuve": "js/accompagnement-contenu-hover.js:317-318 : l'infobulle « eval-filtre-statut » dit « non reçu, reçu, importé, annoté, évalué, non verrouillée (ne compte pas encore dans la note) », puis « ou par type de jeton »",
+  "explication": "L'infobulle du filtre Statut propose bien le filtre par statut et par type de jeton, mais au masculin (« annoté, évalué ») là où l'intention cite « annotée, évaluée » ; le texte exact diffère."
+ },
+ {
+  "id": "2.116",
+  "verdict": "pas fait",
+  "preuve": "js/trimestre-v2-enseignants.js:413-461 : supprimerProfilEnseignantV2 retire le profil de « enseignants » sans toucher la copie « profilEnseignant » ; js/trimestre-v2-enseignants.js:36-56 : au chargement suivant, chargerProfilEnseignantV2 réinjecte cette copie comme nouveau profil",
+  "explication": "La marque « mon profil » (profilEnseignant.enseignantId) n'est pas effacée à la suppression, et la migration du chargement recrée un profil à partir d'elle : le profil revient.",
+  "recherches": "removeSync('profilEnseignant'), setSync('profilEnseignant', null), profilEnseignant dans js/*.js ; supprimerProfilEnseignantV2 et chargerProfilEnseignantV2 dans js/trimestre-v2-enseignants.js"
+ },
+ {
+  "id": "A.72",
+  "verdict": "pas fait",
+  "preuve": "js/evaluation-formules.js:86-172 : les seuls modèles de formule sont penalite_normalisee, ratio_cible et penalite_par_erreur",
+  "explication": "Aucun modèle « taux de repérage » n'existe pour la grille algorithmique ; le mot « Repérage » ne sert qu'aux tampons RLO.",
+  "recherches": "« taux de repérage », reperage, tauxReperage dans js/*.js et index.html ; liste MODELES dans js/evaluation-formules.js"
+ },
+ {
+  "id": "1.23",
+  "verdict": "fait",
+  "preuve": "js/pack-demo-10.js:7447 : le bloc presences du pack démo compte 32 dates, du 2025-08-25 au 2025-12-10 (313 présences), installé par js/demo-namespace.js:197-209",
+  "explication": "Compté en lisant PACK_DEMARRAGE.presences : 32 clés de date, la première le 25 août, la dernière le 10 décembre."
+ },
+ {
+  "id": "7.89",
+  "verdict": "pas fait",
+  "preuve": "js/interventions.js:1774-1835 : transfererPresencesVersModule n'écrit une absence (motivée, facultative) que si marquerNonParticipantsMotives est vrai, sans règle propre aux services",
+  "explication": "Aucun code ne traite un rendez-vous manqué sur un service comme une absence ; la présence d'une rencontre n'écrit que les participants cochés.",
+  "recherches": "manqu, absent, rendez-vous dans js/interventions.js, js/rencontres.js, js/saisie-presences.js ; contexteActifEstService dans js/*.js"
+ },
+ {
+  "id": "5.117",
+  "verdict": "pas fait",
+  "preuve": "js/travaux-annotation.js:468-470 : seul appel à demarrerChrono, à la première annotation ; js/travaux-ui.js:1223-1224 : la barre n'a qu'un badge et un bouton pause caché tant que le chrono n'a pas démarré",
+  "explication": "Le chronomètre ne démarre qu'à la première annotation d'une copie ; aucun bouton ne permet à l'enseignant de le lancer lui-même sans copie.",
+  "recherches": "demarrerChrono, chrono-btn, « Démarrer le chrono », chrono dans js/evaluation*.js et js/travaux-ui.js"
+ },
+ {
+  "id": "7.63",
+  "verdict": "indécidable",
+  "preuve": "js/interventions.js:1450-1454 : les seuils lus par le bilan viennent d'obtenirSeuil (idme.developpement, idme.insuffisant)",
+  "explication": "L'intention dit que des seuils « restent gelés jusqu'aux usages d'octobre » : c'est un engagement de non-changement dans le temps, sans dire quels seuils ; le code d'une seule version ne peut ni le confirmer ni l'infirmer.",
+  "recherches": "seuil, alerte, gel dans js/interventions.js ; obtenirSeuil dans js/interpretation-config.js"
+ },
+ {
+  "id": "6.52",
+  "verdict": "fait",
+  "preuve": "js/profil-etudiant-sections-affichage.js:2627 : sous le nom de l'élève exclu, affiche « <libellé du statut> · hors des moyennes du groupe », le libellé venant de js/main.js:125-127 (« Décrochage », « Inactivité », « Abandon »)",
+  "explication": "estEtudiantExclu (js/main.js:111-114) repère inactif, décrochage et abandon ; la carte du profil écrit alors par exemple « Décrochage · hors des moyennes du groupe »."
+ },
+ {
+  "id": "6.75",
+  "verdict": "fait",
+  "preuve": "index.html:8808-8810 et js/preferences-v2.js:417-420 : Labo › Outils d'observation enregistre seuilsInterpretation.defiSpecifique ; js/profil-etudiant-sections-affichage.js:4184-4188 : la couleur des badges suit ce seuil ; js/profil-etudiant-calculs.js:1275 et 1850 : le défi principal de la carte RàI est tiré de diagnostiquerForcesChallenges avec ce seuil, affiché en js/profil-etudiant-sections-affichage.js:1257",
+  "explication": "Le même seuil réglé dans le Labo décide du vert des badges Forces et défis et du critère retenu comme « Défi principal » de la carte RàI."
+ },
+ {
+  "id": "8.46",
+  "verdict": "fait",
+  "preuve": "js/pratiques/construction-attributs.js:367-369, 391-395, 418 : lignes « Non couvert » pour l'alignement sur des cibles, l'agentivité et les niveaux de la note du cours ; l. 401 et 412 : lignes « Ce à quoi la note se rapporte » et « Temporalité de la note » ; rendues par js/comparateur-pratiques.js:345-352",
+  "explication": "Le Comparateur reçoit de ConstructionAttributs.extraire les six paramètres, dont ce que l'application ne couvre pas, écrit « Non couvert par l'application » ou « Non couvert (la note se rapporte à des instruments) », et les deux lignes nommées."
+ },
+ {
+  "id": "7.16",
+  "verdict": "fait",
+  "preuve": "js/tableau-bord-apercu.js:3001-3005 : un élève dont determinerCibleIntervention rend le niveau 0 (« En attente ») n'entre pas dans la barre des patterns du groupe ; js/profil-etudiant-calculs.js:1818-1830 et 2121-2137 : jamais présent et sans copie, il reçoit ce niveau 0",
+  "explication": "La chaîne carte RàI puis cible d'intervention rend « En attente » (niveau 0) pour l'élève sans présence ni copie, et afficherPatternsApprentissage l'écarte de la barre."
+ },
+ {
+  "id": "1.149",
+  "verdict": "en partie",
+  "preuve": "index.html:14072-14087 : la carte Aide › Codex porte aussi une ligne « Navigation », un paragraphe d'introduction et l'encadré « Qu'est-ce qu'un Codex ? », avant le flux de travail (l. 14089), les fonctions du menu (l. 14097) et « Ton codex est-il à jour ? » (l. 14111)",
+  "explication": "Les trois parties voulues sont là, mais la carte contient davantage que ces trois parties."
+ },
+ {
+  "id": "1.121",
+  "verdict": "indécidable",
+  "preuve": "js/temoin-enregistrement.js:109-118 et 136-139 : le témoin remonte de la hauteur cachée par le clavier, lue dans visualViewport ; styles.css:6141 : bottom calc(16px + var(--temoin-hauteur-clavier))",
+  "explication": "Le code qui place le témoin au-dessus du clavier existe, mais que le clavier à l'écran de l'iPad ne le recouvre plus ne se vérifie qu'à l'essai sur l'appareil.",
+  "recherches": "visualViewport, clavier, --temoin-hauteur-clavier dans js/temoin-enregistrement.js et styles.css"
+ },
+ {
+  "id": "8.57",
+  "verdict": "pas fait",
+  "preuve": "js/config.js:79-87 : le Labo a sept sous-onglets (Outils d'observation, Modélisation, Exploration des pratiques, Rythme de travail, Études, Bilan réflexif, Suivi longitudinal), aucun « Données »",
+  "explication": "Il n'existe pas d'écran Labo › Données qui compte les données ; Réglages › Données ne compte que des ressources et des captures (js/donnees-v2.js:88-115, 155-188), pas les interventions. Labo › Études lit bien les interventions brutes (js/labo-codex-data.js:477-481, js/correlations-longitudinales.js:62), mais sans les compter.",
+  "recherches": "labo-donnees, 'donnees' dans js/config.js, js/navigation.js et index.html ; obtenirInterventions() hors js/interventions.js ; compteurs de js/donnees-v2.js"
+ },
+ {
+  "id": "6.91",
+  "verdict": "fait",
+  "preuve": "js/profil-etudiant-confidentiel.js:185-191 et 229 : les notes de présence passent par escapeHtml avant innerHTML ; l. 103 et 159 : le nom et la note libre sont posés par textContent et value",
+  "explication": "Aucun champ libre du volet n'entre dans la page sans échappement : le seul innerHTML porteur de texte libre échappe les notes, les autres champs passent par textContent ou value."
+ },
+ {
+  "id": "4.95",
+  "verdict": "fait",
+  "preuve": "js/planification-carte.js:6750-6768 : tracerGuides dessine une ligne SVG de classe planif-guide-alignement pour chaque bord ou centre aimanté ; styles.css:20710-20713 : stroke-dasharray 5 3",
+  "explication": "En glissant, l'aimantation (preparerAimantation, appliquerAimantation, l. 6666-6711) trace un guide en pointillé."
+ },
+ {
+  "id": "1.160",
+  "verdict": "en partie",
+  "preuve": "index.html:10020 (« dans l'exemple SRPNF fourni ») et 10263 (« L'exemple qui suit (SRPNF) ») : présentés comme exemples ; mais index.html:12829, 13098 et 13172 décrivent les forces et défis « selon les 4 niveaux IDME », les « Seuils IDME pour chaque niveau » et le score « selon l'échelle IDME » comme la structure de l'outil",
+  "explication": "La plupart des pages présentent SRPNF et IDME comme exemples, mais quelques passages de l'Aide les donnent encore comme le fonctionnement du logiciel."
+ },
+ {
+  "id": "2.20",
+  "verdict": "fait",
+  "preuve": "js/trimestre-v2-liste.js:465-467 : au changement de trimestre, annulerFormEvenementV2 referme le formulaire de journée ; js/trimestre-v2-init.js:768-783 : une modification d'une journée absente du trimestre actif est refusée par une erreur, sans le message « Journée modifiée »",
+  "explication": "La journée ouverte se referme à la bascule, et la garde empêche le faux succès si l'édition chevauchait quand même le changement."
+ },
+ {
+  "id": "4.178",
+  "verdict": "en partie",
+  "preuve": "js/bibliotheque-ui.js:1194-1199 : chaque ligne porte le nom, la puce d'identifiant, « modifié le » et la date, puis « Dans ta barre latérale » ou « Bibliothèque » ; l. 1184-1186 : « Lignée N » quand le groupe a plusieurs lignées ; js/identite-item.js:188-209 : un groupe où deux exemplaires partagent une lignée est classé « copie » (titre « Copies »)",
+  "explication": "Tout y est et les groupes sont rendus dépliés (aucun repli), sauf le libellé : la ligne d'un exemplaire partagé dit « Bibliothèque », pas « Bibliothèque partagée »."
+ },
+ {
+  "id": "7.92",
+  "verdict": "pas fait",
+  "preuve": "js/calendrier-vue.js:258-265 : la vue mensuelle ne reçoit que le calendrier complet et les échéances de productions (construireMapEcheancesProductions, l. 218)",
+  "explication": "Le calendrier du trimestre ne lit pas les interventions ni les rencontres : aucune rencontre de service n'y paraît.",
+  "recherches": "intervention, rencontre, service dans js/calendrier-vue.js ; obtenirInterventions() dans js/*.js"
+ },
+ {
+  "id": "A.58",
+  "verdict": "en partie",
+  "preuve": "js/accueil.js:208-210 : la carte « Observer le groupe » de l'Accueil mène à Suivi › Suivi du groupe, où les barres sont rendues (js/tableau-bord-apercu.js) ; js/config.js:38 : l'Accueil n'a aucune sous-section",
+  "explication": "Les barres à bulles ne s'affichent pas sur l'Accueil lui-même ; on y accède depuis l'Accueil par une carte qui ouvre le Suivi du groupe."
+ },
+ {
+  "id": "4.50",
+  "verdict": "fait",
+  "preuve": "js/trimestre-v2-liste.js:474-479 et js/pratiques-gestion.js:2901 : la bascule de trimestre remet à nul le pointeur de la pratique en édition ; js/navigation.js:233-238 et js/pratiques-gestion.js:79-89 : au retour sur Pratiques de notation, l'éditeur est caché et l'accueil réaffiché",
+  "explication": "Le changement de trimestre se fait depuis Cadre ; l'éditeur resté ouvert perd sa pratique et se referme au prochain affichage de l'écran."
+ },
+ {
+  "id": "6.122",
+  "verdict": "indécidable",
+  "preuve": "js/temoin-enregistrement.js:109-118 et styles.css:6117-6150 : placement au-dessus du clavier et largeur bornée (270 px sous 900 px, 420 px au-delà), mesurés au banc d'après le commentaire",
+  "explication": "Ne pas recouvrir les boutons des présences et rester au-dessus du clavier de l'iPad sont des effets de mise en page qui ne se tranchent qu'à l'essai sur l'appareil.",
+  "recherches": "visualViewport, temoin-enregistrement, max-width dans js/temoin-enregistrement.js et styles.css"
+ },
+ {
+  "id": "6.5",
+  "verdict": "en partie",
+  "preuve": "js/modes.js:1179-1211 et js/temoin-enregistrement.js:1-60 : sauvegarderDonneesSelonMode fait parler un témoin unique en bas à gauche ; mais js/saisie-presences.js:871-874 (verrouiller une séance) et js/equipes.js:321 (retenir les équipes) écrivent par db.setSync sans le témoin",
+  "explication": "La plupart des écritures du Suivi passent par le témoin commun, pas toutes : le verrouillage d'une séance l'annonce par une notification et la mémoire des équipes s'écrit sans rien dire."
+ },
+ {
+  "id": "4.126",
+  "verdict": "fait",
+  "preuve": "js/planification-carte.js:12344-12365 : RACCOURCIS_CARTE liste L, ⇧⌘Z, Suppr ou ⌫, ⇧⌘D, ⇧⌥+glisser, ↓ / ↑ de la recherche, Échap hors recherche et Ctrl+molette ou pincement",
+  "explication": "Les huit gestes branchés mais non décrits relevés le 8 oct. figurent tous dans la liste ; ⌘Y, qui accompagnait ⇧⌘Z, a été retiré parce que Safari le prend (l. 9471)."
+ },
+ {
+  "id": "6.110",
+  "verdict": "indécidable",
+  "preuve": "js/saisie-presences.js:1624-1629 : le bouton porte « ✓ N pér. », avec l'infobulle et l'aria-label « Mettre tout le monde présent (N périodes) »",
+  "explication": "Tenir sur une ligne à 1024, 768 et 390 px dépend du rendu : seul un essai à ces largeurs peut trancher.",
+  "recherches": "pér., Mettre tout le monde présent dans js/saisie-presences.js ; nowrap dans styles.css"
+ },
+ {
+  "id": "6.123",
+  "verdict": "indécidable",
+  "preuve": "styles.css : règles de la saisie des présences (aucune largeur à vérifier sans rendu)",
+  "explication": "Le passage à la ligne de la barre de boutons et son maintien dans la carte à 360, 768, 1024 et 1180 px sont des effets de mise en page qui ne se vérifient qu'à l'écran.",
+  "recherches": "flex-wrap, barre d'actions, 360, 1180 dans styles.css et js/saisie-presences.js"
+ },
+ {
+  "id": "7.14",
+  "verdict": "pas fait",
+  "preuve": "js/profil-etudiant-calculs.js:1244 : le diagnostic s'écrit encore « Progression lente » ; index.html:10232 : la table de l'Aide porte toujours « Progression lente »",
+  "explication": "Aucun code n'écrit « En consolidation » pour un critère resté sous le seuil dont les résultats montent ; l'ancien libellé est en place.",
+  "recherches": "« En consolidation », consolidation, « Progression lente » dans js/*.js et index.html"
+ },
+ {
+  "id": "1.128",
+  "verdict": "fait",
+  "preuve": "index.html:331-332 : .bandeau-mise-a-jour a pour fond var(--acc-fond), défini à #e8923a (orange) en styles.css:274, sans autre définition",
+  "explication": "Le bandeau de nouvelle version (afficherBandeauVersion, js/init-inline.js:395-421) est rendu sur ce fond orange."
+ },
+ {
+  "id": "4.181",
+  "verdict": "pas fait",
+  "preuve": "js/bibliotheque-ui.js:1151-1180 : le bandeau des doublons n'offre par ligne que « Voir », « Retirer » et « Supprimer »",
+  "explication": "Rien ne compare les doublons côte à côte ni ne propose « Tout fusionner ».",
+  "recherches": "« Tout fusionner », « côte à côte », fusionner dans js/bibliotheque-ui.js, js/identite-item.js, js/*-bibliotheque.js, js/modal-doublon.js"
+ },
+ {
+  "id": "A.27",
+  "verdict": "fait",
+  "preuve": "js/evaluation-chargement.js:693-695 : sur une copie déjà évaluée, la cartouche du modèle n'est pas posée ; js/evaluation.js:1382 : le chargeur pose evaluation.cartoucheId ; js/evaluation-chargement.js:1497-1560 : choisir une autre cartouche passe par la question de remplacement",
+  "explication": "À l'ouverture d'une copie évaluée, c'est la cartouche enregistrée avec l'évaluation qui est sélectionnée."
+ },
+ {
+  "id": "4.26",
+  "verdict": "en partie",
+  "preuve": "js/cartouches.js:4686 : la question dit « Supprimer définitivement «X» de la Bibliothèque ? » puis « Cette action est irréversible. » ; l. 4692 : « Retirer «X» de la Bibliothèque ? » si elle reste dans sa grille",
+  "explication": "La branche existe, mais son texte dit « de la Bibliothèque » et non « de la bibliothèque partagée », et ajoute une seconde phrase."
+ },
+ {
+  "id": "4.23",
+  "verdict": "pas fait",
+  "preuve": "js/cartouches.js:4647-4648 : supprimer la Cartouche de départ (CART_GENERIQUE) la marque supprimée ; js/main.js:134-143 : ce registre « ressourcesSupprimees » est global, non préfixé par trimestre ; js/cartouches.js:171 : assurerCartoucheDeDepart ne la sème plus nulle part dès qu'elle est marquée",
+  "explication": "Supprimer la cartouche de départ dans un trimestre empêche de la semer dans les autres trimestres et dans ceux à venir, à l'inverse de l'intention.",
+  "recherches": "ressourcesSupprimees, estRessourceSupprimee, marquerRessourceSupprimee, assurerCartoucheDeDepart, CART_GENERIQUE dans js/main.js et js/cartouches.js"
+ },
+ {
+  "id": "3.66",
+  "verdict": "en partie",
+  "preuve": "js/accompagnement-contenu-popup.js:1138 : le texte « « Aucun » retire le critère de la lecture SOLO : il compte dans la note comme les autres, mais le dépistage des fondations ne le surveille pas et aucune étiquette ne l'accompagne dans les exports. » vit dans la fenêtre d'aide « grille-niveau-solo », ouverte par l'icône du libellé (js/grilles.js:3569-3570)",
+  "explication": "La phrase est la bonne, mais elle n'est pas sous le menu : elle est dans une fenêtre d'aide ouverte depuis l'icône à côté du libellé."
+ },
+ {
+  "id": "8.1",
+  "verdict": "pas fait",
+  "preuve": "js/config.js:79-87 : aucun sous-onglet Démo dans le Labo ; js/accueil.js:262-270 : la case « Données démo » de l'Accueil est le seul déclencheur de la démo",
+  "explication": "L'écran « Labo › Démo » auquel renvoie la note n'existe pas dans la version observée.",
+  "recherches": "labo-demo, démo dans la section Labo d'index.html (l. 8649-9229), liste 'labo' de js/config.js, appels à toggleDemoHandler et activerModeDemo"
+ },
+ {
+  "id": "6.48",
+  "verdict": "fait",
+  "preuve": "js/etudiants.js:1227-1229 : le compteur de la Liste vient d'obtenirInterventionsEtudiant ; js/interventions.js:223-225 et 535-539 : filtre interventionsDuContexteActif, qui garde celles sans groupeCoursId",
+  "explication": "Le compteur ne compte que les interventions du contexte actif ; celles d'avant le 12 sept., sans contexte, restent comptées partout."
+ },
+ {
+  "id": "4.116",
+  "verdict": "indécidable",
+  "preuve": "index.html et styles.css : pastilles du menu « Vue » de la carte d'alignement",
+  "explication": "Voir les douze pastilles en entier sans défilement horizontal sous Chrome et Safari, sur grand écran et iPad en paysage, est un rendu qui ne se juge qu'à l'écran.",
+  "recherches": "pastilles, menu Vue, overflow dans js/planification-carte.js et styles.css"
+ },
+ {
+  "id": "2.27",
+  "verdict": "pas fait",
+  "preuve": "js/trimestre-v2-init.js:469-503 : sauvegarderCadreCalendrierV2 écrit le cadre et régénère le calendrier sans examiner la semaine des productions",
+  "explication": "Les échéances ne bougent pas, puisque rien ne les déplace, mais rien ne signale qu'un nouveau calendrier change la semaine d'une production.",
+  "recherches": "#378, semaine, échéance dans js/trimestre-v2-init.js, js/trimestre.js (genererCalendrierComplet), js/trimestres.js, js/productions.js"
+ },
+ {
+  "id": "4.75",
+  "verdict": "fait",
+  "preuve": "js/pratiques-bibliotheque.js:883-886 : sans échelle dans le trimestre, la fenêtre au nom du modèle s'affiche et la réponse est { adopter: false } ; js/pratiques-gestion.js:842-843 et js/wizard-pratique-v2.js:2516-2517 : les deux gestes d'adoption sortent avant toute écriture",
+  "explication": "L'adoption n'a pas lieu et rien n'est écrit, par les deux chemins."
+ },
+ {
+  "id": "2.35",
+  "verdict": "pas fait",
+  "preuve": "js/trimestres.js:1462-1480 : supprimerTrimestre ne retire que les clés du magasin keyvalue (db.keys, js/db.js:1138-1139) ; les fichiers des copies vivent dans le magasin « fichiers » (js/db.js:490-491), indexés par id de fichier, jamais vidés à la suppression",
+  "explication": "Les métadonnées « fichiersTravaux » du trimestre partent, mais les fichiers eux-mêmes restent dans IndexedDB.",
+  "recherches": "deleteBlob, supprimerBlob, fichiers, travaux dans js/trimestres.js et js/trimestre-v2-liste.js ; _keysIndexedDB dans js/db.js"
+ },
+ {
+  "id": "9.64",
+  "verdict": "fait",
+  "preuve": "js/import-export.js:3357-3363 : les cartouches importées passent par fusionnerParIdentite en ignorant dateImport et auteurOriginal (l. 231) ; l. 192-197 : une entrée identique à celle en place est ignorée",
+  "explication": "Au premier passage comme au second, une cartouche identique (champs posés par l'import exclus) n'est pas ajoutée ; le bilan le dit (l. 3375-3377)."
+ },
+ {
+  "id": "4.70",
+  "verdict": "en partie",
+  "preuve": "js/pratiques-bibliotheque.js:737-741 : le texte affiché est « Aucun modèle « Sommative » fourni », suivi de « enregistre le tien »",
+  "explication": "La famille est bien nommée, mais le message ajoute « enregistre le tien » : le texte exact diffère de l'intention."
+ },
+ {
+  "id": "8.58",
+  "verdict": "pas fait",
+  "preuve": "js/config.js:79-87 : aucun sous-onglet « Données » dans le Labo",
+  "explication": "L'écran Labo › Données en lecture seule n'existe pas ; Réglages › Données, le seul écran « Données », porte des gestes (import, suppression de ressources, js/donnees-v2.js:342, 425, 504, boutons « Supprimer définitivement »).",
+  "recherches": "labo-donnees, 'donnees' dans js/config.js, js/navigation.js et index.html ; boutons Supprimer de js/donnees-v2.js"
+ }
+]
