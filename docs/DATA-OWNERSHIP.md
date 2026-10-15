@@ -400,6 +400,7 @@ du matériel qui NE DOIT PAS entrer dans ces flux.
 | `recalculerIndicesCP` | ssot-ok | `main.js` | 1 |
 | `recherchePresences` | ssot-ok | `saisie-presences.js` | 1 |
 | `ressourcesSupprimees` | ssot-ok | `main.js` | 1 |
+| `<trim>_ressourcesSupprimeesTrimestre` | ssot-ok | `main.js` (#683, 15 oct. 2026 : marque de suppression du matériel de départ, par trimestre ; l’ancienne globale reste lue) | 1 |
 | `retroactionsErreursFr` | ssot-ok | `travaux-outils.js` | 1 |
 | `retroactionsObservations` | ssot-ok | `travaux-outils.js` | 1 |
 | `seancesCompletes` | ssot-ok | `horaire.js` | 0 |

@@ -702,6 +702,19 @@ function _estBiblioPartagee(cle) {
 }
 
 /**
+ * #684 (15 oct. 2026) : le drapeau du renommage du matériel de départ suit le codex. Un codex
+ * qui ne le porte pas date d'avant la migration : ses anciens noms reviennent avec lui, et la
+ * migration (main.js, égalité stricte) doit rejouer au démarrage suivant. Un codex qui le porte
+ * l'a déjà écrit, par la boucle d'ouverture.
+ * @param {Object} donnees - les entrées du codex ouvert
+ */
+async function _drapeau684SuitLeCodex(donnees) {
+    var drapeau = window.FLAG_MIGRATION_NOMS_MATERIEL_684;
+    if (!drapeau || Object.prototype.hasOwnProperty.call(donnees, drapeau)) return;
+    await db.remove(drapeau);
+}
+
+/**
  * Charge un Codex ZIP dans IndexedDB.
  * @param {File|Blob} fichierZip - Le fichier ZIP à charger
  * @returns {Promise<{manifeste: Object, stats: Object}>}
@@ -866,6 +879,7 @@ async function chargerCodex(fichierZip) {
             await _yield();
         }
     }
+    await _drapeau684SuitLeCodex(donnees);
 
     // 3. Synchroniser le cache localStorage
     _majProgression(35, 'Synchronisation du cache…');

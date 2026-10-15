@@ -379,6 +379,16 @@ async function confirmerSuppressionTrimestre(id) {
     });
 }
 
+/** #683 : le semis du chargement, rejoué à la bascule, dans le même ordre et sous les mêmes gardes. */
+async function semerMaterielDeDepartApresBascule() {
+    const archive = !!(window.estTrimestreArchive && window.estTrimestreArchive());
+    if (!archive) {
+        if (typeof window.assurerGrilleDeDepart === 'function') await window.assurerGrilleDeDepart();
+        if (typeof window.assurerEchelleIdmeDeDepart === 'function') await window.assurerEchelleIdmeDeDepart();
+    }
+    if (typeof window.assurerCartoucheDeDepart === 'function') await window.assurerCartoucheDeDepart();
+}
+
 /**
  * Change le trimestre actif et recharge l'interface
  * Délègue à la fonction de trimestres.js
@@ -503,6 +513,15 @@ function changerTrimestreActifV2(valeur) {
             if (typeof window.populerDropdownGroupeCoursV2 === 'function') {
                 window.populerDropdownGroupeCoursV2();
             }
+
+            // #683, mécanisme (i) (15 oct. 2026) : la bascule sème le matériel de départ
+            // EXACTEMENT comme le chargement — grille puis échelle (abstenues en trimestre
+            // archivé, comme dans initialiserModuleGrilles/Echelles), puis cartouche (qui
+            // exige la grille du même trimestre ; son chargement ne s'abstient pas en
+            // archive, la bascule non plus).
+            semerMaterielDeDepartApresBascule().catch(function (e) {
+                console.error('[Trimestre V2] #683 : semis du matériel de départ après bascule', e);
+            });
         }
     } else {
         console.error('[Trimestre V2] Fonction changerTrimestreActif non disponible');

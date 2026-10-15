@@ -131,17 +131,113 @@ window.libelleStatutEtudiant = function(statut) {
    Empêche les fonctions assurer*() de réinjecter des gabarits
    que l'utilisateur a supprimés.
    =============================== */
+// #683 (15 oct. 2026, décision de Grégoire à 11 h 04) — une suppression du matériel
+// de départ ne vaut que pour SON trimestre. La marque se pose donc dans une clé du
+// trimestre (`<trim>_ressourcesSupprimeesTrimestre`, CLES_NAMESPACEES). L'ancienne
+// clé globale `ressourcesSupprimees` n'est ni migrée ni vidée : elle est LUE en plus,
+// et les suppressions déjà faites gardent leur portée de tous les trimestres.
+// ⚠ Pourquoi un autre nom que la clé nue : inscrite telle quelle au registre, les
+// boucles de rapatriement des résidus nus (trimestres.js, forcerMigration,
+// migrerResidusClesNues) déplaceraient l'ancienne marque globale dans le seul
+// trimestre actif, puis l'effaceraient.
+// ⚠ La portée de la marque suit celle de la collection : les `GABARIT_*` vivent dans
+// des bibliothèques GLOBALES (`bibliothequeGrilles`, gabarits-utils.js) ; une marque
+// par trimestre les ferait ressemer partout à la bascule suivante (#468/CO-25). Leur
+// marque reste globale.
+const CLE_RESSOURCES_SUPPRIMEES_TRIMESTRE = 'ressourcesSupprimeesTrimestre';
+function marqueRessourceEstGlobale(id) {
+    return String(id || '').indexOf('GABARIT_') === 0;
+}
+/** La clé du trimestre actif, ou null si `cle()` retombe sur la clé nue (aucun trimestre connu). */
+function cleRessourcesSupprimeesDuTrimestre() {
+    if (typeof window.cle !== 'function') return null;
+    const cleT = window.cle(CLE_RESSOURCES_SUPPRIMEES_TRIMESTRE);
+    return cleT === CLE_RESSOURCES_SUPPRIMEES_TRIMESTRE ? null : cleT;
+}
+
 window.estRessourceSupprimee = function(id) {
-    const supprimees = db.getSync('ressourcesSupprimees', []);
-    return supprimees.includes(id);
+    if ((db.getSync('ressourcesSupprimees', []) || []).includes(id)) return true;
+    if (marqueRessourceEstGlobale(id)) return false;
+    const cleT = cleRessourcesSupprimeesDuTrimestre();
+    return !!cleT && (db.getSync(cleT, []) || []).includes(id);
 };
 
 window.marquerRessourceSupprimee = function(id) {
-    const supprimees = db.getSync('ressourcesSupprimees', []);
+    let cleCible = 'ressourcesSupprimees';
+    if (!marqueRessourceEstGlobale(id)) {
+        const cleT = cleRessourcesSupprimeesDuTrimestre();
+        if (cleT) {
+            cleCible = cleT;
+        } else {
+            // Garde de boot (#358) : sans trimestre connu, la suppression reste durable
+            // — mais à la portée de TOUS les trimestres, et ça se dit.
+            console.warn(`[main] #683 : aucun trimestre actif, la suppression de « ${id} » est marquée pour tous les trimestres (clé globale ressourcesSupprimees).`);
+        }
+    }
+    const supprimees = db.getSync(cleCible, []) || [];
     if (!supprimees.includes(id)) {
         supprimees.push(id);
-        db.setSync('ressourcesSupprimees', supprimees);
-        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('ressourcesSupprimees');   // lot F : geste hors témoin (marquerRessourceSupprimee)
+        db.setSync(cleCible, supprimees);
+        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cleCible);   // lot F : geste hors témoin (marquerRessourceSupprimee)
+    }
+};
+
+/* ===============================
+   #684 (15 oct. 2026, décision de Grégoire à 11 h 20, issue (A)) — LES ANCIENS NOMS
+   DU MATÉRIEL DE DÉPART, RATTRAPÉS UNE FOIS.
+   Le §3 du 1er sept. a renommé les trois pièces semées, mais le semis ne renomme
+   jamais ce qui est déjà en base (#682) : le script de Grégoire n'a atteint que lui.
+   Table et condition reprises de `scripts/renommage-682-materiel-seme.js` : un nom
+   n'est réécrit QUE s'il est égal, au caractère près, à l'ancien libellé écrit par
+   le code, et c'est revérifié DANS le mutateur. Tout autre nom appartient à
+   l'usager. Écriture dans les données de collègues qui ne l'ont pas demandée :
+   autorisée par Grégoire pour ce cas seulement ; le nom d'une grille s'imprime sur
+   le PDF des élèves (assumé par lui).
+   Portée : chaque trimestre du registre, archivés compris (les copies y vivent).
+   =============================== */
+window.FLAG_MIGRATION_NOMS_MATERIEL_684 = 'migration_noms_materiel_depart_684_20261015_done';
+const PIECES_MATERIEL_684 = [
+    { id: 'GRILLE_GENERIQUE', collection: 'grillesTemplates',
+      ancien: 'Grille générique (exemple)', nouveau: 'Grille de départ' },
+    { id: 'ECHELLE_IDME_DEPART', collection: 'echellesTemplates',
+      ancien: 'Échelle IDME (point de départ)', nouveau: 'Échelle de départ (IDME)' },
+    { id: 'CART_GENERIQUE', collection: 'cartouches_GRILLE_GENERIQUE',
+      ancien: 'Cartouche générique (exemple)', nouveau: 'Cartouche de départ' }
+];
+
+/** @returns {Promise<{renommes: Array<{cle: string, id: string}>}>} */
+window.migrerNomsMaterielDeDepart684 = async function() {
+    const renommes = [];
+    const trimestres = (db.getSync('trimestres', []) || []).filter(t => t && t.id);
+    for (const t of trimestres) {
+        for (const p of PIECES_MATERIEL_684) {
+            const cleT = `${t.id}_${p.collection}`;
+            const lue = db.getSync(cleT, null);
+            if (!Array.isArray(lue) || !lue.some(o => o && o.id === p.id && o.nom === p.ancien)) continue;
+            await db.modifier(cleT, (lues) => {
+                const liste = Array.isArray(lues) ? lues : [];
+                const item = liste.find(o => o && o.id === p.id);
+                // ⚠ ÉGALITÉ STRICTE, revérifiée à l'instant de l'écriture : aucune normalisation.
+                if (!item || item.nom !== p.ancien) return undefined;
+                item.nom = p.nouveau;
+                renommes.push({ cle: cleT, id: p.id });
+                return liste;
+            }, []);
+        }
+    }
+    return { renommes };
+};
+
+/** Au démarrage (auDbReady) : une fois, puis le drapeau daté. Sur une erreur, pas de drapeau : réessai. */
+window.lancerMigrationNomsMateriel684 = async function() {
+    if (db.getSync(window.FLAG_MIGRATION_NOMS_MATERIEL_684, false)) return;
+    try {
+        const { renommes } = await window.migrerNomsMaterielDeDepart684();
+        if (typeof db.flush === 'function') await db.flush();
+        db.setSync(window.FLAG_MIGRATION_NOMS_MATERIEL_684, window.dateLocaleYMD ? window.dateLocaleYMD() : true);
+        if (renommes.length) console.warn(`[migration #684] ${renommes.length} nom(s) du matériel de départ mis à jour.`, renommes);
+    } catch (e) {
+        console.error('[migration #684] erreur — drapeau non posé, réessai au prochain démarrage :', e);
     }
 };
 
@@ -743,6 +839,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('[migration_cartouches_namespacees] erreur —  drapeau non posé, réessai au prochain démarrage :', e);
             }
         }
+
+        // #684 (15 oct. 2026) : les anciens noms du matériel de départ, une fois. APRÈS la
+        // migration des cartouches : elle lit `<trim>_cartouches_GRILLE_GENERIQUE`. Le
+        // drapeau voyage avec le codex : un codex qui ne le porte pas le retire à
+        // l'ouverture (codex.js), et la migration rejoue au démarrage suivant.
+        await window.lancerMigrationNomsMateriel684();
 
         // Migration #326 R1 (16 juin 2026) : le flag transitoire de maquette
         // d'exploration passe de `estEssai` à `estMaquette` (renommage zéro-dette).

@@ -138,6 +138,11 @@
         // (trimestre-v2-etudiants.js) ; l'import par cases la lit (import-export.js).
         // Sans semis ; elle voyage comme toute clé du trimestre.
         'elevesDesinscrits',
+        // #683 (15 oct. 2026) : la marque d'une suppression du matériel de départ, par
+        // trimestre (main.js : marquerRessourceSupprimee). Nom distinct de l'ancienne
+        // clé globale `ressourcesSupprimees`, qui reste LUE et intouchée : sous le même
+        // nom, les boucles de rapatriement des résidus nus ci-dessous la déplaceraient.
+        'ressourcesSupprimeesTrimestre',
         // 🆕 Corbeille fichiers travaux (4 mars 2026)
         'corbeilleFichiers',
         // 🆕 (24 mai 2026) Pratique de notation active : namespacée par trimestre

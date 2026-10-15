@@ -135,6 +135,9 @@ var CLES_SANS_FILTRE = [
     'grillesTemplates',
     'echellesTemplates',
     'pratiquesConfigurables',
+    // #683 (15 oct. 2026) : les suppressions du matériel de départ dans ce trimestre (des
+    // identifiants, aucun élève) : elles voyagent avec les grilles qu'elles concernent.
+    'ressourcesSupprimeesTrimestre',
     // #1021 : partagées par le trimestre, sans élève dedans — elles partaient déjà entières,
     // comme clés inconnues ; les voici nommées.
     'modalitesEvaluation',

@@ -70,6 +70,8 @@ Puis, plus loin :
 
 ⮕ **Question ouverte, à Grégoire** : retirer le niveau 0 de son échelle « 0-IDME (5 niv.) ». Ce n'est pas une décision de code mais une décision sur ses données, et elle exige d'abord la mesure du lot 0 (des évaluations existantes portent-elles ce niveau ?).
 
+⮕ 15 oct. 2026, décision de Grégoire : pas de niveau hors calcul. Le seul cas réel, le plagiat soupçonné, se traite au niveau de la copie (« Non recevable »). Voir DECISIONS-2026-10-15-groupe-3.md, question 4.
+
 ### D5 — SOLO est le levier qui doit remplacer les seuils codés en dur
 
 C'est la réponse à la crainte de Grégoire, et le cœur du chantier.
@@ -147,6 +149,8 @@ Le dépistage n'a pas besoin d'« IDME ». Il a besoin d'une échelle **interpr�
 | C4 | L'astérisque « Champ obligatoire » sur *Valeur ponctuelle* n'est **pas appliqué** | `echelles.js:2881, 3164` — #524 ne refuse que le code et le nom |
 
 **C4 est une bonne nouvelle mal dite** : un niveau **sans** valeur ponctuelle est déjà exclu de partout — table de conversion (`calculs.js:86`), moyennes, IPB, et note finale où le critère sort du numérateur **et du dénominateur** (`evaluation-calcul.js:609`). Le mécanisme « jugement suspendu » existe déjà de bout en bout. Ce qui manque, c'est de le **dire** — et de cesser d'annoncer une obligation que rien n'exige.
+
+⮕ 15 oct. 2026, décision de Grégoire : pas de niveau hors calcul. Le seul cas réel, le plagiat soupçonné, se traite au niveau de la copie (« Non recevable »). Voir DECISIONS-2026-10-15-groupe-3.md, question 4.
 
 ---
 
