@@ -7,7 +7,20 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 14 OCT. 2026, 19 h 40 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) COMMITÉE SUR `main` ; VERDICT PLAYWRIGHT PUIS PUSH CE SOIR**
+## POUR LA SESSION QUI PREND LE RELAIS — 15 OCT. 2026, 9 h 10 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) EN LIGNE ; `main` À JOUR**
+
+**En ligne** (mesuré par le connecteur Netlify, Claude Code, 15 oct.) : déploiement `6ad0cfc8017c06d9f5edd16d`, `commit_ref`
+`4ce2ffe6`, `state: ready`, publié à 13:06:31 Z (9 h 06, Toronto). Release `18660532` (build 1014-1940).
+**Verdict complet sur `18660532`** (au signal de Grégoire ; secteur, éveil tenu ; Chrome, Safari et Claude fermés) : code 0, aucun
+instable. Le premier push (`pousser.sh`, 9 h 03) a été refusé par le Vitest du hook : 2 rouges dans `golden-exports-416`, **faux rouge
+de calendrier** (la carte d'essai porte l'échéance fixe 2026-10-15, le jour même ; les gardes cherchaient la date nue). Corrigé en
+`4ce2ffe6` (test seul : elles cherchent « Exporté le <jour> » ; break-test 2 rouges, référence restaurée), Vitest complet vert
+(8 766), poussé par `git push origin main`. Le hook a averti « aucun verdict local pour ce commit » : seul ce fichier de test diffère
+du SHA jugé.
+
+---
+
+## (relais précédent) 14 OCT. 2026, 19 h 40 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) COMMITÉE SUR `main` ; VERDICT PLAYWRIGHT PUIS PUSH CE SOIR**
 
 **Contenu** : lot « À propos » (`92f63708`, texte de l'accueil réécrit par Grégoire) et préparation de la clôture de l'hiver 2026
 (`1db00842`, « Clore » et « Rouvrir » par les fenêtres de l'application ; « Rouvrir » rebranché sur sa confirmation ; la bibliothèque
