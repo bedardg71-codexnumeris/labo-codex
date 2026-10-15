@@ -941,7 +941,12 @@ function _moyennesCriteresDepistage(evaluations, grille) {
  * @returns {Object|null} - Moyennes par critère ou null
  */
 function calculerMoyennesCriteres(da) {
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    // #1055 (15 oct. 2026, verdict de Cowork de 15 h 07) : sans le travail diagnostique, comme
+    // `calculerMoyennesCriteresRecents` en standards (porte 2). Ces moyennes donnent la « Progression
+    // par critère » du profil, et le défi qui mène au pattern et au palier RàI : un diagnostic n'y
+    // entre pas (décisions de Grégoire du 7 sept. et du 15 oct.). La règle des paliers ne bouge pas.
+    const evaluations = window.ProductionDiagnostique.filtrerEvaluations(
+        obtenirDonneesSelonMode('evaluationsSauvegardees') || [], obtenirDonneesSelonMode('productions'));
 
     // Les copies qui COMPTENT (#741, lot A du 16 sept. 2026) : la règle unique #706 — enregistrées,
     // non remplacées (#730 : l'originale d'une reprise porte l'état d'avant), avec ou sans commentaire final.

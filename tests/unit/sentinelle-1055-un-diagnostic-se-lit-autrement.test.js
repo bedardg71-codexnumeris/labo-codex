@@ -249,3 +249,60 @@ describe('#1055 · E — la marque s\'affiche là où la production paraît parm
         expect(profil).toMatch(/const nomProd = production \? echapperHtml\([^\n]*\+ window\.ProductionDiagnostique\.marqueHTML\(production\)/);
     });
 });
+
+/* ------------------------------------------------------------------ F — les moyennes par critère en sommative */
+
+// Verdict de Cowork (15 oct., 15 h 07) : `calculerMoyennesCriteres` passe par l'entité, comme
+// `calculerMoyennesCriteresRecents` en standards. Elles donnent la « Progression par critère » du
+// profil et le défi qui mène au pattern et au palier RàI. Même montage que `sentinelle-730`.
+const DA_F = '2000005';
+const ECHELLE_F = { id: 'E0', nom: 'IDME0', seuilMaitrise: 'M', niveaux: [
+    { code: 'I', nom: 'Insuffisant', min: 0, max: 64, valeurCalcul: 40 }, { code: 'D', nom: 'En développement', min: 65, max: 74, valeurCalcul: 65 },
+    { code: 'M', nom: 'Maîtrisé', min: 75, max: 84, valeurCalcul: 75 }, { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: 100 } ] };
+const GRILLE_F = { id: 'G1', nom: 'Dépistage', criteres: [{ id: 'c1', nom: 'Structure', ponderation: 100, niveauSOLO: 'multistructurel' }] };
+const copieF = (id, prod, code) => ({ id, etudiantDA: DA_F, productionId: prod, noteFinale: 70, niveauFinal: code, echelleId: 'E0', grilleId: 'G1',
+    ponderationCouverte: 100, verrouillee: true, dateEvaluation: '2026-03-01T12:00:00.000Z',
+    criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: code, ponderation: 100 }] });
+const MODULES_F = ['js/interpretation-config.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js'];
+const EXPORTS_F = (() => { const n = new Set(); for (const f of MODULES_F) for (const m of source(f).matchAll(/^\s*window\.([A-Za-z_$][\w$]*)\s*=/gm)) n.add(m[1]); return [...n]; })();
+
+function monterF(productions, evaluations) {
+    const store = { test_evaluationsSauvegardees: evaluations, test_productions: productions, test_echellesTemplates: [ECHELLE_F], test_grillesTemplates: [GRILLE_F] };
+    const db = { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync: (k, v) => { store[k] = clone(v); }, get: async () => null, set: async () => {} };
+    const win = { addEventListener() {}, removeEventListener() {}, obtenirTrimestreId: () => 'test', dateLocaleYMD: () => '2026-05-15' };
+    const fwd = (nom) => (...a) => win[nom](...a);
+    const globaux = { db, cle: (k) => (String(k).startsWith('test_') ? k : 'test_' + k),
+        obtenirDonneesSelonMode: (k) => clone(store['test_' + String(k).replace(/^test_/, '')] || []),
+        obtenirPreference: (n) => (n === 'grilleReferenceDepistage' ? 'G1' : null), definirPreference() {}, echapperHtml: (s) => String(s == null ? '' : s),
+        obtenirTypePratiqueActive: () => 'sommative', estEtudiantExclu: () => false,
+        resoudreModeleParId: (type, id) => clone((store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []).find(m => m.id === id) || null) };
+    for (const nom of EXPORTS_F) if (!(nom in globaux) && !/^[A-Z]/.test(nom)) globaux[nom] = fwd(nom);
+    chargerPredicatsCopie(win);
+    for (const f of MODULES_F) chargerScript(f, globaux, win);
+    return win;
+}
+
+describe('#1055 · F — en sommative, les moyennes par critère ne lisent pas le diagnostic', () => {
+    const ORD = { id: 'P1', titre: 'Analyse', type: 'travail' };
+    const DIAG = { id: 'PD', titre: 'Portrait de lecteur', type: 'travail', diagnostique: true };
+    const r3 = (x) => Math.round(x * 1000) / 1000;
+
+    it('une copie ordinaire (M) et une diagnostique (I) : la moyenne est celle de l\'ordinaire (avant : 0,575)', () => {
+        const w = monterF([ORD, DIAG], [copieF('E1', 'P1', 'M'), copieF('E2', 'PD', 'I')]);
+        expect(r3(w.calculerMoyennesCriteres(DA_F).structure)).toBe(0.75);
+    });
+
+    it('TÉMOIN : décochée, la même copie revient dans la moyenne', () => {
+        const w = monterF([ORD, Object.assign({}, DIAG, { diagnostique: false })], [copieF('E1', 'P1', 'M'), copieF('E2', 'PD', 'I')]);
+        expect(r3(w.calculerMoyennesCriteres(DA_F).structure)).toBe(0.575);
+    });
+
+    it('seule une copie diagnostique : aucune moyenne (null), pas la sienne', () => {
+        const w = monterF([ORD, DIAG], [copieF('E2', 'PD', 'I')]);
+        expect(w.calculerMoyennesCriteres(DA_F)).toBeNull();
+    });
+
+    it('le site passe par l\'entité', () => {
+        expect(corps('js/profil-etudiant-calculs.js', 'calculerMoyennesCriteres')).toContain('window.ProductionDiagnostique.filtrerEvaluations(');
+    });
+});
