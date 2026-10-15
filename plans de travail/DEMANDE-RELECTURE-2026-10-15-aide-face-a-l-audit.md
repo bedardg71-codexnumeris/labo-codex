@@ -92,3 +92,24 @@ Rien de cela n'est inscrit au BACKLOG : aucun symptôme vécu, et la consigne di
 ## 7. Les trois ajouts du verdict de 14 h 02
 
 Ajoutés à `TEXTES-A-RELIRE-2026-10-15.md` (§ 7 à 9), avec ce qui s'affiche aujourd'hui et une question fermée chacun : les recommandations des cartes Contexte et Mobilisation, le vocabulaire du réglage des seuils, les deux étapes de l'assistant qui ne font rien.
+
+## 8. Suite : la consigne du plagiat (Cowork, 14 h 37) — une ligne de verdict demandée
+
+> Ajouté par Claude Code le 15 octobre 2026 à 15 h 23 (Toronto, mesuré par `date`), sur `CONSIGNE-LOT-2026-10-15-aide-plagiat.md`.
+
+**Le texte famille par famille n'est pas posé : une affirmation ne tient pas.** Remesuré au code, phrase par phrase :
+
+| Famille | Phrase de la consigne | Au code |
+|---|---|---|
+| Complétion | compte comme non remise | **Tient** (`evaluationNonRecevable`, lot 30) |
+| Sommative | vaut 0, sauf reprise ou meilleures productions | **Tient** : critères mis à « 0 - Aucun » au choix du statut (`evaluation-sauvegarde.js:595-625`), la copie entre avec sa note (`pratique-sommative.js:74-110`) ; la reprise l'écarte (`remplaceeParId`). ⚠ Aucune sommative ne retient « les meilleures productions » : cette clause ne joue jamais dans cette famille. |
+| Spécifications | compte comme un travail non satisfaisant | **Tient** : note 0 sous le seuil, pas acceptable (`_compterTravauxAcceptables`, `_estTravailAcceptable`, `pratique-pan-specifications.js:777-802`) |
+| Standards, portfolio | sort du portfolio | **Ne tient pas en entier.** Vrai en sélection « meilleurs », « récents », « tous » et en hybride provisoire (`_filtrerEvaluationsArtefactsValides`, `profil-etudiant-actions.js:203-216`). **Faux en hybride avec les notes finales cochées pour une obligatoire** : la copie sort des obligatoires comptées, mais l'obligatoire reste au dénominateur (`nombreObligatoiresTotal`, `_selectionnerArtefactsHybride`) ; elle vaut donc 0, comme une obligatoire non remise. |
+| Standards, terminale | une terminale non recevable vaut 0 | **Tient** (`_obtenirNoteTerminaleEtudiant` ne lit pas l'intégrité) |
+| Dénotation | la copie n'entre pas par calcul | **Tient** (`_calculerPerformanceDenotation` lit le jugement saisi) |
+
+**Question à Cowork, puis à Grégoire si c'est de la pédagogie** : en hybride, une fois les notes finales cochées, une obligatoire non recevable vaut 0. a) C'est voulu : la phrase standards le dit, par exemple « en standards, elle sort du portfolio : la compétence n'est jugée qu'à la reprise. Exceptions : une terminale non recevable vaut 0, et, en mode hybride une fois les notes finales cochées, une obligatoire non recevable aussi, comme une obligatoire non remise. » b) Ce n'est pas voulu : le moteur doit l'écarter du dénominateur (lot de moteur, hors de ce lot).
+
+**Fait dans ce lot** : le point (10) de #1075 au BACKLOG (le nom d'élève dans l'historique des clics du rapport de bogue), sans code. Les six autres trouvailles restent dans cette demande.
+
+**Ligne de verdict demandée** : sur `CONSIGNE-LOT-2026-10-15-aide-plagiat.md` et ce § 8.
