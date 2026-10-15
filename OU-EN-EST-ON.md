@@ -15,6 +15,44 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+⏳ **COMMITÉ LE 15 OCTOBRE 2026, PAS ENCORE EN LIGNE** (en ligne : 1.201.0, envoyée ce matin ; tout ce qui suit part avec la version du soir, après le verdict complet). *Écrit par Claude Code le 15 oct. à 16 h 08 (mesuré par `date`).* **Version en ligne ce soir : — (à compléter après l'envoi).**
+
+**Ce que tu verras** :
+- **Ton codex dit vrai** : les tailles de fichier s'affichent comme sur ton appareil ; quand le codex ne s'enregistre pas, le message ne suppose plus un manque d'espace (#994, #993, #1020).
+- **Le matériel de départ** porte ses noms partout (« Grille de départ », « Échelle de départ (IDME) », « Cartouche de départ ») ; un nom que tu as modifié n'est pas touché (#683, #684).
+- **Note d'un portfolio hybride** : une terminale cochée parmi les obligatoires ne compte plus pour zéro en notes finales ; **en spécifications**, sans seuil réglé, une copie est satisfaisante quand toutes ses spécifications sont respectées (#339, #935).
+- **Au profil d'un élève**, la présence et la remise se disent en mots qui décrivent (« Absences rares, quelques travaux manquants »), et les pistes sont au conditionnel (« À la lumière de ces données, il pourrait être pertinent de… »), sans « critique », « fragile » ni « requise ». La carte Mobilisation n'affiche plus M = (A + C) / 2 (#821, #1083).
+- « Exporter et archiver » devient « Exporter les travaux » ; en Animation, « Des équipes plus grandes » ajoute au plus une personne par équipe (#1017, #1041).
+- **Une production diagnostique** porte l'étiquette « Diagnostique » dans Conception › Productions, la Liste des évaluations et le profil. Elle ne compte plus nulle part : ni dans la note, ni dans la complétion, ni dans les courbes, les flèches et les graphiques du profil. Une nouvelle production ne reprend plus la case de la précédente (#1055).
+- **L'Aide dit ce que fait l'application** : plus d'indice de risque R ni d'échelle de risque, une seule règle pour le niveau RàI, l'assiduité sur les séances saisies, les seuils dans une seule table. Une copie plagiée y est décrite famille par famille, selon tes décisions (#1087).
+- **Les textes que tu as relus** sont posés :
+  - l'aide du Comparateur et de l'import d'un trimestre à l'autre, et une bulle par étape de l'assistant de pratique ;
+  - le réglage des seuils dit « « Quelques absences » à partir de »… ;
+  - plus aucun chiffre sous le dégradé du tableau de bord ;
+  - l'assistant perd « Nombre d'évaluations » et « Tes seuils personnels » (#364, #18).
+
+**En coulisse, rien à l'écran** : le verrou d'une production entière, qui ne protégeait rien, est retiré (le verrou d'une copie ne change pas) (#489).
+
+**Vérifié comment** :
+- chaque lot relu par Cowork ;
+- les textes d'écran tranchés par toi à la page « Textes à relire » ;
+- Vitest complet vert sur le dernier commit (8 910 essais) ;
+- les tests neufs éprouvés par ablation : chacun rougit quand on casse ce qu'il garde.
+**Pas encore vérifié** : la suite Playwright (le verdict du soir) et l'écran sur ton Safari.
+
+**Tes données** : rien n'est réécrit. Deux choses à savoir :
+- des productions créées juste après une production diagnostique ont pu hériter de la case : l'étiquette te les montre, et tu les décoches toi-même (porte terrain de ce soir, `plans de travail/PORTES-TERRAIN-2026-10-15-diagnostique.md`) ;
+- les captures déjà écrites gardent leur complétion tant que tu ne cliques pas « Recalculer les captures ».
+Une pratique rouverte dans l'assistant garde ses anciens seuils et son nombre d'évaluations.
+
+**Ce qui attend** :
+- l'encadré de l'épreuve uniforme dans le PDF de l'élève (#668) et le bulletin d'une page (#333) : tes mots sont acceptés, ils iront aux lots qui construiront ces PDF ;
+- le principe « l'application ne prescrit pas » reste à appliquer à la carte RàI, à son aide et au guide RàI (#1088) ;
+- le nom d'un élève peut partir dans le rapport de bogue s'il a été cliqué : relis le rapport avant de l'envoyer (#1075) ;
+- l'export anonymisé (#1060, #1074).
+
+**Ce qui te revient** : les mots de remplacement des phrases qui prescrivent encore (#1088) ; la porte terrain du diagnostic, après l'envoi.
+
 ✅ **EN LIGNE LE 12 OCTOBRE 2026 À 15 h 13 : 1.200.0 (mesurée chez Netlify sur `239de979` ; verdict complet vert) — MOINS DE FENÊTRES QUI BLOQUENT**
 
 **Ce que tu verras** (les mots de tes Nouvelles) :
