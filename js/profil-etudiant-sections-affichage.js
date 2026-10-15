@@ -1697,15 +1697,8 @@ function genererSectionMobilisation(da) {
             </div>
         </div>
 
-        <!-- DÉCOMPOSITION VISUELLE -->
-        <h4 class="profil-titre-bleu-compact">
-            Décomposition de l'indice M
-        </h4>
-        <div class="profil-carte-simple">
-            <div class="profil-texte-mono-centre-bleu" style="font-size: 1.1rem;">
-                M = (A + C) / 2 = (${indices.A}% + ${indices.C}%) / 2 = ${indices.M}
-            </div>
-        </div>
+        <!-- 15 oct. 2026 (Grégoire, #1083 6.46) : la « Décomposition de l'indice M », M = (A + C) / 2, est
+             retirée : « c'est un reliquat de la moyenne (A+C)/2. c'est abandonné. » -->
 
         <!-- RECOMMANDATIONS SELON LE NIVEAU -->
         ${interpM.code === 'decrochage' ? `

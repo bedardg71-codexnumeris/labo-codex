@@ -340,7 +340,7 @@ const TOOLTIPS = {
     'eval-statut-remise':
         'Indique si la production a été remise. Conditionne le calcul de l\'indice de complétion (C).',
     'eval-integrite':
-        'Recevable ou non. Les travaux non recevables (plagiat, IA non autorisée) sont exclus des calculs de moyenne et de l\'indice P.',
+        'Recevable ou non. Une copie non recevable (plagiat, IA non autorisée) compte comme non remise dans la complétion ; dans la note, son sort dépend de ta pratique (Aide › « Travail NON RECEVABLE »).',
     'eval-francais-ecrit':
         'Évaluation algorithmique du français écrit : saisis les codes d\'erreurs et le nombre de mots. Le calcul et la rétroaction sont générés automatiquement à partir de tes formulations.',
     'eval-codes-erreurs':

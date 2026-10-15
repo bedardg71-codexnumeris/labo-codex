@@ -11868,12 +11868,14 @@
                                 <li>Niveau : 0</li>
                                 <li>Note : -- (deux tirets)</li>
                             </ul>
-                            <p><strong>Impact sur les calculs :</strong></p>
+                            <p><strong>Impact sur les calculs :</strong> une copie non recevable compte comme non remise dans la complétion (C) ; elle reste dans le total attendu. Dans la note, son sort dépend de ta pratique :</p>
                             <ul class="m-10-0-0-0">
-                                <li><strong>Complétion (C)</strong> : Comptée comme non remise (elle reste dans le total attendu)</li>
-                                <li><strong>Performance (P)</strong> : Exclu du calcul de la moyenne</li>
-                                <li><strong>Moyenne</strong> : Complètement exclu</li>
+                                <li>en sommative, elle vaut 0, sauf si une reprise la remplace ;</li>
+                                <li>en spécifications, elle compte comme un travail non satisfaisant ;</li>
+                                <li>en standards, elle sort du portfolio : la compétence n'est jugée qu'à la reprise. Exceptions : une terminale non recevable vaut 0, et, en mode hybride une fois les notes finales cochées, une obligatoire non recevable aussi, comme une obligatoire non remise ;</li>
+                                <li>en dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.</li>
                             </ul>
+                            <p>La moyenne de la Liste des évaluations, elle, l'écarte toujours.</p>
                             <p><strong>Exemple :</strong> Si un·e étudiant·e a 7 productions recevables + 1 plagiat sur 9 attendues, son indice C = 7/9 = 78% (le plagiat compte comme non remis)</p>
                         </div>
 
@@ -11905,7 +11907,7 @@
                             <strong>Jetons de reprise pour les non recevables :</strong> Un travail non recevable peut recevoir un jeton de reprise pour permettre à l'étudiant·e de soumettre un nouveau travail original. La nouvelle évaluation remplacera l'ancienne dans tous les calculs.
                         </div>
 
-                        <p><strong>Exemple concret (Étudiant avec 9 artefacts) :</strong></p>
+                        <p><strong>Exemple concret, en standards (étudiant·e avec 9 artefacts, portfolio retenant les meilleurs) :</strong></p>
                         <table class="tableau">
                             <thead>
                                 <tr>
@@ -11943,7 +11945,7 @@
                                     <td>Non recevable (Plagiat)</td>
                                     <td class="text-center">--</td>
                                     <td>Non (non remis)</td>
-                                    <td>Non</td>
+                                    <td>Non (sort du portfolio)</td>
                                 </tr>
                                 <tr>
                                     <td>Artefact 5</td>
@@ -11971,7 +11973,7 @@
                         </ul>
 
                             <div class="alerte alerte-info">
-                                <strong>Principe clé :</strong> Un travail non recevable n'est pas une note de 0%, c'est une absence d'évaluation.
+                                <strong>Principe clé :</strong> Une copie non recevable compte comme non remise. Ce qu'elle vaut dans la note dépend de ta pratique : 0 en sommative, un travail non satisfaisant en spécifications, hors du portfolio en standards ; en dénotation, ta note est ton jugement.
                             </div>
                         </div>
                     </div>
@@ -14235,7 +14237,7 @@
     <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20261014b"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20261014e"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20261014f"></script> <!-- Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20260917b"></script>
     <script src="js/presences-rapport.js?v=20260827a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20261008a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
@@ -14362,7 +14364,7 @@
     <script src="js/accompagnement.js?v=20261014a"></script> <!-- #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20261014d"></script> <!-- Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20261014e"></script> <!-- Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
     <script src="js/accompagnement-contenu-popup.js?v=20261014e"></script> <!-- Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
     <script src="js/accompagnement-contenu-terme.js?v=20261014c"></script>
     <script src="js/guides-pedagogiques.js?v=20261014a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
