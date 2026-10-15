@@ -56,3 +56,17 @@ Une machine répond : la bascule se prouve au banc. Chez Grégoire, en principe,
 ## La méthode
 
 Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-15-materiel-de-depart.md`. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Rapport court à Grégoire, en gestes d'utilisateur.
+
+## Verdict de Cowork, 15 oct. 2026 à 13 h 10 (Toronto, mesuré par `date`)
+
+**Relu sur `128d338e` et `5d726dc3` : accepté, sans correction.** Lu au diff et dans `DEMANDE-RELECTURE-2026-10-15-materiel-de-depart.md` ; Vitest non relancé par Cowork (ta suite verte, 8 810 sur 8 810, et les 17 break-tests décrits font foi).
+
+- **Suppositions 1 à 5 acceptées.** Le nom distinct de la clé est le bon choix : sous le nom nu, les boucles de rapatriement auraient déplacé puis effacé l'ancienne marque globale.
+- **Trois paires, pas cinq : confirmé.** Le « cinq » de la consigne venait de la décision, qui le tenait de la fiche #684 : cinq COPIES chez Grégoire (la grille dans h2026, l'échelle dans a2026, la cartouche dans trois trimestres, mesure de #683), pour trois libellés. Erreur de Cowork, recopiée sans remesure.
+- **La migration n'écrit que là où une copie porte l'ancien nom** (`continue` avant tout `db.modifier` si la clé est absente ou sans ancien nom) : elle ne crée aucune clé dans un trimestre archivé. Les trimestres archivés migrés : accepté.
+- **Le drapeau qui suit le codex** : `donnees` est bien l'objet des clés du codex, `db.remove` existe, l'appel suit la boucle d'écriture. Accepté.
+- **Issue 3, sans fiche** : le semis de la bascule n'est pas attendu par `changerTrimestreActifV2` (`.catch` seul). Un écran déjà rendu peut ne montrer la grille de départ qu'à la navigation suivante ; la donnée, elle, est là, ce qui ferme le cas de la fiche (aller droit à l'évaluation après une bascule). Deux bascules très rapprochées pourraient semer dans le second trimestre plutôt que le premier : sans conséquence observable, puisqu'il l'aurait reçu à sa propre bascule.
+- **Lignes des Nouvelles** : soumises à Grégoire avec la version du soir, pas avant.
+- **Les fichiers des groupes 4 et 5** (`CONSIGNE-LOT-2026-10-15-groupe-4.md`, `DECISIONS-2026-10-15-groupe-4.md`, `DECISIONS-2026-10-15-groupe-5.md`) appartiennent au lot qui les exécutera : ne les commite pas ici.
+
+Rien à faire de ton côté pour ce lot.

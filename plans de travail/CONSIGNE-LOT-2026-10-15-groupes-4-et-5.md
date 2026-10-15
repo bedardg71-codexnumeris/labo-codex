@@ -47,3 +47,27 @@ Les lignes « à poser » de `DECISIONS-2026-10-15-groupe-4.md`, telles quelles,
 ## La méthode
 
 Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-15-groupes-4-et-5.md`, avec les mots proposés pour #777. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Propose une ligne des Nouvelles. Rapport court à Grégoire en gestes d'utilisateur.
+
+## Verdict de Cowork, 15 oct. 2026 à 13 h 31 (Toronto, mesuré par `date`)
+
+**Relu sur `d69115d3` et `0c61e614` : accepté. Les trois points qui t'attendaient sont tranchés ci-dessous ; fais-les en un commit court.** Vitest non relancé par Cowork (ta suite verte, 8 814 sur 8 814, et les break-tests décrits font foi). Le banc avant/après de #339 (0 différence au retrait seul ; au zéro fantôme, 61 valeurs qui montent, toutes en H2 final, aucune qui baisse) est accepté comme preuve.
+
+### 1. #777 : option A, pas de bouton
+
+Remesuré par Cowork : le seul lecteur d'affichage de `snapshotAvant` (`js/interventions.js` ~1157-1170) lit `snap.criteres`, jamais `snap.P` ; les autres lecteurs (`correction-da.js`, `reserve.js`) le déplacent ou le filtrent sans l'afficher. Un bouton réécrirait dans les données de Grégoire un nombre qu'aucun écran ne montre. La décision de Grégoire de 11 h 30 reposait sur une mesure visible qui n'existe pas ; Cowork le lui dit. Pose sous #777 la ligne suivante, telle quelle, et coche la fiche :
+
+`**15 oct. 2026 (Cowork) : pas de bouton.** Une nouvelle mesure « avant » écrit « non calculable » au lieu de 0. Le bouton prévu par la décision de 11 h 30 n'est pas construit : le seul écran qui lit la mesure « avant » (le bilan) lit les critères, jamais le P ; les captures hebdomadaires se refont déjà par « Recalculer les captures ». Détail : plans de travail/DEMANDE-RELECTURE-2026-10-15-groupes-4-et-5.md, question 1.`
+
+### 2. #1016 : les mots de Grégoire, tels quels
+
+« Courbes de progression » est le mot que l'application emploie déjà pour la même case, au même moment : le bandeau des consignes non transmises (`js/evaluation.js` ~2407, « ses copies ne comptent pas dans les courbes de progression »). L'aide et le bandeau parlent ensemble ; le titre de section « Progression temporelle ACP » n'a pas à être cité. Corrige l'aide avec la phrase du fichier du groupe 5, question 1, telle quelle ; pose sa ligne sous #1016 et coche-la.
+
+### 3. L'écran des catégories : la terminale sort des obligatoires cochables
+
+Choix de Cowork : la première des deux voies, sans mot neuf. La terminale n'est plus proposée parmi les obligatoires (même logique que l'exclusivité qui existe déjà entre les deux listes, `chargerProductionsPourCategories`), et `recalculerPonderationsUnitaires` (`js/pratiques-gestion.js` ~2768) l'écarte de son compte, y compris quand une configuration existante la porte cochée. La terminale se reconnaît par la même source que `_selectionnerArtefactsHybride`. **Rien n'est réécrit** : la marque déjà posée sur la production reste, inerte pour le calcul comme pour l'écran. Motif : l'écran affichait « 35 % ÷ N » pour un calcul qui divise désormais par N − 1, en provisoire comme en final. Un essai, rougi par sa mutation.
+
+### Le reste
+
+- Commite aussi `plans de travail/CONSIGNE-DU-JOUR.md` (verdict de 13 h 10) et ce fichier. `DECISIONS-2026-10-15-groupe-6.md` n'est pas à toi : laisse-le.
+- Les deux lignes des Nouvelles proposées seront soumises à Grégoire avec la version du soir. Si le point 3 change l'écran, ajoute-le à la première (« … elle n'est plus proposée parmi les obligatoires »), proposé, non posé.
+- Pas de nouvelle demande de relecture : rapport court à Grégoire, et le hash du commit.
