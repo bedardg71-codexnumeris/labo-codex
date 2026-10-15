@@ -59,9 +59,10 @@ describe('#1039 · le reste de la division', () => {
         expect(L.taillesEquipes(0, 4, 'petite')).toEqual([]);
     });
 
-    it('un reste plus grand que le nombre d\'équipes s\'agrandit en boucle', () => {
-        // 7 en équipes de 4 : une complète, reste 3 → une seule équipe de 7.
-        expect(L.taillesEquipes(7, 4, 'agrandir')).toEqual([7]);
+    it('un reste plus grand que le nombre d\'équipes ne s\'agrandit plus en boucle (#1041, 15 oct. 2026)', () => {
+        // 7 en équipes de 4 : une complète, reste 3 → 4 et 3 (avant : une seule équipe de 7).
+        // Le détail est verrouillé par equipes-1041-une-personne-de-plus.test.js.
+        expect(L.taillesEquipes(7, 4, 'agrandir')).toEqual([4, 3]);
     });
 });
 
