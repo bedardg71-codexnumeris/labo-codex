@@ -46,3 +46,27 @@ Rien ne change à l'écran. Les bancs suffisent : un verrou statique (plus aucun
 ## La méthode
 
 Commit, Vitest complet (depuis `tests/`), demande `plans de travail/DEMANDE-RELECTURE-2026-10-15-groupes-1-et-2.md`. **Aucun push, aucune release, aucun verdict Playwright avant son signal du soir.** Pas de ligne des Nouvelles : rien de visible. Rapport court à Grégoire.
+
+## Verdict de Cowork, 15 oct. 2026 à 11 h 27 (Toronto, mesuré par `date`)
+
+**Relu sur `90fcdef2` : accepté, avec une correction à faire avant le verdict du soir.** Lu au diff et dans `DEMANDE-RELECTURE-2026-10-15-groupes-1-et-2.md` ; Vitest non relancé par Cowork (ta suite verte, 8 791 sur 8 791, fait foi pour ce qu'elle couvre).
+
+Ce que Cowork a mesuré, et qui tient :
+
+- `noms_stables.json` : une seule ligne retirée, `verrouillerEvaluation`, celle que Grégoire a autorisée.
+- Les 16 symboles retirés : au parent `90fcdef2^`, aucune occurrence dans `js/`, `*.html` ni `css` hors des trois fichiers modifiés ; aucun élément de la Banque dans `index.html`. La Banque retirée en entier est dans le mandat (« retire celles qui le confirment »), pas un élargissement.
+- Le jeton de reprise reste servi par trois chemins vivants (`evaluation-sauvegarde.js`, `liste-evaluations.js`, `travaux-ui.js`) : retirer `appliquerJetonRepriseDepuisSidebar` ne coupe aucun geste.
+- Les huit lignes du BACKLOG sont identiques à leur source, chacune sous sa fiche ; #544, #489 et #275 cochées, les autres ouvertes.
+- Le commentaire de `codex.js` dit ce que disait le verdict de 9 h 46.
+- Suppositions 1 à 3 acceptées. Les deux autres voies de copie (`dupliquerProductionBibliotheque`, `dupliquerEtEditerProduction`) propagent encore `verrouille` par étalement de la source : c'est du stock recopié, pas une écriture, et `forkerItem` est partagé avec les grilles, où ce champ vit. Issue 3, rien à faire.
+
+### La correction : deux bancs Playwright suivent encore le champ retiré
+
+Vitest ne les lance pas ; ils auraient rougi au verdict du soir. Ce n'est pas une trouvaille : c'est ton lot qui n'est pas fini.
+
+1. `tests/integration/lot-e3-creer-ou-modifier.spec.js`, ligne 159 : `toMatchObject({ type: 'travail', ponderation: 10, verrouille: false })`. La création n'écrit plus le champ. Sa jumelle Vitest (`sentinelle-lot-e3`) a été adaptée, pas elle. Retire `verrouille: false` de l'objet attendu et ajoute `expect(creee.verrouille).toBeUndefined()`, avec un commentaire d'une ligne (#489, 15 oct.).
+2. `tests/integration/carac-476-volet2-duplication.spec.js`, ligne 667 (`dupliquerProduction`) : `expect(r.copie.verrouille).toBe(false)`. La copie retire maintenant le champ : `toBeUndefined()`, même commentaire. Les lignes 699 et 726 (`toBe(true)`, voies bibliothèque et forkerItem) restent telles quelles.
+
+Remesure avant de toucher : `git grep -n -w verrouille -- tests/integration` et vérifie qu'aucun autre banc Playwright n'attend ce champ sur une production créée ou copiée par `productions.js` ou `productions-liste.js`.
+
+Pas de Playwright maintenant : le verdict du soir juge ces deux bancs. Commit séparé (`test(integration) : #489, …`), avec ce fichier. Pas de nouvelle demande de relecture : rapport d'une ligne à Grégoire.
