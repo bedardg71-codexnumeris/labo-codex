@@ -83,8 +83,10 @@ describe('Golden master · il ne doit RIEN devoir au jour où on le lance', () =
 
         // Le jour où ce cas tombe parce que les deux dates coïncident, il ne
         // prouve plus rien — mais il ne peut pas mentir non plus.
+        // On cherche « Exporté le <jour> », pas la date nue : la carte d'essai porte
+        // une échéance fixe (2026-10-15), qui a fait rougir ce cas le 15 oct. 2026.
         if (aujourdhui !== attendue) {
-            expect(exporteur.genererExport('sommaire', 'texte')).not.toContain(aujourdhui);
+            expect(exporteur.genererExport('sommaire', 'texte')).not.toContain('Exporté le ' + aujourdhui);
         }
     });
 
@@ -98,7 +100,7 @@ describe('Golden master · il ne doit RIEN devoir au jour où on le lance', () =
             expect(
                 readFileSync(path.join(dossierRef, `${niveau}.${format}.txt`), 'utf8'),
                 `${niveau}.${format} contient la date du jour — le golden master est redevenu périssable.`
-            ).not.toContain(aujourdhui);
+            ).not.toContain('Exporté le ' + aujourdhui);
         }
     });
 
