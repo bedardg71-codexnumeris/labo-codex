@@ -751,7 +751,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: 'Les zones de couleur — Fragile, Modéré, Favorable, Très favorable — t’aident à repérer rapidement qui a besoin d’attention.'
+                contenu: 'Les zones de couleur t’aident à repérer rapidement qui a besoin d’attention.'
             },
             {
                 type: 'exemple',

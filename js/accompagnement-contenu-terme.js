@@ -212,7 +212,7 @@ const GLOSSAIRE = {
         terme: 'Indices A-C-P (ensemble)',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Les trois indices résument le contexte d\'apprentissage observé de chaque étudiant·e. Ensemble, ils forment un portrait : A dit «est-ce que l\'étudiant·e est exposé·e à l\'apprentissage ?», C dit «est-ce qu\'il ou elle se pratique ?», P dit «est-ce que ça se traduit en compétence ?». Les zones de couleur — Fragile, Modéré, Favorable, Très favorable — aident à repérer rapidement qui a besoin d\'attention. Cette lecture est subjective : elle est relative non seulement aux traces que laisse l\'étudiant·e, mais aussi à la lecture qu\'en fait l\'enseignant·e.',
+        definition: 'Les trois indices résument le contexte d\'apprentissage observé de chaque étudiant·e. Ensemble, ils forment un portrait : A dit «est-ce que l\'étudiant·e est exposé·e à l\'apprentissage ?», C dit «est-ce qu\'il ou elle se pratique ?», P dit «est-ce que ça se traduit en compétence ?». Les zones de couleur aident à repérer rapidement qui a besoin d\'attention. Cette lecture est subjective : elle est relative non seulement aux traces que laisse l\'étudiant·e, mais aussi à la lecture qu\'en fait l\'enseignant·e.',
         voir: 'Tableau de bord > Aperçu'
     },
 

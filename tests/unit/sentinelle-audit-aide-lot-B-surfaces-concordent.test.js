@@ -54,23 +54,23 @@ describe('Infobulles — les chiffres qu\'elles donnent sont ceux du code', () =
             i < positions.length - 1 ? `${pct(pos)}-${pct(positions[i + 1])}%` : `≥ ${pct(pos)}%`
         );
 
-        const noms = ['Fragile', 'Modéré', 'Favorable', 'Très favorable'];
-
-        // L'écran DÉRIVE ses libellés : chaque bande appelle le calculateur, dans l'ordre.
-        noms.forEach((nom, i) => {
-            const motif = new RegExp(`>${nom}<[\\s\\S]{0,120}?libelleBandeDistribution\\(${i}\\)`);
-            expect(motif.test(tdb), `la bande « ${nom} » recopie un libellé au lieu de le calculer`).toBe(true);
+        // #821 (15 oct. 2026) : aucun mot sur le dégradé. L'écran DÉRIVE ses plages :
+        // chaque bande appelle le calculateur, dans l'ordre.
+        [0, 1, 2, 3].forEach((i) => {
+            expect(tdb, `la plage ${i} recopie un libellé au lieu de le calculer`).toContain(`\${libelleBandeDistribution(${i})}`);
         });
 
         const bulle = HOVER.match(/'tdb-zones-couleur':\s*\n?\s*'((?:[^'\\]|\\.)*)'/);
         expect(bulle).toBeTruthy();
-        noms.forEach((nom, i) => {
-            expect(bulle[1]).toContain(nom);
+        for (const mot of ['Fragile', 'Modéré', 'Favorable']) {
+            expect(bulle[1], `« ${mot} » est revenu dans l'infobulle des zones`).not.toContain(mot);
+        }
+        attendus.forEach((attendu, i) => {
             // les bornes calculées, avec l'espace fine de l'infobulle
             expect(
                 bulle[1].replace(/\s%/g, '%'),
-                `l'infobulle ne porte pas la borne calculée de « ${nom} » (attendu ${attendus[i]})`
-            ).toContain(attendus[i]);
+                `l'infobulle ne porte pas la borne calculée de la plage ${i} (attendu ${attendu})`
+            ).toContain(attendu);
         });
 
         // Ces zones ne sont PAS configurables : l'infobulle ne doit pas le prétendre.

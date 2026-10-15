@@ -124,7 +124,11 @@ describe('A · #744 — la carte RàI donne seule le palier, sur les écrans du 
    B · #822 — « Insuffisant » retiré du contexte d'apprentissage, aucune borne ne bouge
    ============================================================================================= */
 describe('B · #822 — le palier « Insuffisant » n\'existe plus', () => {
-    const win = chargerScript('js/contexte-qualification.js');
+    // #821 (15 oct. 2026) : le palier dit sa phrase par les seuils du mécanisme 2 — `obtenirSeuil`
+    // (interpretation-config.js, chargé avant lui dans index.html) doit exister, comme dans l'app.
+    const db = { getSync: (k, d) => (d !== undefined ? d : null), setSync() {}, get: async () => null, set: async () => {} };
+    const win = chargerScript('js/interpretation-config.js', { db });
+    chargerScript('js/contexte-qualification.js', { obtenirSeuil: win.obtenirSeuil }, win);
 
     it('B1 · comportement : tout ce qui n\'est pas « Modéré » est « Fragile », jusqu\'à 0 / 0 et jusqu\'à une valeur illisible', () => {
         const niveaux = [[0.9, 0.9], [0.8, 0.8], [0.7, 0.7], [0.64, 0.9], [0.9, 0.64], [0, 0], [NaN, 0.9]].map(([A, C]) => win.qualifierContexteApprentissage(A, C).niveau);

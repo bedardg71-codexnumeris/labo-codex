@@ -16,11 +16,18 @@
    un dégradé continu (mécanisme 1). Les fusionner en une fonction serait un
    changement de comportement déguisé en refactorisation.
 
-   ⛔ CE MODULE N'A RIEN CHANGÉ À L'ÉCRAN, ET NE DOIT RIEN Y CHANGER : mêmes
-   libellés, mêmes bornes, mêmes couleurs, mêmes classes de badge qu'avant son
-   existence. Le renommage des mots attend le travail d'automne avec
-   l'orthopédagogue ; les bornes sont de la pédagogie, elles remontent à
-   Grégoire. Un pixel qui bouge ici est un défaut.
+   ⮕ LES MOTS (15 oct. 2026, décision de Grégoire, groupe 4 question 3, mots
+   adoptés à 11 h 38) : des mots qui DÉCRIVENT ce qu'on observe (la présence,
+   la remise), pas des mots qui jugent l'élève ; UN SEUL vocabulaire, celui du
+   mécanisme 2. Les mécanismes 3 et 4 n'ont plus de mot à eux : ils se disent
+   par les deux descriptions du mécanisme 2 (« Absences rares, quelques travaux
+   manquants »), ce qui empêche deux mots contradictoires pour le même élève.
+   Le mécanisme 1 n'a aucun mot. « Décrochage », statut posé par l'enseignant,
+   reste. Les recommandations attachées n'ont pas été réécrites (relecture).
+
+   ⛔ AUCUNE BORNE NE BOUGE, AUCUNE COULEUR NE CHANGE (gel d'octobre, #742
+   close) : renommer n'est pas reborner. Les bornes sont de la pédagogie, elles
+   remontent à Grégoire.
 
    LES QUATRE MÉCANISMES, côte à côte (mesuré le 10 sept. 2026, `5c29d3fd`) :
 
@@ -31,10 +38,11 @@
    | 3 | Profil › contexte d'apprentissage   | A ET C         | 4 paliers par conjonction      | non      |
    | 4 | Profil › interprétation A-C (M)     | A ET C         | 9 branches par conjonction     | non      |
 
-   ⚠ LA DIVERGENCE DOCUMENTÉE, PRÉSERVÉE TELLE QUELLE : un·e étudiant·e à
-   A = 80 %, C = 80 % est « Favorable » par le mécanisme 3 (A ≥ 75 ET C ≥ 75)
-   et « Acceptable » par le mécanisme 4 (pas A ≥ 90 ET C ≥ 90) — sur le même
-   écran. Le tableau des divergences est dans
+   ⚠ LA DIVERGENCE DES BORNES, PRÉSERVÉE TELLE QUELLE : un·e étudiant·e à
+   A = 80 %, C = 80 % tombe dans le palier « favorable » du mécanisme 3
+   (A ≥ 75 ET C ≥ 75) et dans la branche « acceptable » du mécanisme 4 (pas
+   A ≥ 90 ET C ≥ 90) : badges et couleurs diffèrent, mais depuis le 15 oct.
+   les deux cartes écrivent la MÊME phrase. Le tableau des divergences est dans
    `Rapports/INVENTAIRE-2026-09-10-nomenclature-des-zones.md`, § LOT B.
 
    Verrouillé par `tests/unit/sentinelle-821a-quatre-regles-un-seul-endroit.test.js`.
@@ -53,8 +61,9 @@
 // ⚠ NE CLASSE RIEN. Chaque barre de distribution (une pour A, une pour C,
 // une pour P — l'inventaire disait « indice composite », c'est faux : chaque
 // barre positionne UN indice) est un dégradé continu ; la couleur d'un point
-// est interpolée. Les quatre mots de la légende situent
-// des changements de teinte, ils ne découpent pas des catégories.
+// est interpolée. La légende pose quatre plages de pourcentage sous le
+// dégradé ; depuis le 15 oct. 2026 (#821), AUCUN MOT ne les nomme : un mot
+// découpait des catégories là où il n'y en a pas.
 //
 // La GÉOMÉTRIE du dégradé (axe 30 → 100 %, arrêts posés à 0 / 25 / 50 / 75 %
 // de la barre, donc à 30 / 47,5 / 65 / 82,5 %) vit dans `tableau-bord-apercu.js`
@@ -62,17 +71,11 @@
 // légende la lisent toutes trois. La sentinelle du lot B de l'audit de l'Aide
 // la verrouille LÀ, dans le texte de ce fichier : elle n'est pas recopiée ici,
 // elle est LUE à l'appel. Une copie ferait renaître la dérive que #818 a fermée.
-//
-// Les MOTS, eux, sont ici. Provenance : `8d46101c` (14 nov. 2025), bascule
-// d'une échelle de risque vers une échelle d'« engagement » à cinq paliers ;
-// l'indice E et son classement ont été retirés le 16 avr. 2026 (`adc8f4b9`),
-// les mots sont restés, sans « Insuffisant ». Voir l'inventaire, § 1.
-const LIBELLES_LEGENDE_APERCU = ['Fragile', 'Modéré', 'Favorable', 'Très favorable'];
 
 /**
  * Les quatre bandes de la légende de l'Aperçu, avec leurs bornes en score 0-1,
  * dérivées de la géométrie du dégradé (jamais recopiées).
- * @returns {Array<{libelle: string, de: number, a: (number|null), couleur: string}>}
+ * @returns {Array<{de: number, a: (number|null), couleur: string}>}
  *          `a` vaut null pour la dernière bande (« ≥ »).
  */
 function bandesLegendeApercu() {
@@ -81,11 +84,10 @@ function bandesLegendeApercu() {
     if (!Array.isArray(arrets) || typeof score !== 'function') {
         throw new Error('bandesLegendeApercu : tableau-bord-apercu.js n\'expose pas la géométrie du dégradé');
     }
-    return LIBELLES_LEGENDE_APERCU.map((libelle, i) => ({
-        libelle: libelle,
-        de: score(arrets[i].position),
+    return arrets.map((arret, i) => ({
+        de: score(arret.position),
         a: i < arrets.length - 1 ? score(arrets[i + 1].position) : null,
-        couleur: arrets[i].couleur
+        couleur: arret.couleur
     }));
 }
 
@@ -115,94 +117,64 @@ function seuilsInterpretation() {
     };
 }
 
+// Les cinq paliers, du plus régulier au moins régulier : les mots adoptés par
+// Grégoire le 15 oct. 2026 (11 h 38), tels quels. Les anciennes `description`
+// (« engagement soutenu », « situation d'urgence »…) jugeaient l'élève et
+// n'étaient lues par aucun écran : retirées. Les couleurs n'ont pas bougé.
+const MOTS_PRESENCE = ['Aucune absence ou presque', 'Absences rares', 'Quelques absences',
+    'Absences fréquentes', 'Absences très fréquentes'];
+const MOTS_REMISE = ['Aucun travail manquant ou presque', 'Travaux manquants rares',
+    'Quelques travaux manquants', 'Travaux manquants fréquents', 'Travaux manquants très fréquents'];
+const COULEURS_PALIERS = ['#2196F3', '#28a745', '#ffc107', '#ff9800', '#dc3545']; // bleu, vert, jaune, orange, rouge
+
+/**
+ * Le palier (0 = le plus régulier, 4 = le moins régulier) d'une proportion 0-1,
+ * selon les trois seuils réglés et la borne fixe. Une valeur illisible (NaN)
+ * tombe au dernier palier, comme avant.
+ */
+function palierInterpretation(p) {
+    const seuils = seuilsInterpretation();
+    if (p >= seuils.excellent) return 0;
+    if (p >= seuils.bon) return 1;
+    if (p >= seuils.acceptable) return 2;
+    if (p >= BORNE_FIXE_INSUFFISANT) return 3;
+    return 4;
+}
+
 /**
  * Interprète l'indice A (Assiduité).
- * Déplacée telle quelle depuis `profil-etudiant-helpers.js` le 10 sept. 2026.
+ * Déplacée depuis `profil-etudiant-helpers.js` le 10 sept. 2026 ; mots du 15 oct.
  * @param {number} valeur - Valeur en pourcentage (0-100)
- * @returns {Object} - { niveau, couleur, description }
+ * @returns {Object} - { niveau, couleur }
  */
 function interpreterAssiduite(valeur) {
-    const a = valeur / 100; // Normaliser en 0-1
-    const seuils = seuilsInterpretation();
-
-    if (a >= seuils.excellent) {
-        return {
-            niveau: 'Assiduité exemplaire',
-            couleur: '#2196F3', // Bleu
-            description: 'Présence constante et engagement soutenu'
-        };
-    }
-    if (a >= seuils.bon) {
-        return {
-            niveau: 'Bonne assiduité',
-            couleur: '#28a745', // Vert
-            description: 'Présence régulière avec absences rares et justifiées'
-        };
-    }
-    if (a >= seuils.acceptable) {
-        return {
-            niveau: 'Assiduité acceptable',
-            couleur: '#ffc107', // Jaune
-            description: 'Quelques absences, suivi recommandé'
-        };
-    }
-    if (a >= BORNE_FIXE_INSUFFISANT) {
-        return {
-            niveau: 'Assiduité insuffisante',
-            couleur: '#ff9800', // Orange
-            description: 'Absences fréquentes, intervention nécessaire'
-        };
-    }
-    return {
-        niveau: 'Assiduité critique',
-        couleur: '#dc3545', // Rouge
-        description: 'Absences excessives, situation d\'urgence'
-    };
+    const i = palierInterpretation(valeur / 100);
+    return { niveau: MOTS_PRESENCE[i], couleur: COULEURS_PALIERS[i] };
 }
 
 /**
  * Interprète l'indice C (Complétion).
- * Déplacée telle quelle depuis `profil-etudiant-helpers.js` le 10 sept. 2026.
+ * Déplacée depuis `profil-etudiant-helpers.js` le 10 sept. 2026 ; mots du 15 oct.
  * @param {number} valeur - Valeur en pourcentage (0-100)
- * @returns {Object} - { niveau, couleur, description }
+ * @returns {Object} - { niveau, couleur }
  */
 function interpreterCompletion(valeur) {
-    const c = valeur / 100; // Normaliser en 0-1
-    const seuils = seuilsInterpretation();
+    const i = palierInterpretation(valeur / 100);
+    return { niveau: MOTS_REMISE[i], couleur: COULEURS_PALIERS[i] };
+}
 
-    if (c >= seuils.excellent) {
-        return {
-            niveau: 'Taux de complétion excellent',
-            couleur: '#2196F3', // Bleu
-            description: 'Remise régulière et complète des travaux'
-        };
-    }
-    if (c >= seuils.bon) {
-        return {
-            niveau: 'Bon taux de complétion',
-            couleur: '#28a745', // Vert
-            description: 'Majorité des travaux remis'
-        };
-    }
-    if (c >= seuils.acceptable) {
-        return {
-            niveau: 'Complétion acceptable',
-            couleur: '#ffc107', // Jaune
-            description: 'Quelques travaux manquants, suivi recommandé'
-        };
-    }
-    if (c >= BORNE_FIXE_INSUFFISANT) {
-        return {
-            niveau: 'Complétion insuffisante',
-            couleur: '#ff9800', // Orange
-            description: 'Nombreux travaux manquants, intervention nécessaire'
-        };
-    }
-    return {
-        niveau: 'Complétion critique',
-        couleur: '#dc3545', // Rouge
-        description: 'Travaux non remis, situation critique'
-    };
+/**
+ * La phrase qui dit un contexte par ses deux observations : « Absences rares,
+ * quelques travaux manquants ». C'est le seul mot des mécanismes 3 et 4.
+ * Les proportions sont lues telles quelles (pas de passage par ×100 / ÷100,
+ * qui déplace 0,57 sous 0,57).
+ * @param {number} A - Assiduité en proportion 0-1
+ * @param {number} C - Complétion en proportion 0-1
+ * @returns {string}
+ */
+function decrireContexte(A, C) {
+    const remise = MOTS_REMISE[palierInterpretation(C)];
+    return MOTS_PRESENCE[palierInterpretation(A)] + ', ' + remise.charAt(0).toLowerCase() + remise.slice(1);
 }
 
 /**
@@ -247,17 +219,19 @@ const BORNES_CONTEXTE = {
  * Corps de `determinerAlerteContextuelle` (`profil-etudiant-calculs.js`),
  * déplacé tel quel le 10 sept. 2026 ; la lecture des indices et le cas
  * « En attente » (données insuffisantes) restent chez l'appelant.
+ * #821 (15 oct. 2026) : le palier garde son code, son badge et sa couleur ;
+ * son `label` est la phrase des deux observations (`decrireContexte`), et la
+ * `description` qui le jugeait (« Contexte fragile. […] ») est retirée.
  * @param {number} A - Assiduité en proportion 0-1
  * @param {number} C - Complétion en proportion 0-1
- * @returns {Object} - { niveau, label, description, badgeClasse, A, C, recommandation }
+ * @returns {Object} - { niveau, label, badgeClasse, A, C, recommandation }
  */
 function qualifierContexteApprentissage(A, C) {
     // Contexte très favorable : A ≥ 85% ET C ≥ 85%
     if (A >= BORNES_CONTEXTE.tresFavorable && C >= BORNES_CONTEXTE.tresFavorable) {
         return {
             niveau: 'tres-favorable',
-            label: 'Très favorable',
-            description: 'Contexte très favorable. L\'étudiant·e est assidu·e et mobilisé·e.',
+            label: decrireContexte(A, C),
             badgeClasse: 'badge-engagement-tres-favorable',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
@@ -269,8 +243,7 @@ function qualifierContexteApprentissage(A, C) {
     if (A >= BORNES_CONTEXTE.favorable && C >= BORNES_CONTEXTE.favorable) {
         return {
             niveau: 'favorable',
-            label: 'Favorable',
-            description: 'Contexte favorable. L\'étudiant·e est présent·e et mobilisé·e.',
+            label: decrireContexte(A, C),
             badgeClasse: 'badge-engagement-favorable',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
@@ -282,8 +255,7 @@ function qualifierContexteApprentissage(A, C) {
     if (A >= BORNES_CONTEXTE.modere && C >= BORNES_CONTEXTE.modere) {
         return {
             niveau: 'modere',
-            label: 'Modéré',
-            description: 'Contexte modéré. Performance adéquate mais mobilisation pourrait être améliorée.',
+            label: decrireContexte(A, C),
             badgeClasse: 'badge-engagement-modere',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
@@ -291,15 +263,14 @@ function qualifierContexteApprentissage(A, C) {
         };
     }
 
-    // Contexte fragile : A < 65% OU C < 65% — tout ce qui n'est pas « Modéré ».
+    // Contexte fragile : A < 65% OU C < 65% — tout ce qui n'est pas « modéré ».
     // #822 (lot C du cadrage du 16 sept. 2026) : un cinquième palier, « Insuffisant »,
     // suivait celui-ci sans pouvoir être atteint (ce OU attrapait tout avant lui).
     // Retiré sur décision de Grégoire : il n'a jamais servi, et son mot qualifiait la
     // personne là où les bandes décrivent un état du contexte. Aucune borne n'a bougé.
     return {
         niveau: 'fragile',
-        label: 'Fragile',
-        description: 'Contexte fragile. La tendance actuelle invite à un suivi rapproché.',
+        label: decrireContexte(A, C),
         badgeClasse: 'badge-engagement-fragile',
         A: (A * 100).toFixed(0) + '%',
         C: (C * 100).toFixed(0) + '%',
@@ -325,83 +296,45 @@ const BORNES_MOBILISATION = {
  * Interprète l'indice M (Mobilisation) selon la logique pédagogique avancée.
  * Implémente la formule Excel avec diagnostic précis des composantes A et C.
  * Déplacée telle quelle depuis `profil-etudiant-helpers.js` le 10 sept. 2026.
+ * #821 (15 oct. 2026) : les neuf branches gardent leurs bornes et leurs
+ * couleurs ; elles n'ont plus de mot à elles. `code` nomme la branche (les
+ * lecteurs choisissent leur prose par lui) ; `niveau` est la phrase des deux
+ * observations (`decrireContexte`), sauf « Décrochage », statut posé par
+ * l'enseignant, qui reste.
  * @param {number} A - Assiduité en proportion 0-1
  * @param {number} C - Complétion en proportion 0-1
  * @param {boolean} statutDecrochage - Indicateur de décrochage (défaut: false)
- * @returns {Object} - { niveau, couleur }
+ * @returns {Object} - { code, niveau, couleur }
  */
 function interpreterMobilisation(A, C, statutDecrochage = false) {
-    const B = BORNES_MOBILISATION;
-
     // 1. Décrochage (priorité absolue - interventions impossibles)
     if (statutDecrochage) {
-        return {
-            niveau: 'Décrochage',
-            couleur: '#9e9e9e' // Gris
-        };
+        return { code: 'decrochage', niveau: 'Décrochage', couleur: '#9e9e9e' }; // Gris
     }
+    const branche = brancheMobilisation(A, C);
+    return { code: branche.code, niveau: decrireContexte(A, C), couleur: branche.couleur };
+}
 
-    // 2. Assiduité ET complétion critiques (A<0.7 ET C<0.7)
-    if (A < B.critique && C < B.critique) {
-        return {
-            niveau: 'Assiduité ET complétion critiques',
-            couleur: '#dc3545' // Rouge
-        };
-    }
+/** Les branches 2 à 9 de la mobilisation : un code et une couleur, sans mot. */
+function brancheMobilisation(A, C) {
+    const B = BORNES_MOBILISATION;
 
-    // 3. Assiduité critique seule (A<0.7)
-    if (A < B.critique) {
-        return {
-            niveau: 'Assiduité critique',
-            couleur: '#ff9800' // Orange
-        };
-    }
-
-    // 4. Complétion critique seule (C<0.7)
-    if (C < B.critique) {
-        return {
-            niveau: 'Complétion critique',
-            couleur: '#ff9800' // Orange
-        };
-    }
-
-    // 5. Mobilisation fragile (A<0.8 ET C<0.8)
-    if (A < B.fragile && C < B.fragile) {
-        return {
-            niveau: 'Mobilisation fragile',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-
-    // 6. Assiduité fragile (A<0.8 ET C≥0.8)
-    if (A < B.fragile && C >= B.fragile) {
-        return {
-            niveau: 'Assiduité fragile',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-
-    // 7. Complétion fragile (A≥0.8 ET C<0.8)
-    if (A >= B.fragile && C < B.fragile) {
-        return {
-            niveau: 'Complétion fragile',
-            couleur: '#ffc107' // Jaune
-        };
-    }
-
-    // 8. Favorable (A≥0.9 ET C≥0.9)
-    if (A >= B.favorable && C >= B.favorable) {
-        return {
-            niveau: 'Favorable',
-            couleur: '#2196F3' // Bleu
-        };
-    }
-
-    // 9. Acceptable (sinon: A≥0.8 ET C≥0.8, mais pas tous deux ≥0.9)
-    return {
-        niveau: 'Acceptable',
-        couleur: '#28a745' // Vert
-    };
+    // 2. Assiduité ET complétion sous la borne critique (A<0.7 ET C<0.7)
+    if (A < B.critique && C < B.critique) return { code: 'critiques', couleur: '#dc3545' }; // Rouge
+    // 3. Assiduité seule sous la borne critique (A<0.7)
+    if (A < B.critique) return { code: 'assiduite-critique', couleur: '#ff9800' }; // Orange
+    // 4. Complétion seule sous la borne critique (C<0.7)
+    if (C < B.critique) return { code: 'completion-critique', couleur: '#ff9800' }; // Orange
+    // 5. Les deux sous la borne fragile (A<0.8 ET C<0.8)
+    if (A < B.fragile && C < B.fragile) return { code: 'fragile', couleur: '#ffc107' }; // Jaune
+    // 6. Assiduité seule sous la borne fragile (A<0.8 ET C≥0.8)
+    if (A < B.fragile && C >= B.fragile) return { code: 'assiduite-fragile', couleur: '#ffc107' }; // Jaune
+    // 7. Complétion seule sous la borne fragile (A≥0.8 ET C<0.8)
+    if (A >= B.fragile && C < B.fragile) return { code: 'completion-fragile', couleur: '#ffc107' }; // Jaune
+    // 8. Les deux au-dessus de la borne favorable (A≥0.9 ET C≥0.9)
+    if (A >= B.favorable && C >= B.favorable) return { code: 'favorable', couleur: '#2196F3' }; // Bleu
+    // 9. Sinon : A≥0.8 ET C≥0.8, mais pas tous deux ≥0.9
+    return { code: 'acceptable', couleur: '#28a745' }; // Vert
 }
 
 /* ===============================
@@ -441,11 +374,11 @@ function reglesDeQualification() {
 }
 
 // Exporter vers window (convention systématique cross-zones).
-window.LIBELLES_LEGENDE_APERCU = LIBELLES_LEGENDE_APERCU;
 window.bandesLegendeApercu = bandesLegendeApercu;
 window.BORNE_FIXE_INSUFFISANT = BORNE_FIXE_INSUFFISANT;
 window.interpreterAssiduite = interpreterAssiduite;
 window.interpreterCompletion = interpreterCompletion;
+window.decrireContexte = decrireContexte;
 window.obtenirCouleurSelonSeuils = obtenirCouleurSelonSeuils;
 window.BORNES_CONTEXTE = BORNES_CONTEXTE;
 window.qualifierContexteApprentissage = qualifierContexteApprentissage;
