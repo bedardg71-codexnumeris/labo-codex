@@ -116,9 +116,9 @@ test('#892 · la liste est vue ; annuler ne retire rien ; seules les copies expo
 
     expect(modale.titre).toBe('Libérer de l\'espace');
     expect(modale.lignes.map((l) => l.id), 'seules les deux copies exportées depuis le 16 septembre').toEqual(['FT_avant_hier', 'FT_hier']);
-    expect(modale.lignes[0].texte).toMatch(/2\.0 Mo · exportée le 18 septembre 2026/);
-    expect(modale.lignes[1].texte).toMatch(/1\.0 Mo · exportée le 19 septembre 2026/);
-    expect(modale.boutons).toEqual(['Annuler', 'Retirer ces 2 copies (3.0 Mo)']);
+    expect(modale.lignes[0].texte).toMatch(/2,1 Mo · exportée le 18 septembre 2026/);   // 15 oct. 2026 : les tailles se disent comme sur l'appareil (#993) — base 1000 hors Windows (Mac et runner Linux).
+    expect(modale.lignes[1].texte).toMatch(/1,0 Mo · exportée le 19 septembre 2026/);
+    expect(modale.boutons).toEqual(['Annuler', 'Retirer ces 2 copies (3,1 Mo)']);
     expect(modale.texte).toContain('Ces copies ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur.');
     expect(modale.texte).toContain('1 copie porte une marque d\'exportation antérieure au 16 septembre 2026, que l\'application ne garantit pas.');
     // Les deux copies proposées sont évaluées : l'écran dit ce que leur évaluation devient.

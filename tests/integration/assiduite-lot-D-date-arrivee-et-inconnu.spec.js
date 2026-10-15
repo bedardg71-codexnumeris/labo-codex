@@ -207,7 +207,8 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
     expect(m.absencesTardif.filter(d => d < ARRIVEE)).toEqual([]);
 
     // (2) #743 — l'inconnue : null partout, un tiret à l'écran ; l'absent total, lui, est CONNU à 0 %.
-    expect(m.indicesInconnu).toMatchObject({ A: null, M: null });
+    expect(m.indicesInconnu).toMatchObject({ A: null });
+    expect(m.indicesInconnu, 'l\'indice composite M est retiré le 15 oct. 2026 (#1083, 6.46)').not.toHaveProperty('M');
     expect(m.indicesAbsent.A).toBe(0);
     expect(m.liste.inconnu).toContain('—');
     expect(m.liste.inconnu.some(c => /%/.test(c))).toBe(false);
