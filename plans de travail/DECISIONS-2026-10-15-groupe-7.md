@@ -59,3 +59,8 @@
 - **Décision** : ni guide papier, ni fiche à imprimer comme tâche de développement. La CoP est faite de rencontres informelles (pas une formation) ; Grégoire y arrive avec une note par rencontre (dossier de la CoP) ; le guide qu'on donne à une IA pour se faire accompagner dans l'application (« skill d'accompagnement », objectif d'automne) couvre l'accompagnement.
 
 **Ligne à poser sous #2, et cocher :** `**Close le 15 oct. 2026, décision de Grégoire (13 h 33) :** pas de guide papier ; ses notes de rencontre de la CoP et le guide d'accompagnement pour une IA en tiennent lieu. Détail : plans de travail/DECISIONS-2026-10-15-groupe-7.md.`
+
+### Avancée à 16 h 35 : la purge se fait CE SOIR, après la version du soir
+
+- **Décision de Grégoire (16 h 34)** : « Nous allons faire la purge ce soir », parce que demain s'ouvre un nouveau chantier (un nouveau sous-onglet de Conception).
+- **Ce qui ne change pas (Cowork)** : l'ordre « commit → relecture → verdict → push » ; la purge vient APRÈS la version du soir (verdict complet vert, push, envoi en ligne constaté), dans une séance dédiée de Claude Code, selon le § 0 du chantier (cinq arrêts durs, questions à reposer avant de déclencher), aucune autre session n'écrivant dans le dépôt (la session d'observation dans le nuage en pause, tout poussé). La liste des noms est hors du dépôt : `/Users/kuekatsheu/Documents/Cowork H26 App Labo Codex/purge-identites/`.

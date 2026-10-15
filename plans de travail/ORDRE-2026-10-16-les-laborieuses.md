@@ -1,5 +1,7 @@
 # L'ordre des laborieuses — pour la journée du 16 octobre 2026
 
+> ⚠ **Remplacé pour le 16, le 17 et le 18 octobre** (décision de Grégoire, 15 oct. 2026, 16 h 19) : ces trois jours vont à « Apporter mon matériel » pour la rencontre CoP du 19 oct. (`CADRAGE-2026-10-15-apporter-mon-materiel.md`, première consigne `CONSIGNE-LOT-2026-10-16-apporter-mon-materiel-1.md`). **La purge (#781) et les laborieuses reprennent après le 19.**
+
 > Écrit par Cowork le 15 octobre 2026, 16 h 02 (Toronto), à la demande de Grégoire : « demain, la purge, puis les 73 laborieuses » (une fiche laborieuse : données déjà écrites, zone protégée, ou trois modules et plus).
 > Source : la page du tri (filtre « Laborieuses »), version du 15 oct. à 16 h ; chaque fiche est à **remesurer** au backlog avant d'écrire sa consigne, pas à recopier d'ici.
 > Règles appliquées, de Grégoire : d'abord ce qui se fait sans lui ; ensuite la qualité de l'application (robustesse, logique) ; un chantier clos avant d'ouvrir le suivant ; une seule session écrit dans `js/` ; les vérifications complètes le soir.
