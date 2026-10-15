@@ -7,7 +7,7 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 15 OCT. 2026, 9 h 10 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 15 OCT. 2026, 9 h 07 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify, Claude Code, 15 oct.) : déploiement `6ad0cfc8017c06d9f5edd16d`, `commit_ref`
 `4ce2ffe6`, `state: ready`, publié à 13:06:31 Z (9 h 06, Toronto). Release `18660532` (build 1014-1940).
