@@ -17,9 +17,11 @@
 
 ## Résultat
 
-- **111** conclusions sur 122 : **voulu et fait**.
+- **103** conclusions sur 122 : **voulu et fait**.
 - **11** : **fait sans être voulu**, toutes nommées « bugs » par Grégoire : Q3-29, Q3-35, Q4-32 à Q4-35, Q4-40, Q8-01, Q8-03, Q8-05, Q8-09. Elles nuisent à l'utilisateur (Q3, Q4), et aux élèves aussi (Q8).
 - **0** : **voulu mais invisible**.
+- **8** : **non classées** ; ce sont celles de Q9, qui disent ce que l'observation ne permet pas de savoir. Aucune n'appelle de suite, selon Grégoire.
+- *Correction du 15 octobre 2026 : une première version de ce fichier (`3c8bfb2e`) cochait par erreur ces 8 conclusions « voulu et fait » et comptait 111 « voulu et fait ».*
 - **Dispositions** : toutes **inscrites**. Fiches existantes : #1054, #1057, #1060, #1061, #1064, #1065. Fiches créées le 15 octobre 2026 : **#1068 à #1074**.
 
 ## Les 122 conclusions solides
@@ -849,58 +851,58 @@ L'export dit « anonymisé » garde programme, services adaptés et résultats u
 #### Q9-01
 L'usage réel est inconnu (qui, combien, quels écrans, quelle fréquence) ; toutes les données observées sont fictives.
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 #### Q9-02
 On ne sait pas si les indices et classements sont lus ou guident des actions.
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 #### Q9-03
 On ne sait pas si les PDF et rétroactions parviennent aux étudiant·es (téléversement dans Léa, canal de remise).
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 #### Q9-04
 On ne sait pas à qui vont les fichiers exportés, ni sous quel protocole ni avec quel consentement.
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 #### Q9-05
 Le déploiement réel est inconnu (observé depuis 127.0.0.1) ; ce que l'hébergeur voit ou enregistre est inconnu.
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 #### Q9-06
 Le contenu exact du codex (49 clés ; présence des données confidentielles) n'est pas connu.
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 #### Q9-07
 Chemins non exécutés : sélecteurs natifs, écriture réelle du codex et des archives.
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 #### Q9-13
 Les intentions des auteur·es : le document n'en dit rien.
 
-- Case : ☒ voulu et fait · ☐ fait sans être voulu · ☐ voulu mais invisible
+- Case : non classée (ce que l'observation ne permet pas de savoir ; seule question posée : appelle-t-elle une suite ?)
 - À qui ça sert ou nuit :
-- Disposition : aucune suite
+- Disposition : aucune suite (réponse de Grégoire : « non »)
 
 ## Les autres conclusions (hors confrontation)
 
