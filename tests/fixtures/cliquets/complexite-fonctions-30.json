@@ -94,7 +94,7 @@
  },
  "js/profil-etudiant-sections-affichage.js": {
   "genererSectionMobilisationEngagement": 64,
-  "genererSectionAccompagnement": 34,
+  "genererSectionAccompagnement": 31,
   "afficherProfilComplet": 32,
   "genererSectionProductions": 66
  },
