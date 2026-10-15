@@ -128,7 +128,7 @@ async function lireExportRecherche(page) {
     }, DA);
 }
 
-/** « Exporter et archiver » : la grille (ses copies), le compte en stock, Léa, et l'export ZIP. */
+/** « Exporter les travaux » : la grille (ses copies), le compte en stock, Léa, et l'export ZIP. */
 async function lireArchivage(page, productionLea) {
     return page.evaluate(async ({ prod }) => {
         travauxUI.afficherArchivage();
@@ -160,7 +160,7 @@ test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; 
     const rechercheAvant = await lireExportRecherche(page);
     expect(rechercheAvant.sonDA, 'témoin : l\'export recherche part avec lui').toBe(true);
     const archivageAvant = await lireArchivage(page, prodA);
-    expect(archivageAvant.grille, 'témoin : la grille d\'« Exporter et archiver » montre ses copies').toEqual([...COPIES_DE_LUI, COPIE_TEMOIN].sort());
+    expect(archivageAvant.grille, 'témoin : la grille d\'« Exporter les travaux » montre ses copies').toEqual([...COPIES_DE_LUI, COPIE_TEMOIN].sort());
     expect(archivageAvant.lea, 'témoin : l\'export pour Léa prend sa copie évaluée').toContain(COPIES_DE_LUI[0]);
 
     // LE GESTE : « Supprimer » du Cadre (le codex proposé est écarté, la question acceptée).
@@ -183,7 +183,7 @@ test('#1013 — un élève supprimé quitte la Liste et le tableau des copies ; 
         nbEvaluations: rechercheAvant.nbEvaluations - 2, nbPresences: rechercheAvant.nbPresences - 1, sonDA: false
     });
 
-    // « Exporter et archiver » : ce qui montre ou envoie l'écarte ; ce qui garde emporte tout.
+    // « Exporter les travaux » : ce qui montre ou envoie l'écarte ; ce qui garde emporte tout.
     const archivageApres = await lireArchivage(page, prodA);
     expect(archivageApres.grille, 'la grille (et son aperçu PDF) ne montre plus ses copies').toEqual([COPIE_TEMOIN]);
     expect(archivageApres.lea, 'l\'export pour Léa ne l\'envoie plus').not.toContain(COPIES_DE_LUI[0]);

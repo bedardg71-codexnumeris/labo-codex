@@ -241,7 +241,7 @@ describe('#892 · l\'écran : la liste est vue, et les textes sont ceux que Gré
             'Ces copies ont déjà été exportées : leur fichier existe ailleurs, sur ton ordinateur. Les retirer d\'ici libère de l\'espace tout de suite. Les copies qui n\'ont pas encore été exportées ne sont jamais proposées.',
             'Retirer ces ${n} copies (${taille})',
             'Rien à retirer sans risque',
-            'Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter et archiver », puis reviens ici.',
+            'Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter les travaux », puis reviens ici.',
             '${nbAnciennes} copies portent une marque d\'exportation antérieure au 16 septembre 2026, que l\'application ne garantit pas. Elles ne sont pas proposées : exporte-les de nouveau si tu veux les retirer.',
             '${nbEvaluees} de ces copies sont évaluées. Leur évaluation reste : la note, la grille et la rétroaction ne bougent pas. Seule la copie annotée ne s\'ouvrira plus ici.'
         ]) {

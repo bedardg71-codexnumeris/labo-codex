@@ -74,7 +74,7 @@ const configurationsOnglets = {
         { id: 'importer', label: 'Préparer et importer' },
         { id: 'liste', label: 'Liste des évaluations' },
         { id: 'annoter', label: 'Annoter et évaluer' },
-        { id: 'exporter', label: 'Exporter et archiver' }
+        { id: 'exporter', label: 'Exporter les travaux' }
     ],
     'labo': [
         { id: 'accompagnement', label: "Outils d'observation" },

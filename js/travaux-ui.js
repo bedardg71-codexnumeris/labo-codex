@@ -720,7 +720,7 @@
                 if (fichierOuvert) {
                     // Régénérer les badges toolbar à CHAQUE retour. #881 (16 sept. 2026) — la
                     // garde « bande vide » laissait en place les badges d'avant une suppression
-                    // faite dans « Exporter et archiver » : les copies jetées restaient au carrousel.
+                    // faite dans « Exporter les travaux » : les copies jetées restaient au carrousel.
                     const badgeStrip = document.querySelector('.annot-toolbar-fichiers');
                     if (badgeStrip && fichiersTravaux.length > 0) {
                         const defilement = badgeStrip.scrollLeft;
@@ -1188,7 +1188,7 @@
                                 <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
                                 <div class="actions-separateur"></div>
                                 <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Modifier</button>
-                                <!-- Re-importer : opération sur fichier, disponible dans Exporter et archiver -->
+                                <!-- Re-importer : opération sur fichier, disponible dans Exporter les travaux -->
                                 <!-- Retour testeur du 23 sept. 2026 — la couleur du fond quitte la barre du haut pour ce menu. -->
                                 <div class="actions-separateur"></div>
                                 <div class="actions-sous-titre">Fond du canevas</div>
@@ -1288,12 +1288,12 @@
         const tailleFormatee = window.TailleFichier.dire(tailleFiltree);
 
         conteneur.innerHTML = `
-            <h3>Exporter et archiver <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
+            <h3>Exporter les travaux <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
             <p class="texte-muted">${fichiersTravaux.length} ${pluriel(fichiersTravaux.length, 'fichier', 'fichiers')} en stock (${tailleFormatee})</p>
 
             ${fichiersTravaux.length > 0
                 ? (fichiersMontres.length > 0 ? genererGrilleFichiers(fichiersMontres, 'ouvrirPreviewInline') : '')
-                : `<p class="placeholder-vide">Aucun fichier en stock pour ce groupe. Importe des travaux dans « Préparer et importer » : ils apparaîtront ici, prêts à être exportés ou archivés.</p>`}
+                : `<p class="placeholder-vide">Aucun fichier en stock pour ce groupe. Importe des travaux dans « Préparer et importer » : ils apparaîtront ici, prêts à être exportés.</p>`}
 
             <div class="travaux-archivage-options">
                 <!-- Allégement : fonctionnalité RETIRÉE le 28 août 2026 (décision Grégoire). Le statut « facsimile » subsiste en lecture pour les fichiers déjà allégés. -->
@@ -1327,7 +1327,7 @@
                     </div>
                     <label style="display:flex;align-items:center;gap:6px;margin-top:6px;cursor:pointer">
                         <input type="checkbox" id="travaux-archivage-compression" checked>
-                        Compresser l'archive
+                        Compresser le ZIP
                     </label>
                     <div id="travaux-texte-progression" class="texte-muted"></div>
                     <div class="travaux-barre-progression-container">
@@ -3742,7 +3742,7 @@
 
         if (aRetirer.length === 0) {
             afficherModalePipeline('Rien à retirer sans risque',
-                '<p>Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter et archiver », puis reviens ici.</p>' + phraseAnciennes,
+                '<p>Aucune copie de ce groupe n\'a encore été exportée : les retirer les perdrait. Exporte-les d\'abord dans « Exporter les travaux », puis reviens ici.</p>' + phraseAnciennes,
                 [{ label: 'Fermer', classe: 'btn-secondaire' }]);
             return;
         }

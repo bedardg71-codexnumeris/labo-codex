@@ -20,7 +20,7 @@ const ui = readFileSync(path.join(racine, 'js', 'travaux-ui.js'), 'utf8');
 const css = readFileSync(path.join(racine, 'styles.css'), 'utf8');
 const config = readFileSync(path.join(racine, 'js', 'config.js'), 'utf8');
 
-describe('#569 · l\'écran Exporter et archiver', () => {
+describe('#569 · l\'écran Exporter les travaux', () => {
     it('plus aucun select hors design system dans travaux-ui.js', () => {
         expect(ui).not.toContain('class="form-select');
         expect((ui.match(/class="controle-form(?: pipeline-select-petit)?"/g) || []).length).toBeGreaterThanOrEqual(8);

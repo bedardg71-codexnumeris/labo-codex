@@ -640,7 +640,7 @@ async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, o
         setTimeout(() => initialiserListeEvaluations(), 150);
     }
 
-    if (!silencieux) notifications.succes('Jeton de reprise appliqué (' + (archiverOriginale ? 'originale archivée' : 'originale supprimée') + ')');
+    if (!silencieux) notifications.succes('Jeton de reprise appliqué (' + (archiverOriginale ? 'original gardé' : 'original supprimé') + ')');
     return nouvelleEvaluation;
 }
 

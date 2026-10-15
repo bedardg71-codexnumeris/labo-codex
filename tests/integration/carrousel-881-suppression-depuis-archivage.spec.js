@@ -84,7 +84,7 @@ async function ouvrirCopie(page, id) {
     }, id, { timeout: 10000 });
 }
 
-/** Le geste de Grégoire : « Exporter et archiver », corbeille d'un badge, confirmer. */
+/** Le geste de Grégoire : « Exporter les travaux », corbeille d'un badge, confirmer. */
 async function jeterDepuisArchivage(page, id) {
     await page.evaluate(() => window.afficherSousSection('evaluations-exporter'));
     const badge = `#evaluations-contenu-archivage [data-action="travauxUI.supprimerFichierBadge"][data-param="${id}"]`;
@@ -95,7 +95,7 @@ async function jeterDepuisArchivage(page, id) {
     await page.waitForFunction((s) => !document.querySelector(s), badge, { timeout: 5000 });
 }
 
-test('Porte #881 · une copie jetée depuis « Exporter et archiver » quitte le carrousel', async ({ page }) => {
+test('Porte #881 · une copie jetée depuis « Exporter les travaux » quitte le carrousel', async ({ page }) => {
     const suivi = await monter(page);
     await ouvrirCopie(page, 'FT881A');
 
@@ -118,7 +118,7 @@ test('Porte #881 · une copie jetée depuis « Exporter et archiver » quitte le
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
 
-test('Porte #881 · la copie OUVERTE jetée depuis « Exporter et archiver » n\'est pas rouverte', async ({ page }) => {
+test('Porte #881 · la copie OUVERTE jetée depuis « Exporter les travaux » n\'est pas rouverte', async ({ page }) => {
     const suivi = await monter(page);
     await ouvrirCopie(page, 'FT881B2');
 
