@@ -1935,10 +1935,10 @@ async function gererDoublonProduction(titre, evaluations, idActuel) {
 // #468/CO-17 (21 août 2026) — `idEnEdition` décide de ce que l'objet CONTIENT.
 // L'objet est fusionné par spread sur la production existante
 // (`{...existante, ...productionData}`) : tout champ présent ici ÉCRASE. Les
-// champs d'ÉTAT (verrouille / dansBibliotheque / coursId) n'ont donc leur place
+// champs d'ÉTAT (dansBibliotheque / coursId) n'ont donc leur place
 // qu'à la CRÉATION — sinon la moindre retouche de titre déverrouillait la
-// production, la faisait réapparaître si elle avait été retirée, et la
-// RÉASSIGNAIT au cours actif du moment (mécanisme d'entretien du bug #346).
+// production (#489, 15 oct. 2026 : ce verrou-là n'existe plus), la faisait
+// réapparaître si elle avait été retirée, et la RÉASSIGNAIT au cours actif du moment (mécanisme d'entretien du bug #346).
 function construireProductionData(d, evaluations, idEnEdition) {
     const estModification = !!idEnEdition;
 
@@ -1988,7 +1988,7 @@ function construireProductionData(d, evaluations, idEnEdition) {
     }
 
     // #790 — LE MARQUEUR DIAGNOSTIQUE N'EST PAS UN CHAMP D'ÉTAT COMME LES AUTRES.
-    // `verrouille`, `dansBibliotheque` et `coursId` ne se posent qu'à la CRÉATION
+    // `dansBibliotheque` et `coursId` ne se posent qu'à la CRÉATION
     // (voir l'entête) : les reposer à chaque retouche a produit le bug #346. Celui-ci
     // est l'inverse — il DOIT pouvoir se cocher sur une production déjà créée ET
     // ÉVALUÉE, puisque c'est le cas d'usage même : l'enseignant a déjà fait produire
@@ -2002,8 +2002,9 @@ function construireProductionData(d, evaluations, idEnEdition) {
     }
 
     // #468/CO-17 : champs d'ÉTAT — à la création seulement (voir l'entête).
+    // #489 (15 oct. 2026) : le verrou d'une production entière est retiré, plus de `verrouille` ici.
+    // Celui déjà écrit dans les productions existantes reste, inerte (source, pas stock).
     if (!estModification) {
-        productionData.verrouille = false;
         productionData.dansBibliotheque = true;  // ✅ AJOUT (8 décembre 2025)
         productionData.coursId = coursId;        // ✅ CRITIQUE (Beta 95)
     }
@@ -2378,65 +2379,6 @@ function annulerFormProduction() {
  */
 async function modifierProduction(id) {
     await afficherFormProduction(id);
-}
-
-/* ===============================
-   🔒 FONCTION: VERROUILLER ÉVALUATION
-   Bascule le statut de verrouillage
-   ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
-   =============================== */
-
-/**
- * Bascule le verrouillage d'une production
- * 
- * @param {string} id - ID de la production
- * 
- * UTILISÉ PAR:
- * - Checkbox "Verrouiller" dans la liste
- * 
- * FONCTIONNEMENT:
- * 1. Charge la liste des productions
- * 2. Trouve la production ciblée
- * 3. Inverse son statut de verrouillage
- * 4. Sauvegarde dans localStorage
- * 5. Rafraîchit l'affichage
- */
-async function verrouillerEvaluation(id) {
-
-    let statutApres = null;
-    let idsAuMomentDuRefus = null;
-    await db.modifier(getCleProductions(), (lues) => {
-        const evaluations = lues || [];
-        const index = evaluations.findIndex(e => e.id === id);
-        if (index === -1) {
-            // Relevé pour le message de refus : la liste telle qu'elle était à
-            // l'instant du refus, pas celle d'avant.
-            idsAuMomentDuRefus = evaluations.map(e => ({ id: e.id, titre: e.titre }));
-            return undefined;
-        }
-
-        evaluations[index].verrouille = !evaluations[index].verrouille;
-        statutApres = evaluations[index].verrouille;
-        return evaluations;
-    }, []);
-
-    if (statutApres !== null) {
-        await afficherTableauProductions();
-        await afficherToutesLesProductionsParType();
-
-        // Notification de succès. ⚠ Le statut vient du MUTATEUR : la collection
-        // lue n'existe plus ici, et c'est voulu — l'état annoncé est celui qui
-        // a réellement été écrit, pas celui d'un instantané d'avant.
-        const statut = statutApres ? 'verrouillée' : 'déverrouillée';
-        notifications.succes(`Production ${statut}`);
-    } else {
-        // Si l'évaluation n'est pas trouvée, afficher une erreur
-        console.error('❌ Production non trouvée!');
-        console.error('ID recherché:', id);
-        console.error('IDs disponibles:', idsAuMomentDuRefus);
-
-        notifications.erreur('Évaluation introuvable', `ID: ${id}`);
-    }
 }
 
 /* ===============================
@@ -3220,7 +3162,6 @@ window.peuplerEcheancesParGroupe = peuplerEcheancesParGroupe;
 window.annulerFormProduction = annulerFormProduction;
 window.modifierProduction = modifierProduction;
 window.supprimerProduction = supprimerProduction;
-window.verrouillerEvaluation = verrouillerEvaluation;
 window.monterEvaluation = monterEvaluation;
 window.descendreEvaluation = descendreEvaluation;
 window.gererChangementTypeProduction = gererChangementTypeProduction;
@@ -3312,7 +3253,6 @@ window.typerProductionCommeTerminale = typerProductionCommeTerminale;
  * - annulerFormProduction()
  * - modifierEvaluation(id)
  * - supprimerProduction(id)
- * - verrouillerEvaluation(id)
  * - monterEvaluation(id)
  * - descendreEvaluation(id)
  * - gererChangementTypeProduction()

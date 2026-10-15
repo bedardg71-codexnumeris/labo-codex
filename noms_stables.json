@@ -30,7 +30,6 @@
         { "nom": "annulerFormProduction", "type": "function", "ligne": 1075, "role": "Annule le formulaire de production et réinitialise l'état" },
         { "nom": "modifierProduction", "type": "async function", "ligne": 1108, "role": "Ouvre une production existante en édition" },
         { "nom": "supprimerProduction", "type": "async function", "ligne": 1134, "role": "Supprime une production après confirmation" },
-        { "nom": "verrouillerEvaluation", "type": "async function", "ligne": 1172, "role": "Verrouille ou déverrouille une évaluation rattachée à une production" },
         { "nom": "monterEvaluation", "type": "async function", "ligne": 1229, "role": "Réordonne (monter) une évaluation dans la liste" },
         { "nom": "descendreEvaluation", "type": "async function", "ligne": 1262, "role": "Réordonne (descendre) une évaluation dans la liste" },
         { "nom": "gererChangementTypeProduction", "type": "function", "ligne": 1298, "role": "Adapte le formulaire selon le type de production sélectionné" },

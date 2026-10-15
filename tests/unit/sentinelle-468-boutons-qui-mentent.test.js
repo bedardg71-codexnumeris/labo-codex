@@ -374,7 +374,8 @@ describe('#468 · S4 (CO-17) — enregistrer une production ne réécrit pas son
     it('CRÉATION : les champs d\'état sont posés', () => {
         const win = chargerProductions('COURS_B');
         const data = win.construireProductionData(FORMULAIRE(), [], null);
-        expect(data.verrouille).toBe(false);
+        // #489 (15 oct. 2026) : le verrou d'une production entière est retiré, la création ne l'écrit plus.
+        expect('verrouille' in data).toBe(false);
         expect(data.dansBibliotheque).toBe(true);
         expect(data.coursId).toBe('COURS_B');
     });

@@ -256,7 +256,8 @@ describe('lot E3 · nouvelle production — rien avant « Créer la production �
         remplir(e);
         await e.win.sauvegarderProduction();
         const p = e.store.test_productions.find(x => x.id === 'PROD_NEUF');
-        expect(p).toMatchObject({ titre: 'Journal de bord', type: 'travail', ponderation: 10, verrouille: false, coursId: 'C1' });
+        expect(p).toMatchObject({ titre: 'Journal de bord', type: 'travail', ponderation: 10, coursId: 'C1' });
+        expect('verrouille' in p, '#489 : la création n\'écrit plus le verrou d\'une production').toBe(false);
         expect(e.ecrits).toEqual([{ cle: 'test_productions', geste: 'Créer la production', discret: false }]);
         expect(e.toasts).toEqual(['Production « Journal de bord » créée.']);
         expect(e.ouvertes).toEqual(['PROD_NEUF']);

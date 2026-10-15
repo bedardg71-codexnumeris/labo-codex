@@ -154,7 +154,7 @@ async function monterProductions() {
     win.calculerEtStockerIndicesCP = () => {};
     win.afficherListeProductions = async () => {};
 
-    for (const f of ['monterEvaluation', 'descendreEvaluation', 'verrouillerEvaluation',
+    for (const f of ['monterEvaluation', 'descendreEvaluation', 'supprimerProduction',
                      'typerProductionCommeTerminale']) {
         if (typeof win[f] !== 'function') throw new Error(f + ' absent du sandbox');
     }
@@ -175,26 +175,18 @@ const idsDe = (liste) => liste.map((p) => p.id).join(',');
 
 describe('#522 lot 3a · A — deux gestes en rafale gardent LEURS DEUX effets', () => {
 
-    it('A.a deux verrouillages concurrents tiennent tous les deux', async () => {
+    // #489 (15 oct. 2026) : le verrou d'une production entière (`verrouillerEvaluation`) est
+    // retiré. A.a (deux verrouillages) et B.d (verrou sur un id absent) partent avec lui ;
+    // A.b et A.d gardent leur course, avec un autre geste en face.
+
+    it('A.b un déplacement et une suppression concurrents ne s\'écrasent pas', async () => {
         const { db, win } = await monterProductions();
         await db.set(CLE, PRODUCTIONS());   // security-ok: littéral de banc, aucune source externe
 
-        await Promise.all([win.verrouillerEvaluation('P1'), win.verrouillerEvaluation('P3')]);
+        await Promise.all([win.monterEvaluation('P2'), win.supprimerProduction('P3')]);
 
         const liste = await db.get(CLE);
-        expect(liste.find((p) => p.id === 'P1').verrouille, 'le premier verrou tient').toBe(true);
-        expect(liste.find((p) => p.id === 'P3').verrouille, 'le second verrou tient').toBe(true);
-    });
-
-    it('A.b un déplacement et un verrouillage concurrents ne s\'écrasent pas', async () => {
-        const { db, win } = await monterProductions();
-        await db.set(CLE, PRODUCTIONS());   // security-ok: littéral de banc, aucune source externe
-
-        await Promise.all([win.monterEvaluation('P2'), win.verrouillerEvaluation('P3')]);
-
-        const liste = await db.get(CLE);
-        expect(idsDe(liste), 'le déplacement tient').toBe('P2,P1,P3');
-        expect(liste.find((p) => p.id === 'P3').verrouille, 'le verrou tient').toBe(true);
+        expect(idsDe(liste), 'le déplacement et la suppression tiennent').toBe('P2,P1');
     });
 
     it('A.c une descente et une suppression concurrentes s\'appliquent toutes les deux', async () => {
@@ -208,18 +200,18 @@ describe('#522 lot 3a · A — deux gestes en rafale gardent LEURS DEUX effets',
         expect(liste.every((p) => p && p.id), 'aucune entrée `undefined`').toBe(true);
     });
 
-    it('A.d un typage et un verrouillage concurrents s\'appliquent tous les deux', async () => {
+    it('A.d un typage et un déplacement concurrents s\'appliquent tous les deux', async () => {
         const { db, win } = await monterProductions();
         await db.set(CLE, PRODUCTIONS());   // security-ok: littéral de banc, aucune source externe
 
         await Promise.all([
             win.typerProductionCommeTerminale('P1').catch(() => {}),
-            win.verrouillerEvaluation('P3')
+            win.monterEvaluation('P3')
         ]);
 
         const liste = await db.get(CLE);
         expect(liste.find((p) => p.id === 'P1').type, 'le typage tient').toBe('terminale');
-        expect(liste.find((p) => p.id === 'P3').verrouille, 'le verrou tient').toBe(true);
+        expect(idsDe(liste), 'le déplacement tient').toBe('P1,P3,P2');
     });
 });
 
@@ -278,14 +270,6 @@ describe('#522 lot 3a · B — le geste impossible REFUSE, et ne détruit RIEN',
         expect(terminales, 'une seule terminale').toHaveLength(1);
     });
 
-    it('B.d verrouillerEvaluation sur un id absent ne touche à rien', async () => {
-        const { db, win } = await monterProductions();
-        await db.set(CLE, PRODUCTIONS());   // security-ok: littéral de banc, aucune source externe
-
-        await win.verrouillerEvaluation('P_FANTOME');
-
-        expect(JSON.stringify(await db.get(CLE))).toBe(JSON.stringify(PRODUCTIONS()));
-    });
 });
 
 /* ------------------------------------------------- C — le cliquet du lot 3a */
