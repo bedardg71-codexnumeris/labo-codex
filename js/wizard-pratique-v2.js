@@ -132,7 +132,7 @@ function _etapeApresInference(reponses) {
     const cls = deduireTypePratique(reponses);
     if (cls.type === 'sommative') return 'regles-sommative';
     if (cls.type === 'standards') return 'approche-evaluation';
-    if (cls.type === 'specifications') return 'nb-evaluations';
+    if (cls.type === 'specifications') return 'config-specifications';
     return 'departage-pratique'; // les deux signaux divergent → 3e question
 }
 
@@ -224,7 +224,7 @@ const ETAPES_WIZARD = {
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
             if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
-            if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
+            if (reponses.calcNoteFinale === 'acceptable') return 'config-specifications';
             if (reponses.calcNoteFinale === 'jugement') return 'config-denotation';
             return null;
         },
@@ -326,7 +326,7 @@ const ETAPES_WIZARD = {
             // #900 (lot N6) : l'étape « Configuration sommative » (rang, moyenne du groupe) est retirée.
             if (reponses.typePratique === 'sommative') {
                 const regles = deduireTypePratique(reponses).regles || [];
-                return (regles.length > 0 && !regles.includes('aucune')) ? 'config-sommative-regles' : 'seuils-personnels';
+                return (regles.length > 0 && !regles.includes('aucune')) ? 'config-sommative-regles' : 'regles-sommative';
             }
             if (reponses.typePratique === 'specifications') return 'choix-modele-bundles';
             if (reponses.typePratique === 'denotation') return 'config-denotation';
@@ -387,7 +387,7 @@ const ETAPES_WIZARD = {
         suivant: (reponses) => {
             if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
             if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
-            if (reponses.calcNoteFinale === 'acceptable') return 'nb-evaluations';
+            if (reponses.calcNoteFinale === 'acceptable') return 'config-specifications';
             if (reponses.calcNoteFinale === 'jugement') return 'config-denotation'; // #318
             if (reponses.calcNoteFinale === 'pas-certain') return 'sous-questions-guidees';
             return null;
@@ -493,88 +493,20 @@ const ETAPES_WIZARD = {
                 ]
             }
         ],
-        suivant: () => 'nb-evaluations',
+        // Bloc 9 (15 oct. 2026) : l'aiguillage de l'ex-étape « Tes seuils personnels », sa seule sortie sommative.
+        suivant: (reponses) => {
+            const regles = deduireTypePratique(reponses).regles || [];
+            return (regles.length > 0 && !regles.includes('aucune')) ? 'config-sommative-regles' : 'infos-base';
+        },
         precedent: () => 'calcul-note-finale'
     },
 
-    'nb-evaluations': {
-        id: 'nb-evaluations',
-        titre: 'Nombre d\'évaluations',
-        description: 'Combien d\'évaluations prévois-tu pour cette session ?',
-        branche: 'commune',
-        ordre: 4,
-        champs: [
-            {
-                id: 'nbEvaluationsPrevues',
-                label: 'Nombre d\'évaluations prévues',
-                type: 'number',
-                min: 1,
-                max: 50,
-                default: 6,
-                required: true
-            }
-        ],
-        suivant: () => 'seuils-personnels',
-        precedent: (reponses) => {
-            if (reponses.calcNoteFinale === 'moyenne') return 'regles-sommative';
-            if (reponses.calcNoteFinale === 'niveaux') return 'approche-evaluation';
-            return 'calcul-note-finale';
-        }
-    },
-
-    'seuils-personnels': {
-        id: 'seuils-personnels',
-        titre: 'Tes seuils personnels',
-        description: 'Ces seuils servent au dépistage automatique des étudiant·es en difficulté.',
-        branche: 'commune',
-        ordre: 5,
-        champs: [
-            {
-                id: 'seuilVaBien',
-                label: 'Ça va bien à partir de (%)',
-                type: 'number',
-                min: 0,
-                max: 100,
-                default: 75,
-                required: true
-            },
-            {
-                id: 'seuilDifficulte',
-                label: 'En difficulté à partir de (%)',
-                type: 'number',
-                min: 0,
-                max: 100,
-                default: 65,
-                required: true
-            },
-            {
-                id: 'seuilGrandeDifficulte',
-                label: 'Grande difficulté sous (%)',
-                type: 'number',
-                min: 0,
-                max: 100,
-                default: 55,
-                required: true
-            }
-        ],
-        suivant: (reponses) => {
-            const classification = deduireTypePratique(reponses);
-            const type = classification.type;
-            const regles = classification.regles || [];
-            // Sommative avec règles spéciales → configurer les règles
-            if (type === 'sommative' && regles.length > 0 && !regles.includes('aucune')) {
-                return 'config-sommative-regles';
-            }
-            if (type === 'sommative') return 'infos-base';
-            // #443 : PAN-Standards n'a plus qu'une approche. Le branchement à
-            // trois voies est retiré avec les étapes qu'il servait — un aiguillage
-            // dont deux sorties sont mortes finit par être relu comme un choix.
-            if (type === 'standards') return 'config-portfolio';
-            if (type === 'specifications') return 'config-specifications';
-            return 'infos-base';
-        },
-        precedent: () => 'nb-evaluations'
-    },
+    // Bloc 9 des textes relus (15 oct. 2026, décision de Grégoire) : les étapes « Nombre
+    // d'évaluations » et « Tes seuils personnels » sont retirées. Elles écrivaient
+    // `nbEvaluationsPrevues` et `seuils` (va_bien, difficulte, grande_difficulte), qu'aucun écran
+    // ne lit : seules `detecterDefis` et `interpreterNiveau` de la configurable les lisent, et rien
+    // ne les appelle (#551). Les valeurs déjà enregistrées restent : la réédition les conserve
+    // (elles ne sont plus dans CHAMPS_EDITES_PAR_L_ASSISTANT).
 
     // ─────────────────────────────────────────────────────────────────────────
     // PHASE 2 : ENRICHISSEMENT DE LA CAPTURE
@@ -638,7 +570,7 @@ const ETAPES_WIZARD = {
             return champs;
         },
         suivant: () => 'infos-base',
-        precedent: () => 'seuils-personnels'
+        precedent: () => 'regles-sommative'
     },
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -691,7 +623,7 @@ const ETAPES_WIZARD = {
                 texte: 'PAN-Standards s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.'
             }
         ],
-        suivant: () => 'nb-evaluations',
+        suivant: () => 'config-portfolio',   // bloc 9 (15 oct. 2026) : directement, sans les deux étapes retirées
         precedent: () => 'calcul-note-finale'
     },
 
@@ -753,7 +685,7 @@ const ETAPES_WIZARD = {
             }
         ],
         suivant: () => 'echelle-performance',
-        precedent: () => 'seuils-personnels'
+        precedent: () => 'approche-evaluation'
     },
 
     // --- Branche objectifs ---
@@ -790,7 +722,7 @@ const ETAPES_WIZARD = {
             if (reponses.utiliserJetons) return 'config-jetons';
             return 'choix-modele-bundles';
         },
-        precedent: () => 'seuils-personnels'
+        precedent: () => 'calcul-note-finale'   // bloc 9 : le précédent de l'ex-étape « Nombre d'évaluations »
     },
 
     'config-jetons': {
@@ -903,9 +835,8 @@ const ETAPES_WIZARD = {
                 // pas une copie ; seul le handler diffère.
                 //
                 // ⚠ VOCABULAIRE : cette étape parle de « repères », jamais de
-                // « seuils » — le mot est déjà pris par le dépistage
-                // (`seuils-personnels`), et deux notions sous un même mot dans le
-                // même parcours seraient indémêlables.
+                // « seuils » — le mot est déjà pris par le dépistage (les seuils du
+                // Labo), et deux notions sous un même mot seraient indémêlables.
                 //
                 // ⏳ RÉSERVE DE GRÉGOIRE (arbitrage A1) : « suffisant / maîtrisé »
                 // est le vocabulaire de PAN-Standards. Une autre famille de
@@ -1234,6 +1165,12 @@ function calculerNumeroEtape() {
  * Affiche une étape du wizard V2
  * @param {string} etapeId - ID de l'étape à afficher
  */
+/** Bloc 3 (15 oct. 2026) : les étapes dont le titre porte une bulle. Les étapes d'identification
+ * ont déjà une phrase d'explication sous leur titre ; elles n'en portent pas. */
+const ETAPES_AVEC_INFOBULLE = ['regles-sommative', 'config-sommative-regles', 'approche-evaluation', 'config-portfolio',
+    'config-specifications', 'config-jetons', 'choix-modele-bundles', 'config-denotation', 'echelle-performance',
+    'grille-criteres', 'recapitulatif'];
+
 function afficherEtapeWizardV2(etapeId) {
     const etape = ETAPES_WIZARD[etapeId];
     if (!etape) {
@@ -1244,7 +1181,13 @@ function afficherEtapeWizardV2(etapeId) {
 
     // Mettre à jour le titre et la description
     const titreEl = document.getElementById('wizard-v2-titre');
-    if (titreEl) titreEl.textContent = etape.titre;
+    if (titreEl) {
+        titreEl.textContent = etape.titre;
+        // Bloc 3 des textes relus (15 oct. 2026, #18) : une bulle par étape de configuration,
+        // sur son titre (catalogue : `wizard-etape-<id>`, accompagnement-contenu-hover.js).
+        if (ETAPES_AVEC_INFOBULLE.includes(etapeId)) titreEl.setAttribute('data-tooltip', 'wizard-etape-' + etapeId);
+        else titreEl.removeAttribute('data-tooltip');
+    }
 
     const descEl = document.getElementById('wizard-v2-description');
     if (descEl) descEl.textContent = etape.description || '';
@@ -2009,19 +1952,6 @@ function genererRecapitulatif() {
     if (r.discipline) html += `<p><strong>Discipline\u00a0:</strong> ${echapperHtml(r.discipline)}</p>`;
     html += '</div>';
 
-    // Section : Paramètres généraux
-    if (r.nbEvaluationsPrevues || r.seuilVaBien) {
-        html += '<div class="wizard-v2-recap-section">';
-        html += '<h4>Paramètres généraux</h4>';
-        if (r.nbEvaluationsPrevues) {
-            html += `<p><strong>Évaluations prévues\u00a0:</strong> ${r.nbEvaluationsPrevues}</p>`;
-        }
-        if (r.seuilVaBien) {
-            html += `<p><strong>Seuils\u00a0:</strong> Bien \u2265${r.seuilVaBien}% | Difficulté \u2264${r.seuilDifficulte}% | Grande difficulté &lt;${r.seuilGrandeDifficulte}%</p>`;
-        }
-        html += '</div>';
-    }
-
     // Section spécifique selon le type (#900, lot N6 : la section « Configuration » d'une
     // sommative — rang et moyenne du groupe — part avec son étape.)
     if (r.typePratique === 'standards') {
@@ -2594,21 +2524,6 @@ async function creerPratiqueV2() {
         pratique.calcul_note = { methode: 'conversion_niveaux' };
     }
 
-    // Seuils personnels (toutes branches)
-    if (r.seuilVaBien || r.seuilDifficulte || r.seuilGrandeDifficulte) {
-        pratique.seuils = {
-            type: 'pourcentage',
-            va_bien: parseInt(r.seuilVaBien) || 75,
-            difficulte: parseInt(r.seuilDifficulte) || 65,
-            grande_difficulte: parseInt(r.seuilGrandeDifficulte) || 55
-        };
-    }
-
-    // Nombre d'évaluations prévues
-    if (r.nbEvaluationsPrevues) {
-        pratique.nbEvaluationsPrevues = parseInt(r.nbEvaluationsPrevues) || 6;
-    }
-
     // Règles sommatives (stockées pour référence)
     if (classification.regles && classification.regles.length > 0) {
         pratique.reglesSpeciales = classification.regles;
@@ -2937,9 +2852,10 @@ function conserverConfigurationSpecifications(pratique, existante) {
  * @param {Object} existante - l'objet enregistré qu'il remplace
  * @returns {Object} pratique
  */
+// Bloc 9 (15 oct. 2026) : `seuils` et `nbEvaluationsPrevues` n'y sont plus — l'assistant ne les
+// écrit plus ; une pratique rouverte garde les siens, rien n'est effacé.
 const CHAMPS_EDITES_PAR_L_ASSISTANT = ['id', 'nom', 'auteur', 'etablissement', 'description', 'discipline', 'type',
-    'variante', 'pratiques', 'dansBibliotheque', 'dateCreation', 'configuration', 'calcul_note', 'seuils',
-    'nbEvaluationsPrevues', 'reglesSpeciales'];
+    'variante', 'pratiques', 'dansBibliotheque', 'dateCreation', 'configuration', 'calcul_note', 'reglesSpeciales'];
 const CONFIGURATION_EDITEE_PAR_L_ASSISTANT = {
     sommative: ['conditions_speciales'],
     standards: ['approcheEvaluation', 'echelleId', 'grilleId', 'portfolio', 'categories'],
@@ -3165,11 +3081,7 @@ function chargerPratiqueExistante(pratiqueId) {
         // #903 : les règles retirées ne reviennent ni dans les cases ni dans le récapitulatif ;
         // l'objet enregistré les garde (`conserverReglesRetirees`).
         reglesSommatives: (pratique.reglesSpeciales || pratique.configuration?.reglesSommatives || [])
-            .filter(regle => !REGLES_SOMMATIVES_RETIREES.includes(regle)),
-        nbEvaluationsPrevues: pratique.nbEvaluationsPrevues || null,
-        seuilVaBien: pratique.seuils?.va_bien || null,
-        seuilDifficulte: pratique.seuils?.difficulte || null,
-        seuilGrandeDifficulte: pratique.seuils?.grande_difficulte || null
+            .filter(regle => !REGLES_SOMMATIVES_RETIREES.includes(regle))
     };
 
     // Ajouter la configuration spécifique

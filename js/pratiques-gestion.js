@@ -432,14 +432,14 @@ async function afficherBibliothequePratiques() {
     if (trimestresAvecPratiques.length > 0) {
         sectionImportTrimestre = `
             <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre" aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h4>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <select id="selectTrimestreImportPratiques" class="controle-form" style="flex: 1; min-width: 200px;">
                         <option value="">-- Choisir un trimestre --</option>
                         ${trimestresAvecPratiques.map(t => `<option value="${echapperHtml(t.id)}">${echapperHtml(t.nom)} (${t.nombre} pratique${t.nombre > 1 ? 's' : ''})</option>`).join('')}
                     </select>
                     <button data-action="afficherPratiquesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les pratiques</button>
-                    <button data-action="importerToutPratiquesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
+                    <button data-action="importerToutPratiquesTrimestreModal" class="btn btn-principal btn-compact" data-tooltip="import-trimestre-tout-pratiques">Tout importer</button>
                 </div>
                 <div id="previewPratiquesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
             </div>`;

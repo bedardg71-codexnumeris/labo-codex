@@ -59,7 +59,9 @@ function monter({ echelles, reponses = {} }) {
         if (!elements[id]) {
             elements[id] = {
                 id, value: '', innerHTML: '', textContent: '', style: {}, disabled: false,
-                classList: { add() {}, remove() {}, contains: () => false, toggle() {} }
+                classList: { add() {}, remove() {}, contains: () => false, toggle() {} },
+                // bloc 3 (15 oct. 2026) : le titre de l'étape porte sa bulle
+                setAttribute() {}, removeAttribute() {}
             };
         }
         return elements[id];

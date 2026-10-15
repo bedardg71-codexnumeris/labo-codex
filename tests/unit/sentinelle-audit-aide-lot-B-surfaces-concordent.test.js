@@ -24,58 +24,27 @@ const TERME = lire('js/accompagnement-contenu-terme.js');
 
 describe('Infobulles — les chiffres qu\'elles donnent sont ceux du code', () => {
 
-    it('les zones de couleur du tableau de bord sont celles que l\'écran affiche', () => {
-        // #818 (10 sept. 2026) — CE BANC SE COMPARAIT À LUI-MÊME. Il extrayait les
-        // bornes des littéraux du rendu et vérifiait que l'infobulle les recopiait :
-        // deux copies d'un même arrondi fait à la main, qu'il déclarait concordantes.
-        // Or l'écran annonçait 50 et 80 là où les arrêts du dégradé tombent à 47,5 et
-        // 82,5. Les libellés se CALCULENT désormais ; ce banc recalcule la même chose
-        // depuis les DONNÉES lues à la source (les arrêts, les bornes de l'axe) et
-        // confronte l'infobulle à ce résultat, pas au rendu.
-        //
-        // ⚠ Ces bornes ne classent rien : la barre est un dégradé continu et la
-        // couleur d'un point est interpolée. Elles situent des changements de teinte.
+    it('le dégradé du tableau de bord : aucun chiffre de repère, ni dessiné ni dans les bulles (bloc 6b, 15 oct. 2026)', () => {
+        // #818 (10 sept.) faisait CALCULER les quatre repères (30-47,5 % … ≥ 82,5 %) au lieu de les
+        // recopier. Le 15 oct., Grégoire les a retirés : « Je ne sais pas d'où viennent ces chiffres
+        // […] Je préférerais ne pas les afficher, seulement les commentaires sur A et C. » Ce sont les
+        // quarts de la barre (axe 30 → 100 %), rien de pédagogique. Le dégradé, lui, ne bouge pas.
         const tdb = lire('js/tableau-bord-apercu.js');
-
-        const borneAxe = (nom) => {
-            const m = tdb.match(new RegExp(`const ${nom} = ([0-9.]+);`));
-            expect(m, `${nom} a disparu de tableau-bord-apercu.js`).toBeTruthy();
-            return parseFloat(m[1]);
-        };
-        const axeMin = borneAxe('ECHELLE_DISTRIBUTION_MIN');
-        const axeMax = borneAxe('ECHELLE_DISTRIBUTION_MAX');
-
-        const positions = [...tdb.matchAll(/\{\s*position:\s*(\d+),\s*couleur:/g)].map((m) => parseInt(m[1], 10));
-        expect(positions.length, 'ARRETS_DEGRADE ne porte plus quatre arrêts').toBe(4);
-
-        // La même conversion que le module : position sur la barre → score.
-        const pct = (pos) => String(Math.round((axeMin + (pos / 100) * (axeMax - axeMin)) * 1000) / 10).replace('.', ',');
-        const attendus = positions.map((pos, i) =>
-            i < positions.length - 1 ? `${pct(pos)}-${pct(positions[i + 1])}%` : `≥ ${pct(pos)}%`
-        );
-
-        // #821 (15 oct. 2026) : aucun mot sur le dégradé. L'écran DÉRIVE ses plages :
-        // chaque bande appelle le calculateur, dans l'ordre.
-        [0, 1, 2, 3].forEach((i) => {
-            expect(tdb, `la plage ${i} recopie un libellé au lieu de le calculer`).toContain(`\${libelleBandeDistribution(${i})}`);
-        });
-
-        const bulle = HOVER.match(/'tdb-zones-couleur':\s*\n?\s*'((?:[^'\\]|\\.)*)'/);
-        expect(bulle).toBeTruthy();
-        for (const mot of ['Fragile', 'Modéré', 'Favorable']) {
-            expect(bulle[1], `« ${mot} » est revenu dans l'infobulle des zones`).not.toContain(mot);
+        expect(tdb, 'la légende chiffrée est revenue').not.toMatch(/libelleBandeDistribution|const legendeUnique/);
+        expect(tdb, 'la légende chiffrée est revenue').not.toContain('distribution-legende-commune');
+        // La géométrie du dégradé reste là où elle vit (contexte-qualification.js la lit).
+        expect((tdb.match(/\{\s*position:\s*(\d+),\s*couleur:/g) || []).length).toBe(4);
+        expect(HOVER, 'la bulle des quatre repères est revenue').not.toMatch(/'tdb-zones-couleur':/);
+        const observer = HOVER.match(/'tdb-observer':\s*\n?\s*'((?:[^'\\]|\\.)*)'/);
+        expect(observer).toBeTruthy();
+        expect(observer[1], 'la bulle « Observer » donne un chiffre').not.toMatch(/\d/);
+        // Elle parle avec les mots du profil, lus à leur source (mécanisme 2 de contexte-qualification.js).
+        const qualif = lire('js/contexte-qualification.js');
+        const mots = (nom) => [...qualif.match(new RegExp(`const ${nom} = \\[([^\\]]+)\\]`))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+        const [presence, remise] = [mots('MOTS_PRESENCE'), mots('MOTS_REMISE')];
+        for (const mot of [presence[0], presence[4], remise[0], remise[4]]) {
+            expect(observer[1], `« ${mot} » manque à la bulle`).toContain(`« ${mot} »`);
         }
-        attendus.forEach((attendu, i) => {
-            // les bornes calculées, avec l'espace fine de l'infobulle
-            expect(
-                bulle[1].replace(/\s%/g, '%'),
-                `l'infobulle ne porte pas la borne calculée de la plage ${i} (attendu ${attendu})`
-            ).toContain(attendu);
-        });
-
-        // Ces zones ne sont PAS configurables : l'infobulle ne doit pas le prétendre.
-        expect(tdb).not.toContain('obtenirSeuil');
-        expect(bulle[1]).not.toMatch(/configurable/i);
     });
 
     it('les défauts des seuils d\'interprétation sont ceux de preferences-v2.js', () => {

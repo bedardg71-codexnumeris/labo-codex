@@ -700,7 +700,10 @@
     function entete(titre) {
         return '<div class="comparateur-header">' +
                     '<div>' +
-                        '<h2 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' + titre + '</h2>' +
+                        '<h2 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' + titre +
+                            // Bloc 1 des textes relus (15 oct. 2026, #364 T3) : l'aide du Comparateur.
+                            ' <button class="btn-aide-contextuelle" data-aide="comparateur-pratiques" aria-label="Aide : le Comparateur de pratiques" title="Aide : le Comparateur de pratiques"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>' +
+                        '</h2>' +
                     '</div>' +
                 '</div>';
     }

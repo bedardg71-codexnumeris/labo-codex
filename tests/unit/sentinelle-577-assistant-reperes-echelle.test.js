@@ -52,7 +52,9 @@ function monter({ echelles = [ECHELLE()] } = {}) {
         if (!elements[id]) {
             elements[id] = {
                 id, value: '', innerHTML: '', textContent: '', style: {},
-                classList: { add() {}, remove() {}, contains: () => false, toggle() {} }
+                classList: { add() {}, remove() {}, contains: () => false, toggle() {} },
+                // bloc 3 (15 oct. 2026) : le titre de l'étape porte sa bulle
+                setAttribute() {}, removeAttribute() {}
             };
         }
         return elements[id];

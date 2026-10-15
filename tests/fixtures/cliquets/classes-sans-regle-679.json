@@ -262,7 +262,6 @@
  "js/tableau-bord-apercu.js:alerte-signalement-depistage",
  "js/tableau-bord-apercu.js:barre-patterns-container",
  "js/tableau-bord-apercu.js:barre-rai-container",
- "js/tableau-bord-apercu.js:distribution-legende-commune",
  "js/tableau-bord-apercu.js:filtre-prioritaire",
  "js/travaux-doublons-ui.js:td-radio-corbeille",
  "js/travaux-doublons-ui.js:td-radio-garder",

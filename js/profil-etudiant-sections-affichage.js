@@ -1644,11 +1644,9 @@ function genererSectionMobilisation(da) {
 
     // #821 lot A (10 sept. 2026) — les bornes de l'interprétation A-C ont UNE
     // source, `BORNES_MOBILISATION` (contexte-qualification.js). Les blocs de
-    // recommandation les lisent, et la prose écrit les mêmes chiffres qu'elles.
+    // recommandation les lisent. Depuis le 15 oct. 2026 (bloc 7 des textes relus), la prose ne cite
+    // plus de pourcentage : elle propose des pistes, au conditionnel, sous la phrase qui décrit.
     const B = BORNES_MOBILISATION;
-    const pctCritique = Math.round(B.critique * 100);
-    const pctFragile = Math.round(B.fragile * 100);
-    const pctFavorable = Math.round(B.favorable * 100);
 
     return `
         <!-- STATISTIQUES -->
@@ -1680,22 +1678,22 @@ function genererSectionMobilisation(da) {
             </div>
             <div class="profil-interpretation-texte">
                 ${interpM.code === 'decrochage' ?
-                    "L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
+                    "Tu as indiqué un décrochage. À la lumière de cette situation, il pourrait être pertinent de passer le relais à l'aide pédagogique individuelle (API) ou aux services d'aide." :
                   interpM.code === 'critiques' ?
-                    `Situation critique : présence ET remise des travaux sous ${pctCritique}%. Intervention RàI niveau 3 immédiate requise.` :
+                    "À la lumière de ces données, il pourrait être pertinent de rencontrer l'étudiant·e, du côté de la présence comme de la remise ; une intervention de palier 3 (RàI) pourrait être envisagée." :
                   interpM.code === 'assiduite-critique' ?
-                    `Assiduité critique (< ${pctCritique}%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental.` :
+                    "À la lumière de ces données, il pourrait être pertinent de chercher, avec l'étudiant·e, ce qui l'empêche d'être présent·e en classe." :
                   interpM.code === 'completion-critique' ?
-                    `Complétion critique (< ${pctCritique}%). Les travaux ne sont pas remis. Investigation des obstacles organisationnels ou motivationnels nécessaire.` :
+                    "À la lumière de ces données, il pourrait être pertinent de chercher ce qui fait obstacle à la remise des travaux : organisation, motivation ou autre chose." :
                   interpM.code === 'fragile' ?
-                    `Les deux composantes (A et C) sont entre ${pctCritique}-${pctFragile}%. Soutien proactif recommandé pour stabiliser l'engagement.` :
+                    "À la lumière de ces données, un soutien sur la présence et sur la remise pourrait aider à stabiliser la situation." :
                   interpM.code === 'assiduite-fragile' ?
-                    `L'assiduité est entre ${pctCritique}-${pctFragile}% alors que la complétion est satisfaisante. Renforcer la présence en classe.` :
+                    "À la lumière de ces données, il pourrait être utile d'encourager la présence en classe ; la remise, elle, se tient." :
                   interpM.code === 'completion-fragile' ?
-                    `La complétion est entre ${pctCritique}-${pctFragile}% alors que l'assiduité est satisfaisante. Soutenir l'organisation et la planification.` :
+                    "À la lumière de ces données, un soutien à l'organisation et à la planification pourrait aider ; la présence, elle, se tient." :
                   interpM.code === 'favorable' ?
-                    `Excellent engagement comportemental. Assiduité et complétion ≥ ${pctFavorable}%. Maintenir cette dynamique positive.` :
-                    `Engagement comportemental satisfaisant. Assiduité et complétion ≥ ${pctFragile}%. Continuer la surveillance de niveau 1.`}
+                    "Ces données ne suggèrent aucun geste particulier du côté de la présence et de la remise." :
+                    "Ces données ne suggèrent pas d'autre geste que le suivi habituel en classe."}
             </div>
         </div>
 
@@ -1712,12 +1710,12 @@ function genererSectionMobilisation(da) {
         <!-- RECOMMANDATIONS SELON LE NIVEAU -->
         ${interpM.code === 'decrochage' ? `
             <div style="background: var(--gris-tres-pale); border-left: 4px solid var(--gris-clair); padding: 15px;">
-                <h4 style="color: var(--gris-fonce); margin-bottom: 10px;">Actions requises</h4>
+                <h4 style="color: var(--gris-fonce); margin-bottom: 10px;">Pistes possibles</h4>
                 <ul style="margin: 0; padding-left: 20px; color: var(--gris-fonce); line-height: 1.6;">
-                    <li>Contact immédiat avec l'aide pédagogique individuelle (API)</li>
-                    <li>Tentative de contact direct (téléphone, courriel)</li>
-                    <li>Référence aux services d'aide psychosociale si pertinent</li>
-                    <li>Documentation du dossier étudiant</li>
+                    <li>Communiquer avec l'aide pédagogique individuelle (API)</li>
+                    <li>Tenter un contact direct (téléphone, courriel)</li>
+                    <li>Diriger vers les services d'aide psychosociale, si c'est pertinent</li>
+                    <li>Garder une trace au dossier</li>
                 </ul>
             </div>
         ` : (A < B.critique || C < B.critique) ? `
@@ -1725,32 +1723,32 @@ function genererSectionMobilisation(da) {
                         border-left: 4px solid ${A < B.critique && C < B.critique ? '#e84057' : '#c8a060'};
                         padding: 15px; border-radius: 6px;">
                 <h4 style="color: ${A < B.critique && C < B.critique ? '#f06878' : '#d4b878'}; margin-bottom: 10px;">
-                    Recommandations d'intervention (niveau critique)
+                    Pistes d'intervention
                 </h4>
                 <ul style="margin: 0; padding-left: 20px; color: ${A < B.critique && C < B.critique ? '#f06878' : '#d4b878'}; line-height: 1.6;">
                     ${A < B.critique && C < B.critique ?
-                        '<li><strong>Intervention RàI niveau 3 immédiate</strong> - Les deux composantes sont critiques</li>' : ''}
+                        '<li><strong>Présence et remise :</strong> une intervention de palier 3 (RàI) pourrait être envisagée</li>' : ''}
                     ${A < B.critique ?
-                        '<li><strong>Assiduité critique :</strong> Rencontre immédiate pour identifier les causes d\'absence</li>' : ''}
+                        '<li><strong>Présence :</strong> une rencontre pourrait aider à comprendre les absences</li>' : ''}
                     ${C < B.critique ?
-                        '<li><strong>Complétion critique :</strong> Investigation des obstacles à la remise des travaux</li>' : ''}
-                    <li>Établir un plan d'intervention personnalisé (PIP) avec objectifs mesurables</li>
-                    <li>Suivi hebdomadaire jusqu'à amélioration significative</li>
-                    <li>Mobiliser les ressources d'aide (tutorat, aide technologique, etc.)</li>
+                        '<li><strong>Remise :</strong> chercher ce qui fait obstacle à la remise des travaux pourrait aider</li>' : ''}
+                    <li>Un plan d'intervention personnalisé (PIP), avec des objectifs mesurables, pourrait être utile</li>
+                    <li>Un suivi chaque semaine pourrait permettre de voir si la situation évolue</li>
+                    <li>Les ressources d'aide (tutorat, aide technologique, etc.) pourraient être mises à contribution</li>
                 </ul>
             </div>
         ` : (A < B.fragile || C < B.fragile) ? `
             <div class="info-box info-box--attention">
-                <h4 style="color: var(--alerte-texte-attention); margin-bottom: 10px;">Recommandations préventives (niveau fragile)</h4>
+                <h4 style="color: var(--alerte-texte-attention); margin-bottom: 10px;">Pistes de prévention</h4>
                 <ul style="margin: 0; padding-left: 20px; color: var(--alerte-texte-attention); line-height: 1.6;">
                     ${A < B.fragile && C < B.fragile ?
-                        '<li><strong>Mobilisation fragile :</strong> Soutien sur les deux composantes (présence ET remise)</li>' :
+                        '<li><strong>Présence et remise :</strong> un soutien sur les deux pourrait aider</li>' :
                       A < B.fragile ?
-                        '<li><strong>Assiduité fragile :</strong> Renforcer la motivation à assister aux séances</li>' :
-                        '<li><strong>Complétion fragile :</strong> Soutenir l\'organisation et la gestion du temps</li>'}
-                    <li>Discussion informelle pour identifier les obstacles émergents</li>
-                    <li>Offrir stratégies d'autorégulation et de planification</li>
-                    <li>Réévaluation dans 2 semaines</li>
+                        '<li><strong>Présence :</strong> encourager la présence aux séances pourrait aider</li>' :
+                        '<li><strong>Remise :</strong> un soutien à l\'organisation et à la gestion du temps pourrait aider</li>'}
+                    <li>Une discussion informelle pourrait faire voir les obstacles qui apparaissent</li>
+                    <li>Des stratégies d'autorégulation et de planification pourraient être proposées</li>
+                    <li>Un nouveau regard dans deux semaines pourrait permettre de voir l'évolution</li>
                 </ul>
             </div>
         ` : ''}

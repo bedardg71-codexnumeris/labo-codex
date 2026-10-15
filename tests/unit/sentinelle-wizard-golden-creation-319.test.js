@@ -75,7 +75,7 @@ const GOLDEN = {
         id: 'fixe-SOM', nom: 'Golden SOM', auteur: '', etablissement: '', description: '', discipline: '',
         type: 'sommative', variante: 'classique', pratiques: ['SOM'], dansBibliotheque: true,
         configuration: {},
-        calcul_note: { methode: 'moyenne_ponderee' }, nbEvaluationsPrevues: 6
+        calcul_note: { methode: 'moyenne_ponderee' }   // bloc 9 (15 oct. 2026) : plus de nbEvaluationsPrevues
     },
     // #443 (10 août 2026) : le golden STD_obj est RETIRÉ AVEC la fonctionnalité.
     // Un golden décrit un parcours que l'application OFFRE ; le parcours « par
@@ -233,7 +233,7 @@ describe('#319 Lot 2 (a2) — voie rapide', () => {
     it('route directement vers la branche de configuration selon la famille', () => {
         expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'moyenne' })).toBe('regles-sommative');
         expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'niveaux' })).toBe('approche-evaluation');
-        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'acceptable' })).toBe('nb-evaluations');
+        expect(win.obtenirEtapeSuivante('voie-rapide', { calcNoteFinale: 'acceptable' })).toBe('config-specifications');
     });
 
     it('DEN est un parcours créable depuis la voie rapide (#318, 1.21.0)', () => {
@@ -351,7 +351,8 @@ describe('#443 · cliquet d\'absence — la branche « par objectifs » ne revie
     });
 
     it('le branchement Standards mène toujours au portfolio', () => {
-        const apres = win.obtenirEtapeSuivante('seuils-personnels',
+        // Bloc 9 (15 oct. 2026) : « Tes seuils personnels » est retirée ; c'est l'approche qui mène au portfolio.
+        const apres = win.obtenirEtapeSuivante('approche-evaluation',
             { calcNoteFinale: 'niveaux', approcheEvaluation: 'par-artefacts' });
         expect(apres).toBe('config-portfolio');
     });

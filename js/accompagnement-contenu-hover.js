@@ -161,15 +161,15 @@ const TOOLTIPS = {
     'depist-restaurer':
         'Réinitialise tous les seuils de détection à leurs valeurs par défaut.',
     'depist-seuil-acceptable':
-        'Indice sous lequel la situation est en zone de vigilance (jaune). À surveiller.',
+        'À partir de ce seuil, le profil écrit « Absences rares » (A) et « Travaux manquants rares » (C). Dans la liste des élèves, un chiffre entre le seuil précédent et celui-ci est jaune.',
     'depist-seuil-bon':
-        'Indice au-dessus duquel la situation est satisfaisante (vert).',
+        'À partir de ce seuil, le profil écrit « Aucune absence ou presque » (A) et « Aucun travail manquant ou presque » (C). Dans la liste des élèves, un chiffre à partir de ce seuil est bleu ; entre le seuil précédent et celui-ci, vert.',
     'depist-seuil-defi':
         'Score (%) sous lequel un critère est identifié comme un défi nécessitant attention. Seuil bas = plus exigeant, seuil élevé = moins exigeant. Règle le dépistage seulement.',
     'depist-seuil-direction':
         'Variation minimale de la moyenne d\'un critère, d\'une fenêtre d\'analyse à la précédente (la même, décalée d\'une production), pour afficher une flèche (→ ou ←) après ce critère.',
     'depist-seuil-fragile':
-        'Indice sous lequel la situation est préoccupante (rouge). Nécessite une intervention.',
+        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences fréquentes » et « Travaux manquants fréquents » (« très fréquents » sous 60 %, borne fixe). Dans la liste des élèves, un chiffre sous ce seuil est rouge.',
     'depist-seuil-progression':
         'Différence minimale (%) pour signaler une progression ou une régression entre deux productions. Seuil bas = sensible, seuil élevé = moins sensible.',
     'depist-seuils-interpretation':
@@ -436,13 +436,47 @@ const TOOLTIPS = {
         'Portrait complet de ton groupe-cours : indices d\'apprentissage, patterns, interventions et graphiques de développement.',
     'tdb-sous-nav':
         'Quatre vues : aperçu du groupe, liste des individus, profil étudiant·e et interventions RàI.',
-    'tdb-zones-couleur':
-        'Quatre repères sous le dégradé : 30-47,5 %, 47,5-65 %, 65-82,5 %, ≥ 82,5 %. Ils situent un point, ils ne classent pas l\'étudiant·e.',
+
+    // --- Textes relus par Grégoire (15 oct. 2026) : « Tout importer » (bloc 2) ---
+    'import-trimestre-tout-grilles':
+        'Copie toutes les grilles de ce trimestre dans ton trimestre actif, avec leurs rétroactions. Les originales restent intactes.',
+    'import-trimestre-tout-echelles':
+        'Copie toutes les échelles de ce trimestre dans ton trimestre actif. Les originales restent intactes.',
+    'import-trimestre-tout-cartouches':
+        'Copie toutes les cartouches de ce trimestre dans ton trimestre actif. Les originales restent intactes.',
+    'import-trimestre-tout-productions':
+        'Copie toutes les productions de ce trimestre dans ton trimestre actif. Les originales restent intactes.',
+    'import-trimestre-tout-pratiques':
+        'Copie toutes les pratiques de ce trimestre dans ton trimestre actif. Les originales restent intactes. Vérifie ensuite leur échelle et leur grille.',
+
+    // --- Textes relus par Grégoire (15 oct. 2026) : les étapes de l'assistant de pratique (bloc 3, #18) ---
+    'wizard-etape-regles-sommative':
+        'Les règles s’ajoutent à la moyenne pondérée. Sans règle, chaque évaluation compte selon sa pondération.',
+    'wizard-etape-config-sommative-regles':
+        'Le verrou plafonne la note finale quand l’évaluation choisie n’atteint pas le seuil, même si la moyenne est plus haute.',
+    'wizard-etape-approche-evaluation':
+        'En standards, la note se construit sur le portfolio ; à l’étape suivante, tu choisis quels artefacts comptent.',
+    'wizard-etape-config-portfolio':
+        'Ici, tu dis quels artefacts comptent : les N meilleurs, tous, les N derniers, ou les N meilleurs plus les obligatoires. Les autres restent visibles, mais n’entrent pas dans la note.',
+    'wizard-etape-config-specifications':
+        'Un travail est « acceptable » quand son résultat atteint ce seuil. À 100 %, toutes ses spécifications doivent être respectées.',
+    'wizard-etape-config-jetons':
+        'Un jeton de délai donne quelques jours de plus pour remettre un travail ; un jeton de reprise permet de refaire un travail déjà évalué. Tu fixes combien chaque élève en reçoit.',
+    'wizard-etape-choix-modele-bundles':
+        'Un forfait dit ce qu’il faut réussir pour obtenir une note. La note finale est celle du plus haut forfait atteint.',
+    'wizard-etape-config-denotation':
+        'La note finale est celle que tu poses. Les cibles cochées la justifient ; la suggestion calculée n’est qu’un repère.',
+    'wizard-etape-echelle-performance':
+        'L’échelle traduit chaque niveau (par exemple I, D, M, E) en pourcentage. C’est elle qui transforme un niveau en points.',
+    'wizard-etape-grille-criteres':
+        'La grille donne les critères avec lesquels tu évalues chaque copie. Tu peux la choisir plus tard, dans Conception › Grilles de critères.',
+    'wizard-etape-recapitulatif':
+        'Rien n’est créé avant que tu confirmes. Tu pourras tout modifier ensuite.',
 
     // --- Observer (indices A-C-P) ---
 
     'tdb-observer':
-        'Indices A-C-P du groupe. Chaque barre positionne les étudiant·es sur une échelle continue, de 30 % à 100 %.',
+        'Indices A-C-P du groupe. Chaque barre place les étudiant·es selon un indice : plus un point est à droite, plus l\'indice est haut. Pour A, la droite veut dire « Aucune absence ou presque », la gauche « Absences très fréquentes » ; pour C, « Aucun travail manquant ou presque » et « Travaux manquants très fréquents ».',
     'tdb-selecteur-indice':
         'Choisis l\'indice à visualiser : Assiduité (A), Complétion (C) ou Performance (P).',
     'tdb-assiduite':

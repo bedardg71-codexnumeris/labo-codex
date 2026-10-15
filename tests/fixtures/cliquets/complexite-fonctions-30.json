@@ -172,8 +172,8 @@
   "exporterFormatRecherche": 34
  },
  "js/wizard-pratique-v2.js": {
-  "genererRecapitulatif": 48,
-  "creerPratiqueV2": 86,
-  "chargerPratiqueExistante": 44
+  "genererRecapitulatif": 44,
+  "creerPratiqueV2": 78,
+  "chargerPratiqueExistante": 40
  }
 }
