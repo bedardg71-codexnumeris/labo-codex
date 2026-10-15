@@ -48,3 +48,12 @@ Labo › Outils d'observation (`index.html` ~8902-8916) : « Fragile si inférie
 ## La méthode
 
 Un commit par bloc ou un seul, à toi de voir ; Vitest complet depuis `tests/` ; une sentinelle qui lit les textes posés là où ils vivent (bulles, glossaire, fenêtres) et vérifie qu'aucune bulle du dégradé ne porte de chiffre, break-test. Demande `plans de travail/DEMANDE-RELECTURE-2026-10-15-textes-relus.md` (les phrases de 6b et du bloc 7 à relire, la liste des phrases prescriptives). Propose la ligne des Nouvelles. **Aucun push, aucune release, aucun verdict Playwright avant le signal du soir.** Rapport court à Grégoire, en gestes d'utilisateur.
+
+## Verdict de Cowork, 15 oct. 2026 à 15 h 53 (Toronto, mesuré par `date`)
+
+**Relu sur `e8406dff` et `5f228d54` : accepté, sans correction.** Relu dans la demande : les phrases au conditionnel (§ 3) disent des pistes, gardent les gestes et ne jugent plus ; la bulle « Observer » (§ 2) ne porte aucun chiffre et ne prête aucun mot à P ; la forme « à partir de » du réglage des seuils (§ 4) est la bonne (l'exemple de la consigne inversait le sens : erreur de Cowork) ; la bulle « bleu à 85 et plus » suit l'écran. Vitest non relancé par Cowork : ta suite verte (8 903 sur 8 903) et les 22 ablations font foi.
+
+- **§ 3, « M = (A + C) / 2 »** : Grégoire a dit de cette moyenne « c'est abandonné ». La ligne sort de la carte Mobilisation : c'est dans le lot suivant (`CONSIGNE-LOT-2026-10-15-aide-plagiat.md`, partie ajoutée).
+- **§ 6, les phrases prescriptives** : une fiche, dans le lot suivant.
+- **§ 7, le bulletin et #1076** : pas de contradiction. La décision de 14 h 57 (`LOTS-2026-10-15-fiches-a-toi.md`, lot C) précise celle du matin : la note FINALE (export vers Léa, bulletin de fin de trimestre) s'affiche à l'entier, arrondie une seule fois à partir de la note exacte ; ailleurs, le dixième. La ligne sous #1076 viendra avec le lot C ; rien à faire ici.
+- **§ 9, la ligne des Nouvelles** : soumise à Grégoire avec la version du soir.

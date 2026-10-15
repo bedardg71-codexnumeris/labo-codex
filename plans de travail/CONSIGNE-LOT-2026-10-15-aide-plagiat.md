@@ -44,3 +44,8 @@ Pose le texte avec ces deux retouches :
 La sentinelle lit aussi la branche hybride (`nombreObligatoiresTotal`, `_selectionnerArtefactsHybride`) ; break-test par branche. Un commit, Vitest complet. À faire **après** `CONSIGNE-LOT-2026-10-15-textes-relus.md` si ce lot est déjà commencé, sinon avant ; même règle : aucun push avant le signal du soir.
 
 Avec ce commit : recopie sous #668 et sous #333 les deux lignes de `DECISIONS-2026-10-15-textes-relus.md` (blocs 4 et 5), et commite ce fichier.
+
+## Ajouté par Cowork à 15 h 53 : deux petites choses de la relecture des textes, dans ce même lot
+
+1. **La ligne « Décomposition de l'indice M : M = (A + C) / 2 = … » sort de la carte Mobilisation** (`profil-etudiant-sections-affichage.js`). Grégoire, le 15 oct. : « c'est un reliquat de la moyenne (A+C)/2. c'est abandonné. » Retire aussi le calcul qui ne sert plus qu'à elle (zéro dette), et note-le sous #1083 (6.46). Si d'autres écrans affichent M, liste-les dans la demande sans y toucher.
+2. **Une fiche au BACKLOG : « L'application ne prescrit pas »** — le principe de Grégoire du 15 oct. (15 h 27) : « L'application ne doit pas être prescriptive. Elle doit parler au conditionnel, du genre : “À la lumière de ces données, il pourrait être pertinent de…” ». Reprends le tableau du § 6 de `DEMANDE-RELECTURE-2026-10-15-textes-relus.md` (carte RàI du profil, fenêtre d'aide RàI, guide RàI, cibles d'intervention jamais affichées) ; sans code ici.
