@@ -7,7 +7,7 @@
 
    FONCTIONNALITES :
    - Stack trace complet pour les erreurs
-   - Historique des 10 dernieres actions (clics, navigation)
+   - Historique des 20 dernieres actions (clics, navigation)
    - Contexte de donnees selon la section active
    - Etat stockage pertinent (localStorage, memoryCache, IDB)
    - Selecteur de gravite (bloquant/genant/mineur)

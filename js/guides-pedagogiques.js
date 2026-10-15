@@ -114,7 +114,7 @@
                     contenu: `
 <p><strong>ACP</strong> est l'acronyme de trois indices descriptifs qui mesurent l'engagement et la performance d'un·e étudiant·e dans le cours :</p>
 <ul>
-    <li><strong>A</strong> — <strong>Assiduité</strong> : la proportion des périodes du trimestre auxquelles l'étudiant·e a été présent·e.</li>
+    <li><strong>A</strong> — <strong>Assiduité</strong> : la proportion des périodes offertes auxquelles l'étudiant·e a été présent·e, sur les seules séances saisies (une séance « non saisie » n'y entre pas ; tant qu'aucune ne compte, A est inconnue).</li>
     <li><strong>C</strong> — <strong>Complétion</strong> : la proportion des productions attendues qui ont été remises.</li>
     <li><strong>P</strong> — <strong>Performance</strong> : la note pondérée obtenue selon la pratique de notation choisie.</li>
 </ul>
@@ -190,14 +190,16 @@
     <li><strong>Guider le choix de l'intervention</strong> : quel palier, quels critères cibler.</li>
     <li><strong>Évaluer l'efficacité de ton enseignement</strong>. Si plus de 20 % des étudiant·es sont en difficulté, c'est peut-être ton palier universel qu'il faut renforcer, pas nécessairement l'étudiant·e qui est en cause.</li>
 </ul>
-<h4>Quatre patterns observables</h4>
+<h4>Cinq patterns observables</h4>
 <p>L'app classe automatiquement chaque étudiant·e dans des «patterns» multifactoriels. Ces patterns sont en réalité une combinaison d'observations faites à partir de ses productions récentes. Les plages de pourcentages sont basées sur des données empiriques recueillies avec Labo Codex par Grégoire Bédard à l'automne 2025. Étant donné les limites de l'échantillon, ce sont des hypothèses qui restent encore à valider empiriquement. Ces plages reposent sur SOLO et ACP :</p>
 <ul class="guide-pedagogique-patterns-liste">
     <li><span class="badge-pattern-stable">Progression stable</span> — pas de défi identifié, performance suffisante.</li>
     <li><span class="badge-pattern-defi-specifique">Défi spécifique</span> — performance générale ≥ 75 %, mais un défi récurrent identifié sur un ou plusieurs critères.</li>
     <li><span class="badge-pattern-difficulte-emergente">Difficulté émergente</span> — performance entre 64 % et 74 % avec présence d'un défi. Zone de surveillance.</li>
     <li><span class="badge-pattern-difficulte-persistante">Difficulté persistante</span> — performance inférieure à 64 % sur les artefacts récents. Zone d'intervention prioritaire.</li>
+    <li><span class="badge-pattern-difficulte-persistante">Non-participation</span> — présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une copie du groupe évaluée).</li>
 </ul>
+<p>Tant que rien n'est jugeable, l'app affiche «&nbsp;Données insuffisantes&nbsp;» plutôt qu'un pattern.</p>
 <div class="guide-pedagogique-astuce">L'app surveille particulièrement les critères de <strong>niveau SOLO Multistructurel</strong> — ce sont les fondamentaux. Si les fondamentaux ne sont pas acquis, les compétences supérieures (Relationnel, Abstrait étendu) ne peuvent pas se développer.</div>`
                 },
                 {
@@ -211,7 +213,7 @@
 <h4>Palier 3 — Intensif</h4>
 <p>Intervention individualisée pour les étudiant·es dont la difficulté persiste malgré le palier 2. Plus de temps, plus de fréquence, plus de personnalisation. C'est rare et coûteux en ressources — à utiliser pour les cas où c'est nécessaire – et à répartir dans une équipe intégrée.</p>
 <div class="guide-pedagogique-astuce"><strong>Principe contre-intuitif</strong> : si plus de 20 % de tes étudiant·es sont en difficulté, c'est ton <em>palier 1</em> qu'il faut renforcer en premier, pas multiplier les interventions de palier 2 ou 3. Quand l'enseignement universel échoue à grande échelle, intensifier individuellement masque le vrai problème.</div>
-<p>Dans Labo Codex, l'app suggère un niveau d'intervention basé sur le diagnostic croisé (IPB × direction), mais c'est <strong>toi qui décides</strong>. L'app éclaire, tu juges.</p>`
+<p>Dans Labo Codex, l'app suggère un niveau d'intervention d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (l'indice de persistance, lui, nomme la cible de l'intervention), mais c'est <strong>toi qui décides</strong>. L'app éclaire, tu juges.</p>`
                 },
                 {
                     titre: 'La RàI en pratique dans Labo Codex',

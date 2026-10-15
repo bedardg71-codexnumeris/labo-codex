@@ -47,7 +47,7 @@ const GLOSSAIRE = {
         terme: 'Horaire',
         categorie: 'Réglages',
         etape: 'numerisation',
-        definition: 'Le format de tes périodes de cours dans la semaine : 2×2h (deux périodes séparées), 1×4h (cours intensif en une seule période) ou 1×3h (une seule période). L\'horaire, combiné au trimestre, génère automatiquement le calendrier de tes séances.',
+        definition: 'Tes séances de cours dans la semaine : pour chacune, le jour, les heures et le nombre de périodes. L\'horaire, combiné au trimestre, génère automatiquement le calendrier de tes séances.',
         voir: 'Cadre'
     },
 
@@ -251,7 +251,7 @@ const GLOSSAIRE = {
         terme: 'Niveau RàI',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Le niveau de soutien attribué à un·e étudiant·e selon les signaux du tableau de bord. Niveau 1 : aucune intervention spécifique nécessaire. Niveau 2 : difficultés émergentes détectées — intervention préventive recommandée. Niveau 3 : difficultés persistantes — accompagnement intensif recommandé. Le niveau est calculé uniquement à partir des critères multistructurels.',
+        definition: 'Le niveau de soutien attribué à un·e étudiant·e selon les signaux du tableau de bord. Niveau 1 : aucune intervention spécifique nécessaire. Niveau 2 : difficultés émergentes détectées — intervention préventive recommandée. Niveau 3 : difficultés persistantes — accompagnement intensif recommandé. Le niveau se décide d’après la performance P, quand la note existe, et d’après le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de la grille de référence sauf ceux marqués « Aucun ». L’indice de persistance (IPB) nomme la cible de l’intervention ; il ne fixe pas le niveau.',
         voir: 'Tableau de bord > Interventions'
     },
 
@@ -433,8 +433,8 @@ const GLOSSAIRE = {
         terme: 'Parcours guidé (tour)',
         categorie: 'Aide',
         etape: 'interface',
-        definition: 'Un parcours en 6 étapes qui te guide à travers les sections essentielles de l\'application lors de ta première utilisation. Tu peux le quitter à tout moment, sauter une étape ou y revenir depuis les Préférences. Le parcours est complémentaire au mode assistance.',
-        voir: 'Réglages > Préférences'
+        definition: 'Un parcours en 7 étapes, de l’accueil au Labo, qui te guide à travers les sections essentielles de l\'application. Tu peux le quitter à tout moment et le relancer depuis le bouton « Visite guidée » de l’en-tête. Le parcours est complémentaire au mode assistance.',
+        voir: 'En-tête > Visite guidée'
     },
 
     'bilan-reflexif': {
@@ -442,7 +442,7 @@ const GLOSSAIRE = {
         terme: 'Bilan réflexif',
         categorie: 'Réglages',
         etape: 'interface',
-        definition: 'Un espace dans le Labo pour consigner tes observations sur ta démarche pédagogique : forces, défis et pistes d\'amélioration. C\'est un outil de pratique réflexive, pas un formulaire obligatoire.',
+        definition: 'Un outil du Labo pour recueillir l’expérience vécue : un questionnaire que tu distribues à tes étudiant·es, l’import de leurs réponses, un rapport d’analyse (score moyen sur 4, signaux forts), et ton auto-réflexion d’enseignant·e. C\'est un outil de pratique réflexive, pas un formulaire obligatoire.',
         voir: 'Labo > Bilan réflexif'
     },
 
