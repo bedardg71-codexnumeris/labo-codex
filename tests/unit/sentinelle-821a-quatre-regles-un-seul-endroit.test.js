@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -268,13 +269,10 @@ describe('#821 lot A · mécanisme 1 — l\'Aperçu ne classe rien : quatre mots
         expect(code).not.toMatch(/position:\s*\d+/);
     });
 
-    it('#821 (15 oct. 2026) : la légende du tableau de bord pose les quatre plages calculées, et aucun mot', () => {
+    it('#821 et bloc 6b (15 oct. 2026) : rien ne s\'écrit sous le dégradé, ni mot ni chiffre', () => {
         const tdb = lire('js/tableau-bord-apercu.js');
-        const d = tdb.indexOf('const legendeUnique = `') + 'const legendeUnique = `'.length;
-        const legende = tdb.slice(d, tdb.indexOf('`;', d));
-        const plages = [...legende.matchAll(/>\$\{libelleBandeDistribution\((\d)\)\}<\/span>/g)].map((m) => Number(m[1]));
-        expect(plages).toEqual([0, 1, 2, 3]);
-        expect(legende.replace(/\$\{[^}]*\}/g, '').replace(/<[^>]*>/g, '').trim(), 'un mot est revenu sur le dégradé').toBe('');
+        expect(tdb).not.toContain('const legendeUnique');
+        expect(tdb).not.toContain('libelleBandeDistribution');
     });
 
     it('le tableau des quatre règles se lit d\'un coup, avec les bornes vivantes', () => {
@@ -310,17 +308,31 @@ describe('#821 lot A · la carte Mobilisation du profil lit les bornes, et écri
         return win.__genererSectionMobilisation('da');
     }
 
-    it('« sous 70% », « entre 70-80% », « ≥ 80% », « ≥ 90% » — les chiffres d\'avant, désormais calculés', () => {
-        expect(rendre(0.5, 0.5)).toContain('présence ET remise des travaux sous 70%');
-        expect(rendre(0.75, 0.75)).toContain('Les deux composantes (A et C) sont entre 70-80%');
-        expect(rendre(0.85, 0.85)).toContain('Assiduité et complétion ≥ 80%');
-        expect(rendre(0.95, 0.95)).toContain('Assiduité et complétion ≥ 90%');
+    // Bloc 7 des textes relus (15 oct. 2026, Grégoire) : « L'application ne doit pas être prescriptive. Elle doit
+    // parler au conditionnel. » La prose ne cite plus de pourcentage ; les bornes décident toujours de la piste.
+    it('chaque branche dit sa piste, au conditionnel, et les bornes décident toujours laquelle', () => {
+        expect(rendre(0.5, 0.5)).toContain('du côté de la présence comme de la remise');
+        expect(rendre(0.69, 0.9)).toContain('ce qui l\'empêche d\'être présent·e en classe');
+        expect(rendre(0.9, 0.69)).toContain('ce qui fait obstacle à la remise des travaux');
+        expect(rendre(0.75, 0.75)).toContain('un soutien sur la présence et sur la remise');
+        expect(rendre(0.75, 0.85)).toContain('encourager la présence en classe');
+        expect(rendre(0.85, 0.75)).toContain('organisation et à la planification');
+        expect(rendre(0.85, 0.85)).toContain('suivi habituel en classe');
+        expect(rendre(0.95, 0.95)).toContain('aucun geste particulier');
     });
 
-    it('le bloc de recommandation suit les bornes : critique sous 70, préventif sous 80, rien au-dessus', () => {
-        expect(rendre(0.69, 0.9)).toContain('niveau critique');
-        expect(rendre(0.7, 0.9)).toContain('niveau fragile');
-        expect(rendre(0.8, 0.8)).not.toMatch(/niveau critique|niveau fragile/);
+    it('aucune branche ne juge ni n\'ordonne', () => {
+        for (const [A, C] of [[0.5, 0.5], [0.69, 0.9], [0.9, 0.69], [0.75, 0.75], [0.75, 0.85], [0.85, 0.75], [0.85, 0.85], [0.95, 0.95]]) {
+            const html = rendre(A, C);
+            const prose = tranche(html, 'profil-interpretation-texte');
+            expect(prose, `A=${A}, C=${C}`).not.toMatch(/critique|fragile|[Ee]xcellent|requise?s?\b|immédiate|[Mm]aintenir|niveau critique|niveau fragile/);
+        }
+    });
+
+    it('le bloc de pistes suit les bornes : intervention sous 70, prévention sous 80, rien au-dessus', () => {
+        expect(rendre(0.69, 0.9)).toContain('Pistes d\'intervention');
+        expect(rendre(0.7, 0.9)).toContain('Pistes de prévention');
+        expect(rendre(0.8, 0.8)).not.toMatch(/Pistes d'intervention|Pistes de prévention/);
     });
 });
 

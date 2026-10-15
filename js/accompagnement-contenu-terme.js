@@ -446,13 +446,42 @@ const GLOSSAIRE = {
         voir: 'Labo > Bilan réflexif'
     },
 
-    'namespacing-prefixe-trimestre': {
-        cle: 'namespacing-prefixe-trimestre',
-        terme: 'Namespacing (préfixe trimestre)',
-        categorie: 'Technique',
+    // Bloc 2 des textes relus (15 oct. 2026, #364 T4) : ex-« Namespacing (préfixe trimestre) ».
+    'trimestres-separes': {
+        cle: 'trimestres-separes',
+        terme: 'Trimestres séparés',
+        categorie: 'Réglages',
         etape: 'interface',
-        definition: 'Les données de l\'application sont préfixées par le trimestre actif (ex. : `h2026_`, `a2025_`). Ce mécanisme permet de conserver les données de plusieurs trimestres sans conflit et de basculer entre eux.',
+        definition: 'Chaque trimestre garde ses propres grilles, pratiques et évaluations. Ce que tu changes cet automne ne touche pas l’hiver dernier. Pour reprendre un modèle d’un autre trimestre, importe-le : l’application en crée une copie dans ton trimestre actif, et l’original reste intact là où il était.',
         voir: 'Réglages > Données'
+    },
+
+    // Bloc 1 des textes relus (15 oct. 2026, #364 T3) : le Comparateur et ses maquettes.
+    'comparateur-pratiques': {
+        cle: 'comparateur-pratiques',
+        terme: 'Comparateur de pratiques',
+        categorie: 'Pratiques de notation',
+        etape: 'transversal',
+        definition: 'Un écran du Labo qui montre, côte à côte, la note que deux ou trois pratiques donneraient aux mêmes parcours d’élèves. Il sert à choisir ou à ajuster une pratique avant de l’adopter. Il ne modifie aucune note.',
+        voir: 'Labo > Comparateur de pratiques'
+    },
+
+    'maquette-pratique': {
+        cle: 'maquette-pratique',
+        terme: 'Maquette (de pratique)',
+        categorie: 'Pratiques de notation',
+        etape: 'transversal',
+        definition: 'Une copie d’essai d’une de tes pratiques, faite pour être comparée. Elle reste dans le Comparateur : tu ne peux pas l’appliquer à un groupe tant que tu ne l’as pas adoptée. Une maquette dont tu ne te sers pas depuis 30 jours porte la mention « dormant ».',
+        voir: 'Labo > Comparateur de pratiques'
+    },
+
+    'deriver-maquette': {
+        cle: 'deriver-maquette',
+        terme: 'Dériver une maquette',
+        categorie: 'Pratiques de notation',
+        etape: 'transversal',
+        definition: 'Créer une maquette à partir d’une de tes pratiques. La pratique d’origine n’est pas modifiée. On dérive d’une pratique, jamais d’une autre maquette.',
+        voir: 'Labo > Comparateur de pratiques'
     }
 
 };

@@ -53,9 +53,8 @@ const MESSAGE_SUIVI_COMPLET = 'Cinq élèves suivis au maximum. Retires-en un po
 //
 // L'axe ne part pas de 0 : il montre 30 → 100 %. Les arrêts du dégradé sont
 // posés en POSITION sur la barre (0, 25, 50, 75 %), donc en scores 30 / 47,5 /
-// 65 / 82,5 %. La légende annonçait « 30-49 / 50-64 / 65-79 / ≥ 80 » : des
-// arrondis faits à la main des mêmes arrêts, faux de 2,5 points sur deux d'entre
-// eux. Elle les CALCULE désormais, et ne peut plus dériver.
+// 65 / 82,5 %. La légende qui les affichait est retirée le 15 oct. 2026 (bloc 6b
+// des textes relus) : ces repères ne fondaient rien de pédagogique.
 const ECHELLE_DISTRIBUTION_MIN = 0.30;
 const ECHELLE_DISTRIBUTION_MAX = 1.00;
 
@@ -78,19 +77,6 @@ function positionSurEchelleDistribution(valeur) {
 /** Réciproque : le score 0-1 qu'une position 0-100 sur la barre représente. */
 function scoreALaPositionDistribution(position) {
     return ECHELLE_DISTRIBUTION_MIN + (position / 100) * (ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN);
-}
-
-/** « 47,5 » et non « 47.5 » ni « 47.50 » — virgule décimale, zéro inutile retiré. */
-function pourcentageEchelle(score) {
-    return String(Math.round(score * 1000) / 10).replace('.', ',');
-}
-
-/** Libellé de la bande i de la légende, calculé depuis les arrêts. */
-function libelleBandeDistribution(i) {
-    const borne = (n) => pourcentageEchelle(scoreALaPositionDistribution(ARRETS_DEGRADE[n].position));
-    return i < ARRETS_DEGRADE.length - 1
-        ? `${borne(i)}-${borne(i + 1)}%`
-        : `≥ ${borne(i)}%`;
 }
 
 // #821 lot A (10 sept. 2026) — `contexte-qualification.js` LIT la géométrie du
@@ -1858,18 +1844,10 @@ function afficherMetriquesGlobales(etudiants) {
         genererPanneauSuiviEtudiants();
     }
 
-    // Générer la légende unique en haut. #821 (15 oct. 2026) : quatre plages,
-    // aucun mot — le dégradé ne classe rien (`contexte-qualification.js`, mécanisme 1).
-    const legendeUnique = `
-        <div class="distribution-legende-commune tb-barre-rai" data-tooltip="tdb-zones-couleur">
-            <div class="tb-flex-center-around">
-                <span class="tb-texte-mini" style="color: #ff9800; text-align: center; font-weight: 600;">${libelleBandeDistribution(0)}</span>
-                <span class="tb-texte-mini" style="color: var(--btn-annuler); text-align: center; font-weight: 600;">${libelleBandeDistribution(1)}</span>
-                <span class="tb-texte-mini" style="color: var(--vert-succes); text-align: center; font-weight: 600;">${libelleBandeDistribution(2)}</span>
-                <span class="tb-texte-mini" style="color: var(--bleu-clair); text-align: center; font-weight: 600;">${libelleBandeDistribution(3)}</span>
-            </div>
-        </div>
-    `;
+    // Bloc 6b des textes relus (15 oct. 2026, Grégoire) : plus de légende chiffrée sous le dégradé.
+    // Elle ne portait que quatre repères (30-47,5 % … ≥ 82,5 %), la barre coupée en quarts, que rien
+    // de pédagogique ne fonde ; la bulle « Observer » dit ce que le point représente. Le dégradé et
+    // la position des couleurs ne bougent pas (`ARRETS_DEGRADE`).
 
     // 🆕 BETA 95.7 (22 jan) : Passer le texte explicite "en attente" à chaque barre
     const nbTotal = etudiants.length;
@@ -1883,7 +1861,6 @@ function afficherMetriquesGlobales(etudiants) {
     // Générer les 4 barres de distribution avec interprétations
     const html = `
         <div class="tb-p-20">
-            ${legendeUnique}
             ${genererBarreDistribution(labelA, etudiantsSOM_A, etudiantsPAN_A, 'A', afficherSom, afficherPan, r_AP, texteBarreA, nbTotal)}
             ${genererBarreDistribution(labelC, etudiantsSOM_C, etudiantsPAN_C, 'C', afficherSom, afficherPan, r_CP, texteAttenteC, nbTotal)}
             ${genererBarreDistribution(labelP, etudiantsSOM_P, etudiantsPAN_P, 'P', afficherSom, afficherPan, null, texteAttenteP, nbTotal)}

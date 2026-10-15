@@ -4070,14 +4070,14 @@ function genererSectionImportTrimestreCartouches(trimestres) {
 
     return `
         <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-            <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>
+            <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre" aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h4>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <select id="selectTrimestreImportCartouches" class="controle-form" style="flex: 1; min-width: 200px;">
                     <option value="">-- Choisir un trimestre --</option>
                     ${options}
                 </select>
                 <button data-action="afficherCartouchesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les cartouches</button>
-                <button data-action="importerToutCartouchesTrimestreModal" class="btn btn-principal btn-compact">Tout importer</button>
+                <button data-action="importerToutCartouchesTrimestreModal" class="btn btn-principal btn-compact" data-tooltip="import-trimestre-tout-cartouches">Tout importer</button>
             </div>
             <p style="margin: 10px 0 0; font-size: 0.85rem; color: var(--gris-moyen);">
                 Une cartouche arrive toujours avec sa grille : si la grille est déjà dans ce trimestre, la cartouche s'y range ; sinon la grille est copiée avec elle.

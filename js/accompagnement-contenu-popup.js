@@ -1698,6 +1698,70 @@ const AIDE_CONTEXTUELLE = {
         ]
     },
 
+    // =========================================================================
+    // TEXTES RELUS PAR GRÉGOIRE (15 oct. 2026, blocs 1 et 2 ; #364 T3 et T4)
+    // =========================================================================
+
+    'comparateur-pratiques': {
+        titre: "Comprendre le Comparateur de pratiques",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Le Comparateur montre ce que deux ou trois pratiques de notation feraient des mêmes parcours d'élèves. Seules les règles de la pratique changent d'une colonne à l'autre."
+            },
+            {
+                type: 'texte',
+                contenu: "<strong>Ce que tu vois.</strong> En haut, « Construction de la note » : les réglages de chaque pratique, ligne par ligne. En bas, « Résultat – profils-types » : la note que chaque pratique donnerait à chaque profil. Clique sur un profil pour ouvrir sa fiche : la maîtrise atteinte en fin de parcours et ce que chaque pratique retient."
+            },
+            {
+                type: 'texte',
+                contenu: "<strong>D'où viennent les données.</strong> Par défaut, des profils fictifs fabriqués à partir de ton échelle de performance. Tu peux aussi choisir ton groupe actif : ce sont alors tes vrais résultats. Dans les deux cas, comparer n'écrit rien : tes notes ne changent pas."
+            },
+            {
+                type: 'texte',
+                contenu: "<strong>Les maquettes.</strong> Une maquette est une copie d'essai d'une de tes pratiques. Tu la dérives, tu changes un réglage, puis tu la compares à l'originale. Si elle te convient, adopte-la ; sinon, jette-la. Tant que tu ne l'as pas adoptée, elle n'apparaît nulle part ailleurs."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Un tiret avec « non constructible » n'est pas un zéro : la pratique ne peut pas bâtir de note avec ces réglages et ces résultats. En dénotation, la case dit « jugement » : la note est posée par toi, elle ne se calcule pas."
+            },
+            {
+                type: 'conseil',
+                contenu: "Un écart entre deux notes n'est ni un bonus ni une erreur. Regarde d'abord « Ce que ces réglages changent », puis la maîtrise atteinte, et seulement ensuite les points."
+            }
+        ],
+        voirAussi: []
+    },
+
+    'import-autre-trimestre': {
+        titre: "Importer depuis un autre trimestre",
+        sections: [
+            {
+                type: 'texte',
+                contenu: "Importer crée une copie. Le modèle d'origine reste intact dans son trimestre ; c'est la copie, dans ton trimestre actif, que tu modifies ensuite."
+            },
+            {
+                type: 'texte',
+                contenu: "<strong>Ce qui change sur la copie.</strong> Une pratique copiée porte « (importée) » à la fin de son nom ; tu peux le retirer. La carte de chaque copie dit de quel modèle elle vient."
+            },
+            {
+                type: 'texte',
+                contenu: "<strong>Ce qui voyage avec une grille.</strong> Ses rétroactions (cartouches) sont copiées avec elle."
+            },
+            {
+                type: 'alerte',
+                niveau: 'attention',
+                contenu: "Une pratique copiée garde le nom de son échelle et de sa grille. Si elles n'existent pas dans ton trimestre actif, un message te le dit : choisis-les de nouveau en modifiant la pratique."
+            },
+            {
+                type: 'conseil',
+                contenu: "Pas sûr de tout vouloir ? « Voir les… » affiche la liste ; chaque ligne a son propre bouton « Importer »."
+            }
+        ],
+        voirAussi: []
+    },
+
     'modal-suppression-ressource': {
         titre: "Supprimer une ressource définitivement",
         sections: [

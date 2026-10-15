@@ -33,7 +33,7 @@
 
    | # | Où ça s'affiche                     | Entrée         | Forme                          | Réglable |
    |---|-------------------------------------|----------------|--------------------------------|----------|
-   | 1 | Tableau de bord › Aperçu (légende)  | UN indice (A, C ou P), par barre | dégradé CONTINU, 4 bandes | non |
+   | 1 | Tableau de bord › Aperçu (dégradé)  | UN indice (A, C ou P), par barre | dégradé CONTINU, 4 bandes | non |
    | 2 | couleur des indices, profil (A, C)  | UN pourcentage | 4 paliers (+ un 5e, fixe)      | OUI      |
    | 3 | Profil › contexte d'apprentissage   | A ET C         | 4 paliers par conjonction      | non      |
    | 4 | Profil › interprétation A-C (M)     | A ET C         | 9 branches par conjonction     | non      |
@@ -61,19 +61,19 @@
 // ⚠ NE CLASSE RIEN. Chaque barre de distribution (une pour A, une pour C,
 // une pour P — l'inventaire disait « indice composite », c'est faux : chaque
 // barre positionne UN indice) est un dégradé continu ; la couleur d'un point
-// est interpolée. La légende pose quatre plages de pourcentage sous le
-// dégradé ; depuis le 15 oct. 2026 (#821), AUCUN MOT ne les nomme : un mot
-// découpait des catégories là où il n'y en a pas.
+// est interpolée. Depuis le 15 oct. 2026, rien ne s'écrit sous le dégradé : ni
+// mot (#821 : un mot découpait des catégories là où il n'y en a pas), ni chiffre
+// (bloc 6b des textes relus : les quatre repères ne fondaient rien de pédagogique).
 //
 // La GÉOMÉTRIE du dégradé (axe 30 → 100 %, arrêts posés à 0 / 25 / 50 / 75 %
 // de la barre, donc à 30 / 47,5 / 65 / 82,5 %) vit dans `tableau-bord-apercu.js`
-// (#818, 10 sept. 2026), où la chaîne CSS, l'interpolation de couleur et la
-// légende la lisent toutes trois. La sentinelle du lot B de l'audit de l'Aide
+// (#818, 10 sept. 2026), où la chaîne CSS et l'interpolation de couleur la
+// lisent (la légende qui la lisait aussi est retirée le 15 oct.). La sentinelle du lot B de l'audit de l'Aide
 // la verrouille LÀ, dans le texte de ce fichier : elle n'est pas recopiée ici,
 // elle est LUE à l'appel. Une copie ferait renaître la dérive que #818 a fermée.
 
 /**
- * Les quatre bandes de la légende de l'Aperçu, avec leurs bornes en score 0-1,
+ * Les quatre bandes du dégradé de l'Aperçu, avec leurs bornes en score 0-1,
  * dérivées de la géométrie du dégradé (jamais recopiées).
  * @returns {Array<{de: number, a: (number|null), couleur: string}>}
  *          `a` vaut null pour la dernière bande (« ≥ »).
@@ -235,7 +235,7 @@ function qualifierContexteApprentissage(A, C) {
             badgeClasse: 'badge-engagement-tres-favorable',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Les interventions peuvent se concentrer sur le développement des habiletés et compétences.'
+            recommandation: 'À la lumière de ces données, les interventions pourraient se concentrer sur le développement des habiletés et des compétences.'
         };
     }
 
@@ -247,7 +247,7 @@ function qualifierContexteApprentissage(A, C) {
             badgeClasse: 'badge-engagement-favorable',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Les interventions peuvent se concentrer sur le développement des habiletés et compétences.'
+            recommandation: 'À la lumière de ces données, les interventions pourraient se concentrer sur le développement des habiletés et des compétences.'
         };
     }
 
@@ -259,7 +259,7 @@ function qualifierContexteApprentissage(A, C) {
             badgeClasse: 'badge-engagement-modere',
             A: (A * 100).toFixed(0) + '%',
             C: (C * 100).toFixed(0) + '%',
-            recommandation: 'Suivi régulier recommandé pour maintenir l\'engagement et éviter une baisse de performance.'
+            recommandation: 'À la lumière de ces données, un suivi régulier pourrait aider à garder le cap.'
         };
     }
 
@@ -274,7 +274,7 @@ function qualifierContexteApprentissage(A, C) {
         badgeClasse: 'badge-engagement-fragile',
         A: (A * 100).toFixed(0) + '%',
         C: (C * 100).toFixed(0) + '%',
-        recommandation: 'Interventions recommandées : Rencontrer l\'étudiant·e pour comprendre les absences/non-remises, encourager la mobilisation, vérifier s\'il y a des obstacles (emploi, santé, etc.).'
+        recommandation: 'À la lumière de ces données, il pourrait être pertinent de rencontrer l\'étudiant·e pour comprendre les absences ou les travaux manquants, et de vérifier s\'il y a des obstacles (emploi, santé, etc.).'
     };
 }
 

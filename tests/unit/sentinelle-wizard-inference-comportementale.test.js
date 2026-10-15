@@ -24,7 +24,7 @@ const SIGNAUX = {
 const ETAPE_CONFIG = {
     sommative: 'regles-sommative',
     standards: 'approche-evaluation',
-    specifications: 'nb-evaluations'
+    specifications: 'config-specifications'   // bloc 9 (15 oct. 2026) : « Nombre d'évaluations » retirée
 };
 
 describe('inférence comportementale · signaux concordants → bonne famille', () => {
@@ -67,7 +67,7 @@ describe('inférence comportementale · le départage tranche', () => {
     it('départage « exigences » → specifications', () => {
         const r = { calcNoteFinale: 'pas-certain', uniteCorrection: 'pourcentage', sortReprise: 'compte', departagePratique: 'exigences' };
         expect(deduire(r).type).toBe('specifications');
-        expect(router(r)).toBe('nb-evaluations');
+        expect(router(r)).toBe('config-specifications');
     });
 });
 
