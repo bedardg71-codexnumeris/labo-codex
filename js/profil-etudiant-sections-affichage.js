@@ -1290,9 +1290,9 @@ function genererSectionAccompagnement(da) {
 
                 <div class="profil-separateur-section"></div>
 
-                <p style="font-size: 0.9rem; color: ${alerteContexte.niveau === 'tres-favorable' || alerteContexte.niveau === 'favorable' ? '#16a34a' : alerteContexte.niveau === 'modere' ? '#ca8a04' : '#ea580c'}; font-weight: 600; margin-bottom: 8px;">
+                ${alerteContexte.description ? `<p style="font-size: 0.9rem; color: ${alerteContexte.niveau === 'tres-favorable' || alerteContexte.niveau === 'favorable' ? '#16a34a' : alerteContexte.niveau === 'modere' ? '#ca8a04' : '#ea580c'}; font-weight: 600; margin-bottom: 8px;">
                     ${alerteContexte.description}
-                </p>
+                </p>` : ''}
 
                 <p class="u-texte-09 u-texte-gris" style="line-height: 1.5;">
                     ${alerteContexte.recommandation}
@@ -1663,21 +1663,21 @@ function genererSectionMobilisation(da) {
                 <span class="pastille-rai" style="background:${interpM.couleur}"></span> ${interpM.niveau}
             </div>
             <div class="profil-interpretation-texte">
-                ${interpM.niveau === 'Décrochage' ?
+                ${interpM.code === 'decrochage' ?
                     "L'étudiant ne se présente plus au cours. Les interventions pédagogiques ne sont plus possibles. Référer aux services d'aide et à l'API." :
-                  interpM.niveau === 'Assiduité ET complétion critiques' ?
+                  interpM.code === 'critiques' ?
                     `Situation critique : présence ET remise des travaux sous ${pctCritique}%. Intervention RàI niveau 3 immédiate requise.` :
-                  interpM.niveau === 'Assiduité critique' ?
+                  interpM.code === 'assiduite-critique' ?
                     `Assiduité critique (< ${pctCritique}%). La présence irrégulière compromet l'apprentissage. Intervention prioritaire sur l'engagement comportemental.` :
-                  interpM.niveau === 'Complétion critique' ?
+                  interpM.code === 'completion-critique' ?
                     `Complétion critique (< ${pctCritique}%). Les travaux ne sont pas remis. Investigation des obstacles organisationnels ou motivationnels nécessaire.` :
-                  interpM.niveau === 'Mobilisation fragile' ?
+                  interpM.code === 'fragile' ?
                     `Les deux composantes (A et C) sont entre ${pctCritique}-${pctFragile}%. Soutien proactif recommandé pour stabiliser l'engagement.` :
-                  interpM.niveau === 'Assiduité fragile' ?
+                  interpM.code === 'assiduite-fragile' ?
                     `L'assiduité est entre ${pctCritique}-${pctFragile}% alors que la complétion est satisfaisante. Renforcer la présence en classe.` :
-                  interpM.niveau === 'Complétion fragile' ?
+                  interpM.code === 'completion-fragile' ?
                     `La complétion est entre ${pctCritique}-${pctFragile}% alors que l'assiduité est satisfaisante. Soutenir l'organisation et la planification.` :
-                  interpM.niveau === 'Favorable' ?
+                  interpM.code === 'favorable' ?
                     `Excellent engagement comportemental. Assiduité et complétion ≥ ${pctFavorable}%. Maintenir cette dynamique positive.` :
                     `Engagement comportemental satisfaisant. Assiduité et complétion ≥ ${pctFragile}%. Continuer la surveillance de niveau 1.`}
             </div>
@@ -1694,7 +1694,7 @@ function genererSectionMobilisation(da) {
         </div>
 
         <!-- RECOMMANDATIONS SELON LE NIVEAU -->
-        ${interpM.niveau === 'Décrochage' ? `
+        ${interpM.code === 'decrochage' ? `
             <div style="background: var(--gris-tres-pale); border-left: 4px solid var(--gris-clair); padding: 15px;">
                 <h4 style="color: var(--gris-fonce); margin-bottom: 10px;">Actions requises</h4>
                 <ul style="margin: 0; padding-left: 20px; color: var(--gris-fonce); line-height: 1.6;">

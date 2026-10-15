@@ -22,8 +22,17 @@ const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 //      EXACTEMENT ce qu'il rendait AVANT le déplacement (valeurs relevées sur
 //      `5c29d3fd` par un harnais AVANT/APRÈS : 1630 cas, 0 différence).
 //   2. La divergence documentée SURVIT : à A = 80 %, C = 80 %, le mécanisme 3
-//      dit « Favorable » et le mécanisme 4 dit « Acceptable ». Un banc où cet
-//      écart disparaît prouve qu'on a changé le comportement, pas l'endroit.
+//      range au palier « favorable » et le mécanisme 4 à la branche
+//      « acceptable ». Un banc où cet écart disparaît prouve qu'on a changé
+//      les bornes, pas l'endroit.
+//
+// #821, 15 oct. 2026 — LES MOTS ONT CHANGÉ, LES BORNES NON (décision de
+// Grégoire, mots adoptés à 11 h 38) : un seul vocabulaire, celui du
+// mécanisme 2 (« Aucune absence ou presque » … « Travaux manquants très
+// fréquents ») ; les mécanismes 3 et 4 se disent par la phrase des deux
+// observations ; le mécanisme 1 n'a aucun mot. Les paliers et les branches se
+// lisent donc par leur CODE (`niveau` du 3, `code` du 4), et les deux cartes
+// écrivent la même phrase au même élève.
 //
 // ⚠ Les quatre mécanismes ne sont PAS quatre copies d'une règle : deux
 // qualifient par conjonction sur A et C (3, 4), un applique un seuil à un
@@ -64,26 +73,45 @@ describe('#821 lot A · mécanisme 3 — le contexte d\'apprentissage (A ET C, b
 
     it('chaque borne et chaque borne ± 1 point rend ce qu\'elle rendait avant le déplacement', () => {
         const attendu = [
-            // [A, C, label] — relevés sur 5c29d3fd
-            [0.86, 0.86, 'Très favorable'], [0.85, 0.85, 'Très favorable'], [0.84, 0.85, 'Favorable'], [0.85, 0.84, 'Favorable'],
-            [0.76, 0.76, 'Favorable'], [0.75, 0.75, 'Favorable'], [0.74, 0.75, 'Modéré'], [0.75, 0.74, 'Modéré'],
-            [0.66, 0.66, 'Modéré'], [0.65, 0.65, 'Modéré'], [0.64, 0.65, 'Fragile'], [0.65, 0.64, 'Fragile'],
-            [0, 0, 'Fragile'], [1, 1, 'Très favorable'], [1, 0, 'Fragile']
+            // [A, C, palier] — relevés sur 5c29d3fd (le palier se lit par son code depuis le 15 oct. 2026)
+            [0.86, 0.86, 'tres-favorable'], [0.85, 0.85, 'tres-favorable'], [0.84, 0.85, 'favorable'], [0.85, 0.84, 'favorable'],
+            [0.76, 0.76, 'favorable'], [0.75, 0.75, 'favorable'], [0.74, 0.75, 'modere'], [0.75, 0.74, 'modere'],
+            [0.66, 0.66, 'modere'], [0.65, 0.65, 'modere'], [0.64, 0.65, 'fragile'], [0.65, 0.64, 'fragile'],
+            [0, 0, 'fragile'], [1, 1, 'tres-favorable'], [1, 0, 'fragile']
         ];
-        for (const [A, C, label] of attendu) {
-            expect(q(A, C).label, `A=${A}, C=${C}`).toBe(label);
+        for (const [A, C, palier] of attendu) {
+            expect(q(A, C).niveau, `A=${A}, C=${C}`).toBe(palier);
         }
     });
 
-    it('la dernière branche est un OU : A = 65 %, C = 64 % est « Fragile », pas « Insuffisant »', () => {
-        expect(q(0.65, 0.64)).toMatchObject({ niveau: 'fragile', label: 'Fragile', badgeClasse: 'badge-engagement-fragile' });
-        expect(q(0.64, 0.65).label).toBe('Fragile');
+    it('la dernière branche est un OU : A = 65 %, C = 64 % est au palier « fragile », pas « insuffisant »', () => {
+        expect(q(0.65, 0.64)).toMatchObject({ niveau: 'fragile', badgeClasse: 'badge-engagement-fragile' });
+        expect(q(0.64, 0.65).niveau).toBe('fragile');
     });
 
     it('les sorties gardent leur forme : niveau, label, badgeClasse, A et C en « 80% »', () => {
         expect(q(0.8, 0.8)).toMatchObject({
-            niveau: 'favorable', label: 'Favorable', badgeClasse: 'badge-engagement-favorable', A: '80%', C: '80%'
+            niveau: 'favorable', label: 'Absences rares, travaux manquants rares', badgeClasse: 'badge-engagement-favorable', A: '80%', C: '80%'
         });
+    });
+
+    it('#821 (15 oct. 2026) : le palier n\'a plus de mot à lui — son label est la phrase des deux observations', () => {
+        expect(q(0.9, 0.9).label).toBe('Aucune absence ou presque, aucun travail manquant ou presque');
+        expect(q(0.82, 0.72).label).toBe('Absences rares, quelques travaux manquants');
+        expect(q(0.62, 0.5).label).toBe('Absences fréquentes, travaux manquants très fréquents');
+        for (const [A, C] of [[1, 1], [0.8, 0.8], [0.7, 0.7], [0.3, 0.9]]) {
+            expect(q(A, C).label).toBe(win.decrireContexte(A, C));
+            expect(q(A, C), 'la description qui jugeait est revenue').not.toHaveProperty('description');
+        }
+        const code = lireCodeSansCommentaires('js/contexte-qualification.js');
+        for (const mot of ['Très favorable', 'Favorable', 'Modéré', 'Fragile', 'Contexte fragile', 'engagement soutenu', 'situation d\'urgence', 'intervention nécessaire']) {
+            expect(code, `« ${mot} » est revenu dans le module`).not.toContain(`'${mot}`);
+        }
+    });
+
+    it('les proportions sont lues telles quelles : 0,57 n\'est pas glissé sous 0,57 par un ×100 / ÷100', () => {
+        const { win: w } = monter({ interpretation: { excellent: 0.85, bon: 0.80, acceptable: 0.57 } });
+        expect(w.decrireContexte(0.57, 0.57)).toBe('Quelques absences, quelques travaux manquants');
     });
 
     it('les bornes sont déclarées et nommées à la source, avec les valeurs d\'avant', () => {
@@ -96,17 +124,20 @@ describe('#821 lot A · mécanisme 4 — l\'interprétation A-C de la mobilisati
     const m = (A, C, d) => win.interpreterMobilisation(A, C, d);
 
     it('chaque borne et chaque borne ± 1 point rend ce qu\'elle rendait avant le déplacement', () => {
+        // La branche se lit par son code depuis le 15 oct. 2026 ; les bornes sont celles d'avant.
         const attendu = [
-            [0.69, 0.69, 'Assiduité ET complétion critiques'], [0.7, 0.69, 'Complétion critique'], [0.69, 0.7, 'Assiduité critique'],
-            [0.7, 0.7, 'Mobilisation fragile'], [0.71, 0.71, 'Mobilisation fragile'],
-            [0.79, 0.79, 'Mobilisation fragile'], [0.79, 0.8, 'Assiduité fragile'], [0.8, 0.79, 'Complétion fragile'],
-            [0.8, 0.8, 'Acceptable'], [0.81, 0.81, 'Acceptable'], [0.89, 0.89, 'Acceptable'],
-            [0.89, 0.9, 'Acceptable'], [0.9, 0.89, 'Acceptable'], [0.9, 0.9, 'Favorable'], [0.91, 0.91, 'Favorable'], [1, 1, 'Favorable']
+            [0.69, 0.69, 'critiques'], [0.7, 0.69, 'completion-critique'], [0.69, 0.7, 'assiduite-critique'],
+            [0.7, 0.7, 'fragile'], [0.71, 0.71, 'fragile'],
+            [0.79, 0.79, 'fragile'], [0.79, 0.8, 'assiduite-fragile'], [0.8, 0.79, 'completion-fragile'],
+            [0.8, 0.8, 'acceptable'], [0.81, 0.81, 'acceptable'], [0.89, 0.89, 'acceptable'],
+            [0.89, 0.9, 'acceptable'], [0.9, 0.89, 'acceptable'], [0.9, 0.9, 'favorable'], [0.91, 0.91, 'favorable'], [1, 1, 'favorable']
         ];
-        for (const [A, C, niveau] of attendu) {
-            expect(m(A, C).niveau, `A=${A}, C=${C}`).toBe(niveau);
+        for (const [A, C, code] of attendu) {
+            expect(m(A, C).code, `A=${A}, C=${C}`).toBe(code);
+            expect(m(A, C).niveau, `A=${A}, C=${C} : la phrase des deux observations`).toBe(win.decrireContexte(A, C));
         }
-        expect(m(1, 1, true)).toEqual({ niveau: 'Décrochage', couleur: '#9e9e9e' });
+        // « Décrochage », statut posé par l'enseignant·e, reste un mot.
+        expect(m(1, 1, true)).toEqual({ code: 'decrochage', niveau: 'Décrochage', couleur: '#9e9e9e' });
     });
 
     it('les couleurs n\'ont pas bougé', () => {
@@ -123,23 +154,27 @@ describe('#821 lot A · mécanisme 4 — l\'interprétation A-C de la mobilisati
 });
 
 describe('#821 lot A · LA DIVERGENCE DOCUMENTÉE SURVIT AU DÉPLACEMENT', () => {
-    it('A = 80 %, C = 80 % : « Favorable » par le mécanisme 3, « Acceptable » par le mécanisme 4', () => {
+    it('A = 80 %, C = 80 % : palier « favorable » par le mécanisme 3, branche « acceptable » par le mécanisme 4', () => {
         const { win } = monter();
-        const contexte = win.qualifierContexteApprentissage(0.8, 0.8).label;
-        const mobilisation = win.interpreterMobilisation(0.8, 0.8).niveau;
-        expect(contexte).toBe('Favorable');
-        expect(mobilisation).toBe('Acceptable');
-        // ⚠ Si cette ligne rougit, quelqu'un a UNIFIÉ les règles — c'est une
+        const contexte = win.qualifierContexteApprentissage(0.8, 0.8);
+        const mobilisation = win.interpreterMobilisation(0.8, 0.8);
+        expect(contexte.niveau).toBe('favorable');
+        expect(mobilisation.code).toBe('acceptable');
+        // ⚠ Si cette ligne rougit, quelqu'un a UNIFIÉ les BORNES — c'est une
         // décision de pédagogie, qui remonte à Grégoire, pas une refactorisation.
-        expect(contexte, 'la divergence entre les mécanismes 3 et 4 a disparu : le comportement a changé').not.toBe(mobilisation);
+        expect(contexte.badgeClasse, 'la divergence des bornes a disparu : le comportement a changé').toBe('badge-engagement-favorable');
+        expect(mobilisation.couleur).toBe('#28a745');
+        // #821 (15 oct. 2026) : les deux cartes disent désormais la MÊME phrase — c'est le but du vocabulaire unique.
+        expect(contexte.label).toBe(mobilisation.niveau);
     });
 
-    it('et « Fragile » aussi : le mécanisme 3 le dit sous 65 %, le mécanisme 4 n\'a que « Mobilisation fragile » entre 70 et 80 %', () => {
+    it('et sous 65 % : le mécanisme 3 range au palier « fragile », le mécanisme 4 à « assiduité critique », la phrase est une', () => {
         const { win } = monter();
-        expect(win.qualifierContexteApprentissage(0.64, 0.9).label).toBe('Fragile');
-        expect(win.interpreterMobilisation(0.64, 0.9).niveau).toBe('Assiduité critique');
-        expect(win.interpreterMobilisation(0.75, 0.75).niveau).toBe('Mobilisation fragile');
-        expect(win.qualifierContexteApprentissage(0.75, 0.75).label).toBe('Favorable');
+        expect(win.qualifierContexteApprentissage(0.64, 0.9).niveau).toBe('fragile');
+        expect(win.interpreterMobilisation(0.64, 0.9).code).toBe('assiduite-critique');
+        expect(win.interpreterMobilisation(0.75, 0.75).code).toBe('fragile');
+        expect(win.qualifierContexteApprentissage(0.75, 0.75).niveau).toBe('favorable');
+        expect(win.qualifierContexteApprentissage(0.64, 0.9).label).toBe(win.interpreterMobilisation(0.64, 0.9).niveau);
     });
 });
 
@@ -149,19 +184,19 @@ describe('#821 lot A · mécanisme 2 — un seuil sur un scalaire, réglable, lu
         const { win } = monter();
         const attendu = [
             // [valeur, niveau A, niveau C, couleur]
-            [59, 'Assiduité critique', 'Complétion critique', '#dc2626'],
-            [60, 'Assiduité insuffisante', 'Complétion insuffisante', '#dc2626'],
-            [61, 'Assiduité insuffisante', 'Complétion insuffisante', '#dc2626'],
-            [69, 'Assiduité insuffisante', 'Complétion insuffisante', '#dc2626'],
-            [70, 'Assiduité acceptable', 'Complétion acceptable', '#ca8a04'],
-            [71, 'Assiduité acceptable', 'Complétion acceptable', '#ca8a04'],
-            [79, 'Assiduité acceptable', 'Complétion acceptable', '#ca8a04'],
-            [80, 'Bonne assiduité', 'Bon taux de complétion', 'var(--vert-succes)'],
-            [81, 'Bonne assiduité', 'Bon taux de complétion', 'var(--vert-succes)'],
-            [84, 'Bonne assiduité', 'Bon taux de complétion', 'var(--vert-succes)'],
-            [85, 'Assiduité exemplaire', 'Taux de complétion excellent', '#0284c7'],
-            [86, 'Assiduité exemplaire', 'Taux de complétion excellent', '#0284c7'],
-            [100, 'Assiduité exemplaire', 'Taux de complétion excellent', '#0284c7']
+            [59, 'Absences très fréquentes', 'Travaux manquants très fréquents', '#dc2626'],
+            [60, 'Absences fréquentes', 'Travaux manquants fréquents', '#dc2626'],
+            [61, 'Absences fréquentes', 'Travaux manquants fréquents', '#dc2626'],
+            [69, 'Absences fréquentes', 'Travaux manquants fréquents', '#dc2626'],
+            [70, 'Quelques absences', 'Quelques travaux manquants', '#ca8a04'],
+            [71, 'Quelques absences', 'Quelques travaux manquants', '#ca8a04'],
+            [79, 'Quelques absences', 'Quelques travaux manquants', '#ca8a04'],
+            [80, 'Absences rares', 'Travaux manquants rares', 'var(--vert-succes)'],
+            [81, 'Absences rares', 'Travaux manquants rares', 'var(--vert-succes)'],
+            [84, 'Absences rares', 'Travaux manquants rares', 'var(--vert-succes)'],
+            [85, 'Aucune absence ou presque', 'Aucun travail manquant ou presque', '#0284c7'],
+            [86, 'Aucune absence ou presque', 'Aucun travail manquant ou presque', '#0284c7'],
+            [100, 'Aucune absence ou presque', 'Aucun travail manquant ou presque', '#0284c7']
         ];
         for (const [v, a, c, couleur] of attendu) {
             expect(win.interpreterAssiduite(v).niveau, `A ${v}`).toBe(a);
@@ -179,19 +214,19 @@ describe('#821 lot A · mécanisme 2 — un seuil sur un scalaire, réglable, lu
 
     it('un réglage de l\'enseignant·e est LU, pas recopié : des seuils à 55 / 66 / 77 déplacent les trois paliers', () => {
         const { win } = monter({ interpretation: { excellent: 0.77, bon: 0.66, acceptable: 0.55 } });
-        expect(win.interpreterCompletion(54).niveau).toBe('Complétion critique');
-        expect(win.interpreterCompletion(55).niveau).toBe('Complétion acceptable');
-        expect(win.interpreterCompletion(66).niveau).toBe('Bon taux de complétion');
-        expect(win.interpreterAssiduite(77).niveau).toBe('Assiduité exemplaire');
+        expect(win.interpreterCompletion(54).niveau).toBe('Travaux manquants très fréquents');
+        expect(win.interpreterCompletion(55).niveau).toBe('Quelques travaux manquants');
+        expect(win.interpreterCompletion(66).niveau).toBe('Travaux manquants rares');
+        expect(win.interpreterAssiduite(77).niveau).toBe('Aucune absence ou presque');
         expect(win.obtenirCouleurSelonSeuils(76)).toBe('var(--vert-succes)');
         expect(win.obtenirCouleurSelonSeuils(77)).toBe('#0284c7');
     });
 
     it('un `seuilsInterpretation` stocké PARTIEL est comblé par les défauts, et la valeur stockée ne bouge pas', () => {
         const { win, store } = monter({ interpretation: { acceptable: 0.55 } });
-        expect(win.interpreterCompletion(55).niveau).toBe('Complétion acceptable');   // le réglage est lu
-        expect(win.interpreterCompletion(80).niveau).toBe('Bon taux de complétion');  // le défaut comble
-        expect(win.interpreterCompletion(85).niveau).toBe('Taux de complétion excellent');
+        expect(win.interpreterCompletion(55).niveau).toBe('Quelques travaux manquants');   // le réglage est lu
+        expect(win.interpreterCompletion(80).niveau).toBe('Travaux manquants rares');  // le défaut comble
+        expect(win.interpreterCompletion(85).niveau).toBe('Aucun travail manquant ou presque');
         expect(store.seuilsInterpretation.interpretation).toEqual({ excellent: 0.85, bon: 0.80, acceptable: 0.55 });
     });
 
@@ -217,7 +252,10 @@ describe('#821 lot A · mécanisme 1 — l\'Aperçu ne classe rien : quatre mots
     it('les bandes de la légende sont DÉRIVÉES de la géométrie du dégradé, jamais recopiées : 30 / 47,5 / 65 / 82,5', () => {
         const win = monterAvecApercu();
         const bandes = win.bandesLegendeApercu();
-        expect(bandes.map((b) => b.libelle)).toEqual(['Fragile', 'Modéré', 'Favorable', 'Très favorable']);
+        expect(bandes).toHaveLength(4);
+        // #821 (15 oct. 2026) : aucun mot sur le dégradé.
+        bandes.forEach((b) => expect(b).not.toHaveProperty('libelle'));
+        expect(win.LIBELLES_LEGENDE_APERCU).toBeUndefined();
         const bornes = [[0.30, 0.475], [0.475, 0.65], [0.65, 0.825], [0.825, null]];
         bandes.forEach((b, i) => {
             expect(b.de, `bande ${i} : de`).toBeCloseTo(bornes[i][0], 6);
@@ -230,13 +268,13 @@ describe('#821 lot A · mécanisme 1 — l\'Aperçu ne classe rien : quatre mots
         expect(code).not.toMatch(/position:\s*\d+/);
     });
 
-    it('la légende du tableau de bord affiche les MÊMES quatre mots, dans le même ordre (garde de la duplication)', () => {
-        const win = monterAvecApercu();
+    it('#821 (15 oct. 2026) : la légende du tableau de bord pose les quatre plages calculées, et aucun mot', () => {
         const tdb = lire('js/tableau-bord-apercu.js');
-        const motsRendus = [...tdb.matchAll(/>([^<>]+)<br><span class="tb-texte-mini">\$\{libelleBandeDistribution\((\d)\)\}/g)]
-            .sort((x, y) => Number(x[2]) - Number(y[2]))
-            .map((m) => m[1]);
-        expect(motsRendus).toEqual(win.LIBELLES_LEGENDE_APERCU);
+        const d = tdb.indexOf('const legendeUnique = `') + 'const legendeUnique = `'.length;
+        const legende = tdb.slice(d, tdb.indexOf('`;', d));
+        const plages = [...legende.matchAll(/>\$\{libelleBandeDistribution\((\d)\)\}<\/span>/g)].map((m) => Number(m[1]));
+        expect(plages).toEqual([0, 1, 2, 3]);
+        expect(legende.replace(/\$\{[^}]*\}/g, '').replace(/<[^>]*>/g, '').trim(), 'un mot est revenu sur le dégradé').toBe('');
     });
 
     it('le tableau des quatre règles se lit d\'un coup, avec les bornes vivantes', () => {

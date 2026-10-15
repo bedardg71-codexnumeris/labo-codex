@@ -437,12 +437,12 @@ const TOOLTIPS = {
     'tdb-sous-nav':
         'Quatre vues : aperçu du groupe, liste des individus, profil étudiant·e et interventions RàI.',
     'tdb-zones-couleur':
-        'Fragile (30-47,5 %), Modéré (47,5-65 %), Favorable (65-82,5 %), Très favorable (≥ 82,5 %).',
+        'Quatre repères sous le dégradé : 30-47,5 %, 47,5-65 %, 65-82,5 %, ≥ 82,5 %. Ils situent un point, ils ne classent pas l\'étudiant·e.',
 
     // --- Observer (indices A-C-P) ---
 
     'tdb-observer':
-        'Indices A-C-P du groupe. Chaque barre positionne les étudiant·es sur une échelle qui décrit son contexte d\'apprentissage observé, allant de Fragile à Très favorable.',
+        'Indices A-C-P du groupe. Chaque barre positionne les étudiant·es sur une échelle continue, de 30 % à 100 %.',
     'tdb-selecteur-indice':
         'Choisis l\'indice à visualiser : Assiduité (A), Complétion (C) ou Performance (P).',
     'tdb-assiduite':

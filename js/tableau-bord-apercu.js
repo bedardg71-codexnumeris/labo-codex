@@ -1856,14 +1856,15 @@ function afficherMetriquesGlobales(etudiants) {
         genererPanneauSuiviEtudiants();
     }
 
-    // Générer la légende unique en haut
+    // Générer la légende unique en haut. #821 (15 oct. 2026) : quatre plages,
+    // aucun mot — le dégradé ne classe rien (`contexte-qualification.js`, mécanisme 1).
     const legendeUnique = `
         <div class="distribution-legende-commune tb-barre-rai" data-tooltip="tdb-zones-couleur">
             <div class="tb-flex-center-around">
-                <span style="color: #ff9800; text-align: center; font-weight: 600;">Fragile<br><span class="tb-texte-mini">${libelleBandeDistribution(0)}</span></span>
-                <span style="color: var(--btn-annuler); text-align: center; font-weight: 600;">Modéré<br><span class="tb-texte-mini">${libelleBandeDistribution(1)}</span></span>
-                <span style="color: var(--vert-succes); text-align: center; font-weight: 600;">Favorable<br><span class="tb-texte-mini">${libelleBandeDistribution(2)}</span></span>
-                <span style="color: var(--bleu-clair); text-align: center; font-weight: 600;">Très favorable<br><span class="tb-texte-mini">${libelleBandeDistribution(3)}</span></span>
+                <span class="tb-texte-mini" style="color: #ff9800; text-align: center; font-weight: 600;">${libelleBandeDistribution(0)}</span>
+                <span class="tb-texte-mini" style="color: var(--btn-annuler); text-align: center; font-weight: 600;">${libelleBandeDistribution(1)}</span>
+                <span class="tb-texte-mini" style="color: var(--vert-succes); text-align: center; font-weight: 600;">${libelleBandeDistribution(2)}</span>
+                <span class="tb-texte-mini" style="color: var(--bleu-clair); text-align: center; font-weight: 600;">${libelleBandeDistribution(3)}</span>
             </div>
         </div>
     `;
@@ -1943,7 +1944,7 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  */
 function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, texteAttente = '', nbTotal = 0) {
 
-    // Dégradé CONTINU (Fragile → Modéré → Favorable → Très favorable) : orange,
+    // Dégradé CONTINU, sans mot (#821, 15 oct. 2026) : orange,
     // jaune, vert, bleu, posés aux positions 0 / 25 / 50 / 75 % de la barre.
     // ⚠ Ce commentaire portait « 30-49% → 50-64% → 65-79% → ≥80% » : les mêmes
     // arrondis faits à la main que la légende, et faux comme elle. Les scores

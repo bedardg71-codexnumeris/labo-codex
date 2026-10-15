@@ -2108,7 +2108,7 @@ function determinerCibleIntervention(da) {
         ? obtenirEtudiantsCoursActif().find(e => e.da === da) : null;
     const interpMobilisation = interpreterMobilisation(indices.A / 100, indices.C / 100,
         !!fiche && fiche.statut === 'décrochage');
-    if (interpMobilisation.niveau === 'Décrochage') {
+    if (interpMobilisation.code === 'decrochage') {
         return { cible: 'Décrochage', pattern: M, niveau: 3, couleur: '#9e9e9e' };
     }
 
