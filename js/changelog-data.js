@@ -21,6 +21,21 @@
 
     var CHANGELOG = [
         {
+            // 1.202 (les lots du 15 oct. 2026) — titre et six items approuvés par Grégoire « tel quel »
+            // le 15 oct. 2026 (16 h 35), transmis par Cowork (CONSIGNE-SOIR-2026-10-15), posés tels quels.
+            version: '1.202',
+            couleur: 'bleu',
+            titre: 'Le diagnostic à part, des mots qui décrivent',
+            items: [
+                'Une production «&nbsp;Diagnostique&nbsp;» porte maintenant cette étiquette et ne compte plus nulle part&nbsp;: ni dans la note, ni dans la complétion, ni dans les courbes du profil. Une nouvelle production ne reprend plus la case de la précédente&nbsp;; jette un œil à tes productions marquées.',
+                'Au profil, la présence et la remise se disent en mots qui décrivent («&nbsp;Absences rares, quelques travaux manquants&nbsp;»)&nbsp;; les pistes d\'intervention sont au conditionnel, sans juger. Le réglage des seuils prend les mêmes mots.',
+                'L\'Aide dit ce que fait l\'application, dont ce que vaut une copie plagiée selon ta pratique. Le Comparateur de pratiques et l\'import d\'un trimestre à l\'autre ont leur aide, et l\'assistant de pratique une bulle par étape.',
+                'En spécifications, une copie est satisfaisante par défaut quand toutes ses spécifications sont respectées (100&nbsp;%). En portfolio hybride, une terminale cochée parmi les obligatoires ne compte plus pour zéro dans les notes finales.',
+                'Le matériel de départ porte ses nouveaux noms partout&nbsp;; un nom que tu as modifié n\'est pas touché. Le supprimer ne vaut plus que pour son trimestre.',
+                'Les tailles de fichier s\'affichent comme sur ton appareil. «&nbsp;Exporter et archiver&nbsp;» devient «&nbsp;Exporter les travaux&nbsp;», et «&nbsp;Des équipes plus grandes&nbsp;» n\'ajoute plus qu\'une personne par équipe.'
+            ]
+        },
+        {
             // 1.201 (lot « À propos » et préparation de la clôture de l'hiver 2026) — deux items
             // arrêtés par Grégoire le 14 oct. 2026, transmis par Cowork, posés tels quels.
             version: '1.201',

@@ -37,3 +37,11 @@ Les règles de remplacement s'ajoutent à `regles-texte.txt`, généré HORS du 
 
 ## Fin du lot
 Commit de documents seulement (`.gitignore`, retrait du suivi, plan de purge mis à jour), avec les trois fichiers de Cowork du 15 : cette consigne, `plans de travail/LOTS-2026-10-15-fiches-a-toi.md`, `plans de travail/ORDRE-2026-10-16-les-laborieuses.md`, et le § 0 de `CONSIGNE-DEMARRAGE-COWORK.md`. Relu par Cowork avant l'envoi. Rapport court à Grégoire : où est le dossier rendu, combien de fichiers, et le décompte à valider.
+
+## Ajouté par Cowork (la session qui relit les lots de l'après-midi), 15 oct. 2026 à 16 h 27 (Toronto, mesuré par `date`)
+
+**Décision de Grégoire, 16 h 27 : la capture d'écran de son propre dossier de retours (ajoutée le 10 sept., retirée le 12) part avec la purge.** Ajoute son chemin à la liste du plan (`CHANTIER-historique-git-donnees-personnelles.md`, § 4.4) et à la vérification de fin, comme les autres ; ne recopie dans le dépôt ni le nom qu'on y voit, ni la capture.
+
+**La liste des noms réels, préalable de la purge** : Grégoire l'a déposée HORS du dépôt, dans `/Users/kuekatsheu/Documents/Cowork H26 App Labo Codex/purge-identites/` (dix fichiers « Liste <trimestre> 601-101-MQ … classe <n°>.txt »). Cowork n'en a lu que les noms de fichiers. Elle ne sert qu'au moment de la purge, demain matin : ne la copie pas dans le dépôt, ne la cite dans aucun rapport, commit ni plan ; écris dans le plan son emplacement seulement.
+
+Puis termine le décompte des noms de collègues et rends-le à Grégoire dans la conversation, comme prévu. Aucun push avant son signal du soir.
