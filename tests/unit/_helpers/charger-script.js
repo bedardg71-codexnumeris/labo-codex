@@ -204,6 +204,15 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
             motsNatureContexteActif: winMots.motsNatureContexteActif });
     }
 
+    // #1055 (15 oct. 2026) — `ProductionDiagnostique` (js/entites/production-diagnostique.js) est lu
+    // par tout site qui compile, compte ou trace des productions : un diagnostic ne s'y lit jamais
+    // comme une production ordinaire. Comme `motsNature` : fourni quand le harnais ne le donne pas,
+    // et c'est le VRAI module (pur, sans stockage), chargé dans la fenêtre du harnais — index.html
+    // le charge avant que ces sites ne soient appelés.
+    if (!fauxWindow.ProductionDiagnostique) {
+        new Function('window', readFileSync(path.join(racineProjet, 'js/entites/production-diagnostique.js'), 'utf8'))(fauxWindow);
+    }
+
     // #876 (15 sept. 2026) — `sessionStorage` aussi : une file d'import persistée
     // se restaure au CHARGEMENT de travaux-import.js, donc elle doit être là avant.
     const { document: documentOverride, localStorage: localStorageOverride, sessionStorage: sessionStorageOverride, ...autresGlobaux } = globaux;

@@ -496,11 +496,17 @@ describe('#468 · S4 bis (CO-17) — une nouvelle production n\'hérite pas des 
     });
 
     it('RATCHET — « + Nouvelle production » remet le bloc d\'échéances à neuf', () => {
+        // #1055 (15 oct. 2026) : par le réinitialiseur commun, qui seul porte la liste des champs.
         const source = readFileSync(path.join(racineProjet, 'js', 'productions-liste.js'), 'utf8');
         const debut = source.indexOf('function creerNouvelleProduction()');
         expect(debut).toBeGreaterThan(-1);
         const corps = source.slice(debut, source.indexOf('\nfunction ', debut + 10));
-        expect(corps).toContain('peuplerEcheancesParGroupe(null)');
+        expect(corps).toContain('window.reinitialiserFormulaireProduction()');
+        const prod = readFileSync(path.join(racineProjet, 'js', 'productions.js'), 'utf8');
+        const debutR = prod.indexOf('function reinitialiserFormulaireProduction()');
+        expect(debutR).toBeGreaterThan(-1);
+        const corpsR = prod.slice(debutR, prod.indexOf('\nfunction ', debutR + 10));
+        expect(corpsR).toContain('peuplerEcheancesParGroupe(null)');
     });
 });
 

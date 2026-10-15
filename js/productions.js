@@ -1581,6 +1581,11 @@ async function prerenseignerFormulaireProduction(prod) {
 }
 
 // Réinitialise le formulaire en mode ajout (refactor étape 4, 16 mai 2026)
+// #1055 (15 oct. 2026) : LA SEULE LISTE des champs remis à neuf. « + Nouvelle production »
+// (`creerNouvelleProduction`, productions-liste.js) vidait le formulaire champ par champ, par
+// sa propre liste, qui avait oublié la case « Diagnostique » : une fiche neuve ouverte après
+// une production diagnostique en héritait, et sortait de la note sans qu'on l'ait voulu.
+// Les deux chemins passent maintenant ici ; un champ neuf s'ajoute à cette fonction-ci.
 function reinitialiserFormulaireProduction() {
     const titre = document.getElementById('titreFormEvaluation');
     const selectGrille = document.getElementById('productionGrille');
@@ -1605,6 +1610,15 @@ function reinitialiserFormulaireProduction() {
 
     // ✨ NOUVEAU (Beta 94 - 10 déc 2025): Réinitialiser date d'échéance
     document.getElementById('productionDateEcheance').value = '';
+
+    // #1055 — repris de creerNouvelleProduction, qui seul les vidait : le contexte facultatif,
+    // le panneau des métadonnées (mode création) et la zone portfolio.
+    const productionContexte = document.getElementById('productionContexte');
+    if (productionContexte) productionContexte.value = '';
+    const panneauMeta = document.getElementById('panneauMetadonneesProduction');
+    if (panneauMeta) panneauMeta.innerHTML = '';
+    const champsPortfolio = document.getElementById('champsPortfolio');
+    if (champsPortfolio) champsPortfolio.classList.add('u-hide');
 
     // #790 — une fiche neuve n'hérite pas du marqueur de la précédente.
     const caseDiagnostiqueNeuve = document.getElementById('productionDiagnostique');
@@ -3159,6 +3173,8 @@ window.construireProductionData = construireProductionData;
 // #468/CO-17 : exportée pour la sentinelle ET pour creerNouvelleProduction
 // (productions-liste.js), qui doit remettre le bloc d'échéances à neuf.
 window.peuplerEcheancesParGroupe = peuplerEcheancesParGroupe;
+// #1055 : la remise à neuf commune, appelée aussi par creerNouvelleProduction (productions-liste.js).
+window.reinitialiserFormulaireProduction = reinitialiserFormulaireProduction;
 window.annulerFormProduction = annulerFormProduction;
 window.modifierProduction = modifierProduction;
 window.supprimerProduction = supprimerProduction;

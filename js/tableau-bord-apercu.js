@@ -1688,6 +1688,8 @@ function afficherMetriquesGlobales(etudiants) {
     let evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     if (!Array.isArray(evaluations)) evaluations = [];
     evaluations = evaluations.filter(e => !e.etudiantDA || !supprimes.has(String(e.etudiantDA)));
+    // #1055 : le travail diagnostique ne compte pas parmi les productions évaluées du groupe.
+    evaluations = window.ProductionDiagnostique.filtrerEvaluations(evaluations, obtenirDonneesSelonMode('productions'));
     const productionsDistinctes = [...new Set(evaluations.filter(function(e) { return !e.remplaceeParId; }).map(e => e.productionId || e.artefactId))];
     const nbEvaluationsGroupe = productionsDistinctes.length;
 

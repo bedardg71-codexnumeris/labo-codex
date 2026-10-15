@@ -40,6 +40,15 @@
    objets qu'on lui passe. C'est ce qui permet de le sentinelliser sans bac, et de
    n'avoir qu'UN endroit à faire rougir pour éprouver les quatre portes.
 
+   ⮕ ÉLARGI LE 15 OCT. 2026 (#1055), DANS LES MOTS DE GRÉGOIRE : « si c'est un
+   diagnostic, qu'elle soit vue et lue autrement qu'une production ordinaire ».
+   Au-delà des quatre portes, AUCUNE surface qui compile, compte ou trace le
+   parcours d'un élève ne lit un diagnostic comme une production ordinaire,
+   l'historique compris (captures, courbes, graphiques par critère, trajectoires,
+   comptes du profil et de la liste, export de recherche). Et là où elle s'affiche
+   parmi les autres, elle porte sa marque (`marqueHTML`). Le signalement « Aide en
+   français recommandée » la lit toujours : c'est voulu (7 sept.).
+
    SOURCE OU STOCK : le champ est NEUF. Aucune production existante ne le porte,
    aucune migration ne le pose. C'est l'enseignant qui coche, et c'est ce qui lui
    fait voir le changement.
@@ -60,6 +69,19 @@
  * ne rougisse. La sentinelle vérifie que tous les sites passent par ici.
  */
 var CHAMP = 'diagnostique';
+
+/**
+ * La marque d'une production diagnostique, là où elle s'affiche parmi les autres
+ * (#1055). Le mot est celui de la case de la fiche, sans mot neuf ; la bulle reprend
+ * son libellé. Constante : aucune donnée d'utilisateur n'y entre.
+ */
+var MOT = 'Diagnostique';
+var MARQUE_HTML = '<span class="marque-diagnostique" title="Travail diagnostique — ne compte dans aucun calcul">' + MOT + '</span>';
+
+/** La marque, ou rien si la production n'est pas diagnostique. */
+function marqueHTML(production) {
+    return estDiagnostique(production) ? MARQUE_HTML : '';
+}
 
 /**
  * Cette production est-elle diagnostique ?
@@ -134,7 +156,9 @@ window.ProductionDiagnostique = {
     estDiagnostique: estDiagnostique,
     filtrerProductions: filtrerProductions,
     idsDiagnostiques: idsDiagnostiques,
-    filtrerEvaluations: filtrerEvaluations
+    filtrerEvaluations: filtrerEvaluations,
+    MOT: MOT,
+    marqueHTML: marqueHTML
 };
 
 })();

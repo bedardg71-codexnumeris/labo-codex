@@ -152,6 +152,7 @@ async function afficherListeProductions(filtreType = '') {
                 <div class="sidebar-item-badges">
                     ${ponderationBadge}
                     ${aPlanifierBadge}
+                    ${window.ProductionDiagnostique.marqueHTML(prod)}
                 </div>
             </div>
         `;
@@ -240,69 +241,13 @@ async function creerNouvelleProduction() {
 
     // #1042 — un exemple ouvert juste avant a verrouillé ce formulaire : le rouvrir d'abord.
     if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.quitterModeLectureSeuleDemo) BibliothequeUI.quitterModeLectureSeuleDemo(document.getElementById('formulaireProduction'));
-    // Réinitialiser le formulaire
-    document.getElementById('productionActivite').value = '';
-    document.getElementById('productionTitre').value = '';
-    document.getElementById('productionType').value = '';
-    document.getElementById('productionPonderation').value = '';
-    document.getElementById('productionGrille').value = '';
-    // #500 — ces champs sont RENDUS : ils peuvent ne pas exister encore.
-    if (typeof poserValeurChampGabarit === 'function') {
-        poserValeurChampGabarit('productionObjectif', '');
-        poserValeurChampGabarit('productionTache', '');
-        poserValeurChampGabarit('productionDetailTache', '');
-    }
-
-    // #509 (25 août 2026) : REMETTRE LA ZONE DES CONSIGNES À NEUF.
-    //
-    // Même défaut que #468/CO-17 plus bas, sur la zone voisine — et découvert
-    // par l'audit du 25 août. Ce chemin-ci vide le formulaire champ par champ
-    // et ne passe pas par reinitialiserFormulaireProduction (productions.js),
-    // le seul à appeler le peuplement. Deux conséquences, toutes deux vues à
-    // l'écran : au PREMIER geste d'une session, la fiche neuve n'affichait
-    // AUCUN bloc — ni objectif, ni description, ni détail de la tâche, donc
-    // rien à saisir et un enregistrement muet de chaînes vides ; et APRÈS
-    // l'édition d'une production, ses champs personnalisés, ses titres réécrits
-    // et son ordre de blocs restaient à l'écran dans la fiche « neuve », puis
-    // s'enregistraient dans la nouvelle production.
-    //
-    // ⚠ APRÈS les poserValeurChampGabarit ci-dessus, jamais avant : le
-    // peuplement RE-REND la zone entière, et un rendu postérieur écraserait ce
-    // que ceux-ci viennent de poser.
-    if (typeof peuplerBlocsConsignes === 'function') peuplerBlocsConsignes(null);
-
-    // ✅ AJOUT (6 jan 2026) : Vider le panneau métadonnées (mode création)
-    const panneauMeta = document.getElementById('panneauMetadonneesProduction');
-    if (panneauMeta) panneauMeta.innerHTML = '';
-
-    // Réinitialiser les champs portfolio et les notes explicatives
-    const champsPortfolio = document.getElementById('champsPortfolio');
-    if (champsPortfolio) champsPortfolio.classList.add('u-hide');
-
-    // Réinitialiser la date d'échéance
-    const inputDateEcheance = document.getElementById('productionDateEcheance');
-    if (inputDateEcheance) inputDateEcheance.value = '';
-
-    // #468/CO-17 (21 août 2026) : remettre à neuf le bloc des échéances PAR GROUPE.
-    // Cette fonction vide le formulaire champ par champ et ne passait PAS par
-    // reinitialiserFormulaireProduction (productions.js) : le conteneur
-    // multi-groupes gardait donc les cases cochées et les dates de la production
-    // précédemment ouverte, et la NOUVELLE production en héritait en silence.
-    if (typeof peuplerEcheancesParGroupe === 'function') peuplerEcheancesParGroupe(null);
-
-    // Réinitialiser le contexte facultatif
-    const productionContexte = document.getElementById('productionContexte');
-    if (productionContexte) productionContexte.value = '';
-
-    // Appeler gererChangementTypeProduction pour réinitialiser tous les états
-    // (cartes contextuelles, notes, champs grisés, etc.)
-    gererChangementTypeProduction();
-
-    // Réinitialiser productionEnEdition
-    productionEnEdition = null;
-
-    // Lot E3 (D3) : « Créer la production » paraît ; une fiche existante n'a que « Fermer ».
-    if (typeof window.rendreModeFicheProduction === 'function') window.rendreModeFicheProduction(true);
+    // #1055 (15 oct. 2026) : la remise à neuf est CELLE de la fiche d'ajout
+    // (`reinitialiserFormulaireProduction`, productions.js), et elle seule. Ce chemin
+    // vidait le formulaire par sa propre liste de champs, qui avait déjà oublié les
+    // consignes (#509), les échéances par groupe (#468/CO-17) — et la case
+    // « Diagnostique » : la fiche neuve en héritait. Deux listes finissent toujours par
+    // diverger ; il n'y en a plus qu'une.
+    window.reinitialiserFormulaireProduction();
 
     // Réinitialiser les métriques - DÉSACTIVÉ (cartes métriques supprimées)
     // mettreAJourMetriquesProduction(null);

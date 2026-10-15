@@ -592,8 +592,10 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
 
         // Calculer les statistiques
         // IMPORTANT : Exclure les non-recevables ET les non remis de la moyenne
+        // #1055 : ni le travail diagnostique — il s'affiche, avec sa marque, mais ne pèse pas sur la moyenne.
         const evaluationsRecevables = lignesFiltrees.filter(ligne =>
             ligne.statut === 'evalue' && ligne.noteChiffree !== null && ligne.statutIntegrite !== 'plagiat' && ligne.statutIntegrite !== 'ia'
+            && !ligne.diagnostique
         );
 
         let moyenneAffichee = null;
@@ -1015,6 +1017,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         groupe: etudiant.groupe,
                         productionId: production.id,
                         productionNom: productionNomComplet,
+                        diagnostique: window.ProductionDiagnostique.estDiagnostique(production),   // #1055 : hors de la moyenne
+                        marque: window.ProductionDiagnostique.marqueHTML(production),
                         grilleNom: evaluation.grilleNom || '-',
                         cartoucheId: evaluation.cartoucheId || null,
                         cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
@@ -1057,6 +1061,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     groupe: etudiant.groupe,
                     productionId: production.id,
                     productionNom: productionNomComplet,
+                    diagnostique: window.ProductionDiagnostique.estDiagnostique(production),   // #1055 : hors de la moyenne
+                    marque: window.ProductionDiagnostique.marqueHTML(production),
                     grilleNom: '-',
                     cartoucheId: null,
                     cartoucheNom: '-',
@@ -1084,7 +1090,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
             lignes.push({
                 da: '', daAffichage: '', nom: '?',
                 prenom: (typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(fichier.nomFichier, fichier.etudiantDA) : fichier.nomFichier) || 'Fichier non identifié',
-                groupe: '', productionId: fichier.productionId || '', productionNom: 'Non associé',
+                groupe: '', productionId: fichier.productionId || '', productionNom: 'Non associé', marque: '',
                 associationManquante: true, estFichierNonAssocie: true, etudiantManquant: true, fichierId: fichier.id,
                 grilleNom: '-', cartoucheId: null, cartoucheNom: '-',
                 note: '-', noteChiffree: null, niveauFinal: '-',
@@ -1150,7 +1156,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                 nom: etudiant ? etudiant.nom : '?',
                 prenom: etudiant ? etudiant.prenom : (nomFichier || 'Fichier non identifié'),
                 groupe: etudiant ? (etudiant.groupe || '') : '',
-                productionId: '', productionNom: nomFichier || 'Fichier non associé',
+                productionId: '', productionNom: nomFichier || 'Fichier non associé', marque: '',
                 // #612 T6.5 — DYNAMIQUE, jamais `true` en dur : l'infobulle de
                 // `genererLigneHTML` choisit son diagnostic là-dessus. Posé à
                 // `true` sans condition, un fichier dont l'élève EST inscrit se
@@ -1456,7 +1462,7 @@ function genererLigneHTML(ligne) {
                         : `<span style="color: var(--alerte-texte-attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Non associé</span>`)}`
                 : ligne.fichierAutreProduction
                     ? `${echapperHtml(ligne.productionNom)} <span style="color: var(--alerte-texte-attention); font-size: 0.85em;"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Fichier sous ${ligne.fichierAutreProductionNom ? echapperHtml(ligne.fichierAutreProductionNom) : 'autre production'}</span>`
-                    : echapperHtml(ligne.productionNom)}</td>
+                    : echapperHtml(ligne.productionNom)}${ligne.marque}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
             <td class="td-center">${ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${echapperHtml(ligne.niveauFinal)}</strong>` : '-'}</td>
