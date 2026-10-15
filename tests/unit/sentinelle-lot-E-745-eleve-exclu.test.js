@@ -186,7 +186,7 @@ describe('lot E · #745 — l\'exclu se calcule par SA pratique', () => {
 
     it('(f) un DA qui n\'est plus dans le groupe n\'est PAS calculé : A, C, P, M null et `horsGroupe` — malgré ses cinq présences et ses deux copies', () => {
         const b = banc('som-banc');
-        expect(b.win.calculerTousLesIndices(DA.PARTI)).toEqual({ A: null, C: null, P: null, M: null, pratique: 'SOM', noteConstructible: false, horsGroupe: true });
+        expect(b.win.calculerTousLesIndices(DA.PARTI)).toEqual({ A: null, C: null, P: null, pratique: 'SOM', noteConstructible: false, horsGroupe: true });
         expect(b.store.test_indicesCP[DA.PARTI]).toBeUndefined();
         expect(b.store.test_indicesAssiduite.sommatif[DA.PARTI]).toBeUndefined();
         // Un élève du groupe ne porte jamais le drapeau.

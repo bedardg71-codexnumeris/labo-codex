@@ -497,7 +497,6 @@ function obtenirIndicesCP(da) {
  *   A: 85,              // % assiduité — `null` si INCONNUE (#743 : aucune séance saisie ne compte)
  *   C: 67,              // % complétion (selon pratique)
  *   P: 72,              // % performance (selon pratique)
- *   M: 0.760,           // Mobilisation (composite, (A+C)/2)
  *   pratique: 'SOM'     // Pratique utilisée pour le calcul
  * }
  *
@@ -507,7 +506,7 @@ function obtenirIndicesCP(da) {
  *   - un élève du groupe, exclu par statut compris, a ses entrées (les deux producteurs le
  *     calculent) ; s'il n'en a pas ENCORE (lecture avant le premier recalcul), ses indices sont
  *     calculés ici par les mêmes fonctions que les producteurs, en lecture seule ;
- *   - un DA qui n'est plus dans le groupe n'est PAS calculé : { A, C, P, M : null,
+ *   - un DA qui n'est plus dans le groupe n'est PAS calculé : { A, C, P : null,
  *     horsGroupe: true, noteConstructible: false }.
  */
 function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
@@ -536,7 +535,7 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
     if (assiduiteSommatif === undefined || !indicesCP) {
         const dansLeGroupe = (obtenirDonneesSelonMode('groupeEtudiants') || []).some(e => e.da === da);
         if (!dansLeGroupe) {
-            return { A: null, C: null, P: null, M: null, pratique: pratique, noteConstructible: false, horsGroupe: true };
+            return { A: null, C: null, P: null, pratique: pratique, noteConstructible: false, horsGroupe: true };
         }
         if (assiduiteSommatif === undefined) assiduiteSommatif = calculerAssiduite(da, null);
         // Lot N1b (21 sept. 2026) : l'id que rend LA désignation. Sans pratique assignée, rien à simuler.
@@ -571,14 +570,14 @@ function calculerTousLesIndices(da, _cacheIndicesA, _cacheIndicesCP) {
         completionConstructible = false;
     }
 
-    // INDICES COMPOSITES — #743 : sans A, pas de M (une moyenne avec un inconnu n'existe pas). Sans C non plus.
-    const M = (A === null || !completionConstructible) ? null : (A + C) / 2;
+    // 15 oct. 2026 (#1083, 6.46) : l'indice composite M = (A + C) / 2 est retiré, sur le mot de Grégoire
+    // (« c'est un reliquat de la moyenne (A+C)/2. c'est abandonné »). Son seul lecteur était l'indicateur
+    // « Mobilisation (M) » du profil, retiré avec lui. A et C se lisent séparément.
 
     return {
         A: (A === null) ? null : Math.round(A * 100),
         C: completionConstructible ? Math.round(C * 100) : null,
         P: Math.round(P * 100),
-        M: (M === null) ? null : parseFloat(M.toFixed(3)),
         pratique: pratique,
         noteConstructible: noteConstructible,
         completionConstructible: completionConstructible

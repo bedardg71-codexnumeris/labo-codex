@@ -156,6 +156,16 @@ describe('Blocs 6, 7, 8 — le profil et le réglage décrivent, ils ne prescriv
         expect(carte).not.toMatch(/M = \(A \+ C\) \/ 2 = \(\$\{indices\.A\}/);
     });
 
+    it('7 ter : ni l\'indicateur « Mobilisation (M) », ni l\'indice M lui-même (verdict de Cowork de 16 h 02)', () => {
+        const carte = tranche(lire('js/profil-etudiant-sections-affichage.js'), 'function genererSectionMobilisation(da) {', '\nfunction ');
+        expect(carte).not.toContain('<span class="profil-indicateur-label">Mobilisation (M)</span>');
+        expect(carte).not.toContain('${indices.M}');
+        const retour = tranche(lire('js/indices.js'), '    return {\n        A: (A === null) ? null : Math.round(A * 100),', '\n    };');
+        expect(retour, 'calculerTousLesIndices rend de nouveau M').not.toMatch(/\bM:/);
+        // Les branches de la prose lisent A et C, pas M : `interpreterMobilisation` reste, et a d'autres lecteurs.
+        expect(carte).toContain('interpreterMobilisation(A, C)');
+    });
+
     it('8 : le réglage des seuils prend les mots de la table, lus à leur source', () => {
         const reglage = tranche(INDEX, '<label for="v2-seuil-fragile"', '<!-- ╔', { longueurMin: 200 });
         // Les trois champs fixent le bas des paliers 2, 1 et 0 (70, 80, 85 par défaut).
