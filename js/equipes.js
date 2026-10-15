@@ -60,11 +60,24 @@ function resteDemande(n, taille) {
  * 'petite'   : reste de 2 ou plus → les équipes complètes, plus une équipe du reste ;
  *              reste de 1 → « des équipes plus petites » : une équipe de plus, tailles
  *              aussi égales que possible (9 en 4 → 3, 3, 3) ;
- * 'agrandir' : le reste réparti, un de plus par équipe (en boucle si besoin).
+ * 'agrandir' : le reste réparti, au plus un de plus par équipe ; si le reste dépasse
+ *              le nombre d'équipes, une équipe plus petite à la place (comme 'petite').
+ *              #1041, décidé par Grégoire le 15 oct. 2026 à 13 h 24 : une équipe de 5
+ *              garde le dispositif demandé, une équipe de 7 ne l'est plus (7 en 4 → 4 et 3).
  * Équipes de 2 avec un reste de 1 : une équipe de 3, quel que soit le mode.
  * Moins de personnes qu'une équipe : une seule équipe.
  * Reste de 1 tranché par Grégoire le 7 oct. 2026 : jamais d'équipe d'une seule personne.
  */
+/**
+ * #1041 — « Des équipes plus grandes » ne peut pas placer tout le reste à une personne
+ * de plus par équipe : le reste dépasse le nombre d'équipes complètes. Une équipe plus
+ * petite est alors formée à la place, et l'écran le dit.
+ */
+function agrandirPlafonne(n, taille) {
+    const { completes, reste } = analyserReste(n, taille);
+    return completes > 0 && reste > completes;
+}
+
 function taillesEquipes(n, taille, modeReste) {
     if (n <= 0) return [];
     const { completes, reste } = analyserReste(n, taille);
@@ -72,8 +85,8 @@ function taillesEquipes(n, taille, modeReste) {
     const tailles = new Array(completes).fill(taille);
     if (reste === 0) return tailles;
     if (reste === 1 && taille === 2) modeReste = 'agrandir';
-    if (modeReste === 'agrandir') {
-        for (let i = 0; i < reste; i++) tailles[i % completes] += 1;
+    if (modeReste === 'agrandir' && !agrandirPlafonne(n, taille)) {
+        for (let i = 0; i < reste; i++) tailles[i] += 1;
         return tailles;
     }
     if (reste === 1) {
@@ -140,7 +153,7 @@ function formerEquipes(das, taille, modeReste, pairesDejaFaites, rng) {
     return meilleur;
 }
 
-window.EquipesLogique = { separerAbsentsDuJour, analyserReste, resteDemande, taillesEquipes, pairesDe, formerEquipes };
+window.EquipesLogique = { separerAbsentsDuJour, analyserReste, resteDemande, agrandirPlafonne, taillesEquipes, pairesDe, formerEquipes };
 
 /* ===============================
    ÉCRAN (panneau « Équipes » de l'Animation)
@@ -176,6 +189,11 @@ function elevesDuJour() {
     const date = typeof window.dateLocaleYMD === 'function' ? window.dateLocaleYMD() : new Date().toISOString().slice(0, 10);
     return separerAbsentsDuJour(eleves, presences, date);
 }
+
+// #1041 — la ligne qui dit pourquoi « Des équipes plus grandes » forme une équipe plus petite.
+// Mots proposés le 15 oct. 2026, à relire par Grégoire. `reste` est un nombre calculé.
+const LIGNE_AGRANDIR_PLAFONNE = reste =>
+    `Au plus une personne de plus par équipe : il en reste trop, une équipe sera de ${reste}.`;
 
 // « 6 de 4, 1 de 3 » : décompte lisible d'une liste de tailles.
 function decrireTailles(tailles) {
@@ -244,6 +262,7 @@ function rendreEquipes() {
                     <input type="radio" name="equipes-reste" value="agrandir" data-on-change="choisirResteEquipes" ${etatEquipes.modeReste === 'agrandir' ? 'checked' : ''}>
                     <span>Des équipes plus grandes <span class="text-muted">(${grandes})</span></span>
                 </label>
+                ${agrandirPlafonne(n, taille) ? `<p class="equipes-note">${LIGNE_AGRANDIR_PLAFONNE(reste)}</p>` : ''}
             </fieldset>`;
         }
     }
