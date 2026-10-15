@@ -32,7 +32,8 @@ Décision de Grégoire (15 h 06) : dans la purge du 16, remplacés par une initi
 - les homonymes fictifs (tests, démo) : on n'y touche pas ;
 - les remerciements voulus (`Plan Accompagnement/CONTENU_apropos_sources-remerciements.md`) ;
 - les citations d'auteurs publiés (articles signés par un collègue).
+⚠ `js/pratiques/pratiques-predefines.js` porte des pratiques inventées aux prénoms de collègues (#690) : les compter dans le décompte ; leur retrait du code est un lot à part, juste après la purge (`plans de travail/ORDRE-2026-10-16-les-laborieuses.md`, chantier 1).
 Les règles de remplacement s'ajoutent à `regles-texte.txt`, généré HORS du dépôt, jamais versionné.
 
 ## Fin du lot
-Commit de documents seulement (`.gitignore`, retrait du suivi, plan de purge mis à jour), relu par Cowork avant l'envoi. Rapport court à Grégoire : où est le dossier rendu, combien de fichiers, et le décompte à valider.
+Commit de documents seulement (`.gitignore`, retrait du suivi, plan de purge mis à jour), avec les trois fichiers de Cowork du 15 : cette consigne, `plans de travail/LOTS-2026-10-15-fiches-a-toi.md`, `plans de travail/ORDRE-2026-10-16-les-laborieuses.md`, et le § 0 de `CONSIGNE-DEMARRAGE-COWORK.md`. Relu par Cowork avant l'envoi. Rapport court à Grégoire : où est le dossier rendu, combien de fichiers, et le décompte à valider.

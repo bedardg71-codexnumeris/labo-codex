@@ -247,7 +247,30 @@ IMG_3171.jpg
 Archives/Captures modèles/
 Audit UX/
 Archives/Bugs/
+Retours des testeurs/bruno/
+Retours des testeurs/elise/
+Retours des testeurs/jean-françois/
+Retours des testeurs/jordan/
+Retours des testeurs/mathieu/
+Retours des testeurs/olivier/
+Retours des testeurs/stephane/
+Archives/Retours des testeurs/
+Autres pratiques de notation/
+Archives/Autres pratiques de notation/
+Archives/Beta-95-2/js/pratiques/config-francois-chimie.js
+Archives/Beta-95-2026-01-04/js/pratiques/config-francois-chimie.js
+dist/Beta_91.2_Complet/js/pratiques/config-francois-chimie.js
+dist/Beta_91.2_Utilisateurs/js/pratiques/config-francois-chimie.js
+dist/Beta_91.5_Correctifs/js/pratiques/config-francois-chimie.js
+dist/Beta_91.5b_Correctif/js/pratiques/config-francois-chimie.js
+dist/Beta_91.5c_Correctif/js/pratiques/config-francois-chimie.js
+dist/Beta_91.5d_Primo/js/pratiques/config-francois-chimie.js
+dist/Beta_92_Primo/js/pratiques/config-francois-chimie.js
+dist/Monitorage_Beta_0.92/js/pratiques/config-francois-chimie.js
+js/pratiques/config-francois-chimie.js
 ```
+
+⮕ **Ajouté le 15 oct. 2026 au soir** (consigne `CONSIGNE-LOT-2026-10-15-avant-la-purge.md`, décisions de Grégoire de 14 h 51 à 15 h 08) : les sept dossiers de retours de collègues, l'ancien emplacement `Archives/Retours des testeurs/` (12 chemins), le répertoire « Autres pratiques de notation » aux deux emplacements (110 chemins, 56 fichiers distincts, rendus à Grégoire hors du dépôt le 15 oct.), et les copies de la configuration de pratique nommée d'après un collègue (11 chemins, trouvés par mesure des noms de chemin de l'historique). ⚠ **`Retours des testeurs/grégoire/`** (avec accent ; 2 entrées : une capture d'écran ajoutée le 10 sept., retirée le 12) n'y est PAS encore : elle montre le journal de bord d'un élève réel, nom compris. **À trancher par Grégoire** avant la purge ; si elle part, ajouter la ligne ici.
 
 `regles-texte.txt` — **à GÉNÉRER hors du dépôt, jamais à versionner** (cf. §1 : la table littérale a été retirée d'ici le 7 sept. au soir).
 
@@ -393,6 +416,7 @@ comparé par `diff`).
 
 **B. Les chemins ont-ils disparu de tout l'historique ?**
 `git rev-list --objects --all` puis chercher chaque chemin de la liste. Attendu : zéro.
+**TÉMOIN obligatoire, étendu le 15 oct. 2026** : le même balayage sur le dépôt **original** doit trouver chacun des chemins ajoutés ce jour-là. Mesuré sur l'original le 15 oct. (`git log --all --name-only --format=`, chemins distincts) : 24 sous les sept dossiers de `Retours des testeurs/` ; 12 sous `Archives/Retours des testeurs/` ; 56 sous `Autres pratiques de notation/` et 54 sous `Archives/Autres pratiques de notation/` ; 11 copies de `config-*-chimie.js`. Sur la copie réécrite, chacun de ces comptes doit tomber à 0 ; sur l'original, il doit rester le même (sinon le balayage ne sait pas trouver).
 
 **C. Les DA réels ont-ils disparu ?** Parcourir tous les blobs texte
 (`git cat-file --batch`) et chercher les 19 DA — **liste prise dans le fichier hors dépôt du
