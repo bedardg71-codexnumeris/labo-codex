@@ -1271,7 +1271,8 @@ function remplirFormulairePratique(pratique) {
         // de l'assistant créée à 70 — et l'enregistrer écrivait 75, qui l'emportait.
         const seuilPorte = (typeof config.seuilAcceptable === 'number') ? config.seuilAcceptable
             : (typeof config.seuilAcceptabilite === 'number' ? config.seuilAcceptabilite : null);
-        setValeurChamp('mat-spec-seuil', seuilPorte || 75);
+        // #935 (15 oct. 2026, Grégoire) : sans seuil, 100 % — une copie est satisfaisante quand toutes ses spécifications sont respectées ; un seuil écrit à 0 reste 0.
+        setValeurChamp('mat-spec-seuil', seuilPorte !== null ? seuilPorte : 100);
 
         // Types de travaux
         afficherTypesTravauxMat(config.typesTravaux || []);
@@ -1673,7 +1674,8 @@ function appliquerFormulaireDansCollection(lues) {
         //  réécrite ici — elle reste inerte tant que l'utilisateur ne sauvegarde
         //  pas, et la normalisation d'ouverture l'a signalée en console.)
     } else if (typeCanon === 'specifications') {
-        configurations[index].configuration.seuilAcceptable = parseInt(getValeurChamp('mat-spec-seuil')) || 75;
+        const seuilSaisi = parseInt(getValeurChamp('mat-spec-seuil'));   // #935 : défaut 100, un 0 reste 0
+        configurations[index].configuration.seuilAcceptable = Number.isFinite(seuilSaisi) ? seuilSaisi : 100;
         // typesTravaux et forfaits sont gérés par leurs propres fonctions
     } else if (typeCanon === 'denotation') {
         // #343-T1 — DEN éditée inline. MÊME forme de config que la création assistant

@@ -305,7 +305,7 @@ function monter(jeu, opts = {}) {
         // Aiguillages vers les exports réels, résolus à l'appel (les scripts se référencent par nom nu).
         obtenirPratiqueActiveGroupeCours: fwd('obtenirPratiqueActiveGroupeCours'), lirePointeurPratiqueGroupeCours: fwd('lirePointeurPratiqueGroupeCours'),
         obtenirPratiqueParId: fwd('obtenirPratiqueParId'), obtenirTypePratiqueActive: fwd('obtenirTypePratiqueActive'), normaliserIdPratique: fwd('normaliserIdPratique'),
-        obtenirConfigPratiqueActive: fwd('obtenirConfigPratiqueActive'), obtenirConfigCategories: fwd('obtenirConfigCategories'), calculerNoteAvecCategories: fwd('calculerNoteAvecCategories'),
+        obtenirConfigPratiqueActive: fwd('obtenirConfigPratiqueActive'), obtenirConfigCategories: fwd('obtenirConfigCategories'),
         calculerDetailsNoteFinale: fwd('calculerDetailsNoteFinale'), calculerEtStockerIndicesCP: fwd('calculerEtStockerIndicesCP'), simulerIndices: fwd('simulerIndices'),
         obtenirIndicesCP: fwd('obtenirIndicesCP'), calculerTousLesIndices: fwd('calculerTousLesIndices'),
         obtenirEchelleResolue: fwd('obtenirEchelleResolue'), obtenirTableConversionNiveaux: fwd('obtenirTableConversionNiveaux'),

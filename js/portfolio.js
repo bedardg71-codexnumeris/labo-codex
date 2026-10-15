@@ -63,7 +63,7 @@
  *
  * Ce que « Hybride » veut dire a été tranché par Grégoire : les N meilleures de
  * la SÉLECTION, plus TOUTES les OBLIGATOIRES — la même règle que le moteur de la
- * note (`calculerNoteAvecCategories`) et que `profil-etudiant-actions.js`.
+ * note (`_selectionnerArtefactsHybride`, profil-etudiant-actions.js).
  * Le N de la Sélection est celui des catégories, pas celui du portfolio : sur
  * sa pratique, 4 meilleures + 2 obligatoires = les 6 artefacts de la note.
  *
@@ -733,137 +733,10 @@ function calculerPerformanceParObjectif(da, ensembleId) {
    somme pondérée jamais normalisée par poidsTotal ET zéro appelant (grep js/ +
    index.html + tests). Ablation zéro-dette plutôt que correction d'un mort. */
 
-/* ===============================
-   🆕 CALCUL AVEC CATÉGORIES SÉLECTION/OBLIGATOIRES
-
-   Support pour le système de catégories (Beta 95.4) :
-   - Sélection : Pool de N meilleures productions retenues
-   - Obligatoires : Productions toujours comptées (0 si manquante)
-
-   DATE : Janvier 2026
-   =============================== */
-
-/**
- * Calcule la note finale avec catégories Sélection/Obligatoires
- *
- * Formule : Note = (Moyenne N meilleures Sélection × %sel) + (Moyenne Obligatoires × %obl)
- *
- * @param {string} da - Numéro DA de l'étudiant
- * @param {object} configCategories - Configuration des catégories depuis pratiquesConfigurables
- * @returns {object} - { noteFinale, valide, details }
- *
- * EXEMPLE DE CONFIGURATION :
- * configCategories = {
- *   actif: true,
- *   selection: { nombreARetenir: 4, ponderation: 65 },
- *   obligatoires: { ponderation: 35 }
- * }
- *
- * EXEMPLE DE RÉSULTAT :
- * {
- *   noteFinale: 78.5,
- *   valide: true,
- *   details: {
- *     selection: { moyenne: 82, retenues: 4, total: 8, ponderation: 65, notes: [88, 85, 80, 75] },
- *     obligatoires: { moyenne: 72, completees: 2, total: 2, ponderation: 35, notes: [75, 69] }
- *   }
- * }
- */
-function calculerNoteAvecCategories(da, configCategories) {
-    if (!da || !configCategories || !configCategories.actif) {
-        return { noteFinale: null, valide: false, details: null };
-    }
-
-    // 1. Charger les données
-    const productions = obtenirDonneesSelonMode('productions') || [];
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-
-    // 2. Filtrer les évaluations de cet étudiant — #706 : la règle unique du registre
-    // (remplacées, sans note, brouillons non verrouillés, portée nulle : hors note).
-    const evaluationsEleve = evaluations.filter(e =>
-        e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
-    );
-
-    // 3. Séparer les productions par catégorie
-    const prodsSelection = productions.filter(p => p.categorie === 'selection');
-    const prodsObligatoires = productions.filter(p => p.categorie === 'obligatoire');
-
-
-    // 4. Configuration
-    const { nombreARetenir, ponderation: pondSelection } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
-    const { ponderation: pondOblig } = configCategories.obligatoires || { ponderation: 35 };
-
-    // 5. SÉLECTION : Récupérer les évaluations et prendre les N meilleures
-    const evalsSelection = [];
-    prodsSelection.forEach(prod => {
-        const ev = evaluationsEleve.find(e => e.productionId === prod.id);
-        if (ev) {
-            evalsSelection.push({
-                productionId: prod.id,
-                titre: prod.titre || prod.activiteApprentissage || prod.description,
-                note: ev.noteFinale
-            });
-        }
-    });
-
-    // Trier par note décroissante et prendre les N meilleures
-    evalsSelection.sort((a, b) => b.note - a.note);
-    const meilleures = evalsSelection.slice(0, nombreARetenir);
-
-    const moyenneSelection = meilleures.length > 0
-        ? meilleures.reduce((sum, e) => sum + e.note, 0) / meilleures.length
-        : 0;
-
-    // 6. OBLIGATOIRES : Toutes comptent (0 si manquante)
-    const notesObligatoires = [];
-    prodsObligatoires.forEach(prod => {
-        const ev = evaluationsEleve.find(e => e.productionId === prod.id);
-        notesObligatoires.push({
-            productionId: prod.id,
-            titre: prod.titre || prod.activiteApprentissage || prod.description,
-            note: ev ? ev.noteFinale : 0,  // 0 si non remise
-            manquante: !ev
-        });
-    });
-
-    const moyenneObligatoires = notesObligatoires.length > 0
-        ? notesObligatoires.reduce((sum, e) => sum + e.note, 0) / notesObligatoires.length
-        : 0;
-
-    // 7. NOTE FINALE PONDÉRÉE
-    const noteFinale = (moyenneSelection * pondSelection / 100) + (moyenneObligatoires * pondOblig / 100);
-
-    // 8. Déterminer si le calcul est valide (au moins une note dans chaque catégorie active)
-    const valide = (prodsSelection.length === 0 || meilleures.length > 0) &&
-                   (prodsObligatoires.length === 0 || notesObligatoires.length > 0);
-
-    const resultat = {
-        noteFinale: parseFloat(noteFinale.toFixed(2)),
-        valide: valide,
-        details: {
-            selection: {
-                moyenne: parseFloat(moyenneSelection.toFixed(2)),
-                retenues: meilleures.length,
-                total: prodsSelection.length,
-                disponibles: evalsSelection.length,
-                ponderation: pondSelection,
-                notes: meilleures.map(e => e.note),
-                productions: meilleures.map(e => ({ id: e.productionId, titre: e.titre, note: e.note }))
-            },
-            obligatoires: {
-                moyenne: parseFloat(moyenneObligatoires.toFixed(2)),
-                completees: notesObligatoires.filter(e => !e.manquante).length,
-                total: prodsObligatoires.length,
-                ponderation: pondOblig,
-                notes: notesObligatoires.map(e => e.note),
-                productions: notesObligatoires.map(e => ({ id: e.productionId, titre: e.titre, note: e.note, manquante: e.manquante }))
-            }
-        }
-    };
-
-
-    return resultat;
-}
+/* #339 (15 oct. 2026) : calculerNoteAvecCategories RETIRÉE — second moteur du portfolio hybride, à côté de
+   `_selectionnerArtefactsHybride` (profil-etudiant-actions.js). Son seul appelant (pratique-pan-standards.js,
+   calculerPerformance) n'atteignait plus aucun chiffre visible : banc avant/après sur le pack démo, quatre
+   configurations, notes provisoires et finales, 0 différence. Un seul moteur pour un même chiffre. */
 
 /**
  * Retourne la configuration complète de la pratique active depuis pratiquesConfigurables.
@@ -912,7 +785,6 @@ window.calculerPerformanceParObjectif = calculerPerformanceParObjectif;
 // `portfoliosEleves`, c'est-à-dire dans les données de l'utilisateur : elle ne
 // peut pas rester hors de portée des bancs.
 window.selectionnerArtefactsSelonModalite = selectionnerArtefactsSelonModalite;
-window.calculerNoteAvecCategories = calculerNoteAvecCategories;
 window.obtenirConfigCategories = obtenirConfigCategories;
 window.obtenirConfigPratiqueActive = obtenirConfigPratiqueActive;
 

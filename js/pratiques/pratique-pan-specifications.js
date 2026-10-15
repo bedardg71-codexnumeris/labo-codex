@@ -795,7 +795,9 @@ class PratiquePanSpecifications {
 
         // LOGIQUE BINAIRE : Vérifier toutes les spécifications
         // Pour l'instant, on utilise un seuil simple (sera raffiné avec vraies spécifications)
-        const seuil = typeTravail.seuilAcceptable || 60; // Seuil par défaut B+ (75-80%)
+        // #935 (15 oct. 2026, Grégoire) : sans seuil, 100 % — une copie est satisfaisante quand toutes ses spécifications sont respectées ; un seuil écrit à 0 reste 0.
+        // Avant : `|| 60`, qui lisait aussi un 0 comme 60.
+        const seuil = (typeof typeTravail.seuilAcceptable === 'number') ? typeTravail.seuilAcceptable : 100;
 
         return evaluation.noteFinale >= seuil;
     }

@@ -113,7 +113,7 @@ function monter(jeu) {
         obtenirPratiqueActiveGroupeCours: () => store.test_groupesCours[0].pratiqueId, ...pontsResolution(win, () => store.test_groupesCours[0].pratiqueId),
         resoudreModeleParId: (type, id) => clone((store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []).find(m => m && m.id === id) || null),
         obtenirPratiqueParId: fwd('obtenirPratiqueParId'), obtenirTypePratiqueActive: fwd('obtenirTypePratiqueActive'), normaliserIdPratique: fwd('normaliserIdPratique'),
-        obtenirConfigPratiqueActive: fwd('obtenirConfigPratiqueActive'), obtenirConfigCategories: fwd('obtenirConfigCategories'), calculerNoteAvecCategories: fwd('calculerNoteAvecCategories'),
+        obtenirConfigPratiqueActive: fwd('obtenirConfigPratiqueActive'), obtenirConfigCategories: fwd('obtenirConfigCategories'),
         calculerDetailsNoteFinale: fwd('calculerDetailsNoteFinale'), compterEvaluationsEcarteesDeLaNote: fwd('compterEvaluationsEcarteesDeLaNote'), evaluationEntreDansLaNote: fwd('evaluationEntreDansLaNote') };
     chargerScript('js/pratiques/pratique-configurable.js', globaux, win);
     chargerScript('js/pratiques/pratique-registre.js', Object.assign({ PratiqueConfigurable: win.PratiqueConfigurable }, globaux), win);

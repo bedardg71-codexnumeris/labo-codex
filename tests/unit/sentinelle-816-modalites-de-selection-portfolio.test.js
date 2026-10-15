@@ -129,7 +129,7 @@ describe('#816 · chaque mode de sélection calcule ce que son nom annonce', () 
 
     it('8. les catégories actives ont priorité sur la modalité écrite', () => {
         // Même config, mais la pratique dit « meilleurs » : le moteur de la note
-        // (calculerNoteAvecCategories) traite ce cas en hybride, le panneau aussi.
+        // (`_selectionnerArtefactsHybride`, profil) traite ce cas en hybride, le panneau aussi.
         const r = choisir('meilleurs', 3, { configCategories: CATEGORIES });
         expect(ids(r)).toEqual(['A2', 'A4', 'O1', 'O2']);
     });

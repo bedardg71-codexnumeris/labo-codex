@@ -215,7 +215,7 @@ function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, term
     });
 }
 
-function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories, estFinale) {
+function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories, estFinale, terminalId) {
     const { nombreARetenir: nSelection, ponderation: pondSel } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
     const { ponderation: pondObl } = configCategories.obligatoires || { ponderation: 35 };
     const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
@@ -241,7 +241,13 @@ function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCatego
     // provisoire (au fil de la session), les obligatoires non remises sont
     // ignorées — elles ne pénalisent pas la note tant que la session n'est
     // pas terminée.
-    const nombreObligatoiresTotal = productionsNonPortfolio.filter(p => p.categorie === 'obligatoire').length;
+    // #339 (15 oct. 2026) — LE ZÉRO FANTÔME : l'écran laisse marquer la terminale « obligatoire »
+    // (pratiques-gestion.js, cases des catégories), mais sa copie n'entre jamais dans le pool
+    // (`_filtrerEvaluationsArtefactsValides` l'écarte) ; elle comptait pourtant au dénominateur en notes
+    // finales, comme une obligatoire non remise : un zéro pour une copie remise. La terminale garde sa
+    // propre pondération (plus bas) ; elle ne compte pas parmi les obligatoires du portfolio.
+    const nombreObligatoiresTotal = productionsNonPortfolio
+        .filter(p => p.categorie === 'obligatoire' && p.id !== terminalId).length;
     const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;
 
     // Moyenne pondérée Hybride
@@ -480,7 +486,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
 
     // Sélection des artefacts retenus + moyenne (Hybride ou Legacy)
     const { artefactsRetenus, moyennePortfolio: moyenneBrute } = modeHybrideNote
-        ? _selectionnerArtefactsHybride(evaluationsArtefacts, productions, configCategoriesNote, estFinale)
+        ? _selectionnerArtefactsHybride(evaluationsArtefacts, productions, configCategoriesNote, estFinale, terminalId)
         : _selectionnerArtefactsLegacy(evaluationsArtefacts, productions, methodeSelection, nombreARetenir);
 
     // Plafonnement conformité (déficit d'artefacts)

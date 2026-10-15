@@ -489,7 +489,9 @@ async function appliquerConfigurationPratique(configId) {
             modalites.specifications = {};
         }
 
-        modalites.specifications.seuilAcceptable = config.configuration?.seuilAcceptable || 75;
+        // #935 (15 oct. 2026, Grégoire) : sans seuil, 100 % — une copie est satisfaisante quand toutes ses spécifications sont respectées ; un seuil écrit à 0 reste 0.
+        modalites.specifications.seuilAcceptable = (typeof config.configuration?.seuilAcceptable === 'number')
+            ? config.configuration.seuilAcceptable : 100;
         modalites.specifications.typesTravaux = JSON.parse(JSON.stringify(config.configuration?.typesTravaux || []));
         modalites.specifications.forfaits = JSON.parse(JSON.stringify(config.configuration?.forfaits || []));
         modalites.specifications.modeleChoisi = config.id;
