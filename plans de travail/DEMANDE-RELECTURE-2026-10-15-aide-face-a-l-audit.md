@@ -113,3 +113,19 @@ Ajoutés à `TEXTES-A-RELIRE-2026-10-15.md` (§ 7 à 9), avec ce qui s'affiche a
 **Fait dans ce lot** : le point (10) de #1075 au BACKLOG (le nom d'élève dans l'historique des clics du rapport de bogue), sans code. Les six autres trouvailles restent dans cette demande.
 
 **Ligne de verdict demandée** : sur `CONSIGNE-LOT-2026-10-15-aide-plagiat.md` et ce § 8.
+
+## 9. Le texte du plagiat posé, la ligne M retirée, la fiche #1088 (verdicts de Cowork de 15 h 30 et 15 h 53)
+
+> Ajouté par Claude Code le 15 octobre 2026 à 15 h 57 (Toronto, mesuré par `date`).
+
+- **Posé** sur la carte « Travail NON RECEVABLE » : le texte de Cowork avec ses deux retouches (sommative sans la clause des meilleures productions ; standards avec ses deux exceptions). L'exemple chiffré est maintenant présenté comme celui des standards (portfolio retenant les meilleurs), où l'artefact non recevable « sort du portfolio ». Ses chiffres (2 évaluations comptées, 73,3 %) restent justes pour cette famille. Le « principe clé » dit le sort par famille. L'infobulle `eval-integrite` : « Recevable ou non. Une copie non recevable (plagiat, IA non autorisée) compte comme non remise dans la complétion ; dans la note, son sort dépend de ta pratique (Aide › « Travail NON RECEVABLE »). » (elle ne sait pas la pratique : elle renvoie à la carte).
+- **Banc** : sentinelle de l'Aide du 15 oct., bloc « famille par famille », 5 essais. Chaque règle est lue à sa source :
+  - la mise à 0 des critères ;
+  - `calculerPerformance` sans lecture de l'intégrité ;
+  - la reprise ;
+  - le seuil des spécifications ;
+  - le filtre du portfolio, la terminale et le dénominateur hybride (`nombreObligatoiresTotal`) ;
+  - le jugement de dénotation.
+  - 13 mutations, une par branche et par phrase, **13 rouges**.
+- **La ligne M** : « Décomposition de l'indice M : M = (A + C) / 2 » sort de la carte Mobilisation. Le calcul de M reste : il sert encore à l'indicateur « Mobilisation (M) » affiché en tête de la même carte (`profil-etudiant-sections-affichage.js`, « Mobilisation (M) » : `${indices.M}`). **Autres écrans qui affichent M**, sans y toucher : cet indicateur, seul à l'écran. `obtenirCouleurMobilisation` (`etudiants.js`) colorait une colonne Mobilisation qui n'existe pas (6.46 de #1083) : aucun appelant. Noté sous #1083. Essai neuf (sentinelle des textes relus), rouge sous mutation.
+- **BACKLOG** : #1088 « L'application ne prescrit pas » (le tableau du § 6 de la demande des textes relus, sans code). Les lignes des blocs 4 et 5 sont recopiées sous #668 et #333, telles qu'écrites dans `DECISIONS-2026-10-15-textes-relus.md` : la ligne de #333 posée plus tôt est remplacée par la leur.
