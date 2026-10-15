@@ -247,13 +247,13 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             // 2. Archiver les copies par le vrai menu ; la fenêtre ; le bilan.
             await archiverCopiesParLeMenu(page, fichier);
             let f = await attendreFenetre(page, 'Archiver les copies de Hiver 2032 ?');
-            expect(f.message).toContain('3 copies quitteront l\'application, environ 188,5 Ko.\n');
+            expect(f.message).toContain('3 copies quitteront l\'application, environ 193,0 Ko.\n');   // 15 oct. 2026 : les tailles se disent comme sur l'appareil (#993) — base 1000 hors Windows (Mac et runner Linux).
             expect(f.message).toContain('Toutes les données de Hiver 2032 restent dans l\'application : résultats des étudiant·es et du groupe, grilles, rétroactions. Les annotations restent aussi, mais ne se voient qu\'avec leur copie.');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
             test.info().annotations.push({ type: 'fenêtre', description: f.message });
             await f.fenetre.locator('.modal-actions button', { hasText: 'Archiver les copies' }).click();
             f = await attendreFenetre(page, 'Les copies de Hiver 2032 sont aux archives');
-            expect(f.message).toContain('3 copies retirées. Ton prochain codex sera plus léger d\'environ 188,5 Ko.\n');
+            expect(f.message).toContain('3 copies retirées. Ton prochain codex sera plus léger d\'environ 193,0 Ko.\n');
             test.info().annotations.push({ type: 'bilan', description: f.message });
             await fermerFenetre(page);
 

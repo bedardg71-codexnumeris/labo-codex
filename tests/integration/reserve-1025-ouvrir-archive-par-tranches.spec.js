@@ -157,7 +157,7 @@ test.describe('#1025 — « Ouvrir une archive… » lit l\'archive par tranches
     // répertoire est désormais la source : la borne de validerZipSecurite (règle 3) la refuse.
     test('une archive qui se dit plus lourde que 2 Go est refusée par la borne de validerZipSecurite', async ({ page }) => {
         const r = await ouvrirUneArchive(page, 'enorme');
-        expect(r.erreurs).toEqual([['Lecture impossible', 'Validation sécurité : ZIP trop volumineux une fois décompressé (3.0 Go). Limite : 2 Go.']]);
+        expect(r.erreurs).toEqual([['Lecture impossible', 'Validation sécurité : ZIP trop volumineux une fois décompressé (3,2 Go). Limite : 2 Go.']]);
         expect(r.notes, 'rien n\'est inscrit').toBeNull();
     });
 });

@@ -254,13 +254,13 @@ test.describe('E3 — « Renvoyer aux archives » un trimestre clos (mode fichie
             // 2. Renvoyer par le vrai menu ; la fenêtre ; le bilan.
             await renvoyerParLeMenu(page, fichier);
             let f = await attendreFenetre(page, 'Renvoyer Hiver 2032 aux archives ?');
-            expect(f.message).toContain('Hiver 2032 quittera l\'application : 3 étudiant·es, 3 copies, environ 188,5 Ko.\n');
+            expect(f.message).toContain('Hiver 2032 quittera l\'application : 3 étudiant·es, 3 copies, environ 193,0 Ko.\n');   // 15 oct. 2026 : les tailles se disent comme sur l'appareil (#993) — base 1000 hors Windows (Mac et runner Linux).
             expect(f.message).toContain('le garde tel quel : « Faire revenir » le ramènera.\nGarde bien cette archive : c\'est elle qui le conserve.');
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(IPAD_PORTRAIT.width);
             test.info().annotations.push({ type: 'fenêtre identique', description: f.message });
             await f.fenetre.locator('.modal-actions button', { hasText: 'Renvoyer aux archives' }).click();
             f = await attendreFenetre(page, 'Hiver 2032 est renvoyé aux archives');
-            expect(f.message).toContain('3 copies retirées. Ton prochain codex sera plus léger d\'environ 188,5 Ko.');
+            expect(f.message).toContain('3 copies retirées. Ton prochain codex sera plus léger d\'environ 193,0 Ko.');
             test.info().annotations.push({ type: 'bilan', description: f.message });
             await fermerFenetre(page);
 
