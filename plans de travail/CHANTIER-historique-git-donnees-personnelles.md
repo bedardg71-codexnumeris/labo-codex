@@ -268,9 +268,10 @@ dist/Beta_91.5d_Primo/js/pratiques/config-francois-chimie.js
 dist/Beta_92_Primo/js/pratiques/config-francois-chimie.js
 dist/Monitorage_Beta_0.92/js/pratiques/config-francois-chimie.js
 js/pratiques/config-francois-chimie.js
+Retours des testeurs/grégoire/
 ```
 
-⮕ **Ajouté le 15 oct. 2026 au soir** (consigne `CONSIGNE-LOT-2026-10-15-avant-la-purge.md`, décisions de Grégoire de 14 h 51 à 15 h 08) : les sept dossiers de retours de collègues, l'ancien emplacement `Archives/Retours des testeurs/` (12 chemins), le répertoire « Autres pratiques de notation » aux deux emplacements (110 chemins, 56 fichiers distincts, rendus à Grégoire hors du dépôt le 15 oct.), et les copies de la configuration de pratique nommée d'après un collègue (11 chemins, trouvés par mesure des noms de chemin de l'historique). ⚠ **`Retours des testeurs/grégoire/`** (avec accent ; 2 entrées : une capture d'écran ajoutée le 10 sept., retirée le 12) n'y est PAS encore : elle montre le journal de bord d'un élève réel, nom compris. **À trancher par Grégoire** avant la purge ; si elle part, ajouter la ligne ici.
+⮕ **Ajouté le 15 oct. 2026 au soir** (consigne `CONSIGNE-LOT-2026-10-15-avant-la-purge.md`, décisions de Grégoire de 14 h 51 à 15 h 08) : les sept dossiers de retours de collègues, l'ancien emplacement `Archives/Retours des testeurs/` (12 chemins), le répertoire « Autres pratiques de notation » aux deux emplacements (110 chemins, 56 fichiers distincts, rendus à Grégoire hors du dépôt le 15 oct.), et les copies de la configuration de pratique nommée d'après un collègue (11 chemins, trouvés par mesure des noms de chemin de l'historique). ⚠ **`Retours des testeurs/grégoire/`** (avec accent ; 2 entrées : une capture d'écran ajoutée le 10 sept., retirée le 12) n'y est PAS encore : elle montre le journal de bord d'un élève réel, nom compris. **À trancher par Grégoire** avant la purge ; si elle part, ajouter la ligne ici. ↻ **Tranché par Grégoire le 15 oct. à 16 h 27 : elle part** ; la ligne est ajoutée ci-dessus, et la vérification B doit la trouver sur l'original (2 entrées) et plus sur la copie.
 
 `regles-texte.txt` — **à GÉNÉRER hors du dépôt, jamais à versionner** (cf. §1 : la table littérale a été retirée d'ici le 7 sept. au soir).
 
