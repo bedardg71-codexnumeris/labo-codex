@@ -21,7 +21,7 @@
 | `../8-interpretation.md` | Étapes 5 et 6 : confrontation avec les intentions, et dispositions |
 | `../9-rapport-audit.md` | Le rapport d'audit |
 | `../10-description-application.md` | La description consolidée de ce que fait l'application (base de description) |
-| `../11-confrontation-prevu-pas-fait.md` | Les 710 « prévu mais pas fait » du temps 3 : tri au code, contre-vérification, entrées soumises à Grégoire |
+| `../11-confrontation-prevu-pas-fait.md` | Les 710 « prévu mais pas fait » du temps 3 : tri au code, contre-vérification, entrevue, dispositions (#1075 à #1086) |
 
 ## Les annexes (dans ce dossier)
 
@@ -33,6 +33,7 @@
 | `consignes/copie-aveugle-settings.json` | Réglage ajouté par Grégoire à la copie aveugle : refus de la recherche web et des outils de session |
 | `entrevues/etape1-notes-brutes.md` | Notes brutes de l'entrevue de l'étape 1, avant mise en forme et corrections de dictée |
 | `entrevues/etapes5-6-notes-brutes.md` | Notes brutes de l'entrevue des étapes 5 et 6 |
+| `entrevues/confrontation-prevu-pas-fait-notes-brutes.md` | Notes brutes de l'entrevue sur les 131 entrées « prévu mais pas fait », avec la déclaration de Grégoire qui l'a interrompue |
 | `consignes/tri-prevu-pas-fait-CONSIGNE.md` | Consigne commune des agents qui ont trié les 710 entrées au code |
 | `tri-prevu-pas-fait/tri-1199-710-verdicts.json` | Les 710 verdicts du tri au code de la 1.199.0 (explication, preuve, recherches) |
 | `tri-prevu-pas-fait/contre-verification-47.json`, `echantillon-ids.json` | Le second tri, à l'aveugle, de 47 entrées tirées au hasard |
