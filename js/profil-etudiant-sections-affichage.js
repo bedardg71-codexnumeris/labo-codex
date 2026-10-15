@@ -843,6 +843,20 @@ function genererSectionMobilisationEngagement(da) {
     `;
 }
 
+
+/**
+ * La phrase colorée sous le badge du contexte. #821 (15 oct. 2026) : les quatre paliers
+ * n'en portent plus (elle répétait le mot qui jugeait) ; seuls les états sans palier
+ * (« En attente ») en ont une. Rien quand elle est vide.
+ */
+function _ligneDescriptionContexte(alerte) {
+    if (!alerte.description) return '';
+    const couleur = alerte.niveau === 'tres-favorable' || alerte.niveau === 'favorable' ? '#16a34a'
+        : alerte.niveau === 'modere' ? '#ca8a04' : '#ea580c';
+    return `<p style="font-size: 0.9rem; color: ${couleur}; font-weight: 600; margin-bottom: 8px;">
+                    ${alerte.description}
+                </p>`;
+}
 /**
  * Génère le HTML de la section Accompagnement (interventions RàI)
  * Inclut: badge RàI, risque, pattern, progression, services, échelle, historique
@@ -1290,9 +1304,7 @@ function genererSectionAccompagnement(da) {
 
                 <div class="profil-separateur-section"></div>
 
-                ${alerteContexte.description ? `<p style="font-size: 0.9rem; color: ${alerteContexte.niveau === 'tres-favorable' || alerteContexte.niveau === 'favorable' ? '#16a34a' : alerteContexte.niveau === 'modere' ? '#ca8a04' : '#ea580c'}; font-weight: 600; margin-bottom: 8px;">
-                    ${alerteContexte.description}
-                </p>` : ''}
+                ${_ligneDescriptionContexte(alerteContexte)}
 
                 <p class="u-texte-09 u-texte-gris" style="line-height: 1.5;">
                     ${alerteContexte.recommandation}
