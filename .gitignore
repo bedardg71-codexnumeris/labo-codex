@@ -134,3 +134,6 @@ scripts/.verdict-playwright.json
 # TRANSITOIRE — cette ligne peut partir dès que le dossier est supprimé. Elle
 # n'est là que pour qu'un `git add -A` distrait ne les fasse pas entrer.
 _to_delete/
+
+# Répertoire de publication construit par scripts/construire-publication.mjs (16 oct. 2026)
+/publication/

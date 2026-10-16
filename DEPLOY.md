@@ -268,7 +268,14 @@ surinvoqué et préciser le régime réel»).
 ### 2.3 Configuration Netlify (référence)
 
 Le fichier [`netlify.toml`](netlify.toml) versionné définit :
-- `[build]` — paramètres de build (publish = racine du repo, pas de commande)
+- `[build]` — depuis le 16 octobre 2026, `scripts/construire-publication.mjs` copie la
+  **liste blanche** des fichiers de l'application (`index.html`, `styles.css`,
+  `version.js`, `version.json`, `js/`, `css/`, `icons/`, `libs/`, `img/`,
+  `autocollants/`, sans aucun `.md`) dans `publication/`, seul dossier publié.
+  Avant, `publish = "."` mettait en ligne tout l'arbre, documents de travail compris,
+  dans chaque déploiement et chaque aperçu. Ajouter un fichier ou un dossier à
+  l'application demande de l'ajouter à la liste blanche **et** au banc
+  `tests/unit/sentinelle-publication-liste-blanche.test.js`
 - `[[headers]]` — règles de cache et de sécurité (consolide l'ancien `_headers`)
 
 Toute modification de cette configuration **doit passer par un commit**
