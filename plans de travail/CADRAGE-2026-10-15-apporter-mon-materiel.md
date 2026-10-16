@@ -59,7 +59,7 @@ L'assistant enseigne : il apprend à la personne à se servir de l'application e
 | Ven. 16 | 1. Le modèle, l'onglet, la lecture d'une grille collée, l'aperçu | Conception s'ouvre sur le nouvel onglet ; une grille collée (ou l'exemple) s'affiche telle que l'application l'a reconnue |
 | Sam. 17 | 2. L'assistant et la création (grille, échelle, cartouche si rétroactions) | Il répond aux questions, vérifie, crée ; la grille et l'échelle existent |
 | Sam. 17 soir | Release et verdict du soir (lots 1-2) | Il essaie avec ses vraies grilles dimanche, Mac et iPad (porte terrain : Word et Pages) |
-| Dim. 18 | 3. Les mots relus, les liens vers la barre latérale de chaque outil, les Nouvelles | Une seule page de textes à relire ; « La voir dans… » ouvre l'outil, l'objet créé sélectionné |
+| Dim. 18 | 3. Les mots relus, les descripteurs visibles (en lecture) sur chaque critère dans Grilles de critères, les liens vers la barre latérale de chaque outil, les Nouvelles | Une seule page de textes à relire ; sa grille ouverte dans Grilles montre ses descripteurs ; « La voir dans… » ouvre l'outil, l'objet créé sélectionné |
 | Dim. 18 soir | Release et verdict du soir | En ligne lundi matin |
 
 Révisé le 16 oct. à 14 h 15, d'après le prototype validé par Grégoire (`PROTOTYPE-2026-10-16-apporter-mon-materiel.dc.html`). Repli si le temps manque : lots 1 et 2 suffisent à la démonstration. Après le 19 : le descripteur affiché là où on évalue, l'aller-retour (rouvrir une grille dans le tableau), un ou deux chemins.
