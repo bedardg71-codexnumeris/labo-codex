@@ -705,6 +705,9 @@ const TOOLTIPS = {
 
     'nav-construction':
         'Configuration de l\'évaluation : productions, grilles, échelles, cartouches et pratiques de notation.',
+    // « Apporter mon matériel », lot 1 (16 oct. 2026) — texte provisoire, relu par Grégoire au lot 3.
+    'nav-conception-materiel':
+        'Colle ta grille d\'évaluation copiée dans Word ou Pages : l\'application la reconnaît et te montre ce qu\'elle en a compris.',
     'nav-conception-productions':
         'Définis les productions de tes étudiant·es : portfolios, artefacts et travaux avec pondérations et échéances.',
     'nav-conception-grilles':

@@ -38,8 +38,8 @@ Aucune à ce lot.
 
 ## §4 · Ce que je n'ai pas pu vérifier
 
-- **La suite Playwright n'a pas été lancée** (consigne : pas de verdict avant ton signal du soir). Les deux essais neufs (`materiel-lot1-onglet.spec.js` : l'onglet en tête, l'exemple affiché ; un script collé qui ne s'exécute pas dans WebKit) sont écrits, pas exécutés.
+- **La suite Playwright complète n'a pas été lancée** (pas de verdict avant ton signal du soir). Les deux essais neufs de `materiel-lot1-onglet.spec.js` (l'onglet en tête et l'exemple affiché ; un collage piégé qui n'entre pas dans la page) ont tourné seuls dans WebKit : verts.
 - **Le presse-papiers réel de Pages** : je n'en connais pas la forme. Si Pages ne fournit qu'un texte sans tabulations, la lecture échouera avec le message ci-dessus ; la rangée 2.4 le dira.
 - **Le collage sur iPad** : Safari pour iPad peut ne transmettre que le texte brut. Le repli sur le texte à tabulations existe, mais je ne sais pas ce que Word pour iPad y met.
 - **L'apparence en mode clair et en mode sombre** n'a pas été regardée à l'écran : les couleurs passent par les variables de l'application, sans valeur en dur.
-- **L'info-bulle du bouton** « Apporter mon matériel » n'est pas posée : elle demande une ligne dans `js/navigation.js`, zone protégée, que je n'ai pas touchée sans ton accord.
+- **L'info-bulle du bouton** « Apporter mon matériel » est posée (ta réponse A), texte provisoire relu au lot 3 ; je ne l'ai pas vue s'afficher au survol.

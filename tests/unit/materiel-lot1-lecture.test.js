@@ -327,12 +327,14 @@ describe('lot 1 · S — ce qu’on colle n’entre pas dans la page', () => {
     });
 
     it('S.b l’aperçu échappe tout texte venu du document (ici, du texte à tabulations)', () => {
-        const m = L.interpreter(L.lireTexte('<b>Nom</b>\nC\t<img src=x onerror=alert(1)>\tB\n"><svg onload=alert(2)>\t1\t2\nY\t<iframe src=x></iframe>\tok'), 'colle');
+        const m = L.interpreter(L.lireTexte('<b>Nom</b>\nC\t<img src=x onerror=alert(1)>\tB\n"><svg onload=alert(2)>\t1\t2\nY\t<iframe src=x></iframe>\tok\n<object data=x></object> sous le tableau'), 'colle');
         const html = materiel.apercuHtml(m);
         expect(html).not.toContain('<img');
         expect(html).not.toContain('<svg');
         expect(html).not.toContain('<b>Nom');
         expect(html).not.toContain('<iframe');   // une CASE, pas seulement l'en-tête
+        expect(m.aClasser.map(x => x.texte)).toContain('<object data=x></object> sous le tableau');
+        expect(html).not.toContain('<object');   // un passage « À classer » (relecture de Cowork)
         expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
     });
 
@@ -426,25 +428,41 @@ describe('lot 1 · T — les descripteurs voyagent, et rien d’autre ne bouge',
         expect(g.criteres[0].descripteurs.echelleId).toBe('ECH_1');
     });
 
-    it('T.g une grille SANS descripteurs ressort identique, à l’octet près, de ce que donnaient les schémas d’avant ce lot', () => {
-        // « Avant ce lot » : les mêmes schémas, privés de `descripteurs`.
-        const schemaPartage = wp.partageSchemas.SCHEMA_ENTITE.grille.champs.criteres.schema;
-        const schemaImport = wie.SCHEMAS_IMPORT.grille.criteres.schema;
-        const apresP = JSON.stringify(wp.partageFormat.projeterEntite(grille(false), 'grille'));
-        const apresI = JSON.stringify(wie.assainirObjet(grille(false), wie.SCHEMAS_IMPORT.grille));
-        const sauveP = schemaPartage.descripteurs, sauveI = schemaImport.descripteurs;
-        delete schemaPartage.descripteurs;
-        delete schemaImport.descripteurs;
-        try {
-            expect(apresP).toBe(JSON.stringify(wp.partageFormat.projeterEntite(grille(false), 'grille')));
-            expect(apresI).toBe(JSON.stringify(wie.assainirObjet(grille(false), wie.SCHEMAS_IMPORT.grille)));
-        } finally {
-            schemaPartage.descripteurs = sauveP;
-            schemaImport.descripteurs = sauveI;
-        }
-        const g = grille(false);
-        const avant = JSON.stringify(g);
+    /**
+     * Relecture de Cowork (16 oct.) : la première version comparait le code à lui-même privé de
+     * l'entrée `descripteurs`, ce qui ne pouvait pas échouer (un champ absent est sauté de toute
+     * façon). Ces deux chaînes ont été PRODUITES par le code de `eb6dd86e` (le commit d'avant ce
+     * lot : partage-schemas, partage-validation, partage-format, import-export de ce commit,
+     * chargés dans le même harnais) sur la grille ci-dessous. Elles ne se régénèrent pas : si le
+     * code d'aujourd'hui en diffère, c'est qu'une grille sans descripteurs ne voyage plus comme hier.
+     * Break-test : retirer `enonces` du schéma d'import, ou faire émettre un `descripteurs` vide
+     * par la projection → rouge.
+     */
+    const GRILLE_SANS = {
+        id: 'GR_SANS', nom: 'Dissertation', type: 'analytique', dansBibliotheque: true,
+        metadata_cc: { auteur_original: 'Auteur fictif', licence: 'CC BY-NC-SA 4.0', contributeurs: [] },
+        criteres: [
+            { id: 'CR_1', nom: 'Thèse', description: 'La thèse', ponderation: 60, type: 'analytique', niveauSOLO: 'relationnel', verrouille: false },
+            { id: 'CR_2', nom: 'Langue', ponderation: 40, type: 'algorithmique', formule: 'x', modeleEnonces: 'generique',
+              enonces: { decompte: '', concentre: 'Revois.' },
+              sousCriteres: [{ id: 'S1', code: '1', nom: 'Syntaxe', ponderation: 1, retroaction: 'Vérifie.' }] }
+        ]
+    };
+    const PARTAGE_EB6DD86E = '{"id":"GR_SANS","nom":"Dissertation","type":"analytique","criteres":[{"id":"CR_1","nom":"Thèse","description":"La thèse","ponderation":60,"type":"analytique","niveauSOLO":"relationnel","verrouille":false},{"id":"CR_2","nom":"Langue","ponderation":40,"type":"algorithmique","formule":"x","modeleEnonces":"generique","enonces":{"decompte":"","concentre":"Revois."},"sousCriteres":[{"id":"S1","code":"1","nom":"Syntaxe","ponderation":1,"retroaction":"Vérifie."}]}],"dansBibliotheque":true,"metadata_cc":{"licence":"CC BY-NC-SA 4.0","auteur_original":"Auteur fictif","contributeurs":[]}}';
+    const IMPORT_EB6DD86E = '{"id":"GR_SANS","nom":"Dissertation","criteres":[{"id":"CR_1","nom":"Thèse","description":"La thèse","ponderation":60,"type":"analytique","niveauSOLO":"relationnel","verrouille":false},{"id":"CR_2","nom":"Langue","ponderation":40,"type":"algorithmique","formule":"x","modeleEnonces":"generique","enonces":{"decompte":"","concentre":"Revois."},"sousCriteres":[{"id":"S1","code":"1","nom":"Syntaxe","ponderation":1,"retroaction":"Vérifie."}]}],"type":"analytique","dansBibliotheque":true,"metadata_cc":{"licence":"CC BY-NC-SA 4.0","auteur_original":"Auteur fictif","contributeurs":[]}}';
+    const copie = () => JSON.parse(JSON.stringify(GRILLE_SANS));
+
+    it('T.g une grille SANS descripteurs ressort du PARTAGE à l’octet près comme sur eb6dd86e', () => {
+        expect(JSON.stringify(wp.partageFormat.projeterEntite(copie(), 'grille'))).toBe(PARTAGE_EB6DD86E);
+    });
+
+    it('T.h … et de l’IMPORT à l’octet près comme sur eb6dd86e', () => {
+        expect(JSON.stringify(wie.assainirObjet(copie(), wie.SCHEMAS_IMPORT.grille))).toBe(IMPORT_EB6DD86E);
+    });
+
+    it('T.i … et le rebranchement ne la touche pas', () => {
+        const g = copie();
         expect(wie.rebrancherReferences(g, 'grille', { echelles: { ECH_1: 'X' } })).toBe(0);
-        expect(JSON.stringify(g)).toBe(avant);
+        expect(g).toEqual(GRILLE_SANS);
     });
 });

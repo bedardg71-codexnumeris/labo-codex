@@ -27991,9 +27991,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     font-size: 0.75rem; color: var(--alerte-texte-attention);
     border: 1px dashed var(--alerte-bordure-attention); border-radius: 5px; padding: 1px 6px; white-space: nowrap;
 }
-/* iPad : le tableau défile dans son cadre, la page non. */
+/* iPad : le tableau défile dans son cadre, la page non. `position: relative` y retient les textes
+   réservés aux lecteurs d'écran (.u-lecteur-ecran, en absolu) : sans lui, ceux des colonnes de
+   droite se plaçaient hors du cadre et faisaient défiler la PAGE de 480 px (mesuré à 820 px). */
 .materiel-apercu-cadre {
-    max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    position: relative; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
     border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand); background: var(--surface-carte);
 }
 .materiel-apercu-cadre:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
