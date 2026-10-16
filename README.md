@@ -268,7 +268,9 @@ Selon les conditions suivantes :
 - **Pas d'Utilisation Commerciale** — usage éducatif uniquement
 - **Partage dans les Mêmes Conditions** — adaptations sous même licence
 
-Le texte complet est dans [`LICENSE.md`](LICENSE.md).
+Le détail, dossier par dossier, est dans [`LICENSE.md`](LICENSE.md) ; le texte
+complet de l'AGPL v3, dans [`LICENSE`](LICENSE). Les bibliothèques tierces de
+`libs/` gardent leurs propres licences ([`libs/VERSIONS.md`](libs/VERSIONS.md)).
 
 ---
 
