@@ -161,10 +161,11 @@ function rebrancherEchellePratique(pratique, table) {
  *   cartouche  : grilleId, echelleId (la CLÉ de stockage `cartouches_<grilleId>` reste
  *                à la charge de l'appelant, qui la calcule depuis la même table)
  *   pratique   : `rebrancherEchellePratique` (racine, `configuration`, `config`)
+ *   grille     : `criteres[].descripteurs.echelleId` (« Apporter mon matériel », 16 oct. 2026)
  * Un id absent de sa table ne bouge pas : la table ne contient que ce qui a changé d'id
  * (ou, pour le partage, ce qui est dans le paquet).
  * @param {Object} item - modifié en place
- * @param {'production'|'cartouche'|'pratique'} type
+ * @param {'production'|'cartouche'|'pratique'|'grille'} type
  * @param {{grilles?: Object, echelles?: Object, cartouches?: Object}} tables - ancien id → id neuf
  * @returns {number} nombre de références rebranchées
  */
@@ -185,6 +186,25 @@ function rebrancherReferences(item, type, tables) {
         return suivre('grilleId', table('grilles')) + suivre('echelleId', table('echelles'));
     }
     if (type === 'pratique') return rebrancherEchellePratique(item, table('echelles'));
+    if (type === 'grille') {
+        // « Apporter mon matériel », lot 1 (16 oct. 2026) : les descripteurs d'un critère
+        // désignent l'échelle pour laquelle ils ont été écrits. Seul le PARTAGE appelle cette
+        // règle pour une grille (partage-import, où l'échelle du paquet change toujours d'id).
+        // ⚠ L'import complet et sélectif et la réouverture d'archive ne l'appellent pas pour
+        // les grilles : ils traitent les grilles AVANT les échelles, et une échelle n'y change
+        // d'id que sur collision. Un descripteur qui perd son échelle ne s'affiche pas ; rien
+        // ne se corrompt (cadrage : aucune correspondance devinée entre niveaux).
+        const echelles = table('echelles');
+        let n = 0;
+        (Array.isArray(item.criteres) ? item.criteres : []).forEach((c) => {
+            const d = c && c.descripteurs;
+            if (d && d.echelleId && Object.prototype.hasOwnProperty.call(echelles, d.echelleId)) {
+                d.echelleId = echelles[d.echelleId];
+                n++;
+            }
+        });
+        return n;
+    }
     return 0;
 }
 
@@ -932,6 +952,18 @@ const SCHEMAS_IMPORT = {
                         priorite:  { type: 'string', maxLen: 2000 },
                         concentre: { type: 'string', maxLen: 2000 },
                         aucune:    { type: 'string', maxLen: 2000 }
+                    }
+                },
+
+                // « Apporter mon matériel », lot 1 (16 oct. 2026) — LES DESCRIPTEURS
+                // DU CRITÈRE se perdraient de même : un texte par niveau, lié à
+                // l'échelle pour laquelle il a été écrit (clés = codes de ses
+                // niveaux). Absent = aucun descripteur. Schéma FERMÉ (cf. `enonces`).
+                descripteurs: {
+                    type: 'object',
+                    schema: {
+                        echelleId: { type: 'string', maxLen: 100 },
+                        parNiveau: { type: 'mapStrings', maxLen: 5000 }
                     }
                 },
 

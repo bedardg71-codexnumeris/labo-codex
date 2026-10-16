@@ -37,6 +37,12 @@ const configurationsOnglets = {
     // Sections créées: apercu (plate), structure, contexte, suivi
     'accueil': [],
     'conception': [
+        // « Apporter mon matériel » (16 oct. 2026, lot 1) EN TÊTE : la navigation affiche la
+        // première sous-section à l'ouverture d'un onglet (navigation.js, afficherSousNavigation),
+        // c'est donc elle qui accueille qui ouvre Conception. Autorisation de toucher cette zone
+        // protégée : décision de Grégoire du 15 oct. 2026, 16 h 15-16 h 17, consignée au cadrage
+        // (plans de travail/CADRAGE-2026-10-15-apporter-mon-materiel.md, décision 1).
+        { id: 'materiel', label: 'Apporter mon matériel' },
         // Renommé le 9 août 2026 (#426) : les six onglets voisins de Conception
         // nomment un OBJET de travail ; seul celui-ci nommait une théorie. Et
         // « carte d'alignement » est déjà le mot de l'app (le guide intégré

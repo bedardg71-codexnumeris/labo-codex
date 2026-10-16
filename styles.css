@@ -27919,3 +27919,104 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     flex-direction: column;
     justify-content: space-between;
 }
+
+/* ============================================================
+   « APPORTER MON MATÉRIEL » — lot 1 (16 oct. 2026)
+   Conception › première sous-section : accueil et aperçu, en
+   lecture seule, de la grille reconnue dans un collage.
+   Référence : plans de travail/PROTOTYPE-2026-10-16-apporter-mon-materiel.dc.html.
+   Couleurs : variables seulement (sombre et clair se redéfinissent
+   sur body.mode-clair). Cibles tactiles ≥ 44 px (iPad).
+   États d'une valeur (légende de l'aperçu) :
+     repris   → sans cadre ;
+     complété / proposé → cadre pointillé « attention » ;
+     à remplir → cadre plein « erreur ».
+   ============================================================ */
+.materiel-accueil { display: flex; flex-direction: column; gap: 24px; }
+.materiel-intro { max-width: 780px; }
+.materiel-intro h2 { margin: 0 0 12px; }
+.materiel-intro p { margin: 0; font-size: 1.1rem; line-height: 1.55; color: var(--texte-secondaire); }
+.materiel-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; }
+.materiel-etapes li {
+    flex: 1 1 240px; display: flex; gap: 12px; align-items: flex-start;
+    background: var(--surface-carte); border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand); padding: 16px;
+}
+.materiel-etapes li > div { display: flex; flex-direction: column; gap: 4px; }
+.materiel-etapes li span:not(.materiel-etape-numero) { color: var(--texte-muted); font-size: 0.9rem; line-height: 1.45; }
+.materiel-etape-numero {
+    flex: none; width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+    background: var(--accent-primaire); color: var(--surface-carte);
+}
+.materiel-collage {
+    display: flex; flex-direction: column; gap: 14px;
+    background: var(--surface-carte); border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-grand); padding: 24px;
+}
+.materiel-collage label { font-weight: 600; font-size: 1rem; }
+.materiel-zone { width: 100%; min-height: 160px; border: 2px dashed var(--bordure-moyenne); resize: vertical; line-height: 1.4; }
+.materiel-collage .alerte { margin: 0; }
+.materiel-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.materiel-actions .btn { min-height: 44px; }
+.materiel-actions-sep { color: var(--texte-muted); font-size: 0.9rem; margin-left: 8px; }
+.materiel-btn-lien {
+    background: none; border: none; font: inherit; cursor: pointer; min-height: 44px; padding: 8px 4px;
+    color: var(--accent-primaire); text-decoration: underline; text-underline-offset: 3px;
+}
+.materiel-btn-lien:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
+
+/* L'aperçu */
+.materiel-lecture { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.materiel-lecture h2, .materiel-lecture p { margin: 0; }
+.materiel-bandeau { margin: 0; }
+.materiel-resume { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; align-items: baseline; }
+.materiel-resume dt { font-weight: 600; }
+.materiel-resume dd { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+.materiel-legende { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.85rem; color: var(--texte-secondaire); }
+.materiel-legende > span { display: inline-flex; gap: 6px; align-items: center; }
+.materiel-pastille { width: 22px; height: 14px; border-radius: 3px; border: 1px solid var(--bordure-moyenne); display: inline-block; }
+.materiel-valeur { display: inline-block; padding: 1px 6px; border-radius: 5px; border: 1px solid transparent; }
+.materiel-etat-complete, .materiel-etat-propose {
+    border: 2px dashed var(--alerte-bordure-attention); background: var(--alerte-fond-attention);
+}
+.materiel-etat-remplir {
+    border: 2px solid var(--alerte-bordure-erreur); background: var(--alerte-fond-erreur);
+    color: var(--alerte-texte-erreur);
+}
+.materiel-mention { display: inline-block; font-size: 0.78rem; font-weight: 600; }
+.materiel-mention-complete, .materiel-mention-propose { color: var(--alerte-texte-attention); }
+.materiel-mention-remplir { color: var(--alerte-texte-erreur); }
+.materiel-code {
+    font-size: 0.75rem; color: var(--alerte-texte-attention);
+    border: 1px dashed var(--alerte-bordure-attention); border-radius: 5px; padding: 1px 6px; white-space: nowrap;
+}
+/* iPad : le tableau défile dans son cadre, la page non. */
+.materiel-apercu-cadre {
+    max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand); background: var(--surface-carte);
+}
+.materiel-apercu-cadre:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
+.materiel-apercu { border-collapse: collapse; width: max-content; min-width: 100%; }
+.materiel-apercu th, .materiel-apercu td {
+    padding: 12px; vertical-align: top; text-align: left;
+    border-bottom: 1px solid var(--bordure-claire); border-right: 1px solid var(--bordure-claire);
+}
+.materiel-apercu thead th { background: var(--surface-conteneur); }
+.materiel-apercu .materiel-col-critere { width: 180px; min-width: 180px; font-weight: 600; }
+.materiel-apercu .materiel-col-pond { width: 130px; min-width: 130px; }
+.materiel-apercu .materiel-col-pond .materiel-mention { display: block; margin-top: 4px; }
+.materiel-apercu .materiel-col-niveau { min-width: 200px; max-width: 280px; }
+.materiel-apercu td { min-width: 200px; max-width: 280px; }
+.materiel-niveau-titre { display: block; font-weight: 600; margin-bottom: 6px; }
+.materiel-niveau-details { display: flex; flex-wrap: wrap; gap: 6px; font-weight: 400; }
+.materiel-case { font-size: 0.85rem; line-height: 1.45; color: var(--texte-secondaire); }
+.materiel-case-vide { font-size: 0.85rem; font-style: italic; color: var(--texte-muted); }
+.materiel-a-classer h3 { margin: 0 0 6px; font-size: 1rem; }
+.materiel-a-classer ul { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.materiel-a-classer li {
+    display: flex; flex-direction: column; gap: 4px; padding: 12px 14px;
+    border-radius: var(--radius-moyen); background: var(--surface-carte); border-left: 3px solid var(--alerte-bordure-attention);
+}
+.materiel-a-classer-texte { line-height: 1.45; overflow-wrap: anywhere; }
+.materiel-a-classer-raison { font-size: 0.8rem; color: var(--texte-muted); }

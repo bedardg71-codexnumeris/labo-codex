@@ -11,7 +11,7 @@
     <title>Labo Codex — Espace de travail pour la pratique enseignante</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261015a"> <!-- 1.192.1 (8 oct.) : menu « Vue » à sa largeur, palette des raccourcis revenue · Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261015b"> <!-- « Apporter mon matériel » lot 1 (16 oct.) : accueil et aperçu · 1.192.1 (8 oct.) : menu « Vue » à sa largeur, palette des raccourcis revenue · Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -4166,6 +4166,37 @@
      Carte d'alignement, productions, matériel d'évaluation
      =================================== -->
             <section id="section-conception" class="section">
+
+                <!-- « Apporter mon matériel », lot 1 (16 oct. 2026) : PREMIÈRE sous-section de Conception,
+                     donc celle qui s'affiche à l'ouverture de l'onglet. Textes du prototype validé par
+                     Grégoire le 16 oct., provisoires (relus au lot 3). Branché par js/materiel.js. -->
+                <div id="conception-materiel" class="sous-section">
+                    <div id="materiel-accueil" class="materiel-accueil">
+                        <div class="materiel-intro">
+                            <h2>Apporter mon matériel</h2>
+                            <p>Ton matériel existe déjà. Tes grilles d’évaluation sont sans doute dans Word ou dans Pages : colle-les ici, l’application en fait une grille prête à servir. Elle te pose ensuite quelques questions, et tu vérifies tout avant que quoi que ce soit soit créé.</p>
+                        </div>
+                        <ol class="materiel-etapes">
+                            <li><span class="materiel-etape-numero" aria-hidden="true">1</span><div><strong>Copie ton tableau</strong><span>Dans Word ou Pages, sélectionne la grille en entier, puis copie-la.</span></div></li>
+                            <li><span class="materiel-etape-numero" aria-hidden="true">2</span><div><strong>Colle-le ici</strong><span>L’application reconnaît les critères, les niveaux et le texte de chaque case.</span></div></li>
+                            <li><span class="materiel-etape-numero" aria-hidden="true">3</span><div><strong>Réponds, vérifie, crée</strong><span>Seulement les questions que ton document ne règle pas, une à la fois.</span></div></li>
+                        </ol>
+                        <div class="materiel-collage">
+                            <label for="materiel-zone-collage">Colle ta grille ici</label>
+                            <textarea id="materiel-zone-collage" class="controle-form materiel-zone" rows="7" placeholder="Clique ici, puis colle (⌘ V) le tableau copié dans Word ou Pages."></textarea>
+                            <p id="materiel-erreur" class="alerte alerte-erreur u-hide" role="alert"></p>
+                            <div class="materiel-actions">
+                                <button type="button" class="btn btn-secondaire" data-action="materiel.reconnaitreTexte">Reconnaître le texte ci-dessus</button>
+                                <span class="materiel-actions-sep">Pas de document sous la main ?</span>
+                                <button type="button" class="btn btn-secondaire" data-action="materiel.essayerExemple">Essayer avec un exemple</button>
+                                <button type="button" class="materiel-btn-lien" data-action="materiel.taperMain">Taper ma grille à la main</button>
+                            </div>
+                        </div>
+                        <p class="text-muted">Bientôt ici : tes commentaires habituels aux étudiant·es et tes consignes de travaux.</p>
+                    </div>
+                    <!-- L'aperçu de la grille lue (materiel.apercuHtml, tout texte échappé). -->
+                    <div id="materiel-lecture" class="materiel-lecture u-hide"></div>
+                </div><!-- fin sous-section conception-materiel -->
 
                 <div id="conception-carte" class="sous-section">
                     <h2 class="titre-avec-emoji-toggles">
@@ -14099,7 +14130,7 @@
     <script src="libs/jspdf-autotable.min.js?v=3.8.1"></script>
 
     <!-- PRIORITÉ 1: Fondations -->
-    <script src="js/config.js?v=20261015a"></script> <!-- #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
+    <script src="js/config.js?v=20261015b"></script> <!-- « Apporter mon matériel » lot 1 (16 oct.) : sous-onglet en tête de Conception · #326 (28 juin) : COMPARATEUR_VISIBLE=true (réactivation) ; #345 (22 juin) : flag COMPARATEUR_VISIBLE ; Refonte nav SP5-fix : sous-onglet id court 'vue' (au lieu de 'calendrier') pour éviter la redondance calendrier-calendrier -->
     <script src="js/securite-echappement.js?v=20260821a"></script> <!-- CT-29 : echapperAttribut — echapperHtml n'encode pas les guillemets, insuffisant en contexte d'attribut -->
     <script src="js/identite-naturelle.js?v=20260824a"></script> <!-- CT-15 : source unique de l'identite NATURELLE d'une entite du cadre (code de cours #455, courriel, triplet du groupe-cours) -->
     <script src="js/navigation.js?v=20260918a"></script> <!-- #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
@@ -14177,6 +14208,8 @@
     <script src="js/echelles.js?v=20261015a"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/cartouches.js?v=20261015a"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
+    <script src="js/materiel-lecture.js?v=20261015b"></script> <!-- « Apporter mon matériel », lot 1 (16 oct.) : lecture d'une grille collée, fonctions pures — CHARGÉ AVANT materiel.js -->
+    <script src="js/materiel.js?v=20261015b"></script> <!-- « Apporter mon matériel », lot 1 (16 oct.) : accueil de l'onglet et aperçu de la grille lue -->
     <script src="js/export-pdf.js?v=20261012a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20261014a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=20261012a"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -14312,15 +14345,15 @@
          labo-codex-partage-v1 + signature ECDSA (Défense F, D2) + confiance TOFU (D3).
          Ordre requis : après cc-license.js et bibliotheque-ui.js, avant import-export.js ;
          signature.js avant partage-format.js (construirePackageSigne). -->
-    <script src="js/partage-schemas.js?v=20261010c"></script>
-    <script src="js/partage-validation.js?v=20260926c"></script>
+    <script src="js/partage-schemas.js?v=20261015b"></script> <!-- « Apporter mon matériel » lot 1 (16 oct.) : descripteurs d'un critère, bornés -->
+    <script src="js/partage-validation.js?v=20261015b"></script> <!-- « Apporter mon matériel » lot 1 (16 oct.) : maxCles d'un dictionnaire -->
     <script src="js/signature.js?v=2026061002"></script>
     <script src="js/trust-tofu.js?v=20260902f"></script>
     <script src="js/partage-format.js?v=20260926c"></script>
     <script src="js/partage-export.js?v=20261012a"></script>
     <script src="js/partage-import.js?v=20261015a"></script>
     <script src="js/partage-section.js?v=20261012a"></script>
-    <script src="js/import-export.js?v=20261015a"></script> <!-- #1028 (5 oct., verdict) : copie sans fichier, fusion, notifications · #1028 (5 oct.) : les copies aux archives · #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
+    <script src="js/import-export.js?v=20261015b"></script> <!-- « Apporter mon matériel » lot 1 (16 oct.) : descripteurs au schéma d'import, rebranchés au partage · #1028 (5 oct., verdict) : copie sans fichier, fusion, notifications · #1028 (5 oct.) : les copies aux archives · #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20261015a"></script> <!-- #976 : la fenêtre du codex dit « corriger » pour un déplacement · #1028 (5 oct.) : les copies aux archives · Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
     <script src="js/liste-evaluations.js?v=20261015a"></script> <!-- #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20260924b"></script>

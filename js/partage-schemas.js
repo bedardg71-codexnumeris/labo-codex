@@ -25,7 +25,9 @@
  *                      partage-validation (profondeur max, types JSON purs,
  *                      chaînes bornées, aucune clé préfixée `_`)
  *   - 'dictionnaire-chaines' : objet plat { cléLibre: chaîne } (commentaires
- *                      de cartouche, indexés `<critereId>_<niveau>`)
+ *                      de cartouche, indexés `<critereId>_<niveau>` ; descripteurs
+ *                      d'un critère, indexés par code de niveau). `maxCles`
+ *                      (facultatif) borne le nombre de clés.
  *   - 'tableau'      : `max` = nombre d'items ; `schema` = schéma fermé des
  *                      items objets, OU `element: 'chaine'` pour un tableau de
  *                      chaînes (bornées par `maxLongueurElement`)
@@ -296,6 +298,22 @@
                                 priorite:  { type: 'chaine', max: 2000 },
                                 concentre: { type: 'chaine', max: 2000 },
                                 aucune:    { type: 'chaine', max: 2000 }
+                            }
+                        },
+                        // « Apporter mon matériel », lot 1 (16 oct. 2026) — LES
+                        // DESCRIPTEURS D'UN CRITÈRE VOYAGENT. Un texte par niveau
+                        // (« à quoi ressemble ce niveau », avant la tâche), lié à
+                        // l'échelle pour laquelle il a été écrit : ses clés sont les
+                        // codes de niveaux de CETTE échelle. Absent = aucun
+                        // descripteur ; aucune grille existante n'en porte.
+                        // Même classe que #667/#668/#581 : non déclaré ici, il
+                        // disparaîtrait au partage sans un mot. `maxCles` borne le
+                        // nombre de niveaux (une échelle en compte rarement plus de 6).
+                        descripteurs: {
+                            type: 'objet',
+                            schema: {
+                                echelleId: { type: 'chaine', max: 200 },
+                                parNiveau: { type: 'dictionnaire-chaines', maxLongueurElement: 5000, maxCles: 20 }
                             }
                         },
                         // #669 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT
