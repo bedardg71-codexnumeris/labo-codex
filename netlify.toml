@@ -6,8 +6,11 @@
 # dashboard Netlify.
 
 [build]
-  # Le repo est servi tel quel (pas de build step — vanilla HTML/CSS/JS)
-  publish = "."
+  # 16 oct. 2026 : seule la liste blanche des fichiers de l'application est
+  # publiée (scripts/construire-publication.mjs). Avant, `publish = "."` mettait
+  # en ligne tout l'arbre, documents de travail compris, dans chaque déploiement.
+  command = "node scripts/construire-publication.mjs"
+  publish = "publication"
 
 # ============================================================================
 # Redirections de domaine — fermer les portes de service (1er sept. 2026)
