@@ -89,6 +89,31 @@
     // ------------------------------------------------------------------
 
     /**
+     * 'dictionnaire-chaines' : objet plat de chaînes bornées ; `maxCles` (facultatif) borne
+     * le nombre de clés (« Apporter mon matériel », lot 1, 16 oct. 2026 : extrait de
+     * validerValeur pour qu'elle ne monte pas en complexité).
+     */
+    function validerDictionnaire(valeur, desc, chemin, problemes) {
+        if (!estObjetPlat(valeur)) {
+            problemes.push({ champ: chemin, message: 'objet attendu' });
+            return;
+        }
+        if (desc.maxCles && Object.keys(valeur).length > desc.maxCles) {
+            problemes.push({ champ: chemin, message: 'nombre de clés > max ' + desc.maxCles });
+        }
+        Object.keys(valeur).forEach(function (k) {
+            if (k.charAt(0) === window.partageSchemas.PREFIXE_CHAMP_INTERDIT) {
+                problemes.push({ champ: chemin + '.' + k, message: 'clé préfixée « _ » interdite' });
+            }
+            if (typeof valeur[k] !== 'string') {
+                problemes.push({ champ: chemin + '.' + k, message: 'chaîne attendue' });
+            } else if (desc.maxLongueurElement && valeur[k].length > desc.maxLongueurElement) {
+                problemes.push({ champ: chemin + '.' + k, message: 'longueur > max ' + desc.maxLongueurElement });
+            }
+        });
+    }
+
+    /**
      * Valide une valeur contre un descripteur. Pousse les problèmes dans
      * `problemes` sous forme { champ, message }.
      */
@@ -178,20 +203,7 @@
                 break;
 
             case 'dictionnaire-chaines':
-                if (!estObjetPlat(valeur)) {
-                    problemes.push({ champ: chemin, message: 'objet attendu' });
-                    return;
-                }
-                Object.keys(valeur).forEach(function (k) {
-                    if (k.charAt(0) === window.partageSchemas.PREFIXE_CHAMP_INTERDIT) {
-                        problemes.push({ champ: chemin + '.' + k, message: 'clé préfixée « _ » interdite' });
-                    }
-                    if (typeof valeur[k] !== 'string') {
-                        problemes.push({ champ: chemin + '.' + k, message: 'chaîne attendue' });
-                    } else if (desc.maxLongueurElement && valeur[k].length > desc.maxLongueurElement) {
-                        problemes.push({ champ: chemin + '.' + k, message: 'longueur > max ' + desc.maxLongueurElement });
-                    }
-                });
+                validerDictionnaire(valeur, desc, chemin, problemes);
                 break;
 
             default:

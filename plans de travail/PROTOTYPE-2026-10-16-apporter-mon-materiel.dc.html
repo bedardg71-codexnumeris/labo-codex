@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Apporter mon matériel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#0c1a22}
+*{box-sizing:border-box}
+a{color:#6aacb8}a:hover{color:#9fc5e8}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.onglet{background:transparent;border:0;color:#8aa4b0;font:inherit;font-size:15px;padding:10px 14px;border-radius:6px;cursor:pointer;min-height:44px}
+.onglet:hover{color:#d0e0e4;background:rgba(106,172,184,.12)}
+.onglet.actif{color:#d0e0e4;background:#1a4a5e;font-weight:600}
+.pilule{background:#1a3040;border:1px solid rgba(106,172,184,.25);color:#b0c4cc;font:inherit;font-size:14px;padding:8px 14px;border-radius:20px;cursor:pointer;min-height:40px;display:inline-flex;align-items:center;gap:8px}
+.pilule:hover{background:#244858}
+.pilule.actif{background:#246478;border-color:#6aacb8;color:#ffffff;font-weight:600}
+.badge-nouveau{font-size:11px;letter-spacing:.04em;text-transform:uppercase;background:#c8a060;color:#0c1a22;padding:2px 6px;border-radius:5px;font-weight:700}
+.btn{font:inherit;font-size:15px;border-radius:6px;padding:11px 18px;min-height:44px;cursor:pointer;border:1px solid transparent}
+.btn-principal{background:#1e5a4a;color:#ffffff}
+.btn-principal:hover{background:#287a64}
+.btn-secondaire{background:#1a3040;color:#d0e0e4;border-color:rgba(106,172,184,.35)}
+.btn-secondaire:hover{background:#244858}
+.btn-lien{background:transparent;color:#6aacb8;padding:8px 4px;text-decoration:underline;text-underline-offset:3px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #6aacb8;outline-offset:2px}
+.champ{width:100%;font:inherit;font-size:14px;color:#d0e0e4;background:rgba(106,172,184,.08);border:1px solid rgba(106,172,184,.35);border-radius:6px;padding:8px 10px}
+textarea.champ{resize:vertical;line-height:1.4}
+.champ::placeholder{color:#80a0b0}
+.etat-complete{border:2px dashed #c8a060;background:rgba(200,160,96,.08)}
+.etat-remplir{border:2px solid #ff8a9a;background:rgba(232,64,87,.10)}
+.etat-vide{border-style:dashed}
+.mention{display:inline-block;font-size:12px;font-weight:600}
+.mention-complete{color:#c8a060}
+.mention-remplir{color:#ff8a9a}
+.cellule{padding:12px;border-bottom:1px solid rgba(106,172,184,.18);border-right:1px solid rgba(106,172,184,.12)}
+.ligne-entete .cellule{background:#1a3040}
+.code{font-size:12px;color:#c8a060;border:1px dashed #c8a060;border-radius:5px;padding:1px 6px}
+.etape{background:transparent;border:1px solid rgba(106,172,184,.25);color:#8aa4b0;font:inherit;font-size:13px;padding:6px 12px;border-radius:20px;cursor:pointer;min-height:36px}
+.etape:hover{background:rgba(106,172,184,.12)}
+.etape.fait{color:#d0e0e4;border-color:#4a8a94}
+.etape.actif{background:#246478;color:#ffffff;border-color:#6aacb8;font-weight:600}
+.choix{display:flex;flex-direction:column;gap:6px;text-align:left;font:inherit;color:#d0e0e4;background:#1a3040;border:2px solid rgba(106,172,184,.35);border-radius:12px;padding:16px 18px;cursor:pointer;min-height:44px;flex:1 1 260px}
+.choix:hover{background:#244858}
+.choix.actif{border-color:#6aacb8;background:#1a4a5e}
+.titre-choix{font-weight:600;font-size:16px}
+.aide-choix{font-size:14px;color:#b0c4cc;line-height:1.45}
+.apercu-case{font-size:13px;line-height:1.4;color:#b0c4cc;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.puce{display:inline-block;font-size:12px;padding:2px 8px;border-radius:5px;border:1px solid rgba(106,172,184,.35)}
+.surligne{outline:2px solid #6aacb8;outline-offset:-2px;background:rgba(106,172,184,.10)}
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #0c1a22; color: #d0e0e4; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 15px">
+<header style="background: #142428; border-bottom: 1px solid rgba(106,172,184,0.25)">
+<div style="max-width: 1280px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px">
+<div style="font-weight: 700; font-size: 18px; letter-spacing: 0.02em; color: #d0e0e4">Labo Codex</div>
+<nav aria-label="Sections de l’application" style="display: flex; flex-wrap: wrap; gap: 4px">
+<sc-for list="{{onglets}}" as="o" hint-placeholder-count="7">
+<button type="button" class="{{o.classe}}" aria-current="{{o.courant}}" onClick="{{o.pick}}">{{o.label}}</button>
+</sc-for>
+</nav>
+</div>
+</header>
+<div style="background: #0e1e28; border-bottom: 1px solid rgba(106,172,184,0.25)">
+<nav aria-label="Conception" style="max-width: 1280px; margin: 0 auto; padding: 10px 24px; display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{sousOnglets}}" as="p" hint-placeholder-count="7">
+<button type="button" class="{{p.classe}}" aria-current="{{p.courant}}" onClick="{{p.pick}}">{{p.label}}<sc-if value="{{p.nouveau}}" hint-placeholder-val="{{non}}"><span class="badge-nouveau">nouveau</span></sc-if></button>
+</sc-for>
+</nav>
+</div>
+<main style="max-width: 1160px; margin: 0 auto; padding: 32px 24px 72px; display: flex; flex-direction: column; gap: 20px">
+<sc-if value="{{aToast}}" hint-placeholder-val="{{non}}">
+<p role="status" style="margin: 0; padding: 12px 16px; border-radius: 6px; background: #1a4a5e; border: 1px solid #6aacb8; color: #d0e0e4; font-size: 14px">{{toast}}</p>
+</sc-if>
+
+<sc-if value="{{estAccueil}}" hint-placeholder-val="{{oui}}">
+<section aria-labelledby="titre-accueil" style="display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 780px">
+<h1 id="titre-accueil" style="margin: 0; font-size: 32px; line-height: 1.2; font-weight: 700; color: #d0e0e4">Apporter mon matériel</h1>
+<p style="margin: 0; font-size: 18px; line-height: 1.55; color: #b0c4cc">Ton matériel existe déjà. Tes grilles d’évaluation sont sans doute dans Word ou dans Pages : colle-les ici, l’application en fait une grille prête à servir. Elle te pose ensuite quelques questions, et tu vérifies tout avant que quoi que ce soit soit créé.</p>
+</div>
+<ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px">
+<li style="flex: 1 1 240px; display: flex; gap: 12px; align-items: flex-start; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 16px">
+<span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 50%; background: #1a4a5e; color: #d0e0e4; display: flex; align-items: center; justify-content: center; font-weight: 700">1</span>
+<div style="display: flex; flex-direction: column; gap: 4px"><strong>Copie ton tableau</strong><span style="color: #8aa4b0; font-size: 14px; line-height: 1.45">Dans Word ou Pages, sélectionne la grille en entier, puis copie-la.</span></div>
+</li>
+<li style="flex: 1 1 240px; display: flex; gap: 12px; align-items: flex-start; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 16px">
+<span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 50%; background: #1a4a5e; color: #d0e0e4; display: flex; align-items: center; justify-content: center; font-weight: 700">2</span>
+<div style="display: flex; flex-direction: column; gap: 4px"><strong>Colle-le ici</strong><span style="color: #8aa4b0; font-size: 14px; line-height: 1.45">L’application reconnaît les critères, les niveaux et le texte de chaque case.</span></div>
+</li>
+<li style="flex: 1 1 240px; display: flex; gap: 12px; align-items: flex-start; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 16px">
+<span aria-hidden="true" style="flex: none; width: 32px; height: 32px; border-radius: 50%; background: #1a4a5e; color: #d0e0e4; display: flex; align-items: center; justify-content: center; font-weight: 700">3</span>
+<div style="display: flex; flex-direction: column; gap: 4px"><strong>Réponds, vérifie, crée</strong><span style="color: #8aa4b0; font-size: 14px; line-height: 1.45">Seulement les questions que ton document ne règle pas, une à la fois.</span></div>
+</li>
+</ol>
+<div style="background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<label for="zone-collage" style="font-weight: 600; font-size: 16px">Colle ta grille ici</label>
+<textarea id="zone-collage" class="champ" rows="7" style="border: 2px dashed rgba(106,172,184,0.5); min-height: 160px; font-size: 15px" placeholder="Clique ici, puis colle (⌘ V) le tableau copié dans Word ou Pages." value="{{collage}}" onChange="{{setCollage}}" onPaste="{{onPaste}}"></textarea>
+<sc-if value="{{aErreur}}" hint-placeholder-val="{{non}}">
+<p role="alert" style="margin: 0; padding: 12px 14px; border-radius: 6px; border: 2px solid #ff8a9a; background: rgba(232,64,87,0.10); color: #ffd0d6; font-size: 14px; line-height: 1.5">{{erreur}}</p>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+<button type="button" class="btn btn-secondaire" onClick="{{reconnaitreTexte}}">Reconnaître le texte ci-dessus</button>
+<span style="color: #8aa4b0; font-size: 14px; margin-left: 8px">Pas de document sous la main ?</span>
+<button type="button" class="btn btn-secondaire" onClick="{{essayerExemple}}">Essayer avec un exemple</button>
+<button type="button" class="btn btn-lien" onClick="{{taperMain}}">Taper ma grille à la main</button>
+</div>
+</div>
+<p style="margin: 0; color: #8aa4b0; font-size: 14px">Bientôt ici : tes commentaires habituels aux étudiant·es et tes consignes de travaux.</p>
+</section>
+</sc-if>
+
+<sc-if value="{{estAssistant}}" hint-placeholder-val="{{non}}">
+<section aria-labelledby="titre-etape" style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 13px; color: #8aa4b0; letter-spacing: 0.02em">{{etapeTexte}}</span>
+<nav aria-label="Étapes de l’assistant" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{etapesNav}}" as="e" hint-placeholder-count="5">
+<button type="button" class="{{e.classe}}" aria-current="{{e.courant}}" onClick="{{e.aller}}">{{e.numero}}. {{e.label}}</button>
+</sc-for>
+</nav>
+</div>
+<sc-if value="{{estExemple}}" hint-placeholder-val="{{non}}">
+<p style="margin: 0; padding: 10px 14px; border-radius: 6px; background: #1a3040; border: 1px solid rgba(106,172,184,0.35); color: #b0c4cc; font-size: 14px">Exemple fictif, pour essayer. Tes vraies grilles se collent à l’écran d’accueil de l’onglet.</p>
+</sc-if>
+
+<sc-if value="{{estQuestion}}" hint-placeholder-val="{{oui}}">
+<div style="background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+
+<sc-if value="{{estAxes}}" hint-placeholder-val="{{oui}}">
+<h1 id="titre-etape" style="margin: 0; font-size: 24px; line-height: 1.3">Dans ton document, les critères sont-ils en lignes ou en colonnes ?</h1>
+<p style="margin: 0; color: #b0c4cc; line-height: 1.5">Regarde l’aperçu ci-dessous : chaque ligne devrait être un critère, chaque colonne un niveau.</p>
+<div role="group" aria-label="Sens du tableau" style="display: flex; flex-wrap: wrap; gap: 12px">
+<button type="button" class="{{classeLignes}}" aria-pressed="{{critEnLignes}}" onClick="{{choisirLignes}}"><span class="titre-choix">En lignes</span><span class="aide-choix">Un critère par ligne, un niveau par colonne.</span></button>
+<button type="button" class="{{classeColonnes}}" aria-pressed="{{critEnColonnes}}" onClick="{{choisirColonnes}}"><span class="titre-choix">En colonnes</span><span class="aide-choix">Un critère par colonne, un niveau par ligne : l’application permute le tableau.</span></button>
+</div>
+<span class="mention mention-complete">Proposé d’après la lecture de ton tableau : à vérifier. Si tu changes ce choix, la pondération et la valeur des niveaux seront à revoir.</span>
+</sc-if>
+
+<sc-if value="{{estNature}}" hint-placeholder-val="{{non}}">
+<h1 id="titre-etape" style="margin: 0; font-size: 24px; line-height: 1.3">Les cases de ton tableau décrivent-elles les niveaux, ou s’adressent-elles à l’étudiant·e ?</h1>
+<sc-if value="{{aExempleCase}}" hint-placeholder-val="{{oui}}"><p style="margin: 0; color: #b0c4cc; line-height: 1.5">Une case de ton tableau : <em style="color: #d0e0e4">« {{exempleCase}} »</em></p></sc-if>
+<div role="group" aria-label="Nature des cases" style="display: flex; flex-wrap: wrap; gap: 12px">
+<button type="button" class="{{classeDescr}}" aria-pressed="{{estDescr}}" onClick="{{choisirDescr}}"><span class="titre-choix">Elles décrivent les niveaux</span><span class="aide-choix">Des descripteurs : à quoi ressemble chaque niveau, avant la tâche. Ils iront dans ta grille.</span></button>
+<button type="button" class="{{classeRetro}}" aria-pressed="{{estRetro}}" onClick="{{choisirRetro}}"><span class="titre-choix">Elles s’adressent à l’étudiant·e</span><span class="aide-choix">Des rétroactions : ce que l’étudiant·e lira après l’évaluation. Elles iront dans tes commentaires par critère et par niveau.</span></button>
+</div>
+<sc-if value="{{natureProposee}}" hint-placeholder-val="{{non}}"><span class="mention mention-complete">Proposé d’après le texte des cases : à vérifier.</span></sc-if>
+</sc-if>
+
+<sc-if value="{{estValeurs}}" hint-placeholder-val="{{non}}">
+<h1 id="titre-etape" style="margin: 0; font-size: 24px; line-height: 1.3">Quelle plage de notes correspond à chaque niveau ?</h1>
+<p style="margin: 0; color: #b0c4cc; line-height: 1.5">Pour chaque niveau, indique de quelle note à quelle note il s’étend, en pourcentage. L’application n’en propose aucune : c’est ta pratique.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{niveaux}}" as="n" hint-placeholder-count="4">
+<div style="flex: 1 1 230px; background: #1a3040; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px">
+<label for="q-niv-titre-{{$index}}" style="font-size: 12px; color: #8aa4b0">Niveau</label>
+<input id="q-niv-titre-{{$index}}" class="champ etat-{{n.titreEtat}}" value="{{n.titre}}" onChange="{{n.setTitre}}" style="font-weight: 600">
+<div style="display: flex; gap: 8px; align-items: flex-end">
+<div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 4px"><label for="q-niv-min-{{$index}}" style="font-size: 12px; color: #8aa4b0">De (%)</label><input id="q-niv-min-{{$index}}" class="champ etat-{{n.minEtat}}" value="{{n.min}}" onChange="{{n.setMin}}" placeholder="ex. 85"></div>
+<div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 4px"><label for="q-niv-max-{{$index}}" style="font-size: 12px; color: #8aa4b0">À (%)</label><input id="q-niv-max-{{$index}}" class="champ etat-{{n.maxEtat}}" value="{{n.max}}" onChange="{{n.setMax}}" placeholder="ex. 100"></div>
+</div>
+<sc-if value="{{n.aPlageMention}}" hint-placeholder-val="{{non}}"><span class="mention mention-remplir">plage à remplir</span></sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{aAvertPlages}}" hint-placeholder-val="{{non}}"><p role="status" style="margin: 0; padding: 10px 14px; border-radius: 6px; border: 2px dashed #c8a060; color: #e8d2a8; font-size: 14px">{{avertPlages}}</p></sc-if>
+</sc-if>
+
+<sc-if value="{{estPond}}" hint-placeholder-val="{{non}}">
+<h1 id="titre-etape" style="margin: 0; font-size: 24px; line-height: 1.3">Combien pèse chaque critère ?</h1>
+<p style="margin: 0; color: #b0c4cc; line-height: 1.5">{{pondIntro}}</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-for list="{{criteres}}" as="c" hint-placeholder-count="3">
+<div style="flex: 1 1 200px; background: #1a3040; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+<label for="q-pond-{{$index}}" style="font-weight: 600">{{c.nomAffiche}}</label>
+<input id="q-pond-{{$index}}" class="champ etat-{{c.pondEtat}}" value="{{c.pond}}" onChange="{{c.setPond}}" placeholder="ex. 30">
+<sc-if value="{{c.aPondMention}}" hint-placeholder-val="{{non}}"><span class="mention mention-{{c.pondEtat}}">{{c.pondMention}}</span></sc-if>
+</div>
+</sc-for>
+</div>
+<span style="color: #b0c4cc; font-size: 14px">Pondération totale : {{totalPond}} %</span>
+<sc-if value="{{aAvertPond}}" hint-placeholder-val="{{non}}"><p role="status" style="margin: 0; padding: 10px 14px; border-radius: 6px; border: 2px dashed #c8a060; color: #e8d2a8; font-size: 14px">{{avertPond}}</p></sc-if>
+</sc-if>
+
+<sc-if value="{{estClasser}}" hint-placeholder-val="{{non}}">
+<h1 id="titre-etape" style="margin: 0; font-size: 24px; line-height: 1.3">Que faire de ces passages ?</h1>
+<p style="margin: 0; color: #b0c4cc; line-height: 1.5">Ils viennent de ton document, mais ne trouvent pas leur place dans le tableau. Rien n’est retiré sans toi : range-les ou écarte-les.</p>
+<sc-for list="{{aClasser}}" as="a" hint-placeholder-count="1">
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; background: #1a3040; border-radius: 6px; padding: 12px 14px">
+<div style="flex: 1 1 360px; display: flex; flex-direction: column; gap: 4px; min-width: 0">
+<span style="font-size: 15px; line-height: 1.45">{{a.texte}}</span>
+<span style="font-size: 12px; color: #8aa4b0">{{a.etiquette}}</span>
+</div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-if value="{{a.enAttente}}" hint-placeholder-val="{{oui}}">
+<button type="button" class="btn btn-secondaire" onClick="{{a.placer}}">Ajouter comme critère</button>
+<button type="button" class="btn btn-secondaire" onClick="{{a.ecarter}}">Écarter</button>
+</sc-if>
+<sc-if value="{{a.traite}}" hint-placeholder-val="{{non}}">
+<button type="button" class="btn btn-lien" onClick="{{a.remettre}}">Annuler</button>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{aMotApp}}" hint-placeholder-val="{{non}}">
+<div style="display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 14px; border-radius: 6px; background: #0e1e28; border: 1px solid rgba(106,172,184,0.35)">
+<strong style="flex: none; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; color: #6aacb8">Dans l’application</strong>
+<span style="flex: 1 1 320px; font-size: 14px; line-height: 1.5; color: #d0e0e4">{{motApp}}</span>
+</div>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; padding-top: 4px">
+<button type="button" class="btn btn-lien" onClick="{{precedent}}">{{precedentLabel}}</button>
+<button type="button" class="btn btn-principal" style="font-weight: 600" onClick="{{suivant}}">Suivant →</button>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; align-items: baseline">
+<h2 style="margin: 0; font-size: 16px; color: #b0c4cc">Aperçu de ta grille</h2>
+<div role="note" style="display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: #b0c4cc">
+<span style="display: inline-flex; gap: 6px; align-items: center"><span aria-hidden="true" style="width: 22px; height: 14px; border-radius: 3px; border: 1px solid rgba(106,172,184,0.35); display: inline-block"></span>Repris de ton document</span>
+<span style="display: inline-flex; gap: 6px; align-items: center"><span aria-hidden="true" class="etat-complete" style="width: 22px; height: 14px; border-radius: 3px; display: inline-block"></span>Complété par l’application</span>
+<span style="display: inline-flex; gap: 6px; align-items: center"><span aria-hidden="true" class="etat-remplir" style="width: 22px; height: 14px; border-radius: 3px; display: inline-block"></span>À remplir</span>
+</div>
+</div>
+<div role="table" aria-label="Aperçu de ta grille" style="overflow-x: auto; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; background: #142428">
+<div role="row" class="ligne-entete" style="display: flex; width: max-content; min-width: 100%">
+<div role="columnheader" class="cellule" style="flex: 0 0 180px; font-weight: 600; font-size: 14px">Critère</div>
+<div role="columnheader" class="cellule {{classePondApercu}}" style="flex: 0 0 120px; font-weight: 600; font-size: 14px">Pondération</div>
+<sc-for list="{{niveaux}}" as="n" hint-placeholder-count="4">
+<div role="columnheader" class="cellule {{classeValeursApercu}}" style="flex: 1 0 180px; display: flex; flex-direction: column; gap: 6px">
+<span style="font-weight: 600; font-size: 14px">{{n.titreAffiche}}</span>
+<span><span class="puce etat-{{n.plageEtat}}">{{n.plageAffiche}}</span></span>
+</div>
+</sc-for>
+</div>
+<sc-for list="{{criteres}}" as="c" hint-placeholder-count="3">
+<div role="row" style="display: flex; width: max-content; min-width: 100%">
+<div role="rowheader" class="cellule" style="flex: 0 0 180px; font-weight: 600; font-size: 14px">{{c.nomAffiche}}</div>
+<div role="cell" class="cellule {{classePondApercu}}" style="flex: 0 0 120px"><span class="puce etat-{{c.pondEtat}}">{{c.pondAffiche}}</span></div>
+<sc-for list="{{c.cases}}" as="d" hint-placeholder-count="4">
+<div role="cell" class="cellule" style="flex: 1 0 180px"><span class="apercu-case">{{d.texteAffiche}}</span></div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{estFinal}}" hint-placeholder-val="{{non}}">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 760px">
+<h1 id="titre-etape" style="margin: 0; font-size: 28px; line-height: 1.2">Vérifie ta grille, puis crée-la</h1>
+<p style="margin: 0; color: #b0c4cc; line-height: 1.5">Tout reste modifiable ici. Rien n’est encore créé.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 560px">
+<label for="nom-grille" style="font-weight: 600">Nom de la grille</label>
+<input id="nom-grille" class="champ etat-{{nomEtat}}" value="{{nom}}" onChange="{{setNom}}" style="font-size: 16px">
+<span style="font-size: 13px; color: #8aa4b0">Il apparaîtra sur le document que reçoivent tes étudiant·es.</span>
+<sc-if value="{{nomAMention}}" hint-placeholder-val="{{non}}"><span class="mention mention-{{nomEtat}}">{{nomMention}}</span></sc-if>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<sc-if value="{{montrerAxes}}" hint-placeholder-val="{{oui}}">
+<div role="group" aria-labelledby="final-axes" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 12px 14px">
+<span id="final-axes" style="font-weight: 600; font-size: 14px">Critères :</span>
+<button type="button" class="{{pilLignes}}" aria-pressed="{{critEnLignes}}" onClick="{{choisirLignes}}">en lignes</button>
+<button type="button" class="{{pilColonnes}}" aria-pressed="{{critEnColonnes}}" onClick="{{choisirColonnes}}">en colonnes</button>
+</div>
+</sc-if>
+<div role="group" aria-labelledby="final-nature" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 12px 14px">
+<span id="final-nature" style="font-weight: 600; font-size: 14px">Les cases :</span>
+<button type="button" class="{{pilDescr}}" aria-pressed="{{estDescr}}" onClick="{{choisirDescr}}">décrivent les niveaux</button>
+<button type="button" class="{{pilRetro}}" aria-pressed="{{estRetro}}" onClick="{{choisirRetro}}">s’adressent à l’étudiant·e</button>
+</div>
+</div>
+<div role="note" style="display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; font-size: 14px; color: #b0c4cc">
+<span style="font-weight: 600; color: #d0e0e4">Comment lire le tableau :</span>
+<span style="display: inline-flex; gap: 8px; align-items: center"><span aria-hidden="true" style="width: 28px; height: 18px; border-radius: 4px; border: 1px solid rgba(106,172,184,0.35); background: rgba(106,172,184,0.08); display: inline-block"></span>Repris de ton document</span>
+<span style="display: inline-flex; gap: 8px; align-items: center"><span aria-hidden="true" class="etat-complete" style="width: 28px; height: 18px; border-radius: 4px; display: inline-block"></span>Complété par l’application : à vérifier</span>
+<span style="display: inline-flex; gap: 8px; align-items: center"><span aria-hidden="true" class="etat-remplir" style="width: 28px; height: 18px; border-radius: 4px; display: inline-block"></span>À remplir</span>
+</div>
+<div role="table" aria-label="Ta grille" style="overflow-x: auto; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; background: #142428">
+<div role="row" class="ligne-entete" style="display: flex; width: max-content; min-width: 100%">
+<div role="columnheader" class="cellule" style="flex: 0 0 220px; font-weight: 600; display: flex; align-items: flex-end">Critère</div>
+<div role="columnheader" class="cellule" style="flex: 0 0 140px; font-weight: 600; display: flex; align-items: flex-end">Pondération (%)</div>
+<sc-for list="{{niveaux}}" as="n" hint-placeholder-count="4">
+<div role="columnheader" class="cellule" style="flex: 1 0 220px; display: flex; flex-direction: column; gap: 6px">
+<label for="niv-titre-{{$index}}" style="font-size: 12px; color: #8aa4b0">Niveau</label>
+<input id="niv-titre-{{$index}}" class="champ etat-{{n.titreEtat}}" value="{{n.titre}}" onChange="{{n.setTitre}}" style="font-weight: 600">
+<span><span class="code">code {{n.code}} · complété</span></span>
+<div style="display: flex; gap: 6px; align-items: flex-end">
+<div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 4px"><label for="niv-min-{{$index}}" style="font-size: 12px; color: #8aa4b0">De (%)</label><input id="niv-min-{{$index}}" class="champ etat-{{n.minEtat}}" value="{{n.min}}" onChange="{{n.setMin}}"></div>
+<div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 4px"><label for="niv-max-{{$index}}" style="font-size: 12px; color: #8aa4b0">À (%)</label><input id="niv-max-{{$index}}" class="champ etat-{{n.maxEtat}}" value="{{n.max}}" onChange="{{n.setMax}}"></div>
+</div>
+<sc-if value="{{n.aPlageMention}}" hint-placeholder-val="{{non}}"><span class="mention mention-remplir">plage à remplir</span></sc-if>
+</div>
+</sc-for>
+</div>
+<sc-for list="{{criteres}}" as="c" hint-placeholder-count="3">
+<div role="row" style="display: flex; width: max-content; min-width: 100%">
+<div role="rowheader" class="cellule" style="flex: 0 0 220px; display: flex; flex-direction: column; gap: 4px">
+<label class="vh" for="crit-nom-{{$index}}">Nom du critère</label>
+<input id="crit-nom-{{$index}}" class="champ etat-{{c.nomEtat}}" value="{{c.nom}}" onChange="{{c.setNom}}" style="font-weight: 600" placeholder="Nom du critère">
+<sc-if value="{{c.aNomMention}}" hint-placeholder-val="{{non}}"><span class="mention mention-{{c.nomEtat}}">{{c.nomMention}}</span></sc-if>
+</div>
+<div role="cell" class="cellule" style="flex: 0 0 140px; display: flex; flex-direction: column; gap: 4px">
+<label class="vh" for="crit-pond-{{$index}}">Pondération du critère</label>
+<input id="crit-pond-{{$index}}" class="champ etat-{{c.pondEtat}}" value="{{c.pond}}" onChange="{{c.setPond}}" placeholder="ex. 30">
+<sc-if value="{{c.aPondMention}}" hint-placeholder-val="{{non}}"><span class="mention mention-{{c.pondEtat}}">{{c.pondMention}}</span></sc-if>
+</div>
+<sc-for list="{{c.cases}}" as="d" hint-placeholder-count="4">
+<div role="cell" class="cellule" style="flex: 1 0 220px">
+<textarea class="champ etat-{{d.etat}}" rows="4" aria-label="{{d.label}}" value="{{d.texte}}" onChange="{{d.set}}" placeholder="{{d.placeholder}}"></textarea>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+<button type="button" class="btn btn-secondaire" onClick="{{ajouterCritere}}">Ajouter un critère</button>
+<button type="button" class="btn btn-secondaire" onClick="{{ajouterNiveau}}">Ajouter un niveau</button>
+<span style="color: #8aa4b0; font-size: 14px; margin-left: 8px">Pondération totale : {{totalPond}} %</span>
+</div>
+<sc-if value="{{aAvertPond}}" hint-placeholder-val="{{non}}"><p role="status" style="margin: 0; padding: 10px 14px; border-radius: 6px; border: 2px dashed #c8a060; color: #e8d2a8; font-size: 14px">{{avertPond}}</p></sc-if>
+<sc-if value="{{aAvertPlages}}" hint-placeholder-val="{{non}}"><p role="status" style="margin: 0; padding: 10px 14px; border-radius: 6px; border: 2px dashed #c8a060; color: #e8d2a8; font-size: 14px">{{avertPlages}}</p></sc-if>
+<sc-if value="{{aClasserRestant}}" hint-placeholder-val="{{non}}">
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 6px; border: 2px solid #c8a060; background: #142428">
+<span style="flex: 1 1 300px">{{phraseAClasser}}</span>
+<button type="button" class="btn btn-secondaire" onClick="{{allerClasser}}">Y aller</button>
+</div>
+</sc-if>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+<div style="flex: 1 1 420px; background: #1a3040; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 18px">Ce qui sera créé</h2>
+<ul style="margin: 0; padding-left: 20px; line-height: 1.6">
+<sc-for list="{{creeListe}}" as="ligne" hint-placeholder-count="2"><li>{{ligne.texte}}</li></sc-for>
+</ul>
+<p style="margin: 0; font-size: 13px; color: #8aa4b0">{{noteCree}}</p>
+</div>
+<div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 10px">
+<button type="button" class="btn btn-principal" style="font-size: 16px; font-weight: 600" onClick="{{creer}}">Créer ma grille</button>
+<button type="button" class="btn btn-lien" style="align-self: flex-start" onClick="{{precedent}}">{{precedentLabel}}</button>
+<sc-if value="{{aManquants}}" hint-placeholder-val="{{non}}">
+<div role="alert" style="padding: 12px 14px; border-radius: 6px; border: 2px solid #ff8a9a; background: rgba(232,64,87,0.10); color: #ffd0d6; font-size: 14px; line-height: 1.5">
+<strong>Avant de créer, il reste :</strong>
+<ul style="margin: 6px 0 0; padding-left: 20px">
+<sc-for list="{{manquants}}" as="x" hint-placeholder-count="2"><li>{{x.texte}}</li></sc-for>
+</ul>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+</section>
+</sc-if>
+
+<sc-if value="{{estCree}}" hint-placeholder-val="{{non}}">
+<section aria-labelledby="titre-cree" style="display: flex; flex-direction: column; gap: 24px; max-width: 880px">
+<div style="display: flex; gap: 16px; align-items: center">
+<svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#3aaa8a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>
+<h1 id="titre-cree" style="margin: 0; font-size: 28px; line-height: 1.25">Ta grille « {{nomCree}} » est créée</h1>
+</div>
+<p style="margin: 0; font-size: 16px; line-height: 1.55; color: #b0c4cc">{{phraseCree}}</p>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<div style="flex: 1 1 260px; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<strong>Ta grille</strong>
+<span style="color: #8aa4b0; font-size: 14px; line-height: 1.45">{{carteGrille}}</span>
+<button type="button" class="btn btn-secondaire" style="align-self: flex-start" onClick="{{voirGrilles}}">La voir dans Grilles de critères</button>
+</div>
+<div style="flex: 1 1 260px; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<strong>Ses niveaux</strong>
+<span style="color: #8aa4b0; font-size: 14px; line-height: 1.45">{{carteNiveaux}}</span>
+<button type="button" class="btn btn-secondaire" style="align-self: flex-start" onClick="{{voirEchelles}}">Les voir dans Échelles de performance</button>
+</div>
+<sc-if value="{{estRetroCree}}" hint-placeholder-val="{{non}}">
+<div style="flex: 1 1 260px; background: #142428; border: 1px solid rgba(106,172,184,0.25); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<strong>Tes rétroactions</strong>
+<span style="color: #8aa4b0; font-size: 14px; line-height: 1.45">Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.</span>
+<button type="button" class="btn btn-secondaire" style="align-self: flex-start" onClick="{{voirRetro}}">Les voir dans Cartouches de rétroaction</button>
+</div>
+</sc-if>
+</div>
+<div style="background: #1a3040; border-radius: 12px; padding: 18px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between">
+<span style="font-size: 15px; line-height: 1.5; flex: 1 1 360px">Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>
+<button type="button" class="btn btn-principal" onClick="{{allerProductions}}">Aller aux productions</button>
+</div>
+<button type="button" class="btn btn-lien" style="align-self: flex-start" onClick="{{recommencer}}">Apporter autre chose</button>
+</section>
+</sc-if>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+var NOMS_ETAPES = { axes: 'Sens du tableau', nature: 'Nature des cases', valeurs: 'Plages de notes', pond: 'Pondération', classer: 'À classer', final: 'Vérification' };
+
+class Component extends DCLogic {
+  constructor() {
+    super(...arguments);
+    this.state = Object.assign({ ecran: 'accueil', collage: '', erreur: '', toast: '', modele: null, etapes: [], etape: 0, montrerManquants: false, nomCree: '', resumeCree: null }, this.state || {});
+  }
+
+  componentWillUnmount() { clearTimeout(this._minuterie); }
+
+  exempleHtml() {
+    return '<p>Exposé oral : grille d’évaluation</p>' +
+      '<table>' +
+      '<tr><td>Critères</td><td>Pondération</td><td>Excellent</td><td>Satisfaisant</td><td>À améliorer</td><td>Insuffisant</td></tr>' +
+      '<tr><td>Contenu</td><td>40</td><td>Les idées sont justes, précises et appuyées par des exemples pertinents.</td><td>Les idées sont justes et généralement appuyées.</td><td>Les idées sont parfois imprécises ou peu appuyées.</td><td>Les idées sont souvent inexactes ou absentes.</td></tr>' +
+      '<tr><td>Organisation</td><td>30</td><td>Le plan est clair ; les transitions guident l’auditoire.</td><td>Le plan est perceptible ; quelques transitions manquent.</td><td>Le plan est difficile à suivre.</td><td>Aucun plan ne se dégage.</td></tr>' +
+      '<tr><td>Communication</td><td>30</td><td>Le débit, le volume et le regard soutiennent le propos.</td><td>La communication est claire malgré quelques hésitations.</td><td>Les hésitations nuisent à la compréhension.</td><td>Le propos est difficile à suivre.</td></tr>' +
+      '</table>' +
+      '<p>La qualité de la langue est évaluée à part, selon la politique du département.</p>';
+  }
+
+  propre(s) { return String(s || '').replace(/\s+/g, ' ').trim(); }
+
+  lireHtml(html) {
+    var doc;
+    try { doc = new DOMParser().parseFromString(html, 'text/html'); } catch (e) { return null; }
+    var table = doc.querySelector('table');
+    if (!table) return null;
+    var self = this;
+    var rangees = [];
+    Array.prototype.forEach.call(table.rows, function (tr) {
+      var cells = Array.prototype.map.call(tr.cells, function (td) { return { t: self.propre(td.textContent), span: td.colSpan || 1 }; });
+      if (cells.some(function (c) { return c.t; })) rangees.push(cells);
+    });
+    var avant = [], apres = [];
+    var blocs = doc.body ? doc.body.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li') : [];
+    Array.prototype.forEach.call(blocs, function (el) {
+      if (table.contains(el)) return;
+      var t = self.propre(el.textContent);
+      if (!t) return;
+      if (table.compareDocumentPosition(el) & 2) avant.push(t); else apres.push(t);
+    });
+    if (rangees.length < 2) return null;
+    return { rangees: rangees, avant: avant, apres: apres };
+  }
+
+  lireTexte(txt) {
+    var self = this;
+    var rangees = [], avant = [], apres = [];
+    String(txt || '').split(/\r?\n/).forEach(function (l) {
+      if (l.indexOf('\t') >= 0) {
+        var cells = l.split('\t').map(function (t) { return { t: self.propre(t), span: 1 }; });
+        if (cells.some(function (c) { return c.t; })) rangees.push(cells);
+      } else {
+        var t = self.propre(l);
+        if (t) (rangees.length ? apres : avant).push(t);
+      }
+    });
+    if (rangees.length < 2) return null;
+    return { rangees: rangees, avant: avant, apres: apres };
+  }
+
+  coder(niveaux) {
+    var pris = {};
+    return niveaux.map(function (n) {
+      var s = String(n.titre || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z]/g, '').toUpperCase() || 'N';
+      var code = s.slice(0, 1), k = 2;
+      while (pris[code] && k <= s.length) { code = s.slice(0, k); k++; }
+      var base = code, suffixe = 2;
+      while (pris[code]) { code = base + suffixe; suffixe++; }
+      pris[code] = true;
+      return Object.assign({}, n, { code: code });
+    });
+  }
+
+  partsEgales(criteres) {
+    var n = criteres.length, base = Math.floor(100 / n), reste = 100 - base * n;
+    criteres.forEach(function (c, i) { c.pond = String(base + (i < reste ? 1 : 0)); c.pondEtat = 'complete'; });
+  }
+
+  interpreter(lu, source) {
+    var self = this;
+    var r = lu.rangees, entete = r[0], nb = entete.length;
+    var aClasser = [];
+    var nom = '';
+    lu.avant.forEach(function (t, i) {
+      if (i === 0 && t.length <= 120) nom = t; else aClasser.push({ texte: t, raison: 'Texte avant le tableau' });
+    });
+    var colPond = -1;
+    for (var i = 1; i < nb; i++) {
+      var h = entete[i].t;
+      if (/pond|^(points?|pts|total)\b/i.test(h) || /^\/\s*\d+$/.test(h) || /^%$/.test(h)) { colPond = i; break; }
+    }
+    var idxNiv = [];
+    for (var j = 1; j < nb; j++) if (j !== colPond) idxNiv.push(j);
+    var niveaux = idxNiv.map(function (k) {
+      var brut = entete[k].t;
+      var p = brut.match(/(\d+(?:[.,]\d+)?)\s*%?\s*(?:-|–|à|au)\s*(\d+(?:[.,]\d+)?)\s*%?/);
+      var titre;
+      if (p) {
+        titre = self.propre(brut.replace(/\(?\s*\d+(?:[.,]\d+)?\s*%?\s*(?:-|–|à|au)\s*\d+(?:[.,]\d+)?\s*%?\s*\)?/, '')) || brut;
+        var lo = p[1].replace(',', '.'), hi = p[2].replace(',', '.');
+        if (parseFloat(lo) > parseFloat(hi)) { var tmp = lo; lo = hi; hi = tmp; }
+        return { titre: titre, titreEtat: titre ? 'repris' : 'remplir', min: lo, max: hi, minEtat: 'repris', maxEtat: 'repris' };
+      }
+      titre = self.propre(brut) || brut;
+      return { titre: titre, titreEtat: titre ? 'repris' : 'remplir', min: '', max: '', minEtat: 'remplir', maxEtat: 'remplir', valeur: '', valeurEtat: 'vide' };
+    });
+    var criteres = [];
+    r.slice(1).forEach(function (row) {
+      var texte = row.map(function (c) { return c.t; }).filter(Boolean).join(' · ');
+      if (row.length !== nb || row.some(function (c) { return c.span > 1; })) { aClasser.push({ texte: texte, raison: 'Ligne d’une autre forme que le tableau (cases fusionnées ?)' }); return; }
+      if (!row[0].t) { aClasser.push({ texte: texte, raison: 'Ligne sans nom de critère' }); return; }
+      if (/^pond/i.test(row[0].t)) { aClasser.push({ texte: texte, raison: 'Ligne de pondération, à reporter sur les critères' }); return; }
+      var p = colPond >= 0 ? (row[colPond].t.match(/\d+(?:[.,]\d+)?/) || [])[0] : undefined;
+      criteres.push({
+        nom: row[0].t, nomEtat: 'repris',
+        pond: p ? p.replace(',', '.') : '', pondEtat: p ? 'repris' : 'remplir',
+        descr: idxNiv.map(function (k) { return { texte: row[k].t, etat: row[k].t ? 'repris' : 'vide' }; })
+      });
+    });
+    lu.apres.forEach(function (t) { aClasser.push({ texte: t, raison: 'Texte après le tableau' }); });
+    if (criteres.length && criteres.every(function (c) { return !c.pond; })) this.partsEgales(criteres);
+    var textes = [];
+    criteres.forEach(function (c) { c.descr.forEach(function (d) { if (d.texte) textes.push(d.texte); }); });
+    var auTu = textes.filter(function (t) { return /(^|[^A-Za-zÀ-ÿ])(tu|ton|ta|tes|toi|t’|t')([^A-Za-zÀ-ÿ]|$)/i.test(t); }).length;
+    var nature = textes.length && auTu / textes.length >= 0.3 ? 'retroactions' : 'descripteurs';
+    return {
+      nature: nature, natureProposee: textes.length > 0, critEnColonnes: false,
+      nom: nom, nomEtat: nom ? 'repris' : 'remplir',
+      niveaux: this.coder(niveaux), criteres: criteres,
+      aClasser: aClasser.map(function (a, n) { return Object.assign({ id: n, statut: 'attente' }, a); }),
+      source: source
+    };
+  }
+
+  etapesPour(m) {
+    if (m.source === 'main') return ['final'];
+    var e = ['axes'];
+    var aDuTexte = m.criteres.some(function (c) { return c.descr.some(function (d) { return d.texte; }); });
+    if (aDuTexte) e.push('nature');
+    if (m.niveaux.some(function (n) { return n.minEtat !== 'repris' || n.maxEtat !== 'repris'; })) e.push('valeurs');
+    if (m.criteres.some(function (c) { return c.pondEtat !== 'repris'; })) e.push('pond');
+    if (m.aClasser.length) e.push('classer');
+    e.push('final');
+    return e;
+  }
+
+  charger(lu, source) {
+    var msg = 'L’application n’a pas trouvé de tableau dans ce que tu as collé. Dans Word ou Pages, sélectionne le tableau lui-même en entier, ou tape ta grille à la main.';
+    if (!lu) { this.setState({ erreur: msg }); return false; }
+    var m = this.interpreter(lu, source);
+    if (m.niveaux.length < 2 || m.criteres.length < 1) {
+      this.setState({ erreur: 'Le tableau collé semble incomplet : il faut au moins un critère et deux niveaux. Tu pourrais vérifier ta sélection dans le document, ou taper ta grille à la main.' });
+      return false;
+    }
+    this.setState({ modele: m, etapes: this.etapesPour(m), etape: 0, ecran: 'assistant', erreur: '', montrerManquants: false });
+    return true;
+  }
+
+  surCollage(e) {
+    var cd = e.clipboardData;
+    if (!cd) return;
+    var html = cd.getData('text/html'), txt = cd.getData('text/plain');
+    var lu = html ? this.lireHtml(html) : null;
+    if (!lu) lu = this.lireTexte(txt);
+    if (lu) { e.preventDefault(); this.charger(lu, 'colle'); }
+    else { this.setState({ erreur: 'L’application n’a pas trouvé de tableau dans ce que tu as collé. Dans Word ou Pages, sélectionne le tableau lui-même en entier, ou tape ta grille à la main.' }); }
+  }
+
+  aLaMain() {
+    var niveaux = this.coder([1, 2, 3, 4].map(function () { return { titre: '', titreEtat: 'remplir', min: '', max: '', minEtat: 'remplir', maxEtat: 'remplir', valeur: '', valeurEtat: 'vide' }; }));
+    var criteres = [1, 2, 3].map(function () {
+      return { nom: '', nomEtat: 'remplir', pond: '', pondEtat: 'remplir', descr: [1, 2, 3, 4].map(function () { return { texte: '', etat: 'vide' }; }) };
+    });
+    var m = { nature: 'descripteurs', natureProposee: false, critEnColonnes: false, nom: '', nomEtat: 'remplir', niveaux: niveaux, criteres: criteres, aClasser: [], source: 'main' };
+    this.setState({ ecran: 'assistant', erreur: '', montrerManquants: false, modele: m, etapes: ['final'], etape: 0 });
+  }
+
+  maj(fn) {
+    var m = JSON.parse(JSON.stringify(this.state.modele));
+    fn(m);
+    this.setState({ modele: m });
+  }
+
+  etatSaisi(v) { return String(v || '').trim() ? 'saisi' : 'remplir'; }
+
+  inverser() {
+    var m = this.state.modele;
+    var mat = [[{ t: 'Critère', span: 1 }].concat(m.niveaux.map(function (n) { return { t: n.titre, span: 1 }; }))];
+    m.criteres.forEach(function (c) { mat.push([{ t: c.nom, span: 1 }].concat(c.descr.map(function (d) { return { t: d.texte, span: 1 }; }))); });
+    var T = mat[0].map(function (_, j) { return mat.map(function (row) { return row[j] || { t: '', span: 1 }; }); });
+    var nouveau = this.interpreter({ rangees: T, avant: [], apres: [] }, m.source);
+    nouveau.nom = m.nom; nouveau.nomEtat = m.nomEtat; nouveau.aClasser = m.aClasser;
+    nouveau.critEnColonnes = !m.critEnColonnes; nouveau.nature = m.nature; nouveau.natureProposee = m.natureProposee;
+    var etapes = this.etapesPour(nouveau);
+    var courante = this.state.etapes[this.state.etape];
+    var idx = etapes.indexOf(courante);
+    this.setState({ modele: nouveau, etapes: etapes, etape: idx >= 0 ? idx : 0, montrerManquants: false });
+  }
+
+  creer() {
+    var v = this.calculs(this.state.modele);
+    if (v.manquants.length) { this.setState({ montrerManquants: true }); return; }
+    var m = this.state.modele;
+    this.setState({ ecran: 'cree', nomCree: m.nom.trim(), resumeCree: { retro: m.nature === 'retroactions', nbC: m.criteres.length, niveaux: m.niveaux.map(function (n) { return n.titre + ' (' + n.min + ' à ' + n.max + ' %)'; }) } });
+  }
+
+  annoncer(msg) {
+    var self = this;
+    this.setState({ toast: msg });
+    clearTimeout(this._minuterie);
+    this._minuterie = setTimeout(function () { self.setState({ toast: '' }); }, 4500);
+  }
+
+  pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
+
+  calculs(m) {
+    var manquants = [];
+    if (!String(m.nom).trim()) manquants.push('le nom de la grille');
+    var sansTitre = m.niveaux.filter(function (n) { return !String(n.titre).trim(); }).length;
+    if (sansTitre) manquants.push(sansTitre === 1 ? 'le nom d’un niveau' : 'le nom de ' + sansTitre + ' niveaux');
+    var num = function (v) { return parseFloat(String(v).replace(',', '.')); };
+    var sansPlage = m.niveaux.filter(function (n) { return isNaN(num(n.min)) || isNaN(num(n.max)); }).length;
+    if (sansPlage) manquants.push(sansPlage === 1 ? 'la plage de notes d’un niveau' : 'la plage de notes de ' + sansPlage + ' niveaux');
+    var sansNom = m.criteres.filter(function (c) { return !String(c.nom).trim(); }).length;
+    if (sansNom) manquants.push(sansNom === 1 ? 'le nom d’un critère' : 'le nom de ' + sansNom + ' critères');
+    var sansPond = m.criteres.filter(function (c) { return isNaN(parseFloat(String(c.pond).replace(',', '.'))); }).length;
+    if (sansPond) manquants.push(sansPond === 1 ? 'la pondération d’un critère' : 'la pondération de ' + sansPond + ' critères');
+    var enAttente = m.aClasser.filter(function (a) { return a.statut === 'attente'; }).length;
+    if (enAttente) manquants.push(enAttente === 1 ? 'un passage à classer ou à écarter' : enAttente + ' passages à classer ou à écarter');
+    var total = 0;
+    m.criteres.forEach(function (c) { var p = parseFloat(String(c.pond).replace(',', '.')); if (!isNaN(p)) total += p; });
+    total = Math.round(total * 10) / 10;
+    var plages = m.niveaux.map(function (n) { return { t: n.titre || 'sans nom', lo: num(n.min), hi: num(n.max) }; }).filter(function (p) { return !isNaN(p.lo) && !isNaN(p.hi); }).sort(function (a, b) { return a.lo - b.lo; });
+    var avertPlages = '';
+    var fmt = function (x) { return String(x).replace('.', ','); };
+    for (var q = 1; q < plages.length; q++) {
+      var a = plages[q - 1], b = plages[q];
+      if (b.lo <= a.hi) { avertPlages = 'Les plages « ' + a.t + ' » et « ' + b.t + ' » se chevauchent (' + fmt(a.hi) + ' et ' + fmt(b.lo) + ' %) : une même note tomberait dans deux niveaux. Il pourrait être utile de les ajuster.'; break; }
+      if (b.lo - a.hi > 1) { avertPlages = 'Il y a un trou entre « ' + a.t + ' » (jusqu’à ' + fmt(a.hi) + ' %) et « ' + b.t + ' » (dès ' + fmt(b.lo) + ' %) : certaines notes ne tomberaient dans aucun niveau. Il pourrait être utile de les ajuster.'; break; }
+    }
+    return { manquants: manquants, total: total, avert: !sansPond && m.criteres.length && total !== 100, avertPlages: avertPlages, enAttente: enAttente };
+  }
+
+  renderVals() {
+    var self = this, s = this.state, m = s.modele;
+    var onglets = ['Accueil', 'Cadre', 'Conception', 'Évaluation', 'Suivi', 'Labo', 'CoP'].map(function (t) {
+      var actif = t === 'Conception';
+      return { label: t, classe: actif ? 'onglet actif' : 'onglet', courant: actif ? 'page' : undefined, pick: function () { if (!actif) self.annoncer('Dans l’application, ce bouton ouvrirait l’onglet « ' + t + ' ».'); } };
+    });
+    var sousOnglets = ['Apporter mon matériel', 'Carte d’alignement', 'Productions étudiantes', 'Grilles de critères', 'Échelles de performance', 'Cartouches de rétroaction', 'Pratiques de notation'].map(function (t, i) {
+      var actif = i === 0;
+      return { label: t, nouveau: actif, classe: actif ? 'pilule actif' : 'pilule', courant: actif ? 'page' : undefined, pick: function () { if (actif) self.setState({ ecran: 'accueil', erreur: '' }); else self.annoncer('Dans l’application, ce bouton ouvrirait « ' + t + ' ».'); } };
+    });
+    var vals = {
+      oui: true, non: false,
+      onglets: onglets, sousOnglets: sousOnglets,
+      aToast: !!s.toast, toast: s.toast,
+      estAccueil: s.ecran === 'accueil', estAssistant: s.ecran === 'assistant' && !!m, estCree: s.ecran === 'cree',
+      collage: s.collage, aErreur: !!s.erreur, erreur: s.erreur,
+      setCollage: function (e) { self.setState({ collage: e.target.value }); },
+      onPaste: function (e) { self.surCollage(e); },
+      reconnaitreTexte: function () { self.charger(self.lireTexte(s.collage), 'colle'); },
+      essayerExemple: function () { self.charger(self.lireHtml(self.exempleHtml()), 'exemple'); },
+      taperMain: function () { self.aLaMain(); },
+      recommencer: function () { self.setState({ ecran: 'accueil', modele: null, etapes: [], etape: 0, erreur: '', collage: '', montrerManquants: false }); }
+    };
+    if (m) {
+      var c = this.calculs(m);
+      var nC = m.criteres.length, nN = m.niveaux.length;
+      var etapes = s.etapes, k = s.etape, id = etapes[k];
+      var retro = m.nature === 'retroactions';
+      vals.etapeTexte = 'Étape ' + (k + 1) + ' sur ' + etapes.length;
+      vals.etapesNav = etapes.map(function (e, q) {
+        return { label: NOMS_ETAPES[e], numero: q + 1, classe: q === k ? 'etape actif' : (q < k ? 'etape fait' : 'etape'), courant: q === k ? 'step' : undefined, aller: function () { self.setState({ etape: q, montrerManquants: false }); } };
+      });
+      vals.estQuestion = id !== 'final';
+      vals.estAxes = id === 'axes'; vals.estNature = id === 'nature'; vals.estValeurs = id === 'valeurs';
+      vals.estPond = id === 'pond'; vals.estClasser = id === 'classer'; vals.estFinal = id === 'final';
+      var mots = {
+        axes: 'Chaque ligne de ton tableau est un critère. Ensemble, tes critères forment ce que l’application appelle une grille de critères : tu la retrouveras dans « Grilles de critères ».',
+        nature: retro ? 'Ces textes, l’application les range dans une cartouche de rétroaction : un commentaire par critère et par niveau. Tu la retrouveras dans « Cartouches de rétroaction ».' : 'Ces textes, l’application les appelle des descripteurs : chacun reste attaché à son critère et à son niveau, dans ta grille de critères.',
+        valeurs: 'Ces niveaux et leurs plages de notes, l’application les appelle une échelle de performance. Tu la retrouveras dans « Échelles de performance », où tu pourras aussi fixer une note précise pour chaque niveau.',
+        pond: 'Le poids de chaque critère, l’application l’appelle la pondération. Il fait partie de ta grille de critères.'
+      };
+      vals.motApp = mots[id] || ''; vals.aMotApp = !!mots[id];
+      vals.precedentLabel = k === 0 ? '← Recommencer' : '← Précédent';
+      vals.precedent = function () { if (k === 0) vals.recommencer(); else self.setState({ etape: k - 1, montrerManquants: false }); };
+      vals.suivant = function () { if (k < etapes.length - 1) self.setState({ etape: k + 1 }); };
+      vals.estExemple = m.source === 'exemple';
+
+      vals.critEnColonnes = !!m.critEnColonnes; vals.critEnLignes = !m.critEnColonnes;
+      vals.classeLignes = m.critEnColonnes ? 'choix' : 'choix actif';
+      vals.classeColonnes = m.critEnColonnes ? 'choix actif' : 'choix';
+      vals.pilLignes = m.critEnColonnes ? 'pilule' : 'pilule actif';
+      vals.pilColonnes = m.critEnColonnes ? 'pilule actif' : 'pilule';
+      vals.choisirLignes = function () { if (self.state.modele.critEnColonnes) self.inverser(); };
+      vals.choisirColonnes = function () { if (!self.state.modele.critEnColonnes) self.inverser(); };
+      vals.montrerAxes = m.source !== 'main';
+
+      vals.estDescr = !retro; vals.estRetro = retro;
+      vals.classeDescr = retro ? 'choix' : 'choix actif';
+      vals.classeRetro = retro ? 'choix actif' : 'choix';
+      vals.pilDescr = retro ? 'pilule' : 'pilule actif';
+      vals.pilRetro = retro ? 'pilule actif' : 'pilule';
+      vals.choisirDescr = function () { self.maj(function (x) { x.nature = 'descripteurs'; x.natureProposee = false; }); };
+      vals.choisirRetro = function () { self.maj(function (x) { x.nature = 'retroactions'; x.natureProposee = false; }); };
+      vals.natureProposee = !!m.natureProposee;
+      var premiere = '';
+      m.criteres.some(function (cr) { return cr.descr.some(function (d) { if (d.texte) { premiere = d.texte; return true; } return false; }); });
+      vals.aExempleCase = !!premiere;
+      vals.exempleCase = premiere.length > 160 ? premiere.slice(0, 157) + '…' : premiere;
+
+      vals.nom = m.nom; vals.nomEtat = m.nomEtat;
+      vals.nomAMention = m.nomEtat === 'remplir' || m.nomEtat === 'repris';
+      vals.nomMention = m.nomEtat === 'remplir' ? 'à remplir' : 'repris de la ligne au-dessus du tableau : à vérifier';
+      vals.setNom = function (e) { var v = e.target.value; self.maj(function (x) { x.nom = v; x.nomEtat = self.etatSaisi(v); }); };
+
+      vals.classeValeursApercu = id === 'valeurs' ? 'surligne' : '';
+      vals.classePondApercu = id === 'pond' ? 'surligne' : '';
+      vals.niveaux = m.niveaux.map(function (n, j) {
+        var plageOk = String(n.min).trim() && String(n.max).trim();
+        return Object.assign({}, n, {
+          titreAffiche: n.titre || 'Niveau sans nom',
+          plageAffiche: plageOk ? n.min + ' à ' + n.max + ' %' : 'plage à remplir',
+          plageEtat: plageOk ? (n.minEtat === 'repris' && n.maxEtat === 'repris' ? 'repris' : 'saisi') : 'remplir',
+          aPlageMention: !plageOk,
+          setTitre: function (e) { var v = e.target.value; self.maj(function (x) { x.niveaux[j].titre = v; x.niveaux[j].titreEtat = self.etatSaisi(v); x.niveaux = self.coder(x.niveaux); }); },
+          setMin: function (e) { var v = e.target.value; self.maj(function (x) { x.niveaux[j].min = v; x.niveaux[j].minEtat = self.etatSaisi(v); }); },
+          setMax: function (e) { var v = e.target.value; self.maj(function (x) { x.niveaux[j].max = v; x.niveaux[j].maxEtat = self.etatSaisi(v); }); },
+        });
+      });
+      vals.aAvertPlages = !!c.avertPlages; vals.avertPlages = c.avertPlages;
+      vals.criteres = m.criteres.map(function (cr, i) {
+        return Object.assign({}, cr, {
+          nomAffiche: cr.nom || 'Critère sans nom',
+          pondAffiche: String(cr.pond).trim() ? cr.pond + ' %' : 'à remplir',
+          aNomMention: cr.nomEtat === 'remplir', nomMention: 'à remplir',
+          aPondMention: cr.pondEtat === 'remplir' || cr.pondEtat === 'complete',
+          pondMention: cr.pondEtat === 'complete' ? 'complété : parts égales' : 'à remplir',
+          setNom: function (e) { var v = e.target.value; self.maj(function (x) { x.criteres[i].nom = v; x.criteres[i].nomEtat = self.etatSaisi(v); }); },
+          setPond: function (e) { var v = e.target.value; self.maj(function (x) { x.criteres[i].pond = v; x.criteres[i].pondEtat = self.etatSaisi(v); }); },
+          cases: cr.descr.map(function (d, j) {
+            return Object.assign({}, d, {
+              texteAffiche: d.texte || '(case vide)',
+              label: (retro ? 'Rétroaction : ' : 'Descripteur : ') + (cr.nom || 'critère') + ', niveau ' + (m.niveaux[j] ? m.niveaux[j].titre : ''),
+              placeholder: retro ? 'Rétroaction à l’étudiant·e (facultatif)' : 'Descripteur (facultatif)',
+              set: function (e) { var v = e.target.value; self.maj(function (x) { x.criteres[i].descr[j].texte = v; x.criteres[i].descr[j].etat = String(v).trim() ? 'saisi' : 'vide'; }); }
+            });
+          })
+        });
+      });
+      var parts = m.criteres.some(function (cr) { return cr.pondEtat === 'complete'; });
+      vals.pondIntro = parts ? 'Ton tableau ne donnait pas de pondération : l’application a proposé des parts égales. Ajuste-les au besoin.' : 'Indique le poids de chaque critère, en pourcentage de la note.';
+      vals.ajouterCritere = function () { self.maj(function (x) { x.criteres.push({ nom: '', nomEtat: 'remplir', pond: '', pondEtat: 'remplir', descr: x.niveaux.map(function () { return { texte: '', etat: 'vide' }; }) }); }); };
+      vals.ajouterNiveau = function () { self.maj(function (x) { x.niveaux.push({ titre: '', titreEtat: 'remplir', min: '', max: '', minEtat: 'remplir', maxEtat: 'remplir', valeur: '', valeurEtat: 'vide' }); x.niveaux = self.coder(x.niveaux); x.criteres.forEach(function (cr) { cr.descr.push({ texte: '', etat: 'vide' }); }); }); };
+      vals.totalPond = String(c.total).replace('.', ',');
+      vals.aAvertPond = !!c.avert;
+      vals.avertPond = 'La pondération totalise ' + String(c.total).replace('.', ',') + ' % : il pourrait être utile de l’ajuster à 100 %.';
+      vals.aClasser = m.aClasser.map(function (a, q) {
+        var etiquette = a.statut === 'place' ? 'Ajouté comme critère' : a.statut === 'ecarte' ? 'Écarté : ne sera pas repris dans la grille' : a.raison;
+        return {
+          texte: a.texte, etiquette: etiquette, enAttente: a.statut === 'attente', traite: a.statut !== 'attente',
+          placer: function () { self.maj(function (x) { x.aClasser[q].statut = 'place'; x.criteres.push({ nom: a.texte.slice(0, 120), nomEtat: 'saisi', pond: '', pondEtat: 'remplir', descr: x.niveaux.map(function () { return { texte: '', etat: 'vide' }; }) }); }); },
+          ecarter: function () { self.maj(function (x) { x.aClasser[q].statut = 'ecarte'; }); },
+          remettre: function () { self.maj(function (x) { if (x.aClasser[q].statut === 'place') { for (var z = x.criteres.length - 1; z >= 0; z--) { if (x.criteres[z].nom === a.texte.slice(0, 120)) { x.criteres.splice(z, 1); break; } } } x.aClasser[q].statut = 'attente'; }); }
+        };
+      });
+      vals.aClasserRestant = c.enAttente > 0;
+      vals.phraseAClasser = c.enAttente === 1 ? 'Il reste un passage de ton document à classer ou à écarter.' : 'Il reste ' + c.enAttente + ' passages de ton document à classer ou à écarter.';
+      vals.allerClasser = function () { var q = self.state.etapes.indexOf('classer'); if (q >= 0) self.setState({ etape: q, montrerManquants: false }); };
+      var nomG = String(m.nom).trim() || 'sans nom';
+      var titresN = m.niveaux.map(function (n) { return n.titre || '?'; }).join(' · ');
+      vals.creeListe = [
+        { texte: 'Une grille de critères « ' + nomG + ' » : ' + this.pluriel(nC, 'critère', 'critères') + (retro ? '.' : ', avec leurs descripteurs.') },
+        { texte: 'Une échelle de performance : ' + this.pluriel(nN, 'niveau', 'niveaux') + ' (' + titresN + '), réutilisable pour d’autres grilles.' }
+      ];
+      if (retro) vals.creeListe.push({ texte: 'Une cartouche de rétroaction : un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.' });
+      vals.noteCree = retro ? 'Tu les retrouveras ensuite dans Grilles de critères, Échelles de performance et Cartouches de rétroaction, où tout reste modifiable.' : 'Tu les retrouveras ensuite dans Grilles de critères et dans Échelles de performance, où tout reste modifiable.';
+      vals.creer = function () { self.creer(); };
+      vals.aManquants = s.montrerManquants && c.manquants.length > 0;
+      vals.manquants = c.manquants.map(function (t) { return { texte: t }; });
+    }
+    var rc = s.resumeCree;
+    vals.nomCree = s.nomCree;
+    vals.phraseCree = rc ? (rc.retro ? 'Elle est rangée dans tes grilles, avec ' + this.pluriel(rc.nbC, 'critère', 'critères') + ' ; tes rétroactions sont prêtes à servir quand tu évalueras. Rien d’autre n’a changé dans l’application.' : 'Elle est rangée dans tes grilles, avec ' + this.pluriel(rc.nbC, 'critère', 'critères') + ' et leurs descripteurs. Rien d’autre n’a changé dans l’application.') : '';
+    vals.carteGrille = rc ? (rc.retro ? this.pluriel(rc.nbC, 'critère', 'critères') + '.' : this.pluriel(rc.nbC, 'critère', 'critères') + ', chacun avec un descripteur par niveau.') : '';
+    vals.carteNiveaux = rc ? rc.niveaux.join(' · ') : '';
+    vals.estRetroCree = !!(rc && rc.retro);
+    vals.voirGrilles = function () { self.annoncer('Dans l’application, ce bouton ouvrirait « Grilles de critères », la nouvelle grille sélectionnée.'); };
+    vals.voirEchelles = function () { self.annoncer('Dans l’application, ce bouton ouvrirait « Échelles de performance ».'); };
+    vals.voirRetro = function () { self.annoncer('Dans l’application, ce bouton ouvrirait « Cartouches de rétroaction ».'); };
+    vals.allerProductions = function () { self.annoncer('Dans l’application, ce bouton ouvrirait « Productions étudiantes ».'); };
+    return vals;
+  }
+}
+</script>
+</body>
+</html>
