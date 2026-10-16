@@ -54,20 +54,25 @@ Ce projet utilise une **double licence** pour distinguer le code technique du co
 
 ## Quel dossier relève de quelle licence
 
-Le tableau dit la licence de chaque dossier du dépôt. Une règle passe avant lui : **le contenu pédagogique relève de CC BY-NC-SA 4.0 même quand il vit dans un fichier de code**. C'est le cas des textes de l'aide intégrée, des cartouches et des grilles, échelles et gabarits fournis avec l'application (section 2).
+Le tableau dit la licence de chaque dossier du dépôt. Trois règles passent avant lui :
+
+- **Le contenu pédagogique relève de CC BY-NC-SA 4.0 même quand il vit dans un fichier de code.** C'est le cas des textes de l'aide intégrée, des cartouches et des grilles, échelles et gabarits fournis avec l'application (section 2).
+- **Les logos et les noms « Labo Codex » et « Codex Numeris » sont protégés : tous droits réservés, où qu'ils se trouvent.** Ni l'AGPL v3 ni CC BY-NC-SA ne s'y appliquent, y compris quand ils figurent dans un fichier de code ou dans une ressource sous l'une de ces licences. Cela vaut pour les fichiers de `Logo/` et `img/logo-codex-numeris.svg`, et pour les logos intégrés au code.
+- **Les icônes d'Icons8 restent sous la licence d'Icons8** (<https://icons8.com>), pas sous les nôtres. Ce sont les fichiers `icons8-*` de `icons/` et d'`autocollants/`.
 
 | Dossiers et fichiers | Licence |
 |---|---|
 | `index.html`, `design-system.html`, `styles.css`, `css/`, `js/`, `version.js`, `version.json`, `noms_stables.json`, `netlify.toml` | AGPL v3 (code de l'application) |
-| `icons/`, `img/` | AGPL v3 (ressources graphiques de l'interface) |
+| `icons/`, `img/` | AGPL v3 (ressources graphiques de l'interface), **sauf** les fichiers `icons8-*` (licence d'Icons8) et le logo `img/logo-codex-numeris.svg` (tous droits réservés) |
 | `scripts/`, `tests/`, `.github/` | AGPL v3 (outillage, bancs d'essai, intégration continue) |
 | `Design system - Modules/`, `design_handoff_synthese_B/` | AGPL v3 (maquettes HTML, CSS et JSX) |
 | `docs/`, `plans de travail/`, `Rapports/`, `audit/`, `audit annuel/`, `Plan Accompagnement/`, `Retours des testeurs/`, `références tableur/` | CC BY-NC-SA 4.0 (documentation, plans, rapports) |
 | `.claude/`, `.claude-plugin/`, `plugins/` et les fichiers `.md` et `.txt` de la racine | CC BY-NC-SA 4.0 (guides méthodologiques) |
-| `Logo/`, `autocollants/` | CC BY-NC-SA 4.0 (identité visuelle et autocollants du projet) |
+| `Logo/` | **Tous droits réservés** (logos du projet) |
+| `autocollants/` | CC BY-NC-SA 4.0, **sauf** les fichiers `icons8-*` (licence d'Icons8) |
 | `libs/` | **Licences de chaque bibliothèque** (MIT, Apache 2.0), inventoriées dans [`libs/VERSIONS.md`](libs/VERSIONS.md). Ni l'AGPL v3 ni CC BY-NC-SA ne s'y appliquent. |
 
-Les documents de tiers reproduits dans le dépôt (articles cités, calendrier scolaire, extraits, badges Creative Commons de `icons/`) restent sous les droits de leurs auteurs.
+Les documents de tiers reproduits dans le dépôt (calendrier scolaire du collège, extraits cités, badges Creative Commons de `icons/`) restent sous les droits de leurs auteurs.
 
 ---
 
@@ -204,6 +209,6 @@ Les contributions sont les bienvenues ! Veuillez soumettre des pull requests ou 
 - **3 novembre 2025** : AGPL v3 + CC BY-SA 4.0 (protection renforcée contre appropriation SaaS)
 - **26 novembre 2025** : AGPL v3 + CC BY-NC-SA 4.0 (protection enseignants, usage non-commercial)
 - **14 avril 2026** : Ajout de l'avis d'usage commercial et précision du statut de commun éducatif
-- **16 octobre 2026** : Aucune licence ne change. Le titre de la section 2 dit enfin « BY-NC-SA », comme le reste. Ajout du tableau des dossiers, de la mention des bibliothèques tierces et du texte complet de l'AGPL v3 (`LICENSE`)
+- **16 octobre 2026** : Aucune licence ne change. Le titre de la section 2 dit enfin « BY-NC-SA », comme le reste. Ajout du tableau des dossiers, de la mention des bibliothèques tierces et du texte complet de l'AGPL v3 (`LICENSE`). Les logos et les noms Labo Codex et Codex Numeris sont « tous droits réservés » (décision de l'auteur), et les icônes d'Icons8 restent sous leur licence
 
 **Dernière mise à jour :** 16 octobre 2026
