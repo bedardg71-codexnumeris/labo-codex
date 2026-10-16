@@ -3,7 +3,7 @@
 **Auteur :** Grégoire Bédard
 **Projet :** Système de monitorage pédagogique (Application web)
 **Date de création :** 27 octobre 2025
-**Dernière modification :** 14 avril 2026
+**Dernière modification :** 16 octobre 2026
 
 ---
 
@@ -29,9 +29,9 @@ Ce projet utilise une **double licence** pour distinguer le code technique du co
 **Différence clé vs GPL v3 :**
 > Si quelqu'un héberge une version modifiée de l'application en ligne (ex: plateforme SaaS), l'AGPL v3 l'oblige à partager le code source modifié avec les utilisateurs. La GPL v3 ne le forçait pas.
 
-**Texte complet :** Voir [LICENSE-AGPL-3.0.txt](https://www.gnu.org/licenses/agpl-3.0.html)
+**Texte complet :** le fichier [`LICENSE`](LICENSE), copie conforme du texte publié par la Free Software Foundation (<https://www.gnu.org/licenses/agpl-3.0.html>).
 
-### 2️⃣ Contenu pédagogique → Creative Commons BY-SA 4.0
+### 2️⃣ Contenu pédagogique → Creative Commons BY-NC-SA 4.0
 
 **Concerne :**
 - Documentation et aide intégrée (section Aide de l'application)
@@ -48,7 +48,26 @@ Ce projet utilise une **double licence** pour distinguer le code technique du co
 - Favorise le partage et le bien commun en éducation
 - Redistribution sous même licence (ShareAlike)
 
-**Texte complet :** Voir [LICENSE-CC-BY-NC-SA-4.0.txt](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.fr)
+**Texte complet :** <https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.fr>
+
+---
+
+## Quel dossier relève de quelle licence
+
+Le tableau dit la licence de chaque dossier du dépôt. Une règle passe avant lui : **le contenu pédagogique relève de CC BY-NC-SA 4.0 même quand il vit dans un fichier de code**. C'est le cas des textes de l'aide intégrée, des cartouches et des grilles, échelles et gabarits fournis avec l'application (section 2).
+
+| Dossiers et fichiers | Licence |
+|---|---|
+| `index.html`, `design-system.html`, `styles.css`, `css/`, `js/`, `version.js`, `version.json`, `noms_stables.json`, `netlify.toml` | AGPL v3 (code de l'application) |
+| `icons/`, `img/` | AGPL v3 (ressources graphiques de l'interface) |
+| `scripts/`, `tests/`, `.github/` | AGPL v3 (outillage, bancs d'essai, intégration continue) |
+| `Design system - Modules/`, `design_handoff_synthese_B/` | AGPL v3 (maquettes HTML, CSS et JSX) |
+| `docs/`, `plans de travail/`, `Rapports/`, `audit/`, `audit annuel/`, `Plan Accompagnement/`, `Retours des testeurs/`, `références tableur/` | CC BY-NC-SA 4.0 (documentation, plans, rapports) |
+| `.claude/`, `.claude-plugin/`, `plugins/` et les fichiers `.md` et `.txt` de la racine | CC BY-NC-SA 4.0 (guides méthodologiques) |
+| `Logo/`, `autocollants/` | CC BY-NC-SA 4.0 (identité visuelle et autocollants du projet) |
+| `libs/` | **Licences de chaque bibliothèque** (MIT, Apache 2.0), inventoriées dans [`libs/VERSIONS.md`](libs/VERSIONS.md). Ni l'AGPL v3 ni CC BY-NC-SA ne s'y appliquent. |
+
+Les documents de tiers reproduits dans le dépôt (articles cités, calendrier scolaire, extraits, badges Creative Commons de `icons/`) restent sous les droits de leurs auteurs.
 
 ---
 
@@ -185,5 +204,6 @@ Les contributions sont les bienvenues ! Veuillez soumettre des pull requests ou 
 - **3 novembre 2025** : AGPL v3 + CC BY-SA 4.0 (protection renforcée contre appropriation SaaS)
 - **26 novembre 2025** : AGPL v3 + CC BY-NC-SA 4.0 (protection enseignants, usage non-commercial)
 - **14 avril 2026** : Ajout de l'avis d'usage commercial et précision du statut de commun éducatif
+- **16 octobre 2026** : Aucune licence ne change. Le titre de la section 2 dit enfin « BY-NC-SA », comme le reste. Ajout du tableau des dossiers, de la mention des bibliothèques tierces et du texte complet de l'AGPL v3 (`LICENSE`)
 
-**Dernière mise à jour :** 14 avril 2026
+**Dernière mise à jour :** 16 octobre 2026
