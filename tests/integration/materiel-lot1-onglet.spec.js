@@ -15,7 +15,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 test('lot 1 · Conception s’ouvre sur « Apporter mon matériel » ; l’exemple s’affiche tel que lu', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
     await page.evaluate(() => window.afficherSection('conception'));
     await page.waitForTimeout(200);
 
@@ -45,19 +45,35 @@ test('lot 1 · Conception s’ouvre sur « Apporter mon matériel » ; l’exemp
     await expect(page.locator('#materiel-lecture')).toBeHidden();
 });
 
-test('lot 1 · un script collé ne s’exécute pas : le DOMParser de WebKit est inerte', async ({ page }) => {
+// ⚠ Relecture de Cowork (16 oct.) : la première version de cet essai ne pouvait pas échouer. La CSP
+// bloque un `onerror` inline, et un <script> posé par innerHTML ne s'exécute jamais : un collage
+// INJECTÉ dans la page passait quand même. Les deux témoins qui départagent : aucune requête vers
+// l'image piégée, aucune image de cette source dans la page après la lecture.
+// Break-test : `document.body.insertAdjacentHTML('beforeend', html)` en tête de lireHtml → rouge.
+const SOURCE_PIEGE = 'http://127.0.0.1:9/piege-materiel-lot1.png';
+
+test('lot 1 · un collage piégé n’entre pas dans la page : rien ne s’exécute, rien ne se charge', async ({ page }) => {
+    const requetes = [];
+    page.on('request', (r) => { if (r.url().includes('piege-materiel-lot1')) requetes.push(r.url()); });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
-    const r = await page.evaluate(async () => {
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
+    const r = await page.evaluate(async (source) => {
         window.__pirate = 0;
         const lu = window.materielLecture.lireHtml(
             '<script>window.__pirate = 1;</script>' +
-            '<table><tr><td>C</td><td>A</td><td>B<img src="x" onerror="window.__pirate = 2"></td></tr>' +
+            '<table><tr><td>C</td><td>A</td><td>B<img src="' + source + '" onerror="window.__pirate = 2"></td></tr>' +
             '<tr><td>X</td><td>1</td><td>2</td></tr></table>');
-        await new Promise((ok) => setTimeout(ok, 300));   // le temps qu'un onerror aurait de partir
-        return { pirate: window.__pirate, json: JSON.stringify(lu) };
-    });
+        await new Promise((ok) => setTimeout(ok, 500));   // le temps qu'une image aurait de partir
+        return {
+            pirate: window.__pirate,
+            json: JSON.stringify(lu),
+            imagesPiegees: document.querySelectorAll('img[src*="piege-materiel-lot1"]').length
+        };
+    }, SOURCE_PIEGE);
+    expect(r.imagesPiegees, 'aucune image du collage dans la page').toBe(0);
+    expect(requetes, 'aucune requête vers l’image piégée').toEqual([]);
     expect(r.pirate).toBe(0);
     expect(r.json).not.toContain('__pirate');
+    expect(r.json).not.toContain('piege-materiel');
 });

@@ -150,6 +150,9 @@ const TOOLTIPS_SOUS_NAV = {
     // Accueil : section plate (toggles gérés par accueil.js)
     // Aperçu : section plate, pas de sous-nav
     // Structure
+    // « Apporter mon matériel » (16 oct. 2026, lot 1) : autorisation de Grégoire pour cette zone
+    // protégée, donnée le 16 oct. 2026 (réponse A à la question de l'info-bulle).
+    'conception-materiel': 'nav-conception-materiel',
     'conception-carte': 'nav-conception-alignement',
     // 'conception-organisateur' RETIRÉ le 8 août 2026 (#424 Lot G, autorisation
     // = plan de chantier acté) : la page « Plan de la leçon » n'existe plus.
