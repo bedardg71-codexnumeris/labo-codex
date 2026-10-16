@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import {
     echecsDuRapport, flakyDuRapport, comparerALaBaseline
 } from '../../scripts/rapport-playwright.mjs';
+import { fichiersDuMorceau } from '../../scripts/morceau-playwright.mjs';
+import { readdirSync } from 'node:fs';
 
 // SENTINELLE — 16 OCTOBRE 2026 · LE VERDICT DES MORCEAUX JUGE COMME LE MAC.
 //
@@ -19,6 +21,8 @@ import {
 // C.c rouge (code 0 au lieu de 2) ; `spec.ok === false` remplacé par « un
 // essai n'est pas `expected` » dans rapport-playwright.mjs → A.a et C.e rouges
 // (une spec rattrapée au second essai deviendrait un échec, #534).
+// La répartition en tranches contiguës (comme `--shard`) au lieu de l'alternance
+// dans morceau-playwright.mjs → B.b et B.c rouges.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -88,6 +92,43 @@ describe('A — les règles partagées par le Mac et la CI', () => {
         const mac = readFileSync(path.join(racine, 'scripts', 'verifier-playwright.mjs'), 'utf8');
         expect(mac).toContain("from './rapport-playwright.mjs'");
         expect(mac).not.toMatch(/function (echecsDuRapport|flakyDuRapport|identite)\(/);
+    });
+});
+
+describe('B — la répartition des fichiers entre les morceaux', () => {
+    const MORCEAU = path.join(racine, 'scripts', 'morceau-playwright.mjs');
+    /** Toutes les specs, RÉCURSIVEMENT : un sous-dossier qui échapperait aux morceaux rougit ici. */
+    const toutes = readdirSync(path.join(racine, 'tests', 'integration'), { recursive: true })
+        .filter((f) => f.endsWith('.spec.js'));
+
+    it('B.a les specs vivent à plat dans integration/ : le script les voit toutes', () => {
+        expect(toutes.length).toBeGreaterThan(100);
+        expect(toutes.filter((f) => f.includes(path.sep)), 'une spec en sous-dossier ne serait jouée par aucun morceau').toEqual([]);
+    });
+
+    it('B.b chaque spec va à UN morceau, et un seul ; les tailles diffèrent d’au plus un', () => {
+        for (const total of [1, 4, 10, 16]) {
+            const lots = Array.from({ length: total }, (_, k) => fichiersDuMorceau(toutes, k + 1, total));
+            expect(lots.flat().sort()).toEqual([...toutes].sort());
+            const tailles = lots.map((l) => l.length);
+            expect(Math.max(...tailles) - Math.min(...tailles)).toBeLessThanOrEqual(1);
+        }
+    });
+
+    it('B.c en ALTERNANCE : deux voisins de l’ordre alphabétique ne tombent pas dans le même morceau', () => {
+        const triees = [...toutes].sort();
+        const lot = new Set(fichiersDuMorceau(toutes, 1, 16));
+        expect(lot.has(triees[0])).toBe(true);
+        expect(lot.has(triees[1])).toBe(false);
+        expect(lot.has(triees[16])).toBe(true);
+    });
+
+    it('B.d hors bornes ⮕ 2, et les filtres sont ancrés', () => {
+        expect(spawnSync('node', [MORCEAU, '17', '16']).status).toBe(2);
+        expect(spawnSync('node', [MORCEAU, '0', '16']).status).toBe(2);
+        const r = spawnSync('node', [MORCEAU, '1', '16'], { encoding: 'utf8' });
+        expect(r.status).toBe(0);
+        for (const ligne of r.stdout.trim().split('\n')) expect(ligne).toMatch(/^integration\/[^/]+\\\.spec\\\.js\$$/);
     });
 });
 

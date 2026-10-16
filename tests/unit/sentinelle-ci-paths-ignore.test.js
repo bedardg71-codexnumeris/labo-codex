@@ -223,7 +223,11 @@ describe('CI · Playwright juge à la demande et sur un push observable, en morc
         expect(morceaux).toMatch(/morceau: \$\{\{ fromJSON\(needs\.decision\.outputs\.morceaux\) \}\}/);
         expect(morceaux).toMatch(/fail-fast: false/);
         expect((code.match(/^\s*total=\d+$/gm) || []).length, 'le nombre de morceaux doit vivre UNE fois').toBe(1);
-        expect(workflow).toMatch(/--shard=\$\{\{ matrix\.morceau \}\}\/\$\{\{ needs\.decision\.outputs\.total \}\}/);
+        // Les fichiers en alternance (scripts/morceau-playwright.mjs), pas `--shard` :
+        // ses tranches contiguës regroupaient les specs lentes (point 9a).
+        expect(workflow).toMatch(/node \.\.\/scripts\/morceau-playwright\.mjs \$\{\{ matrix\.morceau \}\} \$\{\{ needs\.decision\.outputs\.total \}\}/);
+        expect(code).not.toMatch(/--shard/);
+        expect(workflow).toMatch(/PLAYWRIGHT_BLOB_OUTPUT_NAME: report-\$\{\{ matrix\.morceau \}\}\.zip/);
     });
 
     it('un morceau ne juge pas : il garde le code de Playwright et dépose son rapport, ou rougit', () => {
