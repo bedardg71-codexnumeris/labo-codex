@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, copyFileSync, rmSync, realpathSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { tranche } from './_helpers/tranche.js';
+import { tranche, position } from './_helpers/tranche.js';
 
 // SENTINELLE-CLIQUET — 23 AOÛT 2026 · L'OPTIMISATION DE LA CI NE DOIT PAS
 // CRÉER D'ANGLE MORT.
@@ -66,6 +68,20 @@ import { tranche } from './_helpers/tranche.js';
 // BREAK-TESTS (faits le 10 octobre) — `|| github.event_name == 'push'` ajouté au
 // `if:` de `playwright` → rouge ; un bloc `schedule:` remis → rouge ; un job
 // `garde` remis → rouge.
+//
+// ↻ BLOC 2 RÉÉCRIT LE 16 OCTOBRE 2026 — LE DÉPÔT EST PUBLIC, PLAYWRIGHT PART EN
+// MORCEAUX (journal de tests.yml, point 9). Quatre jobs : `vitest` juge tout ;
+// `decision` dit si Playwright juge (à la demande : oui ; sur un push : si le lot
+// touche un chemin OBSERVABLE, par scripts/lot-observable.sh ; sur une pull
+// request : sauté) et porte le nombre de morceaux ; `playwright` joue en
+// morceaux et ne juge pas ; `verdict` fusionne et juge contre la baseline. Ce
+// qu'il verrouille : ce câblage ; aucun `schedule` ; un saut reste `skipped` ; la
+// décision appelle la règle du crochet au lieu d'en porter une copie, et DÉCIDE
+// (banc git jetable : le vrai script, cinq cas).
+// BREAK-TESTS (faits le 16 octobre) — `|| github.event_name == 'pull_request'`
+// ajouté au `if:` de `decision` → rouge ; `juger=non` forcé sur le push dans le
+// script → rouge (banc) ; `&& needs.playwright.result != 'skipped'` retiré du
+// verdict → rouge.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -171,7 +187,7 @@ describe('CI · le `paths-ignore` du workflow ne masque aucun test', () => {
     });
 });
 
-describe('CI · Playwright ne part qu\'à la demande ; Vitest juge chaque push', () => {
+describe('CI · Playwright juge à la demande et sur un push observable, en morceaux ; Vitest juge chaque push', () => {
     /** La liste `OBSERVABLE` du workflow (env global) — l'unique source que le shell lit. */
     function cheminsObservables() {
         const m = /^\s*OBSERVABLE:\s*"([^"]+)"/m.exec(workflow);
@@ -180,24 +196,50 @@ describe('CI · Playwright ne part qu\'à la demande ; Vitest juge chaque push',
     const estObservable = (chemin, liste) => liste.some((e) =>
         e.endsWith('/') ? chemin.startsWith(e) : chemin === e);
 
-    it('deux jobs : Vitest sur le push, Playwright à la demande seulement — JAMAIS sur un push', () => {
-        expect(workflow).toMatch(/^  vitest:\n/m);
-        expect(workflow).toMatch(/^  playwright:\n/m);
-        // Hors commentaires : le journal en tête NOMME ce qui a été retiré.
-        const code = workflow.split('\n').filter((l) => !l.trim().startsWith('#')).join('\n');
+    // Hors commentaires : le journal en tête NOMME ce qui a été retiré.
+    const code = workflow.split('\n').filter((l) => !l.trim().startsWith('#')).join('\n');
+    const bloc = (job, fin = '\n    steps:\n') => tranche(workflow, `\n  ${job}:\n`, fin);
+    const conditionDe = (job) => (bloc(job).match(/^    if:.*$/m) || [null])[0];
+
+    it('quatre jobs : vitest, decision, playwright (en morceaux), verdict — pas de garde de nuit', () => {
+        for (const job of ['vitest', 'decision', 'playwright', 'verdict']) {
+            expect(workflow, `job \`${job}\` absent`).toMatch(new RegExp(`^  ${job}:\\n`, 'm'));
+        }
         expect(code, 'un job `garde` est revenu : le passage de nuit est retiré (#1048)').not.toMatch(/^  garde:/m);
         expect(code).not.toMatch(/ci-garde-inutilite/);
-        expect(code).not.toMatch(/outputs\.playwright/);
-        expect(code).not.toMatch(/needs:/);
         expect(existsSync(path.join(racineProjet, 'scripts', 'ci-garde-inutilite.sh')), 'le script de la garde est revenu').toBe(false);
-        // Playwright ne part QUE demandé. Sur un push il est sauté : `skipped`, jamais `success`.
-        const blocPlaywright = tranche(workflow, '\n  playwright:\n', '\n    steps:\n');
-        const conditions = blocPlaywright.match(/^    if:.*$/m);
-        expect(conditions, 'le job `playwright` n\'a plus de `if:` : il partirait sur chaque push').not.toBeNull();
-        expect(conditions[0]).toBe("    if: github.event_name == 'workflow_dispatch'");
-        // Vitest garde le push, la pull_request et la demande : aucun `if:`.
-        const blocVitest = tranche(workflow, '\n  vitest:\n', '\n    steps:\n');
-        expect(blocVitest).not.toMatch(/^    if:/m);
+        // Vitest garde le push, la pull_request et la demande : aucun `if:`, aucune dépendance.
+        expect(bloc('vitest')).not.toMatch(/^    (if|needs):/m);
+    });
+
+    it('la décision part à la demande et sur le push — JAMAIS sur une pull request', () => {
+        expect(conditionDe('decision')).toBe("    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'");
+    });
+
+    it('les morceaux dépendent de la décision ; leur nombre vit en UN endroit', () => {
+        const morceaux = bloc('playwright');
+        expect(morceaux).toMatch(/^    needs: decision$/m);
+        expect(conditionDe('playwright')).toBe("    if: needs.decision.outputs.juger == 'oui'");
+        expect(morceaux).toMatch(/morceau: \$\{\{ fromJSON\(needs\.decision\.outputs\.morceaux\) \}\}/);
+        expect(morceaux).toMatch(/fail-fast: false/);
+        expect((code.match(/^\s*total=\d+$/gm) || []).length, 'le nombre de morceaux doit vivre UNE fois').toBe(1);
+        expect(workflow).toMatch(/--shard=\$\{\{ matrix\.morceau \}\}\/\$\{\{ needs\.decision\.outputs\.total \}\}/);
+    });
+
+    it('un morceau ne juge pas : il garde le code de Playwright et dépose son rapport, ou rougit', () => {
+        const etapes = tranche(workflow, '\n  playwright:\n', '\n  verdict:\n');
+        expect(etapes).toMatch(/\|\| code=\$\?/);
+        expect(etapes).toMatch(/--reporter=blob,list/);
+        expect(etapes).toMatch(/if-no-files-found: error/);
+    });
+
+    it('le verdict juge l’ensemble contre la baseline ; il est sauté si les morceaux le sont', () => {
+        const verdict = tranche(workflow, '\n  verdict:\n', 'juger-rapport-playwright.mjs rapport.json');
+        expect(verdict).toMatch(/^    needs: \[decision, playwright\]$/m);
+        expect(conditionDe('verdict')).toBe("    if: ${{ !cancelled() && needs.playwright.result != 'skipped' }}");
+        // Un morceau sans rapport = des essais NON JUGÉS : le verdict compte avant de juger.
+        expect(verdict).toMatch(/\[ "\$recus" = "\$TOTAL" \] \|\| \{/);
+        expect(verdict).toMatch(/npx playwright merge-reports --config playwright\.config\.js --reporter=json/);
         // Un job sauté doit rester `skipped` : pas de `continue-on-error`, pas de
         // `if: always()` qui transformerait un saut en vert.
         expect(workflow).not.toMatch(/if:\s*always\(\)/);
@@ -206,11 +248,82 @@ describe('CI · Playwright ne part qu\'à la demande ; Vitest juge chaque push',
 
     it('aucun passage de nuit : pas de `schedule`, le lancement à la demande reste', () => {
         const declencheurs = tranche(workflow, '\non:\n', '\npermissions:\n');
-        const code = declencheurs.split('\n').filter((l) => !l.trim().startsWith('#')).join('\n');
-        expect(code, 'le passage de nuit est revenu (#1048)').not.toMatch(/schedule:|- cron:/);
-        expect(code).toMatch(/^  workflow_dispatch:/m);
+        const codeDecl = declencheurs.split('\n').filter((l) => !l.trim().startsWith('#')).join('\n');
+        expect(codeDecl, 'le passage de nuit est revenu (#1048)').not.toMatch(/schedule:|- cron:/);
+        expect(codeDecl).toMatch(/^  workflow_dispatch:/m);
         // Un push ne doit pas annuler un run lancé à la demande.
         expect(workflow).toMatch(/^  group: tests-\$\{\{ github\.ref \}\}-\$\{\{ github\.event_name \}\}$/m);
+    });
+
+    describe('la décision DÉCIDE — banc git jetable, le vrai script', () => {
+        // Le script de l'étape « Décider », tel que le workflow le porte.
+        const script = (() => {
+            const t = tranche(workflow, '      - name: Décider\n', '\n\n');
+            return t.slice(position(t, 'run: |\n') + 'run: |\n'.length)
+                .split('\n').map((l) => l.replace(/^ {10}/, '')).join('\n');
+        })();
+
+        it('il appelle la règle du crochet (lot-observable.sh), sans en porter de copie', () => {
+            expect(script).toMatch(/^\s*\. scripts\/lot-observable\.sh$/m);
+            expect(script).toMatch(/\| lot_observable/);
+            expect(script).not.toMatch(/grep -/);
+        });
+
+        // ⚠ SANS LES VARIABLES GIT_* (16 oct. 2026, vécu) : lancé par le crochet
+        // pré-push, ce banc héritait de GIT_DIR et écrivait dans le VRAI dépôt —
+        // `git init` y a posé `core.bare = true`, et trois commits parasites sur
+        // la branche poussée. Même règle que sentinelle-anticache-fichiers-modifies.
+        const ENV_SANS_GIT = Object.fromEntries(Object.entries(process.env).filter(([k]) => !k.startsWith('GIT_')));
+        const banc = () => {
+            const d = mkdtempSync(path.join(tmpdir(), 'decision-ci-'));
+            const git = (...args) => spawnSync('git', args, { cwd: d, encoding: 'utf8', env: ENV_SANS_GIT });
+            mkdirSync(path.join(d, '.github', 'workflows'), { recursive: true });
+            mkdirSync(path.join(d, 'scripts'));
+            mkdirSync(path.join(d, '.claude'));
+            mkdirSync(path.join(d, 'js'));
+            copyFileSync(path.join(racineProjet, '.github', 'workflows', 'tests.yml'), path.join(d, '.github', 'workflows', 'tests.yml'));
+            copyFileSync(path.join(racineProjet, 'scripts', 'lot-observable.sh'), path.join(d, 'scripts', 'lot-observable.sh'));
+            git('init', '-q');
+            // Le banc ne s'exécute QUE dans son dépôt jetable — sinon il s'arrête là.
+            expect(realpathSync(git('rev-parse', '--show-toplevel').stdout.trim())).toBe(realpathSync(d));
+            git('-c', 'user.email=b@b', '-c', 'user.name=banc', 'add', '.');
+            git('-c', 'user.email=b@b', '-c', 'user.name=banc', 'commit', '-qm', 'base');
+            const commit = (fichier) => {
+                writeFileSync(path.join(d, fichier), String(Math.random()));
+                git('add', '.');
+                git('-c', 'user.email=b@b', '-c', 'user.name=banc', 'commit', '-qm', fichier);
+                return git('rev-parse', 'HEAD').stdout.trim();
+            };
+            const decider = (evenement, avant, apres) => {
+                const sortie = path.join(d, 'sortie');
+                writeFileSync(sortie, '');
+                const r = spawnSync('bash', ['-c', script], {
+                    cwd: d, encoding: 'utf8',
+                    env: { ...ENV_SANS_GIT, EVENEMENT: evenement, AVANT: avant, APRES: apres, GITHUB_OUTPUT: sortie, GITHUB_STEP_SUMMARY: path.join(d, 'resume') }
+                });
+                expect(r.status, r.stderr).toBe(0);
+                return Object.fromEntries(readFileSync(sortie, 'utf8').trim().split('\n').map((l) => l.split('=')));
+            };
+            return { d, git, commit, decider };
+        };
+
+        it('cinq cas : demande, push sans observable, push de code, `before` nul, `before` inconnu', () => {
+            const { d, git, commit, decider } = banc();
+            try {
+                const base = git('rev-parse', 'HEAD').stdout.trim();
+                const doc = commit('.claude/note.md');
+                const js = commit('js/module.js');
+                expect(decider('workflow_dispatch', '', js).juger).toBe('oui');
+                expect(decider('push', base, doc).juger, 'un push sans chemin observable ne lance pas Playwright').toBe('non');
+                expect(decider('push', doc, js).juger, 'un push de js/ lance Playwright').toBe('oui');
+                expect(decider('push', '0000000000000000000000000000000000000000', js).juger, 'dans le doute, on juge').toBe('oui');
+                expect(decider('push', 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeef', js).juger, 'dans le doute, on juge').toBe('oui');
+                const sortie = decider('workflow_dispatch', '', js);
+                expect(JSON.parse(sortie.morceaux)).toHaveLength(Number(sortie.total));
+            } finally {
+                rmSync(d, { recursive: true, force: true });
+            }
+        });
     });
 
     it('la liste OBSERVABLE existe, et elle porte ce qu\'index.html charge', () => {

@@ -227,7 +227,11 @@ describe('#534 · G — une reprise se dit, elle ne se cache pas', () => {
         // `spec.ok` reste vrai après une reprise réussie — c'est ce qui fait que
         // retries:1 a l'effet voulu. Le jour où quelqu'un compterait les essais
         // individuels, la reprise ne servirait plus à rien.
-        expect(VERIF).toContain('spec.ok === false');
+        // ↻ 16 oct. 2026 : la règle vit dans rapport-playwright.mjs, partagée
+        // avec le juge des morceaux de la CI ; le Mac l'importe.
+        const REGLES = readFileSync(path.join(racine, 'scripts', 'rapport-playwright.mjs'), 'utf8');
+        expect(VERIF).toContain("from './rapport-playwright.mjs'");
+        expect(REGLES).toContain('spec.ok === false');
     });
 });
 
