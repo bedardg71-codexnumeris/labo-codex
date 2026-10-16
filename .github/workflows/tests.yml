@@ -187,7 +187,17 @@
 #     vérification depuis l'application GitHub du téléphone (Actions ▸ Tests ▸
 #     Run workflow), et libérer le Mac le soir.
 #     a) MESURE AVANT DÉCOUPE — run 38946931144 (eb6dd86e, workflow du point 8,
-#        un seul job) : MESURE_UN_JOB.
+#        un seul job) : 4 processeurs et 15 Go (`nproc`, `free`, mesurés aux
+#        runs suivants) ; 784 essais prévus, 6 exclus (5 specs, point 5) ; COUPÉ
+#        à 60 min après ~200 essais, 8 rouges parmi eux. Puis, ce lot :
+#          · 4 morceaux (run 38949548776) : 3 coupés au plafond de 30 ; le
+#            verdict a dit « 1 rapport sur 4 — NON JUGÉ ». La garde a tenu.
+#          · 10 morceaux (run 38953736186) : 10 rapports sur 10, 784 essais
+#            joués, 31 min de bout en bout ; 176 min de suite cumulées, soit
+#            ~13,5 s l'essai (le Mac : ~45 min la suite). Verdict ROUGE :
+#            21 rougeurs absentes de la baseline, 3 vertes au second essai.
+#        ⚠ Ces 21 ne sont PAS jugées ici : rouges sur Linux, rien ne dit encore
+#        si elles le sont sur le Mac (le verdict du soir le dira).
 #     b) Quatre jobs. `decision` dit si Playwright juge (demande : oui ; push :
 #        si le lot touche un chemin OBSERVABLE, par scripts/lot-observable.sh,
 #        la règle du crochet — dans le doute, oui ; pull request : sauté) et
@@ -197,7 +207,7 @@
 #        manquant = NON JUGÉ, rouge), les fusionne et juge contre
 #        scripts/playwright-baseline.json par scripts/juger-rapport-playwright.mjs
 #        — les règles du Mac (scripts/rapport-playwright.mjs, partagées) : seule
-#        une rougeur NOUVELLE fait échouer. CHOIX_MORCEAUX.
+#        une rougeur NOUVELLE fait échouer. 16 morceaux (point 9a).
 #     c) `workers: 1` RESTE dans chaque morceau : le parallélisme vient des
 #        machines, isolées par construction (tests/playwright.config.js dit
 #        pourquoi un seul worker). Chaque morceau DIT sa machine (nproc, free).
@@ -331,7 +341,7 @@ jobs:
         run: |
           set -euo pipefail
           # ⚠ LE NOMBRE DE MORCEAUX vit ICI et nulle part ailleurs (point 9a).
-          total=10
+          total=16
           juger=oui
           raison="lancé à la demande"
           if [ "$EVENEMENT" = "push" ]; then
@@ -374,9 +384,10 @@ jobs:
       fail-fast: false
       matrix:
         morceau: ${{ fromJSON(needs.decision.outputs.morceaux) }}
-    # Point 9a : ~78 essais par morceau, 12 à 18 min mesurées au rythme du run
-    # 38949548776 ; 30, c'est près du double. Un morceau coupé n'est pas vert :
-    # son rapport manque, et le verdict dit NON JUGÉ.
+    # Point 9a : à 10 morceaux, 9,3 à 28,8 min (run 38953736186) — les fichiers
+    # lourds se regroupent, le partage se fait par fichier. À 16, ~49 essais
+    # chacun : projection ≤ 20 min, PAS une mesure. Un morceau coupé n'est pas
+    # vert : son rapport manque, et le verdict dit NON JUGÉ.
     timeout-minutes: 30
 
     steps:
