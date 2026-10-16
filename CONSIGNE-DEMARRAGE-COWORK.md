@@ -13,7 +13,8 @@
 
 - Le 15, de 14 h 49 à 15 h 30, Grégoire a tranché avec Cowork les 33 fiches « à toi » : `plans de travail/LOTS-2026-10-15-fiches-a-toi.md` (décisions, lots B à H, lignes à poser au backlog). Il n'en reste que 4, qui attendent l'extérieur (Loi 25 ; rencontre du 19 oct.).
 - Le lot « avant la purge » (#694) part le 15 au soir : `plans de travail/CONSIGNE-LOT-2026-10-15-avant-la-purge.md`. Vérifier qu'il a été exécuté et relu AVANT la purge du 16 au matin (#781).
-- Le plan de la journée du 16, voulu par Grégoire : la purge, puis les laborieuses, dans l'ordre de `plans de travail/ORDRE-2026-10-16-les-laborieuses.md`.
+- ↻ **Remplacé le 15 au soir** (décisions de Grégoire de 16 h 13 à 16 h 34, redites à Cowork à 21 h 15, noté à 21 h 17) : la purge (#781) se fait le 15 au SOIR, après la version 1.202.0 (en ligne à 19 h 50) ; ensuite un NOUVEAU dépôt nommé « Labo Codex », créé à partir de l'historique purgé ; l'ancien dépôt est effacé dans deux semaines, vers le 29 oct. (le paquet de sauvegarde de l'historique complet reste sur le Mac de Grégoire, plan de purge). Du 16 au 18 oct. : le chantier « Apporter mon matériel » (`plans de travail/CADRAGE-2026-10-15-apporter-mon-materiel.md`, première consigne `plans de travail/CONSIGNE-LOT-2026-10-16-apporter-mon-materiel-1.md`), première version en ligne le lundi 19 au matin. Les laborieuses (`plans de travail/ORDRE-2026-10-16-les-laborieuses.md`) reprennent après le 19.
+- ⚠ Après la purge, le dossier de travail et l'adresse du dépôt changent peut-être : remesurer où vit le dépôt avant toute lecture.
 - Ce fichier lui-même est à réécrire en entier à la fin de la journée du 16.
 
 ---
