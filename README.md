@@ -38,7 +38,8 @@ CC BY-NC-SA 4.0 pour les ressources pédagogiques).
 
 ### Téléchargement
 
-Récupérez la dernière version : [Releases GitHub](https://github.com/bedardg71-codexnumeris/Monitorage_v6/releases)
+Récupérez la dernière version sur le dépôt [labo-codex](https://github.com/bedardg71-codexnumeris/labo-codex)
+(bouton « Code », puis « Download ZIP »), ou clonez-le.
 
 ### Lancement local (recommandé pour test ou usage personnel)
 
@@ -46,8 +47,8 @@ Aucune installation requise. Ouvrez `index.html` dans un navigateur moderne
 (Safari, Chrome, Firefox, Edge) :
 
 ```bash
-git clone https://github.com/bedardg71-codexnumeris/Monitorage_v6.git
-cd Monitorage_v6
+git clone https://github.com/bedardg71-codexnumeris/labo-codex.git
+cd labo-codex
 open index.html       # macOS
 xdg-open index.html   # Linux
 start index.html      # Windows
@@ -108,9 +109,8 @@ Voir [`DEPLOY.md`](DEPLOY.md) pour la chaîne de déploiement complète,
 - [`AUDIT.md`](AUDIT.md) — synthèse publique de l'audit annuel 2026
   (6 axes, 25 sous-audits, statuts Vert/Jaune/Rouge, plan de remédiation)
 - [`SECURITY.md`](SECURITY.md) — politique de signalement des vulnérabilités
-- Rapports techniques complets : branche
-  [`audit/2026-mai`](https://github.com/bedardg71-codexnumeris/Monitorage_v6/tree/audit/2026-mai/audit/reports)
-  (`SUMMARY-internal.md` 639 lignes + 25 sous-audits détaillés)
+- Les rapports techniques complets de l'audit (25 sous-audits détaillés) ne
+  sont pas publiés dans ce dépôt.
 
 ### Publications académiques
 
@@ -220,7 +220,7 @@ lisez [`CLAUDE.md`](CLAUDE.md) pour les règles de contribution
 
 ### Signaler un bug ou suggérer une amélioration
 
-Ouvrez une [issue GitHub](https://github.com/bedardg71-codexnumeris/Monitorage_v6/issues).
+Ouvrez une [issue GitHub](https://github.com/bedardg71-codexnumeris/labo-codex/issues).
 
 ### Signaler un incident de confidentialité
 
@@ -232,7 +232,8 @@ Voir la procédure dans [`INCIDENTS.md`](INCIDENTS.md). Délai d'accusé :
 1. Forkez le dépôt
 2. Créez une branche : `git checkout -b feature/ma-fonctionnalite`
 3. Lisez [`docs/00-START-HERE.md`](docs/00-START-HERE.md) avant de coder
-4. Lancez les tests : `cd tests && npm test` (97/97 attendus)
+4. Lancez les tests : `cd tests && npm run test:unit` (Vitest) ; `npm test`
+   enchaîne Vitest et Playwright. Tous doivent être verts.
 5. Ouvrez une Pull Request
 
 ---
@@ -293,11 +294,13 @@ Labo Codex — laboratoire de codexnumeris.org
 
 ---
 
-## Statistiques (au 22 mai 2026)
+## Statistiques (au 16 octobre 2026)
 
-- **Lignes de code** : ~234 000 (HTML + CSS + JavaScript)
-- **Modules JavaScript** : 158 fichiers
-- **Commits** : ~2 886
+- **Lignes de code** : ~276 000 (HTML + CSS + JavaScript de l'application,
+  hors bibliothèques tierces et tests)
+- **Modules JavaScript** : 207 fichiers
+- **Tests automatisés** : 8 917 essais Vitest
+- **Commits** : ~6 040
 - **Période de développement** : septembre 2024 à aujourd'hui
 - **Version courante** : voir [`version.json`](version.json) (source unique de verite)
 
