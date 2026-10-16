@@ -331,7 +331,7 @@ jobs:
         run: |
           set -euo pipefail
           # ⚠ LE NOMBRE DE MORCEAUX vit ICI et nulle part ailleurs (point 9a).
-          total=4
+          total=10
           juger=oui
           raison="lancé à la demande"
           if [ "$EVENEMENT" = "push" ]; then
@@ -374,7 +374,9 @@ jobs:
       fail-fast: false
       matrix:
         morceau: ${{ fromJSON(needs.decision.outputs.morceaux) }}
-    # PLAFOND_MORCEAU — fixé au point 9b, sur la mesure du run 38946931144.
+    # Point 9a : ~78 essais par morceau, 12 à 18 min mesurées au rythme du run
+    # 38949548776 ; 30, c'est près du double. Un morceau coupé n'est pas vert :
+    # son rapport manque, et le verdict dit NON JUGÉ.
     timeout-minutes: 30
 
     steps:
