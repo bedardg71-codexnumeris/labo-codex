@@ -15,6 +15,20 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+🔀 **LE 16 OCTOBRE 2026 AU MATIN : ON TRAVAILLE DANS UN NOUVEAU DÉPÔT, `labo-codex`.** *Écrit par Claude Code le 16 oct. à 7 h 30 (mesuré par `date`).* Rien ne change à l'écran : c'est le même code, à l'octet près.
+
+**Ce qui a changé** :
+- l'historique du projet a été purgé des noms et des DA d'élèves, des noms de collègues (passés à l'initiale) et des cinq dossiers qui portaient une cohorte entière ; ton adresse Gmail d'auteur est remplacée par ton adresse GitHub « noreply » ;
+- cet historique purgé vit dans un nouveau dépôt GitHub, `labo-codex`, **privé** pour l'instant ; le dossier `Monitorage_v6` de ton Mac en est un clone ;
+- l'ancien dépôt est dans `Monitorage_v6-ancien` : on n'y commite plus rien. Tous les numéros de commit ont changé : ceux cités plus bas dans ce fichier renvoient à l'ancien dépôt.
+
+**Vérifié comment** :
+- quatre vérifications (arbre identique, chemins retirés, DA, paires, collègues, images, messages, noms de fichiers), 17 sur 17 vertes, chacune avec un témoin qui rougit sur l'ancien historique ;
+- les branches et les 22 étiquettes de GitHub sont identiques à la copie vérifiée ;
+- Vitest complet vert dans le nouveau dossier (8 910 essais).
+
+**Ce qui te revient** : copier la sauvegarde sur le disque externe ; relier Netlify au nouveau dépôt (ce texte-ci sera le premier commit mis en ligne depuis `labo-codex`, c'est le témoin) ; plus tard, décider quand le dépôt devient public ; vers le 30 octobre, supprimer l'ancien dépôt de GitHub (`plans de travail/PLAN-2026-10-15-nouveau-depot-labo-codex.md`).
+
 ✅ **EN LIGNE LE 15 OCTOBRE 2026 AU SOIR** (tout ce qui suit est parti avec la version du soir, après le verdict complet). *Écrit par Claude Code le 15 oct. à 16 h 08 (mesuré par `date`).* **Version en ligne ce soir : 1.202.0** — constatée chez Netlify par le connecteur le 15 oct. à 19 h 50 : déploiement de production « ready » à 19 h 41, `commit_ref` `0c142077`.
 
 **Ce que tu verras** :
