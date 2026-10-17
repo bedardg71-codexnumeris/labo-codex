@@ -25,9 +25,12 @@
     A.MAX_CRITERES = 50;
     A.MAX_NOM = 200;
     A.MAX_CASE = 5000;
+    A.MAX_SOUS_CRITERES = 30;   // `sousCriteres`, max 30, noms de 200 caractères au plus
+    A.MAX_DESCRIPTION = 2000;
+    A.MAX_CODE = 4;
 
     A.NOMS_ETAPES = {
-        axes: 'Sens du tableau', nature: 'Nature des cases', valeurs: 'Plages de notes',
+        axes: 'Sens du tableau', roles: 'Ce que contient ton tableau', nature: 'Nature des cases', valeurs: 'Plages de notes',
         pond: 'Pondération', classer: 'À classer', final: 'Vérification'
     };
 
@@ -69,10 +72,14 @@
         return n.min.etat !== 'repris' || n.max.etat !== 'repris' || !texte(n.note);
     }
 
-    /** Les étapes, sautées si déjà réglées (prototype, `etapesPour`). */
+    /**
+     * Les étapes, sautées si déjà réglées (prototype, `etapesPour`). « Ce que contient ton
+     * tableau » (lot 3a) suit toujours « Sens du tableau » : c'est le lieu de la correction.
+     */
     A.etapesPour = function (m) {
         if (m.source === 'main') return ['final'];
         var e = ['axes'];
+        if (m.tableau) e.push('roles');
         if (aDuTexte(m)) e.push('nature');
         if (m.niveaux.some(niveauARegler)) e.push('valeurs');
         if (m.criteres.some(function (c) { return c.ponderation.etat !== 'repris'; })) e.push('pond');
@@ -81,7 +88,7 @@
         return e;
     };
 
-    /** Après une inversion : la liste se recalcule, l'étape courante est gardée si elle existe encore. */
+    /** Après une inversion ou un rôle changé : la liste se recalcule, l'étape courante est gardée si elle existe encore. */
     A.recalculerEtapes = function (m, anciennes, index) {
         var etapes = A.etapesPour(m);
         var k = etapes.indexOf(anciennes[index]);
@@ -106,8 +113,35 @@
         if (sansPlage) out.push(compte(sansPlage, 'la plage de notes d’un niveau', 'la plage de notes de # niveaux'));
         var sansNote = m.niveaux.filter(function (n) { return isNaN(A.nombre(n.note && n.note.valeur)); }).length;
         if (sansNote) out.push(compte(sansNote, 'la note retenue d’un niveau', 'la note retenue de # niveaux'));
+        manquantsCodes(m, out);
         if (m.niveaux.length > A.MAX_NIVEAUX) {
             out.push('au plus ' + A.MAX_NIVEAUX + ' niveaux (ta grille en a ' + m.niveaux.length + ')');
+        }
+    }
+
+    /**
+     * Lot 3a : les codes se corrigent. Requis, 1 à 4 caractères, sans souligné (la cartouche
+     * les colle à l'identifiant du critère par un `_`), uniques sans tenir compte de la casse.
+     * Textes PROVISOIRES (Claude Code, 17 oct.), relus en 3b.
+     */
+    function manquantsCodes(m, out) {
+        var codes = m.niveaux.map(function (n) { return texte(n.code); });
+        var sans = codes.filter(function (c) { return !c; }).length;
+        if (sans) out.push(compte(sans, 'le code d’un niveau', 'le code de # niveaux'));
+        var invalides = codes.filter(function (c) { return c && (c.length > A.MAX_CODE || c.indexOf('_') >= 0); }).length;
+        if (invalides) out.push(compte(invalides, 'un code de 1 à 4 caractères, sans souligné, pour un niveau', 'un code de 1 à 4 caractères, sans souligné, pour # niveaux'));
+        var vus = {}, doubles = [];
+        codes.forEach(function (c) {
+            if (!c) return;
+            var k = c.toUpperCase();
+            if (vus[k] === 1) doubles.push(c);
+            vus[k] = (vus[k] || 0) + 1;
+        });
+        if (doubles.length) {
+            var liste = doubles.map(function (c) { return '« ' + c + ' »'; }).join(', ');
+            out.push(doubles.length === 1 && vus[doubles[0].toUpperCase()] === 2
+                ? 'un code différent pour chaque niveau (deux niveaux ont le même code : ' + liste + ')'
+                : 'un code différent pour chaque niveau (des niveaux ont le même code : ' + liste + ')');
         }
     }
 
@@ -125,6 +159,12 @@
         if (longs) out.push('des noms de critères plus courts (' + A.MAX_NOM + ' caractères au plus)');
         var casesLongues = m.criteres.some(function (c) { return c.cases.some(function (d) { return texte(d).length > A.MAX_CASE; }); });
         if (casesLongues) out.push('des cases plus courtes (5 000 caractères au plus)');
+        var tropSous = m.criteres.some(function (c) { return (c.sousCriteres || []).length > A.MAX_SOUS_CRITERES; });
+        if (tropSous) out.push('au plus ' + A.MAX_SOUS_CRITERES + ' sous-critères par critère');
+        var sousLongs = m.criteres.some(function (c) { return (c.sousCriteres || []).some(function (t) { return t.length > A.MAX_NOM; }); });
+        if (sousLongs) out.push('des sous-critères plus courts (' + A.MAX_NOM + ' caractères au plus)');
+        var descLongue = m.criteres.some(function (c) { return texte(c.description).length > A.MAX_DESCRIPTION; });
+        if (descLongue) out.push('des descriptions de critère plus courtes (2 000 caractères au plus)');
     }
 
     /**
@@ -139,6 +179,7 @@
         if (!nom) manquants.push('le nom de la grille');
         else if (nom.length > A.MAX_NOM) manquants.push('un nom de grille plus court (' + A.MAX_NOM + ' caractères au plus)');
         else if (noms.indexOf(nom.toLowerCase()) >= 0) manquants.push('un autre nom de grille : « ' + nom + ' » existe déjà dans ce trimestre');
+        (m.manquesLecture || []).forEach(function (t) { manquants.push(t); });
         manquantsNiveaux(m, manquants);
         manquantsCriteres(m, manquants);
         var enAttente = m.aClasser.filter(function (a) { return a.statut === 'attente'; }).length;
@@ -210,7 +251,8 @@
         var c = {
             nom: nom ? paire(nom, 'saisi') : paire('', 'remplir'),
             ponderation: paire('', 'remplir'),
-            cases: m.niveaux.map(function () { return paire('', 'vide'); })
+            cases: m.niveaux.map(function () { return paire('', 'vide'); }),
+            sousCriteres: [], description: paire('', 'vide')
         };
         if (deClasser != null) c.deClasser = deClasser;
         return c;
@@ -271,6 +313,26 @@
         return A.preparer(window.materielLecture.inverser(m));
     };
 
+    /**
+     * Lot 3a : le rôle d'une rangée (`'rangees'`) ou d'une colonne (`'colonnes'`) change, et la
+     * grille se RELIT depuis le document (`materielLecture.relire`).
+     */
+    A.choisirRole = function (m, sorte, index, role) {
+        if (!m.roles || !m.lecture || !m.roles[sorte] || m.roles[sorte][index] === role) return m;
+        var r = window.materielLecture.changerRole(m.roles, sorte, index, role);
+        return r === m.roles ? m : A.preparer(window.materielLecture.relire(m, r));
+    };
+
+    /** Dans une « Suite du critère », ce que devient la case de la colonne « Noms des critères ». */
+    A.choisirSuiteNom = function (m, valeur) {
+        var permis = window.materielLecture.CHOIX_SUITE.map(function (x) { return x.id; });
+        if (!m.roles || !m.lecture || m.roles.suiteNom === valeur || permis.indexOf(valeur) < 0) return m;
+        var r = JSON.parse(JSON.stringify(m.roles));
+        r.suiteNom = valeur;
+        r.propose = false;
+        return A.preparer(window.materielLecture.relire(m, r));
+    };
+
     A.estRetro = function (m) { return !!(m.nature && m.nature.valeur === 'retroactions'); };
 
     // ------------------------------------------------------------------
@@ -305,7 +367,7 @@
             // retenue SAISIE (décision du 17 oct.), jamais déduite de la plage.
             niveaux: m.niveaux.map(function (n, i) {
                 return {
-                    code: n.code.valeur, nom: texte(n.titre), description: '',
+                    code: texte(n.code), nom: texte(n.titre), description: '',
                     min: contigues[i].min, max: contigues[i].max,
                     valeurCalcul: A.nombre(n.note.valeur), couleur: teintes[i]
                 };
@@ -325,7 +387,7 @@
 
     function textesParNiveau(m, c) {
         var par = {};
-        c.cases.forEach(function (d, j) { if (texte(d)) par[m.niveaux[j].code.valeur] = texte(d); });
+        c.cases.forEach(function (d, j) { if (texte(d)) par[texte(m.niveaux[j].code)] = texte(d); });
         return par;
     }
 
@@ -333,7 +395,21 @@
         var retro = A.estRetro(m);
         return Object.assign(base(ctx, 'GRILLE_', nomGrille), {
             criteres: m.criteres.map(function (c) {
-                var cr = { id: ctx.id('CR_'), nom: texte(c.nom), ponderation: A.nombre(c.ponderation.valeur), type: 'holistique' };
+                // Lot 3a : la forme d'un critère créé à la main (`grilles.js`, « Créer l'objet
+                // critère »), avec ses défauts ; le type reste holistique (lot 2).
+                var cr = {
+                    id: ctx.id('CR_'), nom: texte(c.nom), description: texte(c.description),
+                    ponderation: A.nombre(c.ponderation.valeur), type: 'holistique', formule: '',
+                    niveauSOLO: 'multistructurel', verrouille: false
+                };
+                // La forme de l'éditeur (`grilles.js`, `ajouterSousCritere`), dans l'ordre des lignes.
+                // Absent si aucun, comme un critère de l'éditeur sans sous-critère.
+                var sous = (c.sousCriteres || []).filter(Boolean);
+                if (sous.length) {
+                    cr.sousCriteres = sous.map(function (nom, k) {
+                        return { id: ctx.id('SC_'), code: String(k), nom: nom, ponderation: 1.0, retroaction: '' };
+                    });
+                }
                 var par = textesParNiveau(m, c);
                 // Les descripteurs vivent dans la grille (décision 2 du cadrage), liés à l'échelle créée avec eux.
                 if (!retro && Object.keys(par).length) cr.descripteurs = { echelleId: echelleId, parNiveau: par };
@@ -354,7 +430,7 @@
         var o = Object.assign(base(ctx, 'CART_', 'Rétroactions – ' + nomGrille), {
             grilleId: grille.id, echelleId: echelleId, contexte: '', description: '',
             criteres: grille.criteres.map(function (c) { return { id: c.id, nom: c.nom }; }),
-            niveaux: m.niveaux.map(function (n) { return { code: n.code.valeur, nom: texte(n.titre) }; }),
+            niveaux: m.niveaux.map(function (n) { return { code: texte(n.code), nom: texte(n.titre) }; }),
             commentaires: commentaires
         });
         delete o.isDemo;   // la forme des cartouches créées à la main (cartouches.js) n'en a pas

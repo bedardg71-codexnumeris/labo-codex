@@ -11,8 +11,14 @@
  * il n'est jamais inséré dans la page, ses scripts ne s'exécutent pas, ses images ne se
  * chargent pas, et seul son TEXTE (`textContent`) en sort.
  *
- * Ce que produit la lecture (le « modèle » d'une grille collée, consommé par l'aperçu du
- * lot 1 et par l'assistant du lot 2) : chaque valeur est une paire `{ valeur, etat }`.
+ * Lot 3a (`CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-3a-roles.md`) : le tableau est
+ * DÉPLIÉ en grille régulière (cases fusionnées), les retours à la ligne d'une case survivent,
+ * et le modèle se construit à partir des RÔLES de chaque rangée et de chaque colonne
+ * (`proposerRoles`, `modeleDepuisRoles`) : la lecture automatique n'est qu'une proposition,
+ * que la personne corrige à l'étape « Ce que contient ton tableau ».
+ *
+ * Ce que produit la lecture (le « modèle » d'une grille collée, consommé par l'assistant) :
+ * chaque valeur est une paire `{ valeur, etat }`.
  *   etat 'repris'   : tel quel dans le document ;
  *        'complete' : l'application l'a complétée (parts égales, code de niveau) ;
  *        'propose'  : l'application l'a déduite du texte, à vérifier (nature des cases) ;
@@ -34,13 +40,25 @@
 
     /** Éléments dont le texte n'est jamais du contenu (Word colle aussi ses <style>). */
     var ELEMENTS_IGNORES = 'script, style, template, noscript, head, title, meta, link, object, embed, iframe';
-    /** Blocs de texte : séparés par une espace dans une case, un passage chacun hors du tableau. */
+    /** Blocs de texte : un retour à la ligne dans une case (lot 3a), un passage chacun hors du tableau. */
     var BLOCS = 'p, h1, h2, h3, h4, h5, h6, li, div, blockquote, pre, caption';
+    /** Marque d'un retour à la ligne VOULU (bloc, <br>), posée avant que les blancs du source HTML se resserrent. */
+    var SAUT = '\uE000';
 
     function propre(s) {
         return String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
     }
     L.propre = propre;
+
+    /** Les lignes d'un texte marqué : chacune resserrée, les lignes vides retirées. */
+    function lignesDe(s) {
+        return String(s == null ? '' : s).split(SAUT).map(propre).filter(Boolean);
+    }
+
+    /** Les lignes d'une case lue (`\n` entre elles). */
+    L.lignes = function (t) {
+        return String(t == null ? '' : t).split('\n').map(propre).filter(Boolean);
+    };
 
     function paire(valeur, etat) { return { valeur: valeur, etat: etat }; }
 
@@ -49,18 +67,21 @@
     // ------------------------------------------------------------------
 
     /**
-     * Texte d'une case : les blocs internes (un paragraphe Word par ligne, des <br>) sont
-     * séparés par une espace, sinon « Ligne unLigne deux » se soudent.
+     * Texte d'une case. Lot 3a : les retours à la ligne SURVIVENT — un bloc interne (un
+     * paragraphe Word, un élément de liste) ou un <br> donne un `\n`, les lignes vides se
+     * resserrent. Les retours du source HTML, eux, ne sont que des blancs.
+     * (Au lot 1, une espace : sept micro-tâches d'une grille Pages se collaient en un bloc.)
      */
     function texteDe(el) {
         var doc = el.ownerDocument;
         Array.prototype.forEach.call(el.querySelectorAll('br'), function (br) {
-            br.parentNode.replaceChild(doc.createTextNode(' '), br);
+            br.parentNode.replaceChild(doc.createTextNode(SAUT), br);
         });
         Array.prototype.forEach.call(el.querySelectorAll(BLOCS), function (b) {
-            b.appendChild(doc.createTextNode(' '));
+            b.insertBefore(doc.createTextNode(SAUT), b.firstChild);
+            b.appendChild(doc.createTextNode(SAUT));
         });
-        return propre(el.textContent);
+        return lignesDe(el.textContent).join('\n');
     }
 
     /**
@@ -82,22 +103,25 @@
         });
         var table = doc.body.querySelector('table');
         if (!table) return null;
-        var rangees = rangeesDe(table);
-        if (rangees.length < 2) return null;
         var hors = textesHorsTableau(doc, table);
+        var rangees = rangeesDe(table);
+        if (rangees.filter(aDuTexte).length < 2) return null;
         return { rangees: rangees, avant: hors.avant, apres: hors.apres };
     };
 
-    /** Les rangées non vides d'une <table> : [{ t, span: colSpan, rspan: rowSpan }]. */
+    function aDuTexte(row) { return row.some(function (c) { return c.t; }); }
+
+    /**
+     * Les rangées d'une <table> : [{ t, span: colSpan, rspan: rowSpan }]. Les rangées vides
+     * sont GARDÉES (lot 3a) : une case fusionnée sur plusieurs rangées les compte ; le
+     * dépliage les retire ensuite.
+     */
     function rangeesDe(table) {
-        var rangees = [];
-        Array.prototype.forEach.call(table.rows, function (tr) {
-            var cells = Array.prototype.map.call(tr.cells, function (td) {
+        return Array.prototype.map.call(table.rows, function (tr) {
+            return Array.prototype.map.call(tr.cells, function (td) {
                 return { t: texteDe(td), span: td.colSpan || 1, rspan: td.rowSpan || 1 };
             });
-            if (cells.some(function (c) { return c.t; })) rangees.push(cells);
         });
-        return rangees;
     }
 
     /**
@@ -169,8 +193,253 @@
         return (p.html ? L.lireHtml(p.html) : null) || L.lireTexte(p.texte);
     };
 
+    var RE_NOMBRE = '(\\d+(?:[.,]\\d+)?)';
+    var RE_SEP = '\\s*%?\\s*(?:-|–|—|à|au)\\s*';
+    /** « Excellent (85-100 %) », « Excellent 85 à 100 », « 85 % – 100 % ». */
+    var RE_PLAGE = new RegExp(RE_NOMBRE + RE_SEP + RE_NOMBRE + '\\s*%?');
+    var RE_PLAGE_A_RETIRER = new RegExp('[(\\[]?\\s*' + RE_NOMBRE + RE_SEP + RE_NOMBRE + '\\s*%?\\s*[)\\]]?');
+
     // ------------------------------------------------------------------
-    // 2. INTERPRÉTER : des rangées au modèle d'une grille
+    // 2. DÉPLIER : des rangées lues à une grille régulière (lot 3a)
+    // ------------------------------------------------------------------
+
+    /**
+     * Les cases fusionnées sont DÉPLIÉES avant toute interprétation : une case sur N colonnes
+     * garde son texte dans la première et laisse les suivantes vides ; une case sur N rangées,
+     * dans la première rangée. Chaque rangée a alors le même nombre de cases.
+     * Une case de la grille : { t, fusion: fait partie d'une case fusionnée,
+     *   suite: '' (case d'origine ou normale) | 'h' (à droite de l'origine) | 'v' (sous elle),
+     *   manque: true si la rangée était plus courte que le tableau (dépliage impossible) }.
+     * Les rangées vides sont retirées APRÈS le dépliage.
+     *
+     * @param {Array} rangees - rangées lues ({ t, span, rspan })
+     * @returns {Array} rangées de cases dépliées, toutes de même largeur
+     */
+    L.deplier = function (rangees) {
+        var g = [];
+        rangees.forEach(function (row, r) {
+            g[r] = g[r] || [];
+            var c = 0;
+            row.forEach(function (cell) {
+                while (g[r][c]) c++;
+                var cs = Math.max(1, cell.span || 1);
+                var rs = Math.max(1, Math.min(cell.rspan || 1, rangees.length - r));
+                var fusion = cs > 1 || rs > 1;
+                for (var dr = 0; dr < rs; dr++) {
+                    g[r + dr] = g[r + dr] || [];
+                    for (var dc = 0; dc < cs; dc++) {
+                        g[r + dr][c + dc] = {
+                            t: dr === 0 && dc === 0 ? (cell.t || '') : '', fusion: fusion,
+                            suite: dr > 0 ? 'v' : (dc > 0 ? 'h' : '')
+                        };
+                    }
+                }
+                c += cs;
+            });
+        });
+        var largeur = g.reduce(function (m, row) { return Math.max(m, row.length); }, 0);
+        return g.map(function (row) {
+            var out = [];
+            for (var j = 0; j < largeur; j++) out.push(row[j] || { t: '', fusion: false, suite: '', manque: true });
+            return out;
+        }).filter(aDuTexte);
+    };
+
+    /** Transpose une grille dépliée : une suite horizontale devient verticale, et l'inverse. */
+    function transposerGrille(g) {
+        var largeur = g.length ? g[0].length : 0, t = [];
+        for (var j = 0; j < largeur; j++) {
+            t.push(g.map(function (row) {
+                var c = row[j];
+                return Object.assign({}, c, { suite: c.suite === 'h' ? 'v' : (c.suite === 'v' ? 'h' : '') });
+            }));
+        }
+        return t.filter(aDuTexte);
+    }
+
+    /**
+     * La lecture DANS LE SENS CHOISI à l'étape « Sens du tableau » : la grille dépliée, transposée
+     * si les critères sont en colonnes. C'est à elle que s'appliquent les rôles.
+     * ⚠ Écart assumé au prototype (lot 1) : ce sont les rangées LUES qui sont transposées puis
+     * réinterprétées, pas le modèle ; deux inversions rendent la lecture d'origine.
+     */
+    L.orienter = function (lu, enColonnes) {
+        var g = L.deplier(lu.rangees);
+        return { rangees: enColonnes ? transposerGrille(g) : g, avant: lu.avant || [], apres: lu.apres || [] };
+    };
+
+    // ------------------------------------------------------------------
+    // 3. LES RÔLES : ce qu'est chaque rangée, chaque colonne (lot 3a)
+    // ------------------------------------------------------------------
+
+    /**
+     * Principe de Grégoire (17 oct., 8 h 23) : la lecture automatique n'est qu'une PROPOSITION ;
+     * l'utilisateur dit ce qu'est chaque rangée et chaque colonne. Libellés PROVISOIRES (relus en 3b).
+     */
+    L.ROLES_RANGEES = [
+        { id: 'niveaux', libelle: 'Noms des niveaux' },
+        { id: 'codes', libelle: 'Codes des niveaux' },
+        { id: 'plages', libelle: 'Plages de notes' },
+        { id: 'critere', libelle: 'Un critère' },
+        { id: 'nomCritere', libelle: 'Nom d’un critère' },
+        { id: 'suite', libelle: 'Suite du critère' },
+        { id: 'ignorer', libelle: 'À ignorer' }
+    ];
+    L.ROLES_COLONNES = [
+        { id: 'noms', libelle: 'Noms des critères' },
+        { id: 'pond', libelle: 'Pondération' },
+        { id: 'niveau', libelle: 'Un niveau' },
+        { id: 'sousCriteres', libelle: 'Sous-critères' },
+        { id: 'description', libelle: 'Description du critère' },
+        { id: 'ignorer', libelle: 'À ignorer' }
+    ];
+    /** Dans une « Suite du critère », ce que devient la case de la colonne « Noms des critères ». */
+    L.CHOIX_SUITE = [
+        { id: 'sousCriteres', libelle: 'des sous-critères, un par ligne' },
+        { id: 'description', libelle: 'la description du critère' },
+        { id: 'rien', libelle: 'rien à garder' }
+    ];
+    /**
+     * Un seul de ces rôles par tableau : en choisir un autre fait passer le précédent à
+     * « À ignorer ». ⚠ « Noms des critères » et « Pondération » aussi (supposition de Claude
+     * Code, 17 oct. : la consigne ne lit que la première ; une seconde ne servirait à rien).
+     */
+    var UNIQUES = { rangees: ['niveaux', 'codes', 'plages'], colonnes: ['noms', 'pond'] };
+
+    /** Un code de niveau tel qu'un document l'écrit : court (≤ 4 caractères), sans espace. */
+    function estCode(t) { return !!t && t.length <= 4 && !/\s/.test(t); }
+
+    /** Une case qui ne porte qu'une plage : « 65-74 », « 65 à 74 % ». */
+    var RE_PLAGE_SEULE = new RegExp('^' + RE_NOMBRE + RE_SEP + RE_NOMBRE + '\\s*%?$');
+
+    /** Au-delà, une case d'en-tête n'est plus un nom de niveau (sauf sous une case fusionnée de la 1re rangée). */
+    L.LONGUEUR_ENTETE_MAX = 60;
+
+    function casesDe(row, colonnes, role) {
+        var out = [];
+        colonnes.forEach(function (r, j) { if (r === role && row[j]) out.push(row[j]); });
+        return out;
+    }
+
+    /** Ce que porte une rangée d'en-tête : 'plages', 'codes', 'noms', ou '' (rien dans les niveaux). */
+    function natureEntete(row, colonnes) {
+        var cs = casesDe(row, colonnes, 'niveau').map(function (c) { return propre(c.t); }).filter(Boolean);
+        if (!cs.length) return '';
+        if (cs.every(function (t) { return RE_PLAGE_SEULE.test(t); })) return 'plages';
+        if (cs.every(estCode)) return 'codes';
+        return 'noms';
+    }
+
+    /**
+     * Les rangées d'en-tête : la 1re, puis celles qui la suivent sans nom de critère et dont les
+     * cases de niveau sont courtes — ou qui sont sous une case fusionnée de la 1re rangée.
+     */
+    function rangeesEntete(g, colonnes) {
+        var fin = 0;
+        for (var i = 1; i < g.length; i++) {
+            var nomCase = g[i][0];
+            if (!nomCase || nomCase.t) break;
+            var sousLaPremiere = nomCase.suite === 'v' && g[0][0] && g[0][0].fusion;
+            var courtes = casesDe(g[i], colonnes, 'niveau').every(function (c) {
+                return !c.t || (c.t.indexOf('\n') < 0 && c.t.length <= L.LONGUEUR_ENTETE_MAX);
+            });
+            if (!natureEntete(g[i], colonnes) || !(sousLaPremiere || courtes)) break;
+            fin = i;
+        }
+        return fin;
+    }
+
+    function estBande(row, colonnes) {
+        var cs = casesDe(row, colonnes, 'niveau');
+        return !!(row[0] && propre(row[0].t)) && cs.length > 0 && cs.every(function (c) { return estCode(propre(c.t)) && c.t.indexOf('\n') < 0; });
+    }
+
+    function aDesTextesLongs(row, colonnes) {
+        return casesDe(row, colonnes, 'niveau').some(function (c) { return c.t && !estCode(propre(c.t)); });
+    }
+
+    /**
+     * Ce que propose l'application (fonction pure). Colonnes : la 1re nomme les critères, une
+     * colonne d'en-tête « pondération » la porte, les autres sont des niveaux. Rangées : en
+     * tête, la DERNIÈRE rangée de noms courts nomme les niveaux (les précédentes sont « À
+     * ignorer ») ; une rangée de codes ou de plages seules les donne. Puis, une bande dont les
+     * cases de niveau sont des codes suivie d'une rangée de textes longs : « Nom d'un critère »
+     * puis « Suite du critère » ; une rangée sous la case fusionnée d'un critère : sa suite ;
+     * sinon « Un critère ».
+     *
+     * @param {{rangees: Array}} lu - la lecture orientée (`orienter`)
+     * @returns {{rangees: string[], colonnes: string[], suiteNom: string, propose: boolean}}
+     */
+    L.proposerRoles = function (lu) {
+        var g = lu.rangees;
+        var colonnes = proposerColonnes(g);
+        var fin = rangeesEntete(g, colonnes);
+        var rangees = rolesEntete(g, colonnes, fin).concat(rolesCorps(g, colonnes, fin));
+        return { rangees: rangees, colonnes: colonnes, suiteNom: 'sousCriteres', propose: true };
+    };
+
+    /** La 1re colonne nomme les critères ; la 1re dont l'en-tête dit « pondération » la porte ; les autres sont des niveaux. */
+    function proposerColonnes(g) {
+        var nb = g.length ? g[0].length : 0, colonnes = [];
+        for (var j = 0; j < nb; j++) colonnes.push(j === 0 ? 'noms' : 'niveau');
+        var fin = rangeesEntete(g, colonnes);
+        for (var k = 1; k < nb; k++) {
+            var enteteK = g.slice(0, fin + 1).some(function (row) { return estEntetePonderation(propre(row[k].t)); });
+            if (enteteK) { colonnes[k] = 'pond'; break; }
+        }
+        return colonnes;
+    }
+
+    /** En tête : la DERNIÈRE rangée de noms nomme les niveaux ; la 1re de codes, de plages les donne ; le reste est ignoré. */
+    function rolesEntete(g, colonnes, fin) {
+        var natures = g.slice(0, fin + 1).map(function (row) { return natureEntete(row, colonnes); });
+        var noms = natures.lastIndexOf('noms');
+        if (noms < 0) noms = 0;
+        var roles = [];
+        natures.forEach(function (nat, h) {
+            if (h === noms) roles.push('niveaux');
+            else if ((nat === 'codes' || nat === 'plages') && roles.indexOf(nat) < 0) roles.push(nat);
+            else roles.push('ignorer');
+        });
+        return roles;
+    }
+
+    /** Sous l'en-tête : bande + rangée de textes longs → nom et suite ; sous la case fusionnée d'un critère → suite ; sinon un critère. */
+    function rolesCorps(g, colonnes, fin) {
+        var roles = [];
+        var role = function (i) { return i > fin ? roles[i - fin - 1] : ''; };
+        for (var i = fin + 1; i < g.length; i++) {
+            if (estBande(g[i], colonnes) && i + 1 < g.length && !estBande(g[i + 1], colonnes) && aDesTextesLongs(g[i + 1], colonnes)) {
+                roles.push('nomCritere', 'suite');
+                i++;
+            } else if (g[i][0] && g[i][0].suite === 'v' && ['critere', 'nomCritere', 'suite'].indexOf(role(i - 1)) >= 0) {
+                roles.push('suite');
+            } else {
+                roles.push('critere');
+            }
+        }
+        return roles;
+    }
+
+    /**
+     * Change le rôle d'une rangée (`'rangees'`) ou d'une colonne (`'colonnes'`) : rend une COPIE,
+     * plus « proposée ». Un rôle unique déjà pris ailleurs y passe à « À ignorer ».
+     */
+    L.changerRole = function (roles, sorte, index, role) {
+        var r = JSON.parse(JSON.stringify(roles));
+        var liste = r[sorte];
+        var permis = (sorte === 'rangees' ? L.ROLES_RANGEES : L.ROLES_COLONNES).map(function (x) { return x.id; });
+        if (!liste || index < 0 || index >= liste.length || permis.indexOf(role) < 0) return roles;
+        if (UNIQUES[sorte].indexOf(role) >= 0) {
+            liste.forEach(function (x, q) { if (x === role && q !== index) liste[q] = 'ignorer'; });
+        }
+        liste[index] = role;
+        r.propose = false;
+        return r;
+    };
+
+    // ------------------------------------------------------------------
+    // 4. INTERPRÉTER : de la grille et de ses rôles au modèle d'une grille
     // ------------------------------------------------------------------
 
     /** En-tête d'une colonne de pondération : pondération, points, pts, total, /N, %. */
@@ -178,24 +447,21 @@
         return /pond/i.test(h) || /^(points?|pts|total)\b/i.test(h) || /^\/\s*\d+$/.test(h) || /^%$/.test(h);
     }
 
-    var RE_NOMBRE = '(\\d+(?:[.,]\\d+)?)';
-    var RE_SEP = '\\s*%?\\s*(?:-|–|—|à|au)\\s*';
-    /** « Excellent (85-100 %) », « Excellent 85 à 100 », « 85 % – 100 % ». */
-    var RE_PLAGE = new RegExp(RE_NOMBRE + RE_SEP + RE_NOMBRE + '\\s*%?');
-    var RE_PLAGE_A_RETIRER = new RegExp('[(\\[]?\\s*' + RE_NOMBRE + RE_SEP + RE_NOMBRE + '\\s*%?\\s*[)\\]]?');
-
     function nombreTexte(s) { return String(s).replace(',', '.'); }
 
-    function niveauDeLEntete(brut) {
+    function plageDe(brut) {
         var p = brut.match(RE_PLAGE);
+        if (!p) return null;
+        var lo = nombreTexte(p[1]), hi = nombreTexte(p[2]);
+        if (parseFloat(lo) > parseFloat(hi)) { var tmp = lo; lo = hi; hi = tmp; }
+        return { min: paire(lo, 'repris'), max: paire(hi, 'repris') };
+    }
+
+    function niveauDeLEntete(brut) {
+        var p = plageDe(brut);
         if (p) {
-            var lo = nombreTexte(p[1]), hi = nombreTexte(p[2]);
-            if (parseFloat(lo) > parseFloat(hi)) { var tmp = lo; lo = hi; hi = tmp; }
             var titre = propre(brut.replace(RE_PLAGE_A_RETIRER, '').replace(/[:–—-]\s*$/, ''));
-            return {
-                titre: paire(titre, titre ? 'repris' : 'remplir'),
-                min: paire(lo, 'repris'), max: paire(hi, 'repris')
-            };
+            return { titre: paire(titre, titre ? 'repris' : 'remplir'), min: p.min, max: p.max };
         }
         return {
             titre: paire(brut, brut ? 'repris' : 'remplir'),
@@ -205,11 +471,17 @@
 
     /**
      * Codes de niveau tirés des titres, uniques : la 1re lettre, puis un préfixe plus long,
-     * puis un suffixe numérique. Marqués « complété » : le document n'en donne jamais.
+     * puis un suffixe numérique. Marqués « complété ».
+     * Lot 3a : EN REPLI SEULEMENT. Un code repris du document, saisi ou vidé par la personne
+     * n'est jamais recalculé (modifier un titre ne touche plus son code) ; les codes complétés
+     * évitent ceux-là, sans tenir compte de la casse.
      */
     L.coder = function (niveaux) {
         var pris = {};
+        function garde(n) { return n.code && n.code.etat !== 'complete'; }
+        niveaux.forEach(function (n) { if (garde(n) && n.code.valeur) pris[String(n.code.valeur).trim().toUpperCase()] = true; });
         return niveaux.map(function (n) {
+            if (garde(n)) return Object.assign({}, n);
             var s = String(n.titre.valeur || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
                 .replace(/[^A-Za-z]/g, '').toUpperCase() || 'N';
             var code = s.slice(0, 1), k = 2;
@@ -253,118 +525,192 @@
     };
 
     function texteDeRangee(row) {
-        return row.map(function (c) { return c.t; }).filter(Boolean).join(' · ');
+        return row.map(function (c) { return propre(c.t); }).filter(Boolean).join(' · ');
+    }
+
+    /** Puces et cases à cocher en tête de ligne, retirées des sous-critères. */
+    var RE_PUCE = /^[☐☑□■•*-]+\s*/;
+
+    function sousCriteresDe(t) {
+        return L.lignes(t).map(function (l) { return l.replace(RE_PUCE, '').trim(); }).filter(Boolean);
+    }
+
+    function joindre(a, b) { return a && b ? a + '\n' + b : (a || b); }
+
+    /** Pourquoi une rangée « Un critère » ou « Nom d'un critère » va à « À classer » (règles du lot 1), ou ''. */
+    function raisonAClasser(row, colNoms) {
+        var irreguliere = row.some(function (c) { return c.manque; }) ||
+            (row.length > 1 && row[0].fusion && row.slice(1).every(function (c) { return c.suite === 'h'; }));
+        if (irreguliere) return 'Ligne d’une autre forme que le tableau (cases fusionnées ?)';
+        var nom = propre(row[colNoms].t);
+        if (!nom) return 'Ligne sans nom de critère';
+        if (/^pond/i.test(nom)) return 'Ligne de pondération, à reporter sur les critères';
+        return '';
+    }
+
+    function ponderationDe(row, colPond) {
+        var p = colPond >= 0 ? (propre(row[colPond].t).match(/\d+(?:[.,]\d+)?/) || [])[0] : undefined;
+        return p ? paire(nombreTexte(p), 'repris') : null;
+    }
+
+    /** Les niveaux : titres de « Noms des niveaux », plages de « Plages de notes », codes repris ou complétés. */
+    function niveauxDepuisRoles(g, roles, idxNiv) {
+        var R = roles.rangees;
+        var rN = R.indexOf('niveaux'), rC = R.indexOf('codes'), rP = R.indexOf('plages');
+        var bandes = [];
+        R.forEach(function (r, i) { if (r === 'nomCritere') bandes.push(i); });
+        return L.coder(idxNiv.map(function (k) {
+            var n = rN >= 0 ? niveauDeLEntete(propre(g[rN][k].t))
+                : { titre: paire('', 'remplir'), min: paire('', 'remplir'), max: paire('', 'remplir') };
+            var p = rP >= 0 ? plageDe(propre(g[rP][k].t)) : null;
+            if (p) { n.min = p.min; n.max = p.max; }
+            var code = '';
+            if (rC >= 0) code = propre(g[rC][k].t);
+            else if (bandes.length) {
+                // Les cases de niveau d'une bande « NOM | I | D | M | E » : des codes, s'ils sont
+                // identiques d'une bande à l'autre.
+                var vus = bandes.map(function (i) { return propre(g[i][k].t); });
+                if (vus.every(function (v) { return estCode(v) && v === vus[0]; })) code = vus[0];
+            }
+            if (code) n.code = paire(code, 'repris');
+            return n;
+        }));
     }
 
     /**
-     * Rangées lues → modèle. 1re rangée = niveaux, 1re colonne = critères.
-     * @param {{rangees: Array, avant: string[], apres: string[]}} lu
-     * @param {'colle'|'exemple'|'main'} source
+     * La grille orientée et ses rôles → le modèle (fonction pure). Ce qui ne trouve pas sa
+     * place va dans `aClasser` avec sa raison ; ce qui empêche de construire va dans
+     * `manquesLecture` (affiché dans « Avant de créer, il reste »).
+     *
+     * @param {{rangees: Array, avant: string[], apres: string[]}} lu - la lecture orientée
+     * @param {{rangees: string[], colonnes: string[], suiteNom: string}} roles
      */
-    L.interpreter = function (lu, source) {
-        var r = lu.rangees, entete = r[0], nb = entete.length;
-        var aClasser = [];
+    L.modeleDepuisRoles = function (lu, roles) {
+        var g = lu.rangees, R = roles.rangees, K = roles.colonnes;
+        var aClasser = [], manques = [];
         var nom = '';
         (lu.avant || []).forEach(function (t, i) {
             if (i === 0 && t.length <= L.LONGUEUR_NOM_MAX) nom = t;
             else aClasser.push({ texte: t, raison: 'Texte avant le tableau' });
         });
 
-        var enteteIrreguliere = entete.some(function (c) { return c.span > 1 || c.rspan > 1; });
-        var colPond = -1;
-        for (var i = 1; i < nb; i++) {
-            if (estEntetePonderation(entete[i].t)) { colPond = i; break; }
-        }
-        var idxNiv = [];
-        for (var j = 1; j < nb; j++) if (j !== colPond) idxNiv.push(j);
-        var niveaux = L.coder(idxNiv.map(function (k) { return niveauDeLEntete(entete[k].t); }));
-
-        var criteres = [];
-        r.slice(1).forEach(function (row) {
-            var texte = texteDeRangee(row);
-            if (row.length !== nb || row.some(function (c) { return c.span > 1 || c.rspan > 1; })) {
-                aClasser.push({ texte: texte, raison: 'Ligne d’une autre forme que le tableau (cases fusionnées ?)' });
-                return;
-            }
-            if (!row[0].t) { aClasser.push({ texte: texte, raison: 'Ligne sans nom de critère' }); return; }
-            if (/^pond/i.test(row[0].t)) {
-                aClasser.push({ texte: texte, raison: 'Ligne de pondération, à reporter sur les critères' });
-                return;
-            }
-            var p = colPond >= 0 ? (row[colPond].t.match(/\d+(?:[.,]\d+)?/) || [])[0] : undefined;
-            criteres.push({
-                nom: paire(row[0].t, 'repris'),
-                ponderation: p ? paire(nombreTexte(p), 'repris') : paire('', 'remplir'),
-                cases: idxNiv.map(function (k) { return paire(row[k].t, row[k].t ? 'repris' : 'vide'); })
-            });
+        var idxNiv = [], colsSous = [], colsDesc = [];
+        K.forEach(function (r, j) {
+            if (r === 'niveau') idxNiv.push(j);
+            else if (r === 'sousCriteres') colsSous.push(j);
+            else if (r === 'description') colsDesc.push(j);
         });
+        var colNoms = K.indexOf('noms'), colPond = K.indexOf('pond');
+        // Textes PROVISOIRES (Claude Code, 17 oct.), relus en 3b.
+        if (!idxNiv.length) manques.push('au moins une colonne « Un niveau », à l’étape « Ce que contient ton tableau »');
+        if (colNoms < 0) manques.push('une colonne « Noms des critères », à l’étape « Ce que contient ton tableau »');
+
+        var niveaux = niveauxDepuisRoles(g, roles, idxNiv);
+        var criteres = [], courant = null, orphelines = [];
+
+        function completer(c, row) {
+            colsSous.forEach(function (j) { c.sousCriteres = c.sousCriteres.concat(sousCriteresDe(row[j].t)); });
+            colsDesc.forEach(function (j) { c.description = joindre(c.description, L.lignes(row[j].t).join('\n')); });
+            if (!c.ponderation) c.ponderation = ponderationDe(row, colPond);
+        }
+
+        g.forEach(function (row, i) {
+            var role = R[i];
+            if (colNoms < 0) return;
+            if (role === 'critere' || role === 'nomCritere') {
+                var raison = raisonAClasser(row, colNoms);
+                if (raison) { aClasser.push({ texte: texteDeRangee(row), raison: raison }); courant = null; return; }
+                // Les cases de niveau d'une bande ne vont nulle part : elles restent visibles à l'étape des rôles.
+                var c = {
+                    nom: propre(row[colNoms].t), ponderation: null, sousCriteres: [], description: '',
+                    cases: idxNiv.map(function (k) { return role === 'critere' ? row[k].t : ''; })
+                };
+                completer(c, row);
+                criteres.push(c);
+                courant = c;
+            } else if (role === 'suite') {
+                if (!courant) { orphelines.push(i + 1); return; }
+                idxNiv.forEach(function (k, q) { courant.cases[q] = joindre(courant.cases[q], row[k].t); });
+                var t = row[colNoms].t;
+                if (roles.suiteNom === 'sousCriteres') courant.sousCriteres = courant.sousCriteres.concat(sousCriteresDe(t));
+                else if (roles.suiteNom === 'description') courant.description = joindre(courant.description, L.lignes(t).join('\n'));
+                completer(courant, row);
+            }
+        });
+        if (orphelines.length) {
+            manques.push(orphelines.length === 1
+                ? 'un critère au-dessus de la rangée ' + orphelines[0] + ' (« Suite du critère »), à l’étape « Ce que contient ton tableau »'
+                : 'un critère au-dessus des rangées ' + orphelines.join(', ') + ' (« Suite du critère »), à l’étape « Ce que contient ton tableau »');
+        }
         (lu.apres || []).forEach(function (t) { aClasser.push({ texte: t, raison: 'Texte après le tableau' }); });
 
-        if (criteres.length && criteres.every(function (c) { return !c.ponderation.valeur; })) L.partsEgales(criteres);
+        var modeles = criteres.map(function (c) {
+            return {
+                nom: paire(c.nom, 'repris'),
+                ponderation: c.ponderation || paire('', 'remplir'),
+                cases: c.cases.map(function (t) { return paire(t, t ? 'repris' : 'vide'); }),
+                sousCriteres: c.sousCriteres,
+                description: paire(c.description, c.description ? 'repris' : 'vide')
+            };
+        });
+        if (modeles.length && modeles.every(function (c) { return !c.ponderation.valeur; })) L.partsEgales(modeles);
 
         return {
-            source: source,
-            lecture: { rangees: r, avant: lu.avant || [], apres: lu.apres || [] },
-            critEnColonnes: false,
-            enteteIrreguliere: enteteIrreguliere,
+            tableau: g,
+            roles: roles,
+            fusionnees: g.some(function (row) { return row.some(function (c) { return c.fusion; }); }),
+            manquesLecture: manques,
             nom: paire(nom, nom ? 'repris' : 'remplir'),
-            nature: L.proposerNature(criteres),
+            nature: L.proposerNature(modeles),
             niveaux: niveaux,
-            criteres: criteres,
+            criteres: modeles,
             aClasser: aClasser.map(function (a, n) { return Object.assign({ id: n, statut: 'attente' }, a); })
         };
     };
 
-    // ------------------------------------------------------------------
-    // 3. INVERSER : critères en colonnes → en lignes
-    // ------------------------------------------------------------------
+    /** La lecture BRUTE (non orientée) → le modèle, dans un sens, avec des rôles (proposés si absents). */
+    function construire(lu, source, enColonnes, roles) {
+        var o = L.orienter(lu, enColonnes);
+        var m = L.modeleDepuisRoles(o, roles || L.proposerRoles(o));
+        return Object.assign({
+            source: source,
+            lecture: { rangees: lu.rangees, avant: lu.avant || [], apres: lu.apres || [] },
+            critEnColonnes: !!enColonnes
+        }, m);
+    }
 
     /**
-     * Transpose les rangées LUES. Une case fusionnée sur N colonnes devient N cases marquées
-     * fusionnées : après la transposition, leurs rangées vont à « À classer ».
+     * Rangées lues → modèle, critères en lignes, rôles proposés par l'application.
+     * @param {{rangees: Array, avant: string[], apres: string[]}} lu
+     * @param {'colle'|'exemple'|'main'} source
      */
-    L.transposer = function (rangees) {
-        var grille = rangees.map(function (row) {
-            var out = [];
-            row.forEach(function (c) {
-                var n = Math.max(1, c.span || 1);
-                var fusion = n > 1 || (c.rspan || 1) > 1;
-                for (var q = 0; q < n; q++) {
-                    out.push({ t: q === 0 ? c.t : '', span: fusion ? 2 : 1, rspan: 1 });
-                }
-            });
-            return out;
-        });
-        var largeur = grille.reduce(function (m, row) { return Math.max(m, row.length); }, 0);
-        var t = [];
-        for (var j = 0; j < largeur; j++) {
-            t.push(grille.map(function (row) { return row[j] || { t: '', span: 1, rspan: 1 }; }));
-        }
-        return t.filter(function (row) { return row.some(function (c) { return c.t; }); });
-    };
+    L.interpreter = function (lu, source) { return construire(lu, source, false, null); };
 
-    /**
-     * Le sens du tableau, choisi par la personne (cadrage, idée de Grégoire du 15 oct.).
-     * ⚠ Écart assumé au prototype : il transposait le MODÈLE (critères × niveaux), ce qui
-     * jetait la colonne de pondération et les passages à classer. Ici, ce sont les rangées
-     * LUES qui sont transposées puis réinterprétées : une grille aux niveaux en lignes a ses
-     * plages dans la 1re colonne (« Excellent (85-100 %) ») et sa pondération dans une ligne ;
-     * relues dans le bon sens, elles sont reprises au lieu d'être à remplir. Ce qui ne se
-     * relit pas retombe comme le dit la consigne : parts égales, plages à remplir. Deux
-     * inversions rendent la lecture d'origine.
-     * Le nom (repris d'au-dessus du tableau) et la nature, s'ils ont été choisis, sont gardés.
-     */
-    L.inverser = function (modele) {
-        var lu = modele.lecture;
-        var nouveau = L.interpreter({ rangees: L.transposer(lu.rangees), avant: lu.avant, apres: lu.apres }, modele.source);
-        nouveau.critEnColonnes = !modele.critEnColonnes;
+    /** Ce qui survit à une relecture : le nom (repris d'au-dessus du tableau), la nature si elle a été choisie. */
+    function garder(nouveau, modele) {
         nouveau.nom = modele.nom;
         if (modele.nature && modele.nature.etat !== 'propose') nouveau.nature = modele.nature;
         return nouveau;
+    }
+
+    /**
+     * Le sens du tableau, choisi par la personne (cadrage, idée de Grégoire du 15 oct.) : la
+     * lecture est réorientée et RELUE, les rôles remis à la proposition de l'application. Une
+     * grille aux niveaux en lignes a ses plages dans la 1re colonne et sa pondération dans une
+     * ligne ; relues dans le bon sens, elles sont reprises. Deux inversions rendent la lecture
+     * d'origine.
+     */
+    L.inverser = function (modele) {
+        return garder(construire(modele.lecture, modele.source, !modele.critEnColonnes, null), modele);
+    };
+
+    /** Lot 3a : un rôle changé RELIT tout depuis le document (même règle qu'une inversion). */
+    L.relire = function (modele, roles) {
+        return garder(construire(modele.lecture, modele.source, modele.critEnColonnes, roles), modele);
     };
 
     // ------------------------------------------------------------------
-    // 4. CHARGER : de ce qu'on a collé à un modèle, ou à un message clair
+    // 5. CHARGER : de ce qu'on a collé à un modèle, ou à un message clair
     // ------------------------------------------------------------------
 
     L.MESSAGE_SANS_TABLEAU = 'L’application n’a pas trouvé de tableau dans ce que tu as collé. Dans Word ou Pages, sélectionne le tableau lui-même en entier, ou tape ta grille à la main.';
@@ -388,11 +734,13 @@
         var criteres = [1, 2, 3].map(function () {
             return {
                 nom: paire('', 'remplir'), ponderation: paire('', 'remplir'),
-                cases: niveaux.map(function () { return paire('', 'vide'); })
+                cases: niveaux.map(function () { return paire('', 'vide'); }),
+                sousCriteres: [], description: paire('', 'vide')
             };
         });
         return {
-            source: 'main', lecture: null, critEnColonnes: false, enteteIrreguliere: false,
+            source: 'main', lecture: null, critEnColonnes: false, tableau: null, roles: null,
+            fusionnees: false, manquesLecture: [],
             nom: paire('', 'remplir'), nature: null, niveaux: niveaux, criteres: criteres, aClasser: []
         };
     };
@@ -410,7 +758,7 @@
     };
 
     // ------------------------------------------------------------------
-    // 5. PLAGES : des entiers saisis aux plages contiguës enregistrées
+    // 6. PLAGES : des entiers saisis aux plages contiguës enregistrées
     // ------------------------------------------------------------------
 
     /**
