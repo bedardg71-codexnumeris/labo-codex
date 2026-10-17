@@ -29,10 +29,13 @@ async function ouvrirConception(page) {
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
     await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
-    await page.waitForTimeout(500);
+    // Un témoin, pas un délai : le dernier drapeau des migrations de démarrage (main.js, auDbReady)
+    // et la zone de collage qui écoute « coller » (materiel.js, au DOMContentLoaded).
+    await page.waitForFunction(() => !!db.getSync('migration_pratiqueId_to_configurable_id_done', false)
+        && document.getElementById('materiel-zone-collage')?.dataset.materielBranche === '1', null, { timeout: 20000 });
     expect(await page.evaluate(() => cle('grillesTemplates'))).toBe('a2032_grillesTemplates');
     await page.evaluate(() => window.afficherSection('conception'));
-    await page.waitForTimeout(200);
+    await expect(page.locator('#conception-materiel')).toBeVisible();
 }
 
 const PLAGES = [['85', '100', '92'], ['75', '84', '80'], ['65', '74', '70'], ['0', '64', '50']];
