@@ -35,7 +35,7 @@ La fusion de la vérification sur GitHub (lundi après-midi, après la rencontre
 - [x] 3 — en ligne le 17 à 11 h 08, sans release (1.202.0), vérification complète sans rougeur
 - [x] 4 — mesure écrite le 17 à 9 h 43 : `MESURE-2026-10-17-grilles-en-points.md` (faisable sans rien inventer)
 - [x] 5 — `51a7be2b`, relu et accepté à 12 h 05, non poussé (avec #1095, la rangée du critère sur l'iPad)
-- [ ] 5b
-- [ ] 6
+- [ ] 5b — `d75d8f09`, relu à 14 h 02 : deux corrections à commiter (`VERDICT-RELECTURE-2026-10-17-apporter-mon-materiel-6-et-5b.md`), plus les icônes « i » hors lot
+- [x] 6 — `1c1868e0`, relu et accepté à 14 h 02, non poussé
 - [ ] 7
 - [ ] 8

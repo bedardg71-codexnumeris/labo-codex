@@ -242,13 +242,33 @@ describe('étape 5b · R — les règles, une à une', () => {
         expect(L.pointsDesNiveaux(['• Rien.', 'Un peu.\n2', 'Beaucoup.\n4'])).toBe(4);   // la 1re case peut s'en passer
         expect(L.pointsDesNiveaux(['Un peu.\n2', '• Rien.', 'Beaucoup.\n4'])).toBe(null);  // une autre, non
         expect(L.pointsDesNiveaux(['Un peu.', 'Beaucoup.\n4'])).toBe(null);                // deux cases à points au moins
-        expect(L.pointsDesNiveaux(['1', '2', '3'])).toBe(null);                              // un nombre seul reste un descripteur
-        expect(L.pointsDesNiveaux(['Un peu.\n(2 points)', 'Beaucoup.\n4'])).toBe(null);
+        // Relecture de Cowork (C1) : un nombre seul compte (Q1) ; (C2) l'unité aussi ; jamais « % ».
+        expect(L.pointsDesNiveaux(['1', '2', '3'])).toBe(3);
+        expect(L.pointsDesNiveaux(['Un peu.\n(2 points)', 'Beaucoup.\n4'])).toBe(4);
+        expect(L.pointsDesNiveaux(['Peu.\n2 pt', 'Assez.\n3 pts', 'Beaucoup.\n4 points'])).toBe(4);
+        expect(L.pointsDesNiveaux(['Peu.\n(2 pts.)', 'Beaucoup.\n(5 POINTS)'])).toBe(5);
+        expect(L.pointsDesNiveaux(['Peu.\n2 %', 'Beaucoup.\n4 %'])).toBe(null);
+        expect(L.pointsDesNiveaux(['Peu.\n(2', 'Beaucoup.\n4)'])).toBe(null);
+        expect(L.pointsDesNiveaux(['Peu.\n2 points de plus', 'Beaucoup.\n4'])).toBe(null);
         const m = html('<table><tr><td>C</td><td>A</td><td>B</td></tr><tr><td>X</td><td><p>Peu.</p><p>0,5</p></td><td><p>Beaucoup.</p><p>2,5</p></td></tr></table>');
         expect(points(m)).toEqual(['2.5']);
         expect(m.criteres[0].ponderation.etat).toBe('repris');
         expect(m.enPoints).toBe(true);
         expect(A.calculs(A.preparer(m)).manquants).toContain('des points en nombre entier de 0 à 100 pour un critère');
+    });
+
+    it('R.4c (C1) « Clarté | 10 | 7 | 4 » est une grille en points ; une bande à codes et un en-tête recopié se lisent comme avant', () => {
+        const m = texte('Critère\tExcellent\tBien\tFaible\nClarté\t10\t7\t4\nRigueur\t5\t3\t1');
+        expect(m.enPoints).toBe(true);
+        expect(points(m)).toEqual(['10', '5']);
+        expect(m.niveaux.map(n => n.titre.valeur)).toEqual(['Excellent', 'Bien', 'Faible']);
+        const f2 = html(F.f2Html());   // les cases « I D M E » d'une bande n'entrent pas dans les cases du critère
+        expect(f2.enPoints).toBe(false);
+        expect(f2.criteres.map(c => c.ponderation.etat)).toEqual(['complete', 'complete', 'complete']);
+        expect(f2.niveaux.map(n => n.code.valeur)).toEqual(['I', 'D', 'M', 'E']);
+        const f4a = html(F.f4aHtml());   // les parties qui recopient l'en-tête ne sont pas des critères
+        expect(f4a.roles.rangees.filter(r => r === 'partie')).toHaveLength(2);
+        expect(points(f4a)).toEqual(F.F4A_POINTS.map(String));
     });
 
     it('R.4b une grille dont CHAQUE critère tire ses points de ses niveaux est en points ; une grille mixte reste à niveaux', () => {

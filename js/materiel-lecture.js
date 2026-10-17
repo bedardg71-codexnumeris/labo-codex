@@ -401,23 +401,26 @@
     function estReglette(row, colonnes) { return pointsReglette(row, colonnes) !== null; }
     L.pointsReglette = pointsReglette;
 
-    /** « 3 », « 7-8 », « 10-11-12 » : la dernière ligne d'une case de niveau qui porte ses points. */
-    var RE_POINTS_NIVEAU = /^\d+(?:[.,]\d+)?(?:\s*[-–]\s*\d+(?:[.,]\d+)?)*$/;
+    /**
+     * « 3 », « 7-8 », « 10-11-12 » : la dernière ligne d'une case de niveau qui porte ses points.
+     * Relecture de Cowork (C2, 17 oct., 14 h 02) : avec leur unité aussi — « 4 pts », « 2 pt »,
+     * « 4 points », « (4 points) ». Jamais « % » : dans une case de niveau, c'est une plage de note.
+     */
+    var POINTS_NIVEAU = '\\d+(?:[.,]\\d+)?(?:\\s*[-–]\\s*\\d+(?:[.,]\\d+)?)*(?:\\s*(?:pts?\\.?|points?))?';
+    var RE_POINTS_NIVEAU = new RegExp('^(?:' + POINTS_NIVEAU + '|\\(\\s*' + POINTS_NIVEAU + '\\s*\\))$', 'i');
 
     /**
-     * Étape 5b (point 4) : les points d'un niveau. Quand chaque case de niveau remplie (sauf, au plus,
-     * la première) porte un texte PUIS, sur sa dernière ligne, un nombre, une plage ou une énumération
-     * (la forme de la proposition : « un descripteur ou un qualificatif, puis les points »), le plus grand
+     * Étape 5b (point 4) : les points d'un niveau. Quand la dernière ligne de chaque case de niveau
+     * remplie (sauf, au plus, la première) est un nombre, une plage ou une énumération, le plus grand
      * nombre de la rangée est le maximum du critère (Q1 de Grégoire, 12 h 11 : « aussitôt qu'il y a
-     * des chiffres, il s'agit d'une note chiffrée »). Deux cases au moins ; rend null sinon. Le
-     * nombre RESTE dans le texte de la case.
+     * des chiffres, il s'agit d'une note chiffrée »). Une case faite d'un seul nombre compte aussi
+     * (relecture de Cowork, C1 : « Clarté | 10 | 7 | 4 » est une grille en points). Deux cases au
+     * moins ; rend null sinon. Le nombre RESTE dans le texte de la case.
      * @param {string[]} cases - le texte des cases de niveau d'un critère
      */
     L.pointsDesNiveaux = function (cases) {
         var pleines = cases.map(L.lignes).filter(function (l) { return l.length; });
-        // Une case faite d'un seul nombre (« 1 », « 2 ») reste un descripteur : supposition de Claude
-        // Code (17 oct.), pour que les grilles des lots 1 et 3a se lisent comme avant.
-        var nombres = pleines.map(function (l) { return l.length > 1 && RE_POINTS_NIVEAU.test(l[l.length - 1]) ? Math.max.apply(null, nombresDe(l[l.length - 1])) : null; });
+        var nombres = pleines.map(function (l) { return RE_POINTS_NIVEAU.test(l[l.length - 1]) ? Math.max.apply(null, nombresDe(l[l.length - 1])) : null; });
         var avec = nombres.filter(function (n) { return n !== null; });
         if (avec.length < 2 || nombres.slice(1).some(function (n) { return n === null; })) return null;
         return Math.max.apply(null, avec);

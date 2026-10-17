@@ -395,7 +395,8 @@ describe('étape 5 · N — les grilles à niveaux, comme avant', () => {
         expect(A.calculs(m)).toMatchObject({ total: 90, avertPond: true, peutRamener: true });
     });
 
+    // Relecture de Cowork de 5b (C1) : des cases « 1 », « 2 » seraient des points ; ce sont des textes ici.
     it('N.c une grille à niveaux sans pondération garde ses parts égales', () => {
-        expect(texte('C\tA\tB\nX\t1\t2\nY\t1\t2').criteres.map(c => c.ponderation)).toEqual([{ valeur: '50', etat: 'complete' }, { valeur: '50', etat: 'complete' }]);
+        expect(texte('C\tA\tB\nX\ta\tb\nY\ta\tb').criteres.map(c => c.ponderation)).toEqual([{ valeur: '50', etat: 'complete' }, { valeur: '50', etat: 'complete' }]);
     });
 });

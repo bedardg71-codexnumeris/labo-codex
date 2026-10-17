@@ -161,14 +161,16 @@ describe('lot 1 · I — interpréter le tableau', () => {
         });
     });
 
+    // Relecture de Cowork de 5b (C1, 17 oct.) : des cases faites d'un nombre sont des points (Q1) ;
+    // les cases de remplissage de I.f, I.g, I.q deviennent des textes, leur intention ne change pas.
     it('I.f sans aucune pondération : parts égales qui totalisent 100, marquées « complété »', () => {
-        const m = L.interpreter(L.lireTexte('C\tA\tB\nX\t1\t2\nY\t1\t2\nZ\t1\t2'), 'colle');
+        const m = L.interpreter(L.lireTexte('C\tA\tB\nX\ta\tb\nY\ta\tb\nZ\ta\tb'), 'colle');
         expect(m.criteres.map(c => c.ponderation)).toEqual([
             { valeur: '34', etat: 'complete' }, { valeur: '33', etat: 'complete' }, { valeur: '33', etat: 'complete' }]);
     });
 
     it('I.g une pondération partielle n’est pas complétée : le manque reste « à remplir »', () => {
-        const m = L.interpreter(L.lireTexte('C\tPondération\tA\tB\nX\t50\t1\t2\nY\t\t1\t2'), 'colle');
+        const m = L.interpreter(L.lireTexte('C\tPondération\tA\tB\nX\t50\ta\tb\nY\t\ta\tb'), 'colle');
         expect(m.criteres[1].ponderation).toEqual({ valeur: '', etat: 'remplir' });
     });
 
@@ -264,7 +266,7 @@ describe('lot 1 · I bis — inverser lignes et colonnes', () => {
     });
 
     it('I.q ce que le document ne donne pas retombe : parts égales, plages à remplir', () => {
-        const m = L.interpreter(L.lireTexte('C\tA (80-100)\tB (0-79)\nX\t1\t2\nY\t3\t4'), 'colle');
+        const m = L.interpreter(L.lireTexte('C\tA (80-100)\tB (0-79)\nX\ta\tb\nY\tc\td'), 'colle');
         const inv = L.inverser(m);
         expect(inv.criteres.map(c => c.ponderation.etat)).toEqual(['complete', 'complete']);
         expect(inv.niveaux.every(n => n.min.etat === 'remplir')).toBe(true);
