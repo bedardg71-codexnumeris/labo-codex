@@ -6,8 +6,9 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 
 // « APPORTER MON MATÉRIEL », LOT 2 (consigne du 17 oct. 2026), dans un vrai WebKit.
 //
-//   · l'exemple mène à cinq étapes : Sens du tableau, Nature des cases, Plages de notes,
-//     À classer, Vérification (pas de Pondération : le document la donne) ;
+//   · l'exemple mène à six étapes : Sens du tableau, Ce que contient ton tableau (lot 3a),
+//     Nature des cases, Plages de notes, À classer, Vérification (pas de Pondération : le
+//     document la donne) ;
 //   · « Créer ma grille » fait apparaître la grille dans Grilles de critères et l'échelle dans
 //     Échelles de performance ; la branche rétroactions crée une cartouche, visible dans
 //     Cartouches de rétroaction ;
@@ -40,6 +41,7 @@ const PLAGES = [['85', '100', '92'], ['75', '84', '80'], ['65', '74', '70'], ['0
 async function parcourirExemple(page, nature) {
     await page.locator('[data-action="materiel.essayerExemple"]').click();
     await page.locator('[data-action="materiel.suivant"]').click();                       // Sens du tableau
+    await page.locator('[data-action="materiel.suivant"]').click();                       // Ce que contient ton tableau
     await page.locator(`[data-action="materiel.choisirNature"][data-param="${nature}"]`).click();
     await expect(page.locator(`[data-action="materiel.choisirNature"][data-param="${nature}"]`)).toHaveAttribute('aria-pressed', 'true');
     await page.locator('[data-action="materiel.suivant"]').click();                       // Nature des cases
@@ -54,26 +56,27 @@ async function parcourirExemple(page, nature) {
     await expect(page.locator('#materiel-titre-etape')).toHaveText('Vérifie ta grille, puis crée-la');
 }
 
-test('lot 2 · l’exemple mène à cinq étapes ; « Créer » fait apparaître la grille et l’échelle dans leurs outils', async ({ page }) => {
+test('lot 2 · l’exemple mène à six étapes ; « Créer » fait apparaître la grille et l’échelle dans leurs outils', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     await ouvrirConception(page);
 
     await page.locator('[data-action="materiel.essayerExemple"]').click();
     await expect(page.locator('.materiel-etapes-nav button')).toHaveText([
-        '1. Sens du tableau', '2. Nature des cases', '3. Plages de notes', '4. À classer', '5. Vérification'
+        '1. Sens du tableau', '2. Ce que contient ton tableau', '3. Nature des cases', '4. Plages de notes', '5. À classer', '6. Vérification'
     ]);
-    await expect(page.locator('.materiel-etape-texte')).toHaveText('Étape 1 sur 5');
+    await expect(page.locator('.materiel-etape-texte')).toHaveText('Étape 1 sur 6');
     await expect(page.locator('#materiel-titre-etape')).toBeFocused();
     await expect(page.locator('.materiel-mot-app')).toContainText('grille de critères');
     await page.locator('[data-action="materiel.precedent"]').click();
 
     // Créer trop tôt : la liste des manques, rien d'écrit.
     await page.locator('[data-action="materiel.essayerExemple"]').click();
-    await page.locator('[data-action="materiel.allerEtape"][data-param="4"]').click();
+    await page.locator('[data-action="materiel.allerEtape"][data-param="5"]').click();
     await page.locator('[data-action="materiel.creer"]').click();
     await expect(page.locator('.materiel-manquants')).toContainText('un passage à classer ou à écarter');
     expect(await page.evaluate(() => db.getSync(cle('grillesTemplates'), []).length)).toBe(1);   // la grille de départ seule
+    await page.locator('[data-action="materiel.precedent"]').click();
     await page.locator('[data-action="materiel.precedent"]').click();
     await page.locator('[data-action="materiel.precedent"]').click();
     await page.locator('[data-action="materiel.precedent"]').click();

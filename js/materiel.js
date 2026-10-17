@@ -23,6 +23,10 @@
  * Les textes affichés sont ceux du prototype validé le 16 oct. 2026, PROVISOIRES : Grégoire
  * relit les mots au lot 3. Ceux qui n'y sont pas (la note retenue, les refus de création)
  * sont de Claude Code et le disent dans un commentaire.
+ *
+ * Lot 3a (`CONSIGNE-LOT-2026-10-17-…-3a-roles.md`) : l'étape « Ce que contient ton tableau »,
+ * un menu de rôle au début de chaque rangée et en tête de chaque colonne ; changer un menu
+ * relit la grille. Les codes de niveau se corrigent. Textes de Claude Code, PROVISOIRES (3b).
  */
 (function () {
     'use strict';
@@ -80,6 +84,25 @@
     // L'aperçu (sous chaque question), la partie concernée encadrée
     // ------------------------------------------------------------------
 
+    /** Le code d'un niveau, tel que l'aperçu le montre. */
+    function libelleCode(n) {
+        var c = texte(n.code);
+        if (!c) return 'code à remplir';
+        return 'code ' + c + (n.code.etat === 'complete' ? ' · complété' : '');
+    }
+
+    /** Les sous-critères et la description d'un critère (lot 3a), en lecture. */
+    function detailsCritereHtml(c) {
+        var sous = c.sousCriteres || [];
+        var h = '';
+        if (texte(c.description)) h += '<span class="materiel-description">' + e(texte(c.description)) + '</span>';
+        if (sous.length) {
+            h += '<span class="materiel-sous-titre">' + e(pluriel(sous.length, 'sous-critère', 'sous-critères')) + '</span>' +
+                '<ul class="materiel-sous-criteres">' + sous.map(function (t) { return '<li>' + e(t) + '</li>'; }).join('') + '</ul>';
+        }
+        return h;
+    }
+
     function enteteNiveau(n, surligne) {
         var plageOk = texte(n.min) && texte(n.max);
         var plage = plageOk
@@ -88,7 +111,7 @@
         return '<th scope="col" class="materiel-col-niveau' + (surligne ? ' materiel-surligne' : '') + '">' +
             '<span class="materiel-niveau-titre">' + valeur(n.titre, texte(n.titre) || 'Niveau sans nom') + '</span>' +
             '<span class="materiel-niveau-details">' + plage +
-            ' <span class="materiel-code">' + e('code ' + n.code.valeur + ' · complété') + '</span></span></th>';
+            ' <span class="materiel-code">' + e(libelleCode(n)) + '</span></span></th>';
     }
 
     function mentionPonderation(m, c) {
@@ -104,7 +127,7 @@
             return '<td>' + (texte(d) ? '<span class="materiel-case">' + e(texte(d)) + '</span>'
                 : '<span class="materiel-case-vide">(case vide)</span>') + '</td>';
         }).join('');
-        return '<tr><th scope="row" class="materiel-col-critere">' + valeur(c.nom, texte(c.nom) || 'Critère sans nom') + '</th>' +
+        return '<tr><th scope="row" class="materiel-col-critere">' + valeur(c.nom, texte(c.nom) || 'Critère sans nom') + detailsCritereHtml(c) + '</th>' +
             '<td class="materiel-col-pond' + (surlignePond ? ' materiel-surligne' : '') + '">' + pond + mentionPonderation(m, c) + '</td>' +
             cases + '</tr>';
     }
@@ -208,8 +231,13 @@
         // Adapté le 17 oct. (Claude Code) : la note retenue se saisit désormais ici (décision de
         // Grégoire) ; le prototype renvoyait sa saisie à « Échelles de performance ».
         valeurs: 'Ces niveaux, leurs plages et leurs notes retenues, l’application les appelle une échelle de performance. Tu la retrouveras dans « Échelles de performance ».',
-        pond: 'Le poids de chaque critère, l’application l’appelle la pondération. Il fait partie de ta grille de critères.'
+        pond: 'Le poids de chaque critère, l’application l’appelle la pondération. Il fait partie de ta grille de critères.',
+        // Lot 3a, Claude Code (17 oct.) : PROVISOIRE, relu en 3b.
+        roles: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères et son échelle de performance : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé.'
     };
+
+    // Lot 3a, Claude Code (17 oct.) : PROVISOIRE, relu en 3b. Remplace le bandeau du lot 1 (retiré au lot 2 avec l'aperçu seul).
+    var MOT_FUSION = 'Ton tableau contient des cases fusionnées. L’étape « Ce que contient ton tableau » montre ce que l’application en a lu : tu pourras y corriger sa lecture.';
 
     function motApp(m, id) {
         var t = id === 'nature' ? (A().estRetro(m) ? MOTS_APP.natureRetro : MOTS_APP.natureDescr) : MOTS_APP[id];
@@ -227,11 +255,60 @@
 
     function etapeAxes(m) {
         return titreEtape('Dans ton document, les critères sont-ils en lignes ou en colonnes ?') +
+            (m.fusionnees ? '<p class="alerte alerte-attention materiel-bandeau" role="status">' + e(MOT_FUSION) + '</p>' : '') +
             '<p>Regarde l’aperçu ci-dessous : chaque ligne devrait être un critère, chaque colonne un niveau.</p>' +
             '<div class="materiel-choix-groupe" role="group" aria-label="Sens du tableau">' +
             choix('materiel.choisirSens', 0, !m.critEnColonnes, 'En lignes', 'Un critère par ligne, un niveau par colonne.') +
             choix('materiel.choisirSens', 1, !!m.critEnColonnes, 'En colonnes', 'Un critère par colonne, un niveau par ligne : l’application permute le tableau.') +
             '</div>' + mention('propose', 'Proposé d’après la lecture de ton tableau : à vérifier. Si tu changes ce choix, la pondération et la valeur des niveaux seront à revoir.');
+    }
+
+    // ------------------------------------------------------------------
+    // Lot 3a : « Ce que contient ton tableau » — un rôle par rangée, un rôle par colonne
+    // ------------------------------------------------------------------
+
+    function menuRole(sorte, i, choisi, libelle) {
+        var court = sorte === 'rangees' ? 'r' : 'c';
+        var id = 'materiel-role-' + court + '-' + i;
+        var liste = sorte === 'rangees' ? window.materielLecture.ROLES_RANGEES : window.materielLecture.ROLES_COLONNES;
+        return '<label class="u-lecteur-ecran" for="' + id + '">' + e(libelle) + '</label>' +
+            '<select id="' + id + '" class="controle-form materiel-role" data-on-change="materiel.choisirRole" data-param="' + court + '.' + i + '">' +
+            liste.map(function (o) {
+                return '<option value="' + e(o.id) + '"' + (o.id === choisi ? ' selected' : '') + '>' + e(o.libelle) + '</option>';
+            }).join('') + '</select>';
+    }
+
+    /** Une case du tableau lu ; une case fusionnée est marquée, ses suites le disent. */
+    function caseLue(c, ignoree) {
+        var cls = 'materiel-role-case' + (c.fusion ? ' materiel-case-fusion' : '') + (ignoree ? ' materiel-role-ignore' : '');
+        if (c.suite) {
+            return '<td class="' + cls + '"><span class="materiel-case-vide">' +
+                e(c.suite === 'v' ? '(suite de la case fusionnée au-dessus)' : '(suite de la case fusionnée à gauche)') + '</span></td>';
+        }
+        return '<td class="' + cls + '">' + (c.t ? '<span class="materiel-case">' + e(c.t) + '</span>' : '<span class="materiel-case-vide">(case vide)</span>') +
+            (c.fusion ? '<span class="materiel-mention materiel-mention-propose">case fusionnée</span>' : '') + '</td>';
+    }
+
+    function etapeRoles(m) {
+        var R = m.roles.rangees, K = m.roles.colonnes, t = m.tableau;
+        var suite = R.indexOf('suite') >= 0
+            ? '<fieldset class="materiel-suite-nom"><legend>Dans une « Suite du critère », la case de la colonne « Noms des critères » devient :</legend>' +
+              '<div class="materiel-choix-groupe">' + window.materielLecture.CHOIX_SUITE.map(function (o) {
+                  return pilule('materiel.choisirSuiteNom', o.id, o.id === m.roles.suiteNom, o.libelle);
+              }).join('') + '</div></fieldset>'
+            : '';
+        return titreEtape('Dis à l’application ce qu’est chaque partie de ton tableau') +
+            '<p>Voici ton tableau, tel que l’application l’a lu. Le menu au début de chaque rangée et en tête de chaque colonne dit ce qu’elle en fait. S’il se trompe, change-le : ta grille se relit aussitôt, dans l’aperçu plus bas.</p>' +
+            (m.roles.propose ? mention('propose', 'Proposé par l’application : à vérifier') : '') +
+            '<div class="materiel-apercu-cadre" role="region" aria-label="Ton tableau, tel que l’application l’a lu" tabindex="0">' +
+            '<table class="materiel-apercu materiel-roles"><caption class="u-lecteur-ecran">' +
+            e(pluriel(t.length, 'rangée', 'rangées') + ', ' + pluriel(K.length, 'colonne', 'colonnes')) + '</caption>' +
+            '<thead><tr><th scope="col" class="materiel-roles-coin">Rangées</th>' + K.map(function (r, j) {
+                return '<th scope="col">' + menuRole('colonnes', j, r, 'Rôle de la colonne ' + (j + 1)) + '</th>';
+            }).join('') + '</tr></thead><tbody>' + t.map(function (row, i) {
+                return '<tr><th scope="row"' + (R[i] === 'ignorer' ? ' class="materiel-role-ignore"' : '') + '>' + menuRole('rangees', i, R[i], 'Rôle de la rangée ' + (i + 1)) + '</th>' +
+                    row.map(function (c, j) { return caseLue(c, R[i] === 'ignorer' || K[j] === 'ignorer'); }).join('') + '</tr>';
+            }).join('') + '</tbody></table></div>' + suite;
     }
 
     function premiereCase(m) {
@@ -248,6 +325,12 @@
             choix('materiel.choisirNature', 'descripteurs', !retro, 'Elles décrivent les niveaux', 'Des descripteurs : à quoi ressemble chaque niveau, avant la tâche. Ils iront dans ta grille.') +
             choix('materiel.choisirNature', 'retroactions', retro, 'Elles s’adressent à l’étudiant·e', 'Des rétroactions : ce que l’étudiant·e lira après l’évaluation. Elles iront dans tes commentaires par critère et par niveau.') +
             '</div>' + (m.nature && m.nature.etat === 'propose' ? mention('propose', 'Proposé d’après le texte des cases : à vérifier.') : '');
+    }
+
+    /** Lot 3a : le code d'un niveau se corrige (repris du document, ou complété par l'application). */
+    function champCode(n, j, pre) {
+        return '<label for="' + pre + '-code-' + j + '">Code</label>' +
+            champ(pre + '-code-' + j, 'niveau.' + j + '.code', n.code, ' maxlength="' + A().MAX_CODE + '" autocapitalize="characters" spellcheck="false"');
     }
 
     /** Les quatre champs d'un niveau ; `pre` distingue les deux écrans (identifiants uniques). */
@@ -267,7 +350,7 @@
             '<div class="materiel-cartes-niveaux">' + m.niveaux.map(function (n, j) {
                 return '<div class="materiel-carte-niveau"><label for="materiel-q-titre-' + j + '">Niveau</label>' +
                     champ('materiel-q-titre-' + j, 'niveau.' + j + '.titre', n.titre) +
-                    champsNiveau(n, j, 'materiel-q') + '</div>';
+                    champCode(n, j, 'materiel-q') + champsNiveau(n, j, 'materiel-q') + '</div>';
             }).join('') + '</div>';
     }
 
@@ -303,7 +386,7 @@
             }).join('') + '</ul>';
     }
 
-    var ETAPES = { axes: etapeAxes, nature: etapeNature, valeurs: etapeValeurs, pond: etapePond, classer: etapeClasser };
+    var ETAPES = { axes: etapeAxes, roles: etapeRoles, nature: etapeNature, valeurs: etapeValeurs, pond: etapePond, classer: etapeClasser };
 
     function boutonPrecedent() {
         return '<button type="button" class="materiel-btn-lien" data-action="materiel.precedent">' +
@@ -350,8 +433,7 @@
     function enteteVerifNiveau(n, j) {
         return '<th scope="col" class="materiel-col-niveau">' +
             '<label for="materiel-v-titre-' + j + '">Niveau</label>' + champ('materiel-v-titre-' + j, 'niveau.' + j + '.titre', n.titre) +
-            '<span class="materiel-code" id="materiel-code-' + j + '">' + e('code ' + n.code.valeur + ' · complété') + '</span>' +
-            champsNiveau(n, j, 'materiel-v') + '</th>';
+            champCode(n, j, 'materiel-v') + champsNiveau(n, j, 'materiel-v') + '</th>';
     }
 
     function rangeeVerif(m, c, i) {
@@ -359,7 +441,7 @@
         return '<tr><th scope="row" class="materiel-col-critere">' +
             '<label class="u-lecteur-ecran" for="materiel-v-nom-' + i + '">Nom du critère</label>' +
             champ('materiel-v-nom-' + i, 'critere.' + i + '.nom', c.nom, ' placeholder="Nom du critère"') +
-            (c.nom.etat === 'remplir' ? mention('remplir', 'à remplir') : '') + '</th>' +
+            (c.nom.etat === 'remplir' ? mention('remplir', 'à remplir') : '') + detailsCritereHtml(c) + '</th>' +
             '<td class="materiel-col-pond"><label class="u-lecteur-ecran" for="materiel-v-pond-' + i + '">Pondération du critère</label>' +
             champ('materiel-v-pond-' + i, 'critere.' + i + '.ponderation', c.ponderation, ' inputmode="numeric" placeholder="ex. 30"') +
             mentionPonderation(m, c) + '</td>' +
@@ -485,10 +567,17 @@
         if (id === 'final') {
             remplacer('materiel-cree', creeListeHtml(m));
             remplacer('materiel-manquants', manquantsHtml(m));
-            m.niveaux.forEach(function (n, j) { var c = el('materiel-code-' + j); if (c) c.textContent = 'code ' + n.code.valeur + ' · complété'; });
         } else {
             remplacer('materiel-apercu-zone', apercuHtml(m, id === 'valeurs' || id === 'pond' ? id : ''));
         }
+        // Un code complété suit le titre de son niveau ; un code repris ou saisi ne bouge pas (lot 3a).
+        m.niveaux.forEach(function (n, j) {
+            if (n.code.etat !== 'complete') return;
+            ['materiel-q-code-', 'materiel-v-code-'].forEach(function (pre) {
+                var c = el(pre + j);
+                if (c && c !== document.activeElement) c.value = n.code.valeur;
+            });
+        });
     }
 
     function ouvrirAssistant(m) {
@@ -524,8 +613,17 @@
         rendre(focus);
     }
 
+    /** Une relecture (sens du tableau, rôle) : la liste des étapes se recalcule, l'étape courante gardée. */
+    function relu(m, focus) {
+        if (m === etat.modele) return;
+        var r = A().recalculerEtapes(m, etat.etapes, etat.etape);
+        etat.etapes = r.etapes;
+        etat.etape = r.etape;
+        changer(m, focus);
+    }
+
     /**
-     * Une saisie : « nom », « niveau.<j>.<titre|min|max|note> », « critere.<i>.<nom|ponderation> »,
+     * Une saisie : « nom », « niveau.<j>.<titre|code|min|max|note> », « critere.<i>.<nom|ponderation> »,
      * « case.<i>.<j> ». Le modèle est mis à jour en place, le champ change de cadre.
      */
     /** La mention « plage à remplir » d'un niveau suit sa saisie, sur les deux écrans. */
@@ -617,13 +715,15 @@
         suivant: function () { etapeVers(etat.etape + 1); },
         precedent: function () { if (etat.etape === 0) materiel.recommencer(); else etapeVers(etat.etape - 1); },
         allerClasser: function () { var q = etat.etapes.indexOf('classer'); if (q >= 0) etapeVers(q); },
-        choisirSens: function (enColonnes) {
-            var m = A().choisirSens(etat.modele, Number(enColonnes) === 1);
-            if (m === etat.modele) return;
-            var r = A().recalculerEtapes(m, etat.etapes, etat.etape);
-            etat.etapes = r.etapes;
-            etat.etape = r.etape;
-            changer(m);
+        choisirSens: function (enColonnes) { relu(A().choisirSens(etat.modele, Number(enColonnes) === 1)); },
+        /** « r.<i> » ou « c.<j> », et le menu changé. */
+        choisirRole: function (param, menu) {
+            var p = String(param).split('.'), i = Number(p[1]);
+            if (!menu || (p[0] !== 'r' && p[0] !== 'c')) return;
+            relu(A().choisirRole(etat.modele, p[0] === 'r' ? 'rangees' : 'colonnes', i, menu.value), '#materiel-role-' + p[0] + '-' + i);
+        },
+        choisirSuiteNom: function (v) {
+            relu(A().choisirSuiteNom(etat.modele, String(v)), '[data-action="materiel.choisirSuiteNom"][aria-pressed="true"]');
         },
         choisirNature: function (v) { changer(A().choisirNature(etat.modele, v), '[data-action="materiel.choisirNature"][aria-pressed="true"]'); },
         ramenerA100: function () { changer(A().ramenerA100(etat.modele)); },

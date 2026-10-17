@@ -6,7 +6,7 @@
  * (la consigne supposait un repli sur le milieu de plage, retiré par #527).
  *
  * Ce que ce banc verrouille :
- *   E — ÉTAPES : sautées si réglées ; l'exemple en compte cinq ; la liste se recalcule après
+ *   E — ÉTAPES : sautées si réglées ; l'exemple en compte six (lot 3a) ; la liste se recalcule après
  *       une inversion, l'étape courante gardée.
  *   V — VÉRIFICATIONS : ce qui bloque la création (dont un passage en attente), ce qui avertit
  *       seulement (chevauchement, trou, total ≠ 100).
@@ -90,8 +90,9 @@ function exempleComplet() {
 const ctx = (extra) => Object.assign({ id: (p) => p + 'x' + (++compteur), maintenant: '2026-10-17T12:00:00.000Z' }, extra || {});
 
 describe('E — les étapes', () => {
-    it('E.a l’exemple mène à cinq étapes, sans Pondération (donnée par le document)', () => {
-        expect(A.etapesPour(exemple())).toEqual(['axes', 'nature', 'valeurs', 'classer', 'final']);
+    // Lot 3a : « Ce que contient ton tableau » suit toujours « Sens du tableau » (six étapes).
+    it('E.a l’exemple mène à six étapes, sans Pondération (donnée par le document)', () => {
+        expect(A.etapesPour(exemple())).toEqual(['axes', 'roles', 'nature', 'valeurs', 'classer', 'final']);
     });
 
     it('E.b « Taper ma grille à la main » mène droit à la Vérification', () => {
@@ -100,7 +101,7 @@ describe('E — les étapes', () => {
 
     it('E.c sans texte dans les cases, pas de Nature ; sans pondération, l’étape Pondération ; sans passage, pas d’À classer', () => {
         const m = A.preparer(L.charger(L.lireTexte('C\tExcellent (85-100)\tFaible (0-84)\nX\t\t\nY\t\t'), 'colle').modele);
-        expect(A.etapesPour(m)).toEqual(['axes', 'valeurs', 'pond', 'final']);
+        expect(A.etapesPour(m)).toEqual(['axes', 'roles', 'valeurs', 'pond', 'final']);
     });
 
     it('E.d après une inversion, la liste se recalcule et l’étape courante est gardée', () => {

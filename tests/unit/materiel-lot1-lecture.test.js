@@ -9,6 +9,7 @@
  *       le texte à tabulations, rien ne disparaît en silence.
  *   I — INTERPRÉTER : nom tiré de la ligne avant, plages lues dans l'en-tête, colonne de
  *       pondération, parts égales, nature proposée, cases fusionnées → À classer, inversion.
+ *       (Lot 3a : L.b, I.j et I.s suivent la lecture dépliée ; voir materiel-lot3a-roles.test.js.)
  *   P — PLAGES : des entiers contigus s'enregistrent contigus (max = min suivant − 0,01).
  *   S — SÉCURITÉ : un <script>, un onerror collés ne sont pas retenus ; l'aperçu échappe tout.
  *   T — TRANSPORT : `descripteurs` traverse le partage et l'import, schéma fermé et borné ;
@@ -86,10 +87,11 @@ describe('lot 1 · L — lire ce qu’on colle', () => {
         expect(lu.apres).toEqual(['La langue est évaluée à part.']);
     });
 
-    it('L.b deux paragraphes ou un <br> dans une case ne se soudent pas', () => {
+    // Lot 3a : les retours à la ligne SURVIVENT (au lot 1, une espace).
+    it('L.b deux paragraphes ou un <br> dans une case ne se soudent pas : un retour à la ligne chacun', () => {
         const lu = L.lireHtml(HTML_WORD);
-        expect(lu.rangees[1][2].t).toBe('La thèse est claire. Elle est nuancée.');
-        expect(lu.rangees[2][2].t).toBe('Arguments solides et variés.');
+        expect(lu.rangees[1][2].t).toBe('La thèse est claire.\nElle est nuancée.');
+        expect(lu.rangees[2][2].t).toBe('Arguments solides\net variés.');
     });
 
     it('L.c le <style> que Word colle avec le tableau n’entre nulle part', () => {
@@ -194,12 +196,14 @@ describe('lot 1 · I — interpréter le tableau', () => {
         expect(m.aClasser.every(a => a.statut === 'attente')).toBe(true);
     });
 
-    it('I.j une case fusionnée sur deux LIGNES (rowspan) envoie aussi sa ligne à classer', () => {
+    // Lot 3a : la case est DÉPLIÉE ; la rangée sous elle est proposée comme « Suite du critère ».
+    it('I.j une case fusionnée sur deux LIGNES (rowspan) : la rangée du dessous est la suite du critère', () => {
         const html = '<table><tr><td>C</td><td>A</td><td>B</td></tr>' +
             '<tr><td rowspan="2">X</td><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>';
         const m = L.interpreter(L.lireHtml(html), 'colle');
-        expect(m.criteres).toHaveLength(0);
-        expect(m.aClasser).toHaveLength(2);
+        expect(m.roles.rangees).toEqual(['niveaux', 'critere', 'suite']);
+        expect(m.criteres.map(c => [c.nom.valeur, c.cases.map(d => d.valeur)])).toEqual([['X', ['1\n3', '2\n4']]]);
+        expect(m.aClasser).toHaveLength(0);
     });
 
     it('I.k la nature est PROPOSÉE d’après le tutoiement (seuil 30 %), jamais décidée', () => {
@@ -277,10 +281,12 @@ describe('lot 1 · I bis — inverser lignes et colonnes', () => {
         expect(deux.nature).toEqual({ valeur: 'retroactions', etat: 'saisi' });
     });
 
-    it('I.s une case fusionnée transposée ne se perd pas : sa ligne va à classer', () => {
+    // Lot 3a : dépliée avant la transposition, la case garde son texte dans la première position.
+    it('I.s une case fusionnée transposée ne se perd pas : elle reste à sa place, dépliée', () => {
         const html = '<table><tr><td>C</td><td>A</td><td>B</td></tr><tr><td>X</td><td colspan="2">fusion</td></tr><tr><td>Y</td><td>1</td><td>2</td></tr></table>';
         const inv = L.inverser(L.interpreter(L.lireHtml(html), 'colle'));
-        expect(JSON.stringify(inv.aClasser)).toContain('fusion');
+        expect(inv.criteres.map(c => [c.nom.valeur, c.cases.map(d => d.valeur)])).toEqual([['A', ['fusion', '1']], ['B', ['', '2']]]);
+        expect(inv.fusionnees).toBe(true);
     });
 });
 
