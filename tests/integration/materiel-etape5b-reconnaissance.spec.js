@@ -104,7 +104,7 @@ test('étape 5b · F6 collée : liste à cocher lue sans geste, Vérification «
     await page.locator('[data-action="materiel.suivant"]').click();
 
     await expect(page.locator('.materiel-verif thead th')).toHaveText(['Critère', 'Description', 'Points']);
-    await expect(page.locator('#materiel-v-nom-0')).toHaveValue('INTRODUCTION – Sujet amené');
+    await expect(page.locator('#materiel-v-nom-0')).toHaveValue('Introduction – Sujet amené');
     await expect(page.locator('#materiel-v-pond-3')).toHaveValue('0');
     await expect(page.locator('[data-param="critere.0.description"]')).toHaveValue('Le sujet est amené de loin.\nIl mène au sujet posé.');
     await expect(page.locator('.materiel-total')).toHaveText('Total : sur 100');
