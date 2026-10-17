@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, FIN DE MATINÉE : **BANDEAU ET ÉTAPE 1 EN LIGNE (`4a972d13`) ; LOT 3b1 COMMITÉ SUR `main` (`96812253`), NON POUSSÉ ; RELECTURE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, DÉBUT D'APRÈS-MIDI : **ÉTAPE 5 (GRILLES EN POINTS) ET #1095 COMMITÉS SUR `main` (`51a7be2b`), NON POUSSÉS ; RELECTURE DE COWORK**
+
+**En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : lot 3b1 (`96812253`) et sa demande, puis l'étape 5 (`51a7be2b`) et sa demande.
+Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-5-points.md`. **Vitest** : 9 077/9 077. Verdict Playwright : périmé (juge `4a972d13`).
+**Suite** : relecture de Cowork → corrections → 5b, 6, 7, 8 du plan ; push au signal de Grégoire.
+
+---
+
+## (relais précédent) 17 OCT. 2026, FIN DE MATINÉE : **BANDEAU ET ÉTAPE 1 EN LIGNE (`4a972d13`) ; LOT 3b1 COMMITÉ SUR `main` (`96812253`), NON POUSSÉ ; RELECTURE DE COWORK**
 
 **En ligne** (connecteur Netlify) : déploiement `6ad38f7d`, `commit_ref` `4a972d13`, `ready`, 15:08:55 Z ; 1.202.0 inchangé, sans release.
 Verdict complet par `scripts/pousser.sh` : aucune rougeur. **`main` local** : `96812253` (lot 3b1) et le commit docs de sa demande.
