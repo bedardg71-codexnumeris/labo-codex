@@ -141,14 +141,14 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     expect(mesure.largeur).toBeGreaterThan(120);
     // La note du composeur (texte troué, étape 2 — elle remplace « Écris {service}… ») : une seule, sous les paliers.
     await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:projection"] .palier-note-composer')).toHaveCount(1);
-    // §8 e) et g) : les paliers sont numérotés (« Palier 1 »… sans chevrons), la rangée dit « Descripteur ».
+    // §8 e) et g) : les paliers sont numérotés (« Palier 1 »… sans chevrons), la rangée dit « Description » (D1, 17 oct.).
     const etiquettes = await page.locator('#listeCriteres .palier-projection .sous-critere-label-petit').evaluateAll(els => els.map(e => e.textContent.trim()).filter(t => t.startsWith('Palier')));
     expect(etiquettes[0]).toBe('Palier 1');
     expect(etiquettes.length).toBeGreaterThan(1);
     expect(etiquettes).toEqual(etiquettes.map((_, i) => 'Palier ' + (i + 1)));
     await expect(page.locator('#listeCriteres .palier-projection .pipeline-btn-reorder')).toHaveCount(0);
-    await expect(page.locator('#listeCriteres label', { hasText: /^Descripteur$/ })).toHaveCount(1);
-    await expect(page.locator('#listeCriteres label', { hasText: /^Description$/ })).toHaveCount(0);
+    await expect(page.locator('#listeCriteres label', { hasText: /^Description$/ })).toHaveCount(1);
+    await expect(page.locator('#listeCriteres label', { hasText: /^Descripteur$/ })).toHaveCount(0);
 
     // 6 bis — LOT A (5 sept. 2026) : UNE seule liste. La case en tête des sous-critères, à plat ; cochée, la
     //     rangée gagne sa pastille et son pli « Observation » (fermé par défaut) ; on déplie, on écrit une

@@ -36,8 +36,8 @@ test('bandeau « En construction » : visible à l’accueil, à chaque étape, 
     const visible = async (ou) => expect(bandeau, ou).toBeVisible();
 
     await visible('accueil');
-    await expect(bandeau).toContainText('En construction.');
-    await expect(bandeau).toContainText('rien n’est créé avant que tu aies tout vérifié');
+    await expect(bandeau).toContainText('Cet outil est en développement');
+    await expect(bandeau.locator('span[aria-hidden="true"]')).toHaveText('🚧');
 
     await page.locator('[data-action="materiel.essayerExemple"]').click();
     await expect(page.locator('#materiel-accueil')).toBeHidden();

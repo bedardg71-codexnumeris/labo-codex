@@ -3434,7 +3434,7 @@ function afficherCriteresTemp() {
                     </select>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Descripteur</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(critere.description || '')}"
@@ -4808,7 +4808,7 @@ function afficherCriteresGrille(grille) {
                     </select>
                 </div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Descripteur</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
                            class="controle-form"
                            value="${echapperHtml(critere.description || '')}"

@@ -149,7 +149,7 @@
         var sans = codes.filter(function (c) { return !c; }).length;
         if (sans) out.push(compte(sans, 'le code d’un niveau', 'le code de # niveaux'));
         var invalides = codes.filter(function (c) { return c && (c.length > A.MAX_CODE || c.indexOf('_') >= 0); }).length;
-        if (invalides) out.push(compte(invalides, 'un code de 1 à 4 caractères, sans souligné, pour un niveau', 'un code de 1 à 4 caractères, sans souligné, pour # niveaux'));
+        if (invalides) out.push(compte(invalides, 'un code de 1 à 4 caractères, sans « _ », pour un niveau', 'un code de 1 à 4 caractères, sans « _ », pour # niveaux'));
         var vus = {}, doubles = [];
         codes.forEach(function (c) {
             if (!c) return;
