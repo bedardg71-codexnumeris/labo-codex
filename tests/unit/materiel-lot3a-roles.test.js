@@ -171,7 +171,8 @@ describe('lot 3a · G — une grille de la forme de celle de Grégoire se lit ju
         const r = fictive().roles;
         expect(r.rangees).toEqual(['ignorer', 'niveaux', 'nomCritere', 'suite', 'nomCritere', 'suite', 'nomCritere', 'suite', 'nomCritere', 'suite']);
         expect(r.colonnes).toEqual(['noms', 'niveau', 'niveau', 'niveau', 'niveau']);
-        expect(r.suiteNom).toBe('sousCriteres');
+        // Étape 5b (point 6) : « selon les puces » est proposé par défaut ; les tâches à ☐ restent des sous-critères.
+        expect(r.suiteNom).toBe('selonPuces');
         expect(r.propose).toBe(true);
     });
 
@@ -436,7 +437,8 @@ describe('lot 3a · S — l’étape « Ce que contient ton tableau »', () => {
         expect(d.querySelector('#materiel-role-c-0').value).toBe('noms');
         expect(d.querySelector('#materiel-role-r-3').getAttribute('data-on-change')).toBe('materiel.choisirRole');
         expect(d.textContent).toContain('Proposé par l’application : à vérifier');
-        expect(d.querySelectorAll('[data-action="materiel.choisirSuiteNom"]')).toHaveLength(3);
+        // Étape 5b (point 6) : une 4e option, « selon les puces ».
+        expect(d.querySelectorAll('[data-action="materiel.choisirSuiteNom"]')).toHaveLength(4);
         expect(d.querySelectorAll('.materiel-case-fusion').length).toBe(2);   // la case fusionnée sur deux rangées
     });
 

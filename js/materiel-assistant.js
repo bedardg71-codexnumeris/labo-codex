@@ -40,7 +40,9 @@
         pond: 'Pondération', points: 'Points', classer: 'À classer', final: 'Vérification'
     };
 
-    /** Étape 5 : les points d'un critère, un entier de 1 à 100 (borne du partage, `partage-schemas.js`). */
+    /** Étape 5 : les points d'un critère, un entier de 0 à 100 (borne du partage, `partage-schemas.js`).
+     *  Étape 5b : « / 0 » accepté (`_pourcentageDesPoints` écarte une pondération 0 sans erreur). */
+    A.MIN_POINTS = 0;
     A.MAX_POINTS = 100;
 
     A.estEnPoints = function (m) { return !!(m && m.enPoints); };
@@ -190,14 +192,35 @@
 
     /**
      * Étape 5 : les points d'une grille en points. Il ne manque quelque chose que s'il n'y a ni
-     * niveau ni points ; un point non entier, nul ou au-delà de 100 bloque (comme au lot 2).
+     * niveau ni points ; un point non entier, négatif ou au-delà de 100 bloque (comme au lot 2).
      * Textes PROVISOIRES (Claude Code, 17 oct.), relus à l'étape 7.
      */
     function manquantsPoints(m, ponds, sans, out) {
         if (sans && sans === m.criteres.length) out.push('les points de chaque critère, ou des colonnes de niveaux, à l’étape « Ce que contient ton tableau »');
         else if (sans) out.push(compte(sans, 'les points d’un critère', 'les points de # critères'));
-        var hors = ponds.filter(function (p) { return !isNaN(p) && (!Number.isInteger(p) || p < 1 || p > A.MAX_POINTS); }).length;
-        if (hors) out.push(compte(hors, 'des points en nombre entier de 1 à 100 pour un critère', 'des points en nombre entier de 1 à 100 pour # critères'));
+        var hors = ponds.filter(function (p) { return !isNaN(p) && (!Number.isInteger(p) || p < A.MIN_POINTS || p > A.MAX_POINTS); }).length;
+        if (hors) out.push(compte(hors, 'des points en nombre entier de 0 à 100 pour un critère', 'des points en nombre entier de 0 à 100 pour # critères'));
+    }
+
+    /**
+     * Étape 5b (point 4) : les niveaux d'une grille en points ne gardent que leur NOM, qui range les
+     * descripteurs (`construireGrilleEnPoints`) : requis, unique (sans tenir compte de la casse), sans
+     * « _ » en tête (clé refusée au partage). Ni plage, ni note retenue, ni code. Textes PROVISOIRES (étape 7).
+     */
+    function manquantsNiveauxPoints(m, out) {
+        var titres = m.niveaux.map(function (n) { return texte(n.titre); });
+        var sans = titres.filter(function (t) { return !t; }).length;
+        if (sans) out.push(compte(sans, 'le nom d’un niveau', 'le nom de # niveaux'));
+        var vus = {}, doubles = 0;
+        titres.forEach(function (t) {
+            if (!t) return;
+            var k = t.toLowerCase();
+            if (vus[k]) doubles++;
+            vus[k] = true;
+        });
+        if (doubles) out.push('un nom différent pour chaque niveau');
+        if (titres.some(function (t) { return t.charAt(0) === '_'; })) out.push('un nom de niveau qui ne commence pas par « _ »');
+        if (m.niveaux.length > A.MAX_NIVEAUX) out.push('au plus ' + A.MAX_NIVEAUX + ' niveaux (ta grille en a ' + m.niveaux.length + ')');
     }
 
     /**
@@ -213,7 +236,8 @@
         else if (nom.length > A.MAX_NOM) manquants.push('un nom de grille plus court (' + A.MAX_NOM + ' caractères au plus)');
         else if (noms.indexOf(nom.toLowerCase()) >= 0) manquants.push('un autre nom de grille : « ' + nom + ' » existe déjà dans ce trimestre');
         (m.manquesLecture || []).forEach(function (t) { manquants.push(t); });
-        manquantsNiveaux(m, manquants);   // une grille en points n'a aucun niveau : rien n'y manque
+        if (A.estEnPoints(m)) manquantsNiveauxPoints(m, manquants);   // aucun niveau (étape 5), ou leurs noms seuls (5b)
+        else manquantsNiveaux(m, manquants);
         manquantsCriteres(m, manquants);
         var enAttente = m.aClasser.filter(function (a) { return a.statut === 'attente'; }).length;
         if (enAttente) manquants.push(compte(enAttente, 'un passage à classer ou à écarter', '# passages à classer ou à écarter'));
@@ -455,12 +479,23 @@
     /**
      * Étape 5 : la grille en points. `type: 'analytique'` sur la grille et sur chaque critère, dont
      * la pondération est le maximum de points (`evaluation-calcul.js`, « le maximum EST la
-     * pondération ») ; le reste de la forme, celle de l'éditeur (lot 3a). Aucun descripteur.
+     * pondération ») ; le reste de la forme, celle de l'éditeur (lot 3a).
+     * Étape 5b (point 4) : des niveaux écrits avec leurs points gardent leurs descripteurs, rangés
+     * sous le NOM du niveau (`parNiveau`), sans `echelleId` : il n'y a pas d'échelle (#941), et
+     * Grilles de critères montre alors la clé, donc le nom (`rendreAttenduNiveaux`). Le schéma de
+     * partage (fermé : `echelleId`, `parNiveau`) les garde tels quels ; `null` y serait refusé.
+     * La nature des cases ne joue pas : il n'y a pas de cartouche sans échelle.
      */
     function construireGrilleEnPoints(m, ctx, nomGrille) {
         var g = construireGrille(m, ctx, nomGrille, null);
         g.type = 'analytique';
-        g.criteres.forEach(function (c) { c.type = 'analytique'; });
+        g.criteres.forEach(function (c, i) {
+            c.type = 'analytique';
+            delete c.descripteurs;
+            var par = {};
+            m.criteres[i].cases.forEach(function (d, j) { if (texte(d) && m.niveaux[j]) par[texte(m.niveaux[j].titre)] = texte(d); });
+            if (Object.keys(par).length) c.descripteurs = { parNiveau: par };
+        });
         return g;
     }
 
