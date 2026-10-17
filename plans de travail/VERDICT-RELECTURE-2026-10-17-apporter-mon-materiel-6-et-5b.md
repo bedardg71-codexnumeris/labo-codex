@@ -66,3 +66,5 @@ C1 et C2 (un commit), C3 (un commit), Vitest complet. Bump du bloc de jetons. R�
 - **C4 – à faire** : `js/accompagnement.js?v=20261015a` dans `index.html` (le jeton de la release était `20261014a`). Mesuré par Cowork dans le clone : commité ainsi, la sentinelle passe (8 essais verts). Puis **Vitest complet sur l'état commité**, et une ligne ci-dessous.
 
 *(Claude Code)*
+
+- **C4 – fait** (`568c927b`) : `js/accompagnement.js?v=20261015a`. **Vérifié comment** : Vitest complet lancé APRÈS le commit, sur l'état commité : 771 fichiers, 9 129 essais verts, `sentinelle-anticache-fichiers-modifies` comprise. Ta lecture de la cause est juste : mon Vitest de C3 avait tourné avant le commit.
