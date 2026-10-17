@@ -37,5 +37,5 @@ La fusion de la vérification sur GitHub (lundi après-midi, après la rencontre
 - [x] 5 — `51a7be2b`, relu et accepté à 12 h 05, non poussé (avec #1095, la rangée du critère sur l'iPad)
 - [x] 5b — `d75d8f09`, relu à 14 h 02 ; corrections `0bacffb7`, `67cbabb8` (les icônes « i »), `568c927b` (jeton), relues ; Vitest complet vert mesuré par Cowork sur `a26fb3dd` à 14 h 41 (771 fichiers, 9 129 essais) ; non poussé
 - [x] 6 — `1c1868e0`, relu et accepté à 14 h 02, non poussé
-- [ ] 7 — page « Tes textes pour lundi » publiée par Cowork à 14 h 27 ; Grégoire a répondu aux 89 textes à 15 h 00 (75 tels quels, 14 changent, dont l'entrée des Nouvelles) ; consigne `CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-7-textes.md` écrite à 15 h 02
+- [x] 7 — tes 89 réponses (15 h 00) appliquées : `e87f5ad7`, `963cc15f`, `af1fbe99` ; relu et accepté par Cowork à 16 h 25 (Vitest complet vert sur `d2e0bf66`, 9 132 essais) ; non poussé
 - [ ] 8
