@@ -7,7 +7,18 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026 : **LOT 1 : ESSAI « ZOOM-MOLETTE » RENDU INDÉPENDANT DE LA BARRE ; VERDICT PUIS PUSH**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, 7 h 55 : **LOT 1 D'« APPORTER MON MATÉRIEL » EN LIGNE (1.202.0, SANS RELEASE) ; `main` À JOUR ; LOT 2 ENSUITE**
+
+**En ligne** (mesuré par le connecteur Netlify, Claude Code, 17 oct.) : déploiement `6ad361b21060b4c67b09acdb`, `commit_ref`
+`9257f7e5`, `state: ready`, publié à 11:53:35 Z (7 h 53, Toronto). Numéro affiché inchangé : 1.202.0, build 1015-1639 (la release
+est au lot 3, consigne du lot 1). **Verdict complet sur `9257f7e5`** par `scripts/pousser.sh` (Cowork et Safari fermés) : aucune
+rougeur ; **une spec verte au second essai** : `cours-actif-hors-bibliotheque-916.spec.js` (#916), sans rapport avec le matériel —
+à surveiller si elle revient (#685). Hook pré-push : Vitest vert, « verdict vert à jour pour ce commit ».
+**Suite** : le lot 2, `plans de travail/CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-2.md` (son ajout de tête est maintenant
+périmé pour la partie « pas en ligne » ; #1091 y reste).
+
+### Le correctif qui a débloqué le push (17 oct.)
+
 
 **Décision de Grégoire (17 oct., option 2)** : la sous-navigation de Conception reste sur deux lignes (le retour à la ligne est le
 comportement prévu ; une ligne unique demanderait de raccourcir un libellé ou de resserrer toutes les barres la veille de la
