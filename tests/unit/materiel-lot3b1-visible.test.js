@@ -124,7 +124,8 @@ describe('lot 3b1 · H — un critère sans données s’affiche exactement comm
 describe('lot 3b1 · C et T — la confirmation, les textes', () => {
     it('C.a le résumé de la création porte les identifiants de la grille, de l’échelle, de la cartouche', () => {
         const src = readFileSync(path.join(racine, 'js', 'materiel-creation.js'), 'utf8');
-        expect(src).toContain("ids: { grille: o.grille.id, echelle: o.echelle.id, cartouche: o.cartouche ? o.cartouche.id : null }");
+        // Étape 5 (17 oct.) : une grille en points n'a pas d'échelle — son identifiant est alors null.
+        expect(src).toContain("ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null, cartouche: o.cartouche ? o.cartouche.id : null }");
     });
 
     it('T.a l’étape 1 de l’accueil et le message « aucun tableau » parlent du fichier d’origine', () => {

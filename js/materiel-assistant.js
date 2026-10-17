@@ -14,6 +14,12 @@
  * niveau sans `valeurCalcul` prend le milieu de sa plage à l'évaluation. Mesuré : faux depuis
  * #527 (`valeurNumeriqueDuNiveau` rend null, le critère sort du total, la note reste vide).
  * L'assistant DEMANDE donc la note retenue de chaque niveau, vide au départ, rien de proposé.
+ *
+ * Étape 5 du plan « prêt pour lundi » (`CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-5-points.md`) :
+ * une grille EN POINTS (`m.enPoints`, aucune colonne de niveau) passe par Sens du tableau, Ce que
+ * contient ton tableau, Points (s'il en manque), À classer, Vérification. Elle se crée SEULE :
+ * critères analytiques, le maximum de chacun est sa pondération ; ni échelle ni cartouche (#941 :
+ * une grille entièrement en points se note sans échelle).
  */
 (function () {
     'use strict';
@@ -31,8 +37,13 @@
 
     A.NOMS_ETAPES = {
         axes: 'Sens du tableau', roles: 'Ce que contient ton tableau', nature: 'Nature des cases', valeurs: 'Plages de notes',
-        pond: 'Pondération', classer: 'À classer', final: 'Vérification'
+        pond: 'Pondération', points: 'Points', classer: 'À classer', final: 'Vérification'
     };
+
+    /** Étape 5 : les points d'un critère, un entier de 1 à 100 (borne du partage, `partage-schemas.js`). */
+    A.MAX_POINTS = 100;
+
+    A.estEnPoints = function (m) { return !!(m && m.enPoints); };
 
     /**
      * Couleurs des niveaux, du plus haut au plus bas : celles de l'éditeur d'échelles
@@ -80,6 +91,13 @@
         if (m.source === 'main') return ['final'];
         var e = ['axes'];
         if (m.tableau) e.push('roles');
+        if (A.estEnPoints(m)) {
+            // Ni Nature des cases, ni Plages de notes : il n'y a ni cases ni niveaux.
+            if (m.criteres.some(function (c) { return c.ponderation.etat !== 'repris'; })) e.push('points');
+            if (m.aClasser.length) e.push('classer');
+            e.push('final');
+            return e;
+        }
         if (aDuTexte(m)) e.push('nature');
         if (m.niveaux.some(niveauARegler)) e.push('valeurs');
         if (m.criteres.some(function (c) { return c.ponderation.etat !== 'repris'; })) e.push('pond');
@@ -150,10 +168,13 @@
         if (sansNom) out.push(compte(sansNom, 'le nom d’un critère', 'le nom de # critères'));
         var ponds = m.criteres.map(function (c) { return A.nombre(c.ponderation.valeur); });
         var sansPond = ponds.filter(isNaN).length;
-        if (sansPond) out.push(compte(sansPond, 'la pondération d’un critère', 'la pondération de # critères'));
-        // L'application lit la pondération en entier (`parseInt`, grilles.js) : 12,5 deviendrait 12 en silence.
-        var nonEntieres = ponds.filter(function (p) { return !isNaN(p) && (!Number.isInteger(p) || p < 0 || p > 100); }).length;
-        if (nonEntieres) out.push(compte(nonEntieres, 'une pondération en nombre entier de 0 à 100 pour un critère', 'une pondération en nombre entier de 0 à 100 pour # critères'));
+        if (A.estEnPoints(m)) manquantsPoints(m, ponds, sansPond, out);
+        else {
+            if (sansPond) out.push(compte(sansPond, 'la pondération d’un critère', 'la pondération de # critères'));
+            // L'application lit la pondération en entier (`parseInt`, grilles.js) : 12,5 deviendrait 12 en silence.
+            var nonEntieres = ponds.filter(function (p) { return !isNaN(p) && (!Number.isInteger(p) || p < 0 || p > 100); }).length;
+            if (nonEntieres) out.push(compte(nonEntieres, 'une pondération en nombre entier de 0 à 100 pour un critère', 'une pondération en nombre entier de 0 à 100 pour # critères'));
+        }
         if (m.criteres.length > A.MAX_CRITERES) out.push('au plus ' + A.MAX_CRITERES + ' critères (ta grille en a ' + m.criteres.length + ')');
         var longs = m.criteres.some(function (c) { return texte(c.nom).length > A.MAX_NOM; });
         if (longs) out.push('des noms de critères plus courts (' + A.MAX_NOM + ' caractères au plus)');
@@ -165,6 +186,18 @@
         if (sousLongs) out.push('des sous-critères plus courts (' + A.MAX_NOM + ' caractères au plus)');
         var descLongue = m.criteres.some(function (c) { return texte(c.description).length > A.MAX_DESCRIPTION; });
         if (descLongue) out.push('des descriptions de critère plus courtes (2 000 caractères au plus)');
+    }
+
+    /**
+     * Étape 5 : les points d'une grille en points. Il ne manque quelque chose que s'il n'y a ni
+     * niveau ni points ; un point non entier, nul ou au-delà de 100 bloque (comme au lot 2).
+     * Textes PROVISOIRES (Claude Code, 17 oct.), relus à l'étape 7.
+     */
+    function manquantsPoints(m, ponds, sans, out) {
+        if (sans && sans === m.criteres.length) out.push('les points de chaque critère, ou des colonnes de niveaux, à l’étape « Ce que contient ton tableau »');
+        else if (sans) out.push(compte(sans, 'les points d’un critère', 'les points de # critères'));
+        var hors = ponds.filter(function (p) { return !isNaN(p) && (!Number.isInteger(p) || p < 1 || p > A.MAX_POINTS); }).length;
+        if (hors) out.push(compte(hors, 'des points en nombre entier de 1 à 100 pour un critère', 'des points en nombre entier de 1 à 100 pour # critères'));
     }
 
     /**
@@ -180,7 +213,7 @@
         else if (nom.length > A.MAX_NOM) manquants.push('un nom de grille plus court (' + A.MAX_NOM + ' caractères au plus)');
         else if (noms.indexOf(nom.toLowerCase()) >= 0) manquants.push('un autre nom de grille : « ' + nom + ' » existe déjà dans ce trimestre');
         (m.manquesLecture || []).forEach(function (t) { manquants.push(t); });
-        manquantsNiveaux(m, manquants);
+        manquantsNiveaux(m, manquants);   // une grille en points n'a aucun niveau : rien n'y manque
         manquantsCriteres(m, manquants);
         var enAttente = m.aClasser.filter(function (a) { return a.statut === 'attente'; }).length;
         if (enAttente) manquants.push(compte(enAttente, 'un passage à classer ou à écarter', '# passages à classer ou à écarter'));
@@ -188,7 +221,8 @@
         var ponds = m.criteres.map(function (c) { return A.nombre(c.ponderation.valeur); });
         var total = Math.round(ponds.filter(function (p) { return !isNaN(p); }).reduce(function (s, p) { return s + p; }, 0) * 10) / 10;
         var toutesPonds = m.criteres.length > 0 && !ponds.some(isNaN);
-        var avertPond = toutesPonds && total !== 100;
+        // Étape 5 : le total des points est libre (une grille sur 64 est juste) : ni avertissement ni « Ramener à 100 % ».
+        var avertPond = !A.estEnPoints(m) && toutesPonds && total !== 100;
         return {
             manquants: manquants, total: total, enAttente: enAttente,
             avertPond: avertPond, peutRamener: avertPond && total > 0,
@@ -418,6 +452,18 @@
         });
     }
 
+    /**
+     * Étape 5 : la grille en points. `type: 'analytique'` sur la grille et sur chaque critère, dont
+     * la pondération est le maximum de points (`evaluation-calcul.js`, « le maximum EST la
+     * pondération ») ; le reste de la forme, celle de l'éditeur (lot 3a). Aucun descripteur.
+     */
+    function construireGrilleEnPoints(m, ctx, nomGrille) {
+        var g = construireGrille(m, ctx, nomGrille, null);
+        g.type = 'analytique';
+        g.criteres.forEach(function (c) { c.type = 'analytique'; });
+        return g;
+    }
+
     /** La cartouche, seulement pour des rétroactions, et seulement s'il y a au moins un texte. */
     function construireCartouche(m, ctx, nomGrille, grille, echelleId) {
         if (!A.estRetro(m)) return null;
@@ -439,12 +485,14 @@
 
     /**
      * Les trois objets NEUFS, dans l'ordre d'écriture : échelle, grille, cartouche (ou null).
+     * Une grille en points : la grille seule (échelle et cartouche null).
      * @param {Object} m - un modèle complet (`calculs(m).manquants` vide)
      * @param {{id: function(string): string, maintenant: string, auteur?: string,
      *          metadataCc?: Object, nomsEchelles?: string[]}} ctx
      */
     A.construire = function (m, ctx) {
         var nomGrille = texte(m.nom);
+        if (A.estEnPoints(m)) return { echelle: null, grille: construireGrilleEnPoints(m, ctx, nomGrille), cartouche: null };
         var echelle = construireEchelle(m, ctx, nomGrille);
         var grille = construireGrille(m, ctx, nomGrille, echelle.id);
         return { echelle: echelle, grille: grille, cartouche: construireCartouche(m, ctx, nomGrille, grille, echelle.id) };

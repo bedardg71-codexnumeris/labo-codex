@@ -27,6 +27,11 @@
  * Lot 3a (`CONSIGNE-LOT-2026-10-17-…-3a-roles.md`) : l'étape « Ce que contient ton tableau »,
  * un menu de rôle au début de chaque rangée et en tête de chaque colonne ; changer un menu
  * relit la grille. Les codes de niveau se corrigent. Textes de Claude Code, PROVISOIRES (3b).
+ *
+ * Étape 5 du plan « prêt pour lundi » (`CONSIGNE-LOT-2026-10-17-…-5-points.md`) : une grille
+ * EN POINTS (aucune colonne de niveau) a son aperçu, son étape « Points », sa Vérification
+ * (Critère | Description | Points, total « sur N ») et sa confirmation (la grille seule).
+ * Textes de Claude Code, PROVISOIRES (étape 7).
  */
 (function () {
     'use strict';
@@ -146,6 +151,7 @@
      * @param {string} [surligne]
      */
     function apercuHtml(m, surligne) {
+        if (m.enPoints) return apercuPointsHtml(m, surligne === 'points');   // sans l'assistant : l'aperçu reste une fonction pure du modèle
         return '<div class="materiel-apercu-entete"><h3 id="materiel-titre-apercu">Aperçu de ta grille</h3>' +
             legendeHtml('', 'Complété par l’application') + '</div>' +
             '<div class="materiel-apercu-cadre" role="region" aria-label="Aperçu de ta grille" tabindex="0">' +
@@ -156,6 +162,26 @@
             m.niveaux.map(function (n) { return enteteNiveau(n, surligne === 'valeurs'); }).join('') +
             '</tr></thead><tbody>' + m.criteres.map(function (c) { return rangeeCritere(m, c, surligne === 'pond'); }).join('') +
             '</tbody></table></div>';
+    }
+
+    /** Étape 5 : « sur 4 », ou « à remplir ». */
+    function points(c) {
+        return texte(c.ponderation) ? valeur(c.ponderation, 'sur ' + texte(c.ponderation).replace('.', ',')) : valeur({ etat: 'remplir' }, 'à remplir');
+    }
+
+    /** Étape 5 : l'aperçu d'une grille en points, Critère | Points ; `surligne` encadre les points. */
+    function apercuPointsHtml(m, surligne) {
+        return '<div class="materiel-apercu-entete"><h3 id="materiel-titre-apercu">Aperçu de ta grille</h3>' +
+            legendeHtml('', 'Complété par l’application') + '</div>' +
+            '<div class="materiel-apercu-cadre" role="region" aria-label="Aperçu de ta grille" tabindex="0">' +
+            '<table class="materiel-apercu"><caption class="u-lecteur-ecran">' +
+            e(pluriel(m.criteres.length, 'critère', 'critères') + ', en points') +
+            '</caption><thead><tr><th scope="col" class="materiel-col-critere">Critère</th>' +
+            '<th scope="col" class="materiel-col-pond' + (surligne ? ' materiel-surligne' : '') + '">Points</th>' +
+            '</tr></thead><tbody>' + m.criteres.map(function (c) {
+                return '<tr><th scope="row" class="materiel-col-critere">' + valeur(c.nom, texte(c.nom) || 'Critère sans nom') + detailsCritereHtml(c) + '</th>' +
+                    '<td class="materiel-col-pond' + (surligne ? ' materiel-surligne' : '') + '">' + points(c) + '</td></tr>';
+            }).join('') + '</tbody></table></div>';
     }
 
     // ------------------------------------------------------------------
@@ -183,9 +209,16 @@
             '<button type="button" class="btn btn-secondaire" data-action="materiel.allerClasser">Y aller</button></div>';
     }
 
+    /** Étape 5 : le total d'une grille en points, libre (ni avertissement ni « Ramener à 100 % »). */
+    function blocPoints(c) {
+        return '<p class="materiel-total">Total : sur ' + e(String(c.total).replace('.', ',')) + '</p>';
+    }
+
     /** Ce que la zone `#materiel-derives` montre, selon l'étape. */
     function derivesHtml(m, id) {
         var c = calculs(m);
+        if (id === 'points') return blocPoints(c);
+        if (id === 'final' && A().estEnPoints(m)) return blocPoints(c) + blocAClasserRestant(c);
         if (id === 'pond') return blocPonderation(c);
         if (id === 'valeurs') return avert(c.avertPlages) + avert(c.avertNotes);
         if (id !== 'final') return '';
@@ -197,6 +230,12 @@
     }
 
     function creeListeHtml(m) {
+        if (A().estEnPoints(m)) {
+            var tot = calculs(m).total;
+            return '<h3>Ce qui sera créé</h3><ul><li>' +
+                e('Une grille en points « ' + (texte(m.nom) || 'sans nom') + ' » (' + pluriel(m.criteres.length, 'critère', 'critères') + '), sur ' + String(tot).replace('.', ',') + '.') +
+                '</li></ul><p class="text-muted">' + e('Aucune échelle n’est créée : la note se calcule par les points seuls. Tu retrouveras ta grille dans Grilles de critères, où tout reste modifiable.') + '</p>';
+        }
         var retro = A().estRetro(m);
         var nomG = texte(m.nom) || 'sans nom';
         var nC = m.criteres.length, nN = m.niveaux.length;
@@ -233,6 +272,8 @@
         valeurs: 'Ces niveaux, leurs plages et leurs notes retenues, l’application les appelle une échelle de performance. Tu la retrouveras dans « Échelles de performance ».',
         pond: 'Le poids de chaque critère, l’application l’appelle la pondération. Il fait partie de ta grille de critères.',
         // Lot 3a, Claude Code (17 oct.) : PROVISOIRE, relu en 3b.
+        // Étape 5, Claude Code (17 oct.) : PROVISOIRE (étape 7).
+        points: 'Les points de chaque critère font partie de ta grille de critères : chaque copie se notera sur ce nombre, et la note se calcule par les points seuls.',
         roles: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères et son échelle de performance : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé.'
     };
 
@@ -366,6 +407,17 @@
             }).join('') + '</div>';
     }
 
+    /** Étape 5 : les points de chaque critère, « sur N », un entier de 1 à 100. Textes PROVISOIRES (étape 7). */
+    function etapePoints(m) {
+        return titreEtape('Sur combien de points chaque critère est-il noté ?') +
+            '<p>' + e('Ton tableau ne donnait pas les points de chaque critère. Indique-les : un nombre entier de 1 à 100 par critère. Le total est libre.') + '</p>' +
+            '<div class="materiel-cartes-niveaux">' + m.criteres.map(function (c, i) {
+                return '<div class="materiel-carte-niveau"><span class="materiel-points-nom">' + e(texte(c.nom) || 'Critère sans nom') + '</span>' +
+                    '<label for="materiel-q-points-' + i + '"><span class="u-lecteur-ecran">' + e('Points de « ' + (texte(c.nom) || 'critère sans nom') + ' », ') + '</span>sur</label>' +
+                    champ('materiel-q-points-' + i, 'critere.' + i + '.ponderation', c.ponderation, ' inputmode="numeric" placeholder="ex. 4"') + '</div>';
+            }).join('') + '</div>';
+    }
+
     function etiquettePassage(a) {
         if (a.statut === 'place') return 'Ajouté comme critère';
         if (a.statut === 'ecarte') return 'Écarté : ne sera pas repris dans la grille';
@@ -386,7 +438,7 @@
             }).join('') + '</ul>';
     }
 
-    var ETAPES = { axes: etapeAxes, roles: etapeRoles, nature: etapeNature, valeurs: etapeValeurs, pond: etapePond, classer: etapeClasser };
+    var ETAPES = { axes: etapeAxes, roles: etapeRoles, nature: etapeNature, valeurs: etapeValeurs, pond: etapePond, points: etapePoints, classer: etapeClasser };
 
     function boutonPrecedent() {
         return '<button type="button" class="materiel-btn-lien" data-action="materiel.precedent">' +
@@ -404,7 +456,7 @@
     }
 
     function questionHtml(m, id) {
-        var surligne = id === 'valeurs' || id === 'pond' ? id : '';
+        var surligne = id === 'valeurs' || id === 'pond' || id === 'points' ? id : '';
         return '<div class="materiel-question">' + ETAPES[id](m) +
             '<div id="materiel-derives" class="materiel-derives">' + derivesHtml(m, id) + '</div>' +
             motApp(m, id) +
@@ -426,8 +478,8 @@
         return '<div class="materiel-rappels">' +
             (m.source !== 'main' ? '<div class="materiel-rappel" role="group" aria-labelledby="materiel-rappel-axes"><span id="materiel-rappel-axes">Critères :</span>' +
                 pilule('materiel.choisirSens', 0, !m.critEnColonnes, 'en lignes') + pilule('materiel.choisirSens', 1, !!m.critEnColonnes, 'en colonnes') + '</div>' : '') +
-            '<div class="materiel-rappel" role="group" aria-labelledby="materiel-rappel-nature"><span id="materiel-rappel-nature">Les cases :</span>' +
-            pilule('materiel.choisirNature', 'descripteurs', !retro, 'décrivent les niveaux') + pilule('materiel.choisirNature', 'retroactions', retro, 's’adressent à l’étudiant·e') + '</div></div>';
+            (A().estEnPoints(m) ? '' : '<div class="materiel-rappel" role="group" aria-labelledby="materiel-rappel-nature"><span id="materiel-rappel-nature">Les cases :</span>' +
+            pilule('materiel.choisirNature', 'descripteurs', !retro, 'décrivent les niveaux') + pilule('materiel.choisirNature', 'retroactions', retro, 's’adressent à l’étudiant·e') + '</div>') + '</div>';
     }
 
     function enteteVerifNiveau(n, j) {
@@ -462,7 +514,37 @@
             '<span class="text-muted">Il apparaîtra sur le document que reçoivent tes étudiant·es.</span>' + men + '</div>';
     }
 
+    /** Étape 5 : une rangée de la Vérification d'une grille en points — nom, description, points. */
+    function rangeeVerifPoints(c, i) {
+        var sous = c.sousCriteres || [];
+        return '<tr><th scope="row" class="materiel-col-critere">' +
+            '<label class="u-lecteur-ecran" for="materiel-v-nom-' + i + '">Nom du critère</label>' +
+            champ('materiel-v-nom-' + i, 'critere.' + i + '.nom', c.nom, ' placeholder="Nom du critère"') +
+            (c.nom.etat === 'remplir' ? mention('remplir', 'à remplir') : '') +
+            (sous.length ? detailsCritereHtml({ sousCriteres: sous }) : '') + '</th>' +
+            '<td><textarea class="controle-form materiel-champ" rows="3" aria-label="' + e('Description : ' + (texte(c.nom) || 'critère')) + '"' +
+            ' placeholder="Description (facultatif)" data-on-input="materiel.saisir" data-param="critere.' + i + '.description">' + e(texte(c.description)) + '</textarea></td>' +
+            '<td class="materiel-col-pond"><label for="materiel-v-pond-' + i + '"><span class="u-lecteur-ecran">Points du critère, </span>sur</label>' +
+            champ('materiel-v-pond-' + i, 'critere.' + i + '.ponderation', c.ponderation, ' inputmode="numeric" placeholder="ex. 4"') + '</td></tr>';
+    }
+
+    function verificationPointsHtml(m) {
+        return '<div class="materiel-verif-entete">' + titreEtape('Vérifie ta grille, puis crée-la') +
+            '<p>Tout reste modifiable ici. Rien n’est encore créé.</p></div>' +
+            nomGrilleHtml(m) + rappelsHtml(m) + legendeHtml('Comment lire le tableau :', 'Complété par l’application : à vérifier') +
+            '<div class="materiel-apercu-cadre" role="region" aria-label="Ta grille" tabindex="0"><table class="materiel-apercu materiel-verif materiel-verif-points">' +
+            '<thead><tr><th scope="col" class="materiel-col-critere">Critère</th><th scope="col">Description</th><th scope="col" class="materiel-col-pond">Points</th>' +
+            '</tr></thead><tbody>' + m.criteres.map(rangeeVerifPoints).join('') + '</tbody></table></div>' +
+            '<div class="materiel-actions"><button type="button" class="btn btn-secondaire" data-action="materiel.ajouterCritere">Ajouter un critère</button></div>' +
+            '<div id="materiel-derives" class="materiel-derives">' + derivesHtml(m, 'final') + '</div>' +
+            '<div class="materiel-creation"><div id="materiel-cree" class="materiel-cree-liste">' + creeListeHtml(m) + '</div>' +
+            '<div class="materiel-creation-actions"><button type="button" class="btn btn-principal" data-action="materiel.creer">Créer ma grille</button>' +
+            boutonPrecedent() + '<div id="materiel-manquants">' + manquantsHtml(m) + '</div>' +
+            (etat.erreurCreation ? '<p class="alerte alerte-erreur" role="alert">' + e(etat.erreurCreation) + '</p>' : '') + '</div></div>';
+    }
+
     function verificationHtml(m) {
+        if (A().estEnPoints(m)) return verificationPointsHtml(m);
         var plein = m.niveaux.length >= A().MAX_NIVEAUX;
         return '<div class="materiel-verif-entete">' + titreEtape('Vérifie ta grille, puis crée-la') +
             '<p>Tout reste modifiable ici. Rien n’est encore créé.</p></div>' +
@@ -504,6 +586,7 @@
     // ------------------------------------------------------------------
 
     function confirmationHtml(r) {
+        if (r.enPoints) return confirmationPointsHtml(r);
         var phrase = r.retro
             ? 'Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' ; tes rétroactions sont prêtes à servir quand tu évalueras. Rien d’autre n’a changé dans l’application.'
             : 'Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + (r.descr ? ' et leurs descripteurs' : '') + '. Rien d’autre n’a changé dans l’application.';
@@ -515,6 +598,19 @@
             carteCree('Ta grille', carteGrille, 'grille-criteres', 'La voir dans Grilles de critères') +
             carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') +
             (r.retro ? carteCree('Tes rétroactions', 'Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.', 'retroactions', 'Les voir dans Cartouches de rétroaction') : '') +
+            '</div><div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
+            '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
+            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">Apporter autre chose</button></section>';
+    }
+
+    /** Étape 5 : la carte « Grille » seule ; « Pour t'en servir… » inchangé. Textes PROVISOIRES (étape 7). */
+    function confirmationPointsHtml(r) {
+        return '<section class="materiel-confirmation" aria-labelledby="materiel-titre-cree">' +
+            '<div class="materiel-confirmation-titre"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>' +
+            '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
+            '<p>' + e('Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' notés en points. Rien d’autre n’a changé dans l’application.') + '</p>' +
+            '<div class="materiel-cartes-cree">' +
+            carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + '.', 'grille-criteres', 'La voir dans Grilles de critères') +
             '</div><div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">Apporter autre chose</button></section>';
@@ -568,7 +664,7 @@
             remplacer('materiel-cree', creeListeHtml(m));
             remplacer('materiel-manquants', manquantsHtml(m));
         } else {
-            remplacer('materiel-apercu-zone', apercuHtml(m, id === 'valeurs' || id === 'pond' ? id : ''));
+            remplacer('materiel-apercu-zone', apercuHtml(m, id === 'valeurs' || id === 'pond' || id === 'points' ? id : ''));
         }
         // Un code complété suit le titre de son niveau ; un code repris ou saisi ne bouge pas (lot 3a).
         m.niveaux.forEach(function (n, j) {
@@ -623,7 +719,7 @@
     }
 
     /**
-     * Une saisie : « nom », « niveau.<j>.<titre|code|min|max|note> », « critere.<i>.<nom|ponderation> »,
+     * Une saisie : « nom », « niveau.<j>.<titre|code|min|max|note> », « critere.<i>.<nom|ponderation|description> »,
      * « case.<i>.<j> ». Le modèle est mis à jour en place, le champ change de cadre.
      */
     /** La mention « plage à remplir » d'un niveau suit sa saisie, sur les deux écrans. */
@@ -642,6 +738,12 @@
         'case': function (m, p) { return m.criteres[+p[1]] && m.criteres[+p[1]].cases[+p[2]]; }
     };
 
+    /** Une case, une description (étape 5) : facultatives, vides sans être « à remplir ». */
+    function etatDeSaisie(p, v) {
+        var facultatif = p[0] === 'case' || (p[0] === 'critere' && p[2] === 'description');
+        return facultatif ? (String(v).trim() ? 'saisi' : 'vide') : A().etatSaisi(v);
+    }
+
     function saisir(chemin, champEl) {
         var m = etat.modele;
         if (!m || !champEl) return;
@@ -649,7 +751,7 @@
         var cible = CIBLES[p[0]] ? CIBLES[p[0]](m, p) : null;
         if (!cible) return;
         cible.valeur = v;
-        cible.etat = p[0] === 'case' ? (String(v).trim() ? 'saisi' : 'vide') : A().etatSaisi(v);
+        cible.etat = etatDeSaisie(p, v);
         if (p[0] === 'critere' && p[2] === 'ponderation') m.pondRamenee = false;
         if (p[0] === 'niveau' && p[2] === 'titre') m.niveaux = window.materielLecture.coder(m.niveaux);
         if (p[0] === 'niveau' && (p[2] === 'min' || p[2] === 'max')) montrerPlageARemplir(m.niveaux[+p[1]], +p[1]);
