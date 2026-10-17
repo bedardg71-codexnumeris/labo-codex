@@ -985,6 +985,10 @@ async function afficherListeEchelles() {
     }).join('');
 
     container.innerHTML = html;
+    // Lot 3b1 (17 oct.) : l'objet ouvert reste sélectionné quand la liste se redessine — l'initialisation
+    // de la sous-section la redessine 100 ms après une ouverture venue d'un autre onglet (« Apporter mon matériel »).
+    const edition = document.getElementById('conteneurEditionEchelle');
+    if (echelleTemplateActuelle && edition && !edition.classList.contains('u-hide')) definirEchelleActive(echelleTemplateActuelle.id);
 }
 
 /**

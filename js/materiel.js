@@ -734,7 +734,19 @@
         ajouterNiveau: function () { changer(A().ajouterNiveau(etat.modele), '#materiel-v-titre-' + etat.modele.niveaux.length); },
         saisir: saisir,
         creer: creer,
-        voir: function (id) { sousSection(String(id)); },
+        /**
+         * La sous-section, puis (lot 3b1) l'objet créé ouvert et sélectionné, par le chemin de la
+         * bibliothèque de chaque outil (`ouvrir…DepuisListe`, qui garde une création en cours).
+         */
+        voir: async function (id) {
+            id = String(id);
+            sousSection(id);
+            var ids = etat.ecran === 'cree' && etat.resume && etat.resume.ids;
+            if (!ids) return;
+            if (id === 'grille-criteres' && typeof window.ouvrirGrilleDepuisListe === 'function') await window.ouvrirGrilleDepuisListe(ids.grille);
+            else if (id === 'echelle-performance' && typeof window.ouvrirEchelleDepuisListe === 'function') await window.ouvrirEchelleDepuisListe(ids.echelle);
+            else if (id === 'retroactions' && ids.cartouche && typeof window.ouvrirCartoucheDepuisListe === 'function') await window.ouvrirCartoucheDepuisListe(ids.cartouche, ids.grille);
+        },
         /** L'état de l'assistant (lecture) — pour les bancs. */
         etatCourant: function () { return etat; },
         modeleCourant: function () { return etat.modele; },

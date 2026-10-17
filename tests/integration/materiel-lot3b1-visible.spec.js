@@ -1,0 +1,93 @@
+import { test, expect } from '@playwright/test';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
+
+// « APPORTER MON MATÉRIEL », LOT 3b1 (consigne du 17 oct. 2026), dans un vrai WebKit.
+//
+//   · créer avec l'exemple, « La voir dans Grilles de critères » : la grille créée est OUVERTE et
+//     sélectionnée dans la barre latérale ; sous chaque critère, le bloc « Ce qui est attendu à
+//     chaque niveau », en lecture ;
+//   · même chose pour l'échelle, dans Échelles de performance, et pour la cartouche (rétroactions).
+
+async function ouvrirConception(page) {
+    await page.goto(indexHtml);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
+    await page.evaluate(() => {
+        db.setSync('trimestres', [{ id: 'a2032', nom: 'Automne 2032', actif: true }]);
+        db.setSync('trimestreActif', 'a2032');
+        db.setSync('backupNePlusRappeler', 'true');
+    });
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
+    await page.waitForTimeout(500);
+    await page.evaluate(() => window.afficherSection('conception'));
+    await page.waitForTimeout(200);
+}
+
+const PLAGES = [['85', '100', '92'], ['75', '84', '80'], ['65', '74', '70'], ['0', '64', '50']];
+
+async function creerExemple(page, nature = 'descripteurs') {
+    await page.locator('[data-action="materiel.essayerExemple"]').click();
+    await page.locator('[data-action="materiel.suivant"]').click();
+    await page.locator('[data-action="materiel.suivant"]').click();
+    await page.locator(`[data-action="materiel.choisirNature"][data-param="${nature}"]`).click();
+    await page.locator('[data-action="materiel.suivant"]').click();
+    for (let j = 0; j < 4; j++) {
+        await page.fill('#materiel-q-min-' + j, PLAGES[j][0]);
+        await page.fill('#materiel-q-max-' + j, PLAGES[j][1]);
+        await page.fill('#materiel-q-note-' + j, PLAGES[j][2]);
+    }
+    await page.locator('[data-action="materiel.suivant"]').click();
+    await page.locator('[data-action="materiel.ecarter"]').click();
+    await page.locator('[data-action="materiel.suivant"]').click();
+    await page.locator('[data-action="materiel.creer"]').click();
+    await expect(page.locator('#materiel-titre-cree')).toBeVisible();
+    return page.evaluate(() => {
+        const g = db.getSync(cle('grillesTemplates'), []);
+        const e = db.getSync(cle('echellesTemplates'), []);
+        const grille = g[g.length - 1];
+        return { grille, echelle: e[e.length - 1], cartouche: db.getSync(cle('cartouches_' + grille.id), [])[0] || null };
+    });
+}
+
+test('lot 3b1 · « La voir dans Grilles de critères » ouvre la grille créée, sélectionnée, ses niveaux en lecture', async ({ page }) => {
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    await ouvrirConception(page);
+    const { grille, echelle } = await creerExemple(page);
+
+    await page.locator('[data-action="materiel.voir"][data-param="grille-criteres"]').click();
+    await expect(page.locator('#conception-grille-criteres')).toBeVisible();
+    await expect(page.locator('#nomGrilleTemplate')).toHaveValue(grille.nom);
+    await expect(page.locator(`#conception-grille-criteres .sidebar-item[data-id="${grille.id}"]`)).toHaveClass(/\bactive\b/);
+    const blocs = page.locator('#listeCriteres .grille-attendu');
+    await expect(blocs).toHaveCount(grille.criteres.filter(c => c.descripteurs).length);
+    await expect(blocs.first().locator('.grille-attendu-titre').first()).toHaveText('Ce qui est attendu à chaque niveau');
+    const noms = echelle.niveaux.filter(n => grille.criteres[0].descripteurs.parNiveau[n.code]).map(n => n.nom);
+    await expect(blocs.first().locator('.grille-attendu-niveau strong')).toHaveText(noms);
+    await expect(blocs.first().locator('input, textarea, select')).toHaveCount(0);
+    expect(erreurs).toEqual([]);
+});
+
+test('lot 3b1 · « Les voir dans Échelles de performance » ouvre l’échelle créée, sélectionnée', async ({ page }) => {
+    await ouvrirConception(page);
+    const { echelle } = await creerExemple(page);
+    await page.locator('[data-action="materiel.voir"][data-param="echelle-performance"]').click();
+    await expect(page.locator('#conception-echelle-performance')).toBeVisible();
+    await expect(page.locator('#nomEchelleTemplate')).toHaveValue(echelle.nom);
+    await expect(page.locator(`#conception-echelle-performance .sidebar-item[data-id="${echelle.id}"]`)).toHaveClass(/\bactive\b/);
+});
+
+test('lot 3b1 · « Les voir dans Cartouches de rétroaction » ouvre la cartouche créée, sélectionnée', async ({ page }) => {
+    await ouvrirConception(page);
+    const { cartouche } = await creerExemple(page, 'retroactions');
+    expect(cartouche).not.toBeNull();
+    await page.locator('[data-action="materiel.voir"][data-param="retroactions"]').click();
+    await expect(page.locator('#conception-retroactions')).toBeVisible();
+    await expect(page.locator('#nomCartouche')).toHaveValue(cartouche.nom);
+    await expect(page.locator(`#conception-retroactions .sidebar-item[data-cartouche-id="${cartouche.id}"]`)).toHaveClass(/\bactive\b/);
+});

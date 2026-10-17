@@ -88,6 +88,8 @@
             nbC: o.grille.criteres.length,
             retro: !!o.cartouche,
             descr: o.grille.criteres.some(function (c) { return !!c.descripteurs; }),
+            // Lot 3b1 : les boutons « La voir dans … » de la confirmation ouvrent ces objets-ci.
+            ids: { grille: o.grille.id, echelle: o.echelle.id, cartouche: o.cartouche ? o.cartouche.id : null },
             niveaux: m.niveaux.map(function (n) {
                 return String(n.titre.valeur).trim() + ' (' + String(n.min.valeur).trim() + ' à ' + String(n.max.valeur).trim() + ' %)';
             })

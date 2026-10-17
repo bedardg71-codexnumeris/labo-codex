@@ -714,7 +714,7 @@
     // 5. CHARGER : de ce qu'on a collé à un modèle, ou à un message clair
     // ------------------------------------------------------------------
 
-    L.MESSAGE_SANS_TABLEAU = 'L’application n’a pas trouvé de tableau dans ce que tu as collé. Dans Word ou Pages, sélectionne le tableau lui-même en entier, ou tape ta grille à la main.';
+    L.MESSAGE_SANS_TABLEAU = 'L’application n’a pas trouvé de tableau dans ce que tu as collé. Si ta grille vient d’un PDF, ce serait la cause : un PDF ne transmet que du texte, sans ses cases. Tu pourrais la copier depuis son fichier d’origine (Word, Pages ou un autre traitement de texte), en sélectionnant le tableau entier, ou la taper à la main.';   // validé par Grégoire, 17 oct., 8 h 53
     L.MESSAGE_INCOMPLET = 'Le tableau collé semble incomplet : il faut au moins un critère et deux niveaux. Tu pourrais vérifier ta sélection dans le document, ou taper ta grille à la main.';
 
     /**
