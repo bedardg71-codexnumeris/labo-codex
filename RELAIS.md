@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, MATINÉE : **LOT 2 D'« APPORTER MON MATÉRIEL » COMMITÉ SUR `main` (`2fcad2c5`), NON POUSSÉ ; RELECTURE DE COWORK PUIS VERDICT DU SOIR**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, MATINÉE : **LOT 3a D'« APPORTER MON MATÉRIEL » COMMITÉ SUR `main` (`e7fd773e`), NON POUSSÉ ; RELECTURE DE COWORK, PUIS 3b, PUIS VERDICT DU SOIR**
+
+**En ligne** : toujours le lot 1 (`9257f7e5`, 1.202.0). **`main` local** : lots 2 (relu, corrigé, `0adf66be`) et 3a (`e7fd773e`) et le commit docs
+de la demande de relecture, au-dessus de `84d1b3d6`. Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-3a.md`.
+**Trouvaille pour 3b** : les sous-critères d'un critère holistique sont écrits mais invisibles dans Grilles de critères (`grilles.js` ~4419).
+**Vitest** : 9 037/9 037. **Playwright** : les trois specs du matériel lancées seules dans WebKit (8/8) ; pas de verdict complet.
+**Suite** : relecture de Cowork → corrections → lot 3b (consigne de Cowork) → release et verdict complet ce soir → push au signal de Grégoire.
+
+---
+
+## (relais précédent) 17 OCT. 2026, MATINÉE : **LOT 2 D'« APPORTER MON MATÉRIEL » COMMITÉ SUR `main` (`2fcad2c5`), NON POUSSÉ ; RELECTURE DE COWORK PUIS VERDICT DU SOIR**
 
 **En ligne** : toujours le lot 1 (`9257f7e5`, 1.202.0). **`main` local** : `2fcad2c5` (lot 2) et le commit docs de la demande de relecture, au-dessus de `84d1b3d6`.
 **Décision de Grégoire (17 oct.)** : l'assistant demande la note retenue de chaque niveau (la consigne supposait un repli sur le milieu
