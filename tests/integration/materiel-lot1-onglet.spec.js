@@ -8,7 +8,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //
 //   · ouvrir Conception affiche le nouvel onglet, EN TÊTE, et sa page d'accueil ;
 //   · « Essayer avec un exemple » : l'aperçu montre 3 critères, 4 niveaux, 1 passage à classer ;
-//   · « Recommencer » ramène à l'accueil ;
+//   · « Recommencer » ramène à l'accueil (lot 2 : c'est le « ← Recommencer » de la 1re étape) ;
 //   · ce que Vitest/jsdom ne prouve pas : un <script> ou un onerror dans le HTML collé ne
 //     s'exécutent pas — le DOMParser de WebKit fabrique un document inerte.
 
@@ -27,20 +27,21 @@ test('lot 1 · Conception s’ouvre sur « Apporter mon matériel » ; l’exemp
     await expect(page.locator('#materiel-accueil h2')).toHaveText('Apporter mon matériel');
     await expect(page.locator('#materiel-zone-collage')).toBeVisible();
 
+    // Lot 2 (17 oct.) : l'exemple ouvre l'assistant ; l'aperçu reste visible sous la question, et
+    // le passage à classer se compte à son étape (materiel-lot2-assistant.spec.js).
     await page.locator('[data-action="materiel.essayerExemple"]').click();
     await expect(page.locator('#materiel-lecture')).toBeVisible();
     await expect(page.locator('#materiel-accueil')).toBeHidden();
-    await expect(page.locator('#materiel-lecture tbody tr')).toHaveCount(3);
-    await expect(page.locator('#materiel-lecture thead th.materiel-col-niveau')).toHaveCount(4);
-    await expect(page.locator('#materiel-lecture .materiel-a-classer li')).toHaveCount(1);
-    await expect(page.locator('#materiel-titre-apercu')).toBeFocused();   // règle SPA
+    await expect(page.locator('#materiel-apercu-zone tbody tr')).toHaveCount(3);
+    await expect(page.locator('#materiel-apercu-zone thead th.materiel-col-niveau')).toHaveCount(4);
+    await expect(page.locator('#materiel-titre-etape')).toBeFocused();   // règle SPA
 
     // iPad : le tableau défile dans son cadre, la page non (largeur d'un iPad Air en portrait).
     await page.setViewportSize({ width: 820, height: 1180 });
     const debord = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(debord, 'la page ne défile pas horizontalement').toBeLessThanOrEqual(0);
 
-    await page.locator('[data-action="materiel.recommencer"]').click();
+    await page.locator('[data-action="materiel.precedent"]').click();   // « ← Recommencer » à la 1re étape
     await expect(page.locator('#materiel-accueil')).toBeVisible();
     await expect(page.locator('#materiel-lecture')).toBeHidden();
 });

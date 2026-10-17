@@ -333,18 +333,19 @@ describe('lot 1 · S — ce qu’on colle n’entre pas dans la page', () => {
         expect(html).not.toContain('<svg');
         expect(html).not.toContain('<b>Nom');
         expect(html).not.toContain('<iframe');   // une CASE, pas seulement l'en-tête
+        // Lot 2 (17 oct.) : « À classer » a quitté l'aperçu pour son étape de l'assistant ; son
+        // échappement y est éprouvé (materiel-lot2-assistant.test.js, S.a).
         expect(m.aClasser.map(x => x.texte)).toContain('<object data=x></object> sous le tableau');
-        expect(html).not.toContain('<object');   // un passage « À classer » (relecture de Cowork)
         expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
     });
 
-    it('S.c l’aperçu montre l’exemple : 3 rangées de critères, 4 niveaux, 1 passage à classer', () => {
+    it('S.c l’aperçu montre l’exemple : 3 rangées de critères, 4 niveaux', () => {
         const dom = new JSDOM('<div id="z"></div>');
         const z = dom.window.document.getElementById('z');
         z.innerHTML = materiel.apercuHtml(L.charger(L.lireHtml(L.exempleHtml()), 'exemple').modele);
         expect(z.querySelectorAll('tbody tr')).toHaveLength(3);
         expect(z.querySelectorAll('thead th.materiel-col-niveau')).toHaveLength(4);
-        expect(z.querySelectorAll('.materiel-a-classer li')).toHaveLength(1);
+        // Le passage à classer se compte à son étape (lot 2), plus dans l'aperçu.
         // Les états se lisent sans la couleur : « à remplir » est écrit (plages absentes de l'exemple).
         expect(z.querySelectorAll('thead .materiel-etat-remplir')).toHaveLength(4);
     });

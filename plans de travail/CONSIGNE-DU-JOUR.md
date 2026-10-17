@@ -1,17 +1,17 @@
-# Consigne du jour – « Apporter mon matériel », lot 1
+# Consigne du jour – « Apporter mon matériel », lot 2
 
-> Écrite par Cowork le 16 octobre 2026 à 8 h 47 (Toronto, mesuré par `date`), à la demande de Grégoire : ce lot démarre dans une session neuve ; Cowork clôt de son côté le chantier du nouveau dépôt. Elle remplace les versions de 8 h 30 et 8 h 34, jamais exécutées. L'ancienne consigne (le matériel de départ, #683 et #684, du 15 octobre, livrée) est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-15-materiel-de-depart.md`. Commite ce fichier et ce déplacement avec ton lot.
+> Écrite par Cowork le samedi 17 octobre 2026 à 7 h 57 (Toronto, mesuré par `date`), à la demande de Grégoire : ce lot démarre dans une session neuve. L'ancienne consigne du jour (le lot 1, livré) est archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-16-apporter-mon-materiel-1.md`. **Commite ce fichier et ce déplacement avec ton lot.**
 
-## Où on en est (mesuré par Cowork à 8 h 47)
+## Où on en est (mesuré par Cowork à 7 h 57)
 
-- Le dossier de travail est `~/Documents/GitHub/labo-codex`, renommé ce matin par Grégoire. C'est un clone du nouveau dépôt `labo-codex`, à l'historique purgé ; `origin` pointe vers lui, `core.hooksPath` vaut `scripts/hooks`.
-- ⛔ `~/Documents/GitHub/Monitorage_v6-ancien` est l'ancien dépôt : n'y travaille pas, n'y commite rien, ne pousse rien vers l'ancien dépôt GitHub.
-- `main` local à `efffe795` (Netlify ne publie plus que la liste blanche de l'application). Grégoire le pousse ce matin, avant ce lot ; remesure `origin/main` avant de toucher. S'il n'est pas encore poussé, ne le pousse pas toi-même : rapporte-le.
-- ⛔ **Ne démarre pas avant la fin de la seconde réécriture de l'historique** (décision de Grégoire, 16 oct. à 9 h 19 : \`plans de travail/CONSIGNE-2026-10-16-reecriture-noms-collegues.md\`). Remesure d'abord : \`origin/main\` doit porter l'historique réécrit, et ton dossier de travail le suivre. Si ce n'est pas le cas, ne commite rien et rapporte-le.
-- La purge et la bascule sont faites (`plans de travail/PLAN-2026-10-15-nouveau-depot-labo-codex.md`). Dans la consigne du lot 1, la ligne d'en-tête qui dit la purge « reportée après le 19 oct. » est périmée : la purge a été avancée au 16 au matin. Le reste de la consigne tient.
+- Dossier de travail : `~/Documents/GitHub/labo-codex`. ⛔ `~/Documents/GitHub/Monitorage_v6-ancien` est l'ancien dépôt : n'y travaille pas, n'y pousse rien.
+- `main` local = `origin/main` = `84d1b3d6` (docs du relais seulement, au-dessus de `9257f7e5`). Remesure avant de toucher.
+- **Le lot 1 est en ligne** : Netlify `state: ready` sur `9257f7e5`, publié à 7 h 53 (rapporté par Claude Code, voir `RELAIS.md`, relais du 17 à 7 h 55). Verdict complet sans rouge ; `cours-actif-hors-bibliotheque-916.spec.js` vert au second essai seulement (#916, sans rapport avec le matériel) : si elle rougit encore, inscris-le, ne la corrige pas dans ce lot.
+- Dans la consigne du lot 2, l'« Ajout de Claude Code, 16 oct. à 20 h 55 » est **périmé pour sa partie « pas en ligne »** : la barre sur deux lignes est réglée et poussée, ne la reprends pas. **#1091 reste dans le mandat.**
+- Numéro affiché : 1.202.0 (build 1015-1639). **Pas de release dans ce lot** : elle est au lot 3.
 
 ## Le mandat
 
-Lis `plans de travail/CADRAGE-2026-10-15-apporter-mon-materiel.md`, puis exécute `plans de travail/CONSIGNE-LOT-2026-10-16-apporter-mon-materiel-1.md`. Remesure avant de toucher, comme elle le demande.
+Lis `plans de travail/CADRAGE-2026-10-15-apporter-mon-materiel.md` et le prototype `plans de travail/PROTOTYPE-2026-10-16-apporter-mon-materiel.dc.html`, puis exécute `plans de travail/CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-2.md`.
 
-Aucun push, aucune release, aucun verdict Playwright avant le signal du soir de Grégoire.
+Aucun push, aucune release, aucun verdict Playwright avant la relecture de Cowork (`plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-2.md`) et le signal du soir de Grégoire.

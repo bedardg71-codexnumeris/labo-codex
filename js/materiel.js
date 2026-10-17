@@ -1,25 +1,33 @@
 /**
- * materiel.js — Conception › « Apporter mon matériel », lot 1 : l'accueil de l'onglet et
- * l'APERÇU, en lecture seule, de ce que l'application a reconnu dans une grille collée.
+ * materiel.js — Conception › « Apporter mon matériel » : l'accueil, l'ASSISTANT, la création
+ * et la confirmation.
  *
- * Consigne : `plans de travail/CONSIGNE-LOT-2026-10-16-apporter-mon-materiel-1.md`.
- * La lecture elle-même vit dans `materiel-lecture.js` (fonctions pures). Ce module-ci ne
- * fait que brancher la page : le collage, les trois boutons, le rendu de l'aperçu.
+ * Consignes : lot 1 (`CONSIGNE-LOT-2026-10-16-…-1.md`, l'accueil et la lecture), lot 2
+ * (`CONSIGNE-LOT-2026-10-17-…-2.md`, l'assistant et la création). La lecture vit dans
+ * `materiel-lecture.js`, la logique de l'assistant dans `materiel-assistant.js` (fonctions
+ * pures). Ce module-ci rend la page, garde l'état de l'assistant en mémoire, et ÉCRIT : trois
+ * objets neufs, seulement au clic « Créer ma grille ».
  *
- * Rien n'est écrit en base à ce lot : le modèle lu vit en mémoire, le temps de l'aperçu.
- * L'assistant et « Créer » viennent au lot 2.
+ * Au lot 2, l'aperçu seul du lot 1 est retiré : un collage ouvre l'assistant, dont l'aperçu
+ * reste visible sous chaque question.
  *
- * Sécurité (règle 1 du projet) : le HTML collé n'entre JAMAIS dans le DOM de la page
- * (`materielLecture.lireHtml` n'en retient que le texte) ; tout texte rendu ici passe par
- * `echapperHtml()`. Actions par `data-action` (dispatcher de main.js), aucun handler inline.
+ * Sécurité (règle 1 du projet) : le HTML collé n'entre JAMAIS dans le DOM de la page ; tout
+ * texte rendu ici passe par `echapperHtml()`, valeurs des champs comprises. Actions par
+ * `data-action`, saisies par `data-on-input` (dispatcher de main.js) : aucun handler inline.
  *
- * Les textes affichés sont ceux du prototype validé le 16 oct. 2026, PROVISOIRES :
- * Grégoire relit les mots au lot 3.
+ * Saisie : un champ modifié met le modèle à jour SANS redessiner le formulaire (le focus et
+ * le curseur restent où ils sont) ; seules les zones qui en dépendent se redessinent (total,
+ * avertissements, aperçu, « Ce qui sera créé »). Un geste qui change la forme (ajouter,
+ * classer, inverser, changer d'étape) redessine tout et replace le focus.
+ *
+ * Les textes affichés sont ceux du prototype validé le 16 oct. 2026, PROVISOIRES : Grégoire
+ * relit les mots au lot 3. Ceux qui n'y sont pas (la note retenue, les refus de création)
+ * sont de Claude Code et le disent dans un commentaire.
  */
 (function () {
     'use strict';
 
-    var modele = null;
+    var etat = { ecran: 'accueil', modele: null, etapes: [], etape: 0, montrerManquants: false, resume: null, erreurCreation: '', enCours: false };
 
     var LIBELLES_ETAT = {
         complete: 'complété par l’application',
@@ -27,116 +35,412 @@
         remplir: 'à remplir'
     };
 
+    function A() { return window.materielAssistant; }
     function e(v) { return echapperHtml(v); }
-
-    /**
-     * Une valeur du modèle, marquée de son état. « repris » est le défaut (sans marque) ;
-     * les autres portent un cadre (la légende) ET leur nom en toutes lettres pour les
-     * lecteurs d'écran — la couleur seule ne dit rien.
-     */
-    function valeur(p, texte) {
-        var etat = (p && p.etat) || 'repris';
-        var cls = 'materiel-valeur' + (LIBELLES_ETAT[etat] ? ' materiel-etat-' + etat : '');
-        var sr = LIBELLES_ETAT[etat] ? '<span class="u-lecteur-ecran"> (' + e(LIBELLES_ETAT[etat]) + ')</span>' : '';
-        return '<span class="' + cls + '">' + e(texte) + sr + '</span>';
-    }
-
-    function mention(etat, texte) {
-        return '<span class="materiel-mention materiel-mention-' + e(etat) + '">' + e(texte) + '</span>';
-    }
-
+    function texte(p) { return String(p && p.valeur != null ? p.valeur : '').trim(); }
     function pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
 
-    function enteteNiveau(n) {
-        var plageOk = String(n.min.valeur).trim() && String(n.max.valeur).trim();
-        var titre = n.titre.valeur || 'Niveau sans nom';
-        var plage = plageOk
-            ? valeur(n.min, String(n.min.valeur).replace('.', ',') + ' à ' + String(n.max.valeur).replace('.', ',') + ' %')
-            : valeur({ etat: 'remplir' }, 'plage à remplir');
-        return '<th scope="col" class="materiel-col-niveau">' +
-            '<span class="materiel-niveau-titre">' + valeur(n.titre, titre) + '</span>' +
-            '<span class="materiel-niveau-details">' + plage +
-            ' <span class="materiel-code">' + e('code ' + n.code.valeur + ' · complété') + '</span></span>' +
-            '</th>';
+    /**
+     * Une valeur du modèle, marquée de son état. « repris » et « saisi » sont sans marque ;
+     * les autres portent un cadre (la légende) ET leur nom en toutes lettres pour les lecteurs
+     * d'écran — la couleur seule ne dit rien.
+     */
+    function valeur(p, txt) {
+        var et = (p && p.etat) || 'repris';
+        var cls = 'materiel-valeur' + (LIBELLES_ETAT[et] ? ' materiel-etat-' + et : '');
+        var sr = LIBELLES_ETAT[et] ? '<span class="u-lecteur-ecran"> (' + e(LIBELLES_ETAT[et]) + ')</span>' : '';
+        return '<span class="' + cls + '">' + e(txt) + sr + '</span>';
     }
 
-    function rangeeCritere(c) {
-        var pond = String(c.ponderation.valeur).trim()
-            ? valeur(c.ponderation, String(c.ponderation.valeur).replace('.', ',') + ' %')
+    function mention(et, txt) {
+        return '<span class="materiel-mention materiel-mention-' + e(et) + '">' + e(txt) + '</span>';
+    }
+
+    /** La classe d'état d'un champ de saisie (cadre « à remplir » ou « complété »). */
+    function classeChamp(p) {
+        var et = (p && p.etat) || 'repris';
+        return 'controle-form materiel-champ' + (LIBELLES_ETAT[et] ? ' materiel-etat-' + et : '');
+    }
+
+    function champ(id, chemin, p, attrs) {
+        return '<input type="text" id="' + e(id) + '" class="' + classeChamp(p) + '" value="' + e(p ? p.valeur : '') + '"' +
+            ' data-on-input="materiel.saisir" data-param="' + e(chemin) + '"' + (attrs || '') + '>';
+    }
+
+    function nomsGrillesDuTrimestre() {
+        try {
+            if (typeof db === 'undefined' || typeof cle !== 'function') return [];
+            return (db.getSync(cle('grillesTemplates'), []) || []).map(function (g) { return g && g.nom; }).filter(Boolean);
+        } catch (err) { return []; }
+    }
+
+    function calculs(m) { return A().calculs(m, { nomsGrilles: nomsGrillesDuTrimestre() }); }
+
+    // ------------------------------------------------------------------
+    // L'aperçu (sous chaque question), la partie concernée encadrée
+    // ------------------------------------------------------------------
+
+    function enteteNiveau(n, surligne) {
+        var plageOk = texte(n.min) && texte(n.max);
+        var plage = plageOk
+            ? valeur(n.min, texte(n.min).replace('.', ',') + ' à ' + texte(n.max).replace('.', ',') + ' %')
+            : valeur({ etat: 'remplir' }, 'plage à remplir');
+        return '<th scope="col" class="materiel-col-niveau' + (surligne ? ' materiel-surligne' : '') + '">' +
+            '<span class="materiel-niveau-titre">' + valeur(n.titre, texte(n.titre) || 'Niveau sans nom') + '</span>' +
+            '<span class="materiel-niveau-details">' + plage +
+            ' <span class="materiel-code">' + e('code ' + n.code.valeur + ' · complété') + '</span></span></th>';
+    }
+
+    function mentionPonderation(m, c) {
+        if (c.ponderation.etat !== 'complete') return '';
+        return mention('complete', m.pondRamenee ? 'complété : ramené à 100 %' : 'complété : parts égales');
+    }
+
+    function rangeeCritere(m, c, surlignePond) {
+        var pond = texte(c.ponderation)
+            ? valeur(c.ponderation, texte(c.ponderation).replace('.', ',') + ' %')
             : valeur({ etat: 'remplir' }, 'à remplir');
-        var mentionPond = c.ponderation.etat === 'complete' ? mention('complete', 'complété : parts égales') : '';
         var cases = c.cases.map(function (d) {
-            return '<td>' + (d.valeur ? '<span class="materiel-case">' + e(d.valeur) + '</span>'
+            return '<td>' + (texte(d) ? '<span class="materiel-case">' + e(texte(d)) + '</span>'
                 : '<span class="materiel-case-vide">(case vide)</span>') + '</td>';
         }).join('');
-        return '<tr>' +
-            '<th scope="row" class="materiel-col-critere">' + valeur(c.nom, c.nom.valeur || 'Critère sans nom') + '</th>' +
-            '<td class="materiel-col-pond">' + pond + mentionPond + '</td>' +
+        return '<tr><th scope="row" class="materiel-col-critere">' + valeur(c.nom, texte(c.nom) || 'Critère sans nom') + '</th>' +
+            '<td class="materiel-col-pond' + (surlignePond ? ' materiel-surligne' : '') + '">' + pond + mentionPonderation(m, c) + '</td>' +
             cases + '</tr>';
     }
 
-    /**
-     * Le HTML de l'aperçu (fonction pure : ni DOM ni stockage). Exposée pour les bancs, qui
-     * vérifient que tout texte venu du document en sort échappé.
-     * @param {Object} m - un modèle produit par materielLecture
-     * @returns {string}
-     */
-    function apercuHtml(m) {
-        var h = [];
-        if (m.source === 'exemple') {
-            h.push('<p class="alerte alerte-information materiel-bandeau">Exemple fictif, pour essayer. Tes vraies grilles se collent à l’accueil de l’onglet.</p>');
-        }
-        h.push('<h2 id="materiel-titre-apercu" tabindex="-1">Aperçu de ta grille</h2>');
-        h.push('<p class="text-muted">Voici ce que l’application a reconnu dans ton document. Rien n’est encore créé.</p>');
-
-        // Le nom et la nature des cases : les deux réponses que l'assistant fera vérifier.
-        h.push('<dl class="materiel-resume">');
-        h.push('<dt>Nom de la grille</dt><dd>' + (m.nom.valeur
-            ? valeur(m.nom, m.nom.valeur) + ' ' + mention('propose', 'repris de la ligne au-dessus du tableau : à vérifier')
-            : valeur({ etat: 'remplir' }, 'à remplir')) + '</dd>');
-        if (m.nature) {
-            var nat = m.nature.valeur === 'retroactions' ? 'elles s’adressent à l’étudiant·e (rétroactions)' : 'elles décrivent les niveaux (descripteurs)';
-            h.push('<dt>Les cases</dt><dd>' + valeur(m.nature, nat) + '</dd>');
-        }
-        h.push('</dl>');
-
-        if (m.enteteIrreguliere) {
-            h.push('<p class="alerte alerte-attention" role="status">La première ligne de ton tableau contient des cases fusionnées : les niveaux pourraient être mal reconnus.</p>');
-        }
-
-        h.push('<div class="materiel-legende" role="note">' +
+    function legendeHtml(titre, complete) {
+        return '<div class="materiel-legende" role="note">' + (titre ? '<strong>' + e(titre) + '</strong>' : '') +
             '<span><span class="materiel-pastille" aria-hidden="true"></span>Repris de ton document</span>' +
-            '<span><span class="materiel-pastille materiel-etat-complete" aria-hidden="true"></span>Complété par l’application</span>' +
-            '<span><span class="materiel-pastille materiel-etat-remplir" aria-hidden="true"></span>À remplir</span>' +
-            '</div>');
+            '<span><span class="materiel-pastille materiel-etat-complete" aria-hidden="true"></span>' + e(complete) + '</span>' +
+            '<span><span class="materiel-pastille materiel-etat-remplir" aria-hidden="true"></span>À remplir</span></div>';
+    }
 
-        // iPad : le tableau défile dans son cadre, la page non. Le cadre est focalisable
-        // pour qu'on puisse le faire défiler au clavier.
-        h.push('<div class="materiel-apercu-cadre" role="region" aria-label="Aperçu de ta grille" tabindex="0">');
-        h.push('<table class="materiel-apercu"><caption class="u-lecteur-ecran">' +
+    /**
+     * L'aperçu de la grille (fonction pure). `surligne` : 'valeurs' encadre les niveaux,
+     * 'pond' la colonne des pondérations. Le tableau défile dans son cadre (iPad).
+     * @param {Object} m
+     * @param {string} [surligne]
+     */
+    function apercuHtml(m, surligne) {
+        return '<div class="materiel-apercu-entete"><h3 id="materiel-titre-apercu">Aperçu de ta grille</h3>' +
+            legendeHtml('', 'Complété par l’application') + '</div>' +
+            '<div class="materiel-apercu-cadre" role="region" aria-label="Aperçu de ta grille" tabindex="0">' +
+            '<table class="materiel-apercu"><caption class="u-lecteur-ecran">' +
             e(pluriel(m.criteres.length, 'critère', 'critères') + ', ' + pluriel(m.niveaux.length, 'niveau', 'niveaux')) +
-            '</caption><thead><tr>' +
-            '<th scope="col" class="materiel-col-critere">Critère</th>' +
-            '<th scope="col" class="materiel-col-pond">Pondération</th>' +
-            m.niveaux.map(enteteNiveau).join('') +
-            '</tr></thead><tbody>' +
-            m.criteres.map(rangeeCritere).join('') +
-            '</tbody></table></div>');
+            '</caption><thead><tr><th scope="col" class="materiel-col-critere">Critère</th>' +
+            '<th scope="col" class="materiel-col-pond' + (surligne === 'pond' ? ' materiel-surligne' : '') + '">Pondération</th>' +
+            m.niveaux.map(function (n) { return enteteNiveau(n, surligne === 'valeurs'); }).join('') +
+            '</tr></thead><tbody>' + m.criteres.map(function (c) { return rangeeCritere(m, c, surligne === 'pond'); }).join('') +
+            '</tbody></table></div>';
+    }
 
-        if (m.aClasser.length) {
-            h.push('<section class="materiel-a-classer" aria-labelledby="materiel-titre-a-classer">');
-            h.push('<h3 id="materiel-titre-a-classer">À classer (' + m.aClasser.length + ')</h3>');
-            h.push('<p class="text-muted">Ces passages viennent de ton document, mais ne trouvent pas leur place dans le tableau. Rien n’est retiré sans toi : tu pourras les ranger ou les écarter.</p>');
-            h.push('<ul>' + m.aClasser.map(function (a) {
-                return '<li><span class="materiel-a-classer-texte">' + e(a.texte) + '</span>' +
-                    '<span class="materiel-a-classer-raison">' + e(a.raison) + '</span></li>';
-            }).join('') + '</ul></section>');
+    // ------------------------------------------------------------------
+    // Les zones dérivées (redessinées à chaque saisie)
+    // ------------------------------------------------------------------
+
+    function avert(txt) { return txt ? '<p class="materiel-avert" role="status">' + e(txt) + '</p>' : ''; }
+
+    function blocPonderation(c) {
+        var h = '<p class="materiel-total">Pondération totale : ' + e(String(c.total).replace('.', ',')) + ' %</p>';
+        if (c.avertPond) {
+            h += '<div class="materiel-avert materiel-avert-action" role="status"><span>' +
+                e('La pondération totalise ' + String(c.total).replace('.', ',') + ' % : il pourrait être utile de l’ajuster à 100 %.') + '</span>' +
+                (c.peutRamener ? '<button type="button" class="btn btn-secondaire" data-action="materiel.ramenerA100">Ramener à 100 %</button>' : '') +
+                '</div>';
         }
+        return h;
+    }
 
-        h.push('<div class="materiel-actions">' +
-            '<button type="button" class="btn btn-secondaire" data-action="materiel.recommencer">← Recommencer</button>' +
-            '</div>');
-        return h.join('');
+    function blocAClasserRestant(c) {
+        if (!c.enAttente) return '';
+        var phrase = c.enAttente === 1 ? 'Il reste un passage de ton document à classer ou à écarter.'
+            : 'Il reste ' + c.enAttente + ' passages de ton document à classer ou à écarter.';
+        return '<div class="materiel-restant"><span>' + e(phrase) + '</span>' +
+            '<button type="button" class="btn btn-secondaire" data-action="materiel.allerClasser">Y aller</button></div>';
+    }
+
+    /** Ce que la zone `#materiel-derives` montre, selon l'étape. */
+    function derivesHtml(m, id) {
+        var c = calculs(m);
+        if (id === 'pond') return blocPonderation(c);
+        if (id === 'valeurs') return avert(c.avertPlages) + avert(c.avertNotes);
+        if (id !== 'final') return '';
+        return blocPonderation(c) + avert(c.avertPlages) + avert(c.avertNotes) + blocAClasserRestant(c);
+    }
+
+    function aDesTextes(m) {
+        return m.criteres.some(function (c) { return c.cases.some(function (d) { return texte(d); }); });
+    }
+
+    function creeListeHtml(m) {
+        var retro = A().estRetro(m);
+        var nomG = texte(m.nom) || 'sans nom';
+        var nC = m.criteres.length, nN = m.niveaux.length;
+        var titres = m.niveaux.map(function (n) { return texte(n.titre) || '?'; }).join(' · ');
+        var lignes = [
+            'Une grille de critères « ' + nomG + ' » : ' + pluriel(nC, 'critère', 'critères') + (!retro && aDesTextes(m) ? ', avec leurs descripteurs.' : '.'),
+            'Une échelle de performance : ' + pluriel(nN, 'niveau', 'niveaux') + ' (' + titres + '), réutilisable pour d’autres grilles.'
+        ];
+        if (retro && aDesTextes(m)) lignes.push('Une cartouche de rétroaction : un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.');
+        var note = retro && aDesTextes(m)
+            ? 'Tu les retrouveras ensuite dans Grilles de critères, Échelles de performance et Cartouches de rétroaction, où tout reste modifiable.'
+            : 'Tu les retrouveras ensuite dans Grilles de critères et dans Échelles de performance, où tout reste modifiable.';
+        return '<h3>Ce qui sera créé</h3><ul>' + lignes.map(function (l) { return '<li>' + e(l) + '</li>'; }).join('') +
+            '</ul><p class="text-muted">' + e(note) + '</p>';
+    }
+
+    function manquantsHtml(m) {
+        var c = calculs(m);
+        if (!etat.montrerManquants || !c.manquants.length) return '';
+        return '<div class="alerte alerte-erreur materiel-manquants" role="alert"><strong>Avant de créer, il reste :</strong><ul>' +
+            c.manquants.map(function (t) { return '<li>' + e(t) + '</li>'; }).join('') + '</ul></div>';
+    }
+
+    // ------------------------------------------------------------------
+    // Les étapes
+    // ------------------------------------------------------------------
+
+    var MOTS_APP = {
+        axes: 'Chaque ligne de ton tableau est un critère. Ensemble, tes critères forment ce que l’application appelle une grille de critères : tu la retrouveras dans « Grilles de critères ».',
+        natureRetro: 'Ces textes, l’application les range dans une cartouche de rétroaction : un commentaire par critère et par niveau. Tu la retrouveras dans « Cartouches de rétroaction ».',
+        natureDescr: 'Ces textes, l’application les appelle des descripteurs : chacun reste attaché à son critère et à son niveau, dans ta grille de critères.',
+        // Adapté le 17 oct. (Claude Code) : la note retenue se saisit désormais ici (décision de
+        // Grégoire) ; le prototype renvoyait sa saisie à « Échelles de performance ».
+        valeurs: 'Ces niveaux, leurs plages et leurs notes retenues, l’application les appelle une échelle de performance. Tu la retrouveras dans « Échelles de performance ».',
+        pond: 'Le poids de chaque critère, l’application l’appelle la pondération. Il fait partie de ta grille de critères.'
+    };
+
+    function motApp(m, id) {
+        var t = id === 'nature' ? (A().estRetro(m) ? MOTS_APP.natureRetro : MOTS_APP.natureDescr) : MOTS_APP[id];
+        if (!t) return '';
+        return '<div class="materiel-mot-app"><strong>Dans l’application</strong><span>' + e(t) + '</span></div>';
+    }
+
+    function titreEtape(t) { return '<h2 id="materiel-titre-etape" tabindex="-1">' + e(t) + '</h2>'; }
+
+    function choix(action, param, presse, titre, aide) {
+        return '<button type="button" class="materiel-choix" aria-pressed="' + (presse ? 'true' : 'false') + '"' +
+            ' data-action="' + action + '" data-param="' + e(param) + '">' +
+            '<span class="materiel-choix-titre">' + e(titre) + '</span><span class="materiel-choix-aide">' + e(aide) + '</span></button>';
+    }
+
+    function etapeAxes(m) {
+        return titreEtape('Dans ton document, les critères sont-ils en lignes ou en colonnes ?') +
+            '<p>Regarde l’aperçu ci-dessous : chaque ligne devrait être un critère, chaque colonne un niveau.</p>' +
+            '<div class="materiel-choix-groupe" role="group" aria-label="Sens du tableau">' +
+            choix('materiel.choisirSens', 0, !m.critEnColonnes, 'En lignes', 'Un critère par ligne, un niveau par colonne.') +
+            choix('materiel.choisirSens', 1, !!m.critEnColonnes, 'En colonnes', 'Un critère par colonne, un niveau par ligne : l’application permute le tableau.') +
+            '</div>' + mention('propose', 'Proposé d’après la lecture de ton tableau : à vérifier. Si tu changes ce choix, la pondération et la valeur des niveaux seront à revoir.');
+    }
+
+    function premiereCase(m) {
+        var t = '';
+        m.criteres.some(function (c) { return c.cases.some(function (d) { t = texte(d); return !!t; }); });
+        return t.length > 160 ? t.slice(0, 157) + '…' : t;
+    }
+
+    function etapeNature(m) {
+        var retro = A().estRetro(m), ex = premiereCase(m);
+        return titreEtape('Les cases de ton tableau décrivent-elles les niveaux, ou s’adressent-elles à l’étudiant·e ?') +
+            (ex ? '<p>Une case de ton tableau : <em>« ' + e(ex) + ' »</em></p>' : '') +
+            '<div class="materiel-choix-groupe" role="group" aria-label="Nature des cases">' +
+            choix('materiel.choisirNature', 'descripteurs', !retro, 'Elles décrivent les niveaux', 'Des descripteurs : à quoi ressemble chaque niveau, avant la tâche. Ils iront dans ta grille.') +
+            choix('materiel.choisirNature', 'retroactions', retro, 'Elles s’adressent à l’étudiant·e', 'Des rétroactions : ce que l’étudiant·e lira après l’évaluation. Elles iront dans tes commentaires par critère et par niveau.') +
+            '</div>' + (m.nature && m.nature.etat === 'propose' ? mention('propose', 'Proposé d’après le texte des cases : à vérifier.') : '');
+    }
+
+    /** Les quatre champs d'un niveau ; `pre` distingue les deux écrans (identifiants uniques). */
+    function champsNiveau(n, j, pre) {
+        var plageOk = texte(n.min) && texte(n.max);
+        return '<div class="materiel-champs-ligne">' +
+            '<label for="' + pre + '-min-' + j + '">De (%)</label>' + champ(pre + '-min-' + j, 'niveau.' + j + '.min', n.min, ' inputmode="decimal" placeholder="ex. 85"') +
+            '<label for="' + pre + '-max-' + j + '">À (%)</label>' + champ(pre + '-max-' + j, 'niveau.' + j + '.max', n.max, ' inputmode="decimal" placeholder="ex. 100"') +
+            '<label for="' + pre + '-note-' + j + '">Note retenue (%)</label>' + champ(pre + '-note-' + j, 'niveau.' + j + '.note', n.note, ' inputmode="decimal"') +
+            '</div><span id="' + pre + '-plage-' + j + '" class="materiel-mention materiel-mention-remplir' + (plageOk ? ' u-hide' : '') + '">plage à remplir</span>';
+    }
+
+    function etapeValeurs(m) {
+        return titreEtape('Quelle plage de notes correspond à chaque niveau ?') +
+            // Texte du prototype, complété le 17 oct. (Claude Code) pour la note retenue.
+            '<p>Pour chaque niveau, indique de quelle note à quelle note il s’étend, en pourcentage, et la note que l’application retiendra pour une copie classée à ce niveau. L’application n’en propose aucune : c’est ta pratique.</p>' +
+            '<div class="materiel-cartes-niveaux">' + m.niveaux.map(function (n, j) {
+                return '<div class="materiel-carte-niveau"><label for="materiel-q-titre-' + j + '">Niveau</label>' +
+                    champ('materiel-q-titre-' + j, 'niveau.' + j + '.titre', n.titre) +
+                    champsNiveau(n, j, 'materiel-q') + '</div>';
+            }).join('') + '</div>';
+    }
+
+    function etapePond(m) {
+        var parts = m.criteres.some(function (c) { return c.ponderation.etat === 'complete'; }) && !m.pondRamenee;
+        return titreEtape('Combien pèse chaque critère ?') +
+            '<p>' + e(parts ? 'Ton tableau ne donnait pas de pondération : l’application a proposé des parts égales. Ajuste-les au besoin.'
+                : 'Indique le poids de chaque critère, en pourcentage de la note.') + '</p>' +
+            '<div class="materiel-cartes-niveaux">' + m.criteres.map(function (c, i) {
+                return '<div class="materiel-carte-niveau"><label for="materiel-q-pond-' + i + '">' + e(texte(c.nom) || 'Critère sans nom') + '</label>' +
+                    champ('materiel-q-pond-' + i, 'critere.' + i + '.ponderation', c.ponderation, ' inputmode="numeric" placeholder="ex. 30"') +
+                    mentionPonderation(m, c) + '</div>';
+            }).join('') + '</div>';
+    }
+
+    function etiquettePassage(a) {
+        if (a.statut === 'place') return 'Ajouté comme critère';
+        if (a.statut === 'ecarte') return 'Écarté : ne sera pas repris dans la grille';
+        return a.raison;
+    }
+
+    function etapeClasser(m) {
+        return titreEtape('Que faire de ces passages ?') +
+            '<p>Ils viennent de ton document, mais ne trouvent pas leur place dans le tableau. Rien n’est retiré sans toi : range-les ou écarte-les.</p>' +
+            '<ul class="materiel-a-classer">' + m.aClasser.map(function (a) {
+                var boutons = a.statut === 'attente'
+                    ? '<button type="button" class="btn btn-secondaire" data-action="materiel.placer" data-param="' + a.id + '">Ajouter comme critère</button>' +
+                      '<button type="button" class="btn btn-secondaire" data-action="materiel.ecarter" data-param="' + a.id + '">Écarter</button>'
+                    : '<button type="button" class="materiel-btn-lien" data-action="materiel.annuler" data-param="' + a.id + '">Annuler</button>';
+                return '<li><div><span class="materiel-a-classer-texte">' + e(a.texte) + '</span>' +
+                    '<span class="materiel-a-classer-raison">' + e(etiquettePassage(a)) + '</span></div>' +
+                    '<div class="materiel-actions">' + boutons + '</div></li>';
+            }).join('') + '</ul>';
+    }
+
+    var ETAPES = { axes: etapeAxes, nature: etapeNature, valeurs: etapeValeurs, pond: etapePond, classer: etapeClasser };
+
+    function boutonPrecedent() {
+        return '<button type="button" class="materiel-btn-lien" data-action="materiel.precedent">' +
+            (etat.etape === 0 ? '← Recommencer' : '← Précédent') + '</button>';
+    }
+
+    function progressionHtml() {
+        var k = etat.etape;
+        return '<div class="materiel-progression"><span class="materiel-etape-texte">Étape ' + (k + 1) + ' sur ' + etat.etapes.length + '</span>' +
+            '<nav aria-label="Étapes de l’assistant" class="materiel-etapes-nav">' + etat.etapes.map(function (id, q) {
+                var cls = 'materiel-etape-btn' + (q === k ? ' actif' : (q < k ? ' fait' : ''));
+                return '<button type="button" class="' + cls + '"' + (q === k ? ' aria-current="step"' : '') +
+                    ' data-action="materiel.allerEtape" data-param="' + q + '">' + (q + 1) + '. ' + e(A().NOMS_ETAPES[id]) + '</button>';
+            }).join('') + '</nav></div>';
+    }
+
+    function questionHtml(m, id) {
+        var surligne = id === 'valeurs' || id === 'pond' ? id : '';
+        return '<div class="materiel-question">' + ETAPES[id](m) +
+            '<div id="materiel-derives" class="materiel-derives">' + derivesHtml(m, id) + '</div>' +
+            motApp(m, id) +
+            '<div class="materiel-nav">' + boutonPrecedent() +
+            '<button type="button" class="btn btn-principal" data-action="materiel.suivant">Suivant →</button></div></div>' +
+            '<section id="materiel-apercu-zone" class="materiel-apercu-bloc" aria-labelledby="materiel-titre-apercu">' + apercuHtml(m, surligne) + '</section>';
+    }
+
+    // ------------------------------------------------------------------
+    // La vérification
+    // ------------------------------------------------------------------
+
+    function pilule(action, param, presse, txt) {
+        return '<button type="button" class="materiel-pilule" aria-pressed="' + (presse ? 'true' : 'false') + '" data-action="' + action + '" data-param="' + e(param) + '">' + e(txt) + '</button>';
+    }
+
+    function rappelsHtml(m) {
+        var retro = A().estRetro(m);
+        return '<div class="materiel-rappels">' +
+            (m.source !== 'main' ? '<div class="materiel-rappel" role="group" aria-labelledby="materiel-rappel-axes"><span id="materiel-rappel-axes">Critères :</span>' +
+                pilule('materiel.choisirSens', 0, !m.critEnColonnes, 'en lignes') + pilule('materiel.choisirSens', 1, !!m.critEnColonnes, 'en colonnes') + '</div>' : '') +
+            '<div class="materiel-rappel" role="group" aria-labelledby="materiel-rappel-nature"><span id="materiel-rappel-nature">Les cases :</span>' +
+            pilule('materiel.choisirNature', 'descripteurs', !retro, 'décrivent les niveaux') + pilule('materiel.choisirNature', 'retroactions', retro, 's’adressent à l’étudiant·e') + '</div></div>';
+    }
+
+    function enteteVerifNiveau(n, j) {
+        return '<th scope="col" class="materiel-col-niveau">' +
+            '<label for="materiel-v-titre-' + j + '">Niveau</label>' + champ('materiel-v-titre-' + j, 'niveau.' + j + '.titre', n.titre) +
+            '<span class="materiel-code" id="materiel-code-' + j + '">' + e('code ' + n.code.valeur + ' · complété') + '</span>' +
+            champsNiveau(n, j, 'materiel-v') + '</th>';
+    }
+
+    function rangeeVerif(m, c, i) {
+        var retro = A().estRetro(m);
+        return '<tr><th scope="row" class="materiel-col-critere">' +
+            '<label class="u-lecteur-ecran" for="materiel-v-nom-' + i + '">Nom du critère</label>' +
+            champ('materiel-v-nom-' + i, 'critere.' + i + '.nom', c.nom, ' placeholder="Nom du critère"') +
+            (c.nom.etat === 'remplir' ? mention('remplir', 'à remplir') : '') + '</th>' +
+            '<td class="materiel-col-pond"><label class="u-lecteur-ecran" for="materiel-v-pond-' + i + '">Pondération du critère</label>' +
+            champ('materiel-v-pond-' + i, 'critere.' + i + '.ponderation', c.ponderation, ' inputmode="numeric" placeholder="ex. 30"') +
+            mentionPonderation(m, c) + '</td>' +
+            c.cases.map(function (d, j) {
+                var niv = m.niveaux[j] ? texte(m.niveaux[j].titre) : '';
+                var lab = (retro ? 'Rétroaction : ' : 'Descripteur : ') + (texte(c.nom) || 'critère') + ', niveau ' + niv;
+                return '<td><textarea class="controle-form materiel-champ" rows="4" aria-label="' + e(lab) + '"' +
+                    ' placeholder="' + (retro ? 'Rétroaction à l’étudiant·e (facultatif)' : 'Descripteur (facultatif)') + '"' +
+                    ' data-on-input="materiel.saisir" data-param="case.' + i + '.' + j + '">' + e(texte(d)) + '</textarea></td>';
+            }).join('') + '</tr>';
+    }
+
+    function nomGrilleHtml(m) {
+        var men = m.nom.etat === 'remplir' ? mention('remplir', 'à remplir')
+            : (m.nom.etat === 'repris' ? mention('propose', 'repris de la ligne au-dessus du tableau : à vérifier') : '');
+        return '<div class="materiel-nom-grille"><label for="materiel-nom-grille">Nom de la grille</label>' +
+            champ('materiel-nom-grille', 'nom', m.nom, ' maxlength="200"') +
+            '<span class="text-muted">Il apparaîtra sur le document que reçoivent tes étudiant·es.</span>' + men + '</div>';
+    }
+
+    function verificationHtml(m) {
+        var plein = m.niveaux.length >= A().MAX_NIVEAUX;
+        return '<div class="materiel-verif-entete">' + titreEtape('Vérifie ta grille, puis crée-la') +
+            '<p>Tout reste modifiable ici. Rien n’est encore créé.</p></div>' +
+            nomGrilleHtml(m) + rappelsHtml(m) + legendeHtml('Comment lire le tableau :', 'Complété par l’application : à vérifier') +
+            '<div class="materiel-apercu-cadre" role="region" aria-label="Ta grille" tabindex="0"><table class="materiel-apercu materiel-verif">' +
+            '<thead><tr><th scope="col" class="materiel-col-critere">Critère</th><th scope="col" class="materiel-col-pond">Pondération (%)</th>' +
+            m.niveaux.map(enteteVerifNiveau).join('') + '</tr></thead><tbody>' +
+            m.criteres.map(function (c, i) { return rangeeVerif(m, c, i); }).join('') + '</tbody></table></div>' +
+            '<div class="materiel-actions"><button type="button" class="btn btn-secondaire" data-action="materiel.ajouterCritere">Ajouter un critère</button>' +
+            '<button type="button" class="btn btn-secondaire" data-action="materiel.ajouterNiveau"' + (plein ? ' disabled aria-describedby="materiel-max-niveaux"' : '') + '>Ajouter un niveau</button>' +
+            (plein ? '<span id="materiel-max-niveaux" class="text-muted">' + A().MAX_NIVEAUX + ' niveaux au plus.</span>' : '') + '</div>' +
+            '<div id="materiel-derives" class="materiel-derives">' + derivesHtml(m, 'final') + '</div>' +
+            '<div class="materiel-creation"><div id="materiel-cree" class="materiel-cree-liste">' + creeListeHtml(m) + '</div>' +
+            '<div class="materiel-creation-actions"><button type="button" class="btn btn-principal" data-action="materiel.creer">Créer ma grille</button>' +
+            boutonPrecedent() + '<div id="materiel-manquants">' + manquantsHtml(m) + '</div>' +
+            (etat.erreurCreation ? '<p class="alerte alerte-erreur" role="alert">' + e(etat.erreurCreation) + '</p>' : '') + '</div></div>';
+    }
+
+    /**
+     * L'assistant entier (fonction pure de l'état passé). Exposée pour les bancs, qui
+     * vérifient les étapes et que tout texte venu du document en sort échappé.
+     * @param {{modele: Object, etapes: string[], etape: number, montrerManquants?: boolean}} s
+     */
+    function assistantHtml(s) {
+        var garde = etat;
+        etat = Object.assign({}, garde, s);   // les fonctions de rendu lisent `etat`
+        try {
+            var m = etat.modele, id = etat.etapes[etat.etape];
+            return '<div class="materiel-assistant">' + progressionHtml() +
+                (m.source === 'exemple' ? '<p class="alerte alerte-information materiel-bandeau">Exemple fictif, pour essayer. Tes vraies grilles se collent à l’écran d’accueil de l’onglet.</p>' : '') +
+                (id === 'final' ? verificationHtml(m) : questionHtml(m, id)) + '</div>';
+        } finally {
+            etat = garde;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // La confirmation
+    // ------------------------------------------------------------------
+
+    function confirmationHtml(r) {
+        var phrase = r.retro
+            ? 'Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' ; tes rétroactions sont prêtes à servir quand tu évalueras. Rien d’autre n’a changé dans l’application.'
+            : 'Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + (r.descr ? ' et leurs descripteurs' : '') + '. Rien d’autre n’a changé dans l’application.';
+        var carteGrille = pluriel(r.nbC, 'critère', 'critères') + (r.descr ? ', avec leurs descripteurs.' : '.');
+        return '<section class="materiel-confirmation" aria-labelledby="materiel-titre-cree">' +
+            '<div class="materiel-confirmation-titre"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>' +
+            '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
+            '<p>' + e(phrase) + '</p><div class="materiel-cartes-cree">' +
+            carteCree('Ta grille', carteGrille, 'grille-criteres', 'La voir dans Grilles de critères') +
+            carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') +
+            (r.retro ? carteCree('Tes rétroactions', 'Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.', 'retroactions', 'Les voir dans Cartouches de rétroaction') : '') +
+            '</div><div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
+            '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
+            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">Apporter autre chose</button></section>';
+    }
+
+    function carteCree(titre, txt, sousSection, bouton) {
+        return '<div class="materiel-carte-cree"><strong>' + e(titre) + '</strong><span>' + e(txt) + '</span>' +
+            '<button type="button" class="btn btn-secondaire" data-action="materiel.voir" data-param="' + e(sousSection) + '">' + e(bouton) + '</button></div>';
     }
 
     // ------------------------------------------------------------------
@@ -152,33 +456,59 @@
         p.classList.toggle('u-hide', !msg);
     }
 
-    function afficherApercu(m) {
-        modele = m;
-        var zone = el('materiel-lecture');
-        var accueil = el('materiel-accueil');
+    function focaliser(selecteur) {
+        var cible = selecteur && document.querySelector(selecteur);
+        if (cible) cible.focus();   // règle SPA : le focus suit le changement de vue
+    }
+
+    function rendre(focus) {
+        var zone = el('materiel-lecture'), accueil = el('materiel-accueil');
         if (!zone || !accueil) return;
-        zone.innerHTML = apercuHtml(m);   // security-ok: apercuHtml échappe tout texte (echapperHtml)
+        if (etat.ecran === 'accueil') {
+            zone.innerHTML = '';
+            zone.classList.add('u-hide');
+            accueil.classList.remove('u-hide');
+            return;
+        }
+        zone.innerHTML = etat.ecran === 'cree' ? confirmationHtml(etat.resume) : assistantHtml(etat);   // security-ok: tout texte passe par echapperHtml
         accueil.classList.add('u-hide');
         zone.classList.remove('u-hide');
-        var titre = el('materiel-titre-apercu');
-        if (titre) titre.focus();   // règle SPA : le focus suit le changement de vue
+        focaliser(focus || (etat.ecran === 'cree' ? '#materiel-titre-cree' : '#materiel-titre-etape'));
+    }
+
+    function remplacer(id, html) { var z = el(id); if (z) z.innerHTML = html; }   // security-ok: html échappé par ses producteurs
+
+    /** Après une saisie : seules les zones qui en dépendent se redessinent. */
+    function rafraichirDerives() {
+        var m = etat.modele, id = etat.etapes[etat.etape];
+        remplacer('materiel-derives', derivesHtml(m, id));
+        if (id === 'final') {
+            remplacer('materiel-cree', creeListeHtml(m));
+            remplacer('materiel-manquants', manquantsHtml(m));
+            m.niveaux.forEach(function (n, j) { var c = el('materiel-code-' + j); if (c) c.textContent = 'code ' + n.code.valeur + ' · complété'; });
+        } else {
+            remplacer('materiel-apercu-zone', apercuHtml(m, id === 'valeurs' || id === 'pond' ? id : ''));
+        }
+    }
+
+    function ouvrirAssistant(m) {
+        var modele = A().preparer(m);
+        etat = Object.assign(etat, { ecran: 'assistant', modele: modele, etapes: A().etapesPour(modele), etape: 0, montrerManquants: false, erreurCreation: '' });
+        rendre();
     }
 
     function charger(lu, source) {
         var r = window.materielLecture.charger(lu, source);
         if (r.erreur) { montrerErreur(r.erreur); return false; }
         montrerErreur('');
-        afficherApercu(r.modele);
+        ouvrirAssistant(r.modele);
         return true;
     }
 
     function surCollage(ev) {
         var cd = ev.clipboardData;
         if (!cd) return;
-        var lu = window.materielLecture.lirePressePapiers({
-            html: cd.getData('text/html'),
-            texte: cd.getData('text/plain')
-        });
+        var lu = window.materielLecture.lirePressePapiers({ html: cd.getData('text/html'), texte: cd.getData('text/plain') });
         if (lu) {
             ev.preventDefault();
             charger(lu, 'colle');
@@ -186,6 +516,82 @@
             // Le texte se colle quand même dans la zone : la personne voit ce qu'elle a collé.
             montrerErreur(window.materielLecture.MESSAGE_SANS_TABLEAU);
         }
+    }
+
+    /** Un geste qui change la forme du modèle : l'état est remplacé, la page redessinée. */
+    function changer(m, focus) {
+        etat.modele = m;
+        rendre(focus);
+    }
+
+    /**
+     * Une saisie : « nom », « niveau.<j>.<titre|min|max|note> », « critere.<i>.<nom|ponderation> »,
+     * « case.<i>.<j> ». Le modèle est mis à jour en place, le champ change de cadre.
+     */
+    /** La mention « plage à remplir » d'un niveau suit sa saisie, sur les deux écrans. */
+    function montrerPlageARemplir(n, j) {
+        var plageOk = !!(texte(n.min) && texte(n.max));
+        ['materiel-q', 'materiel-v'].forEach(function (pre) {
+            var men = el(pre + '-plage-' + j);
+            if (men) men.classList.toggle('u-hide', plageOk);
+        });
+    }
+
+    var CIBLES = {
+        nom: function (m) { return m.nom; },
+        niveau: function (m, p) { return m.niveaux[+p[1]] && m.niveaux[+p[1]][p[2]]; },
+        critere: function (m, p) { return m.criteres[+p[1]] && m.criteres[+p[1]][p[2]]; },
+        'case': function (m, p) { return m.criteres[+p[1]] && m.criteres[+p[1]].cases[+p[2]]; }
+    };
+
+    function saisir(chemin, champEl) {
+        var m = etat.modele;
+        if (!m || !champEl) return;
+        var v = champEl.value, p = String(chemin).split('.');
+        var cible = CIBLES[p[0]] ? CIBLES[p[0]](m, p) : null;
+        if (!cible) return;
+        cible.valeur = v;
+        cible.etat = p[0] === 'case' ? (String(v).trim() ? 'saisi' : 'vide') : A().etatSaisi(v);
+        if (p[0] === 'critere' && p[2] === 'ponderation') m.pondRamenee = false;
+        if (p[0] === 'niveau' && p[2] === 'titre') m.niveaux = window.materielLecture.coder(m.niveaux);
+        if (p[0] === 'niveau' && (p[2] === 'min' || p[2] === 'max')) montrerPlageARemplir(m.niveaux[+p[1]], +p[1]);
+        if (champEl.tagName === 'INPUT') champEl.className = classeChamp(cible);
+        rafraichirDerives();
+    }
+
+    function etapeVers(k) {
+        etat.etape = Math.max(0, Math.min(etat.etapes.length - 1, k));
+        etat.montrerManquants = false;
+        rendre();
+    }
+
+    function sousSection(id) {
+        if (typeof window.afficherSousSection === 'function') window.afficherSousSection('conception-' + id);
+    }
+
+    /**
+     * « Créer ma grille » : trop tôt, la liste des manques ; sinon les trois écritures
+     * (`materielCreation`), puis la confirmation. Un second clic pendant l'écriture est sans effet.
+     */
+    async function creer() {
+        if (etat.enCours || !etat.modele) return;
+        if (calculs(etat.modele).manquants.length) {
+            etat.montrerManquants = true;
+            remplacer('materiel-manquants', manquantsHtml(etat.modele));
+            return;
+        }
+        etat.enCours = true;
+        etat.erreurCreation = '';
+        var r;
+        try { r = await window.materielCreation.creer(etat.modele); } finally { etat.enCours = false; }
+        if (r.erreur) {
+            etat.erreurCreation = r.erreur;
+            rendre('[data-action="materiel.creer"]');
+            return;
+        }
+        etat.ecran = 'cree';
+        etat.resume = r.resume;
+        rendre();
     }
 
     var materiel = {
@@ -198,21 +604,43 @@
         },
         taperMain: function () {
             montrerErreur('');
-            afficherApercu(window.materielLecture.modeleVide());
+            ouvrirAssistant(window.materielLecture.modeleVide());
         },
         recommencer: function () {
-            modele = null;
-            var zone = el('materiel-lecture');
-            if (zone) { zone.innerHTML = ''; zone.classList.add('u-hide'); }
-            var accueil = el('materiel-accueil');
-            if (accueil) accueil.classList.remove('u-hide');
+            etat = { ecran: 'accueil', modele: null, etapes: [], etape: 0, montrerManquants: false, resume: null, erreurCreation: '', enCours: false };
+            rendre();
             var collage = el('materiel-zone-collage');
             if (collage) { collage.value = ''; collage.focus(); }
             montrerErreur('');
         },
-        /** Le modèle lu en mémoire (null à l'accueil) — pour le lot 2 et les bancs. */
-        modeleCourant: function () { return modele; },
-        apercuHtml: apercuHtml
+        allerEtape: function (k) { etapeVers(Number(k)); },
+        suivant: function () { etapeVers(etat.etape + 1); },
+        precedent: function () { if (etat.etape === 0) materiel.recommencer(); else etapeVers(etat.etape - 1); },
+        allerClasser: function () { var q = etat.etapes.indexOf('classer'); if (q >= 0) etapeVers(q); },
+        choisirSens: function (enColonnes) {
+            var m = A().choisirSens(etat.modele, Number(enColonnes) === 1);
+            if (m === etat.modele) return;
+            var r = A().recalculerEtapes(m, etat.etapes, etat.etape);
+            etat.etapes = r.etapes;
+            etat.etape = r.etape;
+            changer(m);
+        },
+        choisirNature: function (v) { changer(A().choisirNature(etat.modele, v), '[data-action="materiel.choisirNature"][aria-pressed="true"]'); },
+        ramenerA100: function () { changer(A().ramenerA100(etat.modele)); },
+        placer: function (id) { changer(A().placer(etat.modele, Number(id)), '[data-action="materiel.annuler"][data-param="' + Number(id) + '"]'); },
+        ecarter: function (id) { changer(A().ecarter(etat.modele, Number(id)), '[data-action="materiel.annuler"][data-param="' + Number(id) + '"]'); },
+        annuler: function (id) { changer(A().annuler(etat.modele, Number(id)), '[data-action="materiel.placer"][data-param="' + Number(id) + '"]'); },
+        ajouterCritere: function () { changer(A().ajouterCritere(etat.modele), '#materiel-v-nom-' + etat.modele.criteres.length); },
+        ajouterNiveau: function () { changer(A().ajouterNiveau(etat.modele), '#materiel-v-titre-' + etat.modele.niveaux.length); },
+        saisir: saisir,
+        creer: creer,
+        voir: function (id) { sousSection(String(id)); },
+        /** L'état de l'assistant (lecture) — pour les bancs. */
+        etatCourant: function () { return etat; },
+        modeleCourant: function () { return etat.modele; },
+        apercuHtml: apercuHtml,
+        assistantHtml: assistantHtml,
+        confirmationHtml: confirmationHtml
     };
 
     function initialiser() {

@@ -28022,3 +28022,148 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .materiel-a-classer-texte { line-height: 1.45; overflow-wrap: anywhere; }
 .materiel-a-classer-raison { font-size: 0.8rem; color: var(--texte-muted); }
+
+/* ============================================================
+   « APPORTER MON MATÉRIEL » — lot 2 (17 oct. 2026)
+   L'assistant (une question à la fois, l'aperçu dessous), la
+   vérification (le tableau entier modifiable), la confirmation.
+   Mêmes règles que le lot 1 : variables seulement, cibles ≥ 44 px,
+   le tableau défile dans son cadre, la page non (iPad).
+   ============================================================ */
+.materiel-assistant { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.materiel-assistant h2, .materiel-assistant p { margin: 0; }
+.materiel-assistant p { line-height: 1.5; }
+.materiel-progression { display: flex; flex-direction: column; gap: 10px; }
+.materiel-etape-texte { font-size: 0.85rem; color: var(--texte-muted); letter-spacing: 0.02em; }
+.materiel-etapes-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+.materiel-etape-btn {
+    min-height: 44px; padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem;
+    background: transparent; color: var(--texte-secondaire); border: 1px solid var(--bordure-claire);
+}
+.materiel-etape-btn.fait { border-color: var(--bordure-moyenne); color: var(--texte-principal); }
+.materiel-etape-btn.actif { background: var(--accent-primaire); border-color: var(--accent-primaire); color: var(--surface-carte); font-weight: 600; }
+.materiel-etape-btn:focus-visible, .materiel-choix:focus-visible, .materiel-pilule:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
+
+.materiel-question, .materiel-nom-grille, .materiel-creation {
+    display: flex; flex-direction: column; gap: 16px;
+    background: var(--surface-carte); border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand); padding: 24px;
+}
+.materiel-question h2 { font-size: 1.5rem; line-height: 1.3; }
+.materiel-question h2:focus, .materiel-verif-entete h2:focus, .materiel-confirmation h2:focus { outline: none; }
+
+/* Un choix : un bouton à aria-pressed, jamais un div cliquable. */
+.materiel-choix-groupe { display: flex; flex-wrap: wrap; gap: 12px; }
+.materiel-choix {
+    flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px; text-align: left; cursor: pointer;
+    min-height: 44px; padding: 16px; border-radius: var(--radius-grand); font: inherit;
+    background: var(--surface-conteneur); color: var(--texte-principal); border: 2px solid var(--bordure-claire);
+}
+.materiel-choix[aria-pressed="true"] { border-color: var(--accent-primaire); box-shadow: inset 0 0 0 1px var(--accent-primaire); }
+.materiel-choix-titre { font-weight: 600; font-size: 1.05rem; }
+.materiel-choix-aide { font-size: 0.9rem; line-height: 1.45; color: var(--texte-secondaire); }
+.materiel-pilule {
+    min-height: 44px; padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem;
+    background: transparent; color: var(--texte-secondaire); border: 1px solid var(--bordure-moyenne);
+}
+.materiel-pilule[aria-pressed="true"] { background: var(--accent-primaire); border-color: var(--accent-primaire); color: var(--surface-carte); font-weight: 600; }
+
+.materiel-mot-app {
+    display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 14px;
+    border-radius: var(--radius-moyen); background: var(--surface-conteneur); border: 1px solid var(--bordure-moyenne);
+}
+.materiel-mot-app strong { flex: none; font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-primaire); }
+.materiel-mot-app span { flex: 1 1 320px; font-size: 0.9rem; line-height: 1.5; }
+.materiel-nav { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+.materiel-nav .btn, .materiel-creation .btn, .materiel-confirmation .btn, .materiel-a-classer .btn, .materiel-derives .btn { min-height: 44px; }
+
+/* Les champs des niveaux et des pondérations */
+.materiel-cartes-niveaux { display: flex; flex-wrap: wrap; gap: 12px; }
+.materiel-carte-niveau {
+    flex: 1 1 230px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+    padding: 14px; border-radius: var(--radius-grand); background: var(--surface-conteneur);
+}
+.materiel-carte-niveau label, .materiel-champs-ligne label, .materiel-verif label { font-size: 0.8rem; color: var(--texte-muted); }
+.materiel-champs-ligne { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-auto-flow: column; grid-template-rows: auto auto; gap: 4px 8px; }
+.materiel-champ { width: 100%; min-height: 44px; box-sizing: border-box; }
+textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; font-size: 0.9rem; }
+
+/* Les zones dérivées : total, avertissements (au conditionnel, non bloquants) */
+.materiel-derives { display: flex; flex-direction: column; gap: 10px; }
+.materiel-derives:empty { display: none; }
+.materiel-total { color: var(--texte-secondaire); font-size: 0.9rem; }
+.materiel-avert {
+    margin: 0; padding: 10px 14px; border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.45;
+    border: 2px dashed var(--alerte-bordure-attention); background: var(--alerte-fond-attention); color: var(--alerte-texte-attention);
+}
+.materiel-avert-action { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.materiel-avert-action span { flex: 1 1 280px; }
+.materiel-restant {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px;
+    border-radius: var(--radius-moyen); border: 2px solid var(--alerte-bordure-attention); background: var(--surface-carte);
+}
+.materiel-restant span { flex: 1 1 300px; }
+
+/* L'aperçu sous la question : la partie concernée encadrée */
+.materiel-apercu-bloc { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.materiel-apercu-entete { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; align-items: baseline; }
+.materiel-apercu-entete h3 { margin: 0; font-size: 1rem; color: var(--texte-secondaire); }
+.materiel-apercu .materiel-surligne { box-shadow: inset 0 0 0 2px var(--accent-primaire); }
+
+/* À classer, à l'étape du même nom */
+.materiel-assistant .materiel-a-classer { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.materiel-assistant .materiel-a-classer li { flex-direction: row; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.materiel-assistant .materiel-a-classer li > div:first-child { flex: 1 1 320px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+/* La vérification */
+.materiel-verif-entete { display: flex; flex-direction: column; gap: 6px; max-width: 760px; }
+.materiel-verif-entete h2 { font-size: 1.6rem; line-height: 1.2; }
+.materiel-nom-grille { gap: 6px; max-width: 560px; padding: 16px 20px; }
+.materiel-nom-grille label { font-weight: 600; }
+.materiel-nom-grille .text-muted { font-size: 0.85rem; }
+.materiel-rappels { display: flex; flex-wrap: wrap; gap: 12px; }
+.materiel-rappel {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px;
+    background: var(--surface-carte); border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand);
+}
+.materiel-rappel > span { font-weight: 600; font-size: 0.9rem; }
+.materiel-legende strong { font-weight: 600; color: var(--texte-principal); }
+.materiel-verif th, .materiel-verif td { min-width: 220px; }
+.materiel-verif .materiel-col-critere { width: 220px; min-width: 220px; }
+.materiel-verif .materiel-col-pond { width: 140px; min-width: 140px; }
+.materiel-verif thead th { font-weight: 400; }
+.materiel-verif thead th > label:first-child { display: block; margin-bottom: 2px; }
+.materiel-verif thead .materiel-code { display: inline-block; margin: 6px 0; }
+.materiel-creation { flex-direction: row; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
+.materiel-cree-liste { flex: 1 1 420px; display: flex; flex-direction: column; gap: 8px; }
+.materiel-cree-liste h3 { margin: 0; font-size: 1.1rem; }
+.materiel-cree-liste ul { margin: 0; padding-left: 20px; line-height: 1.6; }
+.materiel-cree-liste p { font-size: 0.85rem; }
+.materiel-creation-actions { flex: 1 1 300px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.materiel-creation-actions .btn-principal { font-size: 1rem; font-weight: 600; }
+.materiel-manquants { margin: 0; }
+.materiel-manquants ul { margin: 6px 0 0; padding-left: 20px; }
+
+/* La confirmation */
+.materiel-confirmation { display: flex; flex-direction: column; gap: 24px; max-width: 880px; }
+.materiel-confirmation p { margin: 0; line-height: 1.55; color: var(--texte-secondaire); }
+.materiel-confirmation-titre { display: flex; gap: 16px; align-items: center; color: var(--accent-primaire); }
+.materiel-confirmation-titre svg { flex: none; }
+.materiel-confirmation-titre h2 { margin: 0; color: var(--texte-principal); line-height: 1.25; }
+.materiel-cartes-cree { display: flex; flex-wrap: wrap; gap: 16px; }
+.materiel-carte-cree {
+    flex: 1 1 260px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; padding: 18px;
+    background: var(--surface-carte); border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand);
+}
+.materiel-carte-cree span { color: var(--texte-muted); font-size: 0.9rem; line-height: 1.45; }
+.materiel-suite {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+    padding: 18px; border-radius: var(--radius-grand); background: var(--surface-conteneur);
+}
+.materiel-suite span { flex: 1 1 360px; line-height: 1.5; }
+/* Les champs de saisie portent le cadre de leur état (légende). Mesuré dans WebKit, mode clair :
+   la couleur de bordure d'un champ y est imposée par une règle plus forte (rgba(3,46,92,.2)) ;
+   l'état passe donc par une ombre intérieure, que rien n'écrase. Le focus garde son anneau. */
+.materiel-assistant .materiel-champ.materiel-etat-remplir { box-shadow: inset 0 0 0 2px var(--alerte-bordure-erreur); }
+.materiel-assistant .materiel-champ.materiel-etat-complete,
+.materiel-assistant .materiel-champ.materiel-etat-propose { box-shadow: inset 0 0 0 2px var(--alerte-bordure-attention); }
+.materiel-assistant .materiel-champ:focus { box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.2); }
