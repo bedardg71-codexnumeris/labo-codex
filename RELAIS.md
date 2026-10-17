@@ -7,7 +7,29 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 15 OCT. 2026, 9 h 07 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) EN LIGNE ; `main` À JOUR**
+## POUR LA SESSION QUI PREND LE RELAIS — 16 OCT. 2026, 20 h 55 : **LOT 1 D'« APPORTER MON MATÉRIEL » NON POUSSÉ, VERDICT ROUGE ; `main` LOCAL EN AVANCE DE 5**
+
+**En ligne** : toujours `eb6dd86e`, 1.202.0 (build 1015-1639). Rien n'a été poussé ce soir.
+**`main` local** : `d50af0ff` (lot 1), `63d5c028` (demande de relecture), `34a0bcaf` (corrections de la relecture), `f28ce0af`
+(docs : consigne du lot 2, cadrage, consigne du jour du lot 1 et son archive), puis le commit docs de ce relais (BACKLOG #1093-#1094,
+ajout à la consigne du lot 2). Aucune autre branche ne porte de travail du matériel.
+**Verdict du soir** (signal de Grégoire, Cowork, Chrome et Safari fermés, secteur, éveil tenu, 0 veille, pression 1) : jeton
+`scripts/.verdict-playwright.json` sur `f28ce0af`, **code 1**, aucun instable. Une spec nouvellement rouge :
+`planif-menu-vue.spec.js` › raccourci « zoom-molette ». Mesuré ensuite :
+- rouge aussi seule (`--retries=0`) : pas une instabilité ;
+- verte sur `eb6dd86e` (en ligne), rouge sur `d50af0ff` : c'est le lot 1 ;
+- cause : la sous-navigation de Conception passe de 58 à 100 px de haut (une seconde ligne, à 1280 × 720) depuis l'onglet
+  « Apporter mon matériel ». La zone de la carte descend de 42 px ; le point visé (zone + 200 px) tombe à y = 732, hors de la
+  fenêtre de 720 px, et la molette n'atteint plus la carte. L'essai visait juste 30 px sous le bord : il était fragile, mais le
+  rouge signale un vrai changement visible (une barre sur deux lignes, à vérifier aussi à 1024 et 1180 px, iPad).
+**À faire, dans l'ordre** : (1) décider de la sous-navigation sur deux lignes (corriger la mise en page, ou l'assumer et rendre
+l'essai indépendant de la hauteur de la barre) – c'est le lot 1 qui n'est pas fini, pas une trouvaille ; (2) Vitest complet ;
+(3) verdict, Cowork fermé ; (4) `scripts/pousser.sh`. Le lot 2 vient après (consigne annotée en tête).
+**Vitest** : 8 963/8 963 sur `34a0bcaf` (audit de début de session).
+
+---
+
+## (relais précédent) 15 OCT. 2026, 9 h 07 : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) EN LIGNE ; `main` À JOUR** : **1.201.0 (À PROPOS, CLORE ET ROUVRIR) EN LIGNE ; `main` À JOUR**
 
 **En ligne** (mesuré par le connecteur Netlify, Claude Code, 15 oct.) : déploiement `6ad0cfc8017c06d9f5edd16d`, `commit_ref`
 `4ce2ffe6`, `state: ready`, publié à 13:06:31 Z (9 h 06, Toronto). Release `18660532` (build 1014-1940).

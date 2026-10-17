@@ -9,6 +9,9 @@
 
 Lot 1 en ligne (à remesurer) : l'onglet, l'accueil, la lecture du collage (`js/materiel-lecture.js`), l'aperçu (`js/materiel.js`, `apercuHtml`). Rien n'est encore écrit en base.
 
+> **Ajout de Claude Code, 16 oct. à 20 h 55.** Le lot 1 n'est **pas** en ligne : le verdict du soir sur `f28ce0af` est rouge (voir `RELAIS.md`). La sous-navigation de Conception passe sur deux lignes à 1280 px depuis l'onglet neuf (58 → 100 px), ce qui fait sortir de l'écran le point visé par `planif-menu-vue.spec.js` › « zoom-molette ». C'est le lot 1 qui n'est pas fini : **à corriger avant tout le reste**, puis verdict, push, et alors seulement ce lot.
+> **#1091 entre dans ce mandat** (accord de Grégoire, 16 oct., 19 h 30) : l'assistant borne à la saisie le nombre de niveaux des descripteurs à 20, comme `maxCles` dans `js/partage-schemas.js`. Banc Vitest et break-test comme le reste.
+
 ## Ce que Grégoire verra à la fin du lot
 
 Il colle sa grille (ou clique sur l'exemple) : au lieu de l'aperçu seul, l'**assistant** s'ouvre. « Étape 1 sur N », la barre des étapes, une question à la fois, l'aperçu du tableau toujours visible dessous (la partie concernée encadrée), l'encadré « Dans l'application » sous chaque question. Il répond, arrive à « Vérifie ta grille, puis crée-la », nomme sa grille, clique « Créer ma grille » : la grille apparaît dans Grilles de critères, l'échelle dans Échelles de performance, et, si les cases étaient des rétroactions, la cartouche dans Cartouches de rétroaction.
