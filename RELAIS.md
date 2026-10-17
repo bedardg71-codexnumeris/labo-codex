@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, VERS 13 H : **ÉTAPE 6 (« ALLER PLUS LOIN ») COMMITÉE SUR `main` (`1c1868e0`), NON POUSSÉE ; ÉTAPE 5b EN COURS**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, VERS 13 H 45 : **ÉTAPES 6 (`1c1868e0`) ET 5b (`d75d8f09`) COMMITÉES SUR `main`, NON POUSSÉES ; RELECTURES DE COWORK**
+
+**En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : 3b1, 5, 6 et sa demande, puis 5b (`d75d8f09`) et sa demande.
+Demandes : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-6-aller-plus-loin.md`, `…-5b-reconnaissance.md`. Inventaire des textes complété (§ 20). **Vitest** : 9 125/9 125. Verdict Playwright : périmé (juge `4a972d13`).
+**Suite** : relectures de Cowork → corrections → 7 (les textes, avec Grégoire), 8 ; push au signal de Grégoire.
+
+---
+
+## (relais précédent) 17 OCT. 2026, VERS 13 H : **ÉTAPE 6 (« ALLER PLUS LOIN ») COMMITÉE SUR `main` (`1c1868e0`), NON POUSSÉE ; ÉTAPE 5b EN COURS**
 
 **En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : 3b1, 5 (relue, acceptée), puis l'étape 6 (`1c1868e0`) et sa demande.
 Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-6-aller-plus-loin.md`. **Vitest** : 9 085/9 085. Verdict Playwright : périmé (juge `4a972d13`).

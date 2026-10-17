@@ -3,6 +3,8 @@
 > Écrit par Claude Code le samedi 17 octobre 2026, d'après la consigne du jour de Cowork (12 h 05, mandat B). **Mesuré dans le code** à `903ac85b` (`main` local, étape 5 comprise), pas recopié des demandes de relecture. Cowork en tirera la page que Grégoire corrigera.
 >
 > ⚠ **Ne couvre pas encore l'étape 6** (« Aller plus loin avec ta grille ») **ni 5b** (la reconnaissance d'après les douze échantillons) : rien n'en est dans le code. L'ordre décidé à 12 h 07 (6, puis 5b, puis 7) appellera un complément de cet inventaire quand ces deux lots seront commités.
+>
+> ✅ **Complété par Claude Code le 17 oct. 2026, vers 13 h 40**, à `d75d8f09` (étapes 6 et 5b commitées) : leurs textes neufs sont au **§ 20** ; les lignes que 5b a changées sont corrigées sur place et marquées **(5b)** (8.6, 8.8, 8.15, 12.2, 15.19). Les numéros de ligne des § 1 à 19 restent ceux de `903ac85b`.
 
 ## Comment lire
 
@@ -40,6 +42,7 @@
 | 17 | La confirmation | 13 | 2 |
 | 18 | Ailleurs : Grilles de critères, Échelles, Cartouches | 5 | 5 |
 | 19 | L'exemple fictif (« Essayer avec un exemple ») | 1 | 0 |
+| 20 | Étapes 6 et 5b (complément, 17 oct. après-midi) | 18 | 10 |
 
 Compté sur les lignes des tableaux ci-dessous (une ligne peut porter deux formes, singulier et pluriel, ou plusieurs boutons ; les renvois « voir … » ne comptent pas). Le lot le plus dense en textes provisoires est l'étape « Ce que contient ton tableau » (§ 8) : aucun de ses textes n'a été relu par Grégoire.
 
@@ -150,16 +153,16 @@ Aucun texte de cet écran ne vient du prototype : l'étape n'y existait pas.
 | 8.3 | Tant qu'aucun menu n'a été changé | Proposé par l’application : à vérifier | `js/materiel.js:343` | prov. Cowork (consigne du lot 3a) |
 | 8.4 | Coin du tableau, au-dessus des menus de rangée | Rangées | `js/materiel.js:347` | prov. CC |
 | 8.5 | La zone du tableau (lecteur d'écran) ; son résumé | Ton tableau, tel que l’application l’a lu · ‹N› rangées, ‹N› colonnes | `js/materiel.js:344`, `346` | prov. CC |
-| 8.6 | Encadré « Dans l’application » | Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères et son échelle de performance : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé. | `js/materiel.js:277` (`MOTS_APP.roles`) | prov. CC (lot 3a). ⚠ Le même texte paraît pour une grille en points, qui n'a ni échelle ni descripteurs. |
+| 8.6 | Encadré « Dans l’application » | Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères et son échelle de performance : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé. | `js/materiel.js:277` (`MOTS_APP.roles`) | prov. CC (lot 3a). ⚠ Le même texte paraît pour une grille en points, qui n'a ni échelle ni descripteurs.  **(5b : pour une grille à niveaux seulement ; grille en points, voir 20.13 et 20.14)** |
 | 8.7 | Bandeau, à l'étape « Sens du tableau » (celle d'avant), si le tableau a des cases fusionnées | Ton tableau contient des cases fusionnées. L’étape « Ce que contient ton tableau » montre ce que l’application en a lu : tu pourras y corriger sa lecture. | `js/materiel.js:281` (`MOT_FUSION`) ; affiché à `299` | prov. CC (lot 3a) |
-| 8.8 | Menu de chaque rangée : les choix | Noms des niveaux · Codes des niveaux · Plages de notes · Un critère · Nom d’un critère · Suite du critère · À ignorer | `js/materiel-lecture.js:285-293` (`ROLES_RANGEES`) | prov. Cowork (consigne du lot 3a) |
+| 8.8 | Menu de chaque rangée : les choix | Noms des niveaux · Codes des niveaux · Plages de notes · Un critère · Nom d’un critère · Suite du critère · Partie **(5b : « Partie » ajouté, prov. CC)** · À ignorer | `js/materiel-lecture.js:285-293` (`ROLES_RANGEES`) | prov. Cowork (consigne du lot 3a) |
 | 8.9 | Menu de chaque colonne : les choix | Noms des critères · Partie · Points ou pondération · Un niveau · Sous-critères · Description du critère · À ignorer | `js/materiel-lecture.js:294-306` (`ROLES_COLONNES`) | prov. Cowork (lot 3a ; « Partie » et « Points ou pondération », consigne de l'étape 5) |
 | 8.10 | Nom des menus (lecteur d'écran) | Rôle de la rangée ‹N› · Rôle de la colonne ‹N› | `js/materiel.js:348`, `350` | prov. CC |
 | 8.11 | Une case fusionnée, sa case d'origine | case fusionnée | `js/materiel.js:330` | prov. CC |
 | 8.12 | Les cases qu'elle couvre | (suite de la case fusionnée au-dessus) · (suite de la case fusionnée à gauche) | `js/materiel.js:327` | prov. CC |
 | 8.13 | Une case sans texte | (case vide) | `js/materiel.js:329` | proto (repris de l'aperçu) |
 | 8.14 | S'il y a au moins une rangée « Suite du critère » | Dans une « Suite du critère », la case de la colonne « Noms des critères » devient : | `js/materiel.js:336` | prov. Cowork (consigne du lot 3a) |
-| 8.15 | Ses trois choix | des sous-critères, un par ligne · la description du critère · rien à garder | `js/materiel-lecture.js:308-312` (`CHOIX_SUITE`) | prov. Cowork (consigne du lot 3a) |
+| 8.15 | Ses quatre choix **(5b : le 1er ajouté, proposé par défaut, prov. CC)** | selon les puces : un sous-critère par ligne à puce, la description pour les autres lignes · des sous-critères, un par ligne · la description du critère · rien à garder | `js/materiel-lecture.js:308-312` (`CHOIX_SUITE`) | prov. Cowork (consigne du lot 3a) |
 | 8.16 | Nom d'un critère sous une « Partie » (étape 5) : forme du nom fabriqué | ‹partie› – ‹critère› (ex. « Introduction – Style ») | `js/materiel-lecture.js:706` | prov. Cowork (consigne de l'étape 5) ; ce nom s'imprime sur le PDF des élèves s'il n'est pas corrigé |
 
 ## 9. Étape « Nature des cases »
@@ -209,7 +212,7 @@ Aucun texte de cet écran ne vient du prototype : l'étape n'y existait pas.
 | # | Quand il paraît | Texte exact | Où | Source |
 |---|---|---|---|---|
 | 12.1 | Titre | Sur combien de points chaque critère est-il noté ? | `js/materiel.js:412` | prov. CC |
-| 12.2 | Texte | Ton tableau ne donnait pas les points de chaque critère. Indique-les : un nombre entier de 1 à 100 par critère. Le total est libre. | `js/materiel.js:413` | prov. CC |
+| 12.2 | Texte | Ton tableau ne donnait pas les points de chaque critère. Indique-les : un nombre entier de 0 à 100 par critère. Le total est libre. **(5b : « de 0 à 100 », au lieu de « de 1 à 100 »)** | `js/materiel.js:413` | prov. CC |
 | 12.3 | Étiquette du champ, devant lui | sur | `js/materiel.js:416` | prov. Cowork (consigne de l'étape 5) |
 | 12.4 | Étiquette complète (lecteur d'écran) | Points de « ‹critère› », sur | `js/materiel.js:416` | prov. CC |
 | 12.5 | Texte d'exemple du champ | ex. 4 | `js/materiel.js:417` | prov. CC |
@@ -294,7 +297,7 @@ Le titre, puis une liste ; chaque élément complète la phrase du titre. Forme 
 | 15.16 | Pondération non entière ou hors de 0-100 | une pondération en nombre entier de 0 à 100 pour un critère · … pour ‹N› critères | `js/materiel-assistant.js:176` | prov. CC (lot 2) |
 | 15.17 | Grille en points, aucun point | les points de chaque critère, ou des colonnes de niveaux, à l’étape « Ce que contient ton tableau » | `js/materiel-assistant.js:197` | prov. Cowork (consigne de l'étape 5), complété par CC (« à l’étape… ») |
 | 15.18 | Grille en points, quelques points absents | les points d’un critère · les points de ‹N› critères | `js/materiel-assistant.js:198` | prov. CC |
-| 15.19 | Points non entiers ou hors de 1-100 | des points en nombre entier de 1 à 100 pour un critère · … pour ‹N› critères | `js/materiel-assistant.js:200` | prov. CC |
+| 15.19 | Points non entiers ou hors de 0-100 **(5b : « / 0 » accepté)** | des points en nombre entier de 0 à 100 pour un critère · … pour ‹N› critères | `js/materiel-assistant.js:200` | prov. CC |
 | 15.20 | Plus de 50 critères | au plus 50 critères (ta grille en a ‹N›) | `js/materiel-assistant.js:178` | prov. CC |
 | 15.21 | Nom de critère trop long | des noms de critères plus courts (200 caractères au plus) | `js/materiel-assistant.js:180` | prov. CC |
 | 15.22 | Case trop longue | des cases plus courtes (5 000 caractères au plus) | `js/materiel-assistant.js:182` | prov. CC |
@@ -353,14 +356,40 @@ Remarque de forme : 15.3 et 15.20-15.25 sont des bornes du partage (ce qui ne vo
 |---|---|---|---|---|
 | 19.1 | Tout le contenu de la grille d'exemple (nom « Exposé oral : grille d’évaluation », critères Contenu, Organisation, Communication, niveaux Excellent, Satisfaisant, À améliorer, Insuffisant, douze descripteurs, et le passage « La qualité de la langue est évaluée à part, selon la politique du département. ») | voir le code | `js/materiel-lecture.js:834-843` (`exempleHtml`) | proto |
 
+## 20. Étapes 6 et 5b (complément, mesuré à `d75d8f09`)
+
+| # | Quand il paraît | Texte exact | Où | Source |
+|---|---|---|---|---|
+| 20.1 | Confirmation, sous les cartes (étape 6) : titre de l'encadré | Aller plus loin avec ta grille | `js/materiel.js`, `PLUS_LOIN.titre` | validé G. (17 oct., 12 h 07) |
+| 20.2 | Idem, grille en points **sans** descripteurs | Ta grille note chaque critère en points. Labo Codex pourrait t’aider à suivre la progression de tes étudiant·es à partir d’elle, par exemple en décrivant, pour un critère, ce qu’on attend à chaque niveau. | `PLUS_LOIN.enPoints` | validé G. (12 h 07) ; apostrophes typographiques (’) au lieu des droites de la consigne |
+| 20.3 | Idem, grille à niveaux, cases = descripteurs | Ta grille décrit ce qu’on attend à chaque niveau. Labo Codex pourrait t’aider à suivre la progression de tes étudiant·es à partir d’elle, par exemple en associant une rétroaction à chaque niveau. | `PLUS_LOIN.aNiveaux` | validé G. (12 h 07) |
+| 20.4 | Idem, dans tous les cas | Un critère peut s’évaluer de trois façons : holistique (par niveaux), analytique (par points) ou algorithmique (par un calcul). | `PLUS_LOIN.commune` | validé G. (12 h 07) |
+| 20.5 | Idem, le lien (ouvre l'aide existante « Type de critère d’évaluation ») | Les trois façons d’évaluer un critère | `PLUS_LOIN.lien` | validé G. (12 h 07) |
+| 20.6 | Quand l'encadré n'a que 20.4 et 20.5 | grille à niveaux dont les cases étaient des rétroactions (supposition de Cowork) ; **et (5b) grille en points qui décrit déjà ses niveaux** (supposition de Claude Code) | `plusLoinHtml` | — |
+| 20.7 | Menu des rangées (5b) : nouveau choix | Partie | `js/materiel-lecture.js`, `ROLES_RANGEES` | prov. CC |
+| 20.8 | Choix d'une « Suite du critère » (5b), proposé par défaut | selon les puces : un sous-critère par ligne à puce, la description pour les autres lignes | `CHOIX_SUITE` | prov. CC |
+| 20.9 | À classer, raison : ligne de calcul de la langue | Ligne de calcul de la langue : l’application ne la lit pas encore comme un critère | `L.RAISONS_PIED.calcul` | prov. CC |
+| 20.10 | À classer, raison : ligne de pénalité | Ligne de pénalité : l’application ne la lit pas encore comme un critère | `L.RAISONS_PIED.penalite` | prov. CC |
+| 20.11 | À classer, raison : « Commentaires : » seul | Espace de commentaires : il se remplit à la correction | `L.RAISONS_PIED.commentaires` | prov. CC |
+| 20.12 | À classer, raison : total, note finale, « Note : », résultat (étendue en 5b) | Ligne de total : l’application le calcule elle-même | `L.RAISONS_PIED.total` | prov. CC (étape 5, = 13.11) |
+| 20.13 | « Dans l’application », étape des rôles, grille en points sans niveaux | Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, leurs descriptions et leurs sous-critères. Rien n’est encore créé. | `MOTS_APP.rolesPoints` | prov. CC |
+| 20.14 | Idem, grille en points à niveaux | Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, ce qui est attendu à chaque niveau, leurs descriptions et leurs sous-critères. Aucune échelle n’est créée. Rien n’est encore créé. | `MOTS_APP.rolesPointsNiveaux` | prov. CC |
+| 20.15 | Vérification d'une grille en points à niveaux : en-tête de chaque niveau ; sous un nom vide | Niveau · à remplir | `enteteVerifNiveauPoints` | proto (repris de la Vérification à niveaux) |
+| 20.16 | Idem, chaque case (lecteur d'écran ; dans la case) | Descripteur : ‹critère›, niveau ‹niveau› · Descripteur (facultatif) | `rangeeVerifPoints` | proto (repris) |
+| 20.17 | « Ce qui sera créé », grille en points à niveaux | Une grille en points « ‹nom› » (‹N› critères), sur ‹T›, avec ce qui est attendu à chaque niveau. | `creeListeHtml` | prov. CC |
+| 20.18 | Manques, grille en points à niveaux | le nom d’un niveau · le nom de ‹N› niveaux · un nom différent pour chaque niveau · un nom de niveau qui ne commence pas par « _ » | `js/materiel-assistant.js`, `manquantsNiveauxPoints` | prov. CC (les deux premiers repris de 15) |
+
+⚠ Deux noms fabriqués par 5b s'impriment sur le PDF des élèves s'ils ne sont pas corrigés (règle de `CLAUDE.md`, « les mots que ses élèves liront ») : **‹partie› – ‹critère›** pour une partie en rangée (« INTRODUCTION – Sujet amené » : la partie garde la casse du document) ; et un nom **recollé** de deux rangées (« Mise en » + « contexte » → « Mise en contexte »).
+
 ---
 
 ## Ce que l'inventaire ne couvre pas
 
 - Les messages des journaux de la console (`console.error` de `materiel-creation.js`) et les messages de validation du partage (`partage-validation.js`, « nombre de clés > max ‹N› ») : un utilisateur ne les lit pas dans l'onglet.
-- Les textes de l'étape 6 et de 5b, pas encore écrits dans le code (voir l'en-tête).
 - L'entrée des Nouvelles (étape 7, après la page des textes).
 
 ## Un constat fait en chemin (non corrigé : mandat sans code)
+
+> ✅ **Réglé à l'étape 5b** (`d75d8f09`) : l'encadré dit ce qui vaut pour la grille lue (20.13, 20.14).
 
 **8.6** : l'encadré « Dans l’application » de « Ce que contient ton tableau » parle d'« échelle de performance » et de « descripteurs » aussi pour une grille en points, qui n'en aura pas (`motApp`, `js/materiel.js:284`, ne distingue pas). Issue : *inscrire et continuer* — inscrit ici, pour l'étape 7, où Grégoire corrige ce texte de toute façon ; rien au BACKLOG.
