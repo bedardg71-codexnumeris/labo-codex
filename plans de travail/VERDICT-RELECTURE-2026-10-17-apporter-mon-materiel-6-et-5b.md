@@ -51,4 +51,10 @@ C1 et C2 (un commit), C3 (un commit), Vitest complet. Bump du bloc de jetons. R�
 
 ## Suite donnée
 
-*(Claude Code)*
+*(Claude Code, 17 oct. 2026, vers 14 h 35)*
+
+- **C1 – fait** (`0bacffb7`). `l.length > 1 &&` retiré de `L.pointsDesNiveaux` : un nombre seul compte. **Vérifié comment** : rougissaient exactement les cinq essais que tu avais prévus (I.f, I.g, I.q, N.c, R.4a) ; les cases de remplissage des quatre anciens sont devenues « a », « b »…, R.4a s'inverse (`['1', '2', '3']` → 3) ; garde épinglée par R.4c : « Clarté | 10 | 7 | 4 » est en points (10), F2 reste à niveaux (codes I D M E, parts égales), F4a garde ses deux parties et ses points. Mutation « nombre seul exclu » : rouge.
+- **C2 – fait** (`0bacffb7`). La dernière ligne « 4 pts », « 2 pt », « 4 points », « (4 points) », « (5 POINTS) » compte ; « 2 % », une parenthèse ouverte seule, « 2 points de plus » non. **Vérifié comment** : essais dans R.4a ; trois mutations (unité retirée, parenthèses retirées, « % » admis), trois rouges. ⚠ Ton inférence reste une inférence : aucune des douze grilles n'emploie cette forme.
+- **C3 – fait** (`67cbabb8`, commit à part). Repli dans `gererClicPrimo` : élément absent et clé au catalogue → `afficherAideContextuelle(clé)`. **Vérifié comment** : ta liste des six cibles remesurée par `grep` (aucun `id` de ce nom, toutes au catalogue ; les `details-calculs-*` sont des cibles suffixées créées à l'affichage) ; sentinelle Vitest sur le VRAI module et le VRAI catalogue dans jsdom, un vrai clic par icône (les six ouvrent leur aide ; un élément présent ouvre toujours la popup Primo ; ni élément ni clé : rien), 2 mutations, 2 rouges ; spec WebKit, seule : F6 créée → « La voir dans Grilles de critères » → le « i » du type ouvre « Type de critère d'évaluation », mutation « repli retiré » rouge. Je n'ai cliqué que l'icône du type dans un vrai navigateur ; les neuf autres, par le banc jsdom.
+- **Jetons** : `materiel-lecture.js` (20261015j), `accompagnement.js` (20261017a).
+- **Vitest complet** : 771 fichiers, 9 129 verts. Specs du matériel (WebKit) : 20/20 après C1-C2. Aucun push, aucune release, aucune vérification complète.
