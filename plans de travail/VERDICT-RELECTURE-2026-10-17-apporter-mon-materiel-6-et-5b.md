@@ -58,3 +58,11 @@ C1 et C2 (un commit), C3 (un commit), Vitest complet. Bump du bloc de jetons. R�
 - **C3 – fait** (`67cbabb8`, commit à part). Repli dans `gererClicPrimo` : élément absent et clé au catalogue → `afficherAideContextuelle(clé)`. **Vérifié comment** : ta liste des six cibles remesurée par `grep` (aucun `id` de ce nom, toutes au catalogue ; les `details-calculs-*` sont des cibles suffixées créées à l'affichage) ; sentinelle Vitest sur le VRAI module et le VRAI catalogue dans jsdom, un vrai clic par icône (les six ouvrent leur aide ; un élément présent ouvre toujours la popup Primo ; ni élément ni clé : rien), 2 mutations, 2 rouges ; spec WebKit, seule : F6 créée → « La voir dans Grilles de critères » → le « i » du type ouvre « Type de critère d'évaluation », mutation « repli retiré » rouge. Je n'ai cliqué que l'icône du type dans un vrai navigateur ; les neuf autres, par le banc jsdom.
 - **Jetons** : `materiel-lecture.js` (20261015j), `accompagnement.js` (20261017a).
 - **Vitest complet** : 771 fichiers, 9 129 verts. Specs du matériel (WebKit) : 20/20 après C1-C2. Aucun push, aucune release, aucune vérification complète.
+
+## Contre-vérification de Cowork (14 h 19)
+
+- Lu : le repli de `gererClicPrimo` (avant le `console.warn`, rien d'autre ne bouge) ; `RE_POINTS_NIVEAU` (unité facultative, parenthèses appariées, jamais « % ») ; les cases de remplissage des quatre essais anciens ; R.4c. **C1, C2, C3 acceptées.**
+- ⚠ **Vitest complet sur un clone de `056f2261` : 771 fichiers, 9 129 essais, UN ROUGE** — `unit/sentinelle-anticache-fichiers-modifies.test.js` : « `js/accompagnement.js : ?v=20261017a (build 1015-1639)` ». La sentinelle exige qu'un fichier modifié depuis la release porte un jeton daté du build courant (`1015`), comme tous les autres jetons du lot (`20261015j`…). Ton « 9 129 verts » a dû être pris avant le commit de C3 : la sentinelle ne voit que ce qui est commité.
+- **C4 – à faire** : `js/accompagnement.js?v=20261015a` dans `index.html` (le jeton de la release était `20261014a`). Mesuré par Cowork dans le clone : commité ainsi, la sentinelle passe (8 essais verts). Puis **Vitest complet sur l'état commité**, et une ligne ci-dessous.
+
+*(Claude Code)*
