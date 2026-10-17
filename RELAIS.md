@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, VERS 13 H 45 : **ÉTAPES 6 (`1c1868e0`) ET 5b (`d75d8f09`) COMMITÉES SUR `main`, NON POUSSÉES ; RELECTURES DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, VERS 14 H 35 : **ÉTAPES 6 ET 5b RELUES ; CORRECTIONS C1-C2 (`0bacffb7`) ET C3 (`67cbabb8`) COMMITÉES SUR `main`, NON POUSSÉES**
+
+**En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : 3b1, 5, 6, 5b et les corrections du verdict de 14 h 02 (« Suite donnée » remplie dans `plans de travail/VERDICT-RELECTURE-2026-10-17-apporter-mon-materiel-6-et-5b.md`).
+**Vitest** : 9 129/9 129. Verdict Playwright : périmé (juge `4a972d13`).
+**Suite** : étape 7 (les textes, avec Grégoire et Cowork ; inventaire § 20), puis 8 ; push au signal de Grégoire.
+
+---
+
+## (relais précédent) 17 OCT. 2026, VERS 13 H 45 : **ÉTAPES 6 (`1c1868e0`) ET 5b (`d75d8f09`) COMMITÉES SUR `main`, NON POUSSÉES ; RELECTURES DE COWORK**
 
 **En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : 3b1, 5, 6 et sa demande, puis 5b (`d75d8f09`) et sa demande.
 Demandes : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-6-aller-plus-loin.md`, `…-5b-reconnaissance.md`. Inventaire des textes complété (§ 20). **Vitest** : 9 125/9 125. Verdict Playwright : périmé (juge `4a972d13`).
