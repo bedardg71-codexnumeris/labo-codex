@@ -942,6 +942,13 @@ function gererClicPrimo(icone) {
         return;
     }
     const contenuElement = document.getElementById(targetId);
+    // Relecture de Cowork (17 oct. 2026, C3) : six icônes de la Conception (grilles.js, echelles.js,
+    // index.html) désignent une clé du CATALOGUE, sans élément de ce nom : elles n'ouvraient rien.
+    // Repli sur l'aide contextuelle de la clé ; le reste inchangé.
+    if (!contenuElement && obtenirPopup(targetId)) {
+        afficherAideContextuelle(targetId);
+        return;
+    }
     if (!contenuElement) {
         console.warn('[Accompagnement/popup] Élément target non trouvé :', targetId);
         return;
