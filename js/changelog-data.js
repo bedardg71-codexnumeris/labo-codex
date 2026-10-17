@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.203 (« Apporter mon matériel ») — titre et sept items de Grégoire, mot pour mot,
+            // validés le 17 oct. 2026 (15 h 00), transmis par Cowork (CONSIGNE-LOT-…-7-textes).
+            version: '1.203',
+            couleur: 'vert',
+            titre: 'Apporter mon matériel',
+            items: [
+                'Un nouvel onglet, en tête de Conception&nbsp;: colle ta grille d’évaluation copiée depuis un traitement de texte, et l’application te montre ce qu’elle en a compris. L’onglet est en construction&nbsp;: il pourrait ne pas reconnaître toutes les grilles.',
+                'Tu corriges sa lecture d’un menu, rangée par rangée et colonne par colonne&nbsp;: critères, niveaux, sous-critères, parties, lignes à mettre de côté. Rien n’est créé avant que tu aies tout vérifié.',
+                'Une grille en points, avec ou sans niveaux, est acceptée telle quelle&nbsp;; les totaux et les lignes de calcul de la langue sont mis de côté, chacun avec sa raison.',
+                '«&nbsp;Créer ma grille&nbsp;» la range dans Grilles de critères&nbsp;; son échelle, s’il y en a une, dans Échelles de performance&nbsp;; et, si tes cases s’adressent à l’étudiant·e, ses rétroactions dans Cartouches de rétroaction.',
+                'Après la création, «&nbsp;Aller plus loin avec ta grille&nbsp;» présente les trois façons d’évaluer un critère que l’application sait exploiter.',
+                'Dans Grilles de critères, un critère venu de ta grille montre ce qui est attendu à chaque niveau, et ses sous-critères.',
+                'Les icônes «&nbsp;i&nbsp;» de Grilles de critères et d’Échelles de performance ouvrent de nouveau leur aide.'
+            ]
+        },
+        {
             // 1.202 (les lots du 15 oct. 2026) — titre et six items approuvés par Grégoire « tel quel »
             // le 15 oct. 2026 (16 h 35), transmis par Cowork (CONSIGNE-SOIR-2026-10-15), posés tels quels.
             version: '1.202',
