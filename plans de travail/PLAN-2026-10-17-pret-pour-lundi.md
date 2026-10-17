@@ -14,7 +14,7 @@
 4. **La mesure : une grille sans niveaux devient une grille en points.** Cowork, en lecture seule, peut se faire pendant les étapes 2 et 3 : le type de critère « analytique » (points saisis sur le maximum du critère, niveau déduit au calcul) ; comment se calcule la note finale sans descripteurs ; quelle échelle il faut, et d'où elle viendrait sans rien inventer.
 5. **Les grilles sans niveaux acceptées telles quelles** (des points par critère, des commentaires), d'après la mesure. *(CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-5-points.md, écrite à 9 h 48)*
 5b. **La reconnaissance, d'après les douze échantillons de Grégoire.** Une autre session Cowork les analyse en lecture seule (`CONSIGNE-COWORK-2026-10-17-analyse-12-echantillons.md`, écrite à 11 h 32), pendant que Claude Code fait l'étape 5 ; sa proposition (`PROPOSITION-2026-10-17-reconnaissance-des-grilles.md`) devient la consigne d'un lot, après l'étape 5.
-6. **« Aller plus loin avec ta grille », première forme modeste.** Après la création, une invitation au conditionnel, sans jugement sur la grille (nom validé à 9 h 30). Forme à proposer par Cowork, à faire valider. **Orientation de Grégoire (9 h 42)** : une grille en points sans échelle, comme sa grille de 1995, est une grille analytique appliquée sans le savoir, le type le plus employé dans le réseau aujourd'hui ; « Aller plus loin » présenterait les trois types de critères (holistique, analytique, algorithmique) que l'utilisateur pourrait employer et que l'application exploite pour mieux suivre les apprentissages. « Nous allons miser là-dessus. »
+6. **« Aller plus loin avec ta grille », première forme modeste.** Après la création, une invitation au conditionnel, sans jugement sur la grille (nom validé à 9 h 30). Forme à proposer par Cowork, à faire valider. **Orientation de Grégoire (9 h 42)** : une grille en points sans échelle, comme sa grille de 1995, est une grille analytique appliquée sans le savoir, le type le plus employé dans le réseau aujourd'hui ; « Aller plus loin » présenterait les trois types de critères (holistique, analytique, algorithmique) que l'utilisateur pourrait employer et que l'application exploite pour mieux suivre les apprentissages. « Nous allons miser là-dessus. » **Forme et textes validés à 12 h 07** : `CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-6-aller-plus-loin.md`. **Ordre décidé à 12 h 07** : 6, puis 5b (le rapport de l'autre session, quand il est prêt), puis 7, pour que la page des textes couvre aussi ceux de 5b.
 7. **Tes textes.** Une seule page avec tous les textes provisoires des étapes 1 à 6, à corriger par toi ; puis l'entrée des Nouvelles. Claude Code applique tes corrections.
 8. **Version finale en ligne, à ton signal**, vérification complète la nuit d'avant ; en ligne lundi matin. Ta porte terrain avant 11 h.
 
@@ -34,7 +34,7 @@ La fusion de la vérification sur GitHub (lundi après-midi, après la rencontre
 - [x] 2 — `96812253`, relu et accepté à 11 h 27, non poussé
 - [x] 3 — en ligne le 17 à 11 h 08, sans release (1.202.0), vérification complète sans rougeur
 - [x] 4 — mesure écrite le 17 à 9 h 43 : `MESURE-2026-10-17-grilles-en-points.md` (faisable sans rien inventer)
-- [ ] 5
+- [x] 5 — `51a7be2b`, relu et accepté à 12 h 05, non poussé (avec #1095, la rangée du critère sur l'iPad)
 - [ ] 5b
 - [ ] 6
 - [ ] 7
