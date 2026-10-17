@@ -7,7 +7,16 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, MATINÉE : **LOT 3a D'« APPORTER MON MATÉRIEL » COMMITÉ SUR `main` (`e7fd773e`), NON POUSSÉ ; RELECTURE DE COWORK, PUIS 3b, PUIS VERDICT DU SOIR**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, FIN DE MATINÉE : **BANDEAU ET ÉTAPE 1 EN LIGNE (`4a972d13`) ; LOT 3b1 COMMITÉ SUR `main` (`96812253`), NON POUSSÉ ; RELECTURE DE COWORK**
+
+**En ligne** (connecteur Netlify) : déploiement `6ad38f7d`, `commit_ref` `4a972d13`, `ready`, 15:08:55 Z ; 1.202.0 inchangé, sans release.
+Verdict complet par `scripts/pousser.sh` : aucune rougeur. **`main` local** : `96812253` (lot 3b1) et le commit docs de sa demande.
+Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-3b1.md`. **Vitest** : 9 047/9 047.
+**Suite** : relecture de Cowork → corrections → étape 5 (`CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-5-points.md`) ; push au signal de Grégoire.
+
+---
+
+## (relais précédent) 17 OCT. 2026, MATINÉE : **LOT 3a D'« APPORTER MON MATÉRIEL » COMMITÉ SUR `main` (`e7fd773e`), NON POUSSÉ ; RELECTURE DE COWORK, PUIS 3b, PUIS VERDICT DU SOIR**
 
 **En ligne** : toujours le lot 1 (`9257f7e5`, 1.202.0). **`main` local** : lots 2 (relu, corrigé, `0adf66be`) et 3a (`e7fd773e`) et le commit docs
 de la demande de relecture, au-dessus de `84d1b3d6`. Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-3a.md`.
