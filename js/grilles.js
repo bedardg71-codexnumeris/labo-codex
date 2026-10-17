@@ -2138,6 +2138,10 @@ async function afficherListeGrilles() {
     }).join('');
 
     container.innerHTML = html;
+    // Lot 3b1 (17 oct.) : l'objet ouvert reste sélectionné quand la liste se redessine — l'initialisation
+    // de la sous-section la redessine 100 ms après une ouverture venue d'un autre onglet (« Apporter mon matériel »).
+    const edition = document.getElementById('conteneurEditionGrille');
+    if (grilleTemplateActuelle && edition && !edition.classList.contains('u-hide')) definirGrilleActive(grilleTemplateActuelle.id);
 }
 
 /**
@@ -4416,6 +4420,46 @@ function rendrePliAucuneAnnotation(critere, ctx) {
  * ajoutée à part. Rien ici n'écrit dans la grille : l'ordre change le rendu, pas
  * les données, et les `data-critere-index` des handlers restent ceux du critère.
  */
+/**
+ * « Apporter mon matériel », lot 3b1 (17 oct. 2026) : ce que l'assistant a écrit dans un critère,
+ * EN LECTURE — le texte de chaque niveau (`descripteurs.parNiveau`, nommé par l'échelle
+ * `descripteurs.echelleId` du trimestre ; le code seul si elle n'existe plus), puis les
+ * sous-critères. Rien pour un critère qui n'en porte pas : son HTML reste celui d'avant.
+ * Les sous-critères d'un critère algorithmique ont déjà leur place, éditable (gabarit) : pas ici.
+ * Titres PROVISOIRES (Claude Code, 17 oct.), relus à l'étape 7. La modification vient après le 19 oct.
+ */
+function rendreAttenduCritere(critere) {
+    const par = (critere && critere.descripteurs && critere.descripteurs.parNiveau) || {};
+    const codes = Object.keys(par).filter(c => String(par[c] || '').trim());
+    const sous = (critere && critere.type !== 'algorithmique' && Array.isArray(critere.sousCriteres))
+        ? critere.sousCriteres.filter(sc => sc && String(sc.nom || '').trim()) : [];
+    if (!codes.length && !sous.length) return '';
+    return `
+            <div class="grille-attendu">${rendreAttenduNiveaux(critere.descripteurs, codes)}${rendreAttenduSousCriteres(sous)}
+            </div>`;
+}
+
+/** Le texte de chaque niveau, dans l'ordre de l'échelle ; un code qu'elle ne connaît pas suit, dans l'ordre écrit. */
+function rendreAttenduNiveaux(descripteurs, codes) {
+    if (!codes.length) return '';
+    const echelle = (db.getSync(cle('echellesTemplates'), []) || []).find(e => e && e.id === descripteurs.echelleId);
+    const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
+    const ordre = niveaux.map(n => n.code).filter(c => codes.includes(c)).concat(codes.filter(c => !niveaux.some(n => n.code === c)));
+    const nomDe = (c) => { const n = niveaux.find(x => x.code === c); return n && String(n.nom || '').trim() ? n.nom : c; };
+    return `
+                <h4 class="grille-attendu-titre">Ce qui est attendu à chaque niveau</h4>
+                <div class="grille-attendu-niveaux">${ordre.map(c => `
+                    <div class="grille-attendu-niveau"><strong>${echapperHtml(nomDe(c))}</strong><p>${echapperHtml(String(descripteurs.parNiveau[c]))}</p></div>`).join('')}
+                </div>`;
+}
+
+function rendreAttenduSousCriteres(sous) {
+    if (!sous.length) return '';
+    return `
+                <h4 class="grille-attendu-titre">Sous-critères</h4>
+                <ul class="grille-attendu-sous">${sous.map(sc => `<li>${echapperHtml(sc.nom)}</li>`).join('')}</ul>`;
+}
+
 function rendreCartesGabaritAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
     return `
@@ -4771,7 +4815,7 @@ function afficherCriteresGrille(grille) {
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}
+            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere)}
         </div>
     `).join('');
 
@@ -5411,6 +5455,7 @@ window.supprimerGrilleDepuisSidebar = supprimerGrilleDepuisSidebar;
 window.annulerFormGrille = annulerFormGrille;
 window.fermerFicheGrille = fermerFicheGrille;
 window.ouvrirGrilleDepuisListe = ouvrirGrilleDepuisListe;
+window.rendreAttenduCritere = rendreAttenduCritere;   // lot 3b1 (17 oct.) : exposé pour les bancs
 window.dupliquerGrilleActive = dupliquerGrilleActive;
 window.supprimerGrilleActive = supprimerGrilleActive;
 window.sauvegarderGrilleComplete = sauvegarderGrilleComplete;
