@@ -120,8 +120,8 @@ describe('étape 5b · F — les grilles fictives de la proposition, lues sans u
     it('F4a parties et points par niveau : 6 critères, noms sans puce préfixés de leur partie, sous-éléments en sous-critères, points 4, 10, 4, 4, 10, 16', () => {
         const m = html(F.f4aHtml());
         expect(m.roles.rangees).toEqual(['niveaux', 'critere', 'critere', 'partie', 'critere', 'critere', 'partie', 'critere', 'critere', 'critere']);
-        expect(noms(m)).toEqual(['PARTIE A – Situer l’œuvre', 'PARTIE A – Résumer le passage', 'PARTIE B – Nommer le procédé',
-            'PARTIE B – Citer juste', 'PARTIE C – Interpréter', 'PARTIE C – Conclure']);
+        expect(noms(m)).toEqual(['Partie A – Situer l’œuvre', 'Partie A – Résumer le passage', 'Partie B – Nommer le procédé',
+            'Partie B – Citer juste', 'Partie C – Interpréter', 'Partie C – Conclure']);
         expect(points(m)).toEqual(F.F4A_POINTS.map(String));
         expect(m.criteres[0].sousCriteres).toEqual(['premier élément 1', 'second élément 1']);
         expect(m.enPoints).toBe(true);
@@ -149,8 +149,8 @@ describe('étape 5b · F — les grilles fictives de la proposition, lues sans u
     it('F6 liste à cocher : critères en points, « / 0 » compris ; constats en description ; cases ignorées ; parties ; totaux à classer', () => {
         const m = A.preparer(html(F.f6Html()));
         expect(m.roles.colonnes).toEqual(['noms', 'pond', 'ignorer', 'ignorer', 'description']);
-        expect(noms(m)).toEqual(['INTRODUCTION – Sujet amené', 'INTRODUCTION – Sujet posé', 'DÉVELOPPEMENT – Arguments',
-            'DÉVELOPPEMENT – Mise en page', 'DÉVELOPPEMENT – Bibliographie', 'LANGUE']);
+        expect(noms(m)).toEqual(['Introduction – Sujet amené', 'Introduction – Sujet posé', 'Développement – Arguments',
+            'Développement – Mise en page', 'Développement – Bibliographie', 'LANGUE']);
         expect(points(m)).toEqual(['10', '20', '30', '0', '0', '40']);
         expect(m.criteres[0].description.valeur).toBe('Le sujet est amené de loin.\nIl mène au sujet posé.');
         expect(raisons(m)).toEqual([R().total, R().total]);
@@ -171,7 +171,7 @@ describe('étape 5b · F — les grilles fictives de la proposition, lues sans u
         const r = L.charger(L.lireHtml(F.f8Html()), 'colle');
         expect(r.erreur).toBeUndefined();
         const m = r.modele;
-        expect(noms(m)).toEqual(['Introduction', 'DÉVELOPPEMENT – Argumentation', 'DÉVELOPPEMENT – Citations', 'Conclusion']);
+        expect(noms(m)).toEqual(['Introduction', 'Développement – Argumentation', 'Développement – Citations', 'Conclusion']);
         expect(points(m)).toEqual(['5', '40', '35', '20']);
         expect(m.criteres.map(c => c.sousCriteres)).toEqual([['amener le sujet', 'poser le sujet'], ['idée principale', 'exemples'], ['intégrées', 'commentées'], ['synthèse']]);
         expect(raisons(m)).toEqual([R().commentaires, R().total]);
@@ -340,7 +340,7 @@ describe('étape 5b · R — les règles, une à une', () => {
     it('R.10 parties en rangée : majuscules seules suivies d’un critère ; ou les niveaux de l’en-tête recopiés, la case d’angle nommant la 1re', () => {
         const m = texte('Critère\tPoints\nINTRODUCTION\t\nSujet\t/4\nPlan\t/6');
         expect(m.roles.rangees).toEqual(['ignorer', 'partie', 'critere', 'critere']);
-        expect(noms(m)).toEqual(['INTRODUCTION – Sujet', 'INTRODUCTION – Plan']);
+        expect(noms(m)).toEqual(['Introduction – Sujet', 'Introduction – Plan']);
         expect(texte('Critère\tPoints\nIntroduction\t\nSujet\t/4').roles.rangees[1]).toBe('critere');   // pas en majuscules
         expect(texte('Critère\tPoints\nSujet\t/4\nPLAN\t').roles.rangees[2]).toBe('critere');           // rien ne suit
         expect(texte('Critère\tPoints\nSujet\t/4\nPLAN\t\nTotal : ___\t/ 4').roles.rangees[2]).toBe('critere');   // un pied suit
@@ -517,5 +517,32 @@ describe('étape 5b · N — comme avant', () => {
         expect(m.roles.rangees).toEqual(['niveaux', 'critere', 'critere', 'critere']);
         expect(points(m)).toEqual(['40', '30', '30']);
         expect(raisons(m)).toEqual(['Texte après le tableau']);
+    });
+});
+
+/* ======================================================= 8.16 — LA CASSE D'UNE PARTIE */
+
+describe('étape 7 · 8.16 — une partie en capitales prend une majuscule initiale dans le nom fabriqué', () => {
+    // Règle validée par Grégoire le 17 oct. 2026 (15 h 00) : le nom s'imprime sur le PDF des
+    // étudiant·es. Lettre seule et chiffre romain gardent leur capitale (sa décision, même jour).
+    const colonnePartie = (p1, p2) => html('<table>' +
+        '<tr><td>Partie</td><td>Critère</td><td>Points</td></tr>' +
+        `<tr><td rowspan="2">${p1}</td><td>Sujet amené</td><td>/4</td></tr><tr><td>SUJET POSÉ</td><td>/6</td></tr>` +
+        `<tr><td>${p2}</td><td>Synthèse</td><td>/10</td></tr></table>`);
+
+    it('P.a la colonne « Partie » (étape 5) : capitales ramenées ; une partie qui porte des minuscules garde sa casse ; le nom du critère jamais touché', () => {
+        const m = colonnePartie('INTRODUCTION', 'Conclusion BIS');
+        expect(m.roles.colonnes).toEqual(['partie', 'noms', 'pond']);
+        expect(noms(m)).toEqual(['Introduction – Sujet amené', 'Introduction – SUJET POSÉ', 'Conclusion BIS – Synthèse']);
+    });
+
+    it('P.b la partie en rangée (5b) : « DÉVELOPPEMENT » → « Développement »', () => {
+        expect(noms(texte('Critère\tPoints\nDÉVELOPPEMENT\t\nArguments\t/4\nPlan\t/6'))).toEqual(['Développement – Arguments', 'Développement – Plan']);
+    });
+
+    it('P.c lettre seule, chiffre romain, lettre élidée, mots composés', () => {
+        const c = L.casseDePartie;
+        expect(['PARTIE A', 'PARTIE II', 'PARTIE XIV', 'ANALYSE DE L’ŒUVRE', 'MISE EN CONTEXTE', 'À PROPOS', 'PARTIE 1', 'Introduction', ''].map(c))
+            .toEqual(['Partie A', 'Partie II', 'Partie XIV', 'Analyse de l’œuvre', 'Mise en contexte', 'À propos', 'Partie 1', 'Introduction', '']);
     });
 });

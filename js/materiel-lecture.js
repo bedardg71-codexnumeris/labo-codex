@@ -932,8 +932,28 @@
     function prefixeDePartie(e, aPuce) {
         if (e.partieRangee && e.partiePuce === null) e.partiePuce = aPuce;
         else if (e.partieRangee && e.partiePuce && !aPuce) e.partieRangee = '';
-        return e.partie || e.partieRangee;
+        return casseDePartie(e.partie || e.partieRangee);
     }
+
+    /**
+     * Règle 8.16 (Grégoire, 17 oct. 2026) : le nom fabriqué s'imprime sur le PDF des étudiant·es, donc
+     * une partie écrite entièrement en capitales prend une majuscule initiale (« INTRODUCTION » →
+     * « Introduction ») ; une partie qui porte déjà des minuscules garde sa casse. Une lettre seule
+     * (« PARTIE A ») ou un chiffre romain (« PARTIE II ») garde sa capitale (même décision) ; une
+     * lettre élidée (« DE L’ŒUVRE ») non.
+     */
+    function casseDePartie(p) {
+        if (!/\p{Lu}/u.test(p) || /\p{Ll}/u.test(p)) return p;
+        var premier = true;
+        return p.replace(/\p{L}+/gu, function (mot, i) {
+            var elide = /^['’]/.test(p.slice(i + mot.length));
+            var garde = (mot.length === 1 && mot !== 'À' && !elide) || /^(?=[IVX])X{0,3}(IX|IV|V?I{0,3})$/.test(mot);
+            var r = garde ? mot : premier ? mot.charAt(0) + mot.slice(1).toLocaleLowerCase('fr') : mot.toLocaleLowerCase('fr');
+            premier = false;
+            return r;
+        });
+    }
+    L.casseDePartie = casseDePartie;
 
     /** Une rangée « Un critère » ou « Nom d'un critère » : un critère, ou un passage à classer. */
     function lireCritere(e, row, role) {
