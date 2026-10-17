@@ -16,7 +16,7 @@
  *   B — CONSTRUIRE : plages contiguës, note retenue SAISIE (jamais le milieu), descripteurs liés
  *       à l'échelle créée, cartouche seulement pour des rétroactions.
  *   W — ÉCRIRE : trois objets NEUFS ; aucun objet existant touché ; un échec ne laisse rien de
- *       partiel ; refus sans trimestre actif ou en trimestre archivé.
+ *       partiel ; refus sans trimestre actif ou en trimestre clos.
  *   S — SÉCURITÉ : l'assistant échappe tout texte venu du document, valeurs des champs comprises.
  */
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
@@ -317,9 +317,12 @@ describe('W — écrire : trois objets neufs, rien d’autre', () => {
         expect(db.store.size).toBe(0);
     });
 
-    it('W.c trimestre archivé : refus clair, rien n’est écrit', async () => {
-        w.estTrimestreArchive = () => true;
-        expect((await C.creer(exempleComplet())).erreur).toBe(C.MESSAGES.archive);
+    it('W.c trimestre clos : refus clair, avec le mot « clos » (pas « archivé »), rien n’est écrit', async () => {
+        w.estTrimestreArchive = () => true;   // lit un trimestre CLOS, malgré son nom
+        const erreur = (await C.creer(exempleComplet())).erreur;
+        expect(erreur).toBe(C.MESSAGES.clos);
+        expect(erreur).toContain('est clos');
+        expect(erreur).not.toMatch(/archiv/i);   // « archivé » = déposé hors du navigateur (vocabulaire de Grégoire)
         expect(db.store.size).toBe(0);
     });
 
