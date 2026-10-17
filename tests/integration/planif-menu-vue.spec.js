@@ -147,6 +147,27 @@ async function pointDuFond(page, ecranX, ecranY) {
     return { x: zr.x + ecranX, y: zr.y + ecranY };
 }
 
+/**
+ * Milieu de la partie VISIBLE de la zone de travail, et l'assurance qu'elle y est.
+ * Un décalage fixe sous le bord de la zone dépend de la hauteur de tout ce qui est
+ * au-dessus : le 16 oct. 2026, la sous-navigation de Conception passée sur deux
+ * lignes (onglet « Apporter mon matériel ») a poussé le point de « zoom-molette »
+ * hors de la fenêtre, et la molette n'atteignait plus la carte.
+ */
+async function pointVisibleDeLaZone(page) {
+    const p = await page.evaluate(() => {
+        const zone = document.getElementById('planif-zone-travail');
+        const r = zone.getBoundingClientRect();
+        const haut = Math.max(r.top, 0), bas = Math.min(r.bottom, window.innerHeight);
+        const gauche = Math.max(r.left, 0), droite = Math.min(r.right, window.innerWidth);
+        const x = (gauche + droite) / 2, y = (haut + bas) / 2;
+        const cible = document.elementFromPoint(x, y);
+        return { x, y, dansLaZone: !!cible && zone.contains(cible) };
+    });
+    expect(p.dansLaZone, 'le milieu visible de la zone de travail doit appartenir à la zone').toBe(true);
+    return { x: p.x, y: p.y };
+}
+
 async function chercher(page, terme) {
     await page.fill('#planif-recherche-champ', terme);
     await page.waitForTimeout(300);
@@ -204,7 +225,7 @@ const ESSAIS_RACCOURCIS = {
     },
     'zoom-molette': async (page) => {
         const z0 = await zoom(page);
-        const p = await pointDuFond(page, 200, 200);
+        const p = await pointVisibleDeLaZone(page);
         await page.mouse.move(p.x, p.y);
         await page.keyboard.down('Control');
         await page.mouse.wheel(0, -200);
