@@ -260,7 +260,7 @@ describe('lot 3a · M — chaque rôle, et le modèle qui en découle', () => {
     it('M.f la case de la colonne des noms d’une suite : sous-critères, description, ou rien', () => {
         const choix = (v) => L.relire(fictive(), Object.assign({}, fictive().roles, { suiteNom: v })).criteres[0];
         expect(choix('sousCriteres').sousCriteres).toEqual(CRITERES[0].taches);
-        expect(choix('description').description.valeur).toBe(CRITERES[0].taches.map(t => '☐ ' + t).join('\n'));
+        expect(choix('description').description.valeur).toBe(CRITERES[0].taches.join('\n'));   // sans les ☐ (relecture du 17 oct.)
         expect(choix('description').sousCriteres).toEqual([]);
         expect(choix('rien').sousCriteres).toEqual([]);
         expect(choix('rien').description.valeur).toBe('');
@@ -273,6 +273,21 @@ describe('lot 3a · M — chaque rôle, et le modèle qui en découle', () => {
         expect(m.niveaux.map(n => n.titre.valeur)).toEqual(['A', 'B']);
         m = avec(m, 'colonnes', 5, 'ignorer');
         expect(m.niveaux.map(n => n.titre.valeur)).toEqual(['A']);
+    });
+
+    it('M.g2 la description du critère perd ses puces en tête de ligne (☐ ☑ □ ■ • - *), en suite comme en colonne', () => {
+        const puces = ['☐', '☑', '□', '■', '•', '-', '*'];
+        const lignes = puces.map((p, k) => '<p>' + p + ' Tâche ' + (k + 1) + '</p>').join('');
+        const attendu = puces.map((p, k) => 'Tâche ' + (k + 1)).join('\n');
+        const suite = L.interpreter(L.lireHtml('<table><tr><td>Critères</td><td>A</td><td>B</td></tr>' +
+            '<tr><td><b>CRITÈRE UN</b></td><td>I</td><td>D</td></tr>' +
+            '<tr><td>' + lignes + '</td><td>Descr. A.</td><td>Descr. B.</td></tr></table>'), 'colle');
+        expect(suite.roles.rangees).toEqual(['niveaux', 'nomCritere', 'suite']);
+        expect(L.relire(suite, Object.assign({}, suite.roles, { suiteNom: 'description' })).criteres[0].description.valeur).toBe(attendu);
+        let col = L.interpreter(L.lireHtml('<table><tr><td>C</td><td>Note</td><td>A</td></tr>' +
+            '<tr><td>X</td><td>' + lignes + '</td><td>Descr. A.</td></tr></table>'), 'colle');
+        col = avec(col, 'colonnes', 1, 'description');
+        expect(col.criteres[0].description.valeur).toBe(attendu);
     });
 
     it('M.h sans colonne « Un niveau » ni « Noms des critères » : deux manques nommés, aucun critère inventé', () => {
@@ -449,7 +464,7 @@ describe('lot 3a · S — l’étape « Ce que contient ton tableau »', () => {
         expect([...div.querySelectorAll('tbody tr')[0].querySelectorAll('.materiel-sous-criteres li')].map(li => li.textContent)).toEqual(CRITERES[0].taches);
         const m = A.choisirSuiteNom(A.preparer(fictive()), 'description');
         div.innerHTML = materiel.apercuHtml(m);
-        expect(div.querySelector('tbody tr .materiel-description').textContent).toBe(CRITERES[0].taches.map(t => '☐ ' + t).join('\n'));
+        expect(div.querySelector('tbody tr .materiel-description').textContent).toBe(CRITERES[0].taches.join('\n'));
         expect(div.querySelector('.materiel-sous-criteres')).toBeNull();
     });
 

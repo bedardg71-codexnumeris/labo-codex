@@ -528,10 +528,11 @@
         return row.map(function (c) { return propre(c.t); }).filter(Boolean).join(' · ');
     }
 
-    /** Puces et cases à cocher en tête de ligne, retirées des sous-critères. */
+    /** Puces et cases à cocher en tête de ligne, retirées des sous-critères ET de la description
+     *  du critère (relecture de Cowork du lot 3a, 17 oct.). */
     var RE_PUCE = /^[☐☑□■•*-]+\s*/;
 
-    function sousCriteresDe(t) {
+    function lignesSansPuces(t) {
         return L.lignes(t).map(function (l) { return l.replace(RE_PUCE, '').trim(); }).filter(Boolean);
     }
 
@@ -609,8 +610,8 @@
         var criteres = [], courant = null, orphelines = [];
 
         function completer(c, row) {
-            colsSous.forEach(function (j) { c.sousCriteres = c.sousCriteres.concat(sousCriteresDe(row[j].t)); });
-            colsDesc.forEach(function (j) { c.description = joindre(c.description, L.lignes(row[j].t).join('\n')); });
+            colsSous.forEach(function (j) { c.sousCriteres = c.sousCriteres.concat(lignesSansPuces(row[j].t)); });
+            colsDesc.forEach(function (j) { c.description = joindre(c.description, lignesSansPuces(row[j].t).join('\n')); });
             if (!c.ponderation) c.ponderation = ponderationDe(row, colPond);
         }
 
@@ -632,8 +633,8 @@
                 if (!courant) { orphelines.push(i + 1); return; }
                 idxNiv.forEach(function (k, q) { courant.cases[q] = joindre(courant.cases[q], row[k].t); });
                 var t = row[colNoms].t;
-                if (roles.suiteNom === 'sousCriteres') courant.sousCriteres = courant.sousCriteres.concat(sousCriteresDe(t));
-                else if (roles.suiteNom === 'description') courant.description = joindre(courant.description, L.lignes(t).join('\n'));
+                if (roles.suiteNom === 'sousCriteres') courant.sousCriteres = courant.sousCriteres.concat(lignesSansPuces(t));
+                else if (roles.suiteNom === 'description') courant.description = joindre(courant.description, lignesSansPuces(t).join('\n'));
                 completer(courant, row);
             }
         });
