@@ -8,6 +8,7 @@
  *   1. l'échelle   → cle('echellesTemplates')
  *   2. la grille   → cle('grillesTemplates')
  *   3. la cartouche → cle('cartouches_<grilleId>'), seulement pour des rétroactions.
+ * Une grille en points (étape 5 du plan « prêt pour lundi ») : la grille seule.
  * Les objets sont construits par `materielAssistant.construire` (fonction pure).
  *
  * ⛔ AUCUN OBJET EXISTANT N'EST MODIFIÉ. Chaque mutateur AJOUTE un objet neuf, et refuse
@@ -89,7 +90,10 @@
             retro: !!o.cartouche,
             descr: o.grille.criteres.some(function (c) { return !!c.descripteurs; }),
             // Lot 3b1 : les boutons « La voir dans … » de la confirmation ouvrent ces objets-ci.
-            ids: { grille: o.grille.id, echelle: o.echelle.id, cartouche: o.cartouche ? o.cartouche.id : null },
+            ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null, cartouche: o.cartouche ? o.cartouche.id : null },
+            // Étape 5 : une grille en points, et son total (« sur 64 »).
+            enPoints: !o.echelle,
+            totalPoints: o.echelle ? null : o.grille.criteres.reduce(function (t, c) { return t + c.ponderation; }, 0),
             niveaux: m.niveaux.map(function (n) {
                 return String(n.titre.valeur).trim() + ' (' + String(n.min.valeur).trim() + ' à ' + String(n.max.valeur).trim() + ' %)';
             })
@@ -97,7 +101,8 @@
     }
 
     /**
-     * Crée l'échelle, la grille et (rétroactions) la cartouche d'un modèle complet.
+     * Crée l'échelle, la grille et (rétroactions) la cartouche d'un modèle complet ; une grille
+     * en points, seule.
      * @param {Object} m - modèle de l'assistant, sans manque (`materielAssistant.calculs`)
      * @returns {Promise<{objets: Object, resume: Object}|{erreur: string}>}
      */
@@ -107,7 +112,7 @@
         // Les clés sont figées une fois : les trois objets vont dans le MÊME trimestre.
         var cles = { echelles: window.cle('echellesTemplates'), grilles: window.cle('grillesTemplates') };
         var o = window.materielAssistant.construire(m, contexte(cles));
-        var plan = [{ cle: cles.echelles, objet: o.echelle }, { cle: cles.grilles, objet: o.grille }];
+        var plan = (o.echelle ? [{ cle: cles.echelles, objet: o.echelle }] : []).concat([{ cle: cles.grilles, objet: o.grille }]);
         if (o.cartouche) plan.push({ cle: window.cle('cartouches_' + o.grille.id), objet: o.cartouche });
         var ecrites = [];
         try {

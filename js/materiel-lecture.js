@@ -17,6 +17,12 @@
  * (`proposerRoles`, `modeleDepuisRoles`) : la lecture automatique n'est qu'une proposition,
  * que la personne corrige à l'étape « Ce que contient ton tableau ».
  *
+ * Étape 5 du plan « prêt pour lundi » (`CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-5-points.md`) :
+ * une grille SANS colonne de niveau est une grille EN POINTS (`enPoints`), acceptée telle
+ * quelle — chaque critère porte ses points, rien n'est inventé. Rôle de colonne « Partie »
+ * (un regroupement, préfixé au nom du critère) ; une case de critère sur plusieurs lignes
+ * donne son nom (1re ligne) et sa description (les suivantes).
+ *
  * Ce que produit la lecture (le « modèle » d'une grille collée, consommé par l'assistant) :
  * chaque valeur est une paire `{ valeur, etat }`.
  *   etat 'repris'   : tel quel dans le document ;
@@ -287,7 +293,12 @@
     ];
     L.ROLES_COLONNES = [
         { id: 'noms', libelle: 'Noms des critères' },
-        { id: 'pond', libelle: 'Pondération' },
+        // Étape 5 (17 oct.) : un regroupement de critères (« Introduction »), souvent en case
+        // fusionnée verticale. Libellé PROVISOIRE (étape 7).
+        { id: 'partie', libelle: 'Partie' },
+        // Étape 5 : avec des colonnes de niveau, la pondération ; sans, les points (le maximum
+        // de chaque critère). Libellé PROVISOIRE (étape 7).
+        { id: 'pond', libelle: 'Points ou pondération' },
         { id: 'niveau', libelle: 'Un niveau' },
         { id: 'sousCriteres', libelle: 'Sous-critères' },
         { id: 'description', libelle: 'Description du critère' },
@@ -303,8 +314,9 @@
      * Un seul de ces rôles par tableau : en choisir un autre fait passer le précédent à
      * « À ignorer ». ⚠ « Noms des critères » et « Pondération » aussi (supposition de Claude
      * Code, 17 oct. : la consigne ne lit que la première ; une seconde ne servirait à rien).
+     * « Partie » de même (étape 5) : une seule colonne de regroupement.
      */
-    var UNIQUES = { rangees: ['niveaux', 'codes', 'plages'], colonnes: ['noms', 'pond'] };
+    var UNIQUES = { rangees: ['niveaux', 'codes', 'plages'], colonnes: ['noms', 'pond', 'partie'] };
 
     /** Un code de niveau tel qu'un document l'écrit : court (≤ 4 caractères), sans espace. */
     function estCode(t) { return !!t && t.length <= 4 && !/\s/.test(t); }
@@ -335,11 +347,11 @@
      * cases de niveau sont courtes — ou qui sont sous une case fusionnée de la 1re rangée.
      */
     function rangeesEntete(g, colonnes) {
-        var fin = 0;
+        var fin = 0, colNoms = Math.max(0, colonnes.indexOf('noms'));
         for (var i = 1; i < g.length; i++) {
-            var nomCase = g[i][0];
+            var nomCase = g[i][colNoms];
             if (!nomCase || nomCase.t) break;
-            var sousLaPremiere = nomCase.suite === 'v' && g[0][0] && g[0][0].fusion;
+            var sousLaPremiere = nomCase.suite === 'v' && g[0][colNoms] && g[0][colNoms].fusion;
             var courtes = casesDe(g[i], colonnes, 'niveau').every(function (c) {
                 return !c.t || (c.t.indexOf('\n') < 0 && c.t.length <= L.LONGUEUR_ENTETE_MAX);
             });
@@ -350,8 +362,8 @@
     }
 
     function estBande(row, colonnes) {
-        var cs = casesDe(row, colonnes, 'niveau');
-        return !!(row[0] && propre(row[0].t)) && cs.length > 0 && cs.every(function (c) { return estCode(propre(c.t)) && c.t.indexOf('\n') < 0; });
+        var cs = casesDe(row, colonnes, 'niveau'), nom = row[Math.max(0, colonnes.indexOf('noms'))];
+        return !!(nom && propre(nom.t)) && cs.length > 0 && cs.every(function (c) { return estCode(propre(c.t)) && c.t.indexOf('\n') < 0; });
     }
 
     function aDesTextesLongs(row, colonnes) {
@@ -378,20 +390,72 @@
         return { rangees: rangees, colonnes: colonnes, suiteNom: 'sousCriteres', propose: true };
     };
 
-    /** La 1re colonne nomme les critères ; la 1re dont l'en-tête dit « pondération » la porte ; les autres sont des niveaux. */
+    /**
+     * La 1re colonne nomme les critères ; la 1re dont l'en-tête dit « pondération » ou « points »,
+     * ou dont les cases sont surtout des points (« /4 », « 4 pts », « sur 18 »), la porte ; une
+     * colonne « Commentaires » vide est à ignorer (étape 5) ; les autres sont des niveaux.
+     * Une 1re colonne aux cases fusionnées verticalement devient « Partie » quand la 2e peut
+     * porter les noms (`proposerPartie`).
+     */
     function proposerColonnes(g) {
         var nb = g.length ? g[0].length : 0, colonnes = [];
         for (var j = 0; j < nb; j++) colonnes.push(j === 0 ? 'noms' : 'niveau');
         var fin = rangeesEntete(g, colonnes);
+        var entete = g.slice(0, fin + 1), corps = g.slice(fin + 1), pond = false;
         for (var k = 1; k < nb; k++) {
-            var enteteK = g.slice(0, fin + 1).some(function (row) { return estEntetePonderation(propre(row[k].t)); });
-            if (enteteK) { colonnes[k] = 'pond'; break; }
+            var titres = entete.map(function (row) { return propre(row[k].t); });
+            if (!pond && (titres.some(estEntetePonderation) || casesDePoints(corps, k))) { colonnes[k] = 'pond'; pond = true; }
+            else if (titres.some(estEnteteCommentaires) && corps.every(function (row) { return !propre(row[k].t); })) colonnes[k] = 'ignorer';
         }
+        if (proposerPartie(g, colonnes, fin)) { colonnes[0] = 'partie'; colonnes[1] = 'noms'; }
         return colonnes;
     }
 
-    /** En tête : la DERNIÈRE rangée de noms nomme les niveaux ; la 1re de codes, de plages les donne ; le reste est ignoré. */
+    /** « /4 », « / 18 », « sur 25 », « 4 pts », « 4 points » (des traits à remplir devant sont permis) ; jamais un nombre nu. */
+    var RE_POINTS_PREFIXE = /^(?:sur|\/)\s*\d+(?:[.,]\d+)?\s*(?:pts?\.?|points?)?$/i;
+    var RE_POINTS_SUFFIXE = /^\d+(?:[.,]\d+)?\s*(?:pts?\.?|points?)$/i;
+
+    function estPoints(t) {
+        var s = propre(t).replace(/^[_.…\s]+/, '');
+        return RE_POINTS_PREFIXE.test(s) || RE_POINTS_SUFFIXE.test(s);
+    }
+
+    /** Les cases non vides d'une colonne sont SURTOUT des points (plus de la moitié). */
+    function casesDePoints(corps, k) {
+        var pleines = corps.map(function (row) { return propre(row[k].t); }).filter(Boolean);
+        return pleines.length > 0 && pleines.filter(estPoints).length * 2 > pleines.length;
+    }
+
+    function estEnteteCommentaires(h) { return /^(commentaires?|remarques?)\b/i.test(h); }
+
+    /**
+     * « Partie » (étape 5) : la 1re colonne porte, SOUS l'en-tête, une case fusionnée sur
+     * plusieurs rangées, chacune de ces rangées a un texte dans la 2e colonne, et celle-ci
+     * peut porter les noms — son en-tête prolonge celui de la 1re (« CRITÈRES » sur deux
+     * colonnes), parle de critères, ou il n'y a aucune autre colonne de niveau (une grille en
+     * points). Sinon, la rangée sous une case fusionnée reste la suite d'un critère (lot 3a).
+     */
+    function proposerPartie(g, colonnes, fin) {
+        if (!g.length || g[0].length < 2 || colonnes[1] !== 'niveau') return false;
+        var corps = g.slice(fin + 1), couvertes = [];
+        corps.forEach(function (row, q) {
+            if (row[0].suite === 'v' && q > 0 && (couvertes.indexOf(q - 1) >= 0 || (corps[q - 1][0].fusion && !corps[q - 1][0].suite))) {
+                if (couvertes.indexOf(q - 1) < 0) couvertes.push(q - 1);
+                couvertes.push(q);
+            }
+        });
+        if (!couvertes.length || !couvertes.every(function (q) { return propre(corps[q][1].t); })) return false;
+        var entete1 = g.slice(0, fin + 1).map(function (row) { return row[1]; });
+        var autresNiveaux = colonnes.some(function (r, j) { return j > 1 && r === 'niveau'; });
+        return entete1.some(function (c) { return c.suite === 'h' || /crit/i.test(c.t); }) || !autresNiveaux;
+    }
+
+    /**
+     * En tête : la DERNIÈRE rangée de noms nomme les niveaux ; la 1re de codes, de plages les donne ;
+     * le reste est ignoré. Sans colonne de niveau (une grille en points, étape 5), tout est ignoré.
+     */
     function rolesEntete(g, colonnes, fin) {
+        if (colonnes.indexOf('niveau') < 0) return g.slice(0, fin + 1).map(function () { return 'ignorer'; });
         var natures = g.slice(0, fin + 1).map(function (row) { return natureEntete(row, colonnes); });
         var noms = natures.lastIndexOf('noms');
         if (noms < 0) noms = 0;
@@ -406,13 +470,13 @@
 
     /** Sous l'en-tête : bande + rangée de textes longs → nom et suite ; sous la case fusionnée d'un critère → suite ; sinon un critère. */
     function rolesCorps(g, colonnes, fin) {
-        var roles = [];
+        var roles = [], colNoms = Math.max(0, colonnes.indexOf('noms'));
         var role = function (i) { return i > fin ? roles[i - fin - 1] : ''; };
         for (var i = fin + 1; i < g.length; i++) {
             if (estBande(g[i], colonnes) && i + 1 < g.length && !estBande(g[i + 1], colonnes) && aDesTextesLongs(g[i + 1], colonnes)) {
                 roles.push('nomCritere', 'suite');
                 i++;
-            } else if (g[i][0] && g[i][0].suite === 'v' && ['critere', 'nomCritere', 'suite'].indexOf(role(i - 1)) >= 0) {
+            } else if (g[i][colNoms] && g[i][colNoms].suite === 'v' && ['critere', 'nomCritere', 'suite'].indexOf(role(i - 1)) >= 0) {
                 roles.push('suite');
             } else {
                 roles.push('critere');
@@ -442,9 +506,9 @@
     // 4. INTERPRÉTER : de la grille et de ses rôles au modèle d'une grille
     // ------------------------------------------------------------------
 
-    /** En-tête d'une colonne de pondération : pondération, points, pts, total, /N, %. */
+    /** En-tête d'une colonne de pondération ou de points : pondération, points, pts, note(s), total, /N, sur N, %. */
     function estEntetePonderation(h) {
-        return /pond/i.test(h) || /^(points?|pts|total)\b/i.test(h) || /^\/\s*\d+$/.test(h) || /^%$/.test(h);
+        return /pond/i.test(h) || /^(points?|pts|notes?|total)\b/i.test(h) || /^(\/|sur)\s*\d+$/i.test(h) || /^%$/.test(h);
     }
 
     function nombreTexte(s) { return String(s).replace(',', '.'); }
@@ -546,6 +610,8 @@
         var nom = propre(row[colNoms].t);
         if (!nom) return 'Ligne sans nom de critère';
         if (/^pond/i.test(nom)) return 'Ligne de pondération, à reporter sur les critères';
+        // Étape 5, Claude Code (17 oct.) : PROVISOIRE (étape 7). Un total compté comme critère doublerait la note.
+        if (/^total\b/i.test(nom)) return 'Ligne de total : l’application le calcule elle-même';
         return '';
     }
 
@@ -601,9 +667,11 @@
             else if (r === 'sousCriteres') colsSous.push(j);
             else if (r === 'description') colsDesc.push(j);
         });
-        var colNoms = K.indexOf('noms'), colPond = K.indexOf('pond');
+        var colNoms = K.indexOf('noms'), colPond = K.indexOf('pond'), colPartie = K.indexOf('partie');
+        // Étape 5 : sans colonne de niveau, la grille est EN POINTS — ce n'est plus un manque.
+        // Il ne manque quelque chose que s'il n'y a ni niveau ni points (`materielAssistant.calculs`).
+        var enPoints = colNoms >= 0 && !idxNiv.length;
         // Textes PROVISOIRES (Claude Code, 17 oct.), relus en 3b.
-        if (!idxNiv.length) manques.push('au moins une colonne « Un niveau », à l’étape « Ce que contient ton tableau »');
         if (colNoms < 0) manques.push('une colonne « Noms des critères », à l’étape « Ce que contient ton tableau »');
 
         var niveaux = niveauxDepuisRoles(g, roles, idxNiv);
@@ -615,15 +683,28 @@
             if (!c.ponderation) c.ponderation = ponderationDe(row, colPond);
         }
 
+        var partie = '';
         g.forEach(function (row, i) {
             var role = R[i];
             if (colNoms < 0) return;
+            // Étape 5 : la partie court sur les rangées que sa case fusionnée couvre ; une case vide
+            // non fusionnée, ou une rangée d'en-tête, l'arrête.
+            if (colPartie >= 0) {
+                var cp = row[colPartie];
+                if (['niveaux', 'codes', 'plages'].indexOf(role) >= 0) partie = '';
+                else if (propre(cp.t)) partie = propre(cp.t);
+                else if (cp.suite !== 'v') partie = '';
+            }
             if (role === 'critere' || role === 'nomCritere') {
                 var raison = raisonAClasser(row, colNoms);
                 if (raison) { aClasser.push({ texte: texteDeRangee(row), raison: raison }); courant = null; return; }
+                // Étape 5 : une case de critère sur plusieurs lignes — la 1re est le nom, les suivantes
+                // la description (toutes les grilles). Le nom de la partie le précède.
+                var lignesNom = L.lignes(row[colNoms].t);
                 // Les cases de niveau d'une bande ne vont nulle part : elles restent visibles à l'étape des rôles.
                 var c = {
-                    nom: propre(row[colNoms].t), ponderation: null, sousCriteres: [], description: '',
+                    nom: (partie ? partie + ' – ' : '') + lignesNom[0], ponderation: null, sousCriteres: [],
+                    description: lignesNom.slice(1).map(function (l) { return l.replace(RE_PUCE, '').trim(); }).filter(Boolean).join('\n'),
                     cases: idxNiv.map(function (k) { return role === 'critere' ? row[k].t : ''; })
                 };
                 completer(c, row);
@@ -654,11 +735,13 @@
                 description: paire(c.description, c.description ? 'repris' : 'vide')
             };
         });
-        if (modeles.length && modeles.every(function (c) { return !c.ponderation.valeur; })) L.partsEgales(modeles);
+        // Des points ne se complètent pas : des parts égales inventeraient le maximum d'un critère.
+        if (!enPoints && modeles.length && modeles.every(function (c) { return !c.ponderation.valeur; })) L.partsEgales(modeles);
 
         return {
             tableau: g,
             roles: roles,
+            enPoints: enPoints,
             fusionnees: g.some(function (row) { return row.some(function (c) { return c.fusion; }); }),
             manquesLecture: manques,
             nom: paire(nom, nom ? 'repris' : 'remplir'),
@@ -723,7 +806,8 @@
     L.charger = function (lu, source) {
         if (!lu) return { erreur: L.MESSAGE_SANS_TABLEAU };
         var m = L.interpreter(lu, source);
-        if (m.niveaux.length < 2 || m.criteres.length < 1) return { erreur: L.MESSAGE_INCOMPLET };
+        // Une grille en points (étape 5) n'a aucun niveau : elle n'en demande pas deux.
+        if ((!m.enPoints && m.niveaux.length < 2) || m.criteres.length < 1) return { erreur: L.MESSAGE_INCOMPLET };
         return { modele: m };
     };
 
@@ -740,7 +824,7 @@
             };
         });
         return {
-            source: 'main', lecture: null, critEnColonnes: false, tableau: null, roles: null,
+            source: 'main', lecture: null, critEnColonnes: false, tableau: null, roles: null, enPoints: false,
             fusionnees: false, manquesLecture: [],
             nom: paire('', 'remplir'), nature: null, niveaux: niveaux, criteres: criteres, aClasser: []
         };

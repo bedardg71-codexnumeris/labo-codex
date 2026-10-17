@@ -125,11 +125,14 @@ describe('lot 3a · R — les retours à la ligne d’une case survivent', () =>
         expect(lu.rangees[1][1].t).toBe('Un\ndeux\ntrois\nquatre\ncinq');
     });
 
-    it('R.b les noms de critère et de niveau restent sur une ligne ; les descripteurs gardent leurs retours', () => {
+    // Étape 5 du plan « prêt pour lundi » (17 oct.) : une case de critère sur plusieurs lignes donne
+    // son NOM (1re ligne) et sa DESCRIPTION (les suivantes) — au lot 3a, ses lignes se joignaient.
+    it('R.b les noms de niveau restent sur une ligne ; un nom de critère sur deux lignes : nom puis description ; les descripteurs gardent leurs retours', () => {
         const m = L.interpreter(L.lireHtml('<table><tr><td>C</td><td><p>Très</p><p>bien</p></td><td>Faible</td></tr>' +
             '<tr><td><p>Thèse</p><p>claire</p></td><td><p>Oui.</p><p>Nuancée.</p></td><td>Non.</td></tr></table>'), 'colle');
         expect(m.niveaux[0].titre.valeur).toBe('Très bien');
-        expect(m.criteres[0].nom.valeur).toBe('Thèse claire');
+        expect(m.criteres[0].nom.valeur).toBe('Thèse');
+        expect(m.criteres[0].description.valeur).toBe('claire');
         expect(m.criteres[0].cases[0].valeur).toBe('Oui.\nNuancée.');
     });
 
@@ -290,13 +293,15 @@ describe('lot 3a · M — chaque rôle, et le modèle qui en découle', () => {
         expect(col.criteres[0].description.valeur).toBe(attendu);
     });
 
-    it('M.h sans colonne « Un niveau » ni « Noms des critères » : deux manques nommés, aucun critère inventé', () => {
+    // Étape 5 (17 oct.) : sans colonne de niveau, la grille est EN POINTS — ce n'est plus un manque
+    // (materiel-etape5-points.test.js) ; sans colonne des noms, toujours.
+    it('M.h sans colonne « Un niveau » ni « Noms des critères » : le manque des noms nommé, aucun critère inventé', () => {
         let m = texte('C\tA\tB\nX\t1\t2');
         m = avec(avec(avec(m, 'colonnes', 1, 'ignorer'), 'colonnes', 2, 'ignorer'), 'colonnes', 0, 'ignorer');
         expect(m.manquesLecture).toEqual([
-            'au moins une colonne « Un niveau », à l’étape « Ce que contient ton tableau »',
             'une colonne « Noms des critères », à l’étape « Ce que contient ton tableau »'
         ]);
+        expect(m.enPoints).toBe(false);
         expect(m.criteres).toEqual([]);
         expect(m.aClasser).toEqual([]);
     });

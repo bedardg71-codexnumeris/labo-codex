@@ -2448,6 +2448,22 @@ span.header-icon {
     padding-right: 140px;
 }
 
+/* #1095 (17 oct. 2026) — sur l'iPad, en long (820 px) comme en large (1180 px), la grille fixe
+   de la rangée (`2fr 140px 90px 150px 3fr`, en style en ligne dans grilles.js) écrasait le champ
+   « Nom du critère » à 42-56 px. Jusqu'à 1180 px : le nom sur sa ligne, puis type, pondération
+   et SOLO côte à côte, puis le descripteur. `!important` : seul moyen de passer devant le style
+   en ligne sans toucher grilles.js. Au-dessus de 1180 px, rien ne change. */
+@media (max-width: 1180px) {
+    #listeCriteres .critere-rangee {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #listeCriteres .critere-rangee > .groupe-form:first-child,
+    #listeCriteres .critere-rangee > .groupe-form:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
 #listeCriteres .sous-critere-item {
     position: relative;
     padding-right: 52px;
@@ -28198,3 +28214,9 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .materiel-suite-nom { border: 0; margin: 0; padding: 0; min-width: 0; }
 .materiel-suite-nom legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
 .materiel-carte-niveau .materiel-champ[maxlength], .materiel-verif thead .materiel-champ[maxlength] { max-width: 120px; }
+
+/* Étape 5 du plan « prêt pour lundi » : une grille en points — le nom du critère au-dessus de ses
+   points (étape « Points ») ; à la Vérification, Critère | Description | Points. */
+.materiel-points-nom { font-weight: 600; overflow-wrap: anywhere; }
+.materiel-verif-points .materiel-col-pond { width: 120px; min-width: 120px; }
+.materiel-verif-points .materiel-col-critere { width: 280px; min-width: 280px; }
