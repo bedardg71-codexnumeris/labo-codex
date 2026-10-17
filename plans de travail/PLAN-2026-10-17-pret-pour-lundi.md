@@ -35,7 +35,7 @@ La fusion de la vérification sur GitHub (lundi après-midi, après la rencontre
 - [x] 3 — en ligne le 17 à 11 h 08, sans release (1.202.0), vérification complète sans rougeur
 - [x] 4 — mesure écrite le 17 à 9 h 43 : `MESURE-2026-10-17-grilles-en-points.md` (faisable sans rien inventer)
 - [x] 5 — `51a7be2b`, relu et accepté à 12 h 05, non poussé (avec #1095, la rangée du critère sur l'iPad)
-- [ ] 5b — `d75d8f09`, relu à 14 h 02 : deux corrections à commiter (`VERDICT-RELECTURE-2026-10-17-apporter-mon-materiel-6-et-5b.md`), plus les icônes « i » hors lot
+- [x] 5b — `d75d8f09`, relu à 14 h 02 ; corrections `0bacffb7`, `67cbabb8` (les icônes « i »), `568c927b` (jeton), relues ; Vitest complet vert mesuré par Cowork sur `a26fb3dd` à 14 h 41 (771 fichiers, 9 129 essais) ; non poussé
 - [x] 6 — `1c1868e0`, relu et accepté à 14 h 02, non poussé
-- [ ] 7 — page « Tes textes pour lundi » publiée par Cowork à 14 h 27 (89 textes provisoires, dont 12 à trancher, et l'entrée des Nouvelles) ; Grégoire répond, Cowork relit ses réponses et écrit la consigne
+- [ ] 7 — page « Tes textes pour lundi » publiée par Cowork à 14 h 27 ; Grégoire a répondu aux 89 textes à 15 h 00 (75 tels quels, 14 changent, dont l'entrée des Nouvelles) ; consigne `CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-7-textes.md` écrite à 15 h 02
 - [ ] 8

@@ -351,7 +351,7 @@ describe('lot 3a · C — les codes de niveau se corrigent', () => {
         expect(manques(avecCodes(['E', 'e', 'A', 'I']))).toEqual(['un code différent pour chaque niveau (deux niveaux ont le même code : « e »)']);
         expect(manques(avecCodes(['E', 'e', 'E', 'I']))).toEqual(['un code différent pour chaque niveau (des niveaux ont le même code : « e »)']);
         expect(manques(avecCodes(['E', 'e', 'A', 'a']))).toEqual(['un code différent pour chaque niveau (des niveaux ont le même code : « e », « a »)']);
-        expect(manques(avecCodes(['EXCEL', 'S', 'A_1', 'I']))).toEqual(['un code de 1 à 4 caractères, sans souligné, pour 2 niveaux']);
+        expect(manques(avecCodes(['EXCEL', 'S', 'A_1', 'I']))).toEqual(['un code de 1 à 4 caractères, sans « _ », pour 2 niveaux']);
     });
 
     it('C.b complétés en repli seulement : un code repris ou saisi n’est jamais recalculé, les complétés l’évitent', () => {

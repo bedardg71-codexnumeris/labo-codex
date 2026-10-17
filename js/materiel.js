@@ -283,13 +283,12 @@
         // Grégoire) ; le prototype renvoyait sa saisie à « Échelles de performance ».
         valeurs: 'Ces niveaux, leurs plages et leurs notes retenues, l’application les appelle une échelle de performance. Tu la retrouveras dans « Échelles de performance ».',
         pond: 'Le poids de chaque critère, l’application l’appelle la pondération. Il fait partie de ta grille de critères.',
-        // Lot 3a, Claude Code (17 oct.) : PROVISOIRE, relu en 3b.
-        // Étape 5, Claude Code (17 oct.) : PROVISOIRE (étape 7).
-        points: 'Les points de chaque critère font partie de ta grille de critères : chaque copie se notera sur ce nombre, et la note se calcule par les points seuls.',
-        roles: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères et son échelle de performance : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé.',
-        // Étape 5b, Claude Code (17 oct.) : ce qui vaut pour une grille en points. PROVISOIRES (étape 7).
-        rolesPoints: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, leurs descriptions et leurs sous-critères. Rien n’est encore créé.',
-        rolesPointsNiveaux: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, ce qui est attendu à chaque niveau, leurs descriptions et leurs sous-critères. Aucune échelle n’est créée. Rien n’est encore créé.'
+        // points, roles, rolesPoints (grille en points sans niveaux), rolesPointsNiveaux : validés
+        // par Grégoire le 17 oct. (15 h 00).
+        points: 'Les points de chaque critère font partie de ta grille de critères : à l’évaluation, tu noteras chaque critère sur ce nombre, et la note de la copie se calculera à partir des points seuls.',
+        roles: 'L’application construira ta grille de critères et son échelle de performance à partir de ce que tu décris ici : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé.',
+        rolesPoints: 'L’application construira ta grille de critères, notée en points, à partir de ce que tu indiques ici : les critères, leurs points, leurs descriptions et leurs sous-critères. Rien n’est encore créé.',
+        rolesPointsNiveaux: 'L’application construira ta grille de critères, notée en points, à partir de ce que tu établis ici : les critères, leurs points, ce qui est attendu à chaque niveau, leurs descriptions et leurs sous-critères. Elle ne créera pas d’échelle : la note se calculera à partir des points. Rien n’est encore créé.'
     };
 
     // Lot 3a, Claude Code (17 oct.) : PROVISOIRE, relu en 3b. Remplace le bandeau du lot 1 (retiré au lot 2 avec l'aperçu seul).
@@ -355,8 +354,8 @@
                   return pilule('materiel.choisirSuiteNom', o.id, o.id === m.roles.suiteNom, o.libelle);
               }).join('') + '</div></fieldset>'
             : '';
-        return titreEtape('Dis à l’application ce qu’est chaque partie de ton tableau') +
-            '<p>Voici ton tableau, tel que l’application l’a lu. Le menu au début de chaque rangée et en tête de chaque colonne dit ce qu’elle en fait. S’il se trompe, change-le : ta grille se relit aussitôt, dans l’aperçu plus bas.</p>' +
+        return titreEtape('Vérifie ce que l’application a lu dans ton tableau') +
+            '<p>Voici ton tableau, tel que l’application l’a lu. Le menu au début de chaque rangée, et celui en tête de chaque colonne, disent ce qu’elle en a compris. Si elle s’est trompée, change le menu : l’aperçu plus bas se met à jour aussitôt.</p>' +
             (m.roles.propose ? mention('propose', 'Proposé par l’application : à vérifier') : '') +
             '<div class="materiel-apercu-cadre" role="region" aria-label="Ton tableau, tel que l’application l’a lu" tabindex="0">' +
             '<table class="materiel-apercu materiel-roles"><caption class="u-lecteur-ecran">' +
@@ -403,8 +402,8 @@
 
     function etapeValeurs(m) {
         return titreEtape('Quelle plage de notes correspond à chaque niveau ?') +
-            // Texte du prototype, complété le 17 oct. (Claude Code) pour la note retenue.
-            '<p>Pour chaque niveau, indique de quelle note à quelle note il s’étend, en pourcentage, et la note que l’application retiendra pour une copie classée à ce niveau. L’application n’en propose aucune : c’est ta pratique.</p>' +
+            // Validé par Grégoire le 17 oct. (15 h 00).
+            '<p>Pour chaque niveau, indique de quelle note à quelle note il s’étend, en pourcentage, et la note que l’application retiendra pour une copie classée à ce niveau.</p>' +
             '<div class="materiel-cartes-niveaux">' + m.niveaux.map(function (n, j) {
                 return '<div class="materiel-carte-niveau"><label for="materiel-q-titre-' + j + '">Niveau</label>' +
                     champ('materiel-q-titre-' + j, 'niveau.' + j + '.titre', n.titre) +

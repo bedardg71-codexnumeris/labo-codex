@@ -664,18 +664,20 @@ describe('lot 4 · C.H — second coup d\'œil : paliers numérotés, sous-crit�
         expect(source('js/evaluation-calcul.js')).toContain('sousCriteres.find(s => s.code === code)');
     });
 
-    it('H.g la rangée du critère dit « Descripteur », plus « Description » — la clé du champ ne bouge pas', () => {
+    // D1 (Grégoire, 17 oct. 2026) : le champ redevient « Description » — les vrais descripteurs, par
+    // niveau, sont dans le bloc « Ce qui est attendu à chaque niveau » du même écran.
+    it('H.g la rangée du critère dit « Description », plus « Descripteur » — la clé du champ ne bouge pas', () => {
         const a = monter([GRILLE]);
         a.win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const edition = a.liste().innerHTML;
-        expect(edition).toContain('>Descripteur</label>');
-        expect(edition).not.toContain('>Description</label>');
+        expect(edition).toContain('>Description</label>');
+        expect(edition).not.toContain('>Descripteur</label>');
         expect(edition).toContain('data-champ="description"');
         const c = monter([]);
         c.win.tempCriteres = [{ id: 'T', nom: 'x', type: 'holistique', ponderation: 0 }];
         c.win.afficherCriteresTemp();
-        expect(c.liste().innerHTML).toContain('>Descripteur</label>');
-        expect(c.liste().innerHTML).not.toContain('>Description</label>');
+        expect(c.liste().innerHTML).toContain('>Description</label>');
+        expect(c.liste().innerHTML).not.toContain('>Descripteur</label>');
         expect(c.liste().innerHTML).toContain('data-champ="description"');
     });
 });

@@ -480,8 +480,8 @@ describe('étape 5b · U — l’interface', () => {
 
     it('U.d « Dans l’application » à l’étape des rôles dit ce qui vaut pour la grille lue', () => {
         const mot = (m) => rendu(A.preparer(m), 'roles').querySelector('.materiel-mot-app span').textContent;
-        expect(mot(html(F.f5Html()))).toBe('Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, ce qui est attendu à chaque niveau, leurs descriptions et leurs sous-critères. Aucune échelle n’est créée. Rien n’est encore créé.');
-        expect(mot(html(F.f8Html()))).toBe('Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, leurs descriptions et leurs sous-critères. Rien n’est encore créé.');
+        expect(mot(html(F.f5Html()))).toBe('L’application construira ta grille de critères, notée en points, à partir de ce que tu établis ici : les critères, leurs points, ce qui est attendu à chaque niveau, leurs descriptions et leurs sous-critères. Elle ne créera pas d’échelle : la note se calculera à partir des points. Rien n’est encore créé.');
+        expect(mot(html(F.f8Html()))).toBe('L’application construira ta grille de critères, notée en points, à partir de ce que tu indiques ici : les critères, leurs points, leurs descriptions et leurs sous-critères. Rien n’est encore créé.');
         expect(mot(L.interpreter(L.lireHtml(L.exempleHtml()), 'exemple'))).toContain('et son échelle de performance');
     });
 

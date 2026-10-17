@@ -75,7 +75,7 @@ test('lot 3a · la grille fictive collée mène à quatre critères codés I, D,
     await expect(page.locator('.materiel-etapes-nav button').nth(1)).toHaveText('2. Ce que contient ton tableau');
     await expect(page.locator('.materiel-question .alerte-attention')).toContainText('cases fusionnées');
     await page.locator('[data-action="materiel.suivant"]').click();
-    await expect(page.locator('#materiel-titre-etape')).toHaveText('Dis à l’application ce qu’est chaque partie de ton tableau');
+    await expect(page.locator('#materiel-titre-etape')).toHaveText('Vérifie ce que l’application a lu dans ton tableau');
     await expect(page.locator('.materiel-question')).toContainText('Proposé par l’application : à vérifier');
     await expect(page.locator('#materiel-role-r-1')).toHaveValue('niveaux');
     await expect(page.locator('#materiel-role-r-3')).toHaveValue('suite');
