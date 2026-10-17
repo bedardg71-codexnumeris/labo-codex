@@ -69,3 +69,16 @@ Révisé le 16 oct. à 14 h 15, d'après le prototype validé par Grégoire (`PR
 ## Ce qui reste hors de cette version
 
 L'accueil qui montre une rétroaction de la démo, le lexique du premier contact, évaluer sans horaire, la copie annotée dans la démo, le choix d'un ou deux chemins : dans l'ébauche de plan de Cowork, après le 19 oct.
+
+## Posture arrêtée le 17 octobre 2026 (Grégoire, 9 h 27 ; noté par Cowork à 9 h 28)
+
+Point de départ : Grégoire a essayé une de ses grilles de l'hiver 1995 (des points par critère, une colonne de commentaires, aucun niveau ni descripteur), forme encore employée par des enseignant·es en 2026 ; il cherche la diversité des mises en page dans ses propres grilles, de 1995 à aujourd'hui. Constat : tout ce qui est construit depuis le 16 suppose une échelle de niveaux.
+
+1. **Première étape : accepter la grille telle quelle**, même sans niveaux, et la rendre utilisable. Aucun refus, aucune transformation à l'entrée.
+2. **Seconde étape : proposer une bonification**, au conditionnel (principe du 15 oct. : l'application n'est pas prescriptive), **sans sous-entendre que le travail de l'enseignant·e est incomplet, insatisfaisant ou inapproprié**. Son but : une structure qui permette ensuite de mieux suivre les apprentissages.
+3. Ce que « Apporter mon matériel » devient : la porte d'entrée du soutien à l'enseignement, pas une simple transcription.
+
+4. **Nom de la seconde étape, validé par Grégoire (9 h 30)** : « Aller plus loin avec ta grille », avec, provisoirement : « Labo Codex pourrait t'aider à suivre la progression de tes étudiant·es à partir de ta grille, par exemple en décrivant ce qu'on attend à chaque niveau. » Motif : nommer ce que la grille permettra (le suivi), pas ce qui lui manquerait ; « amélioration » et « bonification » écartés.
+5. **L'enjeu, dit par Grégoire (9 h 30)** : l'adoption. L'application permet peu, pour l'instant, la transition entre l'état actuel du travail de l'utilisateur et ce que Labo Codex produit ; ce serait peut-être une des raisons de sa faible adoption (hypothèse de Grégoire, non mesurée). Le chantier porte sur l'appropriation : passer d'une méthode de travail à une autre. Réflexion née de la pratique enseignante concrète, pas d'une théorie.
+
+À trancher avant de coder : comment une grille sans niveaux devient utilisable (mesure du modèle de l'application à faire) ; la forme de la seconde étape ; ce qui en entre avant lundi.
