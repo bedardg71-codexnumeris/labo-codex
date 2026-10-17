@@ -7,7 +7,15 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, DÉBUT D'APRÈS-MIDI : **ÉTAPE 5 (GRILLES EN POINTS) ET #1095 COMMITÉS SUR `main` (`51a7be2b`), NON POUSSÉS ; RELECTURE DE COWORK**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, VERS 13 H : **ÉTAPE 6 (« ALLER PLUS LOIN ») COMMITÉE SUR `main` (`1c1868e0`), NON POUSSÉE ; ÉTAPE 5b EN COURS**
+
+**En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : 3b1, 5 (relue, acceptée), puis l'étape 6 (`1c1868e0`) et sa demande.
+Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-6-aller-plus-loin.md`. **Vitest** : 9 085/9 085. Verdict Playwright : périmé (juge `4a972d13`).
+**Suite** : 5b (`CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-5b-reconnaissance.md`) sans attendre la relecture de 6 ; puis 7, 8 ; push au signal de Grégoire.
+
+---
+
+## (relais précédent) 17 OCT. 2026, DÉBUT D'APRÈS-MIDI : **ÉTAPE 5 (GRILLES EN POINTS) ET #1095 COMMITÉS SUR `main` (`51a7be2b`), NON POUSSÉS ; RELECTURE DE COWORK**
 
 **En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : lot 3b1 (`96812253`) et sa demande, puis l'étape 5 (`51a7be2b`) et sa demande.
 Demande : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-5-points.md`. **Vitest** : 9 077/9 077. Verdict Playwright : périmé (juge `4a972d13`).
