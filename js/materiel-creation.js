@@ -20,8 +20,8 @@
  * le message le dit et nomme ce qui pourrait rester : jamais un échec muet.
  *
  * Refus clairs, avant toute écriture : aucun trimestre actif (`cle()` retombe alors sur la clé
- * nue, comme le savent les semeurs de départ, #358), ou un trimestre archivé (lecture seule).
- * Textes de Claude Code, 17 oct. 2026, PROVISOIRES (relus au lot 3).
+ * nue, comme le savent les semeurs de départ, #358), ou un trimestre clos (lecture seule).
+ * Textes de Claude Code, 17 oct. 2026, PROVISOIRES (relus au lot 3) ; celui du trimestre clos est de Cowork.
  */
 (function () {
     'use strict';
@@ -30,7 +30,9 @@
 
     C.MESSAGES = {
         sansTrimestre: 'Aucun trimestre n’est ouvert : la grille n’a nulle part où être rangée. Ouvre ton trimestre, puis reviens la créer ; ce que tu as saisi reste ici tant que la page reste ouverte.',
-        archive: 'Le trimestre ouvert est archivé, en lecture seule : rien ne peut y être créé. Ouvre ton trimestre en cours, puis reviens créer ta grille.',
+        // « clos » et non « archivé » (relecture de Cowork, 17 oct.) : `estTrimestreArchive()` lit un trimestre
+        // CLOS, gelé en lecture seule ; « archivé » veut dire déposé hors du navigateur (vocabulaire de Grégoire).
+        clos: 'Le trimestre ouvert est clos : il se consulte sans se modifier. Ouvre un trimestre en cours, puis reviens créer ta grille.',
         echec: 'La création n’a pas abouti, et rien n’a été créé. Tu pourrais réessayer.',
         echecPartiel: 'La création n’a pas abouti, et l’application n’a pas pu retirer tout ce qu’elle venait d’écrire. Il pourrait rester : '
     };
@@ -99,7 +101,7 @@
      */
     C.creer = async function (m) {
         if (typeof window.cle !== 'function' || window.cle('grillesTemplates') === 'grillesTemplates') return { erreur: C.MESSAGES.sansTrimestre };
-        if (typeof window.estTrimestreArchive === 'function' && window.estTrimestreArchive()) return { erreur: C.MESSAGES.archive };
+        if (typeof window.estTrimestreArchive === 'function' && window.estTrimestreArchive()) return { erreur: C.MESSAGES.clos };
         // Les clés sont figées une fois : les trois objets vont dans le MÊME trimestre.
         var cles = { echelles: window.cle('echellesTemplates'), grilles: window.cle('grillesTemplates') };
         var o = window.materielAssistant.construire(m, contexte(cles));
