@@ -7,7 +7,11 @@
 - En ligne : `4a972d13` (1.202.0). `main` local : `c67a3723`, rien de poussé.
 - Étape 6 relue et acceptée. Étape 5b relue : deux corrections. Une correction hors lot (les icônes « i »).
 
-## Le mandat
+## ↻ Ajout de Cowork, 14 h 19
+
+C1 à C3 acceptées. **Un rouge au Vitest complet de l'état commité** : le jeton d'`accompagnement.js`. Fais **C4** (fin du verdict), un commit, Vitest complet **après** le commit, une ligne dans le verdict. Puis arrête-toi.
+
+## Le mandat (fait)
 
 Applique `plans de travail/VERDICT-RELECTURE-2026-10-17-apporter-mon-materiel-6-et-5b.md` : C1 et C2 (un commit), C3 (un commit), Vitest complet, puis remplis sa section « Suite donnée ».
 
