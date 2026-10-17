@@ -170,11 +170,12 @@ describe('étape 5 · G — une grille de la forme de 1995 se lit juste sans rie
 describe('étape 5 · L — la lecture', () => {
     const colonnes = (t) => texte(t).roles.colonnes;
 
-    it('L.a une case de critère sur plusieurs lignes : la 1re est le nom, les suivantes la description, sans puces', () => {
+    // Étape 5b (point 6) : les lignes À PUCE de la case de nom sont devenues des sous-critères ; les autres restent la description.
+    it('L.a une case de critère sur plusieurs lignes : la 1re est le nom, les suivantes la description (sans puce) ou des sous-critères (à puce)', () => {
         const m = L.interpreter(L.lireHtml('<table><tr><td>C</td><td>Points</td></tr>' +
-            '<tr><td><p>Style</p><p>• Phrases variées.</p><p>• Vocabulaire précis.</p></td><td>/4</td></tr>' +
+            '<tr><td><p>Style</p><p>Phrases variées.</p><p>• Vocabulaire précis.</p></td><td>/4</td></tr>' +
             '<tr><td>Langue</td><td>/6</td></tr></table>'), 'colle');
-        expect(m.criteres.map(c => [c.nom.valeur, c.description.valeur])).toEqual([['Style', 'Phrases variées.\nVocabulaire précis.'], ['Langue', '']]);
+        expect(m.criteres.map(c => [c.nom.valeur, c.description.valeur, c.sousCriteres])).toEqual([['Style', 'Phrases variées.', ['Vocabulaire précis.']], ['Langue', '', []]]);
         expect(m.criteres[1].description.etat).toBe('vide');
     });
 
@@ -270,11 +271,13 @@ describe('étape 5 · A — l’assistant d’une grille en points', () => {
         expect(A.NOMS_ETAPES.points).toBe('Points');
     });
 
-    it('A.b des points entiers de 1 à 100 ; un manque nommé, au singulier ou au pluriel', () => {
+    // Étape 5b (point 1) : « / 0 » est accepté — la borne basse passe de 1 à 0.
+    it('A.b des points entiers de 0 à 100 ; un manque nommé, au singulier ou au pluriel', () => {
         expect(manques(avecPoints(['5', '10', '20', '15']))).toEqual([]);
         expect(manques(avecPoints(['5', '', '20', '15']))).toEqual(['les points d’un critère']);
         expect(manques(avecPoints(['5', '', '', '15']))).toEqual(['les points de 2 critères']);
-        expect(manques(avecPoints(['0', '2,5', '101', '100']))).toEqual(['des points en nombre entier de 1 à 100 pour 3 critères']);
+        expect(manques(avecPoints(['0', '2,5', '101', '100']))).toEqual(['des points en nombre entier de 0 à 100 pour 2 critères']);
+        expect(manques(avecPoints(['-1', '0', '4', '100']))).toEqual(['des points en nombre entier de 0 à 100 pour un critère']);
     });
 
     it('A.c le total est libre : ni avertissement ni « Ramener à 100 % » ; pas de manque de niveau', () => {

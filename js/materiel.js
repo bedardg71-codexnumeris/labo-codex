@@ -124,14 +124,18 @@
         return mention('complete', m.pondRamenee ? 'complété : ramené à 100 %' : 'complété : parts égales');
     }
 
+    function casesHtml(c) {
+        return c.cases.map(function (d) {
+            return '<td>' + (texte(d) ? '<span class="materiel-case">' + e(texte(d)) + '</span>'
+                : '<span class="materiel-case-vide">(case vide)</span>') + '</td>';
+        }).join('');
+    }
+
     function rangeeCritere(m, c, surlignePond) {
         var pond = texte(c.ponderation)
             ? valeur(c.ponderation, texte(c.ponderation).replace('.', ',') + ' %')
             : valeur({ etat: 'remplir' }, 'à remplir');
-        var cases = c.cases.map(function (d) {
-            return '<td>' + (texte(d) ? '<span class="materiel-case">' + e(texte(d)) + '</span>'
-                : '<span class="materiel-case-vide">(case vide)</span>') + '</td>';
-        }).join('');
+        var cases = casesHtml(c);
         return '<tr><th scope="row" class="materiel-col-critere">' + valeur(c.nom, texte(c.nom) || 'Critère sans nom') + detailsCritereHtml(c) + '</th>' +
             '<td class="materiel-col-pond' + (surlignePond ? ' materiel-surligne' : '') + '">' + pond + mentionPonderation(m, c) + '</td>' +
             cases + '</tr>';
@@ -169,18 +173,24 @@
         return texte(c.ponderation) ? valeur(c.ponderation, 'sur ' + texte(c.ponderation).replace('.', ',')) : valeur({ etat: 'remplir' }, 'à remplir');
     }
 
-    /** Étape 5 : l'aperçu d'une grille en points, Critère | Points ; `surligne` encadre les points. */
+    /**
+     * Étape 5 : l'aperçu d'une grille en points, Critère | Points ; `surligne` encadre les points.
+     * Étape 5b (point 4) : des niveaux écrits avec leurs points suivent, par leur seul nom.
+     */
     function apercuPointsHtml(m, surligne) {
         return '<div class="materiel-apercu-entete"><h3 id="materiel-titre-apercu">Aperçu de ta grille</h3>' +
             legendeHtml('', 'Complété par l’application') + '</div>' +
             '<div class="materiel-apercu-cadre" role="region" aria-label="Aperçu de ta grille" tabindex="0">' +
             '<table class="materiel-apercu"><caption class="u-lecteur-ecran">' +
-            e(pluriel(m.criteres.length, 'critère', 'critères') + ', en points') +
+            e(pluriel(m.criteres.length, 'critère', 'critères') + ', en points' + (m.niveaux.length ? ', ' + pluriel(m.niveaux.length, 'niveau', 'niveaux') : '')) +
             '</caption><thead><tr><th scope="col" class="materiel-col-critere">Critère</th>' +
             '<th scope="col" class="materiel-col-pond' + (surligne ? ' materiel-surligne' : '') + '">Points</th>' +
+            m.niveaux.map(function (n) {
+                return '<th scope="col" class="materiel-col-niveau"><span class="materiel-niveau-titre">' + valeur(n.titre, texte(n.titre) || 'Niveau sans nom') + '</span></th>';
+            }).join('') +
             '</tr></thead><tbody>' + m.criteres.map(function (c) {
                 return '<tr><th scope="row" class="materiel-col-critere">' + valeur(c.nom, texte(c.nom) || 'Critère sans nom') + detailsCritereHtml(c) + '</th>' +
-                    '<td class="materiel-col-pond' + (surligne ? ' materiel-surligne' : '') + '">' + points(c) + '</td></tr>';
+                    '<td class="materiel-col-pond' + (surligne ? ' materiel-surligne' : '') + '">' + points(c) + '</td>' + casesHtml(c) + '</tr>';
             }).join('') + '</tbody></table></div>';
     }
 
@@ -232,8 +242,10 @@
     function creeListeHtml(m) {
         if (A().estEnPoints(m)) {
             var tot = calculs(m).total;
+            // Étape 5b : avec des niveaux, ce qui est attendu à chacun. Texte PROVISOIRE (étape 7).
             return '<h3>Ce qui sera créé</h3><ul><li>' +
-                e('Une grille en points « ' + (texte(m.nom) || 'sans nom') + ' » (' + pluriel(m.criteres.length, 'critère', 'critères') + '), sur ' + String(tot).replace('.', ',') + '.') +
+                e('Une grille en points « ' + (texte(m.nom) || 'sans nom') + ' » (' + pluriel(m.criteres.length, 'critère', 'critères') + '), sur ' + String(tot).replace('.', ',') +
+                    (aDesTextes(m) ? ', avec ce qui est attendu à chaque niveau.' : '.')) +
                 '</li></ul><p class="text-muted">' + e('Aucune échelle n’est créée : la note se calcule par les points seuls. Tu retrouveras ta grille dans Grilles de critères, où tout reste modifiable.') + '</p>';
         }
         var retro = A().estRetro(m);
@@ -274,14 +286,19 @@
         // Lot 3a, Claude Code (17 oct.) : PROVISOIRE, relu en 3b.
         // Étape 5, Claude Code (17 oct.) : PROVISOIRE (étape 7).
         points: 'Les points de chaque critère font partie de ta grille de critères : chaque copie se notera sur ce nombre, et la note se calcule par les points seuls.',
-        roles: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères et son échelle de performance : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé.'
+        roles: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères et son échelle de performance : les niveaux, les critères, leurs descripteurs et leurs sous-critères. Rien n’est encore créé.',
+        // Étape 5b, Claude Code (17 oct.) : ce qui vaut pour une grille en points. PROVISOIRES (étape 7).
+        rolesPoints: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, leurs descriptions et leurs sous-critères. Rien n’est encore créé.',
+        rolesPointsNiveaux: 'Ce que tu règles ici, l’application s’en sert pour construire ta grille de critères, notée en points : les critères, leurs points, ce qui est attendu à chaque niveau, leurs descriptions et leurs sous-critères. Aucune échelle n’est créée. Rien n’est encore créé.'
     };
 
     // Lot 3a, Claude Code (17 oct.) : PROVISOIRE, relu en 3b. Remplace le bandeau du lot 1 (retiré au lot 2 avec l'aperçu seul).
     var MOT_FUSION = 'Ton tableau contient des cases fusionnées. L’étape « Ce que contient ton tableau » montre ce que l’application en a lu : tu pourras y corriger sa lecture.';
 
     function motApp(m, id) {
-        var t = id === 'nature' ? (A().estRetro(m) ? MOTS_APP.natureRetro : MOTS_APP.natureDescr) : MOTS_APP[id];
+        var t = id === 'nature' ? (A().estRetro(m) ? MOTS_APP.natureRetro : MOTS_APP.natureDescr)
+            : id === 'roles' && A().estEnPoints(m) ? (m.niveaux.length ? MOTS_APP.rolesPointsNiveaux : MOTS_APP.rolesPoints)
+            : MOTS_APP[id];
         if (!t) return '';
         return '<div class="materiel-mot-app"><strong>Dans l’application</strong><span>' + e(t) + '</span></div>';
     }
@@ -407,10 +424,10 @@
             }).join('') + '</div>';
     }
 
-    /** Étape 5 : les points de chaque critère, « sur N », un entier de 1 à 100. Textes PROVISOIRES (étape 7). */
+    /** Étape 5 : les points de chaque critère, « sur N », un entier de 0 à 100 (5b : « / 0 » accepté). Textes PROVISOIRES (étape 7). */
     function etapePoints(m) {
         return titreEtape('Sur combien de points chaque critère est-il noté ?') +
-            '<p>' + e('Ton tableau ne donnait pas les points de chaque critère. Indique-les : un nombre entier de 1 à 100 par critère. Le total est libre.') + '</p>' +
+            '<p>' + e('Ton tableau ne donnait pas les points de chaque critère. Indique-les : un nombre entier de 0 à 100 par critère. Le total est libre.') + '</p>' +
             '<div class="materiel-cartes-niveaux">' + m.criteres.map(function (c, i) {
                 return '<div class="materiel-carte-niveau"><span class="materiel-points-nom">' + e(texte(c.nom) || 'Critère sans nom') + '</span>' +
                     '<label for="materiel-q-points-' + i + '"><span class="u-lecteur-ecran">' + e('Points de « ' + (texte(c.nom) || 'critère sans nom') + ' », ') + '</span>sur</label>' +
@@ -514,8 +531,8 @@
             '<span class="text-muted">Il apparaîtra sur le document que reçoivent tes étudiant·es.</span>' + men + '</div>';
     }
 
-    /** Étape 5 : une rangée de la Vérification d'une grille en points — nom, description, points. */
-    function rangeeVerifPoints(c, i) {
+    /** Étape 5 : une rangée de la Vérification d'une grille en points — nom, description, points ; 5b : ses descripteurs. */
+    function rangeeVerifPoints(m, c, i) {
         var sous = c.sousCriteres || [];
         return '<tr><th scope="row" class="materiel-col-critere">' +
             '<label class="u-lecteur-ecran" for="materiel-v-nom-' + i + '">Nom du critère</label>' +
@@ -525,7 +542,18 @@
             '<td><textarea class="controle-form materiel-champ" rows="3" aria-label="' + e('Description : ' + (texte(c.nom) || 'critère')) + '"' +
             ' placeholder="Description (facultatif)" data-on-input="materiel.saisir" data-param="critere.' + i + '.description">' + e(texte(c.description)) + '</textarea></td>' +
             '<td class="materiel-col-pond"><label for="materiel-v-pond-' + i + '"><span class="u-lecteur-ecran">Points du critère, </span>sur</label>' +
-            champ('materiel-v-pond-' + i, 'critere.' + i + '.ponderation', c.ponderation, ' inputmode="numeric" placeholder="ex. 4"') + '</td></tr>';
+            champ('materiel-v-pond-' + i, 'critere.' + i + '.ponderation', c.ponderation, ' inputmode="numeric" placeholder="ex. 4"') + '</td>' +
+            c.cases.map(function (d, j) {
+                var lab = 'Descripteur : ' + (texte(c.nom) || 'critère') + ', niveau ' + (m.niveaux[j] ? texte(m.niveaux[j].titre) : '');
+                return '<td><textarea class="controle-form materiel-champ" rows="4" aria-label="' + e(lab) + '" placeholder="Descripteur (facultatif)"' +
+                    ' data-on-input="materiel.saisir" data-param="case.' + i + '.' + j + '">' + e(texte(d)) + '</textarea></td>';
+            }).join('') + '</tr>';
+    }
+
+    /** Étape 5b : l'en-tête d'un niveau d'une grille en points — son nom seul (ni plage, ni note, ni code). */
+    function enteteVerifNiveauPoints(n, j) {
+        return '<th scope="col" class="materiel-col-niveau"><label for="materiel-v-titre-' + j + '">Niveau</label>' +
+            champ('materiel-v-titre-' + j, 'niveau.' + j + '.titre', n.titre) + (n.titre.etat === 'remplir' ? mention('remplir', 'à remplir') : '') + '</th>';
     }
 
     function verificationPointsHtml(m) {
@@ -534,7 +562,8 @@
             nomGrilleHtml(m) + rappelsHtml(m) + legendeHtml('Comment lire le tableau :', 'Complété par l’application : à vérifier') +
             '<div class="materiel-apercu-cadre" role="region" aria-label="Ta grille" tabindex="0"><table class="materiel-apercu materiel-verif materiel-verif-points">' +
             '<thead><tr><th scope="col" class="materiel-col-critere">Critère</th><th scope="col">Description</th><th scope="col" class="materiel-col-pond">Points</th>' +
-            '</tr></thead><tbody>' + m.criteres.map(rangeeVerifPoints).join('') + '</tbody></table></div>' +
+            m.niveaux.map(enteteVerifNiveauPoints).join('') +
+            '</tr></thead><tbody>' + m.criteres.map(function (c, i) { return rangeeVerifPoints(m, c, i); }).join('') + '</tbody></table></div>' +
             '<div class="materiel-actions"><button type="button" class="btn btn-secondaire" data-action="materiel.ajouterCritere">Ajouter un critère</button></div>' +
             '<div id="materiel-derives" class="materiel-derives">' + derivesHtml(m, 'final') + '</div>' +
             '<div class="materiel-creation"><div id="materiel-cree" class="materiel-cree-liste">' + creeListeHtml(m) + '</div>' +
@@ -622,7 +651,8 @@
     };
 
     function plusLoinHtml(r) {
-        var propre = r.enPoints ? PLUS_LOIN.enPoints : (r.retro ? '' : PLUS_LOIN.aNiveaux);
+        // Étape 5b : une grille en points qui décrit déjà ses niveaux a, elle aussi, la phrase commune seule.
+        var propre = r.enPoints ? (r.descr ? '' : PLUS_LOIN.enPoints) : (r.retro ? '' : PLUS_LOIN.aNiveaux);
         return '<aside class="materiel-plus-loin" aria-labelledby="materiel-titre-plus-loin">' +
             '<h3 id="materiel-titre-plus-loin">' + e(PLUS_LOIN.titre) + '</h3>' +
             (propre ? '<p>' + e(propre) + '</p>' : '') + '<p>' + e(PLUS_LOIN.commune) + '</p>' +
