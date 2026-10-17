@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, 7 h 55 : **LOT 1 D'« APPORTER MON MATÉRIEL » EN LIGNE (1.202.0, SANS RELEASE) ; `main` À JOUR ; LOT 2 ENSUITE**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, MATINÉE : **LOT 2 D'« APPORTER MON MATÉRIEL » COMMITÉ SUR `main` (`2fcad2c5`), NON POUSSÉ ; RELECTURE DE COWORK PUIS VERDICT DU SOIR**
+
+**En ligne** : toujours le lot 1 (`9257f7e5`, 1.202.0). **`main` local** : `2fcad2c5` (lot 2) et le commit docs de la demande de relecture, au-dessus de `84d1b3d6`.
+**Décision de Grégoire (17 oct.)** : l'assistant demande la note retenue de chaque niveau (la consigne supposait un repli sur le milieu
+de plage, retiré par #527 ; mesuré). Détail : `plans de travail/DEMANDE-RELECTURE-2026-10-17-apporter-mon-materiel-2.md`.
+**Vitest** : 8 997/8 997. **Playwright** : les deux specs du matériel lancées seules (5/5) ; pas de verdict complet.
+**Suite** : relecture de Cowork → corrections → verdict complet (Cowork fermé) → push au signal de Grégoire. Release au lot 3.
+
+---
+
+## (relais précédent) 17 OCT. 2026, 7 h 55 : **LOT 1 D'« APPORTER MON MATÉRIEL » EN LIGNE (1.202.0, SANS RELEASE) ; `main` À JOUR ; LOT 2 ENSUITE**
 
 **En ligne** (mesuré par le connecteur Netlify, Claude Code, 17 oct.) : déploiement `6ad361b21060b4c67b09acdb`, `commit_ref`
 `9257f7e5`, `state: ready`, publié à 11:53:35 Z (7 h 53, Toronto). Numéro affiché inchangé : 1.202.0, build 1015-1639 (la release
