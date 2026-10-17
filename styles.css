@@ -28185,6 +28185,12 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
     padding: 18px; border-radius: var(--radius-grand); background: var(--surface-conteneur);
 }
 .materiel-suite span { flex: 1 1 360px; line-height: 1.5; }
+/* Étape 6 (17 oct.) : « Aller plus loin avec ta grille », une information, pas une action principale. */
+.materiel-plus-loin {
+    display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding: 18px;
+    border: 1px solid var(--bordure-claire); border-left: 4px solid var(--accent-primaire); border-radius: var(--radius-grand);
+}
+.materiel-plus-loin h3 { margin: 0; font-size: 1.05rem; color: var(--texte-principal); }
 /* Les champs de saisie portent le cadre de leur état (légende). Mesuré dans WebKit, mode clair :
    la couleur de bordure d'un champ y est imposée par une règle plus forte (rgba(3,46,92,.2)) ;
    l'état passe donc par une ombre intérieure, que rien n'écrase. Le focus garde son anneau. */

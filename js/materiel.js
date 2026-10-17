@@ -598,9 +598,35 @@
             carteCree('Ta grille', carteGrille, 'grille-criteres', 'La voir dans Grilles de critères') +
             carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') +
             (r.retro ? carteCree('Tes rétroactions', 'Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.', 'retroactions', 'Les voir dans Cartouches de rétroaction') : '') +
-            '</div><div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
+            '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">Apporter autre chose</button></section>';
+    }
+
+    /**
+     * Étape 6 : « Aller plus loin avec ta grille », sous les cartes. Textes validés par Grégoire
+     * (17 oct., 12 h 07), mot pour mot. Une grille à niveaux dont les cases étaient des rétroactions
+     * (une cartouche vient d'être créée) n'a que la phrase commune : son paragraphe proposerait ce
+     * qui est déjà fait (supposition de Cowork).
+     * Le lien ouvre l'aide existante par sa clé du catalogue (`afficherAideContextuelle`) : le
+     * déclencheur `.primo-aide[data-target]` de Grilles de critères est caché hors du mode aide, et
+     * cherche un élément `#grille-type-critere-detail` que rien ne crée.
+     */
+    var PLUS_LOIN = {
+        titre: 'Aller plus loin avec ta grille',
+        enPoints: 'Ta grille note chaque critère en points. Labo Codex pourrait t’aider à suivre la progression de tes étudiant·es à partir d’elle, par exemple en décrivant, pour un critère, ce qu’on attend à chaque niveau.',
+        aNiveaux: 'Ta grille décrit ce qu’on attend à chaque niveau. Labo Codex pourrait t’aider à suivre la progression de tes étudiant·es à partir d’elle, par exemple en associant une rétroaction à chaque niveau.',
+        commune: 'Un critère peut s’évaluer de trois façons : holistique (par niveaux), analytique (par points) ou algorithmique (par un calcul).',
+        lien: 'Les trois façons d’évaluer un critère',
+        aide: 'grille-type-critere-detail'
+    };
+
+    function plusLoinHtml(r) {
+        var propre = r.enPoints ? PLUS_LOIN.enPoints : (r.retro ? '' : PLUS_LOIN.aNiveaux);
+        return '<aside class="materiel-plus-loin" aria-labelledby="materiel-titre-plus-loin">' +
+            '<h3 id="materiel-titre-plus-loin">' + e(PLUS_LOIN.titre) + '</h3>' +
+            (propre ? '<p>' + e(propre) + '</p>' : '') + '<p>' + e(PLUS_LOIN.commune) + '</p>' +
+            '<button type="button" class="materiel-btn-lien" data-action="afficherAideContextuelle" data-param="' + e(PLUS_LOIN.aide) + '">' + e(PLUS_LOIN.lien) + '</button></aside>';
     }
 
     /** Étape 5 : la carte « Grille » seule ; « Pour t'en servir… » inchangé. Textes PROVISOIRES (étape 7). */
@@ -611,7 +637,7 @@
             '<p>' + e('Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' notés en points. Rien d’autre n’a changé dans l’application.') + '</p>' +
             '<div class="materiel-cartes-cree">' +
             carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + '.', 'grille-criteres', 'La voir dans Grilles de critères') +
-            '</div><div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
+            '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">Apporter autre chose</button></section>';
     }
