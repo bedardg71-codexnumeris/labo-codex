@@ -7,7 +7,26 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 16 OCT. 2026, 20 h 55 : **LOT 1 D'« APPORTER MON MATÉRIEL » NON POUSSÉ, VERDICT ROUGE ; `main` LOCAL EN AVANCE DE 5**
+## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026 : **LOT 1 : ESSAI « ZOOM-MOLETTE » RENDU INDÉPENDANT DE LA BARRE ; VERDICT PUIS PUSH**
+
+**Décision de Grégoire (17 oct., option 2)** : la sous-navigation de Conception reste sur deux lignes (le retour à la ligne est le
+comportement prévu ; une ligne unique demanderait de raccourcir un libellé ou de resserrer toutes les barres la veille de la
+rencontre). L'essai vise désormais le milieu de la partie visible de la carte (`pointVisibleDeLaZone`), et vérifie que ce point
+appartient bien à la carte. Break-tests : gestionnaire Ctrl + molette neutralisé → rouge ; voile posé sur la carte → rouge (la
+garde) ; code restauré. Spec entière : 34/34.
+**Hauteur de la barre de Conception, mesurée (WebKit, hauteur 720)** :
+
+| Largeur | `eb6dd86e` (en ligne) | lot 1 |
+|---|---|---|
+| 1024 px | 0 px (barre masquée), 6 onglets, carte à y = 472 | 0 px (barre masquée), 7 onglets, carte à y = 472 |
+| 1180 px | 58 px, 6 onglets, carte à y = 524 | 100 px, 7 onglets, carte à y = 566 |
+| 1280 px | 58 px, 6 onglets, carte à y = 490 | 100 px, 7 onglets, carte à y = 532 |
+
+**Si ce relais dit encore « verdict puis push » et qu'origin/main n'a pas le lot 1** : lire `scripts/.verdict-playwright.json`.
+
+---
+
+## (relais précédent) 16 OCT. 2026, 20 h 55 : **LOT 1 D'« APPORTER MON MATÉRIEL » NON POUSSÉ, VERDICT ROUGE ; `main` LOCAL EN AVANCE DE 5**
 
 **En ligne** : toujours `eb6dd86e`, 1.202.0 (build 1015-1639). Rien n'a été poussé ce soir.
 **`main` local** : `d50af0ff` (lot 1), `63d5c028` (demande de relecture), `34a0bcaf` (corrections de la relecture), `f28ce0af`
