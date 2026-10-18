@@ -13,6 +13,8 @@
  *   U — la « Suite » après des Points ou une Pondération (point 4, trouvaille 1 du lot 1).
  *   S — un collage piégé : son texte arrive tel quel dans l'objet, jamais interprété.
  *
+ *   C1, C3 — corrections du verdict du 18 oct. : l'ordre des réponses (clés avec unité), le nom de la grille.
+ *
  * Break-tests (faits le 18 oct.) : la garde du « sans place » retirée de `creation` → R.b rouge ; la
  * ligne des points retirée de `texteDuNiveau` → M.a et M.c rouges ; `x.suite = null` remis pour
  * tous les types → U.a et U.b rouges.
@@ -48,8 +50,8 @@ function compriseTexte(lignes) {
     return D.comprendre(doc, liensPar(D.morceaux(doc).ordre, lignes.map((x) => x[1])));
 }
 /** La création possible, puis l'objet construit. */
-function cree(R, contexte) {
-    const c = D.creation(R, contexte);
+function cree(R, contexte, nom) {
+    const c = D.creation(R, contexte, nom);
     expect(c.niveauxSeuls).toBe(false);
     expect(c.raisons).toEqual([]);
     return A.construire(c.modele, ctx());
@@ -102,12 +104,10 @@ describe('M — de la lecture à la grille construite', () => {
             '4 points': 'Réponse juste et complète', '2 points': 'Réponse juste, mais incomplète', '0 point': 'Réponse absente ou fausse'
         });
         expect(g.criteres[1].descripteurs.parNiveau).toEqual({
-            3: 'Définit les trois termes', 2: 'Définit deux termes',
-            1: 'Définit un seul terme, ou en donne un exemple sans le définir', 0: 'Aucun terme défini'
+            '3 points': 'Définit les trois termes', '2 points': 'Définit deux termes',
+            '1 point': 'Définit un seul terme, ou en donne un exemple sans le définir', '0 point': 'Aucun terme défini'
         });
-        // ⚠ Des clés « 0 », « 1 » sont des indices pour JavaScript : elles se rangent avant « 0,5 », par
-        // ordre croissant, et Grilles de critères les montre dans cet ordre. Trouvaille 1 de la relecture 2a.
-        expect(g.criteres[2].descripteurs.parNiveau).toEqual({ 1: 'Donne un exemple juste', '0,5': 'Donne un exemple approximatif', 0: 'Ne donne aucun exemple' });
+        expect(g.criteres[2].descripteurs.parNiveau).toEqual({ '1 point': 'Donne un exemple juste', '0,5 point': 'Donne un exemple approximatif', '0 point': 'Ne donne aucun exemple' });
         expect(g.criteres.some((c) => c.sousCriteres)).toBe(false);
     });
 
@@ -126,7 +126,7 @@ describe('M — de la lecture à la grille construite', () => {
             ['Hors sujet', 'descripteur']
         ]);
         const par = cree(R).grille.criteres[0].descripteurs.parNiveau;
-        expect(par).toEqual({ 2: 'Tout juste', '2 (2)': 'Presque juste', 'Réponse 3': 'Hors sujet' });
+        expect(par).toEqual({ '2 points': 'Tout juste', '2 points (2)': 'Presque juste', 'Réponse 3': 'Hors sujet' });
     });
 
     it('M.e — une description de critère et une pondération écrite l’emportent sur celle tirée des points', () => {
@@ -140,10 +140,53 @@ describe('M — de la lecture à la grille construite', () => {
     });
 });
 
+describe('C1 — l’ordre des réponses survit à l’objet et à JSON', () => {
+    // Break-test (fait le 18 oct.) : `avecUnite` rendant l'écrit tel quel → C1.a rouge (« 0 » passe devant).
+    it('C1.a — (b) : les clés dans l’ordre de lecture, avant et après un aller-retour JSON', () => {
+        const g = cree(comprise(B_AVEC_TITRE)).grille;
+        const attendu = [['4 points', '2 points', '0 point'], ['3 points', '2 points', '1 point', '0 point'], ['1 point', '0,5 point', '0 point']];
+        expect(g.criteres.map((c) => Object.keys(c.descripteurs.parNiveau))).toEqual(attendu);
+        const relu = JSON.parse(JSON.stringify(g));
+        expect(relu.criteres.map((c) => Object.keys(c.descripteurs.parNiveau))).toEqual(attendu);
+    });
+
+    it('C1.b — l’unité au singulier sous 2 ; « 1,5 », « 2 » ; les autres écritures telles quelles', () => {
+        const R = compriseTexte([
+            ['Grille fictive', 'titre'], ['Critère fictif', 'critere'],
+            ['A', 'descripteur'], ['3-4', 'points'], ['B', 'descripteur'], ['2', 'points'],
+            ['C', 'descripteur'], ['1,5', 'points'], ['D', 'descripteur'], ['/1', 'points']
+        ]);
+        expect(Object.keys(cree(R).grille.criteres[0].descripteurs.parNiveau)).toEqual(['3-4', '2 points', '1,5 point', '/1']);
+    });
+});
+
+describe('C3 — le champ « Nom de ta grille »', () => {
+    it('C3.a — prérempli avec le Titre étiqueté', () => {
+        const R = comprise(B_AVEC_TITRE);
+        expect(D.nomPropose(R)).toBe('Questionnaire fictif');
+        expect(D.creation(R).modele.nom.valeur).toBe('Questionnaire fictif');
+    });
+
+    it('C3.b — une fois modifié, le champ l’emporte, Titre étiqueté ou non', () => {
+        expect(D.creation(comprise(B_AVEC_TITRE), {}, '  Autre nom fictif ').modele.nom.valeur).toBe('Autre nom fictif');
+        const sansTitre = D.creation(comprise(GRILLE_B), {}, 'Nom tapé');
+        expect(sansTitre.raisons).toEqual([]);
+        expect(cree(comprise(GRILLE_B), {}, 'Nom tapé').grille.nom).toBe('Nom tapé');
+    });
+
+    it('C3.c — un nom déjà pris se corrige dans le champ, sans « (2) » ajouté', () => {
+        const R = comprise(B_AVEC_TITRE);
+        expect(D.creation(R, { nomsGrilles: ['Questionnaire fictif'] }).raisons).toEqual(['un autre nom de grille : « Questionnaire fictif » existe déjà dans ce trimestre']);
+        const c = D.creation(R, { nomsGrilles: ['Questionnaire fictif'] }, 'Questionnaire fictif, automne');
+        expect(c.raisons).toEqual([]);
+        expect(c.modele.nom.valeur).toBe('Questionnaire fictif, automne');
+    });
+});
+
 describe('R — quand « Créer ma grille » est refusé, et pourquoi', () => {
-    it('R.a — aucun Titre : la raison le dit, une seule fois', () => {
-        const c = D.creation(comprise(GRILLE_B));
-        expect(c.raisons).toEqual(['le titre de ta grille : surligne-le avec l’étiquette « Titre »']);
+    it('R.a — aucun nom (ni Titre, ni champ) : « un nom pour ta grille », une seule fois', () => {
+        expect(D.creation(comprise(GRILLE_B)).raisons).toEqual(['un nom pour ta grille']);
+        expect(D.creation(comprise(B_AVEC_TITRE), {}, '   ').raisons).toEqual(['un nom pour ta grille']);
     });
 
     it('R.b — un morceau étiqueté sans place empêche de créer', () => {

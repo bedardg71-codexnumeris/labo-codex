@@ -407,13 +407,25 @@
     }
 
     /**
-     * Sans niveaux, une clé par réponse : ses points tels qu'écrits (« 2 », « 0,5 »), « Réponse N »
-     * sans points ; deux clés identiques se distinguent par « (2) ». Clés PROVISOIRES (étape 3).
+     * C1 (verdict du 18 oct.) : des points écrits en nombre seul prennent l'unité, au singulier sous 2
+     * (« 0 point », « 0,5 point », « 2 points »). Une clé « 0 » ou « 1 » est un INDICE pour JavaScript
+     * (et pour `JSON.parse`) : elle passerait avant les autres, et l'ordre de l'enseignant serait perdu
+     * dans l'objet même. Les autres écritures (« 3-4 », « /2 », « 2 points ») restent telles quelles.
+     */
+    function avecUnite(ecrit) {
+        if (!/^\d+(?:[.,]\d+)?$/.test(ecrit)) return ecrit;
+        return ecrit + (parseFloat(ecrit.replace(',', '.')) < 2 ? ' point' : ' points');
+    }
+
+    /**
+     * Sans niveaux, une clé par réponse : ses points tels qu'écrits, avec leur unité s'ils ne sont
+     * qu'un nombre (C1) ; « Réponse N » sans points ; deux clés identiques se distinguent par « (2) ».
+     * Clés PROVISOIRES (étape 3).
      */
     function clesDesReponses(reponses) {
         var prises = {};
         return reponses.map(function (r, k) {
-            var base = r.ecrits.length ? r.ecrits.join(' ') : 'Réponse ' + (k + 1);
+            var base = r.ecrits.length ? avecUnite(r.ecrits.join(' ')) : 'Réponse ' + (k + 1);
             var libre = base;
             for (var n = 2; prises[libre]; n++) libre = base + ' (' + n + ')';
             prises[libre] = true;
@@ -426,9 +438,11 @@
      * d'inventé : ni niveau, ni échelle, ni cartouche. Avec des niveaux nommés, chaque niveau garde son
      * nom (les plages restent vides : elles ne servent pas en points) ; sans niveaux, chaque critère
      * porte ses réponses en `parCle`.
+     * @param {object} R - la grille comprise
+     * @param {string} [nom] - C3 : le champ « Nom de ta grille », une fois modifié ; sinon le Titre étiqueté
      */
-    D.modele = function (R) {
-        var titre = R.titre.join(' ');
+    D.modele = function (R, nom) {
+        var titre = nom != null ? String(nom).trim() : D.nomPropose(R);
         var desc = R.description.join('\n');
         return {
             source: 'dissection', enPoints: true, lecture: null, tableau: null, roles: null,
@@ -452,24 +466,29 @@
         };
     };
 
+    /** C3 : ce que le champ « Nom de ta grille » propose tant qu'on n'y a pas touché, le Titre étiqueté. */
+    D.nomPropose = function (R) { return R.titre.join(' '); };
+
     function compte(n, un, plusieurs) { return n === 1 ? un : plusieurs.replace('#', n); }
 
     /**
      * Peut-on créer ? `{ niveauxSeuls, raisons, modele }`. Une grille seulement en niveaux attend le
-     * lot 2b (`niveauxSeuls`) ; sinon, les raisons d'un refus, dans l'ordre : le titre, les morceaux
+     * lot 2b (`niveauxSeuls`) ; sinon, les raisons d'un refus, dans l'ordre : le nom, les morceaux
      * sans place, les points, les réponses par critère, puis les mots de `calculs(m).manquants`, tels
      * quels. Le total qui ne tombe pas juste n'en est pas une : le constat est déjà à l'écran.
      * Textes PROVISOIRES (Claude Code, 18 oct.), relus à l'étape 3.
      * @param {object} R - la grille comprise
      * @param {{nomsGrilles?: string[]}} [contexte] - les noms des grilles déjà dans le trimestre
+     * @param {string} [nom] - C3 : le champ « Nom de ta grille », une fois modifié
      */
-    D.creation = function (R, contexte) {
+    D.creation = function (R, contexte, nom) {
         var b = D.bilan(R);
         if (b.logique === 'niveaux') return { niveauxSeuls: true, raisons: [], modele: null };
-        var m = D.modele(R);
+        var m = D.modele(R, nom);
         var raisons = [];
-        var sansTitre = !R.titre.length;
-        if (sansTitre) raisons.push('le titre de ta grille : surligne-le avec l’étiquette « Titre »');
+        // C3 : un nom vide (ni Titre étiqueté, ni nom tapé) ; la raison remplace celle du Titre.
+        var sansNom = !m.nom.valeur;
+        if (sansNom) raisons.push('un nom pour ta grille');
         if (R.sansPlace.length) raisons.push(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'));
         if (!b.logique) raisons.push('des points : surligne ce que vaut chaque réponse avec l’étiquette « Points »');
         m.criteres.forEach(function (c) {
@@ -481,8 +500,8 @@
             raisons.push('des réponses plus courtes (5 000 caractères au plus)');
         }
         window.materielAssistant.calculs(m, contexte).manquants.forEach(function (t) {
-            // Sans titre, « le nom de la grille » redirait la première raison.
-            if (!(sansTitre && t === 'le nom de la grille')) raisons.push(t);
+            // Sans nom, « le nom de la grille » redirait la première raison.
+            if (!(sansNom && t === 'le nom de la grille')) raisons.push(t);
         });
         return { niveauxSeuls: false, raisons: raisons, modele: m };
     };
