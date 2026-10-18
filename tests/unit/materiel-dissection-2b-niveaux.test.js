@@ -86,7 +86,7 @@ describe('N — de la lecture à l’échelle et à la grille en niveaux', () =>
         expect('type' in g).toBe(false);
         expect(g.criteres.map((c) => c.type)).toEqual(Array(6).fill('holistique'));
         expect(g.criteres.map((c) => c.ponderation)).toEqual([5, 10, 5, 10, 5, 15]);
-        expect(g.criteres[0].nom).toBe('Première section : recueil – L’élève accomplit la tâche fictive 1');
+        expect(g.criteres[0].nom).toBe('Première section : recueil – L’étudiant·e accomplit la tâche fictive 1');
         expect(g.criteres[0].sousCriteres.map((s) => s.nom)).toEqual(['Indice observable 1.1', 'Indice observable 1.2']);
         expect(g.criteres[0].descripteurs).toEqual({ echelleId: e.id, parNiveau: {
             E: 'Tâche 1 absente', D: 'Tâche 1, palier 2\n3', S: 'Tâche 1, palier 3\n4', A: 'Tâche 1, palier 4\n5'

@@ -130,7 +130,7 @@ describe('lot 3b1 · C et T — la confirmation, les textes', () => {
 
     it('T.a l’étape 1 de l’accueil et le message « aucun tableau » parlent du fichier d’origine', () => {
         const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
-        expect(html).toContain('Ouvre ta grille dans son fichier d’origine (Word, Pages ou un autre traitement de texte), sélectionne le tableau entier, et non seulement le texte de ses cases, puis copie-le. Copié depuis un PDF, il arriverait sans ses cases, en texte désordonné.');
+        expect(html).toContain('Ouvre ta grille dans son fichier d’origine (Word, Pages ou un autre traitement de texte), sélectionne le tableau entier – pas seulement le texte de ses cases (ou ses cellules), mais bien le tableau –, puis copie-le. Le texte copié d’un PDF est accepté aussi, mais il arrive sans ses cases : le fichier d’origine donne un meilleur résultat.');
         const L = chargerScript('js/materiel-lecture.js', {}).materielLecture;
         expect(L.MESSAGE_SANS_TABLEAU).toBe('L’application n’a pas trouvé de tableau dans ce que tu as collé. Si ta grille vient d’un PDF, ce serait la cause : un PDF ne transmet que du texte, sans ses cases. Tu pourrais la copier depuis son fichier d’origine (Word, Pages ou un autre traitement de texte), en sélectionnant le tableau entier, ou la taper à la main.');
     });

@@ -69,12 +69,12 @@ describe('M — de la lecture à la grille construite', () => {
         expect(g.description).toBe('Noter des observations et en dégager une idée d’ensemble.');
         expect(g.type).toBe('analytique');
         expect(g.criteres.map((c) => c.nom)).toEqual([
-            'Première section : recueil – L’élève accomplit la tâche fictive 1',
-            'Première section : recueil – L’élève accomplit la tâche fictive 2',
-            'Deuxième section : classement – L’élève accomplit la tâche fictive 3',
-            'Deuxième section : classement – L’élève accomplit la tâche fictive 4',
-            'Troisième section : synthèse – L’élève accomplit la tâche fictive 5',
-            'Troisième section : synthèse – L’élève accomplit la tâche fictive 6'
+            'Première section : recueil – L’étudiant·e accomplit la tâche fictive 1',
+            'Première section : recueil – L’étudiant·e accomplit la tâche fictive 2',
+            'Deuxième section : classement – L’étudiant·e accomplit la tâche fictive 3',
+            'Deuxième section : classement – L’étudiant·e accomplit la tâche fictive 4',
+            'Troisième section : synthèse – L’étudiant·e accomplit la tâche fictive 5',
+            'Troisième section : synthèse – L’étudiant·e accomplit la tâche fictive 6'
         ]);
         expect(g.criteres.map((c) => c.ponderation)).toEqual([5, 10, 5, 10, 5, 15]);
         expect(g.criteres.every((c) => c.type === 'analytique')).toBe(true);

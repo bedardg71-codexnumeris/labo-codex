@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.204 (la dissection) — titre et sept items de Grégoire, tranchés le 18 oct. 2026 (9 h 56)
+            // sur sa page « Tes mots pour la dissection », transmis par Cowork (CONSIGNE-LOT-…-dissection-3).
+            version: '1.204',
+            couleur: 'vert',
+            titre: 'Apporter mon matériel',
+            items: [
+                'Tu colles ta grille, tu la vois telle que tu l’as écrite, et c’est toi qui poses une étiquette sur chaque morceau&nbsp;: critère, sous-critère, descripteur, points, niveau. L’application ne devine plus&nbsp;: elle lit tes étiquettes.',
+                'À chaque geste, elle montre la grille qu’elle en tirerait&nbsp;: ses critères, ses réponses, ses points ou ses niveaux, et les morceaux qui n’ont pas trouvé leur place.',
+                'Le bouton «&nbsp;Créer ma grille&nbsp;» la range dans «&nbsp;Grilles de critères&nbsp;». Une grille en points garde ses réponses et leurs points, dans tes mots.',
+                'Une grille en niveaux te demande la plage et la note retenue de chaque niveau&nbsp;; l’application n’en propose aucune.',
+                'Une grille qui a des points et des niveaux se note en points par défaut&nbsp;; tu peux choisir les niveaux.',
+                'Dans «&nbsp;Grilles de critères&nbsp;», une grille en points s’affiche maintenant en points, et non plus en pourcentage.',
+                'Sur l’iPad, la palette reste à côté de ta grille, et tout se fait au doigt.'
+            ]
+        },
+        {
             // 1.203 (« Apporter mon matériel ») — titre et sept items de Grégoire, mot pour mot,
             // validés le 17 oct. 2026 (15 h 00), transmis par Cowork (CONSIGNE-LOT-…-7-textes).
             version: '1.203',

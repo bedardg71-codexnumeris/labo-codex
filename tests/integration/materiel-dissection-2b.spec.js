@@ -62,8 +62,8 @@ async function coller(page, html) {
 }
 
 const NIVEAUX = ['Insuffisant', 'Partiel', 'Satisfaisant', 'Remarquable'];
-const CRITERES = ['L’élève résume l’œuvre avec justesse', 'L’élève relève des procédés d’écriture',
-    'L’élève relie l’œuvre aux notions du cours', 'L’élève exprime une appréciation argumentée'];
+const CRITERES = ['L’étudiant·e résume l’œuvre avec justesse', 'L’étudiant·e relève des procédés d’écriture',
+    'L’étudiant·e relie l’œuvre aux notions du cours', 'L’étudiant·e exprime une appréciation argumentée'];
 const DESCRIPTEURS = ['Résumé absent ou erroné', 'Résume quelques événements', 'Résume l’essentiel', 'Résume avec précision et concision',
     'Aucun procédé relevé', 'Relève un procédé', 'Relève quelques procédés', 'Relève et illustre plusieurs procédés',
     'Liens absents', 'Établit un lien', 'Établit quelques liens', 'Établit des liens nombreux et pertinents',

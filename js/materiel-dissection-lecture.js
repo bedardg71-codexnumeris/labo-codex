@@ -37,7 +37,7 @@
     /**
      * Les étiquettes de la palette. Celles du noyau (critère, élément observable, descripteur,
      * points, niveau) ont été tranchées par Grégoire le 18 oct. 2026 ; les autres textes sont
-     * ceux de l'ébauche, PROVISOIRES (étape 3 du plan).
+     * ceux de l'ébauche, validé G. 18 oct.
      */
     D.TYPES = [
         { k: 'titre', nom: 'Titre', aide: 'Le nom de ta grille', groupe: 'La grille' },
@@ -424,7 +424,7 @@
     /**
      * Sans niveaux, une clé par réponse : ses points tels qu'écrits, avec leur unité s'ils ne sont
      * qu'un nombre (C1) ; « Réponse N » sans points ; deux clés identiques se distinguent par « (2) ».
-     * Clés PROVISOIRES (étape 3).
+     * Clés de Claude Code, validé G. 18 oct.
      */
     function clesDesReponses(reponses) {
         var prises = {};
@@ -529,7 +529,7 @@
      * codes, le nombre de niveaux). Le total qui ne tombe pas juste n'en est pas une : le constat est
      * déjà à l'écran. En niveaux, les avertissements de `calculs(m)` (plages qui se chevauchent ou
      * laissent un trou, note retenue hors de sa plage), tels quels : ils n'empêchent rien.
-     * Textes PROVISOIRES (Claude Code, 18 oct.), relus à l'étape 3.
+     * Textes de Claude Code (18 oct.), validé G. 18 oct.
      * @param {object} R - la grille comprise
      * @param {{nomsGrilles?: string[]}} [contexte] - les noms des grilles déjà dans le trimestre
      * @param {string} [nom] - C3 : le champ « Nom de ta grille », une fois modifié
@@ -569,6 +569,7 @@
     /**
      * « Essayer avec un exemple » : une grille fictive (aucun texte réel), sans étiquette. Deux
      * sections, quatre critères, quatre niveaux nommés, des points par niveau, un total sur 30.
+     * Validé G. 18 oct. ; ses critères disent « L’étudiant·e » (décision de ce jour-là).
      */
     D.exempleDoc = function () {
         var nouveau = fabrique();
@@ -583,14 +584,14 @@
         return { mode: 'table', rows: [
             [cell(['Journal de lecture']), cell(['Rendre compte d’une lecture personnelle et la relier aux notions vues en classe.'], 4)],
             rangeeSection('PARTIE A : COMPRÉHENSION'),
-            rangeeCritere('L’élève résume l’œuvre avec justesse', ['Repérage des événements principaux', 'Exactitude des faits rapportés'],
+            rangeeCritere('L’étudiant·e résume l’œuvre avec justesse', ['Repérage des événements principaux', 'Exactitude des faits rapportés'],
                 [['Résumé absent ou erroné'], ['Résume quelques événements', '2'], ['Résume l’essentiel', '3-4'], ['Résume avec précision et concision', '5']]),
-            rangeeCritere('L’élève relève des procédés d’écriture', ['Procédés nommés correctement', 'Exemples tirés du texte'],
+            rangeeCritere('L’étudiant·e relève des procédés d’écriture', ['Procédés nommés correctement', 'Exemples tirés du texte'],
                 [['Aucun procédé relevé'], ['Relève un procédé', '3'], ['Relève quelques procédés', '4'], ['Relève et illustre plusieurs procédés', '5']]),
             rangeeSection('PARTIE B : RÉFLEXION'),
-            rangeeCritere('L’élève relie l’œuvre aux notions du cours', ['Liens explicites avec les notions', 'Pertinence des rapprochements'],
+            rangeeCritere('L’étudiant·e relie l’œuvre aux notions du cours', ['Liens explicites avec les notions', 'Pertinence des rapprochements'],
                 [['Liens absents'], ['Établit un lien', '4-5'], ['Établit quelques liens', '6-7'], ['Établit des liens nombreux et pertinents', '8-10']]),
-            rangeeCritere('L’élève exprime une appréciation argumentée', ['Opinion formulée clairement', 'Arguments appuyés sur le texte'],
+            rangeeCritere('L’étudiant·e exprime une appréciation argumentée', ['Opinion formulée clairement', 'Arguments appuyés sur le texte'],
                 [['Appréciation absente'], ['Donne une opinion', '4-5'], ['Justifie son opinion', '6-8'], ['Argumente avec nuance', '9-10']]),
             [cell(['TOTAL : / 30'], 5)]
         ] };

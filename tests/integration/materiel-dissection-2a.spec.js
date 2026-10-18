@@ -68,8 +68,8 @@ async function coller(page, html) {
     }, html);
 }
 
-const CRITERES = ['L’élève résume l’œuvre avec justesse', 'L’élève relève des procédés d’écriture',
-    'L’élève relie l’œuvre aux notions du cours', 'L’élève exprime une appréciation argumentée'];
+const CRITERES = ['L’étudiant·e résume l’œuvre avec justesse', 'L’étudiant·e relève des procédés d’écriture',
+    'L’étudiant·e relie l’œuvre aux notions du cours', 'L’étudiant·e exprime une appréciation argumentée'];
 const DESCRIPTEURS = ['Résumé absent ou erroné', 'Résume quelques événements', 'Résume l’essentiel', 'Résume avec précision et concision',
     'Aucun procédé relevé', 'Relève un procédé', 'Relève quelques procédés', 'Relève et illustre plusieurs procédés',
     'Liens absents', 'Établit un lien', 'Établit quelques liens', 'Établit des liens nombreux et pertinents',
@@ -145,7 +145,7 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
     await expect(page.locator('#materiel-titre-cree')).toHaveText('Ta grille « Journal de lecture » est créée');
     await expect(page.locator('#materiel-titre-cree')).toBeFocused();
     await expect(page.locator('#materiel-dissection')).toBeHidden();
-    await expect(page.locator('.materiel-carte-cree')).toContainText('4 critères, sur 30.');
+    await expect(page.locator('.materiel-carte-cree')).toContainText('4 critères, sur 30 points.');
     await expect(page.locator('.materiel-plus-loin h3')).toHaveText('Aller plus loin avec ta grille');
     await expect(page.locator('.materiel-confirmation [data-action="materiel.recommencer"]')).toHaveText('Coller une autre grille');
 
@@ -154,10 +154,10 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
     expect(g.nom).toBe('Journal de lecture');
     expect(g.description).toBe('Rendre compte d’une lecture personnelle et la relier aux notions vues en classe.');
     expect(g.criteres.map((c) => [c.nom, c.ponderation])).toEqual([
-        ['Partie A : compréhension – L’élève résume l’œuvre avec justesse', 5],
-        ['Partie A : compréhension – L’élève relève des procédés d’écriture', 5],
-        ['Partie B : réflexion – L’élève relie l’œuvre aux notions du cours', 10],
-        ['Partie B : réflexion – L’élève exprime une appréciation argumentée', 10]
+        ['Partie A : compréhension – L’étudiant·e résume l’œuvre avec justesse', 5],
+        ['Partie A : compréhension – L’étudiant·e relève des procédés d’écriture', 5],
+        ['Partie B : réflexion – L’étudiant·e relie l’œuvre aux notions du cours', 10],
+        ['Partie B : réflexion – L’étudiant·e exprime une appréciation argumentée', 10]
     ]);
     expect(g.criteres[0].descripteurs.parNiveau['Satisfaisant']).toBe('Résume l’essentiel\n3-4');
     expect(g.criteres.every((c) => !('echelleId' in (c.descripteurs || {})))).toBe(true);

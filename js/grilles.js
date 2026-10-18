@@ -1245,7 +1245,7 @@ function ponderationEnPoints(criteres) {
     return typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints({ criteres: criteres || [] });
 }
 
-/** « 30 points », « 1 point » ; ou « 30% », comme avant, hors d'une grille en points. Texte PROVISOIRE (étape 3). */
+/** « 30 points », « 1 point » ; ou « 30% », comme avant, hors d'une grille en points. Validé G. 18 oct. */
 function texteDePonderation(n, enPoints) {
     return enPoints ? n + (Math.abs(n) >= 2 ? ' points' : ' point') : n + '%';
 }
@@ -4452,7 +4452,8 @@ function rendrePliAucuneAnnotation(critere, ctx) {
  * `descripteurs.echelleId` du trimestre ; le code seul si elle n'existe plus), puis les
  * sous-critères. Rien pour un critère qui n'en porte pas : son HTML reste celui d'avant.
  * Les sous-critères d'un critère algorithmique ont déjà leur place, éditable (gabarit) : pas ici.
- * Titres PROVISOIRES (Claude Code, 17 oct.), relus à l'étape 7. La modification vient après le 19 oct.
+ * Titres de Claude Code (17 oct.) ; « Ce qui est attendu à chaque niveau » gardé tel quel par décision de
+ * Grégoire, 18 oct. La modification vient après le 19 oct.
  */
 function rendreAttenduCritere(critere) {
     const par = (critere && critere.descripteurs && critere.descripteurs.parNiveau) || {};
