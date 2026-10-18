@@ -1,15 +1,12 @@
-# Consigne du jour – la dissection, étape 3 : les mots (dimanche 18 octobre)
+# Consigne du jour – la dissection, étape 4 : la version (dimanche 18 octobre)
 
-> Écrite par Cowork le dimanche 18 octobre 2026 à 09 h 57 (Toronto, mesuré par `date`). Elle remplace celle de 8 h 44 (lot 2b : fait, `cb125cb9`, relu sans correction), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-2b.md`. **Commite avec ton commit** : ce fichier, ce déplacement, `CONSIGNE-LOT-2026-10-18-dissection-3-les-mots.md`, `VERDICT-RELECTURE-2026-10-18-dissection-2b.md` (ses deux inscriptions au BACKLOG avec) et le plan (étape 2 cochée).
+> Écrite par Cowork le dimanche 18 octobre 2026 à 10 h 22 (Toronto, mesuré par `date`). Elle remplace celle de 9 h 57 (étape 3 : faite, `4c16a4f0`, relue sans correction), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-3-mots.md`. **Commite avec ton premier commit** : ce fichier, ce déplacement, `CONSIGNE-LOT-2026-10-18-dissection-4-version.md` et le plan (étape 3 cochée).
 
 ## Où on en est
 
-- `main` local à `cb125cb9`, six commits devant `origin/main` (`71cdde64`, 1.203.0 en ligne). Rien ne se pousse avant l'étape 4.
-- Étapes 1 et 2 du plan : closes.
+- En ligne : `71cdde64` (1.203.0). `main` local à `4c16a4f0`, sept commits devant, rien de poussé.
+- Étapes 1 à 3 du plan : closes.
 
 ## Le mandat
 
-1. Le verdict du lot 2b : inscris ses deux trouvailles au BACKLOG.
-2. L'étape 3 : `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-3-les-mots.md`.
-
-Puis arrête-toi : le rapport, pas de version, pas de verdict, pas de push.
+Le **temps A** de `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-4-version.md` : la release 1.204.0, Vitest, la porte terrain en markdown, la demande de relecture. **Puis arrête-toi** : le temps B (verdict et push) viendra par un second relais, Cowork fermé.
