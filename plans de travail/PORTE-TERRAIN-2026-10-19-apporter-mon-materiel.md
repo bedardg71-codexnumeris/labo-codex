@@ -42,3 +42,29 @@ Aucune à cette porte.
 - **Un vrai presse-papiers de Word ou de Pages, Safari, l'iPad** : rien de cela n'existe dans les bancs.
 - **Le bandeau avec son emoji sur l'iPad** (rangée 2.7) : jamais vu sur l'appareil.
 - **Trois rangées retirées par Cowork à la relecture** (règle 1 du skill : une machine répond) : l'aperçu qui suit un menu changé (banc `materiel-lot3a-roles`), l'icône « i » du type de critère (banc `icones-i-catalogue-c3`, dans WebKit), et les Nouvelles 1.203 (relues mot pour mot à l'étape 7 ; elles s'affichent d'elles-mêmes au premier chargement de la version). L'artefact et ce markdown portent les mêmes neuf rangées.
+
+---
+
+## Relevé de Grégoire – dimanche 18 octobre, de 5 h 10 à 5 h 36 (Mac, Chrome ; grille « 101-04-Grille Cornell 1 (103) A2023 », Pages)
+
+> Versé par Cowork à 5 h 44. Captures : dossier `~/Desktop/captures test 1 18 oct` (14 images, 5 h 10 à 5 h 36). Rangées 2.5 à 2.7 non faites.
+
+```
+4 passées / 0 échec / 5 non traitées
+[v] 0.1 · [ ] 0.2 Version affichée : Bêta publique 1.203.0 (Build 1017-1629)
+[v] 2.1 Ce qui manque ou est de trop dans l'aperçu : voir capture
+[v] 2.2 Nombre de menus changés : Je ne vois pas de «Menu» (défilant?) Voir capture. Je ne sais pas quoi lire où. Je ne comprends pas ce qu'on me demande. Ok, j'ai cliqué sur «Suivant» et maintenant je vois la page et les «Menus». Voir capture.
+[ ] 2.3 Nom de la grille créée : Est-ce que c'est normal que l'étape précédente s'affiche sous l'étape actuelle (en dessous du bouton «Suivant»)? Voir capture. Je ne peux pas mettre de «note retenue» puisque je ne suis pas en train d'évaluer. Voir capture.
+[v] 2.4 Ce qui ne correspond pas : J'ai du mal à comprendre ce qui se passe à chaque étape. Je ne sais pas où regarder, quoi lire et ce qui est attendu de moi. Est-ce que je dois reproduire ma grille telle que je l'ai dans ma tête ou sur ma feuille de papier (traitement de texte) où je dois l'expliquer à l'application ? Je ne connais pas ce vocabulaire. Je suis confus. Si toute l'application me met dans cet étape, je ne suis pas intéressé.
+[ ] 2.5 Comment faire pour en créer une nouvelle ? Voir capture.
+```
+
+### Ce que les captures montrent (lu par Cowork, faits)
+
+- **La grille** : six critères en trois sections (droite, gauche, bas) ; chaque ligne de section porte les noms des quatre niveaux (« En voie d'acquisition », « Sommaire », « Organisé », « Efficace ») ; des points par niveau et par critère (3 / 4 / 5, 6-7 / 8-9 / 10…) ; une ligne « TOTAL : / 50 ».
+- **La lecture** : les noms de niveaux des lignes de section ne sont pas reconnus (« Niveau sans nom », codes N à N4) ; la ligne de titre et la section de droite deviennent un critère, les sections de gauche et du bas aussi : **9 critères au lieu de 6**, et les noms de niveaux deviennent les descripteurs de ces faux critères. Les points des niveaux restent dans le texte des cases. Pondérations lues 5, 10, 5, 5, 10, 15 (= 50), ramenées à 100 %.
+- **Aucun menu changé** : à l'étape 2, rien ne dit que les lignes de section portent les noms des niveaux, ni comment le dire.
+- **Étape « Plages de notes »** : il a inventé des noms de niveaux qui ne sont pas les siens (insuffisant, passable, moyen, bon ; 0-60, 60-70, 70-80, 80-100) ; chevauchement 60/60 signalé. « Note retenue » incompris.
+- **L'échelle créée** porte une valeur ponctuelle **0** aux quatre niveaux (capture 5 h 33 m 46). À vérifier : saisie par lui pour franchir le blocage, ou écrite par l'application.
+- **« Ce que tu as pris pour l'étape précédente »** sous « Suivant » : c'est l'aperçu de la grille (capture 5 h 21 m 58).
+- **Créer une autre grille** : le lien « Apporter autre chose », petit, au bas de la confirmation (capture 5 h 36 m 10), n'a pas été vu.

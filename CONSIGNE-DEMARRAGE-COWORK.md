@@ -9,6 +9,29 @@
 
 ---
 
+## 0‴ · FIN DU 17 OCTOBRE : 1.203.0 EN LIGNE, LA PORTE DE LUNDI (ajouté le 17 oct. à 20 h 04 par Cowork)
+
+- Le plan « prêt pour lundi » est fini : ses huit étapes cochées. 1.203.0 poussée le 17 vers 19 h 55 (`71cdde64`), vérification complète verte, après la correction C1 de la relecture de 17 h 49 (`VERDICT-RELECTURE-2026-10-17-version-1.203.0.md`). Netlify : pas encore constaté, c'est le §0 de la porte.
+- **Lundi 19, avant 11 h : la porte terrain de Grégoire.** Artefact « Porte · Apporter mon matériel » (https://claude.ai/artifact/C61zsybw5WJXYV1ivH262Y), neuf rangées ; markdown jumeau `plans de travail/PORTE-TERRAIN-2026-10-19-apporter-mon-materiel.md`. Au retour de son relevé (skill `portes-terrain` §5) : trier les échecs (build en retard ou défaut réel), les inscrire au BACKLOG avec le numéro de rangée, mettre le markdown à jour ; puis `OU-EN-EST-ON.md` (« Apporter mon matériel », avec son « vérifié comment »), en retard depuis le 16, et la page du tri.
+- **Lundi après-midi** : la fusion de `ci/verdict-morceaux-2` (§0″ et §0′), puis les corrections de Grégoire, puis la chronique.
+- Non commités sur le Mac : ce fichier, `RELAIS.md` et le plan ; à commiter avec le prochain commit de Claude Code. Les trois fichiers du chantier CI restent non suivis (§0′).
+
+---
+
+## 0″ · LE PLAN DE MATCH POUR LUNDI (ajouté le 17 oct. à 9 h 40 par Cowork)
+
+- `plans de travail/PLAN-2026-10-17-pret-pour-lundi.md` : huit étapes dans l'ordre, sans horaire (règle de Grégoire : l'heure ne compte pas). Cowork y coche chaque étape finie. Rencontre de la CoP lundi 19 oct., 11 h.
+- ↻ **La fusion de `ci/verdict-morceaux-2` glisse à lundi après-midi, après la rencontre** (le § 0′ ci-dessous disait dimanche) : deux versions partent ce week-end, et le juge ne change pas avant celle que la CoP éprouvera.
+
+---
+
+## 0′ · (PÉRIMÉ POUR LA DATE, VOIR 0″) DIMANCHE 18 OCTOBRE — LA FUSION DU VERDICT SUR GITHUB (ajouté le 17 oct. à 8 h 01 par Cowork)
+
+- La branche `ci/verdict-morceaux-2` (`fb20d986`, sur GitHub) se fusionne sur `main` **dimanche 18**, une fois la version de « Apporter mon matériel » en ligne, avec son propre verdict le dimanche soir. Décision de Grégoire le 17 à 8 h 02 : « On n'attend pas à mardi pour fusionner. On termine les lots 2 et 3 aujourd'hui » ; le créneau du dimanche est le choix de Cowork (8 h 03), pour que la version vue lundi par la CoP soit jugée par l'ancien juge. Le verdict de Cowork du 17 à 6 h 55 (accord sur le contenu) garde sa liste « À faire à la fusion, mardi » (dont #1090 en double) : elle vaut pour dimanche.
+- ⚠ Ce verdict, la demande de relecture et la consigne du chantier CI sont des fichiers **non suivis**, sur le Mac seulement : `plans de travail/VERDICT-RELECTURE-2026-10-17-verdict-sur-github.md`, `plans de travail/DEMANDE-RELECTURE-2026-10-16-verdict-sur-github.md`, `plans de travail/CONSIGNE-2026-10-16-verdict-sur-github.md`. Ne pas les commiter sur `main` avant la fusion (la demande est aussi sur la branche : conflit d'ajout possible). La session Claude Code de ce chantier est fermée depuis le 17 vers 8 h ; sa note pour mardi est dans sa mémoire, que la session de la fusion ne verra pas : c'est le verdict qui fait foi.
+
+---
+
 ## 0 · LE 16 OCTOBRE 2026 — À LIRE AVANT LE RESTE (ajouté le 15 oct. à 16 h 05 par la session du tri des fiches « à toi » ; le reste de ce fichier date du 7 oct.)
 
 - Le 15, de 14 h 49 à 15 h 30, Grégoire a tranché avec Cowork les 33 fiches « à toi » : `plans de travail/LOTS-2026-10-15-fiches-a-toi.md` (décisions, lots B à H, lignes à poser au backlog). Il n'en reste que 4, qui attendent l'extérieur (Loi 25 ; rencontre du 19 oct.).
