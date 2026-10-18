@@ -1,12 +1,11 @@
-# Consigne du jour – la dissection, lot 2a (dimanche 18 octobre)
+# Consigne du jour – la dissection, corrections du lot 2a (dimanche 18 octobre)
 
-> Écrite par Cowork le dimanche 18 octobre 2026 à 8 h 11 (Toronto, mesuré par `date`). Elle remplace celle de 7 h 58 (corrections C1 et C2 : faites, `77ecb741`, rapport et capture vus par Cowork), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-1-corrections.md`. **Commite avec ton premier commit** : ce fichier, ce déplacement, `CONSIGNE-LOT-2026-10-18-dissection-2a-creer-en-points.md`, et le plan (étape 1 cochée).
+> Écrite par Cowork le dimanche 18 octobre 2026 à 08 h 29 (Toronto, mesuré par `date`). Elle remplace celle de 8 h 11 (lot 2a : fait, `903e7706`), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-2a.md`. **Commite avec ton commit** : ce fichier, ce déplacement et `VERDICT-RELECTURE-2026-10-18-dissection-2a.md`.
 
-## Où on en est (mesuré par Cowork)
+## Où on en est
 
-- `main` local à `77ecb741`, trois commits devant `origin/main` (`71cdde64`, 1.203.0 en ligne). Rien ne se pousse avant l'étape 4 du plan.
-- Étape 1 du plan : close.
+- `main` local à `903e7706`, quatre commits devant `origin/main` (`71cdde64`, 1.203.0 en ligne). Rien ne se pousse avant l'étape 4 du plan.
 
 ## Le mandat
 
-Le lot 2a : `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-2a-creer-en-points.md`. Puis arrête-toi : la demande de relecture, pas de version, pas de push.
+Lis `VERDICT-RELECTURE-2026-10-18-dissection-2a.md` et fais **C1** (l'ordre des réponses), **C2** (des points, pas des « % », pour une grille en points dans Grilles de critères) et **C3** (le champ « Nom de ta grille », décision de Grégoire). Un commit, Vitest complet vert, les specs touchées vertes dans WebKit. **Puis arrête-toi** : pas de version, pas de verdict, pas de push.

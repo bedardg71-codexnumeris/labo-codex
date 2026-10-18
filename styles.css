@@ -28382,6 +28382,11 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 /* Lot 2a : « Créer ma grille » sous la lecture ; ce qui l'empêche, écrit à côté du bouton. */
 .dissection-creer { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px; border-top: 1px solid var(--bordure-claire); padding-top: 14px; }
 .dissection-creer:empty { display: none; }
+/* C3 : le nom de la grille, au-dessus du bouton ; 16 px au moins (l'iPad ne zoome pas), 44 px de haut. */
+.dissection-creer-nom { flex: 1 1 100%; display: flex; flex-direction: column; gap: 4px; max-width: 60ch; }
+.dissection-creer-nom label { font-weight: 600; }
+.dissection-creer-nom input { min-height: 44px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+.dissection-creer-actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px; }
 .dissection-creer .btn-principal { min-height: 44px; font-size: 1rem; font-weight: 600; }
 .dissection-creer-raisons { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 0.9rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
 .dissection-creer-raisons ul { margin: 4px 0 0; padding-left: 1.2em; }

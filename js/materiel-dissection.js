@@ -30,7 +30,7 @@
     'use strict';
 
     var SVG = 'http://www.w3.org/2000/svg';
-    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false };
+    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null };
     var blocs = {};
     var dessinPrevu = false;
 
@@ -425,23 +425,51 @@
     var TEXTES_CREER = {
         bouton: 'Créer ma grille',
         enCours: 'Création…',
+        nom: 'Nom de ta grille',
         raisons: 'Avant de créer, il reste :',
         bientot: 'La création des grilles en niveaux arrive bientôt. Pour l’instant, l’application crée les grilles qui ont des points.'
     };
 
-    /** Sous la lecture : rien sans étiquette ; « bientôt » pour une grille en niveaux ; sinon le bouton et ses raisons. */
-    function rendreCreer(R) {
-        var z = el('dissection-creer');
+    /** Le nom tapé (C3), ou `undefined` tant que l'enseignant n'a pas touché au champ : le Titre étiqueté vaut. */
+    function nomTape() { return etat.nomSaisi == null ? undefined : etat.nomSaisi; }
+
+    function creation(R) { return D().creation(R, { nomsGrilles: nomsGrilles() }, nomTape()); }
+
+    /**
+     * C3 (verdict du 18 oct., décision de Grégoire) : le champ « Nom de ta grille », au-dessus du bouton,
+     * prérempli avec le Titre étiqueté. Aucun « (2) » ajouté : le nom s'imprime sur le PDF des étudiant·es.
+     */
+    function champNom(R) {
+        var bloc = noeud('div', 'dissection-creer-nom');
+        var lab = noeud('label', null, TEXTES_CREER.nom);
+        lab.setAttribute('for', 'dissection-nom-grille');
+        var champ = noeud('input', 'controle-form');
+        champ.id = 'dissection-nom-grille';
+        champ.type = 'text';
+        champ.maxLength = window.materielAssistant.MAX_NOM;
+        champ.autocomplete = 'off';
+        champ.value = etat.nomSaisi != null ? etat.nomSaisi : D().nomPropose(R);   // .value : jamais du HTML
+        champ.addEventListener('input', function () {
+            etat.nomSaisi = champ.value;
+            etat.erreur = '';
+            rendreActions(creation(D().comprendre(etat.doc, etat.liens)));
+        });
+        bloc.appendChild(lab);
+        bloc.appendChild(champ);
+        return bloc;
+    }
+
+    /** Le bouton, ce qui l'empêche (écrit à côté), l'échec d'une écriture. Le champ n'est pas redessiné. */
+    function rendreActions(c) {
+        var z = el('dissection-creer-actions'), champ = el('dissection-nom-grille');
         if (!z) return;
         z.textContent = '';
-        if (!Object.keys(etat.liens).length) return;
-        var c = D().creation(R, { nomsGrilles: nomsGrilles() });
-        if (c.niveauxSeuls) { z.appendChild(noeud('p', 'dissection-creer-bientot', TEXTES_CREER.bientot)); return; }
         var b = noeud('button', 'btn btn-principal', etat.enCours ? TEXTES_CREER.enCours : TEXTES_CREER.bouton);
         b.type = 'button';
         b.setAttribute('data-action', 'materielDissection.creer');
         b.disabled = c.raisons.length > 0 || etat.enCours;
         z.appendChild(b);
+        if (champ) champ.removeAttribute('aria-describedby');
         if (c.raisons.length) {
             var r = noeud('div', 'dissection-creer-raisons');
             r.id = 'dissection-creer-raisons';
@@ -451,6 +479,7 @@
             r.appendChild(ul);
             z.appendChild(r);
             b.setAttribute('aria-describedby', r.id);
+            if (champ) champ.setAttribute('aria-describedby', r.id);
         }
         if (etat.erreur) {
             var p = noeud('p', 'alerte alerte-erreur', etat.erreur);
@@ -460,13 +489,38 @@
     }
 
     /**
+     * Sous la lecture : rien sans étiquette ; « bientôt » pour une grille en niveaux ; sinon le champ
+     * du nom, le bouton et ses raisons. Le champ existant est GARDÉ (pas de focus perdu) ; tant qu'on
+     * n'y a pas touché, il suit le Titre étiqueté.
+     */
+    function rendreCreer(R) {
+        var z = el('dissection-creer');
+        if (!z) return;
+        var c = Object.keys(etat.liens).length ? creation(R) : null;
+        if (!c || c.niveauxSeuls) {
+            z.textContent = '';
+            if (c) z.appendChild(noeud('p', 'dissection-creer-bientot', TEXTES_CREER.bientot));
+            return;
+        }
+        var champ = el('dissection-nom-grille');
+        if (!champ) {
+            z.textContent = '';
+            z.appendChild(champNom(R));
+            var actions = noeud('div', 'dissection-creer-actions');
+            actions.id = 'dissection-creer-actions';
+            z.appendChild(actions);
+        } else if (etat.nomSaisi == null) champ.value = D().nomPropose(R);
+        rendreActions(c);
+    }
+
+    /**
      * « Créer ma grille » : l'écriture de `materielCreation.creer`, puis la confirmation. Un échec
      * affiche son message, et la dissection reste telle quelle pour réessayer. Un second toucher
      * pendant l'écriture est sans effet.
      */
     async function creer() {
         if (etat.enCours || !etat.doc) return;
-        var c = D().creation(D().comprendre(etat.doc, etat.liens), { nomsGrilles: nomsGrilles() });
+        var c = creation(D().comprendre(etat.doc, etat.liens));
         if (c.niveauxSeuls || c.raisons.length) { rendreLecture(); return; }
         var doc = etat.doc;
         etat.enCours = true;
@@ -521,7 +575,7 @@
     function ouvrir(doc, message) {
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
-        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false };
+        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false, nomSaisi: null };
         desarmer();
         brancher();
         rendrePalette();
@@ -540,7 +594,7 @@
 
     /** Retour à l'accueil : la dissection en cours est oubliée (rien n'avait été écrit). */
     function fermer() {
-        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false };
+        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null };
         blocs = {};
         var vue = el('materiel-dissection'), contenu = el('dissection-contenu'), traits = el('dissection-traits');
         if (contenu) contenu.textContent = '';
