@@ -1,3 +1,5 @@
+> **PÉRIMÉE, remplacée par `PORTE-TERRAIN-2026-10-18-la-dissection.md`** (18 oct. 2026) : elle visait l'assistant en sept étapes, débranché au lot 1 de la dissection. Gardée pour son relevé de 5 h 10.
+
 # Porte terrain – « Apporter mon matériel », version 1.203.0 (lundi 19 octobre 2026, avant 11 h)
 
 > Écrite par Claude Code le samedi 17 octobre 2026 (étape 8 du plan, temps A), pour **lundi matin, avant la rencontre de 11 h**. Une seule porte : le parcours que la communauté fera, **sur tes vraies grilles**, sur le Mac (Safari) puis sur l'iPad. Seul ton matériel peut répondre : ce que Word et Pages mettent vraiment dans le presse-papiers, Safari, et l'iPad au doigt. Tout le reste (la lecture des douze formes de grilles, les règles, la création des trois objets, l'échappement des textes, les textes validés) est mesuré par les bancs.
