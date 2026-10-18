@@ -32,6 +32,12 @@
  * EN POINTS (aucune colonne de niveau) a son aperçu, son étape « Points », sa Vérification
  * (Critère | Description | Points, total « sur N ») et sa confirmation (la grille seule).
  * Textes de Claude Code, PROVISOIRES (étape 7).
+ *
+ * La dissection, lot 1 (`CONSIGNE-LOT-2026-10-18-dissection-1-etiqueter.md`) : un collage, le texte
+ * de la zone et l'exemple ouvrent la DISSECTION (`materiel-dissection.js`) ; « Taper ma grille à la
+ * main » mène vers Grilles de critères. L'assistant en sept étapes est DÉBRANCHÉ, pas supprimé :
+ * plus aucun geste ne l'ouvre (`charger`, `ouvrirAssistant` restent), son retrait est inscrit pour
+ * après lundi. La création (`creer`, la confirmation) servira au lot 2.
  */
 (function () {
     'use strict';
@@ -745,17 +751,22 @@
         return true;
     }
 
+    // Texte de Claude Code, PROVISOIRE (étape 3 du plan de la dissection).
+    var MESSAGE_RIEN_A_LIRE = 'Rien de lisible dans ce que tu as collé. Copie le tableau de ta grille dans Word ou Pages, ou le texte d’un PDF, puis colle-le ici.';
+
+    /** Un document disséqué ouvre la dissection ; rien de lisible, un message. */
+    function ouvrirDissection(doc) {
+        if (!doc) { montrerErreur(MESSAGE_RIEN_A_LIRE); return false; }
+        montrerErreur('');
+        return window.materielDissection.ouvrir(doc);
+    }
+
     function surCollage(ev) {
         var cd = ev.clipboardData;
         if (!cd) return;
-        var lu = window.materielLecture.lirePressePapiers({ html: cd.getData('text/html'), texte: cd.getData('text/plain') });
-        if (lu) {
-            ev.preventDefault();
-            charger(lu, 'colle');
-        } else {
-            // Le texte se colle quand même dans la zone : la personne voit ce qu'elle a collé.
-            montrerErreur(window.materielLecture.MESSAGE_SANS_TABLEAU);
-        }
+        var doc = window.materielDissectionLecture.docDepuisPressePapiers({ html: cd.getData('text/html'), texte: cd.getData('text/plain') });
+        if (doc) ev.preventDefault();
+        ouvrirDissection(doc);
     }
 
     /** Un geste qui change la forme du modèle : l'état est remplacé, la page redessinée. */
@@ -852,17 +863,19 @@
     var materiel = {
         reconnaitreTexte: function () {
             var zone = el('materiel-zone-collage');
-            charger(window.materielLecture.lireTexte(zone ? zone.value : ''), 'colle');
+            ouvrirDissection(window.materielDissectionLecture.docDepuisPressePapiers({ texte: zone ? zone.value : '' }));
         },
         essayerExemple: function () {
-            charger(window.materielLecture.lireHtml(window.materielLecture.exempleHtml()), 'exemple');
+            ouvrirDissection(window.materielDissectionLecture.exempleDoc());
         },
+        /** Vers l'éditeur de Grilles de critères : la façon de créer qui reste (« nous allons garder les deux »). */
         taperMain: function () {
             montrerErreur('');
-            ouvrirAssistant(window.materielLecture.modeleVide());
+            sousSection('grille-criteres');
         },
         recommencer: function () {
             etat = { ecran: 'accueil', modele: null, etapes: [], etape: 0, montrerManquants: false, resume: null, erreurCreation: '', enCours: false };
+            if (window.materielDissection) window.materielDissection.fermer();
             rendre();
             var collage = el('materiel-zone-collage');
             if (collage) { collage.value = ''; collage.focus(); }
