@@ -8,8 +8,12 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // RELECTURE DE COWORK DU 17 OCT. 2026 (C3), dans un vrai WebKit : l'icône « i » du type de critère, dans
 // Grilles de critères, désigne une clé du catalogue (`grille-type-critere-detail`) sans élément de ce
 // nom ; elle n'ouvrait rien. Elle ouvre maintenant l'aide « Type de critère d'évaluation ».
-// Chemin : la grille fictive F6 collée et créée par « Apporter mon matériel », puis « La voir dans
-// Grilles de critères » — celui que la communauté prendra lundi. Assistance active (le défaut).
+// Chemin : la grille fictive F6 créée par « Apporter mon matériel », puis « La voir dans Grilles de
+// critères ». Assistance active (le défaut).
+// ⚠ 18 oct. 2026 (la dissection, lot 1) : l'assistant en sept étapes est DÉBRANCHÉ de l'onglet ; plus
+// aucun collage ne l'ouvre. La grille se crée donc par les mêmes fonctions qu'il appelait (lecture,
+// préparation, passages écartés, `materielCreation.creer`), puis s'ouvre comme `materiel.voir` l'ouvre.
+// À re-router par la dissection quand elle créera (lot 2).
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);
@@ -31,20 +35,19 @@ async function ouvrirConception(page) {
     await expect(page.locator('#conception-materiel')).toBeVisible();
 }
 
-/** Un VRAI événement « coller » sur la zone, avec le HTML au presse-papiers (comme Word ou Pages). */
-async function coller(page, html) {
-    await page.evaluate((h) => {
-        const zone = document.getElementById('materiel-zone-collage');
-        const ev = new Event('paste', { bubbles: true, cancelable: true });
-        const donnees = { 'text/html': h, 'text/plain': '' };
-        Object.defineProperty(ev, 'clipboardData', { value: { getData: (t) => donnees[t] || '' } });
-        zone.dispatchEvent(ev);
+/** F6 lue, préparée, ses passages écartés, créée ; puis ouverte dans Grilles de critères. */
+async function creerEtOuvrir(page, html) {
+    const r = await page.evaluate(async (h) => {
+        const lu = window.materielLecture.charger(window.materielLecture.lireHtml(h), 'colle');
+        let m = window.materielAssistant.preparer(lu.modele);
+        m.aClasser.forEach((a) => { m = window.materielAssistant.ecarter(m, a.id); });
+        const cree = await window.materielCreation.creer(m);
+        if (cree.erreur) return { erreur: cree.erreur };
+        window.afficherSousSection('conception-grille-criteres');
+        await window.ouvrirGrilleDepuisListe(cree.resume.ids.grille);
+        return { erreur: null };
     }, html);
-}
-
-async function ecarterTout(page) {
-    await expect(page.locator('#materiel-titre-etape')).toHaveText('Que faire de ces passages ?');
-    while (await page.locator('[data-action="materiel.ecarter"]').count()) await page.locator('[data-action="materiel.ecarter"]').first().click();
+    expect(r.erreur).toBeNull();
 }
 
 test('C3 · dans Grilles de critères, le « i » du type de critère ouvre l’aide des trois types', async ({ page }) => {
@@ -53,13 +56,7 @@ test('C3 · dans Grilles de critères, le « i » du type de critère ouvre l’
     page.on('console', (m) => { if (m.type() === 'warning' && /target non trouvé/.test(m.text())) avertissements.push(m.text()); });
     await ouvrirConception(page);
     expect(await page.evaluate(() => document.body.classList.contains('aide-contextuelle-active'))).toBe(true);
-    await coller(page, f6Html());
-    await page.locator('[data-action="materiel.suivant"]').click();
-    await page.locator('[data-action="materiel.suivant"]').click();
-    while (await page.locator('[data-action="materiel.ecarter"]').count()) await page.locator('[data-action="materiel.ecarter"]').first().click();
-    await page.locator('[data-action="materiel.suivant"]').click();
-    await page.locator('[data-action="materiel.creer"]').click();
-    await page.locator('[data-action="materiel.voir"][data-param="grille-criteres"]').click();
+    await creerEtOuvrir(page, f6Html());
 
     const icone = page.locator('#listeCriteres .primo-aide[data-target="grille-type-critere-detail"]').first();
     await expect(icone).toBeVisible();

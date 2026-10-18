@@ -28226,3 +28226,150 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .materiel-points-nom { font-weight: 600; overflow-wrap: anywhere; }
 .materiel-verif-points .materiel-col-pond { width: 120px; min-width: 120px; }
 .materiel-verif-points .materiel-col-critere { width: 280px; min-width: 280px; }
+
+/* ============================================================
+   « APPORTER MON MATÉRIEL » — la dissection, lot 1 (18 oct. 2026)
+   Palette d'étiquettes à gauche, canevas au centre (la grille telle
+   que collée, son propre défilement ; la page ne défile jamais de
+   côté), flèches SVG pour la seule étiquette en main, lecture dessous.
+   Référence : l'ébauche PROTOTYPE-2026-10-18-dissection.html (hors git).
+   ⚠ Variables NEUVES, raison documentée : douze surligneurs distincts,
+   un par étiquette (trait --dis-c-*, surlignage --dis-h-*), repris de
+   l'ébauche éprouvée par Grégoire ; aucune famille de styles.css n'en
+   offre douze. Portée limitée à .dissection ; sombre par défaut,
+   redéfinies sous .mode-clair. Cibles tactiles ≥ 44 px (iPad).
+   ============================================================ */
+.dissection {
+    --dis-c-titre: #a9b6c8;       --dis-h-titre: rgba(169, 182, 200, .16);
+    --dis-c-description: #6cc3cc; --dis-h-description: rgba(108, 195, 204, .16);
+    --dis-c-section: #9da2f0;     --dis-h-section: rgba(157, 162, 240, .18);
+    --dis-c-total: #c79ae6;       --dis-h-total: rgba(199, 154, 230, .18);
+    --dis-c-critere: #f2cf3a;     --dis-h-critere: rgba(242, 207, 58, .26);
+    --dis-c-souscritere: #f0a35a; --dis-h-souscritere: rgba(240, 163, 90, .22);
+    --dis-c-ponderation: #ff8a50; --dis-h-ponderation: rgba(255, 138, 80, .22);
+    --dis-c-niveau: #6bd68b;      --dis-h-niveau: rgba(107, 214, 139, .22);
+    --dis-c-descripteur: #7ab4ff; --dis-h-descripteur: rgba(122, 180, 255, .22);
+    --dis-c-points: #ff7ab8;      --dis-h-points: rgba(255, 122, 184, .22);
+    --dis-c-suite: #b8c95a;       --dis-h-suite: rgba(184, 201, 90, .22);
+    --dis-c-ignorer: #9aa3ad;     --dis-h-ignorer: rgba(154, 163, 173, .20);
+    display: flex; flex-direction: column; gap: 16px; min-width: 0;
+}
+.mode-clair .dissection {
+    --dis-c-titre: #44546a;       --dis-h-titre: rgba(68, 84, 106, .16);
+    --dis-c-description: #2f7680; --dis-h-description: rgba(47, 118, 128, .16);
+    --dis-c-section: #4a4fb3;     --dis-h-section: rgba(74, 79, 179, .17);
+    --dis-c-total: #7b3fa0;       --dis-h-total: rgba(123, 63, 160, .17);
+    --dis-c-critere: #8a6700;     --dis-h-critere: rgba(255, 214, 0, .48);
+    --dis-c-souscritere: #a85a14; --dis-h-souscritere: rgba(255, 168, 60, .30);
+    --dis-c-ponderation: #c2410c; --dis-h-ponderation: rgba(234, 88, 12, .24);
+    --dis-c-niveau: #1f7a3a;      --dis-h-niveau: rgba(60, 200, 90, .30);
+    --dis-c-descripteur: #1d5fa8; --dis-h-descripteur: rgba(70, 150, 255, .24);
+    --dis-c-points: #b0236a;      --dis-h-points: rgba(255, 80, 160, .24);
+    --dis-c-suite: #66701a;       --dis-h-suite: rgba(150, 170, 40, .24);
+    --dis-c-ignorer: #6b7280;     --dis-h-ignorer: rgba(107, 114, 128, .20);
+}
+/* Une étiquette, un surligneur : chaque élément porteur d'un type reçoit --dis-c (trait) et --dis-h (fond). */
+.dis-t-titre { --dis-c: var(--dis-c-titre); --dis-h: var(--dis-h-titre); }
+.dis-t-description { --dis-c: var(--dis-c-description); --dis-h: var(--dis-h-description); }
+.dis-t-section { --dis-c: var(--dis-c-section); --dis-h: var(--dis-h-section); }
+.dis-t-total { --dis-c: var(--dis-c-total); --dis-h: var(--dis-h-total); }
+.dis-t-critere { --dis-c: var(--dis-c-critere); --dis-h: var(--dis-h-critere); }
+.dis-t-souscritere { --dis-c: var(--dis-c-souscritere); --dis-h: var(--dis-h-souscritere); }
+.dis-t-ponderation { --dis-c: var(--dis-c-ponderation); --dis-h: var(--dis-h-ponderation); }
+.dis-t-niveau { --dis-c: var(--dis-c-niveau); --dis-h: var(--dis-h-niveau); }
+.dis-t-descripteur { --dis-c: var(--dis-c-descripteur); --dis-h: var(--dis-h-descripteur); }
+.dis-t-points { --dis-c: var(--dis-c-points); --dis-h: var(--dis-h-points); }
+.dis-t-suite { --dis-c: var(--dis-c-suite); --dis-h: var(--dis-h-suite); }
+.dis-t-ignorer { --dis-c: var(--dis-c-ignorer); --dis-h: var(--dis-h-ignorer); }
+
+.dissection h2, .dissection h3, .dissection p { margin: 0; }
+.dissection-tete { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; justify-content: space-between; }
+.dissection-tete-texte { display: flex; flex-direction: column; gap: 6px; min-width: 0; max-width: 78ch; }
+.dissection-consignes { margin: 4px 0 0; padding-left: 1.3em; color: var(--texte-secondaire); display: flex; flex-direction: column; gap: 2px; line-height: 1.45; }
+.dissection-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.dissection-actions .btn, .dissection-bandeau .btn { min-height: 44px; }
+.dissection-statut { min-height: 1.5em; color: var(--texte-secondaire); font-size: 0.92rem; }
+
+.dissection-atelier { position: relative; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; align-items: start; min-width: 0; }
+.dissection-palette { position: sticky; top: 8px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.dissection-groupe { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.dissection-groupe-nom { font-size: 0.74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-muted); }
+.dissection-etiquette {
+    font: inherit; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 0 9px; align-items: start;
+    text-align: left; min-height: 44px; background: var(--surface-carte); color: var(--texte-principal);
+    border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-moyen); padding: 7px 10px; cursor: pointer;
+}
+.dissection-etiquette:hover { border-color: var(--dis-c); }
+.dissection-etiquette:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
+.dissection-etiquette[aria-pressed="true"] { background: var(--dis-h); border-color: var(--dis-c); outline: 3px solid var(--dis-c); outline-offset: 1px; }
+.dissection-etiquette-trait { grid-column: 1; grid-row: 1 / span 3; width: 12px; height: 100%; min-height: 30px; border-radius: 3px; background: var(--dis-h); box-shadow: inset 3px 0 0 var(--dis-c); }
+.dissection-etiquette-nom { grid-column: 2; grid-row: 1; font-weight: 700; font-size: 0.93rem; line-height: 1.3; }
+.dissection-etiquette-aide { grid-column: 2; grid-row: 2; font-size: 0.8rem; color: var(--texte-secondaire); line-height: 1.3; }
+.dissection-etiquette-precision { grid-column: 2; grid-row: 3; font-size: 0.78rem; font-style: italic; color: var(--texte-secondaire); line-height: 1.3; margin-top: 2px; }
+.dissection-etiquette-compte { grid-column: 3; grid-row: 1; font-family: ui-monospace, Menlo, monospace; font-size: 0.8rem; color: var(--texte-secondaire); font-variant-numeric: tabular-nums; }
+.dissection-eclair { animation: dissection-eclair .9s ease 1; }
+@keyframes dissection-eclair { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .dissection-eclair { animation: none; } }
+
+.dissection-centre { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.dissection-bandeau {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+    background: var(--surface-carte); border: 2px solid var(--dis-c, var(--accent-primaire)); border-radius: var(--radius-moyen); padding: 8px 12px;
+}
+.dissection-bandeau p { min-width: 0; }
+.dissection-canevas {
+    position: relative; height: min(76vh, 920px); min-height: 460px; overflow: auto; max-width: 100%;
+    border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-grand); background: var(--surface-conteneur);
+}
+.dissection-contenu { padding: 22px; box-sizing: border-box; width: max-content; min-width: 100%; }
+.dissection-feuille {
+    background: var(--surface-carte); color: var(--texte-principal); border-radius: 4px; box-shadow: var(--shadow-normal);
+    padding: 22px 20px; font-size: 13px; line-height: 1.35;
+}
+.dissection-feuille table { border-collapse: collapse; width: 820px; }
+.dissection-feuille td { border: 1px solid var(--bordure-moyenne); padding: 5px 7px; vertical-align: top; }
+.dissection-feuille-texte { width: 640px; }
+.dissection-morceau { display: block; padding: 2px 5px; margin: 1px -3px; border-radius: 3px; overflow-wrap: anywhere; }
+.dissection-morceau.dissection-marque { background: var(--dis-h); box-shadow: inset 3px 0 0 var(--dis-c); }
+/* Une étiquette en main : les morceaux prennent le doigt (plus de défilement sur eux), la sélection de texte se tait. */
+.dissection-pointage .dissection-feuille { user-select: none; -webkit-user-select: none; }
+.dissection-pointage .dissection-morceau { cursor: pointer; touch-action: none; }
+/* --dis-actif : la couleur de l'étiquette en main, résolue sur le canevas (un morceau surligné garde la sienne dans --dis-c). */
+.dissection-pointage { --dis-actif: var(--dis-c); }
+.dissection-pointage .dissection-morceau:hover { outline: 2px dashed var(--dis-actif); outline-offset: 1px; }
+.dissection-fleches { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
+.dissection-trait { fill: none; stroke: var(--dis-c); stroke-width: 1.8; opacity: .85; }
+.dissection-pointe { fill: var(--dis-c); }
+
+.dissection-resultat { display: flex; flex-direction: column; gap: 10px; background: var(--surface-carte); border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand); padding: 18px; min-width: 0; }
+.dissection-sous { color: var(--texte-secondaire); font-size: 0.92rem; }
+.dissection-logique { background: var(--surface-conteneur); border-left: 4px solid var(--accent-primaire); border-radius: var(--radius-petit); padding: 10px 12px; max-width: 80ch; line-height: 1.5; }
+.dissection-constats { display: flex; flex-wrap: wrap; gap: 6px; }
+.dissection-constat { font-size: 0.88rem; border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-pill); padding: 3px 10px; background: var(--surface-conteneur); font-variant-numeric: tabular-nums; }
+.dissection-constat-ok { border-color: var(--alerte-bordure-succes); color: var(--alerte-texte-succes); }
+.dissection-constat-ecart { border-color: var(--alerte-bordure-attention); color: var(--alerte-texte-attention); background: var(--alerte-fond-attention); }
+.dissection-comprise { overflow-x: auto; min-width: 0; }
+.dissection-table-comprise { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 0.88rem; }
+.dissection-table-comprise th, .dissection-table-comprise td { border: 1px solid var(--bordure-moyenne); padding: 6px 8px; vertical-align: top; text-align: left; }
+.dissection-table-comprise th { background: var(--surface-conteneur); font-weight: 700; }
+.dissection-ligne-section td { background: var(--dis-h-section); font-weight: 700; }
+.dissection-crit-nom { font-weight: 700; }
+.dissection-crit-desc { color: var(--texte-secondaire); font-style: italic; }
+.dissection-table-comprise ul { margin: 4px 0 0; padding-left: 1.1em; color: var(--texte-secondaire); }
+.dissection-table-comprise ul.dissection-reponses { list-style: none; padding-left: 0; color: var(--texte-principal); display: flex; flex-direction: column; gap: 4px; }
+.dissection-reponses li { display: flex; gap: 8px; align-items: baseline; }
+.dissection-reponses .dissection-pts { flex: none; margin-top: 0; min-width: 4.2em; text-align: center; }
+.dissection-pts { display: inline-block; margin-top: 3px; font-size: 0.78rem; font-weight: 700; color: var(--dis-c-points); border: 1px solid var(--dis-c-points); border-radius: var(--radius-pill); padding: 0 7px; font-variant-numeric: tabular-nums; }
+.dissection-pts.dissection-pts-sans { color: var(--texte-secondaire); border-color: var(--bordure-moyenne); font-weight: 400; }
+.dissection-a-nommer { font-weight: 700; font-style: italic; color: var(--alerte-texte-attention); }
+.dissection-deduit { color: var(--texte-secondaire); font-size: 0.8rem; }
+.dissection-vide { color: var(--texte-muted); }
+.dissection-sans-place { color: var(--alerte-texte-attention); font-size: 0.9rem; display: flex; flex-direction: column; gap: 4px; }
+.dissection-sans-place ul { margin: 0; padding-left: 1.2em; }
+
+/* iPad en portrait (820 px) : la palette passe au-dessus du canevas, en rangées. */
+@media (max-width: 1024px) {
+    .dissection-atelier { grid-template-columns: minmax(0, 1fr); }
+    .dissection-palette { position: static; flex-direction: row; flex-wrap: wrap; }
+    .dissection-groupe { flex: 1 1 200px; }
+}
