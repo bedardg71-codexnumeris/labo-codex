@@ -39,5 +39,5 @@
 
 - [x] 1 — `25584d62`, relu à 7 h 58 (accepté, deux corrections) ; corrections `77ecb741`, rapport et capture à 820 px vus par Cowork à 8 h 10
 - [x] 2 — en points : `903e7706`, corrigé `0ba1be2d` (nom de la grille, décision de Grégoire 8 h 28) ; en niveaux : `cb125cb9` (plage et note retenue saisies, décision de 8 h 43), relu sans correction
-- [ ] 3
+- [x] 3 — tes 50 réponses de 9 h 56 appliquées, `4c16a4f0`, relu par Cowork à 10 h 12 sans correction (entrée 1.204 des Nouvelles comprise)
 - [ ] 4
