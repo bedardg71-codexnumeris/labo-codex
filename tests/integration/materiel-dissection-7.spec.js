@@ -13,6 +13,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     (choix annulé), Échap (annulé aussi) ; puis le lien : la marque, la flèche de B vers A, l'étiquette de B
 //     retirée ; les refus « déjà la suite » et « boucle » ; retoucher un morceau rattaché défait son lien ;
 //   · la marque reste l'outil posé, la flèche non ; étiqueter un morceau rattaché ne change rien, et se dit ;
+//   · C1 (verdict du 18 oct., 17 h 15) : la marque d'une suite suit l'étiquette posée, changée ou retirée
+//     ENSUITE sur son A (break-test : sans la remarque des suites dans `appliquer`, l'essai rougit) ;
 //   · la lecture montre le nom entier ; la grille se crée, et son critère se retrouve sous son nom entier
 //     dans Grilles de critères ;
 //   · à 820 px, l'outil fait au moins 44 px et la page ne défile pas de côté.
@@ -104,6 +106,20 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await autre.click();
     await expect(autre).toHaveText('Confirmer : coller une autre grille');
     await expect(page.locator('#materiel-dissection')).toBeVisible();
+    // C1 (verdict du 18 oct., 17 h 15) : rattacher d'abord, étiqueter A ensuite : la suite prend la couleur
+    // de l'étiquette posée sur A, puis de celle qui la remplace ; l'étiquette retirée, elle la perd.
+    const suite = morceau(page, NOM_D7[2]);
+    await expect(suite).toHaveClass(/dissection-rattache/);
+    await expect(suite).not.toHaveClass(/dis-t-/);
+    await etiqueter(page, 'critere', [NOM_D7[0]]);
+    await expect(suite).toHaveClass(/dis-t-critere/);
+    await etiqueter(page, 'descripteur', [NOM_D7[0]]);
+    await expect(suite).toHaveClass(/dis-t-descripteur/);
+    await expect(suite).not.toHaveClass(/dis-t-critere/);
+    await etiqueter(page, 'descripteur', [NOM_D7[0]]);
+    await expect(morceau(page, NOM_D7[0])).not.toHaveAttribute('data-type', /.+/);
+    await expect(suite).not.toHaveClass(/dis-t-/);
+    await expect(suite).toHaveClass(/dissection-rattache/);
     // Le lien défait (outil en main, un toucher sur la suite) : on repart d'une feuille sans lien.
     await outil(page).click();
     await expect(autre).toHaveText('Coller une autre grille');

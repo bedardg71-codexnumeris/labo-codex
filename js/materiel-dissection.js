@@ -320,6 +320,9 @@
         if (mode === 'ajouter') etat.liens[id] = etat.actif;
         else if (etat.liens[id] === etat.actif) delete etat.liens[id];
         marquer(id);
+        // C1 du lot 7 (verdict du 18 oct., 17 h 15) : ses suites prennent la couleur de l'étiquette posée,
+        // changée ou retirée sur lui.
+        Object.keys(etat.rattachements).forEach(function (b) { if (etat.rattachements[b] === id) marquer(b); });
         planifierDessin();
     }
 
