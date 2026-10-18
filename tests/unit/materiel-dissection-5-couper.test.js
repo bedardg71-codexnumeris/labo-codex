@@ -16,6 +16,9 @@
  *       ou la pondération qui manquent ; une Pondération sans critère ou en trop.
  *   N — aucun renvoi à une étape de l'assistant dans ce que la dissection affiche.
  *
+ * C1 du verdict du 18 oct. (13 h 36) : R.g — dans un tableau, une Pondération ne se range que sous le
+ * critère de sa rangée. Break-test : `ciblePonderation` rendant toujours `cible(x, id)` → R.g rouge.
+ *
  * Break-tests (faits le 18 oct.) : la coupe au rang touché plutôt qu'à l'espace (`espaceProche` rendant
  * `decalage`) → C.a, C.b, C.c, C.e et C.g rouges ; l'étiquette non transmise dans `liensApresCoupe` →
  * E.a, E.b, P.a, P.b, D.b et R.f rouges ; le message de l'étape rendu tel quel par `raisonDissection`
@@ -332,21 +335,45 @@ describe('R — des raisons qui nomment', () => {
         expect(NIVEAUX_N.length).toBe(3);
     });
 
-    it('R.e — une Pondération sans critère avant elle : la raison dit qu’une ligne de total prend « Total »', () => {
+    it('R.e — une Pondération sans critère : la raison dit qu’une ligne de total prend « Total » (tableau : « dans sa rangée »)', () => {
         const grille = [[{ l: [['Titre fictif', 'titre']] }], [{ l: [[SECTIONS_D[0], 'section']] }], [{ l: [[TOTAUX_D[0], 'ponderation']] }]];
-        const R = lire(collerD(grille));
+        expect(lire(collerD(grille)).sansPlace).toEqual([{ t: TOTAUX_D[0], type: 'ponderation', raison: 'aucun critère dans sa rangée ; une ligne de total prend l’étiquette « Total »' }]);
+        // Dans un texte brut, l'ordre fait foi : « avant lui ».
+        const doc = D.docDepuisPressePapiers({ texte: ['Titre fictif', TOTAUX_D[0]].join('\n') });
+        const R = D.comprendre(doc, liensPar(D.morceaux(doc).ordre, ['titre', 'ponderation']));
         expect(R.sansPlace).toEqual([{ t: TOTAUX_D[0], type: 'ponderation', raison: 'aucun critère avant lui ; une ligne de total prend l’étiquette « Total »' }]);
     });
 
-    it('R.f — une seconde Pondération pour un même critère (une ligne de total) : sans place, plus en silence', () => {
+    it('R.f — une seconde Pondération pour un même critère : sans place, plus en silence (même rangée ; texte brut)', () => {
+        const grille = [[{ l: [['Titre fictif', 'titre']] }], [{ l: [['Critère fictif', 'critere'], ['/ 10', 'ponderation'], ['/ 70', 'ponderation']] }]];
+        const R = lire(collerD(grille));
+        expect(R.criteres[0].pond).toBe(10);
+        expect(R.sansPlace).toEqual([{ t: '/ 70', type: 'ponderation', raison: 'son critère a déjà une pondération (10) ; une ligne de total prend l’étiquette « Total »' }]);
+        const doc = D.docDepuisPressePapiers({ texte: ['Critère fictif', '/ 25', TOTAUX_D[0]].join('\n') });
+        const T = D.comprendre(doc, liensPar(D.morceaux(doc).ordre, ['critere', 'ponderation', 'ponderation']));
+        expect(T.criteres[0].pond).toBe(25);
+        expect(T.sansPlace.map((x) => x.raison)).toEqual(['son critère a déjà une pondération (25) ; une ligne de total prend l’étiquette « Total »']);
+    });
+
+    it('R.g — C1 : une ligne Critère sans pondération, une Pondération sur la rangée de total : sans place, le critère intact', () => {
+        // (d) telle que collée (critères sur leur ligne entière), une Pondération sur chaque total : la forme de ce midi.
+        const R = lire(collerD());
+        expect(R.criteres.map((c) => c.pond)).toEqual([null, null, null, null, null, null]);
+        expect(R.sansPlace).toEqual(TOTAUX_D.map((t) => ({ t, type: 'ponderation', raison: 'aucun critère dans sa rangée ; une ligne de total prend l’étiquette « Total »' })));
+        // Coupée, ses totaux encore en Pondération : chaque critère garde la sienne, les totaux restent sans place.
         const e = dDecoupee();
         TOTAUX_D.forEach((t) => { e.liens[idDe(e.doc, t)] = 'ponderation'; });
-        const R = D.comprendre(e.doc, e.liens);
-        expect(R.criteres.map((c) => c.pond)).toEqual([10, 20, 15, 25, 10, 20]);
-        expect(R.sansPlace).toEqual([
-            { t: TOTAUX_D[0], type: 'ponderation', raison: 'son critère a déjà une pondération (25) ; une ligne de total prend l’étiquette « Total »' },
-            { t: TOTAUX_D[1], type: 'ponderation', raison: 'son critère a déjà une pondération (20) ; une ligne de total prend l’étiquette « Total »' }
-        ]);
+        const C = lire(e);
+        expect(C.criteres.map((c) => c.pond)).toEqual([10, 20, 15, 25, 10, 20]);
+        expect(C.sansPlace.map((x) => x.t)).toEqual(TOTAUX_D);
+        // Une Pondération dans une rangée fusionnée avec celle du critère se range sous lui.
+        const fusion = { mode: 'table', rows: [
+            [{ cs: 1, rs: 2, lines: [{ id: 'm1', t: 'Critère fictif' }] }, { cs: 1, rs: 1, lines: [{ id: 'm2', t: 'Réponse fictive' }] }],
+            [{ cs: 1, rs: 1, lines: [{ id: 'm3', t: '/ 15' }] }]
+        ] };
+        const F = D.comprendre(fusion, { m1: 'critere', m3: 'ponderation' });
+        expect(F.criteres[0].pond).toBe(15);
+        expect(F.sansPlace).toEqual([]);
     });
 });
 

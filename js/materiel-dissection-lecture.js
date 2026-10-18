@@ -383,6 +383,24 @@
         points: lirePoints
     };
 
+    /**
+     * C1 du lot 5 (verdict du 18 oct., 13 h 36) : dans un tableau, une Pondération ne se range que sous
+     * le critère de SA rangée (rangées fusionnées comprises) : celle d'une ligne de total ne devient plus
+     * en silence le poids du critère d'au-dessus. Inchangés : le texte brut (l'ordre fait foi) et les
+     * critères à nommer (`pondApres`, sans rangée à eux).
+     */
+    function ciblePonderation(x, id) {
+        var cr = cible(x, id);
+        if (!x.table || x.parRangee[x.pos[id].r] || (cr && cr.auto && cr.reponses.length)) return cr;
+        return null;
+    }
+
+    /** Lot 5 : la raison d'un morceau sans critère ; pour une Pondération, l'indice de la ligne de total. Textes provisoires. */
+    function raisonSansCritere(x, t) {
+        if (t !== 'ponderation') return 'aucun critère avant lui';
+        return (x.table ? 'aucun critère dans sa rangée' : 'aucun critère avant lui') + ' ; une ligne de total prend l’étiquette « Total »';
+    }
+
     function lireMorceau(x, id, t, tx) {
         if (t === 'ignorer' || t === 'niveau') return;
         if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, tx, t, 'aucun morceau à compléter avant elle'); return; }
@@ -390,11 +408,10 @@
         // lu ; des points et une pondération sont des nombres, pas du texte à continuer.
         if (t !== 'points' && t !== 'ponderation') x.suite = null;
         if (LIRE_CADRE[t]) { LIRE_CADRE[t](x, id, tx); return; }
-        var cr = cible(x, id);
+        var cr = t === 'ponderation' ? ciblePonderation(x, id) : cible(x, id);
         // Une réponse sans critère, quand aucun niveau n'est nommé : un critère « à nommer ».
         if (t === 'descripteur' && !cr && !x.avecNiveaux) cr = nouveauCritere(x, null, true);
-        // Lot 5 : une Pondération posée sur une ligne de total ; texte provisoire (étape des mots).
-        if (!cr) { sansPlace(x, tx, t, 'aucun critère avant lui' + (t === 'ponderation' ? ' ; une ligne de total prend l’étiquette « Total »' : '')); return; }
+        if (!cr) { sansPlace(x, tx, t, raisonSansCritere(x, t)); return; }
         LIRE_SOUS_CRITERE[t](x, cr, id, tx, t);
     }
 
