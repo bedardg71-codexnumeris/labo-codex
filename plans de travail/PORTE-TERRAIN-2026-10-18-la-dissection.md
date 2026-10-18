@@ -72,3 +72,16 @@ Relevé de 13 h 14 (sur 1.204.0) : 0.1 à 2.4 passées ; **2.5 en échec** sur l
 | 5.3 | Coupe et étiquette tes lignes (Critère, Pondération, Élément observable), tes totaux en « Total » ou « À ignorer », puis « Créer ma grille ». | La grille se crée en points ; ou chaque raison qui reste nomme le critère en cause. | Les raisons qui restent, s'il y en a |
 | 5.4 | Reprends 2.6 à 2.12 de la porte (la grille créée dans Grilles de critères, la grille de ta collègue, l'iPad). | Comme écrit plus haut. | Le numéro des rangées en échec |
 | 5.5 | iPad : prends « Couper » et coupe un morceau au doigt. | La coupe tombe là où ton doigt touche, entre deux mots ; la grille ne défile pas pendant le geste. | Un geste difficile au doigt |
+
+## §6 · Reprise sur la 1.206.0 (« Rattacher »), ajoutée par Cowork le 18 oct. à 17 h 23
+
+Relevé de 16 h 43 (sur 1.205.0) : dans la case où le nom « Idées secondaires » s'écrit sur trois lignes, entrecoupées de cases à cocher, « (explications, procédés, » et « preuves) » deviennent des critères à part. La 1.206.0 ajoute « Rattacher ». Ce que les bancs mesurent déjà n'y est pas : le lien défait, les refus, l'étiquette retirée d'une suite, la marque qui suit l'étiquette de son morceau.
+
+| N° | Geste | Attendu | À noter (champ) |
+|---|---|---|---|
+| 6.1 | Recharge en vidant le cache ; lis le numéro en bas de page, puis les Nouvelles. | **1.206.0** ; en tête des Nouvelles, « Rattacher un morceau ». Sinon, arrête-toi. | Version affichée |
+| 6.2 | Mac : ta grille sur le symbolisme, coupée comme en 5.3 ; prends « Rattacher », touche « (explications, procédés, », puis « Idées secondaires ». | La ligne d'état lit « Idées secondaires (explications, procédés, » ; « (explications, procédés, » garde un trait en pointillé et « ↳ ». | Ce que la ligne d'état a lu |
+| 6.3 | Refais le geste pour « preuves) », puis « Créer ma grille » et « La voir dans Grilles de critères ». | Avant même de créer, les deux lignes de ta capture de 17 h 24 (« des points ou des niveaux », « les points de 2 critères ») ne s'affichent plus. Puis un seul critère, « Idées secondaires (explications, procédés, preuves) », avec sa pondération. | Le nom du critère créé |
+| 6.4 | Si tu travailles en mode sombre : « Rattacher » en main, regarde les flèches et les pointillés sur ta grille. | Lisibles. Sinon, passe cette rangée. | Ce qui se lit mal |
+| 6.5 | iPad : au doigt, rattache « preuves) » à « Idées secondaires » (deux touchers sur des lignes courtes et voisines). | Chaque toucher prend le morceau visé, pas son voisin ; la grille ne défile pas pendant le geste. | Un toucher qui a pris le mauvais morceau |
+

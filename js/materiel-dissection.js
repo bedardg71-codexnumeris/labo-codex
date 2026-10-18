@@ -63,14 +63,14 @@
         coupe: function (a, b) { return 'Morceau coupé en deux : « ' + a + ' » et « ' + b + ' ».'; },
         unMot: 'Ce morceau n’a qu’un mot : il ne se coupe pas.',
         annulee: function (t) { return 'Coupe annulée : « ' + t + ' » est recollé.'; },
-        // Lot 7, texte provisoire (Claude Code, 18 oct.) : quand l'annulation défait un lien.
+        // Lot 7 : quand l'annulation défait un lien. Validé G. 18 oct. 17 h 18.
         lienDefait: ' Le lien qui touchait ses parties est défait.'
     };
 
     /**
-     * Lot 7, « Rattacher » : textes PROVISOIRES de Claude Code (18 oct.), sur le modèle de ceux de « Couper »,
-     * listés dans la demande de relecture ; le refus « déjà la suite » est celui de la consigne du lot.
-     * Les textes collés y entrent par leurs premiers mots (`premiersMots`).
+     * Lot 7, « Rattacher » : textes de Claude Code (18 oct.), sur le modèle de ceux de « Couper » ; le refus
+     * « déjà la suite » est celui de la consigne du lot ; le refus « boucle », réécrit par Grégoire. Validé G.
+     * 18 oct. 17 h 18. Les textes collés y entrent par leurs premiers mots (`premiersMots`).
      */
     var TEXTES_LIEN = {
         bandeau: 'Outil « Rattacher » : touche d’abord le morceau qui en continue un autre, puis celui qu’il continue. Touche un morceau déjà rattaché pour défaire son lien.',
@@ -82,7 +82,7 @@
         etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle du premier morceau vaut pour le texte entier.'; },
         defait: function (b) { return 'Lien défait : « ' + b + ' » redevient un morceau à part.'; },
         soi: 'Un morceau ne se rattache pas à lui-même.',
-        boucle: function (b) { return 'Ce morceau est déjà la suite de « ' + b + ' » : les rattacher dans l’autre sens ferait une boucle.'; },
+        boucle: function (b) { return 'Ce morceau est déjà la suite de « ' + b + ' » : ils sont déjà rattachés, dans l’autre sens.'; },
         dejaSuite: function (a) { return 'Ce morceau est déjà la suite de « ' + a + ' » : rattache plutôt à celui-là.'; },
         sansEtiquette: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour les deux. Défais le lien avec « Rattacher » pour l’étiqueter à part.'; },
         suiteDe: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; }
@@ -949,7 +949,8 @@
         var n = etat.morceaux.ordre.length;
         dire(message || (doc.mode === 'table'
             ? 'Tableau collé : ' + pluriel(doc.rows.length, 'rangée', 'rangées') + ', ' + pluriel(n, 'morceau', 'morceaux') + '. Touche une étiquette, puis surligne.'
-            : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rattachera les morceaux par leur ordre.'));
+            // Validé G. 18 oct. 9 h 52 avec « rattachera » ; revu pour le nom de l'outil du lot 7, validé G. 18 oct. 17 h 18.
+            : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les morceaux selon leur ordre.'));
         var titre = el('dissection-titre');
         if (titre) titre.focus();   // règle SPA : le focus suit le changement de vue
         return true;
