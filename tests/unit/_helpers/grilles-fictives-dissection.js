@@ -109,3 +109,41 @@ export const GRILLE_N = [
     critereN(2, 35),
     critereN(3, 25)
 ];
+
+// ---------------------------------------------------------------------------
+// (d) Lot 5 (« Couper ») : la FORME de la grille de la porte du 18 oct. (13 h 14), textes INVENTÉS.
+//     Un tableau d'une colonne ; trois sections ; chaque critère écrit SUR UNE LIGNE avec son nom,
+//     « / N » et ses cases « [ ] … / … » (plus de 200 caractères) ; deux lignes de total, « / 70 »
+//     (parties A et B : 10 + 20 + 15 + 25) et « / 30 » (partie C : 10 + 20).
+// ---------------------------------------------------------------------------
+const casesD = (n) => ['le premier repère fictif ' + n + ' est relevé / n’est pas relevé',
+    'le deuxième repère fictif ' + n + ' est expliqué / n’est pas expliqué',
+    'le troisième repère fictif ' + n + ' est relié à l’ensemble / n’y est pas relié'];
+/** Les trois morceaux qu'un enseignant tirerait d'une ligne de critère : son nom, « / N », ses cases. */
+export function partiesD(nom, n, k) {
+    return [nom, '/ ' + n, casesD(k).map((c) => '[ ] ' + c).join(' ')];
+}
+export const CRITERES_D = [
+    ['Repérage fictif des images', 10], ['Classement fictif des images', 20],
+    ['Interprétation fictive des motifs', 15], ['Mise en relation fictive des motifs', 25],
+    ['Rédaction fictive de la synthèse', 10], ['Justesse fictive de la langue', 20]
+];
+/** La ligne d'un critère telle que collée : ses trois parties, bout à bout. */
+export const ligneD = (i) => partiesD(CRITERES_D[i][0], CRITERES_D[i][1], i + 1).join(' ');
+export const SECTIONS_D = ['PARTIE A : REPÉRER', 'PARTIE B : INTERPRÉTER', 'PARTIE C : RÉDIGER'];
+export const TOTAUX_D = ['Total des parties A et B : / 70', 'Total de la partie C : / 30'];
+/** (d), étiquetée comme le 18 oct. : titre, sections, critères sur leur ligne entière, une Pondération sur chaque total. */
+export const GRILLE_D = [
+    [{ l: [['Évaluation fictive sur les images', 'titre']] }],
+    [{ l: [[SECTIONS_D[0], 'section']] }],
+    [{ l: [[ligneD(0), 'critere']] }],
+    [{ l: [[ligneD(1), 'critere']] }],
+    [{ l: [[SECTIONS_D[1], 'section']] }],
+    [{ l: [[ligneD(2), 'critere']] }],
+    [{ l: [[ligneD(3), 'critere']] }],
+    [{ l: [[TOTAUX_D[0], 'ponderation']] }],
+    [{ l: [[SECTIONS_D[2], 'section']] }],
+    [{ l: [[ligneD(4), 'critere']] }],
+    [{ l: [[ligneD(5), 'critere']] }],
+    [{ l: [[TOTAUX_D[1], 'ponderation']] }]
+];

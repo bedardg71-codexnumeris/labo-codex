@@ -1,12 +1,12 @@
-# Consigne du jour – la dissection, étape 4 : la version (dimanche 18 octobre)
+# Consigne du jour – la dissection, lot 5 : « Couper » (dimanche 18 octobre, après-midi)
 
-> Écrite par Cowork le dimanche 18 octobre 2026 à 10 h 22 (Toronto, mesuré par `date`). Elle remplace celle de 9 h 57 (étape 3 : faite, `4c16a4f0`, relue sans correction), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-3-mots.md`. **Commite avec ton premier commit** : ce fichier, ce déplacement, `CONSIGNE-LOT-2026-10-18-dissection-4-version.md` et le plan (étape 3 cochée).
+> Écrite par Cowork le dimanche 18 octobre 2026 à 13 h 17 (Toronto, mesuré par `date`). Elle remplace celle de 10 h 22 (étape 4 : 1.204.0 en ligne, `74ab9cc3`), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-4-version.md`.
 
 ## Où on en est
 
-- En ligne : `71cdde64` (1.203.0). `main` local à `4c16a4f0`, sept commits devant, rien de poussé.
-- Étapes 1 à 3 du plan : closes.
+- En ligne : `74ab9cc3` (1.204.0) ; `main` local = `origin/main`, plus des documents non commités (la porte retouchée par Cowork, son verdict de relecture, le plan).
+- La porte de Grégoire (13 h 14) : sa grille sur le symbolisme ne se crée pas. Décision de Grégoire, 13 h 16 : ajouter « Couper » maintenant.
 
 ## Le mandat
 
-Le **temps A** de `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-4-version.md` : la release 1.204.0, Vitest, la porte terrain en markdown, la demande de relecture. **Puis arrête-toi** : le temps B (verdict et push) viendra par un second relais, Cowork fermé.
+Le lot 5 : `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`. Puis arrête-toi : la demande de relecture, pas de version, pas de push.

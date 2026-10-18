@@ -28,6 +28,9 @@
  * niveaux, ou une grille « les deux » que l'enseignant choisit de compter par niveaux, devient le
  * modèle EN NIVEAUX (une échelle, puis la grille). La plage et la note retenue de chaque niveau sont
  * celles qu'il a SAISIES, rien de proposé (décision de Grégoire, 18 oct., 8 h 43).
+ * Lot 5 (`CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`) : `couper` un morceau en deux (jamais dans un
+ * mot, rien de perdu), `recoller` ; des pondérations sur chaque critère, sans niveaux, font une grille en
+ * points ; les raisons d'un refus NOMMENT le critère ou le morceau en cause, sans renvoi à l'assistant.
  */
 (function () {
     'use strict';
@@ -178,6 +181,95 @@
     };
 
     // ------------------------------------------------------------------
+    // 1 bis. COUPER (lot 5) : un morceau devient deux, à la même place
+    // ------------------------------------------------------------------
+
+    /**
+     * Lot 5 (`CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`) : les outils de la palette qui ne sont
+     * pas des étiquettes. Ils ne surlignent rien et ne comptent rien. Aide provisoire (étape des mots).
+     */
+    D.OUTILS = [
+        { k: 'couper', nom: 'Couper', aide: 'Sépare un morceau en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' }
+    ];
+    var OUTIL = {};
+    D.OUTILS.forEach(function (o) { OUTIL[o.k] = o; });
+    D.OUTIL = OUTIL;
+
+    /** L'espace la plus proche d'un point du texte (un rang entre deux caractères), ou -1 s'il n'y en a pas. */
+    function espaceProche(t, decalage) {
+        var meilleure = -1, ecart = Infinity;
+        for (var i = 0; i < t.length; i++) {
+            if (!/\s/.test(t.charAt(i))) continue;
+            // L'espace i sépare les rangs i et i + 1 : y toucher, c'est un écart nul.
+            var e = decalage < i ? i - decalage : (decalage > i + 1 ? decalage - (i + 1) : 0);
+            if (e < ecart) { ecart = e; meilleure = i; }
+        }
+        return meilleure;
+    }
+
+    /** Le plus grand numéro d'identifiant du document : les parties d'une coupe prennent les suivants. */
+    function dernierNumero(doc) {
+        return D.morceaux(doc).ordre.reduce(function (m, id) {
+            var n = /^m(\d+)$/.exec(id);
+            return n ? Math.max(m, parseInt(n[1], 10)) : m;
+        }, 0);
+    }
+
+    /**
+     * Coupe le morceau `id` en deux, à l'espace la plus proche du rang `decalage` (0 à la longueur
+     * de son texte) : jamais dans un mot. Les deux parties, sans leurs espaces de bord, prennent sa
+     * place, l'une après l'autre (dans la même case d'un tableau), avec des identifiants neufs ; mises
+     * bout à bout avec une espace, elles redonnent son texte. L'application ne coupe jamais d'elle-même.
+     *
+     * @returns {{doc: object, parties: string[]}|null} - le NOUVEAU document (l'ancien est intact) et
+     *   les identifiants des deux parties ; null si le morceau n'existe pas ou n'a qu'un mot.
+     */
+    D.couper = function (doc, id, decalage) {
+        if (!doc) return null;
+        var n = dernierNumero(doc), parties = null;
+        function trancher(lines) {
+            var out = [];
+            lines.forEach(function (L) {
+                if (L.id !== id) { out.push(L); return; }
+                var t = String(L.t);
+                var i = espaceProche(t, Math.max(0, Math.min(t.length, Math.round(Number(decalage) || 0))));
+                var a = i < 0 ? '' : t.slice(0, i).trim(), b = i < 0 ? '' : t.slice(i + 1).trim();
+                if (!a || !b) { out.push(L); return; }
+                parties = ['m' + (n + 1), 'm' + (n + 2)];
+                out.push({ id: parties[0], t: a }, { id: parties[1], t: b });
+            });
+            return out;
+        }
+        var nouveau = doc.mode === 'table'
+            ? { mode: 'table', rows: doc.rows.map(function (row) {
+                return row.map(function (cell) { return { cs: cell.cs, rs: cell.rs, lines: trancher(cell.lines) }; });
+            }) }
+            : { mode: 'texte', lines: trancher(doc.lines) };
+        return parties ? { doc: nouveau, parties: parties } : null;
+    };
+
+    /** Les étiquettes après une coupe : la première partie garde celle du morceau coupé, la seconde n'en a pas. */
+    D.liensApresCoupe = function (liens, id, parties) {
+        var l = Object.assign({}, liens);
+        if (l[id]) l[parties[0]] = l[id];
+        delete l[id];
+        return l;
+    };
+
+    /**
+     * Annuler une coupe : `coupe` = { doc (le document d'avant), id, type (l'étiquette d'origine, ou
+     * null), parties }. Rend ce document tel quel (les deux parties recollées exactement) et les
+     * étiquettes, sans celles des parties, avec celle d'origine rendue au morceau. Les coupes
+     * s'annulent de la dernière à la première : le document d'avant est alors celui de la page.
+     */
+    D.recoller = function (liens, coupe) {
+        var l = Object.assign({}, liens);
+        coupe.parties.forEach(function (p) { delete l[p]; });
+        if (coupe.type) l[coupe.id] = coupe.type;
+        return { doc: coupe.doc, liens: l };
+    };
+
+    // ------------------------------------------------------------------
     // 2. COMPRENDRE : des étiquettes à la grille que l'application en tire
     // ------------------------------------------------------------------
 
@@ -281,7 +373,11 @@
         ponderation: function (x, cr, id, tx, t) {
             var np = nombres(tx);
             if (!np.length) { sansPlace(x, tx, t, 'aucun nombre'); return; }
-            if (cr.auto && cr.reponses.length) cr.reponses[cr.reponses.length - 1].pondApres = np[np.length - 1]; else cr.pond = np[np.length - 1];
+            if (cr.auto && cr.reponses.length) { cr.reponses[cr.reponses.length - 1].pondApres = np[np.length - 1]; return; }
+            // Lot 5 : une seconde Pondération (celle d'une ligne de total, après le dernier critère) ne
+            // remplace plus en silence celle du critère. Texte provisoire (étape des mots).
+            if (cr.pond != null) { sansPlace(x, tx, t, 'son critère a déjà une pondération (' + String(cr.pond).replace('.', ',') + ') ; une ligne de total prend l’étiquette « Total »'); return; }
+            cr.pond = np[np.length - 1];
         },
         descripteur: lireDescripteur,
         points: lirePoints
@@ -297,7 +393,8 @@
         var cr = cible(x, id);
         // Une réponse sans critère, quand aucun niveau n'est nommé : un critère « à nommer ».
         if (t === 'descripteur' && !cr && !x.avecNiveaux) cr = nouveauCritere(x, null, true);
-        if (!cr) { sansPlace(x, tx, t, 'aucun critère avant lui'); return; }
+        // Lot 5 : une Pondération posée sur une ligne de total ; texte provisoire (étape des mots).
+        if (!cr) { sansPlace(x, tx, t, 'aucun critère avant lui' + (t === 'ponderation' ? ' ; une ligne de total prend l’étiquette « Total »' : '')); return; }
         LIRE_SOUS_CRITERE[t](x, cr, id, tx, t);
     }
 
@@ -360,7 +457,10 @@
         R.criteres = couperSansNom(R.criteres);
         numeroterEtDeduire(R);
         R.avecNiveaux = x.avecNiveaux;
-        R.aPoints = (R.nb.points || 0) > 0;
+        // Lot 5 : sans niveaux, des pondérations sur CHAQUE critère suffisent à une grille en points :
+        // chaque critère est noté sur sa pondération, telle qu'écrite (aucune conversion).
+        var pondsSeules = !R.avecNiveaux && R.criteres.length > 0 && R.criteres.every(function (c) { return c.pond != null; });
+        R.aPoints = (R.nb.points || 0) > 0 || pondsSeules;
         return R;
     };
 
@@ -522,11 +622,75 @@
 
     function compte(n, un, plusieurs) { return n === 1 ? un : plusieurs.replace('#', n); }
 
+    // ------------------------------------------------------------------
+    // Lot 5 : des raisons qui NOMMENT ce qui bloque, et aucun renvoi à l'assistant débranché.
+    // Textes provisoires de Claude Code (18 oct.), à trancher par Grégoire à l'étape des mots.
+    // ------------------------------------------------------------------
+
+    D.LONGUEUR_PREMIERS_MOTS = 40;
+
+    /** Les premiers mots d'un texte (40 caractères au plus, coupés entre deux mots), suivis de « … » s'il continue. */
+    function premiersMots(t) {
+        var s = propre(t);
+        if (s.length <= D.LONGUEUR_PREMIERS_MOTS) return s;
+        var coupe = s.lastIndexOf(' ', D.LONGUEUR_PREMIERS_MOTS);
+        return s.slice(0, coupe > 0 ? coupe : D.LONGUEUR_PREMIERS_MOTS) + '…';
+    }
+    D.premiersMots = premiersMots;
+
+    /** « « A », « B » et « C » », ou, au-delà de trois, « « A », « B », « C » et N autres ». */
+    function nommer(textes) {
+        var g = textes.slice(0, 3).map(function (t) { return '« ' + premiersMots(t) + ' »'; });
+        if (textes.length > 3) return g.join(', ') + ' et ' + (textes.length - 3) + (textes.length - 3 > 1 ? ' autres' : ' autre');
+        return g.length > 1 ? g.slice(0, -1).join(', ') + ' et ' + g[g.length - 1] : g.join('');
+    }
+
+    function aCouper(base, textes) {
+        return base + ' pour ' + nommer(textes) + ' : ' + (textes.length > 1 ? 'coupe-les' : 'coupe-le') + ' avec « Couper »';
+    }
+
+    /** Le nom d'un critère compris, tel qu'à l'écran : son texte, ou « Critère à nommer (N) ». */
+    function nomAffiche(c) { return c.nom != null ? c.nom : 'Critère à nommer (' + c.numero + ')'; }
+
+    /**
+     * Un message de `materielAssistant.calculs(m).manquants` → sa forme dans la dissection : les mêmes
+     * conditions, mais le critère ou le morceau en cause nommé, et jamais une étape de l'assistant.
+     * Les messages de l'assistant lui-même ne changent pas. `null` : le message est retiré (déjà dit).
+     */
+    function raisonDissection(t, R, m, b) {
+        var A = window.materielAssistant;
+        function texteDe(p) { return String(p && p.valeur != null ? p.valeur : '').trim(); }
+        function criteresOu(pred) { return m.criteres.map(function (c, i) { return pred(c) ? nomAffiche(R.criteres[i]) : null; }).filter(function (x) { return x != null; }); }
+        function sansPoids(c) { return isNaN(A.nombre(c.ponderation.valeur)); }
+        if (t === 'des noms de critères plus courts (' + A.MAX_NOM + ' caractères au plus)') {
+            return aCouper('des noms de critères plus courts (' + A.MAX_NOM + ' caractères au plus)', criteresOu(function (c) { return texteDe(c.nom).length > A.MAX_NOM; }));
+        }
+        if (t === 'des sous-critères plus courts (' + A.MAX_NOM + ' caractères au plus)') {
+            var sous = [];
+            m.criteres.forEach(function (c) { (c.sousCriteres || []).forEach(function (s) { if (s.length > A.MAX_NOM) sous.push(s); }); });
+            return aCouper('des éléments observables plus courts (' + A.MAX_NOM + ' caractères au plus)', sous);
+        }
+        if (t === 'des cases plus courtes (5 000 caractères au plus)') {
+            var cases = [];
+            m.criteres.forEach(function (c) { c.cases.forEach(function (d) { if (texteDe(d).length > A.MAX_CASE) cases.push(texteDe(d)); }); });
+            return aCouper('des réponses plus courtes (5 000 caractères au plus)', cases);
+        }
+        // Le seul message de `calculs` qui renvoie à une étape de l'assistant (`NOMS_ETAPES.roles`).
+        if (t.indexOf('les points de chaque critère') === 0 && t.indexOf('« ' + A.NOMS_ETAPES.roles + ' »') > 0) {
+            // Sans aucune logique, « des points ou des niveaux » l'a déjà dit.
+            return b.logique ? 'les points de chaque critère : surligne le poids de chaque critère avec l’étiquette « Pondération », ou ce que vaut chaque réponse avec l’étiquette « Points »' : null;
+        }
+        if (t === 'les points d’un critère' || /^les points de \d+ critères$/.test(t)) return t + ' (' + nommer(criteresOu(sansPoids)) + ')';
+        if (t === 'la pondération d’un critère' || /^la pondération de \d+ critères$/.test(t)) return t + ' (' + nommer(criteresOu(sansPoids)) + ')';
+        return t;
+    }
+
     /**
      * Peut-on créer ? `{ enNiveaux, raisons, avertissements, modele }`. Les raisons d'un refus, dans
      * l'ordre : le nom, les morceaux sans place, les points ou les niveaux, les réponses par critère,
-     * puis les mots de `calculs(m).manquants`, tels quels (en niveaux : la plage, la note retenue, les
-     * codes, le nombre de niveaux). Le total qui ne tombe pas juste n'en est pas une : le constat est
+     * puis les mots de `calculs(m).manquants` (en niveaux : la plage, la note retenue, les codes, le
+     * nombre de niveaux), ceux qui concernent des critères ou des morceaux précis les NOMMANT, et sans
+     * aucun renvoi à une étape de l'assistant (lot 5, `raisonDissection`). Le total qui ne tombe pas juste n'en est pas une : le constat est
      * déjà à l'écran. En niveaux, les avertissements de `calculs(m)` (plages qui se chevauchent ou
      * laissent un trou, note retenue hors de sa plage), tels quels : ils n'empêchent rien.
      * Textes de Claude Code (18 oct.), validé G. 18 oct.
@@ -550,13 +714,15 @@
             if (c.parCle.length > D.MAX_REPONSES) raisons.push('au plus ' + D.MAX_REPONSES + ' réponses par critère (« ' + c.nom.valeur + ' » en a ' + c.parCle.length + ')');
             if (c.parCle.some(function (x) { return x.cle.charAt(0) === '_'; })) raisons.push('des points qui ne commencent pas par « _ » (« ' + c.nom.valeur + ' »)');
         });
-        if (m.criteres.some(function (c) { return c.parCle && c.parCle.some(function (x) { return x.texte.length > D.MAX_REPONSE; }); })) {
-            raisons.push('des réponses plus courtes (5 000 caractères au plus)');
-        }
+        var longues = [];
+        m.criteres.forEach(function (c) { (c.parCle || []).forEach(function (x) { if (x.texte.length > D.MAX_REPONSE) longues.push(x.texte); }); });
+        if (longues.length) raisons.push(aCouper('des réponses plus courtes (5 000 caractères au plus)', longues));
         var calc = window.materielAssistant.calculs(m, contexte);
         calc.manquants.forEach(function (t) {
             // Sans nom, « le nom de la grille » redirait la première raison.
-            if (!(sansNom && t === 'le nom de la grille')) raisons.push(t);
+            if (sansNom && t === 'le nom de la grille') return;
+            var r = raisonDissection(t, R, m, b);
+            if (r != null) raisons.push(r);
         });
         var avertissements = enNiveaux ? [calc.avertPlages, calc.avertNotes].filter(Boolean) : [];
         return { enNiveaux: enNiveaux, raisons: raisons, avertissements: avertissements, modele: m };

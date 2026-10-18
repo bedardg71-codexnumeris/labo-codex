@@ -28283,6 +28283,9 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .dis-t-points { --dis-c: var(--dis-c-points); --dis-h: var(--dis-h-points); }
 .dis-t-suite { --dis-c: var(--dis-c-suite); --dis-h: var(--dis-h-suite); }
 .dis-t-ignorer { --dis-c: var(--dis-c-ignorer); --dis-h: var(--dis-h-ignorer); }
+/* Lot 5 : « Couper » est un OUTIL, pas une étiquette : rien ne prend sa couleur ; son trait est en pointillé. */
+.dis-t-couper { --dis-c: var(--texte-secondaire); --dis-h: transparent; }
+.dissection-outil .dissection-etiquette-trait { background: none; box-shadow: none; border-left: 3px dashed var(--dis-c); }
 
 .dissection h2, .dissection h3, .dissection p { margin: 0; }
 .dissection-tete { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; justify-content: space-between; }
@@ -28350,6 +28353,8 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 /* --dis-actif : la couleur de l'étiquette en main, résolue sur le canevas (un morceau surligné garde la sienne dans --dis-c). */
 .dissection-pointage { --dis-actif: var(--dis-c); }
 .dissection-pointage .dissection-morceau:hover { outline: 2px dashed var(--dis-actif); outline-offset: 1px; }
+/* Lot 5 : « Couper » en main, le curseur montre l'endroit de la coupe. */
+.dissection-coupe .dissection-morceau { cursor: text; }
 .dissection-fleches { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 2; }
 .dissection-trait { fill: none; stroke: var(--dis-c); stroke-width: 1.8; opacity: .85; }
 .dissection-pointe { fill: var(--dis-c); }
