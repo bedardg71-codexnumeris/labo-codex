@@ -38,6 +38,6 @@
 ## Avancement
 
 - [x] 1 — `25584d62`, relu à 7 h 58 (accepté, deux corrections) ; corrections `77ecb741`, rapport et capture à 820 px vus par Cowork à 8 h 10
-- [ ] 2
+- [x] 2 — en points : `903e7706`, corrigé `0ba1be2d` (nom de la grille, décision de Grégoire 8 h 28) ; en niveaux : `cb125cb9` (plage et note retenue saisies, décision de 8 h 43), relu sans correction
 - [ ] 3
 - [ ] 4

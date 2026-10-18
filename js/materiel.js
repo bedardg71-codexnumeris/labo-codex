@@ -665,7 +665,8 @@
     }
 
     /**
-     * Étape 5 : la carte « Grille » seule ; « Pour t'en servir… » inchangé. Textes PROVISOIRES (étape 7).
+     * Étape 5 : la carte « Grille » seule ; « Pour t'en servir… » inchangé. Textes PROVISOIRES (étape 7) ;
+     * ceux de la carte « Ta grille » et du lien du bas : validé G. 18 oct. (« sur N points », ce jour-là).
      * La dissection, lot 2a : venue d'elle, la confirmation garde « Coller une autre grille » (même geste) ;
      * lot 2b : celle d'une grille en niveaux aussi (`confirmationHtml`).
      */
@@ -676,7 +677,7 @@
             '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
             '<p>' + e('Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' notés en points. Rien d’autre n’a changé dans l’application.') + '</p>' +
             '<div class="materiel-cartes-cree">' +
-            carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + '.', 'grille-criteres', 'La voir dans Grilles de critères') +
+            carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + (Math.abs(r.totalPoints) >= 2 ? ' points.' : ' point.'), 'grille-criteres', 'La voir dans Grilles de critères') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e(retour) + '</button></section>';
@@ -756,7 +757,7 @@
         return true;
     }
 
-    // Texte de Claude Code, PROVISOIRE (étape 3 du plan de la dissection).
+    // Texte de Claude Code, validé G. 18 oct. (étape 3 du plan de la dissection).
     var MESSAGE_RIEN_A_LIRE = 'Rien de lisible dans ce que tu as collé. Copie le tableau de ta grille dans Word ou Pages, ou le texte d’un PDF, puis colle-le ici.';
 
     /** Un document disséqué ouvre la dissection ; rien de lisible, un message. */

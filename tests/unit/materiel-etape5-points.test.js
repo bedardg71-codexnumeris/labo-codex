@@ -358,7 +358,7 @@ describe('étape 5 · U — l’interface', () => {
         const div = fenetreDom.document.createElement('div');
         div.innerHTML = materiel.confirmationHtml({ nom: 'G', nbC: 7, enPoints: true, totalPoints: 64, retro: false, descr: false, ids: {}, niveaux: [] });
         expect([...div.querySelectorAll('[data-action="materiel.voir"]')].map(b => b.getAttribute('data-param'))).toEqual(['grille-criteres', 'productions']);
-        expect(div.querySelector('.materiel-carte-cree span').textContent).toBe('7 critères, sur 64.');
+        expect(div.querySelector('.materiel-carte-cree span').textContent).toBe('7 critères, sur 64 points.');
         expect(div.querySelector('.materiel-suite span').textContent).toBe('Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.');
     });
 

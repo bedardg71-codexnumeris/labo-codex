@@ -28,7 +28,7 @@
  * `touch-action: none` ne vaut sur les morceaux que lorsqu'une étiquette est en main
  * (classe `dissection-pointage`), pour que le canevas défile au doigt le reste du temps.
  *
- * Textes d'écran de Claude Code ou de l'ébauche, PROVISOIRES : ils passent à l'étape 3 du plan.
+ * Textes d'écran de Claude Code ou de l'ébauche : validé G. 18 oct. (étape 3 du plan ; L3 réécrit ce jour-là).
  */
 (function () {
     'use strict';
@@ -318,7 +318,7 @@
 
     function phraseLogique(b) {
         if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + fmt(b.jusqua) : '') + '. Elle ne convertirait rien : ce serait à toi de dire laquelle compte pour la note.';
-        if (b.logique === 'points') return 'L’application y lirait une grille en points : les points de chaque critère s’additionnent' + (b.jusqua != null ? ' jusqu’à un total de ' + fmt(b.jusqua) : '') + '. Aucun niveau n’y est nommé, et l’application n’en inventerait pas.';
+        if (b.logique === 'points') return 'L’application y lirait une grille en points : les points de chaque critère s’additionnent' + (b.jusqua != null ? ' jusqu’à un total de ' + fmt(b.jusqua) : '') + '. Aucun niveau n’y est nommé (et l’application n’en inventerait pas).';
         if (b.logique === 'niveaux') return 'L’application y lirait une grille en niveaux : chaque critère se juge par niveau, sans points à additionner.';
         return '';
     }
@@ -425,7 +425,7 @@
         } catch (err) { return []; }
     }
 
-    // Textes de Claude Code, PROVISOIRES (étape 3 du plan) ; « Avant de créer, il reste : » est celui de la 1.203.
+    // Textes de Claude Code, validé G. 18 oct. ; « Avant de créer, il reste : » est celui de la 1.203.
     var TEXTES_CREER = {
         bouton: 'Créer ma grille',
         enCours: 'Création…',
@@ -708,7 +708,7 @@
     // Les gestes à deux temps : un premier toucher arme le bouton, le second agit
     // ------------------------------------------------------------------
 
-    /** Texte de repos et texte armé (« Confirmer : … » : de Claude Code, PROVISOIRE, étape 3). */
+    /** Texte de repos et texte armé (« Confirmer : … » : de Claude Code, validé G. 18 oct.). */
     var DEUX_TEMPS = {
         'materielDissection.toutRetirer': { repos: 'Retirer les étiquettes', armee: 'Confirmer : tout retirer' },
         'materielDissection.collerAutre': { repos: 'Coller une autre grille', armee: 'Confirmer : coller une autre grille' }

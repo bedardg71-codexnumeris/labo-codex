@@ -4172,28 +4172,29 @@
                      Grégoire le 16 oct., provisoires (relus au lot 3). Branché par js/materiel.js.
                      La dissection, lot 1 (18 oct. 2026) : un collage ouvre #materiel-dissection
                      (js/materiel-dissection.js) à la place de l'assistant en sept étapes, débranché.
-                     Textes de l'accueil retouchés et textes de la dissection : PROVISOIRES (étape 3 du plan). -->
+                     Textes de l'accueil et de la dissection : validé G. 18 oct. (étape 3 du plan ; A1, A2, A4 à A7 et D3
+                     réécrits ce jour-là, `CONSIGNE-LOT-2026-10-18-dissection-3-les-mots.md`). -->
                 <div id="conception-materiel" class="sous-section">
                     <!-- Bandeau « En construction » (demande de Grégoire, 17 oct. 2026) : HORS de #materiel-accueil
                          et de #materiel-lecture, que materiel.js masque tour à tour, pour qu'il se voie à toutes
                          les étapes. Reste jusqu'à ce que Grégoire décide de le retirer. -->
-                    <p id="materiel-en-construction" class="alerte alerte-attention" role="note"><span aria-hidden="true">🚧</span> Cet outil est en développement : il pourrait ne pas reconnaître toutes les grilles et certaines étapes manquent encore.</p>
+                    <p id="materiel-en-construction" class="alerte alerte-attention" role="note"><span aria-hidden="true">🚧</span> Cet outil est en développement : certaines grilles pourraient mal s’y afficher. D’autres étapes viendront, dont les rétroactions.</p>
                     <div id="materiel-accueil" class="materiel-accueil">
                         <div class="materiel-intro">
                             <h2>Apporter mon matériel</h2>
-                            <p>Ton matériel existe déjà. Tes grilles d’évaluation sont sans doute dans Word ou dans Pages : colle-les ici. Tu verras ta grille telle que tu l’as écrite, et c’est toi qui montres à l’application ce que chaque morceau veut dire.</p>
+                            <p>Ton matériel existe déjà ? Tes grilles d’évaluation sont sans doute dans Word ou dans Pages : colle-les ici. Tu verras ta grille telle que tu l’as écrite, et c’est toi qui montres à l’application ce que chaque morceau signifie.</p>
                         </div>
                         <ol class="materiel-etapes">
-                            <li><span class="materiel-etape-numero" aria-hidden="true">1</span><div><strong>Copie ton tableau</strong><span>Ouvre ta grille dans son fichier d’origine (Word, Pages ou un autre traitement de texte), sélectionne le tableau entier, et non seulement le texte de ses cases, puis copie-le. Copié depuis un PDF, il arriverait sans ses cases, en texte désordonné.</span></div></li>
+                            <li><span class="materiel-etape-numero" aria-hidden="true">1</span><div><strong>Copie ton tableau</strong><span>Ouvre ta grille dans son fichier d’origine (Word, Pages ou un autre traitement de texte), sélectionne le tableau entier – pas seulement le texte de ses cases (ou ses cellules), mais bien le tableau –, puis copie-le. Le texte copié d’un PDF est accepté aussi, mais il arrive sans ses cases : le fichier d’origine donne un meilleur résultat.</span></div></li>
                             <li><span class="materiel-etape-numero" aria-hidden="true">2</span><div><strong>Colle-le ici</strong><span>Ta grille s’affiche telle quelle, chaque ligne de chaque case devenue un morceau.</span></div></li>
-                            <li><span class="materiel-etape-numero" aria-hidden="true">3</span><div><strong>Étiquette, puis lis</strong><span>Avec la palette, tu surlignes tes critères, tes réponses, tes points ; l’application montre la grille qu’elle en tire.</span></div></li>
+                            <li><span class="materiel-etape-numero" aria-hidden="true">3</span><div><strong>Étiquette, puis crée</strong><span>Avec la palette, tu identifies tes sections, tes critères, tes points ; l’application te montre ensuite la grille telle qu’elle la comprend. Clique sur « Créer ma grille » afin de la ranger dans « Grilles de critères ».</span></div></li>
                         </ol>
                         <div class="materiel-collage">
                             <label for="materiel-zone-collage">Colle ta grille ici</label>
-                            <textarea id="materiel-zone-collage" class="controle-form materiel-zone" rows="7" placeholder="Clique ici, puis colle (⌘ V) le tableau copié dans Word ou Pages."></textarea>
+                            <textarea id="materiel-zone-collage" class="controle-form materiel-zone" rows="7" placeholder="Clique ici, puis colle (⌘ V) le tableau copié dans Word ou Pages, ou le texte d’un PDF."></textarea>
                             <p id="materiel-erreur" class="alerte alerte-erreur u-hide" role="alert"></p>
                             <div class="materiel-actions">
-                                <button type="button" class="btn btn-secondaire" data-action="materiel.reconnaitreTexte">Reconnaître le texte ci-dessus</button>
+                                <button type="button" class="btn btn-secondaire" data-action="materiel.reconnaitreTexte">Étiqueter le texte ci-dessus</button>
                                 <span class="materiel-actions-sep">Pas de document sous la main ?</span>
                                 <button type="button" class="btn btn-secondaire" data-action="materiel.essayerExemple">Essayer avec un exemple</button>
                                 <button type="button" class="materiel-btn-lien" data-action="materiel.taperMain">Taper ma grille à la main</button>
@@ -4210,7 +4211,7 @@
                                 <ol class="dissection-consignes">
                                     <li>Touche une étiquette dans la palette : elle devient ton surligneur.</li>
                                     <li>Touche les morceaux de ta grille qu’elle désigne, ou glisse dessus pour en surligner plusieurs d’un coup. Touche un morceau déjà surligné pour le retirer.</li>
-                                    <li>En bas, regarde la grille que l’application en tirerait.</li>
+                                    <li>En bas, lis la grille que l’application en tirerait, puis crée-la.</li>
                                 </ol>
                             </div>
                             <div class="dissection-actions">
@@ -14258,17 +14259,17 @@
     <script src="js/composeur-badges.js?v=20260905c"></script> <!-- Le texte troué, étape 3 (5 sept. 2026) : le badge s'affiche dans la phrase — une vue éditable par-dessus chaque zone, le textarea reste la valeur -->
     <script src="js/codes-annotation.js?v=20260903e"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/grilles.js?v=20261017b"></script> <!-- « Apporter mon matériel », étape 7 (17 oct.) : le champ du texte d’un critère redevient « Description » (D1) · texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20261017c"></script> <!-- « Apporter mon matériel », étape 7 (17 oct.) : le champ du texte d’un critère redevient « Description » (D1) · texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20261017a"></script> <!-- #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/cartouches.js?v=20261017a"></script> <!-- #647 : les quatre chemins de suppression d'une cartouche disent leur portée réelle et ce qui survit ; supprimerCartouche() (morte) retirée -->
     <script src="js/materiel-lecture.js?v=20261017a"></script> <!-- « Apporter mon matériel », étape 7 (17 oct.) : une partie en capitales prend une majuscule initiale (8.16) · « Apporter mon matériel », relecture de 5b (17 oct.) : un nombre seul, ou des points avec leur unité, dans une case de niveau · « Apporter mon matériel », étape 5b (17 oct.) : la reconnaissance — pied et calcul, puces, points des niveaux, réglettes, suites, cases à cocher, pas d’en-tête, parties, pondération au bout du nom · « Apporter mon matériel », étape 5 (17 oct.) : grille en points, rôle « Partie », nom et description d’une case de critère · « Apporter mon matériel », relecture du lot 3a (17 oct.) : puces retirées aussi de la description du critère · lot 3a (17 oct.) : dépliage des cases fusionnées, retours à la ligne, rôles des rangées et des colonnes · lot 1 (16 oct.) : lecture d'une grille collée, fonctions pures — CHARGÉ AVANT materiel.js -->
     <script src="js/materiel-assistant.js?v=20261017c"></script> <!-- « Apporter mon matériel », étape 7 (17 oct.) : textes validés par Grégoire · « Apporter mon matériel », étape 5b (17 oct.) : « / 0 » accepté, niveaux d’une grille en points, descripteurs sous le nom du niveau · « Apporter mon matériel », étape 5 (17 oct.) : étapes, points et création d’une grille en points · « Apporter mon matériel », lot 3a (17 oct.) : étape des rôles, codes corrigeables, forme du critère de l’éditeur · lot 2 (17 oct.) : logique de l'assistant et construction des trois objets, fonctions pures — CHARGÉ AVANT materiel.js -->
-    <script src="js/materiel-dissection-lecture.js?v=20261017d"></script> <!-- La dissection, lot 1 (18 oct.) : lire une grille collée en morceaux, comprendre ses étiquettes, fonctions pures — CHARGÉ APRÈS materiel-lecture.js, AVANT materiel.js -->
-    <script src="js/materiel-dissection.js?v=20261017e"></script> <!-- Corrections C1 et C2 (18 oct.) : palette à gauche jusqu’au téléphone, bandeau hors de l’atelier, « Coller une autre grille » à deux temps · La dissection, lot 1 (18 oct.) : palette, canevas, gestes au pointeur, flèches, lecture — rien n'est écrit -->
+    <script src="js/materiel-dissection-lecture.js?v=20261017e"></script> <!-- La dissection, lot 1 (18 oct.) : lire une grille collée en morceaux, comprendre ses étiquettes, fonctions pures — CHARGÉ APRÈS materiel-lecture.js, AVANT materiel.js -->
+    <script src="js/materiel-dissection.js?v=20261017f"></script> <!-- Corrections C1 et C2 (18 oct.) : palette à gauche jusqu’au téléphone, bandeau hors de l’atelier, « Coller une autre grille » à deux temps · La dissection, lot 1 (18 oct.) : palette, canevas, gestes au pointeur, flèches, lecture — rien n'est écrit -->
     <script src="js/materiel-creation.js?v=20261017a"></script> <!-- « Apporter mon matériel », étape 5 (17 oct.) : une grille en points s’écrit seule · « Apporter mon matériel », lot 2 (17 oct.) : les trois écritures de « Créer ma grille », défaites si l'une échoue -->
-    <script src="js/materiel.js?v=20261017d"></script> <!-- La dissection, lot 1 (18 oct.) : collage, texte et exemple ouvrent la dissection ; assistant débranché · « Apporter mon matériel », étape 7 (17 oct.) : textes validés par Grégoire · « Apporter mon matériel », étape 5b (17 oct.) : Vérification et aperçu d’une grille en points à niveaux · « Apporter mon matériel », étape 6 (17 oct.) : « Aller plus loin avec ta grille » sur la confirmation · « Apporter mon matériel », étape 5 (17 oct.) : étape « Points », Vérification et confirmation en points · « Apporter mon matériel », lot 3a (17 oct.) : l’étape « Ce que contient ton tableau », champs « Code » · lot 2 (17 oct.) : l'assistant, la vérification, la confirmation · lot 1 (16 oct.) : accueil de l'onglet -->
+    <script src="js/materiel.js?v=20261017e"></script> <!-- La dissection, lot 1 (18 oct.) : collage, texte et exemple ouvrent la dissection ; assistant débranché · « Apporter mon matériel », étape 7 (17 oct.) : textes validés par Grégoire · « Apporter mon matériel », étape 5b (17 oct.) : Vérification et aperçu d’une grille en points à niveaux · « Apporter mon matériel », étape 6 (17 oct.) : « Aller plus loin avec ta grille » sur la confirmation · « Apporter mon matériel », étape 5 (17 oct.) : étape « Points », Vérification et confirmation en points · « Apporter mon matériel », lot 3a (17 oct.) : l’étape « Ce que contient ton tableau », champs « Code » · lot 2 (17 oct.) : l'assistant, la vérification, la confirmation · lot 1 (16 oct.) : accueil de l'onglet -->
     <script src="js/export-pdf.js?v=20261012a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
     <script src="js/cours.js?v=20261014a"></script> <!-- Beta 99.74 b0529-1016 : chantier 0 refonte — _diagnostiquerModeleCours (read-only) -->
     <script src="js/contexte.js?v=20261012a"></script> <!-- Beta 95.2 : Support groupe-cours -->
@@ -14443,7 +14444,7 @@
     <script src="js/guidage-demo.js?v=20261017a"></script> <!-- #1039 : bandeau de l'Animation · Beta 99.42 b0512-0840 : retrait entrée evaluations-apercu morte -->
 
     <!-- Changelog dynamique -->
-    <script src="js/changelog-data.js?v=20261017a"></script> <!-- Entrée 1.203 « Apporter mon matériel » (17 oct.) · Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
+    <script src="js/changelog-data.js?v=20261017b"></script> <!-- Entrée 1.203 « Apporter mon matériel » (17 oct.) · Entrée 1.126 : l'Aide ne présente plus une pratique comme la définition des PAN -->
 
     <!-- Phase 2 onboarding : états vides + transitions de jalons -->
     <script src="js/etats-vides.js?v=20260911a"></script> <!-- Refonte nav SP5 : clé calendrier-trimestre -->

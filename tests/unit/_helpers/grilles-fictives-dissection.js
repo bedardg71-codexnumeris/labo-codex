@@ -36,7 +36,7 @@ export function liensPar(ordre, types) {
 const NIVEAUX_A = ['Ébauché', 'Développé', 'Solide', 'Accompli'];
 const sectionA = (nom) => [{ l: [[nom, 'section']] }, ...NIVEAUX_A.map((n) => ({ l: [[n, 'niveau']] }))];
 const critereA = (n, pts) => [
-    { l: [['L’élève accomplit la tâche fictive ' + n, 'critere'], ['· Indice observable ' + n + '.1', 'souscritere'], ['· Indice observable ' + n + '.2', 'souscritere']] },
+    { l: [['L’étudiant·e accomplit la tâche fictive ' + n, 'critere'], ['· Indice observable ' + n + '.1', 'souscritere'], ['· Indice observable ' + n + '.2', 'souscritere']] },
     { l: [['●', 'ignorer'], ['Tâche ' + n + ' absente', 'descripteur']] },
     ...pts.map((p, j) => ({ l: [['Tâche ' + n + ', palier ' + (j + 2), 'descripteur'], [p, 'points']] }))
 ];
