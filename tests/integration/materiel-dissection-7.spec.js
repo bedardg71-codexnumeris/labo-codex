@@ -185,7 +185,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     // Refus « boucle » : le nom choisi comme suite de sa propre suite. Puis le choix retouché tombe.
     await toucher(page, NOM_D7[0]);
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText('Ce morceau est déjà la suite de « Nuances fictives du propos » : les rattacher dans l’autre sens ferait une boucle.');
+    await expect(statut(page)).toHaveText('Ce morceau est déjà la suite de « Nuances fictives du propos » : ils sont déjà rattachés, dans l’autre sens.');
     await expect(fleche).toHaveCount(2);
     await toucher(page, NOM_D7[0]);
     await expect(statut(page)).toHaveText('Choix annulé : aucun lien créé.');

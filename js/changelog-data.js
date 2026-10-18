@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.206 (« Rattacher ») — titre et deux items validés par Grégoire le 18 oct. 2026 (17 h 22),
+            // transmis par Cowork (CONSIGNE-LOT-2026-10-18-dissection-8-version-1.206.md).
+            version: '1.206',
+            couleur: 'vert',
+            titre: 'Rattacher un morceau',
+            items: [
+                'Dans «&nbsp;Apporter mon matériel&nbsp;», l’outil «&nbsp;Rattacher&nbsp;» joint un morceau à celui dont il est la suite, quand ta grille écrit un même nom de critère sur plusieurs lignes d’une case. Tu touches la suite, puis le morceau qu’elle continue&nbsp;: l’application lit les deux comme un seul texte.',
+                'Un morceau rattaché garde une marque en pointillé&nbsp;; touche-le de nouveau avec «&nbsp;Rattacher&nbsp;» pour défaire le lien. Rien n’est déplacé dans ta grille.'
+            ]
+        },
+        {
             // 1.205 (« Couper ») — titre et quatre items validés par Grégoire le 18 oct. 2026 (13 h 49),
             // transmis par Cowork (CONSIGNE-LOT-2026-10-18-dissection-6-version-1.205.md).
             version: '1.205',
