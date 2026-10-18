@@ -469,6 +469,8 @@
                     ponderation: isNaN(pond) ? null : pond, type: 'holistique', formule: '',
                     niveauSOLO: 'multistructurel', verrouille: false
                 };
+                // La dissection, lot 9b : la marque « à compléter », que lit la garde de la note (`calculerPortee`).
+                if (isNaN(pond)) cr.ponderationACompleter = true;
                 // La forme de l'éditeur (`grilles.js`, `ajouterSousCritere`), dans l'ordre des lignes.
                 // Absent si aucun, comme un critère de l'éditeur sans sous-critère.
                 var sous = (c.sousCriteres || []).filter(Boolean);

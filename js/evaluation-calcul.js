@@ -947,6 +947,16 @@ function calculerPortee(criteresGrille, niveauDe, valeurDe) {
         const ponderation = Number(critere.ponderation) || 0;
         ponderationGrille += ponderation;
         const niveau = niveauDe(critere);
+        // La dissection, lot 9b (décision de Grégoire, 18 oct. 2026, 18 h 32) : un critère MARQUÉ « à compléter »
+        // (`ponderationACompleter`, posée par la création de la dissection ou par le champ « Points » vidé dans
+        // Grilles de critères) est hors note : pas de note tant que ses points manquent, même avec un niveau.
+        // ⚠ LE STOCK, ASSUMÉ : un critère ANCIEN sans pondération, sans la marque, est calculé comme avant
+        // (il sort de la note en silence, ses voisins la font) ; aucune note déjà remise ne change. Un 0 aussi.
+        if (critere.ponderationACompleter === true) {
+            if (niveau) nbCriteresAvecNiveau++;
+            criteresHorsNote.push({ critereId: critere.id, nom: critere.nom || critere.id, ponderation: ponderation, motif: 'ponderation-a-completer', niveau: niveau || '' });
+            return;
+        }
         if (!niveau) {
             if (ponderation > 0) {
                 criteresHorsNote.push({ critereId: critere.id, nom: critere.nom || critere.id, ponderation: ponderation, motif: 'sans-niveau', niveau: '' });
@@ -1150,9 +1160,12 @@ function texteCriteresHorsNote(portee) {
     const hors = (portee && Array.isArray(portee.criteresHorsNote)) ? portee.criteresHorsNote : [];
     const sansNiveau = hors.filter(c => c.motif === 'sans-niveau').map(c => c.nom + ' (' + c.ponderation + ' %)');
     const sansValeur = hors.filter(c => c.motif === 'niveau-sans-valeur').map(c => c.nom + ' (' + c.niveau + ')');
+    const aCompleter = hors.filter(c => c.motif === 'ponderation-a-completer').map(c => c.nom);
     const parts = [];
     if (sansNiveau.length) parts.push('sans niveau : ' + sansNiveau.join(', '));
     if (sansValeur.length) parts.push('niveau sans valeur dans l\'échelle : ' + sansValeur.join(', '));
+    // Lot 9b de la dissection, texte PROVISOIRE (Claude Code, 18 oct.).
+    if (aCompleter.length) parts.push('sans pondération : ' + aCompleter.join(', '));
     return parts.join(' ; ');
 }
 
@@ -1177,6 +1190,12 @@ function phrasesPorteeIncomplete(portee) {
         phrases.push('Pas de note : ' + (sansValeur.length > 1 ? 'les niveaux choisis n\'ont pas de valeur' : 'le niveau choisi n\'a pas de valeur')
             + ' dans l\'échelle — ' + sansValeur.map(c => c.nom + ' (' + c.niveau + ')').join(', ')
             + '. Donne une valeur ponctuelle à chaque niveau (Conception → Échelles de performance).');
+    }
+    // Lot 9b de la dissection, texte PROVISOIRE (Claude Code, 18 oct.).
+    const aCompleter = hors.filter(c => c.motif === 'ponderation-a-completer');
+    if (aCompleter.length) {
+        phrases.push('Pas de note tant qu\'un critère n\'a pas sa pondération — ' + aCompleter.map(c => c.nom).join(', ')
+            + '. Donne-' + (aCompleter.length > 1 ? 'leur leurs' : 'lui ses') + ' points dans Conception → Grilles de critères.');
     }
     return phrases;
 }

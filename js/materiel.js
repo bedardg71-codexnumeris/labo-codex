@@ -621,12 +621,13 @@
 
     /**
      * La dissection, lot 9 : combien de critères ont été créés sans pondération, à compléter dans Grilles de
-     * critères. Texte PROVISOIRE (Claude Code, 18 oct.) ; rien quand il n'en manque pas.
+     * critères ; lot 9b : la note affichera « -- » d'ici là (la garde de `calculerPortee`). Textes PROVISOIRES
+     * (Claude Code, 18 oct.) ; rien quand il n'en manque pas.
      */
     function aCompleterHtml(r) {
         if (!r.aCompleter) return '';
         return '<p class="materiel-a-completer">' + e('Il te restera à donner ' + (r.enPoints ? 'des points' : 'une pondération') + ' à ' +
-            pluriel(r.aCompleter, 'critère', 'critères') + ', dans « Grilles de critères ».') + '</p>';
+            pluriel(r.aCompleter, 'critère', 'critères') + ', dans « Grilles de critères ». D’ici là, la note d’une copie évaluée avec cette grille affichera « -- ».') + '</p>';
     }
 
     function confirmationHtml(r) {
