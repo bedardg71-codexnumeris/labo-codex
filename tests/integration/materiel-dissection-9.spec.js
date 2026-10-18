@@ -12,7 +12,11 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     « Créer ma grille » s'active, et la liste à part dit les deux critères à compléter ;
 //   · la confirmation compte les critères à compléter, sans « NaN » ni « null » ;
 //   · dans Grilles de critères, la ligne du total dit combien de critères n'ont pas de points ; saisis, le
-//     signal baisse puis disparaît, et les points sont écrits en base.
+//     signal baisse puis disparaît, et les points sont écrits en base ;
+//   · lot 9b : la marque « à compléter » posée à la création, retirée par la saisie, reposée quand le champ est
+//     vidé ; la portée calculée sur la grille en base est incomplète. La note « -- » à l'écran d'évaluation n'est
+//     pas conduite ici : il faudrait semer cours, élève, production et pratique ; elle lit `portee.incomplete`,
+//     que les specs #674 éprouvent déjà.
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);
@@ -86,14 +90,21 @@ test('dissection 9 · (d7) sans rattachement : créée avec deux critères sans 
     await bouton.click();
     await expect(page.locator('#materiel-titre-cree')).toHaveText('Ta grille « Évaluation fictive sur les images » est créée');
     const confirmation = page.locator('.materiel-confirmation');
-    await expect(confirmation).toContainText('Il te restera à donner des points à 2 critères, dans « Grilles de critères ».');
+    await expect(confirmation).toContainText('Il te restera à donner des points à 2 critères, dans « Grilles de critères ». D’ici là, la note d’une copie évaluée avec cette grille affichera « -- ».');
     await expect(confirmation).toContainText('3 critères, sur 24 points ; 2 critères sans points pour l’instant.');
     await expect(confirmation).not.toContainText('NaN');
     await expect(confirmation).not.toContainText('null');
 
-    // En base : `null` pour les deux critères sans points.
+    // En base : `null` pour les deux critères sans points, et (lot 9b) leur marque « à compléter ».
     const g = await page.evaluate(() => db.getSync(cle('grillesTemplates'), []).slice(-1)[0]);
-    expect(g.criteres.map((c) => c.ponderation)).toEqual([24, null, null]);
+    expect(g.criteres.map((c) => [c.ponderation, c.ponderationACompleter === true])).toEqual([[24, false], [null, true], [null, true]]);
+    // Lot 9b : la note d'une copie évaluée avec cette grille serait « -- » (la portée calculée sur la grille en base).
+    const portee = await page.evaluate((id) => {
+        const grille = db.getSync(cle('grillesTemplates'), []).find((x) => x.id === id);
+        return window.calculerPortee(grille.criteres, () => '20', () => 80);
+    }, g.id);
+    expect(portee.incomplete).toBe(true);
+    expect(portee.criteresHorsNote.map((c) => c.motif)).toEqual(['ponderation-a-completer', 'ponderation-a-completer']);
 
     // Grilles de critères : la ligne du total le dit ; chaque saisie le fait baisser, puis disparaître.
     await page.locator('[data-action="materiel.voir"][data-param="grille-criteres"]').click();
@@ -108,6 +119,13 @@ test('dissection 9 · (d7) sans rattachement : créée avec deux critères sans 
     await champs.nth(2).fill('4');
     await champs.nth(2).press('Tab');
     await expect(total).toHaveText('34 points');
-    await expect.poll(() => page.evaluate(() => db.getSync(cle('grillesTemplates'), []).slice(-1)[0].criteres.map((c) => c.ponderation))).toEqual([24, 6, 4]);
+    await expect.poll(() => page.evaluate(() => db.getSync(cle('grillesTemplates'), []).slice(-1)[0].criteres.map((c) => [c.ponderation, 'ponderationACompleter' in c])))
+        .toEqual([[24, false], [6, false], [4, false]]);
+    // Vider de nouveau un champ « Points » repose la marque (lot 9b).
+    await champs.nth(2).fill('');
+    await champs.nth(2).press('Tab');
+    await expect(total).toHaveText('30 points (1 critère sans points)');
+    await expect.poll(() => page.evaluate(() => db.getSync(cle('grillesTemplates'), []).slice(-1)[0].criteres[2]))
+        .toMatchObject({ ponderation: null, ponderationACompleter: true });
     expect(erreurs).toEqual([]);
 });

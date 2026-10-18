@@ -4578,9 +4578,28 @@ async function modifierParamFormuleCritereGrille(grilleId, critereIndex, clePara
     return grilleModifiee;
 }
 
+/**
+ * La dissection, lot 9b (`CONSIGNE-LOT-2026-10-18-dissection-9b-la-garde.md`, décision de Grégoire, 18 oct.,
+ * 18 h 32) : la pondération d'un critère, saisie ou VIDÉE. Vidé, le champ écrit `null` (plus NaN) et pose la
+ * marque `ponderationACompleter` : tant qu'elle y est, la note d'une copie affiche « -- » (`calculerPortee`).
+ * Un nombre saisi retire la marque. Seuls ce geste et la création de la dissection posent la marque : une
+ * grille existante ne la porte pas, et ses notes ne changent pas.
+ */
+function poserPonderation(critere, valeur) {
+    const n = (valeur === '' || valeur == null) ? NaN : Number(valeur);
+    if (Number.isFinite(n)) {
+        critere.ponderation = n;
+        delete critere.ponderationACompleter;
+    } else {
+        critere.ponderation = null;
+        critere.ponderationACompleter = true;
+    }
+}
+
 function modifierCritereTemp(index, champ, valeur) {
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
-    window.tempCriteres[index][champ] = valeur;
+    if (champ === 'ponderation') poserPonderation(window.tempCriteres[index], valeur);
+    else window.tempCriteres[index][champ] = valeur;
     if (champ === 'type') avecProjectionNeuve(window.tempCriteres[index]);   // lot 4, C.3
 }
 
@@ -4971,8 +4990,9 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
         const grille = grilles.find(g => g.id === grilleId);
         if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
 
-        // Mettre à jour le champ
-        grille.criteres[critereIndex][champ] = valeur;
+        // Mettre à jour le champ (lot 9b : la pondération, par `poserPonderation`)
+        if (champ === 'ponderation') poserPonderation(grille.criteres[critereIndex], valeur);
+        else grille.criteres[critereIndex][champ] = valeur;
         if (champ === 'type') avecProjectionNeuve(grille.criteres[critereIndex]);   // lot 4, C.3
         grille.dateModification = new Date().toISOString();
         grilleModifiee = grille;

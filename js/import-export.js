@@ -874,6 +874,9 @@ const SCHEMAS_IMPORT = {
                 nom: { type: 'string', maxLen: 200 },
                 description: { type: 'string', maxLen: 500 },
                 ponderation: { type: 'number' },
+                // La dissection, lot 9b — la marque « à compléter » voyage avec le critère : `'number'` ramène
+                // une pondération `null` à 0, mais la marque reste, et la garde de la note s'applique encore.
+                ponderationACompleter: { type: 'boolean' },
                 type: { type: 'string', maxLen: 50 },
                 formule: { type: 'string', maxLen: 200 },
                 niveauSOLO: { type: 'string', maxLen: 50 },
