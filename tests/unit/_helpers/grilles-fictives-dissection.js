@@ -147,3 +147,20 @@ export const GRILLE_D = [
     [{ l: [[ligneD(5), 'critere']] }],
     [{ l: [[TOTAUX_D[1], 'ponderation']] }]
 ];
+
+// ---------------------------------------------------------------------------
+// (d7) Lot 7 (« Rattacher ») : (d) complétée d'une case de la FORME de celle de la porte du 18 oct.
+//     (16 h 43), textes INVENTÉS : une partie D, puis un nom de critère écrit sur trois lignes d'une même
+//     case, entrecoupées de cases à cocher. Étiquetée comme ce jour-là : les deux fins du nom en Critère.
+// ---------------------------------------------------------------------------
+export const SECTION_D7 = 'PARTIE D : NUANCER';
+/** Le nom du critère, en trois lignes ; mises bout à bout avec une espace, le nom entier. */
+export const NOM_D7 = ['Nuances fictives du propos', '(exemples, contrastes,', 'renvois)'];
+export const POND_D7 = '/ 24';
+export const CASES_D7 = ['[ ] [ ] nuance fictive absente / présente', '[ ] [ ] nuance fictive peu développée / développée'];
+/** La case telle que collée : six lignes, dans l'ordre de sa grille. */
+export const CASE_D7 = [
+    [NOM_D7[0], 'critere'], [POND_D7, 'ponderation'], [CASES_D7[0], 'souscritere'],
+    [NOM_D7[1], 'critere'], [CASES_D7[1], 'souscritere'], [NOM_D7[2], 'critere']
+];
+export const GRILLE_D7 = [...GRILLE_D, [{ l: [[SECTION_D7, 'section']] }], [{ l: CASE_D7 }]];

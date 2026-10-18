@@ -82,10 +82,10 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#dissection-titre')).toBeFocused();   // règle SPA
     await expect(page.locator('#materiel-en-construction')).toBeVisible();
     await expect(page.locator('#dissection-contenu .dissection-morceau')).toHaveCount(24);
-    // Douze étiquettes, plus l'outil « Couper » (lot 5), juste après « Suite ».
+    // Douze étiquettes, plus les outils « Couper » (lot 5), juste après « Suite », et « Rattacher » (lot 7), après « Couper ».
     await expect(page.locator('#dissection-palette .dissection-etiquette:not(.dissection-outil)')).toHaveCount(12);
-    await expect(page.locator('#dissection-palette .dissection-outil')).toHaveCount(1);
-    await expect(page.locator('#dissection-palette [data-param="suite"] + [data-param="couper"]')).toHaveCount(1);
+    await expect(page.locator('#dissection-palette .dissection-outil')).toHaveCount(2);
+    await expect(page.locator('#dissection-palette [data-param="suite"] + [data-param="couper"] + [data-param="rattacher"]')).toHaveCount(1);
     await expect(page.locator('#dissection-comprise')).toContainText('Surligne ta grille');
 
     // Sans étiquette en main, le canevas défile au doigt sur les morceaux.
