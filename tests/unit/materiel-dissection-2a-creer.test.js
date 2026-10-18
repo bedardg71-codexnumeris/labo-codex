@@ -8,8 +8,8 @@
  *       constructeur) : grilles fictives (a), (b), (c) — critères, pondérations, sous-critères, clés et
  *       textes de `parNiveau`, préfixe de section, « Critère N », description de la grille.
  *   R — chaque refus (point 2) : sans Titre, un morceau sans place, aucun point, les mots de
- *       `calculs(m).manquants`, plus de 20 réponses ; une grille seulement en niveaux attend le lot 2b ;
- *       le total qui ne tombe pas juste n'empêche rien.
+ *       `calculs(m).manquants`, plus de 20 réponses ; le total qui ne tombe pas juste n'empêche rien.
+ *       (Une grille seulement en niveaux : lot 2b, `materiel-dissection-2b-niveaux.test.js`.)
  *   U — la « Suite » après des Points ou une Pondération (point 4, trouvaille 1 du lot 1).
  *   S — un collage piégé : son texte arrive tel quel dans l'objet, jamais interprété.
  *
@@ -52,7 +52,7 @@ function compriseTexte(lignes) {
 /** La création possible, puis l'objet construit. */
 function cree(R, contexte, nom) {
     const c = D.creation(R, contexte, nom);
-    expect(c.niveauxSeuls).toBe(false);
+    expect(c.enNiveaux).toBe(false);
     expect(c.raisons).toEqual([]);
     return A.construire(c.modele, ctx());
 }
@@ -194,10 +194,10 @@ describe('R — quand « Créer ma grille » est refusé, et pourquoi', () => {
         expect(c.raisons).toEqual(['une place pour le morceau étiqueté listé plus bas']);
     });
 
-    it('R.c — ni points ni niveaux : il manque des points', () => {
+    it('R.c — ni points ni niveaux : il manque des points ou des niveaux', () => {
         const c = D.creation(compriseTexte([['Grille fictive', 'titre'], ['Critère fictif', 'critere']]));
-        expect(c.niveauxSeuls).toBe(false);
-        expect(c.raisons[0]).toBe('des points : surligne ce que vaut chaque réponse avec l’étiquette « Points »');
+        expect(c.enNiveaux).toBe(false);
+        expect(c.raisons[0]).toBe('des points ou des niveaux : surligne ce que vaut chaque réponse avec l’étiquette « Points », ou le nom de chaque niveau avec l’étiquette « Niveau »');
     });
 
     it('R.d — les mots de calculs(m).manquants, tels quels : points non entiers, nom déjà pris', () => {
@@ -212,11 +212,6 @@ describe('R — quand « Créer ma grille » est refusé, et pourquoi', () => {
         const lignes = [['Grille fictive', 'titre'], ['Critère fictif', 'critere']];
         for (let k = 21; k >= 1; k--) lignes.push(['Réponse ' + k, 'descripteur'], [String(k), 'points']);
         expect(D.creation(compriseTexte(lignes)).raisons).toEqual(['au plus 20 réponses par critère (« Critère fictif » en a 21)']);
-    });
-
-    it('R.f — une grille seulement en niveaux attend le lot 2b : ni bouton, ni modèle', () => {
-        const c = D.creation(compriseTexte(TEXTE_C.filter((x) => x[1] !== 'points')));
-        expect(c).toEqual({ niveauxSeuls: true, raisons: [], modele: null });
     });
 
     it('R.g — un total qui ne tombe pas juste n’empêche pas de créer', () => {

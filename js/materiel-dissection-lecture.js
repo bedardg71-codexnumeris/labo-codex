@@ -24,6 +24,10 @@
  * Lot 2a (`CONSIGNE-LOT-2026-10-18-dissection-2a-creer-en-points.md`) : la grille comprise devient
  * le modèle EN POINTS de `materielAssistant.construire` (`modele`, `creation`) ; l'écriture reste
  * celle de `materielCreation.creer`.
+ * Lot 2b (`CONSIGNE-LOT-2026-10-18-dissection-2b-creer-en-niveaux.md`) : une grille seulement en
+ * niveaux, ou une grille « les deux » que l'enseignant choisit de compter par niveaux, devient le
+ * modèle EN NIVEAUX (une échelle, puis la grille). La plage et la note retenue de chaque niveau sont
+ * celles qu'il a SAISIES, rien de proposé (décision de Grégoire, 18 oct., 8 h 43).
  */
 (function () {
     'use strict';
@@ -434,36 +438,83 @@
     }
 
     /**
-     * La grille comprise → le modèle EN POINTS que `materielAssistant.construire` sait écrire. Rien
-     * d'inventé : ni niveau, ni échelle, ni cartouche. Avec des niveaux nommés, chaque niveau garde son
+     * Lot 2b : la clé de chaque niveau lu, à laquelle se rattache ce que l'enseignant saisit pour lui :
+     * son nom, et son rang parmi les niveaux du même nom (un nom ne contient jamais de saut de ligne).
+     * Une saisie suit ainsi SON niveau quand un autre s'ajoute ou se retire avant lui.
+     */
+    D.clesNiveaux = function (R) {
+        var vus = {};
+        return R.niveaux.map(function (n) { vus[n] = (vus[n] || 0) + 1; return n + '\n' + vus[n]; });
+    };
+
+    /**
+     * Lot 2b : la grille se crée-t-elle EN NIVEAUX ? Seulement en niveaux, oui ; « les deux », si
+     * l'enseignant l'a choisi (des points par défaut, décision de Grégoire, 18 oct., 7 h 31).
+     * @param {object} R - la grille comprise
+     * @param {{compte?: string}} [saisie] - `compte` : 'points' (défaut) ou 'niveaux'
+     */
+    D.enNiveaux = function (R, saisie) {
+        var logique = D.bilan(R).logique;
+        return logique === 'niveaux' || (logique === 'deux' && !!saisie && saisie.compte === 'niveaux');
+    };
+
+    function saisi(v) { var s = String(v == null ? '' : v).trim(); return paire(s, window.materielAssistant.etatSaisi(s)); }
+
+    /**
+     * La grille comprise → le modèle que `materielAssistant.construire` sait écrire. Rien d'inventé.
+     *
+     * EN POINTS (lot 2a) : ni échelle, ni cartouche. Avec des niveaux nommés, chaque niveau garde son
      * nom (les plages restent vides : elles ne servent pas en points) ; sans niveaux, chaque critère
      * porte ses réponses en `parCle`.
+     *
+     * EN NIVEAUX (lot 2b, `enNiveaux`) : chaque niveau, son nom tel qu'étiqueté, un code tiré de son nom
+     * (`materielLecture.coder`, corrigeable ensuite dans Échelles), puis la plage et la note retenue
+     * SAISIES, telles quelles (vides si rien n'est saisi). Nature « descripteurs » : ni cartouche ni
+     * rétroaction. La pondération : écrite, sinon tirée des points, sinon, si aucun critère n'en a, les
+     * parts égales de `materielLecture.partsEgales` (la règle de la 1.203). Mesuré le 18 oct. : la note
+     * d'une grille en niveaux rapporte les pondérations à leur somme (`calculerNote`,
+     * `evaluation-calcul.js`) ; elles se reprennent donc telles quelles, sans conversion.
+     *
      * @param {object} R - la grille comprise
      * @param {string} [nom] - C3 : le champ « Nom de ta grille », une fois modifié ; sinon le Titre étiqueté
+     * @param {{compte?: string, valeurs?: Object<string, {min?: string, max?: string, note?: string}>}} [saisie]
+     *   - lot 2b : le choix, et ce qui est saisi pour chaque niveau, par sa clé (`clesNiveaux`)
      */
-    D.modele = function (R, nom) {
+    D.modele = function (R, nom, saisie) {
         var titre = nom != null ? String(nom).trim() : D.nomPropose(R);
         var desc = R.description.join('\n');
-        return {
-            source: 'dissection', enPoints: true, lecture: null, tableau: null, roles: null,
+        var enNiveaux = D.enNiveaux(R, saisie);
+        var valeurs = (saisie && saisie.valeurs) || {};
+        var cles = D.clesNiveaux(R);
+        var niveaux = !R.avecNiveaux ? [] : R.niveaux.map(function (n, i) {
+            if (!enNiveaux) return { titre: paire(n, 'repris'), min: paire('', 'vide'), max: paire('', 'vide') };
+            var v = valeurs[cles[i]] || {};
+            return { titre: paire(n, 'repris'), min: saisi(v.min), max: saisi(v.max), note: saisi(v.note) };
+        });
+        var criteres = R.criteres.map(function (c) {
+            var p = c.pond != null ? c.pond : c.pondDeduite;
+            var d = c.desc.join('\n');
+            var cr = {
+                nom: paire(nomDuCritere(c), c.nom != null ? 'repris' : 'complete'),
+                ponderation: p != null ? paire(String(p), 'repris') : paire('', 'remplir'),
+                cases: R.avecNiveaux ? R.niveaux.map(function (n, i) { var t = texteDuNiveau(c.niv[i]); return paire(t, t ? 'repris' : 'vide'); }) : [],
+                sousCriteres: c.sous.slice(),
+                description: paire(d, d ? 'repris' : 'vide')
+            };
+            if (!R.avecNiveaux) cr.parCle = clesDesReponses(c.reponses);
+            return cr;
+        });
+        if (enNiveaux && criteres.length && criteres.every(function (c) { return !c.ponderation.valeur; })) window.materielLecture.partsEgales(criteres);
+        var m = {
+            source: 'dissection', enPoints: !enNiveaux, lecture: null, tableau: null, roles: null,
             nom: paire(titre, titre ? 'repris' : 'remplir'),
             description: paire(desc, desc ? 'repris' : 'vide'),
-            niveaux: R.avecNiveaux ? R.niveaux.map(function (n) { return { titre: paire(n, 'repris'), min: paire('', 'vide'), max: paire('', 'vide') }; }) : [],
-            criteres: R.criteres.map(function (c) {
-                var p = c.pond != null ? c.pond : c.pondDeduite;
-                var d = c.desc.join('\n');
-                var cr = {
-                    nom: paire(nomDuCritere(c), c.nom != null ? 'repris' : 'complete'),
-                    ponderation: p != null ? paire(String(p), 'repris') : paire('', 'remplir'),
-                    cases: R.avecNiveaux ? R.niveaux.map(function (n, i) { var t = texteDuNiveau(c.niv[i]); return paire(t, t ? 'repris' : 'vide'); }) : [],
-                    sousCriteres: c.sous.slice(),
-                    description: paire(d, d ? 'repris' : 'vide')
-                };
-                if (!R.avecNiveaux) cr.parCle = clesDesReponses(c.reponses);
-                return cr;
-            }),
+            niveaux: enNiveaux ? window.materielLecture.coder(niveaux) : niveaux,
+            criteres: criteres,
             aClasser: [], manquesLecture: []
         };
+        if (enNiveaux) m.nature = paire('descripteurs', 'choisi');
+        return m;
     };
 
     /** C3 : ce que le champ « Nom de ta grille » propose tant qu'on n'y a pas touché, le Titre étiqueté. */
@@ -472,25 +523,28 @@
     function compte(n, un, plusieurs) { return n === 1 ? un : plusieurs.replace('#', n); }
 
     /**
-     * Peut-on créer ? `{ niveauxSeuls, raisons, modele }`. Une grille seulement en niveaux attend le
-     * lot 2b (`niveauxSeuls`) ; sinon, les raisons d'un refus, dans l'ordre : le nom, les morceaux
-     * sans place, les points, les réponses par critère, puis les mots de `calculs(m).manquants`, tels
-     * quels. Le total qui ne tombe pas juste n'en est pas une : le constat est déjà à l'écran.
+     * Peut-on créer ? `{ enNiveaux, raisons, avertissements, modele }`. Les raisons d'un refus, dans
+     * l'ordre : le nom, les morceaux sans place, les points ou les niveaux, les réponses par critère,
+     * puis les mots de `calculs(m).manquants`, tels quels (en niveaux : la plage, la note retenue, les
+     * codes, le nombre de niveaux). Le total qui ne tombe pas juste n'en est pas une : le constat est
+     * déjà à l'écran. En niveaux, les avertissements de `calculs(m)` (plages qui se chevauchent ou
+     * laissent un trou, note retenue hors de sa plage), tels quels : ils n'empêchent rien.
      * Textes PROVISOIRES (Claude Code, 18 oct.), relus à l'étape 3.
      * @param {object} R - la grille comprise
      * @param {{nomsGrilles?: string[]}} [contexte] - les noms des grilles déjà dans le trimestre
      * @param {string} [nom] - C3 : le champ « Nom de ta grille », une fois modifié
+     * @param {object} [saisie] - lot 2b : le choix et les valeurs des niveaux (voir `modele`)
      */
-    D.creation = function (R, contexte, nom) {
+    D.creation = function (R, contexte, nom, saisie) {
         var b = D.bilan(R);
-        if (b.logique === 'niveaux') return { niveauxSeuls: true, raisons: [], modele: null };
-        var m = D.modele(R, nom);
+        var m = D.modele(R, nom, saisie);
+        var enNiveaux = !m.enPoints;
         var raisons = [];
         // C3 : un nom vide (ni Titre étiqueté, ni nom tapé) ; la raison remplace celle du Titre.
         var sansNom = !m.nom.valeur;
         if (sansNom) raisons.push('un nom pour ta grille');
         if (R.sansPlace.length) raisons.push(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'));
-        if (!b.logique) raisons.push('des points : surligne ce que vaut chaque réponse avec l’étiquette « Points »');
+        if (!b.logique) raisons.push('des points ou des niveaux : surligne ce que vaut chaque réponse avec l’étiquette « Points », ou le nom de chaque niveau avec l’étiquette « Niveau »');
         m.criteres.forEach(function (c) {
             if (!c.parCle) return;
             if (c.parCle.length > D.MAX_REPONSES) raisons.push('au plus ' + D.MAX_REPONSES + ' réponses par critère (« ' + c.nom.valeur + ' » en a ' + c.parCle.length + ')');
@@ -499,11 +553,13 @@
         if (m.criteres.some(function (c) { return c.parCle && c.parCle.some(function (x) { return x.texte.length > D.MAX_REPONSE; }); })) {
             raisons.push('des réponses plus courtes (5 000 caractères au plus)');
         }
-        window.materielAssistant.calculs(m, contexte).manquants.forEach(function (t) {
+        var calc = window.materielAssistant.calculs(m, contexte);
+        calc.manquants.forEach(function (t) {
             // Sans nom, « le nom de la grille » redirait la première raison.
             if (!(sansNom && t === 'le nom de la grille')) raisons.push(t);
         });
-        return { niveauxSeuls: false, raisons: raisons, modele: m };
+        var avertissements = enNiveaux ? [calc.avertPlages, calc.avertNotes].filter(Boolean) : [];
+        return { enNiveaux: enNiveaux, raisons: raisons, avertissements: avertissements, modele: m };
     };
 
     // ------------------------------------------------------------------

@@ -449,9 +449,14 @@
         return par;
     }
 
+    /**
+     * La dissection : la description de la grille (`m.description`), quand il y en a une, va dans la
+     * grille, comme celle de l'éditeur — en points (lot 2a) comme en niveaux (lot 2b). Les modèles de
+     * l'assistant n'en ont pas : ce qu'il produit pour eux ne change pas.
+     */
     function construireGrille(m, ctx, nomGrille, echelleId) {
         var retro = A.estRetro(m);
-        return Object.assign(base(ctx, 'GRILLE_', nomGrille), {
+        var g = Object.assign(base(ctx, 'GRILLE_', nomGrille), {
             criteres: m.criteres.map(function (c) {
                 // Lot 3a : la forme d'un critère créé à la main (`grilles.js`, « Créer l'objet
                 // critère »), avec ses défauts ; le type reste holistique (lot 2).
@@ -474,6 +479,8 @@
                 return cr;
             })
         });
+        if (texte(m.description)) g.description = texte(m.description);
+        return g;
     }
 
     /**
@@ -486,14 +493,12 @@
      * partage (fermé : `echelleId`, `parNiveau`) les garde tels quels ; `null` y serait refusé.
      * La nature des cases ne joue pas : il n'y a pas de cartouche sans échelle.
      * La dissection, lot 2a : un critère qui porte ses réponses sans niveaux (`parCle`, une clé par
-     * réponse, `materielDissectionLecture.modele`) les range telles quelles ; la description de la
-     * grille (`m.description`), quand il y en a une, va dans la grille, comme celle de l'éditeur.
-     * Les modèles de l'assistant n'ont ni l'un ni l'autre : ce qu'il produit pour eux ne change pas.
+     * réponse, `materielDissectionLecture.modele`) les range telles quelles. Les modèles de
+     * l'assistant n'en ont pas : ce qu'il produit pour eux ne change pas.
      */
     function construireGrilleEnPoints(m, ctx, nomGrille) {
         var g = construireGrille(m, ctx, nomGrille, null);
         g.type = 'analytique';
-        if (texte(m.description)) g.description = texte(m.description);
         g.criteres.forEach(function (c, i) {
             c.type = 'analytique';
             delete c.descripteurs;

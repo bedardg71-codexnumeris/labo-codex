@@ -91,3 +91,21 @@ export const TEXTE_C = [
     ['Quelques erreurs', 'descripteur'], ['1', 'points'],
     ['Langue soignée', 'descripteur'], ['2', 'points']
 ];
+
+// ---------------------------------------------------------------------------
+// (n) Lot 2b : une grille SEULEMENT en niveaux, sans aucun point. Un titre, une rangée des niveaux
+//     (la première case, « Critères », sans étiquette), trois critères avec leur pondération en %
+//     dans leur propre case : 40 + 35 + 25 = 100.
+// ---------------------------------------------------------------------------
+export const NIVEAUX_N = ['À reprendre', 'En voie', 'Atteint'];
+const critereN = (n, pond) => [
+    { l: [['Le travail fictif répond à l’attente ' + n, 'critere'], ['(' + pond + ' %)', 'ponderation']] },
+    ...NIVEAUX_N.map((niv) => ({ l: [['Attente ' + n + ' : ' + niv.toLowerCase(), 'descripteur']] }))
+];
+export const GRILLE_N = [
+    [{ cs: 4, l: [['Fiche d’appréciation fictive', 'titre']] }],
+    [{ l: [['Critères', null]] }, ...NIVEAUX_N.map((n) => ({ l: [[n, 'niveau']] }))],
+    critereN(1, 40),
+    critereN(2, 35),
+    critereN(3, 25)
+];
