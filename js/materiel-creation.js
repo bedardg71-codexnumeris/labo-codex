@@ -93,7 +93,9 @@
             ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null, cartouche: o.cartouche ? o.cartouche.id : null },
             // Étape 5 : une grille en points, et son total (« sur 64 »).
             enPoints: !o.echelle,
-            totalPoints: o.echelle ? null : o.grille.criteres.reduce(function (t, c) { return t + c.ponderation; }, 0),
+            totalPoints: o.echelle ? null : o.grille.criteres.reduce(function (t, c) { return t + (c.ponderation == null ? 0 : c.ponderation); }, 0),
+            // La dissection, lot 9 : les critères créés sans pondération (`null`), à compléter dans Grilles de critères.
+            aCompleter: o.grille.criteres.filter(function (c) { return c.ponderation == null; }).length,
             niveaux: m.niveaux.map(function (n) {
                 return String(n.titre.valeur).trim() + ' (' + String(n.min.valeur).trim() + ' à ' + String(n.max.valeur).trim() + ' %)';
             })

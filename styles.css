@@ -28171,6 +28171,8 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 /* La confirmation */
 .materiel-confirmation { display: flex; flex-direction: column; gap: 24px; max-width: 880px; }
 .materiel-confirmation p { margin: 0; line-height: 1.55; color: var(--texte-secondaire); }
+/* La dissection, lot 9 : les critères créés sans pondération, à compléter dans Grilles de critères. */
+.materiel-confirmation p.materiel-a-completer { color: var(--alerte-texte-attention); }
 .materiel-confirmation-titre { display: flex; gap: 16px; align-items: center; color: var(--accent-primaire); }
 .materiel-confirmation-titre svg { flex: none; }
 .materiel-confirmation-titre h2 { margin: 0; color: var(--texte-principal); line-height: 1.25; }
@@ -28399,8 +28401,8 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .dissection-creer-nom input { min-height: 44px; font-size: 1rem; width: 100%; box-sizing: border-box; }
 .dissection-creer-actions { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px; }
 .dissection-creer .btn-principal { min-height: 44px; font-size: 1rem; font-weight: 600; }
-.dissection-creer-raisons { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 0.9rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
-.dissection-creer-raisons ul { margin: 4px 0 0; padding-left: 1.2em; }
+.dissection-creer-raisons, .dissection-creer-a-completer { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 0.9rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
+.dissection-creer-raisons ul, .dissection-creer-a-completer ul { margin: 4px 0 0; padding-left: 1.2em; }
 /* Lot 2b : le choix (des points / des niveaux) et « Ce que vaut chaque niveau ». Cibles de 44 px, texte de 16 px. */
 .dissection-creer-saisie { flex: 1 1 100%; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .dissection-creer-saisie:empty { display: none; }

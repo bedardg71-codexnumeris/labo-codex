@@ -460,9 +460,13 @@
             criteres: m.criteres.map(function (c) {
                 // Lot 3a : la forme d'un critère créé à la main (`grilles.js`, « Créer l'objet
                 // critère »), avec ses défauts ; le type reste holistique (lot 2).
+                // La dissection, lot 9 : une pondération absente s'écrit `null`, la même valeur en IndexedDB et
+                // en localStorage (NaN y devenait `null` d'un côté, restait NaN de l'autre). L'assistant ne crée
+                // jamais sans pondération : pour lui, rien ne change.
+                var pond = A.nombre(c.ponderation.valeur);
                 var cr = {
                     id: ctx.id('CR_'), nom: texte(c.nom), description: texte(c.description),
-                    ponderation: A.nombre(c.ponderation.valeur), type: 'holistique', formule: '',
+                    ponderation: isNaN(pond) ? null : pond, type: 'holistique', formule: '',
                     niveauSOLO: 'multistructurel', verrouille: false
                 };
                 // La forme de l'éditeur (`grilles.js`, `ajouterSousCritere`), dans l'ordre des lignes.

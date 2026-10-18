@@ -164,3 +164,34 @@ export const CASE_D7 = [
     [NOM_D7[1], 'critere'], [CASES_D7[1], 'souscritere'], [NOM_D7[2], 'critere']
 ];
 export const GRILLE_D7 = [...GRILLE_D, [{ l: [[SECTION_D7, 'section']] }], [{ l: CASE_D7 }]];
+
+/**
+ * (d) — ou (d7) — coupée comme l'enseignant le ferait (lots 5, 7 et 9) : chaque ligne de critère en son nom
+ * (« Critère »), « / N » (« Pondération ») et une case par morceau (« Élément observable ») ; les totaux en
+ * « Total ». `D` : `materielDissectionLecture` ; `e` : { doc, liens, … }. Rend un nouvel état.
+ */
+export function decouperD(D, e0) {
+    const idDe = (doc, t) => { const M = D.morceaux(doc); return M.ordre.find((id) => M.texte[id] === t); };
+    const couper = (e, id, n) => {
+        const r = D.couper(e.doc, id, n);
+        if (!r) throw new Error('Coupe impossible : ' + id);
+        return { e: Object.assign({}, e, { doc: r.doc, liens: D.liensApresCoupe(e.liens, id, r.parties) }), parties: r.parties };
+    };
+    let e = e0;
+    CRITERES_D.forEach(([nom, n], i) => {
+        let parties;
+        ({ e, parties } = couper(e, idDe(e.doc, ligneD(i)), nom.length));
+        ({ e, parties } = couper(e, parties[1], partiesD(nom, n, i + 1)[1].length));
+        e.liens[parties[0]] = 'ponderation';
+        let reste = parties[1];
+        for (;;) {
+            e.liens[reste] = 'souscritere';
+            const k = D.morceaux(e.doc).texte[reste].indexOf(' [ ] ');
+            if (k < 0) break;
+            ({ e, parties } = couper(e, reste, k));
+            reste = parties[1];
+        }
+    });
+    TOTAUX_D.forEach((t) => { e.liens[idDe(e.doc, t)] = 'total'; });
+    return e;
+}

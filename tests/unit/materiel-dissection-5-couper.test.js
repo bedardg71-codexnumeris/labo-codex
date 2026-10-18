@@ -247,14 +247,15 @@ describe('P — des pondérations sur chaque critère, sans niveaux : une grille
         expect(R.criteres.map((c) => c.pond)).toEqual(CRITERES_D.map((c) => c[1]));
     });
 
-    it('P.b — un critère sans pondération : pas de logique lue, et le critère en cause est nommé', () => {
+    it('P.b — deux critères sans pondération : la grille se lit en points (lot 9), et les critères en cause sont nommés, à compléter', () => {
         const e = dDecoupee();
         Object.keys(e.liens).forEach((id) => { if (D.morceaux(e.doc).texte[id] === '/ 20') delete e.liens[id]; });   // « Classement fictif » et « Justesse fictive » perdent leur pondération
         const R = D.comprendre(e.doc, e.liens);
-        expect(D.bilan(R).logique).toBeNull();
+        expect(D.bilan(R).logique).toBe('points');
         const c = D.creation(R, {});
-        expect(c.raisons).toContain('les points de 2 critères (« Classement fictif des images » et « Justesse fictive de la langue »)');
-        sansRenvoiAssistant(c.raisons);
+        expect(c.raisons).toEqual([]);
+        expect(c.aCompleter).toEqual(['les points de 2 critères (« Classement fictif des images » et « Justesse fictive de la langue »)']);
+        sansRenvoiAssistant(c.aCompleter);
     });
 
     it('P.c — avec des niveaux nommés, des pondérations seules ne font pas une grille en points', () => {
@@ -391,8 +392,10 @@ describe('N — aucun renvoi à l’assistant', () => {
         const R = lire(collerD(grille));
         expect(D.bilan(R).logique).toBe('points');
         const c = D.creation(R, {});
-        expect(c.raisons).toContain('les points de chaque critère : surligne le poids de chaque critère avec l’étiquette « Pondération », ou ce que vaut chaque réponse avec l’étiquette « Points »');
-        sansRenvoiAssistant(c.raisons);
+        // Lot 9 : à compléter, sans bloquer ; ici, c'est le morceau « beaucoup », sans place, qui bloque.
+        expect(c.aCompleter).toContain('les points de chaque critère : surligne le poids de chaque critère avec l’étiquette « Pondération », ou ce que vaut chaque réponse avec l’étiquette « Points »');
+        expect(c.raisons).toContain('une place pour le morceau étiqueté listé plus bas');
+        sansRenvoiAssistant(c.raisons.concat(c.aCompleter));
         // L'assistant, lui, garde son message.
         expect(A.calculs(c.modele, {}).manquants.some((t) => t.includes('« ' + A.NOMS_ETAPES.roles + ' »'))).toBe(true);
     });

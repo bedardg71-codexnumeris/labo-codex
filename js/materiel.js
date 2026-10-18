@@ -619,6 +619,16 @@
     // La confirmation
     // ------------------------------------------------------------------
 
+    /**
+     * La dissection, lot 9 : combien de critères ont été créés sans pondération, à compléter dans Grilles de
+     * critères. Texte PROVISOIRE (Claude Code, 18 oct.) ; rien quand il n'en manque pas.
+     */
+    function aCompleterHtml(r) {
+        if (!r.aCompleter) return '';
+        return '<p class="materiel-a-completer">' + e('Il te restera à donner ' + (r.enPoints ? 'des points' : 'une pondération') + ' à ' +
+            pluriel(r.aCompleter, 'critère', 'critères') + ', dans « Grilles de critères ».') + '</p>';
+    }
+
     function confirmationHtml(r) {
         if (r.enPoints) return confirmationPointsHtml(r);
         var phrase = r.retro
@@ -628,7 +638,7 @@
         return '<section class="materiel-confirmation" aria-labelledby="materiel-titre-cree">' +
             '<div class="materiel-confirmation-titre"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>' +
             '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
-            '<p>' + e(phrase) + '</p><div class="materiel-cartes-cree">' +
+            '<p>' + e(phrase) + '</p>' + aCompleterHtml(r) + '<div class="materiel-cartes-cree">' +
             carteCree('Ta grille', carteGrille, 'grille-criteres', 'La voir dans Grilles de critères') +
             carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') +
             (r.retro ? carteCree('Tes rétroactions', 'Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.', 'retroactions', 'Les voir dans Cartouches de rétroaction') : '') +
@@ -676,8 +686,10 @@
             '<div class="materiel-confirmation-titre"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>' +
             '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
             '<p>' + e('Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' notés en points. Rien d’autre n’a changé dans l’application.') + '</p>' +
-            '<div class="materiel-cartes-cree">' +
-            carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + (Math.abs(r.totalPoints) >= 2 ? ' points.' : ' point.'), 'grille-criteres', 'La voir dans Grilles de critères') +
+            aCompleterHtml(r) + '<div class="materiel-cartes-cree">' +
+            // Lot 9 : le total des seuls critères qui ont des points, et combien n'en ont pas encore (texte PROVISOIRE).
+            carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + (Math.abs(r.totalPoints) >= 2 ? ' points' : ' point') +
+                (r.aCompleter ? ' ; ' + pluriel(r.aCompleter, 'critère', 'critères') + ' sans points pour l’instant.' : '.'), 'grille-criteres', 'La voir dans Grilles de critères') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e(retour) + '</button></section>';
