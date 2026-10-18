@@ -69,7 +69,7 @@
 
     /**
      * Lot 7, « Rattacher » : textes de Claude Code (18 oct.), sur le modèle de ceux de « Couper » ; le refus
-     * « déjà la suite » est celui de la consigne du lot ; le refus « boucle », réécrit par Grégoire. Validé G.
+     * « déjà la suite » est celui de la consigne du lot ; le refus « boucle », proposé par Cowork et accepté par Grégoire. Validé G.
      * 18 oct. 17 h 18. Les textes collés y entrent par leurs premiers mots (`premiersMots`).
      */
     var TEXTES_LIEN = {
@@ -693,6 +693,8 @@
         enCours: 'Création…',
         nom: 'Nom de ta grille',
         raisons: 'Avant de créer, il reste :',
+        // Lot 9, texte PROVISOIRE (Claude Code, 18 oct.) : ce qui manque sans empêcher de créer.
+        aCompleter: 'Tu pourras créer ta grille, puis compléter dans « Grilles de critères » :',
         // Lot 2b : le choix (logique « les deux » seulement) et le tableau des niveaux.
         choix: 'Le résultat d’une copie viendrait :',
         choixPoints: 'des points',
@@ -833,6 +835,16 @@
             z.appendChild(r);
             b.setAttribute('aria-describedby', r.id);
             if (champ) champ.setAttribute('aria-describedby', r.id);
+        }
+        // Lot 9 : les points ou pondérations qui manquent, sous leur intitulé ; ils ne grisent pas le bouton.
+        if ((c.aCompleter || []).length) {
+            var ac = noeud('div', 'dissection-creer-a-completer');
+            ac.id = 'dissection-creer-a-completer';
+            ac.appendChild(noeud('strong', null, TEXTES_CREER.aCompleter));
+            var ula = noeud('ul');
+            c.aCompleter.forEach(function (t) { ula.appendChild(noeud('li', null, t)); });
+            ac.appendChild(ula);
+            z.appendChild(ac);
         }
         // Lot 2b : les avertissements de `calculs(m)`, tels quels ; ils n'empêchent rien.
         (c.avertissements || []).forEach(function (t) { z.appendChild(noeud('p', 'alerte alerte-attention dissection-creer-avert', t)); });

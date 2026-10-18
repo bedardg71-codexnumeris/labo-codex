@@ -925,6 +925,17 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
  * @returns {{ponderationCouverte:number, ponderationGrille:number, criteresComptes:Array,
  *   criteresHorsNote:Array, nbCriteresAvecNiveau:number, commencee:boolean, incomplete:boolean}}
  */
+/**
+ * La dissection, lot 9 (`CONSIGNE-LOT-2026-10-18-dissection-9-creer-quand-meme.md`) : un critère SANS
+ * pondération — `null` (ce qu'écrit la création d'une grille à compléter), ou ce que d'anciens chemins
+ * ont pu laisser : champ manquant, `''`, NaN, texte qui n'est pas un nombre. Un 0 n'est PAS une absence :
+ * c'est un choix. Règle unique, lue par la note (`calculerPortee`) et par Grilles de critères.
+ */
+function ponderationAbsente(critere) {
+    const p = critere ? critere.ponderation : undefined;
+    if (p == null || (typeof p === 'string' && !p.trim())) return true;
+    return isNaN(Number(p));
+}
 function calculerPortee(criteresGrille, niveauDe, valeurDe) {
     const criteresComptes = [];
     const criteresHorsNote = [];
@@ -1730,6 +1741,7 @@ window._forcerRecalculAlgorithmiqueAvantSauvegarde = _forcerRecalculAlgorithmiqu
 // deux enregistrements manuels ; `texteCriteresHorsNote` nomme ce qui manque à
 // l'export. Sentinelle : `tests/unit/sentinelle-674-*.test.js`.
 window.calculerPortee = calculerPortee;
+window.ponderationAbsente = ponderationAbsente;   // lot 9 de la dissection — la règle de l'absence, lue aussi par Grilles de critères
 window.porteeDepuisEvaluation = porteeDepuisEvaluation;
 window.criteresAjoutesDepuis = criteresAjoutesDepuis;   // #705 — lue par evaluation-chargement.js (le signalement à l'écran)
 window.verifierPorteeAvantSauvegarde = verifierPorteeAvantSauvegarde;

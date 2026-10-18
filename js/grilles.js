@@ -562,7 +562,7 @@ function afficherListeCriteres(criteres, grilleId) {
              display: flex; justify-content: space-between; align-items: center;">
             <div class="grille-flex-1">
                 <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 2px;">
-                    ${echapperHtml(critere.nom)} (${texteDePonderation(critere.ponderation || 0, enPoints)}) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
+                    ${echapperHtml(critere.nom)} (${texteDePonderationDuCritere(critere, enPoints)}) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
                 </div>
                 ${critere.description ? `
                     <details class="grille-mt-4">
@@ -911,7 +911,7 @@ async function afficherGrillesCriteres() {
                 </div>
                 <div style="color: var(--gris-moyen); font-size: 0.85rem;">
                     <span class="grille-mr-20">${grille.criteres?.length || 0} critères</span>
-                    <span>Pondération totale : ${texteDePonderation(grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0, ponderationEnPoints(grille.criteres))}</span>
+                    <span>Pondération totale : ${texteDuTotal(grille.criteres, grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0)}</span>
                 </div>
                 <details class="u-mt-10">
                     <summary style="cursor: pointer; color: var(--texte-secondaire); font-size: 0.9rem;">
@@ -920,7 +920,7 @@ async function afficherGrillesCriteres() {
                     <div style="margin-top: 10px; padding: 10px; background: var(--surface-conteneur, #162c36); border-radius: 4px;">
                         ${(grille.criteres || []).map(c => `
                             <div style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--bleu-tres-pale);">
-                                <strong>${echapperHtml(c.nom)}</strong> (${texteDePonderation(c.ponderation, ponderationEnPoints(grille.criteres))} - ${getTypeCritereLabel(c.type)})
+                                <strong>${echapperHtml(c.nom)}</strong> (${texteDePonderationDuCritere(c, ponderationEnPoints(grille.criteres))} - ${getTypeCritereLabel(c.type)})
                                 ${c.description ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(c.description)}</small>` : ''}
                             </div>
                         `).join('')}
@@ -1250,6 +1250,28 @@ function texteDePonderation(n, enPoints) {
     return enPoints ? n + (Math.abs(n) >= 2 ? ' points' : ' point') : n + '%';
 }
 
+/**
+ * La dissection, lot 9 (`CONSIGNE-LOT-2026-10-18-dissection-9-creer-quand-meme.md`) : un critère peut être
+ * créé SANS pondération (`null`), à compléter ici. La règle de l'absence est celle de la note
+ * (`ponderationAbsente`, evaluation-calcul.js). Textes PROVISOIRES (Claude Code, 18 oct.).
+ */
+function critereSansPonderation(c) {
+    return typeof window.ponderationAbsente === 'function' && window.ponderationAbsente(c);
+}
+
+/** La pondération d'un critère, ou « sans points » / « sans pondération » : jamais « null point » ni « NaN% ». */
+function texteDePonderationDuCritere(c, enPoints) {
+    if (critereSansPonderation(c)) return enPoints ? 'sans points' : 'sans pondération';
+    return texteDePonderation(c.ponderation || 0, enPoints);
+}
+
+/** Le total ; en points, suivi du nombre de critères qui n'ont pas encore de points. Le signal part quand tous en ont. */
+function texteDuTotal(criteres, total) {
+    const enPoints = ponderationEnPoints(criteres);
+    const n = enPoints ? (criteres || []).filter(critereSansPonderation).length : 0;
+    return texteDePonderation(total, enPoints) + (n ? ' (' + n + (n > 1 ? ' critères sans points)' : ' critère sans points)') : '');
+}
+
 function getTypeCritereLabel(type) {
     const labels = {
         'holistique': 'Holistique',
@@ -1289,7 +1311,7 @@ function calculerTotalPonderationCriteres(criteres) {
     if (!totalSpan || !statutSpan) return;
 
     if (ponderationEnPoints(criteres)) {
-        totalSpan.textContent = texteDePonderation(total, true);
+        totalSpan.textContent = texteDuTotal(criteres, total);
         totalSpan.style.color = '';
         statutSpan.textContent = '';
         return;
@@ -1375,7 +1397,7 @@ async function afficherToutesLesGrillesCriteres() {
                  transition: background 0.2s;">
                 <div class="grille-flex-1">
                     <div style="font-weight: 600; color: var(--accent-primaire); margin-bottom: 2px;">
-                        ${echapperHtml(critere.nom)} (${texteDePonderation(critere.ponderation || 0, enPoints)}) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
+                        ${echapperHtml(critere.nom)} (${texteDePonderationDuCritere(critere, enPoints)}) • ${getTypeCritereLabel(critere.type)}${critere.type === 'algorithmique' && critere.formule ? ` • ${echapperHtml(critere.formule)}` : ''}
                     </div>
                     ${critere.description ? `
                         <details class="grille-mt-4">
@@ -1443,7 +1465,7 @@ async function afficherToutesLesGrillesCriteres() {
                     <span style="font-size: 0.9rem; font-weight: normal; opacity: 0.9;">
                         ${criteres.length} critère${criteres.length > 1 ? 's' : ''} ·
                         <span style="color: ${enPoints ? 'inherit' : total === 100 ? 'var(--vert-succes)' : total < 100 ? 'var(--orange-accent)' : 'var(--rouge-erreur)'};">
-                            ${texteDePonderation(total, enPoints)}
+                            ${texteDuTotal(criteres, total)}
                         </span>
                     </span>
                 </summary>
@@ -1453,7 +1475,7 @@ async function afficherToutesLesGrillesCriteres() {
                             ${criteres.map(c => genererHtmlCritere(c, grille.id, enPoints)).join('')}
                         </div>
                         <div style="padding: 10px; background: var(--bleu-tres-pale); border-radius: 4px; margin-bottom: 15px;">
-                            <strong>Pondération totale: <span style="color: ${couleur};">${texteDePonderation(total, enPoints)}</span></strong>
+                            <strong>Pondération totale: <span style="color: ${couleur};">${texteDuTotal(criteres, total)}</span></strong>
                             <span style="color: ${couleur}; margin-left: 10px;">${texteStatut}</span>
                         </div>
                     ` : `
@@ -4596,7 +4618,7 @@ function mettreAJourTotalTemp() {
     const totalElement = document.getElementById('totalPonderationAffichage');
     if (totalElement) {
         const enPoints = ponderationEnPoints(window.tempCriteres);
-        totalElement.textContent = texteDePonderation(total, enPoints);
+        totalElement.textContent = texteDuTotal(window.tempCriteres, total);
         totalElement.style.color = enPoints ? '' : total === 100 ? 'var(--vert-accent)' : 'var(--orange-accent)';
     }
 }
@@ -4874,7 +4896,7 @@ function calculerEtAfficherTotalPonderation(grille) {
     }
 
     if (ponderationEnPoints(grille && grille.criteres)) {
-        totalElement.textContent = texteDePonderation(total, true);
+        totalElement.textContent = texteDuTotal(grille.criteres, total);
         totalElement.style.color = '';
         return;
     }

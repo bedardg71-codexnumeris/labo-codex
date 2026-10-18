@@ -26,7 +26,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { chargerScript } from './_helpers/charger-script.js';
 import {
-    GRILLE_D7, CRITERES_D, TOTAUX_D, NOM_D7, CASES_D7, ligneD, partiesD, enHtml, etiquettes, liensPar
+    GRILLE_D7, NOM_D7, CASES_D7, enHtml, etiquettes, liensPar, decouperD
 } from './_helpers/grilles-fictives-dissection.js';
 
 const fenetreDom = new JSDOM('<!doctype html><html><body></body></html>').window;
@@ -192,29 +192,6 @@ function collerD7() {
     return { doc, liens: liensPar(D.morceaux(doc).ordre, etiquettes(GRILLE_D7)), rattachements: {} };
 }
 
-/** Une coupe du morceau `id` à l'espace qui suit ses `n` premiers caractères ; rend { e, parties }. */
-function couper(e, id, n) {
-    const r = D.couper(e.doc, id, n);
-    expect(r).not.toBeNull();
-    return { e: Object.assign({}, e, { doc: r.doc, liens: D.liensApresCoupe(e.liens, id, r.parties) }), parties: r.parties };
-}
-
-/** Une ligne de critère de (d) coupée en son nom, « / N », puis une case par morceau, comme au lot 5. */
-function couperLigne(e0, i) {
-    const [nom, n] = CRITERES_D[i];
-    let { e, parties } = couper(e0, idDe(e0.doc, ligneD(i)), nom.length);
-    ({ e, parties } = couper(e, parties[1], partiesD(nom, n, i + 1)[1].length));
-    e.liens[parties[0]] = 'ponderation';
-    let reste = parties[1];
-    for (;;) {
-        e.liens[reste] = 'souscritere';
-        const k = D.morceaux(e.doc).texte[reste].indexOf(' [ ] ');
-        if (k < 0) return e;
-        ({ e, parties } = couper(e, reste, k));
-        reste = parties[1];
-    }
-}
-
 describe('D — la grille fictive (d7)', () => {
     it('D.a — telle qu’étiquetée à la porte : les deux fins du nom deviennent des critères à part', () => {
         const e = collerD7();
@@ -223,9 +200,7 @@ describe('D — la grille fictive (d7)', () => {
     });
 
     it('D.b — coupée, rattachée, étiquetée : le critère se crée sous son nom entier, sa pondération et ses cases lues', () => {
-        let e = collerD7();
-        CRITERES_D.forEach((c, i) => { e = couperLigne(e, i); });
-        TOTAUX_D.forEach((t) => { e.liens[idDe(e.doc, t)] = 'total'; });
+        const e = decouperD(D, collerD7());
         const idNom = idDe(e.doc, NOM_D7[0]);
         // Le geste de la porte : la fin d'abord, le milieu ensuite.
         let r = lier(e.rattachements, e.liens, idDe(e.doc, NOM_D7[2]), idNom);

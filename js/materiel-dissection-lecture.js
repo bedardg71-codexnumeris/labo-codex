@@ -571,10 +571,11 @@
         R.criteres = couperSansNom(R.criteres);
         numeroterEtDeduire(R);
         R.avecNiveaux = x.avecNiveaux;
-        // Lot 5 : sans niveaux, des pondérations sur CHAQUE critère suffisent à une grille en points :
-        // chaque critère est noté sur sa pondération, telle qu'écrite (aucune conversion).
-        var pondsSeules = !R.avecNiveaux && R.criteres.length > 0 && R.criteres.every(function (c) { return c.pond != null; });
-        R.aPoints = (R.nb.points || 0) > 0 || pondsSeules;
+        // Lot 5 : sans niveaux, des pondérations suffisent à une grille en points : chaque critère est noté
+        // sur sa pondération, telle qu'écrite (aucune conversion). Lot 9 : il suffit qu'UN critère en ait une ;
+        // ceux qui n'en ont pas sont à compléter ensuite (`creation`, `aCompleter`).
+        var pondsLues = !R.avecNiveaux && R.criteres.some(function (c) { return c.pond != null; });
+        R.aPoints = (R.nb.points || 0) > 0 || pondsLues;
         return R;
     };
 
@@ -800,7 +801,20 @@
     }
 
     /**
-     * Peut-on créer ? `{ enNiveaux, raisons, avertissements, modele }`. Les raisons d'un refus, dans
+     * Lot 9 (`CONSIGNE-LOT-2026-10-18-dissection-9-creer-quand-meme.md`, décision de Grégoire, 17 h 34) : les
+     * messages de `calculs` qui ne disent QUE des points ou des pondérations manquants. Ils ne bloquent plus :
+     * la grille se crée, et ces critères se complètent ensuite dans « Grilles de critères ». Les points hors de
+     * 0 à 100 ou non entiers, eux, bloquent toujours (un objet faux).
+     */
+    function estACompleter(t) {
+        return t === 'les points d’un critère' || /^les points de \d+ critères$/.test(t)
+            || t === 'la pondération d’un critère' || /^la pondération de \d+ critères$/.test(t)
+            || t.indexOf('les points de chaque critère') === 0;
+    }
+
+    /**
+     * Peut-on créer ? `{ enNiveaux, raisons, aCompleter, avertissements, modele }`. Lot 9 : `aCompleter`, ce
+     * qui manque sans bloquer (points ou pondérations), dit sous un intitulé à part (`estACompleter`). Les raisons d'un refus, dans
      * l'ordre : le nom, les morceaux sans place, les points ou les niveaux, les réponses par critère,
      * puis les mots de `calculs(m).manquants` (en niveaux : la plage, la note retenue, les codes, le
      * nombre de niveaux), ceux qui concernent des critères ou des morceaux précis les NOMMANT, et sans
@@ -817,7 +831,7 @@
         var b = D.bilan(R);
         var m = D.modele(R, nom, saisie);
         var enNiveaux = !m.enPoints;
-        var raisons = [];
+        var raisons = [], aCompleter = [];
         // C3 : un nom vide (ni Titre étiqueté, ni nom tapé) ; la raison remplace celle du Titre.
         var sansNom = !m.nom.valeur;
         if (sansNom) raisons.push('un nom pour ta grille');
@@ -836,10 +850,10 @@
             // Sans nom, « le nom de la grille » redirait la première raison.
             if (sansNom && t === 'le nom de la grille') return;
             var r = raisonDissection(t, R, m, b);
-            if (r != null) raisons.push(r);
+            if (r != null) (estACompleter(t) ? aCompleter : raisons).push(r);
         });
         var avertissements = enNiveaux ? [calc.avertPlages, calc.avertNotes].filter(Boolean) : [];
-        return { enNiveaux: enNiveaux, raisons: raisons, avertissements: avertissements, modele: m };
+        return { enNiveaux: enNiveaux, raisons: raisons, aCompleter: aCompleter, avertissements: avertissements, modele: m };
     };
 
     // ------------------------------------------------------------------
