@@ -40,4 +40,16 @@
 - [x] 1 — `25584d62`, relu à 7 h 58 (accepté, deux corrections) ; corrections `77ecb741`, rapport et capture à 820 px vus par Cowork à 8 h 10
 - [x] 2 — en points : `903e7706`, corrigé `0ba1be2d` (nom de la grille, décision de Grégoire 8 h 28) ; en niveaux : `cb125cb9` (plage et note retenue saisies, décision de 8 h 43), relu sans correction
 - [x] 3 — tes 50 réponses de 9 h 56 appliquées, `4c16a4f0`, relu par Cowork à 10 h 12 sans correction (entrée 1.204 des Nouvelles comprise)
-- [ ] 4
+- [x] 4 — 1.204.0 (`fe641099`, documents `74ab9cc3`) : verdict vert à 11 h 35, relu par Cowork à 11 h 49, poussé à 11 h 51, en ligne chez Netlify à 11 h 51 (constaté par Cowork). Reste : la porte de Grégoire, cet après-midi (artefact « Porte · La dissection »)
+
+## Porte de Grégoire, 18 oct. 13 h 14 (relevé partiel : 7 passées, 1 échec, 7 non traitées)
+
+- 2.2, son ressenti : « C'est beaucoup plus lisible. » Son idée : un exemple d'étiquette, de flèche et de contenu (inscrit, après lundi).
+- 2.3 : sa mise en page met parfois deux éléments de niveaux différents dans un même morceau (une section et un critère ; un critère, ses points « / 10 » et ses descripteurs à cocher sur une seule ligne).
+- **2.5, échec** (grille « Évaluation sur le symbolisme ») : « Créer ma grille » refusé. Mesuré sur sa capture : les raisons sont listées, mais sans nommer les critères en cause ; l'une renvoie à l'étape « Ce que contient ton tableau » de l'assistant débranché ; des noms de critères de plus de 200 caractères (le critère, ses points et ses descripteurs dans le même morceau) ; aucun point lu (les « / 10 » sont dans le texte des critères) ; deux « Pondération » posées sur les lignes de total (« / 70 », « / 30 ») tombent sans place.
+
+## Piste de vocabulaire, NON DÉFINITIVE (Grégoire, 18 oct. 13 h 30 à 13 h 33)
+
+- « Maquette » pour l'objet que la dissection construit à partir de la grille de l'enseignant (sa grille, elle, reste « ta grille » à l'écran).
+- Pour libérer le mot : la « maquette » du Comparateur (copie d'essai dérivée d'une pratique de notation) deviendrait « variante » (« dériver une variante ») ; seuls les mots d'écran et le glossaire changent, pas le champ `estMaquette`.
+- **Rien ne se code avant que Grégoire tranche** : il en parle à la communauté de pratique le 19 oct. et recueille leurs suggestions. À reprendre après lundi.

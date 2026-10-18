@@ -20,6 +20,11 @@
  * vaut chaque niveau » demande la plage et la note retenue de chaque niveau, champs VIDES ; ce qui y
  * est saisi vit dans la page avec les étiquettes, et se perd avec elles.
  *
+ * Lot 5 (`CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`) : l'outil « Couper », dans la palette après
+ * « Suite », se prend comme une étiquette ; un toucher coupe un morceau en deux à l'espace la plus proche
+ * (`materielDissectionLecture.couper`), le glisser ne coupe pas. Les coupes vivent dans la page, en pile,
+ * et s'annulent (« Annuler la dernière coupe ») ; rien n'est écrit avant « Créer ma grille ».
+ *
  * Sécurité (règle 1) : tout texte venu du collage s'écrit par `textContent` ; le HTML collé n'est
  * jamais inséré (le document disséqué ne porte que du texte). Boutons par `data-action` (dispatcher
  * de main.js) ; les gestes sur la feuille, par des écouteurs de pointeur posés ici, aucun handler inline.
@@ -34,9 +39,18 @@
     'use strict';
 
     var SVG = 'http://www.w3.org/2000/svg';
-    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {} };
+    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [] };
     var blocs = {};
     var dessinPrevu = false;
+
+    /** Lot 5, « Couper » : textes PROVISOIRES de Claude Code (18 oct.), à trancher à l'étape des mots. */
+    var TEXTES_COUPE = {
+        bandeau: 'Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.',
+        enMain: 'Outil « Couper » en main : touche l’endroit d’un morceau où le séparer en deux.',
+        coupe: function (a, b) { return 'Morceau coupé en deux : « ' + a + ' » et « ' + b + ' ».'; },
+        unMot: 'Ce morceau n’a qu’un mot : il ne se coupe pas.',
+        annulee: function (t) { return 'Coupe annulée : « ' + t + ' » est recollé.'; }
+    };
 
     function D() { return window.materielDissectionLecture; }
     function el(id) { return document.getElementById(id); }
@@ -92,8 +106,12 @@
         return f;
     }
 
+    /** Lot 5 : ce que la palette met en main, une étiquette (`TYPE`) ou un outil (`OUTIL`, « Couper »). */
+    function enMain(k) { return D().TYPE[k] || D().OUTIL[k] || null; }
+    function estOutil(k) { return !!D().OUTIL[k]; }
+
     function classeType(n, type) {
-        D().TYPES.forEach(function (t) { n.classList.remove('dis-t-' + t.k); });
+        D().TYPES.concat(D().OUTILS).forEach(function (t) { n.classList.remove('dis-t-' + t.k); });
         if (type) n.classList.add('dis-t-' + type);
     }
 
@@ -109,11 +127,14 @@
     function rendreFeuille() {
         var contenu = el('dissection-contenu');
         if (!contenu) return;
+        // Lot 5 : refaite après une coupe, la feuille garde son défilement.
+        var cv = el('dissection-canevas'), haut = cv ? cv.scrollTop : 0, gauche = cv ? cv.scrollLeft : 0;
         contenu.textContent = '';
         blocs = {};
         var f = construireFeuille(etat.doc);
         Array.prototype.forEach.call(f.querySelectorAll('.dissection-morceau'), function (b) { blocs[b.getAttribute('data-id')] = b; });
         contenu.appendChild(f);
+        if (cv) { cv.scrollTop = haut; cv.scrollLeft = gauche; }
         etat.morceaux.ordre.forEach(marquer);
     }
 
@@ -125,14 +146,8 @@
         var pal = el('dissection-palette');
         if (!pal || pal.childNodes.length) return;
         var groupes = {};
-        D().TYPES.forEach(function (t) {
-            if (!groupes[t.groupe]) {
-                var g = noeud('div', 'dissection-groupe');
-                g.appendChild(noeud('span', 'dissection-groupe-nom', t.groupe));
-                groupes[t.groupe] = g;
-                pal.appendChild(g);
-            }
-            var b = noeud('button', 'dissection-etiquette dis-t-' + t.k);
+        function bouton(t) {
+            var b = noeud('button', 'dissection-etiquette dis-t-' + t.k + (estOutil(t.k) ? ' dissection-outil' : ''));
             b.type = 'button';
             b.setAttribute('data-action', 'materielDissection.choisir');
             b.setAttribute('data-param', t.k);
@@ -145,6 +160,17 @@
             if (t.precision) b.appendChild(noeud('span', 'dissection-etiquette-precision', t.precision));
             b.appendChild(noeud('span', 'dissection-etiquette-compte', ''));
             groupes[t.groupe].appendChild(b);
+        }
+        D().TYPES.forEach(function (t) {
+            if (!groupes[t.groupe]) {
+                var g = noeud('div', 'dissection-groupe');
+                g.appendChild(noeud('span', 'dissection-groupe-nom', t.groupe));
+                groupes[t.groupe] = g;
+                pal.appendChild(g);
+            }
+            bouton(t);
+            // Lot 5 : un outil prend place juste après l'étiquette qu'il suit (« Couper » après « Suite »).
+            D().OUTILS.forEach(function (o) { if (o.apres === t.k) bouton(o); });
         });
         var defs = el('dissection-pointes');
         if (defs && !defs.childNodes.length) {
@@ -168,7 +194,7 @@
         var pal = el('dissection-palette');
         if (!pal) return;
         Array.prototype.forEach.call(pal.querySelectorAll('.dissection-etiquette'), function (b) {
-            var t = b.getAttribute('data-type'), T = D().TYPE[t];
+            var t = b.getAttribute('data-type'), T = enMain(t);
             b.setAttribute('aria-pressed', t === etat.actif ? 'true' : 'false');
             b.querySelector('.dissection-etiquette-compte').textContent = compte[t] ? String(compte[t]) : '';
             b.setAttribute('aria-label', T.nom + ' : ' + T.aide + (compte[t] ? ', ' + pluriel(compte[t], 'morceau surligné', 'morceaux surlignés') : ''));
@@ -183,26 +209,33 @@
     function majBandeau() {
         var bd = el('dissection-bandeau'), cv = el('dissection-canevas');
         if (!bd || !cv) return;
-        var T = etat.actif ? D().TYPE[etat.actif] : null;
+        var T = etat.actif ? enMain(etat.actif) : null, coupe = etat.actif === 'couper';
         cv.classList.toggle('dissection-pointage', !!T);
+        cv.classList.toggle('dissection-coupe', coupe);
         bd.classList.toggle('dissection-bandeau-actif', !!T);
         classeType(bd, etat.actif);
         classeType(cv, etat.actif);
         el('dissection-terminer').classList.toggle('u-hide', !T);
-        el('dissection-bandeau-texte').textContent = T
-            ? 'Surligneur « ' + T.nom + ' » : touche ou surligne les morceaux de ta grille qu’il désigne. Touche un morceau déjà surligné pour le retirer.'
-            : 'Touche une étiquette dans la palette : elle devient ton surligneur.';
+        // Lot 5 : tant que « Couper » est en main, « Annuler la dernière coupe » dès qu'une coupe est faite.
+        var annuler = el('dissection-annuler-coupe');
+        if (annuler) annuler.classList.toggle('u-hide', !(coupe && etat.coupes.length));
+        el('dissection-bandeau-texte').textContent = coupe
+            ? TEXTES_COUPE.bandeau
+            : T
+                ? 'Surligneur « ' + T.nom + ' » : touche ou surligne les morceaux de ta grille qu’il désigne. Touche un morceau déjà surligné pour le retirer.'
+                : 'Touche une étiquette dans la palette : elle devient ton surligneur.';
         var pr = el('dissection-bandeau-precision');
         pr.textContent = T && T.precision ? T.nom + ' : ' + T.precision : '';
         pr.classList.toggle('u-hide', !(T && T.precision));
     }
 
     function choisir(type) {
-        if (!D().TYPE[type]) return;
+        if (!enMain(type)) return;
         etat.actif = etat.actif === type ? null : type;
         desarmer();
         majPalette(); majBandeau(); planifierDessin();
-        dire(etat.actif ? 'Surligneur « ' + D().TYPE[etat.actif].nom + ' » en main : touche ou surligne les morceaux de ta grille qu’il désigne.' : '');
+        if (etat.actif === 'couper') dire(TEXTES_COUPE.enMain);
+        else dire(etat.actif ? 'Surligneur « ' + D().TYPE[etat.actif].nom + ' » en main : touche ou surligne les morceaux de ta grille qu’il désigne.' : '');
     }
 
     function terminer() {
@@ -239,6 +272,7 @@
             else dire('Touche d’abord une étiquette dans la palette : elle devient ton surligneur.');
             return;
         }
+        if (etat.actif === 'couper') { gesteCoupe(e, id); return; }
         e.preventDefault();
         var feuille = e.currentTarget;
         var mode = etat.liens[id] === etat.actif ? 'retirer' : 'ajouter';
@@ -265,6 +299,80 @@
         feuille.addEventListener('pointermove', bouger);
         feuille.addEventListener('pointerup', fin);
         feuille.addEventListener('pointercancel', fin);
+    }
+
+    // ------------------------------------------------------------------
+    // Couper (lot 5) : un toucher, une coupe ; le glisser ne coupe pas
+    // ------------------------------------------------------------------
+
+    /**
+     * Le rang touché dans le texte d'un morceau : `caretRangeFromPoint` (WebKit), sinon
+     * `caretPositionFromPoint` ; à défaut, ou hors de son texte, le milieu du morceau.
+     */
+    function rangTouche(b, x, y) {
+        var r = null;
+        try {
+            if (document.caretRangeFromPoint) {
+                var rg = document.caretRangeFromPoint(x, y);
+                if (rg) r = { n: rg.startContainer, o: rg.startOffset };
+            } else if (document.caretPositionFromPoint) {
+                var cp = document.caretPositionFromPoint(x, y);
+                if (cp) r = { n: cp.offsetNode, o: cp.offset };
+            }
+        } catch (er) { r = null; }
+        if (r && b.firstChild && r.n === b.firstChild) return r.o;
+        return Math.floor(String(b.textContent).length / 2);
+    }
+
+    /** Le point touché est lu au toucher ; la coupe se fait au lever, si le doigt n'a pas glissé. */
+    function gesteCoupe(e, id) {
+        e.preventDefault();
+        var feuille = e.currentTarget, x = e.clientX, y = e.clientY, glisse = false;
+        var decalage = rangTouche(blocs[id], x, y);
+        try { feuille.setPointerCapture(e.pointerId); } catch (er) { /* sans capture, le lever hors de la feuille ne coupe pas */ }
+        function bouger(ev) { if (Math.abs(ev.clientX - x) > 8 || Math.abs(ev.clientY - y) > 8) glisse = true; }
+        function fin(ev) {
+            feuille.removeEventListener('pointermove', bouger);
+            feuille.removeEventListener('pointerup', fin);
+            feuille.removeEventListener('pointercancel', fin);
+            desarmer();
+            if (ev.type === 'pointerup' && !glisse) couperMorceau(id, decalage);
+        }
+        feuille.addEventListener('pointermove', bouger);
+        feuille.addEventListener('pointerup', fin);
+        feuille.addEventListener('pointercancel', fin);
+    }
+
+    /** La feuille, les compteurs, le bandeau et la lecture, refaits après une coupe ou son annulation. */
+    function apresCoupe() {
+        etat.erreur = '';
+        etat.morceaux = D().morceaux(etat.doc);
+        rendreFeuille();
+        majPalette(); majBandeau(); rendreLecture(); planifierDessin();
+    }
+
+    function couperMorceau(id, decalage) {
+        if (!etat.doc || etat.enCours) return;
+        var r = D().couper(etat.doc, id, decalage);
+        if (!r) { dire(TEXTES_COUPE.unMot); return; }
+        // La pile garde le document d'avant et l'étiquette d'origine : l'annulation les rend tels quels.
+        etat.coupes.push({ doc: etat.doc, id: id, type: etat.liens[id] || null, parties: r.parties });
+        etat.liens = D().liensApresCoupe(etat.liens, id, r.parties);
+        etat.doc = r.doc;
+        apresCoupe();
+        var M = etat.morceaux;
+        dire(TEXTES_COUPE.coupe(M.texte[r.parties[0]], M.texte[r.parties[1]]));
+    }
+
+    /** « Annuler la dernière coupe » : les deux parties recollées, l'étiquette d'origine rendue. */
+    function annulerCoupe() {
+        var c = etat.coupes.pop();
+        if (!c || !etat.doc || etat.enCours) { if (c) etat.coupes.push(c); return; }
+        var r = D().recoller(etat.liens, c);
+        etat.doc = r.doc;
+        etat.liens = r.liens;
+        apresCoupe();
+        dire(TEXTES_COUPE.annulee(etat.morceaux.texte[c.id]));
     }
 
     // ------------------------------------------------------------------
@@ -676,7 +784,7 @@
     function ouvrir(doc, message) {
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
-        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {} };
+        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [] };
         desarmer();
         brancher();
         rendrePalette();
@@ -695,7 +803,7 @@
 
     /** Retour à l'accueil : la dissection en cours est oubliée (rien n'avait été écrit). */
     function fermer() {
-        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {} };
+        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [] };
         blocs = {};
         var vue = el('materiel-dissection'), contenu = el('dissection-contenu'), traits = el('dissection-traits');
         if (contenu) contenu.textContent = '';
@@ -736,10 +844,11 @@
 
     /**
      * « Coller une autre grille » (C2, relecture du 18 oct.) : sans étiquette posée, retour à l'accueil
-     * tout de suite ; dès qu'une étiquette est posée, un premier toucher demande confirmation.
+     * tout de suite ; dès qu'une étiquette est posée, ou une coupe faite (lot 5), un premier toucher
+     * demande confirmation.
      */
     function collerAutre(bouton) {
-        if (Object.keys(etat.liens).length && !confirme(bouton, 'materielDissection.collerAutre')) return;
+        if ((Object.keys(etat.liens).length || etat.coupes.length) && !confirme(bouton, 'materielDissection.collerAutre')) return;
         if (window.materiel) window.materiel.recommencer();
     }
 
@@ -752,6 +861,8 @@
         // Lot 2b : les niveaux partent avec leurs étiquettes, et ce qui était saisi pour eux aussi.
         etat.compte = 'points';
         etat.valeurs = {};
+        // Lot 5 : les coupes restent, mais une coupe annulée ensuite ne rend plus d'étiquette retirée.
+        etat.coupes.forEach(function (c) { c.type = null; });
         etat.morceaux.ordre.forEach(marquer);
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         dire('Toutes les étiquettes sont retirées.');
@@ -775,6 +886,7 @@
         terminer: terminer,
         collerAutre: collerAutre,
         toutRetirer: toutRetirer,
+        annulerCoupe: annulerCoupe,
         creer: creer,
         construireFeuille: construireFeuille,
         /** L'état de la dissection (lecture) — pour les bancs. */

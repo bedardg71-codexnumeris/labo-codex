@@ -194,10 +194,10 @@ describe('W — la pondération en niveaux', () => {
         expect(o.grille.criteres.map((c) => c.ponderation)).toEqual([30, 2]);
     });
 
-    it('W.b — un critère avec, un critère sans : il manque la pondération d’un critère', () => {
+    it('W.b — un critère avec, un critère sans : il manque la pondération d’un critère, nommé (lot 5)', () => {
         const lignes = TEXTE_C.filter((x) => x[1] !== 'points');
         const R = compriseTexte([...lignes.slice(0, 5), ['/ 30', 'ponderation'], ...lignes.slice(5)]);
-        expect(D.creation(R, {}, undefined, enNiveaux(R, TROIS)).raisons).toEqual(['la pondération d’un critère']);
+        expect(D.creation(R, {}, undefined, enNiveaux(R, TROIS)).raisons).toEqual(['la pondération d’un critère (« Tenue de la langue »)']);
     });
 });
 

@@ -38,16 +38,15 @@ Sélectionne **le tableau en entier**, puis copie.
 |---|---|---|---|
 | 2.7 | Colle-la ; étiquette critères, descripteurs et points. | La lecture dit « L’application y lirait une grille en points … jusqu’à un total de ‹N› ». | Le total lu, et celui de son document |
 | 2.8 | « Créer ma grille ». | La carte « Ta grille » dit « ‹N› critères, sur ‹T› points. » | — |
-| 2.9 | « La voir dans Grilles de critères ». | Pondérations en points (« Pondération totale : ‹N› points »), pas en %, et les réponses de chaque critère dans l'ordre de son document. | Ce qui ne correspond pas |
-| 2.10 | « Coller une autre grille » (deux touchers), recolle la même grille, étiquette-la, et garde le même nom. | « Avant de créer, il reste : » nomme le nom déjà pris. Change le nom dans le champ « Nom de ta grille » : « Créer ma grille » s'active, et la grille se crée. | — |
+| 2.9 | « La voir dans Grilles de critères ». | Ses critères et leurs réponses, avec leurs points, tels que dans son document. | Ce qui ne correspond pas à son document |
 
 ### C · Sur l'iPad
 
 | N° | Geste | Attendu | À noter (champ) |
 |---|---|---|---|
-| 2.11 | Une de tes deux grilles : touche la zone, puis « Coller ». | La dissection s'ouvre ; la palette reste à côté de ta grille, iPad debout comme couché. | — |
-| 2.12 | Étiquette au doigt : touche un morceau, puis glisse sur plusieurs. | Chaque toucher et chaque glissé surligne, sans viser ; hors d'une étiquette en main, la grille défile au doigt. | Un geste difficile au doigt, s'il y en a |
-| 2.13 | « Créer ma grille », puis « La voir dans Grilles de critères ». | Comme sur le Mac. | — |
+| 2.10 | Une de tes deux grilles : touche la zone, puis « Coller ». | La dissection s'ouvre ; la palette reste à côté de ta grille, iPad debout comme couché. | — |
+| 2.11 | Étiquette au doigt : touche un morceau, puis glisse sur plusieurs. | Chaque toucher et chaque glissé surligne, sans viser ; hors d'une étiquette en main, la grille défile au doigt. | Un geste difficile au doigt, s'il y en a |
+| 2.12 | « Créer ma grille », puis « La voir dans Grilles de critères ». | Comme sur le Mac. | — |
 
 Si un collage affiche « Rien de lisible dans ce que tu as collé », note-le dans le champ de la rangée, avec l'application et l'appareil : c'est l'information la plus utile de la porte.
 
@@ -59,5 +58,5 @@ Aucune à cette porte. La rangée 2.2 est une mesure de ton ressenti, pas un ver
 
 - **Le verdict Playwright complet** n'est pas pris au moment d'écrire cette porte : il se prend au temps B, sur le dernier commit. Les specs `materiel-*` ont tourné seules dans WebKit sur `4c16a4f0` (11 vertes, 0 rouge) ; Vitest complet est vert sur le commit de release `fe641099` (9 188 / 9 188).
 - **Un vrai presse-papiers de Word ou de Pages, Safari, l'iPad au doigt** : rien de cela n'existe dans les bancs.
-- **Ce que les bancs mesurent déjà, et que la porte rejoue seulement sur tes vraies grilles** : la grille en points affichée en points (spec `materiel-dissection-2a`, C2), l'ordre des réponses (C1), le nom déjà pris puis changé (C3), la création en niveaux et son échelle (`materiel-dissection-2b`), la palette à gauche à 820 px (lot 1, C1), un collage piégé qui ne s'exécute pas (`materiel-dissection-1`).
+- **Retiré par Cowork (relecture de 11 h 50), parce que les bancs le mesurent déjà** (règle de tête du skill) : le nom déjà pris puis changé, l'affichage en points plutôt qu'en %, l'ordre des réponses. Ce que les bancs mesurent, en somme : la grille en points affichée en points (spec `materiel-dissection-2a`, C2), l'ordre des réponses (C1), le nom déjà pris puis changé (C3), la création en niveaux et son échelle (`materiel-dissection-2b`), la palette à gauche à 820 px (lot 1, C1), un collage piégé qui ne s'exécute pas (`materiel-dissection-1`).
 - **Ton ressenti (2.2)** : aucune machine ne le mesure. C'est la raison d'être de cette porte après celle de 5 h 10.
