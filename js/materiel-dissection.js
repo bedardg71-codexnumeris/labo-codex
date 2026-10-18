@@ -15,6 +15,10 @@
  * Lot 2a (`CONSIGNE-LOT-2026-10-18-dissection-2a-creer-en-points.md`) : « Créer ma grille », sous la
  * lecture, pour une grille en points ; l'écriture est celle de `materielCreation.creer` (le seul
  * chemin, rien de neuf), puis la confirmation de `materiel.js`. Ce qui l'empêche s'écrit à côté.
+ * Lot 2b (`CONSIGNE-LOT-2026-10-18-dissection-2b-creer-en-niveaux.md`) : une grille en niveaux se crée
+ * aussi ; pour une grille qui a les deux logiques, un choix (des points par défaut). Le tableau « Ce que
+ * vaut chaque niveau » demande la plage et la note retenue de chaque niveau, champs VIDES ; ce qui y
+ * est saisi vit dans la page avec les étiquettes, et se perd avec elles.
  *
  * Sécurité (règle 1) : tout texte venu du collage s'écrit par `textContent` ; le HTML collé n'est
  * jamais inséré (le document disséqué ne porte que du texte). Boutons par `data-action` (dispatcher
@@ -30,7 +34,7 @@
     'use strict';
 
     var SVG = 'http://www.w3.org/2000/svg';
-    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null };
+    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {} };
     var blocs = {};
     var dessinPrevu = false;
 
@@ -427,13 +431,100 @@
         enCours: 'Création…',
         nom: 'Nom de ta grille',
         raisons: 'Avant de créer, il reste :',
-        bientot: 'La création des grilles en niveaux arrive bientôt. Pour l’instant, l’application crée les grilles qui ont des points.'
+        // Lot 2b : le choix (logique « les deux » seulement) et le tableau des niveaux.
+        choix: 'Le résultat d’une copie viendrait :',
+        choixPoints: 'des points',
+        choixNiveaux: 'des niveaux',
+        niveaux: 'Ce que vaut chaque niveau',
+        niveauxAide: 'Pour chaque niveau : la plage de notes qu’il couvre, et la note qu’une copie reçoit à ce niveau.',
+        de: 'de',
+        a: 'à',
+        note: 'note retenue',
+        pourcent: '%'
     };
 
     /** Le nom tapé (C3), ou `undefined` tant que l'enseignant n'a pas touché au champ : le Titre étiqueté vaut. */
     function nomTape() { return etat.nomSaisi == null ? undefined : etat.nomSaisi; }
 
-    function creation(R) { return D().creation(R, { nomsGrilles: nomsGrilles() }, nomTape()); }
+    function creation(R) { return D().creation(R, { nomsGrilles: nomsGrilles() }, nomTape(), { compte: etat.compte, valeurs: etat.valeurs }); }
+
+    /**
+     * Lot 2b : « Le résultat d'une copie viendrait : des points / des niveaux », pour une grille qui a
+     * les deux seulement ; « des points » coché par défaut (décision de Grégoire, 18 oct., 7 h 31).
+     */
+    function champChoix() {
+        var fs = noeud('fieldset', 'dissection-creer-choix');
+        fs.id = 'dissection-creer-choix';
+        fs.appendChild(noeud('legend', null, TEXTES_CREER.choix));
+        [['points', TEXTES_CREER.choixPoints], ['niveaux', TEXTES_CREER.choixNiveaux]].forEach(function (o) {
+            var lab = noeud('label', 'dissection-creer-option');
+            var r = noeud('input');
+            r.type = 'radio';
+            r.name = 'dissection-compte';
+            r.id = 'dissection-compte-' + o[0];
+            r.value = o[0];
+            r.checked = etat.compte === o[0];
+            r.addEventListener('change', function () {
+                if (!r.checked) return;
+                etat.compte = o[0];
+                etat.erreur = '';
+                rendreCreer(D().comprendre(etat.doc, etat.liens));
+            });
+            lab.appendChild(r);
+            lab.appendChild(noeud('span', null, o[1]));
+            fs.appendChild(lab);
+        });
+        return fs;
+    }
+
+    /** Un champ de saisie d'un niveau : vide, sauf ce que l'enseignant y a tapé (décision du 18 oct., 8 h 43). */
+    function champNiveau(cleNiv, quoi, id, libelle, nomNiveau, sansUnite) {
+        var bloc = noeud('span', 'dissection-niveau-champ');
+        var lab = noeud('label');
+        lab.setAttribute('for', id);
+        lab.appendChild(noeud('span', 'u-lecteur-ecran', nomNiveau + ', '));
+        lab.appendChild(document.createTextNode(libelle));
+        var c = noeud('input', 'controle-form');
+        c.id = id;
+        c.type = 'text';
+        c.inputMode = 'decimal';
+        c.autocomplete = 'off';
+        c.value = (etat.valeurs[cleNiv] && etat.valeurs[cleNiv][quoi]) || '';   // .value : jamais du HTML
+        c.addEventListener('input', function () {
+            if (!etat.valeurs[cleNiv]) etat.valeurs[cleNiv] = {};
+            etat.valeurs[cleNiv][quoi] = c.value;
+            etat.erreur = '';
+            rendreActions(creation(D().comprendre(etat.doc, etat.liens)));
+        });
+        bloc.appendChild(lab);
+        bloc.appendChild(c);
+        if (!sansUnite) bloc.appendChild(noeud('span', 'dissection-niveau-unite', TEXTES_CREER.pourcent));
+        return bloc;
+    }
+
+    /**
+     * Lot 2b : « Ce que vaut chaque niveau », une rangée par niveau dans l'ordre lu, son nom tel
+     * qu'étiqueté, puis « de … à … % » et « note retenue … % ». Rien de proposé ni de calculé, même
+     * quand des points sont écrits par niveau. Les `id` suivent le rang du niveau.
+     */
+    function tableauNiveaux(R) {
+        var fs = noeud('fieldset', 'dissection-creer-niveaux');
+        fs.id = 'dissection-creer-niveaux';
+        fs.appendChild(noeud('legend', null, TEXTES_CREER.niveaux));
+        fs.appendChild(noeud('p', 'dissection-creer-niveaux-aide', TEXTES_CREER.niveauxAide));
+        var cles = D().clesNiveaux(R);
+        R.niveaux.forEach(function (nom, i) {
+            var rangee = noeud('div', 'dissection-niveau');
+            rangee.appendChild(noeud('span', 'dissection-niveau-nom', nom));
+            var plage = noeud('span', 'dissection-niveau-plage');
+            plage.appendChild(champNiveau(cles[i], 'min', 'dissection-niv-' + i + '-min', TEXTES_CREER.de, nom, true));   // « de … à … % »
+            plage.appendChild(champNiveau(cles[i], 'max', 'dissection-niv-' + i + '-max', TEXTES_CREER.a, nom));
+            rangee.appendChild(plage);
+            rangee.appendChild(champNiveau(cles[i], 'note', 'dissection-niv-' + i + '-note', TEXTES_CREER.note, nom));
+            fs.appendChild(rangee);
+        });
+        return fs;
+    }
 
     /**
      * C3 (verdict du 18 oct., décision de Grégoire) : le champ « Nom de ta grille », au-dessus du bouton,
@@ -481,6 +572,8 @@
             b.setAttribute('aria-describedby', r.id);
             if (champ) champ.setAttribute('aria-describedby', r.id);
         }
+        // Lot 2b : les avertissements de `calculs(m)`, tels quels ; ils n'empêchent rien.
+        (c.avertissements || []).forEach(function (t) { z.appendChild(noeud('p', 'alerte alerte-attention dissection-creer-avert', t)); });
         if (etat.erreur) {
             var p = noeud('p', 'alerte alerte-erreur', etat.erreur);
             p.setAttribute('role', 'alert');
@@ -489,27 +582,35 @@
     }
 
     /**
-     * Sous la lecture : rien sans étiquette ; « bientôt » pour une grille en niveaux ; sinon le champ
-     * du nom, le bouton et ses raisons. Le champ existant est GARDÉ (pas de focus perdu) ; tant qu'on
-     * n'y a pas touché, il suit le Titre étiqueté.
+     * Sous la lecture : rien sans étiquette ; sinon, le choix (logique « les deux »), le tableau des
+     * niveaux (en niveaux, lot 2b), le champ du nom, le bouton et ses raisons. Le champ du nom existant
+     * est GARDÉ (pas de focus perdu) ; tant qu'on n'y a pas touché, il suit le Titre étiqueté. Le choix
+     * et le tableau se refont d'un geste d'étiquetage ou du choix, jamais d'une frappe : leurs valeurs
+     * viennent de l'état de la page.
      */
     function rendreCreer(R) {
         var z = el('dissection-creer');
         if (!z) return;
-        var c = Object.keys(etat.liens).length ? creation(R) : null;
-        if (!c || c.niveauxSeuls) {
-            z.textContent = '';
-            if (c) z.appendChild(noeud('p', 'dissection-creer-bientot', TEXTES_CREER.bientot));
-            return;
-        }
+        if (!Object.keys(etat.liens).length) { z.textContent = ''; return; }
+        var c = creation(R);
         var champ = el('dissection-nom-grille');
         if (!champ) {
             z.textContent = '';
+            var zc = noeud('div', 'dissection-creer-saisie');
+            zc.id = 'dissection-creer-saisie';
+            z.appendChild(zc);
             z.appendChild(champNom(R));
             var actions = noeud('div', 'dissection-creer-actions');
             actions.id = 'dissection-creer-actions';
             z.appendChild(actions);
         } else if (etat.nomSaisi == null) champ.value = D().nomPropose(R);
+        // Le choix, touché, n'est pas redessiné (son focus resterait sinon en l'air).
+        var saisie = el('dissection-creer-saisie'), choix = el('dissection-creer-choix'), tab = el('dissection-creer-niveaux');
+        var deux = D().bilan(R).logique === 'deux';
+        if (choix && !deux) saisie.removeChild(choix);
+        if (!choix && deux) saisie.insertBefore(champChoix(), saisie.firstChild);
+        if (tab) saisie.removeChild(tab);
+        if (c.enNiveaux) saisie.appendChild(tableauNiveaux(R));
         rendreActions(c);
     }
 
@@ -521,7 +622,7 @@
     async function creer() {
         if (etat.enCours || !etat.doc) return;
         var c = creation(D().comprendre(etat.doc, etat.liens));
-        if (c.niveauxSeuls || c.raisons.length) { rendreLecture(); return; }
+        if (c.raisons.length) { rendreLecture(); return; }
         var doc = etat.doc;
         etat.enCours = true;
         etat.erreur = '';
@@ -575,7 +676,7 @@
     function ouvrir(doc, message) {
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
-        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false, nomSaisi: null };
+        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {} };
         desarmer();
         brancher();
         rendrePalette();
@@ -594,7 +695,7 @@
 
     /** Retour à l'accueil : la dissection en cours est oubliée (rien n'avait été écrit). */
     function fermer() {
-        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null };
+        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {} };
         blocs = {};
         var vue = el('materiel-dissection'), contenu = el('dissection-contenu'), traits = el('dissection-traits');
         if (contenu) contenu.textContent = '';
@@ -648,6 +749,9 @@
         etat.liens = {};
         etat.actif = null;
         etat.erreur = '';
+        // Lot 2b : les niveaux partent avec leurs étiquettes, et ce qui était saisi pour eux aussi.
+        etat.compte = 'points';
+        etat.valeurs = {};
         etat.morceaux.ordre.forEach(marquer);
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         dire('Toutes les étiquettes sont retirées.');

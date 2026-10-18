@@ -634,7 +634,7 @@
             (r.retro ? carteCree('Tes rétroactions', 'Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.', 'retroactions', 'Les voir dans Cartouches de rétroaction') : '') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
-            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">Apporter autre chose</button></section>';
+            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e(r.depuisDissection ? 'Coller une autre grille' : 'Apporter autre chose') + '</button></section>';
     }
 
     /**
@@ -666,7 +666,8 @@
 
     /**
      * Étape 5 : la carte « Grille » seule ; « Pour t'en servir… » inchangé. Textes PROVISOIRES (étape 7).
-     * La dissection, lot 2a : venue d'elle, la confirmation garde « Coller une autre grille » (même geste).
+     * La dissection, lot 2a : venue d'elle, la confirmation garde « Coller une autre grille » (même geste) ;
+     * lot 2b : celle d'une grille en niveaux aussi (`confirmationHtml`).
      */
     function confirmationPointsHtml(r) {
         var retour = r.depuisDissection ? 'Coller une autre grille' : 'Apporter autre chose';

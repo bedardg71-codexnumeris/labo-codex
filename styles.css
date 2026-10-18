@@ -28390,7 +28390,22 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .dissection-creer .btn-principal { min-height: 44px; font-size: 1rem; font-weight: 600; }
 .dissection-creer-raisons { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 0.9rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
 .dissection-creer-raisons ul { margin: 4px 0 0; padding-left: 1.2em; }
-.dissection-creer-bientot { margin: 0; color: var(--texte-secondaire); max-width: 80ch; }
+/* Lot 2b : le choix (des points / des niveaux) et « Ce que vaut chaque niveau ». Cibles de 44 px, texte de 16 px. */
+.dissection-creer-saisie { flex: 1 1 100%; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.dissection-creer-saisie:empty { display: none; }
+.dissection-creer-choix, .dissection-creer-niveaux { margin: 0; padding: 0; border: 0; min-width: 0; }
+.dissection-creer-choix legend, .dissection-creer-niveaux legend { font-weight: 600; padding: 0; margin-bottom: 4px; }
+.dissection-creer-choix { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.dissection-creer-choix legend { flex-basis: 100%; }
+.dissection-creer-option { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 1rem; cursor: pointer; }
+.dissection-creer-option input { width: 22px; height: 22px; margin: 0; }
+.dissection-creer-niveaux-aide { margin: 0 0 6px; color: var(--texte-secondaire); max-width: 80ch; }
+.dissection-niveau { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 6px 0; border-top: 1px solid var(--bordure-claire); }
+.dissection-niveau-nom { flex: 1 1 12ch; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.dissection-niveau-plage { display: inline-flex; flex-wrap: wrap; gap: 6px 12px; }
+.dissection-niveau-champ { display: inline-flex; align-items: center; gap: 6px; }
+.dissection-niveau-champ input { width: 6.5em; min-height: 44px; font-size: 1rem; box-sizing: border-box; }
+.dissection-niveau-unite { color: var(--texte-secondaire); }
 .dissection-creer .alerte { flex-basis: 100%; margin: 0; }
 
 /* C1 (relecture du 18 oct.) : la palette GARDE SA PLACE à gauche tant que le canevas garde 480 px.

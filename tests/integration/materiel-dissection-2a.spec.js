@@ -18,6 +18,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · C1 — les réponses de (b) gardent leur ordre jusque dans Grilles de critères (« 1 point », « 0,5 point », « 0 point ») ;
 //   · C2 — une grille en points dit « 30 points » et « Points », jamais « % » ; une grille en % garde ses « % » ;
 //   · C3 — le champ « Nom de ta grille » : prérempli, 44 px et 16 px ; l'exemple recréé est refusé, renommé, créé.
+//
+// Une grille seulement en niveaux : lot 2b, `materiel-dissection-2b.spec.js`.
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);
@@ -251,15 +253,4 @@ test('dissection 2a · C1 : les réponses de (b) gardent leur ordre jusque dans 
         rs.map((r) => [...r.querySelectorAll('.grille-attendu-niveau strong')].map((x) => x.textContent)));
     expect(titres).toEqual([['4 points', '2 points', '0 point'], ['3 points', '2 points', '1 point', '0 point'], ['1 point', '0,5 point', '0 point']]);
     expect(erreurs).toEqual([]);
-});
-
-test('dissection 2a · une grille seulement en niveaux : pas de bouton, la ligne « bientôt »', async ({ page }) => {
-    await ouvrirConception(page);
-    await page.locator('[data-action="materiel.essayerExemple"]').click();
-    await etiqueter(page, 'titre', ['Journal de lecture']);
-    await etiqueter(page, 'niveau', ['Insuffisant', 'Partiel', 'Satisfaisant', 'Remarquable']);
-    await etiqueter(page, 'critere', CRITERES);
-    await etiqueter(page, 'descripteur', DESCRIPTEURS);
-    await expect(page.locator('#dissection-creer [data-action="materielDissection.creer"]')).toHaveCount(0);
-    await expect(page.locator('#dissection-creer .dissection-creer-bientot')).toHaveText('La création des grilles en niveaux arrive bientôt. Pour l’instant, l’application crée les grilles qui ont des points.');
 });
