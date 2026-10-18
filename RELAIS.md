@@ -7,7 +7,17 @@
 
 ---
 
-## POUR LA SESSION QUI PREND LE RELAIS — 17 OCT. 2026, VERS 14 H 35 : **ÉTAPES 6 ET 5b RELUES ; CORRECTIONS C1-C2 (`0bacffb7`) ET C3 (`67cbabb8`) COMMITÉES SUR `main`, NON POUSSÉES**
+## POUR LA SESSION QUI PREND LE RELAIS – 17 OCT. 2026, 20 h 04 (écrit par Cowork) : **1.203.0 EN LIGNE ; TOUT EST SUR `main`, POUSSÉ**
+
+**En ligne** : `71cdde64` (1.203.0, « Apporter mon matériel »), poussé vers 19 h 55 ; à constater chez Netlify (§0 de la porte). **`main` local** = `origin/main`.
+**Vitest** : 9 132/9 132 (Cowork sur `071b6a0b` ; le hook au push sur `71cdde64`). **Verdict Playwright** : vert sur `71cdde64` ; #916 et #867 passés au second essai seulement, rien à faire tant qu'ils ne reviennent pas (#685).
+**Ailleurs** : la branche `ci/verdict-morceaux-2` (`fb20d986`, sur GitHub) attend sa fusion, lundi 19 après-midi, après la rencontre (`CONSIGNE-DEMARRAGE-COWORK.md` §0′ et §0″).
+**Non commités, à commiter avec le prochain commit** : ce fichier, `CONSIGNE-DEMARRAGE-COWORK.md`, `plans de travail/PLAN-2026-10-17-pret-pour-lundi.md` (étape 8 cochée). Les trois fichiers du chantier CI restent non suivis jusqu'à la fusion.
+**Suite** : lundi avant 11 h, la porte terrain de Grégoire ; 11 h, la rencontre de la CoP ; l'après-midi, la fusion du chantier CI, puis ses corrections. `OU-EN-EST-ON.md` se met à jour après la porte : une ligne « fait » demande son « vérifié comment ».
+
+---
+
+## (relais précédent) 17 OCT. 2026, VERS 14 H 35 : **ÉTAPES 6 ET 5b RELUES ; CORRECTIONS C1-C2 (`0bacffb7`) ET C3 (`67cbabb8`) COMMITÉES SUR `main`, NON POUSSÉES**
 
 **En ligne** : toujours `4a972d13` (1.202.0). **`main` local** : 3b1, 5, 6, 5b et les corrections du verdict de 14 h 02 (« Suite donnée » remplie dans `plans de travail/VERDICT-RELECTURE-2026-10-17-apporter-mon-materiel-6-et-5b.md`).
 **Vitest** : 9 129/9 129. Verdict Playwright : périmé (juge `4a972d13`).

@@ -38,4 +38,4 @@ La fusion de la vérification sur GitHub (lundi après-midi, après la rencontre
 - [x] 5b — `d75d8f09`, relu à 14 h 02 ; corrections `0bacffb7`, `67cbabb8` (les icônes « i »), `568c927b` (jeton), relues ; Vitest complet vert mesuré par Cowork sur `a26fb3dd` à 14 h 41 (771 fichiers, 9 129 essais) ; non poussé
 - [x] 6 — `1c1868e0`, relu et accepté à 14 h 02, non poussé
 - [x] 7 — tes 89 réponses (15 h 00) appliquées : `e87f5ad7`, `963cc15f`, `af1fbe99` ; relu et accepté par Cowork à 16 h 25 (Vitest complet vert sur `d2e0bf66`, 9 132 essais) ; non poussé
-- [ ] 8
+- [x] 8 — release `6cf60f70` (1.203.0), relue à 17 h 49 et acceptée avec une correction (C1, les délais fixes des huit specs du matériel : `71cdde64`) ; vérification complète verte sur `71cdde64`, poussée le 17 vers 19 h 55. Reste lundi avant 11 h : la porte terrain de Grégoire (`PORTE-TERRAIN-2026-10-19-apporter-mon-materiel.md`, artefact « Porte · Apporter mon matériel »)
