@@ -28379,6 +28379,14 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .dissection-vide { color: var(--texte-muted); }
 .dissection-sans-place { color: var(--alerte-texte-attention); font-size: 0.9rem; display: flex; flex-direction: column; gap: 4px; }
 .dissection-sans-place ul { margin: 0; padding-left: 1.2em; }
+/* Lot 2a : « Créer ma grille » sous la lecture ; ce qui l'empêche, écrit à côté du bouton. */
+.dissection-creer { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px; border-top: 1px solid var(--bordure-claire); padding-top: 14px; }
+.dissection-creer:empty { display: none; }
+.dissection-creer .btn-principal { min-height: 44px; font-size: 1rem; font-weight: 600; }
+.dissection-creer-raisons { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 0.9rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
+.dissection-creer-raisons ul { margin: 4px 0 0; padding-left: 1.2em; }
+.dissection-creer-bientot { margin: 0; color: var(--texte-secondaire); max-width: 80ch; }
+.dissection-creer .alerte { flex-basis: 100%; margin: 0; }
 
 /* C1 (relecture du 18 oct.) : la palette GARDE SA PLACE à gauche tant que le canevas garde 480 px.
    Plus étroite (170 px) : le nom, l'aide et le compte ; la précision passe dans le bandeau.

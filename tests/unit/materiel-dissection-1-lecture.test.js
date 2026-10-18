@@ -103,7 +103,7 @@ describe('A — sections à niveaux nommés, points par niveau, total', () => {
         expect(R.criteres.map((c) => c.pondDeduite)).toEqual([5, 10, 5, 10, 5, 15]);
         const c2 = R.criteres[1];
         expect(c2.sous).toEqual(['Indice observable 2.1', 'Indice observable 2.2']);
-        expect(c2.niv[0]).toEqual({ desc: ['Tâche 2 absente'], pts: [] });
+        expect(c2.niv[0]).toEqual({ desc: ['Tâche 2 absente'], pts: [], ecrits: [] });
         expect(c2.niv[1].pts).toEqual([[6, 7]]);
         expect(R.criteres[5].niv[2].pts).toEqual([[11, 13]]);
         const b = D.bilan(R);
@@ -146,7 +146,8 @@ describe('C — un texte brut : rattachement par l’ordre', () => {
         expect(R.sansPlace).toEqual([]);
         expect(R.niveaux).toEqual(['Insuffisant', 'Réussi', 'Excellent']);
         expect(R.criteres.map((c) => c.nom)).toEqual(['Clarté du propos', 'Tenue de la langue']);
-        expect(R.criteres[0].niv).toEqual({ 0: { desc: ['Propos confus'], pts: [[0, 1]] }, 1: { desc: ['Propos suivi'], pts: [[2, 3]] }, 2: { desc: ['Propos limpide'], pts: [[4, 4]] } });
+        // Lot 2a : `ecrits` garde les points tels qu'écrits (« 0-1 »), à côté de leurs nombres.
+        expect(R.criteres[0].niv).toEqual({ 0: { desc: ['Propos confus'], pts: [[0, 1]], ecrits: ['0-1'] }, 1: { desc: ['Propos suivi'], pts: [[2, 3]], ecrits: ['2-3'] }, 2: { desc: ['Propos limpide'], pts: [[4, 4]], ecrits: ['4'] } });
         expect(D.bilan(R)).toMatchObject({ somme: 6, logique: 'deux' });
     });
 

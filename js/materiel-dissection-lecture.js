@@ -20,6 +20,10 @@
  *
  * Règle de la lecture : un morceau étiqueté qui ne trouve pas sa place finit dans `sansPlace`,
  * avec sa raison — jamais en erreur, jamais en silence.
+ *
+ * Lot 2a (`CONSIGNE-LOT-2026-10-18-dissection-2a-creer-en-points.md`) : la grille comprise devient
+ * le modèle EN POINTS de `materielAssistant.construire` (`modele`, `creation`) ; l'écriture reste
+ * celle de `materielCreation.creer`.
  */
 (function () {
     'use strict';
@@ -210,7 +214,8 @@
     /** Le critère d'un morceau : celui de sa rangée dans un tableau, sinon le dernier ouvert. */
     function cible(x, id) { if (x.table && x.parRangee[x.pos[id].r]) return x.parRangee[x.pos[id].r]; return x.enCours; }
 
-    function caseDe(cr, i) { if (!cr.niv[i]) cr.niv[i] = { desc: [], pts: [] }; return cr.niv[i]; }
+    // `ecrits` : les points tels que l'enseignant les a écrits (« 3-4 », « 2 points ») ; `pts`, leurs nombres.
+    function caseDe(cr, i) { if (!cr.niv[i]) cr.niv[i] = { desc: [], pts: [], ecrits: [] }; return cr.niv[i]; }
 
     /** Un texte rangé dans un tableau de textes ; une « Suite » le complètera. */
     function ranger(x, arr, tx) { arr.push(tx); var k = arr.length - 1; x.suite = function (s) { arr[k] += ' ' + s; }; }
@@ -233,7 +238,7 @@
 
     function lireDescripteur(x, cr, id, tx, t) {
         if (!x.avecNiveaux) {
-            var rep = { desc: tx, pts: [], r: x.table ? x.pos[id].r : null };
+            var rep = { desc: tx, pts: [], ecrits: [], r: x.table ? x.pos[id].r : null };
             cr.reponses.push(rep); x.suite = function (s) { rep.desc += ' ' + s; };
             return;
         }
@@ -263,6 +268,7 @@
         } else dest = reponsePourPoints(x, cr, id);
         if (!dest) { sansPlace(x, tx, t, 'aucune réponse pour ces points'); return; }
         dest.pts.push(intervalle(nn));
+        dest.ecrits.push(tx);
     }
 
     /** Les étiquettes qui se rangent sous un critère. */
@@ -280,7 +286,9 @@
     function lireMorceau(x, id, t, tx) {
         if (t === 'ignorer' || t === 'niveau') return;
         if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, tx, t, 'aucun morceau à compléter avant elle'); return; }
-        x.suite = null;
+        // Lot 2a (trouvaille 1 du lot 1, tranchée par Cowork) : une « Suite » complète le dernier TEXTE
+        // lu ; des points et une pondération sont des nombres, pas du texte à continuer.
+        if (t !== 'points' && t !== 'ponderation') x.suite = null;
         if (LIRE_CADRE[t]) { LIRE_CADRE[t](x, id, tx); return; }
         var cr = cible(x, id);
         // Une réponse sans critère, quand aucun niveau n'est nommé : un critère « à nommer ».
@@ -374,7 +382,113 @@
     };
 
     // ------------------------------------------------------------------
-    // 3. L'EXEMPLE : une grille FICTIVE, de la forme d'une grille à sections et niveaux
+    // 3. CRÉER (lot 2a) : de la grille comprise au modèle de `materielAssistant.construire`
+    // ------------------------------------------------------------------
+
+    /** Au plus 20 réponses par critère : `parNiveau` n'en voyage pas plus (`maxCles`, `partage-schemas.js`). */
+    D.MAX_REPONSES = 20;
+    D.MAX_REPONSE = 5000;
+
+    function paire(valeur, etatV) { return { valeur: valeur, etat: etatV }; }
+
+    /** « Section – Critère », la section à la casse de la règle 8.16 ; un critère à nommer, « Critère N ». */
+    function nomDuCritere(c) {
+        var nom = c.nom != null ? c.nom : 'Critère ' + c.numero;
+        return c.section ? window.materielLecture.casseDePartie(c.section.nom) + ' – ' + nom : nom;
+    }
+
+    /** Le texte d'un niveau : son ou ses descripteurs, puis, sur une ligne à part, ses points tels qu'écrits. */
+    function texteDuNiveau(cell) {
+        if (!cell) return '';
+        var lignes = [];
+        if (cell.desc.length) lignes.push(cell.desc.join(' '));
+        if (cell.ecrits.length) lignes.push(cell.ecrits.join(' '));
+        return lignes.join('\n');
+    }
+
+    /**
+     * Sans niveaux, une clé par réponse : ses points tels qu'écrits (« 2 », « 0,5 »), « Réponse N »
+     * sans points ; deux clés identiques se distinguent par « (2) ». Clés PROVISOIRES (étape 3).
+     */
+    function clesDesReponses(reponses) {
+        var prises = {};
+        return reponses.map(function (r, k) {
+            var base = r.ecrits.length ? r.ecrits.join(' ') : 'Réponse ' + (k + 1);
+            var libre = base;
+            for (var n = 2; prises[libre]; n++) libre = base + ' (' + n + ')';
+            prises[libre] = true;
+            return { cle: libre, texte: r.desc };
+        });
+    }
+
+    /**
+     * La grille comprise → le modèle EN POINTS que `materielAssistant.construire` sait écrire. Rien
+     * d'inventé : ni niveau, ni échelle, ni cartouche. Avec des niveaux nommés, chaque niveau garde son
+     * nom (les plages restent vides : elles ne servent pas en points) ; sans niveaux, chaque critère
+     * porte ses réponses en `parCle`.
+     */
+    D.modele = function (R) {
+        var titre = R.titre.join(' ');
+        var desc = R.description.join('\n');
+        return {
+            source: 'dissection', enPoints: true, lecture: null, tableau: null, roles: null,
+            nom: paire(titre, titre ? 'repris' : 'remplir'),
+            description: paire(desc, desc ? 'repris' : 'vide'),
+            niveaux: R.avecNiveaux ? R.niveaux.map(function (n) { return { titre: paire(n, 'repris'), min: paire('', 'vide'), max: paire('', 'vide') }; }) : [],
+            criteres: R.criteres.map(function (c) {
+                var p = c.pond != null ? c.pond : c.pondDeduite;
+                var d = c.desc.join('\n');
+                var cr = {
+                    nom: paire(nomDuCritere(c), c.nom != null ? 'repris' : 'complete'),
+                    ponderation: p != null ? paire(String(p), 'repris') : paire('', 'remplir'),
+                    cases: R.avecNiveaux ? R.niveaux.map(function (n, i) { var t = texteDuNiveau(c.niv[i]); return paire(t, t ? 'repris' : 'vide'); }) : [],
+                    sousCriteres: c.sous.slice(),
+                    description: paire(d, d ? 'repris' : 'vide')
+                };
+                if (!R.avecNiveaux) cr.parCle = clesDesReponses(c.reponses);
+                return cr;
+            }),
+            aClasser: [], manquesLecture: []
+        };
+    };
+
+    function compte(n, un, plusieurs) { return n === 1 ? un : plusieurs.replace('#', n); }
+
+    /**
+     * Peut-on créer ? `{ niveauxSeuls, raisons, modele }`. Une grille seulement en niveaux attend le
+     * lot 2b (`niveauxSeuls`) ; sinon, les raisons d'un refus, dans l'ordre : le titre, les morceaux
+     * sans place, les points, les réponses par critère, puis les mots de `calculs(m).manquants`, tels
+     * quels. Le total qui ne tombe pas juste n'en est pas une : le constat est déjà à l'écran.
+     * Textes PROVISOIRES (Claude Code, 18 oct.), relus à l'étape 3.
+     * @param {object} R - la grille comprise
+     * @param {{nomsGrilles?: string[]}} [contexte] - les noms des grilles déjà dans le trimestre
+     */
+    D.creation = function (R, contexte) {
+        var b = D.bilan(R);
+        if (b.logique === 'niveaux') return { niveauxSeuls: true, raisons: [], modele: null };
+        var m = D.modele(R);
+        var raisons = [];
+        var sansTitre = !R.titre.length;
+        if (sansTitre) raisons.push('le titre de ta grille : surligne-le avec l’étiquette « Titre »');
+        if (R.sansPlace.length) raisons.push(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'));
+        if (!b.logique) raisons.push('des points : surligne ce que vaut chaque réponse avec l’étiquette « Points »');
+        m.criteres.forEach(function (c) {
+            if (!c.parCle) return;
+            if (c.parCle.length > D.MAX_REPONSES) raisons.push('au plus ' + D.MAX_REPONSES + ' réponses par critère (« ' + c.nom.valeur + ' » en a ' + c.parCle.length + ')');
+            if (c.parCle.some(function (x) { return x.cle.charAt(0) === '_'; })) raisons.push('des points qui ne commencent pas par « _ » (« ' + c.nom.valeur + ' »)');
+        });
+        if (m.criteres.some(function (c) { return c.parCle && c.parCle.some(function (x) { return x.texte.length > D.MAX_REPONSE; }); })) {
+            raisons.push('des réponses plus courtes (5 000 caractères au plus)');
+        }
+        window.materielAssistant.calculs(m, contexte).manquants.forEach(function (t) {
+            // Sans titre, « le nom de la grille » redirait la première raison.
+            if (!(sansTitre && t === 'le nom de la grille')) raisons.push(t);
+        });
+        return { niveauxSeuls: false, raisons: raisons, modele: m };
+    };
+
+    // ------------------------------------------------------------------
+    // 4. L'EXEMPLE : une grille FICTIVE, de la forme d'une grille à sections et niveaux
     // ------------------------------------------------------------------
 
     /**

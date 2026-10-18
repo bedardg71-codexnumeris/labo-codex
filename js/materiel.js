@@ -37,7 +37,7 @@
  * de la zone et l'exemple ouvrent la DISSECTION (`materiel-dissection.js`) ; « Taper ma grille à la
  * main » mène vers Grilles de critères. L'assistant en sept étapes est DÉBRANCHÉ, pas supprimé :
  * plus aucun geste ne l'ouvre (`charger`, `ouvrirAssistant` restent), son retrait est inscrit pour
- * après lundi. La création (`creer`, la confirmation) servira au lot 2.
+ * après lundi. La dissection, lot 2a : sa création aboutit ici (`montrerCreee`, la confirmation).
  */
 (function () {
     'use strict';
@@ -664,8 +664,12 @@
             '<button type="button" class="materiel-btn-lien" data-action="afficherAideContextuelle" data-param="' + e(PLUS_LOIN.aide) + '">' + e(PLUS_LOIN.lien) + '</button></aside>';
     }
 
-    /** Étape 5 : la carte « Grille » seule ; « Pour t'en servir… » inchangé. Textes PROVISOIRES (étape 7). */
+    /**
+     * Étape 5 : la carte « Grille » seule ; « Pour t'en servir… » inchangé. Textes PROVISOIRES (étape 7).
+     * La dissection, lot 2a : venue d'elle, la confirmation garde « Coller une autre grille » (même geste).
+     */
     function confirmationPointsHtml(r) {
+        var retour = r.depuisDissection ? 'Coller une autre grille' : 'Apporter autre chose';
         return '<section class="materiel-confirmation" aria-labelledby="materiel-titre-cree">' +
             '<div class="materiel-confirmation-titre"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>' +
             '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
@@ -674,7 +678,7 @@
             carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + '.', 'grille-criteres', 'La voir dans Grilles de critères') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
-            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">Apporter autre chose</button></section>';
+            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e(retour) + '</button></section>';
     }
 
     function carteCree(titre, txt, sousSection, bouton) {
@@ -904,6 +908,12 @@
         ajouterNiveau: function () { changer(A().ajouterNiveau(etat.modele), '#materiel-v-titre-' + etat.modele.niveaux.length); },
         saisir: saisir,
         creer: creer,
+        /** La dissection, lot 2a : sa grille est créée ; la dissection se ferme, la confirmation s'affiche. */
+        montrerCreee: function (resume) {
+            if (window.materielDissection) window.materielDissection.fermer();
+            etat = Object.assign(etat, { ecran: 'cree', modele: null, resume: Object.assign({}, resume, { depuisDissection: true }), erreurCreation: '', enCours: false });
+            rendre();
+        },
         /**
          * La sous-section, puis (lot 3b1) l'objet créé ouvert et sélectionné, par le chemin de la
          * bibliothèque de chaque outil (`ouvrir…DepuisListe`, qui garde une création en cours).

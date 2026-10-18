@@ -37,7 +37,7 @@
 
 ## Avancement
 
-- [ ] 1
+- [x] 1 — `25584d62`, relu à 7 h 58 (accepté, deux corrections) ; corrections `77ecb741`, rapport et capture à 820 px vus par Cowork à 8 h 10
 - [ ] 2
 - [ ] 3
 - [ ] 4
