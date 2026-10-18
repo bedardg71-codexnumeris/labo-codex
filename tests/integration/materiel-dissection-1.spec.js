@@ -12,6 +12,9 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     ni délai ; la grille comprise se refait ; Échap pose le surligneur ;
 //   · `touch-action: none` seulement quand une étiquette est en main ;
 //   · à la largeur de l'iPad (820), la page ne défile pas de côté ; étiquettes et « Terminer » ≥ 44 px ;
+//   · C1 (relecture du 18 oct.) : la palette reste à GAUCHE du canevas, debout (820) comme couché (1180) ;
+//     la précision de l'étiquette en main passe dans le bandeau ;
+//   · C2 : « Coller une autre grille » demande confirmation dès qu'une étiquette est posée ;
 //   · un collage piégé n'entre pas dans la page ; l'exemple et « Taper ma grille à la main ».
 
 async function ouvrirConception(page) {
@@ -89,7 +92,8 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     // 1re étiquette : « Critère », un toucher.
     await page.locator('#dissection-palette [data-param="critere"]').click();
     await expect(page.locator('#dissection-palette [data-param="critere"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#dissection-bandeau')).toBeVisible();
+    await expect(page.locator('#dissection-terminer')).toBeVisible();
+    await expect(page.locator('#dissection-bandeau-precision')).toHaveText('Critère : Ce qui est attendu : la question que tu te poses devant la copie');
     expect(await touchAction()).toBe('none');
     await geste(page, ['Question 1 : le sens du passage fictif']);
     // La flèche de l'étiquette en main vers son morceau.
@@ -109,7 +113,9 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
 
     // Échap pose le surligneur.
     await page.keyboard.press('Escape');
-    await expect(page.locator('#dissection-bandeau')).toBeHidden();
+    await expect(page.locator('#dissection-terminer')).toBeHidden();
+    await expect(page.locator('#dissection-bandeau-precision')).toBeHidden();
+    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Touche une étiquette dans la palette : elle devient ton surligneur.');
     expect(await touchAction()).toBe('auto');
 
     // La grille comprise : un critère, deux réponses, sans points.
@@ -125,22 +131,51 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#dissection-constats')).toContainText('1 critère');
     await expect(page.locator('#dissection-constats')).toContainText('21 morceaux sans étiquette');
 
-    // iPad en portrait : la page ne défile pas de côté ; le canevas, lui, défile.
-    await page.setViewportSize({ width: 820, height: 1180 });
+    // iPad debout puis couché (C1) : la palette reste à gauche du canevas, leurs hauts au même niveau ;
+    // la page ne défile pas de côté ; le canevas, lui, défile ; la palette tient dans la hauteur du canevas.
     await page.locator('#dissection-palette [data-param="points"]').click();
-    const mesures = await page.evaluate(() => ({
-        debord: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-        canevasDefile: (() => { const c = document.getElementById('dissection-canevas'); return c.scrollWidth > c.clientWidth; })(),
-        etiquettes: Math.min(...[...document.querySelectorAll('#dissection-palette .dissection-etiquette')].map((b) => b.getBoundingClientRect().height)),
-        terminer: document.querySelector('#dissection-bandeau .btn').getBoundingClientRect().height
-    }));
-    expect(mesures.debord, 'la page ne défile pas horizontalement').toBeLessThanOrEqual(0);
-    expect(mesures.canevasDefile, 'la grille défile dans son canevas').toBe(true);
-    expect(mesures.etiquettes).toBeGreaterThanOrEqual(44);
-    expect(mesures.terminer).toBeGreaterThanOrEqual(44);
+    const mesurer = () => page.evaluate(() => {
+        const pal = document.getElementById('dissection-palette').getBoundingClientRect();
+        const c = document.getElementById('dissection-canevas'), cv = c.getBoundingClientRect();
+        return {
+            debord: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            ecartHauts: Math.abs(cv.top - pal.top),
+            aGauche: pal.right <= cv.left,
+            largeurCanevas: cv.width,
+            palettePlusHaute: pal.height > cv.height + 1,
+            canevasDefile: c.scrollWidth > c.clientWidth,
+            etiquettes: Math.min(...[...document.querySelectorAll('#dissection-palette .dissection-etiquette')].map((b) => b.getBoundingClientRect().height)),
+            terminer: document.getElementById('dissection-terminer').getBoundingClientRect().height
+        };
+    });
+    for (const [largeur, hauteur] of [[820, 1180], [1180, 820]]) {
+        await page.setViewportSize({ width: largeur, height: hauteur });
+        const m = await mesurer();
+        const ou = largeur + ' × ' + hauteur;
+        expect(m.debord, ou + ' : la page ne défile pas horizontalement').toBeLessThanOrEqual(0);
+        expect(m.aGauche, ou + ' : la palette est à gauche du canevas').toBe(true);
+        expect(m.ecartHauts, ou + ' : côte à côte, pas l\'une au-dessus de l\'autre').toBeLessThan(100);
+        expect(m.largeurCanevas, ou + ' : le canevas garde 480 px').toBeGreaterThanOrEqual(480);
+        expect(m.palettePlusHaute, ou + ' : la palette défile dans la hauteur du canevas').toBe(false);
+        expect(m.canevasDefile, ou + ' : la grille défile dans son canevas').toBe(true);
+        expect(m.etiquettes).toBeGreaterThanOrEqual(44);
+        expect(m.terminer).toBeGreaterThanOrEqual(44);
+    }
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await page.screenshot({ path: test.info().outputPath('dissection-820.png') });
 
-    // « Coller une autre grille » : retour à l'accueil, la dissection oubliée.
-    await page.locator('#materiel-dissection [data-action="materiel.recommencer"]').click();
+    // C2 · « Coller une autre grille », des étiquettes posées : un premier toucher demande confirmation.
+    // Break-test (fait le 18 oct.) : la garde de `collerAutre` retirée → l'accueil revient au premier toucher, rouge.
+    const autre = page.locator('#materiel-dissection [data-action="materielDissection.collerAutre"]');
+    await autre.click();
+    await expect(autre).toHaveText('Confirmer : coller une autre grille');
+    await expect(page.locator('#materiel-dissection')).toBeVisible();
+    // Un autre geste désarme le bouton.
+    await page.keyboard.press('Escape');
+    await page.locator('#dissection-palette [data-param="titre"]').click();
+    await expect(autre).toHaveText('Coller une autre grille');
+    await autre.click();
+    await autre.click();
     await expect(page.locator('#materiel-accueil')).toBeVisible();
     await expect(page.locator('#materiel-dissection')).toBeHidden();
     expect(await page.evaluate(() => window.materielDissection.etatCourant().doc)).toBeNull();
@@ -182,7 +217,8 @@ test('dissection · « Essayer avec un exemple » ouvre une grille fictive ; « 
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await expect(page.locator('#dissection-contenu')).toContainText('Journal de lecture');
     await expect(page.locator('#dissection-contenu')).toContainText('TOTAL : / 30');
-    await page.locator('#materiel-dissection [data-action="materiel.recommencer"]').click();
+    // Sans étiquette posée, « Coller une autre grille » revient à l'accueil au premier toucher.
+    await page.locator('#materiel-dissection [data-action="materielDissection.collerAutre"]').click();
     await expect(page.locator('#materiel-accueil')).toBeVisible();
 
     await page.locator('#materiel-accueil [data-action="materiel.taperMain"]').click();

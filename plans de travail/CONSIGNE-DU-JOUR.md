@@ -1,12 +1,14 @@
-# Consigne du jour – la dissection, pour lundi (dimanche 18 octobre)
+# Consigne du jour – la dissection, corrections du lot 1 (dimanche 18 octobre)
 
-> Écrite par Cowork le dimanche 18 octobre 2026 à 7 h 17 (Toronto, mesuré par `date`). Elle remplace celle du 17 à 17 h 49 (temps B : fait, 1.203.0 en ligne, `71cdde64`), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-17-temps-B.md`. **Commite avec ton premier commit** : ce fichier, ce déplacement, `PLAN-2026-10-18-la-dissection-pour-lundi.md`, `CONSIGNE-LOT-2026-10-18-dissection-1-etiqueter.md`, et les documents d'hier restés hors commit : `CONSIGNE-DEMARRAGE-COWORK.md`, `RELAIS.md`, `plans de travail/PLAN-2026-10-17-pret-pour-lundi.md`, `plans de travail/PORTE-TERRAIN-2026-10-19-apporter-mon-materiel.md` (il porte le relevé de Grégoire de ce matin). Les trois fichiers du chantier CI restent non suivis.
+> Écrite par Cowork le dimanche 18 octobre 2026 à 7 h 58 (Toronto, mesuré par `date`). Elle remplace celle de 7 h 17 (lot 1 : fait, `25584d62`), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-1.md`. **Commite avec ton commit** : ce fichier, ce déplacement et `VERDICT-RELECTURE-2026-10-18-dissection-1.md`.
 
 ## Où on en est (mesuré par Cowork)
 
-- En ligne : `71cdde64` (1.203.0) ; `main` local = `origin/main`.
-- La porte terrain de ce matin : l'assistant en sept étapes a perdu Grégoire. Il ne sera pas présenté lundi ; la dissection le remplace. La décision, la référence et l'ordre : `PLAN-2026-10-18-la-dissection-pour-lundi.md`.
+- `main` local à `25584d62`, deux commits devant `origin/main` (`71cdde64`, 1.203.0 en ligne). Rien n'est poussé, et rien ne se pousse aujourd'hui avant l'étape 4 du plan.
+- Plan : `PLAN-2026-10-18-la-dissection-pour-lundi.md`. Étape 1 relue : accepté avec deux corrections.
 
 ## Le mandat
 
-Le lot 1 : `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-1-etiqueter.md`. Puis arrête-toi : la demande de relecture, pas de version, pas de push.
+Lis `VERDICT-RELECTURE-2026-10-18-dissection-1.md` et fais **C1** (la palette reste à gauche sur l'iPad debout) et **C2** (« Coller une autre grille » demande confirmation quand des étiquettes sont posées). Un commit. Vitest complet vert ; `materiel-dissection-1` vert dans WebKit ; la capture à 820 px jointe au rapport. Corrige aussi ta mémoire sur la date de fusion du chantier CI (lundi après-midi).
+
+**Puis arrête-toi** : pas de version, pas de verdict, pas de push. Le lot 2 vient dans sa propre consigne.

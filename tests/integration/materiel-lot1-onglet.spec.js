@@ -41,7 +41,7 @@ test('lot 1 · Conception s’ouvre sur « Apporter mon matériel » ; l’exemp
     const debord = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(debord, 'la page ne défile pas horizontalement').toBeLessThanOrEqual(0);
 
-    await page.locator('#materiel-dissection [data-action="materiel.recommencer"]').click();   // « Coller une autre grille »
+    await page.locator('#materiel-dissection [data-action="materielDissection.collerAutre"]').click();   // « Coller une autre grille », sans étiquette : un toucher
     await expect(page.locator('#materiel-accueil')).toBeVisible();
     await expect(page.locator('#materiel-dissection')).toBeHidden();
 });

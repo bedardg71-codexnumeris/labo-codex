@@ -28253,6 +28253,8 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
     --dis-c-suite: #b8c95a;       --dis-h-suite: rgba(184, 201, 90, .22);
     --dis-c-ignorer: #9aa3ad;     --dis-h-ignorer: rgba(154, 163, 173, .20);
     display: flex; flex-direction: column; gap: 16px; min-width: 0;
+    /* C1 (relecture du 18 oct.) : la mise en page suit la largeur UTILE de l'onglet, pas celle de la fenêtre. */
+    container-type: inline-size; container-name: dissection;
 }
 .mode-clair .dissection {
     --dis-c-titre: #44546a;       --dis-h-titre: rgba(68, 84, 106, .16);
@@ -28290,8 +28292,15 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .dissection-actions .btn, .dissection-bandeau .btn { min-height: 44px; }
 .dissection-statut { min-height: 1.5em; color: var(--texte-secondaire); font-size: 0.92rem; }
 
-.dissection-atelier { position: relative; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; align-items: start; min-width: 0; }
-.dissection-palette { position: sticky; top: 8px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* La hauteur du canevas, partagée par la palette : plus haute que lui, elle défile dans son propre cadre. */
+.dissection-atelier {
+    --dis-hauteur: max(460px, min(76vh, 920px));
+    position: relative; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; align-items: start; min-width: 0;
+}
+.dissection-palette {
+    position: sticky; top: 8px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+    max-height: var(--dis-hauteur); overflow-y: auto; overscroll-behavior: contain; padding: 4px; margin: -4px;
+}
 .dissection-groupe { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .dissection-groupe-nom { font-size: 0.74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-muted); }
 .dissection-etiquette {
@@ -28312,13 +28321,17 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 @media (prefers-reduced-motion: reduce) { .dissection-eclair { animation: none; } }
 
 .dissection-centre { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* Le bandeau du surligneur, toujours présent au-dessus de l'atelier : sa hauteur réservée (deux lignes et
+   « Terminer ») évite que la grille saute quand une étiquette se prend. */
 .dissection-bandeau {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
-    background: var(--surface-carte); border: 2px solid var(--dis-c, var(--accent-primaire)); border-radius: var(--radius-moyen); padding: 8px 12px;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; min-height: 64px; box-sizing: border-box;
+    background: var(--surface-carte); border: 2px solid var(--bordure-moyenne); border-radius: var(--radius-moyen); padding: 8px 12px;
 }
-.dissection-bandeau p { min-width: 0; }
+.dissection-bandeau.dissection-bandeau-actif { border-color: var(--dis-c, var(--accent-primaire)); }
+.dissection-bandeau-textes { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 320px; }
+.dissection-bandeau-precision { font-size: 0.88rem; font-style: italic; color: var(--texte-secondaire); }
 .dissection-canevas {
-    position: relative; height: min(76vh, 920px); min-height: 460px; overflow: auto; max-width: 100%;
+    position: relative; height: var(--dis-hauteur); overflow: auto; max-width: 100%;
     border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-grand); background: var(--surface-conteneur);
 }
 .dissection-contenu { padding: 22px; box-sizing: border-box; width: max-content; min-width: 100%; }
@@ -28367,9 +28380,16 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .dissection-sans-place { color: var(--alerte-texte-attention); font-size: 0.9rem; display: flex; flex-direction: column; gap: 4px; }
 .dissection-sans-place ul { margin: 0; padding-left: 1.2em; }
 
-/* iPad en portrait (820 px) : la palette passe au-dessus du canevas, en rangées. */
-@media (max-width: 1024px) {
+/* C1 (relecture du 18 oct.) : la palette GARDE SA PLACE à gauche tant que le canevas garde 480 px.
+   Plus étroite (170 px) : le nom, l'aide et le compte ; la précision passe dans le bandeau.
+   170 + 12 + 480 = 662 px : en dessous seulement (un téléphone), la palette passe au-dessus. */
+@container dissection (max-width: 899px) {
+    .dissection-atelier { grid-template-columns: 170px minmax(0, 1fr); }
+    .dissection-etiquette-precision { display: none; }
+    .dissection-etiquette { padding: 6px 8px; gap: 0 7px; }
+}
+@container dissection (max-width: 661px) {
     .dissection-atelier { grid-template-columns: minmax(0, 1fr); }
-    .dissection-palette { position: static; flex-direction: row; flex-wrap: wrap; }
+    .dissection-palette { position: static; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
     .dissection-groupe { flex: 1 1 200px; }
 }
