@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.205 (« Couper ») — titre et quatre items validés par Grégoire le 18 oct. 2026 (13 h 49),
+            // transmis par Cowork (CONSIGNE-LOT-2026-10-18-dissection-6-version-1.205.md).
+            version: '1.205',
+            couleur: 'vert',
+            titre: 'Couper un morceau',
+            items: [
+                'Dans «&nbsp;Apporter mon matériel&nbsp;», l’outil «&nbsp;Couper&nbsp;» sépare un morceau en deux, là où tu touches, quand une même ligne de ta grille porte plusieurs choses&nbsp;: un critère, ses points, ses cases à cocher. La coupe tombe entre deux mots, et «&nbsp;Annuler la dernière coupe&nbsp;» recolle.',
+                'Quand quelque chose empêche de créer ta grille, la raison nomme maintenant le critère ou le morceau en cause.',
+                'Une grille dont chaque critère porte ses points («&nbsp;/ 10&nbsp;») se lit comme une grille en points.',
+                'Une pondération posée sur une ligne de total ne devient plus, sans rien dire, le poids d’un critère.'
+            ]
+        },
+        {
             // 1.204 (la dissection) — titre et sept items de Grégoire, tranchés le 18 oct. 2026 (9 h 56)
             // sur sa page « Tes mots pour la dissection », transmis par Cowork (CONSIGNE-LOT-…-dissection-3).
             version: '1.204',

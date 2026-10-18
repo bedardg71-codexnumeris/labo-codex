@@ -186,7 +186,7 @@
 
     /**
      * Lot 5 (`CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`) : les outils de la palette qui ne sont
-     * pas des étiquettes. Ils ne surlignent rien et ne comptent rien. Aide provisoire (étape des mots).
+     * pas des étiquettes. Ils ne surlignent rien et ne comptent rien. Nom et aide : validé G. 18 oct. 13 h 48.
      */
     D.OUTILS = [
         { k: 'couper', nom: 'Couper', aide: 'Sépare un morceau en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' }
@@ -375,7 +375,7 @@
             if (!np.length) { sansPlace(x, tx, t, 'aucun nombre'); return; }
             if (cr.auto && cr.reponses.length) { cr.reponses[cr.reponses.length - 1].pondApres = np[np.length - 1]; return; }
             // Lot 5 : une seconde Pondération (celle d'une ligne de total, après le dernier critère) ne
-            // remplace plus en silence celle du critère. Texte provisoire (étape des mots).
+            // remplace plus en silence celle du critère. Texte validé G. 18 oct. 13 h 48.
             if (cr.pond != null) { sansPlace(x, tx, t, 'son critère a déjà une pondération (' + String(cr.pond).replace('.', ',') + ') ; une ligne de total prend l’étiquette « Total »'); return; }
             cr.pond = np[np.length - 1];
         },
@@ -395,7 +395,11 @@
         return null;
     }
 
-    /** Lot 5 : la raison d'un morceau sans critère ; pour une Pondération, l'indice de la ligne de total. Textes provisoires. */
+    /**
+     * Lot 5 : la raison d'un morceau sans critère ; pour une Pondération, l'indice de la ligne de total.
+     * « aucun critère avant lui ; une ligne de total… » : validé G. 18 oct. 13 h 48. « aucun critère dans sa rangée » : texte
+     * de Cowork (verdict du lot 5, 13 h 36), provisoire.
+     */
     function raisonSansCritere(x, t) {
         if (t !== 'ponderation') return 'aucun critère avant lui';
         return (x.table ? 'aucun critère dans sa rangée' : 'aucun critère avant lui') + ' ; une ligne de total prend l’étiquette « Total »';
@@ -641,7 +645,7 @@
 
     // ------------------------------------------------------------------
     // Lot 5 : des raisons qui NOMMENT ce qui bloque, et aucun renvoi à l'assistant débranché.
-    // Textes provisoires de Claude Code (18 oct.), à trancher par Grégoire à l'étape des mots.
+    // Textes de Claude Code (18 oct.), validé G. 18 oct. 13 h 48.
     // ------------------------------------------------------------------
 
     D.LONGUEUR_PREMIERS_MOTS = 40;

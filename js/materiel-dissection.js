@@ -43,7 +43,7 @@
     var blocs = {};
     var dessinPrevu = false;
 
-    /** Lot 5, « Couper » : textes PROVISOIRES de Claude Code (18 oct.), à trancher à l'étape des mots. */
+    /** Lot 5, « Couper » : textes de Claude Code (18 oct.), validé G. 18 oct. 13 h 48. */
     var TEXTES_COUPE = {
         bandeau: 'Outil « Couper » : touche l’endroit d’un morceau où le séparer en deux. La coupe tombe entre deux mots.',
         enMain: 'Outil « Couper » en main : touche l’endroit d’un morceau où le séparer en deux.',

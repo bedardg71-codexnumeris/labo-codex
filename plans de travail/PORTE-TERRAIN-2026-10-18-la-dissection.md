@@ -60,3 +60,15 @@ Aucune à cette porte. La rangée 2.2 est une mesure de ton ressenti, pas un ver
 - **Un vrai presse-papiers de Word ou de Pages, Safari, l'iPad au doigt** : rien de cela n'existe dans les bancs.
 - **Retiré par Cowork (relecture de 11 h 50), parce que les bancs le mesurent déjà** (règle de tête du skill) : le nom déjà pris puis changé, l'affichage en points plutôt qu'en %, l'ordre des réponses. Ce que les bancs mesurent, en somme : la grille en points affichée en points (spec `materiel-dissection-2a`, C2), l'ordre des réponses (C1), le nom déjà pris puis changé (C3), la création en niveaux et son échelle (`materiel-dissection-2b`), la palette à gauche à 820 px (lot 1, C1), un collage piégé qui ne s'exécute pas (`materiel-dissection-1`).
 - **Ton ressenti (2.2)** : aucune machine ne le mesure. C'est la raison d'être de cette porte après celle de 5 h 10.
+
+## §5 · Reprise sur la 1.205.0 (« Couper »), ajoutée par Cowork le 18 oct. à 13 h 50
+
+Relevé de 13 h 14 (sur 1.204.0) : 0.1 à 2.4 passées ; **2.5 en échec** sur la grille « Évaluation sur le symbolisme » (une même ligne porte le critère, ses points et ses cases à cocher). La 1.205.0 ajoute « Couper ». La reprise ne refait pas 2.1 à 2.4.
+
+| N° | Geste | Attendu | À noter (champ) |
+|---|---|---|---|
+| 5.1 | Recharge en vidant le cache ; lis le numéro en bas de page, puis les Nouvelles. | **1.205.0** ; en tête des Nouvelles, « Couper un morceau ». Sinon, arrête-toi. | Version affichée |
+| 5.2 | Mac : colle ta grille sur le symbolisme ; prends « Couper » et touche, dans une ligne, l'endroit entre le nom du critère et ses points. | Deux morceaux, à la même place ; la coupe tombe entre deux mots ; « Annuler la dernière coupe » recolle. | Une coupe qui n'est pas tombée où tu voulais |
+| 5.3 | Coupe et étiquette tes lignes (Critère, Pondération, Élément observable), tes totaux en « Total » ou « À ignorer », puis « Créer ma grille ». | La grille se crée en points ; ou chaque raison qui reste nomme le critère en cause. | Les raisons qui restent, s'il y en a |
+| 5.4 | Reprends 2.6 à 2.12 de la porte (la grille créée dans Grilles de critères, la grille de ta collègue, l'iPad). | Comme écrit plus haut. | Le numéro des rangées en échec |
+| 5.5 | iPad : prends « Couper » et coupe un morceau au doigt. | La coupe tombe là où ton doigt touche, entre deux mots ; la grille ne défile pas pendant le geste. | Un geste difficile au doigt |
