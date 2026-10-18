@@ -485,15 +485,21 @@
      * Grilles de critères montre alors la clé, donc le nom (`rendreAttenduNiveaux`). Le schéma de
      * partage (fermé : `echelleId`, `parNiveau`) les garde tels quels ; `null` y serait refusé.
      * La nature des cases ne joue pas : il n'y a pas de cartouche sans échelle.
+     * La dissection, lot 2a : un critère qui porte ses réponses sans niveaux (`parCle`, une clé par
+     * réponse, `materielDissectionLecture.modele`) les range telles quelles ; la description de la
+     * grille (`m.description`), quand il y en a une, va dans la grille, comme celle de l'éditeur.
+     * Les modèles de l'assistant n'ont ni l'un ni l'autre : ce qu'il produit pour eux ne change pas.
      */
     function construireGrilleEnPoints(m, ctx, nomGrille) {
         var g = construireGrille(m, ctx, nomGrille, null);
         g.type = 'analytique';
+        if (texte(m.description)) g.description = texte(m.description);
         g.criteres.forEach(function (c, i) {
             c.type = 'analytique';
             delete c.descripteurs;
-            var par = {};
-            m.criteres[i].cases.forEach(function (d, j) { if (texte(d) && m.niveaux[j]) par[texte(m.niveaux[j].titre)] = texte(d); });
+            var par = {}, mc = m.criteres[i];
+            if (mc.parCle) mc.parCle.forEach(function (x) { if (String(x.texte).trim()) par[x.cle] = String(x.texte).trim(); });
+            else mc.cases.forEach(function (d, j) { if (texte(d) && m.niveaux[j]) par[texte(m.niveaux[j].titre)] = texte(d); });
             if (Object.keys(par).length) c.descripteurs = { parNiveau: par };
         });
         return g;

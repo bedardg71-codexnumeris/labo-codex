@@ -10,8 +10,11 @@
  * glisse sur les morceaux qu'elle désigne, retouche un morceau surligné pour le retirer. Sous la
  * grille, la lecture de l'application se refait à chaque geste (`materielDissectionLecture`).
  *
- * RIEN N'EST ÉCRIT dans les données : la dissection en cours vit dans la page, et se perd en la
- * quittant. « Créer ma grille » vient au lot 2.
+ * RIEN N'EST ÉCRIT dans les données tant que l'enseignant ne touche pas « Créer ma grille » : la
+ * dissection en cours vit dans la page, et se perd en la quittant.
+ * Lot 2a (`CONSIGNE-LOT-2026-10-18-dissection-2a-creer-en-points.md`) : « Créer ma grille », sous la
+ * lecture, pour une grille en points ; l'écriture est celle de `materielCreation.creer` (le seul
+ * chemin, rien de neuf), puis la confirmation de `materiel.js`. Ce qui l'empêche s'écrit à côté.
  *
  * Sécurité (règle 1) : tout texte venu du collage s'écrit par `textContent` ; le HTML collé n'est
  * jamais inséré (le document disséqué ne porte que du texte). Boutons par `data-action` (dispatcher
@@ -27,7 +30,7 @@
     'use strict';
 
     var SVG = 'http://www.w3.org/2000/svg';
-    var etat = { doc: null, liens: {}, actif: null, morceaux: null };
+    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false };
     var blocs = {};
     var dessinPrevu = false;
 
@@ -215,6 +218,7 @@
     // ------------------------------------------------------------------
 
     function appliquer(id, mode) {
+        etat.erreur = '';
         if (mode === 'ajouter') etat.liens[id] = etat.actif;
         else if (etat.liens[id] === etat.actif) delete etat.liens[id];
         marquer(id);
@@ -385,6 +389,7 @@
         var R = D().comprendre(etat.doc, etat.liens), b = D().bilan(R);
         cs.textContent = ''; cp.textContent = ''; sp.textContent = ''; lg.textContent = '';
         lg.classList.add('u-hide');
+        rendreCreer(R);
         if (!Object.keys(etat.liens).length) {
             cp.appendChild(noeud('p', 'dissection-vide', 'Surligne ta grille : la lecture de l’application apparaîtra ici.'));
             return;
@@ -404,6 +409,80 @@
             R.sansPlace.forEach(function (s) { ul.appendChild(noeud('li', null, '« ' + s.t + ' » (' + D().TYPE[s.type].nom + ') : ' + s.raison)); });
             sp.appendChild(ul);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Créer (lot 2a) : le bouton, ou ce qui l'empêche
+    // ------------------------------------------------------------------
+
+    function nomsGrilles() {
+        try {
+            return (db.getSync(cle('grillesTemplates'), []) || []).map(function (g) { return g && g.nom; }).filter(Boolean);
+        } catch (err) { return []; }
+    }
+
+    // Textes de Claude Code, PROVISOIRES (étape 3 du plan) ; « Avant de créer, il reste : » est celui de la 1.203.
+    var TEXTES_CREER = {
+        bouton: 'Créer ma grille',
+        enCours: 'Création…',
+        raisons: 'Avant de créer, il reste :',
+        bientot: 'La création des grilles en niveaux arrive bientôt. Pour l’instant, l’application crée les grilles qui ont des points.'
+    };
+
+    /** Sous la lecture : rien sans étiquette ; « bientôt » pour une grille en niveaux ; sinon le bouton et ses raisons. */
+    function rendreCreer(R) {
+        var z = el('dissection-creer');
+        if (!z) return;
+        z.textContent = '';
+        if (!Object.keys(etat.liens).length) return;
+        var c = D().creation(R, { nomsGrilles: nomsGrilles() });
+        if (c.niveauxSeuls) { z.appendChild(noeud('p', 'dissection-creer-bientot', TEXTES_CREER.bientot)); return; }
+        var b = noeud('button', 'btn btn-principal', etat.enCours ? TEXTES_CREER.enCours : TEXTES_CREER.bouton);
+        b.type = 'button';
+        b.setAttribute('data-action', 'materielDissection.creer');
+        b.disabled = c.raisons.length > 0 || etat.enCours;
+        z.appendChild(b);
+        if (c.raisons.length) {
+            var r = noeud('div', 'dissection-creer-raisons');
+            r.id = 'dissection-creer-raisons';
+            r.appendChild(noeud('strong', null, TEXTES_CREER.raisons));
+            var ul = noeud('ul');
+            c.raisons.forEach(function (t) { ul.appendChild(noeud('li', null, t)); });
+            r.appendChild(ul);
+            z.appendChild(r);
+            b.setAttribute('aria-describedby', r.id);
+        }
+        if (etat.erreur) {
+            var p = noeud('p', 'alerte alerte-erreur', etat.erreur);
+            p.setAttribute('role', 'alert');
+            z.appendChild(p);
+        }
+    }
+
+    /**
+     * « Créer ma grille » : l'écriture de `materielCreation.creer`, puis la confirmation. Un échec
+     * affiche son message, et la dissection reste telle quelle pour réessayer. Un second toucher
+     * pendant l'écriture est sans effet.
+     */
+    async function creer() {
+        if (etat.enCours || !etat.doc) return;
+        var c = D().creation(D().comprendre(etat.doc, etat.liens), { nomsGrilles: nomsGrilles() });
+        if (c.niveauxSeuls || c.raisons.length) { rendreLecture(); return; }
+        var doc = etat.doc;
+        etat.enCours = true;
+        etat.erreur = '';
+        rendreLecture();
+        var r;
+        try { r = await window.materielCreation.creer(c.modele); } finally { if (etat.doc === doc) etat.enCours = false; }
+        if (etat.doc !== doc) return;   // la page a changé de grille pendant l'écriture
+        if (r.erreur) {
+            etat.erreur = r.erreur;
+            rendreLecture();
+            var b = document.querySelector('[data-action="materielDissection.creer"]');
+            if (b) b.focus();
+            return;
+        }
+        window.materiel.montrerCreee(r.resume);
     }
 
     /** Les constats en pastilles : titre, sections, critères, niveaux, réponses, somme et total, morceaux sans étiquette. */
@@ -442,7 +521,7 @@
     function ouvrir(doc, message) {
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
-        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc) };
+        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false };
         desarmer();
         brancher();
         rendrePalette();
@@ -461,7 +540,7 @@
 
     /** Retour à l'accueil : la dissection en cours est oubliée (rien n'avait été écrit). */
     function fermer() {
-        etat = { doc: null, liens: {}, actif: null, morceaux: null };
+        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false };
         blocs = {};
         var vue = el('materiel-dissection'), contenu = el('dissection-contenu'), traits = el('dissection-traits');
         if (contenu) contenu.textContent = '';
@@ -514,6 +593,7 @@
         if (!etat.doc || !confirme(bouton, 'materielDissection.toutRetirer')) return;
         etat.liens = {};
         etat.actif = null;
+        etat.erreur = '';
         etat.morceaux.ordre.forEach(marquer);
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         dire('Toutes les étiquettes sont retirées.');
@@ -537,6 +617,7 @@
         terminer: terminer,
         collerAutre: collerAutre,
         toutRetirer: toutRetirer,
+        creer: creer,
         construireFeuille: construireFeuille,
         /** L'état de la dissection (lecture) — pour les bancs. */
         etatCourant: function () { return etat; },
