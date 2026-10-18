@@ -46,7 +46,7 @@ test('bandeau « En construction » : visible à l’accueil et dans la dissecti
     await expect(page.locator('#materiel-dissection')).toBeVisible();
     await visible('dissection');
     await page.locator('#dissection-palette [data-param="critere"]').click();
-    await expect(page.locator('#dissection-bandeau')).toBeVisible();
+    await expect(page.locator('#dissection-terminer')).toBeVisible();
     await visible('dissection, étiquette en main');
 
     // Le bandeau est au-dessus de ce que l'onglet montre, pas glissé dessous.

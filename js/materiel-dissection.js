@@ -168,22 +168,32 @@
         });
     }
 
+    /**
+     * Le bandeau du surligneur, toujours à sa place au-dessus de l'atelier (C1, relecture du 18 oct.) :
+     * sans étiquette en main, la consigne ; avec, son nom, sa PRÉCISION (que la palette étroite ne
+     * montre plus) et « Terminer ».
+     */
     function majBandeau() {
         var bd = el('dissection-bandeau'), cv = el('dissection-canevas');
         if (!bd || !cv) return;
         var T = etat.actif ? D().TYPE[etat.actif] : null;
-        bd.classList.toggle('u-hide', !T);
         cv.classList.toggle('dissection-pointage', !!T);
+        bd.classList.toggle('dissection-bandeau-actif', !!T);
         classeType(bd, etat.actif);
         classeType(cv, etat.actif);
+        el('dissection-terminer').classList.toggle('u-hide', !T);
         el('dissection-bandeau-texte').textContent = T
             ? 'Surligneur « ' + T.nom + ' » : touche ou surligne les morceaux de ta grille qu’il désigne. Touche un morceau déjà surligné pour le retirer.'
-            : '';
+            : 'Touche une étiquette dans la palette : elle devient ton surligneur.';
+        var pr = el('dissection-bandeau-precision');
+        pr.textContent = T && T.precision ? T.nom + ' : ' + T.precision : '';
+        pr.classList.toggle('u-hide', !(T && T.precision));
     }
 
     function choisir(type) {
         if (!D().TYPE[type]) return;
         etat.actif = etat.actif === type ? null : type;
+        desarmer();
         majPalette(); majBandeau(); planifierDessin();
         dire(etat.actif ? 'Surligneur « ' + D().TYPE[etat.actif].nom + ' » en main : touche ou surligne les morceaux de ta grille qu’il désigne.' : '');
     }
@@ -240,6 +250,7 @@
             feuille.removeEventListener('pointermove', bouger);
             feuille.removeEventListener('pointerup', fin);
             feuille.removeEventListener('pointercancel', fin);
+            desarmer();
             majPalette();
             rendreLecture();
         }
@@ -268,7 +279,10 @@
         var it = document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + etat.actif + '"]');
         if (!it) return;
         var a = atelier.getBoundingClientRect(), ir = it.getBoundingClientRect(), c = cv.getBoundingClientRect();
-        var C = { x: ir.left - a.left, y: ir.top - a.top, w: ir.width, h: ir.height };
+        // La palette défile dans son cadre : une étiquette sortie du cadre envoie ses flèches depuis son bord.
+        var pr = el('dissection-palette').getBoundingClientRect();
+        var haut = Math.min(Math.max(ir.top, pr.top), pr.bottom), bas = Math.max(Math.min(ir.bottom, pr.bottom), pr.top);
+        var C = { x: ir.left - a.left, y: haut - a.top, w: ir.width, h: bas - haut };
         Object.keys(etat.liens).forEach(function (id) {
             if (etat.liens[id] !== etat.actif || !blocs[id]) return;
             var r = blocs[id].getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -429,8 +443,7 @@
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
         etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc) };
-        var retirer = document.querySelector('[data-action="materielDissection.toutRetirer"]');
-        if (retirer) { retirer.removeAttribute('data-confirmer'); retirer.textContent = 'Retirer les étiquettes'; }
+        desarmer();
         brancher();
         rendrePalette();
         rendreFeuille();
@@ -457,18 +470,48 @@
         dire('');
     }
 
+    // ------------------------------------------------------------------
+    // Les gestes à deux temps : un premier toucher arme le bouton, le second agit
+    // ------------------------------------------------------------------
+
+    /** Texte de repos et texte armé (« Confirmer : … » : de Claude Code, PROVISOIRE, étape 3). */
+    var DEUX_TEMPS = {
+        'materielDissection.toutRetirer': { repos: 'Retirer les étiquettes', armee: 'Confirmer : tout retirer' },
+        'materielDissection.collerAutre': { repos: 'Coller une autre grille', armee: 'Confirmer : coller une autre grille' }
+    };
+
+    /** Tout autre geste (une étiquette, un surlignage, une autre grille) désarme les boutons. */
+    function desarmer() {
+        Object.keys(DEUX_TEMPS).forEach(function (action) {
+            var b = document.querySelector('[data-action="' + action + '"]');
+            if (b) { b.removeAttribute('data-confirmer'); b.textContent = DEUX_TEMPS[action].repos; }
+        });
+    }
+
+    /** Vrai si ce toucher doit agir : le bouton était armé (ou l'appel ne vient pas d'un bouton). */
+    function confirme(bouton, action) {
+        if (bouton && bouton.getAttribute && bouton.getAttribute('data-confirmer') !== '1') {
+            desarmer();
+            bouton.setAttribute('data-confirmer', '1');
+            bouton.textContent = DEUX_TEMPS[action].armee;
+            return false;
+        }
+        desarmer();
+        return true;
+    }
+
+    /**
+     * « Coller une autre grille » (C2, relecture du 18 oct.) : sans étiquette posée, retour à l'accueil
+     * tout de suite ; dès qu'une étiquette est posée, un premier toucher demande confirmation.
+     */
+    function collerAutre(bouton) {
+        if (Object.keys(etat.liens).length && !confirme(bouton, 'materielDissection.collerAutre')) return;
+        if (window.materiel) window.materiel.recommencer();
+    }
+
     /** « Retirer les étiquettes » : un premier toucher demande confirmation, le second retire tout. */
     function toutRetirer(bouton) {
-        if (!etat.doc) return;
-        if (bouton && bouton.getAttribute && bouton.getAttribute('data-confirmer') !== '1') {
-            bouton.setAttribute('data-confirmer', '1');
-            bouton.textContent = 'Confirmer : tout retirer';
-            return;
-        }
-        if (bouton && bouton.removeAttribute) {
-            bouton.removeAttribute('data-confirmer');
-            bouton.textContent = 'Retirer les étiquettes';
-        }
+        if (!etat.doc || !confirme(bouton, 'materielDissection.toutRetirer')) return;
         etat.liens = {};
         etat.actif = null;
         etat.morceaux.ordre.forEach(marquer);
@@ -492,6 +535,7 @@
         fermer: fermer,
         choisir: choisir,
         terminer: terminer,
+        collerAutre: collerAutre,
         toutRetirer: toutRetirer,
         construireFeuille: construireFeuille,
         /** L'état de la dissection (lecture) — pour les bancs. */
