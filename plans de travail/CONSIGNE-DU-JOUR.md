@@ -1,11 +1,12 @@
-# Consigne du jour – la version 1.205.0 (dimanche 18 octobre, après-midi)
+# Consigne du jour – la dissection, lot 7 : « Rattacher » (dimanche 18 octobre, fin d'après-midi)
 
-> Écrite par Cowork le dimanche 18 octobre 2026 à 13 h 50 (Toronto, mesuré par `date`). Elle remplace celle de 13 h 36 (C1 du lot 5 : faite, `63e7b4de`, relue : acceptée), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-5-C1.md`. **Commite avec ton premier commit** : ce fichier, ce déplacement, `CONSIGNE-LOT-2026-10-18-dissection-6-version-1.205.md` et la porte retouchée par Cowork.
+> Écrite par Cowork le dimanche 18 octobre 2026 à 16 h 45 (Toronto, mesuré par `date`). Elle remplace celle de 13 h 50 (1.205.0 : en ligne à 15 h 09, `1d5ecaf1`), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-version-1.205.md`.
 
 ## Où on en est
 
-- En ligne : `74ab9cc3` (1.204.0). `main` local à `63e7b4de`, deux commits devant, rien de poussé.
+- En ligne : `1d5ecaf1` (1.205.0) ; `main` local = `origin/main`, plus le verdict de relecture de la 1.205.0, non commité.
+- La porte de Grégoire, reprise sur la 1.205.0 : il lui manque un geste pour joindre les lignes d'un même nom de critère. Décision de 16 h 44 : « Rattacher », ce soir.
 
 ## Le mandat
 
-Le **temps A** de `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-6-version-1.205.md`. **Puis arrête-toi** : le temps B viendra par un second relais, Cowork fermé.
+Le lot 7 : `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`. Puis arrête-toi : la demande de relecture, pas de version, pas de push.

@@ -31,6 +31,8 @@
  * Lot 5 (`CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`) : `couper` un morceau en deux (jamais dans un
  * mot, rien de perdu), `recoller` ; des pondérations sur chaque critère, sans niveaux, font une grille en
  * points ; les raisons d'un refus NOMMENT le critère ou le morceau en cause, sans renvoi à l'assistant.
+ * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : `rattacher` un morceau à celui dont il est
+ * la suite ; la lecture prend A suivi de ses B, dans l'ordre du document (`morceauxLus`). Rien n'est déplacé.
  */
 (function () {
     'use strict';
@@ -189,7 +191,9 @@
      * pas des étiquettes. Ils ne surlignent rien et ne comptent rien. Nom et aide : validé G. 18 oct. 13 h 48.
      */
     D.OUTILS = [
-        { k: 'couper', nom: 'Couper', aide: 'Sépare un morceau en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' }
+        { k: 'couper', nom: 'Couper', aide: 'Sépare un morceau en deux, là où tu touches', groupe: 'Le reste', apres: 'suite' },
+        // Lot 7 : nom et aide validés par Grégoire (18 oct., 16 h 44).
+        { k: 'rattacher', nom: 'Rattacher', aide: 'Joint un morceau à celui dont il est la suite', groupe: 'Le reste', apres: 'couper' }
     ];
     var OUTIL = {};
     D.OUTILS.forEach(function (o) { OUTIL[o.k] = o; });
@@ -267,6 +271,90 @@
         coupe.parties.forEach(function (p) { delete l[p]; });
         if (coupe.type) l[coupe.id] = coupe.type;
         return { doc: coupe.doc, liens: l };
+    };
+
+    // ------------------------------------------------------------------
+    // 1 ter. RATTACHER (lot 7) : un morceau lu comme la suite d'un autre
+    // ------------------------------------------------------------------
+
+    /*
+     * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : les rattachements, { idB: idA } (B est
+     * la suite de A). Un seul niveau : A n'est jamais lui-même la suite d'un autre. Le document n'est
+     * jamais touché : chaque morceau garde son texte et sa place, et défaire un lien le rend tel quel.
+     * L'application ne crée jamais de lien d'elle-même.
+     */
+
+    /**
+     * Rattache B à A. Refus (aucun lien créé) : 'soi' (B = A) ; 'boucle' (A est déjà la suite de B) ;
+     * 'dejaSuite' (A est déjà la suite d'un autre : `de` le nomme). B qui avait ses propres suites les
+     * passe à A (le niveau reste unique) ; B qui était la suite d'un autre change de A. L'étiquette de B
+     * est retirée : son texte appartient à A, dont l'étiquette vaut pour le texte entier.
+     *
+     * @returns {{rattachements: object, liens: object, retiree: string|null}|{refus: string, de?: string}}
+     *   les NOUVEAUX objets (les anciens sont intacts) et l'étiquette retirée de B ; ou le refus.
+     */
+    D.rattacher = function (rattachements, liens, idB, idA) {
+        var rat = rattachements || {};
+        if (idB === idA) return { refus: 'soi' };
+        if (rat[idA] === idB) return { refus: 'boucle' };
+        if (rat[idA] != null) return { refus: 'dejaSuite', de: rat[idA] };
+        var r = Object.assign({}, rat), l = Object.assign({}, liens);
+        Object.keys(r).forEach(function (b) { if (r[b] === idB) r[b] = idA; });
+        r[idB] = idA;
+        var retiree = l[idB] || null;
+        delete l[idB];
+        return { rattachements: r, liens: l, retiree: retiree };
+    };
+
+    /** Défait le lien de B : il redevient un morceau à part, son texte tel quel. */
+    D.detacher = function (rattachements, idB) {
+        var r = Object.assign({}, rattachements);
+        delete r[idB];
+        return r;
+    };
+
+    /** Après une coupe : la première partie prend la place du morceau coupé dans ses liens, comme son étiquette. */
+    D.rattachementsApresCoupe = function (rattachements, id, parties) {
+        var r = {};
+        Object.keys(rattachements || {}).forEach(function (b) {
+            var a = rattachements[b];
+            r[b === id ? parties[0] : b] = a === id ? parties[0] : a;
+        });
+        return r;
+    };
+
+    /** Annuler une coupe défait d'abord les liens qui touchent ses deux parties (consigne du lot 7, point 6). */
+    D.rattachementsSansParties = function (rattachements, parties) {
+        var r = {};
+        Object.keys(rattachements || {}).forEach(function (b) {
+            if (parties.indexOf(b) < 0 && parties.indexOf(rattachements[b]) < 0) r[b] = rattachements[b];
+        });
+        return r;
+    };
+
+    /**
+     * Les morceaux tels que la lecture les prend : chaque B sort de l'ordre de lecture, et le texte de A
+     * devient A suivi de ses B, DANS L'ORDRE DE LECTURE DU DOCUMENT (pas dans celui des gestes), séparés
+     * par une espace. Un lien dont un bout manque au document, ou dont A est lui-même une suite, est
+     * ignoré : son B reste un morceau à part (rien ne se perd). Mêmes champs que `morceaux`, plus
+     * `suites` { idA: [idB…] }.
+     */
+    D.morceauxLus = function (doc, rattachements) {
+        var M = D.morceaux(doc), rat = rattachements || {};
+        var rang = {};
+        M.ordre.forEach(function (id, i) { rang[id] = i; });
+        var valide = {};
+        Object.keys(rat).forEach(function (b) {
+            var a = rat[b];
+            if (b !== a && b in rang && a in rang && !(a in rat && rat[a] in rang)) valide[b] = a;
+        });
+        var suites = {};
+        M.ordre.forEach(function (id) { if (valide[id]) (suites[valide[id]] = suites[valide[id]] || []).push(id); });
+        var texte = Object.assign({}, M.texte);
+        Object.keys(suites).forEach(function (a) {
+            texte[a] = [M.texte[a]].concat(suites[a].map(function (b) { return M.texte[b]; })).join(' ');
+        });
+        return { ordre: M.ordre.filter(function (id) { return !valide[id]; }), texte: texte, pos: M.pos, suites: suites };
     };
 
     // ------------------------------------------------------------------
@@ -397,8 +485,9 @@
 
     /**
      * Lot 5 : la raison d'un morceau sans critère ; pour une Pondération, l'indice de la ligne de total.
-     * « aucun critère avant lui ; une ligne de total… » : validé G. 18 oct. 13 h 48. « aucun critère dans sa rangée » : texte
-     * de Cowork (verdict du lot 5, 13 h 36), provisoire.
+     * « aucun critère avant lui ; une ligne de total… » : validé G. 18 oct. 13 h 48. « aucun critère dans sa
+     * rangée ; une ligne de total prend l'étiquette « Total » » (texte de Cowork, verdict du lot 5, 13 h 36) :
+     * validé G. 18 oct. 13 h 48 (le texte K13 de sa page, accepté tel quel).
      */
     function raisonSansCritere(x, t) {
         if (t !== 'ponderation') return 'aucun critère avant lui';
@@ -457,13 +546,17 @@
      * à quel niveau il appartient (la rangée d'un critère, la colonne d'un niveau) ; dans un
      * texte brut, c'est son ORDRE.
      *
+     * Lot 7 : un morceau rattaché ne se lit pas à part ; son texte complète celui de son A (`morceauxLus`),
+     * et l'étiquette de A vaut pour le texte entier.
+     *
      * @param {object} doc - le document disséqué
      * @param {Object<string, string>} liens - { idDuMorceau: type }
+     * @param {Object<string, string>} [rattachements] - lot 7 : { idB: idA }
      * @returns {object} R : titre, description, criteres, niveaux, total, totalNb, sansEtiquette,
      *   sansPlace [{ t, type, raison }], nb { type: compte }, aNommer, avecNiveaux, aPoints
      */
-    D.comprendre = function (doc, liens) {
-        var M = D.morceaux(doc);
+    D.comprendre = function (doc, liens, rattachements) {
+        var M = D.morceauxLus(doc, rattachements);
         liens = liens || {};
         function typeDe(id) { var t = liens[id]; return TYPE[t] ? t : null; }
         var R = { titre: [], description: [], criteres: [], niveaux: [], total: null, totalNb: null, sansEtiquette: 0, sansPlace: [], nb: {} };

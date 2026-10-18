@@ -25,6 +25,11 @@
  * (`materielDissectionLecture.couper`), le glisser ne coupe pas. Les coupes vivent dans la page, en pile,
  * et s'annulent (« Annuler la dernière coupe ») ; rien n'est écrit avant « Créer ma grille ».
  *
+ * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : l'outil « Rattacher », après « Couper » ;
+ * deux touchers, la suite (B) puis le morceau qu'elle continue (A) ; retoucher un morceau rattaché défait
+ * son lien. Un morceau rattaché garde sa marque ; l'outil en main, une flèche va de chaque B vers son A.
+ * Rien n'est déplacé dans la feuille, rien n'est deviné, rien n'est écrit avant « Créer ma grille ».
+ *
  * Sécurité (règle 1) : tout texte venu du collage s'écrit par `textContent` ; le HTML collé n'est
  * jamais inséré (le document disséqué ne porte que du texte). Boutons par `data-action` (dispatcher
  * de main.js) ; les gestes sur la feuille, par des écouteurs de pointeur posés ici, aucun handler inline.
@@ -39,7 +44,15 @@
     'use strict';
 
     var SVG = 'http://www.w3.org/2000/svg';
-    var etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [] };
+
+    /**
+     * L'état d'une dissection : le document, ses étiquettes, ce qui est en main, les coupes (lot 5) ;
+     * lot 7, les rattachements { idB: idA } et `suite`, le B choisi au premier toucher de « Rattacher ».
+     */
+    function etatNeuf(doc) {
+        return { doc: doc, liens: {}, actif: null, morceaux: doc ? D().morceaux(doc) : null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [], rattachements: {}, suite: null };
+    }
+    var etat = etatNeuf(null);
     var blocs = {};
     var dessinPrevu = false;
 
@@ -49,7 +62,30 @@
         enMain: 'Outil « Couper » en main : touche l’endroit d’un morceau où le séparer en deux.',
         coupe: function (a, b) { return 'Morceau coupé en deux : « ' + a + ' » et « ' + b + ' ».'; },
         unMot: 'Ce morceau n’a qu’un mot : il ne se coupe pas.',
-        annulee: function (t) { return 'Coupe annulée : « ' + t + ' » est recollé.'; }
+        annulee: function (t) { return 'Coupe annulée : « ' + t + ' » est recollé.'; },
+        // Lot 7, texte provisoire (Claude Code, 18 oct.) : quand l'annulation défait un lien.
+        lienDefait: ' Le lien qui touchait ses parties est défait.'
+    };
+
+    /**
+     * Lot 7, « Rattacher » : textes PROVISOIRES de Claude Code (18 oct.), sur le modèle de ceux de « Couper »,
+     * listés dans la demande de relecture ; le refus « déjà la suite » est celui de la consigne du lot.
+     * Les textes collés y entrent par leurs premiers mots (`premiersMots`).
+     */
+    var TEXTES_LIEN = {
+        bandeau: 'Outil « Rattacher » : touche d’abord le morceau qui en continue un autre, puis celui qu’il continue. Touche un morceau déjà rattaché pour défaire son lien.',
+        bandeauChoix: function (b) { return 'Outil « Rattacher » : touche maintenant le morceau que « ' + b + ' » continue. Retouche « ' + b + ' » pour annuler.'; },
+        enMain: 'Outil « Rattacher » en main : touche d’abord le morceau qui en continue un autre.',
+        choisi: function (b) { return 'Suite choisie : « ' + b + ' ». Touche maintenant le morceau qu’il continue.'; },
+        annule: 'Choix annulé : aucun lien créé.',
+        lie: function (t) { return 'Morceaux rattachés : l’application lit « ' + t + ' ».'; },
+        etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle du premier morceau vaut pour le texte entier.'; },
+        defait: function (b) { return 'Lien défait : « ' + b + ' » redevient un morceau à part.'; },
+        soi: 'Un morceau ne se rattache pas à lui-même.',
+        boucle: function (b) { return 'Ce morceau est déjà la suite de « ' + b + ' » : les rattacher dans l’autre sens ferait une boucle.'; },
+        dejaSuite: function (a) { return 'Ce morceau est déjà la suite de « ' + a + ' » : rattache plutôt à celui-là.'; },
+        sansEtiquette: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour les deux. Défais le lien avec « Rattacher » pour l’étiqueter à part.'; },
+        suiteDe: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; }
     };
 
     function D() { return window.materielDissectionLecture; }
@@ -66,6 +102,10 @@
     function fmt(n) { return String(Math.round(n * 100) / 100).replace('.', ','); }
     function dire(m) { var s = el('dissection-statut'); if (s) s.textContent = m || ''; }
     function typeDe(id) { var t = etat.liens[id]; return D().TYPE[t] ? t : null; }
+    /** La lecture de l'application : les étiquettes et, lot 7, les rattachements. */
+    function lire() { return D().comprendre(etat.doc, etat.liens, etat.rattachements); }
+    /** Lot 7 : les premiers mots d'un morceau, pour le nommer sur la ligne d'état. */
+    function mots(id) { return D().premiersMots(etat.morceaux.texte[id] || ''); }
 
     // ------------------------------------------------------------------
     // La feuille : la grille telle que l'enseignant l'a écrite
@@ -120,8 +160,15 @@
         if (!b) return;
         var t = typeDe(id);
         b.classList.toggle('dissection-marque', !!t);
-        classeType(b, t);
         if (t) b.setAttribute('data-type', t); else b.removeAttribute('data-type');
+        // Lot 7 : un morceau rattaché garde sa marque en tout temps (trait en pointillé et symbole, en CSS),
+        // dans la couleur de l'étiquette de son A ; le B choisi au premier toucher, la sienne.
+        var a = etat.rattachements[id];
+        b.classList.toggle('dissection-rattache', a != null);
+        b.classList.toggle('dissection-choisi', etat.suite === id);
+        classeType(b, a != null ? typeDe(a) : t);
+        if (a != null) { b.setAttribute('data-suite-de', a); b.title = 'Suite de « ' + mots(a) + ' »'; }
+        else { b.removeAttribute('data-suite-de'); b.removeAttribute('title'); }
     }
 
     function rendreFeuille() {
@@ -169,12 +216,16 @@
                 pal.appendChild(g);
             }
             bouton(t);
-            // Lot 5 : un outil prend place juste après l'étiquette qu'il suit (« Couper » après « Suite »).
-            D().OUTILS.forEach(function (o) { if (o.apres === t.k) bouton(o); });
+            // Lot 5 : un outil prend place juste après l'étiquette ou l'outil qu'il suit (« Couper » après
+            // « Suite », lot 7 : « Rattacher » après « Couper »).
+            (function placer(k) {
+                D().OUTILS.forEach(function (o) { if (o.apres === k) { bouton(o); placer(o.k); } });
+            })(t.k);
         });
         var defs = el('dissection-pointes');
         if (defs && !defs.childNodes.length) {
-            D().TYPES.forEach(function (t) {
+            // Lot 7 : « Rattacher » a sa pointe, pour la flèche d'une suite vers son morceau.
+            D().TYPES.concat(D().OUTILS).forEach(function (t) {
                 var m = document.createElementNS(SVG, 'marker');
                 m.setAttribute('id', 'dissection-pointe-' + t.k);
                 m.setAttribute('viewBox', '0 0 10 10'); m.setAttribute('refX', '9'); m.setAttribute('refY', '5');
@@ -221,6 +272,8 @@
         if (annuler) annuler.classList.toggle('u-hide', !(coupe && etat.coupes.length));
         el('dissection-bandeau-texte').textContent = coupe
             ? TEXTES_COUPE.bandeau
+            : etat.actif === 'rattacher'
+                ? (etat.suite ? TEXTES_LIEN.bandeauChoix(mots(etat.suite)) : TEXTES_LIEN.bandeau)
             : T
                 ? 'Surligneur « ' + T.nom + ' » : touche ou surligne les morceaux de ta grille qu’il désigne. Touche un morceau déjà surligné pour le retirer.'
                 : 'Touche une étiquette dans la palette : elle devient ton surligneur.';
@@ -233,8 +286,11 @@
         if (!enMain(type)) return;
         etat.actif = etat.actif === type ? null : type;
         desarmer();
+        // Lot 7 : poser « Rattacher » (une autre étiquette, « Terminer », Échap) annule le choix d'une suite.
+        if (etat.suite) { var s = etat.suite; etat.suite = null; marquer(s); }
         majPalette(); majBandeau(); planifierDessin();
         if (etat.actif === 'couper') dire(TEXTES_COUPE.enMain);
+        else if (etat.actif === 'rattacher') dire(TEXTES_LIEN.enMain);
         else dire(etat.actif ? 'Surligneur « ' + D().TYPE[etat.actif].nom + ' » en main : touche ou surligne les morceaux de ta grille qu’il désigne.' : '');
     }
 
@@ -254,8 +310,13 @@
     // Les gestes : toucher, glisser (événements de pointeur)
     // ------------------------------------------------------------------
 
+    /** Lot 7 : le morceau rattaché qu'un surlignage a voulu étiqueter, pour le dire au lever du doigt. */
+    var suiteTouchee = null;
+
     function appliquer(id, mode) {
         etat.erreur = '';
+        // Lot 7 : un morceau rattaché ne prend pas d'étiquette ; celle de son A vaut pour les deux.
+        if (etat.rattachements[id] != null) { suiteTouchee = id; return; }
         if (mode === 'ajouter') etat.liens[id] = etat.actif;
         else if (etat.liens[id] === etat.actif) delete etat.liens[id];
         marquer(id);
@@ -268,16 +329,19 @@
         var id = b.getAttribute('data-id');
         if (!etat.actif) {
             var t = typeDe(id);
-            if (t) { eclair(t); dire('Ce morceau porte l’étiquette « ' + D().TYPE[t].nom + ' ». Pour la changer, touche une autre étiquette, puis ce morceau.'); }
+            if (etat.rattachements[id] != null) dire(TEXTES_LIEN.suiteDe(mots(etat.rattachements[id])));
+            else if (t) { eclair(t); dire('Ce morceau porte l’étiquette « ' + D().TYPE[t].nom + ' ». Pour la changer, touche une autre étiquette, puis ce morceau.'); }
             else dire('Touche d’abord une étiquette dans la palette : elle devient ton surligneur.');
             return;
         }
         if (etat.actif === 'couper') { gesteCoupe(e, id); return; }
+        if (etat.actif === 'rattacher') { gesteToucher(e, function () { toucherLien(id); }); return; }
         e.preventDefault();
         var feuille = e.currentTarget;
         var mode = etat.liens[id] === etat.actif ? 'retirer' : 'ajouter';
         var vus = {};
         vus[id] = 1;
+        suiteTouchee = null;
         appliquer(id, mode);
         try { feuille.setPointerCapture(e.pointerId); } catch (er) { /* sans capture, le surlignage s'arrête au bord */ }
         function bouger(ev) {
@@ -295,6 +359,7 @@
             desarmer();
             majPalette();
             rendreLecture();
+            if (suiteTouchee) { dire(TEXTES_LIEN.sansEtiquette(mots(etat.rattachements[suiteTouchee]))); suiteTouchee = null; }
         }
         feuille.addEventListener('pointermove', bouger);
         feuille.addEventListener('pointerup', fin);
@@ -324,23 +389,31 @@
         return Math.floor(String(b.textContent).length / 2);
     }
 
-    /** Le point touché est lu au toucher ; la coupe se fait au lever, si le doigt n'a pas glissé. */
-    function gesteCoupe(e, id) {
+    /**
+     * Un toucher d'outil : `agir` se fait au lever, si le doigt n'a pas glissé (« Couper », lot 5 ;
+     * « Rattacher », lot 7).
+     */
+    function gesteToucher(e, agir) {
         e.preventDefault();
         var feuille = e.currentTarget, x = e.clientX, y = e.clientY, glisse = false;
-        var decalage = rangTouche(blocs[id], x, y);
-        try { feuille.setPointerCapture(e.pointerId); } catch (er) { /* sans capture, le lever hors de la feuille ne coupe pas */ }
+        try { feuille.setPointerCapture(e.pointerId); } catch (er) { /* sans capture, le lever hors de la feuille n'agit pas */ }
         function bouger(ev) { if (Math.abs(ev.clientX - x) > 8 || Math.abs(ev.clientY - y) > 8) glisse = true; }
         function fin(ev) {
             feuille.removeEventListener('pointermove', bouger);
             feuille.removeEventListener('pointerup', fin);
             feuille.removeEventListener('pointercancel', fin);
             desarmer();
-            if (ev.type === 'pointerup' && !glisse) couperMorceau(id, decalage);
+            if (ev.type === 'pointerup' && !glisse) agir();
         }
         feuille.addEventListener('pointermove', bouger);
         feuille.addEventListener('pointerup', fin);
         feuille.addEventListener('pointercancel', fin);
+    }
+
+    /** Le point touché est lu au toucher ; la coupe se fait au lever, si le doigt n'a pas glissé. */
+    function gesteCoupe(e, id) {
+        var decalage = rangTouche(blocs[id], e.clientX, e.clientY);
+        gesteToucher(e, function () { couperMorceau(id, decalage); });
     }
 
     /** La feuille, les compteurs, le bandeau et la lecture, refaits après une coupe ou son annulation. */
@@ -358,6 +431,8 @@
         // La pile garde le document d'avant et l'étiquette d'origine : l'annulation les rend tels quels.
         etat.coupes.push({ doc: etat.doc, id: id, type: etat.liens[id] || null, parties: r.parties });
         etat.liens = D().liensApresCoupe(etat.liens, id, r.parties);
+        // Lot 7 : la première partie prend aussi sa place dans ses liens.
+        etat.rattachements = D().rattachementsApresCoupe(etat.rattachements, id, r.parties);
         etat.doc = r.doc;
         apresCoupe();
         var M = etat.morceaux;
@@ -368,11 +443,60 @@
     function annulerCoupe() {
         var c = etat.coupes.pop();
         if (!c || !etat.doc || etat.enCours) { if (c) etat.coupes.push(c); return; }
+        // Lot 7 : d'abord défaire les liens qui touchent ses deux parties.
+        var avant = Object.keys(etat.rattachements).length;
+        etat.rattachements = D().rattachementsSansParties(etat.rattachements, c.parties);
+        var defaits = avant > Object.keys(etat.rattachements).length;
         var r = D().recoller(etat.liens, c);
         etat.doc = r.doc;
         etat.liens = r.liens;
         apresCoupe();
-        dire(TEXTES_COUPE.annulee(etat.morceaux.texte[c.id]));
+        dire(TEXTES_COUPE.annulee(etat.morceaux.texte[c.id]) + (defaits ? TEXTES_COUPE.lienDefait : ''));
+    }
+
+    // ------------------------------------------------------------------
+    // Rattacher (lot 7) : deux touchers, la suite puis le morceau qu'elle continue
+    // ------------------------------------------------------------------
+
+    /** La feuille marquée, la palette, le bandeau, la lecture et les flèches, refaits après un geste de lien. */
+    function apresLien() {
+        etat.erreur = '';
+        etat.morceaux.ordre.forEach(marquer);
+        majPalette(); majBandeau(); rendreLecture(); planifierDessin();
+    }
+
+    /**
+     * Un toucher, « Rattacher » en main. Sans suite choisie : un morceau rattaché voit son lien défait,
+     * un autre devient la suite choisie. Avec : la retoucher annule le choix ; un autre morceau est
+     * celui qu'elle continue, et le lien se crée, ou le refus se dit (le choix reste, pour réessayer).
+     */
+    function toucherLien(id) {
+        if (!etat.doc || etat.enCours) return;
+        var b = etat.suite;
+        if (!b) {
+            if (etat.rattachements[id] != null) {
+                etat.rattachements = D().detacher(etat.rattachements, id);
+                apresLien();
+                dire(TEXTES_LIEN.defait(mots(id)));
+                return;
+            }
+            etat.suite = id;
+            apresLien();
+            dire(TEXTES_LIEN.choisi(mots(id)));
+            return;
+        }
+        if (id === b) { etat.suite = null; apresLien(); dire(TEXTES_LIEN.annule); return; }
+        var r = D().rattacher(etat.rattachements, etat.liens, b, id);
+        if (r.refus) {
+            dire(r.refus === 'soi' ? TEXTES_LIEN.soi : r.refus === 'boucle' ? TEXTES_LIEN.boucle(mots(b)) : TEXTES_LIEN.dejaSuite(mots(r.de)));
+            return;
+        }
+        etat.rattachements = r.rattachements;
+        etat.liens = r.liens;
+        etat.suite = null;
+        apresLien();
+        var M = D().morceauxLus(etat.doc, etat.rattachements);
+        dire(TEXTES_LIEN.lie(M.texte[id]) + (r.retiree ? TEXTES_LIEN.etiquetteRetiree(D().TYPE[r.retiree].nom) : ''));
     }
 
     // ------------------------------------------------------------------
@@ -392,7 +516,8 @@
         if (!traits || !atelier || !cv) return;
         traits.textContent = '';
         if (!etat.actif || !etat.doc) return;
-        var it = document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + etat.actif + '"]');
+        if (etat.actif === 'rattacher') { dessinerLiens(traits, atelier.getBoundingClientRect(), cv.getBoundingClientRect()); return; }
+        var it =document.querySelector('#dissection-palette .dissection-etiquette[data-type="' + etat.actif + '"]');
         if (!it) return;
         var a = atelier.getBoundingClientRect(), ir = it.getBoundingClientRect(), c = cv.getBoundingClientRect();
         // La palette défile dans son cadre : une étiquette sortie du cadre envoie ses flèches depuis son bord.
@@ -410,6 +535,32 @@
             p.setAttribute('d', 'M' + s.x + ',' + s.y + ' C' + mx + ',' + s.y + ' ' + mx + ',' + f.y + ' ' + f.x + ',' + f.y);
             p.setAttribute('class', 'dissection-trait dis-t-' + etat.actif);
             p.setAttribute('marker-end', 'url(#dissection-pointe-' + etat.actif + ')');
+            traits.appendChild(p);
+        });
+    }
+
+    /**
+     * Lot 7, « Rattacher » en main : une flèche de chaque suite vers le morceau qu'elle continue, par la
+     * gauche des deux morceaux (une suite est le plus souvent juste sous lui, dans la même case), si les
+     * deux sont dans le canevas visible.
+     */
+    function dessinerLiens(traits, a, c) {
+        function dedans(r) { var cy = r.top + r.height / 2; return r.right > c.left && r.left < c.right && cy >= c.top && cy <= c.bottom; }
+        Object.keys(etat.rattachements).forEach(function (b) {
+            var idA = etat.rattachements[b];
+            if (!blocs[b] || !blocs[idA]) return;
+            var rb = blocs[b].getBoundingClientRect(), ra = blocs[idA].getBoundingClientRect();
+            if (!dedans(rb) || !dedans(ra)) return;
+            var sx = Math.max(rb.left, c.left) - a.left, sy = rb.top + rb.height / 2 - a.top;
+            var fx = Math.max(ra.left, c.left) - a.left, fy = ra.top + ra.height / 2 - a.top;
+            // La courbe reste dans le canevas : elle ne passe pas sur la palette.
+            var bx = Math.max(c.left - a.left + 4, Math.min(sx, fx) - 18 - Math.min(40, Math.abs(fy - sy) / 6));
+            var p = document.createElementNS(SVG, 'path');
+            p.setAttribute('d', 'M' + sx + ',' + sy + ' C' + bx + ',' + sy + ' ' + bx + ',' + fy + ' ' + fx + ',' + fy);
+            p.setAttribute('class', 'dissection-trait dissection-trait-lien dis-t-rattacher');
+            p.setAttribute('data-de', b);
+            p.setAttribute('data-vers', idA);
+            p.setAttribute('marker-end', 'url(#dissection-pointe-rattacher)');
             traits.appendChild(p);
         });
     }
@@ -498,7 +649,7 @@
     function rendreLecture() {
         var cs = el('dissection-constats'), cp = el('dissection-comprise'), sp = el('dissection-sans-place'), lg = el('dissection-logique');
         if (!cs || !cp || !sp || !lg || !etat.doc) return;
-        var R = D().comprendre(etat.doc, etat.liens), b = D().bilan(R);
+        var R = lire(), b = D().bilan(R);
         cs.textContent = ''; cp.textContent = ''; sp.textContent = ''; lg.textContent = '';
         lg.classList.add('u-hide');
         rendreCreer(R);
@@ -576,7 +727,7 @@
                 if (!r.checked) return;
                 etat.compte = o[0];
                 etat.erreur = '';
-                rendreCreer(D().comprendre(etat.doc, etat.liens));
+                rendreCreer(lire());
             });
             lab.appendChild(r);
             lab.appendChild(noeud('span', null, o[1]));
@@ -602,7 +753,7 @@
             if (!etat.valeurs[cleNiv]) etat.valeurs[cleNiv] = {};
             etat.valeurs[cleNiv][quoi] = c.value;
             etat.erreur = '';
-            rendreActions(creation(D().comprendre(etat.doc, etat.liens)));
+            rendreActions(creation(lire()));
         });
         bloc.appendChild(lab);
         bloc.appendChild(c);
@@ -651,7 +802,7 @@
         champ.addEventListener('input', function () {
             etat.nomSaisi = champ.value;
             etat.erreur = '';
-            rendreActions(creation(D().comprendre(etat.doc, etat.liens)));
+            rendreActions(creation(lire()));
         });
         bloc.appendChild(lab);
         bloc.appendChild(champ);
@@ -729,7 +880,7 @@
      */
     async function creer() {
         if (etat.enCours || !etat.doc) return;
-        var c = creation(D().comprendre(etat.doc, etat.liens));
+        var c = creation(lire());
         if (c.raisons.length) { rendreLecture(); return; }
         var doc = etat.doc;
         etat.enCours = true;
@@ -784,7 +935,7 @@
     function ouvrir(doc, message) {
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
-        etat = { doc: doc, liens: {}, actif: null, morceaux: D().morceaux(doc), erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [] };
+        etat = etatNeuf(doc);
         desarmer();
         brancher();
         rendrePalette();
@@ -803,7 +954,7 @@
 
     /** Retour à l'accueil : la dissection en cours est oubliée (rien n'avait été écrit). */
     function fermer() {
-        etat = { doc: null, liens: {}, actif: null, morceaux: null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [] };
+        etat = etatNeuf(null);
         blocs = {};
         var vue = el('materiel-dissection'), contenu = el('dissection-contenu'), traits = el('dissection-traits');
         if (contenu) contenu.textContent = '';
@@ -844,11 +995,12 @@
 
     /**
      * « Coller une autre grille » (C2, relecture du 18 oct.) : sans étiquette posée, retour à l'accueil
-     * tout de suite ; dès qu'une étiquette est posée, ou une coupe faite (lot 5), un premier toucher
-     * demande confirmation.
+     * tout de suite ; dès qu'une étiquette est posée, une coupe faite (lot 5) ou un lien créé (lot 7), un
+     * premier toucher demande confirmation.
      */
     function collerAutre(bouton) {
-        if ((Object.keys(etat.liens).length || etat.coupes.length) && !confirme(bouton, 'materielDissection.collerAutre')) return;
+        var travail = Object.keys(etat.liens).length || etat.coupes.length || Object.keys(etat.rattachements).length;
+        if (travail && !confirme(bouton, 'materielDissection.collerAutre')) return;
         if (window.materiel) window.materiel.recommencer();
     }
 
@@ -863,6 +1015,8 @@
         etat.valeurs = {};
         // Lot 5 : les coupes restent, mais une coupe annulée ensuite ne rend plus d'étiquette retirée.
         etat.coupes.forEach(function (c) { c.type = null; });
+        // Lot 7 : les liens restent aussi (comme les coupes) ; un choix de suite en cours tombe avec l'outil.
+        etat.suite = null;
         etat.morceaux.ordre.forEach(marquer);
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         dire('Toutes les étiquettes sont retirées.');
@@ -891,6 +1045,6 @@
         construireFeuille: construireFeuille,
         /** L'état de la dissection (lecture) — pour les bancs. */
         etatCourant: function () { return etat; },
-        comprise: function () { return etat.doc ? D().comprendre(etat.doc, etat.liens) : null; }
+        comprise: function () { return etat.doc ? lire() : null; }
     };
 })();
