@@ -114,6 +114,63 @@ const GLOSSAIRE = {
         voir: 'Conception > Échelles'
     },
 
+    // Les six étiquettes d'« Apporter mon matériel » : définitions de la section « Apporter une grille que
+    // tu as déjà » de l'onglet Aide (D4, validées par Grégoire le 19 oct. 2026, 19 h 01), mot pour mot —
+    // un banc les compare. « Niveau (de performance) » ne se confond pas avec « Niveau RàI ».
+    'critere': {
+        cle: 'critere',
+        terme: 'Critère',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Ce qui est attendu ; la question que tu te poses devant la copie.',
+        voir: 'Conception > Grilles'
+    },
+
+    'element-observable': {
+        cle: 'element-observable',
+        terme: 'Élément observable',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Ce que tu regardes dans toutes les copies pour juger d’un critère. On dit aussi sous-critère.',
+        voir: 'Conception > Grilles'
+    },
+
+    'descripteur': {
+        cle: 'descripteur',
+        terme: 'Descripteur',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Ce que tu observes dans une copie, à un niveau donné ; une réponse possible à la question du critère. Une seule vaut pour une copie.',
+        voir: 'Conception > Grilles'
+    },
+
+    'niveau-de-performance': {
+        cle: 'niveau-de-performance',
+        terme: 'Niveau (de performance)',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Le nom d’un stade de qualité du travail observé, par exemple « Sommaire » ou « Efficace ».',
+        voir: 'Conception > Échelles'
+    },
+
+    'points': {
+        cle: 'points',
+        terme: 'Points',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Ce que vaut une réponse, en chiffres.',
+        voir: 'Conception > Grilles'
+    },
+
+    'ponderation': {
+        cle: 'ponderation',
+        terme: 'Pondération',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Le poids d’un critère dans la grille.',
+        voir: 'Conception > Grilles'
+    },
+
     'cartouche-de-retroaction': {
         cle: 'cartouche-de-retroaction',
         terme: 'Cartouche de rétroaction',

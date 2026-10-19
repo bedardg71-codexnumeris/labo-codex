@@ -148,6 +148,27 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['construction-grilles', 'construction-pratiques']
     },
 
+    // « Apporter mon matériel » : l'aide « i » de l'accueil et de l'écran d'étiquetage (B1 à B5, validés
+    // par Grégoire le 19 oct. 2026, 19 h 01).
+    'conception-materiel': {
+        titre: 'Apporter mon matériel',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Cet outil range dans Labo Codex une grille d’évaluation que tu as déjà créée à l’extérieur de l’application. Tu la colles ici, tu poses une étiquette sur chaque morceau (critère, pondération, descripteur, points, niveau…), puis « Créer ma grille » la range dans Grilles de critères. Rien n’entre dans tes grilles avant ce dernier geste.'
+            },
+            {
+                type: 'texte',
+                contenu: 'Ton travail est gardé à chaque geste : si tu quittes l’onglet ou recharges la page, tu retrouves ta grille et ses étiquettes telles que tu les as laissées.'
+            },
+            {
+                type: 'conseil',
+                contenu: 'Copie ta grille depuis son fichier d’origine (Word, Pages) plutôt que depuis un PDF : le tableau arrive avec ses cases, et la place de chaque morceau dit déjà à quel critère et à quel niveau il appartient.'
+            }
+        ],
+        voirAussi: ['construction-grilles', 'construction-echelles', 'grille-type-critere-detail']
+    },
+
     'construction-grilles': {
         titre: 'Grilles de critères',
         sections: [

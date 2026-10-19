@@ -96,6 +96,13 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     await expect(parNiveaux).not.toBeChecked();
     await expect(page.locator('#dissection-creer-niveaux')).toHaveCount(0);
     await expect(bouton).toBeEnabled();
+    // L'aide d'« Apporter mon matériel » (19 oct.) : les bulles C9, C10, C11, posées en JavaScript.
+    await expect(page.locator('#dissection-creer-choix')).toHaveAttribute('data-tooltip', 'materiel-compte');
+    await expect(page.locator('.dissection-creer-nom')).toHaveAttribute('data-tooltip', 'materiel-nom-grille');
+    await expect(bouton).toHaveAttribute('data-tooltip', 'materiel-creer');
+    await page.locator('#dissection-creer-choix legend').hover();
+    await expect(page.locator('#tooltip-bulle.tooltip-visible .tooltip-contenu')).toHaveText('Ta grille porte des points et des niveaux : choisis lequel donne le résultat d’une copie. Avec les niveaux, tu diras ensuite la note que vaut chacun.');
+    await page.mouse.move(0, 0);
 
     // « des niveaux » : le tableau, une rangée par niveau dans l'ordre lu, ses champs VIDES.
     // Break-test (fait le 18 oct.) : une valeur proposée dans `champNiveau` → rouge (ici et dans le second essai).

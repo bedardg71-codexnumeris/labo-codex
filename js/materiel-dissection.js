@@ -250,6 +250,9 @@
     // La palette : chaque étiquette est un surligneur
     // ------------------------------------------------------------------
 
+    /** Les outils qui ont une bulle au survol (clés de js/accompagnement-contenu-hover.js, 19 oct. 2026). */
+    var BULLES_OUTILS = { couper: 'materiel-outil-couper', rattacher: 'materiel-outil-rattacher' };
+
     function rendrePalette() {
         var pal = el('dissection-palette');
         if (!pal || pal.childNodes.length) return;
@@ -261,6 +264,7 @@
             b.setAttribute('data-param', t.k);
             b.setAttribute('data-type', t.k);
             b.setAttribute('aria-pressed', 'false');
+            if (BULLES_OUTILS[t.k]) b.setAttribute('data-tooltip', BULLES_OUTILS[t.k]);   // C5, C6 : le texte est au catalogue des bulles
             b.appendChild(noeud('span', 'dissection-etiquette-trait'));
             b.lastChild.setAttribute('aria-hidden', 'true');
             b.appendChild(noeud('span', 'dissection-etiquette-nom', t.nom));
@@ -647,7 +651,7 @@
     }
 
     function phraseLogique(b) {
-        if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + fmt(b.jusqua) : '') + '. Elle ne convertirait rien : ce serait à toi de dire laquelle compte pour la note.';
+        if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + fmt(b.jusqua) : '') + '. Ce serait à toi de dire laquelle donne le résultat d’une copie.';   // L2, validé G. 19 oct. 19 h 01
         if (b.logique === 'points') return 'L’application y lirait une grille en points : les points de chaque critère s’additionnent' + (b.jusqua != null ? ' jusqu’à un total de ' + fmt(b.jusqua) : '') + '. Aucun niveau n’y est nommé (et l’application n’en inventerait pas).';
         if (b.logique === 'niveaux') return 'L’application y lirait une grille en niveaux : chaque critère se juge par niveau, sans points à additionner.';
         return '';
@@ -787,6 +791,7 @@
     function champChoix() {
         var fs = noeud('fieldset', 'dissection-creer-choix');
         fs.id = 'dissection-creer-choix';
+        fs.setAttribute('data-tooltip', 'materiel-compte');   // C10
         fs.appendChild(noeud('legend', null, TEXTES_CREER.choix));
         [['points', TEXTES_CREER.choixPoints], ['niveaux', TEXTES_CREER.choixNiveaux]].forEach(function (o) {
             var lab = noeud('label', 'dissection-creer-option');
@@ -867,6 +872,7 @@
      */
     function champNom(R) {
         var bloc = noeud('div', 'dissection-creer-nom');
+        bloc.setAttribute('data-tooltip', 'materiel-nom-grille');   // C9
         var lab = noeud('label', null, TEXTES_CREER.nom);
         lab.setAttribute('for', 'dissection-nom-grille');
         var champ = noeud('input', 'controle-form');
@@ -895,6 +901,7 @@
         var b = noeud('button', 'btn btn-principal', etat.enCours ? TEXTES_CREER.enCours : TEXTES_CREER.bouton);
         b.type = 'button';
         b.setAttribute('data-action', 'materielDissection.creer');
+        b.setAttribute('data-tooltip', 'materiel-creer');   // C11
         b.disabled = c.raisons.length > 0 || etat.enCours;
         z.appendChild(b);
         if (champ) champ.removeAttribute('aria-describedby');
