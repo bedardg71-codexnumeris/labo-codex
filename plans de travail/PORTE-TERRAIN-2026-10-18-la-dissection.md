@@ -85,3 +85,13 @@ Relevé de 16 h 43 (sur 1.205.0) : dans la case où le nom « Idées secondaires
 | 6.4 | Si tu travailles en mode sombre : « Rattacher » en main, regarde les flèches et les pointillés sur ta grille. | Lisibles. Sinon, passe cette rangée. | Ce qui se lit mal |
 | 6.5 | iPad : au doigt, rattache « preuves) » à « Idées secondaires » (deux touchers sur des lignes courtes et voisines). | Chaque toucher prend le morceau visé, pas son voisin ; la grille ne défile pas pendant le geste. | Un toucher qui a pris le mauvais morceau |
 
+## §7 · Reprise sur la 1.207.0 (« Créer ta grille, même incomplète »), ajoutée par Cowork le 18 oct. à 20 h 09
+
+Ta capture de 17 h 24 : « Créer ma grille » grisé parce que des critères n'avaient pas de points. La 1.207.0 laisse créer, et « Grilles de critères » dit ce qui reste. Mesuré par les bancs, donc absent ici : le champ vidé qui marque le critère, la note « -- » calculée, le refus du paquet de partage. L'écran d'évaluation attend un cas réel : tu n'as pas à semer de données pour lui.
+
+| N° | Geste | Attendu | À noter (champ) |
+|---|---|---|---|
+| 7.1 | Recharge en vidant le cache ; lis le numéro en bas de page, puis les Nouvelles. | **1.207.0** ; en tête des Nouvelles, « Créer ta grille, même incomplète », puis « Rattacher un morceau ». Sinon, arrête-toi. | Version affichée |
+| 7.2 | Mac : ta grille sur le symbolisme, coupée, **sans rattacher** « (explications, procédés, » ni « preuves) ». | « Créer ma grille » est actif ; dessous, « Tu pourras créer ta grille, puis compléter dans « Grilles de critères » : » et les points de 2 critères. | Ce que dit la liste |
+| 7.3 | « Créer ma grille », puis « La voir dans Grilles de critères » ; saisis des points pour les deux critères. | La ligne du total dit « (2 critères sans points) », puis plus rien une fois les points saisis. | Ce que dit la ligne du total |
+

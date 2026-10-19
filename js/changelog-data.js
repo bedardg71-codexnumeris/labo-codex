@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.207 (« Créer ta grille, même incomplète ») — titre et deux items validés par Grégoire le
+            // 18 oct. 2026 (20 h 08), transmis par Cowork (CONSIGNE-LOT-2026-10-18-dissection-10-version-1.207.md).
+            version: '1.207',
+            couleur: 'vert',
+            titre: 'Créer ta grille, même incomplète',
+            items: [
+                'Dans «&nbsp;Apporter mon matériel&nbsp;», «&nbsp;Créer ma grille&nbsp;» ne bloque plus quand des critères n’ont pas encore leurs points&nbsp;: tu les complètes ensuite dans «&nbsp;Grilles de critères&nbsp;», qui dit combien il en reste.',
+                'Tant qu’un critère n’a pas ses points, la note d’une copie évaluée avec cette grille affiche «&nbsp;--&nbsp;», plutôt que de se calculer sur les autres critères sans le dire. Il en va de même si tu vides le champ des points d’un critère dans «&nbsp;Grilles de critères&nbsp;».'
+            ]
+        },
+        {
             // 1.206 (« Rattacher ») — titre et deux items validés par Grégoire le 18 oct. 2026 (17 h 22),
             // transmis par Cowork (CONSIGNE-LOT-2026-10-18-dissection-8-version-1.206.md).
             version: '1.206',

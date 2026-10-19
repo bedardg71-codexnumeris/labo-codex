@@ -1253,7 +1253,7 @@ function texteDePonderation(n, enPoints) {
 /**
  * La dissection, lot 9 (`CONSIGNE-LOT-2026-10-18-dissection-9-creer-quand-meme.md`) : un critère peut être
  * créé SANS pondération (`null`), à compléter ici. La règle de l'absence est celle de la note
- * (`ponderationAbsente`, evaluation-calcul.js). Textes PROVISOIRES (Claude Code, 18 oct.).
+ * (`ponderationAbsente`, evaluation-calcul.js). Textes validés G. 18 oct. 20 h 08.
  */
 function critereSansPonderation(c) {
     return typeof window.ponderationAbsente === 'function' && window.ponderationAbsente(c);

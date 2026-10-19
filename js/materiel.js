@@ -621,8 +621,8 @@
 
     /**
      * La dissection, lot 9 : combien de critères ont été créés sans pondération, à compléter dans Grilles de
-     * critères ; lot 9b : la note affichera « -- » d'ici là (la garde de `calculerPortee`). Textes PROVISOIRES
-     * (Claude Code, 18 oct.) ; rien quand il n'en manque pas.
+     * critères ; lot 9b : la note affichera « -- » d'ici là (la garde de `calculerPortee`). Textes validés G. 18 oct.
+     * 20 h 08 ; rien quand il n'en manque pas.
      */
     function aCompleterHtml(r) {
         if (!r.aCompleter) return '';
@@ -688,7 +688,7 @@
             '<h2 id="materiel-titre-cree" tabindex="-1">Ta grille « ' + e(r.nom) + ' » est créée</h2></div>' +
             '<p>' + e('Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' notés en points. Rien d’autre n’a changé dans l’application.') + '</p>' +
             aCompleterHtml(r) + '<div class="materiel-cartes-cree">' +
-            // Lot 9 : le total des seuls critères qui ont des points, et combien n'en ont pas encore (texte PROVISOIRE).
+            // Lot 9 : le total des seuls critères qui ont des points, et combien n'en ont pas encore (validé G. 18 oct. 20 h 08).
             carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + (Math.abs(r.totalPoints) >= 2 ? ' points' : ' point') +
                 (r.aCompleter ? ' ; ' + pluriel(r.aCompleter, 'critère', 'critères') + ' sans points pour l’instant.' : '.'), 'grille-criteres', 'La voir dans Grilles de critères') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +

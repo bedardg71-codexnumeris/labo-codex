@@ -357,10 +357,38 @@
      *        `lecteurs` (d'où lire les dépendances) et `chaineAttribution`
      *        (provenance explicite). Voir l'en-tête de partage-format.js.
      */
+    /**
+     * La dissection, version 1.207 (verdict du lot 9b, tranché par Cowork) : une grille dont un critère est
+     * marqué « à compléter » (`ponderationACompleter`) ne part pas en `.lcz`. Son `null` serait refusé par
+     * l'auto-contrôle (« le package généré ne passe pas la validation ») : on le dit AVANT, en nommant les
+     * critères. Le schéma de partage ne change pas. Texte validé G. 18 oct. 20 h 08 ; en pourcentages,
+     * « pondération » au lieu de « points », par la même règle que la garde de la note.
+     * @returns {string} le message de refus, ou '' quand la grille peut partir
+     */
+    partageExport.messageGrilleACompleter = function (grille) {
+        var criteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
+        var noms = criteres.filter(function (c) { return c && c.ponderationACompleter === true; })
+            .map(function (c) { return c.nom || c.id; });
+        if (!noms.length) return '';
+        var enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grille);
+        var un = noms.length === 1;
+        var manque = enPoints ? (un ? 'n\'a pas ses points' : 'n\'ont pas leurs points')
+            : (un ? 'n\'a pas sa pondération' : 'n\'ont pas leur pondération');
+        var donne = enPoints ? (un ? 'Donne-lui ses points' : 'Donne-leur leurs points')
+            : (un ? 'Donne-lui sa pondération' : 'Donne-leur leur pondération');
+        return 'Cette grille ne peut pas encore être partagée : ' + noms.length + (un ? ' critère ' : ' critères ')
+            + manque + ' (' + noms.join(', ') + '). ' + donne + ' dans « Grilles de critères », puis partage-la.';
+    };
+
     partageExport.exporterEntite = function (entite, type, options) {
         options = options || {};
         if (window.BibliothequeUI && BibliothequeUI.estItemDemo && BibliothequeUI.estItemDemo(entite)) {
             alert('Le matériel de démonstration ne s\'exporte pas : il est déjà fourni avec Labo Codex.');
+            return Promise.resolve(false);
+        }
+        var aCompleter = type === 'grille' ? partageExport.messageGrilleACompleter(entite) : '';
+        if (aCompleter) {
+            alert(aCompleter);
             return Promise.resolve(false);
         }
 
