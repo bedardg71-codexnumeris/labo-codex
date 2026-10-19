@@ -4494,7 +4494,7 @@ function rendreAttenduCritere(critere, ctx) {
 /**
  * Le texte de chaque niveau, dans l'ordre de l'échelle ; un code qu'elle ne connaît pas suit, dans l'ordre écrit.
  * Sans échelle (grille en points), chaque réponse porte aussi ses points et sa corbeille, dans l'ordre écrit ;
- * avec une échelle, le texte seul, et l'écran le dit. Textes de Claude Code, PROVISOIRES (lot 13).
+ * avec une échelle, le texte seul, et l'écran le dit. Textes de Claude Code (lot 13), validé G. 19 oct. 19 h 29.
  */
 function rendreAttenduNiveaux(descripteurs, codes, ctx) {
     if (!codes.length) return '';
@@ -4553,13 +4553,14 @@ function rendreAttenduSousCriteres(sous) {
 const MAX_REPONSES_CRITERE = 20;
 const MAX_TEXTE_REPONSE = 5000;
 const MAX_POINTS_REPONSE = 200;   // une clé plus longue serait coupée à l'import (`assainirChaine(k, 200)`)
+// Textes du lot 13, validé G. 19 oct. 19 h 29 (trois refus de points réécrits par Grégoire).
 const REFUS_REPONSES = {
     trop: 'Au plus 20 réponses par critère',
     texteLong: 'Une réponse fait 5 000 caractères au plus',
     pointsVides: 'Les points de la réponse sont obligatoires',
-    pointsSouligne: 'Des points qui ne commencent pas par « _ »',
-    pointsHorsBornes: 'Des points de 0 à 100',
-    pointsLongs: 'Des points de 200 caractères au plus',
+    pointsSouligne: 'Les points ne peuvent pas commencer par « _ »',
+    pointsHorsBornes: 'Les points vont de 0 à 100',
+    pointsLongs: 'Les points font 200 caractères au plus',
     pointsPris: 'Une autre réponse de ce critère porte déjà ces points'
 };
 
