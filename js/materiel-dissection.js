@@ -693,7 +693,7 @@
         enCours: 'Création…',
         nom: 'Nom de ta grille',
         raisons: 'Avant de créer, il reste :',
-        // Lot 9, texte PROVISOIRE (Claude Code, 18 oct.) : ce qui manque sans empêcher de créer.
+        // Lot 9, validé G. 18 oct. 20 h 08 : ce qui manque sans empêcher de créer.
         aCompleter: 'Tu pourras créer ta grille, puis compléter dans « Grilles de critères » :',
         // Lot 2b : le choix (logique « les deux » seulement) et le tableau des niveaux.
         choix: 'Le résultat d’une copie viendrait :',

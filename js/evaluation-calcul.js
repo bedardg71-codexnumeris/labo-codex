@@ -923,7 +923,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
  * @param {Function} niveauDe       - critère → code du niveau choisi, ou vide
  * @param {Function} valeurDe       - (critère, niveau) → valeur numérique, ou undefined
  * @returns {{ponderationCouverte:number, ponderationGrille:number, criteresComptes:Array,
- *   criteresHorsNote:Array, nbCriteresAvecNiveau:number, commencee:boolean, incomplete:boolean}}
+ *   criteresHorsNote:Array, nbCriteresAvecNiveau:number, commencee:boolean, incomplete:boolean, enPoints:boolean}}
  */
 /**
  * La dissection, lot 9 (`CONSIGNE-LOT-2026-10-18-dissection-9-creer-quand-meme.md`) : un critère SANS
@@ -984,7 +984,9 @@ function calculerPortee(criteresGrille, niveauDe, valeurDe) {
         criteresHorsNote: criteresHorsNote,
         nbCriteresAvecNiveau: nbCriteresAvecNiveau,
         commencee: commencee,
-        incomplete: commencee && criteresHorsNote.length > 0
+        incomplete: commencee && criteresHorsNote.length > 0,
+        // La version 1.207 : les mots de la garde disent « points » pour une grille en points, « pondération » sinon.
+        enPoints: typeof grilleEntierementEnPoints === 'function' && grilleEntierementEnPoints({ criteres: criteresGrille })
     };
 }
 
@@ -1164,8 +1166,8 @@ function texteCriteresHorsNote(portee) {
     const parts = [];
     if (sansNiveau.length) parts.push('sans niveau : ' + sansNiveau.join(', '));
     if (sansValeur.length) parts.push('niveau sans valeur dans l\'échelle : ' + sansValeur.join(', '));
-    // Lot 9b de la dissection, texte PROVISOIRE (Claude Code, 18 oct.).
-    if (aCompleter.length) parts.push('sans pondération : ' + aCompleter.join(', '));
+    // Lot 9b de la dissection, validé G. 18 oct. 20 h 08.
+    if (aCompleter.length) parts.push((portee.enPoints ? 'sans points : ' : 'sans pondération : ') + aCompleter.join(', '));
     return parts.join(' ; ');
 }
 
@@ -1191,11 +1193,15 @@ function phrasesPorteeIncomplete(portee) {
             + ' dans l\'échelle — ' + sansValeur.map(c => c.nom + ' (' + c.niveau + ')').join(', ')
             + '. Donne une valeur ponctuelle à chaque niveau (Conception → Échelles de performance).');
     }
-    // Lot 9b de la dissection, texte PROVISOIRE (Claude Code, 18 oct.).
+    // Lot 9b de la dissection, validé G. 18 oct. 20 h 08 : « ses points » en points, « sa pondération » sinon.
     const aCompleter = hors.filter(c => c.motif === 'ponderation-a-completer');
     if (aCompleter.length) {
-        phrases.push('Pas de note tant qu\'un critère n\'a pas sa pondération — ' + aCompleter.map(c => c.nom).join(', ')
-            + '. Donne-' + (aCompleter.length > 1 ? 'leur leurs' : 'lui ses') + ' points dans Conception → Grilles de critères.');
+        const plusieurs = aCompleter.length > 1;
+        const quoi = portee.enPoints
+            ? (plusieurs ? 'leur leurs points' : 'lui ses points')
+            : (plusieurs ? 'leur leur pondération' : 'lui sa pondération');
+        phrases.push('Pas de note tant qu\'un critère n\'a pas ' + (portee.enPoints ? 'ses points' : 'sa pondération') + ' : '
+            + aCompleter.map(c => c.nom).join(', ') + '. Donne-' + quoi + ' dans Conception → Grilles de critères.');
     }
     return phrases;
 }
@@ -1765,6 +1771,7 @@ window.porteeDepuisEvaluation = porteeDepuisEvaluation;
 window.criteresAjoutesDepuis = criteresAjoutesDepuis;   // #705 — lue par evaluation-chargement.js (le signalement à l'écran)
 window.verifierPorteeAvantSauvegarde = verifierPorteeAvantSauvegarde;
 window.texteCriteresHorsNote = texteCriteresHorsNote;
+window.phrasesPorteeIncomplete = phrasesPorteeIncomplete;   // la version 1.207 (18 oct.) : exposée pour les bancs
 // #697 — la même résolution d'échelle pour le calcul, la porte et l'auto-save de création.
 window.resoudreEchelleEvaluation = resoudreEchelleEvaluation;
 // #699 — l'état vivant (le nu l'emporte) pour l'auto-save débouncé et le bilan.

@@ -1,11 +1,7 @@
-# Consigne du jour – la dissection, lot 9b : la garde de la note (dimanche 18 octobre, soir)
+# Consigne du jour – la dissection, la version 1.207.0 (dimanche 18 octobre, soir)
 
-> Écrite par Cowork le dimanche 18 octobre 2026 à 18 h 33 (Toronto, mesuré par `date`). Elle remplace celle de 17 h 47 (lot 9 : points 1 à 3 faits, `cb73e818`, relus : acceptés ; point 4 tranché par Grégoire à 18 h 32), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-9.md`.
-
-## Où on en est
-
-- `main` local : la 1.206.0 commitée et relue, puis le lot 9, **rien de poussé**. Le lot 9 ne se publie pas sans le 9b. Un seul verdict complet ce soir, sur le dernier commit, après la release.
+> Écrite par Cowork le dimanche 18 octobre 2026 à 20 h 09 (Toronto, mesuré par `date`). Elle remplace celle de 18 h 33 (lot 9b : fait, `364e3fcb`, relu : accepté), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-18-dissection-9b.md`. **Commite avec ton commit** : ce fichier, ce déplacement, la consigne du lot, le verdict du lot 9b et la porte retouchée.
 
 ## Le mandat
 
-Lis `VERDICT-RELECTURE-2026-10-18-dissection-9-creer-quand-meme.md`, puis fais le lot 9b : `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-9b-la-garde.md`. Puis arrête-toi : la demande de relecture, pas de version, pas de push.
+Le **temps A** de `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-10-version-1.207.md` : les textes tranchés, le refus clair du paquet `.lcz`, l'entrée des Nouvelles, la release 1.207.0, Vitest complet, la demande de relecture. **Puis arrête-toi** : pas de verdict, pas de push (temps B, au second relais, pour la 1.206.0 et la 1.207.0 ensemble).
