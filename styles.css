@@ -28364,6 +28364,8 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
 .dissection-morceau.dissection-rattache { background: transparent; box-shadow: none; border-left: 3px dashed var(--dis-c, var(--texte-secondaire)); padding-left: 4px; }
 .dissection-morceau.dissection-rattache::before { content: '↳ '; content: '↳ ' / ''; color: var(--dis-c, var(--texte-secondaire)); font-weight: 700; }
 .dissection-morceau.dissection-choisi, .dissection-pointage .dissection-morceau.dissection-choisi:hover { outline: 3px solid var(--accent-primaire); outline-offset: 1px; }
+/* Lot 12 : sous la tête d'un groupe, le nom entier tel que l'application le lit — petit, discret. */
+.dissection-nom-entier { display: block; margin: 0 -3px 2px; padding: 0 5px; font-size: 0.85em; font-style: italic; color: var(--texte-secondaire); overflow-wrap: anywhere; }
 .dissection-trait-lien { stroke-dasharray: 5 3; }
 .dissection-pointe { fill: var(--dis-c); }
 

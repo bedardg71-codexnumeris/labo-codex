@@ -31,8 +31,9 @@
  * Lot 5 (`CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`) : `couper` un morceau en deux (jamais dans un
  * mot, rien de perdu), `recoller` ; des pondérations sur chaque critère, sans niveaux, font une grille en
  * points ; les raisons d'un refus NOMMENT le critère ou le morceau en cause, sans renvoi à l'assistant.
- * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : `rattacher` un morceau à celui dont il est
- * la suite ; la lecture prend A suivi de ses B, dans l'ordre du document (`morceauxLus`). Rien n'est déplacé.
+ * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : rattacher un morceau à celui dont il est
+ * la suite. Lot 12 (`CONSIGNE-LOT-2026-10-19-dissection-12-rattacher-sans-ordre.md`) : l'ordre des touchers ne
+ * compte plus ; `joindre` fait des groupes, lus dans l'ordre du document (`morceauxLus`). Rien n'est déplacé.
  */
 (function () {
     'use strict';
@@ -278,39 +279,90 @@
     // ------------------------------------------------------------------
 
     /*
-     * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : les rattachements, { idB: idA } (B est
-     * la suite de A). Un seul niveau : A n'est jamais lui-même la suite d'un autre. Le document n'est
-     * jamais touché : chaque morceau garde son texte et sa place, et défaire un lien le rend tel quel.
-     * L'application ne crée jamais de lien d'elle-même.
+     * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`), revu au lot 12
+     * (`CONSIGNE-LOT-2026-10-19-dissection-12-rattacher-sans-ordre.md`) : les rattachements font des GROUPES,
+     * { idMembre: idTete }, un seul niveau. La TÊTE est le premier membre dans l'ordre de lecture du document,
+     * jamais l'ordre des touchers : elle porte l'étiquette et la place du groupe. Le document n'est jamais
+     * touché : chaque morceau garde son texte et sa place, et le détacher le rend tel quel. L'application ne
+     * crée jamais de lien d'elle-même.
      */
 
-    /**
-     * Rattache B à A. Refus (aucun lien créé) : 'soi' (B = A) ; 'boucle' (A est déjà la suite de B) ;
-     * 'dejaSuite' (A est déjà la suite d'un autre : `de` le nomme). B qui avait ses propres suites les
-     * passe à A (le niveau reste unique) ; B qui était la suite d'un autre change de A. L'étiquette de B
-     * est retirée : son texte appartient à A, dont l'étiquette vaut pour le texte entier.
-     *
-     * @returns {{rattachements: object, liens: object, retiree: string|null}|{refus: string, de?: string}}
-     *   les NOUVEAUX objets (les anciens sont intacts) et l'étiquette retirée de B ; ou le refus.
-     */
-    D.rattacher = function (rattachements, liens, idB, idA) {
+    /** Le rang de chaque morceau dans l'ordre de lecture. */
+    function rangs(doc) {
+        var rang = {};
+        D.morceaux(doc).ordre.forEach(function (id, i) { rang[id] = i; });
+        return rang;
+    }
+
+    /** La tête du groupe d'un morceau (lui-même s'il est seul ou tête). */
+    function teteDe(rat, id) { return rat[id] != null ? rat[id] : id; }
+
+    /** Les membres du groupe dont `tete` est la tête, elle comprise, dans l'ordre du document. */
+    function membres(rat, tete, rang) {
+        var m = [tete];
+        Object.keys(rat).forEach(function (b) { if (rat[b] === tete && b !== tete) m.push(b); });
+        return m.sort(function (x, y) { return rang[x] - rang[y]; });
+    }
+
+    /** Vrai si le morceau est dans un groupe (tête ou membre). */
+    D.estRattache = function (rattachements, id) {
         var rat = rattachements || {};
-        if (idB === idA) return { refus: 'soi' };
-        if (rat[idA] === idB) return { refus: 'boucle' };
-        if (rat[idA] != null) return { refus: 'dejaSuite', de: rat[idA] };
-        var r = Object.assign({}, rat), l = Object.assign({}, liens);
-        Object.keys(r).forEach(function (b) { if (r[b] === idB) r[b] = idA; });
-        r[idB] = idA;
-        var retiree = l[idB] || null;
-        delete l[idB];
-        return { rattachements: r, liens: l, retiree: retiree };
+        return rat[id] != null || Object.keys(rat).some(function (b) { return rat[b] === id; });
     };
 
-    /** Défait le lien de B : il redevient un morceau à part, son texte tel quel. */
-    D.detacher = function (rattachements, idB) {
-        var r = Object.assign({}, rattachements);
-        delete r[idB];
-        return r;
+    /** La tête du groupe d'un morceau, ou null s'il est seul. */
+    D.teteDuGroupe = function (rattachements, id) {
+        var rat = rattachements || {};
+        return D.estRattache(rat, id) ? teteDe(rat, id) : null;
+    };
+
+    /**
+     * Joint deux morceaux, dans l'ordre où ils sont touchés, sans que cet ordre compte : leurs groupes se
+     * rejoignent, et la tête est le premier membre dans l'ordre du document. L'étiquette du groupe est celle
+     * de la tête ; sans elle, celle du premier membre étiqueté, reportée sur la tête (`reportee`). Les
+     * étiquettes des autres membres sont retirées (`retiree` : la première, pour la ligne d'état).
+     *
+     * @returns {{rattachements: object, liens: object, tete: string, retiree: string|null, reportee: string|null}|{rien: true}}
+     *   les NOUVEAUX objets (les anciens sont intacts) ; `rien` si les deux sont déjà du même groupe (ou un seul).
+     */
+    D.joindre = function (doc, rattachements, liens, id1, id2) {
+        var rat = rattachements || {}, rang = rangs(doc);
+        if (!(id1 in rang) || !(id2 in rang)) return { rien: true };
+        var t1 = teteDe(rat, id1), t2 = teteDe(rat, id2);
+        if (t1 === t2) return { rien: true };
+        var tous = membres(rat, t1, rang).concat(membres(rat, t2, rang)).sort(function (x, y) { return rang[x] - rang[y]; });
+        var tete = tous[0];
+        var r = Object.assign({}, rat), l = Object.assign({}, liens);
+        tous.forEach(function (m) { if (m === tete) delete r[m]; else r[m] = tete; });
+        // L'étiquette gardée : celle de la tête, sinon celle du premier membre étiqueté.
+        var garde = TYPE[l[tete]] ? tete : (tous.filter(function (m) { return TYPE[l[m]]; })[0] || null);
+        var reportee = null, retiree = null;
+        if (garde && garde !== tete) { l[tete] = l[garde]; reportee = l[tete]; }
+        tous.forEach(function (m) {
+            if (m === tete) return;
+            if (m !== garde && TYPE[l[m]] && !retiree) retiree = l[m];
+            delete l[m];
+        });
+        return { rattachements: r, liens: l, tete: tete, retiree: retiree, reportee: reportee };
+    };
+
+    /**
+     * Détache un morceau de son groupe : il redevient un morceau à part, son texte tel quel. Si c'est la
+     * tête, le membre suivant (dans l'ordre du document) devient la tête et garde l'étiquette du groupe ; un
+     * groupe d'un seul morceau cesse d'exister. Le morceau détaché repart sans étiquette s'il était la tête
+     * (elle reste au groupe) ; un autre membre n'en avait déjà plus.
+     *
+     * @returns {{rattachements: object, liens: object}} les NOUVEAUX objets.
+     */
+    D.detacher = function (doc, rattachements, liens, id) {
+        var rat = rattachements || {}, r = Object.assign({}, rat), l = Object.assign({}, liens);
+        if (rat[id] != null) { delete r[id]; return { rattachements: r, liens: l }; }
+        var reste = membres(rat, id, rangs(doc)).filter(function (m) { return m !== id; });
+        if (!reste.length) return { rattachements: r, liens: l };
+        var nouvelle = reste[0];
+        reste.forEach(function (m) { if (m === nouvelle) delete r[m]; else r[m] = nouvelle; });
+        if (l[id] != null) { l[nouvelle] = l[id]; delete l[id]; }
+        return { rattachements: r, liens: l };
     };
 
     /** Après une coupe : la première partie prend la place du morceau coupé dans ses liens, comme son étiquette. */
@@ -333,11 +385,11 @@
     };
 
     /**
-     * Les morceaux tels que la lecture les prend : chaque B sort de l'ordre de lecture, et le texte de A
-     * devient A suivi de ses B, DANS L'ORDRE DE LECTURE DU DOCUMENT (pas dans celui des gestes), séparés
-     * par une espace. Un lien dont un bout manque au document, ou dont A est lui-même une suite, est
-     * ignoré : son B reste un morceau à part (rien ne se perd). Mêmes champs que `morceaux`, plus
-     * `suites` { idA: [idB…] }.
+     * Les morceaux tels que la lecture les prend : chaque membre sort de l'ordre de lecture, et le texte de
+     * la tête devient celui de tous les membres du groupe, DANS L'ORDRE DE LECTURE DU DOCUMENT (pas dans
+     * celui des gestes), séparés par une espace (lot 12). Un lien dont un bout manque au document, ou dont
+     * la tête est elle-même membre d'un autre groupe, est ignoré : son membre reste un morceau à part (rien
+     * ne se perd). Mêmes champs que `morceaux`, plus `suites` { idTete: [idMembre…] }.
      */
     D.morceauxLus = function (doc, rattachements) {
         var M = D.morceaux(doc), rat = rattachements || {};
@@ -352,7 +404,8 @@
         M.ordre.forEach(function (id) { if (valide[id]) (suites[valide[id]] = suites[valide[id]] || []).push(id); });
         var texte = Object.assign({}, M.texte);
         Object.keys(suites).forEach(function (a) {
-            texte[a] = [M.texte[a]].concat(suites[a].map(function (b) { return M.texte[b]; })).join(' ');
+            var tout = [a].concat(suites[a]).sort(function (x, y) { return rang[x] - rang[y]; });
+            texte[a] = tout.map(function (b) { return M.texte[b]; }).join(' ');
         });
         return { ordre: M.ordre.filter(function (id) { return !valide[id]; }), texte: texte, pos: M.pos, suites: suites };
     };
@@ -546,12 +599,12 @@
      * à quel niveau il appartient (la rangée d'un critère, la colonne d'un niveau) ; dans un
      * texte brut, c'est son ORDRE.
      *
-     * Lot 7 : un morceau rattaché ne se lit pas à part ; son texte complète celui de son A (`morceauxLus`),
-     * et l'étiquette de A vaut pour le texte entier.
+     * Lot 7 : un morceau rattaché ne se lit pas à part ; son texte complète celui de la tête de son groupe
+     * (`morceauxLus`, lot 12), et l'étiquette de la tête vaut pour le texte entier.
      *
      * @param {object} doc - le document disséqué
      * @param {Object<string, string>} liens - { idDuMorceau: type }
-     * @param {Object<string, string>} [rattachements] - lot 7 : { idB: idA }
+     * @param {Object<string, string>} [rattachements] - lot 7 : { idMembre: idTete } (lot 12)
      * @returns {object} R : titre, description, criteres, niveaux, total, totalNb, sansEtiquette,
      *   sansPlace [{ t, type, raison }], nb { type: compte }, aNommer, avecNiveaux, aPoints
      */

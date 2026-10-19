@@ -25,9 +25,11 @@
  * (`materielDissectionLecture.couper`), le glisser ne coupe pas. Les coupes vivent dans la page, en pile,
  * et s'annulent (« Annuler la dernière coupe ») ; rien n'est écrit avant « Créer ma grille ».
  *
- * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : l'outil « Rattacher », après « Couper » ;
- * deux touchers, la suite (B) puis le morceau qu'elle continue (A) ; retoucher un morceau rattaché défait
- * son lien. Un morceau rattaché garde sa marque ; l'outil en main, une flèche va de chaque B vers son A.
+ * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : l'outil « Rattacher », après « Couper ».
+ * Lot 12 (`CONSIGNE-LOT-2026-10-19-dissection-12-rattacher-sans-ordre.md`) : deux touchers joignent deux
+ * morceaux, dans l'ordre qu'on veut ; deux touchers sur un morceau rattaché le détachent. Un membre garde sa
+ * marque, la tête de son groupe montre sous elle le nom entier ; l'outil en main, une flèche va de chaque
+ * membre vers la tête.
  * Rien n'est déplacé dans la feuille, rien n'est deviné, rien n'est écrit avant « Créer ma grille ».
  *
  * Sécurité (règle 1) : tout texte venu du collage s'écrit par `textContent` ; le HTML collé n'est
@@ -47,10 +49,11 @@
 
     /**
      * L'état d'une dissection : le document, ses étiquettes, ce qui est en main, les coupes (lot 5) ;
-     * lot 7, les rattachements { idB: idA } et `suite`, le B choisi au premier toucher de « Rattacher ».
+     * lot 7, les rattachements { idMembre: idTete } (lot 12) et `choix`, le morceau choisi au premier toucher
+     * de « Rattacher ».
      */
     function etatNeuf(doc) {
-        return { doc: doc, liens: {}, actif: null, morceaux: doc ? D().morceaux(doc) : null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [], rattachements: {}, suite: null };
+        return { doc: doc, liens: {}, actif: null, morceaux: doc ? D().morceaux(doc) : null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [], rattachements: {}, choix: null };
     }
     var etat = etatNeuf(null);
     var blocs = {};
@@ -68,24 +71,26 @@
     };
 
     /**
-     * Lot 7, « Rattacher » : textes de Claude Code (18 oct.), sur le modèle de ceux de « Couper » ; le refus
-     * « déjà la suite » est celui de la consigne du lot ; le refus « boucle », proposé par Cowork et accepté par Grégoire. Validé G.
-     * 18 oct. 17 h 18. Les textes collés y entrent par leurs premiers mots (`premiersMots`).
+     * Lot 7, « Rattacher » : textes de Claude Code (18 oct.), sur le modèle de ceux de « Couper ». Validé G.
+     * 18 oct. 17 h 18 : `annule`, `lie`, `etiquetteRetiree`, `defait`, `suiteDe`. Lot 12 : `bandeau`,
+     * `bandeauChoix`, `enMain`, `choisi`, `reportee`, `rien`, `nomEntier` et `sansEtiquette` (« le texte
+     * entier » pour « les deux », « Détache-le » pour « Défais le lien ») de Claude Code, 19 oct., PROVISOIRES.
+     * Les textes collés y entrent par leurs premiers mots (`premiersMots`).
      */
     var TEXTES_LIEN = {
-        bandeau: 'Outil « Rattacher » : touche d’abord le morceau qui en continue un autre, puis celui qu’il continue. Touche un morceau déjà rattaché pour défaire son lien.',
-        bandeauChoix: function (b) { return 'Outil « Rattacher » : touche maintenant le morceau que « ' + b + ' » continue. Retouche « ' + b + ' » pour annuler.'; },
-        enMain: 'Outil « Rattacher » en main : touche d’abord le morceau qui en continue un autre.',
-        choisi: function (b) { return 'Suite choisie : « ' + b + ' ». Touche maintenant le morceau qu’il continue.'; },
+        bandeau: 'Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.',
+        bandeauChoix: function (b, rattache) { return 'Outil « Rattacher » : touche maintenant le morceau à joindre à « ' + b + ' ». Retouche « ' + b + ' » pour ' + (rattache ? 'le détacher.' : 'annuler.'); },
+        enMain: 'Outil « Rattacher » en main : touche un morceau, puis celui à lui joindre.',
+        choisi: function (b, rattache) { return 'Morceau choisi : « ' + b + ' ». Touche maintenant celui à lui joindre' + (rattache ? ', ou retouche-le pour le détacher.' : '.'); },
         annule: 'Choix annulé : aucun lien créé.',
         lie: function (t) { return 'Morceaux rattachés : l’application lit « ' + t + ' ».'; },
         etiquetteRetiree: function (nom) { return ' L’étiquette « ' + nom + ' » de la suite est retirée : celle du premier morceau vaut pour le texte entier.'; },
+        reportee: function (nom) { return ' L’étiquette « ' + nom + ' » passe au premier morceau : elle vaut pour le texte entier.'; },
         defait: function (b) { return 'Lien défait : « ' + b + ' » redevient un morceau à part.'; },
-        soi: 'Un morceau ne se rattache pas à lui-même.',
-        boucle: function (b) { return 'Ce morceau est déjà la suite de « ' + b + ' » : ils sont déjà rattachés, dans l’autre sens.'; },
-        dejaSuite: function (a) { return 'Ce morceau est déjà la suite de « ' + a + ' » : rattache plutôt à celui-là.'; },
-        sansEtiquette: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour les deux. Défais le lien avec « Rattacher » pour l’étiqueter à part.'; },
-        suiteDe: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; }
+        rien: 'Ces deux morceaux sont déjà rattachés : rien ne change.',
+        sansEtiquette: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’étiquette de « ' + a + ' » vaut pour le texte entier. Détache-le avec « Rattacher » pour l’étiqueter à part.'; },
+        suiteDe: function (a) { return 'Ce morceau est la suite de « ' + a + ' » : l’application les lit comme un seul texte.'; },
+        nomEntier: function (t) { return 'L’application lit : « ' + t + ' »'; }
     };
 
     function D() { return window.materielDissectionLecture; }
@@ -155,20 +160,35 @@
         if (type) n.classList.add('dis-t-' + type);
     }
 
-    function marquer(id) {
+    /** `M` : la lecture des rattachements (`morceauxLus`), calculée une fois pour toute la feuille. */
+    function marquer(id, M) {
         var b = blocs[id];
         if (!b) return;
+        M = M || D().morceauxLus(etat.doc, etat.rattachements);
         var t = typeDe(id);
         b.classList.toggle('dissection-marque', !!t);
         if (t) b.setAttribute('data-type', t); else b.removeAttribute('data-type');
-        // Lot 7 : un morceau rattaché garde sa marque en tout temps (trait en pointillé et symbole, en CSS),
-        // dans la couleur de l'étiquette de son A ; le B choisi au premier toucher, la sienne.
+        // Lot 7 : un membre garde sa marque en tout temps (trait en pointillé et symbole, en CSS), dans la
+        // couleur de l'étiquette de la tête de son groupe ; le morceau choisi au premier toucher, la sienne.
         var a = etat.rattachements[id];
         b.classList.toggle('dissection-rattache', a != null);
-        b.classList.toggle('dissection-choisi', etat.suite === id);
+        b.classList.toggle('dissection-choisi', etat.choix === id);
         classeType(b, a != null ? typeDe(a) : t);
         if (a != null) { b.setAttribute('data-suite-de', a); b.title = 'Suite de « ' + mots(a) + ' »'; }
         else { b.removeAttribute('data-suite-de'); b.removeAttribute('title'); }
+        // Lot 12 : sous la tête d'un groupe, en tout temps, le nom entier tel que l'application le lit
+        // (du texte, lu aussi par les lecteurs d'écran ; `textContent`, jamais de balise).
+        var sous = b.nextElementSibling && b.nextElementSibling.classList.contains('dissection-nom-entier') ? b.nextElementSibling : null;
+        if (M.suites[id]) {
+            if (!sous) { sous = noeud('div', 'dissection-nom-entier'); b.after(sous); }
+            sous.setAttribute('data-de', id);
+            sous.textContent = TEXTES_LIEN.nomEntier(M.texte[id]);
+        } else if (sous) sous.remove();
+    }
+
+    function marquerTout() {
+        var M = D().morceauxLus(etat.doc, etat.rattachements);
+        etat.morceaux.ordre.forEach(function (id) { marquer(id, M); });
     }
 
     function rendreFeuille() {
@@ -182,7 +202,7 @@
         Array.prototype.forEach.call(f.querySelectorAll('.dissection-morceau'), function (b) { blocs[b.getAttribute('data-id')] = b; });
         contenu.appendChild(f);
         if (cv) { cv.scrollTop = haut; cv.scrollLeft = gauche; }
-        etat.morceaux.ordre.forEach(marquer);
+        marquerTout();
     }
 
     // ------------------------------------------------------------------
@@ -273,7 +293,7 @@
         el('dissection-bandeau-texte').textContent = coupe
             ? TEXTES_COUPE.bandeau
             : etat.actif === 'rattacher'
-                ? (etat.suite ? TEXTES_LIEN.bandeauChoix(mots(etat.suite)) : TEXTES_LIEN.bandeau)
+                ? (etat.choix ? TEXTES_LIEN.bandeauChoix(mots(etat.choix), D().estRattache(etat.rattachements, etat.choix)) : TEXTES_LIEN.bandeau)
             : T
                 ? 'Surligneur « ' + T.nom + ' » : touche ou surligne les morceaux de ta grille qu’il désigne. Touche un morceau déjà surligné pour le retirer.'
                 : 'Touche une étiquette dans la palette : elle devient ton surligneur.';
@@ -286,8 +306,8 @@
         if (!enMain(type)) return;
         etat.actif = etat.actif === type ? null : type;
         desarmer();
-        // Lot 7 : poser « Rattacher » (une autre étiquette, « Terminer », Échap) annule le choix d'une suite.
-        if (etat.suite) { var s = etat.suite; etat.suite = null; marquer(s); }
+        // Lot 7 : poser « Rattacher » (une autre étiquette, « Terminer », Échap) annule le choix d'un morceau.
+        if (etat.choix) { var s = etat.choix; etat.choix = null; marquer(s); }
         majPalette(); majBandeau(); planifierDessin();
         if (etat.actif === 'couper') dire(TEXTES_COUPE.enMain);
         else if (etat.actif === 'rattacher') dire(TEXTES_LIEN.enMain);
@@ -315,13 +335,13 @@
 
     function appliquer(id, mode) {
         etat.erreur = '';
-        // Lot 7 : un morceau rattaché ne prend pas d'étiquette ; celle de son A vaut pour les deux.
+        // Lot 7 : un membre ne prend pas d'étiquette ; celle de la tête de son groupe vaut pour le texte entier.
         if (etat.rattachements[id] != null) { suiteTouchee = id; return; }
         if (mode === 'ajouter') etat.liens[id] = etat.actif;
         else if (etat.liens[id] === etat.actif) delete etat.liens[id];
         marquer(id);
-        // C1 du lot 7 (verdict du 18 oct., 17 h 15) : ses suites prennent la couleur de l'étiquette posée,
-        // changée ou retirée sur lui.
+        // C1 du lot 7 (verdict du 18 oct., 17 h 15) : les membres de son groupe prennent la couleur de
+        // l'étiquette posée, changée ou retirée sur lui.
         Object.keys(etat.rattachements).forEach(function (b) { if (etat.rattachements[b] === id) marquer(b); });
         planifierDessin();
     }
@@ -458,48 +478,50 @@
     }
 
     // ------------------------------------------------------------------
-    // Rattacher (lot 7) : deux touchers, la suite puis le morceau qu'elle continue
+    // Rattacher (lot 7, revu au lot 12) : deux touchers, dans l'ordre qu'on veut
     // ------------------------------------------------------------------
 
     /** La feuille marquée, la palette, le bandeau, la lecture et les flèches, refaits après un geste de lien. */
     function apresLien() {
         etat.erreur = '';
-        etat.morceaux.ordre.forEach(marquer);
+        marquerTout();
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
     }
 
     /**
-     * Un toucher, « Rattacher » en main. Sans suite choisie : un morceau rattaché voit son lien défait,
-     * un autre devient la suite choisie. Avec : la retoucher annule le choix ; un autre morceau est
-     * celui qu'elle continue, et le lien se crée, ou le refus se dit (le choix reste, pour réessayer).
+     * Un toucher, « Rattacher » en main (lot 12). Sans choix : le morceau est choisi. Avec : un AUTRE
+     * morceau est joint au choisi (leurs groupes se rejoignent, lus dans l'ordre du document) ; le MÊME
+     * morceau se détache s'il est rattaché, sinon le choix s'annule. Deux membres d'un même groupe : rien
+     * ne change, et cela se dit.
      */
     function toucherLien(id) {
         if (!etat.doc || etat.enCours) return;
-        var b = etat.suite;
-        if (!b) {
-            if (etat.rattachements[id] != null) {
-                etat.rattachements = D().detacher(etat.rattachements, id);
-                apresLien();
-                dire(TEXTES_LIEN.defait(mots(id)));
-                return;
-            }
-            etat.suite = id;
+        var c = etat.choix;
+        if (!c) {
+            etat.choix = id;
             apresLien();
-            dire(TEXTES_LIEN.choisi(mots(id)));
+            dire(TEXTES_LIEN.choisi(mots(id), D().estRattache(etat.rattachements, id)));
             return;
         }
-        if (id === b) { etat.suite = null; apresLien(); dire(TEXTES_LIEN.annule); return; }
-        var r = D().rattacher(etat.rattachements, etat.liens, b, id);
-        if (r.refus) {
-            dire(r.refus === 'soi' ? TEXTES_LIEN.soi : r.refus === 'boucle' ? TEXTES_LIEN.boucle(mots(b)) : TEXTES_LIEN.dejaSuite(mots(r.de)));
+        etat.choix = null;
+        if (id === c) {
+            if (!D().estRattache(etat.rattachements, id)) { apresLien(); dire(TEXTES_LIEN.annule); return; }
+            var d = D().detacher(etat.doc, etat.rattachements, etat.liens, id);
+            etat.rattachements = d.rattachements;
+            etat.liens = d.liens;
+            apresLien();
+            dire(TEXTES_LIEN.defait(mots(id)));
             return;
         }
+        var r = D().joindre(etat.doc, etat.rattachements, etat.liens, c, id);
+        if (r.rien) { apresLien(); dire(TEXTES_LIEN.rien); return; }
         etat.rattachements = r.rattachements;
         etat.liens = r.liens;
-        etat.suite = null;
         apresLien();
         var M = D().morceauxLus(etat.doc, etat.rattachements);
-        dire(TEXTES_LIEN.lie(M.texte[id]) + (r.retiree ? TEXTES_LIEN.etiquetteRetiree(D().TYPE[r.retiree].nom) : ''));
+        dire(TEXTES_LIEN.lie(M.texte[r.tete])
+            + (r.reportee ? TEXTES_LIEN.reportee(D().TYPE[r.reportee].nom) : '')
+            + (r.retiree ? TEXTES_LIEN.etiquetteRetiree(D().TYPE[r.retiree].nom) : ''));
     }
 
     // ------------------------------------------------------------------
@@ -543,8 +565,8 @@
     }
 
     /**
-     * Lot 7, « Rattacher » en main : une flèche de chaque suite vers le morceau qu'elle continue, par la
-     * gauche des deux morceaux (une suite est le plus souvent juste sous lui, dans la même case), si les
+     * Lot 7, « Rattacher » en main : une flèche de chaque membre vers la tête de son groupe (lot 12), par la
+     * gauche des deux morceaux (un membre est le plus souvent juste sous elle, dans la même case), si les
      * deux sont dans le canevas visible.
      */
     function dessinerLiens(traits, a, c) {
@@ -1031,9 +1053,9 @@
         etat.valeurs = {};
         // Lot 5 : les coupes restent, mais une coupe annulée ensuite ne rend plus d'étiquette retirée.
         etat.coupes.forEach(function (c) { c.type = null; });
-        // Lot 7 : les liens restent aussi (comme les coupes) ; un choix de suite en cours tombe avec l'outil.
-        etat.suite = null;
-        etat.morceaux.ordre.forEach(marquer);
+        // Lot 7 : les liens restent aussi (comme les coupes) ; un choix en cours tombe avec l'outil.
+        etat.choix = null;
+        marquerTout();
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
         dire('Toutes les étiquettes sont retirées.');
     }

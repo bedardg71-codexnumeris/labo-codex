@@ -9,9 +9,11 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //
 //   · la grille fictive (d7) collée : « Rattacher » dans « Le reste », après « Couper » ; un lien seul suffit à
 //     faire confirmer « Coller une autre grille » ;
-//   · deux touchers par événements de POINTEUR : la suite choisie (marquée, le bandeau change), retouchée
-//     (choix annulé), Échap (annulé aussi) ; puis le lien : la marque, la flèche de B vers A, l'étiquette de B
-//     retirée ; les refus « déjà la suite » et « boucle » ; retoucher un morceau rattaché défait son lien ;
+//   · deux touchers par événements de POINTEUR : le morceau choisi (marqué, le bandeau change), retouché
+//     (choix annulé), Échap (annulé aussi) ; puis le lien : la marque, la flèche du membre vers la tête,
+//     l'étiquette du membre retirée ; un troisième morceau se joint au groupe ; deux membres d'un même groupe,
+//     rien ne change ; deux touchers sur un morceau rattaché le détachent (lot 12, 19 oct. : les refus
+//     « déjà la suite » et « boucle » sont tombés, l'ordre des touchers ne compte plus) ;
 //   · la marque reste l'outil posé, la flèche non ; étiqueter un morceau rattaché ne change rien, et se dit ;
 //   · C1 (verdict du 18 oct., 17 h 15) : la marque d'une suite suit l'étiquette posée, changée ou retirée
 //     ENSUITE sur son A (break-test : sans la remarque des suites dans `appliquer`, l'essai rougit) ;
@@ -82,7 +84,7 @@ const outil = (page) => page.locator('#dissection-palette [data-param="rattacher
 const statut = (page) => page.locator('#dissection-statut');
 const idDe = (page, t) => morceau(page, t).getAttribute('data-id');
 
-test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et flèche, refus, nom entier créé et retrouvé', async ({ page }) => {
+test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et flèche, groupe de trois, nom entier créé et retrouvé', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     await page.setViewportSize({ width: 820, height: 1180 });
@@ -98,7 +100,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
 
     // Un lien seul (aucune étiquette) suffit à faire confirmer « Coller une autre grille ».
     await outil(page).click();
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Rattacher » : touche d’abord le morceau qui en continue un autre, puis celui qu’il continue. Touche un morceau déjà rattaché pour défaire son lien.');
+    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Rattacher » : touche deux morceaux d’un même texte, dans l’ordre que tu veux ; l’application les lit dans l’ordre de ta grille. Touche deux fois un morceau rattaché pour le détacher.');
     await toucher(page, NOM_D7[2]);
     await toucher(page, NOM_D7[0]);
     await page.keyboard.press('Escape');
@@ -120,9 +122,11 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await expect(morceau(page, NOM_D7[0])).not.toHaveAttribute('data-type', /.+/);
     await expect(suite).not.toHaveClass(/dis-t-/);
     await expect(suite).toHaveClass(/dissection-rattache/);
-    // Le lien défait (outil en main, un toucher sur la suite) : on repart d'une feuille sans lien.
+    // Le lien défait (outil en main, deux touchers sur la suite) : on repart d'une feuille sans lien.
     await outil(page).click();
     await expect(autre).toHaveText('Coller une autre grille');
+    await toucher(page, NOM_D7[2]);
+    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ». Touche maintenant celui à lui joindre, ou retouche-le pour le détacher.');
     await toucher(page, NOM_D7[2]);
     await expect(statut(page)).toHaveText('Lien défait : « renvois) » redevient un morceau à part.');
     await expect(morceau(page, NOM_D7[2])).not.toHaveClass(/dissection-rattache/);
@@ -137,14 +141,14 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await expect(page.locator('#dissection-constats')).toContainText('3 critères');
     await expect(page.locator('#dissection-comprise .dissection-crit-nom')).toHaveText(NOM_D7);
 
-    // Premier toucher : la suite choisie, marquée ; retouchée, le choix tombe ; Échap aussi.
+    // Premier toucher : le morceau choisi, marqué ; retouché, le choix tombe ; Échap aussi.
     const idNom = await idDe(page, NOM_D7[0]);
     await outil(page).click();
     await expect(outil(page)).toHaveAttribute('aria-pressed', 'true');
     await toucher(page, NOM_D7[2]);
     await expect(morceau(page, NOM_D7[2])).toHaveClass(/dissection-choisi/);
-    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Rattacher » : touche maintenant le morceau que « renvois) » continue. Retouche « renvois) » pour annuler.');
-    await expect(statut(page)).toHaveText('Suite choisie : « renvois) ». Touche maintenant le morceau qu’il continue.');
+    await expect(page.locator('#dissection-bandeau-texte')).toHaveText('Outil « Rattacher » : touche maintenant le morceau à joindre à « renvois) ». Retouche « renvois) » pour annuler.');
+    await expect(statut(page)).toHaveText('Morceau choisi : « renvois) ». Touche maintenant celui à lui joindre.');
     await toucher(page, NOM_D7[2]);
     await expect(morceau(page, NOM_D7[2])).not.toHaveClass(/dissection-choisi/);
     await expect(statut(page)).toHaveText('Choix annulé : aucun lien créé.');
@@ -153,7 +157,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await expect(outil(page)).toHaveAttribute('aria-pressed', 'false');
     await expect(morceau(page, NOM_D7[2])).not.toHaveClass(/dissection-choisi/);
 
-    // Les deux touchers : « renvois) » rattaché au nom. Sa marque, son étiquette retirée, la flèche de B vers A.
+    // Les deux touchers : « renvois) » rattaché au nom. Sa marque, son étiquette retirée, la flèche vers la tête.
     await outil(page).click();
     await toucher(page, NOM_D7[2]);
     await toucher(page, NOM_D7[0]);
@@ -171,24 +175,20 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     expect(marque.trait).toBe('dashed');
     expect(marque.symbole).toContain('↳');
 
-    // Refus « déjà la suite » : la suite choisie reste choisie, aucun lien créé.
+    // Lot 12 : un troisième morceau se joint au groupe, touché avant ou après : le nom entier, dans l'ordre
+    // de la grille (pas celui des gestes).
     await toucher(page, NOM_D7[1]);
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText('Ce morceau est déjà la suite de « Nuances fictives du propos » : rattache plutôt à celui-là.');
-    await expect(morceau(page, NOM_D7[1])).toHaveClass(/dissection-choisi/);
-    await expect(fleche).toHaveCount(1);
-    // … puis le bon morceau : le nom entier, dans l'ordre de la grille (pas celui des gestes).
-    await toucher(page, NOM_D7[0]);
     await expect(statut(page)).toHaveText(/^Morceaux rattachés : l’application lit « Nuances fictives du propos \(exemples, contrastes, renvois\) »\./);
+    await expect(morceau(page, NOM_D7[1])).toHaveAttribute('data-suite-de', idNom);
     await expect(fleche).toHaveCount(2);
 
-    // Refus « boucle » : le nom choisi comme suite de sa propre suite. Puis le choix retouché tombe.
+    // Deux membres d'un même groupe : rien ne change, et cela se dit ; le choix tombe.
     await toucher(page, NOM_D7[0]);
     await toucher(page, NOM_D7[2]);
-    await expect(statut(page)).toHaveText('Ce morceau est déjà la suite de « Nuances fictives du propos » : ils sont déjà rattachés, dans l’autre sens.');
+    await expect(statut(page)).toHaveText('Ces deux morceaux sont déjà rattachés : rien ne change.');
     await expect(fleche).toHaveCount(2);
-    await toucher(page, NOM_D7[0]);
-    await expect(statut(page)).toHaveText('Choix annulé : aucun lien créé.');
+    await expect(morceau(page, NOM_D7[0])).not.toHaveClass(/dissection-choisi/);
 
     // À 820 px : l'outil à 44 px, aucun défilement de côté.
     const mesure = await page.evaluate(() => ({
@@ -209,7 +209,7 @@ test('dissection 7 · « Rattacher » : deux touchers au pointeur, marque et fl�
     await page.locator('#dissection-palette [data-param="descripteur"]').click();
     await toucher(page, NOM_D7[2]);
     await expect(fin).not.toHaveAttribute('data-type', /.+/);
-    await expect(statut(page)).toHaveText('Ce morceau est la suite de « Nuances fictives du propos » : l’étiquette de « Nuances fictives du propos » vaut pour les deux. Défais le lien avec « Rattacher » pour l’étiqueter à part.');
+    await expect(statut(page)).toHaveText('Ce morceau est la suite de « Nuances fictives du propos » : l’étiquette de « Nuances fictives du propos » vaut pour le texte entier. Détache-le avec « Rattacher » pour l’étiqueter à part.');
     await page.keyboard.press('Escape');
 
     // La lecture : un seul critère, sous le nom entier, sa pondération et ses cases.
