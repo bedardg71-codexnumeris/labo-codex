@@ -7,8 +7,9 @@
  *   L — le lien : A suivi de ses B, dans l'ordre de LECTURE du document (pas celui des gestes) ; chaque B
  *       sort de l'ordre de lecture et ne compte plus à part ; l'étiquette de A vaut pour le texte entier ;
  *       l'étiquette de B retirée au lien, et sans effet ensuite ; le document jamais touché.
- *   F — les trois refus (soi, déjà la suite d'un autre, boucle), sans aucun lien créé ; un lien en boucle
- *       forcé dans les données ne perd aucun texte.
+ *   F — un lien en boucle forcé dans les données, ou un bout absent, ne perd aucun texte. (Les trois refus
+ *       du lot 7 — soi, déjà la suite, boucle — sont tombés au lot 12 : l'ordre des touchers ne compte plus,
+ *       voir materiel-dissection-12-rattacher-sans-ordre.test.js.)
  *   X — défaire : le morceau rendu tel quel, la lecture comme avant le lien.
  *   K — avec les coupes : la première partie prend la place du morceau coupé dans ses liens ; annuler une
  *       coupe défait d'abord les liens qui touchent ses parties ; l'aller-retour ne perd rien.
@@ -17,8 +18,9 @@
  *
  * Break-tests (faits le 18 oct.) : les suites rangées dans l'ordre des gestes (`morceauxLus` parcourant les
  * rattachements plutôt que le document) → L.b, L.e, K.d et D.b rouges ; B gardé dans l'ordre de lecture → L.a,
- * L.c, L.d, L.e et K.d rouges ; les refus « boucle » et « déjà la suite » retirés de `rattacher` (un lien en
- * boucle accepté) → F.b et F.c rouges.
+ * L.c, L.d, L.e et K.d rouges. Lot 12 (19 oct.) : `rattacher(rat, liens, B, A)` devient `joindre(doc, rat,
+ * liens, x, y)`, sans refus ; les gestes de ce banc restent ceux du lot 7 (la suite d'abord), et leur
+ * lecture ne change pas.
  *
  * Grilles FICTIVES (tests/unit/_helpers/grilles-fictives-dissection.js), jamais le texte d'une grille réelle.
  */
@@ -48,13 +50,13 @@ const docTexte = (t) => ({ mode: 'texte', lines: t.map((x, i) => ({ id: 'm' + (i
 /** Les textes tels que la lecture les prend, dans son ordre. */
 const lus = (doc, rat) => { const M = D.morceauxLus(doc, rat); return M.ordre.map((id) => M.texte[id]); };
 const idDe = (doc, t) => { const M = D.morceaux(doc); return M.ordre.find((id) => M.texte[id] === t); };
-const lier = (rat, liens, b, a) => { const r = D.rattacher(rat, liens, b, a); expect(r.refus).toBeUndefined(); return r; };
+const lier = (doc, rat, liens, b, a) => { const r = D.joindre(doc, rat, liens, b, a); expect(r.rien).toBeUndefined(); return r; };
 
 describe('L — le lien', () => {
     it('L.a — A suivi de B, séparés par une espace ; B sort de l’ordre de lecture ; le document n’est pas touché', () => {
         const doc = docTexte(['Idées fictives', '/ 24', '(exemples,', 'renvois)']);
         const avant = JSON.stringify(doc);
-        const r = lier({}, {}, 'm3', 'm1');
+        const r = lier(doc, {}, {}, 'm3', 'm1');
         expect(r.rattachements).toEqual({ m3: 'm1' });
         expect(lus(doc, r.rattachements)).toEqual(['Idées fictives (exemples,', '/ 24', 'renvois)']);
         expect(JSON.stringify(doc)).toBe(avant);
@@ -64,8 +66,8 @@ describe('L — le lien', () => {
     it('L.b — l’ordre de LECTURE du document, pas celui des gestes', () => {
         const doc = docTexte(['Idées fictives', '[ ] case', '(exemples,', '[ ] case', 'renvois)']);
         // La fin d'abord, le milieu ensuite : la lecture garde l'ordre du document.
-        let r = lier({}, {}, 'm5', 'm1');
-        r = lier(r.rattachements, r.liens, 'm3', 'm1');
+        let r = lier(doc, {}, {}, 'm5', 'm1');
+        r = lier(doc, r.rattachements, r.liens, 'm3', 'm1');
         expect(D.morceauxLus(doc, r.rattachements).texte.m1).toBe('Idées fictives (exemples, renvois)');
         expect(D.morceauxLus(doc, r.rattachements).suites).toEqual({ m1: ['m3', 'm5'] });
     });
@@ -74,8 +76,8 @@ describe('L — le lien', () => {
         const doc = docTexte(['Idées fictives', '/ 24', '(exemples,', 'renvois)']);
         const liens = { m1: 'critere', m2: 'ponderation', m3: 'critere', m4: 'critere' };
         expect(D.comprendre(doc, liens).criteres.map((c) => c.nom)).toEqual(['Idées fictives', '(exemples,', 'renvois)']);
-        let r = lier({}, liens, 'm3', 'm1');
-        r = lier(r.rattachements, r.liens, 'm4', 'm1');
+        let r = lier(doc, {}, liens, 'm3', 'm1');
+        r = lier(doc, r.rattachements, r.liens, 'm4', 'm1');
         const R = D.comprendre(doc, r.liens, r.rattachements);
         expect(R.criteres.map((c) => [c.nom, c.pond])).toEqual([['Idées fictives (exemples, renvois)', 24]]);
         expect(R.nb).toEqual({ critere: 1, ponderation: 1 });
@@ -85,46 +87,28 @@ describe('L — le lien', () => {
     });
 
     it('L.d — l’étiquette de B est retirée au lien ; posée ensuite, elle ne change rien', () => {
+        const doc = docTexte(['Idées fictives', '/ 24', '(exemples,']);
         const liens = { m1: 'critere', m3: 'critere' };
-        const r = lier({}, liens, 'm3', 'm1');
+        const r = lier(doc, {}, liens, 'm3', 'm1');
         expect(r.retiree).toBe('critere');
         expect(r.liens).toEqual({ m1: 'critere' });
         expect(liens).toEqual({ m1: 'critere', m3: 'critere' });
-        const doc = docTexte(['Idées fictives', '/ 24', '(exemples,']);
         const R1 = D.comprendre(doc, r.liens, r.rattachements);
         const R2 = D.comprendre(doc, Object.assign({}, r.liens, { m3: 'descripteur' }), r.rattachements);
         expect(R2).toEqual(R1);
-        expect(lier({}, { m1: 'critere' }, 'm3', 'm1').retiree).toBeNull();
+        expect(lier(doc, {}, { m1: 'critere' }, 'm3', 'm1').retiree).toBeNull();
     });
 
     it('L.e — B qui avait ses propres suites les passe à A : un seul niveau, tout dans l’ordre du document', () => {
         const doc = docTexte(['Idées fictives', '(exemples,', 'contrastes,', 'renvois)']);
-        let r = lier({}, {}, 'm4', 'm2');
-        r = lier(r.rattachements, r.liens, 'm2', 'm1');
+        let r = lier(doc, {}, {}, 'm4', 'm2');
+        r = lier(doc, r.rattachements, r.liens, 'm2', 'm1');
         expect(r.rattachements).toEqual({ m4: 'm1', m2: 'm1' });
         expect(lus(doc, r.rattachements)).toEqual(['Idées fictives (exemples, renvois)', 'contrastes,']);
     });
 });
 
-describe('F — les refus : aucun lien créé', () => {
-    it('F.a — à lui-même', () => {
-        expect(D.rattacher({}, {}, 'm1', 'm1')).toEqual({ refus: 'soi' });
-    });
-
-    it('F.b — à un morceau qui est lui-même rattaché : le refus nomme celui-là', () => {
-        const rat = { m2: 'm1' };
-        expect(D.rattacher(rat, {}, 'm3', 'm2')).toEqual({ refus: 'dejaSuite', de: 'm1' });
-        expect(rat).toEqual({ m2: 'm1' });
-    });
-
-    it('F.c — un lien qui ferait une boucle', () => {
-        const rat = { m2: 'm1' };
-        const liens = { m1: 'critere' };
-        expect(D.rattacher(rat, liens, 'm1', 'm2')).toEqual({ refus: 'boucle' });
-        expect(rat).toEqual({ m2: 'm1' });
-        expect(liens).toEqual({ m1: 'critere' });
-    });
-
+describe('F — des données abîmées : aucun texte perdu', () => {
     it('F.d — une boucle forcée dans les données, ou un bout absent du document : aucun texte perdu', () => {
         const doc = docTexte(['Idées fictives', '(exemples,', 'renvois)']);
         expect(lus(doc, { m1: 'm2', m2: 'm1' })).toEqual(['Idées fictives', '(exemples,', 'renvois)']);
@@ -138,8 +122,8 @@ describe('X — défaire', () => {
         const doc = docTexte(['Idées fictives', '/ 24', '(exemples,']);
         const liens = { m1: 'critere', m2: 'ponderation' };
         const avant = D.comprendre(doc, liens);
-        const r = lier({}, liens, 'm3', 'm1');
-        const rat = D.detacher(r.rattachements, 'm3');
+        const r = lier(doc, {}, liens, 'm3', 'm1');
+        const rat = D.detacher(doc, r.rattachements, r.liens, 'm3').rattachements;
         expect(rat).toEqual({});
         expect(r.rattachements).toEqual({ m3: 'm1' });
         expect(D.morceauxLus(doc, rat).texte).toEqual(D.morceaux(doc).texte);
@@ -167,8 +151,8 @@ describe('K — avec les coupes', () => {
         const c = D.couper(doc0, 'm1', 14);
         const liens1 = D.liensApresCoupe(liens0, 'm1', c.parties);
         // La seconde partie et « renvois) » rattachées à la première : le nom se relit entier.
-        let r = lier({}, liens1, c.parties[1], c.parties[0]);
-        r = lier(r.rattachements, r.liens, 'm2', c.parties[0]);
+        let r = lier(c.doc, {}, liens1, c.parties[1], c.parties[0]);
+        r = lier(c.doc, r.rattachements, r.liens, 'm2', c.parties[0]);
         expect(D.comprendre(c.doc, r.liens, r.rattachements).criteres.map((x) => x.nom)).toEqual(['Idées fictives (exemples, renvois)']);
         const rat = D.rattachementsSansParties(r.rattachements, c.parties);
         expect(rat).toEqual({});
@@ -180,7 +164,7 @@ describe('K — avec les coupes', () => {
     it('K.d — rien ne se perd : bout à bout, les textes lus sont ceux du document, avec ou sans liens', () => {
         const doc = docTexte(['a1 a2', 'b1', 'c1 c2', 'd1', 'e1']);
         const tout = (rat) => lus(doc, rat).join(' ').split(' ').sort();
-        const r = [['m4', 'm1'], ['m2', 'm1'], ['m5', 'm3']].reduce((e, [b, a]) => lier(e.rattachements, e.liens, b, a), { rattachements: {}, liens: {} });
+        const r = [['m4', 'm1'], ['m2', 'm1'], ['m5', 'm3']].reduce((e, [b, a]) => lier(doc, e.rattachements, e.liens, b, a), { rattachements: {}, liens: {} });
         expect(tout(r.rattachements)).toEqual(tout({}));
         expect(lus(doc, r.rattachements)).toEqual(['a1 a2 b1 d1', 'c1 c2 e1']);
     });
@@ -203,9 +187,9 @@ describe('D — la grille fictive (d7)', () => {
         const e = decouperD(D, collerD7());
         const idNom = idDe(e.doc, NOM_D7[0]);
         // Le geste de la porte : la fin d'abord, le milieu ensuite.
-        let r = lier(e.rattachements, e.liens, idDe(e.doc, NOM_D7[2]), idNom);
+        let r = lier(e.doc, e.rattachements, e.liens, idDe(e.doc, NOM_D7[2]), idNom);
         expect(r.retiree).toBe('critere');
-        r = lier(r.rattachements, r.liens, idDe(e.doc, NOM_D7[1]), idNom);
+        r = lier(e.doc, r.rattachements, r.liens, idDe(e.doc, NOM_D7[1]), idNom);
         const R = D.comprendre(e.doc, r.liens, r.rattachements);
         expect(R.sansPlace).toEqual([]);
         expect(R.criteres).toHaveLength(7);
