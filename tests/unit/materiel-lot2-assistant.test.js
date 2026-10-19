@@ -5,19 +5,20 @@
  * avec la décision de Grégoire du 17 oct. : la note retenue de chaque niveau est DEMANDÉE
  * (la consigne supposait un repli sur le milieu de plage, retiré par #527).
  *
+ * ⚰ 19 oct. 2026 : l'assistant en sept étapes est RETIRÉ (CONSIGNE-LOT-2026-10-19-retrait-ancien-assistant.md).
+ * Partis avec lui : E (ses étapes), R (« Ramener à 100 % »), K (« À classer »), S.a (ses écrans), et le
+ * geste « Ajouter un niveau » de N. Ce qui reste éprouve la logique commune (`calculs`, `construire`,
+ * `materielCreation.creer`, la confirmation), sur les modèles qu'il produisait, figés avant son retrait.
+ *
  * Ce que ce banc verrouille :
- *   E — ÉTAPES : sautées si réglées ; l'exemple en compte six (lot 3a) ; la liste se recalcule après
- *       une inversion, l'étape courante gardée.
  *   V — VÉRIFICATIONS : ce qui bloque la création (dont un passage en attente), ce qui avertit
  *       seulement (chevauchement, trou, total ≠ 100).
- *   R — « Ramener à 100 % » : des entiers qui totalisent 100, rien sans le geste.
- *   N — #1091 : au plus 20 niveaux, bornés à la saisie.
- *   K — À CLASSER : rien ne disparaît ; « Annuler » défait « Ajouter comme critère ».
+ *   N — #1091 : au plus 20 niveaux ; au-delà, la création est refusée.
  *   B — CONSTRUIRE : plages contiguës, note retenue SAISIE (jamais le milieu), descripteurs liés
  *       à l'échelle créée, cartouche seulement pour des rétroactions.
  *   W — ÉCRIRE : trois objets NEUFS ; aucun objet existant touché ; un échec ne laisse rien de
  *       partiel ; refus sans trimestre actif ou en trimestre clos.
- *   S — SÉCURITÉ : l'assistant échappe tout texte venu du document, valeurs des champs comprises.
+ *   S — SÉCURITÉ : la confirmation échappe le nom de la grille.
  */
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
@@ -25,6 +26,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { fige } from './_helpers/modeles-assistant-figes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -57,14 +59,14 @@ const db = {
     }
 };
 
-let w, L, A, C, materiel;
+let w, A, C, materiel;
 let compteur = 0;
 beforeAll(() => {
-    w = chargerScript('js/materiel-lecture.js', { DOMParser: fenetreDom.DOMParser });
+    w = chargerScript('js/materiel-lecture.js', {});   // `plagesContigues`, que `construire` appelle
     chargerScript('js/materiel-assistant.js', {}, w);
     chargerScript('js/materiel-creation.js', { db }, w);
     chargerScript('js/materiel.js', { echapperHtml: vraiEchapperHtml(), db }, w);
-    L = w.materielLecture; A = w.materielAssistant; C = w.materielCreation; materiel = w.materiel;
+    A = w.materielAssistant; C = w.materielCreation; materiel = w.materiel;
     w.genererIdUnique = (p) => p + 'banc' + (++compteur);
 });
 beforeEach(() => {
@@ -73,49 +75,10 @@ beforeEach(() => {
     db.reset({});
 });
 
-const exemple = () => A.preparer(L.charger(L.lireHtml(L.exempleHtml()), 'exemple').modele);
-
-/** L'exemple rendu complet : plages entières contiguës, notes saisies, passage écarté. */
-function exempleComplet() {
-    let m = exemple();
-    const plages = [['85', '100', '92'], ['75', '84', '80'], ['65', '74', '70'], ['0', '64', '50']];
-    m.niveaux.forEach((n, j) => {
-        n.min = { valeur: plages[j][0], etat: 'saisi' };
-        n.max = { valeur: plages[j][1], etat: 'saisi' };
-        n.note = { valeur: plages[j][2], etat: 'saisi' };
-    });
-    return A.ecarter(m, m.aClasser[0].id);
-}
-
+const exemple = () => fige('lot 2 · l’exemple lu');
+const exempleComplet = () => fige('lot 2 · l’exemple complété');
+const retroactions = () => fige('lot 2 · rétroactions');
 const ctx = (extra) => Object.assign({ id: (p) => p + 'x' + (++compteur), maintenant: '2026-10-17T12:00:00.000Z' }, extra || {});
-
-describe('E — les étapes', () => {
-    // Lot 3a : « Ce que contient ton tableau » suit toujours « Sens du tableau » (six étapes).
-    it('E.a l’exemple mène à six étapes, sans Pondération (donnée par le document)', () => {
-        expect(A.etapesPour(exemple())).toEqual(['axes', 'roles', 'nature', 'valeurs', 'classer', 'final']);
-    });
-
-    it('E.b « Taper ma grille à la main » mène droit à la Vérification', () => {
-        expect(A.etapesPour(A.preparer(L.modeleVide()))).toEqual(['final']);
-    });
-
-    it('E.c sans texte dans les cases, pas de Nature ; sans pondération, l’étape Pondération ; sans passage, pas d’À classer', () => {
-        const m = A.preparer(L.charger(L.lireTexte('C\tExcellent (85-100)\tFaible (0-84)\nX\t\t\nY\t\t'), 'colle').modele);
-        expect(A.etapesPour(m)).toEqual(['axes', 'roles', 'valeurs', 'pond', 'final']);
-    });
-
-    it('E.d après une inversion, la liste se recalcule et l’étape courante est gardée', () => {
-        const m = exemple();
-        const avant = A.etapesPour(m);
-        const inverse = A.choisirSens(m, true);
-        expect(inverse.critEnColonnes).toBe(true);
-        const r = A.recalculerEtapes(inverse, avant, avant.indexOf('valeurs'));
-        expect(r.etapes).toEqual(A.etapesPour(inverse));
-        expect(r.etapes[r.etape]).toBe('valeurs');
-        // Une étape qui disparaît ramène à la première.
-        expect(A.recalculerEtapes(m, ['axes', 'pond', 'final'], 1).etape).toBe(0);
-    });
-});
 
 describe('V — ce qui bloque, ce qui avertit', () => {
     it('V.a l’exemple tel que lu ne se crée pas : plages, notes retenues et passage manquent', () => {
@@ -126,8 +89,7 @@ describe('V — ce qui bloque, ce qui avertit', () => {
     });
 
     it('V.b un passage en attente bloque la création, et lui seul', () => {
-        const m = exempleComplet();
-        const enAttente = A.annuler(m, m.aClasser[0].id);
+        const enAttente = fige('lot 2 · un passage en attente');
         expect(A.calculs(enAttente).manquants).toEqual(['un passage à classer ou à écarter']);
     });
 
@@ -170,65 +132,14 @@ describe('V — ce qui bloque, ce qui avertit', () => {
     });
 });
 
-describe('R — « Ramener à 100 % »', () => {
-    function avecPonds(ponds) {
-        const m = exempleComplet();
-        m.criteres.forEach((c, i) => { c.ponderation = { valeur: String(ponds[i]), etat: 'saisi' }; });
-        return m;
-    }
-    const ponds = (m) => m.criteres.map(c => c.ponderation.valeur);
-
-    it('R.a une grille sur 20 devient des pourcentages entiers qui totalisent 100', () => {
-        const m = A.ramenerA100(avecPonds([8, 6, 6]));
-        expect(ponds(m)).toEqual(['40', '30', '30']);
-        expect(m.criteres.every(c => c.ponderation.etat === 'complete')).toBe(true);
-        expect(A.calculs(m).total).toBe(100);
-    });
-
-    it('R.b les restes vont aux plus grands (à égalité, dans l’ordre du tableau)', () => {
-        expect(ponds(A.ramenerA100(avecPonds([1, 1, 1])))).toEqual(['34', '33', '33']);
-        expect(ponds(A.ramenerA100(avecPonds([2.5, 7.5, 10])))).toEqual(['13', '37', '50']);
-        const r = A.ramenerA100(avecPonds([3, 7, 11]));
-        expect(r.criteres.reduce((s, c) => s + Number(c.ponderation.valeur), 0)).toBe(100);
-        expect(r.criteres.every(c => Number.isInteger(Number(c.ponderation.valeur)))).toBe(true);
-    });
-
-    it('R.c rien ne se convertit sans le geste, ni quand une pondération manque', () => {
-        const m = avecPonds([8, 6, 6]);
-        expect(ponds(m)).toEqual(['8', '6', '6']);
-        m.criteres[1].ponderation.valeur = '';
-        expect(A.ramenerA100(m)).toBe(m);
-    });
-});
-
 describe('N — #1091 : au plus 20 niveaux', () => {
-    it('N.a « Ajouter un niveau » s’arrête à 20 ; au-delà, la création est refusée et le dit', () => {
-        let m = A.preparer(L.modeleVide());
-        for (let k = 0; k < 30; k++) m = A.ajouterNiveau(m);
+    it('N.a au-delà de 20 niveaux, la création est refusée et le dit', () => {
+        const m = fige('lot 2 · vingt niveaux');   // le geste « Ajouter un niveau » s'arrêtait à 20 (retiré avec l'assistant)
         expect(m.niveaux).toHaveLength(20);
-        expect(m.criteres[0].cases).toHaveLength(20);
-        expect(new Set(m.niveaux.map(n => n.code.valeur)).size).toBe(20);
+        expect(A.calculs(m).manquants).not.toContain('au plus 20 niveaux (ta grille en a 20)');
         const trop = JSON.parse(JSON.stringify(m));
         trop.niveaux.push(JSON.parse(JSON.stringify(trop.niveaux[0])));
         expect(A.calculs(trop).manquants).toContain('au plus 20 niveaux (ta grille en a 21)');
-    });
-});
-
-describe('K — À classer : rien ne disparaît', () => {
-    it('K.a « Ajouter comme critère » ajoute un critère, « Annuler » le retire, « Écarter » garde le passage', () => {
-        const m = exemple();
-        const id = m.aClasser[0].id;
-        const place = A.placer(m, id);
-        expect(place.criteres).toHaveLength(4);
-        expect(place.criteres[3].nom.valeur).toBe(m.aClasser[0].texte.slice(0, 120));
-        expect(place.aClasser[0].statut).toBe('place');
-        const annule = A.annuler(place, id);
-        expect(annule.criteres).toHaveLength(3);
-        expect(annule.aClasser[0].statut).toBe('attente');
-        const ecarte = A.ecarter(m, id);
-        expect(ecarte.aClasser).toHaveLength(1);
-        expect(ecarte.aClasser[0]).toMatchObject({ statut: 'ecarte', texte: m.aClasser[0].texte });
-        expect(m.aClasser[0].statut).toBe('attente');   // le modèle d'origine n'est pas muté
     });
 });
 
@@ -261,7 +172,7 @@ describe('B — construire les trois objets', () => {
     });
 
     it('B.d des rétroactions : une cartouche liée à la grille et à l’échelle, et une grille sans descripteurs', () => {
-        const m = A.choisirNature(exempleComplet(), 'retroactions');
+        const m = retroactions();
         const o = A.construire(m, ctx());
         expect(o.grille.criteres.some(c => c.descripteurs)).toBe(false);
         expect(o.cartouche).toMatchObject({ grilleId: o.grille.id, echelleId: o.echelle.id });
@@ -272,7 +183,7 @@ describe('B — construire les trois objets', () => {
     });
 
     it('B.e des rétroactions sans aucun texte : pas de cartouche vide', () => {
-        const m = A.choisirNature(exempleComplet(), 'retroactions');
+        const m = retroactions();
         m.criteres.forEach(c => c.cases.forEach(d => { d.valeur = ''; }));
         expect(A.construire(m, ctx()).cartouche).toBeNull();
     });
@@ -296,7 +207,7 @@ describe('W — écrire : trois objets neufs, rien d’autre', () => {
 
     it('W.a « Créer » ajoute l’échelle, la grille et la cartouche au trimestre actif ; aucun objet existant ne change', async () => {
         db.reset(EXISTANTS);
-        const r = await C.creer(A.choisirNature(exempleComplet(), 'retroactions'));
+        const r = await C.creer(retroactions());
         expect(r.erreur).toBeUndefined();
         const grilles = db.getSync('a2032_grillesTemplates');
         const echelles = db.getSync('a2032_echellesTemplates');
@@ -340,7 +251,7 @@ describe('W — écrire : trois objets neufs, rien d’autre', () => {
     it('W.e la cartouche ne s’écrit pas : la grille et l’échelle sont retirées', async () => {
         db.reset(EXISTANTS);
         db.echouerSur = (k) => k.indexOf('a2032_cartouches_GRILLE_') === 0 && k !== 'a2032_cartouches_GRILLE_GENERIQUE';
-        const r = await C.creer(A.choisirNature(exempleComplet(), 'retroactions'));
+        const r = await C.creer(retroactions());
         expect(r.erreur).toBe(C.MESSAGES.echec);
         expect(db.getSync('a2032_echellesTemplates')).toEqual(EXISTANTS.a2032_echellesTemplates);
         expect(db.getSync('a2032_grillesTemplates')).toEqual(EXISTANTS.a2032_grillesTemplates);
@@ -361,25 +272,8 @@ describe('W — écrire : trois objets neufs, rien d’autre', () => {
     });
 });
 
-describe('S — l’assistant échappe tout texte venu du document', () => {
+describe('S — la confirmation échappe tout texte', () => {
     const PIEGE = '"><img src=x onerror=alert(1)>';
-
-    it('S.a à l’étape À classer, et dans les champs de la Vérification (valeurs comprises)', () => {
-        const m = A.preparer(L.interpreter(L.lireTexte('<b>Nom</b>\nC\t' + PIEGE + '\tB\n<svg onload=alert(2)>\t1\t2\nY\t<iframe src=x></iframe>\tok\n<object data=x></object> sous le tableau'), 'colle'));
-        const etapes = A.etapesPour(m);
-        const classer = materiel.assistantHtml({ modele: m, etapes, etape: etapes.indexOf('classer') });
-        expect(classer).toContain('&lt;object data=x&gt;&lt;/object&gt; sous le tableau');
-        expect(classer).not.toContain('<object');
-        expect(classer).not.toContain('<img');
-        const verif = materiel.assistantHtml({ modele: m, etapes, etape: etapes.indexOf('final') });
-        for (const balise of ['<img', '<svg', '<iframe', '<b>Nom']) expect(verif).not.toContain(balise);
-        expect(verif).toContain('value="&quot;&gt;&lt;img src=x onerror=alert(1)&gt;"');
-        // Une seule valeur fermée par son guillemet : le piège ne sort pas de l'attribut.
-        const doc = new JSDOM('<div id="z"></div>').window.document;
-        doc.getElementById('z').innerHTML = verif;
-        expect(doc.querySelectorAll('img, svg, iframe, object')).toHaveLength(0);
-        expect(doc.querySelector('#materiel-v-titre-0').value).toBe(PIEGE);
-    });
 
     it('S.b la confirmation échappe le nom de la grille', () => {
         const html = materiel.confirmationHtml({ nom: PIEGE, nbC: 1, retro: false, descr: false, niveaux: [PIEGE] });

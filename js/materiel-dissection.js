@@ -3,7 +3,7 @@
  *
  * Consigne : `plans de travail/CONSIGNE-LOT-2026-10-18-dissection-1-etiqueter.md` ; plan :
  * `PLAN-2026-10-18-la-dissection-pour-lundi.md`. Elle remplace, dans l'onglet, l'assistant en sept
- * étapes (débranché, pas supprimé : son retrait est inscrit pour après lundi).
+ * étapes (débranché le 18 oct., retiré le 19 : `CONSIGNE-LOT-2026-10-19-retrait-ancien-assistant.md`).
  *
  * L'enseignant colle sa grille ; il la voit telle qu'il l'a écrite, chaque ligne de chaque case
  * devenue un morceau. Une étiquette de la palette, touchée, devient son surligneur ; il touche ou

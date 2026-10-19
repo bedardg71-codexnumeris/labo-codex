@@ -1,19 +1,19 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { f6Html } from '../unit/_helpers/grilles-fictives-5b.js';
+import { readFileSync } from 'node:fs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
+// 19 oct. 2026 : l'assistant qui lisait F6 est retiré ; son modèle (lu, préparé, passages écartés) est figé.
+const F6 = JSON.parse(readFileSync(path.join(__dirname, '..', 'fixtures', 'materiel', 'modeles-assistant-figes.json'), 'utf8')).modeles['icônes C3 · F6, passages écartés'];
 
 // RELECTURE DE COWORK DU 17 OCT. 2026 (C3), dans un vrai WebKit : l'icône « i » du type de critère, dans
 // Grilles de critères, désigne une clé du catalogue (`grille-type-critere-detail`) sans élément de ce
 // nom ; elle n'ouvrait rien. Elle ouvre maintenant l'aide « Type de critère d'évaluation ».
-// Chemin : la grille fictive F6 créée par « Apporter mon matériel », puis « La voir dans Grilles de
-// critères ». Assistance active (le défaut).
-// ⚠ 18 oct. 2026 (la dissection, lot 1) : l'assistant en sept étapes est DÉBRANCHÉ de l'onglet ; plus
-// aucun collage ne l'ouvre. La grille se crée donc par les mêmes fonctions qu'il appelait (lecture,
-// préparation, passages écartés, `materielCreation.creer`), puis s'ouvre comme `materiel.voir` l'ouvre.
-// À re-router par la dissection quand elle créera (lot 2).
+// Chemin : la grille fictive F6 créée par la création d'« Apporter mon matériel » (`materielCreation.creer`),
+// puis ouverte dans Grilles de critères. Assistance active (le défaut).
+// 19 oct. 2026 : l'assistant en sept étapes est RETIRÉ ; son modèle de F6 (lu, préparé, passages écartés)
+// est figé, créé par `materielCreation.creer`, puis ouvert comme `materiel.voir` l'ouvre.
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);
@@ -35,18 +35,15 @@ async function ouvrirConception(page) {
     await expect(page.locator('#conception-materiel')).toBeVisible();
 }
 
-/** F6 lue, préparée, ses passages écartés, créée ; puis ouverte dans Grilles de critères. */
-async function creerEtOuvrir(page, html) {
-    const r = await page.evaluate(async (h) => {
-        const lu = window.materielLecture.charger(window.materielLecture.lireHtml(h), 'colle');
-        let m = window.materielAssistant.preparer(lu.modele);
-        m.aClasser.forEach((a) => { m = window.materielAssistant.ecarter(m, a.id); });
+/** Le modèle de F6, créé ; puis ouvert dans Grilles de critères. */
+async function creerEtOuvrir(page, modele) {
+    const r = await page.evaluate(async (m) => {
         const cree = await window.materielCreation.creer(m);
         if (cree.erreur) return { erreur: cree.erreur };
         window.afficherSousSection('conception-grille-criteres');
         await window.ouvrirGrilleDepuisListe(cree.resume.ids.grille);
         return { erreur: null };
-    }, html);
+    }, modele);
     expect(r.erreur).toBeNull();
 }
 
@@ -56,7 +53,7 @@ test('C3 · dans Grilles de critères, le « i » du type de critère ouvre l’
     page.on('console', (m) => { if (m.type() === 'warning' && /target non trouvé/.test(m.text())) avertissements.push(m.text()); });
     await ouvrirConception(page);
     expect(await page.evaluate(() => document.body.classList.contains('aide-contextuelle-active'))).toBe(true);
-    await creerEtOuvrir(page, f6Html());
+    await creerEtOuvrir(page, F6);
 
     const icone = page.locator('#listeCriteres .primo-aide[data-target="grille-type-critere-detail"]').first();
     await expect(icone).toBeVisible();

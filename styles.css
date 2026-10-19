@@ -27938,15 +27938,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 /* ============================================================
    « APPORTER MON MATÉRIEL » — lot 1 (16 oct. 2026)
-   Conception › première sous-section : accueil et aperçu, en
-   lecture seule, de la grille reconnue dans un collage.
+   Conception › première sous-section : l'accueil (son aperçu en
+   lecture seule est parti avec l'assistant, le 19 oct. 2026).
    Référence : plans de travail/PROTOTYPE-2026-10-16-apporter-mon-materiel.dc.html.
    Couleurs : variables seulement (sombre et clair se redéfinissent
    sur body.mode-clair). Cibles tactiles ≥ 44 px (iPad).
-   États d'une valeur (légende de l'aperçu) :
-     repris   → sans cadre ;
-     complété / proposé → cadre pointillé « attention » ;
-     à remplir → cadre plein « erreur ».
    ============================================================ */
 .materiel-accueil { display: flex; flex-direction: column; gap: 24px; }
 .materiel-intro { max-width: 780px; }
@@ -27982,7 +27978,6 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .materiel-btn-lien:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
 
-/* L'aperçu */
 /* « Apporter mon matériel », lot 3b1 (17 oct.) : ce que l'assistant a écrit dans un critère, en lecture
    (grilles.js, rendreAttenduCritere). Ouvert, pas d'accordéon : Grégoire, 11 sept. */
 #listeCriteres .grille-attendu { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire); display: flex; flex-direction: column; gap: 8px; }
@@ -28004,181 +27999,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 .materiel-lecture { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .materiel-lecture h2, .materiel-lecture p { margin: 0; }
-.materiel-bandeau { margin: 0; }
-.materiel-resume { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; align-items: baseline; }
-.materiel-resume dt { font-weight: 600; }
-.materiel-resume dd { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
-.materiel-legende { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.85rem; color: var(--texte-secondaire); }
-.materiel-legende > span { display: inline-flex; gap: 6px; align-items: center; }
-.materiel-pastille { width: 22px; height: 14px; border-radius: 3px; border: 1px solid var(--bordure-moyenne); display: inline-block; }
-.materiel-valeur { display: inline-block; padding: 1px 6px; border-radius: 5px; border: 1px solid transparent; }
-.materiel-etat-complete, .materiel-etat-propose {
-    border: 2px dashed var(--alerte-bordure-attention); background: var(--alerte-fond-attention);
-}
-.materiel-etat-remplir {
-    border: 2px solid var(--alerte-bordure-erreur); background: var(--alerte-fond-erreur);
-    color: var(--alerte-texte-erreur);
-}
-.materiel-mention { display: inline-block; font-size: 0.78rem; font-weight: 600; }
-.materiel-mention-complete, .materiel-mention-propose { color: var(--alerte-texte-attention); }
-.materiel-mention-remplir { color: var(--alerte-texte-erreur); }
-.materiel-code {
-    font-size: 0.75rem; color: var(--alerte-texte-attention);
-    border: 1px dashed var(--alerte-bordure-attention); border-radius: 5px; padding: 1px 6px; white-space: nowrap;
-}
-/* iPad : le tableau défile dans son cadre, la page non. `position: relative` y retient les textes
-   réservés aux lecteurs d'écran (.u-lecteur-ecran, en absolu) : sans lui, ceux des colonnes de
-   droite se plaçaient hors du cadre et faisaient défiler la PAGE de 480 px (mesuré à 820 px). */
-.materiel-apercu-cadre {
-    position: relative; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-    border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand); background: var(--surface-carte);
-}
-.materiel-apercu-cadre:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
-.materiel-apercu { border-collapse: collapse; width: max-content; min-width: 100%; }
-.materiel-apercu th, .materiel-apercu td {
-    padding: 12px; vertical-align: top; text-align: left;
-    border-bottom: 1px solid var(--bordure-claire); border-right: 1px solid var(--bordure-claire);
-}
-.materiel-apercu thead th { background: var(--surface-conteneur); }
-.materiel-apercu .materiel-col-critere { width: 180px; min-width: 180px; font-weight: 600; }
-.materiel-apercu .materiel-col-pond { width: 130px; min-width: 130px; }
-.materiel-apercu .materiel-col-pond .materiel-mention { display: block; margin-top: 4px; }
-.materiel-apercu .materiel-col-niveau { min-width: 200px; max-width: 280px; }
-.materiel-apercu td { min-width: 200px; max-width: 280px; }
-.materiel-niveau-titre { display: block; font-weight: 600; margin-bottom: 6px; }
-.materiel-niveau-details { display: flex; flex-wrap: wrap; gap: 6px; font-weight: 400; }
-.materiel-case { font-size: 0.85rem; line-height: 1.45; color: var(--texte-secondaire); }
-.materiel-case-vide { font-size: 0.85rem; font-style: italic; color: var(--texte-muted); }
-.materiel-a-classer h3 { margin: 0 0 6px; font-size: 1rem; }
-.materiel-a-classer ul { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.materiel-a-classer li {
-    display: flex; flex-direction: column; gap: 4px; padding: 12px 14px;
-    border-radius: var(--radius-moyen); background: var(--surface-carte); border-left: 3px solid var(--alerte-bordure-attention);
-}
-.materiel-a-classer-texte { line-height: 1.45; overflow-wrap: anywhere; }
-.materiel-a-classer-raison { font-size: 0.8rem; color: var(--texte-muted); }
 
 /* ============================================================
-   « APPORTER MON MATÉRIEL » — lot 2 (17 oct. 2026)
-   L'assistant (une question à la fois, l'aperçu dessous), la
-   vérification (le tableau entier modifiable), la confirmation.
-   Mêmes règles que le lot 1 : variables seulement, cibles ≥ 44 px,
-   le tableau défile dans son cadre, la page non (iPad).
+   « APPORTER MON MATÉRIEL » — lot 2 (17 oct. 2026) : la confirmation
+   d'une grille créée. Mêmes règles que le lot 1 : variables
+   seulement, cibles ≥ 44 px.
+   ⚰ 19 oct. 2026 : les règles de l'assistant en sept étapes (ses
+   questions, son aperçu, sa vérification) sont parties avec lui.
    ============================================================ */
-.materiel-assistant { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.materiel-assistant h2, .materiel-assistant p { margin: 0; }
-.materiel-assistant p { line-height: 1.5; }
-.materiel-progression { display: flex; flex-direction: column; gap: 10px; }
-.materiel-etape-texte { font-size: 0.85rem; color: var(--texte-muted); letter-spacing: 0.02em; }
-.materiel-etapes-nav { display: flex; flex-wrap: wrap; gap: 6px; }
-.materiel-etape-btn {
-    min-height: 44px; padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem;
-    background: transparent; color: var(--texte-secondaire); border: 1px solid var(--bordure-claire);
-}
-.materiel-etape-btn.fait { border-color: var(--bordure-moyenne); color: var(--texte-principal); }
-.materiel-etape-btn.actif { background: var(--accent-primaire); border-color: var(--accent-primaire); color: var(--surface-carte); font-weight: 600; }
-.materiel-etape-btn:focus-visible, .materiel-choix:focus-visible, .materiel-pilule:focus-visible { outline: 3px solid var(--accent-primaire); outline-offset: 2px; }
-
-.materiel-question, .materiel-nom-grille, .materiel-creation {
-    display: flex; flex-direction: column; gap: 16px;
-    background: var(--surface-carte); border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand); padding: 24px;
-}
-.materiel-question h2 { font-size: 1.5rem; line-height: 1.3; }
-.materiel-question h2:focus, .materiel-verif-entete h2:focus, .materiel-confirmation h2:focus { outline: none; }
-
-/* Un choix : un bouton à aria-pressed, jamais un div cliquable. */
-.materiel-choix-groupe { display: flex; flex-wrap: wrap; gap: 12px; }
-.materiel-choix {
-    flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px; text-align: left; cursor: pointer;
-    min-height: 44px; padding: 16px; border-radius: var(--radius-grand); font: inherit;
-    background: var(--surface-conteneur); color: var(--texte-principal); border: 2px solid var(--bordure-claire);
-}
-.materiel-choix[aria-pressed="true"] { border-color: var(--accent-primaire); box-shadow: inset 0 0 0 1px var(--accent-primaire); }
-.materiel-choix-titre { font-weight: 600; font-size: 1.05rem; }
-.materiel-choix-aide { font-size: 0.9rem; line-height: 1.45; color: var(--texte-secondaire); }
-.materiel-pilule {
-    min-height: 44px; padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem;
-    background: transparent; color: var(--texte-secondaire); border: 1px solid var(--bordure-moyenne);
-}
-.materiel-pilule[aria-pressed="true"] { background: var(--accent-primaire); border-color: var(--accent-primaire); color: var(--surface-carte); font-weight: 600; }
-
-.materiel-mot-app {
-    display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 12px 14px;
-    border-radius: var(--radius-moyen); background: var(--surface-conteneur); border: 1px solid var(--bordure-moyenne);
-}
-.materiel-mot-app strong { flex: none; font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent-primaire); }
-.materiel-mot-app span { flex: 1 1 320px; font-size: 0.9rem; line-height: 1.5; }
-.materiel-nav { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
-.materiel-nav .btn, .materiel-creation .btn, .materiel-confirmation .btn, .materiel-a-classer .btn, .materiel-derives .btn { min-height: 44px; }
-
-/* Les champs des niveaux et des pondérations */
-.materiel-cartes-niveaux { display: flex; flex-wrap: wrap; gap: 12px; }
-.materiel-carte-niveau {
-    flex: 1 1 230px; display: flex; flex-direction: column; gap: 6px; min-width: 0;
-    padding: 14px; border-radius: var(--radius-grand); background: var(--surface-conteneur);
-}
-.materiel-carte-niveau label, .materiel-champs-ligne label, .materiel-verif label { font-size: 0.8rem; color: var(--texte-muted); }
-.materiel-champs-ligne { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-auto-flow: column; grid-template-rows: auto auto; gap: 4px 8px; }
-.materiel-champ { width: 100%; min-height: 44px; box-sizing: border-box; }
-textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; font-size: 0.9rem; }
-
-/* Les zones dérivées : total, avertissements (au conditionnel, non bloquants) */
-.materiel-derives { display: flex; flex-direction: column; gap: 10px; }
-.materiel-derives:empty { display: none; }
-.materiel-total { color: var(--texte-secondaire); font-size: 0.9rem; }
-.materiel-avert {
-    margin: 0; padding: 10px 14px; border-radius: var(--radius-moyen); font-size: 0.9rem; line-height: 1.45;
-    border: 2px dashed var(--alerte-bordure-attention); background: var(--alerte-fond-attention); color: var(--alerte-texte-attention);
-}
-.materiel-avert-action { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-.materiel-avert-action span { flex: 1 1 280px; }
-.materiel-restant {
-    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 14px;
-    border-radius: var(--radius-moyen); border: 2px solid var(--alerte-bordure-attention); background: var(--surface-carte);
-}
-.materiel-restant span { flex: 1 1 300px; }
-
-/* L'aperçu sous la question : la partie concernée encadrée */
-.materiel-apercu-bloc { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.materiel-apercu-entete { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; align-items: baseline; }
-.materiel-apercu-entete h3 { margin: 0; font-size: 1rem; color: var(--texte-secondaire); }
-.materiel-apercu .materiel-surligne { box-shadow: inset 0 0 0 2px var(--accent-primaire); }
-
-/* À classer, à l'étape du même nom */
-.materiel-assistant .materiel-a-classer { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.materiel-assistant .materiel-a-classer li { flex-direction: row; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-.materiel-assistant .materiel-a-classer li > div:first-child { flex: 1 1 320px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-
-/* La vérification */
-.materiel-verif-entete { display: flex; flex-direction: column; gap: 6px; max-width: 760px; }
-.materiel-verif-entete h2 { font-size: 1.6rem; line-height: 1.2; }
-.materiel-nom-grille { gap: 6px; max-width: 560px; padding: 16px 20px; }
-.materiel-nom-grille label { font-weight: 600; }
-.materiel-nom-grille .text-muted { font-size: 0.85rem; }
-.materiel-rappels { display: flex; flex-wrap: wrap; gap: 12px; }
-.materiel-rappel {
-    display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 14px;
-    background: var(--surface-carte); border: 1px solid var(--bordure-claire); border-radius: var(--radius-grand);
-}
-.materiel-rappel > span { font-weight: 600; font-size: 0.9rem; }
-.materiel-legende strong { font-weight: 600; color: var(--texte-principal); }
-.materiel-verif th, .materiel-verif td { min-width: 220px; }
-.materiel-verif .materiel-col-critere { width: 220px; min-width: 220px; }
-.materiel-verif .materiel-col-pond { width: 140px; min-width: 140px; }
-.materiel-verif thead th { font-weight: 400; }
-.materiel-verif thead th > label:first-child { display: block; margin-bottom: 2px; }
-.materiel-verif thead .materiel-code { display: inline-block; margin: 6px 0; }
-.materiel-creation { flex-direction: row; flex-wrap: wrap; gap: 20px; align-items: flex-start; }
-.materiel-cree-liste { flex: 1 1 420px; display: flex; flex-direction: column; gap: 8px; }
-.materiel-cree-liste h3 { margin: 0; font-size: 1.1rem; }
-.materiel-cree-liste ul { margin: 0; padding-left: 20px; line-height: 1.6; }
-.materiel-cree-liste p { font-size: 0.85rem; }
-.materiel-creation-actions { flex: 1 1 300px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
-.materiel-creation-actions .btn-principal { font-size: 1rem; font-weight: 600; }
-.materiel-manquants { margin: 0; }
-.materiel-manquants ul { margin: 6px 0 0; padding-left: 20px; }
-
-/* La confirmation */
+.materiel-confirmation h2:focus { outline: none; }
+.materiel-confirmation .btn { min-height: 44px; }
 .materiel-confirmation { display: flex; flex-direction: column; gap: 24px; max-width: 880px; }
 .materiel-confirmation p { margin: 0; line-height: 1.55; color: var(--texte-secondaire); }
 /* La dissection, lot 9 : les critères créés sans pondération, à compléter dans Grilles de critères. */
@@ -28203,41 +28033,6 @@ textarea.materiel-champ { min-height: 96px; resize: vertical; line-height: 1.4; 
     border: 1px solid var(--bordure-claire); border-left: 4px solid var(--accent-primaire); border-radius: var(--radius-grand);
 }
 .materiel-plus-loin h3 { margin: 0; font-size: 1.05rem; color: var(--texte-principal); }
-/* Les champs de saisie portent le cadre de leur état (légende). Mesuré dans WebKit, mode clair :
-   la couleur de bordure d'un champ y est imposée par une règle plus forte (rgba(3,46,92,.2)) ;
-   l'état passe donc par une ombre intérieure, que rien n'écrase. Le focus garde son anneau. */
-.materiel-assistant .materiel-champ.materiel-etat-remplir { box-shadow: inset 0 0 0 2px var(--alerte-bordure-erreur); }
-.materiel-assistant .materiel-champ.materiel-etat-complete,
-.materiel-assistant .materiel-champ.materiel-etat-propose { box-shadow: inset 0 0 0 2px var(--alerte-bordure-attention); }
-.materiel-assistant .materiel-champ:focus { box-shadow: var(--focus-ring), 0 0 0 3px rgba(106, 172, 184, 0.2); }
-
-/* Lot 3a (17 oct.) : les retours à la ligne d'une case, les sous-critères, l'étape « Ce que contient ton tableau » */
-.materiel-case, .materiel-description { white-space: pre-line; }
-.materiel-description { display: block; margin-top: 6px; font-weight: 400; font-size: 0.85rem; line-height: 1.45; color: var(--texte-secondaire); }
-.materiel-sous-titre { display: block; margin-top: 8px; font-size: 0.78rem; font-weight: 600; color: var(--texte-muted); }
-.materiel-sous-criteres { margin: 4px 0 0; padding-left: 18px; font-weight: 400; font-size: 0.85rem; line-height: 1.4; color: var(--texte-secondaire); }
-.materiel-roles thead th, .materiel-roles tbody th { min-width: 190px; font-weight: 400; }
-.materiel-roles .materiel-roles-coin { font-size: 0.8rem; color: var(--texte-muted); vertical-align: bottom; }
-/* Un <select> natif ignore min-height sous WebKit (mesuré au banc iPad du lot 3a) : même patron que
-   `#registre-longitudinal-conteneur select.rl-champ` — apparence retirée, hauteur fixée, chevron redessiné. */
-#materiel-lecture select.materiel-role {
-    width: 100%; height: 44px; box-sizing: border-box; padding: 0 32px 0 12px;
-    appearance: none; -webkit-appearance: none; -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 12px center;
-}
-.materiel-roles .materiel-mention { display: block; margin-top: 4px; }
-.materiel-case-fusion { background: var(--surface-conteneur); }
-.materiel-role-ignore .materiel-case { color: var(--texte-muted); text-decoration: line-through; }
-.materiel-suite-nom { border: 0; margin: 0; padding: 0; min-width: 0; }
-.materiel-suite-nom legend { padding: 0; margin-bottom: 8px; font-weight: 600; }
-.materiel-carte-niveau .materiel-champ[maxlength], .materiel-verif thead .materiel-champ[maxlength] { max-width: 120px; }
-
-/* Étape 5 du plan « prêt pour lundi » : une grille en points — le nom du critère au-dessus de ses
-   points (étape « Points ») ; à la Vérification, Critère | Description | Points. */
-.materiel-points-nom { font-weight: 600; overflow-wrap: anywhere; }
-.materiel-verif-points .materiel-col-pond { width: 120px; min-width: 120px; }
-.materiel-verif-points .materiel-col-critere { width: 280px; min-width: 280px; }
 
 /* ============================================================
    « APPORTER MON MATÉRIEL » — la dissection, lot 1 (18 oct. 2026)

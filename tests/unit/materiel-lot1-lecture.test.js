@@ -4,14 +4,15 @@
  *
  * Consigne : plans de travail/CONSIGNE-LOT-2026-10-16-apporter-mon-materiel-1.md (« Les bancs »).
  *
+ * ⚰ 19 oct. 2026 : l'assistant en sept étapes est RETIRÉ (CONSIGNE-LOT-2026-10-19-retrait-ancien-assistant.md),
+ * avec son interprétation d'un tableau. Partis avec lui : I et I bis (interpréter, inverser), L.g et la fin
+ * de L.f (ses messages de refus), S.b et S.c (son aperçu). La lecture du collage reste : la dissection l'emploie.
+ *
  * Ce que ce banc verrouille :
  *   L — LIRE : le HTML d'un collage Word (paragraphes MsoNormal, tableau, paragraphe après),
  *       le texte à tabulations, rien ne disparaît en silence.
- *   I — INTERPRÉTER : nom tiré de la ligne avant, plages lues dans l'en-tête, colonne de
- *       pondération, parts égales, nature proposée, cases fusionnées → À classer, inversion.
- *       (Lot 3a : L.b, I.j et I.s suivent la lecture dépliée ; voir materiel-lot3a-roles.test.js.)
  *   P — PLAGES : des entiers contigus s'enregistrent contigus (max = min suivant − 0,01).
- *   S — SÉCURITÉ : un <script>, un onerror collés ne sont pas retenus ; l'aperçu échappe tout.
+ *   S — SÉCURITÉ : un <script>, un onerror collés ne sont pas retenus.
  *   T — TRANSPORT : `descripteurs` traverse le partage et l'import, schéma fermé et borné ;
  *       son échelle suit au partage ; une grille sans descripteurs ne change pas d'un octet.
  *
@@ -23,32 +24,13 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { JSDOM } from 'jsdom';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const racine = path.resolve(__dirname, '..', '..');
 
 const fenetreDom = new JSDOM('<!doctype html><html><body></body></html>').window;
 
-/** Le VRAI echapperHtml de config.js (zone protégée : extrait, pas modifié), sur le document de jsdom. */
-function vraiEchapperHtml() {
-    const src = readFileSync(path.join(racine, 'js', 'config.js'), 'utf8');
-    const fabriquer = new Function('window', 'document', 'console', 'localStorage', 'sessionStorage',
-        '"use strict";\n' + src + '\nreturn echapperHtml;');
-    const stockage = { getItem: () => null, setItem() {}, removeItem() {}, clear() {} };
-    return fabriquer({ addEventListener() {}, removeEventListener() {} }, fenetreDom.document, console, stockage, stockage);
-}
-
 let L;
-let materiel;
 beforeAll(() => {
-    const w = chargerScript('js/materiel-lecture.js', { DOMParser: fenetreDom.DOMParser });
-    L = w.materielLecture;
-    chargerScript('js/materiel.js', { echapperHtml: vraiEchapperHtml() }, w);
-    materiel = w.materiel;
+    L = chargerScript('js/materiel-lecture.js', { DOMParser: fenetreDom.DOMParser }).materielLecture;
 });
 
 /** Ce que Word met réellement au presse-papiers, en plus court. */
@@ -74,7 +56,6 @@ const HTML_WORD =
     '<p class=MsoNormal>La langue est évaluée à part.<o:p></o:p></p>' +
     '</div><!--EndFragment--></body></html>';
 
-function lireWord() { return L.interpreter(L.lireHtml(HTML_WORD), 'colle'); }
 
 /* ================================================================ L — LIRE */
 
@@ -111,188 +92,12 @@ describe('lot 1 · L — lire ce qu’on colle', () => {
         expect(lu.apres).toEqual(['Note finale sur 100']);
     });
 
-    it('L.f du HTML sans tableau retombe sur le texte à tabulations ; sans l’un ni l’autre, un message', () => {
+    it('L.f du HTML sans tableau retombe sur le texte à tabulations', () => {
         const lu = L.lirePressePapiers({ html: '<p>prose</p>', texte: 'C\tA\tB\nX\t1\t2' });
         expect(lu.rangees).toHaveLength(2);
-        const r = L.charger(L.lirePressePapiers({ html: '<p>Un texte en prose.</p>', texte: 'Un texte en prose.' }), 'colle');
-        expect(r.erreur).toBe(L.MESSAGE_SANS_TABLEAU);
     });
 
-    it('L.g un tableau d’un seul niveau n’est pas une grille : message, jamais d’échec muet', () => {
-        const r = L.charger(L.lireTexte('Critère\tNiveau\nClarté\tTexte'), 'colle');
-        expect(r.erreur).toBe(L.MESSAGE_INCOMPLET);
-    });
 });
-
-/* ========================================================== I — INTERPRÉTER */
-
-describe('lot 1 · I — interpréter le tableau', () => {
-    it('I.a le nom est tiré de la ligne avant le tableau, « repris »', () => {
-        expect(lireWord().nom).toEqual({ valeur: 'Dissertation critique : grille', etat: 'repris' });
-    });
-
-    it('I.b une ligne avant de plus de 120 caractères n’est pas un nom : elle va à classer', () => {
-        const long = 'x'.repeat(121);
-        const m = L.interpreter(L.lireTexte(long + '\nC\tA\tB\nX\t1\t2'), 'colle');
-        expect(m.nom.etat).toBe('remplir');
-        expect(m.aClasser[0]).toMatchObject({ texte: long, raison: 'Texte avant le tableau' });
-    });
-
-    it('I.c les plages sont lues dans l’en-tête (« 85-100 % », « 70 à 84 »), le titre sans elles', () => {
-        const n = lireWord().niveaux;
-        expect(n.map(x => x.titre.valeur)).toEqual(['Très bien', 'Bien', 'Insuffisant']);
-        expect(n.map(x => [x.min.valeur, x.max.valeur])).toEqual([['85', '100'], ['70', '84'], ['0', '69']]);
-        expect(n.every(x => x.min.etat === 'repris' && x.max.etat === 'repris')).toBe(true);
-    });
-
-    it('I.d un niveau sans plage dans l’en-tête : plage « à remplir », aucune proposée', () => {
-        const m = L.interpreter(L.lireTexte('C\tExcellent\tFaible\nX\t1\t2'), 'colle');
-        expect(m.niveaux[0].min).toEqual({ valeur: '', etat: 'remplir' });
-        expect(m.niveaux[0].max).toEqual({ valeur: '', etat: 'remplir' });
-    });
-
-    it('I.e la colonne de pondération est reconnue à son en-tête et n’est pas un niveau', () => {
-        const m = lireWord();
-        expect(m.niveaux).toHaveLength(3);
-        expect(m.criteres.map(c => c.ponderation)).toEqual([{ valeur: '40', etat: 'repris' }, { valeur: '60', etat: 'repris' }]);
-        ['Points', 'pts', 'Total', '/20', '%'].forEach((h) => {
-            const x = L.interpreter(L.lireTexte('C\t' + h + '\tA\tB\nX\t10\t1\t2'), 'colle');
-            expect(x.niveaux.map(n => n.titre.valeur), h).toEqual(['A', 'B']);
-        });
-    });
-
-    // Relecture de Cowork de 5b (C1, 17 oct.) : des cases faites d'un nombre sont des points (Q1) ;
-    // les cases de remplissage de I.f, I.g, I.q deviennent des textes, leur intention ne change pas.
-    it('I.f sans aucune pondération : parts égales qui totalisent 100, marquées « complété »', () => {
-        const m = L.interpreter(L.lireTexte('C\tA\tB\nX\ta\tb\nY\ta\tb\nZ\ta\tb'), 'colle');
-        expect(m.criteres.map(c => c.ponderation)).toEqual([
-            { valeur: '34', etat: 'complete' }, { valeur: '33', etat: 'complete' }, { valeur: '33', etat: 'complete' }]);
-    });
-
-    it('I.g une pondération partielle n’est pas complétée : le manque reste « à remplir »', () => {
-        const m = L.interpreter(L.lireTexte('C\tPondération\tA\tB\nX\t50\ta\tb\nY\t\ta\tb'), 'colle');
-        expect(m.criteres[1].ponderation).toEqual({ valeur: '', etat: 'remplir' });
-    });
-
-    it('I.h les cases : reprises, ou « vide » (facultatives) — jamais « à remplir »', () => {
-        const c = lireWord().criteres[1].cases;
-        expect(c.map(x => x.etat)).toEqual(['repris', 'repris', 'vide']);
-    });
-
-    it('I.i une ligne à cases fusionnées, une ligne sans nom, une ligne de pondération, le texte après : À classer, avec leur raison', () => {
-        const html = '<table>' +
-            '<tr><td>C</td><td>A</td><td>B</td></tr>' +
-            '<tr><td>X</td><td>1</td><td>2</td></tr>' +
-            '<tr><td colspan="3">Remarque fusionnée</td></tr>' +
-            '<tr><td></td><td>orphelin</td><td></td></tr>' +
-            '<tr><td>Pondération</td><td>50</td><td>50</td></tr>' +
-            '</table><p>Fin.</p>';
-        const m = L.interpreter(L.lireHtml(html), 'colle');
-        expect(m.criteres.map(c => c.nom.valeur)).toEqual(['X']);
-        expect(m.aClasser.map(a => [a.texte, a.raison])).toEqual([
-            ['Remarque fusionnée', 'Ligne d’une autre forme que le tableau (cases fusionnées ?)'],
-            ['orphelin', 'Ligne sans nom de critère'],
-            ['Pondération · 50 · 50', 'Ligne de pondération, à reporter sur les critères'],
-            ['Fin.', 'Texte après le tableau']
-        ]);
-        expect(m.aClasser.every(a => a.statut === 'attente')).toBe(true);
-    });
-
-    // Lot 3a : la case est DÉPLIÉE ; la rangée sous elle est proposée comme « Suite du critère ».
-    it('I.j une case fusionnée sur deux LIGNES (rowspan) : la rangée du dessous est la suite du critère', () => {
-        const html = '<table><tr><td>C</td><td>A</td><td>B</td></tr>' +
-            '<tr><td rowspan="2">X</td><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>';
-        const m = L.interpreter(L.lireHtml(html), 'colle');
-        expect(m.roles.rangees).toEqual(['niveaux', 'critere', 'suite']);
-        expect(m.criteres.map(c => [c.nom.valeur, c.cases.map(d => d.valeur)])).toEqual([['X', ['1\n3', '2\n4']]]);
-        expect(m.aClasser).toHaveLength(0);
-    });
-
-    it('I.k la nature est PROPOSÉE d’après le tutoiement (seuil 30 %), jamais décidée', () => {
-        const descr = lireWord();
-        expect(descr.nature).toEqual({ valeur: 'descripteurs', etat: 'propose' });
-        const retro = L.interpreter(L.lireTexte('C\tA\tB\nX\tTu as bien cerné la thèse.\tRevois ton plan.\nY\tBien.\tPeu clair.'), 'colle');
-        expect(retro.nature).toEqual({ valeur: 'retroactions', etat: 'propose' });
-        // L'élision « t' » : le motif du prototype ne la reconnaissait jamais.
-        const elision = L.interpreter(L.lireTexte('C\tA\tB\nX\tT’es sur la bonne voie.\tIl faut t’appuyer sur le texte.'), 'colle');
-        expect(elision.nature.valeur).toBe('retroactions');
-        // Sous le seuil : 1 case sur 4.
-        const sous = L.interpreter(L.lireTexte('C\tA\tB\nX\tTu y es.\tClair.\nY\tNet.\tFlou.'), 'colle');
-        expect(sous.nature.valeur).toBe('descripteurs');
-    });
-
-    it('I.l aucune case de texte : rien à proposer', () => {
-        expect(L.interpreter(L.lireTexte('C\tA\tB\nX\t\t'), 'colle').nature).toBeNull();
-    });
-
-    it('I.m les codes de niveau sont uniques, tirés des titres, « complété »', () => {
-        const m = L.interpreter(L.lireTexte('C\tExcellent\tÉmergent\tEn cours\tE\nX\t1\t2\t3\t4'), 'colle');
-        const codes = m.niveaux.map(n => n.code.valeur);
-        expect(new Set(codes).size).toBe(4);
-        expect(codes[0]).toBe('E');
-        expect(m.niveaux.every(n => n.code.etat === 'complete')).toBe(true);
-    });
-
-    it('I.n l’exemple du prototype : 3 critères, 4 niveaux, 1 passage à classer', () => {
-        const r = L.charger(L.lireHtml(L.exempleHtml()), 'exemple');
-        expect(r.modele.criteres).toHaveLength(3);
-        expect(r.modele.niveaux).toHaveLength(4);
-        expect(r.modele.aClasser).toHaveLength(1);
-        expect(r.modele.nom.valeur).toBe('Exposé oral : grille d’évaluation');
-    });
-});
-
-/* ============================================================ I bis — INVERSER */
-
-describe('lot 1 · I bis — inverser lignes et colonnes', () => {
-    // Niveaux en LIGNES, critères en COLONNES, plages dans la 1re colonne, pondération en ligne.
-    const TRANSPOSEE = 'Niveau\tThèse\tArguments\n' +
-        'Pondération\t40\t60\n' +
-        'Très bien (85-100)\tThèse nuancée.\tArguments variés.\n' +
-        'Insuffisant (0-84)\tAucune thèse.\tAucun argument.';
-
-    it('I.o lue à l’endroit, une grille transposée prend ses critères pour des niveaux', () => {
-        const m = L.interpreter(L.lireTexte(TRANSPOSEE), 'colle');
-        expect(m.niveaux.map(n => n.titre.valeur)).toEqual(['Thèse', 'Arguments']);
-    });
-
-    it('I.p inversée : critères, niveaux, plages et pondération reprennent leur place', () => {
-        const inv = L.inverser(L.interpreter(L.lireTexte(TRANSPOSEE), 'colle'));
-        expect(inv.critEnColonnes).toBe(true);
-        expect(inv.criteres.map(c => c.nom.valeur)).toEqual(['Thèse', 'Arguments']);
-        expect(inv.niveaux.map(n => [n.titre.valeur, n.min.valeur, n.max.valeur])).toEqual([['Très bien', '85', '100'], ['Insuffisant', '0', '84']]);
-        expect(inv.criteres.map(c => c.ponderation)).toEqual([{ valeur: '40', etat: 'repris' }, { valeur: '60', etat: 'repris' }]);
-        expect(inv.criteres[0].cases.map(c => c.valeur)).toEqual(['Thèse nuancée.', 'Aucune thèse.']);
-    });
-
-    it('I.q ce que le document ne donne pas retombe : parts égales, plages à remplir', () => {
-        const m = L.interpreter(L.lireTexte('C\tA (80-100)\tB (0-79)\nX\ta\tb\nY\tc\td'), 'colle');
-        const inv = L.inverser(m);
-        expect(inv.criteres.map(c => c.ponderation.etat)).toEqual(['complete', 'complete']);
-        expect(inv.niveaux.every(n => n.min.etat === 'remplir')).toBe(true);
-    });
-
-    it('I.r deux inversions rendent la lecture d’origine ; le nom repris et une nature choisie sont gardés', () => {
-        const m = lireWord();
-        m.nature = { valeur: 'retroactions', etat: 'saisi' };
-        const deux = L.inverser(L.inverser(m));
-        expect(deux.critEnColonnes).toBe(false);
-        expect(deux.criteres).toEqual(m.criteres);
-        expect(deux.niveaux).toEqual(m.niveaux);
-        expect(deux.nom).toEqual(m.nom);
-        expect(deux.nature).toEqual({ valeur: 'retroactions', etat: 'saisi' });
-    });
-
-    // Lot 3a : dépliée avant la transposition, la case garde son texte dans la première position.
-    it('I.s une case fusionnée transposée ne se perd pas : elle reste à sa place, dépliée', () => {
-        const html = '<table><tr><td>C</td><td>A</td><td>B</td></tr><tr><td>X</td><td colspan="2">fusion</td></tr><tr><td>Y</td><td>1</td><td>2</td></tr></table>';
-        const inv = L.inverser(L.interpreter(L.lireHtml(html), 'colle'));
-        expect(inv.criteres.map(c => [c.nom.valeur, c.cases.map(d => d.valeur)])).toEqual([['A', ['fusion', '1']], ['B', ['', '2']]]);
-        expect(inv.fusionnees).toBe(true);
-    });
-});
-
-/* ================================================================ P — PLAGES */
 
 describe('lot 1 · P — des plages entières aux plages contiguës', () => {
     it('P.a 0-64, 65-74, 75-100 → 0-64,99 / 65-74,99 / 75-100, comme l’échelle IDME de départ', () => {
@@ -334,29 +139,6 @@ describe('lot 1 · S — ce qu’on colle n’entre pas dans la page', () => {
         expect(L.lireHtml(PIEGE).rangees[0].map(c => c.t)).toEqual(['C', 'A', 'B']);
     });
 
-    it('S.b l’aperçu échappe tout texte venu du document (ici, du texte à tabulations)', () => {
-        const m = L.interpreter(L.lireTexte('<b>Nom</b>\nC\t<img src=x onerror=alert(1)>\tB\n"><svg onload=alert(2)>\t1\t2\nY\t<iframe src=x></iframe>\tok\n<object data=x></object> sous le tableau'), 'colle');
-        const html = materiel.apercuHtml(m);
-        expect(html).not.toContain('<img');
-        expect(html).not.toContain('<svg');
-        expect(html).not.toContain('<b>Nom');
-        expect(html).not.toContain('<iframe');   // une CASE, pas seulement l'en-tête
-        // Lot 2 (17 oct.) : « À classer » a quitté l'aperçu pour son étape de l'assistant ; son
-        // échappement y est éprouvé (materiel-lot2-assistant.test.js, S.a).
-        expect(m.aClasser.map(x => x.texte)).toContain('<object data=x></object> sous le tableau');
-        expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
-    });
-
-    it('S.c l’aperçu montre l’exemple : 3 rangées de critères, 4 niveaux', () => {
-        const dom = new JSDOM('<div id="z"></div>');
-        const z = dom.window.document.getElementById('z');
-        z.innerHTML = materiel.apercuHtml(L.charger(L.lireHtml(L.exempleHtml()), 'exemple').modele);
-        expect(z.querySelectorAll('tbody tr')).toHaveLength(3);
-        expect(z.querySelectorAll('thead th.materiel-col-niveau')).toHaveLength(4);
-        // Le passage à classer se compte à son étape (lot 2), plus dans l'aperçu.
-        // Les états se lisent sans la couleur : « à remplir » est écrit (plages absentes de l'exemple).
-        expect(z.querySelectorAll('thead .materiel-etat-remplir')).toHaveLength(4);
-    });
 });
 
 /* ============================================================= T — TRANSPORT */
