@@ -4,7 +4,9 @@
 # ne touche que de la documentation (voir `paths-ignore` et son cliquet) : c'est
 # la voie de VITEST. Depuis le 20 sept. 2026 (point 7), PLAYWRIGHT a la sienne ;
 # depuis le 10 oct. 2026 (point 8), elle n'est plus qu'à la demande
-# (`workflow_dispatch`) : le passage de nuit (`schedule`) est retiré.
+# (`workflow_dispatch`) : le passage de nuit (`schedule`) est retiré. Depuis le
+# 16 oct. 2026 (point 9), le dépôt est public : elle part à la demande ET sur un
+# push qui touche un chemin OBSERVABLE, en morceaux parallèles.
 # Runner : ubuntu-latest.
 # Note : Playwright WebKit Linux ≠ Safari macOS — la validation device-
 # spécifique (Safari Mac, iPad Air) reste manuelle locale par Grégoire.
@@ -175,6 +177,51 @@
 #        manque ni un succès — le verdict au navigateur est celui du Mac
 #        (`scripts/.verdict-playwright.json`, rituel d'ouverture §2.1).
 #
+# (9) 16 OCT. 2026 — LE DÉPÔT EST PUBLIC : PLAYWRIGHT EN MORCEAUX, SUR LE PUSH ET
+#     À LA DEMANDE. Le dépôt est public depuis le 16 vers 14 h 10. Source (pas
+#     mesure) : pour un dépôt public, les machines Linux standard ont 4
+#     processeurs et 16 Go, et les minutes sont gratuites (billet GitHub du 17
+#     janv. 2024, « Double the power for open source »). L'objection du 4 sept.
+#     aux shards (point 4b : « ils raccourcissent l'attente, pas la facture »)
+#     tombe : il n'y a plus de facture. Demande de Grégoire : lancer et suivre la
+#     vérification depuis l'application GitHub du téléphone (Actions ▸ Tests ▸
+#     Run workflow), et libérer le Mac le soir.
+#     a) MESURE AVANT DÉCOUPE — run 38946931144 (eb6dd86e, workflow du point 8,
+#        un seul job) : 4 processeurs et 15 Go (`nproc`, `free`, mesurés aux
+#        runs suivants) ; 784 essais prévus, 6 exclus (5 specs, point 5) ; COUPÉ
+#        à 60 min après ~200 essais, 8 rouges parmi eux. Puis, ce lot :
+#          · 4 morceaux (run 38949548776) : 3 coupés au plafond de 30 ; le
+#            verdict a dit « 1 rapport sur 4 — NON JUGÉ ». La garde a tenu.
+#          · 10 morceaux (run 38953736186) : 10 rapports sur 10, 784 essais
+#            joués, 31 min de bout en bout ; 176 min de suite cumulées, soit
+#            ~13,5 s l'essai (le Mac : ~45 min la suite). Verdict ROUGE :
+#            21 rougeurs absentes de la baseline, 3 vertes au second essai.
+#          · 16 morceaux par `--shard` (run 38957826759) : 15 finissent entre 3
+#            et 22 min ; le 4e est coupé à 30 — `--shard` coupe en tranches
+#            CONTIGUËS, et les `codex-*` (40 à 100 s l'essai ici) y tombaient
+#            toutes. ⮕ Les fichiers sont désormais distribués EN ALTERNANCE
+#            (scripts/morceau-playwright.mjs, essais dans
+#            tests/unit/sentinelle-ci-verdict-morceaux.test.js, bloc B).
+#        ⚠ Ces 21 ne sont PAS jugées ici : rouges sur Linux, rien ne dit encore
+#        si elles le sont sur le Mac (le verdict du soir le dira).
+#     b) Quatre jobs. `decision` dit si Playwright juge (demande : oui ; push :
+#        si le lot touche un chemin OBSERVABLE, par scripts/lot-observable.sh,
+#        la règle du crochet — dans le doute, oui ; pull request : sauté) et
+#        porte le NOMBRE DE MORCEAUX, en un seul endroit (`total=`).
+#        `playwright` joue sa part (`--shard`) sur sa machine et dépose un
+#        rapport blob ; il ne juge pas. `verdict` compte les rapports (un
+#        manquant = NON JUGÉ, rouge), les fusionne et juge contre
+#        scripts/playwright-baseline.json par scripts/juger-rapport-playwright.mjs
+#        — les règles du Mac (scripts/rapport-playwright.mjs, partagées) : seule
+#        une rougeur NOUVELLE fait échouer. 16 morceaux (point 9a).
+#     c) `workers: 1` RESTE dans chaque morceau : le parallélisme vient des
+#        machines, isolées par construction (tests/playwright.config.js dit
+#        pourquoi un seul worker). Chaque morceau DIT sa machine (nproc, free).
+#     d) Pas de `schedule` (le cron partait en retard ; le push suffit).
+#        INCHANGÉS dans ce lot : le crochet pré-push et le verdict du Mac avant
+#        chaque push (décision de Grégoire, 10 oct.). Ce lot prépare de quoi la
+#        revoir ; il ne la change pas.
+#
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
 #      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
@@ -268,17 +315,86 @@ jobs:
         working-directory: tests
         run: npm run test:unit
 
-  # ── Job 2 : Playwright, à la demande seulement — JAMAIS sur un push (point 8). ──
-  # ⚠ Sauté = `skipped`, jamais `success`. Sur un push, il est sauté.
-  playwright:
-    name: Playwright (WebKit)
-    if: github.event_name == 'workflow_dispatch'
+  # ── Job 2 : la décision — Playwright doit-il juger ce run ? (point 9) ──
+  # À la demande : toujours. Sur un push : seulement si le lot touche un chemin
+  # OBSERVABLE, lu par scripts/lot-observable.sh (la règle du crochet, une seule
+  # source). Sur une pull request : jamais (le job est sauté).
+  # Il porte aussi le NOMBRE DE MORCEAUX, en un seul endroit : la matrice et le
+  # verdict le lisent ici.
+  decision:
+    name: Playwright doit-il juger ?
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
-    # 2 sept. 2026 : 15 -> 40 (point 4a). 20 sept. 2026 : 40 -> 60 (point 6),
-    # sur mesure — 29 jobs coupés à 40 min en six jours. Le plafond se DÉPLACE,
-    # il ne disparaît pas : un job sans limite qui part en boucle consomme des
-    # minutes jusqu'à épuisement.
-    timeout-minutes: 60
+    timeout-minutes: 5
+    outputs:
+      juger: ${{ steps.decider.outputs.juger }}
+      morceaux: ${{ steps.decider.outputs.morceaux }}
+      total: ${{ steps.decider.outputs.total }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Décider
+        id: decider
+        shell: bash
+        env:
+          EVENEMENT: ${{ github.event_name }}
+          AVANT: ${{ github.event.before }}
+          APRES: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          # ⚠ LE NOMBRE DE MORCEAUX vit ICI et nulle part ailleurs (point 9a).
+          total=16
+          juger=oui
+          raison="lancé à la demande"
+          if [ "$EVENEMENT" = "push" ]; then
+            # Dans le doute, on juge : un `before` absent ou inconnu (nouvelle
+            # branche, historique réécrit) ne doit pas sauter le verdict.
+            if [ -n "${AVANT//0/}" ] && git cat-file -e "$AVANT^{commit}" 2>/dev/null; then
+              fichiers=$(git diff --name-only "$AVANT" "$APRES")
+              REPO_ROOT="$PWD"
+              . scripts/lot-observable.sh
+              if printf '%s\n' "$fichiers" | lot_observable; then
+                raison="le lot touche un chemin OBSERVABLE"
+              else
+                juger=non
+                raison="rien d'OBSERVABLE au navigateur dans le lot"
+              fi
+            else
+              raison="commit précédent introuvable — dans le doute, on juge"
+            fi
+          fi
+          morceaux=$(seq 1 "$total" | paste -sd, -)
+          echo "juger=$juger" >> "$GITHUB_OUTPUT"
+          echo "total=$total" >> "$GITHUB_OUTPUT"
+          echo "morceaux=[$morceaux]" >> "$GITHUB_OUTPUT"
+          echo "Playwright : $juger ($raison) — $total morceaux."
+          echo "Playwright : **$juger** ($raison) — $total morceaux." >> "$GITHUB_STEP_SUMMARY"
+
+  # ── Job 3 : Playwright, EN MORCEAUX, chacun sur sa machine (point 9). ──
+  # ⚠ Sauté = `skipped`, jamais `success`. Sur une pull request, ou un push qui
+  # ne touche rien d'observable, il est sauté — et le verdict avec lui.
+  # Un morceau ne JUGE pas : il joue sa part et dépose son rapport (blob). Son
+  # étape de suite ne rougit donc pas sur un essai rouge — c'est le job `verdict`
+  # qui juge l'ensemble contre la baseline. Elle rougit sur ce qui l'empêche de
+  # produire un rapport ; un rapport manquant fait rougir le verdict.
+  playwright:
+    name: Playwright (WebKit) ${{ matrix.morceau }}/${{ needs.decision.outputs.total }}
+    needs: decision
+    if: needs.decision.outputs.juger == 'oui'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        morceau: ${{ fromJSON(needs.decision.outputs.morceaux) }}
+    # Point 9a : à 10 morceaux, 9,3 à 28,8 min (run 38953736186) — les fichiers
+    # lourds se regroupent. À 16, en alternance, ~49 essais chacun : projection
+    # ≤ 20 min, PAS une mesure. Un morceau coupé n'est pas
+    # vert : son rapport manque, et le verdict dit NON JUGÉ.
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -315,12 +431,14 @@ jobs:
         working-directory: tests
         run: npx playwright install webkit
 
-      # ⚠ LA GARDE DE CE LOT : un essai non jugé ne doit jamais ressembler à un
+      # ⚠ LA GARDE DU POINT 5 : un essai non jugé ne doit jamais ressembler à un
       # essai vert. Cette étape DIT, dans ce que le rituel d'ouverture lit (le nom
       # de l'étape, le log, le résumé), combien d'essais sont exclus ici et
       # pourquoi. Elle échoue si le nom ci-dessous ne correspond plus à la liste
       # (tests/playwright.config.js, EXCLUS_WEBKIT_LINUX) — même compte, même
       # source, vérifié aussi par le cliquet sentinelle-ci-paths-ignore (bloc 3).
+      # Elle dit aussi la machine (processeurs, mémoire) : la source du point 9
+      # annonce 4 et 16 Go pour un dépôt public ; on le mesure à chaque run.
       - name: "6 essais NON JUGÉS ici (5 specs, WebKit Linux ≠ Safari macOS)"
         working-directory: tests
         shell: bash
@@ -333,26 +451,102 @@ jobs:
           # plateforme : node lit la liste, node compte.
           liste=$(node -e "import('./playwright.config.js').then(m => console.log(m.EXCLUS_WEBKIT_LINUX.map(e => e.fichier + ' - ' + e.titre).join('\n')))")
           read -r essais specs < <(node -e "import('./playwright.config.js').then(m => console.log(m.EXCLUS_WEBKIT_LINUX.length + ' ' + new Set(m.EXCLUS_WEBKIT_LINUX.map(e => e.fichier)).size))")
+          machine="$(nproc) processeurs, $(free -g | awk '/^Mem:/ {print $2}') Go"
+          echo "Machine : $machine."
           echo "Essais NON JUGÉS sur cette plateforme : $essais ($specs specs) — WebKit Linux ≠ Safari macOS (voir le journal de tests.yml, point 5)."
           echo "$liste" | sed 's/^/  · /'
           {
-            echo "## $essais essais NON JUGÉS ici ($specs specs)"
+            echo "## Morceau ${{ matrix.morceau }} — $machine"
             echo ""
-            echo "Glisser-déposer et mise en page du planificateur sous WebKit **Linux**, qui n'est pas le Safari de macOS. Ces specs restent jugées par \`npm run test:int\` sur macOS."
+            echo "$essais essais NON JUGÉS ici ($specs specs). Glisser-déposer et mise en page du planificateur sous WebKit **Linux**, qui n'est pas le Safari de macOS. Ces specs restent jugées par \`npm run test:int\` sur macOS."
             echo "$liste" | sed 's/^/- /'
           } >> "$GITHUB_STEP_SUMMARY"
           [ "$essais" = "6" ] && [ "$specs" = "5" ] || { echo "::error::le nom de cette étape annonce 6 essais / 5 specs ; la liste en a $essais / $specs — mettre les deux d'accord, et le DIRE"; exit 1; }
 
+      # Le code de Playwright est GARDÉ, pas jeté : il part dans `outputs.code`
+      # et décide du dépôt des traces. Le jugement, lui, revient au verdict.
       - name: Run integration tests (Playwright WebKit)
         working-directory: tests
         env:
           PW_EXCLURE_WEBKIT_LINUX: "1"
-        run: npm run test:int
+          PLAYWRIGHT_BLOB_OUTPUT_NAME: report-${{ matrix.morceau }}.zip
+        id: suite
+        shell: bash
+        run: |
+          # Les fichiers du morceau, EN ALTERNANCE et non en tranche contiguë
+          # (`--shard`) : voir scripts/morceau-playwright.mjs (point 9a).
+          filtres=$(node ../scripts/morceau-playwright.mjs ${{ matrix.morceau }} ${{ needs.decision.outputs.total }})
+          code=0
+          npm run test:int -- $filtres --reporter=blob,list || code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "Playwright, morceau ${{ matrix.morceau }} : code $code (jugé par le job verdict)."
 
-      - name: Upload Playwright traces on failure
-        if: failure()
+      - name: Rapport du morceau
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces
+          name: blob-${{ matrix.morceau }}
+          path: tests/blob-report/
+          if-no-files-found: error
+          retention-days: 2
+
+      - name: Upload Playwright traces on failure
+        if: steps.suite.outputs.code != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces-${{ matrix.morceau }}
           path: tests/test-results/
           retention-days: 7
+
+  # ── Job 4 : le verdict — fusionne les morceaux, juge contre la baseline. ──
+  # Comme le Mac (scripts/verifier-playwright.mjs) : seule une rougeur absente de
+  # scripts/playwright-baseline.json fait échouer. Il part même si un morceau a
+  # échoué (`!cancelled()`), pour DIRE ce qui manque ; il est sauté si les
+  # morceaux l'ont été — jamais `success` pour un verdict qu'on n'a pas rendu.
+  verdict:
+    name: Playwright — verdict
+    needs: [decision, playwright]
+    if: ${{ !cancelled() && needs.playwright.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Install dependencies
+        working-directory: tests
+        run: npm ci
+
+      - name: Rapports des morceaux
+        uses: actions/download-artifact@v4
+        with:
+          pattern: blob-*
+          merge-multiple: true
+          path: tests/rapports-morceaux
+
+      # Un morceau sans rapport n'a rien joué : ses essais ne sont ni verts ni
+      # rouges, ils sont NON JUGÉS — et le verdict le dit en échouant.
+      - name: Compter les morceaux
+        working-directory: tests
+        shell: bash
+        env:
+          TOTAL: ${{ needs.decision.outputs.total }}
+        run: |
+          recus=$(find rapports-morceaux -name '*.zip' 2>/dev/null | wc -l | tr -d ' ')
+          echo "Rapports reçus : $recus sur $TOTAL."
+          [ "$recus" = "$TOTAL" ] || { echo "::error::$recus rapport(s) sur $TOTAL : des essais n'ont pas été joués — verdict NON JUGÉ"; echo "## ✗ Playwright NON JUGÉ — $recus rapport(s) sur $TOTAL" >> "$GITHUB_STEP_SUMMARY"; exit 1; }
+
+      - name: Fusionner et juger contre la baseline
+        working-directory: tests
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: rapport.json
+        run: |
+          npx playwright merge-reports --config playwright.config.js --reporter=json rapports-morceaux
+          node ../scripts/juger-rapport-playwright.mjs rapport.json

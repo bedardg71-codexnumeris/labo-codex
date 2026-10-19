@@ -32,6 +32,7 @@ import {
     lireAssertionsSysteme, lireAssertionsDuProcessus, jugerEveil,
     jugerMemoire, jugerLancementMemoire, memoireAuPlusHaut, lireVeillesDuJournal, formaterMo
 } from './garde-eveil.mjs';
+import { echecsDuRapport, flakyDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -121,58 +122,6 @@ const JAUNE = `${ESC}[0;33m`;
 const RAZ = `${ESC}[0m`;
 
 const ecrire = process.argv.includes('--ecrire');
-
-/**
- * Identité d'une spec, STABLE dans le temps.
- *
- * Volontairement « fichier › titre », sans le numéro de ligne : une ligne bouge
- * dès qu'on édite le fichier au-dessus, et la baseline se mettrait alors à
- * dénoncer des échecs « nouveaux » qui sont les mêmes. Le titre, lui, ne bouge
- * que si l'on change ce que la spec vérifie — auquel cas la revoir est justement
- * ce qu'on veut.
- */
-function identite(fichier, titre) {
-    return `${fichier.replace(/\\/g, '/')} › ${titre}`;
-}
-
-/** Parcourt l'arbre de suites du rapport JSON et rend les specs en échec. */
-function echecsDuRapport(rapport) {
-    const trouves = [];
-    const descendre = (suites) => {
-        for (const suite of suites ?? []) {
-            for (const spec of suite.specs ?? []) {
-                if (spec.ok === false) trouves.push(identite(spec.file ?? suite.file ?? '?', spec.title));
-            }
-            descendre(suite.suites);
-        }
-    };
-    descendre(rapport.suites);
-    return trouves.sort();
-}
-
-/**
- * Specs VERTES AU SECOND ESSAI (#534, 26 août 2026).
- *
- * `retries: 1` empêche qu'un dépassement de délai isolé refuse un push légitime.
- * Mais une reprise silencieuse est un tapis : elle transforme l'instabilité en
- * vert, et personne ne voit plus rien. Ces specs ne bloquent pas — elles se
- * DISENT. C'est la même règle que le « verdict impossible » plus bas : ce qu'on
- * n'a pas su juger ne doit jamais ressembler à ce qui va bien.
- */
-function flakyDuRapport(rapport) {
-    const trouves = [];
-    const descendre = (suites) => {
-        for (const suite of suites ?? []) {
-            for (const spec of suite.specs ?? []) {
-                const instable = (spec.tests ?? []).some((t) => t.status === 'flaky');
-                if (instable) trouves.push(identite(spec.file ?? suite.file ?? '?', spec.title));
-            }
-            descendre(suite.suites);
-        }
-    };
-    descendre(rapport.suites);
-    return trouves.sort();
-}
 
 // ── WebKit est-il seulement là ? ───────────────────────────────────────────────
 // Sans lui, on ne peut RIEN juger. Ne pas confondre avec « tout va bien » : le
@@ -377,9 +326,7 @@ if (!existsSync(BASELINE)) {
     process.exit(2);
 }
 
-const connus = new Set(JSON.parse(readFileSync(BASELINE, 'utf8')).echecsConnus ?? []);
-const nouveaux = echecs.filter((e) => !connus.has(e));
-const reparees = [...connus].filter((e) => !echecs.includes(e)).sort();
+const { nouveaux, reparees } = comparerALaBaseline(echecs, JSON.parse(readFileSync(BASELINE, 'utf8')).echecsConnus);
 
 // Une spec réparée n'a jamais à bloquer un push — mais si personne ne le dit, la
 // baseline se met à couvrir des specs vertes et devient un mensonge silencieux.
