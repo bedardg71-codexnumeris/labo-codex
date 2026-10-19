@@ -126,11 +126,11 @@ describe('lot 13 · P — les fonctions pures', () => {
     it('P.d les refus des points, avec leur raison', () => {
         const refus = (s) => R.pointsModifies(PAR, 1, '2 points', s).refuse;
         expect(refus('  ')).toBe('Les points de la réponse sont obligatoires');
-        expect(refus('_2')).toBe('Des points qui ne commencent pas par « _ »');
-        expect(refus('101')).toBe('Des points de 0 à 100');
-        expect(refus('-1')).toBe('Des points de 0 à 100');
+        expect(refus('_2')).toBe('Les points ne peuvent pas commencer par « _ »');
+        expect(refus('101')).toBe('Les points vont de 0 à 100');
+        expect(refus('-1')).toBe('Les points vont de 0 à 100');
         expect(refus('100')).toBeUndefined();
-        expect(refus('x'.repeat(201))).toBe('Des points de 200 caractères au plus');
+        expect(refus('x'.repeat(201))).toBe('Les points font 200 caractères au plus');
         expect(refus('4')).toBe('Une autre réponse de ce critère porte déjà ces points');
     });
 
