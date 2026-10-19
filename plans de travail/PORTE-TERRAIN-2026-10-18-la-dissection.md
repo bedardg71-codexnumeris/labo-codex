@@ -95,3 +95,22 @@ Ta capture de 17 h 24 : « Créer ma grille » grisé parce que des critères n'
 | 7.2 | Mac : ta grille sur le symbolisme, coupée, **sans rattacher** « (explications, procédés, » ni « preuves) ». | « Créer ma grille » est actif ; dessous, « Tu pourras créer ta grille, puis compléter dans « Grilles de critères » : » et les points de 2 critères. | Ce que dit la liste |
 | 7.3 | « Créer ma grille », puis « La voir dans Grilles de critères » ; saisis des points pour les deux critères. | La ligne du total dit « (2 critères sans points) », puis plus rien une fois les points saisis. | Ce que dit la ligne du total |
 
+## Relevé de Grégoire, lundi 19 octobre 2026, 8 h 34 (sur 1.207.0, build 1018-2016), consigné par Cowork à 08 h 34
+
+**21 passées, 2 échecs, 5 non traitées.**
+- **Échecs : 6.2 et 6.3** (« Rattacher ») : l'outil attendait la suite d'abord ; touchés dans l'ordre naturel, les morceaux se sont rattachés à l'envers (capture de 7 h 54). Correction : `CONSIGNE-LOT-2026-10-19-dissection-12-rattacher-sans-ordre.md` (décision de 7 h 58).
+- **Non traitées : 2.10 à 2.12, 5.5, 6.5** (iPad) : ses grilles d'origine sont sur le Mac. 6.5 attend de toute façon le lot 12.
+- **Remarque en 2.6** : « Il n'y a pas de niveaux identifiés dans ma grille, seulement des points » : c'est la porte qui supposait des niveaux à sa grille Cornell, pas l'application qui se trompe.
+- **Hors des rangées, vécus pendant la porte** : la dissection ne s'enregistrait pas (`CONSIGNE-LOT-2026-10-19-dissection-11-enregistrement.md`) ; la grille d'une collègue dont une partie se multiplie par deux (au BACKLOG, consigne du lot 12) ; deux blocages levés en conversation par l'étiquetage (des totaux étiquetés Pondération ; une première ligne étiquetée Critère qui rangeait 43 réponses sous elle).
+
+## §8 · Reprise sur la 1.208.0 (« Rattacher » sans ordre, et l'enregistrement), ajoutée par Cowork le 19 oct. à 09 h 08
+
+Refait 6.2 et 6.3 dans l'ordre naturel, puis l'enregistrement. Mesuré par les bancs, donc absent ici : les six ordres possibles de trois morceaux, le détachement, le brouillon illisible, le démo séparé.
+
+| N° | Geste | Attendu | À noter (champ) |
+|---|---|---|---|
+| 8.1 | Recharge en vidant le cache ; lis le numéro en bas de page, puis les Nouvelles. | **1.208.0** ; en tête des Nouvelles, « Rattacher sans ordre, et une dissection qui s'enregistre ». Sinon, arrête-toi. | Version affichée |
+| 8.2 | Mac, ta grille sur le symbolisme : « Rattacher » en main, touche « Idées secondaires », puis « (explications, procédés, » ; puis « preuves) », puis l'un des deux autres. | Sous « Idées secondaires » : « L'application lit : « Idées secondaires (explications, procédés, preuves) » ». | Ce qui s'affiche sous le premier morceau |
+| 8.3 | Recharge la page, puis reviens à « Apporter mon matériel ». | Ta dissection rouvre telle que tu l'as laissée : étiquettes, coupes, groupe, nom. | Ce qui manque |
+| 8.4 | « Créer ma grille », puis reviens à « Apporter mon matériel ». | Ta dissection est toujours là. | Ce que tu vois |
+
