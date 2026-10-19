@@ -10,27 +10,29 @@
  * glisse sur les morceaux qu'elle désigne, retouche un morceau surligné pour le retirer. Sous la
  * grille, la lecture de l'application se refait à chaque geste (`materielDissectionLecture`).
  *
- * RIEN N'EST ÉCRIT dans les données tant que l'enseignant ne touche pas « Créer ma grille » : la
- * dissection en cours vit dans la page, et se perd en la quittant.
+ * RIEN N'ENTRE DANS SES GRILLES (ni échelles, ni cartouches) tant que l'enseignant ne touche pas
+ * « Créer ma grille ». Lot 11 (`CONSIGNE-LOT-2026-10-19-dissection-11-enregistrement.md`) : la dissection
+ * en cours, elle, s'enregistre à chaque geste dans son BROUILLON (`<trim>_brouillonDissection`, par le
+ * témoin commun « Enregistré »), et se reprend telle quelle à l'ouverture de l'onglet (`reprendre`).
  * Lot 2a (`CONSIGNE-LOT-2026-10-18-dissection-2a-creer-en-points.md`) : « Créer ma grille », sous la
  * lecture, pour une grille en points ; l'écriture est celle de `materielCreation.creer` (le seul
  * chemin, rien de neuf), puis la confirmation de `materiel.js`. Ce qui l'empêche s'écrit à côté.
  * Lot 2b (`CONSIGNE-LOT-2026-10-18-dissection-2b-creer-en-niveaux.md`) : une grille en niveaux se crée
  * aussi ; pour une grille qui a les deux logiques, un choix (des points par défaut). Le tableau « Ce que
  * vaut chaque niveau » demande la plage et la note retenue de chaque niveau, champs VIDES ; ce qui y
- * est saisi vit dans la page avec les étiquettes, et se perd avec elles.
+ * est saisi s'enregistre avec les étiquettes, dans le brouillon (lot 11).
  *
  * Lot 5 (`CONSIGNE-LOT-2026-10-18-dissection-5-couper.md`) : l'outil « Couper », dans la palette après
  * « Suite », se prend comme une étiquette ; un toucher coupe un morceau en deux à l'espace la plus proche
  * (`materielDissectionLecture.couper`), le glisser ne coupe pas. Les coupes vivent dans la page, en pile,
- * et s'annulent (« Annuler la dernière coupe ») ; rien n'est écrit avant « Créer ma grille ».
+ * et s'annulent (« Annuler la dernière coupe ») ; le brouillon les garde, pile comprise (lot 11).
  *
  * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : l'outil « Rattacher », après « Couper ».
  * Lot 12 (`CONSIGNE-LOT-2026-10-19-dissection-12-rattacher-sans-ordre.md`) : deux touchers joignent deux
  * morceaux, dans l'ordre qu'on veut ; deux touchers sur un morceau rattaché le détachent. Un membre garde sa
  * marque, la tête de son groupe montre sous elle le nom entier ; l'outil en main, une flèche va de chaque
  * membre vers la tête.
- * Rien n'est déplacé dans la feuille, rien n'est deviné, rien n'est écrit avant « Créer ma grille ».
+ * Rien n'est déplacé dans la feuille, rien n'est deviné, rien n'entre dans les grilles avant « Créer ma grille ».
  *
  * Sécurité (règle 1) : tout texte venu du collage s'écrit par `textContent` ; le HTML collé n'est
  * jamais inséré (le document disséqué ne porte que du texte). Boutons par `data-action` (dispatcher
@@ -93,6 +95,15 @@
         nomEntier: function (t) { return 'L’application lit : « ' + t + ' »'; }
     };
 
+    /**
+     * Lot 11 : textes de Claude Code (19 oct.), PROVISOIRES. `geste` n'apparaît que sur un échec, dans
+     * le témoin commun (« Non enregistré – ‹geste› : ‹raison› »).
+     */
+    var TEXTES_BROUILLON = {
+        geste: 'enregistrer ta dissection',
+        reprise: 'Dissection reprise telle que tu l’as laissée.'
+    };
+
     function D() { return window.materielDissectionLecture; }
     function el(id) { return document.getElementById(id); }
 
@@ -109,6 +120,35 @@
     function typeDe(id) { var t = etat.liens[id]; return D().TYPE[t] ? t : null; }
     /** La lecture de l'application : les étiquettes et, lot 7, les rattachements. */
     function lire() { return D().comprendre(etat.doc, etat.liens, etat.rattachements); }
+    // ------------------------------------------------------------------
+    // Le brouillon (lot 11) : écrit à chaque geste, par le témoin commun
+    // ------------------------------------------------------------------
+
+    /** Clé du registre des trimestres (`trimestres.js`) : en démo, `cle()` la range sous `demo_`. */
+    var CLE_BROUILLON = 'brouillonDissection';
+    var minuterieSaisie = null;
+
+    /** Écrit le brouillon de la dissection ouverte ; le témoin commun dit « Enregistré » (ou l'échec). */
+    function enregistrer() {
+        clearTimeout(minuterieSaisie);
+        minuterieSaisie = null;
+        if (!etat.doc || typeof window.sauvegarderDonneesSelonMode !== 'function') return;
+        window.sauvegarderDonneesSelonMode(CLE_BROUILLON, D().brouillon(etat), { geste: TEXTES_BROUILLON.geste });
+    }
+
+    /** Une saisie au clavier : le brouillon s'écrit à la pause de la frappe (et au départ du champ). */
+    function enregistrerBientot() {
+        clearTimeout(minuterieSaisie);
+        minuterieSaisie = setTimeout(enregistrer, 400);
+    }
+
+    /** « Coller une autre grille » : le geste de l'enseignant qui efface le brouillon. */
+    function oublierBrouillon() {
+        clearTimeout(minuterieSaisie);
+        minuterieSaisie = null;
+        if (typeof window.cle === 'function') db.removeSync(window.cle(CLE_BROUILLON));
+    }
+
     /** Lot 7 : les premiers mots d'un morceau, pour le nommer sur la ligne d'état. */
     function mots(id) { return D().premiersMots(etat.morceaux.texte[id] || ''); }
 
@@ -382,6 +422,7 @@
             desarmer();
             majPalette();
             rendreLecture();
+            enregistrer();
             if (suiteTouchee) { dire(TEXTES_LIEN.sansEtiquette(mots(etat.rattachements[suiteTouchee]))); suiteTouchee = null; }
         }
         feuille.addEventListener('pointermove', bouger);
@@ -458,6 +499,7 @@
         etat.rattachements = D().rattachementsApresCoupe(etat.rattachements, id, r.parties);
         etat.doc = r.doc;
         apresCoupe();
+        enregistrer();
         var M = etat.morceaux;
         dire(TEXTES_COUPE.coupe(M.texte[r.parties[0]], M.texte[r.parties[1]]));
     }
@@ -474,6 +516,7 @@
         etat.doc = r.doc;
         etat.liens = r.liens;
         apresCoupe();
+        enregistrer();
         dire(TEXTES_COUPE.annulee(etat.morceaux.texte[c.id]) + (defaits ? TEXTES_COUPE.lienDefait : ''));
     }
 
@@ -510,6 +553,7 @@
             etat.rattachements = d.rattachements;
             etat.liens = d.liens;
             apresLien();
+            enregistrer();
             dire(TEXTES_LIEN.defait(mots(id)));
             return;
         }
@@ -518,6 +562,7 @@
         etat.rattachements = r.rattachements;
         etat.liens = r.liens;
         apresLien();
+        enregistrer();
         var M = D().morceauxLus(etat.doc, etat.rattachements);
         dire(TEXTES_LIEN.lie(M.texte[r.tete])
             + (r.reportee ? TEXTES_LIEN.reportee(D().TYPE[r.reportee].nom) : '')
@@ -755,6 +800,7 @@
                 etat.compte = o[0];
                 etat.erreur = '';
                 rendreCreer(lire());
+                enregistrer();
             });
             lab.appendChild(r);
             lab.appendChild(noeud('span', null, o[1]));
@@ -781,7 +827,9 @@
             etat.valeurs[cleNiv][quoi] = c.value;
             etat.erreur = '';
             rendreActions(creation(lire()));
+            enregistrerBientot();
         });
+        c.addEventListener('change', enregistrer);
         bloc.appendChild(lab);
         bloc.appendChild(c);
         if (!sansUnite) bloc.appendChild(noeud('span', 'dissection-niveau-unite', TEXTES_CREER.pourcent));
@@ -830,7 +878,9 @@
             etat.nomSaisi = champ.value;
             etat.erreur = '';
             rendreActions(creation(lire()));
+            enregistrerBientot();
         });
+        champ.addEventListener('change', enregistrer);
         bloc.appendChild(lab);
         bloc.appendChild(champ);
         return bloc;
@@ -967,12 +1017,17 @@
 
     /**
      * Ouvre la dissection sur un document disséqué (`materielDissectionLecture.docDepuisPressePapiers`
-     * ou `exempleDoc`) : l'accueil se masque, la grille s'affiche sans étiquette.
+     * ou `exempleDoc`) : l'accueil se masque, la grille s'affiche sans étiquette. Lot 11 : le collage
+     * est un geste, il écrit le brouillon (il remplace celui d'avant). `reprise` : ce que porte un
+     * brouillon relu (`reprendre`), qui ne s'écrit pas de nouveau.
      */
-    function ouvrir(doc, message) {
+    function ouvrir(doc, message, reprise) {
         var vue = el('materiel-dissection'), accueil = el('materiel-accueil');
         if (!doc || !vue) return false;
         etat = etatNeuf(doc);
+        if (reprise) {
+            ['liens', 'coupes', 'rattachements', 'nomSaisi', 'compte', 'valeurs'].forEach(function (k) { etat[k] = reprise[k]; });
+        }
         desarmer();
         brancher();
         rendrePalette();
@@ -987,11 +1042,33 @@
             : 'Texte collé : ' + pluriel(n, 'ligne', 'lignes') + ', sans tableau. L’application rangera les morceaux selon leur ordre.'));
         var titre = el('dissection-titre');
         if (titre) titre.focus();   // règle SPA : le focus suit le changement de vue
+        if (!reprise) enregistrer();
         return true;
     }
 
-    /** Retour à l'accueil : la dissection en cours est oubliée (rien n'avait été écrit). */
+    /** Vrai si une dissection est ouverte dans la page. */
+    function estOuverte() { return !!etat.doc; }
+
+    /**
+     * Lot 11, à l'ouverture de l'onglet : le brouillon lisible rouvre la dissection telle qu'elle était,
+     * sans question ('reprise'). Rien ('aucun') : l'accueil. Illisible ('illisible') : l'accueil aussi,
+     * et le brouillon n'est PAS effacé (seul un geste de l'enseignant le remplace).
+     */
+    function reprendre() {
+        if (etat.doc || typeof window.cle !== 'function') return 'aucun';
+        var b = db.getSync(window.cle(CLE_BROUILLON), null);
+        if (b == null) return 'aucun';
+        var r = D().lireBrouillon(b);
+        if (!r) return 'illisible';
+        return ouvrir(r.doc, TEXTES_BROUILLON.reprise, r) ? 'reprise' : 'aucun';
+    }
+
+    /**
+     * Retour à l'accueil (ou à la confirmation d'une grille créée) : la dissection quitte la page. Son
+     * brouillon reste (lot 11) ; seul « Coller une autre grille » l'efface (`oublierBrouillon`).
+     */
     function fermer() {
+        if (minuterieSaisie) enregistrer();
         etat = etatNeuf(null);
         blocs = {};
         var vue = el('materiel-dissection'), contenu = el('dissection-contenu'), traits = el('dissection-traits');
@@ -1057,11 +1134,14 @@
         etat.choix = null;
         marquerTout();
         majPalette(); majBandeau(); rendreLecture(); planifierDessin();
+        enregistrer();
         dire('Toutes les étiquettes sont retirées.');
     }
 
     function initialiser() {
         document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && etat.actif) terminer(); });
+        // Lot 11 : une frappe en attente s'écrit avant que la page parte.
+        window.addEventListener('pagehide', function () { if (minuterieSaisie) enregistrer(); });
         window.addEventListener('resize', planifierDessin);
         window.addEventListener('scroll', planifierDessin, { passive: true });
         var cv = el('dissection-canevas');
@@ -1074,6 +1154,9 @@
     window.materielDissection = {
         ouvrir: ouvrir,
         fermer: fermer,
+        reprendre: reprendre,
+        estOuverte: estOuverte,
+        oublierBrouillon: oublierBrouillon,
         choisir: choisir,
         terminer: terminer,
         collerAutre: collerAutre,
