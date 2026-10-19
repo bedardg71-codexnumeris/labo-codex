@@ -56,7 +56,7 @@ const AVEC = critere({
 
 function bloc(win, c, dom) {
     const div = dom.window.document.createElement('div');
-    div.innerHTML = win.rendreAttenduCritere(c);
+    div.innerHTML = win.rendreAttenduCritere(c, { grilleId: 'GR_BANC', index: 0 });   // lot 13 : le contexte des handlers
     return div;
 }
 
@@ -64,7 +64,8 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
     it('L.a rien pour un critère sans descripteurs ni sous-critères', () => {
         const { win } = monter();
         expect(win.rendreAttenduCritere(critere())).toBe('');
-        expect(win.rendreAttenduCritere(critere({ descripteurs: { echelleId: 'ECH_BANC', parNiveau: { I: '  ' } }, sousCriteres: [] }))).toBe('');
+        // Lot 13 (19 oct.) : une réponse au texte vide se montre (on vient de l'ajouter) ; sans aucune, rien.
+        expect(win.rendreAttenduCritere(critere({ descripteurs: { echelleId: 'ECH_BANC', parNiveau: {} }, sousCriteres: [] }))).toBe('');
     });
 
     it('L.b chaque niveau nommé par l’échelle, dans SON ordre, puis son texte ; puis les sous-critères dans l’ordre', () => {
@@ -72,9 +73,12 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
         const div = bloc(win, AVEC, dom);
         expect([...div.querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Ce qui est attendu à chaque niveau', 'Sous-critères']);
         expect([...div.querySelectorAll('.grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['Incomplet', 'Maîtrisé', 'Étendu']);
-        expect([...div.querySelectorAll('.grille-attendu-niveau p')].map(p => p.textContent)).toEqual(['Ligne un.\nLigne deux.', 'Texte maîtrisé.', 'Texte étendu.']);
+        expect([...div.querySelectorAll('.grille-attendu-niveau textarea')].map(t => t.value)).toEqual(['Ligne un.\nLigne deux.', 'Texte maîtrisé.', 'Texte étendu.']);
         expect([...div.querySelectorAll('.grille-attendu-sous li')].map(li => li.textContent)).toEqual(['Annoncer le plan', 'Conclure']);
-        expect(div.querySelectorAll('input, textarea, select, button')).toHaveLength(0);   // lecture seule
+        // Lot 13 (19 oct.) : lié à une échelle, le texte seul se modifie — ni points, ni corbeille, ni ajout ; l'écran le dit.
+        expect(div.querySelectorAll('.grille-attendu-niveau textarea')).toHaveLength(3);
+        expect(div.querySelectorAll('input, select, button')).toHaveLength(0);
+        expect(div.querySelector('.grille-attendu-mention').textContent).toBe('Les niveaux viennent de l’échelle « Échelle du banc » : ici, seul leur texte se modifie.');
         expect(div.textContent.toLowerCase()).not.toContain('descripteur');
     });
 
@@ -89,7 +93,7 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
         const piege = '<img src=x onerror="window.__pwn=1">';
         const div = bloc(win, critere({ descripteurs: { echelleId: 'ECH_BANC', parNiveau: { I: piege } }, sousCriteres: [{ nom: piege }] }), dom);
         expect(div.querySelector('img')).toBeNull();
-        expect(div.querySelector('.grille-attendu-niveau p').textContent).toBe(piege);
+        expect(div.querySelector('.grille-attendu-niveau textarea').value).toBe(piege);
         expect(div.querySelector('.grille-attendu-sous li').textContent).toBe(piege);
     });
 
@@ -104,7 +108,7 @@ describe('lot 3b1 · H — un critère sans données s’affiche exactement comm
         // Le gabarit d'avant le lot 3b1, à l'octet, PLUS l'appel ; comme il rend '' pour un critère
         // sans données, le HTML de ce critère est celui d'avant.
         const src = readFileSync(path.join(racine, 'js', 'grilles.js'), 'utf8');
-        expect(src).toContain('            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere)}\n        </div>\n    `).join(\'\');');
+        expect(src).toContain('            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}\n        </div>\n    `).join(\'\');');
         const { win, dom } = monter();
         win.afficherCriteresGrille({ id: 'GR_BANC', criteres: [critere(), critere({ id: 'CR_2', nom: 'Structure' })] });
         const html = dom.window.document.getElementById('listeCriteres').innerHTML;

@@ -92,7 +92,7 @@ test('étape 5b · F1 collée : réglettes lues, Vérification juste, la grille 
 
     // Grilles de critères la montre avec le nom de ses niveaux.
     await page.locator('[data-action="materiel.voir"][data-param="grille-criteres"]').click();
-    await expect(page.locator('#listeCriteres .grille-attendu-niveau strong').first()).toHaveText('Débutant');
+    await expect(page.locator('#listeCriteres .grille-attendu-points input').first()).toHaveValue('Débutant');   // lot 13 : la clé, dans « Points »
     expect(erreurs).toEqual([]);
 });
 

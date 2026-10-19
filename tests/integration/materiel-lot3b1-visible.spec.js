@@ -76,7 +76,7 @@ test('lot 3b1 · « La voir dans Grilles de critères » ouvre la grille créée
     await expect(blocs.first().locator('.grille-attendu-titre').first()).toHaveText('Ce qui est attendu à chaque niveau');
     const noms = echelle.niveaux.filter(n => grille.criteres[0].descripteurs.parNiveau[n.code]).map(n => n.nom);
     await expect(blocs.first().locator('.grille-attendu-niveau strong')).toHaveText(noms);
-    await expect(blocs.first().locator('input, textarea, select')).toHaveCount(0);
+    await expect(blocs.first().locator('input, select')).toHaveCount(0);   // lot 13 : lié à l'échelle, le texte seul se modifie
     expect(erreurs).toEqual([]);
 });
 
