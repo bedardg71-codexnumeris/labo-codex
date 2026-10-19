@@ -27992,6 +27992,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 #listeCriteres .grille-attendu-niveau strong { display: block; font-size: 0.85rem; margin-bottom: 4px; }
 #listeCriteres .grille-attendu-niveau p { margin: 0; font-size: 0.85rem; line-height: 1.45; color: var(--texte-secondaire); white-space: pre-line; overflow-wrap: anywhere; }
 #listeCriteres .grille-attendu-sous { margin: 0; padding-left: 20px; font-size: 0.85rem; line-height: 1.5; color: var(--texte-secondaire); }
+/* La dissection, lot 13 (19 oct.) : les réponses se modifient à leur place — points et corbeille en tête,
+   le texte dessous ; cibles de 44 px sur l'iPad (la corbeille aussi à la souris, comme celles des blocs). */
+#listeCriteres .grille-attendu-mention { margin: 0; font-size: 0.85rem; color: var(--texte-secondaire); }
+#listeCriteres .grille-attendu-reponse-tete { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 6px; }
+#listeCriteres .grille-attendu-points { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; font-size: 0.85rem; color: var(--gris-moyen); }
+#listeCriteres .grille-attendu-reponse-tete .btn-icone-nu { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+#listeCriteres .grille-attendu-niveau textarea { width: 100%; box-sizing: border-box; resize: vertical; font-size: 0.85rem; line-height: 1.45; }
+@media (pointer: coarse) {
+    #listeCriteres .grille-attendu-niveau .controle-form { min-height: 44px; }
+}
 .materiel-lecture { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .materiel-lecture h2, .materiel-lecture p { margin: 0; }
 .materiel-bandeau { margin: 0; }

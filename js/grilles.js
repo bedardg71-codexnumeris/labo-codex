@@ -4475,31 +4475,60 @@ function rendrePliAucuneAnnotation(critere, ctx) {
  * sous-critères. Rien pour un critère qui n'en porte pas : son HTML reste celui d'avant.
  * Les sous-critères d'un critère algorithmique ont déjà leur place, éditable (gabarit) : pas ici.
  * Titres de Claude Code (17 oct.) ; « Ce qui est attendu à chaque niveau » gardé tel quel par décision de
- * Grégoire, 18 oct. La modification vient après le 19 oct.
+ * Grégoire, 18 oct.
+ * La dissection, lot 13 (19 oct.) : les réponses se MODIFIENT, à leur place (voir « LES RÉPONSES D'UN
+ * CRITÈRE » plus bas) ; les sous-critères restent en lecture. Une réponse au texte vide se montre :
+ * c'est celle qu'on vient d'ajouter. `ctx` : { grilleId, index }, ceux des handlers du critère.
  */
-function rendreAttenduCritere(critere) {
+function rendreAttenduCritere(critere, ctx) {
     const par = (critere && critere.descripteurs && critere.descripteurs.parNiveau) || {};
-    const codes = Object.keys(par).filter(c => String(par[c] || '').trim());
+    const codes = Object.keys(par);
     const sous = (critere && critere.type !== 'algorithmique' && Array.isArray(critere.sousCriteres))
         ? critere.sousCriteres.filter(sc => sc && String(sc.nom || '').trim()) : [];
     if (!codes.length && !sous.length) return '';
     return `
-            <div class="grille-attendu">${rendreAttenduNiveaux(critere.descripteurs, codes)}${rendreAttenduSousCriteres(sous)}
+            <div class="grille-attendu">${rendreAttenduNiveaux(critere.descripteurs, codes, ctx)}${rendreAttenduSousCriteres(sous)}
             </div>`;
 }
 
-/** Le texte de chaque niveau, dans l'ordre de l'échelle ; un code qu'elle ne connaît pas suit, dans l'ordre écrit. */
-function rendreAttenduNiveaux(descripteurs, codes) {
+/**
+ * Le texte de chaque niveau, dans l'ordre de l'échelle ; un code qu'elle ne connaît pas suit, dans l'ordre écrit.
+ * Sans échelle (grille en points), chaque réponse porte aussi ses points et sa corbeille, dans l'ordre écrit ;
+ * avec une échelle, le texte seul, et l'écran le dit. Textes de Claude Code, PROVISOIRES (lot 13).
+ */
+function rendreAttenduNiveaux(descripteurs, codes, ctx) {
     if (!codes.length) return '';
-    const echelle = (db.getSync(cle('echellesTemplates'), []) || []).find(e => e && e.id === descripteurs.echelleId);
+    const enPoints = !descripteurs.echelleId;
+    const echelle = enPoints ? null : (db.getSync(cle('echellesTemplates'), []) || []).find(e => e && e.id === descripteurs.echelleId);
     const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
     const ordre = niveaux.map(n => n.code).filter(c => codes.includes(c)).concat(codes.filter(c => !niveaux.some(n => n.code === c)));
     const nomDe = (c) => { const n = niveaux.find(x => x.code === c); return n && String(n.nom || '').trim() ? n.nom : c; };
+    const attrs = (c) => `data-grille-id="${echapperHtml(ctx.grilleId)}" data-critere-index="${ctx.index}" data-reponse-index="${codes.indexOf(c)}" data-reponse-cle="${echapperHtml(c)}"`;
+    const tete = (c) => enPoints ? `
+                        <div class="grille-attendu-reponse-tete">
+                            <label class="grille-attendu-points">Points
+                                <input type="text" class="controle-form" value="${echapperHtml(c)}" data-on-change="modifierPointsReponseGrilleHandler" ${attrs(c)}>
+                            </label>
+                            ${retirerBloc({ action: 'supprimerReponseGrille', param: ctx.grilleId, param2: ctx.index, param3: codes.indexOf(c), titre: 'Supprimer cette réponse' })}
+                        </div>` : `<strong>${echapperHtml(nomDe(c))}</strong>`;
     return `
-                <h4 class="grille-attendu-titre">Ce qui est attendu à chaque niveau</h4>
+                <h4 class="grille-attendu-titre">Ce qui est attendu à chaque niveau</h4>${enPoints ? '' : mentionEchelleReponses(echelle)}
                 <div class="grille-attendu-niveaux">${ordre.map(c => `
-                    <div class="grille-attendu-niveau"><strong>${echapperHtml(nomDe(c))}</strong><p>${echapperHtml(String(descripteurs.parNiveau[c]))}</p></div>`).join('')}
-                </div>`;
+                    <div class="grille-attendu-niveau">${tete(c)}
+                        <textarea class="controle-form" rows="3" aria-label="${enPoints ? 'Texte de la réponse' : `Texte du niveau ${echapperHtml(nomDe(c))}`}" data-on-change="modifierTexteReponseGrilleHandler" ${attrs(c)}>${echapperHtml(String(descripteurs.parNiveau[c] == null ? '' : descripteurs.parNiveau[c]))}</textarea>
+                    </div>`).join('')}
+                </div>${enPoints ? boutonAjouterReponse(ctx) : ''}`;
+}
+
+function mentionEchelleReponses(echelle) {
+    const nomme = echelle && String(echelle.nom || '').trim();
+    return `
+                <p class="grille-attendu-mention">Les niveaux viennent de ${nomme ? `l’échelle « ${echapperHtml(echelle.nom)} »` : 'l’échelle de la grille'} : ici, seul leur texte se modifie.</p>`;
+}
+
+function boutonAjouterReponse(ctx) {
+    return `
+                <div><button type="button" class="btn btn-secondaire" data-action="ajouterReponseGrille" data-param="${echapperHtml(ctx.grilleId)}" data-param2="${ctx.index}">+ Ajouter une réponse</button></div>`;
 }
 
 function rendreAttenduSousCriteres(sous) {
@@ -4507,6 +4536,162 @@ function rendreAttenduSousCriteres(sous) {
     return `
                 <h4 class="grille-attendu-titre">Sous-critères</h4>
                 <ul class="grille-attendu-sous">${sous.map(sc => `<li>${echapperHtml(sc.nom)}</li>`).join('')}</ul>`;
+}
+
+/*
+ * LES RÉPONSES D'UN CRITÈRE — la dissection, lot 13 (19 oct. 2026).
+ * Une réponse est une entrée de `descripteurs.parNiveau` : sa CLÉ porte ses points tels qu'écrits
+ * (« 2 points », « 3-4 », « Réponse 1 » : `clesDesReponses`, materiel-dissection-lecture.js), sa valeur
+ * son texte ; l'ordre des clés est celui de l'enseignant. Liée à une échelle (`echelleId`), la clé est
+ * le code d'un niveau : seul le texte se modifie.
+ * ⚠ Aucune évaluation ne lit ces réponses (mesuré au point 0 du lot) : une copie notée garde ses points
+ * (`pointsAnalytiques[critereId]`) ou son niveau, quoi qu'on change ici.
+ * Les fonctions pures rendent `{ parNiveau }` (un objet NEUF, dans l'ordre) ou `{ refuse }` — `null`
+ * quand la réponse visée n'est plus à sa place : rien n'est écrit, rien n'est dit.
+ * Les bornes sont celles de la création (`D.creation`) : celles du partage (`partage-schemas.js`).
+ */
+const MAX_REPONSES_CRITERE = 20;
+const MAX_TEXTE_REPONSE = 5000;
+const MAX_POINTS_REPONSE = 200;   // une clé plus longue serait coupée à l'import (`assainirChaine(k, 200)`)
+const REFUS_REPONSES = {
+    trop: 'Au plus 20 réponses par critère',
+    texteLong: 'Une réponse fait 5 000 caractères au plus',
+    pointsVides: 'Les points de la réponse sont obligatoires',
+    pointsSouligne: 'Des points qui ne commencent pas par « _ »',
+    pointsHorsBornes: 'Des points de 0 à 100',
+    pointsLongs: 'Des points de 200 caractères au plus',
+    pointsPris: 'Une autre réponse de ce critère porte déjà ces points'
+};
+
+function _reponseVisee(par, index, cleLue) {
+    return Object.keys(par || {})[index] === cleLue;
+}
+
+function reponseTexteModifie(par, index, cleLue, texte) {
+    if (!_reponseVisee(par, index, cleLue)) return { refuse: null };
+    const t = String(texte == null ? '' : texte).trim();
+    if (t.length > MAX_TEXTE_REPONSE) return { refuse: REFUS_REPONSES.texteLong };
+    return { parNiveau: Object.assign({}, par, { [cleLue]: t }) };
+}
+
+/** Les points tapés → la clé : un nombre seul, de 0 à 100, prend son unité, comme à la création (C1). */
+function clePointsReponse(saisie) {
+    const s = String(saisie == null ? '' : saisie).trim();
+    if (!s) return { refuse: REFUS_REPONSES.pointsVides };
+    if (s.charAt(0) === '_') return { refuse: REFUS_REPONSES.pointsSouligne };
+    if (/^-?\d+(?:[.,]\d+)?$/.test(s)) {
+        const n = parseFloat(s.replace(',', '.'));
+        if (n < 0 || n > 100) return { refuse: REFUS_REPONSES.pointsHorsBornes };
+    }
+    const cleNeuve = window.materielDissectionLecture.avecUnite(s);
+    if (cleNeuve.length > MAX_POINTS_REPONSE) return { refuse: REFUS_REPONSES.pointsLongs };
+    return { cle: cleNeuve };
+}
+
+function reponsePointsModifies(par, index, cleLue, saisie) {
+    if (!_reponseVisee(par, index, cleLue)) return { refuse: null };
+    const p = clePointsReponse(saisie);
+    if (p.refuse) return p;
+    if (p.cle !== cleLue && Object.prototype.hasOwnProperty.call(par, p.cle)) return { refuse: REFUS_REPONSES.pointsPris };
+    const neuf = {};
+    Object.keys(par).forEach(k => { neuf[k === cleLue ? p.cle : k] = par[k]; });
+    return { parNiveau: neuf, cle: p.cle };
+}
+
+/** Une réponse neuve, en dernier : texte vide, points à saisir (« Réponse N », comme une réponse lue sans points). */
+function reponseAjoutee(par) {
+    const cles = Object.keys(par || {});
+    if (cles.length >= MAX_REPONSES_CRITERE) return { refuse: REFUS_REPONSES.trop };
+    let n = cles.length + 1;
+    while (cles.includes('Réponse ' + n)) n++;
+    return { parNiveau: Object.assign({}, par, { ['Réponse ' + n]: '' }), cle: 'Réponse ' + n };
+}
+
+function reponseRetiree(par, index, cleLue) {
+    if (!_reponseVisee(par, index, cleLue)) return { refuse: null };
+    const neuf = {};
+    Object.keys(par).forEach(k => { if (k !== cleLue) neuf[k] = par[k]; });
+    return { parNiveau: neuf };
+}
+
+/**
+ * Une écriture des réponses du critère, sérialisée (#510). `operation(critere)` rend ce que rendent
+ * les fonctions pures ; sans `parNiveau`, rien n'est écrit. Sans réponse, le critère perd ses
+ * `descripteurs`, comme un critère créé sans (`construireGrilleEnPoints`).
+ */
+async function _modifierReponsesCritere(grilleId, critereIndex, operation) {
+    let resultat = { refuse: null }, grille = null;
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === grilleId);
+        const c = g && g.criteres && g.criteres[critereIndex];
+        if (!c || !c.descripteurs || !c.descripteurs.parNiveau) return undefined;
+        resultat = operation(c);
+        if (!resultat.parNiveau) return undefined;
+        if (Object.keys(resultat.parNiveau).length) c.descripteurs.parNiveau = resultat.parNiveau;
+        else delete c.descripteurs;
+        g.dateModification = new Date().toISOString();
+        grille = g;
+        return grilles;
+    }, [], { geste: 'Modifier la grille' });
+    if (grille && grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) grilleTemplateActuelle = grille;
+    return { resultat, grille };
+}
+
+/** Points, ajout, retrait : sans échelle seulement — avec elle, les niveaux sont les siens. */
+const _sansEchelle = (c, f) => (c.descripteurs.echelleId ? { refuse: null } : f());
+
+function _dataReponse(el) {
+    return { grilleId: el.dataset.grilleId, critereIndex: parseInt(el.dataset.critereIndex),
+        index: parseInt(el.dataset.reponseIndex), cle: el.dataset.reponseCle };
+}
+
+function modifierTexteReponseGrilleHandler(el) {
+    const d = _dataReponse(el);
+    return _modifierReponsesCritere(d.grilleId, d.critereIndex,
+        c => reponseTexteModifie(c.descripteurs.parNiveau, d.index, d.cle, el.value))
+        .then(({ resultat }) => marquerChampRefuse(el, resultat.refuse));
+}
+
+/**
+ * Les points changent la CLÉ : le texte et la corbeille de la même réponse la suivent, sans rendre
+ * la liste à nouveau — le `change` part au blur, au moment où l'on clique dans le champ suivant.
+ */
+function modifierPointsReponseGrilleHandler(el) {
+    const d = _dataReponse(el);
+    return _modifierReponsesCritere(d.grilleId, d.critereIndex,
+        c => _sansEchelle(c, () => reponsePointsModifies(c.descripteurs.parNiveau, d.index, d.cle, el.value)))
+        .then(({ resultat }) => {
+            marquerChampRefuse(el, resultat.refuse);
+            if (!resultat.cle) return;
+            const bloc = el.closest('.grille-attendu-niveau');
+            (bloc ? bloc.querySelectorAll('[data-reponse-cle]') : [el]).forEach(x => { x.dataset.reponseCle = resultat.cle; });
+            el.value = resultat.cle;
+        });
+}
+
+async function ajouterReponseGrille(grilleId, critereIndex) {
+    const { resultat, grille } = await _modifierReponsesCritere(grilleId, critereIndex,
+        c => _sansEchelle(c, () => reponseAjoutee(c.descripteurs.parNiveau)));
+    if (resultat.refuse && window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(resultat.refuse), undefined, cle('grillesTemplates'));
+    }
+    if (!grille) return;
+    afficherCriteresGrille(grille);
+    const champ = [...document.querySelectorAll('#listeCriteres [data-on-change="modifierPointsReponseGrilleHandler"]')]
+        .find(x => x.dataset.critereIndex === String(critereIndex) && x.dataset.reponseCle === resultat.cle);
+    if (champ) { champ.focus(); champ.select(); }
+}
+
+/** Le geste et la confirmation du retrait d'un critère (`supprimerCritereGrille`) ; relu après la fenêtre. */
+async function supprimerReponseGrille(grilleId, critereIndex, reponseIndex) {
+    const critereLu = _critereEnBase(grilleId, critereIndex);
+    const cleLue = critereLu && critereLu.descripteurs && Object.keys(critereLu.descripteurs.parNiveau || {})[reponseIndex];
+    if (cleLue === undefined || cleLue === null) return;
+    if (!confirm('Es-tu sûr de vouloir supprimer cette réponse ?')) return;
+    const { grille } = await _modifierReponsesCritere(grilleId, critereIndex,
+        c => (_memeCritere(c, critereLu) ? _sansEchelle(c, () => reponseRetiree(c.descripteurs.parNiveau, reponseIndex, cleLue)) : { refuse: null }));
+    if (grille) afficherCriteresGrille(grille);
 }
 
 function rendreCartesGabaritAlgo(critere, ctx) {
@@ -4884,7 +5069,7 @@ function afficherCriteresGrille(grille) {
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere)}
+            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}
         </div>
     `).join('');
 
@@ -5532,6 +5717,12 @@ window.annulerFormGrille = annulerFormGrille;
 window.fermerFicheGrille = fermerFicheGrille;
 window.ouvrirGrilleDepuisListe = ouvrirGrilleDepuisListe;
 window.rendreAttenduCritere = rendreAttenduCritere;   // lot 3b1 (17 oct.) : exposé pour les bancs
+// La dissection, lot 13 (19 oct.) : modifier les réponses d'un critère — les gestes, puis les fonctions pures (bancs)
+window.modifierTexteReponseGrilleHandler = modifierTexteReponseGrilleHandler;
+window.modifierPointsReponseGrilleHandler = modifierPointsReponseGrilleHandler;
+window.ajouterReponseGrille = ajouterReponseGrille;
+window.supprimerReponseGrille = supprimerReponseGrille;
+window.reponsesCritere = { texteModifie: reponseTexteModifie, pointsModifies: reponsePointsModifies, ajoutee: reponseAjoutee, retiree: reponseRetiree, REFUS: REFUS_REPONSES };
 window.dupliquerGrilleActive = dupliquerGrilleActive;
 window.supprimerGrilleActive = supprimerGrilleActive;
 window.sauvegarderGrilleComplete = sauvegarderGrilleComplete;

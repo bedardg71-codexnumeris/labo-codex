@@ -418,9 +418,10 @@ describe('étape 5b · C — une grille en points à niveaux se crée sans éche
             notifications: { succes() {}, erreur() {}, info() {} }, grilleTemplateActuelle: null
         });
         const div = dom.window.document.createElement('div');
-        div.innerHTML = win.rendreAttenduCritere(g.criteres[0]);
-        expect([...div.querySelectorAll('.grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['PALIER A', 'PALIER A+', 'PALIER B', 'PALIER C']);
-        expect(div.querySelector('.grille-attendu-niveau p').textContent).toBe('Jamais\n0-5');
+        div.innerHTML = win.rendreAttenduCritere(g.criteres[0], { grilleId: g.id, index: 0 });
+        // Lot 13 (19 oct.) : sans échelle, le nom du niveau est la clé — il se lit, et se modifie, dans « Points ».
+        expect([...div.querySelectorAll('.grille-attendu-points input')].map(i => i.value)).toEqual(['PALIER A', 'PALIER A+', 'PALIER B', 'PALIER C']);
+        expect(div.querySelector('.grille-attendu-niveau textarea').value).toBe('Jamais\n0-5');
     });
 
     it('C.e rien ne se perd au partage : projetés tels quels, paquet valide ; l’import les garde', () => {

@@ -169,9 +169,9 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
     const vus = await liste.locator('.critere-rangee').evaluateAll((rs) => rs.map((r) => [
         r.querySelector('input[data-champ="nom"]').value, r.querySelector('input[data-champ="ponderation"]')?.value]));
     expect(vus).toEqual(g.criteres.map((c) => [c.nom, String(c.ponderation)]));
-    await expect(liste.locator('.grille-attendu-niveau strong').first()).toHaveText('Insuffisant');
-    // Les points sur une ligne à part (`white-space: pre-line`) : innerText garde le saut de ligne.
-    expect(await liste.locator('.grille-attendu-niveau p').nth(2).evaluate((p) => p.innerText)).toBe('Résume l’essentiel\n3-4');
+    // Lot 13 (19 oct.) : sans échelle, le nom du niveau est la clé, dans « Points » ; le texte, dans son champ.
+    await expect(liste.locator('.grille-attendu-points input').first()).toHaveValue('Insuffisant');
+    await expect(liste.locator('.grille-attendu-niveau textarea').nth(2)).toHaveValue('Résume l’essentiel\n3-4');
     // C2 : des points, jamais « % » — le total et la colonne.
     // Break-test (fait le 18 oct.) : `ponderationEnPoints` rendant toujours false → rouge ici.
     await expect(page.locator('#totalPonderationAffichage')).toHaveText('30 points');
@@ -250,7 +250,7 @@ test('dissection 2a · C1 : les réponses de (b) gardent leur ordre jusque dans 
     await page.locator('[data-action="materiel.voir"][data-param="grille-criteres"]').click();
     await expect(page.locator('#listeCriteres .grille-attendu')).toHaveCount(3);
     const titres = await page.locator('#listeCriteres .grille-attendu').evaluateAll((rs) =>
-        rs.map((r) => [...r.querySelectorAll('.grille-attendu-niveau strong')].map((x) => x.textContent)));
+        rs.map((r) => [...r.querySelectorAll('.grille-attendu-points input')].map((x) => x.value)));   // lot 13 : les points, modifiables
     expect(titres).toEqual([['4 points', '2 points', '0 point'], ['3 points', '2 points', '1 point', '0 point'], ['1 point', '0,5 point', '0 point']]);
     expect(erreurs).toEqual([]);
 });
