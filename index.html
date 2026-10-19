@@ -4182,7 +4182,7 @@
                     <p id="materiel-en-construction" class="alerte alerte-attention" role="note"><span aria-hidden="true">🚧</span> Cet outil est en développement : certaines grilles pourraient mal s’y afficher. D’autres étapes viendront, dont les rétroactions.</p>
                     <div id="materiel-accueil" class="materiel-accueil">
                         <div class="materiel-intro">
-                            <h2>Apporter mon matériel</h2>
+                            <h2 class="titre-avec-emoji-toggles"><span>Apporter mon matériel</span><span class="titre-emoji-container"><button class="btn-aide-contextuelle" data-aide="conception-materiel" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></span></h2>
                             <p>Ton matériel existe déjà ? Tes grilles d’évaluation sont sans doute dans Word ou dans Pages : colle-les ici. Tu verras ta grille telle que tu l’as écrite, et c’est toi qui montres à l’application ce que chaque morceau signifie.</p>
                         </div>
                         <ol class="materiel-etapes">
@@ -4197,8 +4197,8 @@
                             <div class="materiel-actions">
                                 <button type="button" class="btn btn-secondaire" data-action="materiel.reconnaitreTexte">Étiqueter le texte ci-dessus</button>
                                 <span class="materiel-actions-sep">Pas de document sous la main ?</span>
-                                <button type="button" class="btn btn-secondaire" data-action="materiel.essayerExemple">Essayer avec un exemple</button>
-                                <button type="button" class="materiel-btn-lien" data-action="materiel.taperMain">Taper ma grille à la main</button>
+                                <button type="button" class="btn btn-secondaire" data-action="materiel.essayerExemple" data-tooltip="materiel-essayer-exemple">Essayer avec un exemple</button>
+                                <button type="button" class="materiel-btn-lien" data-action="materiel.taperMain" data-tooltip="materiel-taper-main">Taper ma grille à la main</button>
                             </div>
                         </div>
                         <p class="text-muted">Bientôt ici : tes commentaires habituels aux étudiant·es et tes consignes de travaux.</p>
@@ -4209,7 +4209,7 @@
                     <div id="materiel-dissection" class="dissection u-hide">
                         <div class="dissection-tete">
                             <div class="dissection-tete-texte">
-                                <h2 id="dissection-titre" tabindex="-1">Étiquette ta grille</h2>
+                                <h2 id="dissection-titre" class="titre-avec-emoji-toggles" tabindex="-1"><span>Étiquette ta grille</span><span class="titre-emoji-container"><button class="btn-aide-contextuelle" data-aide="conception-materiel" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></span></h2>
                                 <ol class="dissection-consignes">
                                     <li>Touche une étiquette dans la palette : elle devient ton surligneur.</li>
                                     <li>Touche les morceaux de ta grille qu’elle désigne, ou glisse dessus pour en surligner plusieurs d’un coup. Touche un morceau déjà surligné pour le retirer.</li>
@@ -4217,8 +4217,8 @@
                                 </ol>
                             </div>
                             <div class="dissection-actions">
-                                <button type="button" class="btn btn-secondaire" data-action="materielDissection.collerAutre">Coller une autre grille</button>
-                                <button type="button" class="btn btn-secondaire" data-action="materielDissection.toutRetirer">Retirer les étiquettes</button>
+                                <button type="button" class="btn btn-secondaire" data-action="materielDissection.collerAutre" data-tooltip="materiel-coller-autre">Coller une autre grille</button>
+                                <button type="button" class="btn btn-secondaire" data-action="materielDissection.toutRetirer" data-tooltip="materiel-retirer-etiquettes">Retirer les étiquettes</button>
                             </div>
                         </div>
                         <p id="dissection-statut" class="dissection-statut" role="status" aria-live="polite"></p>
@@ -4230,8 +4230,8 @@
                                 <p id="dissection-bandeau-precision" class="dissection-bandeau-precision u-hide"></p>
                             </div>
                             <!-- Lot 5 : visible tant que « Couper » est en main et qu'une coupe est faite (texte validé G. 18 oct. 13 h 48). -->
-                            <button type="button" id="dissection-annuler-coupe" class="btn btn-secondaire u-hide" data-action="materielDissection.annulerCoupe">Annuler la dernière coupe</button>
-                            <button type="button" id="dissection-terminer" class="btn btn-principal u-hide" data-action="materielDissection.terminer">Terminer</button>
+                            <button type="button" id="dissection-annuler-coupe" class="btn btn-secondaire u-hide" data-action="materielDissection.annulerCoupe" data-tooltip="materiel-annuler-coupe">Annuler la dernière coupe</button>
+                            <button type="button" id="dissection-terminer" class="btn btn-principal u-hide" data-action="materielDissection.terminer" data-tooltip="materiel-terminer">Terminer</button>
                         </div>
                         <div id="dissection-atelier" class="dissection-atelier">
                             <aside id="dissection-palette" class="dissection-palette" aria-label="Palette d’étiquettes"></aside>
@@ -10963,6 +10963,50 @@
                         </div>
                     </div>
 
+                    <!-- Carte: Apporter une grille que tu as déjà (D1 à D10, validés par Grégoire le 19 oct. 2026, 19 h 01).
+                         Les six définitions de la liste des étiquettes sont celles du lexique, mot pour mot
+                         (js/accompagnement-contenu-terme.js) : un banc les compare. -->
+                    <div class="carte accordeon" id="accordeon-aide-apporter-grille">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Apporter une grille que tu as déjà
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p>Tu as sans doute des grilles d’évaluation qui fonctionnent, dans Word ou dans Pages. Plutôt que de les refaire, tu peux les apporter telles quelles dans Conception › Apporter mon matériel. L’application ne devine pas ce que veut dire chaque morceau de ta grille : c’est toi qui le lui montres, avec des étiquettes. Elle en tire ensuite une grille de critères que tu peux employer pour évaluer.</p>
+
+                            <ol>
+                                <li>Copie le tableau entier dans son fichier d’origine, puis colle-le dans la zone. Ta grille s’affiche telle que tu l’as écrite, chaque ligne de chaque case devenue un morceau.</li>
+                                <li>Touche une étiquette dans la palette : elle devient ton surligneur. Touche les morceaux qu’elle désigne, ou glisse dessus. Sous ta grille, l’application montre à chaque geste la grille qu’elle en tirerait, et les morceaux qui n’ont pas trouvé leur place, avec la raison.</li>
+                                <li>Donne un nom à ta grille, puis touche « Créer ma grille ».</li>
+                            </ol>
+
+                            <ul id="aide-apporter-grille-etiquettes">
+                                <li><strong>Critère</strong> : ce qui est attendu ; la question que tu te poses devant la copie.</li>
+                                <li><strong>Élément observable</strong> : ce que tu regardes dans toutes les copies pour juger d’un critère. On dit aussi sous-critère.</li>
+                                <li><strong>Descripteur</strong> : ce que tu observes dans une copie, à un niveau donné ; une réponse possible à la question du critère. Une seule vaut pour une copie.</li>
+                                <li><strong>Niveau</strong> : le nom d’un stade de qualité du travail observé, par exemple « Sommaire » ou « Efficace ».</li>
+                                <li><strong>Points</strong> : ce que vaut une réponse, en chiffres.</li>
+                                <li><strong>Pondération</strong> : le poids d’un critère dans la grille.</li>
+                            </ul>
+
+                            <p>Des points et des niveaux ne disent pas la même chose. Les points sont des chiffres ; les niveaux décrivent des stades de compréhension ou de qualité du travail. Une grille peut porter les deux : c’est toi qui dis lequel donne le résultat d’une copie. Avec les niveaux, l’application te demande, pour chacun, sa plage de notes et la note qu’une copie reçoit à ce niveau : c’est ainsi qu’un niveau devient une note chiffrée.</p>
+
+                            <ul>
+                                <li><strong>Couper</strong> : quand une case porte deux choses sur une même ligne, par exemple un critère et ses points, touche l’endroit entre les deux.</li>
+                                <li><strong>Rattacher</strong> : quand un nom s’étend sur plusieurs lignes, touche ses morceaux ; l’application les lit comme un seul texte. Touche deux fois un morceau rattaché pour le détacher.</li>
+                            </ul>
+
+                            <p>Ta grille se range dans Grilles de critères ; ses niveaux, s’il y en a, dans Échelles de performance. Tu la modifies ensuite là, comme toute grille : corriger une réponse, changer ses points, en ajouter ou en retirer une. S’il manque des points à un critère, la grille se crée quand même : Grilles de critères dit combien de critères les attendent, et la note d’une copie affiche « -- » tant qu’ils ne sont pas complétés.</p>
+
+                            <p>Chaque étiquette s’enregistre au moment où tu la poses. Si tu quittes l’onglet ou recharges la page, ta grille revient telle que tu l’as laissée, jusqu’à ce que tu en colles une autre.</p>
+
+                            <p>L’outil est en développement. Pour l’instant, il ne lit qu’un tableau à la fois. Le texte d’un PDF arrive sans ses cases : l’étiquetage y demande plus de gestes. Une multiplication écrite dans la grille (« × 2 ») n’est pas lue : tu pourrais mettre ce morceau « À ignorer », puis ajuster les points dans Grilles de critères. Les rétroactions et les consignes de travaux viendront plus tard.</p>
+
+                            <p>Une fois ta grille créée, l’application pourrait te suggérer des façons de suivre la progression de tes étudiant·es à partir d’elle (« Aller plus loin avec ta grille »). Ce sont des pistes : ta grille fonctionne telle quelle.</p>
+                        </div>
+                    </div>
+
                     <!-- Carte: Créer une échelle de performance -->
                     <div class="carte accordeon" id="accordeon-aide-creer-echelles">
                         <div class="accordeon-header">
@@ -14271,7 +14315,7 @@
     <script src="js/materiel-lecture.js?v=20261019c"></script> <!-- Retrait de l’assistant en sept étapes (19 oct.) : ne restent que la lecture du collage, les codes, les parts égales, la casse d’une partie et les plages · « Apporter mon matériel », étape 7 (17 oct.) : une partie en capitales prend une majuscule initiale (8.16) · « Apporter mon matériel », relecture de 5b (17 oct.) : un nombre seul, ou des points avec leur unité, dans une case de niveau · « Apporter mon matériel », étape 5b (17 oct.) : la reconnaissance — pied et calcul, puces, points des niveaux, réglettes, suites, cases à cocher, pas d’en-tête, parties, pondération au bout du nom · « Apporter mon matériel », étape 5 (17 oct.) : grille en points, rôle « Partie », nom et description d’une case de critère · « Apporter mon matériel », relecture du lot 3a (17 oct.) : puces retirées aussi de la description du critère · lot 3a (17 oct.) : dépliage des cases fusionnées, retours à la ligne, rôles des rangées et des colonnes · lot 1 (16 oct.) : lecture d'une grille collée, fonctions pures — CHARGÉ AVANT materiel.js -->
     <script src="js/materiel-assistant.js?v=20261019c"></script> <!-- Retrait de l’assistant en sept étapes (19 oct.) : ne restent que `calculs` et `construire` · « Apporter mon matériel », étape 7 (17 oct.) : textes validés par Grégoire · « Apporter mon matériel », étape 5b (17 oct.) : « / 0 » accepté, niveaux d’une grille en points, descripteurs sous le nom du niveau · « Apporter mon matériel », étape 5 (17 oct.) : étapes, points et création d’une grille en points · « Apporter mon matériel », lot 3a (17 oct.) : étape des rôles, codes corrigeables, forme du critère de l’éditeur · lot 2 (17 oct.) : logique de l'assistant et construction des trois objets, fonctions pures — CHARGÉ AVANT materiel.js -->
     <script src="js/materiel-dissection-lecture.js?v=20261019b"></script> <!-- Lot 13 (19 oct.) : `avecUnite` exposé pour Grilles de critères · Lot 7 (18 oct.) : « Rattacher », la lecture d’un morceau et de ses suites · Lot 5 : textes validés par Grégoire (18 oct., 13 h 48) · C1 du lot 5 (18 oct.) : une Pondération se range sous le critère de sa rangée · La dissection, lot 5 (18 oct.) : « Couper », des raisons qui nomment ce qui bloque · La dissection, lot 1 (18 oct.) : lire une grille collée en morceaux, comprendre ses étiquettes, fonctions pures — CHARGÉ APRÈS materiel-lecture.js, AVANT materiel.js -->
-    <script src="js/materiel-dissection.js?v=20261019c"></script> <!-- 19 oct. : son en-tête dit l’assistant retiré · Lot 8 (18 oct.) : textes de « Rattacher » validés par Grégoire (17 h 18) · C1 du lot 7 (18 oct.) : la marque d’une suite suit l’étiquette de son A · Lot 7 (18 oct.) : l’outil « Rattacher », deux touchers, marque et flèches · Lot 5 : textes validés par Grégoire (18 oct., 13 h 48) · La dissection, lot 5 (18 oct.) : « Couper », des raisons qui nomment ce qui bloque · Corrections C1 et C2 (18 oct.) : palette à gauche jusqu’au téléphone, bandeau hors de l’atelier, « Coller une autre grille » à deux temps · La dissection, lot 1 (18 oct.) : palette, canevas, gestes au pointeur, flèches, lecture — rien n'est écrit -->
+    <script src="js/materiel-dissection.js?v=20261019d"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : bulles des outils et du formulaire de création, phrase de la logique « les deux » · 19 oct. : son en-tête dit l’assistant retiré · Lot 8 (18 oct.) : textes de « Rattacher » validés par Grégoire (17 h 18) · C1 du lot 7 (18 oct.) : la marque d’une suite suit l’étiquette de son A · Lot 7 (18 oct.) : l’outil « Rattacher », deux touchers, marque et flèches · Lot 5 : textes validés par Grégoire (18 oct., 13 h 48) · La dissection, lot 5 (18 oct.) : « Couper », des raisons qui nomment ce qui bloque · Corrections C1 et C2 (18 oct.) : palette à gauche jusqu’au téléphone, bandeau hors de l’atelier, « Coller une autre grille » à deux temps · La dissection, lot 1 (18 oct.) : palette, canevas, gestes au pointeur, flèches, lecture — rien n'est écrit -->
     <script src="js/materiel-creation.js?v=20261019a"></script> <!-- « Apporter mon matériel », étape 5 (17 oct.) : une grille en points s’écrit seule · « Apporter mon matériel », lot 2 (17 oct.) : les trois écritures de « Créer ma grille », défaites si l'une échoue -->
     <script src="js/materiel.js?v=20261019c"></script> <!-- Retrait de l’assistant en sept étapes (19 oct.) : l’accueil et la confirmation seuls · La dissection, lot 1 (18 oct.) : collage, texte et exemple ouvrent la dissection ; assistant débranché · « Apporter mon matériel », étape 7 (17 oct.) : textes validés par Grégoire · « Apporter mon matériel », étape 5b (17 oct.) : Vérification et aperçu d’une grille en points à niveaux · « Apporter mon matériel », étape 6 (17 oct.) : « Aller plus loin avec ta grille » sur la confirmation · « Apporter mon matériel », étape 5 (17 oct.) : étape « Points », Vérification et confirmation en points · « Apporter mon matériel », lot 3a (17 oct.) : l’étape « Ce que contient ton tableau », champs « Code » · lot 2 (17 oct.) : l'assistant, la vérification, la confirmation · lot 1 (16 oct.) : accueil de l'onglet -->
     <script src="js/export-pdf.js?v=20261012a"></script> <!-- #485 : helpers infosCours/nomTrimestre exposés sur ExportPDF -->
@@ -14458,12 +14502,12 @@
          Un seul moteur pour hover, flèches didactiques, popups aide contextuelle,
          visite guidée et glossaire. API publique : window.accompagnement. -->
     <link rel="stylesheet" href="css/accompagnement.css?v=2026042002">
-    <script src="js/accompagnement.js?v=20261018a"></script> <!-- Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
+    <script src="js/accompagnement.js?v=20261019a"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : l’étape « Conception » de la visite correspond aussi à l’onglet (#1092) · Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20261018a"></script> <!-- « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20261017a"></script> <!-- Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
-    <script src="js/accompagnement-contenu-terme.js?v=20261017a"></script>
+    <script src="js/accompagnement-contenu-hover.js?v=20261019a"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20261019a"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : l’aide « i » conception-materiel · Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-terme.js?v=20261019a"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
     <script src="js/guides-pedagogiques.js?v=20261017a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20261017a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=20260923b"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->

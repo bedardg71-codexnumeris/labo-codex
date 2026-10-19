@@ -1086,9 +1086,11 @@ const ETAPES_TOUR = [
     {
         id: 2,
         titre: 'Conception',
-        texte: "Tu construis ici tes outils d'\u00e9valuation \u2014 les m\u00eames que sur papier, mais r\u00e9utilisables. Les productions d\u00e9finissent les occasions d'apprentissage de tes \u00e9tudiant\u00b7es. Les grilles fixent tes crit\u00e8res. Les \u00e9chelles \u00e9tablissent les niveaux de performance. Les cartouches pr\u00e9parent la r\u00e9troaction. La pratique assemble le tout.\n\nL'ordre n'est pas impos\u00e9, mais les productions et les grilles sont un bon point de d\u00e9part.",        correspond: function(idSousSection) {
+        // E1, validé par Grégoire le 19 oct. 2026 (19 h 01) ; l'étape correspond aussi à « Apporter mon matériel » (#1092).
+        texte: "Tu construis ici tes outils d’évaluation : les mêmes que sur papier, mais réutilisables. Si tes grilles existent déjà dans Word ou dans Pages, « Apporter mon matériel » les y range : tu les colles, puis tu montres à l’application ce que veut dire chaque morceau. Les productions définissent les occasions d’apprentissage de tes étudiant·es. Les grilles fixent tes critères. Les échelles établissent les niveaux de performance. Les cartouches préparent la rétroaction. La pratique assemble le tout.\n\nL’ordre n’est pas imposé, mais les productions et les grilles sont un bon point de départ.",
+        correspond: function(idSousSection) {
             if (typeof idSousSection !== 'string') return false;
-            const structureConception = ['conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions', 'conception-pratiques-notation'];
+            const structureConception = ['conception-materiel', 'conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions', 'conception-pratiques-notation'];
             return structureConception.indexOf(idSousSection) !== -1;
         }
     },

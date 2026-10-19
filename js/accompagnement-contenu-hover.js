@@ -705,9 +705,9 @@ const TOOLTIPS = {
 
     'nav-construction':
         'Configuration de l\'évaluation : productions, grilles, échelles, cartouches et pratiques de notation.',
-    // « Apporter mon matériel » — validé par Grégoire le 17 oct. 2026 (15 h 00).
+    // « Apporter mon matériel » — réécrite après le retrait de l'assistant (A1, validé par Grégoire le 19 oct. 2026, 19 h 01).
     'nav-conception-materiel':
-        'Colle ta grille d’évaluation (format tableau), copiée depuis Word, Pages ou un autre traitement de texte : l’application te montre ce qu’elle en a compris, et tu corriges au besoin.',
+        'Apporte une grille que tu as déjà, copiée depuis Word, Pages ou un autre traitement de texte : tu montres à l’application ce que veut dire chaque morceau, puis elle la range dans tes grilles de critères.',
     'nav-conception-productions':
         'Définis les productions de tes étudiant·es : portfolios, artefacts et travaux avec pondérations et échéances.',
     'nav-conception-grilles':
@@ -850,7 +850,35 @@ const TOOLTIPS = {
     'presences-total-periodes':
         'Nombre de périodes (ou d’heures) de présence comptées pour l’étudiant·e à cette séance.',
     'presences-assiduite-col':
-        'Taux de présence de l’étudiant·e sur les seules séances saisies. Une séance « non saisie » n’y entre pas ; tant qu’aucune séance ne compte, l’assiduité est inconnue.'
+        'Taux de présence de l’étudiant·e sur les seules séances saisies. Une séance « non saisie » n’y entre pas ; tant qu’aucune séance ne compte, l’assiduité est inconnue.',
+
+    // =================================================================
+    // CONCEPTION › APPORTER MON MATÉRIEL (C1 à C11, validés par Grégoire le 19 oct. 2026, 19 h 01)
+    // Les six dernières clés sont posées en JavaScript par js/materiel-dissection.js.
+    // =================================================================
+
+    'materiel-essayer-exemple':
+        'Ouvre une grille fictive, pour essayer l’étiquetage sans ton propre document.',
+    'materiel-taper-main':
+        'Mène à Grilles de critères, pour composer une grille directement dans l’application.',
+    'materiel-coller-autre':
+        'Retire cette grille et ses étiquettes de l’écran, pour en coller une autre. Les grilles que tu as déjà créées ne changent pas.',
+    'materiel-retirer-etiquettes':
+        'Enlève toutes les étiquettes posées sur cette grille, pour recommencer l’étiquetage. Le texte collé reste.',
+    'materiel-annuler-coupe':
+        'Recolle le dernier morceau que tu as coupé.',
+    'materiel-terminer':
+        'Repose ce que tu as en main : une étiquette, « Couper » ou « Rattacher ». La touche Échap fait la même chose.',
+    'materiel-outil-couper':
+        'Quand une case porte deux choses sur une même ligne (un critère et ses points, par exemple), touche l’endroit entre les deux : le morceau devient deux, que tu étiquettes chacun.',
+    'materiel-outil-rattacher':
+        'Quand un nom s’étend sur plusieurs lignes, touche ses morceaux : l’application les lit comme un seul texte, dans l’ordre de ta grille.',
+    'materiel-nom-grille':
+        'Ce nom s’imprime sur le PDF que tes étudiant·es reçoivent après l’évaluation.',
+    'materiel-compte':
+        'Ta grille porte des points et des niveaux : choisis lequel donne le résultat d’une copie. Avec les niveaux, tu diras ensuite la note que vaut chacun.',
+    'materiel-creer':
+        'Range ta grille dans Grilles de critères, et ses niveaux dans Échelles de performance s’il y en a. Tu pourras ensuite la modifier là, comme toute autre grille.'
 
 };
 
