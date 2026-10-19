@@ -22,12 +22,13 @@
     var CHANGELOG = [
         {
             // 1.209 (modifier les réponses, l'aide d'« Apporter mon matériel ») — titre et trois items validés par
-            // Grégoire le 19 oct. 2026 (19 h 29), transmis par Cowork (CONSIGNE-LOT-2026-10-19-version-1.209.md).
+            // Grégoire le 19 oct. 2026 (19 h 29), transmis par Cowork (CONSIGNE-LOT-2026-10-19-version-1.209.md) ;
+            // item 1 corrigé par Grégoire à 19 h 50 (« dans une grille en points »).
             version: '1.209',
             couleur: 'vert',
             titre: 'Modifier tes réponses, et l’aide d’Apporter mon matériel',
             items: [
-                'Dans «&nbsp;Grilles de critères&nbsp;», les réponses d’un critère créé à partir de ta grille se modifient&nbsp;: corrige leur texte, change leurs points, ajoute une réponse ou retire-en une. Tout s’enregistre seul, et aucune note déjà donnée ne change.',
+                'Dans «&nbsp;Grilles de critères&nbsp;», les réponses d’un critère créé à partir de ta grille se modifient&nbsp;: corrige leur texte et, dans une grille en points, change leurs points, ajoute une réponse ou retire-en une. Tout s’enregistre seul, et aucune note déjà donnée ne change.',
                 '«&nbsp;Apporter mon matériel&nbsp;» a maintenant son aide&nbsp;: une aide «&nbsp;i&nbsp;» à côté du titre, des bulles sur ses boutons, une section dans Aide › Configuration et une étape de la visite guidée.',
                 'Six termes s’ajoutent au lexique&nbsp;: critère, élément observable, descripteur, niveau, points et pondération.'
             ]
