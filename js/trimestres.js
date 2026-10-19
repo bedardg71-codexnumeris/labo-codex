@@ -195,7 +195,13 @@
         // Rend enfin lues les écritures existantes de purgerLegacy()
         // ({id}_dureePeriode) et du pack démo (demo_dureePeriode). La valeur nue
         // héritée est copiée vers TOUS les trimestres par migrerResidusClesNues().
-        'dureePeriode'
+        'dureePeriode',
+        // 🆕 La dissection, lot 11 (19 oct. 2026) : le brouillon de la dissection en cours
+        // (« Apporter mon matériel »), écrit à chaque geste par materiel-dissection.js. Par
+        // trimestre, comme les grilles qu'elle crée ; en démo, `cle()` le range sous `demo_` et
+        // il ne touche pas celui de l'enseignant. Sans semis ; exclu de l'archive d'un groupe
+        // (reserve.js) : un travail en cours ne voyage pas.
+        'brouillonDissection'
     ];
 
     // 🆕 #464/CT-26 : clés inconnues déjà signalées (un seul warn par clé et par

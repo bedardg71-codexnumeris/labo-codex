@@ -7,6 +7,14 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS – 18 OCT. 2026, 23 h 05 (écrit par Cowork) : **1.206.0 ET 1.207.0 COMMITÉES SUR `main`, LE PUSH ATTEND LE VERDICT DE LA NUIT**
+
+**En ligne au moment d'écrire** : `1d5ecaf1` (1.205.0, « Couper un morceau »). **`main` local** : dix commits devant `origin/main`, jusqu'à `0bdce851` (demande de relecture de la 1.207.0) : le lot 7 « Rattacher » et sa correction, la 1.206.0 (`c7167fc9`), les lots 9 et 9b (créer la grille même s'il manque des points, et la garde de la note pour les critères marqués « à compléter »), la 1.207.0 (`e76e65fe`). Tout est relu et accepté par Cowork.
+**Ce soir (temps B)** : un seul verdict complet sur `0bdce851`, Cowork, Chrome et Safari fermés ; vert : push des deux versions ensemble ; rouge : pas de push. **À constater au début de la prochaine session** : `git log origin/main -1` et la version chez Netlify.
+**Non commités, à commiter avec le prochain commit** : ce fichier et `plans de travail/VERDICT-RELECTURE-2026-10-18-version-1.207.0.md`. La branche `ci/verdict-morceaux-2` attend toujours sa fusion (lundi 19 après-midi).
+↻ **Mesuré le 19 oct. au matin (Claude Code, audit de début de session)** : le verdict de la nuit a été vert (`0bdce851`, code 0, 0 instable, rendu à 0 h 32) et le push fait à 0 h 33 : `origin/main` = `0bdce851`, CI `success` (run 39200083303). Ce fichier et le verdict de la 1.207.0 partent avec le commit du lot 11 ; la limite du paquet est inscrite (#1110). La version chez Netlify n'est pas constatée.
+**Suite** : lundi avant 11 h, la porte de Grégoire (`PORTE-TERRAIN-2026-10-18-la-dissection.md`, §6 et §7) ; 11 h, la rencontre de la communauté. Au BACKLOG : #1108 (la « Grille de base » de l'assistant de pratique, sans pondération), et la limite du paquet d'une cartouche ou d'une production qui emporte une grille à compléter (verdict de la 1.207.0, à inscrire).
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 17 OCT. 2026, 20 h 04 (écrit par Cowork) : **1.203.0 EN LIGNE ; TOUT EST SUR `main`, POUSSÉ**
 
 **En ligne** : `71cdde64` (1.203.0, « Apporter mon matériel »), poussé vers 19 h 55 ; à constater chez Netlify (§0 de la porte). **`main` local** = `origin/main`.

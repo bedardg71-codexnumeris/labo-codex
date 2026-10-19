@@ -38,6 +38,9 @@
  * main » mène vers Grilles de critères. L'assistant en sept étapes est DÉBRANCHÉ, pas supprimé :
  * plus aucun geste ne l'ouvre (`charger`, `ouvrirAssistant` restent), son retrait est inscrit pour
  * après lundi. La dissection, lot 2a : sa création aboutit ici (`montrerCreee`, la confirmation).
+ * La dissection, lot 11 (`CONSIGNE-LOT-2026-10-19-dissection-11-enregistrement.md`) : à l'ouverture de
+ * l'onglet, son brouillon la rouvre telle qu'elle était (`reprendreDissection`) ; « Coller une autre
+ * grille » (`recommencer`) l'efface.
  */
 (function () {
     'use strict';
@@ -892,9 +895,17 @@
             montrerErreur('');
             sousSection('grille-criteres');
         },
+        /**
+         * « Coller une autre grille » (dans la dissection, après sa confirmation, ou sur la confirmation d'une
+         * grille créée) : retour à l'accueil. Lot 11 : c'est le geste qui efface le brouillon de la dissection
+         * (supposition de Claude Code pour celui de la confirmation : le même mot, le même effet).
+         */
         recommencer: function () {
             etat = { ecran: 'accueil', modele: null, etapes: [], etape: 0, montrerManquants: false, resume: null, erreurCreation: '', enCours: false };
-            if (window.materielDissection) window.materielDissection.fermer();
+            if (window.materielDissection) {
+                window.materielDissection.oublierBrouillon();
+                window.materielDissection.fermer();
+            }
             rendre();
             var collage = el('materiel-zone-collage');
             if (collage) { collage.value = ''; collage.focus(); }
@@ -950,11 +961,27 @@
         confirmationHtml: confirmationHtml
     };
 
+    /**
+     * Lot 11 : l'onglet s'ouvre sur l'accueil, sans dissection en cours ; son brouillon lisible la rouvre
+     * telle qu'elle était, sans question. Illisible : l'accueil, et un mot (le brouillon reste).
+     */
+    function reprendreDissection() {
+        if (etat.ecran !== 'accueil' || !window.materielDissection || window.materielDissection.estOuverte()) return;
+        if (window.materielDissection.reprendre() === 'illisible') montrerErreur(MESSAGE_BROUILLON_ILLISIBLE);
+    }
+
+    // Texte de Claude Code, 19 oct., PROVISOIRE (lot 11).
+    var MESSAGE_BROUILLON_ILLISIBLE = 'Ta dissection précédente n’a pas pu être relue : elle reste gardée telle quelle. Colle une grille pour en commencer une autre ; elle la remplacera.';
+
     function initialiser() {
         var zone = el('materiel-zone-collage');
         if (zone && !zone.dataset.materielBranche) {
             zone.addEventListener('paste', surCollage);
             zone.dataset.materielBranche = '1';
+            // L'événement public de navigation.js (zone protégée, non touchée) ; le brouillon se lit DB prête.
+            window.addEventListener('sectionAffichee', function (ev) {
+                if (ev.detail && ev.detail.idSousSection === 'conception-materiel') window.auDbPret(reprendreDissection);
+            });
         }
     }
 

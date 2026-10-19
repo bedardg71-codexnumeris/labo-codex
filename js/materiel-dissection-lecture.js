@@ -34,6 +34,8 @@
  * Lot 7 (`CONSIGNE-LOT-2026-10-18-dissection-7-rattacher.md`) : rattacher un morceau à celui dont il est
  * la suite. Lot 12 (`CONSIGNE-LOT-2026-10-19-dissection-12-rattacher-sans-ordre.md`) : l'ordre des touchers ne
  * compte plus ; `joindre` fait des groupes, lus dans l'ordre du document (`morceauxLus`). Rien n'est déplacé.
+ * Lot 11 (`CONSIGNE-LOT-2026-10-19-dissection-11-enregistrement.md`) : le brouillon de la dissection en
+ * cours (`brouillon`, `lireBrouillon`) ; ce module ne l'écrit pas, `materiel-dissection.js` le fait.
  */
 (function () {
     'use strict';
@@ -408,6 +410,71 @@
             texte[a] = tout.map(function (b) { return M.texte[b]; }).join(' ');
         });
         return { ordre: M.ordre.filter(function (id) { return !valide[id]; }), texte: texte, pos: M.pos, suites: suites };
+    };
+
+    // ------------------------------------------------------------------
+    // 1 quater. LE BROUILLON (lot 11) : la dissection en cours, telle qu'enregistrée
+    // ------------------------------------------------------------------
+
+    /*
+     * Lot 11 (`CONSIGNE-LOT-2026-10-19-dissection-11-enregistrement.md`) : la dissection en cours
+     * s'enregistre à chaque geste, et se reprend telle quelle. Le brouillon porte le document DÉJÀ
+     * DISSÉQUÉ (jamais le HTML collé), les étiquettes, les coupes (chacune avec le document d'avant,
+     * pour « Annuler la dernière coupe »), les rattachements et la saisie. Rien de l'état d'écran
+     * (l'outil en main, le morceau choisi, l'erreur affichée).
+     */
+    D.FORMAT_BROUILLON = 'dissection-1';
+
+    function copie(x) { return JSON.parse(JSON.stringify(x)); }
+    function chaine(x) { return typeof x === 'string'; }
+    function dictionnaire(o, valeurOk) {
+        return !!o && typeof o === 'object' && !Array.isArray(o) && Object.keys(o).every(function (k) { return valeurOk(o[k]); });
+    }
+    function ligneOk(L) { return !!L && chaine(L.id) && chaine(L.t); }
+    function fusionOk(n) { return n === undefined || (Number.isInteger(n) && n >= 1); }
+    function docOk(d) {
+        if (!d || typeof d !== 'object') return false;
+        if (d.mode === 'texte') return Array.isArray(d.lines) && d.lines.every(ligneOk);
+        if (d.mode !== 'table' || !Array.isArray(d.rows)) return false;
+        return d.rows.every(function (row) {
+            return Array.isArray(row) && row.every(function (c) {
+                return !!c && fusionOk(c.cs) && fusionOk(c.rs) && Array.isArray(c.lines) && c.lines.every(ligneOk);
+            });
+        });
+    }
+    function coupeOk(c) {
+        return !!c && docOk(c.doc) && chaine(c.id) && (c.type === null || chaine(c.type))
+            && Array.isArray(c.parties) && c.parties.length === 2 && c.parties.every(chaine);
+    }
+
+    /**
+     * Le brouillon d'une dissection en cours : un NOUVEL objet, sans référence partagée avec `etat`.
+     * @param {object} etat - { doc, liens, coupes, rattachements, nomSaisi, compte, valeurs }
+     */
+    D.brouillon = function (etat) {
+        return copie({
+            format: D.FORMAT_BROUILLON,
+            doc: etat.doc,
+            liens: etat.liens || {},
+            coupes: etat.coupes || [],
+            rattachements: etat.rattachements || {},
+            nomSaisi: etat.nomSaisi == null ? null : etat.nomSaisi,
+            compte: etat.compte === 'niveaux' ? 'niveaux' : 'points',
+            valeurs: etat.valeurs || {}
+        });
+    };
+
+    /**
+     * Relit un brouillon enregistré. Rend une COPIE de ce qu'il porte, ou null s'il est illisible (format
+     * inconnu, champ abîmé) : l'appelant laisse alors l'accueil s'ouvrir, sans effacer le brouillon.
+     */
+    D.lireBrouillon = function (b) {
+        if (!b || typeof b !== 'object' || b.format !== D.FORMAT_BROUILLON) return null;
+        if (!docOk(b.doc) || !dictionnaire(b.liens, chaine) || !dictionnaire(b.rattachements, chaine)) return null;
+        if (!Array.isArray(b.coupes) || !b.coupes.every(coupeOk)) return null;
+        if (!(b.nomSaisi === null || chaine(b.nomSaisi)) || (b.compte !== 'points' && b.compte !== 'niveaux')) return null;
+        if (!dictionnaire(b.valeurs, function (v) { return dictionnaire(v, chaine); })) return null;
+        return copie({ doc: b.doc, liens: b.liens, coupes: b.coupes, rattachements: b.rattachements, nomSaisi: b.nomSaisi, compte: b.compte, valeurs: b.valeurs });
     };
 
     // ------------------------------------------------------------------

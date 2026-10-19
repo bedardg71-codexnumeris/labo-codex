@@ -181,7 +181,9 @@ var CLES_EXCLUES_ARCHIVE = [
     'recherchePresences',
     'groupeSelectionne',
     'pipeline_queue',
-    'archivesBundles'
+    'archivesBundles',
+    // La dissection, lot 11 (19 oct. 2026) : le brouillon d'une grille en cours d'étiquetage.
+    'brouillonDissection'
 ];
 
 /**
