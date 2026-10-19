@@ -76,7 +76,8 @@
      * Lot 7, « Rattacher » : textes de Claude Code (18 oct.), sur le modèle de ceux de « Couper ». Validé G.
      * 18 oct. 17 h 18 : `annule`, `lie`, `etiquetteRetiree`, `defait`, `suiteDe`. Lot 12 : `bandeau`,
      * `bandeauChoix`, `enMain`, `choisi`, `reportee`, `rien`, `nomEntier` et `sansEtiquette` (« le texte
-     * entier » pour « les deux », « Détache-le » pour « Défais le lien ») de Claude Code, 19 oct., PROVISOIRES.
+     * entier » pour « les deux », « Détache-le » pour « Défais le lien ») de Claude Code, 19 oct., validé G.
+     * 19 oct. 9 h 06.
      * Les textes collés y entrent par leurs premiers mots (`premiersMots`).
      */
     var TEXTES_LIEN = {
@@ -96,7 +97,7 @@
     };
 
     /**
-     * Lot 11 : textes de Claude Code (19 oct.), PROVISOIRES. `geste` n'apparaît que sur un échec, dans
+     * Lot 11 : textes de Claude Code (19 oct.), validé G. 19 oct. 9 h 06. `geste` n'apparaît que sur un échec, dans
      * le témoin commun (« Non enregistré – ‹geste› : ‹raison› »).
      */
     var TEXTES_BROUILLON = {

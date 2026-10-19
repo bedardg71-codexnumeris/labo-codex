@@ -970,7 +970,7 @@
         if (window.materielDissection.reprendre() === 'illisible') montrerErreur(MESSAGE_BROUILLON_ILLISIBLE);
     }
 
-    // Texte de Claude Code, 19 oct., PROVISOIRE (lot 11).
+    // Texte de Claude Code, 19 oct. (lot 11), validé G. 19 oct. 9 h 06.
     var MESSAGE_BROUILLON_ILLISIBLE = 'Ta dissection précédente n’a pas pu être relue : elle reste gardée telle quelle. Colle une grille pour en commencer une autre ; elle la remplacera.';
 
     function initialiser() {
