@@ -21,6 +21,17 @@
 
     var CHANGELOG = [
         {
+            // 1.208 (« Rattacher » sans ordre, la dissection qui s'enregistre) — titre et deux items validés par
+            // Grégoire le 19 oct. 2026 (9 h 07), transmis par Cowork (CONSIGNE-LOT-2026-10-19-version-1.208.md).
+            version: '1.208',
+            couleur: 'vert',
+            titre: 'Rattacher sans ordre, et une dissection qui s’enregistre',
+            items: [
+                '«&nbsp;Rattacher&nbsp;» ne dépend plus de l’ordre de tes touchers&nbsp;: touche deux morceaux d’un même texte, l’application les lit dans l’ordre de ta grille, et le nom entier s’affiche sous le premier. Un troisième morceau rejoint le groupe&nbsp;; deux touchers sur un morceau rattaché le détachent.',
+                'Ta dissection s’enregistre à chaque geste&nbsp;: tu la retrouves telle que tu l’as laissée, même après avoir fermé l’application. «&nbsp;Coller une autre grille&nbsp;» repart à neuf.'
+            ]
+        },
+        {
             // 1.207 (« Créer ta grille, même incomplète ») — titre et deux items validés par Grégoire le
             // 18 oct. 2026 (20 h 08), transmis par Cowork (CONSIGNE-LOT-2026-10-18-dissection-10-version-1.207.md).
             version: '1.207',
