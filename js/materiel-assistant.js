@@ -1,23 +1,27 @@
 /**
- * materiel-assistant.js — « Apporter mon matériel », lot 2 : la LOGIQUE de l'assistant et de
- * la création, en fonctions pures.
+ * materiel-assistant.js — « Apporter mon matériel », lot 2 : la LOGIQUE de la création, en fonctions
+ * pures — ce qui manque avant de créer (`calculs`), et les objets neufs (`construire`).
  *
  * Consigne : `plans de travail/CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-2.md`.
- * Référence de comportement : le prototype validé (`PROTOTYPE-2026-10-16-…dc.html`), ses
- * fonctions `etapesPour` et `calculs`.
+ * Référence de comportement : le prototype validé (`PROTOTYPE-2026-10-16-…dc.html`), sa fonction `calculs`.
  *
- * Module de FONCTIONS PURES : aucun stockage, aucun DOM. Le modèle est celui que produit
- * `materielLecture` (chaque valeur est une paire `{ valeur, etat }`) ; les opérations qui le
- * changent de forme rendent une COPIE. `materiel.js` branche la page et fait les écritures.
+ * Module de FONCTIONS PURES : aucun stockage, aucun DOM. Le modèle (chaque valeur est une paire
+ * `{ valeur, etat }`) vient de la dissection (`materielDissectionLecture.modele`) ; `materielCreation`
+ * fait les écritures.
+ *
+ * ⚰ 19 oct. 2026 (`CONSIGNE-LOT-2026-10-19-retrait-ancien-assistant.md`) : l'assistant en sept étapes est
+ * retiré, et avec lui ce qu'il était seul à appeler ici — ses étapes (`preparer`, `etapesPour`,
+ * `recalculerEtapes`) et les gestes qui changeaient la forme du modèle (« Ramener à 100 % », ajouter un
+ * critère ou un niveau, placer, écarter, annuler un passage, choisir la nature, le sens, un rôle). Le nom
+ * du fichier reste : la dissection et la création l'appellent `materielAssistant`.
  *
  * ⚠ Écart à la consigne, décidé par Grégoire le 17 oct. 2026 : la consigne supposait qu'un
  * niveau sans `valeurCalcul` prend le milieu de sa plage à l'évaluation. Mesuré : faux depuis
  * #527 (`valeurNumeriqueDuNiveau` rend null, le critère sort du total, la note reste vide).
- * L'assistant DEMANDE donc la note retenue de chaque niveau, vide au départ, rien de proposé.
+ * La note retenue de chaque niveau est donc DEMANDÉE (`calculs`), vide au départ, rien de proposé.
  *
  * Étape 5 du plan « prêt pour lundi » (`CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-5-points.md`) :
- * une grille EN POINTS (`m.enPoints`, aucune colonne de niveau) passe par Sens du tableau, Ce que
- * contient ton tableau, Points (s'il en manque), À classer, Vérification. Elle se crée SEULE :
+ * une grille EN POINTS (`m.enPoints`, aucune colonne de niveau) se crée SEULE :
  * critères analytiques, le maximum de chacun est sa pondération ; ni échelle ni cartouche (#941 :
  * une grille entièrement en points se note sans échelle).
  */
@@ -54,8 +58,6 @@
      */
     A.COULEURS = ['#27ae60', '#3498db', '#f39c12', '#e74c3c', '#9b59b6', '#1abc9c'];
 
-    function paire(valeur, etat) { return { valeur: valeur, etat: etat }; }
-    function copie(m) { return JSON.parse(JSON.stringify(m)); }
     function texte(p) { return String(p && p.valeur != null ? p.valeur : '').trim(); }
 
     /** « 12,5 », « 85 % » → 12.5, 85 ; tout le reste → NaN (jamais un zéro inventé). */
@@ -66,57 +68,8 @@
 
     A.etatSaisi = function (v) { return String(v == null ? '' : v).trim() ? 'saisi' : 'remplir'; };
 
-    /** Ajoute au modèle ce que la lecture ne produit pas : la note retenue de chaque niveau. */
-    A.preparer = function (m) {
-        var n = copie(m);
-        n.niveaux.forEach(function (niv) { if (!niv.note) niv.note = paire('', 'remplir'); });
-        return n;
-    };
-
     // ------------------------------------------------------------------
-    // 1. LES ÉTAPES
-    // ------------------------------------------------------------------
-
-    function aDuTexte(m) {
-        return m.criteres.some(function (c) { return c.cases.some(function (d) { return texte(d); }); });
-    }
-
-    function niveauARegler(n) {
-        return n.min.etat !== 'repris' || n.max.etat !== 'repris' || !texte(n.note);
-    }
-
-    /**
-     * Les étapes, sautées si déjà réglées (prototype, `etapesPour`). « Ce que contient ton
-     * tableau » (lot 3a) suit toujours « Sens du tableau » : c'est le lieu de la correction.
-     */
-    A.etapesPour = function (m) {
-        if (m.source === 'main') return ['final'];
-        var e = ['axes'];
-        if (m.tableau) e.push('roles');
-        if (A.estEnPoints(m)) {
-            // Ni Nature des cases, ni Plages de notes : il n'y a ni cases ni niveaux.
-            if (m.criteres.some(function (c) { return c.ponderation.etat !== 'repris'; })) e.push('points');
-            if (m.aClasser.length) e.push('classer');
-            e.push('final');
-            return e;
-        }
-        if (aDuTexte(m)) e.push('nature');
-        if (m.niveaux.some(niveauARegler)) e.push('valeurs');
-        if (m.criteres.some(function (c) { return c.ponderation.etat !== 'repris'; })) e.push('pond');
-        if (m.aClasser.length) e.push('classer');
-        e.push('final');
-        return e;
-    };
-
-    /** Après une inversion ou un rôle changé : la liste se recalcule, l'étape courante est gardée si elle existe encore. */
-    A.recalculerEtapes = function (m, anciennes, index) {
-        var etapes = A.etapesPour(m);
-        var k = etapes.indexOf(anciennes[index]);
-        return { etapes: etapes, etape: k >= 0 ? k : 0 };
-    };
-
-    // ------------------------------------------------------------------
-    // 2. LES VÉRIFICATIONS (rien de bloquant n'est silencieux)
+    // 1. LES VÉRIFICATIONS (rien de bloquant n'est silencieux)
     // ------------------------------------------------------------------
 
     function compte(n, un, plusieurs) { return n === 1 ? un : plusieurs.replace('#', n); }
@@ -279,122 +232,10 @@
         return 'La note retenue de « ' + (texte(hors.titre) || 'sans nom') + ' » (' + fmt(A.nombre(hors.note.valeur)) + ' %) est hors de sa plage : il pourrait être utile de la vérifier.';
     }
 
-    // ------------------------------------------------------------------
-    // 3. CE QUI CHANGE LA FORME DU MODÈLE (rend une copie)
-    // ------------------------------------------------------------------
-
-    /**
-     * « Ramener à 100 % » : conversion proportionnelle en entiers qui totalisent 100, par la
-     * méthode des plus grands restes (à égalité, l'ordre du tableau). Rien ne se convertit sans
-     * ce geste. Sans effet si une pondération manque ou si le total est nul.
-     */
-    A.ramenerA100 = function (m) {
-        var ponds = m.criteres.map(function (c) { return A.nombre(c.ponderation.valeur); });
-        var total = ponds.reduce(function (s, p) { return s + p; }, 0);
-        if (!ponds.length || ponds.some(isNaN) || !(total > 0)) return m;
-        var bruts = ponds.map(function (p) { return p * 100 / total; });
-        var entiers = bruts.map(Math.floor);
-        var reste = 100 - entiers.reduce(function (s, p) { return s + p; }, 0);
-        bruts.map(function (b, i) { return { i: i, r: b - entiers[i] }; })
-            .sort(function (a, b) { return b.r - a.r || a.i - b.i; })
-            .slice(0, reste)
-            .forEach(function (x) { entiers[x.i] += 1; });
-        var n = copie(m);
-        n.criteres.forEach(function (c, i) { c.ponderation = paire(String(entiers[i]), 'complete'); });
-        n.pondRamenee = true;
-        return n;
-    };
-
-    function critereVide(m, nom, deClasser) {
-        var c = {
-            nom: nom ? paire(nom, 'saisi') : paire('', 'remplir'),
-            ponderation: paire('', 'remplir'),
-            cases: m.niveaux.map(function () { return paire('', 'vide'); }),
-            sousCriteres: [], description: paire('', 'vide')
-        };
-        if (deClasser != null) c.deClasser = deClasser;
-        return c;
-    }
-
-    A.ajouterCritere = function (m) {
-        var n = copie(m);
-        n.criteres.push(critereVide(n));
-        return n;
-    };
-
-    /** #1091 : au plus 20 niveaux, bornés à la saisie (les descripteurs n'en voyagent pas plus). */
-    A.ajouterNiveau = function (m) {
-        if (m.niveaux.length >= A.MAX_NIVEAUX) return m;
-        var n = copie(m);
-        n.niveaux.push({ titre: paire('', 'remplir'), min: paire('', 'remplir'), max: paire('', 'remplir'), note: paire('', 'remplir') });
-        n.niveaux = window.materielLecture.coder(n.niveaux);
-        n.criteres.forEach(function (c) { c.cases.push(paire('', 'vide')); });
-        return n;
-    };
-
-    function passage(n, id) { return n.aClasser.filter(function (a) { return a.id === id; })[0]; }
-
-    /** « Ajouter comme critère » : le passage devient un critère, marqué pour pouvoir l'annuler. */
-    A.placer = function (m, id) {
-        var n = copie(m), a = passage(n, id);
-        if (!a || a.statut !== 'attente') return m;
-        a.statut = 'place';
-        n.criteres.push(critereVide(n, a.texte.slice(0, 120), id));
-        return n;
-    };
-
-    A.ecarter = function (m, id) {
-        var n = copie(m), a = passage(n, id);
-        if (!a || a.statut !== 'attente') return m;
-        a.statut = 'ecarte';
-        return n;
-    };
-
-    /** « Annuler » : le passage revient en attente ; le critère qu'il avait fait naître repart. */
-    A.annuler = function (m, id) {
-        var n = copie(m), a = passage(n, id);
-        if (!a) return m;
-        if (a.statut === 'place') n.criteres = n.criteres.filter(function (c) { return c.deClasser !== id; });
-        a.statut = 'attente';
-        return n;
-    };
-
-    A.choisirNature = function (m, valeur) {
-        var n = copie(m);
-        n.nature = paire(valeur === 'retroactions' ? 'retroactions' : 'descripteurs', 'choisi');
-        return n;
-    };
-
-    /** Le sens du tableau : une inversion (des rangées LUES, `materielLecture.inverser`) si le choix change. */
-    A.choisirSens = function (m, enColonnes) {
-        if (!!m.critEnColonnes === !!enColonnes || !m.lecture) return m;
-        return A.preparer(window.materielLecture.inverser(m));
-    };
-
-    /**
-     * Lot 3a : le rôle d'une rangée (`'rangees'`) ou d'une colonne (`'colonnes'`) change, et la
-     * grille se RELIT depuis le document (`materielLecture.relire`).
-     */
-    A.choisirRole = function (m, sorte, index, role) {
-        if (!m.roles || !m.lecture || !m.roles[sorte] || m.roles[sorte][index] === role) return m;
-        var r = window.materielLecture.changerRole(m.roles, sorte, index, role);
-        return r === m.roles ? m : A.preparer(window.materielLecture.relire(m, r));
-    };
-
-    /** Dans une « Suite du critère », ce que devient la case de la colonne « Noms des critères ». */
-    A.choisirSuiteNom = function (m, valeur) {
-        var permis = window.materielLecture.CHOIX_SUITE.map(function (x) { return x.id; });
-        if (!m.roles || !m.lecture || m.roles.suiteNom === valeur || permis.indexOf(valeur) < 0) return m;
-        var r = JSON.parse(JSON.stringify(m.roles));
-        r.suiteNom = valeur;
-        r.propose = false;
-        return A.preparer(window.materielLecture.relire(m, r));
-    };
-
     A.estRetro = function (m) { return !!(m.nature && m.nature.valeur === 'retroactions'); };
 
     // ------------------------------------------------------------------
-    // 4. CONSTRUIRE : du modèle aux trois objets NEUFS
+    // 2. CONSTRUIRE : du modèle aux trois objets NEUFS
     // ------------------------------------------------------------------
 
     /** Un nom libre parmi `existants` : « X », sinon « X (2) », « X (3) »… */

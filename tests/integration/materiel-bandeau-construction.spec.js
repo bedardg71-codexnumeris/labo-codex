@@ -7,8 +7,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // « APPORTER MON MATÉRIEL » — le bandeau « En construction » (demande de Grégoire, 17 oct. 2026),
 // dans un vrai WebKit : visible à TOUS les écrans de l'onglet, pas seulement à l'accueil, que
 // materiel.js masque dès qu'un collage s'ouvre. Il reste jusqu'à ce que Grégoire décide de le retirer.
-// 18 oct. 2026 (la dissection, lot 1) : l'assistant en sept étapes est débranché ; les écrans sont
-// l'accueil et la dissection, étiquette en main ou non.
+// 18 oct. 2026 (la dissection, lot 1) : l'assistant en sept étapes est débranché (retiré le 19) ; les écrans
+// sont l'accueil et la dissection, étiquette en main ou non.
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);

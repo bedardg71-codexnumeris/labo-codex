@@ -9,7 +9,7 @@
  *       retours à la ligne gardés ; tout texte échappé ; pas de doublon pour un critère algorithmique.
  *   H — UN CRITÈRE SANS DONNÉES : le HTML de la liste des critères est celui d'avant, à l'octet.
  *   C — LA CONFIRMATION : le résumé de la création porte les identifiants des objets créés.
- *   T — LES DEUX TEXTES « fichier d'origine » (validés par Grégoire, 17 oct., 8 h 53).
+ *   T — LE TEXTE « fichier d'origine » de l'accueil (validé par Grégoire, 17 oct., 8 h 53 ; son jumeau, le message « aucun tableau », est parti le 19 oct. avec l'assistant).
  */
 import { describe, it, expect } from 'vitest';
 import { JSDOM } from 'jsdom';
@@ -132,10 +132,9 @@ describe('lot 3b1 · C et T — la confirmation, les textes', () => {
         expect(src).toContain("ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null, cartouche: o.cartouche ? o.cartouche.id : null }");
     });
 
-    it('T.a l’étape 1 de l’accueil et le message « aucun tableau » parlent du fichier d’origine', () => {
+    // 19 oct. 2026 : le message « aucun tableau » est parti avec l'assistant en sept étapes, qui seul l'affichait.
+    it('T.a l’étape 1 de l’accueil parle du fichier d’origine', () => {
         const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
         expect(html).toContain('Ouvre ta grille dans son fichier d’origine (Word, Pages ou un autre traitement de texte), sélectionne le tableau entier – pas seulement le texte de ses cases (ou ses cellules), mais bien le tableau –, puis copie-le. Le texte copié d’un PDF est accepté aussi, mais il arrive sans ses cases : le fichier d’origine donne un meilleur résultat.');
-        const L = chargerScript('js/materiel-lecture.js', {}).materielLecture;
-        expect(L.MESSAGE_SANS_TABLEAU).toBe('L’application n’a pas trouvé de tableau dans ce que tu as collé. Si ta grille vient d’un PDF, ce serait la cause : un PDF ne transmet que du texte, sans ses cases. Tu pourrais la copier depuis son fichier d’origine (Word, Pages ou un autre traitement de texte), en sélectionnant le tableau entier, ou la taper à la main.');
     });
 });

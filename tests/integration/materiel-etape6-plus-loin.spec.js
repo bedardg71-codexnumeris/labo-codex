@@ -1,27 +1,20 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
-// ⏸ 18 oct. 2026 (la dissection, lot 1) : l'assistant en sept étapes est DÉBRANCHÉ de l'onglet, plus aucun
-// collage ni bouton ne l'ouvre. Ces essais le parcouraient : suspendus, pas supprimés, comme son code. Son
-// retrait est inscrit pour après lundi (PLAN-2026-10-18-la-dissection-pour-lundi.md, « Après lundi »).
-test.skip(() => true, 'Assistant en sept étapes débranché le 18 oct. 2026 (dissection, lot 1) ; retrait après lundi.');
+// 19 oct. 2026 : l'assistant en sept étapes est RETIRÉ ; la confirmation et « Aller plus loin » restent (la
+// dissection y aboutit). La grille en points se crée désormais par la création réelle (`materielCreation.creer`),
+// à partir du modèle que l'assistant en produisait, figé ; la confirmation s'ouvre par `materiel.montrerCreee`.
+const EN_POINTS = JSON.parse(readFileSync(path.join(__dirname, '..', 'fixtures', 'materiel', 'modeles-assistant-figes.json'), 'utf8')).modeles['plus-loin · en points'];
 
 // « APPORTER MON MATÉRIEL », ÉTAPE 6 DU PLAN « PRÊT POUR LUNDI » (consigne du 17 oct. 2026), dans un vrai WebKit.
 //
-//   · une grille en points collée → « Créer ma grille » → l'encadré « Aller plus loin avec ta grille »
+//   · une grille en points créée → sa confirmation → l'encadré « Aller plus loin avec ta grille »
 //     paraît sous les cartes ; son lien ouvre l'aide existante « Type de critère d'évaluation »,
 //     l'assistance active (le défaut) comme désactivée (bouton « Assistance ») ; « Fermer » la referme.
 // ⛔ Textes inventés : aucun mot d'une grille réelle.
-
-function grilleHtml() {
-    return '<p>Lecture fictive : barème</p><table>' +
-        '<tr><td><p><b>CRITÈRES</b></p></td><td><p><b>NOTE</b></p></td><td><p><b>COMMENTAIRES</b></p></td></tr>' +
-        '<tr><td><p>Repérage des idées</p><p>Les idées du texte sont relevées.</p></td><td><p>/10</p></td><td><p>&nbsp;</p></td></tr>' +
-        '<tr><td><p>Organisation</p><p>Le plan est suivi.</p></td><td><p>/15</p></td><td><p>&nbsp;</p></td></tr>' +
-        '</table>';
-}
 
 async function ouvrirConception(page) {
     await page.goto(indexHtml);
@@ -43,15 +36,15 @@ async function ouvrirConception(page) {
     await expect(page.locator('#conception-materiel')).toBeVisible();
 }
 
-/** Un VRAI événement « coller » sur la zone, avec le HTML au presse-papiers (comme Word ou Pages). */
-async function coller(page, html) {
-    await page.evaluate((h) => {
-        const zone = document.getElementById('materiel-zone-collage');
-        const ev = new Event('paste', { bubbles: true, cancelable: true });
-        const donnees = { 'text/html': h, 'text/plain': '' };
-        Object.defineProperty(ev, 'clipboardData', { value: { getData: (t) => donnees[t] || '' } });
-        zone.dispatchEvent(ev);
-    }, html);
+/** La grille créée, puis sa confirmation — le chemin de la dissection, lot 2a. */
+async function creerEtConfirmer(page, modele) {
+    const erreur = await page.evaluate(async (m) => {
+        const r = await window.materielCreation.creer(m);
+        if (r.erreur) return r.erreur;
+        window.materiel.montrerCreee(r.resume);
+        return null;
+    }, modele);
+    expect(erreur).toBeNull();
 }
 
 for (const assistance of [true, false]) test('étape 6 · après une grille en points, « Aller plus loin » paraît et son lien ouvre l’aide des trois types — assistance ' + (assistance ? 'active' : 'désactivée'), async ({ page }) => {
@@ -60,10 +53,7 @@ for (const assistance of [true, false]) test('étape 6 · après une grille en p
     await ouvrirConception(page);
     await page.evaluate((a) => window.accompagnement.definirActif(a), assistance);
     expect(await page.evaluate(() => document.body.classList.contains('aide-contextuelle-active'))).toBe(assistance);
-    await coller(page, grilleHtml());
-    await page.locator('[data-action="materiel.suivant"]').click();
-    await page.locator('[data-action="materiel.suivant"]').click();
-    await page.locator('[data-action="materiel.creer"]').click();
+    await creerEtConfirmer(page, EN_POINTS);
     await expect(page.locator('#materiel-titre-cree')).toBeVisible();
 
     const encadre = page.locator('.materiel-plus-loin');

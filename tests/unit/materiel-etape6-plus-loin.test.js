@@ -4,6 +4,7 @@
  * Consigne : plans de travail/CONSIGNE-LOT-2026-10-17-apporter-mon-materiel-6-aller-plus-loin.md (« Les bancs »).
  *
  * Ce que ce banc verrouille, sur le résumé que rend la VRAIE création (`materielCreation.creer`) :
+ * (19 oct. 2026 : l'assistant qui lisait ces grilles est retiré ; ses modèles sont figés, `_helpers/modeles-assistant-figes.js`.)
  *   P — LE BON PARAGRAPHE selon la grille créée : en points, à niveaux, à niveaux avec rétroactions
  *       (la phrase commune seule).
  *   T — LES TEXTES, mot pour mot (validés par Grégoire le 17 oct. à 12 h 07).
@@ -18,6 +19,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { fige } from './_helpers/modeles-assistant-figes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -46,14 +48,14 @@ const db = {
     }
 };
 
-let w, L, A, C, materiel;
+let w, C, materiel;
 let compteur = 0;
 beforeAll(() => {
-    w = chargerScript('js/materiel-lecture.js', { DOMParser: fenetreDom.DOMParser });
+    w = chargerScript('js/materiel-lecture.js', {});   // `plagesContigues`, que `construire` appelle
     chargerScript('js/materiel-assistant.js', {}, w);
     chargerScript('js/materiel-creation.js', { db }, w);
     chargerScript('js/materiel.js', { echapperHtml: vraiEchapperHtml(), db }, w);
-    L = w.materielLecture; A = w.materielAssistant; C = w.materielCreation; materiel = w.materiel;
+    C = w.materielCreation; materiel = w.materiel;
     w.genererIdUnique = (p) => p + 'banc' + (++compteur);
 });
 beforeEach(() => {
@@ -62,29 +64,7 @@ beforeEach(() => {
     db.reset();
 });
 
-/* ------------------------------------------------------------------ les grilles fictives */
-
-const p = (lignes) => lignes.map(l => '<p>' + l + '</p>').join('');
-/** Une grille en points (forme de 1995, sans « Partie »). */
-function grilleEnPointsHtml() {
-    return '<p>Lecture fictive : barème</p><table>' +
-        '<tr><td><p>CRITÈRES</p></td><td><p>NOTE</p></td><td><p>COMMENTAIRES</p></td></tr>' +
-        [['Repérage des idées', ['Les idées du texte sont relevées.'], '/10'],
-         ['Organisation', ['Le plan est suivi.'], '/15']]
-            .map(([nom, expl, pts]) => '<tr><td>' + p([nom].concat(expl)) + '</td><td>' + pts + '</td><td></td></tr>').join('') +
-        '</table>';
-}
-/** L'exemple de l'application, plages saisies, le passage à classer écarté (comme au lot 2). */
-function exempleComplet() {
-    const m = L.interpreter(L.lireHtml(L.exempleHtml()), 'exemple');
-    const plages = [['85', '100', '92'], ['75', '84', '80'], ['65', '74', '70'], ['0', '64', '50']];
-    m.niveaux.forEach((n, j) => {
-        n.min = { valeur: plages[j][0], etat: 'saisi' };
-        n.max = { valeur: plages[j][1], etat: 'saisi' };
-        n.note = { valeur: plages[j][2], etat: 'saisi' };
-    });
-    return A.ecarter(m, m.aClasser[0].id);
-}
+/* ------------------------------------------------------------------ les modèles (figés) */
 
 const TITRE = 'Aller plus loin avec ta grille';
 const EN_POINTS = 'Ta grille note chaque critère en points. Labo Codex pourrait t’aider à suivre la progression de tes étudiant·es à partir d’elle, par exemple en décrivant, pour un critère, ce qu’on attend à chaque niveau.';
@@ -100,9 +80,9 @@ async function confirmation(m) {
     div.innerHTML = materiel.confirmationHtml(r.resume);
     return div;
 }
-const enPoints = () => confirmation(A.preparer(L.interpreter(L.lireHtml(grilleEnPointsHtml()), 'colle')));
-const aNiveaux = () => confirmation(exempleComplet());
-const aRetroactions = () => confirmation(A.choisirNature(exempleComplet(), 'retroactions'));
+const enPoints = () => confirmation(fige('plus-loin · en points'));
+const aNiveaux = () => confirmation(fige('plus-loin · à niveaux'));
+const aRetroactions = () => confirmation(fige('plus-loin · rétroactions'));
 const paragraphes = (d) => [...d.querySelectorAll('.materiel-plus-loin p')].map(x => x.textContent);
 
 /* ======================================================= P — LE BON PARAGRAPHE */
