@@ -4569,7 +4569,7 @@ function mentionEchelleReponses(echelle) {
  * retroaction). Bornes : celles de l'assistant (`MAX_NOM`, `MAX_SOUS_CRITERES`), pour tout critère.
  * ⚠ Ils ne deviennent pas des codes d'annotation : `codes-annotation.js` ne lit que le critère algorithmique
  * activé (sentinelle `sous-criteres-editables`).
- * Textes de Claude Code (20 oct.) : le nom de chaque champ et les deux refus ; le titre et le bouton sont
+ * Textes de Claude Code, validés G. 20 oct. 14 h 35 : le nom de chaque champ et les deux refus ; le titre et le bouton sont
  * ceux du gabarit algorithmique.
  */
 const TEXTES_SOUS_CRITERES = {
@@ -4586,6 +4586,17 @@ const REFUS_SOUS_CRITERES = {
 function _bornesSousCriteres() {
     const A = window.materielAssistant;
     return { nom: (A && A.MAX_NOM) || Infinity, nombre: (A && A.MAX_SOUS_CRITERES) || Infinity };
+}
+
+/**
+ * Le code d'un sous-critère neuf : le plus grand code numérique du critère, plus un ; le rang s'il n'y en a aucun.
+ * F1 du verdict du 20 oct. : le rang seul (`length`) redonnait, après un retrait, un code déjà porté (0, 1, 2 ; on
+ * retire 0 ; on ajoute : « 2 » deux fois) — inerte hors algorithmique, mais le second ne serait pas posable si le
+ * critère le devenait (`_depuisSousCriteres` : le premier gagne).
+ */
+function codeSousCritereNeuf(scs) {
+    const numeros = scs.map(sc => String(sc && sc.code != null ? sc.code : '').trim()).filter(c => /^\d+$/.test(c)).map(Number);
+    return String(numeros.length ? Math.max(...numeros) + 1 : scs.length);
 }
 
 /** Le refus d'un sous-critère de plus, quand le critère en porte déjà `n` ; sinon `null`. */
@@ -5499,7 +5510,7 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
  * @param {number} critereIndex - Index du critère
  */
 async function ajouterSousCritere(grilleId, critereIndex) {
-    let grille = null, refus = null, nouveauCode = -1;
+    let grille = null, refus = null, nouvelIndex = -1;
     await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
@@ -5514,11 +5525,12 @@ async function ajouterSousCritere(grilleId, critereIndex) {
         if (refus) return undefined;
 
         // Générer un ID unique et un code par défaut
-        nouveauCode = g.criteres[critereIndex].sousCriteres.length;
+        const scs = g.criteres[critereIndex].sousCriteres;
+        nouvelIndex = scs.length;
 
-        g.criteres[critereIndex].sousCriteres.push({
+        g.criteres[critereIndex].sousCriteres.push({   // ⚠ ancre lue par materiel-lot3a-roles (F.b)
             id: genererIdUnique('SC_'),
-            code: nouveauCode.toString(),
+            code: codeSousCritereNeuf(scs),
             nom: '',
             ponderation: 1.0,
             retroaction: ''
@@ -5535,7 +5547,7 @@ async function ajouterSousCritere(grilleId, critereIndex) {
     // Réafficher la grille ; le focus sur le nom du sous-critère neuf (comme « + Ajouter une tranche »).
     afficherCriteresGrille(grille);
     const champ = [...document.querySelectorAll('#listeCriteres [data-champ="nom"][data-sc-index]')]
-        .find(x => x.dataset.critereIndex === String(critereIndex) && x.dataset.scIndex === String(nouveauCode));
+        .find(x => x.dataset.critereIndex === String(critereIndex) && x.dataset.scIndex === String(nouvelIndex));
     if (champ) champ.focus();
 }
 
