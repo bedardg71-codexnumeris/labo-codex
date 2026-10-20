@@ -23,7 +23,8 @@
         {
             // 1.210 (le barème d'un critère en points, le compte des erreurs corrigé) — titre et cinq items proposés
             // par Cowork (10 h 28), validés par Grégoire le 20 oct. 2026 (10 h 30), transmis par Cowork
-            // (CONSIGNE-LOT-2026-10-20-version-1.210.md).
+            // (CONSIGNE-LOT-2026-10-20-version-1.210.md). Items 6 à 8 (#1123, #1124, #1122, fusionnés avant le push) :
+            // validés par Grégoire le 20 oct. 2026, vers 12 h 40.
             version: '1.210',
             couleur: 'vert',
             titre: 'Le barème d’un critère en points, et le compte des erreurs corrigé',
@@ -32,7 +33,10 @@
                 'Le barème a son aide&nbsp;: une aide «&nbsp;i&nbsp;» à côté de son titre, des bulles sur ses champs et une section dans Aide › Configuration. «&nbsp;Barème&nbsp;» et «&nbsp;tranche&nbsp;» s’ajoutent au lexique.',
                 'En mode Évaluer, le nombre d’erreurs de français suit de nouveau les codes posés sur la copie. Il restait à 0 quand la palette Codes n’était pas à l’écran.',
                 'Quand l’observation SOLO est désactivée, les grilles et les échelles ne montrent plus leurs menus SOLO, et un critère neuf reçoit «&nbsp;Aucun&nbsp;». Le dépistage examine alors tous les critères, et le tableau de bord l’indique.',
-                'Après «&nbsp;Créer ma grille&nbsp;», «&nbsp;Revenir à ma dissection&nbsp;» rouvre ta dissection telle que tu l’as laissée, pour en tirer une autre grille.'
+                'Après «&nbsp;Créer ma grille&nbsp;», «&nbsp;Revenir à ma dissection&nbsp;» rouvre ta dissection telle que tu l’as laissée, pour en tirer une autre grille.',
+                'Sur l’iPad, un code ou un tampon se pose maintenant au doigt.',
+                'La gomme est retirée&nbsp;: pour effacer, choisis l’outil Sélection, touche l’annotation, puis la corbeille.',
+                'Dans Annoter et évaluer, passer en mode anonymisé, ou en revenir, garde maintenant la copie ouverte à l’écran.'
             ]
         },
         {
