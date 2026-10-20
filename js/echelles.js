@@ -1723,6 +1723,29 @@ const NIVEAUX_SOLO_ECHELLE = [
 ];
 
 /**
+ * #1117 (19 oct. 2026) — LE PALIER SOLO SUIT LE RÉGLAGE. Case « Activer l'observation de la
+ * structure des résultats d'apprentissage » décochée (`afficherDescriptionsSOLO`), le champ
+ * « Palier SOLO du niveau » n'est pas rendu, dans les deux éditeurs. Masquer n'écrit rien :
+ * le `niveauSOLO` enregistré reste tel quel, et revient au menu quand la case est recochée.
+ * Sans `obtenirPreference` (bancs), le champ est montré.
+ * @param {Object} niveau
+ * @param {string} attrs - les attributs `data-*` du `<select>` propres à l'éditeur
+ */
+function champPalierSOLONiveau(niveau, attrs) {
+    if (typeof obtenirPreference === 'function' && obtenirPreference('afficherDescriptionsSOLO') === false) return '';
+    return `
+                <div class="groupe-form">
+                    <label class="echelle-texte-detail">Palier SOLO du niveau
+                        <span class="echelle-texte-petit"> (facultatif)</span>
+                    </label>
+                    <select class="controle-form"
+                            ${attrs} data-champ="niveauSOLO">
+                        ${optionsNiveauSOLOEchelle(niveau.niveauSOLO)}
+                    </select>
+                </div>`;
+}
+
+/**
  * Rend les <option> du menu SOLO d'un niveau d'échelle.
  *
  * UN SEUL producteur pour les DEUX éditeurs : `echelles.js` en porte deux
@@ -1854,15 +1877,7 @@ function afficherNiveauxNouvelleEchelle() {
                         }
                     })}
                 </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Palier SOLO du niveau
-                        <span class="echelle-texte-petit"> (facultatif)</span>
-                    </label>
-                    <select class="controle-form"
-                            data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}" data-champ="niveauSOLO">
-                        ${optionsNiveauSOLOEchelle(niveau.niveauSOLO)}
-                    </select>
-                </div>
+                ${champPalierSOLONiveau(niveau, `data-on-change="modifierNiveauTempHandler" data-niveau-index="${index}"`)}
             </div>
         </div>
     `}).join('');
@@ -2198,15 +2213,7 @@ ${outils}
                         dataAttrs: Object.assign({ 'champ': 'couleur' }, attrsCouleur)
                     })}
                 </div>
-                <div class="groupe-form">
-                    <label class="echelle-texte-detail">Palier SOLO du niveau
-                        <span class="echelle-texte-petit"> (facultatif)</span>
-                    </label>
-                    <select class="controle-form"
-                            ${attrs} data-champ="niveauSOLO">
-                        ${optionsNiveauSOLOEchelle(niveau.niveauSOLO)}
-                    </select>
-                </div>
+                ${champPalierSOLONiveau(niveau, attrs)}
             </div>
         </div>
 `;
@@ -3591,6 +3598,7 @@ window.modifierNiveauEchelle = modifierNiveauEchelle;
 window.refusChampNiveau = refusChampNiveau;                                 // #524
 window.valeurNumeriqueDuNiveau = valeurNumeriqueDuNiveau;                   // #525 — LA règle, pour tous les lecteurs
 window.optionsNiveauSOLOEchelle = optionsNiveauSOLOEchelle;                 // #542 lot 2 — UN seul producteur pour les deux éditeurs
+window.ligneNiveauEchelleHtml = ligneNiveauEchelleHtml;                   // #1117 — la ligne de l'échelle enregistrée, éprouvée par sa sentinelle
 window.NIVEAUX_SOLO_ECHELLE = NIVEAUX_SOLO_ECHELLE;                         // #542 lot 2 — les cinq niveaux canoniques
 window.REFUS_MIN_NIVEAU = REFUS_MIN_NIVEAU;
 window.REFUS_VALEUR_NIVEAU = REFUS_VALEUR_NIVEAU;                           // #526

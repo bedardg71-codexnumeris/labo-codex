@@ -151,7 +151,7 @@ describe('étape 5 · C — la grille seule, en points', () => {
         const enPoints = A.construire(simple(), ctx()).grille.criteres[0];
         const cles = (c) => Object.keys(c).filter(k => k !== 'descripteurs').sort();
         expect(cles(enPoints)).toEqual(cles(aNiveaux));
-        expect(enPoints).toMatchObject({ formule: '', niveauSOLO: 'multistructurel', verrouille: false });
+        expect(enPoints).toMatchObject({ formule: '', niveauSOLO: 'aucun', verrouille: false });   // #1117
     });
 
     it('C.c `grilleEntierementEnPoints` vrai pour la grille en points, faux pour une grille à niveaux', () => {

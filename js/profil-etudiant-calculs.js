@@ -2019,7 +2019,10 @@ function libelleNiveauSOLO(niveauSOLO) {
  * @returns {string}
  */
 function nommerDefiAvecSOLO(defi) {
-    const libelle = libelleNiveauSOLO(defi && defi.niveauSOLO);
+    // #1117 (19 oct. 2026) : observation SOLO désactivée, le nom seul — l'étiquette du critère
+    // suit le réglage, comme son menu dans l'éditeur de grilles.
+    const soloActive = typeof obtenirPreference !== 'function' || obtenirPreference('afficherDescriptionsSOLO') !== false;
+    const libelle = soloActive ? libelleNiveauSOLO(defi && defi.niveauSOLO) : '';
     return libelle ? defi.nom + ' (' + libelle + ')' : String((defi && defi.nom) || '');
 }
 

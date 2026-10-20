@@ -126,15 +126,20 @@ describe('#542 lot 2 · le champ est posé dans les DEUX éditeurs, par le MÊME
         // `echelles.js` porte deux copies du même formulaire — échelle neuve et
         // échelle existante. Un lot qui n'en sert qu'une laisse la moitié des
         // utilisateurs sans le champ.
+        // ↻ 19 oct. 2026 (#1117) : le champ sort dans `champPalierSOLONiveau` (qui le masque quand
+        // l'observation SOLO est désactivée) ; les DEUX éditeurs l'appellent.
         const occurrences = SRC.match(/data-champ="niveauSOLO"/g) || [];
-        expect(occurrences.length, 'le champ doit être dans les DEUX éditeurs').toBe(2);
+        expect(occurrences.length, 'un seul producteur du champ').toBe(1);
+        const appels = SRC.match(/\$\{champPalierSOLONiveau\(niveau, /g) || [];
+        expect(appels.length, 'le champ doit être dans les DEUX éditeurs').toBe(2);
     });
 
     it('chaque éditeur câble SON propre handler', () => {
-        expect(SRC).toMatch(/data-on-change="modifierNiveauTempHandler"[^>]*data-champ="niveauSOLO"/);
+        expect(SRC).toMatch(/champPalierSOLONiveau\(niveau, `data-on-change="modifierNiveauTempHandler"/);   // ↻ #1117
         // ↻ 11 oct. 2026 (#574) : la ligne de l'échelle enregistrée est une fonction partagée
         // avec le niveau en attente ; le handler lui est passé par l'appelant.
         expect(SRC).toMatch(/\$\{attrs\} data-champ="niveauSOLO"/);
+        expect(SRC).toMatch(/\$\{champPalierSOLONiveau\(niveau, attrs\)\}/);   // ↻ #1117 : la ligne enregistrée passe ses attributs
         expect(SRC).toMatch(/ligneNiveauEchelleHtml\(\s*niveau,\s*`data-on-change="modifierNiveauEchelleHandler"/);
         expect(SRC).toMatch(/`data-on-change="modifierNiveauEnAttenteHandler"/);
     });
@@ -144,7 +149,8 @@ describe('#542 lot 2 · le champ est posé dans les DEUX éditeurs, par le MÊME
         // que #529 a eu à défaire (deux replis aux valeurs différentes selon le
         // chemin), et que #542 a rejoué dans la conversion des niveaux.
         const appels = SRC.match(/optionsNiveauSOLOEchelle\(/g) || [];
-        expect(appels.length, 'un appel par éditeur + la définition').toBeGreaterThanOrEqual(3);
+        // ↻ 19 oct. 2026 (#1117) : la définition + l'appel de `champPalierSOLONiveau`, qui sert les deux éditeurs.
+        expect(appels.length, 'la définition + le producteur du champ').toBeGreaterThanOrEqual(2);
         const listesEnDur = SRC.match(/<option value="multistructurel"/g) || [];
         expect(listesEnDur.length, 'aucune liste d\'options SOLO écrite en dur dans un formulaire').toBe(0);
     });

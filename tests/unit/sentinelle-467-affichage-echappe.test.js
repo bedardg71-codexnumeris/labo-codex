@@ -194,9 +194,12 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // La phrase sous le badge du contexte sort dans `_ligneDescriptionContexte` (cliquet de
     // complexité) : sa couleur, un code hexadécimal choisi par le palier, devient `${couleur}`.
     // ↻ 18 oct. 2026 (dissection 2a, C2) : grilles.js 65 → 64 ; `${c.ponderation}%` passe par `texteDePonderation`.
+    // ↻ 19 oct. 2026 (#1117) : grilles.js 64 → 65, SANS désescape — même cas que #574. Le menu
+    // « Complexité SOLO du critère » sort dans `menuComplexiteSOLOCritere`, partagé par les deux
+    // éditeurs ; leurs attributs (handler, `grille.id`, `index`) lui arrivent en `${attrs}`.
     const NUES = {
         'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 29, 'js/echelles.js': 21, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie */
-        'js/grilles.js': 64, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
+        'js/grilles.js': 65, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 90,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 112, 'js/trimestre-v2-cours.js': 4
