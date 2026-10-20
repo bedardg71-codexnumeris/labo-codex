@@ -101,6 +101,7 @@ function monter(grilles) {
     };
     const win = chargerScript('js/ui-blocs.js', globaux);
     chargerScript('js/grilles.js', globaux, win);
+    win.bareme = chargerScript('js/bareme.js').bareme;   // #1120, lot 1 : la lecture du barème, que la liste des critères appelle
     // Les registres réels — le gabarit rend '' pour un registre absent.
     win.formulesAlgo = require(path.join(racine, 'js/evaluation-formules.js'));
     win.enoncesAlgo = require(path.join(racine, 'js/evaluation-enonces.js'));

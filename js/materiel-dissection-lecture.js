@@ -755,7 +755,6 @@
         if (!/^\d+(?:[.,]\d+)?$/.test(ecrit)) return ecrit;
         return ecrit + (parseFloat(ecrit.replace(',', '.')) < 2 ? ' point' : ' points');
     }
-    D.avecUnite = avecUnite;   // lot 13 (19 oct.) : Grilles de critères écrit les points d'une réponse de la même façon
 
     /**
      * Sans niveaux, une clé par réponse : ses points tels qu'écrits, avec leur unité s'ils ne sont

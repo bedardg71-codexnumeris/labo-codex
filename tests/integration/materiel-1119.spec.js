@@ -208,7 +208,7 @@ test('#1119 · un brouillon devenu illisible : l’accueil, le mot existant, le 
     await creer(page).click();
     await expect(revenir(page)).toBeVisible();
     const abime = { format: 'dissection-9', doc: 'abîmé' };
-    await page.evaluate((b) => db.setSync(cle('brouillonDissection'), b), abime);
+    await page.evaluate((b) => db.setSync(cle('brouillonDissection'), b), abime);   // security-ok: banc, brouillon abîmé exprès dans un contexte neuf
     await revenir(page).click();
     await expect(page.locator('#materiel-accueil')).toBeVisible();
     await expect(page.locator('#materiel-dissection')).toBeHidden();

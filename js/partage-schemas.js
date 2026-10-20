@@ -316,6 +316,25 @@
                                 parNiveau: { type: 'dictionnaire-chaines', maxLongueurElement: 5000, maxCles: 20 }
                             }
                         },
+                        // #1120, lot 1 (20 oct. 2026) — LE BARÈME D'UN CRITÈRE ANALYTIQUE VOYAGE.
+                        // Ses tranches (`js/bareme.js`) : un identifiant stable, un nom
+                        // facultatif, des points (deux nombres, ou deux `null` pour une tranche
+                        // « à compléter », lue d'une ancienne réponse) et un texte. Même classe
+                        // que `descripteurs` : non déclaré ici, il disparaîtrait au partage. Ce
+                        // que le schéma ne dit pas (bornes dans l'ordre, identifiants uniques) :
+                        // `bareme.refusStructure`, appelé par partage-validation (niveau 3).
+                        // ⚠ Pas de borne haute sur les points : une pondération baissée après
+                        // coup laisse une tranche « hors barème », qui voyage telle quelle.
+                        bareme: {
+                            type: 'tableau', max: 20,
+                            schema: {
+                                id: { type: 'chaine', requis: true, max: 100 },
+                                nom: { type: 'chaine', requis: true, max: 200 },
+                                pointsMin: { type: 'nombre', requis: true, nullable: true, minValeur: 0 },
+                                pointsMax: { type: 'nombre', requis: true, nullable: true, minValeur: 0 },
+                                texte: { type: 'chaine', requis: true, max: 5000 }
+                            }
+                        },
                         // #669 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT
                         // AUSSI AU PARTAGE. #511 a comblé ce trou du côté
                         // import/export le 25 août (`5cca483b`) sans ouvrir ce

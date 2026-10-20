@@ -151,15 +151,20 @@ describe('étape 5b · C — une grille en points à niveaux se crée sans éche
         const dom = new JSDOM('<!doctype html><html><body><div id="listeCriteres"></div></body></html>');
         const store = { 'a2032_echellesTemplates': [] };
         const dbG = { getSync: (k, d) => (k in store ? store[k] : d), get: async (k) => store[k], modifier: async () => {}, set: async () => {} };
-        const win = chargerScript('js/grilles.js', {
+        const win = chargerScript('js/bareme.js');
+        chargerScript('js/grilles.js', {
             db: dbG, cle: (k) => 'a2032_' + k, document: dom.window.document, echapperHtml: vraiEchapperHtml(dom.window.document),
             notifications: { succes() {}, erreur() {}, info() {} }, grilleTemplateActuelle: null
-        });
+        }, win);
         const div = dom.window.document.createElement('div');
         div.innerHTML = win.rendreAttenduCritere(g.criteres[0], { grilleId: g.id, index: 0 });
-        // Lot 13 (19 oct.) : sans échelle, le nom du niveau est la clé — il se lit, et se modifie, dans « Points ».
-        expect([...div.querySelectorAll('.grille-attendu-points input')].map(i => i.value)).toEqual(['PALIER A', 'PALIER A+', 'PALIER B', 'PALIER C']);
-        expect(div.querySelector('.grille-attendu-niveau textarea').value).toBe('Jamais\n0-5');
+        // #1120, lot 1 (20 oct.) : le critère analytique montre son BARÈME — le nom du niveau devient le nom de
+        // la tranche, sans points (« à compléter ») ; le texte, intact.
+        const tranches = [...div.querySelectorAll('.grille-bareme-tranche')];
+        expect(tranches.map(t => t.querySelector('[data-champ="nom"]').value)).toEqual(['PALIER A', 'PALIER A+', 'PALIER B', 'PALIER C']);
+        expect(tranches.map(t => t.querySelector('[data-champ="points"]').value)).toEqual(['', '', '', '']);
+        expect(tranches.map(t => t.querySelector('.grille-bareme-marque').textContent)).toEqual(Array(4).fill('à compléter'));
+        expect(tranches[0].querySelector('textarea').value).toBe('Jamais\n0-5');
     });
 
     it('C.e rien ne se perd au partage : projetés tels quels, paquet valide ; l’import les garde', () => {

@@ -56,6 +56,7 @@ function monter(grilles, evaluations) {
         obtenirIdentiteCCUtilisateur: () => 'banc', nommerCopie: (n) => n + ' (copie)', grilleTemplateActuelle: null
     });
     win.estRessourceSupprimee = () => false; win.marquerRessourceSupprimee = () => {}; win.IDS_GABARITS_HARDCODES = [];
+    win.bareme = chargerScript('js/bareme.js').bareme;   // #1120, lot 1 : la lecture du barème, que la liste des critères appelle
     win.boutonRetirerBloc = () => ''; win.boutonsReordonnerBloc = () => '';
     const avis = () => document.getElementById('avisTypeCriteresGrille');
     const choisir = (valeur) => { const m = document.getElementById('typeGrille'); m.value = valeur; return win.modifierTypeGrilleHandler(m); };
