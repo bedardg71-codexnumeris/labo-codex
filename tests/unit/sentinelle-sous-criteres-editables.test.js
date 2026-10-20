@@ -10,7 +10,8 @@
  * Ce que ce banc verrouille :
  *   R — LE RENDU : rangées, handlers et index ; section vide avec son bouton ; texte échappé ; rien pour un
  *       critère algorithmique (son gabarit a déjà la liste) ;
- *   G — LES GESTES : ajouter écrit la forme de la dissection ; la 31ᵉ est refusée sans écriture ; un nom de
+ *   G — LES GESTES : ajouter écrit la forme de la dissection, sous un code neuf (F1 : jamais un code déjà porté) ;
+ *       la 31ᵉ est refusée sans écriture ; un nom de
  *       201 caractères est refusé sans écriture ; un nom de 200 passe ;
  *   A — L'HYPOTHÈSE RETENUE : ces sous-critères NE deviennent PAS des codes d'annotation — `codes-annotation.js`
  *       ne lit que le critère algorithmique activé, même si le drapeau traîne sur un autre critère.
@@ -155,6 +156,19 @@ describe('G — les gestes, et les bornes de l’assistant', () => {
         expect(ecritures).toEqual([]);
         expect(await win.modifierSousCritere('GR_BANC', 0, 1, 'nom', 'y'.repeat(200))).toEqual({ refuse: null });
         expect(store[cle('grillesTemplates')][0].criteres[0].sousCriteres[1].nom).toBe('y'.repeat(200));
+    });
+
+    it('G.e F1 du verdict (20 oct.) : retrait puis ajout, aucun code en double — le plus grand code numérique, plus un', async () => {
+        const { win, store } = monter(grille(sc(3)));
+        await win.supprimerSousCritere('GR_BANC', 0, 0);
+        await win.ajouterSousCritere('GR_BANC', 0);
+        const codes = store[cle('grillesTemplates')][0].criteres[0].sousCriteres.map(s => s.code);
+        expect(codes).toEqual(['1', '2', '3']);
+        expect(new Set(codes).size).toBe(codes.length);
+        // Sans code numérique, le rang (comme avant).
+        const m = monter(grille([{ id: 'SC_A', code: 'A', nom: 'Un', ponderation: 1 }]));
+        await m.win.ajouterSousCritere('GR_BANC', 0);
+        expect(m.store[cle('grillesTemplates')][0].criteres[0].sousCriteres.map(s => s.code)).toEqual(['A', '1']);
     });
 
     it('G.d le champ refusé est marqué (le handler lit le refus)', async () => {
