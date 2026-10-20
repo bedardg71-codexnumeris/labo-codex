@@ -21,6 +21,21 @@
 
     var CHANGELOG = [
         {
+            // 1.210 (le barème d'un critère en points, le compte des erreurs corrigé) — titre et cinq items proposés
+            // par Cowork (10 h 28), validés par Grégoire le 20 oct. 2026 (10 h 30), transmis par Cowork
+            // (CONSIGNE-LOT-2026-10-20-version-1.210.md).
+            version: '1.210',
+            couleur: 'vert',
+            titre: 'Le barème d’un critère en points, et le compte des erreurs corrigé',
+            items: [
+                'Dans «&nbsp;Grilles de critères&nbsp;», un critère noté en points a maintenant son barème&nbsp;: des tranches de points, chacune avec ce qu’on attend d’une copie qui les obtient et, si tu veux, un nom. Les réponses des grilles que tu as apportées s’affichent comme un barème, et ta première modification l’enregistre sans rien perdre. Le barème ne change aucune note.',
+                'Le barème a son aide&nbsp;: une aide «&nbsp;i&nbsp;» à côté de son titre, des bulles sur ses champs et une section dans Aide › Configuration. «&nbsp;Barème&nbsp;» et «&nbsp;tranche&nbsp;» s’ajoutent au lexique.',
+                'En mode Évaluer, le nombre d’erreurs de français suit de nouveau les codes posés sur la copie. Il restait à 0 quand la palette Codes n’était pas à l’écran.',
+                'Quand l’observation SOLO est désactivée, les grilles et les échelles ne montrent plus leurs menus SOLO, et un critère neuf reçoit «&nbsp;Aucun&nbsp;». Le dépistage examine alors tous les critères, et le tableau de bord l’indique.',
+                'Après «&nbsp;Créer ma grille&nbsp;», «&nbsp;Revenir à ma dissection&nbsp;» rouvre ta dissection telle que tu l’as laissée, pour en tirer une autre grille.'
+            ]
+        },
+        {
             // 1.209 (modifier les réponses, l'aide d'« Apporter mon matériel ») — titre et trois items validés par
             // Grégoire le 19 oct. 2026 (19 h 29), transmis par Cowork (CONSIGNE-LOT-2026-10-19-version-1.209.md) ;
             // item 1 corrigé par Grégoire à 19 h 50 (« dans une grille en points »).
