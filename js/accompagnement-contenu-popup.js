@@ -1131,14 +1131,41 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'liste',
                 titre: 'Trois types disponibles',
+                // C1, validé G. 20 oct. 2026, 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md) : ce que fait
+                // l'application, comme le lexique (`type-de-critere`) et la bulle du champ.
                 items: [
-                    '<strong>Holistique</strong> — évalue l’ensemble en considérant les interrelations entre les éléments.',
-                    '<strong>Analytique</strong> — décompose et évalue chaque élément séparément.',
-                    '<strong>Algorithmique</strong> — calcul automatique basé sur une formule (ex.\u00a0: nombre d’erreurs en français écrit).',
+                    '<strong>Holistique</strong> : tu attribues un niveau de l’échelle de performance ; l’échelle donne la note du critère.',
+                    '<strong>Analytique</strong> : tu attribues des points, de 0 à la pondération du critère ; son barème dit ce qu’ils valent.',
+                    '<strong>Algorithmique</strong> : un calcul automatique, à partir d’une formule (ex. : nombre d’erreurs en français écrit).',
                 ]
             },
         ],
         voirAussi: ['construction-grilles', 'evaluations-proceder']
+    },
+    // #1120, lot 2 (20 oct. 2026) : l'aide « i » du barème, ouverte à côté du titre « Barème » d'un critère
+    // analytique (grilles.js, `rendreBaremeCritere`). B1 à B6, validés G. 20 oct. 9 h 23, tels quels.
+    'grille-bareme': {
+        titre: 'Le barème d’un critère',
+        sections: [
+            {
+                type: 'texte',
+                contenu: 'Un critère analytique se note en points, de 0 à sa pondération. Son barème dit ce que valent ces points : chaque tranche porte ses points et ce qu’on attend d’une copie qui les obtient, avec un nom si tu veux. Deux tranches ne se chevauchent pas : des points donnés tombent dans une seule.'
+            },
+            {
+                type: 'texte',
+                contenu: 'Avec une échelle, tu choisis un niveau et l’échelle donne la note. Avec un barème, tu donnes des points et le barème dit à quoi ils correspondent. C’est pourquoi une évaluation n’a qu’une échelle, alors que chaque critère analytique a son propre barème.'
+            },
+            {
+                type: 'exemple',
+                titre: '« L’étudiant·e résume l’œuvre avec justesse », sur 5 points.',
+                contenu: 'Partiel, 2 points : Résume quelques événements.<br>Satisfaisant, 3 à 4 points : Résume l’essentiel.<br>Remarquable, 5 points : Résume avec précision et concision.'
+            },
+            {
+                type: 'conseil',
+                contenu: 'Le barème ne change aucune note : la note vient des points que tu donnes, avec ou sans barème. Il peut t’aider à donner les mêmes points à deux copies semblables.'
+            }
+        ],
+        voirAussi: ['construction-echelles', 'echelle-plage-notes', 'grille-type-critere-detail']
     },
     'grille-niveau-solo': {
         titre: 'Niveau cognitif SOLO',

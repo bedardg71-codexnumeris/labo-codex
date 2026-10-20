@@ -4635,7 +4635,8 @@ function modifierTexteReponseGrilleHandler(el) {
  * règle de Grégoire du 19 oct. pour cet éditeur ; l'iPad recharge une page mise en arrière-plan, #1031).
  * Un refus de points refuse les points seuls : le nom et le texte déjà écrits restent.
  * ⚠ Aucun calcul ne lit le barème (invariant 1) : une copie notée garde ses points, quoi qu'on change ici.
- * Textes de Claude Code (20 oct.), PROVISOIRES.
+ * Textes (D1 à D3) : validé G. 20 oct. 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md). Lot 2 : l'aide « i »
+ * `grille-bareme` à côté du titre, et les bulles E1 à E6 (`BULLES_BAREME`, accompagnement-contenu-hover.js).
  */
 const TEXTES_BAREME = {
     titre: 'Barème',
@@ -4649,13 +4650,19 @@ const TEXTES_BAREME = {
     confirmer: 'Es-tu sûr de vouloir retirer cette tranche ?'
 };
 
+// #1120, lot 2 : la bulle de chaque champ, de « + Ajouter une tranche » et de chaque marque (clés du catalogue).
+const BULLES_BAREME = {
+    nom: 'bareme-tranche-nom', points: 'bareme-tranche-points', texte: 'bareme-tranche-texte', ajouter: 'bareme-ajouter-tranche',
+    [TEXTES_BAREME.aCompleter]: 'bareme-a-completer', [TEXTES_BAREME.horsBareme]: 'bareme-hors-bareme'
+};
+
 function rendreBaremeCritere(critere, ctx) {
     const lignes = window.bareme.tranchesDuCritere(critere).map(t => trancheBaremeHtml(t, critere, ctx));
     return `
-                <h4 class="grille-attendu-titre">${echapperHtml(TEXTES_BAREME.titre)}</h4>
+                <h4 class="grille-attendu-titre">${echapperHtml(TEXTES_BAREME.titre)} <span class="primo-aide" data-target="grille-bareme"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span></h4>
                 <div class="grille-bareme">${lignes.join('')}
                 </div>
-                <div><button type="button" class="btn btn-secondaire" data-action="ajouterTrancheBareme" data-param="${echapperHtml(ctx.grilleId)}" data-param2="${ctx.index}">${echapperHtml(TEXTES_BAREME.ajouter)}</button></div>`;
+                <div><button type="button" class="btn btn-secondaire" data-action="ajouterTrancheBareme" data-param="${echapperHtml(ctx.grilleId)}" data-param2="${ctx.index}" data-tooltip="${echapperHtml(BULLES_BAREME.ajouter)}">${echapperHtml(TEXTES_BAREME.ajouter)}</button></div>`;
 }
 
 /** La marque d'une tranche : « à compléter » (sans points), « hors barème » (au-delà de la pondération), ou rien. */
@@ -4675,16 +4682,16 @@ function trancheBaremeHtml(t, critere, ctx) {
                     <div class="grille-bareme-tranche" data-tranche-id="${echapperHtml(t.id)}">
                         <div class="grille-bareme-tete">
                             <label class="grille-bareme-champ grille-bareme-nom">${echapperHtml(TEXTES_BAREME.nom)}
-                                <input type="text" class="controle-form" value="${echapperHtml(t.nom)}" data-champ="nom" ${attrs}>
+                                <input type="text" class="controle-form" value="${echapperHtml(t.nom)}" data-champ="nom" data-tooltip="${echapperHtml(BULLES_BAREME.nom)}" ${attrs}>
                             </label>
                             <label class="grille-bareme-champ grille-bareme-points">${echapperHtml(TEXTES_BAREME.points)}
-                                <input type="text" inputmode="decimal" class="controle-form" value="${echapperHtml(window.bareme.pointsEnTexte(t))}" data-champ="points"${marque ? ` aria-describedby="${echapperHtml(idMarque)}"` : ''} ${attrs}>
+                                <input type="text" inputmode="decimal" class="controle-form" value="${echapperHtml(window.bareme.pointsEnTexte(t))}" data-champ="points" data-tooltip="${echapperHtml(BULLES_BAREME.points)}"${marque ? ` aria-describedby="${echapperHtml(idMarque)}"` : ''} ${attrs}>
                             </label>
                             ${retirerBloc({ action: 'retirerTrancheBareme', param: ctx.grilleId, param2: ctx.index, param3: t.id, titre: TEXTES_BAREME.retirer })}
                         </div>${marque ? `
-                        <p class="grille-bareme-marque" id="${echapperHtml(idMarque)}">${echapperHtml(marque)}</p>` : ''}
+                        <p class="grille-bareme-marque" id="${echapperHtml(idMarque)}" data-tooltip="${echapperHtml(BULLES_BAREME[marque])}">${echapperHtml(marque)}</p>` : ''}
                         <label class="grille-bareme-champ">${echapperHtml(TEXTES_BAREME.texte)}
-                            <textarea class="controle-form" rows="3" data-champ="texte" ${attrs}>${echapperHtml(t.texte)}</textarea>
+                            <textarea class="controle-form" rows="3" data-champ="texte" data-tooltip="${echapperHtml(BULLES_BAREME.texte)}" ${attrs}>${echapperHtml(t.texte)}</textarea>
                         </label>
                     </div>`;
 }
@@ -4741,6 +4748,7 @@ function _apresEcriturePoints(el, d, grille) {
         bloc.querySelector('.grille-bareme-tete').after(p);
     }
     p.textContent = texte;
+    p.dataset.tooltip = BULLES_BAREME[texte];
     el.setAttribute('aria-describedby', idMarque);
 }
 

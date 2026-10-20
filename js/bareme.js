@@ -42,8 +42,8 @@
     B.MAX_ID = 100;
 
     // Les refus de l'éditeur, lus par le témoin commun (« Non enregistré : ‹raison›. »).
-    // `trop`, `texteLong` : ceux des réponses (lot 13, validés G. 19 oct. 19 h 29), le mot
-    // « réponse » devenu « tranche ». Les autres : textes de Claude Code, 20 oct., PROVISOIRES.
+    // D4 à D10 : validé G. 20 oct. 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md), tels quels. `trop` et
+    // `texteLong` reprennent ceux des réponses (lot 13, validés G. 19 oct. 19 h 29), le mot « réponse » devenu « tranche ».
     B.REFUS = {
         trop: 'Au plus 20 tranches par critère',
         texteLong: 'Une tranche fait 5 000 caractères au plus',
