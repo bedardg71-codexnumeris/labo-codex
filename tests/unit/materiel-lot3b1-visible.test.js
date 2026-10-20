@@ -7,7 +7,9 @@
  *   L — LE BLOC EN LECTURE (`grilles.js`, rendreAttenduCritere) : présent seulement s'il y a des
  *       données ; niveau nommé par l'échelle, dans son ordre ; échelle disparue → le code ;
  *       retours à la ligne gardés ; tout texte échappé ; pas de doublon pour un critère algorithmique.
- *   H — UN CRITÈRE SANS DONNÉES : le HTML de la liste des critères est celui d'avant, à l'octet.
+ *   H — UN CRITÈRE SANS DONNÉES : ↻ 20 oct. (Grégoire, 13 h 56) — il montre sa section « Sous-critères », vide,
+ *       avec son bouton d'ajout ; un critère algorithmique, rien (son gabarit a la liste). Les sous-critères se
+ *       modifient : voir sentinelle-sous-criteres-editables.test.js.
  *   C — LA CONFIRMATION : le résumé de la création porte les identifiants des objets créés.
  *   T — LE TEXTE « fichier d'origine » de l'accueil (validé par Grégoire, 17 oct., 8 h 53 ; son jumeau, le message « aucun tableau », est parti le 19 oct. avec l'assistant).
  */
@@ -74,10 +76,11 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
         expect([...div.querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Ce qui est attendu à chaque niveau', 'Sous-critères']);
         expect([...div.querySelectorAll('.grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['Incomplet', 'Maîtrisé', 'Étendu']);
         expect([...div.querySelectorAll('.grille-attendu-niveau textarea')].map(t => t.value)).toEqual(['Ligne un.\nLigne deux.', 'Texte maîtrisé.', 'Texte étendu.']);
-        expect([...div.querySelectorAll('.grille-attendu-sous li')].map(li => li.textContent)).toEqual(['Annoncer le plan', 'Conclure']);
+        // 20 oct. : les sous-critères se modifient (le nom seul), dans l'ordre.
+        expect([...div.querySelectorAll('.grille-sous-critere input')].map(x => x.value)).toEqual(['Annoncer le plan', 'Conclure']);
         // Lot 13 (19 oct.) : lié à une échelle, le texte seul se modifie — ni points, ni corbeille, ni ajout ; l'écran le dit.
         expect(div.querySelectorAll('.grille-attendu-niveau textarea')).toHaveLength(3);
-        expect(div.querySelectorAll('input, select, button')).toHaveLength(0);
+        expect(div.querySelectorAll('.grille-attendu-niveaux input, .grille-attendu-niveaux select, .grille-attendu-niveaux button')).toHaveLength(0);
         expect(div.querySelector('.grille-attendu-mention').textContent).toBe('Les niveaux viennent de l’échelle « Échelle du banc » : ici, seul leur texte se modifie.');
         expect(div.textContent.toLowerCase()).not.toContain('descripteur');
     });
@@ -94,7 +97,7 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
         const div = bloc(win, critere({ descripteurs: { echelleId: 'ECH_BANC', parNiveau: { I: piege } }, sousCriteres: [{ nom: piege }] }), dom);
         expect(div.querySelector('img')).toBeNull();
         expect(div.querySelector('.grille-attendu-niveau textarea').value).toBe(piege);
-        expect(div.querySelector('.grille-attendu-sous li').textContent).toBe(piege);
+        expect(div.querySelector('.grille-sous-critere input').value).toBe(piege);
     });
 
     it('L.e critère algorithmique : ses sous-critères ont déjà leur place éditable, pas de liste en double', () => {
@@ -103,25 +106,26 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
     });
 });
 
-describe('lot 3b1 · H — un critère sans données s’affiche exactement comme avant', () => {
-    it('H.a la liste des critères : l’appel au bloc est collé au gabarit, sans un caractère de plus ; il rend « » sans données', () => {
-        // Le gabarit d'avant le lot 3b1, à l'octet, PLUS l'appel ; comme il rend '' pour un critère
-        // sans données, le HTML de ce critère est celui d'avant.
+describe('lot 3b1 · H — un critère sans données (↻ 20 oct. : sa section « Sous-critères », vide)', () => {
+    it('H.a la liste des critères : l’appel au bloc est collé au gabarit ; un critère sans données montre la section vide et son bouton ; un algorithmique, rien', () => {
         const src = readFileSync(path.join(racine, 'js', 'grilles.js'), 'utf8');
         expect(src).toContain('            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}\n        </div>\n    `).join(\'\');');
         const { win, dom } = monter();
-        win.afficherCriteresGrille({ id: 'GR_BANC', criteres: [critere(), critere({ id: 'CR_2', nom: 'Structure' })] });
-        const html = dom.window.document.getElementById('listeCriteres').innerHTML;
-        expect(html).not.toContain('grille-attendu');
-        expect(html).toContain('</div>\n            \n        </div>');   // gabarit algo vide, puis rien, puis la fin de la carte
+        win.afficherCriteresGrille({ id: 'GR_BANC', criteres: [critere(), critere({ id: 'CR_2', nom: 'Structure', type: 'algorithmique' })] });
+        const cartes = dom.window.document.querySelectorAll('#listeCriteres .item-liste');
+        expect([...cartes[0].querySelectorAll('.grille-attendu-titre')].map(h => h.textContent)).toEqual(['Sous-critères']);
+        expect(cartes[0].querySelectorAll('.grille-sous-critere')).toHaveLength(0);
+        expect(cartes[0].querySelector('.grille-attendu [data-action="ajouterSousCritere"]')).not.toBeNull();
+        expect(cartes[1].querySelector('.grille-attendu')).toBeNull();
     });
 
     it('H.b un critère qui porte des données : le bloc paraît sur SA carte, après sa rangée', () => {
         const { win, dom } = monter();
         win.afficherCriteresGrille({ id: 'GR_BANC', criteres: [critere(), AVEC] });
         const cartes = dom.window.document.querySelectorAll('#listeCriteres .item-liste');
-        expect(cartes[0].querySelector('.grille-attendu')).toBeNull();
+        expect(cartes[0].querySelectorAll('.grille-attendu-niveau')).toHaveLength(0);
         expect(cartes[1].querySelector('.critere-rangee + .grille-attendu')).not.toBeNull();
+        expect(cartes[1].querySelectorAll('.grille-sous-critere')).toHaveLength(2);
     });
 });
 

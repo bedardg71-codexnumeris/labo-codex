@@ -16,8 +16,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · la grille (b) en points : un refus (chevauchement) n'écrit rien ; « + Ajouter une tranche » écrit
 //     aussitôt une tranche « à compléter » (C1 du verdict du 20 oct.) : son texte tapé, la page RECHARGÉE,
 //     elle est là avec lui ; des points qui chevauchent sont refusés, le texte reste ; la corbeille confirme ;
-//     à 820 px (iPad, au doigt), des cibles de 44 px, la tête empilée, aucun débord ; à 1440 px (Mac), nom
-//     et points côte à côte.
+//     à 820 px (iPad, au doigt), des cibles de 44 px, nom et points côte à côte, le texte dessous, aucun débord ;
+//     à 1440 px (Mac), nom, points et texte sur UNE ligne (↻ 20 oct., Grégoire, 13 h 56).
 //   Break-tests (faits le 20 oct.) : `ecrireSurCritere` qui oublie de retirer `parNiveau` → le premier essai
 //   rougit ; une tranche neuve gardée en mémoire seulement (rendue sans être écrite) → le deuxième rougit.
 
@@ -179,7 +179,7 @@ test.describe('iPad', () => {
         expect(erreurs).toEqual([]);
     });
 
-    test('barème 1 · un refus n’écrit rien ; une tranche neuve écrite aussitôt survit au rechargement ; retirer confirme ; 44 px, tête empilée', async ({ page }) => {
+    test('barème 1 · un refus n’écrit rien ; une tranche neuve écrite aussitôt survit au rechargement ; retirer confirme ; 44 px, texte sous nom et points', async ({ page }) => {
         const erreurs = [];
         page.on('pageerror', (e) => erreurs.push(e.message));
         const questions = [];
@@ -234,15 +234,18 @@ test.describe('iPad', () => {
         await expect.poll(async () => (await criteres(page, id))[0].bareme.map((t) => t.pointsMin)).toEqual([4, 2, 1]);
         expect(questions).toEqual(['Es-tu sûr de vouloir retirer cette tranche ?']);
 
-        // Sur l'iPad : 44 px au moins (champs, corbeille, ajout), la tête empilée (nom, puis points), aucun débord.
+        // Sur l'iPad : 44 px au moins (champs, corbeille, ajout) ; nom, points et corbeille sur une ligne, le texte
+        // dessous, de toute la largeur (↻ 20 oct.) ; aucun débord.
         const mesure = await bloc.evaluate((b) => {
             const t = b.querySelector('.grille-bareme-tranche');
             const nom = t.querySelector('[data-champ="nom"]').getBoundingClientRect(), pts = t.querySelector('[data-champ="points"]').getBoundingClientRect();
+            const texte = t.querySelector('[data-champ="texte"]').getBoundingClientRect();
             const corbeille = t.querySelector('[data-action="retirerTrancheBareme"]').getBoundingClientRect();
             return {
                 hauteurs: [...b.querySelectorAll('.grille-bareme .controle-form, [data-action="ajouterTrancheBareme"]')].map((x) => Math.round(x.getBoundingClientRect().height)),
                 corbeille: [Math.round(corbeille.width), Math.round(corbeille.height)],
-                empilee: pts.top >= nom.bottom - 1 && Math.abs(pts.left - nom.left) < 2,
+                empilee: Math.abs(pts.top - nom.top) < 2 && pts.left > nom.right && corbeille.left >= pts.right - 1
+                    && texte.top >= nom.bottom - 1 && Math.abs(texte.left - nom.left) < 2 && texte.right >= corbeille.right - 1,
                 police: parseFloat(getComputedStyle(t.querySelector('[data-champ="points"]')).fontSize),
                 debord: document.documentElement.scrollWidth - document.documentElement.clientWidth
             };
@@ -260,7 +263,7 @@ test.describe('iPad', () => {
 test.describe('Mac', () => {
     test.use({ viewport: { width: 1440, height: 900 } });
 
-    test('barème 1 · à 1440 px, nom et points côte à côte, la corbeille au bout ; aucun débord', async ({ page }) => {
+    test('barème 1 · à 1440 px, nom, points et texte sur une ligne, la corbeille au bout ; aucun débord', async ({ page }) => {
         const erreurs = [];
         page.on('pageerror', (e) => erreurs.push(e.message));
         await ouvrirConception(page);
@@ -270,8 +273,9 @@ test.describe('Mac', () => {
         await expect(t).toBeVisible();
         const m = await t.evaluate((x) => {
             const r = (s) => x.querySelector(s).getBoundingClientRect();
-            const nom = r('[data-champ="nom"]'), pts = r('[data-champ="points"]'), corbeille = r('[data-action="retirerTrancheBareme"]');
-            return { rang: Math.abs(nom.top - pts.top) < 2 && pts.left > nom.right && corbeille.left >= pts.right - 1,
+            const nom = r('[data-champ="nom"]'), pts = r('[data-champ="points"]'), texte = r('[data-champ="texte"]'), corbeille = r('[data-action="retirerTrancheBareme"]');
+            return { rang: Math.abs(nom.top - pts.top) < 2 && pts.left > nom.right && Math.abs(texte.top - nom.top) < 2
+                    && texte.left > pts.right && corbeille.left >= texte.right - 1,
                 corbeille: Math.round(corbeille.height), debord: document.documentElement.scrollWidth - document.documentElement.clientWidth };
         });
         expect(m.rang).toBe(true);
