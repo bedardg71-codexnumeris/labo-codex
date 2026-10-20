@@ -79,6 +79,11 @@
     let rectangleSelection = null;      // { x1, y1, x2, y2 } — marquee en cours
     let modePanActif = false;
     let modeRedimensionnementSticker = false;
+    // #1123 — un doigt posé avec un code ou un tampon choisi : { pointerId, x, y } jusqu'au relâcher
+    let toucherEnAttente = null;
+    const SEUIL_TOUCHER_PX = 10; // au-delà, le doigt a glissé : ce n'est plus un toucher
+    const DELAI_PAUME_MS = 500;  // un doigt si près d'un geste du Pencil est la paume qui écrit
+    let dernierStyletMs = 0;
 
     // Presse-papiers annotations : sur window pour persister entre fichiers/étudiants
     // même si le module est désactivé/réactivé
@@ -445,10 +450,78 @@
     }
 
     /**
+     * Démarre le chrono à la première annotation et ramène en mode Annoter si on était en Évaluer.
+     */
+    function avantPremiereAnnotation() {
+        if (typeof travauxUI !== 'undefined' && travauxUI.demarrerChrono) {
+            travauxUI.demarrerChrono();
+        }
+        if (typeof travauxUI !== 'undefined' && travauxUI.getModeCourant
+            && travauxUI.getModeCourant() === 'evaluer') {
+            travauxUI.basculerMode('annoter');
+        }
+    }
+
+    /** #1123 — les outils qui posent d'un seul toucher : un autocollant, un symbole ou un code. */
+    function estOutilDunToucher(outil) {
+        return !!_outils().getAutocollantActif() || outil.type === 'symbole';
+    }
+
+    /**
+     * Pose l'autocollant actif, ou le symbole/code de l'outil, au point donné.
+     * @returns {boolean} true si l'outil actif est de ceux qui posent d'un toucher
+     */
+    function poserTamponAuPoint(outil, xNorm, yNorm) {
+        const autoId = _outils().getAutocollantActif();
+        if (autoId) {
+            poserAutocollant(autoId, xNorm, yNorm);
+            return true;
+        }
+        if (outil.type === 'symbole') {
+            ajouterSymbole(outil.id, xNorm, yNorm);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * #1123 — le doigt levé sans avoir glissé ni été rejoint par un second : le code ou le tampon
+     * se pose là où il s'était posé. Un pointercancel (Safari reprend le geste) ne pose rien.
+     */
+    function terminerToucherEnAttente(e) {
+        const toucher = toucherEnAttente;
+        toucherEnAttente = null;
+        if (e.type !== 'pointerup') return;
+        const outil = _outils().getOutilActif();
+        if (!estOutilDunToucher(outil)) return;
+        avantPremiereAnnotation();
+        const rect = canvasAnnotation.getBoundingClientRect();
+        poserTamponAuPoint(outil,
+            (toucher.x - rect.left) / canvasAnnotation.width,
+            (toucher.y - rect.top) / canvasAnnotation.height);
+    }
+
+    /**
+     * #1123 — le doigt en attente bouge : au-delà du seuil, il glisse, ce n'est plus un toucher.
+     * @returns {boolean} true si l'événement appartient au toucher en attente
+     */
+    function suivreToucherEnAttente(e) {
+        if (!toucherEnAttente || e.pointerId !== toucherEnAttente.pointerId) return false;
+        if (Math.hypot(e.clientX - toucherEnAttente.x, e.clientY - toucherEnAttente.y) > SEUIL_TOUCHER_PX) {
+            toucherEnAttente = null;
+        }
+        return true;
+    }
+
+    /**
      * Debut du trait / interaction
      */
     function onPointerDown(e) {
         const outil = _outils().getOutilActif();
+        if (e.pointerType === 'pen') {
+            toucherEnAttente = null; // #1123 — le Pencil écrit : la paume posée n'est pas un toucher
+            dernierStyletMs = Date.now();
+        }
 
         if (modePanActif) return;
         if (outil.id === 'position') return;
@@ -459,22 +532,20 @@
         } else {
             // Rejet de paume: ignorer le touch en mode annotation (seulement pen et mouse)
             if (e.pointerType === 'touch') {
+                // #1123 (rapport de Grégoire, 20 oct., iPad) — sauf pour un code ou un tampon, qui
+                // se pose d'un seul toucher : on attend le relâcher (onPointerUp). Un second doigt
+                // (pincement) ou un glissé annule ; le tracé garde son rejet de paume.
+                if (!e.isPrimary) {
+                    toucherEnAttente = null;
+                } else if (estOutilDunToucher(outil) && Date.now() - dernierStyletMs > DELAI_PAUME_MS) {
+                    toucherEnAttente = { pointerId: e.pointerId, x: e.clientX, y: e.clientY };
+                }
                 return;
             }
         }
 
         e.preventDefault();
-
-        // Démarrer le chrono évaluation à la première annotation
-        if (typeof travauxUI !== 'undefined' && travauxUI.demarrerChrono) {
-            travauxUI.demarrerChrono();
-        }
-
-        // Auto-basculer en mode Annoter si en mode Evaluer
-        if (typeof travauxUI !== 'undefined' && travauxUI.getModeCourant
-            && travauxUI.getModeCourant() === 'evaluer') {
-            travauxUI.basculerMode('annoter');
-        }
+        avantPremiereAnnotation();
 
         const rect = canvasAnnotation.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -483,8 +554,6 @@
         // Coordonnees normalisees (0-1)
         const xNorm = x / canvasAnnotation.width;
         const yNorm = y / canvasAnnotation.height;
-
-        const outilActifId = outil.id;
 
         // Mode selection
         if (outil.type === 'selection') {
@@ -560,20 +629,8 @@
             return;
         }
 
-        // Mode tampon : poser un autocollant
-        if (outilActifId === 'tampon' || _outils().getAutocollantActif()) {
-            const autoId = _outils().getAutocollantActif();
-            if (autoId) {
-                poserAutocollant(autoId, xNorm, yNorm);
-            }
-            return;
-        }
-
-        if (outil.id === 'gomme') {
-            effacerTraitAuContact(xNorm, yNorm);
-            enDessin = true;
-            return;
-        }
+        // Mode tampon (autocollant) ou symbole/code : un seul clic pose
+        if (poserTamponAuPoint(outil, xNorm, yNorm)) return;
 
         if (outil.id === 'texte') {
             // #889 : un clic sur un texte existant l'ouvre en édition. Seul le double-clic de
@@ -587,11 +644,7 @@
             return;
         }
 
-        if (outil.type === 'forme' || outil.type === 'symbole') {
-            if (outil.type === 'symbole') {
-                ajouterSymbole(outil.id, xNorm, yNorm);
-                return;
-            }
+        if (outil.type === 'forme') {
             // #943 — la ligne qu'on vient de tracer : un clic sur l'une de ses poignées la courbe
             // (point de contrôle) ou en tire une extrémité ; ailleurs, on trace une nouvelle ligne.
             if (selectionApresTrace && annotationSelectionnee && selectionsMultiples.length <= 1) {
@@ -668,6 +721,7 @@
      * Mouvement du stylet
      */
     function onPointerMove(e) {
+        if (suivreToucherEnAttente(e)) return;
         const outil = _outils().getOutilActif();
 
         const rect = canvasAnnotation.getBoundingClientRect();
@@ -726,12 +780,6 @@
 
         e.preventDefault();
 
-        // Gomme en mode glissant
-        if (outil.id === 'gomme') {
-            effacerTraitAuContact(xNorm, yNorm);
-            return;
-        }
-
         // Forme en cours
         if (formeEnCours) {
             formeEnCours.x2 = xNorm;
@@ -781,6 +829,11 @@
      * Fin du trait
      */
     function onPointerUp(e) {
+        if (e.pointerType === 'pen') dernierStyletMs = Date.now();
+        if (toucherEnAttente && e.pointerId === toucherEnAttente.pointerId) {
+            terminerToucherEnAttente(e);
+            return;
+        }
         if (!enDessin) return;
 
         const outil = _outils().getOutilActif();
@@ -1252,44 +1305,6 @@
         ctxAnnotation.strokeText(sticker.texteTampon, sx, sy);
         ctxAnnotation.fillText(sticker.texteTampon, sx, sy);
         ctxAnnotation.restore();
-    }
-
-    /* ===============================
-       GOMME
-       =============================== */
-
-    /**
-     * Efface l'annotation la plus proche du point donne
-     * Utilise le hit-testing reutilisable
-     * @param {number} xNorm - X normalise
-     * @param {number} yNorm - Y normalise
-     */
-    function effacerTraitAuContact(xNorm, yNorm) {
-        const hit = trouverAnnotationAuPoint(xNorm, yNorm);
-        if (!hit) return;
-
-        // La gomme n'efface que les annotations du surligneur
-        const estSurligneur = (hit.type === 'stroke' && hit.data.tool === 'surligneur')
-                           || (hit.type === 'shape' && hit.data.type === 'surligneur');
-        if (!estSurligneur) return;
-
-        const donneesPage = obtenirDonneesPage();
-
-        switch (hit.type) {
-            case 'stroke': {
-                const supprime = donneesPage.strokes.splice(hit.index, 1)[0];
-                empilerUndo('suppression-trait', supprime);
-                break;
-            }
-            case 'shape': {
-                const supprime = donneesPage.shapes.splice(hit.index, 1)[0];
-                empilerUndo('suppression-forme', supprime);
-                break;
-            }
-        }
-
-        reRendreAnnotations();
-        planifierSauvegarde();
     }
 
     /* ===============================
