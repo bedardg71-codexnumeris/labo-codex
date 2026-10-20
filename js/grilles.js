@@ -4523,12 +4523,13 @@ function rendreAttenduCritere(critere, ctx) {
     // une échelle (#1120 : rien n'est caché). Ceux d'un analytique SANS échelle sont son barème, lu plus bas.
     const par = (d && d.parNiveau && (!analytique || d.echelleId)) ? d.parNiveau : {};
     const codes = Object.keys(par);
-    const sous = (critere && critere.type !== 'algorithmique' && Array.isArray(critere.sousCriteres))
-        ? critere.sousCriteres.filter(sc => sc && String(sc.nom || '').trim()) : [];
     const bareme = analytique && ctx ? rendreBaremeCritere(critere, ctx) : '';
-    if (!bareme && !codes.length && !sous.length) return '';
+    // 20 oct. (Grégoire, 13 h 56) : les sous-critères d'un critère non algorithmique se modifient, et leur
+    // section se montre même vide, pour créer le premier. Sans contexte de handlers, rien à modifier : rien.
+    const sous = critere && critere.type !== 'algorithmique' && ctx ? rendreSousCriteresCritere(critere, ctx) : '';
+    if (!bareme && !codes.length && !sous) return '';
     return `
-            <div class="grille-attendu">${bareme}${rendreAttenduNiveaux(d, codes, ctx)}${rendreAttenduSousCriteres(sous)}
+            <div class="grille-attendu">${bareme}${rendreAttenduNiveaux(d, codes, ctx)}${sous}
             </div>`;
 }
 
@@ -4560,11 +4561,67 @@ function mentionEchelleReponses(echelle) {
                 <p class="grille-attendu-mention">Les niveaux viennent de ${nomme ? `l’échelle « ${echapperHtml(echelle.nom)} »` : 'l’échelle de la grille'} : ici, seul leur texte se modifie.</p>`;
 }
 
-function rendreAttenduSousCriteres(sous) {
-    if (!sous.length) return '';
+/*
+ * LES SOUS-CRITÈRES D'UN CRITÈRE NON ALGORITHMIQUE — 20 oct. 2026 (Grégoire, 13 h 56). Ils se modifient,
+ * à leur place : le nom seul se montre ; on ajoute, on retire, on réordonne, par les gestes du gabarit
+ * algorithmique (`ajouterSousCritere`, `modifierSousCritere`, `supprimerSousCritere`,
+ * `deplacerSousCritereHaut/Bas`), qui écrivent la forme de la dissection (id, code, nom, ponderation 1.0,
+ * retroaction). Bornes : celles de l'assistant (`MAX_NOM`, `MAX_SOUS_CRITERES`), pour tout critère.
+ * ⚠ Ils ne deviennent pas des codes d'annotation : `codes-annotation.js` ne lit que le critère algorithmique
+ * activé (sentinelle `sous-criteres-editables`).
+ * Textes de Claude Code (20 oct.) : le nom de chaque champ et les deux refus ; le titre et le bouton sont
+ * ceux du gabarit algorithmique.
+ */
+const TEXTES_SOUS_CRITERES = {
+    titre: 'Sous-critères',
+    ajouter: '+ Ajouter un sous-critère',
+    nom: (n) => 'Nom du sous-critère ' + n
+};
+const REFUS_SOUS_CRITERES = {
+    trop: (max) => 'Au plus ' + max + ' sous-critères par critère',
+    nomLong: (max) => 'Le nom d’un sous-critère fait ' + max + ' caractères au plus'
+};
+
+/** Les bornes de l'assistant, lues chez lui (une seule source) ; sans lui, aucune borne. */
+function _bornesSousCriteres() {
+    const A = window.materielAssistant;
+    return { nom: (A && A.MAX_NOM) || Infinity, nombre: (A && A.MAX_SOUS_CRITERES) || Infinity };
+}
+
+/** Le refus d'un sous-critère de plus, quand le critère en porte déjà `n` ; sinon `null`. */
+function refusAjoutSousCritere(n) {
+    const max = _bornesSousCriteres().nombre;
+    return n >= max ? REFUS_SOUS_CRITERES.trop(max) : null;
+}
+
+/** Le refus d'un nom de sous-critère trop long ; sinon `null`. */
+function refusNomSousCritere(nom) {
+    const max = _bornesSousCriteres().nom;
+    return String(nom == null ? '' : nom).length > max ? REFUS_SOUS_CRITERES.nomLong(max) : null;
+}
+
+function rendreSousCriteresCritere(critere, ctx) {
+    const scs = Array.isArray(critere.sousCriteres) ? critere.sousCriteres : [];
+    const T = TEXTES_SOUS_CRITERES;
+    const max = _bornesSousCriteres().nom;
+    const lignes = scs.map((sc, i) => `
+                    <div class="grille-sous-critere">
+                        <input type="text" class="controle-form" value="${echapperHtml((sc && sc.nom) || '')}"${max !== Infinity ? ` maxlength="${max}"` : ''}
+                               aria-label="${echapperHtml(T.nom(i + 1))}" data-champ="nom"
+                               data-on-change="modifierSousCritereHandler" data-grille-id="${echapperHtml(ctx.grilleId)}" data-critere-index="${ctx.index}" data-sc-index="${i}">
+                        <div class="grille-sous-critere-outils">
+                            ${reordonnerBloc({
+                                actionHaut: 'deplacerSousCritereHaut', actionBas: 'deplacerSousCritereBas',
+                                param: ctx.grilleId, param2: ctx.index, param3: i,
+                                premier: i === 0, dernier: i === scs.length - 1, quoi: 'ce sous-critère'
+                            })}
+                            ${retirerBloc({ action: 'supprimerSousCritere', param: ctx.grilleId, param2: ctx.index, param3: i, titre: 'Supprimer ce sous-critère' })}
+                        </div>
+                    </div>`).join('');
     return `
-                <h4 class="grille-attendu-titre">Sous-critères</h4>
-                <ul class="grille-attendu-sous">${sous.map(sc => `<li>${echapperHtml(sc.nom)}</li>`).join('')}</ul>`;
+                <h4 class="grille-attendu-titre">${echapperHtml(T.titre)}</h4>
+                <div class="grille-sous-criteres">${lignes}</div>
+                <div><button type="button" class="btn btn-secondaire" data-action="ajouterSousCritere" data-param="${echapperHtml(ctx.grilleId)}" data-param2="${ctx.index}">${echapperHtml(T.ajouter)}</button></div>`;
 }
 
 /*
@@ -4673,27 +4730,63 @@ function marqueTranche(t, critere) {
 
 const _idMarqueTranche = (index, id) => `bareme-marque-${index}-${id}`;
 
-/** Une tranche : nom, points, corbeille ; sa marque ; son texte. */
+/**
+ * Une tranche, sur UNE ligne (20 oct., Grégoire, 13 h 56 — le modèle de la rangée du critère) : nom, points,
+ * texte, sa marque, la corbeille. Le texte est un champ d'une ligne qui s'agrandit avec son contenu
+ * (`ajusterHauteursAuto`), sans rien cacher ; sur l'iPad en long, il passe sous le nom et les points.
+ */
 function trancheBaremeHtml(t, critere, ctx) {
     const marque = marqueTranche(t, critere);
     const idMarque = _idMarqueTranche(ctx.index, t.id);
     const attrs = `data-grille-id="${echapperHtml(ctx.grilleId)}" data-critere-index="${ctx.index}" data-critere-id="${echapperHtml(critere.id || '')}" data-tranche-id="${echapperHtml(t.id)}" data-on-change="modifierTrancheBaremeHandler"`;
     return `
                     <div class="grille-bareme-tranche" data-tranche-id="${echapperHtml(t.id)}">
-                        <div class="grille-bareme-tete">
-                            <label class="grille-bareme-champ grille-bareme-nom">${echapperHtml(TEXTES_BAREME.nom)}
-                                <input type="text" class="controle-form" value="${echapperHtml(t.nom)}" data-champ="nom" data-tooltip="${echapperHtml(BULLES_BAREME.nom)}" ${attrs}>
-                            </label>
-                            <label class="grille-bareme-champ grille-bareme-points">${echapperHtml(TEXTES_BAREME.points)}
-                                <input type="text" inputmode="decimal" class="controle-form" value="${echapperHtml(window.bareme.pointsEnTexte(t))}" data-champ="points" data-tooltip="${echapperHtml(BULLES_BAREME.points)}"${marque ? ` aria-describedby="${echapperHtml(idMarque)}"` : ''} ${attrs}>
-                            </label>
-                            ${retirerBloc({ action: 'retirerTrancheBareme', param: ctx.grilleId, param2: ctx.index, param3: t.id, titre: TEXTES_BAREME.retirer })}
-                        </div>${marque ? `
-                        <p class="grille-bareme-marque" id="${echapperHtml(idMarque)}" data-tooltip="${echapperHtml(BULLES_BAREME[marque])}">${echapperHtml(marque)}</p>` : ''}
-                        <label class="grille-bareme-champ">${echapperHtml(TEXTES_BAREME.texte)}
-                            <textarea class="controle-form" rows="3" data-champ="texte" data-tooltip="${echapperHtml(BULLES_BAREME.texte)}" ${attrs}>${echapperHtml(t.texte)}</textarea>
+                        <label class="grille-bareme-champ grille-bareme-nom">${echapperHtml(TEXTES_BAREME.nom)}
+                            <input type="text" class="controle-form" value="${echapperHtml(t.nom)}" data-champ="nom" data-tooltip="${echapperHtml(BULLES_BAREME.nom)}" ${attrs}>
                         </label>
+                        <label class="grille-bareme-champ grille-bareme-points">${echapperHtml(TEXTES_BAREME.points)}
+                            <input type="text" inputmode="decimal" class="controle-form" value="${echapperHtml(window.bareme.pointsEnTexte(t))}" data-champ="points" data-tooltip="${echapperHtml(BULLES_BAREME.points)}"${marque ? ` aria-describedby="${echapperHtml(idMarque)}"` : ''} ${attrs}>
+                        </label>
+                        <label class="grille-bareme-champ grille-bareme-texte">${echapperHtml(TEXTES_BAREME.texte)}
+                            <textarea class="controle-form" rows="1" data-hauteur-auto data-champ="texte" data-tooltip="${echapperHtml(BULLES_BAREME.texte)}" ${attrs}>${echapperHtml(t.texte)}</textarea>
+                        </label>
+                        <div class="grille-bareme-marque-cellule">${marque ? `
+                            <p class="grille-bareme-marque" id="${echapperHtml(idMarque)}" data-tooltip="${echapperHtml(BULLES_BAREME[marque])}">${echapperHtml(marque)}</p>` : ''}
+                        </div>
+                        ${retirerBloc({ action: 'retirerTrancheBareme', param: ctx.grilleId, param2: ctx.index, param3: t.id, titre: TEXTES_BAREME.retirer })}
                     </div>`;
+}
+
+/*
+ * UN CHAMP D'UNE LIGNE QUI S'AGRANDIT AVEC SON CONTENU (20 oct.) — un `textarea[data-hauteur-auto]` prend la
+ * hauteur de son texte : au rendu, à la frappe, et quand la liste change de largeur (rotation de l'iPad, panneau
+ * rendu caché puis montré : `ResizeObserver`). Hors de la page (largeur nulle), rien n'est touché : le champ
+ * garde sa hauteur et défile (`overflow-y: auto`), il ne coupe jamais le texte.
+ */
+function ajusterHauteurAuto(el) {
+    if (!el || !el.clientWidth) return;
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight + el.offsetHeight - el.clientHeight) + 'px';
+}
+
+const _hauteurAutoBranchee = new WeakSet();   // un seul jeu d'écouteurs par liste, quel que soit le nombre de rendus
+
+function ajusterHauteursAuto(container) {
+    if (!container || typeof container.querySelectorAll !== 'function') return;
+    container.querySelectorAll('textarea[data-hauteur-auto]').forEach(ajusterHauteurAuto);
+    if (_hauteurAutoBranchee.has(container) || typeof container.addEventListener !== 'function') return;
+    _hauteurAutoBranchee.add(container);
+    container.addEventListener('input', (e) => {
+        if (e.target && e.target.matches && e.target.matches('textarea[data-hauteur-auto]')) ajusterHauteurAuto(e.target);
+    });
+    if (typeof ResizeObserver === 'function') {
+        let largeur = container.clientWidth;
+        new ResizeObserver(() => {
+            if (container.clientWidth === largeur) return;
+            largeur = container.clientWidth;
+            container.querySelectorAll('textarea[data-hauteur-auto]').forEach(ajusterHauteurAuto);
+        }).observe(container);
+    }
 }
 
 /**
@@ -4745,7 +4838,7 @@ function _apresEcriturePoints(el, d, grille) {
         p = document.createElement('p');
         p.className = 'grille-bareme-marque';
         p.id = idMarque;
-        bloc.querySelector('.grille-bareme-tete').after(p);
+        bloc.querySelector('.grille-bareme-marque-cellule').append(p);
     }
     p.textContent = texte;
     p.dataset.tooltip = BULLES_BAREME[texte];
@@ -5171,6 +5264,7 @@ function afficherCriteresGrille(grille) {
     `;
 
     container.innerHTML = html + btnAjouterCritere;
+    ajusterHauteursAuto(container);
     monterVuesBadges(container);
 
     // Calculer et afficher le total de pondération
@@ -5405,7 +5499,7 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
  * @param {number} critereIndex - Index du critère
  */
 async function ajouterSousCritere(grilleId, critereIndex) {
-    let grille = null;
+    let grille = null, refus = null, nouveauCode = -1;
     await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
         const grilles = lues || [];
         const g = grilles.find(x => x.id === grilleId);
@@ -5415,9 +5509,12 @@ async function ajouterSousCritere(grilleId, critereIndex) {
         if (!g.criteres[critereIndex].sousCriteres) {
             g.criteres[critereIndex].sousCriteres = [];
         }
+        // 20 oct. : la borne de l'assistant (`MAX_SOUS_CRITERES`), pour tout critère.
+        refus = refusAjoutSousCritere(g.criteres[critereIndex].sousCriteres.length);
+        if (refus) return undefined;
 
         // Générer un ID unique et un code par défaut
-        const nouveauCode = g.criteres[critereIndex].sousCriteres.length;
+        nouveauCode = g.criteres[critereIndex].sousCriteres.length;
 
         g.criteres[critereIndex].sousCriteres.push({
             id: genererIdUnique('SC_'),
@@ -5430,11 +5527,16 @@ async function ajouterSousCritere(grilleId, critereIndex) {
         grille = g;
         return grilles;
     }, [], { geste: 'Modifier la grille' });
+    if (refus && window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(refus), undefined, cle('grillesTemplates'));
+    }
     if (!grille) return;
 
-    // Réafficher la grille
+    // Réafficher la grille ; le focus sur le nom du sous-critère neuf (comme « + Ajouter une tranche »).
     afficherCriteresGrille(grille);
-
+    const champ = [...document.querySelectorAll('#listeCriteres [data-champ="nom"][data-sc-index]')]
+        .find(x => x.dataset.critereIndex === String(critereIndex) && x.dataset.scIndex === String(nouveauCode));
+    if (champ) champ.focus();
 }
 
 /**
@@ -5446,6 +5548,9 @@ async function ajouterSousCritere(grilleId, critereIndex) {
  * @param {any} valeur - Nouvelle valeur
  */
 async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, valeur) {
+    // 20 oct. : la borne de l'assistant (`MAX_NOM`) ; un nom refusé n'écrit rien.
+    const refuse = champ === 'nom' ? refusNomSousCritere(valeur) : null;
+    if (refuse) return { refuse };
     // ⚠ C'est LE geste de #510 : le `change` d'un champ de sous-critère part au
     // blur, donc au moment précis où l'on clique dans le champ suivant.
     await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
@@ -5460,7 +5565,7 @@ async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, cha
         g.criteres[critereIndex].sousCriteres[sousCritereIndex][champ] = valeur;
         return grilles;
     }, [], { geste: 'Modifier la grille' });
-
+    return { refuse: null };
 }
 
 /**
@@ -6488,7 +6593,8 @@ function modifierSousCritereHandler(el) {
     var scIndex = parseInt(el.dataset.scIndex);
     var champ = el.dataset.champ;
     var valeur = el.hasAttribute('data-parse-float') ? parseFloat(el.value) : el.value;
-    modifierSousCritere(grilleId, critereIndex, scIndex, champ, valeur);
+    return modifierSousCritere(grilleId, critereIndex, scIndex, champ, valeur)
+        .then(function (r) { marquerChampRefuse(el, r && r.refuse); });
 }
 
 /** Handler délégué pour modifierCritereTemp pondération + mise à jour total */
