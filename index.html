@@ -11,7 +11,7 @@
     <title>Labo Codex – Soutenir l’enseignement et le suivi des apprentissages</title>
 
     <!-- CSS externe requis pour styles complets -->
-    <link rel="stylesheet" href="styles.css?v=20261019g"> <!-- #1120, lot 1 (20 oct.) : le barème d’un critère analytique dans Grilles de critères · #1119 (20 oct.) : « Revenir à ma dissection » à côté de « Coller une autre grille » · Retrait de l’assistant en sept étapes (19 oct.) : ses règles parties avec lui · La dissection, lot 13 (19 oct.) : les réponses d’un critère se modifient · La dissection, lot 7 (18 oct.) : « Rattacher », la marque d’une suite et sa flèche · La dissection, lot 5 (18 oct.) : l’outil « Couper » · « Apporter mon matériel » étape 6 (17 oct.) : l’encadré « Aller plus loin avec ta grille » · étape 5 (17 oct.) : grille en points ; #1095, la rangée d’un critère sur iPad · lot 3a (17 oct.) : l’étape « Ce que contient ton tableau », retours à la ligne, sous-critères · lot 2 (17 oct.) : l’assistant, la vérification, la confirmation · lot 1 (16 oct.) : accueil et aperçu, cadre de l’aperçu contenu sur iPad (relecture) · 1.192.1 (8 oct.) : menu « Vue » à sa largeur, palette des raccourcis revenue · Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
+    <link rel="stylesheet" href="styles.css?v=20261019h"> <!-- #1120, lot 2 (20 oct.) : le tableau de l’aide du barème · #1120, lot 1 (20 oct.) : le barème d’un critère analytique dans Grilles de critères · #1119 (20 oct.) : « Revenir à ma dissection » à côté de « Coller une autre grille » · Retrait de l’assistant en sept étapes (19 oct.) : ses règles parties avec lui · La dissection, lot 13 (19 oct.) : les réponses d’un critère se modifient · La dissection, lot 7 (18 oct.) : « Rattacher », la marque d’une suite et sa flèche · La dissection, lot 5 (18 oct.) : l’outil « Couper » · « Apporter mon matériel » étape 6 (17 oct.) : l’encadré « Aller plus loin avec ta grille » · étape 5 (17 oct.) : grille en points ; #1095, la rangée d’un critère sur iPad · lot 3a (17 oct.) : l’étape « Ce que contient ton tableau », retours à la ligne, sous-critères · lot 2 (17 oct.) : l’assistant, la vérification, la confirmation · lot 1 (16 oct.) : accueil et aperçu, cadre de l’aperçu contenu sur iPad (relecture) · 1.192.1 (8 oct.) : menu « Vue » à sa largeur, palette des raccourcis revenue · Lot 2 de la carte (8 oct.) : réserve à gauche retirée, dates du trimestre et invitation · Lot 1 de la carte (8 oct.) : menu « Vue », palettes de fond et des raccourcis retirées · #1039 : barre latérale de l'Animation et panneau Équipes · Lot F : la règle du bloc de l'enregistrement automatique retirée · #934 (22 sept.) : case de sélection, barre et question groupée de la Liste ; #932 : aperçu de la copie dans Propriétés ; #717 : éditeur des cibles ; #936 : défilement à gauche une fois zoomé -->
 
     <style>
         /* Les styles embarqués restent ici */
@@ -11007,6 +11007,37 @@
                         </div>
                     </div>
 
+                    <!-- Carte: Le barème d’un critère analytique (#1120, lot 2 ; F1 à F5, validés par Grégoire le 20 oct. 2026,
+                         9 h 23 : plans de travail/TEXTES-2026-10-20-bareme.md). Un banc compare chaque texte au fichier. -->
+                    <div class="carte accordeon" id="accordeon-aide-bareme">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Le barème d’un critère analytique
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p id="aide-bareme-f2">Un critère analytique se note en points, de 0 à sa pondération. Son barème dit ce que valent ces points. Il se compose de tranches : chacune porte ses points (un nombre, ou deux bornes comme « 3 à 4 »), ce qu’on attend d’une copie qui les obtient et, si tu veux, un nom. Tu l’écris dans Conception › Grilles de critères, sous le critère.</p>
+
+                            <div class="u-overflow-x-auto">
+                                <table class="tableau" id="aide-bareme-tableau">
+                                    <thead>
+                                        <tr><th scope="col"></th><th scope="col">Échelle de performance</th><th scope="col">Barème</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><th scope="row">À quels critères</th><td>les critères holistiques</td><td>les critères analytiques</td></tr>
+                                        <tr><th scope="row">Ce que tu choisis</th><td>un niveau</td><td>des points</td></tr>
+                                        <tr><th scope="row">Ce que l’outil donne</th><td>la note du critère</td><td>ce à quoi les points correspondent</td></tr>
+                                        <tr><th scope="row">D’un critère à l’autre</th><td>une seule échelle pour toute l’évaluation</td><td>chaque critère a le sien</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <p id="aide-bareme-f4">Le barème n’entre dans aucun calcul : la note, les indices et le dépistage lisent les points que tu donnes, avec ou sans barème.</p>
+
+                            <p id="aide-bareme-f5">Une grille créée par « Apporter mon matériel » avant le barème montre les réponses de ses critères comme un barème. Rien ne change dans tes données tant que tu ne touches pas au critère ; ta première modification l’enregistre tel qu’il est affiché, sans rien perdre.</p>
+                        </div>
+                    </div>
+
                     <!-- Carte: Créer une échelle de performance -->
                     <div class="carte accordeon" id="accordeon-aide-creer-echelles">
                         <div class="accordeon-header">
@@ -14307,8 +14338,8 @@
     <script src="js/composeur-badges.js?v=20260905c"></script> <!-- Le texte troué, étape 3 (5 sept. 2026) : le badge s'affiche dans la phrase — une vue éditable par-dessus chaque zone, le textarea reste la valeur -->
     <script src="js/codes-annotation.js?v=20260903e"></script> <!-- 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/bareme.js?v=20261019b"></script> <!-- C1 (20 oct.) : une tranche neuve s’ajoute vide, « à compléter » · #1120, lot 1 (20 oct.) : le barème d’un critère analytique — la lecture unique, les refus, la conversion -->
-    <script src="js/grilles.js?v=20261019h"></script> <!-- C1 (20 oct.) : une tranche neuve s’écrit aussitôt, la tranche gardée dans la page retirée · #1120, lot 1 (20 oct.) : le barème remplace les réponses d’un critère analytique · #1117 (19 oct.) : « Complexité SOLO du critère » suit le réglage, un critère neuf reçoit « aucun » s’il est désactivé · Version 1.209.0 (19 oct.) : trois refus de points réécrits par Grégoire · La dissection, lot 13 (19 oct.) : modifier les réponses d’un critère · « Apporter mon matériel », étape 7 (17 oct.) : le champ du texte d’un critère redevient « Description » (D1) · texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/bareme.js?v=20261019c"></script> <!-- #1120, lot 2 (20 oct.) : textes validés · C1 (20 oct.) : une tranche neuve s’ajoute vide, « à compléter » · #1120, lot 1 (20 oct.) : le barème d’un critère analytique — la lecture unique, les refus, la conversion -->
+    <script src="js/grilles.js?v=20261019i"></script> <!-- #1120, lot 2 (20 oct.) : l’icône « i » et les bulles du barème · C1 (20 oct.) : une tranche neuve s’écrit aussitôt, la tranche gardée dans la page retirée · #1120, lot 1 (20 oct.) : le barème remplace les réponses d’un critère analytique · #1117 (19 oct.) : « Complexité SOLO du critère » suit le réglage, un critère neuf reçoit « aucun » s’il est désactivé · Version 1.209.0 (19 oct.) : trois refus de points réécrits par Grégoire · La dissection, lot 13 (19 oct.) : modifier les réponses d’un critère · « Apporter mon matériel », étape 7 (17 oct.) : le champ du texte d’un critère redevient « Description » (D1) · texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20261019a"></script> <!-- #1117 (19 oct.) : « Palier SOLO du niveau » suit le réglage · #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14506,9 +14537,9 @@
     <script src="js/accompagnement.js?v=20261019c"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : l’étape « Conception » de la visite correspond aussi à l’onglet (#1092) · Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20261019c"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20261019c"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : l’aide « i » conception-materiel · Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
-    <script src="js/accompagnement-contenu-terme.js?v=20261019c"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
+    <script src="js/accompagnement-contenu-hover.js?v=20261019d"></script> <!-- #1120, lot 2 (20 oct.) : les bulles du barème, C2 · L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20261019d"></script> <!-- #1120, lot 2 (20 oct.) : l’aide « i » du barème, les trois types (C1) · L’aide d’« Apporter mon matériel » (19 oct.) : l’aide « i » conception-materiel · Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-terme.js?v=20261019d"></script> <!-- #1120, lot 2 (20 oct.) : « Barème » et « Tranche » au lexique, A3 et A4 · L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
     <script src="js/guides-pedagogiques.js?v=20261017a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20261017a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=20260923b"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->

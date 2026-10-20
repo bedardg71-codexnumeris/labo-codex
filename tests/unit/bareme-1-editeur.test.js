@@ -429,7 +429,7 @@ describe('barème 1 · G — les gestes, dans « Grilles de critères »', () =>
         delete g.criteres[0].descripteurs;
         const m = monter({ grilles: [g] });
         expect(m.tranches(0)).toHaveLength(0);
-        expect(m.carte(0).querySelector('.grille-attendu-titre').textContent).toBe('Barème');
+        expect(m.carte(0).querySelector('.grille-attendu-titre').textContent.trim()).toBe('Barème');   // lot 2 : l'icône « i » le suit
         expect(m.carte(0).querySelector('[data-action="ajouterTrancheBareme"]').textContent).toBe('+ Ajouter une tranche');
     });
 });
@@ -501,7 +501,10 @@ describe('barème 1 · I — aucun calcul ne lit le barème', () => {
         // question remonte à Grégoire (invariant 1 du plan).
         const lecteurs = readdirSync(path.join(racine, 'js')).filter(f => f.endsWith('.js'))
             .filter(f => /\bbareme\b/.test(readFileSync(path.join(racine, 'js', f), 'utf8')));
-        expect(lecteurs.sort()).toEqual(['bareme.js', 'grilles.js', 'import-export.js', 'partage-schemas.js', 'partage-validation.js']);
+        // Lot 2 (20 oct.) : les trois catalogues de l'aide y entrent par leurs CLÉS (`grille-bareme`, `bareme-tranche-…`,
+        // le terme `bareme`) — des textes lus par l'enseignant·e, aucun calcul.
+        expect(lecteurs.sort()).toEqual(['accompagnement-contenu-hover.js', 'accompagnement-contenu-popup.js', 'accompagnement-contenu-terme.js',
+            'bareme.js', 'grilles.js', 'import-export.js', 'partage-schemas.js', 'partage-validation.js']);
     });
 
     it('I.b ni les réponses ni le barème : aucun module d’évaluation, de note ou de bilan ne lit `descripteurs`', () => {

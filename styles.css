@@ -28000,6 +28000,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 #listeCriteres .grille-bareme-tete .btn-icone-nu { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
 #listeCriteres .grille-bareme-marque { margin: 0; font-size: 0.85rem; color: var(--alerte-texte-attention); }
 #listeCriteres .grille-bareme textarea { width: 100%; box-sizing: border-box; resize: vertical; font-size: 0.85rem; line-height: 1.45; }
+/* #1120, lot 2 (20 oct.) : le tableau « échelle / barème » de l'onglet Aide. Un intitulé de rangée (`th` du
+   corps) ne prend ni le fond bleu ni le blanc des en-têtes de `.tableau` : il garde le fond de sa rangée et la
+   couleur des cases, en gras (mesuré : texte sombre sur --bleu-moyen, illisible, sans cette règle). */
+#aide-bareme-tableau tbody th { color: inherit; background: transparent; }
 @media (max-width: 1024px) {
     #listeCriteres .grille-bareme-tete { grid-template-columns: minmax(0, 1fr) auto; }
     #listeCriteres .grille-bareme-nom, #listeCriteres .grille-bareme-points { grid-column: 1; }

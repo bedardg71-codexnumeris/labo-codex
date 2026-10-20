@@ -258,8 +258,23 @@ const TOOLTIPS = {
         'Grilles réutilisables avec critères pondérés. Chaque grille définit les critères d\'évaluation d\'une production — comme la grille papier que tu utilises déjà pour évaluer.',
     'cn-grille-critere':
         'Critères avec nom, type, pondération et description. La pondération totale doit atteindre 100 %.',
+    // C2, validé G. 20 oct. 2026, 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md).
     'cn-grille-type-critere':
-        'Méthode d\'évaluation du critère : holistique (tu attribues un niveau global), analytique (tu attribues des points par élément ou micro-tâche) ou algorithmique (calcul automatique, ex. : français écrit).',
+        'Méthode d’évaluation du critère : holistique (tu attribues un niveau de l’échelle), analytique (tu attribues des points, que son barème décrit) ou algorithmique (calcul automatique, ex. : français écrit).',
+    // #1120, lot 2 (20 oct. 2026) : les bulles du barème d'un critère analytique (grilles.js, `trancheBaremeHtml`).
+    // E1 à E6, validés G. 20 oct. 9 h 23, tels quels.
+    'bareme-tranche-nom':
+        'Facultatif : un mot pour reconnaître la tranche, comme « Partiel ».',
+    'bareme-tranche-points':
+        'Un nombre (3 ou 2,5) ou deux bornes (3 à 4), de 0 à la pondération du critère. Deux tranches ne se chevauchent pas.',
+    'bareme-tranche-texte':
+        'Ce qu’on attend d’une copie qui obtient ces points.',
+    'bareme-ajouter-tranche':
+        'Ajoute une tranche au bas du barème. Elle s’enregistre aussitôt et reste « à compléter » jusqu’à ce que tu lui donnes ses points.',
+    'bareme-a-completer':
+        'Cette tranche n’a pas encore de points : donne-les-lui pour qu’elle compte dans le barème.',
+    'bareme-hors-bareme':
+        'Ces points dépassent la pondération du critère, qui a baissé depuis : corrige les points de la tranche, ou la pondération.',
     'cn-grille-ponderation-totale':
         'Somme des pondérations de tous les critères. Doit atteindre 100 % pour que la grille soit valide.',
 

@@ -101,7 +101,8 @@ const GLOSSAIRE = {
         terme: 'Type de critère',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'La méthode d\'évaluation d\'un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau global), analytique (tu attribues des points par élément ou micro-tâche) et algorithmique (calcul automatique selon une formule, ex. : nombre d\'erreurs / nombre de mots × 100 pour le français écrit).',
+        // A4, validé G. 20 oct. 2026, 9 h 23 : ce que fait l'application (un niveau, ou des points que décrit un barème).
+        definition: 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (calcul automatique selon une formule, ex. : nombre d’erreurs / nombre de mots × 100 pour le français écrit).',
         voir: 'Conception > Grilles'
     },
 
@@ -110,7 +111,8 @@ const GLOSSAIRE = {
         terme: 'Échelle de performance',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Les niveaux que tu attribues à chaque critère lors de l\'évaluation. Par défaut, quatre niveaux alignés sur IDME : Incomplet, Développement, Maîtrise, Étendu. Tu configures les seuils, les valeurs ponctuelles et les couleurs selon ton jugement professionnel.',
+        // A3, validé G. 20 oct. 2026, 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md) : les critères holistiques seuls.
+        definition: 'Les niveaux que tu attribues aux critères holistiques lors de l’évaluation ; une seule échelle par évaluation. Par défaut, quatre niveaux alignés sur IDME : Incomplet, Développement, Maîtrise, Étendu. Tu configures les seuils, les valeurs ponctuelles et les couleurs selon ton jugement professionnel.',
         voir: 'Conception > Échelles'
     },
 
@@ -159,6 +161,26 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         definition: 'Ce que vaut une réponse, en chiffres.',
+        voir: 'Conception > Grilles'
+    },
+
+    // #1120, lot 2 (20 oct. 2026) : A1 et A2, validés G. 20 oct. 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md),
+    // la source unique des deux définitions.
+    'bareme': {
+        cle: 'bareme',
+        terme: 'Barème',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Pour un critère noté en points, ce que valent ces points : une suite de tranches, chacune avec ses points et ce qu’on attend d’une copie qui les obtient. Chaque critère analytique a son propre barème.',
+        voir: 'Conception > Grilles'
+    },
+
+    'tranche': {
+        cle: 'tranche',
+        terme: 'Tranche',
+        categorie: 'Structure',
+        etape: 'numerisation',
+        definition: 'Une partie d’un barème : des points (un nombre, comme 2, ou deux bornes, comme 3 à 4), ce qu’on attend d’une copie qui les obtient et, si tu veux, un nom, comme « Partiel ».',
         voir: 'Conception > Grilles'
     },
 
