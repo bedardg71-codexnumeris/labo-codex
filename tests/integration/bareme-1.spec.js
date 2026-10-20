@@ -13,10 +13,13 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     noms de niveau devenus des tranches « à compléter », leurs textes) ; donner des points à une tranche →
 //     `bareme` écrit, `parNiveau` retiré de CE critère seulement ; recharger → le barème est là ; les autres
 //     critères analytiques gardent leurs réponses ; l'holistique, inchangé à l'octet près ;
-//   · la grille (b) en points : un refus (chevauchement) n'écrit rien ; « + Ajouter une tranche » ne s'écrit
-//     qu'avec ses points ; la corbeille confirme ; à 820 px (iPad, au doigt), des cibles de 44 px, la tête
-//     empilée, aucun débord ; à 1440 px (Mac), nom et points côte à côte.
-//   Break-test (fait le 20 oct.) : `ecrireSurCritere` qui oublie de retirer `parNiveau` → le premier essai rougit.
+//   · la grille (b) en points : un refus (chevauchement) n'écrit rien ; « + Ajouter une tranche » écrit
+//     aussitôt une tranche « à compléter » (C1 du verdict du 20 oct.) : son texte tapé, la page RECHARGÉE,
+//     elle est là avec lui ; des points qui chevauchent sont refusés, le texte reste ; la corbeille confirme ;
+//     à 820 px (iPad, au doigt), des cibles de 44 px, la tête empilée, aucun débord ; à 1440 px (Mac), nom
+//     et points côte à côte.
+//   Break-tests (faits le 20 oct.) : `ecrireSurCritere` qui oublie de retirer `parNiveau` → le premier essai
+//   rougit ; une tranche neuve gardée en mémoire seulement (rendue sans être écrite) → le deuxième rougit.
 
 async function attendreApp(page) {
     await page.waitForLoadState('domcontentloaded');
@@ -176,7 +179,7 @@ test.describe('iPad', () => {
         expect(erreurs).toEqual([]);
     });
 
-    test('barème 1 · un refus n’écrit rien ; une tranche neuve s’écrit avec ses points ; retirer confirme ; 44 px, tête empilée', async ({ page }) => {
+    test('barème 1 · un refus n’écrit rien ; une tranche neuve écrite aussitôt survit au rechargement ; retirer confirme ; 44 px, tête empilée', async ({ page }) => {
         const erreurs = [];
         page.on('pageerror', (e) => erreurs.push(e.message));
         const questions = [];
@@ -195,18 +198,34 @@ test.describe('iPad', () => {
         await expect(p1).toHaveClass(/champ-refuse/);
         expect(await criteres(page, id)).toEqual(avant);
 
-        // « + Ajouter une tranche » : en dernier, le focus sur ses points ; rien d'écrit avant eux.
+        // « + Ajouter une tranche » (C1) : écrite aussitôt, « à compléter », le focus sur son nom ; son texte s'écrit à la sortie du champ.
         const bloc = page.locator('#listeCriteres .item-liste').first();
         await bloc.locator('[data-action="ajouterTrancheBareme"]').click();
         const neuve = tranche(page, 0, 3);
-        await expect(neuve.locator('.grille-bareme-marque')).toHaveText('Pas encore enregistrée : donne-lui ses points');
-        await expect(neuve.locator('[data-champ="points"]')).toBeFocused();
+        await expect(neuve.locator('.grille-bareme-marque')).toHaveText('à compléter');
+        await expect(neuve.locator('[data-champ="nom"]')).toBeFocused();
+        await expect.poll(async () => (await criteres(page, id))[0].bareme?.length).toBe(4);
         await neuve.locator('textarea').fill('Une réponse fictive, presque juste.');
         await neuve.locator('textarea').press('Tab');
-        expect(await criteres(page, id)).toEqual(avant);
+        await expect.poll(async () => (await criteres(page, id))[0].bareme[3].texte).toBe('Une réponse fictive, presque juste.');
+
+        // Recharger (l'iPad recharge une page mise en arrière-plan, #1031) : la tranche et son texte sont là, « à compléter ».
+        await page.evaluate(() => db.flush());
+        await page.reload();
+        await attendreApp(page);
+        await ouvrirGrille(page, id);
+        await expect(valeurs(page, 0, 'texte')).resolves.toEqual([...Object.values(avant[0].descripteurs.parNiveau), 'Une réponse fictive, presque juste.']);
+        await expect(neuve.locator('.grille-bareme-marque')).toHaveText('à compléter');
+        await expect(neuve.locator('[data-champ="points"]')).toHaveValue('');
+
+        // Des points qui chevauchent : refusés, les points seuls ; le texte reste écrit.
+        await neuve.locator('[data-champ="points"]').fill('2');
+        await neuve.locator('[data-champ="points"]').press('Tab');
+        await expect(page.locator('#temoin-enregistrement')).toContainText('Non enregistré : ces points chevauchent ceux de la tranche 2');
+        expect((await criteres(page, id))[0].bareme[3]).toMatchObject({ pointsMin: null, pointsMax: null, texte: 'Une réponse fictive, presque juste.' });
         await neuve.locator('[data-champ="points"]').fill('1');
         await neuve.locator('[data-champ="points"]').press('Tab');
-        await expect.poll(async () => (await criteres(page, id))[0].bareme?.slice(-1).map((t) => [t.pointsMin, t.texte]))
+        await expect.poll(async () => (await criteres(page, id))[0].bareme.slice(-1).map((t) => [t.pointsMin, t.texte]))
             .toEqual([[1, 'Une réponse fictive, presque juste.']]);
         await expect(neuve.locator('.grille-bareme-marque')).toHaveCount(0);
 

@@ -12,7 +12,8 @@
  *   R — LES REFUS : ceux de la saisie, ceux de la structure (l'import), leurs textes.
  *   C — LA CONVERSION, sans perte, partage compris : exporter, valider, importer, comparer.
  *   G — LES GESTES, sur un faux stockage : la première modification convertit CE critère seulement ;
- *       un refus n'écrit rien ; une tranche neuve ne s'écrit qu'avec ses points ; le retrait confirme.
+ *       un refus n'écrit rien ; une tranche neuve s'écrit aussitôt, « à compléter » (C1 du verdict du
+ *       20 oct.), et un refus de points y laisse le nom et le texte ; le retrait confirme.
  *   H — UN CRITÈRE HOLISTIQUE ne change pas : ses textes par niveau, seuls, se modifient.
  *   S — LA SÉCURITÉ : un `<img onerror>` dans un nom de tranche reste du texte ; aucun handler en ligne ;
  *       le partage le refuse.
@@ -176,9 +177,10 @@ describe('barème 1 · R — les refus', () => {
         { id: 'c', nom: 'Partiel', pointsMin: null, pointsMax: null, texte: '' }
     ];
 
-    it('R.a les points : obligatoires, lisibles, de 0 à la pondération, sans chevauchement', () => {
+    it('R.a les points : lisibles, de 0 à la pondération, sans chevauchement ; effacés, la tranche redevient « à compléter »', () => {
         const refus = (s, max = 4) => B.modifierPoints(T, 'c', s, max).refuse;
-        expect(refus(' ')).toBe('Les points de la tranche sont obligatoires');
+        expect(refus(' ')).toBeUndefined();
+        expect(B.modifierPoints(T, 'b', ' ', 4).tranches[1]).toMatchObject({ nom: 'Juste', pointsMin: null, pointsMax: null });   // null, pas 0
         expect(refus('deux')).toBe('Ces points ne se lisent pas : écris un nombre (3 ou 2,5) ou deux bornes (3 à 4)');
         expect(refus('-1')).toBe('Les points d’une tranche commencent à 0 : corrige-les');
         expect(refus('5')).toBe('Les points d’une tranche vont de 0 à 4, la pondération du critère : corrige-les, ou change la pondération');
@@ -197,18 +199,19 @@ describe('barème 1 · R — les refus', () => {
         expect(B.modifierTexte(T, 'a', 'x'.repeat(5001)).refuse).toBe('Une tranche fait 5 000 caractères au plus');
         expect(B.modifierTexte(T, 'a', 'x'.repeat(5000)).tranches).toBeDefined();
         const vingt = Array.from({ length: 20 }, (_, i) => ({ id: 'T' + i, nom: '', pointsMin: i, pointsMax: i, texte: '' }));
-        expect(B.peutAjouter(19)).toBeNull();
-        expect(B.peutAjouter(20)).toBe('Au plus 20 tranches par critère');
-        expect(B.ajouter(vingt, { id: 'n', nom: '', texte: '' }, '25', null).refuse).toBe('Au plus 20 tranches par critère');
+        expect(B.ajouter(vingt.slice(1), 'n').tranches).toHaveLength(20);
+        expect(B.ajouter(vingt, 'n')).toEqual({ refuse: 'Au plus 20 tranches par critère' });
         expect(B.modifierNom(T, 'z', 'x')).toEqual({ refuse: null });
         expect(B.modifierPoints(T, 'z', '2', 4)).toEqual({ refuse: null });
         expect(B.retirer(T, 'z')).toEqual({ refuse: null });
     });
 
-    it('R.c une tranche neuve s’ajoute en dernier avec ses points, ou pas du tout', () => {
-        expect(B.ajouter(T, { id: 'n', nom: ' Presque ', texte: ' Un texte. ' }, '', 4).refuse).toBe('Les points de la tranche sont obligatoires');
-        expect(B.ajouter(T, { id: 'n', nom: ' Presque ', texte: ' Un texte. ' }, '2', 4).tranches.slice(-1))
-            .toEqual([{ id: 'n', nom: 'Presque', pointsMin: 2, pointsMax: 2, texte: 'Un texte.' }]);
+    it('R.c une tranche neuve s’ajoute en dernier, vide et sans points (« à compléter ») — rien n’est inventé', () => {
+        const r = B.ajouter(T, 'n');
+        expect(r.tranches.slice(0, 3)).toEqual(T);
+        expect(r.tranches.slice(-1)).toEqual([{ id: 'n', nom: '', pointsMin: null, pointsMax: null, texte: '' }]);
+        expect(B.aCompleter(r.tranches[3])).toBe(true);
+        expect(B.refusStructure(r.tranches)).toBeNull();
     });
 
     it('R.d la structure (l’import) : ce que l’application écrit entre, même sans points, même chevauchant', () => {
@@ -228,7 +231,8 @@ describe('barème 1 · R — les refus', () => {
         const src = readFileSync(path.join(racine, 'js', 'bareme.js'), 'utf8');
         expect(src).toContain("trop: 'Au plus 20 tranches par critère'");
         expect(src).toContain("texteLong: 'Une tranche fait 5 000 caractères au plus'");
-        expect(src).toContain("pointsVides: 'Les points de la tranche sont obligatoires'");
+        // C1 (verdict du 20 oct.) : « Les points de la tranche sont obligatoires » ne bloque plus rien, il est parti.
+        expect(src).not.toContain('pointsVides');
     });
 });
 
@@ -339,33 +343,47 @@ describe('barème 1 · G — les gestes, dans « Grilles de critères »', () =>
         expect(q.classList.contains('champ-refuse')).toBe(false);
     });
 
-    it('G.c « + Ajouter une tranche » : rien n’est écrit avant ses points ; avec eux, la tranche s’écrit, nom et texte compris', async () => {
+    it('G.c « + Ajouter une tranche » (C1) : écrite aussitôt, « à compléter » ; nom et texte au fil de la saisie ; un refus de points les laisse', async () => {
         const m = monter();
-        const avant = JSON.stringify(m.store[K]);
-        m.win.ajouterTrancheBareme('GRILLE_BANC', 2);
-        expect(JSON.stringify(m.store[K])).toBe(avant);
+        await m.win.ajouterTrancheBareme('GRILLE_BANC', 2);
+        // Écrite tout de suite, par la file : la conversion de CE critère, et la tranche vide en dernier.
+        expect(m.critere(2)).not.toHaveProperty('descripteurs');
+        expect(m.critere(2).bareme.slice(-1)).toEqual([{ id: 'TR_banc1', nom: '', pointsMin: null, pointsMax: null, texte: '' }]);
         const neuve = m.tranches(2)[2];
-        expect(neuve.querySelector('.grille-bareme-marque').textContent).toBe('Pas encore enregistrée : donne-lui ses points');
-        expect(m.document.activeElement).toBe(neuve.querySelector('[data-champ="points"]'));
+        expect(neuve.querySelector('.grille-bareme-marque').textContent).toBe('à compléter');
+        expect(m.document.activeElement).toBe(neuve.querySelector('[data-champ="nom"]'));
         neuve.querySelector('[data-champ="nom"]').value = 'Presque';
         await m.win.modifierTrancheBaremeHandler(neuve.querySelector('[data-champ="nom"]'));
         neuve.querySelector('textarea').value = 'Une ou deux fautes.';
         await m.win.modifierTrancheBaremeHandler(neuve.querySelector('textarea'));
-        expect(JSON.stringify(m.store[K])).toBe(avant);
-        // Un autre rendu de la liste la garde, avec ce qui est saisi.
-        m.rendre();
-        expect(m.champ(2, 2, 'nom').value).toBe('Presque');
+        expect(m.critere(2).bareme[2]).toEqual({ id: 'TR_banc1', nom: 'Presque', pointsMin: null, pointsMax: null, texte: 'Une ou deux fautes.' });
+        // Des points qui chevauchent : refusés, les points seuls ; le nom et le texte restent écrits.
         const p = m.champ(2, 2, 'points');
+        p.value = '4-6';
+        await m.win.modifierTrancheBaremeHandler(p);
+        expect(p.classList.contains('champ-refuse')).toBe(true);
+        expect(m.critere(2).bareme[2]).toEqual({ id: 'TR_banc1', nom: 'Presque', pointsMin: null, pointsMax: null, texte: 'Une ou deux fautes.' });
         p.value = '8';
         await m.win.modifierTrancheBaremeHandler(p);
-        expect(m.critere(2).bareme.slice(-1)).toEqual([{ id: 'TR_banc1', nom: 'Presque', pointsMin: 8, pointsMax: 8, texte: 'Une ou deux fautes.' }]);
-        expect(m.critere(2).bareme.slice(0, 2).map(x => x.texte)).toEqual(['Des fautes.', 'Aucune faute.']);
+        expect(m.critere(2).bareme[2]).toMatchObject({ pointsMin: 8, pointsMax: 8, texte: 'Une ou deux fautes.' });
         expect(m.tranches(2)[2].querySelector('.grille-bareme-marque')).toBeNull();
-        // Écrite, elle se modifie comme les autres.
-        const t = m.champ(2, 2, 'texte');
-        t.value = 'Une faute au plus.';
-        await m.win.modifierTrancheBaremeHandler(t);
-        expect(m.critere(2).bareme[2].texte).toBe('Une faute au plus.');
+        expect(m.critere(2).bareme.slice(0, 2).map(x => x.texte)).toEqual(['Des fautes.', 'Aucune faute.']);
+        // Ses points effacés : la marque revient, la tranche est à compléter.
+        p.value = '';
+        await m.win.modifierTrancheBaremeHandler(p);
+        expect(m.critere(2).bareme[2]).toMatchObject({ pointsMin: null, pointsMax: null });
+        expect(m.tranches(2)[2].querySelector('.grille-bareme-marque').textContent).toBe('à compléter');
+        expect(p.getAttribute('aria-describedby')).toBe(m.tranches(2)[2].querySelector('.grille-bareme-marque').id);
+    });
+
+    it('G.c2 au plus 20 tranches : la 21e n’est pas écrite, le témoin le dit', async () => {
+        const g = grilleFictive();
+        g.criteres[2].bareme = Array.from({ length: 20 }, (_, i) => ({ id: 'T' + i, nom: '', pointsMin: null, pointsMax: null, texte: '' }));
+        const m = monter({ grilles: [g] });
+        const avant = JSON.stringify(m.store[K]);
+        await m.win.ajouterTrancheBareme('GRILLE_BANC', 2);
+        expect(JSON.stringify(m.store[K])).toBe(avant);
+        expect(m.journal).toContainEqual(['nonEnregistre', 'au plus 20 tranches par critère.', K]);
     });
 
     it('G.d retirer : la confirmation du retrait d’un critère ; annulée, rien ne part', async () => {

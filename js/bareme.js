@@ -22,8 +22,10 @@
  *
  * DEUX JEUX DE REFUS. `refusStructure` : ce qu'un barème doit être pour entrer, à l'import comme
  * à l'écriture (types, 20 tranches, 5 000 caractères, des bornes dans l'ordre). Les refus de
- * SAISIE (`modifierPoints`, `ajouter`) y ajoutent ce que l'enseignant écrit lui-même : des points
- * obligatoires, de 0 à la pondération, sans chevauchement. Un barème du stock peut porter une
+ * SAISIE (`modifierPoints`) y ajoutent ce que l'enseignant écrit lui-même : des points lisibles, de 0
+ * à la pondération, sans chevauchement. Des points effacés ne sont pas refusés : la tranche redevient
+ * « à compléter » (`null`), comme une tranche neuve (C1 du verdict du 20 oct. : rien n'est inventé,
+ * et aucun texte n'attend ses points pour s'enregistrer). Un barème du stock peut porter une
  * tranche sans points, deux tranches qui se chevauchent (des réponses « 3-4 » et « 4-5 ») ou une
  * tranche au-delà d'une pondération baissée après coup : il reste lisible, et voyage tel quel.
  *
@@ -40,12 +42,11 @@
     B.MAX_ID = 100;
 
     // Les refus de l'éditeur, lus par le témoin commun (« Non enregistré : ‹raison›. »).
-    // `trop`, `texteLong`, `pointsVides` : ceux des réponses (lot 13, validés G. 19 oct. 19 h 29), le mot
+    // `trop`, `texteLong` : ceux des réponses (lot 13, validés G. 19 oct. 19 h 29), le mot
     // « réponse » devenu « tranche ». Les autres : textes de Claude Code, 20 oct., PROVISOIRES.
     B.REFUS = {
         trop: 'Au plus 20 tranches par critère',
         texteLong: 'Une tranche fait 5 000 caractères au plus',
-        pointsVides: 'Les points de la tranche sont obligatoires',
         nomLong: 'Le nom d’une tranche fait 200 caractères au plus',
         pointsIllisibles: 'Ces points ne se lisent pas : écris un nombre (3 ou 2,5) ou deux bornes (3 à 4)',
         pointsNegatifs: 'Les points d’une tranche commencent à 0 : corrige-les',
@@ -229,7 +230,7 @@
     /** Des points saisis, contrôlés contre le maximum et les autres tranches (sauf `id`). */
     function pointsSaisis(tranches, id, saisie, max) {
         var p = B.lirePoints(saisie);
-        if (p.vide) return { refuse: B.REFUS.pointsVides };
+        if (p.vide) return { pointsMin: null, pointsMax: null };   // à compléter
         if (p.negatif) return { refuse: B.REFUS.pointsNegatifs };
         if (p.illisible) return { refuse: B.REFUS.pointsIllisibles };
         var m = Number(max);
@@ -270,23 +271,14 @@
         return { tranches: liste };
     };
 
-    /** Peut-on ouvrir une tranche de plus ? (`nb` : celles du critère, écrites ou en attente.) */
-    B.peutAjouter = function (nb) { return nb < B.MAX_TRANCHES ? null : B.REFUS.trop; };
-
     /**
-     * Une tranche neuve, en dernier — elle ne s'écrit qu'avec ses points (« des points obligatoires
-     * pour toute tranche écrite ») : `neuve` porte l'identifiant, le nom et le texte déjà saisis.
+     * Une tranche neuve, en dernier, vide et sans points (« à compléter ») : elle s'écrit aussitôt,
+     * son nom, ses points et son texte au fil de la saisie (C1 du verdict du 20 oct.).
      */
-    B.ajouter = function (tranches, neuve, saisiePoints, max) {
+    B.ajouter = function (tranches, id) {
         var liste = copie(tranches);
-        var trop = B.peutAjouter(liste.length);
-        if (trop) return { refuse: trop };
-        var nom = String(neuve.nom == null ? '' : neuve.nom).trim(), texte = String(neuve.texte == null ? '' : neuve.texte).trim();
-        if (nom.length > B.MAX_NOM) return { refuse: B.REFUS.nomLong };
-        if (texte.length > B.MAX_TEXTE) return { refuse: B.REFUS.texteLong };
-        var p = pointsSaisis(liste, neuve.id, saisiePoints, max);
-        if (p.refuse !== undefined) return p;
-        liste.push({ id: String(neuve.id), nom: nom, pointsMin: p.pointsMin, pointsMax: p.pointsMax, texte: texte });
+        if (liste.length >= B.MAX_TRANCHES) return { refuse: B.REFUS.trop };
+        liste.push({ id: String(id), nom: '', pointsMin: null, pointsMax: null, texte: '' });
         return { tranches: liste };
     };
 
