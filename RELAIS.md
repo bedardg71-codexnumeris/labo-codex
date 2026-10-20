@@ -7,6 +7,15 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS – 20 OCT. 2026, APRÈS-MIDI (écrit par Claude Code) : **1.211.0 COMMITÉE SUR `main`, AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**Sur `main`** : la 1.211.0 (build `1020-1451`) — les sous-critères modifiables hors algorithmique, la tranche du barème et l'en-tête de grille sur une ligne, F1 (codes de sous-critère sans doublon), relus et acceptés par Cowork (verdict du 20 oct. 14 h 30) ; les textes des cartes de l'accueil (`lot-accueil-textes-cartes`, `772268fc`, arrêtés par Grégoire le 19 oct., relus par Cowork le 20 à 14 h 50). Les deux branches sont **fusionnées** ; `feat/sous-criteres-condensation` et `lot-accueil-textes-cartes` ne portent plus rien. Les Nouvelles 1.211 sont **proposées** à Grégoire ; le push suit sa réponse et un verdict complet. **À constater au début de la prochaine session** : `git log origin/main -1` (le push a-t-il eu lieu ?) et la version chez Netlify.
+**Hors relais** : `ci/verdict-morceaux` (4 commits, worktree à 339 fichiers modifiés) attend Grégoire (#1093). Le précédent bloc de tête (18 oct.) est périmé : 1.206 à 1.210 sont en ligne.
+**Inscrits** : #1125 (les points des tranches collés au texte par la dissection, niveaux nommés), #1126 (« Nom du critère » trop étroit au Mac).
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.210.0 `eafa4ec4` → 1.211.0) : fichiers de plus de 1 000 lignes 35 → 35, leurs lignes 86 025 → 86 127 (Δ +102, dont `js/grilles.js` 3 872 → 3 950) ; au-dessus de 15 : 454 → 454 (Δ 0) ; au-dessus de 30 : 88 → 88 (Δ 0) ; somme au-dessus de 15 : 11 440 → 11 437 (Δ −3).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 18 OCT. 2026, 23 h 05 (écrit par Cowork) : **1.206.0 ET 1.207.0 COMMITÉES SUR `main`, LE PUSH ATTEND LE VERDICT DE LA NUIT**
 
 **En ligne au moment d'écrire** : `1d5ecaf1` (1.205.0, « Couper un morceau »). **`main` local** : dix commits devant `origin/main`, jusqu'à `0bdce851` (demande de relecture de la 1.207.0) : le lot 7 « Rattacher » et sa correction, la 1.206.0 (`c7167fc9`), les lots 9 et 9b (créer la grille même s'il manque des points, et la garde de la note pour les critères marqués « à compléter »), la 1.207.0 (`e76e65fe`). Tout est relu et accepté par Cowork.

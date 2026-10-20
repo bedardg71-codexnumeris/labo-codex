@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.211 (les sous-critères modifiables, la grille plus compacte, les textes de l'accueil) — titre et trois
+            // items proposés par Claude Code le 20 oct. 2026, À VALIDER par Grégoire avant le push.
+            version: '1.211',
+            couleur: 'vert',
+            titre: 'Des sous-critères à toi, et une grille plus compacte',
+            items: [
+                'Dans «&nbsp;Grilles de critères&nbsp;», les sous-critères d’un critère holistique ou analytique se modifient&nbsp;: tu peux en ajouter, les renommer, les réordonner et les retirer, même dans une grille faite à la main.',
+                'L’éditeur de grille prend moins de place&nbsp;: le nom, le type et la description de la grille tiennent sur une ligne, comme chaque tranche du barème, et le texte d’une tranche s’agrandit avec ce que tu écris.',
+                'Les cartes de l’accueil décrivent mieux chaque section, et «&nbsp;Importer des productions&nbsp;» devient «&nbsp;Importer des copies&nbsp;».'
+            ]
+        },
+        {
             // 1.210 (le barème d'un critère en points, le compte des erreurs corrigé) — titre et cinq items proposés
             // par Cowork (10 h 28), validés par Grégoire le 20 oct. 2026 (10 h 30), transmis par Cowork
             // (CONSIGNE-LOT-2026-10-20-version-1.210.md). Items 6 à 8 (#1123, #1124, #1122, fusionnés avant le push) :
