@@ -972,7 +972,9 @@ function ouvrirIntervention(interventionId, options) {
             // il reste ciblable par l'intervention, il n'est simplement pas étiqueté.
             // #740 (16 sept.) : il n'est jamais PROPOSÉ — ni compté « en défi » ni pré-coché —
             // parce que `calculerMoyennesCriteres` ne le lit plus (filtre unique, helpers).
-            var badgeSolo = niveauLabel
+            // #1117 (19 oct. 2026) : observation SOLO désactivée, pas de badge non plus.
+            var soloActive = typeof obtenirPreference !== 'function' || obtenirPreference('afficherDescriptionsSOLO') !== false;
+            var badgeSolo = niveauLabel && soloActive
                 ? '<span class="badge-sys" style="font-size: 0.75rem; padding: 2px 6px; opacity: 0.7;">' + echapperHtml(niveauLabel) + '</span>'
                 : '';
             return '<label style="display: flex; align-items: center; gap: 8px; padding: 6px 0; cursor: pointer;">' +

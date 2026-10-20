@@ -318,7 +318,8 @@ async function sauvegarderCritere() {
         // il compte dans la note, le dépistage le saute. Le DÉFAUT reste « multistructurel » :
         // un critère sans étiquette est une fondation, comme le lisent `calculerIPB` et
         // l'export (#542) — l'ordre des options change, pas la valeur choisie.
-        niveauSOLO: 'multistructurel',
+        // #1117 (19 oct. 2026) : « aucun » quand l'observation SOLO est désactivée.
+        niveauSOLO: niveauSOLOCritereNeuf(observationSOLOActive()),
         verrouille: false
     };
 
@@ -3227,6 +3228,52 @@ function typeCritereParDefautEnCours() {
 }
 
 /**
+ * #1117 (19 oct. 2026) — LA COMPLEXITÉ SOLO SUIT LE RÉGLAGE. Case décochée (« Activer
+ * l'observation de la structure des résultats d'apprentissage », `afficherDescriptionsSOLO`),
+ * le menu « Complexité SOLO du critère » n'est pas rendu : un menu dont la seule option utile
+ * serait « Aucun » ne sert à rien (Grégoire). Même lecture que les autres lecteurs de la
+ * préférence (`!== false`) ; sans `obtenirPreference` (bancs), le menu est montré.
+ */
+function observationSOLOActive() {
+    return typeof obtenirPreference !== 'function' || obtenirPreference('afficherDescriptionsSOLO') !== false;
+}
+
+/**
+ * Le `niveauSOLO` d'un critère créé à la main. Préférence activée : le défaut du lot 4,
+ * volet B — « multistructurel », une fondation, comme le lisent `calculerIPB` et l'export.
+ * Désactivée : « aucun » (Grégoire, 19 oct., 22 h 05) — le critère compte dans la note, le
+ * dépistage le saute. Seul un critère NEUF le reçoit : masquer le menu n'écrit rien.
+ * @param {boolean} soloActive
+ * @returns {'multistructurel'|'aucun'}
+ */
+function niveauSOLOCritereNeuf(soloActive) {
+    return soloActive ? 'multistructurel' : 'aucun';
+}
+
+/**
+ * Le menu « Complexité SOLO du critère », pour les deux éditeurs (création, grille
+ * existante) — rien du tout quand l'observation SOLO est désactivée (#1117).
+ * @param {Object} critere
+ * @param {string} attrs - les attributs `data-*` du `<select>` propres à l'éditeur
+ */
+function menuComplexiteSOLOCritere(critere, attrs) {
+    if (!observationSOLOActive()) return '';
+    return `
+                <div class="groupe-form">
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Complexité SOLO du critère
+                        <span class="primo-aide" data-target="grille-niveau-solo"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
+                    </label>
+                    <select class="controle-form"
+                            ${attrs} data-champ="niveauSOLO">
+                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
+                        <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
+                        <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
+                        <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
+                    </select>
+                </div>`;
+}
+
+/**
  * Le type déclaré ; sinon celui de ses critères quand ils n'en ont qu'un ; sinon
  * rien (composition mixte, aucun critère, type inconnu). Lecture seule — ce qui
  * est déduit n'est jamais écrit.
@@ -3469,18 +3516,7 @@ function afficherCriteresTemp() {
                            max="100"
                            data-on-change="modifierPonderationCritereTempHandler" data-critere-index="${index}">
                 </div>
-                <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Complexité SOLO du critère
-                        <span class="primo-aide" data-target="grille-niveau-solo"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                    </label>
-                    <select class="controle-form"
-                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="niveauSOLO">
-                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
-                        <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
-                        <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
-                        <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
-                    </select>
-                </div>
+                ${menuComplexiteSOLOCritere(critere, `data-on-change="modifierCritereTempHandler" data-critere-index="${index}"`)}
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
@@ -4799,7 +4835,8 @@ function ajouterCritereTemp() {
         nom: '',
         type: typeCritereParDefautEnCours(),
         ponderation: 0,
-        description: ''
+        description: '',
+        niveauSOLO: niveauSOLOCritereNeuf(observationSOLOActive())   // #1117
     }));
     afficherCriteresTemp();
     mettreAJourTotalTemp();
@@ -5050,18 +5087,7 @@ function afficherCriteresGrille(grille) {
                            max="100"
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="ponderation" data-parse-int>
                 </div>
-                <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Complexité SOLO du critère
-                        <span class="primo-aide" data-target="grille-niveau-solo"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                    </label>
-                    <select class="controle-form"
-                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="niveauSOLO">
-                        <option value="aucun" ${critere.niveauSOLO === 'aucun' ? 'selected' : ''}>Aucun</option>
-                        <option value="multistructurel" ${(critere.niveauSOLO || 'multistructurel') === 'multistructurel' ? 'selected' : ''}>Multistructurel</option>
-                        <option value="relationnel" ${critere.niveauSOLO === 'relationnel' ? 'selected' : ''}>Relationnel</option>
-                        <option value="abstrait_etendu" ${critere.niveauSOLO === 'abstrait_etendu' ? 'selected' : ''}>Abstrait étendu</option>
-                    </select>
-                </div>
+                ${menuComplexiteSOLOCritere(critere, `data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}"`)}
                 <div class="groupe-form">
                     <label style="font-size: 0.85rem; color: var(--gris-moyen);">Description</label>
                     <input type="text"
@@ -5445,7 +5471,8 @@ async function ajouterCritereGrille(grilleId) {
             nom: 'Nouveau critère',
             type: typeCritereParDefaut(g),
             ponderation: 0,
-            description: ''
+            description: '',
+            niveauSOLO: niveauSOLOCritereNeuf(observationSOLOActive())   // #1117
         }));
 
         grille = g;
@@ -6467,6 +6494,7 @@ window.typeCritereParDefaut = typeCritereParDefaut;
 window.typeGrilleAffiche = typeGrilleAffiche;
 window.rendreCartesGabaritAlgo = rendreCartesGabaritAlgo;   // lot 4 — le gabarit algorithmique, pour les sentinelles
 window.afficherCriteresGrille = afficherCriteresGrille;       // lot 4 — l'écran d'édition, exécuté par les sentinelles (afficherCriteresTemp l'est déjà plus haut)
+window.niveauSOLOCritereNeuf = niveauSOLOCritereNeuf;         // #1117 — le défaut d'un critère neuf, éprouvé par sa sentinelle
 window.capturerPlisGabaritAlgo = capturerPlisGabaritAlgo;
 window.phrasePrecisionTypeGrille = phrasePrecisionTypeGrille;
 window.motsAvisCriteresSansType = motsAvisCriteresSansType;   // #703 — les mots, éprouvés par leur sentinelle

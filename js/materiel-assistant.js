@@ -308,7 +308,10 @@
                 var cr = {
                     id: ctx.id('CR_'), nom: texte(c.nom), description: texte(c.description),
                     ponderation: isNaN(pond) ? null : pond, type: 'holistique', formule: '',
-                    niveauSOLO: 'multistructurel', verrouille: false
+                    // #1117 (19 oct. 2026, Grégoire, 22 h 02) : « aucun » DANS TOUS LES CAS — la
+                    // dissection ne choisit pas la complexité SOLO à la place de l'enseignant.
+                    // Le critère compte dans la note, le dépistage le saute, comme à la main.
+                    niveauSOLO: 'aucun', verrouille: false
                 };
                 // La dissection, lot 9b : la marque « à compléter », que lit la garde de la note (`calculerPortee`).
                 if (isNaN(pond)) cr.ponderationACompleter = true;

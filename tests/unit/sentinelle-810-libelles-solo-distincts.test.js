@@ -28,13 +28,17 @@ const etiquettes = (source) =>
 
 describe('#810 · deux noms distincts pour deux objets distincts', () => {
     it('l\'éditeur de grilles nomme la COMPLEXITÉ EXIGÉE, à ses deux sites', () => {
-        const posees = grillesJs.split('Complexité SOLO du critère').length - 1;
-        expect(posees).toBe(2); // création ET édition — n'en corriger qu'un laisserait la moitié de la confusion
+        // ↻ 19 oct. 2026 (#1117) : l'étiquette est posée UNE fois, dans `menuComplexiteSOLOCritere`,
+        // que les DEUX éditeurs appellent — création ET édition.
+        expect(grillesJs.split('>Complexité SOLO du critère').length - 1).toBe(1);
+        expect(grillesJs.match(/\$\{menuComplexiteSOLOCritere\(critere, `data-on-change="modifierCritere(Temp|Grille)Handler"/g) || []).toHaveLength(2);
     });
 
     it('l\'éditeur d\'échelles nomme le PALIER ATTEINT, à ses deux sites', () => {
-        const posees = echellesJs.split('Palier SOLO du niveau').length - 1;
-        expect(posees).toBe(2); // échelle en cours de création ET échelle enregistrée
+        // ↻ 19 oct. 2026 (#1117) : posée UNE fois, dans `champPalierSOLONiveau`, appelé par les deux
+        // éditeurs — échelle en cours de création ET échelle enregistrée (`ligneNiveauEchelleHtml`).
+        expect(echellesJs.split('>Palier SOLO du niveau').length - 1).toBe(1);
+        expect(echellesJs.match(/\$\{champPalierSOLONiveau\(niveau, /g) || []).toHaveLength(2);
     });
 
     it('aucune étiquette de champ des deux éditeurs ne dit plus « Niveau SOLO » nu', () => {
@@ -54,7 +58,8 @@ describe('#810 · deux noms distincts pour deux objets distincts', () => {
     it('la fiche d\'aide du champ de grille reste branchée (on n\'a rien expliqué de plus)', () => {
         // ⛔ Décision : ne PAS ajouter de texte d'explication. La fiche existante
         // disait déjà la bonne chose ; c'est le nom qui manquait.
+        // ↻ 19 oct. 2026 (#1117) : une fois, dans le producteur commun aux deux éditeurs.
         const branchees = grillesJs.split('data-target="grille-niveau-solo"').length - 1;
-        expect(branchees).toBe(2);
+        expect(branchees).toBe(1);
     });
 });

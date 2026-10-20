@@ -119,9 +119,13 @@ describe('lot 4 · B.A — les deux menus offrent « Aucun », le défaut reste 
         expect(html.indexOf('value="aucun"')).toBeLessThan(html.indexOf('value="multistructurel"'));
     });
 
-    it('A.c le défaut d\'un critère neuf est toujours multistructurel — « Aucun » se choisit, il ne s\'impose pas', () => {
+    // ↻ 19 oct. 2026 (#1117, Grégoire, 22 h 05) : observation SOLO DÉSACTIVÉE, le critère créé à la
+    // main reçoit « aucun ». Activée, le défaut de ce lot tient. La règle vit dans
+    // `sentinelle-1117-solo-suit-le-reglage.test.js` ; ici, le défaut d'avant.
+    it('A.c observation SOLO activée, le défaut d\'un critère neuf reste multistructurel — « Aucun » se choisit', () => {
+        const { win } = monterGrilles();
+        expect(win.niveauSOLOCritereNeuf(true)).toBe('multistructurel');
         const code = sansCommentaires(source('js/grilles.js'));
-        expect(code).toContain("niveauSOLO: 'multistructurel',");
         expect(code).not.toContain("niveauSOLO: 'aucun'");
     });
 });
@@ -153,7 +157,7 @@ describe('lot 4 · B.B — un critère « Aucun » n\'a pas de libellé SOLO, et
 
     it('B.c le formulaire d\'intervention : pas de badge sans libellé, le critère reste ciblable', () => {
         const code = sansCommentaires(source('js/interventions.js'));
-        expect(code).toMatch(/var badgeSolo = niveauLabel\s*\?/);
+        expect(code).toMatch(/var badgeSolo = niveauLabel && soloActive\s*\?/);   // ↻ #1117 : et le réglage
         expect(code).toContain("badgeSolo +");
         expect(code).toContain("'<input type=\"checkbox\" class=\"critere-cible-cb\" value=\"' + echapperHtml(c.nom)");
     });

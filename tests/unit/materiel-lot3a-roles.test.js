@@ -134,7 +134,8 @@ describe('lot 3a · F — critère et sous-critères ont la forme de l’éditeu
         const o = A.construire(exemple(), { id: (p) => p + (++compteur), maintenant: 'x' });
         const sansFacultatifs = Object.keys(o.grille.criteres[0]).filter(k => k !== 'descripteurs').sort();
         expect(sansFacultatifs).toEqual([...editeur, 'id'].sort());
-        expect(o.grille.criteres[0]).toMatchObject({ description: '', formule: '', niveauSOLO: 'multistructurel', verrouille: false, type: 'holistique' });
+        // #1117 (19 oct. 2026) : « aucun » dans tous les cas — la dissection ne choisit pas la complexité SOLO.
+        expect(o.grille.criteres[0]).toMatchObject({ description: '', formule: '', niveauSOLO: 'aucun', verrouille: false, type: 'holistique' });
         expect(o.grille.criteres[0]).not.toHaveProperty('sousCriteres');   // aucun : absent, comme à l'éditeur
     });
 
