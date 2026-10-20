@@ -131,7 +131,7 @@
   "genererBarrePatterns": 32
  },
  "js/travaux-annotation.js": {
-  "onPointerDown": 51,
+  "onPointerDown": 50,
   "onKeyDown": 38,
   "trouverAnnotationAuPoint": 32,
   "appliquerRedimensionnement": 41,
