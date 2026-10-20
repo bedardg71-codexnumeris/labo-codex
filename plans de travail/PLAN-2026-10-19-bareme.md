@@ -58,6 +58,8 @@ Le barème guide la saisie (question 1, répondue). Le texte de chaque tranche s
 
 Le chiffre, et dessous le texte de la tranche atteinte, sans son nom (question 4, répondue).
 
+**La grille vierge remise avec la consigne** (décision de Grégoire, 20 oct. 2026, 16 h 58, sur proposition de Cowork) : chaque tranche avec ses points et son texte, sans son nom (« 3-4 points : Résume l'essentiel »). Même motif que la copie corrigée : l'élève ne lit pas « Satisfaisant » sur la grille, puis autre chose sur sa note. Né de son constat de 16 h 54 (1.211.0) : l'aperçu montrait l'échelle au lieu du barème et le formulaire exigeait une échelle. Consigne : `CONSIGNE-LOT-2026-10-20-pdf-grille-bareme.md`.
+
 ### Hors de ce chantier
 
 - Les critères algorithmiques : plus tard, en les distinguant (Grégoire).

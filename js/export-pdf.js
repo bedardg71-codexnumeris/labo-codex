@@ -2264,6 +2264,85 @@ function blocsInfoHTML(modele, styles) {
     ).join('') + `</div>`;
 }
 
+/**
+ * L'ÉCHELLE N'EST EXIGÉE QUE SI UN CRITÈRE EN LIT UNE (#1120, 20 oct. 2026).
+ *
+ * ⚠⚠ Retour de Grégoire, 20 oct. : sa grille « Journal de lecture A26 », quatre critères à
+ * barème et aucune échelle, ne s'ouvrait pas sans échelle (`grille && echelle` à chaque porte).
+ * Un critère à barème montre ses tranches ; seuls les autres lisent les niveaux d'une échelle.
+ * Une grille inconnue ou sans critère l'exige comme avant : rien ne permet d'en dire moins.
+ */
+function echelleExigee(grille) {
+    if (!grille || !Array.isArray(grille.criteres) || grille.criteres.length === 0) return true;
+    return grille.criteres.some(c => window.bareme.tranchesDuCritere(c).length === 0);
+}
+
+/** Une grille s'évalue avec son échelle (ou son identifiant), ou sans elle quand aucun de ses critères n'en lit (#1120). */
+function grilleEvaluable(grille, echelle) {
+    return !!grille && (!!echelle || !echelleExigee(grille));
+}
+
+/** La grille d'un identifiant, lue dans la collection du trimestre ; `null` sans identifiant ou introuvable. */
+async function grilleParId(grilleId) {
+    if (!grilleId) return null;
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    return grilles.find(g => g.id === grilleId) || null;
+}
+
+/**
+ * LE TABLEAU DES CRITÈRES, DÉCIDÉ UNE FOIS (#1120, 20 oct. 2026).
+ *
+ * ⚠⚠ Il était construit deux fois, dans l'aperçu et dans le PDF : une colonne par niveau de
+ * l'échelle, une case par commentaire de cartouche. Un critère à barème n'y montrait que des
+ * « — » (« la visualisation du PDF ne ressemble pas du tout à ma grille », Grégoire, 20 oct.).
+ * Le contenu se décide ici ; les deux rendeurs ne font que le poser (même règle que #497).
+ *
+ * Un critère à barème montre chacune de ses tranches, dans l'ordre écrit, par la lecture
+ * unique (`bareme.tranchesDuCritere`, invariant 2 du plan) : ses points, puis son texte, sans
+ * son nom (`bareme.ligneEleve`, décision de Grégoire du 20 oct., 16 h 58).
+ *
+ * Disposition (Claude Code, 20 oct.) : une grille mixte garde ses colonnes de niveaux, et la
+ * ligne d'un critère à barème les réunit en une case, une tranche par ligne ; une grille toute
+ * à barème n'a qu'une colonne, « Barème ». Ni couleur ni fond par tranche : lisible en noir et
+ * blanc.
+ *
+ * @returns {{ niveaux: Array, lignes: Array<{ critere: Object, tranches: ?Array<string>, cellules: ?Array<string> }> }|null}
+ *   `null` s'il n'y a rien à montrer : aucun critère, ou des critères qui lisent une échelle
+ *   absente. ⚠ Connu, sans symptôme vécu : une production à consignes, liée à une grille mixte
+ *   sans échelle, s'ouvre (#513), et `cransDisponibles`, qui ne voit pas l'échelle, y offre encore
+ *   « + Évaluation » sur une feuille vide. Avant #1120, ce rendu plantait (`echelle.niveaux`).
+ */
+function tableauDesCriteres(grille, echelle, cartouche) {
+    const criteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
+    if (criteres.length === 0) return null;
+    const lisentEchelle = echelleExigee(grille);
+    const niveaux = (lisentEchelle && echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
+    if (lisentEchelle && niveaux.length === 0) return null;
+
+    const commentaires = (cartouche && cartouche.commentaires) || null;
+    return {
+        niveaux: niveaux,
+        lignes: criteres.map(c => {
+            const tranches = window.bareme.tranchesDuCritere(c);
+            if (tranches.length > 0) {
+                return { critere: c, tranches: tranches.map(t => window.bareme.ligneEleve(t)).filter(Boolean), cellules: null };
+            }
+            return {
+                critere: c,
+                tranches: null,
+                cellules: niveaux.map(n => (commentaires && commentaires[`${c.id}_${n.code}`]) || '—')
+            };
+        })
+    };
+}
+
+/** L'en-tête d'une colonne de niveau, ou celle de la grille toute à barème. */
+function entetesColonnesTableau(tableau) {
+    return tableau.niveaux.length > 0
+        ? tableau.niveaux.map(n => (n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?')))
+        : ['Barème'];
+}
+
 function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
 
     // Facteur de taille pour les elements configurables (pas titre, pas retroactions)
@@ -2305,6 +2384,8 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     const styleTableCritere = `font-size: ${7.5 * facteurTaille}pt; font-weight: bold;`;
     // Retroactions : taille auto-ajustee, pas affectee par le facteur utilisateur
     const styleRetroaction = `font-size: ${tailleRetroaction * 0.9}pt; line-height: 1.15;`;
+    // #1120 — les tranches d'un barème : la taille du corps du tableau, comme le PDF.
+    const styleTexteTranche = `font-size: ${7.5 * facteurTaille}pt; line-height: 1.3;`;
 
     // Conteneur principal (le padding est géré par .apercu-pdf-page-contenu dans CSS)
     let html = `<div class="apercu-pdf" style="min-height: 100%; display: flex; flex-direction: column;">`;
@@ -2361,8 +2442,11 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     // Légende supprimée - le nom du niveau est dans l'entête du tableau
 
     // Tableau des criteres - largeurs adaptees comme le PDF
-    if (partie !== 'consignes' && modele.afficheEvaluation && grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
-        const nbNiveaux = echelle.niveaux.length;
+    // #1120 — son contenu vient de `tableauDesCriteres`, partagé avec le PDF.
+    const tableau = (partie !== 'consignes' && modele.afficheEvaluation) ? tableauDesCriteres(grille, echelle, cartouche) : null;
+    if (tableau) {
+        const colonnes = entetesColonnesTableau(tableau);
+        const nbNiveaux = colonnes.length;
         // Largeurs en % comme dans le PDF
         const largeurCritere = aCartoucheLongue ? '8%' : '20%';
         const largeurPond = aCartoucheLongue ? '4%' : '8%';
@@ -2379,15 +2463,14 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
         `;
 
         // En-tetes des niveaux - Code + Nom (fond blanc comme le PDF, texte coloré)
-        echelle.niveaux.forEach(n => {
-            const enteteNiveau = n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?');
+        colonnes.forEach(enteteNiveau => {
             // ✅ CORRECTION (28 janvier 2026) : Fond blanc + texte gris foncé comme le PDF
             html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: white; color: ${couleurTexte}; padding: 4px 5px; text-align: center; border: 1px solid ${couleurBordure}; font-weight: bold;">${escapeHtml(enteteNiveau)}</th>`;
         });
         html += `</tr></thead><tbody>`;
 
         // Lignes des criteres
-        grille.criteres.forEach((c, idx) => {
+        tableau.lignes.forEach(({ critere: c, tranches, cellules }, idx) => {
             const bgColor = idx % 2 === 0 ? 'white' : '#fafafa';
             // Contenu de la colonne critère : nom + description optionnelle
             let contenuCritere = escapeHtml(c.nom || '—');
@@ -2400,15 +2483,16 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
                     <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
             `;
 
-            // Cellules pour chaque niveau - RETROACTIONS avec taille auto
-            echelle.niveaux.forEach(n => {
-                let contenu = '—';
-                if (cartouche && cartouche.commentaires) {
-                    const cle = `${c.id}_${n.code}`;
-                    contenu = cartouche.commentaires[cle] || '—';
-                }
-                html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
-            });
+            if (tranches) {
+                // #1120 — un critère à barème : ses tranches, une par ligne, sur toute la largeur des niveaux.
+                const lignesTranches = tranches.map(l => `<div data-tranche style="margin-bottom: 2px;">${escapeHtml(l)}</div>`).join('');
+                html += `<td data-tranches colspan="${nbNiveaux}" style="${styleTexteTranche} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${lignesTranches}</td>`;
+            } else {
+                // Cellules pour chaque niveau - RETROACTIONS avec taille auto
+                cellules.forEach(contenu => {
+                    html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
+                });
+            }
 
             html += `</tr>`;
         });
@@ -2550,27 +2634,23 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
         });
     }
 
-    if (modele.afficheEvaluation && grille.criteres && grille.criteres.length > 0 && echelle.niveaux && echelle.niveaux.length > 0) {
-        // En-tetes avec Code + Nom niveau
-        const entetes = ['Critère', '%', ...echelle.niveaux.map(n => {
-            return n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?');
-        })];
+    // #1120 — le contenu du tableau vient de `tableauDesCriteres`, partagé avec l'aperçu.
+    const tableau = modele.afficheEvaluation ? tableauDesCriteres(grille, echelle, cartouche) : null;
+    if (tableau) {
+        // En-tetes avec Code + Nom niveau (ou « Barème », pour une grille toute à barème)
+        const colonnes = entetesColonnesTableau(tableau);
+        const entetes = ['Critère', '%', ...colonnes];
 
         // Donnees - inclure description du critère si option cochée
-        const donnees = grille.criteres.map(c => {
+        const donnees = tableau.lignes.map(({ critere: c, tranches, cellules }) => {
             let nomCritere = c.nom || '—';
             if (options.inclureDescCriteres && c.description) {
                 nomCritere += '\n' + c.description;
             }
             const ligne = [nomCritere, c.ponderation ? `${c.ponderation}` : '—'];
-            echelle.niveaux.forEach(n => {
-                let contenu = '—';
-                if (cartouche && cartouche.commentaires) {
-                    const cle = `${c.id}_${n.code}`;
-                    contenu = cartouche.commentaires[cle] || '—';
-                }
-                ligne.push(contenu);
-            });
+            // Un critère à barème : ses tranches, une par ligne, sur toute la largeur des niveaux.
+            if (tranches) ligne.push({ content: tranches.join('\n'), colSpan: colonnes.length });
+            else cellules.forEach(contenu => ligne.push(contenu));
             return ligne;
         });
 
@@ -2588,7 +2668,7 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
         }
 
         // Calcul largeurs colonnes - optimise pour cartouches avec texte long
-        const nbNiveaux = echelle.niveaux.length;
+        const nbNiveaux = colonnes.length;
         const aCartouche = cartouche && longueurMoyenne > 50;
 
         // Colonnes fixes reduites au minimum pour maximiser l'espace des niveaux
@@ -2600,7 +2680,7 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
             0: { cellWidth: largeurCritere, fontStyle: 'bold', valign: 'middle' },
             1: { cellWidth: largeurPond, halign: 'center', valign: 'middle' }
         };
-        echelle.niveaux.forEach((n, i) => {
+        colonnes.forEach((n, i) => {
             colonnesStyles[i + 2] = { cellWidth: largeurNiveau, valign: 'top' };
         });
 
@@ -2653,8 +2733,9 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
             didParseCell: function(data) {
                 // En-têtes de niveaux : fond blanc, texte gris (#593)
                 if (data.section === 'head' && data.column.index >= 2) {
-                    const niveau = echelle.niveaux[data.column.index - 2];
-                    if (niveau?.code) {
+                    const niveau = tableau.niveaux[data.column.index - 2];
+                    // #1120 — la colonne « Barème » prend le même en-tête que celles des niveaux.
+                    if (niveau?.code || tableau.niveaux.length === 0) {
                         const couleur = PDF_CONFIG.couleurs.textePrincipal;   // #593 : même gris pour tout code, quelle que soit l'échelle
                         data.cell.styles.fillColor = [255, 255, 255];
                         data.cell.styles.textColor = couleur;
@@ -3406,7 +3487,7 @@ function genererHTMLFormulairePDF() {
                     </div>
 
                     <div class="groupe-form u-mb-0">
-                        <label for="inlinePDF-echelle" class="prep-pdf-label-sm">Échelle de performance <span class="prep-pdf-requis">*</span></label>
+                        <label for="inlinePDF-echelle" class="prep-pdf-label-sm">Échelle de performance <span id="inlinePDF-echelle-requis" class="prep-pdf-requis">*</span></label>
                         <select id="inlinePDF-echelle" class="controle-form" data-on-change="mettreAJourOptionsInlinePDF">
                             <option value="">-- Sélectionner --</option>
                         </select>
@@ -3582,11 +3663,21 @@ async function mettreAJourOptionsInlinePDF() {
         if (gridContainer) gridContainer.style.gridTemplateColumns = '1fr 1fr';
     }
 
+    await accorderEchelleRequiseInline(scope, grilleId, echelleId);
+}
+
+/**
+ * #1120 — l'échelle n'est exigée que si un critère de la grille en lit une : l'astérisque du
+ * libellé le dit, et le bouton de l'aperçu s'active sans elle pour une grille toute à barème.
+ */
+async function accorderEchelleRequiseInline(scope, grilleId, echelleId) {
+    const grille = await grilleParId(grilleId);
+    const requis = scope.querySelector('#inlinePDF-echelle-requis');
+    if (requis) requis.classList.toggle('u-hide', !echelleExigee(grille));
+
     // Activer/désactiver le bouton aperçu
     const btnApercu = scope.querySelector('#inlinePDF-btn-apercu');
-    if (btnApercu) {
-        btnApercu.disabled = !(grilleId && echelleId);
-    }
+    if (btnApercu) btnApercu.disabled = !(grilleId && grilleEvaluable(grille, echelleId));
 }
 
 /**
@@ -3608,7 +3699,7 @@ async function mettreAJourOptionsInlinePDF() {
  * délègue) et la fiche de production (qui lit sa propre production).
  *
  * @param {Object} ids - { productionId, grilleId, echelleId, cartoucheId }
- * @returns {Promise<boolean>} false si la grille ou l'échelle manque
+ * @returns {Promise<boolean>} false si la grille manque, ou l'échelle qu'elle exige
  */
 async function ouvrirApercuPDFPour(ids) {
     const { productionId, grilleId, echelleId, cartoucheId } = ids || {};
@@ -3635,7 +3726,10 @@ async function ouvrirApercuPDFPour(ids) {
     // ⚠ Ce qui reste refusé : un document qui n'aurait RIEN à montrer — ni
     // évaluation, ni consignes. `false` fait alors ouvrir le formulaire de
     // préparation, qui est le bon endroit pour choisir ce qu'on veut voir.
-    const peutEvaluer = !!(grille && echelle);
+    //
+    // ⚠ #1120 (20 oct. 2026) — l'échelle n'est exigée que si un critère en lit
+    // une : une grille toute à barème s'évalue sans elle (`echelleExigee`).
+    const peutEvaluer = grilleEvaluable(grille, echelle);
     if (!peutEvaluer && !productionAConsignes(production)) return false;
 
     let cartouche = null;
@@ -3716,7 +3810,8 @@ async function ouvrirApercuPDFDepuisInline() {
         cartoucheId: scope.querySelector('#inlinePDF-cartouche')?.value
     };
 
-    if (!ids.grilleId || !ids.echelleId) {
+    // #1120 — l'échelle n'est exigée que si un critère de la grille en lit une.
+    if (!grilleEvaluable(await grilleParId(ids.grilleId), ids.echelleId)) {
         alert('Veuillez sélectionner une grille et une échelle.');
         return;
     }
@@ -3764,6 +3859,8 @@ window.accorderSelecteurCran = accorderSelecteurCran;                       // #
 window.feuillesDuDocument = feuillesDuDocument;
 window.dispositionDocument = dispositionDocument;                           // #497 étape 4 — la mise en page est un choix
 window.repartirEnDeuxColonnes = repartirEnDeuxColonnes;                     // #497 étape 4 — une seule répartition pour les deux rendeurs
+window.echelleExigee = echelleExigee;                                       // #1120 — l'échelle, seulement si un critère en lit une
+window.tableauDesCriteres = tableauDesCriteres;                             // #1120 — le tableau décidé une fois pour les deux rendeurs
 window.blocsInfoHTML = blocsInfoHTML;
 window.blocEcheance = blocEcheance;                                         // #498 — la date de remise, toujours dans les consignes
 window.datesDeRemise = datesDeRemise;                             // #497 étape 3 — les consignes seules sur leur page
