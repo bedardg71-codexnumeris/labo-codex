@@ -4630,17 +4630,13 @@ function modifierTexteReponseGrilleHandler(el) {
  * LA CONVERSION : un critère qui porte encore ses réponses les montre lues comme un barème ; sa première
  * modification écrit `bareme` tel qu'affiché et retire `parNiveau` de CE critère, dans la même écriture
  * (`bareme.ecrireSurCritere`). Rien ne se convertit sans geste.
- * UNE TRANCHE NEUVE ne s'écrit qu'avec ses points : en attendant, elle vit dans cette page
- * (`_tranchesNeuves`), son nom et son texte gardés tant que la page reste ouverte, et elle le dit.
+ * UNE TRANCHE NEUVE s'écrit aussitôt, sans points, « à compléter » ; son nom, ses points et son texte au
+ * fil de la saisie, comme ceux de toute tranche (C1 du verdict du 20 oct. : « tout enregistré seul »,
+ * règle de Grégoire du 19 oct. pour cet éditeur ; l'iPad recharge une page mise en arrière-plan, #1031).
+ * Un refus de points refuse les points seuls : le nom et le texte déjà écrits restent.
  * ⚠ Aucun calcul ne lit le barème (invariant 1) : une copie notée garde ses points, quoi qu'on change ici.
  * Textes de Claude Code (20 oct.), PROVISOIRES.
  */
-const _tranchesNeuves = new Map();   // `${grilleId}|${critereId}` → [{ id, nom, texte }]
-
-function _cleTranchesNeuves(grilleId, critere, index) {
-    return grilleId + '|' + ((critere && critere.id) || ('#' + index));
-}
-
 const TEXTES_BAREME = {
     titre: 'Barème',
     nom: 'Nom',
@@ -4650,15 +4646,11 @@ const TEXTES_BAREME = {
     retirer: 'Retirer cette tranche',
     aCompleter: 'à compléter',
     horsBareme: 'hors barème',
-    neuve: 'Pas encore enregistrée : donne-lui ses points',
     confirmer: 'Es-tu sûr de vouloir retirer cette tranche ?'
 };
 
 function rendreBaremeCritere(critere, ctx) {
-    const B = window.bareme;
-    const neuves = _tranchesNeuves.get(_cleTranchesNeuves(ctx.grilleId, critere, ctx.index)) || [];
-    const lignes = B.tranchesDuCritere(critere).map(t => trancheBaremeHtml(t, critere, ctx, false))
-        .concat(neuves.map(t => trancheBaremeHtml(t, critere, ctx, true)));
+    const lignes = window.bareme.tranchesDuCritere(critere).map(t => trancheBaremeHtml(t, critere, ctx));
     return `
                 <h4 class="grille-attendu-titre">${echapperHtml(TEXTES_BAREME.titre)}</h4>
                 <div class="grille-bareme">${lignes.join('')}
@@ -4666,14 +4658,19 @@ function rendreBaremeCritere(critere, ctx) {
                 <div><button type="button" class="btn btn-secondaire" data-action="ajouterTrancheBareme" data-param="${echapperHtml(ctx.grilleId)}" data-param2="${ctx.index}">${echapperHtml(TEXTES_BAREME.ajouter)}</button></div>`;
 }
 
-/** Une tranche : nom, points, corbeille ; sa marque (à compléter, hors barème, pas encore enregistrée) ; son texte. */
-function trancheBaremeHtml(t, critere, ctx, neuve) {
+/** La marque d'une tranche : « à compléter » (sans points), « hors barème » (au-delà de la pondération), ou rien. */
+function marqueTranche(t, critere) {
     const B = window.bareme;
-    const marque = neuve ? TEXTES_BAREME.neuve : B.aCompleter(t) ? TEXTES_BAREME.aCompleter
-        : B.horsBareme(t, critere.ponderation) ? TEXTES_BAREME.horsBareme : '';
-    const idMarque = `bareme-marque-${ctx.index}-${t.id}`;
-    const attrs = `data-grille-id="${echapperHtml(ctx.grilleId)}" data-critere-index="${ctx.index}" data-critere-id="${echapperHtml(critere.id || '')}" data-tranche-id="${echapperHtml(t.id)}"${neuve ? ' data-tranche-neuve="1"' : ''} data-on-change="modifierTrancheBaremeHandler"`;
-    const points = neuve ? (t.points || '') : B.pointsEnTexte(t);
+    return B.aCompleter(t) ? TEXTES_BAREME.aCompleter : B.horsBareme(t, critere.ponderation) ? TEXTES_BAREME.horsBareme : '';
+}
+
+const _idMarqueTranche = (index, id) => `bareme-marque-${index}-${id}`;
+
+/** Une tranche : nom, points, corbeille ; sa marque ; son texte. */
+function trancheBaremeHtml(t, critere, ctx) {
+    const marque = marqueTranche(t, critere);
+    const idMarque = _idMarqueTranche(ctx.index, t.id);
+    const attrs = `data-grille-id="${echapperHtml(ctx.grilleId)}" data-critere-index="${ctx.index}" data-critere-id="${echapperHtml(critere.id || '')}" data-tranche-id="${echapperHtml(t.id)}" data-on-change="modifierTrancheBaremeHandler"`;
     return `
                     <div class="grille-bareme-tranche" data-tranche-id="${echapperHtml(t.id)}">
                         <div class="grille-bareme-tete">
@@ -4681,7 +4678,7 @@ function trancheBaremeHtml(t, critere, ctx, neuve) {
                                 <input type="text" class="controle-form" value="${echapperHtml(t.nom)}" data-champ="nom" ${attrs}>
                             </label>
                             <label class="grille-bareme-champ grille-bareme-points">${echapperHtml(TEXTES_BAREME.points)}
-                                <input type="text" inputmode="decimal" class="controle-form" value="${echapperHtml(points)}" data-champ="points"${marque ? ` aria-describedby="${echapperHtml(idMarque)}"` : ''} ${attrs}>
+                                <input type="text" inputmode="decimal" class="controle-form" value="${echapperHtml(window.bareme.pointsEnTexte(t))}" data-champ="points"${marque ? ` aria-describedby="${echapperHtml(idMarque)}"` : ''} ${attrs}>
                             </label>
                             ${retirerBloc({ action: 'retirerTrancheBareme', param: ctx.grilleId, param2: ctx.index, param3: t.id, titre: TEXTES_BAREME.retirer })}
                         </div>${marque ? `
@@ -4717,78 +4714,62 @@ async function _modifierBaremeCritere(grilleId, critereIndex, critereId, operati
 
 function _dataTranche(el) {
     return { grilleId: el.dataset.grilleId, critereIndex: parseInt(el.dataset.critereIndex), critereId: el.dataset.critereId || '',
-        id: el.dataset.trancheId, champ: el.dataset.champ, neuve: el.dataset.trancheNeuve === '1' };
+        id: el.dataset.trancheId, champ: el.dataset.champ };
 }
 
-/** Écrite, la tranche perd sa marque « à compléter » ou « pas encore enregistrée » ; ses points se relisent. */
-function _apresEcritureTranche(el, d, grille) {
+/**
+ * Des points écrits : ils se relisent (« 3 à 4 »), et la marque suit ce que la tranche est devenue (posée
+ * quand ses points sont effacés, retirée quand elle en reçoit), sans rendre la liste : le focus est ailleurs.
+ */
+function _apresEcriturePoints(el, d, grille) {
     const bloc = el.closest('.grille-bareme-tranche');
     const c = grille.criteres[d.critereIndex];
     const t = window.bareme.tranchesDuCritere(c).find(x => x.id === d.id);
     if (!bloc || !t) return;
-    if (d.champ === 'points') el.value = window.bareme.pointsEnTexte(t);
-    bloc.querySelectorAll('[data-tranche-neuve]').forEach(x => { delete x.dataset.trancheNeuve; });
-    if (d.champ === 'points' || d.neuve) {
-        const marque = bloc.querySelector('.grille-bareme-marque');
-        if (marque) marque.remove();
-        bloc.querySelectorAll('[aria-describedby]').forEach(x => x.removeAttribute('aria-describedby'));
+    el.value = window.bareme.pointsEnTexte(t);
+    const texte = marqueTranche(t, c), idMarque = _idMarqueTranche(d.critereIndex, t.id);
+    let p = bloc.querySelector('.grille-bareme-marque');
+    if (!texte) {
+        if (p) p.remove();
+        el.removeAttribute('aria-describedby');
+        return;
     }
+    if (!p) {
+        p = document.createElement('p');
+        p.className = 'grille-bareme-marque';
+        p.id = idMarque;
+        bloc.querySelector('.grille-bareme-tete').after(p);
+    }
+    p.textContent = texte;
+    el.setAttribute('aria-describedby', idMarque);
 }
 
-/** Un champ d'une tranche : nom, points ou texte. Une tranche neuve s'écrit avec ses points, pas avant. */
+/** Un champ d'une tranche : nom, points ou texte. */
 function modifierTrancheBaremeHandler(el) {
     const B = window.bareme, d = _dataTranche(el);
-    if (d.neuve) return _saisirTrancheNeuve(el, d);
     return _modifierBaremeCritere(d.grilleId, d.critereIndex, d.critereId, (tranches, c) => (
         d.champ === 'points' ? B.modifierPoints(tranches, d.id, el.value, c.ponderation)
             : d.champ === 'nom' ? B.modifierNom(tranches, d.id, el.value)
                 : B.modifierTexte(tranches, d.id, el.value)))
         .then(({ resultat, grille }) => {
             marquerChampRefuse(el, resultat.refuse);
-            if (grille) _apresEcritureTranche(el, d, grille);
+            if (grille && d.champ === 'points') _apresEcriturePoints(el, d, grille);
         });
 }
 
-function _saisirTrancheNeuve(el, d) {
-    const cleNeuves = _cleTranchesNeuves(d.grilleId, d.critereId ? { id: d.critereId } : null, d.critereIndex);
-    const neuves = _tranchesNeuves.get(cleNeuves) || [];
-    const t = neuves.find(x => x.id === d.id);
-    if (!t) return Promise.resolve();
-    const bloc = el.closest('.grille-bareme-tranche');
-    const lu = (selecteur, defaut) => { const x = bloc && bloc.querySelector(selecteur); return x ? x.value : (defaut || ''); };
-    t.nom = lu('[data-champ="nom"]', t.nom); t.texte = lu('[data-champ="texte"]', t.texte); t.points = lu('[data-champ="points"]', t.points);
-    if (d.champ !== 'points') return Promise.resolve();   // rien ne s'écrit sans ses points
-    return _modifierBaremeCritere(d.grilleId, d.critereIndex, d.critereId,
-        (tranches, c) => window.bareme.ajouter(tranches, t, t.points, c.ponderation))
-        .then(({ resultat, grille }) => {
-            marquerChampRefuse(el, resultat.refuse);
-            if (!grille) return;
-            const reste = neuves.filter(x => x.id !== t.id);
-            if (reste.length) _tranchesNeuves.set(cleNeuves, reste); else _tranchesNeuves.delete(cleNeuves);
-            _apresEcritureTranche(el, d, grille);
-        });
-}
-
-function _grilleEnBase(grilleId) {
-    return (db.getSync(cle('grillesTemplates'), []) || []).find(x => x.id === grilleId) || null;
-}
-
-/** « + Ajouter une tranche » : une tranche neuve, en dernier, le focus sur ses points. Rien n'est écrit. */
-function ajouterTrancheBareme(grilleId, critereIndex) {
-    const grille = _grilleEnBase(grilleId);
-    const c = grille && grille.criteres && grille.criteres[critereIndex];
-    if (!c || c.type !== 'analytique') return;
-    const cleNeuves = _cleTranchesNeuves(grilleId, c, critereIndex);
-    const neuves = _tranchesNeuves.get(cleNeuves) || [];
-    const refus = window.bareme.peutAjouter(window.bareme.tranchesDuCritere(c).length + neuves.length);
-    if (refus) {
-        if (window.temoinEnregistrement) window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(refus), undefined, cle('grillesTemplates'));
-        return;
-    }
+/** « + Ajouter une tranche » : une tranche neuve, en dernier, écrite aussitôt (« à compléter ») ; le focus sur son nom. */
+async function ajouterTrancheBareme(grilleId, critereIndex) {
+    const critereLu = _critereEnBase(grilleId, critereIndex);
+    if (!critereLu || critereLu.type !== 'analytique') return;
     const id = genererIdUnique('TR_');
-    _tranchesNeuves.set(cleNeuves, neuves.concat([{ id, nom: '', texte: '', points: '' }]));
+    const { resultat, grille } = await _modifierBaremeCritere(grilleId, critereIndex, critereLu.id || '',
+        (tranches) => window.bareme.ajouter(tranches, id));
+    if (resultat.refuse && window.temoinEnregistrement) {
+        window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(resultat.refuse), undefined, cle('grillesTemplates'));
+    }
+    if (!grille) return;
     afficherCriteresGrille(grille);
-    const champ = [...document.querySelectorAll('#listeCriteres [data-champ="points"][data-tranche-neuve="1"]')]
+    const champ = [...document.querySelectorAll('#listeCriteres [data-champ="nom"][data-tranche-id]')]
         .find(x => x.dataset.critereIndex === String(critereIndex) && x.dataset.trancheId === id);
     if (champ) champ.focus();
 }
@@ -4798,18 +4779,8 @@ async function retirerTrancheBareme(grilleId, critereIndex, trancheId) {
     const critereLu = _critereEnBase(grilleId, critereIndex);
     if (!critereLu || critereLu.type !== 'analytique') return;
     const id = String(trancheId);
-    const cleNeuves = _cleTranchesNeuves(grilleId, critereLu, critereIndex);
-    const neuves = _tranchesNeuves.get(cleNeuves) || [];
-    const enAttente = neuves.some(x => x.id === id);
-    if (!enAttente && !window.bareme.tranchesDuCritere(critereLu).some(t => t.id === id)) return;
+    if (!window.bareme.tranchesDuCritere(critereLu).some(t => t.id === id)) return;
     if (!confirm(TEXTES_BAREME.confirmer)) return;
-    if (enAttente) {
-        const reste = neuves.filter(x => x.id !== id);
-        if (reste.length) _tranchesNeuves.set(cleNeuves, reste); else _tranchesNeuves.delete(cleNeuves);
-        const grille = _grilleEnBase(grilleId);
-        if (grille) afficherCriteresGrille(grille);
-        return;
-    }
     const { grille } = await _modifierBaremeCritere(grilleId, critereIndex, critereLu.id || '',
         (tranches, c) => (_memeCritere(c, critereLu) ? window.bareme.retirer(tranches, id) : { refuse: null }));
     if (grille) afficherCriteresGrille(grille);
