@@ -75,7 +75,8 @@ describe('Lot F (D4) : les anciens mots ont quitté l\'application', () => {
         expect(rappel).toContain('Mettre à jour le codex');
         // Lot I (#985, option a de Grégoire, 29 sept.) : la carte de l'Accueil est celle du codex.
         expect(accueil).toContain('<div class="accueil-utilitaire-titre">Ton codex</div>');
-        expect(accueil).toContain('<div class="accueil-utilitaire-desc">Mets-le à jour : une copie complète de tes données.</div>');
+        // 19 oct. 2026 : la description réécrite par Grégoire (les textes des cartes de l'accueil).
+        expect(accueil).toContain('<div class="accueil-utilitaire-desc">Données et copies numériques, réunies dans un seul fichier.</div>');
         expect(accueil).not.toContain('<div class="accueil-utilitaire-titre">Copie de secours</div>');
     });
 });

@@ -113,8 +113,20 @@ describe('A · #846 — le champ 2 du groupe-cours dit le même mot sur un servi
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les présences', 'Importer des productions',
+// 19 oct. 2026 : « Importer des productions » devient « Importer des copies » (les productions sont les consignes).
+const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les présences', 'Importer des copies',
     'Annoter et évaluer', 'Observer le groupe', 'Consulter un profil', 'Différencier les interventions'];
+// 19 oct. 2026 : les descriptions des huit tâches, dans l'ordre des titres (relecture de Grégoire avec Cowork).
+const DESCRIPTIONS_TACHES = [
+    'Construction de la note du cours, sommative ou alternative.',
+    'Alignement constructif des objectifs, leçons et évaluations.',
+    'Absences, retards et notes de séance.',
+    'Fichiers PDF ou images des travaux d’étudiant·es.',
+    'Annotation, niveaux ou note par critère, rétroaction automatisée.',
+    'Assiduité, complétion, performance et dépistage des difficultés d’apprentissage.',
+    'Engagement, travaux, progression et accompagnement.',
+    'Niveaux de besoin, rencontres et bilans.'
+];
 
 // Les mots arrêtés par Grégoire, dans l'ordre où l'accueil les rend.
 // 27 sept. 2026 — « Par où commencer ? » en trois étapes et la ligne de l'orthopédagogue gardée
@@ -179,6 +191,17 @@ describe('B1 · la carte est au-dessus des tâches, et les huit tâches sont tou
         expect(html.match(/class="accueil-action"/g)).toHaveLength(8);
         const carte = tranche(html, 'class="accueil-porte-ortho"', '<div class="accueil-section-label">Tâches</div>');
         expect(carte).not.toContain('accueil-action');
+    });
+
+    it('les descriptions des cartes, arrêtées par Grégoire le 19 oct. 2026 : des groupes nominaux, sans deux-points', () => {
+        const { html } = rendreAccueil();
+        const lus = (classe) => [...html.matchAll(new RegExp('<div class="' + classe + '">([^<]*)</div>', 'g'))].map(m => m[1]);
+        expect(lus('accueil-action-desc')).toEqual(DESCRIPTIONS_TACHES);
+        // « Nouveautés » porte la version, pas une description : seule celle du codex est arrêtée.
+        expect(lus('accueil-utilitaire-desc')[0]).toBe('Données et copies numériques, réunies dans un seul fichier.');
+        expect(lus('accueil-aide-desc')).toEqual(['Info-bulles, aide à l’écran et visite guidée.', 'Cours fictif complet, indépendant de tes données.']);
+        // La règle de forme du 19 oct. qu'une machine peut vérifier : aucun deux-points.
+        DESCRIPTIONS_TACHES.concat(lus('accueil-aide-desc'), lus('accueil-utilitaire-desc')[0]).forEach((d) => expect(d, d).not.toContain(':'));
     });
 });
 
