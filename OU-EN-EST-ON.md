@@ -15,6 +15,17 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 20 OCTOBRE 2026, APRÈS-MIDI : LA 1.211.0 EST PRÊTE, ELLE PART EN LIGNE APRÈS TA RÉPONSE SUR LES NOUVELLES ET UN VERDICT COMPLET.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- dans Grilles de critères, les sous-critères d'un critère holistique ou analytique se modifient : on en ajoute (même le premier), on les renomme, on les réordonne, on les retire ; ils ne deviennent pas des codes d'annotation ;
+- l'éditeur de grille prend moins de hauteur : nom, type et description de la grille sur une ligne, chaque tranche du barème sur une ligne, son texte qui s'agrandit avec ce que tu écris ; sur l'iPad en long, le texte passe sous le nom et les points ;
+- les cartes de l'accueil portent les textes que tu as arrêtés le 19 oct. (« Importer des copies »).
+
+**Vérifié comment** : Vitest complet vert (9 278 essais) ; les specs des grilles, du barème, de la dissection et de l'aide vertes dans un vrai WebKit, au Mac (1 440 px) et à l'iPad au doigt (820 px) ; un essai qui rougit quand on casse chacun des quatre comportements gardés (la borne de 30, la section vide, les codes d'annotation, les codes sans doublon) ; relu et accepté par Cowork.
+
+**Ce qui ne marche pas encore** : dans une grille apportée dont les niveaux ont un nom (ton « Journal de lecture »), les points des tranches sont restés au bout du texte et le champ Points est vide ; tu peux les déplacer à la main, le champ accepte « 3-4 » (#1125). Au Mac, le champ « Nom du critère » est trop étroit (#1126).
+
 🔀 **LE 16 OCTOBRE 2026 AU MATIN : ON TRAVAILLE DANS UN NOUVEAU DÉPÔT, `labo-codex`.** *Écrit par Claude Code le 16 oct. à 7 h 30 (mesuré par `date`).* Rien ne change à l'écran : c'est le même code, à l'octet près.
 
 **Ce qui a changé** :
