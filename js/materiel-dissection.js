@@ -150,6 +150,11 @@
         if (typeof window.cle === 'function') db.removeSync(window.cle(CLE_BROUILLON));
     }
 
+    /** #1119 : un brouillon existe (lisible ou non) — la confirmation offre alors « Revenir à ma dissection ». */
+    function aUnBrouillon() {
+        return typeof window.cle === 'function' && db.getSync(window.cle(CLE_BROUILLON), null) != null;
+    }
+
     /** Lot 7 : les premiers mots d'un morceau, pour le nommer sur la ligne d'état. */
     function mots(id) { return D().premiersMots(etat.morceaux.texte[id] || ''); }
 
@@ -1165,6 +1170,7 @@
         reprendre: reprendre,
         estOuverte: estOuverte,
         oublierBrouillon: oublierBrouillon,
+        aUnBrouillon: aUnBrouillon,
         choisir: choisir,
         terminer: terminer,
         collerAutre: collerAutre,
