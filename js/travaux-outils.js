@@ -1,6 +1,6 @@
 /* ===============================
    MODULE: TRAVAUX - OUTILS D'ANNOTATION
-   Definitions des outils (stylo, surligneur, gomme, texte, formes)
+   Definitions des outils (stylo, surligneur, texte, formes)
    et palette de couleurs/epaisseurs
 
    DEPENDANCES:
@@ -193,13 +193,6 @@
             epaisseurMax: 40,
             opacite: 0.5,
             composite: 'multiply'
-        },
-        gomme: {
-            id: 'gomme',
-            nom: 'Gomme',
-            icone: '<img src="' + ICONS_DIR + 'icon-eraser.svg" alt="Gomme" class="outil-svg-icon">',
-            curseur: 'pointer',
-            mode: 'effacer-trait' // efface le trait entier au contact
         },
         texte: {
             id: 'texte',
@@ -1159,7 +1152,6 @@
         selection: 's',    // S = sélection
         stylo: 'd',        // D = dessiner
         surligneur: 'h',   // H = highlight
-        gomme: 'e',        // E = effacer
         texte: 't',        // T = texte
         cercle: 'o',       // O = ovale
         rectangle: 'r',    // R = rectangle
@@ -1929,7 +1921,7 @@
         // <img> écrite par l'application (OUTILS) ; aucune personnalisation ni import ne la
         // réécrit (appliquerPersonnalisations ne touche que les trois symboles). Elle part donc
         // telle quelle ; seul le nom, qui reste du texte, est échappé dans le title.
-        const outilsDessin = ['position', 'selection', 'stylo', 'surligneur', 'gomme', 'texte'];
+        const outilsDessin = ['position', 'selection', 'stylo', 'surligneur', 'texte'];
         outilsDessin.forEach(id => {
             const outil = OUTILS[id];
             const actif = outilActif === id ? ' actif' : '';
@@ -2389,7 +2381,7 @@
         var existant = document.getElementById('modal-raccourcis-outils');
         if (existant) existant.remove();
 
-        var outilsIds = ['position', 'selection', 'stylo', 'surligneur', 'gomme', 'texte',
+        var outilsIds = ['position', 'selection', 'stylo', 'surligneur', 'texte',
                          'cercle', 'rectangle', 'fleche', 'pointille', 'ondule'];
 
         var lignes = outilsIds.map(function(id) {

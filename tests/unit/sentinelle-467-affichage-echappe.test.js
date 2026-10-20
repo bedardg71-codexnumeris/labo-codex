@@ -205,7 +205,7 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
         'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 29, 'js/echelles.js': 21, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie */
         'js/grilles.js': 69, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
-        'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 90,
+        'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 89,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 112, 'js/trimestre-v2-cours.js': 4
     };
     it('C.n les interpolations nues ne montent pas', () => {
@@ -253,7 +253,7 @@ describe('#467 · D — la palette d\'annotation montre ses icônes, pas leur co
     it('D.a chaque bouton d\'outil et de forme porte une vraie balise <img>', () => {
         const html = palette().genererHTMLPalette();
         const boutons = html.match(/<button class="travaux-btn-outil[^"]*" data-outil="[^"]+"[\s\S]*?<\/button>/g) || [];
-        expect(boutons.length, 'la palette rend bien ses boutons d\'outil').toBeGreaterThanOrEqual(11);
+        expect(boutons.length, 'la palette rend bien ses boutons d\'outil').toBeGreaterThanOrEqual(10);
         for (const b of boutons) {
             expect(b, b.slice(0, 120)).not.toContain('&lt;img');
         }
