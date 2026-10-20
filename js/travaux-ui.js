@@ -7472,9 +7472,21 @@
     window.addEventListener('modeChanged', function() {
         // Regénérer les badges fichiers pour appliquer/retirer l'anonymisation
         var conteneurBadges = document.querySelector('.travaux-badges-liste');
-        if (conteneurBadges) {
-            afficherFichiers();
+        if (!conteneurBadges) return;
+        // #1122 (20 oct. 2026) — LA COPIE OUVERTE RESTE À L'ÉCRAN. afficherFichiers() recréait
+        // la visionneuse : canevas neuf, « Clique sur un fichier ci-dessus », et la copie ne
+        // revenait plus (iPad, rapport de Grégoire). Seuls les noms changent avec le mode : les
+        // étiquettes ici, la bande de badges et les palettes par le retour sur l'onglet
+        // (initialiserModuleTravaux, cas 1), que rafraichirContenuSelonMode relance.
+        var fichierOuvert = travauxVisionneuse.getFichierActuel();
+        if (fichierOuvert && document.getElementById('travaux-conteneur-document')) {
+            ecrireLabelsIdentite(fichierOuvert.etudiantDA, fichierOuvert.productionId);
+            // Le formulaire porte des noms (rétroactions) : il se reconstruit dans le nouveau
+            // mode, comme avant, par le basculerMode('evaluer') du cas 1.
+            if (document.getElementById('travaux-palette-eval-gauche')) fermerModeEvaluation();
+            return;
         }
+        afficherFichiers();
     });
 
     /* ===============================
