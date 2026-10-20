@@ -110,7 +110,7 @@ test('(a) une grille toute à barème, sans échelle : l\'aperçu s\'ouvre et mo
 
     const t = await lireTableau(page);
     expect(t, 'le tableau des critères est rendu').not.toBeNull();
-    expect(t.entetes).toEqual(['Critère', '%', 'Barème']);
+    expect(t.entetes).toEqual(['Critère', 'Points', 'Barème']);
     expect(t.lignes).toHaveLength(4);
     t.lignes.forEach((ligne, i) => {
         const n = i + 1;
@@ -134,6 +134,7 @@ test('(b) une grille mixte, avec son échelle : les colonnes de niveaux restent'
     const nbNiveaux = t.entetes.length - 2;
     expect(nbNiveaux, 'des colonnes de niveaux').toBeGreaterThan(1);
     expect(t.entetes).not.toContain('Barème');
+    expect(t.entetes[1], 'une grille mixte garde « % »').toBe('%');
     expect(t.lignes[0], 'le critère holistique : une case par niveau').toHaveLength(2 + nbNiveaux);
     expect(t.lignes[1][2].colspan, 'le critère à barème réunit les niveaux').toBe(nbNiveaux);
     expect(t.lignes[1][2].tranches).toHaveLength(4);
@@ -184,5 +185,5 @@ test('(c) le formulaire : sans échelle, « Voir l\'aperçu » s\'ouvre pour une
     await expect.poll(() => page.evaluate(() => document.getElementById('modalApercuPDF').classList.contains('actif')),
         { message: 'l\'aperçu s\'ouvre sans échelle' }).toBe(true);
     const t = await lireTableau(page);
-    expect(t.entetes).toEqual(['Critère', '%', 'Barème']);
+    expect(t.entetes).toEqual(['Critère', 'Points', 'Barème']);
 });
