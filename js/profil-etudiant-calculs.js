@@ -1132,7 +1132,8 @@ function _identifierCriteresEnDefiIPB(dernierEvaluation, nomsMulti, cacheTables,
 /**
  * Calcule l'Indice de Persistance du Blocage (IPB) sur les critères multistructurels.
  * Compte les artefacts consécutifs récents dont le score pondéré des critères
- * multistructurels est sous le seuil de défi configurable.
+ * multistructurels est sous le seuil de défi configurable. Observation SOLO
+ * désactivée : sur tous les critères (#1117, suite — `criteresSuiviFondations`).
  * @param {string} da - Numéro de DA
  * @returns {Object|null} - { ipb, scoreActuel, scorePrecedent, direction, criteresMulti, criteresEnDefi }
  */
@@ -1140,11 +1141,11 @@ function calculerIPB(da) {
     var grille = obtenirGrilleReferenceDepistage();
     if (!grille || !grille.criteres) return null;
 
-    // Filtrer les critères multistructurels (défaut si pas de tag) — parmi ceux que
-    // le dépistage lit (#740 : « aucun » est déjà sorti par la liste partagée).
-    var criteresMulti = criteresSurveillesParDepistage(grille).filter(function (c) {
-        return (c.niveauSOLO || 'multistructurel') === 'multistructurel';
-    });
+    // Les critères du suivi des fondations : les multistructurels (défaut si pas de
+    // tag) parmi ceux que le dépistage lit — ou tous, observation SOLO désactivée
+    // (#1117, suite). La règle vit dans `criteresSuiviFondations`, que lit aussi
+    // le sous-titre de la barre au tableau de bord.
+    var criteresMulti = criteresSuiviFondations(grille);
     if (criteresMulti.length === 0) return null;
 
     // #555 lot 2 (28 août 2026) — le repli `|| 0.70` est RETIRÉ, pas déplacé.

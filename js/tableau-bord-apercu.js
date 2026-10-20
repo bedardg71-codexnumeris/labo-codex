@@ -1442,10 +1442,12 @@ function genererInterpretationSuiviFondamentaux() {
 
     var messages = [];
 
-    // Fondamentaux acquis (IPB 0-1, ↗)
+    // Fondamentaux acquis (IPB 0-1, ↗). #1117, suite : observation SOLO désactivée,
+    // le suivi lit tous les critères — « multistructurels » tombe (texte provisoire).
     if (maitrise > 0) {
         messages.push(maitrise + ' ' + window.pluriel(maitrise, 'étudiant·e', 'étudiant·es') + ' (' + pct(maitrise) + '%) ' +
-            (maitrise > 1 ? 'maîtrisent' : 'maîtrise') + ' les fondamentaux multistructurels');
+            (maitrise > 1 ? 'maîtrisent' : 'maîtrise') + ' les fondamentaux' +
+            (etiquettesSOLOLuesParDepistage() ? ' multistructurels' : ''));
     }
 
     // En progression (IPB 2, ↗)
@@ -2292,15 +2294,22 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
  * mais qu'aucun n'est multistructurel (tous « Aucun », ou tous relationnels ou
  * abstraits), l'écran le DIT au lieu de se taire — le suivi des fondations n'a rien à
  * lire, et ce silence se prenait pour un chargement raté. Sans grille, rien.
+ *
+ * #1117, suite (20 oct. 2026) : la liste vient de `criteresSuiviFondations`
+ * (`profil-etudiant-helpers.js`), celle-là même que lit `calculerIPB` — ce que la
+ * barre annonce est ce que le calcul lit. Observation SOLO désactivée, tous les
+ * critères sont surveillés, et la phrase le dit (Grégoire, 6 h 48 : « l'application
+ * doit le dire quelque part »). Texte provisoire.
  * @param {Object|null} grille - la grille de référence du dépistage
  * @returns {string} HTML échappé
  */
 function libelleCriteresMultiSurveilles(grille) {
     if (!grille || !Array.isArray(grille.criteres) || grille.criteres.length === 0) return '';
-    var nomsMulti = grille.criteres
-        .filter(function(c) { return (c.niveauSOLO || 'multistructurel') === 'multistructurel'; })
-        .map(function(c) { return c.nom; });
-    if (nomsMulti.length > 0) return 'Critères multistructurels surveillés : ' + echapperHtml(nomsMulti.join(', '));
+    var noms = criteresSuiviFondations(grille).map(function(c) { return c.nom; });
+    if (!etiquettesSOLOLuesParDepistage()) {
+        return 'Observation SOLO désactivée : tous les critères sont surveillés (' + echapperHtml(noms.join(', ')) + ').';
+    }
+    if (noms.length > 0) return 'Critères multistructurels surveillés : ' + echapperHtml(noms.join(', '));
     return 'Aucun critère multistructurel dans la grille de dépistage : le suivi des fondations ne surveille rien.';
 }
 
