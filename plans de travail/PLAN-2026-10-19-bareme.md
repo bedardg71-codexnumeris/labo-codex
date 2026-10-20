@@ -60,6 +60,10 @@ Le chiffre, et dessous le texte de la tranche atteinte, sans son nom (question 4
 
 **La grille vierge remise avec la consigne** (décision de Grégoire, 20 oct. 2026, 16 h 58, sur proposition de Cowork) : chaque tranche avec ses points et son texte, sans son nom (« 3-4 points : Résume l'essentiel »). Même motif que la copie corrigée : l'élève ne lit pas « Satisfaisant » sur la grille, puis autre chose sur sa note. Né de son constat de 16 h 54 (1.211.0) : l'aperçu montrait l'échelle au lieu du barème et le formulaire exigeait une échelle. Consigne : `CONSIGNE-LOT-2026-10-20-pdf-grille-bareme.md`.
 
+**Révisé à 18 h 39 (Grégoire, sur recommandation de Cowork), après avoir comparé le PDF à sa grille d'origine** : quand tous les critères ont les mêmes tranches, nommées pareil et dans le même ordre, la grille vierge prend la forme de la grille d'origine : une colonne par tranche, son nom en tête ; dans chaque case, le texte et ses points dessous ; les éléments observables sous le critère ; la description ; le total. Le « sans nom » ne vaut plus sur cette grille : sans échelle, les noms ne concurrencent aucun autre vocabulaire. Les autres grilles gardent la forme de 16 h 58. La copie corrigée garde la décision du 19 oct. (le chiffre, le texte, sans nom). Consigne : `CONSIGNE-LOT-2026-10-20-pdf-grille-forme-originale.md`.
+
+**Le principe, dit par Grégoire à 18 h 40** : « C'est important de respecter la présentation originale, parce que c'est la façon dont l'utilisateur pense son processus d'évaluation. Si le produit qu'il obtient dans la boîte Codex ne ressemble pas à ce qu'il pense, il aura l'impression qu'on lui impose une pensée autre que la sienne, et il ne voudra pas utiliser l'application. » ⮕ Ce qu'une grille apportée devient (PDF, Grilles de critères, évaluation) se juge d'abord à sa ressemblance avec la grille d'origine, avant la cohérence interne du vocabulaire de l'application.
+
 ### Hors de ce chantier
 
 - Les critères algorithmiques : plus tard, en les distinguant (Grégoire).

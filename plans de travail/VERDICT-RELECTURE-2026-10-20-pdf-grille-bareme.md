@@ -27,3 +27,7 @@ Les deux recommandations de Cowork, retenues : « Barème » reste l'en-tête de
 ## Suite
 
 Une correction courte sur ce lot : `CONSIGNE-LOT-2026-10-20-pdf-grille-bareme-entete-points.md` (écrite à 18 h 22).
+
+## La correction relue (18 h 34)
+
+`c04df849` : « Points » décidé une fois (`entetePonderationTableau`) et posé par les deux rendeurs ; « % » partout ailleurs ; break-test rouge. **Accepté, sans correction.** Trois commits attendent le verdict complet : `9882d2d5`, `67298a8d`, `c04df849`.

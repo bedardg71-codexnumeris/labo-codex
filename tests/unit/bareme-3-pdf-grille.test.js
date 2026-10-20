@@ -13,7 +13,11 @@
  *   P — LA PORTE (`ouvrirApercuPDFPour`) : une grille toute à barème s'ouvre sans échelle ; une mixte, non.
  *   C — L'APERÇU ET LE PDF DISENT LA MÊME CHOSE du même critère, grille toute à barème comme mixte ; la
  *       pondération d'une grille toute à barème s'intitule « Points », « % » ailleurs (Grégoire, 20 oct., 18 h 22).
- *   S — LA SÉCURITÉ : un `<img onerror>` dans le texte d'une tranche sort en texte.
+ *   F — LA FORME DE LA GRILLE D'ORIGINE (décision de Grégoire, 20 oct., 18 h 39) : mêmes tranches partout
+ *       → une colonne par tranche, nom en tête ; le texte puis les points dans chaque case ; les éléments
+ *       observables ; la description ; le total. Un nom, un ordre, un nombre différents, des noms vides →
+ *       la forme à une colonne. Aperçu et `autoTable` identiques.
+ *   S — LA SÉCURITÉ : un `<img onerror>` dans le texte, le nom d'une tranche ou un élément observable sort en texte.
  *
  * Break-tests (faits le 20 oct.) : voir la demande de relecture.
  *
@@ -33,12 +37,13 @@ function monter({ productions = [], grilles = [], echelles = [] } = {}) {
         'a2026_grillesTemplates': grilles,
         'a2026_echellesTemplates': echelles
     };
-    const journal = { tables: [] };
+    const journal = { tables: [], textes: [] };
     const doc = new Proxy({
         internal: { pageSize: { getWidth: () => 216, getHeight: () => 279 }, getNumberOfPages: () => 1 },
         getTextWidth: () => 10,
         splitTextToSize: (t) => [String(t)],
         autoTable: (o) => { journal.tables.push(o); },
+        text: (t) => { journal.textes.push(t); },
         save: () => {}
     }, { get: (o, k) => (k in o ? o[k] : () => {}) });
 
@@ -60,12 +65,16 @@ function monter({ productions = [], grilles = [], echelles = [] } = {}) {
 
 const tranche = (id, nom, min, max, texte) => ({ id, nom, pointsMin: min, pointsMax: max, texte });
 
-/** Le Journal de lecture de Grégoire, recréé : quatre critères analytiques, quatre tranches chacun, aucune échelle. */
+/**
+ * Quatre critères analytiques, quatre tranches chacun, aucune échelle. ⚠ Le 4e critère nomme sa
+ * première tranche autrement (« Très bien ») : les tranches ne sont donc PAS les mêmes partout, et
+ * la grille garde la forme à une colonne (la forme d'origine est éprouvée en F, sur `ORIGINE`).
+ */
 function critereJournal(n) {
     return {
         id: `CR_J${n}`, nom: `Critère ${n}`, type: 'analytique', ponderation: 4,
         bareme: [
-            tranche(`TR_${n}a`, 'Excellent', 3, 4, `Résume l'essentiel ${n}`),
+            tranche(`TR_${n}a`, n === 4 ? 'Très bien' : 'Excellent', 3, 4, `Résume l'essentiel ${n}`),
             tranche(`TR_${n}b`, 'Satisfaisant', 2, 2, `Résume en partie ${n}`),
             tranche(`TR_${n}c`, 'Partiel', 1, 1, `Effleure le propos ${n}`),
             tranche(`TR_${n}d`, 'Insuffisant', 0, 0, `Ne résume pas ${n}`)
@@ -73,7 +82,7 @@ function critereJournal(n) {
     };
 }
 const JOURNAL = { id: 'GR_J', nom: 'Journal de lecture A26', criteres: [1, 2, 3, 4].map(critereJournal) };
-const NOMS_TRANCHES = ['Excellent', 'Satisfaisant', 'Partiel', 'Insuffisant'];
+const NOMS_TRANCHES = ['Excellent', 'Très bien', 'Satisfaisant', 'Partiel', 'Insuffisant'];
 
 const ECHELLE = { id: 'EC_1', nom: 'IDME', niveaux: [
     { code: 'I', nom: 'Incomplet' }, { code: 'D', nom: 'Développement' }, { code: 'M', nom: 'Maîtrisé' }, { code: 'E', nom: 'Étendu' }] };
@@ -85,19 +94,23 @@ const CARTOUCHE = { id: 'CA_1', commentaires: { 'CR_H_I': 'Plan absent', 'CR_H_M
 
 const OPTIONS = { cran: 'retroaction', taillePolice: 'petit' };
 
-/** Les lignes du tableau de l'aperçu : [nom, %, ...cases] ; une case à barème → la liste de ses tranches. */
+/**
+ * Les lignes du tableau de l'aperçu : [nom, %, ...cases] ; une case à barème → la liste de ses tranches ;
+ * une case à plusieurs lignes (forme d'origine) → la liste de ses lignes.
+ */
 function lignesApercu(dom, html) {
     const conteneur = dom.window.document.createElement('div');
     conteneur.innerHTML = html;   // security-ok: banc, HTML rendu par genererApercuCombine
-    return Array.from(conteneur.querySelectorAll('tbody tr')).map(tr => Array.from(tr.children).map(td =>
-        td.hasAttribute('data-tranches')
-            ? Array.from(td.querySelectorAll('[data-tranche]')).map(d => d.textContent)
-            : td.textContent.trim()));
+    return Array.from(conteneur.querySelectorAll('tbody tr')).map(tr => Array.from(tr.children).map(td => {
+        if (td.hasAttribute('data-tranches')) return Array.from(td.querySelectorAll('[data-tranche]')).map(d => d.textContent);
+        if (td.hasAttribute('data-lignes')) return Array.from(td.querySelectorAll('[data-ligne]')).map(d => d.textContent);
+        return td.textContent.trim();
+    }));
 }
 
-/** Les mêmes lignes, lues dans l'appel `autoTable` du PDF. */
+/** Les mêmes lignes, lues dans l'appel `autoTable` du PDF ; une case objet → ses lignes. */
 function lignesPDF(table) {
-    return table.body.map(ligne => ligne.map(c => (c && typeof c === 'object') ? c.content.split('\n') : c));
+    return table.body.map(ligne => ligne.map(c => (c && typeof c === 'object') ? (c.content ? c.content.split('\n') : []) : c));
 }
 
 function entetesApercu(dom, html) {
@@ -261,6 +274,100 @@ describe('barème 3 · C — l’aperçu et le PDF disent la même chose du mêm
     });
 });
 
+/* ======================================================= F — la forme de la grille d'origine */
+
+const NOMS_ORIGINE = ['Insuffisant', 'Partiel', 'Satisfaisant', 'Remarquable'];
+/** Les mêmes quatre tranches partout (noms et ordre), des points qui diffèrent : la grille de Grégoire, fictive. */
+function critereOrigine(n, max) {
+    const bornes = max === 5 ? [[1, 1], [2, 2], [3, 4], [5, 5]] : [[1, 3], [4, 5], [6, 8], [9, 10]];
+    return {
+        id: `CR_O${n}`, nom: `Partie fictive : critère ${n}`, type: 'analytique', ponderation: max,
+        sousCriteres: [{ id: `SC_${n}a`, code: '0', nom: `Observable ${n}a` }, { id: `SC_${n}b`, code: '1', nom: `Observable ${n}b` }],
+        bareme: NOMS_ORIGINE.map((nom, k) => tranche(`TR_O${n}${k}`, nom, bornes[k][0], bornes[k][1], `Texte ${n}.${k}`))
+    };
+}
+const ORIGINE = { id: 'GR_O', nom: 'Grille d’origine fictive', description: 'Rendre compte d’une lecture fictive.',
+    criteres: [critereOrigine(1, 5), critereOrigine(2, 5), critereOrigine(3, 10), critereOrigine(4, 10)] };
+
+/** Une copie de la grille, chaque critère passé par `transformer(critere, rang)`. */
+function avecTranches(g, transformer) {
+    const copie = JSON.parse(JSON.stringify(g));
+    copie.criteres = copie.criteres.map(transformer);
+    return copie;
+}
+
+describe('barème 3 · F — mêmes tranches partout : la forme de la grille d’origine', () => {
+
+    it('F.a LE CAS QUI PORTE LE SENS : une colonne par tranche, le texte puis les points, les observables, le total — aperçu = PDF', async () => {
+        const { win, journal, dom } = monter();
+        const html = win.genererApercuCombine(ORIGINE, null, null, OPTIONS);
+        await win.genererPDFCombine(ORIGINE, null, null, OPTIONS);
+
+        const entetes = ['Critère', 'Points', ...NOMS_ORIGINE];
+        expect(entetesApercu(dom, html)).toEqual(entetes);
+        const apercu = lignesApercu(dom, html);
+        expect(apercu).toHaveLength(5);
+        expect(apercu[0]).toEqual([['Partie fictive : critère 1', '· Observable 1a', '· Observable 1b'], '5',
+            ['Texte 1.0', '1 point'], ['Texte 1.1', '2 points'], ['Texte 1.2', '3-4 points'], ['Texte 1.3', '5 points']]);
+        expect(apercu[2][2]).toEqual(['Texte 3.0', '1-3 points']);
+        expect(apercu[4], 'la rangée « Total »').toEqual(['Total', '30', []]);
+
+        const table = journal.tables[0];
+        expect(table.head[0]).toEqual(entetes);
+        expect(lignesPDF(table), 'le PDF dit ce que dit l’aperçu').toEqual(apercu);
+        expect(html).not.toContain('Barème');
+    });
+
+    it('F.b la description de la grille, au-dessus du tableau, dans l’aperçu et dans le PDF', async () => {
+        const { win, journal, dom } = monter();
+        const html = win.genererApercuCombine(ORIGINE, null, null, OPTIONS);
+        await win.genererPDFCombine(ORIGINE, null, null, OPTIONS);
+        const conteneur = dom.window.document.createElement('div');
+        conteneur.innerHTML = html;   // security-ok: banc
+        expect(conteneur.querySelector('[data-description-grille]').textContent).toBe('Rendre compte d’une lecture fictive.');
+        expect(journal.textes).toContainEqual(['Rendre compte d’une lecture fictive.']);
+        // Sans description : aucune ligne.
+        const sans = Object.assign({}, ORIGINE, { description: '  ' });
+        expect(win.genererApercuCombine(sans, null, null, OPTIONS)).not.toContain('data-description-grille');
+    });
+
+    it('F.c un nom, un ordre, un nombre différents, ou des noms vides → la forme à une colonne', () => {
+        const { win } = monter();
+        const cas = {
+            'un nom différent': avecTranches(ORIGINE, (c, i) => (i === 2 ? Object.assign(c, { bareme: c.bareme.map((t, k) => (k === 0 ? Object.assign(t, { nom: 'Faible' }) : t)) }) : c)),
+            'un ordre différent': avecTranches(ORIGINE, (c, i) => (i === 1 ? Object.assign(c, { bareme: c.bareme.slice().reverse() }) : c)),
+            'un nombre différent': avecTranches(ORIGINE, (c, i) => (i === 3 ? Object.assign(c, { bareme: c.bareme.slice(0, 3) }) : c)),
+            'des noms vides': avecTranches(ORIGINE, c => Object.assign(c, { bareme: c.bareme.map(t => Object.assign(t, { nom: '' })) }))
+        };
+        Object.entries(cas).forEach(([quoi, g]) => {
+            const t = win.tableauDesCriteres(g, null, null);
+            expect(t.colonnesTranches, quoi).toBeNull();
+            expect(t.total, quoi).toBeNull();
+        });
+        // Les noms comparés après `trim` : une espace de trop ne change pas la forme.
+        const espaces = avecTranches(ORIGINE, (c, i) => (i === 0 ? Object.assign(c, { bareme: c.bareme.map(t => Object.assign(t, { nom: ' ' + t.nom + ' ' })) }) : c));
+        expect(win.tableauDesCriteres(espaces, null, null).colonnesTranches).toEqual(NOMS_ORIGINE);
+    });
+
+    it('F.d une tranche à compléter montre son texte seul ; une tranche sans texte, ses points seuls', () => {
+        const { win } = monter();
+        const g = avecTranches(ORIGINE, (c, i) => (i === 0 ? Object.assign(c, { bareme: c.bareme.map((t, k) =>
+            (k === 0 ? Object.assign(t, { pointsMin: null, pointsMax: null }) : k === 1 ? Object.assign(t, { texte: '' }) : t)) }) : c));
+        const cases = win.tableauDesCriteres(g, null, null).lignes[0].cases;
+        expect(cases[0]).toEqual(['Texte 1.0']);
+        expect(cases[1]).toEqual(['2 points']);
+    });
+
+    it('F.e une grille mixte ou à une colonne : ni total, ni description, ni observables', () => {
+        const { win } = monter();
+        [win.tableauDesCriteres(MIXTE, ECHELLE, null), win.tableauDesCriteres(JOURNAL, null, null)].forEach(t => {
+            expect(t.total).toBeNull();
+            expect(t.description).toBe('');
+            t.lignes.forEach(l => expect(l.observables).toEqual([]));
+        });
+    });
+});
+
 /* ======================================================= S — la sécurité */
 
 describe('barème 3 · S — le texte d’une tranche sort en texte', () => {
@@ -274,5 +381,20 @@ describe('barème 3 · S — le texte d’une tranche sort en texte', () => {
         conteneur.innerHTML = html;   // security-ok: banc, c'est l'échappement qu'on mesure
         expect(conteneur.querySelector('td[data-tranches] img')).toBeNull();
         expect(conteneur.querySelector('[data-tranche]').textContent).toBe('2 points\u00a0: ' + charge);
+    });
+
+    it('S.b forme d’origine : un `<img onerror>` dans un nom de tranche, un élément observable, la description sort en texte', () => {
+        const { win, dom } = monter();
+        const charge = '<img src=x onerror="window.__pirate=1">';
+        const g = JSON.parse(JSON.stringify(ORIGINE));
+        g.description = charge;
+        g.criteres.forEach(c => { c.bareme[0].nom = charge; c.sousCriteres[0].nom = charge; });
+        const html = win.genererApercuCombine(g, null, null, OPTIONS);
+        const conteneur = dom.window.document.createElement('div');
+        conteneur.innerHTML = html;   // security-ok: banc, c'est l'échappement qu'on mesure
+        expect(conteneur.querySelector('img:not([alt])')).toBeNull();
+        expect(conteneur.querySelector('thead th:nth-child(3)').textContent).toBe(charge);
+        expect(conteneur.querySelector('tbody [data-ligne]:nth-child(2)').textContent).toBe('· ' + charge);
+        expect(conteneur.querySelector('[data-description-grille]').textContent).toBe(charge);
     });
 });
