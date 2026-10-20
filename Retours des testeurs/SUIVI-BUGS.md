@@ -144,6 +144,12 @@
 > sous quel protocole l'application était ouverte, alors que c'est exactement ce qui départage les deux
 > affichages — il a fallu le déduire. Inscrit au BACKLOG : ajouter `location.protocol` au rapport de bug.
 
+## Corrigés (20 octobre 2026 — basculer l'anonymisation garde la copie ouverte)
+
+| # | Testeur | Date | Description | Correctif |
+|---|---------|------|-------------|-----------|
+| 1122 | Grégoire (`BUG_"grégoire"_2026-10-20_10-59-11`, 1.209.0, Safari/iPad, Évaluation › Annoter et évaluer, gravité GÊNANT) | 20 oct. 2026, 10 h 59 | **« Le travail de mon élève est disparu après avoir été anonymisé à l'écran. »** Copie ouverte dans la visionneuse, bascule du mode anonymisation : « Clique sur un fichier ci-dessus pour l'ouvrir » revient, la copie ne revient pas même au retour en mode normal. | **Cause** : le gestionnaire `modeChanged` de `js/travaux-ui.js` appelait `afficherFichiers()`, qui RECRÉE la visionneuse (canevas neuf, placeholder) quand elle est ouverte. **Correctif** : copie ouverte → seules les étiquettes d'identité sont réécrites (`ecrireLabelsIdentite`) ; badges et palettes passent par le retour sur l'onglet déjà relancé par `rafraichirContenuSelonMode` ; en mode Évaluer, le formulaire se reconstruit dans le nouveau mode comme avant. **Source seulement** : aucune donnée en cause, l'état perdu était l'affichage. **Preuve** : `tests/integration/visionneuse-anonymisation-garde-la-copie-1122.spec.js` (2 cas, Annoter et Évaluer), rouge sans le correctif, vert avec. |
+
 ## Corrigés (20 octobre 2026 — « Nombre d'erreurs » suit les codes même palette fermée)
 
 | # | Testeur | Date | Description | Correctif |
