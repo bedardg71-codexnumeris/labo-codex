@@ -69,8 +69,8 @@ const CLE_REGLAGES_PDF = 'exportPDF_derniersReglages';
  */
 function sauvegarderReglagesPDF() {
     // Lire les dropdowns depuis le formulaire actif (inline ou statique)
-    const scope = _zonePrincipalePDF || document;
-    const inline = !!_zonePrincipalePDF;
+    const scope = _conteneurPDFInline || document;
+    const inline = !!_conteneurPDFInline;
     const prefix = inline ? 'inlinePDF' : 'prepPDF';
 
     const reglages = {
@@ -3366,9 +3366,17 @@ async function afficherFormulairePDFDepuisProduction() {
 // Formulaire injecté dans la zone principale de la section actuelle
 // =============================================================================
 
-// Stockage du contenu précédent pour restauration
-let _contenuPrecedentPDF = null;
-let _zonePrincipalePDF = null;
+// ⚠⚠ 20 oct. 2026 (retour de Grégoire) — LA ZONE EST CACHÉE, JAMAIS DÉTRUITE.
+// Le formulaire gardait `zonePrincipale.innerHTML` en texte et le remettait à
+// la fermeture : la fiche de production revenait reconstruite, ses `<select>`
+// sur l'option écrite dans le HTML et non sur la valeur choisie, et sans
+// l'écouteur `change` posé une seule fois au chargement (`productions.js`) —
+// plus rien de la fiche ne s'enregistrait, sans que rien ne le dise.
+// Désormais les enfants de la zone reçoivent `prep-pdf-recouvert` et le
+// formulaire vit dans son propre conteneur, retiré à la fermeture : nœuds,
+// valeurs et écouteurs restent intacts.
+let _conteneurPDFInline = null;
+let _enfantsRecouvertsPDF = [];
 
 /**
  * Génère le HTML du formulaire de préparation PDF
@@ -3440,23 +3448,25 @@ async function afficherFormulairePDFInline(options = {}) {
         return;
     }
 
-    // Sauvegarder le contenu actuel
-    _contenuPrecedentPDF = zonePrincipale.innerHTML;
-    _zonePrincipalePDF = zonePrincipale;
+    // Recouvrir le contenu actuel, sans le toucher
+    _enfantsRecouvertsPDF = Array.from(zonePrincipale.children);
+    _enfantsRecouvertsPDF.forEach(enfant => enfant.classList.add('prep-pdf-recouvert'));
 
-    // Injecter le formulaire
-    zonePrincipale.innerHTML = genererHTMLFormulairePDF();
+    // Poser le formulaire dans son propre conteneur
+    _conteneurPDFInline = document.createElement('div');
+    _conteneurPDFInline.innerHTML = genererHTMLFormulairePDF();
+    zonePrincipale.prepend(_conteneurPDFInline);
 
-    // Charger les options des dropdowns (scopé à _zonePrincipalePDF)
+    // Charger les options des dropdowns (scopé à _conteneurPDFInline)
     await chargerOptionsInlinePDF();
 
     // Restaurer les derniers réglages sauvegardés
     const reglages = restaurerReglagesPDF();
 
     // Pré-sélectionner : priorité options > réglages sauvegardés
-    const selectProd = _zonePrincipalePDF.querySelector('#inlinePDF-production');
-    const selectGrille = _zonePrincipalePDF.querySelector('#inlinePDF-grille');
-    const selectEchelle = _zonePrincipalePDF.querySelector('#inlinePDF-echelle');
+    const selectProd = _conteneurPDFInline.querySelector('#inlinePDF-production');
+    const selectGrille = _conteneurPDFInline.querySelector('#inlinePDF-grille');
+    const selectEchelle = _conteneurPDFInline.querySelector('#inlinePDF-echelle');
 
     if (options.productionId) {
         if (selectProd) selectProd.value = options.productionId;
@@ -3481,31 +3491,32 @@ async function afficherFormulairePDFInline(options = {}) {
 
     // Pré-sélectionner la cartouche après chargement des options dépendantes
     if (options.cartoucheId) {
-        const selectCartouche = _zonePrincipalePDF.querySelector('#inlinePDF-cartouche');
+        const selectCartouche = _conteneurPDFInline.querySelector('#inlinePDF-cartouche');
         if (selectCartouche) selectCartouche.value = options.cartoucheId;
     } else if (reglages?.cartoucheId) {
-        const selectCartouche = _zonePrincipalePDF.querySelector('#inlinePDF-cartouche');
+        const selectCartouche = _conteneurPDFInline.querySelector('#inlinePDF-cartouche');
         if (selectCartouche) selectCartouche.value = reglages.cartoucheId;
     }
 }
 
 /**
- * Ferme le formulaire et restaure le contenu précédent
+ * Ferme le formulaire et rend visible le contenu qu'il recouvrait
  */
 function fermerFormulairePDFInline() {
-    if (_zonePrincipalePDF && _contenuPrecedentPDF !== null) {
-        _zonePrincipalePDF.innerHTML = _contenuPrecedentPDF;
-        _contenuPrecedentPDF = null;
-        _zonePrincipalePDF = null;
+    if (_conteneurPDFInline) {
+        _conteneurPDFInline.remove();
+        _conteneurPDFInline = null;
     }
+    _enfantsRecouvertsPDF.forEach(enfant => enfant.classList.remove('prep-pdf-recouvert'));
+    _enfantsRecouvertsPDF = [];
 }
 
 /**
  * Charge les options dans les dropdowns du formulaire inline
  */
 async function chargerOptionsInlinePDF() {
-    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
-    const scope = _zonePrincipalePDF || document;
+    // Scopé à _conteneurPDFInline pour éviter les conflits d'IDs dupliqués
+    const scope = _conteneurPDFInline || document;
 
     // Charger les productions
     const selectProd = scope.querySelector('#inlinePDF-production');
@@ -3537,8 +3548,8 @@ async function chargerOptionsInlinePDF() {
  * Met à jour l'affichage des options du formulaire inline selon les sélections
  */
 async function mettreAJourOptionsInlinePDF() {
-    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
-    const scope = _zonePrincipalePDF || document;
+    // Scopé à _conteneurPDFInline pour éviter les conflits d'IDs dupliqués
+    const scope = _conteneurPDFInline || document;
 
     const productionId = scope.querySelector('#inlinePDF-production')?.value;
     const grilleId = scope.querySelector('#inlinePDF-grille')?.value;
@@ -3696,8 +3707,8 @@ async function ouvrirApercuPDFPour(ids) {
  * déduire quoi que ce soit.
  */
 async function ouvrirApercuPDFDepuisInline() {
-    // Scopé à _zonePrincipalePDF pour éviter les conflits d'IDs dupliqués
-    const scope = _zonePrincipalePDF || document;
+    // Scopé à _conteneurPDFInline pour éviter les conflits d'IDs dupliqués
+    const scope = _conteneurPDFInline || document;
     const ids = {
         productionId: scope.querySelector('#inlinePDF-production')?.value,
         grilleId: scope.querySelector('#inlinePDF-grille')?.value,
@@ -3711,7 +3722,7 @@ async function ouvrirApercuPDFDepuisInline() {
     }
 
     // ⚠ AVANT de fermer : `sauvegarderReglagesPDF` lit le DOM du formulaire,
-    // que `fermerFormulairePDFInline` remplace par le contenu précédent.
+    // que `fermerFormulairePDFInline` retire.
     sauvegarderReglagesPDF();
     fermerFormulairePDFInline();
 

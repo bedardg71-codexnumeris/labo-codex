@@ -14488,6 +14488,13 @@ tr.ligne-import-ecartee td {
    et le formulaire inline (Productions, Echelles, Cartouches)
    =========================================================================== */
 
+/* Ce que le formulaire inline recouvre : caché, jamais détruit (20 oct. 2026).
+   Une classe à part, et non `u-hide` : la zone pose et retire ses propres
+   `u-hide`, que la fermeture ne doit pas confondre avec les siens. */
+.prep-pdf-recouvert {
+    display: none !important;
+}
+
 .prep-pdf-titre {
     margin-bottom: 15px;
     color: var(--accent-primaire, #6aacb8);
