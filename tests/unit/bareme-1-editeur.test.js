@@ -442,7 +442,8 @@ describe('barème 1 · H — un critère holistique ne change pas', () => {
         const carte = m.carte(1);
         expect(carte.querySelector('.grille-bareme')).toBeNull();
         expect([...carte.querySelectorAll('.grille-attendu-niveau strong')].map(s => s.textContent)).toEqual(['Incomplet', 'Maîtrisé']);
-        expect([...carte.querySelectorAll('.grille-attendu input, .grille-attendu button')]).toHaveLength(0);
+        // 20 oct. : la section « Sous-critères » a ses champs et son bouton ; les textes par niveau, aucun.
+        expect([...carte.querySelectorAll('.grille-attendu-niveaux input, .grille-attendu-niveaux button')]).toHaveLength(0);
         const t = carte.querySelectorAll('.grille-attendu-niveau textarea')[1];
         t.value = 'Un texte maîtrisé, revu.';
         await m.win.modifierTexteReponseGrilleHandler(t);
