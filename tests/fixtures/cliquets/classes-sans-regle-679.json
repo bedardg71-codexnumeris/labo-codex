@@ -176,7 +176,6 @@
  "js/export-pdf.js:apercu-pdf-pied",
  "js/gabarits-utils.js:badge-composition",
  "js/grilles.js:biblio-groupe-repertoire",
- "js/grilles.js:gabarit-algo",
  "js/grilles.js:grille-section",
  "js/grilles.js:modal-import-grilles",
  "js/grilles.js:palier-apercu-non-corrigee",

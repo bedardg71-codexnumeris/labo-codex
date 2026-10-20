@@ -201,9 +201,13 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // du barème (`trancheBaremeHtml`) reçoit le même fragment d'identifiants dans ses trois champs
     // (`${attrs}` ×3, échappé une fois à sa construction), et le bloc d'un critère pose le barème déjà
     // construit (`${bareme}`). Le nom et le texte d'une tranche passent par `echapperHtml`.
+    // ↻ 20 oct. 2026 (sous-critères modifiables) : grilles.js 69 → 73, SANS désescape — même cas que #574.
+    // Le bloc d'un critère pose la section déjà construite (`${sous}`), la section ses rangées (`${lignes}`) ;
+    // une rangée porte son rang (`${i}`) et la borne de l'assistant (`${max}`), deux nombres. Le nom d'un
+    // sous-critère passe par `echapperHtml`.
     const NUES = {
         'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 29, 'js/echelles.js': 21, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie */
-        'js/grilles.js': 69, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
+        'js/grilles.js': 73, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 89,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 112, 'js/trimestre-v2-cours.js': 4
