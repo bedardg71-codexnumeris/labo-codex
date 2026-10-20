@@ -476,6 +476,18 @@
                 problemes.forEach(function (p) {
                     erreurs.push(erreur(3, 'ENTITE_INVALIDE', p.message, { type: type, id: item.id || null, champ: p.champ, champInconnu: !!p.inconnu }));
                 });
+                // #1120, lot 1 — ce que le schéma du barème ne dit pas : la règle de `bareme.js`,
+                // la même qu'à l'écriture (une seule source). Sans elle, rien n'entre.
+                if (!problemes.length && Array.isArray(item.criteres)) {
+                    item.criteres.forEach(function (c, j) {
+                        if (!c || !('bareme' in c)) return;
+                        var raison = window.bareme ? window.bareme.refusStructure(c.bareme) : 'module du barème absent';
+                        if (raison) {
+                            erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'barème : ' + raison,
+                                { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].bareme' }));
+                        }
+                    });
+                }
             });
         });
         if (erreurs.length) return rejet();

@@ -94,6 +94,7 @@ function monter(grilles) {
         // Déclarée dans js/config.js en production, avant grilles.js.
         grilleTemplateActuelle: null
     });
+    win.bareme = chargerScript('js/bareme.js').bareme;   // #1120, lot 1 : la lecture du barème, que la liste des critères appelle
     win.estRessourceSupprimee = () => false;
     win.marquerRessourceSupprimee = () => {};
     win.IDS_GABARITS_HARDCODES = [];

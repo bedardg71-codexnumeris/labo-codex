@@ -197,9 +197,13 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // ↻ 19 oct. 2026 (#1117) : grilles.js 64 → 65, SANS désescape — même cas que #574. Le menu
     // « Complexité SOLO du critère » sort dans `menuComplexiteSOLOCritere`, partagé par les deux
     // éditeurs ; leurs attributs (handler, `grille.id`, `index`) lui arrivent en `${attrs}`.
+    // ↻ 20 oct. 2026 (#1120, lot 1) : grilles.js 65 → 69, SANS désescape — même cas que #574. Une tranche
+    // du barème (`trancheBaremeHtml`) reçoit le même fragment d'identifiants dans ses trois champs
+    // (`${attrs}` ×3, échappé une fois à sa construction), et le bloc d'un critère pose le barème déjà
+    // construit (`${bareme}`). Le nom et le texte d'une tranche passent par `echapperHtml`.
     const NUES = {
         'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 29, 'js/echelles.js': 21, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie */
-        'js/grilles.js': 65, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
+        'js/grilles.js': 69, 'js/cartouches.js': 16, 'js/objectifs.js': 4, 'js/productions.js': 13,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 90,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 112, 'js/trimestre-v2-cours.js': 4

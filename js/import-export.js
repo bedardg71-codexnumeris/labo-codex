@@ -970,6 +970,22 @@ const SCHEMAS_IMPORT = {
                     }
                 },
 
+                // #1120, lot 1 (20 oct. 2026) — LE BARÈME D'UN CRITÈRE ANALYTIQUE se
+                // perdrait de même (`js/bareme.js`). ⚠ `numberOrNull`, jamais `number` :
+                // une tranche « à compléter » a des points `null`, et `number` les
+                // coercerait en 0 — une valeur fabriquée (invariant 3 du barème). Schéma
+                // FERMÉ ; la lecture (`bareme.tranchesDuCritere`) relit ce qui entre.
+                bareme: {
+                    type: 'array',
+                    schema: {
+                        id: { type: 'string', maxLen: 100 },
+                        nom: { type: 'string', maxLen: 200 },
+                        pointsMin: { type: 'numberOrNull' },
+                        pointsMax: { type: 'numberOrNull' },
+                        texte: { type: 'string', maxLen: 5000 }
+                    }
+                },
+
                 // #511 — LES ONZE RÉTROACTIONS DE FRANÇAIS SE PERDAIENT AUSSI.
                 // Un critère algorithmique porte ses catégories d'erreurs : ce
                 // sont ELLES qui contiennent les textes rendus à l'étudiant·e,

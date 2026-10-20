@@ -169,9 +169,11 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
     const vus = await liste.locator('.critere-rangee').evaluateAll((rs) => rs.map((r) => [
         r.querySelector('input[data-champ="nom"]').value, r.querySelector('input[data-champ="ponderation"]')?.value]));
     expect(vus).toEqual(g.criteres.map((c) => [c.nom, String(c.ponderation)]));
-    // Lot 13 (19 oct.) : sans échelle, le nom du niveau est la clé, dans « Points » ; le texte, dans son champ.
-    await expect(liste.locator('.grille-attendu-points input').first()).toHaveValue('Insuffisant');
-    await expect(liste.locator('.grille-attendu-niveau textarea').nth(2)).toHaveValue('Résume l’essentiel\n3-4');
+    // #1120, lot 1 (20 oct.) : sans échelle, le critère montre son barème — le nom du niveau devient le nom de la
+    // tranche, sans points ; le texte, dans son champ.
+    await expect(liste.locator('.grille-bareme-tranche [data-champ="nom"]').first()).toHaveValue('Insuffisant');
+    await expect(liste.locator('.grille-bareme-tranche [data-champ="points"]').first()).toHaveValue('');
+    await expect(liste.locator('.grille-bareme-tranche textarea').nth(2)).toHaveValue('Résume l’essentiel\n3-4');
     // C2 : des points, jamais « % » — le total et la colonne.
     // Break-test (fait le 18 oct.) : `ponderationEnPoints` rendant toujours false → rouge ici.
     await expect(page.locator('#totalPonderationAffichage')).toHaveText('30 points');
@@ -248,9 +250,12 @@ test('dissection 2a · C1 : les réponses de (b) gardent leur ordre jusque dans 
     await expect(page.locator('#materiel-titre-cree')).toHaveText('Ta grille « Questionnaire fictif » est créée');
 
     await page.locator('[data-action="materiel.voir"][data-param="grille-criteres"]').click();
-    await expect(page.locator('#listeCriteres .grille-attendu')).toHaveCount(3);
-    const titres = await page.locator('#listeCriteres .grille-attendu').evaluateAll((rs) =>
-        rs.map((r) => [...r.querySelectorAll('.grille-attendu-points input')].map((x) => x.value)));   // lot 13 : les points, modifiables
-    expect(titres).toEqual([['4 points', '2 points', '0 point'], ['3 points', '2 points', '1 point', '0 point'], ['1 point', '0,5 point', '0 point']]);
+    await expect(page.locator('#listeCriteres .grille-bareme')).toHaveCount(3);
+    // L'ordre écrit, en base (les clés des réponses) puis à l'écran (#1120 : le barème, ses points lus).
+    const cles = await page.evaluate(() => db.getSync(cle('grillesTemplates'), []).slice(-1)[0].criteres.map((c) => Object.keys(c.descripteurs.parNiveau)));
+    expect(cles).toEqual([['4 points', '2 points', '0 point'], ['3 points', '2 points', '1 point', '0 point'], ['1 point', '0,5 point', '0 point']]);
+    const titres = await page.locator('#listeCriteres .grille-bareme').evaluateAll((rs) =>
+        rs.map((r) => [...r.querySelectorAll('[data-champ="points"]')].map((x) => x.value)));
+    expect(titres).toEqual([['4', '2', '0'], ['3', '2', '1', '0'], ['1', '0,5', '0']]);
     expect(erreurs).toEqual([]);
 });

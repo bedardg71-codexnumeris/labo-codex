@@ -320,7 +320,10 @@ const PAR_LA_FILE = {
     // 24 → 25 le 19 octobre 2026 (la dissection, lot 13) : `_modifierReponsesCritere` — les
     // réponses d'un critère se modifient. UNE fonction pour les quatre gestes (texte, points,
     // ajout, retrait), qui prend l'opération, comme `modifierProjectionCritereGrille` (#668).
-    'js/grilles.js': 25,   // #469 (12 oct. 2026) : ajouterGrillesABibliotheque partie
+    // 25 → 26 le 20 octobre 2026 (#1120, lot 1) : `_modifierBaremeCritere` — le barème d'un
+    // critère analytique, sur le même patron (une fonction, l'opération en paramètre). Celle des
+    // réponses reste, réduite au texte par niveau des critères holistiques.
+    'js/grilles.js': 26,   // #469 (12 oct. 2026) : ajouterGrillesABibliotheque partie
     'js/cartouches.js': 0,   // #469 (12 oct. 2026) : son seul site partait avec une fonction sans appelant
     // ⚰ Retiré le 1er septembre 2026 avec `js/spe-specifications.js` (#681) :
     // code mort, zéro consommateur vivant. Son unique site écrivait bien par la
