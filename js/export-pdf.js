@@ -2306,7 +2306,16 @@ async function grilleParId(grilleId) {
  * à barème n'a qu'une colonne, « Barème ». Ni couleur ni fond par tranche : lisible en noir et
  * blanc.
  *
- * @returns {{ niveaux: Array, lignes: Array<{ critere: Object, tranches: ?Array<string>, cellules: ?Array<string> }> }|null}
+ * ⚠⚠ LA FORME DE LA GRILLE D'ORIGINE (décision de Grégoire, 20 oct., 18 h 39 ; 2e tentative).
+ * Quand TOUS les critères ont un barème aux mêmes tranches — même nombre, mêmes noms non vides,
+ * même ordre ; les points peuvent différer —, la grille reprend la forme que la dissection a lue :
+ * une colonne par tranche, son nom en tête ; dans chaque case, le texte, puis ses points dessous ;
+ * les éléments observables sous le nom du critère ; la description de la grille au-dessus ; une
+ * rangée « Total ». Voir `tableauEnColonnes`. Toutes les autres grilles gardent la forme ci-dessus.
+ *
+ * @returns {{ niveaux: Array, toutBareme: boolean, colonnesTranches: ?Array<string>, description: string,
+ *   total: ?string, lignes: Array<{ critere: Object, tranches: ?Array<string>, cellules: ?Array<string>,
+ *   cases: ?Array<Array<string>>, observables: Array<string> }> }|null}
  *   `null` s'il n'y a rien à montrer : aucun critère, ou des critères qui lisent une échelle
  *   absente. ⚠ Connu, sans symptôme vécu : une production à consignes, liée à une grille mixte
  *   sans échelle, s'ouvre (#513), et `cransDisponibles`, qui ne voit pas l'échelle, y offre encore
@@ -2319,26 +2328,76 @@ function tableauDesCriteres(grille, echelle, cartouche) {
     const niveaux = (lisentEchelle && echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux : [];
     if (lisentEchelle && niveaux.length === 0) return null;
 
+    if (!lisentEchelle) {
+        const listes = criteres.map(c => window.bareme.tranchesDuCritere(c));
+        const noms = nomsDesTranchesCommunes(listes);
+        if (noms) return tableauEnColonnes(grille, criteres, listes, noms);
+    }
+
     const commentaires = (cartouche && cartouche.commentaires) || null;
     return {
         niveaux: niveaux,
         toutBareme: !lisentEchelle,
+        colonnesTranches: null,
+        description: '',
+        total: null,
         lignes: criteres.map(c => {
             const tranches = window.bareme.tranchesDuCritere(c);
             if (tranches.length > 0) {
-                return { critere: c, tranches: tranches.map(t => window.bareme.ligneEleve(t)).filter(Boolean), cellules: null };
+                return { critere: c, tranches: tranches.map(t => window.bareme.ligneEleve(t)).filter(Boolean), cellules: null, cases: null, observables: [] };
             }
             return {
                 critere: c,
                 tranches: null,
-                cellules: niveaux.map(n => (commentaires && commentaires[`${c.id}_${n.code}`]) || '—')
+                cellules: niveaux.map(n => (commentaires && commentaires[`${c.id}_${n.code}`]) || '—'),
+                cases: null,
+                observables: []
             };
         })
     };
 }
 
-/** L'en-tête d'une colonne de niveau, ou celle de la grille toute à barème. */
+/**
+ * Les noms des tranches, si chaque critère a les MÊMES : même nombre, mêmes noms non vides
+ * (comparés après `trim`), même ordre. Sinon `null` (une seule différence suffit).
+ */
+function nomsDesTranchesCommunes(listes) {
+    if (listes.length === 0 || listes[0].length === 0) return null;
+    const noms = listes[0].map(t => String(t.nom).trim());
+    if (noms.some(n => !n)) return null;
+    const pareilles = listes.every(l => l.length === noms.length && l.every((t, i) => String(t.nom).trim() === noms[i]));
+    return pareilles ? noms : null;
+}
+
+/**
+ * La forme de la grille d'origine (décision de Grégoire, 20 oct., 18 h 39) : une case par
+ * tranche, son texte puis ses points sur une ligne à part (« 3-4 points », règle C1) ; une
+ * tranche à compléter, son texte seul. Les éléments observables (`sousCriteres`, par leur nom)
+ * sous le critère ; la description de la grille ; le total des pondérations.
+ */
+function tableauEnColonnes(grille, criteres, listes, noms) {
+    const B = window.bareme;
+    const total = criteres.reduce((somme, c) => somme + (Number(c.ponderation) || 0), 0);
+    return {
+        niveaux: [],
+        toutBareme: true,
+        colonnesTranches: noms,
+        description: String(grille.description == null ? '' : grille.description).trim(),
+        total: String(Math.round(total * 100) / 100),
+        lignes: criteres.map((c, i) => ({
+            critere: c,
+            tranches: null,
+            cellules: null,
+            cases: listes[i].map(t => [String(t.texte).trim(), B.pointsAvecUnite(t)].filter(Boolean)),
+            observables: (Array.isArray(c.sousCriteres) ? c.sousCriteres : [])
+                .map(sc => String((sc && sc.nom) || '').trim()).filter(Boolean)
+        }))
+    };
+}
+
+/** L'en-tête d'une colonne de niveau, d'une tranche (forme d'origine), ou celle de la grille toute à barème. */
 function entetesColonnesTableau(tableau) {
+    if (tableau.colonnesTranches) return tableau.colonnesTranches;
     return tableau.niveaux.length > 0
         ? tableau.niveaux.map(n => (n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?')))
         : ['Barème'];
@@ -2351,6 +2410,97 @@ function entetesColonnesTableau(tableau) {
  */
 function entetePonderationTableau(tableau) {
     return tableau.toutBareme ? 'Points' : '%';
+}
+
+/**
+ * Le tableau des critères dans l'aperçu (#1120) : il pose `tableauDesCriteres`, rien de plus.
+ * Sorti de `genererApercuCombine` le 20 oct. pour la forme de la grille d'origine : `ctx` porte
+ * les styles et les couleurs du document.
+ */
+function tableauHTML(tableau, ctx) {
+    const { aCartoucheLongue, styleTableEntete, styleTableCritere, styleRetroaction, styleTexteTranche, styleTexteNormal,
+        couleurTitre, couleurTexte, couleurSecondaire, couleurBordure } = ctx;
+    let html = '';
+    // #1120 (forme d'origine) — la description de la grille, sur une ligne au-dessus du tableau.
+    if (tableau.description) {
+        html += `<p data-description-grille style="${styleTexteNormal} color: ${couleurTexte}; margin: 0 0 6px;">${escapeHtml(tableau.description)}</p>`;
+    }
+    const colonnes = entetesColonnesTableau(tableau);
+    const nbNiveaux = colonnes.length;
+    // ⚠ Les gabarits gardent l'indentation qu'ils avaient dans `genererApercuCombine` : le golden
+    // master #497 compare l'aperçu à l'octet près.
+    // Largeurs en % comme dans le PDF
+    const largeurCritere = aCartoucheLongue ? '8%' : '20%';
+    const largeurPond = aCartoucheLongue ? '4%' : '8%';
+    const largeurNiveau = aCartoucheLongue
+        ? `${(88 / nbNiveaux).toFixed(1)}%`
+        : `${((100 - 28) / nbNiveaux).toFixed(1)}%`;
+
+    html += `
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid ${couleurBordure}; table-layout: fixed;">
+                <thead>
+                    <tr>
+                        <th style="${styleTableEntete} width: ${largeurCritere}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: left; border: 1px solid ${couleurTitre};">Critère</th>
+                        <th style="${styleTableEntete} width: ${largeurPond}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: center; border: 1px solid ${couleurTitre};">${escapeHtml(entetePonderationTableau(tableau))}</th>
+        `;
+
+    // En-tetes des niveaux - Code + Nom (fond blanc comme le PDF, texte coloré)
+    colonnes.forEach(enteteNiveau => {
+        // ✅ CORRECTION (28 janvier 2026) : Fond blanc + texte gris foncé comme le PDF
+        html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: white; color: ${couleurTexte}; padding: 4px 5px; text-align: center; border: 1px solid ${couleurBordure}; font-weight: bold;">${escapeHtml(enteteNiveau)}</th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
+    // Lignes des criteres
+    tableau.lignes.forEach(({ critere: c, tranches, cellules, cases, observables }, idx) => {
+        const bgColor = idx % 2 === 0 ? 'white' : '#fafafa';
+        // Contenu de la colonne critère : nom + description optionnelle
+        let contenuCritere = escapeHtml(c.nom || '—');
+        if (ctx.inclureDescCriteres && c.description) {
+            contenuCritere += `<br><span style="font-weight: normal; font-size: 0.85em; color: ${couleurSecondaire};">${escapeHtml(c.description)}</span>`;
+        }
+        // #1120 (forme d'origine) — les éléments observables sous le nom, un par ligne.
+        if (cases) {
+            contenuCritere = `<div data-ligne>${contenuCritere}</div>`
+                + observables.map(o => `<div data-ligne style="font-weight: normal; padding-left: 4px;">· ${escapeHtml(o)}</div>`).join('');
+        }
+        html += `
+                <tr style="background: ${bgColor};">
+                    <td ${cases ? 'data-lignes ' : ''}style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; vertical-align: top;">${contenuCritere}</td>
+                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
+            `;
+
+        if (cases) {
+            // #1120 (forme d'origine) — une case par tranche : son texte, puis ses points dessous.
+            cases.forEach(lignes => {
+                const contenu = lignes.map((l, i) => `<div data-ligne${i > 0 ? ' style="margin-top: 2px;"' : ''}>${escapeHtml(l)}</div>`).join('');
+                html += `<td data-lignes style="${styleTexteTranche} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${contenu}</td>`;
+            });
+        } else if (tranches) {
+            // #1120 — un critère à barème : ses tranches, une par ligne, sur toute la largeur des niveaux.
+            const lignesTranches = tranches.map(l => `<div data-tranche style="margin-bottom: 2px;">${escapeHtml(l)}</div>`).join('');
+            html += `<td data-tranches colspan="${nbNiveaux}" style="${styleTexteTranche} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${lignesTranches}</td>`;
+        } else {
+            // Cellules pour chaque niveau - RETROACTIONS avec taille auto
+            cellules.forEach(contenu => {
+                html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
+            });
+        }
+
+        html += `</tr>`;
+    });
+
+    // #1120 (forme d'origine) — la rangée « Total » : la somme des pondérations.
+    if (tableau.total !== null) {
+        html += `<tr data-total>
+            <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure};">Total</td>
+            <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; text-align: center;">${escapeHtml(tableau.total)}</td>
+            <td data-lignes colspan="${nbNiveaux}" style="border: 1px solid ${couleurBordure};"></td>
+        </tr>`;
+    }
+
+    html += `</tbody></table>`;
+    return html;
 }
 
 function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
@@ -2455,59 +2605,11 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
     // #1120 — son contenu vient de `tableauDesCriteres`, partagé avec le PDF.
     const tableau = (partie !== 'consignes' && modele.afficheEvaluation) ? tableauDesCriteres(grille, echelle, cartouche) : null;
     if (tableau) {
-        const colonnes = entetesColonnesTableau(tableau);
-        const nbNiveaux = colonnes.length;
-        // Largeurs en % comme dans le PDF
-        const largeurCritere = aCartoucheLongue ? '8%' : '20%';
-        const largeurPond = aCartoucheLongue ? '4%' : '8%';
-        const largeurNiveau = aCartoucheLongue
-            ? `${(88 / nbNiveaux).toFixed(1)}%`
-            : `${((100 - 28) / nbNiveaux).toFixed(1)}%`;
-
-        html += `
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid ${couleurBordure}; table-layout: fixed;">
-                <thead>
-                    <tr>
-                        <th style="${styleTableEntete} width: ${largeurCritere}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: left; border: 1px solid ${couleurTitre};">Critère</th>
-                        <th style="${styleTableEntete} width: ${largeurPond}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: center; border: 1px solid ${couleurTitre};">${escapeHtml(entetePonderationTableau(tableau))}</th>
-        `;
-
-        // En-tetes des niveaux - Code + Nom (fond blanc comme le PDF, texte coloré)
-        colonnes.forEach(enteteNiveau => {
-            // ✅ CORRECTION (28 janvier 2026) : Fond blanc + texte gris foncé comme le PDF
-            html += `<th style="${styleTableEntete} width: ${largeurNiveau}; background: white; color: ${couleurTexte}; padding: 4px 5px; text-align: center; border: 1px solid ${couleurBordure}; font-weight: bold;">${escapeHtml(enteteNiveau)}</th>`;
+        html += tableauHTML(tableau, {
+            aCartoucheLongue, styleTableEntete, styleTableCritere, styleRetroaction, styleTexteTranche, styleTexteNormal,
+            couleurTitre, couleurTexte, couleurSecondaire, couleurBordure,
+            inclureDescCriteres: options.inclureDescCriteres
         });
-        html += `</tr></thead><tbody>`;
-
-        // Lignes des criteres
-        tableau.lignes.forEach(({ critere: c, tranches, cellules }, idx) => {
-            const bgColor = idx % 2 === 0 ? 'white' : '#fafafa';
-            // Contenu de la colonne critère : nom + description optionnelle
-            let contenuCritere = escapeHtml(c.nom || '—');
-            if (options.inclureDescCriteres && c.description) {
-                contenuCritere += `<br><span style="font-weight: normal; font-size: 0.85em; color: ${couleurSecondaire};">${escapeHtml(c.description)}</span>`;
-            }
-            html += `
-                <tr style="background: ${bgColor};">
-                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; vertical-align: top;">${contenuCritere}</td>
-                    <td style="${styleTableCritere} padding: 4px 5px; border: 1px solid ${couleurBordure}; text-align: center; vertical-align: top;">${c.ponderation || '—'}</td>
-            `;
-
-            if (tranches) {
-                // #1120 — un critère à barème : ses tranches, une par ligne, sur toute la largeur des niveaux.
-                const lignesTranches = tranches.map(l => `<div data-tranche style="margin-bottom: 2px;">${escapeHtml(l)}</div>`).join('');
-                html += `<td data-tranches colspan="${nbNiveaux}" style="${styleTexteTranche} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${lignesTranches}</td>`;
-            } else {
-                // Cellules pour chaque niveau - RETROACTIONS avec taille auto
-                cellules.forEach(contenu => {
-                    html += `<td style="${styleRetroaction} padding: 3px 4px; border: 1px solid ${couleurBordure}; vertical-align: top; color: ${couleurTexte};">${escapeHtml(contenu)}</td>`;
-                });
-            }
-
-            html += `</tr>`;
-        });
-
-        html += `</tbody></table>`;
     }
 
     // Pied de page simule avec options - seulement si contenu a afficher
@@ -2596,6 +2698,41 @@ async function exporterPDFCombine() {
  * @param {Object} cartouche - Cartouche de retroaction (optionnel)
  * @param {Object} options - Options d'affichage
  */
+/**
+ * Les rangées du tableau dans le PDF (#1120) : elles posent `tableauDesCriteres`, comme
+ * `tableauHTML` dans l'aperçu. Une case de la forme d'origine est un objet `{ content }` : ses
+ * lignes (le texte, puis les points ; le nom, puis les éléments observables) s'y séparent par « \n ».
+ */
+function donneesPDFTableau(tableau, options, nbColonnes) {
+    const donnees = tableau.lignes.map(({ critere: c, tranches, cellules, cases, observables }) => {
+        // Donnees - inclure description du critère si option cochée
+        let nomCritere = c.nom || '—';
+        if (options.inclureDescCriteres && c.description) {
+            nomCritere += '\n' + c.description;
+        }
+        if (cases) nomCritere = { content: [nomCritere, ...observables.map(o => '· ' + o)].join('\n') };
+        const ligne = [nomCritere, c.ponderation ? `${c.ponderation}` : '—'];
+        // Un critère à barème : ses tranches, une par ligne, sur toute la largeur des niveaux.
+        if (cases) cases.forEach(lignes => ligne.push({ content: lignes.join('\n') }));
+        else if (tranches) ligne.push({ content: tranches.join('\n'), colSpan: nbColonnes });
+        else cellules.forEach(contenu => ligne.push(contenu));
+        return ligne;
+    });
+    if (tableau.total !== null) donnees.push(['Total', tableau.total, { content: '', colSpan: nbColonnes }]);
+    return donnees;
+}
+
+/** La description de la grille (forme d'origine, #1120), au-dessus du tableau ; rend l'ordonnée suivante. */
+function poserDescriptionGrillePDF(doc, tableau, posY, largeurContenu, facteurTaille) {
+    if (!tableau.description) return posY;
+    doc.setFontSize(PDF_CONFIG.polices.texteNormal * facteurTaille);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...PDF_CONFIG.couleurs.textePrincipal);
+    const lignes = doc.splitTextToSize(tableau.description, largeurContenu);
+    doc.text(lignes, PDF_CONFIG.marges.gauche, posY);
+    return posY + lignes.length * 4.5 + 2;
+}
+
 async function genererPDFCombine(grille, echelle, cartouche = null, options = {}) {
     // Taille fixe: petit (facteur 0.85)
     const facteurTaille = 0.85;
@@ -2647,22 +2784,13 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     // #1120 — le contenu du tableau vient de `tableauDesCriteres`, partagé avec l'aperçu.
     const tableau = modele.afficheEvaluation ? tableauDesCriteres(grille, echelle, cartouche) : null;
     if (tableau) {
-        // En-tetes avec Code + Nom niveau (ou « Barème », pour une grille toute à barème)
+        // #1120 (forme d'origine) — la description de la grille, au-dessus du tableau.
+        posY = poserDescriptionGrillePDF(doc, tableau, posY, largeurContenu, facteurTaille);
+
+        // En-tetes avec Code + Nom niveau (ou « Barème », ou les tranches de la forme d'origine)
         const colonnes = entetesColonnesTableau(tableau);
         const entetes = ['Critère', entetePonderationTableau(tableau), ...colonnes];
-
-        // Donnees - inclure description du critère si option cochée
-        const donnees = tableau.lignes.map(({ critere: c, tranches, cellules }) => {
-            let nomCritere = c.nom || '—';
-            if (options.inclureDescCriteres && c.description) {
-                nomCritere += '\n' + c.description;
-            }
-            const ligne = [nomCritere, c.ponderation ? `${c.ponderation}` : '—'];
-            // Un critère à barème : ses tranches, une par ligne, sur toute la largeur des niveaux.
-            if (tranches) ligne.push({ content: tranches.join('\n'), colSpan: colonnes.length });
-            else cellules.forEach(contenu => ligne.push(contenu));
-            return ligne;
-        });
+        const donnees = donneesPDFTableau(tableau, options, colonnes.length);
 
         // Calculer la longueur moyenne du texte pour ajuster la police
         let longueurMoyenne = 0;
@@ -2741,6 +2869,10 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
             // Permettre plusieurs pages
             rowPageBreak: 'auto',
             didParseCell: function(data) {
+                // #1120 (forme d'origine) — la rangée « Total » en gras.
+                if (data.section === 'body' && tableau.total !== null && data.row.index === tableau.lignes.length) {
+                    data.cell.styles.fontStyle = 'bold';
+                }
                 // En-têtes de niveaux : fond blanc, texte gris (#593)
                 if (data.section === 'head' && data.column.index >= 2) {
                     const niveau = tableau.niveaux[data.column.index - 2];
@@ -3871,6 +4003,7 @@ window.dispositionDocument = dispositionDocument;                           // #
 window.repartirEnDeuxColonnes = repartirEnDeuxColonnes;                     // #497 étape 4 — une seule répartition pour les deux rendeurs
 window.echelleExigee = echelleExigee;                                       // #1120 — l'échelle, seulement si un critère en lit une
 window.tableauDesCriteres = tableauDesCriteres;                             // #1120 — le tableau décidé une fois pour les deux rendeurs
+window.nomsDesTranchesCommunes = nomsDesTranchesCommunes;                   // #1120 — la forme de la grille d'origine, ou non
 window.blocsInfoHTML = blocsInfoHTML;
 window.blocEcheance = blocEcheance;                                         // #498 — la date de remise, toujours dans les consignes
 window.datesDeRemise = datesDeRemise;                             // #497 étape 3 — les consignes seules sur leur page

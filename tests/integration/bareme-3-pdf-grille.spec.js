@@ -14,9 +14,12 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // A26 », quatre critères analytiques à barème, aucune échelle.
 //
 // Ce banc joue le vrai index.html depuis la démonstration, le geste de la fiche de production :
-//   (a) une production liée à une grille toute à barème, SANS échelle ni consignes : « Préparer le
-//       PDF » ouvre l'aperçu (et non le formulaire) ; chaque critère montre ses quatre lignes,
-//       aucun « — », aucun nom de tranche ; une seule colonne, « Barème » ;
+//   (a) une production liée à une grille toute à barème aux MÊMES tranches partout, SANS échelle
+//       ni consignes : « Préparer le PDF » ouvre l'aperçu (et non le formulaire), dans la forme de
+//       la grille d'origine (décision de Grégoire, 20 oct., 18 h 39) — une colonne par tranche, le
+//       texte puis les points, les éléments observables, la description, le total ;
+//   (a2) des tranches qui diffèrent d'un critère à l'autre : une seule colonne, « Barème », chaque
+//       critère montre ses quatre lignes, aucun « — », aucun nom de tranche ;
 //   (b) une grille mixte, avec son échelle : les colonnes de niveaux restent, et le critère à
 //       barème les réunit en une case ;
 //   (c) le formulaire de préparation : sans échelle, ni astérisque ni bouton grisé pour la grille
@@ -27,6 +30,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
 const NOMS_TRANCHES = ['Excellent', 'Satisfaisant', 'Partiel', 'Insuffisant'];
+const NOMS_TOUS = [...NOMS_TRANCHES, 'Très bien'];
 
 const appPrete = (page) => page.waitForFunction(() =>
     typeof window.activerModeDemo === 'function' && typeof window.chargerProductionPourModif === 'function'
@@ -44,19 +48,22 @@ async function ouvrirDemo(page) {
  * Pose la grille (toute à barème, ou mixte), la lie à une production de la démo rendue
  * modifiable, sans consignes, puis ouvre la fiche. `echelle` : l'échelle liée, ou ''.
  */
-async function lierEtOuvrir(page, { mixte, avecEchelle }) {
+async function lierEtOuvrir(page, { mixte, avecEchelle, varie = false }) {
     await page.evaluate(() => naviguerVers('conception', 'productions'));
-    const id = await page.evaluate(async ({ mixte, avecEchelle }) => {
+    const id = await page.evaluate(async ({ mixte, avecEchelle, varie }) => {
         const tranche = (id, nom, min, max, texte) => ({ id, nom, pointsMin: min, pointsMax: max, texte });
         const critere = (n) => ({ id: `CR_BANC_${n}`, nom: `Critère fictif ${n}`, type: 'analytique', ponderation: 4,
-            bareme: [tranche(`TR_${n}a`, 'Excellent', 3, 4, `Résume l'essentiel ${n}`),
+            sousCriteres: [{ id: `SC_BANC_${n}`, code: '0', nom: `Observable fictif ${n}` }],
+            // `varie` : le 4e critère nomme sa première tranche autrement → la forme à une colonne.
+            bareme: [tranche(`TR_${n}a`, varie && n === 4 ? 'Très bien' : 'Excellent', 3, 4, `Résume l'essentiel ${n}`),
                 tranche(`TR_${n}b`, 'Satisfaisant', 2, 2, `Résume en partie ${n}`),
                 tranche(`TR_${n}c`, 'Partiel', 1, 1, `Effleure le propos ${n}`),
                 tranche(`TR_${n}d`, 'Insuffisant', 0, 0, `Ne résume pas ${n}`)] });
         const criteres = mixte
             ? [{ id: 'CR_BANC_H', nom: 'Structure fictive', type: 'holistique', ponderation: 50 }, critere(9)]
             : [1, 2, 3, 4].map(critere);
-        const grille = { id: 'GR_BANC_BAREME', nom: mixte ? 'Grille mixte fictive' : 'Journal de lecture A26', criteres };
+        const grille = { id: 'GR_BANC_BAREME', nom: mixte ? 'Grille mixte fictive' : 'Journal de lecture A26',
+            description: 'Description fictive de la grille.', criteres };
         const grilles = (db.getSync(cle('grillesTemplates'), []) || []).filter(g => g.id !== grille.id);
         grilles.push(grille);
         await db.set(cle('grillesTemplates'), grilles);   // security-ok: banc, grille fictive posée dans l'essai
@@ -69,7 +76,7 @@ async function lierEtOuvrir(page, { mixte, avecEchelle }) {
         p.objectif = ''; p.tache = ''; p.detailTache = ''; p.champsPersonnalises = [];
         await db.set(cle('productions'), liste);   // security-ok: banc, la collection lue dans l'essai, marque « démo » retirée
         return p.id;
-    }, { mixte, avecEchelle });
+    }, { mixte, avecEchelle, varie });
     await page.evaluate(async (id) => { await chargerProductionPourModif(id); }, id);
     await page.waitForFunction(() => {
         const f = document.getElementById('formulaireProduction');
@@ -95,17 +102,42 @@ const lireTableau = (page) => page.evaluate(() => {
     if (!table) return null;
     return {
         entetes: [...table.querySelectorAll('thead th')].map(th => th.textContent.trim()),
-        lignes: [...table.querySelectorAll('tbody tr')].map(tr => [...tr.children].map(td => td.hasAttribute('data-tranches')
-            ? { colspan: td.colSpan, tranches: [...td.querySelectorAll('[data-tranche]')].map(d => d.textContent) }
-            : td.textContent.trim())),
-        texte: table.textContent
+        lignes: [...table.querySelectorAll('tbody tr')].map(tr => [...tr.children].map(td => {
+            if (td.hasAttribute('data-tranches')) return { colspan: td.colSpan, tranches: [...td.querySelectorAll('[data-tranche]')].map(d => d.textContent) };
+            if (td.hasAttribute('data-lignes')) return { lignes: [...td.querySelectorAll('[data-ligne]')].map(d => d.textContent) };
+            return td.textContent.trim();
+        })),
+        texte: table.textContent,
+        description: document.querySelector('#modalApercuPDF [data-description-grille]')?.textContent ?? null
     };
 });
 
-test('(a) une grille toute à barème, sans échelle : l\'aperçu s\'ouvre et montre les tranches', async ({ page }) => {
+test('(a) les mêmes tranches partout, sans échelle : l\'aperçu prend la forme de la grille d\'origine', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirDemo(page);
     await lierEtOuvrir(page, { mixte: false, avecEchelle: false });
+    await preparerLePDF(page);
+
+    const t = await lireTableau(page);
+    expect(t, 'le tableau des critères est rendu').not.toBeNull();
+    expect(t.entetes).toEqual(['Critère', 'Points', ...NOMS_TRANCHES]);
+    expect(t.description).toBe('Description fictive de la grille.');
+    expect(t.lignes).toHaveLength(5);
+    t.lignes.slice(0, 4).forEach((ligne, i) => {
+        const n = i + 1;
+        expect(ligne[0].lignes).toEqual([`Critère fictif ${n}`, `· Observable fictif ${n}`]);
+        expect(ligne.slice(2).map(c => c.lignes)).toEqual([
+            [`Résume l'essentiel ${n}`, '3-4 points'], [`Résume en partie ${n}`, '2 points'],
+            [`Effleure le propos ${n}`, '1 point'], [`Ne résume pas ${n}`, '0 point']]);
+    });
+    expect(t.lignes[4].slice(0, 2), 'la rangée « Total »').toEqual(['Total', '16']);
+    expect(t.entetes).not.toContain('Barème');
+});
+
+test('(a2) des tranches qui diffèrent d\'un critère à l\'autre : une colonne, « Barème », sans nom de tranche', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirDemo(page);
+    await lierEtOuvrir(page, { mixte: false, avecEchelle: false, varie: true });
     await preparerLePDF(page);
 
     const t = await lireTableau(page);
@@ -120,7 +152,8 @@ test('(a) une grille toute à barème, sans échelle : l\'aperçu s\'ouvre et mo
             `1 point\u00a0: Effleure le propos ${n}`, `0 point\u00a0: Ne résume pas ${n}`]);
     });
     expect(t.texte, 'aucun « — »').not.toContain('—');
-    NOMS_TRANCHES.forEach(nom => expect(t.texte, 'aucun nom de tranche').not.toContain(nom));
+    NOMS_TOUS.forEach(nom => expect(t.texte, 'aucun nom de tranche').not.toContain(nom));
+    expect(t.description, 'pas de description hors de la forme d\'origine').toBeNull();
 });
 
 test('(b) une grille mixte, avec son échelle : les colonnes de niveaux restent', async ({ page }) => {
@@ -185,5 +218,5 @@ test('(c) le formulaire : sans échelle, « Voir l\'aperçu » s\'ouvre pour une
     await expect.poll(() => page.evaluate(() => document.getElementById('modalApercuPDF').classList.contains('actif')),
         { message: 'l\'aperçu s\'ouvre sans échelle' }).toBe(true);
     const t = await lireTableau(page);
-    expect(t.entetes).toEqual(['Critère', 'Points', 'Barème']);
+    expect(t.entetes).toEqual(['Critère', 'Points', ...NOMS_TRANCHES]);
 });
