@@ -415,7 +415,7 @@ jobs:
       # Playwright ne bouge pas : la clé du cache est donc le lock des tests.
       - name: Cache du navigateur WebKit
         id: cache-webkit
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-webkit-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
