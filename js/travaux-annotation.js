@@ -632,12 +632,6 @@
         // Mode tampon (autocollant) ou symbole/code : un seul clic pose
         if (poserTamponAuPoint(outil, xNorm, yNorm)) return;
 
-        if (outil.id === 'gomme') {
-            effacerTraitAuContact(xNorm, yNorm);
-            enDessin = true;
-            return;
-        }
-
         if (outil.id === 'texte') {
             // #889 : un clic sur un texte existant l'ouvre en édition. Seul le double-clic de
             // l'outil Sélection le faisait ; l'outil Texte posait un 2e bloc par-dessus.
@@ -785,12 +779,6 @@
         if (e.pointerType === 'touch') return;
 
         e.preventDefault();
-
-        // Gomme en mode glissant
-        if (outil.id === 'gomme') {
-            effacerTraitAuContact(xNorm, yNorm);
-            return;
-        }
 
         // Forme en cours
         if (formeEnCours) {
@@ -1317,44 +1305,6 @@
         ctxAnnotation.strokeText(sticker.texteTampon, sx, sy);
         ctxAnnotation.fillText(sticker.texteTampon, sx, sy);
         ctxAnnotation.restore();
-    }
-
-    /* ===============================
-       GOMME
-       =============================== */
-
-    /**
-     * Efface l'annotation la plus proche du point donne
-     * Utilise le hit-testing reutilisable
-     * @param {number} xNorm - X normalise
-     * @param {number} yNorm - Y normalise
-     */
-    function effacerTraitAuContact(xNorm, yNorm) {
-        const hit = trouverAnnotationAuPoint(xNorm, yNorm);
-        if (!hit) return;
-
-        // La gomme n'efface que les annotations du surligneur
-        const estSurligneur = (hit.type === 'stroke' && hit.data.tool === 'surligneur')
-                           || (hit.type === 'shape' && hit.data.type === 'surligneur');
-        if (!estSurligneur) return;
-
-        const donneesPage = obtenirDonneesPage();
-
-        switch (hit.type) {
-            case 'stroke': {
-                const supprime = donneesPage.strokes.splice(hit.index, 1)[0];
-                empilerUndo('suppression-trait', supprime);
-                break;
-            }
-            case 'shape': {
-                const supprime = donneesPage.shapes.splice(hit.index, 1)[0];
-                empilerUndo('suppression-forme', supprime);
-                break;
-            }
-        }
-
-        reRendreAnnotations();
-        planifierSauvegarde();
     }
 
     /* ===============================
