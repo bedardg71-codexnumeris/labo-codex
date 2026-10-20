@@ -15,7 +15,7 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-📝 **LE 20 OCTOBRE 2026, APRÈS-MIDI : LA 1.211.0 EST PRÊTE, ELLE PART EN LIGNE APRÈS TA RÉPONSE SUR LES NOUVELLES ET UN VERDICT COMPLET.** *Écrit par Claude Code.*
+📝 **LE 20 OCTOBRE 2026, APRÈS-MIDI : LA 1.211.0 EST PRÊTE, ELLE PART EN LIGNE SI LE VERDICT COMPLET EST VERT** (tes Nouvelles validées telles quelles). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :
 - dans Grilles de critères, les sous-critères d'un critère holistique ou analytique se modifient : on en ajoute (même le premier), on les renomme, on les réordonne, on les retire ; ils ne deviennent pas des codes d'annotation ;

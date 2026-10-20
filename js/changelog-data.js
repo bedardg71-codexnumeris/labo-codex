@@ -22,7 +22,7 @@
     var CHANGELOG = [
         {
             // 1.211 (les sous-critères modifiables, la grille plus compacte, les textes de l'accueil) — titre et trois
-            // items proposés par Claude Code le 20 oct. 2026, À VALIDER par Grégoire avant le push.
+            // items proposés par Claude Code, validés par Grégoire tels quels le 20 oct. 2026 (14 h 55).
             version: '1.211',
             couleur: 'vert',
             titre: 'Des sous-critères à toi, et une grille plus compacte',
