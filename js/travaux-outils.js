@@ -2461,26 +2461,31 @@
     }
 
     function mettreAJourCompteursErreurs() {
-        const palette = document.getElementById('travaux-palette-erreurs-fr');
-        if (!palette) return;
         const compteurs = compterErreursFrancais();
         // Le total additionne TOUS les codes posés ; les badges ne montrent que
         // ceux que la palette affiche.
         const total = Object.keys(compteurs).reduce((somme, id) => somme + (compteurs[id] || 0), 0);
-        _codesCourants().forEach(c => {
-            const count = compteurs[c.id] || 0;
-            const idSur = (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') ? CSS.escape(c.id) : c.id.replace(/["\\]/g, '');
-            const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + idSur + '"]');
-            if (badge) {
-                badge.textContent = count > 0 ? count : '';
-                badge.classList.toggle('u-hide', count === 0);
-            }
-        });
 
-        // Afficher le total dans l'entête de la palette CODES
-        const spanTotal = document.getElementById('travaux-errfr-total-header');
-        if (spanTotal) {
-            spanTotal.textContent = total > 0 ? '(' + total + ' erreur' + (total > 1 ? 's' : '') + ')' : '';
+        // Badges et total d'entête : seulement si la palette CODES est ouverte.
+        // Bug 2026-10-20 (Grégoire) : cette garde arrêtait TOUTE la fonction, et le
+        // champ « Nombre d'erreurs » ne suivait plus les codes quand la palette
+        // était fermée — la note partait sur 0 erreur.
+        const palette = document.getElementById('travaux-palette-erreurs-fr');
+        if (palette) {
+            _codesCourants().forEach(c => {
+                const count = compteurs[c.id] || 0;
+                const idSur = (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') ? CSS.escape(c.id) : c.id.replace(/["\\]/g, '');
+                const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + idSur + '"]');
+                if (badge) {
+                    badge.textContent = count > 0 ? count : '';
+                    badge.classList.toggle('u-hide', count === 0);
+                }
+            });
+
+            const spanTotal = document.getElementById('travaux-errfr-total-header');
+            if (spanTotal) {
+                spanTotal.textContent = total > 0 ? '(' + total + ' erreur' + (total > 1 ? 's' : '') + ')' : '';
+            }
         }
 
         // Propager le total dans le champ « Nombre d'erreurs » du critère algorithmique
