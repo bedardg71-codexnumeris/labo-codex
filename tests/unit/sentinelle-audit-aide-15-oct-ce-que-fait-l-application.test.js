@@ -95,7 +95,8 @@ describe('Ce qui fixe le niveau RàI : une seule version, celle du code', () => 
         expect(NIVEAU).toContain('identifierPatternActuel(');
         expect(NIVEAU).toContain('noteConstructible && P <');
         expect(NIVEAU, 'le niveau RàI lit maintenant l\'IPB : l\'Aide est à revoir').not.toMatch(/calculerIPB\(/);
-        expect(lire('js/profil-etudiant-helpers.js')).toMatch(/function estCritereSurveilleParDepistage\(critere\)\s*\{\s*return !!critere && critere\.niveauSOLO !== 'aucun';/);
+        // ↻ #1117, suite (20 oct. 2026) : « Aucun » n'exclut que si l'observation SOLO est activée.
+        expect(lire('js/profil-etudiant-helpers.js')).toMatch(/function estCritereSurveilleParDepistage\(critere\)\s*\{\s*if \(!critere\) return false;\s*if \(!etiquettesSOLOLuesParDepistage\(\)\) return true;\s*return critere\.niveauSOLO !== 'aucun';/);
     });
 
     it('les anciennes versions ont disparu de toutes les surfaces', () => {

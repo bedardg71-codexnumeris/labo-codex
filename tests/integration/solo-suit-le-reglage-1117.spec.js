@@ -149,3 +149,40 @@ test('#1117 — un critère « relationnel », enregistré champ masqué, la pag
     expect(await page.evaluate(() =>
         document.querySelector('#listeCriteres select[data-champ="niveauSOLO"][data-critere-index="0"]')?.value)).toBe('relationnel');
 });
+
+// #1117, suite (20 oct. 2026, verdict C2 — Grégoire, 6 h 48, option A) : RàI activé, SOLO
+// désactivé, une grille de dépistage toute « Aucun » (celle d'« Apporter mon matériel ») —
+// le suivi des fondations surveille TOUS les critères, et la barre du tableau de bord le dit.
+test('#1117, suite — RàI activé, SOLO désactivé, grille de dépistage toute « Aucun » : la barre dit que tous les critères sont surveillés', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page);
+    const id = await premiereGrille(page);
+    expect(id).toBeTruthy();
+
+    // La grille de la démonstration, tous ses critères à « Aucun », choisie pour le dépistage.
+    const noms = await page.evaluate(async (id) => {
+        const grilles = db.getSync(cle('grillesTemplates'), []) || [];
+        const g = grilles.find(x => x.id === id);
+        g.criteres.forEach(c => { c.niveauSOLO = 'aucun'; });
+        db.setSync(cle('grillesTemplates'), grilles);   // security-ok: banc, la grille de la démonstration dans un contexte neuf
+        definirPreference('activerRai', true);
+        definirPreference('grilleReferenceDepistage', id);
+        return g.criteres.map(c => c.nom);
+    }, id);
+
+    const barre = () => page.evaluate(async () => {
+        chargerTableauBordApercu();
+        await new Promise((r) => setTimeout(r, 1200));
+        const el = document.querySelector('.barre-patterns-container');
+        return el ? el.textContent.replace(/\s+/g, ' ') : null;
+    });
+
+    // Témoin : SOLO activé, la barre ne surveille rien, et le dit — comme avant.
+    expect(await page.evaluate(() => obtenirPreference('afficherDescriptionsSOLO'))).not.toBe(false);
+    expect(await barre(), 'témoin : SOLO activé').toContain('Aucun critère multistructurel dans la grille de dépistage');
+
+    await regler(page, false);
+    const texte = await barre();
+    expect(texte).toContain('Observation SOLO désactivée : tous les critères sont surveillés (' + noms.join(', ') + ').');
+    expect(texte).not.toContain('Aucun critère multistructurel');
+});

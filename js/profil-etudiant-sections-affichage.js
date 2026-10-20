@@ -1239,16 +1239,13 @@ function genererSectionAccompagnement(da) {
                             const niveauCritere = lectureCriteres.echelle
                                 ? situerPourcentageDansEchelle(pct, lectureCriteres.echelle)
                                 : null;
-                            const lectureSOLOCritere = interpreterNiveauAtteint(niveauCritere);
-
                             // Même règle qu'au pas 3c-1 : le niveau se lit, SOLO explique
                             // au survol. Sans niveau, le pourcentage porte la raison —
                             // et elle est la même pour toute la liste, d'où un seul
-                            // message plutôt qu'un par ligne.
+                            // message plutôt qu'un par ligne. #1117, suite : le survol
+                            // est composé par `survolNiveauAtteint`, qui lit le réglage.
                             const survolCritere = niveauCritere
-                                ? (lectureSOLOCritere.interpretee
-                                    ? lectureSOLOCritere.libelleSOLO + ' — ' + lectureSOLOCritere.texte
-                                    : (lectureSOLOCritere.texte || '') + (lectureSOLOCritere.message ? ' · ' + lectureSOLOCritere.message : ''))
+                                ? survolNiveauAtteint(niveauCritere)
                                 : (lectureCriteres.message || '');
                             const codeCritere = niveauCritere
                                 ? `<span title="${echapperHtml(survolCritere)}">${echapperHtml(String(niveauCritere.code))}</span> `

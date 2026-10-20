@@ -12,7 +12,13 @@
  *       MASQUER N'ÉCRIT RIEN : la valeur enregistrée reste, et revient avec la case ;
  *   C — « Palier SOLO du niveau », même règle dans les deux éditeurs d'échelles ;
  *   D — les autres affichages de la complexité d'un critère (cible du profil, badge de
- *       l'intervention) suivent ; le calcul du dépistage, non.
+ *       l'intervention) suivent ;
+ *   E — #1117, suite (consigne du 20 oct. 2026, verdict C1-C3) : réglage désactivé, le
+ *       dépistage examine TOUS les critères (Grégoire, 19 oct., 22 h 21) ; le suivi des
+ *       fondations aussi, et la barre le dit (20 oct., 6 h 48, option A) ; les survols du
+ *       profil portent le nom du niveau, sans palier SOLO. Réglage activé : rien ne change.
+ *       ↻ Le cas D.c d'hier (« `calculerIPB` ne lit pas le réglage ») est RENVERSÉ par la
+ *       décision de 6 h 48 : il lit désormais la règle commune `criteresSuiviFondations`.
  *
  * Le parcours réel (enregistrer champ masqué, recharger, recocher) : `tests/integration/
  * solo-suit-le-reglage-1117.spec.js`.
@@ -24,6 +30,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { fige } from './_helpers/modeles-assistant-figes.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';
+import { chargerAvecInterne, fauxDocument as fauxDocumentSuivi } from './_helpers/bac-suivi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -267,11 +275,192 @@ describe('#1117 · D — les autres affichages de la complexité suivent ; le d�
         expect(code).toMatch(/var badgeSolo = niveauLabel && soloActive\s*\?/);
     });
 
-    it('D.c le calcul du dépistage ne lit pas le réglage', () => {
+    it('D.c ↻ (20 oct.) `calculerIPB` lit la règle commune du suivi des fondations, sans garde locale', () => {
         const code = sansCommentaires(source('js/profil-etudiant-calculs.js'));
         const debut = code.indexOf('function calculerIPB(');
         expect(debut).toBeGreaterThan(0);
         const corps = code.slice(debut, code.indexOf('\nfunction ', debut + 10));
+        expect(corps).toContain('var criteresMulti = criteresSuiviFondations(grille);');
         expect(corps).not.toContain('afficherDescriptionsSOLO');
+        expect(corps).not.toContain("'multistructurel'");
+    });
+});
+
+/* ------------------------- E — #1117, suite : le dépistage, le suivi des fondations, les survols */
+
+const DA = '2000001';
+const SEUILS = { defiSpecifique: 0.70, progressionArtefacts: 0.10, directionRisque: 0.05,
+    'idme.insuffisant': 0.64, 'idme.developpement': 0.75, 'idme.maitrise': 0.85 };
+const ECHELLE = { id: 'EG', nom: 'IDME', seuilMaitrise: 'M', niveaux: [
+    { code: 'I', nom: 'Insuffisant', min: 0, max: 64.99, valeurCalcul: '40' },
+    { code: 'D', nom: 'En développement', min: 65, max: 74.99, valeurCalcul: '65' },
+    { code: 'M', nom: 'Maîtrisé', min: 75, max: 84.99, valeurCalcul: '75' },
+    { code: 'E', nom: 'Étendu', min: 85, max: 100, valeurCalcul: '100' }
+] };
+// Structure et Rigueur multistructurelles, Nuance relationnelle, Méthode « Aucun ».
+const GRILLE = { id: 'G1', nom: 'Grille banc #1117', echelleId: 'EG', criteres: [
+    { id: 'c1', nom: 'Structure', type: 'holistique', ponderation: 30, niveauSOLO: 'multistructurel' },
+    { id: 'c2', nom: 'Rigueur', type: 'holistique', ponderation: 30, niveauSOLO: 'multistructurel' },
+    { id: 'c3', nom: 'Nuance', type: 'holistique', ponderation: 20, niveauSOLO: 'relationnel' },
+    { id: 'c4', nom: 'Méthode', type: 'holistique', ponderation: 20, niveauSOLO: 'aucun' }
+] };
+// La grille d'« Apporter mon matériel » : tous ses critères à « Aucun ».
+const TOUT_AUCUN = { id: 'G0', nom: 'Grille apportée', echelleId: 'EG',
+    criteres: GRILLE.criteres.map(c => Object.assign({}, c, { niveauSOLO: 'aucun' })) };
+const PRODUCTIONS = [{ id: 'P1', titre: 'Un' }, { id: 'P2', titre: 'Deux' }, { id: 'P3', titre: 'Trois' }];
+function copie(id, pid, date, grilleId) {
+    return { id, etudiantDA: DA, productionId: pid, echelleId: 'EG', grilleId, dateEvaluation: date, noteFinale: 68,
+        retroactionFinale: 'Rétroaction de banc.',
+        criteres: [
+            { critereId: 'c1', critereNom: 'Structure', niveauSelectionne: 'M', ponderation: 30 },
+            { critereId: 'c2', critereNom: 'Rigueur', niveauSelectionne: 'M', ponderation: 30 },
+            { critereId: 'c3', critereNom: 'Nuance', niveauSelectionne: 'D', ponderation: 20 },
+            { critereId: 'c4', critereNom: 'Méthode', niveauSelectionne: 'I', ponderation: 20 }
+        ] };
+}
+
+/** helpers + calculs dans un même window, réglage SOLO modifiable entre deux appels. */
+function monterDepistage(r, grille) {
+    let win = null;
+    const evaluations = ['P1', 'P2', 'P3'].map((p, i) => copie('E' + i, p, '2026-0' + (i + 2) + '-01', grille.id));
+    const stubs = {
+        calculerMoyennesCriteres: (da) => win.calculerMoyennesCriteres(da),
+        db: { get: async () => null, getSync: (k, d) => (k === 'test_echellesTemplates' ? [ECHELLE] : k === 'test_grillesTemplates' ? [grille] : (d !== undefined ? d : null)),
+            set: async () => {}, setSync() {}, modifier: async () => undefined },
+        cle: (k) => 'test_' + k, echapperHtml: (s) => String(s == null ? '' : s),
+        obtenirDonneesSelonMode: (quoi) => (quoi === 'evaluationsSauvegardees' ? evaluations : quoi === 'productions' ? PRODUCTIONS : []),
+        obtenirPreference: (k) => (k === 'afficherDescriptionsSOLO' ? r.etat.actif : k === 'grilleReferenceDepistage' ? grille.id : null),
+        obtenirEtudiantsCoursActif: () => [], afficherNotificationCopiee() {}, afficherSection() {}, afficherSousSection() {},
+        calculerTousLesIndices: () => ({ A: 1, C: 1, P: 0.70, M: 0, E: 0 }),
+        obtenirSeuil: (n) => SEUILS[n], chargerSeuilsInterpretation: () => ({}),
+        estEtudiantExclu: () => false, filtrerEtudiantsParMode: (arr) => arr, estModeeLectureSeule: () => false,
+        genererSeancesCompletes() {}, calculerEtSauvegarderIndicesAssiduite() {}, calculerEtStockerIndicesCP() {},
+        obtenirGrilleReferenceDepistage: () => grille,
+        obtenirNombreProductionsPourPatterns: () => 3, obtenirIdsProductionsEvaluables: () => PRODUCTIONS.map(p => p.id)
+    };
+    win = chargerScript('js/profil-etudiant-helpers.js', stubs);
+    stubs.estCritereSurveilleParDepistage = win.estCritereSurveilleParDepistage;
+    stubs.criteresSurveillesParDepistage = win.criteresSurveillesParDepistage;
+    stubs.criteresSuiviFondations = win.criteresSuiviFondations;
+    chargerScript('js/profil-etudiant-calculs.js', stubs, win);
+    chargerPredicatsCopie(win);
+    return win;
+}
+
+/** Le tableau de bord, sur les VRAIES règles de helpers. */
+function monterTableauBord(h) {
+    const win = { pluriel: (n, s, p) => (n > 1 ? p : s) };
+    chargerAvecInterne('js/tableau-bord-apercu.js', {
+        db: dbVide, cle: (k) => 'test_' + k, echapperHtml: (s) => String(s == null ? '' : s).replace(/</g, '&lt;'),
+        document: fauxDocumentSuivi({}, {}),
+        criteresSuiviFondations: h.criteresSuiviFondations, etiquettesSOLOLuesParDepistage: h.etiquettesSOLOLuesParDepistage
+    }, win, ['_tousEtudiantsEnrichis', 'genererInterpretationSuiviFondamentaux']);
+    return { f: win.libelleCriteresMultiSurveilles, i: win.__audit['tableau-bord-apercu.js'] };
+}
+
+describe('#1117 · E — réglage désactivé : le dépistage et le suivi des fondations lisent tous les critères', () => {
+    it('E.a la règle des défis : « Aucun » n\'exclut que si l\'observation SOLO est activée', () => {
+        const r = reglage(true);
+        const win = monterDepistage(r, GRILLE);
+        expect(win.estCritereSurveilleParDepistage({ nom: 'X', niveauSOLO: 'aucun' })).toBe(false);
+        expect(win.criteresSurveillesParDepistage(GRILLE).map(c => c.nom)).toEqual(['Structure', 'Rigueur', 'Nuance']);
+        expect(win.trouverCritereDepistage('Méthode', GRILLE)).toBeNull();
+        r.etat.actif = false;
+        expect(win.estCritereSurveilleParDepistage({ nom: 'X', niveauSOLO: 'aucun' })).toBe(true);
+        expect(win.estCritereSurveilleParDepistage(null)).toBe(false);
+        expect(win.criteresSurveillesParDepistage(GRILLE).map(c => c.nom)).toEqual(['Structure', 'Rigueur', 'Nuance', 'Méthode']);
+        expect(win.trouverCritereDepistage('Méthode', GRILLE).id).toBe('c4');
+    });
+
+    it('E.b `calculerIPB` : activé, Structure et Rigueur, comme avant ; désactivé, les quatre critères', () => {
+        const r = reglage(true);
+        const win = monterDepistage(r, GRILLE);
+        const avant = win.calculerIPB(DA);
+        expect(avant.criteresMulti).toEqual(['structure', 'rigueur']);
+        expect(avant.scoreActuel).toBeCloseTo(0.75, 10);   // (0,75 × 30 + 0,75 × 30) / 60
+        expect(avant.ipb).toBe(0);
+        expect(avant.criteresEnDefi).toEqual([]);
+        r.etat.actif = false;
+        const tous = win.calculerIPB(DA);
+        expect(tous.criteresMulti).toEqual(['structure', 'rigueur', 'nuance', 'methode']);
+        expect(tous.scoreActuel).toBeCloseTo((0.75 * 30 + 0.75 * 30 + 0.65 * 20 + 0.40 * 20) / 100, 10);   // 0,66 < 0,70
+        expect(tous.ipb).toBe(3);
+        expect(tous.criteresEnDefi).toEqual(['nuance', 'methode']);
+        // Recochée : la lecture d'avant revient, à la lettre.
+        r.etat.actif = true;
+        expect(win.calculerIPB(DA)).toEqual(avant);
+    });
+
+    it('E.c une grille toute « Aucun » choisie pour le dépistage : désactivé, des défis et un IPB ; activé, rien, comme avant', () => {
+        const r = reglage(false);
+        const win = monterDepistage(r, TOUT_AUCUN);
+        const d = win.diagnostiquerForcesChallenges(win.calculerMoyennesCriteres(DA));
+        expect(d.defis.map(c => c.nom)).toEqual(['Méthode', 'Nuance']);
+        expect(win.identifierDefiSpecifique(DA).defi).toBe('Méthode');
+        expect(win.calculerIPB(DA).criteresMulti).toEqual(['structure', 'rigueur', 'nuance', 'methode']);
+        r.etat.actif = true;
+        expect(win.calculerMoyennesCriteres(DA)).toBeNull();
+        expect(win.identifierDefiSpecifique(DA)).toEqual({ defi: 'Aucun', score: null });
+        expect(win.calculerIPB(DA)).toBeNull();
+    });
+
+    it('E.d le sous-titre de la barre lit la même règle que l\'IPB, et le dit réglage désactivé', () => {
+        const r = reglage(true);
+        const h = monterDepistage(r, GRILLE);
+        const { f } = monterTableauBord(h);
+        expect(f(GRILLE)).toBe('Critères multistructurels surveillés : Structure, Rigueur');
+        expect(f(TOUT_AUCUN)).toBe('Aucun critère multistructurel dans la grille de dépistage : le suivi des fondations ne surveille rien.');
+        r.etat.actif = false;
+        expect(f(GRILLE)).toBe('Observation SOLO désactivée : tous les critères sont surveillés (Structure, Rigueur, Nuance, Méthode).');
+        expect(f(TOUT_AUCUN)).toBe('Observation SOLO désactivée : tous les critères sont surveillés (Structure, Rigueur, Nuance, Méthode).');
+        expect(f({ criteres: [{ nom: '<b>' }] })).toBe('Observation SOLO désactivée : tous les critères sont surveillés (&lt;b>).');
+        expect(f(null)).toBe('');
+        expect(f({ criteres: [] })).toBe('');
+        // Ce que la barre annonce est ce que le calcul lit.
+        expect(h.calculerIPB(DA).criteresMulti.length).toBe(4);
+        expect(sansCommentaires(source('js/tableau-bord-apercu.js'))).toContain('var noms = criteresSuiviFondations(grille).map(');
+    });
+
+    it('E.e la phrase du bilan : « les fondamentaux multistructurels » activé, « les fondamentaux » désactivé', () => {
+        const r = reglage(true);
+        const { i } = monterTableauBord(monterDepistage(r, GRILLE));
+        i._tousEtudiantsEnrichis = [{ suivi: { diagnostic: 'Maîtrise acquise' } }];
+        expect(i.genererInterpretationSuiviFondamentaux()).toContain('1 étudiant·e (100%) maîtrise les fondamentaux multistructurels');
+        r.etat.actif = false;
+        const bilan = i.genererInterpretationSuiviFondamentaux();
+        expect(bilan).toContain('1 étudiant·e (100%) maîtrise les fondamentaux');
+        expect(bilan).not.toMatch(/multistructurel/i);
+    });
+});
+
+describe('#1117 · E — les survols du profil : réglage désactivé, le nom du niveau, sans palier SOLO', () => {
+    const NIVEAU_ETIQUETE = { code: 'M', nom: 'Maîtrisé', min: 75, max: 84.99, niveauSOLO: 'relationnel' };
+    const NIVEAU_NU = { code: 'D', nom: 'En développement', min: 65, max: 74.99 };
+
+    it('E.f `survolNiveauAtteint` : activé, le palier ou l\'invitation, comme avant ; désactivé, le nom seul', () => {
+        const r = reglage(true);
+        const win = monterDepistage(r, GRILLE);
+        win.NIVEAUX_SOLO_ECHELLE = [{ valeur: 'relationnel', libelle: 'Relationnel', description: 'Relie les éléments.' }];
+        const lecture = win.interpreterNiveauAtteint(NIVEAU_ETIQUETE);
+        const etiquete = win.survolNiveauAtteint(NIVEAU_ETIQUETE);
+        expect(lecture.interpretee).toBe(true);
+        expect(etiquete).toBe('Relationnel — Relie les éléments.');
+        expect(win.survolNiveauAtteint(NIVEAU_NU)).toContain('associe une étiquette SOLO');
+        r.etat.actif = false;
+        expect(win.survolNiveauAtteint(NIVEAU_ETIQUETE)).toBe('Maîtrisé');
+        expect(win.survolNiveauAtteint(NIVEAU_NU)).toBe('En développement');
+        expect(win.survolNiveauAtteint({ code: 'X' })).toBe('X');
+        expect(win.survolNiveauAtteint(null)).toBe('');
+    });
+
+    it('E.g les deux survols du profil passent par lui : la note globale et la lecture par critère', () => {
+        const helpers = sansCommentaires(source('js/profil-etudiant-helpers.js'));
+        const debut = helpers.indexOf('function lireNiveauNoteGlobale(');
+        const corps = helpers.slice(debut, helpers.indexOf('\nfunction ', debut + 10));
+        expect(corps).toContain('survol: survolNiveauAtteint(niveau)');
+        expect(corps).not.toContain('interpreterNiveauAtteint(');
+        const affichage = sansCommentaires(source('js/profil-etudiant-sections-affichage.js'));
+        expect(affichage).toContain('? survolNiveauAtteint(niveauCritere)');
+        expect(affichage).not.toContain('lectureSOLOCritere');
     });
 });

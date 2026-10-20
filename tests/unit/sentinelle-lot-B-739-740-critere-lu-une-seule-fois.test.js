@@ -90,6 +90,7 @@ function monterProfil(grille = GRILLE, evaluations = EVALUATIONS()) {
     win = chargerScript('js/profil-etudiant-helpers.js', stubs);
     stubs.estCritereSurveilleParDepistage = win.estCritereSurveilleParDepistage;
     stubs.criteresSurveillesParDepistage = win.criteresSurveillesParDepistage;
+    stubs.criteresSuiviFondations = win.criteresSuiviFondations;   // ↻ #1117, suite : la règle de l'IPB vit aussi dans helpers
     chargerScript('js/profil-etudiant-calculs.js', stubs, win);
     chargerPredicatsCopie(win);
     return win;

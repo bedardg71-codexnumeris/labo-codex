@@ -79,6 +79,7 @@ function monterProfil(grilleReference) {
     // #740 (16 sept. 2026) : le filtre SOLO « Aucun » vit dans helpers ; calculs le lit comme global — le VRAI, pas une copie.
     stubs.estCritereSurveilleParDepistage = win.estCritereSurveilleParDepistage;
     stubs.criteresSurveillesParDepistage = win.criteresSurveillesParDepistage;
+    stubs.criteresSuiviFondations = win.criteresSuiviFondations;   // ↻ #1117, suite : la règle de l'IPB vit aussi dans helpers
     chargerScript('js/profil-etudiant-calculs.js', stubs, win);
     return win;
 }
@@ -171,18 +172,23 @@ describe('lot 4 · B.C — le dépistage : une grille toute « Aucun » n\'a pas
         expect(toutAucun.calculerIPB('1234567')).toBeNull();
         expect(toutAucun.diagnostiquerSuiviApprentissage('1234567')).toBeNull();
         // Le filtre est celui de #542 : un critère sans étiquette est une fondation, « aucun » n'en est pas une.
-        const code = sansCommentaires(source('js/profil-etudiant-calculs.js'));
-        expect(code).toContain("return (c.niveauSOLO || 'multistructurel') === 'multistructurel';");
         // #740 (16 sept. 2026) : l'IPB filtre « multistructurel » PARMI les critères que le dépistage lit — la liste partagée.
-        expect(code).toContain("var criteresMulti = criteresSurveillesParDepistage(grille).filter(function (c) {");
+        // ↻ #1117, suite (20 oct. 2026) : ce filtre vit dans `criteresSuiviFondations` (helpers), que l'IPB lit.
+        const code = sansCommentaires(source('js/profil-etudiant-calculs.js'));
+        expect(sansCommentaires(source('js/profil-etudiant-helpers.js')))
+            .toContain("return surveilles.filter(c => (c.niveauSOLO || 'multistructurel') === 'multistructurel');");
+        expect(code).toContain('var criteresMulti = criteresSuiviFondations(grille);');
         // #744 (lot C, 17 sept. 2026) : sans suivi, c'est la PERSISTANCE qui n'est pas calculable — le palier vient de la carte RàI.
         expect(code).toContain("'Persistance non calculable — aucun suivi des fondations disponible'");
     });
 
     it('C.b le sous-titre du tableau de bord : les critères surveillés, ou la phrase qui dit qu\'il n\'y en a pas', () => {
+        // ↻ #1117, suite : le sous-titre lit la règle de l'IPB, la VRAIE, chargée depuis helpers.
+        const h = monterProfil(null);
         const win = chargerScript('js/tableau-bord-apercu.js', {
             db: dbVide, cle: (k) => 'a2026_' + k, echapperHtml: (s) => String(s == null ? '' : s).replace(/</g, '&lt;'),
-            document: fauxDocument()
+            document: fauxDocument(),
+            criteresSuiviFondations: h.criteresSuiviFondations, etiquettesSOLOLuesParDepistage: h.etiquettesSOLOLuesParDepistage
         });
         const f = win.libelleCriteresMultiSurveilles;
         expect(typeof f).toBe('function');

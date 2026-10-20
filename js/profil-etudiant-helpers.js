@@ -650,14 +650,29 @@ function lireNiveauNoteGlobale(da, pourcentage) {
     // reste au SURVOL — décision de Grégoire sur le comparateur, même esprit
     // ici : ne pas mettre une taxonomie en vedette devant un enseignant qui ne
     // l'emploie pas.
+    return { niveau: niveau, survol: survolNiveauAtteint(niveau), raison: null };
+}
+
+/**
+ * Le texte du SURVOL d'un niveau atteint, au profil (note globale et lecture par
+ * critère) : ces survols sont rendus hors de la carte SOLO.
+ * Observation SOLO activée : le palier SOLO et son explication, ou le nom du niveau
+ * et ce qui manque pour l'interpréter (`interpreterNiveauAtteint`).
+ * Désactivée (#1117, suite — 20 oct. 2026) : le NOM du niveau, seul. Ni palier, ni
+ * l'invitation à poser une étiquette SOLO : elle renvoie à un champ que #1117 masque.
+ * @param {Object} niveau - le niveau atteint (`situerPourcentageDansEchelle`)
+ * @returns {string}
+ */
+function survolNiveauAtteint(niveau) {
+    if (!etiquettesSOLOLuesParDepistage()) {
+        return niveau ? String(niveau.nom || niveau.code || '').trim() : '';
+    }
     const solo = (typeof interpreterNiveauAtteint === 'function')
         ? interpreterNiveauAtteint(niveau)
         : { interpretee: false, texte: '', message: '' };
-    const survol = solo.interpretee
+    return solo.interpretee
         ? solo.libelleSOLO + ' — ' + solo.texte
         : (solo.texte || '') + (solo.message ? ' · ' + solo.message : '');
-
-    return { niveau: niveau, survol: survol, raison: null };
 }
 
 /**
@@ -899,11 +914,29 @@ function obtenirGrilleReferenceDepistage() {
  * Le défaut ne bouge pas : sans étiquette, un critère est multistructurel
  * (#542), donc surveillé. Seul « aucun » sort.
  *
+ * ⮕ #1117, suite (Grégoire, 19 oct. 2026, 22 h 21) : « Aucun » n'exclut que si
+ * l'observation SOLO est activée. Désactivée, le dépistage examine TOUS les
+ * critères, sans lire leur étiquette — une grille faite par « Apporter mon
+ * matériel » (toujours « aucun ») trouve donc ses défis.
+ *
  * @param {Object|null} critere - un critère de la grille de référence
  * @returns {boolean}
  */
 function estCritereSurveilleParDepistage(critere) {
-    return !!critere && critere.niveauSOLO !== 'aucun';
+    if (!critere) return false;
+    if (!etiquettesSOLOLuesParDepistage()) return true;
+    return critere.niveauSOLO !== 'aucun';
+}
+
+/**
+ * #1117, suite (20 oct. 2026) — le dépistage lit-il les étiquettes SOLO des critères ?
+ * Oui quand la case « Activer l'observation de la structure des résultats
+ * d'apprentissage » (`afficherDescriptionsSOLO`) est cochée — même lecture `!== false`
+ * que les autres lecteurs de la préférence. Sans `obtenirPreference` (bancs) : oui.
+ * @returns {boolean}
+ */
+function etiquettesSOLOLuesParDepistage() {
+    return typeof obtenirPreference !== 'function' || obtenirPreference('afficherDescriptionsSOLO') !== false;
 }
 
 /**
@@ -914,6 +947,22 @@ function estCritereSurveilleParDepistage(critere) {
 function criteresSurveillesParDepistage(grille) {
     if (!grille || !Array.isArray(grille.criteres)) return [];
     return grille.criteres.filter(estCritereSurveilleParDepistage);
+}
+
+/**
+ * Les critères que lit le SUIVI DES FONDATIONS (`calculerIPB`), et que nomme le
+ * sous-titre de sa barre au tableau de bord (`libelleCriteresMultiSurveilles`) :
+ * UNE règle pour les deux, pour que la barre annonce ce que le calcul lit.
+ * Observation SOLO activée : les multistructurels parmi les critères surveillés
+ * (défaut si pas d'étiquette, #542). Désactivée (#1117, suite — Grégoire, 20 oct.,
+ * 6 h 48, option A) : tous les critères surveillés, c'est-à-dire tous.
+ * @param {Object|null} grille - la grille de référence du dépistage
+ * @returns {Array} - sous-ensemble de `grille.criteres`, dans l'ordre de la grille
+ */
+function criteresSuiviFondations(grille) {
+    const surveilles = criteresSurveillesParDepistage(grille);
+    if (!etiquettesSOLOLuesParDepistage()) return surveilles;
+    return surveilles.filter(c => (c.niveauSOLO || 'multistructurel') === 'multistructurel');
 }
 
 /**
@@ -1119,6 +1168,10 @@ window.obtenirGrilleReferenceDepistage = obtenirGrilleReferenceDepistage;
 // #740 — le seul filtre SOLO « Aucun » du dépistage.
 window.estCritereSurveilleParDepistage = estCritereSurveilleParDepistage;
 window.criteresSurveillesParDepistage = criteresSurveillesParDepistage;
+// #1117, suite — SOLO désactivé : tous les critères ; la règle du suivi des fondations ; le survol du niveau.
+window.etiquettesSOLOLuesParDepistage = etiquettesSOLOLuesParDepistage;
+window.criteresSuiviFondations = criteresSuiviFondations;
+window.survolNiveauAtteint = survolNiveauAtteint;
 // #550 — le diagnostiqueur qui NOMME la cause quand il n'y a pas de grille.
 window.diagnostiquerGrilleReferenceDepistage = diagnostiquerGrilleReferenceDepistage;
 window.cleCritere = cleCritere;
