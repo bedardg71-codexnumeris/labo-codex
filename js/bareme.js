@@ -10,7 +10,8 @@
  * compléter » (une ancienne réponse lue sans points). Seuls les critères analytiques en portent un.
  *
  * LA LECTURE UNIQUE (invariant 2). `tranchesDuCritere` est la seule façon de lire un barème :
- * l'éditeur, l'import et, plus tard, l'évaluation et le PDF passent par elle. Elle lit `bareme`,
+ * l'éditeur, l'import, la grille du PDF (`export-pdf.js`, `tableauDesCriteres`) et, plus tard,
+ * l'évaluation passent par elle. Elle lit `bareme`,
  * sinon l'ancien `descripteurs.parNiveau` SANS `echelleId` (les « réponses » écrites par la
  * dissection, lot 13), sans rien écrire : rien ne se convertit sans geste (invariant 5). La
  * première modification d'un critère écrit ce que cette lecture rend (`grilles.js`).
@@ -173,6 +174,31 @@
     B.pointsEnTexte = function (t) {
         if (B.aCompleter(t)) return '';
         return t.pointsMin === t.pointsMax ? B.nombreEnTexte(t.pointsMin) : B.nombreEnTexte(t.pointsMin) + ' à ' + B.nombreEnTexte(t.pointsMax);
+    };
+
+    /**
+     * Les points d'une tranche avec leur unité, comme l'élève les lit : « 1 point », « 3-4 points »,
+     * « 2,5 points » ; « » pour une tranche à compléter. Le trait court entre les bornes est celui de
+     * la décision de Grégoire (20 oct., 16 h 58) ; le singulier sous 2, la règle C1 de la dissection
+     * (`avecUnite`, materiel-dissection-lecture.js) ; une plage s'accorde à sa borne haute (« 0-1 point »).
+     */
+    B.pointsAvecUnite = function (t) {
+        if (B.aCompleter(t)) return '';
+        var n = t.pointsMin === t.pointsMax ? B.nombreEnTexte(t.pointsMin) : B.nombreEnTexte(t.pointsMin) + '-' + B.nombreEnTexte(t.pointsMax);
+        return n + (t.pointsMax < 2 ? ' point' : ' points');
+    };
+
+    /**
+     * Ce que l'élève lit d'une tranche (#1120, la grille du PDF) : ses points, puis son texte, SANS
+     * SON NOM — « 3-4 points : Résume l'essentiel » (décision de Grégoire, 20 oct., 16 h 58). Une
+     * tranche à compléter montre son texte seul : aucun chiffre n'est inventé (supposition de Cowork,
+     * réversible). Rien à lire → « ». Le deux-points tient à ses points (espace insécable).
+     */
+    B.ligneEleve = function (t) {
+        var points = B.pointsAvecUnite(t);
+        var texte = String(t && t.texte != null ? t.texte : '').trim();
+        if (points && texte) return points + '\u00a0: ' + texte;
+        return points || texte;
     };
 
     // ------------------------------------------------------------------

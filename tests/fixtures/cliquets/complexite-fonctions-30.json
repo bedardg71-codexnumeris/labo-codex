@@ -30,9 +30,7 @@
  },
  "js/export-pdf.js": {
   "obtenirInfosCoursPDF": 60,
-  "genererApercuCombine": 32,
-  "genererPDFCombine": 32,
-  "ouvrirApercuPDFPour": 34
+  "ouvrirApercuPDFPour": 33
  },
  "js/graphiques-progression.js": {
   "creerGraphiqueTrajectoiresProduction": 84

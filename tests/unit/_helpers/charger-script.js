@@ -122,6 +122,13 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
             readFileSync(path.join(racineProjet, 'js/taille-fichier.js'), 'utf8'))(fauxWindow);
     }
 
+    // #1120 (20 oct. 2026) — même règle pour `js/bareme.js`, la lecture unique d'un barème, chargée
+    // par index.html avant `export-pdf.js` qui la lit. Module pur : il ne pose que `window.bareme`.
+    if (!fauxWindow.bareme) {
+        new Function('window', '"use strict";\n' +
+            readFileSync(path.join(racineProjet, 'js/bareme.js'), 'utf8'))(fauxWindow);
+    }
+
     const fauxDocument = {
         addEventListener: () => {},
         removeEventListener: () => {},
