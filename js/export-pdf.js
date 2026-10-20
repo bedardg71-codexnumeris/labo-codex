@@ -2322,6 +2322,7 @@ function tableauDesCriteres(grille, echelle, cartouche) {
     const commentaires = (cartouche && cartouche.commentaires) || null;
     return {
         niveaux: niveaux,
+        toutBareme: !lisentEchelle,
         lignes: criteres.map(c => {
             const tranches = window.bareme.tranchesDuCritere(c);
             if (tranches.length > 0) {
@@ -2341,6 +2342,15 @@ function entetesColonnesTableau(tableau) {
     return tableau.niveaux.length > 0
         ? tableau.niveaux.map(n => (n.nom ? `${n.code || '?'} - ${n.nom}` : (n.code || '?')))
         : ['Barème'];
+}
+
+/**
+ * L'en-tête de la colonne de la pondération. Décision de Grégoire (20 oct., 18 h 22) : sur une
+ * grille toute à barème, la pondération est le maximum de points du critère (#941), et l'élève
+ * lit « Points » ; partout ailleurs (grille à échelle, grille mixte), « % » reste.
+ */
+function entetePonderationTableau(tableau) {
+    return tableau.toutBareme ? 'Points' : '%';
 }
 
 function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
@@ -2459,7 +2469,7 @@ function genererApercuCombine(grille, echelle, cartouche = null, options = {}) {
                 <thead>
                     <tr>
                         <th style="${styleTableEntete} width: ${largeurCritere}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: left; border: 1px solid ${couleurTitre};">Critère</th>
-                        <th style="${styleTableEntete} width: ${largeurPond}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: center; border: 1px solid ${couleurTitre};">%</th>
+                        <th style="${styleTableEntete} width: ${largeurPond}; background: ${couleurTitre}; color: white; padding: 4px 5px; text-align: center; border: 1px solid ${couleurTitre};">${escapeHtml(entetePonderationTableau(tableau))}</th>
         `;
 
         // En-tetes des niveaux - Code + Nom (fond blanc comme le PDF, texte coloré)
@@ -2639,7 +2649,7 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
     if (tableau) {
         // En-tetes avec Code + Nom niveau (ou « Barème », pour une grille toute à barème)
         const colonnes = entetesColonnesTableau(tableau);
-        const entetes = ['Critère', '%', ...colonnes];
+        const entetes = ['Critère', entetePonderationTableau(tableau), ...colonnes];
 
         // Donnees - inclure description du critère si option cochée
         const donnees = tableau.lignes.map(({ critere: c, tranches, cellules }) => {

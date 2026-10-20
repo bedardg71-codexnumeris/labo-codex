@@ -11,7 +11,8 @@
  *   E — L'ÉCHELLE EXIGÉE OU NON (`echelleExigee`) : seulement si un critère en lit une ; l'ancien format
  *       (`parNiveau` sans `echelleId`) se lit par la même fonction.
  *   P — LA PORTE (`ouvrirApercuPDFPour`) : une grille toute à barème s'ouvre sans échelle ; une mixte, non.
- *   C — L'APERÇU ET LE PDF DISENT LA MÊME CHOSE du même critère, grille toute à barème comme mixte.
+ *   C — L'APERÇU ET LE PDF DISENT LA MÊME CHOSE du même critère, grille toute à barème comme mixte ; la
+ *       pondération d'une grille toute à barème s'intitule « Points », « % » ailleurs (Grégoire, 20 oct., 18 h 22).
  *   S — LA SÉCURITÉ : un `<img onerror>` dans le texte d'une tranche sort en texte.
  *
  * Break-tests (faits le 20 oct.) : voir la demande de relecture.
@@ -204,13 +205,14 @@ describe('barème 3 · C — l’aperçu et le PDF disent la même chose du mêm
         expect(journal.tables).toHaveLength(1);
         expect(lignesPDF(journal.tables[0]), 'le PDF dit ce que dit l’aperçu').toEqual(apercu);
         expect(journal.tables[0].head[0]).toEqual(entetesApercu(dom, html));
-        expect(journal.tables[0].head[0]).toEqual(['Critère', '%', 'Barème']);
+        // Décision de Grégoire (20 oct., 18 h 22) : « Points » au-dessus de la pondération d'une grille toute à barème.
+        expect(journal.tables[0].head[0]).toEqual(['Critère', 'Points', 'Barème']);
     });
 
     it('C.b une grille toute à barème, même avec une échelle choisie, ne montre pas les niveaux', () => {
         const { win, dom } = monter();
         const html = win.genererApercuCombine(JOURNAL, ECHELLE, null, OPTIONS);
-        expect(entetesApercu(dom, html)).toEqual(['Critère', '%', 'Barème']);
+        expect(entetesApercu(dom, html)).toEqual(['Critère', 'Points', 'Barème']);
         expect(html).not.toContain('Incomplet');
     });
 
@@ -239,6 +241,15 @@ describe('barème 3 · C — l’aperçu et le PDF disent la même chose du mêm
         expect(() => win.genererApercuCombine(MIXTE, null, null, OPTIONS)).not.toThrow();
         await win.genererPDFCombine(MIXTE, null, null, OPTIONS);
         expect(journal.tables).toHaveLength(0);
+    });
+
+    it('C.f une grille à échelle garde « % », dans l’aperçu comme dans le PDF', async () => {
+        const { win, journal, dom } = monter();
+        const g = { id: 'GR_E', nom: 'Grille à échelle', criteres: [{ id: 'CR_H', nom: 'Structure', type: 'holistique', ponderation: 100 }] };
+        const html = win.genererApercuCombine(g, ECHELLE, null, OPTIONS);
+        await win.genererPDFCombine(g, ECHELLE, null, OPTIONS);
+        expect(entetesApercu(dom, html)[1]).toBe('%');
+        expect(journal.tables[0].head[0][1]).toBe('%');
     });
 
     it('C.e les tranches dans l’ordre où l’enseignant les a écrites, pas triées', () => {
