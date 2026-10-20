@@ -187,49 +187,49 @@ function afficherAccueilContenu(conteneur) {
             <div class="accueil-action" role="button" tabindex="0" data-section="conception" data-action="ouvrirWizardPratique">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-data-sheet"></span></div>
                 <div class="accueil-action-titre">Adopter ta pratique</div>
-                <div class="accueil-action-desc">Notation sommative, par standards, par sp\u00e9cifications.</div>
+                <div class="accueil-action-desc">Construction de la note du cours, sommative ou alternative.</div>
             </div>
 
             <div class="accueil-action" role="button" tabindex="0" data-section="conception" data-action="naviguerAccueilCarte" data-param="conception|conception-carte">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-puzzle"></span></div>
                 <div class="accueil-action-titre">Planifier ton cours</div>
-                <div class="accueil-action-desc">Carte mentale alignant s\u00e9quences, le\u00e7ons et \u00e9valuations.</div>
+                <div class="accueil-action-desc">Alignement constructif des objectifs, leçons et évaluations.</div>
             </div>
 
             <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-saisie">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-people"></span></div>
                 <div class="accueil-action-titre">Saisir les pr\u00e9sences</div>
-                <div class="accueil-action-desc">Pr\u00e9sences, retards et observations de s\u00e9ance.</div>
+                <div class="accueil-action-desc">Absences, retards et notes de séance.</div>
             </div>
 
             <div class="accueil-action" role="button" tabindex="0" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-downloading"></span></div>
-                <div class="accueil-action-titre">Importer des productions</div>
-                <div class="accueil-action-desc">PDF, images et numérisations, prêts à annoter.</div>
+                <div class="accueil-action-titre">Importer des copies</div>
+                <div class="accueil-action-desc">Fichiers PDF ou images des travaux d’étudiant·es.</div>
             </div>
 
             <div class="accueil-action" role="button" tabindex="0" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-edit"></span></div>
                 <div class="accueil-action-titre">Annoter et \u00e9valuer</div>
-                <div class="accueil-action-desc">Annotation au stylet, grille d\u2019\u00e9valuation, bilan automatique.</div>
+                <div class="accueil-action-desc">Annotation, niveaux ou note par critère, rétroaction automatisée.</div>
             </div>
 
             <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-groupe">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-line-chart"></span></div>
                 <div class="accueil-action-titre">Observer le groupe</div>
-                <div class="accueil-action-desc">Engagement, structure des r\u00e9sultats, signaux \u00e0 surveiller.</div>
+                <div class="accueil-action-desc">Assiduité, complétion, performance et dépistage des difficultés d’apprentissage.</div>
             </div>
 
             <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-profil">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-profile"></span></div>
                 <div class="accueil-action-titre">Consulter un profil</div>
-                <div class="accueil-action-desc">Productions, progression et difficultés récurrentes.</div>
+                <div class="accueil-action-desc">Engagement, travaux, progression et accompagnement.</div>
             </div>
 
             <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-interventions">
                 <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-pause-button"></span></div>
                 <div class="accueil-action-titre">Diff\u00e9rencier les interventions</div>
-                <div class="accueil-action-desc">Mod\u00e8le R\u00e0I, niveaux 2 et 3, interventions selon le besoin.</div>
+                <div class="accueil-action-desc">Niveaux de besoin, rencontres et bilans.</div>
             </div>
 
         </div>
@@ -245,7 +245,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-usb-memory"></span></div>
                 <div>
                     <div class="accueil-utilitaire-titre">Ton codex</div>
-                    <div class="accueil-utilitaire-desc">Mets-le à jour : une copie complète de tes données.</div>
+                    <div class="accueil-utilitaire-desc">Données et copies numériques, réunies dans un seul fichier.</div>
                 </div>
             </div>
 
@@ -261,7 +261,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-aide-icone"><img src="icons/icons8-info-popup.svg" alt=""></div>
                 <div>
                     <div class="accueil-aide-titre">Assistance</div>
-                    <div class="accueil-aide-desc">Info-bulles et aide contextuelle.</div>
+                    <div class="accueil-aide-desc">Info-bulles, aide à l’écran et visite guidée.</div>
                 </div>
                 <input type="checkbox" id="checkbox-accompagnement-accueil"
                     class="accueil-aide-checkbox" ${accChecked ? 'checked' : ''}
@@ -272,7 +272,7 @@ function afficherAccueilContenu(conteneur) {
                 <div class="accueil-aide-icone"><img src="icons/icons8-binary-code.svg" alt=""></div>
                 <div>
                     <div class="accueil-aide-titre">Donn\u00e9es d\u00e9mo <button class="btn-aide-contextuelle" data-aide="accueil-donnees-demo" aria-label="Aide : mode d\u00e9monstration"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></div>
-                    <div class="accueil-aide-desc">Cours fictif d\u00e9j\u00e0 configur\u00e9, \u00e0 explorer librement.</div>
+                    <div class="accueil-aide-desc">Cours fictif complet, indépendant de tes données.</div>
                 </div>
                 <input type="checkbox" id="checkbox-demo-accueil"
                     class="accueil-aide-checkbox" ${demoChecked ? 'checked' : ''}
