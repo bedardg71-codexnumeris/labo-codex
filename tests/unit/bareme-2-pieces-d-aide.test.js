@@ -10,7 +10,8 @@
  * Et, comme au lot de l'aide d'« Apporter mon matériel » : chaque `data-tooltip` et chaque `data-target` neufs ont
  * leur entrée au catalogue ; « barème » et « tranche » existent au lexique.
  *
- * Break-test (fait le 20 oct.) : un caractère retouché dans un texte posé (B2, puis E4) → rouge. Code restauré.
+ * Break-tests (faits le 20 oct.) : un caractère retouché dans un texte posé (B2, puis E4) → rouge ; F2, la ligne
+ * `p.dataset.tooltip = BULLES_BAREME[texte];` retirée de grilles.js → rouge. Code restauré.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { JSDOM } from 'jsdom';
@@ -189,6 +190,31 @@ describe('barème 2 · E — les bulles de l’éditeur', () => {
         expect(bulle(t0.querySelector('[data-champ="texte"]'))).toBe(un('E3'));
         expect(bulle(carte.querySelector('[data-action="ajouterTrancheBareme"]'))).toBe(un('E4'));
         expect([...carte.querySelectorAll('.grille-bareme-marque')].map(bulle)).toEqual([un('E5'), un('E6')]);
+    });
+
+    it('F2 (verdict du 20 oct.) : la marque « à compléter » qui paraît quand on efface des points porte sa bulle (E5), comme celle d’une tranche neuve', async () => {
+        const { w, carte } = monterEditeur();
+        const bulle = (el) => cat[el.getAttribute('data-tooltip')].hover;
+        // TR_b : 3 à 4 sur une pondération de 3, « hors barème » ; ses points effacés, la marque devient « à compléter ».
+        const t1 = () => carte.querySelectorAll('.grille-bareme-tranche')[1];
+        expect(bulle(t1().querySelector('.grille-bareme-marque'))).toBe(un('E6'));
+        const p = t1().querySelector('[data-champ="points"]');
+        p.value = '';
+        await w.modifierTrancheBaremeHandler(p);
+        const marque = t1().querySelector('.grille-bareme-marque');
+        expect(marque.textContent).toBe('à compléter');
+        expect(bulle(marque)).toBe(un('E5'));
+        // Des points rendus : la marque part ; effacés de nouveau sur une tranche sans marque, elle naît avec sa bulle.
+        p.value = '1';
+        await w.modifierTrancheBaremeHandler(p);
+        expect(t1().querySelector('.grille-bareme-marque')).toBeNull();
+        p.value = '';
+        await w.modifierTrancheBaremeHandler(p);
+        expect(bulle(t1().querySelector('.grille-bareme-marque'))).toBe(un('E5'));
+        // Celle d'une tranche neuve, rendue par le gabarit : la même bulle.
+        await w.ajouterTrancheBareme('GRILLE_BANC', 0);
+        const neuve = carte.ownerDocument.querySelectorAll('#listeCriteres .grille-bareme-tranche')[2];
+        expect(bulle(neuve.querySelector('.grille-bareme-marque'))).toBe(un('E5'));
     });
 
     it('chaque data-tooltip et chaque data-target que pose le barème a son entrée au catalogue', () => {

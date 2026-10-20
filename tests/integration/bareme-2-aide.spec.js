@@ -10,6 +10,9 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     « Le barème d'un critère » : ses deux textes, son exemple, son conseil, ses trois « Voir aussi » ;
 //   · la bulle d'un champ de tranche s'affiche au survol, avec son texte ;
 //   · la section « Le barème d'un critère analytique » de l'onglet Aide est trouvée par « barème » et « tranche ».
+//   · F1 (verdict du 20 oct.) : le tableau en mode sombre, à 1440 px puis à 820 px — captures, et le contraste
+//     WCAG de chaque intitulé et de chaque case sur le fond de sa rangée, 4,5 au moins. Break-test (fait le
+//     20 oct.) : l'intitulé de rangée peint #1a2c34 → contraste 1,11, rouge ; restauré.
 // Les textes eux-mêmes, mot pour mot : tests/unit/bareme-2-pieces-d-aide.test.js.
 
 async function ouvrirApp(page) {
@@ -101,4 +104,43 @@ test('barème 2 · la section de l’onglet Aide, trouvée par « barème » et 
     expect(m.fond).toBe('rgba(0, 0, 0, 0)');
     expect(m.couleur).toBe(m.caseCouleur);
     await page.screenshot({ path: test.info().outputPath('bareme-aide-820.png') });
+});
+
+/** Le contraste WCAG de chaque intitulé de rangée et de chaque case du tableau, sur le fond (opaque) de sa rangée. */
+async function contrastesTableau(page) {
+    return page.evaluate(() => {
+        const rgb = (c) => (c.match(/[\d.]+/g) || []).map(Number);
+        const fondOpaque = (el) => {
+            for (let x = el; x; x = x.parentElement) {
+                const c = rgb(getComputedStyle(x).backgroundColor);
+                if (c.length >= 3 && (c[3] === undefined || c[3] > 0.5)) return c;
+            }
+            return [255, 255, 255];
+        };
+        const lum = ([r, g, b]) => [r, g, b].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; })
+            .reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+        const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+        return [...document.querySelectorAll('#aide-bareme-tableau th, #aide-bareme-tableau td')].filter((c) => c.textContent.trim())
+            .map((c) => ({ texte: c.textContent.trim(), ratio: Math.round(ratio(rgb(getComputedStyle(c).color), fondOpaque(c)) * 100) / 100 }));
+    });
+}
+
+test('barème 2 · F1 : le tableau de l’onglet Aide en mode sombre, au Mac puis à l’iPad debout, lisible partout', async ({ page }) => {
+    await ouvrirApp(page);
+    await page.evaluate(() => { document.body.classList.remove('mode-clair'); window.afficherSection('aide'); });
+    const carte = page.locator('#accordeon-aide-bareme');
+    await page.locator('#aide-recherche-input').fill('barème');
+    await page.locator('#aide-recherche-input').press('End');
+    await carte.locator('.accordeon-header').click();
+    await expect(carte.locator('#aide-bareme-tableau')).toBeVisible();
+    for (const [nom, largeur, hauteur] of [['1440', 1440, 900], ['820', 820, 1180]]) {
+        await page.setViewportSize({ width: largeur, height: hauteur });
+        await carte.locator('#aide-bareme-tableau').scrollIntoViewIfNeeded();
+        await page.screenshot({ path: test.info().outputPath('bareme-aide-sombre-' + nom + '.png') });
+        const c = await contrastesTableau(page);
+        expect(c).toHaveLength(14);   // deux en-têtes, quatre intitulés, huit cases
+        expect(c.filter((x) => x.ratio < 4.5), nom + ' px').toEqual([]);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+    }
+    await expect(page.locator('body')).not.toHaveClass(/mode-clair/);
 });
