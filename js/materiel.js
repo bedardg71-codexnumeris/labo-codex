@@ -8,7 +8,7 @@
  * 18 oct.) ; « Taper ma grille à la main » mène vers Grilles de critères. La dissection crée la grille
  * (`materielCreation`), puis la confirmation s'affiche ici (`montrerCreee`). La dissection, lot 11 : à
  * l'ouverture de l'onglet, son brouillon la rouvre telle qu'elle était (`reprendreDissection`) ; « Coller une
- * autre grille » (`recommencer`) l'efface.
+ * autre grille » (`recommencer`) l'efface. #1119 : la confirmation la rouvre aussi (`revenirDissection`).
  *
  * ⚰ 19 oct. 2026 (`CONSIGNE-LOT-2026-10-19-retrait-ancien-assistant.md`, décision de Grégoire, 13 h 51) :
  * l'assistant en sept étapes, débranché depuis le 18, est RETIRÉ — ses écrans, son état, ses gestes, et
@@ -56,7 +56,7 @@
             (r.retro ? carteCree('Tes rétroactions', 'Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.', 'retroactions', 'Les voir dans Cartouches de rétroaction') : '') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
-            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e('Coller une autre grille') + '</button></section>';
+            retoursHtml() + '</section>';
     }
 
     /**
@@ -103,7 +103,18 @@
                 (r.aCompleter ? ' ; ' + pluriel(r.aCompleter, 'critère', 'critères') + ' sans points pour l’instant.' : '.'), 'grille-criteres', 'La voir dans Grilles de critères') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
-            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e('Coller une autre grille') + '</button></section>';
+            retoursHtml() + '</section>';
+    }
+
+    /**
+     * #1119 (consigne du 20 oct.) : « Revenir à ma dissection », à côté de « Coller une autre grille », seulement
+     * si un brouillon existe ; il le rouvre par le chemin de la reprise (`revenirDissection`). Texte PROVISOIRE.
+     */
+    function retoursHtml() {
+        var revenir = window.materielDissection && window.materielDissection.aUnBrouillon()
+            ? '<button type="button" class="btn btn-secondaire" data-action="materiel.revenirDissection">' + e('Revenir à ma dissection') + '</button>' : '';
+        return '<div class="materiel-retours">' + revenir +
+            '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e('Coller une autre grille') + '</button></div>';
     }
 
     function carteCree(titre, txt, sousSection, bouton) {
@@ -191,6 +202,19 @@
             var collage = el('materiel-zone-collage');
             if (collage) { collage.value = ''; collage.focus(); }
             montrerErreur('');
+        },
+        /**
+         * #1119 : depuis la confirmation, la dissection rouvre telle qu'elle était laissée (la reprise du lot 11) ;
+         * le brouillon reste. Un nouveau « Créer ma grille » crée une SECONDE grille : la première ne change pas.
+         */
+        revenirDissection: function () {
+            etat = { ecran: 'accueil', resume: null };
+            rendre();
+            montrerErreur('');
+            reprendreDissection();
+            if (window.materielDissection && window.materielDissection.estOuverte()) return;
+            var collage = el('materiel-zone-collage');   // aucun ou illisible : l'accueil, et le focus y va
+            if (collage) collage.focus();
         },
         /** La dissection, lot 2a : sa grille est créée ; la dissection se ferme, la confirmation s'affiche. */
         montrerCreee: function (resume) {

@@ -28027,6 +28027,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     padding: 18px; border-radius: var(--radius-grand); background: var(--surface-conteneur);
 }
 .materiel-suite span { flex: 1 1 360px; line-height: 1.5; }
+/* #1119 (20 oct.) : « Revenir à ma dissection » (bouton secondaire, 44 px) à côté de « Coller une autre grille ». */
+.materiel-retours { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 /* Étape 6 (17 oct.) : « Aller plus loin avec ta grille », une information, pas une action principale. */
 .materiel-plus-loin {
     display: flex; flex-direction: column; gap: 8px; align-items: flex-start; padding: 18px;
