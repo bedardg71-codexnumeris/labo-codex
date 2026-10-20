@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.212 (le PDF de la grille lit le barème, à la forme de la grille d'origine ; la fiche de production
+            // après « Préparer le PDF ») — titre et trois items proposés par Cowork (20 oct. 2026, 18 h 58), validés
+            // par Grégoire tels quels à 18 h 59.
+            version: '1.212',
+            couleur: 'vert',
+            titre: 'Le PDF de ta grille en points, à la forme de ton original',
+            items: [
+                'Le PDF d’une grille en points montre son barème. Quand tous les critères ont les mêmes niveaux, il reprend la forme de ta grille d’origine&nbsp;: une colonne par niveau, chaque descripteur avec ses points dessous, les éléments observables sous chaque critère, et le total au bas. Sinon, chaque critère montre ses tranches, une par ligne, avec leurs points.',
+                'Une grille dont tous les critères ont un barème n’exige plus d’échelle de performance pour «&nbsp;Préparer le PDF&nbsp;». La colonne de la pondération s’y intitule «&nbsp;Points&nbsp;».',
+                'Après «&nbsp;Préparer le PDF&nbsp;», la fiche de ta production garde tes choix et enregistre de nouveau ce que tu y changes. Avant, elle revenait sans ta grille et n’enregistrait plus rien, sans le signaler.'
+            ]
+        },
+        {
             // 1.211 (les sous-critères modifiables, la grille plus compacte, les textes de l'accueil) — titre et trois
             // items proposés par Claude Code, validés par Grégoire tels quels le 20 oct. 2026 (14 h 55).
             version: '1.211',

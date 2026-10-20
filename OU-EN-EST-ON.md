@@ -15,6 +15,17 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 20 OCTOBRE 2026, SOIR : LA 1.212.0 EST PRÊTE, ELLE PART EN LIGNE SI LE VERDICT COMPLET EST VERT** (tes Nouvelles validées telles quelles à 18 h 59 ; la 1.211.0 est en ligne depuis l'après-midi). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- le PDF d'une grille en points montre son barème ; quand tous les critères ont les mêmes niveaux (ton « Journal de lecture A26 »), il reprend la forme de ta grille d'origine : une colonne par niveau, chaque descripteur avec ses points dessous, les éléments observables sous chaque critère, la description au-dessus, le total au bas ; sinon, chaque critère montre ses tranches, une par ligne, avec leurs points ;
+- une grille dont tous les critères ont un barème s'ouvre sans échelle de performance, et sa colonne de pondération s'intitule « Points » ;
+- après « Préparer le PDF », la fiche de ta production garde tes choix et enregistre de nouveau ce que tu y changes.
+
+**Vérifié comment** : Vitest complet vert (9 301 essais) ; les specs du PDF, du barème et de la fiche de production vertes dans un vrai WebKit (20 sur 20) ; l'aperçu et le PDF comparés ligne à ligne par un banc ; un essai qui rougit quand on casse chaque règle gardée (le nom des tranches, l'échelle exigée, l'échappement, l'en-tête « Points », la forme d'origine, le total) ; le PDF de ta vraie grille, fait avec ton export de 16 h 16 en mode démo, vu par toi à 18 h 56 (« bien meilleur ») ; relu et accepté par Cowork.
+
+**Ce qui ne marche pas encore** : dans le PDF, les éléments observables sont en gras comme le nom du critère, ta grille d'origine ne les y met pas (#1129). Les points collés au texte par la dissection à niveaux nommés (#1125) et le champ « Nom du critère » trop étroit au Mac (#1126) restent ouverts.
+
 📝 **LE 20 OCTOBRE 2026, APRÈS-MIDI : LA 1.211.0 EST PRÊTE, ELLE PART EN LIGNE SI LE VERDICT COMPLET EST VERT** (tes Nouvelles validées telles quelles). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :

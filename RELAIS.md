@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS – 20 OCT. 2026, 19 h 10 (écrit par Claude Code) : **1.212.0 COMMITÉE SUR `main`, NON POUSSÉE ; LE PUSH ATTEND LE VERDICT DU TEMPS B**
+
+**En ligne** : la 1.211.0 (`c8b2af98`, poussée cet après-midi). **`main` local**, en avance sur `origin/main` : `9882d2d5` (#1127, la fiche de production après « Préparer le PDF »), `67298a8d`, `c04df849`, `2fc42169` (#1120, le PDF de la grille lit le barème, « Points », la forme de la grille d'origine), puis le commit de release **1.212.0** (build `1020-1905`) avec les Nouvelles 1.212 validées par Grégoire à 18 h 59. Tout est relu et accepté par Cowork ; la release elle-même attend sa relecture (`plans de travail/DEMANDE-RELECTURE-2026-10-20-version-1.212.0.md`).
+**Temps B** (consigne `plans de travail/CONSIGNE-LOT-2026-10-20-version-1.212.md`), au signal de Grégoire seulement (Chrome, Safari et Claude fermés, Mac sur secteur) : verdict complet du Mac sur le commit de release ; vert : `scripts/pousser.sh`, puis constater `version.json` en 1.212.0 chez Netlify. **À constater au début de la prochaine session** : `git log origin/main -1` et la version en ligne.
+**Hors relais** : `ci/verdict-morceaux` (4 commits) attend Grégoire (#1093).
+**Inscrits** : #1128 (les anciens chemins morts vers le PDF), #1129 (le gras des éléments observables dans le PDF) ; la CI rouge sur `c8b2af98` rattachée à #1114.
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.211.0 `b054a33d` → 1.212.0) : fichiers de plus de 1 000 lignes 35 → 35, leurs lignes 86 127 → 86 273 (Δ +146, dont `js/export-pdf.js` 2 437 → 2 573 et `js/changelog-data.js` 2 265 → 2 275) ; au-dessus de 15 : 454 → 454 (Δ 0) ; au-dessus de 30 : 88 → 86 (Δ −2 : `genererApercuCombine` et `genererPDFCombine`) ; somme au-dessus de 15 : 11 437 → 11 427 (Δ −10).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 20 OCT. 2026, APRÈS-MIDI (écrit par Claude Code) : **1.211.0 COMMITÉE SUR `main`, AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **Sur `main`** : la 1.211.0 (build `1020-1451`) — les sous-critères modifiables hors algorithmique, la tranche du barème et l'en-tête de grille sur une ligne, F1 (codes de sous-critère sans doublon), relus et acceptés par Cowork (verdict du 20 oct. 14 h 30) ; les textes des cartes de l'accueil (`lot-accueil-textes-cartes`, `772268fc`, arrêtés par Grégoire le 19 oct., relus par Cowork le 20 à 14 h 50). Les deux branches sont **fusionnées** ; `feat/sous-criteres-condensation` et `lot-accueil-textes-cartes` ne portent plus rien. Les Nouvelles 1.211 sont **validées** par Grégoire telles quelles ; le push suit un verdict complet vert. **À constater au début de la prochaine session** : `git log origin/main -1` (le push a-t-il eu lieu ?) et la version chez Netlify.
