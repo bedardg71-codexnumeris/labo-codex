@@ -140,7 +140,7 @@ describe('lot 3a · F — critère et sous-critères ont la forme de l’éditeu
     });
 
     it('F.b un sous-critère : les clés et les défauts d’« ajouterSousCritere », dans l’ordre des lignes', () => {
-        const editeur = cles('g.criteres[critereIndex].sousCriteres.push({', '\n        });');
+        const editeur = cles('scs.push({   // ⚠ ancre lue par materiel-lot3a-roles (F.b)', '\n        });');
         const o = A.construire(fictive(), { id: (p) => p + (++compteur), maintenant: 'x' });
         const sc = o.grille.criteres[2].sousCriteres;
         expect(sc.map(s => Object.keys(s).sort())).toEqual(sc.map(() => editeur));

@@ -156,7 +156,7 @@ describe('barème 2 · D — les mots de l’éditeur, tels que validés', () =>
         const { w, carte, journal } = monterEditeur();
         const libelles = T.D1[0].split(' · ').map((x) => x.replace(/ \([^)]*\)$/, ''));
         const [titre, nom, points, texte, ajouter, retirer] = libelles;
-        expect(carte.querySelector('.grille-attendu-titre').textContent.trim()).toBe(titre);
+        expect(carte.querySelector('[data-points-d-abord]').previousElementSibling.textContent.trim()).toBe(titre);   // 21 oct. : le titre du barème suit les sous-critères
         const t0 = carte.querySelector('.grille-bareme-tranche');
         expect([...t0.querySelectorAll('.grille-bareme-champ')].map((l) => l.childNodes[0].textContent.trim())).toEqual([nom, points, texte]);
         expect(carte.querySelector('[data-action="ajouterTrancheBareme"]').textContent).toBe(ajouter);

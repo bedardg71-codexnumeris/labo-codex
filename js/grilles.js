@@ -3526,7 +3526,7 @@ function afficherCriteresTemp() {
                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreCartesGabaritAlgo(critere, { mode: "temp", index: index })}
+            ${rendreCartesGabaritAlgo(critere, { mode: "temp", index: index })}${rendreAttenduCritere(critere, { grilleId: 'temp', index: index })}
         </div>
     `).join('');
 
@@ -3536,6 +3536,7 @@ function afficherCriteresTemp() {
             + Ajouter un critère
         </button>
     `;
+    ajusterHauteursAuto(container);
     monterVuesBadges(container);
 }
 
@@ -4175,34 +4176,71 @@ function rendreSaisieCollectionProjection(critere, ctx) {
                 </div>`;
 }
 
-/** Le critère visé par un geste de collection : en création (`temp`), ou dans une grille enregistrée. */
-async function _critereCibleCollection(cible, index) {
+/*
+ * LES DEUX CIBLES D'UN GESTE SUR UN CRITÈRE — en création (`temp`, `window.tempCriteres`), ou une grille
+ * enregistrée (son id). Nées pour les collections ; #1120 (21 oct., consigne
+ * `CONSIGNE-LOT-2026-10-21-grille-neuve-sous-criteres-bareme.md`) : le barème et les sous-critères d'un
+ * critère non algorithmique les prennent aussi. En création, rien ne s'écrit en base avant « Créer la grille »
+ * (décision E1) : le critère temporaire change, et part avec la grille.
+ */
+/** Le critère visé par un geste : en création (`temp`), ou dans une grille enregistrée. */
+async function _critereCible(cible, index) {
     if (cible === 'temp') return (window.tempCriteres || [])[index] || null;
     const grille = await obtenirGrilleParId(cible);
     return (grille && grille.criteres && grille.criteres[index]) || null;
 }
 
-async function _redessinerCibleCollection(cible) {
+async function _redessinerCible(cible) {
     if (cible === 'temp') { afficherCriteresTemp(); return; }
     afficherCriteresGrille(await obtenirGrilleParId(cible));
 }
 
+/** Le critère tel qu'il est écrit, lu avant l'attente d'une fenêtre (#1007, lot 2b) : le temporaire, ou celui en base. */
+function _critereLuCible(cible, index) {
+    return cible === 'temp' ? ((window.tempCriteres || [])[index] || null) : _critereEnBase(cible, index);
+}
+
+/**
+ * Une écriture sur UN critère de la cible. En création, le critère temporaire change en place ; dans une grille
+ * enregistrée, l'écriture est sérialisée (#510). `mutateur(c)` rend `false` pour ne rien écrire. Rend le critère
+ * écrit, ou `null`.
+ */
+async function _modifierCritereCible(cible, index, mutateur) {
+    if (cible === 'temp') {
+        const c = (window.tempCriteres || [])[index];
+        return c && mutateur(c) !== false ? c : null;
+    }
+    let ecrit = null, grille = null;
+    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
+        const grilles = lues || [];
+        const g = grilles.find(x => x.id === cible);
+        const c = g && g.criteres && g.criteres[index];
+        if (!c || mutateur(c) === false) return undefined;
+        g.dateModification = new Date().toISOString();
+        grille = g;
+        ecrit = c;
+        return grilles;
+    }, [], { geste: 'Modifier la grille' });
+    if (grille && grilleTemplateActuelle && grilleTemplateActuelle.id === cible) grilleTemplateActuelle = grille;
+    return ecrit;
+}
+
 async function ouvrirSaisieCollectionProjection(cible, index) {
-    const critere = await _critereCibleCollection(cible, index);
+    const critere = await _critereCible(cible, index);
     if (!critere) return;
     _etatSaisieCollection[critere.id || ('critere-' + index)] = { nom: '', message: '' };
-    await _redessinerCibleCollection(cible);
+    await _redessinerCible(cible);
 }
 
 async function annulerSaisieCollectionProjection(cible, index) {
-    const critere = await _critereCibleCollection(cible, index);
+    const critere = await _critereCible(cible, index);
     if (!critere) return;
     delete _etatSaisieCollection[critere.id || ('critere-' + index)];
-    await _redessinerCibleCollection(cible);
+    await _redessinerCible(cible);
 }
 
 async function enregistrerCollectionProjection(cible, index) {
-    const critere = await _critereCibleCollection(cible, index);
+    const critere = await _critereCible(cible, index);
     if (!critere) return;
     const cleCritere = critere.id || ('critere-' + index);
     const input = document.querySelector('input[data-collection-nom="' + cleCritere + '"]');
@@ -4217,24 +4255,24 @@ async function enregistrerCollectionProjection(cible, index) {
             nom: nom,
             message: r.raison === 'nom_pris' ? 'Une collection porte déjà ce nom.' : 'Ce modèle n\'a pas de paliers à enregistrer.'
         };
-        await _redessinerCibleCollection(cible);
+        await _redessinerCible(cible);
         return;
     }
     delete _etatSaisieCollection[cleCritere];
     if (typeof notifications !== 'undefined' && notifications.succes) {
         notifications.succes(`Collection « ${r.collection.nom} » enregistrée.`, 'Tu la retrouveras dans le menu de projection de tes grilles.');
     }
-    await _redessinerCibleCollection(cible);
+    await _redessinerCible(cible);
 }
 
 async function supprimerCollectionProjection(id, cible, index) {
     const c = window.collectionsProjection.obtenir(id);
-    if (!c) { await _redessinerCibleCollection(cible); return; }
+    if (!c) { await _redessinerCible(cible); return; }
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('collection'))) return;
     if (!confirm(`Supprimer la collection « ${c.nom} » ? Les grilles qui l'ont copiée ne changent pas.`)) return;
     await window.collectionsProjection.supprimer(id);
-    await _redessinerCibleCollection(cible);
+    await _redessinerCible(cible);
 }
 
 /** Un choix du menu de projection est-il une collection ? Rend son id, ou null. */
@@ -4514,7 +4552,8 @@ function rendrePliAucuneAnnotation(critere, ctx) {
  * Grégoire, 18 oct.
  * La dissection, lot 13 (19 oct.) : les réponses se MODIFIENT, à leur place (voir « LES RÉPONSES D'UN
  * CRITÈRE » plus bas) ; les sous-critères restent en lecture. Une réponse au texte vide se montre :
- * c'est celle qu'on vient d'ajouter. `ctx` : { grilleId, index }, ceux des handlers du critère.
+ * c'est celle qu'on vient d'ajouter. `ctx` : { grilleId, index }, ceux des handlers du critère ; #1120 (21 oct.) :
+ * `grilleId` vaut `temp` pour une grille en création (`afficherCriteresTemp`), où les mêmes sections se montrent.
  */
 function rendreAttenduCritere(critere, ctx) {
     const d = critere && critere.descripteurs;
@@ -4528,8 +4567,9 @@ function rendreAttenduCritere(critere, ctx) {
     // section se montre même vide, pour créer le premier. Sans contexte de handlers, rien à modifier : rien.
     const sous = critere && critere.type !== 'algorithmique' && ctx ? rendreSousCriteresCritere(critere, ctx) : '';
     if (!bareme && !codes.length && !sous) return '';
+    // 21 oct. (Grégoire) : le barème SOUS les sous-critères — critère, ce qu'on observe, ce que ça vaut ; l'ordre du PDF.
     return `
-            <div class="grille-attendu">${bareme}${rendreAttenduNiveaux(d, codes, ctx)}${sous}
+            <div class="grille-attendu">${rendreAttenduNiveaux(d, codes, ctx)}${sous}${bareme}
             </div>`;
 }
 
@@ -4715,7 +4755,10 @@ const TEXTES_BAREME = {
     retirer: 'Retirer cette tranche',
     aCompleter: 'à compléter',
     horsBareme: 'hors barème',
-    confirmer: 'Es-tu sûr de vouloir retirer cette tranche ?'
+    confirmer: 'Es-tu sûr de vouloir retirer cette tranche ?',
+    // Complément du 21 oct., texte validé G. 8 h 11 : la seule dépendance d'ordre (les points d'une tranche vont
+    // de 0 à la pondération ; à 0, tous sont refusés). Une aide en ligne, qui ne bloque rien.
+    pointsDAbord: 'Donne d’abord ses points à ce critère : ceux de ses tranches iront de 0 à ce nombre.'
 };
 
 // #1120, lot 2 : la bulle de chaque champ, de « + Ajouter une tranche » et de chaque marque (clés du catalogue).
@@ -4728,9 +4771,23 @@ function rendreBaremeCritere(critere, ctx) {
     const lignes = window.bareme.tranchesDuCritere(critere).map(t => trancheBaremeHtml(t, critere, ctx));
     return `
                 <h4 class="grille-attendu-titre">${echapperHtml(TEXTES_BAREME.titre)} <span class="primo-aide" data-target="grille-bareme"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span></h4>
+                <p class="grille-attendu-mention" data-points-d-abord="${echapperHtml(String(ctx.index))}"${_aDesPoints(critere) ? ' hidden' : ''}>${echapperHtml(TEXTES_BAREME.pointsDAbord)}</p>
                 <div class="grille-bareme">${lignes.join('')}
                 </div>
                 <div><button type="button" class="btn btn-secondaire" data-action="ajouterTrancheBareme" data-param="${echapperHtml(ctx.grilleId)}" data-param2="${ctx.index}" data-tooltip="${echapperHtml(BULLES_BAREME.ajouter)}">${echapperHtml(TEXTES_BAREME.ajouter)}</button></div>`;
+}
+
+function _aDesPoints(critere) {
+    return Number(critere && critere.ponderation) > 0;
+}
+
+/**
+ * La phrase « Donne d'abord ses points… » suit la pondération sans redessiner la liste (le focus est déjà dans le
+ * champ suivant) : appelée par les deux handlers de pondération, en création et en modification.
+ */
+function suivrePointsDAbord(index, critere) {
+    const p = [...document.querySelectorAll('#listeCriteres [data-points-d-abord]')].find(x => x.dataset.pointsDAbord === String(index));
+    if (p) p.hidden = _aDesPoints(critere);
 }
 
 /** La marque d'une tranche : « à compléter » (sans points), « hors barème » (au-delà de la pondération), ou rien. */
@@ -4801,26 +4858,20 @@ function ajusterHauteursAuto(container) {
 }
 
 /**
- * Une écriture du barème d'un critère, sérialisée (#510). `operation(tranches, critere)` rend ce que
- * rendent les gestes de `bareme.js` ; sans `tranches`, rien n'est écrit. Le critère visé est relu dans
- * la file : analytique, et le même (`_memeCritere`, par son identifiant) qu'au moment du geste.
+ * Une écriture du barème d'un critère, sur sa cible (`temp` en création, ou l'id d'une grille enregistrée :
+ * `_modifierCritereCible`). `operation(tranches, critere)` rend ce que rendent les gestes de `bareme.js` ;
+ * sans `tranches`, rien n'est écrit. Le critère visé est relu au moment d'écrire : analytique, et le même
+ * (`_memeCritere`, par son identifiant) qu'au moment du geste. Rend `{ resultat, critere }` (le critère écrit, ou null).
  */
-async function _modifierBaremeCritere(grilleId, critereIndex, critereId, operation) {
-    let resultat = { refuse: null }, grille = null;
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const g = grilles.find(x => x.id === grilleId);
-        const c = g && g.criteres && g.criteres[critereIndex];
-        if (!c || c.type !== 'analytique' || !_memeCritere(c, critereId ? { id: critereId } : null)) return undefined;
+async function _modifierBaremeCritere(cible, critereIndex, critereId, operation) {
+    let resultat = { refuse: null };
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => {
+        if (c.type !== 'analytique' || !_memeCritere(c, critereId ? { id: critereId } : null)) return false;
         resultat = operation(window.bareme.tranchesDuCritere(c), c);
-        if (!resultat.tranches) return undefined;
+        if (!resultat.tranches) return false;
         window.bareme.ecrireSurCritere(c, resultat.tranches);
-        g.dateModification = new Date().toISOString();
-        grille = g;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-    if (grille && grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) grilleTemplateActuelle = grille;
-    return { resultat, grille };
+    });
+    return { resultat, critere };
 }
 
 function _dataTranche(el) {
@@ -4832,9 +4883,8 @@ function _dataTranche(el) {
  * Des points écrits : ils se relisent (« 3 à 4 »), et la marque suit ce que la tranche est devenue (posée
  * quand ses points sont effacés, retirée quand elle en reçoit), sans rendre la liste : le focus est ailleurs.
  */
-function _apresEcriturePoints(el, d, grille) {
+function _apresEcriturePoints(el, d, c) {
     const bloc = el.closest('.grille-bareme-tranche');
-    const c = grille.criteres[d.critereIndex];
     const t = window.bareme.tranchesDuCritere(c).find(x => x.id === d.id);
     if (!bloc || !t) return;
     el.value = window.bareme.pointsEnTexte(t);
@@ -4863,39 +4913,39 @@ function modifierTrancheBaremeHandler(el) {
         d.champ === 'points' ? B.modifierPoints(tranches, d.id, el.value, c.ponderation)
             : d.champ === 'nom' ? B.modifierNom(tranches, d.id, el.value)
                 : B.modifierTexte(tranches, d.id, el.value)))
-        .then(({ resultat, grille }) => {
+        .then(({ resultat, critere }) => {
             marquerChampRefuse(el, resultat.refuse);
-            if (grille && d.champ === 'points') _apresEcriturePoints(el, d, grille);
+            if (critere && d.champ === 'points') _apresEcriturePoints(el, d, critere);
         });
 }
 
 /** « + Ajouter une tranche » : une tranche neuve, en dernier, écrite aussitôt (« à compléter ») ; le focus sur son nom. */
-async function ajouterTrancheBareme(grilleId, critereIndex) {
-    const critereLu = _critereEnBase(grilleId, critereIndex);
+async function ajouterTrancheBareme(cible, critereIndex) {
+    const critereLu = _critereLuCible(cible, critereIndex);
     if (!critereLu || critereLu.type !== 'analytique') return;
     const id = genererIdUnique('TR_');
-    const { resultat, grille } = await _modifierBaremeCritere(grilleId, critereIndex, critereLu.id || '',
+    const { resultat, critere } = await _modifierBaremeCritere(cible, critereIndex, critereLu.id || '',
         (tranches) => window.bareme.ajouter(tranches, id));
     if (resultat.refuse && window.temoinEnregistrement) {
         window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(resultat.refuse), undefined, cle('grillesTemplates'));
     }
-    if (!grille) return;
-    afficherCriteresGrille(grille);
+    if (!critere) return;
+    await _redessinerCible(cible);
     const champ = [...document.querySelectorAll('#listeCriteres [data-champ="nom"][data-tranche-id]')]
         .find(x => x.dataset.critereIndex === String(critereIndex) && x.dataset.trancheId === id);
     if (champ) champ.focus();
 }
 
 /** La corbeille d'une tranche : le geste et la confirmation du retrait d'un critère (`supprimerCritereGrille`). */
-async function retirerTrancheBareme(grilleId, critereIndex, trancheId) {
-    const critereLu = _critereEnBase(grilleId, critereIndex);
+async function retirerTrancheBareme(cible, critereIndex, trancheId) {
+    const critereLu = _critereLuCible(cible, critereIndex);
     if (!critereLu || critereLu.type !== 'analytique') return;
     const id = String(trancheId);
     if (!window.bareme.tranchesDuCritere(critereLu).some(t => t.id === id)) return;
     if (!confirm(TEXTES_BAREME.confirmer)) return;
-    const { grille } = await _modifierBaremeCritere(grilleId, critereIndex, critereLu.id || '',
+    const { critere } = await _modifierBaremeCritere(cible, critereIndex, critereLu.id || '',
         (tranches, c) => (_memeCritere(c, critereLu) ? window.bareme.retirer(tranches, id) : { refuse: null }));
-    if (grille) afficherCriteresGrille(grille);
+    if (critere) await _redessinerCible(cible);
 }
 
 function rendreCartesGabaritAlgo(critere, ctx) {
@@ -5084,26 +5134,17 @@ async function deplacerCritereGrilleHaut(grilleId, index) {
  * rang) — déplacer ne change pas le sens des tampons déjà posés (`errfr_<code>`). Seul
  * l'ordre d'affichage change, dans la grille ; la carte des codes le suit.
  */
-async function _deplacerSousCritere(grilleId, critereIndex, scIndex, vers) {
-    let grille = null;
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const g = grilles.find(x => x.id === grilleId);
-        const scs = g && g.criteres && g.criteres[critereIndex] && g.criteres[critereIndex].sousCriteres;
-        if (!Array.isArray(scs) || !scs[scIndex] || !scs[scIndex + vers]) return undefined;
+async function _deplacerSousCritere(cible, critereIndex, scIndex, vers) {
+    // #1120 (21 oct.) : `cible`, `temp` en création ou l'id d'une grille enregistrée (`_modifierCritereCible`).
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => {
+        const scs = c.sousCriteres;
+        if (!Array.isArray(scs) || !scs[scIndex] || !scs[scIndex + vers]) return false;
         [scs[scIndex], scs[scIndex + vers]] = [scs[scIndex + vers], scs[scIndex]];
-        g.dateModification = new Date().toISOString();
-        grille = g;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-    if (!grille) return;
-    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
-        grilleTemplateActuelle = grille;
-    }
-    afficherCriteresGrille(grille);
+    });
+    if (critere) await _redessinerCible(cible);
 }
-async function deplacerSousCritereHaut(grilleId, critereIndex, scIndex) { await _deplacerSousCritere(grilleId, critereIndex, scIndex, -1); }
-async function deplacerSousCritereBas(grilleId, critereIndex, scIndex) { await _deplacerSousCritere(grilleId, critereIndex, scIndex, 1); }
+async function deplacerSousCritereHaut(cible, critereIndex, scIndex) { await _deplacerSousCritere(cible, critereIndex, scIndex, -1); }
+async function deplacerSousCritereBas(cible, critereIndex, scIndex) { await _deplacerSousCritere(cible, critereIndex, scIndex, 1); }
 
 /**
  * Déplace un critère de grille vers le bas
@@ -5390,6 +5431,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     // Recalculer et afficher la pondération totale
     if (champ === 'ponderation') {
         calculerEtAfficherTotalPonderation(grille);
+        suivrePointsDAbord(critereIndex, grille.criteres[critereIndex]);
     }
 
     return { ok: true };
@@ -5506,46 +5548,36 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
 
 /**
  * Ajoute un nouveau sous-critère vide à un critère
- * @param {string} grilleId - ID de la grille
+ * @param {string} cible - `temp` en création, ou l'ID de la grille (#1120, 21 oct. : `_modifierCritereCible`)
  * @param {number} critereIndex - Index du critère
  */
-async function ajouterSousCritere(grilleId, critereIndex) {
-    let grille = null, refus = null, nouvelIndex = -1;
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const g = grilles.find(x => x.id === grilleId);
-        if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
-
-        // Initialiser le tableau sousCriteres si nécessaire
-        if (!g.criteres[critereIndex].sousCriteres) {
-            g.criteres[critereIndex].sousCriteres = [];
-        }
+async function ajouterSousCritere(cible, critereIndex) {
+    let refus = null, nouvelIndex = -1;
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => {
+        const scs = Array.isArray(c.sousCriteres) ? c.sousCriteres : [];
         // 20 oct. : la borne de l'assistant (`MAX_SOUS_CRITERES`), pour tout critère.
-        refus = refusAjoutSousCritere(g.criteres[critereIndex].sousCriteres.length);
-        if (refus) return undefined;
+        refus = refusAjoutSousCritere(scs.length);
+        if (refus) return false;
 
         // Générer un ID unique et un code par défaut
-        const scs = g.criteres[critereIndex].sousCriteres;
+        c.sousCriteres = scs;
         nouvelIndex = scs.length;
 
-        g.criteres[critereIndex].sousCriteres.push({   // ⚠ ancre lue par materiel-lot3a-roles (F.b)
+        scs.push({   // ⚠ ancre lue par materiel-lot3a-roles (F.b)
             id: genererIdUnique('SC_'),
             code: codeSousCritereNeuf(scs),
             nom: '',
             ponderation: 1.0,
             retroaction: ''
         });
-
-        grille = g;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
+    });
     if (refus && window.temoinEnregistrement) {
         window.temoinEnregistrement.nonEnregistre(window.raisonPourTemoin(refus), undefined, cle('grillesTemplates'));
     }
-    if (!grille) return;
+    if (!critere) return;
 
     // Réafficher la grille ; le focus sur le nom du sous-critère neuf (comme « + Ajouter une tranche »).
-    afficherCriteresGrille(grille);
+    await _redessinerCible(cible);
     const champ = [...document.querySelectorAll('#listeCriteres [data-champ="nom"][data-sc-index]')]
         .find(x => x.dataset.critereIndex === String(critereIndex) && x.dataset.scIndex === String(nouvelIndex));
     if (champ) champ.focus();
@@ -5559,24 +5591,17 @@ async function ajouterSousCritere(grilleId, critereIndex) {
  * @param {string} champ - Nom du champ à modifier
  * @param {any} valeur - Nouvelle valeur
  */
-async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, champ, valeur) {
+async function modifierSousCritere(cible, critereIndex, sousCritereIndex, champ, valeur) {
     // 20 oct. : la borne de l'assistant (`MAX_NOM`) ; un nom refusé n'écrit rien.
     const refuse = champ === 'nom' ? refusNomSousCritere(valeur) : null;
     if (refuse) return { refuse };
     // ⚠ C'est LE geste de #510 : le `change` d'un champ de sous-critère part au
-    // blur, donc au moment précis où l'on clique dans le champ suivant.
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const g = grilles.find(x => x.id === grilleId);
-
-        if (!g || !g.criteres || !g.criteres[critereIndex] ||
-            !g.criteres[critereIndex].sousCriteres ||
-            !g.criteres[critereIndex].sousCriteres[sousCritereIndex]) return undefined;
-
-        // Mettre à jour le champ
-        g.criteres[critereIndex].sousCriteres[sousCritereIndex][champ] = valeur;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
+    // blur, donc au moment précis où l'on clique dans le champ suivant (sérialisé par `_modifierCritereCible`).
+    await _modifierCritereCible(cible, critereIndex, (c) => {
+        const sc = c.sousCriteres && c.sousCriteres[sousCritereIndex];
+        if (!sc) return false;
+        sc[champ] = valeur;
+    });
     return { refuse: null };
 }
 
@@ -5586,36 +5611,23 @@ async function modifierSousCritere(grilleId, critereIndex, sousCritereIndex, cha
  * @param {number} critereIndex - Index du critère
  * @param {number} sousCritereIndex - Index du sous-critère
  */
-async function supprimerSousCritere(grilleId, critereIndex, sousCritereIndex) {
-    // #1007, lot 2b : un code de catégorie qu'une évaluation a saisi porte des notes.
-    const critereLu = _critereEnBase(grilleId, critereIndex);
+async function supprimerSousCritere(cible, critereIndex, sousCritereIndex) {
+    // #1007, lot 2b : un code de catégorie qu'une évaluation a saisi porte des notes (jamais en création).
+    const critereLu = _critereLuCible(cible, critereIndex);
     const sousCritereLu = (critereLu && critereLu.sousCriteres && critereLu.sousCriteres[sousCritereIndex]) || null;
-    const porteDesNotes = !!sousCritereLu && _lignePorteDesNotes({ grilleId, critere: critereLu, sousCritereCode: sousCritereLu.code });
+    const porteDesNotes = cible !== 'temp' && !!sousCritereLu && _lignePorteDesNotes({ grilleId: cible, critere: critereLu, sousCritereCode: sousCritereLu.code });
     if (porteDesNotes && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('sousCritere'))) return;
     if (!confirm('Supprimer ce sous-critère ?')) return;
 
-    let grille = null;
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const g = grilles.find(x => x.id === grilleId);
-
-        if (!g || !g.criteres || !g.criteres[critereIndex] ||
-            !g.criteres[critereIndex].sousCriteres) return undefined;
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => {
+        if (!c.sousCriteres) return false;
         // Relu après l'attente : la ligne a changé de place, rien n'est retiré.
-        if (!_memeCritere(g.criteres[critereIndex], critereLu)) return undefined;
-        const sc = g.criteres[critereIndex].sousCriteres[sousCritereIndex];
-        if (sousCritereLu && !(sc && sc.code === sousCritereLu.code)) return undefined;
-
-        // Supprimer le sous-critère
-        g.criteres[critereIndex].sousCriteres.splice(sousCritereIndex, 1);
-        grille = g;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-    if (!grille) return;
-
-    // Réafficher la grille
-    afficherCriteresGrille(grille);
-
+        if (!_memeCritere(c, critereLu)) return false;
+        const sc = c.sousCriteres[sousCritereIndex];
+        if (sousCritereLu && !(sc && sc.code === sousCritereLu.code)) return false;
+        c.sousCriteres.splice(sousCritereIndex, 1);
+    });
+    if (critere) await _redessinerCible(cible);
 }
 
 /**
@@ -5807,7 +5819,9 @@ function grilleEnCreationSaisie() {
     if (grilleTemplateActuelle || !conteneur || conteneur.classList.contains('u-hide')) return false;
     const nom = document.getElementById('nomGrilleTemplate')?.value?.trim();
     const description = document.getElementById('descriptionGrille')?.value?.trim();
-    const criteres = (window.tempCriteres || []).some(c => (c.nom || '').trim() || (c.description || '').trim());
+    // #1120 (21 oct.) : des sous-critères ou des tranches saisis en création sont une saisie, comme un nom.
+    const criteres = (window.tempCriteres || []).some(c => (c.nom || '').trim() || (c.description || '').trim()
+        || (Array.isArray(c.sousCriteres) && c.sousCriteres.length) || (Array.isArray(c.bareme) && c.bareme.length));
     return !!(nom || description || criteres || window.tempTypeGrille);
 }
 if (window.uiDialogues) window.uiDialogues.declarerFicheEnCreation('grille', grilleEnCreationSaisie);
@@ -6614,6 +6628,7 @@ function modifierPonderationCritereTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     modifierCritereTemp(index, 'ponderation', parseInt(el.value));
     mettreAJourTotalTemp();
+    if (window.tempCriteres && window.tempCriteres[index]) suivrePointsDAbord(index, window.tempCriteres[index]);
 }
 
 /** Annuler import grilles */
