@@ -24,6 +24,9 @@
        (l'appelant garde son repli : « - », « — »).
      window.formaterNoteNombre(note) → « 89,2 », le même nombre sans le signe : les termes
        d'une somme de notes (« (75 + 80) / 2 »).
+     window.formaterPoints(n) → « 44,5 pts » : les points d'une note composée (contribution d'une
+       catégorie), une décimale fixe, la règle du PDF de l'élève (21 oct. 2026). Une phrase qui
+       additionne des points pour donner une note ne mêle pas deux normes.
      window.ESPACE_INSECABLE → '\u00A0'.
    =============================== */
 
@@ -44,13 +47,20 @@ function formaterNotePourcentage(note) {
     return nombre === '' ? '' : nombre + ESPACE_INSECABLE + '%';
 }
 
+function formaterPoints(points) {
+    var n = Number(points);
+    if (points === null || points === undefined || points === '' || !Number.isFinite(n)) return '';
+    return n.toFixed(1).replace('.', ',') + ESPACE_INSECABLE + 'pts';
+}
+
 if (typeof window !== 'undefined') {
     window.formaterNotePourcentage = formaterNotePourcentage;
     window.formaterNoteNombre = formaterNoteNombre;
+    window.formaterPoints = formaterPoints;
     window.ESPACE_INSECABLE = ESPACE_INSECABLE;
 }
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { formaterNotePourcentage: formaterNotePourcentage, formaterNoteNombre: formaterNoteNombre, ESPACE_INSECABLE: ESPACE_INSECABLE };
+    module.exports = { formaterNotePourcentage: formaterNotePourcentage, formaterNoteNombre: formaterNoteNombre, formaterPoints: formaterPoints, ESPACE_INSECABLE: ESPACE_INSECABLE };
 }
 
 })();

@@ -99,6 +99,7 @@ export function completerNoteParDefaut(globaux) {
     return Object.assign({}, globaux, {
         formaterNotePourcentage: winNote.formaterNotePourcentage,
         formaterNoteNombre: winNote.formaterNoteNombre,
+        formaterPoints: winNote.formaterPoints,
         ESPACE_INSECABLE: winNote.ESPACE_INSECABLE
     });
 }

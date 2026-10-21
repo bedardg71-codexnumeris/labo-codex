@@ -58,6 +58,14 @@ describe('A — la fonction : une décimale au plus, sans zéro final', () => {
         expect(f(67).charCodeAt(2)).toBe(0xA0);
     });
 
+    it('formaterPoints : la règle du PDF de l’élève, une décimale fixe, insécable devant « pts » (21 oct. 2026)', () => {
+        const { formaterPoints: p } = chargerScript('js/note-pourcentage.js');
+        expect(p(44.5)).toBe('44,5\u00A0pts');
+        expect(p(28.4)).toBe('28,4\u00A0pts');
+        expect(p(24)).toBe('24,0\u00A0pts');
+        for (const v of [null, undefined, '', 'abc']) expect(p(v), String(v)).toBe('');
+    });
+
     it('formaterNoteNombre : le même nombre, sans le signe', () => {
         const { formaterNoteNombre: n } = chargerScript('js/note-pourcentage.js');
         expect(n(89.23679060665361)).toBe('89,2');
