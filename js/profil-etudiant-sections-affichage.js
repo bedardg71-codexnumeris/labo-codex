@@ -3106,7 +3106,7 @@ function genererSectionProductions(da) {
             const formule = erreurPond
                 ? `<span class="note-finale-tiret">Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
                 : (calcSel && calcObl
-                    ? `Note finale = ${calcSel.contribution.toFixed(1)} pts + ${calcObl.contribution.toFixed(1)} pts = ${formaterNotePourcentage(calcSel.contribution + calcObl.contribution)}`
+                    ? `Note finale = ${formaterPoints(calcSel.contribution)} + ${formaterPoints(calcObl.contribution)} = ${formaterNotePourcentage(calcSel.contribution + calcObl.contribution)}`   // 21 oct. 2026 : la norme du PDF, une phrase, une norme
                     : `Note finale pondérée (Sélection ${pondSel}% + Obligatoires ${pondObl}% = ${pondSel + pondObl}%)`);
 
             htmlNoteFinale = `

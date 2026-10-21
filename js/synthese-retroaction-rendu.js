@@ -746,7 +746,7 @@
             if (!calc) return '';
             const addition = calc.notes.map(n => formaterNotePourcentage(n)).join(' + ');
             return `(${addition}) &divide; ${calc.notes.length} = <b>${formaterNotePourcentage(calc.moyenne)}</b>`
-                 + ` &times; ${nombreFr(ponderation)}${NBSP}% = <b>${nombreFr(calc.contribution.toFixed(1))}${NBSP}pts</b>`;
+                 + ` &times; ${nombreFr(ponderation)}${NBSP}% = <b>${formaterPoints(calc.contribution)}</b>`;
         };
         const calcSel = estHybride ? calculerCategorie(note.selection, note.ponderationSelection, false) : null;
         const calcObl = estHybride ? calculerCategorie(note.obligatoires || [], note.ponderationObligatoires, estFinale) : null;
@@ -824,7 +824,7 @@
         if (typeof note.moyenne === 'number' && !isNaN(note.moyenne)) {
             let phraseFinale;
             if (estHybride && !note.erreurPonderation && calcSel && calcObl) {
-                phraseFinale = `Note finale = ${nombreFr(calcSel.contribution.toFixed(1))}${NBSP}pts + ${nombreFr(calcObl.contribution.toFixed(1))}${NBSP}pts = ${esc(formaterNotePourcentage(note.moyenne))}`;
+                phraseFinale = `Note finale = ${formaterPoints(calcSel.contribution)} + ${formaterPoints(calcObl.contribution)} = ${esc(formaterNotePourcentage(note.moyenne))}`;
             } else if (estHybride && note.erreurPonderation) {
                 phraseFinale = `⚠ ${esc(note.erreurPonderation)}`;
             } else {

@@ -53,7 +53,11 @@ test('#896 · hybride sans terminale : un brouillon d\'obligatoire est nommé su
         const cont = document.getElementById('contenuProfilEtudiant');
         const carte = cont && cont.querySelector('.note-finale-section');
         const d = window.calculerDetailsNoteFinale(DA) || {};
-        return { type: window.obtenirTypePratiqueActive(), carte: carte ? carte.innerText.replace(/\s+/g, ' ').trim() : null,
+        // 21 oct. 2026 : la phrase de la note finale, TELLE QU'ELLE EST (le nœud de texte, insécables compris).
+        const marcheur = carte ? document.createTreeWalker(carte, NodeFilter.SHOW_TEXT) : null;
+        let formule = null;
+        while (marcheur && marcheur.nextNode()) { if (marcheur.currentNode.data.trim().startsWith('Note finale = ')) { formule = marcheur.currentNode.data.trim(); break; } }
+        return { type: window.obtenirTypePratiqueActive(), carte: carte ? carte.innerText.replace(/\s+/g, ' ').trim() : null, formule,
                  details: { note: d.noteFinale, methode: d.portfolio && d.portfolio.methodeSelection, nb: d.portfolio && d.portfolio.nombreEvalues, erreur: d.erreur, terminal: d.terminal } };
     }, { T, DA });
     expect(r.type).toBe('standards');
@@ -66,7 +70,9 @@ test('#896 · hybride sans terminale : un brouillon d\'obligatoire est nommé su
     expect(r.carte).toContain('Obligatoire 2 (évaluation non verrouillée, non comptée)');
     expect(r.carte).toContain('(70 %) ÷ 1 = 70 % × 35% = 24.5 pts');
     // L'accord qui manquait : la formule écrite et le total du moteur, sur la même carte.
-    expect(r.carte).toContain('Note finale = 55.3 pts + 24.5 pts = 79,8 % 79,8 %');
+    expect(r.carte).toContain('Note finale = 55,3 pts + 24,5 pts = 79,8 % 79,8 %');
+    // 21 oct. 2026 : la phrase à la norme du PDF de l'élève — virgule, insécable devant « pts » et « % ».
+    expect(r.formule).toBe('Note finale = 55,3\u00A0pts + 24,5\u00A0pts = 79,8\u00A0%');
     expect(r.carte).not.toContain('20 %');
     expect(erreurs).toEqual([]);
 });

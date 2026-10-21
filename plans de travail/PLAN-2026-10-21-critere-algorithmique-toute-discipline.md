@@ -2,6 +2,22 @@
 
 > Cowork, mercredi 21 octobre 2026, 9 h 23 (Toronto, mesuré par `date`), sur `main` à `6992bec4` (non poussé, relu à 9 h 16). Ordre approuvé par Grégoire à 9 h 20 ; principe des deux noms (occurrences, étendue) approuvé à 9 h 28. Sources : les pistes de 8 h 44 à 9 h 11 dans `MESURE-2026-10-21-critere-algorithmique.md`, et le code de `main`, lu en lecture seule. Ce plan ne se code pas d'un bloc : chaque étape aura sa consigne.
 
+## Où en est le plan (tenu à jour à chaque lot ; dernière mise à jour : 21 oct. 2026, 12 h 11)
+
+Chaque étape a, ou aura, sa consigne dans `plans de travail/CONSIGNE-LOT-<date>-critere-algorithmique-<étape>.md`, sa demande et son verdict de relecture. Une session qui reprend lit ce tableau, puis le dernier verdict.
+
+| Étape | État | Ce qu'il faut pour la lancer |
+|---|---|---|
+| 0. Ce qui est faux, ce qui nomme le français par défaut | **fait** (`a32bdb41`, relu) ; mots : `904f1a02` et `21357b6a`, relus ; textes réglés par Grégoire (`TEXTES-2026-10-21-critere-algorithmique.md`) ; la liste du français écrit est la sienne (décision de 9 h 57) | — |
+| 1. Le miroir | **à faire en premier, le 22 oct.** : consigne prête (`CONSIGNE-LOT-2026-10-21-critere-algorithmique-miroir.md`), non lancée le 21 (le créneau a servi à la note à la norme française). Sa limite de 12 h 30 ne vaut que pour le 21 : à la reprise, l'en-tête « ⏱ » est à ignorer, le reste vaut tel quel, sur le `main` du jour | — |
+| 2. La palette, et les deux noms de l'enseignant | à faire | **Décisions de Grégoire** : les noms par défaut d'un critère neuf (ce qu'on compte, ce à quoi on le rapporte) ; l'accord de « une fois pondérée(s) » avec un nom masculin. Cowork les lui soumet au début de l'étape, une à la fois. Reprend aussi : les champs « Nombre d'erreurs », « Nombre de mots », la ligne du PDF, le paragraphe D3 de la section 5c, la phrase des deux modèles sous la formule. |
+| 3. La table de cas | à faire, après 2 | **Décision de Grégoire** : les textes par défaut des cas. |
+| 4. Les calculs que l'enseignant compose | à faire, après 3 | **Décision de Grégoire** : ce que veulent dire les calculs tout faits (didactique). Seule étape qui touche le calcul d'une note. |
+| 5. Coller sa liste de codes | à faire, indépendante | Rien : peut se glisser entre deux étapes. |
+| La page « critères algorithmiques » du guide « Construire ton matériel d'évaluation » | à écrire par Cowork (le document du guide est un doc Claude, « Guide – Construire ton matériel d'évaluation (brouillon) ») | Rien : l'écran dit vrai depuis l'étape 0. Grégoire la corrige. Elle décrit l'écran d'aujourd'hui ; chaque étape la met à jour. |
+
+Inscrits sans lot, hors plan : deux critères algorithmiques dans une grille, seul le premier reçoit les codes (#1132) ; le mode Catégories, sans écran, et la démo dont les vingt évaluations sont dans ce mode (#1133).
+
 ## Le principe qui gouverne tout (Grégoire, 9 h 20)
 
 « Ce qu'il faut toujours prendre en considération ici, c'est de ne pas coder pour une discipline particulière. Dans les exemples qui sont donnés, on parle toujours de littérature, de rédaction, de correction de texte. Évidemment que pour un enseignant en chimie, ces choses ne s'appliquent pas. Donc, il faut toujours garder une perspective générale et s'assurer de ne rien coder en dur en fonction d'une discipline précise. »

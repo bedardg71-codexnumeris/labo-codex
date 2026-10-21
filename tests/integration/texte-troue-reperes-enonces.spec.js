@@ -21,6 +21,12 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // Mode « temp » (nouvelle grille) : c'est le même gabarit que la grille
 // enregistrée, sans l'écriture IndexedDB — et `window.tempCriteres` se lit
 // directement, ce qui rend la persistance vérifiable sans attendre.
+//
+// ↻ RÈGLE DU 21 OCT. 2026 (#1131, #1138) : en CRÉATION, QUATRE zones. Depuis #1131 (demande de Grégoire,
+// 21 oct., 9 h 15), le gabarit des sous-critères se rend en création, « Quand la copie ne porte aucun code »
+// compris : la zone « Aucune annotation » (`aucune`) y est, une fois, dans ce pli. La saisir écrit dans
+// `window.tempCriteres[0].enonces.aucune`, sans écriture IndexedDB ; ses repères sont ceux de la modification.
+// (Avant : la carte « Bilan », 1.120, la réservait à une grille enregistrée ; trois zones.)
 
 const OUVRIR = `async (enoncesExistants) => {
     db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
@@ -59,11 +65,17 @@ async function ouvrir(page, enoncesExistants) {
     // ↻ §8 (5 sept.) : prêt quand la base l'est (comme le spec des paliers), plus un délai fixe.
     await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
     const n = await page.evaluate(eval(OUVRIR), enoncesExistants || null);
-    // ↻ La carte « Bilan » (5 sept. 2026, 1.120) : en CRÉATION, trois zones — « Aucune annotation » vit
-    // sous la case des codes, dans la liste des sous-critères d'une grille ENREGISTRÉE (réserve nommée
-    // au cadrage). Son rendu et sa palette ({critere} seul, jamais {erreurs}) sont éprouvés par la
-    // sentinelle Vitest `sentinelle-carte-bilan` (B) et, au registre, par `…-etape-1-reperes` (B.b).
-    expect(n, 'trois zones en création : « Aucune annotation » n\'y est pas').toBe(3);
+    // ↻ 21 oct. 2026 (#1131, #1138) : en CRÉATION, quatre zones — « Aucune annotation » y est, une fois, dans
+    // le pli « Quand la copie ne porte aucun code » des sous-critères. Sa palette ({critere} seul, jamais
+    // {erreurs}) est aussi éprouvée par la sentinelle Vitest `sentinelle-carte-bilan` (B).
+    expect(n, 'quatre zones en création, « Aucune annotation » comprise').toBe(4);
+    await expect(page.locator('#listeCriteres .sous-critere-pli--aucune textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
+    await expect(page.locator('#listeCriteres textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
+    // Son pli est replié à l'ouverture, comme les cartes ci-dessous : on le déplie par l'événement DOM.
+    const pliAucune = page.locator('#listeCriteres .sous-critere-pli--aucune');
+    await expect(pliAucune).toHaveClass(/ferme/);
+    await page.evaluate(() => document.querySelector('#listeCriteres .sous-critere-pli--aucune .accordeon-header').click());
+    await expect(pliAucune).not.toHaveClass(/ferme/);
     // Lot 4 (4 sept. 2026) : les zones vivent dans des cartes repliées à l'ouverture — un pointeur
     // ne les atteint pas plus qu'une main. ↻ §8 (5 sept., décision de Grégoire) : le DÉCOMPTE se
     // compose dans « Ce que l'élève lit » (la carte de projection), avant les paliers ; les deux du
@@ -81,7 +93,7 @@ async function ouvrir(page, enoncesExistants) {
     await expect(page.locator('#listeCriteres textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
 }
 
-test('texte troué · chaque zone offre ses repères ; en création, « Aucune annotation » n\'est pas rendue', async ({ page }) => {
+test('texte troué · chaque zone offre ses repères ; en création, « Aucune annotation » aussi (#1131)', async ({ page }) => {
     await ouvrir(page);
     const offerts = await page.evaluate(() =>
         [...document.querySelectorAll('#listeCriteres .groupe-form:has(textarea[data-enonce-cle])')].map(g => ({
@@ -101,7 +113,7 @@ test('texte troué · chaque zone offre ses repères ; en création, « Aucune a
     expect(offerts.find(o => o.cle === 'decompte').textes).toEqual(['critere', 'erreurs', 'mots', 'points']);
     expect(parCle.priorite).toEqual(['{critere}']);
     expect(parCle.concentre).toEqual(['{critere}']);
-    expect(parCle.aucune, '« Aucune annotation » n\'est pas dans la création (carte « Bilan », 1.120)').toBeUndefined();
+    expect(parCle.aucune, '« Aucune annotation » en création : les repères de la modification, {critere} seul').toEqual(['{critere}']);
     expect(offerts.every(o => o.visibles), 'les repères sont à l\'écran').toBe(true);
     expect(offerts.every(o => o.rangeeAvantZone), 'la rangée « Poser » précède la zone').toBe(true);
     expect(offerts.every(o => o.aideApresZone), 'l\'aide reste attachée au champ, sous lui').toBe(true);
@@ -149,6 +161,32 @@ test('texte troué · au milieu d\'une phrase, le repère prend ses espaces, et 
     expect(r.rendu).toBe('Ta production contient 500 3 erreurs pour 500 mots.');
 });
 
+test('texte troué · « Aucune annotation » en création : la saisir écrit sur le critère, sans écriture en base', async ({ page }) => {
+    await ouvrir(page);
+    // Toute écriture du stockage, comptée pendant la saisie (db.js : setSync, set, modifier).
+    await page.evaluate(() => {
+        window.__ecritures = [];
+        for (const nom of ['setSync', 'set', 'modifier']) {
+            const avant = db[nom].bind(db);
+            db[nom] = (cle, ...reste) => { window.__ecritures.push(nom + ' ' + cle); return avant(cle, ...reste); };
+        }
+    });
+    const defaut = await zone(page, 'aucune').inputValue();
+    expect(defaut, 'la zone porte son texte de départ').not.toBe('');
+    await caretA(vueDe(page, 'aucune'), 0);
+    await page.keyboard.type('Rien à cibler sur ');
+    await repere(page, 'aucune', '{critere}').click();
+    const r = await page.evaluate(() => ({
+        valeur: document.querySelector('#listeCriteres textarea[data-enonce-cle="aucune"]').value,
+        enregistre: (window.tempCriteres[0].enonces || {}).aucune,
+        ecritures: window.__ecritures.filter((e) => /grille/i.test(e))
+    }));
+    console.log('AUCUNE →', JSON.stringify(r));
+    expect(r.enregistre, 'la valeur est sur le critère en création').toBe(r.valeur);
+    expect(r.valeur, 'la frappe et le repère, au curseur, devant le texte de départ').toBe('Rien à cibler sur {critere} ' + defaut);
+    expect(r.ecritures, 'aucune écriture des grilles avant « Créer la grille »').toEqual([]);
+});
+
 test('texte troué · un curseur au milieu d\'un mot : le repère se pose à la frontière, jamais dans le mot (essai iPad)', async ({ page }) => {
     await ouvrir(page);
     const z = zone(page, 'concentre');
@@ -182,6 +220,7 @@ test('texte troué · TÉMOIN NÉGATIF — une grille existante affiche ses text
         return {
             decompte: v('decompte'), priorite: v('priorite'), concentre: v('concentre'),
             aucuneRendue: !!document.querySelector('#listeCriteres textarea[data-enonce-cle="aucune"]'),
+            aucune: v('aucune'),
             rendu: window.enoncesAlgo.enonce(window.tempCriteres[0], 'decompte', { erreurs: 2, mots: 300 }),
             tu: window.enoncesAlgo.enonce(window.tempCriteres[0], 'aucune', {}),
             enonces: window.tempCriteres[0].enonces
@@ -190,7 +229,9 @@ test('texte troué · TÉMOIN NÉGATIF — une grille existante affiche ses text
     console.log('EXISTANTS →', JSON.stringify(lus));
     expect(lus.decompte).toBe(existants.decompte);
     expect(lus.priorite).toBe(existants.priorite);
-    expect(lus.aucuneRendue, 'en création, la zone « Aucune annotation » n\'est pas rendue ; sa valeur vide reste dans les données').toBe(false);
+    // ↻ 21 oct. 2026 (#1131) : en création, la zone est rendue ; vidée, elle se montre vide.
+    expect(lus.aucuneRendue, 'en création, la zone « Aucune annotation » est rendue').toBe(true);
+    expect(lus.aucune, 'la zone vidée se montre vide, sans défaut remis').toBe('');
     // La zone restée au défaut montre le défaut du modèle générique (le nom ne dit pas « français »).
     expect(lus.concentre).toBe('Concentre-toi sur {critere}');
     expect(lus.rendu).toBe('Mon décompte à moi : 2 sur 300.');
