@@ -170,6 +170,26 @@ test('(a) une note tapée puis rechargement dans la seconde et demie ; puis par 
     expect(erreurs).toEqual([]);
 });
 
+// 21 oct. 2026 : « Fermer » vidait l'écriture en attente avant d'aller à la liste. Il est parti ; on revient par le
+// sous-onglet « Liste ». MESURÉ ce jour-là : au clic, la note n'est pas encore en base ; la minuterie (1,5 s) l'y met,
+// et un rechargement la garde. Rien ne se perd : aucun correctif (consigne du jour, point 5).
+test('« Liste » dans la seconde qui suit une note tapée : la note arrive en base, et survit au rechargement', async ({ page }) => {
+    test.setTimeout(90000);
+    const erreurs = brancherEcouteurs(page);
+    await ouvrirSaisieDemo(page);
+    const date = await page.evaluate(() => document.getElementById('date-cours').value);
+    const da = await page.evaluate(() => document.querySelector('#tbody-saisie-presences input[id^="notes_"]').id.slice(6));
+    const lire = () => page.evaluate(({ d, da }) => (db.getSync(cle('presences'), []) || []).find((p) => p.date === d && p.da === da)?.notes ?? null, { d: date, da });
+    await page.locator(`#notes_${da}`).fill('partie vers la liste');
+    await page.locator('[data-sous-onglet="suivi-liste"]').dispatchEvent('click');
+    await expect(page.locator('#suivi-liste')).toHaveClass(/active/);
+    await expect.poll(lire, { timeout: 3000 }).toBe('partie vers la liste');
+    await page.reload();
+    await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
+    expect(await lire()).toBe('partie vers la liste');
+    expect(erreurs).toEqual([]);
+});
+
 test('(c)(d) « Confirmer la séance » ; verrouiller une séance non saisie : un seul message', async ({ page }) => {
     test.setTimeout(90000);
     const erreurs = brancherEcouteurs(page);
@@ -188,12 +208,12 @@ test('(c)(d) « Confirmer la séance » ; verrouiller une séance non saisie : u
     // (d)
     await page.evaluate((d) => window.__ouvrir(d), d2);
     await page.evaluate(() => { window.__toasts = []; });
-    await page.click('label[for="checkbox-verrouillage-presences"]');
-    await page.waitForTimeout(400);
-    const d = await page.evaluate((d) => ({ fiches: window.__fiches(d).length, toasts: window.__toasts.slice(),
-        verrou: document.getElementById('checkbox-verrouillage-presences').checked }), d2);
+    // ↻ 21 oct. 2026 : la case est partie ; un seul bouton, « Verrouiller la saisie ».
+    await page.locator('#btnVerrouillerSaisiePresences').dispatchEvent('click');
+    await expect(page.locator('#btnVerrouillerSaisiePresences')).toHaveText('Déverrouiller la saisie');
+    const d = await page.evaluate((d) => ({ fiches: window.__fiches(d).length, toasts: window.__toasts.slice() }), d2);
     expect(d.fiches).toBeGreaterThan(0);
-    expect(d.verrou).toBe(true);
+    await expect(page.locator('#etat-seance-presences')).toHaveText('Séance verrouillée');
     expect(d.toasts).toHaveLength(1);
     expect(d.toasts[0]).toContain('Séance saisie et verrouillée : les élèves non marqué·es comptent présent·es.');
     expect(await page.locator('#periodes_' + (await page.evaluate(() => document.querySelector('#tbody-saisie-presences input[id^="periodes_"]').id.slice(9)))).isDisabled()).toBe(true);
@@ -298,7 +318,7 @@ test('D2 bis (b) : dans une séance saisie, l’élève sans fiche le dit, et un
     expect(erreurs).toEqual([]);
 });
 
-for (const largeur of [360, 768, 1024, 1180]) {
+for (const largeur of [360, 768, 820, 1024, 1180]) {   // 820 : l'iPad Air debout (21 oct. 2026)
     test(`barre des présences à ${largeur} px : « Confirmer la séance » entier, dans l’écran, hors du témoin`, async ({ page }) => {
         test.setTimeout(90000);
         await page.setViewportSize({ width: largeur, height: 900 });
@@ -325,6 +345,8 @@ for (const largeur of [360, 768, 1024, 1180]) {
                 .map((x) => x.id);
             return { bouton: bb, chevauche, horsCarte,
                 deborde: document.documentElement.scrollWidth > window.innerWidth, texte: btn.textContent.trim(),
+                verrou: (() => { const v = document.getElementById('btnVerrouillerSaisiePresences'); return { texte: v.textContent.trim(), h: r(v).h, visible: !v.classList.contains('u-hide') }; })(),
+                fermer: !!document.querySelector('[data-action="fermerSaisiePresences"]'),
                 etatVisible: !document.getElementById('etat-seance-presences').classList.contains('u-hide') };
         });
         expect(m.texte).toBe('Confirmer la séance');
@@ -335,6 +357,10 @@ for (const largeur of [360, 768, 1024, 1180]) {
         expect(m.deborde, 'aucun défilement horizontal').toBe(false);
         expect(m.horsCarte, 'toute la barre tient dans sa carte').toEqual([]);
         expect(m.etatVisible).toBe(true);
+        // « Verrouiller la saisie » : seul, visible, dans la carte (horsCarte ci-dessus), 44 px au moins (styles.css).
+        expect(m.verrou).toMatchObject({ texte: 'Verrouiller la saisie', visible: true });
+        expect(m.verrou.h).toBeGreaterThanOrEqual(44);
+        expect(m.fermer, '« Fermer » est parti').toBe(false);
         await page.screenshot({ path: path.join(__dirname, '..', 'test-results', `lot-d-barre-${largeur}.png`) });
         expect(erreurs).toEqual([]);
     });

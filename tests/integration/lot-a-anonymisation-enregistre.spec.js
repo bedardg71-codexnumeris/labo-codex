@@ -398,7 +398,7 @@ test('(d) volet confidentiel : ses notes s\'affichent en mode normal, rien ne s\
 // Mesuré avant le correctif : le menu des sous-groupes, rempli au démarrage seulement, gardait
 // les vrais numéros pendant que la liste passait à « Gr. A » ; le tableau tombait à zéro ligne,
 // « Verrouiller » n'écrivait rien sans un mot, et la préférence « Gr. B » s'écrivait en base.
-test('R5 présences par sous-groupe : après la bascule en anonymisation, la séance garde ses élèves et « Verrouiller » écrit', async ({ page }) => {
+test('R5 présences par sous-groupe : après la bascule en anonymisation, la séance garde ses élèves et « Verrouiller la saisie » écrit', async ({ page }) => {
     test.setTimeout(90000);
     brancherEcouteurs(page);
     await packDemo(page);
@@ -438,9 +438,11 @@ test('R5 présences par sous-groupe : après la bascule en anonymisation, la sé
         // touchées ; il ne réécrit plus depuis l'écran une ligne que personne n'a touchée.
         champ.dispatchEvent(new Event('change', { bubbles: true }));
         const date = document.getElementById('date-cours').value;
-        basculerVerrouillageDateActive();
+        // ↻ 21 oct. 2026 : le bouton de la barre (la case est partie), par le dispatcher de main.js.
+        const bouton = document.getElementById('btnVerrouillerSaisiePresences');
+        bouton.click();
         const p = (db.getSync(cle('presences'), []) || []).find(x => x.date === date && x.da === da);
-        basculerVerrouillageDateActive();
+        bouton.click();
         return { periodes: p ? p.periodesPresentes : null, pref: db.getSync(cle('presences_groupe'), null) };
     });
     expect(r.periodes).toBe(0);

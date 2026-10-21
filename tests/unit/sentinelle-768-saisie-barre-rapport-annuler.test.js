@@ -88,13 +88,14 @@ describe('#768/#782 · la barre d\'actions de la saisie', () => {
         // Au moins les trois boutons connus au 7 sept., sans figer la liste :
         // la vérification qui compte est la 3, qui les prend TOUS tels qu'ils sont.
         expect(actions).toContain('ouvrirModaleRapportPresences');
-        // Lot D (27 sept. 2026) : « Enregistrer » → « Confirmer la séance », « Annuler » → « Fermer ».
+        // Lot D (27 sept. 2026) : « Enregistrer » → « Confirmer la séance ».
         expect(actions).toContain('confirmerSeancePresences');
-        expect(actions).toContain('fermerSaisiePresences');
-        // #782 : ce contrôle n'existait QUE dans le gabarit JS, d'où sa disparition
-        // quand le gabarit est parti. Il vit désormais dans index.html.
-        expect(ids).toContain('controle-verrouillage-presences');
-        expect(ids).toContain('checkbox-verrouillage-presences');
+        // #782 : le verrou n'existait QUE dans le gabarit JS, d'où sa disparition quand le gabarit est
+        // parti. Il vit dans index.html. ↻ 21 oct. 2026 (demande de Grégoire) : la case et « Fermer »
+        // partent ; un seul bouton, « Verrouiller la saisie », sur la porte du verrou.
+        expect(actions).toContain('basculerVerrouillageDateActive');
+        expect(ids).toContain('btnVerrouillerSaisiePresences');
+        expect(actions).not.toContain('fermerSaisiePresences');
     });
 
     it('3. le cycle message → restauration laisse la barre INTACTE, quels que soient ses boutons', () => {
@@ -147,12 +148,10 @@ describe('#768/#782 · la barre d\'actions de la saisie', () => {
         expect(els['actions-presences-bar'].innerHTML).toBe(MARQUEUR);
     });
 
-    it('4. « Fermer » (ex-« Annuler ») vise une sous-section que config.js déclare', () => {
-        // Lot D : le bouton passe par `fermerSaisiePresences`, qui vide l'écriture en attente
-        // avant d'aller à la liste ; la cible se lit dans la fonction.
-        const js = lire('js/saisie-presences.js');
-        const cible = (js.split('function fermerSaisiePresences')[1].split('\n}')[0]
-            .match(/afficherSousSection\('([^']+)'\)/) || [])[1];
+    it('4. le retour à la liste se fait par une sous-section que config.js déclare', () => {
+        // ↻ 21 oct. 2026 : « Fermer » (ex-« Annuler », #768 : il visait une sous-section absente) est
+        // parti ; le retour passe par le sous-onglet « Liste » de la navigation, qui doit exister.
+        const cible = 'suivi-liste';
         const config = lire('js/config.js');
         const declare = config.match(/'suivi':\s*\[([\s\S]*?)\]/)[1];
         const valides = [...declare.matchAll(/id:\s*'([^']+)'/g)].map(m => 'suivi-' + m[1]);

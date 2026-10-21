@@ -8028,16 +8028,10 @@
                                         <button class="btn btn-principal btn-compact" data-action="ouvrirModaleRapportPresences">Rapport</button>
                                         <span id="etat-seance-presences" class="u-hide u-texte-petit" style="white-space: nowrap"></span>
                                         <button class="btn btn-confirmer btn-compact u-hide" data-action="confirmerSeancePresences">Confirmer la séance</button>
-                                        <button class="btn btn-annuler btn-compact" data-action="fermerSaisiePresences">Fermer</button>
-                                        <span id="controle-verrouillage-presences" class="u-hide u-flex-gap-6 u-align-center u-texte-petit" style="display: flex">
-                                            <input type="checkbox" id="checkbox-verrouillage-presences"
-                                                   style="width: 16px; height: 16px; accent-color: var(--bleu-principal, #1a73e8); cursor: pointer"
-                                                   data-on-change="basculerVerrouillageDateActive">
-                                            <label for="checkbox-verrouillage-presences" style="cursor: pointer; user-select: none; white-space: nowrap">
-                                                <span id="icone-verrouillage-presences"><img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon"></span>
-                                                <span id="texte-verrouillage-presences">Verrouiller</span>
-                                            </label>
-                                        </span>
+                                        <!-- « Verrouiller la saisie » (21 oct. 2026, demande de Grégoire) : un seul bouton, comme « Verrouiller
+                                             l'évaluation ». Il remplace « Fermer » et la case ; son libellé suit le verrou (saisie-presences.js,
+                                             `mettreAJourControleVerrouillage`). Le retour à la liste : le sous-onglet « Liste ». -->
+                                        <button id="btnVerrouillerSaisiePresences" class="btn btn-principal btn-compact u-hide" data-action="basculerVerrouillageDateActive">Verrouiller la saisie</button>
                                     </span>
                                 </div>
                             </div>
@@ -14312,7 +14306,7 @@
     <script src="js/objectifs.js?v=20261010b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20261017a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20261012a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20261020a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20261017a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->

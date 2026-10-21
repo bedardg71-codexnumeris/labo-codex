@@ -673,14 +673,17 @@ describe('3 · Saisie des présences — écritures, répétition, verrouillage,
         // La ligne porte `<div id="suivi-saisie" class="sous-section">` : [1] = de la sous-section de
         // saisie jusqu'à la suivante.
         const indexHtml = readFileSync(path.join(RACINE, 'index.html'), 'utf8').split('id="suivi-saisie"')[1].split('class="sous-section"')[1];
-        noter('S5', { rapportDansBarre: html.includes('ouvrirModaleRapportPresences'), rapportDansIndex: indexHtml.includes('ouvrirModaleRapportPresences'), fermer: html.includes('data-action="fermerSaisiePresences"'), sousSectionsSuivi: sousSectionsSuivi.map(x => x.replace(/id:\s*'/, '').replace(/'$/, '')) });
+        noter('S5', { rapportDansBarre: html.includes('ouvrirModaleRapportPresences'), rapportDansIndex: indexHtml.includes('ouvrirModaleRapportPresences'), verrou: html.includes('data-action="basculerVerrouillageDateActive"'), sousSectionsSuivi: sousSectionsSuivi.map(x => x.replace(/id:\s*'/, '').replace(/'$/, '')) });
         expect(indexHtml).toContain('ouvrirModaleRapportPresences');
         expect(html).toContain('ouvrirModaleRapportPresences');                   // avant #768 : absent de la barre reconstruite
-        // Lot D : « Annuler » devient « Fermer » (fermerSaisiePresences vide l'écriture en attente,
-        // puis va à suivi-liste). Avant #768 : suivi-apercu-legacy.
-        expect(html).toContain('data-action="fermerSaisiePresences"');
-        const js = readFileSync(path.join(RACINE, 'js/saisie-presences.js'), 'utf8');
-        expect(js.split('function fermerSaisiePresences')[1].split('\n}')[0]).toContain("afficherSousSection('suivi-liste')");
+        // ↻ 21 oct. 2026 (demande de Grégoire) : « Fermer » et la case partent ; un seul bouton, « Verrouiller la
+        // saisie », sur la porte du verrou. Le retour à la liste passe par le sous-onglet « Liste », que config.js
+        // déclare. Avant le lot D : « Annuler », qui visait suivi-apercu-legacy (#768).
+        expect(html).toContain('data-action="basculerVerrouillageDateActive"');
+        expect(html).not.toContain('fermerSaisiePresences');
+        // (`sousSectionsSuivi` ci-dessus, noté seulement, cherche `suivi:` sans guillemets et rend [] ; la clé est `'suivi':`.)
+        const suiviDeclare = (config.match(/'suivi':\s*\[([\s\S]*?)\]/) || ['', ''])[1];
+        expect([...suiviDeclare.matchAll(/id:\s*'([^']+)'/g)].map(m => m[1])).toContain('liste');
         expect(html).not.toContain('apercu-legacy');
     });
 
