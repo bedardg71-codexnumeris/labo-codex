@@ -87,7 +87,7 @@ var MODELES = [
     {
         id: 'penalite_normalisee',
         nom: 'Pénalité normalisée',
-        description: 'La pénalité est proportionnelle au taux d’erreurs, ramené à une longueur de référence. Formule employée depuis l’origine pour le français écrit.',
+        description: 'La pénalité est proportionnelle au taux d’erreurs, ramené à une longueur de référence.',
         utiliseMots: true,
         parametres: [
             {

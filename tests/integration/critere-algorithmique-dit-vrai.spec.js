@@ -154,9 +154,9 @@ test('#1131 · un critère algorithmique en création reçoit ses sous-critères
     await carte.locator('select[data-on-change="modifierTypeCritereTempHandler"]').selectOption('algorithmique');
     await expect(carte).not.toContainText('Les sous-critères se définissent une fois la grille enregistrée.');
     await carte.locator('[data-action="initialiserSousCriteresParDefaut"]').click();
-    await expect(carte.locator('.sous-critere-item')).toHaveCount(11);
+    await expect(carte.locator('.sous-critere-item')).toHaveCount(10);   // ↻ lot de mots (21 oct.) : la liste de Grégoire, codes 1 à 10
     await carte.locator('.sous-criteres-btn-ajouter-liste').click();
-    await expect(carte.locator('.sous-critere-item')).toHaveCount(12);
+    await expect(carte.locator('.sous-critere-item')).toHaveCount(11);
     // ↻ Étape 0 (21 oct.) : né marqué, le critère tire ses codes de ses sous-critères — pas de case à cocher.
     await expect(carte.locator('input[data-on-change="modifierCodesDepuisSousCriteresHandler"]')).toHaveCount(0);
     await page.evaluate(() => db.flush());
@@ -166,6 +166,6 @@ test('#1131 · un critère algorithmique en création reçoit ses sous-critères
     const c = await page.evaluate(() => db.getSync(cle('grillesTemplates'), []).find((g) => g.nom === 'Grille algorithmique fictive').criteres[0]);
     expect(c.type).toBe('algorithmique');
     expect(c.codesSousCriteresSeulement).toBe(true);
-    expect(c.sousCriteres.map((s) => s.code)).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']);
+    expect(c.sousCriteres.map((s) => s.code)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']);
     expect(erreurs).toEqual([]);
 });

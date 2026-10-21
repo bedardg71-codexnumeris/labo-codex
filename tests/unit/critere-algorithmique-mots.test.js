@@ -1,0 +1,198 @@
+/**
+ * LE CRITÈRE ALGORITHMIQUE, LOT DE MOTS (21 oct. 2026) — l'aide dit vrai pour toute discipline, et la liste du
+ * français écrit est celle de Grégoire.
+ *
+ * Consigne : plans de travail/CONSIGNE-LOT-2026-10-21-critere-algorithmique-mots.md ; textes réglés par Grégoire
+ * (9 h 51), ajustés par Cowork (9 h 58) : plans de travail/TEXTES-2026-10-21-critere-algorithmique.md.
+ *
+ * Ce que ce banc verrouille :
+ *   T — chaque texte A1 à F1 à son site, par sa chaîne exacte (et chaque chaîne est bien celle du fichier réglé,
+ *       apostrophes ramenées à une seule forme : la convention de chaque site décide de la sienne) ;
+ *   L — « Partir de la liste du français écrit (codes 1 à 10) » crée dix sous-critères, codes 1 à 10, identiques
+ *       à ceux du critère « Français écrit » de la grille démo « Grille-5 FR-ALGO-20 H26 », hors code 0 ;
+ *   X — aucune des chaînes parties dans `js/` ni dans la section 5c d'`index.html`.
+ *
+ * Break-tests (faits le 21 oct.) : voir la demande de relecture. Grilles et textes FICTIFS.
+ */
+import { describe, it, expect, beforeAll } from 'vitest';
+import { JSDOM } from 'jsdom';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chargerScript } from './_helpers/charger-script.js';
+
+const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
+const plat = (s) => String(s).replace(/\s+/g, ' ').trim();
+const apostrophes = (s) => s.replace(/’/g, "'");
+const REGLES = apostrophes(lire('plans de travail/TEXTES-2026-10-21-critere-algorithmique.md'));
+
+/* ======================================================= T — LES TEXTES À LEURS SITES */
+
+const A1 = 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (une formule calcule la note à partir de ce que tu comptes sur la copie).';
+const A2 = 'Algorithmique : une formule calcule la note à partir de ce que tu comptes sur la copie.';
+const A3 = 'Méthode d’évaluation du critère : holistique (tu attribues un niveau de l’échelle), analytique (tu attribues des points, que son barème décrit) ou algorithmique (une formule calcule la note à partir de ce que tu comptes).';
+const B1 = 'La note de ce critère se calcule par une formule. « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape. La rétroaction se compose avec les phrases écrites dans la grille.';
+const B2 = 'Le niveau de chaque évaluation, dans l\'échelle qu\'elle emploie.';
+const B3 = 'Résultat calculé en temps réel : le pourcentage pondéré, et son niveau dans l\'échelle de l\'évaluation.';
+const C1 = 'somme pondérée';
+const C2 = 'Entre parenthèses, le nombre une fois pondéré : « (5 une fois pondérées) ». Il ne paraît que si un sous-critère ne pèse pas 1 ; place-le juste après le nombre. Une phrase sans lui ne montre que le nombre posé, mais la ligne du calcul, dans le PDF, montre la parenthèse.';
+const F1 = 'La pénalité est proportionnelle au taux d’erreurs, ramené à une longueur de référence.';
+const D = {
+    D1: '5c. Les critères algorithmiques',
+    D2: 'Un critère algorithmique calcule sa note par une formule, à partir de ce que tu comptes sur la copie. Tu choisis la formule dans le gabarit de la grille : un modèle, puis ses paramètres.',
+    D2a: 'Pénalité normalisée : Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur). Le nombre est ramené à une longueur de référence.',
+    D2b: 'Ratio mots par erreur : atteindre le ratio visé donne la note complète.',
+    D2c: 'Pénalité fixe par erreur : chaque erreur retire un nombre de points donné, sans égard à la longueur.',
+    D2d: 'La formule, avec tes valeurs, s\'affiche dans le gabarit et sous le résultat au moment d\'évaluer.',
+    D3: 'Les mots du calcul, « erreurs » et « mots », sont ceux d\'un critère de rédaction. Ils valent pour tout ce qui se compte : des unités oubliées sur douze calculs, des fautes de rythme sur trente-deux mesures.',
+    D4: 'Les sous-critères sont les catégories de ce que tu comptes. Chacun porte un code, un nom, une pondération et une observation : ce que l\'étudiant·e lit à propos de ce code. La pondération dit ce que pèse une occurrence : 1 par défaut, 0,5 pour la compter à moitié ; un sous-critère de pondération 0 ne se pose pas.',
+    D4b: 'Exemple : sept codes posés, trois d\'un sous-critère qui pèse 1 et quatre d\'un sous-critère qui pèse 0,5. La formule reçoit 3 + 2 = 5, et l\'étudiant·e lit « 7 erreurs (5 une fois pondérées) ».',
+    D5: 'Sous le critère, « + Ajouter un sous-critère » en crée un. « Partir de la liste du français écrit » crée d\'un coup dix catégories d\'une correction du français (codes 1 à 10), toutes de pondération 1, que tu modifies ensuite comme les tiennes.',
+    D6: 'Dans Annoter, les sous-critères sont les codes que tu poses, sur toute copie évaluée avec cette grille. Chaque code posé compte une occurrence de son sous-critère ; « Nombre d\'erreurs » se remplit tout seul, et la formule reçoit le nombre pondéré. Sans code posé, tu tapes le nombre : il compte tel quel, sans pondération. Une grille plus ancienne montre la case « Utiliser ces sous-critères comme codes d\'annotation » ; décochée, sa palette garde les dix codes de départ, des codes de correction du français.',
+    D7: 'L\'étudiant·e lit la phrase du décompte écrite dans la grille et, dans son PDF, la ligne du calcul : « 7 erreurs (5 une fois pondérées) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.',
+    D8: 'Règle les pondérations avant de corriger. Une copie déjà évaluée garde sa note jusqu\'à ce que tu y ajoutes ou retires un code ; la pondération s\'applique alors à toute la copie.'
+};
+
+let cat, section;
+beforeAll(() => {
+    cat = {};
+    const win = { accompagnement: { ajouterEntrees: (e) => Object.assign(cat, e) } };
+    chargerScript('js/accompagnement-contenu-terme.js', {}, win);
+    chargerScript('js/accompagnement-contenu-popup.js', {}, win);
+    chargerScript('js/accompagnement-contenu-hover.js', {}, win);
+    const dom = new JSDOM(lire('index.html'));
+    section = dom.window.document.getElementById('accordeon-aide-sous-criteres');
+});
+
+describe('lot de mots · T — chaque texte à son site', () => {
+    it('T.0 chaque chaîne du banc est celle du fichier réglé', () => {
+        // F1 n'a pas de texte réglé : « retirer la phrase […] ; le reste de la description ne change pas ».
+        for (const [k, s] of Object.entries({ A1, A2, A3, B1, B2, B3, C1, C2, ...D })) {
+            expect(REGLES.includes(apostrophes(s)), k).toBe(true);
+        }
+    });
+
+    it('A1 au lexique, A2 à l’aide « i », A3 à la bulle du champ', () => {
+        expect(cat['terme-type-de-critere'].terme.definition).toBe(A1);
+        const items = cat['grille-type-critere-detail'].popup.sections[0].items;
+        expect(items.map((i) => i.replace(/<[^>]+>/g, ''))).toContain(A2);
+        expect(cat['cn-grille-type-critere'].hover).toBe(A3);
+    });
+
+    it('B1 à B3 aux bulles de l’évaluation', () => {
+        expect(cat['eval-francais-ecrit'].hover).toBe(B1);
+        expect(cat['eval-col-niveau'].hover).toBe(B2);
+        expect(cat['eval-note-finale'].hover).toBe(B3);
+    });
+
+    it('C1 et C2 : le repère {points}', () => {
+        const r = chargerScript('js/evaluation-enonces.js').enoncesAlgo.listerReperes().find((x) => x.espaceDeTete);
+        expect(r.libelle).toBe(C1);
+        expect(r.aide).toBe(C2);
+    });
+
+    it('F1 : la description de « Pénalité normalisée », sans la phrase de l’origine', () => {
+        expect(chargerScript('js/evaluation-formules.js').formulesAlgo.obtenirModele('penalite_normalisee').description).toBe(F1);
+    });
+
+    it('D1 à D8 dans la section 5c, D9 parti', () => {
+        expect(plat(section.querySelector('h3').textContent).replace(/^▼ /, '')).toBe(D.D1);
+        const blocs = [...section.querySelectorAll('.accordeon-contenu > p, .accordeon-contenu li, .accordeon-contenu > .alerte')].map((e) => plat(e.textContent));
+        for (const [k, s] of Object.entries(D)) {
+            if (k !== 'D1') expect(blocs, k).toContain(s);
+        }
+        // D2 : une ligne par modèle, et seulement elles.
+        expect([...section.querySelectorAll('li')].map((e) => plat(e.textContent))).toEqual([D.D2a, D.D2b, D.D2c]);
+        expect(section.textContent).not.toContain('Avantages pédagogiques');
+    });
+});
+
+/* ======================================================= L — LA LISTE DU FRANÇAIS ÉCRIT */
+
+function listeDemo() {
+    const win = chargerScript('js/pack-demo-10.js');
+    const g = win.PACK_DEMARRAGE.grillesTemplates.find((x) => x.nom === 'Grille-5 FR-ALGO-20 H26');
+    return g.criteres.find((c) => c.nom === 'Français écrit').sousCriteres;
+}
+
+/** Le vrai `grilles.js` sur les vrais registres (comme le banc de l'étape 0) : le bouton écrit sur un critère en création. */
+function monterBouton() {
+    const dom = new JSDOM('<!doctype html><html><body><div id="listeCriteres"></div><span id="totalPonderationAffichage"></span></body></html>');
+    const document = dom.window.document;
+    const win = { echapperHtml: (s) => String(s), addEventListener() {}, removeEventListener() {} };
+    const db = { get: async () => null, getSync: (k, d) => d, set: async () => {}, setSync() {}, modifier: async () => undefined };
+    chargerScript('js/ui-blocs.js', { document }, win);
+    chargerScript('js/bareme.js', {}, win);
+    chargerScript('js/evaluation-formules.js', {}, win);
+    chargerScript('js/evaluation-enonces.js', {}, win);
+    chargerScript('js/evaluation-projection.js', {}, win);
+    chargerScript('js/codes-annotation.js', { db }, win);
+    win.temoinEnregistrement = { enregistre() {}, fermer() {}, nonEnregistre() {} };
+    chargerScript('js/grilles.js', {
+        db, cle: (k) => 'a2032_' + k, document: dom.window.document, echapperHtml: (s) => String(s), alert() {}, confirm: () => true,
+        genererIdUnique: (p) => p + 'banc', notifications: { succes() {}, erreur() {}, info() {}, avertissement() {} }
+    }, win);
+    return win;
+}
+
+describe('lot de mots · L — la liste du français écrit est celle de Grégoire', () => {
+    it('L.a le bouton crée les dix sous-critères de la grille démo, codes 1 à 10, sans le code 0', async () => {
+        const win = monterBouton();
+        win.tempCriteres = [{ nom: 'Français écrit', type: 'algorithmique', ponderation: 20 }];
+        await win.initialiserSousCriteresParDefaut('temp', 0);
+        const crees = win.tempCriteres[0].sousCriteres;
+        expect(crees.map((s) => s.code)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+        expect(crees).toEqual(listeDemo().filter((s) => s.code !== '0'));
+    });
+
+    it('L.b chaque pression donne une copie neuve : la liste du code ne se modifie pas par la grille', async () => {
+        const win = monterBouton();
+        win.tempCriteres = [{ type: 'algorithmique' }, { type: 'algorithmique' }];
+        await win.initialiserSousCriteresParDefaut('temp', 0);
+        await win.initialiserSousCriteresParDefaut('temp', 1);
+        win.tempCriteres[0].sousCriteres[0].nom = 'Retouché';
+        expect(win.tempCriteres[1].sousCriteres[0].nom).toBe('Construction syntaxique ou accord du verbe');
+    });
+
+    it('L.c une seule définition de la liste dans le code applicatif', () => {
+        const fichiers = (d) => readdirSync(path.join(racine, d)).flatMap((n) => {
+            const r = path.join(d, n);
+            return statSync(path.join(racine, r)).isDirectory() ? fichiers(r) : (r.endsWith('.js') ? [r] : []);
+        });
+        const porteurs = fichiers('js').filter((f) => f !== path.join('js', 'pack-demo-10.js') && lire(f).includes('Accord du pronom ou le lien avec son antécédent'));
+        expect(porteurs).toEqual([path.join('js', 'grilles.js')]);
+        expect(lire('js/grilles.js').split('Accord du pronom ou le lien avec son antécédent').length - 1).toBe(1);
+    });
+});
+
+/* ======================================================= X — CE QUI EST PARTI */
+
+describe('lot de mots · X — ce qui ne doit plus rester', () => {
+    const PARTIS = [
+        'Méthodes quantitatives',
+        'Annexe de grammaire de ton manuel',
+        'Activer la catégorisation des erreurs',
+        '3;3;1',
+        'depuis l’origine pour le français écrit',
+        'nombre d’erreurs / nombre de mots × 100'
+    ];
+
+    it('X.a aucune chaîne partie dans js/', () => {
+        const fichiers = (d) => readdirSync(path.join(racine, d)).flatMap((n) => {
+            const r = path.join(d, n);
+            return statSync(path.join(racine, r)).isDirectory() ? fichiers(r) : (r.endsWith('.js') ? [r] : []);
+        });
+        const touches = [];
+        for (const f of fichiers('js')) {
+            const t = lire(f);
+            for (const s of PARTIS) if (t.includes(s)) touches.push(f + ' : ' + s);
+        }
+        expect(touches).toEqual([]);
+    });
+
+    it('X.b aucune chaîne partie dans la section 5c', () => {
+        const t = section.innerHTML;
+        expect(PARTIS.filter((s) => t.includes(s))).toEqual([]);
+    });
+});

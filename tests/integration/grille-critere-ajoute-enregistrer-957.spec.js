@@ -138,7 +138,7 @@ test('#957 — sous-critères : ajouter, modifier, supprimer, puis « Enregistre
     expect(await nbSc(), 'suppression d\'un sous-critère défaite par « Enregistrer »').toBe(avantSupp - 1);
 });
 
-test('#957 — sous-critères par défaut (0-10), puis « Enregistrer » : les onze restent', async ({ page }) => {
+test('#957 — la liste du français écrit (codes 1 à 10), puis « Enregistrer » : les dix restent', async ({ page }) => {
     test.setTimeout(90000);
     brancher(page);
     await ouvrirDemo(page);
@@ -151,9 +151,9 @@ test('#957 — sous-critères par défaut (0-10), puis « Enregistrer » : les o
     await page.evaluate((id) => chargerGrillePourModif(id), id);
     await pause(page, 900);
     await cliquer(page, `[data-action="initialiserSousCriteresParDefaut"][data-param="${id}"][data-param2="${idx}"]`);
-    expect((await lireGrille(page, id)).criteres[idx].sousCriteres.length).toBe(11);
+    expect((await lireGrille(page, id)).criteres[idx].sousCriteres.length).toBe(10);
     await ecrireLeFormulaire(page);
-    expect((await lireGrille(page, id)).criteres[idx].sousCriteres.length, 'sous-critères par défaut défaits par « Enregistrer »').toBe(11);
+    expect((await lireGrille(page, id)).criteres[idx].sousCriteres.length, 'sous-critères par défaut défaits par « Enregistrer »').toBe(10);
 });
 
 test('#957 — témoin : le changement du nom écrit encore le nom tapé dans le formulaire', async ({ page }) => {

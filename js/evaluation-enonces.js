@@ -196,8 +196,8 @@ var REPERES = [
       aide: 'Le nombre d\'erreurs comptées sur la copie, à la correction.' },
     { jeton: JETON_MOTS,    famille: 'remplie', libelle: 'nombre de mots',
       aide: 'Le nombre de mots de la production, saisi à la correction.' },
-    { jeton: JETON_POINTS,  famille: 'remplie', libelle: 'points pondérés', espaceDeTete: true,
-      aide: 'Entre parenthèses, le compte en points quand les catégories d\'erreurs ne pèsent pas toutes pareil. Vide autrement.' }
+    { jeton: JETON_POINTS,  famille: 'remplie', libelle: 'somme pondérée', espaceDeTete: true,
+      aide: 'Entre parenthèses, le nombre une fois pondéré : « (5 une fois pondérées) ». Il ne paraît que si un sous-critère ne pèse pas 1 ; place-le juste après le nombre. Une phrase sans lui ne montre que le nombre posé, mais la ligne du calcul, dans le PDF, montre la parenthèse.' }
 ];
 
 // ---------------------------------------------------------------------

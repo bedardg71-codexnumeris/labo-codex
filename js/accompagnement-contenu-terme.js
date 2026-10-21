@@ -102,7 +102,7 @@ const GLOSSAIRE = {
         categorie: 'Structure',
         etape: 'numerisation',
         // A4, validé G. 20 oct. 2026, 9 h 23 : ce que fait l'application (un niveau, ou des points que décrit un barème).
-        definition: 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (calcul automatique selon une formule, ex. : nombre d’erreurs / nombre de mots × 100 pour le français écrit).',
+        definition: 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (une formule calcule la note à partir de ce que tu comptes sur la copie).',
         voir: 'Conception > Grilles'
     },
 
