@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.213 (le critère algorithmique pour toute discipline, les notes à la française, « Verrouiller la saisie ») —
+            // titre et six items proposés par Cowork (21 oct. 2026, 12 h 17) à partir des items proposés par Claude Code
+            // dans les demandes de relecture du jour, validés par Grégoire tels quels à 12 h 18 (« c'est bon »).
+            version: '1.213',
+            couleur: 'vert',
+            titre: 'Le critère algorithmique pour toute discipline, et des notes à la française',
+            items: [
+                'Une grille neuve porte ses sous-critères et son barème dès sa création&nbsp;; le barème vient sous les sous-critères.',
+                'Critère algorithmique&nbsp;: la pondération d’un sous-critère s’applique maintenant aux codes que tu poses. Quand elle change le compte, l’élève lit «&nbsp;7 erreurs (5 une fois pondérées)&nbsp;». Avec des pondérations à 1, rien ne change.',
+                'Un critère algorithmique neuf ne reçoit plus d’office les codes du français&nbsp;: ses codes sont ses sous-critères, dans toute discipline. «&nbsp;Partir de la liste du français écrit&nbsp;» donne dix catégories de correction du français.',
+                'L’aide du critère algorithmique décrit ce que fait l’application, pour toute discipline. À l’évaluation, une grille en points affiche «&nbsp;(30 points)&nbsp;», et le niveau nomme son échelle.',
+                'Les notes s’écrivent à la française partout où elles s’affichent et dans le PDF de l’élève&nbsp;: «&nbsp;89,2&nbsp;%&nbsp;», une décimale au plus.',
+                'Saisie des présences&nbsp;: un seul bouton, «&nbsp;Verrouiller la saisie&nbsp;», remplace «&nbsp;Fermer&nbsp;» et la case à cocher. Une séance verrouillée le dit, avec son cadenas.'
+            ]
+        },
+        {
             // 1.212 (le PDF de la grille lit le barème, à la forme de la grille d'origine ; la fiche de production
             // après « Préparer le PDF ») — titre et trois items proposés par Cowork (20 oct. 2026, 18 h 58), validés
             // par Grégoire tels quels à 18 h 59.
