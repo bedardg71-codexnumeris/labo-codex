@@ -206,7 +206,7 @@ describe('lot 3 · A — le « fini quand » : 24 sur 30 trouve son niveau, et l
         taper(win, ecran, '24');
         expect(ec.pointsAnalytiques.c2).toBe(24);
         expect(ec.criteres.c2, 'le niveau déduit, sous le même nom que les niveaux choisis au menu').toBe('M');
-        expect(ecran.noteProduction1.textContent).toBe('80.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('80\u00A0%');
         expect(ecran.niveauProduction1.textContent).toBe('M');
     });
 
@@ -271,7 +271,7 @@ describe('lot 3 · B — le niveau suit les points, et seulement eux', () => {
         expect(ec.criteres.c2).toBe('I');
         expect(ecran.comm_c2.textContent).toBe('La langue nuit à la lecture.');
         // …et ZÉRO point compte dans la note (lot 2) : 0,8 × 70 + 0 = 56,0 %.
-        expect(ecran.noteProduction1.textContent).toBe('56.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('56\u00A0%');
     });
 
     it('B.d une échelle À TROUS — ↻ #701 : le niveau LE PLUS PROCHE (règle unique des trois chemins) ; le niveau périmé ne reste pas, les points comptent seuls', () => {
@@ -283,7 +283,7 @@ describe('lot 3 · B — le niveau suit les points, et seulement eux', () => {
         taper(win, ecran, '10'); expect(ec.criteres.c2).toBe('I');
         taper(win, ecran, '24');   // 80 % : entre 54 et 85, aucune plage — milieu de M (92,5) à 12,5, milieu de I (27) à 53
         expect(ec.criteres.c2, 'un « I » périmé n\'ouvrirait plus la bonne cartouche ; avant #701 : undefined').toBe('M');
-        expect(ecran.noteProduction1.textContent, 'la note compte les points sans niveau : 0,9 × 70 + 24').toBe('87.0 %');
+        expect(ecran.noteProduction1.textContent, 'la note compte les points sans niveau : 0,9 × 70 + 24').toBe('87\u00A0%');
         expect(win.porteeCalculeeCourante.incomplete).toBe(false);
     });
 
@@ -424,7 +424,7 @@ describe('lot 3 · D — ce que l\'élève lit d\'un critère analytique : le ch
         expect(cases, 'quatre cases pour Contenu, aucune pour Langue').toBe(4);
         // Sous le nom de Langue, pas de « 30% » : le maximum EST le poids, déjà dit par « / 30 ».
         expect(page).not.toContain('30%');
-        expect(page).toContain('70%');
+        expect(page).toContain('70\u00A0%');
         expect(page).toContain('Ta langue est maîtrisée.');
     });
 
@@ -435,7 +435,7 @@ describe('lot 3 · D — ce que l\'élève lit d\'un critère analytique : le ch
         const page = pdf.html(pdf.feedback(avant));
         expect(page).not.toContain('24 / 30');
         expect((page.match(/flex: 1; height: 18px;[^>]*>[IDME]<\/div>/g) || []).length).toBe(8);
-        expect(page).toContain('30%');
+        expect(page).toContain('30\u00A0%');
     });
 
     it('D.e la porte que la consigne nomme : sans niveau, la clé `critereId_niveau` ne se forme pas et le commentaire reste vide EN SILENCE ; le niveau déduit la referme', () => {
@@ -500,7 +500,7 @@ describe('lot 3 · E — rien ne bouge pour un critère holistique, algorithmiqu
             cle: (k) => 'test_' + k, valeurNumeriqueDuNiveau
         }, { addEventListener() {}, removeEventListener() {} });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('84.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('84\u00A0%');
         expect(ec.criteres).toEqual({ c1: 'E', c2: 'E', c3: 'I' });
     });
 
@@ -511,7 +511,7 @@ describe('lot 3 · E — rien ne bouge pour un critère holistique, algorithmiqu
         const ev = evaluationEcrite(ecritures, 'EVAL_NEUF');
         expect(ev.criteres.map((c) => c.critereId + ':' + c.niveauSelectionne)).toEqual(['c1:M', 'c2:D']);
         expect(ev.criteres.some((c) => 'points' in c)).toBe(false);
-        expect(ecran.noteProduction1.textContent).toBe('75.5 %');
+        expect(ecran.noteProduction1.textContent).toBe('75,5\u00A0%');
     });
 });
 
@@ -789,7 +789,7 @@ describe('lot 3 · F — témoins de source', () => {
     it('F.e le chiffre est ce que l\'élève lit : synthèse (données + rendu), rétroaction copiée, aperçu enseignant', () => {
         expect(source('js/synthese-retroaction-data.js')).toContain('points:  points,');
         expect(source('js/synthese-retroaction-data.js')).toContain("'Saisis les points'");
-        expect(source('js/synthese-retroaction-rendu.js')).toContain('${esc(critere.points)} / ${esc(critere.weight)}');
+        expect(source('js/synthese-retroaction-rendu.js')).toContain('${esc(nombreFr(critere.points))} / ${esc(nombreFr(critere.weight))}');   // 21 oct. 2026 : la virgule du PDF de l'élève
         expect(source('js/evaluation-retroaction.js')).toContain('? `${ptsAnalytiques} / ${critere.ponderation}` : niveau;');
         expect(source('js/travaux-export-pdf.js')).toContain('? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || \'—\');');
         // Seconde retouche (§6) : le bilan du PDF, trois sites, une lecture ; et la légende conditionnée.

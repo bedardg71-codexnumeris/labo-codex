@@ -130,7 +130,7 @@ test('#699 · rouvrir une évaluation, changer UN niveau : l\'auto-save écrit l
     });
     expect(restaure.selects, 'les trois niveaux enregistrés doivent être revenus dans les selects').toEqual({ c1: 'E', c2: 'E', c3: 'I' });
     expect(restaure.idModification, 'la réouverture doit désigner l\'existante').toBe('EV699');
-    expect(restaure.note).toBe('84.0 %');
+    expect(restaure.note).toBe('84\u00A0%');
     test.info().annotations.push({
         type: '#646 · deux emplacements, après réouverture',
         description: `nu === window : ${restaure.memeObjet} · nu ${JSON.stringify(restaure.critNu)} · window ${JSON.stringify(restaure.critWindow)}`
@@ -166,7 +166,7 @@ test('#699 · rouvrir une évaluation, changer UN niveau : l\'auto-save écrit l
         type: '#646 · après le changement',
         description: `nu ${JSON.stringify(apres.critNu)} · window ${JSON.stringify(apres.critWindow)} · base ${JSON.stringify(apres.base)}`
     });
-    expect(apres.ecranNote, 'l\'écran du calcul').toBe('95.0 %');
+    expect(apres.ecranNote, 'l\'écran du calcul').toBe('95\u00A0%');
     expect(apres.ecranNiveau).toBe('E');
     expect(apres.base, 'l\'auto-save doit avoir réécrit EV699').not.toBeNull();
     // ⚠ LE CŒUR DU BANC : la base doit porter la note ET les critères que le calcul a lus.

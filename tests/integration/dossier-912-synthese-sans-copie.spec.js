@@ -157,7 +157,8 @@ test('Porte #912 · #674 : une note qui ne porte pas sur toute la grille refuse 
     await expect.poll(() => suivi.dialogues.length, { timeout: 10000 }).toBe(1);
     expect(pdf).toEqual([{ nom: 'synthese_Léa_Gagnon_p912.pdf', pages: 1 }]);
     expect(html[0]).toContain('Cette copie n’a pas de niveau général');
-    expect(html[0]).toContain('Structure (40 %)');
+    // 21 oct. 2026 : le PDF porte U+00A0 ; lu par innerHTML, le navigateur le sérialise en « &nbsp; ».
+    expect(html[0]).toContain('Structure (40&nbsp;%)');
     expect(suivi.dialogues[0]).toMatch(/^Le PDF a été exporté, mais la note de cette copie ne porte pas sur toute la grille/);
 });
 

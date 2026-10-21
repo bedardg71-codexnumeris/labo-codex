@@ -22,7 +22,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -33,7 +33,7 @@ function chargerAvecInterne(chemin, globaux, win, noms) {
     let code = readFileSync(path.join(RACINE, chemin), 'utf8');
     const fin = code.lastIndexOf('})();');
     code = code.slice(0, fin) + '\n;window.__banc = {' + noms.map(n => n + ': ' + n).join(', ') + '};\n' + code.slice(fin);
-    const { document: doc, ...autres } = globaux;
+    const { document: doc, ...autres } = completerNoteParDefaut(globaux);   // 21 oct. 2026 (voir charger-script.js)
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     const nomsG = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres)];
     new Function(...nomsG, '"use strict";\n' + code)(win, doc, console, storage(), storage(), ...Object.values(autres));
@@ -212,6 +212,7 @@ function rendre(b, da) {
         regle: texte(/Règle de sélection :<\/strong>\s*([\s\S]*?)<br>/),
         retenues: texte(/retenu[^<(]*(\([^)]*\)) :<\/strong>/),
         liste: texte(/retenu[^<]*:<\/strong>\s*([^\n<]*)/),
+        // `texte` ramène tout blanc à une espace : l'insécable de « 80,8 % » (21 oct. 2026) s'y lit comme une espace.
         calculP: texte(/Calcul de l'indice P :<\/strong>\s*([\s\S]*?)<br>/),
         bloc: texte(/profil-liste-simple[\s\S]*?<strong>• ([^<]*)</)
     };
@@ -226,7 +227,7 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         expect(r.bloc).toContain('(4 meilleurs,');
         expect(r.retenues).toBe('(4 meilleurs artefacts sur 5 évalués)');   // les mots de la carte de la note
         expect(r.liste).toBe('1. Artefact 5 → 90.0/100 • 2. Artefact 1 → 85.0/100 • 3. Artefact 3 → 78.0/100 • 4. Artefact 4 → 70.0/100');
-        expect(r.calculP).toBe('Moyenne des 4 artefacts retenus — P = (90.0 + 85.0 + 78.0 + 70.0) / 4 = <strong>80.8%</strong>');
+        expect(r.calculP).toBe('Moyenne des 4 artefacts retenus — P = (90 + 85 + 78 + 70) / 4 = <strong>80,8 %</strong>');
         expect(r.html).not.toContain('Calcul impossible');
         // Les retenues du panneau sont celles de la note, par identité.
         const ids = b.win.calculerDetailsNoteFinale(DA.STD).portfolio.artefactsRetenus.map(a => a.productionId).sort();
@@ -240,13 +241,13 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         expect(r.regle).toContain('<strong>4 plus récentes productions</strong>');
         expect(r.retenues).toBe('(4 plus récents artefacts sur 5 évalués)');
         expect(r.liste).toBe('1. Artefact 5 → 90.0/100 • 2. Artefact 3 → 78.0/100 • 3. Artefact 4 → 70.0/100 • 4. Artefact 2 → 60.0/100');
-        expect(r.calculP).toBe('Moyenne des 4 artefacts retenus — P = (90.0 + 78.0 + 70.0 + 60.0) / 4 = <strong>74.5%</strong>');
+        expect(r.calculP).toBe('Moyenne des 4 artefacts retenus — P = (90 + 78 + 70 + 60) / 4 = <strong>74,5 %</strong>');
     });
 
     it('Standards avec terminale : la moyenne des retenues n\'est pas P — la ligne le dit par la formule de la carte', () => {
         const b = monter(jeuSTD({ terminale: true }));
         const r = rendre(b, DA.STD);
-        expect(r.calculP).toBe('Moyenne des 4 artefacts retenus = (90.0 + 85.0 + 78.0 + 70.0) / 4 = <strong>80.8%</strong> ; P = portfolio × 60 % + terminale × 40 %');
+        expect(r.calculP).toBe('Moyenne des 4 artefacts retenus = (90 + 85 + 78 + 70) / 4 = <strong>80,8 %</strong> ; P = portfolio × 60 % + terminale × 40 %');
     });
 
     it('Standards hybride par catégories : 2 meilleures de la Sélection et l\'obligatoire ; aucune addition qui ne redonnerait pas la moyenne pondérée', () => {

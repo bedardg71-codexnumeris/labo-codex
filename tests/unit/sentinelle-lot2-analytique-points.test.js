@@ -127,7 +127,7 @@ describe('lot 2 · A — le « fini quand » : 24 sur 30, et l\'on lit 80 %', ()
     it('A.a le cas littéral : un critère qui pèse 30, 24 points → 80,0 % et le niveau que 80 % trouve', () => {
         const { win, ecran } = monter({ grille: GRILLE_ANALYTIQUE_SEULE, points: { k: 24 } });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('80.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('80\u00A0%');
         expect(ecran.niveauProduction1.textContent).toBe('M');
         expect(win.noteCalculeeCourante).toBe(80);
         expect(win.porteeCalculeeCourante).toMatchObject({ ponderationCouverte: 30, ponderationGrille: 30, incomplete: false, criteresHorsNote: [] });
@@ -139,18 +139,18 @@ describe('lot 2 · A — le « fini quand » : 24 sur 30, et l\'on lit 80 %', ()
         const { win, ecran, ec } = monter({ niveaux: { c1: 'M' }, points: { c2: 24 } });
         win.calculerNote();
         // 0,8 × 70 + 0,8 × 30 = 80
-        expect(ecran.noteProduction1.textContent).toBe('80.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('80\u00A0%');
         expect(ecran.niveauProduction1.textContent).toBe('M');
         expect(ecran.criteresCopier.textContent).toBe('M\t24');
         // Le témoin bouge avec la donnée : E (95) sur Contenu → 66,5 + 24 = 90,5.
         ec.criteres.c1 = 'E';
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('90.5 %');
+        expect(ecran.noteProduction1.textContent).toBe('90,5\u00A0%');
         expect(ecran.niveauProduction1.textContent).toBe('E');
         // …et avec les points : 15 sur 30 → 66,5 + 15 = 81,5.
         ec.pointsAnalytiques.c2 = 15;
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('81.5 %');
+        expect(ecran.noteProduction1.textContent).toBe('81,5\u00A0%');
     });
 });
 
@@ -175,7 +175,7 @@ describe('lot 2 · B — la portée (#674) sait lire les points', () => {
         const { win, ecran } = monter({ niveaux: { c1: 'M' }, points: { c2: 0 } });
         win.calculerNote();
         // 0,8 × 70 + 0 = 56
-        expect(ecran.noteProduction1.textContent).toBe('56.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('56\u00A0%');
         expect(win.porteeCalculeeCourante).toMatchObject({ ponderationCouverte: 100, incomplete: false, criteresHorsNote: [] });
         expect(ecran.criteresCopier.textContent).toBe('M\t0');
     });
@@ -183,7 +183,7 @@ describe('lot 2 · B — la portée (#674) sait lire les points', () => {
     it('B.c les décimales passent : 24,5 sur 30', () => {
         const { win, ecran } = monter({ niveaux: { c1: 'M' }, points: { c2: 24.5 } });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('80.5 %');
+        expect(ecran.noteProduction1.textContent).toBe('80,5\u00A0%');
         expect(ecran.criteresCopier.textContent).toBe('M\t24.5');
     });
 
@@ -201,7 +201,7 @@ describe('lot 2 · B — la portée (#674) sait lire les points', () => {
         ] };
         const { win, ecran } = monter({ grille, niveaux: { c1: 'M' }, points: { c0: 3 } });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('80.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('80\u00A0%');
         expect(win.porteeCalculeeCourante.incomplete).toBe(false);
     });
 });
@@ -267,7 +267,7 @@ describe('lot 2 · D — un critère holistique ou algorithmique se calcule exac
         const { win, ecran } = monter({ grille, niveaux: { c1: 'M', c2: 'E' }, points: { c1: 0, c2: 0 } });
         win.calculerNote();
         // 0,8 × 70 + 0,95 × 30 = 56 + 28,5 = 84,5 — et pas 0.
-        expect(ecran.noteProduction1.textContent).toBe('84.5 %');
+        expect(ecran.noteProduction1.textContent).toBe('84,5\u00A0%');
         expect(ecran.criteresCopier.textContent).toBe('M\tE');
     });
 
@@ -275,12 +275,12 @@ describe('lot 2 · D — un critère holistique ou algorithmique se calcule exac
         // Une évaluation faite quand Langue était holistique, relue après le passage en analytique.
         const { win, ecran } = monter({ niveaux: { c1: 'M', c2: 'E' } });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('84.5 %');
+        expect(ecran.noteProduction1.textContent).toBe('84,5\u00A0%');
         expect(win.porteeCalculeeCourante.incomplete).toBe(false);
         // Dès que des points existent, ils l'emportent.
         const apres = monter({ niveaux: { c1: 'M', c2: 'E' }, points: { c2: 24 } });
         apres.win.calculerNote();
-        expect(apres.ecran.noteProduction1.textContent).toBe('80.0 %');
+        expect(apres.ecran.noteProduction1.textContent).toBe('80\u00A0%');
     });
 
     it('D.c la grille 50/30/20 de la sentinelle #674, sans aucun critère analytique : 84,0 % (M), identique', () => {
@@ -297,7 +297,7 @@ describe('lot 2 · D — un critère holistique ou algorithmique se calcule exac
         ] };
         const { win, ecran } = monter({ grille, echelle, niveaux: { c1: 'E', c2: 'E', c3: 'I' } });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('84.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('84\u00A0%');
         expect(ecran.niveauProduction1.textContent).toBe('M');
     });
 
@@ -309,7 +309,7 @@ describe('lot 2 · D — un critère holistique ou algorithmique se calcule exac
         const { win, ecran } = monter({ grille, niveaux: { c1: 'M', fr: 'D' }, algo: { fr: { pourcentage: 61.5, niveau: 'D' } } });
         win.calculerNote();
         // 0,8 × 70 + 0,615 × 30 = 56 + 18,45 = 74,45 → 74.5 (arrondi de l'affichage)
-        expect(ecran.noteProduction1.textContent).toBe('74.5 %');
+        expect(ecran.noteProduction1.textContent).toBe('74,5\u00A0%');
         expect(win.noteCalculeeCourante).toBeCloseTo(74.45, 5);
     });
 });

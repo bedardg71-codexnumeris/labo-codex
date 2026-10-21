@@ -121,7 +121,7 @@ test('le PDF : une copie démo n’a pas de ligne de calcul (mode Catégories, #
         return { total: evs.length, enCategories, ligneDemo: ligne(demoHtml), ligneSimple: ligne(simpleHtml), simpleHtml };
     });
     expect(r).toMatchObject({ total: 20, enCategories: 20, ligneDemo: '' });
-    expect(r.ligneSimple).toBe('7 erreurs sur 400 mots &rarr; 20,25/30 (67,5 %)');
+    expect(r.ligneSimple).toBe('7 erreurs sur 400 mots &rarr; 20,25/30 (67,5\u00A0%)');
     if (process.env.CAPTURES_ETAPE0) {
         const p = await page.context().newPage();
         await p.setContent(r.simpleHtml);

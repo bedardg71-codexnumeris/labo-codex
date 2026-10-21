@@ -326,7 +326,8 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
         expect(ev.avant.echelleChoisie, ev.copie + ' : aucune échelle choisie d\'office').toBe('');
         expect(ev.enBase.echelleId || '', ev.copie + ' : enregistrée sans échelle').toBe('');
         expect(ev.enBase.noteFinale, ev.copie + ' : la note des points').toBeCloseTo(notes[i], 5);
-        expect(ev.ecran.note, ev.copie + ' : la note affichée').toBe(notes[i].toFixed(1) + ' %');
+        // 21 oct. 2026 : la note s'affiche à la norme française (formaterNotePourcentage : « 62 % », « 74,5 % »).
+        expect(ev.ecran.note, ev.copie + ' : la note affichée').toBe(String(Math.round(notes[i] * 10) / 10).replace('.', ',') + '\u00A0%');
         // Chaque critère entre en base par ses points, sans niveau déduit.
         expect(ev.enBase.criteres.length, ev.copie + ' : trois critères en base').toBe(3);
         ev.enBase.criteres.forEach(c => expect(c, ev.copie).toMatch(/^[^:]+: {2}· \d+ \/ \d+ ·/));
@@ -342,12 +343,12 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
     // D4 — la note cumulée dans « Note provisoire », calculée par la pratique sommative : (62 + 70 + 74) ÷ 3.
     const pageP3 = R.pdfSansReperes[2].blocs.map(b => b.texte).join(' ');
     expect(pageP3, 'P3 : la note provisoire de la sommative').toContain('Note provisoire');
-    expect(pageP3, 'P3 : la note cumulée').toContain('68.7 %');
+    expect(pageP3, 'P3 : la note cumulée').toContain('68,7 %')   // `nettoyer` ramène l'insécable à une espace;
     expect(pageP3, 'P3 : les trois copies comptées').toContain('Voici les 3 productions comptées dans ta note');
     // Les repères posés sur l'échelle de départ ne font pas revenir de niveau : ces copies n'ont pas d'échelle.
     R.pdfAvecReperes.forEach(pdf => expect(pdf.blocs.map(b => b.texte).join(' '), pdf.p + ' (repères)').not.toMatch(NOMS_NIVEAUX));
     // « Copier tout » : la note chiffrée, jamais « | Niveau : ».
-    expect(R.etapes.copierTout.texte, 'Copier tout : la note').toContain('Note finale : 74.0 %');
+    expect(R.etapes.copierTout.texte, 'Copier tout : la note').toContain('Note finale : 74\u00A0%');
     expect(R.etapes.copierTout.texte, 'Copier tout : aucun niveau').not.toMatch(/Niveau :|Niveau de performance/);
     // Sans aucune échelle, la grille en points se note encore.
     expect(R.sansAucuneEchelle.ecran.note, 'sans échelle : la note se calcule').not.toBe('--');

@@ -458,10 +458,10 @@ describe('mesure · ce que l\'élève lit dans son PDF et dans le texte copié v
     it('CONSTAT 1 (corrigé, #757) · le texte Léa dit « Note finale : 63.5 % » — l\'unité une seule fois, pour les trois types', () => {
         // `noteProduction1` porte « 63.5 % » (evaluation-calcul.js l. 1404) ; `_rendreNoteFinale`
         // (evaluation-retroaction.js) le recopie sans y ajouter un second « % » (avant : « 63.5 %% »).
-        expect(H.m.ecran.noteAffichee).toBe('63.5 %');
-        expect(H.m.lea.generale).toContain('Note finale : 63.5 %  |  Niveau : D');
-        expect(A.m.lea.generale).toContain('Note finale : 71.0 %  |  Niveau : D');
-        expect(G.m.lea.generale).toContain('Note finale : 76.0 %  |  Niveau : M');
+        expect(H.m.ecran.noteAffichee).toBe('63,5\u00A0%');
+        expect(H.m.lea.generale).toContain('Note finale : 63,5\u00A0%  |  Niveau : D');
+        expect(A.m.lea.generale).toContain('Note finale : 71\u00A0%  |  Niveau : D');
+        expect(G.m.lea.generale).toContain('Note finale : 76\u00A0%  |  Niveau : M');
         [H, A, G].forEach(x => expect(x.m.lea.generale).not.toContain('%%'));
     });
 

@@ -34,9 +34,7 @@ function charger() {
         echapperHtml: echapperHtmlReel,
         obtenirLibelleStatut: (s) => 'Statut ' + s,
         obtenirDonneesSelonMode: () => [],
-        notifications: { succes() {}, erreur() {}, info() {}, warning() {} },
-        // 21 oct. 2026 : la vraie fonction d'affichage de la note (js/note-pourcentage.js).
-        formaterNotePourcentage: chargerScript('js/note-pourcentage.js').formaterNotePourcentage
+        notifications: { succes() {}, erreur() {}, info() {}, warning() {} }
     });
 }
 
@@ -52,15 +50,16 @@ function ligneEvaluee(noteChiffree) {
 
 /** Ce que la colonne « Note % » affiche, sans le balisage. */
 function noteAffichee(html) {
-    const m = /<strong>([^<]*)%<\/strong>/.exec(html);
+    // 21 oct. 2026 : norme française, « 92,5 % » (espace insécable U+00A0 avant le signe).
+    const m = /<strong>([^<]*)\u00A0%<\/strong>/.exec(html);
     return m ? m[1] : null;
 }
 
 describe('#776 · A — la colonne Note % ne montre plus les décimales de calcul', () => {
     it('les deux valeurs de la capture du 7 sept. s\'affichent à une décimale', () => {
         const win = charger();
-        expect(noteAffichee(win._genererLigneHTML(ligneEvaluee(92.52136752136752)))).toBe('92.5');
-        expect(noteAffichee(win._genererLigneHTML(ligneEvaluee(89.23679060665361)))).toBe('89.2');
+        expect(noteAffichee(win._genererLigneHTML(ligneEvaluee(92.52136752136752)))).toBe('92,5');
+        expect(noteAffichee(win._genererLigneHTML(ligneEvaluee(89.23679060665361)))).toBe('89,2');
     });
 
     it('un entier reste un entier, et l\'arrondi monte quand il doit monter', () => {
@@ -73,7 +72,7 @@ describe('#776 · A — la colonne Note % ne montre plus les décimales de calcu
     it('une note « remplacée » passe par la même règle que « évaluée »', () => {
         const win = charger();
         const ligne = { ...ligneEvaluee(74.4444), statut: 'remplacee' };
-        expect(noteAffichee(win._genererLigneHTML(ligne))).toBe('74.4');
+        expect(noteAffichee(win._genererLigneHTML(ligne))).toBe('74,4');
     });
 });
 
@@ -92,7 +91,7 @@ describe('#776 · B — l\'arrondi ne casse ni l\'échappement ni les autres col
             ...ligneEvaluee(88.888), badgeType: 'nouvelle-reprise', verrouille: true,
             scoresOriginaux: { niveauFinal: 'D', noteFinale: 62.3456 }
         });
-        expect(html).toContain('(était D · 62.3%)');
+        expect(html).toContain('(était D · 62,3\u00A0%)');
     });
 
     it('« non remis » et « non recevable » affichent toujours --, pas un arrondi', () => {

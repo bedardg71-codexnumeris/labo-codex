@@ -198,7 +198,7 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
     await choisirContenu(page, 'D');
     await page.waitForTimeout(150);
     ecran = await page.evaluate(eval(LIRE_ECRAN));
-    expect(ecran.note).toBe('69.5 %');
+    expect(ecran.note).toBe('69,5\u00A0%');
     expect(ecran.niveau).toBe('D');
     expect(ecran.retro).toContain('Ton propos se construit.');
     expect(ecran.retro).toContain('Ta langue est maîtrisée.');
@@ -252,7 +252,7 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
     expect(rouverte.niveauLangue).toBe('M');
     expect(rouverte.commLangue).toBe('Ta langue est maîtrisée.');
     expect(rouverte.retro).toContain('Ta langue est maîtrisée.');
-    expect(rouverte.note).toBe('69.5 %');
+    expect(rouverte.note).toBe('69,5\u00A0%');
 
     // 9. LE BILAN (retouche du 4 sept., décision de Grégoire) : copié sous « === BILAN === » dans ce
     //    que l'élève reçoit, il nomme le critère analytique par son chiffre — « Langue (24 / 30) » —
@@ -364,7 +364,7 @@ test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bi
     await saisir(page, 'a3', '8');
     await page.waitForTimeout(150);
     const note = await page.evaluate(() => document.getElementById('noteProduction1').textContent);
-    expect(note).toBe('78.0 %');
+    expect(note).toBe('78\u00A0%');
 
     const apres = await page.evaluate(async () => {
         const notifs = [];
@@ -443,7 +443,7 @@ test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bi
     expect(rouverte.refus, 'aucun bandeau « Impossible de charger l\'évaluation »').toEqual([]);
     expect(rouverte.succes.some(m => m.includes('lecture seule'))).toBe(true);
     expect(rouverte.valeurs, 'les points sont revenus dans leurs champs').toEqual(['50', '20', '8']);
-    expect(rouverte.note).toBe('78.0 %');
+    expect(rouverte.note).toBe('78\u00A0%');
     expect(rouverte.verrouilles, 'le verrouillage a bien été appliqué (étape 14) : les champs de points sont désactivés').toEqual([true, true, true]);
     // (L'indicateur orange de l'étape 13 s'insère dans un conteneur que ce banc sans visionneuse
     // n'a pas : la notification « lecture seule (verrouillée) », émise juste après, prouve que les

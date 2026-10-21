@@ -260,9 +260,9 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
     }
     it('B1 · le NIVEAU GLOBAL : 74,5 → M (M commence à 75), 89,5 → E, 59,5 → D — ↻ #701 : mêmes niveaux, mais par l\'ARRONDI à l\'entier (75, 90, 60), plus par le repli « le plus proche »', () => {
         const r = noter('B1', { '74.5': niveauGlobalPour({ c1: 'E', c2: 'I' }), '89.5': niveauGlobalPour({ c1: 'E', c2: 'M' }), '59.5': niveauGlobalPour({ c1: 'D', c2: 'I' }) });
-        expect(r['74.5']).toMatchObject({ note: '74.5 %', niveau: 'M' });
-        expect(r['89.5']).toMatchObject({ note: '89.5 %', niveau: 'E' });
-        expect(r['59.5']).toMatchObject({ note: '59.5 %', niveau: 'D' });
+        expect(r['74.5']).toMatchObject({ note: '74,5\u00A0%', niveau: 'M' });
+        expect(r['89.5']).toMatchObject({ note: '89,5\u00A0%', niveau: 'E' });
+        expect(r['59.5']).toMatchObject({ note: '59,5\u00A0%', niveau: 'D' });
     });
     it('B2 · le même 74,5 % sur un critère ALGORITHMIQUE — ↻ corrigé #701/#702 : M, comme le niveau global (avant : « -- », et « -- » entrait dans evaluationEnCours.criteres)', () => {
         const ec = ecDe(GRILLE_ALGO, { criteres: { c1: 'M' } });
@@ -274,7 +274,7 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
         expect(ecran.pct_algo_a1.textContent).toBe('74.5');
         expect(ecran.niveau_algo_a1.textContent).toBe('M');      // avant #701 : '--'
         expect(ec.criteres.a1).toBe('M');                        // avant #702 : '--', que les collecteurs écrivaient en base (`if (niveau)` : « -- » est vrai)
-        expect(ecran.noteProduction1.textContent).toBe('82.1 %'); // 0,8×84 + 0,2×74,5 — le critère COMPTE, par son pourcentage exact : l'arrondi ne touche pas la note
+        expect(ecran.noteProduction1.textContent).toBe('82,1\u00A0%'); // 0,8×84 + 0,2×74,5 — le critère COMPTE, par son pourcentage exact : l'arrondi ne touche pas la note
         expect(ecran.criteresCopier.textContent).toBe('M\tM');   // avant : 'M\t--'
     });
     it('B3 · le même 74,5 % sur un critère ANALYTIQUE — ↻ corrigé #701 : M, une seule règle pour les trois chemins (avant : undefined, trois règles pour un trou)', () => {
@@ -303,7 +303,7 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
         const ec = ecDe(GRILLE_50_50, { criteres: { c1: 'E', c2: 'M' } });
         const { win, ecran } = monterMoteur({ grille: GRILLE_50_50, echelles: [echelle], ec });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('89.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('89\u00A0%');
         expect(ecran.niveauProduction1.textContent).toBe('M');
     });
 });
@@ -357,10 +357,10 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
             categories: { niveauAlgo: cat.ecran.niveau_algo_a1.textContent, critere: cat.ec.criteres.a1, note: cat.ecran.noteProduction1.textContent, hors: cat.win.porteeCalculeeCourante.criteresHorsNote.map((c) => c.critereId + ':' + c.motif) },
             simple: { niveauAlgo: simple.ecran.niveau_algo_a1.textContent, pct: simple.ecran.pct_algo_a1.textContent, note: simple.ecran.noteProduction1.textContent }
         });
-        expect(r.categories.note).toBe('87.2 %');   // avant #704 : '--'
+        expect(r.categories.note).toBe('87,2\u00A0%');   // avant #704 : '--'
         expect(r.categories.hors).toEqual([]);      // avant #704 : ['a1:sans-niveau']
         expect(r.categories.niveauAlgo).toBe('E');
-        expect(r.simple).toEqual({ niveauAlgo: 'E', pct: '100.0', note: '87.2 %' });   // 0,8×84 + 0,2×100
+        expect(r.simple).toEqual({ niveauAlgo: 'E', pct: '100.0', note: '87,2\u00A0%' });   // 0,8×84 + 0,2×100
     });
     it('D2 · mode CATÉGORIES : les codes « 1;4 » donnent 87,5 % ; EFFACÉS — ↻ #698 puis #704 : un résultat NEUF, aucune erreur = 100 % (E), 87,2 % (avant #698 : 87,5 et M restaient ; entre #698 et #704 : sans niveau, note retenue)', () => {
         const { win, ecran, ec } = monterAlgo();
@@ -372,9 +372,9 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         const apresReset = { pct: ec.donneesAlgorithmiques.a1.pourcentage, critere: ec.criteres.a1, niveauAlgo: ecran.niveau_algo_a1.textContent, codes: ec.donneesAlgorithmiques.a1.codes };
         win.calculerNote();   // n'importe quel geste qui recalcule ensuite (un autre critère, l'enregistrement…)
         const r = noter('D2', { avant, apresReset, noteApres: ecran.noteProduction1.textContent, porteeApres: win.porteeCalculeeCourante.ponderationCouverte });
-        expect(avant).toMatchObject({ pct: 87.5, critere: 'M', note: '84.7 %' });   // 0,8×84 + 0,2×87,5
+        expect(avant).toMatchObject({ pct: 87.5, critere: 'M', note: '84,7\u00A0%' });   // 0,8×84 + 0,2×87,5
         expect(apresReset).toEqual({ pct: 100, critere: 'E', niveauAlgo: 'E', codes: [] });   // avant #698 : pct 87.5, critere 'M' ; avant #704 : undefined, undefined, '--'
-        expect(r.noteApres).toBe('87.2 %');   // avant #698 : '84.7 %' ; avant #704 : '--'
+        expect(r.noteApres).toBe('87,2\u00A0%');   // avant #698 : '84.7 %' ; avant #704 : '--'
         expect(r.porteeApres).toBe(100);      // avant #704 : 80
     });
     it('D3 · mode SIMPLE : 4 erreurs / 500 mots = 80 % ; le nombre de mots EFFACÉ — ↻ corrigé #698 : le résultat part et la note se retient (avant : 80 et M restaient, 83,2 % inchangé)', () => {
@@ -387,7 +387,7 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         const apres = { pct: ec.donneesAlgorithmiques.a1.pourcentage, mots: ec.donneesAlgorithmiques.a1.mots, critere: ec.criteres.a1, niveauAlgo: ecran.niveau_algo_a1.textContent };
         win.calculerNote();
         const r = noter('D3', { avant, apres, noteApres: ecran.noteProduction1.textContent });
-        expect(avant).toEqual({ pct: 80, note: '83.2 %' });
+        expect(avant).toEqual({ pct: 80, note: '83,2\u00A0%' });
         expect(apres).toEqual({ pct: undefined, mots: 0, critere: undefined, niveauAlgo: '--' });   // avant #698 : pct 80, critere 'M'
         expect(r.noteApres).toBe('--');   // avant #698 : '83.2 %'
     });
@@ -455,7 +455,7 @@ describe('E · pondération et portée', () => {
         const ecrit = derniereEcriture(ecritures, 'EVAL_NEUF');
         const r = noter('E3', { refus: refus.map((x) => x.titre), ecran: ecran.noteProduction1.textContent, ecrit: ecrit && { noteFinale: ecrit.noteFinale, ponderationCouverte: ecrit.ponderationCouverte, verrouillee: ecrit.verrouillee, niveauFinal: ecrit.niveauFinal } });
         expect(refus).toHaveLength(0);
-        expect(r.ecran).toBe('0.0 %');
+        expect(r.ecran).toBe('0\u00A0%');
         expect(r.ecrit).toEqual({ noteFinale: 0, ponderationCouverte: 0, verrouillee: true, niveauFinal: '--' });
     });
 });

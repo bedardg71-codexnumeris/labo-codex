@@ -104,7 +104,7 @@ describe('#698 · effacer tarit la mémoire — mode CATÉGORIES', () => {
         categories(h, '1;4', '500');
         expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ pourcentage: 87.5, niveau: 'M', sommePonderee: 2.5 });
         expect(h.ec.criteres.a1).toBe('M');
-        expect(h.ecran.noteProduction1.textContent).toBe('84.7 %');
+        expect(h.ecran.noteProduction1.textContent).toBe('84,7\u00A0%');
         categories(h, '1;4', '');
         expect(h.ec.donneesAlgorithmiques.a1).toEqual({ codes: ['1', '4'], mots: 0, totalErreurs: 2 });   // #110 v3 : la saisie reste
         expect(h.ec.criteres.a1).toBeUndefined();
@@ -122,7 +122,7 @@ describe('#698 · effacer tarit la mémoire — mode CATÉGORIES', () => {
         expect(h.ec.criteres.a1).toBe('E');
         expect(h.ecran.niveau_algo_a1.textContent).toBe('E');
         expect(h.ecran.cat_dominante_a1.textContent).toBe('--');
-        expect(h.ecran.noteProduction1.textContent).toBe('87.2 %');   // 0,8×84 + 0,2×100
+        expect(h.ecran.noteProduction1.textContent).toBe('87,2\u00A0%');   // 0,8×84 + 0,2×100
         expect(h.win.porteeCalculeeCourante).toMatchObject({ ponderationCouverte: 100, incomplete: false });
     });
     it('B · la rétroaction engendrée part aussi (#673 tient) et la rétroaction générale est régénérée', () => {
@@ -186,7 +186,7 @@ describe('#698 · effacer tarit la mémoire — mode CATÉGORIES', () => {
         categories(h, '1;4;1', '500');
         expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ totalErreurs: 3, sommePonderee: 3.5, pourcentage: 82.5, niveau: 'M' });
         expect(h.ecran.cat_dominante_a1.textContent).toContain('Syntaxe');
-        expect(h.ecran.noteProduction1.textContent).toBe('83.7 %');   // 0,8×84 + 0,2×82,5
+        expect(h.ecran.noteProduction1.textContent).toBe('83,7\u00A0%');   // 0,8×84 + 0,2×82,5
     });
 });
 
@@ -195,7 +195,7 @@ describe('#698 · effacer tarit la mémoire — mode SIMPLE', () => {
         const h = monter({ grille: GRILLE_SIMPLE });
         simple(h, '4', '500');
         expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ erreurs: 4, mots: 500, pourcentage: 80, niveau: 'M' });
-        expect(h.ecran.noteProduction1.textContent).toBe('83.2 %');
+        expect(h.ecran.noteProduction1.textContent).toBe('83,2\u00A0%');
         simple(h, '4', '');
         expect(h.ec.donneesAlgorithmiques.a1).toEqual({ erreurs: 4, mots: 0 });
         expect(h.ec.criteres.a1).toBeUndefined();
@@ -224,6 +224,6 @@ describe('#698 · effacer tarit la mémoire — mode SIMPLE', () => {
         const h = monter({ grille: GRILLE_SIMPLE });
         simple(h, '0', '500');
         expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ pourcentage: 100, niveau: 'E' });
-        expect(h.ecran.noteProduction1.textContent).toBe('87.2 %');
+        expect(h.ecran.noteProduction1.textContent).toBe('87,2\u00A0%');
     });
 });

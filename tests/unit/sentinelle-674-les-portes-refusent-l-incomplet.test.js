@@ -415,7 +415,7 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
     it('…et le rendu REFUSE DE CONCLURE : pas de bandeau « E », les mots de l\'élève nomment Langue (20 %)', () => {
         const { feedback, html } = monterPdf({ grille: GRILLE_DATEE });
         const page = html(feedback(EVAL_INCOMPLETE_AVANT_LOT));
-        expect(page).toContain('Cette copie n’a pas de niveau général : Langue (20 %) reste à évaluer.');
+        expect(page).toContain('Cette copie n’a pas de niveau général : Langue (20\u00A0%) reste à évaluer.');
         // Le bandeau coloré du niveau global (44 px, code seul) n'est PAS rendu.
         expect(page).not.toMatch(/font-size: 44px[^>]*>E</);
         expect(page).not.toContain('Niveau général · Étendu');
