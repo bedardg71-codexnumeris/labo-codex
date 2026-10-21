@@ -34,7 +34,9 @@ function charger() {
         echapperHtml: echapperHtmlReel,
         obtenirLibelleStatut: (s) => 'Statut ' + s,
         obtenirDonneesSelonMode: () => [],
-        notifications: { succes() {}, erreur() {}, info() {}, warning() {} }
+        notifications: { succes() {}, erreur() {}, info() {}, warning() {} },
+        // 21 oct. 2026 : la vraie fonction d'affichage de la note (js/note-pourcentage.js).
+        formaterNotePourcentage: chargerScript('js/note-pourcentage.js').formaterNotePourcentage
     });
 }
 

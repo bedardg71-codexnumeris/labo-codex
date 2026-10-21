@@ -189,7 +189,7 @@ function formaterEntreeJournal(entree) {
                 detailsHtml += '<span class="journal-detail">Durée : ' + min + ' min ' + sec + ' s</span>';
             }
             if (d.noteFinale !== undefined) {
-                detailsHtml += '<span class="journal-detail">Note : ' + d.noteFinale + '%</span>';
+                detailsHtml += '<span class="journal-detail">Note : ' + formaterNotePourcentage(d.noteFinale) + '</span>';
             }
             if (d.niveauFinal) {
                 detailsHtml += '<span class="journal-detail">Niveau : ' + d.niveauFinal + '</span>';
@@ -228,7 +228,7 @@ function formaterEntreeJournal(entree) {
         case ACTIONS.MODIFICATION_POST_REPRISE:
             if (d.avant && d.apres) {
                 if (d.avant.noteFinale !== d.apres.noteFinale) {
-                    detailsHtml += '<span class="journal-detail">Note : ' + d.avant.noteFinale + '% → ' + d.apres.noteFinale + '%</span>';
+                    detailsHtml += '<span class="journal-detail">Note : ' + formaterNotePourcentage(d.avant.noteFinale) + ' → ' + formaterNotePourcentage(d.apres.noteFinale) + '</span>';
                 }
                 if (d.avant.niveauFinal !== d.apres.niveauFinal) {
                     detailsHtml += '<span class="journal-detail">Niveau : ' + d.avant.niveauFinal + ' → ' + d.apres.niveauFinal + '</span>';

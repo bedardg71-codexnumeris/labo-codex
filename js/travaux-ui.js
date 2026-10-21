@@ -3820,7 +3820,7 @@
         if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('copieImportee'))) return;
         if (evalAssociee) {
             const choix = confirm(
-                'Ce fichier a une évaluation associée (' + (evalAssociee.noteFinale || evalAssociee.note || '--') + '%).\n\n' +
+                'Ce fichier a une évaluation associée (' + (formaterNotePourcentage(evalAssociee.noteFinale || evalAssociee.note) || '--%') + ').\n\n' +
                 'Veux-tu supprimer le fichier ET l\'évaluation ?\n\n' +
                 '(OK = supprimer les deux, Annuler = ne rien supprimer)'
             );
@@ -7202,7 +7202,7 @@
         // #941 lot S1 (décision A) — une copie en points : sa note, jamais un niveau ; ses critères
         // par leurs points (ci-dessus), pas par le niveau déduit.
         const enPoints = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
-        const noteTexte = evaluation.noteFinale != null ? evaluation.noteFinale + '%' : '—';
+        const noteTexte = evaluation.noteFinale != null ? formaterNotePourcentage(evaluation.noteFinale) : '—';
         let noteHTML;
         if (enPoints) {
             noteHTML = `Note : <strong>${noteTexte}</strong>`;

@@ -20,6 +20,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { monter, storeBase, clone, elementDom, RACINE } from './_helpers/bac-suivi.js';
 import { tranche } from './_helpers/tranche.js';
+import { chargerScript } from './_helpers/charger-script.js';
 
 const source = (rel) => readFileSync(path.join(RACINE, rel), 'utf8');
 const DA = { ASSIDU: '2000001', EXCLU: '2000002', TEMOIN: '2000003', PARTI: '2000009' };
@@ -115,6 +116,8 @@ function banc(pratiqueId, o = {}) {
         prefs: { activerRai: false, depistageAcp: false, afficherGraphiques: false, afficherDeveloppementHabiletes: false },
         globaux: Object.assign({
             estEtudiantExclu: main.estEtudiantExclu, libelleStatutEtudiant: main.libelleStatutEtudiant,
+            // 21 oct. 2026 : la vraie fonction d'affichage de la note (js/note-pourcentage.js).
+            formaterNotePourcentage: chargerScript('js/note-pourcentage.js').formaterNotePourcentage,
             PratiqueConfigurable: classe('PratiqueConfigurable'), PratiqueSommative: classe('PratiqueSommative'), PratiquePANStandards: classe('PratiquePANStandards'),
             obtenirEcheanceEffective: (production, gcId) => {
                 if (production.echeancesParGroupe && gcId) { const e = production.echeancesParGroupe[gcId]; if (e) return { date: e.date || null, assignee: e.assignee !== false }; }

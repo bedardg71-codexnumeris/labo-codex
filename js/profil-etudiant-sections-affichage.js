@@ -2872,7 +2872,7 @@ function _construireLigneProductionEvaluee(production, evaluation, indexArtefact
         // #941 lot S1 — sans niveau affichable (copie en points), la note seule.
         note: (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
             ? `${_prefixeNiveau(evaluation)}${badgeNoteDifferee()}`   // #321 : niveau IDME gardé, % masqué
-            : `${_prefixeNiveau(evaluation)}${evaluation.noteFinale}%`,
+            : `${_prefixeNiveau(evaluation)}${formaterNotePourcentage(evaluation.noteFinale)}`,   // 21 oct. 2026 : une décimale au plus
         date: _calculerEcheanceFormateeProduction(production),
         statut: estNonRemis ? 'non-remis' : 'evalue',
         statutRemise: statutRemise,
