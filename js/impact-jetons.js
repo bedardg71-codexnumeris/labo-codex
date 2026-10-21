@@ -425,7 +425,7 @@ function creerGraphiqueImpactJetons(canvasId) {
                         var noteInfo = '';
                         if (j.noteOriginale != null && j.noteReprise != null) {
                             var diff = j.noteReprise - j.noteOriginale;
-                            noteInfo = ' : ' + j.noteOriginale.toFixed(0) + '% → ' + j.noteReprise.toFixed(0) + '%' +
+                            noteInfo = ' : ' + formaterNotePourcentage(Math.round(j.noteOriginale)) + ' → ' + formaterNotePourcentage(Math.round(j.noteReprise)) +
                                 ' (' + (diff >= 0 ? '+' : '') + diff.toFixed(0) + ')';
                         }
                         lignes.push('  ' + typeLabel + noteInfo);

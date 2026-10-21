@@ -111,11 +111,11 @@ describe('#883 — une production diagnostique ne compte pas dans le détail de 
     };
 
     it('PDF — « 1 retenue sur 4 possibles » : le nombre de la pratique, pas le nombre retenu', () => {
-        expect(ligneSelection(1, 1)).toBe('Sélection (1 retenue sur 4 possibles) (65 %) :');
+        expect(ligneSelection(1, 1)).toBe('Sélection (1 retenue sur 4 possibles) (65\u00A0%) :');
     });
 
     it('PDF — « parmi N évaluées » seulement quand il y en a plus que de retenues', () => {
-        expect(ligneSelection(4, 6)).toBe('Sélection (4 retenues sur 4 possibles, parmi 6 évaluées) (65 %) :');
+        expect(ligneSelection(4, 6)).toBe('Sélection (4 retenues sur 4 possibles, parmi 6 évaluées) (65\u00A0%) :');
     });
 
     it('TÉMOIN — décochée, la même production revient : évaluée, et retenue en non hybride', () => {

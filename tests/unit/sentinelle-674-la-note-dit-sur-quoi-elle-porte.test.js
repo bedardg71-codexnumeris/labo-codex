@@ -126,7 +126,7 @@ describe('#674 · calculerNote — la note dit sur quoi elle porte', () => {
     it('A · témoin — les trois critères renseignés : 84,0 % (M), et PAS UN MOT DE PLUS', () => {
         const { win, ecran } = monter({ niveaux: { c1: 'E', c2: 'E', c3: 'I' } });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('84.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('84\u00A0%');
         expect(ecran.niveauProduction1.textContent).toBe('M');
         expect(win.noteCalculeeCourante).toBe(84);
         // Un correctif qui avertit tout le monde n'avertit personne.
@@ -188,7 +188,7 @@ describe('#674 · calculerNote — la note dit sur quoi elle porte', () => {
         expect(ecran.noteProduction1.textContent).toBe('--');
         ec.criteres.c3 = 'I';
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent).toBe('84.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('84\u00A0%');
         expect(ecran.porteeNote1.classList.contains('u-hide')).toBe(true);
         expect(win.porteeCalculeeCourante.incomplete).toBe(false);
     });

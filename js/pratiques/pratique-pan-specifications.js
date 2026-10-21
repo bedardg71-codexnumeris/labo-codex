@@ -324,7 +324,7 @@ class PratiquePanSpecifications {
             .filter(p => p.requis && p.noteFixe > noteAtteinte)
             .sort((a, b) => a.noteFixe - b.noteFixe)[0] || null;
 
-        const labelPalier = (p) => p ? (p.label || p.description || (p.noteFixe + ' %')) : null;
+        const labelPalier = (p) => p ? (p.label || p.description || formaterNotePourcentage(p.noteFixe)) : null;
 
         const resultats = types.map(t => {
             const nbAcc = comptes[t.id] || 0;
@@ -885,9 +885,9 @@ class PratiquePanSpecifications {
     _obtenirDescriptionPalier(note) {
         const palier = this.config.tableBundles.find(p => p.noteFixe === note);
         if (palier) {
-            return palier.description || `${palier.label} (${note}%)`;
+            return palier.description || `${palier.label} (${formaterNotePourcentage(note)})`;
         }
-        return `Note de ${note}%`;
+        return `Note de ${formaterNotePourcentage(note)}`;
     }
 
     /**

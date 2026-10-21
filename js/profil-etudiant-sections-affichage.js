@@ -1190,7 +1190,7 @@ function genererSectionAccompagnement(da) {
                         // #706 — ce que la note n'a pas compté, dit à côté du chiffre.
                         const phraseEcartees = _phraseEvaluationsEcartees(
                             (typeof compterEvaluationsEcarteesDeLaNote === 'function') ? compterEvaluationsEcarteesDeLaNote(da) : null);
-                        return `${prefixeNiveau}<span${survolPourcentage}>${pct.toFixed(0)}%</span> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(sur ${nbTotalArtefacts} ${termeArtefact})</span>${noteExplicative}${phraseEcartees}`;
+                        return `${prefixeNiveau}<span${survolPourcentage}>${formaterNotePourcentage(Math.round(pct))}</span> <span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal;">(sur ${nbTotalArtefacts} ${termeArtefact})</span>${noteExplicative}${phraseEcartees}`;
                     })()}
                 </p>
 
@@ -3001,7 +3001,7 @@ function genererSectionProductions(da) {
         const differee = (typeof noteDiffereeActive === 'function' && noteDiffereeActive());  // #321
         const renderLigneRetenu = (r) => {
             const noteTxt = differee ? badgeNoteDifferee()
-                : ((typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—');
+                : ((typeof r.note === 'number') ? formaterNotePourcentage(r.note) : '—');
             // #941 lot S1 — une copie en points n'a pas de niveau : pas de « ? » devant sa note.
             const marqueur = r.enPoints ? noteTxt : `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
             const activite = r.activite ? ` : ${echapperHtml(r.activite)}` : '';
@@ -3009,7 +3009,7 @@ function genererSectionProductions(da) {
         };
         const renderLigneObligatoire = (o) => {
             const aNote = (typeof o.note === 'number');
-            const noteTxt = aNote ? (differee ? badgeNoteDifferee() : `${o.note.toFixed(1)}%`) : null;
+            const noteTxt = aNote ? (differee ? badgeNoteDifferee() : formaterNotePourcentage(o.note)) : null;
             // #941 lot S1 — une obligatoire en points est notée sans niveau : sa note, jamais « non remis ».
             const marqueur = (o.niveau && noteTxt) ? `${echapperHtml(o.niveau)} ${noteTxt}`
                 : (o.enPoints && noteTxt) ? noteTxt
@@ -3094,8 +3094,8 @@ function genererSectionProductions(da) {
             };
             const formaterCalcul = (calc, ponderation) => {
                 if (!calc) return '';
-                const addition = calc.notes.map(n => `${n.toFixed(1)}%`).join(' + ');
-                return `(${addition}) ÷ ${calc.notes.length} = <strong>${calc.moyenne.toFixed(1)}%</strong>`
+                const addition = calc.notes.map(n => formaterNotePourcentage(n)).join(' + ');
+                return `(${addition}) ÷ ${calc.notes.length} = <strong>${formaterNotePourcentage(calc.moyenne)}</strong>`
                      + ` × ${ponderation}% = <strong>${calc.contribution.toFixed(1)} pts</strong>`;
             };
             const calcSel = calculCategorie(selection, pondSel, false);
@@ -3106,7 +3106,7 @@ function genererSectionProductions(da) {
             const formule = erreurPond
                 ? `<span class="note-finale-tiret">Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
                 : (calcSel && calcObl
-                    ? `Note finale = ${calcSel.contribution.toFixed(1)} pts + ${calcObl.contribution.toFixed(1)} pts = ${(calcSel.contribution + calcObl.contribution).toFixed(1)} %`
+                    ? `Note finale = ${calcSel.contribution.toFixed(1)} pts + ${calcObl.contribution.toFixed(1)} pts = ${formaterNotePourcentage(calcSel.contribution + calcObl.contribution)}`
                     : `Note finale pondérée (Sélection ${pondSel}% + Obligatoires ${pondObl}% = ${pondSel + pondObl}%)`);
 
             htmlNoteFinale = `
@@ -3137,7 +3137,7 @@ function genererSectionProductions(da) {
                 <div class="note-finale-resultat">
                     <div class="note-finale-formule">${formule}</div>
                     <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
-                        ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
+                        ${detailsNoteFinale.noteFinale !== null ? formaterNotePourcentage(detailsNoteFinale.noteFinale) : '—'}
                     </div>
                     ${_phraseEvaluationsEcartees(detailsNoteFinale.ecartees, 'note-finale-message-provisoire')}
                 </div>
@@ -3157,7 +3157,7 @@ function genererSectionProductions(da) {
                     </div>
                     <div class="note-finale-valeur-ligne">
                         <span class="note-finale-valeur ${terminal.note === null ? 'note-finale-tiret' : ''}">
-                            ${terminal.note !== null ? terminal.note.toFixed(1) + '%' : '—'}
+                            ${terminal.note !== null ? formaterNotePourcentage(terminal.note) : '—'}
                         </span>
                         <span class="note-finale-ponderation">× ${terminal.ponderationNormalisee}%</span>
                     </div>
@@ -3187,15 +3187,15 @@ function genererSectionProductions(da) {
                         ${portfolio.plafonnement ? `
                             <div class="note-finale-valeur-ligne">
                                 <span class="note-finale-valeur">
-                                    <span class="note-finale-valeur-originale">${portfolio.plafonnement.moyenneOriginale.toFixed(1)}%</span>
-                                    → ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '0%'}
+                                    <span class="note-finale-valeur-originale">${formaterNotePourcentage(portfolio.plafonnement.moyenneOriginale)}</span>
+                                    → ${portfolio.moyenne !== null ? formaterNotePourcentage(portfolio.moyenne) : formaterNotePourcentage(0)}
                                 </span>
                                 <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
                             </div>
                         ` : `
                             <div class="note-finale-valeur-ligne">
                                 <span class="note-finale-valeur">
-                                    ${portfolio.moyenne !== null ? portfolio.moyenne.toFixed(1) + '%' : '<span class="note-finale-tiret">—</span>'}
+                                    ${portfolio.moyenne !== null ? formaterNotePourcentage(portfolio.moyenne) : '<span class="note-finale-tiret">—</span>'}
                                 </span>
                                 <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
                             </div>
@@ -3207,7 +3207,7 @@ function genererSectionProductions(da) {
                 <div class="note-finale-resultat">
                     <div class="note-finale-formule">${formuleClassique}</div>
                     <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
-                        ${detailsNoteFinale.noteFinale !== null ? detailsNoteFinale.noteFinale.toFixed(1) + '%' : '—'}
+                        ${detailsNoteFinale.noteFinale !== null ? formaterNotePourcentage(detailsNoteFinale.noteFinale) : '—'}
                     </div>
                     ${_phraseEvaluationsEcartees(detailsNoteFinale.ecartees, 'note-finale-message-provisoire')}
                     ${detailsNoteFinale.estProvisoire && terminal.present ? '<div class="note-finale-message-provisoire">Basée uniquement sur le portfolio (évaluation terminale non complétée)</div>' : ''}
@@ -3952,7 +3952,7 @@ function _genererNoteSessionSommative(da) {
     const terme = (n) => obtenirTermeProduction(n > 1 ? 'pluriel' : 'singulier') + ' ' + accordTermeProduction('evalue', n);
 
     const ligne = (r, grise) => {
-        const noteTxt = differee ? badgeNoteDifferee() : ((typeof r.note === 'number') ? `${r.note.toFixed(1)}%` : '—');
+        const noteTxt = differee ? badgeNoteDifferee() : ((typeof r.note === 'number') ? formaterNotePourcentage(r.note) : '—');
         // #941 lot S1 — une copie en points n'a pas de niveau : pas de « ? » devant sa note.
         const marqueur = r.enPoints ? noteTxt : `${echapperHtml(r.niveau || '?')} ${noteTxt}`;
         // En texte, pas en pastille : `.note-finale-ponderation` est une pastille sombre, trop lourde dans une liste.
@@ -3969,15 +3969,15 @@ function _genererNoteSessionSommative(da) {
         const total = comptees.reduce((t, r) => t + r.ponderation, 0);
         const somme = comptees.reduce((t, r) => t + r.note * r.ponderation, 0);
         if (total > 0 && typeof moyenneAffichee === 'number' && Math.abs(somme / total - moyenneAffichee) < 0.05) {
-            const termes = comptees.map(r => `${r.note.toFixed(1)} × ${r.ponderation}`).join(' + ');
-            calculHtml = `(${termes}) ÷ ${total} = <strong>${moyenneAffichee.toFixed(1)}%</strong>`;
+            const termes = comptees.map(r => `${formaterNoteNombre(r.note)} × ${r.ponderation}`).join(' + ');
+            calculHtml = `(${termes}) ÷ ${total} = <strong>${formaterNotePourcentage(moyenneAffichee)}</strong>`;
         }
     }
 
     const plafond = recit.synthese.plafonnement
-        ? `<div class="note-finale-message-provisoire">Moyenne de ${recit.synthese.plafonnement.moyenneOriginale.toFixed(1)}% ramenée à ${note.toFixed(1)}% par une règle de la pratique.</div>`
+        ? `<div class="note-finale-message-provisoire">Moyenne de ${formaterNotePourcentage(recit.synthese.plafonnement.moyenneOriginale)} ramenée à ${formaterNotePourcentage(note)} par une règle de la pratique.</div>`
         : '';
-    const totalTxt = differee ? badgeNoteDifferee() : ((typeof note === 'number') ? note.toFixed(1) + '%' : '—');
+    const totalTxt = differee ? badgeNoteDifferee() : ((typeof note === 'number') ? formaterNotePourcentage(note) : '—');
 
     return `
             <!-- Note de session (sommative) — #921 -->
@@ -4094,7 +4094,7 @@ function _ligneCalculIndicePPanneau(note, differee) {
     const n = note.retenues.length;
     const somme = note.retenues.reduce((t, r) => t + r.note, 0);
     if (Math.abs(somme / n - note.moyenne) >= 0.05) return '';
-    const addition = `(${note.retenues.map(r => r.note.toFixed(1)).join(' + ')}) / ${n} = <strong>${note.moyenne.toFixed(1)}%</strong>`;
+    const addition = `(${note.retenues.map(r => formaterNoteNombre(r.note)).join(' + ')}) / ${n} = <strong>${formaterNotePourcentage(note.moyenne)}</strong>`;
     const quoi = `Moyenne des ${n} ${obtenirTermeProduction(n > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('retenu', n)}`;
     if (!note.terminalePresente) return `${quoi} — P = ${addition}`;
     return `${quoi} = ${addition}` + (note.formule ? ` ; P = ${echapperHtml(note.formule)}` : '');

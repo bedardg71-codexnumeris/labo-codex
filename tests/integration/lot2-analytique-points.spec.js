@@ -194,7 +194,7 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     await page.waitForTimeout(150);
     ecran = await page.evaluate(eval(LIRE_ECRAN));
     console.log('FINI QUAND →', JSON.stringify(ecran));
-    expect(ecran.note).toBe('80.0 %');
+    expect(ecran.note).toBe('80\u00A0%');
     expect(ecran.niveau).toBe('M');
     expect(ecran.portee).toBe('');
     // (`#criteresCopier` n'existe pas dans la visionneuse ; la ligne à copier est jugée par la sentinelle unitaire.)
@@ -203,7 +203,7 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     await choisirContenu(page, 'E');
     await page.waitForTimeout(150);
     ecran = await page.evaluate(eval(LIRE_ECRAN));
-    expect(ecran.note).toBe('90.5 %');
+    expect(ecran.note).toBe('90,5\u00A0%');
 
     // 6. Le champ vidé RETIRE les points : Langue redevient hors note, nommée avec son poids.
     await saisirPoints(page, '');
@@ -220,7 +220,7 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     ecran = await page.evaluate(eval(LIRE_ECRAN));
     console.log('40 → 30 →', JSON.stringify(ecran));
     expect(ecran.points).toBe('30');
-    expect(ecran.note).toBe('96.5 %');
+    expect(ecran.note).toBe('96,5\u00A0%');
 
     // 8. Retour à 24, puis Enregistrer : les points sont en base SOUS LEUR NOM, et la base relit
     //    exactement le pourcentage de l'écran (le témoin exigé par la cartographie de Cowork).
@@ -262,7 +262,7 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     console.log('ROUVERTE →', JSON.stringify(rouverte));
     expect(rouverte.contenu, 'le niveau du critère holistique revient').toBe('E');
     expect(rouverte.valeurPoints, 'les points reviennent dans leur champ').toBe('24');
-    expect(rouverte.note).toBe('90.5 %');
+    expect(rouverte.note).toBe('90,5\u00A0%');
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

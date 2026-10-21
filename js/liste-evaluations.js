@@ -632,7 +632,7 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         const elemMoyenne = document.getElementById('moyenne-evaluations');
         if (elemMoyenne) {
             elemMoyenne.textContent = moyenneAffichee !== null
-                ? `Moyenne : ${moyenneAffichee.toFixed(1)}%`
+                ? `Moyenne : ${formaterNotePourcentage(moyenneAffichee)}`
                 : '';
         }
 
@@ -650,7 +650,6 @@ function afficherTableauEvaluations(evaluations, productions, etudiants) {
         // Vérifier si le tableau déborde (après un court délai pour que le DOM soit peint)
         setTimeout(verifierDebordementTableau, 50);
 
-        const logMoyenne = moyenneAffichee !== null ? ` | Moyenne: ${moyenneAffichee.toFixed(1)}%` : '';
     }
 
     // #934 — chaque rendu repart d'une sélection vide : les cases renaissent avec
@@ -1334,19 +1333,19 @@ function rechercherEvaluations() {
 // ============================================
 
 /**
- * Génère le HTML d'une ligne du tableau
- */
-/**
  * #776 — La note affichée dans la Liste des évaluations n'était pas arrondie :
  * « 92.52136752136752% » dans la colonne Note %, alors que la note originale
  * d'une reprise l'est depuis toujours (`genererLigneHTML`, badge « Reprise »).
  * Source d'affichage seulement : la valeur stockée n'est pas touchée.
+ * 21 oct. 2026 : par `formaterNotePourcentage` ; une valeur non numérique reste telle quelle (banc #562).
  */
-function arrondirNoteAffichee(valeur) {
-    const nombre = Number(valeur);
-    return Number.isFinite(nombre) ? Math.round(nombre * 10) / 10 : valeur;
+function _noteChiffreeAffichee(valeur) {
+    return formaterNotePourcentage(valeur) || String(valeur);
 }
 
+/**
+ * Génère le HTML d'une ligne du tableau
+ */
 function genererLigneHTML(ligne) {
     // #562 (29 août 2026) — TOUT ce qui vient des données passe par `echapperHtml`,
     // attributs compris (`data-*`, `title`) : la règle 1 du projet est « sans
@@ -1427,11 +1426,11 @@ function genererLigneHTML(ligne) {
         affichageNoteChiffree = (typeof noteDiffereeActive === 'function' && noteDiffereeActive())
             ? badgeNoteDifferee()
             // #776 : une décimale, comme la note originale d'une reprise (badge
-            // « Reprise », plus haut dans cette même fonction).
+            // « Reprise », plus haut dans cette même fonction) ; norme française depuis le 21 oct. 2026.
             // Une valeur non numérique reste rendue telle quelle (échappée) :
             // le banc d'échappement #562 en fournit une, et « NaN % » serait pire
             // que la valeur brute.
-            : `<strong>${echapperHtml(arrondirNoteAffichee(ligne.noteChiffree))}%</strong>`;
+            : `<strong>${echapperHtml(_noteChiffreeAffichee(ligne.noteChiffree))}</strong>`;
     } else {
         affichageNoteChiffree = '-';
     }

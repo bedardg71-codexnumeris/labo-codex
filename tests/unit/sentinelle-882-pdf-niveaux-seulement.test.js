@@ -119,9 +119,9 @@ describe('#882 — « Niveau de performance » : le PDF ne montre que des niveau
     it('note chiffrée (défaut) : le bloc reste celui d\'avant, avec calcul et note finale', () => {
         const { data, rendu } = charger(PRATIQUE_HYBRIDE);
         const texte = rangeeNote(rendu.rendreSyntheseHTML(data.construireFeedback(evaluation('complet'), { id: 'F1' }, null)));
-        expect(texte).toContain('Artefact 1 (D, 68.5 %)');
-        expect(texte).toMatch(/Note finale = 44\.5 pts \+ 28\.4 pts = 68\.5 %/);
-        expect(texte).toMatch(/68\.5 %\s+65 % =\s+44\.5 pts/);   // « … = 68.5 % × 65 % = 44.5 pts », balises et entités retirées
+        expect(texte).toContain('Artefact 1 (D, 68,5\u00A0%)');
+        expect(texte).toMatch(/Note finale = 44,5\u00A0pts \+ 28,4\u00A0pts = 68,5\u00A0%/);   // 21 oct. 2026 : une phrase, une norme
+        expect(texte).toMatch(/68,5\u00A0%\s+65\u00A0% =\s+44,5\u00A0pts/);   // « … = 68.5 % × 65 % = 44.5 pts », balises et entités retirées
     });
 
     it('sans choix enregistré, la pratique active décide (même priorité que l\'aperçu)', () => {

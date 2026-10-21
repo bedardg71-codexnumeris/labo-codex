@@ -182,7 +182,7 @@ describe('#701 · les trois chemins donnent le MÊME niveau à 74,5 %', () => {
         const h = monter({ grille, niveaux });
         h.ecran.eval_c2 = elementDom(); h.ec.criteres = { c1: 'E', c2: 'I' };   // (95 + 54) / 2 = 74,5
         h.win.calculerNote();
-        expect(h.ecran.noteProduction1.textContent).toBe('74.5 %');   // la NOTE garde son pourcentage exact
+        expect(h.ecran.noteProduction1.textContent).toBe('74,5\u00A0%');   // la NOTE garde son pourcentage exact
         expect(h.ecran.niveauProduction1.textContent).toBe('M');
     });
     it('algorithmique : 51 erreurs / 5000 mots = 74,5 % → M, à l\'écran, dans l\'évaluation en cours et dans la mémoire', () => {
@@ -237,7 +237,7 @@ describe('#704 · zéro erreur donne la note complète, dans les deux modes', ()
         categories(h, '', '500');
         expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ totalErreurs: 0, pourcentage: 100, noteCalculee: 20, niveau: 'E' });
         expect(h.ec.criteres.a1).toBe('E');
-        expect(h.ecran.noteProduction1.textContent).toBe('85.6 %');   // 0,8×82 + 0,2×100
+        expect(h.ecran.noteProduction1.textContent).toBe('85,6\u00A0%');   // 0,8×82 + 0,2×100
         expect(h.win.porteeCalculeeCourante.incomplete).toBe(false);
     });
     it('…et la rétroaction est celle du gabarit pour zéro erreur — la même phrase que le mode simple, jamais l\'amorce', () => {
@@ -267,7 +267,7 @@ describe('#704 · zéro erreur donne la note complète, dans les deux modes', ()
         categories(h, '', '500');
         expect(h.ec.criteres.a1).toBe('M');
         expect(h.ec.donneesAlgorithmiques.a1.pourcentage).toBeUndefined();
-        expect(h.ecran.noteProduction1.textContent).toBe('82.0 %');   // M vaut 82 partout
+        expect(h.ecran.noteProduction1.textContent).toBe('82\u00A0%');   // M vaut 82 partout
     });
     it('le registre dit déjà « aucune erreur : la note est complète » — modèle `ratio_cible`', () => {
         const h = monter({ grille: GRILLE_SIMPLE });

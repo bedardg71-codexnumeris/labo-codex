@@ -86,6 +86,23 @@ export function completerEcrivainsParDefaut(globaux, fauxWindow) {
     return Object.keys(ajouts).length ? Object.assign({}, globaux, ajouts) : globaux;
 }
 
+/**
+ * 21 oct. 2026 — `formaterNotePourcentage` / `formaterNoteNombre` (js/note-pourcentage.js) : LA façon d'afficher
+ * une note (norme française, « 89,2 % »). index.html charge ce module avant tous ses lecteurs (profil, Liste, PDF
+ * de l'élève, calcul, jetons…). Comme `motsNature` : fourni au harnais quand il ne le donne pas, et c'est le VRAI
+ * module qui est chargé (aucune copie de la règle ici). Rend les globaux complétés.
+ */
+export function completerNoteParDefaut(globaux) {
+    if (typeof globaux.formaterNotePourcentage === 'function') return globaux;
+    const winNote = {};
+    new Function('window', readFileSync(path.join(racineProjet, 'js/note-pourcentage.js'), 'utf8'))(winNote);
+    return Object.assign({}, globaux, {
+        formaterNotePourcentage: winNote.formaterNotePourcentage,
+        formaterNoteNombre: winNote.formaterNoteNombre,
+        ESPACE_INSECABLE: winNote.ESPACE_INSECABLE
+    });
+}
+
 export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExistant = null) {
     const chemin = path.join(racineProjet, cheminRelatifProjet);
     const code = readFileSync(chemin, 'utf8');
@@ -195,6 +212,7 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
 
     // Lot E1 de l'enregistrement (27 sept. 2026) : voir `completerEcrivainsParDefaut`.
     globaux = completerEcrivainsParDefaut(globaux, fauxWindow);
+    globaux = completerNoteParDefaut(globaux);   // 21 oct. 2026
 
     // Consigne du 12 sept. 2026 (les étiquettes) — `motsNature` / `motNature` (js/mots-nature.js) est
     // LE point unique du mot de chaque nature de cours ; le formulaire du Cadre, les cartes de

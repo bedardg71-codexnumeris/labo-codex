@@ -1,72 +1,36 @@
-# Consigne du jour – deux petits correctifs vécus par Grégoire (mercredi 21 octobre 2026)
+# Consigne du jour – la note en pourcentage à la norme française (mercredi 21 octobre 2026, après-midi)
 
-**Lot 1** : « Verrouiller la saisie » des présences. **Lot 2** (ajouté à 10 h 20) : la note du profil affichée avec quatorze décimales. Un commit par lot, dans cet ordre ; le point 0 vaut pour les deux, la clôture (§ 5) pour chacun.
+> Écrite par Cowork le mercredi 21 octobre 2026 à 11 h 08 (Toronto, mesuré par `date`). Elle remplace celle du matin (lots 1 et 2 : faits, `67298d08` et `90809966`, relus : acceptés, `VERDICT-RELECTURE-2026-10-21-consigne-du-jour-verrou-et-note.md`), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-21-verrou-et-note-du-profil.md`.
 
-> Écrite par Cowork le mercredi 21 octobre 2026 à 10 h 07 (Toronto, mesuré par `date`). Elle remplace celle du 19 octobre, temps B de la 1.209 (fait : livré depuis, la 1.212.0 est en ligne), archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-19-version-1.209-temps-B.md`.
+## La décision de Grégoire (21 oct. 2026, 11 h 07)
 
-# Lot 1 – « Verrouiller la saisie »
-
-## Ce que Grégoire a vécu (ses mots, 21 oct. 2026)
-
-Dans la saisie des présences, « Fermer » et « Verrouiller » ne sont pas clairs. « Fermer » quitte la page, et on ne peut plus verrouiller : on ne sait pas si c'est enregistré ou non. Il veut **le même comportement que « Verrouiller l'évaluation »** : un seul bouton, « Verrouiller la saisie ».
+Ta trouvaille du lot 2 (« Note de la copie : X % » sur le PDF de l'élève, contre « X% » à l'écran) lui est remontée. Il a choisi **la norme française** : virgule décimale et espace insécable avant le signe, **« 89,2 % »**, dans le PDF de l'élève et partout où une note s'affiche.
 
 ## 0. Arbre propre d'abord
 
-À 10 h 05, une autre session avait des modifications non commitées dans `index.html` et `js/accompagnement-contenu-*.js`. **Ne commence pas avant que l'arbre soit propre** (`git status` vide, sur `main`) : ce lot touche aussi `index.html`, et une seule session écrit à la fois.
+`git status` vide, sur `main`. Les commits non poussés de la journée restent tels quels ; ce lot s'y ajoute.
 
-## 1. Le modèle à reproduire (déjà en place, à lire avant de coder)
+## 1. Le mandat
 
-- `js/evaluation.js` : `basculerVerrouillageEvaluationCourante` (une seule porte pour le verrou) et `_libellerBoutonVerrouiller` (le bouton change de libellé, reste toujours actif).
-- `index.html`, panneau Paramètres de l'évaluation : `#btnVerrouillerEvaluation`, `btn btn-principal`.
+1. **`formaterNotePourcentage` rend la norme française** : « 89,2 % », « 67 % », « 0 % ». Une décimale au plus, sans zéro final (inchangé). L'espace est le caractère U+00A0, **pas** l'entité `&nbsp;` : plusieurs appelants passent le texte par `echapperHtml` ou `esc`, qui la doubleraient.
+2. **Toute note ou moyenne de notes en pourcentage, lue par l'enseignant·e ou par l'élève, passe par elle** : écrans, PDF, aperçus, infobulles, journal. Critère de tri pour chaque site : « est-ce une note, ou une moyenne de notes ? ». Points de départ mesurés par Cowork (à remesurer, règle 1 de `PROTOCOLE.md`) :
+   - le PDF de l'élève, `synthese-retroaction-rendu.js`, l. 449, 718, 742, 822, 826 ;
+   - la note finale du profil (`profil-etudiant-sections-affichage.js`, les `toFixed(1) + '%'`) : l'exception de la sentinelle B disparaît ;
+   - la note de l'écran d'évaluation, `evaluation-calcul.js` vers l. 1688 (`pourcentage.toFixed(1) + ' %'` : une note, même si la variable ne s'appelle pas ainsi) ;
+   - les `toFixed(n)` suivis de « % » dans `js/` : 58 lignes, dont 24 nomment une note ou une moyenne. Balaie les 58 avec le critère ci-dessus.
+3. **Dans le PDF de l'élève, une phrase ne mêle pas deux normes.** La l. 822 met des points et un pourcentage dans la même phrase (« … pts + … pts = … % ») : les nombres décimaux du PDF de l'élève suivent tous la virgule, avec l'espace insécable devant « pts » et « % ». Tu ne changes aucun mot.
+4. **Hors du lot, à inscrire en un seul item** : les autres pourcentages (assiduité, pondérations « × 40% », indices, axes des graphiques) et les points à l'écran de l'enseignant·e. Ce ne sont pas des notes ; Grégoire a tranché pour les notes.
+5. **Rien ne change pour ce qu'un logiciel relit** : CSV, xlsx, JSON, codex, archives, champs de saisie, valeurs stockées. Ils gardent des nombres. Mesuré par Cowork : le tri de la Liste se fait sur `noteChiffree` (numérique), et aucun code vivant ne relit une note affichée (`parseFloat` sur `textContent` : un seul résultat, un commentaire dans `evaluation-calcul.js` vers l. 1679). Remesure-le, specs Playwright comprises : une spec qui relit « 57.5% » à l'écran se corrige dans la spec, pas dans l'app.
 
-## 2. Le mandat
+## 2. Les tests
 
-Dans la barre `#actions-presences-bar` (`index.html`, vers la ligne 8027) :
+- Sentinelle `sentinelle-note-pourcentage-affichage.test.js` : le cas A passe à la norme française (dont le caractère U+00A0) ; le cas B s'étend aux `toFixed` suivis de « % » ou de « ␣% » sur une note ou une moyenne. Break-test : remettre la l. 449 d'origine doit la rougir.
+- Vitest depuis `tests/`, puis les specs Playwright qui lisent une note à l'écran ou dans le PDF. **Pas de verdict complet ni de release maintenant** : ils tournent ce soir, avec le reste de la journée.
+- Dans un vrai WebKit : le PDF de l'élève affiche « 89,2 % », sans « Â » ni glyphe manquant, et l'espace insécable ne coupe pas « 89,2 » de « % » en fin de ligne.
 
-1. **Retirer « Fermer »** (`data-action="fermerSaisiePresences"`) **et la case à cocher** (`#controle-verrouillage-presences`, sa case, son libellé, son icône). Zéro dette : `fermerSaisiePresences`, son export `window.` et tout code qui ne servait qu'à la case partent avec.
-2. **Ajouter un seul bouton** `btn btn-principal btn-compact`, branché par `data-action` sur la porte existante `basculerVerrouillageDateActive` → `basculerVerrouillageDate` (qui enregistre déjà la séance avant de la verrouiller ; n'y change rien). Libellé : **« Verrouiller la saisie »** sous une séance non verrouillée, **« Déverrouiller la saisie »** sous une séance verrouillée. Toujours actif, comme celui de l'évaluation. Caché quand aucune date valide n'est affichée (comme l'est la case aujourd'hui).
-3. **L'état dit le verrou.** Sous une séance verrouillée, `#etat-seance-presences` lit **« Séance verrouillée »**, précédé de `icons/icon-lock.svg`, au lieu de « Séance saisie ». C'est la réponse à « on ne sait pas si c'est enregistré ». La bordure du compteur garde sa couleur actuelle selon l'état.
-4. **Ne rien changer à** « Rapport », « Confirmer la séance » (hypothèse de Cowork, à dire dans ton rapport : c'est un autre geste, « tout le monde est là », hors de la demande), aux messages de `basculerVerrouillageDate`.
-5. **Le retour à la liste** se fait par le sous-onglet « Liste » de la navigation. ⚠ « Fermer » vidait l'écriture en attente avant de partir. **Mesure** qu'une saisie suivie, dans la seconde, d'un clic sur le sous-onglet « Liste » est bien en base. Si elle se perd, corrige dans `saisie-presences.js` **sans toucher à `js/navigation.js` ni `js/config.js`** (zones protégées) ; si c'est impossible sans elles, arrête-toi et dis-le.
+## 3. Clôture
 
-## 3. Les tests
-
-Ces fichiers nomment « Fermer » ou la case et doivent être réécrits pour garder l'invariant nouveau, pas supprimés : `tests/unit/audit-sous-onglets-suivi-2026-09-06.test.js` (S5), `tests/unit/sentinelle-lot-d-presences-enregistrement.test.js` (« Fermer emporte l'écriture en attente » → le verrou l'emporte ; quitter vers « Liste » l'emporte, selon la mesure du point 5), `tests/integration/presences-lot-d-enregistrement.spec.js` (la barre à 360 px), `tests/integration/lot-a-anonymisation-enregistre.spec.js`, `tests/integration/temoin-enregistrement-lot-b.spec.js`. La sentinelle #768/#782 doit rester verte sans modification. Break-test pour chaque test neuf ou réécrit (skill `verification-adverse`).
-
-Vitest depuis `tests/`, puis les seules specs Playwright des présences. **Pas de verdict complet ni de release maintenant** : cadence du 11 oct., le verdict tourne le soir, quand Grégoire dit que sa journée est finie.
-
-## 4. iPad
-
-La règle des 44 px de `#actions-presences-bar .btn` (`styles.css`, vers la ligne 10460) couvre le nouveau bouton : vérifie-le, et que la barre passe à la ligne proprement à 360 px et à la largeur de l'iPad Air.
-
-## 5. Clôture
-
-- Commit sur `main`, puis demande de relecture à Cowork avant le push (règle 2 de `PROTOCOLE.md`).
-- Un item « Nouvelles » proposé dans ton rapport, **pas écrit** dans `changelog-data.js` : Grégoire le valide à la release du soir.
-- Toute trouvaille hors du lot : trois issues (`CLAUDE.md`), « inscrire et continuer » par défaut.
+- Commit sur `main`, puis demande de relecture à Cowork avant le push.
+- L'item « Nouvelles » est proposé dans ton rapport, **pas écrit** dans `changelog-data.js` : Grégoire le valide à la release du soir. Il peut se fondre dans celui du lot 2 du matin, puisqu'ils partent ensemble.
+- Toute trouvaille hors du lot : les trois issues de `CLAUDE.md`, « inscrire et continuer » par défaut.
 - Termine par **le geste à vérifier à l'écran**, en une phrase d'utilisateur.
-
-# Lot 2 – la note du profil avec quatorze décimales
-
-## Ce que Grégoire a vécu (rapport de bug, 21 oct. 2026, 10 h 16, version 1.212.0, Chrome sur Mac, gravité « gênant »)
-
-Profil d'un·e élève, tableau « Liste des productions », colonne Note : « E 89.23679060665361% », « M 79.33333333333333% », alors que les autres lignes lisent « I 57.5% », « D 67% ». Sa description : « Il y a trop de décimales dans le résultat. On avait pourtant réglé ce bug… »
-
-À inscrire dans `Retours des testeurs/SUIVI-BUGS.md` (lecture ciblée, 120 Ko). ⚠ Ne recopie PAS la liste « Dernières actions » du rapport : elle porte des noms d'élèves réels.
-
-## Ce que Cowork a mesuré (à remesurer, règle 1 de `PROTOCOLE.md`)
-
-- **Pourquoi « on l'avait réglé »** : le bogue 123 (24 mai, `SUIVI-BUGS.md` vers la ligne 644) a arrondi l'affichage de la seule « Liste des évaluations » ; la note se stockait alors arrondie. Depuis #572 (29 août) et #701, `noteFinale` est stockée **exacte, délibérément** (`window.noteCalculeeCourante`, `evaluation-calcul.js` vers la ligne 1684). Tout affichage qui la lit brute montre donc le bruit.
-- **Ce n'est pas un problème de stock** : la valeur exacte en base est voulue. On ne touche à aucune donnée ; on corrige l'affichage seulement.
-- **La convention d'affichage déjà en place** : `Math.round(note * 10) / 10` suivi de `%` (une décimale au plus, pas de zéro final : « 67% », « 57.5% », « 89.2% »). Copies inline : `liste-evaluations.js` (vers 1212, 1385, 1856), `evaluation.js` (vers 1401).
-- **Les affichages bruts trouvés par `grep`** (balaie-en d'autres) : `profil-etudiant-sections-affichage.js` vers 2875 (le bogue vu), `travaux-ui.js` vers 7205, `travaux-export-pdf.js` vers 1055 et 1063 (l'aperçu du PDF de l'élève), `journal.js` vers 192 et 231.
-
-## Le mandat
-
-1. **Une seule fonction d'affichage** de la note en pourcentage, à la convention ci-dessus, placée où les quatre modules peuvent la lire. Tous les affichages bruts passent par elle, et les copies inline existantes aussi (zéro dette : une convention, un endroit).
-2. **Ne change pas** la valeur stockée, ni le calcul, ni les `toFixed(1)` de la note finale du profil (autre affichage, hors du bogue ; trouvaille à inscrire si tu juges qu'il faut les unifier).
-3. **Une sentinelle** qui garde l'invariant, pas des exemples (leçon de #768/#782) : aucun fichier de `js/` n'interpole `noteFinale` suivi de `%` sans passer par la fonction. Break-test : remettre la ligne 2875 d'origine doit la rougir.
-
-## Le geste à vérifier à l'écran
-
-Rouvrir le profil du même élève : « Portrait de lecteur/lectrice » et « Artefact 4 » lisent une décimale au plus.

@@ -84,13 +84,14 @@ test('#921 · sommative configurable : la carte « Moyenne pondérée » paraît
     expect(c.titre).toContain('sommative du banc');
     expect(c.titre).toContain('Réglages de la pratique');
     expect(c.composante).toMatch(/^Moyenne pondérée \(2 /);
+    // 21 oct. 2026 : notes à la norme française ; `txt` ramène tout blanc (l'insécable compris) à une espace.
     expect(c.lignes).toEqual([
-        'Analyse terminale · poids 40 % (D 67.4%)',
-        'Portfolio (global) · poids 60 % (M 78.3%)',
-        'Exercice en cours · évaluation non verrouillée · non comptée (I 20.0%)'
+        'Analyse terminale · poids 40 % (D 67,4 %)',
+        'Portfolio (global) · poids 60 % (M 78,3 %)',
+        'Exercice en cours · évaluation non verrouillée · non comptée (I 20 %)'
     ]);
-    expect(c.calcul).toBe('(67.4 × 40 + 78.3 × 60) ÷ 100 = 73.9%');
-    expect(c.total).toBe('73.9%');
+    expect(c.calcul).toBe('(67,4 × 40 + 78,3 × 60) ÷ 100 = 73,9 %');
+    expect(c.total).toBe('73,9 %');
     // Parité : l'écran ne calcule rien, il redit le moteur.
     expect(c.moteur.famille).toBe('SOM');
     expect(Math.abs(c.moteur.note - 73.94)).toBeLessThan(0.001);
@@ -102,9 +103,9 @@ test('#921 · quand le verrou de la pratique (#897) plafonne la moyenne, la cart
     const erreurs = await monter(page, { verrou: true });
     const c = await lireCarte(page);
 
-    expect(c.calcul).toBe('(67.4 × 40 + 78.3 × 60) ÷ 100 = 73.9%');
-    expect(c.total).toBe('55.0%');
-    expect(c.message).toBe('Moyenne de 73.9% ramenée à 55.0% par une règle de la pratique.');
+    expect(c.calcul).toBe('(67,4 × 40 + 78,3 × 60) ÷ 100 = 73,9 %');
+    expect(c.total).toBe('55 %');
+    expect(c.message).toBe('Moyenne de 73,9 % ramenée à 55 % par une règle de la pratique.');
     expect(c.moteur.note).toBe(55);
     expect(erreurs).toEqual([]);
 });
@@ -117,7 +118,7 @@ test('#921 · si la moyenne du moteur ne se retrouve pas par les pondérations a
     const c = await lireCarte(page);
 
     expect(c.presente).toBe(true);
-    expect(c.total).toBe('50.0%');
+    expect(c.total).toBe('50 %');
     expect(c.calcul, 'aucune ligne de calcul plutôt qu\'une arithmétique fausse').toBeNull();
     expect(erreurs).toEqual([]);
 });

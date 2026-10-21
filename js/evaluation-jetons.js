@@ -701,7 +701,7 @@ async function retirerJetonReprise(evaluationId, options) {
         }
         const confirmer = confirm(
             'Cette évaluation est l\'ORIGINALE, remplacée par une reprise'
-            + (noteRepriseLiee !== null ? ` (${noteRepriseLiee}%)` : '') + '.\n\n'
+            + (noteRepriseLiee !== null ? ` (${formaterNotePourcentage(noteRepriseLiee)})` : '') + '.\n\n'
             + 'La restaurer supprimera la reprise.'
             + (nbFichiersLiesAnnonces
                 ? ` Le ou les ${nbFichiersLiesAnnonces} fichier(s) remis pour la reprise iront à la corbeille (récupérables 30 jours).`
@@ -762,7 +762,7 @@ async function retirerJetonReprise(evaluationId, options) {
         }
         const confirmer = confirm(
             `Retirer le jeton de reprise ?\n\n` +
-            `La reprise (${noteReprise}%) sera supprimée et l'originale (${noteOriginale}%) sera restaurée.` +
+            `La reprise (${formaterNotePourcentage(noteReprise)}) sera supprimée et l'originale (${formaterNotePourcentage(noteOriginale)}) sera restaurée.` +
             mentionFichiers + `\n\n` +
             `(Pour conserver la reprise, garde simplement le jeton en place.)`
         );

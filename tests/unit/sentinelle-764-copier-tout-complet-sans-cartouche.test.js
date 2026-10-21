@@ -132,13 +132,13 @@ describe('#764 · « Copier tout » livre un texte complet', () => {
 
     it('la grille de Grégoire (un critère algorithmique, SANS cartouche) : la générale existe, avec la rétroaction du critère, le décompte des codes et la note', () => {
         const { ecran, copie } = monter({ avecCartouche: false });
-        expect(ecran.noteProduction1.textContent).toBe('23.0 %');
+        expect(ecran.noteProduction1.textContent).toBe('23\u00A0%');
         expect(copie.texte, 'avant : la générale était vide (la zone montrait son texte d\'attente) et le collage commençait à « SPÉCIFIQUE »').toContain('=== RÉTROACTION GÉNÉRALE ===');
         expect(copie.texte).toContain('Critère 1 (Français écrit) — I');
         expect(copie.texte).toContain(RETRO_ALGO);
         expect(copie.texte).toContain('--- Langue ---');
         expect(copie.texte).toContain('Code 10 – Orthographe d\'usage ou éléments de typographie (×23) :');
-        expect(copie.texte).toContain('Note finale : 23.0 %  |  Niveau : I');
+        expect(copie.texte).toContain('Note finale : 23\u00A0%  |  Niveau : I');
         // Sans cartouche, aucun contexte de cartouche, et pas de « [Non défini] » à la place d'un commentaire.
         expect(copie.texte).not.toContain('CONTEXTE-CARTOUCHE');
         expect(copie.texte).not.toContain('[Non défini]');
@@ -157,6 +157,6 @@ describe('#764 · « Copier tout » livre un texte complet', () => {
         expect(copie.texte).toContain('=== RÉTROACTION GÉNÉRALE ===');
         expect(copie.texte).toContain('CONTEXTE-CARTOUCHE');
         expect(copie.texte).toContain(RETRO_ALGO);
-        expect(copie.texte).toContain('Note finale : 23.0 %  |  Niveau : I');
+        expect(copie.texte).toContain('Note finale : 23\u00A0%  |  Niveau : I');
     });
 });

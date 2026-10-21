@@ -1685,7 +1685,7 @@ function calculerNote() {
     window.porteeCalculeeCourante = portee;
 
     // Mettre à jour l'affichage
-    document.getElementById('noteProduction1').textContent = portee.incomplete ? '--' : (pourcentage.toFixed(1) + ' %');
+    document.getElementById('noteProduction1').textContent = portee.incomplete ? '--' : formaterNotePourcentage(pourcentage);   // 21 oct. 2026 : une note (virgule, espace insécable)
     document.getElementById('niveauProduction1').textContent = niveauGlobal;
     _ecrirePorteeEcran(portee);
 

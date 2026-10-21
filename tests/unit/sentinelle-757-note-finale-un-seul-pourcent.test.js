@@ -89,10 +89,10 @@ describe('#757 · la ligne « Note finale » du texte copié vers Léa porte l\'
     it('D (60 %) + M (40 %) → « Note finale : 71.0 %  |  Niveau : D », jamais « %% »', () => {
         const { win, ecran } = monter({ niveaux: { c1: 'D', c2: 'M' } });
         win.calculerNote();
-        expect(ecran.noteProduction1.textContent, 'ce que l\'écran affiche (source de la mesure C1)').toBe('71.0 %');
+        expect(ecran.noteProduction1.textContent, 'ce que l\'écran affiche (source de la mesure C1)').toBe('71\u00A0%');
         win.genererRetroaction(1);
         const texte = ecran.retroactionFinale1.value;
-        expect(texte).toContain('Note finale : 71.0 %  |  Niveau : D');
+        expect(texte).toContain('Note finale : 71\u00A0%  |  Niveau : D');
         expect(texte).not.toContain('%%');
     });
 

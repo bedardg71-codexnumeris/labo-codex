@@ -33,7 +33,7 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 /**
@@ -46,7 +46,7 @@ function chargerAvecInterne(chemin, globaux, win, noms) {
     const fin = code.lastIndexOf('})();');
     const expo = '\n;window.__audit = Object.assign(window.__audit || {}, {' + noms.map(n => n + ': ' + n).join(', ') + '});\n';
     code = code.slice(0, fin) + expo + code.slice(fin);
-    const { document: doc, ...autres } = globaux;
+    const { document: doc, ...autres } = completerNoteParDefaut(globaux);   // 21 oct. 2026 (voir charger-script.js)
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     const nomsG = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres)];
     const vals = [win, doc, console, storage(), storage(), ...Object.values(autres)];

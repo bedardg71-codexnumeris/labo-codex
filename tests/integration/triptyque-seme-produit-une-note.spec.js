@@ -132,7 +132,7 @@ test('§1+§2 · BOUT EN BOUT — sans rien créer, une première évaluation pr
     // `valeurCalcul` : un CHIFFRE qui se lit comme un résultat. On exige donc la
     // valeur exacte du niveau coché, pas seulement « quelque chose de non nul ».
     expect(r.noteCalculee, 'la note ne vaut pas la valeur ponctuelle de « M »').toBe(r.valeurM);
-    expect(r.note).toBe(r.valeurM.toFixed(1) + ' %');
+    expect(r.note).toBe(String(Math.round(r.valeurM * 10) / 10).replace('.', ',') + '\u00A0%');   // 21 oct. 2026 : norme française
     expect(r.niveau, 'le niveau global doit être nommé, pas « -- »').toBe('M');
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
@@ -205,7 +205,7 @@ test('§1+§2 · #674 — un critère laissé sans niveau : l\'écran RETIENT la
     expect(r.incomplet.ponderationCouverte).toBe(r.sommeGrille - r.dernierPond);
 
     // Complet : la note revient, et PAS UN MOT DE PLUS.
-    expect(r.complet.note).toBe(r.valeurM.toFixed(1) + ' %');
+    expect(r.complet.note).toBe(String(Math.round(r.valeurM * 10) / 10).replace('.', ',') + '\u00A0%');
     expect(r.complet.niveau).toBe('M');
     expect(r.complet.porteeVisible, 'une évaluation complète ne reçoit aucun avertissement').toBe(false);
     expect(r.complet.porteeTexte).toBe('');
