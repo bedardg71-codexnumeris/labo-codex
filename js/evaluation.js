@@ -552,7 +552,7 @@ function verifierEtChargerEvaluationExistante() {
         const zonesResultat = document.querySelectorAll('div[id^="resultat_algo_"]');
 
         champsCategories.forEach(input => input.value = '');
-        champsErreurs.forEach(input => input.value = '');
+        champsErreurs.forEach(input => window.poserErreursDuChamp(input, ''));   // 21 oct. 2026 : et sa somme pondérée
         champsMots.forEach(input => input.value = '');
         zonesResultat.forEach(div => {
             const spans = div.querySelectorAll('span');
@@ -711,7 +711,7 @@ function verifierEtChargerEvaluationExistante() {
                     if (nbErreurs !== undefined) {
                         const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
                         if (inputErreurs) {
-                            inputErreurs.value = nbErreurs;
+                            window.poserErreursDuChamp(inputErreurs, nbErreurs, donnees.sommePonderee, { enregistree: true });   // 21 oct. 2026
                         }
                     }
 
@@ -1479,7 +1479,7 @@ function _restaurerDonneesAlgorithmiquesModif(evaluation) {
         const nbErreurs = donnees.erreurs !== undefined ? donnees.erreurs : donnees.totalErreurs;
         if (nbErreurs !== undefined) {
             const inputErreurs = document.getElementById(`eval_erreurs_${critereId}`);
-            if (inputErreurs) inputErreurs.value = nbErreurs;
+            if (inputErreurs) window.poserErreursDuChamp(inputErreurs, nbErreurs, donnees.sommePonderee, { enregistree: true });   // 21 oct. 2026
         }
 
         // Déclencher le recalcul pour afficher les résultats (attendre que le DOM soit prêt)

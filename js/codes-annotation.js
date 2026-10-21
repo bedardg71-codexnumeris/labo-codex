@@ -28,7 +28,7 @@
      apercuCodes(critere)   ce que les sous-critères donneraient, geste ou non (gabarit)
      grilleDeCopie(fichier) la grille d'une copie, via sa production, ou null
 
-   Chaque code : { id, code, numero, nom, couleur, retroaction, source }
+   Chaque code : { id, code, numero, nom, couleur, retroaction, source, poids }
      id        ce qui est écrit sur la copie : `errfr_<code>`. ⚠ LE PRÉFIXE RESTE,
                ET C'EST DIT PLUTÔT QUE RENOMMÉ : il vit dans les annotations déjà
                posées, un identifiant n'est pas un libellé, et personne ne le lit.
@@ -36,6 +36,9 @@
                le CODE du sous-critère ; en repli, la POSITION dans l'ordre
                personnalisé — exactement hier (`dessinerErreurFrancais`, le
                curseur, le PDF et la palette suivaient tous l'ordre, pas l'id).
+     poids     ce que pèse un code posé dans la formule (décision de Grégoire,
+               21 oct. 2026, 8 h 38) : la pondération de son sous-critère sous une
+               grille activée ; 1 en repli et pour un code inconnu — comme hier.
 
    LE REPLI = HIER, AU CARACTÈRE PRÈS
    Une grille sans le geste d'activation (`codesDepuisSousCriteres`), une copie
@@ -177,7 +180,8 @@ function _repli() {
             nom: p.nom ? p.nom : t.nom,
             couleur: p.couleur ? p.couleur : t.couleur,
             retroaction: (typeof textes[id] === 'string') ? textes[id] : '',
-            source: 'repli'
+            source: 'repli',
+            poids: 1
         });
     });
     return liste;
@@ -220,7 +224,8 @@ function _depuisSousCriteres(critere) {
             couleur: (typeof sc.couleur === 'string' && COULEUR_VALIDE.test(sc.couleur)) ? sc.couleur
                 : COULEURS_DEFAUT[(liste.length) % COULEURS_DEFAUT.length],
             retroaction: (typeof sc.retroaction === 'string') ? sc.retroaction : '',
-            source: 'grille'
+            source: 'grille',
+            poids: Number(sc.ponderation)
         });
     });
     return liste;
@@ -265,7 +270,7 @@ function code(grille, id) {
     var num = (brut.indexOf(PREFIXE) === 0) ? brut.slice(PREFIXE.length) : brut;
     return {
         id: brut, code: num, numero: num, nom: 'Code ' + num,
-        couleur: '#888888', retroaction: '', source: 'inconnu', inconnu: true
+        couleur: '#888888', retroaction: '', source: 'inconnu', inconnu: true, poids: 1
     };
 }
 

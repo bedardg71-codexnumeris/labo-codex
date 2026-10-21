@@ -2376,6 +2376,20 @@ span.header-icon {
     margin-top: 6px;
 }
 
+/* 21 oct. 2026 (constat 11) : la liste des collections en fin de carte, sous son titre, séparée du critère. */
+#listeCriteres .collections-section {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bordure-claire);
+}
+
+#listeCriteres .collections-titre {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+}
+
 #listeCriteres .collection-ligne {
     display: flex;
     align-items: center;

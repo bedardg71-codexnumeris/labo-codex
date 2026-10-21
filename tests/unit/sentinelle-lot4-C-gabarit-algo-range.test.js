@@ -175,7 +175,7 @@ describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié'
         }
     });
 
-    it('A.c en CRÉATION : les mêmes cartes, sans les codes ni les sous-critères — la grille n\'est pas enregistrée, et on le dit', () => {
+    it('A.c en CRÉATION : les mêmes cartes, et (↻ #1131, 21 oct. 2026) les sous-critères, par la cible `temp`', () => {
         const { win, liste } = monter([]);
         win.tempTypeGrille = 'algorithmique';
         win.tempCriteres = [{ id: 'TEMP_1', nom: 'Rigueur', type: 'algorithmique', ponderation: 100 }];
@@ -185,7 +185,9 @@ describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié'
         expect(pos(html, 'data-pli="TEMP_1:commentaire"')).toBeGreaterThan(pos(html, 'data-pli="TEMP_1:formule"'));
         expect(pos(html, 'data-pli="TEMP_1:projection"')).toBeGreaterThan(pos(html, 'data-pli="TEMP_1:commentaire"'));
         expect(html).not.toContain('data-pli="TEMP_1:codes"');
-        expect(html).toContain('Les sous-critères se définissent une fois la grille enregistrée.');
+        expect(html).not.toContain('Les sous-critères se définissent une fois la grille enregistrée.');
+        expect(html).toContain('data-action="initialiserSousCriteresParDefaut" data-param="temp" data-param2="0"');
+        expect(pos(html, 'class="sous-criteres-conteneur')).toBeLessThan(pos(html, 'data-pli="TEMP_1:formule"'));
         expect(html).toContain('mode: "temp"'.length ? 'modifierParamFormuleTempHandler' : '');
     });
 

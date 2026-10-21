@@ -183,7 +183,8 @@ describe('une seule carte · A — le décompte est rendu UNE fois, dans « Ce q
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
         expect(clesDe(projection)).toEqual(['decompte']);
         expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
-        expect(clesDe(html), 'en création, « Aucune annotation » n\'est nulle part : sa maison est la liste des sous-critères d\'une grille enregistrée').toEqual(['priorite', 'concentre', 'decompte']);
+        // ↻ 21 oct. 2026 (#1131) : la liste des sous-critères existe en création ; « Aucune annotation » y vit, comme en édition.
+        expect(clesDe(html)).toEqual(['aucune', 'priorite', 'concentre', 'decompte']);
         expect(blocDecompte(projection)).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="decompte"/);
     });
 });

@@ -633,9 +633,10 @@ function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePond
     // une donnée du calcul, pas un choix de rédaction. Elle arrive comme le
     // jeton {points}, avec son espace de tête, exactement là où elle était.
     const critereEnonces = _critereEnoncesPour(critereId);   // #686
-    const mentionPoints = (scDominant && scDominant.retroaction && Math.abs(sommePonderee - totalErreurs) > 0.01)
-        ? ` (${sommePonderee.toFixed(1)} points)`
-        : '';
+    // 21 oct. 2026 (décision de Grégoire, 8 h 39) : la mention des deux modes sort d'une seule source,
+    // `enoncesAlgo.mentionPonderee` (« (3,5 une fois pondérées) ») ; elle disait « (3.5 points) », et
+    // seulement quand le code dominant portait une rétroaction.
+    const mentionPoints = window.enoncesAlgo.mentionPonderee(totalErreurs, sommePonderee);
     let retroaction = window.enoncesAlgo.enonce(critereEnonces, 'decompte', {
         erreurs: totalErreurs,
         mots: mots,
@@ -751,6 +752,57 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     window.genererRetroaction(1); // Patch §5.6 — genererRetroaction reste dans le résidu evaluation.js
 }
 
+/*
+ * LE CHAMP « NOMBRE D'ERREURS » ET SA SOMME PONDÉRÉE — décision de Grégoire, 21 oct. 2026 (8 h 38) :
+ * le poids d'un sous-critère s'applique aux codes posés. Le champ garde le nombre BRUT (ce qu'il dit,
+ * ce que l'élève lit) ; la somme pondérée des codes l'accompagne sur le champ (`data-somme-ponderee`),
+ * attachée au nombre brut auquel elle se rapporte (`data-erreurs-brutes`). Elle ne vaut que tant que
+ * le champ porte ce nombre-là : une saisie à la main, sans code posé, reste un nombre brut. C'est le
+ * modèle du mode Catégories (`totalErreurs`, `sommePonderee`), pas un second calcul.
+ * Une seule paire d'écrivains : `poserErreursDuChamp` (Annoter, le chargement d'une évaluation, le
+ * vidage) et `erreursPourLaFormule` (le calcul). Une somme égale au brut n'est pas posée : tous les
+ * poids à 1, rien ne change.
+ * ⚠ LE STOCK (consigne, point 3 : « une évaluation déjà enregistrée garde sa note »). Mesuré : rouvrir
+ * une copie évaluée verse ses codes au champ par un `input` (`mettreAJourCompteursErreurs`), qui
+ * recalcule et arme l'enregistrement automatique (`evaluation-handlers.js`) : sans garde, une note
+ * enregistrée avant les poids serait réécrite à la réouverture, partout où un poids diffère de 1.
+ * D'où `{ enregistree: true }`, posé par les chargeurs : une évaluation rouverte SANS somme pondérée
+ * garde son calcul (`data-erreurs-enregistrees`) tant que les codes posés donnent le même nombre ; un
+ * code ajouté ou retiré est un geste, et le poids s'applique.
+ */
+function poserErreursDuChamp(input, brut, sommePonderee, options) {
+    if (!input) return;
+    input.value = (brut === undefined || brut === null) ? '' : brut;
+    const d = input.dataset;
+    if (options && options.enregistree) {
+        if (sommePonderee === undefined || sommePonderee === null) d.erreursEnregistrees = String(input.value);
+        else delete d.erreursEnregistrees;
+    } else if (d.erreursEnregistrees !== undefined && d.erreursEnregistrees === String(input.value)) {
+        sommePonderee = undefined;   // les mêmes codes : la note enregistrée reste
+    } else {
+        delete d.erreursEnregistrees;
+    }
+    const p = Number(sommePonderee);
+    if (sommePonderee !== undefined && sommePonderee !== null && isFinite(p) && input.value !== ''
+        && Math.abs(p - Number(input.value)) >= 0.005) {
+        input.dataset.sommePonderee = String(p);
+        input.dataset.erreursBrutes = String(input.value);
+    } else {
+        delete input.dataset.sommePonderee;
+        delete input.dataset.erreursBrutes;
+    }
+}
+
+/** Ce que la formule reçoit : la somme pondérée des codes, si le champ porte encore leur nombre brut ; sinon ce nombre. */
+function erreursPourLaFormule(input, brut) {
+    const d = input && input.dataset;
+    if (d && d.sommePonderee !== undefined && d.erreursBrutes === String(input.value)) {
+        const p = Number(d.sommePonderee);
+        if (isFinite(p)) return p;
+    }
+    return brut;
+}
+
 /**
  * Calcule la note algorithmique SIMPLE (sans catégorisation des erreurs)
  * Formule: Note = Pondération − (Total Erreurs ÷ Mots × Facteur)
@@ -772,6 +824,9 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
 
     const erreurs = parseInt(erreursInput?.value) || 0;
     const mots = parseInt(motsInput?.value) || 0;
+    // 21 oct. 2026 : la formule reçoit la somme pondérée des codes posés ; l'élève lit le nombre brut.
+    const erreursFormule = erreursPourLaFormule(erreursInput, erreurs);
+    const sommePonderee = (erreursFormule !== erreurs) ? erreursFormule : undefined;
 
     // Mettre à jour l'affichage du résumé
     const totalErreursElem = document.getElementById(`total_erreurs_simple_${critereId}`);
@@ -795,7 +850,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     const critereFormuleAlgo = _critereFormulePourCalcul(critereId, facteur);
     const resFormule = window.formulesAlgo.calculer(critereFormuleAlgo, {
         ponderation: ponderation,
-        erreurs: erreurs,
+        erreurs: erreursFormule,
         mots: mots
     });
     if (!resFormule.applicable) {
@@ -804,7 +859,8 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     }
     const noteCalculee = resFormule.note;
     const pctFinal = resFormule.pctBorne;
-    _afficherFormuleAlgo(critereId, critereFormuleAlgo, { ponderation, erreurs, mots });
+    // La formule affichée redonne la note : elle montre ce que la formule a reçu (comme en mode catégories).
+    _afficherFormuleAlgo(critereId, critereFormuleAlgo, { ponderation, erreurs: erreursFormule, mots });
 
     // #701 / #702 — le niveau par la règle unique ; `undefined` quand rien ne se déduit.
     const niveauIDME = _determinerNiveauIDMEAlgo(pctFinal);
@@ -823,7 +879,8 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     // celle que le gabarit de la grille porte, et elle ne nomme aucune
     // discipline que son auteur·e n'a pas écrite.
     let retroactionGenerique = window.enoncesAlgo.enonce(
-        _critereEnoncesPour(critereId), 'decompte', { erreurs: erreurs, mots: mots });   // #686
+        _critereEnoncesPour(critereId), 'decompte',
+        { erreurs: erreurs, mots: mots, points: window.enoncesAlgo.mentionPonderee(erreurs, erreursFormule) });   // #686
 
     // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
     const retroactionEUF = _projectionEUF(critereId, erreurs, mots);
@@ -856,6 +913,9 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
         niveau: niveauIDME,
         retroaction: retroactionGenerique
     };
+    // 21 oct. 2026 : seulement quand elle diffère du nombre brut — tous les poids à 1, l'évaluation
+    // enregistrée reste celle d'hier, à l'octet près. Le chargement la rend au champ (`poserErreursDuChamp`).
+    if (sommePonderee !== undefined) evaluationEnCours.donneesAlgorithmiques[critereId].sommePonderee = sommePonderee;
 
     // Sauvegarder le critère dans evaluationEnCours.criteres avec le niveau (#702 : jamais « -- »)
     _poserNiveauCalculeAlgo(critereId, niveauIDME);
@@ -1746,6 +1806,8 @@ function _forcerRecalculAlgorithmiqueAvantSauvegarde(grille) {
 // Préservés depuis bloc principal evaluation.js (session A) :
 window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCategories;
 window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
+window.poserErreursDuChamp = poserErreursDuChamp;       // 21 oct. 2026 — Annoter, le chargement, le vidage
+window.erreursPourLaFormule = erreursPourLaFormule;
 
 // Promotions §5.6 nouvelles (session B) :
 window.calculerNote = calculerNote;

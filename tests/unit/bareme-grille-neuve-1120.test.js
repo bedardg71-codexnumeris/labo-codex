@@ -154,10 +154,11 @@ describe('#1120 grille neuve · A — en création, les sections de la modificat
         expect(m.carte(0).querySelector('[data-action="ajouterTrancheBareme"]')).toBeNull();
     });
 
-    it('A.c un critère algorithmique : rien de neuf (ses sous-critères se définissent une fois la grille enregistrée)', async () => {
+    it('A.c un critère algorithmique : pas la section des autres types ; ses sous-critères, ceux du gabarit, par la cible `temp` (↻ #1131)', async () => {
         const m = await enCreation('algorithmique');
         expect(m.carte(0).querySelector('.grille-attendu')).toBeNull();
-        expect(m.carte(0).textContent).toContain('Les sous-critères se définissent une fois la grille enregistrée.');
+        expect(m.carte(0).textContent).not.toContain('Les sous-critères se définissent une fois la grille enregistrée.');
+        expect(m.carte(0).querySelector('.sous-criteres-conteneur [data-action="ajouterSousCritere"]').dataset.param).toBe('temp');
     });
 });
 

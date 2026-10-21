@@ -186,8 +186,8 @@ var JETONS = [JETON_CRITERE, JETON_ERREURS, JETON_PLURIEL, JETON_MOTS, JETON_POI
 //   remplie  la valeur vient de la CORRECTION, copie par copie — elle
 //            n'existe pas avant, et personne n'a à la saisir dans la grille.
 //
-// `espaceDeTete` : {points} arrive avec son espace de tête (« (3,0 points) »
-// précédé d'une espace, ou vide — voir `_construireRetroactionAlgoCategories`).
+// `espaceDeTete` : {points} arrive avec son espace de tête (« (3,5 une fois pondérées) »
+// précédé d'une espace, ou vide — voir `mentionPonderee`).
 // Un repère posé après un mot reçoit une espace ; celui-là en aurait deux.
 var REPERES = [
     { jeton: JETON_CRITERE, famille: 'posee',   libelle: 'nom du critère',
@@ -644,6 +644,24 @@ function enoncesRediges(critere) {
     return propres;
 }
 
+/**
+ * LA MENTION PONDÉRÉE — décision de Grégoire, 21 oct. 2026 (8 h 38 et 8 h 39, consigne
+ * `CONSIGNE-LOT-2026-10-21-critere-algorithmique-dit-vrai.md`) : la formule reçoit la somme
+ * PONDÉRÉE des codes posés ; quand elle diffère du nombre d'erreurs, l'élève lit les deux,
+ * « 5 erreurs (3,5 une fois pondérées) ». Rend la parenthèse AVEC son espace de tête (la
+ * valeur du jeton {points}, et de la ligne du PDF), ou '' quand les deux nombres sont égaux
+ * — tous les poids à 1 : rien ne change dans ce que l'élève lit. Virgule décimale, deux
+ * décimales au plus ; « pondérée » au singulier sous 2, comme la règle C1.
+ * Une seule source pour la phrase du décompte (les deux modes) et pour le PDF.
+ */
+function mentionPonderee(brut, pondere) {
+    var b = Number(brut), p = Number(pondere);
+    if (brut === null || brut === undefined || pondere === null || pondere === undefined) return '';
+    if (!isFinite(b) || !isFinite(p) || Math.abs(p - b) < 0.005) return '';
+    var arrondi = Math.round(p * 100) / 100;
+    return ' (' + String(arrondi).replace('.', ',') + ' une fois pondérée' + (Math.abs(arrondi) >= 2 ? 's' : '') + ')';
+}
+
 /** Les énoncés par défaut d'un modèle — pour préremplir le gabarit. */
 function enoncesParDefaut(modeleId) {
     var modele = obtenirModele(modeleId) || obtenirModele(MODELE_PAR_DEFAUT);
@@ -671,6 +689,7 @@ var api = {
     normaliser: normaliser,
     rendre: rendre,
     enonce: enonce,
+    mentionPonderee: mentionPonderee,
     libelleCritere: libelleCritere,
     critereAlgorithmique: critereAlgorithmique,
     critereAlgorithmiqueOuNomme: critereAlgorithmiqueOuNomme,

@@ -553,6 +553,8 @@
             // (générique ou personnalisé) est préservé tel quel.
             const algo = (donneesAlgoCrit && typeof donneesAlgoCrit.erreurs === 'number' && typeof donneesAlgoCrit.mots === 'number') ? {
                 erreurs:      donneesAlgoCrit.erreurs,
+                // 21 oct. 2026 : la somme pondérée des codes posés, quand elle diffère du nombre d'erreurs.
+                sommePonderee: (typeof donneesAlgoCrit.sommePonderee === 'number') ? donneesAlgoCrit.sommePonderee : null,
                 mots:         donneesAlgoCrit.mots,
                 noteCalculee: (typeof donneesAlgoCrit.noteCalculee === 'number') ? donneesAlgoCrit.noteCalculee : null,
                 pourcentage:  (typeof donneesAlgoCrit.pourcentage === 'number') ? donneesAlgoCrit.pourcentage : null,
