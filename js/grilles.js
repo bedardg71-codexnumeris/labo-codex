@@ -3869,14 +3869,15 @@ function couleurDeSousCritere(critere, sc) {
 }
 
 async function modifierCodesDepuisSousCriteresHandler(el) {
-    var grilleId = el.dataset.grilleId;
+    // #1131 (21 oct. 2026) : `data-grille-id` vaut `temp` en création (`_modifierCritereCible`).
+    var cible = el.dataset.grilleId;
     var index = parseInt(el.dataset.critereIndex);
     var actif = !!el.checked;
-    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
+    var ecrit = await _modifierCritereCible(cible, index, function(critere) {
         if (actif) critere.codesDepuisSousCriteres = true;
         else delete critere.codesDepuisSousCriteres;
     });
-    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+    if (ecrit) await _redessinerCible(cible);
 }
 
 function rendreBlocProjectionAlgo(critere, ctx) {
@@ -3908,8 +3909,11 @@ function rendreBlocProjectionAlgo(critere, ctx) {
     // (`collectionsProjection`), sous un sous-titre, APRÈS les modèles livrés (liste fermée,
     // intouchée). La valeur porte le préfixe `collection:` que les deux handlers du menu
     // reconnaissent. Choisir COPIE (décision de Grégoire, 4 sept.) : le menu montre ensuite le
-    // modèle copié, pas la collection — le critère ne garde aucun lien. Sous le menu, la
-    // liste des collections avec la corbeille, et la ligne qui dit la copie.
+    // modèle copié, pas la collection — le critère ne garde aucun lien.
+    // ↻ 21 oct. 2026 (constat 11, Grégoire, 8 h 31 : « Labo Anatomie » lu comme une propriété du critère) :
+    // la liste des collections, avec la corbeille et la ligne qui dit la copie, ne suit plus le menu.
+    // Elle prend le titre du menu, « Mes collections », et vient en fin de carte, à côté de
+    // « Enregistrer ces paliers sous un nom… » : ce qu'on gère pour tout le trimestre, après ce critère.
     const collections = (typeof window.collectionsProjection !== 'undefined') ? window.collectionsProjection.lister() : [];
     const optionsCollections = collections.length ? `
                         <optgroup label="Mes collections">${collections.map((c) => `
@@ -3917,10 +3921,13 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                         </optgroup>` : '';
     const cibleCollection = estTemp ? 'temp' : ctx.grilleId;
     const listeCollections = collections.length ? `
+                <div class="collections-section">
+                    <h4 class="collections-titre">Mes collections</h4>
                     <div class="collections-liste">${collections.map((c) => `
                         <div class="collection-ligne"><span class="collection-nom">${esc(c.nom)}</span>${retirerBloc({ action: 'supprimerCollectionProjection', param: c.id, param2: cibleCollection, param3: ctx.index, titre: 'Supprimer la collection « ' + esc(c.nom) + ' »' })}</div>`).join('')}
                     </div>
-                    <small class="collections-aide">Choisir une collection copie ses paliers et ses réglages dans ce critère. Corriger ou supprimer la collection ensuite ne change pas cette grille, ni ce qu'un élève a déjà lu.</small>` : '';
+                    <small class="collections-aide">Choisir une collection copie ses paliers et ses réglages dans ce critère. Corriger ou supprimer la collection ensuite ne change pas cette grille, ni ce qu'un élève a déjà lu.</small>
+                </div>` : '';
 
     const enTete = `
                 <div class="groupe-form">
@@ -3928,7 +3935,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                     <select class="controle-form" data-on-change="${hModele}" ${datas}>
                         ${options}${optionsCollections}
                     </select>
-                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>${listeCollections}
+                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>
                 </div>`;
 
     // ↻ §8 (5 sept. 2026, 7 h 15) — LE DÉCOMPTE VIENT ICI, avant les paliers : la carte
@@ -3953,7 +3960,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
         return `${enTete}${blocDecompte}
                 <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 6px;">
                     Aucune projection ne sera proposée à l'élève pour ce critère.
-                </small>`;
+                </small>` + listeCollections;
     }
 
     const champsParams = p.modele.parametres.map(par => {
@@ -4138,7 +4145,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                 </div>
 ${basApercu}
                 <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
-                        data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>${rendreSaisieCollectionProjection(critere, ctx)}`;
+                        data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>${rendreSaisieCollectionProjection(critere, ctx)}${listeCollections}`;
 }
 
 /**
@@ -4369,16 +4376,13 @@ function codeAfficheSousCritere(sc, scIndex) {
  * de la liste ; couleur et observation n'apparaissent que si elle est cochée. Rien ne
  * change dans les données : mêmes clés, mêmes handlers, même drapeau. Les plis vivent
  * en mémoire (`plisGabaritAlgo`, par `data-pli`), jamais dans la grille.
- * En création (mode temp), la grille n'est pas encore enregistrée : on le dit.
+ * ↻ #1131 (21 oct. 2026) : en création aussi — les gestes prennent la cible `temp` (`_modifierCritereCible`),
+ * comme le barème et les sous-critères des autres types ; rien ne s'écrit avant « Créer la grille ».
  * `esc()` sur tout ce qui vient de la grille — le nom d'un sous-critère est saisi.
  */
 function rendreSousCriteresAlgo(critere, ctx) {
-    if (ctx.mode !== 'grille') {
-        return `
-                <p class="sous-criteres-info">Les sous-critères se définissent une fois la grille enregistrée.</p>`;
-    }
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
-    const grilleId = ctx.grilleId;
+    const grilleId = ctx.mode === 'grille' ? ctx.grilleId : 'temp';
     const index = ctx.index;
     const scs = Array.isArray(critere.sousCriteres) ? critere.sousCriteres : [];
     const datas = (scIndex) => `data-on-change="modifierSousCritereHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${index}" data-sc-index="${scIndex}"`;
@@ -5446,8 +5450,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
  * @param {string} grilleId - ID de la grille
  * @param {number} critereIndex - Index du critère
  */
-async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
-    let grille = null;
+async function initialiserSousCriteresParDefaut(cible, critereIndex) {
 
     // Sous-critères par défaut (vos 11 catégories)
     const sousCriteresParDefaut = [
@@ -5530,20 +5533,9 @@ async function initialiserSousCriteresParDefaut(grilleId, critereIndex) {
         }
     ];
 
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const g = grilles.find(x => x.id === grilleId);
-        if (!g || !g.criteres || !g.criteres[critereIndex]) return undefined;
-
-        g.criteres[critereIndex].sousCriteres = sousCriteresParDefaut;
-        grille = g;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-    if (!grille) return;
-
-    // Réafficher la grille
-    afficherCriteresGrille(grille);
-
+    // #1131 (21 oct. 2026) : `cible`, `temp` en création ou l'id d'une grille enregistrée (`_modifierCritereCible`).
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => { c.sousCriteres = sousCriteresParDefaut; });
+    if (critere) await _redessinerCible(cible);
 }
 
 /**
@@ -5924,6 +5916,7 @@ async function sauvegarderGrilleComplete() {
 window.afficherListeGrilles = afficherListeGrilles;
 window.creerNouvelleGrille = creerNouvelleGrille;
 window.afficherCriteresTemp = afficherCriteresTemp;
+window.texteDePonderation = texteDePonderation;   // 21 oct. 2026 — lu aussi par l'évaluation (« (30 points) » sur une grille en points)
 window.modifierCritereTemp = modifierCritereTemp;
 window.ajouterCritereTemp = ajouterCritereTemp;
 window.supprimerCritereTemp = supprimerCritereTemp;

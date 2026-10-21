@@ -164,9 +164,15 @@ describe('collections · A — le menu de projection', () => {
         expect(select).not.toContain('<b>2026</b>');
         // Par nom : EUF avant Philo.
         expect(select.indexOf('coll_euf')).toBeLessThan(select.indexOf('coll_philo'));
-        // La liste, sous le menu (après la description), avec la corbeille et son triplet ; puis la ligne d'aide.
+        // La liste, avec la corbeille et son triplet ; puis la ligne d'aide. ↻ 21 oct. 2026 (constat 11, Grégoire,
+        // 8 h 31) : sous son titre « Mes collections », en fin de carte, après « Enregistrer ces paliers sous un nom… »
+        // — plus sous le menu, où « Labo Anatomie » se lisait comme une propriété du critère.
         const liste = projection.slice(projection.indexOf('collections-liste'), projection.indexOf('collections-aide'));
         expect(projection.indexOf('collections-liste')).toBeGreaterThan(projection.indexOf('</select>'));
+        expect(projection).toContain('<h4 class="collections-titre">Mes collections</h4>');
+        expect(projection.indexOf('collections-titre')).toBeGreaterThan(projection.indexOf('data-action="ouvrirSaisieCollectionProjection"'));
+        expect(projection.indexOf('collections-liste')).toBeGreaterThan(projection.indexOf('collections-titre'));
+        expect(projection.indexOf('collections-titre')).toBeGreaterThan(projection.indexOf('+ Ajouter un palier'));
         expect((liste.match(/class="collection-ligne"/g) || []).length).toBe(2);
         expect(liste).toContain('<span class="collection-nom">EUF &lt;b&gt;2026&lt;/b&gt;</span>');
         expect(liste).toMatch(/data-action="supprimerCollectionProjection" data-param="coll_euf" data-param2="G1" data-param3="0"/);

@@ -197,13 +197,14 @@ describe('carte « Bilan » · A — le titre, la clé de pli, DEUX énoncés : 
         expect(bilan).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="priorite"/);
     });
 
-    it('A.b en CRÉATION (mode temp) : la même carte, par le handler temp — et « Aucune annotation » nulle part', () => {
+    it('A.b en CRÉATION (mode temp) : la même carte, par le handler temp — « Aucune annotation » sous les sous-critères, comme en édition (#1131)', () => {
         const { html, bilan } = renduTemp();
         expect(html).toMatch(titre('Bilan'));
         expect(clesDe(bilan)).toEqual(['priorite', 'concentre']);
         expect(bilan).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="concentre"/);
-        expect(clesDe(html)).toEqual(['priorite', 'concentre', 'decompte']);
-        expect(html).not.toContain('Aucune annotation');
+        // ↻ 21 oct. 2026 (#1131) : les sous-critères existent en création ; « Aucune annotation » les suit, hors du « Bilan ».
+        expect(clesDe(html)).toEqual(['aucune', 'priorite', 'concentre', 'decompte']);
+        expect(html).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="aucune"/);
     });
 
     it('A.c dans le code : la carte se titre « Bilan », plus « Observation » ; « Bilan » filtre le décompte ET « aucune »', () => {
@@ -258,12 +259,12 @@ describe('carte « Bilan » · B — « Aucune annotation » vit sous la case de
         expect(html.indexOf('data-pli="CR:aucune"')).toBeLessThan(html.indexOf('class="sous-criteres-vide-message"'));
     });
 
-    it('B.d en CRÉATION : la case n\'est pas rendue, la phrase non plus — zéro zone `aucune`, zéro pli (réserve nommée au cadrage)', () => {
+    it('B.d en CRÉATION (↻ #1131, 21 oct. 2026) : la case et la phrase, comme en édition — une zone `aucune`, un pli, la cible `temp`', () => {
         const { html } = renduTemp();
-        expect(compter(html, 'data-enonce-cle="aucune"')).toBe(0);
-        expect(html).not.toContain('Quand la copie ne porte aucun code');
-        expect(html).not.toContain(':aucune"');
-        expect(html).toContain('Les sous-critères se définissent une fois la grille enregistrée.');
+        expect(compter(html, 'data-enonce-cle="aucune"')).toBe(1);
+        expect(html).toContain('Quand la copie ne porte aucun code');
+        expect(html).toMatch(/data-on-change="modifierCodesDepuisSousCriteresHandler" data-grille-id="temp" data-critere-index="0"/);
+        expect(html).not.toContain('Les sous-critères se définissent une fois la grille enregistrée.');
     });
 
     it('B.e le pli vit en mémoire : déplié par l\'enseignant·e, il reste déplié au redessin qui suit une frappe ; rien n\'entre dans la grille', () => {

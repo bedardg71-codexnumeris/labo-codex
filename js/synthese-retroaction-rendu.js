@@ -368,6 +368,8 @@
 
         // Ligne compacte de calcul pour les critères algorithmiques :
         //   « 15 erreurs sur 584 mots → 7.16/20 (35.8%) »
+        // 21 oct. 2026 (décision de Grégoire, 8 h 39) : « 5 erreurs (3,5 une fois pondérées) sur 400 mots »
+        // quand la somme pondérée diffère ; la parenthèse sort de la même source que la phrase du décompte.
         // Données lues depuis l'évaluation (donneesAlgorithmiques) + la
         // pondération du critère (grille). Aucun hard-code.
         let ligneAlgo = '';
@@ -375,8 +377,10 @@
             const a = critere.algo;
             const noteTxt = (typeof a.noteCalculee === 'number') ? a.noteCalculee.toFixed(2) : '—';
             const pctTxt  = (typeof a.pourcentage === 'number')  ? a.pourcentage.toFixed(1) : '—';
+            const mention = (typeof window !== 'undefined' && window.enoncesAlgo && typeof window.enoncesAlgo.mentionPonderee === 'function')
+                ? window.enoncesAlgo.mentionPonderee(a.erreurs, a.sommePonderee) : '';
             ligneAlgo = `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-bottom: 3px;">`
-                      + `${esc(a.erreurs)} erreurs sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(a.ponderation)}</b> (${esc(pctTxt)} %)`
+                      + `${esc(a.erreurs)} erreurs${esc(mention)} sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(a.ponderation)}</b> (${esc(pctTxt)} %)`
                       + `</div>`;
         }
 

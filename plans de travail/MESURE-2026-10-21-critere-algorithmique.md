@@ -1,0 +1,54 @@
+# Mesure – Le critère algorithmique : ce que le code fait, ce que l'écran et l'aide en disent
+
+> Cowork, mercredi 21 octobre 2026, 8 h 36 (Toronto), sur `main` à `2dca7240`. Lecture seule, par un sous-agent de Cowork, contre-vérifiée par Cowork sur les points 4 et 5 (`travaux-outils.js` l. 2455-2510, `evaluation-calcul.js` l. 548-552, `pratiques.js` l. 166-170). Né de la demande de Grégoire (8 h 28) : une page du guide « Construire ton matériel d'évaluation » sur les critères algorithmiques, pas à pas.
+> ⚠ Conclusion de Cowork : la page pas à pas ne peut pas s'écrire honnêtement avant que le critère algorithmique fasse ce que ses écrans et son aide disent. D'abord le lot, ensuite la page.
+
+## Ce que le code fait (vérifié)
+
+- Trois modèles de formule (`evaluation-formules.js` l. 85-170) : « Pénalité normalisée » `Pondération − (Erreurs ÷ Mots × Facteur)` (facteur 500) ; « Ratio mots par erreur » `Pondération × min(1 ; (Mots/Erreurs) ÷ cible)` (cible 60) ; « Pénalité fixe par erreur » `Pondération − Erreurs × pts`. Le % = note ÷ pondération, borné ; le niveau se lit dans l'échelle de l'évaluation ; la note globale prend le % exact.
+- À l'évaluation : les codes posés dans Annoter versent leur total BRUT (chaque code = 1) dans « Nombre d'erreurs » ; le nombre de mots se tape à la main.
+- Commentaires : par critère, un texte engendré (décompte, projection, « Observation » du sous-critère dominant en mode Catégories) ; par code posé, « Code N – nom (×k) : texte » dans le texte copié, les deux codes les plus fréquents dans le PDF ; la cartouche ne remplace le texte engendré que si le niveau est forcé à la main.
+- Les vraies grilles de Grégoire (export du 20 oct., 16 h 16) : deux critères algorithmiques (« G5M français algo. », « G1A Diagnostic du français A26 »), dix sous-critères chacun, **tous de poids 1**, codes tirés des sous-critères, pénalité normalisée, projection à norme externe.
+
+## Les constats et leur disposition
+
+| # | Constat | Disposition proposée |
+|---|---|---|
+| 1 | Le lexique (« Type de critère ») et la fenêtre d'aide « Grilles » donnent la formule « erreurs / mots × 100 » : aucun modèle ne la calcule | Corriger, mots à soumettre à Grégoire (il avait validé A4 le 20 oct. avec cet exemple) |
+| 2 | Aide 5c : renvoie à une option « Activer la catégorisation des erreurs » qui n'existe nulle part ; décrit une saisie « 3;3;1;4… » inaccessible ; dit que la note vient de ce qu'on compte, faux pour les codes posés | Corriger dans le lot, mots à soumettre |
+| 3 | Bulle `eval-francais-ecrit` : « saisis les codes d'erreurs », l'écran demande un nombre | Corriger dans le lot |
+| 4 | **La pondération des sous-critères ne s'applique pas aux codes posés** (chaque code compte 1) ; la somme pondérée n'existe qu'en mode Catégories | **Décidé par Grégoire, 21 oct., 8 h 38** : « le poids des erreurs devrait être ajustable. C'est souvent le cas de la ponctuation, même si ce n'est pas ma pratique. » Le poids s'applique aux codes posés ; l'élève lit « 5 erreurs (3,5 une fois pondérées) » quand les nombres diffèrent (8 h 39). Sans effet sur ses notes de l'automne : ses poids valent tous 1 |
+| 5 | Le mode Catégories n'a aucun écran qui l'active (#806) | Suit la décision 4 |
+| 6 | Les 11 sous-critères par défaut ne correspondent pas aux 10 codes de repli (le 4 change de sens à la case cochée) ; un texte par défaut, lu par l'élève, cite « manuel Méthodes quantitatives » (`grilles.js` l. 5465) | Corriger ; le texte lu par l'élève revient à Grégoire |
+| 7 | Libellés figés : « (30%) » sur une grille en points, « Niveau IDME » sous une autre échelle (`evaluation-chargement.js` l. 1101, 1132) | Corriger dans le lot (mots existants) |
+| 8 | Deux critères algorithmiques dans une grille : seul le premier reçoit le total des codes (`travaux-outils.js` l. 2495) | Inscrire et continuer (pas de symptôme vécu : ses grilles n'en ont qu'un) |
+| 9 | Sous-critères d'un critère algorithmique impossibles en création | Déjà inscrit (#1131) ; dans le lot |
+| 10 | Avec les formules 1 et 3, le même travail donne un % différent selon le poids du critère | Aucune correction : le guide l'explique |
+| 11 | Sous le menu de projection, la liste de toutes les collections du trimestre s'affiche sans titre (« Labo Anatomie » lu comme une propriété du critère, constat de Grégoire, 8 h 31) | Corriger : le titre « Mes collections » du menu, et une place qui ne se confond pas avec le critère |
+| 12 | Vocabulaire flottant : « Observation » à l'écran, « Description/Rétroaction » dans l'aide 5c ; « sous-critère » qui veut aussi dire « élément observable » | Harmoniser avec le guide ; mots à soumettre |
+| 13 | (Inféré) La ligne « N erreurs sur M mots » du PDF n'apparaîtrait pas en mode Catégories | À mesurer dans le lot |
+
+## Piste pour la refonte, à reprendre plus tard (Grégoire, 21 oct., 8 h 44)
+
+« Quand viendra le temps de revoir les critères algorithmiques, je voudrais qu'on s'inspire de ce qui a été fait avec l'étiquetage du « matériel apporté » […] J'ai l'impression qu'on y voit mieux l'organisation logique puis le résultat interprété. »
+
+Lecture de Cowork, deux principes de la dissection à transposer :
+1. **Partir du matériel de l'enseignant** : sa liste de codes (code, nom de l'erreur, poids, commentaire) existe souvent déjà en tableau ; elle pourrait se coller et s'étiqueter comme une grille.
+2. **Le miroir** (« Ta grille, telle que l'application la comprendrait ») : la formule, les paliers et les phrases ne sont pas un document mais une règle ; le second principe y vaut seul. Pour une copie fictive (ex. : 400 mots, 8 erreurs dont 3 de ponctuation), l'écran montrerait, à chaque réglage, la note obtenue et ce que l'élève lirait. Précédent à bâtir dessus : l'« Aperçu aléatoire » des cartouches.
+
+**Précisé par Grégoire à 8 h 51** : « ce que je trouve intéressant, c'est la barre latérale dans laquelle on a tous les morceaux qui sont de couleurs différentes et qui sont décrits et que l'utilisateur peut choisir pour appliquer dans du texte à droite. C'est ce principe […] qui pourrait être réutilisé quand l'utilisateur construit les rétroactions associées à chaque critère algorithmique. »
+
+Lecture de Cowork : aujourd'hui, les repères des phrases (critere, erreurs, mots, points, seuil, service, palier, moyenne, projection, longueur) sont dispersés en rangées « Poser : » au-dessus de chaque champ, sous leur nom de code, sans description ; leurs deux couleurs (bleu écrit dans la grille, vert rempli à la correction) s'expliquent dans un paragraphe. Une palette latérale unique, comme celle de la dissection (\`D.TYPES\` : nom, aide, précision, groupe), les nommerait en mots, les décrirait, et ferait des deux couleurs deux groupes (« Ce que tu écris dans la grille », « Ce qui se remplit à la correction »). Différence de geste à garder en tête : la dissection surligne un texte qui existe ; ici on insère au curseur dans un texte qu'on écrit (sur l'iPad, toucher la palette ne doit pas faire perdre le curseur). Le miroir (point 2 ci-dessus) la complète : la phrase rendue pour une copie fictive.
+
+**Précisé par Grégoire à 8 h 54** : « un champ libre à droite dans lequel l'utilisateur peut rédiger le texte qui sera lu par l'élève et insérer dans ses phrases les différentes variables qui sont dans la barre latérale à gauche. La barre latérale pourrait comprendre des informations ponctuelles, comme elle pourrait également comprendre des formules que l'utilisateur construit lui-même à partir d'informations ponctuelles. […] L'idée est de manipuler ici aussi des blocs (ou des étiquettes) et de les assembler pour faire des phrases et des formules cohérentes, au final, quand l'élève les lit. »
+
+Lecture de Cowork : deux sortes de blocs à gauche, les **données** (ce que la grille fixe : pondération, longueur de référence, erreurs tolérées ; ce que la copie apporte : erreurs, mots) et les **calculs** que l'enseignant compose avec elles (ex. : « moyenne » = mots ÷ erreurs) ; un calcul devient à son tour un bloc qu'on insère dans une phrase. La formule de la note n'est alors qu'un calcul parmi d'autres, celui qui donne la note : les trois modèles d'aujourd'hui et la projection à l'EUF deviendraient des calculs tout faits, qu'on choisit ou qu'on retouche (composer le sien = fonction experte, principe de l'interface progressive du 19 oct.). Deux garde-fous à prévoir : un calcul doit dire ce qu'il vaut quand une donnée manque ou vaut 0 (0 erreur : « 1 erreur à chaque ∞ mots ») ; et une phrase qui change selon le résultat (les paliers d'aujourd'hui) reste nécessaire, autour du champ libre. Le miroir montre chaque bloc avec sa valeur pour une copie fictive.
+
+**Le cadre, dit par Grégoire à 8 h 59** : reprendre le principe du tableur. Les enseignants font leurs consignes et leurs grilles dans Word, leurs calculs dans Excel : « aller chercher le meilleur des deux mondes […] tout en demeurant accessible pour le commun des mortels. Ce n'est pas nécessaire d'être un statisticien ou un expert d'Excel […] la complexité peut se faire au fur et à mesure que l'utilisateur gagne en confiance et en expérience. Il peut aussi transposer son expérience d'Excel ici. »
+
+Lecture de Cowork, ce qu'on prend au tableur et ce qu'on laisse :
+- **On prend** : des valeurs nommées, des formules visibles et modifiables, le recalcul immédiat (le miroir), une formule qu'on réutilise d'un critère à l'autre.
+- **On laisse** : les adresses de cellules et la syntaxe (« =B2/C2 ») au profit de blocs nommés en mots ; les erreurs muettes (« #DIV/0! ») au profit d'un cas « 0 erreur » écrit par l'enseignant.
+- **Ce qu'un tableur ne fait pas et que l'outil devrait faire** : éprouver la règle sur quelques copies fictives aux extrêmes (aucune erreur, quelques-unes, beaucoup) avant qu'elle serve. C'est le moyen pour l'enseignant de vérifier que sa formule dit ce qu'il pense, sans être statisticien.
+
+**L'origine, dite par Grégoire à 9 h 02** : avant l'application, il travaillait ainsi dans un tableur : des textes dans des cellules, dans lesquels il introduisait d'autres cellules de données, pour faire des phrases qui ont du sens. « Un utilisateur d'Excel ou de Numbers devrait se reconnaître dans cette méthode. Ceux qui appliquent des PAN le font déjà. » ⮕ La refonte formalise une pratique existante, la sienne et celle d'enseignants en PAN ; elle ne l'invente pas (principe du 20 oct. : ressembler à ce que l'enseignant pense déjà). Banc d'essai proposé par Cowork : refaire, avec le nouvel outil, les phrases d'un de ses anciens classeurs, s'il en a gardé un.

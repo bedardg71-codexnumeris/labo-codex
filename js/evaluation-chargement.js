@@ -459,7 +459,8 @@ function chargerEvaluationsEtudiant() {
     // correspond pas (voir `_panneauAppartientALEvaluation`).
     const marquer = (input) => { input.value = ''; input.dataset.da = etudiantDA || ''; };
     champsCategories.forEach(marquer);
-    champsErreurs.forEach(marquer);
+    // 21 oct. 2026 : la somme pondérée de la copie précédente part avec son nombre.
+    champsErreurs.forEach((input) => { marquer(input); window.poserErreursDuChamp(input, ''); });
     champsMots.forEach(marquer);
     zonesResultat.forEach(div => {
         // Réinitialiser le contenu avec les placeholders
@@ -978,7 +979,8 @@ function chargerGrilleSelectionnee() {
 
                 const nbErreurs = existantes.erreurs !== undefined ? existantes.erreurs : existantes.totalErreurs;
                 const inputErreurs = document.getElementById(`eval_erreurs_${critere.id}`);
-                if (inputErreurs && nbErreurs !== undefined) inputErreurs.value = nbErreurs;
+                // 21 oct. 2026 : avec sa somme pondérée, si l'évaluation en porte une (`poserErreursDuChamp`).
+                if (inputErreurs && nbErreurs !== undefined) window.poserErreursDuChamp(inputErreurs, nbErreurs, existantes.sommePonderee, { enregistree: true });
 
                 // RELANCER LE CALCUL. Remplir les champs ne suffit pas : la ligne de
                 // résultat et la note ne se recalculent que sur `input`. C'est le même
@@ -1013,6 +1015,24 @@ function chargerGrilleSelectionnee() {
  * UTILISÉ PAR:
  * - onchange="#selectCartoucheEval" dans le HTML
  */
+/**
+ * 21 oct. 2026 (constat 7, `MESURE-2026-10-21-critere-algorithmique.md`) — LES LIBELLÉS D'UN CRITÈRE À
+ * L'ÉVALUATION disent la grille et l'échelle de l'évaluation, avec les mots déjà en usage : « (30 points) »
+ * sur une grille en points (`texteDePonderation`, Grilles de critères), « (30%) » sinon ; « Niveau de
+ * l’échelle « X » » (la mention de Grilles de critères), ou « Niveau » sans échelle nommée. Ils disaient
+ * « (30%) » et « Niveau IDME » sous toute grille et toute échelle.
+ */
+function libellePonderationEval(ponderation, grille) {
+    const enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grille);
+    if (typeof ponderation !== 'number' || typeof window.texteDePonderation !== 'function') return ponderation + '%';
+    return window.texteDePonderation(ponderation, enPoints);
+}
+
+function libelleNiveauEval(echelle) {
+    const nom = (echelle && typeof echelle.nom === 'string') ? echelle.nom.trim() : '';
+    return nom ? 'Niveau de l’échelle « ' + nom + ' »' : 'Niveau';
+}
+
 function cartoucheSelectionnee() {
     const cartoucheId = document.getElementById('selectCartoucheEval').value;
 
@@ -1098,7 +1118,7 @@ function cartoucheSelectionnee() {
             <div>
     <div class="eval-critere-header">
         <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
-        <small class="eval-label">(${ponderation}%)</small>
+        <small class="eval-label">(${echapperHtml(libellePonderationEval(ponderation, grille))})</small>
         ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" class="eval-badge-algo">ALGORITHMIQUE</span>' : ''}
     </div>
     ${critereGrille?.description ?
@@ -1132,7 +1152,7 @@ function cartoucheSelectionnee() {
             <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
         </div>
         <div>
-            <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
+            <label data-tooltip="eval-niveau-idme" class="eval-label">${echapperHtml(libelleNiveauEval(echelleSelectionnee))} (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                     data-on-change="niveauSelectionne" data-param="${critere.id}">
                 <option value="">— Utiliser le niveau calculé —</option>
@@ -1167,7 +1187,7 @@ function cartoucheSelectionnee() {
             <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
         </div>
         <div>
-            <label data-tooltip="eval-niveau-idme" class="eval-label">Niveau IDME (modifiable manuellement) :</label>
+            <label data-tooltip="eval-niveau-idme" class="eval-label">${echapperHtml(libelleNiveauEval(echelleSelectionnee))} (modifiable manuellement) :</label>
             <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
                     data-on-change="niveauSelectionne" data-param="${critere.id}">
                 <option value="">— Utiliser le niveau calculé —</option>
@@ -1318,7 +1338,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
             <div>
                 <div class="eval-critere-header">
                     <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
-                    <small class="eval-label">(${ponderation}%)</small>
+                    <small class="eval-label">(${echapperHtml(libellePonderationEval(ponderation, grille))})</small>
                     ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" class="eval-badge-algo">ALGORITHMIQUE</span>' : ''}
                 </div>
                 ${critere.description ? `<small class="eval-critere-description">${echapperHtml(critere.description)}</small>` : ''}
@@ -2161,6 +2181,8 @@ window.MESSAGE_ATTENTE_CRITERES = MESSAGE_ATTENTE_CRITERES;
 window.criteresHorsGrille = criteresHorsGrille;   // #652 — lue par evaluation.js (modification, ouverture)
 window.ecrireAttenteCriteres = ecrireAttenteCriteres;
 window.messageEchelleManquante = messageEchelleManquante;
+window.libellePonderationEval = libellePonderationEval;   // 21 oct. 2026 — exposés pour les bancs
+window.libelleNiveauEval = libelleNiveauEval;
 window.cartoucheSelectionnee = cartoucheSelectionnee;
 window.choisirCartoucheEval = choisirCartoucheEval;             // #944 — le geste au menu (index.html)
 window.poserCartoucheParChargeur = poserCartoucheParChargeur;   // #944 — evaluation.js, travaux-ui.js

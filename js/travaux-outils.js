@@ -2452,6 +2452,23 @@
         return compteurs;
     }
 
+    /**
+     * 21 oct. 2026 (décision de Grégoire, 8 h 38) — LE POIDS DES CODES POSÉS : chaque code pèse la
+     * pondération de son sous-critère (`codesAnnotation`, `poids`) ; 1 en repli et pour un code que
+     * la grille ne connaît plus, comme hier. Arrondie au dix-millième (des poids de 0,1 s'additionnent).
+     * `grille` : celle de la copie ouverte, par défaut (les bancs la passent).
+     */
+    function sommePondereeErreurs(compteurs, grille) {
+        const t = _codes();
+        const g = (grille === undefined) ? _grilleCourante : grille;
+        const somme = Object.keys(compteurs).reduce((s, id) => {
+            const c = t ? t.code(g, id) : null;
+            const poids = (c && isFinite(Number(c.poids))) ? Number(c.poids) : 1;
+            return s + (compteurs[id] || 0) * poids;
+        }, 0);
+        return Math.round(somme * 10000) / 10000;
+    }
+
     function mettreAJourCompteursErreurs() {
         const compteurs = compterErreursFrancais();
         // Le total additionne TOUS les codes posés ; les badges ne montrent que
@@ -2496,15 +2513,21 @@
         if (!inputErreurs) return;
         const annotation = travauxAnnotation.getAnnotationCourante();
         const fichierId = (annotation && annotation.fichierId) || '';
+        // 21 oct. 2026 : le champ reçoit le nombre BRUT, et la somme pondérée qui lui revient
+        // (`poserErreursDuChamp`, evaluation-calcul.js) — c'est elle que la formule reçoit.
+        const poser = (n, pondere) => {
+            if (typeof window.poserErreursDuChamp === 'function') window.poserErreursDuChamp(inputErreurs, n, pondere);
+            else inputErreurs.value = n;
+        };
         if (total > 0) {
-            inputErreurs.value = total;
+            poser(total, sommePondereeErreurs(compteurs));
             inputErreurs.dataset.totalAnnotations = String(total);
             inputErreurs.dataset.totalAnnotationsFichier = fichierId;
             inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
         } else if (fichierId
             && inputErreurs.dataset.totalAnnotationsFichier === fichierId
             && inputErreurs.value === inputErreurs.dataset.totalAnnotations) {
-            inputErreurs.value = 0;
+            poser(0);
             delete inputErreurs.dataset.totalAnnotations;
             delete inputErreurs.dataset.totalAnnotationsFichier;
             inputErreurs.dispatchEvent(new Event('input', { bubbles: true }));
@@ -3987,6 +4010,7 @@
         // Compteurs erreurs
         compterErreursFrancais: compterErreursFrancais,
         mettreAJourCompteursErreurs: mettreAJourCompteursErreurs,
+        sommePondereeErreurs: sommePondereeErreurs,   // 21 oct. 2026 — exposée pour les bancs
         // Retroactions personnalisées
         obtenirRetroactionsObservations: obtenirRetroactionsObservations,
         obtenirRetroactionsErreursFr: obtenirRetroactionsErreursFr,
