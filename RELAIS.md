@@ -7,6 +7,29 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS – 21 OCT. 2026, 13 h 40, mis à jour à 13 h 44 (écrit par Claude Code) : **1.213.0 COMMITÉE SUR `main`, NON POUSSÉE : LE VERDICT ÉTAIT ROUGE (UNE SPEC) ; LA RELECTURE A TRANCHÉ, LA SPEC EST CORRIGÉE, LE VERDICT SUR CE COMMIT TOURNE CE SOIR**
+
+**13 h 44 – la relecture a tranché** (`plans de travail/CONSIGNE-DU-JOUR.md`, Cowork, 13 h 42) : la spec était en défaut, pas l'app. Les deux motifs `/\d+\s*%/` de `depistage-542-niveau-global-selon-pratique.spec.js` (l. 189 et 240) deviennent `/\d+(?:\s|&nbsp;)*%/` ; le bloc reste lu en `innerHTML`. Break-test : motif strict `/\d+ %/` → rouge aux deux essais, reçu `78&nbsp;%` ; corrigé → la spec seule, 3/3 verte (webkit, sans nouvel essai). L'instable des présences : échec sur `page.goto` (90 s) avant toute saisie, charge de la machine ; on n'y touche pas. **Suite** : verdict complet sur le commit qui porte ce bloc, ce soir au signal de Grégoire ; vert → `scripts/pousser.sh`, constater `origin/main`, puis `OU-EN-EST-ON.md` et `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` ; rouge → on s'arrête.
+
+**En ligne** : la 1.212.0 (`c4b4b41f`). **`main` local**, en avance de dix commits : `2dca7240`, `6992bec4`, `a32bdb41` (le critère algorithmique, le matin), `904f1a02`, `21357b6a` (lots de mots du critère algorithmique), `67298d08` (« Verrouiller la saisie »), `90809966`, `01b40658`, `cceaa892` (la note à la française, #1136, #1138), puis la release **1.213.0** (`8372a987`, build `1021-1224`, Nouvelles validées par Grégoire à 12 h 18). Consigne : `plans de travail/CONSIGNE-LOT-2026-10-21-version.md`, chemin « rouge » suivi : rien poussé, rien corrigé.
+
+**Le verdict** (`scripts/verifier-playwright.mjs`, Cowork mesuré fermé, sur secteur, 0 veille, pression mémoire 1) : jeton `scripts/.verdict-playwright.json`, SHA `8372a987`, **code 1**, rendu à 13 h 39. Vitest complet vert sur le même commit (795 fichiers, 9 367 essais).
+
+| | Spec › essai | Première ligne d'erreur | Depuis |
+|---|---|---|---|
+| **Rouge** (aux deux essais) | `depistage-542-niveau-global-selon-pratique.spec.js` › « #542 pas 3c · sous une pratique SOMMATIVE, la note globale n'affiche aucun niveau » (l. 226) | `Error: le pourcentage doit rester affiché` — `expect(received).toMatch(/\d+\s*%/)`, reçu `…>78&nbsp;%</span>…` | `01b40658` (la note globale du profil passe par `formaterNotePourcentage`), mesuré par `git log -G` sans rien modifier |
+| Instable (verte au second essai, ne bloque pas) | `presences-lot-d-enregistrement.spec.js` › « « Liste » dans la seconde qui suit une note tapée : la note arrive en base, et survit au rechargement » | — | essai ajouté par `67298d08` |
+
+**Ma lecture, à trancher par la relecture** (inférence, non éprouvée par un correctif) : l'application affiche bien « 78 % » ; la spec lit `container.innerHTML` (l. 141), que le navigateur sérialise avec l'entité `&nbsp;`, et `\s` ne reconnaît pas l'entité. La spec serait donc périmée par la norme française, comme les 14 attentes corrigées cet après-midi ; elle a échappé à ma sélection des « specs qui lisent une note » (90 specs), et la demande de relecture `DEMANDE-RELECTURE-2026-10-21-note-norme-francaise.md` ne la nomme pas. Conformément à la consigne, **elle reste rouge**. L'instable vient de mon lot du matin (minuterie de 1,5 s) : à surveiller, rien à faire si elle ne revient pas.
+
+**La suite** : la relecture tranche la spec ; si elle est corrigée, c'est un commit APRÈS la release : nouveau verdict complet sur ce commit, puis `scripts/pousser.sh`, puis constater `origin/main` et la version chez Netlify. Le prochain lot reste le miroir (`CONSIGNE-LOT-2026-10-21-critere-algorithmique-miroir.md`), après la livraison.
+**Non fait, parce que la consigne s'arrête au rouge** : `OU-EN-EST-ON.md` et `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` ne sont pas mis à jour. Ce bloc est commité avec la correction de la spec, APRÈS la release : c'est ce commit que le verdict de ce soir juge.
+**Hors relais** : `ci/verdict-morceaux` attend Grégoire (#1093). `PLAN-2026-10-21-critere-algorithmique-toute-discipline.md` porte une modification de Cowork non commitée.
+**Inscrits ouverts** : #1137 (les pourcentages qui ne sont pas des notes, et les points à l'écran, dont « × 65% = 55.3 pts » du profil), à la décision de Grégoire.
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.212.0 `c4b4b41f` → 1.213.0) : fichiers de plus de 1 000 lignes 35 → 35, leurs lignes Δ −21 (`js/grilles.js` 3 950 → 3 894, `js/travaux-outils.js` 2 849 → 2 866, `js/changelog-data.js` 2 275 → 2 288, `js/evaluation-chargement.js` 1 312 → 1 323, `js/saisie-presences.js` 1 404 → 1 399, `js/liste-evaluations.js` 1 902 → 1 900, `js/import-export.js` 2 718 → 2 719) ; au-dessus de 15 : 454 → 454 (Δ 0) ; au-dessus de 30 : 86 → 86 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 427 → 11 429 (Δ +2). Lignes de `js/` : 150 889 → 150 960 ; fonctions : 13 513 → 13 530.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 20 OCT. 2026, 19 h 10 (écrit par Claude Code) : **1.212.0 COMMITÉE SUR `main`, NON POUSSÉE ; LE PUSH ATTEND LE VERDICT DU TEMPS B**
 
 **En ligne** : la 1.211.0 (`c8b2af98`, poussée cet après-midi). **`main` local**, en avance sur `origin/main` : `9882d2d5` (#1127, la fiche de production après « Préparer le PDF »), `67298a8d`, `c04df849`, `2fc42169` (#1120, le PDF de la grille lit le barème, « Points », la forme de la grille d'origine), puis le commit de release **1.212.0** (build `1020-1905`) avec les Nouvelles 1.212 validées par Grégoire à 18 h 59. Tout est relu et accepté par Cowork ; la release elle-même attend sa relecture (`plans de travail/DEMANDE-RELECTURE-2026-10-20-version-1.212.0.md`).

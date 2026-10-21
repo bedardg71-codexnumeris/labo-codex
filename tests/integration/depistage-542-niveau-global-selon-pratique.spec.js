@@ -184,7 +184,9 @@ test('#542 pas 3c · le niveau global n\'est PLUS un code IDME écrit dans le co
     const codeAffiche = (r.bloc.match(/>\s*([WXYZ])\s*<\/span>/) || [])[1];
     expect(codeAffiche, `aucun code de l'échelle de l'utilisateur n'est affiché — bloc : ${r.bloc.slice(0, 200)}`)
         .toBeTruthy();
-    expect(r.bloc, 'le pourcentage reste affiché à côté du niveau').toMatch(/\d+\s*%/);
+    // « 78 % » à la française : innerHTML sérialise l'espace insécable en
+    // `&nbsp;`, que `\s` ne reconnaît pas (verdict rouge de la 1.213.0).
+    expect(r.bloc, 'le pourcentage reste affiché à côté du niveau').toMatch(/\d+(?:\s|&nbsp;)*%/);
 
     // SOLO est au SURVOL, pas en vedette — même esprit que la décision de
     // Grégoire sur le comparateur : ne pas mettre une taxonomie devant un
@@ -235,7 +237,7 @@ test('#542 pas 3c · sous une pratique SOMMATIVE, la note globale n\'affiche auc
     expect(r.pratiqueEffective, 'le montage doit avoir posé la pratique SOMMATIVE').toBe('sommative');
 
     // Le pourcentage reste — c'est la note, et elle est juste.
-    expect(r.bloc, 'le pourcentage doit rester affiché').toMatch(/\d+\s*%/);
+    expect(r.bloc, 'le pourcentage doit rester affiché').toMatch(/\d+(?:\s|&nbsp;)*%/);
     // Et l'explication est DISPONIBLE au survol, jamais affichée en permanence :
     // une pratique sommative sans niveau n'est pas en panne, et un avertissement
     // permanent le laisserait croire.
