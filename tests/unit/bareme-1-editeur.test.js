@@ -429,7 +429,8 @@ describe('barème 1 · G — les gestes, dans « Grilles de critères »', () =>
         delete g.criteres[0].descripteurs;
         const m = monter({ grilles: [g] });
         expect(m.tranches(0)).toHaveLength(0);
-        expect(m.carte(0).querySelector('.grille-attendu-titre').textContent.trim()).toBe('Barème');   // lot 2 : l'icône « i » le suit
+        // 21 oct. (#1120, Grégoire) : le barème SOUS les sous-critères ; lot 2 : l'icône « i » suit son titre.
+        expect([...m.carte(0).querySelectorAll('.grille-attendu-titre')].map(h => h.textContent.trim())).toEqual(['Sous-critères', 'Barème']);
         expect(m.carte(0).querySelector('[data-action="ajouterTrancheBareme"]').textContent).toBe('+ Ajouter une tranche');
     });
 });
