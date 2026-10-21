@@ -375,12 +375,18 @@
         let ligneAlgo = '';
         if (critere.algo) {
             const a = critere.algo;
-            const noteTxt = (typeof a.noteCalculee === 'number') ? a.noteCalculee.toFixed(2) : '—';
-            const pctTxt  = (typeof a.pourcentage === 'number')  ? a.pourcentage.toFixed(1) : '—';
+            // 21 oct. 2026 (étape 0) : la virgule décimale (« 13,75/20 (68,8 %) »), les décimales d'hier ; « erreur »
+            // au singulier sous 2 (« 0 erreur », « 1 erreur »), la règle `> 1` des autres sites. Les noms « erreurs »
+            // et « mots » restent écrits ici : l'étape 2 les rend à l'enseignant·e. Aucun formateur partagé ne garde
+            // les décimales fixes (`formaterNombrePeriodes` arrondit à deux et rendrait « 68,75 » pour le pourcentage).
+            const virgule = (t) => t.replace('.', ',');
+            const noteTxt = (typeof a.noteCalculee === 'number') ? virgule(a.noteCalculee.toFixed(2)) : '—';
+            const pctTxt  = (typeof a.pourcentage === 'number')  ? virgule(a.pourcentage.toFixed(1)) : '—';
+            const nomErreurs = Number(a.erreurs) > 1 ? 'erreurs' : 'erreur';
             const mention = (typeof window !== 'undefined' && window.enoncesAlgo && typeof window.enoncesAlgo.mentionPonderee === 'function')
                 ? window.enoncesAlgo.mentionPonderee(a.erreurs, a.sommePonderee) : '';
             ligneAlgo = `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-bottom: 3px;">`
-                      + `${esc(a.erreurs)} erreurs${esc(mention)} sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(a.ponderation)}</b> (${esc(pctTxt)} %)`
+                      + `${esc(a.erreurs)} ${nomErreurs}${esc(mention)} sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(a.ponderation)}</b> (${esc(pctTxt)} %)`
                       + `</div>`;
         }
 

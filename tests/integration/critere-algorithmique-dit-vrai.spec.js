@@ -157,15 +157,15 @@ test('#1131 · un critère algorithmique en création reçoit ses sous-critères
     await expect(carte.locator('.sous-critere-item')).toHaveCount(11);
     await carte.locator('.sous-criteres-btn-ajouter-liste').click();
     await expect(carte.locator('.sous-critere-item')).toHaveCount(12);
-    await carte.locator('input[data-on-change="modifierCodesDepuisSousCriteresHandler"]').check();
-    await expect(carte.locator('input[data-on-change="modifierCodesDepuisSousCriteresHandler"]')).toBeChecked();
+    // ↻ Étape 0 (21 oct.) : né marqué, le critère tire ses codes de ses sous-critères — pas de case à cocher.
+    await expect(carte.locator('input[data-on-change="modifierCodesDepuisSousCriteresHandler"]')).toHaveCount(0);
     await page.evaluate(() => db.flush());
     expect(await page.evaluate(() => JSON.stringify(db.getSync(cle('grillesTemplates'), [])))).toBe(avant);
     await page.locator('#btnCreerGrille').click();
     await expect.poll(() => page.evaluate(() => (db.getSync(cle('grillesTemplates'), []).find((g) => g.nom === 'Grille algorithmique fictive') || {}).criteres)).toBeTruthy();
     const c = await page.evaluate(() => db.getSync(cle('grillesTemplates'), []).find((g) => g.nom === 'Grille algorithmique fictive').criteres[0]);
     expect(c.type).toBe('algorithmique');
-    expect(c.codesDepuisSousCriteres).toBe(true);
+    expect(c.codesSousCriteresSeulement).toBe(true);
     expect(c.sousCriteres.map((s) => s.code)).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11']);
     expect(erreurs).toEqual([]);
 });

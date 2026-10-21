@@ -384,7 +384,10 @@
                         // Codes par grille (3 sept. 2026) — le geste d'activation : les
                         // sous-critères sont les codes d'annotation. Sans lui, une grille
                         // partagée arriverait avec ses codes mais muette dans la palette.
-                        codesDepuisSousCriteres: { type: 'booleen' }
+                        codesDepuisSousCriteres: { type: 'booleen' },
+                        // 21 oct. 2026 (étape 0) — la marque d'un critère né sans les dix codes du français :
+                        // sans elle, une grille partagée retomberait chez le collègue sur le repli.
+                        codesSousCriteresSeulement: { type: 'booleen' }
                     }
                 },
                 dateCreation: { type: 'chaine', max: 40 },

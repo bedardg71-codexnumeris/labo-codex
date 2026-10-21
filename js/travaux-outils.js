@@ -1397,7 +1397,11 @@
         // pas ici — coup d'œil de Grégoire : un bandeau prenait trop de place dans
         // l'espace de travail, et le message parle des paramètres que l'engrenage ouvre.
         let html = '<div class="travaux-errfr-liste">';
-        _codesCourants().forEach((c) => {
+        const codes = _codesCourants();
+        // 21 oct. 2026 (étape 0) — un critère né depuis l'étape 0 sans sous-critère n'a AUCUN code
+        // (`codesAnnotation`, la marque) : plus les dix du français. La palette le dit, et où agir.
+        if (!codes.length) html += '<p class="travaux-errfr-vide">Aucun code : ajoute des sous-critères à ton critère algorithmique, dans la grille.</p>';
+        codes.forEach((c) => {
             const actif = outilActif === c.id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(c.id);
             // `c.id` vient d'un champ libre du gabarit (le code d'un sous-critère) :

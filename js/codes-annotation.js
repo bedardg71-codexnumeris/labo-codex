@@ -55,6 +55,20 @@
    grille au lieu de ses textes personnalisés. Ce que les élèves lisent ne change
    pas sans qu'il l'ait voulu.
 
+   ⚠ UN CRITÈRE NÉ DEPUIS LE 21 OCTOBRE 2026 NE REÇOIT PLUS LE REPLI (consigne
+   `CONSIGNE-LOT-2026-10-21-critere-algorithmique-etape-0.md` ; principe de Grégoire,
+   9 h 20 : « ne rien coder en dur en fonction d'une discipline précise »). Les dix
+   codes du repli sont ceux du français : un critère de chimie les recevait. Un
+   critère qui DEVIENT algorithmique (naissance, changement de type) porte la
+   MARQUE `codesSousCriteresSeulement` (`marquerNeuf`, posée par `grilles.js` au
+   même geste que `projectionAlgo.poserDefautNeuf`) : ses codes sont ses
+   sous-critères, et seulement eux — sans sous-critère, aucun code, et la palette
+   d'Annoter le dit. ▣ Une clé NEUVE, pas `codesDepuisSousCriteres` : mesuré, un
+   critère existant qui porte ce drapeau sans sous-critère qui pèse retombe sur le
+   repli (ci-dessous) — le réutiliser aurait changé ce stock. Lecteurs de la
+   marque : ce module seul (`estActive`, `donneSesCodes`), et le gabarit qui
+   montre la case d'activation. ⛔ TARIR N'EST PAS RÉPARER : un critère existant
+   n'a pas la marque et garde le repli, les codes déjà posés gardent leurs noms.
    ⚠ UN SOUS-CRITÈRE DE PONDÉRATION 0 N'EST PAS UN CODE — supposition nommée,
    une ligne à retourner : « 0 — Aucune erreur » (pondération 0) n'a aucun sens
    posé sur une copie.
@@ -68,6 +82,7 @@
 
 var PREFIXE = 'errfr_';
 var DRAPEAU = 'codesDepuisSousCriteres';
+var MARQUE = 'codesSousCriteresSeulement';   // 21 oct. 2026 — voir l'en-tête
 
 // ---------------------------------------------------------------------
 // LE REPLI — les dix codes d'hier, repris de travaux-outils.js au caractère
@@ -232,13 +247,32 @@ function _depuisSousCriteres(critere) {
 }
 
 /**
- * Une grille est activée quand son critère algorithmique porte le drapeau ET
- * qu'au moins un sous-critère pèse : un drapeau sur une liste vide retombe sur
- * le repli plutôt que d'offrir une palette sans rien.
+ * Un critère qui DEVIENT algorithmique porte la marque (21 oct. 2026) : ses codes
+ * seront ses sous-critères, et seulement eux. Rend le critère, muté. Le site
+ * d'appel décide de la naissance (`grilles.js`, `avecProjectionNeuve`) ; ce module
+ * ne marque jamais un critère à la lecture.
+ */
+function marquerNeuf(critere) {
+    if (critere && critere.type === 'algorithmique') critere[MARQUE] = true;
+    return critere;
+}
+
+/** Le critère tire-t-il ses codes de ses sous-critères ? La marque (né depuis le 21 oct.), ou le geste d'activation. */
+function donneSesCodes(critere) {
+    return !!critere && (critere[MARQUE] === true || critere[DRAPEAU] === true);
+}
+
+/**
+ * Une grille est activée quand son critère algorithmique porte la marque — même
+ * sans sous-critère : aucun code, jamais le repli —, ou le drapeau ET au moins un
+ * sous-critère qui pèse : un drapeau sur une liste vide retombe sur le repli
+ * plutôt que d'offrir une palette sans rien (le stock d'avant la marque).
  */
 function estActive(grille) {
     var critere = _critereAlgo(grille);
-    if (!critere || critere[DRAPEAU] !== true) return false;
+    if (!critere) return false;
+    if (critere[MARQUE] === true) return true;
+    if (critere[DRAPEAU] !== true) return false;
     return _depuisSousCriteres(critere).length > 0;
 }
 
@@ -303,6 +337,9 @@ function grilleDeCopie(fichier) {
 var api = {
     PREFIXE: PREFIXE,
     DRAPEAU: DRAPEAU,
+    MARQUE: MARQUE,
+    marquerNeuf: marquerNeuf,
+    donneSesCodes: donneSesCodes,
     REPLI_DEFAUT: REPLI_DEFAUT.map(function(t) {
         return { id: t.id, code: t.code, nom: t.nom, couleur: t.couleur };
     }),
