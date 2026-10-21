@@ -520,7 +520,7 @@ for (const largeur of [360, 768, 1024, 1180]) {
             await page.evaluate((clair) => { document.body.classList.toggle('mode-clair', clair); naviguerVers('suivi', 'saisie'); window.scrollTo(0, 0); }, clair);
             await page.waitForTimeout(800);
 
-            const presences = await chevauchements(page, '#actions-presences-bar, #controle-verrouillage-presences, #btn-cours-precedent, #btn-cours-suivant, #date-cours');
+            const presences = await chevauchements(page, '#actions-presences-bar, #btnVerrouillerSaisiePresences, #btn-cours-precedent, #btn-cours-suivant, #date-cours');
             expect(presences.cibles, `présences à ${largeur} px : ${JSON.stringify(presences.rect)}`).toEqual([]);
             expect(presences.rect.r, 'le témoin tient dans la largeur').toBeLessThanOrEqual(largeur);
 

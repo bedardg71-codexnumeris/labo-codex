@@ -156,12 +156,18 @@ describe('lot D · 4. le vidage avant un nouveau rendu', () => {
         expect(fichesDu(store, DATE2)).toHaveLength(0);
     });
 
-    it('« Fermer » emporte aussi l’écriture en attente', () => {
-        const store = storeSeance();
+    // ↻ 21 oct. 2026 : « Fermer » est parti (demande de Grégoire) ; le verrou de la barre emporte l'écriture en
+    // attente. Quitter vers « Liste » ne vide pas : la minuterie écrit (mesuré dans un vrai WebKit,
+    // presences-lot-d-enregistrement.spec.js).
+    it('« Verrouiller la saisie » emporte aussi l’écriture en attente', () => {
+        // Une séance DÉJÀ saisie : seule l'attente porte l'absence (sur une séance non saisie, le verrou
+        // écrirait tout l'écran et l'essai passerait sans elle — break-test du 21 oct.).
+        const store = storeSeance(DAS.map((da) => ({ date: DATE, da, periodesPresentes: 2, notes: '', coursId: 'GC1' })));
         const b = monterSeance(store, { valeurs: { '2000002': 0 } });
         geste(b, '2000002');
-        b.win.fermerSaisiePresences();
+        try { b.win.basculerVerrouillageDateActive(); } catch { /* le rendu du faux DOM */ }
         expect(fichesDu(store, DATE)).toHaveLength(3);
+        expect(fichesDu(store, DATE).find((p) => p.da === '2000002').periodesPresentes).toBe(0);
     });
 });
 
@@ -232,6 +238,47 @@ describe('lot D · 6. le verrou enregistre et le dit', () => {
         try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
         expect(store[K_VERROU] || []).not.toContain(DATE);
         expect(b.notifs.filter((n) => n.type === 'succes')).toHaveLength(0);
+    });
+});
+
+describe('« Verrouiller la saisie » (21 oct. 2026) : un seul bouton, et l’état dit le verrou', () => {
+    const BOUTON = 'btnVerrouillerSaisiePresences';
+
+    it('sous une séance non verrouillée : « Verrouiller la saisie », actif, visible ; l’état ne dit pas « verrouillée »', () => {
+        const store = storeSeance(DAS.map((da) => ({ date: DATE, da, periodesPresentes: 2, notes: '', coursId: 'GC1' })));
+        const b = monterSeance(store);
+        try { b.win.initialiserSaisiePresences(); } catch { /* idem */ }
+        const btn = b.elements[BOUTON];
+        expect(btn.textContent).toBe('Verrouiller la saisie');
+        expect(btn.disabled).toBe(false);
+        expect(btn.classList.contains('u-hide')).toBe(false);
+        expect(b.elements['etat-seance-presences'].textContent).toBe('Séance saisie');
+    });
+
+    it('le bouton verrouille : « Déverrouiller la saisie », toujours actif ; « Séance verrouillée » et son cadenas', () => {
+        const store = storeSeance(DAS.map((da) => ({ date: DATE, da, periodesPresentes: 2, notes: '', coursId: 'GC1' })));
+        const b = monterSeance(store);
+        try { b.win.basculerVerrouillageDateActive(); } catch { /* idem */ }
+        expect(store['test_datesVerrouillees_gc_GC1']).toEqual([DATE]);
+        const btn = b.elements[BOUTON];
+        expect(btn.textContent).toBe('Déverrouiller la saisie');
+        expect(btn.disabled).toBe(false);
+        expect(b.elements['etat-seance-presences'].innerHTML).toBe('<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Séance verrouillée');
+        // Le même bouton déverrouille.
+        try { b.win.basculerVerrouillageDateActive(); } catch { /* idem */ }
+        expect(store['test_datesVerrouillees_gc_GC1']).toEqual([]);
+        expect(btn.textContent).toBe('Verrouiller la saisie');
+        expect(b.elements['etat-seance-presences'].textContent).toBe('Séance saisie');
+    });
+
+    it('sans date valide affichée, le bouton est caché', () => {
+        const store = storeSeance();
+        const b = monterSeance(store);
+        try { b.win.initialiserSaisiePresences(); } catch { /* idem */ }
+        expect(b.elements[BOUTON].classList.contains('u-hide')).toBe(false);
+        b.elements['date-cours'].value = '2026-09-02';   // hors du calendrier du banc : pas une séance
+        try { b.win.initialiserSaisiePresences(); } catch { /* idem */ }
+        expect(b.elements[BOUTON].classList.contains('u-hide')).toBe(true);
     });
 });
 

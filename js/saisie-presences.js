@@ -875,7 +875,8 @@ function basculerVerrouillageDate(dateStr) {
 }
 
 /**
- * Bascule le verrouillage de la date actuellement affichée (appelé par le checkbox HTML)
+ * Bascule le verrouillage de la date actuellement affichée (« Verrouiller la saisie » /
+ * « Déverrouiller la saisie », `#btnVerrouillerSaisiePresences`).
  */
 function basculerVerrouillageDateActive() {
     const dateInput = document.getElementById('date-cours');
@@ -884,25 +885,21 @@ function basculerVerrouillageDateActive() {
 }
 
 /**
- * Met à jour l'affichage du contrôle de verrouillage
+ * Le bouton du verrou (21 oct. 2026, demande de Grégoire) : comme « Verrouiller l'évaluation », un
+ * seul bouton, toujours actif, dont le libellé suit le verrou. Caché sans date valide affichée.
  */
 function mettreAJourControleVerrouillage(dateStr, estVerrouille) {
-    const conteneur = document.getElementById('controle-verrouillage-presences');
-    const checkbox = document.getElementById('checkbox-verrouillage-presences');
-    const icone = document.getElementById('icone-verrouillage-presences');
-    const texte = document.getElementById('texte-verrouillage-presences');
-    if (!conteneur) return;
+    const bouton = document.getElementById('btnVerrouillerSaisiePresences');
+    if (!bouton) return;
 
     if (!dateStr) {
-        conteneur.classList.add('u-hide');
+        bouton.classList.add('u-hide');
         return;
     }
 
-    checkbox.checked = estVerrouille;
-    icone.innerHTML = estVerrouille ? '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">';
-    texte.textContent = estVerrouille ? 'Verrouillée' : 'Verrouiller';
-
-    conteneur.classList.remove('u-hide');
+    bouton.textContent = estVerrouille ? 'Déverrouiller la saisie' : 'Verrouiller la saisie';
+    bouton.disabled = false;
+    bouton.classList.remove('u-hide');
 
     // Refléter l'état de verrouillage sur la bordure du compteur
     const compteur = document.getElementById('compteur-presences');
@@ -1098,8 +1095,9 @@ function _armerEnregistrementPresences(dateStr, das) {
 
 /**
  * VIDAGE : l'écriture en attente part maintenant. Appelé avant tout nouveau rendu du tableau
- * (date, séance, sous-groupe, tri, retour à l'onglet, verrou), avant « Fermer », et quand la
- * page se cache ou se décharge. Les pertes mesurées par l'inventaire du 26 sept. (A1 : saisie
+ * (date, séance, sous-groupe, tri, retour à l'onglet, verrou), et quand la page se cache ou se
+ * décharge. Quitter vers « Liste » ne vide pas : la minuterie écrit dans la seconde et demie
+ * (mesuré le 21 oct. 2026, `presences-lot-d-enregistrement.spec.js`). Les pertes mesurées par l'inventaire du 26 sept. (A1 : saisie
  * puis séance suivante, puis `naviguerVers`) venaient du rendu qui écrasait la saisie.
  */
 function viderEnregistrementPresences() {
@@ -1127,7 +1125,9 @@ function _seanceNonSaisie(dateStr) {
 
 /**
  * L'état de la séance, dans la barre : « Séance non saisie » + « Confirmer la séance », ou
- * « Séance saisie ». Et la mention des lignes sans fiche d'une séance saisie (D2 bis b).
+ * « Séance saisie », ou, sous le verrou, le cadenas et « Séance verrouillée » (21 oct. 2026 :
+ * c'est ce qui dit qu'elle est enregistrée). Et la mention des lignes sans fiche d'une séance
+ * saisie (D2 bis b).
  * Ne rend pas le tableau : un champ en cours de frappe garde son focus.
  */
 function _rafraichirEtatSeance(dateStr) {
@@ -1138,7 +1138,11 @@ function _rafraichirEtatSeance(dateStr) {
     const verrouillee = dateStr ? estDateVerrouillee(dateStr) : false;
 
     if (etat) {
-        etat.textContent = lignes.length === 0 ? '' : (nonSaisie ? 'Séance non saisie' : 'Séance saisie');
+        if (lignes.length > 0 && verrouillee) {
+            etat.innerHTML = '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Séance verrouillée';   // statique
+        } else {
+            etat.textContent = lignes.length === 0 ? '' : (nonSaisie ? 'Séance non saisie' : 'Séance saisie');
+        }
         etat.classList.toggle('u-hide', lignes.length === 0);
     }
     if (btnConfirmer) {
@@ -1161,12 +1165,6 @@ function confirmerSeancePresences() {
     if (!dateInput || !dateInput.value) return;
     const dateStr = dateInput.value;
     ecrirePresencesSeance(dateStr, { touches: _prendreTouchesEnAttente(dateStr) });
-}
-
-/** « Fermer » : l'écriture en attente part, puis retour à la liste. */
-function fermerSaisiePresences() {
-    viderEnregistrementPresences();
-    if (typeof afficherSousSection === 'function') afficherSousSection('suivi-liste');
 }
 
 // La page qui se cache ou se décharge emporte l'écriture en attente (même trio que `db.js`).
@@ -2166,7 +2164,6 @@ window.initialiserModuleSaisiePresences = initialiserModuleSaisiePresences;
 window.chargerGroupesPresences = chargerGroupesPresences;
 window.initialiserSaisiePresences = initialiserSaisiePresences;
 window.confirmerSeancePresences = confirmerSeancePresences;
-window.fermerSaisiePresences = fermerSaisiePresences;
 window.notePresenceModifiee = notePresenceModifiee;
 window.viderEnregistrementPresences = viderEnregistrementPresences;
 // #224 : calculerAssiduiteJusquADate et calculerEtSauvegarderIndicesAssiduite déplacées vers indices.js
