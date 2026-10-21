@@ -1,6 +1,6 @@
 # Demande de relecture – « Verrouiller la saisie » (consigne du jour, lot 1)
 
-> Claude Code, 21 octobre 2026, 11 h 30. Consigne : `CONSIGNE-DU-JOUR.md`, lot 1. Un commit sur `main`, non poussé, sans numéro de version ni verdict complet.
+> Claude Code, 21 octobre 2026, 10 h 50 (heure corrigée dans le commit du lot 2 : « 11 h 30 » n'était pas mesuré). Consigne : `CONSIGNE-DU-JOUR.md`, lot 1. Un commit sur `main`, non poussé, sans numéro de version ni verdict complet.
 
 ## Ce qui a changé
 

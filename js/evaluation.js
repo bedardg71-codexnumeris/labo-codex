@@ -1398,7 +1398,7 @@ function _appliquerFallbackGrilleManquanteModif(evaluation) {
     const noteElem = document.getElementById('noteProduction1');
     const niveauElem = document.getElementById('niveauProduction1');
     if (noteElem && evaluation.noteFinale != null) {
-        noteElem.textContent = Math.round(evaluation.noteFinale * 10) / 10 + ' %';
+        noteElem.textContent = formaterNotePourcentage(evaluation.noteFinale);
     }
     if (niveauElem && evaluation.niveauFinal) {
         niveauElem.textContent = evaluation.niveauFinal;

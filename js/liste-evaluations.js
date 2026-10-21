@@ -1209,7 +1209,7 @@ function obtenirNoteAffichee(evaluation, estPAN) {
     if (estPAN && !enPoints) {
         return evaluation.niveauFinal || '-';
     } else {
-        return evaluation.noteFinale != null && evaluation.noteFinale !== 0 ? `${(Math.round(evaluation.noteFinale * 10) / 10)}%` : '-';
+        return evaluation.noteFinale != null && evaluation.noteFinale !== 0 ? formaterNotePourcentage(evaluation.noteFinale) : '-';
     }
 }
 
@@ -1382,7 +1382,7 @@ function genererLigneHTML(ligne) {
                 parties.push(echapperHtml(ligne.scoresOriginaux.niveauFinal));
             }
             if (ligne.scoresOriginaux.noteFinale != null) {
-                parties.push((Math.round(ligne.scoresOriginaux.noteFinale * 10) / 10) + '%');
+                parties.push(formaterNotePourcentage(ligne.scoresOriginaux.noteFinale));
             }
             if (parties.length > 0) {
                 infoOriginale = ' <span class="badge-jeton-original">(était ' + parties.join(' · ') + ')</span>';
@@ -1853,7 +1853,7 @@ function ouvrirProprieteFichier(fichierId) {
         var nomProd = prod ? (prod.titre || prod.nom) : (e.productionId || '?');
         var type = e.remplaceeParId ? ' (Remplac\u00e9e)' : (e.repriseDeId ? ' (Reprise)' : '');
         var niv = _niveauAffiche(e);   // #941 lot S1 (et plus de « undefined » sans niveau)
-        var note = e.noteFinale != null ? ' \u2014 ' + (niv ? niv + ' ' : '') + (Math.round(e.noteFinale * 10) / 10) + '%' : '';
+        var note = e.noteFinale != null ? ' \u2014 ' + (niv ? niv + ' ' : '') + formaterNotePourcentage(e.noteFinale) : '';
         var label = nomProd + type + note;
         var selected = (e.id === fichier.evaluationId) ? ' selected' : '';
         return '<option value="' + echapperHtml(e.id) + '"' + selected + '>' + echapperHtml(label) + '</option>';

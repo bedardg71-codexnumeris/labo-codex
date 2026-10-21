@@ -1052,7 +1052,7 @@
             const enPointsPreview = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
             if (enPointsPreview) {
                 if (evaluation.noteFinale != null) {
-                    html += `<p><strong>Note :</strong> ${evaluation.noteFinale}%</p>`;
+                    html += `<p><strong>Note :</strong> ${formaterNotePourcentage(evaluation.noteFinale)}</p>`;
                 }
             } else if (modeNotePreview === 'lettre') {
                 if (evaluation.niveauFinal) {
@@ -1060,7 +1060,7 @@
                 }
             } else {
                 if (evaluation.noteFinale != null) {
-                    html += `<p><strong>Note :</strong> ${evaluation.noteFinale}%</p>`;
+                    html += `<p><strong>Note :</strong> ${formaterNotePourcentage(evaluation.noteFinale)}</p>`;
                 }
                 if (evaluation.niveauFinal) {
                     html += `<p><strong>Niveau :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
