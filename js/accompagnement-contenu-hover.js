@@ -260,7 +260,7 @@ const TOOLTIPS = {
         'Critères avec nom, type, pondération et description. La pondération totale doit atteindre 100 %.',
     // C2, validé G. 20 oct. 2026, 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md).
     'cn-grille-type-critere':
-        'Méthode d’évaluation du critère : holistique (tu attribues un niveau de l’échelle), analytique (tu attribues des points, que son barème décrit) ou algorithmique (calcul automatique, ex. : français écrit).',
+        'Méthode d’évaluation du critère : holistique (tu attribues un niveau de l’échelle), analytique (tu attribues des points, que son barème décrit) ou algorithmique (une formule calcule la note à partir de ce que tu comptes).',
     // #1120, lot 2 (20 oct. 2026) : les bulles du barème d'un critère analytique (grilles.js, `trancheBaremeHtml`).
     // E1 à E6, validés G. 20 oct. 9 h 23, tels quels.
     'bareme-tranche-nom':
@@ -347,17 +347,17 @@ const TOOLTIPS = {
     'eval-critere':
         'Évalue ce critère en attribuant un niveau. La rétroaction est générée automatiquement selon la cartouche.',
     'eval-note-finale':
-        'Résultat calculé en temps réel : pourcentage pondéré et niveau IDME correspondant.',
+        'Résultat calculé en temps réel : le pourcentage pondéré, et son niveau dans l\'échelle de l\'évaluation.',
     'eval-niveau-idme':
         'Niveau calculé automatiquement. Modifie uniquement si nécessaire (ex. : reprise ciblée).',
     'eval-col-niveau':
-        'Niveau IDME : I = Incomplet, D = Développement, M = Maîtrise, E = Étendu.',
+        'Le niveau de chaque évaluation, dans l\'échelle qu\'elle emploie.',
     'eval-statut-remise':
         'Indique si la production a été remise. Conditionne le calcul de l\'indice de complétion (C).',
     'eval-integrite':
         'Recevable ou non. Une copie non recevable (plagiat, IA non autorisée) compte comme non remise dans la complétion ; dans la note, son sort dépend de ta pratique (Aide › « Travail NON RECEVABLE »).',
     'eval-francais-ecrit':
-        'Évaluation algorithmique du français écrit : saisis les codes d\'erreurs et le nombre de mots. Le calcul et la rétroaction sont générés automatiquement à partir de tes formulations.',
+        'La note de ce critère se calcule par une formule. « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape. La rétroaction se compose avec les phrases écrites dans la grille.',
     'eval-codes-erreurs':
         'Codes numériques des erreurs, séparés par points-virgules. Consulte la grille pour la correspondance codes → catégories.',
     'eval-modifier-attribution':

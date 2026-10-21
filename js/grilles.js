@@ -4466,7 +4466,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                         ${scs.length === 0 ? `
                         <button class="btn btn-secondaire btn-tres-compact sous-criteres-btn-defaut"
                                 data-action="initialiserSousCriteresParDefaut" data-param="${esc(grilleId)}" data-param2="${index}">
-                            Partir de la liste du français écrit (codes 0 à 10)
+                            Partir de la liste du français écrit (codes 1 à 10)
                         </button>` : ''}
                     </div>
                     ${rendreActivationCodes(critere, { grilleId: grilleId, index: index })}
@@ -5463,95 +5463,44 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
    =============================== */
 
 /**
- * Initialise les sous-critères par défaut (codes 0-10) pour un critère algorithmique
- * @param {string} grilleId - ID de la grille
+ * LA LISTE DU FRANÇAIS ÉCRIT (21 oct. 2026, consigne du lot de mots) : celle de Grégoire, la seule
+ * définition du code applicatif. Les sous-critères 1 à 10 du critère « Français écrit » de la grille
+ * démo « Grille-5 FR-ALGO-20 H26 » (`pack-demo-10.js`), à l'identique, SANS le code 0 : ses grilles
+ * n'en ont plus, « Quand la copie ne porte aucun code » le remplace. Le pack garde sa propre copie :
+ * c'est une donnée, comme la grille d'un utilisateur (l'égalité est verrouillée par un banc Vitest).
+ * Une grille qui porte déjà des sous-critères les garde : seul ce que crée le bouton change.
+ */
+const LISTE_FRANCAIS_ECRIT = Object.freeze([
+    { id: 'sc_1', code: '1', nom: 'Construction syntaxique ou accord du verbe', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent la construction syntaxique (sujet, prédicat, complément de phrase ou autres compléments) ou l\'accord du verbe (accord avec le sujet, conjugaison, etc.). Il arrive que certaines phrases sont incomplètes ou confuses, ou encore que le lien entre le verbe et son sujet soit erroné. Vérifie que chaque phrase a bien un sujet et un verbe (et parfois un complément) en les identifiant dans l\'interligne. Assure-toi qu\'il n\'y a pas trop de compléments (ce qui pourrait rendre la phrase confuse). Vérifie également la conjugaison et l\'accord des verbes en utilisant des tableaux de conjugaison.' },
+    { id: 'sc_2', code: '2', nom: 'Subordonnées employées seules', ponderation: 1,
+      retroaction: 'La plupart des erreurs sont causées par des subordonnées employées seules. Elles sont construites comme des compléments qui ne se rattachent à aucun prédicat. Relis la phrase pour vérifier sa clarté et assure-toi que chaque subordonnée est rattachée à une phrase principale par un mot de liaison. On peut parfois aussi ajuster la ponctuation pour y remédier.' },
+    { id: 'sc_3', code: '3', nom: 'Ponctuation', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent l\'utilisation de la ponctuation. Elle peut être relative au coordonnant, au complément de phrase, au complément du nom, à l\'organisateur textuel, à une énumération (dont la juxtaposition de phrases) ou encore à une citation. La ponctuation fautive vient embrouiller la structure et la clarté des idées. Vérifie les règles de ponctuation pour les différents types de phrases et de propositions. Certaines conjonctions rendent obligatoire l\'usage de la virgule. Utilise des guides de ponctuation pour vérifier cet usage.' },
+    { id: 'sc_4', code: '4', nom: 'Groupe du nom', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent l\'accord en genre et en nombre dans le groupe du nom (déterminant, nom, adjectif). Il devient plus difficile de comprendre le lien entre les mots si ces accords ne sont pas faits. Identifie dans l\'interligne le genre et le nombre du nom, puis assure-toi que tous les éléments du groupe concordent.' },
+    { id: 'sc_5', code: '5', nom: 'Accord du pronom ou le lien avec son antécédent', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent l\'accord du pronom ou le lien avec son antécédent. Il devient plus difficile de comprendre l\'objet dont on parle ou ce à quoi on fait référence quand il y a de l\'ambiguïté sur ce plan. Relis ta phrase pour clarifier à quoi ou à qui chaque pronom se réfère. Assure-toi qu\'il n\'y a pas d\'autres noms qui pourraient faire écran entre les deux. Vérifie le lien du pronom avec son antécédent et assure-toi que l\'accord est correct.' },
+    { id: 'sc_6', code: '6', nom: 'Accord du participe passé', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent l\'accord du participe passé. Révise les règles d\'accord du participe passé avec avoir (accord avec le COD s\'il est placé avant) et avec être (accord avec le sujet). Identifie ces éléments dans l\'interligne, fais des flèches et vérifie les accords.' },
+    { id: 'sc_7', code: '7', nom: 'Mots invariables', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent les mots invariables, plus précisément l\'usage de la préposition, de l\'adverbe ou de la conjonction. L\'orthographe de ces mots ne change jamais. Consulte les listes de mots invariables et l\'usage qu\'on en fait. Vérifie surtout le sens de ces mots, car ils sont parfois confondus les uns avec les autres.' },
+    { id: 'sc_8', code: '8', nom: 'Déterminant', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent l\'usage du déterminant. Choisis le déterminant approprié en fonction du nom et du contexte, puis vérifie qu\'il concorde en genre et en nombre avec le nom qu\'il accompagne.' },
+    { id: 'sc_9', code: '9', nom: 'Vocabulaire', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent le vocabulaire, c\'est-à-dire le sens d\'un mot ou son utilisation dans un certain contexte. L\'utilisation inexacte d\'une citation entre aussi dans cette catégorie. Utilise systématiquement un dictionnaire pour vérifier le sens des mots. Surtout, méfie-toi des synonymes parce qu\'ils renvoient toujours à un contexte très précis qui n\'est peut-être pas celui dans lequel tu écris. Vérifie tes citations en les relisant attentivement dans l\'oeuvre. Évite les anglicismes (dû à, mettre l\'emphase, canceller).' },
+    { id: 'sc_10', code: '10', nom: 'Orthographe d\'usage ou éléments de typographie', ponderation: 1,
+      retroaction: 'La plupart des erreurs concernent l\'orthographe d\'usage (lettre, chiffre) ou des éléments de typographie (majuscule, minuscule, soulignement, italique, etc.). Relis ton texte et vérifie systématiquement dans le dictionnaire les mots dont l\'orthographe est incertain. Dans le cas de mots étrangers ou de noms de personnages, relis bien ton oeuvre. N\'oublie pas également que les titres d\'oeuvres ou de chapitres requièrent respectivement l\'italique ou le soulignement (les guillemets fonctionnent aussi).' }
+].map(Object.freeze));
+
+/**
+ * « Partir de la liste du français écrit (codes 1 à 10) » : pose une copie de la liste sur le critère.
+ * @param {string} cible - `temp` en création, ou l'ID de la grille
  * @param {number} critereIndex - Index du critère
  */
 async function initialiserSousCriteresParDefaut(cible, critereIndex) {
-
-    // Sous-critères par défaut (vos 11 catégories)
-    const sousCriteresParDefaut = [
-        {
-            id: 'sc_0',
-            code: '0',
-            nom: 'Aucune erreur',
-            ponderation: 0,
-            retroaction: 'Le nombre d\'erreurs de français est trop petit pour cibler un objectif de travail précis.'
-        },
-        {
-            id: 'sc_1',
-            code: '1',
-            nom: 'Syntaxe',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs concernent la construction syntaxique (sujet, prédicat, complément de phrase ou autres compléments) ou l\'accord du verbe (accord avec le sujet, conjugaison, etc.). Il arrive que certaines phrases sont incomplètes ou confuses, ou encore que le lien entre le verbe et son sujet soit erroné. Vérifie que chaque phrase a bien un sujet et un verbe (et parfois un complément) en les identifiant dans l\'interligne. Assure-toi qu\'il n\'y a pas trop de compléments (ce qui pourrait rendre la phrase confuse). Vérifie également la conjugaison et l\'accord des verbes en t\'aidant de l\'Annexe de grammaire de ton manuel Méthodes quantitatives.'
-        },
-        {
-            id: 'sc_2',
-            code: '2',
-            nom: 'Subordination',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs sont causées par des subordonnées employées seules. Elles sont construites comme des compléments qui ne se rattachent à aucun prédicat. Relis la phrase pour vérifier sa clarté et assure-toi que chaque subordonnée est rattachée à une phrase principale par un mot de liaison. On peut parfois aussi ajuster la ponctuation pour y remédier.'
-        },
-        {
-            id: 'sc_3',
-            code: '3',
-            nom: 'Ponctuation',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs sont liées à l\'emploi de la ponctuation. Certains signes de ponctuation (comme la virgule) sont employés de manière superflue ou manquent là où ils seraient nécessaires. Dans d\'autres cas, le point d\'interrogation ou d\'exclamation doit être remplacé par un point. Pour réviser, tu peux te servir de la section portant sur la ponctuation dans l\'Annexe de grammaire de ton manuel.'
-        },
-        {
-            id: 'sc_4',
-            code: '4',
-            nom: 'Orthographe d\'usage',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs sont liées à l\'orthographe d\'usage, c\'est-à-dire que les mots sont mal orthographiés, ce qui peut parfois modifier le sens de la phrase. Il est conseillé de te servir d\'un dictionnaire (comme Antidote) pour réviser ton texte avant de le remettre. Utilise également un outil de synthèse vocale pour entendre ton texte : cela aide généralement à repérer et corriger ce type d\'erreur.'
-        },
-        {
-            id: 'sc_5',
-            code: '5',
-            nom: 'Homophones',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs sont causées par la confusion entre des homophones, c\'est-à-dire des mots qui se prononcent de la même façon, mais qui s\'écrivent différemment (par exemple : «ce» et «se», «a» et «à», «son» et «sont», etc.). Il est possible de réviser les règles générales de ces mots dans l\'Annexe de grammaire de ton manuel. Un truc : en lisant ton texte à voix haute, tu peux parfois repérer ces erreurs.'
-        },
-        {
-            id: 'sc_6',
-            code: '6',
-            nom: 'Accords dans le GN',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs concernent les accords dans le groupe nominal (déterminant, nom et adjectif). Vérifie que tous les mots d\'un même groupe nominal sont bien accordés en genre (masculin ou féminin) et en nombre (singulier ou pluriel). Pour réviser, sers-toi de ton manuel ou d\'Antidote. Un truc : surligne les groupes nominaux dans ton texte pour vérifier les accords.'
-        },
-        {
-            id: 'sc_7',
-            code: '7',
-            nom: 'Participes passés',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs concernent l\'accord des participes passés. Cet accord dépend de la présence et de la position du complément direct (CD) par rapport au verbe. Il est possible de réviser les règles dans l\'Annexe de grammaire de ton manuel. Un truc : identifie d\'abord le verbe conjugué, puis cherche le complément direct (CD) en posant les questions «qui ?» ou «quoi ?» après le verbe.'
-        },
-        {
-            id: 'sc_8',
-            code: '8',
-            nom: 'Mots inappropriés',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs sont liées à un mauvais usage de certains mots. Par exemple : des anglicismes, des mots employés dans un sens erroné, ou encore un registre de langue trop familier pour un texte scientifique. Assure-toi d\'employer les bons termes en consultant un dictionnaire (comme Antidote). Pour le registre de langue, révise ton texte en cherchant les mots ou expressions qui pourraient être trop familiers.'
-        },
-        {
-            id: 'sc_9',
-            code: '9',
-            nom: 'Répétitions et pléonasmes',
-            ponderation: 1.0,
-            retroaction: 'La plupart des erreurs sont liées à des répétitions (un même mot revient trop souvent) ou à des pléonasmes (redondance inutile, comme «monter en haut»). Pour corriger, utilise des synonymes pour varier ton vocabulaire et assure-toi de ne pas répéter inutilement une idée déjà exprimée.'
-        },
-        {
-            id: 'sc_10',
-            code: '10',
-            nom: 'Autres erreurs',
-            ponderation: 1.0,
-            retroaction: 'Les erreurs sont variées et ne relèvent pas d\'une seule catégorie précise. Continue de t\'exercer en français écrit et n\'hésite pas à consulter ton enseignant pour des conseils personnalisés.'
-        }
-    ];
-
     // #1131 (21 oct. 2026) : `cible`, `temp` en création ou l'id d'une grille enregistrée (`_modifierCritereCible`).
-    const critere = await _modifierCritereCible(cible, critereIndex, (c) => { c.sousCriteres = sousCriteresParDefaut; });
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => { c.sousCriteres = LISTE_FRANCAIS_ECRIT.map((sc) => ({ ...sc })); });
     if (critere) await _redessinerCible(cible);
 }
 

@@ -1136,7 +1136,7 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     '<strong>Holistique</strong> : tu attribues un niveau de l’échelle de performance ; l’échelle donne la note du critère.',
                     '<strong>Analytique</strong> : tu attribues des points, de 0 à la pondération du critère ; son barème dit ce qu’ils valent.',
-                    '<strong>Algorithmique</strong> : un calcul automatique, à partir d’une formule (ex. : nombre d’erreurs en français écrit).',
+                    '<strong>Algorithmique</strong> : une formule calcule la note à partir de ce que tu comptes sur la copie.',
                 ]
             },
         ],

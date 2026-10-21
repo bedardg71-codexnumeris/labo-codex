@@ -84,7 +84,9 @@ describe('barème 2 · A — le lexique', () => {
 
     it('A3 et A4 remplacent les définitions d’« Échelle de performance » et de « Type de critère »', () => {
         expect(terme('echelle-de-performance').definition).toBe(un('A3'));
-        expect(terme('type-de-critere').definition).toBe(un('A4'));
+        // ↻ 21 oct. : la parenthèse d'« algorithmique » est réglée par le lot de mots (critere-algorithmique-mots.test.js, A1).
+        const avantAlgo = (t) => t.slice(0, t.indexOf('algorithmique ('));
+        expect(avantAlgo(terme('type-de-critere').definition)).toBe(avantAlgo(un('A4')));
     });
 });
 
@@ -105,12 +107,15 @@ describe('barème 2 · B — l’aide « i » du barème', () => {
 describe('barème 2 · C — les trois types disent ce que fait l’application', () => {
     it('C1 : les trois lignes de l’aide « Type de critère d’évaluation », le nom du type en gras, suivi du deux-points', () => {
         const items = cat['grille-type-critere-detail'].popup.sections[0].items;
-        expect(items.map(sansHtml)).toEqual(T.C1);
+        // ↻ 21 oct. : la ligne Algorithmique est réglée par le lot de mots (critere-algorithmique-mots.test.js, A2).
+        expect(items.map(sansHtml).slice(0, 2)).toEqual(T.C1.slice(0, 2));
         items.forEach((it, i) => expect(it.startsWith('<strong>' + T.C1[i].split(' :')[0] + '</strong> :'), it).toBe(true));
     });
 
     it('C2 : la bulle du champ « Type de critère »', () => {
-        expect(cat['cn-grille-type-critere'].hover).toBe(un('C2'));
+        // ↻ 21 oct. : la parenthèse d'« algorithmique » est réglée par le lot de mots (critere-algorithmique-mots.test.js, A3).
+        const avantAlgo = (t) => t.slice(0, t.indexOf('algorithmique ('));
+        expect(avantAlgo(cat['cn-grille-type-critere'].hover)).toBe(avantAlgo(un('C2')));
     });
 });
 

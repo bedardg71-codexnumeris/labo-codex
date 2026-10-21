@@ -64,7 +64,7 @@ test('une grille neuve, un critère algorithmique de chimie : Annoter n’offre 
     const nom = carte.locator('input[data-on-change="modifierCritereTempHandler"][data-champ="nom"]');
     await nom.fill('Unités et chiffres significatifs');
     await nom.press('Tab');
-    await expect(carte.locator('[data-action="initialiserSousCriteresParDefaut"]')).toHaveText('Partir de la liste du français écrit (codes 0 à 10)');
+    await expect(carte.locator('[data-action="initialiserSousCriteresParDefaut"]')).toHaveText('Partir de la liste du français écrit (codes 1 à 10)');
     await page.locator('#btnCreerGrille').click();
     await expect.poll(() => page.evaluate(() => db.getSync(cle('grillesTemplates'), []).some((g) => g.nom === 'Laboratoire fictif'))).toBe(true);
     const grilleId = await page.evaluate(() => {

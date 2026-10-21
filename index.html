@@ -11179,128 +11179,43 @@
                         </div>
                     </div>
 
-                    <!-- Carte: 5c. Sous-critères avec pondération différenciée -->
+                    <!-- Carte: 5c. Les critères algorithmiques (lot de mots, 21 oct. 2026 : TEXTES-2026-10-21-critere-algorithmique.md, D1 à D9) -->
                     <div class="carte accordeon" id="accordeon-aide-sous-criteres">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> 5c. Sous-critères avec pondération différenciée (Critères algorithmiques)
+                                <span class="accordeon-chevron">▼</span> 5c. Les critères algorithmiques
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Conception → Grilles de critères</p>
 
                             <p><strong>Qu'est-ce qu'un critère algorithmique ?</strong></p>
-                            <p>Un critère <strong>algorithmique</strong> est un type spécial de critère qui calcule automatiquement une note. <strong>C'est toi qui choisis la formule</strong>, dans le gabarit de la grille : un modèle dans la liste, puis ses paramètres. Le cas d'usage principal est l'<strong>évaluation du français écrit</strong>, avec le modèle « Pénalité normalisée » :</p>
-
-                            <div class="u-p-15" style="background: var(--bleu-tres-pale); border-radius: 6px; margin: 15px 0">
-                                <code class="u-texte-moyen">Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur de normalisation)</code>
-                            </div>
-
-                            <p>Les autres modèles offerts sont le <strong>ratio mots par erreur</strong> (atteindre un ratio visé donne la note complète) et la <strong>pénalité fixe par erreur</strong> (chaque erreur retire un nombre de points donné, sans égard à la longueur). La formule retenue, avec tes valeurs, s'affiche dans le gabarit de la grille et sous le résultat au moment d'évaluer.</p>
+                            <p>Un critère algorithmique calcule sa note par une formule, à partir de ce que tu comptes sur la copie. Tu choisis la formule dans le gabarit de la grille : un modèle, puis ses paramètres.</p>
+                            <ul>
+                                <li><strong>Pénalité normalisée</strong> : Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur). Le nombre est ramené à une longueur de référence.</li>
+                                <li><strong>Ratio mots par erreur</strong> : atteindre le ratio visé donne la note complète.</li>
+                                <li><strong>Pénalité fixe par erreur</strong> : chaque erreur retire un nombre de points donné, sans égard à la longueur.</li>
+                            </ul>
+                            <p>La formule, avec tes valeurs, s'affiche dans le gabarit et sous le résultat au moment d'évaluer.</p>
+                            <p>Les mots du calcul, « erreurs » et « mots », sont ceux d'un critère de rédaction. Ils valent pour tout ce qui se compte : des unités oubliées sur douze calculs, des fautes de rythme sur trente-deux mesures.</p>
 
                             <p><strong>Pourquoi des sous-critères ?</strong></p>
-                            <p>Les sous-critères permettent de <strong>catégoriser les erreurs</strong> avec des <strong>pondérations différentes</strong>. Par exemple, dans certains cégeps, les erreurs de ponctuation comptent pour un demi-point (0.5) au lieu d'un point complet (1.0).</p>
-
+                            <p>Les sous-critères sont les catégories de ce que tu comptes. Chacun porte un code, un nom, une pondération et une observation : ce que l'étudiant·e lit à propos de ce code. La pondération dit ce que pèse une occurrence : 1 par défaut, 0,5 pour la compter à moitié ; un sous-critère de pondération 0 ne se pose pas.</p>
                             <div class="alerte alerte-information">
-                                <strong>Exemple concret :</strong><br>
-                                Un·e étudiant·e commet 4 erreurs : 2× ponctuation (0.5 pt chacune) + 1× syntaxe (1.0 pt) + 1× orthographe (1.0 pt)<br>
-                                = 0.5 + 0.5 + 1.0 + 1.0 = <strong>3.0 points d'erreur</strong> (au lieu de 4.0)<br>
-                                Pour 500 mots et facteur 500 : Note = 30 − (3.0 ÷ 500 × 500) = 30 − 3.0 = <strong>27/30</strong>
+                                <strong>Exemple :</strong> sept codes posés, trois d'un sous-critère qui pèse 1 et quatre d'un sous-critère qui pèse 0,5. La formule reçoit 3 + 2 = 5, et l'étudiant·e lit « 7 erreurs (5 une fois pondérées) ».
                             </div>
-
-                            <p><strong>Étape 1 : Créer un critère algorithmique</strong></p>
-                            <ol>
-                                <li>Dans ta grille de critères, ajouter un nouveau critère</li>
-                                <li>Sélectionner le type <strong>«Algorithmique»</strong></li>
-                                <li>Définir la pondération (ex: 30%)</li>
-                                <li>Choisir le modèle de formule, puis fixer ses paramètres (pour « Pénalité normalisée » : le facteur de normalisation, 500 mots par défaut)</li>
-                            </ol>
-
-                            <p><strong>Étape 2 : Ajouter des sous-critères</strong></p>
-                            <p>Tu as deux options :</p>
-
-                            <p><strong>Option A : Utiliser les 11 sous-critères par défaut</strong></p>
-                            <ul>
-                                <li>Cliquer sur le bouton <strong>«<img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Utiliser sous-critères par défaut (0-10)»</strong></li>
-                                <li>Le système crée automatiquement 11 sous-critères avec rétroactions complètes :
-                                    <ul class="mt-5 u-texte-petit">
-                                        <li><strong>Code 0</strong> : Aucune erreur</li>
-                                        <li><strong>Code 1</strong> : Syntaxe (construction de phrases, accord du verbe)</li>
-                                        <li><strong>Code 2</strong> : Subordination (subordonnées mal construites)</li>
-                                        <li><strong>Code 3</strong> : Ponctuation (virgules, points)</li>
-                                        <li><strong>Code 4</strong> : Orthographe d'usage</li>
-                                        <li><strong>Code 5</strong> : Homophones (ce/se, a/à, son/sont)</li>
-                                        <li><strong>Code 6</strong> : Accords dans le GN (groupe nominal)</li>
-                                        <li><strong>Code 7</strong> : Participes passés</li>
-                                        <li><strong>Code 8</strong> : Mots inappropriés (anglicismes, registre)</li>
-                                        <li><strong>Code 9</strong> : Répétitions et pléonasmes</li>
-                                        <li><strong>Code 10</strong> : Autres erreurs variées</li>
-                                    </ul>
-                                </li>
-                                <li>Tous les sous-critères ont une pondération initiale de <strong>1.0</strong></li>
-                            </ul>
-
-                            <p><strong>Option B : Créer tes propres sous-critères</strong></p>
-                            <ul>
-                                <li>Cliquer sur <strong>«+ Ajouter un sous-critère»</strong></li>
-                                <li>Remplir les champs :
-                                    <ul class="mt-5">
-                                        <li><strong>Code</strong> : Identifiant court (ex: "1", "A", "syn", "pct")</li>
-                                        <li><strong>Nom</strong> : Nom descriptif (ex: "Syntaxe", "Ponctuation")</li>
-                                        <li><strong>Pondération</strong> : Poids de l'erreur (défaut: 1.0, ajustable par paliers de 0.1)</li>
-                                        <li><strong>Description/Rétroaction</strong> : Texte à afficher quand c'est le type d'erreur dominant</li>
-                                    </ul>
-                                </li>
-                                <li>Répéter pour chaque catégorie d'erreurs</li>
-                                <li>Nombre de sous-critères : <strong>illimité</strong></li>
-                            </ul>
-
-                            <p><strong>Étape 3 : Personnaliser les pondérations (optionnel)</strong></p>
-                            <p>Pour adapter à la politique de ton département :</p>
-                            <ul>
-                                <li>Ponctuation = 0.5 point (demi-point)</li>
-                                <li>Erreurs graves de syntaxe = 2.0 points (doublement pénalisé)</li>
-                                <li>Erreurs mineures = 0.5 point</li>
-                                <li>Ou toute autre combinaison selon tes besoins</li>
-                            </ul>
+                            <p>Sous le critère, « + Ajouter un sous-critère » en crée un. « Partir de la liste du français écrit » crée d'un coup dix catégories d'une correction du français (codes 1 à 10), toutes de pondération 1, que tu modifies ensuite comme les tiennes.</p>
 
                             <p><strong>Comment utiliser lors de l'évaluation</strong></p>
-                            <ol>
-                                <li>Lors de la correction, noter le code de chaque erreur rencontrée</li>
-                                <li>Dans le formulaire d'évaluation, saisir les codes séparés par des points-virgules :
-                                    <div class="u-p-10" style="background: var(--surface-carte, #1a3a48); border-radius: var(--radius-moyen); margin: 10px 0; font-family: monospace">
-                                        3;3;1;4;4;6;1
-                                    </div>
-                                </li>
-                                <li>Saisir le nombre de mots de la rédaction</li>
-                                <li>Le système calcule automatiquement :
-                                    <ul class="mt-5">
-                                        <li>Le nombre total d'erreurs (7)</li>
-                                        <li>La somme pondérée (ex: 6.0 si ponctuation=0.5)</li>
-                                        <li>La note finale selon la formule</li>
-                                        <li>Le sous-critère dominant (MODE statistique)</li>
-                                        <li>La rétroaction personnalisée selon le type d'erreur dominant</li>
-                                    </ul>
-                                </li>
-                            </ol>
-
-                            <p><strong>Les sous-critères comme codes d'annotation</strong> : chaque sous-critère porte un code, un nom, une pondération et une description, et sert ainsi de code descriptif. Coche « Utiliser ces sous-critères comme codes d'annotation » : dans Annoter, ces codes deviennent la palette de toute copie évaluée avec cette grille. Un code posé sur la copie est donc un sous-critère identifié dans le travail ; ce qu'il compte, comment il se nomme et ce que l'élève lira en viennent. Décochée, la palette garde les dix codes de départ, qui sont des codes de correction du français. Un sous-critère de pondération 0 ne se pose pas.</p>
+                            <p>Dans Annoter, les sous-critères sont les codes que tu poses, sur toute copie évaluée avec cette grille. Chaque code posé compte une occurrence de son sous-critère ; « Nombre d'erreurs » se remplit tout seul, et la formule reçoit le nombre pondéré. Sans code posé, tu tapes le nombre : il compte tel quel, sans pondération. Une grille plus ancienne montre la case « Utiliser ces sous-critères comme codes d'annotation » ; décochée, sa palette garde les dix codes de départ, des codes de correction du français.</p>
+                            <p>L'étudiant·e lit la phrase du décompte écrite dans la grille et, dans son PDF, la ligne du calcul : « 7 erreurs (5 une fois pondérées) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.</p>
 
                             <div class="alerte alerte-attention">
-                                <strong>Mode simple disponible :</strong> Si tu ne souhaites pas catégoriser les erreurs, désactive l'option «Activer la catégorisation des erreurs de français» dans <strong>Conception → Pratiques de notation</strong>. Tu pourras alors simplement saisir le nombre total d'erreurs sans codes.
+                                <strong>Règle les pondérations avant de corriger.</strong> Une copie déjà évaluée garde sa note jusqu'à ce que tu y ajoutes ou retires un code ; la pondération s'applique alors à toute la copie.
                             </div>
 
-                            <p><strong>Avantages pédagogiques</strong></p>
-                            <ul>
-                                <li><strong>Rétroaction ciblée</strong> : L'étudiant·e sait exactement quel type d'erreur dominer</li>
-                                <li><strong>Justice évaluative</strong> : Erreurs mineures pénalisent moins que graves</li>
-                                <li><strong>Gain de temps</strong> : Codes rapides à noter pendant la correction</li>
-                                <li><strong>Suivi longitudinal</strong> : Analyse des types d'erreurs au fil du temps</li>
-                                <li><strong>Flexibilité disciplinaire</strong> : Adaptation aux normes de chaque département</li>
-                            </ul>
-
                             <div class="alerte alerte-succes">
-                                <strong>Astuce professionnelle :</strong> Imprime une feuille de codes plastifiée pour référence rapide pendant la correction. Exemple : «1=Syntaxe, 2=Subord., 3=Ponct., 4=Ortho., 5=Hom., 6=GN, 7=PP, 8=Mots, 9=Rép., 10=Autre»
+                                <strong>Astuce professionnelle :</strong> Imprime une feuille de codes plastifiée pour référence rapide pendant la correction.
                             </div>
                         </div>
                     </div>
@@ -14333,15 +14248,15 @@
     <script src="js/productions-import-export.js?v=20261012a"></script> <!-- Refactor étape 3 (16 mai 2026) : extrait de productions.js (lignes 2630-3276) -->
     <script src="js/productions-liste.js?v=20261017a"></script> <!-- Refactor étape 3 (16 mai 2026) : sidebar + CRUD utilisateur extraits de productions.js · #522 lot 4 : le descripteur de production écrit par db.modifier -->
     <script src="js/productions-bibliotheque-ui.js?v=20261017a"></script> <!-- Fix preview « Voir les productions » : display:none inline → classe u-hide · #522 lot 4 : le descripteur de production écrit par db.modifier -->
-    <script src="js/evaluation-formules.js?v=20260901a"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
+    <script src="js/evaluation-formules.js?v=20261020a"></script> <!-- #667 : registre des modèles de formule algorithmique — CHARGÉ AVANT grilles.js et evaluation-calcul.js, qui l'appellent tous les deux -->
     <script src="js/evaluation-projection.js?v=20260908b"></script>
     <script src="js/collections-projection.js?v=20260905b"></script> <!-- Lot B (5 sept. 2026) : les collections de paramètres de projection — un jeu nommé de réglages, copié dans un critère au choix -->
-    <script src="js/evaluation-enonces.js?v=20261020a"></script>
+    <script src="js/evaluation-enonces.js?v=20261020b"></script>
     <script src="js/composeur-badges.js?v=20260905c"></script> <!-- Le texte troué, étape 3 (5 sept. 2026) : le badge s'affiche dans la phrase — une vue éditable par-dessus chaque zone, le textarea reste la valeur -->
     <script src="js/codes-annotation.js?v=20261020b"></script> <!-- #1135 (21 oct.) : étape 0, un critère algorithmique neuf ne reçoit plus les codes du français · #1134 (21 oct.) : le critère algorithmique fait ce que son écran dit · 3 sept. 2026 : la liste des CODES d'annotation d'une copie (les codes identifient des éléments du travail, rattachés aux critères ; les tampons, eux, commentent — autre palette) — sous-critères de la grille activée, sinon les dix codes d'hier (repli). CHARGÉ AVANT travaux-outils.js, synthese-retroaction-data.js et evaluation-retroaction.js, qui le lisent ; APRÈS evaluation-enonces.js, dont il prend critereAlgorithmique --> <!-- texte troué étape 1 (3 sept.) : repères posables, contrat zone → repères, insertion au curseur · #581 : registre des modeles d'enonce algorithmique - MEME CONTRAINTE D'ORDRE que les deux registres ci-dessus : grilles.js, evaluation-calcul.js, evaluation-retroaction.js et synthese-retroaction-data.js l'appellent tous --> <!-- #668 : registre des modèles de projection (norme externe / EUF) — MÊME CONTRAINTE D'ORDRE que le registre de formules : grilles.js et evaluation-calcul.js l'appellent tous les deux -->
     <script src="js/grilles-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/bareme.js?v=20261020d"></script> <!-- #1120, grille du PDF (20 oct.) : la ligne lue par l’élève, ses points puis son texte, sans son nom · #1120, lot 2 (20 oct.) : textes validés · C1 (20 oct.) : une tranche neuve s’ajoute vide, « à compléter » · #1120, lot 1 (20 oct.) : le barème d’un critère analytique — la lecture unique, les refus, la conversion -->
-    <script src="js/grilles.js?v=20261020h"></script> <!-- #1135 (21 oct.) : étape 0, un critère algorithmique neuf ne reçoit plus les codes du français · #1134 (21 oct.) : le critère algorithmique fait ce que son écran dit · #1130 (21 oct.) : une grille neuve porte sous-critères et barème dès la création, le barème sous les sous-critères · F1 du verdict (20 oct., 14 h 30) : un sous-critère neuf ne reprend jamais un code déjà porté · 20 oct. (Grégoire, 13 h 56) : les sous-critères d’un critère non algorithmique se modifient ; une tranche du barème sur une ligne · #1120, lot 2 (20 oct.) : l’icône « i » et les bulles du barème · C1 (20 oct.) : une tranche neuve s’écrit aussitôt, la tranche gardée dans la page retirée · #1120, lot 1 (20 oct.) : le barème remplace les réponses d’un critère analytique · #1117 (19 oct.) : « Complexité SOLO du critère » suit le réglage, un critère neuf reçoit « aucun » s’il est désactivé · Version 1.209.0 (19 oct.) : trois refus de points réécrits par Grégoire · La dissection, lot 13 (19 oct.) : modifier les réponses d’un critère · « Apporter mon matériel », étape 7 (17 oct.) : le champ du texte d’un critère redevient « Description » (D1) · texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
+    <script src="js/grilles.js?v=20261020i"></script> <!-- lot de mots (21 oct.) : la liste du français écrit est celle de Grégoire, codes 1 à 10 · #1135 (21 oct.) : étape 0, un critère algorithmique neuf ne reçoit plus les codes du français · #1134 (21 oct.) : le critère algorithmique fait ce que son écran dit · #1130 (21 oct.) : une grille neuve porte sous-critères et barème dès la création, le barème sous les sous-critères · F1 du verdict (20 oct., 14 h 30) : un sous-critère neuf ne reprend jamais un code déjà porté · 20 oct. (Grégoire, 13 h 56) : les sous-critères d’un critère non algorithmique se modifient ; une tranche du barème sur une ligne · #1120, lot 2 (20 oct.) : l’icône « i » et les bulles du barème · C1 (20 oct.) : une tranche neuve s’écrit aussitôt, la tranche gardée dans la page retirée · #1120, lot 1 (20 oct.) : le barème remplace les réponses d’un critère analytique · #1117 (19 oct.) : « Complexité SOLO du critère » suit le réglage, un critère neuf reçoit « aucun » s’il est désactivé · Version 1.209.0 (19 oct.) : trois refus de points réécrits par Grégoire · La dissection, lot 13 (19 oct.) : modifier les réponses d’un critère · « Apporter mon matériel », étape 7 (17 oct.) : le champ du texte d’un critère redevient « Description » (D1) · texte troué étape 1 (3 sept.) : repères posables sous les quatre énoncés du bloc 3 · Brique C namespacing pas 4 : import inter-trimestre de grilles (modèle COPIE) + fix preview + garde D-C7 cible archivée · #522 lot 4 : les deux descripteurs de grille écrivent par db.modifier -->
     <script src="js/echelles-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/echelles.js?v=20261020b"></script> <!-- #1117 (19 oct.) : « Palier SOLO du niveau » suit le réglage · #555 lot 2 (b) : l'aperçu de l'éditeur ne recopie plus la règle des zones, il appelle zoneDuCodeDansNiveaux · #555 lot 2 (e) + #577 : repères sur l'échelle NEUVE (tampon), aperçu unique pour les deux éditeurs, ecrireRepereEchelle extraite pour l'assistant · #522 lot 4 : les deux descripteurs d'échelle écrivent par db.modifier -->
     <script src="js/cartouches-bibliotheque.js?v=20261014a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
@@ -14539,9 +14454,9 @@
     <script src="js/accompagnement.js?v=20261019c"></script> <!-- L’aide d’« Apporter mon matériel » (19 oct.) : l’étape « Conception » de la visite correspond aussi à l’onglet (#1092) · Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20261020b"></script> <!-- #1120, lot 2 (20 oct.) : les bulles du barème, C2 · L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20261020b"></script> <!-- #1120, lot 2 (20 oct.) : l’aide « i » du barème, les trois types (C1) · L’aide d’« Apporter mon matériel » (19 oct.) : l’aide « i » conception-materiel · Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
-    <script src="js/accompagnement-contenu-terme.js?v=20261020b"></script> <!-- #1120, lot 2 (20 oct.) : « Barème » et « Tranche » au lexique, A3 et A4 · L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
+    <script src="js/accompagnement-contenu-hover.js?v=20261020c"></script> <!-- #1120, lot 2 (20 oct.) : les bulles du barème, C2 · L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20261020c"></script> <!-- #1120, lot 2 (20 oct.) : l’aide « i » du barème, les trois types (C1) · L’aide d’« Apporter mon matériel » (19 oct.) : l’aide « i » conception-materiel · Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-terme.js?v=20261020c"></script> <!-- #1120, lot 2 (20 oct.) : « Barème » et « Tranche » au lexique, A3 et A4 · L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
     <script src="js/guides-pedagogiques.js?v=20261017a"></script> <!-- Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20261017a"></script> <!-- Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=20260923b"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->

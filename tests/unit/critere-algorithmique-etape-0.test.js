@@ -177,15 +177,13 @@ describe('étape 0 · V — la marque voyage : import et partage', () => {
 describe('étape 0 · D — deux disciplines fictives, dont une sans texte', () => {
     /**
      * Le gabarit, sans les choix offerts (boutons, options de menus) : ce qu'il DIT du critère.
-     * ⚠ LIMITE NOMMÉE : la description du modèle de formule « Pénalité normalisée » dit « Formule employée
-     * depuis l'origine pour le français écrit » (`evaluation-formules.js`). Texte d'aide, hors de l'étape 0
-     * (consigne) : signalé au lot de mots, retiré ici par sa phrase exacte, et par elle seule.
+     * (La limite nommée de l'étape 0, la description de « Pénalité normalisée », est levée : le lot de
+     * mots, F1, en a retiré la phrase.)
      */
-    const AIDE_HORS_LOT = 'Formule employée depuis l’origine pour le français écrit.';
     const ceQueDitLeGabarit = (carte) => {
         const copie = carte.cloneNode(true);
         copie.querySelectorAll('button, option').forEach((x) => x.remove());
-        return copie.textContent.replace(AIDE_HORS_LOT, '');
+        return copie.textContent;
     };
 
     for (const nom of ['Français écrit', 'Unités et chiffres significatifs']) {
@@ -193,7 +191,7 @@ describe('étape 0 · D — deux disciplines fictives, dont une sans texte', () 
             const m = await creerGrilleAlgo(nom);
             const carte = m.carte(0);
             expect(m.win.codesAnnotation.listeCodes({ criteres: m.win.tempCriteres })).toEqual([]);
-            expect(carte.querySelector('[data-action="initialiserSousCriteresParDefaut"]').textContent.trim()).toBe('Partir de la liste du français écrit (codes 0 à 10)');
+            expect(carte.querySelector('[data-action="initialiserSousCriteresParDefaut"]').textContent.trim()).toBe('Partir de la liste du français écrit (codes 1 à 10)');
             expect(carte.querySelector('[data-on-change="modifierCodesDepuisSousCriteresHandler"]'), 'pas de case : aucun repli à choisir').toBeNull();
             if (nom !== 'Français écrit') {
                 const t = ceQueDitLeGabarit(carte).replace(/\s+/g, ' ');
@@ -203,10 +201,10 @@ describe('étape 0 · D — deux disciplines fictives, dont une sans texte', () 
         });
     }
 
-    it('D.c la liste du français, choisie : les onze sous-critères d’hier, leurs dix codes', async () => {
+    it('D.c la liste du français, choisie : ses dix sous-critères, leurs dix codes', async () => {
         const m = await creerGrilleAlgo('Français écrit');
         await m.win.initialiserSousCriteresParDefaut('temp', 0);
-        expect(m.win.tempCriteres[0].sousCriteres.map((s) => s.code)).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+        expect(m.win.tempCriteres[0].sousCriteres.map((s) => s.code)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
         expect(m.win.codesAnnotation.listeCodes({ criteres: m.win.tempCriteres }).map((c) => c.id))
             .toEqual(['errfr_1', 'errfr_2', 'errfr_3', 'errfr_4', 'errfr_5', 'errfr_6', 'errfr_7', 'errfr_8', 'errfr_9', 'errfr_10']);
     });
