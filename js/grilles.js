@@ -3198,10 +3198,19 @@ function typeCritereParDefaut(grille) {
  * son choix, à la naissance et au changement de type — la source, jamais le stock. Les
  * critères existants gardent leur modèle. Sans le registre (bancs sans projection),
  * rien n'est écrit.
+ * ↻ 21 oct. 2026 (consigne `CONSIGNE-LOT-2026-10-21-critere-algorithmique-etape-0.md`) : au MÊME
+ * moment, le critère reçoit la marque des codes (`codesAnnotation.marquerNeuf`) — ses codes seront
+ * ses sous-critères, plus les dix du français. Même condition que le gabarit neuf : un critère qui
+ * devient algorithmique sans avoir de modèle de projection écrit ; jamais un critère qui en porte un.
  */
 function avecProjectionNeuve(critere) {
+    const neuf = !!critere && critere.type === 'algorithmique'
+        && !(typeof critere.modeleProjection === 'string' && critere.modeleProjection.trim());
     if (typeof window.projectionAlgo !== 'undefined' && typeof window.projectionAlgo.poserDefautNeuf === 'function') {
         window.projectionAlgo.poserDefautNeuf(critere);
+    }
+    if (neuf && typeof window.codesAnnotation !== 'undefined' && typeof window.codesAnnotation.marquerNeuf === 'function') {
+        window.codesAnnotation.marquerNeuf(critere);
     }
     return critere;
 }
@@ -3811,7 +3820,7 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
 function rendreActivationCodes(critere, ctx) {
     if (typeof window.codesAnnotation === 'undefined') return '';
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
-    const actif = critere.codesDepuisSousCriteres === true;
+    const actif = window.codesAnnotation.donneSesCodes(critere);
     const apercu = window.codesAnnotation.apercuCodes(critere);
     const n = apercu.length;
     const sansPoids = (critere.sousCriteres || []).length - n;
@@ -3821,6 +3830,14 @@ function rendreActivationCodes(critere, ctx) {
     const precision = sansPoids > 0
         ? ` Un sous-critère de pondération 0 n'est pas un code posable (${sansPoids === 1 ? 'un ici' : sansPoids + ' ici'}).`
         : '';
+    // 21 oct. 2026 — un critère MARQUÉ (né depuis l'étape 0) n'a pas de repli à choisir : ses codes sont ses
+    // sous-critères. Pas de case ; la note d'une case cochée, dès qu'il en a un qui se pose.
+    if (critere[window.codesAnnotation.MARQUE] === true) {
+        return n === 0 ? '' : `
+                        <div class="sous-criteres-codes sous-criteres-codes--actif">
+                            <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}</small>
+                        </div>`;
+    }
     return `
                         <div class="sous-criteres-codes${actif ? ' sous-criteres-codes--actif' : ''}">
                             <label class="sous-criteres-codes-choix">
@@ -4386,7 +4403,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
     const index = ctx.index;
     const scs = Array.isArray(critere.sousCriteres) ? critere.sousCriteres : [];
     const datas = (scIndex) => `data-on-change="modifierSousCritereHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${index}" data-sc-index="${scIndex}"`;
-    const codesActifs = critere.codesDepuisSousCriteres === true;
+    const codesActifs = window.codesAnnotation ? window.codesAnnotation.donneSesCodes(critere) : critere.codesDepuisSousCriteres === true;   // 21 oct. : la marque aussi
     const cleCritere = critere.id || ('critere-' + index);
 
     const lignes = scs.map((sc, scIndex) => `
@@ -4449,7 +4466,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                         ${scs.length === 0 ? `
                         <button class="btn btn-secondaire btn-tres-compact sous-criteres-btn-defaut"
                                 data-action="initialiserSousCriteresParDefaut" data-param="${esc(grilleId)}" data-param2="${index}">
-                            📋 Utiliser sous-critères par défaut (0-10)
+                            Partir de la liste du français écrit (codes 0 à 10)
                         </button>` : ''}
                     </div>
                     ${rendreActivationCodes(critere, { grilleId: grilleId, index: index })}

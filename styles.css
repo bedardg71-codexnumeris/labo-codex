@@ -17305,6 +17305,14 @@ tr.ligne-import-ecartee td {
     gap: 2px;
     padding: 4px;
 }
+/* 21 oct. 2026 (étape 0) : un critère né sans les dix codes du français, sans sous-critère — la palette le dit. */
+.travaux-errfr-vide {
+    margin: 0;
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--texte-secondaire);
+}
 .travaux-errfr-item {
     display: flex;
     flex-direction: row;

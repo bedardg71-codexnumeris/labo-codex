@@ -885,6 +885,9 @@ const SCHEMAS_IMPORT = {
                 estStandard: { type: 'boolean' },   // Lot 3 — critère d'un gabarit STD
                 // Codes par grille (3 sept. 2026) — le geste d'activation voyage avec la grille.
                 codesDepuisSousCriteres: { type: 'boolean' },
+                // 21 oct. 2026 (étape 0) — la marque d'un critère né sans les dix codes du français voyage avec lui :
+                // sans elle, la grille importée retomberait sur le repli.
+                codesSousCriteresSeulement: { type: 'boolean' },
                 facteurNormalisation: { type: 'number' },
 
                 // #667 — le modèle de formule choisi par l'utilisateur et ses
