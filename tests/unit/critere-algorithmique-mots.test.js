@@ -11,6 +11,9 @@
  *   L — « Partir de la liste du français écrit (codes 1 à 10) » crée dix sous-critères, codes 1 à 10, identiques
  *       à ceux du critère « Français écrit » de la grille démo « Grille-5 FR-ALGO-20 H26 », hors code 0 ;
  *   X — aucune des chaînes parties dans `js/` ni dans la section 5c d'`index.html`.
+ *   G — LOT DE MOTS 2 (consigne …-critere-algorithmique-mots-2.md, textes tranchés par Cowork à 10 h 25) : le
+ *       lexique « Sous-critères (critère algorithmique) », les deux textes du gabarit, à leur site ; et, au banc X,
+ *       ce qui en part (« pondération différenciée », « ponctuation = 0.5 », « de la rédaction », l'Astuce).
  *
  * Break-tests (faits le 21 oct.) : voir la demande de relecture. Grilles et textes FICTIFS.
  */
@@ -133,12 +136,12 @@ function monterBouton() {
         db, cle: (k) => 'a2032_' + k, document: dom.window.document, echapperHtml: (s) => String(s), alert() {}, confirm: () => true,
         genererIdUnique: (p) => p + 'banc', notifications: { succes() {}, erreur() {}, info() {}, avertissement() {} }
     }, win);
-    return win;
+    return { win, document };
 }
 
 describe('lot de mots · L — la liste du français écrit est celle de Grégoire', () => {
     it('L.a le bouton crée les dix sous-critères de la grille démo, codes 1 à 10, sans le code 0', async () => {
-        const win = monterBouton();
+        const { win } = monterBouton();
         win.tempCriteres = [{ nom: 'Français écrit', type: 'algorithmique', ponderation: 20 }];
         await win.initialiserSousCriteresParDefaut('temp', 0);
         const crees = win.tempCriteres[0].sousCriteres;
@@ -147,7 +150,7 @@ describe('lot de mots · L — la liste du français écrit est celle de Grégoi
     });
 
     it('L.b chaque pression donne une copie neuve : la liste du code ne se modifie pas par la grille', async () => {
-        const win = monterBouton();
+        const { win } = monterBouton();
         win.tempCriteres = [{ type: 'algorithmique' }, { type: 'algorithmique' }];
         await win.initialiserSousCriteresParDefaut('temp', 0);
         await win.initialiserSousCriteresParDefaut('temp', 1);
@@ -163,6 +166,36 @@ describe('lot de mots · L — la liste du français écrit est celle de Grégoi
         const porteurs = fichiers('js').filter((f) => f !== path.join('js', 'pack-demo-10.js') && lire(f).includes('Accord du pronom ou le lien avec son antécédent'));
         expect(porteurs).toEqual([path.join('js', 'grilles.js')]);
         expect(lire('js/grilles.js').split('Accord du pronom ou le lien avec son antécédent').length - 1).toBe(1);
+    });
+});
+
+/* ======================================================= G — LOT DE MOTS 2 */
+
+const G1_TERME = 'Sous-critères (critère algorithmique)';
+const G1 = 'Les catégories de ce que compte un critère algorithmique. Chaque sous-critère porte un code, un nom, une pondération (ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié) et une observation, que l\'étudiant·e lit. Le calcul reçoit la somme pondérée des codes posés. « Partir de la liste du français écrit » en crée dix d\'un coup. Configuration : Conception → Grilles de critères → type « Algorithmique ».';
+const G2 = '💡 La pondération dit ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié.';
+const G3 = 'Lors de l\'évaluation, « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape.';
+
+/** Le gabarit d'un critère « Français écrit » en création, rendu après la pression du bouton (modèle par défaut). */
+async function gabaritRendu() {
+    const { win, document } = monterBouton();
+    win.tempCriteres = [{ nom: 'Français écrit', type: 'algorithmique', ponderation: 20 }];
+    await win.initialiserSousCriteresParDefaut('temp', 0);
+    return document.getElementById('listeCriteres');
+}
+
+describe('lot de mots 2 · G — trois textes restés faux', () => {
+    it('G1 au lexique de l’onglet Aide : le terme et sa définition', () => {
+        const dt = [...new JSDOM(lire('index.html')).window.document.querySelectorAll('dt.titre-section-aide')]
+            .filter((d) => /^Sous-critères/.test(plat(d.textContent)));
+        expect(dt.map((d) => plat(d.textContent))).toEqual([G1_TERME]);
+        expect(plat(dt[0].nextElementSibling.textContent)).toBe(G1);
+    });
+
+    it('G2 sous les sous-critères, G3 sous la formule (« Pénalité normalisée », qui emploie les mots)', async () => {
+        const gabarit = await gabaritRendu();
+        expect(plat(gabarit.querySelector('.sous-criteres-info').textContent)).toBe(G2);
+        expect([...gabarit.querySelectorAll('small')].map((x) => plat(x.textContent))).toContain(G3);
     });
 });
 
@@ -194,5 +227,19 @@ describe('lot de mots · X — ce qui ne doit plus rester', () => {
     it('X.b aucune chaîne partie dans la section 5c', () => {
         const t = section.innerHTML;
         expect(PARTIS.filter((s) => t.includes(s))).toEqual([]);
+        // Lot 2 : l'« Astuce professionnelle » part, encadré compris (le seul encadré « succès » de la section).
+        expect(t).not.toContain('Astuce professionnelle');
+        expect(section.querySelector('.alerte-succes')).toBeNull();
+    });
+
+    // Lot 2 : ce qui part du lexique et du gabarit. « de la rédaction » vit encore dans le pack démo (une donnée) :
+    // le gabarit se cherche donc rendu, et dans grilles.js, pas dans tout js/.
+    const PARTIS_GABARIT = ['ponctuation = 0.5', 'de la rédaction'];
+
+    it('X.c lot 2 : ni « Pondération différenciée » dans index.html, ni « ponctuation = 0.5 » ou « de la rédaction » dans le gabarit', async () => {
+        expect(lire('index.html').toLowerCase()).not.toContain('pondération différenciée');
+        const gabarit = (await gabaritRendu()).innerHTML;
+        const source = lire('js/grilles.js');
+        expect(PARTIS_GABARIT.filter((s) => gabarit.includes(s) || source.includes(s))).toEqual([]);
     });
 });

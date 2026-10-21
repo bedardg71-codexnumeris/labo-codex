@@ -3629,7 +3629,7 @@ function rendreBlocFormuleAlgo(critere, ctx) {
                 </p>
                 <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
                     ${f.modele.utiliseMots
-                        ? 'Lors de l\'évaluation, tu saisiras le nombre d\'erreurs et le nombre de mots de la rédaction.'
+                        ? 'Lors de l\'évaluation, « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape.'
                         : 'Lors de l\'évaluation, seul le nombre d\'erreurs entre dans la note. Le nombre de mots reste saisi pour la rétroaction.'}
                 </small>${f.herite && critere.modeleFormule ? `
                 <small style="font-size: 0.78rem; color: var(--orange-accent); display: block; margin-top: 4px;">
@@ -4481,7 +4481,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                     </p>
                     ${boutonAjouter('sous-criteres-btn-ajouter-vide')}`}
                     <p class="sous-criteres-info">
-                        💡 Les sous-critères permettent de catégoriser les erreurs avec des pondérations différentes (ex: ponctuation = 0.5 point).
+                        💡 La pondération dit ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié.
                     </p>
                 </div>`;
 }
