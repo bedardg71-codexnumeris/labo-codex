@@ -69,6 +69,10 @@ test('une grille neuve : le miroir paraît sous la formule, suit la pondération
     // Un critère neuf naît à 0 : le miroir le dit
     await expect(miroir.locator('.miroir-algo-vide')).toContainText('Donne une pondération à ce critère');
 
+    // ↻ Étape 2a (22 oct. 2026) : un critère neuf naît sans noms ; « Partir de la liste du français écrit » les pose.
+    await carte.locator('[data-action="initialiserSousCriteresParDefaut"]').click();
+    await expect(carte.locator('.noms-algo input[data-nom-paire="erreurs"][data-nom-forme="singulier"]')).toHaveValue('erreur');
+
     // La pondération : le miroir se refait EN PLACE, sans redessiner le gabarit (le champ suivant garde le focus)
     const ponderation = carte.locator('input[data-on-change="modifierPonderationCritereTempHandler"]');
     await ponderation.fill('30');
@@ -115,9 +119,21 @@ test('à 820 px, un critère de chimie aux codes pondérés : la copie pondéré
     });
     expect(await page.evaluate(() => codesAnnotation.donneSesCodes(window.tempCriteres[0]))).toBe(true);
     const miroir = carte.locator('.miroir-algo');
+    // ↻ Étape 2a (22 oct. 2026) : sans ses noms, le miroir lit le repli ; on les tape dans les quatre champs,
+    // au clavier (le focus suit d'un champ à l'autre malgré le redessin).
+    await expect(carte.locator('.noms-algo-invitation')).toBeVisible();
+    const champNom = (paire, forme) => carte.locator(`.noms-algo input[data-nom-paire="${paire}"][data-nom-forme="${forme}"]`);
+    for (const [paire, forme, valeur] of [['erreurs', 'singulier', 'unité manquante'], ['erreurs', 'pluriel', 'unités manquantes'],
+        ['mots', 'singulier', 'calcul'], ['mots', 'pluriel', 'calculs']]) {
+        await champNom(paire, forme).fill(valeur);
+        await champNom(paire, forme).press('Tab');
+    }
+    await expect(carte.locator('.noms-algo-invitation')).toHaveCount(0);
+    expect(await page.evaluate(() => window.tempCriteres[0].noms)).toEqual({
+        erreurs: { singulier: 'unité manquante', pluriel: 'unités manquantes' }, mots: { singulier: 'calcul', pluriel: 'calculs' } });
     await expect(lignes(carte)).toHaveCount(4);
-    await expect(carte.locator('.miroir-algo-copie[data-copie="ponderee"]')).toContainText('une fois pondérée');
-    await expect(carte.locator('.miroir-algo-copie[data-copie="aucune"] .miroir-algo-donnees')).toHaveText('0 erreur, 12 mots');
+    await expect(carte.locator('.miroir-algo-copie[data-copie="ponderee"]')).toContainText('après pondération');
+    await expect(carte.locator('.miroir-algo-copie[data-copie="aucune"] .miroir-algo-donnees')).toHaveText('0 unité manquante, 12 calculs');
     expect((await miroir.textContent()).toLowerCase()).not.toContain('français');
     const debord = await page.evaluate(() => {
         const m = document.querySelector('#listeCriteres .miroir-algo');
@@ -144,11 +160,11 @@ test('une grille enregistrée : changer la pondération du critère refait le mi
     await page.evaluate(async () => { naviguerVers('conception', 'grille-criteres'); await chargerGrillePourModif('G_MIROIR'); });
     const carte = page.locator('#listeCriteres .item-liste').first();
     await expect(noteDe(carte, 'beaucoup')).toContainText('0/30 (0 %)');
-    await expect(carte.locator('.miroir-algo-copie[data-copie="beaucoup"] .miroir-algo-donnees')).toHaveText('30 erreurs, sans nombre de mots');
+    await expect(carte.locator('.miroir-algo-copie[data-copie="beaucoup"] .miroir-algo-donnees')).toHaveText('30 erreurs, champ « Mots » vide');   // ↻ étape 2a : le nom du champ
     const pond = carte.locator('input[data-on-change="modifierCritereGrilleHandler"][data-champ="ponderation"]');
     await pond.fill('20');
     await pond.press('Tab');
-    await expect(carte.locator('.miroir-algo-copie[data-copie="beaucoup"] .miroir-algo-donnees')).toHaveText('20 erreurs, sans nombre de mots');
+    await expect(carte.locator('.miroir-algo-copie[data-copie="beaucoup"] .miroir-algo-donnees')).toHaveText('20 erreurs, champ « Mots » vide');
     await expect(noteDe(carte, 'aucune')).toHaveText('20/20 (100 %)');
     expect(erreurs).toEqual([]);
 });

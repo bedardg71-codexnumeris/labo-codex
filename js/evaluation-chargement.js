@@ -1022,6 +1022,26 @@ function chargerGrilleSelectionnee() {
  * l’échelle « X » » (la mention de Grilles de critères), ou « Niveau » sans échelle nommée. Ils disaient
  * « (30%) » et « Niveau IDME » sous toute grille et toute échelle.
  */
+/**
+ * Étape 2a (22 oct. 2026) — LES MOTS DES CHAMPS D'UN CRITÈRE ALGORITHMIQUE : ses deux noms
+ * (`enoncesAlgo.noms`). L'étiquette d'un champ est le nom au pluriel, seul, avec sa majuscule
+ * (« Erreurs », « Unités manquantes ») : sans « de » devant, l'élision ne se pose pas
+ * (« Nombre de unités »). Rend des chaînes DÉJÀ ÉCHAPPÉES : ce sont des mots tapés, qui vont
+ * dans du HTML. Sans critère (ou sans registre) : « erreur » et « mot ».
+ */
+function _nomsChampsAlgo(critere) {
+    const E = window.enoncesAlgo;
+    const noms = (E && typeof E.noms === 'function') ? E.noms(critere)
+        : { erreurs: { singulier: 'erreur', pluriel: 'erreurs' }, mots: { singulier: 'mot', pluriel: 'mots' } };
+    const etiquette = (t) => (E && typeof E.enEtiquette === 'function') ? E.enEtiquette(t) : t;
+    return {
+        champErreurs: echapperHtml(etiquette(noms.erreurs.pluriel)),
+        champMots: echapperHtml(etiquette(noms.mots.pluriel)),
+        erreurs: echapperHtml(noms.erreurs.pluriel),
+        mots: echapperHtml(noms.mots.pluriel)
+    };
+}
+
 function libellePonderationEval(ponderation, grille) {
     const enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grille);
     if (typeof ponderation !== 'number' || typeof window.texteDePonderation !== 'function') return formaterPourcentage(ponderation) || String(ponderation) + ESPACE_INSECABLE + '%';
@@ -1097,6 +1117,7 @@ function cartoucheSelectionnee() {
         const estAlgorithmique = critereGrille?.type === 'algorithmique';
         const estAnalytique = critereGrille?.type === 'analytique';   // lot 2
         const facteur = critereGrille?.facteurNormalisation || 500;
+        const N = _nomsChampsAlgo(critereGrille);   // étape 2a (22 oct.) — lu dans les seules branches algorithmiques
 
         // Vérifier si la catégorisation des erreurs est activée
         const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
@@ -1137,7 +1158,7 @@ function cartoucheSelectionnee() {
                 <small class="eval-aide">(Voir configuration de la grille)</small>
             </div>
             <div class="groupe-form">
-                <label class="eval-label">Nombre de mots</label>
+                <label class="eval-label">${N.champMots}</label>
                 <input type="number"
                        id="eval_mots_${critere.id}"
                        class="controle-form"
@@ -1146,7 +1167,7 @@ function cartoucheSelectionnee() {
             </div>
         </div>
         <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
-            <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
+            <span id="total_erreurs_${critere.id}">--</span> ${N.erreurs} / <span id="mots_formule_${critere.id}">--</span> ${N.mots} → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" class="eval-badge-algo">--</span>
             <!-- #667 — formule chiffrée, remplie par _afficherFormuleAlgo -->
             <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
@@ -1164,7 +1185,7 @@ function cartoucheSelectionnee() {
         <!-- Interface algorithmique SIMPLE (sans catégorisation) -->
         <div class="eval-grille-algo">
             <div class="groupe-form">
-                <label class="eval-label">Nombre d'erreurs</label>
+                <label class="eval-label">${N.champErreurs}</label>
                 <input type="number"
                        id="eval_erreurs_${critere.id}"
                        class="controle-form"
@@ -1173,7 +1194,7 @@ function cartoucheSelectionnee() {
                        data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
             </div>
             <div class="groupe-form">
-                <label class="eval-label">Nombre de mots</label>
+                <label class="eval-label">${N.champMots}</label>
                 <input type="number"
                        id="eval_mots_${critere.id}"
                        class="controle-form"
@@ -1182,7 +1203,7 @@ function cartoucheSelectionnee() {
             </div>
         </div>
         <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
-            <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+            <span id="total_erreurs_simple_${critere.id}">--</span> ${N.erreurs} sur <span id="mots_simple_${critere.id}">--</span> ${N.mots} → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
             <!-- #667 — formule chiffrée, remplie par _afficherFormuleAlgo -->
             <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
         </div>
@@ -1331,6 +1352,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
         const estAlgorithmique = critere.type === 'algorithmique';
         const estAnalytique = critere.type === 'analytique';   // lot 2
         const facteur = critere.facteurNormalisation || 500;
+        const N = _nomsChampsAlgo(critere);   // étape 2a (22 oct.) — lu dans les seules branches algorithmiques
 
         return `
     <div class="eval-critere-carte">
@@ -1347,7 +1369,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                     <!-- Interface algorithmique SIMPLE (mode consultation) -->
                     <div class="eval-grille-algo">
                         <div class="groupe-form">
-                            <label class="eval-label">Nombre d'erreurs</label>
+                            <label class="eval-label">${N.champErreurs}</label>
                             <input type="number"
                                    id="eval_erreurs_${critere.id}"
                                    class="controle-form"
@@ -1356,7 +1378,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                                    data-on-input="calculerNoteAlgoSimpleHandler" data-critere-id="${critere.id}" data-ponderation="${ponderation}" data-facteur="${facteur}">
                         </div>
                         <div class="groupe-form">
-                            <label class="eval-label">Nombre de mots</label>
+                            <label class="eval-label">${N.champMots}</label>
                             <input type="number"
                                    id="eval_mots_${critere.id}"
                                    class="controle-form"
@@ -1378,7 +1400,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                          ⚠ Pas d'accent grave dans ce commentaire : il vit DANS un litteral
                          de gabarit, ou un accent grave termine le gabarit. -->
                     <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
-                        <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots &rarr; <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+                        <span id="total_erreurs_simple_${critere.id}">--</span> ${N.erreurs} sur <span id="mots_simple_${critere.id}">--</span> ${N.mots} &rarr; <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
                         <!-- #667 — formule chiffrée (mode consultation) -->
                         <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
                     </div>
@@ -2183,6 +2205,7 @@ window.ecrireAttenteCriteres = ecrireAttenteCriteres;
 window.messageEchelleManquante = messageEchelleManquante;
 window.libellePonderationEval = libellePonderationEval;   // 21 oct. 2026 — exposés pour les bancs
 window.libelleNiveauEval = libelleNiveauEval;
+window.nomsChampsAlgo = _nomsChampsAlgo;   // étape 2a (22 oct.) — exposé pour les bancs
 window.cartoucheSelectionnee = cartoucheSelectionnee;
 window.choisirCartoucheEval = choisirCartoucheEval;             // #944 — le geste au menu (index.html)
 window.poserCartoucheParChargeur = poserCartoucheParChargeur;   // #944 — evaluation.js, travaux-ui.js

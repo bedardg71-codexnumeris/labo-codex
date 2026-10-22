@@ -3628,9 +3628,16 @@ function rendreBlocFormuleAlgo(critere, ctx) {
                     <strong>Formule appliquée :</strong> ${esc(window.formulesAlgo.libelleSymbolique(critere))}
                 </p>
                 <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
-                    ${f.modele.utiliseMots
-                        ? 'Lors de l\'évaluation, « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape.'
-                        : 'Lors de l\'évaluation, seul le nombre d\'erreurs entre dans la note. Le nombre de mots reste saisi pour la rétroaction.'}
+                    ${(() => {
+                        // Étape 2a (22 oct. 2026) : les champs portent les noms du critère (`enEtiquette`, comme
+                        // l'évaluation) ; cités entre guillemets, sans « de » devant. Échappés : des mots tapés.
+                        const N = window.enoncesAlgo.noms(critere);
+                        const champE = esc(window.enoncesAlgo.enEtiquette(N.erreurs.pluriel));
+                        const champM = esc(window.enoncesAlgo.enEtiquette(N.mots.pluriel));
+                        return f.modele.utiliseMots
+                            ? `Lors de l'évaluation, « ${champE} » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « ${champM} » se tape.`
+                            : `Lors de l'évaluation, seul le champ « ${champE} » entre dans la note. Le champ « ${champM} » reste saisi pour la rétroaction.`;
+                    })()}
                 </small>${f.herite && critere.modeleFormule ? `
                 <small style="font-size: 0.78rem; color: var(--orange-accent); display: block; margin-top: 4px;">
                     Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.
@@ -4148,12 +4155,14 @@ function rendreBlocProjectionAlgo(critere, ctx) {
         if (!copie) return '';
         const s = segmentsDe(copie);
         const vide = !s.engendre && !s.ecrit;
+        // Étape 2a (22 oct. 2026) : la copie fictive se dit avec les deux noms du critère.
+        const nomsCopie = window.enoncesAlgo.noms(critere);
         return `
                             <div class="palier-apercu">
                                 <span class="palier-apercu-mot">L'élève lira :</span>
                                 <span class="palier-apercu-engendre">${esc(s.engendre)}</span>
                                 <span class="palier-apercu-ecrit">${esc(s.ecrit)}</span>${vide ? '<em class="palier-apercu-vide">aucune phrase — le décompte est vide et ce palier ne dit rien</em>' : ''}
-                                <span class="palier-apercu-copie">— copie fictive, ${esc(copie.erreurs)} erreur${copie.erreurs > 1 ? 's' : ''} pour ${esc(copie.mots)} mots</span>
+                                <span class="palier-apercu-copie">— copie fictive, ${esc(copie.erreurs)} ${esc(window.enoncesAlgo.accorder(copie.erreurs, nomsCopie.erreurs))} pour ${esc(copie.mots)} ${esc(window.enoncesAlgo.accorder(copie.mots, nomsCopie.mots))}</span>
                             </div>`;
     };
 
@@ -4449,6 +4458,110 @@ function carteGabaritAlgo(critere, ctx, section, titre, contenu, fermeParDefaut)
                     </div>
                     <div class="accordeon-contenu">${contenu}</div>
                 </div>`;
+}
+
+/**
+ * LES DEUX NOMS — le critère algorithmique, étape 2a (22 oct. 2026, consigne du jour ; décision de
+ * Grégoire de 16 h 59 : aucun nom par défaut). En tête du gabarit, avant les sous-critères (qui sont
+ * les catégories de ce qu'on compte) : ce que le critère compte et ce à quoi il le rapporte, au
+ * singulier et au pluriel. Un critère NEUF (la marque) a ses champs vides, un exemple grisé d'une
+ * discipline sans texte, et l'invitation tant qu'une paire manque ; un critère d'avant montre les
+ * noms qu'il LIT (« erreur », « mot ») — rien n'est écrit avant un geste sur un champ.
+ * Le geste : `modifierNomsCritereAlgoHandler`, qui écrit les QUATRE formes affichées (une paire
+ * écrite à moitié se lirait comme absente). En création, la cible `temp` (`_modifierCritereCible`).
+ * `esc()` sur tout : ce sont des mots tapés. ⚠ Textes provisoires (TEXTES-2026-10-22-…).
+ */
+const TEXTES_NOMS_ALGO = {
+    erreurs: 'Ce que tu comptes',
+    mots: 'Ce à quoi tu le rapportes',
+    singulier: 'Singulier',
+    pluriel: 'Pluriel',
+    exemple: {
+        erreurs: { singulier: 'Ex. : unité manquante', pluriel: 'Ex. : unités manquantes' },
+        mots: { singulier: 'Ex. : calcul', pluriel: 'Ex. : calculs' }
+    },
+    invitation: 'Nomme ce que tu comptes et ce à quoi tu le rapportes, au singulier et au pluriel : l\'élève lit ces noms dans la phrase du décompte et dans son PDF.',
+    aide: 'Ces noms remplacent « erreur » et « mot » dans les champs de l\'évaluation, la phrase du décompte et la ligne du PDF.'
+};
+
+function rendreNomsCritereAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique' || typeof window.enoncesAlgo === 'undefined') return '';
+    const E = window.enoncesAlgo;
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const grilleId = ctx.mode === 'grille' ? ctx.grilleId : 'temp';
+    const saisis = E.nomsSaisis(critere);
+    const lus = E.noms(critere);
+    const neuf = E.estNeuf(critere);
+    const manquants = E.nomsManquants(critere);
+    // La valeur d'un champ : la forme écrite ; sans rien d'écrit pour la paire, celle que le critère
+    // LIT s'il est d'avant (« erreur »), vide s'il est neuf.
+    const valeur = (k, f) => (saisis[k].singulier || saisis[k].pluriel || neuf) ? saisis[k][f] : lus[k][f];
+    const champ = (k, f) => `
+                            <label class="noms-algo-forme">
+                                <span class="sous-critere-label-petit">${esc(TEXTES_NOMS_ALGO[f])}</span>
+                                <input type="text" class="controle-form" maxlength="${E.MAX_NOM}"
+                                       value="${esc(valeur(k, f))}"
+                                       placeholder="${esc(TEXTES_NOMS_ALGO.exemple[k][f])}"
+                                       aria-label="${esc(TEXTES_NOMS_ALGO[k] + ', ' + TEXTES_NOMS_ALGO[f].toLowerCase())}"
+                                       data-on-change="modifierNomsCritereAlgoHandler" data-grille-id="${esc(grilleId)}" data-critere-index="${ctx.index}"
+                                       data-nom-paire="${esc(k)}" data-nom-forme="${esc(f)}">
+                            </label>`;
+    const rangee = (k) => `
+                    <div class="noms-algo-rangee${manquants.includes(k) ? ' noms-algo-rangee--manque' : ''}" data-nom-rangee="${esc(k)}">
+                        <span class="noms-algo-libelle">${esc(TEXTES_NOMS_ALGO[k])}</span>
+                        <div class="noms-algo-formes">${champ(k, 'singulier')}${champ(k, 'pluriel')}
+                        </div>
+                    </div>`;
+    return `
+                <div class="noms-algo" data-noms-algo="${esc(grilleId)}:${ctx.index}">
+                    ${rangee('erreurs')}
+                    ${rangee('mots')}${manquants.length ? `
+                    <p class="noms-algo-invitation">${esc(TEXTES_NOMS_ALGO.invitation)}</p>` : ''}
+                    <small class="noms-algo-aide">${esc(TEXTES_NOMS_ALGO.aide)}</small>
+                </div>`;
+}
+
+/**
+ * Le geste sur un des quatre champs : les quatre formes AFFICHÉES partent ensemble
+ * (`enoncesAlgo.appliquerNoms`) — un critère d'avant écrit alors « erreur / erreurs » à côté du
+ * nom changé, ce que la consigne permet (écrire les noms affichés, au geste). Une forme trop
+ * longue est refusée : rien n'est écrit, le champ le dit. Puis le gabarit se redessine (les
+ * champs de l'évaluation, l'aide de la formule, le miroir et l'invitation suivent les noms), et le
+ * focus revient au champ des noms où il était.
+ */
+async function modifierNomsCritereAlgo(cible, critereIndex, saisie) {
+    let refuse = null;
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => {
+        if (c.type !== 'algorithmique') return false;
+        const r = window.enoncesAlgo.appliquerNoms(c, saisie);
+        refuse = r.refuse;
+        if (refuse) return false;
+    });
+    return { refuse, critere };
+}
+
+function modifierNomsCritereAlgoHandler(el) {
+    const bloc = el.closest('[data-noms-algo]');
+    if (!bloc) return Promise.resolve();
+    const saisie = { erreurs: {}, mots: {} };
+    bloc.querySelectorAll('input[data-nom-paire]').forEach((x) => {
+        if (saisie[x.dataset.nomPaire]) saisie[x.dataset.nomPaire][x.dataset.nomForme] = x.value;
+    });
+    const cible = el.dataset.grilleId;
+    return modifierNomsCritereAlgo(cible, parseInt(el.dataset.critereIndex), saisie).then(async (r) => {
+        marquerChampRefuse(el, r.refuse);
+        if (r.refuse || !r.critere) return;
+        // Le focus est déjà parti vers le champ suivant (le `change` part au blur) : on le rend après le redessin.
+        const actif = document.activeElement;
+        const garde = (actif && actif.dataset && actif.dataset.nomPaire)
+            ? { index: actif.dataset.critereIndex, paire: actif.dataset.nomPaire, forme: actif.dataset.nomForme } : null;
+        await _redessinerCible(cible);
+        if (garde) {
+            const x = [...document.querySelectorAll('#listeCriteres input[data-nom-paire]')]
+                .find((i) => i.dataset.critereIndex === garde.index && i.dataset.nomPaire === garde.paire && i.dataset.nomForme === garde.forme);
+            if (x) { x.focus(); const n = x.value.length; try { x.setSelectionRange(n, n); } catch (e) { /* champ sans sélection */ } }
+        }
+    });
 }
 
 /** Le code qu'un sous-critère affiche : le sien, sinon sa position (comme avant ce lot). */
@@ -5051,6 +5164,7 @@ function rendreCartesGabaritAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
     return `
             <div class="gabarit-algo" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
+                ${rendreNomsCritereAlgo(critere, ctx)}
                 ${rendreSousCriteresAlgo(critere, ctx)}
                 ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx) + rendreMiroirAlgo(critere, ctx), false)}
                 ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Bilan', rendreBlocEnoncesAlgo(critere, ctx), true)}
@@ -5579,7 +5693,18 @@ const LISTE_FRANCAIS_ECRIT = Object.freeze([
  */
 async function initialiserSousCriteresParDefaut(cible, critereIndex) {
     // #1131 (21 oct. 2026) : `cible`, `temp` en création ou l'id d'une grille enregistrée (`_modifierCritereCible`).
-    const critere = await _modifierCritereCible(cible, critereIndex, (c) => { c.sousCriteres = LISTE_FRANCAIS_ECRIT.map((sc) => ({ ...sc })); });
+    const critere = await _modifierCritereCible(cible, critereIndex, (c) => {
+        c.sousCriteres = LISTE_FRANCAIS_ECRIT.map((sc) => ({ ...sc }));
+        // Étape 2a (22 oct. 2026) : la liste du français écrit remplit aussi les deux noms
+        // (« erreur », « mot ») — seulement une paire qui n'est pas déjà nommée : des noms écrits restent.
+        if (window.enoncesAlgo && c.type === 'algorithmique') {
+            const saisis = window.enoncesAlgo.nomsSaisis(c);
+            const fr = window.enoncesAlgo.nomsFrancaisEcrit();
+            const aPoser = {};
+            Object.keys(fr).forEach((k) => { if (!(saisis[k].singulier && saisis[k].pluriel)) aPoser[k] = fr[k]; });
+            if (Object.keys(aPoser).length) window.enoncesAlgo.appliquerNoms(c, aPoser);
+        }
+    });
     if (critere) await _redessinerCible(cible);
 }
 
@@ -5982,6 +6107,9 @@ window.modifierTexteReponseGrilleHandler = modifierTexteReponseGrilleHandler;
 window.reponsesCritere = { texteModifie: reponseTexteModifie, REFUS: REFUS_REPONSES };
 // #1120, lot 1 (20 oct.) : le barème d'un critère analytique — ses gestes (data-action, data-on-change)
 window.modifierTrancheBaremeHandler = modifierTrancheBaremeHandler;
+// Le critère algorithmique, étape 2a (22 oct.) : les deux noms — le geste, et la fonction (bancs)
+window.modifierNomsCritereAlgoHandler = modifierNomsCritereAlgoHandler;
+window.modifierNomsCritereAlgo = modifierNomsCritereAlgo;
 window.ajouterTrancheBareme = ajouterTrancheBareme;
 window.retirerTrancheBareme = retirerTrancheBareme;
 window.dupliquerGrilleActive = dupliquerGrilleActive;

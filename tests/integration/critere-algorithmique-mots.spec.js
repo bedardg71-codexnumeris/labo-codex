@@ -78,7 +78,7 @@ test('l’onglet Aide, section 5c : « Les critères algorithmiques », sans « 
     const contenu = carte.locator('.accordeon-contenu');
     await expect(contenu).toBeVisible();
     await expect(contenu).toContainText('Partir de la liste du français écrit » crée d’un coup'.replace('’', '\''));
-    await expect(contenu).toContainText('7 erreurs (5 une fois pondérées) sur 400 mots → 13,75/20 (68,8 %)');
+    await expect(contenu).toContainText('7 erreurs (5 après pondération) sur 400 mots → 13,75/20 (68,8 %)');
     await expect(contenu).not.toContainText('Avantages pédagogiques');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
     if (process.env.CAPTURES_MOTS) await carte.screenshot({ path: path.join(process.env.CAPTURES_MOTS, 'aide-section-5c.png') });

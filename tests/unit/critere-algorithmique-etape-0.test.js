@@ -237,7 +237,7 @@ describe('étape 0 · P — la ligne du PDF, en français correct', () => {
 
     it('P.b la virgule décimale, les décimales d’hier : « 13,75/20 (68,8 %) »', () => {
         expect(ligne({ erreurs: 7, noteCalculee: 13.75, pourcentage: 68.75 }).ligne).toBe('7 erreurs sur 400 mots &rarr; 13,75/20 (68,8\u00A0%)');
-        expect(ligne({ erreurs: 7, sommePonderee: 5, noteCalculee: 13.75, pourcentage: 68.75 }).ligne).toBe('7 erreurs (5 une fois pondérées) sur 400 mots &rarr; 13,75/20 (68,8\u00A0%)');
+        expect(ligne({ erreurs: 7, sommePonderee: 5, noteCalculee: 13.75, pourcentage: 68.75 }).ligne).toBe('7 erreurs (5 après pondération) sur 400 mots &rarr; 13,75/20 (68,8\u00A0%)');
         expect(ligne({ erreurs: 3, noteCalculee: 16.5, pourcentage: 82.5 }).ligne).toBe('3 erreurs sur 400 mots &rarr; 16,50/20 (82,5\u00A0%)');
     });
 

@@ -28,18 +28,21 @@ const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
 const plat = (s) => String(s).replace(/\s+/g, ' ').trim();
 const apostrophes = (s) => s.replace(/’/g, "'");
-const REGLES = apostrophes(lire('plans de travail/TEXTES-2026-10-21-critere-algorithmique.md'));
+// ↻ 22 oct. 2026 (étape 2a) : B1, C2, D3, D4b, D6, D7 et G3 changent avec les deux noms et la parenthèse
+// « (5 après pondération) » ; leurs nouveaux textes, provisoires, sont dans le fichier du 22 oct.
+const REGLES = apostrophes(lire('plans de travail/TEXTES-2026-10-21-critere-algorithmique.md')
+    + '\n' + lire('plans de travail/TEXTES-2026-10-22-noms-critere-algorithmique.md'));
 
 /* ======================================================= T — LES TEXTES À LEURS SITES */
 
 const A1 = 'La méthode d’évaluation d’un critère dans une grille. Trois types sont disponibles : holistique (tu attribues un niveau de l’échelle de performance), analytique (tu attribues des points, que son barème décrit) et algorithmique (une formule calcule la note à partir de ce que tu comptes sur la copie).';
 const A2 = 'Algorithmique : une formule calcule la note à partir de ce que tu comptes sur la copie.';
 const A3 = 'Méthode d’évaluation du critère : holistique (tu attribues un niveau de l’échelle), analytique (tu attribues des points, que son barème décrit) ou algorithmique (une formule calcule la note à partir de ce que tu comptes).';
-const B1 = 'La note de ce critère se calcule par une formule. « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape. La rétroaction se compose avec les phrases écrites dans la grille.';
+const B1 = 'La note de ce critère se calcule par une formule. Le champ de ce que tu comptes se remplit avec les codes que tu poses dans Annoter, ou se tape ; celui de ce à quoi tu le rapportes se tape. Les deux portent les noms que tu as donnés au critère dans la grille. La rétroaction se compose avec les phrases écrites dans la grille.';
 const B2 = 'Le niveau de chaque évaluation, dans l\'échelle qu\'elle emploie.';
 const B3 = 'Résultat calculé en temps réel : le pourcentage pondéré, et son niveau dans l\'échelle de l\'évaluation.';
 const C1 = 'somme pondérée';
-const C2 = 'Entre parenthèses, le nombre une fois pondéré : « (5 une fois pondérées) ». Il ne paraît que si un sous-critère ne pèse pas 1 ; place-le juste après le nombre. Une phrase sans lui ne montre que le nombre posé, mais la ligne du calcul, dans le PDF, montre la parenthèse.';
+const C2 = 'Entre parenthèses, le nombre après pondération : « (5 après pondération) ». Il ne paraît que si un sous-critère ne pèse pas 1 ; place-le juste après le nombre. Une phrase sans lui ne montre que le nombre posé, mais la ligne du calcul, dans le PDF, montre la parenthèse.';
 const F1 = 'La pénalité est proportionnelle au taux d’erreurs, ramené à une longueur de référence.';
 const D = {
     D1: '5c. Les critères algorithmiques',
@@ -48,12 +51,12 @@ const D = {
     D2b: 'Ratio mots par erreur : atteindre le ratio visé donne la note complète.',
     D2c: 'Pénalité fixe par erreur : chaque erreur retire un nombre de points donné, sans égard à la longueur.',
     D2d: 'La formule, avec tes valeurs, s\'affiche dans le gabarit et sous le résultat au moment d\'évaluer.',
-    D3: 'Les mots du calcul, « erreurs » et « mots », sont ceux d\'un critère de rédaction. Ils valent pour tout ce qui se compte : des unités oubliées sur douze calculs, des fautes de rythme sur trente-deux mesures.',
+    D3: 'Tu nommes, au singulier et au pluriel, ce que tu comptes et ce à quoi tu le rapportes : « erreur » sur des « mots » pour une rédaction, « unité manquante » sur des « calculs » en chimie, « faute de rythme » sur des « mesures » en musique. Ces noms s\'écrivent dans les champs de l\'évaluation, dans la phrase du décompte et dans le PDF de l\'étudiant·e. Un critère créé avant ces noms se lit « erreur » et « mot ».',
     D4: 'Les sous-critères sont les catégories de ce que tu comptes. Chacun porte un code, un nom, une pondération et une observation : ce que l\'étudiant·e lit à propos de ce code. La pondération dit ce que pèse une occurrence : 1 par défaut, 0,5 pour la compter à moitié ; un sous-critère de pondération 0 ne se pose pas.',
-    D4b: 'Exemple : sept codes posés, trois d\'un sous-critère qui pèse 1 et quatre d\'un sous-critère qui pèse 0,5. La formule reçoit 3 + 2 = 5, et l\'étudiant·e lit « 7 erreurs (5 une fois pondérées) ».',
+    D4b: 'Exemple : sept codes posés, trois d\'un sous-critère qui pèse 1 et quatre d\'un sous-critère qui pèse 0,5. La formule reçoit 3 + 2 = 5, et l\'étudiant·e lit « 7 erreurs (5 après pondération) ».',
     D5: 'Sous le critère, « + Ajouter un sous-critère » en crée un. « Partir de la liste du français écrit » crée d\'un coup dix catégories d\'une correction du français (codes 1 à 10), toutes de pondération 1, que tu modifies ensuite comme les tiennes.',
-    D6: 'Dans Annoter, les sous-critères sont les codes que tu poses, sur toute copie évaluée avec cette grille. Chaque code posé compte une occurrence de son sous-critère ; « Nombre d\'erreurs » se remplit tout seul, et la formule reçoit le nombre pondéré. Sans code posé, tu tapes le nombre : il compte tel quel, sans pondération. Une grille plus ancienne montre la case « Utiliser ces sous-critères comme codes d\'annotation » ; décochée, sa palette garde les dix codes de départ, des codes de correction du français.',
-    D7: 'L\'étudiant·e lit la phrase du décompte écrite dans la grille et, dans son PDF, la ligne du calcul : « 7 erreurs (5 une fois pondérées) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.',
+    D6: 'Dans Annoter, les sous-critères sont les codes que tu poses, sur toute copie évaluée avec cette grille. Chaque code posé compte une occurrence de son sous-critère ; le champ de ce que tu comptes se remplit tout seul, et la formule reçoit le nombre pondéré. Sans code posé, tu tapes le nombre : il compte tel quel, sans pondération. Une grille plus ancienne montre la case « Utiliser ces sous-critères comme codes d\'annotation » ; décochée, sa palette garde les dix codes de départ, des codes de correction du français.',
+    D7: 'L\'étudiant·e lit la phrase du décompte écrite dans la grille et, dans son PDF, la ligne du calcul : « 7 erreurs (5 après pondération) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.',
     D8: 'Règle les pondérations avant de corriger. Une copie déjà évaluée garde sa note jusqu\'à ce que tu y ajoutes ou retires un code ; la pondération s\'applique alors à toute la copie.'
 };
 
@@ -174,7 +177,8 @@ describe('lot de mots · L — la liste du français écrit est celle de Grégoi
 const G1_TERME = 'Sous-critères (critère algorithmique)';
 const G1 = 'Les catégories de ce que compte un critère algorithmique. Chaque sous-critère porte un code, un nom, une pondération (ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié) et une observation, que l\'étudiant·e lit. Le calcul reçoit la somme pondérée des codes posés. « Partir de la liste du français écrit » en crée dix d\'un coup. Configuration : Conception → Grilles de critères → type « Algorithmique ».';
 const G2 = '💡 La pondération dit ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié.';
-const G3 = 'Lors de l\'évaluation, « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape.';
+// ↻ 22 oct. 2026 (étape 2a) : les champs portent les noms du critère ; la liste du français écrit les pose.
+const G3 = 'Lors de l\'évaluation, « Erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Mots » se tape.';
 
 /** Le gabarit d'un critère « Français écrit » en création, rendu après la pression du bouton (modèle par défaut). */
 async function gabaritRendu() {

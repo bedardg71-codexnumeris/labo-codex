@@ -255,8 +255,8 @@ describe('composeur · E — disponible() mesure ; paletteDe() choisit la palett
         globalThis.window = { projectionAlgo: P, enoncesAlgo: E };
         try {
             expect(C.paletteDe({ dataset: { palierIndex: '0', champ: 'texte' } }).map((r) => r.jeton)).toEqual(PAL_PROJ.map((r) => r.jeton));
-            expect(C.paletteDe({ dataset: { enonceCle: 'decompte' } }).map((r) => r.jeton)).toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
-            expect(C.paletteDe({ dataset: { enonceCle: 'aucune' } }).map((r) => r.jeton)).toEqual(['{critere}']);
+            expect(C.paletteDe({ dataset: { enonceCle: 'decompte' } }).map((r) => r.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
+            expect(C.paletteDe({ dataset: { enonceCle: 'aucune' } }).map((r) => r.jeton)).toEqual(['{critere}', '{nomErreurs}']);
             expect(C.paletteDe({ dataset: {} })).toEqual([]);
             expect(C.paletteDe(null)).toEqual([]);
         } finally {

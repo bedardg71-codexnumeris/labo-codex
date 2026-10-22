@@ -9259,6 +9259,56 @@ body.mode-clair .bloc-rlo-separateur {
     text-align: center;
 }
 
+/* Le critère algorithmique, étape 2a (22 oct. 2026) : ses deux noms, en tête du gabarit
+   (`rendreNomsCritereAlgo`, grilles.js). Les rangées et l'invitation reprennent les voisins :
+   l'étiquette petite des sous-critères, le fond doux du message « Aucun sous-critère ». */
+.noms-algo {
+    margin: 0 0 14px 0;
+}
+.noms-algo-rangee {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) 2fr;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 8px;
+}
+.noms-algo-libelle {
+    font-size: 0.85rem;
+    color: var(--gris-moyen);
+    padding-bottom: 8px;
+}
+.noms-algo-rangee--manque .noms-algo-libelle {
+    color: var(--orange-accent);
+}
+.noms-algo-formes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.noms-algo-forme {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.noms-algo-invitation {
+    font-size: 0.8rem;
+    color: var(--texte-muted, #5a7a88);
+    margin: 4px 0 6px 0;
+    padding: 10px 12px;
+    background: rgba(106, 172, 184, 0.04);
+    border-radius: var(--radius-moyen);
+}
+.noms-algo-aide {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--gris-clair);
+    line-height: 1.35;
+}
+@media (max-width: 700px) {
+    .noms-algo-rangee { grid-template-columns: 1fr; }
+    .noms-algo-libelle { padding-bottom: 0; }
+}
+
 .sous-criteres-info {
     font-size: 0.75rem;
     color: var(--texte-secondaire, #8aa4b0);

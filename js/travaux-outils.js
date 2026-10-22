@@ -604,6 +604,30 @@
         return phrase;
     }
 
+    /**
+     * Étape 2a (22 oct. 2026) — LES DEUX NOMS DU CRITÈRE DE LA COPIE : ce que le total des codes
+     * compte (« 3 erreurs », « 3 unités manquantes »). Sans grille, ou sans noms : « erreur ».
+     */
+    function _texteNomsManquants() {
+        var p = window.enoncesAlgo.NOMS_PROVISOIRES;   // le repli que l'élève lit : une seule source
+        return 'Ton critère algorithmique n’a pas encore ses deux noms : ce que tu comptes, et ce à quoi tu le rapportes. Écris-les dans la grille ; d’ici là, l’élève lit « '
+            + p.erreurs.singulier + ' » et « ' + p.mots.singulier + ' ».';
+    }
+    function _critereDeLaCopie() {
+        var e = (typeof window !== 'undefined') ? window.enoncesAlgo : null;
+        return (e && _grilleCourante) ? e.critereAlgorithmique(_grilleCourante) : null;
+    }
+    function _nomsManquentACopie() {
+        var e = (typeof window !== 'undefined') ? window.enoncesAlgo : null;
+        var c = _critereDeLaCopie();
+        return !!(e && c && e.nomsManquants(c).length);
+    }
+    function _totalCodesEnMots(total) {
+        var e = (typeof window !== 'undefined') ? window.enoncesAlgo : null;
+        if (!e) return total + ' erreur' + (total > 1 ? 's' : '');
+        return total + ' ' + e.accorder(total, e.noms(_critereDeLaCopie()).erreurs);
+    }
+
     /** Les entrées `errfr_*` d'OUTILS suivent la liste courante — et rien d'autre n'y reste. */
     function _regenererOutilsCodes() {
         Object.keys(OUTILS).forEach(function(k) { if (k.indexOf('errfr_') === 0) delete OUTILS[k]; });
@@ -1409,6 +1433,9 @@
         // 21 oct. 2026 (étape 0) — un critère né depuis l'étape 0 sans sous-critère n'a AUCUN code
         // (`codesAnnotation`, la marque) : plus les dix du français. La palette le dit, et où agir.
         if (!codes.length) html += '<p class="travaux-errfr-vide">Aucun code : ajoute des sous-critères à ton critère algorithmique, dans la grille.</p>';
+        // Étape 2a (22 oct. 2026) — un critère neuf sans ses deux noms : la palette le dit, et où agir,
+        // comme pour les sous-critères. ⚠ Texte provisoire (TEXTES-2026-10-22-noms-critere-algorithmique.md).
+        if (_nomsManquentACopie()) html += '<p class="travaux-errfr-vide">' + echapperHtml(_texteNomsManquants()) + '</p>';
         codes.forEach((c) => {
             const actif = outilActif === c.id ? ' actif' : '';
             const raccourci = obtenirRaccourciPourItem(c.id);
@@ -2502,7 +2529,7 @@
 
             const spanTotal = document.getElementById('travaux-errfr-total-header');
             if (spanTotal) {
-                spanTotal.textContent = total > 0 ? '(' + total + ' erreur' + (total > 1 ? 's' : '') + ')' : '';
+                spanTotal.textContent = total > 0 ? '(' + _totalCodesEnMots(total) + ')' : '';   // étape 2a
             }
         }
 
@@ -4020,6 +4047,7 @@
         compterErreursFrancais: compterErreursFrancais,
         mettreAJourCompteursErreurs: mettreAJourCompteursErreurs,
         sommePondereeErreurs: sommePondereeErreurs,   // 21 oct. 2026 — exposée pour les bancs
+        totalCodesEnMots: _totalCodesEnMots,          // étape 2a (22 oct.) — exposée pour les bancs
         // Retroactions personnalisées
         obtenirRetroactionsObservations: obtenirRetroactionsObservations,
         obtenirRetroactionsErreursFr: obtenirRetroactionsErreursFr,

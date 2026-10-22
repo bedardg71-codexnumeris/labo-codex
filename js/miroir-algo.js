@@ -35,13 +35,13 @@
      · « Pondérée » : seulement si le critère tire ses codes de ses sous-critères
        (`donneSesCodes`) et qu'un code ne pèse pas 1. Autant d'erreurs que « quelques-unes »,
        partagées entre le code le plus lourd et le plus léger (le plus lourd prend la moitié
-       arrondie vers le haut) : la parenthèse « (N une fois pondérées) » et son effet sur la note.
+       arrondie vers le haut) : la parenthèse « (N après pondération) » et son effet sur la note.
      Sans pondération du critère, aucune note ne se calcule : aucune copie, une phrase le dit.
 
    LES MOTS
-     Tous ceux du miroir passent par `libelles(critere)`, que l'étape 2 remplacera par les
-     noms que l'enseignant·e donne à ses données. Aujourd'hui : les mots de l'écran actuel,
-     aucun mot de discipline.
+     Tous ceux du miroir passent par `libelles(critere)`. Étape 2a (22 oct. 2026) : ce que la
+     copie compte et ce à quoi elle le rapporte portent les deux noms du critère
+     (`enoncesAlgo.noms`) ; aucun mot de discipline.
 
    LECTURE SEULE : rien n'est écrit dans le critère, la grille ni le stockage.
    Dépendances (lues à l'appel, sur `window`) : formulesAlgo, enoncesAlgo, projectionAlgo,
@@ -63,28 +63,41 @@ function _reg(nom) {
     return (typeof window !== 'undefined' && window[nom]) ? window[nom] : null;
 }
 
-/** Singulier sous 2, comme la règle C1 des énoncés. */
-function _accord(n, singulier, pluriel) {
-    return _formaterNombre(n) + ' ' + (Math.abs(Number(n)) >= 2 ? pluriel : singulier);
+/** Le nombre et son nom, accordé par la règle unique des énoncés (le singulier sous 2). */
+function _accord(n, paire) {
+    var E = _reg('enoncesAlgo');
+    var nom = E ? E.accorder(n, paire) : (Math.abs(Number(n)) >= 2 ? paire.pluriel : paire.singulier);
+    return _formaterNombre(n) + ' ' + nom;
+}
+
+/** Les noms du critère — « erreur » et « mot » sans le registre (un banc qui ne le charge pas). */
+function _noms(critere) {
+    var E = _reg('enoncesAlgo');
+    return E ? E.noms(critere)
+        : { erreurs: { singulier: 'erreur', pluriel: 'erreurs' }, mots: { singulier: 'mot', pluriel: 'mots' } };
 }
 
 /**
- * LES MOTS DU MIROIR — la seule fonction de libellés (étape 2 : les noms de l'enseignant·e).
- * Reçoit le critère pour que l'étape 2 y lise ses noms ; aujourd'hui, elle ne le lit pas.
+ * LES MOTS DU MIROIR — la seule fonction de libellés. Étape 2a (22 oct. 2026) : les deux noms
+ * du critère. ⚠ Sans « de » devant un nom (« nombre de unités ») : le nom du champ, entre
+ * guillemets, comme le libellé de l'évaluation (`enEtiquette`, au pluriel).
  */
 function libelles(critere) {
+    var N = _noms(critere);
+    var E = _reg('enoncesAlgo');
+    var champMots = '« ' + (E ? E.enEtiquette(N.mots.pluriel) : N.mots.pluriel) + ' »';
     return {
         titre: 'Essai sur des copies fictives',
-        occurrences: function(n) { return _accord(n, 'erreur', 'erreurs'); },
-        etendue: function(n) { return _accord(n, 'mot', 'mots'); },
-        sansEtendue: 'sans nombre de mots',
+        occurrences: function(n) { return _accord(n, N.erreurs); },
+        etendue: function(n) { return _accord(n, N.mots); },
+        sansEtendue: 'champ ' + champMots + ' vide',
         code: function(nombre, nom, poids) { return _formaterNombre(nombre) + ' × « ' + nom + ' » (poids ' + _formaterNombre(poids) + ')'; },
         eleveLira: 'L\'élève lira :',
         aucunePhrase: 'aucune phrase',
         plancher: 'la note touche le plancher',
-        noteImpossible: 'aucune note : la formule a besoin du nombre de mots',
+        noteImpossible: 'aucune note : la formule a besoin du champ ' + champMots,
         sansPonderation: 'Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.',
-        etendueDuFacteur: 'Sans projection, ces copies ont la longueur du facteur : chaque erreur y coûte un point, quel que soit le facteur.',
+        etendueDuFacteur: 'Sans projection, ces copies ont la longueur du facteur : chaque ' + N.erreurs.singulier + ' y coûte un point, quel que soit le facteur.',
         intro: 'Ce que ta règle donne sur quelques copies fictives, tirées de tes réglages. Aucune donnée d\'élève ; rien n\'est enregistré.'
     };
 }

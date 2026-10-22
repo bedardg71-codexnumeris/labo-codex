@@ -10,7 +10,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //   · une grille fictive à deux poids (Syntaxe 1, Ponctuation 0,5 ; « Aucune erreur » 0), ses codes tirés des
 //     sous-critères ; la copie ouverte (`travaux-fichier-ouvert`), sept codes posés (3 de syntaxe, 4 de
 //     ponctuation) → « Nombre d'erreurs » dit 7, la note suit 5 ; la phrase et la ligne du PDF disent
-//     « 7 erreurs (5 une fois pondérées) » ;
+//     « 7 erreurs (5 après pondération) » ;
 //   · la même grille, poids à 1 : l'évaluation et le PDF sont, à l'octet près, ceux d'un 7 tapé à la main
 //     — le chemin d'hier, que ce lot ne touche pas ;
 //   · un critère algorithmique en création reçoit ses sous-critères (#1131), rien en base avant « Créer la grille ».
@@ -102,7 +102,7 @@ async function capturerPdf(page, html, fichier) {
     await p.close();
 }
 
-test('poids 1 et 0,5 · sept codes posés : la note suit 5, l’élève lit « 7 erreurs (5 une fois pondérées) »', async ({ page }) => {
+test('poids 1 et 0,5 · sept codes posés : la note suit 5, l’élève lit « 7 erreurs (5 après pondération) »', async ({ page }) => {
     const erreurs = await ouvrir(page);
     expect(await page.evaluate('(' + MONTER + ')(0.5)'), 'DÉCOR : le critère algorithmique est rendu en mode simple').toBe(true);
     await page.evaluate('(' + POSER_CODES + ')()');
@@ -110,9 +110,9 @@ test('poids 1 et 0,5 · sept codes posés : la note suit 5, l’élève lit « 7
     expect(r.champ, '« Nombre d’erreurs » dit le nombre brut').toBe('7');
     expect(r.memo).toMatchObject({ erreurs: 7, sommePonderee: 5, mots: 400, noteCalculee: r.formule5 });
     expect(r.formule5).not.toBe(r.formule7);
-    expect(r.memo.retroaction).toContain('Ta rédaction contient 7 erreurs de français (5 une fois pondérées) pour 400 mots.');
-    expect(r.ligne).toBe('7 erreurs (5 une fois pondérées) sur 400 mots');
-    expect(r.html).toContain('7 erreurs de français (5 une fois pondérées) pour 400 mots.');
+    expect(r.memo.retroaction).toContain('Ta rédaction contient 7 erreurs de français (5 après pondération) pour 400 mots.');
+    expect(r.ligne).toBe('7 erreurs (5 après pondération) sur 400 mots');
+    expect(r.html).toContain('7 erreurs de français (5 après pondération) pour 400 mots.');
     if (process.env.CAPTURES_ALGO) await capturerPdf(page, r.html, path.join(process.env.CAPTURES_ALGO, 'pdf-poids-1-et-0-5.png'));
     expect(erreurs).toEqual([]);
 });

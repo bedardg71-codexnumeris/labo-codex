@@ -62,10 +62,11 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
     await expect(vue(page, 4, 'texte')).toHaveClass(/composeur-badges/);
     await expect(vue(page, 4, 'texte')).toHaveText(verdictDHier);
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveCount(0);
-    // Le décompte : ses jetons sont déjà des chips, `{s}` reste du texte.
+    // Le décompte : ses jetons sont déjà des chips. ↻ Étape 2a (22 oct. 2026) : le texte par défaut ne porte
+    // plus `{s}` ; les deux noms sont des chips (cinq : nombre et nom de chacun, et la parenthèse).
     const decompte = page.locator('#listeCriteres textarea[data-enonce-cle="decompte"]').locator('xpath=following-sibling::*[1]');
-    await expect(decompte.locator('.composeur-chip')).toHaveCount(3);
-    await expect(decompte).toContainText('erreur{s}');
+    await expect(decompte.locator('.composeur-chip')).toHaveCount(5);
+    await expect(decompte).not.toContainText('{');
 
     // 2 — le caret à la fin, UN badge cliqué (le dispatcher) : la chip apparaît, le textarea porte `{projection}`, le focus reste.
     await caretA(vue(page, 4, 'texte'), verdictDHier.length);

@@ -634,7 +634,7 @@ function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePond
     // jeton {points}, avec son espace de tête, exactement là où elle était.
     const critereEnonces = _critereEnoncesPour(critereId);   // #686
     // 21 oct. 2026 (décision de Grégoire, 8 h 39) : la mention des deux modes sort d'une seule source,
-    // `enoncesAlgo.mentionPonderee` (« (3,5 une fois pondérées) ») ; elle disait « (3.5 points) », et
+    // `enoncesAlgo.mentionPonderee` (« (3,5 après pondération) » depuis le 22 oct.) ; elle disait « (3.5 points) », et
     // seulement quand le code dominant portait une rétroaction.
     const mentionPoints = window.enoncesAlgo.mentionPonderee(totalErreurs, sommePonderee);
     let retroaction = window.enoncesAlgo.enonce(critereEnonces, 'decompte', {

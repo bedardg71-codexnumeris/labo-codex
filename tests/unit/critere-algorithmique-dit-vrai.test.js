@@ -10,7 +10,7 @@
  *       chaque code pèse 1.
  *   C — LE CALCUL : la formule reçoit la somme pondérée ; le nombre brut reste (champ, évaluation enregistrée,
  *       décompte) ; une saisie à la main reste brute ; tous les poids à 1, l'évaluation est celle d'hier.
- *   M — CE QUE L'ÉLÈVE LIT (8 h 39) : « 5 erreurs (3,5 une fois pondérées) » ; singulier sous 2 ; rien quand
+ *   M — CE QUE L'ÉLÈVE LIT (8 h 39 ; ↻ 22 oct., 17 h, sans accord) : « 5 erreurs (3,5 après pondération) » ; rien quand
  *       les nombres sont égaux ; la même parenthèse dans la ligne du PDF.
  *   L — LES LIBELLÉS (constat 7) : « (30 points) » sur une grille en points ; « Niveau de l’échelle « X » »,
  *       ou « Niveau ».
@@ -106,7 +106,7 @@ describe('critère algorithmique · S — le poids des codes posés', () => {
         const win = monterAnnoter();
         const g = grilleAlgo(0.5);
         expect(win.codesAnnotation.listeCodes(g).map((c) => [c.id, c.poids])).toEqual([['errfr_1', 1], ['errfr_3', 0.5]]);
-        // 3 de syntaxe, 4 de ponctuation : 7 erreurs, 5 une fois pondérées.
+        // 3 de syntaxe, 4 de ponctuation : 7 erreurs, 5 après pondération.
         expect(win.travauxOutils.sommePondereeErreurs({ errfr_1: 3, errfr_3: 4 }, g)).toBe(5);
         // Des poids de 0,1 ne laissent pas de traîne flottante.
         const dixieme = grilleAlgo(0.1);
@@ -126,7 +126,7 @@ describe('critère algorithmique · S — le poids des codes posés', () => {
 /* ======================================================= C — LE CALCUL */
 
 describe('critère algorithmique · C — la formule reçoit la somme pondérée, l’élève lit le nombre brut', () => {
-    it('C.a 5 erreurs, 3,5 une fois pondérées, 400 mots : la note est celle de 3,5 ; le brut reste ; la somme est enregistrée', () => {
+    it('C.a 5 erreurs, 3,5 après pondération, 400 mots : la note est celle de 3,5 ; le brut reste ; la somme est enregistrée', () => {
         const h = monterCalcul();
         annoter(h, 5, 3.5, 400);
         const attendu = h.win.formulesAlgo.calculer({ type: 'algorithmique', facteurNormalisation: 500 }, { ponderation: 20, erreurs: 3.5, mots: 400 });
@@ -135,7 +135,7 @@ describe('critère algorithmique · C — la formule reçoit la somme pondérée
         expect(h.ec.donneesAlgorithmiques.a1).toMatchObject({ erreurs: 5, sommePonderee: 3.5, mots: 400, noteCalculee: attendu.note, pourcentage: attendu.pctBorne });
         expect(h.ecran.eval_erreurs_a1.value).toBe(5);
         expect(h.ecran.total_erreurs_simple_a1.textContent).toBe(5);
-        expect(h.ec.donneesAlgorithmiques.a1.retroaction).toContain('5 erreurs de français (3,5 une fois pondérées) pour 400 mots.');
+        expect(h.ec.donneesAlgorithmiques.a1.retroaction).toContain('5 erreurs de français (3,5 après pondération) pour 400 mots.');
     });
 
     it('C.b une saisie à la main, sans code posé, reste un nombre brut : la somme ne vaut que pour son nombre', () => {
@@ -209,14 +209,14 @@ describe('critère algorithmique · K — le stock : une évaluation enregistré
 
 /* ======================================================= M — CE QUE L'ÉLÈVE LIT */
 
-describe('critère algorithmique · M — « 5 erreurs (3,5 une fois pondérées) »', () => {
+describe('critère algorithmique · M — « 5 erreurs (3,5 après pondération) »', () => {
     const M = chargerScript('js/evaluation-enonces.js').enoncesAlgo.mentionPonderee;
 
-    it('M.a la parenthèse, virgule décimale, avec son espace de tête ; singulier sous 2 ; rien quand les nombres sont égaux', () => {
-        expect(M(5, 3.5)).toBe(' (3,5 une fois pondérées)');
-        expect(M(2, 1.5)).toBe(' (1,5 une fois pondérée)');
-        expect(M(4, 2)).toBe(' (2 une fois pondérées)');
-        expect(M(3, 0.25)).toBe(' (0,25 une fois pondérée)');
+    it('M.a la parenthèse, virgule décimale, avec son espace de tête ; sans accord (décision du 22 oct., 17 h) ; rien quand les nombres sont égaux', () => {
+        expect(M(5, 3.5)).toBe(' (3,5 après pondération)');
+        expect(M(2, 1.5)).toBe(' (1,5 après pondération)');
+        expect(M(4, 2)).toBe(' (2 après pondération)');
+        expect(M(3, 0.25)).toBe(' (0,25 après pondération)');
         expect(M(5, 5)).toBe('');
         expect(M(5, 5.0000001)).toBe('');
         expect(M(5, undefined)).toBe('');
@@ -224,7 +224,7 @@ describe('critère algorithmique · M — « 5 erreurs (3,5 une fois pondérées
         expect(M(0, 0)).toBe('');
     });
 
-    it('M.b la ligne du PDF : « 5 erreurs (3,5 une fois pondérées) sur 400 mots » ; sans somme, celle d’hier', () => {
+    it('M.b la ligne du PDF : « 5 erreurs (3,5 après pondération) sur 400 mots » ; sans somme, celle d’hier', () => {
         const win = { enoncesAlgo: chargerScript('js/evaluation-enonces.js').enoncesAlgo };
         chargerScript('js/synthese-retroaction-rendu.js', { echapperHtml }, win);
         const base = {
@@ -234,7 +234,7 @@ describe('critère algorithmique · M — « 5 erreurs (3,5 une fois pondérées
         };
         const critere = (algo) => ({ name: 'Français écrit', code: 'M', weight: 20, comment: '', algo: Object.assign({ mots: 400, noteCalculee: 16.5, pourcentage: 82.5, ponderation: 20 }, algo) });
         const pondere = win.syntheseRetroactionRendu.rendreSyntheseHTML(Object.assign({}, base, { criteria: [critere({ erreurs: 5, sommePonderee: 3.5 })] }));
-        expect(pondere).toContain('5 erreurs (3,5 une fois pondérées) sur 400 mots &rarr;');
+        expect(pondere).toContain('5 erreurs (3,5 après pondération) sur 400 mots &rarr;');
         const hier = win.syntheseRetroactionRendu.rendreSyntheseHTML(Object.assign({}, base, { criteria: [critere({ erreurs: 5, sommePonderee: null })] }));
         expect(hier).toContain('5 erreurs sur 400 mots &rarr;');
         expect(hier).not.toContain('pondérée');

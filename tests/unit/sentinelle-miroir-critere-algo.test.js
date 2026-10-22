@@ -10,7 +10,7 @@
 //      pour les trois modèles ; aucune note ne vient d'ailleurs ;
 //   B. LES COPIES SUIVENT LES RÉGLAGES : l'étendue est la longueur de référence (facteur, ou
 //      projection), « beaucoup » est le plancher de la formule ; changer un réglage change les copies ;
-//   C. LA COPIE PONDÉRÉE : « (N une fois pondérées) » dans la phrase, et la note suit la somme ;
+//   C. LA COPIE PONDÉRÉE : « (N après pondération) » dans la phrase, et la note suit la somme ;
 //      absente quand tous les codes pèsent 1 ou que le critère ne tire pas ses codes de ses sous-critères ;
 //   D. LECTURE SEULE : rien n'est écrit dans le critère ni dans le stockage ;
 //   E. LE RENDU : le bloc est dans la carte « Formule », sous « Formule appliquée », sans contrôle,
@@ -58,6 +58,8 @@ const CHIMIE = {
     modeleFormule: 'penalite_normalisee', paramsFormule: { facteurNormalisation: 12 },
     modeleProjection: 'aucune', paramsProjection: {},
     codesSousCriteresSeulement: true,
+    // Étape 2a (22 oct. 2026) : le banc sans texte du plan — « unité manquante » sur « calcul ».
+    noms: { erreurs: { singulier: 'unité manquante', pluriel: 'unités manquantes' }, mots: { singulier: 'calcul', pluriel: 'calculs' } },
     sousCriteres: [
         { code: '1', nom: 'Unité manquante', ponderation: 1.5 },
         { code: '2', nom: 'Chiffres significatifs', ponderation: 0.5 },
@@ -190,7 +192,7 @@ describe('miroir · C — la copie pondérée montre la parenthèse et son effet
         expect(e.copie.erreursFormule).toBe(win.codesAnnotation.sommePonderee({ criteres: [CHIMIE] }, compteurs));
         expect(e.copie.erreursFormule).toBe(compteurs.errfr_1 * 1.5 + compteurs.errfr_2 * 0.5);
         expect(e.decompte).toContain(win.enoncesAlgo.mentionPonderee(e.copie.erreurs, e.copie.erreursFormule).trim());
-        expect(e.decompte).toMatch(/une fois pondérées?\)/);
+        expect(e.decompte).toMatch(/après pondération\)/);
         const r = win.formulesAlgo.calculer(CHIMIE, { ponderation: 20, erreurs: e.copie.erreursFormule, mots: 12 });
         expect(e.pourcentage).toBe(r.pctBorne);
         const brute = win.miroirAlgo.essais(CHIMIE).find((x) => x.copie.cle === 'quelques');
@@ -297,7 +299,7 @@ describe('miroir · E — le bloc dans le gabarit', () => {
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
         const bloc = blocMiroir(carteFormule(html(), 'CR_CH'));
         expect(bloc).toContain('data-copie="ponderee"');
-        expect(bloc).toMatch(/une fois pondérées?\)/);
+        expect(bloc).toMatch(/après pondération\)/);
         expect(bloc).toContain('« Unité manquante » (poids 1,5)');
         expect(bloc.toLowerCase()).not.toContain('français');
     });
@@ -323,7 +325,8 @@ describe('miroir · E — le bloc dans le gabarit', () => {
             return blocMiroir(carteFormule(html(), critere.id)).replace(/&#39;|&#x27;/g, '\'');
         };
         expect(rendu(FRANCAIS)).toContain(LIGNE);
-        expect(rendu(CHIMIE)).toContain(LIGNE);
+        // Étape 2a : la ligne nomme ce que le critère compte.
+        expect(rendu(CHIMIE)).toContain(LIGNE.replace('chaque erreur', 'chaque unité manquante'));
         expect(rendu({ ...FRANCAIS, modeleProjection: 'norme_externe', paramsProjection: { motsReference: 900 } })).not.toContain('longueur du facteur');
         expect(rendu(avec(FRANCAIS, 'ratio_cible', { motsParErreurCible: 60 }))).not.toContain('longueur du facteur');
         expect(rendu({ ...FRANCAIS, ponderation: 0 })).not.toContain('longueur du facteur');
