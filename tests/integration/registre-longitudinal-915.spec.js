@@ -391,7 +391,8 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         expect(texte).toContain('Automne 2024 (601-101-MQ, gr. 00001)');
         expect(texte).toContain('Hiver 2026 (601-101-MQ, gr. 00002)');
         expect(texte).toContain('Indices au moment de la copie');
-        expect(texte).toMatch(/Complétion : \d+ %/);
+        // « 50 % » à la française depuis #1137 : l'espace avant % est insécable (U+00A0), que `\s` reconnaît.
+        expect(texte).toMatch(/Complétion : \d+\s%/);
         expect(texte).toContain('Évaluations (5)');
         expect(texte).toContain('Aucune évaluation dans cette copie.');
         expect(texte).not.toMatch(/undefined|NaN|\bnull\b/);
