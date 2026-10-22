@@ -29,7 +29,7 @@ import { mesurerDepot, mesurerSource, figer, resumer, NON_ANALYSABLES_ATTENDUS }
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const FIGE = JSON.parse(readFileSync(path.join(racine, 'tests', 'fixtures', 'cliquets', 'complexite-fonctions-30.json'), 'utf8'));
-const AU_DESSUS_DE_15 = 454;   // #1055 (15 oct. 2026) : creerNouvelleProduction passe par la remise à neuf commune
+const AU_DESSUS_DE_15 = 453;   // étape 2a (22 oct. 2026) : `construireConcentration` 16 → 15, ses accords passent par `nombreEtNom` · #1055 (15 oct. 2026) : creerNouvelleProduction passe par la remise à neuf commune
 const M = mesurerDepot(racine);   // une seule mesure pour tout le banc (≈ 0,5 s)
 
 /** « fichier : nom » → raison. Vide au relevé du 12 oct. 2026. */

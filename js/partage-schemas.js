@@ -388,6 +388,9 @@
                         // 21 oct. 2026 (étape 0) — la marque d'un critère né sans les dix codes du français :
                         // sans elle, une grille partagée retomberait chez le collègue sur le repli.
                         codesSousCriteresSeulement: { type: 'booleen' },
+                        // 22 oct. 2026 (étape 2a) — la marque d'un critère qui attend ses deux noms ; une version qui
+                        // ne la connaît pas la laisse tomber, et la grille se lit « erreur » et « mot ».
+                        nomsAttendus: { type: 'booleen' },
                         // 22 oct. 2026 (étape 2a) — les deux noms du critère algorithmique (ce qu'il compte, ce à
                         // quoi il le rapporte). Sans eux, la grille partagée se lirait « erreur » et « mot » chez le
                         // collègue. Schéma FERMÉ, bornes de l'éditeur (`enoncesAlgo.MAX_NOM`).

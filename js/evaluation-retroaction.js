@@ -1033,7 +1033,11 @@ function _rendreAlgoA0Bilan(algoA0) {
     var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
     var phrase = window.enoncesAlgo.enonce(algoA0.critere, 'priorite', {});
     if (!phrase) return '';
-    return '<p>- <strong>' + ech(phrase) + '</strong> (' + ech(algoA0.critereNom) + ' : ' + algoA0.erreurs + ' erreur' + (algoA0.erreurs > 1 ? 's' : '') + ' sur ' + algoA0.mots + ' mots, Incomplet)</p>';
+    // Étape 2a (22 oct. 2026, retouche de la relecture) : les deux noms du critère, accordés par la règle
+    // unique (`accorder`, le singulier sous 2) ; échappés, ce sont des mots tapés. Même structure.
+    var E = window.enoncesAlgo, N = E.noms(algoA0.critere);
+    return '<p>- <strong>' + ech(phrase) + '</strong> (' + ech(algoA0.critereNom) + ' : ' + algoA0.erreurs + ' ' + ech(E.accorder(algoA0.erreurs, N.erreurs))
+        + ' sur ' + algoA0.mots + ' ' + ech(E.accorder(algoA0.mots, N.mots)) + ', Incomplet)</p>';
 }
 
 function _rendreDefisBilan(defis, algoA0, niveauDe) {
@@ -1106,7 +1110,9 @@ function _rendreTousMaitrisesBilan(totalErreursFr, evalPrecedente, critereAlgo) 
         // plus diverger, là où deux chaînes jumelles le pouvaient.
         var ech = function (t) { return (typeof echapperHtml === 'function') ? echapperHtml(String(t == null ? '' : t)) : ''; };
         var phrase = window.enoncesAlgo.enonce(critereAlgo, 'concentre', {});
-        return '<p>Tous les critères sont maîtrisés.' + (phrase ? ' ' + ech(phrase) : '') + ' (' + totalErreursFr + ' erreur' + (totalErreursFr > 1 ? 's' : '') + ' annotée' + (totalErreursFr > 1 ? 's' : '') + ').</p>';
+        // Étape 2a — décision de Grégoire, 22 oct. 2026, 17 h 43 : LE PARTICIPE PART (« annotée(s) » ne
+        // s'accorde pas avec un nom donné par l'enseignant·e) ; le nom du critère, accordé. Mêmes mots que le PDF.
+        return '<p>Tous les critères sont maîtrisés.' + (phrase ? ' ' + ech(phrase) : '') + ' (' + ech(window.enoncesAlgo.nombreEtNom(totalErreursFr, critereAlgo)) + ').</p>';
     }
     // Verifier si maitrise depuis 2+ productions (garde length > 0 :
     // .every() retourne true sur tableau vide via vacuite JS).
@@ -1468,5 +1474,7 @@ window.estRetroactionReecrite = estRetroactionReecrite;
 window.poserRetroactionReecrite = poserRetroactionReecrite;
 window.preparerRetroactionEnregistree = preparerRetroactionEnregistree;   // R2 — les chargeurs
 window.marqueRetroactionAEcrire = marqueRetroactionAEcrire;               // R2 — les écrivains
+// Étape 2a (22 oct. 2026) — les deux lignes du bilan qui portent les noms du critère : exposées pour les bancs.
+window.bilanAlgoNoms = { rendreAlgoA0: _rendreAlgoA0Bilan, rendreTousMaitrises: _rendreTousMaitrisesBilan };
 
 })();

@@ -900,7 +900,9 @@
                 // #686 — grille introuvable : le nom que l'évaluation porte, plutôt que rien.
                 const critereAlgo = window.enoncesAlgo.critereAlgorithmiqueOuNomme(grille, evaluation);
                 const phraseConcentre = window.enoncesAlgo.enonce(critereAlgo, 'concentre', {});
-                messageGlobal = `Tous les critères sont maîtrisés.${phraseConcentre ? ` ${phraseConcentre}` : ''} (${totErr} erreur${totErr > 1 ? 's' : ''} annotée${totErr > 1 ? 's' : ''}).`;
+                // Étape 2a — décision de Grégoire, 22 oct. 2026, 17 h 43 : le participe part ; le nom du critère,
+                // accordé (`nombreEtNom`, la même fonction que le bilan de l'app). Échappé au rendu (`esc`).
+                messageGlobal = `Tous les critères sont maîtrisés.${phraseConcentre ? ` ${phraseConcentre}` : ''} (${window.enoncesAlgo.nombreEtNom(totErr, critereAlgo)}).`;
             } else {
                 // Garde length > 0 : .every() retourne true sur tableau vide (vacuité JS).
                 // ⚠ L'évaluation précédente porte SON échelle, pas forcément celle-ci.
