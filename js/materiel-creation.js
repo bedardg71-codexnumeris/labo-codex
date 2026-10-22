@@ -136,11 +136,11 @@
         return { objets: o, resume: resumer(m, o) };
     };
 
-    // Étape 5 du critère algorithmique : textes PROVISOIRES de Claude Code (22 oct. 2026).
+    // Étape 5 du critère algorithmique : textes de Claude Code, validés par Grégoire le 22 oct. 2026 (retouches de Cowork comprises).
     C.MESSAGES_CODES = {
         introuvable: 'Ce critère n’est plus là : rien n’a été ajouté. Choisis-en un autre.',
         refuse: function (motif) { return 'Rien n’a été ajouté. ' + motif + '.'; },
-        echec: 'L’ajout n’a pas abouti, et rien n’a été ajouté. Tu pourrais réessayer.'
+        echec: 'L’ajout n’a pas abouti ; rien n’a été ajouté. Réessaie.'
     };
 
     /** Les règles de `destinationsCodes` : le critère qui reçoit les codes (#1132) et la marque d'un critère né depuis le 21 oct. */

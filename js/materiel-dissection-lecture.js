@@ -58,11 +58,11 @@
         { k: 'descripteur', nom: 'Descripteur', aide: 'Ce que tu vois dans une copie, à un niveau donné', precision: 'Une réponse possible à la question du critère (une seule vaut pour une copie)', groupe: 'Les réponses' },
         { k: 'points', nom: 'Points', aide: 'Les points d’une réponse', precision: 'Ce qu’elle vaut, en chiffres', groupe: 'Les réponses' },
         { k: 'niveau', nom: 'Niveau', aide: 'Le nom d’un niveau de réussite', precision: 'Un stade de qualité du travail observé (par ex. « Sommaire », « Efficace »)', groupe: 'Les réponses' },
-        // Étape 5 du critère algorithmique (22 oct. 2026) : une liste de codes, collée seule. Textes PROVISOIRES de
-        // Claude Code, à valider par Grégoire (consigne `CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`).
+        // Étape 5 du critère algorithmique (22 oct. 2026) : une liste de codes, collée seule. Textes de Claude Code,
+        // validés par Grégoire le 22 oct. 2026, retouches de Cowork comprises (consigne `CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`).
         { k: 'code', nom: 'Code', aide: 'Ce que tu écris sur la copie', precision: 'Un code d’annotation : des lettres ou des chiffres (par ex. « 3 », « S »)', groupe: 'Les codes' },
         { k: 'nomcode', nom: 'Nom du code', aide: 'Ce que le code désigne', groupe: 'Les codes' },
-        { k: 'poids', nom: 'Poids', aide: 'Ce que pèse un code posé', precision: 'Un nombre plus grand que 0 ; sans poids, le code pèse 1', groupe: 'Les codes' },
+        { k: 'poids', nom: 'Poids', aide: 'Ce que pèse un code posé', precision: 'Un nombre plus grand que 0 ; sans poids, le code pèse 1. Il devient la pondération de son sous-critère.', groupe: 'Les codes' },
         { k: 'commentaire', nom: 'Commentaire', aide: 'Ce que l’élève lit pour ce code', precision: 'Il passe tel quel dans la rétroaction', groupe: 'Les codes' },
         { k: 'suite', nom: 'Suite', aide: 'La fin d’un morceau coupé en deux par la mise en page', groupe: 'Le reste' },
         { k: 'ignorer', nom: 'À ignorer', aide: 'Un symbole, une décoration', groupe: 'Le reste' }

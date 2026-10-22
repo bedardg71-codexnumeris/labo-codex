@@ -1,5 +1,14 @@
 # Textes à valider – « Coller sa liste de codes » et les Nouvelles de la prochaine version
 
+> **VALIDÉS par Grégoire le 22 oct. 2026 à 13 h 05** : tout accepté tel quel, retouches de Cowork comprises ; « Poids » est gardé (A3, B1). Cinq textes diffèrent de la proposition ci-dessous et sont appliqués au mot près dans le code et les Nouvelles 1.214 :
+> - **Titre des Nouvelles** : « Essayer sa formule et coller sa liste de codes » (sans virgule).
+> - **Sixième ligne des Nouvelles, ajoutée** : « En mode anonymisé, le vrai DA ne paraît plus dans les propriétés d’un fichier, l’import des copies ni le Comparateur. Un trimestre clos refuse les modifications, sauf si tu coches « Permission d’écriture ». Une production employée ne se supprime plus. Le rapport de bogue ne garde plus le texte des boutons cliqués. »
+> - **A3, bulle de « Poids »** : « Un nombre plus grand que 0 ; sans poids, le code pèse 1. Il devient la pondération de son sous-critère. »
+> - **E2** : « Avant d’ajouter, il faut : » (au lieu de « il reste »).
+> - **G4** : « L’ajout n’a pas abouti ; rien n’a été ajouté. Réessaie. »
+>
+> Tous les autres textes (lignes 1 à 5 des Nouvelles, l’écran des codes, les mots de #1075) restent tels qu’écrits.
+
 > Claude Code, jeudi 22 octobre 2026, sur `main` après `3203a510`. Demandé par Cowork (réponse sur l'étape 5). Cowork en fait une page pour Grégoire.
 > Tous les textes de la partie 1 sont **provisoires** : écrits par Claude Code à l'étape 5, jamais lus par Grégoire. Ils s'affichent à l'enseignant, pas à l'élève ; le **commentaire** collé, lui, passe tel quel à l'élève et n'est pas un texte de l'application.
 > Numéros de ligne : ceux de `3203a510`.
