@@ -108,12 +108,13 @@ test('texte troué · chaque zone offre ses repères ; en création, « Aucune a
         })));
     console.log('OFFERTS →', JSON.stringify(offerts));
     const parCle = Object.fromEntries(offerts.map(o => [o.cle, o.reperes]));
-    expect(parCle.decompte).toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
+    // ↻ Étape 2a (22 oct. 2026) : les deux noms de l'enseignant·e sont offerts au décompte et à « Aucune annotation ».
+    expect(parCle.decompte).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);
     // Le badge montre le mot sans accolades ; ce qu'il pose les garde.
-    expect(offerts.find(o => o.cle === 'decompte').textes).toEqual(['critere', 'erreurs', 'mots', 'points']);
+    expect(offerts.find(o => o.cle === 'decompte').textes).toEqual(['critere', 'erreurs', 'nomErreurs', 'mots', 'nomMots', 'points']);
     expect(parCle.priorite).toEqual(['{critere}']);
     expect(parCle.concentre).toEqual(['{critere}']);
-    expect(parCle.aucune, '« Aucune annotation » en création : les repères de la modification, {critere} seul').toEqual(['{critere}']);
+    expect(parCle.aucune, '« Aucune annotation » en création : les repères de la modification').toEqual(['{critere}', '{nomErreurs}']);
     expect(offerts.every(o => o.visibles), 'les repères sont à l\'écran').toBe(true);
     expect(offerts.every(o => o.rangeeAvantZone), 'la rangée « Poser » précède la zone').toBe(true);
     expect(offerts.every(o => o.aideApresZone), 'l\'aide reste attachée au champ, sous lui').toBe(true);
@@ -143,7 +144,8 @@ test('texte troué · après une FRAPPE, un clic pose le repère au curseur — 
 test('texte troué · au milieu d\'une phrase, le repère prend ses espaces, et se rend comme un jeton tapé', async ({ page }) => {
     await ouvrir(page);
     const z = zone(page, 'decompte');
-    const defaut = 'Ta production contient {erreurs} erreur{s}{points} pour {mots} mots.';
+    // ↻ étape 2a (22 oct. 2026) : les deux noms deviennent des jetons ; la structure du 2 sept. ne change pas.
+    const defaut = 'Ta production contient {erreurs} {nomErreurs}{points} pour {mots} {nomMots}.';
     await expect(z).toHaveValue(defaut);
 
     await caretA(vueDe(page, 'decompte'), 'Ta production contient'.length);
@@ -153,12 +155,13 @@ test('texte troué · au milieu d\'une phrase, le repère prend ses espaces, et 
         const t = document.querySelector('#listeCriteres textarea[data-enonce-cle="decompte"]');
         return {
             valeur: t.value,
-            rendu: window.enoncesAlgo.enonce(window.tempCriteres[0], 'decompte', { erreurs: 3, mots: 500 })
+            rendu: window.enoncesAlgo.enonce(window.tempCriteres[0], 'decompte', { erreurs: 3, mots: 500 }),
+            noms: window.enoncesAlgo.noms(window.tempCriteres[0])
         };
     });
     console.log('MILIEU →', JSON.stringify(r));
-    expect(r.valeur).toBe('Ta production contient {mots} {erreurs} erreur{s}{points} pour {mots} mots.');
-    expect(r.rendu).toBe('Ta production contient 500 3 erreurs pour 500 mots.');
+    expect(r.valeur).toBe('Ta production contient {mots} {erreurs} {nomErreurs}{points} pour {mots} {nomMots}.');
+    expect(r.rendu).toBe(`Ta production contient 500 3 ${r.noms.erreurs.pluriel} pour 500 ${r.noms.mots.pluriel}.`);
 });
 
 test('texte troué · « Aucune annotation » en création : la saisir écrit sur le critère, sans écriture en base', async ({ page }) => {

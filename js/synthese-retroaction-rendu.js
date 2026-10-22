@@ -345,6 +345,27 @@
         return `<div style="display: flex; gap: 8px; font-family: ${FONT_MONO}; font-size: 8px;">${items}</div>`;
     }
 
+    /**
+     * La ligne compacte de calcul d'un critère algorithmique (sortie de `renderCritere`, étape 2a).
+     */
+    function ligneCalculAlgo(a) {
+        // 21 oct. 2026 (étape 0) : la virgule décimale (« 13,75/20 (68,8 %) »), les décimales d'hier. Les décimales
+        // fixes, l'appelant les donne au formateur partagé : `formaterNombre(n, 2)` (#1137, 22 oct.).
+        // Étape 2a (22 oct.) : les noms du critère (`a.noms`, lus par `enoncesAlgo.noms`) ; la règle du pluriel
+        // est celle des énoncés (`enoncesAlgo.accorder`, le singulier sous 2), pour les DEUX noms. Sans le
+        // registre ni les noms, « erreur » et « mot » : la ligne d'hier. Échappés : ce sont des mots tapés.
+        const E = (typeof window !== 'undefined' && window.enoncesAlgo) ? window.enoncesAlgo : null;
+        const noms = a.noms || { erreurs: { singulier: 'erreur', pluriel: 'erreurs' }, mots: { singulier: 'mot', pluriel: 'mots' } };
+        const accorder = (n, paire) => (E && typeof E.accorder === 'function') ? E.accorder(n, paire)
+            : (Math.abs(Number(n)) >= 2 ? paire.pluriel : paire.singulier);
+        const noteTxt = (typeof a.noteCalculee === 'number') ? formaterNombre(a.noteCalculee, 2) : '—';
+        const pctTxt  = (typeof a.pourcentage === 'number')  ? formaterPourcentage(a.pourcentage, 1) : '—';
+        const mention = (E && typeof E.mentionPonderee === 'function') ? E.mentionPonderee(a.erreurs, a.sommePonderee) : '';
+        return `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-bottom: 3px;">`
+                  + `${esc(a.erreurs)} ${esc(accorder(a.erreurs, noms.erreurs))}${esc(mention)} sur ${esc(a.mots)} ${esc(accorder(a.mots, noms.mots))} &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(formaterNombre(a.ponderation))}</b> (${esc(pctTxt)})`
+                  + `</div>`;
+    }
+
     function renderCritere(ctx, critere, isLast) {
         const scale = ctx.feedback.scale || [];
         const idx = scale.findIndex(s => s.code === critere.code);
@@ -373,26 +394,12 @@
 
         // Ligne compacte de calcul pour les critères algorithmiques :
         //   « 15 erreurs sur 584 mots → 7.16/20 (35.8%) »
-        // 21 oct. 2026 (décision de Grégoire, 8 h 39) : « 5 erreurs (3,5 une fois pondérées) sur 400 mots »
-        // quand la somme pondérée diffère ; la parenthèse sort de la même source que la phrase du décompte.
+        // 21 oct. 2026 (décision de Grégoire, 8 h 39) : la parenthèse quand la somme pondérée diffère ;
+        // elle sort de la même source que la phrase du décompte. ↻ 22 oct., 17 h : « 5 erreurs (3,5 après
+        // pondération) sur 400 mots », sans accord. Étape 2a : les deux noms sont ceux du critère.
         // Données lues depuis l'évaluation (donneesAlgorithmiques) + la
         // pondération du critère (grille). Aucun hard-code.
-        let ligneAlgo = '';
-        if (critere.algo) {
-            const a = critere.algo;
-            // 21 oct. 2026 (étape 0) : la virgule décimale (« 13,75/20 (68,8 %) »), les décimales d'hier ; « erreur »
-            // au singulier sous 2 (« 0 erreur », « 1 erreur »), la règle `> 1` des autres sites. Les noms « erreurs »
-            // et « mots » restent écrits ici : l'étape 2 les rend à l'enseignant·e. Les décimales
-            // fixes, l'appelant les donne au formateur partagé : `formaterNombre(n, 2)` (#1137, 22 oct.).
-            const noteTxt = (typeof a.noteCalculee === 'number') ? formaterNombre(a.noteCalculee, 2) : '—';
-            const pctTxt  = (typeof a.pourcentage === 'number')  ? formaterPourcentage(a.pourcentage, 1) : '—';
-            const nomErreurs = Number(a.erreurs) > 1 ? 'erreurs' : 'erreur';
-            const mention = (typeof window !== 'undefined' && window.enoncesAlgo && typeof window.enoncesAlgo.mentionPonderee === 'function')
-                ? window.enoncesAlgo.mentionPonderee(a.erreurs, a.sommePonderee) : '';
-            ligneAlgo = `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-bottom: 3px;">`
-                      + `${esc(a.erreurs)} ${nomErreurs}${esc(mention)} sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(formaterNombre(a.ponderation))}</b> (${esc(pctTxt)})`
-                      + `</div>`;
-        }
+        const ligneAlgo = critere.algo ? ligneCalculAlgo(critere.algo) : '';
 
         return `
             <div style="display: grid; grid-template-columns: 130px 135px 1fr; gap: 10px; align-items: center; padding: 8px 10px; ${isLast ? '' : `border-bottom: 1px solid ${LINE};`}">

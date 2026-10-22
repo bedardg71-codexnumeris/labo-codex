@@ -53,7 +53,7 @@ const nu = (jeton) => jeton.slice(1, -1);
 describe('texte troué · A — la palette est celle du code, pas celle du cadrage', () => {
     it('A.a quatre repères : {critere}, {erreurs}, {mots}, {points}', () => {
         expect(enonces.listerReperes().map(r => r.jeton))
-            .toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
+            .toEqual(['{critere}', '{erreurs}', '{mots}', '{points}', '{nomErreurs}', '{nomMots}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
     });
 
     it('A.b {s} n\'est PAS un repère — c\'est un accord qui suit {erreurs}, jamais un geste', () => {
@@ -129,7 +129,8 @@ describe('texte troué · B — une zone n\'offre que ce qu\'un appel remplit', 
     it('B.b rien d\'offert qu\'aucun appel ne remplit ({critere} vient toujours du registre)', () => {
         const { parCle } = appelsMesures();
         enonces.listerCles().forEach(c => {
-            const permis = new Set(['critere', ...(parCle[c.cle] || [])]);
+            // ↻ étape 2a : les deux noms viennent aussi toujours du registre, comme {critere}.
+            const permis = new Set(['critere', 'nomErreurs', 'nomMots', ...(parCle[c.cle] || [])]);
             enonces.reperesDeCle(c.cle).forEach(r => {
                 expect(permis.has(nu(r.jeton)),
                     `« ${c.libelle} » offre ${r.jeton}, qu'aucun appel ne remplit — il vaudrait toujours vide`).toBe(true);
@@ -149,10 +150,10 @@ describe('texte troué · B — une zone n\'offre que ce qu\'un appel remplit', 
 
     it('B.d « Aucune annotation » n\'offre pas {erreurs} — le piège nommé par Grégoire', () => {
         // La zone s'affiche « quand la copie ne porte ni tampon ni erreur ».
-        expect(enonces.reperesDeCle('aucune').map(r => r.jeton)).toEqual(['{critere}']);
+        expect(enonces.reperesDeCle('aucune').map(r => r.jeton)).toEqual(['{critere}', '{nomErreurs}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts (le nom, pas le nombre)
         // Et le décompte, lui, les offre tous : c'est là que les nombres valent.
         expect(enonces.reperesDeCle('decompte').map(r => r.jeton))
-            .toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
+            .toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
     });
 
     it('B.e `listerCles` porte le même contrat, et une clé inconnue n\'offre rien', () => {

@@ -215,7 +215,7 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         const html = liste().innerHTML;
         const projection = carteProjection(html);
         const decompte = projection.slice(projection.indexOf('Décompte des erreurs'), projection.indexOf('class="sous-criteres-liste-conteneur"'));
-        expect(boutons(decompte).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
+        expect(boutons(decompte).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
         expect(decompte).toContain('aria-label="Poser nom du critère, {critere}, dans « Décompte des erreurs »"');
         expect((source('js/grilles.js').match(/rendreBoutonsReperes\(/g) || []).length).toBe(3);   // la déclaration + deux appels
     });

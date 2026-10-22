@@ -480,6 +480,12 @@
      * `enregistre` : le texte enregistré (vide compris), ou null / undefined s'il n'y en a pas.
      * Rend le texte BRUT : l'anonymisation reste à l'appelant qui imprime (#566).
      */
+    /** Étape 2a (22 oct. 2026) — les deux noms d'un critère algorithmique (`enoncesAlgo.noms`), ou null sans le registre. */
+    function nomsDuCritereAlgo(def) {
+        const E = (typeof window !== 'undefined') ? window.enoncesAlgo : null;
+        return (E && typeof E.noms === 'function') ? E.noms(def) : null;
+    }
+
     function commentaireDuCritere({ enregistre, algorithmique, cartouche, critereId, niveau } = {}) {
         const retenu = (t) => {
             const nu = String(t == null ? '' : t).trim();
@@ -558,7 +564,10 @@
                 mots:         donneesAlgoCrit.mots,
                 noteCalculee: (typeof donneesAlgoCrit.noteCalculee === 'number') ? donneesAlgoCrit.noteCalculee : null,
                 pourcentage:  (typeof donneesAlgoCrit.pourcentage === 'number') ? donneesAlgoCrit.pourcentage : null,
-                ponderation:  ponderationCrit
+                ponderation:  ponderationCrit,
+                // Étape 2a (22 oct. 2026) : les deux noms du critère de la grille (`enoncesAlgo.noms`) —
+                // sans grille, ou sans noms, « erreur » et « mot », la ligne d'hier.
+                noms:         nomsDuCritereAlgo(def)
             } : null;
 
             // Lot 3 (4 sept. 2026) — un critère analytique porte ses POINTS dans

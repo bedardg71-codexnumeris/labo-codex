@@ -357,7 +357,7 @@ const TOOLTIPS = {
     'eval-integrite':
         'Recevable ou non. Une copie non recevable (plagiat, IA non autorisée) compte comme non remise dans la complétion ; dans la note, son sort dépend de ta pratique (Aide › « Travail NON RECEVABLE »).',
     'eval-francais-ecrit':
-        'La note de ce critère se calcule par une formule. « Nombre d\'erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Nombre de mots » se tape. La rétroaction se compose avec les phrases écrites dans la grille.',
+        'La note de ce critère se calcule par une formule. Le champ de ce que tu comptes se remplit avec les codes que tu poses dans Annoter, ou se tape ; celui de ce à quoi tu le rapportes se tape. Les deux portent les noms que tu as donnés au critère dans la grille. La rétroaction se compose avec les phrases écrites dans la grille.',
     'eval-codes-erreurs':
         'Codes numériques des erreurs, séparés par points-virgules. Consulte la grille pour la correspondance codes → catégories.',
     'eval-modifier-attribution':

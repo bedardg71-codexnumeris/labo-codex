@@ -220,7 +220,7 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
         expect(compter(projection, 'data-enonce-cle="decompte"')).toBe(1);
         expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
-        expect(boutons(blocDecompte(projection)).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{mots}', '{points}']);
+        expect(boutons(blocDecompte(projection)).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
         expect(projection).toContain('Aucune projection ne sera proposée');
         expect(projection.indexOf('data-enonce-cle="decompte"')).toBeLessThan(projection.indexOf('Aucune projection ne sera proposée'));
         expect(projection).not.toContain('palier-projection');
@@ -279,7 +279,8 @@ describe('une seule carte · D — même zone, mêmes attributs, même palette ;
         expect(bloc).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="decompte"/);
         expect(bloc).toContain('>' + echapper(E.normaliser(ALGO).enonces.decompte) + '</textarea>');
         expect(boutons(bloc).map((b) => [b.jeton, b.famille, b.texte])).toEqual([
-            ['{critere}', 'posee', 'critere'], ['{erreurs}', 'remplie', 'erreurs'], ['{mots}', 'remplie', 'mots'], ['{points}', 'remplie', 'points']
+            ['{critere}', 'posee', 'critere'], ['{erreurs}', 'remplie', 'erreurs'], ['{nomErreurs}', 'posee', 'nomErreurs'],
+            ['{mots}', 'remplie', 'mots'], ['{nomMots}', 'posee', 'nomMots'], ['{points}', 'remplie', 'points']
         ]);
         expect(bloc).toContain('aria-label="Poser nom du critère, {critere}, dans « Décompte des erreurs »"');
         expect(bloc.indexOf('class="reperes-enonce"')).toBeLessThan(bloc.indexOf('<textarea'));

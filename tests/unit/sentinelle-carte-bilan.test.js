@@ -237,7 +237,7 @@ describe('carte « Bilan » · B — « Aucune annotation » vit sous la case de
         expect(pli).toContain('>' + REGISTRE.aucune.libelle + '</label>');
         expect(pli).toContain(echapper(REGISTRE.aucune.aide));
         // Sa palette : {critere} seul — jamais {erreurs}, qui y vaudrait toujours vide (le cas qui a fait trancher Grégoire le 3 sept.).
-        expect(boutons(pli).map((b) => [b.jeton, b.famille, b.texte])).toEqual([['{critere}', 'posee', 'critere']]);
+        expect(boutons(pli).map((b) => [b.jeton, b.famille, b.texte])).toEqual([['{critere}', 'posee', 'critere'], ['{nomErreurs}', 'posee', 'nomErreurs']]);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
         expect(pli.indexOf('class="reperes-enonce"')).toBeLessThan(pli.indexOf('<textarea'));
     });
 

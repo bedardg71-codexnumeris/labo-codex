@@ -888,6 +888,16 @@ const SCHEMAS_IMPORT = {
                 // 21 oct. 2026 (étape 0) — la marque d'un critère né sans les dix codes du français voyage avec lui :
                 // sans elle, la grille importée retomberait sur le repli.
                 codesSousCriteresSeulement: { type: 'boolean' },
+                // 22 oct. 2026 (étape 2a) — LES DEUX NOMS DU CRITÈRE ALGORITHMIQUE voyagent avec lui : sans eux,
+                // une grille de chimie importée se lirait « erreur » et « mot ». Schéma FERMÉ, chaînes bornées à
+                // la borne de l'éditeur (`enoncesAlgo.MAX_NOM`) ; échappées là où elles s'affichent.
+                noms: {
+                    type: 'object',
+                    schema: {
+                        erreurs: { type: 'object', schema: { singulier: { type: 'string', maxLen: 40 }, pluriel: { type: 'string', maxLen: 40 } } },
+                        mots:    { type: 'object', schema: { singulier: { type: 'string', maxLen: 40 }, pluriel: { type: 'string', maxLen: 40 } } }
+                    }
+                },
                 facteurNormalisation: { type: 'number' },
 
                 // #667 — le modèle de formule choisi par l'utilisateur et ses

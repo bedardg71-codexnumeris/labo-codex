@@ -387,7 +387,17 @@
                         codesDepuisSousCriteres: { type: 'booleen' },
                         // 21 oct. 2026 (étape 0) — la marque d'un critère né sans les dix codes du français :
                         // sans elle, une grille partagée retomberait chez le collègue sur le repli.
-                        codesSousCriteresSeulement: { type: 'booleen' }
+                        codesSousCriteresSeulement: { type: 'booleen' },
+                        // 22 oct. 2026 (étape 2a) — les deux noms du critère algorithmique (ce qu'il compte, ce à
+                        // quoi il le rapporte). Sans eux, la grille partagée se lirait « erreur » et « mot » chez le
+                        // collègue. Schéma FERMÉ, bornes de l'éditeur (`enoncesAlgo.MAX_NOM`).
+                        noms: {
+                            type: 'objet',
+                            schema: {
+                                erreurs: { type: 'objet', schema: { singulier: { type: 'chaine', max: 40 }, pluriel: { type: 'chaine', max: 40 } } },
+                                mots:    { type: 'objet', schema: { singulier: { type: 'chaine', max: 40 }, pluriel: { type: 'chaine', max: 40 } } }
+                            }
+                        }
                     }
                 },
                 dateCreation: { type: 'chaine', max: 40 },
