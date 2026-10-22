@@ -864,11 +864,9 @@ function copiesExemple(critere) {
             copies.push({ cle: pal.cle, libelle: pal.libelle, erreurs: Math.max(1, Math.round(ratio * tolerees)), mots: mots, corrigee: true });
         });
     }
-    if (!copies.length) {
-        // « Aucune projection », ou aucun palier lisible : une copie ordinaire,
-        // pour voir au moins le décompte du bloc 3.
-        copies.push({ cle: 'exemple', libelle: '', erreurs: 3, mots: 300, corrigee: true });
-    }
+    // 22 oct. 2026 (verdict du miroir) : plus de copie ordinaire « 3 erreurs, 300 mots » sous « Aucune
+    // projection » — une constante de rédaction, que rien n'affichait (l'aperçu ne se rend que sous un
+    // palier). Le miroir de la carte « Formule » (`miroirAlgo`) montre le décompte, tiré des réglages.
     copies.push({ cle: 'non_corrigee', libelle: '', erreurs: null, mots: null, corrigee: false });
     return copies;
 }

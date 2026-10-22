@@ -3658,7 +3658,7 @@ function rendreMiroirAlgo(critere, ctx) {
         if (!e.applicable) return esc(L.noteImpossible);
         const pts = formaterNoteNombre(e.points) + '/' + formaterNoteNombre(critere.ponderation);
         return esc(pts + ' (' + formaterNotePourcentage(e.pourcentage) + ')')
-            + (e.plancher ? ` <span class="miroir-algo-plancher">— ${esc(L.plancher)}</span>` : '');
+            + (e.plancher ? ` <span class="miroir-algo-plancher">– ${esc(L.plancher)}</span>` : '');
     };
     const donnees = (c) => {
         const occurrences = L.occurrences(c.erreurs) + (c.erreursFormule !== c.erreurs ? window.enoncesAlgo.mentionPonderee(c.erreurs, c.erreursFormule) : '');
@@ -3674,7 +3674,8 @@ function rendreMiroirAlgo(critere, ctx) {
     return `
             <div class="miroir-algo" data-miroir-algo="${esc(ctx.index)}">
                 <p class="miroir-algo-titre">${esc(L.titre)}</p>
-                <small class="miroir-algo-intro">${esc(L.intro)}</small>${essais.length ? `
+                <small class="miroir-algo-intro">${esc(L.intro)}</small>${essais.length && window.miroirAlgo.sourceEtendue(critere).origine === 'facteur' ? `
+                <small class="miroir-algo-intro">${esc(L.etendueDuFacteur)}</small>` : ''}${essais.length ? `
                 <ul class="miroir-algo-liste">
                     ${lignes}
                 </ul>` : `

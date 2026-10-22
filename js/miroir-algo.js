@@ -83,7 +83,8 @@ function libelles(critere) {
         aucunePhrase: 'aucune phrase',
         plancher: 'la note touche le plancher',
         noteImpossible: 'aucune note : la formule a besoin du nombre de mots',
-        sansPonderation: 'Donne une pondération à ce critère : le miroir montrera la note de chaque copie.',
+        sansPonderation: 'Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.',
+        etendueDuFacteur: 'Sans projection, ces copies ont la longueur du facteur : chaque erreur y coûte un point, quel que soit le facteur.',
         intro: 'Ce que ta règle donne sur quelques copies fictives, tirées de tes réglages. Aucune donnée d\'élève ; rien n\'est enregistré.'
     };
 }
@@ -94,16 +95,24 @@ function _ponderation(critere) {
     return (isFinite(p) && p > 0) ? p : null;
 }
 
-/** L'étendue des copies (voir « La règle des copies »), ou null : copie sans étendue. */
-function etendue(critere) {
+/**
+ * D'où vient l'étendue des copies (voir « La règle des copies ») : {origine, mots}, origine
+ * 'projection' | 'facteur' | 'ratio' | null (copie sans étendue, mots null).
+ */
+function sourceEtendue(critere) {
     var F = _reg('formulesAlgo');
     var P = _reg('projectionAlgo');
     var p = P ? P.normaliser(critere) : null;
-    if (p && p.modele.projette && isFinite(Number(p.params.motsReference))) return Number(p.params.motsReference);
+    if (p && p.modele.projette && isFinite(Number(p.params.motsReference))) return { origine: 'projection', mots: Number(p.params.motsReference) };
     var f = F ? F.normaliser(critere) : null;
-    if (f && isFinite(Number(f.params.facteurNormalisation))) return Number(f.params.facteurNormalisation);
-    if (f && isFinite(Number(f.params.motsParErreurCible))) return Number(f.params.motsParErreurCible) * 10;
-    return null;
+    if (f && isFinite(Number(f.params.facteurNormalisation))) return { origine: 'facteur', mots: Number(f.params.facteurNormalisation) };
+    if (f && isFinite(Number(f.params.motsParErreurCible))) return { origine: 'ratio', mots: Number(f.params.motsParErreurCible) * 10 };
+    return { origine: null, mots: null };
+}
+
+/** L'étendue des copies, ou null : copie sans étendue. */
+function etendue(critere) {
+    return sourceEtendue(critere).mots;
 }
 
 /** La note de la formule pour `erreurs` (ce que la formule reçoit) sur une copie de `mots`. */
@@ -232,6 +241,7 @@ function essais(critere) {
 
 var api = {
     libelles: libelles,
+    sourceEtendue: sourceEtendue,
     etendue: etendue,
     copies: copies,
     essayer: essayer,

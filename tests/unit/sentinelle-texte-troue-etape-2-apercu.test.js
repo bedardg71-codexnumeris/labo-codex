@@ -8,7 +8,8 @@
 //
 //   A. les copies FICTIVES viennent des paliers (`copiesExemple`, registre réel en
 //      Node) : une par palier, chacune ATTEINT son palier, plus une non corrigée ;
-//      « Aucune projection » en a une quand même ; aucune donnée de personne ;
+//      « Aucune projection » n'a plus que la non corrigée (22 oct. 2026 : la copie « 3 erreurs,
+//      300 mots » est retirée, le miroir la remplace) ; aucune donnée de personne ;
 //   B. la LIGNE « L'élève lira : » sous chaque palier, dans la carte « Projection » :
 //      une par palier, APRÈS les deux zones et APRÈS la ligne orange d'un jeton inconnu ;
 //      la phrase = décompte du bloc 3 PUIS projection du bloc 2, dans l'ordre
@@ -200,10 +201,10 @@ describe('texte troué 2 · A — les copies fictives viennent des paliers, et c
         }
     });
 
-    it('A.d « Aucune projection » : une copie ordinaire quand même (pour le décompte), plus la non corrigée', () => {
+    it('A.d « Aucune projection » : la non corrigée seule — plus de copie « 3 erreurs, 300 mots » (22 oct. 2026, le miroir la remplace)', () => {
         const copies = P.copiesExemple(P.appliquerAuCritere({}, 'aucune', {}));
-        expect(copies.map((x) => x.cle)).toEqual(['exemple', 'non_corrigee']);
-        expect(copies[0]).toEqual({ cle: 'exemple', libelle: '', erreurs: 3, mots: 300, corrigee: true });
+        expect(copies.map((x) => x.cle)).toEqual(['non_corrigee']);
+        expect(source('js/evaluation-projection.js')).not.toMatch(/erreurs: 3, mots: 300/);
     });
 
     it('A.e le registre ne lit toujours rien d\'autre que le critère — aucune donnée de personne', () => {
