@@ -1,6 +1,6 @@
-# Textes – Le critère algorithmique, étape 2a : les deux noms de l'enseignant (provisoires)
+# Textes – Le critère algorithmique, étape 2a : les deux noms de l'enseignant (validés le 22 oct. 2026)
 
-> Claude Code, jeudi 22 octobre 2026, 17 h 15 (Toronto, mesuré par `date`), lot 2a de `CONSIGNE-DU-JOUR.md`. **Tous ces textes sont provisoires** : écrits par Claude Code, à soumettre à Grégoire par Cowork **avant la release**. Chaque texte est cité tel qu'il est dans le code, avec son site. Les bancs Vitest lisent ce fichier : un texte changé ici doit l'être aussi à son site (et inversement).
+> Claude Code, jeudi 22 octobre 2026, 17 h 15 (Toronto, mesuré par `date`), lot 2a de `CONSIGNE-DU-JOUR.md`. **Validés le 22 oct. 2026 (voir « Validation », en fin de fichier ; mis au code à 18 h 40)** — à l'origine provisoires : écrits par Claude Code, à soumettre à Grégoire par Cowork **avant la release**. Chaque texte est cité tel qu'il est dans le code, avec son site. Les bancs Vitest lisent ce fichier : un texte changé ici doit l'être aussi à son site (et inversement).
 
 ## 1. Ce que l'élève lit
 
@@ -58,7 +58,7 @@ En tête du gabarit d'un critère algorithmique, avant les sous-critères.
 
 Dans la palette des codes, tant que le critère neuf de la copie n'a pas ses deux noms :
 
-> Ton critère algorithmique n'a pas encore ses deux noms : ce que tu comptes, et ce à quoi tu le rapportes. Écris-les dans la grille ; d'ici là, l'élève lit « élément relevé » et « unité ».
+> Ton critère algorithmique n'a pas encore ses deux noms : ce que tu comptes, et ce à quoi tu le rapportes. Écris-les dans la grille ; d'ici là, l'élève lit « élément relevé » et « élément examiné ».
 
 Le total de l'en-tête de la palette suit le nom : « (3 unités manquantes) ».
 
@@ -97,8 +97,8 @@ Ajoutés à la palette du décompte (et `{nomErreurs}` à « Aucune annotation �
 
 | Jeton | Libellé | Aide |
 |---|---|---|
-| `{nomErreurs}` | ce que tu comptes | Le nom de ce que tu comptes, écrit sous le critère, accordé au nombre : « 1 erreur », « 2 erreurs ». |
-| `{nomMots}` | ce à quoi tu le rapportes | Le nom de ce à quoi tu rapportes le compte, écrit sous le critère, accordé au nombre : « 1 mot », « 400 mots ». |
+| `{nomErreurs}` | ce que tu comptes | Le nom de ce que tu comptes, écrit sous le critère : au singulier sous 2, au pluriel à partir de 2. |
+| `{nomMots}` | ce à quoi tu le rapportes | Le nom de ce à quoi tu rapportes le compte, écrit sous le critère : au singulier sous 2, au pluriel à partir de 2. |
 
 ## Validation (Cowork, 18 h 30)
 

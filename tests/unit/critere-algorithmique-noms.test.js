@@ -11,7 +11,7 @@
  *       « neuf » se lit à la marque PROPRE aux noms (`nomsAttendus`), plus à celle des codes, en ligne depuis
  *       la 1.213 ; le bilan d'un critère effondré et « Tous les critères sont maîtrisés » portent les noms,
  *       sans le participe (Grégoire, 17 h 43).
- *   N — LE MODÈLE : trois lectures (écrits ; d'avant, « erreur / mot » ; neuf, le repli provisoire) ; une
+ *   N — LE MODÈLE : trois lectures (écrits ; d'avant, « erreur / mot » ; neuf, le repli) ; une
  *       paire à moitié écrite se lit absente ; la règle unique du pluriel ; l'écriture, au geste seulement.
  *   S — L'INVARIANT DU STOCK (sentinelle) : un critère sans noms rend, au caractère près, les phrases et la
  *       ligne du PDF de `5bd643c3` — sauf la parenthèse. Les chaînes attendues ont été MESURÉES sur
@@ -56,20 +56,20 @@ const STOCK_1213 = critere({ codesSousCriteresSeulement: true });
 /* ======================================================= N — LE MODÈLE */
 
 describe('noms · N — le modèle', () => {
-    it('N.a trois lectures : écrits ; d’avant, « erreur / mot » ; neuf sans noms, le repli provisoire — jamais vide', () => {
+    it('N.a trois lectures : écrits ; d’avant, « erreur / mot » ; neuf sans noms, le repli — jamais vide', () => {
         const e = E();
         expect(e.noms(CHIMIE)).toEqual(CHIMIE_NOMS);
         expect(e.noms(STOCK)).toEqual(REDACTION_NOMS);
         expect(e.noms(null)).toEqual(REDACTION_NOMS);
         expect(e.noms({ nom: 'Français écrit' })).toEqual(REDACTION_NOMS);   // `critereAlgorithmiqueOuNomme` sans grille
-        expect(e.noms(NEUF_SANS_NOMS)).toEqual(e.NOMS_PROVISOIRES);
+        expect(e.noms(NEUF_SANS_NOMS)).toEqual(e.NOMS_DE_REPLI);
         Object.values(e.noms(NEUF_SANS_NOMS)).forEach((p) => { expect(p.singulier).toBeTruthy(); expect(p.pluriel).toBeTruthy(); });
     });
 
     it('N.b une paire à moitié écrite se lit absente ; l’autre paire garde ses noms', () => {
         const e = E();
         const c = critere({ nomsAttendus: true, noms: { erreurs: { singulier: 'unité manquante' }, mots: CHIMIE_NOMS.mots } });
-        expect(e.noms(c)).toEqual({ erreurs: e.NOMS_PROVISOIRES.erreurs, mots: CHIMIE_NOMS.mots });
+        expect(e.noms(c)).toEqual({ erreurs: e.NOMS_DE_REPLI.erreurs, mots: CHIMIE_NOMS.mots });
         expect(e.nomsManquants(c)).toEqual(['erreurs']);
         const s = critere({ noms: { mots: { pluriel: '  ' } } });
         expect(e.noms(s)).toEqual(REDACTION_NOMS);
@@ -542,7 +542,7 @@ describe('noms · A — Annoter invite à nommer', () => {
     it('A.a un critère neuf sans noms : la palette le dit, et nomme ce que l’élève lit d’ici là', () => {
         const html = annoter(grille(NEUF_SANS_NOMS)).travauxOutils.genererContenuErreursFr();
         expect(html).toContain('Ton critère algorithmique n’a pas encore ses deux noms');
-        expect(html).toContain('« élément relevé » et « unité »');
+        expect(html).toContain('« élément relevé » et « élément examiné »');
     });
     it('A.b nommé, ou d’avant : rien', () => {
         expect(annoter(grille(CHIMIE)).travauxOutils.genererContenuErreursFr()).not.toContain('deux noms');
