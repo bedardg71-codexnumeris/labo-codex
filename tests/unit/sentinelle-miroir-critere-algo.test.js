@@ -20,7 +20,11 @@
 //
 // BREAK-TESTS (faits le 22 octobre 2026, chacun restauré, `cmp` identique) :
 //   · `essayer` rend `points: 30` en dur au lieu du calcul → A.a, A.b et E.a rougissent ;
-//   · `etendue` rend 500 en dur au lieu du réglage → B.a, B.b, B.c, B.d et C.a rougissent.
+//   · `etendue` rend 500 en dur au lieu du réglage → B.a, B.b, B.c, B.d et C.a rougissent ;
+//   · la somme sans les poids (`codesAnnotation.sommePonderee`) → C.a, E.b, et S.a de critere-algorithmique-dit-vrai.
+// VERDICT DU 22 OCT. (retouches 1 à 3), break-tests faits le même jour, restaurés, `cmp` identique :
+//   · la ligne du facteur rendue quelle que soit l'origine de l'étendue → E.e rougit ;
+//   · le tiret cadratin remis avant « la note touche le plancher » → E.a rougit.
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -276,7 +280,7 @@ describe('miroir · E — le bloc dans le gabarit', () => {
         expect(bloc).toContain('30/30 (100 %)');
         expect(bloc).toContain('22/30 (73,3 %)');
         expect(bloc).toContain('0/30 (0 %)');
-        expect(bloc).toContain('la note touche le plancher');
+        expect(bloc).toContain('0/30 (0\u00A0%) <span class="miroir-algo-plancher">– la note touche le plancher</span>');   // verdict du 22 oct., 3 : le demi-cadratin
         expect(bloc).toContain('L\'élève lira :');
         expect(bloc).not.toMatch(/data-action|data-on-change|<input|<textarea|<select|<button/);
         // Le rendu du gabarit écrit déjà la grille sans le miroir (mesuré le 22 oct.) : le miroir n'y ajoute rien.
@@ -306,8 +310,24 @@ describe('miroir · E — le bloc dans le gabarit', () => {
         win.tempCriteres = [{ ...FRANCAIS, id: 'T1', ponderation: 0 }];
         win.afficherCriteresTemp();
         const bloc = blocMiroir(carteFormule(html(), 'T1'));
-        expect(bloc).toContain('Donne une pondération à ce critère');
+        expect(bloc).toContain('Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.');   // verdict du 22 oct., 2
         expect(bloc).not.toContain('miroir-algo-copie');
+    });
+
+    it('E.e (verdict du 22 oct., 1) sans projection, une ligne dit pourquoi le facteur ne bouge aucune note ; avec une projection, ou sous le ratio visé, rien', () => {
+        const LIGNE = 'Sans projection, ces copies ont la longueur du facteur : chaque erreur y coûte un point, quel que soit le facteur.';
+        const rendu = (critere) => {
+            const G = { id: 'G4', nom: 'Essai', criteres: [critere] };
+            const { win, html } = monterGrilles([G]);
+            win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
+            return blocMiroir(carteFormule(html(), critere.id)).replace(/&#39;|&#x27;/g, '\'');
+        };
+        expect(rendu(FRANCAIS)).toContain(LIGNE);
+        expect(rendu(CHIMIE)).toContain(LIGNE);
+        expect(rendu({ ...FRANCAIS, modeleProjection: 'norme_externe', paramsProjection: { motsReference: 900 } })).not.toContain('longueur du facteur');
+        expect(rendu(avec(FRANCAIS, 'ratio_cible', { motsParErreurCible: 60 }))).not.toContain('longueur du facteur');
+        expect(rendu({ ...FRANCAIS, ponderation: 0 })).not.toContain('longueur du facteur');
+        expect(registres().miroirAlgo.libelles(FRANCAIS).etendueDuFacteur).toBe(LIGNE);
     });
 
     it('E.d sous un critère sans sous-critère : « Aucun sous-critère pour l\'instant » (point 7 de la consigne)', () => {
