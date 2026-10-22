@@ -1167,12 +1167,18 @@
         try {
             const trimestres = enumererTrimestres();
             let evalCount = 0;
+            let copiesCount = 0;   // #1075, point 3 : les copies comptent aussi
             trimestres.forEach(trim => {
                 const evaluations = db.getSync(`${trim.id}_evaluationsSauvegardees`) || [];
                 evalCount += evaluations.filter(ev => ev.productionId === productionId).length;
+                const copies = db.getSync(`${trim.id}_fichiersTravaux`) || [];
+                copiesCount += copies.filter(f => f && f.productionId === productionId).length;
             });
             if (evalCount > 0) {
                 dependances.push(`Utilisée par ${evalCount} évaluation(s)`);
+            }
+            if (copiesCount > 0) {
+                dependances.push(`${copiesCount} copie(s) y sont rattachées`);
             }
         } catch (e) {
             console.warn('[donnees-v2] Erreur calcul usages:', e.message);

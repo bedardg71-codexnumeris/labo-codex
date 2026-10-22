@@ -3184,6 +3184,7 @@ function decrirePorteursEchelle(nb) {
     if (n.pratiques) parts.push(p(n.pratiques, 'pratique de notation', 'pratiques de notation'));
     if (n.grilles) parts.push(p(n.grilles, 'grille', 'grilles'));
     if (n.cartouches) parts.push(p(n.cartouches, 'cartouche', 'cartouches'));
+    if (n.copies) parts.push(p(n.copies, 'copie', 'copies'));   // #1075, point 3 : les copies d'une production
     if (parts.length === 0) return 'rien';
     if (parts.length === 1) return parts[0];
     return parts.slice(0, -1).join(', ') + ' et ' + parts[parts.length - 1];

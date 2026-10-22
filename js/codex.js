@@ -3795,6 +3795,9 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     reprise:               { premiere: 'Retirer ce jeton de reprise efface pour de bon la reprise.', pronom: 'la' },
     pages:                 { premiere: 'Retirer ces pages les efface pour de bon.', pronom: 'les' },
     remplacement:          { premiere: 'Remplacer celle qui porte déjà ce nom l\'efface pour de bon.', pronom: 'la' },
+    // #1075, point 4 (22 oct. 2026) : « Remplacer l'existant » au doublon d'une copie importée. L'ancienne
+    // va à la corbeille, qui l'efface pour de bon après 30 jours. Mots proposés, à Grégoire avant la release.
+    copieRemplacee:        { premiere: 'Remplacer ce fichier envoie l\'ancien à la corbeille, qui l\'efface pour de bon après 30 jours.', pronom: 'le', infinitif: 'remplacer' },
     seance:                { premiere: 'Réinitialiser cette séance efface pour de bon ses présences et ses notes.', pronom: 'les' },
     annotationsPage:       { premiere: '« Effacer tout » efface pour de bon les annotations de cette page.', pronom: 'les' },
     registreLongitudinal:  { premiere: 'Retirer cet·te étudiant·e du registre efface pour de bon sa copie et ses résultats ultérieurs.', pronom: 'les' },

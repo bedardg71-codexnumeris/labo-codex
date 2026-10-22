@@ -4889,6 +4889,13 @@ body:not(.mode-clair) .badge-source--partage {
 .demo-readonly .btn-groupe button:not(.btn-annuler):not(.bandeau-demo-readonly-btn) {
     display: none;
 }
+/* #1075, point 5 (22 oct. 2026) : une production de démonstration ne montre pas les gestes qui
+   modifient ses blocs ; l'écriture les refuse de toute façon (productions.js). L'aide reste. */
+#formulaireProduction.demo-readonly [data-action^="deplacerBlocConsigne"],
+#formulaireProduction.demo-readonly [data-action="supprimerChampPersonnalise"],
+#formulaireProduction.demo-readonly [data-action="ajouterChampPersonnalise"] {
+    display: none;
+}
 .biblio-carte-desc {
     font-size: 0.85rem;
     color: var(--gris-clair);
