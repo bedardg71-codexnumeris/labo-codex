@@ -551,7 +551,7 @@ function afficherListeCriteres(criteres, grilleId) {
         container.innerHTML = '<p class="text-muted grille-italic">Aucun critère défini pour cette grille.</p>';
         const totalSpan = document.getElementById('totalPonderationCriteres');
         const statutSpan = document.getElementById('statutPonderationCriteres');
-        if (totalSpan) totalSpan.textContent = '0%';
+        if (totalSpan) totalSpan.textContent = '0\u00a0%';
         if (statutSpan) statutSpan.textContent = '';
         return;
     }
@@ -1246,9 +1246,9 @@ function ponderationEnPoints(criteres) {
     return typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints({ criteres: criteres || [] });
 }
 
-/** « 30 points », « 1 point » ; ou « 30% », comme avant, hors d'une grille en points. Validé G. 18 oct. */
+/** « 30 points », « 1 point » ; ou « 30 % », hors d'une grille en points. Validé G. 18 oct. ; l'insécable et la virgule, #1137 (22 oct.). */
 function texteDePonderation(n, enPoints) {
-    return enPoints ? n + (Math.abs(n) >= 2 ? ' points' : ' point') : n + '%';
+    return enPoints ? formaterNombre(n) + (Math.abs(n) >= 2 ? ' points' : ' point') : formaterPourcentage(n);
 }
 
 /**
@@ -1318,17 +1318,17 @@ function calculerTotalPonderationCriteres(criteres) {
         return;
     }
 
-    totalSpan.textContent = total + '%';
+    totalSpan.textContent = formaterPourcentage(total);
 
     if (total === 100) {
         totalSpan.style.color = 'var(--niveau-attention-minimal)';
         statutSpan.innerHTML = '<span class="grille-texte-minimal"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Pondération complète</span>';
     } else if (total < 100) {
         totalSpan.style.color = 'var(--niveau-attention-modere)';
-        statutSpan.innerHTML = `<span class="grille-texte-modere">${100 - total}% manquant</span>`;
+        statutSpan.innerHTML = `<span class="grille-texte-modere">${formaterPourcentage(100 - total)} manquant</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
     } else {
         totalSpan.style.color = 'var(--niveau-attention-critique)';
-        statutSpan.innerHTML = `<span class="grille-texte-critique">${total - 100}% en trop</span>`;
+        statutSpan.innerHTML = `<span class="grille-texte-critique">${formaterPourcentage(total - 100)} en trop</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
     }
 }
 
@@ -1439,7 +1439,7 @@ async function afficherToutesLesGrillesCriteres() {
             texteStatut = '⚠️ Incomplet';
         } else if (total > 100) {
             couleur = 'var(--niveau-attention-critique)';
-            texteStatut = '❌ Dépasse 100%';
+            texteStatut = '❌ Dépasse 100\u00a0%';
         } else {
             couleur = 'var(--vert-valide)';
             texteStatut = '✅ Complet';
@@ -5413,7 +5413,7 @@ function calculerEtAfficherTotalPonderation(grille) {
         return;
     }
 
-    totalElement.textContent = total + '%';
+    totalElement.textContent = formaterPourcentage(total);
 
     // Changer la couleur selon le total
     if (total === 100) {

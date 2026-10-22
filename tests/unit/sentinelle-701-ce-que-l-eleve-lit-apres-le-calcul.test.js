@@ -188,7 +188,7 @@ describe('#701 · les trois chemins donnent le MÊME niveau à 74,5 %', () => {
     it('algorithmique : 51 erreurs / 5000 mots = 74,5 % → M, à l\'écran, dans l\'évaluation en cours et dans la mémoire', () => {
         const h = monter({ grille: GRILLE_SIMPLE });
         simple(h, '51', '5000');
-        expect(h.ecran.pct_algo_a1.textContent).toBe('74.5');
+        expect(h.ecran.pct_algo_a1.textContent).toBe('74,5');
         expect([h.ecran.niveau_algo_a1.textContent, h.ec.criteres.a1, h.ec.donneesAlgorithmiques.a1.niveau]).toEqual(['M', 'M', 'M']);
     });
     it('analytique : 22,35 points sur 30 = 74,5 % → M', () => {
@@ -204,7 +204,7 @@ describe('#702 · « -- » n\'entre plus dans l\'évaluation, ni en base', () =>
         try {
             const h = monter({ grille: GRILLE_SIMPLE, niveaux: ESPACEE });
             simple(h, '56', '5000');   // 20 − 5,6 = 14,4 → 72 %
-            expect(h.ecran.pct_algo_a1.textContent).toBe('72.0');
+            expect(h.ecran.pct_algo_a1.textContent).toBe('72,0');
             expect(h.ec.criteres.a1).toBe('D');
             expect(h.ecran.criteresCopier.textContent).toBe('M\tD');
         } finally { avertir.mockRestore(); }

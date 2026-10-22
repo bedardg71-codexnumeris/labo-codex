@@ -33,9 +33,10 @@ function fichiersJs(d) {
 
 /**
  * Un nombre (fin d'expression : `toFixed(n)`, une parenthèse, un identifiant, un indice) puis, sur la même ligne,
- * « % » ou « pts » collé par interpolation (`}%`, `} %`, `} pts`) ou par concaténation (`+ '%'`, `+ ' pts'`).
+ * « % » ou « pts » collé par interpolation (`}%`, `} %`, `} pts`, `} pt`) ou par concaténation (`+ '%'`, `+ ' pts'`).
+ * « pt » collé (`${7.5 * f}pt`) est une taille de police CSS, pas un point : il ne compte pas.
  */
-export const NOMBRE_PUIS_SIGNE = /(toFixed\(\d\)|\)|[\w\]'"])\s*(\}\s?(%|pts?\b)|\+\s*['"`]\s?(%|pts?\b))/;
+export const NOMBRE_PUIS_SIGNE = /(toFixed\(\d\)|\)|[\w\]'"])\s*(\}(\s?%|\s?pts\b|\spt\b)|\+\s*['"`](\s?%|\s?pts\b|\spt\b))/;
 
 /** Une ligne qui passe par le module est conforme (même règle que la sentinelle des notes). */
 const PAR_LE_MODULE = /\b(formaterPourcentage|formaterNombre|formaterPoints|formaterNotePourcentage|formaterNoteNombre)\(|\bESPACE_INSECABLE\b/;
@@ -61,7 +62,17 @@ const NON_LU = [
  */
 const LISTE_BLANCHE = [
     { fichier: 'js/db.js', extrait: "'[DB #353] localStorage à ' + (stats.ratio * 100).toFixed(0) + ' % du quota '",
-      motif: 'le journal de la console (avertissement #353), la ligne qui suit `console.warn(` : personne ne le lit à l’écran' }
+      motif: 'le journal de la console (avertissement #353), la ligne qui suit `console.warn(` : personne ne le lit à l’écran' },
+    { fichier: 'js/export-pdf.js', extrait: "? `${(88 / nbNiveaux).toFixed(1)}%`",
+      motif: 'la largeur CSS d’une colonne de niveau dans l’aperçu du PDF (`width: ${largeurNiveau}`), pas un nombre lu' },
+    { fichier: 'js/export-pdf.js', extrait: ": `${((100 - 28) / nbNiveaux).toFixed(1)}%`",
+      motif: 'la même largeur CSS, sans cartouche longue' },
+    { fichier: 'js/planification-export.js', extrait: "var s = prod.nomProduction + ' (' + (prod.ponderation || 0) + ' %)';",
+      motif: 'un EXPORT : le plan (texte, markdown, TSV) qui voyage hors de l’app, gardé à l’octet par golden-exports-416' },
+    { fichier: 'js/planification-export.js', extrait: "(p.ponderation ? ' (' + p.ponderation + ' %)' : '')",
+      motif: 'le même export, la carte d’alignement remise au modèle d’IA (sentinelle-modele-ia-963)' },
+    { fichier: 'js/materiel-creation.js', extrait: "' à ' + String(n.max.valeur).trim() + ' %)'",
+      motif: 'l’écho d’une saisie : les bornes telles que la personne les a tapées dans le matériel (« 64,99 », « 85 % »), une chaîne, pas un nombre' }
 ];
 
 /**
@@ -69,30 +80,14 @@ const LISTE_BLANCHE = [
  * famille (consigne, §5). La liste se vide au dernier commit du lot et disparaît avec lui.
  */
 const EN_COURS = [
-    'js/cartouches.js',
     'js/codex.js',
     'js/correlations-longitudinales.js',
-    'js/echelles.js',
-    'js/evaluation-calcul.js',
-    'js/evaluation-chargement.js',
-    'js/export-pdf.js',
     'js/graphiques-progression.js',
-    'js/grilles.js',
     'js/impact-jetons.js',
-    'js/materiel-creation.js',
     'js/modelisation.js',
-    'js/objectifs.js',
-    'js/planification-carte.js',
-    'js/planification-export.js',
-    'js/pratiques-gestion.js',
-    'js/pratiques/construction-attributs.js',
-    'js/productions-bibliotheque-ui.js',
-    'js/productions-liste.js',
-    'js/productions.js',
     'js/reserve.js',
     'js/travaux-preparation.js',
     'js/travaux-visionneuse.js',
-    'js/wizard-pratique-v2.js',
 ];
 
 function retirerNonLu(ligne) {
@@ -197,12 +192,16 @@ describe('B — l’invariant : aucun nombre suivi de « % » ou de « pts » ho
             "`poids ${r.poids.toFixed(0)} %`",
             "+ ` × ${ponderation}% = <strong>${calc.contribution.toFixed(1)} pts</strong>`;",
             "var deltaTexte = delta !== null ? ((delta >= 0 ? '+' : '') + delta + ' pts') : '—';",
+            "fmt(p[0]) + ' à ' + fmt(p[1]) + ' pts';",
+            "total + ' pt'",
+            "`${c.points} pts`",
             "row.push(Math.round((n / total) * 100) + '%');"
         ]) expect(NOMBRE_PUIS_SIGNE.test(retirerNonLu(l)), l).toBe(true);
         for (const l of [
             "if (barre) barre.style.width = pourcent + '%';",
             '<div class="barre" style="width: ${pct}%"></div>',
             "parts.push(`brightness(${100 + op.value}%)`);",
+            "const styleTextePetit = `font-size: ${7.5 * facteurTaille}pt;`;",
             "stops.push(niveau.couleur + ' ' + debut + '%');",
             "html += '<div class=\"rythme-barre\" style=\"width:' + pctBarre.toFixed(0) + '%\"></div>';"
         ]) expect(NOMBRE_PUIS_SIGNE.test(retirerNonLu(l)), l).toBe(false);

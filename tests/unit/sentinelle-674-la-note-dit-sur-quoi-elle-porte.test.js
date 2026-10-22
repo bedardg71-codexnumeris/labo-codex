@@ -144,7 +144,7 @@ describe('#674 · calculerNote — la note dit sur quoi elle porte', () => {
         // …et NOMME ce qui manque, avec son poids.
         expect(ecran.porteeNote1.classList.contains('u-hide')).toBe(false);
         expect(ecran.porteeNote1.textContent).toContain('Langue');
-        expect(ecran.porteeNote1.textContent).toContain('20 %');
+        expect(ecran.porteeNote1.textContent).toContain('20\u00A0%');
         // La portée est publiée à côté de la note calculée.
         expect(win.porteeCalculeeCourante).toMatchObject({ ponderationCouverte: 80, ponderationGrille: 100, incomplete: true });
         expect(win.porteeCalculeeCourante.criteresHorsNote).toEqual([

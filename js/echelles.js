@@ -2324,7 +2324,7 @@ function apercuNiveauxEchelleHtml(echelle) {
         return `
             <div style="text-align: center; flex: 1; padding: 10px; background: ${niveau.couleur}20; border-radius: 4px; margin: 0 2px;">
                 <strong style="font-size: 1.2rem; color: ${niveau.couleur};">${echapperHtml(niveau.code || '?')}</strong>
-                <div class="echelle-texte-petit-mt5">${niveau.min}%-${niveau.max}%</div>
+                <div class="echelle-texte-petit-mt5">${formaterPourcentage(niveau.min)}-${formaterPourcentage(niveau.max)}</div>
                 ${zone ? `<div class="echelle-texte-petit-mt5">${echapperHtml(zone)}</div>` : ''}
             </div>
         `;

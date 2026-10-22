@@ -214,7 +214,7 @@ describe('#492 · S4 — la pondération n\'est montrée que si elle existe', ()
     it('S4.a Un travail montre sa pondération', () => {
         const win = charger([]);
         expect(win.planificationCarte.optionsProductionsHTML(
-            [prod('T1', 'Analyse', 'travail', 20)], '')).toContain('Analyse (20 %)');
+            [prod('T1', 'Analyse', 'travail', 20)], '')).toContain('Analyse (20\u00A0%)');
     });
 
     it('S4.b Un artefact n\'en montre aucune, même si la donnée en porte une', () => {

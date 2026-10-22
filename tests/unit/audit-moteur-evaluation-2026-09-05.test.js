@@ -271,7 +271,7 @@ describe('B · l\'échelle — un pourcentage qui tombe entre deux bornes entiè
         win.calculerNoteAlgorithmiqueSimple('a1', 20, 500);
         noter('B2', { niveauAlgo: ecran.niveau_algo_a1.textContent, pctAlgo: ecran.pct_algo_a1.textContent, critereEnCours: ec.criteres.a1,
             noteGlobale: ecran.noteProduction1.textContent, niveauGlobal: ecran.niveauProduction1.textContent, ligneACopier: ecran.criteresCopier.textContent });
-        expect(ecran.pct_algo_a1.textContent).toBe('74.5');
+        expect(ecran.pct_algo_a1.textContent).toBe('74,5');
         expect(ecran.niveau_algo_a1.textContent).toBe('M');      // avant #701 : '--'
         expect(ec.criteres.a1).toBe('M');                        // avant #702 : '--', que les collecteurs écrivaient en base (`if (niveau)` : « -- » est vrai)
         expect(ecran.noteProduction1.textContent).toBe('82,1\u00A0%'); // 0,8×84 + 0,2×74,5 — le critère COMPTE, par son pourcentage exact : l'arrondi ne touche pas la note
@@ -360,7 +360,7 @@ describe('D · le critère algorithmique — copie sans code, codes effacés, mo
         expect(r.categories.note).toBe('87,2\u00A0%');   // avant #704 : '--'
         expect(r.categories.hors).toEqual([]);      // avant #704 : ['a1:sans-niveau']
         expect(r.categories.niveauAlgo).toBe('E');
-        expect(r.simple).toEqual({ niveauAlgo: 'E', pct: '100.0', note: '87,2\u00A0%' });   // 0,8×84 + 0,2×100
+        expect(r.simple).toEqual({ niveauAlgo: 'E', pct: '100,0', note: '87,2\u00A0%' });   // 0,8×84 + 0,2×100
     });
     it('D2 · mode CATÉGORIES : les codes « 1;4 » donnent 87,5 % ; EFFACÉS — ↻ #698 puis #704 : un résultat NEUF, aucune erreur = 100 % (E), 87,2 % (avant #698 : 87,5 et M restaient ; entre #698 et #704 : sans niveau, note retenue)', () => {
         const { win, ecran, ec } = monterAlgo();

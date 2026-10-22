@@ -70,8 +70,8 @@ function chargerCalcul(elements, evaluationEnCours, dbStub) {
     // Globaux bare-access consommés par le module :
     //   evaluationEnCours (let global), db.getSync, cle(), console
     const cle = (k) => k; // identité : trimestre non pertinent pour cet invariant
-    const noms = ['window', 'document', 'console', 'evaluationEnCours', 'db', 'cle'];
-    const valeurs = [fauxWindow, fauxDocument, console, evaluationEnCours, dbStub, cle];
+    const noms = ['window', 'document', 'console', 'evaluationEnCours', 'db', 'cle', 'formaterNombre'];
+    const valeurs = [fauxWindow, fauxDocument, console, evaluationEnCours, dbStub, cle, fauxWindow.formaterNombre];   // #1137
 
     const fn = new Function(...noms, '"use strict";\n' + code);
     fn(...valeurs);

@@ -1024,7 +1024,7 @@ function chargerGrilleSelectionnee() {
  */
 function libellePonderationEval(ponderation, grille) {
     const enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grille);
-    if (typeof ponderation !== 'number' || typeof window.texteDePonderation !== 'function') return ponderation + '%';
+    if (typeof ponderation !== 'number' || typeof window.texteDePonderation !== 'function') return formaterPourcentage(ponderation) || String(ponderation) + ESPACE_INSECABLE + '%';
     return window.texteDePonderation(ponderation, enPoints);
 }
 
@@ -1146,7 +1146,7 @@ function cartoucheSelectionnee() {
             </div>
         </div>
         <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
-            <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
+            <span id="total_erreurs_${critere.id}">--</span> erreurs / <span id="mots_formule_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span><br>
             <strong>Catégorie dominante:</strong> <span id="cat_dominante_${critere.id}" class="eval-badge-algo">--</span>
             <!-- #667 — formule chiffrée, remplie par _afficherFormuleAlgo -->
             <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
@@ -1182,7 +1182,7 @@ function cartoucheSelectionnee() {
             </div>
         </div>
         <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
-            <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+            <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots → <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
             <!-- #667 — formule chiffrée, remplie par _afficherFormuleAlgo -->
             <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
         </div>
@@ -1378,7 +1378,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                          ⚠ Pas d'accent grave dans ce commentaire : il vit DANS un litteral
                          de gabarit, ou un accent grave termine le gabarit. -->
                     <div id="resultat_algo_${critere.id}" class="eval-resultat-algo">
-                        <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots &rarr; <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
+                        <span id="total_erreurs_simple_${critere.id}">--</span> erreurs sur <span id="mots_simple_${critere.id}">--</span> mots &rarr; <span id="note_algo_${critere.id}">--</span>/${ponderation} (<span id="pct_algo_${critere.id}">--</span>\u00a0%) | Niveau: <span id="niveau_algo_${critere.id}">--</span>
                         <!-- #667 — formule chiffrée (mode consultation) -->
                         <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
                     </div>
@@ -1852,7 +1852,7 @@ function _signalerCriteresHorsGrille(conteneur, grille) {
         : `${horsGrille.length} critères évalués ne sont plus dans la grille`;
     const detail = document.createElement('div');
     detail.textContent = horsGrille.map(c => {
-        const valeur = typeof c.points === 'number' ? `${c.points} pts` : (c.niveauSelectionne || '—');
+        const valeur = typeof c.points === 'number' ? formaterNombre(c.points) + ESPACE_INSECABLE + 'pts' : (c.niveauSelectionne || '—');
         return `${c.critereNom || c.critereId} (${valeur})`;
     }).join(' · ');
     const explication = document.createElement('small');
@@ -1888,7 +1888,7 @@ function _signalerCriteresAjoutesDepuis(conteneur, grille) {
         ? 'Un critère a été ajouté à la grille après cette évaluation'
         : `${ajoutes.length} critères ont été ajoutés à la grille après cette évaluation`;
     const detail = document.createElement('div');
-    detail.textContent = ajoutes.map(c => `${c.nom} (${c.ponderation} %)`).join(' · ');
+    detail.textContent = ajoutes.map(c => `${c.nom} (${formaterPourcentage(c.ponderation)})`).join(' · ');
     const explication = document.createElement('small');
     explication.textContent = (un ? 'La note enregistrée ne le couvre pas' : 'La note enregistrée ne les couvre pas')
         + ' et reste valable : le PDF de l\'élève conclut normalement. Si tu modifies cette copie, il faudra '

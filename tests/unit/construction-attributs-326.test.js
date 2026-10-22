@@ -78,7 +78,7 @@ describe('#326 R3 · STANDARDS', () => {
         notesFinales: true
     };
     it('pondération par catégories Sélection/Obligatoires', () => {
-        expect(val(extraire(cfg), 'ponderation')).toBe('Sélection 65 % / Obligatoires 35 %');
+        expect(val(extraire(cfg), 'ponderation')).toBe('Sélection 65\u00A0% / Obligatoires 35\u00A0%');
     });
     it('méthode de sélection, composantes, mode note finale, échelle', () => {
         const r = extraire(cfg);
@@ -129,7 +129,7 @@ describe('#326 R3 · SPÉCIFICATIONS', () => {
     it('reprises = jetons (SPE), seuil d\'acceptabilité, forfaits', () => {
         const r = extraire(cfg);
         expect(val(r, 'reprises')).toMatch(/Jetons de reprise \(2\)/);
-        expect(val(r, 'seuilAcceptabilite')).toBe('100 %');
+        expect(val(r, 'seuilAcceptabilite')).toBe('100\u00A0%');
         expect(val(r, 'forfaits')).toBe('3 palier(s)');
     });
     it('nb de productions = types de travaux', () => {

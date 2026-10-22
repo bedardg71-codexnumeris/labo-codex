@@ -43,7 +43,7 @@ describe('#339 — l\'écran des catégories : la terminale sort des obligatoire
         await win.recalculerPonderationsUnitaires();
         expect(elements['mat-obligatoires-liste'].innerHTML).not.toContain('data-prod-id="TERM"');
         expect(elements['mat-obligatoires-liste'].innerHTML).toContain('data-prod-id="O2"');
-        expect(elements['mat-obligatoires-unitaire'].innerHTML).toContain('<strong>17.50%</strong>');
+        expect(elements['mat-obligatoires-unitaire'].innerHTML).toContain('<strong>17,50\u00A0%</strong>');
         expect(elements['mat-obligatoires-unitaire'].innerHTML).toContain('(2 cochées)');
     });
 

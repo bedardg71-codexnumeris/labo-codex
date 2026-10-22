@@ -301,7 +301,7 @@ async function afficherTableauProductions() {
                 ${prod.type !== 'artefact-portfolio' ? `
                 <div>
                     <label class="production-champ-label">Pondération</label>
-                    <input type="text" value="${prod.ponderation}%" class="controle-form production-champ-input-bold" readonly>
+                    <input type="text" value="${formaterPourcentage(prod.ponderation)}" class="controle-form production-champ-input-bold" readonly>
                 </div>
                 ` : ''}
                 ${!estPortfolio ? `
@@ -379,7 +379,7 @@ function validerProductionsStd(productions) {
         // Règle 3a : les pondérées non participantes n'entrent pas dans le calcul.
         candidates.forEach(p => {
             avertissements.push({
-                message: `« ${nomDe(p)} » porte une pondération (${p.ponderation} %) mais n'entre pas dans le calcul STD : seuls le pool d'artefacts et l'évaluation terminale comptent.`
+                message: `« ${nomDe(p)} » porte une pondération (${formaterPourcentage(p.ponderation)}) mais n'entre pas dans le calcul STD : seuls le pool d'artefacts et l'évaluation terminale comptent.`
             });
         });
         // Règle 3a bis : pondération posée sur un artefact du pool (ignorée aussi).
@@ -387,7 +387,7 @@ function validerProductionsStd(productions) {
             .filter(p => p && p.type === 'artefact-portfolio' && typeof p.ponderation === 'number' && p.ponderation > 0)
             .forEach(p => {
                 avertissements.push({
-                    message: `« ${nomDe(p)} » est un artefact du pool : sa pondération (${p.ponderation} %) n'est pas utilisée par le calcul.`
+                    message: `« ${nomDe(p)} » est un artefact du pool : sa pondération (${formaterPourcentage(p.ponderation)}) n'est pas utilisée par le calcul.`
                 });
             });
         // Pondération de la terminale manquante → note non constructible.
@@ -398,13 +398,13 @@ function validerProductionsStd(productions) {
         } else if (!conteneur) {
             // Règle 3b : pondération du pool obtenue par complément.
             avertissements.push({
-                message: `Aucune production « Portfolio (conteneur) » : le pool d'artefacts vaut le complément de la terminale, soit ${Math.max(0, 100 - terminale.ponderation)} % (100 − ${terminale.ponderation}). C'est permis — vérifie que c'est voulu.`
+                message: `Aucune production « Portfolio (conteneur) » : le pool d'artefacts vaut le complément de la terminale, soit ${formaterPourcentage(Math.max(0, 100 - terminale.ponderation))} (100 − ${terminale.ponderation}). C'est permis — vérifie que c'est voulu.`
             });
         }
     } else if (candidates.length === 1) {
         // Règle 5 : cas NON ambigu → geste explicite offert, jamais de conversion auto.
         avertissements.push({
-            message: `« ${nomDe(candidates[0])} » est pondérée (${candidates[0].ponderation} %) mais son type est « ${getTypeLabel(candidates[0].type)} » : sans le type « Évaluation terminale », elle n'entre pas dans le calcul STD.`,
+            message: `« ${nomDe(candidates[0])} » est pondérée (${formaterPourcentage(candidates[0].ponderation)}) mais son type est « ${getTypeLabel(candidates[0].type)} » : sans le type « Évaluation terminale », elle n'entre pas dans le calcul STD.`,
             productionId: candidates[0].id
         });
     } else if (candidates.length > 1) {
@@ -2751,17 +2751,17 @@ async function mettreAJourPonderationTotale() {
 
     const total = productionsComptees.reduce((sum, prod) => sum + (prod.ponderation || 0), 0);
 
-    document.getElementById('ponderationTotale').textContent = total + '%';
+    document.getElementById('ponderationTotale').textContent = formaterPourcentage(total);
 
     const statut = document.getElementById('statutPonderation');
     if (total === 100) {
         statut.innerHTML = '<span class="icone-inline icone-inline--check" aria-hidden="true"></span>Pondération correcte';
         statut.style.color = 'var(--vert-succes)';
     } else if (total > 100) {
-        statut.textContent = `${total - 100}% en trop`;
+        statut.textContent = `${formaterPourcentage(total - 100)} en trop`;
         statut.style.color = 'var(--rouge-erreur)';
     } else {
-        statut.textContent = `${100 - total}% manquant`;
+        statut.textContent = `${formaterPourcentage(100 - total)} manquant`;
         statut.style.color = 'var(--btn-annuler)';
     }
 }
@@ -2929,7 +2929,7 @@ async function afficherToutesLesProductionsParType() {
                         <div class="production-compact-meta">
                             ${getTypeLabel(prod.type)}
                             ${!estArtefact ? `<span class="production-separateur">•</span>
-                            <strong class="production-ponderation">${prod.ponderation}%</strong>` : ''}
+                            <strong class="production-ponderation">${formaterPourcentage(prod.ponderation)}</strong>` : ''}
                             ${!estPortfolio && nomGrille !== 'Aucune grille' ? `<span class="production-separateur">•</span>
                             ${echapperHtml(nomGrille)}` : ''}
                         </div>

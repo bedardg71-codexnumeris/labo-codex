@@ -99,7 +99,7 @@
         var cats = portfolio.categories || (_conf(config).categories);
         if (cats && cats.actif && cats.selection && cats.obligatoires) {
             var ps = cats.selection.ponderation, po = cats.obligatoires.ponderation;
-            if (ps != null && po != null) return 'Sélection ' + ps + ' % / Obligatoires ' + po + ' %';
+            if (ps != null && po != null) return 'Sélection ' + formaterPourcentage(ps) + ' / Obligatoires ' + formaterPourcentage(po);
         }
         if (famille === 'sommative') return 'Par production (réglée dans Conception → Productions)';
         if (famille === 'denotation') return 's.o. (note = jugement)';
@@ -436,7 +436,7 @@
             var seuil = _lire(config, 'seuilAcceptable');
             if (typeof seuil !== 'number') seuil = _lire(config, 'seuilAcceptabilite');
             out.push(_row('seuilAcceptabilite', 'Seuil d\'acceptabilité',
-                seuil != null ? (seuil + ' %') : '—', 'determination'));
+                seuil != null ? (formaterPourcentage(seuil)) : '—', 'determination'));
         }
         if (famille === 'denotation') {
             var sug = _lire(config, 'suggestion') || {};

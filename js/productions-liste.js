@@ -127,7 +127,7 @@ async function afficherListeProductions(filtreType = '') {
         // 🆕 Beta 95.4 : Badges uniformisés avec grilles/échelles
         // Badge de pondération (sauf pour portfolio conteneur et artefacts)
         const ponderationBadge = (prod.type !== 'portfolio' && prod.type !== 'artefact-portfolio' && prod.ponderation)
-            ? `<span class="badge-caracteristique">${prod.ponderation}%</span>`
+            ? `<span class="badge-caracteristique">${formaterPourcentage(prod.ponderation)}</span>`
             : '';
 
         // #486 : badge « à planifier ». Depuis que la date d'échéance ne bloque

@@ -164,7 +164,7 @@ describe('lot 2 · B — la portée (#674) sait lire les points', () => {
         expect(ecran.niveauProduction1.textContent).toBe('--');
         expect(ecran.porteeNote1.classList.contains('u-hide')).toBe(false);
         expect(ecran.porteeNote1.textContent).toContain('Langue');
-        expect(ecran.porteeNote1.textContent).toContain('30 %');
+        expect(ecran.porteeNote1.textContent).toContain('30\u00A0%');
         expect(win.porteeCalculeeCourante).toMatchObject({ ponderationCouverte: 70, ponderationGrille: 100, incomplete: true });
         expect(win.porteeCalculeeCourante.criteresHorsNote).toEqual([
             { critereId: 'c2', nom: 'Langue', ponderation: 30, motif: 'sans-niveau', niveau: '' }
