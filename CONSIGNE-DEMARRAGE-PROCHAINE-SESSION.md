@@ -1,5 +1,15 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 16 h 35 (Toronto) : `1.214.0` EN LIGNE** (build `1022-1318`) — Netlify
+> `6ada7260`, `commit_ref` `06a19301`, `state: ready`, publié à 20:30:45 Z (16 h 30). Verdict Playwright complet vert sur
+> `06a19301` (code 0, 0 échec connu, aucun instable, 0 veille, éveil complet tenu, sur secteur). Le verdict sur `f740621a` était
+> rouge : la spec #830 que #1137 avait périmée (« μ=93 % ») ; `06a19301` corrige ses trois motifs, relu par Cowork. La 1.214 porte
+> le miroir, « Coller sa liste de codes », la limite des deux critères (#1132), la grille à niveaux nommés et à points (#1125),
+> la virgule partout (#1137) et la protection des données (#1075). ⚠ **Le port 22 vers github.com est bloqué sur ce réseau** :
+> `pousser.sh` a poussé par le port 443 (`GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=url.ssh://git@ssh.github.com:443/.insteadOf
+> GIT_CONFIG_VALUE_0=git@github.com:`), sans toucher à la configuration. **Ouverts** : #1140 et #1141 (suites de #1075 et de #1137),
+> #1093 (`ci/verdict-morceaux`, à Grégoire). **MANDAT COURANT** : la prochaine consigne de Cowork, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 1 h 40 (Toronto) : `1.213.0` EN LIGNE** (build `1021-1224`) — Netlify
 > `6ad9a14e`, `commit_ref` `9bb49dcb`, `state: ready`, publié à 05:38:37 Z (1 h 38). Verdict Playwright complet vert sur
 > `9bb49dcb` (code 0, 0 échec connu, 1 instable : `grilles-sous-criteres-condense.spec.js`, 0 veille, sur secteur) ; `9bb49dcb`
