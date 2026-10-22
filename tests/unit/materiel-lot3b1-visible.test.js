@@ -109,7 +109,7 @@ describe('lot 3b1 · L — le bloc « Ce qui est attendu à chaque niveau », en
 describe('lot 3b1 · H — un critère sans données (↻ 20 oct. : sa section « Sous-critères », vide)', () => {
     it('H.a la liste des critères : l’appel au bloc est collé au gabarit ; un critère sans données montre la section vide et son bouton ; un algorithmique, rien', () => {
         const src = readFileSync(path.join(racine, 'js', 'grilles.js'), 'utf8');
-        expect(src).toContain('            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}\n        </div>\n    `).join(\'\');');
+        expect(src).toContain('            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, criteres: grille.criteres })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}\n        </div>\n    `).join(\'\');');
         const { win, dom } = monter();
         win.afficherCriteresGrille({ id: 'GR_BANC', criteres: [critere(), critere({ id: 'CR_2', nom: 'Structure', type: 'algorithmique' })] });
         const cartes = dom.window.document.querySelectorAll('#listeCriteres .item-liste');

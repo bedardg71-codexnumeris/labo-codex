@@ -593,7 +593,15 @@
     /** La phrase de Grégoire, telle quelle. « X » est le NOM de la grille, jamais un identifiant. */
     function _phraseSourceCodes() {
         var nom = (_grilleCourante && typeof _grilleCourante.nom === 'string') ? _grilleCourante.nom.trim() : '';
-        return 'Les codes de cette copie viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.';
+        var phrase = 'Les codes de cette copie viennent de sa grille « ' + (nom || 'sans nom') + ' ». Pour les modifier, ouvre la grille.';
+        // #1132 (22 oct. 2026) : plusieurs critères algorithmiques — les codes ne vont qu'au premier, et on le dit.
+        var e = (typeof window !== 'undefined') ? window.enoncesAlgo : null;
+        var algos = (e && typeof e.criteresAlgorithmiques === 'function') ? e.criteresAlgorithmiques(_grilleCourante) : [];
+        if (algos.length > 1) {
+            var premier = (algos[0].nom || '').trim() || 'sans nom';
+            phrase += ' Ils vont tous au critère « ' + premier + ' », le premier des ' + algos.length + ' critères algorithmiques de la grille.';
+        }
+        return phrase;
     }
 
     /** Les entrées `errfr_*` d'OUTILS suivent la liste courante — et rien d'autre n'y reste. */

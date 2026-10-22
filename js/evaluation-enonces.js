@@ -115,11 +115,18 @@ function libelleCritere(critere) {
  * @returns {object|null} le critère, ou `null` si la grille n'en porte aucun.
  */
 function critereAlgorithmique(grille) {
+    return criteresAlgorithmiques(grille)[0] || null;
+}
+
+/**
+ * #1132 (22 oct. 2026) — TOUS les critères algorithmiques d'une grille, dans l'ordre. Les codes posés
+ * ne vont qu'au premier (ci-dessus) ; l'éditeur de grille et la palette d'Annoter le DISENT quand il y
+ * en a plusieurs. Router chaque code vers son critère demande de changer le modèle (un code posé ne
+ * porte pas son critère) : décision de Grégoire, 22 oct., on dit la limite, la fiche reste ouverte.
+ */
+function criteresAlgorithmiques(grille) {
     var criteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
-    for (var i = 0; i < criteres.length; i++) {
-        if (criteres[i] && criteres[i].type === 'algorithmique') return criteres[i];
-    }
-    return null;
+    return criteres.filter(function(c) { return !!c && c.type === 'algorithmique'; });
 }
 
 /**
@@ -697,6 +704,7 @@ var api = {
     mentionPonderee: mentionPonderee,
     libelleCritere: libelleCritere,
     critereAlgorithmique: critereAlgorithmique,
+    criteresAlgorithmiques: criteresAlgorithmiques,
     critereAlgorithmiqueOuNomme: critereAlgorithmiqueOuNomme,
     appliquerAuCritere: appliquerAuCritere,
     enoncesRediges: enoncesRediges,
