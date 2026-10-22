@@ -4474,7 +4474,7 @@ function carteGabaritAlgo(critere, ctx, section, titre, contenu, fermeParDefaut)
  * noms qu'il LIT (« erreur », « mot ») — rien n'est écrit avant un geste sur un champ.
  * Le geste : `modifierNomsCritereAlgoHandler`, qui écrit les QUATRE formes affichées (une paire
  * écrite à moitié se lirait comme absente). En création, la cible `temp` (`_modifierCritereCible`).
- * `esc()` sur tout : ce sont des mots tapés. ⚠ Textes provisoires (TEXTES-2026-10-22-…).
+ * `esc()` sur tout : ce sont des mots tapés. Textes validés le 22 oct. (TEXTES-2026-10-22-…).
  */
 const TEXTES_NOMS_ALGO = {
     erreurs: 'Ce que tu comptes',

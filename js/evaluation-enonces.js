@@ -208,7 +208,7 @@ var JETONS = [JETON_CRITERE, JETON_ERREURS, JETON_PLURIEL, JETON_MOTS, JETON_POI
 //   · les deux formes écrites            ⮕ celles de l'enseignant·e ;
 //   · sinon, critère d'avant l'étape 2a  ⮕ « erreur / erreurs », « mot / mots » — le texte
 //     d'hier, au caractère près (sentinelle de l'invariant du stock) ;
-//   · sinon, critère né depuis ce lot (`nomsAttendus`) ⮕ un repli PROVISOIRE, qui ne nomme
+//   · sinon, critère né depuis ce lot (`nomsAttendus`) ⮕ le REPLI, qui ne nomme
 //     aucune discipline : jamais un nom vide ni un jeton nu sous les yeux d'un élève.
 // ⚠ PAS LA MARQUE DES CODES (`codesSousCriteresSeulement`) — relecture de Cowork, 22 oct.,
 // 17 h 40 : celle-là est en ligne depuis la 1.213.0 et dit « né depuis le 21 oct. » ; la
@@ -221,11 +221,12 @@ var NOMS_FRANCAIS_ECRIT = {
     erreurs: { singulier: 'erreur', pluriel: 'erreurs' },
     mots:    { singulier: 'mot',    pluriel: 'mots' }
 };
-// ⚠ TEXTE PROVISOIRE, À SOUMETTRE À GRÉGOIRE (TEXTES-2026-10-22-noms-critere-algorithmique.md) :
-// ce que lit l'élève d'un critère neuf évalué sans ses noms.
-var NOMS_PROVISOIRES = {
-    erreurs: { singulier: 'élément relevé', pluriel: 'éléments relevés' },
-    mots:    { singulier: 'unité',          pluriel: 'unités' }
+// Ce que lit l'élève d'un critère neuf évalué sans ses noms : « Ta production contient 5 éléments
+// relevés pour 12 éléments examinés. » Décision de Grégoire, 22 oct. 2026, 18 h 29 (l'étendue) ;
+// textes validés (TEXTES-2026-10-22-noms-critere-algorithmique.md).
+var NOMS_DE_REPLI = {
+    erreurs: { singulier: 'élément relevé',  pluriel: 'éléments relevés' },
+    mots:    { singulier: 'élément examiné', pluriel: 'éléments examinés' }
 };
 // La borne des deux schémas qui voyagent (import, partage), et celle de l'éditeur.
 var MAX_NOM = 40;
@@ -278,7 +279,7 @@ function _paireComplete(p) {
  */
 function noms(critere) {
     var s = nomsSaisis(critere);
-    var repli = _estNeuf(critere) ? NOMS_PROVISOIRES : NOMS_FRANCAIS_ECRIT;
+    var repli = _estNeuf(critere) ? NOMS_DE_REPLI : NOMS_FRANCAIS_ECRIT;
     var r = {};
     CHAMPS_NOMS.forEach(function(k) {
         r[k] = _copiePaire(_paireComplete(s[k]) ? s[k] : repli[k]);
@@ -408,11 +409,11 @@ var REPERES = [
     // Étape 2a (22 oct. 2026) — les deux noms, ÉCRITS dans la grille comme le nom du critère (famille
     // `posee`), remplis par ce module à chaque appel. Ils remplacent {s}, qui n'est plus offert : hors de
     // la palette, le composeur les montrerait en texte brut dans le décompte par défaut.
-    // ⚠ Libellés et aides provisoires (TEXTES-2026-10-22-noms-critere-algorithmique.md).
+    // Libellés et aides validés le 22 oct. (TEXTES-2026-10-22-…) : aucun exemple propre à une discipline.
     { jeton: JETON_NOM_ERREURS, famille: 'posee', libelle: 'ce que tu comptes',
-      aide: 'Le nom de ce que tu comptes, écrit sous le critère, accordé au nombre : « 1 erreur », « 2 erreurs ».' },
+      aide: 'Le nom de ce que tu comptes, écrit sous le critère : au singulier sous 2, au pluriel à partir de 2.' },
     { jeton: JETON_NOM_MOTS,    famille: 'posee', libelle: 'ce à quoi tu le rapportes',
-      aide: 'Le nom de ce à quoi tu rapportes le compte, écrit sous le critère, accordé au nombre : « 1 mot », « 400 mots ».' }
+      aide: 'Le nom de ce à quoi tu rapportes le compte, écrit sous le critère : au singulier sous 2, au pluriel à partir de 2.' }
 ];
 
 // ---------------------------------------------------------------------
@@ -911,7 +912,7 @@ var api = {
     MAX_NOM: MAX_NOM,
     MARQUE_NOMS: MARQUE_NOMS,
     marquerNomsAttendus: marquerNomsAttendus,
-    NOMS_PROVISOIRES: { erreurs: _copiePaire(NOMS_PROVISOIRES.erreurs), mots: _copiePaire(NOMS_PROVISOIRES.mots) },
+    NOMS_DE_REPLI: { erreurs: _copiePaire(NOMS_DE_REPLI.erreurs), mots: _copiePaire(NOMS_DE_REPLI.mots) },
     noms: noms,
     nomsSaisis: nomsSaisis,
     nomsManquants: nomsManquants,
