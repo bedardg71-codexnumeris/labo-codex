@@ -201,7 +201,7 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Échelles prédéfinies disponibles",
                 items: [
                     "4 niveaux : Incomplet, Développement, Maîtrise, Étendu",
-                    "Pourcentage (5 niveaux) : 0-20%, 20-40%, 40-60%, 60-80%, 80-100%",
+                    "Pourcentage (5 niveaux) : 0-20\u00a0%, 20-40\u00a0%, 40-60\u00a0%, 60-80\u00a0%, 80-100\u00a0%",
                     "Lettres (5 niveaux) : E, D, C, B, A",
                     "Personnalisée : crée ta propre échelle"
                 ]
@@ -656,7 +656,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: "Cas typique",
-                contenu: "Un étudiant montre A=85%, C=60%, P=45%. Son assiduité est bonne, mais il remet peu d'artefacts et ceux qu'il remet sont faibles. Le pattern suggère un problème de méthode de travail, pas de motivation. Une intervention de niveau 2 axée sur la planification et l'organisation pourrait aider."
+                contenu: "Un étudiant montre A=85\u00a0%, C=60\u00a0%, P=45\u00a0%. Son assiduité est bonne, mais il remet peu d'artefacts et ceux qu'il remet sont faibles. Le pattern suggère un problème de méthode de travail, pas de motivation. Une intervention de niveau 2 axée sur la planification et l'organisation pourrait aider."
             },
             {
                 type: 'conseil',

@@ -56,7 +56,7 @@ describe('Infobulles — les chiffres qu\'elles donnent sont ceux du code', () =
         });
         const bulle = HOVER.match(/'depist-seuils-restaurer':\s*\n?\s*'((?:[^'\\]|\\.)*)'/);
         expect(bulle).toBeTruthy();
-        expect(bulle[1]).toContain(defauts.join(' / ') + ' %');
+        expect(bulle[1]).toContain(defauts.join(' / ') + '\\u00a0%');   // #1137 : l'insécable avant « % », échappé dans la source
     });
 });
 

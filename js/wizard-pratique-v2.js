@@ -709,7 +709,7 @@ const ETAPES_WIZARD = {
                 max: 100,
                 default: 100,
                 required: true,
-                help: '100% = toutes les spécifications doivent être respectées'
+                help: '100\u00a0% = toutes les spécifications doivent être respectées'
             },
             {
                 id: 'utiliserJetons',

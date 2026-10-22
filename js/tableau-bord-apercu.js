@@ -2362,10 +2362,10 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
                     <div class="barre-patterns-overlay"></div>
                 </div>
                 <div class="distribution-legende tb-barre-distribution">
-                    <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: var(--badge-pattern-stable-texte); font-weight: 600; text-align: center;">Progression<br>stable<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
-                    <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: var(--badge-pattern-defi-texte); font-weight: 600; text-align: center;">Défi<br>spécifique<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
-                    <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: var(--badge-pattern-emergent-texte); font-weight: 600; text-align: center;">Difficulté<br>émergente<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
-                    <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: var(--badge-pattern-critique-texte); font-weight: 600; text-align: center;">Difficulté<br>persistante<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 12.5%; transform: translateX(-50%); color: var(--badge-pattern-stable-texte); font-weight: 600; text-align: center;">Progression<br>stable<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0\u00a0%)</span></span>
+                    <span style="position: absolute; left: 37.5%; transform: translateX(-50%); color: var(--badge-pattern-defi-texte); font-weight: 600; text-align: center;">Défi<br>spécifique<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0\u00a0%)</span></span>
+                    <span style="position: absolute; left: 62.5%; transform: translateX(-50%); color: var(--badge-pattern-emergent-texte); font-weight: 600; text-align: center;">Difficulté<br>émergente<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0\u00a0%)</span></span>
+                    <span style="position: absolute; left: 87.5%; transform: translateX(-50%); color: var(--badge-pattern-critique-texte); font-weight: 600; text-align: center;">Difficulté<br>persistante<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0\u00a0%)</span></span>
                 </div>
             </div>
         `;
@@ -2588,9 +2588,9 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                     <div class="barre-rai-overlay"></div>
                 </div>
                 <div class="distribution-legende tb-barre-distribution">
-                    <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: var(--bleu-clair); font-weight: 600; text-align: center;">Niveau 1<br>Universel<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
-                    <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: var(--jetons-reprise-titre); font-weight: 600; text-align: center;">Niveau 2<br>Préventif<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
-                    <span style="position: absolute; left: 83%; transform: translateX(-50%); color: var(--den-violet); font-weight: 600; text-align: center;">Niveau 3<br>Intensif<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0%)</span></span>
+                    <span style="position: absolute; left: 16.5%; transform: translateX(-50%); color: var(--bleu-clair); font-weight: 600; text-align: center;">Niveau 1<br>Universel<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0\u00a0%)</span></span>
+                    <span style="position: absolute; left: 49.5%; transform: translateX(-50%); color: var(--jetons-reprise-titre); font-weight: 600; text-align: center;">Niveau 2<br>Préventif<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0\u00a0%)</span></span>
+                    <span style="position: absolute; left: 83%; transform: translateX(-50%); color: var(--den-violet); font-weight: 600; text-align: center;">Niveau 3<br>Intensif<br><span class="tb-texte-mini" style="color: var(--texte-muted);">0 (0\u00a0%)</span></span>
                 </div>
             </div>
         `;

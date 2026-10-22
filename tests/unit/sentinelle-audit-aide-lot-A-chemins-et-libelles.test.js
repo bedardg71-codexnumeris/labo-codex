@@ -189,7 +189,7 @@ describe('Aide — les chiffres qu\'elle cite sont ceux du code', () => {
         const m = cfgInterp.match(/defiSpecifique:\s*([0-9.]+)/);
         expect(m).toBeTruthy();
         const pct = Math.round(parseFloat(m[1]) * 100);
-        expect(AIDE_DECODEE).toContain(`(${pct}% par défaut)`);
+        expect(AIDE_DECODEE).toContain(`(${pct} % par défaut)`);   // #1137 : « 70&nbsp;% » dans index.html ; AIDE_TXT ramène &nbsp; à une espace
     });
 });
 

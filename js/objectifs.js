@@ -308,11 +308,11 @@ function genererFormulaireEnsemble(ensemble) {
             <div class="total-poids-header">
                 <span class="total-poids-label">Total des pondérations :</span>
                 <span id="totalPoidsEnsemble" class="total-poids-valeur">
-                    0%
+                    0\u00a0%
                 </span>
             </div>
             <p id="validationPoidsEnsemble" class="total-poids-message">
-                Le total doit atteindre 100% pour que l'ensemble soit valide
+                Le total doit atteindre 100\u00a0% pour que l'ensemble soit valide
             </p>
         </div>
 

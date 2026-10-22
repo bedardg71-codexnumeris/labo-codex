@@ -273,7 +273,7 @@ describe('#963 — les données après les consignes', () => {
         expect(doc).toContain('- Évaluation certificative « Carnet n°1 » (50 min ; niveau cognitif : Analyser)');
         expect(doc).toContain('  - Objectifs vérifiés : « Décrire une observation »');
         expect(doc).toContain('  - Visée : certificative');
-        expect(doc).toContain('  - Production : « Carnet d’observation n°1 » (20 %)');
+        expect(doc).toContain('  - Production : « Carnet d’observation n°1 » (20\u00A0%)');
         expect(doc).toContain('  - Grille : « Grille Ciel profond »');
         expect(doc).toContain('  - Échelle : « Échelle à quatre paliers »');
         expect(doc).toContain('  - Échéance : 2026-10-08');

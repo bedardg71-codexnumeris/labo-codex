@@ -291,7 +291,7 @@ describe('Correctifs #424 · ce que le portage règle une fois pour toutes', () 
 
     it('la production rattachée à une ACTIVITÉ par l’Organisateur sort encore (porteur historique)', () => {
         const doc = exporteur.genererExport('deroulement', 'texte');
-        expect(doc).toMatch(/Pastiche descriptif[\s\S]{0,200}Quiz de lecture \(10 %\)/);
+        expect(doc).toMatch(/Pastiche descriptif[\s\S]{0,200}Quiz de lecture \(10 %\)/);
     });
 
     it('les neuf sorties existent, non vides, et les niveaux diffèrent', () => {

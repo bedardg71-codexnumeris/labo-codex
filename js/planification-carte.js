@@ -12345,7 +12345,7 @@ var RACCOURCIS_CARTE = [
     { id: 'recentrer',          mac: 'R',                    autre: 'R',                     libelle: 'Recentrer la carte' },
     { id: 'loupe',              mac: 'L',                    autre: 'L',                     libelle: 'Longue-vue : lire sans changer le zoom' },
     { id: 'zoom-avant-arriere', mac: '⌘+ / ⌘−',              autre: 'Ctrl++ / Ctrl+−',       libelle: 'Zoom avant / arrière' },
-    { id: 'zoom-100',           mac: '⌘0',                   autre: 'Ctrl+0',                libelle: 'Zoom à 100 %, carte recentrée' },
+    { id: 'zoom-100',           mac: '⌘0',                   autre: 'Ctrl+0',                libelle: 'Zoom à 100\u00a0%, carte recentrée' },
     { id: 'zoom-molette',       mac: 'Pincer ou Ctrl+molette', autre: 'Ctrl+molette',        libelle: 'Zoom à la souris ou au trackpad' },
     { id: 'tout-selectionner',  mac: '⌘A',                   autre: 'Ctrl+A',                libelle: 'Tout sélectionner' },
     { id: 'multi-selection',    mac: '⌘+clic',               autre: 'Ctrl+clic',             libelle: 'Ajouter un bloc à la sélection, ou l’en retirer' },

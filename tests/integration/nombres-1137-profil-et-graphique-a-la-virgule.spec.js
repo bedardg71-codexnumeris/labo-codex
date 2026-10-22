@@ -84,7 +84,7 @@ test('#1137 · le profil lit la virgule et l’insécable : la note finale compo
     expect(erreurs).toEqual([]);
 });
 
-test('#1137 · un graphique de progression : la graduation et l’infobulle lisent « 85 % », « Assiduité (A): 90 % »', async ({ page }) => {
+test('#1137 · un graphique de progression : la graduation et l’infobulle lisent « 85 % », « Assiduité (A) : 90 % »', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push(e.message));
     await page.setViewportSize({ width: 820, height: 1180 });
@@ -113,6 +113,6 @@ test('#1137 · un graphique de progression : la graduation et l’infobulle lise
     }, DA);
     expect(r.chart).toBe(true);
     expect(r.graduations).toEqual(['0\u00A0%', '50\u00A0%', '85\u00A0%', '100\u00A0%']);
-    expect(r.infobulle).toBe('Assiduité (A): 90\u00A0%');
+    expect(r.infobulle).toBe('Assiduité (A)\u00A0: 90\u00A0%');
     expect(erreurs).toEqual([]);
 });

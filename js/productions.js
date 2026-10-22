@@ -1862,7 +1862,7 @@ const GESTE_MODIFIER_PRODUCTION = 'Modifier la production';
 function raisonChampsObligatoiresProduction(d) {
     if (!d.titre) return 'le nom de la production est requis.';
     if (!d.type) return 'choisis le type de la production.';
-    if (d.type !== 'artefact-portfolio' && d.ponderation === 0) return 'la pondération est requise : plus de 0 %.';
+    if (d.type !== 'artefact-portfolio' && d.ponderation === 0) return 'la pondération est requise : plus de 0\u00a0%.';
     return '';
 }
 
@@ -2522,7 +2522,7 @@ function gererChangementTypeProduction() {
         'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
         'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, allez dans « Structure des évaluations » dans les Pratiques de notation.</em>',
-        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt la session et qui s\'ajoute au portfolio dans le calcul de la note finale. Sa pondération est explicite (par exemple 40 %) et elle se combine au portfolio (par exemple 60 %) pour produire la note finale.<br><br>Une seule production de ce type par trimestre.'
+        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt la session et qui s\'ajoute au portfolio dans le calcul de la note finale. Sa pondération est explicite (par exemple 40\u00a0%) et elle se combine au portfolio (par exemple 60\u00a0%) pour produire la note finale.<br><br>Une seule production de ce type par trimestre.'
     };
 
     // Éléments Définition (carte dynamique)
@@ -2657,7 +2657,7 @@ function gererChangementTypeProduction() {
         // Note explicative pour la pondération
         if (notePonderation) {
             notePonderation.classList.remove('u-hide');
-            notePonderation.innerHTML = 'Pour une évaluation formative, utilisez une pondération de 0%.';
+            notePonderation.innerHTML = 'Pour une évaluation formative, utilisez une pondération de 0\u00a0%.';
         }
     }
 }
