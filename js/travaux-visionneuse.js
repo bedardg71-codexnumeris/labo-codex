@@ -645,7 +645,7 @@
         // Zoom — mettre à jour le bouton zoom100 avec le pourcentage réel
         var btnZoom100 = document.getElementById('travaux-btn-zoom100');
         if (btnZoom100) {
-            btnZoom100.textContent = Math.round((zoomAffiche || zoomActuel) * 100) + '%';
+            btnZoom100.textContent = formaterPourcentage(Math.round((zoomAffiche || zoomActuel) * 100));
         }
     }
 

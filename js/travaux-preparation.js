@@ -463,7 +463,7 @@
         prepEspaceWrapper.style.width = (prepEspaceW * prepZoom) + 'px';
         prepEspaceWrapper.style.height = (prepEspaceH * prepZoom) + 'px';
         var info = document.getElementById('prep-zoom-info');
-        if (info) info.textContent = Math.round(prepZoom * 100) + '%';
+        if (info) info.textContent = formaterPourcentage(Math.round(prepZoom * 100));
         // Mettre a jour les boutons preset
         var zoomArrondi = Math.round(prepZoom * 100);
         document.querySelectorAll('.prep-btn-zoom').forEach(function(btn) {
@@ -2559,10 +2559,10 @@
                     <!-- Barre de zoom -->
                     <div class="prep-zoom-bar" id="prep-zoom-bar">
                         <button class="prep-btn-zoom" data-zoom="fit">Fit</button>
-                        <button class="prep-btn-zoom" data-zoom="0.5">50%</button>
-                        <button class="prep-btn-zoom" data-zoom="1">100%</button>
-                        <button class="prep-btn-zoom" data-zoom="1.5">150%</button>
-                        <span class="prep-zoom-info" id="prep-zoom-info">100%</span>
+                        <button class="prep-btn-zoom" data-zoom="0.5">50\u00a0%</button>
+                        <button class="prep-btn-zoom" data-zoom="1">100\u00a0%</button>
+                        <button class="prep-btn-zoom" data-zoom="1.5">150\u00a0%</button>
+                        <span class="prep-zoom-info" id="prep-zoom-info">100\u00a0%</span>
                     </div>
 
                     <!-- Palette Reglages specifiques (flottante, draggable) -->

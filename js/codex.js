@@ -639,7 +639,7 @@ async function genererCodex(options = {}) {
         _prog(
             70 + Math.round(pourcent * 0.28),
             'Compression du ZIP…',
-            Math.round(pourcent) + '% compressé'
+            window.formaterPourcentage(Math.round(pourcent)) + ' compressé'
         );
     });
 
@@ -4572,7 +4572,7 @@ async function actionExporterSelection() {
     _majProgression(65, 'Compression du ZIP…');
     var zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
         _majProgression(65 + Math.round(pourcent * 0.30),
-            'Compression du ZIP…', Math.round(pourcent) + '%');
+            'Compression du ZIP…', window.formaterPourcentage(Math.round(pourcent)));
     });
 
     _majProgression(98, 'Enregistrement…');
