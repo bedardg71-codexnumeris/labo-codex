@@ -964,6 +964,48 @@
         sauvegarderAnnotations(annotations, options);
     }
 
+    /**
+     * #1075, point 7 (22 oct. 2026) — LES ANNOTATIONS SUIVENT LEUR PAGE. Elles sont rangées par
+     * rang de page (`pages[0]`, `pages[1]`…, travaux-annotation.js) ; l'éditeur de pages retirait
+     * ou déplaçait des pages sans les toucher : celles d'une page retirée glissaient sur la
+     * suivante. Fonction pure : `origines[i]` est le rang d'ORIGINE de la page qui occupe le rang
+     * `i` (null pour une page venue d'ailleurs : insérée, ou d'un fichier fusionné). Une page qui
+     * n'a plus de place perd ses annotations ; une page venue d'ailleurs n'en reçoit aucune.
+     * ⚠ Pivoter une page ne déplace pas ses annotations (défaut voisin, jamais signalé).
+     * @param {Object} pages - `annotation.pages`
+     * @param {Array<number|null>} origines
+     * @returns {Object} les pages réindexées
+     */
+    function reindexerPagesAnnotation(pages, origines) {
+        const source = pages && typeof pages === 'object' ? pages : {};
+        const out = {};
+        (origines || []).forEach(function (o, i) {
+            if (Number.isInteger(o) && source[o]) out[i] = source[o];
+        });
+        return out;
+    }
+
+    /**
+     * #1075, point 7 — après l'enregistrement de l'éditeur de pages : les annotations du fichier
+     * suivent leurs pages. N'écrit que si l'ordre a changé.
+     * @param {string} fichierId
+     * @param {Array<number|null>} origines - voir `reindexerPagesAnnotation`
+     * @param {{discret?: boolean}} [options]
+     * @returns {number} le nombre d'annotations réécrites
+     */
+    function reporterAnnotationsPages(fichierId, origines, options) {
+        const identite = (origines || []).every(function (o, i) { return o === i; });
+        if (identite) return 0;
+        let n = 0;
+        const annotations = obtenirAnnotations().map(function (a) {
+            if (!a || a.fichierId !== fichierId) return a;
+            n++;
+            return Object.assign({}, a, { pages: reindexerPagesAnnotation(a.pages, origines), dateModification: new Date().toISOString() });
+        });
+        if (n > 0) sauvegarderAnnotations(annotations, options);
+        return n;
+    }
+
     /* ===============================
        CORBEILLE FICHIERS
        =============================== */
@@ -1417,6 +1459,8 @@
         obtenirAnnotations: obtenirAnnotations,
         obtenirAnnotationFichier: obtenirAnnotationFichier,
         sauvegarderAnnotationFichier: sauvegarderAnnotationFichier,
+        reindexerPagesAnnotation: reindexerPagesAnnotation,   // #1075, point 7
+        reporterAnnotationsPages: reporterAnnotationsPages,
         // FSAPI
         estFSAPIDisponible: estFSAPIDisponible,
         estFSAPIActif: estFSAPIActif,
