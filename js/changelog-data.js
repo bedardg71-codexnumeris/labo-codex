@@ -24,7 +24,8 @@
             // 1.214 (le miroir du critère algorithmique, coller sa liste de codes, la limite des deux critères, la grille
             // à niveaux nommés et à points, la virgule partout, la protection des données de #1075) — titre et cinq items
             // proposés par Claude Code, sixième item et titre retouchés par Cowork, validés par Grégoire le 22 oct. 2026
-            // à 13 h 05 (`plans de travail/TEXTES-2026-10-22-a-valider.md`).
+            // à 13 h 05 ; sixième item resserré par Cowork d'après #1140 (le trimestre clos), validé par Grégoire à 13 h 17
+            // (`plans de travail/TEXTES-2026-10-22-a-valider.md`).
             version: '1.214',
             couleur: 'vert',
             titre: 'Essayer sa formule et coller sa liste de codes',
@@ -34,7 +35,7 @@
                 'Quand une grille a deux critères algorithmiques, les codes posés dans Annoter vont tous au premier. L’éditeur de grille et Annoter le disent maintenant, et nomment le critère qui les reçoit.',
                 'Une grille en points qui nomme ses niveaux (par ex. «&nbsp;Sommaire&nbsp;», «&nbsp;Efficace&nbsp;») se crée avec son barème&nbsp;: chaque niveau devient une tranche, ses points dans le champ Points plutôt que dans le texte.',
                 'Tous les nombres s’écrivent à la française, plus seulement les notes&nbsp;: pondérations, points, indices, taux, graphiques et indicateurs («&nbsp;17,5&nbsp;%&nbsp;», «&nbsp;3,25 / 4&nbsp;»).',
-                'En mode anonymisé, le vrai DA ne paraît plus dans les propriétés d’un fichier, l’import des copies ni le Comparateur. Un trimestre clos refuse les modifications, sauf si tu coches «&nbsp;Permission d’écriture&nbsp;». Une production employée ne se supprime plus. Le rapport de bogue ne garde plus le texte des boutons cliqués.'
+                'En mode anonymisé, le vrai DA ne paraît plus dans les propriétés d’un fichier, l’import des copies ni le Comparateur. Un trimestre clos refuse maintenant d’enregistrer une évaluation ou des présences, sauf si tu coches «&nbsp;Permission d’écriture&nbsp;». Les imports, entre autres, y écrivent encore. Une production employée ne se supprime plus. Le rapport de bogue ne garde plus le texte des boutons cliqués.'
             ]
         },
         {

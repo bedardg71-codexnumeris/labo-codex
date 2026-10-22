@@ -8,6 +8,8 @@
 > - **G4** : « L’ajout n’a pas abouti ; rien n’a été ajouté. Réessaie. »
 >
 > Tous les autres textes (lignes 1 à 5 des Nouvelles, l’écran des codes, les mots de #1075) restent tels qu’écrits.
+>
+> **Sixième ligne resserrée, VALIDÉE par Grégoire à 13 h 17** (Cowork, d'après #1140 : 56 écritures directes ne passent pas par le refus du trimestre clos). Seule la deuxième phrase change : « Un trimestre clos refuse maintenant d’enregistrer une évaluation ou des présences, sauf si tu coches « Permission d’écriture ». Les imports, entre autres, y écrivent encore. »
 
 > Claude Code, jeudi 22 octobre 2026, sur `main` après `3203a510`. Demandé par Cowork (réponse sur l'étape 5). Cowork en fait une page pour Grégoire.
 > Tous les textes de la partie 1 sont **provisoires** : écrits par Claude Code à l'étape 5, jamais lus par Grégoire. Ils s'affichent à l'enseignant, pas à l'élève ; le **commentaire** collé, lui, passe tel quel à l'élève et n'est pas un texte de l'application.
