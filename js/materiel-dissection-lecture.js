@@ -584,7 +584,7 @@
             if (cr.auto && cr.reponses.length) { cr.reponses[cr.reponses.length - 1].pondApres = np[np.length - 1]; return; }
             // Lot 5 : une seconde Pondération (celle d'une ligne de total, après le dernier critère) ne
             // remplace plus en silence celle du critère. Texte validé G. 18 oct. 13 h 48.
-            if (cr.pond != null) { sansPlace(x, tx, t, 'son critère a déjà une pondération (' + String(cr.pond).replace('.', ',') + ') ; une ligne de total prend l’étiquette « Total »'); return; }
+            if (cr.pond != null) { sansPlace(x, tx, t, 'son critère a déjà une pondération (' + formaterNombre(cr.pond) + ') ; une ligne de total prend l’étiquette « Total »'); return; }
             cr.pond = np[np.length - 1];
         },
         descripteur: lireDescripteur,

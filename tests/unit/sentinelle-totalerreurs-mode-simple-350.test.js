@@ -46,6 +46,9 @@ function chargerCalcul(elements, evaluationEnCours, dbStub) {
         addEventListener() {}, querySelector() { return null; }, querySelectorAll() { return []; }
     };
     const fauxWindow = {};
+    // #1137 (22 oct. 2026) : les registres de formules et d'énoncés disent leurs nombres par le module
+    // des nombres affichés, chargé avant eux par index.html. Le VRAI, d'abord.
+    new Function('window', '"use strict";\n' + readFileSync(path.join(racine, 'js/note-pourcentage.js'), 'utf8'))(fauxWindow);
     // genererRetroaction reste dans le résidu ; ici on stube pour ne pas crasher.
     fauxWindow.genererRetroaction = () => {};
 

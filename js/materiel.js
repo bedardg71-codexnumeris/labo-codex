@@ -99,7 +99,7 @@
             '<p>' + e('Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' notés en points. Rien d’autre n’a changé dans l’application.') + '</p>' +
             aCompleterHtml(r) + '<div class="materiel-cartes-cree">' +
             // Lot 9 : le total des seuls critères qui ont des points, et combien n'en ont pas encore (validé G. 18 oct. 20 h 08).
-            carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + String(r.totalPoints).replace('.', ',') + (Math.abs(r.totalPoints) >= 2 ? ' points' : ' point') +
+            carteCree('Ta grille', pluriel(r.nbC, 'critère', 'critères') + ', sur ' + formaterNombre(r.totalPoints) + (Math.abs(r.totalPoints) >= 2 ? ' points' : ' point') +
                 (r.aCompleter ? ' ; ' + pluriel(r.aCompleter, 'critère', 'critères') + ' sans points pour l’instant.' : '.'), 'grille-criteres', 'La voir dans Grilles de critères') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +

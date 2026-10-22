@@ -51,6 +51,11 @@
 (function() {
 'use strict';
 
+// #1137 (22 oct. 2026) : les nombres affichés passent par js/note-pourcentage.js, que index.html
+// charge avant ce module ; un banc Node (`require`) le requiert.
+var _formaterNombre = (typeof window !== 'undefined' && typeof window.formaterNombre === 'function')
+    ? window.formaterNombre : require('./note-pourcentage.js').formaterNombre;
+
 // Borne de la recherche du plancher : une borne de RECHERCHE, pas une longueur de copie.
 var PLAFOND_RECHERCHE = 100000;
 
@@ -58,14 +63,9 @@ function _reg(nom) {
     return (typeof window !== 'undefined' && window[nom]) ? window[nom] : null;
 }
 
-/** Un nombre à la virgule, deux décimales au plus. */
-function _nb(n) {
-    return String(Math.round(Number(n) * 100) / 100).replace('.', ',');
-}
-
 /** Singulier sous 2, comme la règle C1 des énoncés. */
 function _accord(n, singulier, pluriel) {
-    return _nb(n) + ' ' + (Math.abs(Number(n)) >= 2 ? pluriel : singulier);
+    return _formaterNombre(n) + ' ' + (Math.abs(Number(n)) >= 2 ? pluriel : singulier);
 }
 
 /**
@@ -78,7 +78,7 @@ function libelles(critere) {
         occurrences: function(n) { return _accord(n, 'erreur', 'erreurs'); },
         etendue: function(n) { return _accord(n, 'mot', 'mots'); },
         sansEtendue: 'sans nombre de mots',
-        code: function(nombre, nom, poids) { return _nb(nombre) + ' × « ' + nom + ' » (poids ' + _nb(poids) + ')'; },
+        code: function(nombre, nom, poids) { return _formaterNombre(nombre) + ' × « ' + nom + ' » (poids ' + _formaterNombre(poids) + ')'; },
         eleveLira: 'L\'élève lira :',
         aucunePhrase: 'aucune phrase',
         plancher: 'la note touche le plancher',

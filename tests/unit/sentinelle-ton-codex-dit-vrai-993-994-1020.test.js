@@ -29,6 +29,8 @@ function monterTaille(navigator, muter) {
     const code = muter ? muter(brut) : brut;
     if (muter && code === brut) throw new Error('Témoin inerte : la mutation n\'a rien remplacé dans js/taille-fichier.js.');
     const win = { navigator };
+    // #1137 (22 oct. 2026) : le nombre se dit par `window.formaterNombre`, chargé avant par index.html.
+    new Function('window', '"use strict";\n' + readFileSync(path.join(racine, 'js/note-pourcentage.js'), 'utf8'))(win);
     new Function('window', '"use strict";\n' + code)(win);
     return win.TailleFichier;
 }

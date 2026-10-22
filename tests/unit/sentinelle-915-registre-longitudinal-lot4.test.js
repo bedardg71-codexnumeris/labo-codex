@@ -91,8 +91,8 @@ describe('#915 lot 4 — les indices, tels que rangés, à la bonne échelle', (
         expect(b.api.lignesIndices({
             assiduite: { indice: 0.9, periodesPresentes: 27, periodesOffertes: 30, nombreSeances: 15 },
             cp: { actuel: { C: 50, P: 70.4, noteConstructible: true } }
-        })).toEqual(['Assiduité : 90 % (27 sur 30 périodes)', 'Complétion : 50 %', 'Performance : 70 %']);
-        expect(b.api.lignesIndices({ assiduite: 1, cp: { actuel: { C: 100, P: 0 } } })).toEqual(['Assiduité : 100 %', 'Complétion : 100 %', 'Performance : 0 %']);
+        })).toEqual(['Assiduité : 90\u00A0% (27 sur 30 périodes)', 'Complétion : 50\u00A0%', 'Performance : 70\u00A0%']);
+        expect(b.api.lignesIndices({ assiduite: 1, cp: { actuel: { C: 100, P: 0 } } })).toEqual(['Assiduité : 100\u00A0%', 'Complétion : 100\u00A0%', 'Performance : 0\u00A0%']);
     });
 
     it('une note non constructible se DIT (sur `actuel` comme dans `details`) : pas de 0 trompeur', () => {
@@ -126,7 +126,7 @@ describe('#915 lot 4 — le dossier déplié', () => {
         expect(blocs).toHaveLength(2);
         const a25 = blocs.find((x) => texteDe(x).includes('Automne 2025'));
         expect(texteDe(a25)).toMatch(/Automne 2025 \(601-101-MQ, gr\. 00001\) \| Copie du \d{4}-\d{2}-\d{2} · statut : actif · programme : 300\.A0/);
-        expect(texteDe(a25)).toContain('Indices au moment de la copie | Assiduité : 90 % (27 sur 30 périodes) | Complétion : 50 % | Performance : 70 %');
+        expect(texteDe(a25)).toContain('Indices au moment de la copie | Assiduité : 90\u00A0% (27 sur 30 périodes) | Complétion : 50\u00A0% | Performance : 70\u00A0%');
         // L'autre trimestre : aucune évaluation, aucun indice — et l'écran le dit, sans rien inventer.
         const h26 = blocs.find((x) => texteDe(x).includes('Hiver 2026'));
         expect(texteDe(h26)).toContain('Évaluations (0) | Aucune évaluation dans cette copie.');

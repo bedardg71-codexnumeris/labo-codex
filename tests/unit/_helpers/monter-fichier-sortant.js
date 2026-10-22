@@ -14,6 +14,11 @@ const racineProjet = path.resolve(__dirname, '..', '..', '..');
  * @param {function(string): string} [options.muter] - mutation de la SOURCE (témoins)
  */
 export function monterTailleFichier(win, options = {}) {
+    // #1137 (22 oct. 2026) : taille-fichier.js dit son nombre par `window.formaterNombre`
+    // (js/note-pourcentage.js), chargé avant lui par index.html : le VRAI, d'abord.
+    if (typeof win.formaterNombre !== 'function') {
+        new Function('window', '"use strict";\n' + readFileSync(path.join(racineProjet, 'js/note-pourcentage.js'), 'utf8'))(win);
+    }
     const brut = readFileSync(path.join(racineProjet, 'js/taille-fichier.js'), 'utf8');
     const code = options.muter ? options.muter(brut) : brut;
     new Function('window', '"use strict";\n' + code)(win);

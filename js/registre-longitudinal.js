@@ -385,7 +385,7 @@
     }
 
     function formaterNote(note) {
-        return String(note).replace('.', ',');
+        return formaterNombre(note);   // #1137 : la virgule vit dans js/note-pourcentage.js
     }
 
     function libelleResultat(r) {
@@ -716,7 +716,7 @@
     }
 
     function pourcent(valeur) {
-        return Math.round(Number(valeur)) + ' %';
+        return formaterPourcentage(Math.round(Number(valeur)));
     }
 
     /** Les indices tels que rangés : A sur 0-1 (indicesAssiduite.sommatif), C et P sur 0-100 (indicesCP.actuel). */

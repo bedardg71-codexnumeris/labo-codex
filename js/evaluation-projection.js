@@ -73,6 +73,11 @@
 (function() {
 'use strict';
 
+// #1137 (22 oct. 2026) : les nombres affichés passent par js/note-pourcentage.js, que index.html
+// charge avant ce module ; un banc Node (`require`) le requiert.
+var _formaterNombre = (typeof formaterNombre === 'function')
+    ? formaterNombre : require('./note-pourcentage.js').formaterNombre;
+
 // ---------------------------------------------------------------------
 // Le jeton de substitution du nom de service
 // ---------------------------------------------------------------------
@@ -228,8 +233,7 @@ function _valeursJetons(x) {
 /** Formate un nombre pour un libellé (pas de décimale inutile). */
 function _nb(valeur) {
     if (valeur === null || valeur === undefined || isNaN(valeur)) return '?';
-    var arrondi = Math.round(valeur * 100) / 100;
-    return String(arrondi);
+    return _formaterNombre(valeur) || '?';   // #1137 : à la virgule, deux décimales au plus
 }
 
 // ---------------------------------------------------------------------

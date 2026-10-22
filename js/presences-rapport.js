@@ -156,7 +156,7 @@ function construireModeleRapportPresences(etudiants, seancesParDate, presences, 
                 }
                 periodes = Math.round(periodes * 10) / 10;
 
-                const texteChiffre = String(periodes).replace('.', ',');
+                const texteChiffre = formaterNombre(periodes);
                 if (periodes <= 0) return { etat: 'absent', texte: '', periodes: periodes };
                 if (periodes >= col.periodesAttendues) return { etat: 'present', texte: '', periodes: periodes };
                 return { etat: 'partiel', texte: texteChiffre, periodes: periodes };
@@ -458,13 +458,13 @@ function dessinerFeuilleGroupe(doc, modele, opts, entete) {
                     doc.text(texte, cx, cy + 0.7, { align: 'center' });
                 };
                 if (notation === 'presence') {
-                    if (cellule.etat !== 'vide') ecrire(String(cellule.periodes).replace('.', ','));
+                    if (cellule.etat !== 'vide') ecrire(formaterNombre(cellule.periodes));
                 } else if (notation === 'absence') {
                     // Périodes manquées : rien quand la présence est complète
                     if (cellule.etat !== 'vide') {
                         const attendues = colTranche[indexSeance].periodesAttendues;
                         const manquees = Math.round((attendues - cellule.periodes) * 10) / 10;
-                        if (manquees > 0) ecrire(String(manquees).replace('.', ','));
+                        if (manquees > 0) ecrire(formaterNombre(manquees));
                     }
                 } else if (notation === 'x') {
                     // Convention « marquer les absences » : présence complète = rien

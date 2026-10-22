@@ -242,12 +242,12 @@ describe('R — quand « Créer ma grille » est refusé en niveaux, et pourquoi
         const R = comprise(GRILLE_N);
         const chevauche = D.creation(R, {}, undefined, { valeurs: valeurs(R, [['0', '60', '50'], ['60', '79', '70'], ['80', '100', '90']]) });
         expect(chevauche.raisons).toEqual([]);
-        expect(chevauche.avertissements).toEqual(['Les plages « À reprendre » et « En voie » se chevauchent (60 et 60 %) : une même note tomberait dans deux niveaux. Il pourrait être utile de les ajuster.']);
+        expect(chevauche.avertissements).toEqual(['Les plages « À reprendre » et « En voie » se chevauchent (60 et 60\u00A0%) : une même note tomberait dans deux niveaux. Il pourrait être utile de les ajuster.']);
         const trou = D.creation(R, {}, undefined, { valeurs: valeurs(R, [['0', '50', '40'], ['60', '79', '95'], ['80', '100', '90']]) });
         expect(trou.raisons).toEqual([]);
         expect(trou.avertissements).toEqual([
-            'Il y a un trou entre « À reprendre » (jusqu’à 50 %) et « En voie » (dès 60 %) : certaines notes ne tomberaient dans aucun niveau. Il pourrait être utile de les ajuster.',
-            'La note retenue de « En voie » (95 %) est hors de sa plage : il pourrait être utile de la vérifier.'
+            'Il y a un trou entre « À reprendre » (jusqu’à 50\u00A0%) et « En voie » (dès 60\u00A0%) : certaines notes ne tomberaient dans aucun niveau. Il pourrait être utile de les ajuster.',
+            'La note retenue de « En voie » (95\u00A0%) est hors de sa plage : il pourrait être utile de la vérifier.'
         ]);
         expect(D.creation(R, {}, undefined, { valeurs: valeurs(R, TROIS) }).avertissements).toEqual([]);
         // En points : aucun avertissement de plage (il n'y en a pas).

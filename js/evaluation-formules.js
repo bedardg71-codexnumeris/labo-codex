@@ -48,6 +48,11 @@
 (function() {
 'use strict';
 
+// #1137 (22 oct. 2026) : les nombres affichés passent par js/note-pourcentage.js, que index.html
+// charge avant ce module ; un banc Node (`require`) le requiert.
+var _formaterNombre = (typeof window !== 'undefined' && typeof window.formaterNombre === 'function')
+    ? window.formaterNombre : require('./note-pourcentage.js').formaterNombre;
+
 // ---------------------------------------------------------------------
 // Bornes communes à tous les modèles
 // ---------------------------------------------------------------------
@@ -61,8 +66,7 @@ var PCT_MAX = 100;
 /** Formate un nombre pour le libellé (pas de décimale inutile). */
 function _nb(valeur) {
     if (valeur === null || valeur === undefined || isNaN(valeur)) return '?';
-    var arrondi = Math.round(valeur * 100) / 100;
-    return String(arrondi);
+    return _formaterNombre(valeur) || '?';   // #1137 : à la virgule, deux décimales au plus
 }
 
 // ---------------------------------------------------------------------
@@ -107,7 +111,7 @@ var MODELES = [
         },
         chiffre: function(ctx) {
             return 'Note = ' + _nb(ctx.ponderation) + ' − (' + _nb(ctx.erreurs) + ' ÷ ' + _nb(ctx.mots)
-                 + ' × ' + _nb(ctx.params.facteurNormalisation) + ') = ' + ctx.note.toFixed(2);
+                 + ' × ' + _nb(ctx.params.facteurNormalisation) + ') = ' + _formaterNombre(ctx.note, 2);
         }
     },
     {
@@ -136,11 +140,11 @@ var MODELES = [
         },
         chiffre: function(ctx) {
             if (ctx.erreurs <= 0) {
-                return 'Note = ' + _nb(ctx.ponderation) + ' (aucune erreur) = ' + ctx.note.toFixed(2);
+                return 'Note = ' + _nb(ctx.ponderation) + ' (aucune erreur) = ' + _formaterNombre(ctx.note, 2);
             }
             var ratio = ctx.mots / ctx.erreurs;
-            return 'Note = ' + _nb(ctx.ponderation) + ' × min(1 ; ' + ratio.toFixed(1) + ' ÷ '
-                 + _nb(ctx.params.motsParErreurCible) + ') = ' + ctx.note.toFixed(2);
+            return 'Note = ' + _nb(ctx.ponderation) + ' × min(1 ; ' + _formaterNombre(ratio, 1) + ' ÷ '
+                 + _nb(ctx.params.motsParErreurCible) + ') = ' + _formaterNombre(ctx.note, 2);
         }
     },
     {
@@ -166,7 +170,7 @@ var MODELES = [
         },
         chiffre: function(ctx) {
             return 'Note = ' + _nb(ctx.ponderation) + ' − (' + _nb(ctx.erreurs) + ' × '
-                 + _nb(ctx.params.pointsParErreur) + ') = ' + ctx.note.toFixed(2);
+                 + _nb(ctx.params.pointsParErreur) + ') = ' + _formaterNombre(ctx.note, 2);
         }
     }
 ];
