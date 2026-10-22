@@ -1694,6 +1694,7 @@ window.definirOptionAffichageDA = definirOptionAffichageDA;
 window.definirOptionAffichageDADepuisCheckbox = function(el) { definirOptionAffichageDA(el.checked); };
 window.reinitialiserMappingAnonyme = reinitialiserMappingAnonyme;
 window.obtenirDAAffichage = obtenirDAAffichage;
+window.refuserSiTrimestreClos = _refuserSiTrimestreClos;   // #1075, point 2 : l'annotation écrit hors des deux fonctions
 window.estModeClair = estModeClair;
 window.definirTheme = definirTheme;
 window.basculerTheme = basculerTheme;
