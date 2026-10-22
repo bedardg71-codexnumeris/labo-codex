@@ -3643,6 +3643,79 @@ input[type="number"].controle-form {
     white-space: nowrap;
 }
 
+/* Le miroir (22 oct. 2026) — sous la formule, « Essai sur des copies fictives » : une copie par
+   ligne. Ses trois morceaux (la copie, la note, ce que l'élève lira) passent à la ligne plutôt
+   que de déborder : à 820 px (iPad en portrait), la phrase de l'élève prend toute la largeur. */
+#listeCriteres .miroir-algo {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--bordure-claire);
+}
+
+#listeCriteres .miroir-algo-titre {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texte-principal);
+}
+
+#listeCriteres .miroir-algo-intro,
+#listeCriteres .miroir-algo-vide {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: var(--gris-moyen);
+}
+
+#listeCriteres .miroir-algo-liste {
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding: 0;
+}
+
+#listeCriteres .miroir-algo-copie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-left: 3px solid var(--accent-primaire);
+    background: var(--surface-input);
+    border-radius: 4px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--texte-principal);
+    min-width: 0;
+}
+
+#listeCriteres .miroir-algo-donnees {
+    color: var(--gris-moyen);
+    overflow-wrap: anywhere;
+}
+
+#listeCriteres .miroir-algo-note {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#listeCriteres .miroir-algo-plancher {
+    font-weight: 400;
+    font-size: 0.78rem;
+    color: var(--gris-moyen);
+}
+
+#listeCriteres .miroir-algo-eleve {
+    flex: 1 1 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+#listeCriteres .miroir-algo-mot {
+    font-size: 0.78rem;
+    color: var(--gris-moyen);
+}
+
 /* §8 (5 sept.) — une seule carte pour ce que l'élève lit : le décompte se compose ici,
    avant les paliers ; sous lui, la ligne qui dit d'où vient son texte de départ. */
 #listeCriteres .decompte-eleve {

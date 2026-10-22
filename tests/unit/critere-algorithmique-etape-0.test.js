@@ -179,11 +179,14 @@ describe('étape 0 · D — deux disciplines fictives, dont une sans texte', () 
      * Le gabarit, sans les choix offerts (boutons, options de menus) : ce qu'il DIT du critère.
      * (La limite nommée de l'étape 0, la description de « Pénalité normalisée », est levée : le lot de
      * mots, F1, en a retiré la phrase.)
+     * 22 oct. 2026 (consigne du miroir, point 7) : la phrase d'un critère sans sous-critère nomme le même
+     * choix que le bouton — « pars de la liste du français écrit ». Ce NOM d'une liste offerte est retiré
+     * comme le bouton ; tout autre « français » reste rouge.
      */
     const ceQueDitLeGabarit = (carte) => {
         const copie = carte.cloneNode(true);
         copie.querySelectorAll('button, option').forEach((x) => x.remove());
-        return copie.textContent;
+        return copie.textContent.split('la liste du français écrit').join('la liste offerte');
     };
 
     for (const nom of ['Français écrit', 'Unités et chiffres significatifs']) {

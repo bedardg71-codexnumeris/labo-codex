@@ -2461,16 +2461,13 @@
      * pondération de son sous-critère (`codesAnnotation`, `poids`) ; 1 en repli et pour un code que
      * la grille ne connaît plus, comme hier. Arrondie au dix-millième (des poids de 0,1 s'additionnent).
      * `grille` : celle de la copie ouverte, par défaut (les bancs la passent).
+     * 22 oct. 2026 : la règle vit dans `codesAnnotation.sommePonderee`, que le miroir du gabarit lit aussi.
      */
     function sommePondereeErreurs(compteurs, grille) {
         const t = _codes();
         const g = (grille === undefined) ? _grilleCourante : grille;
-        const somme = Object.keys(compteurs).reduce((s, id) => {
-            const c = t ? t.code(g, id) : null;
-            const poids = (c && isFinite(Number(c.poids))) ? Number(c.poids) : 1;
-            return s + (compteurs[id] || 0) * poids;
-        }, 0);
-        return Math.round(somme * 10000) / 10000;
+        if (t) return t.sommePonderee(g, compteurs);
+        return Object.keys(compteurs).reduce((s, id) => s + (compteurs[id] || 0), 0);
     }
 
     function mettreAJourCompteursErreurs() {
