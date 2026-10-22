@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { completerNoteParDefaut } from './_helpers/charger-script.js';   // #1137 : le module des nombres affichés
 
 // SENTINELLE #749 — LA LISTE SUIVIE VIT PAR GROUPE-COURS, ET UNE LECTURE N'EFFACE RIEN.
 //
@@ -78,7 +79,7 @@ function chargerAvecInterne(chemin, globaux, win, noms) {
         + noms.map(n => 'get ' + n + '() { return ' + n + '; }' + (/^_/.test(n) ? ', set ' + n + '(v) { ' + n + ' = v; }' : '')).join(', ') + '};\n';
     const fin = code.lastIndexOf('})();');
     code = fin >= 0 ? code.slice(0, fin) + expo + code.slice(fin) : code + expo;
-    const { document: doc, ...autres } = globaux;
+    const { document: doc, ...autres } = completerNoteParDefaut(globaux);   // #1137 : le module des nombres affichés
     const noms2 = ['window', 'document', 'console', ...Object.keys(autres)];
     const vals = [win, doc, { warn() {}, error() {}, log() {} }, ...Object.values(autres)];
     // eslint-disable-next-line no-new-func

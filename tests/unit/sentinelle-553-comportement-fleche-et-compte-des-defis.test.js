@@ -126,7 +126,7 @@ describe('#553 · comportement (a) — la flèche de direction d\'un critère «
         b.restaurerHorloge();
         const francais = ligneCritere(html, 'Français écrit');
         const structure = ligneCritere(html, 'Structure');
-        expect(francais, 'la ligne doit porter un pourcentage : sinon le montage ne rend pas la liste').toMatch(/\d+%/);
+        expect(francais, 'la ligne doit porter un pourcentage : sinon le montage ne rend pas la liste').toMatch(/\d+\s%/);
         expect(francais.endsWith('→'), 'ligne rendue : « ' + francais + ' »').toBe(true);
         expect(structure).not.toContain('→');
         expect(structure.endsWith('—'), 'ligne rendue : « ' + structure + ' »').toBe(true);

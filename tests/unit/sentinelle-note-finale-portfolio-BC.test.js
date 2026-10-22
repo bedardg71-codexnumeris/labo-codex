@@ -49,7 +49,7 @@ describe('Phase C · le panneau du profil ne montre plus de terminale fantôme',
 
     it('C2 — la formule ne promet « X% + Y% = 100% » que s’il y a deux composantes', () => {
         expect(sourceProfil).toMatch(/const formuleClassique = terminal\.present\s*\n?\s*\?/);
-        expect(sourceProfil).toContain('Note finale (portfolio à 100%)');
+        expect(sourceProfil).toContain('Note finale (portfolio à 100\\u00a0%)');
     });
 
     it('C3 — la grille passe en colonne unique quand la terminale est absente', () => {

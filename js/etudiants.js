@@ -493,11 +493,11 @@ function mettreAJourTitreListeEtudiants() {
 function mettreAJourEntetesAvecCorrelations(r_AP, r_CP, r_PatternP, r_RaiP, r_IntervP, moyenneA, moyenneC, moyenneP) {
     function fmtMoy(v) {
         if (v === null || v === undefined || isNaN(v)) return '—';
-        return 'moy=' + Math.round(v) + '%';
+        return 'moy=' + formaterPourcentage(Math.round(v));
     }
     function fmtCorr(r) {
         if (r === null || r === undefined || isNaN(r)) return '—';
-        return 'r=' + r.toFixed(2);
+        return 'r=' + formaterNombre(r, 2);
     }
     // Interprétation textuelle de l'intensité d'un coefficient de Pearson
     function intensiteCorr(r) {
@@ -597,7 +597,7 @@ function toggleFiltreMinimum(actif) {
 
     function fmtMoy(v) {
         if (v === null || v === undefined || isNaN(v)) return '—';
-        return 'moy=' + Math.round(v) + '%';
+        return 'moy=' + formaterPourcentage(Math.round(v));
     }
 
     var moyC = document.getElementById('moy-c');
@@ -1194,15 +1194,15 @@ function afficherListeEtudiantsConsultation() {
 
         // Colonne A : afficher si l'assiduité est connue (même 0 %), sinon tiret
         if (assiduiteConnue) {
-            html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + Math.round(indices.A) + '%</strong></td>';
+            html += '<td class="etud-text-center"><strong style="color: ' + couleurA + ';">' + formaterPourcentage(Math.round(indices.A)) + '</strong></td>';
         } else {
             html += '<td class="etud-text-center">' + tiret + '</td>';
         }
 
         // Colonnes C et P : afficher si évaluations, sinon tiret
         if (aEvaluations) {
-            html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + Math.round(indices.C) + '%</strong></td>';
-            html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + Math.round(indices.P) + '%</strong></td>';
+            html += '<td class="etud-text-center"><strong style="color: ' + couleurC + ';">' + formaterPourcentage(Math.round(indices.C)) + '</strong></td>';
+            html += '<td class="etud-text-center"><strong style="color: ' + couleurP + ';">' + formaterPourcentage(Math.round(indices.P)) + '</strong></td>';
         } else {
             html += '<td class="etud-text-center">' + tiret + '</td>';
             html += '<td class="etud-text-center">' + tiret + '</td>';

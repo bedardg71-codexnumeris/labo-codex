@@ -69,15 +69,15 @@ describe('#732 · le rapport du profil', () => {
         // À la main : quatre productions comptées (non facultatives, évaluées pour au moins un élève) ; l'élève en a remis quatre ;
         // la note du cours dit 77. Avant : « 75% (4 meilleurs artefacts actuels) » (les 4 meilleures notes : 90, 80, 70, 60) et « 0 remises / 0 productions ».
         const rapport = monterRapport({ A: 100, C: 100, P: 77, M: 100, noteConstructible: true }).genererRapportAPI(DA);
-        expect(rapport).toContain('Assiduité : 100% (20 / 20 périodes)');
-        expect(rapport).toContain('Complétion : 100% (4 remises / 4 productions)');
-        expect(rapport).toContain('Performance : 77% (note du cours)');
+        expect(rapport).toContain('Assiduité : 100\u00A0% (20 / 20 périodes)');
+        expect(rapport).toContain('Complétion : 100\u00A0% (4 remises / 4 productions)');
+        expect(rapport).toContain('Performance : 77\u00A0% (note du cours)');
         expect(rapport).not.toMatch(/meilleurs artefacts/);
     });
     it('les évaluations listées sont celles qui COMPTENT dans la note du cours : la reprise, pas l\'originale remplacée ; le facultatif y est (il compte), l\'autre élève non', () => {
         const rapport = monterRapport({ A: 100, C: 100, P: 77, noteConstructible: true }).genererRapportAPI(DA);
         const lignes = rapport.split('\n').filter(l => /^\d+- /.test(l));
-        expect(lignes).toEqual(['1- Analyse 1 : I (60.0)', '2- Analyse 2 : D (70.0)', '3- Dissertation : M (80.0)', '4- Examen : E (90.0)', '5- Exercice facultatif : E (100.0)']);
+        expect(lignes).toEqual(['1- Analyse 1 : I (60,0)', '2- Analyse 2 : D (70,0)', '3- Dissertation : M (80,0)', '4- Examen : E (90,0)', '5- Exercice facultatif : E (100,0)']);
     });
     it('une note non constructible se dit, elle ne s\'écrit pas 0', () => {
         const rapport = monterRapport({ A: 100, C: 0, P: 0, noteConstructible: false }).genererRapportAPI(DA);

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE #749 LOT 2 — LA LISTE DES ÉTUDIANT·ES DIT VRAI (cadrage 11, 11 sept. 2026)
@@ -84,7 +84,7 @@ function chargerAvecInterne(chemin, globaux, win, noms) {
         + noms.map(n => 'get ' + n + '() { return ' + n + '; }, set ' + n + '(v) { ' + n + ' = v; }').join(', ') + '};\n';
     const fin = code.lastIndexOf('})();');
     code = fin >= 0 ? code.slice(0, fin) + expo + code.slice(fin) : code + expo;
-    const { document: doc, localStorage: ls, sessionStorage: ss, ...autres } = globaux;
+    const { document: doc, localStorage: ls, sessionStorage: ss, ...autres } = completerNoteParDefaut(globaux);   // #1137 : le module des nombres affichés
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; } });
     const noms2 = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres)];
     const vals = [win, doc, { warn() {}, error() {}, log() {} }, ls || storage(), ss || storage(), ...Object.values(autres)];
@@ -197,7 +197,7 @@ describe('#749 lot 2 · A — les abandons visibles, grisés ; les statistiques 
         expect(ligne.dataset.statut).toBe('abandon');
         expect(ligne.innerHTML).toContain('(Abandon)');                              // son statut en clair
         expect(b.moyA()).toBe(moySansAbandon);                                       // les statistiques ne l'ont pas compté
-        expect(moySansAbandon).toBe('moy=73%');                                      // (100 + 40 + 80) / 3
+        expect(moySansAbandon).toBe('moy=73\u00A0%');                                      // (100 + 40 + 80) / 3
     });
 
     it('les mots sont ceux de Cadre › Trimestre : Inactivité, Décrochage', () => {

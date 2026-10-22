@@ -268,15 +268,15 @@ describe('E · complément 1.142.20 — dénominateur de C, rapport, « (sur N) 
         const b = bancDeuxBrouillons();
         const l = lecture(b);
         expect([l.cSom, l.cConfigurable, l.C]).toEqual([1, 1, 100]);
-        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 100% \(3 remises \/ 3 productions\)/);
+        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 100\u00A0% \(3 remises \/ 3 productions\)/);
     });
     it('E2 · TÉMOIN — la P4 du témoin enregistrée remet P4 au dénominateur : C = 3 / 4 et « 3 remises / 4 productions »', () => {
         const b = banc(P4.brouillon());
-        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 75% \(3 remises \/ 4 productions\)/);
+        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 75\u00A0% \(3 remises \/ 4 productions\)/);
     });
     it('E3 · nbRemis du rapport : P4 « non-recu » notée 0 reste au dénominateur (elle compte) mais n\'est pas une remise — « 3 remises / 4 productions »', () => {
         const b = banc(P4.nonRemisNote0('non-recu'));
-        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 75% \(3 remises \/ 4 productions\)/);
+        expect(b.win.genererRapportAPI(DA.ASSIDU)).toMatch(/Complétion : 75\u00A0% \(3 remises \/ 4 productions\)/);
     });
     it('E4 · le « (sur N) » du profil : 3 artefacts avec P4 en brouillon, 4 quand elle est enregistrée', () => {
         const surN = (b) => (b.interne['profil-etudiant-sections-affichage.js'].genererSectionAccompagnement(DA.ASSIDU).match(/\(sur (\d+) artefacts?\)/) || [])[1];

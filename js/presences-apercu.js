@@ -94,7 +94,7 @@ function calculerStatistiquesPresences(etudiants, indicesAssiduite, presences) {
     // 🆕 BETA 96 FIX: Diviser par nbAvecDonnees (comme tableau de bord), pas nbTotal
     // Sinon les étudiants sans données diluent la moyenne
     const tauxMoyen = nbAvecDonnees > 0 ? Math.round((totalTaux / nbAvecDonnees) * 100) : 0;
-    setStatText('pa-taux-moyen', `${tauxMoyen}%`);
+    setStatText('pa-taux-moyen', formaterPourcentage(tauxMoyen));
 
     // SÉANCES DONNÉES (format X / Total)
     // ✅ FIX: Utiliser obtenirSeancesCompletes() comme source unique de vérité

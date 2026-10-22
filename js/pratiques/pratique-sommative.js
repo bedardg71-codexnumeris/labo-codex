@@ -185,7 +185,7 @@ class PratiqueSommative {
                 // production (défaut 1, même règle que `calculerPerformance`), `poids` sa part en % des copies comptées.
                 ponderation: pondProd(e.productionId),
                 poids: poidsPct(e.productionId),
-                detail: 'comptée une fois · poids ' + poidsPct(e.productionId).toFixed(0) + ' %'
+                detail: 'comptée une fois · poids ' + formaterPourcentage(poidsPct(e.productionId), 0)
             });
         });
 

@@ -620,7 +620,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             enPoints: typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluationTerminale),
             note: noteTerminale,
             sort: 'compte',
-            detail: 'comptée · poids ' + normaliser(ponderationTerminale) + ' %'
+            detail: 'comptée · poids ' + formaterPourcentage(normaliser(ponderationTerminale))
         });
     }
     const recit = {
@@ -629,7 +629,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         resultats: _resultatsRecit,
         synthese: {
             formuleTexte: erreurConfiguration ? null
-                : ('portfolio × ' + normaliser(ponderationPortfolio) + ' % + terminale × ' + normaliser(ponderationTerminale) + ' %'),
+                : ('portfolio × ' + formaterPourcentage(normaliser(ponderationPortfolio)) + ' + terminale × ' + formaterPourcentage(normaliser(ponderationTerminale))),
             noteFinale: noteFinale,
             plafonnement: plafonnement
         }

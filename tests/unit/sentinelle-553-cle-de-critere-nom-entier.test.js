@@ -225,8 +225,8 @@ describe('#553 · le stock : une intervention d\'avant le correctif garde son bi
             interventionAncienne(['Français écrit'], { structure: 0.5, francais: 0.4 }));
         const ligne = ligneBilan(html, 'Français écrit');
         expect(ligne, 'la ligne du critère doit être rendue').not.toBeNull();
-        expect(ligne[0]).toContain('40%');
-        expect(ligne[1]).toContain('70%');
+        expect(ligne[0]).toContain('40 %');   // #1137 : ligneBilan ramène l'insécable à une espace (\s+)
+        expect(ligne[1]).toContain('70 %');
         expect(ligne[2]).toContain('+30 pts');
     });
 
@@ -245,7 +245,7 @@ describe('#553 · le stock : une intervention d\'avant le correctif garde son bi
         const html = rendreBilan(GRILLE_DEUX_FRANCAIS, { francaisoral: 0.5, francaisecrit: 0.7, comprehension: 0.7 },
             interventionAncienne(['Français oral'], { francaisoral: 0.2, francaisecrit: 0.9 }));
         const ligne = ligneBilan(html, 'Français oral');
-        expect(ligne[0]).toContain('20%');
+        expect(ligne[0]).toContain('20 %');   // #1137 : ligneBilan ramène l'insécable à une espace (\s+)
         expect(ligne[2]).toContain('+30 pts');
     });
 

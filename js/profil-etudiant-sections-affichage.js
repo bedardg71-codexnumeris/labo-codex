@@ -214,7 +214,7 @@ function _genererTexteMethodePerformanceMobilisation(performanceInsuffisante, po
     if (methodeSelection === 'hybride-categories') {
         const pondSel = configCategories?.selection?.ponderation || 65;
         const pondObl = configCategories?.obligatoires?.ponderation || 35;
-        return `Performance du portfolio actuel (${nombreARetenir} meilleure${nombreARetenir > 1 ? 's' : ''} Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
+        return `Performance du portfolio actuel (${nombreARetenir} meilleure${nombreARetenir > 1 ? 's' : ''} Sélection ${formaterPourcentage(pondSel)} + Obligatoires ${formaterPourcentage(pondObl)})`;
     }
     const textesPerformance = {
         'meilleurs': `Performance du portfolio actuel (${nombreARetenir} ${accordTermeProduction('meilleur', nombreARetenir)}, maîtrise de standards)`,
@@ -582,13 +582,13 @@ function genererSectionMobilisationEngagement(da) {
         <div id="details-calculs-mobilisation-${da}" class="carte-info-toggle carte-info-note u-hide">
             <strong>Méthodologie de calcul</strong>
             <br><br>
-            <strong>Assiduité (A) :</strong> Indice A = ${indices.A === null ? '—' : indices.A + '%'} — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
+            <strong>Assiduité (A) :</strong> Indice A = ${indices.A === null ? '—' : formaterPourcentage(indices.A)} — ${formaterNombrePeriodes(periodesPresentes)} périodes présentes / ${formaterNombrePeriodes(periodesOffertes)} périodes offertes
             <br><br>
-            <strong>Complétion (C) :</strong> Indice C = ${indices.C === null ? '—' : indices.C + '%'} — ${detailsC.remis} ${detailsC.remis > 1 ? 'productions remises' : 'production remise'} / ${detailsC.total} ${detailsC.total > 1 ? 'productions' : 'production'} au total
+            <strong>Complétion (C) :</strong> Indice C = ${indices.C === null ? '—' : formaterPourcentage(indices.C)} — ${detailsC.remis} ${detailsC.remis > 1 ? 'productions remises' : 'production remise'} / ${detailsC.total} ${detailsC.total > 1 ? 'productions' : 'production'} au total
             <br><br>
             <strong>Performance (P) :</strong> ${recitSOM
-                ? `Indice P = ${indicesSOM.P}% — Moyenne pondérée des ${compteesSOM.length} ${obtenirTermeProduction(compteesSOM.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('evalue', compteesSOM.length)}, chacune à son poids`
-                : `Indice P = ${moyenneP}% — Moyenne des ${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction('pluriel')}`}
+                ? `Indice P = ${formaterPourcentage(indicesSOM.P)} — Moyenne pondérée des ${compteesSOM.length} ${obtenirTermeProduction(compteesSOM.length > 1 ? 'pluriel' : 'singulier')} ${accordTermeProduction('evalue', compteesSOM.length)}, chacune à son poids`
+                : `Indice P = ${formaterPourcentage(moyenneP)} — Moyenne des ${nbRetenus} ${accordTermeProduction('meilleur', nbRetenus)} ${obtenirTermeProduction('pluriel')}`}
         </div>
 
         <!-- GRILLE 3 COLONNES : ASSIDUITÉ, COMPLÉTION ET PERFORMANCE -->
@@ -760,7 +760,7 @@ function genererSectionMobilisationEngagement(da) {
                     <div class="badges-centres u-mb-20">
                         ${compteesSOM.map(r => {
                             const couleurBadge = (typeof couleurDuNiveau === 'function') ? couleurDuNiveau(r.niveau, r.echelleId) : '#999999';
-                            const poidsTxt = (typeof r.poids === 'number') ? `poids ${r.poids.toFixed(0)} %` : '';
+                            const poidsTxt = (typeof r.poids === 'number') ? `poids ${formaterPourcentage(r.poids, 0)}` : '';
                             return `
                                 <div class="badge-artefact hover-opaque"
                                      style="background: ${couleurBadge}22; border-color: ${couleurBadge}; border-width: 3px; cursor: pointer;"
@@ -773,7 +773,7 @@ function genererSectionMobilisationEngagement(da) {
                                         ${echapperHtml(r.niveau || '—')}
                                     </span>
                                     <span class="u-texte-petit u-texte-gris" style="font-weight: 500;">
-                                        ${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `(${typeof r.note === 'number' ? r.note.toFixed(1) : '—'}) · ${poidsTxt}`}
+                                        ${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `(${typeof r.note === 'number' ? formaterNombre(r.note, 1) : '—'}) · ${poidsTxt}`}
                                     </span>
                                 </div>
                             `;
@@ -1257,7 +1257,7 @@ function genererSectionAccompagnement(da) {
                             // direction d'un critère « Français… ».
                             const dir = directionsCriteres ? directionsCriteres[c.cleNormalisee] : null;
                             const symbDir = dir && dir.symbole ? ' ' + dir.symbole : '';
-                            return `<li>${echapperHtml(c.nom)} : ${codeCritere}<span${survolPct}>${pct.toFixed(0)}%</span>${symbDir}</li>`;
+                            return `<li>${echapperHtml(c.nom)} : ${codeCritere}<span${survolPct}>${formaterPourcentage(pct, 0)}</span>${symbDir}</li>`;
                         }).join('');
                     })()}
                 </ul>
@@ -1489,7 +1489,7 @@ function genererSectionAccompagnement(da) {
                     // chose que l'utilisateur ait saisie pour lui.
                     const titre = nom
                         ? (code ? nom + ' (' + code + ')' : nom)
-                        : (code || (niveau.min + ' – ' + niveau.max + ' %'));
+                        : (code || (niveau.min + ' – ' + formaterPourcentage(niveau.max)));
 
                     corps += `
                 <div style="margin-bottom: ${index === blocs.length - 1 && horsEchelle.length === 0 ? '0' : '12px'};">
@@ -1651,13 +1651,13 @@ function genererSectionMobilisation(da) {
             <div class="profil-indicateur">
                 <div class="profil-indicateur-contenu">
                     <span class="profil-indicateur-label">Assiduité (A)</span>
-                    <strong class="profil-indicateur-valeur">${indices.A}%</strong>
+                    <strong class="profil-indicateur-valeur">${formaterPourcentage(indices.A)}</strong>
                 </div>
             </div>
             <div class="profil-indicateur">
                 <div class="profil-indicateur-contenu">
                     <span class="profil-indicateur-label">Complétion (C)</span>
-                    <strong class="profil-indicateur-valeur">${indices.C}%</strong>
+                    <strong class="profil-indicateur-valeur">${formaterPourcentage(indices.C)}</strong>
                 </div>
             </div>
         </div>
@@ -2385,7 +2385,7 @@ function genererValeursComparatives(valeurSOM, valeurPAN, afficherTiret = false)
         return `<span style="color: var(--gris-clair); font-weight: 600;">—</span>`;
     }
     const valeur = pratique === 'sommative' ? valeurSOM : valeurPAN;
-    return `<strong class="profil-valeur-grande-bleu">${valeur}%</strong>`;
+    return `<strong class="profil-valeur-grande-bleu">${formaterPourcentage(valeur)}</strong>`;
 }
 
 // === HELPERS PRIVÉS pour afficherProfilComplet (étape 4 éclatement cyc 58 → < 30) ===
@@ -2757,7 +2757,7 @@ function genererSectionAssiduite(da) {
             <div class="profil-carte-importante">
                 <div class="carte-metrique-header">
                     <span class="profil-texte-detail">Taux d'assiduité</span>
-                    <strong class="profil-valeur-grande-bleu">${taux}%</strong>
+                    <strong class="profil-valeur-grande-bleu">${formaterPourcentage(taux)}</strong>
                 </div>
             </div>
             <div class="profil-carte-importante">
@@ -3022,7 +3022,7 @@ function genererSectionProductions(da) {
             <div class="alerte alerte-attention" style="margin-bottom: 15px;">
                 ${portfolio.plafonnement.echec
                     ? `<strong>Échec automatique :</strong> L'étudiant·e n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} ou plus entraîne un échec automatique.`
-                    : `<strong>Note plafonnée :</strong> L'étudiant·e n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} plafonne la note du portfolio au niveau ${portfolio.plafonnement.niveauCode} (maximum ${portfolio.plafonnement.seuilMax}%).`
+                    : `<strong>Note plafonnée :</strong> L'étudiant·e n'a remis que ${portfolio.nombreEvalues} production${portfolio.nombreEvalues > 1 ? 's' : ''} sur les ${portfolio.minimumRequis} requises. Selon les règles de conformité, un déficit de ${portfolio.plafonnement.deficit} production${portfolio.plafonnement.deficit > 1 ? 's' : ''} plafonne la note du portfolio au niveau ${portfolio.plafonnement.niveauCode} (maximum ${formaterPourcentage(portfolio.plafonnement.seuilMax)}).`
                 }
             </div>
         ` : '';
@@ -3065,8 +3065,8 @@ function genererSectionProductions(da) {
                 ? '<ul class="note-finale-liste-artefacts">' + obligatoiresTous.map(renderLigneObligatoire).join('') + '</ul>'
                 : '<span class="note-finale-non-evalue">Aucune production obligatoire configurée</span>';
 
-            const badgePondSel = (pondSel != null) ? ` (${pondSel}%)` : '';
-            const badgePondObl = (pondObl != null) ? ` (${pondObl}%)` : '';
+            const badgePondSel = (pondSel != null) ? ` (${formaterPourcentage(pondSel)})` : '';
+            const badgePondObl = (pondObl != null) ? ` (${formaterPourcentage(pondObl)})` : '';
             // Nombre d'obligatoires réellement évaluées (pas seulement définies),
             // sinon les non-remises sous-estimeraient à tort le pool de sélection.
             const obligatoiresEvaluees = obligatoiresTous.filter(o => typeof o.note === 'number').length;
@@ -3096,18 +3096,18 @@ function genererSectionProductions(da) {
                 if (!calc) return '';
                 const addition = calc.notes.map(n => formaterNotePourcentage(n)).join(' + ');
                 return `(${addition}) ÷ ${calc.notes.length} = <strong>${formaterNotePourcentage(calc.moyenne)}</strong>`
-                     + ` × ${ponderation}% = <strong>${calc.contribution.toFixed(1)} pts</strong>`;
+                     + ` × ${formaterPourcentage(ponderation)} = <strong>${formaterPoints(calc.contribution, 1)}</strong>`;
             };
             const calcSel = calculCategorie(selection, pondSel, false);
             const calcObl = calculCategorie(obligatoiresTous, pondObl, detailsNoteFinale.estFinale === true);
-            const calculSelHtml = calcSel ? formaterCalcul(calcSel, pondSel) : `<span class="note-finale-ponderation">× ${pondSel != null ? pondSel + '%' : '—'}</span>`;
-            const calculOblHtml = calcObl ? formaterCalcul(calcObl, pondObl) : `<span class="note-finale-ponderation">× ${pondObl != null ? pondObl + '%' : '—'}</span>`;
+            const calculSelHtml = calcSel ? formaterCalcul(calcSel, pondSel) : `<span class="note-finale-ponderation">× ${pondSel != null ? formaterPourcentage(pondSel) : '—'}</span>`;
+            const calculOblHtml = calcObl ? formaterCalcul(calcObl, pondObl) : `<span class="note-finale-ponderation">× ${pondObl != null ? formaterPourcentage(pondObl) : '—'}</span>`;
 
             const formule = erreurPond
                 ? `<span class="note-finale-tiret">Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
                 : (calcSel && calcObl
                     ? `Note finale = ${formaterPoints(calcSel.contribution)} + ${formaterPoints(calcObl.contribution)} = ${formaterNotePourcentage(calcSel.contribution + calcObl.contribution)}`   // 21 oct. 2026 : la norme du PDF, une phrase, une norme
-                    : `Note finale pondérée (Sélection ${pondSel}% + Obligatoires ${pondObl}% = ${pondSel + pondObl}%)`);
+                    : `Note finale pondérée (Sélection ${formaterPourcentage(pondSel)} + Obligatoires ${formaterPourcentage(pondObl)} = ${formaterPourcentage(pondSel + pondObl)})`);
 
             htmlNoteFinale = `
             <!-- Note finale de session (hybride sans terminale) -->
@@ -3159,13 +3159,13 @@ function genererSectionProductions(da) {
                         <span class="note-finale-valeur ${terminal.note === null ? 'note-finale-tiret' : ''}">
                             ${terminal.note !== null ? formaterNotePourcentage(terminal.note) : '—'}
                         </span>
-                        <span class="note-finale-ponderation">× ${terminal.ponderationNormalisee}%</span>
+                        <span class="note-finale-ponderation">× ${formaterPourcentage(terminal.ponderationNormalisee)}</span>
                     </div>
                 </div>` : '';
 
             const formuleClassique = terminal.present
-                ? `Note finale pondérée (${portfolio.ponderationNormalisee}% + ${terminal.ponderationNormalisee}% = 100%)`
-                : `Note finale (portfolio à 100%)`;
+                ? `Note finale pondérée (${formaterPourcentage(portfolio.ponderationNormalisee)} + ${formaterPourcentage(terminal.ponderationNormalisee)} = 100\u00a0%)`
+                : `Note finale (portfolio à 100\u00a0%)`;
 
             htmlNoteFinale = `
             <!-- Note finale de session (classique) -->
@@ -3190,14 +3190,14 @@ function genererSectionProductions(da) {
                                     <span class="note-finale-valeur-originale">${formaterNotePourcentage(portfolio.plafonnement.moyenneOriginale)}</span>
                                     → ${portfolio.moyenne !== null ? formaterNotePourcentage(portfolio.moyenne) : formaterNotePourcentage(0)}
                                 </span>
-                                <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                                <span class="note-finale-ponderation">× ${formaterPourcentage(portfolio.ponderationNormalisee)}</span>
                             </div>
                         ` : `
                             <div class="note-finale-valeur-ligne">
                                 <span class="note-finale-valeur">
                                     ${portfolio.moyenne !== null ? formaterNotePourcentage(portfolio.moyenne) : '<span class="note-finale-tiret">—</span>'}
                                 </span>
-                                <span class="note-finale-ponderation">× ${portfolio.ponderationNormalisee}%</span>
+                                <span class="note-finale-ponderation">× ${formaterPourcentage(portfolio.ponderationNormalisee)}</span>
                             </div>
                         `}
                     </div>
@@ -3559,13 +3559,13 @@ function genererSectionCompletion(da) {
             <div class="u-mb-15">
                 <span class="pastille-rai" style="background:${interpC.couleur}"></span>
                 <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
-                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${indices.C}%)</span>
+                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${formaterPourcentage(indices.C)})</span>
             </div>
 
             <!-- Statistiques -->
             <ul class="profil-liste-simple">
                 <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
-                <li><strong>• Indice C :</strong> ${indices.C}%</li>
+                <li><strong>• Indice C :</strong> ${formaterPourcentage(indices.C)}</li>
             </ul>
 
             <hr class="profil-separateur">
@@ -3678,7 +3678,7 @@ function _genererPointsBarreSRPNFNormal(cle, score, directionsPAN) {
     const symboleDirection = direction && direction.symbole ? direction.symbole : '';
     return {
         pointsHTML: `<div class="critere-point" style="left: ${Math.min(pourcentage, 100)}%;"></div>`,
-        valeursHTML: `${pourcentage}%`,
+        valeursHTML: formaterPourcentage(pourcentage),
         symbolesHTML: symboleDirection ? `<div style="position: absolute; left: ${Math.min(pourcentage, 100)}%; transform: translateX(-50%); top: -32px; font-size: 1.2rem; font-weight: bold; color: var(--gris-fonce);" title="${direction.interpretation}">${symboleDirection}</div>` : ''
     };
 }
@@ -3857,7 +3857,7 @@ function _genererTexteRegleSelectionPortfolio(methodeSelectionRapport, nombreARe
     if (methodeSelectionRapport === 'hybride-categories') {
         const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
         const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
-        return `Mode <strong>Hybride</strong> : les <strong>${nombreARetenirConfig} meilleures</strong> du pool Sélection (${pondSel}%) + toutes les Obligatoires (${pondObl}%)`;
+        return `Mode <strong>Hybride</strong> : les <strong>${nombreARetenirConfig} meilleures</strong> du pool Sélection (${formaterPourcentage(pondSel)}) + toutes les Obligatoires (${formaterPourcentage(pondObl)})`;
     }
     const textes = {
         'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
@@ -3873,7 +3873,7 @@ function _genererTextePonderationCriteresActifs() {
     const grilleActive = grilles.find(g => g.active) || grilles[0];
     if (grilleActive && grilleActive.criteres) {
         const ponderations = grilleActive.criteres
-            .map(c => `${echapperHtml(c.nom)}: ${c.ponderation || 0}%`)
+            .map(c => `${echapperHtml(c.nom)}: ${formaterPourcentage(c.ponderation || 0)}`)
             .join(', ');
         return `Pondération des critères configurés dans la grille «${echapperHtml(grilleActive.nom)}» (${ponderations})`;
     }
@@ -3884,7 +3884,7 @@ function _genererTextePerformanceMethodeBloc(methodeSelectionRapport, nombreARet
     if (methodeSelectionRapport === 'hybride-categories') {
         const pondSel = configCategoriesRapport?.selection?.ponderation || 65;
         const pondObl = configCategoriesRapport?.obligatoires?.ponderation || 35;
-        return `Performance du portfolio actuel (${nombreARetenirConfig} meilleures Sélection ${pondSel}% + Obligatoires ${pondObl}%)`;
+        return `Performance du portfolio actuel (${nombreARetenirConfig} meilleures Sélection ${formaterPourcentage(pondSel)} + Obligatoires ${formaterPourcentage(pondObl)})`;
     }
     // Textes selon la modalité de sélection (format uniforme avec section Engagement)
     const textesPerformance = {
@@ -3958,7 +3958,7 @@ function _genererNoteSessionSommative(da) {
         // En texte, pas en pastille : `.note-finale-ponderation` est une pastille sombre, trop lourde dans une liste.
         const suite = grise
             ? ` <span class="note-finale-non-evalue">· ${echapperHtml(r.detail || '')}</span>`
-            : ` · poids ${(typeof r.poids === 'number') ? r.poids.toFixed(0) : '—'} %`;
+            : ` · poids ${(typeof r.poids === 'number') ? formaterPourcentage(r.poids, 0) : '—'}`;
         return `<li>${echapperHtml(r.label)}${suite} <strong>(${marqueur})</strong></li>`;
     };
 
@@ -4140,7 +4140,7 @@ function genererSectionPerformance(da) {
     const differee = (typeof noteDiffereeActive === 'function' && noteDiffereeActive());  // #321, comme la carte
     const ligneCalculP = _ligneCalculIndicePPanneau(noteLue, differee);
     const listeRetenues = noteLue ? (noteLue.retenues.length
-        ? noteLue.retenues.map((r, idx) => `${idx + 1}. ${echapperHtml(r.titre)} → ${differee ? badgeNoteDifferee() : (typeof r.note === 'number' ? r.note.toFixed(1) + '/100' : '—')}`).join(' • ')
+        ? noteLue.retenues.map((r, idx) => `${idx + 1}. ${echapperHtml(r.titre)} → ${differee ? badgeNoteDifferee() : (typeof r.note === 'number' ? formaterNombre(r.note, 1) + '/100' : '—')}`).join(' • ')
         : `${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}`) : '';
 
     // `const interpP = interpreterPerformance(indices.P);` retiré au pas 3c-3 de
@@ -4219,7 +4219,7 @@ ${noteLue ? `
             <!-- En-tête avec indice P -->
             <div class="u-flex-between-mb15">
                 <!-- Session C (#303) : mode comparatif retiré — indice P unique (pratique active). -->
-                <strong class="profil-valeur-grande-bleu" style="margin-left: auto;"${survolPourcentageGlobal}>${prefixeNiveauGlobal}${indices.P}%</strong>
+                <strong class="profil-valeur-grande-bleu" style="margin-left: auto;"${survolPourcentageGlobal}>${prefixeNiveauGlobal}${formaterPourcentage(indices.P)}</strong>
             </div>
 
             <!-- 🆕 MÉTHODE DE CALCUL EXPLICITE -->
@@ -4270,7 +4270,7 @@ function genererSectionAssiduiteLegacy(da) {
             <div class="u-mb-15">
                 <span class="pastille-rai" style="background:${interpA.couleur}"></span>
                 <strong style="font-size: 1.1rem; color: ${interpA.couleur};">${interpA.niveau}</strong>
-                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${taux}%)</span>
+                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpA.couleur}; margin-left: 10px;">(${formaterPourcentage(taux)})</span>
             </div>
 
             <!-- Statistiques -->

@@ -489,7 +489,7 @@ function afficherMapping(entetes, mapping, questions, nbLignes) {
             }
             html.push('</select>');
             if (mp.score >= 0.35) {
-                html.push(' <span class="bilan-mapping-match"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>' + Math.round(mp.score * 100) + '%</span>');
+                html.push(' <span class="bilan-mapping-match"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>' + formaterPourcentage(Math.round(mp.score * 100)) + '</span>');
             }
             html.push('</td>');
         }

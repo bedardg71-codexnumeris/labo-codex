@@ -233,8 +233,8 @@ function qualifierContexteApprentissage(A, C) {
             niveau: 'tres-favorable',
             label: decrireContexte(A, C),
             badgeClasse: 'badge-engagement-tres-favorable',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
+            A: formaterPourcentage(A * 100, 0),
+            C: formaterPourcentage(C * 100, 0),
             recommandation: 'À la lumière de ces données, les interventions pourraient se concentrer sur le développement des habiletés et des compétences.'
         };
     }
@@ -245,8 +245,8 @@ function qualifierContexteApprentissage(A, C) {
             niveau: 'favorable',
             label: decrireContexte(A, C),
             badgeClasse: 'badge-engagement-favorable',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
+            A: formaterPourcentage(A * 100, 0),
+            C: formaterPourcentage(C * 100, 0),
             recommandation: 'À la lumière de ces données, les interventions pourraient se concentrer sur le développement des habiletés et des compétences.'
         };
     }
@@ -257,8 +257,8 @@ function qualifierContexteApprentissage(A, C) {
             niveau: 'modere',
             label: decrireContexte(A, C),
             badgeClasse: 'badge-engagement-modere',
-            A: (A * 100).toFixed(0) + '%',
-            C: (C * 100).toFixed(0) + '%',
+            A: formaterPourcentage(A * 100, 0),
+            C: formaterPourcentage(C * 100, 0),
             recommandation: 'À la lumière de ces données, un suivi régulier pourrait aider à garder le cap.'
         };
     }
@@ -272,8 +272,8 @@ function qualifierContexteApprentissage(A, C) {
         niveau: 'fragile',
         label: decrireContexte(A, C),
         badgeClasse: 'badge-engagement-fragile',
-        A: (A * 100).toFixed(0) + '%',
-        C: (C * 100).toFixed(0) + '%',
+        A: formaterPourcentage(A * 100, 0),
+        C: formaterPourcentage(C * 100, 0),
         recommandation: 'À la lumière de ces données, il pourrait être pertinent de rencontrer l\'étudiant·e pour comprendre les absences ou les travaux manquants, et de vérifier s\'il y a des obstacles (emploi, santé, etc.).'
     };
 }

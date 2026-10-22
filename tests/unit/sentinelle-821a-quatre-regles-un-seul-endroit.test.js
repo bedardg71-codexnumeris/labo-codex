@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -90,9 +90,9 @@ describe('#821 lot A · mécanisme 3 — le contexte d\'apprentissage (A ET C, b
         expect(q(0.64, 0.65).niveau).toBe('fragile');
     });
 
-    it('les sorties gardent leur forme : niveau, label, badgeClasse, A et C en « 80% »', () => {
+    it('les sorties gardent leur forme : niveau, label, badgeClasse, A et C en « 80 % » (↻ #1137 : l’insécable)', () => {
         expect(q(0.8, 0.8)).toMatchObject({
-            niveau: 'favorable', label: 'Absences rares, travaux manquants rares', badgeClasse: 'badge-engagement-favorable', A: '80%', C: '80%'
+            niveau: 'favorable', label: 'Absences rares, travaux manquants rares', badgeClasse: 'badge-engagement-favorable', A: '80\u00A0%', C: '80\u00A0%'
         });
     });
 
@@ -304,7 +304,8 @@ describe('#821 lot A · la carte Mobilisation du profil lit les bornes, et écri
             db: { getSync: () => null, setSync() {}, get: async () => null, set: async () => {} },
             cle: (k) => 'test_' + k, echapperHtml: (s) => String(s == null ? '' : s), obtenirPreference: () => null
         };
-        new Function(...Object.keys(globaux), '"use strict";\n' + code)(...Object.values(globaux));
+        const g = completerNoteParDefaut(globaux);   // #1137 : le module des nombres affichés
+        new Function(...Object.keys(g), '"use strict";\n' + code)(...Object.values(g));
         return win.__genererSectionMobilisation('da');
     }
 
