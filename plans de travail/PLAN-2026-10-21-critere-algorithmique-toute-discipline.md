@@ -13,7 +13,7 @@ Chaque étape a, ou aura, sa consigne dans `plans de travail/CONSIGNE-LOT-<date>
 | 2. La palette, et les deux noms de l'enseignant | à faire | **Décisions de Grégoire** : les noms par défaut d'un critère neuf (ce qu'on compte, ce à quoi on le rapporte) ; l'accord de « une fois pondérée(s) » avec un nom masculin. Cowork les lui soumet au début de l'étape, une à la fois. Reprend aussi : les champs « Nombre d'erreurs », « Nombre de mots », la ligne du PDF, le paragraphe D3 de la section 5c, la phrase des deux modèles sous la formule. |
 | 3. La table de cas | à faire, après 2 | **Décision de Grégoire** : les textes par défaut des cas. |
 | 4. Les calculs que l'enseignant compose | à faire, après 3 | **Décision de Grégoire** : ce que veulent dire les calculs tout faits (didactique). Seule étape qui touche le calcul d'une note. |
-| 5. Coller sa liste de codes | à faire, indépendante | Rien : peut se glisser entre deux étapes. |
+| 5. Coller sa liste de codes | **codé le 22 oct.**, en relecture (consigne `CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`, option A tranchée par Cowork) ; les textes de l'écran sont provisoires, à valider par Grégoire | — |
 | La page « critères algorithmiques » du guide « Construire ton matériel d'évaluation » | à écrire par Cowork (le document du guide est un doc Claude, « Guide – Construire ton matériel d'évaluation (brouillon) ») | Rien : l'écran dit vrai depuis l'étape 0. Grégoire la corrige. Elle décrit l'écran d'aujourd'hui ; chaque étape la met à jour. |
 
 Inscrits sans lot, hors plan : deux critères algorithmiques dans une grille, seul le premier reçoit les codes (#1132) ; le mode Catégories, sans écran, et la démo dont les vingt évaluations sont dans ce mode (#1133).

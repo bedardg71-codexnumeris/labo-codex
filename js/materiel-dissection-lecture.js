@@ -58,6 +58,12 @@
         { k: 'descripteur', nom: 'Descripteur', aide: 'Ce que tu vois dans une copie, à un niveau donné', precision: 'Une réponse possible à la question du critère (une seule vaut pour une copie)', groupe: 'Les réponses' },
         { k: 'points', nom: 'Points', aide: 'Les points d’une réponse', precision: 'Ce qu’elle vaut, en chiffres', groupe: 'Les réponses' },
         { k: 'niveau', nom: 'Niveau', aide: 'Le nom d’un niveau de réussite', precision: 'Un stade de qualité du travail observé (par ex. « Sommaire », « Efficace »)', groupe: 'Les réponses' },
+        // Étape 5 du critère algorithmique (22 oct. 2026) : une liste de codes, collée seule. Textes PROVISOIRES de
+        // Claude Code, à valider par Grégoire (consigne `CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`).
+        { k: 'code', nom: 'Code', aide: 'Ce que tu écris sur la copie', precision: 'Un code d’annotation : des lettres ou des chiffres (par ex. « 3 », « S »)', groupe: 'Les codes' },
+        { k: 'nomcode', nom: 'Nom du code', aide: 'Ce que le code désigne', groupe: 'Les codes' },
+        { k: 'poids', nom: 'Poids', aide: 'Ce que pèse un code posé', precision: 'Un nombre plus grand que 0 ; sans poids, le code pèse 1', groupe: 'Les codes' },
+        { k: 'commentaire', nom: 'Commentaire', aide: 'Ce que l’élève lit pour ce code', precision: 'Il passe tel quel dans la rétroaction', groupe: 'Les codes' },
         { k: 'suite', nom: 'Suite', aide: 'La fin d’un morceau coupé en deux par la mise en page', groupe: 'Le reste' },
         { k: 'ignorer', nom: 'À ignorer', aide: 'Un symbole, une décoration', groupe: 'Le reste' }
     ];
@@ -614,12 +620,53 @@
         return (x.table ? 'aucun critère dans sa rangée' : 'aucun critère avant lui') + ' ; une ligne de total prend l’étiquette « Total »';
     }
 
+    // ------------------------------------------------------------------
+    // Étape 5 du critère algorithmique (22 oct. 2026) : une LISTE DE CODES, rangée à part (`R.codes`).
+    // Un « Code » ouvre une entrée ; son nom, son poids et son commentaire la rejoignent : celle de leur
+    // rangée dans un tableau, sinon la dernière ouverte (le même principe que les critères).
+    // ------------------------------------------------------------------
+
+    function nouveauCode(x, id, tx) {
+        var e = { code: tx, nom: [], poids: null, poidsNegatif: false, commentaire: [] };
+        x.R.codes.push(e);
+        x.codeEnCours = e;
+        if (x.table) x.codeParRangee[x.pos[id].r] = e;
+        x.suite = null;   // un code est un identifiant : une « Suite » ne le continue pas
+        return e;
+    }
+
+    function codeDe(x, id) {
+        if (x.table) return x.codeParRangee[x.pos[id].r] || null;
+        return x.codeEnCours;
+    }
+
+    var LIRE_CODE = {
+        nomcode: function (x, e, id, tx) { ranger(x, e.nom, tx); },
+        commentaire: function (x, e, id, tx) { ranger(x, e.commentaire, tx); },
+        poids: function (x, e, id, tx, t) {
+            var n = nombres(tx);
+            if (!n.length) { sansPlace(x, tx, t, 'aucun nombre'); return; }
+            if (e.poids != null) { sansPlace(x, tx, t, 'son code a déjà un poids (' + formaterNombre(e.poids) + ')'); return; }
+            e.poids = n[0];
+            e.poidsNegatif = /[-−]\s*\d/.test(tx);
+        }
+    };
+
+    /** Un morceau du groupe « Les codes » : « Code » ouvre une entrée ; les autres rejoignent la leur. */
+    function lireMorceauDeCode(x, id, t, tx) {
+        if (t === 'code') { nouveauCode(x, id, tx); return; }
+        var e = codeDe(x, id);
+        if (!e) { sansPlace(x, tx, t, x.table ? 'aucun code dans sa rangée' : 'aucun code avant lui'); return; }
+        LIRE_CODE[t](x, e, id, tx, t);
+    }
+
     function lireMorceau(x, id, t, tx) {
         if (t === 'ignorer' || t === 'niveau') return;
         if (t === 'suite') { if (x.suite) x.suite(tx); else sansPlace(x, tx, t, 'aucun morceau à compléter avant elle'); return; }
         // Lot 2a (trouvaille 1 du lot 1, tranchée par Cowork) : une « Suite » complète le dernier TEXTE
-        // lu ; des points et une pondération sont des nombres, pas du texte à continuer.
-        if (t !== 'points' && t !== 'ponderation') x.suite = null;
+        // lu ; des points, une pondération et un poids sont des nombres, pas du texte à continuer.
+        if (['points', 'ponderation', 'poids'].indexOf(t) < 0) x.suite = null;
+        if (t === 'code' || LIRE_CODE[t]) { lireMorceauDeCode(x, id, t, tx); return; }
         if (LIRE_CADRE[t]) { LIRE_CADRE[t](x, id, tx); return; }
         var cr = t === 'ponderation' ? ciblePonderation(x, id) : cible(x, id);
         // Une réponse sans critère, quand aucun niveau n'est nommé : un critère « à nommer ».
@@ -679,8 +726,9 @@
         var M = D.morceauxLus(doc, rattachements);
         liens = liens || {};
         function typeDe(id) { var t = liens[id]; return TYPE[t] ? t : null; }
-        var R = { titre: [], description: [], criteres: [], niveaux: [], total: null, totalNb: null, sansEtiquette: 0, sansPlace: [], nb: {} };
-        var x = { R: R, table: !!doc && doc.mode === 'table', pos: M.pos, nivIdx: {}, avecNiveaux: false, section: null, enCours: null, parRangee: {}, suite: null };
+        var R = { titre: [], description: [], criteres: [], niveaux: [], codes: [], total: null, totalNb: null, sansEtiquette: 0, sansPlace: [], nb: {} };
+        var x = { R: R, table: !!doc && doc.mode === 'table', pos: M.pos, nivIdx: {}, avecNiveaux: false, section: null, enCours: null, parRangee: {}, suite: null,
+            codeEnCours: null, codeParRangee: {} };
         lireNiveaux(x, M.ordre, M.texte, typeDe);
         M.ordre.forEach(function (id) {
             var t = typeDe(id);
@@ -989,6 +1037,99 @@
         });
         var avertissements = enNiveaux ? [calc.avertPlages, calc.avertNotes].filter(Boolean) : [];
         return { enNiveaux: enNiveaux, raisons: raisons, aCompleter: aCompleter, avertissements: avertissements, modele: m };
+    };
+
+    // ------------------------------------------------------------------
+    // 3 bis. UNE LISTE DE CODES (étape 5 du critère algorithmique, 22 oct. 2026)
+    // Consigne : `plans de travail/CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`.
+    // Option A, tranchée par Cowork : la liste va dans un critère algorithmique EXISTANT qui n'a pas encore
+    // de codes ; il garde sa formule et sa pondération ; rien n'est remplacé ni effacé. Le commentaire passe
+    // tel quel (l'élève le lit) : aucun mot n'est réécrit. Textes des refus : PROVISOIRES (Claude Code).
+    // ------------------------------------------------------------------
+
+    // Les bornes des sous-critères (`partage-schemas.js`, `sousCriteres`) : un code EST un sous-critère du
+    // critère algorithmique (`codes-annotation.js`, `_depuisSousCriteres`), et doit pouvoir voyager.
+    D.MAX_CODES = 30;
+    D.MAX_NOM_CODE = 200;
+    D.MAX_COMMENTAIRE = 5000;
+    D.MAX_POIDS = 100;
+    // Le code vit dans un identifiant posé sur la copie (`errfr_<code>`) : la règle de `codes-annotation.js`.
+    var CODE_VALIDE = /^[A-Za-z0-9_-]{1,20}$/;
+    // Les étiquettes d'une grille : avec des codes, elles n'auraient nulle part où aller.
+    var DE_GRILLE = ['titre', 'description', 'section', 'total', 'critere', 'souscritere', 'ponderation', 'descripteur', 'points', 'niveau'];
+
+    /** La dissection porte-t-elle une liste de codes (au moins un morceau étiqueté du groupe « Les codes ») ? */
+    D.estListeDeCodes = function (R) {
+        return ['code', 'nomcode', 'poids', 'commentaire'].some(function (t) { return (R.nb[t] || 0) > 0; });
+    };
+
+    /**
+     * La liste comprise → `{ codes: [{ code, nom, poids, commentaire }], raisons: [] }`. Rien d'inventé : un
+     * poids absent vaut 1 (le poids d'un code du repli, « comme hier », supposition de la consigne) ; un nom
+     * ou un commentaire absent reste vide. Les raisons NOMMENT le code en cause.
+     */
+    D.codesCompris = function (R) {
+        var raisons = [];
+        if (DE_GRILLE.some(function (t) { return (R.nb[t] || 0) > 0; })) {
+            raisons.push('une liste de codes seule : retire les étiquettes de grille (critères, réponses, titre…), ou celles des codes');
+        }
+        if (!R.codes.length) raisons.push('au moins un code : surligne chaque code avec l’étiquette « Code »');
+        if (R.codes.length > D.MAX_CODES) raisons.push('au plus ' + D.MAX_CODES + ' codes (ta liste en a ' + R.codes.length + ')');
+        var vus = {}, illisibles = [], doubles = [], sansPoids = [], tropLourds = [];
+        var codes = R.codes.map(function (e) {
+            var code = propre(e.code);
+            if (!CODE_VALIDE.test(code)) illisibles.push(code);
+            else if (vus[code]) { if (doubles.indexOf(code) < 0) doubles.push(code); }
+            vus[code] = true;
+            var poids = e.poids == null ? 1 : e.poids;
+            if (e.poidsNegatif || !(poids > 0)) sansPoids.push(code);
+            else if (poids > D.MAX_POIDS) tropLourds.push(code);
+            return { code: code, nom: e.nom.join(' ').trim(), poids: poids, commentaire: e.commentaire.join('\n').trim() };
+        });
+        if (illisibles.length) raisons.push('des codes faits de lettres, de chiffres, de « - » ou de « _ », 20 caractères au plus (' + nommer(illisibles) + ')');
+        if (doubles.length) raisons.push('des codes différents (' + nommer(doubles) + ' en double)');
+        if (sansPoids.length) raisons.push('un poids plus grand que 0 (' + nommer(sansPoids) + ')');
+        if (tropLourds.length) raisons.push('un poids de ' + D.MAX_POIDS + ' au plus (' + nommer(tropLourds) + ')');
+        var noms = codes.filter(function (c) { return c.nom.length > D.MAX_NOM_CODE; }).map(function (c) { return c.code; });
+        if (noms.length) raisons.push('des noms plus courts (' + D.MAX_NOM_CODE + ' caractères au plus) pour ' + nommer(noms));
+        var longs = codes.filter(function (c) { return c.commentaire.length > D.MAX_COMMENTAIRE; }).map(function (c) { return c.code; });
+        if (longs.length) raisons.push('des commentaires plus courts (5 000 caractères au plus) pour ' + nommer(longs));
+        if (R.sansPlace.length) raisons.push(compte(R.sansPlace.length, 'une place pour le morceau étiqueté listé plus bas', 'une place pour les # morceaux étiquetés listés plus bas'));
+        return { codes: codes, raisons: raisons };
+    };
+
+    // Les motifs d'un critère qui ne peut pas recevoir la liste. PROVISOIRES (Claude Code).
+    D.MOTIFS_CODES = {
+        pasLePremier: 'Seul le premier critère algorithmique d’une grille reçoit des codes',
+        dejaDesSousCriteres: 'Il a déjà des codes ou des sous-critères : rien n’est remplacé',
+        repli: 'Il reçoit encore les dix codes du français écrit : rien n’est remplacé'
+    };
+
+    /**
+     * Les critères algorithmiques des grilles, et pour chacun s'il peut recevoir la liste : `{ grilleId,
+     * critereId, grille, critere, motif }`, `motif` à `null` s'il le peut. Il le peut s'il est le critère
+     * qui reçoit les codes de sa grille (#1132, `critereQuiRecoit`), s'il porte la marque d'un critère né
+     * depuis le 21 oct. (`marque`, ses codes sont ses sous-critères et seulement eux) et s'il n'a AUCUN
+     * sous-critère. Sans la marque, un critère sans sous-critère reçoit les dix codes du repli : il a déjà
+     * des codes (`codes-annotation.js`, `listeCodes`). Fonction pure.
+     * @param {Array} grilles - les grilles du trimestre
+     * @param {{ critereQuiRecoit: function(Object): Object|null, marque: string }} regles
+     */
+    D.destinationsCodes = function (grilles, regles) {
+        var out = [];
+        (Array.isArray(grilles) ? grilles : []).forEach(function (g) {
+            if (!g || !Array.isArray(g.criteres)) return;
+            var recoit = regles.critereQuiRecoit(g);
+            g.criteres.forEach(function (c) {
+                if (!c || c.type !== 'algorithmique') return;
+                var motif = null;
+                if (!recoit || recoit.id !== c.id) motif = D.MOTIFS_CODES.pasLePremier;
+                else if (Array.isArray(c.sousCriteres) && c.sousCriteres.length) motif = D.MOTIFS_CODES.dejaDesSousCriteres;
+                else if (c[regles.marque] !== true) motif = D.MOTIFS_CODES.repli;
+                out.push({ grilleId: g.id, critereId: c.id, grille: String(g.nom || ''), critere: String(c.nom || ''), motif: motif });
+            });
+        });
+        return out;
     };
 
     // ------------------------------------------------------------------
