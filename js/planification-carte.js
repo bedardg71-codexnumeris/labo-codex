@@ -8473,7 +8473,7 @@ function optionProductionHTML(prod, idChoisi) {
     var portePonderation = (typeof window.typePorteSaPonderation === 'function')
         ? window.typePorteSaPonderation(prod.type)
         : true;
-    var suffixe = portePonderation ? ' (' + (prod.ponderation || 0) + ' %)' : '';
+    var suffixe = portePonderation ? ' (' + formaterPourcentage(prod.ponderation || 0) + ')' : '';
     return '<option value="' + echapperHtml(prod.id) + '"' +
         (idChoisi === prod.id ? ' selected' : '') + '>' +
         echapperHtml(titre) + suffixe + '</option>';

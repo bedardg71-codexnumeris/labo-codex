@@ -482,7 +482,7 @@ function calculerTotalPoidsEnsemble() {
 
     if (!totalSpan || !validationP) return;
 
-    totalSpan.textContent = total + '%';
+    totalSpan.textContent = formaterPourcentage(total);
 
     // Changer la couleur selon la validité
     totalSpan.classList.remove('u-texte-succes', 'u-texte-danger', 'u-texte-warning');
@@ -494,11 +494,11 @@ function calculerTotalPoidsEnsemble() {
         validationP.classList.add('u-texte-succes');
     } else if (total > 100) {
         totalSpan.classList.add('u-texte-danger');
-        validationP.innerHTML = '<span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Le total dépasse 100% (' + total + '%). Ajustez les pondérations.';
+        validationP.innerHTML = '<span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Le total dépasse 100\u00a0% (' + formaterPourcentage(total) + '). Ajustez les pondérations.';   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
         validationP.classList.add('u-texte-danger');
     } else {
         totalSpan.classList.add('u-texte-warning');
-        validationP.textContent = 'Le total doit atteindre 100% (actuellement ' + total + '%)';
+        validationP.textContent = 'Le total doit atteindre 100\u00a0% (actuellement ' + formaterPourcentage(total) + ')';
         validationP.classList.add('u-texte-warning');
     }
 
@@ -566,7 +566,7 @@ function sauvegarderEnsembleObjectifs() {
     // Valider le total
     const total = calculerTotalPoidsEnsemble();
     if (total !== 100) {
-        if (!confirm(`Le total des pondérations est de ${total}% au lieu de 100%.\n\nVeux-tu quand même enregistrer ?`)) {
+        if (!confirm(`Le total des pondérations est de ${formaterPourcentage(total)} au lieu de 100\u00a0%.\n\nVeux-tu quand même enregistrer ?`)) {
             return;
         }
     }

@@ -473,7 +473,7 @@ function genererApercuGrille(grille) {
                 <tr>
                     <td><strong>${escapeHtml(c.nom || '—')}</strong></td>
                     <td>${escapeHtml(c.description || '—')}</td>
-                    <td style="text-align: center;">${c.ponderation ? c.ponderation + '%' : '—'}</td>
+                    <td style="text-align: center;">${c.ponderation ? formaterPourcentage(c.ponderation) : '—'}</td>
                 </tr>
             `;
         });
@@ -501,7 +501,7 @@ function genererApercuEchelle(echelle) {
     `;
 
     if (echelle.config?.seuilReussite) {
-        html += `<p class="apercu-pdf-info">Seuil de reussite : <strong>${echelle.config.seuilReussite}%</strong></p>`;
+        html += `<p class="apercu-pdf-info">Seuil de reussite : <strong>${formaterPourcentage(echelle.config.seuilReussite)}</strong></p>`;
     }
 
     if (echelle.niveaux && echelle.niveaux.length > 0) {
@@ -524,7 +524,7 @@ function genererApercuEchelle(echelle) {
                     <td style="text-align: center;" class="${couleurClass}"><strong>${escapeHtml(n.code || '—')}</strong></td>
                     <td>${escapeHtml(n.nom || '—')}</td>
                     <td>${escapeHtml(n.description || '—')}</td>
-                    <td style="text-align: center;">${n.min ?? 0}% - ${n.max ?? 100}%</td>
+                    <td style="text-align: center;">${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}</td>
                 </tr>
             `;
         });
@@ -575,7 +575,7 @@ function genererApercuProductions(productions) {
             <tr>
                 <td>${escapeHtml(p.titre || '—')}</td>
                 <td>${escapeHtml(p.type || '—')}</td>
-                <td style="text-align: center;">${p.ponderation ? p.ponderation + '%' : '—'}</td>
+                <td style="text-align: center;">${p.ponderation ? formaterPourcentage(p.ponderation) : '—'}</td>
                 <td>${dateFormatee}</td>
             </tr>
         `;
@@ -673,7 +673,7 @@ async function exporterProductionsPDF(productions, options = {}) {
         return [
             p.titre || '—',
             p.type || '—',
-            p.ponderation ? `${p.ponderation}%` : '—',
+            p.ponderation ? formaterPourcentage(p.ponderation) : '—',
             formaterDate(dateEch)
         ];
     });
@@ -735,7 +735,7 @@ async function exporterGrillePDF(grille, options = {}) {
         const donnees = grille.criteres.map(c => [
             c.nom || '—',
             c.description || '—',
-            c.ponderation ? `${c.ponderation}%` : '—'
+            c.ponderation ? formaterPourcentage(c.ponderation) : '—'
         ]);
 
         doc.autoTable({
@@ -805,7 +805,7 @@ async function exporterToutesGrillesPDF(options = {}) {
             const donnees = grille.criteres.map(c => [
                 c.nom || '—',
                 c.description || '—',
-                c.ponderation ? `${c.ponderation}%` : '—'
+                c.ponderation ? formaterPourcentage(c.ponderation) : '—'
             ]);
 
             doc.autoTable({
@@ -853,7 +853,7 @@ async function exporterEchellePDF(echelle, options = {}) {
     if (echelle.config?.seuilReussite) {
         doc.setFontSize(PDF_CONFIG.polices.texteNormal);
         doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
-        doc.text(`Seuil de reussite : ${echelle.config.seuilReussite}%`, PDF_CONFIG.marges.gauche, posY);
+        doc.text(`Seuil de reussite : ${formaterPourcentage(echelle.config.seuilReussite)}`, PDF_CONFIG.marges.gauche, posY);
         posY += 8;
     }
 
@@ -863,7 +863,7 @@ async function exporterEchellePDF(echelle, options = {}) {
             n.code || '—',
             n.nom || '—',
             n.description || '—',
-            `${n.min ?? 0}% - ${n.max ?? 100}%`
+            `${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}`
         ]);
 
         doc.autoTable({
@@ -931,7 +931,7 @@ async function exporterToutesEchellesPDF(options = {}) {
         if (echelle.config?.seuilReussite) {
             doc.setFontSize(PDF_CONFIG.polices.texteNormal);
             doc.setTextColor(...PDF_CONFIG.couleurs.texteSecondaire);
-            doc.text(`Seuil de reussite : ${echelle.config.seuilReussite}%`, PDF_CONFIG.marges.gauche, posY);
+            doc.text(`Seuil de reussite : ${formaterPourcentage(echelle.config.seuilReussite)}`, PDF_CONFIG.marges.gauche, posY);
             posY += 8;
         }
 
@@ -941,7 +941,7 @@ async function exporterToutesEchellesPDF(options = {}) {
                 n.code || '—',
                 n.nom || '—',
                 n.description || '—',
-                `${n.min ?? 0}% - ${n.max ?? 100}%`
+                `${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}`
             ]);
 
             doc.autoTable({
@@ -1132,7 +1132,7 @@ async function exporterReferentielCompletPDF(options = {}) {
             return [
                 p.titre || '—',
                 p.type || '—',
-                p.ponderation ? `${p.ponderation}%` : '—',
+                p.ponderation ? formaterPourcentage(p.ponderation) : '—',
                 formaterDate(dateEch)
             ];
         });
@@ -1178,7 +1178,7 @@ async function exporterReferentielCompletPDF(options = {}) {
             const donnees = grille.criteres.map(c => [
                 c.nom || '—',
                 c.description || '—',
-                c.ponderation ? `${c.ponderation}%` : '—'
+                c.ponderation ? formaterPourcentage(c.ponderation) : '—'
             ]);
 
             doc.autoTable({
@@ -1214,7 +1214,7 @@ async function exporterReferentielCompletPDF(options = {}) {
                 n.code || '—',
                 n.nom || '—',
                 n.description || '—',
-                `${n.min ?? 0}% - ${n.max ?? 100}%`
+                `${formaterPourcentage(n.min ?? 0)} - ${formaterPourcentage(n.max ?? 100)}`
             ]);
 
             doc.autoTable({

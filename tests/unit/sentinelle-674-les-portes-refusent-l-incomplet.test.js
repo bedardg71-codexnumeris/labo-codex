@@ -181,8 +181,8 @@ describe('#674 · porte 1 — l\'enregistrement refuse ce qui ne porte pas sur t
         win.sauvegarderEvaluation();
         expect(refus).toHaveLength(1);
         expect(refus[0].titre).toBe('Évaluation incomplète');
-        expect(refus[0].details).toContain('Langue (20 %)');
-        expect(refus[0].details).toContain('80 % de la grille');
+        expect(refus[0].details).toContain('Langue (20\u00A0%)');
+        expect(refus[0].details).toContain('80\u00A0% de la grille');
         expect(refus[0].details).toContain('l\'évaluation n\'est pas verrouillée');
         const brouillon = seulUnBrouillon(ecritures).find((ev) => ev.id === 'EVAL_NEUF');
         expect(brouillon, 'le brouillon doit exister : la copie reste exportable').toBeTruthy();
@@ -227,7 +227,7 @@ describe('#674 · porte 1 — l\'enregistrement refuse ce qui ne porte pas sur t
         win.sauvegarderEvaluationModifiee();
         expect(refus).toHaveLength(1);
         expect(refus[0].titre).toBe('Évaluation incomplète');
-        expect(refus[0].details).toContain('Langue (20 %)');
+        expect(refus[0].details).toContain('Langue (20\u00A0%)');
         const ev = seulUnBrouillon(ecritures).find((x) => x.id === 'EV1');
         expect(ev).toBeTruthy();
         expect(ev).toMatchObject({ noteFinale: 95, ponderationCouverte: 80, verrouillee: false });
@@ -407,7 +407,7 @@ describe('#674 · porte 2 — le PDF de l\'élève refuse de conclure et nomme c
         const fb = feedback(EVAL_INCOMPLETE_AVANT_LOT);
         expect(fb.portee).toMatchObject({ incomplete: true, commencee: true, ponderationCouverte: 80, ponderationGrille: 100 });
         expect(fb.portee.criteresHorsNote).toEqual([{ critereId: NE_AVANT(3), nom: 'Langue', ponderation: 20, motif: 'sans-niveau', niveau: '' }]);
-        expect(fb.portee.texte).toBe('sans niveau : Langue (20 %)');
+        expect(fb.portee.texte).toBe('sans niveau : Langue (20\u00A0%)');
     });
 
     // Les mots de l'élève, arrêtés par Grégoire le 2 septembre 2026 (option C) :

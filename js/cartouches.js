@@ -1489,7 +1489,7 @@ async function calculerPourcentageComplete() {
     if (elemNbCriteres) elemNbCriteres.textContent = nbCriteres;
     if (elemNbNiveaux) elemNbNiveaux.textContent = nbNiveaux;
     if (elemNbCommentaires) elemNbCommentaires.textContent = nbCommARediger;
-    if (elemPctComplete) elemPctComplete.textContent = pourcentage + '%';
+    if (elemPctComplete) elemPctComplete.textContent = formaterPourcentage(pourcentage);
 
     // Changer la couleur selon le pourcentage
     const element = elemPctComplete ? elemPctComplete.parentElement : null;
@@ -2536,7 +2536,7 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     lignes.push('');
     lignes.push('Niveaux, du plus faible au plus élevé :');
     niveaux.forEach(n => {
-        const borne = (n.min != null && n.max != null) ? ' [' + n.min + ' à ' + n.max + ' %]' : '';
+        const borne = (n.min != null && n.max != null) ? ' [' + formaterNombre(n.min) + ' à ' + formaterPourcentage(n.max) + ']' : '';
         const repere = (repereMaitrise && n === repereMaitrise) ? '  ← « Maîtrisé à partir de » : à partir d\'ici'
             : ((repereSuffisance && n === repereSuffisance) ? '  ← « Suffisant à partir de » : à partir d\'ici' : '');
         lignes.push('- **' + n.code + '** — ' + (n.nom || '') + borne
@@ -2546,7 +2546,7 @@ function composerModeleCartouche(grille, echelle, production, nomCartouche) {
     lignes.push('Critères de la grille :');
     criteres.forEach(c => {
         lignes.push('- **' + c.nom + '**'
-            + (c.ponderation ? ' (' + c.ponderation + ' %)' : '')
+            + (c.ponderation ? ' (' + formaterPourcentage(c.ponderation) + ')' : '')
             + (c.description ? ' — ' + c.description : ''));
     });
     lignes.push('');

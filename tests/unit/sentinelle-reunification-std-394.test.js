@@ -263,7 +263,7 @@ describe('#394 · règles 3 et 5 — avertissements de transparence + migration 
         const avert = win.validerProductionsStd(productions);
         const complement = avert.find(a => a.message.includes('complément'));
         expect(complement).toBeTruthy();
-        expect(complement.message).toContain('70 %');
+        expect(complement.message).toContain('70\u00A0%');
     });
 
     it('règle 5, cas NON ambigu : une seule candidate → productionId exposé (bouton), jamais de conversion auto', () => {

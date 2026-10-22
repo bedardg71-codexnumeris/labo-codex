@@ -260,8 +260,8 @@ describe('critère algorithmique · L — les libellés disent la grille et l’
         const enPoints = { criteres: [{ type: 'analytique', ponderation: 30 }, { type: 'analytique', ponderation: 70 }] };
         expect(win.libellePonderationEval(30, enPoints)).toBe('30 points');
         expect(win.libellePonderationEval(1, enPoints)).toBe('1 point');
-        expect(win.libellePonderationEval(30, grilleAlgo())).toBe('30%');
-        expect(win.libellePonderationEval('?', enPoints)).toBe('?%');
+        expect(win.libellePonderationEval(30, grilleAlgo())).toBe('30\u00A0%');
+        expect(win.libellePonderationEval('?', enPoints)).toBe('?\u00A0%');   // #1137 : le repli garde sa valeur, à l'insécable
     });
 
     it('L.b « Niveau de l’échelle « X » », ou « Niveau » sans échelle nommée — plus « Niveau IDME » partout', () => {

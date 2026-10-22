@@ -1489,7 +1489,7 @@ function genererSectionAccompagnement(da) {
                     // chose que l'utilisateur ait saisie pour lui.
                     const titre = nom
                         ? (code ? nom + ' (' + code + ')' : nom)
-                        : (code || (niveau.min + ' – ' + formaterPourcentage(niveau.max)));
+                        : (code || (formaterNombre(niveau.min) + ' – ' + formaterPourcentage(niveau.max)));
 
                     corps += `
                 <div style="margin-bottom: ${index === blocs.length - 1 && horsEchelle.length === 0 ? '0' : '12px'};">

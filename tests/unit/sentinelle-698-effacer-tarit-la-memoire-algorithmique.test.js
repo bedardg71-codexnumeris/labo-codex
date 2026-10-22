@@ -112,7 +112,7 @@ describe('#698 · effacer tarit la mémoire — mode CATÉGORIES', () => {
         expect(h.ecran.noteProduction1.textContent).toBe('--');
         expect(h.win.porteeCalculeeCourante).toMatchObject({ ponderationCouverte: 80, incomplete: true });
         expect(h.win.porteeCalculeeCourante.criteresHorsNote.map((c) => c.critereId + ':' + c.motif)).toEqual(['a1:sans-niveau']);
-        expect(h.ecran.porteeNote1.textContent).toContain('Français écrit (20 %)');
+        expect(h.ecran.porteeNote1.textContent).toContain('Français écrit (20\u00A0%)');
     });
     it('A bis · #704 — codes EFFACÉS sur 500 mots : aucune erreur, donc un résultat NEUF (100 %, E, note 87,2 %) ; rien de l\'ancien 87,5 ne survit', () => {
         const h = monter();

@@ -1850,8 +1850,8 @@ function genererSectionExemple(famille) {
     html += '<h4>Ce que ça donnerait</h4>';
     if (ex.disponible) {
         html += '<p class="wizard-v2-recap-aide">Avec une pratique de ce type, sur les profils-types de la démonstration :</p>';
-        html += `<p>Un profil <strong>fort</strong> : <strong>~${ex.fortP} %</strong></p>`;
-        html += `<p>Un profil <strong>en difficulté</strong> : <strong>~${ex.difficulteP} %</strong></p>`;
+        html += `<p>Un profil <strong>fort</strong> : <strong>~${formaterPourcentage(ex.fortP)}</strong></p>`;
+        html += `<p>Un profil <strong>en difficulté</strong> : <strong>~${formaterPourcentage(ex.difficulteP)}</strong></p>`;
         html += '<p class="wizard-v2-recap-aide">Ordre de grandeur lié au <em>type</em> de notation, pas à tes réglages fins.</p>';
     } else {
         const repli = REPLI_EXEMPLE_PAR_FAMILLE[famille];
@@ -1987,7 +1987,7 @@ function genererRecapitulatif() {
     if (r.typePratique === 'specifications') {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Configuration PAN-Spécifications</h4>';
-        html += `<p><strong>Seuil d'acceptabilité\u00a0:</strong> ${r.seuilAcceptabilite}%</p>`;
+        html += `<p><strong>Seuil d'acceptabilité\u00a0:</strong> ${formaterPourcentage(r.seuilAcceptabilite)}</p>`;
         html += `<p><strong>Système de jetons\u00a0:</strong> ${r.utiliserJetons ? 'Activé' : 'Désactivé'}</p>`;
         if (r.utiliserJetons) {
             html += `<p><strong>Jetons délai\u00a0:</strong> ${r.nbJetonsDelai} (${r.dureeDelaiJours} jours)</p>`;

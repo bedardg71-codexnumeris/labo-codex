@@ -60,7 +60,7 @@ async function preparerDonneesBibliothequeProductions() {
         afficherId: true,
         badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
         metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
-            quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
+            quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${formaterPourcentage(prod.ponderation)}`
         }),
         description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
         inspireDe: BibliothequeUI.formaterInspireDe(prod),
@@ -129,7 +129,7 @@ async function preparerDonneesBibliothequeProductions() {
             afficherId: true,
             badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
             metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
-                quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${prod.ponderation}%`
+                quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${formaterPourcentage(prod.ponderation)}`
             }),
             inspireDe: BibliothequeUI.formaterInspireDe(prod),
             description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
@@ -533,7 +533,7 @@ function afficherProductionsTrimestreModal() {
                 <div>
                     <strong>${echapperHtml(prod.titre || 'Sans titre')}</strong>
                     ${(prod.activiteApprentissage || prod.description) ? ` - ${echapperHtml(prod.activiteApprentissage || prod.description)}` : ''}
-                    <br><small style="color: var(--gris-moyen);">Type: ${echapperHtml(prod.type || 'N/A')} • Pondération: ${echapperHtml(prod.ponderation || 0)}%${coursLabel ? ' • ' + echapperHtml(coursLabel) : ''}</small>
+                    <br><small style="color: var(--gris-moyen);">Type: ${echapperHtml(prod.type || 'N/A')} • Pondération: ${echapperHtml(formaterPourcentage(prod.ponderation || 0))}${coursLabel ? ' • ' + echapperHtml(coursLabel) : ''}</small>
                 </div>
                 <button data-action="importerUneProductionTrimestre" data-param="${cleSelectionnee}" data-param2="${prod.id}" class="btn btn-confirmer btn-tres-compact">
                     Importer

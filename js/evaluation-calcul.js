@@ -131,8 +131,8 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
     var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
     var pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
     var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
-    if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
-    if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
+    if (noteAlgoEl) noteAlgoEl.textContent = formaterNombre(noteCalculee, 2);
+    if (pctAlgoEl) pctAlgoEl.textContent = formaterNombre(pctFinal, 1);
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME || '--';
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
@@ -596,8 +596,8 @@ function _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, ni
     const noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
     const pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
     const nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
-    if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
-    if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
+    if (noteAlgoEl) noteAlgoEl.textContent = formaterNombre(noteCalculee, 2);
+    if (pctAlgoEl) pctAlgoEl.textContent = formaterNombre(pctFinal, 1);
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME || '--';
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
     _poserNiveauCalculeAlgo(critereId, niveauIDME);
@@ -869,8 +869,8 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     var noteAlgoEl = document.getElementById(`note_algo_${critereId}`);
     var pctAlgoEl = document.getElementById(`pct_algo_${critereId}`);
     var nivAlgoEl = document.getElementById(`niveau_algo_${critereId}`);
-    if (noteAlgoEl) noteAlgoEl.textContent = noteCalculee.toFixed(2);
-    if (pctAlgoEl) pctAlgoEl.textContent = pctFinal.toFixed(1);
+    if (noteAlgoEl) noteAlgoEl.textContent = formaterNombre(noteCalculee, 2);
+    if (pctAlgoEl) pctAlgoEl.textContent = formaterNombre(pctFinal, 1);
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME || '--';
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
@@ -1220,7 +1220,7 @@ function criteresAjoutesDepuis(evaluation, grille) {
  */
 function texteCriteresHorsNote(portee) {
     const hors = (portee && Array.isArray(portee.criteresHorsNote)) ? portee.criteresHorsNote : [];
-    const sansNiveau = hors.filter(c => c.motif === 'sans-niveau').map(c => c.nom + ' (' + c.ponderation + ' %)');
+    const sansNiveau = hors.filter(c => c.motif === 'sans-niveau').map(c => c.nom + ' (' + formaterPourcentage(c.ponderation) + ')');
     const sansValeur = hors.filter(c => c.motif === 'niveau-sans-valeur').map(c => c.nom + ' (' + c.niveau + ')');
     const aCompleter = hors.filter(c => c.motif === 'ponderation-a-completer').map(c => c.nom);
     const parts = [];
@@ -1245,8 +1245,8 @@ function phrasesPorteeIncomplete(portee) {
     if (sansNiveau.length) {
         const pct = portee.ponderationGrille > 0 ? Math.round((portee.ponderationCouverte / portee.ponderationGrille) * 100) : 0;
         phrases.push('Pas de note tant qu\'un critère est sans niveau — '
-            + sansNiveau.map(c => c.nom + ' (' + c.ponderation + ' %)').join(', ')
-            + '. Sans ' + (sansNiveau.length > 1 ? 'eux' : 'lui') + ', la note ne porterait que sur ' + pct + ' % de la grille.');
+            + sansNiveau.map(c => c.nom + ' (' + formaterPourcentage(c.ponderation) + ')').join(', ')
+            + '. Sans ' + (sansNiveau.length > 1 ? 'eux' : 'lui') + ', la note ne porterait que sur ' + formaterPourcentage(pct) + ' de la grille.');
     }
     if (sansValeur.length) {
         phrases.push('Pas de note : ' + (sansValeur.length > 1 ? 'les niveaux choisis n\'ont pas de valeur' : 'le niveau choisi n\'a pas de valeur')

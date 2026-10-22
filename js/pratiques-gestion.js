@@ -2674,11 +2674,11 @@ function validerPonderationsCategoriesMat() {
 
     if (validation) {
         if (total === 100) {
-            validation.innerHTML = `<span style="color: var(--vert-principal);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Total : ${total}%</span>`;
+            validation.innerHTML = `<span style="color: var(--vert-principal);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Total : ${formaterPourcentage(total)}</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
         } else if (total < 100) {
-            validation.innerHTML = `<span style="color: var(--orange-principal);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Total : ${total}% (il manque ${100 - total}%)</span>`;
+            validation.innerHTML = `<span style="color: var(--orange-principal);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Total : ${formaterPourcentage(total)} (il manque ${formaterPourcentage(100 - total)})</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
         } else {
-            validation.innerHTML = `<span style="color: var(--rouge-principal);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Total : ${total}% (dépasse de ${total - 100}%)</span>`;
+            validation.innerHTML = `<span style="color: var(--rouge-principal);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Total : ${formaterPourcentage(total)} (dépasse de ${formaterPourcentage(total - 100)})</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
         }
     }
 }
@@ -2802,8 +2802,8 @@ async function recalculerPonderationsUnitaires() {
     const nombreARetenir = parseInt(document.getElementById('mat-selection-nombre')?.value) || 1;
 
     // Calculer pondérations unitaires
-    const unitaireSelection = nombreARetenir > 0 ? (pondSelection / nombreARetenir).toFixed(2) : 0;
-    const unitaireObligatoires = nbObligatoires > 0 ? (pondObligatoires / nbObligatoires).toFixed(2) : 0;
+    const unitaireSelection = nombreARetenir > 0 ? pondSelection / nombreARetenir : 0;
+    const unitaireObligatoires = nbObligatoires > 0 ? pondObligatoires / nbObligatoires : 0;
 
     // Afficher
     const divSelection = document.getElementById('mat-selection-unitaire');
@@ -2811,11 +2811,11 @@ async function recalculerPonderationsUnitaires() {
 
     if (divSelection) {
         const infoNb = nbSelection > 0 ? ` (${nbSelection} dans le pool)` : '';
-        divSelection.innerHTML = `Pondération unitaire : <strong>${unitaireSelection}%</strong> par production retenue${infoNb}`;
+        divSelection.innerHTML = `Pondération unitaire : <strong>${formaterPourcentage(unitaireSelection, 2)}</strong> par production retenue${infoNb}`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
     }
     if (divObligatoires) {
         const infoNb = nbObligatoires > 0 ? ` (${nbObligatoires} cochée${nbObligatoires > 1 ? 's' : ''})` : ' (aucune cochée)';
-        divObligatoires.innerHTML = `Pondération unitaire : <strong>${unitaireObligatoires}%</strong> par production${infoNb}`;
+        divObligatoires.innerHTML = `Pondération unitaire : <strong>${formaterPourcentage(unitaireObligatoires, 2)}</strong> par production${infoNb}`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
     }
 
     // 🆕 Beta 95.7 : Mise à jour du résumé construction de la note
@@ -2833,9 +2833,9 @@ async function recalculerPonderationsUnitaires() {
         html += `</div>`;
 
         html += `<div style="margin-top: 8px; font-size: 0.85rem; color: var(--gris-fonce);">`;
-        html += `(${pondSelection}% + ${pondObligatoires}% = ${totalPond}%)`;
+        html += `(${formaterPourcentage(pondSelection)} + ${formaterPourcentage(pondObligatoires)} = ${formaterPourcentage(totalPond)})`;
         if (totalPond !== 100) {
-            html += ` <span style="color: var(--orange-principal);">⚠️ ≠ 100%</span>`;
+            html += ` <span style="color: var(--orange-principal);">⚠️ ≠ 100\u00a0%</span>`;
         }
         html += `</div>`;
 
