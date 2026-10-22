@@ -6338,6 +6338,8 @@
                 }];
             }
 
+            _marquerOrigine(editionPages, fichierId);   // #1075, point 7
+
             if (editionPages.length === 0) {
                 document.getElementById('editeur-chargement').textContent = 'Aucune page trouvée.';
                 return;
@@ -6352,6 +6354,22 @@
                 chargement.textContent = 'Erreur lors du chargement du fichier.';
             }
         }
+    }
+
+    /**
+     * #1075, point 7 (22 oct. 2026) — chaque page de l'éditeur garde d'où elle vient : son fichier et
+     * son rang d'origine. Déplacer, retirer, insérer ou fusionner ne la perd pas.
+     */
+    function _marquerOrigine(pages, fichierId) {
+        pages.forEach(function (p, i) { p.origine = { fichierId: fichierId, page: i }; });
+    }
+
+    /**
+     * #1075, point 7 — le rang d'origine de chaque page, pour le fichier enregistré ; `null` pour une
+     * page venue d'ailleurs (insérée, ou d'un fichier fusionné). Fonction pure, exposée pour son banc.
+     */
+    function originesDesPages(pages, fichierId) {
+        return pages.map(function (p) { return p.origine && p.origine.fichierId === fichierId ? p.origine.page : null; });
     }
 
     /**
@@ -6710,6 +6728,8 @@
                 modifications.nomFichier = nomSansExt + '.pdf';
             }
             travauxStockage.mettreAJourFichier(editionFichierId, modifications);
+            // #1075, point 7 : les annotations du fichier suivent leurs pages ; celles d'une page retirée partent.
+            travauxStockage.reporterAnnotationsPages(editionFichierId, originesDesPages(editionPages, editionFichierId));
 
             // Mode fusion : supprimer les fichiers excedentaires
             if (editionModeFusion && editionFichiersASupprimer.length > 0) {
@@ -7092,6 +7112,7 @@
             // Charger toutes les pages de tous les fichiers
             for (const f of fichiers) {
                 const estPDF = f.typeMIME === 'application/pdf';
+                const debut = editionPages.length;   // #1075, point 7 : les pages de CE fichier
 
                 if (estPDF) {
                     const pages = await travauxImport.decomposerPDF(f.id);
@@ -7123,6 +7144,7 @@
                         hauteur: dims.height
                     });
                 }
+                _marquerOrigine(editionPages.slice(debut), f.id);
             }
 
             if (editionPages.length === 0) {
@@ -7741,6 +7763,7 @@
         pivoterPageEditeur: pivoterPageEditeur,
         ajouterPagesEditeur: ajouterPagesEditeur,
         sauvegarderEdition: sauvegarderEdition,
+        originesDesPages: originesDesPages,   // #1075, point 7 : lue par son banc
         // Fusion depuis editeur
         ouvrirModalFusionEditeur: ouvrirModalFusionEditeur,
         confirmerFusionEditeur: confirmerFusionEditeur,
