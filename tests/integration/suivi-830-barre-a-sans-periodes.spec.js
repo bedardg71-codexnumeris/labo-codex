@@ -86,16 +86,16 @@ test('#830 · la barre A dit pourquoi elle est vide quand aucune séance de l\'h
     expect(m.nbSeancesHoraire).toBe(2);
 
     // Témoin : une moyenne, pas de phrase — sinon le montage ne jugerait rien.
-    expect(m.temoin).toMatch(/μ=\d+%/);
+    expect(m.temoin).toMatch(/μ=\d+\s*%/);
     expect(m.temoin).not.toContain('Assiduité non calculée');
 
     // (b) hors lot, relevé : la barre se calcule sur les lundis ; pas de phrase.
-    expect(m.casB).toMatch(/μ=\d+%/);
+    expect(m.casB).toMatch(/μ=\d+\s*%/);
     expect(m.casB).not.toContain('Assiduité non calculée');
 
     // (c) la phrase, mot pour mot, et plus de moyenne.
     expect(m.casC).toContain(PHRASE);
-    expect(m.casC).not.toMatch(/μ=\d+%/);
+    expect(m.casC).not.toMatch(/μ=\d+\s*%/);
 
     // (a) aucune présence : pas la phrase ; le texte d'attente d'avant reste.
     expect(m.casA).not.toContain('Assiduité non calculée');
