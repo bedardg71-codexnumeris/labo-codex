@@ -1916,8 +1916,44 @@ function validerEcheancesDansTrimestre(d) {
     return confirm(msg);
 }
 
+/** #1075, point 5 : la règle de la Bibliothèque (`BibliothequeUI.estItemDemo`), lue au moment d'écrire. */
+function estProductionDemo(production) {
+    return typeof BibliothequeUI !== 'undefined' && typeof BibliothequeUI.estItemDemo === 'function'
+        && BibliothequeUI.estItemDemo(production);
+}
+
+/**
+ * #1075, point 3 (22 oct. 2026) — CE QUI EMPLOIE UNE PRODUCTION : ses évaluations et ses copies, dans le
+ * trimestre actif, tous groupes confondus. Une production employée ne se supprime pas et ne s'écrase
+ * pas : sans elle, ces notes et ces copies n'auraient plus de production (même règle que la grille,
+ * #624, #967). Lecture seule. Banc : `sentinelle-1075-production-employee.test.js`.
+ * @param {string|string[]} ids - la ou les productions
+ * @returns {{evaluations: number, copies: number, total: number}} la forme de `decrirePorteursEchelle`
+ */
+function compterEmploisProduction(ids) {
+    const liste = [].concat(ids || []).filter(Boolean);
+    const emploie = (x) => x && liste.includes(x.productionId);
+    const evaluations = (db.getSync(cle('evaluationsSauvegardees'), []) || []).filter(emploie).length;
+    const copies = (db.getSync(cle('fichiersTravaux'), []) || []).filter(emploie).length;
+    return { evaluations, copies, total: evaluations + copies };
+}
+
+/**
+ * #1075, point 3 — le refus d'une suppression, dit avant toute question. Mots provisoires de Claude
+ * Code (enseignant·e seulement), sur le modèle du refus de la grille (#624).
+ * @returns {boolean} true si la production peut partir
+ */
+function productionSupprimable(id, titre) {
+    const nb = compterEmploisProduction(id);
+    if (nb.total === 0) return true;
+    const suite = nb.total >= 2 ? 'l\'emploient. Sans elle, elles n\'auraient plus de production.' : 'l\'emploie. Sans elle, elle n\'aurait plus de production.';
+    alert(`Impossible de supprimer la production « ${titre || 'sans titre'} ».\n\n${window.decrirePorteursEchelle(nb)} ${suite}`);
+    return false;
+}
+
 // ✅ AJOUT (6 jan 2026) : Vérifie les doublons de titre (dialogue utilisateur).
 // Retourne { evaluations, titre, annule } — annule=true si l'utilisateur ferme le dialogue.
+// #1075, point 3 : « Remplacer l'existante » refuse un homonyme employé (`porteursHomonymes`, #967).
 async function gererDoublonProduction(titre, evaluations, idActuel) {
     const productionActuelle = idActuel ? evaluations.find(e => e.id === idActuel) : null;
     const isCreation = !idActuel;
@@ -1927,7 +1963,9 @@ async function gererDoublonProduction(titre, evaluations, idActuel) {
         return { evaluations, titre, annule: false };
     }
 
-    const resultat = await verifierEtGererDoublon('production', titre, evaluations.map(e => ({ ...e, nom: e.titre })), idActuel);
+    const resultat = await verifierEtGererDoublon('production', titre, evaluations.map(e => ({ ...e, nom: e.titre })), idActuel, {
+        porteursHomonymes: (homonymes) => compterEmploisProduction(homonymes.map(h => h.id))
+    });
     if (resultat === null) {
         return { evaluations, titre, annule: true };
     }
@@ -2148,12 +2186,17 @@ async function enregistrerProductionModifiee(champ) {
 
     const orphelins = compterBlocsOrphelins();
     let introuvable = false;
+    let demo = false;
     let ecrit;
     try {
         ecrit = await modifierEtAnnoncer(cleProductions, (lues) => {
             const evaluations = (lues || []).filter(e => !idsRetires.includes(e.id));
             const index = evaluations.findIndex(e => e.id === id);
             if (index === -1) { introuvable = true; return undefined; }
+            // #1075, point 5 (22 oct. 2026) : un exemple de démonstration ne s'écrit pas. Sa lecture seule
+            // désactivait les champs, pas les boutons des blocs : déplacer ou retirer un bloc, « + Nouveau
+            // champ », écrivaient dans la démo. Vérifié dans la file, sur la fiche en base.
+            if (estProductionDemo(evaluations[index])) { demo = true; return undefined; }
             const productionData = construireProductionData(donnees, evaluations, id);
             evaluations[index] = { ...evaluations[index], ...productionData };
             // 🆕 Beta 99.05 : Mise à jour dateModification systématique
@@ -2170,6 +2213,11 @@ async function enregistrerProductionModifiee(champ) {
 
     if (introuvable) {
         if (temoin) temoin.nonEnregistre('cette production n\'est plus dans le trimestre actif. Ferme la fiche et rouvre-la depuis la liste.', GESTE_MODIFIER_PRODUCTION, cleProductions);
+        return false;
+    }
+    if (demo) {
+        // Mots provisoires de Claude Code (#1075, point 5), à Grégoire avant la release.
+        if (temoin) temoin.nonEnregistre('cet exemple fourni par Labo Codex est en lecture seule. Duplique-le pour créer ta production.', GESTE_MODIFIER_PRODUCTION, cleProductions);
         return false;
     }
     if (!ecrit) return false;
@@ -3178,6 +3226,9 @@ window.reinitialiserFormulaireProduction = reinitialiserFormulaireProduction;
 window.annulerFormProduction = annulerFormProduction;
 window.modifierProduction = modifierProduction;
 window.supprimerProduction = supprimerProduction;
+window.compterEmploisProduction = compterEmploisProduction;   // #1075, point 3 : lue par productions-liste.js et son banc
+window.productionSupprimable = productionSupprimable;
+window.gererDoublonProduction = gererDoublonProduction;
 window.monterEvaluation = monterEvaluation;
 window.descendreEvaluation = descendreEvaluation;
 window.gererChangementTypeProduction = gererChangementTypeProduction;
@@ -3404,6 +3455,9 @@ async function peuplerEchellesProduction() {
  * partie ; la version dans la file est celle qui reste.
  */
 async function supprimerProduction(id) {
+    // #1075, point 3 : une production employée ne part pas ; le refus vient avant le codex.
+    const cible = (db.getSync(getCleProductions(), []) || []).find(p => p && p.id === id);
+    if (cible && !productionSupprimable(id, cible.titre)) return;
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('production'))) return;
     if (!confirm('Supprimer cette production ?')) return;

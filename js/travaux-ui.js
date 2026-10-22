@@ -4266,6 +4266,20 @@
      * Affiche une modale pour chaque doublon avec 3 choix.
      * @param {Array} doublons - Résultats de type { doublon: true, fichierExistant, fichierPrepare, productionId }
      */
+    /**
+     * Les noms que la fenêtre d'un doublon affiche : l'élève et la production. Sortie de
+     * `traiterDoublonsImport` (#1075, point 4, 22 oct. 2026) pour que la porte du codex n'y
+     * monte pas la complexité figée.
+     */
+    function _nomsDuDoublon(d) {
+        var etudiant = travauxImport.trouverEtudiantParDA(d.fichierExistant.etudiantDA);
+        var prod = (obtenirDonneesSelonMode('productions') || []).find(function(p) { return p.id === d.productionId; });
+        return {
+            nomEtudiant: etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : d.fichierExistant.etudiantDA,
+            nomProd: prod ? (prod.titre || prod.nom) : d.productionId
+        };
+    }
+
     async function traiterDoublonsImport(doublons) {
         var annule = false;
         var configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
@@ -4274,11 +4288,9 @@
         for (var i = 0; i < doublons.length; i++) {
             if (annule) break;
             var d = doublons[i];
-            var etudiant = travauxImport.trouverEtudiantParDA(d.fichierExistant.etudiantDA);
-            var nomEtudiant = etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : d.fichierExistant.etudiantDA;
-            var productions = obtenirDonneesSelonMode('productions');
-            var prod = productions.find(function(p) { return p.id === d.productionId; });
-            var nomProd = prod ? (prod.titre || prod.nom) : d.productionId;
+            var noms = _nomsDuDoublon(d);
+            var nomEtudiant = noms.nomEtudiant;
+            var nomProd = noms.nomProd;
             var compteur = (doublons.length > 1) ? ' (' + (i + 1) + '/' + doublons.length + ')' : '';
 
             // #610 — le critère de détection est DIT : « même élève, même
@@ -4347,6 +4359,11 @@
                     });
                 });
             });
+
+            // #1075, point 4 (22 oct. 2026) : « Remplacer l'existant » propose le codex avant le remplacement,
+            // comme « Remplacer l'existante » des modèles (#1007, 2a-2). « Annuler » devant lui vaut
+            // « Garder l'existant » : rien ne change, le doublon suivant est traité.
+            if (choix === 'remplacer' && typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('copieRemplacee'))) continue;
 
             if (choix === 'annuler') {
                 annule = true;

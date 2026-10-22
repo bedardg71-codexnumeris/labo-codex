@@ -91,6 +91,8 @@ const PORTES = [
     { g: 'Type de production (spécifications)', f: 'js/pratiques-gestion.js', sig: 'async function supprimerTypeTravailMat(', cle: "'typeTravail'", question: 'let typesApres = null;', efface: 'configurations[index].configuration.typesTravaux.splice(indexType, 1);' },
     { g: 'Forfait (spécifications)', f: 'js/pratiques-gestion.js', sig: 'async function supprimerForfaitMat(', cle: "'forfait'", question: 'let apres = null;', efface: 'configurations[index].configuration.forfaits.splice(indexForfait, 1);' },
     // #976 (8 oct. 2026) : un geste qui déplace sans effacer — la même porte, son verbe à lui (« corriger »).
+    // #1075, point 4 (22 oct. 2026) : le doublon d'une copie importée. « Annuler » passe au doublon suivant.
+    { g: 'Copie remplacée (doublon d\'import)', f: 'js/travaux-ui.js', sig: 'async function traiterDoublonsImport(', cle: "'copieRemplacee'", question: "if (choix === 'annuler') {", efface: 'travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);' },
     { g: 'Corriger le DA', f: 'js/trimestre-v2-etudiants.js', sig: 'async function corrigerDAEtudiantV2(', cle: "'corrigerDA'", question: "const mesure = window.CorrectionDA.passeABlanc(ancien, '');", efface: 'await window.CorrectionDA.corriger(ancien, nouveau' }
 ];
 
@@ -133,7 +135,8 @@ describe('#1007, second lot — aucune porte n\'efface sans le codex proposé', 
             expect(sansCommentaires(c.slice(finLigne, iQuestion)), `${p.g} : du code s'intercale entre l'appel et la question`).toBe('');
             // la ligne de l'appel : sur `false`, l'appelant ne fait rien d'autre que sortir
             const ligne = c.slice(c.lastIndexOf('\n', iAppel) + 1, finLigne);
-            expect(ligne).toMatch(/^\s*if \(.*!\(await Codex\.proposerAvantSuppression\(.*\)\)\) return\b[^;]*;$/);
+            // `continue` : la porte d'une boucle (#1075, point 4), qui passe à l'élément suivant.
+            expect(ligne).toMatch(/^\s*if \(.*!\(await Codex\.proposerAvantSuppression\(.*\)\)\) (return\b[^;]*|continue);$/);
             expect(position(c, p.efface, iAppel)).toBeGreaterThan(iAppel);
         });
     }

@@ -298,7 +298,7 @@
     // éditeurs. Les porteurs sont décrits par `decrirePorteursEchelle` (echelles.js) :
     // ses clés (évaluations, productions, pratiques, grilles, cartouches) couvrent aussi
     // les porteurs d'une grille et d'une cartouche.
-    const SUJETS_REFUS = { echelle: 'Une échelle', grille: 'Une grille', cartouche: 'Une cartouche' };
+    const SUJETS_REFUS = { echelle: 'Une échelle', grille: 'Une grille', cartouche: 'Une cartouche', production: 'Une production' };   // production : #1075, point 3
     function phraseRefusEcrasement(typeRessource, nb) {
         const sujet = SUJETS_REFUS[typeRessource] || 'Un modèle';
         const verbe = nb.total >= 2 ? 'l\'emploient' : 'l\'emploie';
