@@ -15,6 +15,18 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 22 OCTOBRE 2026, 1 H 38 : LA 1.213.0 EST EN LIGNE** (tes Nouvelles validées telles quelles le 21 à 12 h 18). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- une grille neuve porte ses sous-critères et son barème dès sa création ;
+- le critère algorithmique sert à toute discipline : ses codes sont ses sous-critères, leur pondération s'applique aux codes que tu poses (l'élève lit « 7 erreurs (5 une fois pondérées) »), et « Partir de la liste du français écrit » donne dix catégories ;
+- les notes s'écrivent à la française partout où elles s'affichent et dans le PDF de l'élève : « 89,2 % », une décimale au plus ;
+- aux présences, un seul bouton, « Verrouiller la saisie », remplace « Fermer » et la case à cocher.
+
+**Vérifié comment** : Vitest complet vert (9 367 essais) ; le verdict complet dans un vrai WebKit, vert sur le commit poussé (aucun échec, sur secteur, sans veille ; une spec des grilles verte au second essai seulement) ; en ligne chez Netlify, sur ce même commit. Le premier verdict, sur la release, était rouge à cause d'une seule spec qui ne reconnaissait pas l'espace de « 78 % » : la spec était en défaut, pas l'application (tranché par Cowork, corrigé, la spec rougit quand on la rend stricte).
+
+**Ce qui ne marche pas encore** : les pourcentages qui ne sont pas des notes, et les points à l'écran (« × 65% = 55.3 pts » au profil), ne sont pas encore à la française : à ta décision (#1137).
+
 📝 **LE 20 OCTOBRE 2026, SOIR : LA 1.212.0 EST PRÊTE, ELLE PART EN LIGNE SI LE VERDICT COMPLET EST VERT** (tes Nouvelles validées telles quelles à 18 h 59 ; la 1.211.0 est en ligne depuis l'après-midi). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :

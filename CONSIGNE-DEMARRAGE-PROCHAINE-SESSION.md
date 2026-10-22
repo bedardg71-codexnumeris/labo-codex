@@ -1,5 +1,13 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 1 h 40 (Toronto) : `1.213.0` EN LIGNE** (build `1021-1224`) — Netlify
+> `6ad9a14e`, `commit_ref` `9bb49dcb`, `state: ready`, publié à 05:38:37 Z (1 h 38). Verdict Playwright complet vert sur
+> `9bb49dcb` (code 0, 0 échec connu, 1 instable : `grilles-sous-criteres-condense.spec.js`, 0 veille, sur secteur) ; `9bb49dcb`
+> corrige seulement, après la release `8372a987`, la spec #542 que la note à la française avait périmée (`&nbsp;` dans `innerHTML`).
+> Poussé par `git push` après un verdict lancé à la main (§4.5 de `fin-de-session`) : `pousser.sh` aurait relancé la suite.
+> **Ouverts** : #1137 (à Grégoire), #1093 (`ci/verdict-morceaux`, à Grégoire). **MANDAT COURANT** : le miroir du critère
+> algorithmique (`plans de travail/CONSIGNE-LOT-2026-10-21-critere-algorithmique-miroir.md`), selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 12 octobre 2026, 16 h 17 (Toronto) : `1.200.0` EN LIGNE** (build `1012-1211`) — Netlify
 > `6acd3140`, `commit_ref` `239de979`, `state: ready`, publié à 19:13:16 Z (15 h 13). Verdict Playwright complet vert sur
 > `6ddf3531` (code 0, 0 échec connu, aucun instable, 0 veille, sur secteur) ; `239de979` n'y ajoute qu'une fusion documentaire.
