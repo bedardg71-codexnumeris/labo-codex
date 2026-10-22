@@ -523,7 +523,9 @@
                     if (g.id === grilleId) trouvee = g;
                 });
                 return trouvee;
-            }
+            },
+            // #1075, point 9 : l'échelle d'une pratique partagée, dans la même collection plate.
+            echelleParId: lireEchellePartageeParId
         };
     }
 

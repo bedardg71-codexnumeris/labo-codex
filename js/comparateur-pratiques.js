@@ -324,8 +324,14 @@
     function _profilsReels() {
         var etu = (typeof obtenirDonneesSelonMode === 'function')
             ? (obtenirDonneesSelonMode('groupeEtudiants') || []) : [];
+        // #1075, point 1 : `da` reste la clé des calculs ; ce qui s'affiche et s'exporte est
+        // `daAffichage` (masqué en anonymisation, sauf réglage contraire). En anonymisation, `nom`
+        // est vide et `prenom` porte « Élève N » : le libellé ne retombe plus sur le vrai DA.
         return etu.filter(function(e) { return e && e.da; }).slice(0, 12)
-            .map(function(e) { return { da: e.da, label: e.nom || e.da, contexte: '' }; });
+            .map(function(e) {
+                var daAffichage = (typeof obtenirDAAffichage === 'function') ? obtenirDAAffichage(e) : e.da;
+                return { da: e.da, daAffichage: daAffichage, label: e.nom || e.prenom || daAffichage, contexte: '' };
+            });
     }
 
     // Note finale simulée (0-100), lecture seule. null si non calculable.
@@ -1116,7 +1122,7 @@
         var lignes = [entetes.map(_csvCell).join(',')];
         _profilsActifs().forEach(function(prof) {
             var na = _niveauAtteint(prof.da, d);
-            var row = [prof.label, prof.da, na ? na.label : '', na ? na.tendance.mot : ''];
+            var row = [prof.label, prof.daAffichage || prof.da, na ? na.label : '', na ? na.tendance.mot : ''];
             cols.forEach(function(c) {
                 var r = _note(prof.da, c.id);
                 // #326 (sous-item) : « non constructible » explicite dans le CSV,

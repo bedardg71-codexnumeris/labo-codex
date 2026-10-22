@@ -438,6 +438,12 @@ async function supprimerProfilEnseignantV2() {
     // #1007 : relue après l'attente de la fenêtre ; celle d'avant ne vaut plus rien.
     const nouvellesListe = db.getSync('enseignants', []).filter(e => e.id !== enseignantEnEditionId);
     if (!sauvegarderDonneesSelonMode('enseignants', nouvellesListe, { geste: 'Supprimer le profil' })) return;
+    // #1075, point 8 (22 oct. 2026) — « mon profil » supprimé ne revient pas : sa copie
+    // `profilEnseignant` ne partait pas, et `chargerProfilEnseignantV2` la réinjectait au chargement
+    // suivant (aucun profil ne portait plus son courriel). Elle part avec lui quand elle est la sienne
+    // (même règle que l'écriture : `_estMonProfil`). Banc : sentinelle-1075-mon-profil-supprime.
+    const copie = db.getSync('profilEnseignant', null);
+    if (copie && typeof copie === 'object' && _estMonProfil(enseignant.id, enseignant)) db.removeSync('profilEnseignant');
 
     // Réinitialiser
     enseignantEnEditionId = null;

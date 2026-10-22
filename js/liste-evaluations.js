@@ -1829,7 +1829,8 @@ function ouvrirProprieteFichier(fichierId) {
         return (a.nom || '').localeCompare(b.nom || '') || (a.prenom || '').localeCompare(b.prenom || '');
     });
     var optionsEtudiants = etudiants.map(function(e) {
-        var label = (e.nom || '') + ', ' + (e.prenom || '') + ' (' + (e.da || '') + ')';
+        // #1075, point 1 : en anonymisation, le DA affiché est celui du réglage (masqué par défaut).
+        var label = (e.nom || '') + ', ' + (e.prenom || '') + ' (' + obtenirDAAffichage(e) + ')';
         var selected = (e.da === fichier.etudiantDA) ? ' selected' : '';
         return '<option value="' + echapperHtml(e.da || '') + '"' + selected + '>' + echapperHtml(label) + '</option>';
     }).join('');

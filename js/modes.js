@@ -1044,8 +1044,37 @@ const RAISONS_NON_ENREGISTRE = {
     // #1029 — connexion IndexedDB perdue, et la réouverture n'y a rien fait (message
     // tranché par Grégoire, 5 oct. 2026, 13 h 44) : seul le rechargement rétablit l'accès,
     // et il perd ce qui n'a pas été écrit.
-    connexion: 'le navigateur a refusé l\'écriture. Note ce que tu viens de saisir, puis recharge la page : ta saisie sera à refaire.'
+    connexion: 'le navigateur a refusé l\'écriture. Note ce que tu viens de saisir, puis recharge la page : ta saisie sera à refaire.',
+    // #1075, point 2 (22 oct. 2026) — mots provisoires de Claude Code, à Grégoire avant la release.
+    clos: 'ce trimestre est clos, en lecture seule. Pour une correction ponctuelle, coche « Permission d\'écriture » dans son bandeau.'
 };
+
+/**
+ * #1075, point 2 (22 oct. 2026) — UN TRIMESTRE CLOS NE S'ÉCRIT PAS. Sa lecture seule n'était qu'une
+ * règle CSS, qui visait des boutons `onclick` disparus : « Enregistrer », le cadenas, l'annotation
+ * écrivaient dans un trimestre archivé. Les deux écritures de l'usager (`sauvegarderDonneesSelonMode`,
+ * `modifierEtAnnoncer`) refusent maintenant une clé DU TRIMESTRE ACTIF quand il est archivé, sauf si
+ * « Permission d'écriture » est cochée (`body.mode-ecriture-temp`, trimestres.js). Une clé globale,
+ * ou celle d'un autre trimestre, passe : l'archivage et la réouverture d'archive écrivent ailleurs.
+ * Banc : `tests/unit/sentinelle-1075-trimestre-clos-refuse.test.js`.
+ * @param {string} cleEffective - la clé namespacée qui serait écrite
+ * @returns {boolean} true si l'écriture doit être refusée
+ */
+function _trimestreClosRefuse(cleEffective) {
+    if (typeof window.estTrimestreArchive !== 'function' || !window.estTrimestreArchive()) return false;
+    const sonde = typeof window.cle === 'function' ? window.cle('§') : '§';
+    if (sonde === '§' || cleEffective.indexOf(sonde.slice(0, -1)) !== 0) return false;
+    const corps = typeof document !== 'undefined' ? document.body : null;
+    return !(corps && corps.classList && corps.classList.contains('mode-ecriture-temp'));
+}
+
+/** Le refus d'un trimestre clos, dit par le témoin (sauf écriture discrète). Rend true s'il refuse. */
+function _refuserSiTrimestreClos(cleEffective, geste, discret) {
+    if (!_trimestreClosRefuse(cleEffective)) return false;
+    const temoin = window.temoinEnregistrement;
+    if (temoin && !discret) temoin.nonEnregistre(RAISONS_NON_ENREGISTRE.clos, geste, cleEffective);
+    return true;
+}
 
 function _raisonNonEnregistre(error) {
     if (error && error.name === 'ConnexionPerdue') return RAISONS_NON_ENREGISTRE.connexion;
@@ -1193,6 +1222,9 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
     try {
         // Utiliser window.cle() pour le namespacing par trimestre (paramètre cle shadowed)
         cleEffective = window.cle(cle);
+        // #1075, point 2 : un trimestre clos ne s'écrit pas. Une écriture discrète (recalcul,
+        // migration) se tait ; celle de l'usager le dit.
+        if (_refuserSiTrimestreClos(cleEffective, geste, discret)) return false;
         // #340 : la garde de `db` refuse une écriture incohérente et rend `false` (sans
         // rien écrire). Avant le lot B, un `return` nu : cette fonction rendait `true`.
         if (db.setSync(cleEffective, donnees) === false) {
@@ -1248,6 +1280,8 @@ function sauvegarderDonneesSelonMode(cle, donnees, options) {
 async function modifierEtAnnoncer(cleEffective, mutateur, defaut = null, options) {
     const { geste, discret } = options || {};
     const temoin = window.temoinEnregistrement;
+    // #1075, point 2 : un trimestre clos ne s'écrit pas (voir `_trimestreClosRefuse`).
+    if (_refuserSiTrimestreClos(cleEffective, geste, discret)) return undefined;
     let refuse = false;
     let ecrit = false;
     try {
