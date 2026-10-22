@@ -19,9 +19,11 @@ Un critère sans noms (tout critère d'avant ce lot) lit, au caractère près, l
 1.3. **Le repli d'un critère né depuis ce lot (marque `nomsAttendus`) évalué sans ses noms** — un critère créé avant, en 1.213 et 1.214 compris, lit « erreur » et « mot » (retouche de la relecture, 17 h 44) (`evaluation-enonces.js`, `NOMS_PROVISOIRES`). Jamais un nom vide ni un jeton nu. Ce que je propose :
 
 - ce que l'on compte : « élément relevé » / « éléments relevés »
-- ce à quoi on le rapporte : « unité » / « unités »
+- ce à quoi on le rapporte : ~~« unité » / « unités »~~ ⮕ **« élément examiné » / « éléments examinés »**
 
-> Ta production contient 5 éléments relevés pour 12 unités.
+> Ta production contient 5 éléments relevés pour 12 éléments examinés.
+
+⮕ **Décision de Grégoire, 22 oct. 2026, 18 h 29 : « éléments examinés »** (recommandation de Cowork, retenue telle quelle). Motif : en chimie, « unité » est justement ce qui manque (« unité manquante ») ; « 12 unités » se lirait comme des unités de mesure. L'invitation d'Annoter (§ 3), qui cite le repli, suit d'elle-même : « … l'élève lit « élément relevé » et « élément examiné ». »
 
 1.4. **Le bilan, critère effondré** (`evaluation-retroaction.js`, `_rendreAlgoA0Bilan`) — même structure, les deux noms accordés (ajouté à la relecture, 17 h 44) :
 
@@ -97,3 +99,12 @@ Ajoutés à la palette du décompte (et `{nomErreurs}` à « Aucune annotation �
 |---|---|---|
 | `{nomErreurs}` | ce que tu comptes | Le nom de ce que tu comptes, écrit sous le critère, accordé au nombre : « 1 erreur », « 2 erreurs ». |
 | `{nomMots}` | ce à quoi tu le rapportes | Le nom de ce à quoi tu rapportes le compte, écrit sous le critère, accordé au nombre : « 1 mot », « 400 mots ». |
+
+## Validation (Cowork, 18 h 30)
+
+- **Ce que l'élève lit** (§ 1) : 1.1, 1.2 et 1.4 suivent des structures déjà arrêtées ; 1.5 est la décision de 17 h 43 ; 1.3 est la décision de 18 h 29. **Tout est réglé.**
+- **Les textes de l'enseignant** (§ 1.6, 2 à 7) : tranchés par Cowork (`CLAUDE.md` : seuls les mots que les élèves lisent remontent à Grégoire). Retenus tels quels, sauf les deux aides du § 7, dont l'exemple venait de la rédaction (« 1 erreur », « 1 mot » ; principe de Grégoire du 21 oct. : aucun exemple propre à une discipline) :
+  - `{nomErreurs}` : « Le nom de ce que tu comptes, écrit sous le critère : au singulier sous 2, au pluriel à partir de 2. »
+  - `{nomMots}` : « Le nom de ce à quoi tu rapportes le compte, écrit sous le critère : au singulier sous 2, au pluriel à partir de 2. »
+- Ces textes ne sont plus provisoires une fois ces deux changements faits au code.
+- **Les Nouvelles 1.215** : validées par Grégoire à 18 h 31, mot pour mot (texte dans `CONSIGNE-DU-JOUR.md` de 18 h 31).
