@@ -335,14 +335,15 @@
      * Étape 5 : la grille en points. `type: 'analytique'` sur la grille et sur chaque critère, dont
      * la pondération est le maximum de points (`evaluation-calcul.js`, « le maximum EST la
      * pondération ») ; le reste de la forme, celle de l'éditeur (lot 3a).
-     * Étape 5b (point 4) : des niveaux écrits avec leurs points gardent leurs descripteurs, rangés
-     * sous le NOM du niveau (`parNiveau`), sans `echelleId` : il n'y a pas d'échelle (#941), et
-     * Grilles de critères montre alors la clé, donc le nom (`rendreAttenduNiveaux`). Le schéma de
-     * partage (fermé : `echelleId`, `parNiveau`) les garde tels quels ; `null` y serait refusé.
-     * La nature des cases ne joue pas : il n'y a pas de cartouche sans échelle.
+     * #1125 (22 oct. 2026, geste 2 du barème) : des niveaux nommés deviennent les tranches du BARÈME
+     * (`js/bareme.js`) : une par niveau qui porte un texte ou des points, le NOM du niveau pour nom, ses
+     * points (`pointsParCase` de la dissection) en nombres, `null` sans points (« à compléter »), son
+     * texte sans la ligne des points. Remplace l'ancien `parNiveau` rangé sous le nom du niveau, dont
+     * les points restaient dans le texte. La nature des cases ne joue pas : il n'y a pas de cartouche
+     * sans échelle.
      * La dissection, lot 2a : un critère qui porte ses réponses sans niveaux (`parCle`, une clé par
-     * réponse, `materielDissectionLecture.modele`) les range telles quelles. Les modèles de
-     * l'assistant n'en ont pas : ce qu'il produit pour eux ne change pas.
+     * réponse, `materielDissectionLecture.modele`) les range telles quelles : la clé porte les points,
+     * et `bareme.lireCle` les lit (pas de barème écrit ici : aucun symptôme, #1125).
      */
     function construireGrilleEnPoints(m, ctx, nomGrille) {
         var g = construireGrille(m, ctx, nomGrille, null);
@@ -350,10 +351,21 @@
         g.criteres.forEach(function (c, i) {
             c.type = 'analytique';
             delete c.descripteurs;
-            var par = {}, mc = m.criteres[i];
-            if (mc.parCle) mc.parCle.forEach(function (x) { if (String(x.texte).trim()) par[x.cle] = String(x.texte).trim(); });
-            else mc.cases.forEach(function (d, j) { if (texte(d) && m.niveaux[j]) par[texte(m.niveaux[j].titre)] = texte(d); });
-            if (Object.keys(par).length) c.descripteurs = { parNiveau: par };
+            var mc = m.criteres[i];
+            if (mc.parCle) {
+                var par = {};
+                mc.parCle.forEach(function (x) { if (String(x.texte).trim()) par[x.cle] = String(x.texte).trim(); });
+                if (Object.keys(par).length) c.descripteurs = { parNiveau: par };
+                return;
+            }
+            var tranches = [];
+            mc.cases.forEach(function (d, j) {
+                var pts = (mc.pointsParCase && mc.pointsParCase[j]) || null;
+                if (!m.niveaux[j] || (!texte(d) && !pts)) return;
+                tranches.push({ id: ctx.id('TR_'), nom: texte(m.niveaux[j].titre),
+                    pointsMin: pts ? pts[0] : null, pointsMax: pts ? pts[1] : null, texte: texte(d) });
+            });
+            if (tranches.length) c.bareme = tranches;
         });
         return g;
     }

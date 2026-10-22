@@ -88,7 +88,8 @@
             nom: o.grille.nom,
             nbC: o.grille.criteres.length,
             retro: !!o.cartouche,
-            descr: o.grille.criteres.some(function (c) { return !!c.descripteurs; }),
+            // #1125 : un barème décrit ses tranches comme des descripteurs décrivent leurs niveaux.
+            descr: o.grille.criteres.some(function (c) { return !!c.descripteurs || Array.isArray(c.bareme); }),
             // Lot 3b1 : les boutons « La voir dans … » de la confirmation ouvrent ces objets-ci.
             ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null, cartouche: o.cartouche ? o.cartouche.id : null },
             // Étape 5 : une grille en points, et son total (« sur 64 »).
