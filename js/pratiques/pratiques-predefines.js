@@ -99,7 +99,7 @@ const PRATIQUE_PAN_STANDARDS_CINQ_NIVEAUX = {
         conditions_speciales: [
             {
                 type: 'plafonnement',
-                description: 'Si moyenne standards terminaux < 60%, note plafonnée à 55%',
+                description: 'Si moyenne standards terminaux < 60\u00a0%, note plafonnée à 55\u00a0%',
                 condition: {
                     cibles: [7, 8, 9, 10],
                     operation: 'moyenne',
@@ -208,7 +208,7 @@ const PRATIQUE_SOMMATIVE_TRADITIONNELLE = {
         conditions_speciales: [
             {
                 type: 'double_verrou',
-                description: 'Analyse finale doit être réussie (≥60%) pour passer',
+                description: 'Analyse finale doit être réussie (≥60\u00a0%) pour passer',
                 condition: {
                     evaluation: 'Analyse finale',
                     comparateur: '<',
@@ -265,7 +265,7 @@ const PRATIQUE_PAN_SPECIFICATIONS = {
     nom: 'PAN-Spécifications (notes fixes)',
     auteur: 'Labo Codex',
     etablissement: 'Cégep',
-    description: 'Notes fixes (50, 60, 80, 100%) selon critères atteints',
+    description: 'Notes fixes (50, 60, 80, 100\u00a0%) selon critères atteints',
     discipline: 'Général',
     version: '1.0',
     date_creation: '2025-11-25',

@@ -65,7 +65,7 @@ const GLOSSAIRE = {
         terme: 'Production',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Une occasion pour tes étudiant·es de mettre en pratique ce qu\'ils et elles apprennent — un exercice, un travail, un examen. Chaque production a une pondération et une échéance. L\'ensemble des productions totalise 100 % de la note finale. Dans le module Planification, les productions sont d\'abord des mises en pratique liées aux objectifs d\'apprentissage.',
+        definition: 'Une occasion pour tes étudiant·es de mettre en pratique ce qu\'ils et elles apprennent — un exercice, un travail, un examen. Chaque production a une pondération et une échéance. L\'ensemble des productions totalise 100\u00a0% de la note finale. Dans le module Planification, les productions sont d\'abord des mises en pratique liées aux objectifs d\'apprentissage.',
         voir: 'Conception > Productions'
     },
 
@@ -92,7 +92,7 @@ const GLOSSAIRE = {
         terme: 'Grille de critères',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'L\'outil qui définit comment tu évalues une production. Tu nommes tes critères, tu choisis leur type (holistique, analytique ou algorithmique) et tu répartis les pondérations pour totaliser 100 %. C\'est le même principe qu\'une grille papier, mais réutilisable d\'une production à l\'autre.',
+        definition: 'L\'outil qui définit comment tu évalues une production. Tu nommes tes critères, tu choisis leur type (holistique, analytique ou algorithmique) et tu répartis les pondérations pour totaliser 100\u00a0%. C\'est le même principe qu\'une grille papier, mais réutilisable d\'une production à l\'autre.',
         voir: 'Conception > Grilles'
     },
 
@@ -310,7 +310,7 @@ const GLOSSAIRE = {
         terme: 'Zone de couleur',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Les paliers de couleur qui traduisent chaque indice A-C-P dans la liste des étudiant·es. Trois seuils découpent quatre bandes : fragile sous le premier, acceptable jusqu’au deuxième, bon jusqu’au troisième, excellent au-delà — chaque curseur ferme la bande qu’il nomme. Les trois se règlent dans Labo > Outils d’observation > Micro-données ACP > Seuils d’interprétation (70 / 80 / 85 % par défaut) et valent pour A, C, P et M. La barre de l’Aperçu, elle, ne suit pas ces paliers : c’est un dégradé continu, dont la couleur est interpolée.',
+        definition: 'Les paliers de couleur qui traduisent chaque indice A-C-P dans la liste des étudiant·es. Trois seuils découpent quatre bandes : fragile sous le premier, acceptable jusqu’au deuxième, bon jusqu’au troisième, excellent au-delà — chaque curseur ferme la bande qu’il nomme. Les trois se règlent dans Labo > Outils d’observation > Micro-données ACP > Seuils d’interprétation (70 / 80 / 85\u00a0% par défaut) et valent pour A, C, P et M. La barre de l’Aperçu, elle, ne suit pas ces paliers : c’est un dégradé continu, dont la couleur est interpolée.',
         voir: 'Tableau de bord > Liste · Labo > Outils d’observation'
     },
 
@@ -339,7 +339,7 @@ const GLOSSAIRE = {
         terme: 'Seuils de dépistage',
         categorie: 'Réglages',
         etape: 'observation',
-        definition: 'Les valeurs qui déterminent les couleurs et les alertes dans le tableau de bord. Valeurs par défaut : Progression 5 points (%), Sensibilité des flèches par critère 5 points (%), Défi ≤70 %. Toute modification s\'applique immédiatement à tous les calculs — diagnostics RàI, patterns et recommandations.',
+        definition: 'Les valeurs qui déterminent les couleurs et les alertes dans le tableau de bord. Valeurs par défaut : Progression 5 points (%), Sensibilité des flèches par critère 5 points (%), Défi ≤70\u00a0%. Toute modification s\'applique immédiatement à tous les calculs — diagnostics RàI, patterns et recommandations.',
         voir: 'Labo > Outils d’observation'
     },
 

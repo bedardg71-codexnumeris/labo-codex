@@ -16,14 +16,14 @@ Exporté le 2026-08-12
   │ • [Activité] Atelier d’analyse en équipe (45 min)
   │   Rétroaction : Orale
   │ ◆ [Évaluation] Évaluation de l’incipit (30 min)
-  │   Évaluation : Dissertation critique (25 %) — Échéance : 2026-10-15
+  │   Évaluation : Dissertation critique (25 %) — Échéance : 2026-10-15
   │   Rétroaction sur le rendu : Écrite
   └─
 
   ┌ LEÇON : La description (Sem. 3) — Σ 30 min
   │ Objectif : Au terme de la leçon, l’étudiant·e sera capable de maîtriser la description réaliste.
   │ • [Activité] Pastiche descriptif (30 min)
-  │   Évaluation : Quiz de lecture (10 %)
+  │   Évaluation : Quiz de lecture (10 %)
   │   Rétroaction : Écrite
   └─
   • [Activité] Lecture obligatoire du recueil (20 min)

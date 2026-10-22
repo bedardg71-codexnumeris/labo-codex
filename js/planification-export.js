@@ -616,7 +616,7 @@ function libelleRetroaction(valeur) {
 }
 
 function ligneProduction(prod, detail) {
-    var s = prod.nomProduction + ' (' + (prod.ponderation || 0) + ' %)';
+    var s = prod.nomProduction + ' (' + window.formaterPourcentage(prod.ponderation || 0) + ')';
     if (prod.dateEcheance) s += ' — Échéance : ' + prod.dateEcheance;
     if (detail) s += ' — Grille : ' + prod.nomGrille + ' · Échelle : ' + prod.nomEchelle;
     return s;
@@ -2154,7 +2154,7 @@ function lignesBloc(b, retrait) {
         } else if (p.introuvable) {
             lignes.push(r + '  - Production : introuvable dans ce trimestre');
         } else {
-            lignes.push(r + '  - Production : ' + guillemets(p.titre) + (p.ponderation ? ' (' + p.ponderation + ' %)' : ''));
+            lignes.push(r + '  - Production : ' + guillemets(p.titre) + (p.ponderation ? ' (' + window.formaterPourcentage(p.ponderation) + ')' : ''));
             lignes.push(r + '  - Grille : ' + (p.grille ? guillemets(p.grille) : 'aucune'));
             lignes.push(r + '  - Échelle : ' + (p.echelle ? guillemets(p.echelle) : 'aucune'));
             lignes.push(r + '  - Échéance : ' + (p.echeance || 'aucune'));

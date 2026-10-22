@@ -1027,7 +1027,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                                 const label = context.dataset.label || '';
                                 const valeurReelle = context.parsed.y;
                                 const value = (valeurReelle * 100).toFixed(0);
-                                return `${label}: ${formaterPourcentage(value)}`;
+                                return `${label}\u00a0: ${formaterPourcentage(value)}`;
                             },
                             afterBody: function(tooltipItems) {
                                 if (!tooltipItems.length) return [];
@@ -2409,7 +2409,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                             label: function(context) {
                                 const critere = context.dataset.label;
                                 const valeur = context.parsed.y;
-                                return valeur !== null ? `${critere}: ${formaterPourcentage(valeur, 0)}` : `${critere}: —`;
+                                return valeur !== null ? `${critere}\u00a0: ${formaterPourcentage(valeur, 0)}` : `${critere}\u00a0: —`;
                             },
                             afterBody: function(tooltipItems) {
                                 if (!tooltipItems.length) return [];
@@ -2963,7 +2963,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                             title: function(items) {
                                 if (items.length > 0) {
                                     const valeur = items[0].parsed.x;
-                                    return `Valeur: ${formaterPourcentage(valeur * 100, 1)}`;
+                                    return `Valeur\u00a0: ${formaterPourcentage(valeur * 100, 1)}`;
                                 }
                                 return '';
                             },
@@ -2979,11 +2979,11 @@ function creerGraphiqueDistributionACPE(canvasId) {
                                         const position = (ecartMu >= 0 ? '+' : '') + formaterNombre(ecartMu, 2) + 'σ';
                                         return [
                                             `Étudiant - Indice ${indice}`,
-                                            `  Valeur: ${formaterPourcentage(valeur * 100, 1)}`,
-                                            `  Position: ${position} par rapport à μ`
+                                            `  Valeur\u00a0: ${formaterPourcentage(valeur * 100, 1)}`,
+                                            `  Position\u00a0: ${position} par rapport à μ`
                                         ];
                                     }
-                                    return `Indice ${indice}: ${formaterPourcentage(valeur * 100, 1)}`;
+                                    return `Indice ${indice}\u00a0: ${formaterPourcentage(valeur * 100, 1)}`;
                                 }
                                 // Si c'est une courbe de Gauss
                                 const indice = label.match(/\(([ACPE])\)/)?.[1];
@@ -3298,8 +3298,8 @@ function creerGraphiqueEvolutionRLO(canvasId, da) {
                             label: function(context) {
                                 const v = context.parsed.y;
                                 return v == null
-                                    ? context.dataset.label + ': —'
-                                    : context.dataset.label + ': ' + formaterPourcentage(v, 1);
+                                    ? context.dataset.label + '\u00a0: —'
+                                    : context.dataset.label + '\u00a0: ' + formaterPourcentage(v, 1);
                             },
                             afterBody: function(items) {
                                 if (!items.length) return [];
@@ -3901,7 +3901,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                 const couleurBande = estClair ? 'rgba(26, 26, 46, 0.10)' : 'rgba(230, 233, 236, 0.10)';
 
                 datasets.push({
-                    label: 'Quartile 25 %',
+                    label: 'Quartile 25\u00a0%',
                     data: q25,
                     _isStat: true,
                     _legendText: 'Bande inter-quartile (Q25–Q75)',
@@ -3917,7 +3917,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                     spanGaps: false
                 });
                 datasets.push({
-                    label: 'Quartile 75 %',
+                    label: 'Quartile 75\u00a0%',
                     data: q75,
                     _isStat: true,
                     _hideFromLegend: true,

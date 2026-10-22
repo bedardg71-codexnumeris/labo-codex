@@ -463,7 +463,8 @@ test('menu « Vue » : trois commandes dans l’ordre, puis le fond, puis la lig
     });
     // Lot 3 (9 oct. 2026) : la longue-vue sous « Tout voir », puis la rubrique « Zoom ».
     expect(ordre).toEqual(['Vue plein écran', 'Recentrer la carte', 'Tout voir', 'Longue-vue',
-        'Zoom', '100 %', '75 %', '50 %', '25 %', 'Fond du canevas', 'Raccourcis clavier']);
+        'Zoom', '100\u00A0%', '75\u00A0%', '50\u00A0%', '25\u00A0%',   // #1137 : l'insécable avant « % »
+        'Fond du canevas', 'Raccourcis clavier']);
     // La liste n'est plus dans le menu : elle le tassait (1.192.1).
     await expect(dd.locator('table')).toHaveCount(0);
     await expect(page.locator('#planif-fond-swatches .travaux-fond-swatch')).toHaveCount(12);

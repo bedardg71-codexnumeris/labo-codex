@@ -21,7 +21,7 @@ Exporté le 2026-08-12
   │   → s'acquiert par : Atelier d’analyse en équipe
   │   → se vérifie par : Évaluation de l’incipit
   │ ◆ [Évaluation] Évaluation de l’incipit (30 min)
-  │   Évaluation : Dissertation critique (25 %) — Échéance : 2026-10-15 — Grille : Grille SRPNF · Échelle : Échelle IDME
+  │   Évaluation : Dissertation critique (25 %) — Échéance : 2026-10-15 — Grille : Grille SRPNF · Échelle : Échelle IDME
   │   Rétroaction sur le rendu : Écrite
   │   ← se vérifie par : Le narrateur omniscient
   └─
@@ -30,7 +30,7 @@ Exporté le 2026-08-12
   │ ← se concrétise dans : maîtriser la description réaliste
   │ Objectif : Au terme de la leçon, l’étudiant·e sera capable de maîtriser la description réaliste.
   │ • [Activité] Pastiche descriptif (30 min)
-  │   Évaluation : Quiz de lecture (10 %) — Grille : Aucune grille · Échelle : Aucune échelle
+  │   Évaluation : Quiz de lecture (10 %) — Grille : Aucune grille · Échelle : Aucune échelle
   │   Rétroaction : Écrite
   └─
   • [Activité] Lecture obligatoire du recueil (20 min)

@@ -68,7 +68,7 @@
 <p>L'étudiant·e identifie plusieurs éléments pertinents, mais ils restent juxtaposés sans relation explicite entre eux. La réponse est riche mais fragmentée. Code IDME : <strong>D</strong> (Développement).</p>
 <p><em>Exemple : pour la même question, l'étudiant·e énumère « la pauvreté, les inégalités sociales, les idées des Lumières et la crise financière » sans expliquer comment ces facteurs interagissent.</em></p>
 <div class="guide-pedagogique-astuce">C'est la <strong>zone critique de consolidation</strong>. L'étudiant·e a les éléments mais pas encore la structure. L'intervention pédagogique vise à amener à <em>relier</em> : « Comment ces facteurs s'influencent-ils les uns les autres ? »</div>
-<p>Dans l'évaluation IDME, ce niveau correspond à un seuil situé entre 64 % et 74 % : la performance est en développement, pas encore aboutie.</p>`
+<p>Dans l'évaluation IDME, ce niveau correspond à un seuil situé entre 64\u00a0% et 74\u00a0% : la performance est en développement, pas encore aboutie.</p>`
                 },
                 {
                     titre: 'Relationnel et Abstrait étendu',
@@ -188,15 +188,15 @@
     <li><strong>Suivre les progrès</strong> de chaque étudiant·e dans le temps.</li>
     <li><strong>Repérer les étudiant·es à risque</strong> qui ne réalisent pas les apprentissages attendus.</li>
     <li><strong>Guider le choix de l'intervention</strong> : quel palier, quels critères cibler.</li>
-    <li><strong>Évaluer l'efficacité de ton enseignement</strong>. Si plus de 20 % des étudiant·es sont en difficulté, c'est peut-être ton palier universel qu'il faut renforcer, pas nécessairement l'étudiant·e qui est en cause.</li>
+    <li><strong>Évaluer l'efficacité de ton enseignement</strong>. Si plus de 20\u00a0% des étudiant·es sont en difficulté, c'est peut-être ton palier universel qu'il faut renforcer, pas nécessairement l'étudiant·e qui est en cause.</li>
 </ul>
 <h4>Cinq patterns observables</h4>
 <p>L'app classe automatiquement chaque étudiant·e dans des «patterns» multifactoriels. Ces patterns sont en réalité une combinaison d'observations faites à partir de ses productions récentes. Les plages de pourcentages sont basées sur des données empiriques recueillies avec Labo Codex par Grégoire Bédard à l'automne 2025. Étant donné les limites de l'échantillon, ce sont des hypothèses qui restent encore à valider empiriquement. Ces plages reposent sur SOLO et ACP :</p>
 <ul class="guide-pedagogique-patterns-liste">
     <li><span class="badge-pattern-stable">Progression stable</span> — pas de défi identifié, performance suffisante.</li>
-    <li><span class="badge-pattern-defi-specifique">Défi spécifique</span> — performance générale ≥ 75 %, mais un défi récurrent identifié sur un ou plusieurs critères.</li>
-    <li><span class="badge-pattern-difficulte-emergente">Difficulté émergente</span> — performance entre 64 % et 74 % avec présence d'un défi. Zone de surveillance.</li>
-    <li><span class="badge-pattern-difficulte-persistante">Difficulté persistante</span> — performance inférieure à 64 % sur les artefacts récents. Zone d'intervention prioritaire.</li>
+    <li><span class="badge-pattern-defi-specifique">Défi spécifique</span> — performance générale ≥ 75\u00a0%, mais un défi récurrent identifié sur un ou plusieurs critères.</li>
+    <li><span class="badge-pattern-difficulte-emergente">Difficulté émergente</span> — performance entre 64\u00a0% et 74\u00a0% avec présence d'un défi. Zone de surveillance.</li>
+    <li><span class="badge-pattern-difficulte-persistante">Difficulté persistante</span> — performance inférieure à 64\u00a0% sur les artefacts récents. Zone d'intervention prioritaire.</li>
     <li><span class="badge-pattern-difficulte-persistante">Non-participation</span> — présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une copie du groupe évaluée).</li>
 </ul>
 <p>Tant que rien n'est jugeable, l'app affiche «&nbsp;Données insuffisantes&nbsp;» plutôt qu'un pattern.</p>
@@ -207,12 +207,12 @@
                     contenu: `
 <p>La RàI propose un <strong>continuum d'intensification</strong> de l'intervention pédagogique, organisé en trois paliers. Ces paliers ne sont pas des catégories où l'on enferme un·e étudiant·e — c'est un curseur que tu ajustes selon sa réponse.</p>
 <h4>Palier 1 — Universel</h4>
-<p>L'enseignement régulier offert à l'ensemble du groupe. C'est le palier le plus large et le plus important. Quand il fonctionne bien, 80 % ou plus des étudiant·es progressent correctement sans intervention supplémentaire.</p>
+<p>L'enseignement régulier offert à l'ensemble du groupe. C'est le palier le plus large et le plus important. Quand il fonctionne bien, 80\u00a0% ou plus des étudiant·es progressent correctement sans intervention supplémentaire.</p>
 <h4>Palier 2 — Préventif</h4>
 <p>Intervention ciblée pour les étudiant·es qui montrent des signes de difficulté émergente. Travail en sous-groupe sur des composantes précises (par exemple un critère récurrent en défi). Durée limitée, objectif clair, mesure de la réponse.</p>
 <h4>Palier 3 — Intensif</h4>
 <p>Intervention individualisée pour les étudiant·es dont la difficulté persiste malgré le palier 2. Plus de temps, plus de fréquence, plus de personnalisation. C'est rare et coûteux en ressources — à utiliser pour les cas où c'est nécessaire – et à répartir dans une équipe intégrée.</p>
-<div class="guide-pedagogique-astuce"><strong>Principe contre-intuitif</strong> : si plus de 20 % de tes étudiant·es sont en difficulté, c'est ton <em>palier 1</em> qu'il faut renforcer en premier, pas multiplier les interventions de palier 2 ou 3. Quand l'enseignement universel échoue à grande échelle, intensifier individuellement masque le vrai problème.</div>
+<div class="guide-pedagogique-astuce"><strong>Principe contre-intuitif</strong> : si plus de 20\u00a0% de tes étudiant·es sont en difficulté, c'est ton <em>palier 1</em> qu'il faut renforcer en premier, pas multiplier les interventions de palier 2 ou 3. Quand l'enseignement universel échoue à grande échelle, intensifier individuellement masque le vrai problème.</div>
 <p>Dans Labo Codex, l'app suggère un niveau d'intervention d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (l'indice de persistance, lui, nomme la cible de l'intervention), mais c'est <strong>toi qui décides</strong>. L'app éclaire, tu juges.</p>`
                 },
                 {

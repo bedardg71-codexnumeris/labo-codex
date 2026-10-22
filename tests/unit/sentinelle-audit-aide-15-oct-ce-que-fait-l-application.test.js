@@ -176,7 +176,8 @@ describe('Les seuils A et C : une seule table, bornes et mots lus à la source',
     const fixe = parseFloat(QUALIF.match(/const BORNE_FIXE_INSUFFISANT = ([0-9.]+);/)[1]);
     const pct = (x) => Math.round(x * 100);
     const [excellent, bon, acceptable] = ['excellent', 'bon', 'acceptable'].map((c) => pct(defaut('interpretation', c)));
-    const bornes = [`≥ ${excellent}%`, `${bon}-${excellent - 1}%`, `${acceptable}-${bon - 1}%`, `${pct(fixe)}-${acceptable - 1}%`, `&lt; ${pct(fixe)}%`];
+    // #1137 (verdict du 22 oct.) : l'aide écrit l'insécable avant « % », en entité dans index.html.
+    const bornes = [`≥ ${excellent}&nbsp;%`, `${bon}-${excellent - 1}&nbsp;%`, `${acceptable}-${bon - 1}&nbsp;%`, `${pct(fixe)}-${acceptable - 1}&nbsp;%`, `&lt; ${pct(fixe)}&nbsp;%`];
 
     const table = tranche(AIDE, 'id="aide-table-paliers-a-c"', '</table>');
     const lignes = [...table.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].slice(1)
@@ -314,8 +315,8 @@ describe('Les gestes décrits sont ceux du code', () => {
     it('l\'échelle IDME d\'exemple n\'a plus de trou : ses bornes sont celles de l\'échelle de départ', () => {
         const echelles = lire('js/echelles.js');
         const minD = parseInt(tranche(echelles, 'nom: \'Développement\'').match(/min: (\d+)/)[1], 10);
-        expect(AIDE).not.toMatch(/Incomplet<\/strong> : &lt; 64%|nsuffisant \(&lt; 64%\)/);
-        expect(AIDE).toContain(`<li><strong>I — Incomplet</strong> : &lt; ${minD}%</li>`);
+        expect(AIDE).not.toMatch(/Incomplet<\/strong> : &lt; 64(&nbsp;)?%|nsuffisant \(&lt; 64(&nbsp;)?%\)/);
+        expect(AIDE).toContain(`<li><strong>I — Incomplet</strong> : &lt; ${minD}&nbsp;%</li>`);
     });
 
     it('plus de langue de code dans l\'Aide', () => {

@@ -264,7 +264,7 @@ test('« Inspecteur » sans bloc sélectionné dit « Sélectionne un bloc pour 
 
 // ─── 4. Zoom ─────────────────────────────────────────────────────────────
 
-const NIVEAUX = [['100 %', 1], ['75 %', 0.75], ['50 %', 0.5], ['25 %', 0.25]];
+const NIVEAUX = [['100\u00A0%', 1], ['75\u00A0%', 0.75], ['50\u00A0%', 0.5], ['25\u00A0%', 0.25]];   // #1137 : l'insécable avant « % »
 
 /** Referme le menu « Vue » par son bouton (Échap ne le referme que si le focus y est). */
 async function fermerMenuVue(page) {

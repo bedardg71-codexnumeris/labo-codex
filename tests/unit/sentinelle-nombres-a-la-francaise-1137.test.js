@@ -71,10 +71,6 @@ const LISTE_BLANCHE = [
       motif: 'la largeur CSS d’une colonne de niveau dans l’aperçu du PDF (`width: ${largeurNiveau}`), pas un nombre lu' },
     { fichier: 'js/export-pdf.js', extrait: ": `${((100 - 28) / nbNiveaux).toFixed(1)}%`",
       motif: 'la même largeur CSS, sans cartouche longue' },
-    { fichier: 'js/planification-export.js', extrait: "var s = prod.nomProduction + ' (' + (prod.ponderation || 0) + ' %)';",
-      motif: 'un EXPORT : le plan (texte, markdown, TSV) qui voyage hors de l’app, gardé à l’octet par golden-exports-416' },
-    { fichier: 'js/planification-export.js', extrait: "(p.ponderation ? ' (' + p.ponderation + ' %)' : '')",
-      motif: 'le même export, la carte d’alignement remise au modèle d’IA (sentinelle-modele-ia-963)' },
     { fichier: 'js/materiel-creation.js', extrait: "' à ' + String(n.max.valeur).trim() + ' %)'",
       motif: 'l’écho d’une saisie : les bornes telles que la personne les a tapées dans le matériel (« 64,99 », « 85 % »), une chaîne, pas un nombre' }
 ];
@@ -208,5 +204,98 @@ describe('C — un seul formateur : la virgule ne se pose qu’au module', () =>
         expect(VIRGULE_LOCALE.test("return String(Math.round(Number(n) * 100) / 100).replace('.', ',');")).toBe(true);
         expect(VIRGULE_LOCALE.test("const nombreFr = (n) => String(n).replace('.', ',');")).toBe(true);
         expect(VIRGULE_LOCALE.test("x.replace(/\\./, ',')")).toBe(true);
+    });
+});
+
+/**
+ * D — LES POURCENTAGES ÉCRITS EN DUR (verdict de Cowork, 22 oct. 2026, point 1). Un « 60% » d'une aide se lit
+ * comme un nombre, à côté d'écrans qui disent « 60 % » : la prose de `js/` (aides, descriptions des pratiques
+ * prédéfinies) et le texte visible d'index.html prennent aussi l'insécable (` ` en JS, `&nbsp;` en HTML).
+ * Restent tels quels : le CSS, les commentaires, et l'historique des Nouvelles publiées (changelog-data.js).
+ * Le plan exporté sort de la liste blanche de B (même verdict, point 2) : c'est un document qu'on lit, pas un export
+ * de données ; golden-exports-416 est refigé en conséquence.
+ *
+ * Break-test (22 oct. 2026, restauré, `cmp` identique) : « (≥60%) » remis dans pratiques-predefines.js et
+ * « &lt; 65% » dans index.html → les deux tests de D rougissent en nommant les deux lignes.
+ */
+const CSS_LITTERAL = [
+    /style\s*=\s*\\?["'][^"']*["']/g,                       // attribut style d'un gabarit
+    /\.style\.\w+\s*=.*$/g, /setAttribute\(\s*'(width|height)'.*$/g,
+    /linear-gradient\(.*$/g, /translate[XY]?\([^)]*\)/g, /calc\([^)]*\)/g,
+    /<!--.*?-->/g,                                          // un commentaire HTML dans un gabarit
+    /\b(x1|x2|y1|y2|offset)="[^"]*"/g,
+    /\b(width|height|left|top|max-width|min-width|max-height|border-radius)\s*:\s*[\d.]+%/g,
+    /console\.\w+\(.*$/g
+];
+/** Un chiffre, puis « % » collé ou après une espace ordinaire — pas après un identifiant (`${n}%` est l'affaire de B). */
+const LITTERAL = /(^|[^\w$}).])(\d+(?:[.,]\d+)?) ?%/g;
+
+/** Deux largeurs CSS passées par une variable (`width: ${largeurCritere}`) : la ligne ne dit pas « style ». */
+const CSS_PAR_VARIABLE = [
+    { fichier: 'js/export-pdf.js', extrait: "const largeurCritere = aCartoucheLongue ? '8%' : '20%';" },
+    { fichier: 'js/export-pdf.js', extrait: "const largeurPond = aCartoucheLongue ? '4%' : '8%';" }
+];
+
+export function litterauxJs(texte, fichier = '') {
+    const fautes = [];
+    // Les commentaires de bloc sont vidés d'abord, lignes gardées (un « 25 % » d'une explication n'est pas lu).
+    const sansBlocs = texte.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
+    sansBlocs.split('\n').forEach((ligne, i) => {
+        const t = ligne.trim();
+        if (/^(\/\/|\*|\/\*)/.test(t)) return;
+        if (CSS_PAR_VARIABLE.some((c) => c.fichier === fichier && ligne.includes(c.extrait))) return;
+        const s = CSS_LITTERAL.reduce((l, re) => l.replace(re, ''), ligne.replace(/(^|[^:'"\\])\/\/.*$/, '$1'));
+        if ([...s.matchAll(LITTERAL)].length) fautes.push(`${i + 1} : ${t.slice(0, 120)}`);
+    });
+    return fautes;
+}
+
+export function litterauxHtml(texte) {
+    const [tete, ...reste] = texte.split('<body');
+    const corps = '<body' + reste.join('<body');
+    const debut = tete.split('\n').length - 1;
+    // Les commentaires et les attributs qui ne se lisent pas (style, data-*, value) sont vidés, lignes gardées.
+    const lisible = corps
+        .replace(/<!--[\s\S]*?-->/g, (m) => m.replace(/[^\n]/g, ' '))
+        .replace(/\b(style|data-[\w-]+|value)="[^"]*"/g, (m) => m.replace(/[^\n]/g, ' '));
+    const fautes = [];
+    lisible.split('\n').forEach((ligne, i) => {
+        if ([...ligne.matchAll(LITTERAL)].length) fautes.push(`${debut + i + 1} : ${ligne.trim().slice(0, 120)}`);
+    });
+    return fautes;
+}
+
+describe('D — les pourcentages écrits en dur prennent l’insécable, eux aussi', () => {
+    it('dans la prose de js/ (hors du module, du pack démo et des Nouvelles publiées)', () => {
+        const fautes = fichiersJs('js')
+            .filter((f) => f !== MODULE && !/pack-demo|changelog-data/.test(f))
+            .flatMap((f) => litterauxJs(lire(f), f).map((l) => `${f}:${l}`));
+        expect(fautes).toEqual([]);
+    });
+
+    it('chaque largeur CSS exemptée vise une ligne qui existe', () => {
+        for (const c of CSS_PAR_VARIABLE) expect(lire(c.fichier).includes(c.extrait), c.extrait).toBe(true);
+    });
+
+    it('dans le texte visible d’index.html', () => {
+        expect(litterauxHtml(lire('index.html'))).toEqual([]);
+    });
+
+    it('le motif attrape les formes d’hier, et laisse le CSS et l’insécable', () => {
+        for (const l of [
+            "description: 'Si moyenne standards terminaux < 60%, note plafonnée à 55%',",
+            "'Réinitialise les seuils à leurs valeurs par défaut (70 / 80 / 85 %).',",
+            "help: '100% = toutes les spécifications doivent être respectées'",
+            "<span class=\"tb-texte-mini\">0 (0%)</span>"
+        ]) expect(litterauxJs(l), l).not.toEqual([]);
+        for (const l of [
+            "description: 'Si moyenne < 60\\u00a0%, note plafonnée à 55\\u00a0%',",
+            "couche.style.width = '100%';",
+            "<summary style=\"background: linear-gradient(135deg, var(--a) 0%, var(--b) 100%);\">",
+            "return `${label}\\u00a0: ${formaterPourcentage(value)}`;",
+            "// commentaire à 25 % de zoom"
+        ]) expect(litterauxJs(l), l).toEqual([]);
+        expect(litterauxHtml('<body>\n<td>&lt; 65%</td>')).not.toEqual([]);
+        expect(litterauxHtml('<body>\n<td>&lt; 65&nbsp;%</td>\n<div style="width: 40%"></div>\n<!-- « 100% » -->')).toEqual([]);
     });
 });

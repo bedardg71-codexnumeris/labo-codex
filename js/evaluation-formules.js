@@ -123,7 +123,7 @@ var MODELES = [
             {
                 cle: 'motsParErreurCible',
                 libelle: 'Ratio visé (mots par erreur pour la note complète)',
-                aide: 'Nombre de mots à écrire par erreur commise pour obtenir 100 %.',
+                aide: 'Nombre de mots à écrire par erreur commise pour obtenir 100\u00a0%.',
                 defaut: 60,
                 min: 1,
                 max: 10000

@@ -3862,7 +3862,7 @@ function _genererTexteRegleSelectionPortfolio(methodeSelectionRapport, nombreARe
     const textes = {
         'meilleurs': `Les <strong>${nombreARetenirConfig} meilleures productions</strong> sont retenues pour le calcul de l'indice P (note maximale atteinte)`,
         'recents': `Les <strong>${nombreARetenirConfig} plus récentes productions</strong> sont retenues pour le calcul de l'indice P (niveau terminal actuel)`,
-        'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
+        'recents-meilleurs': `Les <strong>${nombreARetenirConfig} plus récentes productions parmi les 50\u00a0% meilleures</strong> sont retenues pour le calcul de l'indice P (approche hybride)`,
         'tous': `<strong>Toutes les productions</strong> sont retenues pour le calcul de l'indice P (calcul de type sommative)`
     };
     return textes[methodeSelectionRapport] || textes['meilleurs'];

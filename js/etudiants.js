@@ -381,7 +381,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
     html += 'Proportion des heures de présence parmi les heures de cours <strong>effectivement données jusqu\'à maintenant</strong>. ';
     html += '<br>Formule : <code>A = (heures présentes / heures données) × 100</code>';
     html += '<br><em class="etud-texte-gris-petit">→ Calculé uniquement sur les séances passées (pas sur le total prévu pour la session)</em>';
-    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 séances données sur 15 prévues, un étudiant présent 8/8 a A = 100% (pas 53%)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 séances données sur 15 prévues, un étudiant présent 8/8 a A = 100\u00a0% (pas 53\u00a0%)</em>';
     html += '<br><em class="etud-texte-gris-petit">→ Indépendant de la pratique de notation (fait observable)</em>';
 
     html += '<br><br>';
@@ -391,7 +391,7 @@ function genererExplicationCalculIndices(complementHtml = '') {
     html += 'Proportion de travaux remis parmi les travaux <strong>effectivement réalisés jusqu\'à maintenant</strong>. ';
     html += '<br>Formule : <code>C = (travaux remis / travaux réalisés) × 100</code>';
     html += '<br><em class="etud-texte-gris-petit">→ Un ' + termeSing + ' devient "réalisé" dès qu\'une première évaluation existe pour celui-ci</em>';
-    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 ' + termePlur + ' réalisés sur 10 prévus, un étudiant ayant remis 8/8 a C = 100% (pas 80%)</em>';
+    html += '<br><em class="etud-texte-gris-petit">→ Exemple : Si 8 ' + termePlur + ' réalisés sur 10 prévus, un étudiant ayant remis 8/8 a C = 100\u00a0% (pas 80\u00a0%)</em>';
     html += '<br><em class="etud-texte-gris-petit">→ Indépendant de la pratique de notation (mobilisation observable)</em>';
 
     html += '<br><br>';
@@ -973,7 +973,7 @@ function afficherListeEtudiantsConsultation() {
     }
     const moyCCell = document.getElementById('moy-c');
     if (moyCCell) {
-        moyCCell.title = 'Moyenne C sur ' + valeursC_actifs.length + ' actifs (les 0% comptent)' + suffixeExclus + '.';
+        moyCCell.title = 'Moyenne C sur ' + valeursC_actifs.length + ' actifs (les 0\u00a0% comptent)' + suffixeExclus + '.';
     }
     const moyPCell = document.getElementById('moy-p');
     if (moyPCell) {

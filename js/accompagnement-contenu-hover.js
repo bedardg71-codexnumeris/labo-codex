@@ -134,7 +134,7 @@ const TOOLTIPS = {
     'pref-actions-rlo':
         'Active trois tampons ou estampes (Repérage, Liaison, Ouverture) que tu poses sur les copies pour observer les gestes cognitifs de tes étudiant·es. Les résultats alimentent le profil ACO et l\'export de recherche anonymisé.',
     'pref-affichage-developpement':
-        'Affiche le tableau de progression des critères et les graphiques 0-100 % dans la section «Développement des habiletés» du profil individuel.',
+        'Affiche le tableau de progression des critères et les graphiques 0-100\u00a0% dans la section «Développement des habiletés» du profil individuel.',
     'pref-affichage-graphiques':
         'Affiche les graphiques de progression dans le temps dans la section «Progression temporelle ACP» du profil individuel.',
     'pref-affichage-solo':
@@ -169,13 +169,13 @@ const TOOLTIPS = {
     'depist-seuil-direction':
         'Variation minimale de la moyenne d\'un critère, d\'une fenêtre d\'analyse à la précédente (la même, décalée d\'une production), pour afficher une flèche (→ ou ←) après ce critère.',
     'depist-seuil-fragile':
-        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences fréquentes » et « Travaux manquants fréquents » (« très fréquents » sous 60 %, borne fixe). Dans la liste des élèves, un chiffre sous ce seuil est rouge.',
+        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences fréquentes » et « Travaux manquants fréquents » (« très fréquents » sous 60\u00a0%, borne fixe). Dans la liste des élèves, un chiffre sous ce seuil est rouge.',
     'depist-seuil-progression':
         'Différence minimale (%) pour signaler une progression ou une régression entre deux productions. Seuil bas = sensible, seuil élevé = moins sensible.',
     'depist-seuils-interpretation':
         'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). Détermine les alertes du tableau de bord.',
     'depist-seuils-restaurer':
-        'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut (70 / 80 / 85 %).',
+        'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut (70 / 80 / 85\u00a0%).',
     'depist-seuils-visuels':
         'Lignes pointillées et étiquettes des niveaux de ton échelle (ex. : Incomplet, Développement, Maîtrise, Étendu) sur le graphique par critère du profil individuel et sur les trajectoires du Suivi du groupe, en mode Habiletés. Les indices A-C-P (profil et groupe) et la note finale n\'en portent pas : un pourcentage agrégé ne se situe pas dans une échelle de performance.',
 
@@ -246,7 +246,7 @@ const TOOLTIPS = {
     'cn-prod-detail-tache':
         'Les consignes qui rendent la tâche exécutable : étapes, contraintes, format. N\'y exige rien que la description de la tâche n\'annonce pas — l\'étudiant·e planifie son travail à partir de l\'annonce.',
     'cn-prod-ponderation':
-        'Poids dans la note finale. L\'ensemble des productions se partage le 100 %.',
+        'Poids dans la note finale. L\'ensemble des productions se partage le 100\u00a0%.',
     'cn-prod-echeance':
         'Date limite de remise. Conditionne la génération des snapshots, le calcul de C (complétion) et P (performance), et la gestion des travaux remis ou non remis. Elle peut être posée d\'avance : tant que « Consignes transmises » est décochée, la production reste « à planifier » et rien n\'est dû. Clique sur l\'icône d\'info pour plus de détails.',
     'cn-prod-echeance-mg':
@@ -257,7 +257,7 @@ const TOOLTIPS = {
     'cn-grille-titre':
         'Grilles réutilisables avec critères pondérés. Chaque grille définit les critères d\'évaluation d\'une production — comme la grille papier que tu utilises déjà pour évaluer.',
     'cn-grille-critere':
-        'Critères avec nom, type, pondération et description. La pondération totale doit atteindre 100 %.',
+        'Critères avec nom, type, pondération et description. La pondération totale doit atteindre 100\u00a0%.',
     // C2, validé G. 20 oct. 2026, 9 h 23 (plans de travail/TEXTES-2026-10-20-bareme.md).
     'cn-grille-type-critere':
         'Méthode d’évaluation du critère : holistique (tu attribues un niveau de l’échelle), analytique (tu attribues des points, que son barème décrit) ou algorithmique (une formule calcule la note à partir de ce que tu comptes).',
@@ -276,7 +276,7 @@ const TOOLTIPS = {
     'bareme-hors-bareme':
         'Ces points dépassent la pondération du critère, qui a baissé depuis : corrige les points de la tranche, ou la pondération.',
     'cn-grille-ponderation-totale':
-        'Somme des pondérations de tous les critères. Doit atteindre 100 % pour que la grille soit valide.',
+        'Somme des pondérations de tous les critères. Doit atteindre 100\u00a0% pour que la grille soit valide.',
 
     // --- Échelles de performance ---
 
@@ -387,7 +387,7 @@ const TOOLTIPS = {
     'eval-btn-regenerer-retro':
         'Regénère la rétroaction à partir de la cartouche actuelle et des niveaux sélectionnés. ⚠️ Écrase les modifications manuelles du texte.',
     'eval-affichage-note-choix':
-        'Choisit le format affiché dans la rétroaction : note chiffrée (ex. 78 %) ou niveau de performance (lettre, ex. M).',
+        'Choisit le format affiché dans la rétroaction : note chiffrée (ex. 78\u00a0%) ou niveau de performance (lettre, ex. M).',
 
     // --- Rétroaction ---
 
@@ -474,7 +474,7 @@ const TOOLTIPS = {
     'wizard-etape-config-portfolio':
         'Ici, tu dis quels artefacts comptent : les N meilleurs, tous, les N derniers, ou les N meilleurs plus les obligatoires. Les autres restent visibles, mais n’entrent pas dans la note.',
     'wizard-etape-config-specifications':
-        'Un travail est « acceptable » quand son résultat atteint ce seuil. À 100 %, toutes ses spécifications doivent être respectées.',
+        'Un travail est « acceptable » quand son résultat atteint ce seuil. À 100\u00a0%, toutes ses spécifications doivent être respectées.',
     'wizard-etape-config-jetons':
         'Un jeton de délai donne quelques jours de plus pour remettre un travail ; un jeton de reprise permet de refaire un travail déjà évalué. Tu fixes combien chaque élève en reçoit.',
     'wizard-etape-choix-modele-bundles':
