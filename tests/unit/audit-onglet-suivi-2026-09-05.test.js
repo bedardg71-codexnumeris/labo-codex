@@ -37,7 +37,7 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -53,7 +53,7 @@ function chargerAvecInterne(chemin, globaux, win, noms) {
         + noms.map(n => 'get ' + n + '() { return ' + n + '; }').join(', ') + '};\n';
     const fin = code.lastIndexOf('})();');
     code = fin >= 0 ? code.slice(0, fin) + expo + code.slice(fin) : code + expo;
-    const { document: doc, localStorage: ls, ...autres } = globaux;
+    const { document: doc, localStorage: ls, ...autres } = completerNoteParDefaut(globaux);   // #1137 : le module des nombres affichés
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     const nomsG = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres)];
     const vals = [win, doc, console, ls || storage(), storage(), ...Object.values(autres)];
@@ -562,8 +562,8 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(appelNu).toBe(true);
         expect(stock).toBe(77);
         expect(profil).toBe(77);
-        expect(ligneP).toBe('Performance : 77% (note du cours)');             // avant : « 75% (4 meilleurs artefacts actuels) »
-        expect(ligneC).toBe('Complétion : 100% (4 remises / 4 productions)');  // avant : « 0 remises / 0 productions »
+        expect(ligneP).toBe('Performance : 77\u00A0% (note du cours)');             // avant : « 75\u00A0% (4 meilleurs artefacts actuels) »
+        expect(ligneC).toBe('Complétion : 100\u00A0% (4 remises / 4 productions)');  // avant : « 0 remises / 0 productions »
     });
 });
 

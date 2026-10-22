@@ -108,16 +108,16 @@ describe('#551 · un seuil IDME réglé à zéro reste à zéro dans la suggesti
     };
 
     it('(a) obtenirSeuil ABSENTE : la garde tient, et les valeurs de dernier recours sont celles de SEUILS_PAR_DEFAUT', () => {
-        expect(suggestion({ seuils: null, moyenne: 0.5 })).toBe('Amener Structure à 64 %');
-        expect(suggestion({ seuils: null, moyenne: 0.7 })).toBe('Amener Structure à 75 %');
+        expect(suggestion({ seuils: null, moyenne: 0.5 })).toBe('Amener Structure à 64\u00A0%');
+        expect(suggestion({ seuils: null, moyenne: 0.7 })).toBe('Amener Structure à 75\u00A0%');
     });
     it('(b) idme.insuffisant réglé à 0 : aucun élève n\'est sous ce seuil — la suggestion vise 75 %, pas 64 %', () => {
-        expect(suggestion({ seuils: Object.assign({}, DEFAUTS, { 'idme.insuffisant': 0 }), moyenne: 0.5 })).toBe('Amener Structure à 75 %');
+        expect(suggestion({ seuils: Object.assign({}, DEFAUTS, { 'idme.insuffisant': 0 }), moyenne: 0.5 })).toBe('Amener Structure à 75\u00A0%');
     });
     it('(b) idme.developpement réglé à 0 : le seuil est à 0 % — la suggestion le dit, sans le remplacer par 75 %', () => {
         // Sous l'ancienne forme `|| 0.75`, la moyenne 0,7 retomberait sous 75 % : « Amener Structure à 75 % ». Ce cas
         // distingue donc toujours le correctif #551 de l'ancien code, lettres retirées ou non.
-        expect(suggestion({ seuils: Object.assign({}, DEFAUTS, { 'idme.developpement': 0 }), moyenne: 0.7 })).toBe('Stabiliser Structure au-dessus de 0 %');
+        expect(suggestion({ seuils: Object.assign({}, DEFAUTS, { 'idme.developpement': 0 }), moyenne: 0.7 })).toBe('Stabiliser Structure au-dessus de 0\u00A0%');
     });
 });
 

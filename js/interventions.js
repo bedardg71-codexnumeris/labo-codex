@@ -1199,14 +1199,14 @@ function ouvrirIntervention(interventionId, options) {
                         var niveauAvant = lettre(pctAvant);
                         var niveauApres = lettre(pctApres);
                         var delta = (avant !== null && apres !== null) ? Math.round((apres - avant) * 100) : null;
-                        var deltaTexte = delta !== null ? ((delta >= 0 ? '+' : '') + delta + ' pts') : '—';
+                        var deltaTexte = delta !== null ? ((delta >= 0 ? '+' : '') + formaterPoints(delta, 0)) : '—';
                         var deltaFleche = delta !== null ? (delta > 0 ? ' ↗' : delta < 0 ? ' ↘' : ' →') : '';
                         var deltaCouleur = delta !== null ? (delta > 0 ? 'var(--vert-succes)' : delta < 0 ? 'var(--orange-attention, #e8a838)' : 'var(--gris-moyen)') : 'var(--gris-moyen)';
 
                         return '<tr>' +
                             '<td style="padding: 6px 12px; font-weight: 500;">' + echapperHtml(nom) + '</td>' +
-                            '<td style="padding: 6px 12px; text-align: center;">' + niveauAvant + ' ' + (pctAvant !== null ? pctAvant + '%' : '') + '</td>' +
-                            '<td style="padding: 6px 12px; text-align: center;">' + niveauApres + ' ' + (pctApres !== null ? pctApres + '%' : '') + '</td>' +
+                            '<td style="padding: 6px 12px; text-align: center;">' + niveauAvant + ' ' + (pctAvant !== null ? formaterPourcentage(pctAvant) : '') + '</td>' +
+                            '<td style="padding: 6px 12px; text-align: center;">' + niveauApres + ' ' + (pctApres !== null ? formaterPourcentage(pctApres) : '') + '</td>' +
                             '<td style="padding: 6px 12px; text-align: center; color: ' + deltaCouleur + '; font-weight: 600;">' + deltaTexte + deltaFleche + '</td>' +
                             '</tr>';
                     }).join('');
@@ -1484,11 +1484,11 @@ function suggererObjectifIntervention(interventionId) {
     // Textes approuvés par Grégoire le 13 sept. 2026, au caractère près.
     var suggestion = '';
     if (scorePlusFaible < seuilInsuffisant) {
-        suggestion = 'Amener ' + plusFaible + ' à ' + Math.round(seuilInsuffisant * 100) + ' %';
+        suggestion = 'Amener ' + plusFaible + ' à ' + formaterPourcentage(Math.round(seuilInsuffisant * 100));
     } else if (scorePlusFaible < seuilDeveloppement) {
-        suggestion = 'Amener ' + plusFaible + ' à ' + Math.round(seuilDeveloppement * 100) + ' %';
+        suggestion = 'Amener ' + plusFaible + ' à ' + formaterPourcentage(Math.round(seuilDeveloppement * 100));
     } else {
-        suggestion = 'Stabiliser ' + plusFaible + ' au-dessus de ' + Math.round(seuilDeveloppement * 100) + ' %';
+        suggestion = 'Stabiliser ' + plusFaible + ' au-dessus de ' + formaterPourcentage(Math.round(seuilDeveloppement * 100));
     }
 
     _poserObjectif(objectifField, suggestion);

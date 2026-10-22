@@ -727,7 +727,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         try { html = b.win.__audit.genererSectionPerformance(DA.STD); } catch (e) { erreur = e.constructor.name + ' : ' + e.message; }
         const m = noter('B3b', {
             erreur,
-            pGrand: html && (html.match(/profil-valeur-grande-bleu[\s\S]*?(\d+%)<\/strong>/) || [])[1],
+            pGrand: html && (html.match(/profil-valeur-grande-bleu[\s\S]*?(\d+\u00A0%)<\/strong>/) || [])[1],
             niveauGrand: html && (html.match(/profil-valeur-grande-bleu[^>]*><span[^>]*>([^<]*)<\/span>/) || [])[1],
             methodeBloc: html && (html.match(/profil-liste-simple[\s\S]*?<strong>• ([^<]*)</) || [])[1],
             methodo: html && (html.match(/Calcul de l'indice P :<\/strong>\s*([^<]*)/) || [])[1]?.trim(),
@@ -735,7 +735,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
             ecritures: b.ecritures.filter(k => k === 'test_portfoliosEleves').length
         });
         expect(erreur).toBeNull();
-        expect(m.pGrand).toMatch(/79%/);
+        expect(m.pGrand).toMatch(/79\u00A0%/);
         // ↻ #714 (lot N3, 22 sept. 2026) — valeurs D'APRÈS. Avant : « Calcul impossible : aucune évaluation
         // disponible » et au moins une écriture de `portfoliosEleves` par rendu. Le panneau lit désormais
         // `calculerDetailsNoteFinale` et n'écrit rien (sentinelle-714-panneau-habiletes-lit-la-note).
@@ -894,7 +894,7 @@ describe('D · SOM', () => {
         const p3 = recit.resultats.find(x => x.label === 'Exercice (pondération 0)');
         noter('D3', { detailP3: p3 && p3.detail });
         expect(p3.sort).toBe('compte');
-        expect(p3.detail).toMatch(/poids 1 %/);
+        expect(p3.detail).toMatch(/poids 1\u00A0%/);
     });
 });
 

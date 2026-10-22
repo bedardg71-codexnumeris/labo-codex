@@ -60,8 +60,8 @@ function rendreRapport() {
 
     html.push('<div class="bilan-stat-grid">');
     html.push('<div class="bilan-stat-carte"><div class="bilan-stat-valeur">' + res.nbRepondants + '</div><div class="bilan-stat-label">R\u00e9pondants</div></div>');
-    html.push('<div class="bilan-stat-carte"><div class="bilan-stat-valeur">' + stats.scoreGlobal.toFixed(2) + '</div><div class="bilan-stat-label">Score moyen / 4</div></div>');
-    html.push('<div class="bilan-stat-carte"><div class="bilan-stat-valeur">' + stats.tauxFavorable + '%</div><div class="bilan-stat-label">Favorables</div></div>');
+    html.push('<div class="bilan-stat-carte"><div class="bilan-stat-valeur">' + formaterNombre(stats.scoreGlobal, 2) + '</div><div class="bilan-stat-label">Score moyen / 4</div></div>');
+    html.push('<div class="bilan-stat-carte"><div class="bilan-stat-valeur">' + formaterPourcentage(stats.tauxFavorable) + '</div><div class="bilan-stat-label">Favorables</div></div>');
     html.push('<div class="bilan-stat-carte"><div class="bilan-stat-valeur">' + stats.nbQuestionsRepondues + '</div><div class="bilan-stat-label">Questions analys\u00e9es</div></div>');
     html.push('</div>');
 
@@ -86,13 +86,13 @@ function rendreRapport() {
 
         var scoreBloc = calculerScoreBloc(qsAvecRep, res);
         if (scoreBloc.nb > 0) {
-            html.push(' <span style="font-size:14px;font-weight:400;color:var(--texte-secondaire)">\u2014 ' + scoreBloc.moyenne.toFixed(2) + ' / 4</span>');
+            html.push(' <span style="font-size:14px;font-weight:400;color:var(--texte-secondaire)">\u2014 ' + formaterNombre(scoreBloc.moyenne, 2) + ' / 4</span>');
         }
         html.push('</div>');
 
         var signaux = calculerSignaux(qsAvecRep, res);
-        if (signaux.fort) html.push('<span class="bilan-signal bilan-signal-fort">\u2713 Signal fort \u2014 ' + signaux.tauxFavorable + '% favorables</span>');
-        if (signaux.faible) html.push('<span class="bilan-signal bilan-signal-faible">\u26A0 Signal faible \u2014 ' + signaux.tauxDefavorable + '% d\u00e9favorables</span>');
+        if (signaux.fort) html.push('<span class="bilan-signal bilan-signal-fort">\u2713 Signal fort \u2014 ' + formaterPourcentage(signaux.tauxFavorable) + ' favorables</span>');
+        if (signaux.faible) html.push('<span class="bilan-signal bilan-signal-faible">\u26A0 Signal faible \u2014 ' + formaterPourcentage(signaux.tauxDefavorable) + ' d\u00e9favorables</span>');
 
         // Rendu de chaque question selon son type
         for (var k = 0; k < qsAvecRep.length; k++) {
@@ -140,15 +140,15 @@ function _rendreBarreLikert(distribution, totalRep) {
         var pct = totalRep > 0 ? Math.round((n / totalRep) * 100) : 0;
         pcts[i] = pct;
         if (pct > 0) {
-            html.push('<div class="bilan-rep-likert-segment-' + labels[i].valeur + '" style="width:' + pct + '%" title="' + labels[i].label + ' : ' + pct + '%">' + (pct >= 8 ? pct + '%' : '') + '</div>');
+            html.push('<div class="bilan-rep-likert-segment-' + labels[i].valeur + '" style="width:' + pct + '%" title="' + labels[i].label + ' : ' + formaterPourcentage(pct) + '">' + (pct >= 8 ? formaterPourcentage(pct) : '') + '</div>');
         }
     }
     html.push('</div>');
     var leg = [
-        pcts[0] + '% Tout à fait',
-        pcts[1] + '% Plutôt',
-        pcts[2] + '% Plutôt en désaccord',
-        pcts[3] + '% Pas du tout'
+        formaterPourcentage(pcts[0]) + ' Tout à fait',
+        formaterPourcentage(pcts[1]) + ' Plutôt',
+        formaterPourcentage(pcts[2]) + ' Plutôt en désaccord',
+        formaterPourcentage(pcts[3]) + ' Pas du tout'
     ];
     html.push('<div class="bilan-rep-likert-legende">' + leg.join(' · ') + '</div>');
     return html.join('');
@@ -158,7 +158,7 @@ function _rendreBarrePct(label, pct, dominante) {
     return '<div class="bilan-rep-row">' +
         '<span class="bilan-rep-label">' + echapperHtml(label) + '</span>' +
         '<div class="bilan-rep-bar' + (dominante ? ' dominante' : '') + '"><div style="width:' + pct + '%"></div></div>' +
-        '<span class="bilan-rep-pct"><strong>' + pct + '%</strong></span>' +
+        '<span class="bilan-rep-pct"><strong>' + formaterPourcentage(pct) + '</strong></span>' +
         '</div>';
 }
 
@@ -177,14 +177,14 @@ function rendreReponseLikert(question, rep) {
     var html = ['<div class="bilan-question-rep">'];
     html.push('<div class="bilan-rep-titre">' + echapperHtml(question.texte));
     var meta = '';
-    if (rep.scoreMoyen != null) meta = rep.scoreMoyen.toFixed(2) + ' / 4';
+    if (rep.scoreMoyen != null) meta = formaterNombre(rep.scoreMoyen, 2) + ' / 4';
     if (rep.nbReponses != null) meta += (meta ? ' · ' : '') + rep.nbReponses + ' réponses';
     if (meta) html.push('<span class="bilan-rep-meta">' + meta + '</span>');
     html.push('</div>');
     if (rep.inclureNA && rep.nbNA > 0) {
         var totAvecNA = rep.nbReponses + rep.nbNA;
         var pctNA = totAvecNA > 0 ? Math.round((rep.nbNA / totAvecNA) * 100) : 0;
-        html.push('<div class="bilan-rep-na">⊘ Non applicable : ' + rep.nbNA + ' réponse' + (rep.nbNA > 1 ? 's' : '') + ' (' + pctNA + '%)</div>');
+        html.push('<div class="bilan-rep-na">⊘ Non applicable : ' + rep.nbNA + ' réponse' + (rep.nbNA > 1 ? 's' : '') + ' (' + formaterPourcentage(pctNA) + ')</div>');
     }
     html.push(_rendreBarreLikert(rep.distribution, rep.nbReponses));
     html.push('</div>');
@@ -287,7 +287,7 @@ function rendreReponseMatrix(question, rep) {
                 html.push('<span class="bilan-rep-vide">—</span>');
             }
             html.push('</td>');
-            html.push('<td>' + (repE && repE.scoreMoyen != null ? repE.scoreMoyen.toFixed(2) : '—') + '</td>');
+            html.push('<td>' + (repE && repE.scoreMoyen != null ? formaterNombre(repE.scoreMoyen, 2) : '—') + '</td>');
             html.push('</tr>');
         }
         html.push('</tbody></table>');
@@ -467,7 +467,7 @@ function rendreSynthese(q, res) {
         for (var f = 0; f < forces.length; f++) {
             html.push('<div class="bilan-synthese-item bilan-synthese-force">');
             html.push('<div class="bilan-synthese-titre">' + echapperHtml(forces[f].titre) + '</div>');
-            html.push('<div class="bilan-synthese-detail">Score moyen : ' + forces[f].score.toFixed(2) + '/4 \u2014 ' + forces[f].tauxFav + '% de r\u00e9ponses favorables</div>');
+            html.push('<div class="bilan-synthese-detail">Score moyen : ' + formaterNombre(forces[f].score, 2) + '/4 \u2014 ' + formaterPourcentage(forces[f].tauxFav) + ' de r\u00e9ponses favorables</div>');
             html.push('</div>');
         }
     }
@@ -478,7 +478,7 @@ function rendreSynthese(q, res) {
         for (var v = 0; v < vigilances.length; v++) {
             html.push('<div class="bilan-synthese-item bilan-synthese-vigilance">');
             html.push('<div class="bilan-synthese-titre">' + echapperHtml(vigilances[v].titre) + '</div>');
-            html.push('<div class="bilan-synthese-detail">Score moyen : ' + vigilances[v].score.toFixed(2) + '/4 \u2014 ' + vigilances[v].tauxDefav + '% de r\u00e9ponses d\u00e9favorables</div>');
+            html.push('<div class="bilan-synthese-detail">Score moyen : ' + formaterNombre(vigilances[v].score, 2) + '/4 \u2014 ' + formaterPourcentage(vigilances[v].tauxDefav) + ' de r\u00e9ponses d\u00e9favorables</div>');
             html.push('</div>');
         }
     }
@@ -548,12 +548,12 @@ function creerGraphiqueGlobal(res) {
                         cornerRadius: 6, padding: 10
                     }, {
                         callbacks: {
-                            label: function(ctx) { return ctx.dataset.label + ' : ' + ctx.raw + '%'; }
+                            label: function(ctx) { return ctx.dataset.label + ' : ' + formaterPourcentage(ctx.raw); }
                         }
                     })
                 },
                 scales: {
-                    x: { stacked: true, max: 100, grid: { color: couleurGrille() }, ticks: { color: estClair ? '#555' : '#8aa4b0', callback: function(v) { return v + '%'; } } },
+                    x: { stacked: true, max: 100, grid: { color: couleurGrille() }, ticks: { color: estClair ? '#555' : '#8aa4b0', callback: function(v) { return formaterPourcentage(v); } } },
                     y: { stacked: true, grid: { display: false }, ticks: { color: estClair ? '#1a1a2e' : '#d0e0e4' } }
                 }
             }
@@ -610,12 +610,12 @@ function creerGraphiqueBloc(canvasId, questionsLikert, res) {
                         cornerRadius: 6, padding: 10
                     }, {
                         callbacks: {
-                            label: function(ctx) { return ctx.dataset.label + ' : ' + ctx.raw + '%'; }
+                            label: function(ctx) { return ctx.dataset.label + ' : ' + formaterPourcentage(ctx.raw); }
                         }
                     })
                 },
                 scales: {
-                    x: { stacked: true, max: 100, grid: { color: couleurGrille() }, ticks: { color: estClair ? '#555' : '#8aa4b0', callback: function(v) { return v + '%'; } } },
+                    x: { stacked: true, max: 100, grid: { color: couleurGrille() }, ticks: { color: estClair ? '#555' : '#8aa4b0', callback: function(v) { return formaterPourcentage(v); } } },
                     y: { stacked: true, grid: { display: false }, ticks: { color: estClair ? '#1a1a2e' : '#d0e0e4', font: { size: 11 } } }
                 }
             }
@@ -714,9 +714,9 @@ function _pdfEnteteEtVueEnsemble(doc, q, res, ctx) {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor.apply(doc, _PDF_GRIS_TEXTE);
-    doc.text('Score moyen global : ' + stats.scoreGlobal.toFixed(2) + ' / 4', ctx.marges.gauche, ctx.posY);
+    doc.text('Score moyen global : ' + formaterNombre(stats.scoreGlobal, 2) + ' / 4', ctx.marges.gauche, ctx.posY);
     ctx.posY += 5;
-    doc.text('Taux de réponses favorables : ' + stats.tauxFavorable + '%', ctx.marges.gauche, ctx.posY);
+    doc.text('Taux de réponses favorables : ' + formaterPourcentage(stats.tauxFavorable), ctx.marges.gauche, ctx.posY);
     ctx.posY += 5;
     doc.text('Questions analysées : ' + stats.nbQuestionsRepondues, ctx.marges.gauche, ctx.posY);
     ctx.posY += 12;
@@ -734,9 +734,9 @@ function _pdfRendreTableLikert(doc, questionsLikert, res, ctx) {
         var row = [tronquer(qItem.texte, 45)];
         for (var e = 0; e < echelle.length; e++) {
             var n = (rep.distribution && rep.distribution[echelle[e].label]) || 0;
-            row.push(Math.round((n / total) * 100) + '%');
+            row.push(formaterPourcentage(Math.round((n / total) * 100)));
         }
-        row.push(rep.scoreMoyen.toFixed(2));
+        row.push(formaterNombre(rep.scoreMoyen, 2));
         tableBody.push(row);
     }
 
@@ -819,9 +819,9 @@ function _pdfDessinerBloc(doc, bloc, res, ctx) {
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor.apply(doc, _PDF_GRIS_META);
-        var infoBloc = 'Score moyen : ' + scoreBloc.moyenne.toFixed(2) + '/4';
-        if (signaux.fort) infoBloc += ' — Signal fort (' + signaux.tauxFavorable + '% favorables)';
-        if (signaux.faible) infoBloc += ' — Signal faible (' + signaux.tauxDefavorable + '% défavorables)';
+        var infoBloc = 'Score moyen : ' + formaterNombre(scoreBloc.moyenne, 2) + '/4';
+        if (signaux.fort) infoBloc += ' — Signal fort (' + formaterPourcentage(signaux.tauxFavorable) + ' favorables)';
+        if (signaux.faible) infoBloc += ' — Signal faible (' + formaterPourcentage(signaux.tauxDefavorable) + ' défavorables)';
         doc.text(infoBloc, ctx.marges.gauche, ctx.posY);
         ctx.posY += 5;
 
@@ -848,8 +848,8 @@ function _pdfCollecterForcesEtVigilances(q, res) {
         if (qLikS.length === 0) continue;
         var sb = calculerScoreBloc(qLikS, res);
         var sig = calculerSignaux(qLikS, res);
-        if (sb.moyenne >= 3.2) forces.push(blocS.titre + ' (' + sb.moyenne.toFixed(2) + '/4, ' + sig.tauxFavorable + '% fav.)');
-        if (sb.moyenne < 2.5 || sig.faible) vigilances.push(blocS.titre + ' (' + sb.moyenne.toFixed(2) + '/4, ' + sig.tauxDefavorable + '% défav.)');
+        if (sb.moyenne >= 3.2) forces.push(blocS.titre + ' (' + formaterNombre(sb.moyenne, 2) + '/4, ' + formaterPourcentage(sig.tauxFavorable) + ' fav.)');
+        if (sb.moyenne < 2.5 || sig.faible) vigilances.push(blocS.titre + ' (' + formaterNombre(sb.moyenne, 2) + '/4, ' + formaterPourcentage(sig.tauxDefavorable) + ' défav.)');
     }
     return { forces: forces, vigilances: vigilances };
 }

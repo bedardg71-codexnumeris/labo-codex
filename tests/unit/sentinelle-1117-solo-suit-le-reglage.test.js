@@ -425,10 +425,10 @@ describe('#1117 · E — réglage désactivé : le dépistage et le suivi des fo
         const r = reglage(true);
         const { i } = monterTableauBord(monterDepistage(r, GRILLE));
         i._tousEtudiantsEnrichis = [{ suivi: { diagnostic: 'Maîtrise acquise' } }];
-        expect(i.genererInterpretationSuiviFondamentaux()).toContain('1 étudiant·e (100%) maîtrise les fondamentaux multistructurels');
+        expect(i.genererInterpretationSuiviFondamentaux()).toContain('1 étudiant·e (100\u00A0%) maîtrise les fondamentaux multistructurels');
         r.etat.actif = false;
         const bilan = i.genererInterpretationSuiviFondamentaux();
-        expect(bilan).toContain('1 étudiant·e (100%) maîtrise les fondamentaux');
+        expect(bilan).toContain('1 étudiant·e (100\u00A0%) maîtrise les fondamentaux');
         expect(bilan).not.toMatch(/multistructurel/i);
     });
 });

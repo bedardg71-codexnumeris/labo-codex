@@ -81,7 +81,7 @@ function _genererBarresSRPNF(da) {
             <div class="critere-container">
                 <div class="critere-header">
                     <span class="critere-nom" style="min-width: 120px;">${nomCritere}</span>
-                    <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">${pourcentage}%</span>
+                    <span class="critere-valeur" style="margin-left: auto; font-weight: 600;">${formaterPourcentage(pourcentage)}</span>
                 </div>
                 <div class="critere-barre-gradient" style="background: ${gradientCSS};"${survolBarre}>
                     ${symbolesHTML}
@@ -232,14 +232,14 @@ function genererBlocProfilRLO(da) {
                 <div>
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
                         <span style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire);">Gestes cognitifs</span>
-                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalCognitifs} · ${pctCog}%</span>
+                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalCognitifs} · ${formaterPourcentage(pctCog)}</span>
                     </div>
                     ${rendreBarre(ligneCognitive, maxCog, 'var(--bleu-principal, #3b82f6)')}
                 </div>
                 <div>
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
                         <span style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--texte-secondaire);">Gestes en difficulté</span>
-                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalDifficultes} · ${pctDif}%</span>
+                        <span style="font-size:0.8rem; color:var(--texte-secondaire);">${profil.totalDifficultes} · ${formaterPourcentage(pctDif)}</span>
                     </div>
                     ${rendreBarre(ligneDifficulte, maxDif, 'var(--orange-accent, #f59e0b)')}
                 </div>
@@ -419,9 +419,9 @@ function genererBlocEvolutionRLO(da) {
             return `<tr>${cellTete}<td>${niv}</td><td colspan="3">Non observé</td></tr>`;
         }
         return `<tr>${cellTete}<td>${niv}</td>`
-            + `<td>${r.reperage.toFixed(1)} %</td>`
-            + `<td>${r.liaison.toFixed(1)} %</td>`
-            + `<td>${r.ouverture.toFixed(1)} %</td></tr>`;
+            + `<td>${formaterPourcentage(r.reperage, 1)}</td>`
+            + `<td>${formaterPourcentage(r.liaison, 1)}</td>`
+            + `<td>${formaterPourcentage(r.ouverture, 1)}</td></tr>`;
     }).join('');
 
     return `

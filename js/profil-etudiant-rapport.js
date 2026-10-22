@@ -89,7 +89,7 @@ function genererRapportAPI(da, options = {}) {
     if (opts.assiduite) {
         // #871 — la fraction montre les présences telles que saisies (« 22,5 »), le pourcentage en découle.
         // #743 (lot D) : une assiduité inconnue s'écrit d'un tiret, jamais « null% » ni 100 %.
-        rapport += `Assiduité : ${indices.A === null ? '—' : indices.A + '%'} (${formaterNombrePeriodes(detailsA.periodesPresentes)} / ${formaterNombrePeriodes(detailsA.periodesOffertes)} périodes)\n\n`;
+        rapport += `Assiduité : ${indices.A === null ? '—' : formaterPourcentage(indices.A)} (${formaterNombrePeriodes(detailsA.periodesPresentes)} / ${formaterNombrePeriodes(detailsA.periodesOffertes)} périodes)\n\n`;
     }
 
     // 3. COMPLÉTION
@@ -97,7 +97,7 @@ function genererRapportAPI(da, options = {}) {
         // Lot N1b (21 sept. 2026) : sans pratique assignée, la complétion est inconnue — un tiret, jamais « null% » ni 0 %.
         rapport += (indices.C === null)
             ? `Complétion : —\n\n`
-            : `Complétion : ${indices.C}% (${detailsC.remis} remises / ${detailsC.total} productions)\n\n`;
+            : `Complétion : ${formaterPourcentage(indices.C)} (${detailsC.remis} remises / ${detailsC.total} productions)\n\n`;
     }
 
     // 4. PERFORMANCE — la note du cours, telle que le profil l'affiche, et les évaluations qui y entrent (#706).
@@ -107,7 +107,7 @@ function genererRapportAPI(da, options = {}) {
             const cause = (typeof causeNoteNonConstructible === 'function') ? causeNoteNonConstructible(da) : null;
             rapport += `Performance : non constructible (${cause || 'aucune évaluation ne compte encore dans la note du cours'})\n\n`;
         } else {
-            rapport += `Performance : ${indices.P}% (note du cours)\n\n`;
+            rapport += `Performance : ${formaterPourcentage(indices.P)} (note du cours)\n\n`;
         }
 
         const evaluationsComptees = evaluations
@@ -125,7 +125,7 @@ function genererRapportAPI(da, options = {}) {
 
         evaluationsComptees.forEach((art, idx) => {
             const niveau = (art.niveauFinal !== null && art.niveauFinal !== undefined && art.niveauFinal !== '') ? `${art.niveauFinal} ` : '';
-            rapport += `${idx + 1}- ${art.productionNom} : ${niveau}(${isNaN(art.notePct) ? '—' : art.notePct.toFixed(1)})\n`;
+            rapport += `${idx + 1}- ${art.productionNom} : ${niveau}(${isNaN(art.notePct) ? '—' : formaterNombre(art.notePct, 1)})\n`;
         });
         if (evaluationsComptees.length > 0) rapport += `\n`;
     }

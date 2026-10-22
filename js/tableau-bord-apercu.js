@@ -441,8 +441,8 @@ function genererPanneauSuiviEtudiants() {
         if (filtrePrio) {
             var filtres = [
                 { id: 'alpha', label: 'A→Z' },
-                { id: 'P', label: 'P < 65%' },
-                { id: 'M', label: 'A ou C < ' + borneCritiqueEngagement() + '%' },   // #828 : lu à la borne, jamais recopié
+                { id: 'P', label: 'P < 65\u00a0%' },
+                { id: 'M', label: 'A ou C < ' + formaterPourcentage(borneCritiqueEngagement()) },   // #828 : lu à la borne, jamais recopié
                 { id: 'suivi', label: 'Suivi' },
                 { id: 'rai', label: 'RàI 2-3' }
             ];
@@ -560,7 +560,7 @@ function _badgeIndiceSuivi(label, valeur, cause) {
     var cls = 'prioritaire-indice';
     if (valeur < 65) cls += ' prioritaire-indice-critique';
     else if (valeur < 75) cls += ' prioritaire-indice-attention';
-    return '<span class="' + cls + '">' + label + ' ' + valeur + '%</span>';
+    return '<span class="' + cls + '">' + label + ' ' + formaterPourcentage(valeur) + '</span>';
 }
 
 /* ===============================
@@ -735,7 +735,7 @@ function genererSvgGauss(valeurs, hauteur = 55) {
             ${sigma1PlusPos < 100 ? `<line class="ligne-sigma" x1="${sigma1PlusPos}" y1="0" x2="${sigma1PlusPos}" y2="${hauteur}" />` : ''}
         </svg>
         <div style="position: absolute; bottom: -18px; left: ${muPos}%; transform: translateX(-50%); font-size: 0.7rem; color: var(--gris-moyen); white-space: nowrap;">
-            μ=${Math.round(moyenne * 100)}% | ±1σ: ${dans1Sigma}/${n} (${pct1Sigma}%)
+            μ=${formaterPourcentage(Math.round(moyenne * 100))} | ±1σ: ${dans1Sigma}/${n} (${formaterPourcentage(pct1Sigma)})
         </div>
     `;
 }
@@ -771,11 +771,11 @@ function genererDiagnosticNotePassage(etudiants) {
     const messages = [];
 
     if (enReussite > 0) {
-        messages.push(`${enReussite} ${window.pluriel(enReussite, 'étudiant·e', 'étudiant·es')} (${pctReussite}%) ont une performance égale ou supérieure à la note de passage (60%)`);
+        messages.push(`${enReussite} ${window.pluriel(enReussite, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pctReussite)}) ont une performance égale ou supérieure à la note de passage (60\u00a0%)`);
     }
 
     if (enDifficulte > 0) {
-        messages.push(`${enDifficulte} ${window.pluriel(enDifficulte, 'étudiant·e', 'étudiant·es')} (${pctDifficulte}%) sont en difficulté avec une performance inférieure à 60%`);
+        messages.push(`${enDifficulte} ${window.pluriel(enDifficulte, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pctDifficulte)}) sont en difficulté avec une performance inférieure à 60\u00a0%`);
     }
 
     return messages.length > 0 ? messages.join('. ') + '.' : '';
@@ -836,7 +836,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
 
     if (objectifAtteint > 0) {
         const pct = Math.round((objectifAtteint / total) * 100);
-        messages.push(`${objectifAtteint} ${window.pluriel(objectifAtteint, 'étudiant·e', 'étudiant·es')} (${pct}%) ont atteint ou dépassé le niveau de maîtrise`);
+        messages.push(`${objectifAtteint} ${window.pluriel(objectifAtteint, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pct)}) ont atteint ou dépassé le niveau de maîtrise`);
     }
 
     // 2. Parmi les D, combien en progression (pattern favorable)
@@ -1445,19 +1445,19 @@ function genererInterpretationSuiviFondamentaux() {
     // Fondamentaux acquis (IPB 0-1, ↗). #1117, suite : observation SOLO désactivée,
     // le suivi lit tous les critères — « multistructurels » tombe (texte provisoire).
     if (maitrise > 0) {
-        messages.push(maitrise + ' ' + window.pluriel(maitrise, 'étudiant·e', 'étudiant·es') + ' (' + pct(maitrise) + '%) ' +
+        messages.push(maitrise + ' ' + window.pluriel(maitrise, 'étudiant·e', 'étudiant·es') + ' (' + formaterPourcentage(pct(maitrise)) + ') ' +
             (maitrise > 1 ? 'maîtrisent' : 'maîtrise') + ' les fondamentaux' +
             (etiquettesSOLOLuesParDepistage() ? ' multistructurels' : ''));
     }
 
     // En progression (IPB 2, ↗)
     if (progression > 0) {
-        messages.push(progression + ' (' + pct(progression) + '%) en progression vers la maîtrise');
+        messages.push(progression + ' (' + formaterPourcentage(pct(progression)) + ') en progression vers la maîtrise');
     }
 
     // Plateau (IPB 2, →)
     if (plateau > 0) {
-        messages.push(plateau + ' (' + pct(plateau) + '%) en plateau — consolidation ou stagnation à surveiller');
+        messages.push(plateau + ' (' + formaterPourcentage(pct(plateau)) + ') en plateau — consolidation ou stagnation à surveiller');
     }
 
     // Difficultés actives (récente + constante + persistante)
@@ -1467,7 +1467,7 @@ function genererInterpretationSuiviFondamentaux() {
         if (recente > 0) details.push(recente + ' récente' + (recente > 1 ? 's' : ''));
         if (constante > 0) details.push(constante + ' constante' + (constante > 1 ? 's' : ''));
         if (persistante > 0) details.push(persistante + ' persistante' + (persistante > 1 ? 's' : ''));
-        messages.push(diffActives + ' (' + pct(diffActives) + '%) en difficulté sur les fondamentaux (' + details.join(', ') + ')');
+        messages.push(diffActives + ' (' + formaterPourcentage(pct(diffActives)) + ') en difficulté sur les fondamentaux (' + details.join(', ') + ')');
     }
 
     if (messages.length === 0) return '';
@@ -1504,20 +1504,20 @@ function genererInterpretationRai(rai, totalEtudiants) {
     let interpretation = '';
 
     if (pctNiveau1 >= 70) {
-        interpretation = `La répartition RàI indique une efficacité satisfaisante de l'enseignement universel (${niveau1} étudiants, ${pctNiveau1}% au Niveau 1). `;
+        interpretation = `La répartition RàI indique une efficacité satisfaisante de l'enseignement universel (${niveau1} étudiants, ${formaterPourcentage(pctNiveau1)} au Niveau 1). `;
     } else if (pctNiveau1 >= 60) {
-        interpretation = `La répartition RàI indique une efficacité acceptable de l'enseignement universel (${niveau1} étudiants, ${pctNiveau1}% au Niveau 1). `;
+        interpretation = `La répartition RàI indique une efficacité acceptable de l'enseignement universel (${niveau1} étudiants, ${formaterPourcentage(pctNiveau1)} au Niveau 1). `;
     } else {
-        interpretation = `La répartition RàI suggère que l'enseignement universel pourrait être renforcé (${niveau1} étudiants, ${pctNiveau1}% au Niveau 1). `;
+        interpretation = `La répartition RàI suggère que l'enseignement universel pourrait être renforcé (${niveau1} étudiants, ${formaterPourcentage(pctNiveau1)} au Niveau 1). `;
     }
 
     // Compléter avec Niveau 2 et 3
     if (niveau2 > 0) {
-        interpretation += `${niveau2} étudiants (${pctNiveau2}%) nécessitent des interventions préventives ciblées. `;
+        interpretation += `${niveau2} étudiants (${formaterPourcentage(pctNiveau2)}) nécessitent des interventions préventives ciblées. `;
     }
 
     if (niveau3 > 0) {
-        interpretation += `${niveau3} étudiants (${pctNiveau3}%) requièrent un accompagnement intensif individualisé.`;
+        interpretation += `${niveau3} étudiants (${formaterPourcentage(pctNiveau3)}) requièrent un accompagnement intensif individualisé.`;
     }
 
     return interpretation;
@@ -2039,9 +2039,9 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
         // Explication pédagogique avec force intégrée et corrélation à la fin
         if (type === 'A') {
-            explication = `Les étudiants assidus en classe ont une tendance ${forceAdjectif} à obtenir de meilleures performances. (r(${type}↔P) = ${correlation.toFixed(3)})`;
+            explication = `Les étudiants assidus en classe ont une tendance ${forceAdjectif} à obtenir de meilleures performances. (r(${type}↔P) = ${formaterNombre(correlation, 3)})`;
         } else if (type === 'C') {
-            explication = `Les étudiants qui remettent plus de travaux ont une tendance ${forceAdjectif} à avoir de meilleures notes. (r(${type}↔P) = ${correlation.toFixed(3)})`;
+            explication = `Les étudiants qui remettent plus de travaux ont une tendance ${forceAdjectif} à avoir de meilleures notes. (r(${type}↔P) = ${formaterNombre(correlation, 3)})`;
         }
 
         interpretationHTML = `
@@ -2135,12 +2135,12 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
                 // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
                 const classesSansEval = (e.sansEvaluation || e.nonConstructible) ? ' barre-etudiant-sans-eval' : '';
-                const tooltipValeur = e.nonConstructible ? 'note non constructible' : (e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`);
+                const tooltipValeur = e.nonConstructible ? 'note non constructible' : (e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : formaterPourcentage(Math.round(e.valeur * 100)));
                                 lignesSOM += `<div class="barre-etudiant barre-etudiant-som${classesSansEval}"
                     style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
-                    data-valeur="${(e.sansEvaluation || e.nonConstructible) ? '' : Math.round(e.valeur * 100) + '%'}"
+                    data-valeur="${(e.sansEvaluation || e.nonConstructible) ? '' : formaterPourcentage(Math.round(e.valeur * 100))}"
                     title="${echapperHtml(nomAffiche)} : ${tooltipValeur}"></div>`;
             });
         });
@@ -2194,12 +2194,12 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const duration = (8 - (ampNum - 8) * 0.4).toFixed(1); // 8s à 4s selon amplitude
                 // 🆕 BETA 98.9: Traitement visuel distinct pour élèves sans évaluation
                 const classesSansEval = (e.sansEvaluation || e.nonConstructible) ? ' barre-etudiant-sans-eval' : '';
-                const tooltipValeur = e.nonConstructible ? 'note non constructible' : (e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : `${Math.round(e.valeur * 100)}%`);
+                const tooltipValeur = e.nonConstructible ? 'note non constructible' : (e.sansEvaluation ? `${accordTermeProduction('aucun', 1)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('evalue', 1)}` : formaterPourcentage(Math.round(e.valeur * 100)));
                                 lignesPAN += `<div class="barre-etudiant barre-etudiant-std${classesSansEval}"
                     style="left: ${positionFinale}%; animation-delay: ${animDelay}s; --amp: ${amplitude}px; --offsetX: ${offsetX}px; --jitterV: ${jitterV.toFixed(1)}px; --scaleUp: ${scaleUp}; --scaleDown: ${scaleDown}; --duration: ${duration}s;"
                     data-da="${e.da}"
                     data-nom="${echapperHtml(nomAffiche)}"
-                    data-valeur="${(e.sansEvaluation || e.nonConstructible) ? '' : Math.round(e.valeur * 100) + '%'}"
+                    data-valeur="${(e.sansEvaluation || e.nonConstructible) ? '' : formaterPourcentage(Math.round(e.valeur * 100))}"
                     title="${echapperHtml(nomAffiche)} : ${tooltipValeur}"></div>`;
             });
         });
@@ -2268,7 +2268,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             const nbSans = etudiantsRef.length - nbAvecEval;
             titreInfo = ` title="Moyenne sur ${nbAvecEval} étudiant·e·s ayant au moins 1 évaluation (${nbSans} exclu·e·s). La liste des individus inclut tous les étudiant·e·s."`;
         }
-        moyennePositionneeHTML = `<div${titreInfo} style="cursor: help; position: absolute; top: -20px; left: ${positionMoyenne}%; transform: translateX(-50%); z-index: 10; font-size: 0.9rem; font-weight: 700; color: ${couleurMoyenne};">${moyenneAffichee}%</div>`;
+        moyennePositionneeHTML = `<div${titreInfo} style="cursor: help; position: absolute; top: -20px; left: ${positionMoyenne}%; transform: translateX(-50%); z-index: 10; font-size: 0.9rem; font-weight: 700; color: ${couleurMoyenne};">${formaterPourcentage(moyenneAffichee)}</div>`;
     }
 
     return `
@@ -2513,15 +2513,15 @@ function genererBarrePatterns(etudiantsSOM, etudiantsPAN, afficherSom, afficherP
 
     // Session C (#303) : mode comparatif retiré — une seule couche affichée.
     if (afficherSom) {
-        labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${stablePctSOM}%)</span>`;
-        labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${defiPctSOM}%)</span>`;
-        labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${emergentPctSOM}%)</span>`;
-        labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${critiquePctSOM}%)</span>`;
+        labelStable += `<br><span class="tb-texte-mini-orange">${stableSOM} (${formaterPourcentage(stablePctSOM)})</span>`;
+        labelDefi += `<br><span class="tb-texte-mini-orange">${defiSOM} (${formaterPourcentage(defiPctSOM)})</span>`;
+        labelEmergent += `<br><span class="tb-texte-mini-orange">${emergentSOM} (${formaterPourcentage(emergentPctSOM)})</span>`;
+        labelCritique += `<br><span class="tb-texte-mini-orange">${critiqueSOM} (${formaterPourcentage(critiquePctSOM)})</span>`;
     } else if (afficherPan) {
-        labelStable += `<br><span class="tb-texte-mini-bleu-std">${stablePAN} (${stablePctPAN}%)</span>`;
-        labelDefi += `<br><span class="tb-texte-mini-bleu-std">${defiPAN} (${defiPctPAN}%)</span>`;
-        labelEmergent += `<br><span class="tb-texte-mini-bleu-std">${emergentPAN} (${emergentPctPAN}%)</span>`;
-        labelCritique += `<br><span class="tb-texte-mini-bleu-std">${critiquePAN} (${critiquePctPAN}%)</span>`;
+        labelStable += `<br><span class="tb-texte-mini-bleu-std">${stablePAN} (${formaterPourcentage(stablePctPAN)})</span>`;
+        labelDefi += `<br><span class="tb-texte-mini-bleu-std">${defiPAN} (${formaterPourcentage(defiPctPAN)})</span>`;
+        labelEmergent += `<br><span class="tb-texte-mini-bleu-std">${emergentPAN} (${formaterPourcentage(emergentPctPAN)})</span>`;
+        labelCritique += `<br><span class="tb-texte-mini-bleu-std">${critiquePAN} (${formaterPourcentage(critiquePctPAN)})</span>`;
     }
 
     // Interprétation basée sur les diagnostics IPB × direction (données multistructurelles)
@@ -2727,13 +2727,13 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
 
     // Session C (#303) : mode comparatif retiré — une seule couche affichée.
     if (afficherSom) {
-        labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${niveau1PctSOM}%)</span>`;
-        labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${niveau2PctSOM}%)</span>`;
-        labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${niveau3PctSOM}%)</span>`;
+        labelNiveau1 += `<br><span class="tb-texte-mini-orange">${niveau1SOM} (${formaterPourcentage(niveau1PctSOM)})</span>`;
+        labelNiveau2 += `<br><span class="tb-texte-mini-orange">${niveau2SOM} (${formaterPourcentage(niveau2PctSOM)})</span>`;
+        labelNiveau3 += `<br><span class="tb-texte-mini-orange">${niveau3SOM} (${formaterPourcentage(niveau3PctSOM)})</span>`;
     } else if (afficherPan) {
-        labelNiveau1 += `<br><span class="tb-texte-mini-bleu-std">${niveau1PAN} (${niveau1PctPAN}%)</span>`;
-        labelNiveau2 += `<br><span class="tb-texte-mini-bleu-std">${niveau2PAN} (${niveau2PctPAN}%)</span>`;
-        labelNiveau3 += `<br><span class="tb-texte-mini-bleu-std">${niveau3PAN} (${niveau3PctPAN}%)</span>`;
+        labelNiveau1 += `<br><span class="tb-texte-mini-bleu-std">${niveau1PAN} (${formaterPourcentage(niveau1PctPAN)})</span>`;
+        labelNiveau2 += `<br><span class="tb-texte-mini-bleu-std">${niveau2PAN} (${formaterPourcentage(niveau2PctPAN)})</span>`;
+        labelNiveau3 += `<br><span class="tb-texte-mini-bleu-std">${niveau3PAN} (${formaterPourcentage(niveau3PctPAN)})</span>`;
     }
 
     // 🆕 BETA 91: Générer l'interprétation RàI
@@ -2874,7 +2874,7 @@ function afficherAlerteNonParticipation(etudiants) {
         // Nombre de productions attendues (évaluations du groupe)
         const nbProductions = e.sommatif ? e.sommatif.nbEvaluations || 0 : (e.alternatif ? e.alternatif.nbEvaluations || 0 : 0);
         const detailProd = nbProductions > 0 ? ` — 0/${nbProductions} productions` : '';
-        return `<li>${echapperHtml(nomAffiche)} — A\u00a0: ${assiduite}%${detailProd}</li>`;
+        return `<li>${echapperHtml(nomAffiche)} — A\u00a0: ${formaterPourcentage(assiduite)}${detailProd}</li>`;
     }).join('');
 
     const nbEleves = nonParticipants.length;
@@ -3071,11 +3071,11 @@ function genererCarteRaI(label, description, valeurSomPct, valeurPanPct, valeurS
     const valeurs = [];
 
     if (afficherSom) {
-        valeurs.push(`<strong class="tb-valeur-grande-orange">${valeurSomPct}%</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-orange">${formaterPourcentage(valeurSomPct)}</strong>`);
     }
 
     if (afficherPan) {
-        valeurs.push(`<strong class="tb-valeur-grande-bleu-std">${valeurPanPct}%</strong>`);
+        valeurs.push(`<strong class="tb-valeur-grande-bleu-std">${formaterPourcentage(valeurPanPct)}</strong>`);
     }
 
     // Générer le texte du nombre d'étudiants
@@ -3257,7 +3257,7 @@ function formatPourcentage(valeur) {
     if (valeur === null || valeur === undefined || isNaN(valeur)) {
         return '—';
     }
-    return Math.round(valeur * 100) + '%';
+    return formaterPourcentage(Math.round(valeur * 100));
 }
 
 /**

@@ -86,11 +86,11 @@ describe('A · #744 — la carte RàI donne seule le palier, sur les écrans du 
     it('A4 · le bilan des fondamentaux compte « Difficulté récente » et l\'écrit « récente » ; il ne dit plus « émergente »', () => {
         const { i } = monterGroupe();
         const bilan = i.genererInterpretationSuiviFondamentaux();
-        expect(bilan).toContain('2 (100%) en difficulté sur les fondamentaux (1 récente, 1 persistante)');
+        expect(bilan).toContain('2 (100\u00A0%) en difficulté sur les fondamentaux (1 récente, 1 persistante)');
         expect(bilan).not.toMatch(/mergente/);
         // Un diagnostic resté à l'ancien mot ne serait PLUS compté : c'est ce qui rougit si un site garde « émergente ».
         i._tousEtudiantsEnrichis[1].suivi = { diagnostic: 'Difficulté émergente', ipb: 1 };
-        expect(i.genererInterpretationSuiviFondamentaux()).toContain('1 (50%) en difficulté sur les fondamentaux (1 persistante)');
+        expect(i.genererInterpretationSuiviFondamentaux()).toContain('1 (50\u00A0%) en difficulté sur les fondamentaux (1 persistante)');
     });
 
     it('A5 · verrou structurel : plus aucun `niveauRaI` dans le code de js/, et le mot du suivi vit à un seul endroit', () => {

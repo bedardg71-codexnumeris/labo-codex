@@ -226,7 +226,7 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         expect(r.regle).toContain('<strong>4 meilleures productions</strong>');   // texte de règle existant, terme fixe
         expect(r.bloc).toContain('(4 meilleurs,');
         expect(r.retenues).toBe('(4 meilleurs artefacts sur 5 évalués)');   // les mots de la carte de la note
-        expect(r.liste).toBe('1. Artefact 5 → 90.0/100 • 2. Artefact 1 → 85.0/100 • 3. Artefact 3 → 78.0/100 • 4. Artefact 4 → 70.0/100');
+        expect(r.liste).toBe('1. Artefact 5 → 90,0/100 • 2. Artefact 1 → 85,0/100 • 3. Artefact 3 → 78,0/100 • 4. Artefact 4 → 70,0/100');
         expect(r.calculP).toBe('Moyenne des 4 artefacts retenus — P = (90 + 85 + 78 + 70) / 4 = <strong>80,8 %</strong>');
         expect(r.html).not.toContain('Calcul impossible');
         // Les retenues du panneau sont celles de la note, par identité.
@@ -240,7 +240,7 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         const r = rendre(b, DA.STD);
         expect(r.regle).toContain('<strong>4 plus récentes productions</strong>');
         expect(r.retenues).toBe('(4 plus récents artefacts sur 5 évalués)');
-        expect(r.liste).toBe('1. Artefact 5 → 90.0/100 • 2. Artefact 3 → 78.0/100 • 3. Artefact 4 → 70.0/100 • 4. Artefact 2 → 60.0/100');
+        expect(r.liste).toBe('1. Artefact 5 → 90,0/100 • 2. Artefact 3 → 78,0/100 • 3. Artefact 4 → 70,0/100 • 4. Artefact 2 → 60,0/100');
         expect(r.calculP).toBe('Moyenne des 4 artefacts retenus — P = (90 + 78 + 70 + 60) / 4 = <strong>74,5 %</strong>');
     });
 
@@ -254,9 +254,9 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
         // À la main : Sélection = A1 85, A3 78, A4 70, A5 90 → 2 meilleures : 90, 85. Obligatoire : A2 60.
         const b = monter(jeuSTD({ hybride: true }));
         const r = rendre(b, DA.STD);
-        expect(r.regle).toContain('les <strong>2 meilleures</strong> du pool Sélection (65%)');
+        expect(r.regle).toContain('les <strong>2 meilleures</strong> du pool Sélection (65 %)');   // #1137 : rendre() ramène l'insécable à une espace
         expect(r.retenues).toBe('(les 2 meilleures sur 4 évaluées, et 1 obligatoire)');
-        expect(r.liste).toBe('1. Artefact 5 → 90.0/100 • 2. Artefact 1 → 85.0/100 • 3. Artefact 2 → 60.0/100');
+        expect(r.liste).toBe('1. Artefact 5 → 90,0/100 • 2. Artefact 1 → 85,0/100 • 3. Artefact 2 → 60,0/100');
         expect(r.calculP).toBeNull();
         expect(r.html).not.toContain('Calcul impossible');
     });
@@ -297,7 +297,7 @@ describe('#714 — le panneau « Développement des habiletés » lit la note de
     it('un titre de production porteur de HTML sort échappé dans la liste des retenues', () => {
         const b = monter(jeuSTD({ titreA5: '<img src=x onerror=alert(1)>' }));
         const r = rendre(b, DA.STD);
-        expect(r.html).toContain('1. &lt;img src=x onerror=alert(1)&gt; → 90.0/100');
+        expect(r.html).toContain('1. &lt;img src=x onerror=alert(1)&gt; → 90,0/100');
         expect(r.html).not.toContain('<img src=x');
     });
 

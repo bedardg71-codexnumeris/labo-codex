@@ -14229,7 +14229,7 @@
     <script src="js/pratiques-gestion.js?v=20261017a"></script> <!-- Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20261010a"></script> <!-- #829 (9 oct.) : en démo, la grille de dépistage n'écrit plus la préférence réelle · Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20261014a"></script> <!-- #649 : un seul chemin de suppression des productions, le garde mort est parti -->
-    <script src="js/etudiants.js?v=20261017a"></script>
+    <script src="js/etudiants.js?v=20261021a"></script>
     <script src="js/productions-bibliotheque.js?v=20261006a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <!-- #504 : les boutons d'un bloc réordonnable, partagés par cinq écrans.
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
@@ -14265,7 +14265,7 @@
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
     <script src="js/interpretation-config.js?v=20261006a"></script>
-    <script src="js/contexte-qualification.js?v=20261017a"></script> <!-- #821 lot A (10 sept. 2026) : les quatre règles qui qualifient un contexte, écrites en un seul endroit — lit obtenirSeuil et la géométrie du dégradé à l'appel -->
+    <script src="js/contexte-qualification.js?v=20261021a"></script> <!-- #821 lot A (10 sept. 2026) : les quatre règles qui qualifient un contexte, écrites en un seul endroit — lit obtenirSeuil et la géométrie du dégradé à l'appel -->
 
     <!-- Système de pratiques de notation (Beta 90-91) -->
     <!-- DEN couche 2 (#318, DEN-0) : SSOT de jugementsDenotation, lu par le moteur (DEN-1) -->
@@ -14279,7 +14279,7 @@
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
     <script src="js/pratiques/pratique-pan-standards.js?v=20261017a"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=20260927c"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=20261021a"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=20261021a"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
@@ -14308,24 +14308,24 @@
     <script src="js/objectifs.js?v=20261010b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20261017a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20261021a"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20261021b"></script> <!-- Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20261017a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=20261020b"></script> <!-- #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
+    <script src="js/tableau-bord-apercu.js?v=20261021a"></script> <!-- #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20261021a"></script> <!-- #1117, suite (20 oct.) : SOLO désactivé, le dépistage et le suivi des fondations lisent tous les critères ; le survol du niveau sans palier SOLO · Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-calculs.js?v=20261020b"></script> <!-- #1117, suite (20 oct.) : l’IPB lit criteresSuiviFondations · #1117 (19 oct.) : la cible nomme le défi sans étiquette SOLO si le réglage est désactivé · Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-rapport.js?v=20261006a"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
-    <script src="js/profil-etudiant-diagnostics.js?v=20260911a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
+    <script src="js/profil-etudiant-calculs.js?v=20261021a"></script> <!-- #1117, suite (20 oct.) : l’IPB lit criteresSuiviFondations · #1117 (19 oct.) : la cible nomme le défi sans étiquette SOLO si le réglage est désactivé · Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/profil-etudiant-rapport.js?v=20261021a"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
+    <script src="js/profil-etudiant-diagnostics.js?v=20261021a"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
-    <script src="js/profil-etudiant-actions.js?v=20261017a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20261021a"></script> <!-- #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
-    <script src="js/presences-apercu.js?v=20260917b"></script>
+    <script src="js/profil-etudiant-actions.js?v=20261021a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20261021b"></script> <!-- #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/presences-apercu.js?v=20261021a"></script>
     <script src="js/presences-rapport.js?v=20261021a"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20261008a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
     <script src="js/equipes.js?v=20261017a"></script> <!-- #1039 : générateur d'équipes (Animation) -->
     <script src="js/modelisation.js?v=20261006a"></script> <!-- Modélisation : annotation en projection -->
-    <script src="js/rythme.js?v=20261001b"></script> <!-- Semaine dimanche→samedi (format direction des études, 6 août) -->
+    <script src="js/rythme.js?v=20261021a"></script> <!-- Semaine dimanche→samedi (format direction des études, 6 août) -->
 
     <!-- Module Bilan réflexif -->
     <script src="js/bilan-reflexif-data.js?v=2026032801"></script>
@@ -14334,8 +14334,8 @@
     <script src="js/bilan-reflexif-parcours.js?v=20260515f"></script> <!-- §4.1.e : parcours d'apprentissage -->
     <script src="js/bilan-reflexif-reflexion.js?v=20260929a"></script> <!-- §4.1.e : auto-réflexion enseignant -->
     <script src="js/bilan-reflexif-import-export-texte.js?v=20261003c"></script> <!-- §4.1.f : import/export texte du questionnaire -->
-    <script src="js/bilan-reflexif-csv.js?v=20261006a"></script> <!-- §4.1.f : import CSV des résultats étudiants -->
-    <script src="js/bilan-reflexif-rapport.js?v=20261006a"></script> <!-- §4.1.g : rapport d'analyse + Chart.js + export PDF -->
+    <script src="js/bilan-reflexif-csv.js?v=20261021a"></script> <!-- §4.1.f : import CSV des résultats étudiants -->
+    <script src="js/bilan-reflexif-rapport.js?v=20261021a"></script> <!-- §4.1.g : rapport d'analyse + Chart.js + export PDF -->
     <script src="js/bilan-reflexif.js?v=20260929b"></script> <!-- §4.1.g : résidu (init + navigation + hooks) -->
 
     <!-- Module Planification (Carte mentale) -->
@@ -14385,7 +14385,7 @@
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
     <script src="js/horaire.js?v=20261012a"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
-    <script src="js/interventions.js?v=20261020b"></script> <!-- #1117 (19 oct.) : pas de badge SOLO si le réglage est désactivé · cadrage « Rencontres » : vocabulaire, conteneur, service · lot 5 du cadrage 11 : le brouillon en mémoire, le bilan par les seuils, les notes d'un élève parti -->
+    <script src="js/interventions.js?v=20261021a"></script> <!-- #1117 (19 oct.) : pas de badge SOLO si le réglage est désactivé · cadrage « Rencontres » : vocabulaire, conteneur, service · lot 5 du cadrage 11 : le brouillon en mémoire, le bilan par les seuils, les notes d'un élève parti -->
     <script src="js/rencontres.js?v=20261006a"></script> <!-- cadrage « Rencontres » (12 sept. 2026) : le sous-onglet Suivi › Rencontres, les trois questions -->
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->

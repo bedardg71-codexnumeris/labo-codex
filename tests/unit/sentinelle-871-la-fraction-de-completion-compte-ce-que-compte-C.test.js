@@ -101,7 +101,7 @@ function sites(win, da) {
     const profil = texte(html);
     return {
         C: win.calculerTousLesIndices(da).C, rapport,
-        methodo: (profil.match(/Indice C = \d+% — \d+ productions? remises? \/ \d+ productions? au total/) || [null])[0],
+        methodo: (profil.match(/Indice C = \d+ % — \d+ productions? remises? \/ \d+ productions? au total/) || [null])[0],   // #1137 : texte() ramène l'insécable à une espace
         carte: (profil.match(/• Productions remises : \d+\/\d+/) || [null])[0],
         intitule: (profil.match(/\d+ productions? non remises? ou non recevables?/) || [null])[0],
         remis: (profil.match(/\d+ artefacts? remis(?! :)/) || [null])[0],
@@ -130,8 +130,8 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         expect(win.obtenirDetailsCompletion(DA.ASSIDU)).toMatchObject({ remis: 8, total: 10 });
         const s = sites(win, DA.ASSIDU);
         expect(s.C).toBe(80);
-        expect(s.rapport).toBe('Complétion : 80% (8 remises / 10 productions)');
-        expect(s.methodo).toBe('Indice C = 80% — 8 productions remises / 10 productions au total');
+        expect(s.rapport).toBe('Complétion : 80\u00A0% (8 remises / 10 productions)');
+        expect(s.methodo).toBe('Indice C = 80 % — 8 productions remises / 10 productions au total');
         expect(s.carte).toBe('• Productions remises : 8/10');
     });
 
@@ -139,8 +139,8 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         const { win } = banc(copies());
         const s = sites(win, DA.TEMOIN);
         expect(s.C).toBe(100);
-        expect(s.rapport).toBe('Complétion : 100% (10 remises / 10 productions)');
-        expect(s.methodo).toBe('Indice C = 100% — 10 productions remises / 10 productions au total');
+        expect(s.rapport).toBe('Complétion : 100\u00A0% (10 remises / 10 productions)');
+        expect(s.methodo).toBe('Indice C = 100 % — 10 productions remises / 10 productions au total');
         expect(s.carte).toBe('• Productions remises : 10/10');
     });
 
@@ -149,8 +149,8 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         expect(win.obtenirDetailsCompletion(DA.ASSIDU)).toBe(null);
         const s = sites(win, DA.ASSIDU);
         expect(s.C).toBe(0);
-        expect(s.rapport).toBe('Complétion : 0% (0 remises / 0 productions)');
-        expect(s.methodo).toBe('Indice C = 0% — 0 production remise / 0 production au total');
+        expect(s.rapport).toBe('Complétion : 0\u00A0% (0 remises / 0 productions)');
+        expect(s.methodo).toBe('Indice C = 0 % — 0 production remise / 0 production au total');
         expect(s.carte).toBe('• Productions remises : 0/0');
     });
 
@@ -210,12 +210,12 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         const s = sites(win, DA.ASSIDU);
         expect(s.C).toBe(90);
         expect(s.carte).toBe('• Productions remises : 9/10');
-        expect(s.methodo).toBe('Indice C = 90% — 9 productions remises / 10 productions au total');
+        expect(s.methodo).toBe('Indice C = 90 % — 9 productions remises / 10 productions au total');
         expect(s.intitule).toBe('1 production non remise ou non recevable');
         expect(s.nonRemises).toEqual(['Évaluation terminale']);
         expect(s.remis).toBe('9 artefacts remis');                                        // les pastilles des remis restent des artefacts
         expect([s.message, s.ancienMessage]).toEqual([false, false]);
-        expect(s.rapport).toBe('Complétion : 90% (9 remises / 10 productions)');         // le rapport ne change pas
+        expect(s.rapport).toBe('Complétion : 90\u00A0% (9 remises / 10 productions)');         // le rapport ne change pas
     });
 
     it('(i) lot 30 · deux manquent : accord au pluriel, les deux dans la liste ; tout remis : « Toutes les productions sont remises ! » et « 10/10 »', () => {
@@ -266,7 +266,7 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         const html = String(win.__audit['profil-etudiant-sections-affichage.js'].genererSectionMobilisationEngagement(DA.ASSIDU));
         expect((html.match(/class="badge-completion-non-recevable"/g) || []).length).toBe(1);
         expect(html).toContain('title="Plagiat détecté"');
-        expect(s.rapport).toBe('Complétion : 90% (9 remises / 10 productions)');
+        expect(s.rapport).toBe('Complétion : 90\u00A0% (9 remises / 10 productions)');
     });
 
     it('(n) lot 30 · seulement un BROUILLON : « 0/0 » et « En attente de données », jamais « Toutes les productions sont remises ! »', () => {
@@ -307,7 +307,7 @@ describe('#871 · complétion : la fraction compte ce que compte l\'indice C', (
         const corps = sections.slice(debut, sections.indexOf('\nfunction ', debut + 10));
         expect(corps.length).toBeGreaterThan(5000);                                   // la tranche n'est pas vide
         // ↻ Lot N1b (21 sept. 2026) : une complétion inconnue (sans pratique assignée) s'écrit d'un tiret — la fraction reste celle du détail.
-        expect((corps.match(/Indice C = \$\{indices\.C === null \? '—' : indices\.C \+ '%'\} — \$\{detailsC\.remis\}/g) || []).length).toBe(1);
+        expect((corps.match(/Indice C = \$\{indices\.C === null \? '—' : formaterPourcentage\(indices\.C\)\} — \$\{detailsC\.remis\}/g) || []).length).toBe(1);
         expect((corps.match(/\$\{detailsC\.remis\}\/\$\{detailsC\.total\}/g) || []).length).toBe(1);
         expect(/\$\{nbRemis\}\s*\/\s*\$\{nbTotal\}/.test(corps)).toBe(false);
         ['configurable', 'sommative', 'pan-standards', 'pan-specifications'].forEach(f => {

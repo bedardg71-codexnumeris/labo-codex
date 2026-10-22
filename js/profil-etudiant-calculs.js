@@ -1923,7 +1923,7 @@ function determinerAlerteContextuelle(da) {
     // `null / 100` vaut 0, et tout le groupe se lisait « Fragile » sur un zéro qui n'existe pas.
     const completionInconnue = indices.C === null || indices.C === undefined;
     const C = completionInconnue ? null : indices.C / 100; // décimal 0-1, ou null
-    const texteA = assiduiteInconnue ? '—' : (A * 100).toFixed(0) + '%';
+    const texteA = assiduiteInconnue ? '—' : formaterPourcentage(A * 100, 0);
 
     // Lot N1b — SANS COMPLÉTION, LE CONTEXTE NE SE QUALIFIE PAS (même forme que l'assiduité inconnue,
     // #743) : un tiret à la place du palier. La phrase est celle du diagnostic du profil — aucun mot neuf.
@@ -1970,7 +1970,7 @@ function determinerAlerteContextuelle(da) {
             description: '',
             badgeClasse: 'badge-attente',
             A: texteA,
-            C: (C * 100).toFixed(0) + '%',
+            C: formaterPourcentage(C * 100, 0),
             recommandation: 'L\'assiduité n\'est pas encore connue : le contexte s\'affichera dès qu\'une séance sera saisie pour cet·te étudiant·e.',
             donneesSuffisantes: false
         };

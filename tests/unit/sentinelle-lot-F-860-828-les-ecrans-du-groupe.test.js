@@ -82,10 +82,10 @@ describe('A · #828 — le filtre retient l\'élève dont l\'assiduité OU la co
 
     it('A3 · le libellé du bouton est lu à la borne : « A ou C < 70% », et il SUIT la borne quand elle change — la règle aussi', () => {
         const { b, i } = monterSuivi();
-        expect(boutons(b, i)).toContain('data-tri="M">A ou C < 70%<');
+        expect(boutons(b, i)).toContain('data-tri="M">A ou C < 70\u00A0%<');
         expect(boutons(b, i)).not.toContain('A+C');
         b.win.BORNES_MOBILISATION.critique = 0.6;   // mute la borne
-        expect(boutons(b, i)).toContain('data-tri="M">A ou C < 60%<');
+        expect(boutons(b, i)).toContain('data-tri="M">A ou C < 60\u00A0%<');
         expect(filtrer(i, ['M'])).toEqual(['Zed', 'A55C90']);   // 60 n'est pas < 60 ; 65 non plus
     });
 

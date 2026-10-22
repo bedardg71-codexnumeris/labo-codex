@@ -23,7 +23,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
 import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';   // lot A (16 sept. 2026) : les deux prédicats réels du registre
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -71,7 +71,7 @@ function monter({ echeance, evaluations, A }) {
     let code = readFileSync(path.join(RACINE, 'js/tableau-bord-apercu.js'), 'utf8');
     const fin = code.lastIndexOf('})();');
     code = code.slice(0, fin) + '\n;window.__alerte = afficherAlerteNonParticipation;\n' + code.slice(fin);
-    const { document: doc, ...autres } = globaux;
+    const { document: doc, ...autres } = completerNoteParDefaut(globaux);   // #1137 : le module des nombres affichés
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     new Function('window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres), '"use strict";\n' + code)(win, doc, console, storage(), storage(), ...Object.values(autres));
     // Ce que le tableau de bord passe à l'alerte : la forme de calculerIndicesEtudiant, pour l'élève seul.

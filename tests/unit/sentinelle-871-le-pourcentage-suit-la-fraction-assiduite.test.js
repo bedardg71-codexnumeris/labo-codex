@@ -94,7 +94,7 @@ describe('#871 · assiduité : le pourcentage suit la fraction', () => {
         expect(r.calcul.periodesOffertes).toBe(25);
         expect(r.details.periodesPresentes).toBe(22.5);
         expect(r.details.periodesOffertes).toBe(25);
-        expect(r.ligne).toBe('Assiduité : 90% (22,5 / 25 périodes)');
+        expect(r.ligne).toBe('Assiduité : 90\u00A0% (22,5 / 25 périodes)');
         // Ce que la fraction affichée donne, recalculé à la main, EST le pourcentage affiché.
         expect(Math.round(22.5 / 25 * 100)).toBe(90);
     });
@@ -102,12 +102,12 @@ describe('#871 · assiduité : le pourcentage suit la fraction', () => {
     it('(b2) le dénominateur non plus n\'est pas arrondi : des séances de 2,5 périodes → « 88% (11 / 12,5 périodes) »', () => {
         const r = monter([2.5, 2.5, 2.5, 2.5, 1], 2.5);
         expect(r.details.periodesOffertes).toBe(12.5);
-        expect(r.ligne).toBe('Assiduité : 88% (11 / 12,5 périodes)');
+        expect(r.ligne).toBe('Assiduité : 88\u00A0% (11 / 12,5 périodes)');
     });
 
     it('(c) 23 / 25 : « 92% (23 / 25 périodes) », sans décimale', () => {
         const r = monter([5, 5, 5, 5, 3]);
-        expect(r.ligne).toBe('Assiduité : 92% (23 / 25 périodes)');
+        expect(r.ligne).toBe('Assiduité : 92\u00A0% (23 / 25 périodes)');
     });
 
     it('(d) 0 / 0 et l\'élève sans aucune donnée gardent leur écriture « (0 / 0 périodes) » — et l\'assiduité inconnue s\'écrit d\'un tiret (#743 ; avant : 100%)', () => {

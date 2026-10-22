@@ -23,7 +23,7 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chargerScript } from './_helpers/charger-script.js';
+import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MESURES = {};
@@ -39,7 +39,7 @@ function chargerAvecInterne(chemin, globaux, win, noms) {
         + noms.map(n => 'get ' + n + '() { return ' + n + '; }' + (/^(_|etat|donnees)/.test(n) ? ', set ' + n + '(v) { ' + n + ' = v; }' : '')).join(', ') + '};\n';
     const fin = code.lastIndexOf('})();');
     code = fin >= 0 ? code.slice(0, fin) + expo + code.slice(fin) : code + expo;
-    const { document: doc, localStorage: ls, ...autres } = globaux;
+    const { document: doc, localStorage: ls, ...autres } = completerNoteParDefaut(globaux);   // #1137 : le module des nombres affichés
     const storage = () => ({ _d: {}, getItem(k) { return k in this._d ? this._d[k] : null; }, setItem(k, v) { this._d[k] = String(v); }, removeItem(k) { delete this._d[k]; }, clear() { this._d = {}; } });
     const nomsG = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autres)];
     const vals = [win, doc, console, ls || storage(), storage(), ...Object.values(autres)];
@@ -284,8 +284,8 @@ describe('5 · Interventions — gestes et écritures', () => {
         const html = conteneur.innerHTML;
         // La moyenne « avant » vaut 0,645 : au-dessus d'idme.insuffisant (0,64) = D pour le reste de l'app ; le bilan la lit sous 0,65 = I.
         const bloc = html.slice(html.indexOf('Structure', html.indexOf('Bilan')));
-        const m = bloc.match(/<td[^>]*>\s*([IDME—])\s+(\d+)%/);
-        noter('I5', { lettreAvant: m && m[1], pctAvant: m && m[2], present: html.includes('Bilan'), cellule: (bloc.match(/<td[^>]*>\s*[IDME—]\s+\d+%/) || [''])[0].replace(/<[^>]+>/g, '').trim() });
+        const m = bloc.match(/<td[^>]*>\s*([IDME—])\s+(\d+)\u00A0%/);
+        noter('I5', { lettreAvant: m && m[1], pctAvant: m && m[2], present: html.includes('Bilan'), cellule: (bloc.match(/<td[^>]*>\s*[IDME—]\s+\d+\u00A0%/) || [''])[0].replace(/<[^>]+>/g, '').trim() });
         expect(html).toContain('Bilan');
         // Constat d'origine (6 sept.) : « I » à côté de « 65 % » (seuil 0,65 en clair, arrondi indépendant de la lettre).
         expect(m && m[1]).toBe('D');

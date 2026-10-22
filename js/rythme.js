@@ -1000,7 +1000,7 @@
                             var label = 'Cours';
                             if (c.groupe) label += ' gr. ' + echapperHtml(c.groupe);
                             if (c.debut && c.fin) label += ' ' + c.debut + '–' + c.fin;
-                            else if (c.debut) label += ' ' + c.debut + ' (' + c.duree.toFixed(1) + 'h)';
+                            else if (c.debut) label += ' ' + c.debut + ' (' + formaterNombre(c.duree, 1) + ' h)';
                             html += '<div class="rythme-cours">' + label + '</div>';
                         });
                     }
@@ -1029,7 +1029,7 @@
 
         // Résumé
         html += '<div class="rythme-resume">';
-        html += '<span>Disponible : <strong>' + totalHeuresLibres.toFixed(0) + 'h</strong></span>';
+        html += '<span>Disponible : <strong>' + formaterNombre(totalHeuresLibres, 0) + ' h</strong></span>';
         html += '<span>Charge restante : <strong>' + formaterDureeTexte(totalChargeMs) + '</strong></span>';
         if (totalChargeMs > totalHeuresLibres * 3600000) {
             html += '<span class="rythme-alerte">La charge dépasse le temps disponible — ajuste la date objectif ou les plages.</span>';
@@ -1131,10 +1131,10 @@
         var pctSoir = total > 0 ? Math.round(totalSoir / total * 100) : 0;
         html += '<div class="rythme-portrait-resume u-mt-10">';
         if (pctWeekend > 0) {
-            html += '<span>' + pctWeekend + '% de tes évaluations sont en fin de semaine</span>';
+            html += '<span>' + formaterPourcentage(pctWeekend) + ' de tes évaluations sont en fin de semaine</span>';
         }
         if (pctSoir > 0) {
-            html += '<span>' + pctSoir + '% sont en soirée tardive ou la nuit</span>';
+            html += '<span>' + formaterPourcentage(pctSoir) + ' sont en soirée tardive ou la nuit</span>';
         }
         if (pctWeekend === 0 && pctSoir === 0) {
             html += '<span>Toutes tes évaluations sont en semaine pendant la journée</span>';

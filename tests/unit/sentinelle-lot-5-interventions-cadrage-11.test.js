@@ -164,7 +164,7 @@ describe('A\' · le stock : un brouillon d\'avant le lot, resté en base', () =>
 describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', () => {
     const complete = () => intervention({ id: 'I_B', titre: 'Fini', etudiants: ['2000001'], criteresCibles: ['Structure'], statut: 'completee',
         snapshotAvant: { 2000001: { P: 60, criteres: { structure: 0.645 } } } });
-    const cellules = (html) => [...html.matchAll(/<td style="padding: 6px 12px; text-align: center;">([IDME—]) (\d+)%<\/td>/g)].map(m => m[1] + ' ' + m[2]);
+    const cellules = (html) => [...html.matchAll(/<td style="padding: 6px 12px; text-align: center;">([IDME—]) (\d+) %<\/td>/g)].map(m => m[1] + ' ' + m[2]);
     const suggerer = (b) => {
         b.selecteurs['#listeEtudiantsIntervention input[type="checkbox"]:checked'] = [elementDom({ value: '2000001', checked: true })];
         b.selecteurs['.critere-cible-cb:checked'] = [elementDom({ value: 'Structure', checked: true })];
@@ -176,7 +176,7 @@ describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', ()
     // lettre (« D » au bilan ⇔ « au seuil M ») ; la lettre retirée de la suggestion (#551), il passe par le nombre : la
     // cible attendue se DÉDUIT de la lettre lue dans le bilan et des seuils du banc, pas d'une chaîne recopiée.
     const cibleAuDessusDe = (lettre, seuils) => ({ I: seuils['idme.insuffisant'], D: seuils['idme.developpement'] })[lettre];
-    const suggestionAttendue = (bilan, seuils) => 'Amener Structure à ' + Math.round(cibleAuDessusDe(bilan[0][0], seuils) * 100) + ' %';
+    const suggestionAttendue = (bilan, seuils) => 'Amener Structure à ' + Math.round(cibleAuDessusDe(bilan[0][0], seuils) * 100) + '\u00A0%';
 
     it('seuils par défaut : 0,645 → « D 65 % » avant ET après ; la suggestion vise la borne haute de D (75 %)', () => {
         const b = banc({ interventions: [complete()] });
@@ -184,7 +184,7 @@ describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', ()
         const bilan = cellules(b.conteneur().innerHTML);
         expect(bilan).toEqual(['D 65', 'D 65']);
         expect(suggerer(b)).toBe(suggestionAttendue(bilan, SEUILS_DEFAUT));
-        expect(suggerer(b)).toBe('Amener Structure à 75 %');   // le texte approuvé, figé
+        expect(suggerer(b)).toBe('Amener Structure à 75\u00A0%');   // le texte approuvé, figé
     });
 
     it('idme.insuffisant déplacé à 0,66 : le bilan dit « I 65 % » et la suggestion vise 66 % — les deux ensemble', () => {
@@ -194,7 +194,7 @@ describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', ()
         const bilan = cellules(b.conteneur().innerHTML);
         expect(bilan).toEqual(['I 65', 'I 65']);
         expect(suggerer(b)).toBe(suggestionAttendue(bilan, seuils));
-        expect(suggerer(b)).toBe('Amener Structure à 66 %');
+        expect(suggerer(b)).toBe('Amener Structure à 66\u00A0%');
     });
 
     it('la lettre suit le pourcentage affiché : 0,8449 s\'affiche « 84 % » et se lit M ; 0,845 s\'affiche « 85 % » et se lit E', () => {
