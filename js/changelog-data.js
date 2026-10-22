@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.215 (le critère algorithmique, étape 2a : les deux noms de l'enseignant, la parenthèse sans accord, le
+            // bilan sans participe) — titre et deux items validés par Grégoire, mot pour mot, le 22 oct. 2026 à 18 h 31
+            // (`plans de travail/CONSIGNE-DU-JOUR.md` de 18 h 31). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.215',
+            couleur: 'vert',
+            titre: 'Nommer ce que tu comptes',
+            items: [
+                'Critère algorithmique&nbsp;: tu nommes ce que tu comptes et ce à quoi tu le rapportes, au singulier et au pluriel (par ex. «&nbsp;unité manquante&nbsp;» sur des «&nbsp;calculs&nbsp;»). Ces noms s’écrivent dans les champs de l’évaluation, dans la phrase de l’élève et dans son PDF. «&nbsp;Partir de la liste du français écrit&nbsp;» pose «&nbsp;erreur&nbsp;» et «&nbsp;mot&nbsp;». Un critère créé avant garde «&nbsp;erreur&nbsp;» et «&nbsp;mot&nbsp;».',
+                'Ce que lit l’élève s’accorde maintenant avec n’importe quel nom&nbsp;: «&nbsp;5 erreurs (3,5 après pondération) sur 400 mots&nbsp;». Quand tous les critères sont maîtrisés, le bilan dit «&nbsp;(3 erreurs)&nbsp;» plutôt que «&nbsp;(3 erreurs annotées)&nbsp;».'
+            ]
+        },
+        {
             // 1.214 (le miroir du critère algorithmique, coller sa liste de codes, la limite des deux critères, la grille
             // à niveaux nommés et à points, la virgule partout, la protection des données de #1075) — titre et cinq items
             // proposés par Claude Code, sixième item et titre retouchés par Cowork, validés par Grégoire le 22 oct. 2026
