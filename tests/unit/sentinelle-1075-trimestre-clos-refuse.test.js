@@ -10,15 +10,18 @@
  *       clé du trimestre, et le témoin dit pourquoi (sauf écriture discrète) ;
  *   B — « Permission d'écriture » cochée (`body.mode-ecriture-temp`) : ils écrivent ;
  *   C — trimestre ouvert : rien ne change ; une clé globale ou d'un autre trimestre passe toujours ;
- *   D — la règle CSS ne vise plus d'`onclick` (index.html).
+ *   D — la règle CSS ne vise plus d'`onclick` (index.html) ;
+ *   E — l'annotation, qui écrit par `travauxStockage`, passe par le même refus (exporté par modes.js).
  *
- * Break-test (22 oct.) : `_trimestreClosRefuse` rendant toujours `false` rougit A1, A2 et A3.
+ * Break-test (22 oct.) : `_trimestreClosRefuse` rendant toujours `false` rougit A1, A2, A3 et E1 ; l'ancien
+ * travaux-annotation.js rougit E2.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -108,6 +111,19 @@ describe('#1075, point 2 — un trimestre clos ne s\'écrit pas', () => {
         expect(b.win.sauvegarderDonneesSelonMode('enseignants', [{ id: 'ENS_1' }])).toBe(true);
         await b.win.modifierEtAnnoncer('a2026_grillesTemplates', () => ['G'], []);
         expect(Object.keys(b.ecrit).sort()).toEqual(['a2026_grillesTemplates', 'enseignants']);
+    });
+
+    it('E1 — modes.js exporte le refus, qui rend true et parle pour une clé du trimestre clos', () => {
+        const b = monter();
+        expect(b.win.refuserSiTrimestreClos('h2026_annotationsTravaux', 'Annoter la copie', false)).toBe(true);
+        expect(b.appels[0]).toEqual(['nonEnregistre', expect.stringMatching(/clos, en lecture seule/), 'Annoter la copie', 'h2026_annotationsTravaux']);
+        expect(monter({ temp: true }).win.refuserSiTrimestreClos('h2026_annotationsTravaux', 'x', false)).toBe(false);
+    });
+
+    it('E2 — le seul point d\'écriture d\'Annoter le consulte avant d\'écrire', () => {
+        const src = readFileSync(path.join(racine, 'js/travaux-annotation.js'), 'utf8');
+        const fn = tranche(src, 'function sauvegarderAnnotation(options) {', 'travauxStockage.sauvegarderAnnotationFichier(annotationCourante, options);');
+        expect(fn).toContain("window.refuserSiTrimestreClos(cle('annotationsTravaux'), 'Annoter la copie', options && options.discret)) return;");
     });
 
     it('D — la règle CSS de lecture seule ne vise plus d\'onclick', () => {
