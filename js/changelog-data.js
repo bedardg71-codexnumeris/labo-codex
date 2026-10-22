@@ -21,6 +21,23 @@
 
     var CHANGELOG = [
         {
+            // 1.214 (le miroir du critère algorithmique, coller sa liste de codes, la limite des deux critères, la grille
+            // à niveaux nommés et à points, la virgule partout, la protection des données de #1075) — titre et cinq items
+            // proposés par Claude Code, sixième item et titre retouchés par Cowork, validés par Grégoire le 22 oct. 2026
+            // à 13 h 05 (`plans de travail/TEXTES-2026-10-22-a-valider.md`).
+            version: '1.214',
+            couleur: 'vert',
+            titre: 'Essayer sa formule et coller sa liste de codes',
+            items: [
+                'Critère algorithmique&nbsp;: sous la formule, un essai sur quelques copies fictives montre la note et la phrase que l’élève lirait. Il suit tes réglages à mesure que tu les changes.',
+                'Dans «&nbsp;Apporter mon matériel&nbsp;», tu peux coller ta liste de codes de correction (code, nom, poids, commentaire) et l’ajouter à un critère algorithmique qui n’a pas encore de codes. Rien n’est remplacé.',
+                'Quand une grille a deux critères algorithmiques, les codes posés dans Annoter vont tous au premier. L’éditeur de grille et Annoter le disent maintenant, et nomment le critère qui les reçoit.',
+                'Une grille en points qui nomme ses niveaux (par ex. «&nbsp;Sommaire&nbsp;», «&nbsp;Efficace&nbsp;») se crée avec son barème&nbsp;: chaque niveau devient une tranche, ses points dans le champ Points plutôt que dans le texte.',
+                'Tous les nombres s’écrivent à la française, plus seulement les notes&nbsp;: pondérations, points, indices, taux, graphiques et indicateurs («&nbsp;17,5&nbsp;%&nbsp;», «&nbsp;3,25 / 4&nbsp;»).',
+                'En mode anonymisé, le vrai DA ne paraît plus dans les propriétés d’un fichier, l’import des copies ni le Comparateur. Un trimestre clos refuse les modifications, sauf si tu coches «&nbsp;Permission d’écriture&nbsp;». Une production employée ne se supprime plus. Le rapport de bogue ne garde plus le texte des boutons cliqués.'
+            ]
+        },
+        {
             // 1.213 (le critère algorithmique pour toute discipline, les notes à la française, « Verrouiller la saisie ») —
             // titre et six items proposés par Cowork (21 oct. 2026, 12 h 17) à partir des items proposés par Claude Code
             // dans les demandes de relecture du jour, validés par Grégoire tels quels à 12 h 18 (« c'est bon »).

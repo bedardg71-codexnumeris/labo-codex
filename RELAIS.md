@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS – 22 OCT. 2026, 13 h 15 (écrit par Claude Code) : **1.214.0 COMMITÉE SUR `main`, NON POUSSÉE ; LE PUSH ATTEND UN VERDICT COMPLET VERT SUR CE COMMIT, AU SIGNAL DE GRÉGOIRE**
+
+**En ligne** : la 1.213.0 (`9bb49dcb`). **`main` local**, en avance de 21 commits sur `origin/main` (`941c2491`) : le miroir (`ca0e87c8`, `07bc5929`), la virgule partout (#1137, `b2f78fa7` → `f57b9030`), la limite des deux critères (#1132, `fdaa13e0`), la grille à niveaux nommés et à points (#1125, `b677b6d5`), « Coller sa liste de codes » (`9da84bed`, `3203a510`, `5bb7ff6d`), la protection des données (#1075, `883bec5e` → `8bf55d7f`), #1139 (`6cf96456`), #1140 (`522b87d4`), puis le commit de release **1.214.0** qui porte ce bloc (build `1022-1307`).
+**Les textes** : validés par Grégoire le 22 oct. à 13 h 05, retouches de Cowork comprises, « Poids » gardé ; noté en tête de `plans de travail/TEXTES-2026-10-22-a-valider.md`. Le commit de release applique les trois retouches de l'écran des codes (bulle de « Poids », « Avant d’ajouter, il faut : », l'échec de l'ajout) et les Nouvelles 1.214 (titre et six items).
+**La suite** : verdict complet (`cd tests && node ../scripts/verifier-playwright.mjs`) sur le commit de release, au signal de Grégoire seulement (Cowork fermé, Mac sur secteur) ; vert → `scripts/pousser.sh`, constater `origin/main` et la version chez Netlify, puis `OU-EN-EST-ON.md` et `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` ; rouge → on s'arrête. Relecture demandée : `plans de travail/DEMANDE-RELECTURE-2026-10-22-version-1.214.0.md` (non commitée, pour que le commit de release reste le dernier).
+**Hors relais** : `ci/verdict-morceaux` attend Grégoire (#1093). `plans de travail/CONSIGNE-DU-JOUR.md` porte une modification de Cowork non commitée.
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.213.0 `9bb49dcb` → 1.214.0) : fichiers de plus de 1 000 lignes 35 → 37 (`js/materiel-dissection.js` 1 033 et `js/modes.js` 1 008 franchissent le seuil), leurs lignes 86 252 → 88 426 (Δ +2 174, dont +2 041 des deux entrants ; ailleurs `js/grilles.js` 3 894 → 3 955, `js/productions.js` 1 763 → 1 794, `js/travaux-ui.js` 5 292 → 5 310, `js/changelog-data.js` 2 288 → 2 301) ; au-dessus de 15 : 454 → 454 (Δ 0) ; au-dessus de 30 : 86 → 86 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 429 → 11 431 (Δ +2). Lignes de `js/` : 150 960 → 151 643 ; fonctions : 13 530 → 13 644.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 21 OCT. 2026, 13 h 40, mis à jour à 13 h 44 (écrit par Claude Code) : **1.213.0 COMMITÉE SUR `main`, NON POUSSÉE : LE VERDICT ÉTAIT ROUGE (UNE SPEC) ; LA RELECTURE A TRANCHÉ, LA SPEC EST CORRIGÉE, LE VERDICT SUR CE COMMIT TOURNE CE SOIR**
 
 **22 oct., 1 h 40 – POUSSÉ, EN LIGNE** : verdict complet vert sur `9bb49dcb` (code 0, 0 veille, secteur ; instable : `grilles-sous-criteres-condense.spec.js`), `git push` (hook : « verdict vert à jour pour ce commit »), `origin/main` = `9bb49dcb`, Netlify `6ad9a14e` `ready` sur ce SHA. `OU-EN-EST-ON.md` et `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` à jour. Ce bloc est périmé pour la suite : le prochain lot est le miroir.

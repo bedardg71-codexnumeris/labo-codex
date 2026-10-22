@@ -1043,7 +1043,7 @@
     // Consigne : `plans de travail/CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`.
     // ------------------------------------------------------------------
 
-    // Textes PROVISOIRES de Claude Code, à valider par Grégoire.
+    // Textes de Claude Code, validés par Grégoire le 22 oct. 2026 (retouches de Cowork comprises).
     var TEXTES_CODES = {
         colonnes: ['Code', 'Nom', 'Poids', 'Commentaire'],
         ou: 'Où vont ces codes ?',
@@ -1052,7 +1052,7 @@
         choisir: 'le critère qui recevra ces codes',
         bouton: 'Ajouter ces codes',
         enCours: 'Ajout…',
-        raisons: 'Avant d’ajouter, il reste :',
+        raisons: 'Avant d’ajouter, il faut :',
         ajoutes: function (r) {
             return pluriel(r.nombre, 'code ajouté', 'codes ajoutés') + ' à « ' + r.critere + ' » (grille « ' + r.grille + ' »). Tu les retrouves dans « Grilles de critères ».';
         }
