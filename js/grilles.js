@@ -3535,7 +3535,7 @@ function afficherCriteresTemp() {
                            data-on-change="modifierCritereTempHandler" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreCartesGabaritAlgo(critere, { mode: "temp", index: index })}${rendreAttenduCritere(critere, { grilleId: 'temp', index: index })}
+            ${rendreCartesGabaritAlgo(critere, { mode: "temp", index: index, criteres: window.tempCriteres })}${rendreAttenduCritere(critere, { grilleId: 'temp', index: index })}
         </div>
     `).join('');
 
@@ -3868,9 +3868,36 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
  * ⚠ ABSENT = REPLI. Le handler n'écrit jamais `false` : décocher RETIRE le
  * champ. Une grille d'avant ce lot et une grille décochée sont la même chose.
  */
+/**
+ * #1132 (22 oct. 2026) — OÙ VONT LES CODES quand la grille a plusieurs critères algorithmiques : au
+ * PREMIER seulement (`enoncesAlgo.critereAlgorithmique`). Rend `{ ailleurs, seul }` : `ailleurs`, la phrase
+ * d'un critère qui n'est pas le premier (sa case ne ferait rien, et la note qui l'accompagne serait
+ * fausse : elle la remplace) ; `seul`, la phrase ajoutée au premier. Deux chaînes vides sinon.
+ */
+function destinationDesCodes(critere, criteres) {
+    const algos = (window.enoncesAlgo && typeof window.enoncesAlgo.criteresAlgorithmiques === 'function')
+        ? window.enoncesAlgo.criteresAlgorithmiques({ criteres: criteres }) : [];
+    if (algos.length < 2) return { ailleurs: '', seul: '' };
+    if (algos[0] !== critere) {
+        const nomPremier = (algos[0].nom || '').trim() || 'sans nom';
+        return { ailleurs: 'Les codes posés dans Annoter ne vont pas à ce critère : ils vont tous au premier critère algorithmique de la grille, « '
+            + nomPremier + ' ». Pour celui-ci, le nombre se tape à la correction.', seul: '' };
+    }
+    return { ailleurs: '', seul: ' Il est le seul à les recevoir : cette grille a ' + algos.length
+        + ' critères algorithmiques, et les codes posés vont tous au premier.' };
+}
+
 function rendreActivationCodes(critere, ctx) {
     if (typeof window.codesAnnotation === 'undefined') return '';
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const destination = destinationDesCodes(critere, ctx.criteres);
+    if (destination.ailleurs) {
+        return `
+                        <div class="sous-criteres-codes">
+                            <small class="sous-criteres-codes-note">${esc(destination.ailleurs)}</small>
+                        </div>`;
+    }
+    const seulAlesRecevoir = destination.seul;
     const actif = window.codesAnnotation.donneSesCodes(critere);
     const apercu = window.codesAnnotation.apercuCodes(critere);
     const n = apercu.length;
@@ -3886,7 +3913,7 @@ function rendreActivationCodes(critere, ctx) {
     if (critere[window.codesAnnotation.MARQUE] === true) {
         return n === 0 ? '' : `
                         <div class="sous-criteres-codes sous-criteres-codes--actif">
-                            <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}</small>
+                            <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}${esc(seulAlesRecevoir)}</small>
                         </div>`;
     }
     return `
@@ -3897,7 +3924,7 @@ function rendreActivationCodes(critere, ctx) {
                                        ${actif ? 'checked' : ''}${(n === 0 && !actif) ? ' disabled' : ''}>
                                 Utiliser ces sous-critères comme codes d'annotation
                             </label>
-                            <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}</small>
+                            <small class="sous-criteres-codes-note">${esc(note)}${esc(precision)}${esc(seulAlesRecevoir)}</small>
                             <small class="sous-criteres-codes-palette">Sans cette case, la copie utilise la palette générale (Annoter › palette). Cochée, ce sont ces sous-critères qui deviennent les codes de la copie.</small>
                         </div>`;
 }
@@ -4520,7 +4547,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                             Partir de la liste du français écrit (codes 1 à 10)
                         </button>` : ''}
                     </div>
-                    ${rendreActivationCodes(critere, { grilleId: grilleId, index: index })}
+                    ${rendreActivationCodes(critere, { grilleId: grilleId, index: index, criteres: ctx.criteres })}
                     ${rendrePliAucuneAnnotation(critere, ctx)}
                     ${scs.length > 0 ? `
                     <div class="sous-criteres-liste-conteneur">
@@ -5376,7 +5403,7 @@ function afficherCriteresGrille(grille) {
                            data-on-change="modifierCritereGrilleHandler" data-grille-id="${grille.id}" data-critere-index="${index}" data-champ="description">
                 </div>
             </div>
-            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}
+            ${rendreCartesGabaritAlgo(critere, { mode: "grille", index: index, grilleId: grille.id, criteres: grille.criteres })}${rendreAttenduCritere(critere, { grilleId: grille.id, index: index })}
         </div>
     `).join('');
 

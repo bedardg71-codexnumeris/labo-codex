@@ -431,7 +431,7 @@ describe('lot 4 · C.D — les sous-critères : UNE seule liste (lot A du 5 sept
         expect(code).not.toContain('rendreBlocCodesAlgo');
         expect(code).not.toContain("'codes', 'Codes d\\'annotation'");
         expect((code.match(/function rendrePliObservationSousCritere\(/g) || []).length).toBe(1);
-        expect((code.match(/rendreActivationCodes\(critere, \{ grilleId: grilleId, index: index \}\)/g) || []).length).toBe(1);
+        expect((code.match(/rendreActivationCodes\(critere, \{ grilleId: grilleId, index: index, criteres: ctx\.criteres \}\)/g) || []).length).toBe(1);   // #1132 : les critères de la grille, pour dire où vont les codes
         const css = source('styles.css');
         expect(css).toContain('#listeCriteres .sous-critere-champs-grid--note-codes {\n    grid-template-columns: 80px 1fr 100px 64px;');
         expect(css).toContain('#listeCriteres .sous-critere-pli {');
