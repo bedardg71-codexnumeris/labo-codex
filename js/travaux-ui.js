@@ -1218,7 +1218,7 @@
                             <span id="travaux-indicateur-page">-- / --</span>
                             <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
                             <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100%">100%</button>
+                            <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100\u00a0%">100\u00a0%</button>
                             <span class="travaux-separateur"></span>
                             <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran"><img src="icons/icon-fit-to-width.svg" alt="" class="nav-seq-icon"></button>
                             <!-- Retour testeur du 23 sept. 2026 — le chronomètre revient dans la barre : en palette, il prenait de la place sur la copie. -->

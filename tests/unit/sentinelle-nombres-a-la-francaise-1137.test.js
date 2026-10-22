@@ -13,6 +13,10 @@
  * B — l'invariant : aucun fichier de `js/` n'affiche un nombre suivi de « % » ou de « pts » sans passer par le
  *     module, hors d'une liste blanche nommée et justifiée. Un affichage ajouté demain est couvert.
  * C — un seul formateur : plus aucun `replace('.', ',')` hors du module.
+ *
+ * Break-tests (22 oct. 2026, code restauré ensuite, `cmp` identique) : `poids ${r.poids.toFixed(1)} %` remis dans le
+ * profil et `(v * 100).toFixed(0) + '%'` remis dans une graduation de graphiques-progression.js → B rougit en nommant
+ * les deux lignes ; `String(n).replace('.', ',')` remis dans miroir-algo.js → C rougit en nommant la ligne.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -75,29 +79,14 @@ const LISTE_BLANCHE = [
       motif: 'l’écho d’une saisie : les bornes telles que la personne les a tapées dans le matériel (« 64,99 », « 85 % »), une chaîne, pas un nombre' }
 ];
 
-/**
- * ⏳ EN COURS (22 oct. 2026) — les fichiers que le lot convertit encore, famille par famille, un commit par
- * famille (consigne, §5). La liste se vide au dernier commit du lot et disparaît avec lui.
- */
-const EN_COURS = [
-    'js/codex.js',
-    'js/correlations-longitudinales.js',
-    'js/graphiques-progression.js',
-    'js/impact-jetons.js',
-    'js/modelisation.js',
-    'js/reserve.js',
-    'js/travaux-preparation.js',
-    'js/travaux-visionneuse.js',
-];
-
 function retirerNonLu(ligne) {
     return NON_LU.reduce((l, re) => l.replace(re, ''), ligne);
 }
 
-function fautesDe(fichiers, enCours = EN_COURS) {
+function fautesDe(fichiers) {
     const fautes = [];
     for (const f of fichiers) {
-        if (f === MODULE || f === path.join('js', 'pack-demo-10.js') || enCours.includes(f)) continue;
+        if (f === MODULE || f === path.join('js', 'pack-demo-10.js')) continue;
         lire(f).split('\n').forEach((ligne, i) => {
             const t = ligne.trim();
             if (t.startsWith('//') || t.startsWith('*') || t.startsWith('/*')) return;
@@ -169,12 +158,6 @@ describe('A — les fonctions du module : la virgule, l’insécable, la précis
 describe('B — l’invariant : aucun nombre suivi de « % » ou de « pts » hors du module', () => {
     it('dans tout js/ (hors du module et du pack démo, une donnée)', () => {
         expect(fautesDe(fichiersJs('js'))).toEqual([]);
-    });
-
-    it('EN COURS : chaque fichier encore à convertir a bien des fautes (sinon il sort de la liste)', () => {
-        for (const f of EN_COURS) {
-            expect(fautesDe([f], []).length, `${f} n'a plus de faute : retire-le de EN_COURS`).toBeGreaterThan(0);
-        }
     });
 
     it('chaque entrée de la liste blanche vise une ligne qui existe (sinon elle est périmée)', () => {

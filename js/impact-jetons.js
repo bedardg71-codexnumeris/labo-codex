@@ -462,7 +462,7 @@ function creerGraphiqueImpactJetons(canvasId) {
                     },
                     y: {
                         title: { display: true, text: 'Performance (%)', color: couleurTexte, font: { size: 12, weight: 'bold' } },
-                        ticks: { color: couleurTexte, callback: function(val) { return val.toFixed(0) + '%'; } },
+                        ticks: { color: couleurTexte, callback: function(val) { return formaterPourcentage(val, 0); } },
                         grid: { display: true, color: couleurGrille }
                     }
                 },

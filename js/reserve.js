@@ -1492,7 +1492,7 @@ async function _deposerArchive(o) {
     var zipBlob = await window.FichierSortant.assemblerZip(zip, copies, function(pourcent) {
         _prog(80 + Math.round(pourcent * 0.18),
             'Compression du ZIP…',
-            Math.round(pourcent) + '% compressé');
+            window.formaterPourcentage(Math.round(pourcent)) + ' compressé');
     });
 
     // Convention #262 : préfixe `archive-` + dossier + date + extension simple.

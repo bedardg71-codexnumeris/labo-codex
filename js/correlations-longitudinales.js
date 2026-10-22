@@ -769,7 +769,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                             color: couleurTexte,
                             font: { size: 10 },
                             stepSize: 25,
-                            callback: function(value) { return value + '%'; }
+                            callback: function(value) { return formaterPourcentage(value); }
                         },
                         grid: { display: false }
                     }

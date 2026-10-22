@@ -93,7 +93,7 @@
                             '<span class="travaux-separateur"></span>' +
                             '<button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineLargeur" title="Ajuster a la largeur"><img src="icons/icon-resize-horizontal.svg" alt="" class="nav-seq-icon"></button>' +
                             '<button class="travaux-btn-nav" data-action="travauxVisionneuse.zoomPleineHauteur" title="Ajuster a la hauteur"><img src="icons/icon-resize-vertical.svg" alt="" class="nav-seq-icon"></button>' +
-                            '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Zoom 100%">100%</button>' +
+                            '<button class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Zoom 100\u00a0%">100\u00a0%</button>' +
                             '<span class="travaux-separateur"></span>' +
                             '<button class="travaux-btn-action" data-action="modelisation.fermerVisionneuse" title="Fermer le fichier">Fermer</button>' +
                         '</div>' +
@@ -469,7 +469,7 @@
 
         var indicateurZoom = document.getElementById('model-indicateur-zoom');
         if (indicateurZoom) {
-            indicateurZoom.textContent = Math.round(travauxVisionneuse.getZoomActuel() * 100) + '%';
+            indicateurZoom.textContent = formaterPourcentage(Math.round(travauxVisionneuse.getZoomActuel() * 100));
         }
     }
 

@@ -1027,7 +1027,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                                 const label = context.dataset.label || '';
                                 const valeurReelle = context.parsed.y;
                                 const value = (valeurReelle * 100).toFixed(0);
-                                return `${label}: ${value}%`;
+                                return `${label}: ${formaterPourcentage(value)}`;
                             },
                             afterBody: function(tooltipItems) {
                                 if (!tooltipItems.length) return [];
@@ -1098,7 +1098,7 @@ function creerGraphiqueIndividuel(canvasId, da) {
                         },
                         ticks: {
                             color: couleurTexte(),
-                            callback: value => (value * 100).toFixed(0) + '%',
+                            callback: value => formaterPourcentage(value * 100, 0),
                             stepSize: 0.05
                         },
                         grid: { display: true, color: couleurGrille() }
@@ -1505,7 +1505,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                                 const valeur = context.parsed.y;
                                 if (valeur === null) return '';
                                 const pourcent = (valeur * 100).toFixed(0);
-                                return `${pourcent}%`;
+                                return formaterPourcentage(pourcent);
                             }
                         }
                     }
@@ -1526,7 +1526,7 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
                         grid: { display: true, color: couleurGrille() },
                         ticks: {
                             color: couleurTexte(),
-                            callback: value => (value * 100).toFixed(0) + '%',
+                            callback: value => formaterPourcentage(value * 100, 0),
                             stepSize: 0.05
                         },
                         title: {
@@ -2409,7 +2409,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                             label: function(context) {
                                 const critere = context.dataset.label;
                                 const valeur = context.parsed.y;
-                                return valeur !== null ? `${critere}: ${valeur.toFixed(0)}%` : `${critere}: —`;
+                                return valeur !== null ? `${critere}: ${formaterPourcentage(valeur, 0)}` : `${critere}: —`;
                             },
                             afterBody: function(tooltipItems) {
                                 if (!tooltipItems.length) return [];
@@ -2464,7 +2464,7 @@ function creerGraphiqueCriteres(canvasId, da) {
                             color: couleurTexte(),
                             stepSize: 5,
                             callback: function(value) {
-                                return value + '%';
+                                return formaterPourcentage(value);
                             }
                         },
                         grid: { display: true, color: couleurGrille() }
@@ -2877,7 +2877,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
 
                     // Afficher μ et comptage au-dessus de la ligne
                     ctx.fillStyle = couleurs[i];
-                    const muLabel = `μ${indice}=${(mu * 100).toFixed(0)}% | ±1σ: ${dans1Sigma}/${n} (${Math.round(dans1Sigma/n*100)}%)`;
+                    const muLabel = `μ${indice}=${formaterPourcentage(mu * 100, 0)} | ±1σ: ${dans1Sigma}/${n} (${formaterPourcentage(Math.round(dans1Sigma/n*100))})`;
                     ctx.fillText(muLabel, xMu, chartArea.top + offsetY);
 
                     offsetY += 13; // Décaler pour éviter superposition
@@ -2963,7 +2963,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                             title: function(items) {
                                 if (items.length > 0) {
                                     const valeur = items[0].parsed.x;
-                                    return `Valeur: ${(valeur * 100).toFixed(1)}%`;
+                                    return `Valeur: ${formaterPourcentage(valeur * 100, 1)}`;
                                 }
                                 return '';
                             },
@@ -2975,15 +2975,15 @@ function creerGraphiqueDistributionACPE(canvasId) {
                                     const stats = statistiques[indice];
                                     const valeur = context.parsed.x;
                                     if (stats && stats.moyenne !== null) {
-                                        const ecartMu = ((valeur - stats.moyenne) / stats.ecartType).toFixed(2);
-                                        const position = ecartMu >= 0 ? `+${ecartMu}σ` : `${ecartMu}σ`;
+                                        const ecartMu = (valeur - stats.moyenne) / stats.ecartType;
+                                        const position = (ecartMu >= 0 ? '+' : '') + formaterNombre(ecartMu, 2) + 'σ';
                                         return [
                                             `Étudiant - Indice ${indice}`,
-                                            `  Valeur: ${(valeur * 100).toFixed(1)}%`,
+                                            `  Valeur: ${formaterPourcentage(valeur * 100, 1)}`,
                                             `  Position: ${position} par rapport à μ`
                                         ];
                                     }
-                                    return `Indice ${indice}: ${(valeur * 100).toFixed(1)}%`;
+                                    return `Indice ${indice}: ${formaterPourcentage(valeur * 100, 1)}`;
                                 }
                                 // Si c'est une courbe de Gauss
                                 const indice = label.match(/\(([ACPE])\)/)?.[1];
@@ -2992,10 +2992,10 @@ function creerGraphiqueDistributionACPE(canvasId) {
                                     const dans1Sigma = compterValeursEntre(stats.valeurs, stats.moyenne - stats.ecartType, stats.moyenne + stats.ecartType);
                                     return [
                                         label,
-                                        `  μ = ${(stats.moyenne * 100).toFixed(1)}%`,
-                                        `  σ = ${(stats.ecartType * 100).toFixed(1)}%`,
+                                        `  μ = ${formaterPourcentage(stats.moyenne * 100, 1)}`,
+                                        `  σ = ${formaterPourcentage(stats.ecartType * 100, 1)}`,
                                         `  n = ${stats.n} étudiants`,
-                                        `  Dans ±1σ: ${dans1Sigma} (${Math.round(dans1Sigma/stats.n*100)}%)`
+                                        `  Dans ±1σ: ${dans1Sigma} (${formaterPourcentage(Math.round(dans1Sigma/stats.n*100))})`
                                     ];
                                 }
                                 return label;
@@ -3018,7 +3018,7 @@ function creerGraphiqueDistributionACPE(canvasId) {
                             color: couleurTexte(),
                             stepSize: 0.1,
                             callback: function(value) {
-                                return (value * 100).toFixed(0) + '%';
+                                return formaterPourcentage(value * 100, 0);
                             }
                         },
                         grid: {
@@ -3299,7 +3299,7 @@ function creerGraphiqueEvolutionRLO(canvasId, da) {
                                 const v = context.parsed.y;
                                 return v == null
                                     ? context.dataset.label + ': —'
-                                    : context.dataset.label + ': ' + v.toFixed(1) + '%';
+                                    : context.dataset.label + ': ' + formaterPourcentage(v, 1);
                             },
                             afterBody: function(items) {
                                 if (!items.length) return [];
@@ -3345,7 +3345,7 @@ function creerGraphiqueEvolutionRLO(canvasId, da) {
                         ticks: {
                             color: couleurTexte(),
                             stepSize: 20,
-                            callback: function(v) { return v + '%'; }
+                            callback: function(v) { return formaterPourcentage(v); }
                         },
                         grid: { display: true, color: couleurGrille() }
                     }
@@ -4020,7 +4020,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                     label: function(ctxItem) {
                         const v = ctxItem.parsed.y;
                         if (v === null || v === undefined) return '';
-                        return (v * 100).toFixed(0) + '%';
+                        return formaterPourcentage(v * 100, 0);
                     }
                 }
             };
@@ -4037,7 +4037,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                     label: function(ctxItem) {
                         const v = ctxItem.parsed.y;
                         if (v === null || v === undefined) return '';
-                        return (ctxItem.dataset.label || '') + ' — ' + (v * 100).toFixed(0) + '%';
+                        return (ctxItem.dataset.label || '') + ' — ' + formaterPourcentage(v * 100, 0);
                     }
                 }
             };
@@ -4055,7 +4055,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                     label: function(ctxItem) {
                         const v = ctxItem.parsed.y;
                         if (v === null || v === undefined) return '';
-                        return (ctxItem.dataset.label || '') + ' — ' + (v * 100).toFixed(0) + '%';
+                        return (ctxItem.dataset.label || '') + ' — ' + formaterPourcentage(v * 100, 0);
                     }
                 }
             };
@@ -4153,7 +4153,7 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                         },
                         ticks: {
                             color: couleurTexte(),
-                            callback: v => (v * 100).toFixed(0) + '%',
+                            callback: v => formaterPourcentage(v * 100, 0),
                             stepSize: 0.05
                         },
                         grid: { display: true, color: couleurGrille() }
