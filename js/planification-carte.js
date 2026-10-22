@@ -9670,7 +9670,7 @@ function dureeRollupNoeud(nd) {
 
 function arrondirPeriodes(minutes) {
     var per = Math.round((minutes / dureePeriodeMinutes()) * 10) / 10;
-    return (per % 1 === 0) ? String(per) : String(per).replace('.', ',');
+    return formaterNombre(per);
 }
 
 // « 2 pér. » / « 1,9 pér. » ; sous une période → minutes brutes.
@@ -9720,11 +9720,11 @@ function mettreAJourJaugeTemps(sequences) {
     var dp = dureePeriodeMinutes();
     var heures = Math.round((totalMin / 60) * 10) / 10;
     var texte = 'Total planifié : <strong>' + arrondirPeriodes(totalMin) + ' pér.</strong>' +
-                ' (≈ ' + String(heures).replace('.', ',') + ' h)';
+                ' (≈ ' + formaterNombre(heures) + ' h)';
     var classe = '';
     var heuresCadre = obtenirHeuresCadreCoursActif();
     if (heuresCadre) {
-        texte += ' / ' + String(heuresCadre).replace('.', ',') + ' h au cadre';
+        texte += ' / ' + formaterNombre(heuresCadre) + ' h au cadre';
         var ratio = (totalMin / 60) / heuresCadre;
         if (ratio > 1.1) classe = ' planif-jauge-depasse';
         else if (ratio >= 0.9) classe = ' planif-jauge-cible';

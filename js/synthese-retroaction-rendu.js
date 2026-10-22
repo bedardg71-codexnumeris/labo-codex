@@ -36,11 +36,10 @@
     const FONT_SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
     const FONT_MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
     // 21 oct. 2026 (décision de Grégoire, 11 h 07) : la NORME FRANÇAISE dans le PDF de l'élève. Les notes
-    // passent par `formaterNotePourcentage` (note-pourcentage.js) ; tout autre nombre décimal prend la virgule,
-    // et l'espace insécable (le CARACTÈRE, jamais `&nbsp;` : `esc` la doublerait) précède « % » et « pts ».
+    // passent par `formaterNotePourcentage` (note-pourcentage.js) ; tout autre nombre par `formaterNombre`,
+    // `formaterPourcentage`, `formaterPoints` du même module (#1137, 22 oct.) : la virgule, et l'espace
+    // insécable (le CARACTÈRE, jamais `&nbsp;` : `esc` la doublerait) devant « % » et « pts ».
     // Une phrase ne mêle pas deux normes (« … pts + … pts = … % »).
-    const NBSP = '\u00A0';
-    const nombreFr = (n) => String(n).replace('.', ',');
 
     /* =====================================================================
        API PUBLIQUE
@@ -354,7 +353,7 @@
         // rien d'autre (décision de Grégoire). Le niveau déduit a choisi le commentaire ;
         // il ne s'imprime pas. « 24 / 30 » prend la place de la rangée de l'échelle.
         const segments = (typeof critere.points === 'number')
-            ? `<div style="font-family: ${FONT_MONO}; font-size: 11px; font-weight: 800; color: ${INK};">${esc(nombreFr(critere.points))} / ${esc(nombreFr(critere.weight))}</div>`
+            ? `<div style="font-family: ${FONT_MONO}; font-size: 11px; font-weight: 800; color: ${INK};">${esc(formaterNombre(critere.points))} / ${esc(formaterNombre(critere.weight))}</div>`
             : scale.map((s, i) => {
             const atteint = i <= idx;
             const courant = i === idx;
@@ -368,7 +367,7 @@
         // Lot 3 — sous le nom d'un critère analytique, le poids se dit en points, pas en % :
         // le maximum EST le poids (arrêté 3), et « 30% » à côté de « 24 / 30 » se lirait deux fois.
         const sub = (typeof critere.points === 'number') ? [critere.sub].filter(Boolean).join(' · ') : [
-            critere.weight ? `${nombreFr(critere.weight)}${NBSP}%` : '',
+            critere.weight ? formaterPourcentage(critere.weight) : '',
             critere.sub
         ].filter(Boolean).join(' · ');
 
@@ -383,15 +382,15 @@
             const a = critere.algo;
             // 21 oct. 2026 (étape 0) : la virgule décimale (« 13,75/20 (68,8 %) »), les décimales d'hier ; « erreur »
             // au singulier sous 2 (« 0 erreur », « 1 erreur »), la règle `> 1` des autres sites. Les noms « erreurs »
-            // et « mots » restent écrits ici : l'étape 2 les rend à l'enseignant·e. Aucun formateur partagé ne garde
-            // les décimales fixes (`formaterNombrePeriodes` arrondit à deux et rendrait « 68,75 » pour le pourcentage).
-            const noteTxt = (typeof a.noteCalculee === 'number') ? nombreFr(a.noteCalculee.toFixed(2)) : '—';
-            const pctTxt  = (typeof a.pourcentage === 'number')  ? nombreFr(a.pourcentage.toFixed(1)) : '—';
+            // et « mots » restent écrits ici : l'étape 2 les rend à l'enseignant·e. Les décimales
+            // fixes, l'appelant les donne au formateur partagé : `formaterNombre(n, 2)` (#1137, 22 oct.).
+            const noteTxt = (typeof a.noteCalculee === 'number') ? formaterNombre(a.noteCalculee, 2) : '—';
+            const pctTxt  = (typeof a.pourcentage === 'number')  ? formaterPourcentage(a.pourcentage, 1) : '—';
             const nomErreurs = Number(a.erreurs) > 1 ? 'erreurs' : 'erreur';
             const mention = (typeof window !== 'undefined' && window.enoncesAlgo && typeof window.enoncesAlgo.mentionPonderee === 'function')
                 ? window.enoncesAlgo.mentionPonderee(a.erreurs, a.sommePonderee) : '';
             ligneAlgo = `<div style="font-family: ${FONT_MONO}; font-size: 9px; color: ${MUTED}; margin-bottom: 3px;">`
-                      + `${esc(a.erreurs)} ${nomErreurs}${esc(mention)} sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(a.ponderation)}</b> (${esc(pctTxt)}${NBSP}%)`
+                      + `${esc(a.erreurs)} ${nomErreurs}${esc(mention)} sur ${esc(a.mots)} mots &rarr; <b style="color: ${INK};">${esc(noteTxt)}/${esc(formaterNombre(a.ponderation))}</b> (${esc(pctTxt)})`
                       + `</div>`;
         }
 
@@ -426,7 +425,7 @@
 
     function renderPorteeIncomplete(ctx, portee) {
         const liste = (portee.criteresHorsNote || []).map(c =>
-            c.motif === 'niveau-sans-valeur' ? `${c.nom} (${c.niveau})` : `${c.nom} (${nombreFr(c.ponderation)}${NBSP}%)`);
+            c.motif === 'niveau-sans-valeur' ? `${c.nom} (${c.niveau})` : `${c.nom} (${formaterPourcentage(c.ponderation)})`);
         const suite = liste.length
             ? ` : ${liste.join(', ')} ${liste.length > 1 ? 'restent' : 'reste'} à évaluer.`
             : '.';
@@ -746,13 +745,13 @@
             if (!calc) return '';
             const addition = calc.notes.map(n => formaterNotePourcentage(n)).join(' + ');
             return `(${addition}) &divide; ${calc.notes.length} = <b>${formaterNotePourcentage(calc.moyenne)}</b>`
-                 + ` &times; ${nombreFr(ponderation)}${NBSP}% = <b>${formaterPoints(calc.contribution)}</b>`;
+                 + ` &times; ${formaterPourcentage(ponderation)} = <b>${formaterPoints(calc.contribution)}</b>`;
         };
         const calcSel = estHybride ? calculerCategorie(note.selection, note.ponderationSelection, false) : null;
         const calcObl = estHybride ? calculerCategorie(note.obligatoires || [], note.ponderationObligatoires, estFinale) : null;
 
         // ----- Colonne gauche : sélection (les N meilleures) + calcul -----
-        const badgePondSel = (estHybride && note.ponderationSelection != null) ? ` (${esc(nombreFr(note.ponderationSelection))}${NBSP}%)` : '';
+        const badgePondSel = (estHybride && note.ponderationSelection != null) ? ` (${esc(formaterPourcentage(note.ponderationSelection))})` : '';
         const evaluesSel = (note.nombreEvaluesSelection != null) ? note.nombreEvaluesSelection : nbSelection;
         // #883 — MOTS ARRÊTÉS PAR GRÉGOIRE (16 sept. 2026) : « 1 retenue sur 4 possibles », et
         // « , parmi N évaluées » seulement quand il y en a plus que de retenues. L'ancienne tournure
@@ -787,7 +786,7 @@
         // ----- Colonne droite : obligatoires (hybride) + calcul, puis à venir -----
         const blocsDroite = [];
         if (estHybride && Array.isArray(note.obligatoires) && note.obligatoires.length) {
-            const badgePondObl = (note.ponderationObligatoires != null) ? ` (${esc(nombreFr(note.ponderationObligatoires))}${NBSP}%)` : '';
+            const badgePondObl = (note.ponderationObligatoires != null) ? ` (${esc(formaterPourcentage(note.ponderationObligatoires))})` : '';
             const items = note.obligatoires.map(o => {
                 let ligne = esc(o.titre);
                 const marqueur = formaterNiveauNote(o.niveau, o.note);

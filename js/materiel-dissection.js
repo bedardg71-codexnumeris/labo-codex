@@ -116,7 +116,6 @@
     }
 
     function pluriel(n, un, plusieurs) { return n + ' ' + (n > 1 ? plusieurs : un); }
-    function fmt(n) { return String(Math.round(n * 100) / 100).replace('.', ','); }
     function dire(m) { var s = el('dissection-statut'); if (s) s.textContent = m || ''; }
     function typeDe(id) { var t = etat.liens[id]; return D().TYPE[t] ? t : null; }
     /** La lecture de l'application : les étiquettes et, lot 7, les rattachements. */
@@ -651,13 +650,13 @@
 
     function pts(arr) {
         return arr.map(function (p) {
-            return p[0] === p[1] ? fmt(p[0]) + (p[0] > 1 ? ' pts' : ' pt') : fmt(p[0]) + ' à ' + fmt(p[1]) + ' pts';
+            return p[0] === p[1] ? formaterNombre(p[0]) + ESPACE_INSECABLE + (p[0] > 1 ? 'pts' : 'pt') : formaterNombre(p[0]) + ' à ' + formaterNombre(p[1]) + ESPACE_INSECABLE + 'pts';
         }).join(', ');
     }
 
     function phraseLogique(b) {
-        if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + fmt(b.jusqua) : '') + '. Ce serait à toi de dire laquelle donne le résultat d’une copie.';   // L2, validé G. 19 oct. 19 h 01
-        if (b.logique === 'points') return 'L’application y lirait une grille en points : les points de chaque critère s’additionnent' + (b.jusqua != null ? ' jusqu’à un total de ' + fmt(b.jusqua) : '') + '. Aucun niveau n’y est nommé (et l’application n’en inventerait pas).';
+        if (b.logique === 'deux') return 'L’application y lirait les deux logiques : des niveaux nommés, et des points qui s’additionnent' + (b.jusqua != null ? ' jusqu’à ' + formaterNombre(b.jusqua) : '') + '. Ce serait à toi de dire laquelle donne le résultat d’une copie.';   // L2, validé G. 19 oct. 19 h 01
+        if (b.logique === 'points') return 'L’application y lirait une grille en points : les points de chaque critère s’additionnent' + (b.jusqua != null ? ' jusqu’à un total de ' + formaterNombre(b.jusqua) : '') + '. Aucun niveau n’y est nommé (et l’application n’en inventerait pas).';
         if (b.logique === 'niveaux') return 'L’application y lirait une grille en niveaux : chaque critère se juge par niveau, sans points à additionner.';
         return '';
     }
@@ -691,9 +690,9 @@
             }
             tr.appendChild(tdn);
             var tdp = noeud('td');
-            if (c.pond != null) tdp.textContent = fmt(c.pond);
+            if (c.pond != null) tdp.textContent = formaterNombre(c.pond);
             else if (c.pondDeduite != null) {
-                tdp.appendChild(document.createTextNode(fmt(c.pondDeduite) + ' '));
+                tdp.appendChild(document.createTextNode(formaterNombre(c.pondDeduite) + ' '));
                 tdp.appendChild(noeud('span', 'dissection-deduit', '(tirée des points)'));
             } else tdp.appendChild(noeud('span', 'dissection-vide', '—'));
             tr.appendChild(tdp);
@@ -1010,9 +1009,9 @@
         if (R.avecNiveaux) constat(pluriel(R.niveaux.length, 'niveau', 'niveaux'));
         if (R.nb.descripteur) constat(pluriel(R.nb.descripteur, 'réponse décrite', 'réponses décrites'));
         if (b.totalOk != null) {
-            constat('Somme des pondérations : ' + fmt(b.somme) + ' · ton total : ' + fmt(R.totalNb) + (b.totalOk ? ' ✓' : ' : écart'),
+            constat('Somme des pondérations : ' + formaterNombre(b.somme) + ' · ton total : ' + formaterNombre(R.totalNb) + (b.totalOk ? ' ✓' : ' : écart'),
                 b.totalOk ? 'dissection-constat-ok' : 'dissection-constat-ecart');
-        } else if (b.aDesPoids) constat('Somme des pondérations : ' + fmt(b.somme));
+        } else if (b.aDesPoids) constat('Somme des pondérations : ' + formaterNombre(b.somme));
         constat(pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette'));
     }
 

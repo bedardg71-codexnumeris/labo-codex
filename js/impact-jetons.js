@@ -409,7 +409,7 @@ function creerGraphiqueImpactJetons(canvasId) {
             },
             label: function(context) {
                 var val = context.parsed.y;
-                var pctStr = val != null ? val.toFixed(1).replace('.', ',') + '%' : '—';
+                var pctStr = val != null ? formaterPourcentage(val, 1) : '—';
                 return ' ' + context.dataset.label + ' : ' + pctStr;
             },
             afterBody: function(tooltipItems) {

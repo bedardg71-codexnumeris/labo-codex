@@ -207,8 +207,6 @@
         };
     };
 
-    function fmt(x) { return String(x).replace('.', ','); }
-
     /** Textes du prototype : chevauchement, ou trou de plus d'un point entre deux plages. */
     function avertissementPlages(m) {
         var plages = m.niveaux.filter(plageValide).map(function (n) {
@@ -216,8 +214,8 @@
         }).sort(function (a, b) { return a.lo - b.lo; });
         for (var q = 1; q < plages.length; q++) {
             var a = plages[q - 1], b = plages[q];
-            if (b.lo <= a.hi) return 'Les plages « ' + a.t + ' » et « ' + b.t + ' » se chevauchent (' + fmt(a.hi) + ' et ' + fmt(b.lo) + ' %) : une même note tomberait dans deux niveaux. Il pourrait être utile de les ajuster.';
-            if (b.lo - a.hi > 1) return 'Il y a un trou entre « ' + a.t + ' » (jusqu’à ' + fmt(a.hi) + ' %) et « ' + b.t + ' » (dès ' + fmt(b.lo) + ' %) : certaines notes ne tomberaient dans aucun niveau. Il pourrait être utile de les ajuster.';
+            if (b.lo <= a.hi) return 'Les plages « ' + a.t + ' » et « ' + b.t + ' » se chevauchent (' + formaterNombre(a.hi) + ' et ' + formaterPourcentage(b.lo) + ') : une même note tomberait dans deux niveaux. Il pourrait être utile de les ajuster.';
+            if (b.lo - a.hi > 1) return 'Il y a un trou entre « ' + a.t + ' » (jusqu’à ' + formaterPourcentage(a.hi) + ') et « ' + b.t + ' » (dès ' + formaterPourcentage(b.lo) + ') : certaines notes ne tomberaient dans aucun niveau. Il pourrait être utile de les ajuster.';
         }
         return '';
     }
@@ -229,7 +227,7 @@
             return plageValide(n) && !isNaN(v) && (v < A.nombre(n.min.valeur) || v > A.nombre(n.max.valeur));
         })[0];
         if (!hors) return '';
-        return 'La note retenue de « ' + (texte(hors.titre) || 'sans nom') + ' » (' + fmt(A.nombre(hors.note.valeur)) + ' %) est hors de sa plage : il pourrait être utile de la vérifier.';
+        return 'La note retenue de « ' + (texte(hors.titre) || 'sans nom') + ' » (' + formaterPourcentage(A.nombre(hors.note.valeur)) + ') est hors de sa plage : il pourrait être utile de la vérifier.';
     }
 
     A.estRetro = function (m) { return !!(m.nature && m.nature.valeur === 'retroactions'); };

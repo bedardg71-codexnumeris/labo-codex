@@ -94,7 +94,7 @@ describe('#667 · B — le texte affiché dérive du calcul', () => {
         const critere = { modeleFormule: 'penalite_normalisee', paramsFormule: { facteurNormalisation: 500 } };
         const donnees = { ponderation: 100, erreurs: 59, mots: 460 };
         const note = F.calculer(critere, donnees).note;
-        expect(F.libelleChiffre(critere, donnees)).toContain(note.toFixed(2));
+        expect(F.libelleChiffre(critere, donnees)).toContain(note.toFixed(2).replace(".", ","));
     });
 
     // LE test de la régression que #667 corrige : changer le paramètre doit
@@ -112,8 +112,8 @@ describe('#667 · B — le texte affiché dérive du calcul', () => {
         expect(F.libelleSymbolique(a)).toContain('500');
         expect(F.libelleSymbolique(b)).toContain('250');
         expect(F.libelleSymbolique(b)).not.toContain('500');
-        expect(F.libelleChiffre(a, donnees)).toContain(noteA.toFixed(2));
-        expect(F.libelleChiffre(b, donnees)).toContain(noteB.toFixed(2));
+        expect(F.libelleChiffre(a, donnees)).toContain(noteA.toFixed(2).replace(".", ","));
+        expect(F.libelleChiffre(b, donnees)).toContain(noteB.toFixed(2).replace(".", ","));
     });
 
     it('chaque modèle offert sait se calculer ET se dire', () => {
@@ -126,7 +126,7 @@ describe('#667 · B — le texte affiché dérive du calcul', () => {
             expect(r.applicable, m.id).toBe(true);
             expect(Number.isFinite(r.note), m.id).toBe(true);
             expect(F.libelleSymbolique(critere).length, m.id).toBeGreaterThan(0);
-            expect(F.libelleChiffre(critere, donnees), m.id).toContain(r.note.toFixed(2));
+            expect(F.libelleChiffre(critere, donnees), m.id).toContain(r.note.toFixed(2).replace(".", ","));
         });
     });
 

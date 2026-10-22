@@ -789,7 +789,7 @@ describe('lot 3 · F — témoins de source', () => {
     it('F.e le chiffre est ce que l\'élève lit : synthèse (données + rendu), rétroaction copiée, aperçu enseignant', () => {
         expect(source('js/synthese-retroaction-data.js')).toContain('points:  points,');
         expect(source('js/synthese-retroaction-data.js')).toContain("'Saisis les points'");
-        expect(source('js/synthese-retroaction-rendu.js')).toContain('${esc(nombreFr(critere.points))} / ${esc(nombreFr(critere.weight))}');   // 21 oct. 2026 : la virgule du PDF de l'élève
+        expect(source('js/synthese-retroaction-rendu.js')).toContain('${esc(formaterNombre(critere.points))} / ${esc(formaterNombre(critere.weight))}');   // ↻ #1137 (22 oct.) : le formateur du module   // 21 oct. 2026 : la virgule du PDF de l'élève
         expect(source('js/evaluation-retroaction.js')).toContain('? `${ptsAnalytiques} / ${critere.ponderation}` : niveau;');
         expect(source('js/travaux-export-pdf.js')).toContain('? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || \'—\');');
         // Seconde retouche (§6) : le bilan du PDF, trois sites, une lecture ; et la légende conditionnée.

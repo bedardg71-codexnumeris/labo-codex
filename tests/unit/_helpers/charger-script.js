@@ -93,16 +93,17 @@ export function completerEcrivainsParDefaut(globaux, fauxWindow) {
  * module qui est chargé (aucune copie de la règle ici). Rend les globaux complétés.
  */
 export function completerNoteParDefaut(globaux) {
-    if (typeof globaux.formaterNotePourcentage === 'function') return globaux;
+    // ↻ 22 oct. 2026 (#1137) : le module affiche tout nombre ; chaque nom manquant est complété, un à un
+    // (un banc qui fournit sa propre `formaterNotePourcentage` reçoit quand même `formaterNombre`).
     const winNote = {};
     new Function('window', readFileSync(path.join(racineProjet, 'js/note-pourcentage.js'), 'utf8'))(winNote);
-    return Object.assign({}, globaux, {
-        formaterNotePourcentage: winNote.formaterNotePourcentage,
-        formaterNoteNombre: winNote.formaterNoteNombre,
-        formaterPoints: winNote.formaterPoints,
-        ESPACE_INSECABLE: winNote.ESPACE_INSECABLE
-    });
+    const ajouts = {};
+    for (const nom of NOMS_NOTE_POURCENTAGE) if (typeof globaux[nom] === 'undefined') ajouts[nom] = winNote[nom];
+    return Object.keys(ajouts).length ? Object.assign({}, globaux, ajouts) : globaux;
 }
+
+const NOMS_NOTE_POURCENTAGE = ['formaterNombre', 'formaterPourcentage', 'formaterNotePourcentage',
+    'formaterNoteNombre', 'formaterPoints', 'ESPACE_INSECABLE'];
 
 export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExistant = null) {
     const chemin = path.join(racineProjet, cheminRelatifProjet);
@@ -129,6 +130,14 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
                 rappel({ detail: { rattrapage: true } });
             }
         };
+    }
+
+    // #1137 (22 oct. 2026) — `js/note-pourcentage.js`, la seule façon d'afficher un nombre, est chargé
+    // par index.html avant taille-fichier.js et bareme.js, qui le lisent par `window` : le VRAI, une
+    // fois par sandbox, avant eux.
+    if (typeof fauxWindow.formaterNombre !== 'function') {
+        new Function('window', '"use strict";\n' +
+            readFileSync(path.join(racineProjet, 'js/note-pourcentage.js'), 'utf8'))(fauxWindow);
     }
 
     // #993 (15 oct. 2026) — `js/taille-fichier.js` est chargé par index.html avant tout module

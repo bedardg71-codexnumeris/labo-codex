@@ -144,7 +144,7 @@ describe('texte troué 2 · B — chaque jeton rend sa valeur exacte, sur les qu
     it('B.s {s} suit {erreurs} : une erreur, pas de s ; une demi-faute non plus ; deux, oui', () => {
         const un = P.appliquerAuCritere({}, 'norme_externe', {}, [{ cle: 'x', ratioMax: null, texte: '{erreurs} erreur{s}' }]);
         expect(calc(un, 1, 300).texte).toBe('1 erreur');
-        expect(calc(un, 0.5, 300).texte).toBe('0.5 erreur');
+        expect(calc(un, 0.5, 300).texte).toBe('0,5 erreur');   // #1137 (22 oct.) : la virgule
         expect(calc(un, 2, 300).texte).toBe('2 erreurs');
     });
 

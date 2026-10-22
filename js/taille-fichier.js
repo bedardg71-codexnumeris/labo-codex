@@ -14,7 +14,7 @@
      le donne (Chrome, Edge), sinon « Windows » dans `navigator.userAgent`. Safari
      sur iPad se déclare « Macintosh » : base 1000, comme l'iPad lui-même.
 
-   Dépendances : aucune (lit `navigator`).
+   Dépendances : `window.formaterNombre` (js/note-pourcentage.js, chargé avant ; #1137) ; lit `navigator`.
 
    API : window.TailleFichier
      - dire(octets, options) → string  (« 255 Mo », « 1,08 Go », « environ 1,0 Go »)
@@ -71,7 +71,7 @@ function dire(octets, options) {
             i++;
             valeur = valeur / b;
         }
-        texte = valeur.toFixed(dec[UNITES[i]]).replace('.', ',') + ' ' + UNITES[i];
+        texte = window.formaterNombre(valeur, dec[UNITES[i]]) + ' ' + UNITES[i];   // #1137 : la virgule, du module des nombres
     }
     return options.environ ? 'environ ' + texte : texte;
 }

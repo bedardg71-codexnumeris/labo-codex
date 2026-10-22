@@ -441,9 +441,7 @@ function obtenirNombreProductionsPourPatterns() {
  * @returns {string}
  */
 function formaterNombrePeriodes(n) {
-    const v = Number(n);
-    if (!Number.isFinite(v)) return '0';
-    return String(Math.round(v * 100) / 100).replace('.', ',');
+    return formaterNombre(n) || '0';   // #1137 : la virgule vit dans js/note-pourcentage.js
 }
 
 /**

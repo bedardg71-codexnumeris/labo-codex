@@ -662,10 +662,10 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                                 var val = context.parsed.y;
                                 var nEtu = donnees.n[idx] || 0;
                                 if (context.dataset.yAxisID === 'yPct') {
-                                    var pctStr = val != null ? val.toFixed(1).replace('.', ',') + '%' : '—';
+                                    var pctStr = val != null ? formaterPourcentage(val, 1) : '—';
                                     return ' ' + context.dataset.label + ' : ' + pctStr;
                                 }
-                                var rStr = val != null ? val.toFixed(3).replace('.', ',') : '—';
+                                var rStr = val != null ? formaterNombre(val, 3) : '—';
                                 return ' ' + context.dataset.label + ' : r = ' + rStr + '  (n = ' + nEtu + ')';
                             },
                             afterBody: function(tooltipItems) {
@@ -702,7 +702,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                                         if (!aDesP) { lignes.push(''); aDesP = true; }
                                         var lbl = courbes[ci2].niveauRai === 0 ? 'Contrôle' : courbes[ci2].titre;
                                         var nb = courbes[ci2].nbEtudiants;
-                                        lignes.push((courbes[ci2].niveauRai === 0 ? '○' : '●') + ' ' + lbl + ' : P = ' + val2.toFixed(1).replace('.', ',') + '%' + (nb ? ' (n=' + nb + ')' : ''));
+                                        lignes.push((courbes[ci2].niveauRai === 0 ? '○' : '●') + ' ' + lbl + ' : P = ' + formaterPourcentage(val2, 1) + (nb ? ' (n=' + nb + ')' : ''));
                                     }
                                 }
 
@@ -744,7 +744,7 @@ function creerGraphiqueCorrelationsLongitudinales(canvasId) {
                             font: { size: 11 },
                             stepSize: 0.25,
                             callback: function(value) {
-                                return value.toFixed(2).replace('.', ',');
+                                return formaterNombre(value, 2);
                             }
                         },
                         grid: {

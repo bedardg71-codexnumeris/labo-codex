@@ -66,6 +66,11 @@
 (function() {
 'use strict';
 
+// #1137 (22 oct. 2026) : les nombres affichés passent par js/note-pourcentage.js, que index.html
+// charge avant ce module ; un banc Node (`require`) le requiert.
+var _formaterNombre = (typeof window !== 'undefined' && typeof window.formaterNombre === 'function')
+    ? window.formaterNombre : require('./note-pourcentage.js').formaterNombre;
+
 // ---------------------------------------------------------------------
 // Le nom qui titre — volet (A), sans modèle
 // ---------------------------------------------------------------------
@@ -659,7 +664,7 @@ function mentionPonderee(brut, pondere) {
     if (brut === null || brut === undefined || pondere === null || pondere === undefined) return '';
     if (!isFinite(b) || !isFinite(p) || Math.abs(p - b) < 0.005) return '';
     var arrondi = Math.round(p * 100) / 100;
-    return ' (' + String(arrondi).replace('.', ',') + ' une fois pondérée' + (Math.abs(arrondi) >= 2 ? 's' : '') + ')';
+    return ' (' + _formaterNombre(arrondi) + ' une fois pondérée' + (Math.abs(arrondi) >= 2 ? 's' : '') + ')';
 }
 
 /** Les énoncés par défaut d'un modèle — pour préremplir le gabarit. */

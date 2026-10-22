@@ -168,7 +168,8 @@
     // L'affichage des points
     // ------------------------------------------------------------------
 
-    B.nombreEnTexte = function (n) { return String(n).replace('.', ','); };
+    // #1137 (22 oct. 2026) : la virgule vient du module des nombres affichés (js/note-pourcentage.js).
+    B.nombreEnTexte = function (n) { return window.formaterNombre(n); };
 
     /** « 3 », « 2,5 », « 3 à 4 » ; « » pour une tranche à compléter. */
     B.pointsEnTexte = function (t) {

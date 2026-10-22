@@ -3362,9 +3362,7 @@ function grilleEstAnalytique(grille) {
 
 /** Une borne, telle quelle, en français : 64.99 → « 64,99 », 85 → « 85 ». Vide si ce n'est pas un nombre. */
 function formaterBornePalier(v) {
-    const n = Number(v);
-    if (v === '' || v === null || v === undefined || !Number.isFinite(n)) return '';
-    return String(Math.round(n * 100) / 100).replace('.', ',');
+    return formaterNombre(v);   // #1137 : la règle vit dans js/note-pourcentage.js
 }
 
 /** Le titre d'un palier : « 65–74,99 % » ; sans bornes (copie d'échelle sans elles), le nom du niveau. */
@@ -3373,7 +3371,7 @@ function libellePalier(niveau) {
     const min = formaterBornePalier(niveau.min);
     const max = formaterBornePalier(niveau.max);
     if (min === '' || max === '') return String(niveau.nom || niveau.code || '');
-    return min + '\u2013' + max + '\u00a0%';
+    return min + '\u2013' + formaterPourcentage(niveau.max);
 }
 
 /** La grille d'une cartouche, par son id ou l'id d'origine d'une copie — `null` sans grille. */
