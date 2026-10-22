@@ -63,3 +63,20 @@ Les trois sites passent à la règle unique du pluriel (`> 1` aujourd'hui). Le b
 ## Ensuite
 
 La consigne des trois retouches est dans `CONSIGNE-DU-JOUR.md` (17 h 44). Commit sur `main`, non poussé ; relecture des retouches ; puis les textes soumis à Grégoire, le verdict complet et la version, à son signal.
+
+---
+
+## Relecture des retouches (`efad6af1`) : acceptées
+
+> Cowork, jeudi 22 octobre 2026, 18 h 22 (Toronto, mesuré par `date`). Relu : `efad6af1` contre `365b5364`, et `DEMANDE-RELECTURE-2026-10-22-critere-algorithmique-noms-retouches.md`. Rejoué par `node` sur `js/evaluation-enonces.js` de `efad6af1`.
+
+- **Retouche 1.** `_estNeuf` ne lit plus que `nomsAttendus`, posée dans `avecProjectionNeuve` au même geste et sous la même condition que la marque des codes ; les deux schémas la portent. Rejoué : un critère qui porte la seule marque des codes rend « Ta production contient 5 erreurs pour 400 mots. » et `nomsManquants` rend `[]` ; un critère marqué par `marquerNomsAttendus` rend le repli et les deux paires manquantes.
+- **Retouche 2.** Le bilan d'un critère effondré porte les deux noms, échappés, par `accorder`. « Tous les critères sont maîtrisés » passe par une seule fonction (`nombreEtNom`) dans le bilan et dans le PDF ; le PDF l'échappe au rendu (`synthese-retroaction-rendu.js` l. 654). Rejoué : « 3 erreurs » sans noms, « 1 unité manquante » avec.
+- **Bancs.** S.e (le stock de la 1.213) et B.a (le bilan de `5bd643c3`, le participe en moins) portent des chaînes mesurées ; les quatre break-tests sont nommés. B.c lit la source du PDF plutôt que son rendu : plus faible, suffisant, puisque B.a et B.b éprouvent la fonction partagée.
+- **Jetons anti-cache.** Les six fichiers JS touchés ont un jeton qui diffère de la 1.214 en ligne (`evaluation-retroaction.js` à `20261022c`, les cinq autres à `20261022d`).
+
+**Une remarque, sans suite.** `efad6af1` a aussi embarqué treize documents de `plans de travail/` restés non suivis depuis le 16 oct. (balayage et rapport de la purge, plan du dépôt public, corpus inventé du texte brut, archives de consignes). Hors du lot, mais écrits pour le dépôt public : aucun nom (les collègues y sont désignés par leur rang), aucune adresse autre que celle du projet, mesuré par `grep`. Ils seront publics au prochain push. Disposition : *commenter et oublier* ; à l'avenir, le commit d'un lot n'ajoute que ses propres fichiers.
+
+## Ensuite
+
+Les textes de `TEXTES-2026-10-22-noms-critere-algorithmique.md` soumis à Grégoire, un à la fois, en commençant par ce que l'élève lit ; puis le verdict complet et la version, à son signal ; puis l'étape 2b (la palette).
