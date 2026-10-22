@@ -28227,6 +28227,14 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .dis-t-points { --dis-c: var(--dis-c-points); --dis-h: var(--dis-h-points); }
 .dis-t-suite { --dis-c: var(--dis-c-suite); --dis-h: var(--dis-h-suite); }
 .dis-t-ignorer { --dis-c: var(--dis-c-ignorer); --dis-h: var(--dis-h-ignorer); }
+/* Étape 5 du critère algorithmique (22 oct. 2026) : les étiquettes d'une liste de codes REPRENNENT quatre
+   surligneurs existants, sans variable neuve (une liste de codes se colle seule : jamais à côté d'une
+   grille). Le code comme un critère, son nom comme un élément observable, son poids comme une pondération,
+   son commentaire comme un descripteur. */
+.dis-t-code { --dis-c: var(--dis-c-critere); --dis-h: var(--dis-h-critere); }
+.dis-t-nomcode { --dis-c: var(--dis-c-souscritere); --dis-h: var(--dis-h-souscritere); }
+.dis-t-poids { --dis-c: var(--dis-c-ponderation); --dis-h: var(--dis-h-ponderation); }
+.dis-t-commentaire { --dis-c: var(--dis-c-descripteur); --dis-h: var(--dis-h-descripteur); }
 /* Lot 5 : « Couper » est un OUTIL, pas une étiquette : rien ne prend sa couleur ; son trait est en pointillé. */
 .dis-t-couper, .dis-t-rattacher { --dis-c: var(--texte-secondaire); --dis-h: transparent; }
 .dissection-outil .dissection-etiquette-trait { background: none; box-shadow: none; border-left: 3px dashed var(--dis-c); }
@@ -28364,6 +28372,16 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .dissection-niveau-champ input { width: 6.5em; min-height: 44px; font-size: 1rem; box-sizing: border-box; }
 .dissection-niveau-unite { color: var(--texte-secondaire); }
 .dissection-creer .alerte { flex-basis: 100%; margin: 0; }
+/* Étape 5 : où vont les codes. Un critère par rangée (son nom, sa grille, son motif s'il est refusé) ;
+   un critère refusé reste lisible, grisé par son bouton seul. Le commentaire garde ses paragraphes. */
+.dissection-destinations { flex-direction: column; flex-wrap: nowrap; gap: 2px; }
+.dissection-destinations .dissection-creer-option { display: flex; align-items: flex-start; padding: 8px 0; }
+.dissection-destinations .dissection-creer-option input { flex: 0 0 auto; margin-top: 2px; }
+.dissection-option-refusee { cursor: default; }
+.dissection-destination-texte { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.dissection-destination-critere { font-weight: 600; }
+.dissection-destination-grille, .dissection-destination-motif { font-size: 0.9rem; color: var(--texte-secondaire); }
+.dissection-code-commentaire { white-space: pre-line; }
 
 /* C1 (relecture du 18 oct.) : la palette GARDE SA PLACE à gauche tant que le canevas garde 480 px.
    Plus étroite (170 px) : le nom, l'aide et le compte ; la précision passe dans le bandeau.

@@ -14,6 +14,11 @@
  * ⛔ AUCUN OBJET EXISTANT N'EST MODIFIÉ. Chaque mutateur AJOUTE un objet neuf, et refuse
  * (lève) si son identifiant est déjà pris : la présence se vérifie dans la file, à l'instant
  * de l'écriture (#599).
+ * ⚠ UNE EXCEPTION, NOMMÉE (étape 5 du critère algorithmique, 22 oct. 2026, option A tranchée par
+ * Cowork) : `ajouterCodes` pose une liste de codes collée dans un critère algorithmique EXISTANT qui
+ * n'en a AUCUN — ses sous-critères, vides, deviennent la liste. Rien d'autre du critère ni de la grille
+ * ne change ; un critère qui a déjà des codes ou des sous-critères est refusé, vérifié dans la file, à
+ * l'instant de l'écriture.
  *
  * Aucun objet partiel ne reste visible : trois clés ne s'écrivent pas en une transaction, alors
  * une écriture qui échoue fait DÉFAIRE celles qui l'ont précédée, en ordre inverse (chaque
@@ -129,6 +134,55 @@
             return { erreur: restes.length ? C.MESSAGES.echecPartiel + restes.join(', ') + '.' : C.MESSAGES.echec };
         }
         return { objets: o, resume: resumer(m, o) };
+    };
+
+    // Étape 5 du critère algorithmique : textes PROVISOIRES de Claude Code (22 oct. 2026).
+    C.MESSAGES_CODES = {
+        introuvable: 'Ce critère n’est plus là : rien n’a été ajouté. Choisis-en un autre.',
+        refuse: function (motif) { return 'Rien n’a été ajouté. ' + motif + '.'; },
+        echec: 'L’ajout n’a pas abouti, et rien n’a été ajouté. Tu pourrais réessayer.'
+    };
+
+    /** Les règles de `destinationsCodes` : le critère qui reçoit les codes (#1132) et la marque d'un critère né depuis le 21 oct. */
+    C.reglesCodes = function () {
+        return {
+            critereQuiRecoit: function (g) { return window.enoncesAlgo ? window.enoncesAlgo.critereAlgorithmique(g) : null; },
+            marque: window.codesAnnotation ? window.codesAnnotation.MARQUE : 'codesSousCriteresSeulement'
+        };
+    };
+
+    /**
+     * Pose `codes` ([{ code, nom, poids, commentaire }], `materielDissectionLecture.codesCompris`) comme
+     * sous-critères du critère `critereId` de la grille `grilleId` : `{ code, nom, ponderation, retroaction }`,
+     * la forme de `ajouterSousCritere` (grilles.js). Le commentaire passe TEL QUEL dans `retroaction`.
+     * Le droit d'y écrire (`destinationsCodes`) se vérifie de nouveau dans la file : une liste ne remplace
+     * jamais rien, même collée deux fois.
+     * @returns {Promise<{resume: {grille: string, critere: string, nombre: number}}|{erreur: string}>}
+     */
+    C.ajouterCodes = async function (grilleId, critereId, codes) {
+        if (typeof window.cle !== 'function' || window.cle('grillesTemplates') === 'grillesTemplates') return { erreur: C.MESSAGES.sansTrimestre };
+        if (typeof window.estTrimestreArchive === 'function' && window.estTrimestreArchive()) return { erreur: C.MESSAGES.clos };
+        var regles = C.reglesCodes(), resume = null, refus = null;
+        try {
+            await db.modifier(window.cle('grillesTemplates'), function (lues) {
+                var liste = Array.isArray(lues) ? lues : [];
+                var g = liste.find(function (x) { return x && x.id === grilleId; });
+                var dest = g ? window.materielDissectionLecture.destinationsCodes([g], regles).find(function (d) { return d.critereId === critereId; }) : null;
+                if (!dest) { refus = C.MESSAGES_CODES.introuvable; return undefined; }
+                if (dest.motif) { refus = C.MESSAGES_CODES.refuse(dest.motif); return undefined; }
+                var copie = JSON.parse(JSON.stringify(g));
+                var c = copie.criteres.find(function (x) { return x && x.id === critereId; });
+                c.sousCriteres = codes.map(function (k) {
+                    return { id: window.genererIdUnique('SC_'), code: k.code, nom: k.nom, ponderation: k.poids, retroaction: k.commentaire };
+                });
+                resume = { grille: dest.grille, critere: dest.critere, nombre: codes.length };
+                return liste.map(function (x) { return x === g ? copie : x; });
+            }, []);
+        } catch (err) {
+            console.error('[materiel] ajout des codes interrompu', err);
+            return { erreur: C.MESSAGES_CODES.echec };
+        }
+        return refus ? { erreur: refus } : { resume: resume };
     };
 
     window.materielCreation = C;

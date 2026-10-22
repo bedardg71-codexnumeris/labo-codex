@@ -55,7 +55,10 @@
      * de « Rattacher ».
      */
     function etatNeuf(doc) {
-        return { doc: doc, liens: {}, actif: null, morceaux: doc ? D().morceaux(doc) : null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [], rattachements: {}, choix: null };
+        // Étape 5 du critère algorithmique (22 oct. 2026) : `destination`, le critère choisi pour une liste de codes
+        // (« grilleId\ncritereId ») ; `codesAjoutes`, ce que la confirmation dit. Ni l'un ni l'autre n'entre au brouillon.
+        return { doc: doc, liens: {}, actif: null, morceaux: doc ? D().morceaux(doc) : null, erreur: '', enCours: false, nomSaisi: null, compte: 'points', valeurs: {}, coupes: [], rattachements: {}, choix: null,
+            destination: null, codesAjoutes: null };
     }
     var etat = etatNeuf(null);
     var blocs = {};
@@ -725,6 +728,31 @@
         return t;
     }
 
+    /**
+     * Étape 5 du critère algorithmique : la liste de codes comprise, une rangée par code (code, nom, poids,
+     * commentaire). Tout passe par `textContent` : rien de collé n'est interprété. Un poids absent se lit
+     * « 1 », comme il s'écrira.
+     */
+    function tableCodes(R) {
+        var t = noeud('table', 'dissection-table-comprise dissection-table-codes');
+        var thead = noeud('thead'), th = noeud('tr');
+        TEXTES_CODES.colonnes.forEach(function (x) { var c = noeud('th', null, x); c.scope = 'col'; th.appendChild(c); });
+        thead.appendChild(th);
+        t.appendChild(thead);
+        var tbody = noeud('tbody');
+        D().codesCompris(R).codes.forEach(function (k) {
+            var tr = noeud('tr');
+            tr.appendChild(noeud('td', 'dissection-crit-nom', k.code));
+            tr.appendChild(k.nom ? noeud('td', null, k.nom) : vide());
+            tr.appendChild(noeud('td', null, formaterNombre(k.poids)));
+            tr.appendChild(k.commentaire ? noeud('td', 'dissection-code-commentaire', k.commentaire) : vide());
+            tbody.appendChild(tr);
+        });
+        t.appendChild(tbody);
+        return t;
+        function vide() { var td = noeud('td'); td.appendChild(noeud('span', 'dissection-vide', '—')); return td; }
+    }
+
     function rendreLecture() {
         var cs = el('dissection-constats'), cp = el('dissection-comprise'), sp = el('dissection-sans-place'), lg = el('dissection-logique');
         if (!cs || !cp || !sp || !lg || !etat.doc) return;
@@ -736,6 +764,13 @@
             cp.appendChild(noeud('p', 'dissection-vide', 'Surligne ta grille : la lecture de l’application apparaîtra ici.'));
             return;
         }
+        rendreSansPlace(sp, R);
+        if (D().estListeDeCodes(R)) {
+            cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.codes.length, 'code', 'codes')));
+            cs.appendChild(noeud('span', 'dissection-constat', pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette')));
+            if (R.codes.length) cp.appendChild(tableCodes(R));
+            return;
+        }
         var phrase = phraseLogique(b);
         if (phrase) { lg.textContent = phrase; lg.classList.remove('u-hide'); }
         rendreConstats(cs, R, b);
@@ -745,12 +780,14 @@
         } else {
             cp.appendChild(tableComprise(R));
         }
-        if (R.sansPlace.length) {
-            sp.appendChild(noeud('p', null, 'Ces morceaux ont une étiquette, mais l’application ne saurait pas où les ranger :'));
-            var ul = noeud('ul');
-            R.sansPlace.forEach(function (s) { ul.appendChild(noeud('li', null, '« ' + s.t + ' » (' + D().TYPE[s.type].nom + ') : ' + s.raison)); });
-            sp.appendChild(ul);
-        }
+    }
+
+    function rendreSansPlace(sp, R) {
+        if (!R.sansPlace.length) return;
+        sp.appendChild(noeud('p', null, 'Ces morceaux ont une étiquette, mais l’application ne saurait pas où les ranger :'));
+        var ul = noeud('ul');
+        R.sansPlace.forEach(function (s) { ul.appendChild(noeud('li', null, '« ' + s.t + ' » (' + D().TYPE[s.type].nom + ') : ' + s.raison)); });
+        sp.appendChild(ul);
     }
 
     // ------------------------------------------------------------------
@@ -949,7 +986,10 @@
     function rendreCreer(R) {
         var z = el('dissection-creer');
         if (!z) return;
-        if (!Object.keys(etat.liens).length) { z.textContent = ''; return; }
+        if (!Object.keys(etat.liens).length) { z.textContent = ''; delete z.dataset.mode; return; }
+        // Étape 5 : une liste de codes ne crée pas de grille ; elle va dans un critère existant.
+        if (D().estListeDeCodes(R)) { rendreCodes(z, R); return; }
+        if (z.dataset.mode === 'codes') { z.textContent = ''; delete z.dataset.mode; }
         var c = creation(R);
         var champ = el('dissection-nom-grille');
         if (!champ) {
@@ -996,6 +1036,155 @@
             return;
         }
         window.materiel.montrerCreee(r.resume);
+    }
+
+    // ------------------------------------------------------------------
+    // Étape 5 du critère algorithmique (22 oct. 2026) : une liste de codes va dans un critère existant.
+    // Consigne : `plans de travail/CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`.
+    // ------------------------------------------------------------------
+
+    // Textes PROVISOIRES de Claude Code, à valider par Grégoire.
+    var TEXTES_CODES = {
+        colonnes: ['Code', 'Nom', 'Poids', 'Commentaire'],
+        ou: 'Où vont ces codes ?',
+        ouAide: 'Dans un critère algorithmique qui n’a pas encore de codes. Il garde sa formule et sa pondération ; rien n’est remplacé.',
+        aucun: 'Aucun critère algorithmique dans les grilles de ce trimestre. Crée-le d’abord dans « Grilles de critères », puis reviens.',
+        choisir: 'le critère qui recevra ces codes',
+        bouton: 'Ajouter ces codes',
+        enCours: 'Ajout…',
+        raisons: 'Avant d’ajouter, il reste :',
+        ajoutes: function (r) {
+            return pluriel(r.nombre, 'code ajouté', 'codes ajoutés') + ' à « ' + r.critere + ' » (grille « ' + r.grille + ' »). Tu les retrouves dans « Grilles de critères ».';
+        }
+    };
+
+    function cleDestination(d) { return d.grilleId + '\n' + d.critereId; }
+
+    function destinations() {
+        var grilles = [];
+        try { grilles = db.getSync(cle('grillesTemplates'), []) || []; } catch (err) { grilles = []; }
+        return D().destinationsCodes(grilles, window.materielCreation.reglesCodes());
+    }
+
+    /** Le choix du critère : un bouton radio par critère algorithmique ; ceux qui ne peuvent pas recevoir la liste, grisés, leur motif dessous. */
+    function champDestination(dests) {
+        var fs = noeud('fieldset', 'dissection-creer-choix dissection-destinations');
+        fs.id = 'dissection-destinations';
+        fs.appendChild(noeud('legend', null, TEXTES_CODES.ou));
+        fs.appendChild(noeud('p', 'dissection-creer-niveaux-aide', TEXTES_CODES.ouAide));
+        if (!dests.length) { fs.appendChild(noeud('p', 'dissection-vide', TEXTES_CODES.aucun)); return fs; }
+        dests.forEach(function (d, i) {
+            var lab = noeud('label', 'dissection-creer-option' + (d.motif ? ' dissection-option-refusee' : ''));
+            var r = noeud('input');
+            r.type = 'radio';
+            r.name = 'dissection-destination';
+            r.id = 'dissection-destination-' + i;
+            r.value = cleDestination(d);   // .value : jamais du HTML
+            r.disabled = !!d.motif;
+            r.checked = !d.motif && etat.destination === r.value;
+            r.addEventListener('change', function () {
+                if (!r.checked) return;
+                etat.destination = r.value;
+                etat.erreur = '';
+                etat.codesAjoutes = null;
+                rendreActionsCodes(lire());
+            });
+            lab.appendChild(r);
+            var txt = noeud('span', 'dissection-destination-texte');
+            txt.appendChild(noeud('span', 'dissection-destination-critere', '« ' + d.critere + ' »'));
+            txt.appendChild(noeud('span', 'dissection-destination-grille', d.grille));
+            if (d.motif) {
+                var m = noeud('span', 'dissection-destination-motif', d.motif);
+                m.id = 'dissection-destination-motif-' + i;
+                r.setAttribute('aria-describedby', m.id);
+                txt.appendChild(m);
+            }
+            lab.appendChild(txt);
+            fs.appendChild(lab);
+        });
+        return fs;
+    }
+
+    /** Ce qui empêche l'ajout, avant même de toucher au bouton : la liste, puis le choix. */
+    function raisonsCodes(R) {
+        var raisons = D().codesCompris(R).raisons.slice();
+        var choisie = destinations().some(function (d) { return !d.motif && cleDestination(d) === etat.destination; });
+        if (!choisie) raisons.push(TEXTES_CODES.choisir);
+        return raisons;
+    }
+
+    function rendreActionsCodes(R) {
+        var z = el('dissection-creer-actions');
+        if (!z) return;
+        z.textContent = '';
+        var raisons = raisonsCodes(R);
+        var b = noeud('button', 'btn btn-principal', etat.enCours ? TEXTES_CODES.enCours : TEXTES_CODES.bouton);
+        b.type = 'button';
+        b.setAttribute('data-action', 'materielDissection.ajouterCodes');
+        b.disabled = raisons.length > 0 || etat.enCours;
+        z.appendChild(b);
+        if (raisons.length) {
+            var r = noeud('div', 'dissection-creer-raisons');
+            r.id = 'dissection-creer-raisons';
+            r.appendChild(noeud('strong', null, TEXTES_CODES.raisons));
+            var ul = noeud('ul');
+            raisons.forEach(function (t) { ul.appendChild(noeud('li', null, t)); });
+            r.appendChild(ul);
+            z.appendChild(r);
+            b.setAttribute('aria-describedby', r.id);
+        }
+        if (etat.codesAjoutes) {
+            var ok = noeud('p', 'alerte alerte-succes', TEXTES_CODES.ajoutes(etat.codesAjoutes));
+            ok.id = 'dissection-codes-ajoutes';
+            ok.setAttribute('role', 'status');
+            z.appendChild(ok);
+        }
+        if (etat.erreur) {
+            var p = noeud('p', 'alerte alerte-erreur', etat.erreur);
+            p.setAttribute('role', 'alert');
+            z.appendChild(p);
+        }
+    }
+
+    /** La zone de création, en mode « codes » : le choix du critère, puis le bouton et ses raisons. */
+    function rendreCodes(z, R) {
+        z.textContent = '';
+        z.dataset.mode = 'codes';
+        var dests = destinations();
+        // Un choix qui ne vaut plus (la liste vient d'y entrer, ou la grille a changé) ne reste pas coché.
+        if (!dests.some(function (d) { return !d.motif && cleDestination(d) === etat.destination; })) etat.destination = null;
+        var zc = noeud('div', 'dissection-creer-saisie');
+        zc.id = 'dissection-creer-saisie';
+        zc.appendChild(champDestination(dests));
+        z.appendChild(zc);
+        var actions = noeud('div', 'dissection-creer-actions');
+        actions.id = 'dissection-creer-actions';
+        z.appendChild(actions);
+        rendreActionsCodes(R);
+    }
+
+    /**
+     * « Ajouter ces codes » : l'écriture de `materielCreation.ajouterCodes`, puis la confirmation, sur place.
+     * La dissection reste ouverte ; le critère qui vient de recevoir la liste ne peut plus en recevoir une
+     * autre (il a des codes) : un second toucher n'ajoute rien.
+     */
+    async function ajouterCodes() {
+        if (etat.enCours || !etat.doc) return;
+        var R = lire();
+        if (raisonsCodes(R).length) { rendreLecture(); return; }
+        var parts = etat.destination.split('\n'), doc = etat.doc;
+        etat.enCours = true;
+        etat.erreur = '';
+        etat.codesAjoutes = null;
+        rendreLecture();
+        var r;
+        try { r = await window.materielCreation.ajouterCodes(parts[0], parts[1], D().codesCompris(R).codes); } finally { if (etat.doc === doc) etat.enCours = false; }
+        if (etat.doc !== doc) return;
+        if (r.erreur) etat.erreur = r.erreur; else etat.codesAjoutes = r.resume;
+        rendreLecture();
+        // Le focus va à ce qui vient de se passer : la confirmation, ou le bouton à côté de l'échec.
+        var cible = r.erreur ? document.querySelector('[data-action="materielDissection.ajouterCodes"]') : el('dissection-codes-ajoutes');
+        if (cible) { if (!r.erreur) cible.tabIndex = -1; cible.focus(); }
     }
 
     /** Les constats en pastilles : titre, sections, critères, niveaux, réponses, somme et total, morceaux sans étiquette. */
@@ -1176,6 +1365,7 @@
         toutRetirer: toutRetirer,
         annulerCoupe: annulerCoupe,
         creer: creer,
+        ajouterCodes: ajouterCodes,
         construireFeuille: construireFeuille,
         /** L'état de la dissection (lecture) — pour les bancs. */
         etatCourant: function () { return etat; },

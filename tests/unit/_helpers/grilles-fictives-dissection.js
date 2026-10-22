@@ -195,3 +195,25 @@ export function decouperD(D, e0) {
     TOTAUX_D.forEach((t) => { e.liens[idDe(e.doc, t)] = 'total'; });
     return e;
 }
+
+// ---------------------------------------------------------------------------
+// Étape 5 du critère algorithmique (22 oct. 2026) : deux LISTES DE CODES fictives, en tableau (code, nom,
+// poids, commentaire), une rangée d'en-tête laissée sans étiquette. Le garde-fou du plan : une discipline
+// qui écrit (une rédaction), une qui n'écrit pas (des calculs de chimie). Textes INVENTÉS.
+// ---------------------------------------------------------------------------
+const enTete = [{ l: [['Code', null]] }, { l: [['Nom', null]] }, { l: [['Poids', null]] }, { l: [['Commentaire', null]] }];
+const rangeeCode = (code, nom, poids, commentaires) => [
+    { l: [[code, 'code']] }, { l: [[nom, 'nomcode']] }, { l: poids == null ? [] : [[poids, 'poids']] },
+    { l: commentaires.map((c) => [c, 'commentaire']) }
+];
+export const LISTE_CODES_REDACTION = [
+    enTete,
+    rangeeCode('S', 'Syntaxe fictive', '1', ['Relis la phrase fictive à voix haute.']),
+    rangeeCode('A', 'Accord fictif', '0,5', ['Repère le nom fictif, puis son déterminant.', 'Vérifie ensuite l’adjectif fictif.']),
+    rangeeCode('P', 'Ponctuation fictive', null, ['Une virgule fictive manque.'])
+];
+export const LISTE_CODES_CHIMIE = [
+    enTete,
+    rangeeCode('U1', 'Unité manquante', '2', ['Écris l’unité de chaque résultat fictif.']),
+    rangeeCode('CS', 'Chiffres significatifs', '1', ['Arrondis au nombre de chiffres significatifs des données fictives.'])
+];
