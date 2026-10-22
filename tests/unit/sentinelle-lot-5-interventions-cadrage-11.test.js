@@ -164,7 +164,7 @@ describe('A\' · le stock : un brouillon d\'avant le lot, resté en base', () =>
 describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', () => {
     const complete = () => intervention({ id: 'I_B', titre: 'Fini', etudiants: ['2000001'], criteresCibles: ['Structure'], statut: 'completee',
         snapshotAvant: { 2000001: { P: 60, criteres: { structure: 0.645 } } } });
-    const cellules = (html) => [...html.matchAll(/<td style="padding: 6px 12px; text-align: center;">([IDME—]) (\d+) %<\/td>/g)].map(m => m[1] + ' ' + m[2]);
+    const cellules = (html) => [...html.matchAll(/<td style="padding: 6px 12px; text-align: center;">([IDME—]) (\d+)\u00A0%<\/td>/g)].map(m => m[1] + ' ' + m[2]);
     const suggerer = (b) => {
         b.selecteurs['#listeEtudiantsIntervention input[type="checkbox"]:checked'] = [elementDom({ value: '2000001', checked: true })];
         b.selecteurs['.critere-cible-cb:checked'] = [elementDom({ value: 'Structure', checked: true })];
