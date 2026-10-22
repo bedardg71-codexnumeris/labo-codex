@@ -188,7 +188,7 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
         db.setSync(cle('grillesTemplates'), db.getSync(cle('grillesTemplates'), []).concat([g]));
         await window.ouvrirGrilleDepuisListe('GRILLE_POURCENT_2A');
     });
-    await expect(page.locator('#totalPonderationAffichage')).toHaveText('100%');
+    await expect(page.locator('#totalPonderationAffichage')).toHaveText('100\u00A0%');
     await expect(liste.locator('.critere-rangee label', { hasText: 'Pond. (%)' })).toHaveCount(2);
     expect(erreurs).toEqual([]);
 });

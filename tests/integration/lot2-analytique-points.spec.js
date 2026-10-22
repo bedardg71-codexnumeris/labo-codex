@@ -187,7 +187,7 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     console.log('24 SEUL →', JSON.stringify(ecran));
     expect(ecran.note).toBe('--');
     expect(ecran.portee).toContain('Contenu');
-    expect(ecran.portee).toContain('70 %');
+    expect(ecran.portee).toContain('70\u00A0%');
 
     // 4. LE « FINI QUAND » : Contenu à M (80) au menu → 0,8 × 70 + 24 = 80,0 %.
     await choisirContenu(page, 'M');
@@ -212,7 +212,7 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     console.log('VIDÉ →', JSON.stringify(ecran));
     expect(ecran.note).toBe('--');
     expect(ecran.portee).toContain('Langue');
-    expect(ecran.portee).toContain('30 %');
+    expect(ecran.portee).toContain('30\u00A0%');
 
     // 7. Hors bornes : 40 sur 30 est ramené à 30, et le champ le montre → 66,5 + 30 = 96,5 %.
     await saisirPoints(page, '40');

@@ -136,11 +136,11 @@ describe('A — les fonctions du module : la virgule, l’insécable, la précis
     });
 
     it('formaterPourcentage : le CARACTÈRE U+00A0 avant « % », jamais l’entité ni une espace ordinaire', () => {
-        expect(w.formaterPourcentage(78)).toBe('78 %');
-        expect(w.formaterPourcentage(0.823 * 100, 1)).toBe('82,3 %');
-        expect(w.formaterPourcentage(65, 0)).toBe('65 %');
-        expect(w.formaterPourcentage(0)).toBe('0 %');
-        expect(w.formaterPourcentage(-12.5)).toBe('-12,5 %');
+        expect(w.formaterPourcentage(78)).toBe('78\u00A0%');
+        expect(w.formaterPourcentage(0.823 * 100, 1)).toBe('82,3\u00A0%');
+        expect(w.formaterPourcentage(65, 0)).toBe('65\u00A0%');
+        expect(w.formaterPourcentage(0)).toBe('0\u00A0%');
+        expect(w.formaterPourcentage(-12.5)).toBe('-12,5\u00A0%');
         const t = w.formaterPourcentage(40);
         expect(t).not.toContain('&nbsp;');
         expect(t).not.toContain(' ');
@@ -148,10 +148,10 @@ describe('A — les fonctions du module : la virgule, l’insécable, la précis
     });
 
     it('formaterPoints : une décimale fixe par défaut (la règle du PDF), sinon celle de l’appelant', () => {
-        expect(w.formaterPoints(44.5)).toBe('44,5 pts');
-        expect(w.formaterPoints(24)).toBe('24,0 pts');
-        expect(w.formaterPoints(22.5, 0)).toBe('23 pts');
-        expect(w.formaterPoints(-3, 0)).toBe('-3 pts');
+        expect(w.formaterPoints(44.5)).toBe('44,5\u00A0pts');
+        expect(w.formaterPoints(24)).toBe('24,0\u00A0pts');
+        expect(w.formaterPoints(22.5, 0)).toBe('23\u00A0pts');
+        expect(w.formaterPoints(-3, 0)).toBe('-3\u00A0pts');
     });
 });
 

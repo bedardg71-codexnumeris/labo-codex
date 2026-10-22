@@ -19,9 +19,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // ⚠ Le changement de groupe n'est PAS un décrochage (le banc profil-745 couvre celui-là) : un élève retiré, puis rajouté.
 // ⚠ Stockage vidé UNE fois, avant le reload (pas en addInitScript : il se rejouerait au reload).
 
-const PHRASE_DIX = '9 étudiant·es (90%) maîtrisent les fondamentaux multistructurels. 1 (10%) en difficulté sur les fondamentaux (1 persistante).';
-const PHRASE_SANS_DEMO004 = '8 étudiant·es (89%) maîtrisent les fondamentaux multistructurels. 1 (11%) en difficulté sur les fondamentaux (1 persistante).';
-const PHRASE_SANS_DEMO015 = '9 étudiant·es (100%) maîtrisent les fondamentaux multistructurels.';
+const PHRASE_DIX = '9 étudiant·es (90 %) maîtrisent les fondamentaux multistructurels. 1 (10 %) en difficulté sur les fondamentaux (1 persistante).';
+const PHRASE_SANS_DEMO004 = '8 étudiant·es (89 %) maîtrisent les fondamentaux multistructurels. 1 (11 %) en difficulté sur les fondamentaux (1 persistante).';
+const PHRASE_SANS_DEMO015 = '9 étudiant·es (100 %) maîtrisent les fondamentaux multistructurels.';
 
 test('tableau de bord · la phrase du bilan des fondamentaux décrit le groupe affiché dès le premier rendu', async ({ page }) => {
     test.setTimeout(120000);
@@ -55,7 +55,7 @@ test('tableau de bord · la phrase du bilan des fondamentaux décrit le groupe a
             if (!carte) return { carte: false };
             // La barre : la somme des quatre comptes de sa légende est le groupe qu'elle décrit.
             const comptes = Array.from(carte.querySelectorAll('.distribution-legende > span'))
-                .map(s => parseInt((texte(s).match(/(\d+) \(\d+%\)/) || [])[1], 10));
+                .map(s => parseInt((texte(s).match(/(\d+) \(\d+ %\)/) || [])[1], 10));
             return {
                 carte: true,
                 phrase: texte(carte.querySelector('.interpretation-barre')),

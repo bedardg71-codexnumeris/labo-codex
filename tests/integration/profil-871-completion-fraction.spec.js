@@ -56,8 +56,8 @@ test('profil · la fraction de complétion a pour quotient l\'indice C, aux troi
             const methodo = texte(document.getElementById('details-calculs-mobilisation-' + e.da));
             const carte = Array.from(racine.querySelectorAll('li')).map(texte).find(t => /remis\S* : \d+\/\d+/.test(t)) || '';
             out.push({ da: e.da, C: calculerTousLesIndices(e.da).C,
-                rapport: (rapport.match(/^Complétion : (\d+)% \((\d+) remises \/ (\d+) productions\)$/) || []).slice(1).map(Number),
-                methodo: (methodo.match(/Indice C = (\d+)% — (\d+) \S+ \S+ \/ (\d+) /) || []).slice(1).map(Number),
+                rapport: (rapport.match(/^Complétion : (\d+)\u00A0% \((\d+) remises \/ (\d+) productions\)$/) || []).slice(1).map(Number),
+                methodo: (methodo.match(/Indice C = (\d+) % — (\d+) \S+ \S+ \/ (\d+) /) || []).slice(1).map(Number),
                 carte: (carte.match(/: (\d+)\/(\d+)$/) || []).slice(1).map(Number),
                 // Lot 30 (17 sept. 2026) — la carte dit ce que dit sa fraction : la ligne, l'intitulé, la liste, le message.
                 ligne: carte,

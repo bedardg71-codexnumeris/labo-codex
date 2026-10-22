@@ -123,7 +123,7 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         // LE SUIVI DU GROUPE : la barre A, puis le panneau Détails et le filtre « A ou C < 70% ».
         chargerTableauBordApercu(); await pause(900);
         const carte = texte(document.getElementById('carte-indicateurs-acpe')) || '';
-        const barreA = (carte.match(/Assiduité \(A\) (\d+)% μ=(\d+)%/) || []).slice(1, 3);
+        const barreA = (carte.match(/Assiduité \(A\) (\d+) % μ=(\d+) %/) || []).slice(1, 3);
         document.getElementById('btn-toggle-panneau-prioritaire').click(); await pause(600);
         const badges = (nom) => { const el = Array.from(document.querySelectorAll('#liste-etudiants-suivi > *')).find(n => n.textContent.includes(nom)); return el ? Array.from(el.querySelectorAll('.prioritaire-indice')).map(b => ({ t: texte(b), bulle: b.getAttribute('title') })) : null; };
         const badgesInconnu = badges('Inconnue');
@@ -212,8 +212,8 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
     expect(m.indicesAbsent.A).toBe(0);
     expect(m.liste.inconnu).toContain('—');
     expect(m.liste.inconnu.some(c => /%/.test(c))).toBe(false);
-    expect(m.liste.absent).toContain('0%');
-    expect(m.liste.tardif).toContain('100%');
+    expect(m.liste.absent).toContain('0 %');
+    expect(m.liste.tardif).toContain('100 %');
     expect(m.engagement).toBe('—');                       // « Indice A = — — 0 périodes présentes / 0 périodes offertes »
     expect(m.engagementNul).toBe(false);
     expect(m.contexte).toMatch(/^En attente de données/);      // ni présence ni copie : l'état « aucune donnée », pas « Très favorable »
@@ -223,12 +223,12 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
 
     // (3) #750 — les deux moyennes disent le même chiffre : dix élèves du pack (93), Tardif (100), l'absent (0) ; l'inconnue n'y entre pas.
     const attendue = Math.round((m.indicesDemoAvant.reduce((s, l) => s + l[1], 0) + 100 + 0) / 12);
-    expect(m.liste.moyA).toBe('moy=' + attendue + '%');
+    expect(m.liste.moyA).toBe('moy=' + attendue + ' %');
     expect(m.barreA).toEqual([String(attendue), String(attendue)]);
 
     // (4) Le filtre « A ou C < 70% » : l'absent total (A = 0 %) est retenu ; un A INCONNU ne l'est pas — jugé sur
     //     un élève à C = 80 %, pour que le seul A décide (l'inconnue sans copie, elle, est retenue par son C à 0 %).
-    expect(m.filtre.libelleM).toBe('A ou C < 70%');
+    expect(m.filtre.libelleM).toBe('A ou C < 70 %');
     expect(m.filtre.absentRetenu).toBe(true);
     expect(m.filtreSurA.demo004).toMatchObject({ A: null, C: 80 });
     expect(m.filtreSurA.filtreActif).toBe(true);
@@ -236,7 +236,7 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
     expect(m.filtreSurA.absentRetenu).toBe(true);
     expect(m.filtreSurA.retenu).toBe(false);
     //     … et sa carte de contexte : un tiret à la place du palier (avant : « Très favorable », A lu 100 %), C lisible.
-    expect(m.filtreSurA.contexte).toMatch(/^— Assiduité \(A\) : — Complétion \(C\) : 80%/);
+    expect(m.filtreSurA.contexte).toMatch(/^— Assiduité \(A\) : — Complétion \(C\) : 80\s%/);
     expect(m.filtreSurA.profilNul).toBe(false);
     //     … et, sous le tiret, la phrase de Grégoire (19 sept. 2026, « s'affichera »), au caractère près.
     expect(m.filtreSurA.phrase).toBe('L\'assiduité n\'est pas encore connue : le contexte s\'affichera dès qu\'une séance sera saisie pour cet·te étudiant·e.');

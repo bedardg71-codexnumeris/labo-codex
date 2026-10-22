@@ -35,13 +35,13 @@
      window.formaterPoints(n, decimales) → « 44,5 pts » : les points. Par défaut une décimale fixe,
        la règle du PDF de l'élève (21 oct. 2026) ; une phrase qui additionne des points pour
        donner une note ne mêle pas deux normes. `decimales` comme pour `formaterNombre`.
-     window.ESPACE_INSECABLE → ' '.
+     window.ESPACE_INSECABLE → '\u00A0'.
    =============================== */
 
 (function() {
 'use strict';
 
-var ESPACE_INSECABLE = ' ';
+var ESPACE_INSECABLE = '\u00A0';
 
 /** Le nombre, ou null quand la valeur n'en est pas un (vide, booléen, texte non numérique, infini). */
 function _nombre(valeur) {

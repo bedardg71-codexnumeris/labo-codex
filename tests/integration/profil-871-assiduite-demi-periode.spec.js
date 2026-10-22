@@ -74,14 +74,14 @@ test('profil · une demi-période saisie se lit telle quelle aux quatre endroits
 
     // AVANT : des entiers, écrits comme des entiers (jamais « 56,0 »).
     expect(r.avant.stats).toBe('• Périodes présentes : 56 / 56');
-    expect(r.avant.rapport).toBe('Assiduité : 100% (56 / 56 périodes)');
+    expect(r.avant.rapport).toBe('Assiduité : 100\u00A0% (56 / 56 périodes)');
 
     // APRÈS : 55,5 / 56 partout, avec une virgule, et le pourcentage est celui de CETTE fraction.
     const attendu = Math.round(55.5 / 56 * 100);              // 99
     expect(r.apres.A).toBe(attendu);
     expect(r.apres.stats).toBe('• Périodes présentes : 55,5 / 56');
-    expect(r.apres.methodoA).toBe(`Indice A = ${attendu}% — 55,5 périodes présentes / 56 périodes offertes`);
-    expect(r.apres.rapport).toBe(`Assiduité : ${attendu}% (55,5 / 56 périodes)`);
+    expect(r.apres.methodoA).toBe(`Indice A = ${attendu} % — 55,5 périodes présentes / 56 périodes offertes`);
+    expect(r.apres.rapport).toBe(`Assiduité : ${attendu}\u00A0% (55,5 / 56 périodes)`);
     // La présence partielle a sa pastille, à la virgule elle aussi (la pastille dit les périodes PRÉSENTES).
     expect(r.apres.pastilles).toEqual(['1,5 pér.']);
     expect(r.apres.pastilles.join(' ')).not.toMatch(/\d\.\d/);

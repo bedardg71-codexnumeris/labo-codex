@@ -98,6 +98,6 @@ test('Porte #732 · le bouton « Rapport » du profil produit un rapport dont le
     expect(rapport, rapport).not.toMatch(/Erreur lors de la génération du rapport/);
     expect(rapport).toMatch(/^Camille Roy \(DA: TEST732\)/);
     expect(montage.P).toBe(70);
-    expect(rapport, rapport).toContain(`Performance : ${montage.P}%`);
+    expect(rapport, rapport).toContain(`Performance : ${montage.P}\u00A0%`);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

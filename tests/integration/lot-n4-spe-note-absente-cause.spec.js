@@ -124,7 +124,7 @@ test('lot N4 · « Modèle simple », un élève sans forfait : « — » et la 
     console.log('LOT-N4-SUIVI ' + JSON.stringify(suivi));
     expect(suivi.sans, 'le badge P de l\'élève sans forfait est rendu').not.toBeNull();
     expect(suivi.sans).toEqual({ texte: 'P —', bulle: CAUSE });
-    expect(suivi.avec.texte).toBe('P 70%');
+    expect(suivi.avec.texte).toBe('P 70\u00A0%');
 
     // (4) L'export, par le bouton réel ; le fichier téléchargé est lu.
     await page.evaluate(() => { window.afficherSection('conception'); window.afficherSousSection('conception-pratiques-notation'); });

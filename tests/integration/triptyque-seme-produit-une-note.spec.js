@@ -201,7 +201,7 @@ test('§1+§2 · #674 — un critère laissé sans niveau : l\'écran RETIENT la
     expect(r.incomplet.niveau).toBe('--');
     expect(r.incomplet.porteeVisible, 'la portée doit être DITE sous la note').toBe(true);
     expect(r.incomplet.porteeTexte).toContain(r.dernierNom);
-    expect(r.incomplet.porteeTexte).toContain(r.dernierPond + ' %');
+    expect(r.incomplet.porteeTexte).toContain(r.dernierPond + '\u00A0%');
     expect(r.incomplet.ponderationCouverte).toBe(r.sommeGrille - r.dernierPond);
 
     // Complet : la note revient, et PAS UN MOT DE PLUS.

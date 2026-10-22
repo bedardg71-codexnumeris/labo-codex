@@ -109,7 +109,7 @@ test('#922 · sommative : une production « non remise » quitte les pastilles d
     expect(c.remises).toEqual(['Rédaction P1']);
     expect(c.nonRemises).toEqual(['Dissertation']);
     expect(c.videsEtMessages, 'ni « Aucune production remise », ni « Toutes les productions sont remises ! »').toEqual([]);
-    expect(c.valeurEnTete).toBe('50%');
+    expect(c.valeurEnTete).toBe('50 %');
     expect(erreurs).toEqual([]);
 });
 
@@ -148,13 +148,13 @@ test('#922 · sommative : la carte Performance redit le moteur — P 74 (40/60, 
     expect(p.presente).toBe(true);
     // (67,4 × 40 + 78,3 × 60) ÷ 100 = 73,94 → 74 ; la moyenne simple (67,4 + 78,3) ÷ 2 = 72,85 → 73.
     expect(p.moteurP).toBe(74);
-    expect(p.valeurEnTete).toBe('74%');
+    expect(p.valeurEnTete).toBe('74 %');
     expect(p.methode).toBe('• Moyenne pondérée des productions évaluées');
     expect(p.titre).toBe('2 productions évaluées');
-    expect(p.pastilles).toEqual(['P1 D (67.4) · poids 40 % → pA', 'P2 M (78.3) · poids 60 % → pB']);
+    expect(p.pastilles).toEqual(['P1 D (67,4) · poids 40 % → pA', 'P2 M (78,3) · poids 60 % → pB']);
     expect(p.texte).not.toMatch(/portfolio|meilleur|standards|artefact/i);
     expect(p.jetons, 'aucun jeton appliqué : le bloc ne paraît pas').toBe(false);
-    expect(p.methodologieP).toBe('Indice P = 74% — Moyenne pondérée des 2 productions évaluées, chacune à son poids');
+    expect(p.methodologieP).toBe('Indice P = 74 % — Moyenne pondérée des 2 productions évaluées, chacune à son poids');
     expect(erreurs).toEqual([]);
 });
 
@@ -168,6 +168,6 @@ test('#922 · sommative : un jeton appliqué à une copie fait paraître le bloc
     const p = await lirePerformance(page);
 
     expect(p.jetons).toBe(true);
-    expect(p.valeurEnTete).toBe('74%');
+    expect(p.valeurEnTete).toBe('74 %');
     expect(erreurs).toEqual([]);
 });
