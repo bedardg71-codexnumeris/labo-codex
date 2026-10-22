@@ -6,7 +6,8 @@
  * Ce que ce banc verrouille :
  *   M — de la lecture au modèle, puis à l'objet construit par `materielAssistant.construire` (le seul
  *       constructeur) : grilles fictives (a), (b), (c) — critères, pondérations, sous-critères, clés et
- *       textes de `parNiveau`, préfixe de section, « Critère N », description de la grille.
+ *       textes de `parNiveau` (sans niveaux) ou tranches du barème (niveaux nommés, #1125), préfixe de
+ *       section, « Critère N », description de la grille.
  *   R — chaque refus (point 2) : sans Titre, un morceau sans place, aucun point, les mots de
  *       `calculs(m).manquants`, plus de 20 réponses ; le total qui ne tombe pas juste n'empêche rien.
  *       (Une grille seulement en niveaux : lot 2b, `materiel-dissection-2b-niveaux.test.js`.)
@@ -16,7 +17,8 @@
  *   C1, C3 — corrections du verdict du 18 oct. : l'ordre des réponses (clés avec unité), le nom de la grille.
  *
  * Break-tests (faits le 18 oct.) : la garde du « sans place » retirée de `creation` → R.b rouge ; la
- * ligne des points retirée de `texteDuNiveau` → M.a et M.c rouges ; `x.suite = null` remis pour
+ * ligne des points retirée de `texteDuNiveau` → M.a et M.c rouges (22 oct., #1125 : la ligne des points
+ * remise dans le texte d'une tranche → M.a et M.c rouges) ; `x.suite = null` remis pour
  * tous les types → U.a et U.b rouges.
  *
  * Grilles FICTIVES (tests/unit/_helpers/grilles-fictives-dissection.js), jamais le texte d'une grille réelle.
@@ -60,7 +62,7 @@ function cree(R, contexte, nom) {
 const B_AVEC_TITRE = [[{ cs: 2, l: [['Questionnaire fictif', 'titre']] }], ...GRILLE_B];
 
 describe('M — de la lecture à la grille construite', () => {
-    it('M.a — (a) sections et niveaux nommés : une clé par niveau, ses points sur une ligne à part', () => {
+    it('M.a — (a) sections et niveaux nommés : une tranche du barème par niveau, ses points en nombres (#1125)', () => {
         const o = cree(comprise(GRILLE_A));
         expect(o.echelle).toBeNull();
         expect(o.cartouche).toBeNull();
@@ -79,15 +81,19 @@ describe('M — de la lecture à la grille construite', () => {
         expect(g.criteres.map((c) => c.ponderation)).toEqual([5, 10, 5, 10, 5, 15]);
         expect(g.criteres.every((c) => c.type === 'analytique')).toBe(true);
         expect(g.criteres[0].sousCriteres.map((s) => s.nom)).toEqual(['Indice observable 1.1', 'Indice observable 1.2']);
-        expect(g.criteres[0].descripteurs).toEqual({ parNiveau: {
-            'Ébauché': 'Tâche 1 absente',
-            'Développé': 'Tâche 1, palier 2\n3',
-            'Solide': 'Tâche 1, palier 3\n4',
-            'Accompli': 'Tâche 1, palier 4\n5'
-        } });
-        // Les points ne se convertissent pas : « 11-12-13 » reste tel qu'écrit.
-        expect(g.criteres[5].descripteurs.parNiveau['Solide']).toBe('Tâche 6, palier 3\n11-12-13');
-        expect('echelleId' in g.criteres[0].descripteurs).toBe(false);
+        // #1125 (22 oct. 2026) : un BARÈME, une tranche par niveau — son nom, ses points en nombres (sans points :
+        // `null`, « à compléter »), son texte SANS la ligne des points ; ni `descripteurs`, ni échelle.
+        const lu = (c) => c.bareme.map((t) => [t.nom, t.pointsMin, t.pointsMax, t.texte]);
+        expect(lu(g.criteres[0])).toEqual([
+            ['Ébauché', null, null, 'Tâche 1 absente'],
+            ['Développé', 3, 3, 'Tâche 1, palier 2'],
+            ['Solide', 4, 4, 'Tâche 1, palier 3'],
+            ['Accompli', 5, 5, 'Tâche 1, palier 4']
+        ]);
+        // « 11-12-13 » : de 11 à 13.
+        expect(lu(g.criteres[5])[2]).toEqual(['Solide', 11, 13, 'Tâche 6, palier 3']);
+        expect(g.criteres.every((c) => !('descripteurs' in c) && c.bareme.every((t) => /^TR_/.test(t.id)))).toBe(true);
+        expect(new Set(g.criteres.flatMap((c) => c.bareme.map((t) => t.id))).size).toBe(g.criteres.length * 4);
     });
 
     it('M.b — (b) des réponses sans niveaux : une clé par réponse, ses points tels qu’écrits ; « Critère N »', () => {
@@ -111,11 +117,12 @@ describe('M — de la lecture à la grille construite', () => {
         expect(g.criteres.some((c) => c.sousCriteres)).toBe(false);
     });
 
-    it('M.c — (c) un texte brut : niveaux par l’ordre, mêmes clés et même ligne des points', () => {
+    it('M.c — (c) un texte brut : niveaux par l’ordre, les mêmes tranches', () => {
         const g = cree(compriseTexte(TEXTE_C)).grille;
         expect(g.nom).toBe('Grille d’exposé fictive');
         expect(g.criteres.map((c) => [c.nom, c.ponderation])).toEqual([['Clarté du propos', 4], ['Tenue de la langue', 2]]);
-        expect(g.criteres[0].descripteurs.parNiveau).toEqual({ Insuffisant: 'Propos confus\n0-1', 'Réussi': 'Propos suivi\n2-3', Excellent: 'Propos limpide\n4' });
+        expect(g.criteres[0].bareme.map((t) => [t.nom, t.pointsMin, t.pointsMax, t.texte])).toEqual([
+            ['Insuffisant', 0, 1, 'Propos confus'], ['Réussi', 2, 3, 'Propos suivi'], ['Excellent', 4, 4, 'Propos limpide']]);
     });
 
     it('M.d — une réponse sans points prend « Réponse N » ; deux clés identiques se distinguent par « (2) »', () => {

@@ -15,8 +15,8 @@
  * Ce que ce banc verrouille :
  *   K — CE QUE LA CRÉATION ATTEND des grilles F1, F4b, F5, F6 : les noms de niveau qui manquent, comptés ;
  *       « / 0 » accepté, un nombre négatif ou décimal bloque.
- *   C — LA CRÉATION d'une grille en points À NIVEAUX : analytique, sans échelle, descripteurs rangés
- *       sous le nom du niveau ; lisibles dans Grilles de critères ; rien ne se perd au partage.
+ *   C — LA CRÉATION d'une grille en points À NIVEAUX : analytique, sans échelle, un barème dont les
+ *       tranches portent le nom du niveau (#1125) ; lisible dans Grilles de critères ; rien ne se perd au partage.
  *   U — « Aller plus loin » d'une grille en points qui décrit ses niveaux.
  *   P — LA CASSE d'une partie en capitales (règle 8.16).
  *
@@ -115,7 +115,7 @@ describe('étape 5b · K — ce que la création attend des grilles fictives', (
 
 const ctx = () => ({ id: (pre) => pre + (++compteur), maintenant: '2026-10-17T12:00:00.000Z' });
 
-describe('étape 5b · C — une grille en points à niveaux se crée sans échelle, ses descripteurs sous le nom de leur niveau', () => {
+describe('étape 5b · C — une grille en points à niveaux se crée sans échelle, son barème aux noms de ses niveaux', () => {
     const f5Complete = () => fige('étape 5b · F5 complétée');
 
     it('C.a la grille seule, analytique ; `grilleEntierementEnPoints` vrai ; ni échelle ni cartouche écrites', async () => {
@@ -128,13 +128,18 @@ describe('étape 5b · C — une grille en points à niveaux se crée sans éche
         expect(r.resume).toMatchObject({ enPoints: true, totalPoints: 20, descr: true, ids: { echelle: null, cartouche: null } });
     });
 
-    it('C.b les descripteurs, rangés sous le NOM du niveau, sans `echelleId` ; la nature des cases n’y change rien', () => {
+    it('C.b les descripteurs deviennent un barème, une tranche par NOM de niveau (#1125) ; la nature des cases n’y change rien', () => {
+        // #1125 (22 oct. 2026) : un modèle figé de l'assistant retiré ne porte pas de points par case
+        // (`pointsParCase`, dissection seulement) : ses tranches sont « à compléter », son texte intact.
         const g = A.construire(f5Complete(), ctx()).grille;
-        expect(g.criteres[0].descripteurs).toEqual({ parNiveau: { 'PALIER A': 'Jamais\n0-5', 'PALIER A+': 'Rarement\n6', 'PALIER B': 'Souvent\n7-8', 'PALIER C': 'Toujours\n9-10' } });
-        expect(g.criteres[2]).not.toHaveProperty('descripteurs');   // « / 5 » fusionné : aucun texte de niveau
+        expect(g.criteres[0]).not.toHaveProperty('descripteurs');
+        expect(g.criteres[0].bareme.map(t => [t.nom, t.pointsMin, t.pointsMax, t.texte])).toEqual([
+            ['PALIER A', null, null, 'Jamais\n0-5'], ['PALIER A+', null, null, 'Rarement\n6'],
+            ['PALIER B', null, null, 'Souvent\n7-8'], ['PALIER C', null, null, 'Toujours\n9-10']]);
+        expect(g.criteres[2]).not.toHaveProperty('bareme');   // « / 5 » fusionné : aucun texte de niveau
         const retro = A.construire(fige('étape 5b · F5 complétée, rétroactions'), ctx());
         expect(retro.cartouche).toBeNull();
-        expect(Object.keys(retro.grille.criteres[0].descripteurs.parNiveau)).toHaveLength(4);
+        expect(retro.grille.criteres[0].bareme).toHaveLength(4);
     });
 
     it('C.c les noms de niveau : requis, uniques, sans « _ » en tête ; ni plage, ni note retenue, ni code demandés', () => {
@@ -175,15 +180,13 @@ describe('étape 5b · C — une grille en points à niveaux se crée sans éche
         chargerScript('js/partage-validation.js', { db: dbP }, wp);
         chargerScript('js/partage-format.js', { db: dbP }, wp);
         const projete = wp.partageFormat.projeterEntite(g, 'grille');
-        expect(projete.criteres.map(c => c.descripteurs)).toEqual(g.criteres.map(c => c.descripteurs));
+        // #1125 : le barème (`bareme`) remplace les descripteurs ; il voyage de même.
+        expect(g.criteres[0].bareme).toHaveLength(4);
+        expect(projete.criteres.map(c => c.bareme)).toEqual(g.criteres.map(c => c.bareme));
         const paquet = wp.partageFormat.construirePackage(g, { type: 'grille', identiteAuteur: 'Auteur fictif' });
         expect(wp.partageValidation.validerPackage(paquet).erreurs).toEqual([]);
-        // Un `echelleId: null` y serait refusé : c'est pourquoi la grille en points n'en porte pas.
-        const avecNull = JSON.parse(JSON.stringify(g));
-        avecNull.criteres[0].descripteurs.echelleId = null;
-        expect(wp.partageValidation.validerPackage(wp.partageFormat.construirePackage(avecNull, { type: 'grille', identiteAuteur: 'Auteur fictif' })).valide).toBe(false);
         const wie = chargerScript('js/import-export.js');
-        expect(wie.assainirObjet(g, wie.SCHEMAS_IMPORT.grille).criteres[0].descripteurs).toEqual(g.criteres[0].descripteurs);
+        expect(wie.assainirObjet(g, wie.SCHEMAS_IMPORT.grille).criteres[0].bareme).toEqual(g.criteres[0].bareme);
     });
 });
 

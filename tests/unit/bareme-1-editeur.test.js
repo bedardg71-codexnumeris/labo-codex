@@ -506,8 +506,11 @@ describe('barème 1 · I — aucun calcul ne lit le barème', () => {
         // Lot 2 (20 oct.) : les trois catalogues de l'aide y entrent par leurs CLÉS (`grille-bareme`, `bareme-tranche-…`,
         // le terme `bareme`) — des textes lus par l'enseignant·e, aucun calcul. La grille du PDF (20 oct., #1120) y
         // entre par la lecture unique (`bareme.tranchesDuCritere`, `bareme.ligneEleve`) : un affichage, aucun calcul.
+        // #1125 (22 oct.) : « Apporter mon matériel » ÉCRIT le barème d'une grille créée (`materiel-assistant.js`)
+        // et le compte dans son résumé (`materiel-creation.js`) : une création, aucun calcul.
         expect(lecteurs.sort()).toEqual(['accompagnement-contenu-hover.js', 'accompagnement-contenu-popup.js', 'accompagnement-contenu-terme.js',
-            'bareme.js', 'export-pdf.js', 'grilles.js', 'import-export.js', 'partage-schemas.js', 'partage-validation.js']);
+            'bareme.js', 'export-pdf.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js',
+            'partage-schemas.js', 'partage-validation.js']);
     });
 
     it('I.b ni les réponses ni le barème : aucun module d’évaluation, de note ou de bilan ne lit `descripteurs`', () => {

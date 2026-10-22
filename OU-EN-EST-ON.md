@@ -47,7 +47,7 @@
 
 **Vérifié comment** : Vitest complet vert (9 278 essais) ; les specs des grilles, du barème, de la dissection et de l'aide vertes dans un vrai WebKit, au Mac (1 440 px) et à l'iPad au doigt (820 px) ; un essai qui rougit quand on casse chacun des quatre comportements gardés (la borne de 30, la section vide, les codes d'annotation, les codes sans doublon) ; relu et accepté par Cowork.
 
-**Ce qui ne marche pas encore** : dans une grille apportée dont les niveaux ont un nom (ton « Journal de lecture »), les points des tranches sont restés au bout du texte et le champ Points est vide ; tu peux les déplacer à la main, le champ accepte « 3-4 » (#1125). Au Mac, le champ « Nom du critère » est trop étroit (#1126).
+**Ce qui ne marche pas encore** : dans une grille apportée dont les niveaux ont un nom (ton « Journal de lecture »), les points des tranches sont restés au bout du texte et le champ Points est vide ; tu peux les déplacer à la main, le champ accepte « 3-4 » (#1125). *Le 22 oct., pas encore en ligne ni relu : une grille apportée à partir de maintenant met ses points dans le champ Points ; ta grille déjà créée, elle, garde les siens dans le texte.* Au Mac, le champ « Nom du critère » est trop étroit (#1126).
 
 🔀 **LE 16 OCTOBRE 2026 AU MATIN : ON TRAVAILLE DANS UN NOUVEAU DÉPÔT, `labo-codex`.** *Écrit par Claude Code le 16 oct. à 7 h 30 (mesuré par `date`).* Rien ne change à l'écran : c'est le même code, à l'octet près.
 

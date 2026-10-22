@@ -8,7 +8,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // LE BARÈME, LOT 1 (#1120, geste 1 ; consigne du 20 oct. 2026), dans un vrai WebKit. Remplace la spec du lot 13
 // de la dissection (l'éditeur des réponses, retiré avec elles).
 //
-//   · l'exemple de « Apporter mon matériel » (le Journal de lecture, fictif), créé par la dissection, puis un
+//   · l'exemple de « Apporter mon matériel » (le Journal de lecture, fictif), créé par la dissection, remis au banc
+//     dans la forme d'avant #1125 (des réponses sous le nom du niveau : le stock d'aujourd'hui), puis un
 //     critère holistique ajouté au banc dans la même grille : le critère analytique montre son BARÈME (les
 //     noms de niveau devenus des tranches « à compléter », leurs textes) ; donner des points à une tranche →
 //     `bareme` écrit, `parNiveau` retiré de CE critère seulement ; recharger → le barème est là ; les autres
@@ -131,6 +132,13 @@ test.describe('iPad', () => {
             echelles.push({ id: 'ECH_BANC_1120', nom: 'Échelle fictive', niveaux: [{ code: 'I', nom: 'Insuffisant', min: 0, max: 59 }, { code: 'M', nom: 'Maîtrisé', min: 60, max: 100 }] });
             db.setSync(cle('echellesTemplates'), echelles);   // security-ok: banc, une échelle fictive dans un contexte neuf
             const grilles = db.getSync(cle('grillesTemplates'), []);
+            // #1125 (22 oct.) : la dissection écrit maintenant un barème. Le STOCK d'avant (des réponses rangées sous le
+            // nom du niveau, les points au bout du texte, comme la grille de Grégoire du 20 oct.) se fabrique au banc.
+            grilles.find((g) => g.id === id).criteres.forEach((c) => {
+                const ecrit = (t) => (t.pointsMin === null ? '' : '\n' + (t.pointsMin === t.pointsMax ? t.pointsMin : t.pointsMin + '-' + t.pointsMax));
+                c.descripteurs = { parNiveau: Object.fromEntries(c.bareme.map((t) => [t.nom, t.texte + ecrit(t)])) };
+                delete c.bareme;
+            });
             grilles.find((g) => g.id === id).criteres.push({ id: 'CR_BANC_HOLI', nom: 'Critère holistique fictif', type: 'holistique', ponderation: 0,
                 description: '', formule: '', niveauSOLO: 'aucun', verrouille: false,
                 descripteurs: { echelleId: 'ECH_BANC_1120', parNiveau: { I: 'Un texte fictif insuffisant.', M: 'Un texte fictif maîtrisé.' } } });

@@ -12,7 +12,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · à 820 px, le bouton fait au moins 44 px et la page ne défile pas de côté ;
 //   · un échec de l'écriture affiche son message, et la dissection reste intacte pour réessayer ;
 //   · créée : la confirmation (« sur 30 », « Aller plus loin avec ta grille », « Coller une autre grille ») ;
-//     la grille est rangée, puis retrouvée dans Grilles de critères avec ses critères et ses points.
+//     la grille est rangée, puis retrouvée dans Grilles de critères avec ses critères et ses points (#1125 : les
+//     points des tranches dans le champ Points du barème, plus au bout du texte).
 //
 // Corrections du verdict du 18 oct. :
 //   · C1 — les réponses de (b) gardent leur ordre jusque dans Grilles de critères (« 1 point », « 0,5 point », « 0 point ») ;
@@ -159,8 +160,9 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
         ['Partie B : réflexion – L’étudiant·e relie l’œuvre aux notions du cours', 10],
         ['Partie B : réflexion – L’étudiant·e exprime une appréciation argumentée', 10]
     ]);
-    expect(g.criteres[0].descripteurs.parNiveau['Satisfaisant']).toBe('Résume l’essentiel\n3-4');
-    expect(g.criteres.every((c) => !('echelleId' in (c.descripteurs || {})))).toBe(true);
+    // #1125 (22 oct. 2026) : un barème, les points des tranches en nombres, le texte sans eux ; aucun descripteur.
+    expect(g.criteres[0].bareme.map((t) => [t.nom, t.pointsMin, t.pointsMax, t.texte])[2]).toEqual(['Satisfaisant', 3, 4, 'Résume l’essentiel']);
+    expect(g.criteres.every((c) => !('descripteurs' in c))).toBe(true);
 
     // Retrouvée dans Grilles de critères : ses critères, ses niveaux et leurs points, ses pondérations.
     await page.locator('[data-action="materiel.voir"][data-param="grille-criteres"]').click();
@@ -170,10 +172,14 @@ test('dissection 2a · l’exemple étiqueté, refusé sans nom, un échec rées
         r.querySelector('input[data-champ="nom"]').value, r.querySelector('input[data-champ="ponderation"]')?.value]));
     expect(vus).toEqual(g.criteres.map((c) => [c.nom, String(c.ponderation)]));
     // #1120, lot 1 (20 oct.) : sans échelle, le critère montre son barème — le nom du niveau devient le nom de la
-    // tranche, sans points ; le texte, dans son champ.
-    await expect(liste.locator('.grille-bareme-tranche [data-champ="nom"]').first()).toHaveValue('Insuffisant');
-    await expect(liste.locator('.grille-bareme-tranche [data-champ="points"]').first()).toHaveValue('');
-    await expect(liste.locator('.grille-bareme-tranche textarea').nth(2)).toHaveValue('Résume l’essentiel\n3-4');
+    // tranche ; le texte, dans son champ. #1125 (22 oct.) : ses points dans le champ Points, plus dans le texte ;
+    // « Insuffisant », sans points dans la grille d'origine, reste vide (« à compléter »).
+    const premier = liste.locator('.item-liste').first();
+    await expect(premier.locator('.grille-bareme-tranche [data-champ="nom"]').first()).toHaveValue('Insuffisant');
+    await expect.poll(() => premier.locator('.grille-bareme-tranche [data-champ="points"]').evaluateAll((xs) => xs.map((x) => x.value)))
+        .toEqual(['', '2', '3 à 4', '5']);
+    await expect(premier.locator('.grille-bareme-tranche textarea').nth(2)).toHaveValue('Résume l’essentiel');
+    await expect(premier.locator('.grille-bareme-marque')).toHaveText(['à compléter']);
     // C2 : des points, jamais « % » — le total et la colonne.
     // Break-test (fait le 18 oct.) : `ponderationEnPoints` rendant toujours false → rouge ici.
     await expect(page.locator('#totalPonderationAffichage')).toHaveText('30 points');

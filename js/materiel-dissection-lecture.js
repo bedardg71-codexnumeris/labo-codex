@@ -736,13 +736,26 @@
         return c.section ? window.materielLecture.casseDePartie(c.section.nom) + ' – ' + nom : nom;
     }
 
-    /** Le texte d'un niveau : son ou ses descripteurs, puis, sur une ligne à part, ses points tels qu'écrits. */
-    function texteDuNiveau(cell) {
+    /**
+     * Le texte d'un niveau : son ou ses descripteurs, puis, sur une ligne à part, ses points tels qu'écrits.
+     * #1125 : la ligne des points ne vaut plus qu'EN NIVEAUX (les descripteurs vont dans l'échelle) ; en
+     * points, elle est remplacée par les points de la tranche (`pointsDuNiveau`).
+     */
+    function texteDuNiveau(cell, avecPoints) {
         if (!cell) return '';
         var lignes = [];
         if (cell.desc.length) lignes.push(cell.desc.join(' '));
-        if (cell.ecrits.length) lignes.push(cell.ecrits.join(' '));
+        if (avecPoints && cell.ecrits.length) lignes.push(cell.ecrits.join(' '));
         return lignes.join('\n');
+    }
+
+    /**
+     * #1125 (22 oct. 2026) : les points d'un niveau, `[min, max]`, tous ses morceaux « Points » réunis
+     * (« 11-12-13 » : de 11 à 13) ; `null` sans morceau « Points » (une tranche « à compléter »).
+     */
+    function pointsDuNiveau(cell) {
+        if (!cell || !cell.pts.length) return null;
+        return [Math.min.apply(null, cell.pts.map(function (p) { return p[0]; })), Math.max.apply(null, cell.pts.map(function (p) { return p[1]; }))];
     }
 
     /**
@@ -799,8 +812,8 @@
      * La grille comprise → le modèle que `materielAssistant.construire` sait écrire. Rien d'inventé.
      *
      * EN POINTS (lot 2a) : ni échelle, ni cartouche. Avec des niveaux nommés, chaque niveau garde son
-     * nom (les plages restent vides : elles ne servent pas en points) ; sans niveaux, chaque critère
-     * porte ses réponses en `parCle`.
+     * nom (les plages restent vides : elles ne servent pas en points), et chaque critère, ses points
+     * par niveau en `pointsParCase` (#1125) ; sans niveaux, chaque critère porte ses réponses en `parCle`.
      *
      * EN NIVEAUX (lot 2b, `enNiveaux`) : chaque niveau, son nom tel qu'étiqueté, un code tiré de son nom
      * (`materielLecture.coder`, corrigeable ensuite dans Échelles), puis la plage et la note retenue
@@ -832,10 +845,12 @@
             var cr = {
                 nom: paire(nomDuCritere(c), c.nom != null ? 'repris' : 'complete'),
                 ponderation: p != null ? paire(String(p), 'repris') : paire('', 'remplir'),
-                cases: R.avecNiveaux ? R.niveaux.map(function (n, i) { var t = texteDuNiveau(c.niv[i]); return paire(t, t ? 'repris' : 'vide'); }) : [],
+                cases: R.avecNiveaux ? R.niveaux.map(function (n, i) { var t = texteDuNiveau(c.niv[i], enNiveaux); return paire(t, t ? 'repris' : 'vide'); }) : [],
                 sousCriteres: c.sous.slice(),
                 description: paire(d, d ? 'repris' : 'vide')
             };
+            // #1125 : en points, chaque niveau garde ses points à part ; `construire` en fait les tranches du barème.
+            if (R.avecNiveaux && !enNiveaux) cr.pointsParCase = R.niveaux.map(function (n, i) { return pointsDuNiveau(c.niv[i]); });
             if (!R.avecNiveaux) cr.parCle = clesDesReponses(c.reponses);
             return cr;
         });
