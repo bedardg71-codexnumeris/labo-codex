@@ -16,14 +16,26 @@ Un critère sans noms (tout critère d'avant ce lot) lit, au caractère près, l
 
 > 5 unités manquantes (3,5 après pondération) sur 12 calculs → 14,5/20 (72,5 %)
 
-1.3. **Le repli d'un critère neuf évalué sans ses noms** (`evaluation-enonces.js`, `NOMS_PROVISOIRES`). Jamais un nom vide ni un jeton nu. Ce que je propose :
+1.3. **Le repli d'un critère né depuis ce lot (marque `nomsAttendus`) évalué sans ses noms** — un critère créé avant, en 1.213 et 1.214 compris, lit « erreur » et « mot » (retouche de la relecture, 17 h 44) (`evaluation-enonces.js`, `NOMS_PROVISOIRES`). Jamais un nom vide ni un jeton nu. Ce que je propose :
 
 - ce que l'on compte : « élément relevé » / « éléments relevés »
 - ce à quoi on le rapporte : « unité » / « unités »
 
 > Ta production contient 5 éléments relevés pour 12 unités.
 
-1.4. **« Aucune annotation »**, vu par l'enseignant seulement (`ENONCES_GENERIQUES.aucune`) : « Aucun tampon ni ‹nom au singulier› annotés. » (« annotés » s'accorde au masculin pluriel avec « tampon », juste avec tout nom.)
+1.4. **Le bilan, critère effondré** (`evaluation-retroaction.js`, `_rendreAlgoA0Bilan`) — même structure, les deux noms accordés (ajouté à la relecture, 17 h 44) :
+
+> - **Unités et chiffres significatifs est à travailler en priorité** (Unités et chiffres significatifs : 5 unités manquantes sur 12 calculs, Incomplet)
+
+Sans noms : « (… : 5 erreurs sur 400 mots, Incomplet) », comme hier.
+
+1.5. **« Tous les critères sont maîtrisés »**, bilan de l'app et PDF de synthèse, mêmes mots (`enoncesAlgo.nombreEtNom`). **Décision de Grégoire, 22 oct. 2026, 17 h 43 : le participe part**, pour tous les critères :
+
+> Tous les critères sont maîtrisés. Concentre-toi sur Unités et chiffres significatifs (3 unités manquantes).
+
+Sans noms : « (3 erreurs) » — hier « (3 erreurs annotées) ».
+
+1.6. **« Aucune annotation »**, vu par l'enseignant seulement (`ENONCES_GENERIQUES.aucune`) : « Aucun tampon ni ‹nom au singulier› annotés. » (« annotés » s'accorde au masculin pluriel avec « tampon », juste avec tout nom.)
 
 ## 2. L'éditeur de grille (`grilles.js`, `TEXTES_NOMS_ALGO`)
 
@@ -37,6 +49,7 @@ En tête du gabarit d'un critère algorithmique, avant les sous-critères.
 | Exemple grisé, rangée 1 | Ex. : unité manquante · Ex. : unités manquantes |
 | Exemple grisé, rangée 2 | Ex. : calcul · Ex. : calculs |
 | Invitation (tant qu'une paire manque) | Nomme ce que tu comptes et ce à quoi tu le rapportes, au singulier et au pluriel : l'élève lit ces noms dans la phrase du décompte et dans son PDF. |
+| Refus, au témoin, d'une forme trop longue (`appliquerNoms`) | Un nom fait 40 caractères au plus |
 | Aide sous le bloc | Ces noms remplacent « erreur » et « mot » dans les champs de l'évaluation, la phrase du décompte et la ligne du PDF. |
 
 ## 3. Annoter (`travaux-outils.js`, `_texteNomsManquants`)

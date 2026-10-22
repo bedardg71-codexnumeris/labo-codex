@@ -3212,6 +3212,11 @@ function avecProjectionNeuve(critere) {
     if (neuf && typeof window.codesAnnotation !== 'undefined' && typeof window.codesAnnotation.marquerNeuf === 'function') {
         window.codesAnnotation.marquerNeuf(critere);
     }
+    // Étape 2a (22 oct. 2026, retouche de la relecture) : la marque des noms, au même geste et sous la
+    // même condition — un critère né à partir d'ici attend ses deux noms ; ceux d'avant lisent « erreur ».
+    if (neuf && typeof window.enoncesAlgo !== 'undefined' && typeof window.enoncesAlgo.marquerNomsAttendus === 'function') {
+        window.enoncesAlgo.marquerNomsAttendus(critere);
+    }
     return critere;
 }
 

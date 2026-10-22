@@ -7,6 +7,10 @@
  * (16 h 59) ; la parenthèse ne s'accorde plus, « (3,5 après pondération) » (17 h).
  *
  * Ce que ce banc verrouille :
+ *   ↻ Retouches de la relecture (22 oct., 17 h 44, VERDICT-RELECTURE-2026-10-22-critere-algorithmique-noms.md) :
+ *       « neuf » se lit à la marque PROPRE aux noms (`nomsAttendus`), plus à celle des codes, en ligne depuis
+ *       la 1.213 ; le bilan d'un critère effondré et « Tous les critères sont maîtrisés » portent les noms,
+ *       sans le participe (Grégoire, 17 h 43).
  *   N — LE MODÈLE : trois lectures (écrits ; d'avant, « erreur / mot » ; neuf, le repli provisoire) ; une
  *       paire à moitié écrite se lit absente ; la règle unique du pluriel ; l'écriture, au geste seulement.
  *   S — L'INVARIANT DU STOCK (sentinelle) : un critère sans noms rend, au caractère près, les phrases et la
@@ -42,10 +46,12 @@ const PIEGE = '<img src=x onerror=alert(1)>';
 const NOMS_PIEGES = { erreurs: { singulier: PIEGE, pluriel: PIEGE }, mots: { singulier: PIEGE, pluriel: PIEGE } };
 
 const critere = (o) => Object.assign({ id: 'CA', nom: 'Unités et chiffres significatifs', type: 'algorithmique', ponderation: 20 }, o);
-const CHIMIE = critere({ codesSousCriteresSeulement: true, noms: CHIMIE_NOMS });
-const REDACTION = critere({ nom: 'Langue écrite', codesSousCriteresSeulement: true, noms: REDACTION_NOMS });
-const NEUF_SANS_NOMS = critere({ codesSousCriteresSeulement: true });
+const CHIMIE = critere({ codesSousCriteresSeulement: true, nomsAttendus: true, noms: CHIMIE_NOMS });
+const REDACTION = critere({ nom: 'Langue écrite', codesSousCriteresSeulement: true, nomsAttendus: true, noms: REDACTION_NOMS });
+const NEUF_SANS_NOMS = critere({ codesSousCriteresSeulement: true, nomsAttendus: true });
 const STOCK = critere({});   // d'avant : ni marque, ni noms
+// Né en 1.213 ou 1.214 : la marque des codes, pas celle des noms — c'est du stock (retouche 1).
+const STOCK_1213 = critere({ codesSousCriteresSeulement: true });
 
 /* ======================================================= N — LE MODÈLE */
 
@@ -62,7 +68,7 @@ describe('noms · N — le modèle', () => {
 
     it('N.b une paire à moitié écrite se lit absente ; l’autre paire garde ses noms', () => {
         const e = E();
-        const c = critere({ codesSousCriteresSeulement: true, noms: { erreurs: { singulier: 'unité manquante' }, mots: CHIMIE_NOMS.mots } });
+        const c = critere({ nomsAttendus: true, noms: { erreurs: { singulier: 'unité manquante' }, mots: CHIMIE_NOMS.mots } });
         expect(e.noms(c)).toEqual({ erreurs: e.NOMS_PROVISOIRES.erreurs, mots: CHIMIE_NOMS.mots });
         expect(e.nomsManquants(c)).toEqual(['erreurs']);
         const s = critere({ noms: { mots: { pluriel: '  ' } } });
@@ -107,9 +113,13 @@ describe('noms · N — le modèle', () => {
         });
     });
 
-    it('N.g la marque nommée ici est celle de `codesAnnotation`', () => {
+    it('N.g la marque des noms est la sienne, posée au geste (`marquerNomsAttendus`) sur un critère algorithmique seulement', () => {
+        const e = E();
         const ca = chargerScript('js/codes-annotation.js', { db: { getSync: () => null } }).codesAnnotation;
-        expect(E().MARQUE_NEUF).toBe(ca.MARQUE);
+        expect(e.MARQUE_NOMS).toBe('nomsAttendus');
+        expect(e.MARQUE_NOMS).not.toBe(ca.MARQUE);
+        expect(e.marquerNomsAttendus(critere({}))).toHaveProperty('nomsAttendus', true);
+        expect(e.marquerNomsAttendus({ type: 'holistique' })).not.toHaveProperty('nomsAttendus');
     });
 });
 
@@ -200,6 +210,86 @@ describe('noms · S — l’invariant du stock : un critère sans noms rend ce q
         expect(e.mentionPonderee(2, 1.5)).toBe(' (1,5 après pondération)');
         expect(e.mentionPonderee(5, 3.5)).toBe(' (3,5 après pondération)');
         expect(e.mentionPonderee(5, 5)).toBe('');
+    });
+});
+
+describe('noms · S — retouche 1 : un critère né en 1.213 ou 1.214 (la marque des codes, sans celle des noms) est du stock', () => {
+    it('S.e il lit « erreur » et « mot », ne manque de rien, et rend les chaînes de 5bd643c3 (sauf la parenthèse)', () => {
+        const e = E();
+        expect(e.noms(STOCK_1213)).toEqual(REDACTION_NOMS);
+        expect(e.nomsManquants(STOCK_1213)).toEqual([]);
+        expect(e.estNeuf(STOCK_1213)).toBe(false);
+        Object.entries(ANCIEN.generique).forEach(([k, attendu]) => {
+            const rendu = k.includes('/')
+                ? (() => { const c = cas(k); return e.enonce(STOCK_1213, 'decompte', { erreurs: c.erreurs, mots: c.mots, points: c.pondere === null ? '' : e.mentionPonderee(c.erreurs, c.pondere) }); })()
+                : e.enonce(STOCK_1213, k, {});
+            expect(rendu, k).toBe(parentheseDuJour(attendu));
+        });
+        const algo = { erreurs: 7, mots: 400, sommePonderee: 5, noteCalculee: 13.75, pourcentage: 68.75, noms: e.noms(STOCK_1213) };
+        expect(lignePdf(algo).ligne).toBe(parentheseDuJour(ANCIEN.pdf['7/400/5']));
+    });
+});
+
+/* ======================================================= B — LE BILAN (retouche 2) */
+
+// MESURÉ sur `5bd643c3` (`_rendreAlgoA0Bilan`, `_rendreTousMaitrisesBilan`, chargés tels quels, 22 oct., 17 h 55).
+// Seul « annotée(s) » part : décision de Grégoire, 22 oct. 2026, 17 h 43.
+const ANCIEN_BILAN = {
+    a0: '<p>- <strong>Unités et chiffres significatifs est à travailler en priorité</strong> (Unités et chiffres significatifs : 5 erreurs sur 400 mots, Incomplet)</p>',
+    a0un: '<p>- <strong>Unités et chiffres significatifs est à travailler en priorité</strong> (Unités et chiffres significatifs : 1 erreur sur 400 mots, Incomplet)</p>',
+    tous: '<p>Tous les critères sont maîtrisés. Concentre-toi sur Unités et chiffres significatifs (3 erreurs annotées).</p>',
+    tousUn: '<p>Tous les critères sont maîtrisés. Concentre-toi sur Unités et chiffres significatifs (1 erreur annotée).</p>'
+};
+const sansParticipe = (s) => s.replace(/ annotées?\)/, ')');
+
+/** Le bilan de l'app (evaluation-retroaction.js) : ses deux lignes qui portent les noms. */
+function bilan() {
+    const win = { addEventListener() {}, removeEventListener() {} };
+    chargerScript('js/evaluation-enonces.js', {}, win);
+    chargerScript('js/evaluation-retroaction.js', { echapperHtml: echapper, db: { getSync: (k, d) => d },
+        document: { addEventListener() {}, getElementById: () => null } }, win);
+    return win.bilanAlgoNoms;
+}
+
+describe('noms · B — le bilan : le critère effondré et « Tous les critères sont maîtrisés »', () => {
+    it('B.a sans noms (d’avant, ou né en 1.213) : les phrases de 5bd643c3, le participe en moins', () => {
+        const b = bilan();
+        [STOCK, STOCK_1213].forEach((c) => {
+            expect(b.rendreAlgoA0({ critere: c, critereNom: c.nom, erreurs: 5, mots: 400 })).toBe(ANCIEN_BILAN.a0);
+            expect(b.rendreAlgoA0({ critere: c, critereNom: c.nom, erreurs: 1, mots: 400 })).toBe(ANCIEN_BILAN.a0un);
+            expect(b.rendreTousMaitrises(3, null, c)).toBe(sansParticipe(ANCIEN_BILAN.tous));
+            expect(b.rendreTousMaitrises(1, null, c)).toBe(sansParticipe(ANCIEN_BILAN.tousUn));
+        });
+    });
+
+    [['rédaction', REDACTION, 'erreur', 'erreurs', 'mot', 'mots'], ['chimie', CHIMIE, 'unité manquante', 'unités manquantes', 'calcul', 'calculs']]
+        .forEach(([nom, c, s1, p1, s2, p2]) => {
+            it(`B.b ${nom} : les deux noms, accordés par la règle unique`, () => {
+                const b = bilan();
+                expect(b.rendreAlgoA0({ critere: c, critereNom: c.nom, erreurs: 5, mots: 12 })).toContain(`(${c.nom} : 5 ${p1} sur 12 ${p2}, Incomplet)`);
+                expect(b.rendreAlgoA0({ critere: c, critereNom: c.nom, erreurs: 1, mots: 1 })).toContain(`: 1 ${s1} sur 1 ${s2}, Incomplet)`);
+                expect(b.rendreTousMaitrises(3, null, c)).toMatch(new RegExp(`\\(3 ${p1}\\)\\.</p>$`));
+                expect(b.rendreTousMaitrises(1, null, c)).toMatch(new RegExp(`\\(1 ${s1}\\)\\.</p>$`));
+                expect(E().nombreEtNom(3, c)).toBe(`3 ${p1}`);
+            });
+        });
+
+    it('B.c le PDF de synthèse dit les mêmes mots : même fonction (`nombreEtNom`), sans participe', () => {
+        const src = readFileSync(path.join(racine, 'js/synthese-retroaction-data.js'), 'utf8');
+        const ligne = src.split('\n').find((l) => l.includes('messageGlobal = `Tous les critères sont maîtrisés.'));
+        expect(ligne).toContain('(${window.enoncesAlgo.nombreEtNom(totErr, critereAlgo)}).');
+        expect(ligne).not.toMatch(/annot/);
+        const app = readFileSync(path.join(racine, 'js/evaluation-retroaction.js'), 'utf8');
+        expect(app).toContain("ech(window.enoncesAlgo.nombreEtNom(totalErreursFr, critereAlgo))");
+    });
+
+    it('B.d un nom piégé reste du texte dans le bilan', () => {
+        const b = bilan();
+        const c = critere({ nomsAttendus: true, noms: NOMS_PIEGES });
+        [b.rendreAlgoA0({ critere: c, critereNom: c.nom, erreurs: 5, mots: 12 }), b.rendreTousMaitrises(3, null, c)].forEach((h) => {
+            expect(h).not.toContain(PIEGE);
+            expect(h).toContain('&lt;img src=x onerror=alert(1)&gt;');
+        });
     });
 });
 
@@ -388,6 +478,12 @@ describe('noms · E — l’éditeur de grille', () => {
         expect(JSON.stringify(m.store[K])).toBe(avant);
     });
 
+    it('E.b2 un critère né en 1.213 (marque des codes seule) : comme le stock, ses noms lus, pas d’invitation', () => {
+        const m = editeur(STOCK_1213);
+        expect(champs(m.liste()).map((x) => x.value)).toEqual(['erreur', 'erreurs', 'mot', 'mots']);
+        expect(m.liste().querySelector('.noms-algo-invitation')).toBeNull();
+    });
+
     it('E.c le geste sur un champ écrit les quatre formes affichées ; un critère d’avant reçoit « erreur / erreurs » à côté', async () => {
         const m = editeur(STOCK);
         const x = champs(m.liste()).find((i) => i.dataset.nomPaire === 'mots' && i.dataset.nomForme === 'pluriel');
@@ -410,9 +506,20 @@ describe('noms · E — l’éditeur de grille', () => {
         const m = editeur(NEUF_SANS_NOMS);
         await m.win.initialiserSousCriteresParDefaut('G1', 0);
         expect(m.store[K][0].criteres[0].noms).toEqual(REDACTION_NOMS);
-        const m2 = editeur(critere({ codesSousCriteresSeulement: true, noms: { erreurs: CHIMIE_NOMS.erreurs } }));
+        const m2 = editeur(critere({ nomsAttendus: true, noms: { erreurs: CHIMIE_NOMS.erreurs } }));
         await m2.win.initialiserSousCriteresParDefaut('G1', 0);
         expect(m2.store[K][0].criteres[0].noms).toEqual({ erreurs: CHIMIE_NOMS.erreurs, mots: REDACTION_NOMS.mots });
+    });
+
+    it('E.g la naissance : un critère qui devient algorithmique reçoit la marque des noms, au même geste que celle des codes', async () => {
+        const m = monter();
+        await m.win.creerNouvelleGrille();
+        const select = m.liste().querySelector('[data-on-change="modifierTypeCritereTempHandler"]');
+        select.value = 'algorithmique';
+        m.win.modifierTypeCritereTempHandler(select);
+        expect(m.win.tempCriteres[0]).toMatchObject({ type: 'algorithmique', codesSousCriteresSeulement: true, nomsAttendus: true });
+        m.win.afficherCriteresTemp();
+        expect(m.liste().querySelector('.noms-algo-invitation')).not.toBeNull();
     });
 
     it('E.f en création (cible `temp`) : le geste écrit sur le critère temporaire, rien en base', async () => {
@@ -439,6 +546,7 @@ describe('noms · A — Annoter invite à nommer', () => {
     });
     it('A.b nommé, ou d’avant : rien', () => {
         expect(annoter(grille(CHIMIE)).travauxOutils.genererContenuErreursFr()).not.toContain('deux noms');
+        expect(annoter(grille(STOCK_1213)).travauxOutils.genererContenuErreursFr()).not.toContain('deux noms');
         expect(annoter(grille(STOCK)).travauxOutils.genererContenuErreursFr()).not.toContain('deux noms');
     });
 });
@@ -446,7 +554,7 @@ describe('noms · A — Annoter invite à nommer', () => {
 /* ======================================================= X — UN NOM PIÉGÉ */
 
 describe('noms · X — un nom piégé reste du texte', () => {
-    const c = critere({ codesSousCriteresSeulement: true, noms: NOMS_PIEGES, sousCriteres: SC,
+    const c = critere({ nomsAttendus: true, noms: NOMS_PIEGES, sousCriteres: SC,
         modeleFormule: 'penalite_normalisee', paramsFormule: { facteurNormalisation: 500 } });
 
     it('X.a l’éditeur (champs, aide, miroir) : aucune balise, le texte échappé', () => {

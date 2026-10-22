@@ -208,8 +208,12 @@ var JETONS = [JETON_CRITERE, JETON_ERREURS, JETON_PLURIEL, JETON_MOTS, JETON_POI
 //   · les deux formes écrites            ⮕ celles de l'enseignant·e ;
 //   · sinon, critère d'avant l'étape 2a  ⮕ « erreur / erreurs », « mot / mots » — le texte
 //     d'hier, au caractère près (sentinelle de l'invariant du stock) ;
-//   · sinon, critère neuf (la marque)    ⮕ un repli PROVISOIRE, qui ne nomme aucune
-//     discipline : jamais un nom vide ni un jeton nu sous les yeux d'un élève.
+//   · sinon, critère né depuis ce lot (`nomsAttendus`) ⮕ un repli PROVISOIRE, qui ne nomme
+//     aucune discipline : jamais un nom vide ni un jeton nu sous les yeux d'un élève.
+// ⚠ PAS LA MARQUE DES CODES (`codesSousCriteresSeulement`) — relecture de Cowork, 22 oct.,
+// 17 h 40 : celle-là est en ligne depuis la 1.213.0 et dit « né depuis le 21 oct. » ; la
+// lire ici changeait sans geste ce que lisent les élèves des critères créés en 1.213 et 1.214.
+// Les noms ont leur propre marque, posée à la naissance à partir de l'étape 2a.
 // ⚠ UNE PAIRE À MOITIÉ ÉCRITE SE LIT COMME ABSENTE : « 2 calculs » et « 1 unité » ne
 // viennent pas de deux sources.
 var CHAMPS_NOMS = ['erreurs', 'mots'];
@@ -225,9 +229,10 @@ var NOMS_PROVISOIRES = {
 };
 // La borne des deux schémas qui voyagent (import, partage), et celle de l'éditeur.
 var MAX_NOM = 40;
-// La marque d'un critère né depuis le 21 oct. 2026 : la MÊME clé que `codesAnnotation.MARQUE`
-// (une sentinelle le verrouille). Ce module ne dépend d'aucun autre : il la nomme.
-var MARQUE_NEUF = 'codesSousCriteresSeulement';
+// La marque d'un critère né depuis l'étape 2a (22 oct. 2026) : il attend ses deux noms. Posée
+// par `marquerNomsAttendus`, au geste qui fait naître un critère algorithmique
+// (`grilles.js`, `avecProjectionNeuve`), jamais à la lecture.
+var MARQUE_NOMS = 'nomsAttendus';
 
 function _forme(x) {
     return (typeof x === 'string') ? x.trim() : '';
@@ -237,9 +242,19 @@ function _copiePaire(p) {
     return { singulier: p.singulier, pluriel: p.pluriel };
 }
 
-/** Le critère est-il né depuis l'étape 0 (21 oct. 2026) ? */
+/** Le critère est-il né depuis l'étape 2a (22 oct. 2026) ? Sa marque à lui, et elle seule. */
 function _estNeuf(critere) {
-    return !!critere && critere[MARQUE_NEUF] === true;
+    return !!critere && critere[MARQUE_NOMS] === true;
+}
+
+/**
+ * Pose la marque des noms sur un critère qui DEVIENT algorithmique — appelé par le site qui
+ * décide de la naissance (`grilles.js`), au même geste que `codesAnnotation.marquerNeuf`.
+ * Rend le critère, muté.
+ */
+function marquerNomsAttendus(critere) {
+    if (critere && critere.type === 'algorithmique') critere[MARQUE_NOMS] = true;
+    return critere;
 }
 
 /** Ce que l'enseignant·e a ÉCRIT, formes vides comprises — pour l'éditeur. */
@@ -285,7 +300,7 @@ function nomsManquants(critere) {
     });
 }
 
-/** Le critère est-il né depuis la marque (21 oct. 2026) ? Pour l'éditeur : champs vides ou lus. */
+/** Le critère attend-il ses noms (né depuis l'étape 2a) ? Pour l'éditeur : champs vides ou lus. */
 function estNeuf(critere) {
     return _estNeuf(critere);
 }
@@ -303,6 +318,16 @@ function estPluriel(n) {
 /** La forme d'une paire de noms qui s'accorde avec `n`. */
 function accorder(n, paire) {
     return estPluriel(n) ? paire.pluriel : paire.singulier;
+}
+
+/**
+ * « 3 erreurs », « 1 unité manquante » : le compte et le nom de ce qu'on compte, accordé. Une
+ * source pour les deux sites jumeaux de « Tous les critères sont maîtrisés » (le bilan de l'app,
+ * le PDF de synthèse), qui doivent rendre les mêmes mots (`copierToutRetroaction`). Du texte brut :
+ * l'appelant l'échappe.
+ */
+function nombreEtNom(n, critere) {
+    return n + ' ' + accorder(n, noms(critere).erreurs);
 }
 
 /** Les noms du français écrit — ce que pose « Partir de la liste du français écrit ». */
@@ -884,7 +909,8 @@ var api = {
     JETON_NOM_ERREURS: JETON_NOM_ERREURS,
     JETON_NOM_MOTS: JETON_NOM_MOTS,
     MAX_NOM: MAX_NOM,
-    MARQUE_NEUF: MARQUE_NEUF,
+    MARQUE_NOMS: MARQUE_NOMS,
+    marquerNomsAttendus: marquerNomsAttendus,
     NOMS_PROVISOIRES: { erreurs: _copiePaire(NOMS_PROVISOIRES.erreurs), mots: _copiePaire(NOMS_PROVISOIRES.mots) },
     noms: noms,
     nomsSaisis: nomsSaisis,
@@ -894,6 +920,7 @@ var api = {
     appliquerNoms: appliquerNoms,
     estPluriel: estPluriel,
     accorder: accorder,
+    nombreEtNom: nombreEtNom,
     enEtiquette: enEtiquette,
     listerModeles: listerModeles,
     listerCles: listerCles,

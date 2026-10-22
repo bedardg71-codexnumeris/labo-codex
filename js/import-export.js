@@ -888,6 +888,9 @@ const SCHEMAS_IMPORT = {
                 // 21 oct. 2026 (étape 0) — la marque d'un critère né sans les dix codes du français voyage avec lui :
                 // sans elle, la grille importée retomberait sur le repli.
                 codesSousCriteresSeulement: { type: 'boolean' },
+                // 22 oct. 2026 (étape 2a) — la marque d'un critère qui attend ses deux noms : sans elle, un critère
+                // neuf importé se lirait « erreur » et « mot » sans l'inviter à se nommer.
+                nomsAttendus: { type: 'boolean' },
                 // 22 oct. 2026 (étape 2a) — LES DEUX NOMS DU CRITÈRE ALGORITHMIQUE voyagent avec lui : sans eux,
                 // une grille de chimie importée se lirait « erreur » et « mot ». Schéma FERMÉ, chaînes bornées à
                 // la borne de l'éditeur (`enoncesAlgo.MAX_NOM`) ; échappées là où elles s'affichent.
