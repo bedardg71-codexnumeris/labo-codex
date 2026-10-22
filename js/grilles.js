@@ -3639,6 +3639,56 @@ function rendreBlocFormuleAlgo(critere, ctx) {
 }
 
 /**
+ * LE MIROIR — le critère algorithmique, étape 1 (22 oct. 2026, consigne
+ * `CONSIGNE-LOT-2026-10-21-critere-algorithmique-miroir.md`) : sous la formule, ce que la règle
+ * donne sur quelques copies fictives — la note, et ce que l'élève lirait. Les copies, les notes et
+ * les phrases sortent de `miroirAlgo` (js/miroir-algo.js), qui appelle les fonctions de
+ * l'évaluation : rien n'est calculé ici. Placé dans la carte « Formule », la seule carte jamais
+ * repliée, juste sous « Formule appliquée » : c'est elle que l'essai met à l'épreuve, et ses
+ * réglages sont au-dessus. Lecture seule : aucun contrôle, aucun handler.
+ * Il suit les réglages au même geste que le gabarit (`_redessinerCible`) ; la pondération du
+ * critère, qui ne redessine pas le gabarit, le met à jour en place (`suivreMiroirAlgo`).
+ */
+function rendreMiroirAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique' || typeof window.miroirAlgo === 'undefined') return '';
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const L = window.miroirAlgo.libelles(critere);
+    const essais = window.miroirAlgo.essais(critere);
+    const note = (e) => {
+        if (!e.applicable) return esc(L.noteImpossible);
+        const pts = formaterNoteNombre(e.points) + '/' + formaterNoteNombre(critere.ponderation);
+        return esc(pts + ' (' + formaterNotePourcentage(e.pourcentage) + ')')
+            + (e.plancher ? ` <span class="miroir-algo-plancher">— ${esc(L.plancher)}</span>` : '');
+    };
+    const donnees = (c) => {
+        const occurrences = L.occurrences(c.erreurs) + (c.erreursFormule !== c.erreurs ? window.enoncesAlgo.mentionPonderee(c.erreurs, c.erreursFormule) : '');
+        const codes = c.codes.length ? ' : ' + c.codes.map((x) => L.code(x.nombre, x.nom, x.poids)).join(', ') : '';
+        return occurrences + codes + ', ' + (c.mots === null ? L.sansEtendue : L.etendue(c.mots));
+    };
+    const lignes = essais.map((e) => `
+                    <li class="miroir-algo-copie" data-copie="${esc(e.copie.cle)}">
+                        <span class="miroir-algo-donnees">${esc(donnees(e.copie))}</span>
+                        <span class="miroir-algo-note">${note(e)}</span>
+                        <span class="miroir-algo-eleve"><span class="miroir-algo-mot">${esc(L.eleveLira)}</span> ${e.eleve ? esc(e.eleve) : `<em>${esc(L.aucunePhrase)}</em>`}</span>
+                    </li>`).join('');
+    return `
+            <div class="miroir-algo" data-miroir-algo="${esc(ctx.index)}">
+                <p class="miroir-algo-titre">${esc(L.titre)}</p>
+                <small class="miroir-algo-intro">${esc(L.intro)}</small>${essais.length ? `
+                <ul class="miroir-algo-liste">
+                    ${lignes}
+                </ul>` : `
+                <small class="miroir-algo-vide">${esc(L.sansPonderation)}</small>`}
+            </div>`;
+}
+
+/** La pondération du critère a changé sans redessiner le gabarit : le miroir se refait en place. */
+function suivreMiroirAlgo(index, critere) {
+    const m = [...document.querySelectorAll('#listeCriteres [data-miroir-algo]')].find(x => x.dataset.miroirAlgo === String(index));
+    if (m) m.outerHTML = rendreMiroirAlgo(critere, { index });
+}
+
+/**
  * #668 — Le bloc PROJECTION du gabarit, sous le même patron que la formule.
  *
  * Deux normes cohabitent sur le même critère, et l'écran doit les tenir
@@ -4477,7 +4527,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                         ${boutonAjouter('sous-criteres-btn-ajouter-liste')}
                     </div>` : `
                     <p class="sous-criteres-vide-message">
-                        Aucun sous-critère défini. Utilise les sous-critères par défaut ou crée les tiens.
+                        Aucun sous-critère pour l'instant : ajoute les tiens, ou pars de la liste du français écrit.
                     </p>
                     ${boutonAjouter('sous-criteres-btn-ajouter-vide')}`}
                     <p class="sous-criteres-info">
@@ -4974,7 +5024,7 @@ function rendreCartesGabaritAlgo(critere, ctx) {
     return `
             <div class="gabarit-algo" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
                 ${rendreSousCriteresAlgo(critere, ctx)}
-                ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx), false)}
+                ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx) + rendreMiroirAlgo(critere, ctx), false)}
                 ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Bilan', rendreBlocEnoncesAlgo(critere, ctx), true)}
                 ${carteGabaritAlgo(critere, ctx, 'projection', 'Ce que l\'élève lit', rendreBlocProjectionAlgo(critere, ctx), true)}
             </div>`;
@@ -5453,6 +5503,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     if (champ === 'ponderation') {
         calculerEtAfficherTotalPonderation(grille);
         suivrePointsDAbord(critereIndex, grille.criteres[critereIndex]);
+        suivreMiroirAlgo(critereIndex, grille.criteres[critereIndex]);
     }
 
     return { ok: true };
@@ -6587,7 +6638,10 @@ function modifierPonderationCritereTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     modifierCritereTemp(index, 'ponderation', parseInt(el.value));
     mettreAJourTotalTemp();
-    if (window.tempCriteres && window.tempCriteres[index]) suivrePointsDAbord(index, window.tempCriteres[index]);
+    if (window.tempCriteres && window.tempCriteres[index]) {
+        suivrePointsDAbord(index, window.tempCriteres[index]);
+        suivreMiroirAlgo(index, window.tempCriteres[index]);
+    }
 }
 
 /** Annuler import grilles */

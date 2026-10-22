@@ -2,7 +2,7 @@
 
 > Cowork, mercredi 21 octobre 2026, 9 h 23 (Toronto, mesuré par `date`), sur `main` à `6992bec4` (non poussé, relu à 9 h 16). Ordre approuvé par Grégoire à 9 h 20 ; principe des deux noms (occurrences, étendue) approuvé à 9 h 28. Sources : les pistes de 8 h 44 à 9 h 11 dans `MESURE-2026-10-21-critere-algorithmique.md`, et le code de `main`, lu en lecture seule. Ce plan ne se code pas d'un bloc : chaque étape aura sa consigne.
 
-## Où en est le plan (tenu à jour à chaque lot ; dernière mise à jour : 21 oct. 2026, 12 h 11)
+## Où en est le plan (tenu à jour à chaque lot ; dernière mise à jour : 21 oct. 2026, 12 h 20)
 
 Chaque étape a, ou aura, sa consigne dans `plans de travail/CONSIGNE-LOT-<date>-critere-algorithmique-<étape>.md`, sa demande et son verdict de relecture. Une session qui reprend lit ce tableau, puis le dernier verdict.
 

@@ -27,6 +27,7 @@
      estActive(grille)      le drapeau est posé ET au moins un sous-critère pèse
      apercuCodes(critere)   ce que les sous-critères donneraient, geste ou non (gabarit)
      grilleDeCopie(fichier) la grille d'une copie, via sa production, ou null
+     sommePonderee(grille, compteurs) la somme des codes posés, chacun à son poids
 
    Chaque code : { id, code, numero, nom, couleur, retroaction, source, poids }
      id        ce qui est écrit sur la copie : `errfr_<code>`. ⚠ LE PRÉFIXE RESTE,
@@ -309,6 +310,21 @@ function code(grille, id) {
 }
 
 /**
+ * LE POIDS DES CODES POSÉS (décision de Grégoire, 21 oct. 2026, 8 h 38) : la somme de
+ * `compteurs` ({id: nombre}), chaque code pesant son `poids` sous `grille` — 1 en repli et
+ * pour un code inconnu. Arrondie au dix-millième (des poids de 0,1 s'additionnent). La seule
+ * définition (22 oct. 2026) : Annoter (`travauxOutils.sommePondereeErreurs`) et le miroir du
+ * gabarit (`miroirAlgo`) la lisent toutes deux.
+ */
+function sommePonderee(grille, compteurs) {
+    var somme = Object.keys(compteurs || {}).reduce(function(s, id) {
+        var poids = Number(code(grille, id).poids);
+        return s + (compteurs[id] || 0) * (isFinite(poids) ? poids : 1);
+    }, 0);
+    return Math.round(somme * 10000) / 10000;
+}
+
+/**
  * La grille d'une copie : copie → production → grille.
  *
  * Mesuré le 3 septembre 2026 : ce chemin n'est ni toujours vrai (une copie
@@ -349,6 +365,7 @@ var api = {
     apercuCodes: apercuCodes,
     listeCodes: listeCodes,
     code: code,
+    sommePonderee: sommePonderee,
     grilleDeCopie: grilleDeCopie
 };
 

@@ -401,7 +401,7 @@ describe('lot 4 · C.D — les sous-critères : UNE seule liste (lot A du 5 sept
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
         const html = liste().innerHTML;
         expect(html).toContain('data-action="initialiserSousCriteresParDefaut"');
-        expect(html).toContain('Aucun sous-critère défini.');
+        expect(html).toContain('Aucun sous-critère pour l\'instant : ajoute les tiens, ou pars de la liste du français écrit.');   // 22 oct. 2026, consigne du miroir, point 7
         expect(html).toMatch(/data-on-change="modifierCodesDepuisSousCriteresHandler"[^>]*\sdisabled/);
         expect(html).not.toContain('data-pli="CR:codes"');
         expect(html).not.toContain('Aucun sous-critère : ajoute-en dans le bloc');
