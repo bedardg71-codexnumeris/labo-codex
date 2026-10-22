@@ -229,8 +229,10 @@ describe('Le rapport de bogue : l\'infobulle dit ce qui part', () => {
         expect(texte).not.toContain('Le numéro de build part automatiquement');
     });
 
-    it('elle ne promet pas l\'absence de nom : une action garde le texte cliqué', () => {
-        expect(RAPPORT).toMatch(/textContent\?\.substring\(0, 30\)/);
+    // ↻ #1075, point 10 (22 oct. 2026) : l'historique ne garde plus le texte cliqué
+    // (`sentinelle-1075-rapport-bug-sans-texte`). La bulle n'a pas changé : ses mots sont à Grégoire.
+    it('elle ne promet pas l\'absence de nom, et l\'historique ne garde plus le texte cliqué', () => {
+        expect(RAPPORT).not.toMatch(/textContent\?\.substring\(0, 30\)/);
         expect(bulle('entete-signaler-bug')).not.toMatch(/aucun nom/i);
         expect(bulle('entete-signaler-bug')).toContain('relis le rapport avant de l’envoyer');
     });

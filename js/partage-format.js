@@ -37,8 +37,11 @@
  *   - grille      → ses cartouches (`cartouches_{grilleId}`, clé globale)
  *   - cartouche   → sa grille (grilleId)
  *   - production  → sa grille (si grilleId non vide) + cartouches de celle-ci
- *   - echelle, pratique → aucune (l'échelle d'une pratique est EMBARQUÉE
- *     dans l'entité, pas référencée)
+ *   - pratique    → l'échelle que nomme `configuration.echelleId` (#1075, point 9,
+ *     22 oct. 2026). Avant : « aucune », sur la foi d'une échelle EMBARQUÉE ; or une
+ *     pratique de l'assistant ne porte que la référence, et le paquet partait sans
+ *     elle. L'import la rebranche déjà (`rebrancherReferences`, #627).
+ *   - echelle     → aucune
  *
  * La projection sur les schémas fermés retire par construction tout champ
  * non déclaré : `auteur`, flags démo, champs locaux (coursId, dateEcheance),
@@ -178,6 +181,13 @@
                 if (g.id === grilleId) trouvee = g;
             });
             return trouvee;
+        },
+        // #1075, point 9 : la résolution de la pratique elle-même (`pratique-registre.js`) —
+        // le trimestre actif, puis le pool de travail (#358).
+        echelleParId: function (echelleId) {
+            if (typeof window.resoudreModeleParId === 'function') return window.resoudreModeleParId('echelle', echelleId);
+            var cleT = (typeof window.cle === 'function') ? window.cle('echellesTemplates') : 'echellesTemplates';
+            return lireCollection(cleT).find(function (e) { return e && e.id === echelleId; }) || null;
         }
     };
     partageFormat.LECTEURS_UTILISATEUR = LECTEURS_UTILISATEUR;
@@ -196,8 +206,9 @@
      *
      * @param {Object} item
      * @param {string} type
-     * @param {Object} [lecteurs] - { cartouchesDeGrille(id), grilleParId(id) } ;
-     *                 défaut = les collections de l'utilisateur.
+     * @param {Object} [lecteurs] - { cartouchesDeGrille(id), grilleParId(id), echelleParId(id) } ;
+     *                 défaut = les collections de l'utilisateur. Un jeu de lecteurs sans
+     *                 `echelleParId` lit l'échelle d'une pratique chez l'utilisateur.
      */
     function rassemblerDependances(item, type, lecteurs) {
         var resultat = { entites: {}, references: [] };
@@ -231,14 +242,30 @@
             ajouterCartouchesDeGrille(grilleId);
         }
 
+        // #1075, point 9 : l'échelle nommée par une pratique part avec elle.
+        function ajouterEchelle(echelleId, depuisType, depuisId) {
+            var lireEchelle = typeof lire.echelleParId === 'function' ? lire.echelleParId : LECTEURS_UTILISATEUR.echelleParId;
+            var echelle = lireEchelle(echelleId);
+            if (!echelle) return;
+            resultat.entites.echelles = (resultat.entites.echelles || []);
+            resultat.entites.echelles.push(projeterEntite(echelle, 'echelle'));
+            resultat.references.push({
+                depuis: { type: depuisType, id: depuisId },
+                vers: { type: 'echelle', id: echelle.id },
+                nature: 'utilise'
+            });
+        }
+
         if (type === 'grille') {
             ajouterCartouchesDeGrille(item.id);
         } else if (type === 'cartouche' && item.grilleId) {
             ajouterGrille(item.grilleId, 'cartouche', item.id);
         } else if (type === 'production' && item.grilleId) {
             ajouterGrille(item.grilleId, 'production', item.id);
+        } else if (type === 'pratique' && item.configuration && item.configuration.echelleId) {
+            ajouterEchelle(item.configuration.echelleId, 'pratique', item.id);
         }
-        // echelle, pratique : aucune dépendance référencée.
+        // echelle : aucune dépendance référencée.
 
         return resultat;
     }

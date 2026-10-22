@@ -454,6 +454,7 @@ function monterProprietes({ fichier, vignette = '', verdict = true, jetonsActifs
         obtenirLibelleStatut: (s) => s,
         obtenirDonneesSelonMode: (k) => (k === 'productions' ? PRODUCTIONS : (k === 'evaluationsSauvegardees' ? [{ id: 'EVAL_SARA_A2R', etudiantDA: DA1, productionId: A2R }] : [])),
         obtenirEtudiantsCoursActif: () => ETUDIANTS.slice(),
+        obtenirDAAffichage: (e) => e.da,   // #1075, point 1 : hors anonymisation, le DA lui-même (modes.js)
         obtenirConfigJetons: () => ({ actif: jetonsActifs }),
         appliquerJetonReprise: (id) => { journal.jetons.push(id); return { id: 'EVAL_REPRISE_1' }; },
         setTimeout: () => 0,

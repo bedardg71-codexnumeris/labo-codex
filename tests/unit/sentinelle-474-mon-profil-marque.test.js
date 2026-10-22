@@ -7,8 +7,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 // `profilEnseignant` est la copie que lisent en repli le groupe-cours (`'profil'`), l'attribution CC,
 // l'export PDF et le codex. Avant, chaque profil enregistré l'écrasait : modifier la fiche d'un collègue
 // faisait de lui « moi ». Le marqueur explicite est `profilEnseignant.enseignantId`, posé par un geste
-// qui écrit déjà la copie, jamais au chargement. SANS LA PURGE : supprimer un profil n'efface pas la
-// copie (suppression de donnée : à Grégoire, inscrit à la fiche).
+// qui écrit déjà la copie, jamais au chargement. La purge à la suppression est venue avec #1075, point 8
+// (22 oct. 2026) : `sentinelle-1075-mon-profil-supprime.test.js`.
 // Même montage que `sentinelle-lot-e2-enseignant`. Noms fictifs.
 
 const PROFIL = { id: 'ENS_1', prenom: 'Ada', nom: 'Lovelace', courriel: 'ada@exemple.qc.ca', institution: 'Cégep fictif', departement: '', discipline: '', siteWeb: '' };

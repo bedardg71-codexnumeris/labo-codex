@@ -371,27 +371,33 @@ function enregistrerAction(type, details) {
     }
 }
 
-// Intercepter les clics
-document.addEventListener('click', (event) => {
-    const target = event.target;
-    let description = '';
-
-    // Identifier l'élément cliqué
+/**
+ * #1075, point 10 (22 oct. 2026) — CE QU'UN CLIC LAISSE DANS L'HISTORIQUE : l'élément, jamais son
+ * texte. Avant, les 30 premiers caractères du texte cliqué y entraient : un nom d'élève cliqué dans
+ * une liste partait avec le rapport, hors mode anonymisé. Restent l'id, la première classe et le
+ * `data-action` le plus proche (des noms de code) ; une suite de 5 chiffres ou plus y est masquée,
+ * parce qu'un id peut porter un DA. Fonction pure, verrouillée par
+ * `tests/unit/sentinelle-1075-rapport-bug-sans-texte.test.js`.
+ * @param {Element} target
+ * @returns {string}
+ */
+function decrireElementClique(target) {
+    let description;
     if (target.id) {
         description = `#${target.id}`;
     } else if (target.className && typeof target.className === 'string') {
         description = `.${target.className.split(' ')[0]}`;
     } else {
-        description = target.tagName.toLowerCase();
+        description = String(target.tagName || '').toLowerCase();
     }
+    const porteur = typeof target.closest === 'function' ? target.closest('[data-action]') : null;
+    if (porteur) description += ` [${porteur.getAttribute('data-action')}]`;
+    return description.replace(/\d{5,}/g, '#');
+}
 
-    // Ajouter le texte si disponible
-    const texte = target.textContent?.substring(0, 30).trim();
-    if (texte && texte.length > 0) {
-        description += ` "${texte}${texte.length >= 30 ? '…' : ''}"`;
-    }
-
-    enregistrerAction('clic', description);
+// Intercepter les clics
+document.addEventListener('click', (event) => {
+    enregistrerAction('clic', decrireElementClique(event.target));
 }, true);
 
 // #587 (12 oct. 2026) : l'interception de `afficherSection` est retirée. Ce fichier est chargé
@@ -1279,6 +1285,7 @@ window.copierRapportBug = copierRapportBug;
 window.telechargerRapportTxt = telechargerRapportTxt;
 window.envoyerRapportParCourriel = envoyerRapportParCourriel;
 window.enregistrerAction = enregistrerAction;
+window.decrireElementClique = decrireElementClique;   // #1075, point 10 : lu par son banc
 // Gestion des rapports archivés
 window.ouvrirModalRapportsArchives = ouvrirModalRapportsArchives;
 window.fermerModalRapportsArchives = fermerModalRapportsArchives;
