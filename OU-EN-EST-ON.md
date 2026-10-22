@@ -15,6 +15,18 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 22 OCTOBRE 2026, 16 H 30 : LA 1.214.0 EST EN LIGNE** (tes textes validés à 13 h 05, la sixième ligne des Nouvelles resserrée à 13 h 17). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- critère algorithmique : sous la formule, un essai sur quelques copies fictives montre la note et la phrase que l'élève lirait ;
+- dans « Apporter mon matériel », tu peux coller ta liste de codes de correction et l'ajouter à un critère algorithmique qui n'a pas encore de codes ;
+- avec deux critères algorithmiques dans une grille, l'éditeur et Annoter disent lequel reçoit les codes ;
+- une grille en points qui nomme ses niveaux se crée avec son barème ;
+- tous les nombres s'écrivent à la française, plus seulement les notes ;
+- en mode anonymisé, le vrai DA ne paraît plus ; un trimestre clos refuse d'enregistrer une évaluation ou des présences (les imports, entre autres, y écrivent encore) ; une production employée ne se supprime plus.
+
+**Vérifié comment** : verdict complet du navigateur vert sur le commit poussé (aucun échec, aucune spec instable, Mac tenu éveillé), puis la mise en ligne constatée chez Netlify sur ce commit.
+
 📝 **LE 22 OCTOBRE 2026, 1 H 38 : LA 1.213.0 EST EN LIGNE** (tes Nouvelles validées telles quelles le 21 à 12 h 18). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :
