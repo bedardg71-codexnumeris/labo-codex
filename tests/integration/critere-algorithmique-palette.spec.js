@@ -13,6 +13,13 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     pose, au curseur, et le curseur reste (le toucher émulé : voir la note dans l'essai) ;
 //   · captures (CAPTURES_PALETTE=<dossier>) : une rédaction avec projection, une chimie sans projection, aux
 //     deux largeurs. Le même spec, lancé dans Chrome, donne les captures de Chrome.
+// ↻ LES RETOUCHES DE LA RELECTURE (22 oct., 21 h 51) :
+//   · Mac : un bloc inactif se réduit à son nom (ni aide ni précision visibles, une ligne, la mention dans son
+//     `title`) ; la liste des grilles colle SOUS la barre de navigation, pas dessous ;
+//   · iPad, portrait ET paysage (le gabarit y a 649 et 675 px, sous le seuil de 754) : la palette est compacte,
+//     en tête du gabarit sans zone visitée, puis JUSTE AU-DESSUS de la zone touchée, qu'elle suit ; elle n'y montre
+//     que les blocs offerts ; la zone touchée ne bouge pas à l'écran quand la palette arrive au-dessus d'elle ;
+//   · captures `-retouches` (CAPTURES_RETOUCHES=<dossier>).
 // ⛔ Aucun `waitForTimeout`. Le seul geste de pointeur éprouvé est le bloc (souris, puis doigt) ; le caret se
 // pose par le composeur lui-même (`placerCaret`), comme les specs du texte troué.
 
@@ -48,6 +55,10 @@ async function ouvrir(page, grilleId) {
         await page.evaluate((s) => document.querySelector(`#listeCriteres .gabarit-algo-carte[data-pli$=":${s}"] .accordeon-header`).click(), section);
         await expect(page.locator(`#listeCriteres .gabarit-algo-carte[data-pli$=":${section}"]`)).not.toHaveClass(/ferme/);
     }
+    // Les cartes se déplient en transition : on mesure une fois le dépliage fini (sans quoi une carte rogne
+    // encore son contenu, et une mesure de position mesure la transition).
+    await page.waitForFunction(() => [...document.querySelectorAll('#listeCriteres .gabarit-algo-carte .accordeon-contenu')]
+        .every((c) => c.getAnimations().length === 0));
     return erreurs;
 }
 
@@ -65,6 +76,21 @@ const etat = (zone) => zone.evaluate((t) => {
 });
 /** La boîte d'un élément, et s'il est dans la fenêtre. */
 const boite = (loc) => loc.evaluate((el) => { const r = el.getBoundingClientRect(); return { haut: r.top, bas: r.bottom, gauche: r.left, droite: r.right, hauteur: r.height, dansLaFenetre: r.bottom > 0 && r.top < window.innerHeight }; });
+/** Ce qu'un bloc montre à l'œil : son aide, sa précision, sa mention (plus d'1 px de côté = visible), et s'il tient sur une ligne. */
+const reduitASonNom = (loc) => loc.evaluate((b) => {
+    const vu = (sel) => { const s = b.querySelector(sel); if (!s) return false; const r = s.getBoundingClientRect(); return r.width > 1 && r.height > 1; };
+    const nom = b.querySelector('.palette-algo-bloc-nom');
+    const ligne = parseFloat(getComputedStyle(nom).lineHeight);
+    return { aide: vu('.palette-algo-bloc-aide'), precision: vu('.palette-algo-bloc-precision'), mention: vu('.palette-algo-bloc-inactif'),
+             uneLigne: nom.getBoundingClientRect().height <= ligne + 1 && b.getBoundingClientRect().height <= 44.5 };
+});
+/** Les jetons des blocs qu'on VOIT dans la palette. */
+const blocsVus = (page) => palette(page).locator('.palette-algo-bloc').evaluateAll((els) => els.filter((b) => b.getClientRects().length).map((b) => b.dataset.jeton));
+/** La palette est-elle juste au-dessus de cette zone : de la rangée de ses deux zones (palier), de son champ (énoncé) ? */
+const justeAuDessus = (zone) => zone.evaluate((z) => {
+    const ancre = z.closest('.palier-rangee') || z.closest('.groupe-form');
+    return !!ancre && !!ancre.previousElementSibling && ancre.previousElementSibling.matches('.palette-algo');
+});
 
 test('Mac · la palette, à gauche et collante, pose un bloc dans un palier loin sous elle et dans un énoncé, au curseur, sans perdre le focus', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -110,7 +136,9 @@ test('Mac · la palette, à gauche et collante, pose un bloc dans un palier loin
     await page.keyboard.type(' (dès maintenant)');
     await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Dans : « Défi prioritaire »');
     await expect(bloc(page, '{erreurs}')).toHaveAttribute('aria-disabled', 'true');
-    await expect(bloc(page, '{erreurs}').locator('.palette-algo-bloc-inactif')).toBeVisible();
+    // Retouche 2 : un bloc inactif n'est plus que son nom, sur une ligne ; sa mention est dans son `title`.
+    await expect(bloc(page, '{erreurs}')).toHaveAttribute('title', 'Ce texte ne le remplit pas.');
+    expect(await reduitASonNom(bloc(page, '{erreurs}')), 'inactif : son nom seul, sur une ligne').toEqual({ aide: false, precision: false, mention: false, uneLigne: true });
     await bloc(page, '{critere}').click();
     e = await etat(priorite);
     expect(e.valeur).toBe('{critere} est à travailler en priorité (dès maintenant) {critere}');
@@ -122,42 +150,104 @@ test('Mac · la palette, à gauche et collante, pose un bloc dans un palier loin
     expect(erreurs).toEqual([]);
 });
 
-test.describe('iPad portrait', () => {
-    test.use({ hasTouch: true, viewport: { width: 820, height: 1180 } });
-
-    test('iPad · la palette est où la règle la met, ses blocs ont 44 px, et un bloc loin de la zone s\'y pose au curseur', async ({ page }) => {
-        const erreurs = await ouvrir(page, 'GR');
-        const largeur = await page.locator('#listeCriteres .gabarit-algo').evaluate((el) => el.getBoundingClientRect().width);
-        const p = await boite(palette(page));
-        const corps = await boite(page.locator('#listeCriteres .gabarit-algo-corps'));
-        console.log('IPAD · GABARIT →', Math.round(largeur), 'PALETTE →', JSON.stringify(p), 'CORPS →', JSON.stringify(corps));
-        if (largeur >= 754) expect(p.droite, 'sur le côté').toBeLessThanOrEqual(corps.gauche);
-        else expect(p.bas, 'au-dessus du gabarit').toBeLessThanOrEqual(corps.haut);
-        const hauteurs = await palette(page).locator('.palette-algo-bloc').evaluateAll((els) => els.map((b) => b.getBoundingClientRect().height));
-        expect(Math.min(...hauteurs), 'chaque bloc fait au moins 44 px').toBeGreaterThanOrEqual(44);
-        const debord = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-        expect(debord, 'aucun défilement de côté').toBeLessThanOrEqual(0);
-
-        // Le verdict du palier 4 au curseur, puis le bloc {palier} TOUCHÉ (au doigt), la palette loin de la zone.
-        const verdict = zonePalier(page, 3, 'texte');
-        const v = vueDe(verdict);
-        await v.scrollIntoViewIfNeeded();
-        const texteDHier = await verdict.inputValue();
-        await caretA(v, texteDHier.length);
-        // ⚠ MESURÉ (22 oct.) : sous le WebKit de Playwright, avec `hasTouch`, un `pointerdown` annulé fait
-        // tomber le clic qu'un toucher émulé aurait produit (un bouton témoin sans annulation le reçoit). C'est
-        // le mécanisme du 3 sept., que la consigne garde, et que Grégoire emploie au doigt sur son iPad depuis.
-        // Ce spec éprouve donc la pose par le clic, à la largeur et à la mise en page de l'iPad ; le toucher
-        // réel reste le geste à vérifier à l'écran.
-        await bloc(page, '{palier}').click();
-        const e = await etat(verdict);
-        console.log('IPAD · APRÈS LE BLOC →', JSON.stringify(e));
-        expect(e.valeur).toBe(texteDHier + ' {palier}');
-        expect(e.focalisee, 'le curseur reste dans la zone').toBe(true);
-        expect(e.curseur).toBe(e.valeur.length);
-        expect(erreurs).toEqual([]);
-    });
+test('Mac · la liste des grilles colle sous la barre de navigation, pas dessous', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const erreurs = await ouvrir(page, 'GR');
+    const liste = page.locator('.section.active .sous-section.active .sidebar-navigation');
+    await expect(liste).toHaveCount(1);
+    await page.evaluate(() => window.scrollTo(0, 1500));
+    const barre = await boite(page.locator('.navigation-principale'));
+    const l = await boite(liste);
+    console.log('MAC · BARRE →', JSON.stringify(barre), 'LISTE →', JSON.stringify(l));
+    expect(l.haut, 'la liste commence sous la barre').toBeGreaterThanOrEqual(barre.bas);
+    expect(l.haut, 'et elle colle : la page défilée de 1500 px ne l\'emporte pas').toBeLessThan(200);
+    expect(l.bas, 'elle tient dans la fenêtre').toBeLessThanOrEqual(900);
+    expect(erreurs).toEqual([]);
 });
+
+// Le gabarit mesure 649 px en portrait et 675 px en paysage (WebKit, 22 oct.) : sous le seuil dans les deux sens.
+for (const [sens, largeur, hauteur] of [['portrait', 820, 1180], ['paysage', 1180, 820]]) {
+    test.describe(`iPad ${sens}`, () => {
+        test.use({ hasTouch: true, viewport: { width: largeur, height: hauteur } });
+
+        test(`iPad ${sens} · la palette compacte va juste au-dessus de la zone touchée et la suit, n'y montre que ses blocs (44 px), la zone ne saute pas, un bloc s'y pose au curseur`, async ({ page }) => {
+            const erreurs = await ouvrir(page, 'GR');
+            // Sans zone visitée : en tête du gabarit, avec l'invitation.
+            const p0 = await boite(palette(page));
+            const corps = await boite(page.locator('#listeCriteres .gabarit-algo-corps'));
+            expect(p0.bas, 'en tête du gabarit').toBeLessThanOrEqual(corps.haut);
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText(/^Place le curseur/);
+            const debord = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+            expect(debord, 'aucun défilement de côté').toBeLessThanOrEqual(0);
+
+            /** Toucher une zone (au clic : voir la note plus bas) ; rend son déplacement à l'écran. */
+            const toucher = async (zone) => {
+                const v = vueDe(zone);
+                await v.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+                const avant = (await boite(v)).haut;
+                await v.click({ position: { x: 8, y: 8 } });
+                const apres = (await boite(v)).haut;
+                console.log(`IPAD ${sens.toUpperCase()} · ZONE TOUCHÉE →`, await zone.getAttribute('data-nom-zone'), 'avant', Math.round(avant), 'après', Math.round(apres));
+                return apres - avant;
+            };
+            const offerts = (quoi) => page.evaluate((q) => (q === 'palier' ? window.projectionAlgo.listerReperes() : window.enoncesAlgo.reperesDeCle(q)).map((r) => r.jeton), quoi);
+            const tousCompacts = async () => {
+                const hauteurs = await palette(page).locator('.palette-algo-bloc').evaluateAll((els) => els.filter((b) => b.getClientRects().length).map((b) => b.getBoundingClientRect().height));
+                expect(Math.min(...hauteurs), 'chaque bloc fait au moins 44 px').toBeGreaterThanOrEqual(44);
+                for (const j of await blocsVus(page)) {
+                    expect(await reduitASonNom(bloc(page, j)), `${j} : son nom seul`).toEqual({ aide: false, precision: false, mention: false, uneLigne: true });
+                }
+            };
+
+            // 1 — un énoncé, « Défi prioritaire » (carte « Bilan ») : la palette passe juste au-dessus de son champ.
+            const priorite = zoneEnonce(page, 'priorite');
+            expect(Math.abs(await toucher(priorite)), 'la zone touchée ne saute pas').toBeLessThanOrEqual(2);
+            expect(await justeAuDessus(priorite), 'la palette est juste au-dessus du champ').toBe(true);
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Dans : « Défi prioritaire »');
+            expect(await blocsVus(page), 'seulement les blocs que la zone offre').toEqual(await offerts('priorite'));
+            await tousCompacts();
+
+            // 2 — le verdict du palier 4, plus bas : la palette le suit, au-dessus de la rangée de ses deux zones.
+            const verdict = zonePalier(page, 3, 'texte');
+            expect(Math.abs(await toucher(verdict)), 'la zone touchée ne saute pas').toBeLessThanOrEqual(2);
+            expect(await justeAuDessus(verdict), 'la palette a suivi : juste au-dessus du palier').toBe(true);
+            expect(await justeAuDessus(priorite), 'elle a quitté le champ d\'avant').toBe(false);
+            await expect(palette(page)).toHaveCount(1);
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Dans : « Verdict, palier 4 »');
+            expect([...await blocsVus(page)].sort()).toEqual([...await offerts('palier')].sort());
+            await tousCompacts();
+
+            // 3 — le décompte, PLUS HAUT que le palier : la palette remonte, la zone touchée ne saute pas non plus.
+            const decompte = zoneEnonce(page, 'decompte');
+            expect(Math.abs(await toucher(decompte)), 'la zone touchée ne saute pas').toBeLessThanOrEqual(2);
+            expect(await justeAuDessus(decompte)).toBe(true);
+
+            // 4 — de retour au verdict du palier 4, un bloc posé au curseur, sans perdre le focus.
+            await toucher(verdict);
+            const v = vueDe(verdict);
+            const texteDHier = await verdict.inputValue();
+            await caretA(v, texteDHier.length);
+            // ⚠ MESURÉ (22 oct.) : sous le WebKit de Playwright, avec `hasTouch`, un `pointerdown` annulé fait
+            // tomber le clic qu'un toucher émulé aurait produit (un bouton témoin sans annulation le reçoit). C'est
+            // le mécanisme du 3 sept., que la consigne garde, et que Grégoire emploie au doigt sur son iPad depuis.
+            // Ce spec éprouve donc la pose par le clic, à la largeur et à la mise en page de l'iPad ; le toucher
+            // réel reste le geste à vérifier à l'écran.
+            await bloc(page, '{palier}').click();
+            const e = await etat(verdict);
+            console.log(`IPAD ${sens.toUpperCase()} · APRÈS LE BLOC →`, JSON.stringify(e));
+            expect(e.valeur).toBe(texteDHier + ' {palier}');
+            expect(e.focalisee, 'le curseur reste dans la zone').toBe(true);
+            expect(e.curseur).toBe(e.valeur.length);
+            expect(await justeAuDessus(verdict), 'la pose ne déplace pas la palette').toBe(true);
+
+            // 5 — la fenêtre s'élargit au-dessus du seuil : la palette retourne sur le côté (`replacerPalettesAlgo`).
+            await page.setViewportSize({ width: 1440, height: 900 });
+            await expect.poll(() => palette(page).evaluate((p) => p.parentElement.classList.contains('gabarit-algo-atelier') && !p.previousElementSibling),
+                'revenue à sa place, sur le côté').toBe(true);
+            expect(erreurs).toEqual([]);
+        });
+    });
+}
 
 test('captures · une rédaction avec projection, une chimie sans projection, à la largeur du Mac et de l\'iPad portrait', async ({ page, browserName }) => {
     test.skip(!process.env.CAPTURES_PALETTE, 'captures : CAPTURES_PALETTE=<dossier>');
@@ -182,4 +272,33 @@ test('captures · une rédaction avec projection, une chimie sans projection, à
         await expect(palette(page)).not.toContainText(/\berreurs?\b|\bmots?\b/i);
         await deux(`chimie-sans-projection-${largeur}`, zoneEnonce(page, 'decompte'));
     }
+});
+
+test('captures `-retouches` · la palette compacte au-dessus d\'un énoncé puis d\'un palier (iPad), les blocs inactifs réduits et la liste des grilles sous la barre (Mac)', async ({ page, browserName }) => {
+    test.skip(!process.env.CAPTURES_RETOUCHES, 'captures : CAPTURES_RETOUCHES=<dossier>');
+    const dossier = process.env.CAPTURES_RETOUCHES;
+    const moteur = process.env.CAPTURES_MOTEUR || browserName;
+    const shot = (nom) => page.screenshot({ path: path.join(dossier, `${nom}-${moteur}-retouches.png`) });
+    /** Le curseur dans une zone, la zone au milieu de la fenêtre. */
+    const viser = async (zone) => {
+        const v = vueDe(zone);
+        await v.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+        await caretA(v, (await zone.inputValue()).length);
+        await v.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    };
+    for (const [largeur, hauteur] of [[820, 1180], [1180, 820]]) {
+        await page.setViewportSize({ width: largeur, height: hauteur });
+        await ouvrir(page, 'GR');
+        await viser(zoneEnonce(page, 'priorite'));
+        await shot(`redaction-${largeur}-1-enonce`);
+        await viser(zonePalier(page, 1, 'texte'));
+        await shot(`redaction-${largeur}-2-palier`);
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await ouvrir(page, 'GR');
+    await viser(zonePalier(page, 1, 'texte'));
+    await palette(page).evaluate((el) => el.closest('.gabarit-algo').scrollIntoView({ block: 'start' }));
+    await shot('redaction-1440-1-palier-inactifs');
+    await page.evaluate(() => window.scrollTo(0, 1500));
+    await shot('redaction-1440-2-defilee');
 });

@@ -94,8 +94,9 @@ const GRILLE = { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [ALGO
 /** La palette simulée d'un gabarit : ses blocs (un par jeton), sa ligne de cible ; le gabarit qui la porte. */
 function fauxGabarit(jetons) {
     const blocs = (jetons || ['{critere}', '{erreurs}', '{projection}']).map((j) => ({
-        dataset: { jeton: j }, attrs: { 'aria-disabled': 'true' },
-        setAttribute(k, v) { this.attrs[k] = v; }, removeAttribute(k) { delete this.attrs[k]; }
+        dataset: { jeton: j }, attrs: { 'aria-disabled': 'true' }, title: '',
+        setAttribute(k, v) { this.attrs[k] = v; }, removeAttribute(k) { delete this.attrs[k]; },
+        querySelector: () => null   // ni aide ni précision simulées : un `title` vide (retouches du 22 oct.)
     }));
     const ligne = { textContent: '' };
     const palette = { dataset: {}, _blocs: blocs, _ligne: ligne,

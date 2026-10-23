@@ -18,6 +18,9 @@
  *       seconde. Avec une projection, les cinq libellés des paliers parlent encore d'erreurs et de mots :
  *       l'étape 3 les reprend — le banc le DIT (G.c), il ne le cache pas.
  *   X — UN NOM PIÉGÉ reste du texte : dans la palette, dans les étiquettes, dans les chips.
+ *   R — LES RETOUCHES DE LA RELECTURE (22 oct., 21 h 51) : le `title` des blocs (l'aide, la mention quand
+ *       inactif), les groupes vides marqués ; la feuille de style (bloc inactif réduit, palette compacte,
+ *       liste des grilles sous la barre). La position de la palette se mesure dans WebKit (le spec).
  *   S — L'INVARIANT DU STOCK : un critère d'avant ce lot rend à l'élève les mêmes phrases ; le rendu du
  *       gabarit n'écrit rien, ni dans le critère ni dans le stockage ; un bloc posé écrit son JETON.
  *
@@ -182,6 +185,56 @@ describe('palette · P — une palette par critère, plus aucune rangée « Pose
         expect(new Set(avec).size).toBe(avec.length);   // {erreurs} et {mots}, partagés : un bloc chacun
         expect([...avec].sort()).toEqual([...new Set(E.listerReperes().concat(P.listerReperes()).map((r) => r.jeton))].sort());
         expect([...sans].sort()).toEqual(E.listerReperes().map((r) => r.jeton).sort());
+    });
+});
+
+/* ======================================================= R — LES RETOUCHES DE LA RELECTURE (22 oct., 21 h 51) */
+
+describe('palette · R — les retouches : le bloc inactif réduit à son nom, la palette compacte, la liste des grilles sous la barre', () => {
+    const aideDe = (b) => [b.querySelector('.palette-algo-bloc-aide'), b.querySelector('.palette-algo-bloc-precision')]
+        .filter(Boolean).map((s) => texteVisible(s)).filter(Boolean).join(' ');
+
+    it('R.a l\'aide de chaque bloc est son `title` ; devenu inactif, son `title` est la mention, et il la reprend redevenu actif', () => {
+        const m = rendu([REDACTION]);
+        const { palette, zones } = domDe(m, 'CR');
+        for (const b of palette.querySelectorAll('.palette-algo-bloc')) expect(b.title, b.dataset.jeton).toBe(aideDe(b));
+        const palier = zones.find((z) => z.dataset.palierIndex === '1');
+        m.win.ciblerPaletteAlgo(palette, palier);
+        const horsZone = [...palette.querySelectorAll('[data-hors-zone]')];
+        expect(horsZone.map((b) => b.dataset.jeton)).toContain('{points}');   // le bloc qui a une précision
+        for (const b of horsZone) expect(b.title, b.dataset.jeton).toBe(PA.TEXTES.inactif);
+        m.win.ciblerPaletteAlgo(palette, zones.find((z) => z.dataset.enonceCle === 'decompte'));
+        const points = palette.querySelector('[data-jeton="{points}"]');
+        expect(points.dataset.horsZone).toBeUndefined();
+        expect(points.title).toBe(aideDe(points));
+        expect(points.title).toContain(texteVisible(points.querySelector('.palette-algo-bloc-precision')));
+    });
+
+    it('R.b un groupe sans bloc offert par la zone est marqué vide (la palette compacte le cache) ; il se rouvre avec la zone suivante', () => {
+        const m = rendu([REDACTION]);
+        const { palette, zones } = domDe(m, 'CR');
+        const groupes = () => [...palette.querySelectorAll('.palette-algo-groupe')].map((g) => g.dataset.vide === '1');
+        m.win.ciblerPaletteAlgo(palette, zones.find((z) => z.dataset.enonceCle === 'priorite'));
+        expect(E.reperesDeCle('priorite').every((r) => r.famille === 'posee')).toBe(true);
+        expect(groupes()).toEqual([false, true]);
+        m.win.ciblerPaletteAlgo(palette, zones.find((z) => z.dataset.palierIndex === '0'));
+        expect(groupes()).toEqual([false, false]);
+    });
+
+    it('R.c la feuille de style : un bloc inactif garde son nom seul (aide, précision, mention masquées à l\'œil, pas au lecteur d\'écran) ; sous le seuil, la palette se dit compacte et ne montre que ce que la zone offre ; la liste des grilles colle sous la barre', () => {
+        const css = source('styles.css');
+        const inactif = tranche(css, '.palette-algo-bloc[data-hors-zone] .palette-algo-bloc-aide,', '}');
+        expect(inactif).toMatch(/\.palette-algo-bloc\[data-hors-zone\] \.palette-algo-bloc-precision,/);
+        expect(inactif).toMatch(/clip-path: inset\(50%\)/);
+        expect(inactif).not.toMatch(/display: none/);   // masqué à l'œil seulement : le lecteur d'écran lit encore la mention
+        const compacte = tranche(css, '@container gabarit-algo (max-width: 753px) {', '\n}\n');
+        expect(compacte).toMatch(/--palette-algo-compacte: 1;/);
+        expect(compacte).toMatch(/\.palette-algo-groupe\[data-vide\],\s*\.palette-algo-bloc\[data-hors-zone\] \{ display: none; \}/);
+        expect(compacte).toMatch(/\.palette-algo-bloc-aide,\s*\.palette-algo-bloc-precision \{[^}]*clip-path: inset\(50%\)/);
+        const collant = tranche(css, '@media (min-width: 1200px) {\n    body:has(.section.active .sous-section.active .palette-algo)', '\n}\n');
+        expect(collant).toMatch(/body:has\(\.section\.active \.sous-section\.active \.palette-algo\) \.sidebar-navigation \{ top: 96px; max-height: calc\(100vh - 104px\); \}/);
+        // Le JS lit le seuil dans la feuille de style, il ne l'écrit pas une seconde fois.
+        expect(source('js/grilles.js')).toMatch(/getPropertyValue\('--palette-algo-compacte'\)/);
     });
 });
 
