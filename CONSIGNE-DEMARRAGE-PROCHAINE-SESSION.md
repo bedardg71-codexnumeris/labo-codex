@@ -1,5 +1,13 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 20 h 30 (Toronto) : `1.215.0` EN LIGNE** (build `1022-1833`) — Netlify
+> `6adaa934`, `commit_ref` `628a7657`, `state: ready`, publié à 00:24:35 Z le 23 (20 h 24). Verdict Playwright complet vert sur
+> `628a7657` (code 0, 0 échec connu, aucun instable, 0 veille, éveil complet tenu, sur batterie). La 1.215 porte l'étape 2a du
+> critère algorithmique : les deux noms de l'enseignant, la parenthèse « (3,5 après pondération) », le bilan sans participe. Poussé
+> par `git push` sur le port 443 (contournement de 16 h 35), le hook lisant le jeton vert du même SHA. **Ouverts** : #1140, #1141,
+> #1093 (`ci/verdict-morceaux`, à Grégoire). **Prochain lot du plan** : 2b (la palette). **MANDAT COURANT** : la prochaine consigne de
+> Cowork, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 16 h 35 (Toronto) : `1.214.0` EN LIGNE** (build `1022-1318`) — Netlify
 > `6ada7260`, `commit_ref` `06a19301`, `state: ready`, publié à 20:30:45 Z (16 h 30). Verdict Playwright complet vert sur
 > `06a19301` (code 0, 0 échec connu, aucun instable, 0 veille, éveil complet tenu, sur secteur). Le verdict sur `f740621a` était
