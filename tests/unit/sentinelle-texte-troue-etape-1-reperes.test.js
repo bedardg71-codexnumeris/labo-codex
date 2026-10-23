@@ -302,13 +302,14 @@ describe('texte troué · D — un repère posé se rend comme un jeton tapé', 
 describe('texte troué · E — le gabarit offre les repères par le registre', () => {
     const grilles = () => readFileSync(path.join(racine, 'js/grilles.js'), 'utf8');
 
-    it('E.a les boutons viennent de `reperesDeCle`, et le clic est un `data-action` sans paramètre', () => {
+    // ↻ Étape 2b (22 oct. 2026) : les rangées « Poser : » sont parties ; la palette du critère
+    // (`palette-algo.js`, `rendrePaletteAlgo`) offre les blocs — son banc :
+    // `critere-algorithmique-palette.test.js`. Ce qui reste de l'étape 1 se lit ici.
+    it('E.a la zone n\'offre que ce que `reperesDeCle` dit, et le clic est un `data-action` sans paramètre', () => {
         const src = grilles();
-        expect(src).toMatch(/enoncesAlgo\.reperesDeCle\(/);
-        // « retire les accolades » (Grégoire, essai iPad) : le badge montre le mot nu ;
-        // le jeton posé, lui, garde ses accolades (data-jeton).
-        expect(src).toMatch(/data-jeton="\$\{esc\(r\.jeton\)\}"/);
-        expect(src).toMatch(/>\$\{esc\(r\.jeton\.slice\(1, -1\)\)\}<\/button>/);
+        expect(readFileSync(path.join(racine, 'js/palette-algo.js'), 'utf8')).toMatch(/E\.reperesDeCle\(d\.enonceCle\)/);
+        // Le jeton posé garde ses accolades (data-jeton) ; le bloc montre un nom en mots.
+        expect(src).toMatch(/data-jeton="\$\{esc\(b\.jeton\)\}"/);
         expect(src).toMatch(/data-action="insererRepereEnonce"/);
         expect(src).toMatch(/window\.insererRepereEnonce = insererRepereEnonce/);
     });
@@ -316,16 +317,16 @@ describe('texte troué · E — le gabarit offre les repères par le registre', 
     it('E.b la note qui ENSEIGNAIT la syntaxe est partie ; ce qui reste invisible est toujours dit', () => {
         const src = grilles();
         expect(src).not.toMatch(/là où le nom de ce critère doit apparaître/);
-        expect(src).toMatch(/Un repère que la phrase n'a pas à remplir disparaît proprement/);
+        expect(src).toMatch(/Un bloc que la phrase n'a pas à remplir disparaît proprement/);
         expect(src).toMatch(/Une zone laissée VIDE fait taire l'énoncé/);
     });
 
-    it('E.c le clic ne prend pas le focus — sinon le premier repère posé après une frappe se perd', () => {
-        // `pointerdown` annulé sur le bouton : la zone garde son focus et son
+    it('E.c toucher la palette ne prend pas le focus — sinon le premier bloc posé après une frappe se perd', () => {
+        // `pointerdown` annulé sur la palette : la zone garde son focus et son
         // curseur, et le `change` qui re-rend le gabarit ne part pas avant le clic.
         const src = grilles();
         expect(src).toMatch(/\['pointerdown', 'mousedown'\]/);
-        expect(src).toMatch(/closest\('\[data-action="insererRepereEnonce"\]'\)\) e\.preventDefault\(\)/);
+        expect(src).toMatch(/if \(cible\.closest\('\.palette-algo'\)\) e\.preventDefault\(\)/);
     });
 
     it('E.d index.html charge le registre AVANT grilles.js, et les jetons de cache du lot ont bougé', () => {

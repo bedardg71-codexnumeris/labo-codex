@@ -45,6 +45,7 @@ const require = createRequire(import.meta.url);
 
 const E = require(path.join(racine, 'js/evaluation-enonces.js'));
 const P = require(path.join(racine, 'js/evaluation-projection.js'));
+const PA = require(path.join(racine, 'js/palette-algo.js'));
 
 /* ------------------------------------------------------------------ harnais */
 
@@ -109,6 +110,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.paletteAlgo = PA;
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     return { win, store, document, ecrits, liste: () => document.getElementById('listeCriteres') };
@@ -127,8 +129,6 @@ const carte = (html, id, section) => {
 };
 const compter = (h, motif) => (h.split(motif).length - 1);
 const clesDe = (h) => [...h.matchAll(/data-enonce-cle="([a-z]+)"/g)].map((m) => m[1]);
-const boutons = (bloc) => [...bloc.matchAll(/<button type="button" class="repere-enonce repere-enonce--(posee|remplie)"\s+data-action="insererRepereEnonce" data-jeton="([^"]+)"[^>]*>([^<]*)<\/button>/g)]
-    .map((m) => ({ famille: m[1], jeton: m[2], texte: m[3] }));
 /** Le rendu du gabarit d'une grille en ÉDITION : tout, la carte de projection, la carte « Bilan » (clé de pli `commentaire`). */
 function rendu(grille) {
     const m = monter([grille || GRILLE]);
@@ -210,17 +210,17 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
         expect(decompte).toBeLessThan(paliers);
         expect(paliers).toBeLessThan(nonCorrigee);
         expect(nonCorrigee).toBeLessThan(bouton);
-        // Le décompte précède la palette du premier palier : le premier « Poser : » de la carte est le sien.
-        expect(projection.indexOf('Poser :')).toBeGreaterThan(projection.lastIndexOf('<div class="groupe-form">', decompte));
-        expect(projection.indexOf('Poser :')).toBeLessThan(decompte);
+        // ↻ Étape 2b (22 oct. 2026) : plus aucune rangée « Poser : » dans la carte — la palette du critère la sert.
+        expect(projection).not.toContain('Poser :');
     });
 
-    it('B.b « Aucune projection » : le décompte est là quand même, composable (ses quatre badges), avant la note ; ni palier, ni aide des paliers', () => {
+    it('B.b « Aucune projection » : le décompte est là quand même, composable (ce que sa zone offre), avant la note ; ni palier, ni aide des paliers', () => {
         const { html, projection, commentaire } = rendu({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune', paramsProjection: {} }] });
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
         expect(compter(projection, 'data-enonce-cle="decompte"')).toBe(1);
         expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
-        expect(boutons(blocDecompte(projection)).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
+        // ↻ 2b : ce que la zone offre se lit par `paletteAlgo.reperesDeZone`, la source de la palette et de la pose.
+        expect(PA.reperesDeZone(ALGO, { enonceCle: 'decompte' }).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);
         expect(projection).toContain('Aucune projection ne sera proposée');
         expect(projection.indexOf('data-enonce-cle="decompte"')).toBeLessThan(projection.indexOf('Aucune projection ne sera proposée'));
         expect(projection).not.toContain('palier-projection');
@@ -261,9 +261,9 @@ describe('une seule carte · C — les titres que Grégoire lira, la clé de pli
         expect(css).toMatch(/#listeCriteres \.decompte-texte-depart \{[^}]*color: var\(--gris-clair\)/);
     });
 
-    it('C.c l\'aide de la carte dit « la zone où est le curseur » (plus « du palier ») ; la ligne d\'aperçu redevient « L\'élève lira : »', () => {
+    it('C.c l\'aide de la carte ne dit plus où le bloc se pose (la palette le dit) ; la ligne d\'aperçu redevient « L\'élève lira : »', () => {
         const { projection } = rendu();
-        expect(projection).toContain('le pose dans la zone où est le curseur — sans curseur, dans « Verdict »');
+        expect(projection).not.toContain('le pose dans la zone où est le curseur');
         expect(projection).not.toContain('la zone du palier où est le curseur');
         expect(compter(projection, '<span class="palier-apercu-mot">L\'élève lira :</span>')).toBe(6);
         expect(projection).not.toContain('décompte, puis tes deux phrases');
@@ -273,17 +273,13 @@ describe('une seule carte · C — les titres que Grégoire lira, la clé de pli
 /* ============================================================ D — RIEN NE CHANGE DANS LES DONNÉES */
 
 describe('une seule carte · D — même zone, mêmes attributs, même palette ; le rendu n\'écrit rien', () => {
-    it('D.a la zone du décompte est celle d\'avant : handler, grille, index, clé, valeur en vigueur, palette avant la zone, aide après', () => {
+    it('D.a la zone du décompte est celle d\'avant : handler, grille, index, clé, valeur en vigueur, aide après ; ↻ 2b : son nom, plus de rangée', () => {
         const { projection } = rendu();
         const bloc = blocDecompte(projection);
         expect(bloc).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="decompte"/);
         expect(bloc).toContain('>' + echapper(E.normaliser(ALGO).enonces.decompte) + '</textarea>');
-        expect(boutons(bloc).map((b) => [b.jeton, b.famille, b.texte])).toEqual([
-            ['{critere}', 'posee', 'critere'], ['{erreurs}', 'remplie', 'erreurs'], ['{nomErreurs}', 'posee', 'nomErreurs'],
-            ['{mots}', 'remplie', 'mots'], ['{nomMots}', 'posee', 'nomMots'], ['{points}', 'remplie', 'points']
-        ]);
-        expect(bloc).toContain('aria-label="Poser nom du critère, {critere}, dans « Décompte des erreurs »"');
-        expect(bloc.indexOf('class="reperes-enonce"')).toBeLessThan(bloc.indexOf('<textarea'));
+        expect(bloc).toContain('data-enonce-cle="decompte" data-nom-zone="Décompte des erreurs"');
+        expect(bloc).not.toContain('<button');
         expect(bloc.indexOf('<textarea')).toBeLessThan(bloc.indexOf('<small'));
     });
 

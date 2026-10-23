@@ -3486,42 +3486,78 @@ input[type="number"].controle-form {
     color: white;
 }
 
-/* === REPÈRES POSABLES — le texte troué, étape 1 (3 septembre 2026) ===
-   Au-dessus de chaque zone d'énoncé d'un critère algorithmique (gabarit des
-   grilles), les repères qu'un clic pose au curseur : {critere}, {erreurs},
-   {mots}, {points}. La rangée précède la zone — Grégoire l'a cherchée là au
-   premier coup d'œil. Deux familles, deux couleurs (cadrage du 2 septembre) : bleu =
-   écrit dans la grille par l'enseignant·e ; vert = se remplit à la correction.
-   Texte en --texte-principal dans les deux modes : les teintes de famille ne
-   portent que le cadre et le fond, et le contraste ne dépend pas d'elles. */
-.reperes-enonce {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 8px;
-    margin: 0 0 6px 0;
+/* === LA PALETTE DU CRITÈRE ALGORITHMIQUE — étape 2b (22 oct. 2026) ===
+   Une palette par critère, sur le côté de son gabarit, collante, sur le modèle de
+   celle de la dissection (`.dissection-atelier`, `.dissection-palette`) ; elle sert
+   toutes les zones d'écriture du critère. Au-dessus quand la largeur manque : la
+   requête de conteneur suit la largeur UTILE du gabarit, pas celle de la fenêtre.
+   220 + 14 + 520 = 754 px : en dessous, le gabarit n'a plus sa colonne de formulaire.
+   Deux familles, deux couleurs (cadrage du 2 septembre) : bleu = écrit dans la
+   grille par l'enseignant·e ; vert = se remplit à la correction. Les teintes ne
+   portent que le cadre et le fond ; le texte garde --texte-principal dans les deux
+   modes. Un bloc inactif garde son texte lisible : son cadre passe en pointillé. */
+.gabarit-algo { container-type: inline-size; container-name: gabarit-algo; }
+/* ⚠ COLLANTE, À UNE CONDITION MESURÉE (22 oct., WebKit) : deux `overflow: hidden` font de `body` (style
+   d'index.html, `overflow-x`) et de `.conteneur` (ses coins arrondis) des conteneurs de défilement qui ne
+   défilent pas — c'est `html` qui défile — et AUCUN `position: sticky` de l'application ne colle : ni la
+   palette, ni la barre de navigation, ni les `.sidebar-navigation`, prévues collantes (constat hors du lot,
+   dit dans la demande de relecture). `clip` rogne pareil sans créer ce conteneur. Seulement quand une palette
+   est à l'écran, et seulement à partir de 1200 px : plus étroit, la palette passe au-dessus du gabarit et ne
+   colle pas — mesuré à 820 px, ouvrir `body` y réveillait les sous-navigations mobiles (≤ 1024 px), collantes
+   par leur règle, qui recouvraient le contenu. Sur cet écran, la barre de navigation colle elle aussi, comme
+   sa règle le prévoit. Un moteur sans `clip` ni `:has` garde `hidden` : la palette reste en tête du gabarit. */
+@media (min-width: 1200px) {
+    body:has(.section.active .sous-section.active .palette-algo) { overflow-x: clip; }
+    .conteneur:has(.section.active .sous-section.active .palette-algo) { overflow: clip; }
+}
+.gabarit-algo-atelier {
+    display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 14px; align-items: start; min-width: 0;
+}
+.gabarit-algo-corps { min-width: 0; }
+.palette-algo {
+    /* Sous la barre de navigation, elle aussi collante : 83 px mesurés à 1440 et 1180 px de large. */
+    position: sticky; top: 96px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+    max-height: calc(100vh - 104px); overflow-y: auto; overscroll-behavior: contain; padding: 4px; margin: -4px;
+}
+.palette-algo-cible { margin: 0; font-size: 0.85rem; line-height: 1.35; color: var(--texte-secondaire); overflow-wrap: anywhere; }
+.palette-algo[data-cible] .palette-algo-cible { color: var(--texte-principal); font-weight: 600; }
+.palette-algo-groupe { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.palette-algo-groupe-nom { font-size: 0.74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-muted); }
+.palette-algo-bloc {
+    font: inherit; display: flex; flex-direction: column; gap: 2px; text-align: left; min-height: 44px; box-sizing: border-box;
+    padding: 7px 10px; border: 1px solid var(--bordure-moyenne); border-left-width: 4px; border-radius: var(--radius-moyen);
+    background: var(--surface-carte); color: var(--texte-principal); cursor: pointer;
+}
+.palette-algo-bloc--posee { background: var(--bleu-pale); border-color: var(--accent-primaire); }
+.palette-algo-bloc--remplie { background: var(--alerte-fond-succes); border-color: var(--alerte-bordure-succes); }
+.palette-algo-bloc[aria-disabled="true"] { background: var(--surface-carte); border-style: dashed; cursor: default; }
+.palette-algo-bloc:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.palette-algo-bloc-nom { font-weight: 700; font-size: 0.9rem; line-height: 1.3; overflow-wrap: anywhere; }
+.palette-algo-bloc-aide { font-size: 0.78rem; line-height: 1.3; color: var(--texte-secondaire); }
+.palette-algo-bloc-precision { font-size: 0.76rem; line-height: 1.3; font-style: italic; color: var(--texte-secondaire); }
+.palette-algo-bloc-inactif { display: none; font-size: 0.76rem; font-weight: 600; color: var(--texte-secondaire); }
+.palette-algo-bloc[data-hors-zone] .palette-algo-bloc-inactif { display: block; }
+@container gabarit-algo (max-width: 753px) {
+    .gabarit-algo-atelier { grid-template-columns: minmax(0, 1fr); }
+    .palette-algo { position: static; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
+    .palette-algo-cible { flex: 1 1 100%; }
+    .palette-algo-groupe { flex: 1 1 240px; }
+    .palette-algo-bloc-precision { display: none; }
 }
 
-.reperes-enonce-mot {
-    font-size: 0.78rem;
-    color: var(--gris-clair);
-}
-
+/* La pastille d'un bloc dans la phrase (`composeur-badges.js`, chip) : les deux
+   familles de la palette, en petit. Elle porte le nom du bloc en mots (étape 2b). */
 .repere-enonce {
     display: inline-flex;
     align-items: center;
-    min-height: 30px;
-    padding: 4px 11px;
+    max-width: 100%;
     border: 1px solid var(--bordure-moyenne);
     border-radius: var(--radius-pill);
     background: var(--surface-input);
     color: var(--texte-principal);
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 0.78rem;
     font-weight: 600;
-    line-height: 1;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    line-height: 1.3;
 }
 
 .repere-enonce--posee {
@@ -3532,19 +3568,6 @@ input[type="number"].controle-form {
 .repere-enonce--remplie {
     background: var(--alerte-fond-succes);
     border-color: var(--alerte-bordure-succes);
-}
-
-.repere-enonce:hover {
-    transform: translateY(-1px);
-}
-
-.repere-enonce:active {
-    transform: translateY(0);
-}
-
-.repere-enonce:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
 }
 
 /* Le texte troué, étape 3 (5 sept. 2026) — LA VUE qui montre les badges dans la
@@ -3568,18 +3591,12 @@ input[type="number"].controle-form {
 }
 
 .composeur-badges .composeur-chip {
-    min-height: 0;
     margin: 0 2px;
     padding: 1px 8px;
     vertical-align: baseline;
     cursor: default;
     user-select: none;
     -webkit-user-select: none;
-    transition: none;
-}
-
-.composeur-badges .composeur-chip:hover {
-    transform: none;
 }
 
 .composeur-badges .composeur-chip-croix {
@@ -3594,11 +3611,10 @@ input[type="number"].controle-form {
     opacity: 1;
 }
 
-/* Le texte troué, étape 2 (4 sept. 2026) — la palette d'un palier de projection :
-   une par palier, entre sa rangée « Palier · Jusqu'à » et ses deux zones. Même
-   composant que la palette des énoncés (ci-dessus) ; seul l'espacement diffère. */
-#listeCriteres .palier-projection .reperes-palier {
-    margin: 8px 0 4px;
+/* Étape 2b (22 oct. 2026) — la rangée de badges qui séparait « Palier · Jusqu'à » des deux zones
+   est partie (la palette du critère la remplace) : l'écart qu'elle donnait reste entre les rangées. */
+#listeCriteres .palier-projection .palier-rangee + .palier-rangee {
+    margin-top: 8px;
 }
 
 /* Le texte troué, étape 2 (§5, 4 sept.) — l'aperçu SOUS CHAQUE PALIER : « L'élève lira… »
@@ -19240,12 +19256,10 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     .travaux-btn-nav { min-width: 44px; min-height: 44px; }
     .travaux-fond-swatch { width: 44px; height: 44px; }
     .eval-actions-select { min-height: 44px; padding: 8px 10px; font-size: 0.9rem; }
-    /* Le texte troué, étape 1 (3 sept. 2026) — les repères posables des énoncés
-       algorithmiques (30 px au pointeur fin). */
-    .repere-enonce { min-height: 44px; padding: 8px 14px; }
     /* Le texte troué, étape 3 (5 sept. 2026) — la chip dans la phrase n'est pas un
-       bouton : elle garde sa taille de texte ; sa croix, elle, s'élargit au doigt. */
-    .composeur-badges .composeur-chip { min-height: 0; padding: 3px 10px; }
+       bouton : elle garde sa taille de texte ; sa croix, elle, s'élargit au doigt.
+       (Les blocs de la palette ont 44 px à tout pointeur : `.palette-algo-bloc`.) */
+    .composeur-badges .composeur-chip { padding: 3px 10px; }
     .composeur-badges .composeur-chip-croix { padding: 4px 8px; }
 }
 

@@ -126,7 +126,8 @@ describe('composeur · B — rendreHtml : échappé, la chip est la pastille, le
         expect(html).toContain('Va &lt;b&gt;voir&lt;/b&gt; ');
         expect(html).not.toContain('<b>voir</b>');
         expect(html).toContain('&amp; &quot;vite&quot; ');
-        expect(html).toContain('<span class="repere-enonce repere-enonce--posee composeur-chip" contenteditable="false" data-jeton="{service}" title="nom du service">service<span class="composeur-chip-croix" aria-hidden="true" title="Retirer ce badge">×</span></span>');
+        // ↻ Étape 2b (22 oct. 2026) : la chip montre le NOM du bloc (`libelle`), plus le nom de code.
+        expect(html).toContain('<span class="repere-enonce repere-enonce--posee composeur-chip" contenteditable="false" data-jeton="{service}" title="nom du service">nom du service<span class="composeur-chip-croix" aria-hidden="true" title="Retirer ce badge">×</span></span>');
         expect(html).toContain('repere-enonce--remplie composeur-chip" contenteditable="false" data-jeton="{erreurs}"');
         expect(html).not.toContain('data-action');
         expect(html).not.toContain('onclick');
@@ -134,6 +135,7 @@ describe('composeur · B — rendreHtml : échappé, la chip est la pastille, le
         const piege = [{ jeton: '{x}', famille: 'posee', libelle: 'a"b<c' }];
         expect(C.rendreHtml('{x}', piege)).toContain('title="a&quot;b&lt;c"');
         expect(C.rendreHtml('{x}', piege)).not.toContain('a"b<c');
+        expect(C.rendreHtml('{x}', piege)).toContain('>a&quot;b&lt;c<span class="composeur-chip-croix"');
     });
 
     it('B.b `\\n` → `<br>` ; un texte qui finit par `\\n` reçoit un `<br>` de plus (le placeholder) ; rien n\'est ajouté ailleurs', () => {
@@ -283,12 +285,16 @@ describe('composeur · F — index.html, styles.css, et le module n\'écrit jama
         const css = source('styles.css');
         expect(css).toContain('.composeur-badges {');
         expect(css).toMatch(/\.composeur-badges \{[^}]*white-space: pre-wrap/);
-        expect(css).toMatch(/\.composeur-badges \.composeur-chip \{[^}]*min-height: 0/);
+        // ↻ Étape 2b (22 oct. 2026) : `.repere-enonce` n'est plus qu'une pastille (les boutons des
+        // rangées sont partis) — aucune hauteur de bouton à défaire, ni au doigt ni à la souris.
+        const pastille = css.match(/\n\.repere-enonce \{[^}]*\}/);
+        expect(pastille).not.toBeNull();
+        expect(pastille[0]).not.toMatch(/min-height/);
         // Dans LE bloc tactile de #568 (un seul bloc, que sa sentinelle lit en premier), pas un bloc à part.
         const debut = css.indexOf('@media (pointer: coarse) {');
         const coarse = css.slice(debut, css.indexOf('\n}\n', debut));
-        expect(coarse).toMatch(/\.repere-enonce \{ min-height: 44px/);
-        expect(coarse).toMatch(/\.composeur-badges \.composeur-chip \{ min-height: 0/);
+        expect(coarse).not.toMatch(/\.repere-enonce \{/);
+        expect(coarse).toMatch(/\.composeur-badges \.composeur-chip \{ padding: 3px 10px/);
         expect(coarse).toMatch(/\.composeur-badges \.composeur-chip-croix \{ padding: 4px 8px/);
         expect(css).toContain('.composeur-badges .composeur-chip-croix {');
         expect(css).toContain('.composeur-badges:empty::before {');

@@ -34,6 +34,8 @@ const cliquerDom = (locator) => locator.evaluate((el) => el.click());
 const palier = (page, i) => page.locator('#listeCriteres .palier-projection').nth(i);
 const zone = (page, i, champ) => palier(page, i).locator(`textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
 const vue = (page, i, champ) => zone(page, i, champ).locator('xpath=following-sibling::*[1]');
+// ↻ Étape 2b (22 oct. 2026) : les blocs se posent depuis LA palette du critère, qui vise la zone où est le curseur.
+const bloc = (page, jeton) => page.locator(`#listeCriteres .palette-algo [data-action="insererRepereEnonce"][data-jeton="${jeton}"]`);
 const grilleEnBase = (page) => page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find((x) => x.id === 'G1'));
 const recharger = (page) => page.evaluate(async () => { await window.chargerGrillePourModif('G2'); await window.chargerGrillePourModif('G1'); });
 /** Focus dans la vue, le caret à une position de TEXTE (le composeur lui-même le pose). */
@@ -70,10 +72,11 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
 
     // 2 — le caret à la fin, UN badge cliqué (le dispatcher) : la chip apparaît, le textarea porte `{projection}`, le focus reste.
     await caretA(vue(page, 4, 'texte'), verdictDHier.length);
-    await cliquerDom(palier(page, 4).locator('[data-action="insererRepereEnonce"][data-jeton="{projection}"]'));
+    await cliquerDom(bloc(page, '{projection}'));
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveCount(1);
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveAttribute('data-jeton', '{projection}');
-    await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toContainText('projection');
+    // ↻ 2b : la chip montre le NOM du bloc, plus le nom de code.
+    await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toContainText('Erreurs projetées');
     await expect(zone(page, 4, 'texte')).toHaveValue(verdictDHier + ' {projection}');
     expect(await page.evaluate(() => document.activeElement && document.activeElement.classList.contains('composeur-badges'))).toBe(true);
 
@@ -122,7 +125,7 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
 
     // 7 — l'effacement arrière sur un badge (le comportement natif, à confirmer à la porte iPad) : mesuré, dit.
     await caretA(vue(page, 4, 'texte'), verdictDHier.length);
-    await cliquerDom(palier(page, 4).locator('[data-action="insererRepereEnonce"][data-jeton="{palier}"]'));
+    await cliquerDom(bloc(page, '{palier}'));
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveCount(1);
     await page.keyboard.press('Backspace');
     const apresBackspace = await vue(page, 4, 'texte').evaluate((el) => ({ chips: el.querySelectorAll('.composeur-chip').length, texte: window.composeurBadges.lire(el) }));

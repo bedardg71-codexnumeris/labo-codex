@@ -7,8 +7,11 @@
 //   B. la pose au clic : quand la zone porte une vue, le caret vient de la vue, le texte reste
 //      `zone.value`, la vue se redessine (`ecrire`), l'écriture passe par le même chemin ; sans vue,
 //      le chemin d'avant (selectionStart / setSelectionRange) ;
-//   C. le focus : la vue focalisée vaut sa zone (`curseurVu`, `zoneActive`, la zone cible du palier) ;
+//   C. le focus : la vue focalisée vaut sa zone (`curseurVu`, la cible de la palette du critère) ;
 //   D. les sources (un seul point de montage par rendu, le jeton).
+//   ↻ Étape 2b (22 oct. 2026) : le bouton est un bloc de LA palette du critère ; sa zone est la cible
+//     de la palette (le focus, sinon la dernière visitée), plus « la zone du même palier ». B et C
+//     simulent la palette et son gabarit ; le reste de la pose ne bouge pas.
 //
 // BREAK-TESTS (faits le 5 septembre 2026, chacun restauré, `cmp` identique) :
 //   · `monterVuesBadges` retiré du rendu en édition → A.a rougit ;
@@ -69,6 +72,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.paletteAlgo = require(path.join(racine, 'js/palette-algo.js'));
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     // Le composeur ESPION.
@@ -87,16 +91,32 @@ const ALGO = { id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20,
                paramsProjection: { nomServiceAide: 'Passerelle +' }, paliersProjection: P.paliersMigration() };
 const GRILLE = { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [ALGO] };
 
-/** Une zone (textarea simulé) d'un palier, avec ou sans vue. */
+/** La palette simulée d'un gabarit : ses blocs (un par jeton), sa ligne de cible ; le gabarit qui la porte. */
+function fauxGabarit(jetons) {
+    const blocs = (jetons || ['{critere}', '{erreurs}', '{projection}']).map((j) => ({
+        dataset: { jeton: j }, attrs: { 'aria-disabled': 'true' },
+        setAttribute(k, v) { this.attrs[k] = v; }, removeAttribute(k) { delete this.attrs[k]; }
+    }));
+    const ligne = { textContent: '' };
+    const palette = { dataset: {}, _blocs: blocs, _ligne: ligne,
+        querySelector: (sel) => (sel === '.palette-algo-cible' ? ligne : null),
+        querySelectorAll: (sel) => (sel === '.palette-algo-bloc' ? blocs : []) };
+    palette.closest = (sel) => (sel === '.palette-algo' ? palette : null);
+    const gabarit = { querySelector: (sel) => (sel === '.palette-algo' ? palette : null) };
+    return { palette, gabarit };
+}
+
+/** Une zone (textarea simulé) d'un palier, avec ou sans vue, dans un gabarit dont la palette la vise (`cible`). */
 function zonePalier(opts) {
+    const g = opts.gabarit || fauxGabarit();
     const zone = Object.assign(fauxElement(), { tagName: 'TEXTAREA', value: opts.value || '', selectionStart: opts.sel || 0, selectionEnd: opts.sel || 0,
-        dataset: { critereIndex: '0', palierIndex: '4', champ: opts.champ || 'texte', curseurVu: opts.visitee ? '1' : undefined },
+        dataset: { critereIndex: '0', palierIndex: '4', champ: opts.champ || 'texte', nomZone: 'Verdict, palier 5', curseurVu: opts.visitee ? '1' : undefined },
         setSelectionRange(a, b) { this._range = [a, b]; }, focus() { this._focus = true; } });
     if (opts.vue) { zone._vue = Object.assign(fauxElement(), { _curseur: opts.curseur || null, _textarea: zone, closest: (s) => (s === '.composeur-badges' ? zone._vue : null), focus() { this._focus = true; } }); }
-    const palier = { dataset: { zoneActive: opts.champ || 'texte' }, contains: (n) => n === zone || n === zone._vue, querySelector: () => zone, closest: () => null };
-    zone.closest = (s) => (s === '.palier-projection' ? palier : null);
-    const bouton = { closest: (s) => (s === '.palier-projection' ? palier : null), dataset: { jeton: opts.jeton || '{projection}' } };
-    return { zone, palier, bouton };
+    zone.closest = (s) => (s === '.gabarit-algo' ? g.gabarit : null);
+    if (opts.cible !== false) g.palette._zoneCible = zone;   // la dernière zone visitée de la palette
+    const bouton = { closest: (s) => (s === '.palette-algo' ? g.palette : null), dataset: { jeton: opts.jeton || '{projection}' } };
+    return { zone, palette: g.palette, gabarit: g, bouton };
 }
 
 /* ============================================================ A — LE MONTAGE */
@@ -144,13 +164,14 @@ describe('branchement · B — la pose au clic, avec et sans vue', () => {
         expect(m.win.tempCriteres[0].paliersProjection[4].texte).toBe('Tu as. {projection} Bilan');
     });
 
-    it('B.b avec une vue jamais visitée : à la fin du texte, quoi que dise la vue', () => {
+    it('B.b sans cible (aucune zone visitée depuis le rendu, aucune au focus), rien ne se pose ni ne s\'écrit', () => {
         const m = monter([]);
         m.win.tempCriteres = [clone(ALGO)];
-        const { zone, bouton } = zonePalier({ value: 'Tu as', visitee: false, vue: true, curseur: { debut: 0, fin: 0 } });
+        const { zone, bouton } = zonePalier({ value: 'Tu as', vue: true, cible: false });
         m.win.insererRepereEnonce(bouton);
-        expect(zone.value).toBe('Tu as {projection}');
-        expect(m.appels.filter((a) => a[0] === 'ecrire')[0]).toEqual(['ecrire', 'Tu as {projection}', 18]);
+        expect(zone.value).toBe('Tu as');
+        expect(m.appels.filter((a) => a[0] === 'ecrire')).toEqual([]);
+        expect(m.win.tempCriteres[0].paliersProjection[4].texte).not.toContain('{projection}');
     });
 
     it('B.c sans vue : le chemin d\'avant — selectionStart, setSelectionRange, focus sur le textarea', () => {
@@ -165,56 +186,93 @@ describe('branchement · B — la pose au clic, avec et sans vue', () => {
         expect(m.appels.filter((a) => a[0] === 'ecrire')).toEqual([]);
     });
 
-    it('B.d un énoncé avec une vue : même chose, par le groupe de formulaire', () => {
+    it('B.d un énoncé avec une vue : même chose, par la palette du gabarit ; un bloc que la zone n\'offre pas ne pose rien', () => {
         const m = monter([]);
         m.win.tempCriteres = [clone(ALGO)];
+        const g = fauxGabarit();
         // Un texte qui n'est PAS celui du modèle : le registre n'écrit `critere.enonces` que pour ce qui diffère du défaut.
         const zone = Object.assign(fauxElement(), { tagName: 'TEXTAREA', value: 'Travaille surtout', dataset: { critereIndex: '0', enonceCle: 'concentre', curseurVu: '1' } });
         zone._vue = Object.assign(fauxElement(), { _curseur: { debut: 17, fin: 17 }, _textarea: zone });
-        const groupe = { querySelector: () => zone };
-        const bouton = { closest: (s) => (s === '.groupe-form' ? groupe : null), dataset: { jeton: '{critere}' } };
-        m.win.insererRepereEnonce(bouton);
+        zone.closest = (s) => (s === '.gabarit-algo' ? g.gabarit : null);
+        g.palette._zoneCible = zone;
+        const bloc = (jeton) => ({ closest: (s) => (s === '.palette-algo' ? g.palette : null), dataset: { jeton } });
+        // « Quand tout est maîtrisé » n'offre que {critere} : {erreurs} est refusé, le texte n'est pas touché.
+        m.win.insererRepereEnonce(bloc('{erreurs}'));
+        expect(zone.value).toBe('Travaille surtout');
+        m.win.insererRepereEnonce(bloc('{critere}'));
         expect(zone.value).toBe('Travaille surtout {critere}');
         expect(m.win.tempCriteres[0].enonces.concentre).toBe('Travaille surtout {critere}');
         expect(E.normaliser(m.win.tempCriteres[0]).enonces.concentre).toBe('Travaille surtout {critere}');
-        expect(m.appels.filter((a) => a[0] === 'ecrire')[0]).toEqual(['ecrire', 'Travaille surtout {critere}', 27]);
+        expect(m.appels.filter((a) => a[0] === 'ecrire')).toEqual([['ecrire', 'Travaille surtout {critere}', 27]]);
+    });
+
+    it('B.e une zone qui n\'offre RIEN ne reçoit rien — même un bloc des énoncés (la pose, sans palette, retomberait sur la leur)', () => {
+        const m = monter([]);
+        m.win.tempCriteres = [clone(ALGO)];
+        const g = fauxGabarit();
+        const zone = Object.assign(fauxElement(), { tagName: 'TEXTAREA', value: 'Texte', dataset: { critereIndex: '0', enonceCle: 'inconnue', curseurVu: '1' } });
+        zone.closest = (s) => (s === '.gabarit-algo' ? g.gabarit : null);
+        g.palette._zoneCible = zone;
+        m.win.insererRepereEnonce({ closest: (s) => (s === '.palette-algo' ? g.palette : null), dataset: { jeton: '{critere}' } });
+        expect(zone.value).toBe('Texte');
+        expect(m.win.tempCriteres[0].enonces).toBeUndefined();
     });
 });
 
 /* ============================================================ C — LE FOCUS */
 
 describe('branchement · C — la vue focalisée vaut sa zone', () => {
-    it('C.a focusin sur la vue : la zone est marquée visitée et le palier retient sa zone active ; un textarea nu marche comme avant ; autre chose, rien', () => {
+    it('C.a focusin sur la vue : la zone est marquée visitée et devient la cible de la palette, qui la nomme et active ce qu\'elle offre ; un textarea nu marche comme avant ; autre chose, rien', () => {
         const m = monter([]);
         const focusin = m.ecoutes.focusin[0];
         expect(typeof focusin).toBe('function');
-        const { zone, palier } = zonePalier({ champ: 'texteAide', vue: true });
-        palier.dataset.zoneActive = 'texte';
-        zone.closest = (s) => (s === '.palier-projection' ? palier : null);
+        const { zone, palette } = zonePalier({ champ: 'texteAide', vue: true, cible: false });
         delete zone.dataset.curseurVu;
         focusin({ target: zone._vue });
         expect(zone.dataset.curseurVu).toBe('1');
-        expect(palier.dataset.zoneActive).toBe('texteAide');
+        expect(palette._zoneCible).toBe(zone);
+        expect(palette.dataset.cible).toBe('Verdict, palier 5');
+        expect(palette._ligne.textContent).toBe('Dans : « Verdict, palier 5 »');
+        // Un palier offre {erreurs} et {projection}, pas {critere} : inactif, et dit.
+        const [critere, erreurs, projection] = palette._blocs;
+        expect(critere.attrs['aria-disabled']).toBe('true');
+        expect(critere.dataset.horsZone).toBe('1');
+        expect(erreurs.attrs['aria-disabled']).toBeUndefined();
+        expect(projection.dataset.horsZone).toBeUndefined();
         // Un textarea nu : comme avant.
-        const nue = zonePalier({ champ: 'texte', vue: false });
+        const nue = zonePalier({ champ: 'texte', vue: false, cible: false });
         delete nue.zone.dataset.curseurVu;
         focusin({ target: nue.zone });
         expect(nue.zone.dataset.curseurVu).toBe('1');
+        expect(nue.palette._zoneCible).toBe(nue.zone);
         // Un élément quelconque : rien.
         expect(() => focusin({ target: { tagName: 'DIV', closest: () => null } })).not.toThrow();
         expect(() => focusin({ target: null })).not.toThrow();
     });
 
-    it('C.b la zone cible d\'un palier : la vue qui a le focus désigne son textarea', () => {
+    it('C.b la cible : la zone où est le curseur l\'emporte sur la dernière visitée — la vue qui a le focus désigne son textarea', () => {
         const m = monter([]);
         m.win.tempCriteres = [clone(ALGO)];
-        const { zone, palier, bouton } = zonePalier({ value: 'Ici', visitee: true, vue: true, curseur: { debut: 3, fin: 3 }, champ: 'texteAide' });
-        palier.dataset.zoneActive = 'texte';   // la dernière visitée dit « texte »…
-        palier.querySelector = (sel) => (sel.indexOf('texteAide') >= 0 ? zone : null);
+        const g = fauxGabarit();
+        const visitee = zonePalier({ value: 'Là', visitee: true, champ: 'texte', gabarit: g });
+        const { zone, bouton } = zonePalier({ value: 'Ici', visitee: true, vue: true, curseur: { debut: 3, fin: 3 }, champ: 'texteAide', gabarit: g, cible: false });
+        g.palette._zoneCible = visitee.zone;   // la dernière visitée dit « texte »…
         m.document.activeElement = zone._vue;  // …mais la vue de « texteAide » a le focus : c'est elle la cible
         m.win.insererRepereEnonce(bouton);
         expect(zone.value).toBe('Ici {projection}');
+        expect(visitee.zone.value).toBe('Là');
         expect(m.win.tempCriteres[0].paliersProjection[4].texteAide).toBe('Ici {projection}');
+    });
+
+    it('C.c une zone d\'un AUTRE gabarit, même au focus, n\'est pas la cible de cette palette', () => {
+        const m = monter([]);
+        m.win.tempCriteres = [clone(ALGO)];
+        const ailleurs = zonePalier({ value: 'Autre', visitee: true, vue: false });
+        const { zone, bouton } = zonePalier({ value: 'Ici', visitee: true, vue: false, sel: 3 });
+        m.document.activeElement = ailleurs.zone;
+        m.win.insererRepereEnonce(bouton);
+        expect(ailleurs.zone.value).toBe('Autre');
+        expect(zone.value).toBe('Ici {projection}');
     });
 });
 
@@ -224,7 +282,7 @@ describe('branchement · D — un point de montage par rendu, le jeton', () => {
     it('D.a `monterVuesBadges` est déclaré une fois et appelé par les deux rendus ; `_zoneDeFocus` sert le focusin et la zone cible ; jeton grilles (d)', () => {
         const code = source('js/grilles.js');
         expect((code.match(/function monterVuesBadges\(/g) || []).length).toBe(1);
-        expect((code.match(/^\s*monterVuesBadges\(container\);/gm) || []).length).toBe(2);
+        expect((code.match(/^\s*monterVuesBadges\(container, (window\.tempCriteres|grille\.criteres)\);/gm) || []).length).toBe(2);
         expect((code.match(/_zoneDeFocus\(/g) || []).length).toBe(3);
         expect(code).toMatch(/window\.composeurBadges\.ecrire\(vue, r\.texte, r\.curseur\)/);
         // ↻ 19 sept. 2026 (1.150.0) — le motif d'origine (« 20260905[d-z] | 2026090[6-9] | 20261… ») ne couvrait
