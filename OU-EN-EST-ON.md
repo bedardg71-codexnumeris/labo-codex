@@ -15,6 +15,17 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 23 OCTOBRE 2026, 16 H 13 : LA 1.216.1 EST EN LIGNE** (tes Nouvelles validées à 10 h 36 et à 13 h 59). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- critère algorithmique : une palette de blocs nommés en mots remplace les rangées « Poser : » ; place le curseur dans une phrase et touche un bloc, il s'y pose ;
+- en mode Évaluer, le nombre d'erreurs d'une copie ne s'enregistre plus dans l'évaluation de la précédente ;
+- à l'évaluation, l'écran montre toujours les critères de la grille choisie, même avec une cartouche faite pour une autre grille, et une ligne nomme ceux que la cartouche ne commente pas.
+
+**Ce qui reste à toi** : dans Chrome, `await ComptesErreurs.verifier()` et `await CartouchesDecalees.verifier()` à la console ; elles n'écrivent rien. Montre les listes à Cowork avant toute réparation.
+
+**Vérifié comment** : verdict complet du navigateur vert sur le commit poussé (aucun échec, trois specs vertes au second essai, Mac tenu éveillé), puis la mise en ligne constatée chez Netlify sur ce commit.
+
 📝 **LE 22 OCTOBRE 2026, 20 H 24 : LA 1.215.0 EST EN LIGNE** (tes Nouvelles validées mot pour mot à 18 h 31). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :
