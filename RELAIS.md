@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS – 23 OCT. 2026, 10 h 38 (écrit par Claude Code) : **1.216.0 COMMITÉE SUR `main`, NON POUSSÉE ; LE PUSH ATTEND UN VERDICT COMPLET VERT SUR CE COMMIT, AU SIGNAL DE GRÉGOIRE**
+
+**En ligne** : la 1.215.0 (`origin/main` = `6cac9b1d`). **`main` local**, en avance de neuf commits : le critère algorithmique, étape 2b — la palette (`ae911d5c`), ses trois retouches (`cc87c74a` docs, `53cb39b8`) —, #1142 (`92aface2` docs, `3ebcd4ae` : le compte d'erreurs d'une copie ne s'écrit plus dans l'évaluation d'une autre ; `ComptesErreurs.verifier()` mesure le stock à la console, la réparation attend l'accord de Grégoire), la retouche et #1143 (`f2478f91` docs, `603dad65` : tests seuls), la consigne de 10 h 36 (`d04f8324` docs), puis le commit de release **1.216.0** (build `1023-1037`) qui porte ce bloc et les Nouvelles 1.216, validées mot pour mot par Grégoire à 10 h 36. ⚠ Le stock de #1142 n'est PAS réparé : les évaluations déjà écrites gardent leur compte (les Nouvelles le disent).
+**Vérifié** : Vitest 9 540/9 540 (810 fichiers), sur l'arbre de la release ; `git grep` de l'ancien build `1022-1833`, de son jeton `10221833` et de « 1.215.0 » hors `*.md` : zéro. Pas de verdict complet.
+**La suite** : verdict complet (`cd tests && node ../scripts/verifier-playwright.mjs`) sur le commit de release, au signal de Grégoire ; vert → push, constater `origin/main` et la version chez Netlify, puis `OU-EN-EST-ON.md` et `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` ; rouge → on s'arrête. Relecture demandée : `plans de travail/DEMANDE-RELECTURE-2026-10-23-version-1.216.0.md`. Après le push : `await ComptesErreurs.verifier()` dans l'onglet de Grégoire (n'écrit rien) ; la réparation (`{ reparer: true }`) seulement sur son accord.
+**Hors relais** : `ci/verdict-morceaux` attend Grégoire (#1093).
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.215.0 `628a7657` → 1.216.0) : fichiers de plus de 1 000 lignes 37 → 37, leurs lignes 88 578 → 88 663 (Δ +85 : `js/grilles.js` 4 054 → 4 124, `js/changelog-data.js` 2 310 → 2 319, `js/travaux-outils.js` 2 890 → 2 895, `js/codex.js` 2 990 → 2 991) ; au-dessus de 15 : 453 → 453 (Δ 0) ; au-dessus de 30 : 86 → 86 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 415 → 11 410 (Δ −5). Lignes de `js/` : 151 945 → 152 396 ; fonctions : 13 688 → 13 769 ; fichiers : 214 → 216 (`js/palette-algo.js`, `js/comptes-erreurs-stock.js`).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 22 OCT. 2026, 18 h 40 (écrit par Claude Code) : **1.215.0 COMMITÉE SUR `main`, NON POUSSÉE ; LE PUSH ATTEND UN VERDICT COMPLET VERT SUR CE COMMIT, AU SIGNAL DE GRÉGOIRE**
 
 **22 oct., 20 h 25 – POUSSÉ, EN LIGNE, AUCUN TRAVAIL EN AVANCE AILLEURS** : verdict complet vert sur `628a7657` (code 0, 0 échec connu, aucun instable, 0 veille, éveil complet tenu, sur batterie, pression mémoire 1, rendu à 20 h 23), poussé par `git push` sur le port 443 (même contournement qu'à 16 h 35) : le hook a lancé Vitest (vert) et lu le jeton « verdict vert à jour pour ce commit » ; `pousser.sh` n'a pas servi, il aurait relancé les 45 min de la suite. `origin/main` = `628a7657`, Netlify `6adaa934` `ready` sur ce SHA (20 h 24). Le reste de ce bloc est périmé.

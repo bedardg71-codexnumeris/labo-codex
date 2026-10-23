@@ -21,7 +21,19 @@
 
     var CHANGELOG = [
         {
-            // 1.215 (le critère algorithmique, étape 2a : les deux noms de l'enseignant, la parenthèse sans accord, le
+            // 1.216 (le critère algorithmique, étape 2b : la palette de blocs ; #1142, le compte d'erreurs écrit dans
+            // l'évaluation d'une autre copie) — titre et deux items validés par Grégoire, mot pour mot, le 23 oct. 2026
+            // à 10 h 36 (`plans de travail/CONSIGNE-DU-JOUR.md` de 10 h 36). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.216',
+            couleur: 'vert',
+            titre: 'Une palette de blocs, et le bon compte d’erreurs',
+            items: [
+                'Critère algorithmique&nbsp;: une palette de blocs nommés en mots («&nbsp;Compte des erreurs&nbsp;», «&nbsp;Nom du critère&nbsp;»…) remplace les rangées «&nbsp;Poser&nbsp;:&nbsp;». Place le curseur dans une phrase et touche un bloc&nbsp;: il s’y pose. Au Mac, la palette reste à côté du critère&nbsp;; sur l’iPad, elle se place juste au-dessus du texte que tu écris.',
+                'Correction&nbsp;: en passant d’une copie à l’autre en mode Évaluer, le nombre d’erreurs d’une copie pouvait s’enregistrer dans l’évaluation de la précédente, même verrouillée. Dans le PDF, la ligne du calcul pouvait alors donner un autre compte que la phrase&nbsp;; la phrase, le niveau et la note restaient justes. Les évaluations déjà enregistrées gardent ce compte&nbsp;: si une ligne du calcul te semble fausse, écris-moi.'
+            ]
+        },
+        {
+            // 1.215(le critère algorithmique, étape 2a : les deux noms de l'enseignant, la parenthèse sans accord, le
             // bilan sans participe) — titre et deux items validés par Grégoire, mot pour mot, le 22 oct. 2026 à 18 h 31
             // (`plans de travail/CONSIGNE-DU-JOUR.md` de 18 h 31). Insécables en `&nbsp;`, apostrophes typographiques.
             version: '1.215',
