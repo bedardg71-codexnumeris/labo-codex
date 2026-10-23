@@ -1110,10 +1110,14 @@ function cartoucheSelectionnee() {
         ? echelleSelectionnee.niveaux
         : cartouche.niveaux;
 
-    // Afficher les critères
-    const html = cartouche.criteres.map(critere => {
-        const critereGrille = grille.criteres.find(c => c.id === critere.id);
-        const ponderation = critereGrille ? critereGrille.ponderation : '?';
+    // #1144 (23 oct. 2026) — LES CRITÈRES SONT CEUX DE LA GRILLE. La grille dit QUOI évaluer, la
+    // cartouche AVEC QUELS COMMENTAIRES (cf. MESSAGE_ATTENTE_CRITERES) : ce rendu parcourait
+    // `cartouche.criteres`, et une cartouche aux ids d'une autre grille remplaçait les critères
+    // (« (? %) », un critère disparu). Les commentaires se lisent par id (`<critereId>_<niveau>`),
+    // jamais par nom : une correspondance par nom masquerait le prochain décalage.
+    const html = (grille.criteres || []).map(critereGrille => {
+        const critere = critereGrille;
+        const ponderation = critereGrille.ponderation;
         const estAlgorithmique = critereGrille?.type === 'algorithmique';
         const estAnalytique = critereGrille?.type === 'analytique';   // lot 2
         const facteur = critereGrille?.facteurNormalisation || 500;
@@ -1247,6 +1251,7 @@ function cartoucheSelectionnee() {
     document.getElementById('listeCriteresGrille1').innerHTML = html;
     _signalerCriteresHorsGrille(document.getElementById('listeCriteresGrille1'), grille);   // #652
     _signalerCriteresAjoutesDepuis(document.getElementById('listeCriteresGrille1'), grille);   // #705
+    _signalerCriteresNonCouverts(document.getElementById('listeCriteresGrille1'), grille, cartouche);   // #1144
 
     // Restaurer les niveaux précédemment sélectionnés (s'ils existent)
     // puis recalculer la note et regénérer la rétroaction en temps réel
@@ -1916,6 +1921,27 @@ function _signalerCriteresAjoutesDepuis(conteneur, grille) {
         + ' et reste valable : le PDF de l\'élève conclut normalement. Si tu modifies cette copie, il faudra '
         + (un ? 'lui' : 'leur') + ' donner un niveau avant de verrouiller.';
     avis.append(titre, detail, explication);
+    conteneur.prepend(avis);
+}
+
+/**
+ * #1144 (23 oct. 2026) — LES CRITÈRES DE LA GRILLE QUE LA CARTOUCHE NE COUVRE PAS. Ils restent
+ * évaluables (le rendu suit la grille) ; l'enseignant·e le lit en une ligne. Côté élève, rien de
+ * neuf : sans commentaire de cartouche, la règle #939 s'applique déjà (le commentaire enregistré,
+ * la rétroaction algorithmique, sinon le critère se dit par son en-tête). Par id seulement
+ * (`cartoucheCorrespondance.criteresNonCouverts`). Par `textContent` (noms = données).
+ */
+function _signalerCriteresNonCouverts(conteneur, grille, cartouche) {
+    if (!conteneur || !window.cartoucheCorrespondance) return;
+    const nonCouverts = window.cartoucheCorrespondance.criteresNonCouverts(grille, cartouche);
+    if (nonCouverts.length === 0) return;
+    const avis = document.createElement('p');
+    avis.id = 'avisCriteresNonCouverts';
+    avis.className = 'alerte alerte-information';
+    const noms = nonCouverts.map(c => `«\u00a0${c.nom || c.id}\u00a0»`).join(', ');
+    avis.textContent = nonCouverts.length === 1
+        ? `La cartouche n’a pas de commentaires pour ${noms}. Ce critère s’évalue quand même.`
+        : `La cartouche n’a pas de commentaires pour ${noms}. Ces critères s’évaluent quand même.`;
     conteneur.prepend(avis);
 }
 

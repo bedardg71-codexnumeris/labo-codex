@@ -73,7 +73,7 @@ function monter(initial) {
         obtenirTrimestres: () => [{ id: 'h2026', actif: true }, { id: 'a2025' }],
         obtenirTrimestreId: () => 'h2026',
         alert: () => {}, confirm: () => true
-    });
+    }, chargerScript('js/cartouche-correspondance.js', {}));   // #1144 : chargé avant cartouches.js, comme dans index.html
     return { db, ps: winPartage.partageSection, win };
 }
 

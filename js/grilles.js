@@ -2777,86 +2777,25 @@ async function deplacerCartouchesVersAutreGrille(ancienneGrilleId, nouvelleGrill
     const orphelins = [];
     let sansCritere = 0;
 
+    // #1144 (23 oct. 2026) — la correspondance (id, puis nom ; clés de commentaires reconnues par
+    // préfixe, jamais découpées) vit dans `cartoucheCorrespondance.remapper`, partagée avec la
+    // réparation du stock (`CartouchesDecalees`). Ce geste-ci garde sa règle : un critère sans
+    // correspondance part, ses commentaires non vides sont NOMMÉS à l'appelant.
     const remappees = aDeplacer.map(cartouche => {
-        const criteresSource = Array.isArray(cartouche.criteres) ? cartouche.criteres : [];
-
-        // Table ancienCritereId -> nouveauCritère, par ID d'abord, par NOM ensuite.
-        const correspondance = {};
-        criteresSource.forEach(cs => {
-            let cible = criteresCible.find(cc => cc.id === cs.id);
-            if (!cible && cs.nom) {
-                cible = criteresCible.find(cc => cc.nom === cs.nom);
-            }
-            if (cible) correspondance[cs.id] = cible;
-        });
-
-        // Réindexer les commentaires. La clé est `critereId_niveauCode`.
-        //
-        // ⚠⚠ NE PAS DÉCOUPER LA CLÉ. Un identifiant de critère est produit par
-        // `genererIdUnique('CR_')` (grilles.js:351, :371, :1033) : il CONTIENT
-        // déjà un souligné. Un `clef.indexOf('_')` ou un `clef.split('_')[0]`
-        // rendrait « CR », pas « CR_a1b2c3 » — et le remappage viserait un critère
-        // qui n'existe pas, en silence. Première version de ce bloc écrite avec
-        // ce défaut, attrapée au pré-vol.
-        //
-        // ⮕ Remède : on ne LIT pas l'identifiant dans la clé, on le RECONNAÎT.
-        // Les identifiants sources sont connus ; on cherche celui qui préfixe la
-        // clé, en gardant le PLUS LONG au cas où l'un préfixerait l'autre.
-        const commentaires = cartouche.commentaires || {};
-        const commentairesRemappes = {};
-        const perdusParCritere = {};
-
-        Object.keys(commentaires).forEach(clef => {
-            let source = null;
-            criteresSource.forEach(cs => {
-                if (!cs.id) return;
-                if (clef.startsWith(cs.id + '_') && (!source || cs.id.length > source.id.length)) {
-                    source = cs;
-                }
-            });
-            // Une clé qu'aucun critère de la cartouche ne revendique n'est pas une
-            // perte imputable au déplacement : elle était déjà orpheline AVANT. On la
-            // transporte telle quelle plutôt que de la faire disparaître à l'occasion
-            // d'un geste qui n'a pas ça pour objet.
-            //
-            // ⚠ MAIS ELLE NE VOYAGE PAS MUETTE. Elle référence un critère qui n'existe
-            // nulle part ; si l'annonce disait « tout est passé » sans la mentionner,
-            // l'enseignant lirait un déplacement propre alors qu'il emporte des
-            // commentaires que rien ne raccroche. On la compte, et l'appelant la dit.
-            if (!source) {
-                commentairesRemappes[clef] = commentaires[clef];
-                if (commentaires[clef]) sansCritere++;
-                return;
-            }
-
-            const suffixe = clef.slice(source.id.length);
-            const cible = correspondance[source.id];
-
-            if (cible) {
-                commentairesRemappes[cible.id + suffixe] = commentaires[clef];
-            } else if (commentaires[clef]) {
-                // Seuls les commentaires NON VIDES comptent comme une perte : une
-                // cellule jamais remplie n'est rien à annoncer.
-                perdusParCritere[source.nom || source.id] =
-                    (perdusParCritere[source.nom || source.id] || 0) + 1;
-            }
-        });
-
-        Object.keys(perdusParCritere).forEach(nom => {
+        const r = window.cartoucheCorrespondance.remapper(cartouche, criteresCible);
+        sansCritere += r.sansCritere;
+        Object.keys(r.perdus).forEach(nom => {
             orphelins.push({
                 cartouche: cartouche.nom || 'sans nom',
                 critere: nom,
-                nbCommentaires: perdusParCritere[nom]
+                nbCommentaires: r.perdus[nom]
             });
         });
-
         return {
             ...cartouche,
             grilleId: nouvelleGrilleId,
-            criteres: criteresSource
-                .filter(cs => correspondance[cs.id])
-                .map(cs => ({ id: correspondance[cs.id].id, nom: correspondance[cs.id].nom })),
-            commentaires: commentairesRemappes
+            criteres: r.criteres,
+            commentaires: r.commentaires
         };
     });
 
