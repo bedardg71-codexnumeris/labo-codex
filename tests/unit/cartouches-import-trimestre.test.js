@@ -174,7 +174,7 @@ describe('Cartouches · import depuis un autre trimestre', () => {
     // source, et l'évaluation affichait ses critères à la place de ceux de la grille.
     it('2b · #1144 — sous une grille de même lignée aux ids NEUFS, la copie est rattachée à ses critères', async () => {
         const { win, db } = ctx;
-        await db.set('h2026_grillesTemplates', [{
+        await db.set('h2026_grillesTemplates', [{   // security-ok: littéral de banc, aucune source externe
             id: 'GRILLE_LOCALE', nom: 'Copie fictive', dansBibliotheque: true,
             criteres: [{ id: 'CR_neuf_1', nom: 'Structure', ponderation: 20 }, { id: 'CR_neuf_2', nom: 'Français écrit', ponderation: 20 }],
             inspireDe: { nom: 'Grille-5 FR-HOLIS A25', auteur: 'Test', date: '2026-08-24', sourceId: 'GRILLE_A25' }
@@ -187,11 +187,11 @@ describe('Cartouches · import depuis un autre trimestre', () => {
 
     it('2c · #1144 — ajouter depuis la bibliothèque sous la grille locale : rattachée, et elle pointe cette grille', async () => {
         const { win, db } = ctx;
-        await db.set('h2026_grillesTemplates', [{
+        await db.set('h2026_grillesTemplates', [{   // security-ok: littéral de banc, aucune source externe
             id: 'GRILLE_LOCALE', nom: 'Copie fictive', idOriginal: 'GRILLE_A25', dansBibliotheque: true,
             criteres: [{ id: 'CR_neuf_1', nom: 'Structure', ponderation: 20 }]
         }]);
-        await db.set('bibliothequeCartouches', [CARTOUCHE('CART_BIB', 'Fictive de la bibliothèque')]);
+        await db.set('bibliothequeCartouches', [CARTOUCHE('CART_BIB', 'Fictive de la bibliothèque')]);   // security-ok: littéral de banc, aucune source externe
         // Ce qui suit l'écriture (fermer le modal, redessiner) n'existe pas ici : son échec est tu.
         const erreur = vi.spyOn(console, 'error').mockImplementation(() => {});
         await win.ajouterCartoucheIndividuelle('CART_BIB', 'GRILLE_A25');
