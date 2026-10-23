@@ -1,6 +1,6 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 20 h 30 (Toronto) : `1.215.0` EN LIGNE** (build `1022-1833`) — Netlify
+> ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 20 h 25 (Toronto) : `1.215.0` EN LIGNE** (build `1022-1833`) — Netlify
 > `6adaa934`, `commit_ref` `628a7657`, `state: ready`, publié à 00:24:35 Z le 23 (20 h 24). Verdict Playwright complet vert sur
 > `628a7657` (code 0, 0 échec connu, aucun instable, 0 veille, éveil complet tenu, sur batterie). La 1.215 porte l'étape 2a du
 > critère algorithmique : les deux noms de l'enseignant, la parenthèse « (3,5 après pondération) », le bilan sans participe. Poussé
