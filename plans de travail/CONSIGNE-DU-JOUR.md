@@ -1,27 +1,31 @@
-# Consigne du jour – #1142, la retouche de la relecture, et #1143 avant la version (vendredi 23 octobre 2026)
+# Consigne du jour – la version 1.216.0 : la palette (étape 2b) et #1142 (vendredi 23 octobre 2026)
 
-> Écrite par Cowork le vendredi 23 octobre 2026 à 9 h 32 (Toronto, mesuré par `date`), sur `main` à `3ebcd4ae` (non poussé). Elle remplace la consigne urgente de 8 h 24, exécutée, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-23-compte-erreurs-autre-copie.md`. Source : `VERDICT-RELECTURE-2026-10-23-compte-erreurs-autre-copie.md` (accepté), **à lire d'abord**.
+> Écrite par Cowork le vendredi 23 octobre 2026 à 10 h 36 (Toronto, mesuré par `date`), sur `main` à `603dad65` (non poussé). Elle remplace la consigne de 9 h 32, exécutée, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-23-1142-retouche-et-1143.md`. Lots relus et acceptés : l'étape 2b (`VERDICT-RELECTURE-2026-10-22-critere-algorithmique-palette.md`), #1142 et #1143 (`VERDICT-RELECTURE-2026-10-23-compte-erreurs-autre-copie.md` ; la retouche et #1143 relus par Cowork à 10 h 35 : tests seuls, aucun fichier de l'application).
 
 ## 0. Avant tout
 
-`git status` : le verdict, cette consigne et son archive viennent de Cowork. **Commit de docs seul, d'abord**, fichiers nommés.
+- **Aucune suite ne tourne en arrière-plan** (ton rapport de 10 h 31 signalait trois shells encore actifs) : arrête-les ou attends-les. Une seule suite à la fois (règle 5).
+- `git status` : cette consigne et son archive viennent de Cowork. Commit de docs seul, d'abord.
 
-## 1. La retouche – l'invariant, pour toute l'évaluation
+## 1. Les Nouvelles 1.216 (validées par Grégoire à 10 h 36, mot pour mot)
 
-Le banc « le pivot et la base ne partagent aucun objet » parcourt **tous** les objets imbriqués du pivot et de l'évaluation enregistrée, à l'ouverture et après le verrouillage, et rougit sur le premier partagé (chemin nommé dans le message). S'il en trouve un autre que les deux déjà copiés, le copier comme eux. Break-test : une des copies retirée le rougit.
+En tête de `js/changelog-data.js`, `vert`, insécables en `&nbsp;` et apostrophes courbes comme la 1.215.
 
-## 2. #1143 – la spec de la palette sur iPad
+- Titre : **Une palette de blocs, et le bon compte d'erreurs**
+- Item 1 : Critère algorithmique : une palette de blocs nommés en mots (« Compte des erreurs », « Nom du critère »…) remplace les rangées « Poser : ». Place le curseur dans une phrase et touche un bloc : il s'y pose. Au Mac, la palette reste à côté du critère ; sur l'iPad, elle se place juste au-dessus du texte que tu écris.
+- Item 2 : Correction : en passant d'une copie à l'autre en mode Évaluer, le nombre d'erreurs d'une copie pouvait s'enregistrer dans l'évaluation de la précédente, même verrouillée. Dans le PDF, la ligne du calcul pouvait alors donner un autre compte que la phrase ; la phrase, le niveau et la note restaient justes. Les évaluations déjà enregistrées gardent ce compte : si une ligne du calcul te semble fausse, écris-moi.
 
-1. Établir d'abord si l'instabilité vient du **banc** (mesure trop tôt, défilement pas encore rendu) ou du **code** (la compensation du saut qui manque) : instrumenter, rejouer au moins dix fois, et dire ce qu'on a vu.
-2. Si c'est le code : le corriger ; c'est un saut réel sous le doigt de Grégoire. Si c'est le banc : attendre ce que le code garantit, sans relâcher le seuil.
-3. Preuve : dix passages verts de suite, portrait et paysage.
+## 2. La version
 
-## 3. Tests
+- `node scripts/release.mjs minor --dry-run`, puis `minor` : **1.216.0**, les quatre points de vérité ; `git grep` de l'ancien build et de « 1.215.0 » hors du changelog : zéro.
+- `RELAIS.md` : un bloc de tête, avec la ligne « complexité ».
+- Vitest complet depuis `tests/`. **La release est le dernier commit** : la demande de relecture de la version et la ligne du plan restent hors commit, comme pour la 1.215.0.
 
-Vitest depuis `tests/`, puis les specs WebKit d'Annoter, de l'évaluation, du critère algorithmique et du texte troué. **Ni verdict complet, ni release** : ils se prennent au signal de Grégoire, avec ses Nouvelles.
+## 3. Ce qui attend le signal de Grégoire
+
+**Ni verdict complet ni push dans cette consigne.** Ils suivront sa ligne de signal (Chrome, Safari et Claude fermés, Mac branché).
 
 ## 4. Clôture
 
-- Commit sur `main`, non poussé, fichiers nommés ; demande de relecture courte, `DEMANDE-RELECTURE-2026-10-23-1142-retouche-et-1143.md`.
-- **Propose dans ton rapport les items des Nouvelles** de la prochaine version (l'étape 2b, la palette ; #1142), pas écrits : Cowork les soumettra à Grégoire.
-- #1143 coché au BACKLOG avec sa phrase « vérifié comment ».
+- Demande de relecture : `DEMANDE-RELECTURE-2026-10-23-version-1.216.0.md`, sur le modèle de celle de la 1.215.0.
+- Termine par **le geste à vérifier à l'écran** après le push, et par la phrase qui dira à Grégoire comment lancer `ComptesErreurs.verifier()` une fois la 1.216.0 chargée dans son onglet.
