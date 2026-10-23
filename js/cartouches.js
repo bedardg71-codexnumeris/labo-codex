@@ -4145,8 +4145,12 @@ async function copierCartoucheDepuisTrimestre(srcId, grilleSource, cartoucheSour
     // Chemin 2 — la grille de même lignée est déjà là : la cartouche s'y range.
     const cleDest = cle(`cartouches_${grilleAccueil.id}`);
 
+    // #1144 (23 oct. 2026) — la grille d'accueil est de même LIGNÉE (`memeIdentite`, qui compte
+    // `inspireDe.sourceId`), pas forcément aux mêmes ids de critères : une grille dupliquée en
+    // reçoit de neufs. Rangée telle quelle, la copie gardait les ids de la source, et l'évaluation
+    // affichait ses critères à la place de ceux de la grille. Rattachée ici, par id puis par nom.
     const copie = {
-        ...marquerProvenanceCartouche(cartoucheSource, srcId),
+        ...window.cartoucheCorrespondance.rattacher(marquerProvenanceCartouche(cartoucheSource, srcId), grilleAccueil.criteres).cartouche,
         id: genererIdUnique('CART_'),
         grilleId: grilleAccueil.id
     };
@@ -4374,10 +4378,13 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
                 }
                 // Générer un nouvel ID pour éviter les conflits (pattern Productions)
                 const nouvelId = genererIdUnique('CART_');
+                // #1144 — rangée sous la grille LOCALE (trouvée aussi par `idOriginal`, donc pas
+                // forcément aux mêmes ids de critères) : rattachée à ses critères, et elle la pointe.
                 cartouche = {
-                    ...cartoucheSource,
+                    ...window.cartoucheCorrespondance.rattacher(cartoucheSource, grilleLocale.criteres).cartouche,
                     id: nouvelId,
                     idOriginal: cartoucheSource.id,
+                    grilleId: grilleIdLocal,
                     dansBibliotheque: true,
                     dateImport: new Date().toISOString()
                 };

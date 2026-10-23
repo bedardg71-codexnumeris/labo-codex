@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
 // Sentinelle — import inter-trimestre de cartouches (24 août 2026).
@@ -111,8 +111,9 @@ function monter(initial) {
         },
         obtenirTrimestres: () => TRIMESTRES,
         obtenirTrimestreId: () => 'h2026',
+        obtenirToutesLesCartouchesBibliotheque: async () => (await db.get('bibliothequeCartouches')) || [],
         alert: () => {}, confirm: () => true
-    });
+    }, chargerScript('js/cartouche-correspondance.js', {}));   // #1144 : chargé avant cartouches.js, comme dans index.html
 
     return { win, db, notifs };
 }
@@ -166,6 +167,40 @@ describe('Cartouches · import depuis un autre trimestre', () => {
         expect(cartouches).toHaveLength(1);
         expect(cartouches[0].grilleId, 'la cartouche pointe la grille d\'accueil').toBe('GRILLE_LOCALE');
         expect(cartouches[0].idOriginal).toBe('CART_1');
+    });
+
+    // #1144 (23 oct. 2026) — une grille de même LIGNÉE n'a pas forcément les mêmes ids de critères
+    // (une grille dupliquée en reçoit de neufs). Rangée telle quelle, la copie gardait ceux de la
+    // source, et l'évaluation affichait ses critères à la place de ceux de la grille.
+    it('2b · #1144 — sous une grille de même lignée aux ids NEUFS, la copie est rattachée à ses critères', async () => {
+        const { win, db } = ctx;
+        await db.set('h2026_grillesTemplates', [{
+            id: 'GRILLE_LOCALE', nom: 'Copie fictive', dansBibliotheque: true,
+            criteres: [{ id: 'CR_neuf_1', nom: 'Structure', ponderation: 20 }, { id: 'CR_neuf_2', nom: 'Français écrit', ponderation: 20 }],
+            inspireDe: { nom: 'Grille-5 FR-HOLIS A25', auteur: 'Test', date: '2026-08-24', sourceId: 'GRILLE_A25' }
+        }]);
+        await win.copierCartoucheDepuisTrimestre('a2025', GRILLE_SOURCE(), CARTOUCHE('CART_1', 'Stratégies de lecture'));
+        const [copie] = await db.get('cartouches_GRILLE_LOCALE');
+        expect(copie.criteres).toEqual([{ id: 'CR_neuf_1', nom: 'Structure' }]);
+        expect(copie.commentaires).toEqual({ CR_neuf_1_I: 'À retravailler.' });
+    });
+
+    it('2c · #1144 — ajouter depuis la bibliothèque sous la grille locale : rattachée, et elle pointe cette grille', async () => {
+        const { win, db } = ctx;
+        await db.set('h2026_grillesTemplates', [{
+            id: 'GRILLE_LOCALE', nom: 'Copie fictive', idOriginal: 'GRILLE_A25', dansBibliotheque: true,
+            criteres: [{ id: 'CR_neuf_1', nom: 'Structure', ponderation: 20 }]
+        }]);
+        await db.set('bibliothequeCartouches', [CARTOUCHE('CART_BIB', 'Fictive de la bibliothèque')]);
+        // Ce qui suit l'écriture (fermer le modal, redessiner) n'existe pas ici : son échec est tu.
+        const erreur = vi.spyOn(console, 'error').mockImplementation(() => {});
+        await win.ajouterCartoucheIndividuelle('CART_BIB', 'GRILLE_A25');
+        erreur.mockRestore();
+        const [ajoutee] = await db.get('cartouches_GRILLE_LOCALE');
+        expect(ajoutee.idOriginal).toBe('CART_BIB');
+        expect(ajoutee.grilleId).toBe('GRILLE_LOCALE');
+        expect(ajoutee.criteres).toEqual([{ id: 'CR_neuf_1', nom: 'Structure' }]);
+        expect(ajoutee.commentaires).toEqual({ CR_neuf_1_I: 'À retravailler.' });
     });
 
     it('3 · réimporter la même cartouche est REFUSÉ par la garde d\'identité', async () => {

@@ -167,7 +167,7 @@ describe('#522 lot 5b · A — deux gestes rapprochés gardent LEURS DEUX effets
             notifications: silencieux,
             echapperHtml: (t) => String(t == null ? '' : t),
             alert: () => {}, confirm: () => true
-        });
+        }, chargerScript('js/cartouche-correspondance.js', {}));   // #1144 : chargé avant cartouches.js, comme dans index.html
         const grille = { id: 'G1', nom: 'Grille fictive', criteres: [{ id: 'K1', nom: 'Structure' }] };
         await db.set('h2026_grillesTemplates', [grille]);   // security-ok: littéral de banc, aucune source externe
         await db.set('cartouches_G1', []);                  // security-ok: littéral de banc, aucune source externe

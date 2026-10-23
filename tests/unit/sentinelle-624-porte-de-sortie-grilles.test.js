@@ -61,6 +61,7 @@ const cleBanc = (nom) => `a2026_${nom}`;
 
 async function monter() {
     const db = await monterDb();
+    // #1144 : la correspondance vit dans cartouche-correspondance.js, chargé avant grilles.js comme dans index.html.
     const win = chargerScript('js/grilles.js', {
         db,
         cle: cleBanc,
@@ -69,7 +70,7 @@ async function monter() {
         genererIdUnique: (p) => (p || '') + Math.random().toString(36).slice(2, 8),
         BibliothequeUI: new Proxy({}, { get: () => (() => '') }),
         nommerCopie: (n) => n
-    });
+    }, chargerScript('js/cartouche-correspondance.js', {}));
     // Garde de validité : sans l'export, tout passerait au vert sans rien exercer.
     if (typeof win.deplacerCartouchesVersAutreGrille !== 'function') {
         throw new Error('deplacerCartouchesVersAutreGrille absente du sandbox — export manquant ?');
