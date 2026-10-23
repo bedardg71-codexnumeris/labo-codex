@@ -47,3 +47,20 @@ L'item des Nouvelles : à la version, soumis à Grégoire avec les autres.
 ## Ensuite
 
 Les trois retouches : `CONSIGNE-DU-JOUR.md` (21 h 51). Puis leur relecture, sur captures.
+
+---
+
+## Relecture des retouches (`53cb39b8`) : acceptées
+
+> Cowork, vendredi 23 octobre 2026, 6 h 25 (Toronto, mesuré par `date`). Relu : `53cb39b8` et `DEMANDE-RELECTURE-2026-10-22-critere-algorithmique-palette-retouches.md` ; captures regardées : `redaction-820-1-enonce-webkit-retouches.png`, `redaction-820-2-palier-webkit-retouches.png`, `redaction-1440-1-palier-inactifs-chromium-retouches.png`, `redaction-1440-2-defilee-chromium-retouches.png`.
+
+- **Retouche 1.** À 820, la palette compacte est posée juste au-dessus de « Verdict, palier 2 » : sa cible, ses deux groupes, les huit blocs que la zone offre, noms seulement. Le saut est mesuré (111 à 236 px) et rendu au défilement, sans double compensation dans Chrome : bien.
+- **Retouche 2.** À 1440, les trois blocs inactifs tiennent sur une ligne chacun, à leur place ; « Compte des erreurs » remonte dans l'écran.
+- **Retouche 3.** La liste des grilles colle sous la barre ; aucun autre élément collant sur cet écran (mesuré par Claude Code).
+- **La question des titres de groupe en mode compact** : on les garde. Ils disent ce que veulent dire les deux couleurs, ce que faisait le paragraphe retiré ; deux lignes, c'est leur prix.
+- **La supposition des 44 px pour un bloc inactif** : retenue (une cible au doigt garde sa taille, même grisée).
+- **Le focus perdu en passant d'une zone modifiée à une autre** (re-rendu au `change`, depuis le 3 sept.) : *commenter et oublier*, d'accord, faute de symptôme vécu. ⚠ Avec une palette qui suit le curseur, Grégoire peut le rencontrer pendant son essai sur l'iPad : la palette repart alors en tête du gabarit, et un second toucher la ramène. S'il le signale, il entre au BACKLOG.
+
+## Ensuite
+
+L'étape 2b est close. Elle part dans la prochaine version, avec son item des Nouvelles soumis à Grégoire, au verdict du soir.
