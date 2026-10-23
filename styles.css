@@ -3495,7 +3495,11 @@ input[type="number"].controle-form {
    Deux familles, deux couleurs (cadrage du 2 septembre) : bleu = écrit dans la
    grille par l'enseignant·e ; vert = se remplit à la correction. Les teintes ne
    portent que le cadre et le fond ; le texte garde --texte-principal dans les deux
-   modes. Un bloc inactif garde son texte lisible : son cadre passe en pointillé. */
+   modes.
+   ↻ Retouches de la relecture (22 oct., 21 h 51) : un bloc inactif se réduit à son nom, grisé,
+   sur une ligne (sa mention dans son `title` et pour le lecteur d'écran) ; sous le seuil, la
+   palette est COMPACTE et se place juste au-dessus de la zone qu'on écrit (`placerPaletteAlgo`,
+   grilles.js) : le nom des blocs que la zone offre, rien d'autre. */
 .gabarit-algo { container-type: inline-size; container-name: gabarit-algo; }
 /* ⚠ COLLANTE, À UNE CONDITION MESURÉE (22 oct., WebKit) : deux `overflow: hidden` font de `body` (style
    d'index.html, `overflow-x`) et de `.conteneur` (ses coins arrondis) des conteneurs de défilement qui ne
@@ -3506,9 +3510,14 @@ input[type="number"].controle-form {
    colle pas — mesuré à 820 px, ouvrir `body` y réveillait les sous-navigations mobiles (≤ 1024 px), collantes
    par leur règle, qui recouvraient le contenu. Sur cet écran, la barre de navigation colle elle aussi, comme
    sa règle le prévoit. Un moteur sans `clip` ni `:has` garde `hidden` : la palette reste en tête du gabarit. */
+/* ↻ Retouche 3 (22 oct., 21 h 51) : sous la même condition, la liste des grilles (`.sidebar-navigation`, collante
+   à 20 px par sa règle) glissait sous la barre et y coupait sa première carte. Elle colle sous la barre, comme la
+   palette ; son `max-height` suit. Mesuré à 1440 (WebKit) : les autres éléments collants à l'écran sont la barre
+   elle-même (top 0) et la palette (96 px) ; la sous-navigation mobile n'y paraît pas (≤ 1024 px). */
 @media (min-width: 1200px) {
     body:has(.section.active .sous-section.active .palette-algo) { overflow-x: clip; }
     .conteneur:has(.section.active .sous-section.active .palette-algo) { overflow: clip; }
+    body:has(.section.active .sous-section.active .palette-algo) .sidebar-navigation { top: 96px; max-height: calc(100vh - 104px); }
 }
 .gabarit-algo-atelier {
     display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 14px; align-items: start; min-width: 0;
@@ -3524,7 +3533,7 @@ input[type="number"].controle-form {
 .palette-algo-groupe { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .palette-algo-groupe-nom { font-size: 0.74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-muted); }
 .palette-algo-bloc {
-    font: inherit; display: flex; flex-direction: column; gap: 2px; text-align: left; min-height: 44px; box-sizing: border-box;
+    font: inherit; position: relative; display: flex; flex-direction: column; gap: 2px; text-align: left; min-height: 44px; box-sizing: border-box;
     padding: 7px 10px; border: 1px solid var(--bordure-moyenne); border-left-width: 4px; border-radius: var(--radius-moyen);
     background: var(--surface-carte); color: var(--texte-principal); cursor: pointer;
 }
@@ -3535,14 +3544,41 @@ input[type="number"].controle-form {
 .palette-algo-bloc-nom { font-weight: 700; font-size: 0.9rem; line-height: 1.3; overflow-wrap: anywhere; }
 .palette-algo-bloc-aide { font-size: 0.78rem; line-height: 1.3; color: var(--texte-secondaire); }
 .palette-algo-bloc-precision { font-size: 0.76rem; line-height: 1.3; font-style: italic; color: var(--texte-secondaire); }
-.palette-algo-bloc-inactif { display: none; font-size: 0.76rem; font-weight: 600; color: var(--texte-secondaire); }
+.palette-algo-bloc-inactif { display: none; }
+/* Retouche 2 — un bloc inactif : son nom, grisé, sur une ligne, à sa place. L'aide, la précision et la mention
+   restent lues par le lecteur d'écran (masquées à l'œil seulement) ; la mention est aussi son `title`. */
+.palette-algo-bloc[data-hors-zone] { justify-content: center; }
+.palette-algo-bloc[data-hors-zone] .palette-algo-bloc-nom {
+    color: var(--texte-muted); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .palette-algo-bloc[data-hors-zone] .palette-algo-bloc-inactif { display: block; }
+.palette-algo-bloc[data-hors-zone] .palette-algo-bloc-aide,
+.palette-algo-bloc[data-hors-zone] .palette-algo-bloc-precision,
+.palette-algo-bloc[data-hors-zone] .palette-algo-bloc-inactif {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+/* Retouche 1 — sous le seuil, la palette COMPACTE, juste au-dessus de la zone qu'on écrit (`placerPaletteAlgo`
+   la déplace ; `--palette-algo-compacte` lui dit qu'on est sous le seuil, écrit ici seulement). Le nom des blocs
+   que la zone offre, à 44 px au doigt ; l'aide dans `title` et pour le lecteur d'écran ; la ligne de cible reste. */
 @container gabarit-algo (max-width: 753px) {
     .gabarit-algo-atelier { grid-template-columns: minmax(0, 1fr); }
-    .palette-algo { position: static; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
-    .palette-algo-cible { flex: 1 1 100%; }
-    .palette-algo-groupe { flex: 1 1 240px; }
-    .palette-algo-bloc-precision { display: none; }
+    .palette-algo {
+        --palette-algo-compacte: 1;
+        position: static; gap: 6px; max-height: none; overflow: visible; margin: 0 0 8px; padding: 8px 10px;
+        border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: var(--surface-carte);
+    }
+    .palette-algo-groupe { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .palette-algo-groupe-nom { flex: 1 1 100%; }
+    .palette-algo-groupe[data-vide],
+    .palette-algo-bloc[data-hors-zone] { display: none; }
+    .palette-algo-bloc { flex-direction: row; align-items: center; max-width: 100%; padding: 6px 12px; }
+    .palette-algo-bloc-nom { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .palette-algo-bloc-aide,
+    .palette-algo-bloc-precision {
+        position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+        clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+    }
 }
 
 /* La pastille d'un bloc dans la phrase (`composeur-badges.js`, chip) : les deux

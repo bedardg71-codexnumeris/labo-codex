@@ -3789,6 +3789,10 @@ function rendreChampEnonceAlgo(c, e, ctx, critere) {
  * rendu (`ciblerPaletteAlgo`, au `focusin`) — un rendu n'en a visité aucune. D'ici là, chaque
  * bloc est inactif (`aria-disabled`, il ne pose rien) et une ligne invite à placer le curseur.
  * Le geste : `insererRepereEnonce`, sur le même `data-action` qu'avant.
+ *
+ * ↻ Retouches de la relecture (22 oct., 21 h 51) — l'aide de chaque bloc est aussi son `title` :
+ * c'est elle qu'on lit quand le bloc se réduit à son nom (palette compacte, bloc inactif). Sous le
+ * seuil, la palette est rendue en tête du gabarit, puis va au-dessus de sa cible (`placerPaletteAlgo`).
  */
 function rendrePaletteAlgo(critere, ctx) {
     if (typeof window.paletteAlgo === 'undefined') return '';
@@ -3802,7 +3806,8 @@ function rendrePaletteAlgo(critere, ctx) {
                     <div class="palette-algo-groupe" role="group" aria-label="${esc(T.groupes[famille])}">
                         <span class="palette-algo-groupe-nom">${esc(T.groupes[famille])}</span>${lesBlocs.map((b) => `
                         <button type="button" class="palette-algo-bloc palette-algo-bloc--${esc(b.famille)}"
-                                data-action="insererRepereEnonce" data-jeton="${esc(b.jeton)}" aria-disabled="true">
+                                data-action="insererRepereEnonce" data-jeton="${esc(b.jeton)}" aria-disabled="true"
+                                title="${esc(b.aide + (b.precision ? ' ' + b.precision : ''))}">
                             <span class="palette-algo-bloc-nom">${esc(b.nom)}</span>
                             <span class="palette-algo-bloc-aide">${esc(b.aide)}</span>${b.precision ? `
                             <span class="palette-algo-bloc-precision">${esc(b.precision)}</span>` : ''}
@@ -6587,6 +6592,9 @@ function _zoneCibleDeLaPalette(palette) {
  * Une zone devient la cible de la palette de son critère : la palette la nomme, active les
  * blocs que la zone offre, et montre les autres inactifs, avec leur mention. Touche les
  * attributs de la palette, jamais le gabarit : rien n'est re-rendu, le curseur reste.
+ * ↻ Retouches (22 oct., 21 h 51) : un bloc inactif se réduit à son nom (`styles.css`) — sa
+ * mention passe dans son `title` ; un groupe sans bloc offert est marqué `data-vide` (la palette
+ * compacte le cache) ; puis la palette va où elle doit être (`placerPaletteAlgo`).
  */
 function ciblerPaletteAlgo(palette, zone) {
     if (!palette || !zone || typeof window.paletteAlgo === 'undefined') return;
@@ -6601,10 +6609,77 @@ function ciblerPaletteAlgo(palette, zone) {
         if (offerts[b.dataset.jeton]) {
             b.removeAttribute('aria-disabled');
             delete b.dataset.horsZone;
+            b.title = _aideDuBloc(b);
         } else {
             b.setAttribute('aria-disabled', 'true');
             b.dataset.horsZone = '1';
+            b.title = T.inactif;
         }
+    });
+    palette.querySelectorAll('.palette-algo-groupe').forEach(function(g) {
+        if (g.querySelector('.palette-algo-bloc:not([data-hors-zone])')) delete g.dataset.vide;
+        else g.dataset.vide = '1';
+    });
+    placerPaletteAlgo(palette, zone);
+}
+
+/** L'aide d'un bloc telle que son `title` la donne : l'aide, puis la précision s'il en a une. */
+function _aideDuBloc(b) {
+    var texte = function(sel) { var s = b.querySelector(sel); return s ? s.textContent.trim() : ''; };
+    return [texte('.palette-algo-bloc-aide'), texte('.palette-algo-bloc-precision')].filter(Boolean).join(' ');
+}
+
+/**
+ * La palette est-elle COMPACTE ? C'est la requête de conteneur de `styles.css` qui en décide (le
+ * gabarit sous 754 px) ; elle le dit par `--palette-algo-compacte` — le seuil n'est écrit qu'une fois.
+ */
+function _paletteCompacte(palette) {
+    if (typeof getComputedStyle !== 'function') return false;
+    return getComputedStyle(palette).getPropertyValue('--palette-algo-compacte').trim() === '1';
+}
+
+/**
+ * Retouche 1 de la relecture (22 oct., 21 h 51) — OÙ EST LA PALETTE. Au-dessus du seuil : à sa
+ * place, sur le côté (premier enfant de `.gabarit-algo-atelier`). Sous le seuil : JUSTE AU-DESSUS
+ * de la zone qu'on écrit — de la rangée des deux zones d'un palier, du champ d'un énoncé — et elle
+ * la suit d'une zone à l'autre. C'est le MÊME élément, déplacé : rien n'est re-rendu, rien ne se
+ * duplique, et le focus reste dans la zone (la palette ne le contient jamais).
+ *
+ * ⚠ LA ZONE DESCEND de la hauteur de la palette quand celle-ci arrive au-dessus d'elle (ou monte,
+ * quand elle quitte une zone plus haute). WebKit ne compense pas — mesuré au banc, la zone sautait
+ * de la hauteur de la palette ; on rend au défilement l'écart mesuré, pour que la zone reste sous
+ * le doigt. Chrome compense de lui-même (ancrage du défilement) : l'écart mesuré après coup y est
+ * nul, et rien n'est rendu deux fois (mesuré au banc dans les deux moteurs, 22 oct.).
+ */
+function placerPaletteAlgo(palette, zone) {
+    var ancre = _ancreDeLaPalette(palette, zone);
+    if (!ancre || ancre === palette || palette.nextElementSibling === ancre) return;
+    var repere = _vueBadgesDe(zone) || zone;
+    var avant = repere.getBoundingClientRect().top;
+    ancre.parentNode.insertBefore(palette, ancre);
+    var ecart = repere.getBoundingClientRect().top - avant;
+    if (ecart && typeof window.scrollBy === 'function') window.scrollBy(0, ecart);
+}
+
+/**
+ * L'élément AVANT lequel la palette doit être (voir `placerPaletteAlgo`) : sous le seuil, la rangée
+ * des zones du palier ou le champ de l'énoncé ; au-dessus, le premier enfant de l'atelier.
+ */
+function _ancreDeLaPalette(palette, zone) {
+    if (!palette || !zone || typeof zone.closest !== 'function' || typeof palette.closest !== 'function') return null;
+    var gabarit = palette.closest('.gabarit-algo');
+    var atelier = gabarit ? gabarit.querySelector('.gabarit-algo-atelier') : null;
+    if (!atelier) return null;
+    if (!_paletteCompacte(palette)) return atelier.firstElementChild;
+    var ancre = zone.closest('.palier-rangee') || zone.closest('.groupe-form');
+    return (ancre && ancre.parentNode) ? ancre : null;
+}
+
+/** Une fenêtre qui change de largeur (l'iPad qu'on tourne) peut faire passer le seuil : chaque palette ciblée se replace. */
+function replacerPalettesAlgo() {
+    if (typeof document === 'undefined') return;
+    document.querySelectorAll('.palette-algo').forEach(function(p) {
+        if (p._zoneCible && p._zoneCible.isConnected) placerPaletteAlgo(p, p._zoneCible);
     });
 }
 
@@ -6617,6 +6692,9 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
         zone.dataset.curseurVu = '1';
         ciblerPaletteAlgo(_paletteDeZone(zone), zone);
     });
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+        window.addEventListener('resize', replacerPalettesAlgo);
+    }
     // ⚠ TOUCHER LA PALETTE NE DOIT PAS PRENDRE LE FOCUS. Sinon la zone le perd
     // d'abord, son `change` part, le gabarit se re-rend, et le bloc sous le doigt
     // n'existe plus quand le clic arrive : le premier bloc posé après une frappe
