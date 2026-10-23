@@ -13,7 +13,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 // B. La correspondance partagée (`cartoucheCorrespondance.remapper`) : id, puis nom ; clés de
 //    commentaires reconnues par préfixe ; ce qui ne trouve rien est rendu, jamais jeté.
 // C. Le stock (`CartouchesDecalees`) : la mesure n'écrit rien ; la réparation n'écrit que ce
-//    qu'elle a listé, et refuse sans codex à jour.
+//    qu'elle a listé, et refuse sans codex à jour. #1145 : une cartouche dont tous les critères
+//    sont ceux d'UNE autre grille existante est RANGÉE sous elle, telle quelle ; le rattachement
+//    par le nom ne vaut que si ses critères ne sont ceux d'aucune grille (C sans G4, plus bas).
 // Noms et ids fictifs.
 
 const NOMS = ['Structure', 'Rigueur', 'Plausibilité', 'Nuance'];
@@ -144,11 +146,13 @@ describe('#1144 B — cartoucheCorrespondance.remapper', () => {
 
 /* ================================================================ C. le stock */
 
-function stock({ codexAJour = true, trimestre = 'a2026' } = {}) {
+// #1145 — `avecG4` : la grille des critères de la cartouche existe (le cas de « Plan de rédaction »,
+// à ranger) ; sans elle, ses critères ne sont ceux d'aucune grille (« Rédaction », à rattacher).
+function stock({ codexAJour = true, trimestre = 'a2026', avecG4 = false } = {}) {
     const rangee = cartoucheDecalee();
     const intacte = { id: 'CART_intacte', nom: 'Cartouche fictive intacte', grilleId: G5.id, criteres: G5.criteres.map(c => ({ id: c.id, nom: c.nom })), commentaires: { CR_cinq0_M: 'ok' } };
     const store = {
-        a2026_grillesTemplates: [G5, G4],
+        a2026_grillesTemplates: avecG4 ? [G5, G4] : [G5],
         a2026_cartouches_G_CINQ: [rangee, intacte],
         a2026_cartouches_G_QUATRE: [],
         a2026_cartouches_G_ABSENTE: [rangee]   // clé orpheline : hors lot
@@ -248,5 +252,78 @@ describe('#1144 C — CartouchesDecalees', () => {
     it('H2026 est refusé, même pour la mesure', async () => {
         const s = stock({ trimestre: 'h2026' });
         expect(await s.C.verifier()).toBeNull();
+    });
+});
+
+/* ===================== #1145 — RANGER sous la grille de ses critères, telle quelle */
+
+describe('#1145 — une cartouche dont tous les critères sont ceux d\'une autre grille est RANGÉE sous elle', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // « Rédaction » : ses critères ne sont ceux d'aucune grille existante — elle se rattache, comme avant.
+    const aRattacher = () => ({
+        id: 'CART_absente', nom: 'Cartouche fictive d\'une grille absente', grilleId: G5.id,
+        criteres: NOMS.map((n, i) => ({ id: `CR_absente${i}`, nom: n })),
+        commentaires: { CR_absente0_M: 'Commentaire M de Structure' }
+    });
+
+    it('la mesure dit « ranger sous » G4, n\'écrit rien ; la cartouche sans grille dit « rattacher à » G5', async () => {
+        const s = stock({ avecG4: true });
+        s.store.a2026_cartouches_G_CINQ.push(aRattacher());
+        const avant = JSON.stringify(s.store);
+        const r = await s.C.verifier();
+        expect(r.decalees.map(l => [l.cartoucheId, l.action, l.vers, l.proposition])).toEqual([
+            ['CART_decalee', 'ranger', G4.nom, true],
+            ['CART_absente', 'rattacher', G5.nom, true]
+        ]);
+        expect(r.decalees[0].nonCouverts).toEqual([]);
+        expect(s.ecritures).toEqual([]);
+        expect(JSON.stringify(s.store)).toBe(avant);
+    });
+
+    it('la réparation la range TELLE QUELLE sous G4 (grilleId mis à jour) et la retire de G5, dans cet ordre', async () => {
+        const s = stock({ avecG4: true });
+        const intacteAvant = JSON.stringify(s.store.a2026_cartouches_G_CINQ[1]);
+        const orphelineAvant = JSON.stringify(s.store.a2026_cartouches_G_ABSENTE);
+        const r = await s.C.verifier({ reparer: true });
+        expect(r.ecrites).toEqual([{ grille: G5.nom, cartouche: 'Cartouche fictive décalée', action: 'ranger', vers: G4.nom }]);
+        expect(s.ecritures).toEqual(['a2026_cartouches_G_QUATRE', 'a2026_cartouches_G_CINQ']);   // ajoutée d'abord
+        expect(s.store.a2026_cartouches_G_QUATRE).toEqual([{ ...cartoucheDecalee(), grilleId: G4.id }]);   // contenu inchangé
+        expect(s.store.a2026_cartouches_G_CINQ.map(c => c.id)).toEqual(['CART_intacte']);
+        expect(JSON.stringify(s.store.a2026_cartouches_G_CINQ[0])).toBe(intacteAvant);
+        expect(JSON.stringify(s.store.a2026_cartouches_G_ABSENTE)).toBe(orphelineAvant);
+        expect((await s.C.verifier()).decalees).toEqual([]);   // une seconde mesure ne la liste plus
+    });
+
+    it('les deux issues dans la même réparation : l\'une rangée, l\'autre rattachée', async () => {
+        const s = stock({ avecG4: true });
+        s.store.a2026_cartouches_G_CINQ.push(aRattacher());
+        const r = await s.C.verifier({ reparer: true });
+        expect(r.ecrites.map(e => [e.cartouche, e.action, e.vers])).toEqual([
+            ['Cartouche fictive d\'une grille absente', 'rattacher', G5.nom],
+            ['Cartouche fictive décalée', 'ranger', G4.nom]
+        ]);
+        expect(s.store.a2026_cartouches_G_QUATRE.map(c => c.id)).toEqual(['CART_decalee']);
+        expect(s.store.a2026_cartouches_G_CINQ.map(c => c.id)).toEqual(['CART_intacte', 'CART_absente']);
+    });
+
+    it('G4 porte déjà une cartouche du même identifiant : listée sans proposition, rien d\'écrit', async () => {
+        const s = stock({ avecG4: true });
+        s.store.a2026_cartouches_G_QUATRE = [{ ...cartoucheDecalee(), grilleId: G4.id, nom: 'Déjà là' }];
+        const r = await s.C.verifier({ reparer: true });
+        expect(r.decalees[0].proposition).toBe(false);
+        expect(r.decalees[0].pourquoi).toBe(`« ${G4.nom} » porte déjà une cartouche de même identifiant`);
+        expect(s.ecritures).toEqual([]);
+    });
+
+    it('ses critères sont ceux de PLUSIEURS grilles : listée sans proposition, ni rangée ni rattachée', async () => {
+        const s = stock({ avecG4: true });
+        const jumelle = { id: 'G_JUMELLE', nom: 'Grille fictive jumelle', criteres: G4.criteres };
+        s.store.a2026_grillesTemplates.push(jumelle);
+        const r = await s.C.verifier({ reparer: true });
+        expect(r.decalees[0].action).toBe('ranger');
+        expect(r.decalees[0].proposition).toBe(false);
+        expect(r.decalees[0].pourquoi).toBe(`ses critères sont ceux de plusieurs grilles : ${G4.nom}, Grille fictive jumelle`);
+        expect(s.ecritures).toEqual([]);
     });
 });

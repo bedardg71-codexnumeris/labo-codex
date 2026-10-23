@@ -135,7 +135,7 @@ function nouvelleEvaluation() {
     cocherOptionsParDefaut();
 
     // Annuler tout auto-save en attente (race condition) — Patch §5.6 fix #109 (étape 4)
-    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
+    window._annulerAutoSaveEnAttente();   // #1145 — l'instantané part avec le minuteur
 
     // 🔄 Réinitialiser evaluationEnCours à un objet vide (pas null) pour permettre l'affichage des jetons
     window.evaluationEnCours = {
@@ -1160,7 +1160,7 @@ function modifierEvaluation(evaluationId) {
             }
 
             // Annuler tout auto-save en attente (race condition) — Patch §5.6 fix #109 (étape 4)
-            if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
+            window._annulerAutoSaveEnAttente();   // #1145 — l'instantané part avec le minuteur
 
             // ÉTAPE 5 : Initialiser evaluationEnCours + pré-remplir critères + fallback rétroaction
             _initEvaluationEnCoursPourModif(evaluation, evaluationId);
@@ -1896,8 +1896,7 @@ function _postSauvegardeMod(evalModifiee) {
 
 function sauvegarderEvaluationModifiee() {
     // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
-    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
-    window._pendingAutoSaveSnapshot = null;
+    window._annulerAutoSaveEnAttente();   // #1145 — l'instantané part avec le minuteur
 
     const evaluationId = window.evaluationEnCours?.idModification;
     if (!evaluationId) {
