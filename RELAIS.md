@@ -7,6 +7,16 @@
 
 ---
 
+## POUR LA SESSION QUI PREND LE RELAIS – 23 OCT. 2026, 18 h 25 (écrit par Claude Code) : **1.216.2 COMMITÉE SUR `main`, NON POUSSÉE ; LE PUSH ATTEND LA RELECTURE DE COWORK ET UN VERDICT COMPLET VERT SUR CE COMMIT, AU SIGNAL DE GRÉGOIRE**
+
+**Ce que porte la 1.216.2** (patch, build `1023-1818`) : #1145, « Évaluer » ne rejoue plus un instantané d'auto-sauvegarde (`3a14c2f2`, relu et accepté par Cowork) ; la console `CartouchesDecalees` range sous X une cartouche dont tous les critères sont ceux d'une seule autre grille ; un quatrième item dans les Nouvelles 1.216 (validé par Grégoire, 18 h 17) ; le stock de #1145 mesuré par Cowork à `SUIVI-BUGS.md` (une seule évaluation, à réévaluer par Grégoire). Sur `main`, au-dessus de `origin/main` (`5f9942b0`) : `1024de84`, `3a14c2f2`, `7500ebc9`, `3fcbb8de`, puis la release. Vitest complet : 9 569 sur 9 569, 812 fichiers. WebKit : seulement les 12 specs du périmètre au lot (74 sur 75 ; `comptes-erreurs-stock-1142` rouge une fois, vert 3 sur 3 rejoué seul — sous surveillance, verdict de Cowork). **Aucun verdict complet sur ce commit.** `git grep` hors `*.md` : `1023-1402` 0, `10231402` 0 (témoins `1023-1818` 4, `10231818` 1) ; « 1.216.1 » : 2, deux commentaires historiques (`js/changelog-data.js`, l'en-tête de la spec #1145), aucun point de vérité.
+
+**Complexité** (`node tests/unit/_helpers/complexite.js`, 1.216.1 en ligne `aaaa80b5` → 1.216.2) : fichiers de plus de 1 000 lignes 37 → 37, leurs lignes 88 645 → 88 654 (Δ +9 : `js/evaluation-chargement.js` 1 352 → 1 361, `js/changelog-data.js` 2 320 → 2 321, `js/evaluation.js` 1 647 → 1 646) ; au-dessus de 15 : 453 → 453 (Δ 0) ; au-dessus de 30 : 86 → 86 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 410 → 11 408 (Δ −2). Lignes de `js/` : 152 566 → 152 672 ; fonctions : 13 805 → 13 828.
+
+**Reste à faire** : relecture de Cowork (`plans de travail/DEMANDE-RELECTURE-2026-10-23-version-1.216.2.md`), puis, au signal de Grégoire, verdict complet et `scripts/pousser.sh`.
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 23 OCT. 2026, 14 h 02 (écrit par Claude Code) : **1.216.1 COMMITÉE SUR `main`, NON POUSSÉE ; LE PUSH ATTEND LA RELECTURE DE COWORK ET UN VERDICT COMPLET VERT SUR CE COMMIT, AU SIGNAL DE GRÉGOIRE**
 
 **23 oct., 16 h 15 – POUSSÉ, EN LIGNE, AUCUN TRAVAIL EN AVANCE AILLEURS** : verdict complet vert sur `aaaa80b5` (code 0, 0 échec connu, trois instables, verts au second essai : `comptes-erreurs-stock-1142.spec.js` (la réparation de #1142, neuve dans cette version), `cours-actif-hors-bibliotheque-916.spec.js`, `grilles-sous-criteres-condense.spec.js` ; 0 veille, éveil complet tenu, sur batterie, pression mémoire 1, rendu à 16 h 12), poussé par `git push` sur le port 443 (même contournement que le 22 oct.) : le hook a lancé Vitest (vert) et lu le jeton « verdict vert à jour pour ce commit ». `origin/main` = `aaaa80b5`, Netlify `6adbbfed` `ready` sur ce SHA (16 h 13), qui porte `version.json` 1.216.1, build `1023-1402` (le site est derrière Cloudflare Access : la version se lit au SHA déployé). La 1.216.0 n'a jamais été servie. Si la spec de #1142 revient instable, c'est un vrai sujet (#685). Le reste de ce bloc est périmé.

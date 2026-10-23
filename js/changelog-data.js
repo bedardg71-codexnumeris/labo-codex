@@ -22,9 +22,10 @@
     var CHANGELOG = [
         {
             // 1.216 (le critère algorithmique, étape 2b : la palette de blocs ; #1142, le compte d'erreurs écrit dans
-            // l'évaluation d'une autre copie ; 1.216.1 : #1144, la cartouche qui remplaçait les critères de la grille) —
-            // titre et deux items validés par Grégoire, mot pour mot, le 23 oct. 2026 à 10 h 36 ; troisième item (#1144)
-            // validé mot pour mot à 13 h 59 (`plans de travail/CONSIGNE-DU-JOUR.md` de 10 h 36 et de 13 h 59). Une entrée
+            // l'évaluation d'une autre copie ; 1.216.1 : #1144, la cartouche qui remplaçait les critères de la grille ;
+            // 1.216.2 : #1145, Évaluer qui réécrivait une évaluation) — titre et deux items validés par Grégoire, mot pour
+            // mot, le 23 oct. 2026 à 10 h 36 ; troisième item (#1144) validé mot pour mot à 13 h 59 ; quatrième (#1145) à
+            // 18 h 17 (`plans de travail/CONSIGNE-DU-JOUR.md` de 10 h 36, de 13 h 59 et de 18 h 18). Une entrée
             // par version mineure : le patch se consolide ici. Insécables en `&nbsp;`, apostrophes typographiques.
             version: '1.216',
             couleur: 'vert',
@@ -32,7 +33,8 @@
             items: [
                 'Critère algorithmique&nbsp;: une palette de blocs nommés en mots («&nbsp;Compte des erreurs&nbsp;», «&nbsp;Nom du critère&nbsp;»…) remplace les rangées «&nbsp;Poser&nbsp;:&nbsp;». Place le curseur dans une phrase et touche un bloc&nbsp;: il s’y pose. Au Mac, la palette reste à côté du critère&nbsp;; sur l’iPad, elle se place juste au-dessus du texte que tu écris.',
                 'Correction&nbsp;: en passant d’une copie à l’autre en mode Évaluer, le nombre d’erreurs d’une copie pouvait s’enregistrer dans l’évaluation de la précédente, même verrouillée. Dans le PDF, la ligne du calcul pouvait alors donner un autre compte que la phrase&nbsp;; la phrase, le niveau et la note restaient justes. Les évaluations déjà enregistrées gardent ce compte&nbsp;: si une ligne du calcul te semble fausse, écris-moi.',
-                'Correction&nbsp;: à l’évaluation, une cartouche faite pour une autre grille pouvait remplacer à l’écran les critères de la grille choisie (pondérations en «&nbsp;?&nbsp;», un critère disparu). L’écran montre maintenant toujours les critères de la grille, et une ligne nomme ceux que la cartouche ne commente pas. Si cette ligne apparaît avec une cartouche qui devrait tout couvrir, écris-moi.'
+                'Correction&nbsp;: à l’évaluation, une cartouche faite pour une autre grille pouvait remplacer à l’écran les critères de la grille choisie (pondérations en «&nbsp;?&nbsp;», un critère disparu). L’écran montre maintenant toujours les critères de la grille, et une ligne nomme ceux que la cartouche ne commente pas. Si cette ligne apparaît avec une cartouche qui devrait tout couvrir, écris-moi.',
+                'Correction&nbsp;: passer en mode Évaluer pouvait réécrire une évaluation non verrouillée avec des niveaux posés plus tôt sur cette copie, sans «&nbsp;Enregistrer&nbsp;». Les évaluations verrouillées n’étaient pas touchées.'
             ]
         },
         {
