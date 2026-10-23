@@ -15,6 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 23 OCTOBRE 2026, 19 H 45 : LA 1.216.2 EST EN LIGNE** (ta ligne des Nouvelles validée à 18 h 17). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- passer en mode Évaluer ne réécrit plus une évaluation non verrouillée avec des niveaux posés plus tôt sur cette copie, sans « Enregistrer ».
+
+**Ce qui reste à toi**, dans Chrome et dans cet ordre : mettre l'Artefact 5 sur G4H dans les réglages de la production ; mettre ton codex à jour ; lancer `await ComptesErreurs.verifier()` et `await CartouchesDecalees.verifier()` sans paramètre (elles n'écrivent rien) et **montrer les deux listes à Cowork avant toute réparation** ; réévaluer la copie de 17 h 11.
+
+**Vérifié comment** : verdict complet du navigateur vert sur le commit poussé (aucun échec, aucune spec instable, Mac tenu éveillé), puis la mise en ligne constatée chez Netlify sur ce commit. Pas encore à l'écran : le geste de la Liste des évaluations (voir le rapport de 19 h 45).
+
 📝 **LE 23 OCTOBRE 2026, 16 H 13 : LA 1.216.1 EST EN LIGNE** (tes Nouvelles validées à 10 h 36 et à 13 h 59). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :

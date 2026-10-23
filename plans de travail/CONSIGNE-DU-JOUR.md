@@ -1,30 +1,27 @@
-# Consigne du jour – la version 1.216.2 : #1145 dans les Nouvelles (vendredi 23 octobre 2026)
+# Consigne du jour – le verdict complet et la mise en ligne de la 1.216.2 (vendredi 23 octobre 2026)
 
-> Écrite par Cowork le vendredi 23 octobre 2026 à 18 h 18 (Toronto, mesuré par `date`), sur `main` à `7500ebc9` (non poussé ; en ligne : la 1.216.1, `aaaa80b5`). Elle remplace la consigne de 17 h 31 (#1145), exécutée, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-23-1145-evaluer-reecrit.md`. #1145 relu et accepté : `VERDICT-RELECTURE-2026-10-23-1145-evaluer-reecrit.md`.
+> Écrite par Cowork le vendredi 23 octobre 2026 à 18 h 22 (Toronto, mesuré par `date`), sur `main` à `dbd4a79d` (release 1.216.2, non poussée ; en ligne : la 1.216.1). Elle remplace la consigne de 18 h 18, exécutée, archivée sous `_ancienne-CONSIGNE-DU-JOUR-2026-10-23-nouvelles-1.216.2.md`. Relecture de Cowork : `VERDICT-RELECTURE-2026-10-23-version-1.216.2.md`, acceptée.
+> **Quand Grégoire colle la ligne qui pointe ici, c'est son signal** : Chrome, Safari et Claude sont fermés, le Mac est branché (`PROTOCOLE.md`, règles 7 et 8). Le verdict peut tourner la nuit.
 
 ## 0. Avant tout
 
-- Aucune suite ne tourne en arrière-plan (règle 5).
-- Un commit de docs seul, fichiers nommés : cette consigne, son archive, le verdict de #1145.
+Aucune suite ne tourne en arrière-plan ; sinon, attends-la (règle 5).
 
-## 1. SUIVI-BUGS, #1145
+## 1. Le verdict complet
 
-Ajoute le stock mesuré par Cowork (verdict, § « Le stock ») : une seule évaluation réécrite, celle de 17 h 11, que Grégoire réévalue ; la fonction de console refusée (motif : un seul cas, connu) ; les mêmes niveaux chez trois autres élèves, périmé (évaluations verrouillées).
+Sur `dbd4a79d`, selon `fin-de-session` § 4.5. **Rien ne se commite avant le verdict** : il juge ce commit-là. Ni la demande de relecture, ni le verdict de Cowork, ni cette consigne.
 
-## 2. Les Nouvelles 1.216 : un quatrième item (validé par Grégoire à 18 h 17, mot pour mot)
+## 2. Vert
 
-Dans l'entrée `1.216` existante de `js/changelog-data.js`, après les trois items ; insécables en `&nbsp;` et apostrophes courbes comme les autres ; titre et couleur inchangés ; commentaire de tête mis à jour (#1145, validation de 18 h 17).
+1. Push de `main`.
+2. Un commit de docs, poussé seul ensuite, fichiers nommés un par un : la demande de relecture de la 1.216.2, le verdict de Cowork, cette consigne et son archive, et les fichiers de relais qui constatent le push (`OU-EN-EST-ON.md`, `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md`, `RELAIS.md`). Pas `.claude/worktrees/`.
+3. Constate `origin/main` et le déploiement Netlify de `dbd4a79d` (1.216.2, build `1023-1818`).
+4. `CONSIGNE-DU-JOUR.md` à l'état neutre sur la 1.216.2.
 
-> Correction : passer en mode Évaluer pouvait réécrire une évaluation non verrouillée avec des niveaux posés plus tôt sur cette copie, sans « Enregistrer ». Les évaluations verrouillées n'étaient pas touchées.
+## 3. Rouge
 
-## 3. La version
-
-- `node scripts/release.mjs patch --dry-run`, puis `patch` : **1.216.2**, les quatre points de vérité ; `git grep` de l'ancien build `1023-1402`, de son jeton et de « 1.216.1 » hors `*.md` : zéro.
-- `RELAIS.md` : un bloc de tête, avec la ligne « complexité » (par rapport à la 1.216.1 en ligne, `aaaa80b5`).
-- Vitest complet depuis `tests/`. **La release est le dernier commit** : la demande de relecture reste hors commit.
+**Ne pas pousser, ne rien corriger** : personne ne pourrait relire. Écris dans `RELAIS.md` (bloc de tête, non poussé) et dans le rapport : chaque spec rouge, sa première ligne d'erreur, et ton diagnostic (régression de #1145, de la console des cartouches, spec fragile, ou autre). `comptes-erreurs-stock-1142` est déjà connue instable : si elle seule rougit puis passe au second essai, c'est le cas « instable », pas un rouge. Cowork lit le rapport à la reprise.
 
 ## 4. Clôture
 
-- **Ni verdict complet ni push** : ils suivront la relecture de Cowork et le signal de Grégoire.
-- Demande de relecture : `DEMANDE-RELECTURE-2026-10-23-version-1.216.2.md`.
-- Termine par le geste à vérifier à l'écran de ton rapport de 18 h, et par ce que Grégoire fera ensuite (l'Artefact 5 sur G4H, le codex à jour, les deux réparations de console après lecture des mesures, la copie de 17 h 11 réévaluée).
+Termine par le geste à vérifier à l'écran de ton rapport de 18 h, puis par ce que Grégoire fera dans Chrome : mettre l'Artefact 5 sur G4H ; mettre son codex à jour ; lire les deux mesures de console sans paramètre et les montrer à Cowork avant de lancer les réparations ; réévaluer la copie de 17 h 11.

@@ -1,14 +1,14 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
-> ↻ **ÉTAT MESURÉ par Claude Code le 23 octobre 2026, 16 h 15 (Toronto) : `1.216.1` EN LIGNE** (build `1023-1402`) — Netlify
-> `6adbbfed`, `commit_ref` `aaaa80b5`, `state: ready`, publié à 20:13:48 Z (16 h 13). Verdict Playwright complet vert sur
-> `aaaa80b5` (code 0, 0 échec connu, 3 instables verts au second essai : #1142 stock, #916, sous-critères condensés ; 0 veille,
-> éveil complet tenu, sur batterie). La 1.216 porte l'étape 2b du critère algorithmique (la palette), #1142 (le compte d'erreurs
-> d'une copie qui s'écrivait dans une autre) et #1144 (la cartouche qui remplaçait les critères de la grille). La 1.216.0 n'a jamais
-> été servie. Poussé par `git push` sur le port 443. **Stocks** : `ComptesErreurs.verifier()` et `CartouchesDecalees.verifier()`
-> attendent que Grégoire lance la mesure dans Chrome et montre les listes à Cowork ; aucune réparation avant. **Ouverts** : la
-> source de #1144 (issue 2), #1140, #1141, #1093 (`ci/verdict-morceaux`, à Grégoire). **MANDAT COURANT** : la prochaine consigne
-> de Cowork, selon `plans de travail/CONSIGNE-DU-JOUR.md`.
+> ↻ **ÉTAT MESURÉ par Claude Code le 23 octobre 2026, 19 h 47 (Toronto) : `1.216.2` EN LIGNE** (build `1023-1818`) — Netlify
+> `6adbf197`, `commit_ref` `dbd4a79d`, `state: ready`, publié à 23:45:40 Z (19 h 45). Verdict Playwright complet vert sur
+> `dbd4a79d` (code 0, 0 échec connu, aucun instable ; 0 veille, éveil complet tenu, sur batterie). La 1.216.2 porte #1145
+> (« Évaluer » qui rejouait un instantané d'auto-sauvegarde) et l'issue « ranger sous X » de `CartouchesDecalees.verifier()`.
+> Poussé par `git push` sur le port 443. **Stocks** : `ComptesErreurs.verifier()` et `CartouchesDecalees.verifier()` attendent
+> que Grégoire mette l'Artefact 5 sur G4H, mette son codex à jour, lance les mesures dans Chrome et montre les listes à Cowork ;
+> aucune réparation avant. #1145 : une évaluation, que Grégoire réévalue. **Ouverts** : la source de #1144 (issue 2), #1140,
+> #1141, #1093 (`ci/verdict-morceaux`, à Grégoire). **MANDAT COURANT** : la prochaine consigne de Cowork, selon
+> `plans de travail/CONSIGNE-DU-JOUR.md`.
 >
 > ↻ **ÉTAT MESURÉ par Claude Code le 22 octobre 2026, 20 h 25 (Toronto) : `1.215.0` EN LIGNE** (build `1022-1833`) — Netlify
 > `6adaa934`, `commit_ref` `628a7657`, `state: ready`, publié à 00:24:35 Z le 23 (20 h 24). Verdict Playwright complet vert sur
