@@ -1795,7 +1795,26 @@ function _debouncerAutoSave() {
     // Lot C — l'intégrité voyage DANS l'instantané : l'écriture peut partir après un changement
     // de copie, quand l'écran montre déjà l'élève suivant (#959 le remet à « recevable »).
     window._pendingAutoSaveSnapshot.integrite = _lireIntegriteEcran();
-    window._timerAutoSave = setTimeout(function() { _autoSauvegarderCriteres(window._pendingAutoSaveSnapshot); }, 1500);
+    // #1145 — le minuteur CONSOMME l'instantané : laissé en attente, le prochain flush le rejouait.
+    window._timerAutoSave = setTimeout(function() {
+        const instantane = window._pendingAutoSaveSnapshot;
+        window._pendingAutoSaveSnapshot = null;
+        _autoSauvegarderCriteres(instantane);
+    }, 1500);
+}
+
+/**
+ * #1145 (23 oct. 2026) — ANNULER L'ENREGISTREMENT AUTOMATIQUE EN ATTENTE, C'EST AUSSI JETER SON
+ * INSTANTANÉ. Les annulations (« Enregistrer », « Modifier », `nouvelleEvaluation`) ne vidaient que le
+ * minuteur, et le minuteur lui-même laissait l'instantané derrière lui. `_flusherAutoSave` le rejouait
+ * au chargement d'élève suivant — `basculerMode('evaluer')` → `preRemplirEvaluation`, +150 ms —, des
+ * minutes ou des heures plus tard : la copie qu'il nommait était réécrite avec SES niveaux et sa grille,
+ * et la note, la rétroaction et la cartouche que l'écran portait alors (vécu le 23 oct., 17 h 11 ;
+ * banc `tests/integration/evaluer-reecrit-evaluation-1145.spec.js`). Une seule fonction pour tous.
+ */
+function _annulerAutoSaveEnAttente() {
+    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
+    window._pendingAutoSaveSnapshot = null;
 }
 
 /**
@@ -2254,6 +2273,7 @@ window.demarrerEvaluationDepuisFichier = demarrerEvaluationDepuisFichier;
 // Exposé pour la sentinelle auto-save ↔ verrouillage (Phase 0 A25, juin 2026) :
 // vérifie que l'auto-save ne réécrit JAMAIS une évaluation verrouillée.
 window._autoSauvegarderCriteres = _autoSauvegarderCriteres;
+window._annulerAutoSaveEnAttente = _annulerAutoSaveEnAttente;   // #1145 — evaluation.js, evaluation-sauvegarde.js
 // #882 — les options d'affichage (evaluation.js) arment l'auto-save comme un critère : nom privé de cette IIFE.
 window._debouncerAutoSave = _debouncerAutoSave;
 // Lot C — travaux-annotation.js le lisait par son nom nu, privé à cette IIFE : `typeof` rendait

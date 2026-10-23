@@ -388,8 +388,7 @@ function _postSauvegardeSauv(evaluation, groupeCoursActif) {
 
 function sauvegarderEvaluation() {
     // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
-    if (window._timerAutoSave) { clearTimeout(window._timerAutoSave); window._timerAutoSave = null; }
-    window._pendingAutoSaveSnapshot = null;
+    window._annulerAutoSaveEnAttente();   // #1145 — l'instantané part avec le minuteur
 
     // 🔄 Détecter si on est en mode modification d'une évaluation existante
     if (window.evaluationEnCours?.idModification) {

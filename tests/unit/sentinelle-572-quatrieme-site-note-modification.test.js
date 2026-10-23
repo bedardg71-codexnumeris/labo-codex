@@ -68,7 +68,8 @@ function monter({ affichageNote, noteCalculee }) {
         sauvegarderEvaluation() { throw new Error('chemin de CRÉATION pris — le test vise la MODIFICATION'); },
         majBadgesApresEvaluation() {},
         // #652 — posée par evaluation-chargement.js, que ce banc ne charge pas ; l'évaluation n'a aucun critère.
-        criteresHorsGrille: () => []
+        criteresHorsGrille: () => [],
+        _annulerAutoSaveEnAttente() {}   // #1145 — même origine
     };
     chargerScript('js/evaluation.js', {
         document,
