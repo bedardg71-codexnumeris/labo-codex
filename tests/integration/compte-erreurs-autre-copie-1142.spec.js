@@ -74,7 +74,8 @@ async function monter(page, { verrouillee, volumineuse, enregistreB = 11 }) {
                 { critereId: 'c2', critereNom: 'Français écrit', niveauSelectionne: niv, ponderation: 20, retroaction: 'PHRASE ' + nb }
             ],
             donneesAlgorithmiques: { c2: { erreurs: nb, mots: 600, noteCalculee: 0, pourcentage: pct, niveau: niv, retroaction: 'PHRASE ' + nb } },
-            retroactionFinale: '', retroactionReecrite: false
+            retroactionFinale: '', retroactionReecrite: false,
+            pointsAnalytiques: {}, optionsAffichage: { description: true, objectif: false, tache: false, adresse: false, contexte: false, affichageNote: 'complet' }
         });
         const evals = [evaluation('EVA1142', 'TESTA1142', 1, 95, 'E'), evaluation('EVB1142', 'TESTB1142', enregistreB, 45, 'I')];
         if (volumineuse) {
@@ -180,44 +181,69 @@ test('#1142 · (2) le geste de Grégoire, base au-delà de 25 Ki : déverrouille
     expect(sansBruit(erreurs)).toEqual([]);
 });
 
-test('#1142 · le pivot et la base ne partagent aucun objet : ni à l\'ouverture, ni après le verrouillage', async ({ page }) => {
+/**
+ * Verdict de Cowork (23 oct., 9 h 32) — L'INVARIANT POUR TOUTE L'ÉVALUATION. Le défaut est d'une classe : tout
+ * objet de la base que le pivot tient par référence peut être réécrit en place. Le témoin parcourt TOUS les objets
+ * imbriqués de l'évaluation enregistrée (`criteres` et ses entrées, `optionsAffichage`, `donneesAlgorithmiques`…)
+ * et des deux pivots, et rend le chemin de chaque objet partagé : « pivot.x ↔ base.y ».
+ */
+const TEMOIN_PARTAGES = `(T) => {
+    const e = window.db.getSync(T + '_evaluationsSauvegardees', []).find(x => x.id === 'EVA1142');
+    if (!e) return null;
+    const base = new Map();
+    const parcourirBase = (o, chemin) => {
+        if (!o || typeof o !== 'object' || base.has(o)) return;
+        base.set(o, chemin);
+        Object.keys(o).forEach(k => parcourirBase(o[k], chemin + '.' + k));
+    };
+    parcourirBase(e, 'base');
+    const partages = [];
+    const vus = new Set();
+    const parcourirPivot = (o, chemin) => {
+        if (!o || typeof o !== 'object' || vus.has(o)) return;
+        vus.add(o);
+        if (base.has(o)) { partages.push(chemin + ' ↔ ' + base.get(o)); return; }
+        Object.keys(o).forEach(k => parcourirPivot(o[k], chemin + '.' + k));
+    };
+    parcourirPivot(window.evaluationEnCours, 'window.evaluationEnCours');
+    parcourirPivot(evaluationEnCours, 'evaluationEnCours');   // eslint-disable-line no-undef
+    return { partages, objetsEnBase: base.size, cacheMemoire: window.db.memoryCache.has(T + '_evaluationsSauvegardees') };
+}`;
+
+test('#1142 · le pivot et la base ne partagent aucun objet, à aucune profondeur : ni à l\'ouverture, ni après le verrouillage', async ({ page }) => {
     await monter(page, { verrouillee: true, volumineuse: true });
-    const partage = () => page.evaluate((T) => {
-        const e = window.db.getSync(T + '_evaluationsSauvegardees', []).find(x => x.id === 'EVA1142');
-        const pivots = [window.evaluationEnCours, evaluationEnCours].filter(Boolean);   // eslint-disable-line no-undef
-        return {
-            cacheMemoire: window.db.memoryCache.has(T + '_evaluationsSauvegardees'),
-            algo: pivots.some(p => p.donneesAlgorithmiques === e.donneesAlgorithmiques),
-            points: pivots.some(p => p.pointsAnalytiques === e.pointsAnalytiques)
-        };
-    }, T);
+    await page.evaluate('window.__temoin1142 = ' + TEMOIN_PARTAGES);
     // À l'ouverture : `verifierEtChargerEvaluationExistante` d'abord (l'alias de lecture), avant « Modifier ».
     await page.evaluate(() => window.naviguerVers('evaluations', 'annoter'));
     await page.waitForFunction(() => !!document.querySelector('#evaluations-contenu-fichiers [data-fichier-id="FTA1142"]'), null, { timeout: 10000 });
     await page.evaluate(() => window.travauxUI.ouvrirFichier('FTA1142'));
     await page.waitForFunction(() => (window.travauxVisionneuse.getFichierActuel() || {}).id === 'FTA1142', null, { timeout: 10000 });
     await page.waitForTimeout(800);
-    await page.evaluate(() => {
-        window.__partages1142 = [];
-        const T = 't1142';
-        const espion = () => {
-            const e = window.db.getSync(T + '_evaluationsSauvegardees', []).find(x => x.id === 'EVA1142');
+    await page.evaluate((T) => {
+        window.__ouverture1142 = { releves: 0, partages: [] };
+        window.__espion1142 = setInterval(() => {
             const p = window.evaluationEnCours;
-            if (e && p && p.etudiantDA === 'TESTA1142') window.__partages1142.push(p.donneesAlgorithmiques === e.donneesAlgorithmiques || p.pointsAnalytiques === e.pointsAnalytiques);
-        };
-        window.__espion1142 = setInterval(espion, 10);
-    });
+            if (!p || p.etudiantDA !== 'TESTA1142') return;
+            const r = window.__temoin1142(T);
+            if (!r) return;
+            window.__ouverture1142.releves++;
+            r.partages.forEach(c => { if (!window.__ouverture1142.partages.includes(c)) window.__ouverture1142.partages.push(c); });
+        }, 10);
+    }, T);
     await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
     await attendreCopie(page, 'TESTA1142');
-    const ouverture = await page.evaluate(() => { clearInterval(window.__espion1142); return window.__partages1142; });
-    await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());
+    const ouverture = await page.evaluate(() => { clearInterval(window.__espion1142); return window.__ouverture1142; });
+    await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());   // déverrouiller
     await page.waitForTimeout(500);
-    await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());
+    await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());   // reverrouiller
     await page.waitForTimeout(1500);
-    const apresVerrou = await partage();
-    expect.soft(ouverture.length, 'l\'espion a observé l\'ouverture').toBeGreaterThan(0);
-    expect.soft(ouverture.filter(Boolean).length, 'aucun instant de l\'ouverture où le pivot est l\'objet de la base').toBe(0);
-    expect(apresVerrou).toEqual({ cacheMemoire: true, algo: false, points: false });
+    const apresVerrou = await page.evaluate((T) => window.__temoin1142(T), T);
+    expect.soft(ouverture.releves, 'l\'espion a observé l\'ouverture').toBeGreaterThan(0);
+    expect.soft(ouverture.partages, 'aucun objet partagé à l\'ouverture').toEqual([]);
+    expect.soft(apresVerrou.cacheMemoire, 'la base vit dans le cache mémoire (la forme de toute vraie base)').toBe(true);
+    // Témoin de profondeur : `criteres` et ses deux entrées, `optionsAffichage`, `donneesAlgorithmiques` et `.c2`, `pointsAnalytiques`…
+    expect.soft(apresVerrou.objetsEnBase, 'le témoin parcourt bien les objets imbriqués').toBeGreaterThanOrEqual(8);
+    expect(apresVerrou.partages, 'aucun objet partagé après le verrouillage').toEqual([]);
 });
 
 test('#1142 · non-régression : la copie ouverte reçoit SON compte, même si son évaluation enregistrée en porte un autre', async ({ page }) => {
