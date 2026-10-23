@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 22 OCTOBRE 2026, 20 H 24 : LA 1.215.0 EST EN LIGNE** (tes Nouvelles validées mot pour mot à 18 h 31). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- critère algorithmique : tu nommes ce que tu comptes et ce à quoi tu le rapportes, au singulier et au pluriel ; ces noms passent dans l'évaluation, la phrase de l'élève et son PDF ; un critère créé avant garde « erreur » et « mot » ;
+- la phrase de l'élève s'accorde avec n'importe quel nom : « 5 erreurs (3,5 après pondération) sur 400 mots » ; le bilan dit « (3 erreurs) » plutôt que « (3 erreurs annotées) ».
+
+**Vérifié comment** : verdict complet du navigateur vert sur le commit poussé (aucun échec, aucune spec instable, Mac tenu éveillé), puis la mise en ligne constatée chez Netlify sur ce commit.
+
 📝 **LE 22 OCTOBRE 2026, 16 H 30 : LA 1.214.0 EST EN LIGNE** (tes textes validés à 13 h 05, la sixième ligne des Nouvelles resserrée à 13 h 17). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :
