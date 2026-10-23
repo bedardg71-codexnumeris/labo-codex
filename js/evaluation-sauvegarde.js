@@ -268,8 +268,9 @@ function _construireObjetEvaluationSauv(ctx) {
         heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
         criteres: criteres,
         optionsAffichage: _lireOptionsAffichageSauv(),
-        donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {},
-        pointsAnalytiques: evaluationEnCours.pointsAnalytiques || {},   // lot 2 — les points, sous leur nom
+        // #1142 — des copies : le pivot et la base ne partagent aucun objet (voir `sauvegarderEvaluationModifiee`).
+        donneesAlgorithmiques: JSON.parse(JSON.stringify(evaluationEnCours.donneesAlgorithmiques || {})),
+        pointsAnalytiques: JSON.parse(JSON.stringify(evaluationEnCours.pointsAnalytiques || {})),   // lot 2 — les points, sous leur nom
         verrouillee: true
     }, _lireChampsDOMSauv());
 }

@@ -678,13 +678,16 @@ function verifierEtChargerEvaluationExistante() {
             evaluationExistante.criteres.forEach(c => {
                 window.evaluationEnCours.criteres[c.critereId] = c.niveauSelectionne;
             });
-            window.evaluationEnCours.pointsAnalytiques = evaluationExistante.pointsAnalytiques || {};   // lot 2
+            // #1142 — des COPIES, jamais les objets de la base : au-delà de 25 Ki, `db.getSync` rend ceux du
+            // cache mémoire, et le calcul qui écrit dans le pivot réécrivait l'évaluation enregistrée en place,
+            // verrou compris (« le pivot et la base ne partagent aucun objet »).
+            window.evaluationEnCours.pointsAnalytiques = JSON.parse(JSON.stringify(evaluationExistante.pointsAnalytiques || {}));   // lot 2
 
             // Restaurer les données algorithmiques (français écrit)
             if (evaluationExistante.donneesAlgorithmiques && Object.keys(evaluationExistante.donneesAlgorithmiques).length > 0) {
 
                 // Sauvegarder dans evaluationEnCours
-                window.evaluationEnCours.donneesAlgorithmiques = evaluationExistante.donneesAlgorithmiques;
+                window.evaluationEnCours.donneesAlgorithmiques = JSON.parse(JSON.stringify(evaluationExistante.donneesAlgorithmiques));   // #1142
 
                 Object.keys(evaluationExistante.donneesAlgorithmiques).forEach(critereId => {
                     const donnees = evaluationExistante.donneesAlgorithmiques[critereId];
@@ -1955,8 +1958,12 @@ function sauvegarderEvaluationModifiee() {
             grilleNom: grille ? grille.nom : '',
             criteres: criteres.concat(window.criteresHorsGrille(evaluations[indexEval], grille)),   // #652 — conservés
             optionsAffichage: _lireOptionsAffichageMod(),
-            donneesAlgorithmiques: evaluationEnCours.donneesAlgorithmiques || {},
-            pointsAnalytiques: evaluationEnCours.pointsAnalytiques || {},   // lot 2
+            // #1142 (23 oct. 2026) — des COPIES. L'objet même du pivot rangé dans la base (le cache mémoire
+            // de `db` au-delà de 25 Ki) : le calcul suivant — celui que la copie SUIVANTE déclenche à la
+            // bascule — réécrivait cette évaluation verrouillée en place, sans « Enregistrer », sans verrou,
+            // sans toucher la phrase ni la note. Mesuré au banc `compte-erreurs-autre-copie-1142`.
+            donneesAlgorithmiques: JSON.parse(JSON.stringify(evaluationEnCours.donneesAlgorithmiques || {})),
+            pointsAnalytiques: JSON.parse(JSON.stringify(evaluationEnCours.pointsAnalytiques || {})),   // lot 2
             verrouillee: true
         },
         _lireChampsDOMMod(maintenant),

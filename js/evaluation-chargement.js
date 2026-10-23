@@ -1983,13 +1983,13 @@ function _majEvaluationExistanteAutoSave(evalExistante, ec, criteres) {
     // et la restauration depuis la DB. Le test explicite préserve les valeurs
     // déjà persistées (nombre d'erreurs, nombre de mots, etc.).
     if (ec.donneesAlgorithmiques && Object.keys(ec.donneesAlgorithmiques).length > 0) {
-        evalExistante.donneesAlgorithmiques = ec.donneesAlgorithmiques;
+        evalExistante.donneesAlgorithmiques = JSON.parse(JSON.stringify(ec.donneesAlgorithmiques));   // #1142 — jamais l'objet du pivot
     }
     // Lot 2 — les points suivent, MÊME VIDÉS : un champ effacé retire son entrée, et la
     // base ne doit pas garder des points que l'écran n'a plus (la suspension de l'auto-save
     // au chargement couvre la fenêtre de course que la garde ci-dessus visait).
     if (ec.pointsAnalytiques && typeof ec.pointsAnalytiques === 'object') {
-        evalExistante.pointsAnalytiques = ec.pointsAnalytiques;
+        evalExistante.pointsAnalytiques = JSON.parse(JSON.stringify(ec.pointsAnalytiques));   // #1142
     }
 }
 
@@ -2045,8 +2045,8 @@ function _construireNouvelleEvaluationAutoSave(ec, grille, criteres) {
         heureEvaluation: maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }),
         criteres: criteres,
         optionsAffichage: _lireOptionsAffichageAutoSave(),
-        donneesAlgorithmiques: ec.donneesAlgorithmiques || {},
-        pointsAnalytiques: ec.pointsAnalytiques || {},   // lot 2
+        donneesAlgorithmiques: JSON.parse(JSON.stringify(ec.donneesAlgorithmiques || {})),   // #1142 — jamais l'objet du pivot
+        pointsAnalytiques: JSON.parse(JSON.stringify(ec.pointsAnalytiques || {})),   // lot 2
         retroactionReecrite: (typeof window.marqueRetroactionAEcrire === 'function') ? window.marqueRetroactionAEcrire(ec) === true : false,   // #961 — copie neuve : jamais « à demander »
         verrouillee: false
     }, champsDOM);

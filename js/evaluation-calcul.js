@@ -41,7 +41,8 @@
        window.calculerNoteAlgorithmiqueSimple et window.calculerNoteAlgorithmique
        AvecCategories — PAS calculerNoteAlgorithmique sans suffixe. Donc cette
        fonction est apparemment dead code (préservation Cat-B post-merge).
-     · _projectionEUF : helper interne, DEUX appelants au sein du même IIFE.
+     · _projectionEUF : helper interne, DEUX appelants au sein du même IIFE (le mode catégories,
+       et `phraseDecompteAlgo` — mode simple et réparation du stock, #1142).
 
    Patches §5.6 appliqués DANS ce sous-module :
      · 3 sites `genererRetroaction(1)` → `window.genererRetroaction(1)` aux
@@ -178,7 +179,7 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
  * @param {number} mots - nombre de mots du texte
  * @returns {string} le fragment à concaténer, ou '' si rien à conclure
  */
-function _projectionEUF(critereId, erreurs, mots) {
+function _projectionEUF(critereId, erreurs, mots, critere) {
     if (!window.projectionAlgo) {
         // Ne pas deviner un texte de remplacement : un module absent est un
         // défaut de chargement, pas un cas d'usage. Mieux vaut aucune projection
@@ -186,10 +187,26 @@ function _projectionEUF(critereId, erreurs, mots) {
         console.warn('[_projectionEUF] registre de projection absent', critereId);
         return '';
     }
+    // #1142 — `critere` : le critère de grille déjà résolu (la réparation du stock n'a pas d'évaluation ouverte).
     var resultat = window.projectionAlgo.calculer(
-        _critereDeGrille(critereId), { erreurs: erreurs, mots: mots }
+        critere || _critereDeGrille(critereId), { erreurs: erreurs, mots: mots }
     );
     return resultat.applicable ? ' ' + resultat.texte : '';
+}
+
+/**
+ * #1142 — LA PHRASE DU CRITÈRE ALGORITHMIQUE EN MODE SIMPLE : le décompte du gabarit, puis la
+ * projection EUF. Une seule construction pour le calcul à l'écran et pour la réparation du stock
+ * (`comptes-erreurs-stock.js`) : la phrase réparée est celle que l'écran aurait écrite.
+ * @param {Object} critereEnonces - le critère dont les énoncés se lisent (#686)
+ * @param {Object} critereGrille - le critère de grille, qui porte la projection
+ */
+function phraseDecompteAlgo(critereEnonces, critereGrille, erreurs, erreursFormule, mots) {
+    // #581 — la phrase est celle que le gabarit de la grille porte, et elle ne nomme aucune
+    // discipline que son auteur·e n'a pas écrite.
+    return window.enoncesAlgo.enonce(critereEnonces, 'decompte',
+        { erreurs: erreurs, mots: mots, points: window.enoncesAlgo.mentionPonderee(erreurs, erreursFormule) })   // #686
+        + _projectionEUF(critereGrille && critereGrille.id, erreurs, mots, critereGrille);   // puis la projection EUF
 }
 
 /**
@@ -235,6 +252,36 @@ function _panneauAppartientALEvaluation(critereId) {
         }
     }
     return true;
+}
+
+/**
+ * #1142 (23 oct. 2026) — LA COPIE ANNOTÉE EST-ELLE CELLE DE L'ÉVALUATION EN COURS ?
+ *
+ * Le jumeau de la garde #671, du côté des ANNOTATIONS : #671 refuse un calcul quand le PANNEAU
+ * porte encore l'élève précédent ; ici, ce sont les annotations de la copie SUIVANTE qui arrivent
+ * pendant que l'évaluation en cours est encore la précédente (`activerAnnotation`, travaux-ui.js,
+ * avant `basculerMode`). Leur total partait dans l'évaluation précédente. Comme #671, une IDENTITÉ
+ * comparée, aucune horloge : l'élève (et la production, quand les deux la portent) du fichier
+ * annoté, contre les DEUX pivots — le nom nu que le calcul écrit, et `window`, que les chargeurs
+ * posent (deux objets distincts, cf. `etatVivantEvaluationEnCours`).
+ * Aucune évaluation ouverte (Annoter seul) : rien à contaminer, vrai. Fichier introuvable : faux.
+ *
+ * @param {string} fichierId - le fichier dont viennent les annotations
+ * @returns {boolean}
+ */
+function copieEstCelleDeLEvaluationEnCours(fichierId) {
+    const nu = (typeof evaluationEnCours !== 'undefined') ? evaluationEnCours : null;
+    const pivots = [window.evaluationEnCours, nu].filter(p => p && p.etudiantDA);
+    if (pivots.length === 0) return true;
+    const ts = window.travauxStockage;
+    const fichier = (fichierId && ts && typeof ts.obtenirFichierParId === 'function') ? ts.obtenirFichierParId(fichierId) : null;
+    if (!fichier || !fichier.etudiantDA) return false;
+    let production = fichier.productionId || '';
+    if (!production && window.travauxResolution && typeof window.travauxResolution.trouverProductionPourFichier === 'function') {
+        production = window.travauxResolution.trouverProductionPourFichier(fichier) || '';
+    }
+    return pivots.every(p => String(p.etudiantDA) === String(fichier.etudiantDA)
+        && (!p.productionId || !production || p.productionId === production));
 }
 
 /**
@@ -874,19 +921,8 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     if (nivAlgoEl) nivAlgoEl.textContent = niveauIDME || '--';
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
-    // Construire la rétroaction générique simple
-    // #581 — même registre que le mode catégories ci-dessus : la phrase est
-    // celle que le gabarit de la grille porte, et elle ne nomme aucune
-    // discipline que son auteur·e n'a pas écrite.
-    let retroactionGenerique = window.enoncesAlgo.enonce(
-        _critereEnoncesPour(critereId), 'decompte',
-        { erreurs: erreurs, mots: mots, points: window.enoncesAlgo.mentionPonderee(erreurs, erreursFormule) });   // #686
-
-    // Ajouter la rétroaction EUF (Épreuve Uniforme de Français)
-    const retroactionEUF = _projectionEUF(critereId, erreurs, mots);
-    if (retroactionEUF) {
-        retroactionGenerique += retroactionEUF;
-    }
+    // Construire la rétroaction générique simple (#581, #686, EUF) — `phraseDecompteAlgo`.
+    const retroactionGenerique = phraseDecompteAlgo(_critereEnoncesPour(critereId), _critereDeGrille(critereId), erreurs, erreursFormule, mots);
 
     // #672 — `textContent`, PAS `.value`. `comm_<critereId>` est un `<div>`
     // (evaluation-chargement.js:1028 et :1194, les deux chemins de rendu) : `.value`
@@ -1808,6 +1844,8 @@ window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCa
 window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
 window.poserErreursDuChamp = poserErreursDuChamp;       // 21 oct. 2026 — Annoter, le chargement, le vidage
 window.erreursPourLaFormule = erreursPourLaFormule;
+window.copieEstCelleDeLEvaluationEnCours = copieEstCelleDeLEvaluationEnCours;   // #1142 — lue par travaux-outils.js (le compte des codes)
+window.phraseDecompteAlgo = phraseDecompteAlgo;   // #1142 — lue par la réparation du stock
 
 // Promotions §5.6 nouvelles (session B) :
 window.calculerNote = calculerNote;

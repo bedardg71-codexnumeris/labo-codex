@@ -4711,6 +4711,7 @@ window.Codex = {
     actionEnregistrerSous: actionEnregistrerSous,
     ecrireAPartAvantSuppression: ecrireCodexAPartAvantSuppression,   // #1007
     proposerAvantSuppression: proposerCodexAvantSuppression,         // #1007, second lot
+    estAJour: function() { return !!(_etat.actif && !_etat.modificationsDepuis); },   // #1142 — la réparation du stock l'exige
     messageDeLaProposition: messageDeLaProposition,
     actionNouveau: actionNouveau,
     actionDetails: actionDetails,

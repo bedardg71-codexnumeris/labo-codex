@@ -36,6 +36,9 @@ const MONTER = `(poidsPonctuation) => {
     db.setSync(k('modalitesEvaluation'), { activerCategorisationErreurs: false });
     // security-ok: fixture littérale du spec, aucune source externe.
     db.setSync(k('productions'), [{ id: 'P_ALGO', titre: 'Dissertation fictive', grilleId: 'G_ALGO', echelleId: 'ECH_F', cartoucheId: 'CART_F' }]);
+    // #1142 — la copie annotée existe : le compte des codes n'entre que dans l'évaluation de SA copie.
+    // security-ok: fixture littérale du spec, aucune source externe.
+    db.setSync(k('fichiersTravaux'), [{ id: 'F_ALGO', etudiantDA: 'DA-F', productionId: 'P_ALGO', nomFichier: 'FICTIF.png', typeMIME: 'image/png' }]);
     evaluationEnCours = { etudiantDA: 'DA-F', productionId: 'P_ALGO', grilleId: 'G_ALGO', echelleId: 'ECH_F', cartoucheId: 'CART_F',
         criteres: {}, donneesAlgorithmiques: {}, statutRemise: 'evalue' };
     document.getElementById('selectEchelle1').innerHTML = '<option value="ECH_F">Échelle fictive</option>';
