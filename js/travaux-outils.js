@@ -2474,7 +2474,15 @@
     function compterErreursFrancais() {
         const compteurs = {};
         _codesCourants().forEach(t => { compteurs[t.id] = 0; });
-        const annotation = travauxAnnotation.getAnnotationCourante();
+        return Object.assign(compteurs, compterCodesAnnotation(travauxAnnotation.getAnnotationCourante()));
+    }
+
+    /**
+     * Les codes `errfr_*` posés sur UNE annotation, par code. Pure : la mesure du stock (#1142,
+     * `comptes-erreurs-stock.js`) compte les codes de chaque copie par la même règle que l'écran.
+     */
+    function compterCodesAnnotation(annotation) {
+        const compteurs = {};
         if (!annotation || !annotation.pages) return compteurs;
         for (const pageKey of Object.keys(annotation.pages)) {
             const page = annotation.pages[pageKey];
@@ -2549,6 +2557,13 @@
         if (!inputErreurs) return;
         const annotation = travauxAnnotation.getAnnotationCourante();
         const fichierId = (annotation && annotation.fichierId) || '';
+        // #1142 (23 oct. 2026) — LE COMPTE D'UNE COPIE NE VA QU'À L'ÉVALUATION DE CETTE COPIE. Au passage
+        // à la copie suivante, `activerAnnotation` charge SES annotations et appelle cette fonction pendant
+        // que l'évaluation en cours est encore la PRÉCÉDENTE : le champ, partagé (#671), recevait le total
+        // de la suivante, et l'`input` l'écrivait dans l'évaluation de la précédente (mesuré : 21 copies sur
+        // 24 de l'Artefact 4). Pendant la bascule, rien ne s'écrit ; le compteur relancé après le chargement
+        // (`afficherPalettesEval`, +2 s) pose le compte quand l'évaluation est la bonne.
+        if (typeof window.copieEstCelleDeLEvaluationEnCours === 'function' && !window.copieEstCelleDeLEvaluationEnCours(fichierId)) return;
         // 21 oct. 2026 : le champ reçoit le nombre BRUT, et la somme pondérée qui lui revient
         // (`poserErreursDuChamp`, evaluation-calcul.js) — c'est elle que la formule reçoit.
         const poser = (n, pondere) => {
@@ -4046,6 +4061,7 @@
         // Compteurs erreurs
         compterErreursFrancais: compterErreursFrancais,
         mettreAJourCompteursErreurs: mettreAJourCompteursErreurs,
+        compterCodesAnnotation: compterCodesAnnotation,   // #1142 — la mesure du stock
         sommePondereeErreurs: sommePondereeErreurs,   // 21 oct. 2026 — exposée pour les bancs
         totalCodesEnMots: _totalCodesEnMots,          // étape 2a (22 oct.) — exposée pour les bancs
         // Retroactions personnalisées

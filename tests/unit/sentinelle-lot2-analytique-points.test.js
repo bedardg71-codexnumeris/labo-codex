@@ -328,7 +328,8 @@ function tousLesJs(dossier) {
 
 describe('lot 2 · E — les points vivent sous leur nom, partout où `donneesAlgorithmiques` voyage', () => {
     it('E.a chaque objet d\'évaluation qui emporte `donneesAlgorithmiques` emporte `pointsAnalytiques` à côté (périmètre déduit de js/)', () => {
-        const ECRIT_ALGO = /\bdonneesAlgorithmiques:\s*(evaluationEnCours|ec)\.donneesAlgorithmiques \|\| \{\}/;
+        // #1142 (23 oct. 2026) : la forme COPIÉE aussi — le pivot et la base ne partagent plus aucun objet.
+        const ECRIT_ALGO = /\bdonneesAlgorithmiques:\s*(JSON\.parse\(JSON\.stringify\()?(evaluationEnCours|ec)\.donneesAlgorithmiques \|\| \{\}/;
         const trouves = []; const orphelins = [];
         for (const f of tousLesJs(path.join(racine, 'js'))) {
             if (f.includes('pack-demo')) continue;
