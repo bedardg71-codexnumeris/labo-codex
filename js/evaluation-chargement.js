@@ -1117,6 +1117,8 @@ function cartoucheSelectionnee() {
     // jamais par nom : une correspondance par nom masquerait le prochain décalage.
     const html = (grille.criteres || []).map(critereGrille => {
         const critere = critereGrille;
+        // Une pondération non numérique (null) s'affiche « (null %) », comme avant #1144 : un seul
+        // critère connu chez Grégoire, dans une grille sans cartouche (relecture du 23 oct., troisième issue).
         const ponderation = critereGrille.ponderation;
         const estAlgorithmique = critereGrille?.type === 'algorithmique';
         const estAnalytique = critereGrille?.type === 'analytique';   // lot 2
