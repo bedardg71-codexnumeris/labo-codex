@@ -180,12 +180,21 @@ for (const [sens, largeur, hauteur] of [['portrait', 820, 1180], ['paysage', 118
             const debord = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
             expect(debord, 'aucun défilement de côté').toBeLessThanOrEqual(0);
 
-            /** Toucher une zone (au clic : voir la note plus bas) ; rend son déplacement à l'écran. */
+            /**
+             * Toucher une zone (au clic : voir la note plus bas) ; rend son déplacement à l'écran.
+             * #1143 (23 oct. 2026) — LE CLIC SE DONNE AUX COORDONNÉES MESURÉES, pas par `locator.click`. Mesuré sur
+             * vingt passages instrumentés : quand le contrôle de stabilité de Playwright tarde, Playwright fait
+             * défiler la zone tout en haut de la fenêtre AVANT le `pointerdown` (+374 px, aucun code de l'application
+             * n'est appelé ; le `pointerdown` arrive sur la page déjà défilée) ; la mesure « après » rendait 0, et
+             * l'essai rougissait une fois sur deux sur le code de l'étape 2b seul. Le doigt ne fait pas défiler la
+             * page avant de toucher : ce geste-ci non plus. Le seuil (2 px) ne bouge pas.
+             */
             const toucher = async (zone) => {
                 const v = vueDe(zone);
                 await v.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-                const avant = (await boite(v)).haut;
-                await v.click({ position: { x: 8, y: 8 } });
+                const b0 = await boite(v);
+                const avant = b0.haut;
+                await page.mouse.click(b0.gauche + 8, b0.haut + 8);
                 const apres = (await boite(v)).haut;
                 console.log(`IPAD ${sens.toUpperCase()} · ZONE TOUCHÉE →`, await zone.getAttribute('data-nom-zone'), 'avant', Math.round(avant), 'après', Math.round(apres));
                 return apres - avant;
