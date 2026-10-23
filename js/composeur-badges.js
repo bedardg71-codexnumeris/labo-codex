@@ -7,7 +7,7 @@
  * `{erreurs}` en clair, et ce texte brut est ce que la grille enregistre, ce que
  * le moteur lit, ce qui voyage. RIEN DE CELA NE CHANGE. Ce module pose, par-dessus
  * chaque `<textarea>`, une VUE éditable qui rend les `{jetons}` de sa palette
- * comme des pastilles (les mêmes que la rangée « Poser : ») et le reste comme du
+ * comme des pastilles (aux couleurs des blocs de la palette) et le reste comme du
  * texte. Le `<textarea>` reste la valeur — caché, il garde ses attributs, ses
  * handlers, son moment d'écriture (en quittant la zone) ; la vue s'y resynchronise.
  * Si la vue ne peut pas se construire, le `<textarea>` se montre et tout marche
@@ -102,11 +102,15 @@ function assembler(segments) {
     }).join('');
 }
 
-/** Le HTML d'une chip — la pastille de la palette, sans `data-action`, non éditable, avec sa croix. */
+/**
+ * Le HTML d'une chip — la pastille de la palette, sans `data-action`, non éditable, avec sa croix.
+ * ↻ Étape 2b (22 oct. 2026) : elle montre le NOM du bloc (`libelle`), plus le nom de code ; le
+ * jeton reste dans `data-jeton`, c'est lui que `lire` rend au texte.
+ */
 function _htmlChip(s, esc) {
     return '<span class="repere-enonce repere-enonce--' + esc(s.famille) + ' composeur-chip" contenteditable="false"'
         + ' data-jeton="' + esc(s.jeton) + '" title="' + esc(s.libelle) + '">'
-        + esc(s.jeton.slice(1, -1))
+        + esc(s.libelle)
         + '<span class="composeur-chip-croix" aria-hidden="true" title="Retirer ce badge">×</span></span>';
 }
 
@@ -241,6 +245,11 @@ function paletteDe(textarea) {
     return [];
 }
 
+/** La palette que la vue d'une zone reçoit : celle que `nommer` rend (étape 2b), sinon celle des registres. */
+function _paletteMontee(textarea, nommer) {
+    return (typeof nommer === 'function') ? (nommer(textarea) || []) : paletteDe(textarea);
+}
+
 function vueDe(textarea) { return (textarea && textarea._composeurVue) || null; }
 function textareaDe(vue) { return (vue && vue._composeurTextarea) || null; }
 
@@ -359,11 +368,13 @@ function placerCaret(vue, position) {
  * Pose la vue par-dessus un `<textarea>` (qui se cache et garde tout). Rend la vue,
  * ou null si le composeur n'est pas disponible, si la zone n'offre aucune palette, ou
  * si le moteur refuse — le `<textarea>` reste alors visible pour cette zone.
+ * `nommer` (étape 2b) : `function(textarea)` qui rend la palette de la zone, nommée pour son
+ * critère (`paletteAlgo.reperesDeZone`) ; sans lui, celle des registres (`paletteDe`).
  */
-function monter(textarea) {
+function monter(textarea, nommer) {
     if (!textarea || !disponible()) return null;
     if (vueDe(textarea)) return vueDe(textarea);
-    var palette = paletteDe(textarea);
+    var palette = _paletteMontee(textarea, nommer);
     if (!palette.length) return null;
     var d = _document();
     try {
@@ -390,13 +401,13 @@ function monter(textarea) {
     }
 }
 
-/** Pose une vue sur chaque zone à badges d'une racine (les paliers, les énoncés). */
-function monterTout(racine) {
+/** Pose une vue sur chaque zone à badges d'une racine (les paliers, les énoncés). `nommer` : voir `monter`. */
+function monterTout(racine, nommer) {
     var r = racine || _document();
     if (!r || typeof r.querySelectorAll !== 'function' || !disponible()) return 0;
     var zones = r.querySelectorAll('textarea[data-palier-index], textarea[data-enonce-cle]');
     var n = 0;
-    for (var i = 0; i < zones.length; i++) if (monter(zones[i])) n++;
+    for (var i = 0; i < zones.length; i++) if (monter(zones[i], nommer)) n++;
     return n;
 }
 

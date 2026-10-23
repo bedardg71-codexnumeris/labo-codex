@@ -40,7 +40,8 @@ const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo-cart
 const cliquerDom = (locator) => locator.evaluate((el) => el.click());
 const palier = (page, i) => page.locator('#listeCriteres .palier-projection').nth(i);
 const zone = (page, i, champ) => palier(page, i).locator(`textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
-const badge = (page, i, jeton) => palier(page, i).locator(`[data-action="insererRepereEnonce"][data-jeton="${jeton}"]`);
+// ↻ Étape 2b (22 oct. 2026) : plus de palette par palier — LA palette du critère vise la zone où est le curseur.
+const badge = (page, jeton) => page.locator(`#listeCriteres .palette-algo [data-action="insererRepereEnonce"][data-jeton="${jeton}"]`);
 const paliersEnBase = (page) => page.evaluate(async () =>
     ((await db.get(cle('grillesTemplates'))) || []).find((g) => g.id === 'G1').criteres[0].paliersProjection);
 /** La frappe telle que le navigateur la livre : la valeur, puis `change`. */
@@ -90,20 +91,23 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     await cliquerDom(carte(page, 'projection').locator('.accordeon-header'));
     await expect(carte(page, 'projection')).not.toHaveClass(/ferme/);
 
-    // 2 — six paliers, une palette par palier, les huit badges dans l'ordre arrêté, sans accolades.
+    // 2 — six paliers, aucune palette de palier ; la zone du palier 5 visée, la palette du critère active
+    //     ses huit blocs dans l'ordre arrêté, nommés en mots (↻ 2b, 22 oct. 2026).
     await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(6);
-    await expect(page.locator('#listeCriteres .reperes-palier')).toHaveCount(6);
-    const offerts = await palier(page, 4).locator('[data-action="insererRepereEnonce"]').evaluateAll((els) => ({
+    await expect(page.locator('#listeCriteres .palier-projection [data-action="insererRepereEnonce"]')).toHaveCount(0);
+    await focusEnFin(zone(page, 4, 'texte'));
+    const offerts = await page.locator('#listeCriteres .palette-algo .palette-algo-bloc:not([aria-disabled="true"])').evaluateAll((els) => ({
         jetons: els.map((b) => b.dataset.jeton),
-        textes: els.map((b) => b.textContent.trim()),
-        familles: els.map((b) => (b.classList.contains('repere-enonce--posee') ? 'posee' : (b.classList.contains('repere-enonce--remplie') ? 'remplie' : '?'))),
+        noms: els.map((b) => b.querySelector('.palette-algo-bloc-nom').textContent.trim()),
+        familles: els.map((b) => (b.classList.contains('palette-algo-bloc--posee') ? 'posee' : (b.classList.contains('palette-algo-bloc--remplie') ? 'remplie' : '?'))),
         visibles: els.every((b) => b.offsetParent !== null)
     }));
-    console.log('PALETTE DU PALIER 5 →', JSON.stringify(offerts));
+    console.log('PALETTE VISANT LE PALIER 5 →', JSON.stringify(offerts));
     expect(offerts.jetons).toEqual(['{service}', '{seuil}', '{longueur}', '{erreurs}', '{mots}', '{moyenne}', '{projection}', '{palier}']);
-    expect(offerts.textes).toEqual(['service', 'seuil', 'longueur', 'erreurs', 'mots', 'moyenne', 'projection', 'palier']);
+    expect(offerts.noms).toEqual(['Nom du service', 'Erreurs tolérées', 'Longueur de référence', 'Compte des erreurs', 'Compte des mots', 'Mots par erreur', 'Erreurs projetées', 'Palier atteint']);
     expect(offerts.familles).toEqual(['posee', 'posee', 'posee', 'remplie', 'remplie', 'remplie', 'remplie', 'remplie']);
-    expect(offerts.visibles, 'les badges sont à l\'écran').toBe(true);
+    expect(offerts.visibles, 'les blocs sont à l\'écran').toBe(true);
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-cible')).toHaveText('Dans : « Verdict, palier 5 »');
     await expect(page.locator('#listeCriteres .palier-note-service')).toHaveCount(0);
     await expect(page.locator('#listeCriteres .palier-note-composer')).toHaveCount(1);
 
@@ -115,7 +119,7 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     await expect(texte).toHaveValue(verdictDHier);
     await focusEnFin(texte);
     await page.keyboard.type(' Bilan :');
-    await cliquerSouris(badge(page, 4, '{projection}'));
+    await cliquerSouris(badge(page, '{projection}'));
     await expect(texte).toHaveValue(verdictDHier + ' Bilan : {projection}');
     const apresClic = await page.evaluate(() => {
         const t = document.querySelector('#listeCriteres textarea[data-palier-index="4"][data-champ="texte"]');
@@ -130,14 +134,14 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     await expect.poll(async () => (await paliersEnBase(page))[4].texte).toBe(verdictDHier + ' Bilan : {projection}');
 
     // 4 — second badge, par l'événement DOM : la zone est toujours celle où est le curseur.
-    await cliquerDom(badge(page, 4, '{longueur}'));
+    await cliquerDom(badge(page, '{longueur}'));
     await expect(texte).toHaveValue(verdictDHier + ' Bilan : {projection} {longueur}');
 
     // 5 — la palette sert aussi la recommandation : focus sur l'autre zone du même palier, badge {seuil}.
     const aide = zone(page, 4, 'texteAide');
     await expect(aide).toHaveValue('Il est recommandé de t\'inscrire au {service}.');
     await focusEnFin(aide);
-    await cliquerDom(badge(page, 4, '{seuil}'));
+    await cliquerDom(badge(page, '{seuil}'));
     await expect(aide).toHaveValue('Il est recommandé de t\'inscrire au {service}. {seuil}');
     await expect(texte, 'l\'autre zone n\'a pas bougé').toHaveValue(verdictDHier + ' Bilan : {projection} {longueur}');
     await expect.poll(async () => (await paliersEnBase(page))[4].texteAide).toBe('Il est recommandé de t\'inscrire au {service}. {seuil}');

@@ -14,7 +14,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     d'abord faire sortir la zone (son `change` re-rend tout le gabarit, et
 //     le bouton sous le doigt disparaît avant que le clic arrive). Le premier
 //     lot a été conçu contre ça ; c'est ici que ça se prouve ;
-//   · une zone jamais visitée reçoit le repère à la FIN, pas en tête ;
+//   · ↻ 2b : sans zone visitée, rien ne se pose (avant : à la FIN de la zone du bouton) ;
 //   · le témoin négatif : les textes d'une grille existante s'affichent tels
 //     quels, et le rendu d'un texte composé au clic est celui d'un texte tapé.
 //
@@ -56,8 +56,10 @@ const etatZone = (page, cle) => page.evaluate((c) => {
     const curseur = vue ? window.composeurBadges.curseur(vue) : null;
     return { valeur: t.value, focalisee: !!vue && document.activeElement === vue, curseur: curseur ? curseur.debut : t.selectionStart };
 }, cle);
+// ↻ Étape 2b (22 oct. 2026) : plus de rangée par zone — LA palette du critère vise la zone où est le curseur
+// (`cle` ne sert plus qu'à dire, à la lecture du spec, la zone visée).
 const repere = (page, cle, jeton) =>
-    page.locator(`#listeCriteres .groupe-form:has(textarea[data-enonce-cle="${cle}"]) [data-action="insererRepereEnonce"][data-jeton="${jeton}"]`);
+    page.locator(`#listeCriteres .palette-algo [data-action="insererRepereEnonce"][data-jeton="${jeton}"]`);
 
 async function ouvrir(page, enoncesExistants) {
     await page.goto(indexHtml);
@@ -93,30 +95,40 @@ async function ouvrir(page, enoncesExistants) {
     await expect(page.locator('#listeCriteres textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
 }
 
-test('texte troué · chaque zone offre ses repères ; en création, « Aucune annotation » aussi (#1131)', async ({ page }) => {
+test('texte troué · chaque zone, visée, active ses repères dans la palette ; en création, « Aucune annotation » aussi (#1131)', async ({ page }) => {
     await ouvrir(page);
-    const offerts = await page.evaluate(() =>
-        [...document.querySelectorAll('#listeCriteres .groupe-form:has(textarea[data-enonce-cle])')].map(g => ({
-            cle: g.querySelector('textarea').dataset.enonceCle,
-            reperes: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].map(b => b.dataset.jeton),
-            textes: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].map(b => b.textContent.trim()),
-            visibles: [...g.querySelectorAll('[data-action="insererRepereEnonce"]')].every(b => b.offsetParent !== null),
-            // La palette AVANT l'établi (Grégoire, 3 sept. après-midi) : la rangée
-            // précède la zone, et l'aide suit la zone — c'est le champ qu'elle décrit.
-            rangeeAvantZone: !!(g.querySelector('.reperes-enonce').compareDocumentPosition(g.querySelector('textarea')) & Node.DOCUMENT_POSITION_FOLLOWING),
-            aideApresZone: !!(g.querySelector('textarea').compareDocumentPosition(g.querySelector('small')) & Node.DOCUMENT_POSITION_FOLLOWING)
-        })));
+    // ↻ Étape 2b (22 oct. 2026) : plus aucune rangée « Poser : » ; la zone visée (le focus) règle la palette.
+    await expect(page.locator('#listeCriteres .reperes-enonce')).toHaveCount(0);
+    const offerts = [];
+    for (const cle of ['decompte', 'priorite', 'concentre', 'aucune']) {
+        await caretA(vueDe(page, cle), 0);
+        offerts.push(await page.evaluate((c) => {
+            const t = document.querySelector(`#listeCriteres textarea[data-enonce-cle="${c}"]`);
+            const g = t.closest('.groupe-form');
+            const actifs = [...document.querySelectorAll('#listeCriteres .palette-algo .palette-algo-bloc:not([aria-disabled="true"])')];
+            return {
+                cle: c,
+                reperes: actifs.map((b) => b.dataset.jeton),
+                noms: actifs.map((b) => b.querySelector('.palette-algo-bloc-nom').textContent.trim()),
+                visibles: actifs.every((b) => b.offsetParent !== null),
+                cible: document.querySelector('#listeCriteres .palette-algo .palette-algo-cible').textContent.trim(),
+                etiquette: g.querySelector('label').textContent.trim(),
+                aideApresZone: !!(t.compareDocumentPosition(g.querySelector('small')) & Node.DOCUMENT_POSITION_FOLLOWING)
+            };
+        }, cle));
+    }
     console.log('OFFERTS →', JSON.stringify(offerts));
     const parCle = Object.fromEntries(offerts.map(o => [o.cle, o.reperes]));
     // ↻ Étape 2a (22 oct. 2026) : les deux noms de l'enseignant·e sont offerts au décompte et à « Aucune annotation ».
-    expect(parCle.decompte).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);
-    // Le badge montre le mot sans accolades ; ce qu'il pose les garde.
-    expect(offerts.find(o => o.cle === 'decompte').textes).toEqual(['critere', 'erreurs', 'nomErreurs', 'mots', 'nomMots', 'points']);
+    // L'ordre est celui de la palette : ce qui s'écrit dans la grille, puis ce qui se remplit à la correction.
+    expect(parCle.decompte).toEqual(['{critere}', '{nomErreurs}', '{nomMots}', '{erreurs}', '{mots}', '{points}']);
+    // Le bloc montre un nom en mots ; ce qu'il pose garde ses accolades. Ce critère d'avant lit « erreur / mot ».
+    expect(offerts.find(o => o.cle === 'decompte').noms).toEqual(['Nom du critère', '« erreurs »', '« mots »', 'Compte des erreurs', 'Compte des mots', 'Somme pondérée']);
     expect(parCle.priorite).toEqual(['{critere}']);
     expect(parCle.concentre).toEqual(['{critere}']);
     expect(parCle.aucune, '« Aucune annotation » en création : les repères de la modification').toEqual(['{critere}', '{nomErreurs}']);
-    expect(offerts.every(o => o.visibles), 'les repères sont à l\'écran').toBe(true);
-    expect(offerts.every(o => o.rangeeAvantZone), 'la rangée « Poser » précède la zone').toBe(true);
+    expect(offerts.every(o => o.visibles), 'les blocs actifs sont à l\'écran').toBe(true);
+    expect(offerts.every(o => o.cible === 'Dans : « ' + o.etiquette + ' »'), 'la palette nomme la zone par son étiquette').toBe(true);
     expect(offerts.every(o => o.aideApresZone), 'l\'aide reste attachée au champ, sous lui').toBe(true);
     expect(offerts.flatMap(o => o.reperes)).not.toContain('{s}');
 });
@@ -202,12 +214,18 @@ test('texte troué · un curseur au milieu d\'un mot : le repère se pose à la 
     expect(v).toBe('{critere} Concentre-toi sur {critere}');
 });
 
-test('texte troué · une zone jamais visitée reçoit le repère à la fin, pas en tête', async ({ page }) => {
+test('texte troué · sans zone visitée depuis le rendu, un bloc ne pose rien, et la palette invite à placer le curseur', async ({ page }) => {
+    // ↻ Étape 2b (22 oct. 2026) : avant, le repère allait à la fin de SA zone ; la palette sert toutes les
+    // zones, et sans cible elle ne devine pas laquelle.
     await ouvrir(page);
-    await repere(page, 'concentre', '{critere}').click();
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-cible')).toHaveText('Place le curseur dans un texte : un bloc touché s\'y pose, là où est le curseur.');
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-bloc:not([aria-disabled="true"])')).toHaveCount(0);
+    // `force` : Playwright ne clique pas un élément `aria-disabled` ; un doigt, si — c'est ce qu'on éprouve.
+    await repere(page, 'concentre', '{critere}').click({ force: true });
     const v = await zone(page, 'concentre').inputValue();
-    console.log('JAMAIS VISITÉE →', JSON.stringify(v));
-    expect(v).toBe('Concentre-toi sur {critere} {critere}');
+    console.log('SANS CIBLE →', JSON.stringify(v));
+    expect(v).toBe('Concentre-toi sur {critere}');
+    expect(await page.evaluate(() => (window.tempCriteres[0].enonces || {}).concentre)).toBeUndefined();
 });
 
 test('texte troué · TÉMOIN NÉGATIF — une grille existante affiche ses textes tels quels', async ({ page }) => {

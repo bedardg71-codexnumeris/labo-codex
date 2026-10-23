@@ -156,8 +156,6 @@ const pliAucune = (html, id) => {
 };
 const compter = (h, motif) => (h.split(motif).length - 1);
 const clesDe = (h) => [...h.matchAll(/data-enonce-cle="([a-z]+)"/g)].map((m) => m[1]);
-const boutons = (bloc) => [...bloc.matchAll(/<button type="button" class="repere-enonce repere-enonce--(posee|remplie)"\s+data-action="insererRepereEnonce" data-jeton="([^"]+)"[^>]*>([^<]*)<\/button>/g)]
-    .map((m) => ({ famille: m[1], jeton: m[2], texte: m[3] }));
 const titre = (t) => new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '\\s*<');
 
 function rendu(grille) {
@@ -236,9 +234,12 @@ describe('carte « Bilan » · B — « Aucune annotation » vit sous la case de
         expect(pli).toContain('>' + echapper(E.normaliser(ALGO).enonces.aucune) + '</textarea>');
         expect(pli).toContain('>' + REGISTRE.aucune.libelle + '</label>');
         expect(pli).toContain(echapper(REGISTRE.aucune.aide));
-        // Sa palette : {critere} seul — jamais {erreurs}, qui y vaudrait toujours vide (le cas qui a fait trancher Grégoire le 3 sept.).
-        expect(boutons(pli).map((b) => [b.jeton, b.famille, b.texte])).toEqual([['{critere}', 'posee', 'critere'], ['{nomErreurs}', 'posee', 'nomErreurs']]);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
-        expect(pli.indexOf('class="reperes-enonce"')).toBeLessThan(pli.indexOf('<textarea'));
+        // Ce qu'elle offre : {critere} et {nomErreurs} — jamais {erreurs}, qui y vaudrait toujours vide (le cas qui a
+        // fait trancher Grégoire le 3 sept.). ↻ Étape 2b (22 oct. 2026) : plus de rangée ; la palette du critère le lit
+        // de `reperesDeCle`, son banc est `critere-algorithmique-palette.test.js`.
+        expect(E.reperesDeCle('aucune').map((r) => [r.jeton, r.famille])).toEqual([['{critere}', 'posee'], ['{nomErreurs}', 'posee']]);
+        expect(pli).not.toContain('<button type="button" class="repere-enonce');
+        expect(pli).toContain('data-enonce-cle="aucune" data-nom-zone="' + REGISTRE.aucune.libelle + '"');
     });
 
     it('B.b case cochée, avec des sous-critères : toujours UNE zone `aucune`, avant les rangées ; les plis « Observation » des rangées sont intacts', () => {

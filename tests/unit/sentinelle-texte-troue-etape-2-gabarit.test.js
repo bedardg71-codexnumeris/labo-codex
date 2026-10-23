@@ -21,6 +21,11 @@
 //   E. les invariants statiques : le clic ne prend pas le focus, `focusin`
 //      connaît les zones de palier, les jetons anti-cache ont bougé.
 //
+// ↻ ÉTAPE 2b (22 oct. 2026) : les palettes de palier sont parties, la palette du critère sert ses
+//   zones (`palette-algo.js`) ; B dit ce qui reste du rendu (les zones, leur nom, la note), D simule
+//   la palette et sa cible (le focus, sinon la dernière zone visitée ; sans elle, rien), E lit les
+//   invariants d'aujourd'hui. Le banc de la palette : `critere-algorithmique-palette.test.js`.
+//
 // BREAK-TESTS (faits le 4 septembre 2026, chacun restauré, `cmp` identique) :
 //   · B — `reperesPalier` rendu vide → B rougit ;
 //   · B — la note du composeur privée de sa dernière phrase → B.c rougit ;
@@ -108,6 +113,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.paletteAlgo = require(path.join(racine, 'js/palette-algo.js'));
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     return { win, store, document, liste: () => document.getElementById('listeCriteres') };
@@ -123,8 +129,6 @@ function carteProjection(html) {
     return html.slice(i, suivant < 0 ? undefined : suivant);
 }
 const paliersDe = (projection) => projection.split('class="sous-critere-item palier-projection"').slice(1);
-const boutons = (bloc) => [...bloc.matchAll(/<button type="button" class="repere-enonce repere-enonce--(posee|remplie)"\s+data-action="insererRepereEnonce" data-jeton="([^"]+)"[^>]*>([^<]*)<\/button>/g)]
-    .map((m) => ({ famille: m[1], jeton: m[2], texte: m[3] }));
 
 /* ================================================================ A — LA POSE */
 
@@ -162,31 +166,28 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         return carteProjection(liste().innerHTML);
     };
 
-    it('B.a chaque palier porte UNE palette, avec les huit badges dans l\'ordre arrêté, sans accolades sur le bouton', () => {
-        const projection = rendu();
-        const paliers = paliersDe(projection);
-        expect(paliers.length).toBe(6);   // les six paliers de migration
-        expect((projection.match(/class="reperes-enonce reperes-palier"/g) || []).length).toBe(6);
-        for (const pal of paliers) {
-            const b = boutons(pal.split('class="sous-critere-item palier-projection"')[0]);
-            expect(b.map((x) => x.jeton)).toEqual(['{service}', '{seuil}', '{longueur}', '{erreurs}', '{mots}', '{moyenne}', '{projection}', '{palier}']);
-            expect(b.map((x) => x.texte)).toEqual(['service', 'seuil', 'longueur', 'erreurs', 'mots', 'moyenne', 'projection', 'palier']);
-            expect(b.map((x) => x.famille)).toEqual(['posee', 'posee', 'posee', 'remplie', 'remplie', 'remplie', 'remplie', 'remplie']);
-        }
+    it('B.a aucun palier ne porte plus de palette : les huit blocs des paliers sont dans la palette du critère, dans leur ordre', () => {
+        const { win, liste } = monter([GRILLE]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
+        const html = liste().innerHTML;
+        const projection = carteProjection(html);
+        expect(paliersDe(projection).length).toBe(6);   // les six paliers de migration
+        expect(projection).not.toContain('reperes-palier');
+        expect(projection).not.toContain('data-action="insererRepereEnonce"');
+        const palette = tranche(html, '<aside class="palette-algo"', '</aside>');
+        const jetons = [...palette.matchAll(/data-jeton="([^"]+)"/g)].map((m) => m[1]);
+        for (const j of P.listerReperes().map((r) => r.jeton)) expect(jetons, j).toContain(j);
+        const ordre = ['{service}', '{seuil}', '{longueur}', '{moyenne}', '{projection}', '{palier}'].map((j) => jetons.indexOf(j));
+        expect([...ordre].sort((a, b) => a - b)).toEqual(ordre);
     });
 
-    it('B.b la palette est ENTRE la rangée « Palier · Jusqu\'à » et les deux zones, et les zones portent leur index et leur champ', () => {
+    it('B.b les zones portent leur index, leur champ et leur nom — celui que la palette dit', () => {
         const projection = rendu();
         paliersDe(projection).forEach((pal, i) => {
             const bloc = pal.split('class="sous-critere-item palier-projection"')[0];
-            const rangees = [...bloc.matchAll(/class="grille-form-2col palier-rangee"/g)].map((m) => m.index);
-            const palette = bloc.indexOf('class="reperes-enonce reperes-palier"');
-            expect(rangees.length, 'deux rangées').toBe(2);
-            expect(palette).toBeGreaterThan(rangees[0]);
-            expect(palette).toBeLessThan(rangees[1]);
-            expect(bloc).toContain(`aria-label="Badges à poser dans le palier ${i + 1}"`);
-            expect(bloc).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texte"`));
-            expect(bloc).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texteAide"`));
+            expect([...bloc.matchAll(/class="grille-form-2col palier-rangee"/g)].length, 'deux rangées').toBe(2);
+            expect(bloc).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texte" data-nom-zone="Verdict, palier ${i + 1}"`));
+            expect(bloc).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texteAide" data-nom-zone="Recommandation, palier ${i + 1}"`));
         });
     });
 
@@ -195,9 +196,10 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         expect(projection).not.toContain('palier-note-service');
         expect(projection).not.toContain('là où le nom du service doit apparaître');
         expect((projection.match(/palier-note-composer/g) || []).length).toBe(1);
-        expect(projection).toContain('Sans badge, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un badge, elle est entière : c\'est toi qui l\'écris.');
-        expect(projection).toContain('sans curseur, dans « Verdict »');
-        // §7 (5 sept.) : l'aide était à six paliers de la rangée « Poser : » ; elle précède le premier palier.
+        expect(projection).toContain('Sans bloc, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un bloc, elle est entière : c\'est toi qui l\'écris.');
+        // ↻ 2b : plus de « sans curseur, dans « Verdict » » — sans zone visitée, rien ne se pose ; ni d'explication des couleurs.
+        expect(projection).not.toContain('sans curseur');
+        expect(projection).not.toContain('bleus sont écrits');
         const note = projection.indexOf('palier-note-composer');
         expect(note).toBeGreaterThan(-1);
         expect(note).toBeLessThan(projection.indexOf('palier-projection'));
@@ -209,24 +211,24 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         expect(projection).not.toContain('Phrase de recommandation');
     });
 
-    it('B.d les énoncés gardent leur palette, par le même helper : « Décompte des erreurs » offre ses quatre repères — ↻ §8 : dans « Ce que l\'élève lit »', () => {
-        const { win, liste } = monter([GRILLE]);
-        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
-        const html = liste().innerHTML;
-        const projection = carteProjection(html);
+    it('B.d le décompte, dans « Ce que l\'élève lit », par le même helper : son étiquette, sa zone, son nom ; aucune rangée', () => {
+        const projection = rendu();
         const decompte = projection.slice(projection.indexOf('Décompte des erreurs'), projection.indexOf('class="sous-criteres-liste-conteneur"'));
-        expect(boutons(decompte).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);   // ↻ étape 2a (22 oct. 2026) : les deux noms, offerts
-        expect(decompte).toContain('aria-label="Poser nom du critère, {critere}, dans « Décompte des erreurs »"');
-        expect((source('js/grilles.js').match(/rendreBoutonsReperes\(/g) || []).length).toBe(3);   // la déclaration + deux appels
+        expect(decompte).toContain('data-enonce-cle="decompte" data-nom-zone="Décompte des erreurs"');
+        expect(decompte).not.toContain('<button');
+        expect(source('js/grilles.js')).not.toMatch(/rendreBoutonsReperes/);
     });
 
-    it('B.e « Aucune projection » : ni palette ni note — rien à composer', () => {
+    it('B.e « Aucune projection » : ni note du composeur, ni blocs des paliers dans la palette', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune' }] });
-        const projection = carteProjection(liste().innerHTML);
-        expect(projection).not.toContain('reperes-palier');
+        const html = liste().innerHTML;
+        const projection = carteProjection(html);
         expect(projection).not.toContain('palier-note-composer');
         expect(projection).toContain('Aucune projection ne sera proposée');
+        const palette = tranche(html, '<aside class="palette-algo"', '</aside>');
+        for (const j of ['{service}', '{seuil}', '{longueur}', '{moyenne}', '{projection}', '{palier}']) expect(palette, j).not.toContain(`data-jeton="${j}"`);
+        expect(palette).toContain('data-jeton="{erreurs}"');
     });
 });
 
@@ -270,35 +272,32 @@ describe('texte troué 2 · C — un jeton inconnu se dit sous son palier', () =
 /* ================================================================ D — LE GESTE */
 
 describe('texte troué 2 · D — le clic pose le badge dans la bonne zone et l\'écrit sans rendu', () => {
-    function zoneFactice(dataset, valeur) {
+    /** Le gabarit d'un critère et sa palette ; `visitee` : la dernière zone visitée (sa cible sans focus). */
+    function gabaritFactice() {
+        const palette = { dataset: {}, querySelector: () => null, querySelectorAll: () => [] };
+        const gabarit = { querySelector: (sel) => (sel === '.palette-algo' ? palette : null) };
+        return { palette, gabarit };
+    }
+    function zoneFactice(g, dataset, valeur) {
         return {
             tagName: 'TEXTAREA', value: valeur, dataset: Object.assign({}, dataset),
             selectionStart: valeur.length, selectionEnd: valeur.length,
+            closest: (sel) => (sel === '.gabarit-algo' ? g.gabarit : null),
             focus() {}, setSelectionRange(a) { this.selectionStart = this.selectionEnd = a; }
         };
     }
-    /** Un palier factice avec ses deux zones ; `actif` : la zone que le document dit focalisée. */
-    function palierFactice(zones) {
-        return {
-            dataset: {},
-            contains: (n) => zones.includes(n),
-            querySelector: (sel) => {
-                const m = sel.match(/data-champ="([^"]+)"/);
-                return m ? (zones.find((z) => z.dataset.champ === m[1]) || null) : (zones[0] || null);
-            }
-        };
-    }
-    const bouton = (palier, jeton) => ({ closest: (sel) => (sel === '.palier-projection' ? palier : null), dataset: { jeton } });
+    const bouton = (g, jeton) => ({ closest: (sel) => (sel === '.palette-algo' ? g.palette : null), dataset: { jeton } });
     const tick = () => new Promise((r) => setTimeout(r, 0));
 
-    it('D.a en CRÉATION (temp) : sans curseur, le badge va dans « Ce que l\'élève lit », à la fin, et le palier est écrit sur le critère', () => {
+    it('D.a en CRÉATION (temp) : la zone visitée reçoit le badge, à la fin sans curseur connu, et le palier est écrit sur le critère', () => {
         const { win, document } = monter([]);
         win.tempCriteres = [{ ...ALGO, id: 'T' }];
-        const texte = zoneFactice({ palierIndex: '4', champ: 'texte', critereIndex: '0' }, 'Verdict.');
-        const aide = zoneFactice({ palierIndex: '4', champ: 'texteAide', critereIndex: '0' }, 'Inscris-toi.');
-        const palier = palierFactice([texte, aide]);
+        const g = gabaritFactice();
+        const texte = zoneFactice(g, { palierIndex: '4', champ: 'texte', critereIndex: '0' }, 'Verdict.');
+        const aide = zoneFactice(g, { palierIndex: '4', champ: 'texteAide', critereIndex: '0' }, 'Inscris-toi.');
+        g.palette._zoneCible = texte;
         document.activeElement = null;
-        win.insererRepereEnonce(bouton(palier, '{erreurs}'));
+        win.insererRepereEnonce(bouton(g, '{erreurs}'));
         expect(texte.value).toBe('Verdict. {erreurs}');
         expect(texte.dataset.curseurVu).toBe('1');
         expect(aide.value).toBe('Inscris-toi.');
@@ -311,43 +310,42 @@ describe('texte troué 2 · D — le clic pose le badge dans la bonne zone et l\
         expect(win.enoncesAlgo).toBe(E);
     });
 
-    it('D.b la zone FOCALISÉE du palier reçoit le badge, au curseur — la recommandation ici', () => {
+    it('D.b la zone FOCALISÉE reçoit le badge, au curseur — la recommandation ici, même si la dernière visitée est le verdict', () => {
         const { win, document } = monter([]);
         win.tempCriteres = [{ ...ALGO, id: 'T' }];
-        const texte = zoneFactice({ palierIndex: '4', champ: 'texte', critereIndex: '0' }, 'Verdict.');
-        const aide = zoneFactice({ palierIndex: '4', champ: 'texteAide', critereIndex: '0', curseurVu: '1' }, 'Inscris-toi vite.');
+        const g = gabaritFactice();
+        const texte = zoneFactice(g, { palierIndex: '4', champ: 'texte', critereIndex: '0' }, 'Verdict.');
+        const aide = zoneFactice(g, { palierIndex: '4', champ: 'texteAide', critereIndex: '0', curseurVu: '1' }, 'Inscris-toi vite.');
         aide.selectionStart = aide.selectionEnd = 'Inscris-toi'.length;
-        const palier = palierFactice([texte, aide]);
+        g.palette._zoneCible = texte;
         document.activeElement = aide;
-        win.insererRepereEnonce(bouton(palier, '{service}'));
+        win.insererRepereEnonce(bouton(g, '{service}'));
         expect(aide.value).toBe('Inscris-toi {service} vite.');
         expect(aide.selectionStart, 'le curseur est juste après le badge ; l\'espace qui suit était déjà là').toBe('Inscris-toi {service}'.length);
         expect(texte.value).toBe('Verdict.');
         expect(win.tempCriteres[0].paliersProjection[4].texteAide).toBe('Inscris-toi {service} vite.');
     });
 
-    it('D.c sans focus, la dernière zone VISITÉE du palier (`data-zone-active`) est la cible', () => {
+    it('D.c sans focus et sans zone visitée depuis le rendu : rien ne se pose, rien ne s\'écrit', () => {
         const { win, document } = monter([]);
         win.tempCriteres = [{ ...ALGO, id: 'T' }];
-        const texte = zoneFactice({ palierIndex: '1', champ: 'texte', critereIndex: '0' }, 'V');
-        const aide = zoneFactice({ palierIndex: '1', champ: 'texteAide', critereIndex: '0' }, 'A');
-        const palier = palierFactice([texte, aide]);
-        palier.dataset.zoneActive = 'texteAide';
+        const g = gabaritFactice();
+        const texte = zoneFactice(g, { palierIndex: '1', champ: 'texte', critereIndex: '0' }, 'V');
         document.activeElement = null;
-        win.insererRepereEnonce(bouton(palier, '{projection}'));
-        expect(aide.value).toBe('A {projection}');
+        win.insererRepereEnonce(bouton(g, '{projection}'));
         expect(texte.value).toBe('V');
-        expect(win.tempCriteres[0].paliersProjection[1].texteAide).toBe('A {projection}');
+        expect(win.tempCriteres[0].paliersProjection).toBeUndefined();
     });
 
     it('D.d en ÉDITION (grille enregistrée) : l\'écriture passe par `db.modifier`, sans rendu', async () => {
         const { win, store, document } = monter([GRILLE]);
-        const texte = zoneFactice({ palierIndex: '0', champ: 'texte', critereIndex: '0', grilleId: 'G1' }, 'Zéro faute.');
-        const palier = palierFactice([texte]);
+        const g = gabaritFactice();
+        const texte = zoneFactice(g, { palierIndex: '0', champ: 'texte', critereIndex: '0', grilleId: 'G1' }, 'Zéro faute.');
+        g.palette._zoneCible = texte;
         document.activeElement = null;
         let rendus = 0;
         win.afficherCriteresGrille = () => { rendus++; };
-        win.insererRepereEnonce(bouton(palier, '{palier}'));
+        win.insererRepereEnonce(bouton(g, '{palier}'));
         await tick();
         expect(texte.value).toBe('Zéro faute. {palier}');
         const paliers = store[CLE][0].criteres[0].paliersProjection;
@@ -357,23 +355,26 @@ describe('texte troué 2 · D — le clic pose le badge dans la bonne zone et l\
         expect(rendus, 'le clic ne re-rend pas le gabarit : le curseur doit survivre').toBe(0);
     });
 
-    it('D.e un jeton hors de la palette des paliers ({critere}) ne pose rien et n\'écrit rien', () => {
+    it('D.e un bloc que la zone de palier n\'offre pas ({critere}) ne pose rien et n\'écrit rien', () => {
         const { win, document } = monter([]);
         win.tempCriteres = [{ ...ALGO, id: 'T' }];
-        const texte = zoneFactice({ palierIndex: '0', champ: 'texte', critereIndex: '0' }, 'V');
+        const g = gabaritFactice();
+        const texte = zoneFactice(g, { palierIndex: '0', champ: 'texte', critereIndex: '0' }, 'V');
+        g.palette._zoneCible = texte;
         document.activeElement = null;
-        win.insererRepereEnonce(bouton(palierFactice([texte]), '{critere}'));
+        win.insererRepereEnonce(bouton(g, '{critere}'));
         expect(texte.value).toBe('V');
         expect(win.tempCriteres[0].paliersProjection).toBeUndefined();
     });
 
     it('D.f une zone d\'ÉNONCÉ passe toujours par son chemin — rien de l\'étape 1 ne bouge', () => {
-        const { win } = monter([]);
+        const { win, document } = monter([]);
         win.tempCriteres = [{ ...ALGO, id: 'T' }];
-        const zone = zoneFactice({ enonceCle: 'priorite', critereIndex: '0' }, 'le calcul d\'abord');
-        const groupe = { querySelector: (sel) => (sel === 'textarea[data-enonce-cle]' ? zone : null) };
-        const el = { closest: (sel) => (sel === '.groupe-form' ? groupe : null), dataset: { jeton: '{critere}' } };
-        win.insererRepereEnonce(el);
+        const g = gabaritFactice();
+        const zone = zoneFactice(g, { enonceCle: 'priorite', critereIndex: '0' }, 'le calcul d\'abord');
+        g.palette._zoneCible = zone;
+        document.activeElement = null;
+        win.insererRepereEnonce(bouton(g, '{critere}'));
         expect(zone.value).toBe('le calcul d\'abord {critere}');
         expect(win.tempCriteres[0].enonces.priorite).toBe('le calcul d\'abord {critere}');
         expect(win.tempCriteres[0].paliersProjection).toBeUndefined();
@@ -385,12 +386,13 @@ describe('texte troué 2 · D — le clic pose le badge dans la bonne zone et l\
 describe('texte troué 2 · E — les invariants statiques du gabarit', () => {
     const grilles = source('js/grilles.js');
 
-    it('E.a le clic ne prend pas le focus, et `focusin` connaît les zones de palier', () => {
+    it('E.a toucher la palette ne prend pas le focus, et `focusin` connaît les zones de palier et d\'énoncé', () => {
         expect(grilles).toMatch(/\['pointerdown', 'mousedown'\]/);
-        expect(grilles).toMatch(/closest\('\[data-action="insererRepereEnonce"\]'\)\) e\.preventDefault\(\)/);
-        expect(grilles).toMatch(/zone\.dataset\.palierIndex !== undefined/);
-        expect(grilles).toMatch(/palier\.dataset\.zoneActive = zone\.dataset\.champ/);
-        expect(grilles).toMatch(/function _zoneCibleDuPalier\(palier\)/);
+        expect(grilles).toMatch(/if \(cible\.closest\('\.palette-algo'\)\) e\.preventDefault\(\)/);
+        expect(grilles).toMatch(/zone\.dataset\.enonceCle !== undefined \|\| zone\.dataset\.palierIndex !== undefined/);
+        expect(grilles).toMatch(/ciblerPaletteAlgo\(_paletteDeZone\(zone\), zone\)/);
+        // La cible d'hier (« la zone du palier, sinon Verdict ») est partie, sans alias.
+        expect(grilles).not.toMatch(/_zoneCibleDuPalier|zoneActive/);
     });
 
     it('E.b le bloc projection n\'a toujours aucun handler inline, et échappe ce qui vient de la grille', () => {

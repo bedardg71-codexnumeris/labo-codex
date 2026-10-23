@@ -207,7 +207,7 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // sous-critère passe par `echapperHtml`.
     const NUES = {
         'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 24, /* #1137 (22 oct.) : −5, passées par formaterPourcentage */ 'js/echelles.js': 21, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie */
-        'js/grilles.js': 73, 'js/cartouches.js': 16, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 13,
+        'js/grilles.js': 72 /* étape 2b : −1, la rangée « Poser : » des paliers */, 'js/cartouches.js': 16, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 13,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 89,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 106, /* #1137 (22 oct.) : −6, passées par formaterPourcentage */ 'js/trimestre-v2-cours.js': 4
