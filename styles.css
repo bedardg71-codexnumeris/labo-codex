@@ -9806,9 +9806,9 @@ td .marque-diagnostique { margin-left: 6px; }
     .rangee-selection-etiquettes { justify-content: flex-start; margin-left: 0; }
 }
 /* Le titre de la section ouverte passe au lecteur d'écran (le bouton plein le nomme) ; l'icône d'aide propre
-   à la section reste en tête du contenu, à droite. */
+   à la section reste en tête du contenu, à droite. Sans icône, l'en-tête ne prend aucune hauteur : jamais de
+   `display: none` ici, il retirerait le titre de l'arbre d'accessibilité (verdict #1151, § 2). */
 #profil-contenu-dynamique .profil-contenu-header { display: flex; justify-content: flex-end; margin: 0; padding: 0; border: 0; }
-#profil-contenu-dynamique .profil-contenu-header-vide { display: none; }
 
 /* === SECTION ACCORDÉON D'IMPORT === */
 .section-accordeon {

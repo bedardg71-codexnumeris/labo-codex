@@ -180,6 +180,33 @@ test('#1151 · chaque bouton ouvre sa section, seul lui est plein — y compris 
     expect([r.pleines, r.titreSection]).toEqual([['mobilisation'], 'Engagement ACP']);
 });
 
+// Verdict de relecture § 2 : le titre caché à l'œil reste dans l'arbre d'accessibilité, avec ou sans icône d'aide.
+test('#1151 · le titre de chaque section reste au lecteur d\'écran, et son en-tête sans icône ne prend aucune hauteur', async ({ page }) => {
+    await ouvrirDemo(page);
+    await ouvrirProfil(page, 1);
+    const ids = await page.evaluate(() => [...document.querySelectorAll('.rangee-selection-sections [data-action="changerSectionProfil"]')].map(b => b.dataset.param));
+    expect(ids.length).toBe(SECTIONS_DEMO.length);
+    for (const id of ids) {
+        await page.click(`.rangee-selection-sections [data-param="${id}"]`);
+        await pause(page, 300);
+        const etat = await page.evaluate(() => {
+            const h2 = document.querySelector('#profil-contenu-dynamique .profil-contenu-header h2');
+            if (!h2) return null;
+            const cache = [];
+            for (let e = h2; e && e !== document.body; e = e.parentElement) {
+                const s = getComputedStyle(e);
+                if (s.display === 'none' || s.visibility === 'hidden') cache.push(e.className || e.id || e.tagName);
+            }
+            const entete = h2.parentElement;
+            return { cache, avecAide: !!entete.querySelector('.primo-aide'), hauteur: Math.round(entete.getBoundingClientRect().height) };
+        });
+        expect([id, etat && etat.cache]).toEqual([id, []]);
+        if (!etat.avecAide) expect([id, etat.hauteur]).toEqual([id, 0]);
+        // Le témoin du lecteur d'écran : le rôle « heading » se trouve (getByRole écarte ce qui est retiré de l'arbre).
+        await expect(page.locator('#profil-contenu-dynamique .profil-contenu-header').getByRole('heading', { level: 2 })).toHaveCount(1);
+    }
+});
+
 test('#1151 · « Jugement » n\'apparaît qu\'avec une pratique par dénotation, juste après Productions', async ({ page }) => {
     await ouvrirDemo(page);
     await ouvrirProfil(page, 1);
