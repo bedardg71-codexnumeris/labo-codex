@@ -15,6 +15,7 @@ Chaque étape a, ou aura, sa consigne dans `plans de travail/CONSIGNE-LOT-<date>
 | 4. Les calculs que l'enseignant compose | à faire, après 3 | **Décision de Grégoire** : ce que veulent dire les calculs tout faits (didactique). Seule étape qui touche le calcul d'une note. |
 | 5. Coller sa liste de codes | **codé le 22 oct.**, en relecture (consigne `CONSIGNE-LOT-2026-10-22-critere-algorithmique-coller-codes.md`, option A tranchée par Cowork) ; les textes de l'écran sont provisoires, à valider par Grégoire | — |
 | La page « critères algorithmiques » du guide « Construire ton matériel d'évaluation » | à écrire par Cowork (le document du guide est un doc Claude, « Guide – Construire ton matériel d'évaluation (brouillon) ») | Rien : l'écran dit vrai depuis l'étape 0. Grégoire la corrige. Elle décrit l'écran d'aujourd'hui ; chaque étape la met à jour. |
+| Présentation de l'écran (maquette du 24 oct.) | **décidée par Grégoire le 24 oct. à 12 h 04**, à cadrer : lot 4 de `PLAN-2026-10-24-bibliotheques-chaines-critere-algo.md` (#1150), après la barre latérale retirée (lot 1) | Avant l'étape 3 : la table de cas se posera dans la nouvelle présentation |
 
 Inscrits sans lot, hors plan : deux critères algorithmiques dans une grille, seul le premier reçoit les codes (#1132) ; le mode Catégories, sans écran, et la démo dont les vingt évaluations sont dans ce mode (#1133).
 
