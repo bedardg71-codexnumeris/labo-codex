@@ -17,7 +17,7 @@
 
 | Lot | Ce que l'utilisateur voit | Fiche | État |
 |---|---|---|---|
-| 1. La Conception | Productions, Grilles, Échelles, Cartouches, Pratiques : « Consulter la bibliothèque », un menu déroulant de sa sélection, « + Nouvelle … » ; la fiche ouverte sur toute la largeur. Plus de barre latérale. | #1147 | **consigne prête** : `CONSIGNE-LOT-2026-10-24-bibliotheques-menu-conception.md` |
+| 1. La Conception | Productions, Grilles, Échelles, Cartouches, Pratiques : « Consulter la bibliothèque », un menu déroulant de sa sélection, « + Nouvelle … » ; la fiche ouverte sur toute la largeur. Plus de barre latérale. | #1147 | **codé, relu, accepté avec une retouche** (`e3f42ec4` ; `VERDICT-RELECTURE-2026-10-24-bibliotheques-menu-conception.md`), non poussé ; composant `js/menu-selection.js` |
 | 2. Le Cadre | Les six accordéons de la page Trimestre (Trimestre, Cours, Enseignant·e, Étudiant·es, Horaire, Groupe-cours) : la même rangée en tête, au lieu de la colonne de gauche. | #1148 | à cadrer après le lot 1, sur le composant qu'il aura livré |
 | 3. Les chaînes d'étapes | Dans chaque partie, la chaîne des étapes qui rendent l'outil fonctionnel, sur le modèle de la barre du Trimestre (un composant commun, tiré de `.barre-convergence`). Une option « Afficher les chaînes d'étapes » dans les réglages de l'affichage, activée par défaut. Absorbe #1146. | #1149 | à cadrer ; **revient à Grégoire** : les étapes de chaque outil et leurs mots (Cowork les propose à corriger) |
 | 4. Le critère algorithmique | La présentation de la maquette : la chaîne en haut, la palette qui dit à quoi elle sert, les zones où se posent les blocs (en violet), ce que l'élève lira à droite ; blocs à bordure égale sur les quatre côtés (retouche de Grégoire, 11 h 22). | #1150 | à cadrer ; s'insère dans `PLAN-2026-10-21-critere-algorithmique-toute-discipline.md`, avant l'étape 3 (la table de cas) |
@@ -27,5 +27,5 @@
 ## Hors du plan
 
 - Les tampons d'Annoter : exclus (la palette est l'outil d'annotation lui-même ; un menu ajouterait un geste à chaque tampon).
-- La Carte d'alignement : déjà conforme (bouton « Consulter la bibliothèque » et menu `#planif-liste-cartes`) ; seulement aligner son apparence si elle diffère.
+- La Carte d'alignement : même modèle (bouton « Consulter la bibliothèque » et menu `#planif-liste-cartes`), **apparence différente, mesurée au lot 1** (pas de bande bleu pâle, menu de hauteur native sur le Mac, « Actions ▾ » au lieu de « + Nouvelle … ») : à aligner au lot 2, l'apparence seulement.
 - La fenêtre de la bibliothèque : déjà commune aux dix bibliothèques (`BibliothequeUI.creerModal`), inchangée.

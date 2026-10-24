@@ -3872,7 +3872,7 @@ async function afficherBibliothequeCartouches() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeCartouches',
         titre: 'Bibliothèque de cartouches de rétroaction',
-        sousTitre: 'Gérez les cartouches de rétroaction offertes dans ta sélection.',
+        sousTitre: 'Gère les cartouches de rétroaction de ta sélection.',
         onFermer: 'fermerModalBibliothequeCartouches',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.cartouchesDansBibliotheque,

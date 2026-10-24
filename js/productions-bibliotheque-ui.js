@@ -250,7 +250,7 @@ async function afficherBibliothequeProductions() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeProductions',
         titre: 'Bibliothèque de productions',
-        sousTitre: 'Gérez les productions offertes dans ta sélection.',
+        sousTitre: 'Gère les productions de ta sélection.',
         onFermer: 'fermerModalBibliothequeProductions',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.productionsDansSelection,
