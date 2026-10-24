@@ -37,7 +37,6 @@ function monter({ enseignants = [PROFIL, COLLEGUE], copie = undefined, confirmer
     const sauvegarder = vi.fn((k, v) => { store[k] = v; return true; });
     const temoin = { nonEnregistre: vi.fn(), enregistre: vi.fn() };
     const notifications = { succes: vi.fn(), erreur: vi.fn() };
-    const synthese = vi.fn();
     // Comme le vrai (ui-dialogues.js) : la question n'est posée que si la fiche porte une saisie.
     const quitterCreationSiConfirme = vi.fn(async (genre) => (fiches[genre] && fiches[genre]() ? quitter : true));
     const fiches = {};
@@ -53,12 +52,11 @@ function monter({ enseignants = [PROFIL, COLLEGUE], copie = undefined, confirmer
         document: { getElementById: (id) => ids[id] || null, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [] }
     }, {
         temoinEnregistrement: temoin, raisonPourTemoin: (r) => r.charAt(0).toLowerCase() + r.slice(1) + '.',
-        afficherSyntheseEnseignant: synthese,
         uiDialogues: { quitterCreationSiConfirme, declarerFicheEnCreation: (g, p) => { fiches[g] = p; } }
     });
     const ouvrir = async (id) => { ids['v2-selectEnseignant'].value = id; await win.chargerEnseignantSelectionneV2(); };
     const saisir = (champ, valeur) => { ids['v2-ens-' + champ].value = valeur; return win.sauvegarderChampEnseignantV2(ids['v2-ens-' + champ]); };
-    return { win, store, ids, classes, sauvegarder, temoin, notifications, synthese, quitterCreationSiConfirme, fiches, ouvrir, saisir };
+    return { win, store, ids, classes, sauvegarder, temoin, notifications, quitterCreationSiConfirme, fiches, ouvrir, saisir };
 }
 
 

@@ -296,7 +296,6 @@ function changerCoursSelectionneV2(coursId) {
         if (formulaire) formulaire.classList.add('u-hide');
         if (listeGroupes) listeGroupes.innerHTML = '<p class="text-muted">Sélectionne un cours pour voir ses groupes.</p>';
         if (btnSupprimer) btnSupprimer.classList.add('u-hide');
-        afficherSyntheseCours(null);  // Beta 95.3 : vider la synthèse
         coursEnEditionV2 = null;
         modeFormCoursV2 = null;
         _cacherBandeauEdition();
@@ -346,7 +345,6 @@ function changerCoursSelectionneV2(coursId) {
         // Remplir le formulaire
         remplirFormCoursV2(coursSelectionne);
         rendreModeFicheCoursV2(false);
-        afficherSyntheseCours(coursSelectionne);  // Beta 95.3 : synthèse sidebar
         if (typeof window.chargerGroupesCoursV2 === 'function') {
             window.chargerGroupesCoursV2(coursId);
         }
@@ -924,221 +922,6 @@ function normaliserPonderationCoursV2() {
 }
 
 /**
- * Affiche la synthèse du cours dans la sidebar (Beta 95.3)
- * Synthèse concise: nom, discipline, compétence
- */
-function afficherSyntheseCours(cours) {
-    const sidebar = document.getElementById('v2-apercuCoursSidebar');
-    if (!sidebar) return;
-
-    if (!cours) {
-        // #842 : « Aucun cours sélectionné » / « Aucun service sélectionné », selon le contexte actif (point unique).
-        sidebar.innerHTML = '<p class="etat-vide-resume" data-mot-nature="aucunObjet">' + echapperHtml(motsNatureContexteActif().aucunObjet) + '</p>';
-        return;
-    }
-
-    // 🆕 FIX (4 fév 2026) : Priorité codeCours
-    const code = cours.codeCours || cours.sigle || cours.code || '';
-    const nom = cours.nomCours || cours.titre || cours.nom || '';
-    const discipline = cours.discipline || '—';
-    const competence = cours.numeroCompetence || cours.competence || '—';
-
-    const infoCours = db.getSync('infoCours', null);
-    const estActif = infoCours && infoCours.id === cours.id;
-    const badgeActif = estActif ? `<div class="apercu-badge-actif">${motsNature(cours).ObjetLong} actif</div>` : '';
-
-    if (cours.nature === 'service') {
-        sidebar.innerHTML = `
-        ${badgeActif}
-        <div class="apercu-titre">${echapperHtml(nom)}</div>
-        <div class="apercu-code">${motNature(cours)}</div>
-    `;
-        return;
-    }
-
-    sidebar.innerHTML = `
-        ${badgeActif}
-        <div class="apercu-titre">${echapperHtml(nom)}</div>
-        <div class="apercu-code">${echapperHtml(code)}</div>
-        <div class="apercu-detail">Discipline : ${echapperHtml(discipline)}</div>
-        <div class="apercu-detail">Compétence : ${echapperHtml(competence)}</div>
-    `;
-}
-
-/**
- * 🆕 Beta 95.3 : Synthèse Enseignant dans sidebar
- * Affiche : Prénom Nom, Courriel, Institution - Département
- */
-function afficherSyntheseEnseignant(enseignant) {
-    const elemNom = document.getElementById('enseignant-resume-nom');
-    const elemCourriel = document.getElementById('enseignant-resume-courriel');
-    const elemInstitution = document.getElementById('enseignant-resume-institution');
-
-    if (!elemNom) return;
-
-    if (!enseignant) {
-        if (elemNom) elemNom.textContent = '—';
-        if (elemCourriel) elemCourriel.textContent = '';
-        if (elemInstitution) elemInstitution.textContent = '';
-        return;
-    }
-
-    const nom = `${enseignant.prenom || ''} ${enseignant.nom || ''}`.trim() || '—';
-    const courriel = enseignant.courriel || '';
-    const institution = enseignant.institution || '';
-    const departement = enseignant.departement || '';
-    const instDept = [institution, departement].filter(Boolean).join(' — ');
-
-    if (elemNom) elemNom.textContent = nom;
-    if (elemCourriel) elemCourriel.textContent = courriel;
-    if (elemInstitution) elemInstitution.textContent = instDept;
-}
-
-/**
- * 🆕 Beta 95.3 : Synthèse Groupe Étudiants dans sidebar
- * Affiche : X étudiants, Y en SA, Top programmes
- */
-function afficherSyntheseGroupeEtudiants() {
-    const etudiants = obtenirDonneesSelonMode('groupeEtudiants') || [];
-
-    // Mettre à jour les compteurs existants
-    const elemTotal = document.getElementById('v2-resumeNbTotal');
-    const elemNbTotal = document.getElementById('v2-nbEtudiantsTotal');
-    const elemSA = document.getElementById('v2-resumeNbSA');
-    const conteneurSA = document.getElementById('v2-resumeSA');
-    const elemProgrammes = document.getElementById('v2-topProgrammes');
-
-    const total = etudiants.length;
-    const nbSA = etudiants.filter(e => e.sa === true || e.sa === 'oui' || e.sa === 'Oui' || e.SA === true).length;
-
-    // Compter les programmes
-    const programmes = {};
-    etudiants.forEach(e => {
-        const prog = e.programme || e.programmeEtudes || 'Non spécifié';
-        programmes[prog] = (programmes[prog] || 0) + 1;
-    });
-    const topProgrammes = Object.entries(programmes)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3);
-
-    // Mettre à jour l'affichage
-    if (elemTotal) elemTotal.textContent = total;
-    const elemLabelEtud = document.getElementById('v2-resumeLabelEtudiants');
-    if (elemLabelEtud && window.pluriel) elemLabelEtud.textContent = window.pluriel(total, 'étudiant·e', 'étudiant·es');
-    if (elemNbTotal) elemNbTotal.textContent = window.formaterNbEtudiants ? window.formaterNbEtudiants(total) : total;
-
-    if (conteneurSA) {
-        toggleDisplay(conteneurSA, nbSA > 0);
-        if (elemSA) elemSA.textContent = window.formaterNbEtudiants ? window.formaterNbEtudiants(nbSA) : nbSA;
-    }
-
-    if (elemProgrammes) {
-        if (topProgrammes.length > 0 && total > 0) {
-            elemProgrammes.classList.remove('u-hide');
-            elemProgrammes.innerHTML = '<strong style="font-size: 0.75rem;">Programmes :</strong><br>' +
-                topProgrammes.map(([prog, nb]) => `<span style="font-size: 0.75rem;">${echapperHtml(prog)} (${nb})</span>`).join('<br>');
-        } else {
-            elemProgrammes.classList.add('u-hide');
-        }
-    }
-}
-
-/**
- * 🆕 Beta 95.3 : Synthèse Horaire dans sidebar
- * Affiche : X séances/sem, Y heures, Jours
- */
-function afficherSyntheseHoraire(horaire) {
-    const sidebar = document.getElementById('v2-carteResumeHoraire');
-    if (!sidebar) return;
-
-    if (!horaire || !horaire.seances || horaire.seances.length === 0) {
-        sidebar.innerHTML = '<p class="etat-vide-resume">Aucun horaire sélectionné</p>';
-        return;
-    }
-
-    const seances = horaire.seances || [];
-    const nbSeances = seances.length;
-
-    // Calculer les heures totales
-    let totalMinutes = 0;
-    const joursSet = new Set();
-    const joursNoms = { 'lundi': 'Lun', 'mardi': 'Mar', 'mercredi': 'Mer', 'jeudi': 'Jeu', 'vendredi': 'Ven', 'samedi': 'Sam' };
-
-    seances.forEach(s => {
-        if (s.heureDebut && s.heureFin) {
-            const [h1, m1] = s.heureDebut.split(':').map(Number);
-            const [h2, m2] = s.heureFin.split(':').map(Number);
-            totalMinutes += (h2 * 60 + m2) - (h1 * 60 + m1);
-        }
-        if (s.jour) {
-            joursSet.add(joursNoms[s.jour.toLowerCase()] || s.jour.substring(0, 3));
-        }
-    });
-
-    const heures = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    const heuresStr = minutes > 0 ? `${heures}h${minutes}` : `${heures}h`;
-    const joursStr = Array.from(joursSet).join(', ');
-
-    sidebar.innerHTML = `
-        <div class="apercu-titre">${echapperHtml(horaire.nom || 'Horaire')}</div>
-        <div class="apercu-detail">${nbSeances} séance${nbSeances > 1 ? 's' : ''}/sem. • ${heuresStr}</div>
-        <div class="apercu-detail">Jours : ${joursStr || '—'}</div>
-    `;
-}
-
-/**
- * 🆕 Beta 95.3 : Synthèse Groupe-cours dans sidebar
- * Affiche : Code cours - Groupe, Enseignant, Séances/étudiants, Pratique
- */
-function afficherSyntheseGroupeCours(gc) {
-    const sidebar = document.getElementById('v2-carteResumeGroupeCours');
-    if (!sidebar) return;
-
-    if (!gc) {
-        sidebar.innerHTML = '<p class="etat-vide-resume">Aucun groupe-cours sélectionné</p>';
-        return;
-    }
-
-    // Récupérer les entités liées
-    const cours = db.getSync('cours', []);
-    const enseignants = db.getSync('enseignants', []);
-    // 🆕 FIX (1er fév 2026) : Utiliser cle() pour namespacing (horaires est dans CLES_NAMESPACEES)
-    const cleHoraires = cle('horaires');
-    const horaires = db.getSync(cleHoraires, []);
-    const pratiques = db.getSync(cle('pratiquesConfigurables'), null) || [];
-
-    const coursInfo = cours.find(c => c.id === gc.coursId);
-    const ens = enseignants.find(e => e.id === gc.enseignantId);
-    const hor = horaires.find(h => h.id === gc.horaireId);
-    const prat = pratiques.find(p => p.id === gc.pratiqueId);
-
-    // Construire le libellé
-    const codeCours = coursInfo?.codeCours || coursInfo?.sigle || null;
-    const groupe = gc.groupeNum || '00001';
-    const titre = codeCours ? `${codeCours} — Groupe ${groupe}`
-        : (coursInfo?.nature === 'service' ? `${coursInfo.nomCours || motsNature(coursInfo).Objet} — ${motNature(coursInfo)}` : `Groupe ${groupe}`);
-
-    const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '—';
-    const nbSeances = hor?.seances?.length || 0;
-    const nomPratique = prat?.nom || gc.pratiqueId || '—';
-
-    // Score de complétude
-    const elements = [gc.coursId, gc.enseignantId, gc.horaireId, gc.pratiqueId, gc.groupeNum];
-    const complets = elements.filter(Boolean).length;
-
-    sidebar.innerHTML = `
-        <div class="apercu-titre">${echapperHtml(titre)}</div>
-        <div class="apercu-detail">${echapperHtml(nomEns)}</div>
-        <div class="apercu-detail">${nbSeances} séance${nbSeances !== 1 ? 's' : ''}/sem.</div>
-        <div class="apercu-detail">Pratique : ${echapperHtml(nomPratique)}</div>
-        <div class="apercu-completude" style="font-size: 0.75rem; color: ${complets === 5 ? 'var(--vert-principal)' : 'var(--orange-principal)'}; margin-top: 5px;">
-            ${complets}/5 éléments configurés
-        </div>
-    `;
-}
-
-/**
  * Dérive { session, annee } depuis le trimestre actif (SSOT).
  * Source unique : l'ID du trimestre actif (ex. "e2026" → session "E", année 2026),
  * avec repli sur ses propriétés session/annee. Le regex [aeh] couvre Hiver/Été/Automne.
@@ -1428,7 +1211,6 @@ function _apresEcritureCoursV2(cours, creation) {
         changerCoursSelectionneV2(cours.id);
     } else {
         if (selectCours) selectCours.value = cours.id;
-        afficherSyntheseCours(cours);
         _afficherBandeauEdition(cours);
     }
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
@@ -1581,11 +1363,6 @@ window.sauvegarderChampCoursV2 = sauvegarderChampCoursV2;
 window.changerPonderationCoursV2 = changerPonderationCoursV2;
 window.changerNatureFicheCoursV2 = changerNatureFicheCoursV2;
 window.rendreModeFicheCoursV2 = rendreModeFicheCoursV2;
-window.afficherSyntheseCours = afficherSyntheseCours;
-window.afficherSyntheseEnseignant = afficherSyntheseEnseignant;
-window.afficherSyntheseGroupeEtudiants = afficherSyntheseGroupeEtudiants;
-window.afficherSyntheseHoraire = afficherSyntheseHoraire;
-window.afficherSyntheseGroupeCours = afficherSyntheseGroupeCours;
 window.ouvrirModalNouveauCours = ouvrirModalNouveauCours;
 
 // Helper partagé via window pour les autres sous-modules trimestre-v2-*

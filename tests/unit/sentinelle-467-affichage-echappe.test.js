@@ -211,7 +211,7 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
         'js/grilles.js': 68 /* étape 2b : −1, la rangée « Poser : » des paliers ; #1147 : −4, la barre latérale */, 'js/cartouches.js': 15 /* #1147 : −1 */, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 11 /* #1147 : −2, le surlignage de la barre latérale */,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 89,
-        'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 106, /* #1137 (22 oct.) : −6, passées par formaterPourcentage */ 'js/trimestre-v2-cours.js': 4
+        'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 106, /* #1137 (22 oct.) : −6, passées par formaterPourcentage ; #1148 (24 oct.) : −4, les synthèses de la barre latérale partent */ 'js/trimestre-v2-cours.js': 0
     };
     it('C.n les interpolations nues ne montent pas', () => {
         const G = /\$\{\s*([A-Za-z_$][\w$]*)\s*\}/g;

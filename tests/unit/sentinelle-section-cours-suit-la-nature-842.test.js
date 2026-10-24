@@ -77,7 +77,7 @@ const MOTS_1_136_0_HORS_SERVICE = {
     // #846 (12 sept., 10 h 25) : `choisirObjetGC` a quitté le point unique — le champ 2 ne suit plus la nature
     // (verrouillé dans sentinelle-accueil-porte-ortho-et-champ2-846.test.js).
     choisirObjet: 'Sélectionner un cours...', choisirPersonneGC: '— Choisir un enseignant —',
-    aucunObjet: 'Aucun cours sélectionné', nouveau: 'Nouveau cours', modifier: 'Modifier le cours', dupliquer: 'Dupliquer le cours', Objet: 'Cours', objet: 'cours',
+    nouveau: 'Nouveau cours', modifier: 'Modifier le cours', dupliquer: 'Dupliquer le cours', Objet: 'Cours', objet: 'cours',
     elementsObligatoires: 'renseigne les 5 éléments obligatoires : trimestre, cours, numéro de groupe, horaire et enseignant·e. La pratique de notation est facultative.',
     nbElementsObligatoires: '5 éléments obligatoires', elementsObligatoiresForm: 'Renseigne les 5 éléments obligatoires (la pratique de notation est facultative).', horaireFacultatif: ''
 };
@@ -198,9 +198,10 @@ describe('3 · la phrase des éléments obligatoires suit la nature, et n\'annon
         expect(c.horaireFacultatif).toBe('');
     });
 
-    it('appliquerMotsNatureCadre pose la phrase, le compte, le suffixe de l\'horaire et la synthèse vide, dans les deux sens', () => {
+    // #1148 (24 oct. 2026) : la synthèse vide (« aucunObjet ») est partie avec l'aperçu du cours.
+    it('appliquerMotsNatureCadre pose la phrase, le compte et le suffixe de l\'horaire, dans les deux sens', () => {
         const w = monterMots();
-        const cles = ['elementsObligatoires', 'nbElementsObligatoires', 'horaireFacultatif', 'elementsObligatoiresForm', 'aucunObjet', 'Objet', 'objet'];
+        const cles = ['elementsObligatoires', 'nbElementsObligatoires', 'horaireFacultatif', 'elementsObligatoiresForm', 'Objet', 'objet'];
         const marques = cles.map((k, i) => { const el = elementDom('m' + i); el.setAttribute('data-mot-nature', k); el.textContent = w.MOTS_NATURE.cours[k]; return el; });
         const etat = { service: true };
         const elements = {};
@@ -237,10 +238,12 @@ describe('4 · hors service, les mots de la section Cours sont ceux de 1.136.0 (
         const html = lire('index.html');
         const section = html.slice(html.indexOf('id="accordeon-cours"'), html.indexOf('id="v2-natureCours"'));
         expect(section).toMatch(/<span class="accordeon-chevron">▶<\/span> Cours et services/);
-        expect(section).toContain('+ Nouveau cours\n');
+        expect(section).toContain('>+ Nouveau cours</button>');
         expect(section).toContain('Pour créer un nouveau cours, clique <strong>+ Nouveau cours</strong>.');
-        expect(section).toContain('<label class="libelle-selection"><span data-mot-nature="Objet">Cours</span> :</label>');
-        expect(section).toContain('<p class="etat-vide-resume" data-mot-nature="aucunObjet">Aucun cours sélectionné</p>');
+        // #1148 (24 oct. 2026) : le libellé du menu passe au lecteur d'écran (la rangée de sélection) ; l'aperçu
+        // du cours et sa synthèse vide sont partis.
+        expect(section).toContain('<label class="u-lecteur-ecran" for="v2-selectCours"><span data-mot-nature="Objet">Cours</span></label>');
+        expect(section).not.toContain('aucunObjet');
         expect(section).toContain('<p>Sélectionne un <span data-mot-nature="objet">cours</span> pour l\'éditer ou crée un nouveau cours.</p>');
         expect(section).toContain('<strong>Mode modification</strong> — <span id="v2-bandeauObjet">Cours</span> <strong id="v2-bandeauCodeCours"></strong>.');
         expect(html).toContain('<span class="bc-label" data-mot-nature="Objet">Cours</span>');
@@ -297,16 +300,12 @@ describe('5 · #842 — le titre du formulaire et le bandeau suivent la FICHE ; 
         expect(titre(b), 'formulaire fermé : rien à re-titrer').toBe(apres);
     });
 
-    it('la synthèse vide et l\'option vide du menu Cours suivent le contexte actif : « Aucun service sélectionné », « Sélectionner un service... »', () => {
+    it('l\'option vide du menu Cours suit le contexte actif : « Sélectionner un service... »', () => {
         const etat = { service: true };
         const b = monterForm(etat);
-        b.win.afficherSyntheseCours(null);
-        expect(b.elements['v2-apercuCoursSidebar'].innerHTML).toBe('<p class="etat-vide-resume" data-mot-nature="aucunObjet">Aucun service sélectionné</p>');
         b.win.chargerDropdownCoursV2();
         expect(b.elements['v2-selectCours'].options[0].textContent).toBe('Sélectionner un service...');
         etat.service = false;
-        b.win.afficherSyntheseCours(null);
-        expect(b.elements['v2-apercuCoursSidebar'].innerHTML).toBe('<p class="etat-vide-resume" data-mot-nature="aucunObjet">Aucun cours sélectionné</p>');
         b.win.chargerDropdownCoursV2();
         expect(b.elements['v2-selectCours'].options[0].textContent).toBe('Sélectionner un cours...');
     });

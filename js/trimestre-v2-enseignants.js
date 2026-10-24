@@ -8,7 +8,6 @@
 
    Dépendances cross-module accédées via `window.X` (résidu trimestre-v2.js
    chargé AVANT ce fichier dans index.html) :
-   - `window.afficherSyntheseEnseignant` (zone 6 résidu, déjà exposé)
    - `window.populerDropdownsAssemblageV2` (hub résiduel exposé pour session A)
 
    Variable module-scope `enseignantEnEditionId` migrée ici (n'est pas
@@ -70,19 +69,6 @@ function chargerProfilEnseignantV2() {
         // Aucun enseignant : état vide (#306) — la création passe par
         // « + Nouveau profil », comme chez Cours.
         _basculerFormulaireEnseignant(false);
-        mettreAJourCarteEnseignant();
-    }
-}
-
-/**
- * Met à jour la carte résumé de l'enseignant.
- * Lot E2 (D3, 28 sept. 2026) : elle ne montre plus que ce qui est ÉCRIT — le profil en
- * base, jamais la saisie en cours (avant, elle changeait pendant la frappe et montrait
- * comme acquis ce qui ne l'était pas). Un profil en création n'a rien d'écrit : carte vide.
- */
-function mettreAJourCarteEnseignant() {
-    if (typeof window.afficherSyntheseEnseignant === 'function') {
-        window.afficherSyntheseEnseignant(_enseignantEnBase());
     }
 }
 
@@ -250,7 +236,6 @@ async function chargerEnseignantSelectionneV2() {
     setValue('v2-ens-siteWeb', enseignant.siteWeb);
 
     rendreModeFicheEnseignantV2(false);
-    mettreAJourCarteEnseignant();
 }
 
 /**
@@ -285,7 +270,6 @@ function viderFormulaireEnseignantV2() {
         const elem = document.getElementById(id);
         if (elem) elem.value = '';
     });
-    mettreAJourCarteEnseignant();
 }
 
 /**
@@ -321,7 +305,6 @@ function _apresEcritureEnseignant(profil, idEcrit, enBase) {
     if (typeof window.populerDropdownsAssemblageV2 === 'function') {
         window.populerDropdownsAssemblageV2();
     }
-    mettreAJourCarteEnseignant();
 }
 
 /**
@@ -463,7 +446,6 @@ async function supprimerProfilEnseignantV2() {
 }
 
 // Exports globaux
-window.mettreAJourCarteEnseignant = mettreAJourCarteEnseignant;
 window.sauvegarderChampEnseignantV2 = sauvegarderChampEnseignantV2;
 window.creerProfilEnseignantV2 = creerProfilEnseignantV2;
 window.fermerFicheEnseignantV2 = fermerFicheEnseignantV2;

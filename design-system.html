@@ -2489,35 +2489,36 @@
      SECTION 23 — LAYOUT BIBLIOTHÈQUE / FORMULAIRE
      ============================================================ -->
 <section id="layout-bibliotheque" class="guide-section">
-    <h2 class="guide-section-title">23. Layout bibliothèque / formulaire</h2>
-    <p class="guide-section-intro">Disposition à deux colonnes utilisée dans Contexte &gt; Trimestre pour chaque accordéon : sidebar (bibliothèque + sélecteur + aperçu) à gauche, formulaire d'édition à droite.</p>
+    <h2 class="guide-section-title">23. Rangée de sélection et formulaire (Cadre)</h2>
+    <p class="guide-section-intro">Les six accordéons de Cadre &gt; Trimestre (#1148, 24 oct. 2026) : en tête, la rangée de la Conception (§ 15, #1147) — « Consulter la bibliothèque » là où l'accordéon en a une, le menu, « + Nouveau … » à droite ; dessous, ce que la fiche ne dit pas ; puis le formulaire sur toute la largeur. La colonne de gauche (<code>.disposition-bibliotheque-formulaire</code>, <code>.panneau-bibliotheque</code>) est retirée.</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Disposition complète</h3>
         <div class="ref-dual">
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
-                <div class="disposition-bibliotheque-formulaire" style="font-size:0.85rem">
-                    <div class="panneau-bibliotheque">
-                        <button class="btn btn-secondaire btn-bibliotheque" style="width:100%">📚 Bibliothèque</button>
-                        <div class="groupe-form" style="margin-top:12px">
-                            <label class="libelle-selection" style="font-size:0.8rem">Élément actif :</label>
-                            <select class="controle-form" style="font-size:0.8rem">
-                                <option>Hiver 2026</option>
+                <div class="sous-section active" style="font-size:0.85rem">
+                    <div class="rangee-selection">
+                        <button class="btn btn-principal">Consulter la bibliothèque</button>
+                        <div class="rangee-selection-emplacement">
+                            <label class="rangee-selection-libelle">Trimestre actif :</label>
+                            <select class="controle-form rangee-selection-menu" aria-label="Trimestre actif">
+                                <option selected>Automne 2026</option>
+                                <option>Hiver 2027</option>
                             </select>
                         </div>
-                        <button class="btn btn-principal btn-sm" style="width:100%; margin-top:8px">+ Nouveau</button>
-                        <div class="apercu-trimestre-sidebar" style="margin-top:12px; font-size:0.75rem">
-                            <strong>Aperçu :</strong><br>
-                            16 semaines · 47 jours
-                        </div>
+                        <button class="btn btn-principal rangee-selection-nouveau">+ Nouveau trimestre</button>
+                    </div>
+                    <div class="rangee-selection-resume">
+                        <strong>Trimestre :</strong> 15 semaines • 75 jours de cours
+                        <span class="rangee-selection-resume-note">(aucun congé)</span>
                     </div>
                     <div class="panneau-formulaire" style="padding:12px">
                         <div class="bloc-section bloc-section--vert" style="padding:12px">
                             <h5 style="margin:0 0 8px; font-size:0.85rem">Identification</h5>
                             <div class="groupe-form">
                                 <label style="font-size:0.75rem">Nom</label>
-                                <input type="text" class="controle-form" value="Hiver 2026" style="font-size:0.8rem">
+                                <input type="text" class="controle-form" value="Automne 2026" style="font-size:0.8rem">
                             </div>
                         </div>
                     </div>
@@ -2525,27 +2526,28 @@
             </div>
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
-                <div class="disposition-bibliotheque-formulaire" style="font-size:0.85rem">
-                    <div class="panneau-bibliotheque">
-                        <button class="btn btn-secondaire btn-bibliotheque" style="width:100%">📚 Bibliothèque</button>
-                        <div class="groupe-form" style="margin-top:12px">
-                            <label class="libelle-selection" style="font-size:0.8rem">Élément actif :</label>
-                            <select class="controle-form" style="font-size:0.8rem">
-                                <option>Hiver 2026</option>
+                <div class="sous-section active" style="font-size:0.85rem">
+                    <div class="rangee-selection">
+                        <button class="btn btn-principal">Consulter la bibliothèque</button>
+                        <div class="rangee-selection-emplacement">
+                            <label class="rangee-selection-libelle">Trimestre actif :</label>
+                            <select class="controle-form rangee-selection-menu" aria-label="Trimestre actif">
+                                <option selected>Automne 2026</option>
+                                <option>Hiver 2027</option>
                             </select>
                         </div>
-                        <button class="btn btn-principal btn-sm" style="width:100%; margin-top:8px">+ Nouveau</button>
-                        <div class="apercu-trimestre-sidebar" style="margin-top:12px; font-size:0.75rem">
-                            <strong>Aperçu :</strong><br>
-                            16 semaines · 47 jours
-                        </div>
+                        <button class="btn btn-principal rangee-selection-nouveau">+ Nouveau trimestre</button>
+                    </div>
+                    <div class="rangee-selection-resume">
+                        <strong>Trimestre :</strong> 15 semaines • 75 jours de cours
+                        <span class="rangee-selection-resume-note">(aucun congé)</span>
                     </div>
                     <div class="panneau-formulaire" style="padding:12px">
                         <div class="bloc-section bloc-section--vert" style="padding:12px">
                             <h5 style="margin:0 0 8px; font-size:0.85rem">Identification</h5>
                             <div class="groupe-form">
                                 <label style="font-size:0.75rem">Nom</label>
-                                <input type="text" class="controle-form" value="Hiver 2026" style="font-size:0.8rem">
+                                <input type="text" class="controle-form" value="Automne 2026" style="font-size:0.8rem">
                             </div>
                         </div>
                     </div>
@@ -2555,11 +2557,11 @@
 
         <div class="guide-specs-title">Specs</div>
         <ul>
-            <li>Conteneur : <code>.disposition-bibliotheque-formulaire</code> — grid 2 colonnes (sidebar 250px + formulaire 1fr)</li>
-            <li>Sidebar : <code>.panneau-bibliotheque</code> — bouton Bibliothèque, sélecteur, bouton Nouveau, aperçu</li>
+            <li>Rangée : <code>.rangee-selection</code> — le menu garde son identifiant et son gestionnaire (aucun n'emploie <code>MenuSelection</code>)</li>
+            <li>Libellé : <code>.rangee-selection-libelle</code>, visible, quand choisir active (Trimestre) ou filtre (Groupe) ; ailleurs <code>.u-lecteur-ecran</code></li>
+            <li>Résumé : <code>.rangee-selection-resume</code> — seulement ce que la fiche ne dit pas (semaines et jours ; élèves, groupes, SA, programmes ; complétude du groupe-cours)</li>
+            <li>Aide : <code>.rangee-selection-aide</code> — le texte d'aide de l'accordéon, sous la rangée</li>
             <li>Formulaire : <code>.panneau-formulaire</code> — contient les blocs-section colorés</li>
-            <li>Blocs-section : <code>.bloc-section--vert</code> / <code>.bloc-section--bleu</code> — bordure gauche colorée</li>
-            <li>Utilisé dans : Trimestre, Cours, Enseignant, Horaire, Groupe-cours (6 accordéons)</li>
         </ul>
     </div>
 </section>
