@@ -2397,7 +2397,7 @@ function _rendreSectionProfil(def, da) {
         ? `<span class="primo-aide" data-target="details-calculs-${def.aide}-${echapperHtml(da)}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`
         : '';
     return `
-        <div class="profil-contenu-header${aide ? '' : ' profil-contenu-header-vide'}">
+        <div class="profil-contenu-header">
             <h2 class="u-lecteur-ecran">${echapperHtml(def.titre)}</h2>
             ${aide}
         </div>
