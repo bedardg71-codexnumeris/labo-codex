@@ -1933,6 +1933,11 @@
 
         // Boutons d'action
         html += '<div class="groupe-boutons-colonne">';
+        // 24 oct. 2026 — le verrou de l'évaluation, jumeau de « Verrouiller l'évaluation » (Paramètres).
+        // Caché tant que `mettreAJourVerrouAnnotation` (evaluation.js) n'a pas lu l'évaluation de la copie.
+        html += '<div class="groupe-boutons-ligne u-hide">';
+        html += '<button id="travaux-annot-btn-verrou" class="btn btn-principal btn-tres-compact u-flex-1" data-action="basculerVerrouDepuisAnnotation">Verrouiller l\'\u00e9valuation</button>';
+        html += '</div>';
         html += '<div class="groupe-boutons-ligne">';
         html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
         html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
@@ -3878,6 +3883,8 @@
                 const newProd = document.getElementById('travaux-annot-label-production');
                 if (newEtud) newEtud.textContent = etudTxt;
                 if (newProd) newProd.textContent = prodTxt;
+                // Et le bouton du verrou, qui renaît caché
+                if (typeof window.mettreAJourVerrouAnnotation === 'function') window.mettreAJourVerrouAnnotation();
             }
         }
 
