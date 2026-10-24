@@ -2373,7 +2373,8 @@ function mettreAJourVerrouAnnotation() {
  *   · sinon, verrouiller → la porte lit le formulaire, qui porte une autre copie : l'évaluation de
  *     la copie affichée y est d'abord chargée par le chemin d'« Évaluer » (`basculerMode`), et la
  *     porte n'est passée qu'une fois ce chargement fini et l'identité vérifiée. Faute de quoi,
- *     rien n'est écrit : jamais un verrouillage avec les données d'une autre copie.
+ *     rien n'est écrit, et un message le dit : jamais un verrouillage avec les données d'une
+ *     autre copie.
  */
 async function basculerVerrouDepuisAnnotation() {
     const evaluation = _evaluationDeLaCopieAffichee();
@@ -2394,30 +2395,37 @@ async function basculerVerrouDepuisAnnotation() {
     travauxUI.basculerMode('evaluer');
     if (await _attendreEvaluationChargee(evaluation.id, fichier.id)) {
         basculerVerrouillageEvaluationCourante();
+    } else {
+        // Rien n'est écrit, et c'est dit (verdict de Cowork, 24 oct. 2026, 9 h 33 ; ses mots).
+        notifications.erreur('L\'évaluation n\'a pas été verrouillée : son chargement n\'a pas abouti.');
     }
 }
 
 /**
  * Attend que le formulaire porte l'évaluation `evaluationId` de la copie `fichierId`, chargement
- * fini (`modifierEvaluation` a rendu son compteur, #960). `idModification` n'est posé que par ce
- * chargement (`_initEvaluationEnCoursPourModif`) : un formulaire seulement réinitialisé pour la
- * copie ne suffit pas. Bornée par `DELAI_BORNE_CHARGEMENT_EVALUATION` ; la copie quittée en
- * chemin, faux.
+ * fini et retombé. DEUX chargeurs posent `idModification` sur le chemin d'« Évaluer » :
+ * `verifierEtChargerEvaluationExistante` (~150 ms, valeurs posées d'abord) puis `modifierEvaluation`
+ * (~600 ms, compteur #960) ; et `afficherPalettesEval` injecte le compte des codes à +2 s. La
+ * condition (identité, aucun chargeur en cours, aucun enregistrement automatique en attente) doit
+ * donc tenir une seconde d'affilée, pas avant 3 s : l'état où l'enseignant cliquerait lui-même.
+ * Bornée par `DELAI_BORNE_CHARGEMENT_EVALUATION` ; la copie quittée en chemin, faux.
  * @returns {Promise<boolean>}
  */
 function _attendreEvaluationChargee(evaluationId, fichierId) {
     const debut = Date.now();
+    let stableDepuis = 0;
     return new Promise(resolve => {
         (function verifier() {
             const actuel = travauxVisionneuse.getFichierActuel();
             if (!actuel || actuel.id !== fichierId) return resolve(false);
             const enCours = window.evaluationEnCours;
-            if (enCours && enCours.idModification === evaluationId
+            const pret = enCours && enCours.idModification === evaluationId
                 && !(window._chargementsEvaluationEnCours > 0) && !window._modifierEvaluationEnCours
-                && copieEstCelleDeLEvaluationEnCours(fichierId)) {
-                return resolve(true);
-            }
-            if (Date.now() - debut > DELAI_BORNE_CHARGEMENT_EVALUATION) return resolve(false);
+                && !window._timerAutoSave && copieEstCelleDeLEvaluationEnCours(fichierId);
+            const maintenant = Date.now();
+            stableDepuis = pret ? (stableDepuis || maintenant) : 0;
+            if (pret && maintenant - debut >= 3000 && maintenant - stableDepuis >= 1000) return resolve(true);
+            if (maintenant - debut > DELAI_BORNE_CHARGEMENT_EVALUATION) return resolve(false);
             setTimeout(verifier, 100);
         })();
     });

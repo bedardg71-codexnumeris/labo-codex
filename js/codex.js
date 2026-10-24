@@ -334,6 +334,8 @@ function _marquerStockAvantLotF(etatLu) {
  * @param {function(number, number): Promise<boolean>} [options.confirmerCopiesManquantes] - #1012 :
  *   appelée avec (manquantes, attendues) quand des copies attendues n'ont pas de fichier, avant
  *   l'aperçu ; rend false pour renoncer (la génération rend alors null, comme un aperçu refusé)
+ * @param {{titre: string, texteConfirmer: string}} [options.motsApercu] - le titre et le bouton de
+ *   l'aperçu ; sans eux, ceux de « Mettre à jour le codex » (le codex à part a les siens)
  * @returns {Promise<{blob: Blob, nomFichier: string, manifeste: Object,
  *   copies: {attendues: number, manquantes: number}}|null>}
  */
@@ -433,6 +435,9 @@ function _extensionDansLeCodex(nomFichier) {
     var ext = (nf.indexOf('.') !== -1) ? nf.split('.').pop() : 'bin';
     return /^[A-Za-z0-9]+$/.test(ext) ? ext : 'bin';
 }
+
+/** Les mots de l'aperçu pour « Mettre à jour le codex » et « Enregistrer sous » (Grégoire, 24 oct. 2026). */
+const MOTS_APERCU_CODEX = { titre: 'Mettre à jour le codex', texteConfirmer: 'Mettre à jour' };
 
 async function genererCodex(options = {}) {
     if (typeof JSZip === 'undefined') {
@@ -617,9 +622,9 @@ async function genererCodex(options = {}) {
     // Sautée seulement si le module preview n'est pas chargé (dégradation gracieuse).
     //
     // Le codex n'est pas un export (D4, 26 sept. 2026) : la fenêtre dit « Mettre à jour
-    // le codex » et son bouton « Mettre à jour » (mots de Grégoire, 24 oct. 2026), pour
-    // tous les gestes qui passent ici — « Mettre à jour le codex », « Enregistrer sous »
-    // et, provisoirement, le codex à part avant une suppression.
+    // le codex » et son bouton « Mettre à jour » (mots de Grégoire, 24 oct. 2026) pour
+    // « Mettre à jour le codex » et « Enregistrer sous » ; le codex à part avant une
+    // suppression passe les siens (`options.motsApercu`).
     //
     // Important UX : on masque l'overlay de progression avant la modale
     // (sinon double affichage), puis on le RÉAFFICHE après le clic
@@ -628,10 +633,11 @@ async function genererCodex(options = {}) {
     // attend dans le noir pendant generateAsync.
     if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
+        const mots = Object.assign({}, MOTS_APERCU_CODEX, options.motsApercu);
         const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(window.FichierSortant.entreesDuZip(zip, copies, DOSSIER_TRAVAUX + '/'), 'codex', {
             taille: window.TailleFichier.dire(tailleEstimee, { environ: true }),
-            titre: 'Mettre à jour le codex',
-            texteConfirmer: 'Mettre à jour'
+            titre: mots.titre,
+            texteConfirmer: mots.texteConfirmer
         });
         if (!ok) {
             return null;
@@ -3677,6 +3683,9 @@ async function _mettreAJourLeCodex(forcerDialogue) {
    =============================== */
 
 /** Le nom du codex à part : le nom habituel, suivi de « avant-suppression » (la date suit, `_genererNomFichier`). */
+/** L'aperçu du codex à part : il n'écrit pas dans le codex tenu, mais un autre fichier (Grégoire, 24 oct. 2026, 9 h 01). */
+const MOTS_APERCU_CODEX_A_PART = { titre: 'Écrire le codex à part', texteConfirmer: 'Écrire' };
+
 function _nomDuCodexAPart() {
     return (_etat.nom || _genererNomCodex()) + ' avant-suppression';
 }
@@ -3708,7 +3717,7 @@ async function ecrireCodexAPartAvantSuppression(premierePhrase) {
     var avertissement = _avertissementDesCopies();
     var resultat;
     try {
-        resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer, nom: _nomDuCodexAPart() });
+        resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer, nom: _nomDuCodexAPart(), motsApercu: MOTS_APERCU_CODEX_A_PART });
     } catch (e) {
         console.error('[Codex] Codex à part non préparé :', e);
         _finirTentative('échec de la préparation du fichier', e);

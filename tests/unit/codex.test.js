@@ -298,7 +298,8 @@ describe('codex.js — tout appelant de la génération passe l\'avertissement (
         });
         expect(appels).toEqual([
             'codex.js : resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer });',
-            'codex.js : resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer, nom: _nomDuCodexAPart() });'
+            // 24 oct. 2026 : le codex à part passe aussi les mots de son aperçu.
+            'codex.js : resultat = await genererCodex({ suivreTentative: true, confirmerCopiesManquantes: avertissement.confirmer, nom: _nomDuCodexAPart(), motsApercu: MOTS_APERCU_CODEX_A_PART });'
         ]);
     });
 
