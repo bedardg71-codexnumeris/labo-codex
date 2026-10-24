@@ -5081,6 +5081,8 @@
             var el = document.getElementById(id);
             if (el) el.classList.remove('u-hide');
         });
+        // 24 oct. 2026 — de retour d'« Évaluer », le bouton du verrou dit l'état enregistré.
+        if (typeof window.mettreAJourVerrouAnnotation === 'function') window.mettreAJourVerrouAnnotation();
     }
 
     function afficherPalettesEval(fichier) {
@@ -5332,9 +5334,12 @@
     }
 
     /**
-     * Le cadenas (verrouiller / déverrouiller l'évaluation). UN seul dans la page :
+     * Le cadenas (verrouiller / déverrouiller l'évaluation). UN seul cadenas dans la page :
      * `btnVerrouPalette` est lu par `afficherOuMasquerBoutonVerrouillage` (evaluation.js),
-     * qui le montre dès qu'une évaluation enregistrée est chargée.
+     * qui le montre dès qu'une évaluation enregistrée est chargée. Les contrôles du verrou sont
+     * trois : ce cadenas et « Verrouiller l'évaluation » (Paramètres) disent l'état du formulaire ;
+     * le bouton de la palette Annotation (`travaux-annot-btn-verrou`, 24 oct. 2026), celui de la
+     * copie affichée (`mettreAJourVerrouAnnotation`).
      * @param {HTMLElement|null} parent
      * @param {boolean} enPremier - l'insérer en tête de `parent` plutôt qu'à la fin
      */
@@ -5482,6 +5487,11 @@
         const labelAnnotProd = document.getElementById('travaux-annot-label-production');
         if (labelAnnotProd) {
             labelAnnotProd.textContent = labelProd ? labelProd.textContent : '--';
+        }
+
+        // 24 oct. 2026 — le bouton du verrou de la palette Annotation suit la copie affichée.
+        if (typeof window.mettreAJourVerrouAnnotation === 'function') {
+            window.mettreAJourVerrouAnnotation();
         }
 
         // #1010 — tous les chemins qui ouvrent une évaluation passent ici : le signal

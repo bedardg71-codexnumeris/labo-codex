@@ -2095,7 +2095,8 @@ function appliquerJetonDelaiDepuisSidebar() {
 /**
  * Lot C de l'enregistrement (D1, Grégoire, 26 sept. 2026) — UNE SEULE PORTE POUR LE VERROU.
  * « Verrouiller l'évaluation » (le bouton du panneau Paramètres) et le cadenas (`btnVerrouPalette`,
- * en-tête de la palette ou du formulaire sans copie) appellent cette fonction, et elle seule :
+ * en-tête de la palette ou du formulaire sans copie) appellent cette fonction, et elle seule ; le
+ * bouton de la palette Annotation (24 oct. 2026) y passe aussi (`basculerVerrouDepuisAnnotation`) :
  *   · évaluation non verrouillée, ou pas encore créée → `sauvegarderEvaluation`, qui fait les
  *     vérifications (références, échelle résolue #697, portée #674), crée l'évaluation au besoin
  *     et la verrouille. Le cadenas verrouillait sans rien vérifier : ce raccourci est fermé ;
@@ -2119,9 +2120,22 @@ function basculerVerrouillageEvaluationCourante() {
         return;
     }
 
-    // Déverrouiller
+    _deverrouillerEvaluation(evaluations, index);
+}
+
+/**
+ * Le déverrouillage, noyau de la porte : `basculerVerrouillageEvaluationCourante` et le bouton de
+ * la palette Annotation l'appellent, sans vérification (cf. la porte). Le formulaire, le cadenas
+ * et `evaluationEnCours` ne bougent que si l'évaluation déverrouillée est celle du formulaire :
+ * en mode Annoter, il peut porter une AUTRE copie (#1142).
+ * @param {Array} evaluations - le tableau lu par `db.getSync(cle('evaluationsSauvegardees'))`
+ * @param {number} index - l'évaluation à déverrouiller dans ce tableau
+ */
+function _deverrouillerEvaluation(evaluations, index) {
     evaluations[index].verrouillee = false;
     const estVerrouillee = false;
+    const estCelleDuFormulaire = !!window.evaluationEnCours
+        && window.evaluationEnCours.idModification === evaluations[index].id;
 
     // Lot B de l'enregistrement (#618) : sur un échec, rien ne bascule à l'écran (cadenas,
     // formulaire, message) et le tableau lu reprend son état — il peut être l'objet du
@@ -2133,22 +2147,20 @@ function basculerVerrouillageEvaluationCourante() {
         return;
     }
 
-    // Mettre à jour evaluationEnCours pour refléter le changement
-    if (window.evaluationEnCours) {
+    if (estCelleDuFormulaire) {
+        // Mettre à jour evaluationEnCours pour refléter le changement
         window.evaluationEnCours.verrouillee = estVerrouillee;
-    }
-
-    // Mettre à jour l'icône de verrouillage
-    if (typeof mettreAJourBoutonVerrouillage === 'function') {
+        // Mettre à jour l'icône de verrouillage (et les deux boutons à libellé)
         mettreAJourBoutonVerrouillage(estVerrouillee);
+        // Activer/désactiver tous les champs du formulaire (sans reload)
+        desactiverFormulaireEvaluation(estVerrouillee);
+    } else {
+        // Le formulaire porte une autre copie : seuls les badges et le bouton d'Annotation suivent.
+        _poserCadenasDesBadges(estVerrouillee);
+        mettreAJourVerrouAnnotation();
     }
 
     notifications.succes(messageVerrouEvaluation(evaluations[index], false));
-
-    // Activer/désactiver tous les champs du formulaire (sans reload)
-    if (typeof desactiverFormulaireEvaluation === 'function') {
-        desactiverFormulaireEvaluation(estVerrouillee);
-    }
 
     // Mettre à jour le cadenas sur le badge du fichier actuel (sans reconstruire la grille)
     const fichierActuel = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
@@ -2186,8 +2198,14 @@ function mettreAJourBoutonVerrouillage(estVerrouillee) {
         btnVerrouPalette.setAttribute('aria-label', btnVerrouPalette.title);
     }
     _libellerBoutonVerrouiller(estVerrouillee);
+    _poserCadenasDesBadges(estVerrouillee);
+    // Le bouton de la palette Annotation dit l'état de la copie AFFICHÉE, lu en stockage : en mode
+    // Annoter, `estVerrouillee` (celui du formulaire) peut être celui d'une autre copie (#1142).
+    mettreAJourVerrouAnnotation();
+}
 
-    // Cadenas sur les badges (sidebar actif + toolbar)
+/** Cadenas sur les badges de la copie active (barre latérale + barre d'outils). */
+function _poserCadenasDesBadges(estVerrouillee) {
     const badgesActifs = [
         document.querySelector('.annot-badge.actif'),
         document.querySelector('#travaux-badge-fichier-actif .annot-badge')
@@ -2223,6 +2241,7 @@ function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
         _libellerBoutonVerrouiller(false);   // lot C — copie neuve : « Verrouiller l'évaluation »
         // Retirer le cadenas des badges
         document.querySelectorAll('.travaux-badge-verrou').forEach(el => el.remove());
+        mettreAJourVerrouAnnotation();
     }
 }
 
@@ -2298,11 +2317,110 @@ function desactiverFormulaireEvaluation(desactiver) {
 const TITRE_CADENAS_VERROUILLE = 'Verrouillée – clique pour déverrouiller';
 const TITRE_CADENAS_OUVERT = 'Non verrouillée – clique pour verrouiller';
 
+/** Les mots des deux boutons à libellé (Paramètres, Annotation) : les mêmes partout. */
+function _motDuBoutonVerrou(estVerrouillee) {
+    return estVerrouillee ? 'Déverrouiller l\'évaluation' : 'Verrouiller l\'évaluation';
+}
+
+/**
+ * Le bouton du panneau Paramètres (`btnVerrouillerEvaluation`) : l'état du FORMULAIRE. Son jumeau
+ * de la palette Annotation (`travaux-annot-btn-verrou`) est tenu par `mettreAJourVerrouAnnotation`.
+ */
 function _libellerBoutonVerrouiller(estVerrouillee) {
     const btn = document.getElementById('btnVerrouillerEvaluation');
     if (!btn) return;
-    btn.textContent = estVerrouillee ? 'Déverrouiller l\'évaluation' : 'Verrouiller l\'évaluation';
+    btn.textContent = _motDuBoutonVerrou(estVerrouillee);
     btn.disabled = false;
+}
+
+/* ===============================
+   LE VERROU DANS LA PALETTE ANNOTATION (24 oct. 2026)
+   ===============================
+   Demande de Grégoire (24 oct., 8 h 51) : après l'enregistrement, ajouter un commentaire, un
+   tampon ou un code sans faire le détour par la palette d'évaluation pour déverrouiller.
+   Le bouton dit l'état de l'évaluation de la copie AFFICHÉE, lu en stockage : en mode Annoter,
+   le formulaire et `evaluationEnCours` restent ceux de la dernière copie évaluée — naviguer
+   d'une copie à l'autre ne les recharge pas (`ouvrirFichier`, travaux-ui.js ; #1142). Caché
+   quand la copie n'a pas d'évaluation : la palette Annotation n'en crée pas. */
+
+/** L'évaluation active de la copie affichée (même résolution que les badges), ou null. */
+function _evaluationDeLaCopieAffichee() {
+    const fichier = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    const resolution = window.travauxResolution;
+    if (!fichier || !fichier.etudiantDA || !resolution) return null;
+    let production = fichier.productionId || '';
+    if (!production && typeof resolution.trouverProductionPourFichier === 'function') {
+        production = resolution.trouverProductionPourFichier(fichier) || '';
+    }
+    return resolution.trouverEvaluationPourFichier(Object.assign({}, fichier, { productionId: production }));
+}
+
+/** Montre (ou cache) le bouton de la palette Annotation et lui donne les mots de l'état. */
+function mettreAJourVerrouAnnotation() {
+    const btn = document.getElementById('travaux-annot-btn-verrou');
+    if (!btn) return;
+    const evaluation = _evaluationDeLaCopieAffichee();
+    if (btn.parentElement) btn.parentElement.classList.toggle('u-hide', !evaluation);
+    if (evaluation) btn.textContent = _motDuBoutonVerrou(evaluation.verrouillee === true);
+}
+
+/**
+ * Le clic du bouton de la palette Annotation. Une seule porte (lot C) :
+ *   · la copie affichée est celle du formulaire → `basculerVerrouillageEvaluationCourante`, telle quelle ;
+ *   · sinon, déverrouiller → le noyau de la porte, sur l'évaluation de la copie affichée (aucun
+ *     formulaire lu) ;
+ *   · sinon, verrouiller → la porte lit le formulaire, qui porte une autre copie : l'évaluation de
+ *     la copie affichée y est d'abord chargée par le chemin d'« Évaluer » (`basculerMode`), et la
+ *     porte n'est passée qu'une fois ce chargement fini et l'identité vérifiée. Faute de quoi,
+ *     rien n'est écrit : jamais un verrouillage avec les données d'une autre copie.
+ */
+async function basculerVerrouDepuisAnnotation() {
+    const evaluation = _evaluationDeLaCopieAffichee();
+    if (!evaluation) { mettreAJourVerrouAnnotation(); return; }
+    const fichier = travauxVisionneuse.getFichierActuel();
+    const enCours = window.evaluationEnCours;
+    if (enCours && enCours.idModification === evaluation.id && copieEstCelleDeLEvaluationEnCours(fichier.id)) {
+        basculerVerrouillageEvaluationCourante();
+        return;
+    }
+    if (evaluation.verrouillee === true) {
+        const evaluations = db.getSync(cle('evaluationsSauvegardees'), []);
+        const index = evaluations.findIndex(e => e.id === evaluation.id);
+        if (index !== -1 && evaluations[index].verrouillee === true) _deverrouillerEvaluation(evaluations, index);
+        return;
+    }
+    if (typeof travauxUI === 'undefined' || typeof travauxUI.basculerMode !== 'function') return;
+    travauxUI.basculerMode('evaluer');
+    if (await _attendreEvaluationChargee(evaluation.id, fichier.id)) {
+        basculerVerrouillageEvaluationCourante();
+    }
+}
+
+/**
+ * Attend que le formulaire porte l'évaluation `evaluationId` de la copie `fichierId`, chargement
+ * fini (`modifierEvaluation` a rendu son compteur, #960). `idModification` n'est posé que par ce
+ * chargement (`_initEvaluationEnCoursPourModif`) : un formulaire seulement réinitialisé pour la
+ * copie ne suffit pas. Bornée par `DELAI_BORNE_CHARGEMENT_EVALUATION` ; la copie quittée en
+ * chemin, faux.
+ * @returns {Promise<boolean>}
+ */
+function _attendreEvaluationChargee(evaluationId, fichierId) {
+    const debut = Date.now();
+    return new Promise(resolve => {
+        (function verifier() {
+            const actuel = travauxVisionneuse.getFichierActuel();
+            if (!actuel || actuel.id !== fichierId) return resolve(false);
+            const enCours = window.evaluationEnCours;
+            if (enCours && enCours.idModification === evaluationId
+                && !(window._chargementsEvaluationEnCours > 0) && !window._modifierEvaluationEnCours
+                && copieEstCelleDeLEvaluationEnCours(fichierId)) {
+                return resolve(true);
+            }
+            if (Date.now() - debut > DELAI_BORNE_CHARGEMENT_EVALUATION) return resolve(false);
+            setTimeout(verifier, 100);
+        })();
+    });
 }
 
 /**
@@ -2630,6 +2748,8 @@ window.copierCriteresSRPNF = copierCriteresSRPNF;
 // Exports requis pour le mode evaluation depuis la visionneuse (travaux-ui.js)
 window.changerEchelleEvaluation = changerEchelleEvaluation;
 window.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCourante;
+window.basculerVerrouDepuisAnnotation = basculerVerrouDepuisAnnotation;   // 24 oct. 2026 — le bouton de la palette Annotation
+window.mettreAJourVerrouAnnotation = mettreAJourVerrouAnnotation;         // appelé par travaux-ui.js et travaux-outils.js
 window.messageVerrouEvaluation = messageVerrouEvaluation;   // lot C — evaluation-sauvegarde.js
 window.nouvelleEvaluation = nouvelleEvaluation;
 
