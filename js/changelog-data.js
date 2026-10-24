@@ -21,6 +21,19 @@
 
     var CHANGELOG = [
         {
+            // 1.217 (les cinq bibliothèques de la Conception en menu déroulant, #1147 ; le verrou dans la palette
+            // Annotation ; les mots de l'aperçu du codex) — titre et trois items validés par Grégoire, mot pour mot,
+            // le 24 oct. 2026 vers 13 h 45. Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.217',
+            couleur: 'vert',
+            titre: 'Les bibliothèques en menu, et le verrou dans la palette',
+            items: [
+                'Conception&nbsp;: dans les cinq bibliothèques (productions, grilles, échelles, cartouches, pratiques), un menu au-dessus de la fiche remplace la barre latérale. Choisis-y ce que tu veux ouvrir&nbsp;: la fiche prend toute la largeur. Le tri des productions fonctionne maintenant.',
+                'Annoter&nbsp;: la palette Annotation porte aussi le bouton «&nbsp;Verrouiller l’évaluation&nbsp;» ou «&nbsp;Déverrouiller l’évaluation&nbsp;», pour la copie affichée.',
+                'Codex&nbsp;: la fenêtre qui précède l’écriture du fichier dit maintenant «&nbsp;Mettre à jour le codex&nbsp;», ou «&nbsp;Écrire le codex à part&nbsp;» avant une suppression. Son «&nbsp;i&nbsp;» explique ce que contient le fichier.'
+            ]
+        },
+        {
             // 1.216 (le critère algorithmique, étape 2b : la palette de blocs ; #1142, le compte d'erreurs écrit dans
             // l'évaluation d'une autre copie ; 1.216.1 : #1144, la cartouche qui remplaçait les critères de la grille ;
             // 1.216.2 : #1145, Évaluer qui réécrivait une évaluation) — titre et deux items validés par Grégoire, mot pour
