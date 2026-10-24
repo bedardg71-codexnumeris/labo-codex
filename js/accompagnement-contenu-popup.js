@@ -1722,26 +1722,29 @@ const AIDE_CONTEXTUELLE = {
         voirAussi: ['modal-export-preview']
     },
 
+    // La fenêtre d'aperçu (Défense K-β, docs/securite/MODELE-MENACES.md §X-02) : une seule aide
+    // pour le codex, l'archive, la configuration et les tampons. Mots de Cowork (24 oct. 2026) :
+    // ni « export », ni « téléchargement », ni jargon interne.
     'modal-export-preview': {
-        titre: "Aperçu avant téléchargement (Défense K-β)",
+        titre: "Ce que contient le fichier",
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette fenêtre te montre la liste des fichiers (ou la liste des champs racine pour un JSON) qui composent l'export, AVANT qu'il soit téléchargé. C'est la dernière barrière de sécurité — tu peux annuler si quelque chose paraît inattendu."
+                contenu: "Cette fenêtre te montre ce qui va entrer dans le fichier (la liste des fichiers et dossiers, ou celle des champs pour un fichier JSON), avant qu'il soit écrit. Tu peux encore annuler si quelque chose te paraît inattendu."
             },
             {
                 type: 'liste',
                 titre: "Ce que tu dois vérifier",
                 items: [
-                    "Les noms de fichiers correspondent à ce que tu exportes (pas de chemins suspects, pas de fichiers cachés).",
-                    "Pour un JSON, les champs racine sont ceux attendus (pas de clé ajoutée par un payload tiers).",
-                    "Le nombre de fichiers ou champs est cohérent avec ce que tu as configuré."
+                    "Les noms correspondent à ce que tu veux enregistrer : pas de chemin étrange, pas de fichier caché.",
+                    "Pour un fichier JSON, les champs sont ceux que tu attends.",
+                    "Le nombre de fichiers ou de champs correspond à ce que tu as préparé."
                 ]
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Si tu vois un nom de fichier que tu ne reconnais pas, ou un champ JSON suspect, clique « Annuler » et signale-le. C'est exactement le scénario que cette défense est conçue pour intercepter (cf. MODELE-MENACES.md)."
+                contenu: "Si tu vois un nom que tu ne reconnais pas, clique « Annuler » et signale-le."
             }
         ]
     },

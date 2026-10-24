@@ -210,3 +210,30 @@ test('verrou · verrouiller depuis Annoter verrouille l\'évaluation de la copie
     expect.soft(await boutonParametres(page), 'Paramètres (B chargée)').toBe('Déverrouiller l\'évaluation');
     expect(sansBruit(erreurs)).toEqual([]);
 });
+
+test('verrou · le chargement de l\'évaluation n\'aboutit pas : rien n\'est verrouillé, et c\'est dit', async ({ page }) => {
+    const erreurs = await monter(page, { verrouillee: false });
+    await allerAAnnoter(page);
+    await ouvrir(page, 'FTA1024');
+    await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
+    await attendreCopie(page, 'TESTA1024');
+    await page.evaluate(() => window.travauxUI.basculerMode('annoter'));
+    await page.waitForTimeout(500);
+    await ouvrir(page, 'FTB1024');
+
+    // La panne : les deux chargeurs de l'évaluation (celui des menus, puis `modifierEvaluation`) ne
+    // chargent rien. Le canal d'échec est écouté, pas remplacé.
+    await page.evaluate(() => {
+        window.verifierEtChargerEvaluationExistante = () => {};
+        window.modifierEvaluationParId = () => {};
+        window.__echecs = [];
+        const erreur = window.notifications.erreur;
+        window.notifications.erreur = function (titre) { window.__echecs.push(titre); return erreur.apply(this, arguments); };
+    });
+    await cliquerVerrou(page);
+    await page.waitForFunction(() => window.__echecs.length > 0, null, { timeout: 25000 });
+    expect.soft(await page.evaluate(() => window.__echecs)).toEqual(['L\'évaluation n\'a pas été verrouillée : son chargement n\'a pas abouti.']);
+    expect.soft(await stock(page, 'EVB1024'), 'B non verrouillée').toEqual({ verrouillee: false, erreurs: 11 });
+    expect.soft(await stock(page, 'EVA1024'), 'A n\'a pas bougé').toEqual({ verrouillee: false, erreurs: 1 });
+    expect(sansBruit(erreurs)).toEqual([]);
+});

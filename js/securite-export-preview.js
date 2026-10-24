@@ -88,7 +88,7 @@
             var btnAide = document.createElement('button');
             btnAide.className = 'btn-aide-contextuelle';
             btnAide.setAttribute('data-aide', 'modal-export-preview');
-            btnAide.setAttribute('aria-label', 'Aide : aperçu de l\'export');
+            btnAide.setAttribute('aria-label', 'Aide : ce que contient le fichier');   // mots de Cowork, 24 oct. 2026 : vrais pour tous les appelants
             btnAide.innerHTML = '<span class="icone-info-aide taille-bouton" aria-hidden="true"></span>';
             titre.appendChild(document.createTextNode(' '));
             titre.appendChild(btnAide);
