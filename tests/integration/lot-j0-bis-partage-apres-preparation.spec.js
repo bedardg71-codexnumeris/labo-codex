@@ -11,7 +11,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // =======================================================================
 //
 // Vécu le 30 sept. 2026 (iPad, Safari 27, 1.170.1, codex de 1,3 Go) : la préparation dure
-// 8 secondes après le toucher « Télécharger » de l'aperçu, puis `navigator.share` rend
+// 8 secondes après le toucher « Mettre à jour » de l’aperçu, puis `navigator.share` rend
 // NotAllowedError ; « Réessayer » réussit. Mesuré le même jour sous WebKit 26.4 : le partage
 // exige l'activation du dernier toucher, qui s'éteint après 5 s environ (actif à 4,5 s,
 // éteint à 5,5 s), et `navigator.userActivation.isActive` lit cette même activation.
@@ -178,7 +178,7 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
         // La fausse activation et le faux partage, tenus par les règles mesurées sous WebKit :
         //   · un clic (même scripté) accorde l'activation ; le partage la consomme ;
         //   · sans activation, le partage rejette NotAllowedError, le message de WebKit mot pour mot ;
-        //   · l'aperçu (faux) répond « Télécharger » : c'est le dernier toucher avant le partage ;
+        //   · l'aperçu (faux) répond « Mettre à jour » : c'est le dernier toucher avant le partage ;
         //     `__preparationLongue` dit si l'activation a expiré avant la fin de la préparation.
         await page.evaluate((refus) => {
             delete window.showSaveFilePicker;
@@ -464,7 +464,7 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
             return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
         }, [selecteur, texte]);
 
-        /** Menu « Codex » › « Mettre à jour le codex » › « Télécharger » de l'aperçu, en vrais clics. */
+        /** Menu « Codex » › « Mettre à jour le codex » › « Mettre à jour » de l'aperçu, en vrais clics. */
         async function mettreAJourParLeMenu(retardMs) {
             await page.evaluate((ms) => {
                 window.__retardPreparationMs = ms;
@@ -476,8 +476,8 @@ test.describe('Lot J0 bis (#988) — le partage du codex après une préparation
             await page.click('#btn-codex');
             await page.click('#codex-menu [data-action="Codex.actionEnregistrer"]');
             await page.waitForSelector('.export-preview-modal .btn-confirmer', { timeout: 30000 });
-            const telecharger = await centreDe('.export-preview-modal .btn-confirmer', 'Télécharger');
-            await page.mouse.click(telecharger.x, telecharger.y);      // le dernier toucher avant le partage
+            const mettreAJour = await centreDe('.export-preview-modal .btn-confirmer', 'Mettre à jour');
+            await page.mouse.click(mettreAJour.x, mettreAJour.y);      // le dernier toucher avant le partage
         }
         const lireLeJournal = () => page.evaluate(() => ({
             journal: window.__journalPartage.slice(), titres: window.__titresModales.slice(), toasts: window.__toasts.slice()
