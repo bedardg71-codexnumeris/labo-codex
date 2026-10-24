@@ -246,7 +246,10 @@ describe('4 · hors service, les mots de la section Cours sont ceux de 1.136.0 (
         expect(section).not.toContain('aucunObjet');
         expect(section).toContain('<p>Sélectionne un <span data-mot-nature="objet">cours</span> pour l\'éditer ou crée un nouveau cours.</p>');
         expect(section).toContain('<strong>Mode modification</strong> — <span id="v2-bandeauObjet">Cours</span> <strong id="v2-bandeauCodeCours"></strong>.');
-        expect(html).toContain('<span class="bc-label" data-mot-nature="Objet">Cours</span>');
+        // #1149, lot 3a (24 oct. 2026) : la barre du Trimestre est dessinée par le composant commun ; l'étape
+        // « Cours » y porte toujours `data-mot-nature="Objet"` (relu par appliquerMotsNatureCadre), posé par
+        // `mettreAJourBarreContexte` (le dessin réel est éprouvé par chaines-etapes-1149.spec.js).
+        expect(lire('js/trimestre-v2.js')).toMatch(/etape\('cours', mots\.Objet \|\| 'Cours'[^\n]*\{ motNature: 'Objet' \}/);
     });
 });
 

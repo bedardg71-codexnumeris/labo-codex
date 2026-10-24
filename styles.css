@@ -5834,6 +5834,7 @@ a.soutien-action:focus {
 }
 
 .bc-etape {
+    position: relative; /* l'état dit au lecteur d'écran (.u-lecteur-ecran) reste dans le bouton */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -5915,6 +5916,26 @@ a.soutien-action:focus {
 
 .bc-etape.bc-complet .bc-info {
     color: var(--accent-primaire);
+}
+
+/* #1149, lot 3a — « en attention » (sous 100 %) et « critique » (au-dessus) : l'info prend la couleur
+   du total affiché (grilles.js, couleurDuTotal) ; le nœud reste non réglé. Jetons à 4,5:1 et plus
+   dans les deux modes sur --surface-carte (calcul du 24 oct. : attention 6,3 clair / 7,1 sombre ;
+   erreur 6,6 clair / 4,5 sombre). --orange-accent du mode clair (#ff6b35) n'y passait pas (2,8:1). */
+.bc-etape.bc-attention .bc-info {
+    color: var(--alerte-texte-attention);
+    font-weight: 600;
+}
+
+.bc-etape.bc-critique .bc-info {
+    color: var(--etat-erreur-texte);
+    font-weight: 600;
+}
+
+/* L'option « Afficher les chaînes d'étapes » décochée (Préférences › Expérience visuelle) :
+   aucune chaîne, celle du Trimestre comprise (ChaineEtapes.afficherToutes). */
+body.chaines-etapes-masquees .barre-convergence {
+    display: none;
 }
 
 /* Ligne de liaison */
