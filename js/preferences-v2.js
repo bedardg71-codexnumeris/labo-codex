@@ -132,6 +132,9 @@
             contexteGraphiques.checked = obtenirPreference('afficherContexteGraphiques') !== false;
         }
 
+        // #1149, lot 3a : les chaînes d'étapes (la case, puis l'affichage).
+        chargerChainesEtapes();
+
         // Chrono évaluation
         const chronoEval = document.getElementById('v2-pref-chrono-eval');
         if (chronoEval) {
@@ -334,6 +337,9 @@
         appliquerAnimationPoints(animationActive);
 
         definir('afficherContexteGraphiques', document.getElementById('v2-pref-contexte-graphiques')?.checked !== false);
+        const afficherChaines = document.getElementById('v2-pref-chaines-etapes')?.checked !== false;   // #1149, lot 3a
+        definir('afficherChainesEtapes', afficherChaines);
+        appliquerChainesEtapes(afficherChaines);
         definir('chronoEvaluation', document.getElementById('v2-pref-chrono-eval')?.checked === true);
         definir('sisDefaut', document.getElementById('v2-pref-sis')?.value || 'lea');
 
@@ -491,6 +497,25 @@
     // =========================================================================
     // NOTIFICATIONS
     // =========================================================================
+
+    // =========================================================================
+    // #1149, LOT 3a (24 oct. 2026) : LES CHAÎNES D'ÉTAPES
+    // =========================================================================
+
+    /**
+     * La case suit la préférence AVANT toute écriture (#806 : `sauvegarderPreferencesV2` écrit tout le
+     * panneau à chaque changement), puis les chaînes s'affichent ou non. Préférence absente : true.
+     */
+    function chargerChainesEtapes() {
+        const afficher = obtenirPreference('afficherChainesEtapes') !== false;
+        const caseChaines = document.getElementById('v2-pref-chaines-etapes');
+        if (caseChaines) caseChaines.checked = afficher;
+        appliquerChainesEtapes(afficher);
+    }
+
+    function appliquerChainesEtapes(afficher) {
+        if (typeof ChaineEtapes !== 'undefined') ChaineEtapes.afficherToutes(afficher);
+    }
 
     // =========================================================================
     // 🆕 BETA 96.1 : ANIMATION DES POINTS DU TABLEAU DE BORD

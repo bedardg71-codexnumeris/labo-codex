@@ -826,10 +826,10 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     // « Sauvegarder la grille » (enregistrerCommeGrille) et sauvegarderGrilleComplete.
     const gesteExplicite = !silencieux && !appliquer;
     const criteresEnregistres = (grilleTemplateActuelle && grilleTemplateActuelle.criteres) || [];
-    if (gesteExplicite && criteresEnregistres.length > 0 && !ponderationEnPoints(criteresEnregistres)) {
-        const totalPonderation = criteresEnregistres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
-        if (totalPonderation !== 100) {
-            notifications.warning(`Grille enregistrée : ses critères totalisent ${totalPonderation}\u00a0%, pas 100\u00a0%.`);
+    if (gesteExplicite && criteresEnregistres.length > 0) {
+        const etat = etatPonderation(criteresEnregistres);   // #1149, lot 3a : la règle du total et de la chaîne
+        if (!etat.reglee) {
+            notifications.warning(`Grille enregistrée : ses critères totalisent ${etat.total}\u00a0%, pas 100\u00a0%.`);
         }
     }
 }
@@ -912,7 +912,7 @@ async function afficherGrillesCriteres() {
                 </div>
                 <div style="color: var(--gris-moyen); font-size: 0.85rem;">
                     <span class="grille-mr-20">${grille.criteres?.length || 0} critères</span>
-                    <span>Pondération totale : ${texteDuTotal(grille.criteres, grille.criteres?.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0) || 0)}</span>
+                    <span>Pondération totale : ${texteDuTotal(grille.criteres, etatPonderation(grille.criteres).total)}</span>
                 </div>
                 <details class="u-mt-10">
                     <summary style="cursor: pointer; color: var(--texte-secondaire); font-size: 0.9rem;">
@@ -1273,6 +1273,95 @@ function texteDuTotal(criteres, total) {
     return texteDePonderation(total, enPoints) + (n ? ' (' + n + (n > 1 ? ' critères sans points)' : ' critère sans points)') : '');
 }
 
+/**
+ * #1149, lot 3a (24 oct. 2026) — L'ÉTAT DE LA PONDÉRATION : une seule règle pour le total affiché sous
+ * les critères et pour l'étape « Pondération » de la chaîne de la grille. Avant, quatre sommes de deux
+ * façons et trois façons de colorer le total. La somme est celle de l'avertissement à l'enregistrement
+ * (`parseInt` : une pondération décimale enregistrée, 12,5, compte 12). Une grille en points est réglée.
+ */
+function etatPonderation(criteres) {
+    const liste = criteres || [];
+    const total = liste.reduce((sum, c) => sum + (parseInt(c && c.ponderation) || 0), 0);
+    const enPoints = ponderationEnPoints(liste);
+    return {
+        total: total,
+        enPoints: enPoints,
+        reglee: enPoints || total === 100,
+        enDessous: !enPoints && total < 100,
+        auDessus: !enPoints && total > 100
+    };
+}
+
+/**
+ * La couleur du total : orange sous 100 %, rouge au-dessus, vert à 100 %, aucune en points. Les jetons
+ * passent 4,5:1 dans les deux modes ; `.bc-attention` et `.bc-critique` (styles.css) lisent les mêmes.
+ */
+function couleurDuTotal(etat) {
+    if (etat.enPoints) return '';
+    if (etat.enDessous) return 'var(--alerte-texte-attention)';
+    if (etat.auDessus) return 'var(--etat-erreur-texte)';
+    return 'var(--etat-valide-texte)';
+}
+
+/** Le total sous les critères (`#totalPonderationAffichage`), puis la chaîne, au même moment. */
+function afficherTotalPonderation(criteres) {
+    const totalElement = document.getElementById('totalPonderationAffichage');
+    if (totalElement) {
+        const etat = etatPonderation(criteres);
+        totalElement.textContent = texteDuTotal(criteres, etat.total);
+        totalElement.style.color = couleurDuTotal(etat);
+    }
+    rendreChaineGrille(criteres);
+}
+
+/**
+ * #1149, lot 3a — LES TROIS ÉTAPES DE LA GRILLE (validées par Grégoire, 24 oct., 19 h 04). Fonction pure :
+ * les critères (du formulaire en création, du stockage sinon), les productions que l'écran des productions
+ * montre, l'identifiant de la grille (aucun en création).
+ * « Critères » compte les critères nommés : un critère sans nom n'est pas encore un critère.
+ */
+function etapesChaineGrille(criteres, productions, grilleId) {
+    const nommes = (criteres || []).filter(c => c && String(c.nom == null ? '' : c.nom).trim()).length;
+    const etat = etatPonderation(criteres);
+    const nbProd = grilleId ? (productions || []).filter(p => p && p.grilleId === grilleId).length : 0;
+    return [
+        { id: 'criteres', libelle: 'Critères', reglee: nommes > 0,
+          info: nommes === 0 ? 'aucun' : nommes + (nommes > 1 ? ' critères' : ' critère') },
+        { id: 'ponderation', libelle: 'Pondération', reglee: etat.reglee,
+          info: etat.enPoints ? 'en points' : formaterPourcentage(etat.total),
+          ton: etat.enDessous ? 'attention' : etat.auDessus ? 'critique' : '' },
+        { id: 'production', libelle: 'Production', arrivee: true, reglee: nbProd > 0,
+          info: nbProd === 0 ? 'aucune' : nbProd + ' prod.' }
+    ];
+}
+
+/** Les productions du trimestre actif que Conception › Productions étudiantes montre (afficherListeProductions). */
+function productionsVisiblesPourLaChaine() {
+    const productions = (typeof db !== 'undefined' && db.getSync) ? (db.getSync(cle('productions'), []) || []) : [];
+    const dansBibliotheque = productions.filter(p => p && p.dansBibliotheque !== false);
+    return (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.filtrerParModeDemo)
+        ? BibliothequeUI.filtrerParModeDemo(dansBibliotheque) : dansBibliotheque;
+}
+
+/** Dessine la chaîne en tête de la fiche ; elle paraît et part avec la fiche (`#conteneurEditionGrille`). */
+function rendreChaineGrille(criteres) {
+    const conteneur = document.getElementById('chaineGrille');
+    if (!conteneur || typeof ChaineEtapes === 'undefined') return;
+    const grilleId = grilleTemplateActuelle ? grilleTemplateActuelle.id : null;
+    ChaineEtapes.dessiner(conteneur, etapesChaineGrille(criteres, productionsVisiblesPourLaChaine(), grilleId),
+        { libelle: 'Étapes de la grille', surClic: suivreEtapeDeLaGrille });
+}
+
+/** Le clic : « Critères » descend à la liste, « Pondération » au total, « Production » ouvre les productions. */
+function suivreEtapeDeLaGrille(idEtape) {
+    if (idEtape === 'production') {
+        if (typeof afficherSousSection === 'function') afficherSousSection('conception-productions');
+        return;
+    }
+    const cible = document.getElementById(idEtape === 'criteres' ? 'listeCriteres' : 'totalPonderationAffichage');
+    if (cible) cible.scrollIntoView({ behavior: 'smooth', block: idEtape === 'criteres' ? 'start' : 'center' });
+}
+
 function getTypeCritereLabel(type) {
     const labels = {
         'holistique': 'Holistique',
@@ -1305,7 +1394,7 @@ function getTypeCritereLabel(type) {
  *    - Rouge si > 100%
  */
 function calculerTotalPonderationCriteres(criteres) {
-    const total = criteres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
+    const total = etatPonderation(criteres).total;
     const totalSpan = document.getElementById('totalPonderationCriteres');
     const statutSpan = document.getElementById('statutPonderationCriteres');
 
@@ -1430,7 +1519,7 @@ async function afficherToutesLesGrillesCriteres() {
      * Fonction helper pour calculer total pondération
      */
     function calculerTotal(criteres) {
-        const total = criteres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
+        const total = etatPonderation(criteres).total;
         let couleur = '#666';
         let texteStatut = '';
 
@@ -3373,12 +3462,8 @@ async function creerNouvelleGrille() {
     // Afficher le premier critère avec placeholders
     afficherCriteresTemp();
 
-    // Réinitialiser le total de pondération
-    const totalElement = document.getElementById('totalPonderationAffichage');
-    if (totalElement) {
-        totalElement.textContent = texteDePonderation(0, ponderationEnPoints(window.tempCriteres));
-        totalElement.style.color = 'var(--orange-accent)';
-    }
+    // Réinitialiser le total de pondération (et la chaîne de la grille, #1149)
+    afficherTotalPonderation(window.tempCriteres);
 
     // Une grille en création n'est pas encore dans le menu.
     MenuSelection.marquer('menuGrilles', null);
@@ -5187,6 +5272,7 @@ function modifierCritereTemp(index, champ, valeur) {
     if (champ === 'ponderation') poserPonderation(window.tempCriteres[index], valeur);
     else window.tempCriteres[index][champ] = valeur;
     if (champ === 'type') avecProjectionNeuve(window.tempCriteres[index]);   // lot 4, C.3
+    if (champ === 'nom') rendreChaineGrille(window.tempCriteres);   // #1149 : « Critères » compte les critères nommés
 }
 
 /**
@@ -5220,13 +5306,7 @@ function supprimerCritereTemp(index) {
  * Met à jour le total de pondération pour les critères temporaires
  */
 function mettreAJourTotalTemp() {
-    const total = (window.tempCriteres || []).reduce((sum, c) => sum + (c.ponderation || 0), 0);
-    const totalElement = document.getElementById('totalPonderationAffichage');
-    if (totalElement) {
-        const enPoints = ponderationEnPoints(window.tempCriteres);
-        totalElement.textContent = texteDuTotal(window.tempCriteres, total);
-        totalElement.style.color = enPoints ? '' : total === 100 ? 'var(--vert-accent)' : 'var(--orange-accent)';
-    }
+    afficherTotalPonderation(window.tempCriteres);   // #1149, lot 3a : la règle du total et de la chaîne
 }
 
 /**
@@ -5394,6 +5474,7 @@ function afficherCriteresGrille(grille) {
 
     if (!grille.criteres || grille.criteres.length === 0) {
         container.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucun critère défini</p>';
+        calculerEtAfficherTotalPonderation(grille);   // #1149 : sinon le total et la chaîne gardaient la grille d'avant
         return;
     }
 
@@ -5474,30 +5555,7 @@ function afficherCriteresGrille(grille) {
  * Calcule et affiche le total de pondération des critères
  */
 function calculerEtAfficherTotalPonderation(grille) {
-    const totalElement = document.getElementById('totalPonderationAffichage');
-    if (!totalElement) return;
-
-    let total = 0;
-    if (grille && grille.criteres) {
-        total = grille.criteres.reduce((sum, c) => sum + (parseInt(c.ponderation) || 0), 0);
-    }
-
-    if (ponderationEnPoints(grille && grille.criteres)) {
-        totalElement.textContent = texteDuTotal(grille.criteres, total);
-        totalElement.style.color = '';
-        return;
-    }
-
-    totalElement.textContent = formaterPourcentage(total);
-
-    // Changer la couleur selon le total
-    if (total === 100) {
-        totalElement.style.color = 'var(--vert-moyen)';
-    } else if (total > 100) {
-        totalElement.style.color = 'var(--rouge)';
-    } else {
-        totalElement.style.color = 'var(--orange-accent)';
-    }
+    afficherTotalPonderation(grille && grille.criteres);   // #1149, lot 3a : la règle du total et de la chaîne
 }
 
 /**
@@ -5574,6 +5632,8 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
         grilleTemplateActuelle = grille;
     }
+
+    if (champ === 'nom') rendreChaineGrille(grille.criteres);   // #1149 : « Critères » compte les critères nommés
 
     // Recalculer et afficher la pondération totale
     if (champ === 'ponderation') {
@@ -6014,6 +6074,9 @@ window.modifierCritereTemp = modifierCritereTemp;
 window.ajouterCritereTemp = ajouterCritereTemp;
 window.supprimerCritereTemp = supprimerCritereTemp;
 window.mettreAJourTotalTemp = mettreAJourTotalTemp;
+window.etatPonderation = etatPonderation;   // #1149, lot 3a : la règle du total et de la chaîne
+window.etapesChaineGrille = etapesChaineGrille;
+window.rendreChaineGrille = rendreChaineGrille;
 window.deplacerCritereTempHaut = deplacerCritereTempHaut;
 window.deplacerCritereTempBas = deplacerCritereTempBas;
 window.deplacerCritereGrilleHaut = deplacerCritereGrilleHaut;

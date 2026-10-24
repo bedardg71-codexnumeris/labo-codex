@@ -66,6 +66,9 @@
         afficherSeuilsVisuels: true,
         afficherDeveloppementHabiletes: true,
         afficherContexteGraphiques: true,
+        // #1149, lot 3a (24 oct. 2026) : les chaînes d'étapes en tête des outils (Trimestre, Grilles…).
+        // Préférence neuve : absente, elle vaut true ; rien à migrer.
+        afficherChainesEtapes: true,
         animationPoints: true,
         chronoEvaluation: false,
         // #321 — « note différée » (couche 1 PRÉN) : masque les notes PAR TRAVAIL

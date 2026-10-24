@@ -545,76 +545,49 @@ function allerVersAide(idAccordeon) {
 /**
  * Met à jour la barre de convergence en haut de la page Trimestre.
  * Vérifie l'état de chaque composante et affiche complété/incomplet.
+ * #1149, lot 3a (24 oct. 2026) : le dessin et le clic passent par le composant commun
+ * (js/chaine-etapes.js) ; `#barreConvergence` n'est plus que son conteneur. Le clic était
+ * écouté sur tout le document (`.bc-etape`) : il aurait attrapé ceux de la chaîne des grilles.
  */
 function mettreAJourBarreContexte() {
     const barre = document.getElementById('barreConvergence');
-    if (!barre || typeof db === 'undefined' || !db.getSync) return;
+    if (!barre || typeof db === 'undefined' || !db.getSync || typeof ChaineEtapes === 'undefined') return;
 
     // #642 (12 oct. 2026) : plus d'alias local `cle` (il masquait le helper) ; `window.cle`
     // est posé par trimestres.js, chargé avant.
-    // Vérifier chaque composante
-    const etapes = {
-        'trimestre': {
-            ok: !!db.getSync('trimestreActif', null),
-            info: db.getSync('trimestreActif', '') ? 'Actif' : ''
-        },
-        'cours': {
-            ok: (db.getSync('cours', []) || []).length > 0,
-            info: (() => { const n = (db.getSync('cours', []) || []).length; return n > 0 ? n + ' cours' : ''; })()
-        },
-        'enseignant': {
-            ok: (db.getSync('enseignants', []) || []).length > 0,
-            info: (() => { const e = db.getSync('enseignants', []) || []; return e.length > 0 && e[0].nom ? e[0].prenom + ' ' + e[0].nom : ''; })()
-        },
-        'etudiants': {
-            ok: (db.getSync(cle('groupeEtudiants'), []) || []).length > 0,
-            info: (() => { const n = (db.getSync(cle('groupeEtudiants'), []) || []).length; return n > 0 ? n + ' étud.' : ''; })()
-        },
-        'horaire': {
-            ok: (db.getSync(cle('horaires'), []) || []).length > 0,
-            info: (() => { const n = (db.getSync(cle('horaires'), []) || []).length; return n > 0 ? n + ' hor.' : ''; })()
-        },
-        'groupe-cours': {
-            ok: (db.getSync(cle('groupesCours'), []) || []).length > 0,
-            info: (() => { const n = (db.getSync(cle('groupesCours'), []) || []).length; return n > 0 ? n + ' GC' : ''; })()
-        }
-    };
+    // Les mots du contexte (cours ou service) : ceux que `appliquerMotsNatureCadre` pose aussi.
+    const mots = typeof motsNatureContexteActif === 'function' ? motsNatureContexteActif() : {};
+    const nb = (cleLue) => (db.getSync(cleLue, []) || []).length;
+    const etape = (id, libelle, n, suffixe) => ({ id, libelle, reglee: n > 0, info: n > 0 ? n + suffixe : '' });
+    const enseignants = db.getSync('enseignants', []) || [];
+    const premier = enseignants[0];
+    const etapes = [
+        { id: 'trimestre', libelle: 'Trimestre', reglee: !!db.getSync('trimestreActif', null),
+          info: db.getSync('trimestreActif', '') ? 'Actif' : '' },
+        Object.assign(etape('cours', mots.Objet || 'Cours', nb('cours'), ' cours'), { motNature: 'Objet' }),
+        { id: 'enseignant', libelle: mots.Personne || 'Enseignant·e', motNature: 'Personne', reglee: !!premier,
+          info: premier && premier.nom ? premier.prenom + ' ' + premier.nom : '' },
+        etape('etudiants', 'Étudiant·es', nb(cle('groupeEtudiants')), ' étud.'),
+        etape('horaire', 'Horaire', nb(cle('horaires')), ' hor.'),
+        Object.assign(etape('groupe-cours', 'Groupe-cours', nb(cle('groupesCours')), ' GC'), { arrivee: true })
+    ];
 
-    // Appliquer l'état visuel à chaque étape
-    const boutons = barre.querySelectorAll('.bc-etape');
-    let precedentComplet = true;
-
-    boutons.forEach(btn => {
-        const id = btn.dataset.etape;
-        const etat = etapes[id];
-        if (!etat) return;
-
-        // Toggle classe complété
-        btn.classList.toggle('bc-complet', etat.ok);
-
-        // Mettre à jour le compteur
-        const infoEl = btn.querySelector('.bc-info');
-        if (infoEl) infoEl.textContent = etat.info;
-
-        // Mettre à jour la liaison précédente
-        const liaisonPrecedente = btn.previousElementSibling;
-        if (liaisonPrecedente && liaisonPrecedente.classList.contains('bc-liaison')) {
-            liaisonPrecedente.classList.toggle('bc-liaison-ok', precedentComplet && etat.ok);
-        }
-
-        precedentComplet = etat.ok;
-    });
+    ChaineEtapes.dessiner(barre, etapes, { surClic: ouvrirAccordeonDeLEtape, prefixeIdInfo: 'bc-info-' });
 }
 
-// Click handler : scroll vers l'accordéon et l'ouvrir
-document.addEventListener('click', function(e) {
-    const etape = e.target.closest('.bc-etape');
-    if (!etape) return;
+/** L'accordéon que chaque étape de la barre ouvre. */
+const ACCORDEON_DE_L_ETAPE = {
+    'trimestre': 'accordeon-gestion-trimestres',
+    'cours': 'accordeon-cours',
+    'enseignant': 'accordeon-enseignant',
+    'etudiants': 'accordeon-groupe-etudiants',
+    'horaire': 'accordeon-horaire',
+    'groupe-cours': 'accordeon-groupe-cours'
+};
 
-    const accordeonId = etape.dataset.accordeon;
-    if (!accordeonId) return;
-
-    const accordeon = document.getElementById(accordeonId);
+// Clic sur une étape : scroll vers l'accordéon et l'ouvrir
+function ouvrirAccordeonDeLEtape(idEtape) {
+    const accordeon = document.getElementById(ACCORDEON_DE_L_ETAPE[idEtape]);
     if (!accordeon) return;
 
     // Ouvrir si fermé
@@ -629,7 +602,7 @@ document.addEventListener('click', function(e) {
     setTimeout(function() {
         accordeon.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
-});
+}
 
 window.mettreAJourBarreContexte = mettreAJourBarreContexte;
 
