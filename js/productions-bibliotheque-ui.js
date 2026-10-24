@@ -67,7 +67,7 @@ async function preparerDonneesBibliothequeProductions() {
         boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerProductionBibliotheque', param: prod.id, classe: 'btn-confirmer', title: 'Créer une copie' },
         actionsMenu: [
             { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'production', param2: prod.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-            { label: 'Retirer', action: 'retirerProductionDeBibliotheque', param: prod.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Retirer', action: 'retirerProductionDeBibliotheque', param: prod.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
             { label: 'Supprimer', action: 'supprimerProductionDefinitivement', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
     }));
@@ -179,7 +179,7 @@ async function afficherBibliothequeProductions() {
     // Section 1
     let contenuSection1 = '';
     if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production dans la barre latérale</p>';
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production dans ta sélection</p>';
     } else {
         data.cartesSection1.forEach(carte => {
             contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
@@ -250,7 +250,7 @@ async function afficherBibliothequeProductions() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeProductions',
         titre: 'Bibliothèque de productions',
-        sousTitre: 'Gérez les productions affichées dans la barre latérale.',
+        sousTitre: 'Gérez les productions offertes dans ta sélection.',
         onFermer: 'fermerModalBibliothequeProductions',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.productionsDansSelection,
@@ -264,7 +264,7 @@ async function afficherBibliothequeProductions() {
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
         sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Productions disponibles à ajouter à la barre latérale',
+        titreSection2: 'Productions disponibles à ajouter à ta sélection',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeProductionsDisponibles',
         contenuSection2: contenuSection2,
@@ -653,7 +653,7 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
 async function retirerProductionDeBibliotheque(id) {
     const okRetrait = await uiDialogues.confirmerAction({
         titre: 'Retirer de la sélection',
-        message: 'Retirer cette production de ta sélection ? Elle ne sera plus affichée dans la barre latérale mais restera disponible dans le gestionnaire.',
+        message: 'Retirer cette production de ta sélection ? Elle ne sera plus offerte dans le menu mais restera disponible dans le gestionnaire.',
         texteConfirmer: 'Retirer'
     });
     if (!okRetrait) {

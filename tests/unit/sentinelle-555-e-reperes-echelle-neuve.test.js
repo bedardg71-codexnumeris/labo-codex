@@ -48,7 +48,7 @@ function monter() {
     // pour lire ensuite ce que le rendu y a écrit.
     const elements = {};
     const element = (id) => {
-        if (!elements[id]) elements[id] = { id, value: '', innerHTML: '', classList: { add() {}, remove() {} } };
+        if (!elements[id]) elements[id] = { id, value: '', innerHTML: '', classList: { add() {}, remove() {}, contains: () => false } };   // contains : #1147, le menu lit si la fiche est ouverte
         return elements[id];
     };
     const lecteurs = vraisLecteurs();
@@ -74,7 +74,8 @@ function monter() {
         genererIdUnique: (p) => p + 'NEUVE',
         nommerCopie: (nom) => nom + ' (copie)',
         obtenirIdentiteCCUtilisateur: () => 'test',
-        BibliothequeUI: new Proxy({}, { get: () => (() => '') }),
+        // #1147 : les filtres rendent la liste (le menu la parcourt) ; le reste, du vide.
+        BibliothequeUI: new Proxy({}, { get: (_, nom) => (String(nom).startsWith('filtrer') ? (l) => l : () => '') }),
         notifications: { succes: () => {}, info: () => {}, avertissement: () => {}, erreur: () => {} },
         echelleTemplateActuelle: null,
         travauxOutils: { renderPickerCouleur: () => '' },

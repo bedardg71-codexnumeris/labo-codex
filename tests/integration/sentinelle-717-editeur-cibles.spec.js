@@ -41,9 +41,13 @@ const lignes = (page, sel) => page.evaluate((sel) => [...document.querySelectorA
 test('gestion des pratiques · déplacer, renommer, retirer : les ids restent, la question précède l\'écriture', async ({ page }) => {
     await preparer(page);
     await page.evaluate(() => { window.afficherSection('conception'); window.afficherSousSection('conception-pratiques-notation'); });
-    // Le geste réel : cliquer la pratique dans la liste latérale ouvre son formulaire.
+    // Le geste réel : choisir la pratique dans le menu de la sélection ouvre son formulaire (#1147).
     await page.evaluate(() => window.afficherListePratiquesMateriel());
-    await page.locator('#sidebarListePratiques .sidebar-item[data-id="P_DEN_717"]').click();
+    // L'initialisation de la sous-section part 100 ms après `afficherSousSection` (navigation.js) et referme la
+    // fiche : le clic sur une carte de l'ancienne barre l'attendait par construction (la barre redessinée), le
+    // choix au menu non — on la laisse passer, comme l'enseignant qui arrive à l'écran.
+    await page.waitForTimeout(300);
+    await page.locator('#menuPratiques').selectOption('P_DEN_717');
     await expect(page.locator('#mat-den-cibles .editeur-cibles-ligne').first()).toBeVisible();
     const liste = page.locator('#mat-den-cibles');
     await expect(liste.locator('.editeur-cibles-ligne')).toHaveCount(2);

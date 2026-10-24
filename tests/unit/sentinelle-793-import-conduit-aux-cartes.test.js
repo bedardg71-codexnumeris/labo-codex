@@ -65,7 +65,7 @@ describe('#793 · A — conduireAuxImportes', () => {
     it('A.c aucune carte ne porte l\'import, case « Masquer » cochée : la phrase le dit', async () => {
         const { w } = monter({ cartes: [], masquage: true });
         const ligne = await w.BibliothequeUI.conduireAuxImportes('modalBiblio', () => {}, ['ECH_1']);
-        expect(ligne).toContain('décoche « Masquer les éléments déjà dans la barre latérale »');
+        expect(ligne).toContain('décoche « Masquer les éléments déjà dans ta sélection »');
     });
 
     it('A.d aucune carte, case présente mais décochée (un dossier, un autre filtre) : rien n\'est dit', async () => {

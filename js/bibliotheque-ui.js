@@ -154,7 +154,7 @@
                     'data-on-change="BibliothequeUI.basculerMasquerDejaPresent" ' +
                     'data-refresh-fn="' + refreshFnName + '" ' +
                     (actif ? 'checked' : '') + '>' +
-                'Masquer les éléments déjà dans la barre latérale' +
+                'Masquer les éléments déjà dans ta sélection' +
             '</label>' +
         '</div>';
     };
@@ -738,7 +738,7 @@
      * - Plus de badge `Bibliothèque` (no-op contextuel — la modale s'appelle déjà ainsi)
      * - Plus de badge violet `Démo` (items démo filtrés par A.0 en mode normal)
      * - Plus de badge `Locale` (redondant : Section 1 par définition tous locaux ;
-     *   Section 2 a déjà un message « Déjà dans la barre latérale » quand applicable)
+     *   Section 2 a déjà un message « Déjà dans ta sélection » quand applicable)
      * Ne reste que `Retirée` (état distinct, signal d'action utile).
      * Le 2e argument `itemsLocaux` est conservé pour compatibilité API.
      */
@@ -1021,7 +1021,7 @@
                     ligneInspireDe +
                     '<div class="biblio-carte-meta">' + opts.metadonnees + puceId + '</div>' +
                     descHTML +
-                    (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans la barre latérale</div>' : '') +
+                    (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans ta sélection</div>' : '') +
                 '</div>' +
                 actionsHTML +
             '</div>' +
@@ -1163,7 +1163,7 @@
                     boutons.push({
                         label: 'Retirer', action: actions.retirer, param: ex.id, param2: param2,
                         classe: 'btn-secondaire',
-                        title: 'Retirer de la barre latérale (données conservées)'
+                        title: 'Retirer de ta sélection (données conservées)'
                     });
                 }
                 if (dansSelection && actions.supprimer) {
@@ -1194,7 +1194,7 @@
                         BibliothequeUI.renderPuceId(ex.id) +
                         (date ? '<span class="biblio-doublon-date">modifié le ' + echapperHtml(date) + '</span>' : '') +
                         BibliothequeUI.genererBadgeSource(item) +
-                        (dansSelection ? '<span class="biblio-doublon-lieu">Dans ta barre latérale</span>'
+                        (dansSelection ? '<span class="biblio-doublon-lieu">Dans ta sélection</span>'
                                        : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">Bibliothèque</span>') +
                         reperes +
                     '</span>' +
@@ -1332,7 +1332,7 @@
         var caseMasquer = (modal && typeof modal.querySelector === 'function')
             ? modal.querySelector('.biblio-toggle-deja-present input[type="checkbox"]') : null;
         if (caseMasquer && caseMasquer.checked) {
-            return 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans la barre latérale » pour les voir.';
+            return 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans ta sélection » pour les voir.';
         }
         return (options && options.repliFiltre)
             ? 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.'

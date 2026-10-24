@@ -159,7 +159,7 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
         cles: Object.keys(pratique), cleConfig: pratique.config ? Object.keys(pratique.config) : [] } : null;
     if (pratique) {
         await page.evaluate((id) => { window.chargerPratiquePourModif(id); }, pratique.id);
-        await attendre(page, (id) => !!document.querySelector(`#sidebarListePratiques .sidebar-item[data-id="${id}"]`), pratique.id);
+        await attendre(page, (id) => document.getElementById('menuPratiques')?.value === id, pratique.id);   // #1147 : le menu montre la pratique ouverte
         await page.evaluate(() => document.querySelector('button[data-action="appliquerPratiqueAuCoursActive"]').click());
         await attendre(page, (id) => (window.db.getSync(window.cle('groupesCours'), []) || [])[0]?.pratiqueId === id, pratique.id);
         R.etapes.assistant.appliquee = await page.evaluate(() => (window.db.getSync(window.cle('groupesCours'), []) || [])[0]?.pratiqueId || null);

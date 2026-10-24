@@ -309,15 +309,17 @@ describe('lot 1 · C — en édition : une grille d\'avant ce lot fonctionne com
         expect(ligne(document), 'le champ retiré, la déduction revient').toBe('Tes critères sont tous holistiques.');
     });
 
-    it('C.g le badge de la barre latérale est rafraîchi quand un critère change de type', async () => {
+    // #1147 (24 oct. 2026) : la barre latérale et son badge de composition sont partis ; le menu de la sélection,
+    // lui, est redessiné (le nom seul) — le geste qui rafraîchissait le badge reste éprouvé.
+    it('C.g le menu de la sélection est redessiné quand un critère change de type', async () => {
         const { win, document, grilles } = monter(GRILLES_AVANT());
         await win.chargerGrillePourModif('G0');
         expect(ligne(document)).toBe('Tes critères sont tous holistiques.');
-        const barre = document.getElementById('sidebarListeGrilles');
+        const barre = document.getElementById('selectionGrilles');
         barre.innerHTML = '';
         await win.modifierTypeCritereGrilleHandler({ dataset: { grilleId: 'G0', critereIndex: '1' }, value: 'algorithmique' });
         expect(grilles().find(x => x.id === 'G0').criteres[1].type).toBe('algorithmique');
-        expect(barre.innerHTML, 'la barre latérale a été re-rendue').not.toBe('');
+        expect(barre.innerHTML, 'le menu a été redessiné').toContain('<select id="menuGrilles"');
         expect(ligne(document), 'mixte désormais : la ligne suit sans rechargement').toBe('');
     });
 

@@ -73,30 +73,31 @@ describe('#467 · A — les cartes de la Bibliothèque', () => {
 
 /* ------------------------------------------------ B — trois barres latérales */
 
-describe('#467 · B — les barres latérales affichent le nom, elles ne l\'exécutent pas', () => {
+describe('#467 · B — les sélections affichent le nom, elles ne l\'exécutent pas (#1147 : des menus, plus des barres latérales)', () => {
     const BibliothequeUI = { filtrerParModeDemo: (l) => l, filtrerParMaquette: (l) => l };
 
     it('B.a pratiques', async () => {
-        const { els, document } = conteneurs(['sidebarListePratiques']);
+        // #1147 (24 oct. 2026) : la sélection est un menu, dessiné dans son emplacement de la rangée.
+        const { els, document } = conteneurs(['selectionPratiques']);
         const win = chargerScript('js/pratiques-gestion.js', {
             document, echapperHtml, BibliothequeUI, cle: (k) => 'a2026_' + k,
             db: { getSync: () => [{ id: 'P1', nom: CHARGE + 'Pratique reçue', dansBibliotheque: true }] },
             genererBadgeTypePratique: () => '', obtenirIdPratiqueActive: () => null
         });
         await win.afficherListePratiquesMateriel();
-        expect(els.sidebarListePratiques.innerHTML).toContain('&lt;img');
-        expect(els.sidebarListePratiques.innerHTML).not.toContain('<img');
+        expect(els.selectionPratiques.innerHTML).toContain('&lt;img');
+        expect(els.selectionPratiques.innerHTML).not.toContain('<img');
     });
 
     it('B.b échelles', async () => {
-        const { els, document } = conteneurs(['sidebarListeEchelles']);
+        const { els, document } = conteneurs(['selectionEchelles']);
         const win = chargerScript('js/echelles.js', {
             document, echapperHtml, BibliothequeUI, cle: (k) => 'a2026_' + k,
             db: { get: async () => [{ id: 'E1', nom: CHARGE + 'Échelle reçue', niveaux: [] }], getSync: (k, d) => d }
         });
         await win.afficherListeEchelles();
-        expect(els.sidebarListeEchelles.innerHTML).toContain('&lt;img');
-        expect(els.sidebarListeEchelles.innerHTML).not.toContain('<img');
+        expect(els.selectionEchelles.innerHTML).toContain('&lt;img');
+        expect(els.selectionEchelles.innerHTML).not.toContain('<img');
     });
 
     it('B.c ensembles d\'objectifs', () => {
@@ -206,8 +207,8 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // une rangée porte son rang (`${i}`) et la borne de l'assistant (`${max}`), deux nombres. Le nom d'un
     // sous-critère passe par `echapperHtml`.
     const NUES = {
-        'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 24, /* #1137 (22 oct.) : −5, passées par formaterPourcentage */ 'js/echelles.js': 21, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie */
-        'js/grilles.js': 72 /* étape 2b : −1, la rangée « Poser : » des paliers */, 'js/cartouches.js': 16, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 13,
+        'js/bibliotheque-ui.js': 29, 'js/pratiques-gestion.js': 21, /* #1137 (22 oct.) : −5, passées par formaterPourcentage ; #1147 (24 oct.) : −3, la barre latérale et ses badges partis */ 'js/echelles.js': 19, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie ; #1147 : −2, la barre latérale */
+        'js/grilles.js': 68 /* étape 2b : −1, la rangée « Poser : » des paliers ; #1147 : −4, la barre latérale */, 'js/cartouches.js': 15 /* #1147 : −1 */, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 11 /* #1147 : −2, le surlignage de la barre latérale */,
         'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 89,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 106, /* #1137 (22 oct.) : −6, passées par formaterPourcentage */ 'js/trimestre-v2-cours.js': 4

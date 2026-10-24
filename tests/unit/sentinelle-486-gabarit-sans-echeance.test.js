@@ -27,7 +27,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //        au calendrier, ou l'inverse.
 //   S3 — `validerChampsObligatoiresProduction` ne bloque PLUS sur la date, et
 //        bloque TOUJOURS sur titre / type / pondération.
-//   S4 — la liste de la barre latérale pose réellement le badge « à planifier »
+//   S4 — le menu de la sélection pose réellement « (à planifier) » (#1147 : c'était un badge de la barre latérale)
 //        sur les gabarits sans échéance, et le refuse au portfolio conteneur
 //        (dispensé de date par construction : seuls ses artefacts en ont une).
 
@@ -66,7 +66,8 @@ const FORMULAIRE = (extra = {}) => ({
 });
 
 /**
- * Rend la barre latérale des productions et retourne le HTML injecté.
+ * Rend la sélection des productions (#1147 : un menu déroulant, plus une barre latérale) et retourne
+ * le HTML injecté dans son emplacement.
  *
  * `aucuneEcheanceAssignee` est injectée explicitement comme globale. Dans le
  * navigateur, productions-liste.js la résout par la chaîne de portées jusqu'à
@@ -82,11 +83,12 @@ async function rendreListe(productions, fnAucuneEcheance) {
               set: async () => {}, setSync: () => {} },
         cle: (k) => 'h2026_' + k,
         aucuneEcheanceAssignee: fnAucuneEcheance,
+        productionEnEdition: null,   // #1147 : le menu lit la fiche ouverte (config.js)
         BibliothequeUI: { filtrerParModeDemo: (arr) => arr },
         GabaritsUtils: { genererBadgesPratiques: () => '' },
         echapperHtml: (t) => String(t == null ? '' : t),
         document: {
-            getElementById: (id) => (id === 'sidebarListeProductions' ? conteneur : null),
+            getElementById: (id) => (id === 'selectionProductions' ? conteneur : null),
             querySelector: () => null, querySelectorAll: () => [], addEventListener() {}
         }
     });
@@ -246,18 +248,17 @@ describe('#486 · S3 — la date ne bloque plus, le reste bloque toujours', () =
     });
 });
 
-/* ---------------------------------------- S4 · le badge dans la sidebar */
+/* ---------------------------------------- S4 · l'état dans le menu (#1147 : il était un badge de la barre) */
 
-describe('#486 · S4 — la barre latérale signale les gabarits à planifier', () => {
-    it('un gabarit sans échéance porte le badge « à planifier »', async () => {
+describe('#486 · S4 — le menu de la sélection signale les gabarits à planifier', () => {
+    it('un gabarit sans échéance porte « (à planifier) » après son titre', async () => {
         const win = chargerProductions();
         const html = await rendreListe(
             [{ id: 'PROD_1', titre: 'Description de personnage', type: 'travail',
                ponderation: 20, dateEcheance: null }],
             win.aucuneEcheanceAssignee
         );
-        expect(html).toContain('badge-a-planifier');
-        expect(html).toContain('à planifier');
+        expect(html).toContain('>Description de personnage (à planifier)</option>');
     });
 
     it('un gabarit daté n\'en porte pas', async () => {
@@ -267,7 +268,7 @@ describe('#486 · S4 — la barre latérale signale les gabarits à planifier', 
                ponderation: 20, dateEcheance: '2026-11-15' }],
             win.aucuneEcheanceAssignee
         );
-        expect(html).not.toContain('badge-a-planifier');
+        expect(html).not.toContain('(à planifier)');
     });
 
     it('le portfolio conteneur est exclu : il n\'a JAMAIS de date propre', async () => {
@@ -276,16 +277,16 @@ describe('#486 · S4 — la barre latérale signale les gabarits à planifier', 
             [{ id: 'PROD_P', titre: 'Portfolio', type: 'portfolio', dateEcheance: null }],
             win.aucuneEcheanceAssignee
         );
-        expect(html).not.toContain('badge-a-planifier');
+        expect(html).not.toContain('(à planifier)');
     });
 
-    it('un artefact sans date porte le badge (les artefacts, eux, ont une échéance)', async () => {
+    it('un artefact sans date le porte (les artefacts, eux, ont une échéance)', async () => {
         const win = chargerProductions();
         const html = await rendreListe(
             [{ id: 'PROD_A', titre: 'Artefact 3', type: 'artefact-portfolio', dateEcheance: null }],
             win.aucuneEcheanceAssignee
         );
-        expect(html).toContain('badge-a-planifier');
+        expect(html).toContain('>Artefact 3 (à planifier)</option>');
     });
 
     it('le badge se pose par production, pas sur la liste entière', async () => {
@@ -296,6 +297,8 @@ describe('#486 · S4 — la barre latérale signale les gabarits à planifier', 
             { id: 'PROD_3', titre: 'Décochée', type: 'travail', ponderation: 10,
               echeancesParGroupe: { gc_1: { assignee: false, date: '2026-11-15' } } }
         ], win.aucuneEcheanceAssignee);
-        expect((html.match(/badge-a-planifier/g) || []).length).toBe(2);
+        expect((html.match(/\(à planifier\)/g) || []).length).toBe(2);
+        expect(html).toContain('>Sans date (à planifier)</option>');
+        expect(html).toContain('>Décochée (à planifier)</option>');
     });
 });

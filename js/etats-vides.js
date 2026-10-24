@@ -10,7 +10,7 @@
  * Stratégie de détection — 100 % DOM, zéro dépendance au stockage :
  *
  * 1) Si le module a déjà rendu son propre placeholder d'état vide
- *    (`.sidebar-vide`, `.placeholder-vide`, `.empty-state`), on s'efface
+ *    (`.rangee-selection-vide`, `.placeholder-vide`, `.empty-state`), on s'efface
  *    pour ne pas doublonner. Le module est la source de vérité.
  *
  * 2) Sinon, on cherche des motifs de contenu universels dans le conteneur
@@ -45,6 +45,8 @@ function estDonneesDemoActives() {
 var MOTIFS_CONTENU = [
     // Cartes génériques (mais pas les bandeaux info ou notre propre bannière)
     '.carte:not(.etat-vide-banniere):not(.carte-info-toggle):not(.carte-info-note):not(.carte-info-conseil)',
+    // #1147 : la sélection d'une bibliothèque de la Conception, en menu (elle était en cartes `-item`)
+    '.rangee-selection-menu',
     // Items nommés par suffixe
     '[class*="-item"]',
     '[class*="-card"]',
@@ -72,7 +74,7 @@ var MOTIFS_CONTENU = [
 // Motifs indiquant que le module gère déjà son propre état vide :
 // on défère pour éviter de doublonner le message.
 var MOTIFS_PLACEHOLDER = [
-    '.sidebar-vide',
+    '.rangee-selection-vide',   // #1147 : la phrase de la sélection vide (était `.sidebar-vide`)
     '.placeholder-vide',
     '.empty-state',
     '.liste-vide'

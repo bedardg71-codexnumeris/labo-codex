@@ -210,7 +210,7 @@ function obtenirEcheancePlusTot(production) {
 }
 
 /**
- * 🆕 Beta 99.08 : Handler pour le select de tri dans la sidebar
+ * 🆕 Beta 99.08 : Handler pour le select de tri (#1147 : dans la rangée du menu)
  */
 function trierListeProductions() {
     afficherListeProductions();
@@ -2069,19 +2069,15 @@ function construireProductionData(d, evaluations, idEnEdition) {
 }
 
 /**
- * Lot E3 (D3) — après une modification enregistrée : la barre latérale (nom, type,
- * pondération), le total et les avertissements STD suivent. La fiche reste ouverte,
+ * Lot E3 (D3) — après une modification enregistrée : le menu de la sélection (le titre),
+ * le total et les avertissements STD suivent. La fiche reste ouverte,
  * telle quelle : aucune réouverture, qui déplacerait le curseur.
  */
 async function rafraichirApresModificationProduction() {
     await afficherTableauProductions();
     await mettreAJourPonderationTotale();
+    // Le menu redessiné montre encore la fiche ouverte (afficherListeProductions lit `productionEnEdition`).
     await afficherListeProductions();
-    // La barre latérale est redessinée : l'élément de la fiche ouverte reste surligné.
-    if (productionEnEdition) {
-        const item = document.querySelector(`.sidebar-item[data-id="${productionEnEdition}"]`);
-        if (item) item.classList.add('active');
-    }
     if (typeof window.chargerProductionsDansSelect === 'function') window.chargerProductionsDansSelect();
     if (typeof window.rechargerFiltreProduction === 'function') window.rechargerFiltreProduction();
 }
@@ -2410,13 +2406,9 @@ function annulerFormProduction() {
     const accueil = document.getElementById('accueilProductions');
     if (accueil) accueil.classList.remove('u-hide');
 
-    // Retirer le surlignage de la barre latérale
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Réinitialiser la variable d'édition
+    // Réinitialiser la variable d'édition ; le menu revient à « Aucune production ouverte »
     productionEnEdition = null;
+    MenuSelection.marquer('menuProductions', null);
 }
 
 /* ===============================
@@ -3176,13 +3168,9 @@ function initialiserModuleProductions() {
     // ✅ AJOUT (8 décembre 2025) : Migration vers système bibliothèque
     migrerProductionsVersBibliotheque();
 
-    // ✅ CORRECTION (8 décembre 2025) : Afficher la sidebar sans condition
+    // ✅ CORRECTION (8 décembre 2025) : Afficher la sélection sans condition
     // comme pour les autres sections (Cours, Grilles, Échelles, Cartouches)
-    const container = document.getElementById('sidebarListeProductions');
-    if (container) {
-        afficherListeProductions();
-    } else {
-    }
+    if (document.getElementById('selectionProductions')) afficherListeProductions();
 
     // Afficher aussi l'ancienne vue si on est sur la page productions
     const sousSection = document.querySelector('#conception-productions');
@@ -3254,6 +3242,7 @@ window.chargerGrillesDisponiblesPourProduction = chargerGrillesDisponiblesPourPr
 // 🆕 Beta 98.3 : Échéances par groupe-cours
 window.obtenirEcheanceEffective = obtenirEcheanceEffective;
 window.obtenirEcheancePlusTot = obtenirEcheancePlusTot;                     // #930 — le tri « échéance » de la barre latérale vit dans productions-liste.js ; sans cet export, ReferenceError depuis le 16 mai 2026
+window.trierListeProductions = trierListeProductions;                       // #1147 — le tri de la rangée (data-on-change) : jamais exposé depuis l'IIFE, changer le tri ne redessinait rien
 window.aucuneEcheanceAssignee = aucuneEcheanceAssignee;                    // #486 — badge « à planifier » + sentinelle (tests/unit)
 window.datesSeancesDeLaSemaine = datesSeancesDeLaSemaine;                   // #493 — la liste unique (rang ⇄ date)
 window.dateSeanceDuRang = dateSeanceDuRang;                                 // #493 — « semaine 4, séance B » → « mardi 17 février »
@@ -3362,24 +3351,6 @@ function filtrerListeProductions() {
 // SUPPRIMÉ: Définition dupliquée de chargerProductionPourModif
 // Cette fonction est maintenant définie une seule fois aux lignes 1286-1318
 // La duplication causait un bug où productionEnEdition n'était pas défini correctement
-
-/**
- * Met le highlight sur la production active dans la sidebar
- *
- * @param {string} id - ID de la production active
- */
-function definirProductionActive(id) {
-    // Retirer le highlight de tous les items
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Ajouter le highlight à l'item actif
-    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
-    if (itemActif) {
-        itemActif.classList.add('active');
-    }
-}
 
 /**
  * Charge les grilles disponibles dans les selects de production

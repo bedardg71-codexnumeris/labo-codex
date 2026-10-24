@@ -1,11 +1,11 @@
 /* ===============================
-   LISTE DES PRODUCTIONS (SIDEBAR + CRUD UTILISATEUR)
+   LISTE DES PRODUCTIONS (MENU DE LA SÉLECTION + CRUD UTILISATEUR)
    ✅ EXTRACTION (16 mai 2026, refactor étape 3)
 
    Sous-module extrait de productions.js. Contient :
    - dupliquerEtEditerProduction (fork production démo)
-   - afficherListeProductions (sidebar)
-   - chargerProductionPourModif (clic sidebar → formulaire)
+   - afficherListeProductions (le menu de la sélection, #1147)
+   - chargerProductionPourModif (choix dans le menu → formulaire)
    - creerNouvelleProduction (bouton + Nouvelle)
    - dupliquerProduction / dupliquerProductionActive (boutons Dupliquer)
    - supprimerProductionActive (bouton Supprimer)
@@ -64,10 +64,8 @@ async function afficherListeProductions(filtreType = '') {
     const cleGrilles = cle('grillesTemplates');
     const productions = await db.get(cleProductions) || [];
     const grilles = await db.get(cleGrilles) || [];
-    const container = document.getElementById('sidebarListeProductions');
-
-
-    if (!container) {
+    const emplacement = document.getElementById('selectionProductions');
+    if (!emplacement) {
         return;
     }
 
@@ -96,7 +94,8 @@ async function afficherListeProductions(filtreType = '') {
     // ✅ CORRECTION (8 décembre 2025) : Ne plus générer le bouton bibliothèque
     // car il est maintenant dans le HTML (comme pour Cours, Grilles, etc.)
 
-    // 🆕 Beta 99.08 : Tri des productions dans la sidebar
+    // 🆕 Beta 99.08 : Tri des productions (#930 : Grégoire s'en sert, par date d'échéance).
+    // #1147 : il reste, dans la rangée du menu, et ordonne le menu ; sans tri, l'ordre personnalisé.
     const selectTri = document.getElementById('triProductions');
     const tri = selectTri ? selectTri.value : '';
     if (tri) {
@@ -114,56 +113,32 @@ async function afficherListeProductions(filtreType = '') {
         });
     }
 
-    if (productionsFiltrees.length === 0) {
-        container.innerHTML = '<p class="text-muted text-italic" style="font-size: 0.9rem; text-align: center; padding: 20px 10px;">Crée une nouvelle production ou puise dans la bibliothèque</p>';
-        return;
-    }
-
-    const html = productionsFiltrees.map(prod => {
-        const titre = prod.titre || 'Sans titre';
-        // ✅ MODIF (28 janvier 2026) : Afficher l'activité d'apprentissage sous le titre
-        const activite = prod.activiteApprentissage || prod.description || '';
-
-        // 🆕 Beta 95.4 : Badges uniformisés avec grilles/échelles
-        // Badge de pondération (sauf pour portfolio conteneur et artefacts)
-        const ponderationBadge = (prod.type !== 'portfolio' && prod.type !== 'artefact-portfolio' && prod.ponderation)
-            ? `<span class="badge-caracteristique">${formaterPourcentage(prod.ponderation)}</span>`
-            : '';
-
-        // #486 : badge « à planifier ». Depuis que la date d'échéance ne bloque
-        // plus la sauvegarde, un gabarit peut légitimement vivre sans elle — mais
-        // il est alors ABSENT du calendrier, des snapshots et des indices C et P.
-        // Le badge est le seul endroit où cet état se voit sans ouvrir la fiche.
-        // Ton neutre volontaire (jetons `--badge-non-evalue-*`) : c'est un état de
-        // préparation normal, pas une anomalie — une pastille d'alerte harcèlerait
-        // Grégoire pendant qu'il fait exactement ce qu'il veut faire.
-        // Le portfolio conteneur est exclu : il n'a JAMAIS de date propre (seuls
-        // ses artefacts en ont), le badge y serait un faux positif permanent.
-        const aPlanifierBadge = (prod.type !== 'portfolio'
-            && typeof aucuneEcheanceAssignee === 'function'
-            && aucuneEcheanceAssignee(prod))
-            ? '<span class="badge-a-planifier" title="Aucune échéance assignée : les consignes ne sont pas encore transmises. Cette production n\'apparaît ni au calendrier ni dans les indices C et P.">à planifier</span>'
-            : '';
-
-        return `
-            <div class="sidebar-item" data-id="${prod.id}" data-action="chargerProductionPourModif" data-param="${prod.id}">
-                <div class="sidebar-item-titre">${echapperHtml(titre)}</div>
-                ${activite ? `<div class="sidebar-item-activite">${echapperHtml(activite)}</div>` : ''}
-                <div class="sidebar-item-badges">
-                    ${ponderationBadge}
-                    ${aPlanifierBadge}
-                    ${window.ProductionDiagnostique.marqueHTML(prod)}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
+    // #1147 (24 oct. 2026) : la sélection en menu déroulant, le titre seul, à plat (la barre latérale
+    // ne rangeait pas les artefacts sous leur portfolio). La pondération, l'activité et la marque
+    // « diagnostique » sont parties avec la barre ; « (à planifier) » reste, parce que c'est un ÉTAT
+    // (#486 : sans échéance, la production est absente du calendrier et des indices C et P) et que
+    // la barre était le seul endroit où il se voyait sans ouvrir la fiche. Le portfolio conteneur
+    // n'a jamais de date propre : exclu, comme son badge l'était.
+    const formulaire = document.getElementById('formulaireProduction');
+    MenuSelection.rendre(emplacement, {
+        idMenu: 'menuProductions',
+        elements: productionsFiltrees.map(prod => ({
+            id: prod.id,
+            nom: prod.titre,
+            suffixe: (prod.type !== 'portfolio' && typeof aucuneEcheanceAssignee === 'function'
+                && aucuneEcheanceAssignee(prod)) ? '(à planifier)' : ''
+        })),
+        idOuvert: (productionEnEdition && formulaire && !formulaire.classList.contains('u-hide')) ? productionEnEdition : null,
+        libelleAucun: 'Aucune production ouverte',
+        libelleMenu: 'Production ouverte',
+        phraseVide: 'Crée une nouvelle production ou puise dans la bibliothèque',
+        ouvrir: chargerProductionPourModif
+    });
 }
 
 /**
  * Charge une production pour modification dans le formulaire
- * Appelée par le clic sur un item de la sidebar
+ * Appelée par le choix dans le menu de la sélection (#1147)
  */
 async function chargerProductionPourModif(id) {
     // Lot E3 (D3) : une production en cours de création ne se perd pas sans question.
@@ -202,14 +177,8 @@ async function chargerProductionPourModif(id) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurProd, production, 'dupliquerEtEditerProduction', 'Dupliquer pour créer ma production');
     }
 
-    // Highlighter l'item actif
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
-    if (itemActif) {
-        itemActif.classList.add('active');
-    }
+    // Le menu montre la production ouverte
+    MenuSelection.marquer('menuProductions', id);
 
     // Mettre à jour les métriques - DÉSACTIVÉ (cartes métriques supprimées)
     // const productions = db.getSync('productions', []);
@@ -252,10 +221,8 @@ async function creerNouvelleProduction() {
     // Réinitialiser les métriques - DÉSACTIVÉ (cartes métriques supprimées)
     // mettreAJourMetriquesProduction(null);
 
-    // Retirer le highlight de tous les items
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    // Une production en création n'est pas encore dans le menu
+    MenuSelection.marquer('menuProductions', null);
 
     // Charger les grilles disponibles (avec petit délai pour laisser le DOM se mettre à jour)
     setTimeout(async () => {

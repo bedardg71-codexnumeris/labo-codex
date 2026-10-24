@@ -89,7 +89,8 @@ function globauxCommuns(store, { element }) {
         notifications: { succes: () => {}, erreur: () => {}, info: () => {}, avertissement: () => {} },
         genererIdUnique: (p) => p + 'NEUF',
         obtenirIdentiteCCUtilisateur: () => 'test',
-        BibliothequeUI: new Proxy({}, { get: () => (() => '') }),
+        // #1147 : les filtres rendent la liste (le menu la parcourt) ; le reste, du vide.
+        BibliothequeUI: new Proxy({}, { get: (_, nom) => (String(nom).startsWith('filtrer') ? (l) => l : () => '') }),
         travauxOutils: { renderPickerCouleur: () => '' },
         document: {
             getElementById: element,
