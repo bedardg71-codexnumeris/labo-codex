@@ -255,19 +255,26 @@ test('Règle 5 · un nom de programme importé entre ÉCHAPPÉ dans le résumé 
     expect(r.texte, 'le nom est lu en texte').toContain('<img src=x id=programme-pirate>');
 });
 
-test('Carte d’alignement : le couple bouton + menu a l’apparence de la rangée ; « Actions ▾ » s’ouvre', async ({ page }) => {
+test('Carte d’alignement : le couple bouton + menu a l’apparence de la rangée, la bande l’entoure seul ; « Actions ▾ » s’ouvre', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.evaluate(() => naviguerVers('conception', 'carte'));
     await pause(page, 1500);
     const m = await page.evaluate(() => {
-        const z = document.getElementById('planif-selecteur-cartes');
         const s = document.getElementById('planif-liste-cartes');
         const b = document.getElementById('planif-btn-bibliotheque');
+        const a = document.getElementById('planif-btn-actions');
         const rangee = document.querySelector('.rangee-selection');
+        // La bande : le plus proche ancêtre commun du bouton et du menu (il doit porter le fond).
+        let bande = s.parentElement;
+        while (bande && !bande.contains(b)) bande = bande.parentElement;
+        const rb = bande.getBoundingClientRect(), ra = a.getBoundingClientRect();
         return {
-            fond: getComputedStyle(z).backgroundColor,
+            fond: getComputedStyle(bande).backgroundColor,
+            actionsDansLaBande: bande.contains(a),
+            // Hors de la bande à l'œil aussi : « Actions ▾ » commence après le bord droit de la bande.
+            actionsApresLaBande: ra.left >= rb.right,
             hauteurMenu: Math.round(s.getBoundingClientRect().height),
             hauteurBouton: Math.round(b.getBoundingClientRect().height),
             gras: getComputedStyle(s).fontWeight,
@@ -280,7 +287,11 @@ test('Carte d’alignement : le couple bouton + menu a l’apparence de la rang�
     expect(m.hauteurBouton).toBeGreaterThanOrEqual(44);
     expect(Number(m.gras)).toBeGreaterThanOrEqual(600);
     expect(m.apparence).toBe('none');
+    expect(m.fond, 'la bande a un fond').not.toBe('rgba(0, 0, 0, 0)');
     if (m.fondAttendu) expect(m.fond, 'la bande bleu pâle de la rangée').toBe(m.fondAttendu);
+    // Verdict de Cowork (24 oct.) : la bande dit « ta sélection » ; les outils de la carte ouverte restent dehors.
+    expect(m.actionsDansLaBande, '« Actions ▾ » hors de la bande (DOM)').toBe(false);
+    expect(m.actionsApresLaBande, '« Actions ▾ » hors de la bande (à l’œil)').toBe(true);
     await page.locator('#planif-btn-actions').click();
     await pause(page, 400);
     await expect(page.locator('#planif-actions-dropdown')).toBeVisible();
