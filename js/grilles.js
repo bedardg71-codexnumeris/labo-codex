@@ -2351,7 +2351,7 @@ async function afficherBibliothequeGrilles() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeGrilles',
         titre: 'Bibliothèque de grilles de critères',
-        sousTitre: 'Gérez les grilles de critères offertes dans ta sélection.',
+        sousTitre: 'Gère les grilles de critères de ta sélection.',
         onFermer: 'fermerModalBibliothequeGrilles',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.grillesDansBibliotheque,

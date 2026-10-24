@@ -295,7 +295,7 @@ async function afficherBibliothequePratiques() {
     // Message d'aide intégré au début de Section 1
     const messageAide = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
         '<p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
-            '<strong>Pour éditer une pratique</strong>, transférez-la d\'abord dans ta sélection en cliquant sur « Ajouter », puis cliquez dessus pour l\'ouvrir en mode édition.' +
+            '<strong>Pour éditer une pratique</strong>, transfère-la d\'abord dans ta sélection en cliquant sur « Ajouter », puis clique dessus pour l\'ouvrir en mode édition.' +
         '</p>' +
     '</div>';
     contenuSection1 = messageAide + contenuSection1;
@@ -449,7 +449,7 @@ async function afficherBibliothequePratiques() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequePratiques',
         titre: 'Bibliothèque de pratiques de notation',
-        sousTitre: 'Gérez les pratiques offertes dans ta sélection.',
+        sousTitre: 'Gère les pratiques de notation de ta sélection.',
         onFermer: 'fermerModalBibliothequePratiques',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes, {
             itemsSelection: pratiquesDansBibliotheque,

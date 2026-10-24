@@ -1154,7 +1154,7 @@ async function afficherBibliothequeEchelles() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeEchelles',
         titre: "Bibliothèque d'échelles de performance",
-        sousTitre: 'Gérez les échelles de performance offertes dans ta sélection.',
+        sousTitre: 'Gère les échelles de performance de ta sélection.',
         onFermer: 'fermerModalBibliothequeEchelles',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.echellesDansBibliotheque,

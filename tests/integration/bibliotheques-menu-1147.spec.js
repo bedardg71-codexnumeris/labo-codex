@@ -244,6 +244,34 @@ test('production : changer le tri réordonne le menu (#930 ; le tri n’était p
     expect([...parTitre].sort()).toEqual([...perso].sort());
 });
 
+// Verdict de relecture du lot 1, § 2 : « barre latérale » devenu « ta sélection », les sous-titres de la
+// fenêtre mêlaient « Gérez » et « ta ». Les cinq, lus dans la fenêtre ouverte par le vrai bouton.
+const SOUS_TITRES = {
+    'grille-criteres': 'Gère les grilles de critères de ta sélection.',
+    'echelle-performance': 'Gère les échelles de performance de ta sélection.',
+    'retroactions': 'Gère les cartouches de rétroaction de ta sélection.',
+    'productions': 'Gère les productions de ta sélection.',
+    'pratiques-notation': 'Gère les pratiques de notation de ta sélection.'
+};
+
+test('la fenêtre de la bibliothèque : les cinq sous-titres tutoient', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirDemo(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const lus = {};
+    for (const e of ECRANS) {
+        await page.evaluate((s) => naviguerVers('conception', s), e.sous);
+        await pause(page, 900);
+        await page.locator(`#${e.ss} .rangee-selection button`, { hasText: 'Consulter la bibliothèque' }).click();
+        const fenetre = page.locator('.modal-js-overlay:visible').last();
+        await expect(fenetre).toBeVisible();
+        lus[e.sous] = (await fenetre.locator('.modal-js-contenu > p').first().textContent()).trim();
+        await fenetre.locator('.modal-js-btn-fermer').click();
+        await expect(page.locator('.modal-js-overlay:visible')).toHaveCount(0);
+    }
+    expect(lus).toEqual(SOUS_TITRES);
+});
+
 test.describe('iPad portrait (WebKit, tactile)', () => {
     test.use({ hasTouch: true, viewport: { width: 820, height: 1180 } });
 
