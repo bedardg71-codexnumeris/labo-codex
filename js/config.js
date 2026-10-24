@@ -91,13 +91,16 @@ const configurationsOnglets = {
         { id: 'bilan', label: 'Bilan réflexif' },
         { id: 'longitudinal', label: 'Suivi longitudinal' } // #915 — nom tranché par Grégoire le 17 sept. 2026 ; entrée autorisée par lui le même soir
     ],
+    // #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11) — rangée comme l'application ; entrée autorisée par Grégoire le 24 oct., 18 h 38
     'aide': [
-        { id: 'introduction', label: 'Introduction' },
-        { id: 'configuration', label: 'Configuration' },
-        { id: 'formation', label: 'Formation et démonstration' },
-        { id: 'utilisation', label: 'Utilisation hebdomadaire' },
-        { id: 'consultation', label: 'Consultation' },
-        { id: 'reference', label: 'Référence rapide' }
+        { id: 'commencer', label: 'Commencer' },
+        { id: 'cadre', label: 'Cadre' },
+        { id: 'conception', label: 'Conception' },
+        { id: 'evaluation', label: 'Évaluation' },
+        { id: 'suivi', label: 'Suivi' },
+        { id: 'labo', label: 'Labo' },
+        { id: 'codex-archives', label: 'Codex et archives' },
+        { id: 'reference', label: 'Référence' }
     ],
     'reglages': [
         { id: 'preferences', label: 'Préférences' },

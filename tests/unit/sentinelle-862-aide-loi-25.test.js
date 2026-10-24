@@ -34,7 +34,10 @@ describe('#862 · l\'Aide dit ce que la Loi 25 demande', () => {
     });
 
     it('elle porte l\'encadré « Important » qui nomme la Loi 25', () => {
-        expect(CARTE).toMatch(/<div class="alerte alerte-attention">\s*<strong>Important — les données de tes élèves et la Loi 25\.<\/strong>/);
+        // ↻ #1152, lot 1 — décision D7 de Grégoire (audit de l'Aide, 24 oct. 2026, 18 h 24) : « les données de tes étudiant·es » ;
+        // rien d'autre ne change dans l'encadré. L'ancien mot ne doit plus y paraître.
+        expect(CARTE).toMatch(/<div class="alerte alerte-attention">\s*<strong>Important — les données de tes étudiant·es et la Loi 25\.<\/strong>/);
+        expect(CARTE).not.toMatch(/les données de tes élèves/);
         expect(texte(CARTE)).toMatch(/personne d'autre ne peut les consulter/);
         expect(texte(CARTE)).toMatch(/sous la responsabilité de ton établissement/);
     });

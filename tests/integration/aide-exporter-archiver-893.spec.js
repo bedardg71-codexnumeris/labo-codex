@@ -37,7 +37,8 @@ test('#893 · l\'aide nomme les deux cartes que l\'écran rend, et son bloc d\'e
 
     // 1. L'Aide : déplier la carte et lire ses modes.
     const aide = await page.evaluate(async () => {
-        window.naviguerVers('aide', 'utilisation');
+        // ↻ #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11) : l'entrée est rangée sous « Évaluation ».
+        window.naviguerVers('aide', 'evaluation');
         const carte = document.getElementById('accordeon-aide-exporter-archiver');
         if (carte.classList.contains('ferme')) carte.querySelector('.accordeon-header').click();
         await new Promise((r) => setTimeout(r, 450)); // transition d'ouverture : 0,3 s

@@ -506,11 +506,11 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: 'Formats de noms reconnus',
-                contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Dupont_Marie_1234567.pdf », « Turcotte_1234567_Artefact-8a.jpeg » (multi-pages : a, b, c…)'
+                contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Exemple_Ada_1234567.pdf », « Essai_1234567_Artefact-8a.jpeg » (multi-pages : a, b, c…)'
             },
             {
                 type: 'conseil',
-                contenu: 'Pour un travail multi-pages, nomme chaque page avec le même DA et la même production (ex: « Turcotte_1234567_Artefact-8a.jpeg », « ...8b.jpeg »). Les pages seront automatiquement assemblées en un seul PDF dans l\'ordre alphabétique du nom de fichier.'
+                contenu: 'Pour un travail multi-pages, nomme chaque page avec le même DA et la même production (ex: « Essai_1234567_Artefact-8a.jpeg », « ...8b.jpeg »). Les pages seront automatiquement assemblées en un seul PDF dans l\'ordre alphabétique du nom de fichier.'
             },
             {
                 type: 'liste',

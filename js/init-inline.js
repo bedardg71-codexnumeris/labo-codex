@@ -242,8 +242,8 @@ function afficherBuildNumero() {
     if (span) {
         span.textContent = `(Build ${BUILD_ID})`;
     }
-    [['apropos-version-beta', 'apropos-version-build'],
-     ['aide-apropos-version-beta', 'aide-apropos-version-build']].forEach(function (ids) {
+    // #1152, lot 1 (24 oct. 2026) : la paire « aide-apropos-* » est partie avec la carte « À propos » de l'Aide
+    [['apropos-version-beta', 'apropos-version-build']].forEach(function (ids) {
         const elBeta = document.getElementById(ids[0]);
         const elBuild = document.getElementById(ids[1]);
         if (elBeta) elBeta.textContent = 'Bêta publique ' + VERSION_MAJEURE;
@@ -779,7 +779,7 @@ function reafficherToutesLesCartes() {
     // Restaurer la sous-section active originale
     const sousSections = document.querySelectorAll('#section-aide .sous-section');
     sousSections.forEach(ss => ss.classList.remove('active'));
-    var idActive = (typeof sousSectionActive === 'string' && sousSectionActive.startsWith('aide-')) ? sousSectionActive : 'aide-introduction';
+    var idActive = (typeof sousSectionActive === 'string' && sousSectionActive.startsWith('aide-')) ? sousSectionActive : 'aide-commencer';
     var ssActive = document.getElementById(idActive);
     if (ssActive) ssActive.classList.add('active');
 }
