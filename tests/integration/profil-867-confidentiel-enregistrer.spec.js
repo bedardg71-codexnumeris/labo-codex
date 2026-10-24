@@ -92,11 +92,11 @@ test('Porte #867 · après l\'enregistrement, la barre latérale du profil répo
 
     // Le geste suivant de l'enseignant : changer de sous-section.
     await page.evaluate(() => {
-        const item = Array.from(document.querySelectorAll('.sidebar-item')).find((el) => el.textContent.trim().startsWith('Travaux soumis'));
+        const item = Array.from(document.querySelectorAll('.rangee-selection-section')).find((el) => el.textContent.trim().startsWith('Travaux soumis'));
         if (item) item.click();
     });
     await page.waitForTimeout(400);
-    const section = await page.evaluate(() => (document.querySelector('.sidebar-item.active') || {}).textContent?.trim() || null);
+    const section = await page.evaluate(() => (document.querySelector('.rangee-selection-section[aria-current="true"]') || {}).textContent?.trim() || null);
     // AVANT : `changerSectionProfil` sortait sur « Aucun profil actuel » — le clic ne faisait rien.
     expect(section).toBe('Travaux soumis');
 });

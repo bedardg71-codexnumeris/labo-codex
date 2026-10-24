@@ -1623,7 +1623,7 @@
      ============================================================ -->
 <section id="sidebar" class="guide-section">
     <h2 class="guide-section-title">15. Sidebar navigation</h2>
-    <p class="guide-section-intro">Panneau latéral 280px sticky avec filtre, info-card, items et actions. Profil de l'élève et CoP › Outils d'animation. Les bibliothèques de la Conception l'ont quitté pour la rangée de la sélection (#1147, ci-dessous).</p>
+    <p class="guide-section-intro">Panneau latéral 280px sticky avec items et actions : Suivi › Animation. Les bibliothèques de la Conception (#1147) et le profil de l'élève (#1151) l'ont quitté pour la rangée de la sélection (ci-dessous).</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Sidebar complète</h3>
@@ -1631,15 +1631,6 @@
             <div class="ref-panel ref-panel-sombre">
                 <div class="ref-panel-label">Mode sombre</div>
                 <div class="sidebar-navigation" style="position:static; max-height:none">
-                    <div class="sidebar-section-titre">Grilles d'évaluation</div>
-                    <div class="sidebar-info-card">
-                        <div class="sidebar-info-card-nom">Alice Tremblay</div>
-                        <div class="sidebar-info-card-details">DA: 1234567 | Programme: TI</div>
-                    </div>
-                    <div class="sidebar-nav-buttons">
-                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&larr;</button>
-                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&rarr;</button>
-                    </div>
                     <div class="sidebar-liste">
                         <div class="sidebar-item active">
                             <div class="sidebar-item-titre">Grille TP1</div>
@@ -1659,15 +1650,6 @@
             <div class="ref-panel ref-panel-clair mode-clair">
                 <div class="ref-panel-label">Mode clair</div>
                 <div class="sidebar-navigation" style="position:static; max-height:none">
-                    <div class="sidebar-section-titre">Grilles d'évaluation</div>
-                    <div class="sidebar-info-card">
-                        <div class="sidebar-info-card-nom">Alice Tremblay</div>
-                        <div class="sidebar-info-card-details">DA: 1234567 | Programme: TI</div>
-                    </div>
-                    <div class="sidebar-nav-buttons">
-                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&larr;</button>
-                        <button class="btn btn-principal" style="flex:1; font-size:0.85rem; padding:8px">&rarr;</button>
-                    </div>
                     <div class="sidebar-liste">
                         <div class="sidebar-item active">
                             <div class="sidebar-item-titre">Grille TP1</div>
@@ -1719,6 +1701,72 @@
                             </select>
                         </div>
                         <button class="btn btn-principal rangee-selection-nouveau">+ Nouvelle grille</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="guide-component">
+        <h3 class="guide-component-title">Rangée du profil, sur deux lignes (Suivi › Profils individuels, #1151)</h3>
+        <p class="guide-section-intro">En haut, l'élève : « Liste des étudiant·es », ‹ le menu ›, le compte, puis ses étiquettes à droite (<code>.rangee-selection-etiquette</code>, bordure égale sur les quatre côtés ; <code>-alerte</code> pour le statut exclu, <code>-mesure</code> pour les services adaptés et la mesure d'aide). En bas, les sections en boutons (<code>.rangee-selection-section</code>) : pleine, celle qui est ouverte (<code>aria-current="true"</code>). Flèches et boutons de 44 px ; sous 760 px, ‹ menu › prend sa ligne et les boutons passent à la ligne.</p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="sous-section active">
+                    <div class="rangee-selection rangee-selection-profil">
+                        <div class="rangee-selection-ligne">
+                            <button class="btn btn-principal">Liste des étudiant·es</button>
+                            <div class="rangee-selection-pas">
+                                <button class="rangee-selection-fleche" aria-label="Étudiant·e précédent·e">‹</button>
+                                <select class="controle-form rangee-selection-menu" aria-label="Étudiant·e">
+                                    <option selected>Curie, Marie (DEMO006)</option>
+                                </select>
+                                <button class="rangee-selection-fleche" aria-label="Étudiant·e suivant·e">›</button>
+                                <span class="rangee-selection-compte">2 sur 8</span>
+                            </div>
+                            <div class="rangee-selection-etiquettes">
+                                <span class="rangee-selection-etiquette rangee-selection-etiquette-alerte">Abandon · hors des moyennes du groupe</span>
+                                <span class="rangee-selection-etiquette"><b>Groupe</b> 00001</span>
+                                <span class="rangee-selection-etiquette"><b>Programme</b> 200.B1</span>
+                                <span class="rangee-selection-etiquette rangee-selection-etiquette-mesure">Services adaptés</span>
+                            </div>
+                        </div>
+                        <nav class="rangee-selection-sections" aria-label="Sections du profil">
+                            <button class="rangee-selection-section" aria-current="true">Productions</button>
+                            <button class="rangee-selection-section">Engagement ACP</button>
+                            <button class="rangee-selection-section">Développement des habiletés</button>
+                            <button class="rangee-selection-section">Rapport</button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="sous-section active">
+                    <div class="rangee-selection rangee-selection-profil">
+                        <div class="rangee-selection-ligne">
+                            <button class="btn btn-principal">Liste des étudiant·es</button>
+                            <div class="rangee-selection-pas">
+                                <button class="rangee-selection-fleche" aria-label="Étudiant·e précédent·e">‹</button>
+                                <select class="controle-form rangee-selection-menu" aria-label="Étudiant·e">
+                                    <option selected>Curie, Marie (DEMO006)</option>
+                                </select>
+                                <button class="rangee-selection-fleche" aria-label="Étudiant·e suivant·e">›</button>
+                                <span class="rangee-selection-compte">2 sur 8</span>
+                            </div>
+                            <div class="rangee-selection-etiquettes">
+                                <span class="rangee-selection-etiquette rangee-selection-etiquette-alerte">Abandon · hors des moyennes du groupe</span>
+                                <span class="rangee-selection-etiquette"><b>Groupe</b> 00001</span>
+                                <span class="rangee-selection-etiquette"><b>Programme</b> 200.B1</span>
+                                <span class="rangee-selection-etiquette rangee-selection-etiquette-mesure">Services adaptés</span>
+                            </div>
+                        </div>
+                        <nav class="rangee-selection-sections" aria-label="Sections du profil">
+                            <button class="rangee-selection-section" aria-current="true">Productions</button>
+                            <button class="rangee-selection-section">Engagement ACP</button>
+                            <button class="rangee-selection-section">Développement des habiletés</button>
+                            <button class="rangee-selection-section">Rapport</button>
+                        </nav>
                     </div>
                 </div>
             </div>

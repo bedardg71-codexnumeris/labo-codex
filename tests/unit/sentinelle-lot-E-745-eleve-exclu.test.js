@@ -266,12 +266,15 @@ describe('lot E · #745 — le profil de l\'exclu s\'ouvre et dit son statut', (
         return { b, html: b.elements.contenuProfilEtudiant.innerHTML };
     };
 
-    it('(k) décrochage : le profil s\'ouvre (avant : « Étudiant·e introuvable »), et la ligne sous le nom dit « Décrochage · hors des moyennes du groupe »', () => {
+    it('(k) décrochage : le profil s\'ouvre (avant : « Étudiant·e introuvable »), et la première étiquette de la rangée dit « Décrochage · hors des moyennes du groupe »', () => {
         const { b, html } = ouvrir('décrochage');
         expect(b.avertissements).toEqual([]);
         expect(b.win.profilActuelDA).toBe(DA.EXCLU);
-        const carte = tranche(html, 'sidebar-info-card-nom', 'sidebar-liste', { longueurMin: 80 });
-        expect(texte('<' + carte)).toMatch(/Bruno Exclu\s+Décrochage · hors des moyennes du groupe\s+DA:/);
+        // #1151 : la carte d'identité de la barre latérale est partie ; le nom est dans le menu (l'option sélectionnée),
+        // le statut est la PREMIÈRE étiquette de la ligne de l'élève, avant le groupe.
+        expect(texte(html.match(/<option value="\d+"\s*selected>[^<]*/)[0])).toMatch(/^Exclu, Bruno/);
+        const etiquettes = tranche(html, 'rangee-selection-etiquettes', 'rangee-selection-sections', { longueurMin: 80 });
+        expect(texte('<div class="' + etiquettes)).toMatch(/^Décrochage · hors des moyennes du groupe\s+Groupe/);
     });
 
     it('(l) le mot vient de `libelleStatutEtudiant`, pas d\'une chaîne en dur : « Inactivité », « Abandon » — et un mot changé dans main.js change l\'en-tête', () => {
@@ -290,9 +293,10 @@ describe('lot E · #745 — le profil de l\'exclu s\'ouvre et dit son statut', (
         expect(html).not.toContain('data-statut-exclu');
     });
 
-    it('(n) le sélecteur : les actifs, plus l\'exclu AFFICHÉ (sélectionné, à sa place alphabétique) ; depuis un actif, l\'exclu n\'y est pas et Préc. / Suiv. le sautent', () => {
+    it('(n) le sélecteur : les actifs, plus l\'exclu AFFICHÉ (sélectionné, à sa place alphabétique) ; depuis un actif, l\'exclu n\'y est pas et ‹ / › le sautent', () => {
         const options = (html) => [...html.matchAll(/<option value="(\d+)"\s*(selected)?/g)].map(m => m[1] + (m[2] ? '*' : ''));
-        const nav = (html) => [...html.matchAll(/data-action="afficherProfilComplet" data-param="([^"]*)"/g)].map(m => m[1]);
+        // #1151 : ‹ et › — la flèche du bout est désactivée et ne porte plus de `data-param` (avant : « undefined »).
+        const nav = (html) => [...html.matchAll(/data-action="afficherProfilComplet" (?:data-param="([^"]*)"|(disabled))/g)].map(m => m[1] || m[2]);
         const { html } = ouvrir('décrochage');
         expect(options(html)).toEqual([DA.ASSIDU, DA.EXCLU + '*', DA.TEMOIN]);      // Assidu, Exclu, Témoin
         expect(nav(html)).toEqual([DA.ASSIDU, DA.TEMOIN]);
@@ -300,7 +304,7 @@ describe('lot E · #745 — le profil de l\'exclu s\'ouvre et dit son statut', (
         b.win.afficherProfilComplet(DA.ASSIDU);
         const h2 = b.elements.contenuProfilEtudiant.innerHTML;
         expect(options(h2)).toEqual([DA.ASSIDU + '*', DA.TEMOIN]);
-        expect(nav(h2)).toEqual(['undefined', DA.TEMOIN]);
+        expect(nav(h2)).toEqual(['disabled', DA.TEMOIN]);
     });
 
     it('(o) un DA qui n\'est plus dans le groupe : aucun profil ne s\'ouvre (aucun écran ne le calcule), et le profil affiché avant reste le profil courant (#867)', () => {

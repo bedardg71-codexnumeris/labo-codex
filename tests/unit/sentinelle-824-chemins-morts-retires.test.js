@@ -70,9 +70,11 @@ describe('#824 · les chemins morts sous les réglages du dépistage', () => {
         const code = SOURCES.find((s) => s.fichier === 'js/profil-etudiant-sections-affichage.js').code;
         expect(code.includes("case 'cible'"), '`case \'cible\'` est revenu').toBe(false);
         expect(code.includes("section === 'cible'"), 'une branche « cible » est revenue').toBe(false);
-        // Témoin : les sections voisines, elles, sont bien là — le retrait n'a pas emporté le switch.
+        // #1151 : le `switch` est devenu la table `SECTIONS_PROFIL` — une seule source des sections.
+        expect(/id:\s*'cible'/.test(code), 'une section « cible » est revenue dans la table').toBe(false);
+        // Témoin : les sections voisines, elles, sont bien là — le retrait n'a pas emporté la table.
         for (const s of ['productions', 'progression', 'performance', 'mobilisation']) {
-            expect(code.includes(`case '${s}'`), `la section « ${s} » a disparu`).toBe(true);
+            expect(new RegExp(`id:\\s*'${s}'`).test(code), `la section « ${s} » a disparu`).toBe(true);
         }
     });
 

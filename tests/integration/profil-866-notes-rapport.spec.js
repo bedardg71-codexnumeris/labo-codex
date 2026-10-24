@@ -56,10 +56,10 @@ async function ouvrirRapport(page) {
     await page.waitForFunction((da) => !!document.getElementById('textarea-notes-rapport-' + da), DA, { timeout: 10000 });
 }
 
-/** Clique un item de la barre latérale du profil par son libellé — le vrai geste, donc le vrai blur. */
+/** Clique un bouton de section de la rangée du profil (#1151) par son libellé — le vrai geste, donc le vrai blur. */
 async function cliquerSousSection(page, libelle) {
     await page.evaluate((lib) => {
-        const item = Array.from(document.querySelectorAll('.sidebar-item'))
+        const item = Array.from(document.querySelectorAll('.rangee-selection-section'))
             .find((el) => el.textContent.trim().startsWith(lib));
         if (item) item.click();
     }, libelle);
@@ -125,7 +125,7 @@ test('Porte #866 · chemin B — une navigation faite par du code n\'émet aucun
     // Aucun blur, aucun délai : le champ est encore celui qui a le focus quand il est détruit.
     const focusGarde = await page.evaluate((da) => {
         const avant = document.activeElement && document.activeElement.id;
-        const item = Array.from(document.querySelectorAll('.sidebar-item')).find((el) => el.textContent.trim().startsWith('Travaux soumis'));
+        const item = Array.from(document.querySelectorAll('.rangee-selection-section')).find((el) => el.textContent.trim().startsWith('Travaux soumis'));
         item.click();
         return avant === 'textarea-notes-rapport-' + da;
     }, DA);

@@ -2027,8 +2027,14 @@ window.profilActuelDA = null;
 let sectionProfilActive = 'productions'; // Par défaut: Productions
 
 /**
- * Change la section affichée dans la colonne droite du profil
- * @param {string} section - Nom de la section (cible, performance, assiduite, etc.)
+ * Change la section affichée sous la rangée du profil.
+ *
+ * #1151 (24 oct. 2026) — Le même rendu que l'ouverture (`_rendreSectionProfil`) : avant, ce
+ * `switch` et `_resoudreSectionContenu` dessinaient chacun l'en-tête, avec des titres et une
+ * cible d'aide qui divergeaient. Le bouton actif se marque par sa `data-param` : l'ancien code
+ * lisait le global `event` au clic et, appelé par programme (`tableau-bord-apercu.js`), cherchait
+ * un attribut `onclick` disparu depuis `data-action` — il ne marquait rien.
+ * @param {string} section - Identifiant de la section (`SECTIONS_PROFIL`)
  */
 function changerSectionProfil(section) {
     if (!profilActuelDA) {
@@ -2041,133 +2047,16 @@ function changerSectionProfil(section) {
     // NOUVEAU (Beta 85): Mémoriser la section active pour navigation entre étudiants
     sectionProfilActive = section;
 
-    // Mettre à jour la navigation active (utilise les classes CSS matériel)
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // NOUVEAU (Beta 85): Trouver l'élément correspondant à la section
-    // Supporte à la fois les clics directs (avec event) et les appels programmatiques
-    let itemToActivate = null;
-
-    if (typeof event !== 'undefined' && event.target) {
-        // Appel depuis un clic : utiliser event.target
-        itemToActivate = event.target.closest('.sidebar-item');
-    } else {
-        // Appel programmatique : trouver l'item par onclick
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            const onclickAttr = item.getAttribute('onclick');
-            if (onclickAttr && onclickAttr.includes(`'${section}'`)) {
-                itemToActivate = item;
-            }
-        });
-    }
-
-    if (itemToActivate) {
-        itemToActivate.classList.add('active');
-    }
-
-    // Générer le contenu selon la section
     const contenuContainer = document.getElementById('profil-contenu-dynamique');
     if (!contenuContainer) {
         console.error('❌ Conteneur de contenu introuvable');
         return;
     }
 
-    let contenu = '';
-    let titre = '';
-
-    switch (section) {
-        case 'productions':
-            titre = 'Productions et évaluations';
-            contenu = genererSectionProductions(da);
-            break;
-        case 'jugement':
-            // DEN couche 2 (#318) : panneau de saisie du jugement.
-            titre = 'Jugement (dénotation)';
-            contenu = (window.denotationSaisie && typeof window.denotationSaisie.panneau === 'function')
-                ? window.denotationSaisie.panneau(da)
-                : '<div class="alerte alerte-information">Module de dénotation indisponible.</div>';
-            break;
-        // #824 — le `case 'cible'` (« Suivi de l'apprentissage ») appelait
-        // `genererContenuCibleIntervention`, définie nulle part : erreur d'exécution si un
-        // bouton y avait mené. Inatteignable depuis #551 ; retiré avec sa branche d'aide.
-        case 'progression':
-            titre = 'Progression temporelle ACP';
-            contenu = genererSectionProgression(da);
-            break;
-        case 'performance':
-            titre = 'Développement des habiletés';
-            contenu = genererSectionPerformance(da);
-            break;
-        case 'mobilisation':
-            titre = 'Engagement ACP';
-            contenu = genererSectionMobilisationEngagement(da);
-            break;
-        case 'rapport':
-            titre = 'Rapport';
-            contenu = genererSectionRapport(da);
-            break;
-        case 'accompagnement':
-            titre = 'Accompagnement';
-            contenu = genererSectionAccompagnement(da);
-            break;
-        case 'travaux':
-            titre = 'Travaux soumis';
-            contenu = genererSectionTravaux(da);
-            break;
-        default:
-            titre = 'Section inconnue';
-            contenu = '<p>Section non trouvée</p>';
-    }
-
-    // Récupérer les indices (pour autres usages, badge retiré - info déjà dans l'en-tête)
-    const indices = calculerTousLesIndices(da);
-
-    // Générer l'aide Primo selon la section (popup au clic)
-    let toggleInfo = '';
-    if (section === 'performance') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-performance-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
-    } else if (section === 'mobilisation') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-mobilisation-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
-    } else if (section === 'accompagnement') {
-        toggleInfo = `<span class="primo-aide" data-target="details-calculs-accompagnement-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`;
-    }
-
-    contenuContainer.innerHTML = `
-        <div class="profil-contenu-header">
-            <h2 class="u-flex-between-mb20">
-                <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[section] || ''}">${titre}</span>
-                ${toggleInfo}
-            </h2>
-        </div>
-        <div class="profil-contenu-body">
-            ${contenu}
-        </div>
-    `;
-
-    // Charger les thumbnails async (section travaux)
-    if (section === 'travaux' && typeof travauxStockage !== 'undefined') {
-        travauxStockage.chargerThumbnailsConteneur(contenuContainer);
-    }
-
-    // Réattacher les événements des toggles et Primo après changement de section
-    setTimeout(() => {
-        if (typeof reattacherEvenementsToggles === 'function') {
-            reattacherEvenementsToggles();
-        }
-
-        // Réinitialiser la visibilité des icônes info dynamiques après re-render DOM
-        if (window.accompagnement && typeof window.accompagnement.initialiserPopup === 'function') {
-            window.accompagnement.initialiserPopup();
-        }
-
-        // Restaurer les préférences du rapport si on vient de charger cette section
-        if (section === 'rapport') {
-            restaurerPreferencesRapport(da);
-        }
-    }, 100);
-
+    const def = _resoudreSectionProfil(section, _lirePrefsProfil());
+    contenuContainer.innerHTML = _rendreSectionProfil(def, da);
+    _marquerSectionProfil(def.id);
+    _postRendreProfilSection(def.id, da, contenuContainer);
 }
 
 /**
@@ -2442,53 +2331,106 @@ function _recalculerIndicesACPSiPossible() {
     if (typeof calculerEtStockerIndicesCP === 'function') calculerEtStockerIndicesCP();
 }
 
-function _resoudreSectionContenu(sectionAffichee, da, prefs) {
-    const fallback = { titreSection: 'Productions et évaluations', contenuSection: genererSectionProductions(da) };
+/**
+ * #1151 — LES SECTIONS DU PROFIL, dans l'ordre de la rangée. Une seule table pour les boutons,
+ * l'en-tête et le contenu : `libelle` (le bouton), `titre` (l'en-tête, au lecteur d'écran — le
+ * bouton plein le nomme à l'écran), `infobulle` (posée sur le bouton), `aide` (la carte
+ * `details-calculs-<aide>-<da>` que la section rend elle-même ; `null` : aucune), `pref` (la
+ * préférence de `_lirePrefsProfil` qui la montre ; `null` : toujours).
+ */
+const SECTIONS_PROFIL = [
+    { id: 'productions',    libelle: 'Productions',                 titre: 'Productions et évaluations',  infobulle: 'profil-productions',    aide: null,             pref: null,
+      contenu: (da) => genererSectionProductions(da) },
+    // DEN couche 2 (#318) : panneau de saisie du jugement.
+    { id: 'jugement',       libelle: 'Jugement',                    titre: 'Jugement (dénotation)',       infobulle: '',                      aide: null,             pref: 'jugementDenActif',
+      contenu: (da) => window.denotationSaisie.panneau(da) },
+    { id: 'mobilisation',   libelle: 'Engagement ACP',              titre: 'Engagement ACP',              infobulle: 'profil-mobilisation',   aide: 'mobilisation',   pref: 'engagementVisible',
+      contenu: (da) => genererSectionMobilisationEngagement(da) },
+    { id: 'progression',    libelle: 'Progression temporelle ACP',  titre: 'Progression temporelle ACP',  infobulle: 'profil-progression',    aide: null,             pref: 'progressionVisible',
+      contenu: (da) => genererSectionProgression(da) },
+    { id: 'performance',    libelle: 'Développement des habiletés', titre: 'Développement des habiletés', infobulle: 'profil-habiletes',      aide: 'performance',    pref: 'developpementVisible',
+      contenu: (da) => genererSectionPerformance(da) },
+    { id: 'accompagnement', libelle: 'Accompagnement',              titre: 'Accompagnement',              infobulle: 'profil-accompagnement', aide: 'accompagnement', pref: 'activerRai',
+      contenu: (da) => genererSectionAccompagnement(da) },
+    { id: 'travaux',        libelle: 'Travaux soumis',              titre: 'Travaux soumis',              infobulle: 'profil-travaux',        aide: null,             pref: null,
+      contenu: (da) => genererSectionTravaux(da) },
+    { id: 'rapport',        libelle: 'Rapport',                     titre: 'Rapport',                     infobulle: 'profil-rapport',        aide: null,             pref: null,
+      contenu: (da) => genererSectionRapport(da) }
+];
 
-    if (sectionAffichee === 'productions') return fallback;
-    if (sectionAffichee === 'jugement') {
-        return (prefs.jugementDenActif && window.denotationSaisie)
-            ? { titreSection: 'Jugement (dénotation)', contenuSection: window.denotationSaisie.panneau(da) }
-            : fallback;
-    }
-    if (sectionAffichee === 'performance') {
-        return prefs.developpementVisible
-            ? { titreSection: 'Développement des habiletés', contenuSection: genererSectionPerformance(da) }
-            : fallback;
-    }
-    if (sectionAffichee === 'mobilisation') {
-        return prefs.engagementVisible
-            ? { titreSection: 'Engagement ACP', contenuSection: genererSectionMobilisationEngagement(da) }
-            : fallback;
-    }
-    if (sectionAffichee === 'progression') {
-        return prefs.progressionVisible
-            ? { titreSection: 'Progression', contenuSection: genererSectionProgression(da) }
-            : fallback;
-    }
-    if (sectionAffichee === 'rapport') return { titreSection: 'Rapport', contenuSection: genererSectionRapport(da) };
-    if (sectionAffichee === 'accompagnement') {
-        return prefs.activerRai
-            ? { titreSection: 'Accompagnement', contenuSection: genererSectionAccompagnement(da) }
-            : fallback;
-    }
-    if (sectionAffichee === 'travaux') return { titreSection: 'Travaux soumis', contenuSection: genererSectionTravaux(da) };
-    return { titreSection: '', contenuSection: '' };
+/**
+ * HELPER : les préférences qui montrent ou cachent des sections du profil.
+ */
+function _lirePrefsProfil() {
+    return {
+        activerRai:           obtenirPreference('activerRai') !== false,
+        engagementVisible:    obtenirPreference('depistageAcp') !== false,
+        progressionVisible:   obtenirPreference('afficherGraphiques') !== false,
+        developpementVisible: obtenirPreference('afficherDeveloppementHabiletes') !== false,
+        // DEN couche 2 (#318) : section « Jugement » visible seulement quand la
+        // pratique active du groupe-cours est une dénotation (note saisie).
+        jugementDenActif:     !!(window.denotationSaisie
+                                  && typeof window.denotationSaisie.estActive === 'function'
+                                  && window.denotationSaisie.estActive())
+    };
+}
+
+function _sectionsProfilVisibles(prefs) {
+    return SECTIONS_PROFIL.filter(def => !def.pref || prefs[def.pref]);
 }
 
 /**
- * HELPER : post-rendu setTimeout T+100ms (réattaches + initialisations différées).
+ * HELPER : la section demandée si elle est visible, sinon Productions. Le bouton marqué est
+ * toujours celui de la section rendue. `sectionProfilActive` garde la demande, pour l'élève suivant.
+ */
+function _resoudreSectionProfil(section, prefs) {
+    return _sectionsProfilVisibles(prefs).find(def => def.id === section) || SECTIONS_PROFIL[0];
+}
+
+/**
+ * HELPER : l'en-tête et le contenu d'une section — le seul rendu, à l'ouverture comme au changement.
+ * L'icône d'aide vise la carte que la section rend (`details-calculs-<aide>-<da>`) ; à l'ouverture,
+ * l'ancien en-tête visait `details-calculs-risque-<da>`, qu'aucune section ne rend.
+ */
+function _rendreSectionProfil(def, da) {
+    const aide = def.aide
+        ? `<span class="primo-aide" data-target="details-calculs-${def.aide}-${echapperHtml(da)}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>`
+        : '';
+    return `
+        <div class="profil-contenu-header${aide ? '' : ' profil-contenu-header-vide'}">
+            <h2 class="u-lecteur-ecran">${echapperHtml(def.titre)}</h2>
+            ${aide}
+        </div>
+        <div class="profil-contenu-body">
+            ${def.contenu(da)}
+        </div>
+    `;
+}
+
+/**
+ * HELPER : marque le bouton de la section rendue (plein), et lui seul — par sa `data-param`.
+ */
+function _marquerSectionProfil(section) {
+    document.querySelectorAll('#contenuProfilEtudiant [data-action="changerSectionProfil"]').forEach(bouton => {
+        if (bouton.dataset.param === section) bouton.setAttribute('aria-current', 'true');
+        else bouton.removeAttribute('aria-current');
+    });
+}
+
+/**
+ * HELPER : post-rendu — les vignettes des travaux tout de suite, puis à T+100 ms les réattaches
+ * et les initialisations différées.
  */
 function _postRendreProfilSection(sectionAffichee, da, container) {
+    if (sectionAffichee === 'travaux' && typeof travauxStockage !== 'undefined') {
+        travauxStockage.chargerThumbnailsConteneur(container);
+    }
     setTimeout(() => {
         if (typeof reattacherEvenementsToggles === 'function') reattacherEvenementsToggles();
         if (window.accompagnement && typeof window.accompagnement.initialiserPopup === 'function') {
             window.accompagnement.initialiserPopup();
         }
         if (sectionAffichee === 'rapport') restaurerPreferencesRapport(da);
-        if (sectionAffichee === 'travaux' && typeof travauxStockage !== 'undefined') {
-            travauxStockage.chargerThumbnailsConteneur(container);
-        }
     }, 100);
 }
 
@@ -2520,8 +2462,8 @@ function _activerSousSectionProfil() {
 }
 
 /**
- * Affiche le profil complet avec layout 2 colonnes
- * Inspiré de la page d'évaluation
+ * Affiche le profil complet : la rangée de l'élève et des sections (#1151), puis la section
+ * sur toute la largeur.
  *
  * Orchestrateur slim post-éclatement (étape 4, 18 mai 2026) — délègue à 5 helpers
  * privés `_X` ci-dessus. Cyc cible ≤ 30. Signature externe arité 1 préservée.
@@ -2559,155 +2501,90 @@ function afficherProfilComplet(daOuEl) {
 
     // Session C (#303) : mode comparatif retiré — le calcul dual SOM/PAN (mort) a été retiré.
 
-    // 4. Préférences UI (pour résolution section + sidebar)
-    const prefs = {
-        activerRai:           obtenirPreference('activerRai') !== false,
-        engagementVisible:    obtenirPreference('depistageAcp') !== false,
-        progressionVisible:   obtenirPreference('afficherGraphiques') !== false,
-        developpementVisible: obtenirPreference('afficherDeveloppementHabiletes') !== false,
-        // DEN couche 2 (#318) : section « Jugement » visible seulement quand la
-        // pratique active du groupe-cours est une dénotation (note saisie).
-        jugementDenActif:     !!(window.denotationSaisie
-                                  && typeof window.denotationSaisie.estActive === 'function'
-                                  && window.denotationSaisie.estActive())
-    };
+    // 4. Préférences UI (sections visibles)
+    const prefs = _lirePrefsProfil();
 
-    // 5. Navigation Précédent/Suivant
-    const indexActuel = etudiants.findIndex(e => e.da === da);
-    const etudiantPrecedent = indexActuel > 0 ? etudiants[indexActuel - 1] : null;
-    const etudiantSuivant = indexActuel < etudiants.length - 1 ? etudiants[indexActuel + 1] : null;
+    // 5. Section + contenu (Beta 90 : section mémorisée ou 'productions' par défaut)
+    const def = _resoudreSectionProfil(sectionProfilActive || 'productions', prefs);
 
-    // 6. Section + contenu (Beta 90 : section mémorisée ou 'productions' par défaut)
-    const sectionAffichee = sectionProfilActive || 'productions';
-    const { titreSection, contenuSection } = _resoudreSectionContenu(sectionAffichee, da, prefs);
-    const { activerRai, engagementVisible, progressionVisible, developpementVisible, jugementDenActif } = prefs;
+    // #1151 — le rendu remplace la rangée : la flèche qui avait le focus le garde (‹ › au clavier).
+    const actif = document.activeElement;
+    const focusAvant = actif && /^profilEleve(Precedent|Suivant)$/.test(actif.id) ? actif.id : '';
 
-    // Générer le HTML avec layout sidebar matériel
     container.innerHTML = `
-        <div class="layout-sidebar-2col">
-            <!-- SIDEBAR GAUCHE (navigation) -->
-            <div class="sidebar-navigation">
-                <!-- Sélecteur d'étudiant -->
-                <div class="sidebar-filtre">
-                    <label class="u-texte-mini u-texte-gris" style="margin-bottom: 5px; display: block;" data-tooltip="profil-selecteur">Étudiant·e :</label>
-                    <select id="selecteurEtudiantProfil" class="controle-form" data-on-change="afficherProfilComplet">
-                        ${etudiants.map(e => {
-                            // ✅ CORRIGÉ (29 déc 2025): Ne pas afficher DA en mode anonymisation
-                            const daTexte = modeAnonymisation ? '' : ` (${echapperHtml(e.da)})`;
-                            return `
-                            <option value="${echapperHtml(e.da)}" ${e.da === da ? 'selected' : ''}>
-                                ${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}${daTexte}
-                            </option>
-                            `;
-                        }).join('')}
-                    </select>
-                </div>
-
-                <!-- Navigation Précédent/Suivant -->
-                <div class="sidebar-nav-buttons">
-                    <button class="btn btn-principal"
-                            data-action="afficherProfilComplet" data-param="${etudiantPrecedent?.da}"
-                            ${!etudiantPrecedent ? 'disabled' : ''}
-                            title="Étudiant·e précédent·e">
-                        ← Préc.
-                    </button>
-                    <button class="btn btn-principal"
-                            data-action="afficherProfilComplet" data-param="${etudiantSuivant?.da}"
-                            ${!etudiantSuivant ? 'disabled' : ''}
-                            title="Étudiant·e suivant·e">
-                        Suiv. →
-                    </button>
-                </div>
-
-                <!-- Informations étudiant -->
-                <div class="sidebar-info-card">
-                    <div class="sidebar-info-card-nom">
-                        ${echapperHtml(eleve.prenom)} ${echapperHtml(eleve.nom)}
-                    </div>
-                    <div class="sidebar-info-card-details">
-                        ${estEtudiantExclu(eleve) ? `<div data-statut-exclu="${echapperHtml(eleve.statut)}">${echapperHtml(libelleStatutEtudiant(eleve.statut))} · hors des moyennes du groupe</div>` : ''}
-                        ${modeAnonymisation ? '' : `<div><strong>DA:</strong> ${echapperHtml(eleve.da)}</div>`}
-                        ${eleve.groupe ? `<div><strong>Groupe:</strong> ${echapperHtml(eleve.groupe)}</div>` : ''}
-                        ${eleve.programme ? `<div><strong>Programme:</strong> ${typeof obtenirNomProgramme === 'function' ? echapperHtml(obtenirNomProgramme(eleve.programme)) : echapperHtml(eleve.programme)}</div>` : ''}
-                        ${eleve.sa === 'Oui' ? '<div class="u-texte-bleu">Services adaptés</div>' : ''}
-                        ${eleve.caf === 'Oui' ? '<div class="u-texte-bleu">Mesure d\'aide</div>' : ''}
-                    </div>
-                </div>
-
-                <!-- Navigation sections (utilise les classes matériel) -->
-                <div class="sidebar-liste">
-                    <div class="sidebar-section-titre" data-tooltip="profil-nav-observations">OBSERVATIONS</div>
-
-                    <!-- 1. Productions -->
-                    <div class="sidebar-item ${sectionAffichee === 'productions' ? 'active' : ''}" data-action="changerSectionProfil" data-param="productions">
-                        <div class="sidebar-item-titre">Productions</div>
-                    </div>
-
-                    <!-- 1b. Jugement (Dénotation #318) — visible seulement si la pratique active est une DEN -->
-                    ${jugementDenActif ? `
-                    <div class="sidebar-item ${sectionAffichee === 'jugement' ? 'active' : ''}" data-action="changerSectionProfil" data-param="jugement">
-                        <div class="sidebar-item-titre">Jugement</div>
-                    </div>
-                    ` : ''}
-
-                    <!-- 2. Engagement ACP (affiché uniquement si Micro données ACP activé) -->
-                    ${engagementVisible ? `
-                    <div class="sidebar-item ${sectionAffichee === 'mobilisation' ? 'active' : ''}" data-action="changerSectionProfil" data-param="mobilisation">
-                        <div class="sidebar-item-titre">Engagement ACP</div>
-                    </div>
-                    ` : ''}
-
-                    <!-- 2b. Progression temporelle ACP (affiché uniquement si Graphiques d'évolution activé) -->
-                    ${progressionVisible ? `
-                    <div class="sidebar-item ${sectionAffichee === 'progression' ? 'active' : ''}" data-action="changerSectionProfil" data-param="progression">
-                        <div class="sidebar-item-titre">Progression temporelle ACP</div>
-                    </div>
-                    ` : ''}
-
-                    <!-- 3. Développement des habiletés (affiché uniquement si préférence activée) -->
-                    ${developpementVisible ? `
-                    <div class="sidebar-item ${sectionAffichee === 'performance' ? 'active' : ''}" data-action="changerSectionProfil" data-param="performance">
-                        <div class="sidebar-item-titre">Développement des habiletés</div>
-                    </div>
-                    ` : ''}
-
-                    <!-- 4. Accompagnement (affiché uniquement si RàI activé) -->
-                    ${activerRai ? `
-                    <div class="sidebar-item ${sectionAffichee === 'accompagnement' ? 'active' : ''}" data-action="changerSectionProfil" data-param="accompagnement">
-                        <div class="sidebar-item-titre">Accompagnement</div>
-                    </div>
-                    ` : ''}
-
-                    <!-- 5. Travaux soumis (Beta 96.3) -->
-                    <div class="sidebar-item ${sectionAffichee === 'travaux' ? 'active' : ''}" data-action="changerSectionProfil" data-param="travaux">
-                        <div class="sidebar-item-titre">Travaux soumis</div>
-                    </div>
-
-                    <!-- 6. Rapport -->
-                    <div class="sidebar-item ${sectionAffichee === 'rapport' ? 'active' : ''}" data-action="changerSectionProfil" data-param="rapport">
-                        <div class="sidebar-item-titre">Rapport</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ZONE PRINCIPALE (centrale, scroll) -->
-            <div class="zone-principale" id="profil-contenu-dynamique">
-                <!-- Contenu dynamique chargé par changerSectionProfil() -->
-                <div class="profil-contenu-header">
-                    <h2 class="u-flex-between-mb20">
-                        <span data-tooltip="${{'productions':'profil-productions','mobilisation':'profil-mobilisation','progression':'profil-progression','performance':'profil-habiletes','accompagnement':'profil-accompagnement','travaux':'profil-travaux','rapport':'profil-rapport'}[sectionAffichee] || ''}">${titreSection}</span>
-                        <span class="primo-aide" data-target="details-calculs-risque-${da}"><span class="icone-info-aide taille-inline" aria-hidden="true"></span></span>
-                    </h2>
-                </div>
-                <div class="profil-contenu-body">
-                    ${contenuSection}
-                </div>
-            </div>
+        ${_rendreRangeeProfil(eleve, etudiants, def.id, prefs, modeAnonymisation)}
+        <div class="zone-principale" id="profil-contenu-dynamique">
+            ${_rendreSectionProfil(def, da)}
         </div>
     `;
 
-    // 7. Post-rendu T+100ms (réattaches + initialisations différées)
-    _postRendreProfilSection(sectionAffichee, da, container);
+    const aRefocaliser = focusAvant && document.getElementById(focusAvant);
+    if (aRefocaliser) (aRefocaliser.disabled ? document.getElementById('selecteurEtudiantProfil') : aRefocaliser).focus();
+
+    // 6. Post-rendu (vignettes, puis réattaches + initialisations différées à T+100 ms)
+    _postRendreProfilSection(def.id, da, container);
+}
+
+/**
+ * HELPER (#1151, 24 oct. 2026) — LA RANGÉE DU PROFIL, au lieu de la barre latérale : la bande des
+ * bibliothèques (#1147, `.rangee-selection`), sur deux lignes. En haut, l'élève : « Liste des
+ * étudiant·es », ‹ le menu ›, le compte, ses étiquettes. En bas, les sections en boutons (plein :
+ * celle qui est ouverte). Le menu garde son identifiant et son gestionnaire.
+ */
+function _rendreRangeeProfil(eleve, etudiants, sectionId, prefs, modeAnonymisation) {
+    const index = etudiants.findIndex(e => e.da === eleve.da);
+    const precedent = index > 0 ? etudiants[index - 1] : null;
+    const suivant = index < etudiants.length - 1 ? etudiants[index + 1] : null;
+    const fleche = (id, cible, libelle, signe) => `
+                <button type="button" id="${id}" class="rangee-selection-fleche"
+                        data-action="afficherProfilComplet" ${cible ? `data-param="${echapperHtml(cible.da)}"` : 'disabled'}
+                        aria-label="${libelle}" title="${libelle}">${signe}</button>`;
+    const options = etudiants.map(e => {
+        // ✅ CORRIGÉ (29 déc 2025): Ne pas afficher DA en mode anonymisation
+        const daTexte = modeAnonymisation ? '' : ` (${echapperHtml(e.da)})`;
+        return `<option value="${echapperHtml(e.da)}" ${e.da === eleve.da ? 'selected' : ''}>${echapperHtml(e.nom)}, ${echapperHtml(e.prenom)}${daTexte}</option>`;
+    }).join('');
+    const boutons = _sectionsProfilVisibles(prefs).map(def => `
+            <button type="button" class="rangee-selection-section" data-action="changerSectionProfil" data-param="${def.id}"
+                    ${def.infobulle ? `data-tooltip="${def.infobulle}"` : ''} ${def.id === sectionId ? 'aria-current="true"' : ''}>${echapperHtml(def.libelle)}</button>`).join('');
+    return `
+        <div class="rangee-selection rangee-selection-profil">
+            <div class="rangee-selection-ligne">
+                <button type="button" class="btn btn-principal" data-action="naviguerVers" data-param="suivi" data-param2="liste">Liste des étudiant·es</button>
+                <div class="rangee-selection-pas">
+                    ${fleche('profilElevePrecedent', precedent, 'Étudiant·e précédent·e', '‹')}
+                    <label for="selecteurEtudiantProfil" class="u-lecteur-ecran">Étudiant·e</label>
+                    <select id="selecteurEtudiantProfil" class="controle-form rangee-selection-menu" data-on-change="afficherProfilComplet" data-tooltip="profil-selecteur">
+                        ${options}
+                    </select>
+                    ${fleche('profilEleveSuivant', suivant, 'Étudiant·e suivant·e', '›')}
+                    <span class="rangee-selection-compte">${index + 1} sur ${etudiants.length}</span>
+                </div>
+                <div class="rangee-selection-etiquettes">${_etiquettesEleveProfil(eleve)}</div>
+            </div>
+            <nav class="rangee-selection-sections" aria-label="Sections du profil">${boutons}
+            </nav>
+        </div>
+    `;
+}
+
+/**
+ * HELPER (#1151) — ce que disait la carte d'identité, hors du nom (dans le menu) et du DA (dans le
+ * menu aussi, sauf en anonymisation) : le statut s'il est exclu, le groupe, le programme, les mesures.
+ */
+function _etiquettesEleveProfil(eleve) {
+    const etiquettes = [];
+    if (estEtudiantExclu(eleve)) {
+        etiquettes.push(`<span class="rangee-selection-etiquette rangee-selection-etiquette-alerte" data-statut-exclu="${echapperHtml(eleve.statut)}">${echapperHtml(libelleStatutEtudiant(eleve.statut))} · hors des moyennes du groupe</span>`);
+    }
+    if (eleve.groupe) etiquettes.push(`<span class="rangee-selection-etiquette"><b>Groupe</b> ${echapperHtml(eleve.groupe)}</span>`);
+    if (eleve.programme) {
+        const programme = typeof obtenirNomProgramme === 'function' ? obtenirNomProgramme(eleve.programme) : eleve.programme;
+        etiquettes.push(`<span class="rangee-selection-etiquette"><b>Programme</b> ${echapperHtml(programme)}</span>`);
+    }
+    if (eleve.sa === 'Oui') etiquettes.push('<span class="rangee-selection-etiquette rangee-selection-etiquette-mesure">Services adaptés</span>');
+    if (eleve.caf === 'Oui') etiquettes.push('<span class="rangee-selection-etiquette rangee-selection-etiquette-mesure">Mesure d\'aide</span>');
+    return etiquettes.join('');
 }
 
 /* ===============================

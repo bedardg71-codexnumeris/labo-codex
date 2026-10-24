@@ -78,7 +78,7 @@ async function monter(page) {
         window.afficherProfilComplet('TEST868B');
     }, PNG);
     await page.waitForFunction((da) => window.profilActuelDA === da && !window._profilAutoChargement
-        && !!document.querySelector('#contenuProfilEtudiant .layout-sidebar-2col'), DA, { timeout: 10000 });
+        && !!document.querySelector('#contenuProfilEtudiant .rangee-selection-profil'), DA, { timeout: 10000 });
     return suivi;
 }
 

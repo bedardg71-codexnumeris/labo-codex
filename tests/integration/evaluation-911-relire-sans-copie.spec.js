@@ -188,7 +188,7 @@ test('Porte #911 · S4 · le même trajet, « Consulter » depuis le PROFIL de l
     await evaluerUneCopiePuisBasculer(page);
     await page.evaluate(() => { window.afficherSection('suivi'); window.afficherProfilComplet('TEST911B'); });
     await page.waitForFunction(() => window.profilActuelDA === 'TEST911B' && !window._profilAutoChargement
-        && !!document.querySelector('#contenuProfilEtudiant .layout-sidebar-2col'), null, { timeout: 10000 });
+        && !!document.querySelector('#contenuProfilEtudiant .rangee-selection-profil'), null, { timeout: 10000 });
     await page.evaluate(() => window.changerSectionProfil('productions'));
     const selecteur = '#suivi-profil [data-action="consulterEvaluation"][data-param2="pB"]';
     await page.waitForFunction((s) => !!document.querySelector(s), selecteur, { timeout: 10000 });

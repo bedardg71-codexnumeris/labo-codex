@@ -9726,6 +9726,89 @@ td .marque-diagnostique { margin-left: 6px; }
 }
 .rangee-selection-resume-note { color: var(--gris-moyen); }
 .rangee-selection-aide { margin: 0 0 12px; }
+/* #1151 (24 oct. 2026) — LE PROFIL INDIVIDUEL (Suivi › Profils individuels) : la même bande, sur deux lignes, au
+   lieu de la barre latérale du profil. En haut, l'élève : « Liste des étudiant·es », ‹ le menu ›, le compte, puis
+   ses étiquettes poussées à droite. En bas, les sections en boutons : pleine, celle qui est ouverte (`aria-current`) ;
+   bordées, les autres. Maquette validée par Grégoire le 24 oct. à 17 h 41. Sous 760 px, ‹ menu › prend sa ligne. */
+.rangee-selection-profil { flex-direction: column; align-items: stretch; }
+.rangee-selection-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.rangee-selection-pas { display: flex; align-items: center; gap: 6px; flex: 1 1 380px; max-width: 540px; min-width: 0; }
+.rangee-selection-pas .rangee-selection-menu { flex: 1 1 auto; min-width: 0; text-overflow: ellipsis; }
+.rangee-selection-fleche {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    height: 44px;
+    padding: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent-primaire);
+    background: var(--surface-carte);
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-moyen);
+    cursor: pointer;
+}
+.rangee-selection-fleche:hover:not(:disabled) { border-color: var(--accent-primaire); }
+.rangee-selection-fleche:disabled { opacity: 0.35; cursor: default; }
+.rangee-selection-compte {
+    flex: 0 0 auto;
+    padding-left: 4px;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--texte-secondaire);
+}
+.rangee-selection-etiquettes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-left: auto; min-width: 0; }
+/* Bordure égale sur les quatre côtés (règle de Grégoire du 24 oct. : pas de liseré). */
+.rangee-selection-etiquette {
+    display: inline-block;
+    padding: 3px 9px;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    white-space: nowrap;
+    color: var(--texte-principal);
+    background: var(--surface-carte);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-petit);
+}
+.rangee-selection-etiquette b { font-weight: 600; color: var(--texte-secondaire); }
+.rangee-selection-etiquette-mesure { font-weight: 600; color: var(--accent-primaire); border-color: var(--bleu-leger); }
+.rangee-selection-etiquette-alerte {
+    font-weight: 600;
+    white-space: normal;
+    color: var(--alerte-texte-attention);
+    background: var(--alerte-fond-attention);
+    border-color: var(--alerte-bordure-attention);
+}
+.rangee-selection-sections { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px solid var(--bordure-moyenne); }
+.rangee-selection-section {
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--accent-primaire);
+    background: var(--surface-carte);
+    border: 1px solid var(--bleu-leger);
+    border-radius: var(--radius-moyen);
+    cursor: pointer;
+}
+.rangee-selection-section:hover { border-color: var(--accent-primaire); }
+.rangee-selection-section[aria-current="true"] {
+    color: white;
+    background: var(--btn-principal);
+    border-color: var(--btn-principal);
+    box-shadow: var(--shadow-normal);
+}
+@media (max-width: 760px) {
+    .rangee-selection-pas { flex-basis: 100%; max-width: none; }
+    .rangee-selection-etiquettes { justify-content: flex-start; margin-left: 0; }
+}
+/* Le titre de la section ouverte passe au lecteur d'écran (le bouton plein le nomme) ; l'icône d'aide propre
+   à la section reste en tête du contenu, à droite. */
+#profil-contenu-dynamique .profil-contenu-header { display: flex; justify-content: flex-end; margin: 0; padding: 0; border: 0; }
+#profil-contenu-dynamique .profil-contenu-header-vide { display: none; }
 
 /* === SECTION ACCORDÉON D'IMPORT === */
 .section-accordeon {
@@ -9776,53 +9859,6 @@ td .marque-diagnostique { margin-left: 6px; }
 
 .sidebar-liste {
     margin: 15px 0;
-}
-
-.sidebar-filtre {
-    margin-bottom: 15px;
-}
-
-/* Carte d'information dans la sidebar */
-.sidebar-info-card {
-    background: var(--bleu-tres-pale);
-    padding: 12px;
-    border-radius: var(--radius-moyen);
-    margin-bottom: 15px;
-    font-size: 0.85rem;
-    line-height: 1.8;
-}
-
-.sidebar-info-card-nom {
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--accent-primaire);
-}
-
-.sidebar-info-card-details {
-    color: var(--texte-secondaire, #8aa4b0);
-}
-
-/* Groupe de boutons de navigation */
-.sidebar-nav-buttons {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.sidebar-nav-buttons .btn {
-    flex: 1;
-    font-size: 0.85rem;
-    padding: 8px;
-}
-
-/* Titre de section dans sidebar */
-.sidebar-section-titre {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--accent-primaire);
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 /* ===============================================
