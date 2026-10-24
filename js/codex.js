@@ -613,17 +613,26 @@ async function genererCodex(options = {}) {
     }
 
     // K-β — preview UI : montrer la liste des fichiers à l'utilisateur
-    // avant compression et téléchargement. L'utilisateur peut annuler.
+    // avant compression et écriture du fichier. L'utilisateur peut annuler.
     // Sautée seulement si le module preview n'est pas chargé (dégradation gracieuse).
+    //
+    // Le codex n'est pas un export (D4, 26 sept. 2026) : la fenêtre dit « Mettre à jour
+    // le codex » et son bouton « Mettre à jour » (mots de Grégoire, 24 oct. 2026), pour
+    // tous les gestes qui passent ici — « Mettre à jour le codex », « Enregistrer sous »
+    // et, provisoirement, le codex à part avant une suppression.
     //
     // Important UX : on masque l'overlay de progression avant la modale
     // (sinon double affichage), puis on le RÉAFFICHE après le clic
-    // Télécharger pour montrer la compression (qui peut prendre plusieurs
+    // « Mettre à jour » pour montrer la compression (qui peut prendre plusieurs
     // minutes avec beaucoup de fichiers). Sans réaffichage, l'utilisateur
     // attend dans le noir pendant generateAsync.
     if (window.SecuriteExportPreview && typeof window.SecuriteExportPreview.previewZipEtConfirmer === 'function') {
         _progMasquer();
-        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(window.FichierSortant.entreesDuZip(zip, copies, DOSSIER_TRAVAUX + '/'), 'codex', { taille: window.TailleFichier.dire(tailleEstimee, { environ: true }) });
+        const ok = await window.SecuriteExportPreview.previewZipEtConfirmer(window.FichierSortant.entreesDuZip(zip, copies, DOSSIER_TRAVAUX + '/'), 'codex', {
+            taille: window.TailleFichier.dire(tailleEstimee, { environ: true }),
+            titre: 'Mettre à jour le codex',
+            texteConfirmer: 'Mettre à jour'
+        });
         if (!ok) {
             return null;
         }

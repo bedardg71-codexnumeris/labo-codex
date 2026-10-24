@@ -15,8 +15,9 @@
    uniquement).
 
    Comportement : la modale est non bloquante côté JS — elle retourne
-   une Promise qui résout `true` sur Télécharger, `false` sur Annuler
-   ou Échap. Le pipeline d'export attend la résolution.
+   une Promise qui résout `true` sur le bouton de confirmation (« Télécharger »
+   par défaut ; « Mettre à jour » pour le codex), `false` sur Annuler ou
+   Échap. Le pipeline d'export attend la résolution.
    =============================== */
 
 (function () {
@@ -62,7 +63,8 @@
     }
 
     /**
-     * Affiche une modale Promise<boolean>. true = Télécharger, false = Annuler.
+     * Affiche une modale Promise<boolean>. true = bouton de confirmation
+     * (opts.texteConfirmer, « Télécharger » par défaut), false = Annuler.
      */
     function _afficherModale(opts) {
         return new Promise(function (resolve) {
@@ -149,7 +151,7 @@
             var btnConfirmer = document.createElement('button');
             btnConfirmer.type = 'button';
             btnConfirmer.className = 'btn btn-confirmer';
-            btnConfirmer.textContent = 'Télécharger';
+            btnConfirmer.textContent = opts.texteConfirmer || 'Télécharger';
 
             actions.appendChild(btnAnnuler);
             actions.appendChild(btnConfirmer);
@@ -175,7 +177,7 @@
             document.addEventListener('keydown', surEchap);
 
             document.body.appendChild(overlay);
-            // Focus initial sur Télécharger pour que Entrée valide directement.
+            // Focus initial sur le bouton de confirmation pour que Entrée valide directement.
             setTimeout(function () { btnConfirmer.focus(); }, 0);
         });
     }
@@ -187,6 +189,10 @@
      * @param {Object} [options]
      * @param {string} [options.taille] - lot G (#988) : la taille du fichier, dite par
      *   l'appelant (« environ 1,0 Go »), ajoutée au sous-titre. Texte, jamais du HTML.
+     * @param {string} [options.titre] - le titre, à la place de « Confirmer l'export ‹libellé› ».
+     * @param {string} [options.texteConfirmer] - le bouton, à la place de « Télécharger ».
+     *   Le codex n'est ni un export ni un téléchargement (D4, 26 sept. 2026) : il passe
+     *   « Mettre à jour le codex » et « Mettre à jour » (mots de Grégoire, 24 oct. 2026).
      * @returns {Promise<boolean>}
      */
     async function previewZipEtConfirmer(zip, libelle, options) {
@@ -194,7 +200,8 @@
         var entrees = _construireListeZip(zip);
         var taille = options && options.taille ? ' – ' + String(options.taille) : '';
         return await _afficherModale({
-            titre: 'Confirmer l\'export ' + (libelle || ''),
+            titre: (options && options.titre) || 'Confirmer l\'export ' + (libelle || ''),
+            texteConfirmer: options && options.texteConfirmer,
             // Accordé au nombre (mots de Grégoire, lot G, 29 sept. 2026 : plus de « (s) »).
             sousTitre: entrees.length + (entrees.length > 1 ? ' fichiers ou dossiers' : ' fichier ou dossier') + ' à inclure' + taille,
             lignes: entrees,
