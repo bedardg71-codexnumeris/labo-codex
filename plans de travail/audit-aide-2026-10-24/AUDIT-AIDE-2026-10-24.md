@@ -68,108 +68,108 @@ Ce sont des textes neufs : Cowork les propose à Grégoire, qui les corrige, ava
 
 ## Les 75 entrées : verdict final et disposition
 
-`#FICHE-AIDE` : la fiche du chantier, inscrite au BACKLOG par le lot 1 (étape 1), qui remplace ce repère par son numéro.
+`#1152` : la fiche du chantier, inscrite au BACKLOG par le lot 1 (étape 1), qui remplace ce repère par son numéro.
 
 | Entrée (id `accordeon-aide-…`) | Titre actuel | Ancrage | Verdict final | Mots : avant → visés | Place dans la nouvelle forme | Disposition |
 |---|---|---|---|---|---|---|
-| `presentation` | « Présentation de l'application » | Ancrée en partie | Corriger et resserrer ; ne garder que « Où vont tes données ? » | 702 → ~120 | Commencer | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `monitorage` | « Comprendre le suivi de l'apprentissage » | Sans ancrage | Couper ; une phrase passe dans « Présentation de l'application » | 203 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `acp` | « Lire les indices A-C-P de tes étudiant·es » | Ancrée en partie | Corriger et resserrer | 120 → ~80 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `rai` | « La Réponse à l'Intervention (RàI) » | Ancrée en partie | Corriger et resserrer | 279 → ~120 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `solo` | « La taxonomie SOLO : évaluer la profondeur de l'apprentissage » | Ancrée en partie | Fusionner avec « Appliquer l'échelle IDME » | 205 → ~150 pour les deux | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `pan` | « Les pratiques alternatives de notation (PAN) » | Ancrée en partie | Resserrer | 408 → ~150 | Labo | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `suivi-apprentissage` | « Suivi de l'apprentissage et dépistage SOLO » | Ancrée en partie | Corriger et resserrer | 427 → ~220 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `criteres` | « Tes critères d'évaluation : le socle du dépistage » | Ancrée en partie | Fusionner dans « 5b. Configurer la grille de critères pour le dépistage » | 244 → ~60 versés | Labo | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `srpnf` | « Utiliser la grille SRPNF (PAN – Standards) » | Sans ancrage | Couper | 92 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `idme` | « Appliquer l'échelle IDME » | Ancrée | Fusionner avec « La taxonomie SOLO : évaluer la profondeur de l'apprentissage » | 109 → compté avec SOLO | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `ssot` | « Une donnée, une seule source » | Sans ancrage | Couper | 93 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `modes` | « Choisir ton mode d'utilisation » | Sans ancrage | Fusionner avec « Les deux modes de l'application » | 157 → compté avec celle-ci | Commencer | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `partage` | « Partager tes ressources pédagogiques » | Ancrée en partie | Corriger et resserrer | 224 → ~70 | Codex et archives | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `etapes-config` | « Étapes de configuration » | Ancrée | Fusionner avec « 2. Section Trimestre - Configuration centralisée » et « Checklist de configuration » | 111 → ~150 pour les trois | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `prise-en-main` | « Prendre en main l'application » | Ancrée en partie | Resserrer | 144 → ~80 | Commencer | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `cours` | « 1. Configurer le cours » | Ancrée | Corriger et resserrer | 73 → ~45 | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `trimestre` | « 2. Section Trimestre - Configuration centralisée » | Ancrée en partie | Fusionner avec « Étapes de configuration » | 182 → compté avec celle-ci | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `groupe-cours` | « 2c. Le concept Groupe-cours » | Sans ancrage | Fusionner avec « Étapes de configuration » ; une phrase de définition, corrigée | 183 → ~20 versés | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `groupe` | « 3. Créer le groupe » | Ancrée | Fusionner avec « Gérer la liste des étudiant·es » | 73 → ~110 pour les deux | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `horaire` | « 4. Établir l'horaire » | Ancrée | Corriger | 63 → ~55 | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `pratique` | « 5. Choisir ta pratique de notation » | Ancrée en partie | Resserrer ; garder une phrase par famille, couper « Sur les reprises » | 322 → ~170 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `creer-productions` | « Créer et configurer les productions » | Ancrée | Corriger et resserrer | 185 → ~100 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `creer-grilles` | « Créer une grille de critères » | Ancrée | Corriger | 132 → ~120 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `apporter-grille` | « Apporter une grille que tu as déjà » | Postérieure à l'audit | Corriger et resserrer | 613 → ~420 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `bareme` | « Le barème d’un critère analytique » | Postérieure à l'audit | Garder | 195 → 195 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger) ; texte gardé |
-| `creer-echelles` | « Créer une échelle de performance » | Ancrée | Corriger et resserrer | 123 → ~80 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `creer-cartouches` | « Créer une cartouche de rétroaction » | Ancrée | Corriger | 109 → ~100 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `grille-depistage` | « 5b. Configurer la grille de critères pour le dépistage » | Ancrée en partie | Corriger et resserrer | 303 → ~130 | Labo | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `sous-criteres` | « 5c. Les critères algorithmiques » | Postérieure à l'audit | Garder | 508 → 508 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger) ; texte gardé |
-| `checklist` | « Checklist de configuration » | Sans ancrage | Couper | 52 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `archivage` | « Qu'est-ce que clore un trimestre ? » | Postérieure à l'audit | Corriger | 145 → ~150 | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `preferences` | « Personnaliser les préférences » | Ancrée en partie | Corriger et resserrer | 158 → ~70 | Commencer | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `modes-formation` | « Les deux modes de l'application » | Ancrée en partie | Fusionner avec « Choisir ton mode d'utilisation » : une entrée « Le mode anonymisé » | 107 → ~80 pour les deux | Commencer | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `demo` | « Explorer la démonstration » | Ancrée | Corriger et resserrer | 199 → ~110 | Commencer | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `parcours` | « Deux parcours selon ton expérience » | Sans ancrage | Couper | 175 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `validation-grille` | « Valider ta configuration : Tests de la grille de référence » | Sans ancrage | Couper | 489 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `flux-travail` | « Flux de travail hebdomadaire » | Sans ancrage | Couper | 45 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `etudiants` | « Gérer la liste des étudiant·es » | Ancrée | Fusionner avec « 3. Créer le groupe » | 162 → compté avec celle-ci | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `lecons` | « Planifier les leçons » | Ancrée en partie | Corriger et resserrer ; déplacer vers la Conception ; retirer la suppression par la corbeille jusqu'au correctif | 676 → ~200 | Conception | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `preparer-importer` | « Préparer et importer les travaux » | Ancrée | Corriger et resserrer | 289 → ~180 | Évaluation | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `annoter-evaluer` | « Annoter et évaluer un travail » | Ancrée | Corriger et resserrer | 375 → ~245 | Évaluation | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `exporter-archiver` | « Exporter les travaux » | Ancrée | Resserrer | 167 → ~120 | Évaluation | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `saisie-presences` | « 1. Saisir les présences » | Ancrée | Corriger | 135 → ~90 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `evaluer-productions` | « 2. Évaluer les productions » | Ancrée en partie | Fusionner dans « Annoter et évaluer un travail » | 111 → ~25 versés | Évaluation | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `gerer-jetons` | « 3. Gérer les jetons » | Sans ancrage | Couper | 79 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `irrecevables` | « 4. Gestion des travaux irrecevables et non-remis » | Ancrée | Corriger et resserrer | 574 → ~250 | Évaluation | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `verification-hebdo` | « 5. Vérification hebdomadaire » | Ancrée en partie | Couper | 67 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `snapshots` | « 6. Captures de progression hebdomadaires » | Ancrée en partie | Corriger et resserrer | 457 → ~150 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `collaboration` | « 7. Collaboration entre collègues » | Ancrée en partie | Corriger et resserrer | 909 → ~220 | Codex et archives | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `rai-absences` | « 8. Interventions RàI avec absences motivées » | Ancrée en partie | Fusionner dans « Planifier les interventions RàI » ; n'en garder que la case de report | 682 → ~40 versés | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `tirage-sort` | « Utiliser le tirage au sort » | Ancrée | Corriger et resserrer | 136 → ~70 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `modelisation` | « Modéliser en projection » | Sans ancrage | Fusionner avec « Labo — Analyser ta démarche pédagogique » ; une phrase dans la vue d'ensemble | 150 → ~25 versés | Labo | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `jetons-reprise` | « Utiliser les jetons de reprise » | Ancrée en partie | Corriger et resserrer | 261 → ~170 | Évaluation | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `temps-estimes` | « Temps estimés par activité » | Sans ancrage | Couper (décision 9) | 32 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `tableau-bord` | « Consulter l'aperçu » | Ancrée | Corriger | 65 → ~70 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `presences-apercu` | « Consulter l'aperçu des présences » | Sans ancrage | Couper | 92 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `presences-calendrier` | « Lire le calendrier des présences » | Ancrée en partie | Corriger et resserrer | 87 → ~35 | Cadre | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2a |
-| `profil-etudiant` | « Interpréter le profil d'un·e étudiant·e » | Ancrée | Fusionner avec « Guide détaillé : Profil étudiant » | 159 → ~350 pour les deux | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `diagnostics` | « Comprendre les diagnostics automatiques » | Ancrée | Corriger | 143 → ~120 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `rai-solo` | « Options configurables : RàI et SOLO » | Ancrée en partie | Corriger et resserrer | 332 → ~120 | Labo | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `patterns` | « Repérer les patterns de progression » | Ancrée en partie | Corriger et resserrer | 361 → ~170 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `guide-profil` | « Guide détaillé : Profil étudiant » | Ancrée en partie | Fusionner avec « Interpréter le profil d'un·e étudiant·e » | 1307 → compté avec celle-ci | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `planifier-rai` | « Planifier les interventions RàI » | Ancrée | Fusionner avec « 8. Interventions RàI avec absences motivées » ; ce texte comme base | 209 → ~150 | Suivi | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2b |
-| `labo` | « Labo — Analyser ta démarche pédagogique » | Ancrée en partie | Corriger et resserrer | 355 → ~180 | Labo | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `bilan-reflexif` | « Bilan réflexif — Recueillir l'expérience vécue » | Ancrée en partie | Corriger et resserrer ; retirer l'import des résultats jusqu'au correctif | 379 → ~150 | Labo | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `glossaire` | « Glossaire — 48 termes du parcours » | Ancrée | Corriger | 21 → ~12 | Référence | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `seuils-critiques` | « Seuils critiques d'alerte » | Sans ancrage | Couper | 39 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `architecture` | « Une donnée, une seule source (rappel) » | Sans ancrage | Couper | 62 → 0 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
-| `problemes` | « Résolution de problèmes courants » | Ancrée en partie | Corriger et resserrer | 130 → ~70 | Référence | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `faq` | « Questions fréquentes (FAQ) » | Ancrée en partie | Corriger et resserrer | 880 → ~310 | Référence | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `glossaire-statique` | « Glossaire des termes » | Ancrée en partie | Fusionner dans le glossaire de l'aide contextuelle | 1770 → 0 ici, ~500 au glossaire | Référence | inscrit #FICHE-AIDE, lot 1 (ranger), lot 3 (un seul glossaire) |
-| `export-import` | « Ouverture et partage de tes données » | Ancrée | Corriger et resserrer | 325 → ~150 | Codex et archives | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `codex` | « Le Codex — Espace de travail portable » | Ancrée | Corriger et resserrer | 426 → ~220 | Codex et archives | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `ressources` | « Ressources et documentation » | Sans ancrage | Resserrer ; ne garder que la bibliographie | 441 → ~120 | Référence | inscrit #FICHE-AIDE, lot 1 (ranger), lot 2c |
-| `apropos` | « À propos de l'application » | Ancrée en partie | Couper ; une ligne renvoie à Réglages › À propos | 86 → ~15 | (coupée) | inscrit #FICHE-AIDE, lot 1 |
+| `presentation` | « Présentation de l'application » | Ancrée en partie | Corriger et resserrer ; ne garder que « Où vont tes données ? » | 702 → ~120 | Commencer | inscrit #1152, lot 1 (ranger), lot 2a |
+| `monitorage` | « Comprendre le suivi de l'apprentissage » | Sans ancrage | Couper ; une phrase passe dans « Présentation de l'application » | 203 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `acp` | « Lire les indices A-C-P de tes étudiant·es » | Ancrée en partie | Corriger et resserrer | 120 → ~80 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `rai` | « La Réponse à l'Intervention (RàI) » | Ancrée en partie | Corriger et resserrer | 279 → ~120 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `solo` | « La taxonomie SOLO : évaluer la profondeur de l'apprentissage » | Ancrée en partie | Fusionner avec « Appliquer l'échelle IDME » | 205 → ~150 pour les deux | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `pan` | « Les pratiques alternatives de notation (PAN) » | Ancrée en partie | Resserrer | 408 → ~150 | Labo | inscrit #1152, lot 1 (ranger), lot 2c |
+| `suivi-apprentissage` | « Suivi de l'apprentissage et dépistage SOLO » | Ancrée en partie | Corriger et resserrer | 427 → ~220 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `criteres` | « Tes critères d'évaluation : le socle du dépistage » | Ancrée en partie | Fusionner dans « 5b. Configurer la grille de critères pour le dépistage » | 244 → ~60 versés | Labo | inscrit #1152, lot 1 (ranger), lot 2c |
+| `srpnf` | « Utiliser la grille SRPNF (PAN – Standards) » | Sans ancrage | Couper | 92 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `idme` | « Appliquer l'échelle IDME » | Ancrée | Fusionner avec « La taxonomie SOLO : évaluer la profondeur de l'apprentissage » | 109 → compté avec SOLO | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `ssot` | « Une donnée, une seule source » | Sans ancrage | Couper | 93 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `modes` | « Choisir ton mode d'utilisation » | Sans ancrage | Fusionner avec « Les deux modes de l'application » | 157 → compté avec celle-ci | Commencer | inscrit #1152, lot 1 (ranger), lot 2a |
+| `partage` | « Partager tes ressources pédagogiques » | Ancrée en partie | Corriger et resserrer | 224 → ~70 | Codex et archives | inscrit #1152, lot 1 (ranger), lot 2c |
+| `etapes-config` | « Étapes de configuration » | Ancrée | Fusionner avec « 2. Section Trimestre - Configuration centralisée » et « Checklist de configuration » | 111 → ~150 pour les trois | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `prise-en-main` | « Prendre en main l'application » | Ancrée en partie | Resserrer | 144 → ~80 | Commencer | inscrit #1152, lot 1 (ranger), lot 2a |
+| `cours` | « 1. Configurer le cours » | Ancrée | Corriger et resserrer | 73 → ~45 | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `trimestre` | « 2. Section Trimestre - Configuration centralisée » | Ancrée en partie | Fusionner avec « Étapes de configuration » | 182 → compté avec celle-ci | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `groupe-cours` | « 2c. Le concept Groupe-cours » | Sans ancrage | Fusionner avec « Étapes de configuration » ; une phrase de définition, corrigée | 183 → ~20 versés | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `groupe` | « 3. Créer le groupe » | Ancrée | Fusionner avec « Gérer la liste des étudiant·es » | 73 → ~110 pour les deux | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `horaire` | « 4. Établir l'horaire » | Ancrée | Corriger | 63 → ~55 | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `pratique` | « 5. Choisir ta pratique de notation » | Ancrée en partie | Resserrer ; garder une phrase par famille, couper « Sur les reprises » | 322 → ~170 | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `creer-productions` | « Créer et configurer les productions » | Ancrée | Corriger et resserrer | 185 → ~100 | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `creer-grilles` | « Créer une grille de critères » | Ancrée | Corriger | 132 → ~120 | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `apporter-grille` | « Apporter une grille que tu as déjà » | Postérieure à l'audit | Corriger et resserrer | 613 → ~420 | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `bareme` | « Le barème d’un critère analytique » | Postérieure à l'audit | Garder | 195 → 195 | Conception | inscrit #1152, lot 1 (ranger) ; texte gardé |
+| `creer-echelles` | « Créer une échelle de performance » | Ancrée | Corriger et resserrer | 123 → ~80 | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `creer-cartouches` | « Créer une cartouche de rétroaction » | Ancrée | Corriger | 109 → ~100 | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `grille-depistage` | « 5b. Configurer la grille de critères pour le dépistage » | Ancrée en partie | Corriger et resserrer | 303 → ~130 | Labo | inscrit #1152, lot 1 (ranger), lot 2c |
+| `sous-criteres` | « 5c. Les critères algorithmiques » | Postérieure à l'audit | Garder | 508 → 508 | Conception | inscrit #1152, lot 1 (ranger) ; texte gardé |
+| `checklist` | « Checklist de configuration » | Sans ancrage | Couper | 52 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `archivage` | « Qu'est-ce que clore un trimestre ? » | Postérieure à l'audit | Corriger | 145 → ~150 | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `preferences` | « Personnaliser les préférences » | Ancrée en partie | Corriger et resserrer | 158 → ~70 | Commencer | inscrit #1152, lot 1 (ranger), lot 2a |
+| `modes-formation` | « Les deux modes de l'application » | Ancrée en partie | Fusionner avec « Choisir ton mode d'utilisation » : une entrée « Le mode anonymisé » | 107 → ~80 pour les deux | Commencer | inscrit #1152, lot 1 (ranger), lot 2a |
+| `demo` | « Explorer la démonstration » | Ancrée | Corriger et resserrer | 199 → ~110 | Commencer | inscrit #1152, lot 1 (ranger), lot 2a |
+| `parcours` | « Deux parcours selon ton expérience » | Sans ancrage | Couper | 175 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `validation-grille` | « Valider ta configuration : Tests de la grille de référence » | Sans ancrage | Couper | 489 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `flux-travail` | « Flux de travail hebdomadaire » | Sans ancrage | Couper | 45 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `etudiants` | « Gérer la liste des étudiant·es » | Ancrée | Fusionner avec « 3. Créer le groupe » | 162 → compté avec celle-ci | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `lecons` | « Planifier les leçons » | Ancrée en partie | Corriger et resserrer ; déplacer vers la Conception ; retirer la suppression par la corbeille jusqu'au correctif | 676 → ~200 | Conception | inscrit #1152, lot 1 (ranger), lot 2a |
+| `preparer-importer` | « Préparer et importer les travaux » | Ancrée | Corriger et resserrer | 289 → ~180 | Évaluation | inscrit #1152, lot 1 (ranger), lot 2b |
+| `annoter-evaluer` | « Annoter et évaluer un travail » | Ancrée | Corriger et resserrer | 375 → ~245 | Évaluation | inscrit #1152, lot 1 (ranger), lot 2b |
+| `exporter-archiver` | « Exporter les travaux » | Ancrée | Resserrer | 167 → ~120 | Évaluation | inscrit #1152, lot 1 (ranger), lot 2b |
+| `saisie-presences` | « 1. Saisir les présences » | Ancrée | Corriger | 135 → ~90 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `evaluer-productions` | « 2. Évaluer les productions » | Ancrée en partie | Fusionner dans « Annoter et évaluer un travail » | 111 → ~25 versés | Évaluation | inscrit #1152, lot 1 (ranger), lot 2b |
+| `gerer-jetons` | « 3. Gérer les jetons » | Sans ancrage | Couper | 79 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `irrecevables` | « 4. Gestion des travaux irrecevables et non-remis » | Ancrée | Corriger et resserrer | 574 → ~250 | Évaluation | inscrit #1152, lot 1 (ranger), lot 2b |
+| `verification-hebdo` | « 5. Vérification hebdomadaire » | Ancrée en partie | Couper | 67 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `snapshots` | « 6. Captures de progression hebdomadaires » | Ancrée en partie | Corriger et resserrer | 457 → ~150 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `collaboration` | « 7. Collaboration entre collègues » | Ancrée en partie | Corriger et resserrer | 909 → ~220 | Codex et archives | inscrit #1152, lot 1 (ranger), lot 2c |
+| `rai-absences` | « 8. Interventions RàI avec absences motivées » | Ancrée en partie | Fusionner dans « Planifier les interventions RàI » ; n'en garder que la case de report | 682 → ~40 versés | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `tirage-sort` | « Utiliser le tirage au sort » | Ancrée | Corriger et resserrer | 136 → ~70 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `modelisation` | « Modéliser en projection » | Sans ancrage | Fusionner avec « Labo — Analyser ta démarche pédagogique » ; une phrase dans la vue d'ensemble | 150 → ~25 versés | Labo | inscrit #1152, lot 1 (ranger), lot 2c |
+| `jetons-reprise` | « Utiliser les jetons de reprise » | Ancrée en partie | Corriger et resserrer | 261 → ~170 | Évaluation | inscrit #1152, lot 1 (ranger), lot 2b |
+| `temps-estimes` | « Temps estimés par activité » | Sans ancrage | Couper (décision 9) | 32 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `tableau-bord` | « Consulter l'aperçu » | Ancrée | Corriger | 65 → ~70 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `presences-apercu` | « Consulter l'aperçu des présences » | Sans ancrage | Couper | 92 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `presences-calendrier` | « Lire le calendrier des présences » | Ancrée en partie | Corriger et resserrer | 87 → ~35 | Cadre | inscrit #1152, lot 1 (ranger), lot 2a |
+| `profil-etudiant` | « Interpréter le profil d'un·e étudiant·e » | Ancrée | Fusionner avec « Guide détaillé : Profil étudiant » | 159 → ~350 pour les deux | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `diagnostics` | « Comprendre les diagnostics automatiques » | Ancrée | Corriger | 143 → ~120 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `rai-solo` | « Options configurables : RàI et SOLO » | Ancrée en partie | Corriger et resserrer | 332 → ~120 | Labo | inscrit #1152, lot 1 (ranger), lot 2c |
+| `patterns` | « Repérer les patterns de progression » | Ancrée en partie | Corriger et resserrer | 361 → ~170 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `guide-profil` | « Guide détaillé : Profil étudiant » | Ancrée en partie | Fusionner avec « Interpréter le profil d'un·e étudiant·e » | 1307 → compté avec celle-ci | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `planifier-rai` | « Planifier les interventions RàI » | Ancrée | Fusionner avec « 8. Interventions RàI avec absences motivées » ; ce texte comme base | 209 → ~150 | Suivi | inscrit #1152, lot 1 (ranger), lot 2b |
+| `labo` | « Labo — Analyser ta démarche pédagogique » | Ancrée en partie | Corriger et resserrer | 355 → ~180 | Labo | inscrit #1152, lot 1 (ranger), lot 2c |
+| `bilan-reflexif` | « Bilan réflexif — Recueillir l'expérience vécue » | Ancrée en partie | Corriger et resserrer ; retirer l'import des résultats jusqu'au correctif | 379 → ~150 | Labo | inscrit #1152, lot 1 (ranger), lot 2c |
+| `glossaire` | « Glossaire — 48 termes du parcours » | Ancrée | Corriger | 21 → ~12 | Référence | inscrit #1152, lot 1 (ranger), lot 2c |
+| `seuils-critiques` | « Seuils critiques d'alerte » | Sans ancrage | Couper | 39 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `architecture` | « Une donnée, une seule source (rappel) » | Sans ancrage | Couper | 62 → 0 | (coupée) | inscrit #1152, lot 1 |
+| `problemes` | « Résolution de problèmes courants » | Ancrée en partie | Corriger et resserrer | 130 → ~70 | Référence | inscrit #1152, lot 1 (ranger), lot 2c |
+| `faq` | « Questions fréquentes (FAQ) » | Ancrée en partie | Corriger et resserrer | 880 → ~310 | Référence | inscrit #1152, lot 1 (ranger), lot 2c |
+| `glossaire-statique` | « Glossaire des termes » | Ancrée en partie | Fusionner dans le glossaire de l'aide contextuelle | 1770 → 0 ici, ~500 au glossaire | Référence | inscrit #1152, lot 1 (ranger), lot 3 (un seul glossaire) |
+| `export-import` | « Ouverture et partage de tes données » | Ancrée | Corriger et resserrer | 325 → ~150 | Codex et archives | inscrit #1152, lot 1 (ranger), lot 2c |
+| `codex` | « Le Codex — Espace de travail portable » | Ancrée | Corriger et resserrer | 426 → ~220 | Codex et archives | inscrit #1152, lot 1 (ranger), lot 2c |
+| `ressources` | « Ressources et documentation » | Sans ancrage | Resserrer ; ne garder que la bibliographie | 441 → ~120 | Référence | inscrit #1152, lot 1 (ranger), lot 2c |
+| `apropos` | « À propos de l'application » | Ancrée en partie | Couper ; une ligne renvoie à Réglages › À propos | 86 → ~15 | (coupée) | inscrit #1152, lot 1 |
 
 ## Trouvé hors de la section Aide
 
 | Constat | Preuve (à `35745bd`) | Disposition proposée |
 |---|---|---|
-| Le message affiché au choix « Non recevable » dit « sera exclue des calculs de moyenne » ; en sommative, elle vaut 0 dans la note | `js/evaluation-sauvegarde.js:614-619` | inscrit #FICHE-AIDE, lot 5 |
-| Réglages › Données annonce « triple confirmation + mot de passe » ; le code : codex à part, deux confirmations, « EFFACER » | `index.html:9722` ; `js/import-export.js` (`reinitialiserDonnees`) | inscrit #FICHE-AIDE, lot 5 |
-| L'écran Grilles de critères dit que les grilles peuvent être « verrouillées une fois finalisées » ; aucun geste ne le fait | `index.html:4970` ; `js/grilles.js:1185, 2097` | inscrit #FICHE-AIDE, lot 5 |
-| « Exporter ma config » annoncé « ZIP léger » ; il télécharge un .json et un LISEZMOI.txt | `index.html:9488` ; `js/accompagnement-contenu-hover.js:197` ; `js/import-export.js:4048-4087` | inscrit #FICHE-AIDE, lot 5 |
-| La pratique propose encore « Reprise ciblée », qu'aucun geste n'applique (#563) | `index.html:6155-6168, 8358` | inscrit #FICHE-AIDE, lot 5 (mesure d'abord : retirer l'option touche une pratique déjà configurée, donc ses données) |
-| L'aide contextuelle d'Annoter conseille « …8a, …8b » pour assembler des pages ; noms de famille en exemple | `js/accompagnement-contenu-popup.js:509, 513` | inscrit #FICHE-AIDE, lot 1 (les noms, D10) et lot 5 (la règle) |
-| Le profil et l'encart de la démo parlent encore de risque ou d'indice E | `js/profil-etudiant-sections-affichage.js:1081, 2699, 3392` ; `js/guidage-demo.js:17` | inscrit #FICHE-AIDE, lot 5 |
-| La popup de Conception donne une formule d'erreurs qui n'est aucun des trois modèles, et exige que les pondérations totalisent 100 % | `js/accompagnement-contenu-popup.js:177, 186` ; `js/evaluation-formules.js:93-152` | inscrit #FICHE-AIDE, lot 5 |
-| La note « i » des corrélations parle de points carrés ; le graphique dessine des cercles | `index.html:9210` ; `js/correlations-longitudinales.js:406-420` | inscrit #FICHE-AIDE, lot 5 |
-| Bulles d'onglet Animation, Modélisation, Rythme de travail périmées ; Exploration des pratiques et Suivi longitudinal sans bulle | `js/accompagnement-contenu-hover.js:771-772, 788-791` ; `js/navigation.js:149-191` (zone protégée) | inscrit #FICHE-AIDE, lot 5 (`navigation.js` : autorisation de Grégoire requise) |
-| « Élève » dans des textes d'écran et le formulaire d'intervention | `index.html:7520, 8984` ; `js/bilan-reflexif-parcours.js:36-38` ; `js/interventions.js:1080-1081` | inscrit #FICHE-AIDE, lot 5 |
-| L'infobulle des outils RàI dit « ciblé » en minuscules ; la sentinelle, sensible à la casse, ne le voit pas | `js/accompagnement-contenu-hover.js:149` | inscrit #FICHE-AIDE, lot 5 (et la sentinelle rendue insensible à la casse) |
+| Le message affiché au choix « Non recevable » dit « sera exclue des calculs de moyenne » ; en sommative, elle vaut 0 dans la note | `js/evaluation-sauvegarde.js:614-619` | inscrit #1152, lot 5 |
+| Réglages › Données annonce « triple confirmation + mot de passe » ; le code : codex à part, deux confirmations, « EFFACER » | `index.html:9722` ; `js/import-export.js` (`reinitialiserDonnees`) | inscrit #1152, lot 5 |
+| L'écran Grilles de critères dit que les grilles peuvent être « verrouillées une fois finalisées » ; aucun geste ne le fait | `index.html:4970` ; `js/grilles.js:1185, 2097` | inscrit #1152, lot 5 |
+| « Exporter ma config » annoncé « ZIP léger » ; il télécharge un .json et un LISEZMOI.txt | `index.html:9488` ; `js/accompagnement-contenu-hover.js:197` ; `js/import-export.js:4048-4087` | inscrit #1152, lot 5 |
+| La pratique propose encore « Reprise ciblée », qu'aucun geste n'applique (#563) | `index.html:6155-6168, 8358` | inscrit #1152, lot 5 (mesure d'abord : retirer l'option touche une pratique déjà configurée, donc ses données) |
+| L'aide contextuelle d'Annoter conseille « …8a, …8b » pour assembler des pages ; noms de famille en exemple | `js/accompagnement-contenu-popup.js:509, 513` | inscrit #1152, lot 1 (les noms, D10) et lot 5 (la règle) |
+| Le profil et l'encart de la démo parlent encore de risque ou d'indice E | `js/profil-etudiant-sections-affichage.js:1081, 2699, 3392` ; `js/guidage-demo.js:17` | inscrit #1152, lot 5 |
+| La popup de Conception donne une formule d'erreurs qui n'est aucun des trois modèles, et exige que les pondérations totalisent 100 % | `js/accompagnement-contenu-popup.js:177, 186` ; `js/evaluation-formules.js:93-152` | inscrit #1152, lot 5 |
+| La note « i » des corrélations parle de points carrés ; le graphique dessine des cercles | `index.html:9210` ; `js/correlations-longitudinales.js:406-420` | inscrit #1152, lot 5 |
+| Bulles d'onglet Animation, Modélisation, Rythme de travail périmées ; Exploration des pratiques et Suivi longitudinal sans bulle | `js/accompagnement-contenu-hover.js:771-772, 788-791` ; `js/navigation.js:149-191` (zone protégée) | inscrit #1152, lot 5 (`navigation.js` : autorisation de Grégoire requise) |
+| « Élève » dans des textes d'écran et le formulaire d'intervention | `index.html:7520, 8984` ; `js/bilan-reflexif-parcours.js:36-38` ; `js/interventions.js:1080-1081` | inscrit #1152, lot 5 |
+| L'infobulle des outils RàI dit « ciblé » en minuscules ; la sentinelle, sensible à la casse, ne le voit pas | `js/accompagnement-contenu-hover.js:149` | inscrit #1152, lot 5 (et la sentinelle rendue insensible à la casse) |
 | « En savoir plus » d'un terme souligné ouvrirait l'Introduction de l'Aide plutôt que la fiche du terme | `js/navigation.js:445` (zone protégée) | à voir à l'écran ; lot 5 si confirmé |
-| Le nom du fichier .lcz porte « CC-BY-SA » ; la licence est BY-NC-SA | `js/cc-license.js:1565` contre `js/partage-schemas.js:45` | inscrit #FICHE-AIDE, lot 5 (mots publics : le nom du fichier est vu par les collègues) |
+| Le nom du fichier .lcz porte « CC-BY-SA » ; la licence est BY-NC-SA | `js/cc-license.js:1565` contre `js/partage-schemas.js:45` | inscrit #1152, lot 5 (mots publics : le nom du fichier est vu par les collègues) |
 | Le champ « Séance concernée » d'une intervention de rattrapage n'a pas de lecteur | `js/interventions.js:1838, 1905-1944` | à voir à l'écran ; commenter dans le code (issue 3) si rien ne s'affiche |
-| Branche morte de l'ancien assistant d'« Apporter mon matériel » | `js/materiel-assistant.js:233, 297, 373-375` | inscrit #FICHE-AIDE, lot 5 (retrait du code mort) |
-| Un test du 10 sept. reste vert à tort : il trouve « Régénérer » sur le bouton de la rétroaction | `tests/unit/sentinelle-audit-aide-lot-A-chemins-et-libelles.test.js` ; `index.html:8701` | inscrit #FICHE-AIDE, lot 1 (le test resserré avec la coupe) |
-| Les bornes du niveau RàI fixes (64 %, 75 %), sans lien avec l'échelle de l'utilisateur | `js/interpretation-config.js:43-46` | inscrit à part (D3) : question de pédagogie, une fiche distincte, sans code tant que Grégoire n'a pas tranché |
+| Branche morte de l'ancien assistant d'« Apporter mon matériel » | `js/materiel-assistant.js:233, 297, 373-375` | inscrit #1152, lot 5 (retrait du code mort) |
+| Un test du 10 sept. reste vert à tort : il trouve « Régénérer » sur le bouton de la rétroaction | `tests/unit/sentinelle-audit-aide-lot-A-chemins-et-libelles.test.js` ; `index.html:8701` | inscrit #1152, lot 1 (le test resserré avec la coupe) |
+| Les bornes du niveau RàI fixes (64 %, 75 %), sans lien avec l'échelle de l'utilisateur | `js/interpretation-config.js:43-46` | inscrit à part (D3) : rattaché à #551, déjà ouverte sur la même question (note du 24 oct.), en attente de Grégoire, sans code |
 
 ## Limites
 

@@ -71,9 +71,11 @@ test('une grille neuve : « Partir de la liste du français écrit (codes 1 à 1
 test('l’onglet Aide, section 5c : « Les critères algorithmiques », sans « Avantages pédagogiques »', async ({ page }) => {
     await page.setViewportSize({ width: 820, height: 1180 });
     const erreurs = await ouvrir(page);
-    await page.evaluate(() => window.naviguerVers('aide', 'configuration'));
+    // ↻ #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11) : l'entrée est rangée sous « Conception », son titre perd « 5c. ».
+    await page.evaluate(() => window.naviguerVers('aide', 'conception'));
     const carte = page.locator('#accordeon-aide-sous-criteres');
-    await expect(carte.locator('h3')).toContainText('5c. Les critères algorithmiques');
+    await expect(carte.locator('h3')).toContainText('Les critères algorithmiques');
+    await expect(carte.locator('h3')).not.toContainText('5c.');
     await carte.locator('.accordeon-header').click();
     const contenu = carte.locator('.accordeon-contenu');
     await expect(contenu).toBeVisible();

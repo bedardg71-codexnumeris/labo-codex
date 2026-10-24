@@ -76,8 +76,10 @@ describe('Aide — les chemins de navigation qu\'elle cite existent', () => {
 describe('Aide — les boutons qu\'elle dit de cliquer existent', () => {
     // Chaque libellé cité à l'impératif doit se retrouver TEL QUEL dans
     // l'interface (index.html hors Aide).
+    // ↻ #1152, lot 1 (audit de l'Aide du 24 oct. 2026, lot-6-reference.md, constat 2) : « Régénérer » sort de cette
+    // liste. Le banc le trouvait dans l'interface grâce au bouton de la RÉTROACTION, alors que l'Aide l'envoie au
+    // CALENDRIER : un faux vert. Le test qui suit dit ce qui est.
     const boutons = [
-        'Régénérer',
         'Mettre à jour le codex',       // lot I bis (D9) : remplace le bouton de l'ancien fichier de secours, retiré
         'Recalculer les captures',
         "Appliquer une adaptation du modèle de la Réponse à l'intervention",
@@ -89,6 +91,23 @@ describe('Aide — les boutons qu\'elle dit de cliquer existent', () => {
             expect(AIDE_TXT).toContain(libelle);
         });
     }
+
+    it('« Régénérer » : le seul bouton de ce nom refait la rétroaction ; l\'Aide l\'envoie encore au calendrier, deux fois (dette nommée)', () => {
+        const boutonsRegenerer = [...INTERFACE.matchAll(/<button\b[^>]*>\s*Régénérer\s*<\/button>/g)].map((m) => m[0]);
+        expect(boutonsRegenerer).toHaveLength(1);
+        expect(boutonsRegenerer[0]).toContain('data-action="regenererRetroactionAvecFeedback"');
+        // Aucune autre surface de l'interface ne nomme « Régénérer le calendrier ».
+        expect(INTERFACE).not.toContain('Régénérer le calendrier');
+        // Les deux mentions fausses vivent dans `problemes` et `faq` : le lot 2c (#1152) les réécrit. Ce compte
+        // tombe alors à 0, et cette ligne se met à jour avec lui ; d'ici là, une troisième mention rougit ici.
+        const entrees = [...AIDE.matchAll(/id="accordeon-aide-([a-z0-9-]+)"/g)].map((m) => m[1]);
+        const parEntree = entrees.map((id, k) => {
+            const debut = AIDE.indexOf(`id="accordeon-aide-${id}"`);
+            const fin = k + 1 < entrees.length ? AIDE.indexOf(`id="accordeon-aide-${entrees[k + 1]}"`) : AIDE.length;
+            return [id, (AIDE.slice(debut, fin).match(/Régénérer/g) || []).length];
+        }).filter(([, n]) => n > 0);
+        expect(Object.fromEntries(parEntree)).toEqual({ faq: 1, problemes: 1 });
+    });
 
     it('les libellés périmés ont disparu de l\'Aide', () => {
         for (const perime of ['Générer le calendrier complet', 'Exporter mes données', 'Exporter le Codex',

@@ -45,7 +45,8 @@ const C1 = 'somme pondérée';
 const C2 = 'Entre parenthèses, le nombre après pondération : « (5 après pondération) ». Il ne paraît que si un sous-critère ne pèse pas 1 ; place-le juste après le nombre. Une phrase sans lui ne montre que le nombre posé, mais la ligne du calcul, dans le PDF, montre la parenthèse.';
 const F1 = 'La pénalité est proportionnelle au taux d’erreurs, ramené à une longueur de référence.';
 const D = {
-    D1: '5c. Les critères algorithmiques',
+    // ↻ #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11 : l'Aide rangée par onglet) : le titre perd son numéro de tête « 5c. », le reste est inchangé.
+    D1: 'Les critères algorithmiques',
     D2: 'Un critère algorithmique calcule sa note par une formule, à partir de ce que tu comptes sur la copie. Tu choisis la formule dans le gabarit de la grille : un modèle, puis ses paramètres.',
     D2a: 'Pénalité normalisée : Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur). Le nombre est ramené à une longueur de référence.',
     D2b: 'Ratio mots par erreur : atteindre le ratio visé donne la note complète.',
