@@ -24291,13 +24291,19 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 /* === SÉLECTEUR DE CARTES === */
 /* #1148 (24 oct. 2026) — le couple « Consulter la bibliothèque » + menu des cartes prend l'apparence de
    la rangée de sélection des bibliothèques (#1147, `.rangee-selection`) : la bande bleu pâle, le menu à
-   44 px, en gras, couleur d'accent, chevron redessiné. « Actions ▾ » reste où il est. */
+   44 px, en gras, couleur d'accent, chevron redessiné. La bande entoure le couple SEUL (verdict de
+   Cowork) : « Actions ▾ », « Annuler », « Rétablir » agissent sur la carte ouverte et restent dehors. */
 #planif-selecteur-cartes {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.planif-couple-selection {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 6px 8px;
-    border-right: none;
     background: var(--bleu-pale);
     border-radius: var(--radius-grand);
 }
