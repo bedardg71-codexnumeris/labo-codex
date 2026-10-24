@@ -49,7 +49,7 @@ function faireFichier(nom) {
 // Même banc que #603 : l'import réel, sans stockage derrière.
 function monter() {
     return chargerScript('js/travaux-import.js', {
-        obtenirDonneesSelonMode: (quoi) => (quoi === 'groupeEtudiants' ? [{ da: '9000058', nom: 'Bourdages', prenom: 'Alma' }] : []),
+        obtenirDonneesSelonMode: (quoi) => (quoi === 'groupeEtudiants' ? [{ da: '9000058', nom: 'Exemple', prenom: 'Alma' }] : []),
         travauxStockage: {
             obtenirFichiersGroupeActif: () => [],
             genererMiniaturePDF: async () => ({ thumbnail: '', nombrePages: 1 }),
@@ -62,7 +62,7 @@ function monter() {
 }
 
 // Le nom Léa d'une page, tel que Grégoire le renomme après le dézippage.
-const nomLea = (production, secondes) => 'Bourdages_9000058_' + production + '__Remis_le_2026-09-15_09h46m' + secondes + 's.pdf';
+const nomLea = (production, secondes) => 'Exemple_9000058_' + production + '__Remis_le_2026-09-15_09h46m' + secondes + 's.pdf';
 // « -p2 » et « _p 2 » se collent au nom ; « page 2 », « (2) »… en sont séparés par une espace.
 const nommer = (forme) => 'Artefact_1' + (/^[-_]/.test(forme) ? '' : ' ') + forme;
 // L'Aide abrège le second exemple (« Artefact_1a, 1b ») : le nom entier se reconstitue.

@@ -25,7 +25,7 @@ const CORBEILLE_FICTIVE = [
         id: 'ft_606_a',
         etudiantDA: '9000058',
         productionId: 'p_606',
-        nomFichier: 'Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg',
+        nomFichier: 'Exemple_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg',
         dateSuppression: '2026-08-30T12:00:00.000Z'
     }
 ];
@@ -80,7 +80,7 @@ test('chaque cellule de la corbeille tombe sous l\'en-tête qui la nomme', async
 
     const parEntete = Object.fromEntries(releve.map(c => [c.entete, c.contenu]));
 
-    expect(parEntete['Fichier']).toContain('Bourdages_9000058_Portrait_de_lecteur-p1');
+    expect(parEntete['Fichier']).toContain('Exemple_9000058_Portrait_de_lecteur-p1');
     expect(parEntete['Expire dans']).toMatch(/jour\(s\)/);
     expect(parEntete['Supprimé le']).toMatch(/2026/);
     expect(parEntete['Actions']).toContain('Restaurer');

@@ -22,7 +22,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 const ETUDIANTS = [
     { da: 'DEMO011', nom: 'Curie', prenom: 'Marie' },
     { da: 'DEMO004', nom: 'Fictif', prenom: 'Lubin' },
-    { da: '9000058', nom: 'Bourdages', prenom: 'Alma' }
+    { da: '9000058', nom: 'Exemple', prenom: 'Alma' }
 ];
 
 const OCTETS_JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46]);
@@ -87,7 +87,7 @@ describe('T1 — en démo, le DA du pack est lu', () => {
     });
 
     it('les sept chiffres gardent la priorité', () => {
-        expect(win.travauxImport.detecterDA('Bourdages_9000058_DEMO011_x.jpg')).toBe('9000058');
+        expect(win.travauxImport.detecterDA('Exemple_9000058_DEMO011_x.jpg')).toBe('9000058');
     });
 });
 
@@ -120,9 +120,9 @@ describe('T1 — hors démo, rien ne change', () => {
     it('un DA à sept chiffres se lit et se coupe comme avant', () => {
         enDemo = false;
         const r = win.travauxImport.parserNomFichierLea(
-            'Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg');
+            'Exemple_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg');
         expect(r.da).toBe('9000058');
-        expect(r.nom).toBe('Bourdages');
+        expect(r.nom).toBe('Exemple');
         expect(r.nomProduction).toBe('Portrait de lecteur');
     });
 });

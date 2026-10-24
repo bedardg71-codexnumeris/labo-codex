@@ -40,7 +40,7 @@ const PROD_ARTEFACTS = Array.from({ length: 10 }, (_, i) => ({
 }));
 const PROD_PORTFOLIO = { id: 'p_folio', titre: 'Portfolio de fin de session', type: 'portfolio' };
 
-const YANN = { da: '9000058', nom: 'Bourdages', prenom: 'Yann', groupe: '00007' };
+const YANN = { da: '9000058', nom: 'Exemple', prenom: 'Yann', groupe: '00007' };
 const LOU = { da: '9000200', nom: 'Postiche', prenom: 'Lou', groupe: '00007' };
 
 function charger(fichiers, productions) {

@@ -7,8 +7,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 // #603 + #604 — L'IMPORT DU 30 AOÛT 2026, ET SES DEUX DÉFAUTS ENCHAÎNÉS.
 //
 // Mesuré sur l'import réel de Grégoire : 601-101 gr.00007, « Portrait de
-// lecteur - lectrice », 49 fichiers tirés de Livia. Deux élèves — Bourdages et
-// Turcotte — avaient remis leur travail en DEUX pages, dézippées puis
+// lecteur - lectrice », 49 fichiers tirés de Livia. Deux élèves — Exemple et
+// Essai — avaient remis leur travail en DEUX pages, dézippées puis
 // numérotées à la main : « …_Portrait_de_lecteur-p1__Remis_le_… » et
 // « …-p2__Remis_le_… ». Ce sont les seuls fichiers que l'application a
 // signalés comme doublons, et les seuls qui ne sont jamais arrivés.
@@ -46,8 +46,8 @@ const sourceUI = readFileSync(path.join(racineProjet, 'js', 'travaux-ui.js'), 'u
    ---------------------------------------------------------------------- */
 
 const ETUDIANTS = [
-    { da: '9000058', nom: 'Bourdages', prenom: 'Alma' },
-    { da: '9000582', nom: 'Turcotte', prenom: 'Aria' },
+    { da: '9000058', nom: 'Exemple', prenom: 'Alma' },
+    { da: '9000582', nom: 'Essai', prenom: 'Aria' },
     { da: '9000200', nom: 'Postiche', prenom: 'Lubin' }
 ];
 
@@ -107,11 +107,11 @@ beforeEach(() => { win = monter(); });
 
 describe('#603 — le suffixe de page est détaché du nom de production', () => {
 
-    it('les deux pages de la remise de Bourdages portent le MÊME nom de production', () => {
+    it('les deux pages de la remise de Exemple portent le MÊME nom de production', () => {
         const p1 = win.travauxImport.parserNomFichierLea(
-            'Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg');
+            'Exemple_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg');
         const p2 = win.travauxImport.parserNomFichierLea(
-            'Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg');
+            'Exemple_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg');
 
         expect(p1.nomProduction).toBe('Portrait de lecteur');
         expect(p2.nomProduction).toBe('Portrait de lecteur');
@@ -129,10 +129,10 @@ describe('#603 — le suffixe de page est détaché du nom de production', () =>
 
     it('reconnaît les autres formes de numérotation de page', () => {
         const formes = [
-            ['Bourdages_9000058_Portrait_de_lecteur_p2__Remis_le_2026-08-21_11h36m32s.jpg', 2],
-            ['Bourdages_9000058_Portrait_de_lecteur_page_3__Remis_le_2026-08-21_11h36m32s.jpg', 3],
-            ['Bourdages_9000058_Portrait_de_lecteur_partie_2__Remis_le_2026-08-21_11h36m32s.jpg', 2],
-            ['Bourdages_9000058_Portrait_de_lecteur_(2)__Remis_le_2026-08-21_11h36m32s.jpg', 2]
+            ['Exemple_9000058_Portrait_de_lecteur_p2__Remis_le_2026-08-21_11h36m32s.jpg', 2],
+            ['Exemple_9000058_Portrait_de_lecteur_page_3__Remis_le_2026-08-21_11h36m32s.jpg', 3],
+            ['Exemple_9000058_Portrait_de_lecteur_partie_2__Remis_le_2026-08-21_11h36m32s.jpg', 2],
+            ['Exemple_9000058_Portrait_de_lecteur_(2)__Remis_le_2026-08-21_11h36m32s.jpg', 2]
         ];
         for (const [nom, page] of formes) {
             const r = win.travauxImport.parserNomFichierLea(nom);
@@ -145,7 +145,7 @@ describe('#603 — le suffixe de page est détaché du nom de production', () =>
         // Rien avant le suffixe : le retirer laisserait une production sans nom,
         // et deux remises différentes se retrouveraient sous la même clé vide.
         const r = win.travauxImport.parserNomFichierLea(
-            'Bourdages_9000058_p2__Remis_le_2026-08-21_11h36m32s.jpg');
+            'Exemple_9000058_p2__Remis_le_2026-08-21_11h36m32s.jpg');
         expect(r.nomProduction).toBe('p2');
         expect(r.page).toBe(null);
     });
@@ -153,15 +153,15 @@ describe('#603 — le suffixe de page est détaché du nom de production', () =>
     it('un chiffre seul en fin de titre n\'est pas un numéro de page', () => {
         // « Artefact 9 » est un titre, pas la 9e page de « Artefact ».
         const r = win.travauxImport.parserNomFichierLea(
-            'Bourdages_9000058_Artefact_9__Remis_le_2026-08-21_11h36m32s.jpg');
+            'Exemple_9000058_Artefact_9__Remis_le_2026-08-21_11h36m32s.jpg');
         expect(r.nomProduction).toBe('Artefact 9');
         expect(r.page).toBe(null);
     });
 
     it('les deux pages tombent dans UN SEUL groupe de document', () => {
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf')
         ]);
         const groupes = win.travauxImport.regrouperParDocument();
         expect(groupes.size).toBe(1);
@@ -173,8 +173,8 @@ describe('#603 — le suffixe de page est détaché du nom de production', () =>
         // donc rien. Déposées à l'envers, elles doivent
         // ressortir p1 puis p2 — sans quoi le PDF assemblé sort dans le désordre.
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf')
         ]);
         const pages = [...win.travauxImport.regrouperParDocument().values()][0];
         expect(pages.map(f => f.parseLea.page)).toEqual([1, 2]);
@@ -182,11 +182,11 @@ describe('#603 — le suffixe de page est détaché du nom de production', () =>
 
     it('deux pages d\'un même travail ne sont PLUS annoncées comme doublons', () => {
         // Le symptôme exact de la capture du 30 août :
-        // « Bourdages, Alma — Portrait de lecteur - lectrice (présent 2 fois dans la file) ».
+        // « Exemple, Alma — Portrait de lecteur - lectrice (présent 2 fois dans la file) ».
         win.travauxImport.setProductionGlobale('prod_portrait');
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf')
         ]);
         expect(win.travauxImport.detecterDoublonsStockage()).toEqual([]);
     });
@@ -195,8 +195,8 @@ describe('#603 — le suffixe de page est détaché du nom de production', () =>
         // Le témoin inverse : la correction ne doit pas éteindre la détection.
         win.travauxImport.setProductionGlobale('prod_portrait');
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.pdf'),
-            faireFichier('Bourdages_9000058_Autre_travail__Remis_le_2026-08-22_09h00m00s.pdf')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.pdf'),
+            faireFichier('Exemple_9000058_Autre_travail__Remis_le_2026-08-22_09h00m00s.pdf')
         ]);
         expect(win.travauxImport.detecterDoublonsStockage()).toHaveLength(1);
     });
@@ -210,7 +210,7 @@ describe('#604 — « Remplacer l\'existant » écrit le remplaçant', () => {
 
     const prepare = (extra = {}) => Object.assign({
         fichier: new Blob([OCTETS_PDF], { type: 'application/pdf' }),
-        nomFichier: 'Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf',
+        nomFichier: 'Exemple_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.pdf',
         typeMIME: 'application/pdf',
         estPDF: true,
         estImage: false,
@@ -256,7 +256,7 @@ describe('#604 — « Remplacer l\'existant » écrit le remplaçant', () => {
         // déjà stocké mais affiché comme s'il attendait encore.
         win.travauxImport.setProductionGlobale('prod_portrait');
         const [f] = win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.pdf')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.pdf')
         ]);
         f.statut = 'importe';
         expect(win.travauxImport.purgerFichiersImportes()).toBe(1);
@@ -373,9 +373,9 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
         // réelles) : « présent 2 fois dans la file », « présent 3 fois »…
         win.travauxImport.setProductionGlobale('prod_artefact_1');
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m55s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m45s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h47m04s.jpg', 'image/jpeg')
+            faireFichier('Exemple_9000058_Artefact_1_Remis_le_2026-09-15_09h46m55s.jpg', 'image/jpeg'),
+            faireFichier('Exemple_9000058_Artefact_1_Remis_le_2026-09-15_09h46m45s.jpg', 'image/jpeg'),
+            faireFichier('Exemple_9000058_Artefact_1_Remis_le_2026-09-15_09h47m04s.jpg', 'image/jpeg')
         ]);
         const groupes = win.travauxImport.regrouperParDocument();
         expect(groupes.size).toBe(1);
@@ -389,8 +389,8 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
     it('deux remises du MÊME élève à des dates différentes font UN groupe, trié par date (#873)', () => {
         // Le tri v1 / v2 revient à l'enseignant, dans le pipeline.
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur__Remis_le_2026-08-26_14h22m00s.jpg', 'image/jpeg'),
+            faireFichier('Exemple_9000058_Portrait_de_lecteur__Remis_le_2026-08-24_09h10m00s.jpg', 'image/jpeg')
         ]);
         const groupes = win.travauxImport.regrouperParDocument();
         expect(groupes.size).toBe(1);
@@ -400,8 +400,8 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
 
     it('les pages d\'une MÊME remise restent UN seul groupe', () => {
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg'),
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p1__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg'),
+            faireFichier('Exemple_9000058_Portrait_de_lecteur-p2__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg')
         ]);
         const groupes = win.travauxImport.regrouperParDocument();
         expect(groupes.size).toBe(1);
@@ -414,7 +414,7 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
         win.travauxImport.setProductionGlobale('prod_artefact_1');
         magasin.push({ id: 'ft_ancien', etudiantDA: '9000058', productionId: 'prod_artefact_1' });
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m45s.jpg', 'image/jpeg')
+            faireFichier('Exemple_9000058_Artefact_1_Remis_le_2026-09-15_09h46m45s.jpg', 'image/jpeg')
         ]);
         const doublons = win.travauxImport.detecterDoublonsStockage();
         expect(doublons).toHaveLength(1);
@@ -423,8 +423,8 @@ describe('#609 — deux fichiers ne sont un document que si le document le dit',
 
     it('deux élèves DIFFÉRENTS, même production, même date : deux groupes (inchangé)', () => {
         win.travauxImport.ajouterFichiersEnAttente([
-            faireFichier('Bourdages_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg'),
-            faireFichier('Turcotte_9000582_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg')
+            faireFichier('Exemple_9000058_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg'),
+            faireFichier('Essai_9000582_Portrait_de_lecteur__Remis_le_2026-08-21_11h36m32s.jpg', 'image/jpeg')
         ]);
         expect(win.travauxImport.regrouperParDocument().size).toBe(2);
     });
@@ -460,12 +460,12 @@ function sessionAvecFile(entrees) {
 
 // Une entrée telle que `persisterFileDAttente` l'écrit (JSON : la date est une chaîne).
 function entreePersistee(secondes, groupeDocumentId, parseLea) {
-    const nom = 'Bourdages_9000058_Artefact_1_Remis_le_2026-09-15_09h46m' + secondes + 's.jpg';
+    const nom = 'Exemple_9000058_Artefact_1_Remis_le_2026-09-15_09h46m' + secondes + 's.jpg';
     return {
         nomFichier: nom, typeMIME: 'image/jpeg', tailleFichier: 100, tailleOriginale: 100,
         daDetecte: '9000058', etudiantDA: '9000058', estPDF: false, estImage: true,
         statut: 'en-attente', pipelineStatut: 'apercu', productionId: 'prod_artefact_1',
-        parseLea: parseLea || { nom: 'Bourdages', da: '9000058', nomProduction: 'Artefact 1', page: null,
+        parseLea: parseLea || { nom: 'Exemple', da: '9000058', nomProduction: 'Artefact 1', page: null,
             dateRemise: '2026-09-15T13:46:' + secondes + '.000Z', raw: nom },
         groupeDocumentId: groupeDocumentId
     };
