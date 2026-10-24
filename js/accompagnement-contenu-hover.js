@@ -559,9 +559,7 @@ const TOOLTIPS = {
     // --- Profil étudiant·e ---
 
     'profil-selecteur':
-        'Choisis un·e étudiant·e. Les boutons Préc./Suiv. parcourent la liste séquentiellement.',
-    'profil-nav-observations':
-        'Sept vues d\'observation : productions, mobilisation, progression, habiletés, accompagnement, travaux, rapport.',
+        'Choisis un·e étudiant·e. Les flèches ‹ et › parcourent la liste dans l\'ordre alphabétique.',
     'profil-productions':
         'Liste des productions avec description, jeton, note, date et accès direct à l\'évaluation.',
     'profil-col-jeton':

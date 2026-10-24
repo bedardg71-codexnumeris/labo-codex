@@ -89,7 +89,7 @@ test('Porte #761 · la vignette d\'un travail, dans le profil, mène à Évaluat
 
     // Le rendu du profil passé (un seul, #754), la section « Travaux soumis » est demandée (le clic de la
     // barre latérale), et sa vignette attendue.
-    await page.waitForFunction(() => window.__rendus761 >= 1 && !window._profilAutoChargement && !!document.querySelector('#contenuProfilEtudiant .layout-sidebar-2col'), null, { timeout: 10000 });
+    await page.waitForFunction(() => window.__rendus761 >= 1 && !window._profilAutoChargement && !!document.querySelector('#contenuProfilEtudiant .rangee-selection-profil'), null, { timeout: 10000 });
     await page.evaluate(() => window.changerSectionProfil('travaux'));
     await page.waitForFunction(() => !!document.querySelector('#suivi-profil .travaux-grille-item[data-action="travauxUI.ouvrirFichier"][data-param="FT761"]'), null, { timeout: 10000 });
 

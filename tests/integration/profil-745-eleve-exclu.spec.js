@@ -71,21 +71,24 @@ test('profil · un élève en décrochage : son profil s\'ouvre, calculé par sa
 
         afficherProfilComplet('DEMO004'); await pause(400);
         afficherProfilComplet(DA); await pause(500);
-        const carte = document.querySelector('.sidebar-info-card');
-        const ligne = carte ? carte.querySelector('[data-statut-exclu]') : null;
+        // #1151 : la carte d'identité est partie. Le nom est dans le menu ; le statut, la PREMIÈRE étiquette de la rangée.
+        const rangee = document.querySelector('#contenuProfilEtudiant .rangee-selection-profil');
+        const etiquettes = rangee ? rangee.querySelector('.rangee-selection-etiquettes') : null;
+        const ligne = etiquettes ? etiquettes.querySelector('[data-statut-exclu]') : null;
+        const groupe = ligne ? ligne.nextElementSibling : null;
         const select = document.getElementById('selecteurEtudiantProfil');
         const profil = {
             profilActuelDA: window.profilActuelDA,
-            nom: texte(document.querySelector('.sidebar-info-card-nom')),
+            nom: select && select.selectedOptions[0] ? texte(select.selectedOptions[0]) : null,
             ligne: texte(ligne),
-            ligneSousLeNom: !!(ligne && ligne.previousElementSibling === null && ligne.parentElement.previousElementSibling === document.querySelector('.sidebar-info-card-nom')),
+            ligneSousLeNom: !!(ligne && etiquettes.firstElementChild === ligne),
             indices: calculerTousLesIndices(DA),
             selection: select ? select.value : null,
             nbOptions: select ? select.options.length : null,
-            // mise en page à 768 px : la carte ne déborde pas de la barre latérale, la ligne tient dans la carte
-            deborde: carte ? (carte.scrollWidth > carte.clientWidth + 1) : null,
+            // mise en page à 768 px : la rangée ne déborde pas, l'étiquette du statut tient sur une ligne comme celle du groupe
+            deborde: rangee ? (rangee.scrollWidth > rangee.clientWidth + 1) : null,
             hauteurLigne: ligne ? Math.round(ligne.getBoundingClientRect().height) : null,
-            hauteurLigneDA: carte && carte.querySelector('.sidebar-info-card-details > div:nth-child(2)') ? Math.round(carte.querySelector('.sidebar-info-card-details > div:nth-child(2)').getBoundingClientRect().height) : null
+            hauteurLigneDA: groupe ? Math.round(groupe.getBoundingClientRect().height) : null
         };
         afficherProfilComplet('DEMO004'); await pause(400);
         const selectActif = document.getElementById('selecteurEtudiantProfil');
@@ -109,16 +112,16 @@ test('profil · un élève en décrochage : son profil s\'ouvre, calculé par sa
     expect(m.actif).toMatchObject({ A: 84, C: 80, P: 68 });
     expect(m.profil.indices).toEqual(m.actif);
 
-    // (2) Le profil s'ouvre, sans dialogue ; la ligne de statut est la première sous le nom ; le sélecteur le montre.
+    // (2) Le profil s'ouvre, sans dialogue ; le statut est la première étiquette de la rangée (#1151) ; le sélecteur le montre.
     expect(dialogues).toEqual([]);
     expect(m.profil.profilActuelDA).toBe(DA);
-    expect(m.profil.nom).toBe('Nelson Mandela');
+    expect(m.profil.nom).toMatch(/^Mandela, Nelson\b/);
     expect(m.profil.ligne).toBe('Décrochage · hors des moyennes du groupe');
     expect(m.profil.ligneSousLeNom).toBe(true);
     expect(m.profil.selection).toBe(DA);
     expect(m.profil.nbOptions).toBe(10);                 // neuf actifs + l'exclu affiché
     expect(m.depuisUnActif).toEqual({ nbOptions: 9, contientExclu: false, ligne: false });
-    // Mise en page à 768 px : une ligne de plus, de la hauteur des autres, sans débordement.
+    // Mise en page à 768 px : une étiquette de plus, de la hauteur de celle du groupe, sans débordement.
     expect(m.profil.deborde).toBe(false);
     expect(m.profil.hauteurLigne).toBe(m.profil.hauteurLigneDA);
 

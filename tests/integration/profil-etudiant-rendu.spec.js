@@ -16,7 +16,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Dette résiduelle évoquée dans METHODE §7 profil-etudiant (test Section
 // Productions par défaut suggéré comme priorité pour ce module).
 
-test('Chantier I · profil-etudiant rend la Section Productions (sidebar + tableau)', async ({ page }) => {
+test('Chantier I · profil-etudiant rend la Section Productions (rangée + tableau)', async ({ page }) => {
     const erreurs = [];
     const patternsAttendus = [
         /version\.json.*access control/i,
@@ -88,10 +88,12 @@ test('Chantier I · profil-etudiant rend la Section Productions (sidebar + table
         const html = container.innerHTML;
         return {
             longueur: html.length,
+            // #1151 : la rangée de sélection au lieu de la barre latérale ; ‹ et › au lieu de « Préc. » / « Suiv. ».
+            aRangee: !!container.querySelector('.rangee-selection-profil'),
             aLayoutSidebar: !!container.querySelector('.layout-sidebar-2col'),
-            aSelecteurEtudiant: !!container.querySelector('#selecteurEtudiantProfil'),
-            aBoutonPrec: html.includes('Préc.'),
-            aBoutonSuiv: html.includes('Suiv.'),
+            aSelecteurEtudiant: !!container.querySelector('.rangee-selection-profil #selecteurEtudiantProfil'),
+            aBoutonPrec: !!container.querySelector('#profilElevePrecedent[aria-label="Étudiant·e précédent·e"]'),
+            aBoutonSuiv: !!container.querySelector('#profilEleveSuivant[aria-label="Étudiant·e suivant·e"]'),
             aNomEtudiant: html.includes('Tremblay') && html.includes('Alex'),
             // Marqueurs Section Productions par défaut
             aSectionProductions:
@@ -104,7 +106,8 @@ test('Chantier I · profil-etudiant rend la Section Productions (sidebar + table
 
     expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
     expect(resultat.longueur).toBeGreaterThan(500);
-    expect(resultat.aLayoutSidebar).toBe(true);
+    expect(resultat.aRangee).toBe(true);
+    expect(resultat.aLayoutSidebar).toBe(false);
     expect(resultat.aSelecteurEtudiant).toBe(true);
     expect(resultat.aBoutonPrec).toBe(true);
     expect(resultat.aBoutonSuiv).toBe(true);
