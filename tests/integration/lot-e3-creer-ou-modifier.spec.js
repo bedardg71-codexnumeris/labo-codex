@@ -176,7 +176,7 @@ test('(P-b bis) « Quitter sans créer » n\'écrit rien ; ouvrir une autre prod
     const nb = (await productions(page)).length;
     await cliquer(page, '[data-action="creerNouvelleProduction"]');
     await changer(page, '#productionTitre', 'Brouillon fictif banc E3');
-    await cliquer(page, '.sidebar-item[data-action="chargerProductionPourModif"]');
+    await page.locator('#menuProductions').selectOption({ index: 1 });   // #1147 : choisir dans le menu de la sélection
     expect(await questionOuverte(page)).toBe('Cette production n\'est pas encore créée.');
     await repondre(page, 'Quitter sans créer');
     expect((await productions(page)).length).toBe(nb);

@@ -241,8 +241,10 @@ describe('#1055 · E — la marque s\'affiche là où la production paraît parm
         expect(ligne(dsp.marqueHTML({}))).not.toContain('marque-diagnostique');
     });
 
-    it('Conception › Productions, profil (liste des productions, travaux soumis) : la marque est posée par l\'entité', () => {
-        expect(source('js/productions-liste.js')).toContain('${window.ProductionDiagnostique.marqueHTML(prod)}');
+    // #1147 (24 oct. 2026) : Conception › Productions montre sa sélection dans un menu déroulant, le titre seul
+    // (décision du 24 oct. : aucun badge) — la marque n'y est plus ; la fiche ouverte porte la case.
+    it('profil (liste des productions, travaux soumis) : la marque est posée par l\'entité ; plus dans le menu de la Conception', () => {
+        expect(source('js/productions-liste.js')).not.toContain('ProductionDiagnostique.marqueHTML');
         const profil = source('js/profil-etudiant-sections-affichage.js');
         expect((profil.match(/marque: window\.ProductionDiagnostique\.marqueHTML\(production\)/g) || []).length).toBe(2);
         expect(profil).toContain('${echapperHtml(ligne.production)}${ligne.marque}');

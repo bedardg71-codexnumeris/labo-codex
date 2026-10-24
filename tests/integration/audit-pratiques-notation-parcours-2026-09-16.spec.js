@@ -171,15 +171,15 @@ for (const [code, F] of Object.entries(FAMILLES)) {
         // (3) « Appliquer au cours actif » (bouton réel, patron #762).
         if (R.pratique) {
             await page.evaluate((id) => { window.chargerPratiquePourModif(id); }, R.pratique.id);
-            await page.waitForFunction((id) => !!document.querySelector(`#sidebarListePratiques .sidebar-item[data-id="${id}"]`), R.pratique.id, { timeout: 8000 }).catch(() => {});
+            await page.waitForFunction((id) => document.getElementById('menuPratiques')?.value === id, R.pratique.id, { timeout: 8000 }).catch(() => {});   // #1147
             await page.evaluate(() => document.querySelector('button[data-action="appliquerPratiqueAuCoursActive"]').click());
             await page.waitForFunction((id) => (window.db.getSync(window.cle('groupesCours'), []) || [])[0]?.pratiqueId === id, R.pratique.id, { timeout: 8000 }).catch(() => {});
             R.applique = await page.evaluate(() => ({ pratiqueId: (window.db.getSync(window.cle('groupesCours'), []) || [])[0]?.pratiqueId,
-                badgeActive: document.querySelectorAll('#sidebarListePratiques .sidebar-item-badge').length }));
+                badgeActive: [...(document.getElementById('menuPratiques')?.options || [])].filter(o => o.textContent.endsWith(' (active)')).length }));   // #1147 : l'état dans le menu
             if (code === 'SPE') {
                 // #899 — LE CHEMIN QUE LE RÉCAPITULATIF PROMET : « Conception › Pratiques de notation (clique sur la pratique) ».
-                // Le clic réel sur la pratique de la liste montre les deux titres nommés par la phrase.
-                await page.evaluate((id) => document.querySelector(`#sidebarListePratiques .sidebar-item[data-id="${id}"]`).click(), R.pratique.id);
+                // Le choix réel de la pratique dans le menu (#1147) montre les deux titres nommés par la phrase.
+                await page.locator('#menuPratiques').selectOption(R.pratique.id);
                 await page.waitForFunction(() => [...document.querySelectorAll('h4')].some(h => h.textContent.trim() === 'Types de productions' && h.offsetParent !== null), null, { timeout: 8000 }).catch(() => {});
                 R.chemin899 = await page.evaluate(() => {
                     const visible = (t) => [...document.querySelectorAll('h4')].some(h => h.textContent.trim() === t && h.offsetParent !== null);

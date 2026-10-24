@@ -15,7 +15,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     deux largeurs. Le même spec, lancé dans Chrome, donne les captures de Chrome.
 // ↻ LES RETOUCHES DE LA RELECTURE (22 oct., 21 h 51) :
 //   · Mac : un bloc inactif se réduit à son nom (ni aide ni précision visibles, une ligne, la mention dans son
-//     `title`) ; la liste des grilles colle SOUS la barre de navigation, pas dessous ;
+//     `title`) ; (↻ #1147 : la liste des grilles, devenue un menu, ne colle plus) ;
 //   · iPad, portrait ET paysage (le gabarit y a 649 et 675 px, sous le seuil de 754) : la palette est compacte,
 //     en tête du gabarit sans zone visitée, puis JUSTE AU-DESSUS de la zone touchée, qu'elle suit ; elle n'y montre
 //     que les blocs offerts ; la zone touchée ne bouge pas à l'écran quand la palette arrive au-dessus d'elle ;
@@ -92,8 +92,12 @@ const justeAuDessus = (zone) => zone.evaluate((z) => {
     return !!ancre && !!ancre.previousElementSibling && ancre.previousElementSibling.matches('.palette-algo');
 });
 
-test('Mac · la palette, à gauche et collante, pose un bloc dans un palier loin sous elle et dans un énoncé, au curseur, sans perdre le focus', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+// ↻ #1147 (24 oct. 2026) : sans la barre latérale, le gabarit prend toute la largeur ; en iPad paysage (1180 px) il
+// mesure 975 px, au-delà du seuil compact : la palette y est sur le côté, collante comme sur le Mac (le seuil du
+// collage descend de 1200 à 1025 px, styles.css). Le même essai, aux deux largeurs.
+for (const [nomEcran, largeurEcran, hauteurEcran] of [['Mac', 1440, 900], ['iPad paysage', 1180, 820]]) {
+test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un palier loin sous elle et dans un énoncé, au curseur, sans perdre le focus`, async ({ page }) => {
+    await page.setViewportSize({ width: largeurEcran, height: hauteurEcran });
     const erreurs = await ouvrir(page, 'GR');
     await expect(palette(page)).toHaveCount(1);
     await expect(page.locator('#listeCriteres .reperes-enonce, #listeCriteres .reperes-palier')).toHaveCount(0);
@@ -149,24 +153,14 @@ test('Mac · la palette, à gauche et collante, pose un bloc dans un palier loin
         .toBe('{critere} est à travailler en priorité (dès maintenant) {critere}');
     expect(erreurs).toEqual([]);
 });
+}
 
-test('Mac · la liste des grilles colle sous la barre de navigation, pas dessous', async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    const erreurs = await ouvrir(page, 'GR');
-    const liste = page.locator('.section.active .sous-section.active .sidebar-navigation');
-    await expect(liste).toHaveCount(1);
-    await page.evaluate(() => window.scrollTo(0, 1500));
-    const barre = await boite(page.locator('.navigation-principale'));
-    const l = await boite(liste);
-    console.log('MAC · BARRE →', JSON.stringify(barre), 'LISTE →', JSON.stringify(l));
-    expect(l.haut, 'la liste commence sous la barre').toBeGreaterThanOrEqual(barre.bas);
-    expect(l.haut, 'et elle colle : la page défilée de 1500 px ne l\'emporte pas').toBeLessThan(200);
-    expect(l.bas, 'elle tient dans la fenêtre').toBeLessThanOrEqual(900);
-    expect(erreurs).toEqual([]);
-});
+// ↻ #1147 (24 oct. 2026) : « la liste des grilles colle sous la barre de navigation » est RETIRÉ — la liste n'est
+// plus une barre latérale collante, c'est un menu au-dessus de la fiche (bibliotheques-menu-1147.spec.js le mesure).
 
-// Le gabarit mesure 649 px en portrait et 675 px en paysage (WebKit, 22 oct.) : sous le seuil dans les deux sens.
-for (const [sens, largeur, hauteur] of [['portrait', 820, 1180], ['paysage', 1180, 820]]) {
+// Le gabarit mesure 649 px en portrait (WebKit, 22 oct.) : sous le seuil. ↻ #1147 : en paysage, 975 px depuis que la
+// barre latérale est partie — la palette y est sur le côté (l'essai du Mac, plus haut, à 1180 px).
+for (const [sens, largeur, hauteur] of [['portrait', 820, 1180]]) {
     test.describe(`iPad ${sens}`, () => {
         test.use({ hasTouch: true, viewport: { width: largeur, height: hauteur } });
 

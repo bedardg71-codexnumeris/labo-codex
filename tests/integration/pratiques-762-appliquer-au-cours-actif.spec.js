@@ -60,7 +60,7 @@ test('Porte #762 · le bouton « Appliquer au cours actif » assigne la pratique
         try {
             window.afficherSection('conception');
             window.afficherSousSection('conception-pratiques-notation');
-            window.chargerPratiquePourModif(PAN_STD_ID);   // ce que le clic sur la pratique, dans la barre latérale, appelle
+            window.chargerPratiquePourModif(PAN_STD_ID);   // ce que le choix de la pratique, dans le menu de la sélection (#1147), appelle
         } catch (e) {
             return { erreur: 'montage planté : ' + e.message };
         }
@@ -70,9 +70,11 @@ test('Porte #762 · le bouton « Appliquer au cours actif » assigne la pratique
     // Le diagnostic, AVANT le geste : il dit que rien n'est assigné (avant le correctif : « introuvable »).
     expect(montage.diagnosticAvant).toMatch(/[Aa]ucune pratique de notation n'est assignée/);
 
-    // La barre latérale liste la PAN-STD, et aucun badge « Active » nulle part.
-    await page.waitForFunction((id) => !!document.querySelector(`#sidebarListePratiques .sidebar-item[data-id="${id}"]`), PAN_STD_ID, { timeout: 10000 });
-    expect(await page.locator('#sidebarListePratiques .sidebar-item-badge', { hasText: 'Active' }).count()).toBe(0);
+    // Le menu de la sélection (#1147) liste la PAN-STD, et aucun « (active) » nulle part.
+    const actives = () => page.evaluate(() => [...(document.getElementById('menuPratiques')?.options || [])]
+        .filter(o => o.textContent.endsWith(' (active)')).map(o => o.value));
+    await page.waitForFunction((id) => !!document.querySelector(`#menuPratiques option[value="${id}"]`), PAN_STD_ID, { timeout: 10000 });
+    expect(await actives()).toEqual([]);
 
     // Le geste de l'enseignant : le bouton « Appliquer au cours actif », par le dispatcher réel.
     await page.evaluate(() => { document.querySelector('button[data-action="appliquerPratiqueAuCoursActive"]').click(); });
@@ -86,12 +88,9 @@ test('Porte #762 · le bouton « Appliquer au cours actif » assigne la pratique
     expect(apres.pratiqueId).toBe(PAN_STD_ID);
     expect(apres.pointeur).toBe(PAN_STD_ID);
 
-    // La barre latérale le montre : un badge « Active », sur la PAN-STD.
-    await page.waitForFunction((id) => {
-        const item = document.querySelector(`#sidebarListePratiques .sidebar-item[data-id="${id}"]`);
-        return !!(item && item.querySelector('.sidebar-item-badge') && /Active/.test(item.textContent));
-    }, PAN_STD_ID, { timeout: 10000 });
-    expect(await page.locator('#sidebarListePratiques .sidebar-item-badge', { hasText: 'Active' }).count()).toBe(1);
+    // Le menu le montre : « (active) » après le nom de la PAN-STD, et d'elle seule.
+    await page.waitForFunction((id) => / \(active\)$/.test(document.querySelector(`#menuPratiques option[value="${id}"]`)?.textContent || ''), PAN_STD_ID, { timeout: 10000 });
+    expect(await actives()).toEqual([PAN_STD_ID]);
 
     // Et le profil ne parle plus de pratique introuvable : la pratique est assignée et résolue.
     const diagnosticApres = await page.evaluate(() => ({

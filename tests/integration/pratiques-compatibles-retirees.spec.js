@@ -7,9 +7,11 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // LES CASES « PRATIQUES COMPATIBLES » PARTENT, LE BADGE DIT LA COMPOSITION
 // (consigne du 3 septembre 2026, volet C) — dans un vrai WebKit.
 //
-//   · la liste des grilles porte un badge DÉDUIT des types de critères : ALGO,
+//   · la composition d'une grille est un badge DÉDUIT des types de critères : ALGO,
 //     HOLIS, MIXTE ; rien pour une grille sans critère ; et le champ déclaré ne
-//     commande plus rien ;
+//     commande plus rien. ↻ #1147 (24 oct. 2026) : la barre latérale est partie, la
+//     sélection est un menu au nom seul ; le badge vit dans la bibliothèque, qui le tire
+//     de `GabaritsUtils.genererBadgeComposition` — c'est lui qu'on lit ;
 //   · le formulaire d'une grille n'offre plus de cases ;
 //   · une grille enregistrée qui portait `pratiquesCompatibles` le garde après
 //     une sauvegarde : on ne saisit plus, on ne supprime rien.
@@ -28,11 +30,15 @@ const SEMER = `async () => {
     window.afficherSection('conception');
     window.afficherSousSection('conception-grille-criteres');
     await window.afficherListeGrilles();
-    return [...document.querySelectorAll('#sidebarListeGrilles .sidebar-item')].map(el => ({
-        id: el.dataset.id,
-        badges: [...el.querySelectorAll('.badge-composition')].map(b => b.textContent),
-        ancien: el.querySelectorAll('.badge-type-som, .badge-type-std, .badge-type-spe, .badge-type-den, .badge-type-multi').length
-    }));
+    const grilles = await db.get(cle('grillesTemplates'));
+    const menu = [...document.getElementById('menuGrilles').options].filter(o => o.value).map(o => o.textContent);
+    return grilles.map(g => {
+        const el = document.createElement('div');
+        el.innerHTML = window.GabaritsUtils.genererBadgeComposition(g);
+        return { id: g.id, menu,
+            badges: [...el.querySelectorAll('.badge-composition')].map(b => b.textContent),
+            ancien: el.querySelectorAll('.badge-type-som, .badge-type-std, .badge-type-spe, .badge-type-den, .badge-type-multi').length };
+    });
 }`;
 
 test('volet C · la liste des grilles dit la composition, déduite des critères', async ({ page }) => {
@@ -46,6 +52,8 @@ test('volet C · la liste des grilles dit la composition, déduite des critères
     expect(par.G_HOLIS.badges).toEqual(['HOLIS']);
     expect(par.G_MIXTE.badges).toEqual(['MIXTE']);
     expect(par.G_VIDE.badges).toEqual([]);
+    // #1147 : le menu de la sélection montre le nom seul.
+    expect(liste[0].menu).toEqual(liste.map(l => l.id === 'G_ALGO' ? 'G1 FR-ALGO seul A26' : l.id === 'G_HOLIS' ? 'G5 FR-HOLIS A26' : l.id === 'G_MIXTE' ? 'Grille mixte' : 'Grille vide'));
     // Le champ déclaré (SOM, STD, SPE) ne commande plus aucun badge.
     expect(liste.every(l => l.ancien === 0)).toBe(true);
 });

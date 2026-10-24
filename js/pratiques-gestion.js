@@ -88,6 +88,7 @@ async function initialiserModulePratiquesMateriel() {
 
     if (conteneurEdition) conteneurEdition.classList.add('u-hide');
     if (accueil) accueil.classList.remove('u-hide');
+    MenuSelection.marquer('menuPratiques', null);
 
 }
 
@@ -96,15 +97,15 @@ async function initialiserModulePratiquesMateriel() {
    =============================== */
 
 /**
- * Affiche la liste des pratiques dans la sidebar
+ * Affiche la sélection des pratiques dans son menu (#1147 : la barre latérale est partie)
  * Note: Le bouton "Consulter la bibliothèque" est maintenant dans le HTML statique
  * Renommé avec suffixe "Materiel" pour éviter conflit avec pratiques.js
  */
 async function afficherListePratiquesMateriel() {
 
-    const container = document.getElementById('sidebarListePratiques');
-    if (!container) {
-        console.warn('[pratiques-gestion] ⚠️ Élément sidebarListePratiques introuvable');
+    const emplacement = document.getElementById('selectionPratiques');
+    if (!emplacement) {
+        console.warn('[pratiques-gestion] ⚠️ Élément selectionPratiques introuvable');
         return;
     }
 
@@ -112,45 +113,34 @@ async function afficherListePratiquesMateriel() {
     // localStorage est toujours à jour grâce à la double écriture (setSync + set)
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
-    // Filtrer les pratiques dans la bibliothèque (affichées dans la sidebar)
+    // Filtrer les pratiques dans la bibliothèque (affichées dans la sélection)
     // Beta 99.39 (A.0) : masque les items démo en mode normal
     // #326 axe D : masque aussi les variantes d'essai (réservées au Labo › Exploration).
     const pratiquesDansBibliotheque = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(
         configurations.filter(p => p.dansBibliotheque !== false)
     ));
 
-
-    // Si aucune pratique, afficher message
-    if (pratiquesDansBibliotheque.length === 0) {
-        container.innerHTML = '<p class="sidebar-vide">Crée une nouvelle pratique ou puisez dans la bibliothèque</p>';
-        return;
-    }
-
-    // #762 (6 sept. 2026) — LA PRATIQUE ASSIGNÉE AU GROUPE-COURS ACTIF SE VOIT ICI. Cette barre
-    // ne le disait pas : un enseignant pouvait croire sa pratique « activée » sans qu'aucune le
-    // soit (le repli « sommative » ne correspond à aucune pratique de la liste : pas de badge).
-    // Même badge et même règle que `afficherListePratiquesSidebar` (pratiques.js) : la SSOT.
+    // #762 (6 sept. 2026) — LA PRATIQUE ASSIGNÉE AU GROUPE-COURS ACTIF SE VOIT ICI : un enseignant
+    // pouvait croire sa pratique « activée » sans qu'aucune le soit (le repli « sommative » ne
+    // correspond à aucune pratique de la liste). La SSOT : `obtenirIdPratiqueActive`.
+    // #1147 (24 oct. 2026) : dans le menu, le nom seul ; « (active) » après le nom, parce que c'est un
+    // ÉTAT et non une caractéristique (le badge « Active » de la barre latérale). Les badges de type et
+    // de caractéristiques sont partis avec la barre ; la bibliothèque les montre.
     const pratiqueActiveId = (typeof obtenirIdPratiqueActive === 'function')
         ? obtenirIdPratiqueActive()
         : null;
-
-    // Générer les items de la sidebar
-    const html = pratiquesDansBibliotheque.map(pratique => {
-        const nomPratique = pratique.nom || 'Sans titre';
-        const badgeType = genererBadgeTypePratique(pratique);
-        const badgesCaracteristiques = genererBadgeCaracteristiques(pratique);
-        // La couleur de l'ÉTAT, pas celle des caractéristiques (demande de Grégoire, 6 sept.) :
-        // `.sidebar-item-badge.badge-pratique-active` dans styles.css.
-        const badgeActive = (pratique.id === pratiqueActiveId) ? ' <span class="sidebar-item-badge badge-pratique-active">Active</span>' : '';
-        return `
-            <div class="sidebar-item" data-id="${pratique.id}" data-action="chargerPratiquePourModif" data-param="${pratique.id}">
-                <div class="sidebar-item-titre">${echapperHtml(nomPratique)}</div>
-                <div class="sidebar-item-badges">${badgeType} ${badgesCaracteristiques}${badgeActive}</div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
+    const edition = document.getElementById('conteneurEditionPratique');
+    MenuSelection.rendre(emplacement, {
+        idMenu: 'menuPratiques',
+        elements: pratiquesDansBibliotheque.map(p => ({
+            id: p.id, nom: p.nom, suffixe: p.id === pratiqueActiveId ? '(active)' : ''
+        })),
+        idOuvert: (pratiqueEnEditionMateriel && edition && !edition.classList.contains('u-hide')) ? pratiqueEnEditionMateriel : null,
+        libelleAucun: 'Aucune pratique ouverte',
+        libelleMenu: 'Pratique ouverte',
+        phraseVide: 'Crée une nouvelle pratique ou puise dans la bibliothèque',
+        ouvrir: chargerPratiquePourModif
+    });
 }
 
 /**
@@ -180,78 +170,6 @@ function obtenirDescriptionCourtePratique(pratique) {
     // mais pratique.type peut encore être legacy tant que le select n'est pas migré.
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
     return descriptions[typeCanon] || pratique.type || '';
-}
-
-/**
- * Génère les badges de caractéristiques basés sur la configuration de la pratique
- * Retourne toutes les caractéristiques formatées en badges (couleur via CSS selon le mode)
- * @param {Object} pratique - La configuration de pratique
- */
-function genererBadgeCaracteristiques(pratique) {
-    if (!pratique) return '';
-
-    const caracteristiques = [];
-
-    // (#435 : le badge « par objectifs » est RETIRÉ avec le mode. Il lisait
-    //  `configuration.varianteCalcul`, que les pratiques STOCKÉES portent
-    //  encore — il aurait donc continué d'annoncer, dans la liste des
-    //  pratiques, un mode qui n'existe plus. Et son test inverse masquait le
-    //  badge portfolio de ces mêmes pratiques, qui est désormais le seul vrai.)
-
-    // Portfolio actif (N meilleures, ou hybride N meilleures + M obligatoires)
-    if (pratique.configuration?.portfolio) {
-        const config = pratique.configuration;
-        const categoriesActif = config.categories?.actif || config.portfolio?.hybride || false;
-
-        if (categoriesActif && config.categories?.selection) {
-            // Mode hybride : N meilleures + M obligatoires
-            const nMeilleures = config.categories.selection.nombreARetenir || 0;
-            const nTotal = config.portfolio.nombreARetenir || config.portfolio.nbArtefactsRetenus || 0;
-            const nObligatoires = nTotal > nMeilleures ? nTotal - nMeilleures : 0;
-
-            if (nMeilleures > 0) {
-                let texte = `${nMeilleures} meilleure${nMeilleures > 1 ? 's' : ''}`;
-                if (nObligatoires > 0) {
-                    texte += ` + ${nObligatoires} oblig.`;
-                }
-                caracteristiques.push(texte);
-            }
-        } else {
-            // Mode simple : N meilleures
-            const n = config.portfolio.nombreARetenir || config.portfolio.nbArtefactsRetenus || 0;
-            if (n > 0) {
-                caracteristiques.push(`${n} meilleures`);
-            }
-        }
-    }
-
-    // 3. Jetons actifs
-    if (pratique.jetons?.actif) {
-        const nbJetons = pratique.jetons.nombre || 2;  // 🆕 Beta 95.7 : défaut 2
-        caracteristiques.push(`${nbJetons} jetons`);
-    }
-
-    // 4. Notes finalisées (toggle Provisoire/Finale activé)
-    if (pratique.configuration?.notesFinales) {
-        caracteristiques.push('notes finalisées');
-    }
-
-    // 5. Échelle associée (nom abrégé)
-    if (pratique.configuration?.echelleId) {
-        const echelles = db.getSync(cle('echellesTemplates'), []);
-        const echelle = echelles.find(e => e.id === pratique.configuration.echelleId);
-        if (echelle) {
-            const nomCourt = echelle.code || echelle.nom?.substring(0, 12) || 'échelle';
-            caracteristiques.push(nomCourt);
-        }
-    }
-
-    if (caracteristiques.length === 0) return '';
-
-    // Formater chaque caractéristique en badge (couleur gérée par CSS via var(--accent-primaire))
-    return caracteristiques.map(c =>
-        `<span class="badge-caracteristique">${echapperHtml(c)}</span>`
-    ).join(' ');
 }
 
 /**
@@ -350,7 +268,7 @@ async function afficherBibliothequePratiques() {
     // Section 1 : pratiques dans la sélection
     let contenuSection1 = '';
     if (pratiquesDansBibliotheque.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique dans la barre latérale</p>';
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique dans ta sélection</p>';
     } else {
         pratiquesDansBibliotheque.forEach(pratique => {
             contenuSection1 += BibliothequeUI.renderCarteSelection({
@@ -367,7 +285,7 @@ async function afficherBibliothequePratiques() {
                     { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'pratique', param2: pratique.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
                     // Legacy JSON — retrait prévu à la convergence des formats (P8 #329)
                     { label: 'Exporter (JSON)', action: 'partagerPratiqueMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Exporter en JSON (ancien format)' },
-                    { label: 'Retirer', action: 'retirerPratiqueDeBibliothequeMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                    { label: 'Retirer', action: 'retirerPratiqueDeBibliothequeMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
                     { label: 'Supprimer', action: 'supprimerPratiqueDefinitivement', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
                 ]
             });
@@ -377,7 +295,7 @@ async function afficherBibliothequePratiques() {
     // Message d'aide intégré au début de Section 1
     const messageAide = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
         '<p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
-            '<strong>Pour éditer une pratique</strong>, transférez-la d\'abord dans la barre latérale en cliquant sur « Ajouter », puis cliquez dessus pour l\'ouvrir en mode édition.' +
+            '<strong>Pour éditer une pratique</strong>, transférez-la d\'abord dans ta sélection en cliquant sur « Ajouter », puis cliquez dessus pour l\'ouvrir en mode édition.' +
         '</p>' +
     '</div>';
     contenuSection1 = messageAide + contenuSection1;
@@ -531,7 +449,7 @@ async function afficherBibliothequePratiques() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequePratiques',
         titre: 'Bibliothèque de pratiques de notation',
-        sousTitre: 'Gérez les pratiques affichées dans la barre latérale.',
+        sousTitre: 'Gérez les pratiques offertes dans ta sélection.',
         onFermer: 'fermerModalBibliothequePratiques',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes, {
             itemsSelection: pratiquesDansBibliotheque,
@@ -541,12 +459,12 @@ async function afficherBibliothequePratiques() {
                 supprimerPartagee: 'supprimerPratiqueDeBibliothequePartagee'
             }
         }),
-        titreSection1: 'Pratiques dans la barre latérale',
+        titreSection1: 'Pratiques dans ta sélection',
         contenuIdListe1: 'listePratiquesDansBibliotheque',
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
         sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Pratiques disponibles à ajouter à la barre latérale',
+        titreSection2: 'Pratiques disponibles à ajouter à ta sélection',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listePratiquesDisponibles',
         contenuSection2: contenuSection2,
@@ -1120,13 +1038,8 @@ async function chargerPratiquePourModif(pratiqueId) {
     // Remplir les champs du formulaire (incluant l'échelle)
     remplirFormulairePratique(pratique);
 
-    // Marquer l'item actif dans la sidebar
-    document.querySelectorAll('#sidebarListePratiques .sidebar-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.id === pratiqueId) {
-            item.classList.add('active');
-        }
-    });
+    // Le menu montre la pratique ouverte
+    MenuSelection.marquer('menuPratiques', pratiqueId);
 
     // Phase 4.B : mode lecture seule si item démo
     if (conteneurEdition && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
@@ -2542,7 +2455,7 @@ window.confirmerImportPratiques = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} pratique(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Pratiques disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Pratiques disponibles » pour les ajouter à ta sélection.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {

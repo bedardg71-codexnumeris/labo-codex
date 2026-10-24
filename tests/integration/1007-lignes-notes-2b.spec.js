@@ -139,7 +139,8 @@ test.describe('#1007, lot 2b — le codex proposé avant de retirer une ligne qu
             db.setSync(cle('jugementsDenotation'), { P_DEN_2B: { 9000101: { ciblesAtteintes: { cible_lire: true, cible_ecrire: false }, noteFinale: 78, justification: 'banc', date: '2026-09-01' } } });
         }, PRATIQUE);
         await page.evaluate(() => { afficherSection('conception'); afficherSousSection('conception-pratiques-notation'); afficherListePratiquesMateriel(); });
-        await page.locator('#sidebarListePratiques .sidebar-item[data-id="P_DEN_2B"]').click();
+        await page.waitForTimeout(300);   // l'initialisation différée de la sous-section (navigation.js, 100 ms) referme la fiche
+        await page.locator('#menuPratiques').selectOption('P_DEN_2B');   // #1147 : le menu de la sélection
         const liste = page.locator('#mat-den-cibles');
         await expect(liste.locator('.editeur-cibles-ligne')).toHaveCount(2);
         const objectifs = () => page.evaluate(() => db.getSync(cle('pratiquesConfigurables'), [])[0].configuration.objectifs);

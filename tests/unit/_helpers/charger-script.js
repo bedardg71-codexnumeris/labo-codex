@@ -102,6 +102,25 @@ export function completerNoteParDefaut(globaux) {
     return Object.keys(ajouts).length ? Object.assign({}, globaux, ajouts) : globaux;
 }
 
+/**
+ * #1147 (24 oct. 2026) — `MenuSelection` (js/menu-selection.js), le menu de la sélection des cinq
+ * bibliothèques de la Conception, appelé par grilles, échelles, cartouches, pratiques et productions.
+ * Comme `ProductionDiagnostique` : le VRAI module, fourni quand le harnais ne le donne pas, chargé une
+ * fois par fenêtre, sur le `document` du harnais. Son `echapperHtml` : celui du harnais, sinon la même
+ * règle que config.js (& < > " '). Rend les globaux complétés.
+ */
+export function completerMenuSelectionParDefaut(globaux, fauxWindow, document) {
+    if (typeof globaux.MenuSelection !== 'undefined') return globaux;
+    if (!fauxWindow.MenuSelection) {
+        const echapper = typeof globaux.echapperHtml === 'function' ? globaux.echapperHtml
+            : (t) => (t == null ? '' : String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;'));
+        new Function('window', 'document', 'echapperHtml', '"use strict";\n' +
+            readFileSync(path.join(racineProjet, 'js/menu-selection.js'), 'utf8'))(fauxWindow, document, echapper);
+    }
+    return Object.assign({}, globaux, { MenuSelection: fauxWindow.MenuSelection });
+}
+
 const NOMS_NOTE_POURCENTAGE = ['formaterNombre', 'formaterPourcentage', 'formaterNotePourcentage',
     'formaterNoteNombre', 'formaterPoints', 'ESPACE_INSECABLE'];
 
@@ -247,6 +266,8 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     if (!fauxWindow.ProductionDiagnostique) {
         new Function('window', readFileSync(path.join(racineProjet, 'js/entites/production-diagnostique.js'), 'utf8'))(fauxWindow);
     }
+
+    globaux = completerMenuSelectionParDefaut(globaux, fauxWindow, globaux.document || fauxDocument);   // #1147
 
     // #876 (15 sept. 2026) — `sessionStorage` aussi : une file d'import persistée
     // se restaure au CHARGEMENT de travaux-import.js, donc elle doit être là avant.

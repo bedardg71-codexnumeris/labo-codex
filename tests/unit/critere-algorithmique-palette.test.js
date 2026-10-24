@@ -231,8 +231,11 @@ describe('palette · R — les retouches : le bloc inactif réduit à son nom, l
         expect(compacte).toMatch(/--palette-algo-compacte: 1;/);
         expect(compacte).toMatch(/\.palette-algo-groupe\[data-vide\],\s*\.palette-algo-bloc\[data-hors-zone\] \{ display: none; \}/);
         expect(compacte).toMatch(/\.palette-algo-bloc-aide,\s*\.palette-algo-bloc-precision \{[^}]*clip-path: inset\(50%\)/);
-        const collant = tranche(css, '@media (min-width: 1200px) {\n    body:has(.section.active .sous-section.active .palette-algo)', '\n}\n');
-        expect(collant).toMatch(/body:has\(\.section\.active \.sous-section\.active \.palette-algo\) \.sidebar-navigation \{ top: 96px; max-height: calc\(100vh - 104px\); \}/);
+        const collant = tranche(css, '@media (min-width: 1025px) {\n    body:has(.section.active .sous-section.active .palette-algo)', '\n}\n');
+        // #1147 (24 oct. 2026) : la liste des grilles n'est plus une barre latérale collante — sa règle est partie,
+        // celles qui rendent la palette collante restent.
+        expect(collant).toMatch(/\.conteneur:has\(\.section\.active \.sous-section\.active \.palette-algo\) \{ overflow: clip; \}/);
+        expect(collant).not.toMatch(/sidebar-navigation/);
         // Le JS lit le seuil dans la feuille de style, il ne l'écrit pas une seconde fois.
         expect(source('js/grilles.js')).toMatch(/getPropertyValue\('--palette-algo-compacte'\)/);
     });

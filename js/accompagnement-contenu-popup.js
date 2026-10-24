@@ -414,17 +414,17 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "<strong class='badge-source-locale'>Locale</strong> : élément que tu as créé ou modifié toi-même",
                     "<strong class='badge-source-bibliotheque'>Bibliothèque</strong> : élément provenant de la Bibliothèque (gabarits)",
-                    "<strong class='badge-source-retiree'>Retirée</strong> : élément retiré de la barre latérale mais conservé dans tes données"
+                    "<strong class='badge-source-retiree'>Retirée</strong> : élément retiré de ta sélection mais conservé dans tes données"
                 ]
             },
             {
                 type: 'alerte',
                 niveau: 'important',
-                contenu: "<strong>Retirer ≠ Supprimer</strong><br><br><strong>Retirer</strong> : masque l'élément de la barre latérale, mais il reste dans tes données. Tu peux le réajouter plus tard depuis « Disponibles ».<br><br><strong>Supprimer</strong> : efface définitivement l'élément de tes données. Cette action est irréversible."
+                contenu: "<strong>Retirer ≠ Supprimer</strong><br><br><strong>Retirer</strong> : masque l'élément de ta sélection, mais il reste dans tes données. Tu peux le réajouter plus tard depuis « Disponibles ».<br><br><strong>Supprimer</strong> : efface définitivement l'élément de tes données. Cette action est irréversible."
             },
             {
                 type: 'conseil',
-                contenu: "Utilise <strong>Retirer</strong> pour désencombrer ta barre latérale sans perdre tes configurations. Utilise <strong>Supprimer</strong> uniquement pour les éléments dont tu es certain de ne plus avoir besoin."
+                contenu: "Utilise <strong>Retirer</strong> pour désencombrer ta sélection sans perdre tes configurations. Utilise <strong>Supprimer</strong> uniquement pour les éléments dont tu es certain de ne plus avoir besoin."
             },
             {
                 type: 'liste',
@@ -432,7 +432,7 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "<strong>Dupliquer</strong> : crée une copie indépendante avec un nouvel ID, idéal pour créer une variante",
                     "<strong>Exporter</strong> : télécharge l'élément en fichier JSON pour le partager ou le garder",
-                    "<strong>Ajouter</strong> : transfère un élément disponible vers ta barre latérale"
+                    "<strong>Ajouter</strong> : transfère un élément disponible vers ta sélection"
                 ]
             },
             {

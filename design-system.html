@@ -1623,7 +1623,7 @@
      ============================================================ -->
 <section id="sidebar" class="guide-section">
     <h2 class="guide-section-title">15. Sidebar navigation</h2>
-    <p class="guide-section-intro">Panneau latéral 280px sticky avec filtre, info-card, items et actions.</p>
+    <p class="guide-section-intro">Panneau latéral 280px sticky avec filtre, info-card, items et actions. Profil de l'élève et CoP › Outils d'animation. Les bibliothèques de la Conception l'ont quitté pour la rangée de la sélection (#1147, ci-dessous).</p>
 
     <div class="guide-component">
         <h3 class="guide-component-title">Sidebar complète</h3>
@@ -1681,6 +1681,44 @@
                             <div class="sidebar-item-titre">Grille Examen</div>
                             <div class="sidebar-item-description">Planifiée</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="guide-component">
+        <h3 class="guide-component-title">Rangée de la sélection (Conception, #1147)</h3>
+        <p class="guide-section-intro">Au-dessus de la fiche : « Consulter la bibliothèque », le menu de la sélection (le nom seul ; « Aucune … ouverte » en tête, non choisissable), puis « + Nouvelle … » à droite. La fiche prend toute la largeur. Composant : <code>js/menu-selection.js</code>.</p>
+        <div class="ref-dual">
+            <div class="ref-panel ref-panel-sombre">
+                <div class="ref-panel-label">Mode sombre</div>
+                <div class="sous-section active">
+                    <div class="rangee-selection">
+                        <button class="btn btn-principal">Consulter la bibliothèque</button>
+                        <div class="rangee-selection-emplacement">
+                            <select class="controle-form rangee-selection-menu" aria-label="Grille ouverte">
+                                <option disabled>Aucune grille ouverte</option>
+                                <option selected>Dissertation fictive</option>
+                                <option>Exposé oral fictif</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-principal rangee-selection-nouveau">+ Nouvelle grille</button>
+                    </div>
+                </div>
+            </div>
+            <div class="ref-panel ref-panel-clair mode-clair">
+                <div class="ref-panel-label">Mode clair</div>
+                <div class="sous-section active">
+                    <div class="rangee-selection">
+                        <button class="btn btn-principal">Consulter la bibliothèque</button>
+                        <div class="rangee-selection-emplacement">
+                            <select class="controle-form rangee-selection-menu" aria-label="Grille ouverte">
+                                <option disabled>Aucune grille ouverte</option>
+                                <option selected>Dissertation fictive</option>
+                                <option>Exposé oral fictif</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-principal rangee-selection-nouveau">+ Nouvelle grille</button>
                     </div>
                 </div>
             </div>

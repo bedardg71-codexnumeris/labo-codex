@@ -25,7 +25,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //        attend de productions.js est réellement exporté. C'est la classe du
 //        défaut qu'on ferme, pas le seul cas vu.
 //   E4 — le trajet vécu : les deux fichiers chargés, le tri « échéance »
-//        actif, la barre latérale se dessine dans l'ordre des dates.
+//        actif, le menu de la sélection (#1147) se dessine dans l'ordre des dates.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -111,12 +111,12 @@ describe('#930 · E3 — tout ce que productions-liste.js attend de productions.
 
 /* ------------------------------------------------ E4 — le trajet des deux fichiers */
 
-describe('#930 · E4 — les deux fichiers chargés, le tri « échéance » range la barre latérale', () => {
+describe('#930 · E4 — les deux fichiers chargés, le tri « échéance » range le menu de la sélection (#1147 : il rangeait la barre latérale)', () => {
     async function barreLaterale(productions, tri) {
         const winProd = chargerProductions();
         const container = { innerHTML: '' };
         const elements = {
-            sidebarListeProductions: container,
+            selectionProductions: container,
             triProductions: { value: tri }
         };
         const winListe = chargerScript('js/productions-liste.js', {
@@ -125,6 +125,7 @@ describe('#930 · E4 — les deux fichiers chargés, le tri « échéance » ran
             echapperHtml: (t) => String(t == null ? '' : t),
             BibliothequeUI: { filtrerParModeDemo: (x) => x },
             aucuneEcheanceAssignee: (p) => winProd.aucuneEcheanceAssignee(p),
+            productionEnEdition: null,   // #1147 : le menu lit la fiche ouverte (config.js)
             // ⚠ Renvoi par fermeture vers l'EXPORT de productions.js : si
             // l'export manque, ce renvoi lève — c'est le défaut de Grégoire.
             obtenirEcheancePlusTot: (p) => winProd.obtenirEcheancePlusTot(p),
@@ -135,7 +136,8 @@ describe('#930 · E4 — les deux fichiers chargés, le tri « échéance » ran
             }
         });
         await winListe.afficherListeProductions();
-        return [...container.innerHTML.matchAll(/data-id="([^"]+)"/g)].map(m => m[1]);
+        // Les options du menu, sans « Aucune production ouverte » (valeur vide).
+        return [...container.innerHTML.matchAll(/<option value="([^"]+)"/g)].map(m => m[1]);
     }
 
     const PRODUCTIONS = [

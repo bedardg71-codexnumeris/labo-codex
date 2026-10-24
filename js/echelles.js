@@ -911,7 +911,7 @@ window.confirmerImportEchelles = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} échelle(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Échelles disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Échelles disponibles » pour les ajouter à ta sélection.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
@@ -945,9 +945,9 @@ window.importerEchelles = importerEchelles;
 async function afficherListeEchelles() {
     const echelles = await db.get(cle('echellesTemplates')) ||  [];
 
-    const container = document.getElementById('sidebarListeEchelles');
-    if (!container) {
-        console.warn('   ⚠️ Élément sidebarListeEchelles introuvable');
+    const emplacement = document.getElementById('selectionEchelles');
+    if (!emplacement) {
+        console.warn('   ⚠️ Élément selectionEchelles introuvable');
         return;
     }
 
@@ -957,38 +957,20 @@ async function afficherListeEchelles() {
         echelles.filter(e => e.dansBibliotheque !== false)
     );
 
-    // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
-    let html = `
-        <div class="u-mb-15">
-            <button data-action="afficherBibliothequeEchelles" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
-                Consulter la bibliothèque
-            </button>
-        </div>
-    `;
-
-    if (echellesDansBibliotheque.length === 0) {
-        html += '<p class="sidebar-vide">Crée une nouvelle échelle ou puisez dans la bibliothèque</p>';
-        container.innerHTML = html;
-        return;
-    }
-
-
-    html += echellesDansBibliotheque.map(echelle => {
-        const nomEchelle = echelle.nom || 'Sans titre';
-        const nbNiveaux = echelle.niveaux?.length || 0;
-        return `
-            <div class="sidebar-item" data-id="${echelle.id}" data-action="ouvrirEchelleDepuisListe" data-param="${echelle.id}">
-                <div class="sidebar-item-titre">${echapperHtml(nomEchelle)}</div>
-                <div class="sidebar-item-badges"><span class="badge-caracteristique">${nbNiveaux} niveaux</span></div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-    // Lot 3b1 (17 oct.) : l'objet ouvert reste sélectionné quand la liste se redessine — l'initialisation
+    // #1147 (24 oct. 2026) : la sélection en menu déroulant, le nom seul (le nombre de niveaux est
+    // parti avec la barre latérale ; la bibliothèque le montre).
+    // Lot 3b1 (17 oct.) : l'objet ouvert reste choisi quand la liste se redessine — l'initialisation
     // de la sous-section la redessine 100 ms après une ouverture venue d'un autre onglet (« Apporter mon matériel »).
     const edition = document.getElementById('conteneurEditionEchelle');
-    if (echelleTemplateActuelle && edition && !edition.classList.contains('u-hide')) definirEchelleActive(echelleTemplateActuelle.id);
+    MenuSelection.rendre(emplacement, {
+        idMenu: 'menuEchelles',
+        elements: echellesDansBibliotheque.map(e => ({ id: e.id, nom: e.nom })),
+        idOuvert: (echelleTemplateActuelle && edition && !edition.classList.contains('u-hide')) ? echelleTemplateActuelle.id : null,
+        libelleAucun: 'Aucune échelle ouverte',
+        libelleMenu: 'Échelle ouverte',
+        phraseVide: 'Crée une nouvelle échelle ou puise dans la bibliothèque',
+        ouvrir: ouvrirEchelleDepuisListe
+    });
 }
 
 /**
@@ -1031,7 +1013,7 @@ async function preparerDonneesBibliothequeEchelles() {
         boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerEchelleBibliotheque', param: echelle.id, classe: 'btn-confirmer', title: 'Créer une copie' },
         actionsMenu: [
             { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'echelle', param2: echelle.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-            { label: 'Retirer', action: 'retirerEchelleDeBibliotheque', param: echelle.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Retirer', action: 'retirerEchelleDeBibliotheque', param: echelle.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
             { label: 'Supprimer', action: 'supprimerEchelleDefinitivement', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
     }));
@@ -1102,7 +1084,7 @@ async function afficherBibliothequeEchelles() {
     // Section 1
     let contenuSection1 = '';
     if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle dans la barre latérale</p>';
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle dans ta sélection</p>';
     } else {
         data.cartesSection1.forEach(carte => {
             contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
@@ -1172,7 +1154,7 @@ async function afficherBibliothequeEchelles() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeEchelles',
         titre: "Bibliothèque d'échelles de performance",
-        sousTitre: 'Gérez les échelles de performance affichées dans la barre latérale.',
+        sousTitre: 'Gérez les échelles de performance offertes dans ta sélection.',
         onFermer: 'fermerModalBibliothequeEchelles',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.echellesDansBibliotheque,
@@ -1182,12 +1164,12 @@ async function afficherBibliothequeEchelles() {
                 supprimerPartagee: 'supprimerEchelleDeBibliothequePartagee'
             }
         }),
-        titreSection1: 'Échelles dans la barre latérale',
+        titreSection1: 'Échelles dans ta sélection',
         contenuIdListe1: 'listeEchellesDansBibliotheque',
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
         sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Échelles disponibles à ajouter à la barre latérale',
+        titreSection2: 'Échelles disponibles à ajouter à ta sélection',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeEchellesDisponibles',
         contenuSection2: contenuSection2,
@@ -1613,8 +1595,9 @@ async function creerNouvelleEchelle() {
     // Afficher les niveaux avec placeholders
     afficherNiveauxNouvelleEchelle();
 
-    // Réinitialiser la référence à l'échelle actuelle
+    // Réinitialiser la référence à l'échelle actuelle ; une échelle en création n'est pas encore dans le menu
     echelleTemplateActuelle = null;
+    MenuSelection.marquer('menuEchelles', null);
 
 }
 
@@ -2075,8 +2058,9 @@ function annulerFormEchelle() {
     document.getElementById('descriptionEchelle').value = '';
     document.getElementById('tableauNiveauxEchelle').innerHTML = '';
 
-    // Réinitialiser la référence à l'échelle actuelle
+    // Réinitialiser la référence à l'échelle actuelle ; le menu revient à « Aucune échelle ouverte »
     echelleTemplateActuelle = null;
+    MenuSelection.marquer('menuEchelles', null);
 
 }
 
@@ -2123,7 +2107,7 @@ async function chargerEchellePourModif(id) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneur, echelle, 'dupliquerEtEditerEchelle', 'Dupliquer pour créer mon échelle');
     }
 
-    // Mettre le highlight et rafraîchir la sidebar
+    // Rafraîchir le menu, qui montre l'échelle ouverte
     await definirEchelleActive(id);
     await afficherListeEchelles();
 }
@@ -2966,14 +2950,7 @@ async function deplacerNiveauEchelleBas(echelleId, index) {
 }
 
 async function definirEchelleActive(id) {
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
-    if (itemActif) {
-        itemActif.classList.add('active');
-    }
+    MenuSelection.marquer('menuEchelles', id);
 }
 
 async function dupliquerEchelleDepuisSidebar(id) {

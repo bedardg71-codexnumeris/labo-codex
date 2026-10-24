@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
-
-const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // SENTINELLE #762 (volet bouton) — « APPLIQUER AU COURS ACTIF » ASSIGNE LA PRATIQUE AU GROUPE-COURS.
 //
@@ -67,7 +62,7 @@ function monter({ avecGroupeCours = true } = {}) {
     const win = { addEventListener() {}, removeEventListener() {}, lirePointeurPratiqueGroupeCours: pratiqueActive };
     const globaux = {
         db, cle: (k) => 'test_' + k,
-        document: { getElementById: (id) => (id === 'sidebarListePratiques' ? sidebar : null), querySelector: () => null, querySelectorAll: () => [],
+        document: { getElementById: (id) => (id === 'selectionPratiques' ? sidebar : null),   // #1147 : l'emplacement du menu querySelector: () => null, querySelectorAll: () => [],
             addEventListener() {}, removeEventListener() {}, createElement: () => ({ style: {}, classList: { add() {}, remove() {} }, setAttribute() {}, appendChild() {} }),
             body: { appendChild() {}, classList: { add() {}, remove() {} } } },
         notifications: { succes: (t, m) => notifs.push({ type: 'succes', t, m }), erreur: (t, m) => notifs.push({ type: 'erreur', t, m }), info() {}, warning() {} },
@@ -103,21 +98,18 @@ describe('#762 · « Appliquer au cours actif » assigne la pratique au groupe-c
         expect(notifs[0].t + ' ' + (notifs[0].m || '')).toMatch(/cours actif/);
     });
 
-    it('la barre latérale de Conception › Pratiques marque « Active » sur la pratique assignée, et sur elle seule', async () => {
+    // #1147 (24 oct. 2026) : la sélection est un menu déroulant ; l'état se dit en mots, « (active) » après
+    // le nom de la pratique assignée — plus un badge (et plus la classe `badge-pratique-active`, partie).
+    it('le menu de Conception › Pratiques dit « (active) » sur la pratique assignée, et sur elle seule', async () => {
         const { win, sidebar } = monter();
         await win.afficherListePratiquesMateriel();
-        expect(sidebar.innerHTML, 'avant tout : aucune pratique assignée, aucun badge').not.toContain('>Active<');
+        expect(sidebar.innerHTML, 'avant tout : aucune pratique assignée, aucun « (active) »').not.toContain('(active)');
         await win.appliquerPratiqueAuCours(PAN_STD.id);
-        const items = sidebar.innerHTML.split('<div class="sidebar-item"').slice(1);
-        const actives = items.filter(i => i.includes('>Active<'));
+        const options = [...sidebar.innerHTML.matchAll(/<option value="([^"]*)"[^>]*>([^<]*)<\/option>/g)];
+        const actives = options.filter(o => o[2].endsWith(' (active)'));
         expect(actives).toHaveLength(1);
-        expect(actives[0]).toContain(PAN_STD.id);
-        // La couleur d'un ÉTAT, pas d'une caractéristique (demande de Grégoire, 6 sept.) : la
-        // classe est posée, ET la feuille de style la définit (règle 8.1 : un banc vert peut
-        // couvrir un écran cassé — une classe jamais définie ne se voit qu'au grep).
-        expect(actives[0]).toMatch(/class="sidebar-item-badge badge-pratique-active"/);
-        const css = readFileSync(path.join(RACINE, 'styles.css'), 'utf8');
-        expect(css).toMatch(/\.sidebar-item-badge\.badge-pratique-active\s*\{/);
+        expect(actives[0][1]).toBe(PAN_STD.id);
+        expect(options.length, 'le banc voit bien les autres pratiques').toBeGreaterThan(2);
     });
 
     it('sans groupe-cours actif : rien n\'est assigné et l\'enseignant l\'apprend (pas un succès)', async () => {

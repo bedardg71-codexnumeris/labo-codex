@@ -104,7 +104,9 @@ test('marquée diagnostique, une production n\'entre ni dans la note, ni dans C,
     }
 });
 
-test('la marque « Diagnostique » paraît dans Conception › Productions et dans la Liste des évaluations', async ({ page }) => {
+// ↻ #1147 (24 oct. 2026) : Conception › Productions montre sa sélection dans un menu au nom seul (décision du
+// 24 oct. : aucun badge) ; la marque n'y paraît plus, la Liste des évaluations la garde.
+test('la marque « Diagnostique » paraît dans la Liste des évaluations ; le menu de la Conception dit le titre seul', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirDemo(page);
     const cible = await page.evaluate(`(${CHOISIR.toString()})()`);
@@ -113,10 +115,8 @@ test('la marque « Diagnostique » paraît dans Conception › Productions et da
 
     await page.evaluate(() => naviguerVers('conception', 'productions'));
     await pause(page, 1200);
-    const item = page.locator(`.sidebar-item[data-id="${cible.id}"]`);
-    await expect(item.locator('.marque-diagnostique')).toHaveText('Diagnostique');
-    // Une seule production marquée : aucune autre ne porte la marque.
-    await expect(page.locator('.sidebar-item .marque-diagnostique')).toHaveCount(1);
+    await expect(page.locator(`#menuProductions option[value="${cible.id}"]`)).toHaveText(cible.titre);
+    await expect(page.locator('#conception-productions .marque-diagnostique')).toHaveCount(0);
 
     await page.evaluate(() => naviguerVers('evaluations', 'liste'));
     await pause(page, 1500);

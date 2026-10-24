@@ -170,7 +170,7 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     // L'échelle dans Échelles de performance : son nom, ses niveaux et leurs notes retenues.
     await page.locator('[data-action="materiel.voir"][data-param="echelle-performance"]').click();
     await expect(page.locator('#nomEchelleTemplate')).toHaveValue(e.nom);
-    await expect(page.locator(`#conception-echelle-performance .sidebar-item[data-id="${e.id}"]`)).toHaveClass(/\bactive\b/);
+    await expect(page.locator('#menuEchelles'), 'le menu de la sélection montre l\'échelle ouverte (#1147)').toHaveValue(e.id);
     const vus = await page.locator('#conception-echelle-performance input[data-champ="nom"]:visible').evaluateAll((cs) => cs.map((c) => c.value));
     expect(vus).toEqual(NIVEAUX);
 

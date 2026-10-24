@@ -117,9 +117,9 @@ test('#623 · barre latérale et matrice montrent les cartouches du trimestre AC
         // collection du trimestre actif : il partagerait la barre sans rien dire du
         // routage. On le neutralise en LISANT le sujet, plutôt qu'en écrivant un
         // tombstone global qui déteindrait sur les autres specs de la suite.
-        const lireBarre = () => [...document.querySelectorAll(
-            '#listeCartouchesBanque .sidebar-item[data-grille-id="GR_S5_ROUTE"] .sidebar-item-titre'
-        )].map((n) => n.textContent.trim());
+        // #1147 : la sélection est un menu ; ses options ne portent pas la grille, on lit donc les cartouches DU CAS.
+        const lireBarre = () => [...(document.getElementById('menuCartouches')?.options || [])]
+            .filter((o) => ['CART_H', 'CART_A'].includes(o.value)).map((n) => n.textContent.trim());
 
         // — Trimestre actif = Hiver 2026
         await afficherBanqueCartouches();
@@ -206,9 +206,8 @@ test('#623 · après un démarrage, les cartouches restées sous clé NUE s\'aff
         await attendre(300);
         return {
             // Scopé à la grille du cas — voir la note du premier cas.
-            barre: [...document.querySelectorAll(
-                '#listeCartouchesBanque .sidebar-item[data-grille-id="GR_S5_BOOT"] .sidebar-item-titre'
-            )].map((n) => n.textContent.trim()),
+            barre: [...(document.getElementById('menuCartouches')?.options || [])]   // #1147 : le menu de la sélection
+                .filter((o) => o.value === 'CART_LEGACY').map((n) => n.textContent.trim()),
             cleNueRestee: db.getSync('cartouches_GR_S5_BOOT', null),
             copieHiver: (db.getSync('h2026_cartouches_GR_S5_BOOT', []) || []).map((c) => c.id),
             copieAutomne: (db.getSync('a2025_cartouches_GR_S5_BOOT', []) || []).map((c) => c.id),
@@ -276,9 +275,8 @@ test('#623 · un trimestre archivé PUIS désarchivé retrouve ses cartouches à
         await afficherBanqueCartouches();
         await attendre(300);
 
-        const barre = [...document.querySelectorAll(
-            '#listeCartouchesBanque .sidebar-item[data-grille-id="GR_S5_ARCH"] .sidebar-item-titre'
-        )].map((n) => n.textContent.trim());
+        const barre = [...(document.getElementById('menuCartouches')?.options || [])]   // #1147 : le menu de la sélection
+            .filter((o) => o.value === 'CART_ARCH').map((n) => n.textContent.trim());
 
         await chargerCartouchePourModif('CART_ARCH', 'GR_S5_ARCH');
         await attendre(400);

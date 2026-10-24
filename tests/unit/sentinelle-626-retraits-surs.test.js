@@ -207,7 +207,8 @@ describe('#626 · M4 — deux des trois couches d\'override de productions.js so
         expect(c).not.toMatch(/const\s+annulerFormProductionOriginale\s*=/);
         expect(c.match(/(?:^|\n)\s*window\.annulerFormProduction\s*=\s*annulerFormProduction\s*;/g) || []).toHaveLength(1);
         const corps = tranche(c, 'function annulerFormProduction() {', '\n}\n');
-        for (const geste of ["getElementById('accueilProductions')", "item.classList.remove('active')",
+        // #1147 (24 oct. 2026) : le surlignage de la barre latérale devient le menu remis à « Aucune … ».
+        for (const geste of ["getElementById('accueilProductions')", "MenuSelection.marquer('menuProductions', null)",
             "getElementById('optionsImportExportProductions')", 'productionEnEdition = null;']) {
             expect(corps, geste).toContain(geste);
         }

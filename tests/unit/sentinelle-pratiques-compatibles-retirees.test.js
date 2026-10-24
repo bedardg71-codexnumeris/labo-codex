@@ -113,7 +113,8 @@ describe('pratiques compatibles retirées · P.c — plus aucune case, plus aucu
             expect(source('js/' + f).includes('genererBadgesPratiques'), f).toBe(false);
         });
         const grilles = source('js/grilles.js');
-        expect((grilles.match(/genererBadgeComposition\(grille\)/g) || []).length).toBe(3);
+        // #1147 (24 oct. 2026) : 3 → 2, la barre latérale est partie (restent la bibliothèque, ses deux sections).
+        expect((grilles.match(/genererBadgeComposition\(grille\)/g) || []).length).toBe(2);
         ['js/echelles.js', 'js/cartouches.js', 'js/objectifs.js', 'js/productions-liste.js'].forEach(rel => {
             expect(source(rel).includes('genererBadgeComposition'), rel + ' n\'a pas de critères').toBe(false);
         });

@@ -103,7 +103,7 @@ async function obtenirCartouchesGrille(grilleId) {
  */
 async function initialiserModuleCartouches() {
     // Vérifier que nous sommes dans la bonne section
-    const listeBanque = document.getElementById('listeCartouchesBanque');
+    const listeBanque = document.getElementById('selectionCartouches');
     if (!listeBanque) {
         return;
     }
@@ -2844,6 +2844,8 @@ function annulerFormCartouche() {
     if (zoneImport) zoneImport.classList.add('u-hide');
     if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
     if (messageAccueil) messageAccueil.classList.remove('u-hide');
+    // #1147 : le menu revient à « Aucune cartouche ouverte »
+    MenuSelection.marquer('menuCartouches', null);
 
     // Réinitialiser les champs
     document.getElementById('nomCartouche').value = '';
@@ -3237,41 +3239,26 @@ async function afficherBanqueCartouches(grilleIdFiltre = '') {
     }
 
 
-    // Générer HTML de la liste
-    const container = document.getElementById('listeCartouchesBanque');
-    if (!container) {
-        console.warn('   ⚠️ Élément listeCartouchesBanque introuvable');
+    const emplacement = document.getElementById('selectionCartouches');
+    if (!emplacement) {
+        console.warn('   ⚠️ Élément selectionCartouches introuvable');
         return;
     }
 
-    // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
-    let html = `
-        <div style="margin-bottom: 15px;">
-            <button data-action="afficherBibliothequeCartouches" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
-                Consulter la bibliothèque
-            </button>
-        </div>
-    `;
-
-    if (cartouchesFiltrees.length === 0) {
-        container.innerHTML = html + '<p class="sidebar-vide">Crée une nouvelle cartouche ou puisez dans la bibliothèque</p>';
-        return;
-    }
-
-    html += cartouchesFiltrees.map(cart => {
-        const estActive = window.cartoucheActuel?.id === cart.id;
-        return `
-            <div class="sidebar-item ${estActive ? 'active' : ''}"
-                 data-cartouche-id="${cart.id}"
-                 data-grille-id="${cart.grilleId}"
-                 data-action="ouvrirCartoucheDepuisListe" data-param="${cart.id}" data-param2="${cart.grilleId}">
-                <div class="sidebar-item-titre">${echapperHtml(cart.nom)}</div>
-                <div class="sidebar-item-badges"><span class="badge-caracteristique">${echapperHtml(cart.grilleNom)}</span></div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
+    // #1147 (24 oct. 2026) : la sélection en menu déroulant, le nom seul (le nom de la grille est
+    // parti avec la barre latérale ; la bibliothèque le montre). Ouvrir une cartouche demande sa grille.
+    const grilleDe = {};
+    cartouchesFiltrees.forEach(c => { if (!(c.id in grilleDe)) grilleDe[c.id] = c.grilleId; });
+    const infoCartouche = document.getElementById('infoCartouche');
+    MenuSelection.rendre(emplacement, {
+        idMenu: 'menuCartouches',
+        elements: cartouchesFiltrees.map(c => ({ id: c.id, nom: c.nom })),
+        idOuvert: (window.cartoucheActuel && infoCartouche && !infoCartouche.classList.contains('u-hide')) ? window.cartoucheActuel.id : null,
+        libelleAucun: 'Aucune cartouche ouverte',
+        libelleMenu: 'Cartouche ouverte',
+        phraseVide: 'Crée une nouvelle cartouche ou puise dans la bibliothèque',
+        ouvrir: (id) => ouvrirCartoucheDepuisListe(id, grilleDe[id])
+    });
 }
 
 /**
@@ -3612,6 +3599,8 @@ async function creerNouvelleCartouche() {
     const infoCartouche = document.getElementById('infoCartouche');
     if (messageAccueil) messageAccueil.classList.add('u-hide');
     if (infoCartouche) infoCartouche.classList.remove('u-hide');
+    // #1147 : une cartouche en création n'est pas encore dans le menu
+    MenuSelection.marquer('menuCartouches', null);
 
     // #1042 — un exemple ouvert juste avant a verrouillé ce formulaire : le rouvrir d'abord.
     if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.quitterModeLectureSeuleDemo) BibliothequeUI.quitterModeLectureSeuleDemo(document.getElementById('infoCartouche'));
@@ -3649,16 +3638,7 @@ async function creerNouvelleCartouche() {
  * @param {string} cartoucheId - ID de la cartouche à marquer comme active
  */
 function definirCartoucheActive(cartoucheId) {
-    // Retirer le highlight de toutes les cartouches
-    document.querySelectorAll('.item-cartouche-banque').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Ajouter le highlight à la cartouche active
-    const itemActif = document.querySelector(`[data-cartouche-id="${cartoucheId}"]`);
-    if (itemActif) {
-        itemActif.classList.add('active');
-    }
+    MenuSelection.marquer('menuCartouches', cartoucheId);
 }
 
 /**
@@ -3793,7 +3773,7 @@ async function preparerDonneesBibliothequeCartouches() {
                 boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerCartoucheBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-confirmer', title: 'Créer une copie' },
                 actionsMenu: [
                     { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'cartouche', param2: cartouche.id, param3: cartouche.grilleId, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-                    { label: 'Retirer', action: 'retirerCartoucheDeBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+                    { label: 'Retirer', action: 'retirerCartoucheDeBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
                     { label: 'Supprimer', action: 'supprimerCartoucheDefinitivement', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
                 ],
                 groupe: grilleNom
@@ -3846,7 +3826,7 @@ async function afficherBibliothequeCartouches() {
     // Section 1
     let contenuSection1 = '';
     if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche dans la barre latérale</p>';
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche dans ta sélection</p>';
     } else {
         let groupeCourant = null;
         data.cartesSection1.forEach(carte => {
@@ -3892,7 +3872,7 @@ async function afficherBibliothequeCartouches() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeCartouches',
         titre: 'Bibliothèque de cartouches de rétroaction',
-        sousTitre: 'Gérez les cartouches de rétroaction affichées dans la barre latérale.',
+        sousTitre: 'Gérez les cartouches de rétroaction offertes dans ta sélection.',
         onFermer: 'fermerModalBibliothequeCartouches',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.cartouchesDansBibliotheque,
@@ -3905,11 +3885,11 @@ async function afficherBibliothequeCartouches() {
                 champParam2: 'grilleId'
             }
         }),
-        titreSection1: 'Cartouches dans la barre latérale',
+        titreSection1: 'Cartouches dans ta sélection',
         contenuIdListe1: 'listeCartouchesDansBibliotheque',
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
-        titreSection2: 'Cartouches disponibles à ajouter à la barre latérale',
+        titreSection2: 'Cartouches disponibles à ajouter à ta sélection',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeCartouchesDisponibles',
         contenuSection2: contenuSection2,

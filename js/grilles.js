@@ -2039,7 +2039,7 @@ window.confirmerImportGrilles = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} grille(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Grilles disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Grilles disponibles » pour les ajouter à ta sélection.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
@@ -2145,8 +2145,8 @@ function genererBadgeGrilleDepistage(grille) {
 
 async function afficherListeGrilles() {
     const grilles = await db.get(cle('grillesTemplates')) || [];
-    const container = document.getElementById('sidebarListeGrilles');
-    if (!container) return;
+    const emplacement = document.getElementById('selectionGrilles');
+    if (!emplacement) return;
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les grilles dans la bibliothèque
     // Beta 99.39 (A.0) : masque les items démo en mode normal
@@ -2154,43 +2154,20 @@ async function afficherListeGrilles() {
         grilles.filter(g => g.dansBibliotheque !== false)
     );
 
-    // ✅ AJOUT (8 décembre 2025) : Bouton "Consulter la bibliothèque" en en-tête
-    let html = `
-        <div class="u-mb-15">
-            <button data-action="afficherBibliothequeGrilles" class="btn btn-principal" style="width: 100%; font-size: 0.9rem;">
-                Consulter la bibliothèque
-            </button>
-        </div>
-    `;
-
-    if (grillesDansBibliotheque.length === 0) {
-        html += '<p class="sidebar-vide">Crée une nouvelle grille ou puisez dans la bibliothèque</p>';
-        container.innerHTML = html;
-        return;
-    }
-
-    html += grillesDansBibliotheque.map(grille => {
-        const nomGrille = grille.nom || 'Sans titre';
-        const nbCriteres = grille.criteres?.length || 0;
-        // Volet C (3 sept. 2026) — le badge dit la COMPOSITION de la grille, déduite
-        // des types de ses critères ; les cases « Pratiques compatibles » sont parties.
-        const badgeComposition = typeof GabaritsUtils !== 'undefined'
-            ? GabaritsUtils.genererBadgeComposition(grille)
-            : '';
-        const badgeDepistage = genererBadgeGrilleDepistage(grille);
-        return `
-            <div class="sidebar-item" data-id="${grille.id}" data-action="ouvrirGrilleDepuisListe" data-param="${grille.id}">
-                <div class="sidebar-item-titre">${echapperHtml(nomGrille)}</div>
-                <div class="sidebar-item-badges">${badgeComposition}${badgeDepistage} <span class="badge-caracteristique">${nbCriteres} critères</span></div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-    // Lot 3b1 (17 oct.) : l'objet ouvert reste sélectionné quand la liste se redessine — l'initialisation
+    // #1147 (24 oct. 2026) : la sélection en menu déroulant, le nom seul — les badges (composition,
+    // dépistage, nombre de critères) sont partis avec la barre latérale ; la bibliothèque les montre.
+    // Lot 3b1 (17 oct.) : l'objet ouvert reste choisi quand la liste se redessine — l'initialisation
     // de la sous-section la redessine 100 ms après une ouverture venue d'un autre onglet (« Apporter mon matériel »).
     const edition = document.getElementById('conteneurEditionGrille');
-    if (grilleTemplateActuelle && edition && !edition.classList.contains('u-hide')) definirGrilleActive(grilleTemplateActuelle.id);
+    MenuSelection.rendre(emplacement, {
+        idMenu: 'menuGrilles',
+        elements: grillesDansBibliotheque.map(g => ({ id: g.id, nom: g.nom })),
+        idOuvert: (grilleTemplateActuelle && edition && !edition.classList.contains('u-hide')) ? grilleTemplateActuelle.id : null,
+        libelleAucun: 'Aucune grille ouverte',
+        libelleMenu: 'Grille ouverte',
+        phraseVide: 'Crée une nouvelle grille ou puise dans la bibliothèque',
+        ouvrir: ouvrirGrilleDepuisListe
+    });
 }
 
 /**
@@ -2236,7 +2213,7 @@ async function preparerDonneesBibliothequeGrilles() {
         boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerGrilleBibliotheque', param: grille.id, classe: 'btn-confirmer', title: 'Créer une copie' },
         actionsMenu: [
             { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'grille', param2: grille.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-            { label: 'Retirer', action: 'retirerGrilleDeBibliotheque', param: grille.id, classe: 'btn-secondaire', title: 'Retirer de la barre latérale (données conservées)' },
+            { label: 'Retirer', action: 'retirerGrilleDeBibliotheque', param: grille.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
             { label: 'Supprimer', action: 'supprimerGrilleDefinitivement', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
         ]
     }));
@@ -2299,7 +2276,7 @@ async function afficherBibliothequeGrilles() {
     // Section 1
     let contenuSection1 = '';
     if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille dans la barre latérale</p>';
+        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille dans ta sélection</p>';
     } else {
         data.cartesSection1.forEach(carte => {
             contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
@@ -2374,7 +2351,7 @@ async function afficherBibliothequeGrilles() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeGrilles',
         titre: 'Bibliothèque de grilles de critères',
-        sousTitre: 'Gérez les grilles de critères affichées dans la barre latérale.',
+        sousTitre: 'Gérez les grilles de critères offertes dans ta sélection.',
         onFermer: 'fermerModalBibliothequeGrilles',
         doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.grillesDansBibliotheque,
@@ -2384,12 +2361,12 @@ async function afficherBibliothequeGrilles() {
                 supprimerPartagee: 'supprimerGrilleDeBibliothequePartagee'
             }
         }),
-        titreSection1: 'Grilles dans la barre latérale',
+        titreSection1: 'Grilles dans ta sélection',
         contenuIdListe1: 'listeGrillesDansBibliotheque',
         contenuSection1: contenuSection1,
         boutonsApresSection1: boutonsApresSection1,
         sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Grilles disponibles à ajouter à la barre latérale',
+        titreSection2: 'Grilles disponibles à ajouter à ta sélection',
         filtresSection2: filtresHTML,
         contenuIdListe2: 'listeGrillesDisponibles',
         contenuSection2: contenuSection2,
@@ -3403,10 +3380,8 @@ async function creerNouvelleGrille() {
         totalElement.style.color = 'var(--orange-accent)';
     }
 
-    // Retirer le highlight
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
+    // Une grille en création n'est pas encore dans le menu.
+    MenuSelection.marquer('menuGrilles', null);
 
 }
 
@@ -5389,7 +5364,7 @@ async function chargerGrillePourModif(id) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneur, grille, 'dupliquerEtEditerGrille', 'Dupliquer pour créer ma grille');
     }
 
-    // Mettre le highlight
+    // Le menu montre la grille ouverte
     definirGrilleActive(id);
 
 }
@@ -5839,14 +5814,7 @@ async function supprimerCritereGrille(grilleId, critereIndex) {
 }
 
 function definirGrilleActive(id) {
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    const itemActif = document.querySelector(`.sidebar-item[data-id="${id}"]`);
-    if (itemActif) {
-        itemActif.classList.add('active');
-    }
+    MenuSelection.marquer('menuGrilles', id);
 }
 
 async function dupliquerGrilleDepuisSidebar(id) {
@@ -5964,13 +5932,9 @@ function annulerFormGrille() {
     // Note: optionsImportExportGrilles supprimé en Beta 92
     document.getElementById('accueilGrilles').classList.remove('u-hide');
 
-    // Retirer le highlight
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-        item.classList.remove('active');
-    });
-
-    // Réinitialiser la grille actuelle
+    // Réinitialiser la grille actuelle ; le menu revient à « Aucune grille ouverte »
     grilleTemplateActuelle = null;
+    MenuSelection.marquer('menuGrilles', null);
 }
 
 /**

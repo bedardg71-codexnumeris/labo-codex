@@ -83,16 +83,11 @@ async function exporterProductions() {
  * Exporte la production actuellement en cours d'édition
  */
 async function exporterProductionActive() {
-    // Récupérer l'ID de la production depuis le sidebar actif
-    const itemActif = document.querySelector('.sidebar-item.active');
-    if (!itemActif) {
-        alert('Aucune production sélectionnée à exporter.');
-        return;
-    }
-
-    const productionId = itemActif.getAttribute('data-id');
+    // #1147 : la production ouverte, et non plus la carte surlignée de la barre latérale (partie).
+    // (Aucun appelant mesuré le 24 oct. 2026.)
+    const productionId = productionEnEdition;
     if (!productionId) {
-        alert('Impossible de déterminer la production à exporter.');
+        alert('Aucune production sélectionnée à exporter.');
         return;
     }
 
@@ -346,7 +341,7 @@ window.confirmerImportProductions = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) production(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} production(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Productions disponibles » pour les ajouter à ta barre latérale.');
+        details.push(ligneMasquee || 'Consulte « Productions disponibles » pour les ajouter à ta sélection.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
