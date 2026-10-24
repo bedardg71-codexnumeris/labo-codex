@@ -9,7 +9,7 @@ const racineProjet = path.resolve(__dirname, '..', '..');
 // #597, seconde passe (30 août 2026) — le HEIC échouait EN SILENCE.
 //
 // La première passe a livré un décodeur qui fonctionne : mesuré au navigateur,
-// application SERVIE en http, les deux remises de Bourdages converties en
+// application SERVIE en http, les deux remises de Exemple converties en
 // 3024 x 4032. Mais l'application de Grégoire s'ouvre par DOUBLE-CLIC, et dans
 // ce mode le décodage n'a aucun chemin. Mesuré le 30 août, Chrome, banc isolé :
 //   - worker classique, app servie, CSP du projet   → décodage 3024 x 4032 ;

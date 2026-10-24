@@ -28,7 +28,7 @@ const racineProjet = path.resolve(__dirname, '..', '..');
 //
 // Portée : sentinelle STATIQUE. La conversion réelle exige un Worker,
 // OffscreenCanvas et le WASM de libheif, dont Node ne dispose pas ; la mesure
-// de bout en bout a été faite au navigateur (deux fichiers de Bourdages convertis
+// de bout en bout a été faite au navigateur (deux fichiers de Exemple convertis
 // en 3024x4032, affichés dans un <img>, break-test à deux mutations). Ce que
 // cette sentinelle verrouille, ce sont les invariants sans lesquels le défaut
 // revient en silence.

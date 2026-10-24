@@ -22,7 +22,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const sourceUI = readFileSync(path.resolve(__dirname, '..', '..', 'js', 'travaux-ui.js'), 'utf8');
 
-const ETUDIANTS = [{ da: '9000058', nom: 'Bourdages', prenom: 'Alma' }];
+const ETUDIANTS = [{ da: '9000058', nom: 'Exemple', prenom: 'Alma' }];
 
 // Lettre US : 612 x 792 points.
 const LETTRE = { width: 612, height: 792 };
@@ -101,7 +101,7 @@ describe('#880 — les PDF d\'un même élève pour une production se fusionnent
 
     it('quatre PDF remis par le même élève tombent dans UN groupe', () => {
         const noms = [1, 2, 3, 4].map(i =>
-            `Bourdages_Alma_9000058_Artefact_1__Remis_le_2026-09-15_09h46m4${i}s.pdf`);
+            `Exemple_Alma_9000058_Artefact_1__Remis_le_2026-09-15_09h46m4${i}s.pdf`);
         win.travauxImport.ajouterFichiersEnAttente(noms.map(n => fauxPdf(n, 1)));
         const groupes = win.travauxImport.regrouperParDocument();
         expect(groupes.size).toBe(1);

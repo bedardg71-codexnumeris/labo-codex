@@ -21,7 +21,7 @@ beforeAll(() => {
 
 describe('#333 — échappement CSV (RFC 4180 + anti-injection de formules)', () => {
     it('valeur simple : inchangée', () => {
-        expect(X.echapperCelluleCSV('Turcotte')).toBe('Turcotte');
+        expect(X.echapperCelluleCSV('Essai')).toBe('Essai');
         expect(X.echapperCelluleCSV(81)).toBe('81');
     });
 
@@ -46,7 +46,7 @@ describe('#333 — échappement CSV (RFC 4180 + anti-injection de formules)', ()
 
 describe('#333 — construction des lignes de synthèse', () => {
     const etudiants = [
-        { da: '9000113', nom: 'Turcotte', prenom: 'Livia' },
+        { da: '9000113', nom: 'Essai', prenom: 'Livia' },
         { da: '9000114', nom: 'Rondeau', prenom: 'Simon' },
         { da: '9000115', nom: 'Grandbois', prenom: 'Joss' }
     ];
@@ -65,7 +65,7 @@ describe('#333 — construction des lignes de synthèse', () => {
     it('note réelle → valeur + statut « final »', () => {
         const lignes = X.construireLignesSynthese(etudiants, contexte, simuler);
         // #706 (5 sept. 2026) : 11e colonne « Non comptées » — vide quand la simulation ne porte pas `ecartees`.
-        expect(lignes[0]).toEqual(['9000113', 'Turcotte', 'Livia', '00001', 'Littérature', 'H2026', 'STD', 'PAN-Standards', 82, 'final', '']);
+        expect(lignes[0]).toEqual(['9000113', 'Essai', 'Livia', '00001', 'Littérature', 'H2026', 'STD', 'PAN-Standards', 82, 'final', '']);
     });
 
     it('non constructible → note vide + statut « non constructible » (pas un 0)', () => {
