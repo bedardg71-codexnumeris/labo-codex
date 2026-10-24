@@ -518,14 +518,12 @@ function chargerHorairesV2() {
     if (horaire) {
         const select = document.getElementById('v2-selectHoraire');
         if (select) select.value = horaire.id;
-        mettreAJourCarteResumeHoraireV2(horaire);
         editerHoraireV2(horaire);
     } else {
         // Aucun horaire pour ce trimestre (ou sélection orpheline d'un autre trimestre) :
         // nettoyer la sélection et réinitialiser l'éditeur (afficherEtatVideHoraireV2 remet
         // horaireEnEditionId à null). On n'éditera jamais un horaire hors trimestre actif.
         if (horaireIdSauvegarde) db.setSync(cle('horaireSelectionne'), null);
-        mettreAJourCarteResumeHoraireV2(null);
         afficherEtatVideHoraireV2();
     }
 }
@@ -572,7 +570,6 @@ function changerHoraireSelectionneV2(horaireId) {
     if (!horaireId) {
         // Aucun horaire sélectionné - afficher état vide
         db.setSync(cle('horaireSelectionne'), null);
-        mettreAJourCarteResumeHoraireV2(null);
         afficherEtatVideHoraireV2();
         return;
     }
@@ -595,55 +592,8 @@ function changerHoraireSelectionneV2(horaireId) {
     if (horaire) {
         // Sauvegarder la sélection pour persistance (Beta 95.2)
         db.setSync(cle('horaireSelectionne'), horaireId);
-        mettreAJourCarteResumeHoraireV2(horaire);
         editerHoraireV2(horaire);
     }
-}
-
-/**
- * Met à jour la carte résumé de l'horaire
- * 🆕 (10 jan 2026) : Affiche local par séance
- */
-function mettreAJourCarteResumeHoraireV2(horaire) {
-    const carte = document.getElementById('v2-carteResumeHoraire');
-    if (!carte) return;
-
-    if (!horaire) {
-        carte.innerHTML = '<p class="etat-vide-resume">Aucun horaire sélectionné</p>';
-        return;
-    }
-
-    const nbSeances = horaire.seances?.length || 0;
-    // #540 lot C : le total se LIT aux séances. Il valait `nbSeances × periodesParSeance`
-    // — une déclaration uniforme jamais confrontée aux heures saisies : un horaire annoncé
-    // « 2 périodes/séance » avec des séances de 08:00 à 11:00 affichait 4 périodes/semaine
-    // et en pesait 8 au dénominateur de l'assiduité.
-    const totalPeriodes = periodesParSemaine(horaire.seances);
-
-    let seancesHtml = '';
-    if (horaire.seances && horaire.seances.length > 0) {
-        seancesHtml = '<ul>';
-        horaire.seances.forEach(s => {
-            // Une fin manquante se dérive des périodes de CETTE séance, pas du format
-            // déclaré de l'horaire. 0 période → on ne fabrique pas d'heure de fin.
-            const perSeance = periodesDeLaSeance(s);
-            const heureFin = s.heureFin || (perSeance > 0 ? calculerHeureFin(s.heureDebut, perSeance) : '');
-            // Afficher le local par séance (ou fallback vers local global pour anciennes données)
-            const localSeance = s.local || horaire.local || '';
-            const localInfo = localSeance ? ` (${echapperHtml(localSeance)})` : '';
-            seancesHtml += `<li>${echapperHtml(s.jour)} ${echapperHtml(s.heureDebut)} - ${echapperHtml(heureFin)}${localInfo}</li>`;
-        });
-        seancesHtml += '</ul>';
-    }
-
-    carte.innerHTML = `
-        <div class="resume-horaire-nom">${echapperHtml(horaire.nom || 'Sans nom')}</div>
-        <div class="resume-horaire-details">
-            <div>Format : ${nbSeances} séance${nbSeances > 1 ? 's' : ''}</div>
-            <div>${totalPeriodes > 0 ? totalPeriodes + ' périodes/semaine' : 'durée non déterminée'}</div>
-        </div>
-        ${seancesHtml ? `<div class="resume-horaire-seances">${seancesHtml}</div>` : ''}
-    `;
 }
 
 /**
@@ -652,12 +602,9 @@ function mettreAJourCarteResumeHoraireV2(horaire) {
 function afficherEtatVideHoraireV2() {
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
-    const carteResume = document.getElementById('v2-carteResumeHoraire');
 
     if (etatVide) etatVide.classList.remove('u-hide');
     if (formulaire) formulaire.classList.add('u-hide');
-    // Afficher la carte résumé seulement en état vide (Beta 95.2)
-    if (carteResume) carteResume.classList.remove('u-hide');
     horaireEnEditionId = null;
 }
 
@@ -730,13 +677,11 @@ async function nouveauHoraireV2() {
     // Générer les champs de séances
     mettreAJourSeancesHoraireV2();
 
-    // Afficher le formulaire, masquer carte résumé (évite redondance - Beta 95.2)
+    // Afficher le formulaire
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
-    const carteResume = document.getElementById('v2-carteResumeHoraire');
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
-    if (carteResume) carteResume.classList.add('u-hide');
 
     // Désélectionner dans le dropdown
     const select = document.getElementById('v2-selectHoraire');
@@ -805,13 +750,11 @@ function editerHoraireV2(horaire) {
         majResumeFormatHoraireV2();
     }
 
-    // Afficher le formulaire, masquer carte résumé (évite redondance - Beta 95.2)
+    // Afficher le formulaire
     const etatVide = document.getElementById('v2-horaireEtatVide');
     const formulaire = document.getElementById('v2-formulaireHoraire');
-    const carteResume = document.getElementById('v2-carteResumeHoraire');
     if (etatVide) etatVide.classList.add('u-hide');
     if (formulaire) formulaire.classList.remove('u-hide');
-    if (carteResume) carteResume.classList.add('u-hide');
 }
 
 /**
@@ -887,7 +830,6 @@ function _fermerFormHoraireV2() {
     // (`changerHoraireSelectionneV2`). Sinon, au prochain `chargerHorairesV2` (démarrage, changement
     // de trimestre), l'horaire fermé se rouvrait en édition.
     db.setSync(cle('horaireSelectionne'), null);
-    mettreAJourCarteResumeHoraireV2(null);
 }
 
 /**
@@ -1029,7 +971,6 @@ function sauvegarderHoraireV2() {
     if (select) select.value = horaireEnEditionId;
 
     const horaire = horaires.find(h => h.id === horaireEnEditionId);
-    mettreAJourCarteResumeHoraireV2(horaire);
 
     // Porte terrain 2.4 (21 août 2026) : apres une CREATION, le formulaire
     // restait en mode creation — titre « Nouvel horaire », bouton « Creer », et
@@ -1098,7 +1039,6 @@ async function supprimerHoraireV2() {
     horaireEnEditionId = null;
     afficherEtatVideHoraireV2();
     populerDropdownHorairesV2();
-    mettreAJourCarteResumeHoraireV2(null);
 
     // 🆕 (10 jan 2026) : Rafraîchir le dropdown horaires dans Groupe-cours
     window.populerDropdownsAssemblageV2();

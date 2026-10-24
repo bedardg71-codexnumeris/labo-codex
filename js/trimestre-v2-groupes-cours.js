@@ -1081,7 +1081,7 @@ function ouvrirModalBibliothequeGroupeCours() {
     BibliothequeUI.creerModal({
         modalId: 'modalBibliothequeGroupeCours',
         titre: 'Bibliothèque groupe-cours',
-        sousTitre: 'Gérez les groupe-cours affichés dans le dropdown de l\'en-tête.',
+        sousTitre: 'Gère les groupes-cours affichés dans le menu de l\'en-tête.',
         onFermerAction: 'fermerModalBibliothequeGroupeCours',
         doublonsHTML: '',
         titreSection1: 'Groupe-cours dans le dropdown',

@@ -498,7 +498,8 @@ function mettreAJourResumeEtudiantsV2(etudiants) {
             elemTopProgrammes.classList.remove('u-hide');
             let html = '<div class="label-top">Programmes :</div>';
             topProgrammes.forEach(([prog, nb]) => {
-                html += `<div class="programme-item"><span>${prog}</span><span>${nb}</span></div>`;
+                // #1148 : le programme vient de l'import (CSV) — échappé (règle 1).
+                html += `<div class="programme-item"><span>${echapperHtml(prog)}</span><span>${nb}</span></div>`;
             });
             elemTopProgrammes.innerHTML = html;
         }

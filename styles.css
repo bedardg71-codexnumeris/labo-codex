@@ -9655,7 +9655,8 @@ td .marque-diagnostique { margin-left: 6px; }
 }
 
 /* #1147 (24 oct. 2026) — LA RANGÉE DE LA SÉLECTION, au-dessus de la fiche (Conception : Productions,
-   Grilles, Échelles, Cartouches, Pratiques ; `js/menu-selection.js`). Elle remplace la barre latérale :
+   Grilles, Échelles, Cartouches, Pratiques ; `js/menu-selection.js` — et, depuis #1148, les six accordéons du
+   Cadre › Trimestre, où les menus gardent leur propre gestionnaire). Elle remplace la barre latérale :
    « Consulter la bibliothèque », le menu, puis « + Nouvelle … » poussé à droite ; la fiche prend toute
    la largeur. Fond et ombre de l'ancienne barre (maquette du 24 oct., version « Menu déroulant »).
    Cibles de 44 px (iPad) ; sous 760 px, le menu prend sa ligne. */
@@ -9700,6 +9701,31 @@ td .marque-diagnostique { margin-left: 6px; }
 /* Les actions de la fiche (#503) restent en tête de la fiche, à droite. Sans fiche ouverte ni action
    de liste, la rangée vide disparaît au lieu de laisser un intervalle sous le menu. */
 .rangee-fiche-actions:not(:has(> :not(.u-hide))) { display: none; }
+/* #1148 — Là où choisir fait autre chose qu'ouvrir une fiche (activer un trimestre, filtrer les élèves), le
+   libellé du menu reste visible ; ailleurs, il passe au lecteur d'écran (`u-lecteur-ecran`). */
+.rangee-selection-libelle {
+    flex: 0 0 auto;
+    margin: 0 8px 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-primaire);
+    white-space: nowrap;
+}
+/* #1148 — Ce qu'un accordéon du Cadre résume et que sa fiche ne dit pas (le compte des semaines, les élèves,
+   la complétude d'un groupe-cours) : sous la rangée, sur toute la largeur, en une bande. */
+.rangee-selection-resume {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    background: var(--bleu-pale);
+    border-radius: var(--radius-grand);
+}
+.rangee-selection-resume-note { color: var(--gris-moyen); }
+.rangee-selection-aide { margin: 0 0 12px; }
 
 /* === SECTION ACCORDÉON D'IMPORT === */
 .section-accordeon {
@@ -9804,42 +9830,6 @@ td .marque-diagnostique { margin-left: 6px; }
    Pattern uniforme pour les accordéons Trimestre
    =============================================== */
 
-/**
- * Layout 2 colonnes : Panneau bibliothèque (gauche) + Formulaire (droite)
- * Utilisé dans : Gestion des trimestres, Cours, Enseignant·e, Horaire, Groupe-cours
- */
-.disposition-bibliotheque-formulaire {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 20px;
-    align-items: start;
-}
-
-/* Panneau gauche : Bibliothèque + Sélection */
-.panneau-bibliotheque {
-    background: var(--bleu-pale);
-    padding: 15px;
-    border-radius: var(--radius-grand);
-    box-shadow: var(--shadow-normal);
-}
-
-.btn-bibliotheque {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-weight: 600;
-}
-
-.libelle-selection {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent-primaire);
-    margin-bottom: 6px;
-}
-
 /* Panneau droite : Formulaire d'édition */
 .panneau-formulaire {
     background: var(--surface-carte, #1a3040);
@@ -9910,24 +9900,6 @@ td .marque-diagnostique { margin-left: 6px; }
     font-weight: 600;
 }
 
-/* Carte profil (panneau gauche enseignant) */
-.profil-nom {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--accent-primaire);
-    margin: 0 0 8px 0;
-}
-
-.profil-detail {
-    font-size: 0.85rem;
-    color: var(--gris-texte);
-    margin: 0 0 4px 0;
-}
-
-.profil-detail:empty {
-    display: none;
-}
-
 /* Responsive : empiler sur mobile */
 @media (max-width: 768px) {
     /* Lot C (5 sept. 2026) — iPad en portrait : la grille à deux colonnes du formulaire
@@ -9937,43 +9909,20 @@ td .marque-diagnostique { margin-left: 6px; }
     #listeCriteres .sous-critere-champs-grid {
         grid-template-columns: 1fr;
     }
-
-    .disposition-bibliotheque-formulaire {
-        grid-template-columns: 1fr;
-    }
-
-    .panneau-bibliotheque {
-        order: 1;
-    }
-
-    .panneau-formulaire {
-        order: 2;
-    }
 }
 
 /* --- Groupe d'étudiants (Beta 95.2) --- */
 
-.disposition-etudiants {
-    align-items: stretch;
-}
-
-.carte-resume-etudiants {
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
-    padding: 15px;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
+/* #1148 (24 oct. 2026) — le résumé des élèves quitte la colonne de gauche : une bande sous la rangée
+   (`.rangee-selection-resume`), le compte, puis les groupes, les SA et les programmes, à la suite. */
 .resume-stat-principal {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 10px;
+    align-items: baseline;
+    gap: 6px;
 }
 
 .resume-nombre {
-    font-size: 2rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--accent-primaire);
     line-height: 1;
@@ -9985,23 +9934,19 @@ td .marque-diagnostique { margin-left: 6px; }
 }
 
 .resume-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
     font-size: 0.8rem;
     color: var(--gris-texte);
-    border-top: 1px solid var(--bleu-leger);
-    padding-top: 10px;
-    margin-top: 5px;
 }
 
 .resume-details-ligne {
     display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
+    gap: 6px;
 }
 
 .resume-sa {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--bleu-leger);
     font-size: 0.85rem;
 }
 
@@ -10066,17 +10011,13 @@ td .marque-diagnostique { margin-left: 6px; }
     margin-top: 15px;
 }
 
+/* #1148 : les actions sur la liste des élèves, en tête de la liste, à droite (comme celles d'une fiche, #503). */
 .section-actions-liste {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 8px;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid var(--bleu-leger);
-}
-
-.btn-block {
-    width: 100%;
+    margin-bottom: 12px;
 }
 
 /* Panneau liste étudiants */
@@ -10469,62 +10410,6 @@ summary.rl-tuile-entete::after {
 
 /* --- Horaire (Beta 95.2) --- */
 
-.carte-resume-horaire {
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
-    padding: 15px;
-    margin-bottom: 15px;
-    min-height: 120px;
-}
-
-.carte-resume-horaire .etat-vide-resume {
-    color: var(--gris-texte-pale);
-    font-style: italic;
-    text-align: center;
-    padding: 20px 0;
-}
-
-.resume-horaire-nom {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--accent-primaire);
-    margin-bottom: 10px;
-}
-
-.resume-horaire-details {
-    font-size: 0.85rem;
-    color: var(--gris-texte);
-    margin-bottom: 10px;
-}
-
-.resume-horaire-details div {
-    padding: 2px 0;
-}
-
-.resume-horaire-seances {
-    border-top: 1px solid var(--bleu-leger);
-    padding-top: 10px;
-    margin-top: 10px;
-}
-
-.resume-horaire-seances ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.resume-horaire-seances li {
-    font-size: 0.85rem;
-    padding: 3px 0;
-    color: var(--gris-texte);
-}
-
-.resume-horaire-seances li::before {
-    content: '•';
-    color: var(--accent-primaire);
-    margin-right: 8px;
-}
-
 .section-config-periode {
     background: var(--bleu-pale);
     border-radius: var(--radius-grand);
@@ -10606,8 +10491,13 @@ summary.rl-tuile-entete::after {
 
 /* En dessous, la rangée ne tient plus d'un trait : deux colonnes, le libellé
    en tête, et « à » masqué (les deux heures se suivent, la préposition n'a
-   plus de sens sur deux lignes). */
-@media (max-width: 720px) {
+   plus de sens sur deux lignes).
+   #1148 (24 oct. 2026) — la bascule suit la largeur de la FICHE, plus celle de l'écran. Tant que la colonne
+   de gauche du Cadre existait, sa grille laissait la fiche déborder de l'accordéon jusqu'à la largeur
+   minimale de la rangée (721 px pour 695 disponibles, mesuré à 820 px) : le seuil de 720 px d'écran tenait
+   par ce débordement. La rangée d'un trait demande 653 px (mesuré, WebKit) ; en dessous, deux colonnes. */
+#v2-formulaireHoraire { container-type: inline-size; container-name: fiche-horaire; }
+@container fiche-horaire (max-width: 659px) {
     .seance-horaire-ligne {
         grid-template-columns: 1fr 1fr;
         gap: 8px;
@@ -10641,44 +10531,35 @@ summary.rl-tuile-entete::after {
 
 /* --- Groupe-cours (Beta 95.2) --- */
 
-.carte-resume-groupe-cours {
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
-    padding: 15px;
-    margin-bottom: 15px;
-    min-height: 100px;
-}
-
-.carte-resume-groupe-cours .etat-vide-resume {
-    color: var(--gris-texte-pale);
-    font-style: italic;
-    text-align: center;
-    padding: 15px 0;
+/* #1148 (24 oct. 2026) — la carte du groupe-cours quitte la colonne : une bande sous la rangée. Sans
+   groupe-cours ouvert, elle ne dit que « Aucun groupe-cours sélectionné », ce que la fiche dit déjà : elle se tait. */
+.carte-resume-groupe-cours:has(> .etat-vide-resume) {
+    display: none;
 }
 
 .resume-gc-nom {
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--accent-primaire);
-    margin-bottom: 12px;
     line-height: 1.3;
     word-break: break-word;
 }
 
 .resume-gc-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
     font-size: 0.85rem;
     color: var(--gris-texte);
 }
 
 .resume-gc-details div {
-    padding: 3px 0;
     display: flex;
-    gap: 8px;
+    gap: 6px;
 }
 
 .resume-gc-details .label-gc {
     color: var(--gris-texte-pale);
-    min-width: 70px;
 }
 
 .apercu-nom-groupe-cours {
@@ -14157,11 +14038,6 @@ label:has(+ textarea:disabled) {
     padding: 12px 0 0 0;
 }
 
-/* Compacter la disposition bibliothèque/formulaire */
-#calendrier-trimestre .disposition-bibliotheque-formulaire {
-    gap: 12px;
-}
-
 /* Compacter le panneau formulaire */
 #calendrier-trimestre .panneau-formulaire {
     padding: 12px;
@@ -14266,56 +14142,22 @@ tr.ligne-import-ecartee td {
     margin-top: 6px;
 }
 
-/* Compacter le panneau bibliothèque */
-#calendrier-trimestre .panneau-bibliotheque {
-    padding: 10px;
+/* #1148 (24 oct. 2026) — LA RANGÉE DE LA SÉLECTION DANS LE CADRE (patron du lot 1, `.rangee-selection`),
+   compactée comme le reste de la page. */
+#calendrier-trimestre .rangee-selection {
+    margin-bottom: 12px;
 }
 
-#calendrier-trimestre .panneau-bibliotheque .btn {
-    padding: 6px 10px;
-    font-size: 0.8rem;
+/* `#calendrier-trimestre select` (plus bas, 1,0,1) poserait 6 px 10 px : le texte passerait sous le chevron. */
+#calendrier-trimestre .rangee-selection select.rangee-selection-menu {
+    padding: 0 32px 0 12px;
+    font-size: 0.9rem;
 }
 
-/* Compacter l'aperçu sidebar */
-#calendrier-trimestre .apercu-trimestre-sidebar {
-    padding: 10px;
-    margin-top: 12px;
-    font-size: 0.8rem;
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
-}
-
-/* ========== SYNTHÈSES SIDEBAR (Beta 95.3) ========== */
-#calendrier-trimestre .apercu-sidebar {
-    padding: 10px;
-    margin-top: 12px;
-    font-size: 0.8rem;
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
-}
-
-#calendrier-trimestre .apercu-titre {
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin-bottom: 2px;
-    color: var(--texte-fonce);
-}
-
-#calendrier-trimestre .apercu-code {
-    font-size: 0.75rem;
-    color: var(--texte-secondaire, #8aa4b0);
-    margin-bottom: 8px;
-}
-
-#calendrier-trimestre .apercu-detail {
-    font-size: 0.75rem;
-    color: var(--texte-secondaire, #8aa4b0);
-    line-height: 1.4;
-}
 
 #calendrier-trimestre .apercu-badge-actif {
     display: inline-block;
-    margin-bottom: 6px;
+    margin-bottom: 0;
     padding: 2px 8px;
     font-size: 0.7rem;
     font-weight: 600;
@@ -14330,9 +14172,6 @@ tr.ligne-import-ecartee td {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(0,0,0,0.1);
     font-size: 0.75rem;
 }
 
@@ -14348,23 +14187,22 @@ tr.ligne-import-ecartee td {
     color: #d97706;
 }
 
-/* Top programmes groupe étudiants */
+/* Top programmes groupe étudiants (#1148 : à la suite, dans la bande du résumé) */
 #calendrier-trimestre .top-programmes {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
     font-size: 0.75rem;
 }
 
 #calendrier-trimestre .top-programmes .label-top {
     font-weight: 500;
     color: var(--texte-secondaire, #8aa4b0);
-    margin-bottom: 4px;
 }
 
 #calendrier-trimestre .top-programmes .programme-item {
     display: flex;
-    justify-content: space-between;
+    gap: 6px;
     color: var(--texte-secondaire, #8aa4b0);
 }
 
@@ -14447,12 +14285,6 @@ tr.ligne-import-ecartee td {
     font-size: 0.75rem;
 }
 
-/* Boutons bibliothèque */
-#calendrier-trimestre .btn-bibliotheque {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
 /* Boutons dans les actions formulaire - Supprimer à gauche, Annuler/Enregistrer à droite */
 #calendrier-trimestre .actions-formulaire {
     display: flex;
@@ -14514,29 +14346,6 @@ tr.ligne-import-ecartee td {
     border-color: var(--accent-primaire);
     outline: none;
     box-shadow: var(--focus-ring);
-}
-
-/* Boutons pleine largeur */
-#calendrier-trimestre .btn-block {
-    width: 100%;
-    margin-top: 8px;
-}
-
-#calendrier-trimestre .btn-block:first-of-type {
-    margin-top: 0;
-}
-
-/* « + Nouveau… » : une seule position dans les six accordéons du Cadre — juste
-   sous le menu déroulant de l'entité, sans y être collé (design-system.html §23).
-   La marge du .groupe-form qui précède est annulée : sinon elle fusionne avec
-   celle du bouton et impose 20 px. Doit rester APRÈS la règle :first-of-type,
-   qui sans cela remet la marge à 0 dans les panneaux sans bouton Bibliothèque. */
-#calendrier-trimestre .btn-block.btn-nouvelle-entite {
-    margin-top: 8px;
-}
-
-#calendrier-trimestre .groupe-form:has(+ .btn-nouvelle-entite) {
-    margin-bottom: 0;
 }
 
 /* Boutons - Utilisation des variables Design System */
@@ -14652,24 +14461,6 @@ tr.ligne-import-ecartee td {
     /* Grille identification : empiler sur mobile */
     #calendrier-trimestre .grille-identification {
         grid-template-columns: 1fr;
-    }
-}
-
-/* iPad portrait (768–1024 px) : la disposition biblio+formulaire à 220px
-   + 1fr laisse un formulaire trop étroit (~560 px pour 3 colonnes
-   .grille-identification 2fr/1fr/1fr). Sur iPad on empile biblio puis
-   formulaire en pleine largeur pour récupérer tout l'espace horizontal. */
-@media (max-width: 1024px) {
-    #calendrier-trimestre .disposition-bibliotheque-formulaire {
-        grid-template-columns: 1fr;
-    }
-
-    #calendrier-trimestre .panneau-bibliotheque {
-        order: 1;
-    }
-
-    #calendrier-trimestre .panneau-formulaire {
-        order: 2;
     }
 }
 
@@ -22694,21 +22485,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     #planif-btn-actions,
     #planif-btn-annuler,
     #planif-btn-retablir { min-height: 44px; }
-    /* La liste des cartes : un <select> natif ignore `min-height` sous WebKit
-       (21 px mesurés). Hauteur fixe, apparence retirée, chevron redessiné —
-       patron de `.select-nav-mobile`. Deux id (2,0,0) : la règle
-       `.mode-clair #planif-selecteur-cartes select` (1,1,1) pose `background`
-       en raccourci et effacerait le chevron. */
-    #planif-selecteur-cartes #planif-liste-cartes {
-        height: 44px;
-        padding: 0 30px 0 10px;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-    }
+    /* La liste des cartes est à 44 px partout depuis #1148 (`#planif-selecteur-cartes select`). */
     .planif-vue-dropdown .planif-action-item { min-height: 44px; }
     .planif-raccourcis-panel-replier,
     .planif-raccourcis-panel-fermer { width: 44px; height: 44px; }
@@ -24512,20 +24289,38 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 
 
 /* === SÉLECTEUR DE CARTES === */
+/* #1148 (24 oct. 2026) — le couple « Consulter la bibliothèque » + menu des cartes prend l'apparence de
+   la rangée de sélection des bibliothèques (#1147, `.rangee-selection`) : la bande bleu pâle, le menu à
+   44 px, en gras, couleur d'accent, chevron redessiné. « Actions ▾ » reste où il est. */
 #planif-selecteur-cartes {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    padding: 6px 8px;
+    border-right: none;
+    background: var(--bleu-pale);
+    border-radius: var(--radius-grand);
 }
 
+/* Un <select> natif ignore `min-height` sous WebKit : hauteur fixée, apparence retirée, chevron
+   redessiné (patron de `.rangee-selection-menu`). Deux identifiants ne sont pas nécessaires ici : la
+   règle du mode clair ne pose plus que `background-color`, qui laisse le chevron en place. */
 #planif-selecteur-cartes select {
-    padding: 4px 8px;
+    height: 44px;
+    padding: 0 32px 0 12px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
-    font-size: 13px;
-    background: var(--surface-carte, #1a3040);
-    color: var(--planif-couleur-texte);
-    max-width: 200px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-primaire);
+    background-color: var(--surface-carte, #1a3040);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    max-width: 380px;
     cursor: pointer;
 }
 
@@ -24561,18 +24356,11 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .mode-clair .planif-btn-carte:disabled,
 .mode-clair .planif-btn-carte:disabled:hover { background: #ffffff; }
 
-/* « Consulter la bibliothèque » (lot 3) : le bouton des bibliothèques de la
-   Conception (btn-principal), ramené à la hauteur de ses voisins de barre.
-   Au doigt, `.btn` monte à 44 px (T-A10) : la règle n'y touche pas. */
+/* « Consulter la bibliothèque » (lot 3) : le bouton des bibliothèques de la Conception (btn-principal),
+   à 44 px comme dans leur rangée (#1148 ; il était ramené à 28 px, la hauteur de ses voisins de barre). */
 .planif-btn-bibliotheque {
-    height: 28px;
-    padding: 0 12px;
-    font-size: 12px;
-    line-height: 1;
+    min-height: 44px;
     white-space: nowrap;
-}
-@media (pointer: coarse) {
-    .planif-btn-bibliotheque { height: auto; }
 }
 
 /* Menu déroulant Actions */
@@ -25173,9 +24961,8 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: #ffffff;
 }
 .mode-clair #planif-selecteur-cartes select {
-    background: #ffffff;
+    background-color: #ffffff;
     border-color: rgba(3, 46, 92, 0.2);
-    color: var(--texte-principal);
 }
 .mode-clair .planif-actions-dropdown {
     background: #ffffff;

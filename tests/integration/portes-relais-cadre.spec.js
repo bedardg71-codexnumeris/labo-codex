@@ -63,6 +63,10 @@ test('#371 · Semaines spéciales : empilées, la borne de fin de planification 
 
     const finPlanif = page.locator('#v2-semainePlanificationFin');
     await expect(finPlanif).toBeVisible();
+    // #1148 (24 oct. 2026) : la rangée de sélection et le résumé du trimestre passent AU-DESSUS de la fiche ;
+    // le champ descend sous le bas de la fenêtre, où `elementFromPoint` ne rend rien. Le banc mesure un
+    // recouvrement, pas une position : il amène le champ dans la vue d'abord.
+    await finPlanif.scrollIntoViewIfNeeded();
 
     // 1. Le champ « au » de la planification est CLIQUABLE : l'élément peint
     //    en son centre est bien lui (c'est exactement ce qui échouait — le

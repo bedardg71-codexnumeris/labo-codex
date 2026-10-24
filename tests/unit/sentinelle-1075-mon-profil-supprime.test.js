@@ -45,7 +45,7 @@ function monter(copie) {
         echapperHtml: (t) => String(t), echapperAttribut: (t) => String(t)
     }, {
         temoinEnregistrement: { nonEnregistre: vi.fn(), enregistre: vi.fn() },
-        raisonPourTemoin: (r) => r, afficherSyntheseEnseignant: vi.fn(),
+        raisonPourTemoin: (r) => r,
         uiDialogues: { quitterCreationSiConfirme: async () => true, declarerFicheEnCreation() {} }
     });
     const supprimer = async (id) => {

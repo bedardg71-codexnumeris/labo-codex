@@ -8,11 +8,14 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 // Chantier I (Cat-B Track 4) — Test Playwright rendu DOM trimestre-v2.
 // Vérifie que chargerHorairesV2() peuple effectivement le dropdown
-// d'horaires + la carte résumé (#v2-carteResumeHoraire) avec les séances
+// d'horaires et ouvre la fiche de l'horaire retenu avec ses séances
 // (jour, heure, local). Attrape les régressions silencieuses post-refactor
 // où la fonction se charge sans erreur mais produit un DOM vide.
+// #1148 (24 oct. 2026) : la carte résumé (#v2-carteResumeHoraire) est partie avec la colonne de gauche
+// du Cadre — elle ne paraissait que sans fiche ouverte. Le banc lit maintenant la FICHE, qui montre les
+// mêmes séances : c'est ce qui justifie le retrait.
 
-test('Chantier I · trimestre-v2 rend la carte résumé horaires (jours + heures + local)', async ({ page }) => {
+test('Chantier I · trimestre-v2 ouvre la fiche de l\'horaire retenu (jours + heures + local)', async ({ page }) => {
     const erreurs = [];
     const patternsAttendus = [
         /version\.json.*access control/i,
@@ -65,42 +68,33 @@ test('Chantier I · trimestre-v2 rend la carte résumé horaires (jours + heures
 
         window.chargerHorairesV2();
 
-        const carte = document.getElementById('v2-carteResumeHoraire');
+        const fiche = document.getElementById('v2-formulaireHoraire');
         const select = document.getElementById('v2-selectHoraire');
-
-        const htmlCarte = carte ? carte.innerHTML : '';
+        // Les champs de la fiche, en valeurs : le nom, puis jour, début, fin, local, périodes de chaque séance.
+        const valeurs = fiche ? Array.from(fiche.querySelectorAll('input, select')).map((el) => el.value) : [];
         return {
-            aCarte: !!carte,
+            aFiche: !!fiche,
+            ficheOuverte: !!fiche && !fiche.classList.contains('u-hide'),
             aSelect: !!select,
             nbOptionsHoraire: select
                 ? Array.from(select.options).filter((o) => o.value === horaire.id).length
                 : 0,
-            longueurCarte: htmlCarte.length,
-            aNomHoraire: htmlCarte.includes('Horaire test chantier I'),
-            aLundi: htmlCarte.includes('Lundi'),
-            aMercredi: htmlCarte.includes('Mercredi'),
-            aHeureLundi: htmlCarte.includes('08:30'),
-            aHeureMercredi: htmlCarte.includes('13:00'),
-            aLocal: htmlCarte.includes('A-101'),
-            // Le libellé « 2×2 » a disparu avec le format déclaré (#540 lot E1).
-            aFormat: htmlCarte.includes('Format'),
-            aPeriodes: htmlCarte.includes('périodes')
+            choisi: select ? select.value : null,
+            valeurs,
+            plusDeCarte: !document.getElementById('v2-carteResumeHoraire')
         };
     });
 
     expect(resultat.erreur, `Erreur eval : ${resultat.erreur}`).toBeUndefined();
-    expect(resultat.aCarte).toBe(true);
+    expect(resultat.aFiche).toBe(true);
+    expect(resultat.ficheOuverte, 'l\'horaire retenu s\'ouvre en fiche').toBe(true);
     expect(resultat.aSelect).toBe(true);
     expect(resultat.nbOptionsHoraire).toBe(1);
-    expect(resultat.longueurCarte).toBeGreaterThan(50);
-    expect(resultat.aNomHoraire).toBe(true);
-    expect(resultat.aLundi).toBe(true);
-    expect(resultat.aMercredi).toBe(true);
-    expect(resultat.aHeureLundi).toBe(true);
-    expect(resultat.aHeureMercredi).toBe(true);
-    expect(resultat.aLocal).toBe(true);
-    expect(resultat.aFormat).toBe(true);
-    expect(resultat.aPeriodes).toBe(true);
+    expect(resultat.choisi).toBe('test-h1-chantierI');
+    expect(resultat.plusDeCarte, '#1148 : la carte résumé est partie').toBe(true);
+    for (const attendu of ['Horaire test chantier I', 'Lundi', 'Mercredi', '08:30', '13:00', 'A-101']) {
+        expect(resultat.valeurs, attendu).toContain(attendu);
+    }
 
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });

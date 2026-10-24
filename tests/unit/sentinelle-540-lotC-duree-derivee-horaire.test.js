@@ -250,7 +250,8 @@ describe('#540-C/D — plus rien n\'est fabriqué dans le module horaires', () =
             return SRC_HORAIRES.slice(i, SRC_HORAIRES.indexOf('\n}', i));
         };
 
-        for (const nom of ['chargerSeancesV2', 'mettreAJourCarteResumeHoraireV2']) {
+        // #1148 (24 oct. 2026) : `mettreAJourCarteResumeHoraireV2` part avec la carte résumé de l'horaire.
+        for (const nom of ['chargerSeancesV2']) {
             const corps = corpsDe(nom);
             // On vise l'ACCUMULATION d'une constante — `sum + 2`, `acc + 2`, `total + 2`.
             // (Une première version interdisait tout `: 2` et rougissait sur la table des

@@ -286,7 +286,6 @@
  "js/travaux-ui.js:travaux-drop-zone-contenu",
  "js/travaux-ui.js:travaux-tableau-checkbox",
  "js/travaux-ui.js:travaux-tableau-select-prod",
- "js/trimestre-v2-cours.js:apercu-completude",
  "js/trimestre-v2-groupes-cours.js:sans-horaire",
  "js/trimestre-v2-horaires.js:alerte-info",
  "js/trimestre-v2-horaires.js:btn-sm",

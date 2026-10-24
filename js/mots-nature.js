@@ -45,7 +45,6 @@ const MOTS_NATURE = Object.freeze({
         choisirPersonne: 'Sélectionner un enseignant·e', // option vide du sélecteur de profil (v2-selectEnseignant)
         choisirPersonneGC: '— Choisir un enseignant —',   // option vide du champ 5 du groupe-cours (v2-gc-enseignant)
         choisirObjet: 'Sélectionner un cours...',        // option vide du menu Cours du Cadre (v2-selectCours)
-        aucunObjet: 'Aucun cours sélectionné',            // la synthèse vide, à gauche du formulaire
         nouveau: 'Nouveau cours',                         // titre du formulaire (création)
         modifier: 'Modifier le cours',                    // titre du formulaire (édition)
         dupliquer: 'Dupliquer le cours',                  // titre du formulaire (duplication)
@@ -70,7 +69,6 @@ const MOTS_NATURE = Object.freeze({
         choisirPersonne: 'Sélectionner un·e orthopédagogue',
         choisirPersonneGC: '— Choisir un·e orthopédagogue —',
         choisirObjet: 'Sélectionner un service...',
-        aucunObjet: 'Aucun service sélectionné',
         nouveau: 'Nouveau service',
         modifier: 'Modifier le service',
         dupliquer: 'Dupliquer le service',

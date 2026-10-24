@@ -4,8 +4,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 // LOT E2 DE L'ENREGISTREMENT — LE PROFIL ENSEIGNANT (D3, 28 sept. 2026)
 //
 // Un profil existant s'enregistre tout seul, champ par champ ; « Créer le profil » est le
-// seul geste qui crée ; « Annuler » devient « Fermer » ; la carte de synthèse ne montre plus
-// que ce qui est écrit (avant, elle suivait la frappe). Tout passe par
+// seul geste qui crée ; « Annuler » devient « Fermer ». (La carte de synthèse, qui ne montrait plus
+// que ce qui était écrit, est partie avec la colonne de gauche du Cadre : #1148, 24 oct. 2026 — la
+// fiche montre les mêmes champs.) Tout passe par
 // `sauvegarderDonneesSelonMode` (le témoin commun), espionné ici. Noms fictifs.
 
 const PROFIL = { id: 'ENS_1', prenom: 'Ada', nom: 'Lovelace', courriel: 'ada@exemple.qc.ca', institution: 'Cégep fictif', departement: '', discipline: '', siteWeb: '' };
@@ -31,7 +32,6 @@ function monter({ enseignants = [PROFIL], confirmer = true, quitter = true } = {
     const sauvegarder = vi.fn((k, v) => { store[k] = v; return true; });
     const temoin = { nonEnregistre: vi.fn(), enregistre: vi.fn() };
     const notifications = { succes: vi.fn(), erreur: vi.fn() };
-    const synthese = vi.fn();
     // Comme le vrai (ui-dialogues.js) : la question n'est posée que si la fiche porte une saisie.
     const quitterCreationSiConfirme = vi.fn(async (genre) => (fiches[genre] && fiches[genre]() ? quitter : true));
     const fiches = {};
@@ -47,12 +47,11 @@ function monter({ enseignants = [PROFIL], confirmer = true, quitter = true } = {
         document: { getElementById: (id) => ids[id] || null, addEventListener() {}, querySelector: () => null, querySelectorAll: () => [] }
     }, {
         temoinEnregistrement: temoin, raisonPourTemoin: (r) => r.charAt(0).toLowerCase() + r.slice(1) + '.',
-        afficherSyntheseEnseignant: synthese,
         uiDialogues: { quitterCreationSiConfirme, declarerFicheEnCreation: (g, p) => { fiches[g] = p; } }
     });
     const ouvrir = async (id) => { ids['v2-selectEnseignant'].value = id; await win.chargerEnseignantSelectionneV2(); };
     const saisir = (champ, valeur) => { ids['v2-ens-' + champ].value = valeur; return win.sauvegarderChampEnseignantV2(ids['v2-ens-' + champ]); };
-    return { win, store, ids, classes, sauvegarder, temoin, notifications, synthese, quitterCreationSiConfirme, fiches, ouvrir, saisir };
+    return { win, store, ids, classes, sauvegarder, temoin, notifications, quitterCreationSiConfirme, fiches, ouvrir, saisir };
 }
 
 describe('lot E2 · profil existant — champ par champ, par le témoin', () => {
@@ -85,17 +84,6 @@ describe('lot E2 · profil existant — champ par champ, par le témoin', () => 
         expect(e.ids['v2-ens-courriel'].value).toBe('ada@exemple.qc.ca');
     });
 
-    it('la carte de synthèse montre ce qui est ÉCRIT, pas la saisie : un refus ne la change pas', async () => {
-        const e = monter();
-        await e.ouvrir('ENS_1');
-        e.synthese.mockClear();
-        e.ids['v2-ens-prenom'].value = 'Pas encore écrit';
-        e.saisir('institution', '');                     // refusé
-        expect(e.synthese).not.toHaveBeenCalled();
-        e.win.mettreAJourCarteEnseignant();
-        expect(e.synthese).toHaveBeenLastCalledWith(expect.objectContaining({ prenom: 'Ada' }));
-    });
-
     it('en édition, « Créer le profil » est caché ; « Fermer » ne pose aucune question utile et referme', async () => {
         const e = monter();
         await e.ouvrir('ENS_1');
@@ -112,13 +100,12 @@ describe('lot E2 · nouveau profil — rien avant « Créer le profil »', () =>
         e.ids['v2-ens-courriel'].value = 'grace@exemple.qc.ca'; e.ids['v2-ens-institution'].value = 'Cégep fictif';
     };
 
-    it('la saisie n\'écrit rien, la carte reste vide, la fiche retient le rechargement', async () => {
+    it('la saisie n\'écrit rien, la fiche retient le rechargement', async () => {
         const e = monter();
         await e.win.nouveauProfilEnseignantV2();
         remplir(e);
         expect(e.win.sauvegarderChampEnseignantV2(e.ids['v2-ens-nom'])).toBe(false);
         expect(e.sauvegarder).not.toHaveBeenCalled();
-        expect(e.synthese).toHaveBeenLastCalledWith(null);
         expect(e.fiches.enseignant()).toBe(true);
         expect(e.classes['v2-btnCreerEnseignant'].has('u-hide')).toBe(false);
     });
