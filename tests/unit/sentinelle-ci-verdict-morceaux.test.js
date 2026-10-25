@@ -23,6 +23,8 @@ import { readdirSync } from 'node:fs';
 // (une spec rattrapée au second essai deviendrait un échec, #534).
 // La répartition en tranches contiguës (comme `--shard`) au lieu de l'alternance
 // dans morceau-playwright.mjs → B.b et B.c rouges.
+// #1114 (25 oct. 2026) — `process.argv[3]` ignoré par le juge (la commune toujours lue) → C.f
+// rouge ; la baseline Linux retirée de l'étape du workflow → D.a rouge.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -49,14 +51,23 @@ function rapport(specs, { errors = [] } = {}) {
     };
 }
 
-function juger(contenu) {
+/** `baseline` : null (la commune), une liste d'échecs connus (écrite dans un fichier), ou un chemin. */
+function juger(contenu, baseline = null) {
     const dossier = mkdtempSync(path.join(tmpdir(), 'juge-pw-'));
     try {
         const fichier = path.join(dossier, 'rapport.json');
         const resume = path.join(dossier, 'resume.md');
         writeFileSync(fichier, JSON.stringify(contenu), 'utf8');
         writeFileSync(resume, '', 'utf8');
-        const r = spawnSync('node', [JUGE, fichier], {
+        const args = [JUGE, fichier];
+        if (Array.isArray(baseline)) {
+            const chemin = path.join(dossier, 'baseline.json');
+            writeFileSync(chemin, JSON.stringify({ echecsConnus: baseline }), 'utf8');
+            args.push(chemin);
+        } else if (baseline) {
+            args.push(baseline);
+        }
+        const r = spawnSync('node', args, {
             encoding: 'utf8', env: { ...process.env, GITHUB_STEP_SUMMARY: resume }
         });
         return { code: r.status, resume: readFileSync(resume, 'utf8') };
@@ -164,5 +175,41 @@ describe('C — le juge de la CI (scripts/juger-rapport-playwright.mjs)', () => 
         const { code, resume } = juger(rapport([{ titre: 'rattrapé', statut: 'flaky' }]));
         expect(code).toBe(0);
         expect(resume).toContain('VERTE(S) AU SECOND ESSAI');
+    });
+
+    it('C.f #1114 : la baseline nommée en second argument est celle qui juge', () => {
+        const r = rapport([
+            { titre: 'propre à Linux', statut: 'unexpected', file: 'l.spec.js' },
+            { titre: 'neuve', statut: 'unexpected', file: 'n.spec.js' }
+        ]);
+        // La commune (vide) ne connaît ni l'une ni l'autre ; la nommée en connaît une.
+        expect(juger(r).resume).toContain('2 spec(s) Playwright NOUVELLEMENT');
+        const { code, resume } = juger(r, ['l.spec.js › propre à Linux', 'r.spec.js › réparée']);
+        expect(code).toBe(1);
+        expect(resume).toContain('1 spec(s) Playwright NOUVELLEMENT');
+        expect(resume).toContain('n.spec.js › neuve');
+        expect(resume).toContain('baseline.json');
+        // Une entrée redevenue verte ne bloque pas, et se retire à la main.
+        expect(resume).toContain('r.spec.js › réparée');
+        expect(resume).toContain('à retirer de baseline.json, à la main');
+        expect(juger(rapport([{ titre: 'propre à Linux', statut: 'unexpected', file: 'l.spec.js' }]), ['l.spec.js › propre à Linux']).code).toBe(0);
+    });
+
+    it('C.g #1114 : une baseline nommée mais absente ⮕ 2 (NON JUGÉ)', () => {
+        const { code, resume } = juger(rapport([{ titre: 'vert', statut: 'expected' }]), path.join(tmpdir(), 'baseline-inexistante-1114.json'));
+        expect(code).toBe(2);
+        expect(resume).toContain('Baseline absente');
+    });
+});
+
+describe('D — #1114 : GitHub juge contre la baseline Linux', () => {
+    it('D.a le job de verdict passe scripts/playwright-baseline-linux.json au juge, et le fichier est bien formé', () => {
+        const workflow = readFileSync(path.join(racine, '.github', 'workflows', 'tests.yml'), 'utf8');
+        expect(workflow).toContain('node ../scripts/juger-rapport-playwright.mjs rapport.json ../scripts/playwright-baseline-linux.json');
+        const linux = JSON.parse(readFileSync(path.join(racine, 'scripts', 'playwright-baseline-linux.json'), 'utf8'));
+        expect(Array.isArray(linux.echecsConnus)).toBe(true);
+        expect(linux.echecsConnus.length).toBe(linux.totalEchecsConnus);
+        for (const e of linux.echecsConnus) expect(e).toMatch(/^[^/›]+\.spec\.js › ./);
+        expect(new Set(linux.echecsConnus).size).toBe(linux.echecsConnus.length);
     });
 });

@@ -211,7 +211,7 @@
 #        `playwright` joue sa part (`--shard`) sur sa machine et dépose un
 #        rapport blob ; il ne juge pas. `verdict` compte les rapports (un
 #        manquant = NON JUGÉ, rouge), les fusionne et juge contre
-#        scripts/playwright-baseline.json par scripts/juger-rapport-playwright.mjs
+#        scripts/playwright-baseline-linux.json (#1114) par scripts/juger-rapport-playwright.mjs
 #        — les règles du Mac (scripts/rapport-playwright.mjs, partagées) : seule
 #        une rougeur NOUVELLE fait échouer. 16 morceaux (point 9a).
 #     c) `workers: 1` RESTE dans chaque morceau : le parallélisme vient des
@@ -499,7 +499,9 @@ jobs:
 
   # ── Job 4 : le verdict — fusionne les morceaux, juge contre la baseline. ──
   # Comme le Mac (scripts/verifier-playwright.mjs) : seule une rougeur absente de
-  # scripts/playwright-baseline.json fait échouer. Il part même si un morceau a
+  # la baseline fait échouer. #1114 (25 oct. 2026) : la baseline est celle de
+  # Linux, scripts/playwright-baseline-linux.json (les rougeurs propres à Linux,
+  # vertes sur le Mac) ; le Mac garde la commune. Il part même si un morceau a
   # échoué (`!cancelled()`), pour DIRE ce qui manque ; il est sauté si les
   # morceaux l'ont été — jamais `success` pour un verdict qu'on n'a pas rendu.
   verdict:
@@ -549,4 +551,4 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: rapport.json
         run: |
           npx playwright merge-reports --config playwright.config.js --reporter=json rapports-morceaux
-          node ../scripts/juger-rapport-playwright.mjs rapport.json
+          node ../scripts/juger-rapport-playwright.mjs rapport.json ../scripts/playwright-baseline-linux.json
