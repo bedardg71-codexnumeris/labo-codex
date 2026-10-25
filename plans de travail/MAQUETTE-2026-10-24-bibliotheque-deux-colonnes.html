@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Maquette de Cowork, 24 oct. 2026 : copie de l’ébauche 1 (https://claude.ai/artifact/Ei1tPHTr1egbRmdTUR7jTm). Données fictives. Référence visuelle du plan PLAN-2026-10-24-bibliotheques-deux-colonnes.md ; son code n’est pas à recopier dans l’app. -->
+</head>
+<body>
+<title>Bibliothèque à deux colonnes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Ébauche de la fenêtre de bibliothèque (Labo Codex). Jetons repris de styles.css :
+   clair = .mode-clair, sombre = :root de l'app. Mise en page : deux panneaux côte à côte,
+   « Dans ce trimestre » | « Dans ta bibliothèque », qui s'empilent sous 760 px de fenêtre. */
+:root {
+  --surface-page: #d4e6f5;
+  --surface-carte: #ffffff;
+  --panneau-trimestre: #e8f2fd;   /* --bleu-pale */
+  --panneau-biblio: #f0f1f5;      /* --gris-tres-pale */
+  --texte-principal: #1a1a2e;
+  --texte-secondaire: #555566;
+  --texte-muted: #666677;
+  --accent-primaire: #065dbb;
+  --btn-principal: #032e5c;
+  --btn-principal-hover: #0a4a7e;
+  --btn-texte: #ffffff;
+  --bordure: #d0d1dd;             /* --gris-tres-clair */
+  --bordure-legere: rgba(3, 46, 92, 0.12);
+  --danger: #8a2a2a;              /* --btn-supprimer */
+  --succes: #1e5a4a;              /* --btn-confirmer */
+  --voile: rgba(15, 30, 58, 0.45);
+  --ombre-fenetre: 0 6px 12px rgba(3,46,92,0.12), 0 12px 32px rgba(3,46,92,0.2);
+  --ombre-menu: 0 2px 4px rgba(3,46,92,0.08), 0 4px 12px rgba(3,46,92,0.15);
+  --focus: 0 0 0 3px rgba(6, 93, 187, 0.45);
+  --radius-moyen: 6px;
+  --radius-grand: 12px;
+  --police: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface-page: #0c1a22;
+    --surface-carte: #1a3040;
+    --panneau-trimestre: #142428;
+    --panneau-biblio: #0e1e28;
+    --texte-principal: #d0e0e4;
+    --texte-secondaire: #8aa4b0;
+    --texte-muted: #80a0b0;
+    --accent-primaire: #6aacb8;
+    --btn-principal: #1a4a5e;
+    --btn-principal-hover: #246478;
+    --btn-texte: #ffffff;
+    --bordure: #2a4a54;
+    --bordure-legere: rgba(106, 172, 184, 0.25);
+    --danger: #f06878;
+    --succes: #5ae080;
+    --voile: rgba(0, 0, 0, 0.55);
+    --ombre-fenetre: 0 8px 24px rgba(10, 30, 40, 0.55);
+    --ombre-menu: 0 4px 14px rgba(10, 30, 40, 0.5);
+    --focus: 0 0 0 3px rgba(106, 172, 184, 0.55);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --surface-page: #0c1a22;
+  --surface-carte: #1a3040;
+  --panneau-trimestre: #142428;
+  --panneau-biblio: #0e1e28;
+  --texte-principal: #d0e0e4;
+  --texte-secondaire: #8aa4b0;
+  --texte-muted: #80a0b0;
+  --accent-primaire: #6aacb8;
+  --btn-principal: #1a4a5e;
+  --btn-principal-hover: #246478;
+  --btn-texte: #ffffff;
+  --bordure: #2a4a54;
+  --bordure-legere: rgba(106, 172, 184, 0.25);
+  --danger: #f06878;
+  --succes: #5ae080;
+  --voile: rgba(0, 0, 0, 0.55);
+  --ombre-fenetre: 0 8px 24px rgba(10, 30, 40, 0.55);
+  --ombre-menu: 0 4px 14px rgba(10, 30, 40, 0.5);
+  --focus: 0 0 0 3px rgba(106, 172, 184, 0.55);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--surface-page);
+  color: var(--texte-principal);
+  font-family: var(--police);
+  font-size: 15px;
+  line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 40px;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: none; box-shadow: var(--focus); }
+
+/* ── Commandes de la maquette (hors de l'app) ── */
+.maquette-barre {
+  max-width: 1160px; margin: 0 auto 14px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  font-size: 0.85rem; color: var(--texte-secondaire);
+}
+.maquette-barre p { margin: 0; min-width: 0; }
+.maquette-vues { display: flex; gap: 6px; align-items: center; }
+.maquette-vues button {
+  min-height: 36px; padding: 0 12px; border-radius: var(--radius-moyen);
+  border: 1px solid var(--bordure); background: var(--surface-carte); cursor: pointer;
+}
+.maquette-vues button[aria-pressed="true"] { background: var(--btn-principal); color: var(--btn-texte); border-color: var(--btn-principal); }
+
+/* ── La scène : l'écran derrière, voilé ── */
+.scene {
+  display: grid; max-width: 1160px; margin: 0 auto;
+  border-radius: var(--radius-grand); overflow: hidden;
+  transition: max-width .2s ease;
+}
+.scene > .ecran-derriere, .scene > .voile { grid-area: 1 / 1; }
+.scene[data-vue="ipad"] { max-width: 820px; }
+.ecran-derriere {
+  padding: 22px; background: var(--surface-carte);
+}
+.ecran-derriere h1 { margin: 0 0 14px; font-size: 1.35rem; }
+.rangee-fictive {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  padding: 12px; border-radius: var(--radius-grand); background: var(--panneau-trimestre);
+}
+.rangee-fictive span {
+  min-height: 44px; display: inline-flex; align-items: center; padding: 0 14px;
+  border-radius: var(--radius-moyen); font-weight: 600; font-size: 0.9rem;
+}
+.rangee-fictive .f-btn { background: var(--btn-principal); color: var(--btn-texte); }
+.rangee-fictive .f-menu { background: var(--surface-carte); border: 1px solid var(--bordure); color: var(--accent-primaire); flex: 0 1 320px; }
+.rangee-fictive .f-nouveau { margin-left: auto; background: var(--btn-principal); color: var(--btn-texte); }
+.voile {
+  background: var(--voile);
+  display: flex; justify-content: center; align-items: flex-start;
+  padding: 28px 16px;
+}
+
+/* ── La fenêtre ── */
+.fenetre {
+  container-type: inline-size; container-name: fenetre;
+  width: 100%; max-width: 1100px;
+  background: var(--surface-carte); border-radius: var(--radius-grand);
+  box-shadow: var(--ombre-fenetre); border: 1px solid var(--bordure-legere);
+  padding: 24px 26px 18px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.fenetre-entete { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fenetre-entete h2 {
+  margin: 0; font-size: 1.45rem; line-height: 1.2; color: var(--accent-primaire);
+  text-wrap: balance; flex: 1 1 260px; min-width: 0;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-aide {
+  width: 28px; height: 28px; border-radius: 50%; flex: none;
+  border: 1px solid var(--bordure); background: transparent; color: var(--texte-secondaire);
+  font-weight: 700; font-size: 0.85rem; cursor: pointer;
+}
+.btn-fermer {
+  width: 44px; height: 44px; border: none; background: transparent; cursor: pointer;
+  font-size: 1.6rem; line-height: 1; color: var(--texte-muted); border-radius: var(--radius-moyen);
+}
+
+/* Boutons */
+.btn {
+  min-height: 44px; padding: 0 14px; border-radius: var(--radius-moyen);
+  font-weight: 600; font-size: 0.88rem; cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-principal { background: var(--btn-principal); color: var(--btn-texte); border: 1px solid var(--btn-principal); }
+.btn-principal:hover { background: var(--btn-principal-hover); }
+.btn-neutre { background: var(--surface-carte); color: var(--texte-principal); border: 1px solid var(--bordure); }
+.btn-neutre:hover { border-color: var(--texte-muted); }
+.btn-texte {
+  min-height: 44px; padding: 0 6px; border: none; background: none; cursor: pointer;
+  color: var(--accent-primaire); font-weight: 600; font-size: 0.85rem; text-decoration: underline; text-underline-offset: 3px;
+}
+.btn-kebab {
+  width: 44px; height: 44px; flex: none; border-radius: var(--radius-moyen);
+  border: 1px solid transparent; background: transparent; cursor: pointer; font-size: 1.15rem; color: var(--texte-secondaire);
+}
+.btn-kebab:hover, .btn-kebab[aria-expanded="true"] { border-color: var(--bordure); }
+
+/* Menus déroulants (Importer / exporter, ⋮) */
+.menu-ancre { position: relative; }
+.menu {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; min-width: 250px;
+  background: var(--surface-carte); border: 1px solid var(--bordure); border-radius: var(--radius-moyen);
+  box-shadow: var(--ombre-menu); padding: 6px; display: flex; flex-direction: column;
+}
+.menu button {
+  text-align: left; min-height: 40px; padding: 0 10px; border: none; background: none;
+  border-radius: 4px; cursor: pointer; font-size: 0.9rem;
+}
+.menu button:hover { background: var(--panneau-biblio); }
+.menu .menu-danger { color: var(--danger); }
+.menu hr { border: none; border-top: 1px solid var(--bordure-legere); margin: 4px 2px; }
+.menu-note { font-size: 0.78rem; color: var(--texte-muted); padding: 4px 10px 2px; margin: 0; }
+
+/* Les deux panneaux */
+.colonnes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.panneau {
+  container-type: inline-size; container-name: panneau;
+  border-radius: var(--radius-grand); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+}
+.panneau--trimestre { background: var(--panneau-trimestre); }
+.panneau--biblio { background: var(--panneau-biblio); }
+.panneau-entete { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 4px 10px; }
+.panneau-entete h3 { margin: 0; font-size: 1.1rem; line-height: 1.3; }
+.panneau-entete h3 .compte { font-weight: 500; color: var(--texte-muted); }
+.panneau-phrase { margin: 2px 0 0; font-size: 0.86rem; color: var(--texte-secondaire); max-width: 52ch; }
+.panneau-outils { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 0.86rem; }
+.panneau-outils select {
+  min-height: 40px; padding: 0 10px; border-radius: var(--radius-moyen);
+  border: 1px solid var(--bordure); background: var(--surface-carte); color: var(--texte-principal); font: inherit; font-size: 0.86rem;
+}
+.panneau-outils label { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; cursor: pointer; color: var(--texte-secondaire); }
+.panneau-outils input[type="checkbox"] { width: 18px; height: 18px; }
+.dossiers-gestion {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 10px; border-radius: var(--radius-moyen); background: var(--surface-carte); border: 1px solid var(--bordure);
+}
+.dossiers-gestion input {
+  flex: 1 1 160px; min-width: 0; min-height: 44px; padding: 0 10px; border-radius: var(--radius-moyen);
+  border: 1px solid var(--bordure); background: var(--surface-carte); color: var(--texte-principal); font: inherit;
+}
+
+/* Les rangées */
+.liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rangee {
+  background: var(--surface-carte); border: 1px solid var(--bordure-legere); border-radius: var(--radius-moyen);
+  padding: 8px 8px 8px 12px;
+}
+.rangee-ligne { display: flex; align-items: center; gap: 8px; }
+.rangee-texte { flex: 1 1 auto; min-width: 0; }
+.rangee-nom {
+  border: none; background: none; padding: 2px 0; cursor: pointer; text-align: left;
+  font-weight: 700; font-size: 0.95rem; color: var(--texte-principal); overflow-wrap: anywhere;
+  display: inline-flex; align-items: baseline; gap: 6px;
+}
+.rangee-nom .chevron { font-size: 0.7rem; color: var(--texte-muted); transition: transform .15s ease; }
+.rangee-nom[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+.rangee-meta { margin: 1px 0 0; font-size: 0.82rem; color: var(--texte-secondaire); }
+.rangee-actions { display: flex; align-items: center; gap: 4px; flex: none; }
+.etat-calme {
+  font-size: 0.82rem; color: var(--texte-muted); white-space: nowrap; padding: 0 6px;
+  display: inline-flex; align-items: center; gap: 5px; min-height: 44px;
+}
+.etat-calme .coche { color: var(--succes); font-weight: 700; }
+.fl-bas, .fl-haut { display: none; }
+
+/* L'aperçu d'une rangée */
+.apercu { margin: 8px 0 2px; padding-top: 8px; border-top: 1px solid var(--bordure-legere); }
+.apercu p { margin: 0 0 6px; font-size: 0.84rem; color: var(--texte-secondaire); }
+.apercu table { width: 100%; border-collapse: collapse; font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+.apercu td { padding: 4px 0; border-bottom: 1px solid var(--bordure-legere); vertical-align: top; }
+.apercu td.type { color: var(--texte-secondaire); padding-left: 10px; }
+.apercu td.pond { text-align: right; white-space: nowrap; padding-left: 10px; }
+.apercu tr:last-child td { border-bottom: none; }
+
+/* Confirmation dans la rangée */
+.confirmation {
+  margin-top: 8px; padding: 10px; border-radius: var(--radius-moyen);
+  background: var(--panneau-biblio); border: 1px solid var(--bordure);
+  font-size: 0.86rem; display: flex; flex-direction: column; gap: 8px;
+}
+.confirmation p { margin: 0; }
+.confirmation .boutons { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-danger { background: var(--danger); color: #fff; border: 1px solid var(--danger); }
+:root[data-theme="dark"] .btn-danger { color: #1a1a2e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn-danger { color: #1a1a2e; } }
+
+.vide { margin: 0; padding: 14px; text-align: center; font-size: 0.86rem; color: var(--texte-secondaire); border: 1px dashed var(--bordure); border-radius: var(--radius-moyen); }
+
+/* Le message d'état, en bas */
+.etat-ligne { min-height: 22px; margin: 0; font-size: 0.86rem; color: var(--texte-secondaire); }
+
+/* ── Étroit : la rangée passe le bouton sous le nom ── */
+@container panneau (max-width: 400px) {
+  .rangee-ligne { flex-wrap: wrap; }
+  .rangee-texte { flex-basis: calc(100% - 52px); }
+  .rangee-actions { width: 100%; justify-content: space-between; }
+  .rangee-actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+/* ── Fenêtre étroite (iPad portrait) : les panneaux s'empilent, les flèches tournent ── */
+@container fenetre (max-width: 760px) {
+  .colonnes { grid-template-columns: minmax(0, 1fr); }
+  .fl-droite, .fl-gauche { display: none; }
+  .fl-bas, .fl-haut { display: inline; }
+}
+@media (max-width: 520px) {
+  .fenetre { padding: 18px 14px 14px; }
+  .voile { padding: 12px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+
+<div class="maquette-barre">
+  <p>Ébauche du 24 octobre 2026, données de démonstration. Les boutons répondent ; rien n'est enregistré.</p>
+  <div class="maquette-vues" role="group" aria-label="Largeur de l'écran">
+    <span>Vue :</span>
+    <button type="button" id="vue-mac" data-vue="mac" aria-pressed="true">Mac</button>
+    <button type="button" id="vue-ipad" data-vue="ipad" aria-pressed="false">iPad, portrait</button>
+    <button type="button" id="reinitialiser">Recommencer</button>
+  </div>
+</div>
+
+<div class="scene" id="scene" data-vue="mac">
+  <div class="ecran-derriere" aria-hidden="true">
+    <h1>Grilles de critères</h1>
+    <div class="rangee-fictive">
+      <span class="f-btn">Consulter la bibliothèque</span>
+      <span class="f-menu">Aucune grille ouverte</span>
+      <span class="f-nouveau">+ Nouvelle grille</span>
+    </div>
+  </div>
+
+  <div class="voile">
+    <section class="fenetre" role="dialog" aria-modal="true" aria-labelledby="titre-fenetre">
+      <header class="fenetre-entete">
+        <h2 id="titre-fenetre">Bibliothèque de grilles de critères
+          <button type="button" class="btn-aide" title="Comment fonctionne la bibliothèque" aria-label="Comment fonctionne la bibliothèque">?</button>
+        </h2>
+        <div class="menu-ancre">
+          <button type="button" class="btn btn-neutre" id="btn-fichiers" aria-haspopup="true" aria-expanded="false">Importer ou exporter ▾</button>
+          <div class="menu" id="menu-fichiers" hidden>
+            <button type="button" data-fichier="Importer des grilles">Importer des grilles</button>
+            <button type="button" data-fichier="Importer un partage d'une ou d'un collègue">Importer le partage d'une ou d'un collègue</button>
+            <hr>
+            <button type="button" data-fichier="Exporter les grilles de ce trimestre">Exporter les grilles de ce trimestre</button>
+            <p class="menu-note">Fichiers .json et .lcz</p>
+          </div>
+        </div>
+        <button type="button" class="btn-fermer" aria-label="Fermer la bibliothèque">×</button>
+      </header>
+
+      <div class="colonnes">
+        <section class="panneau panneau--trimestre" aria-labelledby="titre-trimestre">
+          <div class="panneau-entete">
+            <div>
+              <h3 id="titre-trimestre">Dans ce trimestre <span class="compte" id="compte-trimestre"></span></h3>
+              <p class="panneau-phrase">Les grilles que le menu de l'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l'exemplaire de ta bibliothèque.</p>
+            </div>
+            <button type="button" class="btn-texte" id="tout-garder">Tout garder dans ma bibliothèque</button>
+          </div>
+          <ul class="liste" id="liste-trimestre"></ul>
+        </section>
+
+        <section class="panneau panneau--biblio" aria-labelledby="titre-biblio">
+          <div class="panneau-entete">
+            <div>
+              <h3 id="titre-biblio">Dans ta bibliothèque <span class="compte" id="compte-biblio"></span></h3>
+              <p class="panneau-phrase">Les grilles que tu gardes pour tous tes trimestres. C'est d'ici que tu peux les partager.</p>
+            </div>
+          </div>
+          <div class="panneau-outils">
+            <select id="filtre-dossier" aria-label="Dossier">
+              <option value="tous">Tous les dossiers</option>
+              <option value="non-classees">Non classées</option>
+              <option value="gerer">Gérer les dossiers…</option>
+            </select>
+            <label><input type="checkbox" id="masquer-presentes"> Masquer ce qui est déjà dans ce trimestre</label>
+          </div>
+          <div class="dossiers-gestion" id="dossiers-gestion" hidden>
+            <input type="text" id="nouveau-dossier" placeholder="Nom d'un nouveau dossier" aria-label="Nom d'un nouveau dossier">
+            <button type="button" class="btn btn-principal" id="creer-dossier">Créer le dossier</button>
+            <button type="button" class="btn-texte" id="fermer-dossiers">Fermer</button>
+          </div>
+          <ul class="liste" id="liste-biblio"></ul>
+        </section>
+      </div>
+
+      <p class="etat-ligne" id="etat" aria-live="polite"></p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const H = 'Holistique', A = 'Algorithmique';
+  const DEPART = {
+    trimestre: [
+      { id: 'g5h', nom: 'Grille-5 FR-HOLIS-20 H26', crit: [['Structure', H, 20], ['Rigueur', H, 20], ['Plausibilité', H, 15], ['Nuance', H, 25], ['Français écrit', H, 20]] },
+      { id: 'g4', nom: 'Grille-4', crit: [['Structure', H, 20], ['Rigueur', H, 30], ['Plausibilité', H, 15], ['Nuance', H, 35]] },
+      { id: 'g5a', nom: 'Grille-5 FR-ALGO-20 H26', crit: [['Structure', H, 20], ['Rigueur', H, 20], ['Plausibilité', H, 15], ['Nuance', H, 25], ['Français écrit', A, 20]] },
+      { id: 'gdep', nom: 'Grille de départ', desc: 'Quatre critères pondérés à parts égales.', crit: [['Compréhension', H, 25], ['Application', H, 25], ['Analyse', H, 25], ['Synthèse', H, 25]] }
+    ],
+    biblio: ['g5h', 'g5a', 'ana', 'spe', 'obj'],
+    catalogue: {
+      ana: { id: 'ana', nom: 'Grille analytique', origine: 'gabarit de Labo Codex', desc: 'Plusieurs critères et des niveaux de performance.', crit: [['Critère 1', null, 25], ['Critère 2', null, 25], ['Critère 3', null, 25], ['Critère 4', null, 25]] },
+      spe: { id: 'spe', nom: 'Checklist de spécifications', origine: 'gabarit de Labo Codex', desc: 'Des spécifications à cocher, oui ou non.', crit: [['Spécification 1', 'Oui ou non', null], ['Spécification 2', 'Oui ou non', null], ['Spécification 3', 'Oui ou non', null]] },
+      obj: { id: 'obj', nom: 'Grille par objectifs', origine: 'gabarit de Labo Codex', desc: 'Des critères alignés sur les objectifs du cours.', crit: [["Objectif d'apprentissage 1", null, null], ["Objectif d'apprentissage 2", null, null], ["Objectif d'apprentissage 3", null, null]] }
+    }
+  };
+
+  let etat;
+  function reinitialiser() {
+    const catalogue = Object.assign({}, DEPART.catalogue);
+    DEPART.trimestre.forEach(g => { catalogue[g.id] = g; });
+    etat = {
+      catalogue: catalogue,
+      trimestre: DEPART.trimestre.map(g => g.id),
+      biblio: DEPART.biblio.slice(),
+      ouverts: new Set(),
+      confirmer: null,   // { col, id }
+      menu: null,        // { col, id }
+      masquer: false
+    };
+  }
+
+  // ── Utilitaires ──
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pluriel = (n, un, plusieurs) => n + ' ' + (n < 2 ? un : plusieurs);
+
+  function decrireTypes(crit) {
+    const types = [...new Set(crit.map(c => c[1]).filter(Boolean))];
+    if (!types.length) return '';
+    if (types.length === 1) return types[0];
+    return types[0] + ' et ' + types.slice(1).join(' et ').toLowerCase();
+  }
+  function meta(g) {
+    const parts = [];
+    const t = decrireTypes(g.crit);
+    if (t && t !== 'Oui ou non') parts.push(t);
+    parts.push(pluriel(g.crit.length, 'critère', 'critères'));
+    if (g.origine) parts.push(g.origine);
+    return parts.join(' · ');
+  }
+
+  let messageMinuterie = null;
+  function dire(texte) {
+    const el = $('etat');
+    el.textContent = texte;
+    clearTimeout(messageMinuterie);
+    messageMinuterie = setTimeout(() => { el.textContent = ''; }, 6000);
+  }
+
+  // ── Rendu ──
+  function apercuHtml(g) {
+    const total = g.crit.reduce((s, c) => s + (c[2] || 0), 0);
+    let lignes = g.crit.map(c =>
+      '<tr><td>' + esc(c[0]) + '</td><td class="type">' + esc(c[1] || '') + '</td><td class="pond">' + (c[2] != null ? c[2] + ' %' : '') + '</td></tr>'
+    ).join('');
+    if (total) lignes += '<tr><td><strong>Total</strong></td><td></td><td class="pond"><strong>' + total + ' %</strong></td></tr>';
+    return '<div class="apercu">' + (g.desc ? '<p>' + esc(g.desc) + '</p>' : '') + '<table><tbody>' + lignes + '</tbody></table></div>';
+  }
+
+  function menuHtml(col, g) {
+    const items = [];
+    items.push('<button type="button" data-geste="dupliquer" data-id="' + g.id + '" data-col="' + col + '">Dupliquer</button>');
+    if (col === 'biblio') items.push('<button type="button" data-geste="partager" data-id="' + g.id + '" data-col="' + col + '">Exporter pour partager</button>');
+    items.push('<hr>');
+    if (col === 'trimestre') items.push('<button type="button" class="menu-danger" data-geste="demander-retrait" data-id="' + g.id + '" data-col="trimestre">Retirer de ce trimestre</button>');
+    else items.push('<button type="button" class="menu-danger" data-geste="demander-retrait" data-id="' + g.id + '" data-col="biblio">Supprimer de ma bibliothèque</button>');
+    return '<div class="menu" role="menu">' + items.join('') + '</div>';
+  }
+
+  function confirmationHtml(col, g) {
+    let phrase;
+    if (col === 'trimestre') {
+      phrase = etat.biblio.includes(g.id)
+        ? 'Retirer « ' + esc(g.nom) + ' » de ce trimestre ? Elle reste dans ta bibliothèque.'
+        : 'Retirer « ' + esc(g.nom) + ' » de ce trimestre ? Elle n\'est pas dans ta bibliothèque : garde-la d\'abord dans ta bibliothèque si tu veux la retrouver.';
+    } else {
+      phrase = etat.trimestre.includes(g.id)
+        ? 'Supprimer « ' + esc(g.nom) + ' » de ta bibliothèque ? Elle reste dans ce trimestre, mais tes prochains trimestres ne la verront plus.'
+        : 'Supprimer « ' + esc(g.nom) + ' » de ta bibliothèque ? Elle n\'est dans aucun trimestre ouvert. Fais un codex avant : c\'est irréversible.';
+    }
+    const libelle = col === 'trimestre' ? 'Retirer' : 'Supprimer';
+    return '<div class="confirmation"><p>' + phrase + '</p><div class="boutons">' +
+      '<button type="button" class="btn btn-danger" data-geste="retirer" data-id="' + g.id + '" data-col="' + col + '">' + libelle + '</button>' +
+      '<button type="button" class="btn btn-neutre" data-geste="annuler">Annuler</button></div></div>';
+  }
+
+  function rangeeHtml(col, g) {
+    const cle = col + ':' + g.id;
+    const ouvert = etat.ouverts.has(cle);
+    let action;
+    if (col === 'trimestre') {
+      action = etat.biblio.includes(g.id)
+        ? '<span class="etat-calme"><span class="coche" aria-hidden="true">✓</span> Aussi dans ta bibliothèque</span>'
+        : '<button type="button" class="btn btn-principal" data-geste="garder" data-id="' + g.id + '">Garder dans ma bibliothèque <span class="fl-droite" aria-hidden="true">→</span><span class="fl-bas" aria-hidden="true">↓</span></button>';
+    } else {
+      action = etat.trimestre.includes(g.id)
+        ? '<span class="etat-calme"><span class="coche" aria-hidden="true">✓</span> Déjà dans ce trimestre</span>'
+        : '<button type="button" class="btn btn-principal" data-geste="utiliser" data-id="' + g.id + '"><span class="fl-gauche" aria-hidden="true">←</span><span class="fl-haut" aria-hidden="true">↑</span> Utiliser dans ce trimestre</button>';
+    }
+    const menuOuvert = etat.menu && etat.menu.col === col && etat.menu.id === g.id;
+    const conf = etat.confirmer && etat.confirmer.col === col && etat.confirmer.id === g.id;
+    return '<li class="rangee">' +
+      '<div class="rangee-ligne">' +
+        '<div class="rangee-texte">' +
+          '<button type="button" class="rangee-nom" data-geste="apercu" data-cle="' + cle + '" aria-expanded="' + ouvert + '">' +
+            '<span class="chevron" aria-hidden="true">▶</span><span>' + esc(g.nom) + '</span></button>' +
+          '<p class="rangee-meta">' + esc(meta(g)) + '</p>' +
+        '</div>' +
+        '<div class="rangee-actions">' + action +
+          '<div class="menu-ancre"><button type="button" class="btn-kebab" data-geste="menu" data-id="' + g.id + '" data-col="' + col + '" aria-haspopup="true" aria-expanded="' + !!menuOuvert + '" aria-label="Autres gestes pour ' + esc(g.nom) + '">⋮</button>' +
+          (menuOuvert ? menuHtml(col, g) : '') + '</div>' +
+        '</div>' +
+      '</div>' +
+      (ouvert ? apercuHtml(g) : '') +
+      (conf ? confirmationHtml(col, g) : '') +
+    '</li>';
+  }
+
+  function rendre() {
+    const lt = $('liste-trimestre'), lb = $('liste-biblio');
+    const trim = etat.trimestre.map(id => etat.catalogue[id]);
+    let bib = etat.biblio.map(id => etat.catalogue[id]);
+    const presentes = bib.filter(g => etat.trimestre.includes(g.id)).length;
+    if (etat.masquer) bib = bib.filter(g => !etat.trimestre.includes(g.id));
+
+    lt.innerHTML = trim.length ? trim.map(g => rangeeHtml('trimestre', g)).join('')
+      : '<li><p class="vide">Aucune grille dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle grille ».</p></li>';
+    lb.innerHTML = bib.length ? bib.map(g => rangeeHtml('biblio', g)).join('')
+      : '<li><p class="vide">' + (etat.masquer && presentes ? 'Toutes les grilles de ta bibliothèque sont déjà dans ce trimestre.' : 'Ta bibliothèque est vide. Garde-y une grille de ce trimestre pour la retrouver plus tard.') + '</p></li>';
+
+    $('compte-trimestre').textContent = '(' + etat.trimestre.length + ')';
+    $('compte-biblio').textContent = '(' + etat.biblio.length + ')';
+    const aGarder = etat.trimestre.filter(id => !etat.biblio.includes(id)).length;
+    $('tout-garder').hidden = aGarder < 2;
+    $('masquer-presentes').checked = etat.masquer;
+  }
+
+  // ── Gestes ──
+  function nom(id) { return '« ' + etat.catalogue[id].nom + ' »'; }
+
+  document.addEventListener('click', function (e) {
+    const cible = e.target.closest('[data-geste]');
+    const dansMenu = e.target.closest('.menu-ancre');
+    if (!dansMenu && etat.menu) { etat.menu = null; rendre(); }
+    if (!e.target.closest('#btn-fichiers') && !e.target.closest('#menu-fichiers')) fermerMenuFichiers();
+    if (!cible) return;
+    const g = cible.dataset.geste, id = cible.dataset.id, col = cible.dataset.col;
+
+    if (g === 'apercu') {
+      const cle = cible.dataset.cle;
+      etat.ouverts.has(cle) ? etat.ouverts.delete(cle) : etat.ouverts.add(cle);
+    } else if (g === 'menu') {
+      etat.menu = (etat.menu && etat.menu.id === id && etat.menu.col === col) ? null : { col: col, id: id };
+    } else if (g === 'garder') {
+      if (!etat.biblio.includes(id)) etat.biblio.push(id);
+      dire(nom(id) + ' est maintenant aussi dans ta bibliothèque.');
+    } else if (g === 'utiliser') {
+      if (!etat.trimestre.includes(id)) etat.trimestre.push(id);
+      dire(nom(id) + ' est maintenant dans ce trimestre ; le menu de l\'écran la propose.');
+    } else if (g === 'dupliquer') {
+      etat.menu = null;
+      dire('Dans l\'app, « Dupliquer » créerait une version modifiable de ' + nom(id) + '.');
+    } else if (g === 'partager') {
+      etat.menu = null;
+      dire('Dans l\'app, ce geste préparerait un fichier de partage pour ' + nom(id) + '.');
+    } else if (g === 'demander-retrait') {
+      etat.menu = null;
+      etat.confirmer = { col: col, id: id };
+    } else if (g === 'annuler') {
+      etat.confirmer = null;
+    } else if (g === 'retirer') {
+      const n = nom(id);
+      etat.confirmer = null;
+      if (col === 'trimestre') { etat.trimestre = etat.trimestre.filter(x => x !== id); dire(n + ' est retirée de ce trimestre.'); }
+      else { etat.biblio = etat.biblio.filter(x => x !== id); dire(n + ' est supprimée de ta bibliothèque.'); }
+    }
+    rendre();
+  });
+
+  $('tout-garder').addEventListener('click', function () {
+    const nouvelles = etat.trimestre.filter(id => !etat.biblio.includes(id));
+    etat.biblio.push(...nouvelles);
+    dire(pluriel(nouvelles.length, 'grille', 'grilles') + ' de ce trimestre ' + (nouvelles.length < 2 ? 'est' : 'sont') + ' maintenant aussi dans ta bibliothèque.');
+    rendre();
+  });
+
+  $('masquer-presentes').addEventListener('change', function () { etat.masquer = this.checked; rendre(); });
+
+  $('filtre-dossier').addEventListener('change', function () {
+    if (this.value === 'gerer') { $('dossiers-gestion').hidden = false; this.value = 'tous'; $('nouveau-dossier').focus(); }
+  });
+  $('fermer-dossiers').addEventListener('click', function () { $('dossiers-gestion').hidden = true; });
+  $('creer-dossier').addEventListener('click', function () {
+    const champ = $('nouveau-dossier');
+    const n = champ.value.trim();
+    if (!n) { dire('Donne un nom au dossier.'); champ.focus(); return; }
+    const opt = document.createElement('option');
+    opt.value = 'd-' + Date.now(); opt.textContent = n;
+    const sel = $('filtre-dossier');
+    sel.insertBefore(opt, sel.querySelector('option[value="gerer"]'));
+    champ.value = '';
+    $('dossiers-gestion').hidden = true;
+    dire('Le dossier « ' + n + ' » est créé. Range une grille avec ⋮.');
+  });
+
+  // Menu Importer ou exporter
+  function fermerMenuFichiers() { $('menu-fichiers').hidden = true; $('btn-fichiers').setAttribute('aria-expanded', 'false'); }
+  $('btn-fichiers').addEventListener('click', function () {
+    const m = $('menu-fichiers'); m.hidden = !m.hidden; this.setAttribute('aria-expanded', String(!m.hidden));
+  });
+  $('menu-fichiers').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-fichier]'); if (!b) return;
+    fermerMenuFichiers();
+    dire('Dans l\'app : « ' + b.dataset.fichier + ' » ouvrirait le choix d\'un fichier.');
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { etat.menu = null; etat.confirmer = null; fermerMenuFichiers(); rendre(); }
+  });
+
+  // Commandes de la maquette
+  document.querySelectorAll('.maquette-vues [data-vue]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      $('scene').dataset.vue = b.dataset.vue;
+      document.querySelectorAll('.maquette-vues [data-vue]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    });
+  });
+  $('reinitialiser').addEventListener('click', function () { reinitialiser(); $('etat').textContent = ''; rendre(); });
+
+  reinitialiser();
+  rendre();
+})();
+</script>
+
+</body>
+</html>
