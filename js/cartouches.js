@@ -39,7 +39,7 @@
    - #listeCartouchesExistants : Conteneur liste
    - #zoneImportCommentaires : Zone d'import
    - #commentairesColles : Textarea d'import
-   - #nbCriteres, #nbNiveaux, #nbCommentaires, #pctComplete : Métriques
+   - #chaineCartouche : la chaîne des étapes (#1149, lot 3b ; elle a remplacé les métriques, absentes de la page)
    
    LocalStorage utilisé:
    - 'cartouches_{grilleId}' : Array des cartouches par grille
@@ -501,7 +501,6 @@ async function initialiserNouveauCartouche(grilleId) {
     await populerDropdownsCartouche(grilleId, cartoucheActuel.echelleId, false);
 
     await afficherMatriceRetroaction();
-    mettreAJourMetriques();
     document.getElementById('matriceRetroaction').classList.remove('u-hide');
 }
 
@@ -562,7 +561,6 @@ async function chargerMatriceRetroaction(cartoucheIdParam = null, grilleIdParam 
 
         // Afficher la matrice
         await afficherMatriceRetroaction();
-        await calculerPourcentageComplete();
 
         document.getElementById('matriceRetroaction').classList.remove('u-hide');
 
@@ -610,42 +608,17 @@ async function afficherMatriceRetroaction() {
     // rien de ce qui voyage ne bouge. Sans bornes (copie seule), le nom du niveau.
     const enPaliers = grilleEstAnalytique(await grilleDeCartouche(cartoucheActuel.grilleId));
 
-    // Utiliser les niveaux de l'échelle sélectionnée (stockés dans cartoucheActuel)
-    // L'ordre est conservé tel que défini par l'utilisateur dans l'échelle
-    let niveauxAffichage = [];
-
-    // Si echelleId est défini, charger les couleurs depuis l'échelle source
-    if (cartoucheActuel.echelleId) {
-        const echelles = await db.get(cle('echellesTemplates')) || [];
-        const echelleSource = echelles.find(e => e.id === cartoucheActuel.echelleId) || echelles.find(e => e.idOriginal === cartoucheActuel.echelleId);
-
-        if (echelleSource && echelleSource.niveaux) {
-            // Utiliser les niveaux de l'échelle avec leurs couleurs
-            niveauxAffichage = echelleSource.niveaux.map(n => ({
-                code: n.code,
-                nom: n.nom,
-                min: n.min,
-                max: n.max,
-                couleur: n.couleur || '#cccccc'
-            }));
-        }
-    }
-
-    // Fallback: utiliser les niveaux stockés dans la cartouche
-    if (niveauxAffichage.length === 0 && cartoucheActuel.niveaux) {
-        niveauxAffichage = cartoucheActuel.niveaux.map(n => ({
-            code: n.code,
-            nom: n.nom,
-            couleur: n.couleur || '#cccccc'
-        }));
-    }
+    // Les colonnes : celles de l'échelle source (ses couleurs, ses bornes), sinon la copie que porte la
+    // cartouche — par `niveauxDeLaMatrice`, que la chaîne des étapes compte aussi (#1149, lot 3b).
+    const echellesLues = cartoucheActuel.echelleId ? (await db.get(cle('echellesTemplates')) || []) : [];
+    const niveauxAffichage = niveauxDeLaMatrice(cartoucheActuel, echellesLues);
 
     // #578 — sans échelle, pas de colonnes : on le dit, on n'invente rien.
     // (Un tableau à une seule colonne « Critère / Niveau » se lisait comme un bug.)
     if (niveauxAffichage.length === 0) {
         container.innerHTML = '<div class="message-vide"><p>'
             + echapperHtml(enPaliers ? LIBELLES_PALIERS.sansEchellePaliers : LIBELLES_PALIERS.sansEchelleNiveaux) + '</p></div>';
-        mettreAJourMetriques();
+        rendreChaineCartouche();
         return;
     }
 
@@ -723,8 +696,25 @@ async function afficherMatriceRetroaction() {
 
     container.innerHTML = html;
 
-    // Mettre à jour les métriques
-    mettreAJourMetriques();
+    rendreChaineCartouche();
+}
+
+/**
+ * Les colonnes de la matrice — UNE SEULE LECTURE pour la matrice et pour l'étape « Commentaires ».
+ * Les niveaux de l'échelle source (par id, puis par `idOriginal`), dans l'ordre de l'échelle, avec
+ * leurs couleurs et leurs bornes ; sans elle, la copie que porte la cartouche. Fonction pure.
+ */
+function niveauxDeLaMatrice(cartouche, echelles) {
+    if (!cartouche) return [];
+    if (cartouche.echelleId) {
+        const liste = echelles || [];
+        const source = liste.find(e => e && e.id === cartouche.echelleId)
+            || liste.find(e => e && e.idOriginal === cartouche.echelleId);
+        if (source && Array.isArray(source.niveaux) && source.niveaux.length) {
+            return source.niveaux.map(n => ({ code: n.code, nom: n.nom, min: n.min, max: n.max, couleur: n.couleur || '#cccccc' }));
+        }
+    }
+    return (cartouche.niveaux || []).map(n => ({ code: n.code, nom: n.nom, couleur: n.couleur || '#cccccc' }));
 }
 
 /**
@@ -767,9 +757,9 @@ async function sauvegarderCommentaire(key) {
     const textarea = document.getElementById(`comm_${key}`);
     if (textarea) {
         // ▣ L'ÉCRAN FAIT FOI PENDANT L'ÉDITION : la mémoire est mise à jour
-        // d'abord, et c'est elle que lit le calcul de complétion.
+        // d'abord, et c'est elle que lit la chaîne des étapes (« Commentaires »).
         cible.commentaires[key] = textarea.value;
-        await calculerPourcentageComplete();
+        rendreChaineCartouche();
         const ecrit = await persisterCartouchePartielle(c => { c.commentaires[key] = textarea.value; }, cible);
         signalerAutosaveCartoucheMuette(ecrit);
     }
@@ -1350,7 +1340,6 @@ async function importerCommentaires() {
 
         // Rafraîchir l'affichage
         await afficherMatriceRetroaction();
-        await calculerPourcentageComplete();
         annulerImportCommentaires();
         
         notifications.succes(`${compteur} commentaire(s) importé(s) avec succès !`);
@@ -1362,147 +1351,102 @@ async function importerCommentaires() {
 }
 
 /* ===============================
-   MÉTRIQUES ET PROGRESSION
+   LA CHAÎNE DES ÉTAPES (#1149, lot 3b, 24 oct. 2026)
+   Elle remplace les métriques (#nbCriteres, #nbNiveaux, #nbCommentaires, #pctComplete) : ces
+   éléments n'étaient plus dans la page, et leur compte fusionnait les niveaux de TOUTES les
+   échelles quand la matrice ne montre que ceux de la sienne (#578).
    =============================== */
 
 /**
- * Met à jour les métriques affichées
- * (Nombre de critères, niveaux, commentaires, pourcentage)
- * 
- * FONCTIONNEMENT:
- * 1. Compte les critères
- * 2. Compte les niveaux
- * 3. Calcule le total de commentaires à remplir
- * 4. Appelle await calculerPourcentageComplete()
- * 
- * UTILISÉ PAR:
- * - await afficherMatriceRetroaction()
- * 
- * MÉTRIQUES AFFICHÉES:
- * - #nbCriteres : Nombre de critères
- * - #nbNiveaux : Nombre de niveaux
- * - #nbCommentaires : Total de cases à remplir (critères × niveaux)
- * - #pctComplete : Pourcentage (via calculerPourcentageComplete)
+ * LES QUATRE ÉTAPES D'UNE CARTOUCHE (validées par Grégoire, 24 oct., 19 h 45). Fonction pure : la
+ * cartouche (ou, en création, ce que montrent ses deux menus), les grilles, les échelles, les
+ * productions que le menu des productions montre. « Commentaires » compte les cases que la matrice
+ * montre (critères de la cartouche × colonnes de `niveauxDeLaMatrice`) ; incomplète, elle reste
+ * « à régler », sans couleur d'alerte.
  */
-async function mettreAJourMetriques() {
-    if (!cartoucheActuel) return;
-    
-    const nbCriteres = cartoucheActuel.criteres.length;
-    const nbNiveaux = cartoucheActuel.niveaux.length;
-    const nbTotal = nbCriteres * nbNiveaux;
+function etapesChaineCartouche(cartouche, grilles, echelles, productions) {
+    const c = cartouche || {};
+    const nbCriteres = criteresNommesDeLaGrille(c.grilleId, grilles);
+    const colonnes = niveauxDeLaMatrice(c, echelles);
+    const { total, remplies } = casesDeLaMatrice(c, colonnes);
+    const nbProd = c.id ? (productions || []).filter(p => p && p.cartoucheId === c.id).length : 0;
+    return [
+        { id: 'grille', libelle: 'Grille', reglee: nbCriteres > 0,
+          info: nbCriteres === 0 ? 'aucun' : nbCriteres + (nbCriteres > 1 ? ' critères' : ' critère') },
+        { id: 'echelle', libelle: 'Échelle', reglee: !!c.echelleId,
+          info: !c.echelleId ? 'à choisir' : colonnes.length + (colonnes.length > 1 ? ' niveaux' : ' niveau') },
+        { id: 'commentaires', libelle: 'Commentaires', reglee: total > 0 && remplies === total,
+          info: total === 0 ? 'aucune case' : remplies + ' sur ' + total },
+        { id: 'production', libelle: 'Production', arrivee: true, reglee: nbProd > 0,
+          info: nbProd === 0 ? 'aucune' : nbProd + ' prod.' }
+    ];
+}
 
-    // Mettre à jour les métriques (si les éléments existent)
-    const elemNbCriteres = document.getElementById('nbCriteres');
-    const elemNbNiveaux = document.getElementById('nbNiveaux');
-    const elemNbCommentaires = document.getElementById('nbCommentaires');
+/** Les critères nommés de la grille de la cartouche (par id, puis par `idOriginal`) ; 0 sans elle. */
+function criteresNommesDeLaGrille(grilleId, grilles) {
+    if (!grilleId) return 0;
+    const grille = (grilles || []).find(g => g && (g.id === grilleId || g.idOriginal === grilleId));
+    return grille ? (grille.criteres || []).filter(cr => cr && String(cr.nom == null ? '' : cr.nom).trim()).length : 0;
+}
 
-    if (elemNbCriteres) elemNbCriteres.textContent = nbCriteres;
-    if (elemNbNiveaux) elemNbNiveaux.textContent = nbNiveaux;
-    if (elemNbCommentaires) elemNbCommentaires.textContent = nbTotal;
-
-    await calculerPourcentageComplete();
+/** Les cases de la matrice (critères de la cartouche × colonnes) et celles qui portent un commentaire non vide. */
+function casesDeLaMatrice(cartouche, colonnes) {
+    const criteres = cartouche.criteres || [];
+    const commentaires = cartouche.commentaires || {};
+    let remplies = 0;
+    criteres.forEach(cr => colonnes.forEach(n => {
+        const texte = commentaires[cr.id + '_' + n.code];
+        if (texte && String(texte).trim()) remplies++;
+    }));
+    return { total: criteres.length * colonnes.length, remplies: remplies };
 }
 
 /**
- * Calcule et affiche le pourcentage de complétion
- * Change la couleur selon le niveau d'avancement
- * 
- * FONCTIONNEMENT:
- * 1. Compte les cellules remplies (non vides)
- * 2. Calcule le pourcentage
- * 3. Applique une couleur selon le niveau:
- *    - 100% : vert (complet)
- *    - 75%+ : bleu (presque complet)
- *    - 50%+ : orange (en cours)
- *    - <50% : rouge (début)
- * 
- * UTILISÉ PAR:
- * - sauvegarderCommentaire()
- * - await chargerMatriceRetroaction()
- * - importerCommentaires()
- * - mettreAJourMetriques()
- * 
- * AFFICHAGE:
- * - Met à jour #pctComplete
- * - Change le background de son parent
- * 
- * CRITÈRE DE REMPLISSAGE:
- * - Commentaire non vide après trim()
+ * La cartouche que la chaîne lit : celle de l'écran. En création, tant que la grille ET l'échelle ne
+ * sont pas choisies, `cartoucheActuel` peut encore être la cartouche ouverte avant « + Nouvelle » :
+ * la chaîne lit alors les deux menus, sans commentaires.
  */
-async function calculerPourcentageComplete() {
-    if (!cartoucheActuel) return;
+function cartouchePourLaChaine() {
+    const btnCreer = document.getElementById('btnCreerCartouche');
+    const enCreation = !!(btnCreer && !btnCreer.classList.contains('u-hide'));
+    const c = cartoucheActuel;
+    if (c && !(enCreation && cartoucheEstEnBase(c))) return c;
+    const valeur = (id) => (document.getElementById(id) || {}).value || '';
+    return { id: null, grilleId: valeur('selectGrilleCartouche'), echelleId: valeur('selectEchelleCartouche'),
+        criteres: [], niveaux: [], commentaires: {} };
+}
 
-    // CRITIQUE: Utiliser la même logique que await afficherMatriceRetroaction()
-    // pour compter tous les niveaux disponibles (pas seulement ceux de la cartouche)
-    const echelles = await db.get(cle('echellesTemplates')) || [];
+/** Dessine la chaîne en tête de la fiche (`#chaineCartouche`) ; elle paraît et part avec la fiche. */
+function rendreChaineCartouche() {
+    if (typeof document === 'undefined') return;
+    const conteneur = document.getElementById('chaineCartouche');
+    if (!conteneur || typeof ChaineEtapes === 'undefined') return;
+    const lire = (k) => db.getSync(cle(k), []) || [];
+    const productions = typeof productionsVisiblesPourLaChaine === 'function' ? productionsVisiblesPourLaChaine() : [];
+    ChaineEtapes.dessiner(conteneur,
+        etapesChaineCartouche(cartouchePourLaChaine(), lire('grillesTemplates'), lire('echellesTemplates'), productions),
+        { libelle: 'Étapes de la cartouche', surClic: suivreEtapeDeLaCartouche });
+}
 
-    const niveauxDisponiblesMap = new Map();
-
-    // Fusionner les niveaux de toutes les échelles
-    echelles.forEach(echelle => {
-        if (echelle.niveaux) {
-            echelle.niveaux.forEach(n => {
-                if (!niveauxDisponiblesMap.has(n.code)) {
-                    niveauxDisponiblesMap.set(n.code, n);
-                }
-            });
-        }
-    });
-
-    // Ajouter les niveaux de la cartouche
-    if (cartoucheActuel.niveaux) {
-        cartoucheActuel.niveaux.forEach(n => {
-            if (!niveauxDisponiblesMap.has(n.code)) {
-                niveauxDisponiblesMap.set(n.code, n);
-            }
-        });
+/**
+ * Le clic conduit, il n'écrit rien. « Grille » : une grille choisie s'ouvre dans son écran (ses critères
+ * se règlent là) ; sinon, le menu de la fiche. « Échelle » : le menu de la fiche. « Commentaires » : la
+ * première case vide de la matrice (la matrice, si toutes sont remplies ; le menu de l'échelle, si elle
+ * n'est pas encore là). « Production » : les productions.
+ */
+function suivreEtapeDeLaCartouche(idEtape) {
+    const aller = (id) => { if (typeof afficherSousSection === 'function') afficherSousSection(id); };
+    const descendre = (el, bloc) => { if (el) el.scrollIntoView({ behavior: 'smooth', block: bloc || 'center' }); };
+    if (idEtape === 'production') return aller('conception-productions');
+    if (idEtape === 'grille') {
+        if (cartouchePourLaChaine().grilleId) return aller('conception-grille-criteres');
+        return descendre(document.getElementById('selectGrilleCartouche'));
     }
-
-    const niveauxAffichage = Array.from(niveauxDisponiblesMap.values());
-
-    const totalCases = cartoucheActuel.criteres.length * niveauxAffichage.length;
-    let casesRemplies = 0;
-
-    // Compter les cases remplies
-    cartoucheActuel.criteres.forEach(critere => {
-        niveauxAffichage.forEach(niveau => {
-            const key = `${critere.id}_${niveau.code}`;
-            if (cartoucheActuel.commentaires[key] && cartoucheActuel.commentaires[key].trim()) {
-                casesRemplies++;
-            }
-        });
-    });
-
-    // #578 — zéro colonne : 0 %, pas NaN.
-    const pourcentage = totalCases ? Math.round((casesRemplies / totalCases) * 100) : 0;
-
-    // Mettre à jour les cartes métriques (vérification existence éléments)
-    const nbCriteres = cartoucheActuel.criteres.length;
-    const nbNiveaux = niveauxAffichage.length;
-    const nbCommARediger = totalCases - casesRemplies;
-
-    const elemNbCriteres = document.getElementById('nbCriteres');
-    const elemNbNiveaux = document.getElementById('nbNiveaux');
-    const elemNbCommentaires = document.getElementById('nbCommentaires'); // ID correct: nbCommentaires (pas nbCommentairesRestants)
-    const elemPctComplete = document.getElementById('pctComplete');
-
-    if (elemNbCriteres) elemNbCriteres.textContent = nbCriteres;
-    if (elemNbNiveaux) elemNbNiveaux.textContent = nbNiveaux;
-    if (elemNbCommentaires) elemNbCommentaires.textContent = nbCommARediger;
-    if (elemPctComplete) elemPctComplete.textContent = formaterPourcentage(pourcentage);
-
-    // Changer la couleur selon le pourcentage
-    const element = elemPctComplete ? elemPctComplete.parentElement : null;
-    if (!element) return;
-    if (pourcentage === 100) {
-        element.style.background = 'var(--vert-pale)';
-    } else if (pourcentage >= 75) {
-        element.style.background = 'var(--bleu-carte)';
-    } else if (pourcentage >= 50) {
-        element.style.background = 'var(--orange-accent)20';
-    } else {
-        element.style.background = 'var(--niveau-attention-critique)20';
-    }
+    if (idEtape === 'echelle') return descendre(document.getElementById('selectEchelleCartouche'));
+    const matrice = document.getElementById('matriceRetroaction');
+    if (!matrice || matrice.classList.contains('u-hide')) return descendre(document.getElementById('selectEchelleCartouche'));
+    const vide = [...matrice.querySelectorAll('#matriceContainer textarea')].find(t => !t.value.trim());
+    descendre(vide || matrice, vide ? 'center' : 'start');
 }
 
 /* ===============================
@@ -2334,7 +2278,6 @@ function importerCartoucheDepuisTxt(eventOuEl) {
 
             // Rafraîchir l'affichage
             await afficherMatriceRetroaction();
-            await calculerPourcentageComplete();
 
             notifications.succes(`${compteur} commentaire(s) importé(s) depuis le fichier !`);
 
@@ -3056,6 +2999,9 @@ async function _diagnostiquerEchellesGrilles() {
 window._diagnostiquerEchellesGrilles = _diagnostiquerEchellesGrilles;   // diagnostic console (#578, lecture seule)
 window.ajouterCartoucheAGrille = ajouterCartoucheAGrille;
 window.chargerCartouchePourModif = chargerCartouchePourModif;
+window.etapesChaineCartouche = etapesChaineCartouche;   // #1149, lot 3b
+window.niveauxDeLaMatrice = niveauxDeLaMatrice;
+window.rendreChaineCartouche = rendreChaineCartouche;
 window.dupliquerCartouche = dupliquerCartouche;
 window.supprimerCartoucheConfirm = supprimerCartoucheConfirm;
 window.chargerCartouchesRetroaction = chargerCartouchesRetroaction;
@@ -3488,6 +3434,7 @@ async function onChangeSelectionCartouche() {
     // Si les deux ne sont pas sélectionnés, masquer la matrice
     if (!grilleId || !echelleId) {
         if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
+        rendreChaineCartouche();   // #1149, lot 3b : la grille choisie seule compte déjà
         return;
     }
 
@@ -3559,7 +3506,6 @@ async function initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId) {
 
     // Afficher la matrice
     await afficherMatriceRetroaction();
-    mettreAJourMetriques();
     document.getElementById('matriceRetroaction').classList.remove('u-hide');
 }
 
@@ -3620,6 +3566,7 @@ async function creerNouvelleCartouche() {
     // Masquer la matrice jusqu'à sélection des deux
     const matriceRetroaction = document.getElementById('matriceRetroaction');
     if (matriceRetroaction) matriceRetroaction.classList.add('u-hide');
+    rendreChaineCartouche();   // #1149, lot 3b : la chaîne lit les deux menus vides
 
     // Si une seule grille ET une seule échelle, les sélectionner automatiquement
     if (grilles.length === 1 && echelles.length === 1) {

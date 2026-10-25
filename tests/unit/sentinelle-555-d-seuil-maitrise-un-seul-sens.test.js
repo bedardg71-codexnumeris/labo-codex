@@ -53,7 +53,8 @@ function compter(source, motif) {
 const EMPLOIS_CONNUS = {
     // Le libellé du repère, la copie dans `dupliquerEchelle`, le refus croisé,
     // et le `<select>` de l'éditeur : tous sur l'échelle.
-    'js/echelles.js': 5,
+    // #1149, lot 3b (24 oct. 2026) : +2, l'étape « Repères » de la chaîne lit le code posé (`e.seuilMaitrise`).
+    'js/echelles.js': 7,
     // Le transport à l'import : `SCHEMAS_IMPORT.echelle.seuilMaitrise`.
     'js/import-export.js': 1,
     // #583 : le transport au PARTAGE (`SCHEMA_ENTITE.echelle.seuilMaitrise`), et le

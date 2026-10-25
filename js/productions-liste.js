@@ -5,6 +5,7 @@
    Sous-module extrait de productions.js. Contient :
    - dupliquerEtEditerProduction (fork production démo)
    - afficherListeProductions (le menu de la sélection, #1147)
+   - productionsVisiblesPourLaChaine (ce que ce menu montre : le compte des chaînes d'étapes, #1149)
    - chargerProductionPourModif (choix dans le menu → formulaire)
    - creerNouvelleProduction (bouton + Nouvelle)
    - dupliquerProduction / dupliquerProductionActive (boutons Dupliquer)
@@ -49,6 +50,22 @@ async function dupliquerEtEditerProduction(id) {
 }
 
 /**
+ * #1149, lot 3b (24 oct. 2026) — LES PRODUCTIONS QUE LE MENU MONTRE : celles de la bibliothèque, sans
+ * les exemples hors du mode démo. Une seule règle, pour ce menu et pour le compte « 2 prod. » des
+ * chaînes d'étapes (grilles, échelles, cartouches) ; elle vivait en double dans grilles.js (lot 3a).
+ */
+function productionsDuMenu(productions) {
+    const dansBibliotheque = (productions || []).filter(p => p && p.dansBibliotheque !== false);
+    return (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.filtrerParModeDemo)
+        ? BibliothequeUI.filtrerParModeDemo(dansBibliotheque) : dansBibliotheque;
+}
+
+/** Les productions du trimestre actif que le menu montre, lues tout de suite (les chaînes d'étapes). */
+function productionsVisiblesPourLaChaine() {
+    return productionsDuMenu((typeof db !== 'undefined' && db.getSync) ? db.getSync(cle('productions'), []) : []);
+}
+
+/**
  * Affiche la liste des productions dans la sidebar
  *
  * FONCTIONNEMENT:
@@ -71,9 +88,7 @@ async function afficherListeProductions(filtreType = '') {
 
     // ✅ AJOUT (8 décembre 2025) : Filtrer uniquement les productions dans la bibliothèque
     // Beta 99.39 (A.0) : masque les items démo en mode normal
-    const productionsDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
-        productions.filter(p => p.dansBibliotheque !== false)
-    );
+    const productionsDansBibliotheque = productionsDuMenu(productions);
 
     // Filtrer selon le type si nécessaire
     let productionsFiltrees = productionsDansBibliotheque;
@@ -406,6 +421,7 @@ window.importerProductionsExternes = function(nouvellesProductions, options) {
 
 window.dupliquerEtEditerProduction = dupliquerEtEditerProduction;
 window.afficherListeProductions = afficherListeProductions;
+window.productionsVisiblesPourLaChaine = productionsVisiblesPourLaChaine;   // #1149 : grilles, échelles, cartouches
 window.chargerProductionPourModif = chargerProductionPourModif;
 window.creerNouvelleProduction = creerNouvelleProduction;
 window.dupliquerProduction = dupliquerProduction;

@@ -1335,20 +1335,14 @@ function etapesChaineGrille(criteres, productions, grilleId) {
     ];
 }
 
-/** Les productions du trimestre actif que Conception › Productions étudiantes montre (afficherListeProductions). */
-function productionsVisiblesPourLaChaine() {
-    const productions = (typeof db !== 'undefined' && db.getSync) ? (db.getSync(cle('productions'), []) || []) : [];
-    const dansBibliotheque = productions.filter(p => p && p.dansBibliotheque !== false);
-    return (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.filtrerParModeDemo)
-        ? BibliothequeUI.filtrerParModeDemo(dansBibliotheque) : dansBibliotheque;
-}
-
 /** Dessine la chaîne en tête de la fiche ; elle paraît et part avec la fiche (`#conteneurEditionGrille`). */
 function rendreChaineGrille(criteres) {
     const conteneur = document.getElementById('chaineGrille');
     if (!conteneur || typeof ChaineEtapes === 'undefined') return;
     const grilleId = grilleTemplateActuelle ? grilleTemplateActuelle.id : null;
-    ChaineEtapes.dessiner(conteneur, etapesChaineGrille(criteres, productionsVisiblesPourLaChaine(), grilleId),
+    // Le compte des productions : la règle du menu des productions (productions-liste.js, #1149 lot 3b).
+    const productions = typeof productionsVisiblesPourLaChaine === 'function' ? productionsVisiblesPourLaChaine() : [];
+    ChaineEtapes.dessiner(conteneur, etapesChaineGrille(criteres, productions, grilleId),
         { libelle: 'Étapes de la grille', surClic: suivreEtapeDeLaGrille });
 }
 

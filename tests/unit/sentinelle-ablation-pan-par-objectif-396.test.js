@@ -25,7 +25,7 @@ describe('#396 · cliquet d\'absence — le chemin pan_par_objectif ne revient p
         expect(src).not.toMatch(/case\s*'pan_par_objectif'/);
         expect(src).not.toMatch(/calculerPerformanceParObjectif\s*\(/);
         // l'échelle n'est plus exigée que pour conversion_niveaux
-        expect(src).toMatch(/methodesAvecEchelle = \['conversion_niveaux'\]/);
+        expect(src).toMatch(/METHODES_AVEC_ECHELLE = \['conversion_niveaux'\]/);   // #1149, lot 3b : la liste sortie de valider(), partagée
     });
 
     it('le wizard ne produit plus jamais pan_par_objectif', () => {
