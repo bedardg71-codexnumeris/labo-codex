@@ -270,7 +270,7 @@ test('sans doublon, ni puce d’identifiant ni badge de type ; un doublon semé 
     // Un homonyme fictif semé dans la bibliothèque, puis la fenêtre redessinée.
     await page.evaluate(async () => {
         const biblio = db.getSync('bibliothequeGrilles', []) || [];
-        await db.set('bibliothequeGrilles', biblio.concat([{ id: 'GRILLE_HOMONYME_BANC', nom: 'Grille-4',
+        await db.set('bibliothequeGrilles', biblio.concat([{ id: 'GRILLE_HOMONYME_BANC', nom: 'Grille-4',   // security-ok: fixture littérale écrite par le banc, aucune source externe
             criteres: [{ id: 'c1', nom: 'Critère fictif', type: 'holistique', ponderation: 100 }] }]));
         await afficherBibliothequeGrilles();
     });
