@@ -404,8 +404,8 @@ const AIDE_CONTEXTUELLE = {
     'bibliotheque-fonctionnement': {
         // #1157 (retouche du lot 4) — le texte validé par Grégoire (25 oct. 2026, 16 h 53), mot pour
         // mot : la fenêtre en deux colonnes. « le ramène » est vrai des six fenêtres de la Conception :
-        // « ← Utiliser » remet en service l'élément retiré lui-même (par `id` ou `idOriginal`, ou, pour
-        // une production, par sa propre rangée « Retirée de ce trimestre »).
+        // « ← Utiliser » remet en service l'élément retiré lui-même (par `id` ou `idOriginal` ; une
+        // production, aussi par sa propre rangée « Retirée de ce trimestre »).
         titre: "Comment fonctionne la bibliothèque",
         sections: [
             {
@@ -443,6 +443,46 @@ const AIDE_CONTEXTUELLE = {
             }
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'construction-cartouches', 'construction-pratiques']
+    },
+
+    'bibliotheque-tampons-fonctionnement': {
+        // #1158 (retouche du lot 5) — la variante courte de la fenêtre des tampons, sur son bouton ⓘ
+        // seulement : le texte validé par Grégoire (25 oct. 2026, 18 h 42), mot pour mot. La palette et
+        // la bibliothèque des tampons sont communes à tous les trimestres : ni « Dans ce trimestre »,
+        // ni « Retirer ».
+        titre: "Comment fonctionne la bibliothèque des tampons",
+        sections: [
+            {
+                type: 'liste',
+                titre: "Deux colonnes",
+                items: [
+                    "« Dans ta palette » : les tampons que tu poses sur les copies, dans tous tes trimestres.",
+                    "« Dans ta bibliothèque » : les tampons que tu gardes de côté pour les retrouver plus tard."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Passer d'une colonne à l'autre",
+                items: [
+                    "« Garder dans ma bibliothèque → » copie un tampon de ta palette dans ta bibliothèque.",
+                    "« ← Utiliser dans ma palette » ajoute à ta palette un tampon de ta bibliothèque."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Les catégories",
+                items: [
+                    "Dans ta palette, les tampons sont rangés par catégorie. Le menu ⋮ d'une catégorie la garde tout entière dans ta bibliothèque, ou l'exporte."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Supprimer",
+                items: [
+                    "« Supprimer de ma bibliothèque » (dans le menu ⋮) efface l'exemplaire de ta bibliothèque ; ta palette n'est pas touchée."
+                ]
+            }
+        ]
     },
 
     'evaluations-importer': {

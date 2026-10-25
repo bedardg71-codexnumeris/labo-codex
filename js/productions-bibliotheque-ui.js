@@ -194,7 +194,8 @@ async function preparerDonneesBibliothequeProductions() {
     // « Dans ta bibliothèque » : les exemplaires, puis les productions retirées de ce trimestre (la
     // section 2 d'avant les listait déjà : sans elles, une production retirée deviendrait
     // introuvable). Une retirée qui porte l'`id` d'un exemplaire n'est pas listée deux fois :
-    // « ← Utiliser » sur l'exemplaire la remet (`ajouterProductionIndividuelle` la trouve par son id).
+    // « ← Utiliser » sur l'exemplaire la remet (`ajouterProductionIndividuelle` la trouve par son id ou
+    // son `idOriginal`).
     const idsBiblio = new Set(toutesProductionsBiblio.map(p => p.id));
     const disponibles = toutesProductionsBiblio.map(prod => ({ prod, retiree: false }))
         .concat(productionsRetirees.filter(p => !idsBiblio.has(p.id)).map(prod => ({ prod, retiree: true })));
@@ -362,7 +363,9 @@ async function ajouterProductionIndividuelle(id) {
 
         const ecritLotF = await db.modifier(cleProductions, async (lues) => {
         let productions = lues || [];
-        prod = productions.find(p => p.id === id);
+        // Par `id` ou `idOriginal`, comme les grilles, les échelles et les cartouches : « ← Utiliser »
+        // sur l'exemplaire d'une production venue de la bibliothèque, puis retirée, la ramène.
+        prod = productions.find(p => p.id === id) || productions.find(p => p.idOriginal === id);
 
         // Si pas trouvée dans le cours actuel, chercher dans la Bibliothèque
         if (!prod) {

@@ -41,6 +41,8 @@ const dossierCaptures = process.env.CAPTURES_1156 || null;
 //   · ⋮ : « Retirer de ce trimestre » → `supprimerProductionDefinitivement`                         → ROUGIT ;
 //   · suppression d'une production : `retirerDeLaBibliotheque(id)` remis ; la phrase toujours      → ROUGIT ;
 //   · retirée : les retirées hors de « Dans ta bibliothèque »                                    → ROUGIT ;
+//   · ramenée puis retirée (verdict du lot 5, § 2.1) : `|| productions.find(p => p.idOriginal === id)`
+//     retiré de `ajouterProductionIndividuelle`                                                   → ROUGIT ;
 //   · import : `importAutreTrimestre` retiré de la colonne « Dans ta bibliothèque » des productions → ROUGIT ;
 //   · pratiques : un passage posé sur les rangées du trimestre ; `filtrerParMaquette` retiré de la
 //     colonne de la bibliothèque ; la famille par `type` seul (sans `configuration.type`)         → ROUGIT ;
@@ -303,6 +305,39 @@ test('productions : ⋮, les libellés et leurs actions ; une production retiré
     await expect(rt()).toHaveCount(1);
     await expect(rangee(page, 'productions', 'bibliotheque', 'Artefact 3')).toHaveCount(0);
     expect(await page.evaluate((i) => (db.getSync(cle('productions'), []) || []).find(p => p.id === i).dansBibliotheque, id)).toBe(true);
+});
+
+test('productions : ramenée, puis retirée, « ← Utiliser » sur l’exemplaire la ramène (par `idOriginal`, verdict du lot 5, § 2.1)', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page, 'productions', 1440, 900);
+    await semerProductions(page, [productionFictive('PROD_BANC_BIBLIO', 'Production fictive de la bibliothèque')]);
+    await ouvrirBibliotheque(page, 'productions');
+    const exemplaire = () => colonne(page, 'productions', 'bibliotheque').locator('.biblio2-rangee[data-biblio-item-id="PROD_BANC_BIBLIO"]');
+    const rt = () => rangee(page, 'productions', 'trimestre', 'Production fictive de la bibliothèque');
+    const copies = () => page.evaluate(() => (db.getSync(cle('productions'), []) || []).filter(p => p.idOriginal === 'PROD_BANC_BIBLIO'));
+
+    await exemplaire().locator('.biblio2-passage').click();
+    await expect(rt()).toHaveCount(1);
+    const [ramenee] = await copies();
+    const menu = await ouvrirMenu(rt());
+    await menu.getByRole('menuitem', { name: 'Retirer de ce trimestre' }).click();
+    await expect(rt()).toHaveCount(0);
+
+    await page.evaluate(() => {
+        window.__notifs = [];
+        for (const genre of ['info', 'succes', 'erreur']) {
+            const f = notifications[genre].bind(notifications);
+            notifications[genre] = (...a) => { window.__notifs.push([genre, ...a]); return f(...a); };
+        }
+    });
+    await expect(exemplaire().locator('.biblio2-passage')).toHaveText('← Utiliser dans ce trimestre', { useInnerText: true });
+    await exemplaire().locator('.biblio2-passage').click();
+    await expect(rt()).toHaveCount(1);
+    const apres = await copies();
+    expect(apres.map(p => [p.id, p.dansBibliotheque]), 'la même production revient, aucun second exemplaire').toEqual([[ramenee.id, true]]);
+    const notifs = await page.evaluate(() => window.__notifs);
+    expect(notifs.map(n => n[0])).toEqual(['succes']);
+    await expect(exemplaire().locator('.biblio2-etat')).toHaveText('✓ Déjà dans ce trimestre');
 });
 
 test('productions : « Supprimer définitivement » garde l’exemplaire de la bibliothèque et le dit ; la phrase seulement avec un exemplaire', async ({ page }) => {

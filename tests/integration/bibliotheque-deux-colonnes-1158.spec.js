@@ -42,7 +42,10 @@ const dossierCaptures = process.env.CAPTURES_1158 || null;
 //   · aperçu : `MOTIF_IMAGE_TAMPON.test(src) &&` → `true &&` → « la ligne en clair, l'aperçu » ROUGIT ;
 //   · ⋮ de catégorie : `menusGroupe: data.menusGroupe` retiré → « ⋮ » ROUGIT ;
 //   · gestion : la phrase retirée → « la gestion » ROUGIT ; l'ancien `querySelector('button')` remis →
-//     « la gestion » ROUGIT.
+//     « la gestion » ROUGIT ;
+//   · retouche (verdict du lot 5, § 2) : le filtre des tampons déjà gardés retiré de `partagerCategorie`
+//     → « Tout garder […] en partie gardée » ROUGIT ; `_nTampons` rendu à « tampon(s) » → ROUGIT ;
+//     `aide: 'bibliotheque-fonctionnement'` remis sur la fenêtre des tampons → « l'aide » ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
 const pause = (page, ms) => page.waitForTimeout(ms);
@@ -331,6 +334,52 @@ test('⋮ des rangées et de l’intertitre d’une catégorie : libellés et ac
     // Tout est gardé : il ne reste qu'« Exporter ».
     menu = await ouvrirMenu(intertitre());
     await expect(menu.locator('.biblio-menu-item')).toHaveText(['Exporter']);
+});
+
+test('« Tout garder » d’une catégorie en partie gardée : sans « Doublon » ; « 1 tampon », « N tampons » (verdict du lot 5, § 2.2 et 2.3)', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirAnnoter(page, 1440, 900);
+    // Toute la catégorie « Observations » déjà gardée, sauf un tampon.
+    const { ids, nomCat } = await page.evaluate(() => ({
+        ids: travauxOutils.obtenirAutocollants().filter(a => !a.legacy && a.categorie === 'observations').map(a => a.id),
+        nomCat: travauxOutils.obtenirNomsCategories().observations
+    }));
+    expect(ids.length, 'la catégorie a plusieurs tampons').toBeGreaterThan(2);
+    await semerBibliotheque(page, ids.slice(1).map((id) => tamponFictif(id, 'Tampon gardé ' + id, 'observations')));
+    await ouvrirBibliotheque(page);
+    await page.evaluate(() => {
+        window.__notifs = [];
+        for (const genre of ['succes', 'erreur', 'info']) {
+            const f = notifications[genre].bind(notifications);
+            notifications[genre] = (...a) => { window.__notifs.push([genre, ...a]); return f(...a); };
+        }
+    });
+
+    const intertitre = () => colonne(page, 'trimestre').locator('.biblio2-groupe').filter({ hasText: 'Observations' });
+    let menu = await ouvrirMenu(intertitre());
+    await menu.getByRole('menuitem', { name: 'Tout garder dans ma bibliothèque' }).click();
+    await expect.poll(async () => (await biblio(page)).map(t => t.id).sort()).toEqual(ids.slice().sort());
+    expect(await page.evaluate(() => window.__notifs)).toEqual([['succes', '1 tampon "' + nomCat + '" ajouté à la bibliothèque']]);
+
+    menu = await ouvrirMenu(intertitre());
+    await page.evaluate(() => { window.__notifs = []; });
+    await Promise.all([page.waitForEvent('download'), menu.getByRole('menuitem', { name: 'Exporter' }).click()]);
+    expect(await page.evaluate(() => window.__notifs)).toEqual([['succes', ids.length + ' tampons "' + nomCat + '" exportés']]);
+});
+
+test('l’aide de la fenêtre des tampons : la variante courte validée, par son bouton ⓘ (verdict du lot 5, § 2.4)', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirAnnoter(page, 1440, 900);
+    await page.evaluate(() => document.body.classList.add('aide-contextuelle-active'));
+    await ouvrirBibliotheque(page);
+    await page.locator(SEL + ' .biblio2-entete .btn-aide-contextuelle').click();
+    const modale = page.locator('.aide-contextuelle-modal.active');
+    await expect(modale.locator('#aide-ctx-titre')).toHaveText('Comment fonctionne la bibliothèque des tampons');
+    await expect(modale.locator('.aide-liste-titre')).toHaveText(['Deux colonnes', 'Passer d\'une colonne à l\'autre', 'Les catégories', 'Supprimer']);
+    const texte = await texteVisible(modale.locator('.aide-contextuelle-body'));
+    expect(texte).toContain('« Dans ta palette » : les tampons que tu poses sur les copies, dans tous tes trimestres.');
+    expect(texte).toContain('« Supprimer de ma bibliothèque » (dans le menu ⋮) efface l\'exemplaire de ta bibliothèque ; ta palette n\'est pas touchée.');
+    for (const absent of ['Dans ce trimestre', 'Retirer']) expect(texte, absent).not.toContain(absent);
 });
 
 // ─────────────────────────────────────────── 820 PX ───────────────────────────────────────────
