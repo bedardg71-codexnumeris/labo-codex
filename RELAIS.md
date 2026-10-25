@@ -7,6 +7,18 @@
 
 ---
 
+## 25 OCT. 2026 (Claude Code) : **LE LOT 1 DES BIBLIOTHÈQUES EN DEUX COLONNES (#1154) VIT SUR LA BRANCHE `bibliotheques-deux-colonnes` ; LE MERGE ATTEND**
+
+**Où vit le travail** : branche locale `bibliotheques-deux-colonnes`, partie de `main` = `05843aba`, non poussée : `3d3918c4` (documents de Cowork : audit d'apparence, plan, maquette, consigne du lot 1), `9ee51473` (fiches #1154 à #1159), `ae34b7cd` (le lot : la bibliothèque des grilles en deux colonnes), `0032552c` (ligne du plan). **`main` n'a reçu que ce relais.** En relecture chez Cowork : `plans de travail/DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-1.md`.
+
+**Pourquoi le merge attend** (consigne du lot 1, § 0) : la branche ne rejoint `main` qu'une fois le **lot 3** relu (#1156) **et** la version du soir en ligne (les six lots relus du 24 : #1148, #1151, #1149, #1153, #1152, #1150, toujours sur `main` non poussé). Les lots 2 et 3 continuent sur la même branche. Pas de release avant la fin du lot 3 (plan, « La livraison »).
+
+**État mesuré sur la branche** : Vitest 9 692 sur 9 693 ; le rouge est `sentinelle-anticache-fichiers-modifies`, attendu (jetons `20261025a`, build `1024-1447`), que `scripts/release.mjs` réglera à la release. WebKit : 110 essais verts dans le périmètre (33 fichiers). Pas de verdict complet.
+
+**Reste dû, hors de ce lot** : la version du soir et son verdict, au signal de Grégoire ; le rouge GitHub de `973ad366` à regarder avant le push (relais du 24 ci-dessous).
+
+---
+
 ## POUR LA SESSION QUI PREND LE RELAIS – 24 OCT. 2026, 14 h 50 (écrit par Claude Code) : **1.217.0 COMMITÉE SUR `main` ; VERDICT COMPLET PUIS `scripts/pousser.sh` LANCÉS DANS LA FOULÉE, AU SIGNAL DE GRÉGOIRE (COWORK FERMÉ)**
 
 **24 oct., 16 h 06 – POUSSÉ** : verdict complet vert sur `973ad366` (code 0, 0 échec connu, aucun instable ; 0 veille, éveil complet tenu, sur secteur, pression mémoire 1), poussé par `scripts/pousser.sh` : le hook a lancé Vitest (vert) et lu le jeton « verdict vert à jour pour ce commit ». `origin/main` = `973ad366`. Déploiement Netlify non constaté par la session. Ensuite sur `main`, NON POUSSÉ : `078eab16` (documents de Cowork), `28f379d5` (ce relais), puis le lot 2 (#1148, le Cadre en rangées), codé, Vitest 9 594/9 594, 114 essais WebKit du périmètre verts, accepté avec une retouche (faite, `2e19fddb`) ; puis le lot 2 bis (#1151, le profil individuel en rangée, consigne `8c446b6f`), codé, Vitest 9 594/9 594, 95 essais WebKit du périmètre verts, en relecture chez Cowork (`plans de travail/DEMANDE-RELECTURE-2026-10-24-profil-individuel-rangee.md`). Pas de verdict complet sur les lots ; release et push au signal de Grégoire. **⚠ GitHub est rouge sur `973ad366`** (run 40128243995 : 32 essais absents de la baseline — codex et fichiers, matériel, dissection, planif — Mac vert sur le même commit ; non analysé, peut-être la famille Linux du 19 oct., #1114-#1116) : à regarder avant le prochain push.
