@@ -45,7 +45,9 @@ const dossierCaptures = process.env.CAPTURES_1156 || null;
 //   · pratiques : un passage posé sur les rangées du trimestre ; `filtrerParMaquette` retiré de la
 //     colonne de la bibliothèque ; la famille par `type` seul (sans `configuration.type`)         → ROUGIT ;
 //   · suppression d'une pratique : la phrase toujours                                             → ROUGIT ;
-//   · pratiques : `await afficherBibliothequePratiques()` retiré après « ← Utiliser »             → ROUGIT.
+//   · pratiques : `await afficherBibliothequePratiques()` retiré après « ← Utiliser »             → ROUGIT ;
+//   · retouche : `DEN: 'denotation'` → `DEN: 'denombrement'` dans `familleDeLaPratique`, puis l'entrée
+//     `denotation` retirée de `FAMILLES_TAXONOMIQUES`                                             → ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
 const pause = (page, ms) => page.waitForTimeout(ms);
@@ -481,7 +483,7 @@ test('pratiques : aucune rangée du trimestre ne porte de passage ; la famille e
     // La famille en mots, à la place des badges ; « Gabarit » parti.
     await expect(rangee(page, 'pratiques', 'trimestre', 'PAN – Standards (démo)').locator('.biblio2-rangee-meta')).toHaveText(/^PAN-Standards( · par .+)?$/);
     await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle sommatif').locator('.biblio2-rangee-meta')).toHaveText(/^Sommative · par /);
-    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle de base').locator('.biblio2-rangee-meta')).toHaveText(/^Dénombrement · par /);
+    await expect(rangee(page, 'pratiques', 'bibliotheque', 'Modèle de base').locator('.biblio2-rangee-meta')).toHaveText(/^PAN-Dénotation · par /);
     const fen = page.locator(FAMILLES.pratiques.sel);
     await expect(fen.locator('.badge-type-pratique')).toHaveCount(0);
     await expect(fen.locator('.badge-source')).toHaveCount(0);
@@ -525,6 +527,18 @@ test('pratiques : l’aperçu dit la description, puis l’échelle et la grille
     const demo = rangee(page, 'pratiques', 'trimestre', 'PAN – Standards (démo)');
     await demo.locator('.biblio2-rangee-nom').click();
     await expect(demo.locator('.biblio2-apercu .biblio2-apercu-texte').first()).toHaveText('PAN-Standards - Maîtrise de standards/objectifs');
+
+    // Retouche du lot 3 : l'éditeur recompose la même table ; une pratique DEN sans description y lisait
+    // « denotation » brut (aucune entrée canonique), elle lit maintenant le nom de la famille.
+    await page.evaluate(async () => {
+        const liste = db.getSync(cle('pratiquesConfigurables'), []) || [];
+        await db.set(cle('pratiquesConfigurables'), liste.concat([{ id: 'PRAT_BANC_DEN', nom: 'Pratique fictive DEN',   // security-ok: fixture littérale écrite par le banc
+            type: 'denotation', pratiques: ['DEN'], configuration: { type: 'denotation', modeDEN: 'eliminee', objectifs: [] } }]));
+        await fermerModalBibliothequePratiques();
+        await chargerPratiquePourModif('PRAT_BANC_DEN');
+    });
+    await expect(page.locator('#mat-description-pratique'))
+        .toHaveText('PAN-Dénotation - Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage');
 });
 
 test('pratiques : ⋮, les libellés et leurs actions ; la phrase dans la confirmation avec un exemplaire, absente sans', async ({ page }) => {

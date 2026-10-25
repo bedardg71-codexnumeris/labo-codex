@@ -294,7 +294,7 @@ async function afficherBibliothequeProductions() {
             phrase: 'Les productions que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
             idListe: 'listeProductionsDansBibliotheque',
             rangees: data.rangeesTrimestre,
-            vide: 'Aucune production dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la à l\'écran.',
+            vide: 'Aucune production dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle production ».',
             boutonEntete: horsBibliotheque >= 2
                 ? { label: 'Tout garder dans ma bibliothèque', action: 'ajouterMesProductionsALaBibliotheque' }
                 : null
