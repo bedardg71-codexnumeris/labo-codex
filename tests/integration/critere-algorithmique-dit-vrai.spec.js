@@ -156,7 +156,13 @@ test('#1131 · un critère algorithmique en création reçoit ses sous-critères
     const carte = page.locator('#listeCriteres .item-liste').first();
     await carte.locator('select[data-on-change="modifierTypeCritereTempHandler"]').selectOption('algorithmique');
     await expect(carte).not.toContainText('Les sous-critères se définissent une fois la grille enregistrée.');
-    await carte.locator('[data-action="initialiserSousCriteresParDefaut"]').click();
+    // ↻ #1150 lot 4 (24 oct.) : l'atelier s'ouvre sur « Ce que l'élève lit », une seule étape ouverte. Les
+    // sous-critères vivent dans l'étape « Codes » : l'enseignant l'ouvre d'un clic sur son en-tête (mesuré le 25 oct.).
+    const bouton = carte.locator('[data-action="initialiserSousCriteresParDefaut"]');
+    await expect(bouton).toBeHidden();
+    await carte.locator('.atelier-algo-etape[data-etape="codes"] .atelier-algo-etape-tete').click();
+    await expect(bouton).toBeVisible();
+    await bouton.click();
     await expect(carte.locator('.sous-critere-item')).toHaveCount(10);   // ↻ lot de mots (21 oct.) : la liste de Grégoire, codes 1 à 10
     await carte.locator('.sous-criteres-btn-ajouter-liste').click();
     await expect(carte.locator('.sous-critere-item')).toHaveCount(11);
