@@ -209,7 +209,8 @@ async function afficherBibliothequeAlignements() {
             phrase: 'Les cartes d\'alignement que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
             idListe: 'listeAlignementsTrimestre',
             rangees: data.rangeesTrimestre,
-            vide: 'Aucune carte d\'alignement dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « Nouvelle carte ».',
+            // #1157 (retouche) — « Nouvelle carte » est dans le menu « Actions ▾ », pas sur un bouton visible.
+            vide: 'Aucune carte d\'alignement dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « Nouvelle carte », dans le menu « Actions ».',
             // Import depuis un autre trimestre — il écrit dans CE trimestre
             // (`importerCarteTrimestreVersActif`) : au pied de « Dans ce trimestre ». Les cartes du
             // même cours (#368) remontent en tête : c'est le geste de la rentrée, le repli s'ouvre
@@ -395,14 +396,14 @@ async function supprimerAlignementDuTrimestre(carteId) {
     var carte = index.cartes.find(function (c) { return c.id === carteId; });
     if (!carte) return;
     if (index.cartes.length <= 1) {
-        notifications.warning('Impossible de supprimer la dernière carte du trimestre actif.');
+        notifications.warning('Impossible de supprimer la dernière carte de ce trimestre.');
         return;
     }
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('carte'))) return;
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer la carte',
-        message: 'Supprimer définitivement la carte « ' + carte.nom + ' » du trimestre actif ?',
+        message: 'Supprimer définitivement la carte « ' + carte.nom + ' » de ce trimestre ?',
         texteConfirmer: 'Supprimer',
         variante: 'danger'
     });
