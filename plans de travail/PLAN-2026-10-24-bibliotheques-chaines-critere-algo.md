@@ -27,7 +27,7 @@
 
 ## Inséré le 24 oct. à 20 h 55 (bug, priorité)
 
-- **« + Nouvelle cartouche » renomme la cartouche ouverte ; changer la grille d'une cartouche la dédouble** : trouvé au lot 3b, probable source du mécanisme (1) de #1144. Décision de Grégoire : « on corrige ». Consigne : `CONSIGNE-LOT-2026-10-24-cartouche-nouvelle-renomme.md`. Passe avant le lot 4.
+- **« + Nouvelle cartouche » renomme la cartouche ouverte ; changer la grille d'une cartouche la dédouble** : trouvé au lot 3b, probable source du mécanisme (1) de #1144. Décision de Grégoire : « on corrige ». Consigne : `CONSIGNE-LOT-2026-10-24-cartouche-nouvelle-renomme.md`. Passe avant le lot 4. **#1153, codé, en relecture** (`DEMANDE-RELECTURE-2026-10-24-cartouche-nouvelle-renomme.md`), non poussé.
 
 ## Hors du plan
 

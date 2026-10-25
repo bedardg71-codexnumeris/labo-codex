@@ -3034,6 +3034,7 @@ window.creerNouvelleCartouche = creerNouvelleCartouche;
 window.populerDropdownsCartouche = populerDropdownsCartouche;
 window.onChangeSelectionCartouche = onChangeSelectionCartouche;
 window.initialiserNouveauCartoucheAvecEchelle = initialiserNouveauCartoucheAvecEchelle;
+window.forgerCopieCartouchePourGrille = forgerCopieCartouchePourGrille;   // #1153 : pure, éprouvée en Vitest
 window.exporterCartouches = exporterCartouches;
 window.importerCartouches = importerCartouches;
 window.importerCartoucheDepuisTxt = importerCartoucheDepuisTxt;
@@ -3438,23 +3439,110 @@ async function onChangeSelectionCartouche() {
         return;
     }
 
-    // En mode édition, avertir que la matrice va être reconfigurée
-    if (cartoucheActuel && cartoucheActuel.grilleId && cartoucheActuel.grilleId !== grilleId) {
-        const ok = confirm('Changer de grille va reconfigurer la matrice.\nLes commentaires des critères communs seront conservés.\n\nContinuer ?');
-        if (!ok) {
-            // Remettre l'ancienne valeur
-            selectGrille.value = cartoucheActuel.grilleId;
-            return;
-        }
-    }
+    if (!(await traiterChangementDeGrilleCartouche(selectGrille, grilleId))) return;
 
     // Les deux sont sélectionnés - initialiser la cartouche
     await initialiserNouveauCartoucheAvecEchelle(grilleId, echelleId);
 }
 
 /**
+ * #1153 — la grille change sous une fiche ouverte. Rend vrai quand l'initialisation de la matrice
+ * doit suivre ; faux quand le geste s'arrête ici (question refusée, ou copie faite et ouverte).
+ *
+ * Une cartouche ENREGISTRÉE ne change pas de grille : elle est copiée pour la grille choisie
+ * (`copierCartouchePourGrille`). La garder sous son id en changeant son `grilleId` l'écrivait sous
+ * la clé de l'autre grille sans la retirer de la sienne (#1144, mécanisme 1). Une cartouche EN
+ * CRÉATION, elle, n'est sous aucune clé : elle change simplement de grille.
+ */
+async function traiterChangementDeGrilleCartouche(selectGrille, grilleId) {
+    if (!cartoucheActuel || !cartoucheActuel.grilleId || cartoucheActuel.grilleId === grilleId) return true;
+    if (cartoucheEstEnBase(cartoucheActuel)) {
+        const ok = confirm('Changer de grille crée une copie de cette cartouche pour la grille choisie. L\'originale reste telle quelle. Les commentaires des critères communs passent dans la copie. Continuer ?');
+        if (ok && await copierCartouchePourGrille(cartoucheActuel, grilleId)) return false;
+        selectGrille.value = cartoucheActuel.grilleId;
+        return false;
+    }
+    const ok = confirm('Changer de grille va reconfigurer la matrice.\nLes commentaires des critères communs seront conservés.\n\nContinuer ?');
+    if (!ok) selectGrille.value = cartoucheActuel.grilleId;   // Remettre l'ancienne valeur
+    return ok;
+}
+
+/**
+ * #1153 — la copie d'une cartouche pour une autre grille. Pure : rien n'est lu ni écrit en base.
+ *
+ * Les critères et les commentaires passent par `cartoucheCorrespondance.rattacher` (par id, puis
+ * par nom ; un critère sans correspondant reste avec ses commentaires). Quand le rattachement
+ * superposerait des commentaires, la copie n'est pas faite (`null`) : une copie aux critères de
+ * l'ancienne grille serait exactement la cartouche décalée de #1144.
+ *
+ * Le nom de l'originale est gardé, sauf s'il est déjà pris sous la grille choisie : la copie prend
+ * alors le nom d'une copie (`nommerCopie`). Aucun homonyme n'est donc écrasé ni créé.
+ *
+ * @param {Object} originale - la cartouche telle qu'elle est en base
+ * @param {{id: string, criteres?: Array}} grille - la grille choisie
+ * @param {Array} listeCible - les cartouches déjà rangées sous la grille choisie
+ * @param {string} idNeuf
+ * @param {string} maintenant - date ISO
+ * @returns {Object|null}
+ */
+function forgerCopieCartouchePourGrille(originale, grille, listeCible, idNeuf, maintenant) {
+    const { cartouche: rattachee, sur } = window.cartoucheCorrespondance.rattacher(originale, (grille && grille.criteres) || []);
+    if (!sur) return null;
+    const copie = JSON.parse(JSON.stringify(rattachee));
+    copie.id = idNeuf;
+    copie.grilleId = grille.id;
+    // La matrice a une ligne par critère de la cartouche : tous ceux de la grille choisie, dans son
+    // ordre (ceux qu'aucun critère de l'originale ne rejoint arrivent vides), puis les critères de
+    // l'originale restés sans correspondant, avec leurs commentaires.
+    const idsGrille = new Set(((grille && grille.criteres) || []).map(c => c && c.id));
+    copie.criteres = ((grille && grille.criteres) || []).filter(Boolean).map(c => ({ id: c.id, nom: c.nom }))
+        .concat((copie.criteres || []).filter(c => c && !idsGrille.has(c.id)));
+    delete copie.idOriginal;   // #586 : la copie ne répond pas à l'identifiant de sa source
+    copie.dateCreation = maintenant;
+    copie.dateModification = maintenant;
+    const normaliser = (n) => String(n == null ? '' : n).trim().toLowerCase().replace(/\s+/g, ' ');
+    if ((listeCible || []).some(c => c && normaliser(c.nom) === normaliser(copie.nom))) {
+        copie.nom = nommerCopie(copie.nom, listeCible);
+    }
+    return copie;
+}
+
+/**
+ * #1153 — écrire la copie sous la grille choisie et l'ouvrir. L'originale n'est pas touchée : les
+ * évaluations et les productions qui la portent la cherchent sous SA grille.
+ * @returns {Promise<Object|null>} la copie, ou null si rien n'a été écrit
+ */
+async function copierCartouchePourGrille(source, grilleId) {
+    const grilles = await db.get(cle('grillesTemplates')) || [];
+    const grille = grilles.find(g => g.id === grilleId);
+    const originale = (await db.get(cle(`cartouches_${source.grilleId}`)) || []).find(c => c.id === source.id);
+    if (!grille || !originale) return null;
+
+    let copie = null;
+    await modifierEtAnnoncer(cle(`cartouches_${grilleId}`), (lues) => {
+        const liste = lues || [];
+        copie = forgerCopieCartouchePourGrille(originale, grille, liste, genererIdUnique('CART_'), new Date().toISOString());
+        if (!copie) return undefined;
+        liste.push(copie); // security-ok: la liste écrite est la collection lue en stockage, augmentée d'une copie forgée localement — aucune source externe
+        return liste;
+    }, [], { geste: 'Copier la cartouche' });
+
+    if (!copie) {
+        alert('La copie n\'a pas été faite : des commentaires de cette cartouche se superposeraient dans la grille choisie. L\'originale reste telle quelle.');
+        return null;
+    }
+    // Le menu d'abord (la copie doit y être), puis la fiche : `chargerCartouchePourModif` la marque.
+    await afficherBanqueCartouches();
+    await chargerCartouchePourModif(copie.id, grilleId);
+    return copie;
+}
+
+/**
  * Initialise ou met à jour une cartouche avec grille ET échelle spécifiées
  * Préserve le nom et les commentaires existants lors des changements dynamiques
+ * ⚠ #1153 : `cartoucheActuel` n'est ici que la fiche EN CRÉATION (remise à zéro par
+ * `creerNouvelleCartouche`) ou une cartouche enregistrée gardée sur SA grille ; une cartouche
+ * enregistrée qui change de grille passe par `copierCartouchePourGrille`, jamais par ici.
  * @param {string} grilleId - ID de la grille (critères)
  * @param {string} echelleId - ID de l'échelle (niveaux)
  */
@@ -3528,6 +3616,12 @@ async function creerNouvelleCartouche() {
         alert('Tu dois d\'abord créer au moins une échelle de performance dans la section « Échelles de performance »');
         return;
     }
+
+    // #1153 — la fiche ouverte avant ne survit pas : `initialiserNouveauCartoucheAvecEchelle`
+    // reprenait son id et ses commentaires, et « Créer » la renommait (ou l'écrivait sous une
+    // autre grille).
+    cartoucheActuel = null;
+    window.cartoucheActuel = null;
 
     // Masquer les boutons Dupliquer, Supprimer, Export PDF et Export texte (mode création)
     const btnDupliquer = document.getElementById('btnDupliquerCartouche');
