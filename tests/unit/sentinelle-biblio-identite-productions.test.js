@@ -35,7 +35,11 @@ describe('bibliothèques · l\'appartenance se teste sur l\'IDENTITÉ, pas sur l
     });
 
     it('les trois autres bibliothèques gardent leur test d\'identité', () => {
-        expect(lire('js/grilles.js')).toMatch(/g\.id === grille\.id \|\| g\.idOriginal === grille\.id/);
+        // #1154 (verdict du 25 oct., § 5.2) : grilles.js porte la relation dans `grilleLieeAExemplaire`,
+        // lue par les deux colonnes ; la rangée de la bibliothèque doit encore passer par elle.
+        const grilles = lire('js/grilles.js');
+        expect(grilles).toMatch(/grille\.id === exemplaire\.id \|\| grille\.idOriginal === exemplaire\.id/);
+        expect(grilles).toMatch(/grilles\.some\(g => grilleLieeAExemplaire\(g, grille\)/);
         expect(lire('js/echelles.js')).toMatch(/e\.id === echelle\.id \|\| e\.idOriginal === echelle\.id/);
         expect(lire('js/cartouches.js')).toMatch(/c\.id === cartouche\.id \|\| c\.idOriginal === cartouche\.id/);
     });
