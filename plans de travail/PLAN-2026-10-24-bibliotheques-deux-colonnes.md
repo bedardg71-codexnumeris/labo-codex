@@ -43,7 +43,7 @@
 
 | Lot | Ce que l'utilisateur voit | Fiche | État |
 |---|---|---|---|
-| 1. Le composant et les grilles | Conception › Grilles de critères › « Consulter la bibliothèque » : la fenêtre de l'ébauche, deux colonnes, rangées compactes, aperçu des critères, « Importer ou exporter ▾ », dossiers et « Masquer » en haut de la bibliothèque. Les neuf autres fenêtres ne changent pas. | #1154 | **codé, en relecture** (25 oct., Claude Code) : `ae34b7cd` sur la branche `bibliotheques-deux-colonnes` ; demande `DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-1.md` ; captures `captures-2026-10-25-bibliotheques-deux-colonnes-1/` |
+| 1. Le composant et les grilles | Conception › Grilles de critères › « Consulter la bibliothèque » : la fenêtre de l'ébauche, deux colonnes, rangées compactes, aperçu des critères, « Importer ou exporter ▾ », dossiers et « Masquer » en haut de la bibliothèque. Les neuf autres fenêtres ne changent pas. | #1154 | **codé, en relecture** (25 oct., Claude Code) : `ae34b7cd` sur la branche `bibliotheques-deux-colonnes` ; demande `DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-1.md` ; captures `captures-2026-10-25-bibliotheques-deux-colonnes-1/`. **Accepté avec une retouche** (verdict du 25 oct., 8 h 25) ; **retouche du § 2 codée** (25 oct., Claude Code, même branche) : « Supprimer définitivement » garde l'exemplaire de la bibliothèque, « ce trimestre » dans les messages et le bandeau des doublons |
 | 2. Échelles et cartouches | Les mêmes deux colonnes. Les cartouches gardent leur regroupement par grille, en intertitres dans chaque colonne ; « Filtrer par grille » rejoint la barre de la bibliothèque. | #1155 | à cadrer après le verdict du lot 1 |
 | 3. Productions et pratiques | Idem. L'encadré « Pour éditer une pratique, transfère-la… » disparaît : les deux colonnes le disent. À la fin du lot, l'aide « Comment fonctionne la bibliothèque » est réécrite (texte proposé par Claude Code, **validé par Grégoire**). | #1156 | à cadrer |
 | 4. Cartes d'alignement | Idem (« Partager » devient le passage « Garder dans ma bibliothèque → » si la mesure confirme que c'est le même geste). | #1157 | à cadrer |
@@ -53,6 +53,12 @@
 **Pourquoi cet ordre** : le lot 1 éprouve le composant sur une seule fenêtre, celle de l'ébauche ; les lots 2 à 4 sont les cinq autres bibliothèques par trimestre, que les mots validés couvrent sans question ; le lot 5 attend des mots ; le lot 6 ferme le chantier en retirant l'ancien.
 
 **La livraison** : pas de release avant la fin du lot 3, pour que les six bibliothèques de la Conception changent ensemble (sinon, pendant quelques jours, deux grammaires cohabitent dans le même onglet). Le moment reste celui de Grégoire (règle 7). Chaque lot dépose ses captures (Mac 1440 clair et sombre, iPad 820) : c'est par elles que Grégoire voit l'avancement avant la mise en ligne.
+
+## Inscrit en chemin (verdict du lot 1, 25 oct.)
+
+- **Exporter pour partager depuis « Dans ta bibliothèque »** (maquette) : l'export d'aujourd'hui (`partageExport.resoudreEntite`) ne lit que les grilles des trimestres, c'est du code neuf. La phrase « C'est d'ici que tu peux les partager. » revient avec ce geste.
+- **« ta sélection » dans les autres fenêtres** : les mêmes phrases (refus de la garde #476 « … est déjà dans ta sélection », notification d'ajout, lieux du bandeau des doublons) dans `cartouches.js`, `echelles.js` et `pratiques-gestion.js` passent à « ce trimestre » à leur lot (le bandeau prend l'option `mots` de `renderAvertissementDoublons`).
+- **À arbitrer par Cowork — une grille ramenée par « ← Utiliser dans ce trimestre » ne se reconnaît pas dans sa bibliothèque** (mesuré le 25 oct. au banc #1154) : `ajouterGrilleIndividuelle` lui donne un identifiant neuf (`idOriginal` = celui de la bibliothèque), et non le même. La rangée du trimestre (critère « même `id` », lot 1) propose alors « Garder dans ma bibliothèque → », pendant que la rangée de la bibliothèque (critère `id` ou `idOriginal`) dit « ✓ Déjà dans ce trimestre » ; « Garder → » y verserait un second exemplaire. La phrase « Son exemplaire de ta bibliothèque reste. » suit la rangée du trimestre (même `id`) : elle ne s'affiche pas pour une grille ramenée. Rien n'est entre les mains des utilisateurs (pas de mise en ligne avant le lot 3).
 
 ## Les règles qui valent pour tous les lots
 

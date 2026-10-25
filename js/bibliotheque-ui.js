@@ -1151,12 +1151,18 @@
      *        {retirer, supprimer, supprimerPartagee, champParam2}
      *        `champParam2` nomme le champ de l'item à passer en 2e paramètre
      *        (cartouches : 'grilleId'). On ne crée aucune action neuve.
+     * @param {Object} [opts.mots] - #1154 : {selection, bibliotheque, retirer}, les mots d'une
+     *        fenêtre en deux colonnes (les titres de ses colonnes) ; les autres gardent les leurs.
      * @returns {string} HTML du bandeau ('' si rien à signaler)
      */
     BibliothequeUI.renderAvertissementDoublons = function (groupes, opts) {
         if (!groupes || groupes.length === 0) return '';
         opts = opts || {};
         var actions = opts.actions || {};
+        var mots = opts.mots || {};
+        var lieuSelection = mots.selection || 'Dans ta sélection';
+        var lieuBibliotheque = mots.bibliotheque || 'Bibliothèque';
+        var titreRetirer = mots.retirer || 'Retirer de ta sélection (données conservées)';
         var selection = Array.isArray(opts.itemsSelection) ? opts.itemsSelection : [];
 
         function estDansSelection(item) {
@@ -1192,7 +1198,7 @@
                     boutons.push({
                         label: 'Retirer', action: actions.retirer, param: ex.id, param2: param2,
                         classe: 'btn-secondaire',
-                        title: 'Retirer de ta sélection (données conservées)'
+                        title: titreRetirer
                     });
                 }
                 if (dansSelection && actions.supprimer) {
@@ -1223,8 +1229,8 @@
                         BibliothequeUI.renderPuceId(ex.id) +
                         (date ? '<span class="biblio-doublon-date">modifié le ' + echapperHtml(date) + '</span>' : '') +
                         BibliothequeUI.genererBadgeSource(item) +
-                        (dansSelection ? '<span class="biblio-doublon-lieu">Dans ta sélection</span>'
-                                       : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">Bibliothèque</span>') +
+                        (dansSelection ? '<span class="biblio-doublon-lieu">' + echapperHtml(lieuSelection) + '</span>'
+                                       : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">' + echapperHtml(lieuBibliotheque) + '</span>') +
                         reperes +
                     '</span>' +
                     '<span class="biblio-doublon-actions">' +
