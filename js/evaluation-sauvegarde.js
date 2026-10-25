@@ -88,8 +88,8 @@
      · calculerEtStockerIndicesCP (portfolio.js, déjà window.X)
      · initialiserListeEvaluations (liste-evaluations.js, déjà window.X)
      · Journal.capturerFinEvaluation (journal.js namespace)
-     · travauxUI, travauxVisionneuse, travauxStockage (travaux-*.js
-       namespaces)
+     · travauxUI, travauxVisionneuse, travauxStockage, travauxResolution
+       (travaux-*.js namespaces)
      · actionsRLO.agregerActionsRLO (actions-rlo.js namespace)
      · BibliothequeUI.verifierReferencesPasDemo (bibliotheque-ui.js)
      · cartoucheSelectionnee (chargement.js, déjà window.X session A)
@@ -530,6 +530,8 @@ function majBadgesApresEvaluation(evaluation) {
 
 /**
  * Met à jour la pill de statut dans la palette Paramètres
+ * ⚠ Constat du 25 oct. 2026 (verdict de Cowork, « commenter et oublier ») : `#travaux-eval-statut-pill`
+ * n'existe plus dans index.html — la fonction sort à la ligne suivante, sans effet visible.
  */
 function mettreAJourPillStatut(valeur) {
     const pill = document.getElementById('travaux-eval-statut-pill');
@@ -691,10 +693,16 @@ function afficherTravailEnCours(enCours) {
 }
 
 /**
- * La pastille de la copie active (barre latérale, barre d'outils) dit « Incomplet » ; retiré, elle
- * reprend « En cours » — l'état de la copie ouverte, comme à sa sélection (travaux-ui.js).
+ * La pastille de la copie active (barre latérale, barre d'outils) dit « Incomplet » ; décochée, elle
+ * reprend l'état réel de la copie — celui que calcule sa sélection (`travauxUI.statutPastilleFichier`,
+ * affiché par `travauxUI.afficherPastilleActive`) : une copie annotée redevient « Annoté », une copie
+ * dont les niveaux étaient saisis sous la case redevient « Évalué ». Retouche de Cowork, 25 oct. 2026.
  */
 function _poserPastilleTravailEnCours(enCours) {
+    const ui = window.travauxUI;
+    if (!ui || typeof ui.statutPastilleFichier !== 'function' || typeof ui.afficherPastilleActive !== 'function') return;
+    const etat = enCours ? { texte: 'Incomplet', classe: 'incomplet' } : _etatReelCopieActiveSansStatut(ui);
+    if (!etat) return;
     const badges = [
         document.querySelector('.annot-badge.actif'),
         document.querySelector('#travaux-badge-fichier-actif .annot-badge')
@@ -702,21 +710,26 @@ function _poserPastilleTravailEnCours(enCours) {
     badges.forEach(badge => {
         const pill = badge && badge.querySelector('.travaux-badge-pill');
         if (!pill) return;
-        if (enCours) {
-            pill.textContent = 'Incomplet';
-            pill.className = 'travaux-badge-pill incomplet';
-            pill.title = 'Incomplet ; travail en cours';
-        } else if (pill.classList.contains('incomplet')) {
-            pill.textContent = 'EN COURS';
-            pill.className = 'travaux-badge-pill en-cours';
-            pill.removeAttribute('title');
-        }
-        // À la sélection d'une autre copie, la pastille reprend son état d'origine (travaux-ui.js).
-        if (pill.dataset.origTexte !== undefined) {
-            if (enCours) { pill.dataset.origTexte = 'Incomplet'; pill.dataset.origClasse = 'incomplet'; }
-            else if (pill.dataset.origClasse === 'incomplet') { pill.dataset.origTexte = 'Importé'; pill.dataset.origClasse = 'importe'; }
-        }
+        if (!enCours && !pill.classList.contains('incomplet') && pill.dataset.origClasse !== 'incomplet') return;
+        // À la sélection d'une autre copie, la pastille reprend cet état (travaux-ui.js).
+        if (pill.dataset.origTexte !== undefined) { pill.dataset.origTexte = etat.texte; pill.dataset.origClasse = etat.classe; }
+        ui.afficherPastilleActive(pill, etat.classe);
     });
+}
+
+/**
+ * L'état de la copie ouverte une fois la case décochée : son évaluation en base, sans le statut (l'auto-save
+ * l'écrira ainsi 1,5 s plus tard). Les niveaux saisis sous la case sont restés en base : ils comptent.
+ */
+function _etatReelCopieActiveSansStatut(ui) {
+    const fichier = (typeof travauxVisionneuse !== 'undefined' && travauxVisionneuse.getFichierActuel)
+        ? travauxVisionneuse.getFichierActuel() : null;
+    if (!fichier) return null;
+    const evaluation = (typeof travauxResolution !== 'undefined' && travauxResolution.trouverEvaluationPourFichier)
+        ? travauxResolution.trouverEvaluationPourFichier(fichier) : null;
+    const sansStatut = evaluation ? Object.assign({}, evaluation) : null;
+    if (sansStatut) delete sansStatut.travailEnCours;
+    return ui.statutPastilleFichier(fichier, sansStatut);
 }
 
 /**

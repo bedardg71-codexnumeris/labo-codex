@@ -81,6 +81,7 @@
      */
     function construireFeedback(evaluation, fichier, annotation) {
         if (!evaluation) return null;
+        evaluation = sansNiveauxSiTravailEnCours(evaluation);
 
         const grille = lireGrille(evaluation.grilleId);
         const cartouche = lireCartouche(evaluation.grilleId, evaluation.cartoucheId);
@@ -120,6 +121,19 @@
             // le rendu refuse de conclure et NOMME ce qui manque.
             portee: construirePortee(evaluation, grille)
         };
+    }
+
+    /**
+     * Statut « Incomplet ; travail en cours » (retouche de Cowork, 25 oct. 2026) — AUCUN NIVEAU NE SORT.
+     * Cochée après des niveaux, la case les laisse en base, masqués (réversible, modèle de « Non reçu »).
+     * Ce que l'élève lit en est tiré ici : la copie se lit comme cochée avant tout niveau — aucun critère,
+     * donc ni « Présentement », ni portée, ni « Ta force ». Les copies de l'historique passent par la même
+     * vue (`historiqueAnterieur`) : une copie suivante ne compare pas ses niveaux à ceux d'un brouillon.
+     * La règle du statut est celle du registre (`evaluationTravailEnCours`), pas une recopie.
+     */
+    function sansNiveauxSiTravailEnCours(evaluation) {
+        const enCours = typeof evaluationTravailEnCours === 'function' && evaluationTravailEnCours(evaluation);
+        return enCours ? Object.assign({}, evaluation, { criteres: [] }) : evaluation;
     }
 
     /**
@@ -1491,7 +1505,8 @@
         return evaluations
             .filter(e => e && e.etudiantDA === da && !e.remplaceeParId && !(idCopie && e.id === idCopie))
             .filter(e => isNaN(limite) || !e.dateEvaluation || !(quand(e) > limite))
-            .sort((a, b) => quand(b) - quand(a));
+            .sort((a, b) => quand(b) - quand(a))
+            .map(sansNiveauxSiTravailEnCours);
     }
 
     /**
