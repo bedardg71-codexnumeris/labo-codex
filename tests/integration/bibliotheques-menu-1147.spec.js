@@ -255,8 +255,10 @@ const SOUS_TITRES = {
     // ↻ #1155 (25 oct. 2026) : les échelles et les cartouches passent en deux colonnes à leur tour, même lecture.
     'echelle-performance': 'Les échelles que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
     'retroactions': 'Les cartouches que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
-    'productions': 'Gère les productions de ta sélection.',
-    'pratiques-notation': 'Gère les pratiques de notation de ta sélection.'
+    // ↻ #1156 (25 oct. 2026) : les productions et les pratiques passent en deux colonnes à leur tour, même lecture.
+    // BREAK-TEST (25 oct.) : « te propose » → « vous propose » dans pratiques-gestion.js → ROUGE.
+    'productions': 'Les productions que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+    'pratiques-notation': 'Les pratiques que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.'
 };
 
 test('la fenêtre de la bibliothèque : les cinq sous-titres tutoient', async ({ page }) => {

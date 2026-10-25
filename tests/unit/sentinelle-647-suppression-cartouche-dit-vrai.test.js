@@ -163,14 +163,16 @@ describe('#647 · chemin 1 — l\'invariant couplé : la fonction ne touche pas 
 // CHEMIN 2 — la liste et la zone d'édition : l'ancrage seul, et la question le
 // dit, avec ce qui survit.
 // =============================================================================
-async function questionChemin2({ dansBibliotheque, evaluations = [], verrouille = false }) {
+async function questionChemin2({ dansBibliotheque, evaluations = [], verrouille = false, idOriginal }) {
     const questions = [];
     const alertes = [];
     const modifier = vi.fn();
     const fn = instancier(cartouchesJs, 'supprimerCartoucheConfirm', {
+        // ↻ #1156 (verdict du lot 2, § 3) — la relation unique, la vraie (extraite de bibliotheque-ui.js).
+        BibliothequeUI: { lieeAExemplaire },
         db: {
             get: async (k) => ({
-                'h2026_cartouches_G1': [{ id: 'C1', nom: 'Cartouche 1', verrouille }],
+                'h2026_cartouches_G1': [{ id: idOriginal ? 'C1_COPIE' : 'C1', nom: 'Cartouche 1', verrouille, idOriginal }],
                 'h2026_grillesTemplates': [{ id: 'G1', nom: 'Grille A' }],
                 'h2026_evaluationsSauvegardees': evaluations
             })[k] ?? null,
@@ -184,7 +186,7 @@ async function questionChemin2({ dansBibliotheque, evaluations = [], verrouille 
         afficherBanqueCartouches: vi.fn(),
         chargerCartouchesRetroaction: vi.fn()
     });
-    await fn('C1', 'G1');
+    await fn(idOriginal ? 'C1_COPIE' : 'C1', 'G1');
     // La question vient AVANT toute écriture : refuser ne détruit rien.
     expect(modifier).not.toHaveBeenCalled();
     return { questions, alertes };
@@ -195,10 +197,22 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
         const { questions } = await questionChemin2({ dansBibliotheque: true, evaluations: [{ cartoucheId: 'C1' }, { cartoucheId: 'C1' }, { cartoucheId: 'X' }] });
         expect(questions).toEqual([
             'Supprimer la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\n'
-            + 'Elle reste dans la Bibliothèque.\n'
+            // ↻ #1156 (25 oct. 2026) : « Elle reste dans la Bibliothèque. » devient la phrase de Grégoire, celle de
+            // la fenêtre en deux colonnes (verdict du lot 2, § 3). BREAK-TEST (25 oct.) : l'ancienne phrase remise
+            // dans `supprimerCartoucheConfirm` → ROUGE.
+            + 'Son exemplaire de ta bibliothèque reste.\n'
             + "2 évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n\n"
             + 'Cette action est irréversible.'
         ]);
+    });
+
+    // #1156 — une cartouche ramenée par « ← Utiliser dans ce trimestre » a un `id` neuf et nomme son exemplaire
+    // par `idOriginal` : la relation unique la voit, l'`id` seul ne la voyait pas (la question se taisait).
+    // BREAK-TEST (25 oct.) : la condition remise en `biblio.some(c => c.id === cartoucheId)` → ROUGE.
+    it('#1156 · ramenée de la bibliothèque (idOriginal) : la phrase est dite', async () => {
+        const { questions } = await questionChemin2({ dansBibliotheque: true, idOriginal: 'C1' });
+        expect(questions).toEqual(['Supprimer la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\n'
+            + 'Son exemplaire de ta bibliothèque reste.\n\nCette action est irréversible.']);
     });
 
     it('nulle part ailleurs, employée par personne : la portée et l\'irréversibilité, rien de plus', async () => {
@@ -208,7 +222,8 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
 
     it('employée mais pas dans la bibliothèque : les évaluations sont nommées, la bibliothèque non', async () => {
         const { questions } = await questionChemin2({ dansBibliotheque: false, evaluations: [{ cartoucheId: 'C1' }] });
-        expect(questions[0]).not.toContain('Bibliothèque');
+        // ↻ #1156 : la phrase dit « bibliothèque » en minuscule ; l'absence se teste sans la casse.
+        expect(questions[0]).not.toMatch(/bibliothèque/i);
         expect(questions[0]).toContain("1 évaluation(s) l'emploient");
     });
 

@@ -341,7 +341,8 @@ window.confirmerImportProductions = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) production(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} production(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Productions disponibles » pour les ajouter à ta sélection.');
+        // #1156 — « Productions disponibles » n'existe plus : les mots des grilles, des échelles et des cartouches.
+        details.push(ligneMasquee || 'Elles sont dans ta bibliothèque : « Utiliser dans ce trimestre » les ajoute à ce trimestre.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {

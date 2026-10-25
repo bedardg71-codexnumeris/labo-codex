@@ -97,13 +97,6 @@
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle);   // lot F : geste hors témoin (ecrire)
     }
 
-    function echapper(s) {
-        if (typeof echapperHtml === 'function') return echapperHtml(s);
-        return String(s)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-    }
-
     function nomDe(item) {
         return String(item.nom || item.titre || '(sans nom)');
     }
@@ -641,63 +634,15 @@
         return String(item.description || item.contexte || item.objectif || '');
     }
 
-    /**
-     * HTML de la section « Partagés par des collègues » pour un type, à
-     * passer à window.BibliothequeUI.creerModal via `sectionPartages`. Chaîne vide
-     * s'il n'y a aucun item partagé de ce type (la section n'apparaît pas).
-     */
-    partageSection.genererSectionHTML = function (type) {
-        var items = lire(CLES_STOCKAGE[type] || '');
-        if (!items.length) return '';
-
-        var cartes = items.map(function (item) {
-            return window.BibliothequeUI.renderCarteDisponible({
-                nom: echapper(window.BibliothequeUI.formaterTitre(nomDe(item))),
-                id: item.id,
-                badgeSource: '<span class="badge-source badge-source--partage">Partagé</span>',
-                metadonnees: echapper('par ' + auteurDe(item)),
-                description: descriptionPour(type, item),
-                boutonPrincipal: {
-                    label: type === 'cartouche' ? 'Dupliquer avec sa grille' : 'Dupliquer vers mes documents',
-                    action: 'partageSection.dupliquer',
-                    param: type,
-                    param2: item.id,
-                    classe: 'btn-confirmer',
-                    title: 'Créer une copie modifiable dans tes documents (l\'original partagé reste intact)'
-                },
-                actionsMenu: [{
-                    label: 'Exporter pour partager',
-                    action: 'partageSection.exporterPourPartager',
-                    param: type,
-                    param2: item.id,
-                    classe: 'btn-secondaire',
-                    title: 'Générer un fichier .lcz signé — l\'attribution d\'origine part avec lui'
-                }, {
-                    label: 'Supprimer',
-                    action: 'partageSection.supprimer',
-                    param: type,
-                    param2: item.id,
-                    classe: 'btn-supprimer',
-                    title: 'Supprimer cette copie importée (tes documents ne sont pas touchés)'
-                }]
-            });
-        }).join('');
-
-        return '<h3 class="biblio-section-titre">Partagés par des collègues</h3>' +
-            '<p style="color: var(--gris-clair); font-size: 0.9em; margin-bottom: 12px;">' +
-                'Importés par fichier .lcz, non modifiables ici. « Dupliquer » crée une copie ' +
-                'modifiable dans tes documents — l\'attribution d\'origine est conservée. ' +
-                'Le menu ⋮ retransmet un item à un collègue ou supprime la copie importée ; ' +
-                'pour retirer un package entier : Réglages › Données.' +
-            '</p>' +
-            cartes;
-    };
+    // #1156 (25 oct. 2026) — `genererSectionHTML` (la section en cartes de `creerModal`) est retirée :
+    // les cinq fenêtres qui la lisaient (grilles, échelles, cartouches, productions, pratiques) sont en
+    // deux colonnes et lisent `rangeesDeuxColonnes`.
 
     /**
      * #1154 — La même section, en DONNÉES pour la fenêtre en deux colonnes
      * (`BibliothequeUI.creerFenetreDeuxColonnes`, colonne « Dans ta bibliothèque ») :
-     * mêmes mots, mêmes gestes que `genererSectionHTML`, que gardent les fenêtres pas
-     * encore migrées (plan du 24 oct., lots 2 à 6). Texte brut : la fenêtre échappe.
+     * mêmes mots, mêmes gestes que l'ancienne `genererSectionHTML` (retirée au lot 3, #1156).
+     * Texte brut : la fenêtre échappe.
      * @returns {{titre: string, phrase: string, rangees: Array}|null}
      */
     partageSection.rangeesDeuxColonnes = function (type) {
