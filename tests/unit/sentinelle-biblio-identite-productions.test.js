@@ -35,12 +35,15 @@ describe('bibliothèques · l\'appartenance se teste sur l\'IDENTITÉ, pas sur l
     });
 
     it('les trois autres bibliothèques gardent leur test d\'identité', () => {
-        // #1154 (verdict du 25 oct., § 5.2) : grilles.js porte la relation dans `grilleLieeAExemplaire`,
-        // lue par les deux colonnes ; la rangée de la bibliothèque doit encore passer par elle.
-        const grilles = lire('js/grilles.js');
-        expect(grilles).toMatch(/grille\.id === exemplaire\.id \|\| grille\.idOriginal === exemplaire\.id/);
-        expect(grilles).toMatch(/grilles\.some\(g => grilleLieeAExemplaire\(g, grille\)/);
-        expect(lire('js/echelles.js')).toMatch(/e\.id === echelle\.id \|\| e\.idOriginal === echelle\.id/);
-        expect(lire('js/cartouches.js')).toMatch(/c\.id === cartouche\.id \|\| c\.idOriginal === cartouche\.id/);
+        // #1154 (verdict du 25 oct., § 5.2) puis #1155 (consigne du lot 2, § 3.1) — RÉANCRÉ : la relation
+        // (`id` ou `idOriginal`) est UNE, `BibliothequeUI.lieeAExemplaire`, et les trois fenêtres en deux
+        // colonnes la lisent pour dire « Déjà dans ce trimestre ».
+        expect(lire('js/bibliotheque-ui.js')).toMatch(/item\.id === exemplaire\.id \|\| item\.idOriginal === exemplaire\.id/);
+        expect(lire('js/grilles.js')).toMatch(/grilles\.some\(g => BibliothequeUI\.lieeAExemplaire\(g, grille\)/);
+        expect(lire('js/echelles.js')).toMatch(/echelles\.some\(e => BibliothequeUI\.lieeAExemplaire\(e, echelle\)/);
+        expect(lire('js/cartouches.js')).toMatch(/cartouchesDansBibliotheque\.some\(c => BibliothequeUI\.lieeAExemplaire\(c, cartouche\)\)/);
+        for (const f of ['js/grilles.js', 'js/echelles.js', 'js/cartouches.js']) {
+            expect(lire(f), f + ' : plus de copie locale de la relation').not.toMatch(/function \w*LieeAExemplaire/);
+        }
     });
 });

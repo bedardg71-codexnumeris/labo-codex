@@ -252,8 +252,9 @@ const SOUS_TITRES = {
     // « Dans ce trimestre » : c'est elle que l'essai lit pour cette fenêtre.
     // BREAK-TEST (25 oct.) : « te propose » → « vous propose » dans grilles.js → ROUGE.
     'grille-criteres': 'Les grilles que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
-    'echelle-performance': 'Gère les échelles de performance de ta sélection.',
-    'retroactions': 'Gère les cartouches de rétroaction de ta sélection.',
+    // ↻ #1155 (25 oct. 2026) : les échelles et les cartouches passent en deux colonnes à leur tour, même lecture.
+    'echelle-performance': 'Les échelles que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+    'retroactions': 'Les cartouches que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
     'productions': 'Gère les productions de ta sélection.',
     'pratiques-notation': 'Gère les pratiques de notation de ta sélection.'
 };

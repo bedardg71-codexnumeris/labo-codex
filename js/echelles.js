@@ -911,7 +911,7 @@ window.confirmerImportEchelles = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) échelle(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} échelle(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Échelles disponibles » pour les ajouter à ta sélection.');
+        details.push(ligneMasquee || 'Elles sont dans ta bibliothèque : « Utiliser dans ce trimestre » les ajoute à ce trimestre.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
@@ -974,9 +974,42 @@ async function afficherListeEchelles() {
 }
 
 /**
- * ✅ AJOUT (8 décembre 2025) : Afficher le modal de gestion de la bibliothèque d'échelles
- * Permet d'ajouter/retirer des échelles de la barre latérale
- * Avec filtre par discipline
+ * #1155 (lot 2 des bibliothèques en deux colonnes) — LA LIGNE EN CLAIR D'UNE RANGÉE : le nombre
+ * de niveaux, puis l'auteur quand ce n'est pas l'utilisateur actif (même lecture que les grilles,
+ * `ligneGrilleBibliotheque`). Remplace « 4 niveau(x) • par … • discipline » et la marque
+ * « (gabarit) » (les grilles l'ont perdue au lot 1). Texte brut : la fenêtre l'échappe.
+ */
+function ligneEchelleBibliotheque(echelle, auteurActif) {
+    const nb = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux.filter(Boolean).length : 0;
+    const parts = [nb + (nb > 1 ? ' niveaux' : ' niveau')];
+    const auteur = (echelle.metadata_cc && echelle.metadata_cc.auteur_original) || echelle.auteur || '';
+    if (auteur && auteur !== auteurActif) parts.push('par ' + auteur);
+    return parts.join(' · ');
+}
+
+/**
+ * #1155 — L'aperçu qu'ouvre le nom d'une rangée : la description, la provenance, puis les niveaux
+ * dans l'ordre (nom, code, bornes s'il y en a ; les bornes dites comme dans l'éditeur).
+ */
+function apercuEchelleBibliotheque(echelle) {
+    const niveaux = (echelle && Array.isArray(echelle.niveaux)) ? echelle.niveaux.filter(Boolean) : [];
+    const paragraphes = [echelle.description || '', BibliothequeUI.formaterInspireDe(echelle)];
+    if (!niveaux.length) paragraphes.push('Aucun niveau.');
+    const borne = (v) => (typeof v === 'number' && isFinite(v)) ? formaterPourcentage(v) : '';
+    return {
+        paragraphes: paragraphes,
+        lignes: niveaux.map(n => {
+            const min = borne(n.min);
+            const max = borne(n.max);
+            return [n.nom || 'Sans nom', n.code || '', (min && max) ? min + ' – ' + max : ''];
+        })
+    };
+}
+
+/**
+ * Les données de la bibliothèque des échelles. #1155 : des rangées pour la fenêtre en deux
+ * colonnes (`BibliothequeUI.creerFenetreDeuxColonnes`), plus aucun HTML. Mêmes gestes, mêmes
+ * fonctions de données qu'avant ; seuls la place et le libellé changent.
  */
 async function preparerDonneesBibliothequeEchelles() {
     const echelles = await db.get(cle('echellesTemplates')) || [];
@@ -984,12 +1017,14 @@ async function preparerDonneesBibliothequeEchelles() {
     const echellesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
         echelles.filter(e => e.dansBibliotheque !== false)
     );
-    const echellesDisponibles = BibliothequeUI.filtrerParModeDemo(
-        await obtenirToutesLesEchellesBibliotheque()
-    );
+    const toutesBibliotheque = await obtenirToutesLesEchellesBibliotheque();
+    const echellesDisponibles = BibliothequeUI.filtrerParModeDemo(toutesBibliotheque);
     // #291 — réunion des deux magasins avant analyse (cf. grilles.js).
     const doublonsDetectes = analyserDoublons(
         reunirSources(echellesDansBibliotheque, echellesDisponibles), 'nom');
+    // #291 — la puce d'identifiant ne s'affiche que sur une rangée que le bandeau nomme.
+    const idsNommes = new Set();
+    doublonsDetectes.forEach(groupe => groupe.exemplaires.forEach(ex => idsNommes.add(ex.id)));
 
     // #327 — dossiers de classement (couche par-dessus, range par identité).
     const repsEchelles = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
@@ -998,182 +1033,157 @@ async function preparerDonneesBibliothequeEchelles() {
     const repParEchelle = {};
     repsEchelles.forEach(r => (r.itemIds || []).forEach(id => { repParEchelle[id] = r.id; }));
 
-    // Section 1
-    const cartesSection1 = echellesDansBibliotheque.map(echelle => ({
-        nom: BibliothequeUI.formaterTitreDemo(echapperHtml(echelle.nom || 'Sans titre'), BibliothequeUI.estItemDemo(echelle)),
-        id: echelle.id,
-        afficherId: true,
-        badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
-        metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
-            quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
-            discipline: true
-        }),
-        description: echelle.description || '',
-        inspireDe: BibliothequeUI.formaterInspireDe(echelle),
-        boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerEchelleBibliotheque', param: echelle.id, classe: 'btn-confirmer', title: 'Créer une copie' },
-        actionsMenu: [
-            { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'echelle', param2: echelle.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-            { label: 'Retirer', action: 'retirerEchelleDeBibliotheque', param: echelle.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
-            { label: 'Supprimer', action: 'supprimerEchelleDefinitivement', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-        ]
-    }));
+    const auteurActif = BibliothequeUI.obtenirAuteurActif();
 
-    // Section 2 : #327 — cartes à plat (le groupage par dossier se fait au rendu
-    // via repertoiresBibliotheque.grouper). Chaque carte porte au menu ⋮ les
-    // actions « Classer dans … » / « Retirer du dossier » selon son dossier courant.
-    const cartesSection2 = echellesDisponibles.map(echelle => {
-        const dejaPresent = echelles.some(e => (e.id === echelle.id || e.idOriginal === echelle.id) && e.dansBibliotheque !== false);
-        const estGabarit = echelle.estGabarit === true;
-        const styleGabarit = estGabarit ? 'border-left: 4px solid var(--gabarit-couleur); background: var(--gabarit-fond);' : '';
-        const gabaritBadge = estGabarit ? '<span style="font-size: 0.7rem; color: var(--gabarit-couleur); font-weight: 500;">(gabarit)</span>' : '';
+    // « Aussi dans ta bibliothèque » : la relation unique (`BibliothequeUI.lieeAExemplaire`), la même
+    // que « Déjà dans ce trimestre » plus bas. Pas `dansBibliotheque`, qui veut dire « dans le menu
+    // de l'écran » sur une échelle du trimestre.
+    const rangeesTrimestre = echellesDansBibliotheque.map(echelle => {
+        const rangee = {
+            id: echelle.id,
+            nom: BibliothequeUI.formaterTitre(echelle.nom || 'Sans titre'),
+            ligne: ligneEchelleBibliotheque(echelle, auteurActif),
+            afficherId: idsNommes.has(echelle.id),
+            apercu: apercuEchelleBibliotheque(echelle),
+            dansBibliotheque: toutesBibliotheque.some(ex => BibliothequeUI.lieeAExemplaire(echelle, ex)),
+            menu: [
+                { label: 'Dupliquer', action: 'dupliquerEchelleBibliotheque', param: echelle.id, title: 'Créer une copie' },
+                { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'echelle', param2: echelle.id, title: 'Générer un fichier .lcz signé à transmettre (#329)' },
+                { separateur: true },
+                { label: 'Retirer de ce trimestre', action: 'retirerEchelleDeBibliotheque', param: echelle.id, classe: 'btn-supprimer', title: 'L\'échelle quitte le menu de l\'écran ; ses données sont conservées' },
+                { label: 'Supprimer définitivement', action: 'supprimerEchelleDefinitivement', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+            ]
+        };
+        if (rangee.dansBibliotheque) {
+            rangee.etat = 'Aussi dans ta bibliothèque';
+        } else {
+            rangee.passage = { label: 'Garder dans ma bibliothèque', action: 'garderEchelleDansBibliotheque', param: echelle.id, sens: 'versBibliotheque' };
+        }
+        return rangee;
+    });
 
+    // #327 — rangées à plat, chacune avec son dossier ; le menu de la barre filtre.
+    const rangeesBibliotheque = echellesDisponibles.map(echelle => {
+        const dejaPresent = echelles.some(e => BibliothequeUI.lieeAExemplaire(e, echelle) && e.dansBibliotheque !== false);
         const repCourant = repParEchelle[echelle.id] || null;
-        const actionsMenu = [];
+        const menu = [];
         repsEchelles.forEach(r => {
             if (r.id !== repCourant) {
-                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'echelles', param2: echelle.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+                menu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'echelles', param2: echelle.id, param3: r.id, title: 'Ranger dans ce dossier' });
             }
         });
         if (repCourant) {
-            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'echelles', param2: echelle.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+            menu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'echelles', param2: echelle.id, title: 'Sortir du dossier (repasse en non classées)' });
         }
-        actionsMenu.push({ label: 'Supprimer', action: 'supprimerEchelleDeBibliothequePartagee', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
+        if (menu.length) menu.push({ separateur: true });
+        menu.push({ label: 'Supprimer de ma bibliothèque', action: 'supprimerEchelleDeBibliothequePartagee', param: echelle.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque' });
 
-        return {
-            nom: BibliothequeUI.formaterTitreDemo(echapperHtml(echelle.nom || 'Sans titre'), BibliothequeUI.estItemDemo(echelle)) + ' ' + gabaritBadge,
-            libelle: BibliothequeUI.formaterTitre(echelle.nom || 'Sans titre'),   // #467 : texte brut, pour le select des dossiers
+        const rangee = {
             id: echelle.id,
-            afficherId: true,
-            badgeSource: BibliothequeUI.genererBadgeSource(echelle, echellesDansBibliotheque),
-            metadonnees: BibliothequeUI.formaterMetadonnees(echelle, {
-                quantite: `${echelle.niveaux?.length || 0} niveau(x)`,
-                discipline: true
-            }),
-            inspireDe: BibliothequeUI.formaterInspireDe(echelle),
-            description: echelle.description || '',
+            nom: BibliothequeUI.formaterTitre(echelle.nom || 'Sans titre'),
+            ligne: ligneEchelleBibliotheque(echelle, auteurActif),
+            afficherId: idsNommes.has(echelle.id),
+            dossier: repCourant,
+            apercu: apercuEchelleBibliotheque(echelle),
             dejaPresent: dejaPresent,
-            classeItem: 'echelle-disponible-item',
-            styleExtra: styleGabarit,
-            boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterEchelleIndividuelle', param: echelle.id, classe: 'btn-confirmer', title: 'Ajouter cette échelle à ta sélection' },
-            actionsMenu: actionsMenu
+            menu: menu
         };
+        if (dejaPresent) {
+            rangee.etat = 'Déjà dans ce trimestre';
+        } else {
+            rangee.passage = { label: 'Utiliser dans ce trimestre', action: 'ajouterEchelleIndividuelle', param: echelle.id, sens: 'versTrimestre' };
+        }
+        return rangee;
     });
 
     // Import trimestre
     const trimestresDisponibles = typeof listerTrimestresAvecEchelles === 'function' ? listerTrimestresAvecEchelles() : [];
-    const sectionImportTrimestre = trimestresDisponibles.length > 0 ? { trimestres: trimestresDisponibles } : null;
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, sectionImportTrimestre, repsEchelles, echellesDansBibliotheque };
+    return { rangeesTrimestre, rangeesBibliotheque, doublonsDetectes, trimestresDisponibles, repsEchelles, echellesDansBibliotheque };
 }
 
 async function afficherBibliothequeEchelles() {
-    // #327 — enregistre la biblio « echelles » auprès du helper générique de
-    // répertoires (idempotent). Les items de Section 2 sont des cartes-config
-    // déjà libellées : labelItem lit leur .libelle (texte brut ; le .nom est du HTML
-    // échappé depuis #467, et le select l'échapperait une seconde fois).
+    // #327 — la biblio « echelles » auprès du moteur des dossiers (idempotent) : ses gestes
+    // (créer, renommer, classer…) redessinent la fenêtre par ce rappel. #1155 : plus de
+    // « select » de dossier par cartes (`renderLigneDossierSelect`), donc plus de `labelItem`.
     BibliothequeUI.repertoires.enregistrer('echelles', {
         rafraichir: afficherBibliothequeEchelles,
-        ajouterItem: (id) => ajouterEchelleIndividuelle(id),
-        supprimerItem: (id) => supprimerEchelleDeBibliothequePartagee(id),
-        labelItem: (c) => c.libelle,
         labelPluriel: 'échelles'
     });
 
     const data = await preparerDonneesBibliothequeEchelles();
 
-    // Section 1
-    let contenuSection1 = '';
-    if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle dans ta sélection</p>';
-    } else {
-        data.cartesSection1.forEach(carte => {
-            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
-        });
-    }
+    // #293 — « Masquer ce qui est déjà dans ce trimestre » (même préférence qu'avant).
+    const rangeesBibliotheque = BibliothequeUI.filtrerParDejaPresent(data.rangeesBibliotheque);
+    const toutesMasquees = data.rangeesBibliotheque.length > 0 && rangeesBibliotheque.length === 0;
+    const horsBibliotheque = data.rangeesTrimestre.filter(r => !r.dansBibliotheque).length;
 
-    const boutonsApresSection1 = `
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button data-action="ajouterMesEchellesALaBibliotheque" class="btn btn-principal btn-mini">Ajouter mes échelles à la bibliothèque</button>
-            <button data-action="exporterEchelles" class="btn btn-secondaire btn-mini">Exporter toutes mes échelles (JSON)</button>
-            <button data-action="ouvrirFilePickerImportEchelles" class="btn btn-secondaire btn-mini">Importer des échelles (JSON)</button>
-            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
-            <input type="file" id="fichier-import-echelles-modal" accept=".json" style="display: none;" data-on-change="importerEchelles">
-        </div>`;
-
-    // Section import trimestre
-    let sectionImportTrimestre = '';
-    if (data.sectionImportTrimestre) {
-        const trimestres = data.sectionImportTrimestre.trimestres;
-        sectionImportTrimestre = `
-            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre" aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h4>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <select id="selectTrimestreImportEchelles" class="controle-form" style="flex: 1; min-width: 200px;">
-                        <option value="">-- Choisir un trimestre --</option>
-                        ${trimestres.map(t => `<option value="${echapperHtml(t.cle)}">${echapperHtml(t.nom)} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})</option>`).join('')}
-                    </select>
-                    <button data-action="afficherEchellesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les échelles</button>
-                    <button data-action="importerToutEchellesTrimestreModal" class="btn btn-principal btn-compact" data-tooltip="import-trimestre-tout-echelles">Tout importer</button>
-                </div>
-                <div id="previewEchellesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
-            </div>`;
-    }
-
-    // Filtres Section 2 : #327 — filtres discipline ET pratique retirés (incohérents
-    // avec l'organisation par dossiers). La zone « Mes dossiers » (repliable) tient
-    // lieu de tête de section ; le toggle « masquer déjà présents » (#293) est conservé.
-    const filtresHTML = BibliothequeUI.repertoires.genererZone('echelles') +
-        BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeEchelles');
-
-    // Section 2 — #293 (masquer déjà présents) puis #327 (groupage par dossier).
-    const cartesAffichables = BibliothequeUI.filtrerParDejaPresent(data.cartesSection2);
-    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
-
-    let contenuSection2 = '';
-    if (cartesAffichables.length === 0) {
-        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle disponible à ajouter</p>';
-    } else if (data.repsEchelles && data.repsEchelles.length === 0) {
-        // Aucun dossier → liste à plat (comportement d'origine)
-        cartesAffichables.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
-    } else {
-        // Dossier → select compact ; « Non classées » → cartes (ce qui reste à ranger).
-        const groupes = window.repertoiresBibliotheque.grouper(cartesAffichables, 'echelles');
-        groupes.forEach(g => {
-            const cleGroupe = g.id || '__nonclasse__';
-            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
-            contenuSection2 += enteteGroupe(g.titre);
-            if (g.id) {
-                contenuSection2 += BibliothequeUI.repertoires.renderLigneDossierSelect('echelles', g);
-            } else {
-                g.items.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
-            }
-            contenuSection2 += `</div>`;
-        });
-    }
-
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: 'modalBibliothequeEchelles',
-        titre: "Bibliothèque d'échelles de performance",
-        sousTitre: 'Gère les échelles de performance de ta sélection.',
-        onFermer: 'fermerModalBibliothequeEchelles',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+        titre: 'Bibliothèque d\'échelles de performance',
+        aide: 'bibliotheque-fonctionnement',
+        menuFichiers: [
+            { label: 'Importer des échelles', action: 'ouvrirFilePickerImportEchelles' },
+            { label: 'Importer le partage d\'une ou d\'un collègue', action: 'partageImport.ouvrirSelecteurFichier' },
+            { separateur: true },
+            { label: 'Exporter les échelles de ce trimestre', action: 'exporterEchelles' },
+            { note: 'Fichiers .json et .lcz' }
+        ],
+        champsFichier: [{ id: 'fichier-import-echelles-modal', accept: '.json', onChange: 'importerEchelles' }],
+        avantColonnes: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.echellesDansBibliotheque,
+            mots: { selection: 'Dans ce trimestre', bibliotheque: 'Dans ta bibliothèque', retirer: 'Retirer de ce trimestre (données conservées)' },
             actions: {
                 retirer: 'retirerEchelleDeBibliotheque',
                 supprimer: 'supprimerEchelleDefinitivement',
                 supprimerPartagee: 'supprimerEchelleDeBibliothequePartagee'
             }
         }),
-        titreSection1: 'Échelles dans ta sélection',
-        contenuIdListe1: 'listeEchellesDansBibliotheque',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: boutonsApresSection1,
-        sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Échelles disponibles à ajouter à ta sélection',
-        filtresSection2: filtresHTML,
-        contenuIdListe2: 'listeEchellesDisponibles',
-        contenuSection2: contenuSection2,
-        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('echelle') : ''
+        trimestre: {
+            titre: 'Dans ce trimestre',
+            phrase: 'Les échelles que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+            idListe: 'listeEchellesDansBibliotheque',
+            rangees: data.rangeesTrimestre,
+            vide: 'Aucune échelle dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle échelle ».',
+            boutonEntete: horsBibliotheque >= 2
+                ? { label: 'Tout garder dans ma bibliothèque', action: 'ajouterMesEchellesALaBibliotheque' }
+                : null
+        },
+        bibliotheque: {
+            titre: 'Dans ta bibliothèque',
+            // Sans « C'est d'ici que tu peux les partager. » : même raison qu'au lot 1 (le partage
+            // est sur la rangée du trimestre ; l'export depuis la bibliothèque est inscrit au plan).
+            phrase: 'Les échelles que tu gardes pour tous tes trimestres.',
+            idListe: 'listeEchellesDisponibles',
+            compte: data.rangeesBibliotheque.length,
+            rangees: rangeesBibliotheque,
+            vide: toutesMasquees
+                ? 'Toutes les échelles de ta bibliothèque sont déjà dans ce trimestre.'
+                : 'Ta bibliothèque est vide. Garde-y une échelle de ce trimestre pour la retrouver plus tard.',
+            videFiltre: 'Aucune échelle dans ce dossier.',
+            dossiers: {
+                biblio: 'echelles',
+                reps: data.repsEchelles.map(r => ({ id: r.id, nom: r.nom })),
+                refreshFn: 'afficherBibliothequeEchelles',
+                masquerLibelle: 'Masquer ce qui est déjà dans ce trimestre',
+                labelPluriel: 'échelles'
+            },
+            // #1155 — au pied de « Dans ta bibliothèque », et non de « Dans ce trimestre » comme pour les
+            // grilles : l'import d'échelles d'un autre trimestre écrit dans la bibliothèque
+            // (`ajouterEchelleALaBibliotheque`), pas dans ce trimestre. Ses mots ne changent pas.
+            importAutreTrimestre: {
+                titre: 'Importer depuis un autre trimestre',
+                selectId: 'selectTrimestreImportEchelles',
+                apercuId: 'previewEchellesTrimestre',
+                options: data.trimestresDisponibles.map(t => ({ value: t.cle, label: `${t.nom} (${t.nombre} échelle${t.nombre > 1 ? 's' : ''})` })),
+                actionVoir: 'afficherEchellesTrimestreModal',
+                libelleVoir: 'Voir les échelles',
+                actionTout: 'importerToutEchellesTrimestreModal',
+                tooltipTout: 'import-trimestre-tout-echelles',
+                aide: 'import-autre-trimestre'
+            },
+            partages: window.partageSection ? partageSection.rangeesDeuxColonnes('echelle') : null
+        }
     });
 }
 
@@ -1234,7 +1244,7 @@ async function ajouterEchelleIndividuelle(id) {
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('echellesTemplates'));   // lot F : geste hors témoin (ajouterEchelleIndividuelle)
 
         if (nomEnConflit) {
-            alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+            alert(`« ${nomEnConflit} » est déjà dans ce trimestre.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
             return;
         }
         if (sourceIntrouvable) {
@@ -1256,7 +1266,7 @@ async function ajouterEchelleIndividuelle(id) {
             return;
         }
 
-        notifications.succes('Échelle ajoutée à ta sélection !');
+        notifications.succes('Échelle ajoutée à ce trimestre !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de l\'échelle');
@@ -1298,15 +1308,17 @@ async function supprimerEchelleDefinitivement(id) {
     const echelle = echelles.find(e => e.id === id);
     if (!echelle) return;
 
+    //
+    // #1155 (25 oct. 2026) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE : la décision de Grégoire pour les
+    // grilles (#1154), étendue par Cowork aux échelles (consigne du lot 2, § 3.2). Ce chemin le
+    // retirait aussi ; la fenêtre en deux colonnes présente deux exemplaires séparés, et
+    // « ← Utiliser dans ce trimestre » ramène l'échelle. La question le dit
+    // (`_phraseExemplaireEchelle`, dans `supprimerOuRemplacerEchelle`).
+    // Stock : les échelles déjà supprimées ont perdu le leur ; rien ne se répare.
     const resultat = await supprimerOuRemplacerEchelle(id, {
         questionSimple: `Supprimer définitivement l'échelle «${echelle.nom}» ?\n\nCette action est irréversible.`
     });
     if (!resultat.supprimee) return;
-
-    // Suppression du store partagé
-    if (typeof retirerEchelleDeLaBibliotheque === 'function') {
-        await retirerEchelleDeLaBibliotheque(id);
-    }
 
     // Rafraîchir UI
     fermerModalBibliothequeEchelles();
@@ -1377,6 +1389,37 @@ async function ajouterMesEchellesALaBibliotheque() {
 }
 
 /**
+ * #1155 — « Garder dans ma bibliothèque → » : pour UNE échelle, ce que « Tout garder dans ma
+ * bibliothèque » fait pour toutes — la même écriture (`importerEchellesDansBibliotheque`). Sans la
+ * confirmation du geste groupé : il n'ajoute qu'un exemplaire, qui se supprime d'un geste.
+ * @param {string} id - ID de l'échelle du trimestre
+ */
+async function garderEchelleDansBibliotheque(id) {
+    try {
+        const echelles = await db.get(cle('echellesTemplates')) || [];
+        const echelle = echelles.find(e => e.id === id);
+        if (!echelle) {
+            alert('Échelle introuvable');
+            return;
+        }
+
+        const resultat = await importerEchellesDansBibliotheque([echelle]);
+
+        fermerModalBibliothequeEchelles();
+        await afficherBibliothequeEchelles();
+
+        if (resultat.ajoutees > 0) {
+            notifications.succes('Échelle ajoutée à la bibliothèque !');
+        } else {
+            notifications.info('Cette échelle était déjà dans la bibliothèque.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
+        alert('Erreur lors de l\'ajout de l\'échelle à la bibliothèque.');
+    }
+}
+
+/**
  * ✅ AJOUT (28 janvier 2026) : Dupliquer une échelle dans la bibliothèque
  * @param {string} id - ID de l'échelle à dupliquer
  */
@@ -1438,28 +1481,29 @@ function afficherEchellesTrimestreModal() {
         : [];
 
     if (echelles.length === 0) {
-        preview.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucune échelle trouvée.</p>';
+        preview.innerHTML = '<p class="biblio2-phrase">Aucune échelle trouvée.</p>';
         preview.classList.remove('u-hide');
         return;
     }
 
-    let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
+    // #1155 — l'aperçu vit dans la fenêtre en deux colonnes : des classes, aucun style en ligne.
+    let html = '<ul class="biblio2-import-liste">';
     echelles.forEach(echelle => {
         const nbNiveaux = echelle.niveaux?.length || 0;
+        const auteur = echelle.auteurOriginal ? ' · ' + echapperHtml(echelle.auteurOriginal) : '';
         html += `
-            <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
+            <li class="biblio2-import-rangee">
                 <div>
-                    <strong>${echapperHtml(echelle.nom || 'Sans titre')}</strong>
-                    ${echelle.discipline ? ` - ${echapperHtml(echelle.discipline)}` : ''}
-                    <br><small style="color: var(--gris-moyen);">${nbNiveaux} niveau(x)${echelle.auteurOriginal ? ' • ' + echapperHtml(echelle.auteurOriginal) : ''}</small>
+                    <strong>${echapperHtml(echelle.nom || 'Sans titre')}</strong>${echelle.discipline ? ` - ${echapperHtml(echelle.discipline)}` : ''}
+                    <p class="biblio2-rangee-meta">${nbNiveaux} niveau${nbNiveaux > 1 ? 'x' : ''}${auteur}</p>
                 </div>
-                <button data-action="importerUneEchelleTrimestre" data-param="${cleSelectionnee}" data-param2="${echelle.id}" class="btn btn-confirmer btn-tres-compact">
+                <button type="button" data-action="importerUneEchelleTrimestre" data-param="${echapperAttribut(cleSelectionnee)}" data-param2="${echapperAttribut(echelle.id)}" class="btn btn-secondaire">
                     Importer
                 </button>
-            </div>
+            </li>
         `;
     });
-    html += '</div>';
+    html += '</ul>';
 
     preview.innerHTML = html;
     preview.classList.remove('u-hide');
@@ -3308,6 +3352,7 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
     const echelle = echelles.find(e => e && e.id === id);
     if (!echelle) return { supprimee: false };
     const nomEchelle = echelle.nom || 'cette échelle';
+    const phraseBibliotheque = await _phraseExemplaireEchelle(echelle);
 
     const nb = compterPorteursEchelleDans(id, await lireMagasinsEchelle());
     let successeur = null;
@@ -3317,7 +3362,7 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
         // Témoin négatif : rien ne la nomme — la question d'avant, sans un mot de plus.
         // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
         if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('echelle'))) return { supprimee: false, annulee: true };
-        if (!confirm(options.questionSimple || 'Supprimer cette échelle ?')) return { supprimee: false, annulee: true };
+        if (!confirm((options.questionSimple || 'Supprimer cette échelle ?') + phraseBibliotheque)) return { supprimee: false, annulee: true };
     } else {
         if (window.estTrimestreArchive && window.estTrimestreArchive()) {
             alert(`Ce trimestre est clos : remplacer l'échelle «${nomEchelle}» toucherait ${decrirePorteursEchelle(nb)}, dont des notes déjà remises.\n\nRien n'a été modifié.`);
@@ -3338,7 +3383,7 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
         }
         // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
         if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('echelle'))) return { supprimee: false, annulee: true };
-        const choix = prompt(question + '\nEntre le numéro, ou Annuler pour ne rien changer :');
+        const choix = prompt(question + (phraseBibliotheque ? phraseBibliotheque.slice(1) + '\n' : '') + '\nEntre le numéro, ou Annuler pour ne rien changer :');
         const numero = parseInt(choix, 10);
         if (!numero || numero < 1 || numero > candidats.length) return { supprimee: false, annulee: true, nb };
         successeur = candidats[numero - 1];
@@ -3357,6 +3402,19 @@ async function supprimerOuRemplacerEchelle(id, options = {}) {
         return restants;
     }, [], { geste: 'Supprimer l\'échelle' });
     return { supprimee, nb: ecrits, successeur };
+}
+
+/**
+ * #1155 (25 oct. 2026) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE, ET LES DEUX QUESTIONS DE LA
+ * SUPPRESSION (sans porteur : la confirmation ; avec : le choix du remplaçant) LE DISENT quand il y
+ * en a un, selon la relation des deux colonnes (`BibliothequeUI.lieeAExemplaire`). Aucun des trois
+ * appelants de `supprimerOuRemplacerEchelle` ne le retire : la phrase est vraie par tous les chemins.
+ * @returns {Promise<string>} la phrase, précédée d'une ligne vide, ou ''.
+ */
+async function _phraseExemplaireEchelle(echelle) {
+    if (typeof obtenirToutesLesEchellesBibliotheque !== 'function') return '';
+    const biblio = await obtenirToutesLesEchellesBibliotheque() || [];
+    return biblio.some(ex => BibliothequeUI.lieeAExemplaire(echelle, ex)) ? '\n\nSon exemplaire de ta bibliothèque reste.' : '';
 }
 
 /** Le message d'après dit ce qui est parti — et, s'il y a eu remplacement, ce qui a suivi. */
@@ -3696,6 +3754,7 @@ window.retirerEchelleDeBibliotheque = retirerEchelleDeBibliotheque;
 window.fermerModalBibliothequeEchelles = fermerModalBibliothequeEchelles;
 window.ajouterEchelleIndividuelle = ajouterEchelleIndividuelle;
 window.dupliquerEchelleBibliotheque = dupliquerEchelleBibliotheque;
+window.garderEchelleDansBibliotheque = garderEchelleDansBibliotheque;      // #1155
 window.supprimerEchelleDefinitivement = supprimerEchelleDefinitivement;
 window.supprimerEchelleDeBibliothequePartagee = supprimerEchelleDeBibliothequePartagee;
 window.ajouterMesEchellesALaBibliotheque = ajouterMesEchellesALaBibliotheque;

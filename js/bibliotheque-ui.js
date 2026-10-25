@@ -1813,10 +1813,32 @@
                    menu: [geste | {separateur}] }
        dossiers = { biblio, reps: [{id, nom}], refreshFn, masquerLibelle }
        partages = { titre, phrase, rangees }
+
+       #1155 (lot 2, échelles et cartouches) — trois options, sans rien changer à ce que les
+       grilles reçoivent :
+         rangee.groupe : l'intertitre sous lequel la rangée se range (les cartouches, par grille) ;
+         bibliotheque.filtreGroupe = { libelle, tous, groupes: [noms] } : le menu qui filtre la
+           colonne par groupe, dans la barre, quand il n'y a pas de dossiers ;
+         bibliotheque.masquer = { libelle, refreshFn } : la case « Masquer… » de cette barre ;
+         importAutreTrimestre.phrase : une phrase sous la ligne d'import.
        ===================================================================== */
+
+    /**
+     * #1155 (consigne du lot 2, § 3.1) — UNE SEULE RELATION entre un élément du trimestre et un
+     * exemplaire de la bibliothèque, pour les trois fenêtres (grilles, échelles, cartouches), leurs
+     * deux colonnes et les questions de la suppression. Les deux passages ne laissent pas la même
+     * trace : « Garder → » conserve l'`id` ; « ← Utiliser » en donne un neuf et nomme la source dans
+     * `idOriginal`. Lire l'`id` seul d'un côté faisait proposer « Garder → » pour un élément venu de
+     * la bibliothèque (verdict du lot 1, § 5.2).
+     */
+    BibliothequeUI.lieeAExemplaire = function (item, exemplaire) {
+        if (!item || !exemplaire || !exemplaire.id) return false;
+        return item.id === exemplaire.id || item.idOriginal === exemplaire.id;
+    };
 
     var _etatsRetenusDeuxColonnes = {};
     var _filtresDossierDeuxColonnes = {};
+    var _filtresGroupeDeuxColonnes = {};
     // Une reconstruction suit sa fermeture dans la même suite d'`await` ; au-delà,
     // l'état retenu ne décrit plus ce que l'utilisateur regarde.
     var DELAI_ETAT_RETENU = 10000;
@@ -1917,7 +1939,9 @@
     }
 
     function _rangeeCachee(r, colonne, ctx) {
-        if (colonne !== 'bibliotheque' || ctx.filtre === '__tous__') return false;
+        if (colonne !== 'bibliotheque') return false;
+        if (ctx.filtreGroupe && r.groupe !== ctx.filtreGroupe) return true;
+        if (ctx.filtre === '__tous__') return false;
         return (r.dossier || '__nonclasse__') !== ctx.filtre;
     }
 
@@ -1928,6 +1952,7 @@
         var dossier = colonne === 'bibliotheque'
             ? ' data-dossier="' + echapperAttribut(r.dossier || '__nonclasse__') + '"'
             : '';
+        if (r.groupe != null) dossier += ' data-groupe="' + echapperAttribut(r.groupe) + '"';
         return '<li class="biblio2-rangee"' + _ancreItem(r.id) + dossier +
                 (_rangeeCachee(r, colonne, ctx) ? ' hidden' : '') + '>' +
             '<div class="biblio2-rangee-ligne">' +
@@ -1951,8 +1976,23 @@
         '</li>';
     }
 
+    /** #1155 — l'intertitre d'un groupe (les cartouches, par grille), caché avec ses rangées. */
+    function _renderIntertitreGroupe(nom, colonne, ctx) {
+        var cache = colonne === 'bibliotheque' && ctx.filtreGroupe && ctx.filtreGroupe !== nom;
+        return '<li class="biblio2-groupe" data-groupe="' + echapperAttribut(nom) + '"' + (cache ? ' hidden' : '') + '>' +
+            '<h4 class="biblio2-intertitre">' + echapperHtml(nom) + '</h4></li>';
+    }
+
     function _renderListe(rangees, colonne, ctx, idListe, vide, videFiltre) {
-        var items = rangees.map(function (r, i) { return _renderRangee(r, colonne, ctx, i); }).join('');
+        var groupeCourant = null;
+        var items = rangees.map(function (r, i) {
+            var intertitre = '';
+            if (r.groupe != null && r.groupe !== groupeCourant) {
+                groupeCourant = r.groupe;
+                intertitre = _renderIntertitreGroupe(r.groupe, colonne, ctx);
+            }
+            return intertitre + _renderRangee(r, colonne, ctx, i);
+        }).join('');
         if (!rangees.length && vide) {
             items = '<li><p class="biblio2-vide">' + echapperHtml(vide) + '</p></li>';
         }
@@ -1987,6 +2027,7 @@
                       '<span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>'
                     : '') +
             '</div>' +
+            (o.phrase ? '<p class="biblio2-phrase">' + echapperHtml(o.phrase) + '</p>' : '') +
             '<div id="' + echapperAttribut(o.apercuId) + '" class="u-hide biblio2-import-apercu"></div>' +
         '</details>';
     }
@@ -2022,12 +2063,7 @@
                 '<select class="controle-form biblio2-select" aria-label="Dossier affiché"' +
                     ' data-on-change="BibliothequeUI.choisirDossier" data-param="' + echapperAttribut(ctx.modalId) + '">' +
                     options + '</select>' +
-                '<label class="biblio-toggle-deja-present biblio2-case">' +
-                    '<input type="checkbox" data-on-change="BibliothequeUI.basculerMasquerDejaPresent"' +
-                        ' data-refresh-fn="' + echapperAttribut(d.refreshFn) + '"' +
-                        (BibliothequeUI.estMasquerDejaPresentActif() ? ' checked' : '') + '> ' +
-                    echapperHtml(d.masquerLibelle) +
-                '</label>' +
+                _renderCaseMasquer(d.masquerLibelle, d.refreshFn) +
             '</div>' +
             '<div class="biblio2-dossiers" id="' + echapperAttribut(ctx.modalId) + '-dossiers" data-biblio="' + b + '"' +
                 (gestionOuverte ? '' : ' hidden') + '>' +
@@ -2042,6 +2078,59 @@
                     ' data-param="' + echapperAttribut(ctx.modalId) + '">Fermer</button>' +
             '</div>';
     }
+
+    /** La case « Masquer ce qui est déjà dans ce trimestre » (même clé de préférence pour toutes). */
+    function _renderCaseMasquer(libelle, refreshFn) {
+        return '<label class="biblio-toggle-deja-present biblio2-case">' +
+            '<input type="checkbox" data-on-change="BibliothequeUI.basculerMasquerDejaPresent"' +
+                ' data-refresh-fn="' + echapperAttribut(refreshFn) + '"' +
+                (BibliothequeUI.estMasquerDejaPresentActif() ? ' checked' : '') + '> ' +
+            echapperHtml(libelle) +
+        '</label>';
+    }
+
+    /**
+     * #1155 — la barre d'une bibliothèque sans dossiers (les cartouches) : le menu qui filtre par
+     * groupe (« Filtrer par grille »), puis la case « Masquer… ».
+     */
+    function _renderBarreGroupes(col, ctx) {
+        var f = col.filtreGroupe;
+        var html = '<div class="biblio2-barre">';
+        if (f) {
+            var options = [['', f.tous]].concat((f.groupes || []).map(function (g) { return [g, g]; }))
+                .map(function (o) {
+                    return '<option value="' + echapperAttribut(o[0]) + '"' + (o[0] === (ctx.filtreGroupe || '') ? ' selected' : '') + '>' +
+                        echapperHtml(o[1]) + '</option>';
+                }).join('');
+            html += '<select class="controle-form biblio2-select" aria-label="' + echapperAttribut(f.libelle) + '"' +
+                ' title="' + echapperAttribut(f.libelle) + '"' +
+                ' data-on-change="BibliothequeUI.choisirGroupe" data-param="' + echapperAttribut(ctx.modalId) + '">' +
+                options + '</select>';
+        }
+        if (col.masquer) html += _renderCaseMasquer(col.masquer.libelle, col.masquer.refreshFn);
+        return html + '</div>';
+    }
+
+    function _appliquerFiltreGroupe(modal, filtre) {
+        var liste = modal.querySelector('.biblio2-panneau--bibliotheque .biblio2-liste');
+        if (!liste) return;
+        var visibles = 0;
+        Array.prototype.forEach.call(liste.querySelectorAll('.biblio2-rangee, .biblio2-groupe'), function (li) {
+            var cache = !!filtre && li.getAttribute('data-groupe') !== filtre;
+            li.hidden = cache;
+            if (!cache && li.classList.contains('biblio2-rangee')) visibles++;
+        });
+        var videFiltre = liste.querySelector('.biblio2-vide-filtre');
+        if (videFiltre) videFiltre.hidden = !(liste.querySelector('.biblio2-rangee') && !visibles);
+    }
+
+    /** #1155 — « Filtrer par grille » : ne garde dans la colonne de la bibliothèque que ce groupe. */
+    BibliothequeUI.choisirGroupe = function (modalId, select) {
+        var modal = document.getElementById(modalId);
+        if (!modal || !select) return;
+        _filtresGroupeDeuxColonnes[modalId] = select.value;
+        _appliquerFiltreGroupe(modal, select.value);
+    };
 
     function _appliquerFiltreDossier(modal, filtre) {
         var liste = modal.querySelector('.biblio2-panneau--bibliotheque .biblio2-liste');
@@ -2086,6 +2175,18 @@
         zone.hidden = true;
     };
 
+    /** La barre d'une colonne : les dossiers, sinon (#1155) le filtre par groupe et la case « Masquer… ». */
+    function _renderBarre(col, ctx) {
+        if (col.dossiers) return _renderBarreDossiers(col.dossiers, ctx);
+        if (col.filtreGroupe || col.masquer) return _renderBarreGroupes(col, ctx);
+        return '';
+    }
+
+    /** La phrase d'une colonne filtrée que le filtre vide, seulement si la colonne a un filtre. */
+    function _videFiltre(col) {
+        return (col.dossiers || col.filtreGroupe) ? col.videFiltre : null;
+    }
+
     function _renderColonne(col, colonne, ctx) {
         col = col || {};
         var rangees = col.rangees || [];
@@ -2105,8 +2206,8 @@
                     : '') +
             '</div>';
 
-        if (col.dossiers) html += _renderBarreDossiers(col.dossiers, ctx);
-        html += _renderListe(rangees, colonne, ctx, col.idListe, col.vide, col.dossiers ? col.videFiltre : null);
+        html += _renderBarre(col, ctx);
+        html += _renderListe(rangees, colonne, ctx, col.idListe, col.vide, _videFiltre(col));
         if (col.importAutreTrimestre) html += _renderImportAutreTrimestre(col.importAutreTrimestre, ctx);
 
         var p = col.partages;
@@ -2140,6 +2241,14 @@
             reps.some(function (r) { return r.id === filtre; });
         _filtresDossierDeuxColonnes[modalId] = connu ? filtre : '__tous__';
         return _filtresDossierDeuxColonnes[modalId];
+    }
+
+    /** #1155 — le groupe filtré (« Filtrer par grille »), ou aucun s'il n'existe plus. */
+    function _filtreGroupeValide(modalId, filtreGroupe) {
+        var filtre = _filtresGroupeDeuxColonnes[modalId] || '';
+        if (!filtreGroupe || (filtreGroupe.groupes || []).indexOf(filtre) < 0) filtre = '';
+        _filtresGroupeDeuxColonnes[modalId] = filtre;
+        return filtre;
     }
 
     /** L'en-tête, sur une ligne : le titre, l'aide, « Importer ou exporter ▾ », la fermeture. */
@@ -2180,7 +2289,8 @@
             modalId: modalId,
             ouverts: new Set(etat ? etat.ouverts : []),
             replis: new Set(etat ? etat.replis : []),
-            filtre: _filtreValide(modalId, (biblio.dossiers && biblio.dossiers.reps) || [])
+            filtre: _filtreValide(modalId, (biblio.dossiers && biblio.dossiers.reps) || []),
+            filtreGroupe: _filtreGroupeValide(modalId, biblio.filtreGroupe)
         };
         var idTitre = modalId + '-titre';
 

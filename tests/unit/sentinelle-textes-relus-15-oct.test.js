@@ -59,6 +59,8 @@ describe('Bloc 1 — l\'aide du Comparateur', () => {
 });
 
 describe('Bloc 2 — l\'aide de l\'import d\'un trimestre à l\'autre', () => {
+    // Les bibliothèques en deux colonnes : leur section d'import est une configuration du composant.
+    const EN_DONNEES = ['js/grilles.js', 'js/echelles.js', 'js/cartouches.js'];
     const BIBLIOTHEQUES = [
         ['js/grilles.js', 'importerToutGrillesTrimestreModal', 'grilles'],
         ['js/echelles.js', 'importerToutEchellesTrimestreModal', 'échelles'],
@@ -81,22 +83,26 @@ describe('Bloc 2 — l\'aide de l\'import d\'un trimestre à l\'autre', () => {
         expect(fenetre).toContain('Importer crée une copie.');
         expect(fenetre).toContain('« (importée) »');
         for (const [f] of BIBLIOTHEQUES) {
-            if (f === 'js/grilles.js') continue;   // #1154 : en données, voir l'essai qui suit
+            if (EN_DONNEES.includes(f)) continue;   // #1154, #1155 : en données, voir plus bas
             expect(lire(f), f).toMatch(/Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre"/);
         }
         // ↻ #1154 (25 oct. 2026) : la bibliothèque des grilles passe en deux colonnes ; « Importer depuis un
         // autre trimestre » y est dessinée par le composant (`_renderImportAutreTrimestre`, bibliotheque-ui.js),
         // à qui grilles.js passe ses mots, son aide et son action. Même titre, même bouton d'aide.
         // BREAK-TEST (25 oct.) : `aide: 'import-autre-trimestre'` retiré de grilles.js → ROUGE.
-        expect(lire('js/grilles.js')).toMatch(/importAutreTrimestre: \{\s*titre: 'Importer depuis un autre trimestre',/);
-        expect(lire('js/grilles.js')).toContain("aide: 'import-autre-trimestre'");
+        // ↻ #1155 (25 oct. 2026) : les échelles et les cartouches passent en deux colonnes à leur tour, même forme.
+        for (const f of EN_DONNEES) {
+            expect(lire(f), f).toMatch(/importAutreTrimestre: \{\s*titre: 'Importer depuis un autre trimestre',/);
+            expect(lire(f), f).toContain("aide: 'import-autre-trimestre'");
+        }
         expect(lire('js/bibliotheque-ui.js')).toMatch(/class="btn-aide-contextuelle" data-aide="' \+ echapperAttribut\(o\.aide\)/);
     });
 
     it('chaque « Tout importer » porte sa bulle, avec le nom de sa bibliothèque', () => {
         for (const [f, action, nom] of BIBLIOTHEQUES) {
-            // #1154 : les grilles passent l'action et la bulle en données au composant, qui écrit « Tout importer ».
-            const m = f === 'js/grilles.js'
+            // #1154, #1155 : les fenêtres en deux colonnes passent l'action et la bulle en données au composant,
+            // qui écrit « Tout importer ».
+            const m = EN_DONNEES.includes(f)
                 ? lire(f).match(new RegExp(`actionTout: '${action}',\\s*tooltipTout: '([\\w-]+)'`))
                 : lire(f).match(new RegExp(`data-action="${action}"[^>]*data-tooltip="([\\w-]+)">Tout importer`));
             expect(m, f).toBeTruthy();

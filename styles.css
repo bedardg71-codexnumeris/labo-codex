@@ -5426,6 +5426,12 @@ body:not(.mode-clair) .badge-source--partage {
     border-bottom: 1px solid var(--bordure-claire);
 }
 .biblio2-import-rangee:last-child { border-bottom: none; }
+/* #1155 — les cartouches d'un autre trimestre, par grille */
+.biblio2-import-groupe { margin: 10px 0 6px; font-size: 0.9rem; color: var(--texte-secondaire); }
+.biblio2-import-mention { font-weight: 400; font-style: italic; }
+
+/* #1155 — l'intertitre d'un groupe dans une colonne (les cartouches, par grille) */
+.biblio2-groupe .biblio2-intertitre { margin: 6px 0 0; color: var(--texte-secondaire); }
 
 /* Le bandeau des doublons (#291), dans la fenêtre : ses boutons à 44 px */
 .biblio2-fenetre .biblio-doublon-action { min-height: 44px; }
