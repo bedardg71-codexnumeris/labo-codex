@@ -2685,6 +2685,28 @@
     }
 
     /**
+     * La pastille de la copie OUVERTE, lue dans son état d'origine (`dataset.origClasse`) : déjà évaluée,
+     * ÉVALUÉ ; « Incomplet ; travail en cours », Incomplet ; sinon EN COURS. Lue à la sélection d'une copie,
+     * et par la case du statut incomplet (evaluation-sauvegarde.js) quand elle change l'état d'origine.
+     * @param {HTMLElement} pill - `.travaux-badge-pill` de la copie ouverte
+     * @param {string} [classe] - son état d'origine ; par défaut `pill.dataset.origClasse`
+     */
+    function afficherPastilleActive(pill, classe = pill.dataset.origClasse) {
+        if (classe === 'evalue') {
+            pill.textContent = 'ÉVALUÉ';
+            pill.className = 'travaux-badge-pill evalue';
+        } else if (classe === 'incomplet') {
+            pill.textContent = 'Incomplet';
+            pill.className = 'travaux-badge-pill incomplet';
+        } else {
+            pill.textContent = 'EN COURS';
+            pill.className = 'travaux-badge-pill en-cours';
+        }
+        if (classe === 'incomplet') pill.title = 'Incomplet ; travail en cours';
+        else pill.removeAttribute('title');
+    }
+
+    /**
      * Genere un badge compact pour un fichier importe
      * @param {Object} f - Le fichier
      * @returns {string} HTML
@@ -3423,18 +3445,7 @@
                     pill.dataset.origTexte = pill.textContent;
                     pill.dataset.origClasse = pill.className.replace('travaux-badge-pill', '').trim();
                 }
-                // Si déjà évalué, afficher ÉVALUÉ (vert) au lieu de EN COURS
-                if (pill.dataset.origClasse === 'evalue') {
-                    pill.textContent = 'ÉVALUÉ';
-                    pill.className = 'travaux-badge-pill evalue';
-                } else if (pill.dataset.origClasse === 'incomplet') {
-                    // Statut incomplet (25 oct. 2026) : la copie ouverte le garde
-                    pill.textContent = 'Incomplet';
-                    pill.className = 'travaux-badge-pill incomplet';
-                } else {
-                    pill.textContent = 'EN COURS';
-                    pill.className = 'travaux-badge-pill en-cours';
-                }
+                afficherPastilleActive(pill);
             } else if (pill.dataset.origTexte) {
                 // Restaurer l'etat d'origine
                 pill.textContent = pill.dataset.origTexte;
@@ -7667,6 +7678,10 @@
 
     window.travauxUI = {
         initialiser: initialiserModuleTravaux,
+        // Statut incomplet (retouche du 25 oct. 2026) : décochée, la pastille de la copie ouverte reprend
+        // l'état que sa sélection calcule — ces deux-là, pas une recopie.
+        statutPastilleFichier: statutPastilleFichier,
+        afficherPastilleActive: afficherPastilleActive,
         // #608 — exposés pour la sentinelle. Le souligné dit « pas une API » :
         // les deux points de décision de la chaîne « jeton de reprise » sont
         // enfouis dans une modale et dans un balayage post-import, que Vitest ne

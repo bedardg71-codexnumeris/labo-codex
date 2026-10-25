@@ -242,3 +242,70 @@ test('statut incomplet · remplacer la copie garde le statut ; décocher la rend
     expect(final.note).toBeCloseTo(72.5, 1);       // (65 + 80) / 2
     expect(sansBruit(erreurs)).toEqual([]);
 });
+
+// RETOUCHE (verdict de Cowork, 25 oct. 2026) : cochée APRÈS des niveaux, la case les laisse en base, masqués —
+// mais le PDF de l'élève n'en montre aucun, exactement comme une copie cochée avant tout niveau. Et décochée, la
+// pastille reprend l'état réel de la copie (« Annoté », « Évalué »), pas « Importé » d'office.
+const pastille = (page) => page.evaluate(() => {
+    const p = document.querySelector('.annot-badge.actif .travaux-badge-pill');
+    return p ? { texte: p.textContent.trim(), origine: p.dataset.origTexte || null } : null;
+});
+
+test('statut incomplet · cochée après des niveaux : le PDF n\'en montre aucun ; décochée, la pastille reprend l\'état réel', async ({ page }) => {
+    const erreurs = await monter(page);
+    // La copie d'Alpha est annotée (un trait) : son état réel, avant toute évaluation, est « Annoté ».
+    await page.evaluate(() => {
+        window.db.setSync(window.cle('annotationsTravaux'), [{
+            id: 'AN_A_P1', fichierId: 'FT_A_P1', pages: { 1: { strokes: [{ points: [{ x: 1, y: 1 }, { x: 2, y: 2 }] }] } }
+        }]);
+    });
+    await ouvrirEnEvaluer(page, 'FT_A_P1');
+    expect(await pastille(page)).toEqual({ texte: 'EN COURS', origine: 'Annoté' });
+
+    // Cochée puis décochée avant tout niveau : « Annoté » revient, pas « Importé ».
+    await page.locator('#travailEnCours').click();
+    expect(await pastille(page)).toEqual({ texte: 'Incomplet', origine: 'Incomplet' });
+    await laisserEnregistrer(page);
+    await page.locator('#travailEnCours').click();
+    expect(await pastille(page)).toEqual({ texte: 'EN COURS', origine: 'Annoté' });
+    await laisserEnregistrer(page);
+
+    // Des niveaux saisis (D partout), PUIS la case.
+    for (const id of ['eval_c1', 'eval_c2']) await page.locator('#' + id).selectOption('D');
+    await laisserEnregistrer(page);
+    await page.locator('#travailEnCours').click();
+    await laisserEnregistrer(page);
+
+    const lu = await page.evaluate(({ T, ALPHA }) => {
+        const evals = window.db.getSync(T + '_evaluationsSauvegardees', []);
+        const e = evals.find(x => x.etudiantDA === ALPHA && x.productionId === 'p1');
+        const f = window.db.getSync(T + '_fichiersTravaux', []).find(x => x.id === 'FT_A_P1');
+        const a = window.travauxStockage.obtenirAnnotationFichier('FT_A_P1');
+        const fb = window.syntheseRetroactionData.construireFeedback(e, f, a);
+        // La même copie cochée AVANT tout niveau : sans critère en base (mesuré au premier test).
+        const avant = window.syntheseRetroactionData.construireFeedback(Object.assign({}, e, { criteres: [] }), f, a);
+        // L'historique d'une copie SUIVANTE d'Alpha : le brouillon y passe sans ses niveaux.
+        const hist = window.syntheseRetroactionData.historiqueAnterieur(evals, { da: ALPHA, idCopie: 'COPIE_SUIVANTE', date: '2099-01-01' });
+        return {
+            enBase: { travailEnCours: e.travailEnCours === true, noteFinale: e.noteFinale, niveaux: (e.criteres || []).map(c => c.niveauSelectionne) },
+            criteres: fb.criteria.length,
+            overall: fb.overall.code,
+            identique: JSON.stringify(fb) === JSON.stringify(avant),
+            brouillonDansHistorique: (hist.find(x => x.id === e.id) || {}).criteres
+        };
+    }, { T, ALPHA });
+    // Rien n'est vidé en base : les niveaux restent, masqués (réversible).
+    expect(lu.enBase).toEqual({ travailEnCours: true, noteFinale: null, niveaux: ['D', 'D'] });
+    // Le PDF : ni critère, ni niveau — exactement la copie cochée avant tout niveau.
+    expect(lu.criteres).toBe(0);
+    expect(lu.overall).toBe('');
+    expect(lu.identique).toBe(true);
+    expect(lu.brouillonDansHistorique).toEqual([]);
+
+    // Décochée : les niveaux reviennent à l'écran, et la pastille dit l'état réel — « Évalué ».
+    await page.locator('#travailEnCours').click();
+    await expect(page.locator('#listeCriteresGrille1')).toBeVisible();
+    expect(await pastille(page)).toEqual({ texte: 'ÉVALUÉ', origine: 'Évalué' });
+    await laisserEnregistrer(page);
+    expect(sansBruit(erreurs)).toEqual([]);
+});

@@ -117,6 +117,47 @@ describe('Statut incomplet · les trois familles qui comptent des productions', 
     });
 });
 
+describe('Statut incomplet · le C des spécifications : la copie est mise de côté (décision de Grégoire, 25 oct., 11 h 30)', () => {
+    // Pendant le délai, la copie incomplète n'est ni acceptable ni non acceptable : le C des spécifications est
+    // celui de « pas de copie ». Mesuré par Cowork : déjà le cas (copies sans note écartées, dénominateur fixe —
+    // les travaux exigés du palier le plus haut). Ce banc le FIXE ; le code n'a pas changé.
+    const CONFIG = {
+        id: 'test',
+        typesTravaux: [{ id: 'analyse', nom: 'Analyse', seuilAcceptable: 70 }],
+        tableBundles: [{ noteFixe: 100, requis: { analyse: 2 } }, { noteFixe: 60, requis: { analyse: 1 } }]
+    };
+    function store(copieP2) {
+        const s = storeBase();
+        s.test_productions = [
+            { id: 'P1', titre: 'Analyse 1', type: 'analyse', ponderation: 50, dateEcheance: '2026-03-01', coursId: 'GC1' },
+            { id: 'P2', titre: 'Analyse 2', type: 'analyse', ponderation: 50, dateEcheance: '2026-03-15', coursId: 'GC1' }
+        ];
+        s.test_evaluationsSauvegardees = [evalue('E_BEA_1', BEA, 'P1')].concat(copieP2 ? [copieP2] : []);
+        return s;
+    }
+    const lire = (s) => {
+        const b = monter(s, { modules: ['js/entites/production-diagnostique.js', { chemin: 'js/pratiques/pratique-pan-specifications.js', internes: [] }] });
+        const inst = Object.create(b.win.PratiquePanSpecifications.prototype);
+        inst.config = clone(CONFIG);
+        const d = inst.detecterDefis(BEA);
+        return { completion: inst.calculerDetailsCompletion(BEA), acceptables: d.travauxAcceptables, prochainPalier: d.prochainPalier };
+    };
+
+    it('une copie incomplète laisse le C des spécifications identique à « pas de copie » (1/2), même portant une note et un verrou', () => {
+        const sansCopie = lire(store(null));
+        expect(sansCopie.completion).toEqual({ remis: 1, total: 2 });
+        expect(lire(store(incomplete('E_BEA_2', BEA, 'P2')))).toEqual(sansCopie);
+        // La copie incomplète porte une note acceptable et un verrou (un fichier importé, un ancien geste) : toujours de côté.
+        expect(lire(store(incomplete('E_BEA_2', BEA, 'P2', { noteFinale: 90, verrouillee: true, ponderationCouverte: 100 })))).toEqual(sansCopie);
+    });
+
+    it('TÉMOIN : sans le statut, la même copie notée et verrouillée est acceptable (2/2) — c\'est bien le statut qui la met de côté', () => {
+        const copie = incomplete('E_BEA_2', BEA, 'P2', { noteFinale: 90, verrouillee: true, ponderationCouverte: 100 });
+        delete copie.travailEnCours;
+        expect(lire(store(copie)).completion).toEqual({ remis: 2, total: 2 });
+    });
+});
+
 describe('Statut incomplet · les deux calculs de C des snapshots', () => {
     // Même montage que sentinelle-726 (les vrais prédicats de copie, snapshots.js réel).
     const ELEVES = [{ da: ANA, nom: 'Fictif', prenom: 'Ana', groupe: '01' }, { da: BEA, nom: 'Fictif', prenom: 'Bea', groupe: '01' }];
