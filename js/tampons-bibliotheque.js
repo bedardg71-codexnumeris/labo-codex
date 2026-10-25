@@ -15,6 +15,12 @@
 var MODAL_ID = 'modalBibliothequeTampons';
 var CLE_BIBLIO = 'bibliothequeTampons';
 
+/** « 1 tampon exporté », « 3 tampons exportés » : pas de « (s) » dans les notifications (règle du plan). */
+function _nTampons(n, participe) {
+    var s = n > 1 ? 's' : '';
+    return n + ' tampon' + s + (participe ? ' ' + participe + s : '');
+}
+
 // ============================================
 // CRUD — IDB non-namespacée (globale)
 // ============================================
@@ -247,7 +253,7 @@ async function exporterBibliotheque() {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 
-    notifications.succes(items.length + ' tampon(s) exporté(s)');
+    notifications.succes(_nTampons(items.length, 'exporté'));
 }
 
 // Limites de surface — équivalent JSON de validerZipSecurite pour le canal
@@ -286,9 +292,9 @@ async function importerFichier(event) {
         var resultat = await importerDansBibliotheque(data.tampons);
         var ajoutes = (typeof resultat === 'object' && resultat !== null) ? resultat.ajoutes : resultat;
         var sceauAltere = (typeof resultat === 'object' && resultat !== null) ? resultat.sceauAltere : 0;
-        var msg = ajoutes + ' tampon(s) importé(s) dans la bibliothèque';
+        var msg = _nTampons(ajoutes, 'importé') + ' dans la bibliothèque';
         if (sceauAltere > 0) {
-            msg += '\n\n⚠ ' + sceauAltere + ' tampon(s) avec sceau invalide (modifié(s) après l\'export). Vérifie avant utilisation.';
+            msg += '\n\n⚠ ' + _nTampons(sceauAltere) + ' avec sceau invalide (' + (sceauAltere > 1 ? 'modifiés' : 'modifié') + ' après l\'export). Vérifie avant utilisation.';
         }
         notifications.succes(msg);
         rafraichirModal();
@@ -441,7 +447,7 @@ function afficherBibliothequeTampons() {
     BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: MODAL_ID,
         titre: 'Bibliothèque de tampons',
-        aide: 'bibliotheque-fonctionnement',
+        aide: 'bibliotheque-tampons-fonctionnement',   // la variante courte (verdict du lot 5, § 2.4)
         menuFichiers: [
             { label: 'Importer des tampons', action: 'tamponsBiblioClickImport' },
             { label: 'Exporter ta bibliothèque', action: 'tamponsBibliotheque.exporterBibliotheque' },
@@ -584,11 +590,14 @@ function exporterCategorie(catId) {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
 
-    notifications.succes(tamponsExport.length + ' tampon(s) "' + nomCat + '" exporté(s)');
+    notifications.succes(_nTampons(tamponsExport.length) + ' "' + nomCat + '" ' + (tamponsExport.length > 1 ? 'exportés' : 'exporté'));
 }
 
 async function partagerCategorie(catId) {
-    var tampons = _obtenirTamponsDCategorie(catId);
+    // Seulement ceux qui n'y sont pas encore : le ⋮ offre ce geste sur une catégorie en partie
+    // gardée, et chaque tampon déjà gardé levait une notification « Doublon » (verdict du lot 5, § 2.2).
+    var idsBiblio = new Set(obtenirTousSync().map(function(t) { return t.id; }));
+    var tampons = _obtenirTamponsDCategorie(catId).filter(function(t) { return !idsBiblio.has(t.id); });
     if (tampons.length === 0) return;
 
     var nomsCat = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirNomsCategories)
@@ -611,7 +620,7 @@ async function partagerCategorie(catId) {
         if (ok) ajoutes++;
     }
 
-    notifications.succes(ajoutes + '/' + tampons.length + ' tampon(s) "' + nomCat + '" ajouté(s) à la bibliothèque');
+    notifications.succes(_nTampons(ajoutes) + ' "' + nomCat + '" ' + (ajoutes > 1 ? 'ajoutés' : 'ajouté') + ' à la bibliothèque');
     rafraichirModal();
 }
 
