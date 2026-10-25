@@ -152,9 +152,10 @@ function _etapeCodes(c, criteres) {
             : (nb > 1 ? nb + ' sous-critères servent de codes' : '1 sous-critère sert de code') };
 }
 
-/** Note — une pondération et chaque paramètre de la formule au-dessus de 0. ⚠ Mesuré (24 oct.) : le registre
- *  borne ses paramètres (un 0 devient 1, un vide le défaut) ; on lit ce que le calcul applique, la règle des
- *  paramètres ne refuse donc rien aujourd'hui. La pondération, elle, peut manquer. */
+/** Note — une pondération et chaque paramètre de la formule au-dessus de 0. ⚠ Mesuré (25 oct.) : on lit ce que
+ *  le calcul applique (`normaliser`). Deux formules sur trois bornent leur paramètre à 1 (pénalité normalisée,
+ *  ratio visé : un 0 devient 1) ; la pénalité fixe admet 0 point par erreur (`min: 0`), que l'étape signale
+ *  « à régler » — la pleine note à toute copie, rien n'est refusé ni écrit. La pondération, elle, peut manquer. */
 function _etapeNote(c) {
     var f = _F().normaliser(c);
     var pond = Number(c.ponderation);

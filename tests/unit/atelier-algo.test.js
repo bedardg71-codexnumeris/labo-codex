@@ -19,6 +19,8 @@
 //   · `_morceauxDeLaProjection` qui ne pousse pas la recommandation (la phrase retombe d'un seul morceau) → C.c ;
 //   · `ouvrir` qui ne ferme pas les étapes déjà ouvertes → E.b, E.e, E.g ;
 //   · `poserEtats` qui pose `bc-ouvert` sans `etape.ouverte` → E.a, E.b, F.a.
+//   (25 octobre 2026, retouche du verdict § 2) · `_etapeNote` sans la règle des paramètres (`reglee: pondOk`)
+//     → A.c (la pénalité fixe à 0 point par erreur passe pour réglée).
 
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -82,11 +84,16 @@ describe('atelier · A — les cinq étapes, dans l\'ordre de la maquette, chacu
         expect(A.etapes(second, [CHIMIE, second]).find((e) => e.id === 'codes')).toMatchObject({ reglee: true, info: 'nombre tapé' });
     });
 
-    it('A.c « Note » : une pondération et le paramètre de la formule au-dessus de 0', () => {
+    it('A.c « Note » : une pondération et le paramètre de la formule au-dessus de 0 (la pénalité fixe seule admet 0)', () => {
         expect(etat(REDACTION, 'note')).toMatchObject({ reglee: true, info: 'pénalité normalisée', resume: 'Formule : pénalité normalisée, sur 20' });
         expect(etat({ ...REDACTION, ponderation: 0 }, 'note')).toMatchObject({ reglee: false, resume: 'Formule : pénalité normalisée, sans pondération' });
-        // Mesuré : le registre borne le facteur (0 → 1) ; l'étape suit ce que le calcul applique.
+        // Mesuré : la pénalité normalisée et le ratio visé bornent leur paramètre (0 → 1) ; l'étape suit ce que le calcul applique.
         expect(etat({ ...REDACTION, paramsFormule: { facteurNormalisation: 0 } }, 'note').reglee).toBe(true);
+        expect(etat({ ...REDACTION, modeleFormule: 'ratio_cible', paramsFormule: { motsParErreurCible: 0 } }, 'note').reglee).toBe(true);
+        // La pénalité fixe admet 0 (`min: 0`) : 0 point par erreur → « à régler » ; 1 → réglée.
+        const fixe = { ...REDACTION, modeleFormule: 'penalite_par_erreur' };
+        expect(etat({ ...fixe, paramsFormule: { pointsParErreur: 0 } }, 'note').reglee).toBe(false);
+        expect(etat({ ...fixe, paramsFormule: { pointsParErreur: 1 } }, 'note').reglee).toBe(true);
         expect(etat({ ...REDACTION, modeleFormule: 'ratio_cible', paramsFormule: { motsParErreurCible: 60 } }, 'note').info).toBe('ratio visé');
     });
 

@@ -75,6 +75,7 @@ Chaque étape a son banc dans **deux disciplines fictives au moins, dont une san
 - **Existe** : les paliers (un texte selon le ratio) ; les choix que l'application fait sans les montrer (l'« Observation » du sous-critère dominant, la tendance, la réussite).
 - **Devient** : une table « si la valeur est…, ce texte », chaque texte dans son champ. La valeur qui choisit est n'importe quel bloc (une donnée, un calcul), pas seulement le ratio. Les choix silencieux s'y affichent et se modifient.
 - Stock : une table existante (les paliers) se lit comme aujourd'hui. **Revient à Grégoire** : les textes par défaut des cas.
+- À reprendre avec l'étape, qui retouche les paliers : le bouton « Voir ce que l'élève lirait à ce palier » de la maquette du 24 oct., pas fait au lot 4 (#1150, décision 10 du verdict `VERDICT-RELECTURE-2026-10-24-critere-algorithmique-presentation.md`). Pas de fiche au BACKLOG : aucun symptôme vécu.
 
 ### 4. Les calculs que l'enseignant compose
 
