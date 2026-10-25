@@ -3528,7 +3528,9 @@ async function copierCartouchePourGrille(source, grilleId) {
     }, [], { geste: 'Copier la cartouche' });
 
     if (!copie) {
-        alert('La copie n\'a pas été faite : des commentaires de cette cartouche se superposeraient dans la grille choisie. L\'originale reste telle quelle.');
+        // Mots de Cowork (verdict du 24 oct., § 2). ⚠ `sur` est faux aussi quand une clé réécrite tomberait
+        // sur un commentaire orphelin déjà là (aucun critère de la cartouche ne le revendique) : soumis à Cowork.
+        alert('Copie impossible : dans la grille choisie, deux critères de cette cartouche tomberaient sur le même critère, et leurs commentaires se mêleraient. L\'originale reste telle quelle. Pour cette grille, crée une cartouche avec « + Nouvelle cartouche ».');
         return null;
     }
     // Le menu d'abord (la copie doit y être), puis la fiche : `chargerCartouchePourModif` la marque.
