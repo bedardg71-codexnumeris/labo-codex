@@ -259,6 +259,13 @@
     --focus-ring-offset: 2px;
     --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
 
+    /* #1150 (24 oct. 2026, maquette validée) — LES ZONES OÙ SE POSENT LES BLOCS du critère algorithmique,
+       et cela seulement : le violet de la maquette, ses jetons du mode sombre (ici) et du mode clair. */
+    --zone-blocs: #b79cff;
+    --zone-blocs-fond: rgba(183, 156, 255, 0.06);
+    --zone-blocs-fond-fort: rgba(183, 156, 255, 0.2);
+    --zone-blocs-bord: rgba(183, 156, 255, 0.55);
+
     /* ═══════════════════════════════════════════
        PALETTE ACCOMPAGNEMENT
        Fond orange chaud, texte sombre — identique 2 modes
@@ -531,6 +538,12 @@ body.mode-clair[data-mode="anonymisation"] .sous-navigation button:hover {
     --surface-carte: #ffffff;
     --surface-element: #f0f8ff;
     --surface-input: rgba(3, 46, 92, 0.06);
+
+    /* #1150 — les zones où se posent les blocs (violet de la maquette, mode clair). */
+    --zone-blocs: #6d28d9;
+    --zone-blocs-fond: rgba(109, 40, 217, 0.05);
+    --zone-blocs-fond-fort: rgba(109, 40, 217, 0.15);
+    --zone-blocs-bord: rgba(109, 40, 217, 0.5);
 
     /* Navigation — RESTE SOMBRE (en-tête conservé) */
     /* pas de redéfinition des --nav-* ni --sous-nav-* */
@@ -2289,15 +2302,6 @@ span.header-icon {
     border-top: none;
 }
 
-#listeCriteres .gabarit-algo-carte {
-    margin-top: 12px;
-    margin-bottom: 0;
-}
-
-#listeCriteres .gabarit-algo-carte:not(.ferme) .accordeon-contenu {
-    max-height: 6000px;
-}
-
 #listeCriteres .sous-critere-champs-grid--note {
     grid-template-columns: 80px 1fr 100px;
 }
@@ -2346,11 +2350,9 @@ span.header-icon {
     padding: 0;
 }
 
-/* La carte « Bilan » (5 sept. 2026, 1.120) — « Aucune annotation » vit sous la case des
-   codes, dans le même pli que les observations des rangées ; seule la marge diffère :
-   la case porte déjà la sienne au-dessus, la liste des rangées suit. */
-#listeCriteres .sous-critere-pli--aucune {
-    margin: 0 0 12px;
+/* La carte « Bilan » (1.120) — « Aucune annotation » vit avec les codes ; #1150 : à plat, sous la liste. */
+#listeCriteres .sous-criteres-aucune {
+    margin-top: 12px;
 }
 
 /* Sous le menu « Modèle des phrases (bilan et décompte) » : ce que le menu fait, avant
@@ -3495,7 +3497,9 @@ input[type="number"].controle-form {
    sur une ligne (sa mention dans son `title` et pour le lecteur d'écran) ; sous le seuil, la
    palette est COMPACTE et se place juste au-dessus de la zone qu'on écrit (`placerPaletteAlgo`,
    grilles.js) : le nom des blocs que la zone offre, rien d'autre. */
-.gabarit-algo { container-type: inline-size; container-name: gabarit-algo; }
+/* ↻ #1150 : la requête mesure le CENTRE de l'atelier (palette + étapes) — « Ce que l'élève lira » prend
+   sa colonne à droite ; le seuil de la palette compacte (753 px) reste celui de l'étape 2b. */
+.gabarit-algo-centre { container-type: inline-size; container-name: gabarit-algo; min-width: 0; }
 /* ⚠ COLLANTE, À UNE CONDITION MESURÉE (22 oct., WebKit) : deux `overflow: hidden` font de `body` (style
    d'index.html, `overflow-x`) et de `.conteneur` (ses coins arrondis) des conteneurs de défilement qui ne
    défilent pas — c'est `html` qui défile — et AUCUN `position: sticky` de l'application ne colle : ni la
@@ -3523,13 +3527,31 @@ input[type="number"].controle-form {
     position: sticky; top: 96px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
     max-height: calc(100vh - 104px); overflow-y: auto; overscroll-behavior: contain; padding: 4px; margin: -4px;
 }
-.palette-algo-cible { margin: 0; font-size: 0.85rem; line-height: 1.35; color: var(--texte-secondaire); overflow-wrap: anywhere; }
-.palette-algo[data-cible] .palette-algo-cible { color: var(--texte-principal); font-weight: 600; }
+/* #1150 — l'en-tête dit à quoi servent les blocs (mots de la maquette) ; la ligne de cible y vit. */
+.palette-algo-tete {
+    display: flex; flex-direction: column; gap: 8px; padding: 12px;
+    border: 1.5px solid var(--zone-blocs-bord); border-radius: var(--radius-grand); background: var(--zone-blocs-fond);
+}
+.palette-algo-titre { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: var(--texte-principal); }
+.palette-algo-crayon { color: var(--zone-blocs); }
+.palette-algo-but { margin: 0; font-size: 0.82rem; line-height: 1.4; color: var(--texte-secondaire); }
+.palette-algo-gestes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--texte-principal); }
+.palette-algo-gestes li { display: flex; gap: 8px; align-items: baseline; }
+.palette-algo-geste-n {
+    flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--zone-blocs); color: var(--surface-carte);
+    font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;
+}
+.palette-algo-cible {
+    margin: 0; font-size: 0.85rem; line-height: 1.35; color: var(--texte-secondaire); overflow-wrap: anywhere;
+    padding: 8px 10px; border-radius: var(--radius-moyen); background: var(--surface-carte); border: 1px solid var(--bordure-claire);
+}
+.palette-algo[data-cible] .palette-algo-cible { color: var(--texte-principal); font-weight: 600; border-color: var(--zone-blocs); }
+.palette-algo-astuce { display: none; margin: 0; font-size: 0.84rem; color: var(--texte-secondaire); }
 .palette-algo-groupe { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .palette-algo-groupe-nom { font-size: 0.74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-muted); }
 .palette-algo-bloc {
     font: inherit; position: relative; display: flex; flex-direction: column; gap: 2px; text-align: left; min-height: 44px; box-sizing: border-box;
-    padding: 7px 10px; border: 1px solid var(--bordure-moyenne); border-left-width: 4px; border-radius: var(--radius-moyen);
+    padding: 7px 10px; border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-moyen);
     background: var(--surface-carte); color: var(--texte-principal); cursor: pointer;
 }
 .palette-algo-bloc--posee { background: var(--bleu-pale); border-color: var(--accent-primaire); }
@@ -3563,6 +3585,12 @@ input[type="number"].controle-form {
         position: static; gap: 6px; max-height: none; overflow: visible; margin: 0 0 8px; padding: 8px 10px;
         border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: var(--surface-carte);
     }
+    .palette-algo-tete { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 0; border: 0; background: none; }
+    .palette-algo-titre { font-size: 0.88rem; }
+    .palette-algo-but, .palette-algo-gestes { display: none; }
+    .palette-algo-cible { flex: 1 1 200px; padding: 0; border: 0; background: none; }
+    .palette-algo:not([data-cible]) .palette-algo-groupe { display: none; }
+    .palette-algo:not([data-cible]) .palette-algo-astuce { display: block; }
     .palette-algo-groupe { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px; }
     .palette-algo-groupe-nom { flex: 1 1 100%; }
     .palette-algo-groupe[data-vide],
@@ -3574,6 +3602,169 @@ input[type="number"].controle-form {
         position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
         clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
     }
+}
+
+/* ===============================
+   #1150, lot 4 (24 oct. 2026) — L'ATELIER DU CRITÈRE ALGORITHMIQUE (maquette validée,
+   `plans de travail/MAQUETTE-2026-10-24-critere-algorithmique.html` ; `js/atelier-algo.js`)
+   La chaîne en tête ; trois colonnes : la palette et les étapes (le centre, qui porte la requête de la
+   palette compacte), « Ce que l'élève lira » à droite, collé en haut au défilement. 300 px de 760 à
+   1 179 px ; sous 760 px, un tiroir collé en bas (celui du premier atelier à l'écran : `data-tiroir`).
+   =============================== */
+#listeCriteres .gabarit-algo {
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);
+    display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.atelier-algo-chaine.barre-convergence { margin-bottom: 0; }
+/* Le gabarit se redessine à chaque modification enregistrée : la chaîne ne rejoue pas son entrée. */
+.atelier-algo-chaine .bc-etape { animation: none; }
+/* Les deux états de l'atelier (ChaineEtapes, options `ouverte` et `crayons`) */
+.bc-etape.bc-ouvert .bc-noeud { box-shadow: 0 0 0 4px var(--bleu-pale), 0 0 0 6px var(--accent-primaire); }
+.bc-etape.bc-ouvert .bc-label { color: var(--accent-primaire); }
+.bc-crayon {
+    position: absolute; top: -2px; right: 10px; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--zone-blocs); color: var(--surface-carte); font-size: 12px; line-height: 1;
+    display: none; align-items: center; justify-content: center;
+}
+.bc-etape.bc-montre .bc-crayon { display: flex; }
+.bc-etape.bc-montre .bc-noeud { box-shadow: 0 0 0 4px var(--zone-blocs-fond-fort), 0 0 0 6px var(--zone-blocs); }
+
+.gabarit-algo-plan { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; min-width: 0; }
+
+/* Les étapes : une section par étape, une seule ouverte */
+.gabarit-algo-corps { display: flex; flex-direction: column; gap: 10px; }
+.atelier-algo-etape {
+    background: var(--surface-carte); border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-grand);
+    min-width: 0; scroll-margin-top: 104px;
+}
+.atelier-algo-etape-titre { margin: 0; font-size: inherit; font-weight: inherit; }
+.atelier-algo-etape-tete {
+    width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 14px; min-height: 56px;
+    background: none; border: 0; cursor: pointer; text-align: left; color: var(--texte-principal);
+    border-radius: var(--radius-grand); font: inherit;
+}
+.atelier-algo-etape-tete:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.atelier-algo-etape[data-ouverte] .atelier-algo-etape-tete { border-bottom: 1px solid var(--bordure-claire); border-radius: var(--radius-grand) var(--radius-grand) 0 0; }
+.atelier-algo-etape-noeud {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--bleu-moyen);
+    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: transparent;
+}
+.atelier-algo-etape--reglee .atelier-algo-etape-noeud { background: var(--vert-succes, #4caf50); border-color: var(--vert-succes, #4caf50); color: #fff; }
+.atelier-algo-etape-titres { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.atelier-algo-etape-nom { font-size: 1rem; font-weight: 700; }
+.atelier-algo-etape-resume { font-size: 0.84rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
+.atelier-algo-etape-chevron { color: var(--texte-muted); transition: transform 0.2s; }
+.atelier-algo-etape[data-ouverte] .atelier-algo-etape-chevron { transform: rotate(180deg); }
+.atelier-algo-etape-corps { padding: 14px 16px 16px; min-width: 0; }
+.atelier-algo-etape-corps[hidden] { display: none; }
+.atelier-algo-etape-but { margin: 0 0 12px; font-size: 0.88rem; color: var(--texte-secondaire); max-width: 68ch; }
+
+/* Les zones où se posent les blocs : violettes, en pointillé (la vue à badges, sinon le champ) */
+.gabarit-algo .composeur-badges,
+.gabarit-algo textarea[data-enonce-cle],
+.gabarit-algo textarea[data-palier-index] {
+    border: 1.5px dashed var(--zone-blocs-bord); background: var(--zone-blocs-fond);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.gabarit-algo .composeur-badges:focus,
+.gabarit-algo textarea[data-enonce-cle]:focus,
+.gabarit-algo textarea[data-palier-index]:focus {
+    outline: none; border-style: solid; border-color: var(--zone-blocs); box-shadow: 0 0 0 3px var(--zone-blocs-fond-fort);
+}
+.gabarit-algo .atelier-algo-peut { border-style: solid; box-shadow: 0 0 0 3px var(--zone-blocs-fond-fort); }
+.gabarit-algo .atelier-algo-montree { background: var(--zone-blocs-fond-fort); }
+.gabarit-algo .atelier-algo-allume { animation: atelier-algo-allume 1.6s ease; }
+@keyframes atelier-algo-allume {
+    0%, 100% { background: var(--zone-blocs-fond); }
+    30%, 70% { background: var(--zone-blocs-fond-fort); box-shadow: 0 0 0 4px var(--zone-blocs-fond-fort); }
+}
+
+/* Ce que l'élève lira */
+.apercu-algo {
+    position: sticky; top: 96px; max-height: calc(100vh - 104px); overflow-y: auto; overscroll-behavior: contain;
+    background: var(--surface-carte); border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-grand);
+    padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; box-sizing: border-box;
+}
+.apercu-algo-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.apercu-algo-titre { margin: 0; font-size: 1rem; color: var(--texte-principal); }
+.apercu-algo-reduire { display: none; }
+.apercu-algo-copie { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--radius-moyen); background: var(--surface-element); }
+.apercu-algo-copie-titre,
+.apercu-algo-lecture h4 { margin: 0; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texte-muted); font-weight: 600; }
+.apercu-algo-references { display: flex; flex-wrap: wrap; gap: 6px; }
+.apercu-algo-reference {
+    min-height: 44px; padding: 6px 12px; font: inherit; font-size: 0.85rem; cursor: pointer;
+    border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-pill); background: var(--surface-carte); color: var(--texte-principal);
+}
+.apercu-algo-reference:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.apercu-algo-reference[aria-pressed="true"] { border-color: var(--accent-primaire); background: var(--bleu-pale); font-weight: 700; }
+.apercu-algo-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--texte-principal); }
+.apercu-algo-pas {
+    width: 44px; height: 44px; border-radius: var(--radius-moyen); border: 1px solid var(--bordure-moyenne);
+    background: var(--surface-input); color: var(--texte-principal); cursor: pointer; font: inherit; font-weight: 700;
+}
+.apercu-algo-pas:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.apercu-algo-ligne .apercu-algo-nombre { width: 76px; min-height: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+.apercu-algo-curseur { width: 100%; min-height: 32px; accent-color: var(--accent-primaire); }
+.apercu-algo-codes, .apercu-algo-etendue, .apercu-algo-raison { font-size: 0.78rem; color: var(--texte-muted); }
+.apercu-algo-codes:empty, .apercu-algo-etendue:empty, .apercu-algo-raison:empty { display: none; }
+.apercu-algo-resultats { display: flex; flex-wrap: wrap; gap: 6px; }
+.apercu-algo-resultat {
+    display: inline-flex; gap: 6px; align-items: baseline; padding: 4px 10px; border-radius: var(--radius-pill);
+    border: 1px solid var(--bordure-moyenne); font-size: 0.85rem; font-variant-numeric: tabular-nums; color: var(--texte-principal);
+}
+.apercu-algo-resultat-nom { color: var(--texte-muted); font-size: 0.78rem; }
+.apercu-algo-resultat--palier { border-color: var(--alerte-bordure-attention, #a07830); background: var(--alerte-fond-attention); }
+.apercu-algo-lecture { display: flex; flex-direction: column; gap: 6px; }
+.apercu-algo-texte {
+    margin: 0; font-size: 0.95rem; line-height: 1.85; padding: 10px 12px; border-radius: var(--radius-moyen);
+    border: 1px solid var(--bordure-claire); background: var(--surface-input); color: var(--texte-principal); overflow-wrap: anywhere;
+}
+.apercu-algo-rien { color: var(--texte-muted); font-style: italic; }
+.apercu-algo-segment {
+    display: inline; font: inherit; color: inherit; text-align: left; background: none; border: 0; padding: 1px 0; margin: 0;
+    border-radius: 4px; cursor: pointer; transition: background 0.15s;
+}
+button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
+    background: var(--zone-blocs-fond-fort); outline: none; text-decoration: underline dotted var(--zone-blocs); text-underline-offset: 3px;
+}
+.apercu-algo-segment--engendre { color: var(--texte-secondaire); cursor: default; }
+.apercu-algo-source {
+    display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--zone-blocs); border: 1px solid var(--zone-blocs-bord); border-radius: var(--radius-pill);
+    padding: 0 6px; margin-right: 4px; line-height: 1.5; vertical-align: 1px; white-space: nowrap;
+}
+.apercu-algo-segment--engendre .apercu-algo-source { color: var(--texte-muted); border-color: var(--bordure-moyenne); border-style: dashed; }
+.apercu-algo[data-sans-sources] .apercu-algo-source { display: none; }
+.apercu-algo-condition { display: flex; flex-direction: column; gap: 2px; }
+.apercu-algo-si { font-size: 0.8rem; color: var(--texte-muted); }
+.apercu-algo-bascule { display: flex; gap: 8px; align-items: center; min-height: 44px; font-size: 0.84rem; color: var(--texte-secondaire); cursor: pointer; }
+.apercu-algo-bascule input { width: 18px; height: 18px; accent-color: var(--zone-blocs); }
+.apercu-algo-astuce { margin: 0; font-size: 0.78rem; color: var(--texte-muted); }
+
+/* Sous 1 025 px, rien ne colle dans l'application (body et .conteneur rognent : voir plus haut) — l'aperçu
+   reste en haut de sa colonne, à sa place. */
+@media (max-width: 1024px) {
+    .apercu-algo { position: static; max-height: none; overflow: visible; }
+}
+@media (max-width: 1179px) {
+    .gabarit-algo-plan { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+@media (max-width: 759px) {
+    .gabarit-algo-plan { grid-template-columns: minmax(0, 1fr); }
+    .gabarit-algo-plan[data-tiroir] { padding-bottom: 42vh; }
+    .gabarit-algo-plan[data-tiroir] .apercu-algo {
+        position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 60; max-height: 40vh; overflow-y: auto;
+        border-radius: var(--radius-grand) var(--radius-grand) 0 0; box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+    .gabarit-algo-plan[data-tiroir] .apercu-algo[data-reduit] { max-height: none; }
+    .apercu-algo-reduire { display: inline-flex; }
+    .apercu-algo[data-reduit] .apercu-algo-detail { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .gabarit-algo .atelier-algo-allume { animation: none; }
+    .atelier-algo-etape-chevron, .apercu-algo-segment { transition: none; }
 }
 
 /* La pastille d'un bloc dans la phrase (`composeur-badges.js`, chip) : les deux
@@ -3688,92 +3879,6 @@ input[type="number"].controle-form {
     color: var(--gris-clair);
     margin-left: 4px;
     white-space: nowrap;
-}
-
-/* Le miroir (22 oct. 2026) — sous la formule, « Essai sur des copies fictives » : une copie par
-   ligne. Ses trois morceaux (la copie, la note, ce que l'élève lira) passent à la ligne plutôt
-   que de déborder : à 820 px (iPad en portrait), la phrase de l'élève prend toute la largeur. */
-#listeCriteres .miroir-algo {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--bordure-claire);
-}
-
-#listeCriteres .miroir-algo-titre {
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--texte-principal);
-}
-
-#listeCriteres .miroir-algo-intro,
-#listeCriteres .miroir-algo-vide {
-    display: block;
-    margin-top: 2px;
-    font-size: 0.78rem;
-    color: var(--gris-moyen);
-}
-
-#listeCriteres .miroir-algo-liste {
-    list-style: none;
-    margin: 8px 0 0 0;
-    padding: 0;
-}
-
-#listeCriteres .miroir-algo-copie {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 2px 12px;
-    margin-top: 6px;
-    padding: 6px 10px;
-    border-left: 3px solid var(--accent-primaire);
-    background: var(--surface-input);
-    border-radius: 4px;
-    font-size: 0.88rem;
-    line-height: 1.45;
-    color: var(--texte-principal);
-    min-width: 0;
-}
-
-#listeCriteres .miroir-algo-donnees {
-    color: var(--gris-moyen);
-    overflow-wrap: anywhere;
-}
-
-#listeCriteres .miroir-algo-note {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-#listeCriteres .miroir-algo-plancher {
-    font-weight: 400;
-    font-size: 0.78rem;
-    color: var(--gris-moyen);
-}
-
-#listeCriteres .miroir-algo-eleve {
-    flex: 1 1 100%;
-    min-width: 0;
-    overflow-wrap: anywhere;
-}
-
-#listeCriteres .miroir-algo-mot {
-    font-size: 0.78rem;
-    color: var(--gris-moyen);
-}
-
-/* §8 (5 sept.) — une seule carte pour ce que l'élève lit : le décompte se compose ici,
-   avant les paliers ; sous lui, la ligne qui dit d'où vient son texte de départ. */
-#listeCriteres .decompte-eleve {
-    margin-top: 10px;
-}
-
-#listeCriteres .decompte-texte-depart {
-    display: block;
-    margin-top: 2px;
-    font-size: 0.78rem;
-    color: var(--gris-clair);
 }
 
 /* iPad : la cible tactile des repères monte à 44 px dans le bloc `@media

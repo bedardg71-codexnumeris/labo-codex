@@ -54,6 +54,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { etapeDe, etapeOuverte, atelierDe } from './_helpers/atelier-algo.js';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -131,6 +132,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     return { win, store, document, ecrits, liste: () => document.getElementById('listeCriteres') };
@@ -140,12 +142,9 @@ const ALGO = { id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20,
                paramsProjection: { nomServiceAide: 'Passerelle +' } };
 const GRILLE = { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [ALGO] };
 
-const carte = (html, section) => {
-    const i = html.indexOf('data-pli="CR:' + section + '"');
-    if (i < 0) return '';
-    const suivant = html.indexOf('class="carte accordeon gabarit-algo-carte', i + 10);
-    return html.slice(i, suivant < 0 ? undefined : suivant);
-};
+// ↻ #1150, lot 4 (24 oct. 2026) : les cartes sont devenues les étapes de l'atelier (`_helpers/atelier-algo.js`).
+const ETAPE_DE = { formule: 'note', projection: 'paliers', commentaire: 'eleve' };
+const carte = (html, section) => etapeDe(html, 'CR', ETAPE_DE[section] || section);
 /** Les blocs de palier de la carte « Projection », chacun jusqu'au suivant. */
 const paliersDe = (projection) => projection.split('class="sous-critere-item palier-projection"').slice(1);
 const ligneDe = (pal) => (pal.match(/<div class="palier-apercu">[\s\S]*?<\/div>/) || [])[0] || '';

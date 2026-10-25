@@ -16,6 +16,12 @@
      Les étapes ne sont reconstruites que si leurs identifiants changent : une mise à jour (à chaque
      saisie, pour les grilles) ne rejoue pas l'animation d'entrée.
 
+   DEUX ÉTATS DE PLUS, POUR LE CRITÈRE ALGORITHMIQUE (#1150, lot 4, 24 oct.)
+     `ouverte` : l'étape dont la section est ouverte (`.bc-ouvert`). `crayons` (option) : chaque étape
+     porte un crayon, montré par `marquer(conteneur, ids)` sur celles où le bloc survolé peut se poser
+     (`.bc-montre`). Les chaînes qui n'en usent pas ne changent pas : sans `ouverte` ni `crayons`, le
+     dessin est celui des lots 3a-3b.
+
    L'OPTION « Afficher les chaînes d'étapes » (Préférences › Expérience visuelle)
      Une classe sur <body> masque toutes les `.barre-convergence` : `afficherToutes(false)`.
 
@@ -73,6 +79,13 @@ function construire(conteneur, etapes, options) {
         etat.className = 'u-lecteur-ecran';
 
         bouton.append(noeud, libelle, info, etat);
+        if (options.crayons) {
+            const crayon = document.createElement('span');
+            crayon.className = 'bc-crayon';
+            crayon.setAttribute('aria-hidden', 'true');
+            crayon.textContent = '✎';
+            bouton.appendChild(crayon);
+        }
         conteneur.appendChild(bouton);
     });
 }
@@ -87,9 +100,10 @@ function poserEtats(conteneur, etapes) {
         bouton.classList.toggle('bc-complet', reglee);
         bouton.classList.toggle('bc-attention', !reglee && etape.ton === 'attention');
         bouton.classList.toggle('bc-critique', !reglee && etape.ton === 'critique');
+        bouton.classList.toggle('bc-ouvert', !!etape.ouverte);
         bouton.querySelector('.bc-label').textContent = etape.libelle == null ? '' : String(etape.libelle);
         bouton.querySelector('.bc-info').textContent = etape.info == null ? '' : String(etape.info);
-        bouton.querySelector('.u-lecteur-ecran').textContent = reglee ? ', réglée' : ', à régler';
+        bouton.querySelector('.u-lecteur-ecran').textContent = (reglee ? ', réglée' : ', à régler') + (etape.ouverte ? ', ouverte' : '');
         // La liaison qui mène à cette étape : verte quand elle et la précédente sont réglées.
         const liaison = bouton.previousElementSibling;
         if (liaison && liaison.classList.contains('bc-liaison')) {
@@ -102,8 +116,8 @@ function poserEtats(conteneur, etapes) {
 /**
  * Dessine (ou met à jour) la chaîne dans son conteneur.
  * @param {HTMLElement} conteneur
- * @param {Array<{id:string, libelle:string, info?:string, reglee?:boolean, ton?:string, arrivee?:boolean, motNature?:string}>} etapes
- * @param {{libelle?:string, surClic?:function(string, HTMLElement), prefixeIdInfo?:string}} [options]
+ * @param {Array<{id:string, libelle:string, info?:string, reglee?:boolean, ton?:string, arrivee?:boolean, motNature?:string, ouverte?:boolean}>} etapes
+ * @param {{libelle?:string, surClic?:function(string, HTMLElement), prefixeIdInfo?:string, crayons?:boolean}} [options]
  */
 function dessiner(conteneur, etapes, options) {
     if (!conteneur) return;
@@ -124,12 +138,21 @@ function dessiner(conteneur, etapes, options) {
     poserEtats(conteneur, liste);
 }
 
+/** Le crayon sur les étapes `ids` (celles où le bloc survolé peut se poser), retiré des autres. */
+function marquer(conteneur, ids) {
+    if (!conteneur) return;
+    const vises = (ids || []).map(String);
+    conteneur.querySelectorAll('.bc-etape').forEach(function (b) {
+        b.classList.toggle('bc-montre', vises.indexOf(b.dataset.etape) !== -1);
+    });
+}
+
 /** L'option « Afficher les chaînes d'étapes » : toutes les chaînes, celle du Trimestre comprise. */
 function afficherToutes(afficher) {
     if (!document.body) return;
     document.body.classList.toggle(CLASSE_MASQUEE, afficher === false);
 }
 
-window.ChaineEtapes = { dessiner: dessiner, afficherToutes: afficherToutes, CLASSE_MASQUEE: CLASSE_MASQUEE };
+window.ChaineEtapes = { dessiner: dessiner, marquer: marquer, afficherToutes: afficherToutes, CLASSE_MASQUEE: CLASSE_MASQUEE };
 
 })();

@@ -36,6 +36,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { etapeDe, etapeOuverte, atelierDe } from './_helpers/atelier-algo.js';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -113,6 +114,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.paletteAlgo = require(path.join(racine, 'js/palette-algo.js'));
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
@@ -123,10 +125,9 @@ const ALGO = { id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20,
 const GRILLE = { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [ALGO] };
 
 /** Le HTML de la carte « Projection » du critère CR. */
+// ↻ #1150, lot 4 (24 oct. 2026) : la carte est devenue l'étape « Paliers » de l'atelier (`_helpers/atelier-algo.js`).
 function carteProjection(html) {
-    const i = html.indexOf('data-pli="CR:projection"');
-    const suivant = html.indexOf('class="carte accordeon gabarit-algo-carte', i + 10);
-    return html.slice(i, suivant < 0 ? undefined : suivant);
+    return etapeDe(html, 'CR', 'paliers');
 }
 const paliersDe = (projection) => projection.split('class="sous-critere-item palier-projection"').slice(1);
 
@@ -211,9 +212,13 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         expect(projection).not.toContain('Phrase de recommandation');
     });
 
+    // ↻ #1150 : le décompte est dans l'étape « Ce que l'élève lit » de l'atelier (plus dans la carte des paliers).
     it('B.d le décompte, dans « Ce que l\'élève lit », par le même helper : son étiquette, sa zone, son nom ; aucune rangée', () => {
-        const projection = rendu();
-        const decompte = projection.slice(projection.indexOf('Décompte des erreurs'), projection.indexOf('class="sous-criteres-liste-conteneur"'));
+        const { win, liste } = monter([GRILLE]);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
+        const eleve = etapeDe(liste().innerHTML, 'CR', 'eleve');
+        expect(rendu()).not.toContain('data-enonce-cle="decompte"');
+        const decompte = eleve.slice(eleve.indexOf('Décompte des erreurs'), eleve.indexOf('data-enonce-cle="priorite"'));
         expect(decompte).toContain('data-enonce-cle="decompte" data-nom-zone="Décompte des erreurs"');
         expect(decompte).not.toContain('<button');
         expect(source('js/grilles.js')).not.toMatch(/rendreBoutonsReperes/);

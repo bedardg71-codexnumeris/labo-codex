@@ -29,9 +29,20 @@
 // annotation » vit sous la case des codes, dans la liste des sous-critères (grille enregistrée
 // seulement). Les attentes ci-dessous sont adaptées ; `sentinelle-carte-bilan.test.js` porte le
 // reste (le pli, le menu, le modèle « Français écrit »).
+//
+// ↻ #1150, LOT 4 (24 oct. 2026, maquette validée par Grégoire) : les cartes sont devenues les étapes de
+// l'atelier. L'INVARIANT DE CE BANC RESTE — le décompte a UN endroit d'écriture —, l'endroit change :
+// l'étape « Ce que l'élève lit » (le décompte PUIS les deux phrases du bilan, sous le menu du modèle),
+// absent de l'étape « Paliers » (l'ancienne carte de projection). `projection` lit l'étape « Paliers »,
+// `commentaire` l'étape « Ce que l'élève lit ». La ligne « Texte de départ » est partie : le menu du
+// modèle est juste au-dessus du décompte, dans la même étape.
+// BREAK-TESTS (24 oct., restaurés, `shasum` identique) : le décompte rendu aussi dans « Paliers » → A.a,
+// A.b, B.a, B.b, D.b, D.c, E.a (et « Bilan » A.b) ; retiré de « Ce que l'élève lit » → A.a, A.b, B.a, B.b,
+// D.a, D.b, D.c, E.a (et « Bilan » A.a, A.b, A.c).
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { etapeDe, etapeOuverte, atelierDe } from './_helpers/atelier-algo.js';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -110,6 +121,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.paletteAlgo = PA;
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
@@ -121,12 +133,9 @@ const ALGO = { id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20,
 const GRILLE = { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [ALGO] };
 
 /** Une carte du gabarit, de son `data-pli` jusqu'à la carte suivante. */
-const carte = (html, id, section) => {
-    const i = html.indexOf('data-pli="' + id + ':' + section + '"');
-    if (i < 0) return '';
-    const suivant = html.indexOf('class="carte accordeon gabarit-algo-carte', i + 10);
-    return html.slice(i, suivant < 0 ? undefined : suivant);
-};
+// ↻ #1150, lot 4 (24 oct. 2026) : les cartes sont devenues les étapes de l'atelier (`_helpers/atelier-algo.js`).
+const ETAPE_DE = { formule: 'note', projection: 'paliers', commentaire: 'eleve' };
+const carte = (html, id, section) => etapeDe(html, id, ETAPE_DE[section] || section);
 const compter = (h, motif) => (h.split(motif).length - 1);
 const clesDe = (h) => [...h.matchAll(/data-enonce-cle="([a-z]+)"/g)].map((m) => m[1]);
 /** Le rendu du gabarit d'une grille en ÉDITION : tout, la carte de projection, la carte « Bilan » (clé de pli `commentaire`). */
@@ -164,50 +173,55 @@ describe('une seule carte · A — le décompte est rendu UNE fois, dans « Ce q
         expect(projection.length).toBeGreaterThan(0);
         expect(commentaire.length).toBeGreaterThan(0);
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
-        expect(compter(projection, 'data-enonce-cle="decompte"')).toBe(1);
-        expect(commentaire).not.toContain('data-enonce-cle="decompte"');
-        expect(commentaire).not.toContain('Décompte des erreurs');
-        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
-        expect(clesDe(projection)).toEqual(['decompte']);
-        // ↻ La carte « Bilan » (1.120) : « Aucune annotation » vit sous la case des codes, dans la liste
-        // des sous-critères — rendue AVANT les cartes (sentinelle `carte-bilan`, B).
-        expect(clesDe(html)).toEqual(['aucune', 'priorite', 'concentre', 'decompte']);
+        // ↻ #1150 : l'étape « Ce que l'élève lit » porte le décompte puis le bilan ; « Paliers » n'en porte aucun.
+        expect(compter(commentaire, 'data-enonce-cle="decompte"')).toBe(1);
+        expect(projection).not.toContain('data-enonce-cle="decompte"');
+        expect(projection).not.toContain('Décompte des erreurs');
+        expect(clesDe(commentaire)).toEqual(['decompte', 'priorite', 'concentre']);
+        expect(clesDe(projection)).toEqual([]);
+        // « Aucune annotation » vit avec les codes (sentinelle `carte-bilan`, B) — l'étape « Codes », avant.
+        expect(clesDe(html)).toEqual(['aucune', 'decompte', 'priorite', 'concentre']);
         // Témoin : le décompte est bien celui du registre — étiquette et aide au mot.
         const c = E.listerCles().find((x) => x.cle === 'decompte');
-        expect(projection).toContain('>' + c.libelle + '</label>');
-        expect(blocDecompte(projection)).toContain(echapper(c.aide));
+        expect(commentaire).toContain('>' + c.libelle + '</label>');
+        expect(blocDecompte(commentaire)).toContain(echapper(c.aide));
     });
 
     it('A.b en CRÉATION (mode temp) : la même chose, par le handler temp', () => {
         const { html, projection, commentaire } = renduTemp();
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
-        expect(clesDe(projection)).toEqual(['decompte']);
-        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
+        expect(clesDe(projection)).toEqual([]);
+        expect(clesDe(commentaire)).toEqual(['decompte', 'priorite', 'concentre']);
         // ↻ 21 oct. 2026 (#1131) : la liste des sous-critères existe en création ; « Aucune annotation » y vit, comme en édition.
-        expect(clesDe(html)).toEqual(['aucune', 'priorite', 'concentre', 'decompte']);
-        expect(blocDecompte(projection)).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="decompte"/);
+        expect(clesDe(html)).toEqual(['aucune', 'decompte', 'priorite', 'concentre']);
+        expect(blocDecompte(commentaire)).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="decompte"/);
     });
 });
 
 /* ============================================================ B — L'ORDRE DE LECTURE */
 
 describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre de la phrase de l\'élève', () => {
-    it('B.a modèle et réglages → aide → décompte → paliers → notes du bas → bouton', () => {
-        const { projection } = rendu();
+    // ↻ #1150 : l'étape « Paliers » se lit sans le décompte — modèle et réglages → aide → paliers → notes → bouton ;
+    // l'étape « Ce que l'élève lit », le menu du modèle → le décompte → le bilan.
+    it('B.a « Paliers » : modèle et réglages → aide → paliers → notes du bas → bouton ; « Ce que l\'élève lit » : menu → décompte → bilan', () => {
+        const { projection, commentaire } = rendu();
+        expect(projection).not.toContain('data-enonce-cle="decompte"');
+        const menu = commentaire.indexOf('Modèle des phrases (bilan et décompte)');
+        expect(menu).toBeGreaterThan(-1);
+        expect(menu).toBeLessThan(commentaire.indexOf('data-enonce-cle="decompte"'));
+        expect(commentaire.indexOf('data-enonce-cle="decompte"')).toBeLessThan(commentaire.indexOf('data-enonce-cle="priorite"'));
         const pos = (motif) => { const i = projection.indexOf(motif); expect(i, motif).toBeGreaterThan(-1); return i; };
         const modele = pos('Modèle de projection');
         const reglage = pos('data-param-cle="motsReference"');
         const seuil = pos('Seuil de l\'épreuve');
         const aide = pos('palier-note-composer');
-        const decompte = pos('data-enonce-cle="decompte"');
         const paliers = pos('class="sous-critere-item palier-projection"');
         const nonCorrigee = pos('palier-apercu-non-corrigee');
         const bouton = projection.lastIndexOf('+ Ajouter un palier');
         expect(modele).toBeLessThan(reglage);
         expect(reglage).toBeLessThan(seuil);
         expect(seuil).toBeLessThan(aide);
-        expect(aide).toBeLessThan(decompte);
-        expect(decompte).toBeLessThan(paliers);
+        expect(aide).toBeLessThan(paliers);
         expect(paliers).toBeLessThan(nonCorrigee);
         expect(nonCorrigee).toBeLessThan(bouton);
         // ↻ Étape 2b (22 oct. 2026) : plus aucune rangée « Poser : » dans la carte — la palette du critère la sert.
@@ -217,12 +231,12 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
     it('B.b « Aucune projection » : le décompte est là quand même, composable (ce que sa zone offre), avant la note ; ni palier, ni aide des paliers', () => {
         const { html, projection, commentaire } = rendu({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune', paramsProjection: {} }] });
         expect(compter(html, 'data-enonce-cle="decompte"')).toBe(1);
-        expect(compter(projection, 'data-enonce-cle="decompte"')).toBe(1);
-        expect(clesDe(commentaire)).toEqual(['priorite', 'concentre']);
+        expect(compter(commentaire, 'data-enonce-cle="decompte"')).toBe(1);
+        expect(clesDe(commentaire)).toEqual(['decompte', 'priorite', 'concentre']);
         // ↻ 2b : ce que la zone offre se lit par `paletteAlgo.reperesDeZone`, la source de la palette et de la pose.
         expect(PA.reperesDeZone(ALGO, { enonceCle: 'decompte' }).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);
         expect(projection).toContain('Aucune projection ne sera proposée');
-        expect(projection.indexOf('data-enonce-cle="decompte"')).toBeLessThan(projection.indexOf('Aucune projection ne sera proposée'));
+        expect(projection).not.toContain('data-enonce-cle="decompte"');
         expect(projection).not.toContain('palier-projection');
         expect(projection).not.toContain('palier-note-composer');
         expect(projection).not.toContain('reperes-palier');
@@ -235,30 +249,29 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
 describe('une seule carte · C — les titres que Grégoire lira, la clé de pli inchangée, la ligne « Texte de départ », l\'aide reprise', () => {
     const titre = (t) => new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '\\s*<');
 
-    it('C.a « Ce que l\'élève lit » et « Bilan » (↻ 1.120, d\'abord « Observation ») ; plus de carte titrée « Projection » ; la clé de pli `projection` reste (mémoire des plis)', () => {
+    // ↻ #1150 : les titres sont ceux des étapes de la maquette validée — « Paliers » et « Ce que l'élève lit » ;
+    // ni « Projection », ni « Bilan », ni « Observation » ; plus de carte ni de clé de pli.
+    const etape = (t) => new RegExp('<span class="atelier-algo-etape-nom">' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '</span>');
+    it('C.a les étapes « Paliers » et « Ce que l\'élève lit » ; plus de carte titrée « Projection » ni « Bilan » ; plus de clé de pli de carte', () => {
         const { html } = rendu();
-        expect(html).toMatch(titre('Ce que l\'élève lit'));
-        expect(html).toMatch(titre('Bilan'));
-        expect(source('js/grilles.js')).not.toMatch(/carteGabaritAlgo\(critere, ctx, 'commentaire', 'Observation'/);
+        expect(html).toMatch(etape('Ce que l\'élève lit'));
+        expect(html).toMatch(etape('Paliers'));
         expect(html).not.toMatch(titre('Projection'));
-        expect(html).toContain('data-pli="CR:projection"');
-        expect(html).toContain('data-pli="CR:commentaire"');
-        expect(source('js/grilles.js')).toMatch(/carteGabaritAlgo\(critere, ctx, 'projection', 'Ce que l\\'élève lit'/);
+        expect(html).not.toMatch(titre('Bilan'));
+        expect(html).not.toContain('data-pli="CR:projection"');
+        expect(html).not.toContain('data-pli="CR:commentaire"');
+        expect(source('js/grilles.js')).not.toMatch(/carteGabaritAlgo/);
     });
 
-    it('C.b sous le décompte, une fois : « Texte de départ : le modèle des phrases, carte « Bilan ». » ; le menu du modèle reste dans « Bilan »', () => {
-        const { projection, commentaire } = rendu();
-        expect(compter(projection, 'decompte-texte-depart')).toBe(1);
-        expect(projection).toContain('Texte de départ : le modèle des phrases, carte « Bilan ».');
-        const ligne = projection.indexOf('decompte-texte-depart');
-        expect(ligne).toBeGreaterThan(projection.indexOf('data-enonce-cle="decompte"'));
-        expect(ligne).toBeLessThan(projection.indexOf('class="sous-critere-item palier-projection"'));
+    it('C.b la ligne « Texte de départ » est partie : le menu du modèle est dans la même étape, juste au-dessus du décompte', () => {
+        const { html, projection, commentaire } = rendu();
+        expect(html).not.toContain('decompte-texte-depart');
+        expect(html).not.toContain('Texte de départ : le modèle des phrases');
         expect(commentaire).toContain('Modèle des phrases (bilan et décompte)');
         expect(projection).not.toContain('Modèle des phrases (bilan et décompte)</label>');
-        // Ses classes vivent dans styles.css, scopées à l'éditeur.
         const css = source('styles.css');
-        expect(css).toMatch(/#listeCriteres \.decompte-eleve \{/);
-        expect(css).toMatch(/#listeCriteres \.decompte-texte-depart \{[^}]*color: var\(--gris-clair\)/);
+        expect(css).not.toMatch(/\.decompte-eleve \{/);
+        expect(css).not.toMatch(/\.decompte-texte-depart \{/);
     });
 
     it('C.c l\'aide de la carte ne dit plus où le bloc se pose (la palette le dit) ; la ligne d\'aperçu redevient « L\'élève lira : »', () => {
@@ -274,8 +287,8 @@ describe('une seule carte · C — les titres que Grégoire lira, la clé de pli
 
 describe('une seule carte · D — même zone, mêmes attributs, même palette ; le rendu n\'écrit rien', () => {
     it('D.a la zone du décompte est celle d\'avant : handler, grille, index, clé, valeur en vigueur, aide après ; ↻ 2b : son nom, plus de rangée', () => {
-        const { projection } = rendu();
-        const bloc = blocDecompte(projection);
+        const { commentaire } = rendu();
+        const bloc = blocDecompte(commentaire);
         expect(bloc).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="decompte"/);
         expect(bloc).toContain('>' + echapper(E.normaliser(ALGO).enonces.decompte) + '</textarea>');
         expect(bloc).toContain('data-enonce-cle="decompte" data-nom-zone="Décompte des erreurs"');
@@ -283,12 +296,13 @@ describe('une seule carte · D — même zone, mêmes attributs, même palette ;
         expect(bloc.indexOf('<textarea')).toBeLessThan(bloc.indexOf('<small'));
     });
 
-    it('D.b un décompte écrit par l\'enseignant·e se lit dans la carte de projection, échappé, et nulle part ailleurs', () => {
+    it('D.b un décompte écrit par l\'enseignant·e se lit dans l\'étape « Ce que l\'élève lit », échappé, et pas dans « Paliers »', () => {
         const ecrit = 'Mon décompte : {erreurs} <b>fautes</b> sur {mots} "mots".';
-        const { projection, commentaire } = rendu({ ...GRILLE, criteres: [{ ...ALGO, enonces: { decompte: ecrit } }] });
-        expect(blocDecompte(projection)).toContain('>' + echapper(ecrit) + '</textarea>');
-        expect(projection).not.toContain('<b>fautes</b>');
-        expect(commentaire).not.toContain('Mon décompte');
+        const { html, projection, commentaire } = rendu({ ...GRILLE, criteres: [{ ...ALGO, enonces: { decompte: ecrit } }] });
+        expect(blocDecompte(commentaire)).toContain('>' + echapper(ecrit) + '</textarea>');
+        expect(html).not.toContain('<b>fautes</b>');
+        // Les lignes « L'élève lira : » des paliers le citent rempli (c'est leur objet) ; aucune zone ne l'y écrit.
+        expect(projection).not.toContain('>' + echapper(ecrit) + '</textarea>');
     });
 
     it('D.c le rendu n\'écrit ni dans la grille ni dans le stockage, en édition comme en création', () => {
@@ -310,11 +324,11 @@ describe('une seule carte · D — même zone, mêmes attributs, même palette ;
 /* ============================================================ E — LA FACTORISATION, LES JETONS */
 
 describe('une seule carte · E — un helper, deux appels ; les jetons anti-cache ont bougé', () => {
-    it('E.a `rendreChampEnonceAlgo` est déclaré une fois et appelé trois fois (↻ 1.120) ; « Bilan » filtre le décompte et « aucune » ; la zone n\'est écrite qu\'à un endroit', () => {
+    it('E.a `rendreChampEnonceAlgo` est déclaré une fois et appelé deux fois (↻ #1150) ; « Ce que l\'élève lit » ne filtre que « aucune » ; la zone n\'est écrite qu\'à un endroit', () => {
         const src = source('js/grilles.js');
         expect((src.match(/function rendreChampEnonceAlgo\(/g) || []).length).toBe(1);
-        expect((src.match(/rendreChampEnonceAlgo\(/g) || []).length).toBe(4);   // la déclaration + trois appels (« Bilan », le décompte, « Aucune annotation » sous la case des codes)
-        expect((src.match(/listerCles\(\)\.filter\(\(c\) => c\.cle !== 'decompte' && c\.cle !== 'aucune'\)/g) || []).length).toBe(1);
+        expect((src.match(/rendreChampEnonceAlgo\(/g) || []).length).toBe(3);   // la déclaration + deux appels (« Ce que l'élève lit », « Aucune annotation » avec les codes)
+        expect((src.match(/listerCles\(\)\.filter\(\(c\) => c\.cle !== 'aucune'\)/g) || []).length).toBe(1);
         expect((src.match(/data-enonce-cle="\$\{esc\(c\.cle\)\}"/g) || []).length).toBe(1);
         expect(src).not.toMatch(/rendreBlocApercuAlgo/);
     });

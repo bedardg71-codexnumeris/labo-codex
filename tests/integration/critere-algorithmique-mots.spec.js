@@ -45,6 +45,9 @@ test('une grille neuve : « Partir de la liste du français écrit (codes 1 à 1
     const nom = carte.locator('input[data-on-change="modifierCritereTempHandler"][data-champ="nom"]');
     await nom.fill('Français écrit');
     await nom.press('Tab');
+    // ↻ #1150 (24 oct. 2026) : les sous-critères vivent dans l'étape « Codes » de l'atelier, fermée au départ ; on
+    // l'ouvre par son en-tête, et elle reste ouverte au redessin qui suit le bouton.
+    await carte.locator('.atelier-algo-etape[data-etape="codes"] .atelier-algo-etape-tete').click();
     const bouton = carte.locator('[data-action="initialiserSousCriteresParDefaut"]');
     await expect(bouton).toHaveText('Partir de la liste du français écrit (codes 1 à 10)');
     await bouton.click();

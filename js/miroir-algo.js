@@ -43,6 +43,11 @@
      copie compte et ce à quoi elle le rapporte portent les deux noms du critère
      (`enoncesAlgo.noms`) ; aucun mot de discipline.
 
+   ↻ #1150, LOT 4 (24 oct. 2026) : le bloc « Essai sur des copies fictives » de la carte « Formule » est
+     parti ; « Ce que l'élève lira », dans l'atelier du critère (js/atelier-algo.js), règle UNE copie
+     fictive par `essayer`, à partir de `copies` (les trois copies de référence) et de `etendue`. Ses
+     libellés de liste (titre, intro, « L'élève lira : », « aucune phrase ») sont partis avec le bloc.
+
    LECTURE SEULE : rien n'est écrit dans le critère, la grille ni le stockage.
    Dépendances (lues à l'appel, sur `window`) : formulesAlgo, enoncesAlgo, projectionAlgo,
    codesAnnotation.
@@ -87,18 +92,14 @@ function libelles(critere) {
     var E = _reg('enoncesAlgo');
     var champMots = '« ' + (E ? E.enEtiquette(N.mots.pluriel) : N.mots.pluriel) + ' »';
     return {
-        titre: 'Essai sur des copies fictives',
         occurrences: function(n) { return _accord(n, N.erreurs); },
         etendue: function(n) { return _accord(n, N.mots); },
         sansEtendue: 'champ ' + champMots + ' vide',
         code: function(nombre, nom, poids) { return _formaterNombre(nombre) + ' × « ' + nom + ' » (poids ' + _formaterNombre(poids) + ')'; },
-        eleveLira: 'L\'élève lira :',
-        aucunePhrase: 'aucune phrase',
         plancher: 'la note touche le plancher',
         noteImpossible: 'aucune note : la formule a besoin du champ ' + champMots,
         sansPonderation: 'Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.',
-        etendueDuFacteur: 'Sans projection, ces copies ont la longueur du facteur : chaque ' + N.erreurs.singulier + ' y coûte un point, quel que soit le facteur.',
-        intro: 'Ce que ta règle donne sur quelques copies fictives, tirées de tes réglages. Aucune donnée d\'élève ; rien n\'est enregistré.'
+        etendueDuFacteur: 'Sans projection, ces copies ont la longueur du facteur : chaque ' + N.erreurs.singulier + ' y coûte un point, quel que soit le facteur.'
     };
 }
 

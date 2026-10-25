@@ -40,9 +40,22 @@
 //   · l'étiquette du menu remise à « Modèle d'observation » → 3 rouges : ici C.a ; « une seule
 //     carte » C.b ; lot 4 C B.a.
 // Une sentinelle qui n'a jamais rougi n'a rien prouvé.
+//
+// ↻ #1150, LOT 4 (24 oct. 2026, maquette validée par Grégoire) : les cartes sont devenues les étapes de
+// l'atelier. Ce qui reste arrêté : « Aucune annotation » vit avec les codes (étape « Codes »), une fois,
+// hors de ce que l'élève lit ; le menu « Modèle des phrases (bilan et décompte) » et sa ligne d'aide ; le
+// modèle « Français écrit ». Ce qui change : la carte « Bilan » est l'étape « Ce que l'élève lit » (le
+// décompte PUIS les deux phrases du bilan) ; « Aucune annotation » est À PLAT sous la liste des
+// sous-critères (l'étape est le pli) ; la ligne « Texte de départ » est partie (le menu est juste
+// au-dessus du décompte). A, B et C sont réécrits sur ces invariants.
+// BREAK-TESTS (24 oct., restaurés, `shasum` identique) : `aucune` réintroduit dans « Ce que l'élève lit »
+// (filtre retiré) → A.a, A.b, A.c, B.a, B.b, B.c, B.d, B.f, E.a (et « une seule carte » A.a, A.b, B.b, E.a) ;
+// la zone `aucune` retirée de l'étape « Codes » → A.b, B.a, B.b, B.c, B.d, B.e, B.f, E.a (et « une seule
+// carte » A.a, A.b).
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { etapeDe, etapeOuverte, atelierDe } from './_helpers/atelier-algo.js';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -119,6 +132,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     return { win, store, document, ecrits, liste: () => document.getElementById('listeCriteres') };
@@ -133,26 +147,16 @@ const COCHEE = { ...GRILLE, criteres: [{ ...ALGO, codesDepuisSousCriteres: true,
 ] }] };
 
 /** Une carte du gabarit, de son `data-pli` jusqu'à la carte suivante. */
-const carte = (html, id, section) => {
-    const i = html.indexOf('data-pli="' + id + ':' + section + '"');
-    if (i < 0) return '';
-    const suivant = html.indexOf('class="carte accordeon gabarit-algo-carte', i + 10);
-    return html.slice(i, suivant < 0 ? undefined : suivant);
-};
-/** Le bloc des sous-critères : de son conteneur à la première carte. */
-const blocSousCriteres = (html) => {
-    const i = html.indexOf('sous-criteres-conteneur--en-tete');
-    if (i < 0) return '';
-    const fin = html.indexOf('class="carte accordeon gabarit-algo-carte', i);
-    return html.slice(i, fin < 0 ? undefined : fin);
-};
-/** Le pli « Aucune annotation » : de son `data-pli` à la fin de son contenu (la liste, ou la carte suivante). */
+// ↻ #1150, lot 4 (24 oct. 2026) : les cartes sont devenues les étapes de l'atelier (`_helpers/atelier-algo.js`).
+const ETAPE_DE = { formule: 'note', projection: 'paliers', commentaire: 'eleve' };
+const carte = (html, id, section) => etapeDe(html, id, ETAPE_DE[section] || section);
+/** ↻ #1150 : le bloc des sous-critères, c'est l'étape « Codes » de l'atelier. */
+const blocSousCriteres = (html, id) => etapeDe(html, id || 'CR', 'codes');
+/** ↻ #1150 : « Aucune annotation », à plat dans l'étape « Codes » — de son bloc à la fin de l'étape. */
 const pliAucune = (html, id) => {
-    const i = html.indexOf('data-pli="' + (id || 'CR') + ':aucune"');
-    if (i < 0) return '';
-    const debut = html.lastIndexOf('<div class="carte accordeon', i);
-    const candidats = [html.indexOf('class="sous-criteres-liste-conteneur"', i), html.indexOf('class="sous-criteres-vide-message"', i), html.indexOf('class="carte accordeon gabarit-algo-carte', i)].filter((x) => x > 0);
-    return html.slice(debut, candidats.length ? Math.min(...candidats) : undefined);
+    const codes = blocSousCriteres(html, id);
+    const i = codes.indexOf('<div class="sous-criteres-aucune">');
+    return i < 0 ? '' : codes.slice(i);
 };
 const compter = (h, motif) => (h.split(motif).length - 1);
 const clesDe = (h) => [...h.matchAll(/data-enonce-cle="([a-z]+)"/g)].map((m) => m[1]);
@@ -175,116 +179,107 @@ function renduTemp(critere) {
 
 const REGISTRE = Object.fromEntries(E.listerCles().map((c) => [c.cle, c]));
 
-/* ====================================================== A — LA CARTE « BILAN » */
+/* ====================================================== A — L'ÉTAPE « CE QUE L'ÉLÈVE LIT » */
 
-describe('carte « Bilan » · A — le titre, la clé de pli, DEUX énoncés : ce que l\'élève lit dans son bilan', () => {
-    it('A.a en ÉDITION : « Bilan » (clé `commentaire`, repliée), le menu puis « Défi prioritaire » et « Quand tout est maîtrisé » ; ni « Aucune annotation » ni le décompte', () => {
+const etapeNommee = (t) => new RegExp('<span class="atelier-algo-etape-nom">' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '</span>');
+
+describe('carte « Bilan » · A — ↻ #1150 : l\'étape « Ce que l\'élève lit » — le menu, le décompte, puis les deux phrases du bilan', () => {
+    it('A.a en ÉDITION : l\'étape, ouverte au départ ; le menu, puis le décompte, « Défi prioritaire » et « Quand tout est maîtrisé » ; ni « Aucune annotation » ni titre « Bilan »', () => {
         const { html, bilan } = rendu();
         expect(bilan.length).toBeGreaterThan(0);
-        expect(html).toMatch(titre('Bilan'));
-        expect(html).toContain('class="carte accordeon gabarit-algo-carte ferme" data-pli="CR:commentaire"');
-        expect(clesDe(bilan)).toEqual(['priorite', 'concentre']);
+        expect(html).toMatch(etapeNommee('Ce que l\'élève lit'));
+        expect(html).not.toMatch(titre('Bilan'));
+        expect(etapeOuverte(html, 'CR', 'eleve')).toBe(true);
+        expect(clesDe(bilan)).toEqual(['decompte', 'priorite', 'concentre']);
         expect(bilan).toContain('>' + REGISTRE.priorite.libelle + '</label>');
         expect(bilan).toContain('>' + REGISTRE.concentre.libelle + '</label>');
-        expect(bilan.indexOf('<select')).toBeLessThan(bilan.indexOf('data-enonce-cle="priorite"'));
+        expect(bilan.indexOf('<select')).toBeLessThan(bilan.indexOf('data-enonce-cle="decompte"'));
         expect(bilan).not.toContain('data-enonce-cle="aucune"');
         expect(bilan).not.toContain('Aucune annotation');
-        expect(bilan).not.toContain('Quand la copie ne porte aucun code');
-        expect(bilan).not.toContain('data-enonce-cle="decompte"');
         // Témoin : la zone est celle d'avant — même handler, même grille, même index, même clé.
         expect(bilan).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="priorite"/);
     });
 
-    it('A.b en CRÉATION (mode temp) : la même carte, par le handler temp — « Aucune annotation » sous les sous-critères, comme en édition (#1131)', () => {
+    it('A.b en CRÉATION (mode temp) : la même étape, par le handler temp — « Aucune annotation » avec les codes, comme en édition (#1131)', () => {
         const { html, bilan } = renduTemp();
-        expect(html).toMatch(titre('Bilan'));
-        expect(clesDe(bilan)).toEqual(['priorite', 'concentre']);
+        expect(html).toMatch(etapeNommee('Ce que l\'élève lit'));
+        expect(clesDe(bilan)).toEqual(['decompte', 'priorite', 'concentre']);
         expect(bilan).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="concentre"/);
-        // ↻ 21 oct. 2026 (#1131) : les sous-critères existent en création ; « Aucune annotation » les suit, hors du « Bilan ».
-        expect(clesDe(html)).toEqual(['aucune', 'priorite', 'concentre', 'decompte']);
+        expect(clesDe(html)).toEqual(['aucune', 'decompte', 'priorite', 'concentre']);
         expect(html).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="aucune"/);
     });
 
-    it('A.c dans le code : la carte se titre « Bilan », plus « Observation » ; « Bilan » filtre le décompte ET « aucune »', () => {
+    it('A.c dans le code : l\'étape porte le bloc des énoncés, qui ne filtre que « aucune » ; plus de carte « Bilan » ni « Observation »', () => {
         const src = source('js/grilles.js');
-        expect(src).toMatch(/carteGabaritAlgo\(critere, ctx, 'commentaire', 'Bilan', rendreBlocEnoncesAlgo\(critere, ctx\), true\)/);
-        expect(src).not.toMatch(/carteGabaritAlgo\(critere, ctx, 'commentaire', 'Observation'/);
-        expect((src.match(/listerCles\(\)\.filter\(\(c\) => c\.cle !== 'decompte' && c\.cle !== 'aucune'\)/g) || []).length).toBe(1);
+        expect(src).toMatch(/eleve: rendreBlocEnoncesAlgo\(critere, ctx\)/);
+        expect(src).not.toMatch(/carteGabaritAlgo/);
+        expect((src.match(/listerCles\(\)\.filter\(\(c\) => c\.cle !== 'aucune'\)/g) || []).length).toBe(1);
     });
 });
 
-/* ============================================ B — « AUCUNE ANNOTATION », SOUS LA CASE DES CODES */
+/* ============================================ B — « AUCUNE ANNOTATION », AVEC LES CODES */
 
-describe('carte « Bilan » · B — « Aucune annotation » vit sous la case des codes, sous un pli fermé, une fois', () => {
-    it('B.a en ÉDITION, case décochée : UNE zone `aucune` dans tout le gabarit, dans la liste des sous-critères, après la case et avant les cartes, sous le pli « Quand la copie ne porte aucun code »', () => {
+describe('carte « Bilan » · B — ↻ #1150 : « Aucune annotation » vit dans l\'étape « Codes », à plat, sous la liste, une fois', () => {
+    it('B.a en ÉDITION, case décochée : UNE zone `aucune` dans tout le gabarit, dans l\'étape « Codes », après la case et après la liste', () => {
         const { html, sousCriteres } = rendu();
         expect(compter(html, 'data-enonce-cle="aucune"')).toBe(1);
         expect(compter(sousCriteres, 'data-enonce-cle="aucune"')).toBe(1);
-        const pli = pliAucune(html);
-        expect(pli.length).toBeGreaterThan(0);
-        expect(pli).toContain('<div class="carte accordeon sous-critere-pli sous-critere-pli--aucune ferme" data-pli="CR:aucune">');
-        expect(pli).toContain('<span class="accordeon-chevron">▶</span> Quand la copie ne porte aucun code</h3>');
-        expect(pli).not.toMatch(/sous-critere-pli--aucune[^>]*\sid=/);
-        // Après la case (son handler), avant la première carte ; la case est décochée et la phrase est là quand même.
-        expect(html.indexOf('data-on-change="modifierCodesDepuisSousCriteresHandler"')).toBeLessThan(html.indexOf('data-pli="CR:aucune"'));
-        expect(html.indexOf('data-pli="CR:aucune"')).toBeLessThan(html.indexOf('data-pli="CR:formule"'));
+        const zone = pliAucune(html);
+        expect(zone.length).toBeGreaterThan(0);
+        expect(html).not.toContain('sous-critere-pli--aucune');
+        expect(html).not.toContain('data-pli="CR:aucune"');
+        expect(sousCriteres.indexOf('data-on-change="modifierCodesDepuisSousCriteresHandler"')).toBeLessThan(sousCriteres.indexOf('data-enonce-cle="aucune"'));
+        expect(sousCriteres.indexOf('class="sous-criteres-liste-conteneur"')).toBeLessThan(sousCriteres.indexOf('data-enonce-cle="aucune"'));
         expect(html).not.toContain('sous-criteres-codes--actif');
         // La zone est celle d'avant : même handler, même grille, même index, même clé, même valeur, même étiquette, même aide.
-        expect(pli).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="aucune"/);
-        expect(pli).toContain('>' + echapper(E.normaliser(ALGO).enonces.aucune) + '</textarea>');
-        expect(pli).toContain('>' + REGISTRE.aucune.libelle + '</label>');
-        expect(pli).toContain(echapper(REGISTRE.aucune.aide));
+        expect(zone).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="aucune"/);
+        expect(zone).toContain('>' + echapper(E.normaliser(ALGO).enonces.aucune) + '</textarea>');
+        expect(zone).toContain('>' + REGISTRE.aucune.libelle + '</label>');
+        expect(zone).toContain(echapper(REGISTRE.aucune.aide));
         // Ce qu'elle offre : {critere} et {nomErreurs} — jamais {erreurs}, qui y vaudrait toujours vide (le cas qui a
-        // fait trancher Grégoire le 3 sept.). ↻ Étape 2b (22 oct. 2026) : plus de rangée ; la palette du critère le lit
-        // de `reperesDeCle`, son banc est `critere-algorithmique-palette.test.js`.
+        // fait trancher Grégoire le 3 sept.).
         expect(E.reperesDeCle('aucune').map((r) => [r.jeton, r.famille])).toEqual([['{critere}', 'posee'], ['{nomErreurs}', 'posee']]);
-        expect(pli).not.toContain('<button type="button" class="repere-enonce');
-        expect(pli).toContain('data-enonce-cle="aucune" data-nom-zone="' + REGISTRE.aucune.libelle + '"');
+        expect(zone).toContain('data-enonce-cle="aucune" data-nom-zone="' + REGISTRE.aucune.libelle + '"');
     });
 
-    it('B.b case cochée, avec des sous-critères : toujours UNE zone `aucune`, avant les rangées ; les plis « Observation » des rangées sont intacts', () => {
-        const { html, bilan } = rendu(COCHEE);
+    it('B.b case cochée, avec des sous-critères : toujours UNE zone `aucune`, après les rangées ; les plis « Observation » des rangées sont intacts', () => {
+        const { html, bilan, sousCriteres } = rendu(COCHEE);
         expect(compter(html, 'data-enonce-cle="aucune"')).toBe(1);
         expect(html).toContain('sous-criteres-codes--actif');
-        expect(html.indexOf('data-pli="CR:aucune"')).toBeLessThan(html.indexOf('class="sous-critere-item avec-outils"'));
+        expect(sousCriteres.indexOf('class="sous-critere-item avec-outils"')).toBeLessThan(sousCriteres.indexOf('data-enonce-cle="aucune"'));
         expect(compter(html, 'data-champ="retroaction"')).toBe(2);
         expect(html).toContain('class="carte accordeon sous-critere-pli ferme" data-pli="CR:sc:sc_1"');
         expect(bilan).not.toContain('data-enonce-cle="aucune"');
     });
 
-    it('B.c sans sous-critère : la case est là, inactive, et la phrase sous son pli aussi', () => {
+    it('B.c sans sous-critère : la case est là, inactive, et la phrase après le message vide', () => {
         const G = { id: 'G5', criteres: [{ id: 'CR', nom: 'Rigueur', type: 'algorithmique', ponderation: 20 }] };
-        const { html } = rendu(G);
+        const { html, sousCriteres } = rendu(G);
         expect(html).toMatch(/data-on-change="modifierCodesDepuisSousCriteresHandler"[^>]*\sdisabled/);
         expect(compter(html, 'data-enonce-cle="aucune"')).toBe(1);
-        expect(html.indexOf('data-pli="CR:aucune"')).toBeLessThan(html.indexOf('class="sous-criteres-vide-message"'));
+        expect(sousCriteres.indexOf('class="sous-criteres-vide-message"')).toBeLessThan(sousCriteres.indexOf('data-enonce-cle="aucune"'));
     });
 
-    it('B.d en CRÉATION (↻ #1131, 21 oct. 2026) : la case et la phrase, comme en édition — une zone `aucune`, un pli, la cible `temp`', () => {
+    it('B.d en CRÉATION (↻ #1131, 21 oct. 2026) : la case et la phrase, comme en édition — une zone `aucune`, la cible `temp`', () => {
         const { html } = renduTemp();
         expect(compter(html, 'data-enonce-cle="aucune"')).toBe(1);
-        expect(html).toContain('Quand la copie ne porte aucun code');
+        expect(compter(blocSousCriteres(html, 'T'), 'data-enonce-cle="aucune"')).toBe(1);
         expect(html).toMatch(/data-on-change="modifierCodesDepuisSousCriteresHandler" data-grille-id="temp" data-critere-index="0"/);
         expect(html).not.toContain('Les sous-critères se définissent une fois la grille enregistrée.');
     });
 
-    it('B.e le pli vit en mémoire : déplié par l\'enseignant·e, il reste déplié au redessin qui suit une frappe ; rien n\'entre dans la grille', () => {
+    it('B.e plus de pli « Quand la copie ne porte aucun code » : l\'étape « Codes » le porte, et le rendu n\'écrit rien dans la grille', () => {
         const m = monter([GRILLE]);
-        m.win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const avant = JSON.stringify(m.store[CLE]);
-        m.liste().querySelectorAll = (sel) => sel === '.carte.accordeon[data-pli]'
-            ? [{ dataset: { pli: 'CR:aucune' }, classList: { contains: () => false } }]
-            : [];
         m.win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = m.liste().innerHTML;
-        expect(html).toContain('<div class="carte accordeon sous-critere-pli sous-critere-pli--aucune" data-pli="CR:aucune">');
-        expect(html).toContain('<span class="accordeon-chevron">▼</span> Quand la copie ne porte aucun code</h3>');
-        expect(html).toContain('class="carte accordeon gabarit-algo-carte ferme" data-pli="CR:commentaire"');
+        expect(html).not.toContain('Quand la copie ne porte aucun code');
+        expect(compter(etapeDe(html, 'CR', 'codes'), 'data-enonce-cle="aucune"')).toBe(1);
+        expect(source('js/grilles.js')).not.toMatch(/rendrePliAucuneAnnotation\(|:aucune`/);
         expect(JSON.stringify(m.store[CLE])).toBe(avant);
-        expect(avant).not.toMatch(/"pli|plisGabarit|data-pli|aucune"/);
     });
 
-    it('B.f une phrase écrite par l\'enseignant·e se relit sous le pli, échappée, et nulle part ailleurs', () => {
+    it('B.f une phrase écrite par l\'enseignant·e se relit dans sa zone, échappée, et nulle part ailleurs', () => {
         const ecrit = 'Rien <b>à</b> signaler sur "{critere}".';
         const { html, bilan } = rendu({ ...GRILLE, criteres: [{ ...ALGO, enonces: { aucune: ecrit } }] });
         expect(pliAucune(html)).toContain('>' + echapper(ecrit) + '</textarea>');
@@ -294,12 +289,13 @@ describe('carte « Bilan » · B — « Aucune annotation » vit sous la case de
     });
 });
 
-/* ============================================================ C — LE MENU ET SES LIGNES */
+/* ============================================================ C — LE MENU ET SA LIGNE */
 
-describe('carte « Bilan » · C — « Modèle des phrases (bilan et décompte) », sa ligne d\'aide, la ligne « Texte de départ », les classes scopées', () => {
-    const AIDE = 'Fournit le texte de départ des deux phrases du bilan et du décompte de la carte « Ce que l\'élève lit ».';
+describe('carte « Bilan » · C — « Modèle des phrases (bilan et décompte) », sa ligne d\'aide, les classes scopées', () => {
+    // ↻ #1150 : le décompte est dans la même étape que le menu — la ligne d'aide ne renvoie plus à une autre carte.
+    const AIDE = 'Fournit le texte de départ du décompte et des deux phrases du bilan.';
 
-    it('C.a le menu est dans « Bilan », étiqueté au mot ; la ligne d\'aide suit le menu et précède la description du modèle ; « Modèle d\'observation » n\'existe plus', () => {
+    it('C.a le menu est dans « Ce que l\'élève lit », étiqueté au mot ; la ligne d\'aide suit le menu et précède la description du modèle ; « Modèle d\'observation » n\'existe plus', () => {
         const { bilan, projection } = rendu();
         expect(bilan).toContain('>Modèle des phrases (bilan et décompte)</label>');
         expect(bilan).toContain('<small class="modele-phrases-aide">' + AIDE + '</small>');
@@ -316,21 +312,21 @@ describe('carte « Bilan » · C — « Modèle des phrases (bilan et décompte)
         expect(bilan).not.toContain('Modèle d\'observation');
     });
 
-    it('C.b la ligne sous le décompte dit d\'où vient le texte de départ : le modèle des phrases, carte « Bilan »', () => {
-        const { projection } = rendu();
-        expect(compter(projection, 'decompte-texte-depart')).toBe(1);
-        expect(projection).toContain('Texte de départ : le modèle des phrases, carte « Bilan ».');
-        expect(projection).not.toContain('carte « Observation »');
+    it('C.b la ligne « Texte de départ » est partie : rien ne renvoie plus à la carte « Bilan »', () => {
+        const { html } = rendu();
+        expect(html).not.toContain('decompte-texte-depart');
+        expect(html).not.toContain('carte « Bilan »');
+        expect(html).not.toContain('carte « Observation »');
     });
 
-    it('C.c les classes vivent dans styles.css, scopées à l\'éditeur ; le pli neuf ne porte aucun style inline', () => {
+    it('C.c les classes vivent dans styles.css, scopées à l\'éditeur ; la zone ne porte aucun style inline', () => {
         const css = source('styles.css');
-        expect(css).toMatch(/#listeCriteres \.sous-critere-pli--aucune \{[^}]*margin: 0 0 12px/);
+        expect(css).toMatch(/#listeCriteres \.sous-criteres-aucune \{[^}]*margin-top: 12px/);
         expect(css).toMatch(/#listeCriteres \.modele-phrases-aide \{[^}]*color: var\(--gris-clair\)/);
         expect(css).toMatch(/#listeCriteres \.sous-critere-pli \.accordeon-header \{[^}]*min-height: 44px/);
         const { html } = rendu();
-        const pli = pliAucune(html);
-        const enveloppe = pli.slice(0, pli.indexOf('<div class="accordeon-contenu">'));
+        const zone = pliAucune(html);
+        const enveloppe = zone.slice(0, zone.indexOf('<div class="groupe-form">'));   // l'enveloppe ; le champ est celui du helper commun
         expect(enveloppe).not.toContain('style=');
         expect(enveloppe).not.toMatch(/\son[a-z]+=/);
     });

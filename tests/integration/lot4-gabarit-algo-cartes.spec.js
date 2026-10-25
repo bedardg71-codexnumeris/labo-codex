@@ -12,6 +12,11 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // UN CHAMP : la bande reste dépliée. Il replie la formule, tape dans un de ses champs : elle
 // reste repliée. Il change de grille et revient : les plis sont ceux qu'il a laissés.
 //
+// ↻ #1150 (24 oct. 2026, maquette validée par Grégoire) : les cartes sont devenues les cinq ÉTAPES de l'atelier
+// (Ce que tu comptes · Codes · Note · Paliers · Ce que l'élève lit), UNE seule ouverte — « Ce que l'élève lit »
+// au départ. Le « fini quand » devient : il ouvre une étape (à la souris, ou par la chaîne), TAPE DANS UN CHAMP :
+// l'étape reste ouverte, seule ; il change de grille et revient : c'est encore elle. Rien n'entre dans la grille.
+//
 // ⚠ Le test qui compte est celui de la frappe : chaque handler redessine le gabarit entier.
 // Le clic sur la bande passe par la souris (Playwright), donc par le dispatcher de main.js et
 // `toggleAccordeonV2` ; la frappe est rejouée comme le navigateur la livre (valeur + `change`).
@@ -34,19 +39,23 @@ const SEMER = `async () => {
 
 const LIRE = `() => {
     const l = document.getElementById('listeCriteres');
-    const blocs = [...l.querySelectorAll('.sous-criteres-conteneur--en-tete, .gabarit-algo-carte')];
+    const etapes = [...l.querySelectorAll('.atelier-algo-etape')];
     return {
-        ordre: blocs.map(e => e.dataset.pli || 'sous-criteres'),
-        plis: Object.fromEntries([...l.querySelectorAll('.gabarit-algo-carte')].map(e => [e.dataset.pli, e.classList.contains('ferme') ? 'replie' : 'ouvert'])),
+        ordre: etapes.map(e => e.dataset.etape),
+        plis: Object.fromEntries(etapes.map(e => [e.dataset.etape, e.hasAttribute('data-ouverte') ? 'ouvert' : 'replie'])),
+        chaineOuverte: [...l.querySelectorAll('.atelier-algo-chaine .bc-ouvert')].map(b => b.dataset.etape),
         rangeeAvantSousCriteres: l.innerHTML.indexOf('data-champ="nom"') < l.innerHTML.indexOf('sous-criteres-conteneur--en-tete'),
+        sousCriteresDansCodes: !!l.querySelector('.atelier-algo-etape[data-etape="codes"] .sous-criteres-conteneur--en-tete'),
         commentaire: l.innerHTML.includes("Modèle des phrases (bilan et décompte)") && !l.innerHTML.includes("Modèle d'observation") && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
         euf: [...l.querySelectorAll('option')].some(o => o.textContent === "Projection à l'EUF"),
         motsReference: (l.querySelector('input[data-param-cle="motsReference"]') || {}).value,
-        cartesAvecId: [...l.querySelectorAll('.gabarit-algo-carte[id]')].length
+        cartes: l.querySelectorAll('.gabarit-algo-carte').length
     };
 }`;
 
-const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo-carte[data-pli="CR:${section}"]`);
+const ETAPE_DE = { projection: 'paliers', commentaire: 'eleve', formule: 'note' };
+const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo[data-critere-id="CR"] .atelier-algo-etape[data-etape="${ETAPE_DE[section] || section}"]`);
+const SEUL = (ouverte) => Object.fromEntries(['compte', 'codes', 'note', 'paliers', 'eleve'].map(e => [e, e === ouverte ? 'ouvert' : 'replie']));
 // ↻ 4 sept. 2026, 18 h 30 — RUN GITHUB 33902352824 (1.117.0) ROUGE sur ce spec : sur le runner, chaque
 // clic à la souris coûte de 2 à 9 s (« waiting for element to be visible, enabled and stable ») et le
 // budget de 30 s s'épuise — la même cause que le matin (run 33869215489), pas une régression du gabarit.
@@ -60,7 +69,7 @@ const cliquerDom = (locator) => locator.evaluate((el) => el.click());
  * fait, avant de cliquer — un délai fixe ne dirait rien de l'écran.
  */
 async function cliquerBande(page, section) {
-    const bande = carte(page, section).locator('.accordeon-header');
+    const bande = carte(page, section).locator('.atelier-algo-etape-tete');
     await bande.scrollIntoViewIfNeeded();
     let precedent = null;
     for (let i = 0; i < 40; i++) {
@@ -86,61 +95,62 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
     await page.evaluate(eval(SEMER));
 
-    // 1 — l'ordre et l'état à l'ouverture.
+    // 1 — l'ordre et l'état à l'ouverture : cinq étapes, « Ce que l'élève lit » seule ouverte (la chaîne la marque).
     let etat = await page.evaluate(eval(LIRE));
     console.log('OUVERTURE →', JSON.stringify(etat));
-    // ↻ Lot A (5 sept. 2026) : plus de carte « Codes d'annotation » — la liste des sous-critères porte tout.
-    expect(etat.ordre).toEqual(['sous-criteres', 'CR:formule', 'CR:commentaire', 'CR:projection']);
-    expect(etat.rangeeAvantSousCriteres, 'les sous-critères viennent tout de suite sous la rangée du critère').toBe(true);
-    expect(etat.plis).toEqual({ 'CR:formule': 'ouvert', 'CR:commentaire': 'replie', 'CR:projection': 'replie' });
+    expect(etat.ordre).toEqual(['compte', 'codes', 'note', 'paliers', 'eleve']);
+    expect(etat.rangeeAvantSousCriteres, 'la rangée du critère, puis l\'atelier').toBe(true);
+    expect(etat.sousCriteresDansCodes, 'les sous-critères sont dans l\'étape « Codes »').toBe(true);
+    expect(etat.plis).toEqual(SEUL('eleve'));
+    expect(etat.chaineOuverte).toEqual(['eleve']);
     expect(etat.commentaire, '« Modèle des phrases (bilan et décompte) » (carte « Bilan », 1.120), ni « observation », ni « rétroaction » ni « commentaire »').toBe(true);
     expect(etat.euf, '« Projection à l\'EUF » au menu de projection').toBe(true);
-    expect(etat.cartesAvecId, 'aucune carte ne porte d\'id : le composant ne persiste rien').toBe(0);
+    expect(etat.cartes, 'plus aucune carte du composant accordéon pour le gabarit').toBe(0);
 
-    // 2 — déplier la projection À LA SOURIS, puis TAPER dans un de ses champs : elle reste dépliée.
+    // 2 — ouvrir « Paliers » À LA SOURIS, puis TAPER dans un de ses champs : elle reste ouverte, seule.
     await cliquerBande(page, 'projection');
-    await expect(carte(page, 'projection')).not.toHaveClass(/ferme/);
-    await frapper(page, '#listeCriteres .gabarit-algo-carte[data-pli="CR:projection"] input[data-param-cle="motsReference"]', '1000');
+    await expect(carte(page, 'projection')).toHaveAttribute('data-ouverte', '');
+    await frapper(page, '#listeCriteres .atelier-algo-etape[data-etape="paliers"] input[data-param-cle="motsReference"]', '1000');
     await expect(page.locator('#listeCriteres input[data-param-cle="motsReference"]'), 'le gabarit s\'est redessiné avec la valeur').toHaveValue('1000');
     etat = await page.evaluate(eval(LIRE));
-    console.log('APRÈS FRAPPE (projection dépliée) →', JSON.stringify(etat.plis));
-    expect(etat.plis['CR:projection'], 'la bande reste dépliée sous les doigts').toBe('ouvert');
-    expect(etat.plis['CR:formule']).toBe('ouvert');
-    expect(etat.plis['CR:commentaire']).toBe('replie');
+    console.log('APRÈS FRAPPE (Paliers) →', JSON.stringify(etat.plis));
+    expect(etat.plis, 'l\'étape reste ouverte sous les doigts, seule').toEqual(SEUL('paliers'));
+    expect(etat.chaineOuverte).toEqual(['paliers']);
 
-    // 3 — replier la formule, taper dans un de ses champs : elle reste repliée.
-    await cliquerDom(carte(page, 'formule').locator('.accordeon-header'));
-    await expect(carte(page, 'formule')).toHaveClass(/ferme/);
-    await frapper(page, '#listeCriteres .gabarit-algo-carte[data-pli="CR:formule"] input[data-param-cle]', '7');
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:formule"] input[data-param-cle]').first(), 'le gabarit s\'est redessiné avec la valeur').toHaveValue('7');
+    // 3 — toucher « Note » dans la chaîne, taper dans un de ses champs : « Note » reste ouverte, seule.
+    await cliquerDom(page.locator('#listeCriteres .atelier-algo-chaine .bc-etape[data-etape="note"]'));
+    await expect(carte(page, 'formule')).toHaveAttribute('data-ouverte', '');
+    await frapper(page, '#listeCriteres .atelier-algo-etape[data-etape="note"] input[data-param-cle]', '7');
+    await expect(page.locator('#listeCriteres .atelier-algo-etape[data-etape="note"] input[data-param-cle]').first(), 'le gabarit s\'est redessiné avec la valeur').toHaveValue('7');
     etat = await page.evaluate(eval(LIRE));
-    console.log('APRÈS FRAPPE (formule repliée) →', JSON.stringify(etat.plis));
-    expect(etat.plis['CR:formule']).toBe('replie');
-    expect(etat.plis['CR:projection']).toBe('ouvert');
+    console.log('APRÈS FRAPPE (Note) →', JSON.stringify(etat.plis));
+    expect(etat.plis).toEqual(SEUL('note'));
 
-    // 4 — changer de grille et revenir : les plis sont ceux qu'il a laissés.
+    // 4 — changer de grille et revenir : l'étape est celle qu'il a laissée.
     await page.evaluate(async () => { await window.chargerGrillePourModif('G2'); await window.chargerGrillePourModif('G1'); });
     await expect(page.locator('#listeCriteres input[data-param-cle="motsReference"]'), 'G1 est de retour, avec la valeur écrite à l\'étape 2').toHaveValue('1000');
     etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS RETOUR →', JSON.stringify(etat.plis));
-    expect(etat.plis).toEqual({ 'CR:formule': 'replie', 'CR:commentaire': 'replie', 'CR:projection': 'ouvert' });
+    expect(etat.plis).toEqual(SEUL('note'));
 
     // 5 — rien de tout cela n'est dans la grille : les plis meurent avec la page.
     const grille = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(g => g.id === 'G1'));
     const texte = JSON.stringify(grille);
-    expect(texte).not.toMatch(/"pli|plis|ferme|ouvert/);
+    expect(texte).not.toMatch(/"pli|plis|ferme|ouvert|atelier|etape/);
     expect(grille.criteres[0].paramsProjection.motsReference, 'la frappe, elle, est bien écrite').toBe(1000);
 
     // 6 — coup d'œil de Grégoire (4 sept., §7 b) : le nom d'un palier se lit EN ENTIER — « Sans erreur »,
-    //     pas « Sans erre » — dans la carte « Projection » dépliée.
-    const nomPalier = page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:projection"] input.palier-nom').first();
+    //     pas « Sans erre » — dans l'étape « Paliers » ouverte.
+    await cliquerDom(carte(page, 'projection').locator('.atelier-algo-etape-tete'));
+    await expect(carte(page, 'projection')).toHaveAttribute('data-ouverte', '');
+    const nomPalier = page.locator('#listeCriteres .atelier-algo-etape[data-etape="paliers"] input.palier-nom').first();
     await expect(nomPalier).toHaveValue('Sans erreur');
     const mesure = await nomPalier.evaluate((el) => ({ scroll: el.scrollWidth, client: el.clientWidth, largeur: el.getBoundingClientRect().width }));
     console.log('PALIER « Sans erreur » →', JSON.stringify(mesure));
     expect(mesure.scroll, 'le texte tient dans le champ').toBeLessThanOrEqual(mesure.client);
     expect(mesure.largeur).toBeGreaterThan(120);
     // La note du composeur (texte troué, étape 2 — elle remplace « Écris {service}… ») : une seule, sous les paliers.
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:projection"] .palier-note-composer')).toHaveCount(1);
+    await expect(page.locator('#listeCriteres .atelier-algo-etape[data-etape="paliers"] .palier-note-composer')).toHaveCount(1);
     // §8 e) et g) : les paliers sont numérotés (« Palier 1 »… sans chevrons), la rangée dit « Description » (D1, 17 oct.).
     const etiquettes = await page.locator('#listeCriteres .palier-projection .sous-critere-label-petit').evaluateAll(els => els.map(e => e.textContent.trim()).filter(t => t.startsWith('Palier')));
     expect(etiquettes[0]).toBe('Palier 1');
@@ -153,27 +163,22 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     // 6 bis — LOT A (5 sept. 2026) : UNE seule liste. La case en tête des sous-critères, à plat ; cochée, la
     //     rangée gagne sa pastille et son pli « Observation » (fermé par défaut) ; on déplie, on écrit une
     //     observation, la frappe laisse le pli ouvert ; on recharge la grille : la case et l'observation se relisent.
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:codes"]')).toHaveCount(0);
+    // ↻ #1150 : la case, la liste et « Aucune annotation » (à plat, sous la liste) sont dans l'étape « Codes » ;
+    //     on l'ouvre par son en-tête, et le redessin de la case cochée la garde ouverte.
+    await cliquerDom(carte(page, 'codes').locator('.atelier-algo-etape-tete'));
+    await expect(carte(page, 'codes')).toHaveAttribute('data-ouverte', '');
     const caseCodes = page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-criteres-codes input[type="checkbox"]');
     await expect(caseCodes).toHaveCount(1);
     await expect(caseCodes).not.toBeChecked();
-    // ↻ La carte « Bilan » (5 sept. 2026, 1.120) : sous la case, cochée ou non, le pli « Quand la copie ne porte
-    //     aucun code » (fermé, le même composant) porte « Aucune annotation », partie de la carte « Bilan » ;
-    //     ce qui n'existe pas décoché, c'est le pli DE RANGÉE. On le déplie par l'événement DOM ; le redessin
-    //     qui suit la case cochée le garde déplié (les plis vivent en mémoire).
-    const pliAucune = () => page.locator('#listeCriteres .sous-critere-pli--aucune[data-pli="CR:aucune"]');
-    await expect(pliAucune()).toHaveCount(1);
-    await expect(pliAucune()).toHaveClass(/ferme/);
-    await expect(pliAucune().locator('.accordeon-header h3')).toHaveText(/Quand la copie ne porte aucun code/);
+    const zoneAucune = () => page.locator('#listeCriteres .atelier-algo-etape[data-etape="codes"] .sous-criteres-aucune textarea[data-enonce-cle="aucune"]');
+    await expect(zoneAucune()).toHaveCount(1);
     await expect(page.locator('#listeCriteres textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:commentaire"] textarea[data-enonce-cle="aucune"]')).toHaveCount(0);
+    await expect(page.locator('#listeCriteres .sous-critere-pli--aucune')).toHaveCount(0);
     await expect(page.locator('#listeCriteres .sous-critere-pli[data-pli*=":sc:"]')).toHaveCount(0);
     await expect(page.locator('#listeCriteres textarea[data-champ="retroaction"]')).toHaveCount(0);
-    await cliquerDom(pliAucune().locator('.accordeon-header'));
-    await expect(pliAucune()).not.toHaveClass(/ferme/);
     await caseCodes.evaluate((el) => el.click());
     await expect(page.locator('#listeCriteres .sous-criteres-codes--actif')).toHaveCount(1);
-    await expect(pliAucune(), 'le redessin de la case cochée garde le pli déplié').not.toHaveClass(/ferme/);
+    await expect(carte(page, 'codes'), 'le redessin de la case cochée garde l\'étape ouverte').toHaveAttribute('data-ouverte', '');
     await expect(page.locator('#listeCriteres textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
     await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe .travaux-retro-couleur-picker')).toHaveCount(1);
     const pli = () => page.locator('#listeCriteres .sous-critere-pli[data-pli="CR:sc:sc_1"]');
@@ -194,7 +199,7 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     // Décocher : couleur et pli disparaissent de l'écran ; l'observation reste en base.
     await page.locator('#listeCriteres .sous-criteres-codes input[type="checkbox"]').evaluate((el) => el.click());
     await expect(page.locator('#listeCriteres .sous-critere-pli[data-pli*=":sc:"]')).toHaveCount(0);
-    await expect(pliAucune(), 'décochée, la phrase « Aucune annotation » reste sous la case').toHaveCount(1);
+    await expect(zoneAucune(), 'décochée, la phrase « Aucune annotation » reste avec les codes').toHaveCount(1);
     await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe')).toHaveCount(0);
     gA = await page.evaluate(async () => ((await db.get(cle('grillesTemplates'))) || []).find(x => x.id === 'G1'));
     expect(gA.criteres[0].sousCriteres[0].retroaction).toBe(observation);
@@ -203,9 +208,11 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     //     ou à plat) ; aucun « ✕ » ne reste dans l'éditeur.
     await expect(page.locator('#listeCriteres .btn-supprimer')).toHaveCount(0);
     const nbPaliersAvant = await page.locator('#listeCriteres .palier-projection').count();
+    await cliquerDom(carte(page, 'projection').locator('.atelier-algo-etape-tete'));   // ↻ #1150 : l'étape des paliers
     await cliquerDom(page.locator('#listeCriteres .palier-projection').last().locator('.bloc-retirer-coin'));
     await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(nbPaliersAvant - 1);
     await expect(page.locator('#listeCriteres .sous-critere-input-code')).toHaveCount(1);
+    await cliquerDom(carte(page, 'codes').locator('.atelier-algo-etape-tete'));   // ↻ #1150 : l'étape des sous-critères
     // §8 f : le sous-critère porte chevrons + corbeille en coin — la corbeille est le bouton d'icône du coin.
     await cliquerDom(page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-critere-item .bloc-coin-outils .btn-icone-nu').first());
     await expect(page.locator('#listeCriteres .sous-critere-input-code')).toHaveCount(0);

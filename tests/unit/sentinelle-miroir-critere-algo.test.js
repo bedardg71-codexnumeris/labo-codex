@@ -18,6 +18,12 @@
 //      dit pas « français » ; la phrase « Aucun sous-critère pour l'instant » (point 7) ;
 //   F. LE CHARGEMENT : index.html charge miroir-algo.js après ses registres, avant grilles.js.
 //
+// ↻ #1150, LOT 4 (24 oct. 2026, maquette validée) : le bloc rendu sous la formule est remplacé par « Ce que
+// l'élève lira », la copie fictive réglable de l'atelier. A à D (le calcul, les copies, la pondération, la
+// lecture seule) restent ici ; E vérifie que le bloc est parti de l'étape « Note » sans rien changer à ce que
+// le rendu écrit ; ce que l'aperçu montre (note, phrases, copie pondérée, ligne du facteur, sans pondération)
+// est éprouvé par `atelier-algo.test.js` (jsdom) et `critere-algorithmique-presentation.spec.js` (WebKit).
+//
 // BREAK-TESTS (faits le 22 octobre 2026, chacun restauré, `cmp` identique) :
 //   · `essayer` rend `points: 30` en dur au lieu du calcul → A.a, A.b et E.a rougissent ;
 //   · `etendue` rend 500 en dur au lieu du réglage → B.a, B.b, B.c, B.d et C.a rougissent ;
@@ -35,6 +41,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
+const source = (rel) => readFileSync(path.join(racine, rel), 'utf8');
 
 /* ------------------------------------------------------------------ harnais */
 
@@ -257,6 +264,7 @@ function monterGrilles(grilles) {
         BibliothequeUI: { obtenirAuteurActif: () => 'banc', forgerInspireDe: () => null, filtrerParModeDemo: (l) => l, repertoires: { rendre() {} } },
         obtenirIdentiteCCUtilisateur: () => 'banc', grilleTemplateActuelle: null };
     const win = registres();
+    chargerScript('js/atelier-algo.js', { document }, win);   // #1150 : l'atelier rend le gabarit
     chargerScript('js/ui-blocs.js', globaux, win);
     chargerScript('js/grilles.js', globaux, win);
     win.estRessourceSupprimee = () => false;
@@ -264,73 +272,33 @@ function monterGrilles(grilles) {
     return { win, ecrits, store, html: () => document.getElementById('listeCriteres').innerHTML };
 }
 
-/** La carte « Formule » d'un critère : jusqu'à la carte suivante (« Bilan »), toujours rendue après elle. */
-const carteFormule = (html, id) => tranche(html, 'data-pli="' + id + ':formule"', 'class="carte accordeon gabarit-algo-carte');
-const blocMiroir = (html) => (html.match(/<div class="miroir-algo"[\s\S]*?<\/ul>\s*<\/div>|<div class="miroir-algo"[\s\S]*?miroir-algo-vide[\s\S]*?<\/div>/) || [])[0] || '';
-
-describe('miroir · E — le bloc dans le gabarit', () => {
-    it('E.a dans la carte « Formule », sous « Formule appliquée » : une ligne par copie, la note à la virgule, rien d\'écrit', () => {
+describe('miroir · E — ↻ #1150 : le bloc est parti de l\'étape « Note » ; « Ce que l\'élève lira » le remplace', () => {
+    it('E.a ni « Essai sur des copies fictives » ni liste de copies dans le gabarit, en édition comme en création ; l\'aperçu est là, et le rendu n\'écrit rien de plus', () => {
         const G = { id: 'G1', nom: 'Rédaction', criteres: [FRANCAIS] };
         const { win, store, html } = monterGrilles([G]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
-        const formule = carteFormule(html(), 'CR_FR');
-        expect(formule).toContain('Essai sur des copies fictives');
-        expect(formule.indexOf('class="miroir-algo"')).toBeGreaterThan(formule.indexOf('Formule appliquée'));
-        const bloc = blocMiroir(formule);
-        expect((bloc.match(/class="miroir-algo-copie"/g) || []).length).toBe(3);
-        expect(bloc).toContain('0 erreur, 500 mots');
-        expect(bloc).toContain('30/30 (100 %)');
-        expect(bloc).toContain('22/30 (73,3 %)');
-        expect(bloc).toContain('0/30 (0 %)');
-        expect(bloc).toContain('0/30 (0\u00A0%) <span class="miroir-algo-plancher">– la note touche le plancher</span>');   // verdict du 22 oct., 3 : le demi-cadratin
-        expect(bloc).toContain('L\'élève lira :');
-        expect(bloc).not.toMatch(/data-action|data-on-change|<input|<textarea|<select|<button/);
-        // Le rendu du gabarit écrit déjà la grille sans le miroir (mesuré le 22 oct.) : le miroir n'y ajoute rien.
+        expect(html()).not.toContain('miroir-algo');
+        expect(html()).not.toContain('Essai sur des copies fictives');
+        expect(html()).toContain('<aside class="apercu-algo" data-apercu-algo="0"');
+        expect(html()).toContain('Formule appliquée');
+        const temp = monterGrilles([]);
+        temp.win.tempCriteres = [{ ...FRANCAIS, id: 'T1' }];
+        temp.win.afficherCriteresTemp();
+        expect(temp.html()).not.toContain('miroir-algo');
+        expect(temp.html()).toContain('<aside class="apercu-algo" data-apercu-algo="0"');
+        // Le rendu n'écrit rien que le rendu sans miroir n'écrivait déjà (mesuré le 22 oct.).
         const temoin = monterGrilles([G]);
         delete temoin.win.miroirAlgo;
         temoin.win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
-        expect(temoin.html()).not.toContain('miroir-algo');
         expect(JSON.stringify(store)).toBe(JSON.stringify(temoin.store));
+        expect(source('js/grilles.js')).not.toMatch(/rendreMiroirAlgo|suivreMiroirAlgo/);
     });
 
-    it('E.b en chimie : la copie pondérée paraît, et le miroir ne dit pas « français »', () => {
-        const G = { id: 'G2', nom: 'Laboratoire', criteres: [CHIMIE] };
-        const { win, html } = monterGrilles([G]);
-        win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
-        const bloc = blocMiroir(carteFormule(html(), 'CR_CH'));
-        expect(bloc).toContain('data-copie="ponderee"');
-        expect(bloc).toMatch(/après pondération\)/);
-        expect(bloc).toContain('« Unité manquante » (poids 1,5)');
-        expect(bloc.toLowerCase()).not.toContain('français');
-    });
-
-    it('E.c en création aussi (mode temp) ; sans pondération, une phrase le dit au lieu des copies', () => {
-        const { win, html } = monterGrilles([]);
-        win.tempCriteres = [{ ...FRANCAIS, id: 'T1' }];
-        win.afficherCriteresTemp();
-        expect((blocMiroir(carteFormule(html(), 'T1')).match(/class="miroir-algo-copie"/g) || []).length).toBe(3);
-        win.tempCriteres = [{ ...FRANCAIS, id: 'T1', ponderation: 0 }];
-        win.afficherCriteresTemp();
-        const bloc = blocMiroir(carteFormule(html(), 'T1'));
-        expect(bloc).toContain('Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.');   // verdict du 22 oct., 2
-        expect(bloc).not.toContain('miroir-algo-copie');
-    });
-
-    it('E.e (verdict du 22 oct., 1) sans projection, une ligne dit pourquoi le facteur ne bouge aucune note ; avec une projection, ou sous le ratio visé, rien', () => {
+    it('E.e la ligne du facteur reste un libellé du miroir, qui nomme ce que le critère compte (étape 2a)', () => {
         const LIGNE = 'Sans projection, ces copies ont la longueur du facteur : chaque erreur y coûte un point, quel que soit le facteur.';
-        const rendu = (critere) => {
-            const G = { id: 'G4', nom: 'Essai', criteres: [critere] };
-            const { win, html } = monterGrilles([G]);
-            win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
-            return blocMiroir(carteFormule(html(), critere.id)).replace(/&#39;|&#x27;/g, '\'');
-        };
-        expect(rendu(FRANCAIS)).toContain(LIGNE);
-        // Étape 2a : la ligne nomme ce que le critère compte.
-        expect(rendu(CHIMIE)).toContain(LIGNE.replace('chaque erreur', 'chaque unité manquante'));
-        expect(rendu({ ...FRANCAIS, modeleProjection: 'norme_externe', paramsProjection: { motsReference: 900 } })).not.toContain('longueur du facteur');
-        expect(rendu(avec(FRANCAIS, 'ratio_cible', { motsParErreurCible: 60 }))).not.toContain('longueur du facteur');
-        expect(rendu({ ...FRANCAIS, ponderation: 0 })).not.toContain('longueur du facteur');
         expect(registres().miroirAlgo.libelles(FRANCAIS).etendueDuFacteur).toBe(LIGNE);
+        expect(registres().miroirAlgo.libelles(CHIMIE).etendueDuFacteur).toBe(LIGNE.replace('chaque erreur', 'chaque unité manquante'));
+        expect(registres().miroirAlgo.libelles(FRANCAIS)).not.toHaveProperty('titre');
     });
 
     it('E.d sous un critère sans sous-critère : « Aucun sous-critère pour l\'instant » (point 7 de la consigne)', () => {
