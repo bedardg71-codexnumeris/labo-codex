@@ -2122,7 +2122,7 @@ window.confirmerImportGrilles = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} grille(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Grilles disponibles » pour les ajouter à ta sélection.');
+        details.push(ligneMasquee || 'Elles sont dans ta bibliothèque : « Utiliser dans ce trimestre » les ajoute à ce trimestre.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
@@ -2422,6 +2422,7 @@ async function afficherBibliothequeGrilles() {
         champsFichier: [{ id: 'fichier-import-grilles-modal', accept: '.json', onChange: 'importerGrilles' }],
         avantColonnes: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.grillesDansBibliotheque,
+            mots: { selection: 'Dans ce trimestre', bibliotheque: 'Dans ta bibliothèque', retirer: 'Retirer de ce trimestre (données conservées)' },
             actions: {
                 retirer: 'retirerGrilleDeBibliotheque',
                 supprimer: 'supprimerGrilleDefinitivement',
@@ -2725,7 +2726,7 @@ async function ajouterGrilleIndividuelle(id) {
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('grillesTemplates'));   // lot F : geste hors témoin (ajouterGrilleIndividuelle)
 
         if (nomEnConflit) {
-            alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+            alert(`« ${nomEnConflit} » est déjà dans ce trimestre.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
             return;
         }
         if (sourceIntrouvable) {
@@ -2751,7 +2752,7 @@ async function ajouterGrilleIndividuelle(id) {
             return;
         }
 
-        notifications.succes('Grille ajoutée à ta sélection !');
+        notifications.succes('Grille ajoutée à ce trimestre !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la grille');
@@ -3029,9 +3030,12 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
         return supprimee;
     }
 
+    // #1154 — lu AVANT le codex : rien ne s'intercale entre son appel et la question (sentinelle #1007).
+    const phraseBibliotheque = await _phraseExemplaireDeBibliotheque(grilleId);
+
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('grille'))) return false;
-    if (!confirm(`Supprimer la grille « ${nomGrille} » ?`)) return false;
+    if (!confirm(`Supprimer la grille « ${nomGrille} » ?${phraseBibliotheque}`)) return false;
 
     const supprimee = await _retirerGrilleDeLaListe(grilleId, options);
     if (supprimee) {
@@ -3039,6 +3043,19 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
         notifications.succes(`Grille « ${nomGrille} » supprimée`);
     }
     return supprimee;
+}
+
+/**
+ * #1154 (25 oct. 2026, décision de Grégoire) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE, ET LA
+ * QUESTION LE DIT quand il y en a un (même `id`, clé non namespacée). Aucun des quatre
+ * appelants de `supprimerGrilleAvecPorteDeSortie` ne le retire : la phrase est vraie par
+ * tous les chemins qui l'affichent.
+ * @returns {Promise<string>} la phrase, précédée d'une ligne vide, ou ''.
+ */
+async function _phraseExemplaireDeBibliotheque(grilleId) {
+    if (typeof obtenirToutesLesGrillesBibliotheque !== 'function') return '';
+    const biblio = await obtenirToutesLesGrillesBibliotheque();
+    return biblio.some(g => g && g.id === grilleId) ? '\n\nSon exemplaire de ta bibliothèque reste.' : '';
 }
 
 /**
@@ -3077,13 +3094,14 @@ async function supprimerGrilleDefinitivement(id) {
     // l'enseignant sans autre recours que de les supprimer une a une. Il passe
     // desormais par le chemin unique, qui bloque, NOMME les cartouches, et offre de
     // les deplacer vers une autre grille.
+    //
+    // #1154 (25 oct. 2026, décision de Grégoire) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE. Ce
+    // chemin le retirait aussi, sans le dire ; la fenêtre en deux colonnes présente deux
+    // exemplaires séparés, et « Utiliser dans ce trimestre » ramène la grille (sous un
+    // identifiant neuf qui nomme sa source, `idOriginal` : mesuré au banc #1154).
+    // Stock : les grilles déjà supprimées ont perdu le leur ; rien ne se répare.
     await supprimerGrilleAvecPorteDeSortie(id, {
         apres: async () => {
-            // Le store partage n'est pas touche par le chemin unique : il ne connait
-            // que la collection locale. On le retire ici, apres la suppression.
-            if (typeof retirerGrilleDeLaBibliotheque === 'function') {
-                await retirerGrilleDeLaBibliotheque(id);
-            }
             fermerModalBibliothequeGrilles();
             await afficherListeGrilles();
             await afficherBibliothequeGrilles();

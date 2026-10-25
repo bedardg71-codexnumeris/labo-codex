@@ -38,6 +38,12 @@ const dossierCaptures = process.env.CAPTURES_1154 || null;
 //   · 820 px : `@container biblio2-fenetre (max-width: 760px)` → `(max-width: 700px)` → « 820 » ROUGIT ;
 //   · Échap : la branche `_fenetreDeuxColonnesAuPremierPlan` retirée du keydown → « Échap » ROUGIT ;
 //   · dossiers : `_appliquerFiltreDossier(modal, select.value)` retiré de `choisirDossier` → « les dossiers » ROUGIT.
+// Retouche du verdict du 25 oct., § 2 :
+//   · `await retirerGrilleDeLaBibliotheque(id)` remis dans `apres` de `supprimerGrilleDefinitivement`
+//     → « Supprimer définitivement » ROUGIT (l'exemplaire part) ;
+//   · `_phraseExemplaireDeBibliotheque` rend la phrase toujours → ROUGIT (la question nue la porte) ;
+//   · `${phraseBibliotheque}` retiré de la question → ROUGIT (la phrase manque) ;
+//   · `mots` retiré de l'appel du bandeau dans grilles.js → « sans doublon » ROUGIT (« Dans ta sélection »).
 // L'essai « mesure : … exemplaire séparé » n'est pas une défense : il établit un fait (§ 1.2 de la consigne).
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
@@ -252,6 +258,67 @@ test('⋮ : les libellés et leurs actions, rangée du trimestre et rangée de l
     expect(stock.dansBibliotheque).toBe(false);
 });
 
+// Verdict du 25 oct., § 2.1 (décision de Grégoire) : « Supprimer définitivement » garde l'exemplaire de
+// la bibliothèque, et la question le dit seulement quand il y en a un.
+test('« Supprimer définitivement » : l’exemplaire de la bibliothèque reste et revient ; la phrase seulement avec un exemplaire', async ({ page }) => {
+    test.setTimeout(120000);
+    await ouvrirDemo(page, 1440, 900);
+    const questions = [];
+    page.on('dialog', (d) => { if (d.message().startsWith('Supprimer la grille')) questions.push(d.message()); });
+
+    const DEUX = 'Grille fictive des deux colonnes';
+    const SEULE = 'Grille fictive du trimestre seul';
+    await page.evaluate(async ([deux, seule]) => {
+        Codex.proposerAvantSuppression = async () => true;   // la fenêtre du codex (#1007) a ses propres bancs
+        const grille = (id, nom) => ({ id, nom, criteres: [{ id: 'c1', nom: 'Critère fictif', type: 'holistique', ponderation: 100 }] });
+        const trimestre = db.getSync(cle('grillesTemplates'), []) || [];
+        await db.set(cle('grillesTemplates'), trimestre.concat([   // security-ok: fixture littérale écrite par le banc, aucune source externe
+            { ...grille('GRILLE_BANC_DEUX', deux), dansBibliotheque: true },
+            { ...grille('GRILLE_BANC_SEULE', seule), dansBibliotheque: true }
+        ]));
+        const biblio = db.getSync('bibliothequeGrilles', []) || [];
+        await db.set('bibliothequeGrilles', biblio.concat([grille('GRILLE_BANC_DEUX', deux)]));   // security-ok: fixture littérale écrite par le banc, aucune source externe
+    }, [DEUX, SEULE]);
+    await ouvrirBibliotheque(page);
+    await expect(rangee(page, 'bibliotheque', DEUX)).toHaveCount(1);
+
+    const supprimer = async (nom) => {
+        const r = rangee(page, 'trimestre', nom);
+        await r.locator('.biblio2-kebab').click();
+        await r.getByRole('menuitem', { name: 'Supprimer définitivement' }).click();
+        await expect(rangee(page, 'trimestre', nom)).toHaveCount(0);
+    };
+    const stock = () => page.evaluate(() => ({
+        trimestre: (db.getSync(cle('grillesTemplates'), []) || []).map(g => g.id),
+        biblio: (db.getSync('bibliothequeGrilles', []) || []).map(g => g.id)
+    }));
+
+    // Présente dans les deux colonnes : elle quitte « Dans ce trimestre », reste dans « Dans ta bibliothèque ».
+    await supprimer(DEUX);
+    await expect(rangee(page, 'bibliotheque', DEUX)).toHaveCount(1);
+    let s = await stock();
+    expect(s.trimestre).not.toContain('GRILLE_BANC_DEUX');
+    expect(s.biblio, 'l’exemplaire de la bibliothèque reste').toContain('GRILLE_BANC_DEUX');
+
+    // « ← Utiliser dans ce trimestre » la ramène. MESURÉ : sous un identifiant NEUF, qui nomme sa source
+    // (`idOriginal`, `ajouterGrilleIndividuelle`) — pas « même id » comme le supposait le verdict.
+    await rangee(page, 'bibliotheque', DEUX).locator('.biblio2-passage').click();
+    await expect(rangee(page, 'trimestre', DEUX)).toHaveCount(1);
+    const ramenee = await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.idOriginal === 'GRILLE_BANC_DEUX'));
+    expect(ramenee, 'la grille est revenue dans ce trimestre').toBeTruthy();
+
+    // Sans exemplaire dans la bibliothèque : la question nue.
+    await supprimer(SEULE);
+    s = await stock();
+    expect(s.trimestre).not.toContain('GRILLE_BANC_SEULE');
+    expect(s.biblio).not.toContain('GRILLE_BANC_SEULE');
+
+    expect(questions).toEqual([
+        `Supprimer la grille « ${DEUX} » ?\n\nSon exemplaire de ta bibliothèque reste.`,
+        `Supprimer la grille « ${SEULE} » ?`
+    ]);
+});
+
 test('sans doublon, ni puce d’identifiant ni badge de type ; un doublon semé : la puce sur les rangées nommées, « Voir » y mène ; 44 px partout', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirDemo(page, 1440, 900);
@@ -275,6 +342,13 @@ test('sans doublon, ni puce d’identifiant ni badge de type ; un doublon semé 
         await afficherBibliothequeGrilles();
     });
     await expect(fen.locator('.biblio-doublons')).toHaveCount(1);
+    // Verdict du 25 oct., § 2.2 : le bandeau dit les titres des colonnes, plus « ta sélection ».
+    const lieux = await fen.locator('.biblio-doublon-lieu').allTextContents();
+    expect(lieux).toContain('Dans ce trimestre');
+    expect(lieux).toContain('Dans ta bibliothèque');
+    expect(lieux.filter(l => !['Dans ce trimestre', 'Dans ta bibliothèque'].includes(l))).toEqual([]);
+    expect(await fen.locator('.biblio-doublons [data-action="retirerGrilleDeBibliotheque"]').first().getAttribute('title'))
+        .toBe('Retirer de ce trimestre (données conservées)');
     const nommes = await fen.locator('.biblio-doublons .biblio-id-court').evaluateAll(cs => cs.map(c => c.getAttribute('title').replace('Identifiant complet : ', '')));
     expect(nommes.length).toBeGreaterThanOrEqual(2);
     const porteurs = await fen.locator('.biblio2-rangee .biblio-id-court').evaluateAll(cs => cs.map(c => c.closest('.biblio2-rangee').getAttribute('data-biblio-item-id')));
