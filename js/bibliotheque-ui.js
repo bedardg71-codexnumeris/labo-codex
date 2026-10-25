@@ -1697,6 +1697,13 @@
          importAutreTrimestre.enTete = { id, titre, rangees: [{nom, detail, action, param, param2, libelle}] } :
            une courte liste avant la ligne d'import (« Même cours », #368) ;
          importAutreTrimestre.ouvert : le repli s'ouvre d'emblée (cette liste est le geste de la rentrée).
+
+       #1158 (lot 5, tampons) — deux options, sans rien changer à ce que les six autres reçoivent :
+         colonne.menusGroupe = { <nom du groupe>: [geste | {separateur}] } : un ⋮ sur l'intertitre
+           d'un groupe (les gestes d'une catégorie de tampons) ;
+         apercu.image = { src, alt } : l'image telle qu'elle paraît ailleurs dans l'application (le
+           tampon sur une copie). Seules une image du dossier `autocollants/` ou une image en
+           `data:image/…;base64` passent : une autre source n'affiche rien.
        ===================================================================== */
 
     /**
@@ -1790,9 +1797,28 @@
             (p.title ? ' title="' + echapperAttribut(p.title) + '"' : '') + '>' + contenu + '</button>';
     }
 
+    /**
+     * #1158 — la source d'une image d'aperçu, ou '' : un fichier du dossier des tampons, ou une
+     * image en base64 (un tampon personnalisé, un tampon importé). Rien d'autre : la source peut
+     * venir d'un fichier importé.
+     */
+    var MOTIF_IMAGE_DONNEES = /^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+\/=]+$/;
+    var MOTIF_IMAGE_TAMPON = /^autocollants\/[^:"'<>\\?#]+$/;
+    BibliothequeUI.sourceImageApercu = function (src) {
+        if (typeof src !== 'string') return '';
+        if (MOTIF_IMAGE_DONNEES.test(src)) return src;
+        if (MOTIF_IMAGE_TAMPON.test(src) && src.split('/').indexOf('..') < 0) return src;
+        return '';
+    };
+
     function _renderApercu(apercu, idApercu, ouvert) {
         apercu = apercu || {};
         var html = '';
+        var src = apercu.image ? BibliothequeUI.sourceImageApercu(apercu.image.src) : '';
+        if (src) {
+            html += '<img class="biblio2-apercu-image" src="' + echapperAttribut(src) + '" alt="' +
+                echapperAttribut(apercu.image.alt || '') + '">';
+        }
         (apercu.paragraphes || []).forEach(function (texte) {
             if (texte) html += '<p class="biblio2-apercu-texte">' + echapperHtml(texte) + '</p>';
         });
@@ -1856,20 +1882,32 @@
         '</li>';
     }
 
-    /** #1155 — l'intertitre d'un groupe (les cartouches, par grille), caché avec ses rangées. */
-    function _renderIntertitreGroupe(nom, colonne, ctx) {
+    /**
+     * #1155 — l'intertitre d'un groupe (les cartouches, par grille), caché avec ses rangées.
+     * #1158 — avec un ⋮ quand la colonne lui donne des gestes (`menusGroupe`).
+     */
+    function _renderIntertitreGroupe(nom, colonne, ctx, menu, index) {
         var cache = colonne === 'bibliotheque' && ctx.filtreGroupe && ctx.filtreGroupe !== nom;
+        var titre = '<h4 class="biblio2-intertitre">' + echapperHtml(nom) + '</h4>';
+        if (menu && menu.length) {
+            titre = '<div class="biblio2-groupe-ligne">' + titre +
+                BibliothequeUI.renderMenuActions(menu, ctx.modalId + '-' + colonne + '-groupe-' + index,
+                    { ariaLabel: 'Autres gestes pour ' + nom, classeBouton: 'biblio2-kebab' }) +
+            '</div>';
+        }
         return '<li class="biblio2-groupe" data-groupe="' + echapperAttribut(nom) + '"' + (cache ? ' hidden' : '') + '>' +
-            '<h4 class="biblio2-intertitre">' + echapperHtml(nom) + '</h4></li>';
+            titre + '</li>';
     }
 
-    function _renderListe(rangees, colonne, ctx, idListe, vide, videFiltre) {
+    function _renderListe(rangees, colonne, ctx, idListe, vide, videFiltre, menusGroupe) {
         var groupeCourant = null;
+        var nbGroupes = 0;
         var items = rangees.map(function (r, i) {
             var intertitre = '';
             if (r.groupe != null && r.groupe !== groupeCourant) {
                 groupeCourant = r.groupe;
-                intertitre = _renderIntertitreGroupe(r.groupe, colonne, ctx);
+                var menu = (menusGroupe && Object.prototype.hasOwnProperty.call(menusGroupe, r.groupe)) ? menusGroupe[r.groupe] : null;
+                intertitre = _renderIntertitreGroupe(r.groupe, colonne, ctx, menu, nbGroupes++);
             }
             return intertitre + _renderRangee(r, colonne, ctx, i);
         }).join('');
@@ -2120,7 +2158,7 @@
             '</div>';
 
         html += _renderBarre(col, ctx);
-        html += _renderListe(rangees, colonne, ctx, col.idListe, col.vide, _videFiltre(col));
+        html += _renderListe(rangees, colonne, ctx, col.idListe, col.vide, _videFiltre(col), col.menusGroupe);
         if (col.importAutreTrimestre) html += _renderImportAutreTrimestre(col.importAutreTrimestre, ctx);
 
         var p = col.partages;
