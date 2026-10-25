@@ -36,8 +36,17 @@ const SEMER = `async () => {
     await window.chargerGrillePourModif('G1');
 }`;
 
-const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo-carte[data-pli="CR:${section}"]`);
+// ↻ #1150 (24 oct. 2026) : les cartes sont devenues les étapes de l'atelier (une seule ouverte, l'état gardé en
+// mémoire au redessin) : « projection » → l'étape « Paliers », « commentaire » → « Ce que l'élève lit ».
+const ETAPE_DE = { projection: 'paliers', commentaire: 'eleve', formule: 'note' };
+const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo[data-critere-id="CR"] .atelier-algo-etape[data-etape="${ETAPE_DE[section || 'projection'] || section}"]`);
 const cliquerDom = (locator) => locator.evaluate((el) => el.click());
+/** Ouvre l'étape par son en-tête (le geste), si elle n'est pas déjà ouverte. */
+const ouvrirCarte = async (page, section) => {
+    const c = carte(page, section);
+    if (await c.getAttribute('data-ouverte') === null) await cliquerDom(c.locator('.atelier-algo-etape-tete'));
+    await expect(c).toHaveAttribute('data-ouverte', '');
+};
 const palier = (page, i) => page.locator('#listeCriteres .palier-projection').nth(i);
 const zone = (page, i, champ) => palier(page, i).locator(`textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
 // ↻ Étape 2b (22 oct. 2026) : plus de palette par palier — LA palette du critère vise la zone où est le curseur.
@@ -87,9 +96,8 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     await page.evaluate(eval(SEMER));
 
     // 1 — la carte « Projection » est repliée ; on la déplie par l'événement DOM.
-    await expect(carte(page, 'projection')).toHaveClass(/ferme/);
-    await cliquerDom(carte(page, 'projection').locator('.accordeon-header'));
-    await expect(carte(page, 'projection')).not.toHaveClass(/ferme/);
+    await expect(carte(page, 'projection')).not.toHaveAttribute('data-ouverte', '');
+    await ouvrirCarte(page, 'projection');
 
     // 2 — six paliers, aucune palette de palier ; la zone du palier 5 visée, la palette du critère active
     //     ses huit blocs dans l'ordre arrêté, nommés en mots (↻ 2b, 22 oct. 2026).
@@ -107,7 +115,7 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     expect(offerts.noms).toEqual(['Nom du service', 'Erreurs tolérées', 'Longueur de référence', 'Compte des erreurs', 'Compte des mots', 'Mots par erreur', 'Erreurs projetées', 'Palier atteint']);
     expect(offerts.familles).toEqual(['posee', 'posee', 'posee', 'remplie', 'remplie', 'remplie', 'remplie', 'remplie']);
     expect(offerts.visibles, 'les blocs sont à l\'écran').toBe(true);
-    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-cible')).toHaveText('Dans : « Verdict, palier 5 »');
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-cible')).toHaveText('Tu écris dans : « Verdict, palier 5 »');
     await expect(page.locator('#listeCriteres .palier-note-service')).toHaveCount(0);
     await expect(page.locator('#listeCriteres .palier-note-composer')).toHaveCount(1);
 
@@ -221,6 +229,6 @@ test('texte troué 2 · deux badges posés dans un palier au clic, enregistrés,
     });
     expect(ordre, 'la ligne orange précède la ligne « L\'élève lira : »').toBe(true);
     // Le redessin a gardé la carte dépliée, et n'a rien écrit d'autre.
-    await expect(carte(page, 'projection')).not.toHaveClass(/ferme/);
+    await expect(carte(page, 'projection')).toHaveAttribute('data-ouverte', '');
     expect((await paliersEnBase(page))[4].texte).toBe(verdictDHier + ' Bilan : {projection} {longueur}');
 });

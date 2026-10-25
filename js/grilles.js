@@ -3545,6 +3545,7 @@ function afficherCriteresTemp() {
     `;
     ajusterHauteursAuto(container);
     monterVuesBadges(container, window.tempCriteres);
+    if (window.atelierAlgo) window.atelierAlgo.monter(container, window.tempCriteres, { mode: 'temp' });   // #1150 : chaîne et aperçu
 }
 
 /**
@@ -3613,8 +3614,8 @@ function rendreBlocFormuleAlgo(critere, ctx) {
     // ⚠ Le texte de la formule N'EST PAS écrit ici : il sort du registre, de la
     // même source que le calcul. C'est tout l'objet de #667.
     //
-    // Lot 4 (4 sept. 2026) : le bloc se dessine SANS cadre — c'est la carte
-    // « Formule » de `rendreCartesGabaritAlgo` qui le porte, sur les deux écrans.
+    // Lot 4 (4 sept. 2026) : le bloc se dessine SANS cadre — c'est l'étape « Note » de l'atelier
+    // (`rendreCartesGabaritAlgo`, #1150) qui le porte, sur les deux écrans.
     return `
             <div>
                 <div class="groupe-form">
@@ -3647,57 +3648,6 @@ function rendreBlocFormuleAlgo(critere, ctx) {
                     Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.
                 </small>` : ''}
             </div>`;
-}
-
-/**
- * LE MIROIR — le critère algorithmique, étape 1 (22 oct. 2026, consigne
- * `CONSIGNE-LOT-2026-10-21-critere-algorithmique-miroir.md`) : sous la formule, ce que la règle
- * donne sur quelques copies fictives — la note, et ce que l'élève lirait. Les copies, les notes et
- * les phrases sortent de `miroirAlgo` (js/miroir-algo.js), qui appelle les fonctions de
- * l'évaluation : rien n'est calculé ici. Placé dans la carte « Formule », la seule carte jamais
- * repliée, juste sous « Formule appliquée » : c'est elle que l'essai met à l'épreuve, et ses
- * réglages sont au-dessus. Lecture seule : aucun contrôle, aucun handler.
- * Il suit les réglages au même geste que le gabarit (`_redessinerCible`) ; la pondération du
- * critère, qui ne redessine pas le gabarit, le met à jour en place (`suivreMiroirAlgo`).
- */
-function rendreMiroirAlgo(critere, ctx) {
-    if (!critere || critere.type !== 'algorithmique' || typeof window.miroirAlgo === 'undefined') return '';
-    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
-    const L = window.miroirAlgo.libelles(critere);
-    const essais = window.miroirAlgo.essais(critere);
-    const note = (e) => {
-        if (!e.applicable) return esc(L.noteImpossible);
-        const pts = formaterNoteNombre(e.points) + '/' + formaterNoteNombre(critere.ponderation);
-        return esc(pts + ' (' + formaterNotePourcentage(e.pourcentage) + ')')
-            + (e.plancher ? ` <span class="miroir-algo-plancher">– ${esc(L.plancher)}</span>` : '');
-    };
-    const donnees = (c) => {
-        const occurrences = L.occurrences(c.erreurs) + (c.erreursFormule !== c.erreurs ? window.enoncesAlgo.mentionPonderee(c.erreurs, c.erreursFormule) : '');
-        const codes = c.codes.length ? ' : ' + c.codes.map((x) => L.code(x.nombre, x.nom, x.poids)).join(', ') : '';
-        return occurrences + codes + ', ' + (c.mots === null ? L.sansEtendue : L.etendue(c.mots));
-    };
-    const lignes = essais.map((e) => `
-                    <li class="miroir-algo-copie" data-copie="${esc(e.copie.cle)}">
-                        <span class="miroir-algo-donnees">${esc(donnees(e.copie))}</span>
-                        <span class="miroir-algo-note">${note(e)}</span>
-                        <span class="miroir-algo-eleve"><span class="miroir-algo-mot">${esc(L.eleveLira)}</span> ${e.eleve ? esc(e.eleve) : `<em>${esc(L.aucunePhrase)}</em>`}</span>
-                    </li>`).join('');
-    return `
-            <div class="miroir-algo" data-miroir-algo="${esc(ctx.index)}">
-                <p class="miroir-algo-titre">${esc(L.titre)}</p>
-                <small class="miroir-algo-intro">${esc(L.intro)}</small>${essais.length && window.miroirAlgo.sourceEtendue(critere).origine === 'facteur' ? `
-                <small class="miroir-algo-intro">${esc(L.etendueDuFacteur)}</small>` : ''}${essais.length ? `
-                <ul class="miroir-algo-liste">
-                    ${lignes}
-                </ul>` : `
-                <small class="miroir-algo-vide">${esc(L.sansPonderation)}</small>`}
-            </div>`;
-}
-
-/** La pondération du critère a changé sans redessiner le gabarit : le miroir se refait en place. */
-function suivreMiroirAlgo(index, critere) {
-    const m = [...document.querySelectorAll('#listeCriteres [data-miroir-algo]')].find(x => x.dataset.miroirAlgo === String(index));
-    if (m) m.outerHTML = rendreMiroirAlgo(critere, { index });
 }
 
 /**
@@ -3808,9 +3758,17 @@ function rendrePaletteAlgo(critere, ctx) {
                         </button>`).join('')}
                     </div>`;
     }).join('');
+    // #1150, lot 4 (maquette du 24 oct.) : l'en-tête dit à quoi servent les blocs et les deux gestes ; sans
+    // cible, l'astuce (montrée par la palette compacte, qui cache alors ses blocs).
     return `
                 <aside class="palette-algo" data-palette-algo="${esc(ctx.index)}" aria-label="${esc(T.titre)}">
-                    <p class="palette-algo-cible" aria-live="polite">${esc(T.invitation)}</p>${groupes}
+                    <header class="palette-algo-tete">
+                        <h3 class="palette-algo-titre"><span class="palette-algo-crayon" aria-hidden="true">✎</span> ${esc(T.titre)}</h3>
+                        <p class="palette-algo-but">${esc(T.but)}</p>
+                        <ol class="palette-algo-gestes">${T.gestes.map((g, n) => `<li><span class="palette-algo-geste-n" aria-hidden="true">${n + 1}</span><span>${esc(g)}</span></li>`).join('')}</ol>
+                        <p class="palette-algo-cible" aria-live="polite">${esc(T.invitation)}</p>
+                    </header>
+                    <p class="palette-algo-astuce">${esc(T.astuce)}</p>${groupes}
                 </aside>`;
 }
 
@@ -3821,16 +3779,13 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
     const e = window.enoncesAlgo.normaliser(critere);
     const modeles = window.enoncesAlgo.listerModeles();
-    // ↻ §8 (5 sept. 2026, 7 h 15 — décision de Grégoire : « non pas doublonner, mais
-    // fondre les deux en un seul endroit d'écriture ») : le DÉCOMPTE se compose dans la
-    // carte « Ce que l'élève lit » (`rendreBlocProjectionAlgo`), avant les paliers — la
-    // phrase de l'élève se lit de haut en bas. ↻ La carte « Bilan » (cadrage du 5 sept.,
-    // 7 h 55, livrée en 1.120) : « Aucune annotation » ne s'affiche qu'à l'enseignant·e —
-    // elle se compose sous la case des codes (`rendrePliAucuneAnnotation`), pas ici. Ici
-    // restent le menu du modèle et les DEUX énoncés que l'élève lit dans son bilan. Même
-    // clé, mêmes handlers : rien ne change dans les données, et le modèle fournit toujours
-    // le texte de départ du décompte.
-    const cles = window.enoncesAlgo.listerCles().filter((c) => c.cle !== 'decompte' && c.cle !== 'aucune');
+    // ↻ §8 (5 sept. 2026, décision de Grégoire : « non pas doublonner, mais fondre les deux en un
+    // seul endroit d'écriture ») : le DÉCOMPTE a UN endroit. ↻ La carte « Bilan » (1.120) : « Aucune
+    // annotation » ne s'affiche qu'à l'enseignant·e — elle se compose avec les codes
+    // (`rendreZoneAucuneAnnotation`), pas ici. Mêmes clés, mêmes handlers : rien ne change dans les données.
+    // ↻ #1150, lot 4 (24 oct. 2026) : l'étape « Ce que l'élève lit » de l'atelier porte le décompte ET le bilan
+    // — le menu du modèle, puis les trois textes que l'élève lit. Les paliers, leur étape à eux.
+    const cles = window.enoncesAlgo.listerCles().filter((c) => c.cle !== 'aucune');
 
     const estTemp = ctx.mode === 'temp';
     const handlerModele = estTemp ? 'modifierModeleEnoncesTempHandler' : 'modifierModeleEnoncesGrilleHandler';
@@ -3863,7 +3818,7 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
                             data-on-change="${handlerModele}" ${datasCommunes}>
                         ${options}
                     </select>
-                    <small class="modele-phrases-aide">Fournit le texte de départ des deux phrases du bilan et du décompte de la carte « Ce que l'élève lit ».</small>
+                    <small class="modele-phrases-aide">Fournit le texte de départ du décompte et des deux phrases du bilan.</small>
                     <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(modeleCourant ? modeleCourant.description : '')}</small>
                 </div>
                 <div style="margin-top: 10px;">
@@ -4056,26 +4011,13 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                     <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>
                 </div>`;
 
-    // ↻ §8 (5 sept. 2026, 7 h 15) — LE DÉCOMPTE VIENT ICI, avant les paliers : la carte
-    // « Ce que l'élève lit » se lit de haut en bas dans l'ordre exact de la phrase de
-    // l'élève (décompte du bloc 3, puis projection du bloc 2). Le décompte gris de la ligne
-    // « L'élève lira : » ne tombe plus du ciel : son composeur est juste au-dessus. Même
-    // clé (`enonces.decompte`), mêmes handlers, même helper que les deux énoncés de la
-    // carte « Bilan » ; le texte de départ vient toujours du modèle des phrases
-    // (`enoncesAlgo.normaliser`), et une ligne le dit. Rendu AVANT le `if` qui suit : sous
-    // « Aucune projection », l'élève lit quand même le décompte, il reste composable.
-    const cleDecompte = (typeof window.enoncesAlgo !== 'undefined')
-        ? window.enoncesAlgo.listerCles().find((c) => c.cle === 'decompte') : null;
-    const blocDecompte = cleDecompte ? `
-                <div class="decompte-eleve">
-                    ${rendreChampEnonceAlgo(cleDecompte, window.enoncesAlgo.normaliser(critere), ctx, critere)}
-                    <small class="decompte-texte-depart">Texte de départ : le modèle des phrases, carte « Bilan ».</small>
-                </div>` : '';
+    // ↻ #1150, lot 4 (24 oct. 2026) : le décompte (§8 du 5 sept.) a quitté cette carte, devenue l'étape
+    // « Paliers » : il se compose dans l'étape « Ce que l'élève lit », avec le bilan (`rendreBlocEnoncesAlgo`).
 
     // « Aucune projection » : rien d'autre à régler. Le dire, plutôt que de
     // laisser un bloc vide qui ressemble à un chargement raté.
     if (!p.modele.projette) {
-        return `${enTete}${blocDecompte}
+        return `${enTete}
                 <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 6px;">
                     Aucune projection ne sera proposée à l'élève pour ce critère.
                 </small>` + listeCollections;
@@ -4249,7 +4191,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                 <small class="palier-note-composer" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 8px;">
                     Un bloc sans valeur disparaît.
                     Sans bloc, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un bloc, elle est entière : c'est toi qui l'écris.
-                </small>${blocDecompte}
+                </small>
                 <div class="sous-criteres-liste-conteneur" style="margin-top: 10px;">
                     ${paliers}
                 </div>
@@ -4411,6 +4353,9 @@ function _direCollectionDisparue() {
 
 /**
  * Les PLIS du gabarit vivent ici — pas dans le DOM, pas dans la grille.
+ * ↻ #1150, lot 4 (24 oct. 2026) : les cartes du gabarit sont devenues les étapes de l'atelier (une seule
+ * ouverte, `js/atelier-algo.js`, qui garde l'étape ouverte en mémoire) ; restent ici les plis
+ * « Observation » des sous-critères.
  *
  * Chaque handler de champ redessine le bloc entier (`afficherCriteresTemp`,
  * `afficherCriteresGrille`) : un pli qui ne vivrait que dans le DOM se refermerait
@@ -4442,28 +4387,6 @@ function pliGabaritAlgoFerme(clePli, fermeParDefaut) {
     return Object.prototype.hasOwnProperty.call(plisGabaritAlgo, clePli)
         ? plisGabaritAlgo[clePli]
         : fermeParDefaut;
-}
-
-/**
- * Une section repliable du gabarit — le composant `.carte.accordeon` de l'application
- * (bascule `toggleAccordeonV2`, délégation des clics dans main.js), employé tel quel :
- * la bascule exige une VRAIE carte, et son sélecteur ne s'assouplit pas pour un écran.
- * Règle de Grégoire (3 sept.) : ouvert ce qui porte la note, fermé ce qui porte les mots.
- * Le chevron suit ce que la bascule écrit (▼ ouvert, ▶ replié).
- */
-function carteGabaritAlgo(critere, ctx, section, titre, contenu, fermeParDefaut) {
-    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
-    const clePli = `${critere.id || ('critere-' + ctx.index)}:${section}`;
-    const ferme = pliGabaritAlgoFerme(clePli, fermeParDefaut);
-    return `
-                <div class="carte accordeon gabarit-algo-carte${ferme ? ' ferme' : ''}" data-pli="${esc(clePli)}">
-                    <div class="accordeon-header">
-                        <h3 class="carte-titre-bleu" style="margin: 0;">
-                            <span class="accordeon-chevron">${ferme ? '▶' : '▼'}</span> ${esc(titre)}
-                        </h3>
-                    </div>
-                    <div class="accordeon-contenu">${contenu}</div>
-                </div>`;
 }
 
 /**
@@ -4532,7 +4455,7 @@ function rendreNomsCritereAlgo(critere, ctx) {
  * (`enoncesAlgo.appliquerNoms`) — un critère d'avant écrit alors « erreur / erreurs » à côté du
  * nom changé, ce que la consigne permet (écrire les noms affichés, au geste). Une forme trop
  * longue est refusée : rien n'est écrit, le champ le dit. Puis le gabarit se redessine (les
- * champs de l'évaluation, l'aide de la formule, le miroir et l'invitation suivent les noms), et le
+ * champs de l'évaluation, l'aide de la formule, l'aperçu et l'invitation suivent les noms), et le
  * focus revient au champ des noms où il était.
  */
 async function modifierNomsCritereAlgo(cible, critereIndex, saisie) {
@@ -4667,7 +4590,6 @@ function rendreSousCriteresAlgo(critere, ctx) {
                         </button>` : ''}
                     </div>
                     ${rendreActivationCodes(critere, { grilleId: grilleId, index: index, criteres: ctx.criteres })}
-                    ${rendrePliAucuneAnnotation(critere, ctx)}
                     ${scs.length > 0 ? `
                     <div class="sous-criteres-liste-conteneur">
                         ${lignes}
@@ -4680,6 +4602,7 @@ function rendreSousCriteresAlgo(critere, ctx) {
                     <p class="sous-criteres-info">
                         💡 La pondération dit ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié.
                     </p>
+                    ${rendreZoneAucuneAnnotation(critere, ctx)}
                 </div>`;
 }
 
@@ -4715,54 +4638,22 @@ function rendrePliObservationSousCritere(sc, scIndex, ctx) {
 }
 
 /**
- * La carte « Bilan » (cadrage du 5 sept. 2026, point 3 ; livrée en 1.120) — « Aucune
- * annotation » ne s'affiche qu'à l'enseignant·e, dans le panneau de correction, quand
- * la copie ne porte ni tampon ni erreur (`evaluation-retroaction.js`, clé `aucune`).
- * Elle ne va pas dans le bilan de l'élève : elle quitte la carte « Bilan » et vit ICI,
- * sous la case « Utiliser ces sous-critères comme codes d'annotation », sous un pli
- * fermé — le même composant que le pli « Observation » des rangées (`.carte.accordeon`,
- * bascule `toggleAccordeonV2`, état en mémoire par `data-pli`, jamais dans la grille).
- * UNE seule maison : `rendreBlocEnoncesAlgo` la filtre. Même helper, même clé
- * `enonces.aucune`, mêmes handlers que dans la carte : rien ne change dans les données.
- * ⚠ Réserve nommée au cadrage : comme la case, elle n'est rendue qu'en ÉDITION d'une
- * grille enregistrée (`rendreSousCriteresAlgo` s'arrête avant, en création) ; la phrase
- * se compose une fois la grille enregistrée.
+ * « Aucune annotation » ne s'affiche qu'à l'enseignant·e, dans le panneau de correction, quand la copie
+ * ne porte ni tampon ni erreur (`evaluation-retroaction.js`, clé `aucune`) : elle vit avec les codes
+ * (carte « Bilan », 1.120). ↻ #1150, lot 4 (24 oct. 2026) : dans l'étape « Codes » de l'atelier, sous la
+ * liste, À PLAT comme dans la maquette — l'étape est déjà le pli. Même helper, même clé `enonces.aucune`,
+ * mêmes handlers : rien ne change dans les données.
  */
-function rendrePliAucuneAnnotation(critere, ctx) {
+function rendreZoneAucuneAnnotation(critere, ctx) {
     if (typeof window.enoncesAlgo === 'undefined') return '';
-    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
     const cleAucune = window.enoncesAlgo.listerCles().find((c) => c.cle === 'aucune');
     if (!cleAucune) return '';
-    const clePli = `${critere.id || ('critere-' + ctx.index)}:aucune`;
-    const ferme = pliGabaritAlgoFerme(clePli, true);
     return `
-                    <div class="carte accordeon sous-critere-pli sous-critere-pli--aucune${ferme ? ' ferme' : ''}" data-pli="${esc(clePli)}">
-                        <div class="accordeon-header">
-                            <h3 class="sous-critere-pli-titre"><span class="accordeon-chevron">${ferme ? '▶' : '▼'}</span> Quand la copie ne porte aucun code</h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            ${rendreChampEnonceAlgo(cleAucune, window.enoncesAlgo.normaliser(critere), ctx, critere)}
-                        </div>
+                    <div class="sous-criteres-aucune">
+                        ${rendreChampEnonceAlgo(cleAucune, window.enoncesAlgo.normaliser(critere), ctx, critere)}
                     </div>`;
 }
 
-/**
- * LE GABARIT D'UN CRITÈRE ALGORITHMIQUE, pour les deux écrans de grille — un seul
- * rendu, deux contextes (`ctx.mode` : 'temp' en création, 'grille' en édition).
- * Ordre décidé par Grégoire le 4 sept. : les sous-critères d'abord, sous la rangée
- * du critère ; puis la formule (ouverte : elle porte la note), « Bilan » et
- * « Ce que l'élève lit » (repliées : elles portent les mots). ↻ Lot A du 5 sept. :
- * la carte « Codes d'annotation » n'existe plus — la liste des sous-critères porte
- * tout (`rendreSousCriteresAlgo`). ↻ La carte « Bilan » (1.120) : « Observation »
- * s'appelle « Bilan » et ne porte que ce que l'élève lit dans son bilan ; la clé de
- * pli `commentaire` reste (mémoire des plis seulement). Chaque carte a son
- * titre et sa bande — c'est ce qui sépare la formule de la projection, sans marge
- * ajoutée à part. Rien ici n'écrit dans la grille : l'ordre change le rendu, pas
- * les données, et les `data-critere-index` des handlers restent ceux du critère.
- * ↻ Étape 2b (22 oct. 2026) : la palette du critère (`rendrePaletteAlgo`) sur le côté de
- * tout le gabarit — elle sert les zones des sous-critères, du « Bilan » et de « Ce que
- * l'élève lit » ; la colonne et le passage au-dessus : `.gabarit-algo-atelier`.
- */
 /**
  * « Apporter mon matériel », lot 3b1 (17 oct. 2026) : ce que l'assistant a écrit dans un critère,
  * EN LECTURE — le texte de chaque niveau (`descripteurs.parNiveau`, nommé par l'échelle
@@ -5169,20 +5060,23 @@ async function retirerTrancheBareme(cible, critereIndex, trancheId) {
     if (critere) await _redessinerCible(cible);
 }
 
+/**
+ * #1150, lot 4 (24 oct. 2026, maquette validée par Grégoire) — L'ATELIER DU CRITÈRE : la chaîne des cinq
+ * étapes, la palette, une section repliable par étape (une seule ouverte), « Ce que l'élève lira » à
+ * droite. La mise en page et les gestes : `js/atelier-algo.js`. Ici, ce que chaque étape contient — les
+ * blocs d'hier, déplacés : les noms (« Ce que tu comptes »), les sous-critères (« Codes »), la formule
+ * (« Note »), la projection et ses paliers (« Paliers »), le décompte et le bilan (« Ce que l'élève lit »).
+ */
 function rendreCartesGabaritAlgo(critere, ctx) {
-    if (!critere || critere.type !== 'algorithmique') return '';
-    return `
-            <div class="gabarit-algo" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordure-claire);">
-                <div class="gabarit-algo-atelier">${rendrePaletteAlgo(critere, ctx)}
-                    <div class="gabarit-algo-corps">
-                ${rendreNomsCritereAlgo(critere, ctx)}
-                ${rendreSousCriteresAlgo(critere, ctx)}
-                ${carteGabaritAlgo(critere, ctx, 'formule', 'Formule', rendreBlocFormuleAlgo(critere, ctx) + rendreMiroirAlgo(critere, ctx), false)}
-                ${carteGabaritAlgo(critere, ctx, 'commentaire', 'Bilan', rendreBlocEnoncesAlgo(critere, ctx), true)}
-                ${carteGabaritAlgo(critere, ctx, 'projection', 'Ce que l\'élève lit', rendreBlocProjectionAlgo(critere, ctx), true)}
-                    </div>
-                </div>
-            </div>`;
+    if (!critere || critere.type !== 'algorithmique' || typeof window.atelierAlgo === 'undefined') return '';
+    return window.atelierAlgo.rendre(critere, ctx, {
+        palette: rendrePaletteAlgo(critere, ctx),
+        compte: rendreNomsCritereAlgo(critere, ctx),
+        codes: rendreSousCriteresAlgo(critere, ctx),
+        note: rendreBlocFormuleAlgo(critere, ctx),
+        paliers: rendreBlocProjectionAlgo(critere, ctx),
+        eleve: rendreBlocEnoncesAlgo(critere, ctx)
+    });
 }
 
 /**
@@ -5540,6 +5434,7 @@ function afficherCriteresGrille(grille) {
     container.innerHTML = html + btnAjouterCritere;
     ajusterHauteursAuto(container);
     monterVuesBadges(container, grille.criteres);
+    if (window.atelierAlgo) window.atelierAlgo.monter(container, grille.criteres, { mode: 'grille', grilleId: grille.id });   // #1150 : chaîne et aperçu
 
     // Calculer et afficher le total de pondération
     calculerEtAfficherTotalPonderation(grille);
@@ -5633,7 +5528,7 @@ async function modifierCritereGrille(grilleId, critereIndex, champ, valeur) {
     if (champ === 'ponderation') {
         calculerEtAfficherTotalPonderation(grille);
         suivrePointsDAbord(critereIndex, grille.criteres[critereIndex]);
-        suivreMiroirAlgo(critereIndex, grille.criteres[critereIndex]);
+        if (window.atelierAlgo) window.atelierAlgo.suivre(critereIndex, grille.criteres[critereIndex]);   // #1150 : la chaîne et l'aperçu
     }
 
     return { ok: true };
@@ -6489,23 +6384,33 @@ function insererRepereEnonce(el) {
         if (zone.dataset.grilleId) {
             modifierProjectionCritereGrille(zone.dataset.grilleId, index, function(critere) {
                 return _muterPalier(critere, palierIndex, champ, r.texte);
-            }).catch(function(err) {
+            }).then(_suivreAtelier(index)).catch(function(err) {
                 console.warn('[paliers] le bloc est à l\'écran mais pas enregistré :', err);
             });
         } else if (window.tempCriteres && window.tempCriteres[index]) {
             _muterPalier(window.tempCriteres[index], palierIndex, champ, r.texte);
+            _suivreAtelier(index)({ criteres: window.tempCriteres });
         }
         return;
     }
     var cleEnonce = zone.dataset.enonceCle;
     if (zone.dataset.grilleId) {
         _ecrireTexteEnonceGrille(zone.dataset.grilleId, index, cleEnonce, r.texte)
+            .then(_suivreAtelier(index))
             .catch(function(err) {
                 console.warn('[énoncés] le bloc est à l\'écran mais pas enregistré :', err);
             });
-    } else {
-        _ecrireTexteEnonceTemp(index, cleEnonce, r.texte);
+    } else if (_ecrireTexteEnonceTemp(index, cleEnonce, r.texte)) {
+        _suivreAtelier(index)({ criteres: window.tempCriteres });
     }
+}
+
+/** #1150 — le bloc posé sans redessin : la chaîne et « Ce que l'élève lira » suivent le critère écrit (la grille rendue). */
+function _suivreAtelier(index) {
+    return function(grille) {
+        if (window.atelierAlgo && grille && grille.criteres && grille.criteres[index]) window.atelierAlgo.suivre(index, grille.criteres[index]);
+        return grille;
+    };
 }
 
 /** La vue (composeur-badges) posée sur une zone, s'il y en a une. */
@@ -6581,6 +6486,27 @@ function ciblerPaletteAlgo(palette, zone) {
         else g.dataset.vide = '1';
     });
     placerPaletteAlgo(palette, zone);
+}
+
+/**
+ * #1150, lot 4 — la palette n'a plus de cible : l'étape qui portait sa zone s'est fermée. Elle revient à son
+ * état rendu (l'invitation, chaque bloc inactif avec son aide) et à sa place, en tête de l'atelier, si elle
+ * avait suivi sa zone sous le seuil. Rien n'est re-rendu.
+ */
+function deciblerPaletteAlgo(palette) {
+    if (!palette || typeof window.paletteAlgo === 'undefined') return;
+    palette._zoneCible = null;
+    delete palette.dataset.cible;
+    var ligne = palette.querySelector('.palette-algo-cible');
+    if (ligne) ligne.textContent = window.paletteAlgo.TEXTES.invitation;
+    palette.querySelectorAll('.palette-algo-bloc').forEach(function(b) {
+        b.setAttribute('aria-disabled', 'true');
+        delete b.dataset.horsZone;
+        b.title = _aideDuBloc(b);
+    });
+    palette.querySelectorAll('.palette-algo-groupe').forEach(function(g) { delete g.dataset.vide; });
+    var atelier = palette.closest('.gabarit-algo') ? palette.closest('.gabarit-algo').querySelector('.gabarit-algo-atelier') : null;
+    if (atelier && atelier.firstElementChild !== palette) atelier.insertBefore(palette, atelier.firstElementChild);
 }
 
 /** L'aide d'un bloc telle que son `title` la donne : l'aide, puis la précision s'il en a une. */
@@ -6871,7 +6797,7 @@ function modifierPonderationCritereTempHandler(el) {
     mettreAJourTotalTemp();
     if (window.tempCriteres && window.tempCriteres[index]) {
         suivrePointsDAbord(index, window.tempCriteres[index]);
-        suivreMiroirAlgo(index, window.tempCriteres[index]);
+        if (window.atelierAlgo) window.atelierAlgo.suivre(index, window.tempCriteres[index]);   // #1150 : la chaîne et l'aperçu
     }
 }
 
@@ -6917,6 +6843,7 @@ window.modifierModeleEnoncesGrilleHandler = modifierModeleEnoncesGrilleHandler;
 window.modifierTexteEnonceGrilleHandler = modifierTexteEnonceGrilleHandler;
 window.insererRepereEnonce = insererRepereEnonce;
 window.ciblerPaletteAlgo = ciblerPaletteAlgo;
+window.deciblerPaletteAlgo = deciblerPaletteAlgo;   // #1150 : l'atelier, quand l'étape de la zone ciblée se ferme
 window.modifierCodesDepuisSousCriteresHandler = modifierCodesDepuisSousCriteresHandler;
 window.ajouterPalierProjectionTemp = ajouterPalierProjectionTemp;
 window.supprimerPalierProjectionTemp = supprimerPalierProjectionTemp;

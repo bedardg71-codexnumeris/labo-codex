@@ -17,6 +17,13 @@
  *   D — la ligne de partage traverse les sous-critères : code · nom · pondération à plat,
  *       couleur · rétroaction · activation dans la carte des codes ; tout ce qui vient de la
  *       grille est échappé ;
+ *   ↻ #1150, LOT 4 (24 oct. 2026, maquette validée par Grégoire) : les cartes sont devenues les cinq ÉTAPES de
+ *       l'atelier — Ce que tu comptes · Codes · Note · Paliers · Ce que l'élève lit —, UNE seule ouverte (« Ce
+ *       que l'élève lit » au départ), l'étape ouverte gardée en mémoire par critère (`js/atelier-algo.js`), jamais
+ *       dans la grille. Cette décision remplace « ouvert ce qui porte la note, fermé ce qui porte les mots ».
+ *       A, B.c et C sont réécrits sur ces invariants ; les plis qui restent sont ceux des rangées (« Observation »).
+ *       BREAK-TESTS (24 oct., restaurés, `shasum` identique) : Note après Paliers → A.a, B.c ; deux étapes
+ *       ouvertes au rendu → A.b, C.a, C.b ; l'état oublié au redessin (`etats` remis à zéro) → C.a, C.b.
  *   E — le composant accordéon n'est pas touché : la bascule exige toujours une vraie carte,
  *       et le plafond de hauteur est relevé dans une règle SCOPÉE ;
  *   F — C.3 (décision du 4 sept., 15 h 40) : un critère algorithmique NEUF naît « sans
@@ -32,6 +39,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { etapeDe, etapeOuverte } from './_helpers/atelier-algo.js';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -107,6 +115,7 @@ function monter(grilles) {
     win.enoncesAlgo = require(path.join(racine, 'js/evaluation-enonces.js'));
     win.projectionAlgo = require(path.join(racine, 'js/evaluation-projection.js'));
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     return { win, store, document, liste: () => document.getElementById('listeCriteres') };
@@ -123,78 +132,77 @@ const GRILLE = { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [ALGO
 
 /** Position de la première occurrence d'un marqueur dans le HTML rendu (−1 : absent). */
 const pos = (html, marqueur) => html.indexOf(marqueur);
-const carte = (html, section) => {
-    const m = html.match(new RegExp('<div class="carte accordeon gabarit-algo-carte( ferme)?" data-pli="CR:' + section + '">'));
-    return m ? { presente: true, ferme: !!m[1] } : { presente: false };
+// ↻ #1150 : les cartes sont les étapes de l'atelier (`_helpers/atelier-algo.js`).
+const ETAPE_DE = { formule: 'note', projection: 'paliers', commentaire: 'eleve' };
+const carte = (html, section, id) => {
+    const e = etapeDe(html, id || 'CR', ETAPE_DE[section] || section);
+    return e ? { presente: true, ferme: !etapeOuverte(html, id || 'CR', ETAPE_DE[section] || section) } : { presente: false };
 };
-/** Le HTML d'une carte, de son ouverture à l'ouverture de la suivante (ou la fin). */
-const contenuCarte = (html, section) => {
-    const i = pos(html, 'data-pli="CR:' + section + '"');
-    if (i < 0) return '';
-    const suivant = html.indexOf('class="carte accordeon gabarit-algo-carte', i + 10);
-    return html.slice(i, suivant < 0 ? undefined : suivant);
-};
+/** Le HTML d'une étape, de sa section à la suivante (ou à l'aperçu). */
+const contenuCarte = (html, section, id) => etapeDe(html, id || 'CR', ETAPE_DE[section] || section);
+/** Un atelier sans DOM, pour l'état en mémoire : `ouvrir` n'a besoin que de son critère et de son contexte. */
+const atelierFictif = (critereId, index) => ({
+    _critere: { id: critereId }, _ctx: { mode: 'grille', grilleId: 'G1', index: index || 0 },
+    querySelectorAll: () => [], querySelector: () => null
+});
+const ORDRE = ['compte', 'codes', 'note', 'paliers', 'eleve'];
 
 /* ----------------------------------------------- A — l'ordre et l'état des cartes */
 
-describe('lot 4 · C.A — l\'ordre du gabarit, et ce qui est ouvert ou replié', () => {
-    it('A.a en ÉDITION : la rangée du critère, puis les sous-critères, puis formule · commentaire · projection (lot A : plus de carte des codes)', () => {
+describe('lot 4 · C.A — ↻ #1150 : l\'ordre des étapes, et UNE seule ouverte', () => {
+    it('A.a en ÉDITION : la rangée du critère, puis la chaîne, puis Ce que tu comptes · Codes (les sous-critères) · Note · Paliers · Ce que l\'élève lit', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
         const rangee = pos(html, 'data-champ="nom"');
-        const sousCriteres = pos(html, 'sous-criteres-conteneur--en-tete');
-        const formule = pos(html, 'data-pli="CR:formule"');
-        const commentaire = pos(html, 'data-pli="CR:commentaire"');
-        const projection = pos(html, 'data-pli="CR:projection"');
-        for (const p of [rangee, sousCriteres, formule, commentaire, projection]) expect(p).toBeGreaterThan(-1);
-        expect(rangee).toBeLessThan(sousCriteres);
-        expect(sousCriteres).toBeLessThan(formule);
-        expect(formule).toBeLessThan(commentaire);
-        expect(commentaire).toBeLessThan(projection);
-        // ↻ Lot A (5 sept. 2026) : plus de carte « Codes d'annotation » — la liste des sous-critères porte tout.
+        const chaine = pos(html, 'class="atelier-algo-chaine"');
+        const positions = ORDRE.map((e) => pos(html, 'data-etape="' + e + '"'));
+        for (const p of [rangee, chaine, ...positions]) expect(p).toBeGreaterThan(-1);
+        expect(rangee).toBeLessThan(chaine);
+        expect(chaine).toBeLessThan(positions[0]);
+        positions.slice(1).forEach((p, n) => expect(p, ORDRE[n + 1]).toBeGreaterThan(positions[n]));
+        // Les sous-critères sont dans l'étape « Codes », la formule dans « Note », les paliers dans « Paliers ».
+        expect(contenuCarte(html, 'codes')).toContain('sous-criteres-conteneur--en-tete');
+        expect(contenuCarte(html, 'formule')).toContain('Formule appliquée');
+        expect(contenuCarte(html, 'projection')).toContain('Modèle de projection');
+        expect(html).not.toContain('gabarit-algo-carte');
         expect(html).not.toContain('data-pli="CR:codes"');
     });
 
-    it('A.b ouvert ce qui porte la note, replié ce qui porte les mots', () => {
+    it('A.b UNE seule étape ouverte au départ, « Ce que l\'élève lit » ; chaque étape a son en-tête-bouton, relié à son corps', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        expect(carte(html, 'formule')).toEqual({ presente: true, ferme: false });
-        expect(carte(html, 'commentaire')).toEqual({ presente: true, ferme: true });
-        expect(carte(html, 'projection')).toEqual({ presente: true, ferme: true });
-        expect(carte(html, 'codes')).toEqual({ presente: false });
-        // Le bloc des sous-critères n'est PAS une carte : il ne se replie pas (cadrage, friction nommée).
-        expect(html).not.toMatch(/data-pli="CR:sous-criteres"/);
-        // Chaque carte est une VRAIE carte du composant, avec son en-tête cliquable et son contenu.
-        for (const s of ['formule', 'commentaire', 'projection']) {
-            const c = contenuCarte(html, s);
-            expect(c, s).toContain('class="accordeon-header"');
-            expect(c, s).toContain('class="accordeon-chevron"');
-            expect(c, s).toContain('class="accordeon-contenu"');
+        expect(ORDRE.filter((e) => etapeOuverte(html, 'CR', e))).toEqual(['eleve']);
+        expect((html.match(/<div class="atelier-algo-etape-corps" id="[^"]+">/g) || []).length).toBe(1);
+        expect((html.match(/<div class="atelier-algo-etape-corps" id="[^"]+" hidden>/g) || []).length).toBe(4);
+        for (const e of ORDRE) {
+            const c = contenuCarte(html, e);
+            expect(c, e).toMatch(new RegExp('<button type="button" class="atelier-algo-etape-tete" data-action="atelierAlgo.basculerEtape" aria-expanded="' + (e === 'eleve') + '" aria-controls="atelier-algo-0-' + e + '">'));
+            expect(c, e).toContain('id="atelier-algo-0-' + e + '"');
+            expect(c, e).toContain('class="atelier-algo-etape-resume" data-resume>');
         }
     });
 
-    it('A.c en CRÉATION : les mêmes cartes, et (↻ #1131, 21 oct. 2026) les sous-critères, par la cible `temp`', () => {
+    it('A.c en CRÉATION : les mêmes étapes, et (↻ #1131, 21 oct. 2026) les sous-critères, par la cible `temp`', () => {
         const { win, liste } = monter([]);
         win.tempTypeGrille = 'algorithmique';
         win.tempCriteres = [{ id: 'TEMP_1', nom: 'Rigueur', type: 'algorithmique', ponderation: 100 }];
         win.afficherCriteresTemp();
         const html = liste().innerHTML;
-        expect(pos(html, 'data-pli="TEMP_1:formule"')).toBeGreaterThan(-1);
-        expect(pos(html, 'data-pli="TEMP_1:commentaire"')).toBeGreaterThan(pos(html, 'data-pli="TEMP_1:formule"'));
-        expect(pos(html, 'data-pli="TEMP_1:projection"')).toBeGreaterThan(pos(html, 'data-pli="TEMP_1:commentaire"'));
-        expect(html).not.toContain('data-pli="TEMP_1:codes"');
+        const positions = ORDRE.map((e) => pos(html, 'data-critere-id="TEMP_1"') < 0 ? -1 : etapeDe(html, 'TEMP_1', e).length);
+        positions.forEach((n, k) => expect(n, ORDRE[k]).toBeGreaterThan(0));
         expect(html).not.toContain('Les sous-critères se définissent une fois la grille enregistrée.');
         expect(html).toContain('data-action="initialiserSousCriteresParDefaut" data-param="temp" data-param2="0"');
-        expect(pos(html, 'class="sous-criteres-conteneur')).toBeLessThan(pos(html, 'data-pli="TEMP_1:formule"'));
-        expect(html).toContain('mode: "temp"'.length ? 'modifierParamFormuleTempHandler' : '');
+        expect(etapeDe(html, 'TEMP_1', 'codes')).toContain('class="sous-criteres-conteneur');
+        expect(etapeDe(html, 'TEMP_1', 'note')).toContain('modifierParamFormuleTempHandler');
     });
 
     it('A.d un critère holistique ou analytique n\'a aucune carte — le gabarit long est celui de l\'algorithmique seul', () => {
         const { win, liste } = monter([]);
         win.afficherCriteresGrille({ id: 'G2', criteres: [{ id: 'H', nom: 'Contenu', type: 'holistique', ponderation: 50 }, { id: 'A', nom: 'Langue', type: 'analytique', ponderation: 50 }] });
-        expect(liste().innerHTML).not.toContain('gabarit-algo-carte');
+        expect(liste().innerHTML).not.toContain('gabarit-algo');
+        expect(liste().innerHTML).not.toContain('atelier-algo-etape');
         expect(liste().innerHTML).not.toContain('sous-criteres-conteneur');
     });
 });
@@ -232,83 +240,70 @@ describe('lot 4 · C.B — les libellés', () => {
         expect(liste().innerHTML).toMatch(/<option value="norme_externe" selected>Projection à l&#x27;EUF|<option value="norme_externe" selected>Projection à l'EUF/);
     });
 
-    it('B.c les titres des cartes sont ceux que Grégoire lira', () => {
+    it('B.c les titres des étapes sont ceux de la maquette validée (↻ #1150) : « Formule » devient « Note », la projection « Paliers », « Bilan » « Ce que l\'élève lit »', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        // ↻ §8 (5 sept. 2026, titres confirmés par Grégoire à 7 h 24) : « Projection » devient
-        // « Ce que l'élève lit » — le décompte s'y compose, avant les paliers. ↻ La carte « Bilan »
-        // (1.120) : « Observation » s'appelle « Bilan » et ne porte que ce que l'élève lit dans son bilan.
-        for (const titre of ['Formule', 'Bilan', 'Ce que l\'élève lit']) {
-            expect(html).toMatch(new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + titre.replace(/'/g, "(?:'|&#x27;|&#39;)")));
-        }
+        const titres = [...html.matchAll(/<span class="atelier-algo-etape-nom">([^<]+)<\/span>/g)].map((m) => m[1].replace(/&#x27;|&#39;/g, "'"));
+        expect(titres).toEqual(['Ce que tu comptes', 'Codes', 'Note', 'Paliers', 'Ce que l\'élève lit']);
+        expect(html).not.toMatch(/<span class="accordeon-chevron">[▶▼]<\/span> (?:Formule|Bilan|Ce que l)/);
         expect(html).not.toMatch(/<\/span> Codes d(?:'|&#x27;|&#39;)annotation/);
     });
 });
 
 /* ------------------------------------------------------------ C — les plis, en mémoire */
 
-describe('lot 4 · C.C — les plis vivent en mémoire, jamais dans la grille', () => {
-    /** Simule l'état du DOM juste avant un redessin : les cartes en place, avec leur classe. */
-    const domAvecPlis = (liste, plis) => {
-        liste.querySelectorAll = (sel) => sel === '.carte.accordeon[data-pli]'
-            ? Object.entries(plis).map(([pli, ferme]) => ({ dataset: { pli }, classList: { contains: (c) => c === 'ferme' && ferme } }))
-            : [];
-    };
-
-    it('C.a le redessin RELIT l\'état laissé à l\'écran : une carte dépliée reste dépliée, une repliée reste repliée', () => {
+describe('lot 4 · C.C — ↻ #1150 : l\'étape ouverte vit en mémoire, par critère, jamais dans la grille', () => {
+    it('C.a le redessin relit l\'étape ouverte : « Paliers » ouverte reste ouverte, seule ; fermer tout tient aussi', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
-        // L'enseignant a déplié la projection et replié la formule, puis tape dans un champ :
-        // le handler redessine tout. L'état est celui du DOM au moment du redessin.
-        domAvecPlis(liste(), { 'CR:formule': true, 'CR:commentaire': true, 'CR:projection': false });
+        win.atelierAlgo.ouvrir(atelierFictif('CR'), 'paliers', false);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         let html = liste().innerHTML;
-        expect(carte(html, 'projection').ferme).toBe(false);
-        expect(carte(html, 'formule').ferme).toBe(true);
-        expect(carte(html, 'commentaire').ferme).toBe(true);
-        // Le chevron suit ce que la bascule écrit : ▼ ouvert, ▶ replié.
-        expect(contenuCarte(html, 'projection')).toContain('<span class="accordeon-chevron">▼</span>');
-        expect(contenuCarte(html, 'formule')).toContain('<span class="accordeon-chevron">▶</span>');
-        // Un redessin de plus, DOM vide entre-temps (aucune carte à relever) : l'état tient encore.
-        liste().querySelectorAll = () => [];
+        expect(ORDRE.filter((e) => etapeOuverte(html, 'CR', e))).toEqual(['paliers']);
+        win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
+        expect(ORDRE.filter((e) => etapeOuverte(liste().innerHTML, 'CR', e))).toEqual(['paliers']);
+        win.atelierAlgo.ouvrir(atelierFictif('CR'), null, false);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         html = liste().innerHTML;
-        expect(carte(html, 'projection').ferme).toBe(false);
-        expect(carte(html, 'formule').ferme).toBe(true);
+        expect(ORDRE.filter((e) => etapeOuverte(html, 'CR', e))).toEqual([]);
+        win.atelierAlgo.ouvrir(atelierFictif('CR'), 'eleve', false);   // l'état de départ, pour la suite du banc
     });
 
-    it('C.b les plis sont par CRITÈRE : déplier la projection de l\'un ne déplie pas celle de l\'autre', () => {
+    it('C.b l\'état est par CRITÈRE : ouvrir « Paliers » de l\'un laisse l\'autre sur « Ce que l\'élève lit »', () => {
         const AUTRE = { ...ALGO, id: 'CR2', nom: 'Français' };
-        const G = { id: 'G3', criteres: [ALGO, AUTRE] };
+        const G = { id: 'G1', criteres: [ALGO, AUTRE] };
         const { win, liste } = monter([G]);
-        win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
-        domAvecPlis(liste(), { 'CR:projection': false });
+        win.atelierAlgo.ouvrir(atelierFictif('CR'), 'paliers', false);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(G)));
         const html = liste().innerHTML;
-        expect(html).toMatch(/gabarit-algo-carte" data-pli="CR:projection"/);
-        expect(html).toMatch(/gabarit-algo-carte ferme" data-pli="CR2:projection"/);
+        expect(ORDRE.filter((e) => etapeOuverte(html, 'CR', e))).toEqual(['paliers']);
+        expect(ORDRE.filter((e) => etapeOuverte(html, 'CR2', e))).toEqual(['eleve']);
+        // Deux ateliers, des identifiants préfixés par l'index du critère.
+        expect(html).toContain('id="atelier-algo-0-paliers"');
+        expect(html).toContain('id="atelier-algo-1-paliers"');
+        win.atelierAlgo.ouvrir(atelierFictif('CR'), 'eleve', false);
     });
 
-    it('C.c rien n\'est écrit dans la grille ni dans le stockage, et aucune carte ne porte d\'`id` (le composant ne persiste rien)', () => {
+    it('C.c rien n\'est écrit dans la grille ni dans le stockage ; plus aucune carte du composant accordéon pour les étapes', () => {
         const { win, liste, store } = monter([GRILLE]);
         const avant = JSON.stringify(store[CLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
-        domAvecPlis(liste(), { 'CR:projection': false, 'CR:formule': true });
+        win.atelierAlgo.ouvrir(atelierFictif('CR'), 'note', false);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         expect(JSON.stringify(store[CLE])).toBe(avant);
-        expect(avant).not.toMatch(/"pli|plisGabarit|data-pli/);
+        expect(avant).not.toMatch(/"ouverte|atelier|data-etape/);
         const html = liste().innerHTML;
-        expect(html).not.toMatch(/gabarit-algo-carte[^>]*\sid=/);
-        // Et rien n'atteint la clé que `sauvegarderEtatAccordeons` écrit.
+        expect(html).not.toContain('gabarit-algo-carte');
         expect(Object.keys(store)).toEqual([CLE]);
+        win.atelierAlgo.ouvrir(atelierFictif('CR'), 'eleve', false);
     });
 });
 
 /* ---------------------------------------- D — la ligne de partage des sous-critères */
 
 describe('lot 4 · C.D — les sous-critères : UNE seule liste (lot A du 5 sept.) — la note à plat, la case en tête, les mots sous un pli par rangée', () => {
-    const plat = (html) => html.slice(pos(html, 'sous-criteres-conteneur--en-tete'), pos(html, 'data-pli="CR:formule"'));
+    const plat = (html) => contenuCarte(html, 'codes');   // ↻ #1150 : l'étape « Codes »
     const COCHEE = { ...GRILLE, criteres: [{ ...ALGO, codesDepuisSousCriteres: true }] };
 
     it('D.a case décochée : code · nom · pondération, chevrons et corbeille ; ni couleur, ni observation ; plus de carte des codes', () => {
@@ -453,7 +448,8 @@ describe('lot 4 · C.E — le composant accordéon est employé, pas refait', ()
 
     it('E.b le plafond est relevé dans une règle SCOPÉE à la liste des critères', () => {
         const css = source('styles.css');
-        expect(css).toContain('#listeCriteres .gabarit-algo-carte:not(.ferme) .accordeon-contenu {\n    max-height: 6000px;');
+        // ↻ #1150 : les cartes du gabarit sont parties — leur plafond avec elles.
+        expect(css).not.toContain('.gabarit-algo-carte');
         expect(css).toContain('#listeCriteres .sous-critere-champs-grid--note {');
         expect(css).toContain('#listeCriteres .sous-critere-champs-grid--note-codes {');
         // La grille des cinq colonnes du lot des codes (3 sept.) reste la règle de base.

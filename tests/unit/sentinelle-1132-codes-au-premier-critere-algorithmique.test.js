@@ -76,6 +76,7 @@ function monterEditeur(grilles) {
     win.enoncesAlgo = require(path.join(racine, 'js/evaluation-enonces.js'));
     win.projectionAlgo = require(path.join(racine, 'js/evaluation-projection.js'));
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     return { win, liste: () => document.getElementById('listeCriteres').innerHTML };

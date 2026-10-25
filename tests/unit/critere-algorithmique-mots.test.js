@@ -135,6 +135,7 @@ function monterBouton() {
     chargerScript('js/evaluation-enonces.js', {}, win);
     chargerScript('js/evaluation-projection.js', {}, win);
     chargerScript('js/codes-annotation.js', { db }, win);
+    chargerScript('js/atelier-algo.js', { document: dom.window.document }, win);   // #1150 : l'atelier du critère, qui rend le gabarit
     win.temoinEnregistrement = { enregistre() {}, fermer() {}, nonEnregistre() {} };
     chargerScript('js/grilles.js', {
         db, cle: (k) => 'a2032_' + k, document: dom.window.document, echapperHtml: (s) => String(s), alert() {}, confirm: () => true,

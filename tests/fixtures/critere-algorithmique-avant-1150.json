@@ -1,0 +1,197 @@
+{
+ "grille": "Grille-5 FR-ALGO-20 H26",
+ "critere": "Français écrit",
+ "ponderation": 20,
+ "copies": [
+  {
+   "erreurs": 0,
+   "mots": 300,
+   "note": 20,
+   "pct": 100,
+   "phrase": "Ta rédaction contient 0 erreur de français pour 300 mots. En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+  },
+  {
+   "erreurs": 1,
+   "mots": 300,
+   "note": 18.333333333333332,
+   "pct": 91.66666666666666,
+   "phrase": "Ta rédaction contient 1 erreur de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+  },
+  {
+   "erreurs": 3,
+   "mots": 300,
+   "note": 15,
+   "pct": 75,
+   "phrase": "Ta rédaction contient 3 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 100 mots. En prévision de l'EUF, ce ratio est excellent."
+  },
+  {
+   "erreurs": 7,
+   "mots": 300,
+   "note": 8.333333333333332,
+   "pct": 41.666666666666664,
+   "phrase": "Ta rédaction contient 7 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 43 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 12,
+   "mots": 300,
+   "note": 0,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 12 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 25 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 20,
+   "mots": 300,
+   "note": -13.333333333333336,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 20 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 30,
+   "mots": 300,
+   "note": -30,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 30 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 45,
+   "mots": 300,
+   "note": -55,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 45 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 7 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 60,
+   "mots": 300,
+   "note": -80,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 60 erreurs de français pour 300 mots. Tu fais en moyenne 1 erreur à chaque 5 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 0,
+   "mots": 600,
+   "note": 20,
+   "pct": 100,
+   "phrase": "Ta rédaction contient 0 erreur de français pour 600 mots. En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+  },
+  {
+   "erreurs": 1,
+   "mots": 600,
+   "note": 19.166666666666668,
+   "pct": 95.83333333333334,
+   "phrase": "Ta rédaction contient 1 erreur de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 600 mots. En prévision de l'EUF, ce ratio est excellent."
+  },
+  {
+   "erreurs": 3,
+   "mots": 600,
+   "note": 17.5,
+   "pct": 87.5,
+   "phrase": "Ta rédaction contient 3 erreurs de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 200 mots. En prévision de l'EUF, ce ratio est excellent."
+  },
+  {
+   "erreurs": 7,
+   "mots": 600,
+   "note": 14.166666666666666,
+   "pct": 70.83333333333333,
+   "phrase": "Ta rédaction contient 7 erreurs de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 86 mots. En prévision de l'EUF, ce ratio est très bien."
+  },
+  {
+   "erreurs": 12,
+   "mots": 600,
+   "note": 10,
+   "pct": 50,
+   "phrase": "Ta rédaction contient 12 erreurs de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 50 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 20,
+   "mots": 600,
+   "note": 3.333333333333332,
+   "pct": 16.66666666666666,
+   "phrase": "Ta rédaction contient 20 erreurs de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 30,
+   "mots": 600,
+   "note": -5,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 30 erreurs de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 45,
+   "mots": 600,
+   "note": -17.5,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 45 erreurs de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 13 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 60,
+   "mots": 600,
+   "note": -30,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 60 erreurs de français pour 600 mots. Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 0,
+   "mots": 900,
+   "note": 20,
+   "pct": 100,
+   "phrase": "Ta rédaction contient 0 erreur de français pour 900 mots. En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+  },
+  {
+   "erreurs": 1,
+   "mots": 900,
+   "note": 19.444444444444443,
+   "pct": 97.22222222222221,
+   "phrase": "Ta rédaction contient 1 erreur de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 900 mots. En prévision de l'EUF, ce ratio est excellent."
+  },
+  {
+   "erreurs": 3,
+   "mots": 900,
+   "note": 18.333333333333332,
+   "pct": 91.66666666666666,
+   "phrase": "Ta rédaction contient 3 erreurs de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+  },
+  {
+   "erreurs": 7,
+   "mots": 900,
+   "note": 16.11111111111111,
+   "pct": 80.55555555555556,
+   "phrase": "Ta rédaction contient 7 erreurs de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 129 mots. En prévision de l'EUF, ce ratio est excellent."
+  },
+  {
+   "erreurs": 12,
+   "mots": 900,
+   "note": 13.333333333333332,
+   "pct": 66.66666666666666,
+   "phrase": "Ta rédaction contient 12 erreurs de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+  },
+  {
+   "erreurs": 20,
+   "mots": 900,
+   "note": 8.88888888888889,
+   "pct": 44.44444444444445,
+   "phrase": "Ta rédaction contient 20 erreurs de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 45 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 30,
+   "mots": 900,
+   "note": 3.333333333333332,
+   "pct": 16.66666666666666,
+   "phrase": "Ta rédaction contient 30 erreurs de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 45,
+   "mots": 900,
+   "note": -5,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 45 erreurs de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  },
+  {
+   "erreurs": 60,
+   "mots": 900,
+   "note": -13.333333333333336,
+   "pct": 0,
+   "phrase": "Ta rédaction contient 60 erreurs de français pour 900 mots. Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+  }
+ ],
+ "releve": "96dccb51 (avant le lot 4, #1150), 24 oct. 2026 : formulesAlgo.calculer et phraseDecompteAlgo, critère de démonstration"
+}

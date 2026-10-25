@@ -72,6 +72,7 @@ function monter(grilles) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.paletteAlgo = require(path.join(racine, 'js/palette-algo.js'));
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
@@ -233,7 +234,7 @@ describe('branchement · C — la vue focalisée vaut sa zone', () => {
         expect(zone.dataset.curseurVu).toBe('1');
         expect(palette._zoneCible).toBe(zone);
         expect(palette.dataset.cible).toBe('Verdict, palier 5');
-        expect(palette._ligne.textContent).toBe('Dans : « Verdict, palier 5 »');
+        expect(palette._ligne.textContent).toBe('Tu écris dans : « Verdict, palier 5 »');
         // Un palier offre {erreurs} et {projection}, pas {critere} : inactif, et dit.
         const [critere, erreurs, projection] = palette._blocs;
         expect(critere.attrs['aria-disabled']).toBe('true');

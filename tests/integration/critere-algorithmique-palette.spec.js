@@ -50,15 +50,9 @@ async function ouvrir(page, grilleId) {
     await page.waitForFunction(() => window.dbReady === true && window.paletteAlgo, null, { timeout: 20000 });
     await page.evaluate(eval(SEMER));
     await page.evaluate((id) => window.chargerGrillePourModif(id), grilleId);
-    // Les cartes « Bilan » et « Ce que l'élève lit » sont repliées à l'ouverture : on les déplie par le dispatcher.
-    for (const section of ['commentaire', 'projection']) {
-        await page.evaluate((s) => document.querySelector(`#listeCriteres .gabarit-algo-carte[data-pli$=":${s}"] .accordeon-header`).click(), section);
-        await expect(page.locator(`#listeCriteres .gabarit-algo-carte[data-pli$=":${section}"]`)).not.toHaveClass(/ferme/);
-    }
-    // Les cartes se déplient en transition : on mesure une fois le dépliage fini (sans quoi une carte rogne
-    // encore son contenu, et une mesure de position mesure la transition).
-    await page.waitForFunction(() => [...document.querySelectorAll('#listeCriteres .gabarit-algo-carte .accordeon-contenu')]
-        .every((c) => c.getAnimations().length === 0));
+    // ↻ #1150 (24 oct. 2026) : plus de cartes à déplier — les étapes de l'atelier s'ouvrent une à une, celle d'une
+    // zone s'ouvre avant qu'on la vise (`etapeDe`, plus bas).
+    await expect(page.locator('#listeCriteres .atelier-algo-etape[data-etape="eleve"]')).toHaveAttribute('data-ouverte', '');
     return erreurs;
 }
 
@@ -67,7 +61,12 @@ const bloc = (page, jeton) => palette(page).locator(`.palette-algo-bloc[data-jet
 const zonePalier = (page, i, champ) => page.locator(`#listeCriteres textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
 const zoneEnonce = (page, cle) => page.locator(`#listeCriteres textarea[data-enonce-cle="${cle}"]`);
 const vueDe = (zone) => zone.locator('xpath=following-sibling::*[1]');
-const caretA = (vue, position) => vue.evaluate((el, p) => { el.focus(); window.composeurBadges.placerCaret(el, p); }, position);
+/** ↻ #1150 : ouvre, par son en-tête (le geste), l'étape de l'atelier qui porte cet élément, si elle est fermée. */
+const etapeDe = async (loc) => {
+    const ouverte = await loc.evaluate((el) => { const s = el.closest('.atelier-algo-etape'); return !s || s.hasAttribute('data-ouverte'); });
+    if (!ouverte) await loc.evaluate((el) => el.closest('.atelier-algo-etape').querySelector('.atelier-algo-etape-tete').click());
+};
+const caretA = async (vue, position) => { await etapeDe(vue); await vue.evaluate((el, p) => { el.focus(); window.composeurBadges.placerCaret(el, p); }, position); };
 /** La zone garde-t-elle le focus, et où est son caret (positions de texte) ? */
 const etat = (zone) => zone.evaluate((t) => {
     const vue = window.composeurBadges.vueDe(t);
@@ -92,10 +91,11 @@ const justeAuDessus = (zone) => zone.evaluate((z) => {
     return !!ancre && !!ancre.previousElementSibling && ancre.previousElementSibling.matches('.palette-algo');
 });
 
-// ↻ #1147 (24 oct. 2026) : sans la barre latérale, le gabarit prend toute la largeur ; en iPad paysage (1180 px) il
-// mesure 975 px, au-delà du seuil compact : la palette y est sur le côté, collante comme sur le Mac (le seuil du
-// collage descend de 1200 à 1025 px, styles.css). Le même essai, aux deux largeurs.
-for (const [nomEcran, largeurEcran, hauteurEcran] of [['Mac', 1440, 900], ['iPad paysage', 1180, 820]]) {
+// ↻ #1147 (24 oct. 2026) : sans la barre latérale, le gabarit prend toute la largeur. ↻ #1150 (24 oct. 2026) :
+// « Ce que l'élève lira » prend la colonne de droite (340 px dès 1 180 px) ; le centre de l'atelier (palette et
+// étapes) mesure 619 px en iPad paysage, sous le seuil compact (754) : la palette y est compacte, comme en
+// portrait (consigne § 3.5, maquette). Sur le côté, au Mac seulement.
+for (const [nomEcran, largeurEcran, hauteurEcran] of [['Mac', 1440, 900]]) {
 test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un palier loin sous elle et dans un énoncé, au curseur, sans perdre le focus`, async ({ page }) => {
     await page.setViewportSize({ width: largeurEcran, height: hauteurEcran });
     const erreurs = await ouvrir(page, 'GR');
@@ -109,10 +109,11 @@ test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un pal
     // 1 — un palier loin sous la palette : le verdict du palier 6, mis en vue.
     const verdict = zonePalier(page, 5, 'texte');
     const v = vueDe(verdict);
+    await etapeDe(v);
     await v.scrollIntoViewIfNeeded();
     const texteDHier = await verdict.inputValue();
     await caretA(v, texteDHier.length);
-    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Dans : « Verdict, palier 6 »');
+    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Verdict, palier 6 »');
     const zoneB = await boite(v);
     const paletteB = await boite(palette(page));
     console.log('MAC · ZONE →', JSON.stringify(zoneB), 'PALETTE →', JSON.stringify(paletteB));
@@ -135,10 +136,11 @@ test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un pal
     // 2 — un énoncé, « Défi prioritaire » (carte « Bilan »), après une frappe : le bloc {critere}.
     const priorite = zoneEnonce(page, 'priorite');
     const vp = vueDe(priorite);
+    await etapeDe(vp);
     await vp.scrollIntoViewIfNeeded();
     await caretA(vp, (await priorite.inputValue()).length);
     await page.keyboard.type(' (dès maintenant)');
-    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Dans : « Défi prioritaire »');
+    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Défi prioritaire »');
     await expect(bloc(page, '{erreurs}')).toHaveAttribute('aria-disabled', 'true');
     // Retouche 2 : un bloc inactif n'est plus que son nom, sur une ligne ; sa mention est dans son `title`.
     await expect(bloc(page, '{erreurs}')).toHaveAttribute('title', 'Ce texte ne le remplit pas.');
@@ -158,9 +160,9 @@ test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un pal
 // ↻ #1147 (24 oct. 2026) : « la liste des grilles colle sous la barre de navigation » est RETIRÉ — la liste n'est
 // plus une barre latérale collante, c'est un menu au-dessus de la fiche (bibliotheques-menu-1147.spec.js le mesure).
 
-// Le gabarit mesure 649 px en portrait (WebKit, 22 oct.) : sous le seuil. ↻ #1147 : en paysage, 975 px depuis que la
-// barre latérale est partie — la palette y est sur le côté (l'essai du Mac, plus haut, à 1180 px).
-for (const [sens, largeur, hauteur] of [['portrait', 820, 1180]]) {
+// Le gabarit mesure 649 px en portrait (WebKit, 22 oct.) : sous le seuil. ↻ #1150 : le centre de l'atelier mesure
+// 333 px en portrait et 619 px en paysage (l'aperçu prend sa colonne) — sous le seuil aux deux.
+for (const [sens, largeur, hauteur] of [['portrait', 820, 1180], ['paysage', 1180, 820]]) {
     test.describe(`iPad ${sens}`, () => {
         test.use({ hasTouch: true, viewport: { width: largeur, height: hauteur } });
 
@@ -170,7 +172,7 @@ for (const [sens, largeur, hauteur] of [['portrait', 820, 1180]]) {
             const p0 = await boite(palette(page));
             const corps = await boite(page.locator('#listeCriteres .gabarit-algo-corps'));
             expect(p0.bas, 'en tête du gabarit').toBeLessThanOrEqual(corps.haut);
-            await expect(palette(page).locator('.palette-algo-cible')).toHaveText(/^Place le curseur/);
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Aucune zone choisie.');
             const debord = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
             expect(debord, 'aucun défilement de côté').toBeLessThanOrEqual(0);
 
@@ -185,6 +187,7 @@ for (const [sens, largeur, hauteur] of [['portrait', 820, 1180]]) {
              */
             const toucher = async (zone) => {
                 const v = vueDe(zone);
+                await etapeDe(v);   // ↻ #1150 : l'étape de la zone, ouverte par son en-tête
                 await v.evaluate((el) => el.scrollIntoView({ block: 'center' }));
                 const b0 = await boite(v);
                 const avant = b0.haut;
@@ -206,7 +209,7 @@ for (const [sens, largeur, hauteur] of [['portrait', 820, 1180]]) {
             const priorite = zoneEnonce(page, 'priorite');
             expect(Math.abs(await toucher(priorite)), 'la zone touchée ne saute pas').toBeLessThanOrEqual(2);
             expect(await justeAuDessus(priorite), 'la palette est juste au-dessus du champ').toBe(true);
-            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Dans : « Défi prioritaire »');
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Défi prioritaire »');
             expect(await blocsVus(page), 'seulement les blocs que la zone offre').toEqual(await offerts('priorite'));
             await tousCompacts();
 
@@ -216,7 +219,7 @@ for (const [sens, largeur, hauteur] of [['portrait', 820, 1180]]) {
             expect(await justeAuDessus(verdict), 'la palette a suivi : juste au-dessus du palier').toBe(true);
             expect(await justeAuDessus(priorite), 'elle a quitté le champ d\'avant').toBe(false);
             await expect(palette(page)).toHaveCount(1);
-            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Dans : « Verdict, palier 4 »');
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Verdict, palier 4 »');
             expect([...await blocsVus(page)].sort()).toEqual([...await offerts('palier')].sort());
             await tousCompacts();
 

@@ -48,7 +48,13 @@ const zone = (page, cle) => page.locator(`#listeCriteres textarea[data-enonce-cl
 // ↻ Étape 3 (5 sept. 2026) : la zone que l'œil voit est la VUE du composeur, posée après le textarea
 // (caché, il reste la valeur). Le focus et le caret se posent dans la vue ; la valeur se lit au textarea.
 const vueDe = (page, cle) => zone(page, cle).locator('xpath=following-sibling::*[1]');
-const caretA = (locator, position) => locator.evaluate((el, p) => { el.focus(); window.composeurBadges.placerCaret(el, p); }, position);
+// ↻ #1150 (24 oct. 2026) : une seule étape de l'atelier est ouverte ; on ouvre celle de la zone (le geste de
+// l'en-tête, `atelierAlgo.ouvrir`) avant d'y poser le caret.
+const caretA = (locator, position) => locator.evaluate((el, p) => {
+    const s = el.closest('.atelier-algo-etape');
+    if (s && !s.hasAttribute('data-ouverte')) window.atelierAlgo.ouvrir(s.closest('.gabarit-algo'), s.dataset.etape, false);
+    el.focus(); window.composeurBadges.placerCaret(el, p);
+}, position);
 /** Ce que la zone rend de son état : la valeur, le focus (dans sa vue), le caret en positions de texte. */
 const etatZone = (page, cle) => page.evaluate((c) => {
     const t = document.querySelector(`#listeCriteres textarea[data-enonce-cle="${c}"]`);
@@ -71,27 +77,15 @@ async function ouvrir(page, enoncesExistants) {
     // le pli « Quand la copie ne porte aucun code » des sous-critères. Sa palette ({critere} seul, jamais
     // {erreurs}) est aussi éprouvée par la sentinelle Vitest `sentinelle-carte-bilan` (B).
     expect(n, 'quatre zones en création, « Aucune annotation » comprise').toBe(4);
-    await expect(page.locator('#listeCriteres .sous-critere-pli--aucune textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
+    // ↻ #1150 (24 oct. 2026) : les cartes sont devenues les étapes de l'atelier, une seule ouverte. « Aucune
+    // annotation » vit dans l'étape « Codes » (fermée au départ) ; le décompte et les deux phrases du bilan,
+    // dans « Ce que l'élève lit » (ouverte au départ). `caretA` ouvre l'étape d'une zone avant de la viser.
+    const etape = (e) => page.locator(`#listeCriteres .atelier-algo-etape[data-etape="${e}"]`);
+    await expect(etape('codes').locator('textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
+    await expect(etape('eleve')).toHaveAttribute('data-ouverte', '');
+    await expect(etape('codes')).not.toHaveAttribute('data-ouverte', '');
+    await expect(etape('eleve').locator('textarea[data-enonce-cle]')).toHaveCount(3);
     await expect(page.locator('#listeCriteres textarea[data-enonce-cle="aucune"]')).toHaveCount(1);
-    // Son pli est replié à l'ouverture, comme les cartes ci-dessous : on le déplie par l'événement DOM.
-    const pliAucune = page.locator('#listeCriteres .sous-critere-pli--aucune');
-    await expect(pliAucune).toHaveClass(/ferme/);
-    await page.evaluate(() => document.querySelector('#listeCriteres .sous-critere-pli--aucune .accordeon-header').click());
-    await expect(pliAucune).not.toHaveClass(/ferme/);
-    // Lot 4 (4 sept. 2026) : les zones vivent dans des cartes repliées à l'ouverture — un pointeur
-    // ne les atteint pas plus qu'une main. ↻ §8 (5 sept., décision de Grégoire) : le DÉCOMPTE se
-    // compose dans « Ce que l'élève lit » (la carte de projection), avant les paliers ; les deux du
-    // bilan sont dans « Bilan » (↻ 1.120). On déplie les deux par l'événement DOM (le dispatcher de
-    // main.js) ; les redessins qui suivent chaque frappe les gardent dépliées (spec lot4-gabarit-algo-cartes).
-    for (const section of ['commentaire', 'projection']) {
-        const carte = page.locator(`#listeCriteres .gabarit-algo-carte[data-pli$=":${section}"]`);
-        await expect(carte).toHaveClass(/ferme/);
-        await page.evaluate((s) => document.querySelector(`#listeCriteres .gabarit-algo-carte[data-pli$=":${s}"] .accordeon-header`).click(), section);
-        await expect(carte).not.toHaveClass(/ferme/);
-    }
-    // §8 : le décompte est dans la carte de projection, une fois, et nulle part ailleurs.
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":projection"] textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli$=":commentaire"] textarea[data-enonce-cle]')).toHaveCount(2);
     await expect(page.locator('#listeCriteres textarea[data-enonce-cle="decompte"]')).toHaveCount(1);
 }
 
@@ -128,7 +122,7 @@ test('texte troué · chaque zone, visée, active ses repères dans la palette ;
     expect(parCle.concentre).toEqual(['{critere}']);
     expect(parCle.aucune, '« Aucune annotation » en création : les repères de la modification').toEqual(['{critere}', '{nomErreurs}']);
     expect(offerts.every(o => o.visibles), 'les blocs actifs sont à l\'écran').toBe(true);
-    expect(offerts.every(o => o.cible === 'Dans : « ' + o.etiquette + ' »'), 'la palette nomme la zone par son étiquette').toBe(true);
+    expect(offerts.every(o => o.cible === 'Tu écris dans : « ' + o.etiquette + ' »'), 'la palette nomme la zone par son étiquette').toBe(true);
     expect(offerts.every(o => o.aideApresZone), 'l\'aide reste attachée au champ, sous lui').toBe(true);
     expect(offerts.flatMap(o => o.reperes)).not.toContain('{s}');
 });
@@ -216,9 +210,11 @@ test('texte troué · un curseur au milieu d\'un mot : le repère se pose à la 
 
 test('texte troué · sans zone visitée depuis le rendu, un bloc ne pose rien, et la palette invite à placer le curseur', async ({ page }) => {
     // ↻ Étape 2b (22 oct. 2026) : avant, le repère allait à la fin de SA zone ; la palette sert toutes les
-    // zones, et sans cible elle ne devine pas laquelle.
+    // zones, et sans cible elle ne devine pas laquelle. ↻ #1150 : à la largeur du Mac (palette sur le côté) ; plus
+    // étroite, la palette compacte cache ses blocs tant qu'aucune zone n'est choisie, et le dit (maquette du 24 oct.).
+    await page.setViewportSize({ width: 1440, height: 900 });
     await ouvrir(page);
-    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-cible')).toHaveText('Place le curseur dans un texte : un bloc touché s\'y pose, là où est le curseur.');
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-cible')).toHaveText('Aucune zone choisie.');   // ↻ #1150 : les mots de la maquette
     await expect(page.locator('#listeCriteres .palette-algo .palette-algo-bloc:not([aria-disabled="true"])')).toHaveCount(0);
     // `force` : Playwright ne clique pas un élément `aria-disabled` ; un doigt, si — c'est ce qu'on éprouve.
     await repere(page, 'concentre', '{critere}').click({ force: true });
@@ -226,6 +222,11 @@ test('texte troué · sans zone visitée depuis le rendu, un bloc ne pose rien, 
     console.log('SANS CIBLE →', JSON.stringify(v));
     expect(v).toBe('Concentre-toi sur {critere}');
     expect(await page.evaluate(() => (window.tempCriteres[0].enonces || {}).concentre)).toBeUndefined();
+    // Compacte (iPad portrait) : sans zone choisie, ni bloc à l'écran, ni geste possible ; l'astuce le dit.
+    await page.setViewportSize({ width: 820, height: 1180 });
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-astuce')).toBeVisible();
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-astuce')).toHaveText('Clique dans une zone violette : les blocs qu\'elle accepte paraîtront ici.');
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-bloc:visible')).toHaveCount(0);
 });
 
 test('texte troué · TÉMOIN NÉGATIF — une grille existante affiche ses textes tels quels', async ({ page }) => {

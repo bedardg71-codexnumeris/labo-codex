@@ -20,6 +20,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { etapeDe } from './_helpers/atelier-algo.js';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -107,6 +108,7 @@ function monter(grilles, collections, opts) {
     win.enoncesAlgo = E;
     win.projectionAlgo = P;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     return { win, store, document, ecrits, notes, confirmations, liste: () => document.getElementById('listeCriteres') };
@@ -124,12 +126,8 @@ const EUF = { id: 'coll_euf', nom: 'EUF <b>2026</b>', dateCreation: '2026-09-05T
 const PHILO = { id: 'coll_philo', nom: 'Philo', dateCreation: '2026-09-05T13:01:00.000Z', modeleId: 'norme_externe',
                 params: { motsReference: 600, erreursTolerees: 20, nomServiceAide: 'Le CAF', lienServiceAide: '' }, paliers: clone(P.paliersMigration()) };
 
-const carteProjection = (html, id) => {
-    const i = html.indexOf('data-pli="' + (id || 'CR') + ':projection"');
-    if (i < 0) return '';
-    const suivant = html.indexOf('class="carte accordeon gabarit-algo-carte', i + 10);
-    return html.slice(i, suivant < 0 ? undefined : suivant);
-};
+// ↻ #1150, lot 4 (24 oct. 2026) : la carte « Ce que l'élève lit » est devenue l'étape « Paliers » de l'atelier.
+const carteProjection = (html, id) => etapeDe(html, id || 'CR', 'paliers');
 function rendu(m, grille) {
     m.win.afficherCriteresGrille(clone(grille));
     const html = m.liste().innerHTML;

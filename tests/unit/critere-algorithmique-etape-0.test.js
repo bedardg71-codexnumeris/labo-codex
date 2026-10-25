@@ -72,6 +72,7 @@ function monter(grilles = []) {
     chargerScript('js/evaluation-enonces.js', {}, win);
     chargerScript('js/evaluation-projection.js', {}, win);
     chargerScript('js/codes-annotation.js', { db }, win);
+    chargerScript('js/atelier-algo.js', { document }, win);   // #1150 : l'atelier du critère, qui rend le gabarit
     win.uiDialogues = { declarerFicheEnCreation() {}, quitterCreationSiConfirme: async () => true };
     chargerScript('js/grilles.js', {
         db, cle, document, echapperHtml, alert() {}, confirm: () => true,

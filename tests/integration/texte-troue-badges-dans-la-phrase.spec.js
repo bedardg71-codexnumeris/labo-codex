@@ -29,8 +29,17 @@ const SEMER = `async () => {
     await window.chargerGrillePourModif('G1');
 }`;
 
-const carte = (page) => page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:projection"]');
+// ↻ #1150 (24 oct. 2026) : les cartes sont devenues les étapes de l'atelier (une seule ouverte, l'état gardé en
+// mémoire au redessin) : « projection » → l'étape « Paliers », « commentaire » → « Ce que l'élève lit ».
+const ETAPE_DE = { projection: 'paliers', commentaire: 'eleve', formule: 'note' };
+const carte = (page, section) => page.locator(`#listeCriteres .gabarit-algo[data-critere-id="CR"] .atelier-algo-etape[data-etape="${ETAPE_DE[section || 'projection'] || section}"]`);
 const cliquerDom = (locator) => locator.evaluate((el) => el.click());
+/** Ouvre l'étape par son en-tête (le geste), si elle n'est pas déjà ouverte. */
+const ouvrirCarte = async (page, section) => {
+    const c = carte(page, section);
+    if (await c.getAttribute('data-ouverte') === null) await cliquerDom(c.locator('.atelier-algo-etape-tete'));
+    await expect(c).toHaveAttribute('data-ouverte', '');
+};
 const palier = (page, i) => page.locator('#listeCriteres .palier-projection').nth(i);
 const zone = (page, i, champ) => palier(page, i).locator(`textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
 const vue = (page, i, champ) => zone(page, i, champ).locator('xpath=following-sibling::*[1]');
@@ -51,13 +60,12 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
     expect(dispo, 'WebKit accepte contenteditable : le composeur est disponible').toBe(true);
 
     // 1 — la carte dépliée : chaque zone de palier porte sa vue, le textarea est caché et garde sa valeur.
-    await expect(carte(page)).toHaveClass(/ferme/);
-    await cliquerDom(carte(page).locator('.accordeon-header'));
-    await expect(carte(page)).not.toHaveClass(/ferme/);
+    await expect(carte(page)).not.toHaveAttribute('data-ouverte', '');
+    await ouvrirCarte(page);
     await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(6);
     await expect(page.locator('#listeCriteres .palier-projection .composeur-badges')).toHaveCount(12);
-    // ↻ La carte « Bilan » (1.120) : deux énoncés — « Aucune annotation » vit sous la case des codes.
-    await expect(page.locator('#listeCriteres .gabarit-algo-carte[data-pli="CR:commentaire"] .composeur-badges')).toHaveCount(2);
+    // ↻ #1150 : « Ce que l'élève lit » porte le décompte et les deux phrases du bilan ; « Aucune annotation » vit avec les codes.
+    await expect(carte(page, 'commentaire').locator('.composeur-badges')).toHaveCount(3);
     const verdictDHier = 'En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
     await expect(zone(page, 4, 'texte')).toBeHidden();
     await expect(zone(page, 4, 'texte')).toHaveValue(verdictDHier);
@@ -106,7 +114,7 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
     // 5 — recharger sans frappe : la chip est là, la donnée n'a pas bougé (au caractère), rien n'est réécrit.
     const avant = JSON.stringify(g);
     await recharger(page);
-    await cliquerDom(carte(page).locator('.accordeon-header'));
+    await ouvrirCarte(page);
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveCount(1);
     await expect(zone(page, 4, 'texte')).toHaveValue(attendu);
     // Entrer dans une zone et en sortir SANS frappe n'écrit rien.

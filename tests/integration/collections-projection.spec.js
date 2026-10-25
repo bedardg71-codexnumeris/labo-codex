@@ -42,12 +42,12 @@ const SEMER = `async () => {
     await window.chargerGrillePourModif('G1');
 }`;
 
-const carte = (page, id) => page.locator(`#listeCriteres .gabarit-algo-carte[data-pli="${id}:projection"]`);
+// ↻ #1150 (24 oct. 2026) : la carte de projection est devenue l'étape « Paliers » de l'atelier (fermée au départ).
+const carte = (page, id) => page.locator(`#listeCriteres .gabarit-algo[data-critere-id="${id}"] .atelier-algo-etape[data-etape="paliers"]`);
 const cliquerDom = (locator) => locator.evaluate((el) => el.click());
 const deplier = async (page, id) => {
-    await expect(carte(page, id)).toHaveClass(/ferme/);
-    await cliquerDom(carte(page, id).locator('.accordeon-header'));
-    await expect(carte(page, id)).not.toHaveClass(/ferme/);
+    if (await carte(page, id).getAttribute('data-ouverte') === null) await cliquerDom(carte(page, id).locator('.atelier-algo-etape-tete'));
+    await expect(carte(page, id)).toHaveAttribute('data-ouverte', '');
 };
 const menu = (page) => page.locator('#listeCriteres select[data-on-change="modifierModeleProjectionGrilleHandler"]');
 const choisir = (page, valeur) => menu(page).evaluate((el, v) => { el.value = v; el.dispatchEvent(new Event('change', { bubbles: true })); }, valeur);

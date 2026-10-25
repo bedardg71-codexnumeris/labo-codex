@@ -48,15 +48,19 @@ function _P() { return _reg('projectionAlgo', './evaluation-projection.js'); }
 
 // Les textes de la palette — provisoires, réunis avec leur site dans
 // `plans de travail/TEXTES-2026-10-22-palette-critere-algorithmique.md`. Cowork les tranche.
+// ↻ #1150, lot 4 (24 oct. 2026) : l'en-tête, l'état sans cible et la cible — les mots de la maquette validée.
 var TEXTES = {
-    titre: 'Blocs à poser',
+    titre: 'Blocs du critère algorithmique',
+    but: 'Ils servent à écrire les phrases que ce critère rédige seul, copie par copie. Chaque bloc prend la valeur de la copie corrigée.',
+    gestes: ['Clique dans une zone violette.', 'Touche un bloc : il se pose au curseur.'],
     groupes: {
         posee: 'Ce que tu écris dans la grille',
         remplie: 'Ce qui se remplit à la correction'
     },
-    invitation: 'Place le curseur dans un texte : un bloc touché s\'y pose, là où est le curseur.',
+    invitation: 'Aucune zone choisie.',
+    astuce: 'Clique dans une zone violette : les blocs qu\'elle accepte paraîtront ici.',
     inactif: 'Ce texte ne le remplit pas.',
-    dans: function(zone) { return 'Dans : « ' + zone + ' »'; },
+    dans: function(zone) { return 'Tu écris dans : « ' + zone + ' »'; },
     zonePalier: function(champ, rang) { return champ + ', palier ' + rang; },
     champsPalier: { texte: 'Verdict', texteAide: 'Recommandation' }
 };

@@ -73,6 +73,10 @@ function monter({ grilles = [] } = {}) {
     win.temoinEnregistrement = { enregistre() {}, fermer() {}, nonEnregistre: (raison, geste, k) => journal.push(['nonEnregistre', raison, k]) };
     chargerScript('js/ui-blocs.js', { document }, win);
     chargerScript('js/bareme.js', {}, win);
+    // #1150 (24 oct. 2026) : le gabarit algorithmique passe par l'atelier, qui lit les registres.
+    ['js/evaluation-formules.js', 'js/evaluation-enonces.js', 'js/evaluation-projection.js'].forEach((f) => chargerScript(f, {}, win));
+    chargerScript('js/codes-annotation.js', { db }, win);
+    chargerScript('js/atelier-algo.js', { document }, win);
     const predicats = {};   // la question de sortie commune (ui-dialogues.js) : le prédicat que grilles.js déclare
     win.uiDialogues = { declarerFicheEnCreation: (genre, p) => { predicats[genre] = p; }, quitterCreationSiConfirme: async () => true };
     chargerScript('js/grilles.js', {

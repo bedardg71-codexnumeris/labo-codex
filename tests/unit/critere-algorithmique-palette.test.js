@@ -34,6 +34,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { etapeDe, etapeOuverte, atelierDe } from './_helpers/atelier-algo.js';
 import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -101,6 +102,7 @@ function monter(grilles) {
     win.projectionAlgo = P;
     win.paletteAlgo = PA;
     win.codesAnnotation = require(path.join(racine, 'js/codes-annotation.js'));
+    win.atelierAlgo = require(path.join(racine, 'js/atelier-algo.js'));   // #1150 : l'atelier du critère, qui rend le gabarit
     win.estRessourceSupprimee = () => false;
     win.IDS_GABARITS_HARDCODES = [];
     const montes = [];
@@ -123,7 +125,7 @@ function rendu(criteres) {
 function domDe(m, id) {
     const doc = new JSDOM('<body>' + m.html + '</body>').window.document;
     const gabarits = [...doc.querySelectorAll('.gabarit-algo')];
-    const g = gabarits.find((x) => x.querySelector(`[data-pli="${id}:formule"]`));
+    const g = gabarits.find((x) => x.dataset.critereId === id);   // ↻ #1150 : l'atelier porte l'id de son critère
     return { doc, gabarit: g, palette: g.querySelector('.palette-algo'), zones: [...g.querySelectorAll('textarea[data-enonce-cle], textarea[data-palier-index]')] };
 }
 

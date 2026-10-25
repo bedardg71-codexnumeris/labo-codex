@@ -339,6 +339,8 @@ function monter(grilles = []) {
     chargerScript('js/evaluation-projection.js', {}, win);
     chargerScript('js/codes-annotation.js', { db }, win);
     chargerScript('js/miroir-algo.js', {}, win);
+    chargerScript('js/note-pourcentage.js', {}, win);
+    chargerScript('js/atelier-algo.js', { document }, win);   // #1150 : l'atelier rend le gabarit et remplit « Ce que l'élève lira »
     win.uiDialogues = { declarerFicheEnCreation() {}, quitterCreationSiConfirme: async () => true };
     chargerScript('js/grilles.js', {
         db, cle: (k) => 'a2032_' + k, document, echapperHtml, alert() {}, confirm: () => true,
@@ -425,19 +427,23 @@ describe('noms · D — une rédaction et une discipline sans texte, sur chaque 
             expect(plat(document.querySelector('.eval-resultat-algo').textContent)).toMatch(new RegExp(`^-- ${d.p} sur -- ${d.mp} → `));
         });
 
-        it(`D.d ${d.nom} : le gabarit — l’aide sous la formule, le miroir, la copie fictive d’un palier`, () => {
+        // ↻ #1150 (24 oct. 2026) : le miroir est devenu « Ce que l'élève lira », la copie fictive réglable de
+        // l'atelier — « Quelques » au départ, sur l'étendue du miroir (900 : la longueur de la projection).
+        it(`D.d ${d.nom} : le gabarit — l’aide sous la formule, « Ce que l’élève lira », la copie fictive d’un palier`, () => {
             const c = Object.assign({}, d.c, { sousCriteres: SC, modeleFormule: 'penalite_normalisee', paramsFormule: { facteurNormalisation: 500 },
                 modeleProjection: 'norme_externe', paramsProjection: { motsReference: 900 } });
             const liste = editeur(c).liste();
             const t = plat(liste.textContent);
             expect(t).toContain(`Lors de l'évaluation, « ${d.champE} » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « ${d.champM} » se tape.`);
-            expect(t).toMatch(new RegExp(`0 ${d.s}, 900 ${d.mp}`));                        // le miroir
-            expect(t).toMatch(new RegExp(`Ta production contient 0 ${d.s} pour 900 ${d.mp}\\.`));
+            const apercu = liste.querySelector('.apercu-algo');
+            expect(apercu.querySelector('[data-apercu-champ="mots"]').value).toBe('900');
+            expect(plat(apercu.querySelector('[data-apercu-nom="mots"]').textContent)).toBe(d.mp);
+            expect(plat(apercu.querySelector('[data-lecture="pdf"]').textContent)).toMatch(new RegExp(`Ta production contient \\d+ (${d.s}|${d.p}) pour 900 ${d.mp}\\.`));
             expect(t).toMatch(new RegExp(`— copie fictive, \\d+ (${d.s}|${d.p}) pour 900 ${d.mp}`));   // un palier
-            // Ce que le miroir dit des copies ne garde aucun mot de la rédaction. (Hors du lot : la formule,
+            // Ce que l'aperçu dit de la copie ne garde aucun mot de la rédaction. (Hors du lot : la formule,
             // « Erreurs pondérées ÷ Mots », attend l'étape 4 ; les textes de la projection EUF, l'étape 3.)
             if (d.nom === 'chimie') {
-                const donnees = [...liste.querySelectorAll('.miroir-algo-donnees, .palier-apercu-copie')].map((x) => x.textContent).join(' ');
+                const donnees = [...liste.querySelectorAll('[data-apercu-nom], .apercu-algo-codes, .apercu-algo-etendue, .palier-apercu-copie')].map((x) => x.textContent).join(' ');
                 expect(donnees.toLowerCase()).not.toMatch(/\berreurs?\b|\bmots?\b/);
             }
         });
