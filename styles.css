@@ -5437,6 +5437,13 @@ body:not(.mode-clair) .badge-source--partage {
 
 /* #1155 — l'intertitre d'un groupe dans une colonne (les cartouches, par grille) */
 .biblio2-groupe .biblio2-intertitre { margin: 6px 0 0; color: var(--texte-secondaire); }
+/* #1158 — l'intertitre qui porte un ⋮ (une catégorie de tampons) ; l'image d'un aperçu (le tampon) */
+.biblio2-groupe-ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.biblio2-groupe-ligne .biblio2-intertitre { margin: 0; }
+/* Le tampon tel qu'il paraît sur une copie : sur le blanc du papier, dans les deux modes (la palette, elle,
+   l'inverse en mode sombre, ce qui fausserait une image personnelle en couleur). */
+.biblio2-apercu-image { display: block; width: 72px; height: 72px; object-fit: contain; margin: 0 0 6px; padding: 6px;
+    background: #fff; border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); box-sizing: content-box; }
 
 /* #1156 — une note au-dessus des colonnes (les maquettes de pratiques, #326) : le bleu d'information */
 .biblio2-note {
@@ -26254,6 +26261,12 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 }
 
 /* Modal rétroaction — réutilise .modal-overlay/.modal-contenu existants */
+/* #1158 — la phrase d'aide sous « + Ajouter une catégorie » : du texte, sans encadré */
+.travaux-retro-cat-aide {
+    margin: 2px 0 0;
+    font-size: 0.8rem;
+    color: var(--texte-secondaire);
+}
 .travaux-retro-entete {
     font-size: 0.85rem;
     color: var(--texte-secondaire);

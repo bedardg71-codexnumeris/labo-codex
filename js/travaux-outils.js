@@ -372,6 +372,17 @@
         });
     }
 
+    /**
+     * #1158 — un tampon écrit dans `tamponsPersonnalises` hors de cette fenêtre (« ← Utiliser dans ma
+     * palette », js/tampons-bibliotheque.js) n'entrait dans la palette qu'au chargement suivant de la
+     * page. Rien n'est écrit ici : la palette relit ce qui l'est déjà.
+     */
+    function rechargerTamponsPersonnalises() {
+        chargerTamponsPersonnalises();
+        appliquerPersonnalisations();
+        rafraichirPalettesApresPersonnalisation();
+    }
+
     let imagesAutocollants = {};   // Cache { id: HTMLImageElement }
     let promessesAutocollants = {}; // Cache { id: Promise<HTMLImageElement> }
     let autocollantActif = null;   // ID de l'autocollant selectionne (ou null)
@@ -2640,6 +2651,9 @@
             html += '</div>';
         });
         html += '<button class="btn btn-secondaire" data-action="travauxOutils.ajouterCategorieRetroObs" style="margin-top:4px;font-size:0.8rem;align-self:flex-start;">+ Ajouter une cat\u00e9gorie</button>';
+        // #1158 — la phrase de Grégoire (25 oct. 2026, 16 h 47), mot pour mot : les tampons restent
+        // communs à tous les trimestres, une catégorie par cours les range.
+        html += '<p class="travaux-retro-cat-aide">Tu enseignes plus d\'un cours ? Cr\u00e9e une cat\u00e9gorie par cours pour y ranger ses tampons.</p>';
         html += '</div>';
 
         // Helper pour generer une ligne de tampon (Phase C #267 \u2014 menu \u22ee remplace \ud83d\uddd1)
@@ -3262,7 +3276,9 @@
         // Ajouter la ligne dans la zone des noms de categories
         var catContainer = document.getElementById('travaux-retro-categories');
         if (!catContainer) return;
-        var btnAjouter = catContainer.querySelector('button');
+        // #1158 — le bouton « + Ajouter une catégorie » lui-même : depuis le ⋮ de chaque rangée (#267),
+        // le premier <button> de la zone était celui de la première rangée, et insertBefore échouait.
+        var btnAjouter = catContainer.querySelector(':scope > [data-action="travauxOutils.ajouterCategorieRetroObs"]');
         var rowDiv = document.createElement('div');
         rowDiv.className = 'travaux-retro-cat-draggable';
         rowDiv.style.cssText = 'display:flex; gap:8px; align-items:center;';
@@ -4114,6 +4130,7 @@
         obtenirModeSyntheseErrFr: obtenirModeSyntheseErrFr,
         // Bibliothèque de tampons — accès aux données
         obtenirAutocollants: function() { return AUTOCOLLANTS; },
+        rechargerTamponsPersonnalises: rechargerTamponsPersonnalises,
         obtenirImageAutocollant: function(id) { return imagesAutocollants[id] || null; },
         // Wrappers delegation (Phase 5)
         setEpaisseurActiveFromSlider: setEpaisseurActiveFromSlider,

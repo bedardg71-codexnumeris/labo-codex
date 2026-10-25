@@ -5,8 +5,8 @@
    Partage et réutilisation des collections de tampons
    entre trimestres et entre collègues.
 
-   Pattern identique à planification-bibliotheque.js
-   et grilles-bibliotheque.js. Utilise BibliothequeUI.
+   La fenêtre est celle des autres bibliothèques, en deux colonnes
+   (BibliothequeUI.creerFenetreDeuxColonnes, #1158).
    =============================== */
 
 (function() {
@@ -162,12 +162,15 @@ async function ajouterDepuisBibliotheque(tamponId) {
     db.setSync('tamponsPersonnalises', customs);
 
     // Si image base64, stocker pour affichage futur
+    // ⚠ #1166 : rien ne lit `tamponsImages` (la palette lit `personnalisationObservations`) : l'image se perd.
     if (tampon.imageBase64) {
         var imagesCustom = db.getSync('tamponsImages', {});
         imagesCustom[tampon.id] = tampon.imageBase64;
         db.setSync('tamponsImages', imagesCustom);
     }
     if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('tamponsPersonnalises');   // lot F : geste hors témoin (ajouter un tampon depuis la bibliothèque)
+    // #1158 — la palette le montre tout de suite, et la colonne « Dans ta palette » aussi.
+    if (typeof travauxOutils !== 'undefined' && travauxOutils.rechargerTamponsPersonnalises) travauxOutils.rechargerTamponsPersonnalises();
 
     notifications.succes('Tampon « ' + tampon.nom + ' » ajouté à ta palette');
     rafraichirModal();
@@ -299,118 +302,168 @@ async function importerFichier(event) {
 }
 
 // ============================================
-// MODALE — BibliothequeUI
+// MODALE — La fenêtre en deux colonnes (#1158, lot 5 du plan du 24 oct. 2026)
 // ============================================
 
-function afficherBibliothequeTampons() {
-    // Fermer si déjà ouvert
-    var existant = document.getElementById(MODAL_ID);
-    if (existant) { existant.remove(); return; }
+/*
+ * « Dans ta palette » | « Dans ta bibliothèque ». La palette (les tampons intégrés et
+ * `tamponsPersonnalises`) et la bibliothèque (`bibliothequeTampons`) sont toutes deux communes à
+ * tous les trimestres : « ce trimestre » y serait faux (mots de Grégoire, 25 oct., 16 h 55).
+ * LA RELATION SE LIT PAR L'`id` : « Garder → » (`partagerTampon`) et « ← Utiliser »
+ * (`ajouterDepuisBibliotheque`) gardent tous deux l'`id` du tampon. D'où les deux états calmes.
+ */
 
-    // Section 1 : Mes tampons actuels (built-in + custom)
+/**
+ * Les tampons de la palette, sans les anciens (`legacy`), comme avant ; ni les jetons (#240), que la
+ * palette ne montre pas (js/travaux-outils.js, `categorie: 'jeton'`) : la colonne s'appelle
+ * maintenant « Dans ta palette ».
+ */
+function _tamponsPalette() {
     var autocollants = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirAutocollants)
         ? travauxOutils.obtenirAutocollants() : [];
+    return autocollants.filter(function(a) { return !a.legacy && a.categorie !== 'jeton'; });
+}
+
+/**
+ * Les `id` de la palette, tampons intégrés compris : « ✓ Déjà dans ta palette » doit reconnaître un
+ * tampon intégré gardé dans la bibliothèque (consigne du lot 5, § 1.4). Même ensemble qu'avant.
+ */
+function _idsPalette() {
+    var ids = new Set(db.getSync('tamponsPersonnalises', []).map(function(c) { return c.id; }));
+    var autocollants = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirAutocollants)
+        ? travauxOutils.obtenirAutocollants() : [];
+    autocollants.forEach(function(a) { ids.add(a.id); });
+    return ids;
+}
+
+/** L'image d'un tampon de la palette, telle que la palette et la copie l'affichent. */
+function _sourceImagePalette(tampon) {
+    var img = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirImageAutocollant)
+        ? travauxOutils.obtenirImageAutocollant(tampon.id) : null;
+    var src = img ? img.getAttribute('src') : '';
+    return src || (tampon.fichier ? 'autocollants/' + tampon.fichier : '');
+}
+
+/**
+ * L'aperçu d'un tampon : son image, si le composant peut l'afficher ; sinon sa description, si elle
+ * dit plus que son nom ; sinon rien (null : le nom n'est pas un bouton).
+ */
+function _apercuTampon(nom, src, description) {
+    if (BibliothequeUI.sourceImageApercu(src)) return { image: { src: src, alt: nom } };
+    if (description && description !== nom) return { paragraphes: [description] };
+    return null;
+}
+
+/** Les catégories dans l'ordre de la palette, puis celles qu'elle ne connaît pas (un import). */
+function _rangerParCategorie(items, categorieDe) {
+    var ordre = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirOrdreCategories)
+        ? travauxOutils.obtenirOrdreCategories().slice() : [];
+    items.forEach(function(it) {
+        var cat = categorieDe(it);
+        if (ordre.indexOf(cat) < 0) ordre.push(cat);
+    });
+    var rang = function(it) { return ordre.indexOf(categorieDe(it)); };
+    return items.map(function(it, i) { return { it: it, i: i }; })
+        .sort(function(a, b) { return (rang(a.it) - rang(b.it)) || (a.i - b.i); })
+        .map(function(x) { return x.it; });
+}
+
+function preparerDonneesBibliothequeTampons() {
     var nomsCat = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirNomsCategories)
         ? travauxOutils.obtenirNomsCategories() : {};
-
-    // Grouper par catégorie
-    var parCat = {};
-    autocollants.forEach(function(a) {
-        if (a.legacy) return; // Exclure les legacy
-        var cat = a.categorie || 'observations';
-        if (!parCat[cat]) parCat[cat] = [];
-        parCat[cat].push(a);
-    });
-
-    var htmlMesTampons = '';
-    Object.keys(parCat).forEach(function(catId) {
-        // #467 — noms de catégorie importables (fichier de tampons) : échappés une fois ici,
-        // pour le titre, la carte et les attributs plus bas.
-        var nomCat = echapperHtml(nomsCat[catId] || catId);
-        var catIdHtml = echapperHtml(catId);
-        var nbCat = parCat[catId].length;
-        htmlMesTampons += '<div style="margin-bottom:16px;">';
-        htmlMesTampons += '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">';
-        htmlMesTampons += '<span style="font-weight:600; color:var(--accent-primaire); font-size:0.85em;">' + nomCat + ' (' + nbCat + ')</span>';
-        htmlMesTampons += '<div style="display:flex; gap:4px;">';
-        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.partagerCategorie" data-param="' + catIdHtml + '" title="Ajouter toute la catégorie à la bibliothèque">Partager</button>';
-        htmlMesTampons += '<button class="btn btn-secondaire btn-tres-compact" style="font-size:0.75em;" data-action="tamponsBibliotheque.exporterCategorie" data-param="' + catIdHtml + '" title="Exporter cette catégorie en JSON">Exporter</button>';
-        htmlMesTampons += '</div></div>';
-        parCat[catId].forEach(function(t) {
-            htmlMesTampons += BibliothequeUI.renderCarteSelection({
-                nom: echapperHtml(t.nom),
-                id: t.id,
-                badgeSource: t.custom
-                    ? '<span class="badge-source badge-source--locale">Personnalisé</span>'
-                    : '<span class="badge-source badge-source--id">Intégré</span>',
-                metadonnees: nomCat,
-                boutonPrincipal: { label: 'Partager', action: 'tamponsBibliotheque.partagerTampon', param: t.id, classe: 'btn-confirmer', title: 'Ajouter à la Bibliothèque' },
-                actionsMenu: [
-                    { label: 'Exporter', action: 'tamponsBibliotheque.exporterUnTampon', param: t.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' }
-                ]
-            });
-        });
-        htmlMesTampons += '</div>';
-    });
-
-    if (autocollants.filter(function(a) { return !a.legacy; }).length === 0) {
-        htmlMesTampons = '<p style="color:var(--texte-secondaire);">Aucun tampon configuré.</p>';
-    }
-
-    // Boutons après Section 1
-    var boutonsApres = '<div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">' +
-        '<button class="btn btn-secondaire btn-tres-compact" data-action="tamponsBiblioClickImport">Importer un fichier JSON</button>' +
-        '<input type="file" id="biblio-tampons-fichier-import" accept=".json" style="display:none" data-on-change="tamponsBiblioImporterFichier">' +
-        '<button class="btn btn-secondaire btn-tres-compact" data-action="tamponsBibliotheque.exporterBibliotheque">Exporter la bibliothèque</button>' +
-        '</div>' +
-        '<p style="font-size:0.8em; color:var(--texte-secondaire); margin-top:8px;">Assure-toi d\'avoir les droits sur les images importées.</p>';
-
-    // Section 2 : Bibliothèque
+    var nomCategorie = function(catId) { return nomsCat[catId] || catId; };
+    var auteurActif = BibliothequeUI.obtenirAuteurActif();
     var biblioItems = obtenirTousSync();
-    var customsActuels = db.getSync('tamponsPersonnalises', []);
-    var idsActuels = new Set(customsActuels.map(function(c) { return c.id; }));
-    // Inclure aussi les built-in
-    autocollants.forEach(function(a) { idsActuels.add(a.id); });
+    var idsBiblio = new Set(biblioItems.map(function(t) { return t.id; }));
+    var idsPalette = _idsPalette();
 
-    var htmlBiblio = '';
-    if (biblioItems.length === 0) {
-        htmlBiblio = '<p style="color:var(--texte-secondaire);">Aucun tampon dans la Bibliothèque.<br>Utilise « Partager » pour y ajouter des tampons.</p>';
-    } else {
-        biblioItems.forEach(function(item) {
-            var dejaPresent = idsActuels.has(item.id);
-            var meta = (item.categorie ? echapperHtml(nomsCat[item.categorie] || item.categorie) : '') +
-                (item.metadata_cc && (item.metadata_cc.auteur_original || item.metadata_cc.auteur) ? ' · ' + echapperHtml(item.metadata_cc.auteur_original || item.metadata_cc.auteur) : '') +
-                (item.dateAjoutBiblio ? ' · ' + new Date(item.dateAjoutBiblio).toLocaleDateString('fr-CA') : '');
-            htmlBiblio += BibliothequeUI.renderCarteDisponible({
-                nom: echapperHtml(item.nom || 'Sans titre'),
-                id: item.id,
-                badgeSource: '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>',
-                metadonnees: meta,
-                description: (item.metadata_cc && item.metadata_cc.description_courte) || '',
-                dejaPresent: dejaPresent,
-                boutonPrincipal: { label: 'Ajouter', action: 'tamponsBibliotheque.ajouterDepuisBibliotheque', param: item.id, classe: 'btn-confirmer', title: 'Copier dans ta palette de tampons' },
-                actionsMenu: [
-                    { label: 'Supprimer', action: 'tamponsBibliotheque.supprimerDeBibliotheque', param: item.id, classe: 'btn-supprimer', title: 'Retirer de la bibliothèque', showAlways: true }
-                ]
-            });
-        });
-    }
+    var palette = _rangerParCategorie(_tamponsPalette(), function(a) { return a.categorie || 'observations'; });
+    var rangeesPalette = palette.map(function(t) {
+        var rangee = {
+            id: t.id,
+            nom: t.nom,
+            groupe: nomCategorie(t.categorie || 'observations'),
+            // L'étiquette d'avant (« Intégré » / « Personnalisé »), en clair : rien pour un tampon à soi.
+            ligne: t.custom ? '' : 'Intégré',
+            apercu: _apercuTampon(t.nom, _sourceImagePalette(t), ''),
+            menu: [
+                { label: 'Exporter', action: 'tamponsBibliotheque.exporterUnTampon', param: t.id, title: 'Télécharger en JSON' }
+            ]
+        };
+        if (idsBiblio.has(t.id)) rangee.etat = 'Aussi dans ta bibliothèque';
+        else rangee.passage = { label: 'Garder dans ma bibliothèque', action: 'tamponsBibliotheque.partagerTampon', param: t.id, sens: 'versBibliotheque' };
+        return rangee;
+    });
 
-    BibliothequeUI.creerModal({
+    // Le ⋮ d'une catégorie : « Partager » et « Exporter » de l'intertitre d'avant. « Tout garder »
+    // n'est offert que s'il reste un tampon de la catégorie hors de la bibliothèque.
+    var menusGroupe = {};
+    palette.forEach(function(t) {
+        var catId = t.categorie || 'observations';
+        var nom = nomCategorie(catId);
+        if (menusGroupe[nom]) return;
+        var resteAGarder = palette.some(function(x) { return (x.categorie || 'observations') === catId && !idsBiblio.has(x.id); });
+        var menu = [];
+        if (resteAGarder) menu.push({ label: 'Tout garder dans ma bibliothèque', action: 'tamponsBibliotheque.partagerCategorie', param: catId, title: 'Garder toute la catégorie dans ta bibliothèque' });
+        menu.push({ label: 'Exporter', action: 'tamponsBibliotheque.exporterCategorie', param: catId, title: 'Exporter cette catégorie en JSON' });
+        menusGroupe[nom] = menu;
+    });
+
+    var biblio = _rangerParCategorie(biblioItems, function(t) { return t.categorie || 'observations'; });
+    var rangeesBibliotheque = biblio.map(function(item) {
+        var nom = item.nom || 'Sans titre';
+        var meta = item.metadata_cc || {};
+        var auteur = meta.auteur_original || meta.auteur || '';
+        var morceaux = [];
+        if (!item.custom) morceaux.push('Intégré');
+        if (auteur && auteur !== auteurActif) morceaux.push('par ' + auteur);
+        var rangee = {
+            id: item.id,
+            nom: nom,
+            groupe: nomCategorie(item.categorie || 'observations'),
+            ligne: morceaux.join(' · '),
+            apercu: _apercuTampon(nom, item.imageBase64 || (item.fichier ? 'autocollants/' + item.fichier : ''), meta.description_courte || ''),
+            menu: [
+                { label: 'Supprimer de ma bibliothèque', action: 'tamponsBibliotheque.supprimerDeBibliotheque', param: item.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque' }
+            ]
+        };
+        if (idsPalette.has(item.id)) rangee.etat = 'Déjà dans ta palette';
+        else rangee.passage = { label: 'Utiliser dans ma palette', action: 'tamponsBibliotheque.ajouterDepuisBibliotheque', param: item.id, sens: 'versTrimestre' };
+        return rangee;
+    });
+
+    return { rangeesPalette: rangeesPalette, menusGroupe: menusGroupe, rangeesBibliotheque: rangeesBibliotheque };
+}
+
+function afficherBibliothequeTampons() {
+    var data = preparerDonneesBibliothequeTampons();
+
+    BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: MODAL_ID,
         titre: 'Bibliothèque de tampons',
-        sousTitre: 'Partagez et réutilisez vos collections de tampons entre les trimestres.',
-        onFermerAction: 'tamponsBibliotheque.fermerModal',
-        doublonsHTML: '',
-        titreSection1: 'Mes tampons (' + autocollants.filter(function(a) { return !a.legacy; }).length + ')',
-        contenuIdListe1: 'listeTamponsPerso',
-        contenuSection1: htmlMesTampons,
-        boutonsApresSection1: boutonsApres,
-        sectionImportTrimestre: '',
-        titreSection2: 'Bibliothèque (' + biblioItems.length + ')',
-        filtresSection2: '',
-        contenuIdListe2: 'listeTamponsBibliotheque',
-        contenuSection2: htmlBiblio
+        aide: 'bibliotheque-fonctionnement',
+        menuFichiers: [
+            { label: 'Importer des tampons', action: 'tamponsBiblioClickImport' },
+            { label: 'Exporter ta bibliothèque', action: 'tamponsBibliotheque.exporterBibliotheque' },
+            { note: 'Fichiers .json' },
+            { note: 'Assure-toi d\'avoir les droits sur les images importées.' }
+        ],
+        champsFichier: [{ id: 'biblio-tampons-fichier-import', accept: '.json', onChange: 'tamponsBiblioImporterFichier' }],
+        trimestre: {
+            titre: 'Dans ta palette',
+            phrase: 'Les tampons de ta palette, dans Annoter, pour tous tes trimestres.',
+            idListe: 'listeTamponsPerso',
+            rangees: data.rangeesPalette,
+            menusGroupe: data.menusGroupe,
+            vide: 'Aucun tampon configuré.'
+        },
+        bibliotheque: {
+            titre: 'Dans ta bibliothèque',
+            phrase: 'Les tampons que tu gardes pour les retrouver ou les partager.',
+            idListe: 'listeTamponsBibliotheque',
+            rangees: data.rangeesBibliotheque,
+            vide: 'Ta bibliothèque est vide. Garde-y un tampon de ta palette pour le retrouver plus tard.'
+        }
     });
 }
 
@@ -418,12 +471,9 @@ function fermerModal() {
     BibliothequeUI.fermerModal(MODAL_ID);
 }
 
+/** Après un geste : la fenêtre se redessine en gardant le défilement et les aperçus ouverts. */
 function rafraichirModal() {
-    var existant = document.getElementById(MODAL_ID);
-    if (existant) {
-        existant.remove();
-        afficherBibliothequeTampons();
-    }
+    if (document.getElementById(MODAL_ID)) afficherBibliothequeTampons();
 }
 
 async function supprimerDeBibliotheque(tamponId) {
