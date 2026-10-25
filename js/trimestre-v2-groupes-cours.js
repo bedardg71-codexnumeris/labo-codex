@@ -993,8 +993,10 @@ async function supprimerGroupeCoursV2() {
 
 /**
  * 🆕 Beta 95.3 : Modal bibliothèque groupe-cours
- * 🔄 (10 jan 2026) : Refonte avec sections "Dans le dropdown" / "Masqués"
- * Affiche la liste de tous les groupe-cours avec gestion de la visibilité
+ * #1159 (lot 6, 25 oct. 2026) — une seule liste ; les groupes-cours mis de côté
+ * (`dansSidebar === false`) en bas, sous « Mis de côté (n) », replié. Mots proposés par Cowork,
+ * validés par Grégoire (25 oct., 19 h 06) : plus de « dropdown », ni dans les mots ni dans les
+ * bulles.
  */
 function ouvrirModalBibliothequeGroupeCours() {
     const cleGC = cle('groupesCours');
@@ -1007,12 +1009,7 @@ function ouvrirModalBibliothequeGroupeCours() {
     const cleHoraires = cle('horaires');
     const horaires = db.getSync(cleHoraires, []);
 
-    // Séparer les groupe-cours visibles et masqués
-    const gcVisibles = groupesCours.filter(gc => gc.dansSidebar !== false);
-    const gcMasques = groupesCours.filter(gc => gc.dansSidebar === false);
-
-    // Phase C #267 — migration vers BibliothequeUI (carte + menu ⋮)
-    function genererCarteGC(gc, estMasque) {
+    function rangeeGC(gc, estDeCote) {
         const coursInfo = cours.find(c => c.id === gc.coursId);
         const ens = enseignants.find(e => e.id === gc.enseignantId);
         const hor = horaires.find(h => h.id === gc.horaireId);
@@ -1024,95 +1021,48 @@ function ouvrirModalBibliothequeGroupeCours() {
         const nomEns = ens ? `${ens.prenom || ''} ${ens.nom || ''}`.trim() : '';
         const nomHor = hor?.nom || '';
         const estActif = gcActif && gc.id === gcActif.id;
-        const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
-        const sousInfo = [nomEns, nomHor].filter(Boolean).join(' • ');
 
-        // Bouton primaire :
-        // - Masqué : Afficher
-        // - Visible non-actif : Activer
-        // - Visible actif : pas de primaire (déjà actif)
-        let primaire = null;
-        if (estMasque) {
-            primaire = { label: 'Afficher', action: 'afficherGroupeCoursDepuisBibliotheque', param: gc.id, classe: 'btn-confirmer', title: 'Afficher dans le dropdown' };
+        // Le bouton de la rangée : « Remettre dans le menu » (mis de côté), « Activer » (les
+        // autres) ; le groupe actif n'en a pas.
+        let passage = null;
+        if (estDeCote) {
+            passage = { label: 'Remettre dans le menu', action: 'afficherGroupeCoursDepuisBibliotheque', param: gc.id };
         } else if (!estActif) {
-            primaire = { label: 'Activer', action: 'activerGroupeCoursDepuisBibliotheque', param: gc.id, classe: 'btn-confirmer', title: 'Activer ce groupe-cours' };
+            passage = { label: 'Activer', action: 'activerGroupeCoursDepuisBibliotheque', param: gc.id, title: 'Activer ce groupe-cours' };
         }
 
-        // Menu ⋮ : Masquer (si visible) ou Afficher déjà en primaire si masqué.
-        // Supprimer toujours présent (rouge).
-        const actions = [];
-        if (!estMasque) {
-            actions.push({ label: 'Masquer', action: 'masquerGroupeCoursDepuisBibliotheque', param: gc.id, classe: 'btn-secondaire', title: 'Masquer du dropdown' });
+        const menu = [];
+        if (!estDeCote) {
+            menu.push({ label: 'Mettre de côté', action: 'masquerGroupeCoursDepuisBibliotheque', param: gc.id });
+            menu.push({ separateur: true });
         }
-        actions.push({ label: 'Supprimer', action: 'supprimerGroupeCoursDepuisBibliotheque', param: gc.id, param2: titreNu, classe: 'btn-supprimer', title: 'Supprimer définitivement' });
+        menu.push({ label: 'Supprimer', action: 'supprimerGroupeCoursDepuisBibliotheque', param: gc.id, param2: titreNu, classe: 'btn-supprimer', title: 'Supprimer définitivement' });
 
-        return BibliothequeUI.renderCarteSelection({
-            nom: echapperHtml(titreNu) + badgeActif,
+        return {
             id: gc.id,
-            badgeSource: '',
-            metadonnees: sousInfo,
-            description: '',
-            boutonPrincipal: primaire,
-            actionsMenu: actions
-        });
+            nom: titreNu,
+            ligne: [estActif ? 'Actif' : '', nomEns, nomHor].filter(Boolean).join(' • '),
+            passage: passage,
+            menu: menu
+        };
     }
 
-    let contenuSection1 = '';
-    let titreSection2 = '';
-    let contenuSection2 = '';
-
-    if (groupesCours.length === 0) {
-        contenuSection1 = '<div style="text-align: center; padding: 40px; color: var(--gris-moyen);">' +
-            '<p style="font-size: 1.1rem;">Aucun groupe-cours configuré</p>' +
-            '<p>Clique sur « + Nouveau groupe-cours » dans l\'accordéon pour en créer un.</p>' +
-            '</div>';
-    } else {
-        if (gcVisibles.length === 0) {
-            contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucun groupe-cours visible dans le dropdown</p>';
-        } else {
-            gcVisibles.forEach(gc => { contenuSection1 += genererCarteGC(gc, false); });
-        }
-        if (gcMasques.length > 0) {
-            titreSection2 = 'Groupe-cours masqués';
-            gcMasques.forEach(gc => { contenuSection2 += genererCarteGC(gc, true); });
-        }
-    }
-
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreListe({
         modalId: 'modalBibliothequeGroupeCours',
-        titre: 'Bibliothèque groupe-cours',
-        sousTitre: 'Gère les groupes-cours affichés dans le menu de l\'en-tête.',
-        onFermerAction: 'fermerModalBibliothequeGroupeCours',
-        doublonsHTML: '',
-        titreSection1: 'Groupe-cours dans le dropdown',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: '',
-        titreSection2: titreSection2,
-        filtresSection2: '',
-        contenuSection2: contenuSection2
+        titre: 'Bibliothèque des groupes-cours',
+        phrase: 'Les groupes-cours que le menu de l\'en-tête te propose.',
+        liste: {
+            vide: 'Aucun groupe-cours pour l\'instant. Crée-en un avec « + Nouveau groupe-cours ».',
+            rangees: groupesCours.filter(gc => gc.dansSidebar !== false).map(gc => rangeeGC(gc, false))
+        },
+        repli: { titre: 'Mis de côté', rangees: groupesCours.filter(gc => gc.dansSidebar === false).map(gc => rangeeGC(gc, true)) }
     });
-
-    // Si pas de section 2, masquer son titre vide (creerModal rend toujours h3)
-    if (!titreSection2) {
-        const modalEl = document.getElementById('modalBibliothequeGroupeCours');
-        if (modalEl) {
-            const h3s = modalEl.querySelectorAll('.biblio-section-titre');
-            if (h3s.length >= 2 && !h3s[1].textContent.trim()) h3s[1].style.display = 'none';
-        }
-    }
-
-    document.addEventListener('keydown', fermerModalBibliothequeGroupeCoursEscape);
 }
 
-function fermerModalBibliothequeGroupeCoursEscape(e) {
-    if (e.key === 'Escape') {
-        fermerModalBibliothequeGroupeCours();
-    }
-}
-
+// #1159 — Échap ferme la fenêtre par le composant (`BibliothequeUI.fermerFenetre`) : l'écouteur
+// propre à cette bibliothèque est parti avec l'ancienne modale.
 function fermerModalBibliothequeGroupeCours() {
     BibliothequeUI.fermerModal('modalBibliothequeGroupeCours');
-    document.removeEventListener('keydown', fermerModalBibliothequeGroupeCoursEscape);
 }
 
 async function activerGroupeCoursDepuisBibliotheque(gcId) {

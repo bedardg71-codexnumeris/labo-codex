@@ -44,7 +44,7 @@ describe('#458 · une fiche neuve est visible dans la Bibliothèque', () => {
         expect(store.cours[0].dansBibliotheque).toBe(true);
     });
 
-    it('B · une fiche au champ ABSENT rend dans « ta sélection », pas nulle part', async () => {
+    it('B · une fiche au champ ABSENT rend dans la liste, pas nulle part', async () => {
         const rendues = { selection: [], disponibles: [] };
         const win = chargerScript('js/cours.js', {
             db: {
@@ -53,9 +53,13 @@ describe('#458 · une fiche neuve est visible dans la Bibliothèque', () => {
             },
             echapperHtml: (s) => String(s),
             BibliothequeUI: {
-                renderCarteSelection: (o) => { rendues.selection.push(o.id); return ''; },
-                renderCarteDisponible: (o) => { rendues.disponibles.push(o.id); return ''; },
-                creerModal() {}, fermerModal() {}, ajouterOptgroupDemo() {}
+                // #1159 (lot 6) — réancré : la fenêtre à une seule liste reçoit les deux groupes
+                // (la liste, « Mis de côté ») en données ; on lit leurs ids.
+                creerFenetreListe(c) {
+                    rendues.selection.push(...c.liste.rangees.map(r => r.id));
+                    rendues.disponibles.push(...c.repli.rangees.map(r => r.id));
+                },
+                fermerModal() {}, ajouterOptgroupDemo() {}
             },
             alert() {}, confirm: () => false
         });
@@ -66,7 +70,7 @@ describe('#458 · une fiche neuve est visible dans la Bibliothèque', () => {
         expect(rendues.disponibles).toEqual([]);          // pas en double
     });
 
-    it('C · une fiche retirée (false explicite) rend dans « disponibles » seulement', async () => {
+    it('C · une fiche retirée (false explicite) rend dans « Mis de côté » seulement', async () => {
         const rendues = { selection: [], disponibles: [] };
         const win = chargerScript('js/cours.js', {
             db: {
@@ -75,9 +79,13 @@ describe('#458 · une fiche neuve est visible dans la Bibliothèque', () => {
             },
             echapperHtml: (s) => String(s),
             BibliothequeUI: {
-                renderCarteSelection: (o) => { rendues.selection.push(o.id); return ''; },
-                renderCarteDisponible: (o) => { rendues.disponibles.push(o.id); return ''; },
-                creerModal() {}, fermerModal() {}, ajouterOptgroupDemo() {}
+                // #1159 (lot 6) — réancré : la fenêtre à une seule liste reçoit les deux groupes
+                // (la liste, « Mis de côté ») en données ; on lit leurs ids.
+                creerFenetreListe(c) {
+                    rendues.selection.push(...c.liste.rangees.map(r => r.id));
+                    rendues.disponibles.push(...c.repli.rangees.map(r => r.id));
+                },
+                fermerModal() {}, ajouterOptgroupDemo() {}
             },
             alert() {}, confirm: () => false
         });

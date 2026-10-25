@@ -108,7 +108,7 @@ describe('#390 B6 · supprimer le groupe-cours ACTIF purge le couple groupeCours
         const win = chargerScript('js/trimestre-v2-groupes-cours.js', {
             db, cle: (k) => k, confirm: () => true, echapperHtml: (s) => s,
             notifications: { succes: vi.fn(), erreur: vi.fn() },
-            BibliothequeUI: { fermerModal: () => {}, creerModal: () => {}, renderCarteSelection: () => '' },
+            BibliothequeUI: { fermerModal: () => {}, creerFenetreListe: () => {} },   // #1159
             estEnModeDemo: () => false, genererIdUnique: (p) => p + 'X',
             // #1007 : le codex à part précède la suppression (doublure : « écrit »).
             Codex: { ecrireAPartAvantSuppression: async () => true }

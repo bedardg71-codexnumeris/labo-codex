@@ -125,6 +125,14 @@ async function verifierParLeBouton(page, dossier, fichier) {
     return { titre, message };
 }
 
+
+// #1159 (lot 6, 25 oct. 2026) — RÉANCRÉ : les trimestres clos sont rangés en bas de la bibliothèque, sous
+// « Clos (n) », replié ; le banc l'ouvre comme l'utilisateur, par son intitulé (s'il ne l'est pas déjà).
+const ouvrirClos = async (modale) => {
+    const intitule = modale.locator('details.biblio2-repli:not([open]) > summary');
+    if (await intitule.count()) await intitule.click();
+};
+
 test.describe('E1 — « Archiver le trimestre… » depuis la bibliothèque des trimestres (mode fichier, largeur iPad)', () => {
     test.setTimeout(150000);
     test.use({ viewport: IPAD_PORTRAIT });
@@ -152,6 +160,7 @@ test.describe('E1 — « Archiver le trimestre… » depuis la bibliothèque des
         const geste = modale.locator('[data-action="ReserveTrimestre.actionArchiver"]');
         await expect(geste).toHaveCount(1);
         await expect(geste).toHaveAttribute('data-param', 'h2032');
+        await ouvrirClos(modale);
         await modale.locator('[data-param="biblio-menu-h2032"]').click();
         await expect(geste).toBeVisible();
         await expect(geste).toHaveText('Archiver le trimestre…');

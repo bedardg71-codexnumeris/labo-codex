@@ -149,6 +149,14 @@ async function fermerFenetre(page) {
 }
 const cliquerDansFenetre = (page, texte) => page.locator('#overlay-ui-dialogue .modal-actions button', { hasText: texte }).click();
 
+
+// #1159 (lot 6, 25 oct. 2026) — RÉANCRÉ : les trimestres clos sont rangés en bas de la bibliothèque, sous
+// « Clos (n) », replié ; le banc l'ouvre comme l'utilisateur, par son intitulé (s'il ne l'est pas déjà).
+const ouvrirClos = async (modale) => {
+    const intitule = modale.locator('details.biblio2-repli:not([open]) > summary');
+    if (await intitule.count()) await intitule.click();
+};
+
 async function bibliotheque(page) {
     await page.evaluate(() => ouvrirBibliothequeTrimestreV2());
     const modale = page.locator('#modalBibliothequeTrimestres');
@@ -253,6 +261,7 @@ test.describe('Clore et alléger un trimestre — le chemin complet (14 oct. 202
 
             // 3. Archiver les copies, par le menu ⋮ de la carte close.
             modale = await bibliotheque(page);
+            await ouvrirClos(modale);
             await modale.locator('[data-param="biblio-menu-h2032"]').click();
             const archiverCopies = modale.locator('[data-action="ReserveCopies.actionArchiverCopies"][data-param="h2032"]');
             await expect(archiverCopies).toHaveText('Archiver les copies…');
@@ -279,12 +288,14 @@ test.describe('Clore et alléger un trimestre — le chemin complet (14 oct. 202
             await page.evaluate(() => fermerModalBibliothequeTrimestres());
             modale = await bibliotheque(page);
             // D'abord « Annuler » : rien ne bouge.
+            await ouvrirClos(modale);
             await modale.locator('[data-action="confirmerDesarchivage"][data-param="h2032"]').click();
             await attendreFenetre(page, 'Rouvrir le trimestre "Hiver 2032" ?');
             await cliquerDansFenetre(page, 'Annuler');
             await expect(page.locator('#overlay-ui-dialogue')).toHaveCount(0);
             await page.waitForTimeout(300);
             expect((await registre(page)).archive, 'annulé : toujours clos').toBe(true);
+            await ouvrirClos(modale);
             await modale.locator('[data-action="confirmerDesarchivage"][data-param="h2032"]').click();
             f = await attendreFenetre(page, 'Rouvrir le trimestre "Hiver 2032" ?');
             expect(f.message).toBe('Cela permettra de modifier à nouveau les données de ce trimestre.');

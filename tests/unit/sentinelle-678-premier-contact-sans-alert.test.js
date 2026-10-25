@@ -84,11 +84,8 @@ describe('#678 · B — un geste du parcours parle par les notifications', () =>
         return { win, vus };
     }
 
-    it('B.a partager un cours introuvable : notification d\'erreur, mêmes mots', async () => {
-        const { win, vus } = charger();
-        await win.partagerCours('COURS_ABSENT');
-        expect(vus).toEqual([['erreur', 'Cours introuvable', undefined]]);
-    });
+    // #1159 (lot 6, 25 oct. 2026) — B.a retiré avec son geste : `partagerCours` (« Déposer dans les cours
+    // disponibles ») est parti.
 
     it('B.b partager toute la sélection, vide : notification d\'information, mêmes mots', async () => {
         const { win, vus } = charger();

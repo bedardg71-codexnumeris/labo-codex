@@ -58,8 +58,12 @@ describe('#386 · dropdowns/listes trimestre-v2 : libellés utilisateur échapp�
     it('les libellés passent par echapperHtml', () => {
         expect(tv2).toMatch(/>\$\{echapperHtml\(labelCours\(c\)\)\}<\/option>/);
         expect(tv2orch).toMatch(/>\$\{echapperHtml\(label\)\}<\/option>/);
-        // La liste de gestion (`${echapperHtml(t.nom)}`) est retirée le 4 oct. 2026 (#1006) ; la carte de la bibliothèque reste.
-        expect(tv2liste).toContain('nom: echapperHtml(t.nom || t.id) + badgeActif');
+        // La liste de gestion (`${echapperHtml(t.nom)}`) est retirée le 4 oct. 2026 (#1006). #1159 (lot 6) :
+        // la rangée de la bibliothèque passe le nom en TEXTE, le composant l'échappe (`_renderRangee`) ;
+        // le banc bibliotheque-liste-1159 l'éprouve avec un nom hostile.
+        expect(tv2liste).toContain('nom: t.nom || t.id,');
+        expect(tv2liste).toContain('BibliothequeUI.creerFenetreListe(');
+        expect(tv2liste).not.toMatch(/nom: [^\n]*\+ badgeActif/);
     });
 });
 

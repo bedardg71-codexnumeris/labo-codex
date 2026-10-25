@@ -209,90 +209,60 @@ function ouvrirBibliothequeTrimestreV2() {
         return;
     }
 
-    // Phase C #267 — modale BibliothequeUI avec carte + menu ⋮
-    const trimestresActifs = trimestres.filter(t => !t.archive);
-    const trimestresArchives = trimestres.filter(t => t.archive);
+    // #1159 (lot 6, 25 oct. 2026) — une seule liste ; les trimestres clos en bas, sous
+    // « Clos (n) », replié. Mots proposés par Cowork, validés par Grégoire (25 oct., 19 h 06).
+    const trimestresOuverts = trimestres.filter(t => !t.archive);
+    const trimestresClos = trimestres.filter(t => t.archive);
 
-    function genererCarteTrim(t, estArchive) {
+    function rangeeTrim(t, estClos) {
         const estActif = !!t.actif;
-        const badgeActif = estActif ? '<span style="background: var(--vert-principal); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 10px;">Actif</span>' : '';
-        const meta = estArchive ? 'Clos' : (estActif ? 'Trimestre actuellement actif' : 'Disponible');
-
-        let primaire = null;
-        const actions = [];
-        if (estArchive) {
-            primaire = { label: 'Rouvrir', action: 'confirmerDesarchivage', param: t.id, classe: 'btn-confirmer', title: 'Restaurer ce trimestre comme actif' };
+        let passage = null;
+        const menu = [];
+        if (estClos) {
+            passage = { label: 'Rouvrir', action: 'confirmerDesarchivage', param: t.id, title: 'Restaurer ce trimestre comme actif' };
             // E1 (#1022) : archiver un trimestre clos entier, hors du navigateur (mots dans ReserveTrimestre.MOTS)
             if (window.ReserveTrimestre) {
-                actions.push({ label: ReserveTrimestre.MOTS.menu, action: ReserveTrimestre.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveTrimestre.MOTS.menuTitre });
+                menu.push({ label: ReserveTrimestre.MOTS.menu, action: ReserveTrimestre.ACTION, param: t.id, title: ReserveTrimestre.MOTS.menuTitre });
             }
             // #1028 : archiver les copies d'un trimestre clos, ses données restent (mots dans ReserveCopies.MOTS)
             if (window.ReserveCopies && !estActif) {
-                actions.push({ label: ReserveCopies.MOTS.menu, action: ReserveCopies.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveCopies.MOTS.menuTitre });
+                menu.push({ label: ReserveCopies.MOTS.menu, action: ReserveCopies.ACTION, param: t.id, title: ReserveCopies.MOTS.menuTitre });
             }
             // E3 (#1024) : renvoyer aux archives un trimestre clos dont l'archive vérifiée le garde (mots dans ReserveRenvoyer.MOTS)
             if (window.ReserveRenvoyer && !estActif) {
-                actions.push({ label: ReserveRenvoyer.MOTS.menu, action: ReserveRenvoyer.ACTION, param: t.id, classe: 'btn-secondaire', title: ReserveRenvoyer.MOTS.menuTitre });
+                menu.push({ label: ReserveRenvoyer.MOTS.menu, action: ReserveRenvoyer.ACTION, param: t.id, title: ReserveRenvoyer.MOTS.menuTitre });
             }
             // #361 : suppression définitive (jamais sur le trimestre actif)
-            actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
+            if (menu.length) menu.push({ separateur: true });
+            menu.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         } else if (!estActif) {
-            primaire = { label: 'Activer', action: 'changerTrimestreActifV2', param: t.id, classe: 'btn-confirmer', title: 'Définir comme trimestre actif' };
-            actions.push({ label: 'Clore', action: 'confirmerArchivage', param: t.id, classe: 'btn-secondaire', title: 'Conserver en lecture seule' });
+            passage = { label: 'Activer', action: 'changerTrimestreActifV2', param: t.id, title: 'Définir comme trimestre actif' };
+            menu.push({ label: 'Clore', action: 'confirmerArchivage', param: t.id, title: 'Conserver en lecture seule' });
             // #361 : suppression définitive (jamais sur le trimestre actif)
-            actions.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
+            menu.push({ separateur: true });
+            menu.push({ label: 'Supprimer…', action: 'confirmerSuppressionTrimestre', param: t.id, classe: 'btn-supprimer', title: 'Effacer définitivement ce trimestre et toutes ses données' });
         }
-        // Actif courant : aucune action. Ni « Supprimer » (garde anti-actif, #361), ni « Clore » :
+        // Actif courant : ni bouton ni ⋮. Ni « Supprimer » (garde anti-actif, #361), ni « Clore » :
         // #1018 (lot 8, décision de Cowork, 11 oct. 2026) — `archiverTrimestre` refuse toujours le
-        // trimestre actif ; un geste qui ne peut que refuser ne s'offre pas. Sans action, la carte n'a
-        // pas de menu ⋮ (`renderMenuActions` ne dessine rien pour une liste vide).
+        // trimestre actif ; un geste qui ne peut que refuser ne s'offre pas. Sans geste, la rangée
+        // n'a pas de ⋮ (`renderMenuActions` ne dessine rien pour une liste vide).
 
-        return BibliothequeUI.renderCarteSelection({
-            nom: echapperHtml(t.nom || t.id) + badgeActif,
+        return {
             id: t.id,
-            badgeSource: '',
-            metadonnees: meta,
-            description: '',
-            boutonPrincipal: primaire,
-            actionsMenu: actions
-        });
+            nom: t.nom || t.id,
+            ligne: estClos ? 'Clos' : (estActif ? 'Actif' : 'Ouvert'),
+            passage: passage,
+            menu: menu
+        };
     }
 
-    let contenuSection1 = '';
-    if (trimestresActifs.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucun trimestre actif</p>';
-    } else {
-        trimestresActifs.forEach(t => { contenuSection1 += genererCarteTrim(t, false); });
-    }
-
-    let contenuSection2 = '';
-    let titreSection2 = '';
-    if (trimestresArchives.length > 0) {
-        titreSection2 = 'Trimestres clos';
-        trimestresArchives.forEach(t => { contenuSection2 += genererCarteTrim(t, true); });
-    }
-
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreListe({
         modalId: 'modalBibliothequeTrimestres',
-        titre: '📚 Bibliothèque des trimestres',
-        sousTitre: 'Active, clos ou rouvre tes trimestres.',
-        onFermerAction: 'fermerModalBibliothequeTrimestres',
-        doublonsHTML: '',
-        titreSection1: 'Trimestres disponibles',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: '',
-        titreSection2: titreSection2,
-        filtresSection2: '',
-        contenuSection2: contenuSection2
+        titre: 'Bibliothèque des trimestres',
+        phrase: 'Active, clos ou rouvre tes trimestres.',
+        liste: { vide: 'Aucun trimestre ouvert.', rangees: trimestresOuverts.map(t => rangeeTrim(t, false)) },
+        repli: { titre: 'Clos', rangees: trimestresClos.map(t => rangeeTrim(t, true)) }
     });
-
-    if (!titreSection2) {
-        const modalEl = document.getElementById('modalBibliothequeTrimestres');
-        if (modalEl) {
-            const h3s = modalEl.querySelectorAll('.biblio-section-titre');
-            if (h3s.length >= 2 && !h3s[1].textContent.trim()) h3s[1].style.display = 'none';
-        }
-    }
 }
 
 function fermerModalBibliothequeTrimestres() {

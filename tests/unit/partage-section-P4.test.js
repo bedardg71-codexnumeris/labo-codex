@@ -55,9 +55,7 @@ function charger() {
     w.cle = (k) => 'h2026_' + k;
     w.BibliothequeUI = {
         obtenirAuteurActif: () => 'Grégoire',
-        formaterTitre: (n) => n,
-        renderCarteDisponible: (opts) => '[carte:' + opts.nom + ':' + opts.boutonPrincipal.label + ']'
-            + '[menu:' + (opts.actionsMenu || []).map(a => a.label + '→' + a.action).join(',') + ']'
+        formaterTitre: (n) => n
     };
     // Registre des packages importés : le vrai module (partage-import.js) est
     // chargé à part dans les tests de suppression, pour vérifier que la

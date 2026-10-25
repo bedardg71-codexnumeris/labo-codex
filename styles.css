@@ -4805,52 +4805,9 @@ body:not(.mode-clair) .badge-source--partage {
     color: var(--texte-secondaire);
 }
 
-/* BibliothequeUI — Composant cartes bibliothèque */
-.biblio-section-titre {
-    color: var(--bleu-clair);
-    font-size: 1.1rem;
-    margin-top: 20px;
-    margin-bottom: 15px;
-}
-.biblio-carte {
-    border-radius: 6px;
-    padding: 15px;
-    margin-bottom: 10px;
-}
-.biblio-carte--selection {
-    border: 1px solid var(--bleu-clair);
-    background: var(--bleu-tres-pale);
-}
-.biblio-carte--disponible {
-    border: 1px solid var(--bordure-claire);
-    background: var(--surface-carte, #1a3040);
-}
-.biblio-carte-contenu {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-.biblio-carte-titre {
-    font-weight: bold;
-    color: var(--accent-primaire);
-    margin-bottom: 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-.biblio-carte-meta {
-    color: var(--gris-clair);
-    font-size: 0.9em;
-    margin-bottom: 4px;
-}
-.biblio-carte-inspire {
-    color: var(--gris-clair);
-    font-size: 0.82em;
-    font-style: italic;
-    margin-bottom: 4px;
-    opacity: 0.85;
-}
+/* #1159 (lot 6, 25 oct. 2026) — les cartes de bibliothèque (`.biblio-carte*`) et l'intertitre de
+   section de `creerModal` sont partis avec lui ; reste `.biblio-carte--pointee`, que la rangée
+   reçoit de « Voir » (bandeau des doublons). */
 
 /* ============================================================
    #291 (23 août 2026) — Identifier, distinguer, résoudre les doublons
@@ -5048,32 +5005,6 @@ body:not(.mode-clair) .badge-source--partage {
 #formulaireProduction.demo-readonly [data-action="ajouterChampPersonnalise"] {
     display: none;
 }
-.biblio-carte-desc {
-    font-size: 0.85rem;
-    color: var(--gris-clair);
-}
-.biblio-carte-deja {
-    font-size: 0.8rem;
-    color: var(--bleu-clair);
-    font-style: italic;
-    margin-top: 4px;
-}
-.biblio-carte-actions {
-    display: flex;
-    gap: 6px;
-    margin-left: 10px;
-    border-top: 1px solid var(--bordure-claire);
-    padding-top: 8px;
-    margin-top: 8px;
-    align-items: center;
-    flex-shrink: 0;
-}
-/* Phase C #267 — variant vertical retiré : nouveau layout = primaire + ⋮ horizontal partout */
-.biblio-carte-actions--vertical {
-    flex-direction: column;
-    align-items: flex-end;
-}
-
 /* ============================================================
    Phase C #267 — Menu d'actions secondaires ⋮ (kebab)
    ============================================================ */
@@ -5149,20 +5080,6 @@ body:not(.mode-clair) .badge-source--partage {
 }
 .mode-clair .biblio-menu-trigger[aria-expanded="true"] {
     background: var(--bleu-tres-pale) !important;
-}
-
-/* Beta 99.39 (#267 Phase B) — uniformisation taille des boutons dans tous les
-   biblios. Cible TOUS les .btn dans les modaux dont l'id commence par
-   "modalBibliotheque" (5 ressources : grilles, échelles, cartouches,
-   productions, pratiques). !important pour court-circuiter toute autre
-   règle (.btn, .btn-mini, .btn-tres-compact) peu importe l'ordre source. */
-[id^="modalBibliotheque"]:not(.biblio2-voile) .btn,
-[id^="modalBibliotheque"]:not(.biblio2-voile) .btn-mini,
-[id^="modalBibliotheque"]:not(.biblio2-voile) .btn-tres-compact {
-    padding: 4px 10px !important;
-    font-size: 0.8rem !important;
-    font-weight: 600 !important;
-    line-height: 1.4 !important;
 }
 
 /* ============================================================
@@ -5440,6 +5357,14 @@ body:not(.mode-clair) .badge-source--partage {
 /* #1158 — l'intertitre qui porte un ⋮ (une catégorie de tampons) ; l'image d'un aperçu (le tampon) */
 .biblio2-groupe-ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .biblio2-groupe-ligne .biblio2-intertitre { margin: 0; }
+
+/* #1159 (lot 6) — la fenêtre à une seule liste (BibliothequeUI.creerFenetreListe) : les cours,
+   les trimestres, les groupes-cours ; le groupe replié (« Mis de côté », « Clos ») en bas. */
+.modal-js-contenu.biblio2-fenetre--liste { max-width: 720px; }
+.biblio2-fenetre--liste > .biblio2-phrase { margin-top: -12px; }
+.biblio2-panneau--liste { background: var(--fond-page-sature); }
+.mode-clair .biblio2-panneau--liste { background: var(--gris-tres-pale); }
+.biblio2-panneau--liste .biblio2-repli > .biblio2-liste { margin: 4px 0 8px; }
 /* Le tampon tel qu'il paraît sur une copie : sur le blanc du papier, dans les deux modes (la palette, elle,
    l'inverse en mode sombre, ce qui fausserait une image personnelle en couleur). */
 .biblio2-apercu-image { display: block; width: 72px; height: 72px; object-fit: contain; margin: 0 0 6px; padding: 6px;
