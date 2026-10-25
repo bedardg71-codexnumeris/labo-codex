@@ -7,6 +7,20 @@
 
 ---
 
+## 25 OCT. 2026, FIN D'APRÈS-MIDI (Claude Code) : **LES BIBLIOTHÈQUES EN DEUX COLONNES, LOTS 1 À 3, VIVENT SUR LA BRANCHE `bibliotheques-deux-colonnes` = `deef36ff` ; LA FUSION ATTEND LE LOT 4**
+
+**Où vit le travail** : branche locale `bibliotheques-deux-colonnes` = `deef36ff`, non poussée. La copie de travail est revenue sur `main` (verdict du lot 3, § 2.3) pour que la version du soir parte de `main`.
+
+**État des lots** (plan `plans de travail/PLAN-2026-10-24-bibliotheques-deux-colonnes.md`) : lot 1, les grilles (#1154), relu et accepté avec ses deux retouches ; lot 2, les échelles et les cartouches (#1155, `115747e1`), relu et accepté ; lot 3, les productions et les pratiques (#1156, `1c854369`), relu et accepté avec une retouche ; la retouche est `6a2bc864` (« PAN-Dénotation », la phrase de colonne vide), en relecture (`DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-3-retouche.md`). **Lot 4** (#1157, les cartes d'alignement, l'aide de la bibliothèque, le spécimen du composant, les Nouvelles, la porte iPad et Safari) : à cadrer.
+
+**La fusion** dans `main` est prévue **après le lot 4**, au signal de Grégoire, avec la release groupée (nouveau partage du 25 oct., consigne du lot 3, § 6).
+
+**État mesuré sur la branche** : Vitest 9 694 sur 9 695 ; le rouge est `sentinelle-anticache-fichiers-modifies` pour `gabarits-utils.js` (jeton `20261025a`, build `1024-1447`), attendu, que `scripts/release.mjs` réglera à la release. WebKit, banc `bibliotheque-deux-colonnes-1156` : les six tests « pratiques » verts.
+
+**Sur `main`, ce commit** : seulement des documents de Cowork (l'aide suspendue, la correction des noms fictifs, le verdict du banc #1131) et ce relais. Pas de push : Grégoire pousse.
+
+---
+
 ## 25 OCT. 2026 (Claude Code) : **LE LOT 1 DES BIBLIOTHÈQUES EN DEUX COLONNES (#1154) VIT SUR LA BRANCHE `bibliotheques-deux-colonnes` ; LE MERGE ATTEND**
 
 **Où vit le travail** : branche locale `bibliotheques-deux-colonnes`, partie de `main` = `05843aba`, non poussée : `3d3918c4` (documents de Cowork : audit d'apparence, plan, maquette, consigne du lot 1), `9ee51473` (fiches #1154 à #1159), `ae34b7cd` (le lot : la bibliothèque des grilles en deux colonnes), `0032552c` (ligne du plan). **`main` n'a reçu que ce relais.** En relecture chez Cowork : `plans de travail/DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-1.md`.

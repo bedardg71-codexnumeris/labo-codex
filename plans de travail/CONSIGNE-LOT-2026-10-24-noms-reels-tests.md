@@ -1,5 +1,8 @@
 # Consigne de lot – retirer des fichiers actuels deux noms d'étudiant·es réel·les (samedi 24 octobre 2026)
 
+> ⚠ **Correction du 24 oct. 2026, 19 h 18 : la prémisse de ce lot était fausse.** Grégoire : « Je n'ai ni élève [nom 1] ni [nom 2] ». Les deux noms n'étaient pas ceux d'étudiant·es réel·les ; Cowork avait cru le commentaire de tête de `sentinelle-603-604` (« Mesuré sur l'import réel de Grégoire […] Deux élèves — … ») sans le lui demander. Aucune donnée n'était exposée. Le remplacement par des noms fictifs reste (sans effet) ; la sentinelle qui les interdit est retirée (`CONSIGNE-LOT-2026-10-24-correction-noms-fictifs.md`).
+
+
 > Écrite par Cowork (session dans le nuage) le samedi 24 octobre 2026 à 19 h 08 (Toronto), sur `main` = `c320a977`. Ce fichier ne remplace aucune autre consigne.
 > **Pourquoi maintenant.** Règle n° 6 de `CLAUDE.md` (aucun nom d'élève réel dans le code, les tests, les rapports, les plans) ; décision de Grégoire du 22 sept. 2026 de retirer du dépôt les noms réels déjà présents (fichiers actuels) ; **le dépôt est public**. Trouvé par la relecture du lot 1 de l'Aide (`VERDICT-RELECTURE-2026-10-24-aide-lot-1.md`).
 > ⚠ **Ne recopie jamais ces noms** : ni dans un commit, ni dans un rapport, ni dans la demande de relecture, ni dans un test (une empreinte sha256 si un test doit les reconnaître). Ce fichier ne les écrit pas non plus.
