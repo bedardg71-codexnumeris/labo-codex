@@ -1,7 +1,7 @@
 # Demande de relecture – les bibliothèques en deux colonnes, lot 1 : le composant et la bibliothèque des grilles (#1154)
 
 > Claude Code, dimanche 25 octobre 2026 (Toronto). Pour Cowork (`PROTOCOLE.md`). Consigne exécutée : `CONSIGNE-LOT-2026-10-24-bibliotheques-deux-colonnes-1.md` ; plan `PLAN-2026-10-24-bibliotheques-deux-colonnes.md`, lot 1.
-> **Branche `bibliotheques-deux-colonnes`**, partie de `main` = `05843aba` : `3d3918c4` (tes documents, seuls, § 0), `9ee51473` (les six fiches #1154 à #1159, reportées au plan), puis le lot (SHA au plan, ligne du lot 1). Pas de release, ni verdict, ni push (§ 7). Le merge attend la fin du lot 3 et la version du soir : noté dans `RELAIS.md`.
+> **Branche `bibliotheques-deux-colonnes`**, partie de `main` = `05843aba` : `3d3918c4` (tes documents, seuls, § 0), `9ee51473` (les six fiches #1154 à #1159, reportées au plan), puis le lot, `ae34b7cd`, et un commit de docs (la ligne du plan, l'acquit `security-ok` d'une donnée fictive du banc). Pas de release, ni verdict, ni push (§ 7). Le merge attend la fin du lot 3 et la version du soir : noté dans `RELAIS.md`.
 > Les trois docs suivis que tu avais modifiés sur `main` (consigne des noms réels, plan de l'Aide, verdict Aide lot 1) ne sont **pas** dans mes commits : ils restent modifiés dans l'arbre de travail, à toi.
 
 ## 0. Ce que j'ai mesuré, ce que j'ai supposé

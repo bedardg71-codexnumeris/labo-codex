@@ -43,7 +43,7 @@
 
 | Lot | Ce que l'utilisateur voit | Fiche | État |
 |---|---|---|---|
-| 1. Le composant et les grilles | Conception › Grilles de critères › « Consulter la bibliothèque » : la fenêtre de l'ébauche, deux colonnes, rangées compactes, aperçu des critères, « Importer ou exporter ▾ », dossiers et « Masquer » en haut de la bibliothèque. Les neuf autres fenêtres ne changent pas. | #1154 | **consigne prête** : `CONSIGNE-LOT-2026-10-24-bibliotheques-deux-colonnes-1.md` |
+| 1. Le composant et les grilles | Conception › Grilles de critères › « Consulter la bibliothèque » : la fenêtre de l'ébauche, deux colonnes, rangées compactes, aperçu des critères, « Importer ou exporter ▾ », dossiers et « Masquer » en haut de la bibliothèque. Les neuf autres fenêtres ne changent pas. | #1154 | **codé, en relecture** (25 oct., Claude Code) : `ae34b7cd` sur la branche `bibliotheques-deux-colonnes` ; demande `DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-1.md` ; captures `captures-2026-10-25-bibliotheques-deux-colonnes-1/` |
 | 2. Échelles et cartouches | Les mêmes deux colonnes. Les cartouches gardent leur regroupement par grille, en intertitres dans chaque colonne ; « Filtrer par grille » rejoint la barre de la bibliothèque. | #1155 | à cadrer après le verdict du lot 1 |
 | 3. Productions et pratiques | Idem. L'encadré « Pour éditer une pratique, transfère-la… » disparaît : les deux colonnes le disent. À la fin du lot, l'aide « Comment fonctionne la bibliothèque » est réécrite (texte proposé par Claude Code, **validé par Grégoire**). | #1156 | à cadrer |
 | 4. Cartes d'alignement | Idem (« Partager » devient le passage « Garder dans ma bibliothèque → » si la mesure confirme que c'est le même geste). | #1157 | à cadrer |
