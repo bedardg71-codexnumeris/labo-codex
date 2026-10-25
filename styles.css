@@ -5433,6 +5433,19 @@ body:not(.mode-clair) .badge-source--partage {
 /* #1155 — l'intertitre d'un groupe dans une colonne (les cartouches, par grille) */
 .biblio2-groupe .biblio2-intertitre { margin: 6px 0 0; color: var(--texte-secondaire); }
 
+/* #1156 — une note au-dessus des colonnes (les maquettes de pratiques, #326) : le bleu d'information */
+.biblio2-note {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--alerte-bordure-information);
+    border-radius: 0 var(--radius-moyen) var(--radius-moyen) 0;
+    background: var(--alerte-fond-information);
+    font-size: 0.9rem;
+    color: var(--texte-secondaire);
+}
+.biblio2-note p { margin: 0 0 8px; }
+.biblio2-note .btn { min-height: 44px; }
+
 /* Le bandeau des doublons (#291), dans la fenêtre : ses boutons à 44 px */
 .biblio2-fenetre .biblio-doublon-action { min-height: 44px; }
 

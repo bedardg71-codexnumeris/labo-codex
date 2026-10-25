@@ -161,12 +161,12 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // d'un select de dossiers, échappé à l'option par bibliotheque-ui.js).
     const TITRE_BRUT = /formaterTitre(?:Demo)?\(\s*(?=\S)(?!echapperHtml\()/g;
     const TITRES_TEXTE = {
-        'js/bibliotheque-ui.js': 2,               // formaterTitreDemo → formaterTitre ; _labelItem (texte)
-        'js/pratiques-gestion.js': 1,             // labelItem (texte)
+        'js/bibliotheque-ui.js': 1,               // formaterTitreDemo → formaterTitre ; #1156 : _labelItem parti avec la ligne-select des dossiers
+        'js/pratiques-gestion.js': 2,             // #1156 : le nom des rangées de la fenêtre en deux colonnes, ×2 (texte, échappé par creerFenetreDeuxColonnes) ; `labelItem` parti
         'js/grilles.js': 2,                       // #1154 : le nom des rangées de la fenêtre en deux colonnes, ×2 (texte, échappé par creerFenetreDeuxColonnes) ; `libelle` parti
         'js/echelles.js': 2,                      // #1155 : le nom des rangées de la fenêtre en deux colonnes, ×2 (texte, échappé par creerFenetreDeuxColonnes) ; `libelle` parti
         'js/cartouches.js': 2,                    // #1155 : le nom des rangées de la fenêtre en deux colonnes, ×2 (texte, échappé par creerFenetreDeuxColonnes)
-        'js/productions-bibliotheque-ui.js': 1    // libelle (texte)
+        'js/productions-bibliotheque-ui.js': 1    // #1156 : le nom des rangées (`nomProductionBibliotheque`, texte, échappé par creerFenetreDeuxColonnes) ; `libelle` parti
     };
     it('C.t les titres de cartes reçoivent un nom déjà échappé', () => {
         for (const f of FICHIERS) {
@@ -213,10 +213,13 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // (« trimestre » ou « bibliotheque », du code), `compte` (un nombre). Tout nom reçu passe par
     // `echapperHtml` / `echapperAttribut` dans le composant. BREAK-TEST (25 oct.) : `echapperHtml(r.nom)` → `r.nom`
     // dans `_renderRangee` → le volet C ROUGIT.
+    // ↻ 25 oct. 2026 (#1156) : bibliotheque-ui.js 40 → 23, à la BAISSE — la zone « Mes dossiers » (`genererZone`)
+    // et la ligne-select des dossiers (`renderLigneDossierSelect`) sont retirées, sans lecteur depuis le lot 3 ;
+    // productions-bibliotheque-ui.js 1 → 0, l'aperçu d'import réécrit (le nom passe par `echapperHtml`).
     const NUES = {
-        'js/bibliotheque-ui.js': 40, 'js/pratiques-gestion.js': 21, /* #1137 (22 oct.) : −5, passées par formaterPourcentage ; #1147 (24 oct.) : −3, la barre latérale et ses badges partis */ 'js/echelles.js': 19, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie ; #1147 : −2, la barre latérale */
+        'js/bibliotheque-ui.js': 23, 'js/pratiques-gestion.js': 21, /* #1137 (22 oct.) : −5, passées par formaterPourcentage ; #1147 (24 oct.) : −3, la barre latérale et ses badges partis */ 'js/echelles.js': 19, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie ; #1147 : −2, la barre latérale */
         'js/grilles.js': 66 /* étape 2b : −1, la rangée « Poser : » des paliers ; #1147 : −4, la barre latérale ; #1150 : −2, le miroir et les cartes du gabarit */, 'js/cartouches.js': 15 /* #1147 : −1 */, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 11 /* #1147 : −2, le surlignage de la barre latérale */,
-        'js/productions-bibliotheque-ui.js': 1, 'js/tampons-bibliotheque.js': 4,
+        'js/productions-bibliotheque-ui.js': 0, 'js/tampons-bibliotheque.js': 4,
         'js/planification-bibliotheque.js': 2, 'js/travaux-outils.js': 89,
         'js/wizard-pratique-v2.js': 40, 'js/profil-etudiant-sections-affichage.js': 106, /* #1137 (22 oct.) : −6, passées par formaterPourcentage ; #1148 (24 oct.) : −4, les synthèses de la barre latérale partent */ 'js/trimestre-v2-cours.js': 0
     };

@@ -1539,14 +1539,13 @@
 
     /* =====================================================================
        #327 — RÉPERTOIRES DE CLASSEMENT : couche UI GÉNÉRIQUE (transversale).
-       Généralise l'UI livrée pour les pratiques en #320 (zone « Mes dossiers »
-       repliable, pool groupé en selects compacts, assignation) à TOUTES les
+       Généralise l'UI livrée pour les pratiques en #320 à TOUTES les
        bibliothèques. Le moteur (js/repertoires-bibliotheque.js) est déjà
-       paramétré par `biblio` ; ici on mutualise le rendu et les handlers.
+       paramétré par `biblio` ; ici on mutualise les handlers. #1156 : le rendu
+       (zone et selects) est parti, la barre de la fenêtre en deux colonnes le porte.
 
        Chaque bibliothèque s'enregistre une fois via `enregistrer(biblio, cfg)`
-       en fournissant ses callbacks spécifiques (rafraîchir la modale, ajouter /
-       supprimer un item, libeller un item). Les handlers génériques reçoivent
+       en fournissant son rappel (rafraîchir la fenêtre). Les handlers génériques reçoivent
        la `biblio` en premier data-param, sans jamais utiliser `this`
        (le dispatcher data-action appelle fn(param, param2, param3)).
 
@@ -1568,22 +1567,6 @@
             return window.repertoiresBibliotheque;
         }
 
-        function _reps(biblio) {
-            var m = _moteur();
-            return (m && typeof m.obtenir === 'function') ? m.obtenir(biblio) : [];
-        }
-
-        function _labelPluriel(biblio) {
-            return _cfg(biblio).labelPluriel || 'éléments';
-        }
-
-        // Libellé d'affichage d'un item dans un select (callback ou défaut).
-        function _labelItem(biblio, item) {
-            var fn = _cfg(biblio).labelItem;
-            if (typeof fn === 'function') return fn(item);
-            return BibliothequeUI.formaterTitre((item && item.nom) || 'Sans titre');
-        }
-
         async function _rafraichir(biblio) {
             var fn = _cfg(biblio).rafraichir;
             if (typeof fn === 'function') await fn();
@@ -1594,10 +1577,9 @@
          * @param {string} biblio  clé de bibliothèque ('pratiques', 'grilles'…)
          * @param {Object} cfg
          *   - rafraichir   {Function}  ré-affiche la modale après mutation (async ok)
-         *   - ajouterItem  {Function}  (id) => ajoute l'item à la sélection (optionnel)
-         *   - supprimerItem{Function}  (id) => supprime l'item de la biblio (optionnel)
-         *   - labelItem    {Function}  (item) => texte d'option de select (optionnel)
-         *   - labelPluriel {string}    pour les textes d'aide/confirmation ('pratiques'…)
+         * #1156 : `ajouterItem`, `supprimerItem`, `labelItem` et `labelPluriel` sont partis avec la zone
+         * « Mes dossiers » et la ligne-select ; les cinq fenêtres à dossiers sont en deux colonnes (⋮ de
+         * chaque rangée ; le pluriel de la barre vient de `dossiers.labelPluriel`).
          */
         BibliothequeUI.repertoires = {};
 
@@ -1615,56 +1597,8 @@
             _deplie[biblio] = !!deplie;
         };
 
-        // --- Zone « Mes dossiers » (repliable) -------------------------------
-
-        /** HTML de la zone « Mes dossiers » (créer / renommer / supprimer). */
-        BibliothequeUI.repertoires.genererZone = function (biblio) {
-            var reps = _reps(biblio);
-            var deplie = _deplie[biblio] || reps.length === 0;
-            var pluriel = _labelPluriel(biblio);
-
-            var lignes = reps.map(function (r) {
-                var id = echapperHtml(r.id);
-                var b = echapperHtml(biblio);
-                return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">' +
-                    '<input type="text" data-rep-biblio="' + b + '" data-rep-id="' + id + '" value="' + echapperHtml(r.nom || '') + '" class="controle-form" style="flex:1;" aria-label="Nom du dossier" />' +
-                    '<button data-action="BibliothequeUI.repertoires.renommer" data-param="' + b + '" data-param2="' + id + '" class="btn btn-secondaire btn-mini">Renommer</button>' +
-                    // Lot C (5 sept. 2026) : la corbeille, comme partout — le geste et sa confirmation ne changent pas.
-                    window.boutonRetirerBloc({ action: 'BibliothequeUI.repertoires.supprimer', param: biblio, param2: r.id, titre: 'Supprimer le dossier',
-                                               confirm: 'Supprimer ce dossier ? Son contenu n\'est pas supprimé : les ' + pluriel + ' repassent en « non classées ».' }) +
-                    '</div>';
-            }).join('');
-
-            if (!lignes) {
-                lignes = '<p style="color: var(--gris-clair); font-style: italic; margin:0 0 6px;">Aucun dossier pour l\'instant. Crée-en un pour ranger tes ' + pluriel + '.</p>';
-            }
-
-            var b = echapperHtml(biblio);
-            return '<div style="border:1px solid var(--bordure, #ddd); border-radius:8px; padding:12px; margin-bottom:15px; background:var(--surface-carte, #fff);">' +
-                '<button type="button" data-action="BibliothequeUI.repertoires.basculer" data-param="' + b + '" aria-expanded="' + deplie + '" style="background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:600; color:var(--texte-principal, #222); display:flex; align-items:center; gap:6px;">' +
-                    '<span id="rep-' + b + '-zone-icone" aria-hidden="true">' + (deplie ? '▾' : '▸') + '</span> Mes dossiers' + (reps.length ? ' (' + reps.length + ')' : '') +
-                '</button>' +
-                '<div id="rep-' + b + '-zone-contenu" style="' + (deplie ? 'margin-top:8px;' : 'display:none;') + '">' +
-                    '<div id="rep-' + b + '-liste">' + lignes + '</div>' +
-                    '<div style="display:flex; gap:6px; margin-top:8px;">' +
-                        '<input type="text" id="rep-' + b + '-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier" style="flex:1;" aria-label="Nom du nouveau dossier" />' +
-                        '<button data-action="BibliothequeUI.repertoires.creer" data-param="' + b + '" class="btn btn-principal btn-mini">Créer le dossier</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
-        };
-
-        /** Replie/déplie « Mes dossiers » sans re-rendu (préserve le scroll). */
-        BibliothequeUI.repertoires.basculer = function (biblio) {
-            _deplie[biblio] = !_deplie[biblio];
-            var contenu = document.getElementById('rep-' + biblio + '-zone-contenu');
-            var icone = document.getElementById('rep-' + biblio + '-zone-icone');
-            if (contenu) {
-                contenu.style.display = _deplie[biblio] ? '' : 'none';
-                if (_deplie[biblio]) contenu.style.marginTop = '8px';
-            }
-            if (icone) icone.textContent = _deplie[biblio] ? '▾' : '▸';
-        };
+        // #1156 (25 oct. 2026) — la zone « Mes dossiers » (`genererZone`, `basculer`) est retirée : la
+        // gestion des dossiers vit dans la barre de la fenêtre en deux colonnes (« Gérer les dossiers… »).
 
         // --- Mutations sur les dossiers --------------------------------------
 
@@ -1706,79 +1640,8 @@
             await _rafraichir(biblio);
         };
 
-        // --- Ligne compacte d'un dossier : select + Ajouter + menu ⋮ ----------
-        // Actions agissant sur l'item SÉLECTIONNÉ dans le select du dossier.
-
-        function _idSelectionne(selectId) {
-            var s = document.getElementById(selectId);
-            return s && s.value ? s.value : null;
-        }
-
-        /**
-         * Rend la ligne compacte d'un groupe-dossier : un select de ses items +
-         * bouton « Ajouter » + menu ⋮ (déplacer vers un autre dossier / retirer /
-         * supprimer). `groupe` = { id, titre, items } issu de repertoiresBibliotheque.grouper.
-         * Gagne de l'espace vertical vs une carte par item.
-         */
-        BibliothequeUI.repertoires.renderLigneDossierSelect = function (biblio, groupe) {
-            var selectId = 'rep-' + biblio + '-select-' + groupe.id;
-            var b = echapperHtml(biblio);
-            var sid = echapperHtml(selectId);
-            var options = groupe.items.map(function (item) {
-                return '<option value="' + echapperHtml(item.id) + '">' + echapperHtml(_labelItem(biblio, item)) + '</option>';
-            }).join('');
-
-            var actions = [];
-            _reps(biblio).forEach(function (r) {
-                if (r.id !== groupe.id) {
-                    actions.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classerSel', param: biblio, param2: selectId, param3: r.id, classe: 'btn-secondaire', title: 'Déplacer vers ce dossier' });
-                }
-            });
-            actions.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirerSel', param: biblio, param2: selectId, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
-            if (typeof _cfg(biblio).supprimerItem === 'function') {
-                actions.push({ label: 'Supprimer de la bibliothèque', action: 'BibliothequeUI.repertoires.supprimerSel', param: biblio, param2: selectId, classe: 'btn-supprimer', title: 'Supprimer définitivement', showAlways: true });
-            }
-
-            var boutonAjouter = (typeof _cfg(biblio).ajouterItem === 'function')
-                ? '<button data-action="BibliothequeUI.repertoires.ajouterSel" data-param="' + b + '" data-param2="' + sid + '" class="btn btn-principal btn-mini">Ajouter</button>'
-                : '';
-
-            return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">' +
-                '<select id="' + sid + '" class="controle-form" style="flex:1;" aria-label="' + echapperHtml(_labelPluriel(biblio)) + ' du dossier ' + echapperHtml(groupe.titre) + '">' + options + '</select>' +
-                boutonAjouter +
-                BibliothequeUI.renderMenuActions(actions, selectId) +
-            '</div>';
-        };
-
-        /** Ajoute à la sélection l'item choisi dans le select du dossier. */
-        BibliothequeUI.repertoires.ajouterSel = async function (biblio, selectId) {
-            var id = _idSelectionne(selectId);
-            var fn = _cfg(biblio).ajouterItem;
-            if (id && typeof fn === 'function') await fn(id);
-        };
-
-        /** Déplace l'item choisi vers un autre dossier (exclusif). */
-        BibliothequeUI.repertoires.classerSel = async function (biblio, selectId, repId) {
-            var id = _idSelectionne(selectId);
-            if (!id) return;
-            _moteur().assigner(id, repId, biblio);
-            await _rafraichir(biblio);
-        };
-
-        /** Sort l'item choisi de son dossier (repasse en non classées). */
-        BibliothequeUI.repertoires.retirerSel = async function (biblio, selectId) {
-            var id = _idSelectionne(selectId);
-            if (!id) return;
-            _moteur().retirerItem(id, biblio);
-            await _rafraichir(biblio);
-        };
-
-        /** Supprime de la bibliothèque l'item choisi dans le select. */
-        BibliothequeUI.repertoires.supprimerSel = async function (biblio, selectId) {
-            var id = _idSelectionne(selectId);
-            var fn = _cfg(biblio).supprimerItem;
-            if (id && typeof fn === 'function') await fn(id);
-        };
+        // #1156 — la ligne compacte d'un dossier (`renderLigneDossierSelect` et ses quatre gestes `…Sel`)
+        // est retirée : chaque rangée porte « Classer dans : … » et « Retirer du dossier » à son ⋮.
     })();
 
     /* =====================================================================
@@ -1821,6 +1684,12 @@
            colonne par groupe, dans la barre, quand il n'y a pas de dossiers ;
          bibliotheque.masquer = { libelle, refreshFn } : la case « Masquer… » de cette barre ;
          importAutreTrimestre.phrase : une phrase sous la ligne d'import.
+
+       #1156 (lot 3, productions et pratiques) — deux options de la ligne d'import, pour les
+       productions, dont le filtre de cours suit le trimestre choisi :
+         importAutreTrimestre.selectOnChange : le `data-on-change` du menu des trimestres ;
+         importAutreTrimestre.selectSecond = { id, label, ariaLabel } : un second menu, caché
+           tant que le premier ne l'a pas rempli (`toggleDisplay`).
        ===================================================================== */
 
     /**
@@ -2014,9 +1883,15 @@
             '<summary class="biblio2-repli-titre">' + echapperHtml(o.titre) + '</summary>' +
             '<div class="biblio2-import-ligne">' +
                 '<select id="' + echapperAttribut(o.selectId) + '" class="controle-form biblio2-select biblio2-import-select"' +
-                    ' aria-label="Trimestre d\'où importer">' +
+                    ' aria-label="Trimestre d\'où importer"' +
+                    (o.selectOnChange ? ' data-on-change="' + echapperAttribut(o.selectOnChange) + '"' : '') + '>' +
                     '<option value="">-- Choisir un trimestre --</option>' + options +
                 '</select>' +
+                (o.selectSecond
+                    ? '<select id="' + echapperAttribut(o.selectSecond.id) + '" class="controle-form biblio2-select biblio2-import-select u-hide"' +
+                      ' aria-label="' + echapperAttribut(o.selectSecond.ariaLabel) + '">' +
+                      '<option value="">' + echapperHtml(o.selectSecond.label) + '</option></select>'
+                    : '') +
                 '<button type="button" data-action="' + echapperAttribut(o.actionVoir) + '" class="btn btn-secondaire">' +
                     echapperHtml(o.libelleVoir) + '</button>' +
                 '<button type="button" data-action="' + echapperAttribut(o.actionTout) + '" class="btn btn-secondaire"' +

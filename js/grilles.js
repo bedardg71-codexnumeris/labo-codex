@@ -2396,8 +2396,7 @@ async function afficherBibliothequeGrilles() {
     // #327 — la biblio « grilles » auprès du moteur des dossiers (idempotent) : ses
     // gestes (créer, renommer, classer…) redessinent la fenêtre par ce rappel.
     BibliothequeUI.repertoires.enregistrer('grilles', {
-        rafraichir: afficherBibliothequeGrilles,
-        labelPluriel: 'grilles'
+        rafraichir: afficherBibliothequeGrilles
     });
 
     const data = await preparerDonneesBibliothequeGrilles();

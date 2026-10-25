@@ -1657,8 +1657,10 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     const nbEvaluations = evaluations.filter(ev => ev && ev.cartoucheId === cartoucheId).length;
 
     let survivance = '';
-    if (biblio.some(c => c.id === cartoucheId)) {
-        survivance += 'Elle reste dans la Bibliothèque.\n';
+    // #1156 (verdict du lot 2, § 3) — la phrase et la relation de la fenêtre en deux colonnes : ce chemin
+    // n'efface pas l'exemplaire, et une cartouche ramenée par « ← Utiliser » le nomme par `idOriginal`.
+    if (cartouche && biblio.some(ex => BibliothequeUI.lieeAExemplaire(cartouche, ex))) {
+        survivance += 'Son exemplaire de ta bibliothèque reste.\n';
     }
     if (nbEvaluations > 0) {
         survivance += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;

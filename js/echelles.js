@@ -1107,8 +1107,7 @@ async function afficherBibliothequeEchelles() {
     // (créer, renommer, classer…) redessinent la fenêtre par ce rappel. #1155 : plus de
     // « select » de dossier par cartes (`renderLigneDossierSelect`), donc plus de `labelItem`.
     BibliothequeUI.repertoires.enregistrer('echelles', {
-        rafraichir: afficherBibliothequeEchelles,
-        labelPluriel: 'échelles'
+        rafraichir: afficherBibliothequeEchelles
     });
 
     const data = await preparerDonneesBibliothequeEchelles();

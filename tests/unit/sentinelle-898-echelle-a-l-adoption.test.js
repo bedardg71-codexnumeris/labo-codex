@@ -155,7 +155,13 @@ function monter(jeu, opts = {}) {
         notifications: { succes(t, m) { notifs.push({ type: 'succes', t, m }); }, erreur(t, m) { notifs.push({ type: 'erreur', t, m }); }, info(t, m) { notifs.push({ type: 'info', t, m }); }, warning() {} },
         uiDialogues: { demanderChoix: async (options) => { questions.push(clone(options)); return opts.reponse ? opts.reponse(options) : null; },
             informer: async (options) => { informations.push(clone(options)); } },
-        BibliothequeUI: { fermerModal() {}, filtrerParMaquette: (a) => a, filtrerParModeDemo: (a) => a, obtenirAuteurActif: () => 'banc', forgerInspireDe: () => null, repertoires: { rendre() {} } },
+        // ↻ #1156 (25 oct. 2026) : « ← Utiliser dans ce trimestre » REDESSINE la fenêtre en deux colonnes (avant,
+        // elle se fermait) ; le faux composant reçoit donc ce que `afficherBibliothequePratiques` lit. Il ne
+        // rend rien : ce banc vérifie l'écriture et les trois écrans, pas la fenêtre (banc WebKit #1156).
+        BibliothequeUI: { fermerModal() {}, filtrerParMaquette: (a) => a, filtrerParModeDemo: (a) => a, obtenirAuteurActif: () => 'banc', forgerInspireDe: () => null,
+            repertoires: { rendre() {}, enregistrer() {} }, estMaquette: () => false, lieeAExemplaire: (i, e) => !!(i && e && (i.id === e.id || i.idOriginal === e.id)),
+            formaterTitre: (n) => n, formaterInspireDe: () => '', filtrerParDejaPresent: (a) => a, renderAvertissementDoublons: () => '', creerFenetreDeuxColonnes() {} },
+        analyserDoublons: () => [], reunirSources: (a, b) => a.concat(b),
         ajouterAvecGardeIdentite: (liste, item) => ({ ajoute: true, liste: liste.concat([item]) }),
         confirm: () => true, alert() {}, genererIdUnique: (p) => p + 'NEUF' + (++compteurId),
         toggleDisplay() {}, setValeurChamp() {}, getValeurChamp: () => '', getCheckbox: () => false, setCheckbox() {},
