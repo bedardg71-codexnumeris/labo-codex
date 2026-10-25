@@ -255,7 +255,7 @@ test('statut incomplet · cochée après des niveaux : le PDF n\'en montre aucun
     const erreurs = await monter(page);
     // La copie d'Alpha est annotée (un trait) : son état réel, avant toute évaluation, est « Annoté ».
     await page.evaluate(() => {
-        window.db.setSync(window.cle('annotationsTravaux'), [{
+        window.db.setSync(window.cle('annotationsTravaux'), [{   // security-ok: fixture littérale du banc, aucune source externe.
             id: 'AN_A_P1', fichierId: 'FT_A_P1', pages: { 1: { strokes: [{ points: [{ x: 1, y: 1 }, { x: 2, y: 2 }] }] } }
         }]);
     });
