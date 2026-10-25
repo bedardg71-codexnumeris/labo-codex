@@ -40,6 +40,9 @@ const dossierCaptures = process.env.CAPTURES_1157 || null;
 //   · ⋮ : « Supprimer définitivement » → `supprimerAlignementDeBibliotheque` → « ⋮ » ROUGIT ;
 //   · dernière carte : `index.cartes.length <= 1` → `< 1` → « la dernière carte » ROUGIT ;
 //   · import : `ouvert: reprises.length > 0` → `ouvert: false` → « Même cours » ROUGIT ;
+//   · retouche (verdict du lot 4, § 2) : « de ce trimestre ? » → « du trimestre actif ? » → « ⋮ » ROUGIT ;
+//     « de ce trimestre. » → « du trimestre actif. » → « la dernière carte » ROUGIT ; « le ramène » →
+//     « en remet un exemplaire » dans l'aide → « l'aide » ROUGIT ;
 //   · composant : le nom toujours en bouton (`var nom = r.apercu` → `var nom = true`) → « la ligne en
 //     clair » ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
@@ -282,11 +285,18 @@ test('⋮ : les libellés et leurs actions, dans les deux colonnes', async ({ pa
     const questions = await page.evaluate(() => window.__questions);
     expect(questions.some(q => q.includes(nomCible))).toBe(true);
     expect(questions.some(q => q.includes('exemplaire'))).toBe(false);
+    // Retouche (verdict du lot 4, § 2.2) : « ce trimestre », plus « le trimestre actif ».
+    expect(questions).toContain('Supprimer définitivement la carte « ' + nomCible + ' » de ce trimestre ?');
 });
 
 test('la dernière carte du trimestre ne se supprime toujours pas', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirDemo(page, 1440, 900);
+    await page.evaluate(() => {
+        window.__avertissements = [];
+        const avant = notifications.warning;
+        notifications.warning = (...a) => { window.__avertissements.push(a.join(' ')); return avant.apply(notifications, a); };
+    });
     await ouvrirBibliotheque(page);
     expect((await indexCartes(page)).cartes.length).toBe(1);
     const menu = await ouvrirMenu(rangee(page, 'trimestre', NOM_DEMO));
@@ -294,7 +304,23 @@ test('la dernière carte du trimestre ne se supprime toujours pas', async ({ pag
     await pause(page, 500);
     expect((await indexCartes(page)).cartes.length).toBe(1);
     expect(await page.evaluate(() => window.__questions)).toEqual([]);
+    // Retouche (verdict du lot 4, § 2.2).
+    expect(await page.evaluate(() => window.__avertissements)).toEqual(['Impossible de supprimer la dernière carte de ce trimestre.']);
     await expect(rangee(page, 'trimestre', NOM_DEMO)).toHaveCount(1);
+});
+
+test('l’aide « Comment fonctionne la bibliothèque » : le texte validé, « le ramène »', async ({ page }) => {
+    test.setTimeout(90000);
+    await ouvrirDemo(page, 1440, 900);
+    await page.evaluate(() => document.body.classList.add('aide-contextuelle-active'));
+    await ouvrirBibliotheque(page);
+    await page.locator(SEL + ' .biblio2-entete .btn-aide-contextuelle[data-aide="bibliotheque-fonctionnement"]').click();
+    const modale = page.locator('.aide-contextuelle-modal.active');
+    await expect(modale.locator('#aide-ctx-titre')).toHaveText('Comment fonctionne la bibliothèque');
+    const texte = await texteVisible(modale.locator('.aide-contextuelle-body'));
+    expect(texte).toContain('« Dans ta bibliothèque » : ce que tu gardes pour tous tes trimestres.');
+    expect(texte).toContain('S\'il est dans ta bibliothèque, « ← Utiliser dans ce trimestre » le ramène.');
+    for (const ancien of ['badges de source', 'ta sélection', 'Disponibles']) expect(texte, ancien).not.toContain(ancien);
 });
 
 test('« Importer depuis un autre trimestre » au pied de « Dans ce trimestre » ; « Même cours » en tête, repli ouvert', async ({ page }) => {
