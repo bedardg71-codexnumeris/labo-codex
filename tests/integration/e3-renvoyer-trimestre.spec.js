@@ -202,6 +202,14 @@ async function ouvrirArchives(page) {
     await page.waitForTimeout(300);
 }
 
+
+// #1159 (lot 6, 25 oct. 2026) — RÉANCRÉ : les trimestres clos sont rangés en bas de la bibliothèque, sous
+// « Clos (n) », replié ; le banc l'ouvre comme l'utilisateur, par son intitulé (s'il ne l'est pas déjà).
+const ouvrirClos = async (modale) => {
+    const intitule = modale.locator('details.biblio2-repli:not([open]) > summary');
+    if (await intitule.count()) await intitule.click();
+};
+
 /** Le menu ⋮ de la carte h2032 : « Renvoyer aux archives… », puis le fichier. */
 async function renvoyerParLeMenu(page, fichier) {
     await page.evaluate(() => ouvrirBibliothequeTrimestreV2());
@@ -210,6 +218,7 @@ async function renvoyerParLeMenu(page, fichier) {
     const geste = modale.locator('[data-action="ReserveRenvoyer.actionRenvoyer"]');
     await expect(geste).toHaveCount(1);
     await expect(geste).toHaveAttribute('data-param', 'h2032');
+    await ouvrirClos(modale);
     await modale.locator('[data-param="biblio-menu-h2032"]').click();
     await expect(geste).toBeVisible();
     await expect(geste).toHaveText('Renvoyer aux archives…');

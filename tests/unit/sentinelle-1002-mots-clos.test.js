@@ -123,7 +123,10 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
     it('la bibliothèque des trimestres nomme les gestes « Clore » et « Rouvrir »', () => {
         const liste = lire('js', 'trimestre-v2-liste.js');
         // Le badge « Clos » vivait dans la liste sans conteneur, retirée le 4 oct. 2026 (#1006).
-        expect(liste).toContain('titreSection2 = \'Trimestres clos\';');
+        // #1159 (lot 6) : « Trimestres clos » devient le groupe replié « Clos (n) » (mots validés par
+        // Grégoire, 25 oct., 19 h 06) ; la rangée d'un trimestre clos dit « Clos ».
+        expect(liste).toContain("repli: { titre: 'Clos', rangees:");
+        expect(liste).toContain("ligne: estClos ? 'Clos' :");
         // #1018 (lot 8, 11 oct. 2026) : « Clore » n'est plus offert sur le trimestre actif (il y était
         // toujours refusé) ; il reste sur le trimestre disponible, une seule fois.
         expect(liste.match(/\{ label: 'Clore', action: 'confirmerArchivage'/g)).toHaveLength(1);

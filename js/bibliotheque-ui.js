@@ -4,9 +4,8 @@
  * éliminer ~1167 lignes de code dupliqué.
  *
  * API :
- *   BibliothequeUI.creerModal(config)
- *   BibliothequeUI.renderCarteSelection(opts)
- *   BibliothequeUI.renderCarteDisponible(opts)
+ *   BibliothequeUI.creerFenetreDeuxColonnes(config)   — #1154, les sept bibliothèques à deux colonnes
+ *   BibliothequeUI.creerFenetreListe(config)          — #1159, les cours, les trimestres, les groupes-cours
  *   BibliothequeUI.fermerModal(modalId)
  *   BibliothequeUI.genererBadgeSource(item, itemsLocaux)
  *   BibliothequeUI.genererIdCourt(id)
@@ -162,7 +161,7 @@
     /**
      * Bascule la préférence + rafraîchit la modale en cours via la fonction
      * de re-render dont le nom est passé via data-refresh-fn. Le re-render
-     * reconstruit la modale entière (creerModal retire l'ancienne avant
+     * reconstruit la fenêtre entière (`creerFenetreDeuxColonnes` retire l'ancienne avant
      * insertion). Reçoit l'élément directement (dispatcher data-on-change).
      */
     BibliothequeUI.basculerMasquerDejaPresent = function (elementOuNom) {
@@ -717,23 +716,6 @@
     };
 
     /**
-     * Phase D (audit biblios 2026-05-09) — Tronque une description pour
-     * affichage compact en carte biblio. Coupe au dernier espace si la
-     * coupure tombe au-delà de 70% de la longueur cible (sinon coupe net).
-     * Ajoute « … » quand tronqué.
-     */
-    BibliothequeUI.tronquerDescription = function (desc, max) {
-        if (!desc) return '';
-        var s = String(desc);
-        var n = max || 120;
-        if (s.length <= n) return s;
-        var coupe = s.slice(0, n);
-        var lastSpace = coupe.lastIndexOf(' ');
-        if (lastSpace > n * 0.7) coupe = coupe.slice(0, lastSpace);
-        return coupe.replace(/\s+$/, '') + '…';
-    };
-
-    /**
      * Génère le badge source HTML. Phase A.2 + A.4 (audit biblios 2026-05-09) :
      * - Plus de badge `Bibliothèque` (no-op contextuel — la modale s'appelle déjà ainsi)
      * - Plus de badge violet `Démo` (items démo filtrés par A.0 en mode normal)
@@ -922,140 +904,8 @@
         });
     }
 
-    /**
-     * Phase C #267 (audit biblios) — Rend la HTML d'un bouton primaire de
-     * carte. Échappe le label et le title (sécurité — texte utilisateur).
-     */
-    function _renderBoutonPrincipal(p) {
-        if (!p) return '';
-        return '<button type="button" ' + _btnAttrs(p) +
-            ' class="btn ' + (p.classe || 'btn-confirmer') + ' btn-mini"' +
-            (p.title ? ' title="' + echapperHtml(p.title) + '"' : '') + '>' +
-            echapperHtml(p.label) + '</button>';
-    }
-
-    /**
-     * Rend une carte d'item en Section 1 (dans la sélection).
-     * Phase C #267 — API : bouton principal + menu d'actions secondaires.
-     *
-     * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges) — #467 : le nom
-     *        reçu s'échappe AVANT, chez l'appelant (`echapperHtml`) ; ce rendu ne le fait pas.
-     * @param {string} opts.id - ID complet (sert de contextId pour le menu)
-     * @param {string} opts.badgeSource - HTML du badge source
-     * @param {string} opts.metadonnees - Ligne de métadonnées
-     * @param {string} [opts.description] - Description (auto-tronquée + échappée)
-     * @param {string} [opts.inspireDe] - Trace d'origine
-     * @param {string} [opts.badgesPratiques] - HTML des badges de pratique
-     * @param {Object} [opts.boutonPrincipal] - {label, action, param, classe, title}
-     * @param {Array}  [opts.actionsMenu] - [{label, action, param, classe, title}]
-     */
-    BibliothequeUI.renderCarteSelection = function (opts) {
-        var badgesPratiques = opts.badgesPratiques || '';
-
-        var actionsHTML = '<div class="biblio-carte-actions">' +
-            _renderBoutonPrincipal(opts.boutonPrincipal) +
-            BibliothequeUI.renderMenuActions(opts.actionsMenu, opts.id) +
-            '</div>';
-
-        var ligneInspireDe = opts.inspireDe
-            ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
-            : '';
-
-        var descTronquee = BibliothequeUI.tronquerDescription(opts.description);
-        var descHTML = descTronquee
-            ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
-            : '';
-
-        var puceId = opts.afficherId ? BibliothequeUI.renderPuceId(opts.id) : '';
-
-        return '<div class="biblio-carte biblio-carte--selection"' + _ancreItem(opts.id) + '>' +
-            '<div class="biblio-carte-contenu">' +
-                '<div style="flex: 1;">' +
-                    '<div class="biblio-carte-titre">' +
-                        badgesPratiques +
-                        opts.nom +
-                        ' ' + opts.badgeSource +
-                    '</div>' +
-                    ligneInspireDe +
-                    '<div class="biblio-carte-meta">' + opts.metadonnees + puceId + '</div>' +
-                    descHTML +
-                '</div>' +
-                actionsHTML +
-            '</div>' +
-        '</div>';
-    };
-
-    /**
-     * Rend une carte d'item en Section 2 (disponible à ajouter).
-     * Phase C #267 — API : bouton principal + menu d'actions secondaires.
-     *
-     * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges) — #467 : le nom
-     *        reçu s'échappe AVANT, chez l'appelant (`echapperHtml`) ; ce rendu ne le fait pas.
-     * @param {string} opts.id - ID complet (sert de contextId pour le menu)
-     * @param {string} opts.badgeSource - HTML du badge source
-     * @param {string} opts.metadonnees - Ligne de métadonnées
-     * @param {string} [opts.description] - Description (auto-tronquée + échappée)
-     * @param {string} [opts.inspireDe] - Trace d'origine
-     * @param {boolean} opts.dejaPresent - true si déjà dans la sélection
-     * @param {string} [opts.badgesPratiques] - HTML des badges de pratique
-     * @param {string} [opts.styleExtra] - Style CSS supplémentaire
-     * @param {string} [opts.dataAttrs] - Attributs data- supplémentaires
-     * @param {string} [opts.classeItem] - Classe CSS pour l'item (filtrage)
-     * @param {Object} [opts.boutonPrincipal] - {label, action, param, classe, title, showAlways}.
-     *        Si dejaPresent et !showAlways, primaire masqué.
-     * @param {Array}  [opts.actionsMenu] - [{label, action, param, classe, title, showAlways}].
-     *        Si dejaPresent, items sans showAlways filtrés.
-     */
-    BibliothequeUI.renderCarteDisponible = function (opts) {
-        var badgesPratiques = opts.badgesPratiques || '';
-        var opacite = opts.dejaPresent ? 'opacity: 0.5;' : '';
-        var styleExtra = opts.styleExtra || '';
-        var dataAttrs = opts.dataAttrs || '';
-        var classeItem = opts.classeItem || '';
-
-        var primaire = opts.boutonPrincipal;
-        if (opts.dejaPresent && primaire && !primaire.showAlways) primaire = null;
-
-        var actionsMenu = opts.actionsMenu;
-        if (opts.dejaPresent && Array.isArray(actionsMenu)) {
-            actionsMenu = actionsMenu.filter(function (a) { return a && a.showAlways; });
-        }
-
-        var actionsHTML = '<div class="biblio-carte-actions">' +
-            _renderBoutonPrincipal(primaire) +
-            BibliothequeUI.renderMenuActions(actionsMenu, opts.id) +
-            '</div>';
-
-        var ligneInspireDe = opts.inspireDe
-            ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
-            : '';
-
-        var descTronquee = BibliothequeUI.tronquerDescription(opts.description);
-        var descHTML = descTronquee
-            ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
-            : '';
-
-        var puceId = opts.afficherId ? BibliothequeUI.renderPuceId(opts.id) : '';
-
-        return '<div class="' + classeItem + ' biblio-carte biblio-carte--disponible" ' + dataAttrs + _ancreItem(opts.id) + ' style="' + opacite + styleExtra + '">' +
-            '<div class="biblio-carte-contenu">' +
-                '<div style="flex: 1;">' +
-                    '<div class="biblio-carte-titre">' +
-                        badgesPratiques +
-                        opts.nom +
-                        ' ' + opts.badgeSource +
-                    '</div>' +
-                    ligneInspireDe +
-                    '<div class="biblio-carte-meta">' + opts.metadonnees + puceId + '</div>' +
-                    descHTML +
-                    (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans ta sélection</div>' : '') +
-                '</div>' +
-                actionsHTML +
-            '</div>' +
-        '</div>';
-    };
+    // #1159 (lot 6, 25 oct. 2026) — `renderCarteSelection`, `renderCarteDisponible` et leur bouton
+    // principal sont retirés : les dix bibliothèques rendent leurs rangées par `_renderRangee`.
 
     /* ===========================================================
        #291 — LE BANDEAU DÉSIGNE, IL NE DÉCRIT PLUS
@@ -1379,69 +1229,7 @@
             : null;
     };
 
-    /**
-     * Crée et injecte une modale complète de bibliothèque
-     * @param {Object} config
-     * @param {string} config.modalId - ID unique du modal (ex: "modalBibliothequeGrilles")
-     * @param {string} config.titre - Titre H2
-     * @param {string} config.sousTitre - Description sous le titre
-     * @param {string} config.onFermer - Nom de la fonction de fermeture
-     * @param {string} config.doublonsHTML - HTML de l'avertissement doublons (ou '')
-     * @param {string} config.titreSection1 - Titre de la Section 1
-     * @param {string} config.contenuSection1 - HTML du contenu de la Section 1
-     * @param {string} config.boutonsApresSection1 - HTML des boutons après Section 1
-     * @param {string} [config.sectionImportTrimestre] - HTML optionnel pour import trimestre
-     * @param {string} config.titreSection2 - Titre de la Section 2
-     * @param {string} config.filtresSection2 - HTML des filtres avant Section 2
-     * @param {string} config.contenuSection2 - HTML du contenu de la Section 2
-     * @param {string} [config.contenuIdListe2] - ID du conteneur Section 2
-     * @param {string} [config.sectionPartages] - HTML optionnel de la section
-     *        « Partagés par des collègues » (#329 P4, partageSection.genererSectionHTML)
-     */
-    BibliothequeUI.creerModal = function (config) {
-        // Idempotence : si une instance avec ce modalId existe déjà (cas typique
-        // d'un rafraîchissement après import), la retirer avant d'en créer une
-        // nouvelle. Sinon `insertAdjacentHTML('beforeend', …)` empile deux
-        // modales partageant le même id, ce qui double le backdrop et oblige
-        // à fermer 2 fois pour que la modale disparaisse.
-        var existant = document.getElementById(config.modalId);
-        if (existant) existant.remove();
-
-        var fermerAttr = 'data-action="' + (config.onFermerAction || config.onFermer) + '"';
-        var html = '<div id="' + config.modalId + '" class="modal-js-overlay" style="z-index: 10000;">' +
-            '<div class="modal-js-contenu" style="max-width: 800px;">' +
-                '<button ' + fermerAttr + ' class="modal-js-btn-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
-                '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
-                    '<h2 style="margin: 0; color: var(--accent-primaire);">' + config.titre + '</h2>' +
-                    '<button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>' +
-                '</div>' +
-                '<p style="color: var(--gris-clair); margin-bottom: 20px;">' + config.sousTitre + '</p>' +
-
-                config.doublonsHTML +
-
-                '<h3 class="biblio-section-titre">' + config.titreSection1 + '</h3>' +
-                '<div style="margin-bottom: 30px;">' +
-                    '<div id="' + (config.contenuIdListe1 || '') + '">' +
-                        config.contenuSection1 +
-                    '</div>' +
-                    config.boutonsApresSection1 +
-                '</div>' +
-
-                (config.sectionImportTrimestre || '') +
-
-                '<h3 class="biblio-section-titre">' + config.titreSection2 + '</h3>' +
-                config.filtresSection2 +
-                '<div id="' + (config.contenuIdListe2 || '') + '">' +
-                    config.contenuSection2 +
-                '</div>' +
-
-                (config.sectionPartages || '') +
-
-            '</div>' +
-        '</div>';
-
-        document.body.insertAdjacentHTML('beforeend', html);
-    };
+    // #1159 — `creerModal` est retiré : plus aucune bibliothèque ne s'en sert.
 
     /* =====================================================================
        SECTION « IMPORTER DEPUIS UN AUTRE TRIMESTRE » — SURVIVRE À LA
@@ -1656,8 +1444,7 @@
        ligne, et chaque bibliothèque dessinait la sienne (audit du 24 oct., « une
        cause commune »). Ici, le module passe des textes et des gestes ; tout
        l'échappement et toutes les classes sont faits ici. `creerModal`,
-       `renderCarteSelection` et `renderCarteDisponible` restent tant qu'une des
-       neuf autres fenêtres s'en sert (plan, lot 6).
+       `renderCarteSelection` et `renderCarteDisponible` sont partis au lot 6 (#1159).
 
        config = {
          modalId, titre, aide,                 // aide : la clé `data-aide` du bouton ⓘ
@@ -1874,7 +1661,7 @@
                 '</div>' +
                 '<div class="biblio2-rangee-actions">' +
                     _renderPassage(r) +
-                    BibliothequeUI.renderMenuActions(r.menu, colonne + '-' + r.id,
+                    BibliothequeUI.renderMenuActions(r.menu, (ctx.menuParId ? '' : colonne + '-') + r.id,
                         { ariaLabel: 'Autres gestes pour ' + r.nom, classeBouton: 'biblio2-kebab' }) +
                 '</div>' +
             '</div>' +
@@ -2255,6 +2042,64 @@
                         _renderColonne(config.trimestre, 'trimestre', ctx) +
                         _renderColonne(biblio, 'bibliotheque', ctx) +
                     '</div>' +
+                '</section>' +
+            '</div>');
+
+        var fenetre = document.querySelector('#' + modalId + ' .biblio2-fenetre');
+        if (fenetre) {
+            if (etat && etat.defilement) fenetre.scrollTop = etat.defilement;
+            if (typeof fenetre.focus === 'function') fenetre.focus({ preventScroll: true });
+        }
+    };
+
+    /* =====================================================================
+       #1159 (lot 6) — LA FENÊTRE À UNE SEULE LISTE : les cours, les trimestres, les groupes-cours.
+
+       Une liste, et en bas un groupe replié (« Mis de côté (n) », « Clos (n) »). Les rangées sont
+       celles des deux colonnes (`_renderRangee`, sans aperçu si la rangée n'en a pas) ; rien ne
+       change pour les sept autres fenêtres. Dans une seule liste, un id ne paraît qu'une fois : le ⋮
+       d'une rangée garde l'id `biblio-menu-<id>` des cartes qu'elle remplace.
+
+       config = { modalId, titre, phrase, menuFichiers?, champsFichier?,
+                  liste: { idListe?, vide, rangees },
+                  repli: { titre, rangees } }     // sans rangée, pas de groupe replié
+       ===================================================================== */
+    BibliothequeUI.creerFenetreListe = function (config) {
+        var modalId = config.modalId;
+        var etat = _reprendreEtat(modalId);
+        var ctx = {
+            modalId: modalId,
+            ouverts: new Set(etat ? etat.ouverts : []),
+            replis: new Set(etat ? etat.replis : []),
+            filtre: '__tous__',
+            filtreGroupe: '',
+            menuParId: true
+        };
+        var idTitre = modalId + '-titre';
+        var liste = config.liste || {};
+        var repli = config.repli || {};
+        var rangeesRepli = repli.rangees || [];
+
+        var contenu = _renderListe(liste.rangees || [], 'liste', ctx, liste.idListe, liste.vide, null, null);
+        if (rangeesRepli.length) {
+            contenu += '<details class="biblio2-repli" data-repli="repli"' + (ctx.replis.has('repli') ? ' open' : '') + '>' +
+                // Le titre et son compte dans une seule boîte : l'intitulé est en `flex`, l'espace entre
+                // deux enfants y tomberait (« Mis de côté(1) », capture du 25 oct.).
+                '<summary class="biblio2-repli-titre"><span>' + echapperHtml(repli.titre) +
+                    ' <span class="biblio2-compte">(' + rangeesRepli.length + ')</span></span></summary>' +
+                _renderListe(rangeesRepli, 'repli', ctx, null, null, null, null) +
+            '</details>';
+        }
+
+        document.body.insertAdjacentHTML('beforeend',
+            '<div id="' + echapperAttribut(modalId) + '" class="modal-js-overlay biblio2-voile">' +
+                '<section class="modal-js-contenu biblio2-fenetre biblio2-fenetre--liste" role="dialog" aria-modal="true"' +
+                    ' aria-labelledby="' + echapperAttribut(idTitre) + '" tabindex="-1">' +
+                    _renderEntete(config, idTitre) +
+                    (config.phrase ? '<p class="biblio2-phrase">' + echapperHtml(config.phrase) + '</p>' : '') +
+                    '<section class="biblio2-panneau biblio2-panneau--liste" aria-labelledby="' + echapperAttribut(idTitre) + '">' +
+                        contenu +
+                    '</section>' +
                 '</section>' +
             '</div>');
 

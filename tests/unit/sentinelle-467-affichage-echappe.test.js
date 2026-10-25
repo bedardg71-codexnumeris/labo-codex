@@ -124,7 +124,7 @@ const FICHIERS = [
 
 // Les seules interpolations brutes admises : des constantes du code, jamais une donnée reçue.
 const ADMISES = {
-    'js/bibliotheque-ui.js': ['+ config.titre +'],          // titre de fenêtre passé par le code appelant
+    // js/bibliotheque-ui.js : `+ config.titre +` (le titre de fenêtre de `creerModal`) est parti avec lui (#1159, 25 oct.)
     'js/echelles.js': ['${ph.code}', '${ph.nom}'],          // exemples de placeholder, table du code
     'js/travaux-outils.js': ['+ c.nom +', '${m.titre}',     // COULEURS et modes de pointe : tables du code
         '${outil.icone}', '${outil.icone}'],                 // icônes <img> des outils et formes (OUTILS) : D.a
@@ -221,7 +221,7 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // ↻ 25 oct. 2026 (#1158) : tampons-bibliotheque.js 4 → 0, à la BAISSE — la fenêtre des tampons passe des
     // données au composant en deux colonnes ; ses chaînes (`htmlMesTampons`, `boutonsApres`) sont parties.
     const NUES = {
-        'js/bibliotheque-ui.js': 23, 'js/pratiques-gestion.js': 21, /* #1137 (22 oct.) : −5, passées par formaterPourcentage ; #1147 (24 oct.) : −3, la barre latérale et ses badges partis */ 'js/echelles.js': 19, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie ; #1147 : −2, la barre latérale */
+        'js/bibliotheque-ui.js': 21 /* #1159 (25 oct.) : −2, `renderCarteDisponible` (`classeItem`) et `creerModal` (`fermerAttr`) partis */, 'js/pratiques-gestion.js': 21, /* #1137 (22 oct.) : −5, passées par formaterPourcentage ; #1147 (24 oct.) : −3, la barre latérale et ses badges partis */ 'js/echelles.js': 19, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie ; #1147 : −2, la barre latérale */
         'js/grilles.js': 66 /* étape 2b : −1, la rangée « Poser : » des paliers ; #1147 : −4, la barre latérale ; #1150 : −2, le miroir et les cartes du gabarit */, 'js/cartouches.js': 15 /* #1147 : −1 */, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 11 /* #1147 : −2, le surlignage de la barre latérale */,
         'js/productions-bibliotheque-ui.js': 0, 'js/tampons-bibliotheque.js': 0,
         'js/planification-bibliotheque.js': 0, 'js/travaux-outils.js': 89,

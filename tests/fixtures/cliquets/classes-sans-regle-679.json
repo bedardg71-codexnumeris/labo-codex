@@ -4,6 +4,7 @@
  "js/accompagnement.js:glossaire-lien-guide",
  "js/accompagnement.js:primo-popup-titre",
  "js/bibliotheque-ui.js:biblio-toggle-deja-present",
+ "js/bibliotheque-ui.js:biblio2-voile",
  "js/bilan-reflexif-core.js:bilan-aide-body",
  "js/bilan-reflexif-core.js:bilan-aide-chevron",
  "js/bilan-reflexif-core.js:bilan-aide-header",

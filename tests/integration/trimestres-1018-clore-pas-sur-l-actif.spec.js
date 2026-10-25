@@ -55,7 +55,10 @@ test.describe('#1018 — « Clore » n\'est offert que là où il peut réussir'
         // Le trimestre actif : ni « Clore », ni menu ⋮.
         await expect(modale.locator('[data-action="confirmerArchivage"][data-param="a2032"]')).toHaveCount(0);
         await expect(modale.locator('[data-param="biblio-menu-a2032"]')).toHaveCount(0);
-        await expect(modale).toContainText('Trimestre actuellement actif');
+        // #1159 (lot 6) — réancré : « Actif » en clair sous le nom (mot validé par Grégoire, 25 oct., 19 h 06),
+        // au lieu de « Trimestre actuellement actif ».
+        await expect(modale.locator('.biblio2-rangee[data-biblio-item-id="a2032"] .biblio2-rangee-meta')).toHaveText('Actif');
+        await expect(modale).not.toContainText('Trimestre actuellement actif');
 
         await page.screenshot({ path: test.info().outputPath('bibliotheque-trimestres-1018.png'), fullPage: false });
     });
