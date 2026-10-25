@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Copie de la maquette publiée https://claude.ai/artifact/6cBTUpiKXmqs21cDDaoVuX (version 1792855383-ebcb), déposée par Cowork le 24 oct. 2026 pour la consigne du lot 4 (#1150). Lecture seule : référence de présentation, pas du code à reprendre tel quel. -->
+</head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Maquette du critère algorithmique</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Mise en page : la chaîne en haut (comme la barre du Trimestre), puis trois colonnes —
+   les blocs, les étapes à régler, ce que l'élève lira. Couleurs reprises de styles.css
+   (mode clair / mode sombre de Labo Codex) ; le violet marque seulement « les zones où se posent les blocs ». */
+:root {
+  --fond: #ffffff;
+  --fond-page: #f3f7fc;
+  --carte: #ffffff;
+  --element: #f0f8ff;
+  --texte: #1a1a2e;
+  --texte-2: #555566;
+  --muted: #666677;
+  --accent: #065dbb;
+  --accent-pale: #e8f2fd;
+  --bleu-moyen: #2a4a8a;
+  --bordure: rgba(3, 46, 92, 0.14);
+  --bordure-claire: rgba(3, 46, 92, 0.08);
+  --input: #ffffff;
+  --input-bord: rgba(3, 46, 92, 0.2);
+  --vert: #34c759;
+  --vert-fond: rgba(40, 167, 69, 0.1);
+  --vert-bord: #28a745;
+  --vert-texte: #1e7e34;
+  --zone: #6d28d9;
+  --zone-fond: rgba(109, 40, 217, 0.05);
+  --zone-fond-fort: rgba(109, 40, 217, 0.15);
+  --zone-bord: rgba(109, 40, 217, 0.5);
+  --ambre: #7a5a20;
+  --ambre-bord: #a07830;
+  --ambre-fond: rgba(160, 120, 48, 0.12);
+  --ombre: 0 1px 3px rgba(3, 46, 92, 0.06), 0 2px 6px rgba(3, 46, 92, 0.08);
+  --ombre-haut: 0 -4px 16px rgba(3, 46, 92, 0.14);
+  --r: 6px;
+  --r-grand: 12px;
+  --pill: 20px;
+  --police: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #142428; --fond-page: #0c1a22; --carte: #1a3040; --element: #244858;
+    --texte: #d0e0e4; --texte-2: #a4bac4; --muted: #8fadbb; --accent: #6aacb8; --accent-pale: #1f4052;
+    --bleu-moyen: #3a6476; --bordure: rgba(106, 172, 184, 0.35); --bordure-claire: rgba(106, 172, 184, 0.2);
+    --input: #142428; --input-bord: rgba(106, 172, 184, 0.4);
+    --vert: #34c759; --vert-fond: rgba(52, 199, 89, 0.12); --vert-bord: #34c759; --vert-texte: #5ae080;
+    --zone: #b79cff; --zone-fond: rgba(183, 156, 255, 0.06); --zone-fond-fort: rgba(183, 156, 255, 0.2); --zone-bord: rgba(183, 156, 255, 0.55);
+    --ambre: #d4b878; --ambre-bord: #c8a060; --ambre-fond: rgba(200, 160, 96, 0.12);
+    --ombre: 0 1px 4px rgba(10, 30, 40, 0.3); --ombre-haut: 0 -4px 16px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fond: #142428; --fond-page: #0c1a22; --carte: #1a3040; --element: #244858;
+  --texte: #d0e0e4; --texte-2: #a4bac4; --muted: #8fadbb; --accent: #6aacb8; --accent-pale: #1f4052;
+  --bleu-moyen: #3a6476; --bordure: rgba(106, 172, 184, 0.35); --bordure-claire: rgba(106, 172, 184, 0.2);
+  --input: #142428; --input-bord: rgba(106, 172, 184, 0.4);
+  --vert: #34c759; --vert-fond: rgba(52, 199, 89, 0.12); --vert-bord: #34c759; --vert-texte: #5ae080;
+  --zone: #b79cff; --zone-fond: rgba(183, 156, 255, 0.06); --zone-fond-fort: rgba(183, 156, 255, 0.2); --zone-bord: rgba(183, 156, 255, 0.55);
+  --ambre: #d4b878; --ambre-bord: #c8a060; --ambre-fond: rgba(200, 160, 96, 0.12);
+  --ombre: 0 1px 4px rgba(10, 30, 40, 0.3); --ombre-haut: 0 -4px 16px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--fond-page); color: var(--texte); font-family: var(--police); font-size: 15px; line-height: 1.45; }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.ic { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.page {
+  max-width: 1480px; margin: 0 auto;
+  padding-block: 16px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* Bandeau de maquette — le style des alertes « attention » de l'app */
+.bandeau {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+  padding: 10px 14px; border-left: 4px solid var(--ambre-bord); border-radius: var(--r);
+  background: var(--ambre-fond); color: var(--ambre); font-size: 0.88rem;
+}
+.btn-discret {
+  border: 1px solid var(--bordure); background: var(--carte); border-radius: var(--r);
+  padding: 6px 12px; min-height: 36px; cursor: pointer; font-size: 0.85rem; color: var(--texte);
+}
+.btn-discret:hover { border-color: var(--accent); }
+
+/* Le fil : remplace la liste des grilles */
+.fil { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.9rem; color: var(--texte-2); }
+.fil-retour {
+  display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--bordure); border-radius: var(--pill);
+  background: var(--carte); padding: 4px 12px; min-height: 34px; cursor: pointer; color: var(--accent); font-weight: 600; font-size: 0.85rem;
+}
+.fil strong { color: var(--texte); }
+.fil-note { font-size: 0.8rem; color: var(--muted); }
+
+/* Carte du critère */
+.critere {
+  background: var(--fond); border: 1px solid var(--bordure-claire); border-radius: var(--r-grand);
+  padding: 16px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--ombre);
+}
+.tete-champs {
+  display: grid; gap: 12px;
+  grid-template-columns: minmax(150px, 1.3fr) minmax(130px, 1fr) minmax(80px, 0.55fr) minmax(140px, 1fr) minmax(180px, 2fr);
+}
+.champ { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.champ > label, .champ > .etiq { font-size: 0.82rem; color: var(--texte-2); font-weight: 500; }
+.saisie {
+  width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid var(--input-bord); border-radius: var(--r);
+  background: var(--input); color: var(--texte);
+}
+.saisie:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-pale); }
+.obligatoire { color: #c0392b; }
+
+/* ===== LA CHAÎNE — reprise de la barre de convergence du Trimestre ===== */
+.barre-convergence {
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 16px 12px 12px; background: var(--carte); border: 1px solid var(--bordure-claire);
+  border-radius: var(--r); overflow-x: auto;
+}
+.bc-etape {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
+  cursor: pointer; padding: 4px 6px; min-width: 84px; transition: transform 0.15s ease; position: relative;
+}
+.bc-etape:hover { transform: translateY(-2px); }
+.bc-noeud {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--bleu-moyen); background: transparent;
+  display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; position: relative;
+}
+.bc-check { font-size: 13px; color: transparent; line-height: 1; }
+.bc-complet .bc-noeud { border-color: var(--vert); background: var(--vert); box-shadow: 0 0 8px rgba(52, 199, 89, 0.3); }
+.bc-complet .bc-check { color: #fff; }
+.bc-label { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.02em; text-align: center; white-space: nowrap; color: var(--texte); }
+.bc-etape:not(.bc-complet) .bc-label { color: var(--texte-2); }
+.bc-info { font-size: 0.68rem; color: var(--accent); min-height: 14px; text-align: center; white-space: nowrap; }
+.bc-liaison { flex: 1; height: 2px; background: var(--bleu-moyen); margin-top: 17px; min-width: 16px; max-width: 64px; }
+.bc-liaison.ok { background: var(--vert); }
+.bc-destination .bc-noeud { width: 34px; height: 34px; border-width: 3px; border-color: var(--accent); }
+.bc-destination.bc-complet .bc-noeud { border-color: var(--vert); background: var(--vert); box-shadow: 0 0 12px rgba(52, 199, 89, 0.4); }
+.bc-destination .bc-label { font-weight: 700; font-size: 0.76rem; }
+.bc-liaison-finale { border-top: 2px dashed var(--bleu-moyen); background: none; height: 0; margin-top: 18px; }
+.bc-liaison-finale.ok { border-top-style: solid; border-top-color: var(--vert); }
+/* Ajouts de la maquette : l'étape ouverte ; l'étape où un bloc peut se poser */
+.bc-ouvert .bc-noeud { box-shadow: 0 0 0 4px var(--accent-pale), 0 0 0 6px var(--accent); }
+.bc-ouvert .bc-label { color: var(--accent); }
+.bc-crayon {
+  position: absolute; top: -2px; right: 14px; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--zone); color: var(--carte); display: none; align-items: center; justify-content: center;
+}
+.bc-crayon .ic { width: 12px; height: 12px; stroke-width: 2.4; }
+.bc-montre .bc-crayon { display: flex; }
+.bc-montre .bc-noeud { box-shadow: 0 0 0 4px var(--zone-fond-fort), 0 0 0 6px var(--zone); }
+
+/* ===== L'ATELIER ===== */
+.atelier { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.centre { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; align-items: start; min-width: 0; }
+
+/* La palette */
+.palette {
+  position: sticky; top: 12px; display: flex; flex-direction: column; gap: 12px;
+  max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 2px; min-width: 0;
+}
+.palette-tete {
+  display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1.5px solid var(--zone-bord);
+  border-radius: var(--r-grand); background: var(--zone-fond);
+}
+.palette-titre { display: flex; align-items: center; gap: 8px; font-size: 0.98rem; }
+.palette-titre .ic { color: var(--zone); }
+.palette-but { font-size: 0.84rem; color: var(--texte-2); }
+.palette-mode { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 0.84rem; }
+.palette-mode li { display: flex; gap: 8px; align-items: baseline; }
+.palette-mode .n {
+  flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--zone); color: var(--carte);
+  font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; transform: translateY(-1px);
+}
+.palette-cible { font-size: 0.85rem; color: var(--texte-2); padding: 8px 10px; border-radius: var(--r); background: var(--carte); border: 1px solid var(--bordure-claire); }
+.palette[data-cible] .palette-cible { color: var(--texte); border-color: var(--zone); }
+.palette-cible strong { color: var(--zone); }
+.palette-cible.secoue { animation: secoue 0.4s; }
+.palette-groupe { display: flex; flex-direction: column; gap: 6px; }
+.palette-groupe-nom { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.palette-legende { font-size: 0.76rem; color: var(--muted); }
+.bloc {
+  position: relative; display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left; min-height: 44px;
+  padding: 6px 10px; border: 1px solid var(--bordure); border-radius: var(--r);
+  background: var(--carte); color: var(--texte); cursor: pointer;
+}
+.bloc--posee { background: var(--accent-pale); border-color: var(--accent); }
+.bloc--remplie { background: var(--vert-fond); border-color: var(--vert-bord); }
+.bloc:hover { filter: brightness(0.97); }
+.bloc-nom { font-weight: 700; font-size: 0.87rem; line-height: 1.3; overflow-wrap: anywhere; }
+.bloc-valeur { font-size: 0.78rem; color: var(--texte-2); overflow-wrap: anywhere; }
+.bloc-valeur::before { content: "→ "; color: var(--muted); }
+.bloc-valeur.vide { font-style: italic; }
+.bloc[aria-disabled="true"] { background: transparent; border-style: dashed; border-color: var(--bordure); min-height: 32px; padding-block: 4px; }
+.bloc[aria-disabled="true"] .bloc-nom { color: var(--muted); font-weight: 600; }
+.bloc[aria-disabled="true"] .bloc-valeur { display: none; }
+.palette-astuce { display: none; font-size: 0.84rem; color: var(--texte-2); }
+
+/* Les étapes */
+.etapes { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.etape h3 { font-size: inherit; font-weight: inherit; }
+.etape { background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r-grand); min-width: 0; scroll-margin-top: 12px; }
+.etape-tete {
+  width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 56px;
+  background: none; border: 0; cursor: pointer; text-align: left; border-radius: var(--r-grand);
+}
+.etape-noeud {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--bleu-moyen);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: transparent;
+}
+.etape.complete .etape-noeud { background: var(--vert); border-color: var(--vert); color: #fff; }
+.etape-titres { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.etape-titre { font-size: 1rem; font-weight: 700; }
+.etape-resume { font-size: 0.84rem; color: var(--texte-2); }
+.etape-chevron { transition: transform 0.2s; color: var(--muted); }
+.etape[data-ouverte] .etape-chevron { transform: rotate(180deg); }
+.etape[data-ouverte] .etape-tete { border-bottom: 1px solid var(--bordure-claire); border-radius: var(--r-grand) var(--r-grand) 0 0; }
+.etape-corps { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 16px; }
+.etape-corps[hidden] { display: none; }
+.etape-but { font-size: 0.88rem; color: var(--texte-2); max-width: 68ch; }
+.grille-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grille-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.rangee-noms { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: end; }
+.rangee-noms .quoi { font-size: 0.9rem; color: var(--texte-2); padding-bottom: 10px; }
+.petit { font-size: 0.8rem; color: var(--muted); }
+.formule { font-size: 0.88rem; color: var(--texte-2); }
+.formule strong { color: var(--texte); }
+.formule-copie { font-size: 0.88rem; padding: 8px 10px; border-radius: var(--r); background: var(--element); font-variant-numeric: tabular-nums; }
+.case { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--accent); border-radius: var(--r); background: var(--accent-pale); }
+.case input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--accent); flex: none; }
+.case strong { display: block; }
+.liste-codes { display: flex; flex-direction: column; gap: 6px; }
+.code-rangee { display: grid; grid-template-columns: 52px minmax(0, 1fr) 72px 24px; gap: 8px; align-items: center; }
+.code-rangee .saisie { min-height: 36px; padding: 5px 8px; font-size: 0.9rem; }
+.code-rangee .saisie.code { text-align: center; }
+.code-tete { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+.pastille { width: 22px; height: 22px; border-radius: 50%; }
+.liste-codes[data-inactif] { opacity: 0.5; }
+
+/* Les zones où se posent les blocs */
+.zone-bloc { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.zone-etiquette { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.zone-etiquette .ic { color: var(--zone); }
+.zone-nom { font-weight: 700; font-size: 0.9rem; }
+.zone-public {
+  font-size: 0.72rem; font-weight: 600; padding: 1px 8px; border-radius: var(--pill);
+  border: 1px solid var(--bordure); color: var(--texte-2);
+}
+.zone-public.eleve { border-color: var(--vert-bord); color: var(--vert-texte); }
+.zone-modele { margin-left: auto; background: none; border: 0; color: var(--accent); font-size: 0.78rem; cursor: pointer; padding: 4px 2px; text-decoration: underline; text-underline-offset: 2px; }
+.zone {
+  min-height: 2.8em; padding: 8px 10px; border: 1.5px dashed var(--zone-bord); border-radius: var(--r);
+  background: var(--zone-fond); line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; cursor: text;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.zone:empty::before { content: attr(data-vide); color: var(--muted); font-style: italic; }
+.zone:focus, .zone.est-cible { outline: none; border-style: solid; border-color: var(--zone); background: var(--carte); box-shadow: 0 0 0 3px var(--zone-fond-fort); }
+.zone.peut { box-shadow: 0 0 0 3px var(--zone-fond-fort); border-style: solid; }
+.zone.allume { animation: allume 1.6s ease; }
+.zone.montree { background: var(--zone-fond-fort); }
+.zone-aide { font-size: 0.78rem; color: var(--muted); }
+.chip {
+  display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 8px; margin: 0 1px; border: 1px solid;
+  border-radius: var(--pill); font-size: 0.82em; font-weight: 600; line-height: 1.55; vertical-align: baseline;
+  white-space: nowrap; user-select: none; -webkit-user-select: none; cursor: default;
+}
+.chip--posee { background: var(--accent-pale); border-color: var(--accent); }
+.chip--remplie { background: var(--vert-fond); border-color: var(--vert-bord); }
+.chip--accord { padding-right: 8px; background: transparent; border-style: dotted; border-color: var(--muted); color: var(--texte-2); }
+.chip--hors { border-style: dashed; opacity: 0.7; }
+.chip-x { border: 0; background: none; cursor: pointer; padding: 0 5px; line-height: 1; opacity: 0.6; font-size: 1.05em; }
+.chip-x:hover { opacity: 1; }
+
+/* Les paliers */
+.paliers { display: flex; flex-direction: column; gap: 6px; }
+.palier { border: 1px solid var(--bordure); border-radius: var(--r); background: var(--carte); }
+.palier[data-atteint] { border-color: var(--ambre-bord); }
+.palier-tete {
+  width: 100%; display: grid; grid-template-columns: 110px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center;
+  padding: 8px 12px; min-height: 48px; background: none; border: 0; cursor: pointer; text-align: left;
+}
+.palier-nom { font-weight: 700; font-size: 0.9rem; }
+.palier-seuil { font-size: 0.78rem; color: var(--muted); grid-column: 1; }
+.palier-extrait { grid-column: 2; grid-row: 1 / span 2; font-size: 0.84rem; color: var(--texte-2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.palier-ici { grid-column: 3; grid-row: 1 / span 2; font-size: 0.72rem; font-weight: 700; color: var(--ambre); background: var(--ambre-fond); border-radius: var(--pill); padding: 2px 8px; white-space: nowrap; visibility: hidden; }
+.palier[data-atteint] .palier-ici { visibility: visible; }
+.palier[data-ouvert] .palier-extrait { visibility: hidden; }
+.palier-corps { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 12px; }
+.palier-corps[hidden] { display: none; }
+.palier-essai { align-self: flex-start; }
+
+/* ===== CE QUE L'ÉLÈVE LIRA ===== */
+.apercu {
+  position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r-grand); box-shadow: var(--ombre);
+  padding: 14px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.apercu-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.apercu-tete h2 { font-size: 1.02rem; }
+.apercu-reduire { display: none; }
+.copie { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r); background: var(--element); }
+.copie-titre { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.copie-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.9rem; }
+.pas { width: 36px; height: 36px; border-radius: var(--r); border: 1px solid var(--input-bord); background: var(--input); cursor: pointer; font-weight: 700; }
+.copie-ligne .saisie { width: 72px; min-height: 36px; padding: 4px 8px; text-align: center; font-variant-numeric: tabular-nums; }
+.copie input[type="range"] { width: 100%; accent-color: var(--accent); }
+.copie-codes { font-size: 0.78rem; color: var(--muted); }
+.resultats { display: flex; flex-wrap: wrap; gap: 6px; }
+.resultat { display: inline-flex; gap: 6px; align-items: baseline; padding: 4px 10px; border-radius: var(--pill); border: 1px solid var(--bordure); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.resultat span { color: var(--muted); font-size: 0.78rem; }
+.resultat.palier-r { border-color: var(--ambre-bord); background: var(--ambre-fond); }
+.lecture { display: flex; flex-direction: column; gap: 6px; }
+.lecture h3 { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.texte-eleve { font-size: 0.95rem; line-height: 1.85; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--bordure-claire); background: var(--fond); }
+.texte-eleve .rien { color: var(--muted); font-style: italic; }
+.seg { color: inherit; text-decoration: none; border-radius: 4px; padding: 1px 0; transition: background 0.15s; cursor: pointer; }
+a.seg:hover, .seg.est-cible { background: var(--zone-fond-fort); }
+a.seg:hover { text-decoration: underline dotted var(--zone); text-underline-offset: 3px; }
+.seg--engendre { color: var(--texte-2); }
+.seg-src {
+  display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--zone); border: 1px solid var(--zone-bord); border-radius: var(--pill); padding: 0 6px; margin-right: 4px;
+  line-height: 1.5; vertical-align: 1px; white-space: nowrap;
+}
+.seg--engendre .seg-src { color: var(--muted); border-color: var(--bordure); border-style: dashed; }
+.apercu[data-sans-sources] .seg-src { display: none; }
+.condition { display: flex; flex-direction: column; gap: 2px; }
+.condition-si { font-size: 0.8rem; color: var(--muted); }
+.bascule { display: flex; gap: 8px; align-items: center; font-size: 0.84rem; color: var(--texte-2); cursor: pointer; }
+.bascule input { width: 18px; height: 18px; accent-color: var(--zone); }
+.apercu-astuce { font-size: 0.78rem; color: var(--muted); }
+
+@keyframes allume { 0%, 100% { background: var(--zone-fond); } 30%, 70% { background: var(--zone-fond-fort); box-shadow: 0 0 0 4px var(--zone-fond-fort); } }
+@keyframes secoue { 0%, 100% { transform: none; } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ===== Largeurs intermédiaires (iPad portrait, fenêtre étroite) : palette compacte, collée en haut ===== */
+@media (max-width: 1179px) {
+  html { scroll-padding-top: 90px; }
+  .tete-champs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tete-champs .champ-desc { grid-column: span 2; }
+  .atelier { grid-template-columns: minmax(0, 1fr) 300px; }
+  .centre { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .palette {
+    top: 0; z-index: 5; max-height: none; overflow: visible; gap: 8px; padding: 8px 10px;
+    background: var(--fond); border-bottom: 1px solid var(--bordure-claire);
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  }
+  .palette-tete { flex-direction: row; flex-wrap: wrap; align-items: center; padding: 8px 10px; gap: 4px 10px; }
+  .palette-but, .palette-mode, .palette-legende, .palette-groupe-nom { display: none; }
+  .palette-cible { padding: 4px 0; border: 0; background: none; flex: 1 1 220px; }
+  .palette[data-cible] .palette-cible { border: 0; }
+  .palette-tete .palette-cible { order: 2; }
+  .palette-groupe { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .palette:not([data-cible]) .palette-groupe { display: none; }
+  .palette:not([data-cible]) .palette-astuce { display: block; }
+  .bloc { width: auto; flex-direction: row; align-items: baseline; gap: 6px; min-height: 40px; padding: 6px 10px; }
+  .bloc[aria-disabled="true"] { display: none; }
+}
+@media (max-width: 900px) {
+  .tete-champs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tete-champs .champ-desc { grid-column: span 2; }
+}
+/* ===== Téléphone / colonne unique : ce que l'élève lira devient un tiroir collé en bas ===== */
+@media (max-width: 759px) {
+  .atelier { grid-template-columns: minmax(0, 1fr); }
+  .apercu {
+    top: auto; bottom: 0; max-height: 40vh; z-index: 6; border-radius: var(--r-grand) var(--r-grand) 0 0;
+    box-shadow: var(--ombre-haut); padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  html { scroll-padding-bottom: 42vh; scroll-padding-top: 90px; }
+  .apercu-reduire { display: inline-flex; }
+  .apercu[data-reduit] .apercu-detail { display: none; }
+  .grille-2, .grille-3 { grid-template-columns: minmax(0, 1fr); }
+  .rangee-noms { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .rangee-noms .quoi { grid-column: span 2; padding-bottom: 0; }
+  .palier-tete { grid-template-columns: minmax(0, 1fr) auto; }
+  .palier-extrait { display: none; }
+  .palier-ici { grid-column: 2; }
+  .bc-etape { min-width: 64px; padding: 4px 2px; }
+  .bc-label { font-size: 0.66rem; }
+  .bc-liaison { min-width: 8px; }
+}
+@media (max-width: 480px) {
+  .tete-champs { grid-template-columns: minmax(0, 1fr); }
+  .tete-champs .champ-desc { grid-column: auto; }
+  .barre-convergence { justify-content: flex-start; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-crayon" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+</svg>
+
+<div class="page">
+  <div class="bandeau" role="note">
+    <span>Maquette de travail : copie fictive, aucune donnée d’élève, rien n’est enregistré.</span>
+    <button type="button" class="btn-discret" id="toutRemettre">Tout remettre au départ</button>
+  </div>
+
+  <nav class="fil" aria-label="Où je suis">
+    <button type="button" class="fil-retour" id="filRetour">‹ Toutes les grilles</button>
+    <span>Grille d’exemple</span><span aria-hidden="true">›</span><strong id="filCritere">Français écrit</strong>
+    <span class="fil-note" id="filNote" hidden>Dans l’app, ce bouton ramènerait à la liste des grilles. Ici, elle n’occupe plus la gauche de l’écran.</span>
+  </nav>
+
+  <section class="critere" aria-label="Le critère">
+    <div class="tete-champs">
+      <div class="champ"><label for="nomCritere">Nom du critère <span class="obligatoire">*</span></label><input class="saisie" id="nomCritere" value="Français écrit"></div>
+      <div class="champ"><label for="typeCritere">Type</label>
+        <select class="saisie" id="typeCritere"><option disabled>Holistique</option><option disabled>Analytique</option><option selected>Algorithmique</option></select></div>
+      <div class="champ"><label for="pondCritere">Pond. (%)</label><input class="saisie" id="pondCritere" type="number" min="1" max="100" value="20"></div>
+      <div class="champ"><label for="soloCritere">Complexité SOLO</label>
+        <select class="saisie" id="soloCritere"><option>Préstructurel</option><option>Unistructurel</option><option selected>Multistructurel</option><option>Relationnel</option><option>Abstrait étendu</option></select></div>
+      <div class="champ champ-desc"><label for="descCritere">Description</label><input class="saisie" id="descCritere" value="Respecter les normes de la langue écrite"></div>
+    </div>
+
+    <nav class="barre-convergence" id="chaine" aria-label="Les étapes du critère algorithmique"></nav>
+
+    <div class="atelier">
+      <div class="centre">
+        <aside class="palette" id="palette" aria-label="Blocs du critère algorithmique">
+          <header class="palette-tete">
+            <h2 class="palette-titre"><svg class="ic" aria-hidden="true"><use href="#i-crayon"/></svg>Blocs du critère algorithmique</h2>
+            <p class="palette-but">Ils servent à écrire les phrases que ce critère rédige seul, copie par copie. Chaque bloc prend la valeur de la copie corrigée.</p>
+            <ol class="palette-mode">
+              <li><span class="n">1</span><span>Clique dans une zone violette <svg class="ic" style="width:13px;height:13px;color:var(--zone);vertical-align:-2px" aria-hidden="true"><use href="#i-crayon"/></svg>.</span></li>
+              <li><span class="n">2</span><span>Touche un bloc : il se pose au curseur.</span></li>
+            </ol>
+            <p class="palette-cible" id="paletteCible" aria-live="polite">Aucune zone choisie.</p>
+          </header>
+          <p class="palette-astuce">Clique dans une zone violette : les blocs qu’elle accepte paraîtront ici.</p>
+          <p class="palette-legende">Après la flèche : ce que le bloc donne sur la copie fictive.</p>
+          <div class="palette-groupe" role="group" aria-label="Ce que tu écris dans la grille">
+            <span class="palette-groupe-nom">Ce que tu écris dans la grille</span>
+            <div class="palette-groupe" id="groupePosee"></div>
+          </div>
+          <div class="palette-groupe" role="group" aria-label="Ce qui se remplit à la correction">
+            <span class="palette-groupe-nom">Ce qui se remplit à la correction</span>
+            <div class="palette-groupe" id="groupeRemplie"></div>
+          </div>
+        </aside>
+
+        <div class="etapes" id="etapes">
+
+          <section class="etape" id="etape-compte" data-etape="compte">
+            <h3><button type="button" class="etape-tete" aria-expanded="false" aria-controls="corps-compte">
+              <span class="etape-noeud" aria-hidden="true">&#10003;</span>
+              <span class="etape-titres"><span class="etape-titre">Ce que tu comptes</span><span class="etape-resume" data-resume="compte"></span></span>
+              <svg class="ic etape-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </button></h3>
+            <div class="etape-corps" id="corps-compte" hidden>
+              <p class="etape-but">Les noms de ce que tu comptes. Ils remplacent « erreur » et « mot » dans les champs de l’évaluation, les phrases et le PDF.</p>
+              <div class="rangee-noms">
+                <span class="quoi">Ce que tu comptes</span>
+                <div class="champ"><label for="nomE1">Singulier</label><input class="saisie" id="nomE1" data-nom="e1"></div>
+                <div class="champ"><label for="nomE2">Pluriel</label><input class="saisie" id="nomE2" data-nom="e2"></div>
+              </div>
+              <div class="rangee-noms">
+                <span class="quoi">Ce à quoi tu le rapportes</span>
+                <div class="champ"><label for="nomM1">Singulier</label><input class="saisie" id="nomM1" data-nom="m1"></div>
+                <div class="champ"><label for="nomM2">Pluriel</label><input class="saisie" id="nomM2" data-nom="m2"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="etape" id="etape-codes" data-etape="codes">
+            <h3><button type="button" class="etape-tete" aria-expanded="false" aria-controls="corps-codes">
+              <span class="etape-noeud" aria-hidden="true">&#10003;</span>
+              <span class="etape-titres"><span class="etape-titre">Codes</span><span class="etape-resume" data-resume="codes"></span></span>
+              <svg class="ic etape-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </button></h3>
+            <div class="etape-corps" id="corps-codes" hidden>
+              <p class="etape-but">Ce que tu poses sur la copie dans Annoter. Chaque code posé compte pour son poids.</p>
+              <label class="case"><input type="checkbox" id="codesActifs" checked>
+                <span><strong>Utiliser ces sous-critères comme codes d’annotation</strong>
+                <span class="petit">Sans cette case, la copie utilise la palette générale d’Annoter.</span></span></label>
+              <div class="liste-codes" id="listeCodes">
+                <div class="code-rangee code-tete" aria-hidden="true"><span>Code</span><span>Nom</span><span>Poids</span><span></span></div>
+              </div>
+              <div class="zone-bloc">
+                <div class="zone-etiquette">
+                  <svg class="ic" aria-hidden="true"><use href="#i-crayon"/></svg>
+                  <span class="zone-nom" id="lbl-aucune">Aucune annotation</span>
+                  <span class="zone-public">Toi seul·e le vois</span>
+                  <button type="button" class="zone-modele" data-modele="aucune">Revenir au modèle</button>
+                </div>
+                <div class="zone" contenteditable="true" role="textbox" aria-labelledby="lbl-aucune" data-zone="aucune" id="zone-aucune" data-vide="Vide : rien ne s’affiche."></div>
+                <small class="zone-aide">Affiché quand la copie ne porte ni tampon ni code.</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="etape" id="etape-note" data-etape="note">
+            <h3><button type="button" class="etape-tete" aria-expanded="false" aria-controls="corps-note">
+              <span class="etape-noeud" aria-hidden="true">&#10003;</span>
+              <span class="etape-titres"><span class="etape-titre">Note</span><span class="etape-resume" data-resume="note"></span></span>
+              <svg class="ic etape-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </button></h3>
+            <div class="etape-corps" id="corps-note" hidden>
+              <p class="etape-but">Comment le compte devient une note, sur la pondération du critère.</p>
+              <div class="grille-2">
+                <div class="champ"><label for="modeleFormule">Modèle de formule</label>
+                  <select class="saisie" id="modeleFormule">
+                    <option value="penalite_normalisee">Pénalité normalisée</option>
+                    <option value="ratio_cible">Ratio mots par erreur</option>
+                    <option value="penalite_par_erreur">Pénalité fixe par erreur</option>
+                  </select></div>
+                <div class="champ"><label for="paramFormule" id="lblParam">Facteur de normalisation (nombre de mots)</label><input class="saisie" id="paramFormule" type="number" min="0.1" step="any"></div>
+              </div>
+              <p class="petit" id="descFormule"></p>
+              <p class="formule"><strong>Formule appliquée :</strong> <span id="formuleSymbole"></span></p>
+              <p class="formule-copie" id="formuleCopie"></p>
+            </div>
+          </section>
+
+          <section class="etape" id="etape-paliers" data-etape="paliers">
+            <h3><button type="button" class="etape-tete" aria-expanded="false" aria-controls="corps-paliers">
+              <span class="etape-noeud" aria-hidden="true">&#10003;</span>
+              <span class="etape-titres"><span class="etape-titre">Paliers</span><span class="etape-resume" data-resume="paliers"></span></span>
+              <svg class="ic etape-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </button></h3>
+            <div class="etape-corps" id="corps-paliers" hidden>
+              <p class="etape-but">Où la copie se situe face à une norme externe, et ce que tu en dis à l’élève à chaque palier.</p>
+              <div class="champ"><label for="modeleProj">Modèle de projection</label>
+                <select class="saisie" id="modeleProj"><option value="norme_externe">Projection à l’EUF</option><option value="aucune">Aucune projection</option></select></div>
+              <div id="projReglages" class="etape-corps" style="padding:0">
+                <div class="grille-3">
+                  <div class="champ"><label for="projLongueur">Longueur de référence (mots)</label><input class="saisie" id="projLongueur" type="number" min="1"></div>
+                  <div class="champ"><label for="projTolere">Erreurs tolérées sur cette longueur</label><input class="saisie" id="projTolere" type="number" min="1"></div>
+                  <div class="champ"><label for="projService">Nom du service d’aide</label><input class="saisie" id="projService"></div>
+                </div>
+                <p class="formule" id="projSeuil"></p>
+                <div class="paliers" id="paliers"></div>
+              </div>
+              <p class="petit" id="projAucune" hidden>Aucune projection ne sera proposée à l’élève pour ce critère.</p>
+            </div>
+          </section>
+
+          <section class="etape" id="etape-eleve" data-etape="eleve">
+            <h3><button type="button" class="etape-tete" aria-expanded="false" aria-controls="corps-eleve">
+              <span class="etape-noeud" aria-hidden="true">&#10003;</span>
+              <span class="etape-titres"><span class="etape-titre">Ce que l’élève lit</span><span class="etape-resume" data-resume="eleve"></span></span>
+              <svg class="ic etape-chevron" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </button></h3>
+            <div class="etape-corps" id="corps-eleve" hidden>
+              <p class="etape-but">Les phrases que l’app écrit à ta place pour chaque copie. Le verdict de chaque palier s’écrit dans l’étape Paliers.</p>
+              <div class="champ"><label for="modeleEnonces">Modèle des phrases</label>
+                <select class="saisie" id="modeleEnonces"><option value="generique">Générique (nom du critère)</option><option value="francais">Français écrit</option></select>
+                <small class="petit" id="modeleNote" hidden>Les trois textes et « Aucune annotation » ont repris ceux du modèle.</small></div>
+              <div class="zone-bloc">
+                <div class="zone-etiquette">
+                  <svg class="ic" aria-hidden="true"><use href="#i-crayon"/></svg>
+                  <span class="zone-nom" id="lbl-decompte">Décompte</span>
+                  <span class="zone-public eleve">L’élève le lit</span>
+                  <button type="button" class="zone-modele" data-modele="decompte">Revenir au modèle</button>
+                </div>
+                <div class="zone" contenteditable="true" role="textbox" aria-labelledby="lbl-decompte" data-zone="decompte" id="zone-decompte" data-vide="Vide : l’élève ne lit aucun décompte."></div>
+                <small class="zone-aide">Sous le critère, et repris dans le PDF de l’élève.</small>
+              </div>
+              <div class="zone-bloc">
+                <div class="zone-etiquette">
+                  <svg class="ic" aria-hidden="true"><use href="#i-crayon"/></svg>
+                  <span class="zone-nom" id="lbl-priorite">Défi prioritaire</span>
+                  <span class="zone-public eleve">L’élève le lit</span>
+                  <button type="button" class="zone-modele" data-modele="priorite">Revenir au modèle</button>
+                </div>
+                <div class="zone" contenteditable="true" role="textbox" aria-labelledby="lbl-priorite" data-zone="priorite" id="zone-priorite" data-vide="Vide : rien n’est mis en tête du bilan."></div>
+                <small class="zone-aide">En tête du bilan, quand ce critère est effondré.</small>
+              </div>
+              <div class="zone-bloc">
+                <div class="zone-etiquette">
+                  <svg class="ic" aria-hidden="true"><use href="#i-crayon"/></svg>
+                  <span class="zone-nom" id="lbl-concentre">Quand tout est maîtrisé</span>
+                  <span class="zone-public eleve">L’élève le lit</span>
+                  <button type="button" class="zone-modele" data-modele="concentre">Revenir au modèle</button>
+                </div>
+                <div class="zone" contenteditable="true" role="textbox" aria-labelledby="lbl-concentre" data-zone="concentre" id="zone-concentre" data-vide="Vide : rien n’est suggéré."></div>
+                <small class="zone-aide">Ce qui reste à travailler lorsque tous les critères sont acquis.</small>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <aside class="apercu" id="apercu" aria-label="Ce que l’élève lira">
+        <div class="apercu-tete">
+          <h2>Ce que l’élève lira</h2>
+          <button type="button" class="btn-discret apercu-reduire" id="apercuReduire" aria-expanded="true">Réduire</button>
+        </div>
+        <div class="copie apercu-detail">
+          <span class="copie-titre">Copie fictive</span>
+          <div class="copie-ligne">
+            <button type="button" class="pas" id="eMoins" aria-label="Une de moins">−</button>
+            <label class="sr" for="copieE">Nombre compté</label>
+            <input class="saisie" id="copieE" type="number" min="0" step="1">
+            <button type="button" class="pas" id="ePlus" aria-label="Une de plus">+</button>
+            <span id="copieNomE">erreurs</span>
+            <span>pour</span>
+            <label class="sr" for="copieM">Longueur</label>
+            <input class="saisie" id="copieM" type="number" min="0" step="10">
+            <span id="copieNomM">mots</span>
+          </div>
+          <label class="sr" for="copieCurseur">Glisser pour changer le compte</label>
+          <input type="range" id="copieCurseur" min="0" max="60" step="1">
+          <span class="copie-codes" id="copieCodes"></span>
+        </div>
+        <div class="resultats" id="resultats"></div>
+        <div class="lecture">
+          <h3>Sous le critère, dans son PDF</h3>
+          <p class="texte-eleve" id="lecturePdf"></p>
+        </div>
+        <div class="lecture apercu-detail">
+          <h3>Dans son bilan</h3>
+          <div class="condition"><span class="condition-si">Si ce critère est effondré, en tête :</span><p class="texte-eleve" id="lecturePriorite"></p></div>
+          <div class="condition"><span class="condition-si">Si tous ses critères sont acquis :</span><p class="texte-eleve" id="lectureConcentre"></p></div>
+        </div>
+        <div class="lecture apercu-detail">
+          <h3>Pour toi seul·e</h3>
+          <div class="condition"><span class="condition-si">Si la copie ne porte aucun code :</span><p class="texte-eleve" id="lectureAucune"></p></div>
+        </div>
+        <label class="bascule apercu-detail"><input type="checkbox" id="basculeSources" checked> Montrer d’où vient chaque phrase</label>
+        <p class="apercu-astuce apercu-detail">Clique une phrase : la zone qui l’écrit s’ouvre.</p>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Données de départ (celles de l'app, sans aucune donnée d'élève) ---------- */
+var SOUS_CRITERES = [
+  ['1', 'Construction syntaxique ou accord du verbe', '#c0392b'],
+  ['2', 'Subordonnées employées seules', '#d35400'],
+  ['3', 'Ponctuation', '#b7950b'],
+  ['4', 'Groupe du nom', '#27ae60'],
+  ['5', 'Accord du pronom ou le lien avec son antécédent', '#16a085'],
+  ['6', 'Accord du participe passé', '#2980b9'],
+  ['7', 'Mots invariables', '#8e44ad'],
+  ['8', 'Déterminant', '#c2185b'],
+  ['9', 'Vocabulaire', '#6d4c41'],
+  ['10', 'Orthographe d\'usage ou éléments de typographie', '#546e7a']
+];
+var ENONCES = {
+  generique: {
+    decompte: 'Ta production contient {erreurs} {nomErreurs}{points} pour {mots} {nomMots}.',
+    priorite: '{critere} est à travailler en priorité',
+    concentre: 'Concentre-toi sur {critere}',
+    aucune: 'Aucun tampon ni {nomErreurs} annotés.'
+  },
+  francais: {
+    decompte: 'Ta rédaction contient {erreurs} erreur{s} de français{points} pour {mots} mots.',
+    priorite: 'la qualité du français écrit est à travailler en priorité',
+    concentre: 'Concentre-toi sur la qualité du français',
+    aucune: 'Aucun tampon ni erreur de français annotés.'
+  }
+};
+var PALIERS = [
+  { cle: 'sans_erreur', libelle: 'Sans erreur', sansErreur: true, ratioMax: null,
+    texte: 'En prévision de l\'épreuve uniforme, l\'absence d\'erreur est exceptionnelle.', aide: '' },
+  { cle: 'excellent', libelle: 'Excellent', ratioMax: 0.3, texte: 'En prévision de l\'épreuve uniforme, ce ratio est excellent.', aide: '' },
+  { cle: 'tres_bien', libelle: 'Très bien', ratioMax: 0.4, texte: 'En prévision de l\'épreuve uniforme, ce ratio est très bien.', aide: '' },
+  { cle: 'bien', libelle: 'Bien', ratioMax: 0.5, texte: 'En prévision de l\'épreuve uniforme, ce ratio est bien.', aide: '' },
+  { cle: 'risque', libelle: 'Risqué', ratioMax: 1, texte: 'En prévision de l\'épreuve uniforme, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.',
+    aide: 'Il est recommandé de t\'inscrire au {service}.' },
+  { cle: 'echec', libelle: 'Échec', ratioMax: null, texte: 'En prévision de l\'épreuve uniforme, ce ratio mènerait à un échec automatique.',
+    aide: 'Il est fortement recommandé de t\'inscrire au {service}.' }
+];
+var FORMULES = {
+  penalite_normalisee: { court: 'pénalité normalisée', param: 'Facteur de normalisation (nombre de mots)', defaut: 500,
+    desc: 'La pénalité est proportionnelle au taux d’erreurs, ramené à une longueur de référence.' },
+  ratio_cible: { court: 'ratio visé', param: 'Ratio visé (mots par erreur pour la note complète)', defaut: 60,
+    desc: 'La note est le rapport entre le ratio atteint (mots par erreur) et un ratio visé. Atteindre le ratio visé donne la pondération complète.' },
+  penalite_par_erreur: { court: 'pénalité fixe', param: 'Points retirés par erreur', defaut: 1,
+    desc: 'Chaque erreur retire un nombre fixe de points, sans égard à la longueur du texte. Le nombre de mots reste saisi pour la rétroaction.' }
+};
+
+var S;
+function etatDeDepart() {
+  return {
+    nom: 'Français écrit', pond: 20,
+    noms: { e1: 'erreur', e2: 'erreurs', m1: 'mot', m2: 'mots' },
+    codesActifs: true,
+    sc: SOUS_CRITERES.map(function (x) { return { code: x[0], nom: x[1], couleur: x[2], poids: 1 }; }),
+    formule: { modele: 'penalite_normalisee', params: { penalite_normalisee: 500, ratio_cible: 60, penalite_par_erreur: 1 } },
+    proj: { modele: 'norme_externe', longueur: 900, tolere: 30, service: 'Centre d\'aide du collège' },
+    paliers: PALIERS.map(function (p) { return Object.assign({}, p); }),
+    modeleEnonces: 'generique',
+    textes: Object.assign({}, ENONCES.generique),
+    copie: { erreurs: 12, mots: 600 },
+    ouverte: 'eleve',
+    paliersOuverts: {}
+  };
+}
+
+/* ---------- Les blocs ---------- */
+var JETONS = {
+  critere:    { famille: 'posee', nom: function () { return 'Nom du critère'; }, aide: 'Le nom de ce critère, tel qu’il est écrit dans la grille.' },
+  nomErreurs: { famille: 'posee', nom: function () { return '« ' + S.noms.e2 + ' »'; }, aide: 'Le nom de ce que tu comptes : au singulier sous 2, au pluriel à partir de 2.' },
+  nomMots:    { famille: 'posee', nom: function () { return '« ' + S.noms.m2 + ' »'; }, aide: 'Le nom de ce à quoi tu rapportes le compte : au singulier sous 2, au pluriel à partir de 2.' },
+  service:    { famille: 'posee', nom: function () { return 'Nom du service'; }, aide: 'Le nom du service d’aide réglé dans les paliers. Vide : la recommandation disparaît.' },
+  seuil:      { famille: 'posee', nom: function () { return 'Erreurs tolérées'; }, aide: 'Le nombre d’erreurs tolérées sur la longueur de référence (30 pour l’EUF).' },
+  longueur:   { famille: 'posee', nom: function () { return 'Longueur de référence'; }, aide: 'La longueur de référence de l’épreuve, en mots (900 pour l’EUF).' },
+  erreurs:    { famille: 'remplie', nom: function () { return 'Compte des ' + S.noms.e2; }, aide: 'Le nombre compté sur la copie, à la correction : les codes posés dans Annoter, ou le nombre tapé.' },
+  mots:       { famille: 'remplie', nom: function () { return 'Compte des ' + S.noms.m2; }, aide: 'Le nombre saisi à la correction, copie par copie.' },
+  points:     { famille: 'remplie', espaceDeTete: true, nom: function () { return 'Somme pondérée'; }, aide: 'Entre parenthèses, le compte après pondération. Il ne paraît que si un code ne pèse pas 1. Place-le juste après le compte.' },
+  moyenne:    { famille: 'remplie', nom: function () { return 'Mots par erreur'; }, aide: 'En moyenne, 1 erreur à chaque N mots : c’est ce N. Vide sur une copie sans erreur.' },
+  projection: { famille: 'remplie', nom: function () { return 'Erreurs projetées'; }, aide: 'Le nombre d’erreurs que la copie ferait sur la longueur de référence, au même rythme.' },
+  palier:     { famille: 'remplie', nom: function () { return 'Palier atteint'; }, aide: 'Le nom du palier que la copie atteint.' }
+};
+var ORDRE = { posee: ['critere', 'nomErreurs', 'nomMots', 'service', 'seuil', 'longueur'], remplie: ['erreurs', 'mots', 'points', 'moyenne', 'projection', 'palier'] };
+var OFFRE = {
+  decompte: ['critere', 'erreurs', 'nomErreurs', 'mots', 'nomMots', 'points'],
+  priorite: ['critere'], concentre: ['critere'], aucune: ['critere', 'nomErreurs'],
+  palier: ['service', 'seuil', 'longueur', 'erreurs', 'mots', 'moyenne', 'projection', 'palier']
+};
+var ETAPE_DE_ZONE = { decompte: 'eleve', priorite: 'eleve', concentre: 'eleve', aucune: 'codes', palier: 'paliers' };
+
+/* ---------- Outils ---------- */
+var nf = new Intl.NumberFormat('fr-CA', { maximumFractionDigits: 2 });
+function fmt(n) { return nf.format(n); }
+function $(id) { return document.getElementById(id); }
+function accorder(n, sing, plur) { var x = Number(n); return (n !== null && n !== undefined && n !== '' && isFinite(x) && Math.abs(x) >= 2) ? plur : sing; }
+function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; }
+var reduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+/* ---------- Le calcul (celui du moteur, recopié pour la maquette) ---------- */
+function calculer() {
+  var e = Math.max(0, Math.round(Number(S.copie.erreurs) || 0));
+  var m = Math.max(0, Number(S.copie.mots) || 0);
+  var dist = [];
+  if (S.codesActifs && e > 0) {
+    var c1 = Math.ceil(e * 0.4), reste = e - c1, c3 = Math.ceil(reste / 2), c10 = reste - c3;
+    [[0, c1], [2, c3], [9, c10]].forEach(function (d) { if (d[1] > 0 && S.sc[d[0]]) dist.push({ sc: S.sc[d[0]], n: d[1] }); });
+  }
+  var pondere = S.codesActifs ? dist.reduce(function (s, d) { return s + d.n * (Number(d.sc.poids) || 0); }, 0) : e;
+  var points = (S.codesActifs && pondere !== e) ? ' (' + fmt(pondere) + ' après pondération)' : '';
+
+  // La note
+  var pond = Number(S.pond) || 0, mod = S.formule.modele, par = Number(S.formule.params[mod]) || 0;
+  var note = null, calcul = '', impossible = '';
+  if (pond <= 0) impossible = 'Donne une pondération au critère : la note se calculera.';
+  else if (mod === 'penalite_normalisee') {
+    if (m <= 0) impossible = 'Aucune note : la formule a besoin du champ « ' + S.noms.m2 + ' ».';
+    else { note = pond - (pondere / m * par); calcul = 'Note = ' + fmt(pond) + ' − (' + fmt(pondere) + ' ÷ ' + fmt(m) + ' × ' + fmt(par) + ')'; }
+  } else if (mod === 'ratio_cible') {
+    if (m <= 0) impossible = 'Aucune note : la formule a besoin du champ « ' + S.noms.m2 + ' ».';
+    else if (pondere === 0) { note = pond; calcul = 'Note = ' + fmt(pond) + ' (aucune erreur)'; }
+    else { note = pond * Math.min(1, (m / pondere) / par); calcul = 'Note = ' + fmt(pond) + ' × min(1 ; ' + fmt(m / pondere) + ' ÷ ' + fmt(par) + ')'; }
+  } else {
+    note = pond - pondere * par; calcul = 'Note = ' + fmt(pond) + ' − (' + fmt(pondere) + ' × ' + fmt(par) + ')';
+  }
+  var plancher = false;
+  if (note !== null) {
+    if (note <= 0) { note = 0; plancher = true; }
+    if (note > pond) note = pond;
+    note = Math.round(note * 100) / 100;
+  }
+
+  // La projection
+  var proj = { active: S.proj.modele === 'norme_externe', applicable: false };
+  if (proj.active) {
+    var L = Number(S.proj.longueur) || 0, T = Number(S.proj.tolere) || 0;
+    proj.seuil = (L > 0 && T > 0) ? L / T : null;
+    if (m > 0 && proj.seuil) {
+      var palier = null;
+      if (e === 0) palier = S.paliers.filter(function (p) { return p.sansErreur; })[0];
+      else {
+        var ratio = proj.seuil * e / m;
+        var ech = S.paliers.filter(function (p) { return !p.sansErreur; });
+        for (var i = 0; i < ech.length; i++) if (ech[i].ratioMax !== null && ratio <= ech[i].ratioMax) { palier = ech[i]; break; }
+        if (!palier) palier = ech[ech.length - 1];
+        proj.moyenne = Math.round(m / e);
+      }
+      proj.applicable = !!palier;
+      proj.palier = palier;
+      proj.projection = Math.round(L * e / m);
+    }
+  }
+
+  return { e: e, m: m, dist: dist, pondere: pondere, points: points, note: note, calcul: calcul, impossible: impossible, plancher: plancher, proj: proj };
+}
+
+/** La valeur d'un bloc pour la copie fictive. */
+function valeurs(C) {
+  return {
+    critere: (S.nom || '').trim() || 'ce critère',
+    nomErreurs: accorder(C.e, S.noms.e1, S.noms.e2),
+    nomMots: accorder(C.m, S.noms.m1, S.noms.m2),
+    service: (S.proj.service || '').trim(),
+    seuil: fmt(Number(S.proj.tolere) || 0),
+    longueur: fmt(Number(S.proj.longueur) || 0),
+    erreurs: fmt(C.e), mots: fmt(C.m),
+    points: C.points,
+    moyenne: (C.proj.moyenne !== undefined && C.e > 0) ? String(C.proj.moyenne) : '',
+    projection: C.proj.applicable ? String(C.proj.projection) : '',
+    palier: C.proj.applicable ? C.proj.palier.libelle : '',
+    s: C.e >= 2 ? 's' : ''
+  };
+}
+function remplir(texte, v, offre, sansNom) {
+  return String(texte || '').replace(/\{(\w+)\}/g, function (tout, j) {
+    if (j === 's') return v.s;
+    if (j === 'nomErreurs' && sansNom) return S.noms.e1;   // sans compte : le singulier, comme le moteur
+    if (offre.indexOf(j) === -1) return tout;
+    return v[j];
+  }).replace(/\s{2,}/g, ' ').replace(/\s+([.,])/g, '$1').trim();
+}
+function porteJeton(texte) { return /\{(service|seuil|longueur|erreurs|mots|moyenne|projection|palier)\}/.test(texte || ''); }
+
+/* ---------- Les zones : texte troué ---------- */
+function puce(j) {
+  var connu = JETONS[j];
+  var s = el('span', 'chip chip--' + (j === 's' ? 'accord' : connu.famille));
+  s.contentEditable = 'false';
+  s.dataset.jeton = j;
+  s.appendChild(el('span', 'chip-nom', j === 's' ? 's' : connu.nom()));
+  if (j === 's') s.title = 'Accord : « s » à partir de 2. Ce bloc n’est pas dans la palette.';
+  else {
+    s.title = connu.aide;
+    var x = el('button', 'chip-x', '×');
+    x.type = 'button'; x.tabIndex = -1; x.setAttribute('aria-label', 'Retirer ' + connu.nom());
+    s.appendChild(x);
+  }
+  return s;
+}
+function versZone(z, texte) {
+  z.textContent = '';
+  var re = /\{(\w+)\}/g, i = 0, m;
+  texte = texte || '';
+  while ((m = re.exec(texte))) {
+    if (m.index > i) z.appendChild(document.createTextNode(texte.slice(i, m.index)));
+    if (JETONS[m[1]] || m[1] === 's') z.appendChild(puce(m[1])); else z.appendChild(document.createTextNode(m[0]));
+    i = re.lastIndex;
+  }
+  if (i < texte.length) z.appendChild(document.createTextNode(texte.slice(i)));
+  marquerHors(z);
+}
+function depuisZone(z) {
+  var out = '';
+  (function parcourir(n) {
+    n.childNodes.forEach(function (c) {
+      if (c.nodeType === 3) out += c.nodeValue;
+      else if (c.dataset && c.dataset.jeton) out += '{' + c.dataset.jeton + '}';
+      else if (c.nodeName === 'BR') out += ' ';
+      else if (c.nodeType === 1) parcourir(c);
+    });
+  })(z);
+  return out.replace(/ /g, ' ').replace(/​/g, '');
+}
+function offreDe(z) { return z.dataset.palier ? OFFRE.palier : OFFRE[z.dataset.zone]; }
+function cleDe(z) { return z.dataset.palier ? 'p:' + z.dataset.palier + ':' + z.dataset.champ : z.dataset.zone; }
+function nomDe(z) {
+  if (z.dataset.palier) {
+    var p = S.paliers.filter(function (x) { return x.cle === z.dataset.palier; })[0];
+    return (z.dataset.champ === 'texte' ? 'Verdict' : 'Recommandation') + ', palier ' + (p ? p.libelle : '');
+  }
+  return { decompte: 'Décompte', priorite: 'Défi prioritaire', concentre: 'Quand tout est maîtrisé', aucune: 'Aucune annotation' }[z.dataset.zone];
+}
+function etapeDe(z) { return ETAPE_DE_ZONE[z.dataset.palier ? 'palier' : z.dataset.zone]; }
+function marquerHors(z) {
+  var o = offreDe(z);
+  z.querySelectorAll('.chip[data-jeton]').forEach(function (c) {
+    var j = c.dataset.jeton;
+    c.classList.toggle('chip--hors', j !== 's' && o.indexOf(j) === -1);
+  });
+}
+function lireZone(z) {
+  var t = depuisZone(z);
+  if (z.dataset.palier) {
+    var p = S.paliers.filter(function (x) { return x.cle === z.dataset.palier; })[0];
+    if (p) p[z.dataset.champ === 'texte' ? 'texte' : 'aide'] = t;
+  } else S.textes[z.dataset.zone] = t;
+}
+function zoneDeCle(cle) {
+  var zs = document.querySelectorAll('.zone');
+  for (var i = 0; i < zs.length; i++) if (cleDe(zs[i]) === cle) return zs[i];
+  return null;
+}
+
+/* ---------- La cible et la pose ---------- */
+var cible = null, plage = null;
+function choisirCible(z) {
+  if (cible === z) return;
+  if (cible) cible.classList.remove('est-cible');
+  cible = z;
+  if (z) z.classList.add('est-cible');
+  majPalette();
+  majSegmentsCible();
+}
+document.addEventListener('selectionchange', function () {
+  var sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return;
+  var r = sel.getRangeAt(0);
+  var n = r.startContainer.nodeType === 1 ? r.startContainer : r.startContainer.parentElement;
+  var z = n && n.closest ? n.closest('.zone') : null;
+  if (z) { plage = r.cloneRange(); choisirCible(z); }
+});
+
+function dernierCar(n) {
+  while (n) {
+    if (n.nodeType === 3) { var t = n.nodeValue.replace(/​/g, ''); if (t) return t.slice(-1); }
+    else if (n.dataset && n.dataset.jeton) return 'x';
+    n = n.previousSibling;
+  }
+  return '';
+}
+function carAvant(r) {
+  var c = r.startContainer, o = r.startOffset;
+  if (c.nodeType === 3) {
+    var t = c.nodeValue.slice(0, o).replace(/​/g, '');
+    return t ? t.slice(-1) : dernierCar(c.previousSibling);
+  }
+  return dernierCar(c.childNodes[o - 1] || null);
+}
+function premierCar(n) {
+  while (n) {
+    if (n.nodeType === 3) { var t = n.nodeValue.replace(/\u200b/g, ''); if (t) return t.charAt(0); }
+    else if (n.dataset && n.dataset.jeton) return 'x';
+    n = n.nextSibling;
+  }
+  return '';
+}
+function carApres(r) {
+  var c = r.endContainer, o = r.endOffset;
+  if (c.nodeType === 3) {
+    var t = c.nodeValue.slice(o).replace(/\u200b/g, '');
+    return t ? t.charAt(0) : premierCar(c.nextSibling);
+  }
+  return premierCar(c.childNodes[o] || null);
+}
+
+function poser(j) {
+  var cp = $('paletteCible');
+  if (!cible || !document.body.contains(cible) || cible.offsetParent === null) {
+    choisirCible(null);
+    cp.innerHTML = '';
+    cp.append('Choisis d’abord une zone violette. ');
+    var b = el('strong', '', JETONS[j].nom()); cp.append(b, ' se pose dans : ' + ouSePose(j) + '.');
+    secouer(cp); allumer(j);
+    return;
+  }
+  if (offreDe(cible).indexOf(j) === -1) {
+    cp.innerHTML = '';
+    cp.append(el('strong', '', nomDe(cible)), ' ne remplit pas ce bloc. Il se pose dans : ' + ouSePose(j) + '.');
+    secouer(cp); allumer(j);
+    return;
+  }
+  cible.focus({ preventScroll: true });
+  var r = (plage && cible.contains(plage.startContainer)) ? plage : null;
+  if (!r) { r = document.createRange(); r.selectNodeContents(cible); r.collapse(false); }
+  r.deleteContents();
+  var avant = carAvant(r), apres = carApres(r);
+  var frag = document.createDocumentFragment();
+  if (!JETONS[j].espaceDeTete && avant && !/[\s(«'’]/.test(avant)) frag.appendChild(document.createTextNode(' '));
+  var p = puce(j);
+  frag.appendChild(p);
+  var suite = document.createTextNode(apres && /[\wÀ-ÿ]/.test(apres) ? ' ' : '​');
+  frag.appendChild(suite);
+  r.insertNode(frag);
+  var sel = window.getSelection();
+  var nr = document.createRange(); nr.setStartAfter(suite); nr.collapse(true);
+  sel.removeAllRanges(); sel.addRange(nr);
+  plage = nr.cloneRange();
+  marquerHors(cible);
+  lireZone(cible);
+  maj();
+}
+function ouSePose(j) {
+  var lieux = [];
+  if (OFFRE.decompte.indexOf(j) > -1) lieux.push('Décompte');
+  if (OFFRE.priorite.indexOf(j) > -1) lieux.push('Défi prioritaire', 'Quand tout est maîtrisé');
+  if (OFFRE.aucune.indexOf(j) > -1) lieux.push('Aucune annotation');
+  if (OFFRE.palier.indexOf(j) > -1 && S.proj.modele === 'norme_externe') lieux.push('Verdict et Recommandation des paliers');
+  return lieux.length ? lieux.join(', ') : 'aucune zone de ce critère';
+}
+function etapesDe(j) {
+  var e = [];
+  if (OFFRE.aucune.indexOf(j) > -1) e.push('codes');
+  if (OFFRE.palier.indexOf(j) > -1 && S.proj.modele === 'norme_externe') e.push('paliers');
+  if (OFFRE.decompte.indexOf(j) > -1 || OFFRE.priorite.indexOf(j) > -1) e.push('eleve');
+  return e;
+}
+function montrer(j, oui) {
+  document.querySelectorAll('.zone').forEach(function (z) { z.classList.toggle('peut', oui && z.offsetParent !== null && offreDe(z).indexOf(j) > -1); });
+  var ets = oui ? etapesDe(j) : [];
+  document.querySelectorAll('.bc-etape').forEach(function (b) { b.classList.toggle('bc-montre', ets.indexOf(b.dataset.etape) > -1); });
+}
+var minuterie = null;
+function allumer(j) {
+  document.querySelectorAll('.zone').forEach(function (z) {
+    z.classList.remove('allume');
+    if (z.offsetParent !== null && offreDe(z).indexOf(j) > -1) { void z.offsetWidth; z.classList.add('allume'); }
+  });
+  montrer(j, true);
+  clearTimeout(minuterie);
+  minuterie = setTimeout(function () { montrer(j, false); }, 2200);
+}
+function secouer(n) { n.classList.remove('secoue'); void n.offsetWidth; n.classList.add('secoue'); }
+
+/* ---------- La palette ---------- */
+function construirePalette() {
+  ['posee', 'remplie'].forEach(function (f) {
+    var g = $(f === 'posee' ? 'groupePosee' : 'groupeRemplie');
+    g.textContent = '';
+    ORDRE[f].forEach(function (j) {
+      var b = el('button', 'bloc bloc--' + f);
+      b.type = 'button'; b.dataset.jeton = j;
+      b.appendChild(el('span', 'bloc-nom'));
+      b.appendChild(el('span', 'bloc-valeur'));
+      b.addEventListener('pointerdown', function (ev) { ev.preventDefault(); });
+      b.addEventListener('click', function () { poser(j); });
+      b.addEventListener('pointerenter', function () { if (!b.matches('[aria-disabled="true"]')) montrer(j, true); });
+      b.addEventListener('pointerleave', function () { montrer(j, false); });
+      b.addEventListener('focus', function () { montrer(j, true); });
+      b.addEventListener('blur', function () { montrer(j, false); });
+      g.appendChild(b);
+    });
+  });
+}
+function majPalette(C, v) {
+  C = C || calculer(); v = v || valeurs(C);
+  var pal = $('palette'), cp = $('paletteCible');
+  var o = cible ? offreDe(cible) : null;
+  if (cible) { pal.dataset.cible = ''; cp.innerHTML = ''; cp.append('Tu écris dans : ', el('strong', '', '« ' + nomDe(cible) + ' »')); } // security-ok: innerHTML vidé, le nom est posé par append (textContent)
+  else { delete pal.dataset.cible; cp.textContent = 'Aucune zone choisie.'; }
+  pal.querySelectorAll('.bloc').forEach(function (b) {
+    var j = b.dataset.jeton, J = JETONS[j];
+    b.querySelector('.bloc-nom').textContent = J.nom();
+    var val = v[j], vide = !val;
+    if (j === 'points' && vide) val = 'vide : tous les codes pèsent 1';
+    else if (j === 'moyenne' && vide) val = 'vide : aucune erreur';
+    else if (j === 'service' && vide) val = 'vide : aucune recommandation';
+    else if ((j === 'projection' || j === 'palier') && vide) val = 'vide : aucune projection';
+    else if (j === 'points') val = val.trim();
+    var bv = b.querySelector('.bloc-valeur');
+    bv.textContent = val; bv.classList.toggle('vide', vide);
+    var hors = !!(o && o.indexOf(j) === -1);
+    if (hors) b.setAttribute('aria-disabled', 'true'); else b.removeAttribute('aria-disabled');
+    b.title = J.aide + (hors ? ' Cette zone ne le remplit pas.' : '') + ' Se pose dans : ' + ouSePose(j) + '.';
+  });
+}
+
+/* ---------- La chaîne et les étapes ---------- */
+var ETAPES = [
+  { id: 'compte', label: 'Ce que tu comptes' },
+  { id: 'codes', label: 'Codes' },
+  { id: 'note', label: 'Note' },
+  { id: 'paliers', label: 'Paliers' },
+  { id: 'eleve', label: 'Ce que l’élève lit', destination: true }
+];
+function construireChaine() {
+  var nav = $('chaine');
+  ETAPES.forEach(function (et, i) {
+    if (i > 0) { var l = el('span', 'bc-liaison' + (et.destination ? ' bc-liaison-finale' : '')); l.setAttribute('aria-hidden', 'true'); nav.appendChild(l); }
+    var b = el('button', 'bc-etape' + (et.destination ? ' bc-destination' : ''));
+    b.type = 'button'; b.dataset.etape = et.id;
+    var n = el('span', 'bc-noeud'); n.appendChild(el('span', 'bc-check', '✓')); b.appendChild(n);
+    var cr = el('span', 'bc-crayon'); cr.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-crayon"/></svg>'; b.appendChild(cr);
+    b.appendChild(el('span', 'bc-label', et.label));
+    b.appendChild(el('span', 'bc-info'));
+    b.addEventListener('click', function () { ouvrir(et.id, true); });
+    nav.appendChild(b);
+  });
+}
+function etatsEtapes(C) {
+  var n = S.noms, nbTextes = ['decompte', 'priorite', 'concentre'].filter(function (k) { return (S.textes[k] || '').trim(); }).length;
+  return {
+    compte: { ok: !!(n.e1.trim() && n.e2.trim() && n.m1.trim() && n.m2.trim()), info: n.e2 + ' / ' + n.m2,
+      resume: '« ' + n.e2 + ' », rapportées aux « ' + n.m2 + ' »' },
+    codes: { ok: !S.codesActifs || S.sc.length > 0, info: S.codesActifs ? S.sc.length + ' codes' : 'palette générale',
+      resume: S.codesActifs ? S.sc.length + ' sous-critères servent de codes' : 'La palette générale d’Annoter' },
+    note: { ok: (Number(S.pond) > 0) && (Number(S.formule.params[S.formule.modele]) > 0), info: FORMULES[S.formule.modele].court,
+      resume: 'Formule : ' + FORMULES[S.formule.modele].court + ', sur ' + fmt(Number(S.pond) || 0) },
+    paliers: { ok: S.proj.modele === 'aucune' || (Number(S.proj.longueur) > 0 && Number(S.proj.tolere) > 0),
+      info: S.proj.modele === 'aucune' ? 'aucun' : S.paliers.length + ' paliers',
+      resume: S.proj.modele === 'aucune' ? 'Aucune projection' : 'Projection à l’EUF, ' + S.paliers.length + ' paliers' },
+    eleve: { ok: nbTextes > 0, info: nbTextes + (nbTextes > 1 ? ' textes' : ' texte'),
+      resume: 'Décompte et bilan : ' + nbTextes + (nbTextes > 1 ? ' textes' : ' texte') }
+  };
+}
+function majChaine(C) {
+  var E = etatsEtapes(C);
+  var boutons = document.querySelectorAll('.bc-etape'), liaisons = document.querySelectorAll('.bc-liaison');
+  boutons.forEach(function (b, i) {
+    var e = E[b.dataset.etape];
+    b.classList.toggle('bc-complet', e.ok);
+    b.classList.toggle('bc-ouvert', S.ouverte === b.dataset.etape);
+    b.querySelector('.bc-info').textContent = e.info;
+    b.setAttribute('aria-label', ETAPES[i].label + ' : ' + e.info + (e.ok ? ', réglé' : ', à régler') + '. Ouvrir.');
+    if (i > 0) liaisons[i - 1].classList.toggle('ok', E[ETAPES[i - 1].id].ok && e.ok);
+  });
+  document.querySelectorAll('.etape').forEach(function (s) {
+    var e = E[s.dataset.etape];
+    s.classList.toggle('complete', e.ok);
+    s.querySelector('[data-resume]').textContent = e.resume;
+  });
+}
+function ouvrir(id, defiler) {
+  S.ouverte = id;
+  document.querySelectorAll('.etape').forEach(function (s) {
+    var o = s.dataset.etape === id;
+    if (o) s.dataset.ouverte = ''; else delete s.dataset.ouverte;
+    s.querySelector('.etape-tete').setAttribute('aria-expanded', String(o));
+    s.querySelector('.etape-corps').hidden = !o;
+  });
+  if (cible && cible.offsetParent === null) choisirCible(null);
+  majChaine();
+  if (defiler && id) {
+    var s = $('etape-' + id);
+    var haut = s.getBoundingClientRect().top;
+    if (haut < 0 || haut > window.innerHeight * 0.5) s.scrollIntoView({ behavior: reduit.matches ? 'auto' : 'smooth', block: 'start' });
+  }
+}
+document.querySelectorAll('.etape-tete').forEach(function (t) {
+  t.addEventListener('click', function () {
+    var id = t.closest('.etape').dataset.etape;
+    ouvrir(S.ouverte === id ? null : id, false);
+  });
+});
+
+/* ---------- Codes ---------- */
+function construireCodes() {
+  var liste = $('listeCodes');
+  liste.querySelectorAll('.code-rangee:not(.code-tete)').forEach(function (r) { r.remove(); });
+  S.sc.forEach(function (sc, i) {
+    var r = el('div', 'code-rangee');
+    var c = el('input', 'saisie code'); c.value = sc.code; c.setAttribute('aria-label', 'Code ' + (i + 1));
+    c.addEventListener('input', function () { sc.code = c.value; maj(); });
+    var n = el('input', 'saisie'); n.value = sc.nom; n.setAttribute('aria-label', 'Nom du code ' + sc.code);
+    n.addEventListener('input', function () { sc.nom = n.value; });
+    var p = el('input', 'saisie'); p.type = 'number'; p.min = '0'; p.step = '0.5'; p.value = sc.poids; p.setAttribute('aria-label', 'Poids du code ' + sc.code);
+    p.addEventListener('input', function () { sc.poids = p.value; maj(); });
+    var d = el('span', 'pastille'); d.style.background = sc.couleur; d.setAttribute('aria-hidden', 'true');
+    r.append(c, n, p, d);
+    liste.appendChild(r);
+  });
+}
+
+/* ---------- Paliers ---------- */
+function construirePaliers() {
+  var box = $('paliers');
+  box.textContent = '';
+  S.paliers.forEach(function (p) {
+    var d = el('div', 'palier'); d.dataset.palier = p.cle;
+    var t = el('button', 'palier-tete'); t.type = 'button'; t.setAttribute('aria-expanded', 'false');
+    t.append(el('span', 'palier-nom', p.libelle), el('span', 'palier-extrait'), el('span', 'palier-ici', 'copie fictive'), el('span', 'palier-seuil'));
+    var corps = el('div', 'palier-corps'); corps.hidden = true; corps.id = 'corps-' + p.cle;
+    t.setAttribute('aria-controls', corps.id);
+    [['texte', 'Verdict', 'Ce que l’élève lit à ce palier.'], ['aide', 'Recommandation', 'Jointe seulement si un service d’aide est nommé.']].forEach(function (ch) {
+      var zb = el('div', 'zone-bloc');
+      var et = el('div', 'zone-etiquette');
+      et.innerHTML = '<svg class="ic" aria-hidden="true"><use href="#i-crayon"/></svg>';
+      var lid = 'lbl-' + p.cle + '-' + ch[0];
+      var nm = el('span', 'zone-nom', ch[1]); nm.id = lid;
+      et.append(nm, el('span', 'zone-public eleve', 'L’élève le lit'));
+      var z = el('div', 'zone'); z.contentEditable = 'true'; z.setAttribute('role', 'textbox'); z.setAttribute('aria-labelledby', lid);
+      z.dataset.zone = 'palier'; z.dataset.palier = p.cle; z.dataset.champ = ch[0]; z.id = 'zone-' + p.cle + '-' + ch[0];
+      z.dataset.vide = ch[0] === 'texte' ? 'Vide : ce palier ne dit rien.' : 'Vide : aucune recommandation.';
+      zb.append(et, z, el('small', 'zone-aide', ch[2]));
+      corps.appendChild(zb);
+      versZone(z, ch[0] === 'texte' ? p.texte : p.aide);
+      brancherZone(z);
+    });
+    var essai = el('button', 'btn-discret palier-essai', 'Voir ce que l’élève lirait à ce palier');
+    essai.type = 'button';
+    essai.addEventListener('click', function () { amenerAuPalier(p.cle); });
+    corps.appendChild(essai);
+    t.addEventListener('click', function () { basculerPalier(p.cle); });
+    d.append(t, corps);
+    box.appendChild(d);
+  });
+  appliquerPaliersOuverts();
+}
+function basculerPalier(cle, forcer) {
+  var o = forcer === undefined ? !S.paliersOuverts[cle] : forcer;
+  S.paliersOuverts[cle] = o;
+  appliquerPaliersOuverts();
+  if (!o && cible && cible.offsetParent === null) choisirCible(null);
+}
+function appliquerPaliersOuverts() {
+  document.querySelectorAll('.palier').forEach(function (d) {
+    var o = !!S.paliersOuverts[d.dataset.palier];
+    if (o) d.dataset.ouvert = ''; else delete d.dataset.ouvert;
+    d.querySelector('.palier-tete').setAttribute('aria-expanded', String(o));
+    d.querySelector('.palier-corps').hidden = !o;
+  });
+}
+function palierPour(e, m) {
+  var L = Number(S.proj.longueur) || 0, T = Number(S.proj.tolere) || 0;
+  if (!(L > 0 && T > 0 && m > 0)) return null;
+  if (e === 0) return 'sans_erreur';
+  var ratio = (L / T) * e / m, ech = S.paliers.filter(function (p) { return !p.sansErreur; });
+  for (var i = 0; i < ech.length; i++) if (ech[i].ratioMax !== null && ratio <= ech[i].ratioMax) return ech[i].cle;
+  return ech[ech.length - 1].cle;
+}
+function amenerAuPalier(cle) {
+  var m = Number(S.copie.mots) || 0;
+  if (m <= 0) { S.copie.mots = m = 600; }
+  if (cle === 'sans_erreur') { S.copie.erreurs = 0; majCopie(); maj(); return; }
+  var L = Number(S.proj.longueur) || 900, T = Number(S.proj.tolere) || 30, seuil = L / T;
+  var ech = S.paliers.filter(function (p) { return !p.sansErreur; });
+  var i = ech.map(function (p) { return p.cle; }).indexOf(cle);
+  var bas = i > 0 ? ech[i - 1].ratioMax : 0;
+  var haut = ech[i].ratioMax !== null ? ech[i].ratioMax : bas * 1.6;
+  var e = Math.max(1, Math.round(((bas + haut) / 2) * m / seuil));
+  for (var k = 0; k < 400 && palierPour(e, m) !== cle; k++) e += (palierPour(e, m) && ech.map(function (p) { return p.cle; }).indexOf(palierPour(e, m)) < i) ? 1 : -1;
+  if (e < 1) e = 1;
+  S.copie.erreurs = e;
+  majCopie(); maj();
+}
+
+/* ---------- Brancher une zone ---------- */
+function brancherZone(z) {
+  z.addEventListener('focus', function () { choisirCible(z); });
+  z.addEventListener('input', function () { lireZone(z); maj(); });
+  z.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') ev.preventDefault(); });
+  z.addEventListener('paste', function (ev) {
+    ev.preventDefault();
+    var t = (ev.clipboardData || window.clipboardData).getData('text/plain').replace(/\s*\n\s*/g, ' ');
+    if (!document.execCommand('insertText', false, t)) {
+      var sel = window.getSelection(); if (!sel.rangeCount) return;
+      var r = sel.getRangeAt(0); r.deleteContents(); var n = document.createTextNode(t); r.insertNode(n);
+      r.setStartAfter(n); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+    }
+    lireZone(z); maj();
+  });
+  z.addEventListener('mousedown', function (ev) { if (ev.target.closest('.chip-x')) ev.preventDefault(); });
+  z.addEventListener('click', function (ev) {
+    var x = ev.target.closest('.chip-x');
+    if (!x) return;
+    var c = x.closest('.chip');
+    var suiv = c.nextSibling;
+    if (suiv && suiv.nodeType === 3 && /^​/.test(suiv.nodeValue)) suiv.nodeValue = suiv.nodeValue.slice(1);
+    c.remove();
+    lireZone(z); maj();
+    z.focus({ preventScroll: true });
+  });
+}
+document.querySelectorAll('.zone[data-zone]:not([data-palier])').forEach(brancherZone);
+
+/* ---------- L'aperçu ---------- */
+function segment(cle, src, texte, engendre) {
+  var s;
+  if (engendre) { s = el('span', 'seg seg--engendre'); s.title = 'Ajoutée par l’app. Elle disparaît dès que le verdict porte un bloc : « Mots par erreur » remet ce nombre où tu veux.'; }
+  else {
+    s = el('a', 'seg'); s.href = '#'; s.dataset.vers = cle;
+    s.addEventListener('click', function (ev) { ev.preventDefault(); allerA(cle); });
+    s.addEventListener('pointerenter', function () { var z = zoneDeCle(cle); if (z) z.classList.add('montree'); });
+    s.addEventListener('pointerleave', function () { var z = zoneDeCle(cle); if (z) z.classList.remove('montree'); });
+  }
+  s.appendChild(el('span', 'seg-src', src));
+  s.appendChild(document.createTextNode(texte));
+  return s;
+}
+function rien(t) { return el('span', 'rien', t); }
+function allerA(cle) {
+  var et, palier = null;
+  if (cle.indexOf('p:') === 0) { et = 'paliers'; palier = cle.split(':')[1]; }
+  else et = ETAPE_DE_ZONE[cle];
+  ouvrir(et, false);
+  if (palier) basculerPalier(palier, true);
+  var z = zoneDeCle(cle);
+  if (!z) return;
+  z.scrollIntoView({ behavior: reduit.matches ? 'auto' : 'smooth', block: 'center' });
+  z.focus({ preventScroll: true });
+  var r = document.createRange(); r.selectNodeContents(z); r.collapse(false);
+  var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  z.classList.remove('allume'); void z.offsetWidth; z.classList.add('allume');
+}
+function majSegmentsCible() {
+  var c = cible ? cleDe(cible) : null;
+  document.querySelectorAll('.seg[data-vers]').forEach(function (s) { s.classList.toggle('est-cible', s.dataset.vers === c); });
+}
+function majApercu(C, v) {
+  // Copie
+  $('copieNomE').textContent = accorder(C.e, S.noms.e1, S.noms.e2);
+  $('copieNomM').textContent = accorder(C.m, S.noms.m1, S.noms.m2);
+  $('copieCodes').textContent = !S.codesActifs ? 'Le compte est tapé : la palette générale ne pondère rien.'
+    : (C.dist.length ? 'Codes posés : ' + C.dist.map(function (d) { return d.n + ' × code ' + d.sc.code + (Number(d.sc.poids) !== 1 ? ' (poids ' + fmt(Number(d.sc.poids) || 0) + ')' : ''); }).join(', ') : 'Aucun code posé.');
+  // Résultats
+  var res = $('resultats'); res.textContent = '';
+  var rn = el('span', 'resultat');
+  if (C.note === null) { rn.append(el('span', '', 'Note'), document.createTextNode('aucune')); rn.title = C.impossible; }
+  else {
+    rn.append(el('span', '', 'Note'), document.createTextNode(fmt(C.note) + ' / ' + fmt(Number(S.pond)) + ' (' + fmt(Math.round(C.note / Number(S.pond) * 100)) + ' %)'));
+    if (C.plancher) rn.append(el('span', '', 'plancher'));
+  }
+  res.appendChild(rn);
+  if (C.proj.active && C.proj.applicable) {
+    var rp = el('span', 'resultat palier-r'); rp.append(el('span', '', 'Palier'), document.createTextNode(C.proj.palier.libelle)); res.appendChild(rp);
+  }
+  // Le PDF
+  var pdf = $('lecturePdf'); pdf.textContent = '';
+  var dec = remplir(S.textes.decompte, v, OFFRE.decompte);
+  var morceaux = [];
+  if (dec) morceaux.push(segment('decompte', 'Décompte', dec));
+  if (C.proj.active && C.proj.applicable) {
+    var p = C.proj.palier;
+    var verdict = remplir(p.texte, v, OFFRE.palier);
+    if (C.e > 0 && !porteJeton(p.texte)) morceaux.push(segment(null, 'ajoutée par l’app', 'Tu fais en moyenne 1 erreur à chaque ' + C.proj.moyenne + ' mots.', true));
+    if (verdict) morceaux.push(segment('p:' + p.cle + ':texte', 'Verdict · ' + p.libelle, verdict));
+    var aide = v.service ? remplir(p.aide, v, OFFRE.palier) : '';
+    if (aide) morceaux.push(segment('p:' + p.cle + ':aide', 'Recommandation', aide));
+  }
+  if (!morceaux.length) pdf.appendChild(rien('Aucune phrase.'));
+  morceaux.forEach(function (m, i) { if (i) pdf.appendChild(document.createTextNode(' ')); pdf.appendChild(m); });
+  // Le bilan
+  [['priorite', 'lecturePriorite', 'Défi prioritaire'], ['concentre', 'lectureConcentre', 'Quand tout est maîtrisé'], ['aucune', 'lectureAucune', 'Aucune annotation']].forEach(function (x) {
+    var box = $(x[1]); box.textContent = '';
+    var t = remplir(S.textes[x[0]], v, OFFRE[x[0]], x[0] === 'aucune');
+    box.appendChild(t ? segment(x[0], x[2], t) : rien('Rien ne s’affiche.'));
+  });
+  majSegmentsCible();
+}
+
+/* ---------- Mise à jour générale ---------- */
+function maj() {
+  var C = calculer(), v = valeurs(C);
+  majPalette(C, v);
+  majChaine(C);
+  majApercu(C, v);
+  // chips : noms à jour
+  document.querySelectorAll('.chip[data-jeton]').forEach(function (c) { var j = c.dataset.jeton; if (JETONS[j]) c.querySelector('.chip-nom').textContent = JETONS[j].nom(); });
+  // Formule
+  var f = FORMULES[S.formule.modele];
+  $('lblParam').textContent = f.param;
+  $('descFormule').textContent = f.desc;
+  $('formuleSymbole').textContent = S.formule.modele === 'penalite_normalisee' ? 'Note = Pondération − (Erreurs ÷ Mots × ' + fmt(Number(S.formule.params.penalite_normalisee) || 0) + ')'
+    : S.formule.modele === 'ratio_cible' ? 'Note = Pondération × min(1 ; (Mots ÷ Erreurs) ÷ ' + fmt(Number(S.formule.params.ratio_cible) || 0) + ')'
+    : 'Note = Pondération − (Erreurs × ' + fmt(Number(S.formule.params.penalite_par_erreur) || 0) + ')';
+  $('formuleCopie').textContent = C.note === null ? C.impossible
+    : 'Sur la copie fictive : ' + C.calcul + ' = ' + fmt(C.note) + (C.plancher ? ' (la note touche le plancher)' : '');
+  // Projection
+  var actif = S.proj.modele === 'norme_externe';
+  $('projReglages').hidden = !actif; $('projAucune').hidden = actif;
+  if (actif) {
+    $('projSeuil').textContent = C.proj.seuil ? 'Seuil : 1 ' + S.noms.e1 + ' à chaque ' + fmt(C.proj.seuil) + ' ' + S.noms.m2 + ' (' + fmt(Number(S.proj.tolere)) + ' ' + accorder(S.proj.tolere, S.noms.e1, S.noms.e2) + ' pour ' + fmt(Number(S.proj.longueur)) + ' ' + S.noms.m2 + ').' : 'Seuil : indéterminé.';
+    var ech = S.paliers.filter(function (p) { return !p.sansErreur; });
+    document.querySelectorAll('.palier').forEach(function (d) {
+      var p = S.paliers.filter(function (x) { return x.cle === d.dataset.palier; })[0];
+      var atteint = C.proj.applicable && C.proj.palier.cle === p.cle;
+      if (atteint) d.dataset.atteint = ''; else delete d.dataset.atteint;
+      var s;
+      if (p.sansErreur) s = 'aucune ' + S.noms.e1;
+      else if (p.ratioMax === null) s = 'au-delà du dernier seuil';
+      else s = C.proj.seuil ? 'jusqu’à 1 / ' + fmt(Math.round(C.proj.seuil / p.ratioMax)) + ' ' + S.noms.m2 : '';
+      d.querySelector('.palier-seuil').textContent = s;
+      d.querySelector('.palier-extrait').textContent = remplir(p.texte, v, OFFRE.palier) || '(vide)';
+    });
+  }
+  $('filCritere').textContent = (S.nom || '').trim() || 'Critère sans nom';
+}
+
+/* ---------- Copie fictive ---------- */
+function majCopie() {
+  var e = Math.max(0, Math.round(Number(S.copie.erreurs) || 0));
+  var cur = $('copieCurseur');
+  cur.max = String(Math.max(60, e));
+  cur.value = String(e);
+  $('copieE').value = String(e);
+  $('copieM').value = String(S.copie.mots);
+}
+$('copieE').addEventListener('input', function () { S.copie.erreurs = this.value; $('copieCurseur').value = this.value; maj(); });
+$('copieM').addEventListener('input', function () { S.copie.mots = this.value; maj(); });
+$('copieCurseur').addEventListener('input', function () { S.copie.erreurs = this.value; $('copieE').value = this.value; maj(); });
+$('eMoins').addEventListener('click', function () { S.copie.erreurs = Math.max(0, (Number(S.copie.erreurs) || 0) - 1); majCopie(); maj(); });
+$('ePlus').addEventListener('click', function () { S.copie.erreurs = (Number(S.copie.erreurs) || 0) + 1; majCopie(); maj(); });
+
+/* ---------- Champs ---------- */
+$('nomCritere').addEventListener('input', function () { S.nom = this.value; maj(); });
+$('pondCritere').addEventListener('input', function () { S.pond = this.value; maj(); });
+document.querySelectorAll('[data-nom]').forEach(function (i) { i.addEventListener('input', function () { S.noms[i.dataset.nom] = i.value; maj(); }); });
+$('codesActifs').addEventListener('change', function () {
+  S.codesActifs = this.checked;
+  if (this.checked) delete $('listeCodes').dataset.inactif; else $('listeCodes').dataset.inactif = '';
+  maj();
+});
+$('modeleFormule').addEventListener('change', function () { S.formule.modele = this.value; $('paramFormule').value = S.formule.params[this.value]; maj(); });
+$('paramFormule').addEventListener('input', function () { S.formule.params[S.formule.modele] = this.value; maj(); });
+$('modeleProj').addEventListener('change', function () {
+  S.proj.modele = this.value;
+  if (cible && cible.dataset.palier) choisirCible(null);
+  maj();
+});
+$('projLongueur').addEventListener('input', function () { S.proj.longueur = this.value; maj(); });
+$('projTolere').addEventListener('input', function () { S.proj.tolere = this.value; maj(); });
+$('projService').addEventListener('input', function () { S.proj.service = this.value; maj(); });
+$('modeleEnonces').addEventListener('change', function () {
+  S.modeleEnonces = this.value;
+  S.textes = Object.assign({}, ENONCES[this.value]);
+  ['decompte', 'priorite', 'concentre', 'aucune'].forEach(function (k) { versZone($('zone-' + k), S.textes[k]); });
+  $('modeleNote').hidden = false;
+  maj();
+});
+document.querySelectorAll('.zone-modele').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var k = b.dataset.modele;
+    S.textes[k] = ENONCES[S.modeleEnonces][k];
+    versZone($('zone-' + k), S.textes[k]);
+    maj();
+  });
+});
+$('basculeSources').addEventListener('change', function () {
+  if (this.checked) delete $('apercu').dataset.sansSources; else $('apercu').dataset.sansSources = '';
+});
+$('apercuReduire').addEventListener('click', function () {
+  var a = $('apercu'), r = a.hasAttribute('data-reduit');
+  if (r) a.removeAttribute('data-reduit'); else a.setAttribute('data-reduit', '');
+  this.textContent = r ? 'Réduire' : 'Tout voir';
+  this.setAttribute('aria-expanded', String(r));
+});
+$('filRetour').addEventListener('click', function () { $('filNote').hidden = !$('filNote').hidden; });
+
+/* ---------- Départ ---------- */
+function toutRemplir() {
+  S = etatDeDepart();
+  cible = null; plage = null;
+  clearTimeout(minuterie); montrer('', false);
+  $('nomCritere').value = S.nom; $('pondCritere').value = S.pond;
+  $('nomE1').value = S.noms.e1; $('nomE2').value = S.noms.e2; $('nomM1').value = S.noms.m1; $('nomM2').value = S.noms.m2;
+  $('codesActifs').checked = true; delete $('listeCodes').dataset.inactif;
+  $('modeleFormule').value = S.formule.modele; $('paramFormule').value = S.formule.params[S.formule.modele];
+  $('modeleProj').value = S.proj.modele;
+  $('projLongueur').value = S.proj.longueur; $('projTolere').value = S.proj.tolere; $('projService').value = S.proj.service;
+  $('modeleEnonces').value = S.modeleEnonces; $('modeleNote').hidden = true;
+  ['decompte', 'priorite', 'concentre', 'aucune'].forEach(function (k) { versZone($('zone-' + k), S.textes[k]); });
+  construireCodes();
+  construirePaliers();
+  var C = calculer();
+  if (C.proj.applicable) S.paliersOuverts[C.proj.palier.cle] = true;
+  appliquerPaliersOuverts();
+  majCopie();
+  ouvrir(S.ouverte, false);
+  maj();
+}
+$('toutRemettre').addEventListener('click', function () {
+  document.querySelectorAll('.zone.est-cible').forEach(function (z) { z.classList.remove('est-cible'); });
+  toutRemplir();
+});
+
+construirePalette();
+construireChaine();
+toutRemplir();
+if (window.matchMedia('(max-width: 759px)').matches) $('apercuReduire').click();
+})();
+</script>
+
+</body></html>
+</body></html>
