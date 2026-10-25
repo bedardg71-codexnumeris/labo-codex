@@ -81,7 +81,9 @@ describe('lot E · structurel : l\'expression n\'est plus recopiée hors de mode
     });
     // Lot N2 (#716, 22 sept. 2026) : deux sites partent avec les méthodes historiques de la standards et de la
     // sommative (le P historique est désormais la note du cours) — 20 → 18, et la sommative sort de la liste.
-    it('les onze fichiers mesurés appellent bien le point unique (dix-huit appels : dix-sept sites et le helper de snapshots)', () => {
+    // #1149, lot 3b (24 oct. 2026) : 18 → 19, l'échéance de la chaîne des étapes d'une production se lit pour le
+    // groupe-cours actif (`rendreChaineProduction`, productions.js), par le point unique.
+    it('les onze fichiers mesurés appellent bien le point unique (dix-neuf appels : dix-huit sites et le helper de snapshots)', () => {
         const fichiers = ['correlations-longitudinales.js', 'export-pdf.js', 'graphiques-progression.js', 'impact-jetons.js', 'planification-carte.js', 'productions.js', 'profil-etudiant-calculs.js', 'trimestres.js', 'profil-etudiant-sections-affichage.js', 'snapshots.js', 'pratiques/pratique-pan-standards.js'];
         let total = 0;
         for (const f of fichiers) {
@@ -89,7 +91,7 @@ describe('lot E · structurel : l\'expression n\'est plus recopiée hors de mode
             expect(n, f).toBeGreaterThan(0);
             total += n;
         }
-        expect(total).toBe(18);
+        expect(total).toBe(19);
     });
 });
 

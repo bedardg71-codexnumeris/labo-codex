@@ -1578,6 +1578,7 @@ async function prerenseignerFormulaireProduction(prod) {
         poserReferenceSelect(selectGrilleInline, prod.grilleId, 'grille');
     }
 
+    rendreChaineProduction();   // #1149, lot 3b : la chaîne lit le formulaire qu'on vient de remplir
 }
 
 // Réinitialise le formulaire en mode ajout (refactor étape 4, 16 mai 2026)
@@ -1636,6 +1637,7 @@ function reinitialiserFormulaireProduction() {
 
     // Réinitialiser l'affichage
     gererChangementTypeProduction();
+    rendreChaineProduction();   // #1149, lot 3b : en création, la chaîne lit le formulaire
 }
 
 async function afficherFormProduction(id) {
@@ -2238,6 +2240,7 @@ async function surChangementFormulaireProduction(champ) {
     // Les autres écouteurs du même changement agissent d'abord : le type adapte les
     // champs (`gererChangementTypeProduction`, par le dispatcher du document).
     await new Promise(resolve => setTimeout(resolve, 0));
+    rendreChaineProduction();   // #1149, lot 3b : après les menus repeuplés et le type adapté
     if (!productionEnEdition) return;
     const formulaire = document.getElementById('formulaireProduction');
     if (!formulaire || formulaire.classList.contains('u-hide')) return;
@@ -2248,6 +2251,54 @@ function brancherEnregistrementProduction() {
     const formulaire = document.getElementById('formulaireProduction');
     if (!formulaire || typeof formulaire.addEventListener !== 'function') return;
     formulaire.addEventListener('change', (e) => { surChangementFormulaireProduction(e.target); });
+    // #1149, lot 3b : la chaîne suit la frappe (objectif, tâche) ; elle n'écrit rien.
+    formulaire.addEventListener('input', () => { rendreChaineProduction(); });
+}
+
+/**
+ * #1149, lot 3b (24 oct. 2026) — LES SIX ÉTAPES D'UNE PRODUCTION (validées par Grégoire, 24 oct., 19 h 47
+ * et 19 h 49). Fonction pure : la production telle que le formulaire la porte (`lireDonneesFormulaireProduction`,
+ * en création comme en modification) et le groupe-cours actif. Aucune n'est « en attention » ; une
+ * production sans échéance assignée est un état légitime (#486), « à planifier ».
+ * Le portfolio conteneur n'a pas de chaîne : il n'a ni grille ni échéance, ce sont ses artefacts qui
+ * sont évalués (`gererChangementTypeProduction` le dit sous ses champs).
+ */
+function etapesChaineProduction(production, groupeCoursId) {
+    const p = production || {};
+    if (p.type === 'portfolio') return [];
+    const rempli = (v) => !!String(v == null ? '' : v).trim();
+    const echeance = obtenirEcheanceEffective(p, groupeCoursId);
+    const due = !!(echeance.assignee && echeance.date);
+    const outil = (id, libelle, vide) => ({ id: id, libelle: libelle, reglee: !!p[id + 'Id'],
+        info: p[id + 'Id'] ? 'choisie' : vide });
+    return [
+        { id: 'objectif', libelle: 'Objectif', reglee: rempli(p.objectif), info: rempli(p.objectif) ? 'écrit' : 'à écrire' },
+        { id: 'tache', libelle: 'Tâche', reglee: rempli(p.tache), info: rempli(p.tache) ? 'écrite' : 'à écrire' },
+        outil('grille', 'Grille', 'à choisir'),
+        outil('echelle', 'Échelle', 'à choisir'),
+        outil('cartouche', 'Cartouche', 'aucune'),
+        { id: 'echeance', libelle: 'Échéance', arrivee: true, reglee: due,
+          info: due ? (typeof formaterDateCourte === 'function' ? formaterDateCourte(echeance.date) : echeance.date) : 'à planifier' }
+    ];
+}
+
+/** Dessine la chaîne en tête de la fiche (`#chaineProduction`) ; elle paraît et part avec la fiche. */
+function rendreChaineProduction() {
+    const conteneur = document.getElementById('chaineProduction');
+    const formulaire = document.getElementById('formulaireProduction');
+    if (!conteneur || !formulaire || formulaire.classList.contains('u-hide') || typeof ChaineEtapes === 'undefined') return;
+    const groupeCoursId = obtenirIdContexteActif(db.getSync('infoCours', null));
+    const etapes = etapesChaineProduction(lireDonneesFormulaireProduction(), groupeCoursId);
+    conteneur.classList.toggle('u-hide', etapes.length === 0);
+    ChaineEtapes.dessiner(conteneur, etapes, { libelle: 'Étapes de la production', surClic: suivreEtapeDeLaProduction });
+}
+
+/** Le clic conduit au champ où l'on règle l'étape, dans la fiche ; il n'écrit rien. */
+function suivreEtapeDeLaProduction(idEtape) {
+    const CIBLES = { objectif: 'productionObjectif', tache: 'productionTache', grille: 'productionGrille',
+        echelle: 'productionEchelle', cartouche: 'productionCartouche', echeance: 'sectionPlanification' };
+    const cible = document.getElementById(CIBLES[idEtape]) || document.getElementById('champsPersonnalisesListe');
+    if (cible) cible.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 /**
@@ -2783,13 +2834,20 @@ async function chargerArtefactsDisponibles() {
  *    - Rouge si > 100%
  *    - Orange si < 100%
  */
+/**
+ * La somme des pondérations des productions — les artefacts-portfolio exclus (ils font partie du
+ * portfolio). #1149, lot 3b : extraite telle quelle de `mettreAJourPonderationTotale`, pour que l'étape
+ * « Pondération » d'une pratique sommative lise la même somme. Fonction pure.
+ */
+function totalPonderationProductions(productions) {
+    return (productions || [])
+        .filter(p => p && p.type !== 'artefact-portfolio')
+        .reduce((sum, prod) => sum + (prod.ponderation || 0), 0);
+}
+
 async function mettreAJourPonderationTotale() {
     const productions = await db.get(getCleProductions()) || [];
-
-    // Ignorer les artefacts-portfolio dans le calcul (ils font partie du Portfolio)
-    const productionsComptees = productions.filter(p => p.type !== 'artefact-portfolio');
-
-    const total = productionsComptees.reduce((sum, prod) => sum + (prod.ponderation || 0), 0);
+    const total = totalPonderationProductions(productions);
 
     document.getElementById('ponderationTotale').textContent = formaterPourcentage(total);
 
@@ -3222,6 +3280,9 @@ window.descendreEvaluation = descendreEvaluation;
 window.gererChangementTypeProduction = gererChangementTypeProduction;
 window.chargerArtefactsDisponibles = chargerArtefactsDisponibles;
 window.mettreAJourPonderationTotale = mettreAJourPonderationTotale;
+window.totalPonderationProductions = totalPonderationProductions;   // #1149, lot 3b : l'étape « Pondération » des pratiques
+window.etapesChaineProduction = etapesChaineProduction;             // #1149, lot 3b
+window.rendreChaineProduction = rendreChaineProduction;
 window.getTypeLabel = getTypeLabel;
 window.TYPES_PRODUCTION = TYPES_PRODUCTION;                                 // 25 août 2026 — table unique des types (sélecteurs, sentinelle)
 window.typeProduction = typeProduction;

@@ -870,10 +870,14 @@ document.addEventListener('keydown', function(e) {
 // SECTION: Wrappers Phase 5b — mat-echelle (ex-ligne 17752)
 // ===============================
 
-// Wrapper: mat-echelle-id change (afficherPreviewEchelleMat + peuplerDropdownNoteMaximaleMat)
+// Wrapper: mat-echelle-id change (afficherPreviewEchelleMat + peuplerDropdownNoteMaximaleMat + sauvegarder)
+// #1149, lot 3b (24 oct. 2026) : depuis le lot E1 (« tout s'enregistre au changement de champ »), ce menu
+// était le seul de la fiche à ne rien écrire — l'échelle choisie se perdait si aucun autre champ ne
+// changeait, et l'étape « Échelle » de la chaîne ne pouvait pas la suivre. Même chemin que ses voisins.
 function onMatEchelleIdChange() {
     afficherPreviewEchelleMat();
     peuplerDropdownNoteMaximaleMat();
+    sauvegarderConfigPratiqueMat();
 }
 
 // Wrapper: mat-selection-nombre change (recalculer + sauvegarder)

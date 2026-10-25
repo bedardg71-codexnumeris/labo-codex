@@ -82,7 +82,7 @@ function elementFictif(valeur = '') {
 }
 
 describe("#593 · 3 — l'écriture d'une cellule atterrit dans la cartouche qui la portait", () => {
-    it("même si une cartouche NEUVE est ouverte pendant l'await de la complétion", async () => {
+    it("même si une cartouche NEUVE est ouverte pendant l'await de l'écriture", async () => {
         const A = { id: 'CA', grilleId: 'G1', nom: 'A', criteres: [{ id: 'CR', nom: 'C' }], niveaux: [{ code: 'W', nom: 'w' }], commentaires: {} };
         // ⚠ CLÉ MIGRÉE PAR S5/#623 LE 31 AOÛT 2026 : ce corpus semait sous la clé NUE
         // `cartouches_G1`. `js/cartouches.js` route désormais par `cle(...)`, et le
@@ -98,16 +98,16 @@ describe("#593 · 3 — l'écriture d'une cellule atterrit dans la cartouche qui
         let basculer = null;
         const globaux = {
             db: {
-                // Pendant la lecture des échelles (calcul de complétion, AVANT la
-                // persistance), l'utilisateur ouvre une cartouche neuve : la
-                // variable de module `cartoucheActuel` change de cible.
-                get: async (k, d) => {
-                    if (k === 'a2026_echellesTemplates' && basculer) { const b = basculer; basculer = null; await b(); }
-                    return (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null));
-                },
+                get: async (k, d) => (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null)),
                 getSync: (k, d) => (k in store ? JSON.parse(JSON.stringify(store[k])) : (d !== undefined ? d : null)),
                 set: async (k, v) => { store[k] = v; }, setSync: (k, v) => { store[k] = v; },
+                // Pendant l'écriture de la cellule, l'utilisateur ouvre une cartouche neuve : la
+                // variable de module `cartoucheActuel` change de cible. ↻ #1149, lot 3b (24 oct. 2026) :
+                // la bascule se faisait pendant la lecture des échelles du calcul de complétion ; ce
+                // calcul (asynchrone) est parti avec les métriques, la chaîne se dessine sans attendre.
+                // L'attente qui reste avant que la cellule atterrisse est celle de l'écriture.
                 modifier: async (k, mutateur, defaut) => {
+                    if (k === 'a2026_cartouches_G1' && basculer) { const b = basculer; basculer = null; await b(); }
                     const valeur = (k in store ? JSON.parse(JSON.stringify(store[k])) : defaut);
                     const r = await mutateur(valeur); if (r === undefined) return undefined; store[k] = r; return r;
                 }

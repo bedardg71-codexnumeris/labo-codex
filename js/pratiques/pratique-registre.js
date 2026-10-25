@@ -237,6 +237,34 @@ function enregistrerPratique(id, instance) {
  * @param {Object} pratiqueData - Données de la pratique depuis pratiquesConfigurables
  * @returns {Object} Config complète prête pour PratiqueConfigurable
  */
+/** #762 — la méthode de calcul de chaque famille, quand une pratique ne porte pas de `calcul_note`. */
+const METHODE_PAR_FAMILLE = {
+    sommative: 'moyenne_ponderee',
+    specifications: 'specifications',
+    denotation: 'jugement_global',
+    standards: 'conversion_niveaux'
+};
+
+/** La méthode que sa famille donne à une pratique (le type, à la racine, dans `.config` ou `.configuration`), ou null. */
+function methodeDeLaFamille(pratiqueData) {
+    const p = pratiqueData || {};
+    const config = p.config || {};
+    return METHODE_PAR_FAMILLE[normaliserIdPratique(config.type || p.type || p.configuration?.type)] || null;
+}
+
+/**
+ * #1149, lot 3b (24 oct. 2026) — LA MÉTHODE QUE LE MOTEUR APPLIQUERA, lue comme `construireConfigComplete`
+ * la lit : le `calcul_note` porté (`pan_par_objectif` normalisée, #396), sinon celle de la famille (#762).
+ * `null` quand rien ne la dit : là où le moteur retombe sur `conversion_niveaux` par défaut, la chaîne
+ * des étapes, elle, ne prétend pas qu'une méthode est posée. Fonction pure.
+ */
+function methodeDeCalculDeLaPratique(pratiqueData) {
+    const p = pratiqueData || {};
+    const portee = (p.config || {}).calcul_note || p.calcul_note;
+    if (portee) return portee.methode === 'pan_par_objectif' ? 'conversion_niveaux' : (portee.methode || null);
+    return methodeDeLaFamille(p);
+}
+
 function construireConfigComplete(pratiqueData) {
     // Priorité : config interne > racine
     const config = pratiqueData.config || {};
@@ -298,15 +326,8 @@ function construireConfigComplete(pratiqueData) {
     // echelle », et la pratique était introuvable partout où le registre résout (comparateur,
     // activation, calculs). Une sommative n'a pas d'échelle à fournir. Lecture seule : le stock
     // déjà adopté est lu juste sans être réécrit. Une PAN-Standards sans échelle reste refusée.
-    const familleCanon = normaliserIdPratique(config.type || pratiqueData.type || pratiqueData.configuration?.type);
-    const METHODE_PAR_FAMILLE = {
-        sommative: 'moyenne_ponderee',
-        specifications: 'specifications',
-        denotation: 'jugement_global',
-        standards: 'conversion_niveaux'
-    };
     let calcul_note = config.calcul_note || pratiqueData.calcul_note
-        || { methode: METHODE_PAR_FAMILLE[familleCanon] || 'conversion_niveaux' };
+        || { methode: methodeDeLaFamille(pratiqueData) || 'conversion_niveaux' };
     if (calcul_note && calcul_note.methode === 'pan_par_objectif') {
         console.warn(`[construireConfigComplete] Méthode retirée « pan_par_objectif » (pratique « ${config.id || pratiqueData.id || '?'} ») — normalisée vers conversion_niveaux (#396). Ré-enregistrer la pratique au wizard pour faire disparaître cet avertissement.`);
         calcul_note = Object.assign({}, calcul_note, { methode: 'conversion_niveaux' });
@@ -939,6 +960,8 @@ window.initialiserRegistrePratiques = initialiserRegistrePratiques;
 // d'une pratique quelle que soit sa forme stockée (.config legacy OU .configuration
 // + racine du wizard) — la SSOT de résolution, pas une relecture à l'aveugle.
 window.construireConfigComplete = construireConfigComplete;
+window.methodeDeCalculDeLaPratique = methodeDeCalculDeLaPratique;   // #1149, lot 3b : la chaîne de la pratique
+window.METHODE_PAR_FAMILLE = METHODE_PAR_FAMILLE;
 
 // Gestion du cache
 window.invaliderCachePratique = invaliderCachePratique;

@@ -1754,6 +1754,7 @@ function optionsNiveauSOLOEchelle(valeurCourante) {
 }
 
 function afficherNiveauxNouvelleEchelle() {
+    rendreChaineEchelle(echelleNouvelleTampon());   // #1149, lot 3b : en création, la chaîne lit le tampon
     const container = document.getElementById('tableauNiveauxEchelle');
     const apercuContainer = document.getElementById('apercuEchelleNiveaux');
     const niveaux = window._niveauxNouvelleEchelle || [];
@@ -2227,6 +2228,7 @@ function ligneNiveauEnAttenteHtml(echelle) {
 }
 
 function afficherNiveauxEchelle(echelle) {
+    rendreChaineEchelle(echelle);   // #1149, lot 3b : chaque modification de l'échelle passe par ici
     const container = document.getElementById('tableauNiveauxEchelle');
     const apercuContainer = document.getElementById('apercuEchelleNiveaux');
 
@@ -2278,6 +2280,94 @@ function afficherNiveauxEchelle(echelle) {
 
     // Afficher l'aperçu visuel
     if (apercuContainer) apercuContainer.innerHTML = apercuNiveauxEchelleHtml(echelle);
+}
+
+/**
+ * #1149, lot 3b (24 oct. 2026) — LES POURCENTAGES D'UNE ÉCHELLE, JUGÉS AVEC LE RANGEMENT DE L'APP.
+ * `niveauDuPourcentage` (evaluation-calcul.js) arrondit la note à l'entier, puis prend la PREMIÈRE plage
+ * qui le contient ; sans plage, le niveau le plus proche, avec un avertissement en console. Ici, chaque
+ * entier de 0 à 100 : aucune plage le contient, c'est un trou ; deux, un chevauchement. Le premier
+ * entier fautif est rendu.
+ * Deux écarts assumés avec `niveauDuPourcentage` :
+ *  · une borne VIDE est absente (la règle de `valeurNumeriqueDuNiveau`, plus haut) : `Number('')` vaut 0,
+ *    et un niveau neuf dont les bornes ne sont pas encore tapées se lirait « 0 à 0 » ;
+ *  · le niveau « 0 » est écarté, comme le font les chemins algorithmique et analytique
+ *    (`sansNiveauZero`) : il est réservé à l'intégrité académique et ne se déduit jamais d'un chiffre.
+ * @returns {{etat:'ok'|'trou'|'chevauchement'|'vide', a?:number}}
+ */
+function couvertureDesPourcentages(niveaux) {
+    const brut = (v) => (v == null || String(v).trim() === '') ? NaN : Number(v);
+    const plages = (niveaux || [])
+        .filter(n => n && n.code !== '0' && n.code !== 0)
+        .map(n => ({ min: brut(n.min), max: brut(n.max) }))
+        .filter(p => !isNaN(p.min) && !isNaN(p.max));
+    if (plages.length === 0) return { etat: 'vide' };
+    for (let entier = 0; entier <= 100; entier++) {
+        const contiennent = plages.filter(p => entier >= p.min && entier <= p.max).length;
+        if (contiennent === 0) return { etat: 'trou', a: entier };
+        if (contiennent > 1) return { etat: 'chevauchement', a: entier };
+    }
+    return { etat: 'ok' };
+}
+
+/**
+ * #1149, lot 3b — LES QUATRE ÉTAPES D'UNE ÉCHELLE (validées par Grégoire, 24 oct., 19 h 44). Fonction
+ * pure : l'échelle (le tampon en création, l'échelle enregistrée sinon) et les productions que le menu
+ * des productions montre. Seuls le trou et le chevauchement sont « en attention » ; des repères absents
+ * sont un état légitime (#555), « à régler ».
+ */
+function etapesChaineEchelle(echelle, productions) {
+    const e = echelle || {};
+    const niveaux = Array.isArray(e.niveaux) ? e.niveaux : [];
+    const rempli = (v) => !!String(v == null ? '' : v).trim();
+    const nbNiveaux = niveaux.length;
+    const couverture = couvertureDesPourcentages(niveaux);
+    const reperes = !!(e.seuilSuffisance && e.seuilMaitrise);
+    const nbProd = e.id ? (productions || []).filter(p => p && p.echelleId === e.id).length : 0;
+    return [
+        { id: 'niveaux', libelle: 'Niveaux',
+          reglee: nbNiveaux >= 2 && niveaux.every(n => n && rempli(n.code) && rempli(n.nom)),
+          info: nbNiveaux === 0 ? 'aucun' : nbNiveaux + (nbNiveaux > 1 ? ' niveaux' : ' niveau') },
+        { id: 'pourcentages', libelle: 'Pourcentages', reglee: couverture.etat === 'ok',
+          info: couverture.etat === 'ok' ? '0 à ' + formaterPourcentage(100)
+              : couverture.etat === 'vide' ? 'à poser'
+              : couverture.etat + ' à ' + formaterPourcentage(couverture.a),
+          ton: (couverture.etat === 'trou' || couverture.etat === 'chevauchement') ? 'attention' : '' },
+        { id: 'reperes', libelle: 'Repères', reglee: reperes,
+          info: reperes ? e.seuilSuffisance + ' · ' + e.seuilMaitrise : 'à poser' },
+        { id: 'production', libelle: 'Production', arrivee: true, reglee: nbProd > 0,
+          info: nbProd === 0 ? 'aucune' : nbProd + ' prod.' }
+    ];
+}
+
+/** Dessine la chaîne en tête de la fiche (`#chaineEchelle`) ; elle paraît et part avec la fiche. */
+function rendreChaineEchelle(echelle) {
+    const conteneur = document.getElementById('chaineEchelle');
+    if (!conteneur || typeof ChaineEtapes === 'undefined') return;
+    const productions = typeof productionsVisiblesPourLaChaine === 'function' ? productionsVisiblesPourLaChaine() : [];
+    ChaineEtapes.dessiner(conteneur, etapesChaineEchelle(echelle, productions),
+        { libelle: 'Étapes de l\'échelle', surClic: suivreEtapeDeLEchelle });
+}
+
+/**
+ * Le clic conduit, il n'écrit rien : « Niveaux » descend à la table, « Pourcentages » à la première borne,
+ * « Repères » à leur bloc (à la table tant qu'aucun niveau n'a de bornes : le bloc n'existe pas encore),
+ * « Production » ouvre les productions.
+ */
+function suivreEtapeDeLEchelle(idEtape) {
+    if (idEtape === 'production') {
+        if (typeof afficherSousSection === 'function') afficherSousSection('conception-productions');
+        return;
+    }
+    const table = document.getElementById('tableauNiveauxEchelle');
+    if (!table) return;
+    let cible = table;
+    if (idEtape === 'pourcentages') cible = table.querySelector('[data-champ="min"]') || table;
+    if (idEtape === 'reperes') {
+        const grille = table.querySelector('.echelle-reperes-grille');
+        cible = grille ? grille.parentElement : table;
+    }
+    cible.scrollIntoView({ behavior: 'smooth', block: cible === table ? 'start' : 'center' });
 }
 
 /**
@@ -3565,6 +3655,9 @@ window.modifierNiveauEnAttente = modifierNiveauEnAttente;                     //
 window.retirerNiveauEnAttente = retirerNiveauEnAttente;                       // #574
 window.ajouterPremierNiveau = ajouterPremierNiveau;
 window.afficherNiveauxNouvelleEchelle = afficherNiveauxNouvelleEchelle;
+window.etapesChaineEchelle = etapesChaineEchelle;           // #1149, lot 3b
+window.couvertureDesPourcentages = couvertureDesPourcentages;
+window.rendreChaineEchelle = rendreChaineEchelle;
 window.afficherNiveauxEchelle = afficherNiveauxEchelle;                     // #505 — pour que la sentinelle puisse EXÉCUTER ce rendu
 window.modifierNiveauTemp = modifierNiveauTemp;
 window.ajouterNiveauTemp = ajouterNiveauTemp;

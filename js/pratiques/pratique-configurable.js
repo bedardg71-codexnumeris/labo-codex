@@ -16,6 +16,13 @@
 (function() {
 'use strict';
 
+// Les méthodes de calcul qui CONSOMMENT une échelle (conversion de niveaux). Le Sommatif
+// ('moyenne_ponderee') et les Spécifications ('specifications') notent en % / par seuils.
+// #396 : 'pan_par_objectif' retiré — seule conversion_niveaux consomme l'échelle.
+// #1149, lot 3b : une seule liste, que la chaîne des étapes d'une pratique lit aussi (l'étape
+// « Échelle » n'y paraît que pour ces méthodes).
+const METHODES_AVEC_ECHELLE = ['conversion_niveaux'];
+
 // ============================================================================
 // CLASSE PRINCIPALE
 // ============================================================================
@@ -48,9 +55,7 @@ class PratiqueConfigurable {
         // et les Spécifications ('specifications') notent en % / par seuils, sans échelle
         // IDME. Avant, l'échelle était exigée pour TOUTES les pratiques → une SOM/SPE
         // créée au wizard échouait à l'instanciation (« Champ obligatoire manquant : echelle »).
-        // #396 : 'pan_par_objectif' retiré — seule conversion_niveaux consomme l'échelle.
-        const methodesAvecEchelle = ['conversion_niveaux'];
-        const echelleRequise = methodesAvecEchelle.includes(this.config.calcul_note?.methode);
+        const echelleRequise = METHODES_AVEC_ECHELLE.includes(this.config.calcul_note?.methode);
         if (echelleRequise && !this.config.echelle) {
             throw new Error('Champ obligatoire manquant : echelle');
         }
@@ -842,6 +847,7 @@ class PratiqueConfigurable {
 // ============================================================================
 
 window.PratiqueConfigurable = PratiqueConfigurable;
+window.METHODES_AVEC_ECHELLE = METHODES_AVEC_ECHELLE;   // #1149, lot 3b : la chaîne de la pratique
 
 
 

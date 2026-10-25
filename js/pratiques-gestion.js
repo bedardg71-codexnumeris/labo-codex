@@ -141,6 +141,9 @@ async function afficherListePratiquesMateriel() {
         phraseVide: 'Crée une nouvelle pratique ou puise dans la bibliothèque',
         ouvrir: chargerPratiquePourModif
     });
+    // #1149, lot 3b : le menu se redessine après l'assistant et après « Appliquer au cours actif » ;
+    // la chaîne de la pratique ouverte suit (sa méthode, « active »).
+    if (edition && !edition.classList.contains('u-hide')) rendreChainePratique();
 }
 
 /**
@@ -1045,6 +1048,106 @@ async function chargerPratiquePourModif(pratiqueId) {
     if (conteneurEdition && typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneurEdition, pratique, 'dupliquerEtEditerPratique', 'Dupliquer pour créer ma pratique');
     }
+
+    pratiqueOuverte = pratique;
+    rendreChainePratique();   // #1149, lot 3b
+}
+
+/* ===============================
+   LA CHAÎNE DES ÉTAPES (#1149, lot 3b, 24 oct. 2026)
+   =============================== */
+
+/** La pratique ouverte, telle que chargée (une pratique de la bibliothèque globale n'est pas dans la collection). */
+let pratiqueOuverte = null;
+
+/**
+ * LES ÉTAPES D'UNE PRATIQUE (validées par Grégoire, 24 oct., 19 h 51). Fonction pure : la pratique, et ce
+ * que l'écran a lu pour elle — la méthode que le moteur appliquera (`methodeDeCalculDeLaPratique`), son
+ * libellé, le total des pondérations des productions, la pratique active du groupe-cours, les méthodes qui
+ * consomment une échelle.
+ * La famille sommative se reconnaît à sa MÉTHODE (`moyenne_ponderee`), pas à un nom affiché. « Échelle »
+ * n'existe que pour les méthodes qui la consomment ; « Pondération », que pour la sommative : sous 100 %,
+ * elle est « à régler » sans couleur (toutes les productions ne sont pas créées), au-dessus, critique.
+ */
+function etapesChainePratique(pratique, contexte) {
+    const p = pratique || {};
+    const c = contexte || {};
+    const methode = c.methode || null;
+    const etapes = [
+        { id: 'methode', libelle: 'Méthode', reglee: !!methode, info: methode ? (c.libelleMethode || methode) : 'à choisir' }
+    ];
+    if (methode && (c.methodesAvecEchelle || []).includes(methode)) etapes.push(etapeEchelleDeLaPratique(p));
+    if (methode === 'moyenne_ponderee') etapes.push(etapePonderationSommative(c.totalPonderation));
+    const active = !!p.id && c.idActive === p.id;
+    etapes.push({ id: 'groupe-cours', libelle: 'Groupe-cours', arrivee: true, reglee: active,
+        info: active ? 'active' : 'à activer' });
+    return etapes;
+}
+
+/** « Échelle » : seulement pour les méthodes qui la consomment. */
+function etapeEchelleDeLaPratique(pratique) {
+    const choisie = !!(pratique.configuration && pratique.configuration.echelleId);
+    return { id: 'echelle', libelle: 'Échelle', reglee: choisie, info: choisie ? 'choisie' : 'à choisir' };
+}
+
+/** « Pondération » : la sommative seulement ; sous 100 %, à régler sans couleur ; au-dessus, critique. */
+function etapePonderationSommative(totalPonderation) {
+    const total = Number(totalPonderation) || 0;
+    return { id: 'ponderation', libelle: 'Pondération', reglee: total === 100,
+        info: formaterPourcentage(total), ton: total > 100 ? 'critique' : '' };
+}
+
+/** La pratique ouverte, dans sa version enregistrée d'abord (la fiche écrit à chaque changement de champ). */
+function pratiquePourLaChaine() {
+    const enregistree = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p && p.id === pratiqueEnEditionMateriel);
+    if (enregistree) return enregistree;
+    return (pratiqueOuverte && pratiqueOuverte.id === pratiqueEnEditionMateriel) ? pratiqueOuverte : null;
+}
+
+/** Le libellé de la famille d'une méthode, tel que la fiche l'affiche dans son menu « Type de pratique ». */
+function libelleDeLaMethode(methode) {
+    const familles = window.METHODE_PAR_FAMILLE || {};
+    const famille = Object.keys(familles).find(f => familles[f] === methode);
+    const menuType = document.getElementById('mat-pratique-type');
+    const option = (famille && menuType) ? [...menuType.options].find(o => o.value === famille) : null;
+    return option ? option.textContent.trim() : '';
+}
+
+/** Dessine la chaîne de la pratique ouverte (`#chainePratique`) ; elle paraît et part avec la fiche. */
+function rendreChainePratique() {
+    const conteneur = document.getElementById('chainePratique');
+    if (!conteneur || typeof ChaineEtapes === 'undefined' || !pratiqueEnEditionMateriel) return;
+    const pratique = pratiquePourLaChaine();
+    if (!pratique) return;
+    const methode = typeof methodeDeCalculDeLaPratique === 'function' ? methodeDeCalculDeLaPratique(pratique) : null;
+    ChaineEtapes.dessiner(conteneur, etapesChainePratique(pratique, {
+        methode: methode,
+        libelleMethode: libelleDeLaMethode(methode),
+        totalPonderation: typeof totalPonderationProductions === 'function'
+            ? totalPonderationProductions(db.getSync(cle('productions'), []) || []) : 0,
+        idActive: typeof obtenirIdPratiqueActive === 'function' ? obtenirIdPratiqueActive() : null,
+        methodesAvecEchelle: window.METHODES_AVEC_ECHELLE || []
+    }), { libelle: 'Étapes de la pratique', surClic: suivreEtapeDeLaPratique });
+}
+
+/**
+ * Le clic conduit, il n'agit pas. « Méthode » rouvre l'assistant en édition (comme `editerPratique`) ;
+ * « Échelle » descend au menu de l'échelle ; « Pondération » ouvre les productions, où elle se règle ;
+ * « Groupe-cours » descend au bouton « Appliquer au cours actif », sans l'appuyer.
+ */
+function suivreEtapeDeLaPratique(idEtape) {
+    if (idEtape === 'methode') {
+        if (typeof ouvrirWizardV2 === 'function' && pratiqueEnEditionMateriel) ouvrirWizardV2(true, pratiqueEnEditionMateriel);
+        return;
+    }
+    if (idEtape === 'ponderation') {
+        if (typeof afficherSousSection === 'function') afficherSousSection('conception-productions');
+        return;
+    }
+    const cible = idEtape === 'echelle'
+        ? document.getElementById('mat-echelle-id')
+        : document.querySelector('#conteneurEditionPratique [data-action="appliquerPratiqueAuCoursActive"]');
+    if (cible) cible.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 /**
@@ -1499,6 +1602,7 @@ async function sauvegarderConfigPratiqueMat() {
     }
 
     await modifierEtAnnoncer(cle('pratiquesConfigurables'), appliquerFormulaireDansCollection, [], { geste: 'Modifier la pratique' });
+    rendreChainePratique();   // #1149, lot 3b : l'échelle choisie, une conversion vers DEN
     return true;
 }
 
@@ -2826,6 +2930,8 @@ function confirmerEtFermerImportPratiques() {
 
 // Module principal
 window.initialiserModulePratiquesMateriel = initialiserModulePratiquesMateriel;
+window.etapesChainePratique = etapesChainePratique;   // #1149, lot 3b
+window.rendreChainePratique = rendreChainePratique;
 window.afficherListePratiquesMateriel = afficherListePratiquesMateriel;
 // 🆕 #466/CO-16 (21 août 2026) : appelé par changerTrimestreActifV2 (même patron
 // que grilles/échelles) — le pointeur d'édition ne survit pas à la bascule
