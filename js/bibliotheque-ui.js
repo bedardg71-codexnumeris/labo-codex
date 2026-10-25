@@ -1690,6 +1690,13 @@
          importAutreTrimestre.selectOnChange : le `data-on-change` du menu des trimestres ;
          importAutreTrimestre.selectSecond = { id, label, ariaLabel } : un second menu, caché
            tant que le premier ne l'a pas rempli (`toggleDisplay`).
+
+       #1157 (lot 4, cartes d'alignement) — sans rien changer à ce que les cinq autres reçoivent :
+         rangee.apercu absent : la rangée n'a rien de plus à montrer, son nom n'est pas un bouton ;
+         importAutreTrimestre.actionTout absent : pas de « Tout importer » (la Carte n'en a jamais eu) ;
+         importAutreTrimestre.enTete = { id, titre, rangees: [{nom, detail, action, param, param2, libelle}] } :
+           une courte liste avant la ligne d'import (« Même cours », #368) ;
+         importAutreTrimestre.ouvert : le repli s'ouvre d'emblée (cette liste est le geste de la rentrée).
        ===================================================================== */
 
     /**
@@ -1822,15 +1829,19 @@
             ? ' data-dossier="' + echapperAttribut(r.dossier || '__nonclasse__') + '"'
             : '';
         if (r.groupe != null) dossier += ' data-groupe="' + echapperAttribut(r.groupe) + '"';
+        // #1157 — sans aperçu, le nom n'est pas un bouton : il n'aurait rien à déplier.
+        var nom = r.apercu
+            ? '<button type="button" class="biblio2-rangee-nom" data-action="BibliothequeUI.basculerApercu"' +
+                ' data-param="' + echapperAttribut(cleApercu) + '" aria-expanded="' + ouvert + '"' +
+                ' aria-controls="' + echapperAttribut(idApercu) + '">' +
+                '<span class="biblio2-chevron" aria-hidden="true">▶</span>' +
+                '<span>' + echapperHtml(r.nom) + '</span></button>'
+            : '<p class="biblio2-rangee-nom biblio2-rangee-nom--fixe">' + echapperHtml(r.nom) + '</p>';
         return '<li class="biblio2-rangee"' + _ancreItem(r.id) + dossier +
                 (_rangeeCachee(r, colonne, ctx) ? ' hidden' : '') + '>' +
             '<div class="biblio2-rangee-ligne">' +
                 '<div class="biblio2-rangee-texte">' +
-                    '<button type="button" class="biblio2-rangee-nom" data-action="BibliothequeUI.basculerApercu"' +
-                        ' data-param="' + echapperAttribut(cleApercu) + '" aria-expanded="' + ouvert + '"' +
-                        ' aria-controls="' + echapperAttribut(idApercu) + '">' +
-                        '<span class="biblio2-chevron" aria-hidden="true">▶</span>' +
-                        '<span>' + echapperHtml(r.nom) + '</span></button>' +
+                    nom +
                     (r.marqueHtml || '') +
                     '<p class="biblio2-rangee-meta">' + echapperHtml(r.ligne || '') +
                         (r.afficherId ? BibliothequeUI.renderPuceId(r.id) : '') + '</p>' +
@@ -1841,7 +1852,7 @@
                         { ariaLabel: 'Autres gestes pour ' + r.nom, classeBouton: 'biblio2-kebab' }) +
                 '</div>' +
             '</div>' +
-            _renderApercu(r.apercu, idApercu, ouvert) +
+            (r.apercu ? _renderApercu(r.apercu, idApercu, ouvert) : '') +
         '</li>';
     }
 
@@ -1873,14 +1884,39 @@
         return '<ul class="biblio2-liste"' + (idListe ? ' id="' + echapperAttribut(idListe) + '"' : '') + '>' + items + '</ul>';
     }
 
+    /**
+     * #1157 — les rangées d'import d'un autre trimestre, au patron des aperçus « Voir » des autres
+     * fenêtres (`biblio2-import-rangee`) : le nom, une ligne en clair, le geste.
+     */
+    BibliothequeUI.renderRangeesImport = function (rangees) {
+        return '<ul class="biblio2-import-liste">' + (rangees || []).map(function (r) {
+            return '<li class="biblio2-import-rangee">' +
+                '<div><strong>' + echapperHtml(r.nom) + '</strong>' +
+                    (r.detail ? '<p class="biblio2-rangee-meta">' + echapperHtml(r.detail) + '</p>' : '') + '</div>' +
+                '<button type="button" class="btn btn-secondaire" ' + _btnAttrs(r) + '>' + echapperHtml(r.libelle) + '</button>' +
+            '</li>';
+        }).join('') + '</ul>';
+    };
+
+    /** #1157 — une courte liste en tête du repli d'import (« Même cours » de la Carte). */
+    function _renderImportEnTete(e) {
+        if (!e || !e.rangees || !e.rangees.length) return '';
+        return '<div' + (e.id ? ' id="' + echapperAttribut(e.id) + '"' : '') + ' class="biblio2-import-entete">' +
+            '<p class="biblio2-import-groupe">' + echapperHtml(e.titre) + '</p>' +
+            BibliothequeUI.renderRangeesImport(e.rangees) +
+        '</div>';
+    }
+
     /** « Importer depuis un autre trimestre », replié sur une ligne au pied de « Dans ce trimestre ». */
     function _renderImportAutreTrimestre(o, ctx) {
         if (!o || !o.options || !o.options.length) return '';
         var options = o.options.map(function (t) {
             return '<option value="' + echapperAttribut(t.value) + '">' + echapperHtml(t.label) + '</option>';
         }).join('');
-        return '<details class="biblio2-repli" data-repli="import-trimestre"' + (ctx.replis.has('import-trimestre') ? ' open' : '') + '>' +
+        var ouvert = o.ouvert || ctx.replis.has('import-trimestre');
+        return '<details class="biblio2-repli" data-repli="import-trimestre"' + (ouvert ? ' open' : '') + '>' +
             '<summary class="biblio2-repli-titre">' + echapperHtml(o.titre) + '</summary>' +
+            _renderImportEnTete(o.enTete) +
             '<div class="biblio2-import-ligne">' +
                 '<select id="' + echapperAttribut(o.selectId) + '" class="controle-form biblio2-select biblio2-import-select"' +
                     ' aria-label="Trimestre d\'où importer"' +
@@ -1894,8 +1930,10 @@
                     : '') +
                 '<button type="button" data-action="' + echapperAttribut(o.actionVoir) + '" class="btn btn-secondaire">' +
                     echapperHtml(o.libelleVoir) + '</button>' +
-                '<button type="button" data-action="' + echapperAttribut(o.actionTout) + '" class="btn btn-secondaire"' +
-                    (o.tooltipTout ? ' data-tooltip="' + echapperAttribut(o.tooltipTout) + '"' : '') + '>Tout importer</button>' +
+                (o.actionTout
+                    ? '<button type="button" data-action="' + echapperAttribut(o.actionTout) + '" class="btn btn-secondaire"' +
+                      (o.tooltipTout ? ' data-tooltip="' + echapperAttribut(o.tooltipTout) + '"' : '') + '>Tout importer</button>'
+                    : '') +
                 (o.aide
                     ? '<button type="button" class="btn-aide-contextuelle" data-aide="' + echapperAttribut(o.aide) + '"' +
                       ' aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre">' +
