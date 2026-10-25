@@ -44,6 +44,10 @@ const dossierCaptures = process.env.CAPTURES_1154 || null;
 //   · `_phraseExemplaireDeBibliotheque` rend la phrase toujours → ROUGIT (la question nue la porte) ;
 //   · `${phraseBibliotheque}` retiré de la question → ROUGIT (la phrase manque) ;
 //   · `mots` retiré de l'appel du bandeau dans grilles.js → « sans doublon » ROUGIT (« Dans ta sélection »).
+// Seconde retouche, § 5.2 (une seule relation pour les deux colonnes et la phrase) :
+//   · `|| grille.idOriginal === exemplaire.id` retiré de `grilleLieeAExemplaire` → « Supprimer définitivement »
+//     ROUGIT (la grille ramenée propose « Garder → », la phrase manque à sa suppression) ;
+//   · `+ phraseBibliotheque` retiré de la question des cartouches → « Supprimer définitivement » ROUGIT.
 // L'essai « mesure : … exemplaire séparé » n'est pas une défense : il établit un fait (§ 1.2 de la consigne).
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
@@ -259,26 +263,31 @@ test('⋮ : les libellés et leurs actions, rangée du trimestre et rangée de l
 });
 
 // Verdict du 25 oct., § 2.1 (décision de Grégoire) : « Supprimer définitivement » garde l'exemplaire de
-// la bibliothèque, et la question le dit seulement quand il y en a un.
+// la bibliothèque, et la question le dit seulement quand il y en a un. § 5.2 : une grille ramenée par
+// « ← Utiliser » (id neuf, `idOriginal`) est liée à son exemplaire, dans les deux colonnes et dans la
+// question ; la question des cartouches porte la même phrase.
 test('« Supprimer définitivement » : l’exemplaire de la bibliothèque reste et revient ; la phrase seulement avec un exemplaire', async ({ page }) => {
     test.setTimeout(120000);
     await ouvrirDemo(page, 1440, 900);
     const questions = [];
-    page.on('dialog', (d) => { if (d.message().startsWith('Supprimer la grille')) questions.push(d.message()); });
+    page.on('dialog', (d) => { if (/^(Supprimer la grille|La grille « )/.test(d.message())) questions.push(d.message()); });
 
     const DEUX = 'Grille fictive des deux colonnes';
     const SEULE = 'Grille fictive du trimestre seul';
-    await page.evaluate(async ([deux, seule]) => {
+    const CART = 'Grille fictive à cartouche';
+    await page.evaluate(async ([deux, seule, cart]) => {
         Codex.proposerAvantSuppression = async () => true;   // la fenêtre du codex (#1007) a ses propres bancs
         const grille = (id, nom) => ({ id, nom, criteres: [{ id: 'c1', nom: 'Critère fictif', type: 'holistique', ponderation: 100 }] });
         const trimestre = db.getSync(cle('grillesTemplates'), []) || [];
         await db.set(cle('grillesTemplates'), trimestre.concat([   // security-ok: fixture littérale écrite par le banc, aucune source externe
             { ...grille('GRILLE_BANC_DEUX', deux), dansBibliotheque: true },
-            { ...grille('GRILLE_BANC_SEULE', seule), dansBibliotheque: true }
+            { ...grille('GRILLE_BANC_SEULE', seule), dansBibliotheque: true },
+            { ...grille('GRILLE_BANC_CART', cart), dansBibliotheque: true }
         ]));
         const biblio = db.getSync('bibliothequeGrilles', []) || [];
-        await db.set('bibliothequeGrilles', biblio.concat([grille('GRILLE_BANC_DEUX', deux)]));   // security-ok: fixture littérale écrite par le banc, aucune source externe
-    }, [DEUX, SEULE]);
+        await db.set('bibliothequeGrilles', biblio.concat([grille('GRILLE_BANC_DEUX', deux), grille('GRILLE_BANC_CART', cart)]));   // security-ok: fixture littérale écrite par le banc, aucune source externe
+        await db.set(cle('cartouches_GRILLE_BANC_CART'), [{ id: 'CART_BANC', nom: 'Cartouche fictive', grilleId: 'GRILLE_BANC_CART', criteres: [], commentaires: {} }]);   // security-ok: fixture littérale écrite par le banc, aucune source externe
+    }, [DEUX, SEULE, CART]);
     await ouvrirBibliotheque(page);
     await expect(rangee(page, 'bibliotheque', DEUX)).toHaveCount(1);
 
@@ -300,12 +309,25 @@ test('« Supprimer définitivement » : l’exemplaire de la bibliothèque reste
     expect(s.trimestre).not.toContain('GRILLE_BANC_DEUX');
     expect(s.biblio, 'l’exemplaire de la bibliothèque reste').toContain('GRILLE_BANC_DEUX');
 
-    // « ← Utiliser dans ce trimestre » la ramène. MESURÉ : sous un identifiant NEUF, qui nomme sa source
-    // (`idOriginal`, `ajouterGrilleIndividuelle`) — pas « même id » comme le supposait le verdict.
+    // « ← Utiliser dans ce trimestre » la ramène, sous un identifiant NEUF qui nomme sa source
+    // (`idOriginal`, `ajouterGrilleIndividuelle`). Les deux colonnes la disent liée : pas de « Garder → ».
     await rangee(page, 'bibliotheque', DEUX).locator('.biblio2-passage').click();
     await expect(rangee(page, 'trimestre', DEUX)).toHaveCount(1);
     const ramenee = await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.idOriginal === 'GRILLE_BANC_DEUX'));
     expect(ramenee, 'la grille est revenue dans ce trimestre').toBeTruthy();
+    expect(ramenee.id).not.toBe('GRILLE_BANC_DEUX');
+    await expect(rangee(page, 'trimestre', DEUX).locator('.biblio2-etat')).toHaveText('✓ Aussi dans ta bibliothèque');
+    await expect(rangee(page, 'trimestre', DEUX).locator('.biblio2-passage')).toHaveCount(0);
+    await expect(rangee(page, 'bibliotheque', DEUX).locator('.biblio2-etat')).toHaveText('✓ Déjà dans ce trimestre');
+    // Une grille sans lien avec la bibliothèque garde son passage.
+    await expect(rangee(page, 'trimestre', SEULE).locator('.biblio2-passage')).toHaveText('Garder dans ma bibliothèque →', { useInnerText: true });
+
+    // La grille ramenée se supprime avec la phrase, et l'exemplaire reste encore.
+    await supprimer(DEUX);
+    s = await stock();
+    expect(s.trimestre).not.toContain(ramenee.id);
+    expect(s.biblio).toEqual(expect.arrayContaining(['GRILLE_BANC_DEUX']));
+    expect(s.biblio).not.toContain(ramenee.id);
 
     // Sans exemplaire dans la bibliothèque : la question nue.
     await supprimer(SEULE);
@@ -313,9 +335,20 @@ test('« Supprimer définitivement » : l’exemplaire de la bibliothèque reste
     expect(s.trimestre).not.toContain('GRILLE_BANC_SEULE');
     expect(s.biblio).not.toContain('GRILLE_BANC_SEULE');
 
+    // La question des cartouches porte la phrase (le déplacement est ensuite annulé : la grille reste).
+    const r = rangee(page, 'trimestre', CART);
+    await r.locator('.biblio2-kebab').click();
+    await r.getByRole('menuitem', { name: 'Supprimer définitivement' }).click();
+    await expect.poll(() => questions.length).toBe(4);
+    expect((await stock()).trimestre).toContain('GRILLE_BANC_CART');
+
     expect(questions).toEqual([
         `Supprimer la grille « ${DEUX} » ?\n\nSon exemplaire de ta bibliothèque reste.`,
-        `Supprimer la grille « ${SEULE} » ?`
+        `Supprimer la grille « ${DEUX} » ?\n\nSon exemplaire de ta bibliothèque reste.`,
+        `Supprimer la grille « ${SEULE} » ?`,
+        `La grille « ${CART} » porte 1 cartouche(s) : Cartouche fictive.\n\n`
+            + 'Ces cartouches deviendraient introuvables si la grille partait sans elles.\n\n'
+            + 'Veux-tu les déplacer vers une autre grille ?\n\nSon exemplaire de ta bibliothèque reste.'
     ]);
 });
 
