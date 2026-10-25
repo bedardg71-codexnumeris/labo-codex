@@ -2755,6 +2755,7 @@ function _construireLigneProductionEvaluee(production, evaluation, indexArtefact
         statutRemise: statutRemise,
         statutIntegrite: statutIntegrite,
         estNonRecevable: estNonRecevable,
+        travailEnCours: typeof window.evaluationTravailEnCours === 'function' && window.evaluationTravailEnCours(evaluation),   // statut incomplet (25 oct. 2026)
         verrouille: evaluation.verrouillee || false,
         evaluationId: evaluation.id,
         productionId: production.id,
@@ -3139,7 +3140,9 @@ function genererSectionProductions(da) {
                                     ${badgeJeton}
                                 </td>
                                 <td style="padding: 12px; text-align: center;">
-                                    ${(ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
+                                    ${ligne.travailEnCours
+                                        ? '<span class="badge-jeton badge-jeton-incomplet">Incomplet ; travail en cours</span>'
+                                        : (ligne.statutRemise === 'non-remis' || ligne.statutRemise === 'retard')
                                         ? '<span class="badge-non-remis-wrapper"><span class="badge-jeton-titre">Non remis</span></span>'
                                         : (ligne.estNonRecevable
                                             ? `<span class="badge-non-recevable-wrapper" title="${ligne.statutIntegrite === 'plagiat' ? 'Plagiat détecté' : 'Utilisation IA non autorisée'}"><span class="badge-jeton-titre">Non recevable</span></span>`

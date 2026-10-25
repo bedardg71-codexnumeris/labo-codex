@@ -2662,6 +2662,29 @@
     }
 
     /**
+     * Le statut le plus avancé de la copie, selon le workflow : Importé, Annoté, Évalué — ou Incomplet.
+     * Extrait de `genererBadgeFichierImporte` le 25 oct. 2026 (statut incomplet).
+     * @param {Object} f - Le fichier
+     * @param {Object|null} evaluation - Son évaluation active
+     * @returns {{texte: string, classe: string}}
+     */
+    function statutPastilleFichier(f, evaluation) {
+        // Statut « Incomplet ; travail en cours » (25 oct. 2026) : prime sur les critères gardés en base.
+        if (typeof window.evaluationTravailEnCours === 'function' && window.evaluationTravailEnCours(evaluation)) {
+            return { texte: 'Incomplet', classe: 'incomplet' };
+        }
+        // Beta 99.30 : ne marquer "Évalué" que si au moins un critère a été noté.
+        // Une évaluation sauvegardée sans critère (ex. juste un jeton de délai
+        // appliqué) ne doit pas écraser l'état Annoté/Importé.
+        if (evaluation && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0) {
+            return { texte: 'Évalué', classe: 'evalue' };
+        }
+        const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
+        if (annotation && annotationContientDuContenu(annotation)) return { texte: 'Annoté', classe: 'annote' };
+        return { texte: 'Importé', classe: 'importe' };
+    }
+
+    /**
      * Genere un badge compact pour un fichier importe
      * @param {Object} f - Le fichier
      * @returns {string} HTML
@@ -2674,27 +2697,8 @@
             : (f.etudiantDA || 'Non associé');
         const nomEtudiant = (typeof anonymiserNom === 'function' && anonymiserNom(f.etudiantDA)) || nomReel;
 
-        // Déterminer le statut le plus avancé selon le workflow
-        let statutTexte = 'Importé';
-        let statutClasse = 'importe';
-
-        const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
-        if (annotation && annotationContientDuContenu(annotation)) {
-            statutTexte = 'Annoté';
-            statutClasse = 'annote';
-        }
-
         const evaluation = travauxResolution.trouverEvaluationPourFichier(f);
-        // Beta 99.30 : ne marquer "Évalué" que si au moins un critère a été noté.
-        // Une évaluation sauvegardée sans critère (ex. juste un jeton de délai
-        // appliqué) ne doit pas écraser l'état Annoté/Importé.
-        const evaluationNotee = evaluation
-            && Array.isArray(evaluation.criteres)
-            && evaluation.criteres.length > 0;
-        if (evaluationNotee) {
-            statutTexte = 'Évalué';
-            statutClasse = 'evalue';
-        }
+        const { texte: statutTexte, classe: statutClasse } = statutPastilleFichier(f, evaluation);
 
         // 🔧 FIX (29 mars 2026) : Indicateurs reprise/remplacée dans les badges
         // Étoile ★ pour les reprises (comme le profil Engagement)
@@ -2778,6 +2782,7 @@
      */
     function determinerStatutFichier(f, evaluations) {
         const evaluation = travauxResolution.trouverEvaluationPourFichier(f);
+        if (evaluation && typeof window.evaluationTravailEnCours === 'function' && window.evaluationTravailEnCours(evaluation)) return 'incomplet';   // 25 oct. 2026
         if (evaluation) return 'evalue';
         const annotation = travauxStockage.obtenirAnnotationFichier(f.id);
         if (annotation && annotationContientDuContenu(annotation)) return 'annote';
@@ -2788,10 +2793,11 @@
      * Genere un resume compact des statuts pour un groupe de fichiers
      */
     function genererResumeStatuts(fichiers, evaluations) {
-        let nbEvalue = 0, nbAnnote = 0, nbImporte = 0;
+        let nbEvalue = 0, nbAnnote = 0, nbImporte = 0, nbIncomplet = 0;
         fichiers.forEach(f => {
             const s = determinerStatutFichier(f, evaluations);
             if (s === 'evalue') nbEvalue++;
+            else if (s === 'incomplet') nbIncomplet++;
             else if (s === 'annote') nbAnnote++;
             else nbImporte++;
         });
@@ -2799,6 +2805,7 @@
         if (nbEvalue > 0) parts.push(`<span class="travaux-compteur-pill evalue">${nbEvalue} évalué${nbEvalue > 1 ? 's' : ''}</span>`);
         if (nbAnnote > 0) parts.push(`<span class="travaux-compteur-pill annote">${nbAnnote} annoté${nbAnnote > 1 ? 's' : ''}</span>`);
         if (nbImporte > 0) parts.push(`<span class="travaux-compteur-pill importe">${nbImporte} importé${nbImporte > 1 ? 's' : ''}</span>`);
+        if (nbIncomplet > 0) parts.push(`<span class="travaux-compteur-pill incomplet">${nbIncomplet} incomplet${nbIncomplet > 1 ? 's' : ''}</span>`);
         return parts.join(' ');
     }
 
@@ -2987,7 +2994,7 @@
 
         // Statut
         const statut = determinerStatutFichier(f, evaluations);
-        const statutLabels = { importe: 'Importé', annote: 'Annoté', evalue: 'Évalué' };
+        const statutLabels = { importe: 'Importé', annote: 'Annoté', evalue: 'Évalué', incomplet: 'Incomplet' };
 
         // Select production avec valeur pré-sélectionnée
         const selectId = `travaux-tableau-prod-${f.id}`;
@@ -3420,6 +3427,10 @@
                 if (pill.dataset.origClasse === 'evalue') {
                     pill.textContent = 'ÉVALUÉ';
                     pill.className = 'travaux-badge-pill evalue';
+                } else if (pill.dataset.origClasse === 'incomplet') {
+                    // Statut incomplet (25 oct. 2026) : la copie ouverte le garde
+                    pill.textContent = 'Incomplet';
+                    pill.className = 'travaux-badge-pill incomplet';
                 } else {
                     pill.textContent = 'EN COURS';
                     pill.className = 'travaux-badge-pill en-cours';

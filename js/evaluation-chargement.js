@@ -1795,6 +1795,7 @@ function _debouncerAutoSave() {
     // Lot C — l'intégrité voyage DANS l'instantané : l'écriture peut partir après un changement
     // de copie, quand l'écran montre déjà l'élève suivant (#959 le remet à « recevable »).
     window._pendingAutoSaveSnapshot.integrite = _lireIntegriteEcran();
+    window._pendingAutoSaveSnapshot.travailEnCoursEcran = _lireTravailEnCoursEcran();   // statut incomplet, même raison
     // #1145 — le minuteur CONSOMME l'instantané : laissé en attente, le prochain flush le rejouait.
     window._timerAutoSave = setTimeout(function() {
         const instantane = window._pendingAutoSaveSnapshot;
@@ -2099,6 +2100,22 @@ function _construireNouvelleEvaluationAutoSave(ec, grille, criteres) {
     }, champsDOM);
 }
 
+/**
+ * #697 (A-1, audit du 5 sept. 2026) — ne rien CRÉER sans échelle résolue : `calculerNote`
+ * n'a pas pu calculer, et la nouvelle évaluation porterait `0` sans portée (mesuré au
+ * banc : A5). Une existante garde sa note (`_majEvaluationExistanteAutoSave`, `#572`).
+ * #941 lot S1 — une grille entièrement en points se note sans échelle : `calculerNote` a
+ * calculé, la création passe (même règle que la porte de l'enregistrement).
+ * Extrait de `_autoSauvegarderCriteres` le 25 oct. 2026 (statut incomplet).
+ * @returns {boolean} vrai si la création doit attendre une échelle
+ */
+function _echelleManquanteAutoSave(ec, grille) {
+    const enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grille);
+    if (enPoints || typeof window.resoudreEchelleEvaluation !== 'function') return false;
+    const echelleId = ec.echelleId || (document.getElementById('selectEchelle1') || {}).value || '';
+    return !window.resoudreEchelleEvaluation(echelleId);
+}
+
 function _autoSauvegarderCriteres(snapshot) {
     window._timerAutoSave = null;
     var ec = snapshot || window.evaluationEnCours;
@@ -2112,6 +2129,8 @@ function _autoSauvegarderCriteres(snapshot) {
         || Object.keys(ec.pointsAnalytiques || {}).length > 0;   // lot 2 — des points seuls comptent
     const integrite = ec.integrite || _lireIntegriteEcran();
     const integriteSignalee = integrite.statutIntegrite !== 'recevable';
+    // Statut incomplet (25 oct. 2026) — comme l'intégrité : posé sans niveau, il s'enregistre.
+    const travailEnCours = (typeof ec.travailEnCoursEcran === 'boolean') ? ec.travailEnCoursEcran : _lireTravailEnCoursEcran();
 
     // Collecter les criteres
     const grilles = db.getSync(cle('grillesTemplates'), []);
@@ -2152,24 +2171,18 @@ function _autoSauvegarderCriteres(snapshot) {
         if (evaluations[idx].verrouillee === true) return;
         _majIntegriteAutoSave(evaluations[idx], integrite);   // lot C
         // Sans niveau dans l'instantané, les critères ne sont pas réécrits : un instantané vide
-        // effacerait ceux de la base (la garde d'origine de cette fonction).
-        if (aDesNiveaux) _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres.concat(criteresHorsGrille(evaluations[idx], grille)));   // #652
+        // effacerait ceux de la base (la garde d'origine de cette fonction). Statut incomplet posé :
+        // les critères masqués ne sont pas réécrits non plus, la note est retirée.
+        if (aDesNiveaux && !travailEnCours) _majEvaluationExistanteAutoSave(evaluations[idx], ec, criteres.concat(criteresHorsGrille(evaluations[idx], grille)));   // #652
+        _majTravailEnCoursAutoSave(evaluations[idx], travailEnCours);
     } else {
-        if (!aDesNiveaux && !integriteSignalee) return;
-        // #697 (A-1, audit du 5 sept. 2026) — ne rien CRÉER sans échelle résolue : `calculerNote`
-        // n'a pas pu calculer, et la nouvelle évaluation porterait `0` sans portée (mesuré au
-        // banc : A5). Une existante garde sa note (`_majEvaluationExistanteAutoSave`, `#572`).
-        // #941 lot S1 — une grille entièrement en points se note sans échelle : `calculerNote` a
-        // calculé, la création passe (même règle que la porte de l'enregistrement).
-        const enPoints = typeof window.grilleEntierementEnPoints === 'function' && window.grilleEntierementEnPoints(grille);
-        if (!enPoints && typeof window.resoudreEchelleEvaluation === 'function') {
-            const echelleId = ec.echelleId || (document.getElementById('selectEchelle1') || {}).value || '';
-            if (!window.resoudreEchelleEvaluation(echelleId)) return;
-        }
+        if (!aDesNiveaux && !integriteSignalee && !travailEnCours) return;
+        if (!travailEnCours && _echelleManquanteAutoSave(ec, grille)) return;   // incomplet : aucune note à calculer
         // Creer une nouvelle evaluation (brouillon non verrouille)
         const nouvelle = _construireNouvelleEvaluationAutoSave(ec, grille, criteres);
         if (!nouvelle) return;
         _majIntegriteAutoSave(nouvelle, integrite);   // lot C — l'instantané, pas l'écran
+        _majTravailEnCoursAutoSave(nouvelle, travailEnCours);
         if (typeof integrite.notesIntegrite !== 'string') nouvelle.notesIntegrite = '';   // masquées : rien
         evaluations.push(nouvelle);
         ec.idModification = nouvelle.id;
@@ -2201,6 +2214,27 @@ function _lireIntegriteEcran() {
 function _majIntegriteAutoSave(evaluation, integrite) {
     evaluation.statutIntegrite = integrite.statutIntegrite;
     if (typeof integrite.notesIntegrite === 'string') evaluation.notesIntegrite = integrite.notesIntegrite;
+}
+
+/** Statut « Incomplet ; travail en cours » (25 oct. 2026) — la case de la palette Paramètres. */
+function _lireTravailEnCoursEcran() {
+    const caseEnCours = document.getElementById('travailEnCours');
+    return !!(caseEnCours && caseEnCours.checked);
+}
+
+/**
+ * Posé : la copie n'a pas de note (`evaluationEntreDansLaNote` l'écarte de toute façon) ; ses
+ * critères restent en base, masqués à l'écran, comme pour « Non reçu ». Retiré : aucune trace
+ * (décision de Cowork, 25 oct.) — la note revient au prochain niveau saisi.
+ */
+function _majTravailEnCoursAutoSave(evaluation, travailEnCours) {
+    if (travailEnCours) {
+        evaluation.travailEnCours = true;
+        evaluation.noteFinale = null;
+        evaluation.niveauFinal = '';
+    } else {
+        delete evaluation.travailEnCours;
+    }
 }
 
 /**

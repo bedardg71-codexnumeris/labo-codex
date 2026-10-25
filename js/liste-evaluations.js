@@ -39,6 +39,9 @@ function productionGenereUneLigne(production) {
  * @returns {string} Le statut workflow
  */
 function calculerStatutWorkflow(ligne) {
+    // Statut « Incomplet ; travail en cours » (25 oct. 2026) : ni évaluée, ni en attente de fichier.
+    if (ligne.travailEnCours) return 'incomplet';
+
     // Beta 99.30 : une évaluation sans critère noté (ex. uniquement un jeton de
     // délai appliqué) ne doit pas être traitée comme évaluée. On retombe alors
     // sur le calcul normal (importé / annoté / reçu) basé sur le fichier.
@@ -141,7 +144,8 @@ function obtenirLibelleStatut(statut) {
         'evalue': 'Évalué',
         // #927 (20 sept. 2026) puis lot C de l'enregistrement (D1, 26 sept.) : « Non verrouillée ».
         // L'identifiant reste `non-enregistree` : le filtre retenu le mémorise (`etat.statut`).
-        'non-enregistree': 'Non verrouillée'
+        'non-enregistree': 'Non verrouillée',
+        'incomplet': 'Incomplet'   // 25 oct. 2026 — le libellé complet est dans le badge de la ligne
     };
     return libelles[statut] || statut;
 }
@@ -189,6 +193,9 @@ let vueCorbeilleActive = false;
  * ARCHITECTURE: Identique à calculerEtSauvegarderIndicesAssiduite() dans saisie-presences.js
  */
 function calculerEtSauvegarderIndiceCompletion() {
+    // ⚠ (25 oct. 2026) Ce que rend cette fonction n'est lu par personne : son seul appelant
+    // (`initialiserListeEvaluations`) l'ignore depuis le retrait de l'écriture (Tier 6.2, ci-dessous).
+    // L'indice C affiché vient des pratiques (`calculerDetailsCompletion`) et des snapshots.
 
     const etudiants = (typeof obtenirEtudiantsCoursActif === 'function')
         ? obtenirEtudiantsCoursActif()
@@ -936,51 +943,9 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
             if (evaluationsTrouvees.length > 0) {
                 // Créer une ligne pour CHAQUE évaluation trouvée
                 evaluationsTrouvees.forEach(evaluation => {
-                    // IMPORTANT : Quatre types de badges (par ordre de priorité)
-                    // 1. Intégrité académique : plagiat ou IA non autorisée (prioritaire)
-                    // 2. ORIGINALE remplacée : remplaceeParId existe → grisée, "Remplacée"
-                    // 3. NOUVELLE reprise : repriseDeId existe OU ID commence par EVAL_REPRISE_ → "Jeton de reprise appliqué"
-                    // 4. Délai : jetonDelaiApplique = true ET pas de repriseDeId → "Jeton de délai appliqué"
-
-                    const statutIntegrite = evaluation.statutIntegrite || 'recevable';
-                    const estNonRecevable = (statutIntegrite === 'plagiat' || statutIntegrite === 'ia');
-                    const estSoupcon = (statutIntegrite === 'soupcon');
-
-                    const estOriginaleRemplacee = evaluation.remplaceeParId ? true : false;
-                    const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
-                    const estRepriseCiblee = evaluation.jetonRepriseCibleeApplique === true;
-                    const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId && !evaluation.jetonRepriseCibleeApplique;
-
-                    // Déterminer le statut et le badge
-                    let statut = 'evalue';
-                    let badgeType = null;
-
-                    // Priorité 1 : Intégrité académique
-                    if (estNonRecevable) {
-                        statut = 'non-recevable';
-                        badgeType = statutIntegrite === 'plagiat' ? 'plagiat' : 'ia';
-                    } else if (estSoupcon) {
-                        statut = 'evalue';
-                        badgeType = 'soupcon';
-                    }
-                    // Priorité 2 : Jetons (seulement si pas de problème d'intégrité)
-                    else if (estOriginaleRemplacee) {
-                        // L'originale remplacée par une reprise
-                        statut = 'remplacee';
-                        badgeType = 'originale-reprise';
-                    } else if (estRepriseCiblee) {
-                        // La nouvelle évaluation de reprise ciblée
-                        statut = 'evalue';
-                        badgeType = 'reprise-ciblee';
-                    } else if (estNouvelleReprise) {
-                        // La nouvelle évaluation de reprise standard
-                        statut = 'evalue';
-                        badgeType = 'nouvelle-reprise';
-                    } else if (aJetonDelai) {
-                        // Évaluation avec délai accordé
-                        statut = 'evalue';
-                        badgeType = 'delai';
-                    }
+                    // Le statut et le badge de la ligne (extraits le 25 oct. 2026, statut incomplet)
+                    const { statut, badgeType, statutIntegrite, estOriginaleRemplacee, estNouvelleReprise, estTravailEnCours } =
+                        _statutEtBadgeDeLigne(evaluation);
 
                     // Formater le nom de production avec description
                     let productionNomComplet = production.titre;
@@ -1036,7 +1001,8 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         // #927 (20 sept. 2026) — NON ENREGISTRÉE : le même test que `evaluationEntreDansLaNote`
                         // (`verrouillee === false`, strict). La liste la disait « Évalué » pendant que la note et la
                         // complétion l'ignoraient : 10 portfolios d'A2024 introuvables, rapport de Grégoire.
-                        nonEnregistree: evaluation.verrouillee === false && !estOriginaleRemplacee,
+                        nonEnregistree: evaluation.verrouillee === false && !estOriginaleRemplacee && !estTravailEnCours,
+                        travailEnCours: estTravailEnCours,
                         remplacee: estOriginaleRemplacee,
                         badgeType: badgeType,
                         scoresOriginaux: scoresOriginaux
@@ -1344,6 +1310,77 @@ function _noteChiffreeAffichee(valeur) {
 }
 
 /**
+ * Le statut et le badge d'une ligne de la Liste pour une évaluation (extraits du constructeur des
+ * lignes le 25 oct. 2026, statut « Incomplet ; travail en cours »).
+ * @param {Object} evaluation
+ * @returns {{statut: string, badgeType: string|null, statutIntegrite: string, estOriginaleRemplacee: boolean,
+ *            estNouvelleReprise: boolean, estTravailEnCours: boolean}}
+ */
+function _statutEtBadgeDeLigne(evaluation) {
+    // IMPORTANT : Quatre types de badges (par ordre de priorité)
+    // 1. Intégrité académique : plagiat ou IA non autorisée (prioritaire)
+    // 2. ORIGINALE remplacée : remplaceeParId existe → grisée, "Remplacée"
+    // 3. NOUVELLE reprise : repriseDeId existe OU ID commence par EVAL_REPRISE_ → "Jeton de reprise appliqué"
+    // 4. Délai : jetonDelaiApplique = true ET pas de repriseDeId → "Jeton de délai appliqué"
+
+    const statutIntegrite = evaluation.statutIntegrite || 'recevable';
+    const estNonRecevable = (statutIntegrite === 'plagiat' || statutIntegrite === 'ia');
+    const estSoupcon = (statutIntegrite === 'soupcon');
+    const estTravailEnCours = typeof window.evaluationTravailEnCours === 'function' && window.evaluationTravailEnCours(evaluation);   // 25 oct. 2026
+
+    const estOriginaleRemplacee = !!evaluation.remplaceeParId;
+    const estNouvelleReprise = evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_');
+    const estRepriseCiblee = evaluation.jetonRepriseCibleeApplique === true;
+    const aJetonDelai = evaluation.jetonDelaiApplique && !evaluation.repriseDeId && !evaluation.jetonRepriseCibleeApplique;
+
+    // Déterminer le statut et le badge
+    let statut = 'evalue';
+    let badgeType = null;
+
+    // Priorité 1 : Intégrité académique
+    if (estNonRecevable) {
+        statut = 'non-recevable';
+        badgeType = statutIntegrite;   // « plagiat » ou « ia » : les clés de `BADGES_STATUT_COPIE`
+    } else if (estSoupcon) {
+        statut = 'evalue';
+        badgeType = 'soupcon';
+    } else if (estTravailEnCours) {
+        // Statut « Incomplet ; travail en cours » (25 oct. 2026), sur le modèle de « Soupçon »
+        statut = 'evalue';
+        badgeType = 'incomplet';
+    }
+    // Priorité 2 : Jetons (seulement si pas de problème d'intégrité)
+    else if (estOriginaleRemplacee) {
+        // L'originale remplacée par une reprise
+        statut = 'remplacee';
+        badgeType = 'originale-reprise';
+    } else if (estRepriseCiblee) {
+        // La nouvelle évaluation de reprise ciblée
+        statut = 'evalue';
+        badgeType = 'reprise-ciblee';
+    } else if (estNouvelleReprise) {
+        // La nouvelle évaluation de reprise standard
+        statut = 'evalue';
+        badgeType = 'nouvelle-reprise';
+    } else if (aJetonDelai) {
+        // Évaluation avec délai accordé
+        statut = 'evalue';
+        badgeType = 'delai';
+    }
+
+    return { statut, badgeType, statutIntegrite, estOriginaleRemplacee, estNouvelleReprise: !!estNouvelleReprise, estTravailEnCours };
+}
+
+// Les badges d'un statut de la copie, sans valeur variable (statut incomplet, 25 oct. 2026 : en table plutôt
+// qu'en branche de plus dans `genererLigneHTML`).
+const BADGES_STATUT_COPIE = {
+    plagiat: ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (Plagiat)</span>',
+    ia: ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (IA)</span>',
+    soupcon: ' <span class="badge-jeton badge-jeton-soupcon">À vérifier</span>',
+    incomplet: ' <span class="badge-jeton badge-jeton-incomplet">Incomplet ; travail en cours</span>'
+};
+
+/**
  * Génère le HTML d'une ligne du tableau
  */
 function genererLigneHTML(ligne) {
@@ -1356,13 +1393,9 @@ function genererLigneHTML(ligne) {
     let classeRemplacee = '';
     let badgeJeton = '';
 
-    // Priorité aux badges d'intégrité
-    if (ligne.badgeType === 'plagiat') {
-        badgeJeton = ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (Plagiat)</span>';
-    } else if (ligne.badgeType === 'ia') {
-        badgeJeton = ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (IA)</span>';
-    } else if (ligne.badgeType === 'soupcon') {
-        badgeJeton = ' <span class="badge-jeton badge-jeton-soupcon">À vérifier</span>';
+    // Priorité aux badges d'intégrité, puis au statut incomplet (`BADGES_STATUT_COPIE`)
+    if (Object.prototype.hasOwnProperty.call(BADGES_STATUT_COPIE, ligne.badgeType)) {
+        badgeJeton = BADGES_STATUT_COPIE[ligne.badgeType];
     }
     // Badges de jetons
     else if (ligne.badgeType === 'originale-reprise') {

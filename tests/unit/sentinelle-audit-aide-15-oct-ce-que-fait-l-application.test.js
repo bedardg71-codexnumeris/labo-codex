@@ -263,10 +263,12 @@ describe('Les gestes décrits sont ceux du code', () => {
     });
 
     it('une copie non recevable reste au dénominateur de la complétion', () => {
-        // Le code : la complétion de chaque famille qui compte des productions lit ce prédicat.
+        // Le code : la complétion de chaque famille qui compte des productions lit la règle unique de la remise
+        // (25 oct. 2026), et cette règle écarte une copie non recevable.
         for (const f of ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-configurable.js']) {
-            expect(lire(f), f).toContain('!window.evaluationNonRecevable(e)');
+            expect(lire(f), f).toContain('window.evaluationCompteCommeRemise(e)');
         }
+        expect(tranche(lire('js/pratiques/pratique-registre.js'), 'function evaluationCompteCommeRemise(', 'function compterEvaluationsEcarteesDeLaNote(')).toContain('if (evaluationNonRecevable(evaluation)) return false;');
         const carte = tranche(AIDE, 'Travail NON RECEVABLE', 'Travail SOUPÇONNÉ');
         expect(carte).toContain('7/9');
         expect(carte).not.toMatch(/7\/8|Exclu du total attendu/);
