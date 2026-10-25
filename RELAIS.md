@@ -7,6 +7,18 @@
 
 ---
 
+## 25 OCT. 2026, SOIR (Claude Code) : **LES BIBLIOTHÈQUES EN DEUX COLONNES, LOTS 1 À 4, VIVENT SUR LA BRANCHE `bibliotheques-deux-colonnes` = `d331c3fa` ; LE LOT 4 EST EN RELECTURE ; LA FUSION ATTEND LE VERDICT ET LES MOTS DE GRÉGOIRE**
+
+**Où vit le travail** : branche locale `bibliotheques-deux-colonnes` = `d331c3fa`, non poussée : `2798558e` (consigne du lot 4), `63c324c6` (le lot : la Carte d'alignement en deux colonnes, le spécimen dans `design-system.html`, #1165 inscrite), `d331c3fa` (demande de relecture, porte terrain, captures, ligne du plan). La copie de travail est revenue sur `main`.
+
+**En relecture chez Cowork** : `plans de travail/DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-4.md`. Son § 5 porte, **pour Grégoire**, le texte proposé de l'aide « Comment fonctionne la bibliothèque » et celui des Nouvelles : ni l'un ni l'autre n'est codé.
+
+**La suite, dans l'ordre** (plan, « Les étapes de la mise en ligne groupée ») : verdict de Cowork et retouches ; les mots validés par Grégoire, l'aide posée en retouche ; la fusion dans `main` au signal de Grégoire (BACKLOG : le plus grand des deux compteurs, **#1165 sur la branche, #1162 sur `main`**, aucun numéro ne resert) ; la vérification complète ; la release (`minor`) ; la porte terrain une fois la version en ligne (artefact à publier par Cowork).
+
+**État mesuré sur la branche** (`63c324c6`) : Vitest 9 694 sur 9 695, le rouge est `sentinelle-anticache-fichiers-modifies`, attendu, que la release réglera. WebKit, les bancs des six fenêtres et ceux qui touchent une bibliothèque ou la Carte : 117 verts, 4 sautés (captures), 0 rouge. Pas de verdict complet.
+
+**Sur `main`, ce commit** : seulement ce relais. Pas de push : Grégoire pousse. `main` reste à 35 commits d'avance sur `origin/main` (la version du soir n'est pas partie).
+
 ## 25 OCT. 2026, FIN D'APRÈS-MIDI (Claude Code) : **LES BIBLIOTHÈQUES EN DEUX COLONNES, LOTS 1 À 3, VIVENT SUR LA BRANCHE `bibliotheques-deux-colonnes` = `deef36ff` ; LA FUSION ATTEND LE LOT 4**
 
 **Où vit le travail** : branche locale `bibliotheques-deux-colonnes` = `deef36ff`, non poussée. La copie de travail est revenue sur `main` (verdict du lot 3, § 2.3) pour que la version du soir parte de `main`.
