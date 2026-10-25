@@ -164,7 +164,8 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
         'js/bibliotheque-ui.js': 2,               // formaterTitreDemo → formaterTitre ; _labelItem (texte)
         'js/pratiques-gestion.js': 1,             // labelItem (texte)
         'js/grilles.js': 2,                       // #1154 : le nom des rangées de la fenêtre en deux colonnes, ×2 (texte, échappé par creerFenetreDeuxColonnes) ; `libelle` parti
-        'js/echelles.js': 1,                      // libelle (texte)
+        'js/echelles.js': 2,                      // #1155 : le nom des rangées de la fenêtre en deux colonnes, ×2 (texte, échappé par creerFenetreDeuxColonnes) ; `libelle` parti
+        'js/cartouches.js': 2,                    // #1155 : le nom des rangées de la fenêtre en deux colonnes, ×2 (texte, échappé par creerFenetreDeuxColonnes)
         'js/productions-bibliotheque-ui.js': 1    // libelle (texte)
     };
     it('C.t les titres de cartes reçoivent un nom déjà échappé', () => {

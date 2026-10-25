@@ -86,6 +86,11 @@ describe('#658 · B — echelles.js ne rend dans aucun élément absent du docum
         for (const { src } of JS) {
             for (const m of src.matchAll(/id=\\?"([A-Za-z][\w-]*)\\?"/g)) forges.add(m[1]);
             for (const m of src.matchAll(/modalId:\s*'([\w-]+)'/g)) forges.add(m[1]);
+            // #1155 (25 oct. 2026) — RÉANCRÉ : la fenêtre en deux colonnes pose aussi les ids que le
+            // module lui passe en configuration (le sélecteur et l'aperçu de l'import d'un autre
+            // trimestre, le champ de fichier du menu « Importer ou exporter ▾ »).
+            for (const m of src.matchAll(/(?:selectId|apercuId|idListe):\s*'([\w-]+)'/g)) forges.add(m[1]);
+            for (const m of src.matchAll(/champsFichier:\s*\[\{\s*id:\s*'([\w-]+)'/g)) forges.add(m[1]);
         }
         const lus = [...ECHELLES.matchAll(/getElementById\(\s*'([^'$]+)'\s*\)/g)].map((m) => m[1]);
         // Règle 10 : le motif trouve bien les lectures du module.

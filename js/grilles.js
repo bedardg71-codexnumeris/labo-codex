@@ -2292,23 +2292,15 @@ function apercuGrilleBibliotheque(grille) {
     };
 }
 
+// #1154 (verdict du 25 oct., § 5.2) — la relation entre une grille du trimestre et un exemplaire de
+// la bibliothèque (`id`, ou `idOriginal` après « ← Utiliser ») est UNE pour les deux colonnes et la
+// question de la suppression ; #1155 l'a montée dans `BibliothequeUI.lieeAExemplaire`, que les
+// échelles et les cartouches lisent aussi.
+
 /**
  * Les données de la bibliothèque des grilles. #1154 : des rangées pour la fenêtre en
  * deux colonnes (`BibliothequeUI.creerFenetreDeuxColonnes`), plus aucun HTML.
  */
-/**
- * #1154 (verdict du 25 oct., § 5.2) — UNE SEULE RELATION entre une grille du trimestre et un
- * exemplaire de la bibliothèque, pour les deux colonnes et pour la question de la suppression.
- * Les deux passages ne laissent pas la même trace : « Garder → » conserve l'`id`
- * (`ajouterGrilleALaBibliotheque`) ; « ← Utiliser » en donne un neuf et nomme la source dans
- * `idOriginal` (`ajouterGrilleIndividuelle`). Lire l'`id` seul d'un côté et les deux de l'autre
- * faisait proposer « Garder → » pour une grille venue de la bibliothèque.
- */
-function grilleLieeAExemplaire(grille, exemplaire) {
-    if (!grille || !exemplaire || !exemplaire.id) return false;
-    return grille.id === exemplaire.id || grille.idOriginal === exemplaire.id;
-}
-
 async function preparerDonneesBibliothequeGrilles() {
     const grilles = await db.get(cle('grillesTemplates')) || [];
     // Beta 99.39 (A.0) : masque les items démo en mode normal
@@ -2326,7 +2318,7 @@ async function preparerDonneesBibliothequeGrilles() {
     const idsNommes = new Set();
     doublonsDetectes.forEach(groupe => groupe.exemplaires.forEach(ex => idsNommes.add(ex.id)));
 
-    // « Aussi dans ta bibliothèque » : la relation de `grilleLieeAExemplaire`, la même que
+    // « Aussi dans ta bibliothèque » : la relation de `BibliothequeUI.lieeAExemplaire`, la même que
     // « Déjà dans ce trimestre » plus bas. Pas `dansBibliotheque`, qui veut dire « dans le menu
     // de l'écran » sur une grille du trimestre.
     // #327 — dossiers de classement (couche par-dessus, range par identité).
@@ -2345,7 +2337,7 @@ async function preparerDonneesBibliothequeGrilles() {
             ligne: ligneGrilleBibliotheque(grille, auteurActif),
             afficherId: idsNommes.has(grille.id),
             apercu: apercuGrilleBibliotheque(grille),
-            dansBibliotheque: toutesBibliotheque.some(ex => grilleLieeAExemplaire(grille, ex)),
+            dansBibliotheque: toutesBibliotheque.some(ex => BibliothequeUI.lieeAExemplaire(grille, ex)),
             menu: [
                 { label: 'Dupliquer', action: 'dupliquerGrilleBibliotheque', param: grille.id, title: 'Créer une copie' },
                 { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'grille', param2: grille.id, title: 'Générer un fichier .lcz signé à transmettre (#329)' },
@@ -2364,7 +2356,7 @@ async function preparerDonneesBibliothequeGrilles() {
 
     // #327 — rangées à plat, chacune avec son dossier ; le menu de la barre filtre.
     const rangeesBibliotheque = grillesDisponibles.map(grille => {
-        const dejaPresent = grilles.some(g => grilleLieeAExemplaire(g, grille) && g.dansBibliotheque !== false);
+        const dejaPresent = grilles.some(g => BibliothequeUI.lieeAExemplaire(g, grille) && g.dansBibliotheque !== false);
         const repCourant = repParGrille[grille.id] || null;
         const menu = [];
         repsGrilles.forEach(r => {
@@ -3059,14 +3051,14 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
 /**
  * #1154 (25 oct. 2026, décision de Grégoire) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE, ET LES
  * DEUX QUESTIONS DE LA SUPPRESSION (avec ou sans cartouches) LE DISENT quand il y en a un, selon
- * la relation des deux colonnes (`grilleLieeAExemplaire`). Aucun des quatre appelants de
+ * la relation des deux colonnes (`BibliothequeUI.lieeAExemplaire`). Aucun des quatre appelants de
  * `supprimerGrilleAvecPorteDeSortie` ne le retire : la phrase est vraie par tous les chemins.
  * @returns {Promise<string>} la phrase, précédée d'une ligne vide, ou ''.
  */
 async function _phraseExemplaireDeBibliotheque(grille) {
     if (typeof obtenirToutesLesGrillesBibliotheque !== 'function') return '';
     const biblio = await obtenirToutesLesGrillesBibliotheque();
-    return biblio.some(ex => grilleLieeAExemplaire(grille, ex)) ? '\n\nSon exemplaire de ta bibliothèque reste.' : '';
+    return biblio.some(ex => BibliothequeUI.lieeAExemplaire(grille, ex)) ? '\n\nSon exemplaire de ta bibliothèque reste.' : '';
 }
 
 /**
