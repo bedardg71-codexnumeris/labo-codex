@@ -32,12 +32,15 @@ const SEMER = `async () => {
     await window.afficherListeGrilles();
     const grilles = await db.get(cle('grillesTemplates'));
     const menu = [...document.getElementById('menuGrilles').options].filter(o => o.value).map(o => o.textContent);
+    // ↻ #1154 (25 oct. 2026) : la bibliothèque des grilles passe en deux colonnes ; le badge HOLIS / MIXTE
+    // devient la ligne en clair de la rangée (« Holistique et algorithmique · 2 critères »). C'est elle qu'on lit.
+    await window.afficherBibliothequeGrilles();
+    const fenetre = document.getElementById('modalBibliothequeGrilles');
     return grilles.map(g => {
-        const el = document.createElement('div');
-        el.innerHTML = window.GabaritsUtils.genererBadgeComposition(g);
+        const rangee = fenetre.querySelector('.biblio2-panneau--trimestre .biblio2-rangee[data-biblio-item-id="' + g.id + '"]');
         return { id: g.id, menu,
-            badges: [...el.querySelectorAll('.badge-composition')].map(b => b.textContent),
-            ancien: el.querySelectorAll('.badge-type-som, .badge-type-std, .badge-type-spe, .badge-type-den, .badge-type-multi').length };
+            ligne: rangee ? rangee.querySelector('.biblio2-rangee-meta').textContent : null,
+            ancien: fenetre.querySelectorAll('.badge-composition, .badge-type-som, .badge-type-std, .badge-type-spe, .badge-type-den, .badge-type-multi').length };
     });
 }`;
 
@@ -48,13 +51,14 @@ test('volet C · la liste des grilles dit la composition, déduite des critères
     const liste = await page.evaluate(eval(SEMER));
     console.log('LISTE →', JSON.stringify(liste));
     const par = Object.fromEntries(liste.map(l => [l.id, l]));
-    expect(par.G_ALGO.badges).toEqual(['ALGO']);
-    expect(par.G_HOLIS.badges).toEqual(['HOLIS']);
-    expect(par.G_MIXTE.badges).toEqual(['MIXTE']);
-    expect(par.G_VIDE.badges).toEqual([]);
+    expect(par.G_ALGO.ligne).toBe('Algorithmique · 2 critères');
+    expect(par.G_HOLIS.ligne).toBe('Holistique · 1 critère');
+    expect(par.G_MIXTE.ligne).toBe('Holistique et algorithmique · 2 critères');
+    expect(par.G_VIDE.ligne).toBe('0 critère');
     // #1147 : le menu de la sélection montre le nom seul.
     expect(liste[0].menu).toEqual(liste.map(l => l.id === 'G_ALGO' ? 'G1 FR-ALGO seul A26' : l.id === 'G_HOLIS' ? 'G5 FR-HOLIS A26' : l.id === 'G_MIXTE' ? 'Grille mixte' : 'Grille vide'));
-    // Le champ déclaré (SOM, STD, SPE) ne commande plus aucun badge.
+    // Le champ déclaré (SOM, STD, SPE) ne commande plus aucun badge. BREAK-TEST (25 oct.) : la ligne des types
+    // retirée de `ligneGrilleBibliotheque` → ROUGE.
     expect(liste.every(l => l.ancien === 0)).toBe(true);
 });
 
