@@ -24,7 +24,7 @@
 
 - **D6** (« Étudiant·e N ») : arrêtée à bon droit (le changement réécrirait les tables de pseudonymes et changerait les numéros). Soumise à Grégoire avec la voie qui n'écrit rien.
 - **Le menu principal qui affiche « Accueil » pendant que l'Aide est ouverte, à 1024 px et moins** : antérieur au lot, aucun symptôme vécu. Issue : noté ici, sans fiche.
-- **Le commentaire de `sentinelle-603-604`** (et des fixtures de huit autres fichiers de tests, et une ligne de `RELAIS.md`) porte des noms de famille d'étudiant·es réel·les de l'import du 30 août. Issue : **corriger maintenant** (règle n° 6 de `CLAUDE.md`, dépôt public ; décision de Grégoire du 22 sept. de retirer les noms réels des fichiers actuels). Consigne : `CONSIGNE-LOT-2026-10-24-noms-reels-tests.md`. L'historique du dépôt est soumis à Grégoire.
+- **Le commentaire de `sentinelle-603-604`** (et des fixtures de huit autres fichiers de tests, et une ligne de `RELAIS.md`) porte, selon ce commentaire, des noms de famille d'étudiant·es réel·les de l'import du 30 août. **Corrigé le 24 oct. à 19 h 18 : Grégoire n'a pas d'élèves de ces noms ; ils étaient fictifs.** Issue : **corriger maintenant** (règle n° 6 de `CLAUDE.md`, dépôt public ; décision de Grégoire du 22 sept. de retirer les noms réels des fichiers actuels). Consigne : `CONSIGNE-LOT-2026-10-24-noms-reels-tests.md`. L'historique du dépôt est soumis à Grégoire.
 
 ## Le geste à vérifier à l'écran
 

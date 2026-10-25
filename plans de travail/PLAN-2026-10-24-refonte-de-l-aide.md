@@ -3,6 +3,17 @@
 > Écrit par Cowork (session dans le nuage) le samedi 24 octobre 2026 au soir, sur `main` = `dc39bff2`, à partir de l'audit `plans de travail/audit-aide-2026-10-24/AUDIT-AIDE-2026-10-24.md` et des treize décisions que Grégoire y a rendues (24 oct., 18 h 24-18 h 25).
 > **Ordre avec l'autre plan du jour.** `PLAN-2026-10-24-bibliotheques-chaines-critere-algo.md` a encore ses lots 3 et 4. Une seule session écrit à la fois (règle de parallélisme) : les lots de ce plan passent **entre** deux lots de l'autre, ou après lui, jamais en même temps. Le lot 1 ne décrit aucun écran ; les lots 2 décrivent les écrans tels qu'ils sont quand ils passent.
 
+## État au 24 octobre 2026, 20 h 07 : chantier suspendu
+
+Décision de Grégoire (20 h 06) : le chantier est mis en suspens, parce que d'autres lots tournent dans d'autres sessions et qu'il n'en lance pas plusieurs à la fois ; l'interface des bibliothèques va être revue.
+
+- **Fait** : le lot 1, couper et ranger (`c320a977`, relu et accepté par Cowork ; pas encore en ligne, il part avec la prochaine version).
+- **Il reste** :
+  - la consigne `CONSIGNE-LOT-2026-10-24-correction-noms-fictifs.md`, pas encore exécutée : les deux noms retirés en `cac1465d` étaient fictifs (Grégoire, 19 h 18) ; elle retire la sentinelle sans objet et rend vrais un commentaire de test et une ligne du relais ;
+  - D6 (« Étudiant·e 1 » en mode anonymisé) : la décision de Grégoire, sur la voie qui ne réécrit aucune table (`DEMANDE-RELECTURE-2026-10-24-aide-lot-1.md`) ;
+  - les lots 2a, 2b, 2c, 3, 4, 5 et la porte, tels que décrits plus haut.
+- **Avant de reprendre** : remesurer, contre le code d'alors, les entrées qui décrivent les écrans changés depuis l'audit (les bibliothèques de la Conception et leur nouvelle revue, la page Trimestre, le profil individuel, les chaînes d'étapes). Le dossier d'audit a été mesuré à `35745bd` ; ses verdicts « vrai ? » sur ces écrans peuvent avoir vieilli. Ajuster le plan si un écran a changé de forme, puis seulement écrire la consigne du lot 2a.
+
 ## Ce que l'utilisateur verra à la fin
 
 Une Aide rangée comme l'application : huit parties (Commencer, Cadre, Conception, Évaluation, Suivi, Labo, Codex et archives, Référence), une soixantaine d'entrées au lieu de 75, environ 8 400 mots au lieu de 20 900. Chaque entrée dit ce que fait l'application aujourd'hui ; la théorie est dans les guides intégrés ; plus rien n'y décrit un bouton disparu ; ce qui manquait le plus y est.
