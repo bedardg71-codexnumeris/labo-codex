@@ -5355,6 +5355,8 @@ body:not(.mode-clair) .badge-source--partage {
     align-items: center;
     gap: 6px;
 }
+/* #1157 — une rangée sans aperçu : le nom n'est pas un bouton, il garde la hauteur des autres */
+.biblio2-rangee-nom--fixe { margin: 0; cursor: default; display: flex; }
 .biblio2-chevron { font-size: 0.7rem; color: var(--texte-muted); transition: transform 0.15s ease; }
 .biblio2-rangee-nom[aria-expanded="true"] .biblio2-chevron { transform: rotate(90deg); }
 .biblio2-rangee-meta { margin: 0; font-size: 0.82rem; color: var(--texte-secondaire); }
@@ -5429,6 +5431,9 @@ body:not(.mode-clair) .badge-source--partage {
 /* #1155 — les cartouches d'un autre trimestre, par grille */
 .biblio2-import-groupe { margin: 10px 0 6px; font-size: 0.9rem; color: var(--texte-secondaire); }
 .biblio2-import-mention { font-weight: 400; font-style: italic; }
+/* #1157 — « Même cours », en tête du repli d'import de la Carte */
+.biblio2-import-entete { margin-bottom: 10px; }
+.biblio2-import-entete .biblio2-import-groupe { margin-top: 4px; }
 
 /* #1155 — l'intertitre d'un groupe dans une colonne (les cartouches, par grille) */
 .biblio2-groupe .biblio2-intertitre { margin: 6px 0 0; color: var(--texte-secondaire); }

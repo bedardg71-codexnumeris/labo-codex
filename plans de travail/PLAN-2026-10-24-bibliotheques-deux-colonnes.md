@@ -54,6 +54,15 @@
 
 **La livraison** : pas de release avant la fin du **lot 4** (nouveau partage du 25 oct., consigne du lot 3, § 6 : la Carte d'alignement est aussi dans l'onglet Conception, et l'aide sert les dix fenêtres), pour que les six bibliothèques de la Conception changent ensemble (sinon, pendant quelques jours, deux grammaires cohabitent dans le même onglet). Le moment reste celui de Grégoire (règle 7). Chaque lot dépose ses captures (Mac 1440 clair et sombre, iPad 820) : c'est par elles que Grégoire voit l'avancement avant la mise en ligne.
 
+**Les étapes de la mise en ligne groupée** (consigne du lot 4, § 4.3), dans cet ordre, aucune avant la précédente :
+
+1. **Le verdict de Cowork** sur le lot 4, et ses retouches s'il y en a.
+2. **Les mots validés par Grégoire** : le texte de l'aide « Comment fonctionne la bibliothèque » et celui des Nouvelles (proposés dans `DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-4.md`), puis l'aide posée en retouche, sur la branche.
+3. **La fusion dans `main`**, au signal de Grégoire, `main` au repos. La ligne « Dernier ID utilisé » du BACKLOG prend **le plus grand des deux compteurs** (branche et `main`) ; les fiches des deux côtés restent, **aucun numéro ne resert** ; un numéro pris des deux côtés se renumérote du côté de la branche, et se dit.
+4. **La vérification complète** sur `main` fusionné (Vitest, puis le verdict Playwright, `fin-de-session` § 4.5).
+5. **La release** (`scripts/release.mjs`, `minor`), les Nouvelles validées dans `js/changelog-data.js`, puis le push par Grégoire.
+6. **La porte terrain** `PORTES-TERRAIN-2026-10-25-bibliotheques-deux-colonnes.md` (artefact jumeau publié par Cowork), une fois la version lue en bas de page.
+
 ## Inscrit en chemin (verdict du lot 1, 25 oct.)
 
 - **Exporter pour partager depuis « Dans ta bibliothèque »** (maquette) : l'export d'aujourd'hui (`partageExport.resoudreEntite`) ne lit que les grilles des trimestres, c'est du code neuf. La phrase « C'est d'ici que tu peux les partager. » revient avec ce geste.
