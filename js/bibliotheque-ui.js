@@ -754,7 +754,15 @@
      */
     BibliothequeUI.fermerModal = function (modalId) {
         var modal = document.getElementById(modalId);
-        if (modal) modal.remove();
+        if (!modal) return;
+        // #1154 — une fenêtre en deux colonnes fermée PAR LE CODE va être reconstruite
+        // (mesuré le 25 oct. : les neuf appels de grilles.js sont suivis de son
+        // `afficher…`) : on retient où l'on était. L'utilisateur, lui, ferme par
+        // `fermerFenetre`, qui oublie.
+        if (modal.classList.contains('biblio2-voile')) {
+            _etatsRetenusDeuxColonnes[modalId] = _capturerDeuxColonnes(modal);
+        }
+        modal.remove();
     };
 
     /**
@@ -845,15 +853,27 @@
 
     /**
      * Rend le bloc trigger + popover. Renvoie '' si actions vide.
-     * @param {Array} actions - [{label, action, param, classe?, title?}]
+     * @param {Array} actions - [{label, action, param, classe?, title?}] ; #1154 : aussi
+     *        `{separateur: true}` (un trait) et `{note: '…'}` (une ligne de texte, sans geste)
      * @param {string} [contextId] - ID stable optionnel (sinon généré)
+     * @param {Object} [options] - #1154 : `libelle` (texte visible du bouton, à la place
+     *        de ⋮), `ariaLabel` (nom du bouton ⋮), `classeBouton` (classe en plus)
      */
-    BibliothequeUI.renderMenuActions = function (actions, contextId) {
+    BibliothequeUI.renderMenuActions = function (actions, contextId, options) {
         if (!actions || actions.length === 0) return '';
+        options = options || {};
         var menuId = contextId ? 'biblio-menu-' + contextId : _genererMenuId();
         var itemsHTML = '';
         for (var i = 0; i < actions.length; i++) {
             var a = actions[i];
+            if (a.separateur) {
+                itemsHTML += '<hr class="biblio-menu-separateur">';
+                continue;
+            }
+            if (a.note) {
+                itemsHTML += '<p class="biblio-menu-note">' + echapperHtml(a.note) + '</p>';
+                continue;
+            }
             var classeExtra = a.classe === 'btn-supprimer' ? ' biblio-menu-item--danger' : '';
             itemsHTML += '<button type="button" ' + _btnAttrs(a) +
                 ' class="biblio-menu-item' + classeExtra + '"' +
@@ -861,12 +881,16 @@
                 ' role="menuitem">' +
                 echapperHtml(a.label) + '</button>';
         }
+        var nomBouton = options.libelle
+            ? ''
+            : ' aria-label="' + echapperAttribut(options.ariaLabel || 'Plus d\'actions') + '" title="Plus d\'actions"';
         return '<span class="biblio-menu-wrapper">' +
-            '<button type="button" class="biblio-menu-trigger btn btn-mini"' +
+            '<button type="button" class="biblio-menu-trigger btn btn-mini' +
+            (options.classeBouton ? ' ' + options.classeBouton : '') + '"' +
             ' data-action="BibliothequeUI.toggleMenuActions"' +
             ' data-param="' + echapperHtml(menuId) + '"' +
-            ' aria-haspopup="menu" aria-expanded="false"' +
-            ' aria-label="Plus d\'actions" title="Plus d\'actions">⋮</button>' +
+            ' aria-haspopup="menu" aria-expanded="false"' + nomBouton + '>' +
+            (options.libelle ? echapperHtml(options.libelle) : '⋮') + '</button>' +
             '<div id="' + echapperHtml(menuId) + '" class="biblio-menu-popover" role="menu">' +   // #467 : contextId peut venir d'un id importé
                 itemsHTML +
             '</div>' +
@@ -887,9 +911,14 @@
             if (_menuOuvertCourant) BibliothequeUI.fermerTousLesMenus();
         });
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && _menuOuvertCourant) {
+            if (e.key !== 'Escape') return;
+            // #1154 — Échap ferme d'abord un menu ouvert, puis la fenêtre en deux colonnes.
+            if (_menuOuvertCourant) {
                 BibliothequeUI.fermerTousLesMenus();
+                return;
             }
+            var fenetre = _fenetreDeuxColonnesAuPremierPlan();
+            if (fenetre) BibliothequeUI.fermerFenetre(fenetre.id);
         });
     }
 
@@ -1332,7 +1361,12 @@
         var caseMasquer = (modal && typeof modal.querySelector === 'function')
             ? modal.querySelector('.biblio-toggle-deja-present input[type="checkbox"]') : null;
         if (caseMasquer && caseMasquer.checked) {
-            return 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans ta sélection » pour les voir.';
+            // #1154 — la case dit ses mots : la fenêtre en deux colonnes l'appelle « Masquer ce
+            // qui est déjà dans ce trimestre », les quatre autres gardent les leurs.
+            var libelleCase = (caseMasquer.closest && caseMasquer.closest('label'))
+                ? caseMasquer.closest('label').textContent.trim()
+                : 'Masquer les éléments déjà dans ta sélection';
+            return 'Aucune n\'apparaît dans la liste : décoche « ' + libelleCase + ' » pour les voir.';
         }
         return (options && options.repliFiltre)
             ? 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.'
@@ -1565,6 +1599,16 @@
             _config[biblio] = cfg || {};
         };
 
+        // #1154 — la fenêtre en deux colonnes ouvre la gestion des dossiers à la demande :
+        // elle lit et pose le même état que les gestes ci-dessous (créer, renommer et
+        // supprimer la gardent ouverte), sans le défaut « déplié s'il n'y a aucun dossier ».
+        BibliothequeUI.repertoires.estDeplie = function (biblio) {
+            return !!_deplie[biblio];
+        };
+        BibliothequeUI.repertoires.poserDeplie = function (biblio, deplie) {
+            _deplie[biblio] = !!deplie;
+        };
+
         // --- Zone « Mes dossiers » (repliable) -------------------------------
 
         /** HTML de la zone « Mes dossiers » (créer / renommer / supprimer). */
@@ -1730,6 +1774,429 @@
             if (id && typeof fn === 'function') await fn(id);
         };
     })();
+
+    /* =====================================================================
+       #1154 — LA FENÊTRE EN DEUX COLONNES (lot 1 du plan du 24 oct. 2026)
+
+       « Dans ce trimestre » | « Dans ta bibliothèque », un seul geste de passage
+       par rangée. Mots de Grégoire (24 oct., 19 h 50) ; référence visuelle :
+       `plans de travail/MAQUETTE-2026-10-24-bibliotheque-deux-colonnes.html`.
+
+       LE COMPOSANT IMPOSE LA STRUCTURE, LE MODULE NE FOURNIT QUE DES DONNÉES :
+       `creerModal` recevait des fragments HTML tout faits, avec leurs styles en
+       ligne, et chaque bibliothèque dessinait la sienne (audit du 24 oct., « une
+       cause commune »). Ici, le module passe des textes et des gestes ; tout
+       l'échappement et toutes les classes sont faits ici. `creerModal`,
+       `renderCarteSelection` et `renderCarteDisponible` restent tant qu'une des
+       neuf autres fenêtres s'en sert (plan, lot 6).
+
+       config = {
+         modalId, titre, aide,                 // aide : la clé `data-aide` du bouton ⓘ
+         menuFichiers: [geste | {separateur} | {note}],   // « Importer ou exporter ▾ »
+         champsFichier: [{id, accept, onChange}],          // les <input type="file"> du menu
+         avantColonnes: html,                  // le bandeau des doublons (renderAvertissementDoublons)
+         trimestre:    colonne,
+         bibliotheque: colonne + { dossiers, partages }
+       }
+       colonne = { titre, phrase, idListe, vide, rangees, compte?, boutonEntete?,
+                   importAutreTrimestre? (trimestre), videFiltre? (bibliothèque) }
+       rangee  = { id, nom, ligne, afficherId?, marqueHtml?, dossier?,
+                   apercu: {paragraphes, lignes: [[nom, type, valeur]], total: [libellé, valeur]},
+                   passage: {label, action, param, param2?, sens: 'versBibliotheque'|'versTrimestre'|null}
+                   OU etat: 'texte de l'état calme',
+                   menu: [geste | {separateur}] }
+       dossiers = { biblio, reps: [{id, nom}], refreshFn, masquerLibelle }
+       partages = { titre, phrase, rangees }
+       ===================================================================== */
+
+    var _etatsRetenusDeuxColonnes = {};
+    var _filtresDossierDeuxColonnes = {};
+    // Une reconstruction suit sa fermeture dans la même suite d'`await` ; au-delà,
+    // l'état retenu ne décrit plus ce que l'utilisateur regarde.
+    var DELAI_ETAT_RETENU = 10000;
+
+    /** Ce qu'une reconstruction doit rendre : le défilement, les aperçus ouverts, les replis ouverts. */
+    function _capturerDeuxColonnes(modal) {
+        var fenetre = modal.querySelector('.biblio2-fenetre');
+        var ouverts = [];
+        var replis = [];
+        Array.prototype.forEach.call(modal.querySelectorAll('.biblio2-rangee-nom[aria-expanded="true"]'),
+            function (b) { ouverts.push(b.getAttribute('data-param')); });
+        Array.prototype.forEach.call(modal.querySelectorAll('details[data-repli][open]'),
+            function (d) { replis.push(d.getAttribute('data-repli')); });
+        return { defilement: fenetre ? fenetre.scrollTop : 0, ouverts: ouverts, replis: replis, quand: Date.now() };
+    }
+
+    /**
+     * La fenêtre en deux colonnes que la touche Échap doit fermer, ou null : une autre
+     * fenêtre visible ouverte PAR-DESSUS (aperçu d'un import, métadonnées CC…) la garde.
+     */
+    function _fenetreDeuxColonnesAuPremierPlan() {
+        if (typeof document === 'undefined') return null;
+        var fenetres = document.querySelectorAll('.biblio2-voile');
+        if (!fenetres.length) return null;
+        var derniere = fenetres[fenetres.length - 1];
+        var autres = document.querySelectorAll('.modal-js-overlay, [role="dialog"], [aria-modal="true"], .modal-import-grilles');
+        for (var i = 0; i < autres.length; i++) {
+            var el = autres[i];
+            if (el === derniere || derniere.contains(el)) continue;
+            var apres = derniere.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING;
+            if (apres && el.getClientRects().length > 0) return null;
+        }
+        return derniere;
+    }
+
+    /** L'utilisateur ferme (×, Échap) : rien n'est retenu pour la prochaine ouverture. */
+    BibliothequeUI.fermerFenetre = function (modalId) {
+        delete _etatsRetenusDeuxColonnes[modalId];
+        BibliothequeUI.fermerTousLesMenus();
+        var modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+    };
+
+    /** Le nom d'une rangée déplie ou replie son aperçu (plusieurs peuvent être ouverts). */
+    BibliothequeUI.basculerApercu = function (cleApercu) {
+        var boutons = document.querySelectorAll('.biblio2-rangee-nom');
+        for (var i = 0; i < boutons.length; i++) {
+            if (boutons[i].getAttribute('data-param') !== String(cleApercu)) continue;
+            var ouvert = boutons[i].getAttribute('aria-expanded') === 'true';
+            boutons[i].setAttribute('aria-expanded', ouvert ? 'false' : 'true');
+            var apercu = document.getElementById(boutons[i].getAttribute('aria-controls'));
+            if (apercu) apercu.hidden = ouvert;
+            return;
+        }
+    };
+
+    function _renderPassage(r) {
+        if (r.etat) {
+            return '<span class="biblio2-etat"><span class="biblio2-coche" aria-hidden="true">✓</span> ' +
+                echapperHtml(r.etat) + '</span>';
+        }
+        var p = r.passage;
+        if (!p) return '';
+        var contenu = echapperHtml(p.label);
+        if (p.sens === 'versBibliotheque') {
+            contenu += ' <span class="biblio2-fleche-large" aria-hidden="true">→</span>' +
+                '<span class="biblio2-fleche-etroite" aria-hidden="true">↓</span>';
+        } else if (p.sens === 'versTrimestre') {
+            contenu = '<span class="biblio2-fleche-large" aria-hidden="true">←</span>' +
+                '<span class="biblio2-fleche-etroite" aria-hidden="true">↑</span> ' + contenu;
+        }
+        return '<button type="button" class="btn biblio2-passage" ' + _btnAttrs(p) +
+            (p.title ? ' title="' + echapperAttribut(p.title) + '"' : '') + '>' + contenu + '</button>';
+    }
+
+    function _renderApercu(apercu, idApercu, ouvert) {
+        apercu = apercu || {};
+        var html = '';
+        (apercu.paragraphes || []).forEach(function (texte) {
+            if (texte) html += '<p class="biblio2-apercu-texte">' + echapperHtml(texte) + '</p>';
+        });
+        var lignes = apercu.lignes || [];
+        if (lignes.length) {
+            html += '<table class="biblio2-apercu-table"><tbody>' +
+                lignes.map(function (l) {
+                    return '<tr><td>' + echapperHtml(l[0] || '') + '</td>' +
+                        '<td class="biblio2-apercu-type">' + echapperHtml(l[1] || '') + '</td>' +
+                        '<td class="biblio2-apercu-valeur">' + echapperHtml(l[2] || '') + '</td></tr>';
+                }).join('') +
+                (apercu.total
+                    ? '<tr class="biblio2-apercu-total"><td>' + echapperHtml(apercu.total[0]) + '</td><td></td>' +
+                      '<td class="biblio2-apercu-valeur">' + echapperHtml(apercu.total[1]) + '</td></tr>'
+                    : '') +
+                '</tbody></table>';
+        }
+        return '<div class="biblio2-apercu" id="' + echapperAttribut(idApercu) + '"' + (ouvert ? '' : ' hidden') + '>' +
+            html + '</div>';
+    }
+
+    function _rangeeCachee(r, colonne, ctx) {
+        if (colonne !== 'bibliotheque' || ctx.filtre === '__tous__') return false;
+        return (r.dossier || '__nonclasse__') !== ctx.filtre;
+    }
+
+    function _renderRangee(r, colonne, ctx, index) {
+        var cleApercu = colonne + ':' + r.id;
+        var ouvert = ctx.ouverts.has(cleApercu);
+        var idApercu = ctx.modalId + '-apercu-' + colonne + '-' + index;
+        var dossier = colonne === 'bibliotheque'
+            ? ' data-dossier="' + echapperAttribut(r.dossier || '__nonclasse__') + '"'
+            : '';
+        return '<li class="biblio2-rangee"' + _ancreItem(r.id) + dossier +
+                (_rangeeCachee(r, colonne, ctx) ? ' hidden' : '') + '>' +
+            '<div class="biblio2-rangee-ligne">' +
+                '<div class="biblio2-rangee-texte">' +
+                    '<button type="button" class="biblio2-rangee-nom" data-action="BibliothequeUI.basculerApercu"' +
+                        ' data-param="' + echapperAttribut(cleApercu) + '" aria-expanded="' + ouvert + '"' +
+                        ' aria-controls="' + echapperAttribut(idApercu) + '">' +
+                        '<span class="biblio2-chevron" aria-hidden="true">▶</span>' +
+                        '<span>' + echapperHtml(r.nom) + '</span></button>' +
+                    (r.marqueHtml || '') +
+                    '<p class="biblio2-rangee-meta">' + echapperHtml(r.ligne || '') +
+                        (r.afficherId ? BibliothequeUI.renderPuceId(r.id) : '') + '</p>' +
+                '</div>' +
+                '<div class="biblio2-rangee-actions">' +
+                    _renderPassage(r) +
+                    BibliothequeUI.renderMenuActions(r.menu, colonne + '-' + r.id,
+                        { ariaLabel: 'Autres gestes pour ' + r.nom, classeBouton: 'biblio2-kebab' }) +
+                '</div>' +
+            '</div>' +
+            _renderApercu(r.apercu, idApercu, ouvert) +
+        '</li>';
+    }
+
+    function _renderListe(rangees, colonne, ctx, idListe, vide, videFiltre) {
+        var items = rangees.map(function (r, i) { return _renderRangee(r, colonne, ctx, i); }).join('');
+        if (!rangees.length && vide) {
+            items = '<li><p class="biblio2-vide">' + echapperHtml(vide) + '</p></li>';
+        }
+        if (videFiltre) {
+            var visibles = rangees.filter(function (r) { return !_rangeeCachee(r, colonne, ctx); }).length;
+            items += '<li class="biblio2-vide-filtre"' + (rangees.length && !visibles ? '' : ' hidden') + '>' +
+                '<p class="biblio2-vide">' + echapperHtml(videFiltre) + '</p></li>';
+        }
+        return '<ul class="biblio2-liste"' + (idListe ? ' id="' + echapperAttribut(idListe) + '"' : '') + '>' + items + '</ul>';
+    }
+
+    /** « Importer depuis un autre trimestre », replié sur une ligne au pied de « Dans ce trimestre ». */
+    function _renderImportAutreTrimestre(o, ctx) {
+        if (!o || !o.options || !o.options.length) return '';
+        var options = o.options.map(function (t) {
+            return '<option value="' + echapperAttribut(t.value) + '">' + echapperHtml(t.label) + '</option>';
+        }).join('');
+        return '<details class="biblio2-repli" data-repli="import-trimestre"' + (ctx.replis.has('import-trimestre') ? ' open' : '') + '>' +
+            '<summary class="biblio2-repli-titre">' + echapperHtml(o.titre) + '</summary>' +
+            '<div class="biblio2-import-ligne">' +
+                '<select id="' + echapperAttribut(o.selectId) + '" class="controle-form biblio2-select biblio2-import-select"' +
+                    ' aria-label="Trimestre d\'où importer">' +
+                    '<option value="">-- Choisir un trimestre --</option>' + options +
+                '</select>' +
+                '<button type="button" data-action="' + echapperAttribut(o.actionVoir) + '" class="btn btn-secondaire">' +
+                    echapperHtml(o.libelleVoir) + '</button>' +
+                '<button type="button" data-action="' + echapperAttribut(o.actionTout) + '" class="btn btn-secondaire"' +
+                    (o.tooltipTout ? ' data-tooltip="' + echapperAttribut(o.tooltipTout) + '"' : '') + '>Tout importer</button>' +
+                (o.aide
+                    ? '<button type="button" class="btn-aide-contextuelle" data-aide="' + echapperAttribut(o.aide) + '"' +
+                      ' aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre">' +
+                      '<span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>'
+                    : '') +
+            '</div>' +
+            '<div id="' + echapperAttribut(o.apercuId) + '" class="u-hide biblio2-import-apercu"></div>' +
+        '</details>';
+    }
+
+    /** La barre de « Dans ta bibliothèque » : le menu des dossiers, « Masquer… », la gestion à la demande. */
+    function _renderBarreDossiers(d, ctx) {
+        var b = echapperAttribut(d.biblio);
+        var options = [['__tous__', 'Tous les dossiers'], ['__nonclasse__', 'Non classées']]
+            .concat((d.reps || []).map(function (r) { return [r.id, r.nom || 'Sans nom']; }))
+            .concat([['__gerer__', 'Gérer les dossiers…']])
+            .map(function (o) {
+                return '<option value="' + echapperAttribut(o[0]) + '"' + (o[0] === ctx.filtre ? ' selected' : '') + '>' +
+                    echapperHtml(o[1]) + '</option>';
+            }).join('');
+
+        var lignes = (d.reps || []).map(function (r) {
+            return '<div class="biblio2-dossier-ligne">' +
+                '<input type="text" class="controle-form" data-rep-biblio="' + b + '" data-rep-id="' + echapperAttribut(r.id) + '"' +
+                    ' value="' + echapperAttribut(r.nom || '') + '" aria-label="Nom du dossier">' +
+                '<button type="button" data-action="BibliothequeUI.repertoires.renommer" data-param="' + b + '"' +
+                    ' data-param2="' + echapperAttribut(r.id) + '" class="btn btn-secondaire">Renommer</button>' +
+                window.boutonRetirerBloc({ action: 'BibliothequeUI.repertoires.supprimer', param: d.biblio, param2: r.id, titre: 'Supprimer le dossier',
+                    confirm: 'Supprimer ce dossier ? Son contenu n\'est pas supprimé : les ' + (d.labelPluriel || 'éléments') + ' repassent en « non classées ».' }) +
+            '</div>';
+        }).join('');
+        if (!lignes) {
+            lignes = '<p class="biblio2-phrase">Aucun dossier pour l\'instant. Crée-en un pour ranger tes ' +
+                echapperHtml(d.labelPluriel || 'éléments') + '.</p>';
+        }
+
+        var gestionOuverte = BibliothequeUI.repertoires.estDeplie(d.biblio);
+        return '<div class="biblio2-barre">' +
+                '<select class="controle-form biblio2-select" aria-label="Dossier affiché"' +
+                    ' data-on-change="BibliothequeUI.choisirDossier" data-param="' + echapperAttribut(ctx.modalId) + '">' +
+                    options + '</select>' +
+                '<label class="biblio-toggle-deja-present biblio2-case">' +
+                    '<input type="checkbox" data-on-change="BibliothequeUI.basculerMasquerDejaPresent"' +
+                        ' data-refresh-fn="' + echapperAttribut(d.refreshFn) + '"' +
+                        (BibliothequeUI.estMasquerDejaPresentActif() ? ' checked' : '') + '> ' +
+                    echapperHtml(d.masquerLibelle) +
+                '</label>' +
+            '</div>' +
+            '<div class="biblio2-dossiers" id="' + echapperAttribut(ctx.modalId) + '-dossiers" data-biblio="' + b + '"' +
+                (gestionOuverte ? '' : ' hidden') + '>' +
+                '<p class="biblio2-dossiers-titre">Mes dossiers</p>' +
+                lignes +
+                '<div class="biblio2-dossier-ligne">' +
+                    '<input type="text" id="rep-' + b + '-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier"' +
+                        ' aria-label="Nom du nouveau dossier">' +
+                    '<button type="button" data-action="BibliothequeUI.repertoires.creer" data-param="' + b + '" class="btn btn-secondaire">Créer le dossier</button>' +
+                '</div>' +
+                '<button type="button" class="biblio2-btn-texte" data-action="BibliothequeUI.fermerGestionDossiers"' +
+                    ' data-param="' + echapperAttribut(ctx.modalId) + '">Fermer</button>' +
+            '</div>';
+    }
+
+    function _appliquerFiltreDossier(modal, filtre) {
+        var liste = modal.querySelector('.biblio2-panneau--bibliotheque .biblio2-liste');
+        if (!liste) return;
+        var visibles = 0;
+        var rangees = liste.querySelectorAll('.biblio2-rangee');
+        Array.prototype.forEach.call(rangees, function (li) {
+            var cachee = filtre !== '__tous__' && li.getAttribute('data-dossier') !== filtre;
+            li.hidden = cachee;
+            if (!cachee) visibles++;
+        });
+        var videFiltre = liste.querySelector('.biblio2-vide-filtre');
+        if (videFiltre) videFiltre.hidden = !(rangees.length && !visibles);
+    }
+
+    /** Le menu des dossiers : filtrer la colonne, ou ouvrir « Gérer les dossiers… ». */
+    BibliothequeUI.choisirDossier = function (modalId, select) {
+        var modal = document.getElementById(modalId);
+        if (!modal || !select) return;
+        if (select.value === '__gerer__') {
+            select.value = _filtresDossierDeuxColonnes[modalId] || '__tous__';
+            BibliothequeUI.ouvrirGestionDossiers(modalId);
+            return;
+        }
+        _filtresDossierDeuxColonnes[modalId] = select.value;
+        _appliquerFiltreDossier(modal, select.value);
+    };
+
+    BibliothequeUI.ouvrirGestionDossiers = function (modalId) {
+        var zone = document.getElementById(modalId + '-dossiers');
+        if (!zone) return;
+        BibliothequeUI.repertoires.poserDeplie(zone.getAttribute('data-biblio'), true);
+        zone.hidden = false;
+        var champ = zone.querySelector('input[id$="-nouveau-nom"]');
+        if (champ) champ.focus();
+    };
+
+    BibliothequeUI.fermerGestionDossiers = function (modalId) {
+        var zone = document.getElementById(modalId + '-dossiers');
+        if (!zone) return;
+        BibliothequeUI.repertoires.poserDeplie(zone.getAttribute('data-biblio'), false);
+        zone.hidden = true;
+    };
+
+    function _renderColonne(col, colonne, ctx) {
+        col = col || {};
+        var rangees = col.rangees || [];
+        var idTitre = ctx.modalId + '-titre-' + colonne;
+        var compte = (col.compte != null) ? col.compte : rangees.length;
+
+        var html = '<section class="biblio2-panneau biblio2-panneau--' + colonne + '" aria-labelledby="' + echapperAttribut(idTitre) + '">' +
+            '<div class="biblio2-panneau-entete">' +
+                '<div>' +
+                    '<h3 id="' + echapperAttribut(idTitre) + '" class="biblio2-panneau-titre">' + echapperHtml(col.titre) +
+                        ' <span class="biblio2-compte">(' + compte + ')</span></h3>' +
+                    (col.phrase ? '<p class="biblio2-phrase">' + echapperHtml(col.phrase) + '</p>' : '') +
+                '</div>' +
+                (col.boutonEntete
+                    ? '<button type="button" class="biblio2-btn-texte" ' + _btnAttrs(col.boutonEntete) + '>' +
+                      echapperHtml(col.boutonEntete.label) + '</button>'
+                    : '') +
+            '</div>';
+
+        if (col.dossiers) html += _renderBarreDossiers(col.dossiers, ctx);
+        html += _renderListe(rangees, colonne, ctx, col.idListe, col.vide, col.dossiers ? col.videFiltre : null);
+        if (col.importAutreTrimestre) html += _renderImportAutreTrimestre(col.importAutreTrimestre, ctx);
+
+        var p = col.partages;
+        if (p && p.rangees && p.rangees.length) {
+            html += '<h4 class="biblio2-intertitre">' + echapperHtml(p.titre) + '</h4>' +
+                (p.phrase ? '<p class="biblio2-phrase">' + echapperHtml(p.phrase) + '</p>' : '') +
+                _renderListe(p.rangees, 'partages', ctx, null, null, null);
+        }
+        return html + '</section>';
+    }
+
+    /** L'état à rendre : celui de la fenêtre encore là, sinon celui qu'une fermeture par le code a retenu. */
+    function _reprendreEtat(modalId) {
+        var existant = document.getElementById(modalId);
+        var etat = null;
+        if (existant) {
+            etat = _capturerDeuxColonnes(existant);
+            existant.remove();
+        } else {
+            var retenu = _etatsRetenusDeuxColonnes[modalId];
+            if (retenu && Date.now() - retenu.quand < DELAI_ETAT_RETENU) etat = retenu;
+        }
+        delete _etatsRetenusDeuxColonnes[modalId];
+        return etat;
+    }
+
+    /** Le dossier filtré, ou « Tous les dossiers » s'il a été supprimé entre-temps. */
+    function _filtreValide(modalId, reps) {
+        var filtre = _filtresDossierDeuxColonnes[modalId] || '__tous__';
+        var connu = filtre === '__tous__' || filtre === '__nonclasse__' ||
+            reps.some(function (r) { return r.id === filtre; });
+        _filtresDossierDeuxColonnes[modalId] = connu ? filtre : '__tous__';
+        return _filtresDossierDeuxColonnes[modalId];
+    }
+
+    /** L'en-tête, sur une ligne : le titre, l'aide, « Importer ou exporter ▾ », la fermeture. */
+    function _renderEntete(config, idTitre) {
+        var champsFichier = (config.champsFichier || []).map(function (c) {
+            return '<input type="file" id="' + echapperAttribut(c.id) + '" accept="' + echapperAttribut(c.accept || '') + '"' +
+                ' class="u-hide" data-on-change="' + echapperAttribut(c.onChange) + '">';
+        }).join('');
+        return '<header class="biblio2-entete">' +
+            '<h2 id="' + echapperAttribut(idTitre) + '" class="biblio2-titre">' + echapperHtml(config.titre) + '</h2>' +
+            (config.aide
+                ? '<button type="button" class="btn-aide-contextuelle" data-aide="' + echapperAttribut(config.aide) + '"' +
+                  ' title="Comment fonctionne la bibliothèque" aria-label="Comment fonctionne la bibliothèque">' +
+                  '<span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>'
+                : '') +
+            '<span class="biblio2-entete-droite">' +
+                BibliothequeUI.renderMenuActions(config.menuFichiers, config.modalId + '-fichiers',
+                    { libelle: 'Importer ou exporter ▾', classeBouton: 'biblio2-btn-fichiers' }) +
+                '<button type="button" class="biblio2-fermer" data-action="BibliothequeUI.fermerFenetre"' +
+                    ' data-param="' + echapperAttribut(config.modalId) + '" aria-label="Fermer la bibliothèque" title="Fermer">' +
+                    '<img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
+            '</span>' +
+            champsFichier +
+        '</header>';
+    }
+
+    /**
+     * Crée (ou reconstruit) la fenêtre en deux colonnes. Une reconstruction rend le
+     * défilement, les aperçus et les replis ouverts (plainte du 24 août : « je dois
+     * l'ouvrir à chaque cartouche »), que la fenêtre soit encore là (case « Masquer »,
+     * dossiers) ou qu'un passage vienne de la fermer pour la redessiner.
+     */
+    BibliothequeUI.creerFenetreDeuxColonnes = function (config) {
+        var modalId = config.modalId;
+        var etat = _reprendreEtat(modalId);
+        var biblio = config.bibliotheque || {};
+        var ctx = {
+            modalId: modalId,
+            ouverts: new Set(etat ? etat.ouverts : []),
+            replis: new Set(etat ? etat.replis : []),
+            filtre: _filtreValide(modalId, (biblio.dossiers && biblio.dossiers.reps) || [])
+        };
+        var idTitre = modalId + '-titre';
+
+        document.body.insertAdjacentHTML('beforeend',
+            '<div id="' + echapperAttribut(modalId) + '" class="modal-js-overlay biblio2-voile">' +
+                '<section class="modal-js-contenu biblio2-fenetre" role="dialog" aria-modal="true"' +
+                    ' aria-labelledby="' + echapperAttribut(idTitre) + '" tabindex="-1">' +
+                    _renderEntete(config, idTitre) +
+                    (config.avantColonnes || '') +
+                    '<div class="biblio2-colonnes">' +
+                        _renderColonne(config.trimestre, 'trimestre', ctx) +
+                        _renderColonne(biblio, 'bibliotheque', ctx) +
+                    '</div>' +
+                '</section>' +
+            '</div>');
+
+        var fenetre = document.querySelector('#' + modalId + ' .biblio2-fenetre');
+        if (fenetre) {
+            if (etat && etat.defilement) fenetre.scrollTop = etat.defilement;
+            if (typeof fenetre.focus === 'function') fenetre.focus({ preventScroll: true });
+        }
+    };
 
     // Exposer globalement
     window.BibliothequeUI = BibliothequeUI;

@@ -70,12 +70,6 @@
     // Il dit vrai même quand un type change après coup. Les quatre autres objets
     // n'ont pas de critères : pas de badge, sans remplaçant (accepté par lui).
     const LIBELLES_COMPOSITION = { algorithmique: 'ALGO', holistique: 'HOLIS', analytique: 'ANALY' };
-    const LIBELLES_COMPOSITION_LONGS = {
-        ALGO: 'tous les critères sont algorithmiques',
-        HOLIS: 'tous les critères sont holistiques',
-        ANALY: 'tous les critères sont analytiques',
-        MIXTE: 'plusieurs types de critères'
-    };
 
     /**
      * La composition d'une grille, déduite des types de ses critères.
@@ -135,12 +129,9 @@
         return (niv && niv !== '--') ? String(niv) : '';
     }
 
-    /** Le badge de composition d'une grille — '' quand il n'y a rien à dire. */
-    function genererBadgeComposition(grille) {
-        const code = compositionGrille(grille);
-        if (!code) return '';
-        return `<span class="badge-type-pratique badge-composition badge-composition--${code.toLowerCase()}" title="${echapperHtml(LIBELLES_COMPOSITION_LONGS[code])}">${code}</span>`;
-    }
+    // #1154 (25 oct. 2026) — `genererBadgeComposition` (le badge HOLIS / MIXTE…) est parti avec son dernier
+    // lecteur, la bibliothèque des grilles : ses rangées disent les types en mots (`ligneGrilleBibliotheque`,
+    // grilles.js). `compositionGrille` reste : `grilleEntierementEnPoints` la lit.
 
     /**
      * Génère le HTML pour un séparateur visuel
@@ -324,7 +315,6 @@
 
         // Composition d'une grille (3 sept. 2026, volet C)
         compositionGrille,
-        genererBadgeComposition,
         grilleEntierementEnPoints,   // #941 lot S1
         evaluationEnPoints,          // #941 lot S1
         niveauFinalAffichable,       // #941 lot S1

@@ -693,6 +693,55 @@
             cartes;
     };
 
+    /**
+     * #1154 — La même section, en DONNÉES pour la fenêtre en deux colonnes
+     * (`BibliothequeUI.creerFenetreDeuxColonnes`, colonne « Dans ta bibliothèque ») :
+     * mêmes mots, mêmes gestes que `genererSectionHTML`, que gardent les fenêtres pas
+     * encore migrées (plan du 24 oct., lots 2 à 6). Texte brut : la fenêtre échappe.
+     * @returns {{titre: string, phrase: string, rangees: Array}|null}
+     */
+    partageSection.rangeesDeuxColonnes = function (type) {
+        var items = lire(CLES_STOCKAGE[type] || '');
+        if (!items.length) return null;
+        return {
+            titre: 'Partagés par des collègues',
+            phrase: 'Importés par fichier .lcz, non modifiables ici. « Dupliquer » crée une copie ' +
+                'modifiable dans tes documents — l\'attribution d\'origine est conservée. ' +
+                'Le menu ⋮ retransmet un item à un collègue ou supprime la copie importée ; ' +
+                'pour retirer un package entier : Réglages › Données.',
+            rangees: items.map(function (item) {
+                return {
+                    id: item.id,
+                    nom: window.BibliothequeUI.formaterTitre(nomDe(item)),
+                    ligne: 'par ' + auteurDe(item),
+                    apercu: { paragraphes: [descriptionPour(type, item)] },
+                    passage: {
+                        label: type === 'cartouche' ? 'Dupliquer avec sa grille' : 'Dupliquer vers mes documents',
+                        action: 'partageSection.dupliquer',
+                        param: type,
+                        param2: item.id,
+                        sens: null,
+                        title: 'Créer une copie modifiable dans tes documents (l\'original partagé reste intact)'
+                    },
+                    menu: [{
+                        label: 'Exporter pour partager',
+                        action: 'partageSection.exporterPourPartager',
+                        param: type,
+                        param2: item.id,
+                        title: 'Générer un fichier .lcz signé — l\'attribution d\'origine part avec lui'
+                    }, {
+                        label: 'Supprimer',
+                        action: 'partageSection.supprimer',
+                        param: type,
+                        param2: item.id,
+                        classe: 'btn-supprimer',
+                        title: 'Supprimer cette copie importée (tes documents ne sont pas touchés)'
+                    }]
+                };
+            })
+        };
+    };
+
     // Exposé pour réutilisation (Brique C : l'import inter-trimestre du pas 4
     // l'appellera avec un lecteur de cartouches par CLÉ via cleSource) et pour
     // la sentinelle storage-pur. copiePropre reste interne tant qu'aucun caller externe.

@@ -101,11 +101,13 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     expect(neuve.criteres).toEqual(['analytique', 'analytique', 'analytique']);
     // #1147 : le menu montre la grille enregistrée, ouverte ; sa composition, celle que la bibliothèque affiche.
     await expect(page.locator('#menuGrilles')).toHaveValue(neuve.id);
+    // ↻ #1154 (25 oct. 2026) : le badge est parti (la bibliothèque dit les types en mots) ; on lit la
+    // composition qu'il affichait, calculée des critères par `compositionGrille`.
     const composition = (id) => page.evaluate(async (id) => {
         const g = (await db.get(cle('grillesTemplates'))).find(x => x.id === id);
-        return (window.GabaritsUtils.genererBadgeComposition(g).match(/badge-composition--[a-z]+/g) || []);
+        return window.GabaritsUtils.compositionGrille(g);
     }, id);
-    await expect.poll(() => composition(neuve.id)).toEqual(['badge-composition--analy']);
+    await expect.poll(() => composition(neuve.id)).toBe('ANALY');
 
     // 2 — en passer un en algorithmique : le badge devient MIXTE, le type déclaré reste.
     await page.evaluate((id) => window.chargerGrillePourModif(id), neuve.id);
@@ -114,7 +116,7 @@ test('lot 1 · le type monte à la grille — le « fini quand », à l\'écran'
     await expect(page.locator('#precisionTypeGrille'), 'déclaré : la ligne se tait').toHaveText('');
     await expect(page.locator(TYPES_GRILLE)).toHaveCount(3);
     await page.locator(TYPES_GRILLE).nth(2).selectOption('algorithmique');
-    await expect.poll(() => composition(neuve.id)).toEqual(['badge-composition--mixte']);
+    await expect.poll(() => composition(neuve.id)).toBe('MIXTE');
     etat = await page.evaluate(eval(LIRE));
     console.log('APRÈS DÉROGATION →', JSON.stringify(etat));
     let g = etat.grilles.find(x => x.id === neuve.id);

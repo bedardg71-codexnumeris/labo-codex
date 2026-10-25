@@ -5156,13 +5156,298 @@ body:not(.mode-clair) .badge-source--partage {
    "modalBibliotheque" (5 ressources : grilles, échelles, cartouches,
    productions, pratiques). !important pour court-circuiter toute autre
    règle (.btn, .btn-mini, .btn-tres-compact) peu importe l'ordre source. */
-[id^="modalBibliotheque"] .btn,
-[id^="modalBibliotheque"] .btn-mini,
-[id^="modalBibliotheque"] .btn-tres-compact {
+[id^="modalBibliotheque"]:not(.biblio2-voile) .btn,
+[id^="modalBibliotheque"]:not(.biblio2-voile) .btn-mini,
+[id^="modalBibliotheque"]:not(.biblio2-voile) .btn-tres-compact {
     padding: 4px 10px !important;
     font-size: 0.8rem !important;
     font-weight: 600 !important;
     line-height: 1.4 !important;
+}
+
+/* ============================================================
+   #1154 (25 oct. 2026) — LA FENÊTRE DE BIBLIOTHÈQUE EN DEUX COLONNES
+   « Dans ce trimestre » | « Dans ta bibliothèque » (BibliothequeUI.creerFenetreDeuxColonnes).
+   Référence : plans de travail/MAQUETTE-2026-10-24-bibliotheque-deux-colonnes.html.
+   Jetons existants des deux modes ; cibles de 44 px ; sous 760 px de FENÊTRE
+   (requête de conteneur, pas d'écran), les panneaux s'empilent et les flèches tournent.
+   ============================================================ */
+.modal-js-contenu.biblio2-fenetre {
+    container-type: inline-size;
+    container-name: biblio2-fenetre;
+    width: calc(100% - 32px);
+    max-width: 1100px;
+    padding: 24px 26px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    color: var(--texte-principal);
+    border: 1px solid var(--bordure-moyenne);
+}
+.biblio2-fenetre:focus { outline: none; }
+/* `hidden` l'emporte sur les `display` posés plus bas (gestion des dossiers, rangées filtrées, aperçus). */
+.biblio2-fenetre [hidden] { display: none !important; }
+.biblio2-fenetre button:focus-visible,
+.biblio2-fenetre select:focus-visible,
+.biblio2-fenetre input:focus-visible,
+.biblio2-fenetre summary:focus-visible {
+    outline: 3px solid var(--focus-ring-color, var(--accent-primaire));
+    outline-offset: 2px;
+}
+
+/* L'en-tête, sur une ligne */
+.biblio2-entete { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.biblio2-titre {
+    margin: 0;
+    font-size: 1.45rem;
+    line-height: 1.2;
+    color: var(--accent-primaire);
+    text-wrap: balance;
+    min-width: 0;
+}
+.biblio2-entete-droite { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.biblio2-fermer {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-moyen);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.biblio2-fermer:hover { background: var(--gris-tres-pale); }
+.biblio2-fenetre .btn-aide-contextuelle { min-width: 44px; min-height: 44px; }
+
+/* Les boutons de la fenêtre : 44 px, une seule couleur forte (le passage) */
+.biblio2-fenetre .btn {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.biblio2-fenetre .btn.biblio2-passage { background: var(--btn-principal); color: white; }
+.biblio2-fenetre .btn.biblio2-passage:hover { background: var(--btn-principal-hover); }
+.biblio2-btn-texte {
+    min-height: 44px;
+    padding: 0 6px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--accent-primaire);
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Les menus (« Importer ou exporter ▾ », ⋮) : le popover existant, à 44 px */
+.biblio2-fenetre .biblio-menu-trigger { min-width: 44px; min-height: 44px; }
+.biblio2-fenetre .biblio-menu-trigger.biblio2-btn-fichiers {
+    padding: 0 14px !important;
+    font-size: 0.88rem !important;
+    font-weight: 600;
+    background: var(--surface-carte) !important;
+    border: 1px solid var(--bordure-moyenne);
+    color: var(--texte-principal);
+}
+.biblio2-fenetre .biblio-menu-trigger.biblio2-kebab { border-color: transparent; color: var(--texte-secondaire); }
+.biblio2-fenetre .biblio-menu-trigger.biblio2-kebab:hover,
+.biblio2-fenetre .biblio-menu-trigger.biblio2-kebab[aria-expanded="true"] { border-color: var(--bordure-moyenne); }
+.biblio2-fenetre .biblio-menu-popover { min-width: 250px; padding: 6px; }
+.biblio2-fenetre .biblio-menu-item { min-height: 44px; font-size: 0.9rem; }
+.biblio-menu-separateur { border: none; border-top: 1px solid var(--bordure-moyenne); margin: 4px 2px; }
+.biblio-menu-note { margin: 0; padding: 4px 12px 2px; font-size: 0.78rem; color: var(--texte-muted); }
+
+/* Les deux panneaux */
+.biblio2-colonnes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+.biblio2-panneau {
+    container-type: inline-size;
+    container-name: biblio2-panneau;
+    min-width: 0;
+    border-radius: var(--radius-grand);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.biblio2-panneau--trimestre { background: var(--bleu-tres-pale); }
+.biblio2-panneau--bibliotheque { background: var(--fond-page-sature); }
+.mode-clair .biblio2-panneau--trimestre { background: var(--bleu-pale); }
+.mode-clair .biblio2-panneau--bibliotheque { background: var(--gris-tres-pale); }
+.biblio2-panneau-entete { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 4px 10px; }
+.biblio2-panneau-titre { margin: 0; font-size: 1.1rem; line-height: 1.3; color: var(--texte-principal); }
+.biblio2-compte { font-weight: 500; color: var(--texte-muted); }
+.biblio2-phrase { margin: 2px 0 0; font-size: 0.86rem; color: var(--texte-secondaire); max-width: 52ch; }
+.biblio2-intertitre { margin: 8px 0 0; font-size: 0.98rem; color: var(--texte-principal); }
+
+/* La barre de la bibliothèque */
+.biblio2-barre { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 0.86rem; }
+/* Un <select> natif ignore `min-height` sous WebKit : patron de `.rangee-selection` (hauteur fixée,
+   apparence retirée, chevron redessiné). `.modal-js-contenu.biblio2-fenetre` (0,3,1) : la règle
+   `.mode-clair .modal-js-contenu select { background: white }` (0,2,1), plus bas, emporterait le chevron. */
+.modal-js-contenu.biblio2-fenetre select.biblio2-select {
+    width: auto;
+    max-width: 100%;
+    height: 44px;
+    padding: 0 32px 0 12px;
+    font-size: 0.88rem;
+    color: var(--texte-principal);
+    background-color: var(--surface-carte);
+    border: 1px solid var(--bordure-moyenne);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+.biblio2-case { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; color: var(--texte-secondaire); }
+.biblio2-case input[type="checkbox"] { width: 18px; height: 18px; }
+.biblio2-dossiers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border-radius: var(--radius-moyen);
+    background: var(--surface-carte);
+    border: 1px solid var(--bordure-moyenne);
+}
+.biblio2-dossiers-titre { margin: 0; font-weight: 600; font-size: 0.9rem; }
+.biblio2-dossier-ligne { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.biblio2-dossier-ligne .controle-form { flex: 1 1 160px; width: auto; min-width: 0; min-height: 44px; }
+.biblio2-fenetre .btn-icone-nu { min-width: 44px; min-height: 44px; }
+.biblio2-dossiers > .biblio2-btn-texte { align-self: flex-start; }
+
+/* Les rangées */
+.biblio2-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.biblio2-rangee {
+    background: var(--surface-carte);
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen);
+    padding: 8px 8px 8px 12px;
+}
+.biblio2-rangee-ligne { display: flex; align-items: center; gap: 8px; }
+.biblio2-rangee-texte { flex: 1 1 auto; min-width: 0; }
+.biblio2-rangee-nom {
+    min-height: 44px;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--texte-principal);
+    overflow-wrap: anywhere;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.biblio2-chevron { font-size: 0.7rem; color: var(--texte-muted); transition: transform 0.15s ease; }
+.biblio2-rangee-nom[aria-expanded="true"] .biblio2-chevron { transform: rotate(90deg); }
+.biblio2-rangee-meta { margin: 0; font-size: 0.82rem; color: var(--texte-secondaire); }
+.biblio2-rangee-actions { display: flex; align-items: center; gap: 4px; flex: none; }
+.biblio2-etat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 44px;
+    padding: 0 6px;
+    font-size: 0.82rem;
+    color: var(--texte-muted);
+    white-space: nowrap;
+}
+.biblio2-coche { color: var(--alerte-texte-succes); font-weight: 700; }
+.biblio2-fleche-etroite { display: none; }
+
+/* L'aperçu d'une rangée */
+.biblio2-apercu { margin: 8px 0 2px; padding-top: 8px; border-top: 1px solid var(--bordure-moyenne); }
+.biblio2-apercu-texte { margin: 0 0 6px; font-size: 0.84rem; color: var(--texte-secondaire); }
+.biblio2-apercu-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+.biblio2-apercu-table td { padding: 4px 0; border-bottom: 1px solid var(--bordure-claire); vertical-align: top; }
+.biblio2-apercu-table tr:last-child td { border-bottom: none; }
+.biblio2-apercu-type { color: var(--texte-secondaire); padding-left: 10px !important; }
+.biblio2-apercu-valeur { text-align: right; white-space: nowrap; padding-left: 10px !important; }
+.biblio2-apercu-total td { font-weight: 700; }
+
+.biblio2-vide-filtre .biblio2-vide { font-style: italic; }
+.biblio2-vide {
+    margin: 0;
+    padding: 14px;
+    text-align: center;
+    font-size: 0.86rem;
+    color: var(--texte-secondaire);
+    border: 1px dashed var(--bordure-moyenne);
+    border-radius: var(--radius-moyen);
+}
+
+/* « Importer depuis un autre trimestre », replié au pied de « Dans ce trimestre » */
+.biblio2-repli { border-top: 1px solid var(--bordure-moyenne); padding-top: 4px; }
+.biblio2-repli-titre {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--accent-primaire);
+}
+.biblio2-import-ligne { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.modal-js-contenu.biblio2-fenetre select.biblio2-import-select { flex: 1 1 200px; }
+.biblio2-import-apercu { margin-top: 10px; }
+.biblio2-import-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen);
+    background: var(--surface-carte);
+}
+.biblio2-import-rangee {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bordure-claire);
+}
+.biblio2-import-rangee:last-child { border-bottom: none; }
+
+/* Le bandeau des doublons (#291), dans la fenêtre : ses boutons à 44 px */
+.biblio2-fenetre .biblio-doublon-action { min-height: 44px; }
+
+/* Panneau étroit : le passage passe sous le nom */
+@container biblio2-panneau (max-width: 400px) {
+    .biblio2-rangee-ligne { flex-wrap: wrap; }
+    .biblio2-rangee-texte { flex-basis: calc(100% - 52px); }
+    .biblio2-rangee-actions { width: 100%; justify-content: space-between; }
+    .biblio2-rangee-actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+/* Fenêtre étroite (iPad en portrait) : les panneaux s'empilent, les flèches tournent */
+@container biblio2-fenetre (max-width: 760px) {
+    .biblio2-colonnes { grid-template-columns: minmax(0, 1fr); }
+    .biblio2-fleche-large { display: none; }
+    .biblio2-fleche-etroite { display: inline; }
+}
+@media (max-width: 520px) {
+    .modal-js-contenu.biblio2-fenetre { padding: 18px 14px 14px; width: calc(100% - 16px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .biblio2-chevron { transition: none; }
 }
 
 /* Changelog entries — remplace inline style="background: linear-gradient(...); border-left: 3px solid ..." */

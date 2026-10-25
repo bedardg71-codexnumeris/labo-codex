@@ -72,9 +72,16 @@ test('T1 · grilles · zone dossiers + assignation « Classer dans… » via le 
         await window.BibliothequeUI.repertoires.classer('grilles', grilleId, dossier.id);
         const html2 = lireModal();
         const aEnteteDossier = html2.includes('Mon dossier grilles');
-        const aOptionSelect = !!document.querySelector('#rep-grilles-select-' + dossier.id + ' option[value="' + grilleId + '"]');
-        const aBoutonAjouterSelect = !!document.querySelector('[data-action="BibliothequeUI.repertoires.ajouterSel"][data-param2="rep-grilles-select-' + dossier.id + '"]');
-        const aActionRetirer = !!document.querySelector('[data-action="BibliothequeUI.repertoires.retirerSel"][data-param2="rep-grilles-select-' + dossier.id + '"]');
+        // ↻ #1154 (25 oct. 2026) : la fenêtre des grilles passe en deux colonnes. Le dossier n'est plus un
+        // select compact par dossier (« Ajouter » + ⋮ sur l'item choisi) : chaque rangée porte son dossier
+        // (`data-dossier`, que le menu de la barre filtre), garde son passage (« ← Utiliser dans ce
+        // trimestre », la même action qu'« Ajouter ») et son ⋮ « Retirer du dossier ». Même moteur, mêmes gestes.
+        // BREAK-TEST (25 oct.) : l'attribut `data-dossier` renommé dans bibliotheque-ui.js → ROUGE.
+        const rangeeClassee = document.querySelector('.biblio2-rangee[data-biblio-item-id="' + grilleId + '"]');
+        const aOptionSelect = !!rangeeClassee && rangeeClassee.getAttribute('data-dossier') === dossier.id &&
+            !!document.querySelector('#modalBibliothequeGrilles .biblio2-barre select option[value="' + dossier.id + '"]');
+        const aBoutonAjouterSelect = !!document.querySelector('[data-action="ajouterGrilleIndividuelle"][data-param="' + grilleId + '"]');
+        const aActionRetirer = !!document.querySelector('[data-action="BibliothequeUI.repertoires.retirer"][data-param2="' + grilleId + '"]');
 
         const reps = window.repertoiresBibliotheque.obtenir('grilles');
         const estClassee = reps[0].itemIds.includes(grilleId);

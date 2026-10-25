@@ -62,16 +62,13 @@ describe('pratiques compatibles retirées · P.a — la composition est déduite
         expect(G.compositionGrille({ criteres: [{ id: 'x' }, { id: 'y', type: 'holistique' }] })).toBe('HOLIS');
     });
 
-    it('P.a.4 le badge : le code, une classe par composition, un titre qui le dit ; vide quand il n\'y a rien', () => {
-        const html = G.genererBadgeComposition(grille('holistique', 'algorithmique'));
-        expect(html).toContain('badge-composition--mixte');
-        expect(html).toContain('>MIXTE<');
-        expect(html).toContain('plusieurs types de critères');
-        expect(G.genererBadgeComposition(grille())).toBe('');
-        // Il ne dépend PAS du champ déclaré.
+    // ↻ #1154 (25 oct. 2026) : le badge est parti avec la bibliothèque des grilles en deux colonnes, qui dit
+    // les types en mots. Ce qui reste à tenir : la composition ne dépend PAS du champ déclaré.
+    // BREAK-TEST (25 oct.) : `genererBadgeComposition` remis dans l'export de GabaritsUtils → ROUGE.
+    it('P.a.4 la composition ignore le champ déclaré ; le badge de code n\'existe plus', () => {
         const g = grille('algorithmique'); g.pratiquesCompatibles = ['SOM', 'STD', 'SPE'];
-        expect(G.genererBadgeComposition(g)).toContain('>ALGO<');
-        expect(G.genererBadgeComposition(g)).not.toContain('MULTI');
+        expect(G.compositionGrille(g)).toBe('ALGO');
+        expect(G.genererBadgeComposition).toBeUndefined();
     });
 });
 
@@ -112,9 +109,10 @@ describe('pratiques compatibles retirées · P.c — plus aucune case, plus aucu
         readdirSync(path.join(racine, 'js')).filter(f => f.endsWith('.js')).forEach(f => {
             expect(source('js/' + f).includes('genererBadgesPratiques'), f).toBe(false);
         });
-        const grilles = source('js/grilles.js');
-        // #1147 (24 oct. 2026) : 3 → 2, la barre latérale est partie (restent la bibliothèque, ses deux sections).
-        expect((grilles.match(/genererBadgeComposition\(grille\)/g) || []).length).toBe(2);
+        // #1147 (24 oct. 2026) : 3 → 2, la barre latérale est partie. ↻ #1154 (25 oct.) : 2 → 0, la bibliothèque
+        // des grilles dit la composition en mots (« Holistique et algorithmique ») ; le badge est retiré.
+        expect(source('js/grilles.js').includes('genererBadgeComposition')).toBe(false);
+        expect(source('js/grilles.js')).toMatch(/function ligneGrilleBibliotheque\(/);
         ['js/echelles.js', 'js/cartouches.js', 'js/objectifs.js', 'js/productions-liste.js'].forEach(rel => {
             expect(source(rel).includes('genererBadgeComposition'), rel + ' n\'a pas de critères').toBe(false);
         });
