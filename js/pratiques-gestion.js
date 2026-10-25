@@ -126,7 +126,7 @@ const FAMILLES_TAXONOMIQUES = {
     'sommative': { nom: 'Sommative', anglais: 'Traditional Grading', resume: 'Moyenne pondérée des évaluations' },
     'standards': { nom: 'PAN-Standards', anglais: 'Standards-Based Grading', resume: 'Maîtrise de standards/objectifs' },
     'specifications': { nom: 'PAN-Spécifications', anglais: 'Specifications Grading', resume: 'Évaluation dichotomique par forfaits' },
-    'denombrement': { nom: 'Dénombrement', anglais: 'Counting-Based', resume: 'Comptage de réussites' }
+    'denotation': { nom: 'PAN-Dénotation', resume: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage' }
 };
 
 /**
@@ -148,7 +148,7 @@ function obtenirDescriptionCourtePratique(pratique) {
     // mais pratique.type peut encore être legacy tant que le select n'est pas migré.
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
     const f = FAMILLES_TAXONOMIQUES[typeCanon];
-    return f ? `${f.nom} (${f.anglais}) - ${f.resume}` : (pratique.type || '');
+    return f ? `${f.nom}${f.anglais ? ` (${f.anglais})` : ''} - ${f.resume}` : (pratique.type || '');
 }
 
 /**
@@ -213,12 +213,11 @@ function genererBadgeTypePratique(pratique) {
  * française de la description taxonomique (`FAMILLES_TAXONOMIQUES`), à la place des badges SOM, STD,
  * SPE, DEN. Le code vient du registre (`obtenirRepresentationPratiqueStricte`, source unique), lu sur
  * `pratiques[0]`, puis `type`, puis `configuration.type` (la lecture du moteur,
- * `PratiqueConfigurable._typeFamille` : les pratiques de la démo n'ont que celui-là). DEN couvre la
- * dénotation canonique comme l'ancien `denombrement`.
+ * `PratiqueConfigurable._typeFamille` : les pratiques de la démo n'ont que celui-là).
  */
 function familleDeLaPratique(pratique) {
     if (!pratique) return null;
-    const PAR_CODE = { SOM: 'sommative', STD: 'standards', SPE: 'specifications', DEN: 'denombrement' };
+    const PAR_CODE = { SOM: 'sommative', STD: 'standards', SPE: 'specifications', DEN: 'denotation' };
     const source = (Array.isArray(pratique.pratiques) && pratique.pratiques[0]) || pratique.type ||
         (pratique.configuration && pratique.configuration.type) || '';
     let code = PAR_CODE[source] ? source : null;
@@ -449,7 +448,7 @@ async function afficherBibliothequePratiques() {
             phrase: 'Les pratiques que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
             idListe: 'listePratiquesDansBibliotheque',
             rangees: data.rangeesTrimestre,
-            vide: 'Aucune pratique dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la à l\'écran.',
+            vide: 'Aucune pratique dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle pratique ».',
             // Brique C namespacing — pas 5, modèle COPIE. DIVERGENCE vs grilles : pratiquesConfigurables
             // est NAMESPACÉE par trimestre, donc listerTrimestresAvecPratiques() liste TOUS les trimestres
             // ≠ actif ayant des pratiques. Destination = trimestre ACTIF (`copierPratiqueDepuisTrimestre`) :
