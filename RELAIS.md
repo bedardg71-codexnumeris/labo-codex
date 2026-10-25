@@ -7,6 +7,18 @@
 
 ---
 
+## 25 OCT. 2026, FIN DE SOIRÉE (Claude Code) : **LES BIBLIOTHÈQUES EN DEUX COLONNES, LOTS 1 À 5, VIVENT SUR LA BRANCHE `bibliotheques-deux-colonnes` = `d8cbe5dd` ; LE LOT 5 (LES TAMPONS) ET LA RETOUCHE DU LOT 4 SONT EN RELECTURE ; LA FUSION ATTEND LE LOT 6**
+
+**Où vit le travail** : branche locale `bibliotheques-deux-colonnes` = `d8cbe5dd`, non poussée : `cfcf61d8` (verdict du lot 4, consigne du lot 5), `b481e947` (retouche du lot 4 : l'aide validée posée, « de ce trimestre » dans la Carte, le plan réécrit), `39e1c202` (le lot 5 : les tampons en deux colonnes, la phrase de Grégoire sous « + Ajouter une catégorie », ce bouton réparé, #1166 et #1167 inscrites), `d8cbe5dd` (demande de relecture, captures, lignes du plan). La copie de travail est revenue sur `main`.
+
+**En relecture chez Cowork** : `plans de travail/DEMANDE-RELECTURE-2026-10-25-bibliotheques-deux-colonnes-5.md`. Son § 7 porte, **pour Grégoire**, les mots neufs et la question de l'aide ⓘ des tampons (fausse pour eux). Son § 6 nomme deux corrections faites dans du code d'avant le lot, à juger.
+
+**La suite, dans l'ordre** (plan réécrit, verdict du lot 4, § 2.3) : verdict de Cowork sur le lot 5 ; le lot 6 (cours, trimestres, groupes-cours, puis le retrait de l'ancien composant) ; **après le lot 6 seulement** : les Nouvelles validées, la fusion dans `main` au signal de Grégoire (BACKLOG : le plus grand des deux compteurs, **#1167 sur la branche, #1162 sur `main`**, aucun numéro ne resert), la vérification complète, la release `minor`, la porte terrain pour les dix fenêtres.
+
+**État mesuré sur la branche** (`39e1c202`) : Vitest 9 694 sur 9 695, le rouge est `sentinelle-anticache-fichiers-modifies` (`js/gabarits-utils.js`), attendu, que la release réglera. WebKit, 40 fichiers (les sept fenêtres en deux colonnes, les bancs de bibliothèque, ceux de la palette d'Annoter) : 176 verts, 6 sautés (captures), 0 rouge. Pas de verdict complet.
+
+**Sur `main`, ce commit** : seulement ce relais. Pas de push : Grégoire pousse. `main` reste à 36 commits d'avance sur `origin/main` (avec celui-ci : 37).
+
 ## 25 OCT. 2026, SOIR (Claude Code) : **LES BIBLIOTHÈQUES EN DEUX COLONNES, LOTS 1 À 4, VIVENT SUR LA BRANCHE `bibliotheques-deux-colonnes` = `d331c3fa` ; LE LOT 4 EST EN RELECTURE ; LA FUSION ATTEND LE VERDICT ET LES MOTS DE GRÉGOIRE**
 
 **Où vit le travail** : branche locale `bibliotheques-deux-colonnes` = `d331c3fa`, non poussée : `2798558e` (consigne du lot 4), `63c324c6` (le lot : la Carte d'alignement en deux colonnes, le spécimen dans `design-system.html`, #1165 inscrite), `d331c3fa` (demande de relecture, porte terrain, captures, ligne du plan). La copie de travail est revenue sur `main`.
