@@ -118,6 +118,7 @@ function nouvelleEvaluation() {
     document.getElementById('selectCartoucheEval').value = '';
     document.getElementById('remiseProduction1').value = 'non-recu';
     window.mettreAJourPillStatut('non-recu');
+    if (typeof window.afficherTravailEnCours === 'function') window.afficherTravailEnCours(false);   // statut incomplet (25 oct. 2026)
     window.ecrireAttenteCriteres(window.MESSAGE_ATTENTE_CRITERES);
     document.getElementById('retroactionFinale1').value = '';
     if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);   // #961
@@ -566,6 +567,9 @@ function verifierEtChargerEvaluationExistante() {
             selectIntegrite.value = 'recevable';
             selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
         }
+        // Statut incomplet (25 oct. 2026) — la case de la copie précédente ne passe pas à celle-ci.
+        if (window.evaluationEnCours) delete window.evaluationEnCours.travailEnCours;
+        if (typeof window.afficherTravailEnCours === 'function') window.afficherTravailEnCours(false);
 
         // Masquer les badges de jetons
         const section = document.getElementById('gestionJetonsEvaluation');
@@ -1446,6 +1450,14 @@ function _chargerStatutsEtBadgesModif(evaluation) {
         selectIntegrite.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
+    // Statut « Incomplet ; travail en cours » (25 oct. 2026) — les deux chemins passent ici (#959).
+    const travailEnCours = evaluation.travailEnCours === true;
+    if (window.evaluationEnCours) {
+        if (travailEnCours) window.evaluationEnCours.travailEnCours = true;
+        else delete window.evaluationEnCours.travailEnCours;
+    }
+    if (typeof window.afficherTravailEnCours === 'function') window.afficherTravailEnCours(travailEnCours);
+
     // Afficher badges jetons
     window.afficherBadgesJetons();
 }
@@ -2262,7 +2274,8 @@ function desactiverFormulaireEvaluation(desactiver) {
         'selectCartoucheEval',
         'selectEchelle1',
         'remiseProduction1',
-        'statutIntegrite'  // Intégrité académique (recevabilité)
+        'statutIntegrite',  // Intégrité académique (recevabilité)
+        'travailEnCours'    // Statut « Incomplet ; travail en cours » (25 oct. 2026)
     ];
 
     selects.forEach(id => {

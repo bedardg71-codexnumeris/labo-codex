@@ -856,13 +856,14 @@ function creerComparateurRecenceStd(productions) {
 
 /**
  * Vrai si l'évaluation compte dans la note du cours ; faux pour une remplacée, une sans note,
- * un brouillon (non verrouillée) ou une portée nulle.
+ * un brouillon (non verrouillée), une portée nulle ou une copie « Incomplet ; travail en cours ».
  * @param {Object} evaluation
  * @returns {boolean}
  */
 function evaluationEntreDansLaNote(evaluation) {
     if (!evaluation) return false;
     if (evaluation.remplaceeParId) return false;
+    if (evaluationTravailEnCours(evaluation)) return false;   // statut incomplet (25 oct. 2026) : verrouillée ou non
     if (evaluation.noteFinale === null || evaluation.noteFinale === undefined) return false;
     if (evaluation.verrouillee === false) return false;
     if (evaluation.ponderationCouverte === 0) return false;
@@ -902,6 +903,36 @@ function evaluationNonRecevable(evaluation) {
 }
 
 /**
+ * Statut « Incomplet ; travail en cours » (décisions de Grégoire, 25 oct. 2026) — l'élève n'a pas eu
+ * le temps de finir et l'enseignant lui donne un délai, SANS jeton. Tant que le statut est posé, la
+ * copie n'a pas de note et ne compte jamais dans la note du cours (`evaluationEntreDansLaNote`) ;
+ * elle compte comme REMISE pour l'indice C (`evaluationCompteCommeRemise`). Le travail terminé
+ * remplace la première copie (« Remplacer l'existant » à l'import) ; l'enseignant décoche ensuite.
+ * Un champ à part, pas une valeur de `statutRemise` : celui-ci est réécrit par l'application
+ * (« evalue » à chaque verrouillage, « importe » à l'import).
+ * @param {Object} evaluation
+ * @returns {boolean}
+ */
+function evaluationTravailEnCours(evaluation) {
+    return !!evaluation && evaluation.travailEnCours === true;
+}
+
+/**
+ * LA COPIE COMPTE COMME REMISE POUR L'INDICE C — la règle unique des calculs de complétion (SOM,
+ * configurable, STD, et les deux des snapshots). Une copie qui compte (#706), qui n'est ni non remise
+ * ni non recevable ; ou une copie « Incomplet ; travail en cours » non remplacée (l'élève a remis à
+ * temps, le délai vient de l'enseignant : Grégoire, 25 oct. 2026). Une non recevable ne l'est jamais.
+ * @param {Object} evaluation
+ * @returns {boolean}
+ */
+function evaluationCompteCommeRemise(evaluation) {
+    if (!evaluation || evaluation.remplaceeParId) return false;
+    if (evaluationNonRecevable(evaluation)) return false;
+    if (evaluationTravailEnCours(evaluation)) return true;
+    return evaluationEntreDansLaNote(evaluation) && !evaluationNonRemise(evaluation);
+}
+
+/**
  * Combien d'évaluations de cet élève portent une note mais sont écartées par #706.
  * @param {string} da
  * @param {Array} [evaluations] - liste déjà lue (sinon lue via obtenirDonneesSelonMode)
@@ -931,6 +962,9 @@ window.compterEvaluationsEcarteesDeLaNote = compterEvaluationsEcarteesDeLaNote;
 window.evaluationNonRemise = evaluationNonRemise;
 // Lot 30 (17 sept. 2026) — une copie non recevable (plagiat, IA) n'est pas une remise pour la complétion
 window.evaluationNonRecevable = evaluationNonRecevable;
+// Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C
+window.evaluationTravailEnCours = evaluationTravailEnCours;
+window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;

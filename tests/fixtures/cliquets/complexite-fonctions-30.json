@@ -51,10 +51,9 @@
  "js/liste-evaluations.js": {
   "(anonyme)": [
    37,
-   34,
    31
   ],
-  "genererLigneHTML": 43,
+  "genererLigneHTML": 41,
   "genererDropdownActions": 31
  },
  "js/main.js": {

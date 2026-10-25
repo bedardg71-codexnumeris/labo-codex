@@ -387,6 +387,10 @@ function _postSauvegardeSauv(evaluation, groupeCoursActif) {
 }
 
 function sauvegarderEvaluation() {
+    // Statut incomplet (25 oct. 2026) : refusé AVANT d'annuler l'enregistrement automatique, qui
+    // porte peut-être le statut qu'on vient de poser.
+    if (refuserVerrouTravailEnCours()) return;
+
     // Annuler le debounce auto-save (la sauvegarde manuelle prend le relais) — Patch §5.6 fix #109 (étape 4)
     window._annulerAutoSaveEnAttente();   // #1145 — l'instantané part avec le minuteur
 
@@ -649,6 +653,86 @@ function changerStatutIntegrite() {
     // Les chargeurs qui posent ce menu par `change` (#959) sont tus par les gardes de
     // `_debouncerAutoSave` (suspension, compteur #960).
     if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
+}
+
+/**
+ * Statut « Incomplet ; travail en cours » (décisions de Grégoire, 25 oct. 2026) — la case de la
+ * palette Paramètres. Posée : les critères et la note disparaissent du formulaire, la copie
+ * s'enregistre sans note (`_majTravailEnCoursAutoSave`, evaluation-chargement.js) et n'entre
+ * jamais dans la note (`evaluationEntreDansLaNote`). Décochée : elle redevient ordinaire.
+ */
+function changerTravailEnCours() {
+    const caseEnCours = document.getElementById('travailEnCours');
+    const enCours = !!(caseEnCours && caseEnCours.checked);
+    if (evaluationEnCours) {
+        if (enCours) evaluationEnCours.travailEnCours = true;
+        else delete evaluationEnCours.travailEnCours;
+    }
+    afficherTravailEnCours(enCours);
+    // Comme l'intégrité (lot C) : le statut s'enregistre tout seul ; les chargeurs qui posent
+    // la case par `change` sont tus par les gardes de `_debouncerAutoSave`.
+    if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
+}
+
+/**
+ * L'écran du statut incomplet : la classe du panneau des critères (une classe, pas le contenu de
+ * la liste : les rendus des critères la réécrivent) et la pastille de la copie active.
+ * Appelée aussi par les chargeurs (evaluation.js) pour une évaluation qui porte déjà le statut.
+ * @param {boolean} enCours
+ */
+function afficherTravailEnCours(enCours) {
+    const panneau = document.getElementById('travaux-eval-droite');
+    if (panneau) panneau.classList.toggle('travail-en-cours', enCours);
+    const message = document.getElementById('messageTravailEnCours');
+    if (message) message.classList.toggle('u-hide', !enCours);
+    const caseEnCours = document.getElementById('travailEnCours');
+    if (caseEnCours && caseEnCours.checked !== enCours) caseEnCours.checked = enCours;
+    _poserPastilleTravailEnCours(enCours);
+}
+
+/**
+ * La pastille de la copie active (barre latérale, barre d'outils) dit « Incomplet » ; retiré, elle
+ * reprend « En cours » — l'état de la copie ouverte, comme à sa sélection (travaux-ui.js).
+ */
+function _poserPastilleTravailEnCours(enCours) {
+    const badges = [
+        document.querySelector('.annot-badge.actif'),
+        document.querySelector('#travaux-badge-fichier-actif .annot-badge')
+    ];
+    badges.forEach(badge => {
+        const pill = badge && badge.querySelector('.travaux-badge-pill');
+        if (!pill) return;
+        if (enCours) {
+            pill.textContent = 'Incomplet';
+            pill.className = 'travaux-badge-pill incomplet';
+            pill.title = 'Incomplet ; travail en cours';
+        } else if (pill.classList.contains('incomplet')) {
+            pill.textContent = 'EN COURS';
+            pill.className = 'travaux-badge-pill en-cours';
+            pill.removeAttribute('title');
+        }
+        // À la sélection d'une autre copie, la pastille reprend son état d'origine (travaux-ui.js).
+        if (pill.dataset.origTexte !== undefined) {
+            if (enCours) { pill.dataset.origTexte = 'Incomplet'; pill.dataset.origClasse = 'incomplet'; }
+            else if (pill.dataset.origClasse === 'incomplet') { pill.dataset.origTexte = 'Importé'; pill.dataset.origClasse = 'importe'; }
+        }
+    });
+}
+
+/**
+ * La porte du verrouillage refuse une copie « Incomplet ; travail en cours » : elle n'a pas de note
+ * à figer. Rend vrai quand elle refuse (et le dit).
+ */
+function refuserVerrouTravailEnCours() {
+    if (!_lireTravailEnCoursCoche()) return false;
+    notifications.warning('Copie incomplète',
+        'Une copie « Incomplet ; travail en cours » ne se verrouille pas : décoche la case pour évaluer la copie terminée.');
+    return true;
+}
+
+function _lireTravailEnCoursCoche() {
+    const caseEnCours = document.getElementById('travailEnCours');
+    return !!(caseEnCours && caseEnCours.checked);
 }
 
 // Fonction gererDelaiAccorde() supprimée - remplacée par appliquerJetonDelaiDepuisSidebar()
@@ -1069,6 +1153,10 @@ window.sauvegarderEvaluation = sauvegarderEvaluation;
 window.mettreAJourPillStatut = mettreAJourPillStatut;
 window.changerStatutRemise = changerStatutRemise;
 window.changerStatutIntegrite = changerStatutIntegrite;
+// Statut « Incomplet ; travail en cours » (25 oct. 2026)
+window.changerTravailEnCours = changerTravailEnCours;
+window.afficherTravailEnCours = afficherTravailEnCours;
+window.refuserVerrouTravailEnCours = refuserVerrouTravailEnCours;
 window.peuplementOptJetons = peuplementOptJetons;
 window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;
 window.gererChangementCheckboxJetonReprise = gererChangementCheckboxJetonReprise;

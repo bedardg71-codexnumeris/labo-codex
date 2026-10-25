@@ -25877,11 +25877,30 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     color: #fff;
 }
 
-/* Reprise en attente de réévaluation ; #927 — évaluation non enregistrée : même famille, un geste attendu de l'enseignant·e */
+/* Reprise en attente de réévaluation ; #927 — évaluation non enregistrée ; statut « Incomplet ; travail en cours »
+   (25 oct. 2026) : même famille, un geste attendu de l'enseignant·e */
 .travaux-badge-pill.a-reevaluer,
-.travaux-badge-pill.non-enregistree {
+.travaux-badge-pill.non-enregistree,
+.travaux-badge-pill.incomplet {
     background: var(--alerte-bordure-attention);
     color: #fff;
+}
+
+/* Statut « Incomplet ; travail en cours » (25 oct. 2026) — la case de la palette Paramètres
+   (cible tactile de 44 px) ; posée, les critères et la note du panneau de droite disparaissent
+   (une classe sur le panneau : les rendus des critères réécrivent la liste, pas le panneau). */
+.case-travail-en-cours {
+    align-items: center;
+    min-height: 44px;
+}
+.case-travail-en-cours input[type="checkbox"] {
+    margin-top: 0;
+    width: 20px;
+    height: 20px;
+}
+.travaux-panneau-droite.travail-en-cours #listeCriteresGrille1,
+.travaux-panneau-droite.travail-en-cours #noteFinale1 {
+    display: none;
 }
 
 /* Remis — vert foncé */
@@ -26025,6 +26044,7 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
 .travaux-compteur-pill.evalue { background: var(--vert-succes, #28a745); color: #fff; }
 .travaux-compteur-pill.annote { background: var(--bleu-clair, #6aacb8); color: #fff; }
 .travaux-compteur-pill.importe { background: var(--turquoise-500, #2da89e); color: #fff; }
+.travaux-compteur-pill.incomplet { background: var(--alerte-bordure-attention); color: #fff; }   /* statut incomplet (25 oct. 2026) */
 
 /* ===============================
    MODALE TRANSFERT FICHIERS

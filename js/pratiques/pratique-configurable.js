@@ -636,9 +636,7 @@ class PratiqueConfigurable {
             remis: evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
-                window.evaluationEntreDansLaNote(e) &&
-                !window.evaluationNonRemise(e) &&
-                !window.evaluationNonRecevable(e)   // lot 30 : tranché par Grégoire, 17 sept. 2026
+                window.evaluationCompteCommeRemise(e)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
             )
         }));
 

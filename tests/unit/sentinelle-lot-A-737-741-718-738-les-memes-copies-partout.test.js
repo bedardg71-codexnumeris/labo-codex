@@ -316,22 +316,25 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
     it('D3 · les complétions des trois familles et les deux lecteurs des snapshots passent par les DEUX prédicats (le troisième est parti avec le repli, #716) ; les directions et le « (sur N) » du profil par le premier', () => {
         // #871 (17 sept. 2026) : le compte vit dans `calculerDetailsCompletion` ; `calculerCompletion` n'est plus que le quotient.
         const corps = (f, debut, fin) => sansCommentaires(tranche(source(f), debut, fin));
-        const deux = (s) => /evaluationEntreDansLaNote\(/.test(s) && /!window\.evaluationNonRemise\(/.test(s);
+        // Statut incomplet (25 oct. 2026) : la remise pour C a UN lecteur, `evaluationCompteCommeRemise` (registre),
+        // qui lit les trois prédicats — les sites ne les recopient plus (un site qui en oubliait un rougissait ici).
+        const regle = sansCommentaires(tranche(source('js/pratiques/pratique-registre.js'), 'function evaluationCompteCommeRemise(', 'function compterEvaluationsEcarteesDeLaNote('));
+        expect(/evaluationEntreDansLaNote\(/.test(regle) && /!evaluationNonRemise\(/.test(regle) && /evaluationNonRecevable\(/.test(regle)).toBe(true);
+        const deux = (s) => /window\.evaluationCompteCommeRemise\(e\)/.test(s);
         expect(deux(corps('js/pratiques/pratique-sommative.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         expect(deux(corps('js/pratiques/pratique-configurable.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         expect(deux(corps('js/pratiques/pratique-pan-standards.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
-        // Lot 30 : partout où la complétion lit « non remise », elle lit aussi « non recevable » — un site qui en oublie une rougit.
-        const trois = (x) => deux(x) && /!window\.evaluationNonRecevable\(/.test(x);
+        // Lot 30 : partout où la complétion lit « non remise », elle lit aussi « non recevable » — par la règle unique.
         ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-configurable.js', 'js/pratiques/pratique-pan-standards.js'].forEach(fichier =>
-            expect([fichier, trois(corps(fichier, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))]).toEqual([fichier, true]));
+            expect([fichier, /evaluationNonRemise\(|evaluationNonRecevable\(/.test(corps(fichier, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))]).toEqual([fichier, false]));
         const snapshots = sansCommentaires(source('js/snapshots.js'));
-        expect((snapshots.match(/!window\.evaluationNonRecevable\(/g) || []).length).toBe(2);
+        expect((snapshots.match(/window\.evaluationCompteCommeRemise\(e\)/g) || []).length).toBe(2);
         // Lot N2 (#716, 22 sept. 2026) : le troisième lecteur — le filtre du repli du P historique — est parti avec
         // le repli. Le P historique est la note du cours : il lit les copies par les accesseurs de la pratique.
         expect((snapshots.match(/window\.evaluationNonRecevable\(e\)\) return false/g) || []).length).toBe(0);
         expect(/calculerNoteDuCours\(da, pratiqueP\)/.test(snapshots)).toBe(true);
         expect((sansCommentaires(source('js/pratiques/pratique-registre.js')).match(/'plagiat'/g) || []).length).toBe(1);
-        expect((snapshots.match(/!window\.evaluationNonRemise\(/g) || []).length).toBe(2);
+        expect((snapshots.match(/!window\.evaluationNonRemise\(|!window\.evaluationNonRecevable\(/g) || []).length).toBe(0);   // 25 oct. : par la règle unique
         expect((snapshots.match(/window\.evaluationNonRemise\(e\)\) return false/g) || []).length).toBe(0);
         const affichage = sansCommentaires(source('js/profil-etudiant-sections-affichage.js'));
         expect(/evaluationEntreDansLaNote\(e\)/.test(tranche(affichage, 'function calculerDirectionsCriteres(da) {', 'const resultatParDefaut'))).toBe(true);
