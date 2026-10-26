@@ -167,6 +167,32 @@ function _couplesDesFichesV2(etudiants) {
     return vus;
 }
 
+/**
+ * #1038 (26 oct. 2026) — où sont les élèves d'un numéro, cours par cours. Lu par la garde de
+ * l'enregistrement d'un groupe-cours : le groupe-cours « 203-SN4 + 00001 » naissait vide, les élèves
+ * de 00001 étant rattachés à un autre cours, sans que rien ne le dise. Le jugement est celui de la
+ * liste (`_ficheEstDuGroupeV2`) ; une fiche sans coursId (stock d'avant #887) est comptée à part,
+ * puisqu'elle passe le filtre de tout cours. Pure : ne lit que ce qu'on lui donne.
+ * @returns {{duCours: number, sansCours: number, ailleurs: Array<{coursId: string, n: number}>}}
+ */
+function repartitionGroupeParCoursV2(etudiants, coursId, groupeNum) {
+    const sel = { coursId: String(coursId || ''), groupe: normaliserNumeroGroupe(groupeNum) };
+    let duCours = 0, sansCours = 0;
+    const ailleurs = new Map();
+    (etudiants || []).forEach(e => {
+        if (!e || !e.groupe || normaliserNumeroGroupe(e.groupe) !== sel.groupe) return;
+        if (_ficheEstDuGroupeV2(e, sel)) duCours++;
+        else if (!e.coursId) sansCours++;
+        else ailleurs.set(String(e.coursId), (ailleurs.get(String(e.coursId)) || 0) + 1);
+    });
+    return { duCours, sansCours, ailleurs: Array.from(ailleurs, ([id, n]) => ({ coursId: id, n })) };
+}
+
+/** #1038 : un cours nommé comme la zone d'import le nomme, d'après son id. */
+function libelleCoursParIdV2(coursId) {
+    return _libelleCoursRattachementV2(_coursParIdV2(coursId)) || `Cours ${coursId}`;
+}
+
 /** Le libellé du groupe choisi, pour les phrases (suppression, liste vide, bouton). */
 function _libelleGroupeChoisiV2(sel, etudiants) {
     const couples = _couplesDesFichesV2(etudiants);
@@ -1707,5 +1733,8 @@ window.viderListeEtudiantsV2 = viderListeEtudiantsV2;
 // Cadrage « Rencontres » (12 sept. 2026) : la lecture d'une liste collée, partagée avec rencontres.js.
 window.decouperLigneCollee = decouperLigneCollee;
 window.analyserListeEtudiantsCollee = analyserListeEtudiantsCollee;
+// #1038 : lus par la garde du groupe-cours et par le sélecteur « Production » de l'import.
+window.repartitionGroupeParCoursV2 = repartitionGroupeParCoursV2;
+window.libelleCoursParIdV2 = libelleCoursParIdV2;
 
 })();

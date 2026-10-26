@@ -1758,6 +1758,21 @@ function normaliserNumeroGroupe(g) {
     return String(g || '').padStart(5, '0');
 }
 
+/**
+ * #1038 (26 oct. 2026) — les productions que le filtre de cours d'`obtenirDonneesSelonMode` écarte
+ * TOUTES. Même règle que lui : une production sans coursId passe pour tout cours, une du cours actif
+ * passe. Si une seule passe, rien à dire ([]) : deux cours bien rangés ne font aucun bruit.
+ * Pure : le stock brut du trimestre et l'id du cours actif, rien d'autre.
+ * @returns {Array<{coursId: string, n: number}>} les cours qui portent les productions écartées
+ */
+function productionsRangeesAilleurs(stock, coursActifId) {
+    const productions = Array.isArray(stock) ? stock.filter(Boolean) : [];
+    if (!coursActifId || productions.some(p => !p.coursId || p.coursId === coursActifId)) return [];
+    const parCours = new Map();
+    productions.forEach(p => parCours.set(String(p.coursId), (parCours.get(String(p.coursId)) || 0) + 1));
+    return Array.from(parCours, ([coursId, n]) => ({ coursId, n }));
+}
+
 function obtenirEtudiantsCoursActif() {
     // Obtenir le cours actif (résolu de façon fiable, cf. #130)
     const coursActif = obtenirContexteCoursActif();
@@ -1901,6 +1916,7 @@ function lirePointeurPratiqueGroupeCours() {
 // Exporter les nouvelles fonctions
 window.obtenirEtudiantsCoursActif = obtenirEtudiantsCoursActif;
 window.normaliserNumeroGroupe = normaliserNumeroGroupe;
+window.productionsRangeesAilleurs = productionsRangeesAilleurs;   // #1038 : le sélecteur « Production » de l'import
 // Cadrage « Rencontres » (12 sept. 2026) : le contexte de service, lu à un seul endroit.
 window.obtenirIdContexteActif = obtenirIdContexteActif;
 window.coursDuContexteActif = coursDuContexteActif;

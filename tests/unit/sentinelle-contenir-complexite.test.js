@@ -36,7 +36,10 @@ const M = mesurerDepot(racine);   // une seule mesure pour tout le banc (≈ 0,5
 const HAUSSES_ASSUMEES = {
     // Le type de schéma `tablesCas` : un `case` d'une ligne, qui délègue à `_assainirTablesCas` (le registre des tables
     // de cas écarte une table illisible ; le type `array` aurait coercé une borne illisible en 0). +1, le minimum.
-    'js/import-export.js : assainirObjet': 'lot 3b de la table de cas (26 oct. 2026) : 43 → 44, le type `tablesCas`'
+    'js/import-export.js : assainirObjet': 'lot 3b de la table de cas (26 oct. 2026) : 43 → 44, le type `tablesCas`',
+    // La garde du groupe-cours qui naît sans ses élèves : un `if` d'une ligne, qui délègue à
+    // `_groupeSansSesElevesAccepteV2` (la question, « Annuler » qui remet la fiche). +1, le minimum.
+    'js/trimestre-v2-groupes-cours.js : sauvegarderGroupeCoursV2': '#1038 (26 oct. 2026) : 33 → 34, la garde du groupe-cours sans ses élèves'
 };
 
 /** Compare deux relevés { fichier: { nom: cyc | [cyc…] } } : hausses, neuves, baisses (à reporter). */

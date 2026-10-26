@@ -1830,6 +1830,32 @@
      * @param {Map} groupes - Groupes de documents
      * @returns {string} HTML
      */
+    /**
+     * #1038 (26 oct. 2026) — le sélecteur « Production » vide sans le dire : les productions du
+     * trimestre étaient rangées sous un autre cours, seul « Jeton de reprise » restait. Une ligne
+     * les nomme ; rien quand le cours actif en a au moins une. Mots validés par Grégoire le 26 oct.
+     * (15 h 01). Les libellés de cours viennent d'une saisie : échappés.
+     */
+    function phraseProductionsRangeesAilleurs(productions) {
+        // Le cas courant (le cours actif a ses productions) ne relit pas le stock.
+        if (productions.length > 0 || typeof window.productionsRangeesAilleurs !== 'function') return '';
+        // Le cours que le filtre compare (`obtenirContexteCoursActif`, modes.js : l'id d'`infoCours`).
+        const coursActif = db.getSync('infoCours', null);
+        if (!coursActif || !coursActif.id) return '';
+        const ailleurs = window.productionsRangeesAilleurs(db.getSync(cle('productions'), []), coursActif.id);
+        if (ailleurs.length === 0) return '';
+        const libelle = id => (typeof window.libelleCoursParIdV2 === 'function' ? window.libelleCoursParIdV2(id) : 'Cours ' + id);
+        const n = ailleurs.reduce((total, a) => total + a.n, 0);
+        const sous = ailleurs.length === 1
+            ? libelle(ailleurs[0].coursId)
+            : 'd\'autres cours (' + ailleurs.map(a => libelle(a.coursId)).sort().join(', ') + ')';
+        const phrase = 'Aucune production dans ' + libelle(coursActif.id) + '. '
+            + (n === 1 ? '1 production de ce trimestre est rangée sous ' : n + ' productions de ce trimestre sont rangées sous ')
+            + sous + ' : ' + (n === 1 ? 'elle n\'apparaît' : 'elles n\'apparaissent') + ' ici que lorsque '
+            + (ailleurs.length === 1 ? 'ce cours est actif.' : 'leur cours est actif.');
+        return `<p class="texte-muted u-texte-petit" id="pipeline-productions-ailleurs" style="margin:4px 0 0 0;">${echapperHtml(phrase)}</p>`;
+    }
+
     function genererEtape2Colonnes(queue) {
         const nbImages = queue.filter(f => f.estImage).length;
         const productions = obtenirDonneesSelonMode('productions');
@@ -1943,6 +1969,7 @@
                 ${jetonsActifs ? `<option value="__jeton_reprise__" ${prodActuelle === '__jeton_reprise__' || modeJetonActif ? 'selected' : ''}>Jeton de reprise</option>` : ''}
             </select>
             <p class="texte-muted u-texte-petit" style="margin:4px 0 0 0;">S'applique à tout le lot. Une correction faite via « Modifier » sur un fichier est conservée.</p>
+            ${phraseProductionsRangeesAilleurs(productions)}
         </div>`;
         // Sous-sélecteur : quelle production le jeton cible-t-il ?
         if (prodActuelle === '__jeton_reprise__' || modeJetonActif) {
