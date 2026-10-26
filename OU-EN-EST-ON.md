@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 26 OCTOBRE 2026, 16 H : LE GROUPE-COURS QUI NAÎT SANS SES ÉLÈVES LE DIT, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : créer un groupe-cours dont le groupe n'a aucun·e élève dans le cours choisi, alors que ses élèves sont rattaché·es à un autre cours, pose d'abord une question (« Le groupe 00001 n'a aucun·e étudiant·e dans … Créer quand même le groupe-cours ? ») ; « Annuler » n'écrit rien. À l'import des travaux, quand le cours actif n'a aucune production mais que le trimestre en a sous un autre cours, une ligne sous « Production » le dit. Rien n'est déplacé : qui a les mêmes élèves dans deux cours garde son second groupe-cours vide, averti. C'est ce qui a bloqué Mathieu quatre semaines (#1038).
+
+**Ce qui reste** : aucun geste ne change encore le cours d'un·e élève (#1170) ; Conception › Productions montre les productions de tous les cours sans nommer le leur (#1171). Pour toi : le signal pour le verdict complet et la mise en ligne, avec les deux lots de la table de cas.
+
+**Vérifié comment** : Vitest entier vert (9 768) ; dans WebKit, la séquence de Mathieu rejouée par les fonctions de l'écran, qui lit les mots de la question et de la ligne, et les cas sans question ni ligne ; chaque condition retirée fait échouer un banc (12 sur 12) ; les 18 specs qui touchent le Cadre ou l'import, vertes (50 essais). Pas encore : la suite complète du navigateur, Chrome sous Windows (celui de Mathieu).
+
 📝 **LE 26 OCTOBRE 2026, FIN D'APRÈS-MIDI : LA TABLE DE CAS EST COMPLÈTE (LES DEUX LOTS), PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : sous les paliers, « + Ajouter une table de cas » ; chaque table lit une valeur de la copie (le compte, ce à quoi tu le rapportes, la note du critère, la part de la limite, la moyenne, le code le plus fréquent) et tu écris un texte par cas ; l'étudiant·e lit le texte de son cas sous le critère, après les paliers, et dans son PDF. Une table neuve est vide : rien ne change pour un·e étudiant·e tant que tu n'écris rien. Retirer une table écrite, ou changer ce qu'elle lit, te le demande d'abord. Tes tables partent avec la grille (export, partage, bibliothèque).
