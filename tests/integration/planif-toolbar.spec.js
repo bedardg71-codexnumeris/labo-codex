@@ -395,6 +395,9 @@ test('import inter-trimestre — copie vers le trimestre actif, source intacte, 
     // (« Consulter la bibliothèque ») et non plus dans « Actions ▾ ».
     await expect(page.locator('#planif-btn-import-trimestre')).toHaveCount(0);
     await page.click('#planif-btn-bibliotheque');
+    // ↻ 25 oct. 2026 (#1157) — RÉANCRÉ, motif : la ligne d'import est repliée au pied de « Dans ce
+    // trimestre » (fenêtre en deux colonnes) ; sans carte du même cours, le repli est fermé : on l'ouvre.
+    await page.locator('#modalBibliothequeAlignements details[data-repli="import-trimestre"] > summary').click();
     await page.selectOption('#biblio-alignements-import-trimestre', 'h9099');
     await page.click('[data-action="importerAlignementsTrimestre"]');
     const panneau = page.locator('#biblio-alignements-cartes-trimestre');

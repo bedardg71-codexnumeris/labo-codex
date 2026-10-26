@@ -52,44 +52,49 @@ const NOM_HOSTILE = '<img src=x onerror="alert(1)">';
 /* 3.1 — la carte porte son identifiant                                */
 /* ------------------------------------------------------------------ */
 
+// #1159 (lot 6, 25 oct. 2026) — RÉANCRÉ : les cartes (`renderCarteSelection`, `renderCarteDisponible`)
+// sont retirées ; les dix bibliothèques rendent des RANGÉES (`_renderRangee`). Les mêmes promesses se
+// jouent sur la fenêtre à une seule liste, rendue dans un `document` qui garde le HTML inséré.
+function rendreListe(liste, repli) {
+    const echappement = chargerScript('js/securite-echappement.js');
+    let html = '';
+    const document = {
+        getElementById: () => null, querySelector: () => null, querySelectorAll: () => [],
+        addEventListener() {}, body: { insertAdjacentHTML: (_ou, h) => { html += h; } }
+    };
+    const B = chargerScript('js/bibliotheque-ui.js', {
+        document, echapperHtml: echapperHtmlReel, echapperAttribut: echappement.echapperAttribut
+    }).BibliothequeUI;
+    B.creerFenetreListe({ modalId: 'modalBanc291', titre: 'Banc', liste: { rangees: liste }, repli: { titre: 'Mis de côté', rangees: repli || [] } });
+    return html;
+}
+
 describe('#291 §3.1 · « ils ne sont pas affichés ! »', () => {
-    it('la carte disponible affiche l\'ID court et porte l\'ID complet en title', () => {
-        const html = ui.renderCarteDisponible({
-            nom: 'Grille FR', id: 'GRILLE_1755900000_a_b209ef',
-            badgeSource: '', metadonnees: '4 critère(s)', afficherId: true
-        });
+    it('la rangée affiche l\'ID court et porte l\'ID complet en title', () => {
+        const html = rendreListe([{ nom: 'Grille FR', id: 'GRILLE_1755900000_a_b209ef', ligne: '4 critères', afficherId: true }]);
         expect(html).toContain('#b209ef');
         expect(html).toContain('title="Identifiant complet : GRILLE_1755900000_a_b209ef"');
     });
 
-    it('la carte de sélection l\'affiche aussi — « Voir » doit pouvoir l\'atteindre', () => {
-        const html = ui.renderCarteSelection({
-            nom: 'Grille FR', id: 'GRILLE_x_b209ef',
-            badgeSource: '', metadonnees: '', afficherId: true
-        });
+    it('la rangée du groupe replié l\'affiche aussi — « Voir » doit pouvoir l\'atteindre', () => {
+        const html = rendreListe([], [{ nom: 'Grille FR', id: 'GRILLE_x_b209ef', ligne: '', afficherId: true }]);
         expect(html).toContain('#b209ef');
     });
 
-    it('les deux cartes portent l\'ancre qui rend « Voir » possible', () => {
-        const opts = { nom: 'G', id: 'ID_42', badgeSource: '', metadonnees: '' };
-        expect(ui.renderCarteDisponible(opts)).toContain('data-biblio-item-id="ID_42"');
-        expect(ui.renderCarteSelection(opts)).toContain('data-biblio-item-id="ID_42"');
+    it('les rangées des deux groupes portent l\'ancre qui rend « Voir » possible', () => {
+        const html = rendreListe([{ nom: 'G', id: 'ID_42', ligne: '' }], [{ nom: 'H', id: 'ID_43', ligne: '' }]);
+        expect(html).toContain('data-biblio-item-id="ID_42"');
+        expect(html).toContain('data-biblio-item-id="ID_43"');
     });
 
-    it('la puce reste OPT-IN : les écrans hors bibliothèque ne changent pas', () => {
-        // renderCarteSelection sert aussi cours.js, trimestre-v2-liste.js,
-        // tampons-bibliotheque.js, planification-bibliotheque.js. Aucun d'eux
-        // n'a demandé d'ID à l'écran : sans `afficherId`, rien ne bouge.
-        const html = ui.renderCarteSelection({
-            nom: 'Cours', id: 'COURS_1', badgeSource: '', metadonnees: 'Session A25'
-        });
+    it('la puce reste OPT-IN : les bibliothèques qui ne la demandent pas ne changent pas', () => {
+        // Les cours, les trimestres, les groupes-cours n'ont pas demandé d'ID à l'écran.
+        const html = rendreListe([{ nom: 'Cours', id: 'COURS_1', ligne: 'Session A25' }]);
         expect(html).not.toContain('biblio-id-court');
     });
 
     it('un identifiant hostile n\'échappe pas de son attribut', () => {
-        const html = ui.renderCarteDisponible({
-            nom: 'G', id: 'X" onload="alert(1)', badgeSource: '', metadonnees: '', afficherId: true
-        });
+        const html = rendreListe([{ nom: 'G', id: 'X" onload="alert(1)', ligne: '', afficherId: true }]);
         expect(html).not.toContain('onload="alert(1)"');
         expect(html).toContain('&quot;');
     });
@@ -305,12 +310,12 @@ describe('#291 §3.4 · résoudre sans aller chercher un menu ⋮', () => {
 const ID_HOSTILE = 'PARTAGE_x" data-action="supprimerTout';
 
 describe('CT-29 · les identifiants sortent échappés des attributs de bouton', () => {
-    it('bouton principal : un id porteur d\'un guillemet ne peut pas greffer d\'attribut', () => {
-        const html = ui.renderCarteDisponible({
-            nom: 'Grille partagée', id: ID_HOSTILE, badgeSource: '', metadonnees: '',
-            boutonPrincipal: { label: 'Dupliquer', action: 'partageSection.dupliquer',
-                param: 'grille', param2: ID_HOSTILE }
-        });
+    // #1159 : réancré du bouton principal d'une carte au bouton de passage d'une rangée.
+    it('bouton de la rangée : un id porteur d\'un guillemet ne peut pas greffer d\'attribut', () => {
+        const html = rendreListe([{
+            nom: 'Grille partagée', id: 'PARTAGE_1', ligne: '',
+            passage: { label: 'Dupliquer', action: 'partageSection.dupliquer', param: 'grille', param2: ID_HOSTILE }
+        }]);
         expect(html).toContain('&quot; data-action=&quot;supprimerTout');
         expect(html).not.toContain('" data-action="supprimerTout');
     });

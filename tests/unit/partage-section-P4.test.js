@@ -55,9 +55,7 @@ function charger() {
     w.cle = (k) => 'h2026_' + k;
     w.BibliothequeUI = {
         obtenirAuteurActif: () => 'Grégoire',
-        formaterTitre: (n) => n,
-        renderCarteDisponible: (opts) => '[carte:' + opts.nom + ':' + opts.boutonPrincipal.label + ']'
-            + '[menu:' + (opts.actionsMenu || []).map(a => a.label + '→' + a.action).join(',') + ']'
+        formaterTitre: (n) => n
     };
     // Registre des packages importés : le vrai module (partage-import.js) est
     // chargé à part dans les tests de suppression, pour vérifier que la
@@ -130,7 +128,8 @@ beforeEach(() => {
 
 describe('lot P4 · sentinelle exports', () => {
     it('expose l\'API attendue sur window.partageSection', () => {
-        ['genererSectionHTML', 'dupliquer', 'dupliquerVersMesDocuments',
+        // ↻ #1156 : `genererSectionHTML` retirée, `rangeesDeuxColonnes` la remplace.
+        ['rangeesDeuxColonnes', 'dupliquer', 'dupliquerVersMesDocuments',
             'consequencesSuppression', 'supprimerDuPartage', 'supprimer',
             'exporterPourPartager', 'chaineAttributionPour'].forEach(nom => {
             expect(w.partageSection[nom], nom).toBeTypeOf('function');
@@ -224,20 +223,25 @@ describe('lot P4 · duplication échelle et pratique', () => {
 });
 
 describe('lot P4 · rendu de la section', () => {
-    it('chaîne vide quand aucun item partagé du type (la section n\'apparaît pas)', () => {
+    // ↻ #1156 (25 oct. 2026) : `genererSectionHTML` (la section en cartes de `creerModal`) est retirée ; les cinq
+    // fenêtres sont en deux colonnes et lisent `rangeesDeuxColonnes` (mêmes mots, mêmes gestes, en données).
+    // BREAK-TEST (25 oct.) : « Dupliquer vers mes documents » → « Dupliquer » dans `rangeesDeuxColonnes` → ROUGE.
+    it('rien quand aucun item partagé du type (la section n\'apparaît pas)', () => {
         db.setSync('partage_grilles', []);
-        expect(w.partageSection.genererSectionHTML('grille')).toBe('');
+        expect(w.partageSection.rangeesDeuxColonnes('grille')).toBeNull();
     });
 
-    it('rend le titre de section + une carte par item, bouton Dupliquer', () => {
-        const html = w.partageSection.genererSectionHTML('grille');
-        expect(html).toContain('Partagés par des collègues');
-        expect(html).toContain('[carte:Grille partagée:Dupliquer vers mes documents]');
+    it('rend le titre de section + une rangée par item, passage Dupliquer', () => {
+        const section = w.partageSection.rangeesDeuxColonnes('grille');
+        expect(section.titre).toBe('Partagés par des collègues');
+        expect(section.rangees.map(r => [r.nom, r.passage.label, r.passage.action]))
+            .toContainEqual(['Grille partagée', 'Dupliquer vers mes documents', 'partageSection.dupliquer']);
     });
 
-    it('cartouche : bouton « Dupliquer avec sa grille »', () => {
-        const html = w.partageSection.genererSectionHTML('cartouche');
-        expect(html).toContain('Dupliquer avec sa grille');
+    it('cartouche : passage « Dupliquer avec sa grille »', () => {
+        const section = w.partageSection.rangeesDeuxColonnes('cartouche');
+        expect(section.rangees.length).toBeGreaterThan(0);
+        section.rangees.forEach(r => expect(r.passage.label).toBe('Dupliquer avec sa grille'));
     });
 });
 
@@ -262,11 +266,15 @@ describe('lot P4 · rendu de la section', () => {
 describe('suppression · le menu ⋮ est rendu sur toutes les bibliothèques', () => {
     it('chaque type propose « Supprimer » → partageSection.supprimer', () => {
         ['grille', 'echelle', 'cartouche', 'production', 'pratique'].forEach(type => {
-            const html = w.partageSection.genererSectionHTML(type);
+            // ↻ #1156 (25 oct. 2026) : `genererSectionHTML` (la section en cartes de `creerModal`) est retirée ; les cinq
+            // fenêtres sont en deux colonnes et lisent `rangeesDeuxColonnes` (mêmes mots, mêmes gestes, en données).
+            const section = w.partageSection.rangeesDeuxColonnes(type);
+            expect(section && section.rangees.length, type).toBeGreaterThan(0);
             // Le menu a gagné « Exporter pour partager » le 25 août (décision 3.2) :
             // on tient la PRÉSENCE de l'entrée, pas la composition entière du menu
             // — celle-ci est verrouillée par la sentinelle de ré-export plus bas.
-            expect(html, type).toContain('Supprimer→partageSection.supprimer]');
+            section.rangees.forEach(r => expect(r.menu.map(g => g.label + '→' + g.action), type)
+                .toContain('Supprimer→partageSection.supprimer'));
         });
     });
 });
@@ -458,10 +466,12 @@ describe('suppression · le registre cesse d\'annoncer ce qui n\'est plus là', 
 describe('ré-export · le menu ⋮ propose « Exporter pour partager »', () => {
     it('l\'entrée existe dans les cinq bibliothèques, avant « Supprimer »', () => {
         ['grille', 'echelle', 'cartouche', 'production', 'pratique'].forEach(type => {
-            const html = w.partageSection.genererSectionHTML(type);
-            expect(html, type).toContain(
-                '[menu:Exporter pour partager→partageSection.exporterPourPartager,'
-                + 'Supprimer→partageSection.supprimer]');
+            // ↻ #1156 (25 oct. 2026) : `genererSectionHTML` (la section en cartes de `creerModal`) est retirée ; les cinq
+            // fenêtres sont en deux colonnes et lisent `rangeesDeuxColonnes` (mêmes mots, mêmes gestes, en données).
+            const section = w.partageSection.rangeesDeuxColonnes(type);
+            expect(section && section.rangees.length, type).toBeGreaterThan(0);
+            section.rangees.forEach(r => expect(r.menu.map(g => g.label + '→' + g.action), type).toEqual([
+                'Exporter pour partager→partageSection.exporterPourPartager', 'Supprimer→partageSection.supprimer']));
         });
     });
 });

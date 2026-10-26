@@ -40,7 +40,7 @@ const ANNONCES = {
     'js/cartouches-bibliotheque.js': 1,   // + 1 silence (#982 : la migration au démarrage)
     'js/cartouches.js': 5,
     'js/cc-license.js': 1,
-    'js/cours.js': 5,
+    'js/cours.js': 4,   // #1159 (lot 6) : − 1, « Déposer dans les cours disponibles » (`partagerCours`) retiré
     'js/donnees-v2.js': 4,
     'js/echelles-bibliotheque.js': 2,
     'js/echelles.js': 3,

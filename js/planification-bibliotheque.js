@@ -115,134 +115,148 @@ function seederDemoSiNecessaire() {
 }
 
 // ============================================
-// MODALE — Affichage via BibliothequeUI
+// MODALE — La fenêtre en deux colonnes (#1157, lot 4 du plan du 24 oct. 2026)
 // ============================================
 
-async function afficherBibliothequeAlignements() {
-    var biblioItems = await obtenirTousLesAlignementsBibliotheque();
+/** « 17 nœuds · 12 liens » : le pluriel réel, « nœud » avec son œ. */
+function compteNoeudsLiens(donnees) {
+    var nbNoeuds = donnees ? (donnees.noeuds || []).length : 0;
+    var nbLiens = donnees ? (donnees.liens || []).length : 0;
+    return nbNoeuds + ' nœud' + (nbNoeuds > 1 ? 's' : '') + ' · ' + nbLiens + ' lien' + (nbLiens > 1 ? 's' : '');
+}
 
-    // Section 1 : Cartes du trimestre actif
+/**
+ * L'aperçu d'une carte de la bibliothèque : ce que sa rangée d'avant montrait en plus des
+ * comptes (la description courte, l'auteur, la licence), avec les libellés des métadonnées CC.
+ * Une carte qui n'a rien de plus n'a pas d'aperçu (null) : son nom n'est pas un bouton.
+ */
+function apercuAlignementBibliotheque(item) {
+    var meta = item.metadata_cc || {};
+    var description = meta.description_courte || '';
+    var auteur = item.auteur || meta.auteur_original || '';
+    var licence = meta.licence || '';
+    if (!description && !auteur && !licence) return null;
+    var lignes = [];
+    if (auteur) lignes.push(['Auteur', auteur, '']);
+    if (licence) lignes.push(['Licence', licence, '']);
+    return { paragraphes: [description], lignes: lignes };
+}
+
+/**
+ * Les rangées des deux colonnes. AUCUNE RELATION n'est enregistrée entre une carte et son
+ * exemplaire : « Garder → » (`partagerAlignement`) et « ← Utiliser »
+ * (`ajouterAlignementDepuisBibliotheque`) donnent chacun un `id` neuf sans nommer la source.
+ * Il n'y a donc ni état calme (« ✓ Aussi… », « ✓ Déjà… ») ni « Tout garder » : le passage
+ * reste offert sur chaque rangée, comme « Partager » et « Ajouter » avant (consigne du lot 4,
+ * § 1.1 ; le lien est inscrit, pas ajouté).
+ */
+async function preparerDonneesBibliothequeAlignements() {
+    var biblioItems = await obtenirTousLesAlignementsBibliotheque();
     var index = window.planificationDonnees ? window.planificationDonnees.getIndex() : null;
     var cartesActives = (index && index.cartes) ? index.cartes : [];
-    var contenuSection1 = '';
+    var auteurActif = BibliothequeUI.obtenirAuteurActif();
 
-    if (cartesActives.length === 0) {
-        contenuSection1 = '<p class="text-muted" style="padding: 10px;">Aucune carte d\'alignement dans le trimestre actif.</p>';
-    } else {
-        cartesActives.forEach(function (carte) {
-            var donnees = window.planificationDonnees.chargerCarte(carte.id);
-            var nbNoeuds = donnees ? (donnees.noeuds || []).length : 0;
-            var nbLiens = donnees ? (donnees.liens || []).length : 0;
-            contenuSection1 += BibliothequeUI.renderCarteSelection({
-                nom: echapperHtml(carte.nom || 'Sans titre'),
-                id: carte.id,
-                badgeSource: '<span class="badge-source badge-source--locale">Trimestre actif</span>',
-                metadonnees: nbNoeuds + ' noeud(s) \u00b7 ' + nbLiens + ' lien(s)',
-                boutonPrincipal: { label: 'Partager', action: 'partagerAlignement', param: carte.id, classe: 'btn-confirmer', title: 'Ajouter à la Bibliothèque' },
-                actionsMenu: [
-                    { label: 'Dupliquer', action: 'dupliquerAlignementDuTrimestre', param: carte.id, classe: 'btn-secondaire', title: 'Créer une copie dans le trimestre actif' },
-                    { label: 'Exporter', action: 'exporterAlignementJSON', param: carte.id, classe: 'btn-secondaire', title: 'Télécharger en JSON' },
-                    { label: 'Supprimer', action: 'supprimerAlignementDuTrimestre', param: carte.id, classe: 'btn-supprimer', title: 'Supprimer cette carte du trimestre actif', showAlways: true }
-                ]
-            });
-        });
-    }
+    var rangeesTrimestre = cartesActives.map(function (carte) {
+        return {
+            id: carte.id,
+            nom: carte.nom || 'Sans titre',
+            ligne: compteNoeudsLiens(window.planificationDonnees.chargerCarte(carte.id)),
+            passage: { label: 'Garder dans ma bibliothèque', action: 'partagerAlignement', param: carte.id, sens: 'versBibliotheque' },
+            menu: [
+                { label: 'Dupliquer', action: 'dupliquerAlignementDuTrimestre', param: carte.id, title: 'Créer une copie dans ce trimestre' },
+                { label: 'Exporter', action: 'exporterAlignementJSON', param: carte.id, title: 'Télécharger en JSON' },
+                { separateur: true },
+                { label: 'Supprimer définitivement', action: 'supprimerAlignementDuTrimestre', param: carte.id, classe: 'btn-supprimer', title: 'Supprimer cette carte de ce trimestre' }
+            ]
+        };
+    });
 
-    // Section 2 : Bibliothèque
-    var contenuSection2 = '';
-    if (biblioItems.length === 0) {
-        contenuSection2 = '<p class="text-muted" style="padding: 10px;">La bibliothèque est vide. Partage une carte d\'alignement depuis la section ci-dessus.</p>';
-    } else {
-        biblioItems.forEach(function (item) {
-            var nbNoeuds = item.donnees ? (item.donnees.noeuds || []).length : 0;
-            var nbLiens = item.donnees ? (item.donnees.liens || []).length : 0;
-            var auteur = item.auteur || (item.metadata_cc && item.metadata_cc.auteur_original) || '';
-            var licence = (item.metadata_cc && item.metadata_cc.licence) || '';
-            var meta = nbNoeuds + ' noeud(s) \u00b7 ' + nbLiens + ' lien(s)';
-            if (auteur) meta += ' \u00b7 ' + echapperHtml(auteur);     // #467
-            if (licence) meta += ' \u00b7 ' + echapperHtml(licence);
+    var rangeesBibliotheque = biblioItems.map(function (item) {
+        var ligne = compteNoeudsLiens(item.donnees);
+        var auteur = item.auteur || (item.metadata_cc && item.metadata_cc.auteur_original) || '';
+        if (auteur && auteur !== auteurActif) ligne += ' · par ' + auteur;
+        return {
+            id: item.id,
+            nom: item.nom || 'Sans titre',
+            ligne: ligne,
+            apercu: apercuAlignementBibliotheque(item),
+            passage: { label: 'Utiliser dans ce trimestre', action: 'ajouterAlignementDepuisBibliotheque', param: item.id, sens: 'versTrimestre' },
+            menu: [
+                { label: 'Supprimer de ma bibliothèque', action: 'supprimerAlignementDeBibliotheque', param: item.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque' }
+            ]
+        };
+    });
 
-            contenuSection2 += BibliothequeUI.renderCarteDisponible({
-                nom: echapperHtml(item.nom || 'Sans titre'),
-                id: item.id,
-                badgeSource: '<span class="badge-source badge-source--bibliotheque">Bibliothèque</span>',
-                metadonnees: meta,
-                description: (item.metadata_cc && item.metadata_cc.description_courte) || '',
-                dejaPresent: false,
-                boutonPrincipal: { label: 'Ajouter', action: 'ajouterAlignementDepuisBibliotheque', param: item.id, classe: 'btn-confirmer', title: 'Copier dans le trimestre actif' },
-                actionsMenu: [
-                    { label: 'Supprimer', action: 'supprimerAlignementDeBibliotheque', param: item.id, classe: 'btn-supprimer', title: 'Retirer de la bibliothèque', showAlways: true }
-                ]
-            });
-        });
-    }
+    return { rangeesTrimestre: rangeesTrimestre, rangeesBibliotheque: rangeesBibliotheque };
+}
 
-    // Import depuis un autre trimestre — dans le TRIMESTRE ACTIF (lot 3, 9 oct.
-    // 2026), comme les bibliothèques de la Conception et comme le panneau
-    // d'« Actions ▾ » que cette section remplace. Les cartes du même cours
-    // (#368) remontent en tête : c'est le geste de la rentrée.
-    var sectionImportTrimestre = rendreSectionImportTrimestre();
+async function afficherBibliothequeAlignements() {
+    var data = await preparerDonneesBibliothequeAlignements();
 
-    // Import de fichier : même rangée centrée que dans la Conception.
-    var boutonsApresSection1 = '<div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">' +
-        '<button class="btn btn-secondaire btn-mini" data-action="_declencherImportAlignementFichier">Importer une carte (JSON)</button>' +
-        '<input type="file" id="biblio-alignements-fichier-import" accept=".json" style="display:none" data-on-change="_importerAlignementFichierChange">' +
-    '</div>';
-
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: MODAL_ID,
         titre: "Bibliothèque de cartes d'alignement",
-        sousTitre: 'Partage et réutilise tes cartes d\'alignement entre les trimestres.',
-        onFermer: 'fermerModalBibliothequeAlignements',
-        doublonsHTML: '',
-        titreSection1: 'Mes cartes d\'alignement (trimestre actif)',
-        contenuIdListe1: 'listeAlignementsTrimestre',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: boutonsApresSection1,
-        sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Bibliothèque (' + biblioItems.length + ')',
-        filtresSection2: '',
-        contenuIdListe2: 'listeAlignementsBibliotheque',
-        contenuSection2: contenuSection2
+        aide: 'bibliotheque-fonctionnement',
+        menuFichiers: [
+            { label: 'Importer une carte', action: '_declencherImportAlignementFichier' },
+            { note: 'Fichier .json' }
+        ],
+        champsFichier: [{ id: 'biblio-alignements-fichier-import', accept: '.json', onChange: '_importerAlignementFichierChange' }],
+        trimestre: {
+            titre: 'Dans ce trimestre',
+            // Seconde phrase vraie : les deux passages clonent les données (`importerDepuisBibliotheque`,
+            // `exporterCartePourBibliotheque`, JSON.parse(JSON.stringify(…))) — deux copies séparées.
+            phrase: 'Les cartes d\'alignement que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+            idListe: 'listeAlignementsTrimestre',
+            rangees: data.rangeesTrimestre,
+            // #1157 (retouche) — « Nouvelle carte » est dans le menu « Actions ▾ », pas sur un bouton visible.
+            vide: 'Aucune carte d\'alignement dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « Nouvelle carte », dans le menu « Actions ».',
+            // Import depuis un autre trimestre — il écrit dans CE trimestre
+            // (`importerCarteTrimestreVersActif`) : au pied de « Dans ce trimestre ». Les cartes du
+            // même cours (#368) remontent en tête : c'est le geste de la rentrée, le repli s'ouvre
+            // d'emblée quand il y en a.
+            importAutreTrimestre: optionsImportTrimestre()
+        },
+        bibliotheque: {
+            titre: 'Dans ta bibliothèque',
+            // Sans « C'est d'ici que tu peux les partager. » : même raison qu'aux lots 1 à 3.
+            phrase: 'Les cartes d\'alignement que tu gardes pour tous tes trimestres.',
+            idListe: 'listeAlignementsBibliotheque',
+            rangees: data.rangeesBibliotheque,
+            vide: 'Ta bibliothèque est vide. Garde-y une carte de ce trimestre pour la retrouver plus tard.'
+        }
     });
 }
 
-function rendreSectionImportTrimestre() {
+function optionsImportTrimestre() {
     var donnees = window.planificationDonnees;
     var sources = (donnees && typeof donnees.listerTrimestresAvecCartes === 'function')
         ? donnees.listerTrimestresAvecCartes() : [];
-    if (!sources.length) return '';
+    if (!sources.length) return null;
     var carte = window.planificationCarte;
     var reprises = (carte && typeof carte.reprisesDisponibles === 'function') ? carte.reprisesDisponibles() : [];
-
-    var html = '<div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">' +
-        '<h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre</h4>';
-    if (reprises.length) {
-        html += '<div id="biblio-alignements-meme-cours" style="margin-bottom: 10px;">' +
-            '<div class="text-muted" style="font-size: 0.85rem; margin-bottom: 4px;">Même cours</div>';
-        reprises.forEach(function (r) {
-            html += ligneCarteTrimestre(r.carte.nom, r.trimestreNom, r.trimestreId, r.carte.id, 'Reprendre');
-        });
-        html += '</div>';
-    }
-    var options = '<option value="">-- Choisir un trimestre --</option>';
-    sources.forEach(function (t) {
-        options += '<option value="' + echapperHtml(t.id) + '">' + echapperHtml(t.nom) + ' (' + t.cartes.length + ' carte' + (t.cartes.length > 1 ? 's' : '') + ')</option>';
-    });
-    html += '<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">' +
-            '<select id="biblio-alignements-import-trimestre" class="controle-form" style="flex: 1; min-width: 200px;">' + options + '</select>' +
-            '<button class="btn btn-secondaire btn-compact" data-action="importerAlignementsTrimestre">Voir les cartes</button>' +
-        '</div>' +
-        '<div id="biblio-alignements-cartes-trimestre" style="margin-top: 10px;"></div>' +
-    '</div>';
-    return html;
+    return {
+        titre: 'Importer depuis un autre trimestre',
+        selectId: 'biblio-alignements-import-trimestre',
+        apercuId: 'biblio-alignements-cartes-trimestre',
+        options: sources.map(function (t) {
+            return { value: t.id, label: t.nom + ' (' + t.cartes.length + ' carte' + (t.cartes.length > 1 ? 's' : '') + ')' };
+        }),
+        actionVoir: 'importerAlignementsTrimestre',
+        libelleVoir: 'Voir les cartes',
+        ouvert: reprises.length > 0,
+        enTete: {
+            id: 'biblio-alignements-meme-cours',
+            titre: 'Même cours',
+            rangees: reprises.map(function (r) {
+                return rangeeCarteTrimestre(r.carte.nom, r.trimestreNom, r.trimestreId, r.carte.id, 'Reprendre');
+            })
+        }
+    };
 }
 
-function ligneCarteTrimestre(nom, detail, trimestreId, carteId, libelle) {
-    return '<div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--bordure);">' +
-        '<span>' + echapperHtml(nom) + ' <small class="text-muted">(' + echapperHtml(detail) + ')</small></span>' +
-        '<button class="btn btn-confirmer btn-tres-compact" data-action="importerCarteTrimestreVersActif" data-param="' + echapperHtml(trimestreId) + '" data-param2="' + echapperHtml(carteId) + '">' + libelle + '</button>' +
-    '</div>';
+function rangeeCarteTrimestre(nom, detail, trimestreId, carteId, libelle) {
+    return { nom: nom, detail: detail, action: 'importerCarteTrimestreVersActif', param: trimestreId, param2: carteId, libelle: libelle };
 }
 
 function fermerModalBibliothequeAlignements() {
@@ -382,14 +396,14 @@ async function supprimerAlignementDuTrimestre(carteId) {
     var carte = index.cartes.find(function (c) { return c.id === carteId; });
     if (!carte) return;
     if (index.cartes.length <= 1) {
-        notifications.warning('Impossible de supprimer la dernière carte du trimestre actif.');
+        notifications.warning('Impossible de supprimer la dernière carte de ce trimestre.');
         return;
     }
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('carte'))) return;
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer la carte',
-        message: 'Supprimer définitivement la carte « ' + carte.nom + ' » du trimestre actif ?',
+        message: 'Supprimer définitivement la carte « ' + carte.nom + ' » de ce trimestre ?',
         texteConfirmer: 'Supprimer',
         variante: 'danger'
     });
@@ -525,13 +539,13 @@ function importerAlignementsTrimestre() {
         .find(function (t) { return t.id === select.value; });
     if (!source) {
         container.innerHTML = '';
+        container.classList.add('u-hide');
         return;
     }
-    var html = '';
-    source.cartes.forEach(function (c) {
-        html += ligneCarteTrimestre(c.nom, c.nbNoeuds + ' nœud' + (c.nbNoeuds > 1 ? 's' : ''), source.id, c.id, 'Importer');
-    });
-    container.innerHTML = html;
+    container.innerHTML = BibliothequeUI.renderRangeesImport(source.cartes.map(function (c) {
+        return rangeeCarteTrimestre(c.nom, c.nbNoeuds + ' nœud' + (c.nbNoeuds > 1 ? 's' : ''), source.id, c.id, 'Importer');
+    }));
+    container.classList.remove('u-hide');
 }
 
 /**

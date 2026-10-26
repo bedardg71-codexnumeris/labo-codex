@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE — #386 (audit qualité 5 août 2026, rapports A5+B9+D2, 🟡) —
 // Lot échappement/coercition : des données utilisateur ou importées étaient
@@ -57,8 +58,12 @@ describe('#386 · dropdowns/listes trimestre-v2 : libellés utilisateur échapp�
     it('les libellés passent par echapperHtml', () => {
         expect(tv2).toMatch(/>\$\{echapperHtml\(labelCours\(c\)\)\}<\/option>/);
         expect(tv2orch).toMatch(/>\$\{echapperHtml\(label\)\}<\/option>/);
-        // La liste de gestion (`${echapperHtml(t.nom)}`) est retirée le 4 oct. 2026 (#1006) ; la carte de la bibliothèque reste.
-        expect(tv2liste).toContain('nom: echapperHtml(t.nom || t.id) + badgeActif');
+        // La liste de gestion (`${echapperHtml(t.nom)}`) est retirée le 4 oct. 2026 (#1006). #1159 (lot 6) :
+        // la rangée de la bibliothèque passe le nom en TEXTE, le composant l'échappe (`_renderRangee`) ;
+        // le banc bibliotheque-liste-1159 l'éprouve avec un nom hostile.
+        expect(tv2liste).toContain('nom: t.nom || t.id,');
+        expect(tv2liste).toContain('BibliothequeUI.creerFenetreListe(');
+        expect(tv2liste).not.toMatch(/nom: [^\n]*\+ badgeActif/);
     });
 });
 
@@ -118,11 +123,19 @@ describe('#386 · planification : titre de nœud échappé, attributs value= coe
     });
 
     it('bibliothèque d\'alignements : nom de carte et attributs data-* échappés', () => {
-        // Lot 3 (9 oct. 2026) : les lignes « Importer » / « Reprendre » passent par
-        // `ligneCarteTrimestre` — nom, détail et identifiants échappés.
-        expect(biblio).toMatch(/'<span>' \+ echapperHtml\(nom\) \+ ' <small class="text-muted">\(' \+ echapperHtml\(detail\) \+ '\)/);
-        expect(biblio).toMatch(/data-param="' \+ echapperHtml\(trimestreId\) \+ '" data-param2="' \+ echapperHtml\(carteId\) \+ '"/);
-        expect(biblio).toMatch(/'<option value="' \+ echapperHtml\(t\.id\) \+ '">' \+ echapperHtml\(t\.nom\)/);
-        expect(biblio).not.toMatch(/'<span>' \+ (c\.)?nom \+ '/);
+        // ↻ 25 oct. 2026 (#1157, lot 4 des bibliothèques en deux colonnes) — RÉANCRÉ, motif : la fenêtre
+        // ne construit plus de HTML. `ligneCarteTrimestre` et ses chaînes sont parties ; le module passe des
+        // données (`rangeeCarteTrimestre`) et le composant (`BibliothequeUI.renderRangeesImport`, les colonnes
+        // de `creerFenetreDeuxColonnes`) échappe nom, détail et identifiants. La défense est la même, elle
+        // a changé de fichier. BREAK-TEST (25 oct.) : `echapperHtml(r.nom)` → `r.nom` dans
+        // `renderRangeesImport` → ce test ROUGIT ; une chaîne `'<span>' + nom +` remise dans le module → ROUGIT.
+        expect(biblio).toMatch(/BibliothequeUI\.renderRangeesImport\(/);
+        expect(biblio).toMatch(/BibliothequeUI\.creerFenetreDeuxColonnes\(/);
+        expect(biblio).not.toMatch(/<(span|div|button|option|small|li)\b/);
+        const ui = lire('bibliotheque-ui.js');
+        const rangees = tranche(ui, 'BibliothequeUI.renderRangeesImport = function', '/** #1157 — une courte liste en tête du repli');
+        expect(rangees).toMatch(/^[^]*?echapperHtml\(r\.nom\)[^]*?echapperHtml\(r\.detail\)[^]*?_btnAttrs\(r\)[^]*?echapperHtml\(r\.libelle\)/);
+        expect(ui).toMatch(/if \(btn\.param2 != null\) attrs \+= ' data-param2="' \+ echapperAttribut\(btn\.param2\)/);
+        expect(ui).toMatch(/'<option value="' \+ echapperAttribut\(t\.value\) \+ '">' \+ echapperHtml\(t\.label\)/);
     });
 });

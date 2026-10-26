@@ -28,12 +28,84 @@
 'use strict';
 
 /**
- * Affiche le modal gestionnaire de bibliothèque de productions
- * Permet d'ajouter/retirer des productions de la sidebar
- *
- * SECTIONS:
- * 1. Productions dans ma sélection (avec bouton "Retirer")
- * 2. Productions disponibles à ajouter (bibliothèque + productions retirées)
+ * #1156 (lot 3 des bibliothèques en deux colonnes) — LA LIGNE EN CLAIR D'UNE RANGÉE : ce que la
+ * rangée disait (« Type: … • Pondération: … »), en mots : le libellé de lecture du type, sans le
+ * préfixe 📁 (`getTypeLabel` le pose ; aucun emoji dans la fenêtre), puis la pondération à la
+ * française (comme avant, artefacts compris), puis l'auteur quand ce n'est pas l'utilisateur actif
+ * (même lecture que les grilles). Texte brut : la fenêtre l'échappe.
+ */
+function ligneProductionBibliotheque(prod, auteurActif) {
+    const t = typeof typeProduction === 'function' ? typeProduction(prod.type) : null;
+    const parts = [];
+    const type = t ? (t.libelleLong || t.libelle) : (prod.type || '');
+    if (type) parts.push(type);
+    if (typeof prod.ponderation === 'number') {
+        parts.push(formaterPourcentage(prod.ponderation));
+    }
+    const auteur = (prod.metadata_cc && prod.metadata_cc.auteur_original) || prod.auteur || '';
+    if (auteur && auteur !== auteurActif) parts.push('par ' + auteur);
+    return parts.join(' · ');
+}
+
+/**
+ * #1156 — Les noms de ce qu'une production nomme (sa grille, son échelle, sa cartouche), cherchés
+ * dans ce trimestre puis dans la bibliothèque. Un identifiant qu'aucun des deux ne connaît n'est
+ * pas montré : l'aperçu ne dit que ce qu'il peut nommer.
+ */
+async function lecteurNomsProduction() {
+    const grilles = [].concat(await db.get(cle('grillesTemplates')) || [],
+        typeof obtenirToutesLesGrillesBibliotheque === 'function' ? (await obtenirToutesLesGrillesBibliotheque() || []) : []);
+    const echelles = [].concat(await db.get(cle('echellesTemplates')) || [],
+        typeof obtenirToutesLesEchellesBibliotheque === 'function' ? (await obtenirToutesLesEchellesBibliotheque() || []) : []);
+    const cartouchesBiblio = typeof obtenirToutesLesCartouchesBibliotheque === 'function'
+        ? (await obtenirToutesLesCartouchesBibliotheque() || []) : [];
+    const cartouchesParGrille = {};
+    const nomDans = (liste, id) => {
+        const x = id ? liste.find(e => e && (e.id === id || e.idOriginal === id)) : null;
+        return x ? (x.nom || '') : '';
+    };
+    return {
+        grille: (id) => nomDans(grilles, id),
+        echelle: (id) => nomDans(echelles, id),
+        cartouche: async (grilleId, id) => {
+            if (!id) return '';
+            if (grilleId && !cartouchesParGrille[grilleId]) {
+                cartouchesParGrille[grilleId] = await db.get(cle(`cartouches_${grilleId}`)) || [];
+            }
+            return nomDans((cartouchesParGrille[grilleId] || []).concat(cartouchesBiblio), id);
+        }
+    };
+}
+
+/**
+ * #1156 — L'aperçu qu'ouvre le nom d'une rangée : l'objectif en entier, la provenance, puis ce que
+ * la fiche nomme, sous les libellés de la fiche (« Grille de critères d'évaluation », « Échelle de
+ * performance », « Cartouche de rétroaction »).
+ */
+async function apercuProductionBibliotheque(prod, noms) {
+    const lignes = [];
+    const grille = noms.grille(prod.grilleId);
+    if (grille) lignes.push(['Grille de critères d\'évaluation', grille, '']);
+    const echelle = noms.echelle(prod.echelleId);
+    if (echelle) lignes.push(['Échelle de performance', echelle, '']);
+    const cartouche = await noms.cartouche(prod.grilleId, prod.cartoucheId);
+    if (cartouche) lignes.push(['Cartouche de rétroaction', cartouche, '']);
+    return {
+        paragraphes: [prod.objectif ? 'Objectif : ' + prod.objectif : '', BibliothequeUI.formaterInspireDe(prod)],
+        lignes: lignes
+    };
+}
+
+/** Le nom d'une rangée : le titre, puis l'activité (ou la description), comme avant. */
+function nomProductionBibliotheque(prod) {
+    const suite = prod.activiteApprentissage || prod.description;
+    return BibliothequeUI.formaterTitre(prod.titre || 'Sans titre') + (suite ? ' - ' + suite : '');
+}
+
+/**
+ * Les données de la bibliothèque des productions. #1156 : des rangées pour la fenêtre en deux
+ * colonnes (`BibliothequeUI.creerFenetreDeuxColonnes`), plus aucun HTML. Mêmes gestes, mêmes
+ * fonctions de données qu'avant ; seuls la place et le libellé changent.
  */
 async function preparerDonneesBibliothequeProductions() {
     if (typeof obtenirToutesLesProductionsBibliotheque !== 'function') {
@@ -52,29 +124,9 @@ async function preparerDonneesBibliothequeProductions() {
     // entre les cinq détecteurs qu'`analyserDoublons` remplace.
     const doublonsDetectes = analyserDoublons(
         reunirSources(productionsUtilisateur, toutesProductionsBiblio), 'titre');
-
-    // Section 1
-    const cartesSection1 = productionsDansSelection.map(prod => ({
-        nom: `${BibliothequeUI.formaterTitreDemo(echapperHtml(prod.titre), BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + echapperHtml(prod.activiteApprentissage || prod.description) : ''}`,
-        id: prod.id,
-        afficherId: true,
-        badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsDansSelection),
-        metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
-            quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${formaterPourcentage(prod.ponderation)}`
-        }),
-        description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
-        inspireDe: BibliothequeUI.formaterInspireDe(prod),
-        boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerProductionBibliotheque', param: prod.id, classe: 'btn-confirmer', title: 'Créer une copie' },
-        actionsMenu: [
-            { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'production', param2: prod.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-            { label: 'Retirer', action: 'retirerProductionDeBibliotheque', param: prod.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
-            { label: 'Supprimer', action: 'supprimerProductionDefinitivement', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-        ]
-    }));
-
-    // Section 2 : fusionner retirées + bibliothèque, exclure celles déjà en sélection.
-    // #327 — cartes à plat (groupage par dossier au rendu via repertoiresBibliotheque).
-    const toutesProductionsDisponibles = [...toutesProductionsBiblio, ...productionsRetirees];
+    // #291 — la puce d'identifiant ne s'affiche que sur une rangée que le bandeau nomme.
+    const idsNommes = new Set();
+    doublonsDetectes.forEach(groupe => groupe.exemplaires.forEach(ex => idsNommes.add(ex.id)));
 
     // Dossiers de classement (couche par-dessus, range par identité).
     const repsProductions = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
@@ -82,6 +134,36 @@ async function preparerDonneesBibliothequeProductions() {
         : [];
     const repParProduction = {};
     repsProductions.forEach(r => (r.itemIds || []).forEach(id => { repParProduction[id] = r.id; }));
+
+    const auteurActif = BibliothequeUI.obtenirAuteurActif();
+    const noms = await lecteurNomsProduction();
+
+    // « Aussi dans ta bibliothèque » : la relation unique (`BibliothequeUI.lieeAExemplaire`). Pas
+    // `dansBibliotheque`, qui veut dire « dans le menu de l'écran » sur une production du trimestre.
+    const rangeesTrimestre = [];
+    for (const prod of productionsDansSelection) {
+        const rangee = {
+            id: prod.id,
+            nom: nomProductionBibliotheque(prod),
+            ligne: ligneProductionBibliotheque(prod, auteurActif),
+            afficherId: idsNommes.has(prod.id),
+            apercu: await apercuProductionBibliotheque(prod, noms),
+            dansBibliotheque: toutesProductionsBiblio.some(ex => BibliothequeUI.lieeAExemplaire(prod, ex)),
+            menu: [
+                { label: 'Dupliquer', action: 'dupliquerProductionBibliotheque', param: prod.id, title: 'Créer une copie' },
+                { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'production', param2: prod.id, title: 'Générer un fichier .lcz signé à transmettre (#329)' },
+                { separateur: true },
+                { label: 'Retirer de ce trimestre', action: 'retirerProductionDeBibliotheque', param: prod.id, classe: 'btn-supprimer', title: 'La production quitte le menu de l\'écran ; ses données sont conservées' },
+                { label: 'Supprimer définitivement', action: 'supprimerProductionDefinitivement', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+            ]
+        };
+        if (rangee.dansBibliotheque) {
+            rangee.etat = 'Aussi dans ta bibliothèque';
+        } else {
+            rangee.passage = { label: 'Garder dans ma bibliothèque', action: 'garderProductionDansBibliotheque', param: prod.id, sens: 'versBibliotheque' };
+        }
+        rangeesTrimestre.push(rangee);
+    }
 
     // Identités déjà présentes dans la sélection.
     //
@@ -98,60 +180,71 @@ async function preparerDonneesBibliothequeProductions() {
     // notait les boutons « re-cliquables » sans en trouver la cause).
     //
     // On compare donc sur l'IDENTITÉ : l'id propre ET l'id d'origine, des deux
-    // côtés.
+    // côtés. #1156 : cette identité dit maintenant « Déjà dans ce trimestre » au lieu d'écarter la
+    // rangée. Elle contient la relation unique (`lieeAExemplaire`) et la déborde d'un cas, la copie
+    // sœur (même `idOriginal`), que la garde #476 refuserait de toute façon.
     const identitesEnSelection = new Set();
     productionsDansSelection.forEach(p => {
         if (p.id) identitesEnSelection.add(p.id);
         if (p.idOriginal) identitesEnSelection.add(p.idOriginal);
     });
+    const dejaDansCeTrimestre = (prod) => identitesEnSelection.has(prod.id) ||
+        !!(prod.idOriginal && identitesEnSelection.has(prod.idOriginal));
 
-    const cartesSection2 = [];
-    toutesProductionsDisponibles.forEach(prod => {
-        if (identitesEnSelection.has(prod.id)) return;
-        if (prod.idOriginal && identitesEnSelection.has(prod.idOriginal)) return;
+    // « Dans ta bibliothèque » : les exemplaires, puis les productions retirées de ce trimestre (la
+    // section 2 d'avant les listait déjà : sans elles, une production retirée deviendrait
+    // introuvable). Une retirée qui porte l'`id` d'un exemplaire n'est pas listée deux fois :
+    // « ← Utiliser » sur l'exemplaire la remet (`ajouterProductionIndividuelle` la trouve par son id ou
+    // son `idOriginal`).
+    const idsBiblio = new Set(toutesProductionsBiblio.map(p => p.id));
+    const disponibles = toutesProductionsBiblio.map(prod => ({ prod, retiree: false }))
+        .concat(productionsRetirees.filter(p => !idsBiblio.has(p.id)).map(prod => ({ prod, retiree: true })));
 
+    const rangeesBibliotheque = [];
+    for (const { prod, retiree } of disponibles) {
+        const dejaPresent = dejaDansCeTrimestre(prod);
         const repCourant = repParProduction[prod.id] || null;
-        const actionsMenu = [];
+        const menu = [];
         repsProductions.forEach(r => {
             if (r.id !== repCourant) {
-                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'productions', param2: prod.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+                menu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'productions', param2: prod.id, param3: r.id, title: 'Ranger dans ce dossier' });
             }
         });
         if (repCourant) {
-            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'productions', param2: prod.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+            menu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'productions', param2: prod.id, title: 'Sortir du dossier (repasse en non classées)' });
         }
-        actionsMenu.push({ label: 'Supprimer', action: 'supprimerProductionDeBibliothequePartagee', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
+        // Une production retirée n'est pas dans la bibliothèque : le « Supprimer » d'avant n'y faisait
+        // rien (`supprimerProductionDeBibliothequePartagee` ne la trouve pas), il n'est pas reporté.
+        if (!retiree) {
+            if (menu.length) menu.push({ separateur: true });
+            menu.push({ label: 'Supprimer de ma bibliothèque', action: 'supprimerProductionDeBibliothequePartagee', param: prod.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque' });
+        }
 
-        cartesSection2.push({
-            nom: `${BibliothequeUI.formaterTitreDemo(echapperHtml(prod.titre), BibliothequeUI.estItemDemo(prod))}${(prod.activiteApprentissage || prod.description) ? ' - ' + echapperHtml(prod.activiteApprentissage || prod.description) : ''}`,
-            libelle: `${BibliothequeUI.formaterTitre(prod.titre)}${(prod.activiteApprentissage || prod.description) ? ' - ' + (prod.activiteApprentissage || prod.description) : ''}`,   // #467 : texte brut, select des dossiers
+        const rangee = {
             id: prod.id,
-            afficherId: true,
-            badgeSource: BibliothequeUI.genererBadgeSource(prod, productionsUtilisateur),
-            metadonnees: BibliothequeUI.formaterMetadonnees(prod, {
-                quantite: `Type: ${getTypeLabel(prod.type)} • Pondération: ${formaterPourcentage(prod.ponderation)}`
-            }),
-            inspireDe: BibliothequeUI.formaterInspireDe(prod),
-            description: prod.objectif ? 'Objectif: ' + prod.objectif : '',
-            dejaPresent: false,
-            classeItem: 'production-disponible-item',
-            boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterProductionIndividuelle', param: prod.id, classe: 'btn-confirmer', title: 'Ajouter cette production à ta sélection' },
-            actionsMenu: actionsMenu
-        });
-    });
-
-    // Import trimestre
-    const trimestresDisponibles = listerTrimestresAvecProductions();
-    const sectionImportTrimestre = trimestresDisponibles.length > 0 ? { trimestres: trimestresDisponibles } : null;
+            nom: nomProductionBibliotheque(prod),
+            ligne: (retiree ? 'Retirée de ce trimestre · ' : '') + ligneProductionBibliotheque(prod, auteurActif),
+            afficherId: idsNommes.has(prod.id),
+            dossier: repCourant,
+            apercu: await apercuProductionBibliotheque(prod, noms),
+            dejaPresent: dejaPresent,
+            menu: menu
+        };
+        if (dejaPresent) {
+            rangee.etat = 'Déjà dans ce trimestre';
+        } else {
+            rangee.passage = { label: 'Utiliser dans ce trimestre', action: 'ajouterProductionIndividuelle', param: prod.id, sens: 'versTrimestre' };
+        }
+        rangeesBibliotheque.push(rangee);
+    }
 
     return {
-        cartesSection1,
-        cartesSection2,
+        rangeesTrimestre,
+        rangeesBibliotheque,
         doublonsDetectes,
-        sectionImportTrimestre,
+        trimestresDisponibles: listerTrimestresAvecProductions(),
         repsProductions,
-        productionsDansSelection,
-        nombreSelection: productionsDansSelection.length
+        productionsDansSelection
     };
 }
 
@@ -161,114 +254,90 @@ async function afficherBibliothequeProductions() {
         return;
     }
 
-    // #327 — enregistre la biblio « productions » auprès du helper générique de
-    // répertoires (idempotent). Les items de Section 2 sont des cartes-config
-    // déjà libellées : labelItem lit leur .libelle (texte brut ; le .nom est du HTML
-    // échappé depuis #467, et le select l'échapperait une seconde fois).
+    // #327 — la biblio « productions » auprès du moteur des dossiers (idempotent) : ses gestes
+    // (créer, renommer, classer…) redessinent la fenêtre par ce rappel. #1156 : plus de « select »
+    // de dossier par cartes (`renderLigneDossierSelect`), donc plus de `labelItem`.
     BibliothequeUI.repertoires.enregistrer('productions', {
-        rafraichir: afficherBibliothequeProductions,
-        ajouterItem: (id) => ajouterProductionIndividuelle(id),
-        supprimerItem: (id) => supprimerProductionDeBibliothequePartagee(id),
-        labelItem: (c) => c.libelle,
-        labelPluriel: 'productions'
+        rafraichir: afficherBibliothequeProductions
     });
 
     const data = await preparerDonneesBibliothequeProductions();
     if (!data) return;
 
-    // Section 1
-    let contenuSection1 = '';
-    if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production dans ta sélection</p>';
-    } else {
-        data.cartesSection1.forEach(carte => {
-            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
-        });
-    }
+    // #293 — « Masquer ce qui est déjà dans ce trimestre » (même préférence qu'avant).
+    const rangeesBibliotheque = BibliothequeUI.filtrerParDejaPresent(data.rangeesBibliotheque);
+    const toutesMasquees = data.rangeesBibliotheque.length > 0 && rangeesBibliotheque.length === 0;
+    const horsBibliotheque = data.rangeesTrimestre.filter(r => !r.dansBibliotheque).length;
 
-    const boutonsApresSection1 = `
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button data-action="ajouterMesProductionsALaBibliotheque" class="btn btn-principal btn-mini">Ajouter mes productions à la bibliothèque</button>
-            <button data-action="exporterProductions" class="btn btn-secondaire btn-mini">Exporter toutes mes productions (JSON)</button>
-            <button data-action="ouvrirFilePickerImportProductions" class="btn btn-secondaire btn-mini">Importer des productions (JSON)</button>
-            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
-            <input type="file" id="fichier-import-productions-modal" accept=".json" style="display: none;" data-on-change="importerProductions">
-        </div>`;
-
-    // Section import trimestre
-    let sectionImportTrimestre = '';
-    if (data.sectionImportTrimestre) {
-        const trimestres = data.sectionImportTrimestre.trimestres;
-        sectionImportTrimestre = `
-            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre" aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h4>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <select id="selectTrimestreImport" class="controle-form" style="flex: 1; min-width: 200px;" data-on-change="mettreAJourFiltreCoursTrimestreProductions">
-                        <option value="">-- Choisir un trimestre --</option>
-                        ${trimestres.map(t => `<option value="${echapperHtml(t.cle)}">${echapperHtml(t.nom)} (${t.nombre} production${t.nombre > 1 ? 's' : ''})</option>`).join('')}
-                    </select>
-                    <select id="selectCoursImportProductions" class="controle-form" style="flex: 1; min-width: 150px; display: none;">
-                        <option value="">Tous les cours</option>
-                    </select>
-                    <button data-action="afficherProductionsTrimestreModal" class="btn btn-secondaire btn-compact">Voir les productions</button>
-                    <button data-action="importerToutTrimestreModal" class="btn btn-principal btn-compact" data-tooltip="import-trimestre-tout-productions">Tout importer</button>
-                </div>
-                <div id="previewProductionsTrimestre" class="u-hide" style="margin-top: 10px;"></div>
-            </div>`;
-    }
-
-    // Filtres Section 2 : #327 — le filtre par discipline est retiré (incohérent avec
-    // l'organisation par dossiers). La zone « Mes dossiers » (repliable) tient lieu de
-    // tête de section.
-    const filtresHTML = BibliothequeUI.repertoires.genererZone('productions');
-
-    // Section 2 — #327 (groupage par dossier).
-    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
-
-    let contenuSection2 = '';
-    if (data.cartesSection2.length === 0) {
-        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production disponible à ajouter</p>';
-    } else if (data.repsProductions && data.repsProductions.length === 0) {
-        // Aucun dossier → liste à plat (comportement d'origine)
-        data.cartesSection2.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
-    } else {
-        // Dossier → select compact ; « Non classées » → cartes (ce qui reste à ranger).
-        const groupes = window.repertoiresBibliotheque.grouper(data.cartesSection2, 'productions');
-        groupes.forEach(g => {
-            const cleGroupe = g.id || '__nonclasse__';
-            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
-            contenuSection2 += enteteGroupe(g.titre);
-            if (g.id) {
-                contenuSection2 += BibliothequeUI.repertoires.renderLigneDossierSelect('productions', g);
-            } else {
-                g.items.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
-            }
-            contenuSection2 += `</div>`;
-        });
-    }
-
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: 'modalBibliothequeProductions',
         titre: 'Bibliothèque de productions',
-        sousTitre: 'Gère les productions de ta sélection.',
-        onFermer: 'fermerModalBibliothequeProductions',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+        aide: 'bibliotheque-fonctionnement',
+        menuFichiers: [
+            { label: 'Importer des productions', action: 'ouvrirFilePickerImportProductions' },
+            { label: 'Importer le partage d\'une ou d\'un collègue', action: 'partageImport.ouvrirSelecteurFichier' },
+            { separateur: true },
+            { label: 'Exporter les productions de ce trimestre', action: 'exporterProductions' },
+            { note: 'Fichiers .json et .lcz' }
+        ],
+        champsFichier: [{ id: 'fichier-import-productions-modal', accept: '.json', onChange: 'importerProductions' }],
+        avantColonnes: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.productionsDansSelection,
+            mots: { selection: 'Dans ce trimestre', bibliotheque: 'Dans ta bibliothèque', retirer: 'Retirer de ce trimestre (données conservées)' },
             actions: {
                 retirer: 'retirerProductionDeBibliotheque',
                 supprimer: 'supprimerProductionDefinitivement',
                 supprimerPartagee: 'supprimerProductionDeBibliothequePartagee'
             }
         }),
-        titreSection1: `Productions dans ta sélection (${data.nombreSelection})`,
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: boutonsApresSection1,
-        sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Productions disponibles à ajouter à ta sélection',
-        filtresSection2: filtresHTML,
-        contenuIdListe2: 'listeProductionsDisponibles',
-        contenuSection2: contenuSection2,
-        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('production') : ''
+        trimestre: {
+            titre: 'Dans ce trimestre',
+            phrase: 'Les productions que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+            idListe: 'listeProductionsDansBibliotheque',
+            rangees: data.rangeesTrimestre,
+            vide: 'Aucune production dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle production ».',
+            boutonEntete: horsBibliotheque >= 2
+                ? { label: 'Tout garder dans ma bibliothèque', action: 'ajouterMesProductionsALaBibliotheque' }
+                : null
+        },
+        bibliotheque: {
+            titre: 'Dans ta bibliothèque',
+            // Sans « C'est d'ici que tu peux les partager. » : même raison qu'aux lots 1 et 2 (le
+            // partage est sur la rangée du trimestre ; l'export depuis la bibliothèque est inscrit au plan).
+            phrase: 'Les productions que tu gardes pour tous tes trimestres.',
+            idListe: 'listeProductionsDisponibles',
+            compte: data.rangeesBibliotheque.length,
+            rangees: rangeesBibliotheque,
+            vide: toutesMasquees
+                ? 'Toutes les productions de ta bibliothèque sont déjà dans ce trimestre.'
+                : 'Ta bibliothèque est vide. Garde-y une production de ce trimestre pour la retrouver plus tard.',
+            videFiltre: 'Aucune production dans ce dossier.',
+            dossiers: {
+                biblio: 'productions',
+                reps: data.repsProductions.map(r => ({ id: r.id, nom: r.nom })),
+                refreshFn: 'afficherBibliothequeProductions',
+                masquerLibelle: 'Masquer ce qui est déjà dans ce trimestre',
+                labelPluriel: 'productions'
+            },
+            // #1156 — au pied de « Dans ta bibliothèque », comme pour les échelles : l'import de
+            // productions d'un autre trimestre écrit dans la bibliothèque (`importerDansBibliotheque`,
+            // `ajouterALaBibliotheque`), pas dans ce trimestre. Ses mots ne changent pas ; le filtre de
+            // cours (`selectCoursImportProductions`) suit le trimestre choisi, comme avant.
+            importAutreTrimestre: {
+                titre: 'Importer depuis un autre trimestre',
+                selectId: 'selectTrimestreImport',
+                selectOnChange: 'mettreAJourFiltreCoursTrimestreProductions',
+                selectSecond: { id: 'selectCoursImportProductions', label: 'Tous les cours', ariaLabel: 'Cours d\'où importer' },
+                apercuId: 'previewProductionsTrimestre',
+                options: data.trimestresDisponibles.map(t => ({ value: t.cle, label: `${t.nom} (${t.nombre} production${t.nombre > 1 ? 's' : ''})` })),
+                actionVoir: 'afficherProductionsTrimestreModal',
+                libelleVoir: 'Voir les productions',
+                actionTout: 'importerToutTrimestreModal',
+                tooltipTout: 'import-trimestre-tout-productions',
+                aide: 'import-autre-trimestre'
+            },
+            partages: window.partageSection ? partageSection.rangeesDeuxColonnes('production') : null
+        }
     });
 }
 
@@ -294,7 +363,9 @@ async function ajouterProductionIndividuelle(id) {
 
         const ecritLotF = await db.modifier(cleProductions, async (lues) => {
         let productions = lues || [];
-        prod = productions.find(p => p.id === id);
+        // Par `id` ou `idOriginal`, comme les grilles, les échelles et les cartouches : « ← Utiliser »
+        // sur l'exemplaire d'une production venue de la bibliothèque, puis retirée, la ramène.
+        prod = productions.find(p => p.id === id) || productions.find(p => p.idOriginal === id);
 
         // Si pas trouvée dans le cours actuel, chercher dans la Bibliothèque
         if (!prod) {
@@ -354,7 +425,7 @@ async function ajouterProductionIndividuelle(id) {
         // Les messages vivent HORS du mutateur : la file ne porte que l'écriture.
         if (titreEnConflit) {
             notifications.info(
-                `« ${titreEnConflit} » est déjà dans ta sélection.`,
+                `« ${titreEnConflit} » est déjà dans ce trimestre.`,
                 'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
             return;
         }
@@ -448,6 +519,37 @@ async function ajouterMesProductionsALaBibliotheque() {
 }
 
 /**
+ * #1156 — « Garder dans ma bibliothèque → » : pour UNE production, ce que « Tout garder dans ma
+ * bibliothèque » fait pour toutes — la même écriture (`importerDansBibliotheque`). Sans la
+ * confirmation du geste groupé : il n'ajoute qu'un exemplaire, qui se supprime d'un geste.
+ * @param {string} id - ID de la production du trimestre
+ */
+async function garderProductionDansBibliotheque(id) {
+    try {
+        const productions = await db.get(getCleProductions()) || [];
+        const prod = productions.find(p => p.id === id);
+        if (!prod) {
+            notifications.erreur('Production introuvable.');
+            return;
+        }
+
+        const resultat = await importerDansBibliotheque([prod]);
+
+        fermerModalBibliothequeProductions();
+        await afficherBibliothequeProductions();
+
+        if (resultat.ajoutees > 0) {
+            notifications.succes('Production ajoutée à la bibliothèque !');
+        } else {
+            notifications.info('Cette production était déjà dans la bibliothèque.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
+        notifications.erreur('Erreur lors de l\'ajout de la production à la bibliothèque.');
+    }
+}
+
+/**
  * 🆕 Beta 95.3 : Mettre à jour le dropdown filtre cours quand un trimestre est sélectionné
  */
 function mettreAJourFiltreCoursTrimestreProductions() {
@@ -520,28 +622,29 @@ function afficherProductionsTrimestreModal() {
     }
 
     if (productions.length === 0) {
-        preview.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucune production trouvée.</p>';
+        preview.innerHTML = '<p class="biblio2-phrase">Aucune production trouvée.</p>';
         preview.classList.remove('u-hide');
         return;
     }
 
-    let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
+    // #1156 — l'aperçu vit dans la fenêtre en deux colonnes : des classes, aucun style en ligne.
+    let html = '<ul class="biblio2-import-liste">';
     productions.forEach(prod => {
         const coursLabel = prod.sigleCours || prod.coursNom || '';
+        const meta = [ligneProductionBibliotheque(prod, null), coursLabel].filter(Boolean).join(' · ');
         html += `
-            <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
+            <li class="biblio2-import-rangee">
                 <div>
-                    <strong>${echapperHtml(prod.titre || 'Sans titre')}</strong>
-                    ${(prod.activiteApprentissage || prod.description) ? ` - ${echapperHtml(prod.activiteApprentissage || prod.description)}` : ''}
-                    <br><small style="color: var(--gris-moyen);">Type: ${echapperHtml(prod.type || 'N/A')} • Pondération: ${echapperHtml(formaterPourcentage(prod.ponderation || 0))}${coursLabel ? ' • ' + echapperHtml(coursLabel) : ''}</small>
+                    <strong>${echapperHtml(prod.titre || 'Sans titre')}</strong>${(prod.activiteApprentissage || prod.description) ? ` - ${echapperHtml(prod.activiteApprentissage || prod.description)}` : ''}
+                    <p class="biblio2-rangee-meta">${echapperHtml(meta)}</p>
                 </div>
-                <button data-action="importerUneProductionTrimestre" data-param="${cleSelectionnee}" data-param2="${prod.id}" class="btn btn-confirmer btn-tres-compact">
+                <button type="button" data-action="importerUneProductionTrimestre" data-param="${echapperAttribut(cleSelectionnee)}" data-param2="${echapperAttribut(prod.id)}" class="btn btn-secondaire">
                     Importer
                 </button>
-            </div>
+            </li>
         `;
     });
-    html += '</div>';
+    html += '</ul>';
 
     preview.innerHTML = html;
     preview.classList.remove('u-hide');
@@ -652,8 +755,8 @@ async function importerUneProductionTrimestre(cleTrimestre, productionId) {
  */
 async function retirerProductionDeBibliotheque(id) {
     const okRetrait = await uiDialogues.confirmerAction({
-        titre: 'Retirer de la sélection',
-        message: 'Retirer cette production de ta sélection ? Elle ne sera plus offerte dans le menu mais restera disponible dans le gestionnaire.',
+        titre: 'Retirer de ce trimestre',
+        message: 'Retirer cette production de ce trimestre ? Elle ne sera plus offerte dans le menu mais restera disponible dans le gestionnaire.',
         texteConfirmer: 'Retirer'
     });
     if (!okRetrait) {
@@ -703,11 +806,23 @@ async function supprimerProductionDefinitivement(id) {
     if (!production) return;
 
     // Confirmation
+    //
+    // #1156 (25 oct. 2026) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE : la décision de Grégoire pour les
+    // grilles (#1154), étendue par Cowork aux échelles, aux cartouches (lot 2), puis aux productions
+    // (consigne du lot 3, § 1). Ce chemin retirait aussi l'exemplaire (`retirerDeLaBibliotheque`) ;
+    // la fenêtre en deux colonnes présente deux exemplaires séparés, et « ← Utiliser dans ce
+    // trimestre » ramène la production. La question le dit, quand la relation unique la lie à un
+    // exemplaire. Ses deux chemins (⋮ de « Dans ce trimestre », bandeau des doublons) passent ici.
+    // Stock : les productions déjà supprimées ont perdu le leur ; rien ne se répare.
+    const biblio = typeof obtenirToutesLesProductionsBibliotheque === 'function'
+        ? (await obtenirToutesLesProductionsBibliotheque() || []) : [];
+    const phraseBibliotheque = biblio.some(ex => BibliothequeUI.lieeAExemplaire(production, ex))
+        ? ' Son exemplaire de ta bibliothèque reste.' : '';
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('production'))) return;
     const okSuppr = await uiDialogues.confirmerAction({
         titre: 'Supprimer définitivement',
-        message: `Supprimer définitivement la production «${production.titre}» ? Cette action est irréversible.`,
+        message: `Supprimer définitivement la production «${production.titre}» ? Cette action est irréversible.${phraseBibliotheque}`,
         texteConfirmer: 'Supprimer',
         variante: 'danger'
     });
@@ -721,11 +836,6 @@ async function supprimerProductionDefinitivement(id) {
         return (lues || []).filter(p => p.id !== id);
     }, []);
     if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(getCleProductions());   // lot F : geste hors témoin (supprimerProductionDefinitivement)
-
-    // Suppression du store partagé
-    if (typeof retirerDeLaBibliotheque === 'function') {
-        await retirerDeLaBibliotheque(id);
-    }
 
     // Rafraîchir UI
     fermerModalBibliothequeProductions();
@@ -788,6 +898,9 @@ async function dupliquerProductionBibliotheque(id) {
 
 /**
  * Ajoute les productions sélectionnées à la bibliothèque
+ *
+ * ⚠ Sans appelant (mesuré le 25 oct. 2026, #1156) : aucune fenêtre ne pose de case à cocher dans
+ * `#listeProductionsDisponibles`, ni avant ni après les deux colonnes. Laissée telle quelle.
  */
 async function ajouterProductionsABibliotheque() {
     const checkboxes = document.querySelectorAll('#listeProductionsDisponibles input[type="checkbox"]:checked');
@@ -865,6 +978,7 @@ window.ajouterProductionsABibliotheque = ajouterProductionsABibliotheque;
 window.fermerModalBibliothequeProductions = fermerModalBibliothequeProductions;
 window.ajouterProductionIndividuelle = ajouterProductionIndividuelle;
 window.ajouterMesProductionsALaBibliotheque = ajouterMesProductionsALaBibliotheque;
+window.garderProductionDansBibliotheque = garderProductionDansBibliotheque;
 window.afficherProductionsTrimestreModal = afficherProductionsTrimestreModal;
 window.importerToutTrimestreModal = importerToutTrimestreModal;
 window.importerUneProductionTrimestre = importerUneProductionTrimestre;

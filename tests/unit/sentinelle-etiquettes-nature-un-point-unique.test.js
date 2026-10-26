@@ -97,12 +97,13 @@ describe('A · le point unique : un mot par nature, et nulle part ailleurs', () 
         for (const m of ['modes.js', 'trimestre-v2.js', 'trimestre-v2-enseignants.js', 'trimestre-v2-cours.js', 'trimestre-v2-groupes-cours.js', 'trimestre-v2-orchestre.js', 'rencontres.js', 'accompagnement-contenu-hover.js', 'contexte.js']) {
             expect(ordre('mots-nature.js'), m + ' doit se charger après mots-nature.js').toBeLessThan(ordre(m));
         }
-        // cours.js (bibliothèque des cours, deux cartes) : site absent de la liste de la consigne, attrapé par le verrou ci-dessus.
+        // cours.js (bibliothèque des cours) : site absent de la liste de la consigne, attrapé par le verrou ci-dessus. #1159 (lot 6) :
+        // un seul appel, le nom d'une rangée (`nomCours`) servant aux deux groupes (la liste, « Mis de côté ») ; il en avait deux, un par carte.
         // #841 / #842 (12 sept.) : trimestre-v2.js et trimestre-v2-enseignants.js lisent le contexte actif quand ils reconstruisent un menu ;
         // l'orchestre ne compte plus qu'un appel (sa fonction morte `peuplerDropdownEnseignants` a été retirée).
         // #846 (12 sept., 10 h 25) : trimestre-v2.js n'en compte plus qu'un — le champ 2 (v2-gc-cours) nomme un choix,
         // il ne lit plus le contexte ; reste le champ 5 (la personne).
-        const sites = { 'trimestre-v2-cours.js': 10, 'trimestre-v2-groupes-cours.js': 4, 'trimestre-v2-orchestre.js': 1, 'trimestre-v2.js': 1, 'trimestre-v2-enseignants.js': 1, 'rencontres.js': 3, 'accompagnement-contenu-hover.js': 4, 'cours.js': 2 };
+        const sites = { 'trimestre-v2-cours.js': 10, 'trimestre-v2-groupes-cours.js': 4, 'trimestre-v2-orchestre.js': 1, 'trimestre-v2.js': 1, 'trimestre-v2-enseignants.js': 1, 'rencontres.js': 3, 'accompagnement-contenu-hover.js': 4, 'cours.js': 1 };
         for (const [f, min] of Object.entries(sites)) {
             const n = (lire('js/' + f).match(/\bmots?Nature(ContexteActif)?\(/g) || []).length;
             expect(n, f + ' lit le point unique').toBeGreaterThanOrEqual(min);

@@ -9,7 +9,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // Remesuré par `scripts/mesurer-522.py ""` (⚠ sans argument, le script ne filtre que les clés du
 // lot 3 — son en-tête dit « tout le dépôt ») : 30 sites en course, pas 22. Neuf sont des gestes
 // de l'usager, convertis ici à `db.modifier`, au patron des lots 1 à 4 :
-//   cours.js — retirer, ajouter, importer, déposer (partagerCours) un cours ;
+//   cours.js — retirer, ajouter, importer un cours (déposer, `partagerCours`, retiré au #1159) ;
 //   cartouches.js — copier une cartouche depuis un autre trimestre ;
 //   cc-license.js — enregistrer les métadonnées d'une ressource ;
 //   snapshots.js — capturer une séance ;
@@ -105,7 +105,7 @@ async function monterCours(globaux = {}) {
         alert: () => {}, confirm: () => true,
         echapperHtml: (t) => String(t == null ? '' : t)
     }, globaux));
-    for (const f of ['retirerCoursDeBibliotheque', 'ajouterCoursIndividuel', 'partagerCours']) {
+    for (const f of ['retirerCoursDeBibliotheque', 'ajouterCoursIndividuel']) {
         if (typeof win[f] !== 'function') throw new Error(f + ' absent du sandbox');
     }
     return { db, win };
@@ -132,26 +132,9 @@ describe('#522 lot 5b · A — deux gestes rapprochés gardent LEURS DEUX effets
         expect(parId(liste, 'C2').dansBibliotheque, 'l\'ajout tient').toBe(true);
     });
 
-    it('A.b déposer un cours : ce qui s\'enregistre PENDANT la question des métadonnées reste', async () => {
-        let winRef = null;
-        const { db, win } = await monterCours({
-            ouvrirModalBibliothequeCours: async () => {},
-            // La question est à l'écran : un autre geste s'enregistre pendant ce temps.
-            demanderMetadonneesEnrichies: async () => {
-                await winRef.ajouterCoursIndividuel('C2');
-                return { licence: 'CC BY-NC-SA 4.0', auteur_original: 'Prof Fictif' };
-            }
-        });
-        winRef = win;
-        await db.set('cours', COURS());   // security-ok: littéral de banc, aucune source externe
-
-        await win.partagerCours('C1');
-
-        const liste = await db.get('cours');
-        expect(parId(liste, 'C1').metadata_cc, 'le dépôt tient').toMatchObject({ licence: 'CC BY-NC-SA 4.0' });
-        expect(parId(liste, 'C1').dansBibliotheque).toBe(false);
-        expect(parId(liste, 'C2').dansBibliotheque, 'l\'ajout fait pendant la question tient').toBe(true);
-    });
+    // #1159 (lot 6, 25 oct. 2026) — A.b retiré avec son geste : « Déposer dans les cours disponibles »
+    // (`partagerCours`) est parti, « Mettre de côté » prend l'action de `retirerCoursDeBibliotheque`
+    // (A.a), qui ne pose aucune question.
 
     it('A.c copier deux cartouches d\'un autre trimestre dans la même grille, en rafale : les deux sont là', async () => {
         const db = await monterDb();
@@ -217,17 +200,16 @@ describe('#522 lot 5b · A — deux gestes rapprochés gardent LEURS DEUX effets
 /* ------------------------------------------------------------- B — les refus */
 
 describe('#522 lot 5b · B — le geste impossible n\'écrit rien', () => {
-    it('B.a retirer, ajouter ou déposer un cours introuvable laisse la liste intacte', async () => {
-        const { db, win } = await monterCours({ demanderMetadonneesEnrichies: async () => ({ licence: 'CC BY' }) });
+    it('B.a retirer ou ajouter un cours introuvable laisse la liste intacte', async () => {   // #1159 : « déposer » retiré
+        const { db, win } = await monterCours();
         await db.set('cours', COURS());   // security-ok: littéral de banc, aucune source externe
         await win.retirerCoursDeBibliotheque('C9');
         await win.ajouterCoursIndividuel('C9');
-        await win.partagerCours('C9');
         expect(JSON.stringify(await db.get('cours'))).toBe(JSON.stringify(COURS()));
     });
 });
 
-/* ------------------------------------------- C — le cliquet : les neuf sites */
+/* ------------------------------------------- C — le cliquet : les huit sites (#1159 : − partagerCours) */
 
 /** Le corps d'une fonction nommée, par appariement d'accolades. */
 function corps(fichier, nom) {
@@ -244,12 +226,12 @@ function corps(fichier, nom) {
     throw new Error('corps non borné : ' + nom);
 }
 
-describe('#522 lot 5b · C — les neuf gestes lisent et écrivent DANS la file de leur clé', () => {
+describe('#522 lot 5b · C — les huit gestes lisent et écrivent DANS la file de leur clé', () => {
     const SITES = [
         ['js/cours.js', 'retirerCoursDeBibliotheque', "'cours'"],
         ['js/cours.js', 'ajouterCoursIndividuel', "'cours'"],
         ['js/cours.js', 'importerCoursSimple', "'cours'"],
-        ['js/cours.js', 'partagerCours', "'cours'"],
+        // #1159 (lot 6) : `partagerCours` retiré avec « Déposer dans les cours disponibles ».
         ['js/cartouches.js', 'copierCartoucheDepuisTrimestre', 'cleDest'],
         ['js/cc-license.js', 'sauvegarderMetadonnees', 'cleStockage'],
         ['js/snapshots.js', 'capturerSnapshotSeance', 'cleSnapshots()'],
@@ -264,9 +246,4 @@ describe('#522 lot 5b · C — les neuf gestes lisent et écrivent DANS la file 
             expect(c).not.toMatch(new RegExp('db\\.set\\(' + esc));
         });
     }
-
-    it('partagerCours lit HORS file pour poser la question, et relit DANS la file pour écrire', () => {
-        const c = corps('js/cours.js', 'partagerCours');
-        expect(c.indexOf('demanderMetadonneesEnrichies')).toBeLessThan(c.indexOf("db.modifier('cours'"));
-    });
 });

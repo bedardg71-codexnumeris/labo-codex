@@ -1657,8 +1657,10 @@ async function supprimerCartoucheConfirm(cartoucheId, grilleId) {
     const nbEvaluations = evaluations.filter(ev => ev && ev.cartoucheId === cartoucheId).length;
 
     let survivance = '';
-    if (biblio.some(c => c.id === cartoucheId)) {
-        survivance += 'Elle reste dans la Bibliothèque.\n';
+    // #1156 (verdict du lot 2, § 3) — la phrase et la relation de la fenêtre en deux colonnes : ce chemin
+    // n'efface pas l'exemplaire, et une cartouche ramenée par « ← Utiliser » le nomme par `idOriginal`.
+    if (cartouche && biblio.some(ex => BibliothequeUI.lieeAExemplaire(cartouche, ex))) {
+        survivance += 'Son exemplaire de ta bibliothèque reste.\n';
     }
     if (nbEvaluations > 0) {
         survivance += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;
@@ -2027,7 +2029,7 @@ window.confirmerImportCartouches = async function(donnees) {
         let message = `✅ Import réussi !\n\n`;
         if (nbAjoutees > 0) message += `${nbAjoutees} nouvelle(s) cartouche(s) ajoutée(s).\n`;
         if (nbMisesAJour > 0) message += `${nbMisesAJour} cartouche(s) mise(s) à jour.\n`;
-        message += '\n' + (ligneMasquee || 'Consulte « Cartouches disponibles » pour les ajouter à ta sélection.');
+        message += '\n' + (ligneMasquee || 'Elles sont dans ta bibliothèque : « Utiliser dans ce trimestre » les ajoute à ce trimestre.');
         notifications.succes(message);
 
     } catch (error) {
@@ -3756,8 +3758,52 @@ function genererChecklistCriteresImport() {
    =============================== */
 
 /**
- * Affiche le modal de gestion de la bibliothèque de cartouches
- * Permet d'ajouter/retirer des cartouches de la sidebar
+ * #1155 (lot 2 des bibliothèques en deux colonnes) — le nombre de commentaires RÉDIGÉS d'une
+ * cartouche, ou de l'un de ses critères (`prefixe` = `<critereId>_`). Une case vide n'en est pas un.
+ */
+function compterCommentairesCartouche(cartouche, prefixe) {
+    const commentaires = (cartouche && cartouche.commentaires) || {};
+    return Object.keys(commentaires).filter(k =>
+        (!prefixe || k.indexOf(prefixe) === 0) && String(commentaires[k] || '').trim() !== '').length;
+}
+
+function texteNombreCommentaires(n) {
+    return n === 0 ? 'Aucun commentaire' : n + (n > 1 ? ' commentaires' : ' commentaire');
+}
+
+/**
+ * #1155 — LA LIGNE EN CLAIR D'UNE RANGÉE : le nombre de commentaires, puis l'auteur quand ce n'est
+ * pas l'utilisateur actif (même lecture que les grilles). Remplace « 20 commentaire(s) • par … ».
+ * Texte brut : la fenêtre l'échappe.
+ */
+function ligneCartoucheBibliotheque(cartouche, auteurActif) {
+    const parts = [texteNombreCommentaires(compterCommentairesCartouche(cartouche))];
+    const auteur = (cartouche.metadata_cc && cartouche.metadata_cc.auteur_original) || cartouche.auteur || '';
+    if (auteur && auteur !== auteurActif) parts.push('par ' + auteur);
+    return parts.join(' · ');
+}
+
+/**
+ * #1155 — L'aperçu qu'ouvre le nom d'une rangée : la description, la provenance, les niveaux, puis
+ * chaque critère avec le nombre de commentaires rédigés pour lui.
+ */
+function apercuCartoucheBibliotheque(cartouche) {
+    const criteres = Array.isArray(cartouche.criteres) ? cartouche.criteres.filter(Boolean) : [];
+    const niveaux = Array.isArray(cartouche.niveaux) ? cartouche.niveaux.filter(Boolean) : [];
+    const paragraphes = [cartouche.description || '', BibliothequeUI.formaterInspireDe(cartouche)];
+    if (niveaux.length) paragraphes.push('Niveaux : ' + niveaux.map(n => n.code || n.nom || '?').join(' · '));
+    if (!criteres.length) paragraphes.push('Aucun critère.');
+    return {
+        paragraphes: paragraphes,
+        lignes: criteres.map(c => [c.nom || 'Sans nom', '',
+            texteNombreCommentaires(compterCommentairesCartouche(cartouche, String(c.id) + '_'))])
+    };
+}
+
+/**
+ * Les données de la bibliothèque des cartouches. #1155 : des rangées pour la fenêtre en deux
+ * colonnes (`BibliothequeUI.creerFenetreDeuxColonnes`), plus aucun HTML ; les cartouches restent
+ * rangées sous l'intertitre de leur grille (#146), dans chaque colonne (`rangee.groupe`).
  */
 async function preparerDonneesBibliothequeCartouches() {
     const grilles = await db.get(cle('grillesTemplates')) || [];
@@ -3777,148 +3823,120 @@ async function preparerDonneesBibliothequeCartouches() {
         cartouchesLocales.filter(c => c.dansBibliotheque !== false)
     );
 
-    let cartouchesDisponibles = cartouchesLocales.filter(c => c.dansBibliotheque === false);
-    if (window.CARTOUCHES_BIBLIOTHEQUE) {
-        const cartouchesBibliothequePartagee = await obtenirToutesLesCartouchesBibliotheque();
-        cartouchesDisponibles = [...cartouchesDisponibles, ...cartouchesBibliothequePartagee];
-    }
-    cartouchesDisponibles = BibliothequeUI.filtrerParModeDemo(cartouchesDisponibles);
+    // ⚠ #1155 — « Dans ta bibliothèque » liste aussi, comme la section 2 d'avant, les cartouches
+    // RETIRÉES de ce trimestre (`dansBibliotheque === false`) : c'est le seul endroit où on les
+    // retrouve, et « ← Utiliser dans ce trimestre » les y remet. Elles ne sont pas dans la
+    // bibliothèque ; leur ligne le dit (`retiree`). Soumis à Cowork par la demande de relecture.
+    const cartouchesRetirees = BibliothequeUI.filtrerParModeDemo(cartouchesLocales.filter(c => c.dansBibliotheque === false));
+    const toutesBibliotheque = await obtenirToutesLesCartouchesBibliotheque() || [];
+    const cartouchesBibliotheque = BibliothequeUI.filtrerParModeDemo(toutesBibliotheque);
+    const cartouchesDisponibles = [...cartouchesRetirees, ...cartouchesBibliotheque];
 
     // #291 — voir le commentaire de grilles.js : réunion des deux magasins
     // avant analyse, sinon un même objet vu des deux côtés passerait pour
     // une collision d'identifiant.
     const doublonsDetectes = analyserDoublons(
         reunirSources(cartouchesDansBibliotheque, cartouchesDisponibles), 'nom');
-    const toutesLesGrilleNoms = [...cartouchesLocales, ...cartouchesDisponibles].map(c => c.grilleNom || 'Autre');
-    const disciplines = [...new Set(toutesLesGrilleNoms)].sort();
+    // #291 — la puce d'identifiant ne s'affiche que sur une rangée que le bandeau nomme.
+    const idsNommes = new Set();
+    doublonsDetectes.forEach(groupe => groupe.exemplaires.forEach(ex => idsNommes.add(ex.id)));
 
-    // Section 1 : groupée par grille (#146)
-    const cartesSection1 = [];
-    const cartouchesParGrilleSection1 = {};
-    cartouchesDansBibliotheque.forEach(c => {
-        const g = c.grilleNom || 'Grille inconnue';
-        if (!cartouchesParGrilleSection1[g]) cartouchesParGrilleSection1[g] = [];
-        cartouchesParGrilleSection1[g].push(c);
+    // L'intertitre d'une cartouche de la bibliothèque : le nom qu'elle porte, sinon celui de sa grille
+    // (elle la nomme par son `grilleId`), sinon « Autre » comme avant.
+    const grillesBibliotheque = typeof obtenirToutesLesGrillesBibliotheque === 'function'
+        ? (await obtenirToutesLesGrillesBibliotheque() || []) : [];
+    const nomDeGrille = (id) => {
+        const g = grillesBibliotheque.find(x => x && x.id === id) || grilles.find(x => x && (x.id === id || x.idOriginal === id));
+        return g ? g.nom : null;
+    };
+    const parGroupe = (liste, groupeDe) => {
+        const groupes = {};
+        liste.forEach(c => { const g = groupeDe(c); (groupes[g] = groupes[g] || []).push(c); });
+        return Object.keys(groupes).sort().reduce((tout, g) => tout.concat(groupes[g].map(c => ({ c, g }))), []);
+    };
+
+    const auteurActif = BibliothequeUI.obtenirAuteurActif();
+
+    // Colonne « Dans ce trimestre », groupée par grille (#146). Pas de « Garder → » : la fenêtre
+    // d'avant n'avait aucun geste qui verse une cartouche dans la bibliothèque (consigne du lot 2,
+    // § 2.2 ; inscrit). L'état calme paraît quand la relation unique le dit.
+    const rangeesTrimestre = parGroupe(cartouchesDansBibliotheque, c => c.grilleNom || 'Grille inconnue').map(({ c: cartouche, g }) => {
+        const rangee = {
+            id: cartouche.id,
+            nom: BibliothequeUI.formaterTitre(cartouche.nom || 'Sans titre'),
+            ligne: ligneCartoucheBibliotheque(cartouche, auteurActif),
+            afficherId: idsNommes.has(cartouche.id),
+            apercu: apercuCartoucheBibliotheque(cartouche),
+            groupe: g,
+            menu: [
+                { label: 'Dupliquer', action: 'dupliquerCartoucheBibliotheque', param: cartouche.id, param2: cartouche.grilleId, title: 'Créer une copie' },
+                { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'cartouche', param2: cartouche.id, param3: cartouche.grilleId, title: 'Générer un fichier .lcz signé à transmettre (#329)' },
+                { separateur: true },
+                { label: 'Retirer de ce trimestre', action: 'retirerCartoucheDeBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-supprimer', title: 'La cartouche quitte le menu de l\'écran ; ses données sont conservées' },
+                { label: 'Supprimer définitivement', action: 'supprimerCartoucheDefinitivement', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+            ]
+        };
+        if (toutesBibliotheque.some(ex => BibliothequeUI.lieeAExemplaire(cartouche, ex))) rangee.etat = 'Aussi dans ta bibliothèque';
+        return rangee;
     });
 
-    Object.keys(cartouchesParGrilleSection1).sort().forEach(grilleNom => {
-        cartouchesParGrilleSection1[grilleNom].forEach(cartouche => {
-            cartesSection1.push({
-                nom: BibliothequeUI.formaterTitreDemo(echapperHtml(cartouche.nom || 'Sans titre'), BibliothequeUI.estItemDemo(cartouche)),
-                id: cartouche.id,
-                afficherId: true,
-                badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
-                    quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
-                }),
-                description: cartouche.description || '',
-                inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
-                boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerCartoucheBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-confirmer', title: 'Créer une copie' },
-                actionsMenu: [
-                    { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'cartouche', param2: cartouche.id, param3: cartouche.grilleId, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-                    { label: 'Retirer', action: 'retirerCartoucheDeBibliotheque', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
-                    { label: 'Supprimer', action: 'supprimerCartoucheDefinitivement', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-                ],
-                groupe: grilleNom
-            });
-        });
-    });
-
-    // Section 2 : groupée par grille
-    const cartesSection2 = [];
-    const cartouchesParGrille = {};
-    cartouchesDisponibles.forEach(c => {
-        const g = c.grilleNom || 'Autre';
-        if (!cartouchesParGrille[g]) cartouchesParGrille[g] = [];
-        cartouchesParGrille[g].push(c);
-    });
-
-    Object.keys(cartouchesParGrille).sort().forEach(grilleNom => {
-        cartouchesParGrille[grilleNom].forEach(cartouche => {
-            const dejaPresent = cartouchesDansBibliotheque.some(c => c.id === cartouche.id || c.idOriginal === cartouche.id);
-            cartesSection2.push({
-                nom: BibliothequeUI.formaterTitreDemo(echapperHtml(cartouche.nom || 'Sans titre'), BibliothequeUI.estItemDemo(cartouche)),
-                id: cartouche.id,
-                afficherId: true,
-                badgeSource: BibliothequeUI.genererBadgeSource(cartouche, cartouchesDansBibliotheque),
-                metadonnees: BibliothequeUI.formaterMetadonnees(cartouche, {
-                    quantite: `${Object.keys(cartouche.commentaires || {}).length} commentaire(s)`
-                }),
-                inspireDe: BibliothequeUI.formaterInspireDe(cartouche),
-                description: cartouche.description || '',
-                dejaPresent: dejaPresent,
-                classeItem: 'cartouche-disponible-item',
-                dataAttrs: `data-grille="${echapperHtml(grilleNom)}"`,
-                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterCartoucheIndividuelle', param: cartouche.id, param2: cartouche.grilleId, classe: 'btn-confirmer', title: 'Ajouter cette cartouche à ta sélection' },
-                actionsMenu: [
-                    { label: 'Supprimer', action: 'supprimerCartoucheDeBibliothequePartagee', param: cartouche.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true }
-                ],
-                groupe: grilleNom
-            });
-        });
+    // Colonne « Dans ta bibliothèque », groupée par grille.
+    const rangeesBibliotheque = parGroupe(cartouchesDisponibles,
+        c => c.grilleNom || nomDeGrille(c.grilleId) || 'Autre').map(({ c: cartouche, g }) => {
+        const retiree = cartouche.dansBibliotheque === false && cartouchesRetirees.indexOf(cartouche) >= 0;
+        const dejaPresent = cartouchesDansBibliotheque.some(c => BibliothequeUI.lieeAExemplaire(c, cartouche));
+        const rangee = {
+            id: cartouche.id,
+            nom: BibliothequeUI.formaterTitre(cartouche.nom || 'Sans titre'),
+            ligne: (retiree ? 'Retirée de ce trimestre · ' : '') + ligneCartoucheBibliotheque(cartouche, auteurActif),
+            afficherId: idsNommes.has(cartouche.id),
+            apercu: apercuCartoucheBibliotheque(cartouche),
+            groupe: g,
+            dejaPresent: dejaPresent,
+            // Une cartouche retirée n'est pas dans la bibliothèque : « Supprimer » d'avant n'y faisait
+            // rien (`supprimerCartoucheDeBibliothequePartagee` ne la trouve pas), il n'est pas reporté.
+            menu: retiree ? [] : [
+                { label: 'Supprimer de ma bibliothèque', action: 'supprimerCartoucheDeBibliothequePartagee', param: cartouche.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque' }
+            ]
+        };
+        if (dejaPresent) {
+            rangee.etat = 'Déjà dans ce trimestre';
+        } else {
+            rangee.passage = { label: 'Utiliser dans ce trimestre', action: 'ajouterCartoucheIndividuelle', param: cartouche.id, param2: cartouche.grilleId, sens: 'versTrimestre' };
+        }
+        return rangee;
     });
 
     const trimestresAvecCartouches = await listerTrimestresAvecCartouches();
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, disciplines, cartouchesDansBibliotheque, trimestresAvecCartouches };
+    return { rangeesTrimestre, rangeesBibliotheque, doublonsDetectes, cartouchesDansBibliotheque, trimestresAvecCartouches };
 }
 
 async function afficherBibliothequeCartouches() {
     const data = await preparerDonneesBibliothequeCartouches();
 
-    // Section 1
-    let contenuSection1 = '';
-    if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche dans ta sélection</p>';
-    } else {
-        let groupeCourant = null;
-        data.cartesSection1.forEach(carte => {
-            if (carte.groupe && carte.groupe !== groupeCourant) {
-                groupeCourant = carte.groupe;
-                contenuSection1 += `<h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--gris-moyen);">${echapperHtml(groupeCourant)}</h4>`;
-            }
-            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
-        });
-    }
+    // #293 — « Masquer ce qui est déjà dans ce trimestre » (même préférence qu'avant).
+    const rangeesBibliotheque = BibliothequeUI.filtrerParDejaPresent(data.rangeesBibliotheque);
+    const toutesMasquees = data.rangeesBibliotheque.length > 0 && rangeesBibliotheque.length === 0;
+    const groupesBibliotheque = [];
+    data.rangeesBibliotheque.forEach(r => { if (groupesBibliotheque.indexOf(r.groupe) < 0) groupesBibliotheque.push(r.groupe); });
+    const trimestres = data.trimestresAvecCartouches || [];
 
-    const boutonsApresSection1 = `
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-            <button data-action="exporterCartouches" class="btn btn-secondaire btn-mini">Exporter toutes mes cartouches (JSON)</button>
-            <button data-action="ouvrirFilePickerImportCartouches" class="btn btn-secondaire btn-mini">Importer des cartouches (JSON)</button>
-            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
-            <input type="file" id="fichier-import-cartouches-modal" accept=".json" style="display: none;" data-on-change="importerCartouches">
-        </div>`;
-
-    // Filtres Section 2
-    const filtresHTML = `
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; margin-bottom: 5px; color: var(--gris-moyen); font-weight: 500;">Filtrer par grille :</label>
-            <select id="filtreGrilleCartouches" class="controle-form" data-on-change="filtrerCartouchesParGrille" style="max-width: 300px;">
-                <option value="">Toutes les grilles</option>
-                ${data.disciplines.map(g => `<option value="${echapperHtml(g)}">${echapperHtml(g)}</option>`).join('')}
-            </select>
-        </div>
-        ${BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeCartouches')}`;
-
-    // Section 2 — filtrage #293 (Masquer les items déjà dans la sidebar)
-    const cartesAffichables = BibliothequeUI.filtrerParDejaPresent(data.cartesSection2);
-    let contenuSection2 = '';
-    let groupeCourant = null;
-    cartesAffichables.forEach(carte => {
-        if (carte.groupe && carte.groupe !== groupeCourant) {
-            groupeCourant = carte.groupe;
-            contenuSection2 += `<h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--gris-moyen);">${echapperHtml(groupeCourant)}</h4>`;
-        }
-        contenuSection2 += BibliothequeUI.renderCarteDisponible(carte);
-    });
-
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: 'modalBibliothequeCartouches',
         titre: 'Bibliothèque de cartouches de rétroaction',
-        sousTitre: 'Gère les cartouches de rétroaction de ta sélection.',
-        onFermer: 'fermerModalBibliothequeCartouches',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+        aide: 'bibliotheque-fonctionnement',
+        menuFichiers: [
+            { label: 'Importer des cartouches', action: 'ouvrirFilePickerImportCartouches' },
+            { label: 'Importer le partage d\'une ou d\'un collègue', action: 'partageImport.ouvrirSelecteurFichier' },
+            { separateur: true },
+            { label: 'Exporter les cartouches de ce trimestre', action: 'exporterCartouches' },
+            { note: 'Fichiers .json et .lcz' }
+        ],
+        champsFichier: [{ id: 'fichier-import-cartouches-modal', accept: '.json', onChange: 'importerCartouches' }],
+        avantColonnes: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.cartouchesDansBibliotheque,
+            mots: { selection: 'Dans ce trimestre', bibliotheque: 'Dans ta bibliothèque', retirer: 'Retirer de ce trimestre (données conservées)' },
             actions: {
                 retirer: 'retirerCartoucheDeBibliotheque',
                 supprimer: 'supprimerCartoucheDefinitivement',
@@ -3928,16 +3946,42 @@ async function afficherBibliothequeCartouches() {
                 champParam2: 'grilleId'
             }
         }),
-        titreSection1: 'Cartouches dans ta sélection',
-        contenuIdListe1: 'listeCartouchesDansBibliotheque',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: boutonsApresSection1,
-        titreSection2: 'Cartouches disponibles à ajouter à ta sélection',
-        filtresSection2: filtresHTML,
-        contenuIdListe2: 'listeCartouchesDisponibles',
-        contenuSection2: contenuSection2,
-        sectionImportTrimestre: genererSectionImportTrimestreCartouches(data.trimestresAvecCartouches),
-        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('cartouche') : ''
+        trimestre: {
+            titre: 'Dans ce trimestre',
+            phrase: 'Les cartouches que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+            idListe: 'listeCartouchesDansBibliotheque',
+            rangees: data.rangeesTrimestre,
+            vide: 'Aucune cartouche dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle cartouche ».',
+            importAutreTrimestre: {
+                titre: 'Importer depuis un autre trimestre',
+                selectId: 'selectTrimestreImportCartouches',
+                apercuId: 'previewCartouchesTrimestre',
+                options: trimestres.map(t => ({ value: t.id, label: `${t.nom} (${t.nombre} cartouche${t.nombre > 1 ? 's' : ''})` })),
+                actionVoir: 'afficherCartouchesTrimestreModal',
+                libelleVoir: 'Voir les cartouches',
+                actionTout: 'importerToutCartouchesTrimestreModal',
+                tooltipTout: 'import-trimestre-tout-cartouches',
+                aide: 'import-autre-trimestre',
+                phrase: 'Une cartouche arrive toujours avec sa grille : si la grille est déjà dans ce trimestre, la cartouche s\'y range ; sinon la grille est copiée avec elle.'
+            }
+        },
+        bibliotheque: {
+            titre: 'Dans ta bibliothèque',
+            // Sans « C'est d'ici que tu peux les partager. » : même raison qu'au lot 1.
+            phrase: 'Les cartouches que tu gardes pour tous tes trimestres.',
+            idListe: 'listeCartouchesDisponibles',
+            compte: data.rangeesBibliotheque.length,
+            rangees: rangeesBibliotheque,
+            vide: toutesMasquees
+                ? 'Toutes les cartouches de ta bibliothèque sont déjà dans ce trimestre.'
+                : 'Ta bibliothèque de cartouches est vide.',
+            videFiltre: 'Aucune cartouche pour cette grille.',
+            filtreGroupe: groupesBibliotheque.length
+                ? { libelle: 'Filtrer par grille', tous: 'Toutes les grilles', groupes: groupesBibliotheque }
+                : null,
+            masquer: { libelle: 'Masquer ce qui est déjà dans ce trimestre', refreshFn: 'afficherBibliothequeCartouches' },
+            partages: window.partageSection ? partageSection.rangeesDeuxColonnes('cartouche') : null
+        }
     });
 }
 
@@ -4079,35 +4123,6 @@ async function listerTrimestresAvecCartouches() {
 }
 
 /**
- * Construit le bloc « Importer depuis un autre trimestre » du modal.
- * Rien à importer → chaîne vide, et `creerModal` n'affiche aucune section.
- */
-function genererSectionImportTrimestreCartouches(trimestres) {
-    if (!Array.isArray(trimestres) || trimestres.length === 0) return '';
-
-    const options = trimestres.map(t =>
-        `<option value="${echapperHtml(t.id)}">${echapperHtml(t.nom)} (${t.nombre} cartouche${t.nombre > 1 ? 's' : ''})</option>`
-    ).join('');
-
-    return `
-        <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-            <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre" aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h4>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <select id="selectTrimestreImportCartouches" class="controle-form" style="flex: 1; min-width: 200px;">
-                    <option value="">-- Choisir un trimestre --</option>
-                    ${options}
-                </select>
-                <button data-action="afficherCartouchesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les cartouches</button>
-                <button data-action="importerToutCartouchesTrimestreModal" class="btn btn-principal btn-compact" data-tooltip="import-trimestre-tout-cartouches">Tout importer</button>
-            </div>
-            <p style="margin: 10px 0 0; font-size: 0.85rem; color: var(--gris-moyen);">
-                Une cartouche arrive toujours avec sa grille : si la grille est déjà dans ce trimestre, la cartouche s'y range ; sinon la grille est copiée avec elle.
-            </p>
-            <div id="previewCartouchesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
-        </div>`;
-}
-
-/**
  * Pose la trace de provenance sur une COPIE de la cartouche source.
  *
  * Les DEUX chemins de `copierCartoucheDepuisTrimestre` passent par ici, et c'est
@@ -4220,7 +4235,8 @@ async function afficherCartouchesTrimestreModal() {
     const lots = await lotsCartouchesDuTrimestre(srcId);
     const grillesLocales = await db.get(cle('grillesTemplates')) || [];
 
-    let html = '<div style="max-height: 260px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
+    // #1155 — l'aperçu vit dans la fenêtre en deux colonnes : des classes, aucun style en ligne.
+    let html = '';
     let total = 0;
 
     for (const { grille, cartouches } of lots) {
@@ -4229,31 +4245,30 @@ async function afficherCartouchesTrimestreModal() {
             ? 'sa grille est déjà dans ce trimestre'
             : 'sa grille sera copiée avec elle';
 
-        html += `<h5 style="margin: 12px 0 6px; color: var(--gris-moyen); font-size: 0.9rem;">
-                    ${echapperHtml(grille.nom || 'Grille sans titre')}
-                    <span style="font-weight: 400; font-style: italic;"> — ${mention}</span>
-                 </h5>`;
+        html += `<h5 class="biblio2-import-groupe">${echapperHtml(grille.nom || 'Grille sans titre')}
+                    <span class="biblio2-import-mention"> — ${mention}</span></h5>
+                 <ul class="biblio2-import-liste">`;
 
         cartouches.forEach(cartouche => {
             total++;
             const nbCommentaires = Object.keys(cartouche.commentaires || {}).length;
             html += `
-                <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                    <div style="min-width: 0;">
+                <li class="biblio2-import-rangee">
+                    <div>
                         <strong>${echapperHtml(cartouche.nom || 'Sans titre')}</strong>
-                        <br><small style="color: var(--gris-moyen);">${nbCommentaires} commentaire${nbCommentaires > 1 ? 's' : ''}</small>
+                        <p class="biblio2-rangee-meta">${nbCommentaires} commentaire${nbCommentaires > 1 ? 's' : ''}</p>
                     </div>
-                    <button data-action="importerUneCartoucheTrimestre" data-param="${echapperHtml(srcId)}" data-param2="${echapperHtml(grille.id)}" data-param3="${echapperHtml(cartouche.id)}" class="btn btn-confirmer btn-tres-compact">
+                    <button type="button" data-action="importerUneCartoucheTrimestre" data-param="${echapperAttribut(srcId)}" data-param2="${echapperAttribut(grille.id)}" data-param3="${echapperAttribut(cartouche.id)}" class="btn btn-secondaire">
                         Importer
                     </button>
-                </div>`;
+                </li>`;
         });
+        html += '</ul>';
     }
-    html += '</div>';
 
     preview.innerHTML = total > 0
         ? html
-        : '<p style="color: var(--gris-clair); font-style: italic;">Aucune cartouche trouvée dans ce trimestre.</p>';
+        : '<p class="biblio2-phrase">Aucune cartouche trouvée dans ce trimestre.</p>';
     preview.classList.remove('u-hide');
 }
 
@@ -4436,7 +4451,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
             return;
         }
         if (nomEnConflit) {
-            alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+            alert(`« ${nomEnConflit} » est déjà dans ce trimestre.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
             return;
         }
         if (sourceIntrouvable) {
@@ -4458,7 +4473,7 @@ async function ajouterCartoucheIndividuelle(id, grilleId) {
             return;
         }
 
-        notifications.succes('Cartouche ajoutée à ta sélection !');
+        notifications.succes('Cartouche ajoutée à ce trimestre !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la cartouche');
@@ -4511,7 +4526,8 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     const biblio = typeof obtenirToutesLesCartouchesBibliotheque === 'function'
         ? (await obtenirToutesLesCartouchesBibliotheque() || [])
         : [];
-    const aussiDansBibliotheque = biblio.some(c => c.id === id);
+    // #1155 — la relation unique des deux colonnes (`id`, ou `idOriginal` après « ← Utiliser »).
+    const aussiDansBibliotheque = biblio.some(ex => BibliothequeUI.lieeAExemplaire(cartouche, ex));
     const evaluations = await db.get(cle('evaluationsSauvegardees')) || [];
     const nbEvaluations = evaluations.filter(ev => ev && ev.cartoucheId === id).length;
 
@@ -4521,8 +4537,11 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     const grilles = await db.get(cle('grillesTemplates')) || [];
     const grille = grilles.find(g => g.id === grilleId);
     let portee = '';
+    // #1155 (25 oct. 2026) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE : la décision de Grégoire pour
+    // les grilles (#1154), étendue par Cowork aux cartouches (consigne du lot 2, § 3.2). La question
+    // disait « Elle part aussi de la Bibliothèque. » ; elle dit maintenant ce qui reste.
     if (aussiDansBibliotheque) {
-        portee += 'Elle part aussi de la Bibliothèque.\n';
+        portee += 'Son exemplaire de ta bibliothèque reste.\n';
     }
     if (nbEvaluations > 0) {
         portee += `${nbEvaluations} évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n`;
@@ -4546,10 +4565,8 @@ async function supprimerCartoucheDefinitivement(id, grilleId) {
     }, []);
     if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle(`cartouches_${grilleId}`));   // lot F : geste hors témoin (supprimerCartoucheDefinitivement)
 
-    // Suppression du store partagé
-    if (typeof retirerCartoucheDeLaBibliotheque === 'function') {
-        await retirerCartoucheDeLaBibliotheque(id);
-    }
+    // #1155 — plus de retrait de la bibliothèque ici (voir la question). Stock : les cartouches déjà
+    // supprimées ont perdu leur exemplaire ; rien ne se répare.
 
     // Rafraîchir UI
     fermerModalBibliothequeCartouches();
@@ -4648,18 +4665,6 @@ async function dupliquerCartoucheBibliotheque(id, grilleId) {
 }
 
 /**
- * Filtrer les cartouches disponibles par grille
- */
-function filtrerCartouchesParGrille() {
-    const filtre = document.getElementById('filtreGrilleCartouches').value;
-    const items = document.querySelectorAll('.cartouche-disponible-item');
-
-    items.forEach(item => {
-        toggleDisplay(item, filtre === '' || item.dataset.grille === filtre);
-    });
-}
-
-/**
  * Fermer le modal de gestion de bibliothèque
  */
 function fermerModalBibliothequeCartouches() {
@@ -4669,7 +4674,6 @@ function fermerModalBibliothequeCartouches() {
 // Exporter les fonctions
 window.afficherBibliothequeCartouches = afficherBibliothequeCartouches;
 window.retirerCartoucheDeBibliotheque = retirerCartoucheDeBibliotheque;
-window.filtrerCartouchesParGrille = filtrerCartouchesParGrille;
 window.fermerModalBibliothequeCartouches = fermerModalBibliothequeCartouches;
 window.ajouterCartoucheIndividuelle = ajouterCartoucheIndividuelle;
 window.dupliquerCartoucheBibliotheque = dupliquerCartoucheBibliotheque;
@@ -4687,7 +4691,6 @@ window.listerTrimestresAvecCartouches = listerTrimestresAvecCartouches;
 window.copierCartoucheDepuisTrimestre = copierCartoucheDepuisTrimestre;
 window.lireCartouchesDuTrimestre = lireCartouchesDuTrimestre;
 window.lotsCartouchesDuTrimestre = lotsCartouchesDuTrimestre;
-window.genererSectionImportTrimestreCartouches = genererSectionImportTrimestreCartouches;
 
 /**
  * Importe une liste de cartouches externes (archives, voûte, etc.).

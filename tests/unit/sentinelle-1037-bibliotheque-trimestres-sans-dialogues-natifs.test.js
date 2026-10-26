@@ -33,7 +33,7 @@ describe('#1037 · aucun dialogue natif dans la bibliothèque des trimestres', (
     });
     it('archiverTrimestreActif est retiré, et « Rouvrir » mène à sa confirmation', () => {
         expect(src).not.toMatch(/function archiverTrimestreActif\(|window\.archiverTrimestreActif/);
-        expect(src).toContain("primaire = { label: 'Rouvrir', action: 'confirmerDesarchivage', param: t.id,");
+        expect(src).toContain("passage = { label: 'Rouvrir', action: 'confirmerDesarchivage', param: t.id,");   // #1159 : le bouton de la rangée
         expect(src).not.toContain("action: 'desarchiverTrimestre'");
     });
 });
@@ -58,7 +58,7 @@ function banc({ repondre = true, archiver, desarchiver, modaleOuverte = true } =
             succes: (m) => journal.notes.push(['succes', m]), erreur: (m) => journal.notes.push(['erreur', m]),
             info() {}, warning() {}
         },
-        BibliothequeUI: { creerModal: () => journal.appels.push(['redessiner']), fermerModal() {}, renderCarteSelection: () => '' },
+        BibliothequeUI: { creerFenetreListe: () => journal.appels.push(['redessiner']), fermerModal() {} },   // #1159 : la fenêtre à une seule liste
         document: { getElementById: (id) => (id === 'modalBibliothequeTrimestres' && modaleOuverte ? { querySelectorAll: () => [] } : null), querySelectorAll: () => [] },
         echapperHtml: (s) => String(s)
     });

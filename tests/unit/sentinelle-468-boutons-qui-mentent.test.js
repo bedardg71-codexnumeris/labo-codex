@@ -547,11 +547,9 @@ function chargerCours(store, journal) {
         BibliothequeUI: {
             // on capture ce que la modale DEMANDE à rendre : c'est là que vivent
             // les libellés du menu ⋮, et donc la promesse faite à l'utilisateur
-            renderCarteSelection: (opts) => { journal.cartes.push(opts); return ''; },
-            renderCarteDisponible: (opts) => { journal.cartes.push(opts); return ''; },
+            // #1159 (lot 6) — réancré : la fenêtre à une seule liste reçoit les rangées en données.
+            creerFenetreListe: (c) => { journal.cartes.push(...c.liste.rangees, ...c.repli.rangees); },
             renderMenuActions: () => '', obtenirAuteurActif: () => 'Grégoire',
-            creerModal: () => ({ style: {}, classList: { add() {}, remove() {} },
-                                 querySelector: () => null, appendChild() {} }),
             fermerModal: () => {}, renderSection: (t, contenu) => String(contenu || ''),
             formaterTitre: (t) => String(t), repertoires: { enregistrer: () => {} },
             filtrerParModeDemo: (l) => l, filtrerParMaquette: (l) => l
@@ -601,19 +599,23 @@ describe('#468 · S5 (CT-13) — « Exporter » exporte, « Déposer » dépose'
         expect(store.cours[0].dansBibliotheque).toBe(true);
     });
 
-    it('partagerCours dépose la fiche ET la sort de l\'actif — sans prétendre exporter', async () => {
+    // #1159 (lot 6) — réancré : « Mettre de côté » remplace « Déposer dans les cours disponibles »
+    // (`partagerCours`, retiré) et « Retirer de ma sélection » ; il prend l'action du second.
+    it('« Mettre de côté » sort la fiche de la liste ET de l\'actif — sans prétendre exporter', async () => {
         const journal = { alertes: [], telechargements: [], contenus: [], metadonnees: { licence: 'CC BY' } };
         const store = { cours: [COURS()] };
         const win = chargerCours(store, journal);
 
-        await win.partagerCours('COURS_1');
+        await win.retirerCoursDeBibliotheque('COURS_1');
 
         expect(store.cours[0].dansBibliotheque).toBe(false);
-        expect(store.cours[0].actif).toBe(false);   // aligné sur « Retirer de ma sélection »
-        expect(journal.telechargements.length).toBe(0);  // ce geste ne télécharge rien, et ne le dit plus
+        expect(store.cours[0].actif).toBe(false);
+        expect(store.cours[0].metadata_cc).toBeUndefined();   // ce que « Déposer… » écrivait, plus rien ne l'écrit
+        expect(journal.telechargements.length).toBe(0);
+        expect(win.partagerCours).toBeUndefined();
     });
 
-    it('le menu ⋮ de la fiche offre les DEUX gestes, chacun sous son vrai nom', async () => {
+    it('le menu ⋮ de la fiche offre « Exporter » et « Mettre de côté », chacun sous son vrai nom', async () => {
         const journal = { alertes: [], telechargements: [], contenus: [], metadonnees: null };
         const store = { cours: [COURS()] };
         const win = chargerCours(store, journal);
@@ -622,11 +624,12 @@ describe('#468 · S5 (CT-13) — « Exporter » exporte, « Déposer » dépose'
 
         const carte = journal.cartes.find(c => c.id === 'COURS_1');
         expect(carte).toBeTruthy();
-        const parLabel = Object.fromEntries(carte.actionsMenu.map(a => [a.label, a.action]));
+        const parLabel = Object.fromEntries(carte.menu.filter(a => a.label).map(a => [a.label, a.action]));
         expect(parLabel['Exporter']).toBe('exporterUnCours');
-        expect(parLabel['Déposer dans les cours disponibles']).toBe('partagerCours');
-        // les gestes déjà en place n'ont pas bougé
-        expect(parLabel['Retirer de ma sélection']).toBe('retirerCoursDeBibliotheque');
+        // #1159 : un seul geste réversible, « Mettre de côté », à la place des deux d'avant
+        expect(parLabel['Mettre de côté']).toBe('retirerCoursDeBibliotheque');
+        expect(parLabel['Déposer dans les cours disponibles']).toBeUndefined();
+        expect(parLabel['Retirer de ma sélection']).toBeUndefined();
         expect(parLabel['Supprimer la fiche']).toBe('supprimerFicheCours');
     });
 

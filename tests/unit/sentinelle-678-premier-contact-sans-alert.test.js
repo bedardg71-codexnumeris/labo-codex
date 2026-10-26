@@ -84,15 +84,14 @@ describe('#678 · B — un geste du parcours parle par les notifications', () =>
         return { win, vus };
     }
 
-    it('B.a partager un cours introuvable : notification d\'erreur, mêmes mots', async () => {
-        const { win, vus } = charger();
-        await win.partagerCours('COURS_ABSENT');
-        expect(vus).toEqual([['erreur', 'Cours introuvable', undefined]]);
-    });
+    // #1159 (lot 6, 25 oct. 2026) — B.a retiré avec son geste : `partagerCours` (« Déposer dans les cours
+    // disponibles ») est parti.
 
-    it('B.b partager toute la sélection, vide : notification d\'information, mêmes mots', async () => {
+    // #1159 (verdict du lot 6, § 2.1) — réancré : plus aucune notification de la bibliothèque des cours ne
+    // dit « ta sélection » ; « Exporter tous mes cours » sans cours dit « Aucun cours à exporter. ».
+    it('B.b exporter tous les cours, sans cours : notification d\'information', async () => {
         const { win, vus } = charger();
         await win.partagerTousLesCours();
-        expect(vus).toEqual([['info', 'Aucun cours à partager dans ta sélection', undefined]]);
+        expect(vus).toEqual([['info', 'Aucun cours à exporter.', undefined]]);
     });
 });

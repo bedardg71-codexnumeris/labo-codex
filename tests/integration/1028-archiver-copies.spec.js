@@ -199,6 +199,14 @@ async function ouvrirArchives(page) {
     await page.waitForTimeout(300);
 }
 
+
+// #1159 (lot 6, 25 oct. 2026) — RÉANCRÉ : les trimestres clos sont rangés en bas de la bibliothèque, sous
+// « Clos (n) », replié ; le banc l'ouvre comme l'utilisateur, par son intitulé (s'il ne l'est pas déjà).
+const ouvrirClos = async (modale) => {
+    const intitule = modale.locator('details.biblio2-repli:not([open]) > summary');
+    if (await intitule.count()) await intitule.click();
+};
+
 /** Le menu ⋮ de la carte h2032 : « Archiver les copies… », puis le fichier. */
 async function archiverCopiesParLeMenu(page, fichier) {
     await page.evaluate(() => ouvrirBibliothequeTrimestreV2());
@@ -207,6 +215,7 @@ async function archiverCopiesParLeMenu(page, fichier) {
     const geste = modale.locator('[data-action="ReserveCopies.actionArchiverCopies"]');
     await expect(geste).toHaveCount(1);
     await expect(geste).toHaveAttribute('data-param', 'h2032');
+    await ouvrirClos(modale);
     await modale.locator('[data-param="biblio-menu-h2032"]').click();
     await expect(geste).toBeVisible();
     await expect(geste).toHaveText('Archiver les copies…');
@@ -391,6 +400,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             // 14 oct. 2026 : « Rouvrir » passe par sa confirmation, dans la fenêtre de l'application.
             const rouvrir = modale.locator('[data-action="confirmerDesarchivage"][data-param="h2032"]');
             await expect(rouvrir).toHaveText('Rouvrir');
+            await ouvrirClos(modale);
             await rouvrir.click();
             f = await attendreFenetre(page, 'Rouvrir le trimestre "Hiver 2032" ?');
             await f.fenetre.locator('.modal-actions button', { hasText: 'Rouvrir' }).click();

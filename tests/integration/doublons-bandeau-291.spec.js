@@ -71,7 +71,11 @@ test('porte #291 · le bandeau distingue copies et homonymes, et « Voir » mèn
         out.texteBandeau = bandeau.textContent;
 
         // 3 — Les cartes portent leur ID court, et l'ancre de « Voir ».
-        out.cartesAvecId = document.querySelectorAll('.biblio-carte .biblio-id-court').length;
+        // ↻ #1154 (25 oct. 2026) : la bibliothèque des grilles passe en deux colonnes ; ses cartes
+        // deviennent des rangées (`.biblio2-rangee`), qui gardent la puce sur toute rangée que le bandeau
+        // nomme (ici, toutes) et l'ancre `data-biblio-item-id`. Même défense, autre conteneur.
+        // BREAK-TEST (25 oct.) : `afficherId: idsNommes.has(grille.id)` → `false` (×2, grilles.js) → ROUGE.
+        out.cartesAvecId = document.querySelectorAll('.biblio2-rangee .biblio-id-court').length;
         out.ancres = [...document.querySelectorAll('[data-biblio-item-id]')].map((e) => e.dataset.biblioItemId);
 
         // 4 — Mesure RÉELLE des boutons du bandeau (cible tactile iPad).

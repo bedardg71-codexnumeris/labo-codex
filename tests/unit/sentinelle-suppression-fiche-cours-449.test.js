@@ -54,7 +54,7 @@ function charger(store, { confirmReponse = false } = {}) {
         echapperHtml: (s) => String(s),
         genererIdUnique: (p) => p + 'X1',
         notifications: { succes() {}, erreur() {}, info() {} },
-        BibliothequeUI: { fermerModal() {}, creerModal() {}, renderCarteSelection: () => '', renderCarteDisponible: () => '', ajouterOptgroupDemo() {} },
+        BibliothequeUI: { fermerModal() {}, creerFenetreListe() {}, ajouterOptgroupDemo() {} },   // #1159
         // #678 (12 oct. 2026) : le refus parle par la fenêtre d'information de l'application ;
         // `alertes` recueille son titre et son message. Le natif lève : il ne doit plus servir.
         uiDialogues: { informer: (o) => { alertes.push(String(o.titre) + ' ' + String(o.message)); return Promise.resolve(); } },
@@ -186,11 +186,13 @@ describe('#449 · suppression de fiche de cours gardée par recensement', () => 
         const source = readFileSync(new URL('../../js/cours.js', import.meta.url), 'utf-8')
             .replace(/\/\*[\s\S]*?\*\//g, '')
             .replace(/\/\/[^\n]*/g, '');
-        expect(source).toMatch(/label: 'Retirer de ma sélection'/);
-        // Deux entrées « Supprimer la fiche » : sélection ET disponibles.
+        // #1159 (lot 6) — réancré : le réversible s'appelle « Mettre de côté » (mot validé par Grégoire,
+        // 25 oct., 16 h 56) ; même action.
+        expect(source).toMatch(/label: 'Mettre de côté'/);
+        // Deux entrées « Supprimer la fiche » : la liste ET « Mis de côté ».
         expect(source.match(/label: 'Supprimer la fiche'/g)).toHaveLength(2);
         // Le réversible n'est PAS stylé en danger ; le définitif l'est.
-        expect(source).toMatch(/'Retirer de ma sélection', action: 'retirerCoursDeBibliotheque', param: cours\.id, classe: 'btn-secondaire'/);
+        expect(source).toMatch(/\{ label: 'Mettre de côté', action: 'retirerCoursDeBibliotheque', param: cours\.id \}/);
         expect(source).toMatch(/'Supprimer la fiche', action: 'supprimerFicheCours', param: cours\.id, classe: 'btn-supprimer'/);
     });
 });

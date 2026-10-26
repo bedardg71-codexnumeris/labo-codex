@@ -30,7 +30,7 @@ function envGroupesCours(groupesCours) {
     };
     const win = chargerScript('js/trimestre-v2-groupes-cours.js', {
         db, cle: (k) => k, notifications: { succes: vi.fn(), erreur: vi.fn() },
-        BibliothequeUI: { fermerModal: () => {}, creerModal: () => {}, renderCarteSelection: () => '' },
+        BibliothequeUI: { fermerModal: () => {}, creerFenetreListe: () => {} },   // #1159 : la fenêtre à une seule liste
         genererIdUnique: (p) => p + 'X', estEnModeDemo: () => false, echapperHtml: (s) => s
     });
     win.changerGroupeCoursActifV2 = vi.fn(async () => {});

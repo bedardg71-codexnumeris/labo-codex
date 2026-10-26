@@ -247,11 +247,18 @@ test('production : changer le tri réordonne le menu (#930 ; le tri n’était p
 // Verdict de relecture du lot 1, § 2 : « barre latérale » devenu « ta sélection », les sous-titres de la
 // fenêtre mêlaient « Gérez » et « ta ». Les cinq, lus dans la fenêtre ouverte par le vrai bouton.
 const SOUS_TITRES = {
-    'grille-criteres': 'Gère les grilles de critères de ta sélection.',
-    'echelle-performance': 'Gère les échelles de performance de ta sélection.',
-    'retroactions': 'Gère les cartouches de rétroaction de ta sélection.',
-    'productions': 'Gère les productions de ta sélection.',
-    'pratiques-notation': 'Gère les pratiques de notation de ta sélection.'
+    // ↻ #1154 (25 oct. 2026) : la fenêtre des grilles passe en deux colonnes, son en-tête tient sur une ligne
+    // et n'a plus de sous-titre (consigne du lot 1, § 1.1). Ce qui tutoie maintenant, c'est la phrase sous
+    // « Dans ce trimestre » : c'est elle que l'essai lit pour cette fenêtre.
+    // BREAK-TEST (25 oct.) : « te propose » → « vous propose » dans grilles.js → ROUGE.
+    'grille-criteres': 'Les grilles que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+    // ↻ #1155 (25 oct. 2026) : les échelles et les cartouches passent en deux colonnes à leur tour, même lecture.
+    'echelle-performance': 'Les échelles que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+    'retroactions': 'Les cartouches que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+    // ↻ #1156 (25 oct. 2026) : les productions et les pratiques passent en deux colonnes à leur tour, même lecture.
+    // BREAK-TEST (25 oct.) : « te propose » → « vous propose » dans pratiques-gestion.js → ROUGE.
+    'productions': 'Les productions que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+    'pratiques-notation': 'Les pratiques que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.'
 };
 
 test('la fenêtre de la bibliothèque : les cinq sous-titres tutoient', async ({ page }) => {
@@ -265,8 +272,9 @@ test('la fenêtre de la bibliothèque : les cinq sous-titres tutoient', async ({
         await page.locator(`#${e.ss} .rangee-selection button`, { hasText: 'Consulter la bibliothèque' }).click();
         const fenetre = page.locator('.modal-js-overlay:visible').last();
         await expect(fenetre).toBeVisible();
-        lus[e.sous] = (await fenetre.locator('.modal-js-contenu > p').first().textContent()).trim();
-        await fenetre.locator('.modal-js-btn-fermer').click();
+        const deuxColonnes = (await fenetre.locator('.biblio2-fenetre').count()) > 0;   // #1154
+        lus[e.sous] = (await fenetre.locator(deuxColonnes ? '.biblio2-phrase' : '.modal-js-contenu > p').first().textContent()).trim();
+        await fenetre.locator(deuxColonnes ? '.biblio2-fermer' : '.modal-js-btn-fermer').click();
         await expect(page.locator('.modal-js-overlay:visible')).toHaveCount(0);
     }
     expect(lus).toEqual(SOUS_TITRES);

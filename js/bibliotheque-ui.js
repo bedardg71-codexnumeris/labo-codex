@@ -4,9 +4,8 @@
  * éliminer ~1167 lignes de code dupliqué.
  *
  * API :
- *   BibliothequeUI.creerModal(config)
- *   BibliothequeUI.renderCarteSelection(opts)
- *   BibliothequeUI.renderCarteDisponible(opts)
+ *   BibliothequeUI.creerFenetreDeuxColonnes(config)   — #1154, les sept bibliothèques à deux colonnes
+ *   BibliothequeUI.creerFenetreListe(config)          — #1159, les cours, les trimestres, les groupes-cours
  *   BibliothequeUI.fermerModal(modalId)
  *   BibliothequeUI.genererBadgeSource(item, itemsLocaux)
  *   BibliothequeUI.genererIdCourt(id)
@@ -162,7 +161,7 @@
     /**
      * Bascule la préférence + rafraîchit la modale en cours via la fonction
      * de re-render dont le nom est passé via data-refresh-fn. Le re-render
-     * reconstruit la modale entière (creerModal retire l'ancienne avant
+     * reconstruit la fenêtre entière (`creerFenetreDeuxColonnes` retire l'ancienne avant
      * insertion). Reçoit l'élément directement (dispatcher data-on-change).
      */
     BibliothequeUI.basculerMasquerDejaPresent = function (elementOuNom) {
@@ -276,23 +275,8 @@
         selectElement.appendChild(optgroup);
     };
 
-    /**
-     * Format d'attribution « par <auteur> [+N contrib.] » pour affichage
-     * dans les métadonnées de carte. Retourne '' si aucun auteur connu.
-     * Lit meta.contributeurs ou item.contributeurs (respecte la licence CC BY).
-     */
-    BibliothequeUI.formaterAttribution = function (item) {
-        if (!item) return '';
-        var meta = item.metadata_cc || item.metadata || {};
-        var auteur = meta.auteur_original || item.auteur || '';
-        if (!auteur) return '';
-        var contribs = meta.contributeurs || item.contributeurs || [];
-        var suffixe = '';
-        if (contribs.length === 1) suffixe = ' +1 contrib.';
-        else if (contribs.length > 1) suffixe = ' +' + contribs.length + ' contrib.';
-        // #467 — l'auteur vient du fichier reçu ; la ligne part dans le HTML de la carte.
-        return 'par ' + echapperHtml(auteur) + suffixe;
-    };
+    // #1159 (verdict du lot 6, § 2.2) — `formaterAttribution` et `formaterMetadonnees` (la ligne de
+    // métadonnées des cartes) sont partis avec l'ancien rendu : les rangées reçoivent leur ligne en texte.
 
     /**
      * Formate la trace d'origine d'un item forké. Retourne
@@ -682,58 +666,6 @@
     };
 
     /**
-     * Phase D (audit biblios 2026-05-09) — Construit la ligne de
-     * métadonnées d'une carte biblio dans un ordre fixe :
-     *   quantité · auteur · discipline
-     *
-     * @param {Object} item - L'item rendu (grille, échelle, cartouche…)
-     * @param {Object} [opts]
-     * @param {string|Function} [opts.quantite] - Texte de quantité
-     *        (ex. "3 critère(s)"). Si Function, appelée avec (item).
-     * @param {boolean|string} [opts.discipline] - true pour utiliser
-     *        item.discipline ; string pour valeur explicite ; falsy
-     *        pour ne pas afficher.
-     * @returns {string} Métadonnées jointes par ' • ' (vide si rien).
-     */
-    BibliothequeUI.formaterMetadonnees = function (item, opts) {
-        opts = opts || {};
-        var parts = [];
-
-        var qte = (typeof opts.quantite === 'function')
-            ? opts.quantite(item)
-            : opts.quantite;
-        if (qte) parts.push(qte);
-
-        // #467 : l'ancien repli sur `item.auteur` est retiré — formaterAttribution le lit déjà.
-        var att = BibliothequeUI.formaterAttribution(item);
-        if (att) parts.push(att);
-
-        var disc = null;
-        if (opts.discipline === true && item) disc = item.discipline;
-        else if (typeof opts.discipline === 'string') disc = opts.discipline;
-        if (disc) parts.push(echapperHtml(disc));   // #467
-
-        return parts.join(' • ');
-    };
-
-    /**
-     * Phase D (audit biblios 2026-05-09) — Tronque une description pour
-     * affichage compact en carte biblio. Coupe au dernier espace si la
-     * coupure tombe au-delà de 70% de la longueur cible (sinon coupe net).
-     * Ajoute « … » quand tronqué.
-     */
-    BibliothequeUI.tronquerDescription = function (desc, max) {
-        if (!desc) return '';
-        var s = String(desc);
-        var n = max || 120;
-        if (s.length <= n) return s;
-        var coupe = s.slice(0, n);
-        var lastSpace = coupe.lastIndexOf(' ');
-        if (lastSpace > n * 0.7) coupe = coupe.slice(0, lastSpace);
-        return coupe.replace(/\s+$/, '') + '…';
-    };
-
-    /**
      * Génère le badge source HTML. Phase A.2 + A.4 (audit biblios 2026-05-09) :
      * - Plus de badge `Bibliothèque` (no-op contextuel — la modale s'appelle déjà ainsi)
      * - Plus de badge violet `Démo` (items démo filtrés par A.0 en mode normal)
@@ -754,30 +686,21 @@
      */
     BibliothequeUI.fermerModal = function (modalId) {
         var modal = document.getElementById(modalId);
-        if (modal) modal.remove();
+        if (!modal) return;
+        // #1154 — une fenêtre en deux colonnes fermée PAR LE CODE va être reconstruite
+        // (mesuré le 25 oct. : les neuf appels de grilles.js sont suivis de son
+        // `afficher…`) : on retient où l'on était. L'utilisateur, lui, ferme par
+        // `fermerFenetre`, qui oublie.
+        if (modal.classList.contains('biblio2-voile')) {
+            _etatsRetenusDeuxColonnes[modalId] = _capturerDeuxColonnes(modal);
+        }
+        modal.remove();
     };
 
     /**
-     * Convertit une chaine onclick legacy en attributs data-action.
-     * Ex: "fn('a')" -> 'data-action="fn" data-param="a"'
-     *     "fn('a', 'b')" -> 'data-action="fn" data-param="a" data-param2="b"'
-     */
-    function onclickToDataAttrs(onclickStr) {
-        if (!onclickStr) return '';
-        var m = onclickStr.match(/^([a-zA-Z0-9_.]+)\(([^)]*)\)$/);
-        if (!m) return 'data-action="' + onclickStr.replace(/[()'"]/g, '') + '"';
-        var fnName = m[1];
-        var argsStr = m[2].trim();
-        if (!argsStr) return 'data-action="' + fnName + '"';
-        var args = argsStr.split(/,\s*/).map(function(a) { return a.replace(/^['"]|['"]$/g, ''); });
-        var attrs = 'data-action="' + fnName + '" data-param="' + args[0] + '"';
-        if (args[1] !== undefined) attrs += ' data-param2="' + args[1] + '"';
-        if (args[2] !== undefined) attrs += ' data-param3="' + args[2] + '"';
-        return attrs;
-    }
-
-    /**
-     * Génère les attributs d'un bouton : supporte {action, param} (délégué) ou {onclick} (legacy)
+     * Génère les attributs d'un bouton {action, param, param2, param3}. #1159 (verdict du lot 6, § 2.2) :
+     * la branche héritée `{onclick}` (`onclickToDataAttrs`, qui n'échappait pas ses paramètres) est retirée ;
+     * plus aucun appelant ne la passait.
      *
      * ⚠ CONTEXTE D'ATTRIBUT (CT-29, 25 août 2026) — `echapperAttribut`, pas
      * `echapperHtml` : la seconde n'encode pas les guillemets. Les `param*`
@@ -788,7 +711,7 @@
      * le bouton. `el.dataset.param*` décode les entités : le dispatcher de
      * main.js lit exactement la même valeur qu'avant.
      *
-     * @param {Object} btn - {label, classe, title, onclick?, action?, param?}
+     * @param {Object} btn - {label, classe, title, action, param?, param2?, param3?}
      * @returns {string} attributs HTML du bouton
      */
     function _btnAttrs(btn) {
@@ -798,10 +721,6 @@
             if (btn.param2 != null) attrs += ' data-param2="' + echapperAttribut(btn.param2) + '"';
             if (btn.param3 != null) attrs += ' data-param3="' + echapperAttribut(btn.param3) + '"';
             return attrs;
-        }
-        // Legacy onclick string → convertir en data-action via parsing
-        if (btn.onclick) {
-            return onclickToDataAttrs(btn.onclick);
         }
         return '';
     }
@@ -845,15 +764,27 @@
 
     /**
      * Rend le bloc trigger + popover. Renvoie '' si actions vide.
-     * @param {Array} actions - [{label, action, param, classe?, title?}]
+     * @param {Array} actions - [{label, action, param, classe?, title?}] ; #1154 : aussi
+     *        `{separateur: true}` (un trait) et `{note: '…'}` (une ligne de texte, sans geste)
      * @param {string} [contextId] - ID stable optionnel (sinon généré)
+     * @param {Object} [options] - #1154 : `libelle` (texte visible du bouton, à la place
+     *        de ⋮), `ariaLabel` (nom du bouton ⋮), `classeBouton` (classe en plus)
      */
-    BibliothequeUI.renderMenuActions = function (actions, contextId) {
+    BibliothequeUI.renderMenuActions = function (actions, contextId, options) {
         if (!actions || actions.length === 0) return '';
+        options = options || {};
         var menuId = contextId ? 'biblio-menu-' + contextId : _genererMenuId();
         var itemsHTML = '';
         for (var i = 0; i < actions.length; i++) {
             var a = actions[i];
+            if (a.separateur) {
+                itemsHTML += '<hr class="biblio-menu-separateur">';
+                continue;
+            }
+            if (a.note) {
+                itemsHTML += '<p class="biblio-menu-note">' + echapperHtml(a.note) + '</p>';
+                continue;
+            }
             var classeExtra = a.classe === 'btn-supprimer' ? ' biblio-menu-item--danger' : '';
             itemsHTML += '<button type="button" ' + _btnAttrs(a) +
                 ' class="biblio-menu-item' + classeExtra + '"' +
@@ -861,12 +792,16 @@
                 ' role="menuitem">' +
                 echapperHtml(a.label) + '</button>';
         }
+        var nomBouton = options.libelle
+            ? ''
+            : ' aria-label="' + echapperAttribut(options.ariaLabel || 'Plus d\'actions') + '" title="Plus d\'actions"';
         return '<span class="biblio-menu-wrapper">' +
-            '<button type="button" class="biblio-menu-trigger btn btn-mini"' +
+            '<button type="button" class="biblio-menu-trigger btn btn-mini' +
+            (options.classeBouton ? ' ' + options.classeBouton : '') + '"' +
             ' data-action="BibliothequeUI.toggleMenuActions"' +
             ' data-param="' + echapperHtml(menuId) + '"' +
-            ' aria-haspopup="menu" aria-expanded="false"' +
-            ' aria-label="Plus d\'actions" title="Plus d\'actions">⋮</button>' +
+            ' aria-haspopup="menu" aria-expanded="false"' + nomBouton + '>' +
+            (options.libelle ? echapperHtml(options.libelle) : '⋮') + '</button>' +
             '<div id="' + echapperHtml(menuId) + '" class="biblio-menu-popover" role="menu">' +   // #467 : contextId peut venir d'un id importé
                 itemsHTML +
             '</div>' +
@@ -887,146 +822,19 @@
             if (_menuOuvertCourant) BibliothequeUI.fermerTousLesMenus();
         });
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && _menuOuvertCourant) {
+            if (e.key !== 'Escape') return;
+            // #1154 — Échap ferme d'abord un menu ouvert, puis la fenêtre en deux colonnes.
+            if (_menuOuvertCourant) {
                 BibliothequeUI.fermerTousLesMenus();
+                return;
             }
+            var fenetre = _fenetreDeuxColonnesAuPremierPlan();
+            if (fenetre) BibliothequeUI.fermerFenetre(fenetre.id);
         });
     }
 
-    /**
-     * Phase C #267 (audit biblios) — Rend la HTML d'un bouton primaire de
-     * carte. Échappe le label et le title (sécurité — texte utilisateur).
-     */
-    function _renderBoutonPrincipal(p) {
-        if (!p) return '';
-        return '<button type="button" ' + _btnAttrs(p) +
-            ' class="btn ' + (p.classe || 'btn-confirmer') + ' btn-mini"' +
-            (p.title ? ' title="' + echapperHtml(p.title) + '"' : '') + '>' +
-            echapperHtml(p.label) + '</button>';
-    }
-
-    /**
-     * Rend une carte d'item en Section 1 (dans la sélection).
-     * Phase C #267 — API : bouton principal + menu d'actions secondaires.
-     *
-     * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges) — #467 : le nom
-     *        reçu s'échappe AVANT, chez l'appelant (`echapperHtml`) ; ce rendu ne le fait pas.
-     * @param {string} opts.id - ID complet (sert de contextId pour le menu)
-     * @param {string} opts.badgeSource - HTML du badge source
-     * @param {string} opts.metadonnees - Ligne de métadonnées
-     * @param {string} [opts.description] - Description (auto-tronquée + échappée)
-     * @param {string} [opts.inspireDe] - Trace d'origine
-     * @param {string} [opts.badgesPratiques] - HTML des badges de pratique
-     * @param {Object} [opts.boutonPrincipal] - {label, action, param, classe, title}
-     * @param {Array}  [opts.actionsMenu] - [{label, action, param, classe, title}]
-     */
-    BibliothequeUI.renderCarteSelection = function (opts) {
-        var badgesPratiques = opts.badgesPratiques || '';
-
-        var actionsHTML = '<div class="biblio-carte-actions">' +
-            _renderBoutonPrincipal(opts.boutonPrincipal) +
-            BibliothequeUI.renderMenuActions(opts.actionsMenu, opts.id) +
-            '</div>';
-
-        var ligneInspireDe = opts.inspireDe
-            ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
-            : '';
-
-        var descTronquee = BibliothequeUI.tronquerDescription(opts.description);
-        var descHTML = descTronquee
-            ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
-            : '';
-
-        var puceId = opts.afficherId ? BibliothequeUI.renderPuceId(opts.id) : '';
-
-        return '<div class="biblio-carte biblio-carte--selection"' + _ancreItem(opts.id) + '>' +
-            '<div class="biblio-carte-contenu">' +
-                '<div style="flex: 1;">' +
-                    '<div class="biblio-carte-titre">' +
-                        badgesPratiques +
-                        opts.nom +
-                        ' ' + opts.badgeSource +
-                    '</div>' +
-                    ligneInspireDe +
-                    '<div class="biblio-carte-meta">' + opts.metadonnees + puceId + '</div>' +
-                    descHTML +
-                '</div>' +
-                actionsHTML +
-            '</div>' +
-        '</div>';
-    };
-
-    /**
-     * Rend une carte d'item en Section 2 (disponible à ajouter).
-     * Phase C #267 — API : bouton principal + menu d'actions secondaires.
-     *
-     * @param {Object} opts
-     * @param {string} opts.nom - Nom de l'item (HTML autorisé : badges) — #467 : le nom
-     *        reçu s'échappe AVANT, chez l'appelant (`echapperHtml`) ; ce rendu ne le fait pas.
-     * @param {string} opts.id - ID complet (sert de contextId pour le menu)
-     * @param {string} opts.badgeSource - HTML du badge source
-     * @param {string} opts.metadonnees - Ligne de métadonnées
-     * @param {string} [opts.description] - Description (auto-tronquée + échappée)
-     * @param {string} [opts.inspireDe] - Trace d'origine
-     * @param {boolean} opts.dejaPresent - true si déjà dans la sélection
-     * @param {string} [opts.badgesPratiques] - HTML des badges de pratique
-     * @param {string} [opts.styleExtra] - Style CSS supplémentaire
-     * @param {string} [opts.dataAttrs] - Attributs data- supplémentaires
-     * @param {string} [opts.classeItem] - Classe CSS pour l'item (filtrage)
-     * @param {Object} [opts.boutonPrincipal] - {label, action, param, classe, title, showAlways}.
-     *        Si dejaPresent et !showAlways, primaire masqué.
-     * @param {Array}  [opts.actionsMenu] - [{label, action, param, classe, title, showAlways}].
-     *        Si dejaPresent, items sans showAlways filtrés.
-     */
-    BibliothequeUI.renderCarteDisponible = function (opts) {
-        var badgesPratiques = opts.badgesPratiques || '';
-        var opacite = opts.dejaPresent ? 'opacity: 0.5;' : '';
-        var styleExtra = opts.styleExtra || '';
-        var dataAttrs = opts.dataAttrs || '';
-        var classeItem = opts.classeItem || '';
-
-        var primaire = opts.boutonPrincipal;
-        if (opts.dejaPresent && primaire && !primaire.showAlways) primaire = null;
-
-        var actionsMenu = opts.actionsMenu;
-        if (opts.dejaPresent && Array.isArray(actionsMenu)) {
-            actionsMenu = actionsMenu.filter(function (a) { return a && a.showAlways; });
-        }
-
-        var actionsHTML = '<div class="biblio-carte-actions">' +
-            _renderBoutonPrincipal(primaire) +
-            BibliothequeUI.renderMenuActions(actionsMenu, opts.id) +
-            '</div>';
-
-        var ligneInspireDe = opts.inspireDe
-            ? '<div class="biblio-carte-inspire">' + echapperHtml(opts.inspireDe) + '</div>'
-            : '';
-
-        var descTronquee = BibliothequeUI.tronquerDescription(opts.description);
-        var descHTML = descTronquee
-            ? '<div class="biblio-carte-desc">' + echapperHtml(descTronquee) + '</div>'
-            : '';
-
-        var puceId = opts.afficherId ? BibliothequeUI.renderPuceId(opts.id) : '';
-
-        return '<div class="' + classeItem + ' biblio-carte biblio-carte--disponible" ' + dataAttrs + _ancreItem(opts.id) + ' style="' + opacite + styleExtra + '">' +
-            '<div class="biblio-carte-contenu">' +
-                '<div style="flex: 1;">' +
-                    '<div class="biblio-carte-titre">' +
-                        badgesPratiques +
-                        opts.nom +
-                        ' ' + opts.badgeSource +
-                    '</div>' +
-                    ligneInspireDe +
-                    '<div class="biblio-carte-meta">' + opts.metadonnees + puceId + '</div>' +
-                    descHTML +
-                    (opts.dejaPresent ? '<div class="biblio-carte-deja">Déjà dans ta sélection</div>' : '') +
-                '</div>' +
-                actionsHTML +
-            '</div>' +
-        '</div>';
-    };
+    // #1159 (lot 6, 25 oct. 2026) — `renderCarteSelection`, `renderCarteDisponible` et leur bouton
+    // principal sont retirés : les dix bibliothèques rendent leurs rangées par `_renderRangee`.
 
     /* ===========================================================
        #291 — LE BANDEAU DÉSIGNE, IL NE DÉCRIT PLUS
@@ -1122,12 +930,18 @@
      *        {retirer, supprimer, supprimerPartagee, champParam2}
      *        `champParam2` nomme le champ de l'item à passer en 2e paramètre
      *        (cartouches : 'grilleId'). On ne crée aucune action neuve.
+     * @param {Object} [opts.mots] - #1154 : {selection, bibliotheque, retirer}, les mots d'une
+     *        fenêtre en deux colonnes (les titres de ses colonnes) ; les autres gardent les leurs.
      * @returns {string} HTML du bandeau ('' si rien à signaler)
      */
     BibliothequeUI.renderAvertissementDoublons = function (groupes, opts) {
         if (!groupes || groupes.length === 0) return '';
         opts = opts || {};
         var actions = opts.actions || {};
+        var mots = opts.mots || {};
+        var lieuSelection = mots.selection || 'Dans ta sélection';
+        var lieuBibliotheque = mots.bibliotheque || 'Bibliothèque';
+        var titreRetirer = mots.retirer || 'Retirer de ta sélection (données conservées)';
         var selection = Array.isArray(opts.itemsSelection) ? opts.itemsSelection : [];
 
         function estDansSelection(item) {
@@ -1163,7 +977,7 @@
                     boutons.push({
                         label: 'Retirer', action: actions.retirer, param: ex.id, param2: param2,
                         classe: 'btn-secondaire',
-                        title: 'Retirer de ta sélection (données conservées)'
+                        title: titreRetirer
                     });
                 }
                 if (dansSelection && actions.supprimer) {
@@ -1194,8 +1008,8 @@
                         BibliothequeUI.renderPuceId(ex.id) +
                         (date ? '<span class="biblio-doublon-date">modifié le ' + echapperHtml(date) + '</span>' : '') +
                         BibliothequeUI.genererBadgeSource(item) +
-                        (dansSelection ? '<span class="biblio-doublon-lieu">Dans ta sélection</span>'
-                                       : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">Bibliothèque</span>') +
+                        (dansSelection ? '<span class="biblio-doublon-lieu">' + echapperHtml(lieuSelection) + '</span>'
+                                       : '<span class="biblio-doublon-lieu biblio-doublon-lieu--partagee">' + echapperHtml(lieuBibliotheque) + '</span>') +
                         reperes +
                     '</span>' +
                     '<span class="biblio-doublon-actions">' +
@@ -1332,76 +1146,19 @@
         var caseMasquer = (modal && typeof modal.querySelector === 'function')
             ? modal.querySelector('.biblio-toggle-deja-present input[type="checkbox"]') : null;
         if (caseMasquer && caseMasquer.checked) {
-            return 'Aucune n\'apparaît dans la liste : décoche « Masquer les éléments déjà dans ta sélection » pour les voir.';
+            // #1154 — la case dit ses mots : la fenêtre en deux colonnes l'appelle « Masquer ce
+            // qui est déjà dans ce trimestre », les quatre autres gardent les leurs.
+            var libelleCase = (caseMasquer.closest && caseMasquer.closest('label'))
+                ? caseMasquer.closest('label').textContent.trim()
+                : 'Masquer les éléments déjà dans ta sélection';
+            return 'Aucune n\'apparaît dans la liste : décoche « ' + libelleCase + ' » pour les voir.';
         }
         return (options && options.repliFiltre)
             ? 'Aucune n\'apparaît dans la liste : un filtre d\'affichage les masque ici.'
             : null;
     };
 
-    /**
-     * Crée et injecte une modale complète de bibliothèque
-     * @param {Object} config
-     * @param {string} config.modalId - ID unique du modal (ex: "modalBibliothequeGrilles")
-     * @param {string} config.titre - Titre H2
-     * @param {string} config.sousTitre - Description sous le titre
-     * @param {string} config.onFermer - Nom de la fonction de fermeture
-     * @param {string} config.doublonsHTML - HTML de l'avertissement doublons (ou '')
-     * @param {string} config.titreSection1 - Titre de la Section 1
-     * @param {string} config.contenuSection1 - HTML du contenu de la Section 1
-     * @param {string} config.boutonsApresSection1 - HTML des boutons après Section 1
-     * @param {string} [config.sectionImportTrimestre] - HTML optionnel pour import trimestre
-     * @param {string} config.titreSection2 - Titre de la Section 2
-     * @param {string} config.filtresSection2 - HTML des filtres avant Section 2
-     * @param {string} config.contenuSection2 - HTML du contenu de la Section 2
-     * @param {string} [config.contenuIdListe2] - ID du conteneur Section 2
-     * @param {string} [config.sectionPartages] - HTML optionnel de la section
-     *        « Partagés par des collègues » (#329 P4, partageSection.genererSectionHTML)
-     */
-    BibliothequeUI.creerModal = function (config) {
-        // Idempotence : si une instance avec ce modalId existe déjà (cas typique
-        // d'un rafraîchissement après import), la retirer avant d'en créer une
-        // nouvelle. Sinon `insertAdjacentHTML('beforeend', …)` empile deux
-        // modales partageant le même id, ce qui double le backdrop et oblige
-        // à fermer 2 fois pour que la modale disparaisse.
-        var existant = document.getElementById(config.modalId);
-        if (existant) existant.remove();
-
-        var fermerAttr = 'data-action="' + (config.onFermerAction || config.onFermer) + '"';
-        var html = '<div id="' + config.modalId + '" class="modal-js-overlay" style="z-index: 10000;">' +
-            '<div class="modal-js-contenu" style="max-width: 800px;">' +
-                '<button ' + fermerAttr + ' class="modal-js-btn-fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
-                '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">' +
-                    '<h2 style="margin: 0; color: var(--accent-primaire);">' + config.titre + '</h2>' +
-                    '<button class="btn-aide-contextuelle" data-aide="bibliotheque-fonctionnement" title="Comment fonctionne la bibliothèque"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>' +
-                '</div>' +
-                '<p style="color: var(--gris-clair); margin-bottom: 20px;">' + config.sousTitre + '</p>' +
-
-                config.doublonsHTML +
-
-                '<h3 class="biblio-section-titre">' + config.titreSection1 + '</h3>' +
-                '<div style="margin-bottom: 30px;">' +
-                    '<div id="' + (config.contenuIdListe1 || '') + '">' +
-                        config.contenuSection1 +
-                    '</div>' +
-                    config.boutonsApresSection1 +
-                '</div>' +
-
-                (config.sectionImportTrimestre || '') +
-
-                '<h3 class="biblio-section-titre">' + config.titreSection2 + '</h3>' +
-                config.filtresSection2 +
-                '<div id="' + (config.contenuIdListe2 || '') + '">' +
-                    config.contenuSection2 +
-                '</div>' +
-
-                (config.sectionPartages || '') +
-
-            '</div>' +
-        '</div>';
-
-        document.body.insertAdjacentHTML('beforeend', html);
-    };
+    // #1159 — `creerModal` est retiré : plus aucune bibliothèque ne s'en sert.
 
     /* =====================================================================
        SECTION « IMPORTER DEPUIS UN AUTRE TRIMESTRE » — SURVIVRE À LA
@@ -1499,14 +1256,13 @@
 
     /* =====================================================================
        #327 — RÉPERTOIRES DE CLASSEMENT : couche UI GÉNÉRIQUE (transversale).
-       Généralise l'UI livrée pour les pratiques en #320 (zone « Mes dossiers »
-       repliable, pool groupé en selects compacts, assignation) à TOUTES les
+       Généralise l'UI livrée pour les pratiques en #320 à TOUTES les
        bibliothèques. Le moteur (js/repertoires-bibliotheque.js) est déjà
-       paramétré par `biblio` ; ici on mutualise le rendu et les handlers.
+       paramétré par `biblio` ; ici on mutualise les handlers. #1156 : le rendu
+       (zone et selects) est parti, la barre de la fenêtre en deux colonnes le porte.
 
        Chaque bibliothèque s'enregistre une fois via `enregistrer(biblio, cfg)`
-       en fournissant ses callbacks spécifiques (rafraîchir la modale, ajouter /
-       supprimer un item, libeller un item). Les handlers génériques reçoivent
+       en fournissant son rappel (rafraîchir la fenêtre). Les handlers génériques reçoivent
        la `biblio` en premier data-param, sans jamais utiliser `this`
        (le dispatcher data-action appelle fn(param, param2, param3)).
 
@@ -1528,22 +1284,6 @@
             return window.repertoiresBibliotheque;
         }
 
-        function _reps(biblio) {
-            var m = _moteur();
-            return (m && typeof m.obtenir === 'function') ? m.obtenir(biblio) : [];
-        }
-
-        function _labelPluriel(biblio) {
-            return _cfg(biblio).labelPluriel || 'éléments';
-        }
-
-        // Libellé d'affichage d'un item dans un select (callback ou défaut).
-        function _labelItem(biblio, item) {
-            var fn = _cfg(biblio).labelItem;
-            if (typeof fn === 'function') return fn(item);
-            return BibliothequeUI.formaterTitre((item && item.nom) || 'Sans titre');
-        }
-
         async function _rafraichir(biblio) {
             var fn = _cfg(biblio).rafraichir;
             if (typeof fn === 'function') await fn();
@@ -1554,10 +1294,9 @@
          * @param {string} biblio  clé de bibliothèque ('pratiques', 'grilles'…)
          * @param {Object} cfg
          *   - rafraichir   {Function}  ré-affiche la modale après mutation (async ok)
-         *   - ajouterItem  {Function}  (id) => ajoute l'item à la sélection (optionnel)
-         *   - supprimerItem{Function}  (id) => supprime l'item de la biblio (optionnel)
-         *   - labelItem    {Function}  (item) => texte d'option de select (optionnel)
-         *   - labelPluriel {string}    pour les textes d'aide/confirmation ('pratiques'…)
+         * #1156 : `ajouterItem`, `supprimerItem`, `labelItem` et `labelPluriel` sont partis avec la zone
+         * « Mes dossiers » et la ligne-select ; les cinq fenêtres à dossiers sont en deux colonnes (⋮ de
+         * chaque rangée ; le pluriel de la barre vient de `dossiers.labelPluriel`).
          */
         BibliothequeUI.repertoires = {};
 
@@ -1565,56 +1304,18 @@
             _config[biblio] = cfg || {};
         };
 
-        // --- Zone « Mes dossiers » (repliable) -------------------------------
-
-        /** HTML de la zone « Mes dossiers » (créer / renommer / supprimer). */
-        BibliothequeUI.repertoires.genererZone = function (biblio) {
-            var reps = _reps(biblio);
-            var deplie = _deplie[biblio] || reps.length === 0;
-            var pluriel = _labelPluriel(biblio);
-
-            var lignes = reps.map(function (r) {
-                var id = echapperHtml(r.id);
-                var b = echapperHtml(biblio);
-                return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">' +
-                    '<input type="text" data-rep-biblio="' + b + '" data-rep-id="' + id + '" value="' + echapperHtml(r.nom || '') + '" class="controle-form" style="flex:1;" aria-label="Nom du dossier" />' +
-                    '<button data-action="BibliothequeUI.repertoires.renommer" data-param="' + b + '" data-param2="' + id + '" class="btn btn-secondaire btn-mini">Renommer</button>' +
-                    // Lot C (5 sept. 2026) : la corbeille, comme partout — le geste et sa confirmation ne changent pas.
-                    window.boutonRetirerBloc({ action: 'BibliothequeUI.repertoires.supprimer', param: biblio, param2: r.id, titre: 'Supprimer le dossier',
-                                               confirm: 'Supprimer ce dossier ? Son contenu n\'est pas supprimé : les ' + pluriel + ' repassent en « non classées ».' }) +
-                    '</div>';
-            }).join('');
-
-            if (!lignes) {
-                lignes = '<p style="color: var(--gris-clair); font-style: italic; margin:0 0 6px;">Aucun dossier pour l\'instant. Crée-en un pour ranger tes ' + pluriel + '.</p>';
-            }
-
-            var b = echapperHtml(biblio);
-            return '<div style="border:1px solid var(--bordure, #ddd); border-radius:8px; padding:12px; margin-bottom:15px; background:var(--surface-carte, #fff);">' +
-                '<button type="button" data-action="BibliothequeUI.repertoires.basculer" data-param="' + b + '" aria-expanded="' + deplie + '" style="background:none; border:none; padding:0; cursor:pointer; font:inherit; font-weight:600; color:var(--texte-principal, #222); display:flex; align-items:center; gap:6px;">' +
-                    '<span id="rep-' + b + '-zone-icone" aria-hidden="true">' + (deplie ? '▾' : '▸') + '</span> Mes dossiers' + (reps.length ? ' (' + reps.length + ')' : '') +
-                '</button>' +
-                '<div id="rep-' + b + '-zone-contenu" style="' + (deplie ? 'margin-top:8px;' : 'display:none;') + '">' +
-                    '<div id="rep-' + b + '-liste">' + lignes + '</div>' +
-                    '<div style="display:flex; gap:6px; margin-top:8px;">' +
-                        '<input type="text" id="rep-' + b + '-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier" style="flex:1;" aria-label="Nom du nouveau dossier" />' +
-                        '<button data-action="BibliothequeUI.repertoires.creer" data-param="' + b + '" class="btn btn-principal btn-mini">Créer le dossier</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>';
+        // #1154 — la fenêtre en deux colonnes ouvre la gestion des dossiers à la demande :
+        // elle lit et pose le même état que les gestes ci-dessous (créer, renommer et
+        // supprimer la gardent ouverte), sans le défaut « déplié s'il n'y a aucun dossier ».
+        BibliothequeUI.repertoires.estDeplie = function (biblio) {
+            return !!_deplie[biblio];
+        };
+        BibliothequeUI.repertoires.poserDeplie = function (biblio, deplie) {
+            _deplie[biblio] = !!deplie;
         };
 
-        /** Replie/déplie « Mes dossiers » sans re-rendu (préserve le scroll). */
-        BibliothequeUI.repertoires.basculer = function (biblio) {
-            _deplie[biblio] = !_deplie[biblio];
-            var contenu = document.getElementById('rep-' + biblio + '-zone-contenu');
-            var icone = document.getElementById('rep-' + biblio + '-zone-icone');
-            if (contenu) {
-                contenu.style.display = _deplie[biblio] ? '' : 'none';
-                if (_deplie[biblio]) contenu.style.marginTop = '8px';
-            }
-            if (icone) icone.textContent = _deplie[biblio] ? '▾' : '▸';
-        };
+        // #1156 (25 oct. 2026) — la zone « Mes dossiers » (`genererZone`, `basculer`) est retirée : la
+        // gestion des dossiers vit dans la barre de la fenêtre en deux colonnes (« Gérer les dossiers… »).
 
         // --- Mutations sur les dossiers --------------------------------------
 
@@ -1656,80 +1357,687 @@
             await _rafraichir(biblio);
         };
 
-        // --- Ligne compacte d'un dossier : select + Ajouter + menu ⋮ ----------
-        // Actions agissant sur l'item SÉLECTIONNÉ dans le select du dossier.
+        // #1156 — la ligne compacte d'un dossier (`renderLigneDossierSelect` et ses quatre gestes `…Sel`)
+        // est retirée : chaque rangée porte « Classer dans : … » et « Retirer du dossier » à son ⋮.
+    })();
 
-        function _idSelectionne(selectId) {
-            var s = document.getElementById(selectId);
-            return s && s.value ? s.value : null;
+    /* =====================================================================
+       #1154 — LA FENÊTRE EN DEUX COLONNES (lot 1 du plan du 24 oct. 2026)
+
+       « Dans ce trimestre » | « Dans ta bibliothèque », un seul geste de passage
+       par rangée. Mots de Grégoire (24 oct., 19 h 50) ; référence visuelle :
+       `plans de travail/MAQUETTE-2026-10-24-bibliotheque-deux-colonnes.html`.
+
+       LE COMPOSANT IMPOSE LA STRUCTURE, LE MODULE NE FOURNIT QUE DES DONNÉES :
+       `creerModal` recevait des fragments HTML tout faits, avec leurs styles en
+       ligne, et chaque bibliothèque dessinait la sienne (audit du 24 oct., « une
+       cause commune »). Ici, le module passe des textes et des gestes ; tout
+       l'échappement et toutes les classes sont faits ici. `creerModal`,
+       `renderCarteSelection` et `renderCarteDisponible` sont partis au lot 6 (#1159).
+
+       config = {
+         modalId, titre, aide,                 // aide : la clé `data-aide` du bouton ⓘ
+         menuFichiers: [geste | {separateur} | {note}],   // « Importer ou exporter ▾ »
+         champsFichier: [{id, accept, onChange}],          // les <input type="file"> du menu
+         avantColonnes: html,                  // le bandeau des doublons (renderAvertissementDoublons)
+         trimestre:    colonne,
+         bibliotheque: colonne + { dossiers, partages }
+       }
+       colonne = { titre, phrase, idListe, vide, rangees, compte?, boutonEntete?,
+                   importAutreTrimestre? (trimestre), videFiltre? (bibliothèque) }
+       rangee  = { id, nom, ligne, afficherId?, marqueHtml?, dossier?,
+                   apercu: {paragraphes, lignes: [[nom, type, valeur]], total: [libellé, valeur]},
+                   passage: {label, action, param, param2?, sens: 'versBibliotheque'|'versTrimestre'|null}
+                   OU etat: 'texte de l'état calme',
+                   menu: [geste | {separateur}] }
+       dossiers = { biblio, reps: [{id, nom}], refreshFn, masquerLibelle }
+       partages = { titre, phrase, rangees }
+
+       #1155 (lot 2, échelles et cartouches) — trois options, sans rien changer à ce que les
+       grilles reçoivent :
+         rangee.groupe : l'intertitre sous lequel la rangée se range (les cartouches, par grille) ;
+         bibliotheque.filtreGroupe = { libelle, tous, groupes: [noms] } : le menu qui filtre la
+           colonne par groupe, dans la barre, quand il n'y a pas de dossiers ;
+         bibliotheque.masquer = { libelle, refreshFn } : la case « Masquer… » de cette barre ;
+         importAutreTrimestre.phrase : une phrase sous la ligne d'import.
+
+       #1156 (lot 3, productions et pratiques) — deux options de la ligne d'import, pour les
+       productions, dont le filtre de cours suit le trimestre choisi :
+         importAutreTrimestre.selectOnChange : le `data-on-change` du menu des trimestres ;
+         importAutreTrimestre.selectSecond = { id, label, ariaLabel } : un second menu, caché
+           tant que le premier ne l'a pas rempli (`toggleDisplay`).
+
+       #1157 (lot 4, cartes d'alignement) — sans rien changer à ce que les cinq autres reçoivent :
+         rangee.apercu absent : la rangée n'a rien de plus à montrer, son nom n'est pas un bouton ;
+         importAutreTrimestre.actionTout absent : pas de « Tout importer » (la Carte n'en a jamais eu) ;
+         importAutreTrimestre.enTete = { id, titre, rangees: [{nom, detail, action, param, param2, libelle}] } :
+           une courte liste avant la ligne d'import (« Même cours », #368) ;
+         importAutreTrimestre.ouvert : le repli s'ouvre d'emblée (cette liste est le geste de la rentrée).
+
+       #1158 (lot 5, tampons) — deux options, sans rien changer à ce que les six autres reçoivent :
+         colonne.menusGroupe = { <nom du groupe>: [geste | {separateur}] } : un ⋮ sur l'intertitre
+           d'un groupe (les gestes d'une catégorie de tampons) ;
+         apercu.image = { src, alt } : l'image telle qu'elle paraît ailleurs dans l'application (le
+           tampon sur une copie). Seules une image du dossier `autocollants/` ou une image en
+           `data:image/…;base64` passent : une autre source n'affiche rien.
+       ===================================================================== */
+
+    /**
+     * #1155 (consigne du lot 2, § 3.1) — UNE SEULE RELATION entre un élément du trimestre et un
+     * exemplaire de la bibliothèque, pour les trois fenêtres (grilles, échelles, cartouches), leurs
+     * deux colonnes et les questions de la suppression. Les deux passages ne laissent pas la même
+     * trace : « Garder → » conserve l'`id` ; « ← Utiliser » en donne un neuf et nomme la source dans
+     * `idOriginal`. Lire l'`id` seul d'un côté faisait proposer « Garder → » pour un élément venu de
+     * la bibliothèque (verdict du lot 1, § 5.2).
+     */
+    BibliothequeUI.lieeAExemplaire = function (item, exemplaire) {
+        if (!item || !exemplaire || !exemplaire.id) return false;
+        return item.id === exemplaire.id || item.idOriginal === exemplaire.id;
+    };
+
+    var _etatsRetenusDeuxColonnes = {};
+    var _filtresDossierDeuxColonnes = {};
+    var _filtresGroupeDeuxColonnes = {};
+    // Une reconstruction suit sa fermeture dans la même suite d'`await` ; au-delà,
+    // l'état retenu ne décrit plus ce que l'utilisateur regarde.
+    var DELAI_ETAT_RETENU = 10000;
+
+    /** Ce qu'une reconstruction doit rendre : le défilement, les aperçus ouverts, les replis ouverts. */
+    function _capturerDeuxColonnes(modal) {
+        var fenetre = modal.querySelector('.biblio2-fenetre');
+        var ouverts = [];
+        var replis = [];
+        Array.prototype.forEach.call(modal.querySelectorAll('.biblio2-rangee-nom[aria-expanded="true"]'),
+            function (b) { ouverts.push(b.getAttribute('data-param')); });
+        Array.prototype.forEach.call(modal.querySelectorAll('details[data-repli][open]'),
+            function (d) { replis.push(d.getAttribute('data-repli')); });
+        return { defilement: fenetre ? fenetre.scrollTop : 0, ouverts: ouverts, replis: replis, quand: Date.now() };
+    }
+
+    /**
+     * La fenêtre en deux colonnes que la touche Échap doit fermer, ou null : une autre
+     * fenêtre visible ouverte PAR-DESSUS (aperçu d'un import, métadonnées CC…) la garde.
+     */
+    function _fenetreDeuxColonnesAuPremierPlan() {
+        if (typeof document === 'undefined') return null;
+        var fenetres = document.querySelectorAll('.biblio2-voile');
+        if (!fenetres.length) return null;
+        var derniere = fenetres[fenetres.length - 1];
+        var autres = document.querySelectorAll('.modal-js-overlay, [role="dialog"], [aria-modal="true"], .modal-import-grilles');
+        for (var i = 0; i < autres.length; i++) {
+            var el = autres[i];
+            if (el === derniere || derniere.contains(el)) continue;
+            var apres = derniere.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING;
+            if (apres && el.getClientRects().length > 0) return null;
         }
+        return derniere;
+    }
 
-        /**
-         * Rend la ligne compacte d'un groupe-dossier : un select de ses items +
-         * bouton « Ajouter » + menu ⋮ (déplacer vers un autre dossier / retirer /
-         * supprimer). `groupe` = { id, titre, items } issu de repertoiresBibliotheque.grouper.
-         * Gagne de l'espace vertical vs une carte par item.
-         */
-        BibliothequeUI.repertoires.renderLigneDossierSelect = function (biblio, groupe) {
-            var selectId = 'rep-' + biblio + '-select-' + groupe.id;
-            var b = echapperHtml(biblio);
-            var sid = echapperHtml(selectId);
-            var options = groupe.items.map(function (item) {
-                return '<option value="' + echapperHtml(item.id) + '">' + echapperHtml(_labelItem(biblio, item)) + '</option>';
+    /** L'utilisateur ferme (×, Échap) : rien n'est retenu pour la prochaine ouverture. */
+    BibliothequeUI.fermerFenetre = function (modalId) {
+        delete _etatsRetenusDeuxColonnes[modalId];
+        BibliothequeUI.fermerTousLesMenus();
+        var modal = document.getElementById(modalId);
+        if (modal) modal.remove();
+    };
+
+    /** Le nom d'une rangée déplie ou replie son aperçu (plusieurs peuvent être ouverts). */
+    BibliothequeUI.basculerApercu = function (cleApercu) {
+        var boutons = document.querySelectorAll('.biblio2-rangee-nom');
+        for (var i = 0; i < boutons.length; i++) {
+            if (boutons[i].getAttribute('data-param') !== String(cleApercu)) continue;
+            var ouvert = boutons[i].getAttribute('aria-expanded') === 'true';
+            boutons[i].setAttribute('aria-expanded', ouvert ? 'false' : 'true');
+            var apercu = document.getElementById(boutons[i].getAttribute('aria-controls'));
+            if (apercu) apercu.hidden = ouvert;
+            return;
+        }
+    };
+
+    function _renderPassage(r) {
+        if (r.etat) {
+            return '<span class="biblio2-etat"><span class="biblio2-coche" aria-hidden="true">✓</span> ' +
+                echapperHtml(r.etat) + '</span>';
+        }
+        var p = r.passage;
+        if (!p) return '';
+        var contenu = echapperHtml(p.label);
+        if (p.sens === 'versBibliotheque') {
+            contenu += ' <span class="biblio2-fleche-large" aria-hidden="true">→</span>' +
+                '<span class="biblio2-fleche-etroite" aria-hidden="true">↓</span>';
+        } else if (p.sens === 'versTrimestre') {
+            contenu = '<span class="biblio2-fleche-large" aria-hidden="true">←</span>' +
+                '<span class="biblio2-fleche-etroite" aria-hidden="true">↑</span> ' + contenu;
+        }
+        return '<button type="button" class="btn biblio2-passage" ' + _btnAttrs(p) +
+            (p.title ? ' title="' + echapperAttribut(p.title) + '"' : '') + '>' + contenu + '</button>';
+    }
+
+    /**
+     * #1158 — la source d'une image d'aperçu, ou '' : un fichier du dossier des tampons, ou une
+     * image en base64 (un tampon personnalisé, un tampon importé). Rien d'autre : la source peut
+     * venir d'un fichier importé.
+     */
+    var MOTIF_IMAGE_DONNEES = /^data:image\/(png|jpeg|gif|webp);base64,[A-Za-z0-9+\/=]+$/;
+    var MOTIF_IMAGE_TAMPON = /^autocollants\/[^:"'<>\\?#]+$/;
+    BibliothequeUI.sourceImageApercu = function (src) {
+        if (typeof src !== 'string') return '';
+        if (MOTIF_IMAGE_DONNEES.test(src)) return src;
+        if (MOTIF_IMAGE_TAMPON.test(src) && src.split('/').indexOf('..') < 0) return src;
+        return '';
+    };
+
+    function _renderApercu(apercu, idApercu, ouvert) {
+        apercu = apercu || {};
+        var html = '';
+        var src = apercu.image ? BibliothequeUI.sourceImageApercu(apercu.image.src) : '';
+        if (src) {
+            html += '<img class="biblio2-apercu-image" src="' + echapperAttribut(src) + '" alt="' +
+                echapperAttribut(apercu.image.alt || '') + '">';
+        }
+        (apercu.paragraphes || []).forEach(function (texte) {
+            if (texte) html += '<p class="biblio2-apercu-texte">' + echapperHtml(texte) + '</p>';
+        });
+        var lignes = apercu.lignes || [];
+        if (lignes.length) {
+            html += '<table class="biblio2-apercu-table"><tbody>' +
+                lignes.map(function (l) {
+                    return '<tr><td>' + echapperHtml(l[0] || '') + '</td>' +
+                        '<td class="biblio2-apercu-type">' + echapperHtml(l[1] || '') + '</td>' +
+                        '<td class="biblio2-apercu-valeur">' + echapperHtml(l[2] || '') + '</td></tr>';
+                }).join('') +
+                (apercu.total
+                    ? '<tr class="biblio2-apercu-total"><td>' + echapperHtml(apercu.total[0]) + '</td><td></td>' +
+                      '<td class="biblio2-apercu-valeur">' + echapperHtml(apercu.total[1]) + '</td></tr>'
+                    : '') +
+                '</tbody></table>';
+        }
+        return '<div class="biblio2-apercu" id="' + echapperAttribut(idApercu) + '"' + (ouvert ? '' : ' hidden') + '>' +
+            html + '</div>';
+    }
+
+    function _rangeeCachee(r, colonne, ctx) {
+        if (colonne !== 'bibliotheque') return false;
+        if (ctx.filtreGroupe && r.groupe !== ctx.filtreGroupe) return true;
+        if (ctx.filtre === '__tous__') return false;
+        return (r.dossier || '__nonclasse__') !== ctx.filtre;
+    }
+
+    function _renderRangee(r, colonne, ctx, index) {
+        var cleApercu = colonne + ':' + r.id;
+        var ouvert = ctx.ouverts.has(cleApercu);
+        var idApercu = ctx.modalId + '-apercu-' + colonne + '-' + index;
+        var dossier = colonne === 'bibliotheque'
+            ? ' data-dossier="' + echapperAttribut(r.dossier || '__nonclasse__') + '"'
+            : '';
+        if (r.groupe != null) dossier += ' data-groupe="' + echapperAttribut(r.groupe) + '"';
+        // #1157 — sans aperçu, le nom n'est pas un bouton : il n'aurait rien à déplier.
+        var nom = r.apercu
+            ? '<button type="button" class="biblio2-rangee-nom" data-action="BibliothequeUI.basculerApercu"' +
+                ' data-param="' + echapperAttribut(cleApercu) + '" aria-expanded="' + ouvert + '"' +
+                ' aria-controls="' + echapperAttribut(idApercu) + '">' +
+                '<span class="biblio2-chevron" aria-hidden="true">▶</span>' +
+                '<span>' + echapperHtml(r.nom) + '</span></button>'
+            : '<p class="biblio2-rangee-nom biblio2-rangee-nom--fixe">' + echapperHtml(r.nom) + '</p>';
+        return '<li class="biblio2-rangee"' + _ancreItem(r.id) + dossier +
+                (_rangeeCachee(r, colonne, ctx) ? ' hidden' : '') + '>' +
+            '<div class="biblio2-rangee-ligne">' +
+                '<div class="biblio2-rangee-texte">' +
+                    nom +
+                    (r.marqueHtml || '') +
+                    '<p class="biblio2-rangee-meta">' + echapperHtml(r.ligne || '') +
+                        (r.afficherId ? BibliothequeUI.renderPuceId(r.id) : '') + '</p>' +
+                '</div>' +
+                '<div class="biblio2-rangee-actions">' +
+                    _renderPassage(r) +
+                    BibliothequeUI.renderMenuActions(r.menu, (ctx.menuParId ? '' : colonne + '-') + r.id,
+                        { ariaLabel: 'Autres gestes pour ' + r.nom, classeBouton: 'biblio2-kebab' }) +
+                '</div>' +
+            '</div>' +
+            (r.apercu ? _renderApercu(r.apercu, idApercu, ouvert) : '') +
+        '</li>';
+    }
+
+    /**
+     * #1155 — l'intertitre d'un groupe (les cartouches, par grille), caché avec ses rangées.
+     * #1158 — avec un ⋮ quand la colonne lui donne des gestes (`menusGroupe`).
+     */
+    function _renderIntertitreGroupe(nom, colonne, ctx, menu, index) {
+        var cache = colonne === 'bibliotheque' && ctx.filtreGroupe && ctx.filtreGroupe !== nom;
+        var titre = '<h4 class="biblio2-intertitre">' + echapperHtml(nom) + '</h4>';
+        if (menu && menu.length) {
+            titre = '<div class="biblio2-groupe-ligne">' + titre +
+                BibliothequeUI.renderMenuActions(menu, ctx.modalId + '-' + colonne + '-groupe-' + index,
+                    { ariaLabel: 'Autres gestes pour ' + nom, classeBouton: 'biblio2-kebab' }) +
+            '</div>';
+        }
+        return '<li class="biblio2-groupe" data-groupe="' + echapperAttribut(nom) + '"' + (cache ? ' hidden' : '') + '>' +
+            titre + '</li>';
+    }
+
+    function _renderListe(rangees, colonne, ctx, idListe, vide, videFiltre, menusGroupe) {
+        var groupeCourant = null;
+        var nbGroupes = 0;
+        var items = rangees.map(function (r, i) {
+            var intertitre = '';
+            if (r.groupe != null && r.groupe !== groupeCourant) {
+                groupeCourant = r.groupe;
+                var menu = (menusGroupe && Object.prototype.hasOwnProperty.call(menusGroupe, r.groupe)) ? menusGroupe[r.groupe] : null;
+                intertitre = _renderIntertitreGroupe(r.groupe, colonne, ctx, menu, nbGroupes++);
+            }
+            return intertitre + _renderRangee(r, colonne, ctx, i);
+        }).join('');
+        if (!rangees.length && vide) {
+            items = '<li><p class="biblio2-vide">' + echapperHtml(vide) + '</p></li>';
+        }
+        if (videFiltre) {
+            var visibles = rangees.filter(function (r) { return !_rangeeCachee(r, colonne, ctx); }).length;
+            items += '<li class="biblio2-vide-filtre"' + (rangees.length && !visibles ? '' : ' hidden') + '>' +
+                '<p class="biblio2-vide">' + echapperHtml(videFiltre) + '</p></li>';
+        }
+        return '<ul class="biblio2-liste"' + (idListe ? ' id="' + echapperAttribut(idListe) + '"' : '') + '>' + items + '</ul>';
+    }
+
+    /**
+     * #1157 — les rangées d'import d'un autre trimestre, au patron des aperçus « Voir » des autres
+     * fenêtres (`biblio2-import-rangee`) : le nom, une ligne en clair, le geste.
+     */
+    BibliothequeUI.renderRangeesImport = function (rangees) {
+        return '<ul class="biblio2-import-liste">' + (rangees || []).map(function (r) {
+            return '<li class="biblio2-import-rangee">' +
+                '<div><strong>' + echapperHtml(r.nom) + '</strong>' +
+                    (r.detail ? '<p class="biblio2-rangee-meta">' + echapperHtml(r.detail) + '</p>' : '') + '</div>' +
+                '<button type="button" class="btn btn-secondaire" ' + _btnAttrs(r) + '>' + echapperHtml(r.libelle) + '</button>' +
+            '</li>';
+        }).join('') + '</ul>';
+    };
+
+    /** #1157 — une courte liste en tête du repli d'import (« Même cours » de la Carte). */
+    function _renderImportEnTete(e) {
+        if (!e || !e.rangees || !e.rangees.length) return '';
+        return '<div' + (e.id ? ' id="' + echapperAttribut(e.id) + '"' : '') + ' class="biblio2-import-entete">' +
+            '<p class="biblio2-import-groupe">' + echapperHtml(e.titre) + '</p>' +
+            BibliothequeUI.renderRangeesImport(e.rangees) +
+        '</div>';
+    }
+
+    /** « Importer depuis un autre trimestre », replié sur une ligne au pied de « Dans ce trimestre ». */
+    function _renderImportAutreTrimestre(o, ctx) {
+        if (!o || !o.options || !o.options.length) return '';
+        var options = o.options.map(function (t) {
+            return '<option value="' + echapperAttribut(t.value) + '">' + echapperHtml(t.label) + '</option>';
+        }).join('');
+        var ouvert = o.ouvert || ctx.replis.has('import-trimestre');
+        return '<details class="biblio2-repli" data-repli="import-trimestre"' + (ouvert ? ' open' : '') + '>' +
+            '<summary class="biblio2-repli-titre">' + echapperHtml(o.titre) + '</summary>' +
+            _renderImportEnTete(o.enTete) +
+            '<div class="biblio2-import-ligne">' +
+                '<select id="' + echapperAttribut(o.selectId) + '" class="controle-form biblio2-select biblio2-import-select"' +
+                    ' aria-label="Trimestre d\'où importer"' +
+                    (o.selectOnChange ? ' data-on-change="' + echapperAttribut(o.selectOnChange) + '"' : '') + '>' +
+                    '<option value="">-- Choisir un trimestre --</option>' + options +
+                '</select>' +
+                (o.selectSecond
+                    ? '<select id="' + echapperAttribut(o.selectSecond.id) + '" class="controle-form biblio2-select biblio2-import-select u-hide"' +
+                      ' aria-label="' + echapperAttribut(o.selectSecond.ariaLabel) + '">' +
+                      '<option value="">' + echapperHtml(o.selectSecond.label) + '</option></select>'
+                    : '') +
+                '<button type="button" data-action="' + echapperAttribut(o.actionVoir) + '" class="btn btn-secondaire">' +
+                    echapperHtml(o.libelleVoir) + '</button>' +
+                (o.actionTout
+                    ? '<button type="button" data-action="' + echapperAttribut(o.actionTout) + '" class="btn btn-secondaire"' +
+                      (o.tooltipTout ? ' data-tooltip="' + echapperAttribut(o.tooltipTout) + '"' : '') + '>Tout importer</button>'
+                    : '') +
+                (o.aide
+                    ? '<button type="button" class="btn-aide-contextuelle" data-aide="' + echapperAttribut(o.aide) + '"' +
+                      ' aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre">' +
+                      '<span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>'
+                    : '') +
+            '</div>' +
+            (o.phrase ? '<p class="biblio2-phrase">' + echapperHtml(o.phrase) + '</p>' : '') +
+            '<div id="' + echapperAttribut(o.apercuId) + '" class="u-hide biblio2-import-apercu"></div>' +
+        '</details>';
+    }
+
+    /** La barre de « Dans ta bibliothèque » : le menu des dossiers, « Masquer… », la gestion à la demande. */
+    function _renderBarreDossiers(d, ctx) {
+        var b = echapperAttribut(d.biblio);
+        var options = [['__tous__', 'Tous les dossiers'], ['__nonclasse__', 'Non classées']]
+            .concat((d.reps || []).map(function (r) { return [r.id, r.nom || 'Sans nom']; }))
+            .concat([['__gerer__', 'Gérer les dossiers…']])
+            .map(function (o) {
+                return '<option value="' + echapperAttribut(o[0]) + '"' + (o[0] === ctx.filtre ? ' selected' : '') + '>' +
+                    echapperHtml(o[1]) + '</option>';
             }).join('');
 
-            var actions = [];
-            _reps(biblio).forEach(function (r) {
-                if (r.id !== groupe.id) {
-                    actions.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classerSel', param: biblio, param2: selectId, param3: r.id, classe: 'btn-secondaire', title: 'Déplacer vers ce dossier' });
-                }
-            });
-            actions.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirerSel', param: biblio, param2: selectId, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
-            if (typeof _cfg(biblio).supprimerItem === 'function') {
-                actions.push({ label: 'Supprimer de la bibliothèque', action: 'BibliothequeUI.repertoires.supprimerSel', param: biblio, param2: selectId, classe: 'btn-supprimer', title: 'Supprimer définitivement', showAlways: true });
-            }
-
-            var boutonAjouter = (typeof _cfg(biblio).ajouterItem === 'function')
-                ? '<button data-action="BibliothequeUI.repertoires.ajouterSel" data-param="' + b + '" data-param2="' + sid + '" class="btn btn-principal btn-mini">Ajouter</button>'
-                : '';
-
-            return '<div style="display:flex; gap:6px; align-items:center; margin-bottom:10px;">' +
-                '<select id="' + sid + '" class="controle-form" style="flex:1;" aria-label="' + echapperHtml(_labelPluriel(biblio)) + ' du dossier ' + echapperHtml(groupe.titre) + '">' + options + '</select>' +
-                boutonAjouter +
-                BibliothequeUI.renderMenuActions(actions, selectId) +
+        var lignes = (d.reps || []).map(function (r) {
+            return '<div class="biblio2-dossier-ligne">' +
+                '<input type="text" class="controle-form" data-rep-biblio="' + b + '" data-rep-id="' + echapperAttribut(r.id) + '"' +
+                    ' value="' + echapperAttribut(r.nom || '') + '" aria-label="Nom du dossier">' +
+                '<button type="button" data-action="BibliothequeUI.repertoires.renommer" data-param="' + b + '"' +
+                    ' data-param2="' + echapperAttribut(r.id) + '" class="btn btn-secondaire">Renommer</button>' +
+                window.boutonRetirerBloc({ action: 'BibliothequeUI.repertoires.supprimer', param: d.biblio, param2: r.id, titre: 'Supprimer le dossier',
+                    confirm: 'Supprimer ce dossier ? Son contenu n\'est pas supprimé : les ' + (d.labelPluriel || 'éléments') + ' repassent en « non classées ».' }) +
             '</div>';
-        };
+        }).join('');
+        if (!lignes) {
+            lignes = '<p class="biblio2-phrase">Aucun dossier pour l\'instant. Crée-en un pour ranger tes ' +
+                echapperHtml(d.labelPluriel || 'éléments') + '.</p>';
+        }
 
-        /** Ajoute à la sélection l'item choisi dans le select du dossier. */
-        BibliothequeUI.repertoires.ajouterSel = async function (biblio, selectId) {
-            var id = _idSelectionne(selectId);
-            var fn = _cfg(biblio).ajouterItem;
-            if (id && typeof fn === 'function') await fn(id);
-        };
+        var gestionOuverte = BibliothequeUI.repertoires.estDeplie(d.biblio);
+        return '<div class="biblio2-barre">' +
+                '<select class="controle-form biblio2-select" aria-label="Dossier affiché"' +
+                    ' data-on-change="BibliothequeUI.choisirDossier" data-param="' + echapperAttribut(ctx.modalId) + '">' +
+                    options + '</select>' +
+                _renderCaseMasquer(d.masquerLibelle, d.refreshFn) +
+            '</div>' +
+            '<div class="biblio2-dossiers" id="' + echapperAttribut(ctx.modalId) + '-dossiers" data-biblio="' + b + '"' +
+                (gestionOuverte ? '' : ' hidden') + '>' +
+                '<p class="biblio2-dossiers-titre">Mes dossiers</p>' +
+                lignes +
+                '<div class="biblio2-dossier-ligne">' +
+                    '<input type="text" id="rep-' + b + '-nouveau-nom" class="controle-form" placeholder="Nom d\'un nouveau dossier"' +
+                        ' aria-label="Nom du nouveau dossier">' +
+                    '<button type="button" data-action="BibliothequeUI.repertoires.creer" data-param="' + b + '" class="btn btn-secondaire">Créer le dossier</button>' +
+                '</div>' +
+                '<button type="button" class="biblio2-btn-texte" data-action="BibliothequeUI.fermerGestionDossiers"' +
+                    ' data-param="' + echapperAttribut(ctx.modalId) + '">Fermer</button>' +
+            '</div>';
+    }
 
-        /** Déplace l'item choisi vers un autre dossier (exclusif). */
-        BibliothequeUI.repertoires.classerSel = async function (biblio, selectId, repId) {
-            var id = _idSelectionne(selectId);
-            if (!id) return;
-            _moteur().assigner(id, repId, biblio);
-            await _rafraichir(biblio);
-        };
+    /** La case « Masquer ce qui est déjà dans ce trimestre » (même clé de préférence pour toutes). */
+    function _renderCaseMasquer(libelle, refreshFn) {
+        return '<label class="biblio-toggle-deja-present biblio2-case">' +
+            '<input type="checkbox" data-on-change="BibliothequeUI.basculerMasquerDejaPresent"' +
+                ' data-refresh-fn="' + echapperAttribut(refreshFn) + '"' +
+                (BibliothequeUI.estMasquerDejaPresentActif() ? ' checked' : '') + '> ' +
+            echapperHtml(libelle) +
+        '</label>';
+    }
 
-        /** Sort l'item choisi de son dossier (repasse en non classées). */
-        BibliothequeUI.repertoires.retirerSel = async function (biblio, selectId) {
-            var id = _idSelectionne(selectId);
-            if (!id) return;
-            _moteur().retirerItem(id, biblio);
-            await _rafraichir(biblio);
-        };
+    /**
+     * #1155 — la barre d'une bibliothèque sans dossiers (les cartouches) : le menu qui filtre par
+     * groupe (« Filtrer par grille »), puis la case « Masquer… ».
+     */
+    function _renderBarreGroupes(col, ctx) {
+        var f = col.filtreGroupe;
+        var html = '<div class="biblio2-barre">';
+        if (f) {
+            var options = [['', f.tous]].concat((f.groupes || []).map(function (g) { return [g, g]; }))
+                .map(function (o) {
+                    return '<option value="' + echapperAttribut(o[0]) + '"' + (o[0] === (ctx.filtreGroupe || '') ? ' selected' : '') + '>' +
+                        echapperHtml(o[1]) + '</option>';
+                }).join('');
+            html += '<select class="controle-form biblio2-select" aria-label="' + echapperAttribut(f.libelle) + '"' +
+                ' title="' + echapperAttribut(f.libelle) + '"' +
+                ' data-on-change="BibliothequeUI.choisirGroupe" data-param="' + echapperAttribut(ctx.modalId) + '">' +
+                options + '</select>';
+        }
+        if (col.masquer) html += _renderCaseMasquer(col.masquer.libelle, col.masquer.refreshFn);
+        return html + '</div>';
+    }
 
-        /** Supprime de la bibliothèque l'item choisi dans le select. */
-        BibliothequeUI.repertoires.supprimerSel = async function (biblio, selectId) {
-            var id = _idSelectionne(selectId);
-            var fn = _cfg(biblio).supprimerItem;
-            if (id && typeof fn === 'function') await fn(id);
+    function _appliquerFiltreGroupe(modal, filtre) {
+        var liste = modal.querySelector('.biblio2-panneau--bibliotheque .biblio2-liste');
+        if (!liste) return;
+        var visibles = 0;
+        Array.prototype.forEach.call(liste.querySelectorAll('.biblio2-rangee, .biblio2-groupe'), function (li) {
+            var cache = !!filtre && li.getAttribute('data-groupe') !== filtre;
+            li.hidden = cache;
+            if (!cache && li.classList.contains('biblio2-rangee')) visibles++;
+        });
+        var videFiltre = liste.querySelector('.biblio2-vide-filtre');
+        if (videFiltre) videFiltre.hidden = !(liste.querySelector('.biblio2-rangee') && !visibles);
+    }
+
+    /** #1155 — « Filtrer par grille » : ne garde dans la colonne de la bibliothèque que ce groupe. */
+    BibliothequeUI.choisirGroupe = function (modalId, select) {
+        var modal = document.getElementById(modalId);
+        if (!modal || !select) return;
+        _filtresGroupeDeuxColonnes[modalId] = select.value;
+        _appliquerFiltreGroupe(modal, select.value);
+    };
+
+    function _appliquerFiltreDossier(modal, filtre) {
+        var liste = modal.querySelector('.biblio2-panneau--bibliotheque .biblio2-liste');
+        if (!liste) return;
+        var visibles = 0;
+        var rangees = liste.querySelectorAll('.biblio2-rangee');
+        Array.prototype.forEach.call(rangees, function (li) {
+            var cachee = filtre !== '__tous__' && li.getAttribute('data-dossier') !== filtre;
+            li.hidden = cachee;
+            if (!cachee) visibles++;
+        });
+        var videFiltre = liste.querySelector('.biblio2-vide-filtre');
+        if (videFiltre) videFiltre.hidden = !(rangees.length && !visibles);
+    }
+
+    /** Le menu des dossiers : filtrer la colonne, ou ouvrir « Gérer les dossiers… ». */
+    BibliothequeUI.choisirDossier = function (modalId, select) {
+        var modal = document.getElementById(modalId);
+        if (!modal || !select) return;
+        if (select.value === '__gerer__') {
+            select.value = _filtresDossierDeuxColonnes[modalId] || '__tous__';
+            BibliothequeUI.ouvrirGestionDossiers(modalId);
+            return;
+        }
+        _filtresDossierDeuxColonnes[modalId] = select.value;
+        _appliquerFiltreDossier(modal, select.value);
+    };
+
+    BibliothequeUI.ouvrirGestionDossiers = function (modalId) {
+        var zone = document.getElementById(modalId + '-dossiers');
+        if (!zone) return;
+        BibliothequeUI.repertoires.poserDeplie(zone.getAttribute('data-biblio'), true);
+        zone.hidden = false;
+        var champ = zone.querySelector('input[id$="-nouveau-nom"]');
+        if (champ) champ.focus();
+    };
+
+    BibliothequeUI.fermerGestionDossiers = function (modalId) {
+        var zone = document.getElementById(modalId + '-dossiers');
+        if (!zone) return;
+        BibliothequeUI.repertoires.poserDeplie(zone.getAttribute('data-biblio'), false);
+        zone.hidden = true;
+    };
+
+    /** La barre d'une colonne : les dossiers, sinon (#1155) le filtre par groupe et la case « Masquer… ». */
+    function _renderBarre(col, ctx) {
+        if (col.dossiers) return _renderBarreDossiers(col.dossiers, ctx);
+        if (col.filtreGroupe || col.masquer) return _renderBarreGroupes(col, ctx);
+        return '';
+    }
+
+    /** La phrase d'une colonne filtrée que le filtre vide, seulement si la colonne a un filtre. */
+    function _videFiltre(col) {
+        return (col.dossiers || col.filtreGroupe) ? col.videFiltre : null;
+    }
+
+    function _renderColonne(col, colonne, ctx) {
+        col = col || {};
+        var rangees = col.rangees || [];
+        var idTitre = ctx.modalId + '-titre-' + colonne;
+        var compte = (col.compte != null) ? col.compte : rangees.length;
+
+        var html = '<section class="biblio2-panneau biblio2-panneau--' + colonne + '" aria-labelledby="' + echapperAttribut(idTitre) + '">' +
+            '<div class="biblio2-panneau-entete">' +
+                '<div>' +
+                    '<h3 id="' + echapperAttribut(idTitre) + '" class="biblio2-panneau-titre">' + echapperHtml(col.titre) +
+                        ' <span class="biblio2-compte">(' + compte + ')</span></h3>' +
+                    (col.phrase ? '<p class="biblio2-phrase">' + echapperHtml(col.phrase) + '</p>' : '') +
+                '</div>' +
+                (col.boutonEntete
+                    ? '<button type="button" class="biblio2-btn-texte" ' + _btnAttrs(col.boutonEntete) + '>' +
+                      echapperHtml(col.boutonEntete.label) + '</button>'
+                    : '') +
+            '</div>';
+
+        html += _renderBarre(col, ctx);
+        html += _renderListe(rangees, colonne, ctx, col.idListe, col.vide, _videFiltre(col), col.menusGroupe);
+        if (col.importAutreTrimestre) html += _renderImportAutreTrimestre(col.importAutreTrimestre, ctx);
+
+        var p = col.partages;
+        if (p && p.rangees && p.rangees.length) {
+            html += '<h4 class="biblio2-intertitre">' + echapperHtml(p.titre) + '</h4>' +
+                (p.phrase ? '<p class="biblio2-phrase">' + echapperHtml(p.phrase) + '</p>' : '') +
+                _renderListe(p.rangees, 'partages', ctx, null, null, null);
+        }
+        return html + '</section>';
+    }
+
+    /** L'état à rendre : celui de la fenêtre encore là, sinon celui qu'une fermeture par le code a retenu. */
+    function _reprendreEtat(modalId) {
+        var existant = document.getElementById(modalId);
+        var etat = null;
+        if (existant) {
+            etat = _capturerDeuxColonnes(existant);
+            existant.remove();
+        } else {
+            var retenu = _etatsRetenusDeuxColonnes[modalId];
+            if (retenu && Date.now() - retenu.quand < DELAI_ETAT_RETENU) etat = retenu;
+        }
+        delete _etatsRetenusDeuxColonnes[modalId];
+        return etat;
+    }
+
+    /** Le dossier filtré, ou « Tous les dossiers » s'il a été supprimé entre-temps. */
+    function _filtreValide(modalId, reps) {
+        var filtre = _filtresDossierDeuxColonnes[modalId] || '__tous__';
+        var connu = filtre === '__tous__' || filtre === '__nonclasse__' ||
+            reps.some(function (r) { return r.id === filtre; });
+        _filtresDossierDeuxColonnes[modalId] = connu ? filtre : '__tous__';
+        return _filtresDossierDeuxColonnes[modalId];
+    }
+
+    /** #1155 — le groupe filtré (« Filtrer par grille »), ou aucun s'il n'existe plus. */
+    function _filtreGroupeValide(modalId, filtreGroupe) {
+        var filtre = _filtresGroupeDeuxColonnes[modalId] || '';
+        if (!filtreGroupe || (filtreGroupe.groupes || []).indexOf(filtre) < 0) filtre = '';
+        _filtresGroupeDeuxColonnes[modalId] = filtre;
+        return filtre;
+    }
+
+    /** L'en-tête, sur une ligne : le titre, l'aide, « Importer ou exporter ▾ », la fermeture. */
+    function _renderEntete(config, idTitre) {
+        var champsFichier = (config.champsFichier || []).map(function (c) {
+            return '<input type="file" id="' + echapperAttribut(c.id) + '" accept="' + echapperAttribut(c.accept || '') + '"' +
+                ' class="u-hide" data-on-change="' + echapperAttribut(c.onChange) + '">';
+        }).join('');
+        return '<header class="biblio2-entete">' +
+            '<h2 id="' + echapperAttribut(idTitre) + '" class="biblio2-titre">' + echapperHtml(config.titre) + '</h2>' +
+            (config.aide
+                ? '<button type="button" class="btn-aide-contextuelle" data-aide="' + echapperAttribut(config.aide) + '"' +
+                  ' title="Comment fonctionne la bibliothèque" aria-label="Comment fonctionne la bibliothèque">' +
+                  '<span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>'
+                : '') +
+            '<span class="biblio2-entete-droite">' +
+                BibliothequeUI.renderMenuActions(config.menuFichiers, config.modalId + '-fichiers',
+                    { libelle: 'Importer ou exporter ▾', classeBouton: 'biblio2-btn-fichiers' }) +
+                '<button type="button" class="biblio2-fermer" data-action="BibliothequeUI.fermerFenetre"' +
+                    ' data-param="' + echapperAttribut(config.modalId) + '" aria-label="Fermer la bibliothèque" title="Fermer">' +
+                    '<img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
+            '</span>' +
+            champsFichier +
+        '</header>';
+    }
+
+    /**
+     * Crée (ou reconstruit) la fenêtre en deux colonnes. Une reconstruction rend le
+     * défilement, les aperçus et les replis ouverts (plainte du 24 août : « je dois
+     * l'ouvrir à chaque cartouche »), que la fenêtre soit encore là (case « Masquer »,
+     * dossiers) ou qu'un passage vienne de la fermer pour la redessiner.
+     */
+    BibliothequeUI.creerFenetreDeuxColonnes = function (config) {
+        var modalId = config.modalId;
+        var etat = _reprendreEtat(modalId);
+        var biblio = config.bibliotheque || {};
+        var ctx = {
+            modalId: modalId,
+            ouverts: new Set(etat ? etat.ouverts : []),
+            replis: new Set(etat ? etat.replis : []),
+            filtre: _filtreValide(modalId, (biblio.dossiers && biblio.dossiers.reps) || []),
+            filtreGroupe: _filtreGroupeValide(modalId, biblio.filtreGroupe)
         };
-    })();
+        var idTitre = modalId + '-titre';
+
+        document.body.insertAdjacentHTML('beforeend',
+            '<div id="' + echapperAttribut(modalId) + '" class="modal-js-overlay biblio2-voile">' +
+                '<section class="modal-js-contenu biblio2-fenetre" role="dialog" aria-modal="true"' +
+                    ' aria-labelledby="' + echapperAttribut(idTitre) + '" tabindex="-1">' +
+                    _renderEntete(config, idTitre) +
+                    (config.avantColonnes || '') +
+                    '<div class="biblio2-colonnes">' +
+                        _renderColonne(config.trimestre, 'trimestre', ctx) +
+                        _renderColonne(biblio, 'bibliotheque', ctx) +
+                    '</div>' +
+                '</section>' +
+            '</div>');
+
+        var fenetre = document.querySelector('#' + modalId + ' .biblio2-fenetre');
+        if (fenetre) {
+            if (etat && etat.defilement) fenetre.scrollTop = etat.defilement;
+            if (typeof fenetre.focus === 'function') fenetre.focus({ preventScroll: true });
+        }
+    };
+
+    /* =====================================================================
+       #1159 (lot 6) — LA FENÊTRE À UNE SEULE LISTE : les cours, les trimestres, les groupes-cours.
+
+       Une liste, et en bas un groupe replié (« Mis de côté (n) », « Clos (n) »). Les rangées sont
+       celles des deux colonnes (`_renderRangee`, sans aperçu si la rangée n'en a pas) ; rien ne
+       change pour les sept autres fenêtres. Dans une seule liste, un id ne paraît qu'une fois : le ⋮
+       d'une rangée garde l'id `biblio-menu-<id>` des cartes qu'elle remplace.
+
+       config = { modalId, titre, phrase, menuFichiers?, champsFichier?,
+                  liste: { idListe?, vide, rangees },
+                  repli: { titre, rangees } }     // sans rangée, pas de groupe replié
+       ===================================================================== */
+    BibliothequeUI.creerFenetreListe = function (config) {
+        var modalId = config.modalId;
+        var etat = _reprendreEtat(modalId);
+        var ctx = {
+            modalId: modalId,
+            ouverts: new Set(etat ? etat.ouverts : []),
+            replis: new Set(etat ? etat.replis : []),
+            filtre: '__tous__',
+            filtreGroupe: '',
+            menuParId: true
+        };
+        var idTitre = modalId + '-titre';
+        var liste = config.liste || {};
+        var repli = config.repli || {};
+        var rangeesRepli = repli.rangees || [];
+
+        var contenu = _renderListe(liste.rangees || [], 'liste', ctx, liste.idListe, liste.vide, null, null);
+        if (rangeesRepli.length) {
+            contenu += '<details class="biblio2-repli" data-repli="repli"' + (ctx.replis.has('repli') ? ' open' : '') + '>' +
+                // Le titre et son compte dans une seule boîte : l'intitulé est en `flex`, l'espace entre
+                // deux enfants y tomberait (« Mis de côté(1) », capture du 25 oct.).
+                '<summary class="biblio2-repli-titre"><span>' + echapperHtml(repli.titre) +
+                    ' <span class="biblio2-compte">(' + rangeesRepli.length + ')</span></span></summary>' +
+                _renderListe(rangeesRepli, 'repli', ctx, null, null, null, null) +
+            '</details>';
+        }
+
+        document.body.insertAdjacentHTML('beforeend',
+            '<div id="' + echapperAttribut(modalId) + '" class="modal-js-overlay biblio2-voile">' +
+                '<section class="modal-js-contenu biblio2-fenetre biblio2-fenetre--liste" role="dialog" aria-modal="true"' +
+                    ' aria-labelledby="' + echapperAttribut(idTitre) + '" tabindex="-1">' +
+                    _renderEntete(config, idTitre) +
+                    (config.phrase ? '<p class="biblio2-phrase">' + echapperHtml(config.phrase) + '</p>' : '') +
+                    '<section class="biblio2-panneau biblio2-panneau--liste" aria-labelledby="' + echapperAttribut(idTitre) + '">' +
+                        contenu +
+                    '</section>' +
+                '</section>' +
+            '</div>');
+
+        var fenetre = document.querySelector('#' + modalId + ' .biblio2-fenetre');
+        if (fenetre) {
+            if (etat && etat.defilement) fenetre.scrollTop = etat.defilement;
+            if (typeof fenetre.focus === 'function') fenetre.focus({ preventScroll: true });
+        }
+    };
 
     // Exposer globalement
     window.BibliothequeUI = BibliothequeUI;

@@ -74,11 +74,15 @@ async function selectionner(page, id) {
     }, id);
 }
 
-/** Ouvre le menu « ⋮ » d'une carte de la Bibliothèque et rend ses libellés. */
+/**
+ * Ouvre le menu « ⋮ » d'une carte de la Bibliothèque et rend ses libellés.
+ * ↻ 25 oct. 2026 (#1157, lot 4 des bibliothèques en deux colonnes) — RÉANCRÉ, motif : la fenêtre passe au
+ * composant en deux colonnes, qui nomme le menu d'une rangée par sa colonne (`biblio-menu-trimestre-<id>`).
+ */
 async function ouvrirMenuCarte(page, carteId) {
-    const declencheur = page.locator(`.biblio-menu-trigger[data-param="biblio-menu-${carteId}"]`);
+    const declencheur = page.locator(`.biblio-menu-trigger[data-param="biblio-menu-trimestre-${carteId}"]`);
     await declencheur.click();
-    const menu = page.locator(`#biblio-menu-${carteId}`);
+    const menu = page.locator(`#biblio-menu-trimestre-${carteId}`);
     await expect(menu).toBeVisible();
     return menu;
 }
@@ -133,13 +137,15 @@ test('« Actions ▾ » garde ses huit commandes ; les cinq de gestion des carte
 
 // ─── 2. La Bibliothèque, lieu de gestion des cartes ──────────────────────
 
-test('« Consulter la bibliothèque » ouvre la Bibliothèque ; le menu ⋮ d’une carte offre Dupliquer, Exporter, Supprimer', async ({ page }) => {
+// ↻ 25 oct. 2026 (#1157) — RÉANCRÉ, motif : « Supprimer » s'appelle « Supprimer définitivement » dans la
+// fenêtre en deux colonnes (consigne du lot 4, § 1) ; même action (`supprimerAlignementDuTrimestre`).
+test('« Consulter la bibliothèque » ouvre la Bibliothèque ; le menu ⋮ d’une carte offre Dupliquer, Exporter, Supprimer définitivement', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
     const actif = (await indexCartes(page)).active;
     await page.click('#planif-btn-bibliotheque');
     await expect(page.locator('#modalBibliothequeAlignements')).toBeVisible();
     const menu = await ouvrirMenuCarte(page, actif);
-    await expect(menu.locator('.biblio-menu-item')).toHaveText(['Dupliquer', 'Exporter', 'Supprimer']);
+    await expect(menu.locator('.biblio-menu-item')).toHaveText(['Dupliquer', 'Exporter', 'Supprimer définitivement']);
     expect(erreurs).toEqual([]);
 });
 

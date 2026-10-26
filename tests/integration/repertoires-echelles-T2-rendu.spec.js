@@ -8,9 +8,15 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 // #327 T2 — câblage des répertoires de classement dans la bibliothèque d'ÉCHELLES
 // via le helper générique BibliothequeUI.repertoires.* (paramétré par `biblio`).
-// Vérifie : zone « Mes dossiers » (echelles), assignation « Classer dans… » au menu
-// d'une carte du pool, select compact du dossier (option + Ajouter + Retirer), et
-// persistance module. Les filtres discipline ET pratique ont été retirés.
+// Les filtres discipline ET pratique ont été retirés.
+//
+// ↻ #1155 (25 oct. 2026) — RÉANCRÉ : la bibliothèque des échelles passe en deux colonnes (consigne du
+// lot 2, § 1 : « Dossiers … comme au lot 1 »). La boîte « Mes dossiers » dépliée et le « select » compact
+// par dossier (Ajouter / Retirer) disparaissent : un menu de dossiers filtre la colonne « Dans ta
+// bibliothèque », « Gérer les dossiers… » ouvre la gestion à la demande, et « Classer dans » / « Retirer
+// du dossier » sont dans le ⋮ de la rangée. L'essai éprouve la même chaîne sur la nouvelle forme : la
+// gestion et son champ de création, « Classer dans » au ⋮, le dossier au menu de la barre, la rangée
+// rangée (`data-dossier`), puis « Retirer du dossier », et la persistance du module.
 
 const patternsAttendus = [
     /version\.json.*access control/i,
@@ -58,22 +64,21 @@ test('T2 · échelles · zone dossiers + assignation « Classer dans… » via l
 
         const dossier = window.repertoiresBibliotheque.creer('Mon dossier échelles', 'echelles');
 
-        // 1er rendu : zone « Mes dossiers » (echelles) + l'échelle propose « Classer dans… »
+        // 1er rendu : la gestion (cachée, à la demande) + l'échelle propose « Classer dans… » au ⋮
         await window.afficherBibliothequeEchelles();
         const html1 = lireModal();
-        const aZone = html1.includes('Mes dossiers');
+        const aZone = html1.includes('Mes dossiers') && !!document.querySelector('#modalBibliothequeEchelles-dossiers[hidden]');
         const aChampCreation = !!document.getElementById('rep-echelles-nouveau-nom');
         const aActionClasser = !!document.querySelector('[data-action="BibliothequeUI.repertoires.classer"][data-param3="' + dossier.id + '"]');
         // filtres discipline + pratique retirés
         const filtresAbsents = !document.getElementById('filtreDisciplineEchelles') && !document.getElementById('filtrePratiqueEchelles');
 
-        // Classer via le handler générique (comme le ferait le menu ⋮)
+        // Classer via le handler générique (comme le fait le ⋮)
         await window.BibliothequeUI.repertoires.classer('echelles', echelleId, dossier.id);
-        const html2 = lireModal();
-        const aEnteteDossier = html2.includes('Mon dossier échelles');
-        const aOptionSelect = !!document.querySelector('#rep-echelles-select-' + dossier.id + ' option[value="' + echelleId + '"]');
-        const aBoutonAjouterSelect = !!document.querySelector('[data-action="BibliothequeUI.repertoires.ajouterSel"][data-param2="rep-echelles-select-' + dossier.id + '"]');
-        const aActionRetirer = !!document.querySelector('[data-action="BibliothequeUI.repertoires.retirerSel"][data-param2="rep-echelles-select-' + dossier.id + '"]');
+        const aOptionDossier = !!document.querySelector('#modalBibliothequeEchelles .biblio2-barre select option[value="' + dossier.id + '"]');
+        const rangee = document.querySelector('#modalBibliothequeEchelles .biblio2-rangee[data-biblio-item-id="' + echelleId + '"]');
+        const aDossierSurRangee = !!rangee && rangee.getAttribute('data-dossier') === dossier.id;
+        const aActionRetirer = !!document.querySelector('[data-action="BibliothequeUI.repertoires.retirer"][data-param2="' + echelleId + '"]');
 
         const reps = window.repertoiresBibliotheque.obtenir('echelles');
         const estClassee = reps[0].itemIds.includes(echelleId);
@@ -82,11 +87,12 @@ test('T2 · échelles · zone dossiers + assignation « Classer dans… » via l
         await window.BibliothequeUI.repertoires.retirer('echelles', echelleId);
         const repsApres = window.repertoiresBibliotheque.obtenir('echelles');
         const retiree = !repsApres[0].itemIds.includes(echelleId);
+        const rangeeApres = document.querySelector('#modalBibliothequeEchelles .biblio2-rangee[data-biblio-item-id="' + echelleId + '"]');
 
         return {
             aZone, aChampCreation, aActionClasser, filtresAbsents,
-            aEnteteDossier, aOptionSelect, aBoutonAjouterSelect, aActionRetirer,
-            estClassee, retiree
+            aOptionDossier, aDossierSurRangee, aActionRetirer,
+            estClassee, retiree, nonClasseeApres: !!rangeeApres && rangeeApres.getAttribute('data-dossier') === '__nonclasse__'
         };
     });
 
@@ -95,11 +101,11 @@ test('T2 · échelles · zone dossiers + assignation « Classer dans… » via l
     expect(resultat.aChampCreation).toBe(true);
     expect(resultat.aActionClasser).toBe(true);
     expect(resultat.filtresAbsents).toBe(true);
-    expect(resultat.aEnteteDossier).toBe(true);
-    expect(resultat.aOptionSelect).toBe(true);
-    expect(resultat.aBoutonAjouterSelect).toBe(true);
+    expect(resultat.aOptionDossier).toBe(true);
+    expect(resultat.aDossierSurRangee).toBe(true);
     expect(resultat.aActionRetirer).toBe(true);
     expect(resultat.estClassee).toBe(true);
     expect(resultat.retiree).toBe(true);
+    expect(resultat.nonClasseeApres).toBe(true);
     expect(erreurs).toEqual([]);
 });

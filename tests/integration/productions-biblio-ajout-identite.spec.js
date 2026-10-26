@@ -65,6 +65,12 @@ test('terrain · ajouter depuis la bibliothèque retire l\'item des « disponibl
         out.nbProductions = (await db.get(cle('productions'))).length;
         out.copie = (await db.get(cle('productions'))).find((p) => p.idOriginal === 'BIB_A2') || null;
 
+        // ↻ #1156 (25 oct. 2026) : dans la fenêtre en deux colonnes, l'item ne quitte plus « Dans ta bibliothèque » :
+        // sa rangée perd son passage et dit « ✓ Déjà dans ce trimestre » (consigne du lot 1, § 1.3). Le geste paraît
+        // donc avoir un effet, et la défense tient : plus de bouton à recliquer.
+        const rangeeBib = document.querySelector('#listeProductionsDisponibles [data-biblio-item-id="BIB_A2"]');
+        out.etatApres = rangeeBib ? rangeeBib.querySelector('.biblio2-etat')?.textContent.replace(/\s+/g, ' ').trim() : null;
+
         // recliquer doit être IMPOSSIBLE : le bouton a disparu
         const encore = document.querySelector('[data-action="ajouterProductionIndividuelle"][data-param="BIB_A2"]');
         out.boutonEncorePresent = !!encore;
@@ -78,8 +84,10 @@ test('terrain · ajouter depuis la bibliothèque retire l\'item des « disponibl
     expect(r.copie, 'la copie garde la trace de son original').not.toBeNull();
     expect(
         r.disponiblesApres,
-        'l\'item doit QUITTER la liste des disponibles — sans quoi le geste paraît sans effet'
+        'l\'item ne doit plus PROPOSER son passage — sans quoi le geste paraît sans effet'
     ).not.toContain('BIB_A2');
+    // BREAK-TEST (25 oct.) : `dejaDansCeTrimestre` rendu toujours faux dans productions-bibliotheque-ui.js → ROUGE.
+    expect(r.etatApres, 'la rangée dit où est l\'item').toBe('✓ Déjà dans ce trimestre');
     expect(r.boutonEncorePresent, 'le bouton ne doit plus être là').toBe(false);
     expect(r.nbApres2eTentative, 'aucun second exemplaire ne doit pouvoir être créé').toBe(2);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);

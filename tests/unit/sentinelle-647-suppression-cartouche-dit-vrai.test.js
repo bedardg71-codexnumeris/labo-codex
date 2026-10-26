@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE #647 (2 septembre 2026, soir) — LA SUPPRESSION D'UNE CARTOUCHE DIT
 // VRAI, SUR SES QUATRE CHEMINS VIVANTS — ET LE CINQUIÈME, MORT, EST PARTI.
@@ -21,6 +22,10 @@ import { fileURLToPath } from 'node:url';
 //      Bibliothèque. Ne disait que « irréversible » ; depuis le 3 sept., la grille
 //      est nommée dans TOUS les cas (c'est l'ancrage qu'on vide), la Bibliothèque
 //      seulement quand la cartouche y est.
+//      ↻ #1155 (25 oct. 2026, décision de Grégoire pour les grilles, étendue par Cowork aux
+//      cartouches) : ce chemin n'écrit plus que l'ANCRAGE ; l'exemplaire de la bibliothèque
+//      reste, et la question le dit (« Son exemplaire de ta bibliothèque reste. ») quand la
+//      relation des deux colonnes le lie (`id`, ou `idOriginal` après « ← Utiliser »).
 //   4. Conception › cartouches, section 2 (`supprimerCartoucheDeBibliothequePartagee`)
 //      — bibliothèque seulement, comme le chemin 1.
 //   †  `supprimerCartouche()` — AUCUN appelant, aucun export : retirée, pas corrigée.
@@ -66,6 +71,11 @@ function instancier(src, nom, globaux) {
 }
 
 const cle = (k) => 'h2026_' + k;
+
+// #1155 — la relation unique des deux colonnes, extraite de bibliotheque-ui.js (pas recopiée).
+const DEBUT_RELATION = 'BibliothequeUI.lieeAExemplaire = function (item, exemplaire) {';
+const lieeAExemplaire = new Function('item', 'exemplaire',
+    tranche(nettoyer(lire('js/bibliotheque-ui.js')), DEBUT_RELATION, '\n    };', { longueurMin: 40 }).slice(DEBUT_RELATION.length));
 
 // =============================================================================
 // CHEMIN 1 — onglet Données : l'avertissement mesure la survivance, il ne la
@@ -153,14 +163,16 @@ describe('#647 · chemin 1 — l\'invariant couplé : la fonction ne touche pas 
 // CHEMIN 2 — la liste et la zone d'édition : l'ancrage seul, et la question le
 // dit, avec ce qui survit.
 // =============================================================================
-async function questionChemin2({ dansBibliotheque, evaluations = [], verrouille = false }) {
+async function questionChemin2({ dansBibliotheque, evaluations = [], verrouille = false, idOriginal }) {
     const questions = [];
     const alertes = [];
     const modifier = vi.fn();
     const fn = instancier(cartouchesJs, 'supprimerCartoucheConfirm', {
+        // ↻ #1156 (verdict du lot 2, § 3) — la relation unique, la vraie (extraite de bibliotheque-ui.js).
+        BibliothequeUI: { lieeAExemplaire },
         db: {
             get: async (k) => ({
-                'h2026_cartouches_G1': [{ id: 'C1', nom: 'Cartouche 1', verrouille }],
+                'h2026_cartouches_G1': [{ id: idOriginal ? 'C1_COPIE' : 'C1', nom: 'Cartouche 1', verrouille, idOriginal }],
                 'h2026_grillesTemplates': [{ id: 'G1', nom: 'Grille A' }],
                 'h2026_evaluationsSauvegardees': evaluations
             })[k] ?? null,
@@ -174,7 +186,7 @@ async function questionChemin2({ dansBibliotheque, evaluations = [], verrouille 
         afficherBanqueCartouches: vi.fn(),
         chargerCartouchesRetroaction: vi.fn()
     });
-    await fn('C1', 'G1');
+    await fn(idOriginal ? 'C1_COPIE' : 'C1', 'G1');
     // La question vient AVANT toute écriture : refuser ne détruit rien.
     expect(modifier).not.toHaveBeenCalled();
     return { questions, alertes };
@@ -185,10 +197,22 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
         const { questions } = await questionChemin2({ dansBibliotheque: true, evaluations: [{ cartoucheId: 'C1' }, { cartoucheId: 'C1' }, { cartoucheId: 'X' }] });
         expect(questions).toEqual([
             'Supprimer la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\n'
-            + 'Elle reste dans la Bibliothèque.\n'
+            // ↻ #1156 (25 oct. 2026) : « Elle reste dans la Bibliothèque. » devient la phrase de Grégoire, celle de
+            // la fenêtre en deux colonnes (verdict du lot 2, § 3). BREAK-TEST (25 oct.) : l'ancienne phrase remise
+            // dans `supprimerCartoucheConfirm` → ROUGE.
+            + 'Son exemplaire de ta bibliothèque reste.\n'
             + "2 évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.\n\n"
             + 'Cette action est irréversible.'
         ]);
+    });
+
+    // #1156 — une cartouche ramenée par « ← Utiliser dans ce trimestre » a un `id` neuf et nomme son exemplaire
+    // par `idOriginal` : la relation unique la voit, l'`id` seul ne la voyait pas (la question se taisait).
+    // BREAK-TEST (25 oct.) : la condition remise en `biblio.some(c => c.id === cartoucheId)` → ROUGE.
+    it('#1156 · ramenée de la bibliothèque (idOriginal) : la phrase est dite', async () => {
+        const { questions } = await questionChemin2({ dansBibliotheque: true, idOriginal: 'C1' });
+        expect(questions).toEqual(['Supprimer la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\n'
+            + 'Son exemplaire de ta bibliothèque reste.\n\nCette action est irréversible.']);
     });
 
     it('nulle part ailleurs, employée par personne : la portée et l\'irréversibilité, rien de plus', async () => {
@@ -198,7 +222,8 @@ describe('#647 · chemin 2 (liste et zone d\'édition) — la fenêtre que Grég
 
     it('employée mais pas dans la bibliothèque : les évaluations sont nommées, la bibliothèque non', async () => {
         const { questions } = await questionChemin2({ dansBibliotheque: false, evaluations: [{ cartoucheId: 'C1' }] });
-        expect(questions[0]).not.toContain('Bibliothèque');
+        // ↻ #1156 : la phrase dit « bibliothèque » en minuscule ; l'absence se teste sans la casse.
+        expect(questions[0]).not.toMatch(/bibliothèque/i);
         expect(questions[0]).toContain("1 évaluation(s) l'emploient");
     });
 
@@ -235,14 +260,16 @@ describe('#647 · † — le chemin sans appelant est retiré, pas corrigé', ()
 // CHEMIN 3 — section 1 de la bibliothèque modale : le plus destructeur, et il le
 // dit — sans un mot de plus quand il n'y a rien à dire.
 // =============================================================================
-async function questionChemin3({ dansBibliotheque, evaluations = [] }) {
+async function questionChemin3({ dansBibliotheque, evaluations = [], idOriginal }) {
     const questions = [];
     const retirer = vi.fn();
     const modifier = vi.fn();
     const fn = instancier(cartouchesJs, 'supprimerCartoucheDefinitivement', {
+        // #1155 — la relation unique, la vraie (extraite de bibliotheque-ui.js plus bas).
+        BibliothequeUI: { lieeAExemplaire },
         db: {
             get: async (k) => ({
-                'h2026_cartouches_G1': [{ id: 'C1', nom: 'Cartouche 1' }],
+                'h2026_cartouches_G1': [{ id: 'C1', nom: 'Cartouche 1', idOriginal }],
                 'h2026_grillesTemplates': [{ id: 'G1', nom: 'Grille A' }],
                 'h2026_evaluationsSauvegardees': evaluations
             })[k] ?? null,
@@ -251,7 +278,7 @@ async function questionChemin3({ dansBibliotheque, evaluations = [] }) {
         cle,
         confirm: (q) => { questions.push(q); return false; },
         window: {},
-        obtenirToutesLesCartouchesBibliotheque: async () => (dansBibliotheque ? [{ id: 'C1', grilleId: 'G1' }] : []),
+        obtenirToutesLesCartouchesBibliotheque: async () => (dansBibliotheque ? [{ id: idOriginal || 'C1', grilleId: 'G1' }] : []),
         retirerCartoucheDeLaBibliotheque: retirer,
         fermerModalBibliothequeCartouches: vi.fn(),
         afficherBanqueCartouches: vi.fn(),
@@ -268,9 +295,16 @@ describe('#647 · chemin 3 (section 1) — la question dit d\'où part la cartou
     it('dans la grille ET la bibliothèque, employée par 2 évaluations : tout est dit', async () => {
         const q = await questionChemin3({ dansBibliotheque: true, evaluations: [{ cartoucheId: 'C1' }, { cartoucheId: 'C1' }, { cartoucheId: 'X' }] });
         expect(q).toMatch(/^Supprimer définitivement la cartouche «Cartouche 1» de sa grille « Grille A » \?\n\n/);
-        expect(q).toContain('Elle part aussi de la Bibliothèque.');
+        expect(q).toContain('Son exemplaire de ta bibliothèque reste.');
+        expect(q).not.toContain('Elle part aussi de la Bibliothèque.');
         expect(q).toContain("2 évaluation(s) l'emploient : leur rétroaction déjà rédigée est conservée.");
         expect(q).toMatch(/\n\nCette action est irréversible\.$/);
+    });
+
+    it('#1155 · ramenée par « ← Utiliser » (id neuf, `idOriginal` = l\'exemplaire) : la phrase aussi', async () => {
+        const q = await questionChemin3({ dansBibliotheque: true, idOriginal: 'C_BIBLIO' });
+        expect(q).toBe('Supprimer définitivement la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\n'
+            + 'Son exemplaire de ta bibliothèque reste.\n\nCette action est irréversible.');
     });
 
     it('témoin négatif : dans sa grille seulement, employée par personne — la grille est nommée (3 sept.), rien de plus', async () => {
@@ -278,10 +312,12 @@ describe('#647 · chemin 3 (section 1) — la question dit d\'où part la cartou
         expect(q).toBe('Supprimer définitivement la cartouche «Cartouche 1» de sa grille « Grille A » ?\n\nCette action est irréversible.');
     });
 
-    it('invariant couplé : ce chemin écrit l\'ancrage ET la bibliothèque — la question dit les deux', () => {
+    // ↻ #1155 : l'invariant change de sens — l'ancrage SEUL ; l'exemplaire de la bibliothèque reste.
+    it('invariant couplé : ce chemin n\'écrit que l\'ancrage — la bibliothèque n\'est que lue, et la question le dit', () => {
         const c = corps(cartouchesJs, 'supprimerCartoucheDefinitivement');
         expect(c).toMatch(/(?:db\.modifier|modifierEtAnnoncer)\(cle\(`cartouches_\$\{grilleId\}`\)/);   // lot E1 : la même file, annoncée
-        expect(c).toContain('retirerCartoucheDeLaBibliotheque(');
+        expect(c).not.toContain('retirerCartoucheDeLaBibliotheque(');
+        expect(c).toContain("'Son exemplaire de ta bibliothèque reste.\\n'");
     });
 
     it('dans sa grille seulement, mais employée : la bibliothèque n\'est pas nommée, les évaluations le sont', async () => {
