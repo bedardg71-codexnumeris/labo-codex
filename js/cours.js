@@ -387,7 +387,7 @@ async function retirerCoursDeBibliotheque(id) {
     if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (retirer un cours de ma sélection)
         await rafraichirBibliothequeCours();
-        notifications.succes('Cours retiré de ta sélection');
+        notifications.succes('Cours mis de côté.');   // #1159 : mots de Cowork (verdict du lot 6, § 2.1)
     }
 }
 
@@ -590,7 +590,7 @@ async function ajouterCoursIndividuel(id) {
     if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (ajouter un cours à ma sélection)
         await rafraichirBibliothequeCours();
-        notifications.succes('Cours ajouté à ta sélection avec succès !');
+        notifications.succes('Cours remis dans tes cours.');   // #1159 : mots de Cowork (verdict du lot 6, § 2.1)
     }
 }
 
@@ -766,7 +766,7 @@ async function partagerTousLesCours() {
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
 
     if (coursDansBibliotheque.length === 0) {
-        notifications.info('Aucun cours à partager dans ta sélection');
+        notifications.info('Aucun cours à exporter.');   // #1159 : plus de « ta sélection » (verdict du lot 6, § 2.1)
         return;
     }
 

@@ -275,23 +275,8 @@
         selectElement.appendChild(optgroup);
     };
 
-    /**
-     * Format d'attribution « par <auteur> [+N contrib.] » pour affichage
-     * dans les métadonnées de carte. Retourne '' si aucun auteur connu.
-     * Lit meta.contributeurs ou item.contributeurs (respecte la licence CC BY).
-     */
-    BibliothequeUI.formaterAttribution = function (item) {
-        if (!item) return '';
-        var meta = item.metadata_cc || item.metadata || {};
-        var auteur = meta.auteur_original || item.auteur || '';
-        if (!auteur) return '';
-        var contribs = meta.contributeurs || item.contributeurs || [];
-        var suffixe = '';
-        if (contribs.length === 1) suffixe = ' +1 contrib.';
-        else if (contribs.length > 1) suffixe = ' +' + contribs.length + ' contrib.';
-        // #467 — l'auteur vient du fichier reçu ; la ligne part dans le HTML de la carte.
-        return 'par ' + echapperHtml(auteur) + suffixe;
-    };
+    // #1159 (verdict du lot 6, § 2.2) — `formaterAttribution` et `formaterMetadonnees` (la ligne de
+    // métadonnées des cartes) sont partis avec l'ancien rendu : les rangées reçoivent leur ligne en texte.
 
     /**
      * Formate la trace d'origine d'un item forké. Retourne
@@ -681,41 +666,6 @@
     };
 
     /**
-     * Phase D (audit biblios 2026-05-09) — Construit la ligne de
-     * métadonnées d'une carte biblio dans un ordre fixe :
-     *   quantité · auteur · discipline
-     *
-     * @param {Object} item - L'item rendu (grille, échelle, cartouche…)
-     * @param {Object} [opts]
-     * @param {string|Function} [opts.quantite] - Texte de quantité
-     *        (ex. "3 critère(s)"). Si Function, appelée avec (item).
-     * @param {boolean|string} [opts.discipline] - true pour utiliser
-     *        item.discipline ; string pour valeur explicite ; falsy
-     *        pour ne pas afficher.
-     * @returns {string} Métadonnées jointes par ' • ' (vide si rien).
-     */
-    BibliothequeUI.formaterMetadonnees = function (item, opts) {
-        opts = opts || {};
-        var parts = [];
-
-        var qte = (typeof opts.quantite === 'function')
-            ? opts.quantite(item)
-            : opts.quantite;
-        if (qte) parts.push(qte);
-
-        // #467 : l'ancien repli sur `item.auteur` est retiré — formaterAttribution le lit déjà.
-        var att = BibliothequeUI.formaterAttribution(item);
-        if (att) parts.push(att);
-
-        var disc = null;
-        if (opts.discipline === true && item) disc = item.discipline;
-        else if (typeof opts.discipline === 'string') disc = opts.discipline;
-        if (disc) parts.push(echapperHtml(disc));   // #467
-
-        return parts.join(' • ');
-    };
-
-    /**
      * Génère le badge source HTML. Phase A.2 + A.4 (audit biblios 2026-05-09) :
      * - Plus de badge `Bibliothèque` (no-op contextuel — la modale s'appelle déjà ainsi)
      * - Plus de badge violet `Démo` (items démo filtrés par A.0 en mode normal)
@@ -748,26 +698,9 @@
     };
 
     /**
-     * Convertit une chaine onclick legacy en attributs data-action.
-     * Ex: "fn('a')" -> 'data-action="fn" data-param="a"'
-     *     "fn('a', 'b')" -> 'data-action="fn" data-param="a" data-param2="b"'
-     */
-    function onclickToDataAttrs(onclickStr) {
-        if (!onclickStr) return '';
-        var m = onclickStr.match(/^([a-zA-Z0-9_.]+)\(([^)]*)\)$/);
-        if (!m) return 'data-action="' + onclickStr.replace(/[()'"]/g, '') + '"';
-        var fnName = m[1];
-        var argsStr = m[2].trim();
-        if (!argsStr) return 'data-action="' + fnName + '"';
-        var args = argsStr.split(/,\s*/).map(function(a) { return a.replace(/^['"]|['"]$/g, ''); });
-        var attrs = 'data-action="' + fnName + '" data-param="' + args[0] + '"';
-        if (args[1] !== undefined) attrs += ' data-param2="' + args[1] + '"';
-        if (args[2] !== undefined) attrs += ' data-param3="' + args[2] + '"';
-        return attrs;
-    }
-
-    /**
-     * Génère les attributs d'un bouton : supporte {action, param} (délégué) ou {onclick} (legacy)
+     * Génère les attributs d'un bouton {action, param, param2, param3}. #1159 (verdict du lot 6, § 2.2) :
+     * la branche héritée `{onclick}` (`onclickToDataAttrs`, qui n'échappait pas ses paramètres) est retirée ;
+     * plus aucun appelant ne la passait.
      *
      * ⚠ CONTEXTE D'ATTRIBUT (CT-29, 25 août 2026) — `echapperAttribut`, pas
      * `echapperHtml` : la seconde n'encode pas les guillemets. Les `param*`
@@ -778,7 +711,7 @@
      * le bouton. `el.dataset.param*` décode les entités : le dispatcher de
      * main.js lit exactement la même valeur qu'avant.
      *
-     * @param {Object} btn - {label, classe, title, onclick?, action?, param?}
+     * @param {Object} btn - {label, classe, title, action, param?, param2?, param3?}
      * @returns {string} attributs HTML du bouton
      */
     function _btnAttrs(btn) {
@@ -788,10 +721,6 @@
             if (btn.param2 != null) attrs += ' data-param2="' + echapperAttribut(btn.param2) + '"';
             if (btn.param3 != null) attrs += ' data-param3="' + echapperAttribut(btn.param3) + '"';
             return attrs;
-        }
-        // Legacy onclick string → convertir en data-action via parsing
-        if (btn.onclick) {
-            return onclickToDataAttrs(btn.onclick);
         }
         return '';
     }

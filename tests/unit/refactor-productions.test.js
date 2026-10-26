@@ -51,7 +51,6 @@ beforeAll(() => {
             filtrerParModeDemo: (arr) => arr,
             formaterTitreDemo: (titre) => titre,
             estItemDemo: () => false,
-            formaterMetadonnees: () => '',
             formaterInspireDe: () => '',
             fermerModal: () => {},
             renderAvertissementDoublons: () => '',

@@ -1153,7 +1153,7 @@ function masquerGroupeCoursDepuisBibliotheque(gcId) {
         fermerModalBibliothequeGroupeCours();
         ouvrirModalBibliothequeGroupeCours();
 
-        notifications.succes('Groupe-cours masqué');
+        notifications.succes('Groupe-cours mis de côté.');   // #1159 : mots de Cowork (verdict du lot 6, § 2.1)
     }
 }
 
@@ -1180,7 +1180,7 @@ function afficherGroupeCoursDepuisBibliotheque(gcId) {
         fermerModalBibliothequeGroupeCours();
         ouvrirModalBibliothequeGroupeCours();
 
-        notifications.succes('Groupe-cours affiché');
+        notifications.succes('Groupe-cours remis dans le menu.');   // #1159 : mots de Cowork (verdict du lot 6, § 2.1)
     }
 }
 
