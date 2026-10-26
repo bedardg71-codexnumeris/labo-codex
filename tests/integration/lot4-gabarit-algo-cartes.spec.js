@@ -46,8 +46,9 @@ const LIRE = `() => {
         chaineOuverte: [...l.querySelectorAll('.atelier-algo-chaine .bc-ouvert')].map(b => b.dataset.etape),
         rangeeAvantSousCriteres: l.innerHTML.indexOf('data-champ="nom"') < l.innerHTML.indexOf('sous-criteres-conteneur--en-tete'),
         sousCriteresDansCodes: !!l.querySelector('.atelier-algo-etape[data-etape="codes"] .sous-criteres-conteneur--en-tete'),
-        commentaire: l.innerHTML.includes("Modèle des phrases (bilan et décompte)") && !l.innerHTML.includes("Modèle d'observation") && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
-        euf: [...l.querySelectorAll('option')].some(o => o.textContent === "Projection à l'EUF"),
+        commentaire: l.innerHTML.includes("Modèle des phrases</label>") && !l.innerHTML.includes("Modèle d'observation") && !l.innerHTML.includes('Modèle de rétroaction') && !l.innerHTML.includes('Modèle de commentaire'),
+        // ↻ Lot 3a (26 oct. 2026) : le menu des modèles est parti ; la limite fixée se dit par « Retirer la limite ».
+        euf: !!l.querySelector('[data-action="retirerLimiteAlgo"]'),
         motsReference: (l.querySelector('input[data-param-cle="motsReference"]') || {}).value,
         cartes: l.querySelectorAll('.gabarit-algo-carte').length
     };
@@ -103,8 +104,8 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     expect(etat.sousCriteresDansCodes, 'les sous-critères sont dans l\'étape « Codes »').toBe(true);
     expect(etat.plis).toEqual(SEUL('eleve'));
     expect(etat.chaineOuverte).toEqual(['eleve']);
-    expect(etat.commentaire, '« Modèle des phrases (bilan et décompte) » (carte « Bilan », 1.120), ni « observation », ni « rétroaction » ni « commentaire »').toBe(true);
-    expect(etat.euf, '« Projection à l\'EUF » au menu de projection').toBe(true);
+    expect(etat.commentaire, '« Modèle des phrases » (ébauche du 26 oct.), ni « observation », ni « rétroaction » ni « commentaire »').toBe(true);
+    expect(etat.euf, 'la limite fixée : « Retirer la limite »').toBe(true);
     expect(etat.cartes, 'plus aucune carte du composant accordéon pour le gabarit').toBe(0);
 
     // 2 — ouvrir « Paliers » À LA SOURIS, puis TAPER dans un de ses champs : elle reste ouverte, seule.
@@ -149,14 +150,13 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     console.log('PALIER « Sans erreur » →', JSON.stringify(mesure));
     expect(mesure.scroll, 'le texte tient dans le champ').toBeLessThanOrEqual(mesure.client);
     expect(mesure.largeur).toBeGreaterThan(120);
-    // La note du composeur (texte troué, étape 2 — elle remplace « Écris {service}… ») : une seule, sous les paliers.
-    await expect(page.locator('#listeCriteres .atelier-algo-etape[data-etape="paliers"] .palier-note-composer')).toHaveCount(1);
-    // §8 e) et g) : les paliers sont numérotés (« Palier 1 »… sans chevrons), la rangée dit « Description » (D1, 17 oct.).
-    const etiquettes = await page.locator('#listeCriteres .palier-projection .sous-critere-label-petit').evaluateAll(els => els.map(e => e.textContent.trim()).filter(t => t.startsWith('Palier')));
-    expect(etiquettes[0]).toBe('Palier 1');
-    expect(etiquettes.length).toBeGreaterThan(1);
-    expect(etiquettes).toEqual(etiquettes.map((_, i) => 'Palier ' + (i + 1)));
-    await expect(page.locator('#listeCriteres .palier-projection .pipeline-btn-reorder')).toHaveCount(0);
+    // ↻ Lot 3a (26 oct. 2026) : l'introduction de la table (qui porte la décision sur le préfixe), une seule ; les
+    // rangées disent QUAND elles s'appliquent (plus de numéro), sans chevrons — l'ordre est le seuil.
+    await expect(page.locator('#listeCriteres .atelier-algo-etape[data-etape="paliers"] .table-cas-ou')).toHaveCount(1);
+    const quand = await page.locator('#listeCriteres .table-cas-rangee .table-cas-quand strong').allTextContents();
+    expect(quand[0]).toBe('Rien de compté');
+    expect(quand[quand.length - 1]).toBe('Au-delà du dernier seuil');
+    await expect(page.locator('#listeCriteres .table-cas-rangee .pipeline-btn-reorder')).toHaveCount(0);
     await expect(page.locator('#listeCriteres label', { hasText: /^Description$/ })).toHaveCount(1);
     await expect(page.locator('#listeCriteres label', { hasText: /^Descripteur$/ })).toHaveCount(0);
 
@@ -207,10 +207,11 @@ test('lot 4 · C — sous-critères en tête, cartes nommées, et la carte reste
     // 7 — §7 c) : la corbeille supprime un palier et un sous-critère (à la souris, dans une carte dépliée
     //     ou à plat) ; aucun « ✕ » ne reste dans l'éditeur.
     await expect(page.locator('#listeCriteres .btn-supprimer')).toHaveCount(0);
-    const nbPaliersAvant = await page.locator('#listeCriteres .palier-projection').count();
+    const nbPaliersAvant = await page.locator('#listeCriteres .table-cas-rangee').count();
     await cliquerDom(carte(page, 'projection').locator('.atelier-algo-etape-tete'));   // ↻ #1150 : l'étape des paliers
-    await cliquerDom(page.locator('#listeCriteres .palier-projection').last().locator('.bloc-retirer-coin'));
-    await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(nbPaliersAvant - 1);
+    // ↻ Lot 3a : un palier se retire par « Retirer ce palier », au pied de sa rangée.
+    await cliquerDom(page.locator('#listeCriteres .table-cas-rangee').last().locator('[data-action="supprimerPalierProjectionGrille"]'));
+    await expect(page.locator('#listeCriteres .table-cas-rangee')).toHaveCount(nbPaliersAvant - 1);
     await expect(page.locator('#listeCriteres .sous-critere-input-code')).toHaveCount(1);
     await cliquerDom(carte(page, 'codes').locator('.atelier-algo-etape-tete'));   // ↻ #1150 : l'étape des sous-critères
     // §8 f : le sous-critère porte chevrons + corbeille en coin — la corbeille est le bouton d'icône du coin.

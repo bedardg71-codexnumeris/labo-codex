@@ -3781,14 +3781,37 @@ function rendreChampEnonceAlgo(c, e, ctx, critere) {
         : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
     const nom = (typeof window.paletteAlgo !== 'undefined')
         ? window.paletteAlgo.nomDeZone({ enonceCle: c.cle }, critere) : c.libelle;
+    // ↻ Lot 3a (ébauche du 26 oct.) : l'aide de l'atelier (qui lit la phrase, et quand), qui la lit (« Toi
+    // seul·e » pour « Aucune annotation »), et « Revenir au modèle » — le texte du modèle POUR CE CRITÈRE
+    // (`enoncesAlgo.defautEnonce` : le « Quand tout est maîtrisé » d'un critère neuf est le sien).
+    const A = window.atelierAlgo ? window.atelierAlgo.TEXTES : null;
+    const aide = (A && A.aides[c.cle]) || c.aide;
+    const cible = estTemp ? 'temp' : ctx.grilleId;
+    const toi = c.cle === 'aucune';
+    const publicZone = A ? `<span class="table-cas-public${toi ? ' table-cas-public--toi' : ''}">${esc(toi ? 'Toi seul·e' : A.cas.public)}</span>` : '';
+    const revenir = A ? `<button type="button" class="table-cas-lien zone-revenir" data-action="revenirAuModeleEnonce" data-param="${esc(cible)}" data-param2="${ctx.index}" data-param3="${esc(c.cle)}">${esc(A.modele)}</button>` : '';
     return `
                     <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(nom)}</label>
+                        <span class="table-cas-zone-tete"><span class="table-cas-zone-nom">${esc(nom)}</span>${publicZone}${revenir}</span>
                         <textarea class="controle-form" rows="2"
                                   data-on-change="${handlerTexte}" ${datasCommunes} data-enonce-cle="${esc(c.cle)}" data-nom-zone="${esc(nom)}"
-                                  title="${esc(c.aide)}">${esc(e.enonces[c.cle])}</textarea>
-                        <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 2px;">${esc(c.aide)}</small>
+                                  aria-label="${esc(nom)}" title="${esc(aide)}">${esc(e.enonces[c.cle])}</textarea>
+                        <small class="table-cas-petit">${esc(aide)}</small>
                     </div>`;
+}
+
+/**
+ * « Revenir au modèle » (lot 3a) — la zone reprend le texte du modèle de CE critère : rien n'est écrit pour
+ * elle (`appliquerAuCritere` n'écrit que ce qui diffère du défaut), le critère relit le défaut à chaque rendu.
+ */
+async function revenirAuModeleEnonce(cible, index, cleEnonce) {
+    const ecrit = await _modifierCritereCible(cible, index, (c) => {
+        if (c.type !== 'algorithmique') return false;
+        const e = window.enoncesAlgo.normaliser(c);
+        window.enoncesAlgo.appliquerAuCritere(c, e.modeleId,
+            _enoncesEditesDepuis(c, cleEnonce, window.enoncesAlgo.defautEnonce(c, cleEnonce)));
+    });
+    if (ecrit) await _redessinerCible(cible);
 }
 
 /**
@@ -3822,6 +3845,7 @@ function rendrePaletteAlgo(critere, ctx) {
                                 data-action="insererRepereEnonce" data-jeton="${esc(b.jeton)}" aria-disabled="true"
                                 title="${esc(b.aide + (b.precision ? ' ' + b.precision : ''))}">
                             <span class="palette-algo-bloc-nom">${esc(b.nom)}</span>
+                            <span class="palette-algo-bloc-valeur" aria-hidden="true"></span>
                             <span class="palette-algo-bloc-aide">${esc(b.aide)}</span>${b.precision ? `
                             <span class="palette-algo-bloc-precision">${esc(b.precision)}</span>` : ''}
                             <span class="palette-algo-bloc-inactif">${esc(T.inactif)}</span>
@@ -3838,7 +3862,8 @@ function rendrePaletteAlgo(critere, ctx) {
                         <ol class="palette-algo-gestes">${T.gestes.map((g, n) => `<li><span class="palette-algo-geste-n" aria-hidden="true">${n + 1}</span><span>${esc(g)}</span></li>`).join('')}</ol>
                         <p class="palette-algo-cible" aria-live="polite">${esc(T.invitation)}</p>
                     </header>
-                    <p class="palette-algo-astuce">${esc(T.astuce)}</p>${groupes}
+                    <p class="palette-algo-astuce">${esc(T.astuce)}</p>
+                    <p class="palette-algo-legende">${esc(T.legende)}</p>${groupes}
                 </aside>`;
 }
 
@@ -3883,7 +3908,7 @@ function rendreBlocEnoncesAlgo(critere, ctx) {
     return `
             <div>
                 <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle des phrases (bilan et décompte)</label>
+                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(window.atelierAlgo ? window.atelierAlgo.TEXTES.modelePhrases : 'Modèle des phrases')}</label>
                     <select class="controle-form"
                             data-on-change="${handlerModele}" ${datasCommunes}>
                         ${options}
@@ -3952,7 +3977,7 @@ function rendreActivationCodes(critere, ctx) {
     const sansPoids = (critere.sousCriteres || []).length - n;
     const note = actif
         ? `Sur toute copie évaluée avec cette grille, la palette des codes montre ${n === 1 ? 'ce sous-critère' : 'ces ' + n + ' sous-critères'} : le numéro est le code, avec le nom, la couleur et l'observation d'ici.`
-        : `Décochée : la palette montre les dix codes de l'écran Annoter › palette, comme avant.`;
+        : `Ce critère utilise encore les dix codes de la palette générale ; tu les configures dans Annoter, sous l’engrenage de la palette.`;   // lot 3a (ébauche du 26 oct.)
     const precision = sansPoids > 0
         ? ` Un sous-critère de pondération 0 n'est pas un code posable (${sansPoids === 1 ? 'un ici' : sansPoids + ' ici'}).`
         : '';
@@ -4023,17 +4048,39 @@ async function modifierCodesDepuisSousCriteresHandler(el) {
     if (ecrit) await _redessinerCible(cible);
 }
 
+/**
+ * LA TABLE DES PALIERS — l'étape « Cas d'interprétation » de l'atelier, lot 3a de la table de cas
+ * (26 oct. 2026, consigne `CONSIGNE-LOT-2026-10-26-critere-algorithmique-table-de-cas-3a.md` ; ébauche validée,
+ * `EBAUCHE-2026-10-26-table-de-cas.html`). Elle reprend TOUT ce que faisait la carte des paliers (#668, lots
+ * B et 2b) : les cinq réglages de la limite, le seuil de chaque palier, son nom court, son verdict, sa
+ * recommandation, son signalement, ajouter et retirer un palier, les collections — disposé en table : une
+ * rangée par palier, trois colonnes (Quand · Nom court · L'étudiant·e lit) qui s'empilent quand la place
+ * manque (`styles.css`, `.table-cas`).
+ *   · « Fixer une limite » / « Retirer la limite » remplacent le menu « Modèle de projection »
+ *     (`projectionAlgo.fixerLimite` / `retirerLimite`) ; retirer GARDE ce qui est écrit.
+ *   · Les collections se reprennent par l'en-tête (« Reprendre une de tes collections… ») : même geste
+ *     (copie, aucun lien).
+ *   · Le seuil se règle en POURCENTAGE de la limite ; il s'enregistre comme avant (`ratioMax`).
+ *   · La copie fictive (l'atelier) marque la rangée qu'elle atteint et règle la simulation sur un palier
+ *     (« Voir ce que l'étudiant·e lirait à ce palier ») : `atelierAlgo`, après chaque rendu.
+ * Les mots : `atelierAlgo.TEXTES.cas`. Zéro handler inline, `esc()` sur tout ce que l'enseignant·e écrit ;
+ * les zones restent les `<textarea>` d'hier (mêmes `data-palier-index`, `data-champ`, mêmes handlers).
+ */
 function rendreBlocProjectionAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
-    if (typeof window.projectionAlgo === 'undefined') return '';
+    if (typeof window.projectionAlgo === 'undefined' || typeof window.atelierAlgo === 'undefined') return '';
 
-    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t)) : '');
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
     const nb = (v) => (v === undefined || v === null || v === '') ? '' : esc(v);
-    const p = window.projectionAlgo.normaliser(critere);
-    const modeles = window.projectionAlgo.listerModeles();
+    const fmt = (v) => (typeof window.formaterNombre === 'function' ? window.formaterNombre(v) : String(v));
+    const P = window.projectionAlgo, E = window.enoncesAlgo;
+    const T = window.atelierAlgo.TEXTES.cas;
+    const p = P.normaliser(critere);
+    const N = E.noms(critere);
+    const fixee = !!p.modele.projette;
 
     const estTemp = ctx.mode === 'temp';
-    const hModele = estTemp ? 'modifierModeleProjectionTempHandler' : 'modifierModeleProjectionGrilleHandler';
+    const cible = estTemp ? 'temp' : ctx.grilleId;
     const hParam = estTemp ? 'modifierParamProjectionTempHandler' : 'modifierParamProjectionGrilleHandler';
     const hPalier = estTemp ? 'modifierPalierProjectionTempHandler' : 'modifierPalierProjectionGrilleHandler';
     const datas = estTemp
@@ -4042,232 +4089,184 @@ function rendreBlocProjectionAlgo(critere, ctx) {
     const actionAjout = estTemp ? 'ajouterPalierProjectionTemp' : 'ajouterPalierProjectionGrille';
     const actionRetrait = estTemp ? 'supprimerPalierProjectionTemp' : 'supprimerPalierProjectionGrille';
     const paramsAction = estTemp ? `data-param="${ctx.index}"` : `data-param="${esc(ctx.grilleId)}" data-param2="${ctx.index}"`;
-    const paramPalier = estTemp ? 'data-param2' : 'data-param3';
+    const paramsCible = `data-param="${esc(cible)}" data-param2="${ctx.index}"`;
+    const ident = (x) => `cas-${esc(cible)}-${ctx.index}-${x}`;
 
-    const options = modeles.map(m =>
-        `<option value="${esc(m.id)}"${m.id === p.modeleId ? ' selected' : ''}>${esc(m.nom)}</option>`
-    ).join('');
-
-    // Lot B (5 sept. 2026) — LES COLLECTIONS DE PARAMÈTRES : les jeux nommés du trimestre
-    // (`collectionsProjection`), sous un sous-titre, APRÈS les modèles livrés (liste fermée,
-    // intouchée). La valeur porte le préfixe `collection:` que les deux handlers du menu
-    // reconnaissent. Choisir COPIE (décision de Grégoire, 4 sept.) : le menu montre ensuite le
-    // modèle copié, pas la collection — le critère ne garde aucun lien.
-    // ↻ 21 oct. 2026 (constat 11, Grégoire, 8 h 31 : « Labo Anatomie » lu comme une propriété du critère) :
-    // la liste des collections, avec la corbeille et la ligne qui dit la copie, ne suit plus le menu.
-    // Elle prend le titre du menu, « Mes collections », et vient en fin de carte, à côté de
-    // « Enregistrer ces paliers sous un nom… » : ce qu'on gère pour tout le trimestre, après ce critère.
+    // Lot B (5 sept. 2026) — LES COLLECTIONS DU TRIMESTRE (`collectionsProjection`). Choisir COPIE (décision
+    // de Grégoire, 4 sept.) : le critère ne garde aucun lien. ↻ Lot 3a : on les reprend par l'en-tête, la liste
+    // et sa corbeille viennent en fin de table, avec « Enregistrer ces paliers sous un nom… ».
     const collections = (typeof window.collectionsProjection !== 'undefined') ? window.collectionsProjection.lister() : [];
-    const optionsCollections = collections.length ? `
-                        <optgroup label="Mes collections">${collections.map((c) => `
-                            <option value="collection:${esc(c.id)}">${esc(c.nom)}</option>`).join('')}
-                        </optgroup>` : '';
-    const cibleCollection = estTemp ? 'temp' : ctx.grilleId;
+    const menuCollections = collections.length ? `
+                        <label class="table-cas-selon table-cas-reprendre">
+                            <span class="u-lecteur-ecran">${esc(T.reprendreLecteur)}</span>
+                            <select class="controle-form" data-on-change="reprendreCollectionProjectionHandler" data-grille-id="${esc(cible)}" data-critere-index="${ctx.index}">
+                                <option value="">${esc(T.reprendre)}</option>${collections.map((c) => `
+                                <option value="${esc(c.id)}">${esc(c.nom)}</option>`).join('')}
+                            </select>
+                        </label>` : '';
     const listeCollections = collections.length ? `
-                <div class="collections-section">
-                    <h4 class="collections-titre">Mes collections</h4>
-                    <div class="collections-liste">${collections.map((c) => `
-                        <div class="collection-ligne"><span class="collection-nom">${esc(c.nom)}</span>${retirerBloc({ action: 'supprimerCollectionProjection', param: c.id, param2: cibleCollection, param3: ctx.index, titre: 'Supprimer la collection « ' + esc(c.nom) + ' »' })}</div>`).join('')}
+                    <div class="collections-section">
+                        <h5 class="collections-titre">${esc(T.collections)}</h5>
+                        <ul class="collections-liste">${collections.map((c) => `
+                            <li class="collection-ligne"><span class="collection-nom">${esc(c.nom)}</span>
+                                <button type="button" class="table-cas-lien" data-action="supprimerCollectionProjection" data-param="${esc(c.id)}" data-param2="${esc(cible)}" data-param3="${ctx.index}">${esc(T.supprimerCollection)}</button></li>`).join('')}
+                        </ul>
+                        <small class="collections-aide">${esc(T.collectionsAide)}</small>
+                    </div>` : '';
+
+    const tete = `
+                    <div class="table-cas-tete">
+                        <h4 class="table-cas-titre" id="${ident('titre')}">${esc(T.titre)}</h4>
+                        <span class="table-cas-selon">${esc(T.selon)} <span class="table-cas-repere">${esc(T.repere)}</span></span>${menuCollections}${fixee ? `
+                        <button type="button" class="table-cas-lien table-cas-retirer" data-action="retirerLimiteAlgo" ${paramsCible}>${esc(T.retirer)}</button>` : ''}
+                    </div>`;
+
+    // Sans limite : rien à régler ; le dire, et le geste qui la fixe. Les collections restent accessibles.
+    if (!fixee) {
+        return `
+                <section class="table-cas" aria-labelledby="${ident('titre')}">${tete}
+                    <div class="table-cas-corps">
+                        <p class="table-cas-vide">${esc(T.sansLimite)}</p>
+                        <button type="button" class="btn btn-secondaire btn-tres-compact table-cas-fixer" data-action="fixerLimiteAlgo" ${paramsCible}>${esc(T.fixer)}</button>${listeCollections}
                     </div>
-                    <small class="collections-aide">Choisir une collection copie ses paliers et ses réglages dans ce critère. Corriger ou supprimer la collection ensuite ne change pas cette grille, ni ce qu'un élève a déjà lu.</small>
-                </div>` : '';
-
-    const enTete = `
-                <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de projection</label>
-                    <select class="controle-form" data-on-change="${hModele}" ${datas}>
-                        ${options}${optionsCollections}
-                    </select>
-                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(p.modele.description)}</small>
-                </div>`;
-
-    // ↻ #1150, lot 4 (24 oct. 2026) : le décompte (§8 du 5 sept.) a quitté cette carte, devenue l'étape
-    // « Paliers » : il se compose dans l'étape « Ce que l'élève lit », avec le bilan (`rendreBlocEnoncesAlgo`).
-
-    // « Aucune projection » : rien d'autre à régler. Le dire, plutôt que de
-    // laisser un bloc vide qui ressemble à un chargement raté.
-    if (!p.modele.projette) {
-        return `${enTete}
-                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 6px;">
-                    Aucune projection ne sera proposée à l'élève pour ce critère.
-                </small>` + listeCollections;
+                </section>${rendreChoixAppAlgo(critere)}`;
     }
 
-    const champsParams = p.modele.parametres.map(par => {
-        const commun = `data-on-change="${hParam}" ${datas} data-param-cle="${esc(par.cle)}" title="${esc(par.aide)}"`;
-        const champ = (par.type === 'texte')
-            ? `<input type="text" class="controle-form" value="${esc(p.params[par.cle])}" ${par.max ? `maxlength="${esc(par.max)}"` : ''} ${commun}>`
-            : `<input type="number" class="controle-form" value="${nb(p.params[par.cle])}" min="${nb(par.min)}" max="${nb(par.max)}" ${commun}>`;
+    // Les cinq réglages : les champs du registre, nommés pour CE critère (ses noms, § 3.6).
+    const params = {};
+    p.modele.parametres.forEach((par) => { params[par.cle] = par; });
+    const champ = (cleParam, libelle, exemple, aide) => {
+        const par = params[cleParam];
+        if (!par) return '';
+        const commun = `id="${ident(cleParam)}" data-on-change="${hParam}" ${datas} data-param-cle="${esc(cleParam)}" placeholder="${esc(exemple)}"`;
+        const saisie = (par.type === 'texte')
+            ? `<input type="text" class="controle-form" value="${esc(p.params[cleParam])}" ${par.max ? `maxlength="${esc(par.max)}"` : ''} ${commun}>`
+            : `<input type="number" class="controle-form" inputmode="decimal" value="${nb(p.params[cleParam])}" min="${nb(par.min)}" max="${nb(par.max)}" ${commun}>`;
         return `
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(par.libelle)}</label>
-                        ${champ}
-                    </div>`;
-    }).join('');
+                        <div class="groupe-form">
+                            <label class="table-cas-etiquette" for="${ident(cleParam)}">${esc(libelle)}</label>
+                            ${saisie}${aide ? `
+                            <small class="table-cas-petit">${esc(aide)}</small>` : ''}
+                        </div>`;
+    };
+    const complete = P.limiteComplete(critere);
+    const seuil = complete ? P.libelleSeuil(critere, N) : '';
 
-    // Le seuil dans les DEUX unités — comme libelleSymbolique dit la formule.
-    // Le ratio normalisé, lui, ne s'affiche jamais à l'élève ; ici il sert à
-    // l'enseignant·e, toujours accompagné de son équivalent en mots.
-    //
-    // ↻ 4 SEPT. 2026 (coup d'œil de Grégoire, retouche b) — UN PALIER SUR DEUX RANGÉES,
-    // pas quatre : « Palier · Jusqu'à », puis « Ce que l'élève lit · Phrase de
-    // recommandation », côte à côte dans la grille du formulaire groupe-cours
-    // (`grille-form-2col`, empruntée telle quelle — mesuré : elle ne s'empile pas sur
-    // iPad en portrait, ce formulaire-là non plus). Le nom du palier a toute sa colonne
-    // (« Sans erreur » s'affichait « Sans erre » dans les 80 px du code d'un
-    // sous-critère). La corbeille en coin (retouche c). La note « Écris {service}… »
-    // UNE fois, sous les paliers, pas sous chacun.
-    //
-    // ↻ §8 e) — LES PALIERS SONT NUMÉROTÉS par rang (« Palier 1 »…, « Sans erreur »
-    // compris) et N'ONT PAS de chevrons : le calcul lit les paliers dans leur ordre
-    // (`_paliersDeRatio`, le terminal en dernier), l'ordre EST le seuil, un déplacement à
-    // la main pourrait le contredire. ▣ Mesuré : ni le registre ni les handlers ne rangent
-    // les paliers par seuil à la saisie — inscrit, rien n'est réécrit dans les grilles.
-    // ↻ Étape 2b (22 oct. 2026) : la rangée de badges de chaque palier est partie — la palette du
-    // critère (`rendrePaletteAlgo`) sert ses deux zones, qui portent leur nom (`data-nom-zone`).
-    // Un jeton INCONNU de cette version reste dans le texte au rendu — l'élève le
-    // lirait tel quel. Le gabarit le DIT sous le palier, comme `herite` le dit pour
-    // un modèle inconnu (carte du 4 sept., §d : le risque nommé de ce lot).
+    // Un jeton INCONNU de cette version reste dans le texte au rendu — l'étudiant·e le lirait tel quel. La
+    // table le DIT sous le palier (carte du 4 sept., §d).
     const ligneInconnus = (pal) => {
-        const inconnus = (typeof window.projectionAlgo.jetonsInconnus === 'function')
-            ? window.projectionAlgo.jetonsInconnus((pal.texte || '') + ' ' + (pal.texteAide || '')) : [];
+        const inconnus = P.jetonsInconnus((pal.texte || '') + ' ' + (pal.texteAide || ''));
         if (!inconnus.length) return '';
         const un = inconnus.length === 1;
         return `
-                            <small class="palier-jetons-inconnus" style="font-size: 0.78rem; color: var(--orange-accent); display: block; margin-top: 4px;">
-                                ${un ? 'Le badge' : 'Les badges'} ${inconnus.map(j => '« ' + esc(j) + ' »').join(', ')} ${un ? 'est inconnu' : 'sont inconnus'} de cette version de l'application : l'élève ${un ? 'le lirait tel quel' : 'les lirait tels quels'}.
-                            </small>`;
+                                <small class="palier-jetons-inconnus">${un ? 'Le badge' : 'Les badges'} ${inconnus.map(j => '« ' + esc(j) + ' »').join(', ')} ${un ? 'est inconnu' : 'sont inconnus'} de cette version de l'application : l'étudiant·e ${un ? 'le lirait tel quel' : 'les lirait tels quels'}.</small>`;
     };
-
-    // ↻ §5 (4 sept. 2026, 18 h 38 — coup d'œil de Grégoire : « on compose dans le palier,
-    // on lit le résultat dans une autre carte, plus bas, repliée ») : L'APERÇU VIENT SOUS
-    // CHAQUE PALIER. C'est l'aperçu au niveau du gabarit des arrêtés 4 et 5 (ce que l'élève
-    // lit vient de deux blocs à la fois) : la copie FICTIVE de ce palier
-    // (`projectionAlgo.copiesExemple`, retrouvée par sa `cle`), et la phrase = décompte du
-    // bloc 3 PUIS projection du bloc 2, dans l'ordre exact où
-    // `_construireRetroactionAlgoCategories` (evaluation-calcul.js) les concatène. Rendu
-    // pur, aucun état : le gabarit se redessine à chaque frappe, l'aperçu suit. La copie
-    // non corrigée n'a AUCUNE phrase (l'application s'arrête sans erreurs ni mots) : une
-    // ligne en bas de la carte le dit, une fois. ⚠ Ce que l'aperçu ne montre pas, et dit :
-    // la rétroaction du sous-critère dominant, qui dépend des codes posés sur une vraie copie.
-    const apercuPossible = typeof window.enoncesAlgo !== 'undefined'
-        && typeof window.projectionAlgo.copiesExemple === 'function';
-    const copies = apercuPossible ? window.projectionAlgo.copiesExemple(critere) : [];
-    // ↻ §7 (5 sept. 2026, 6 h 50 — coup d'œil de Grégoire : rien ne montrait que la ligne
-    // grise est FABRIQUÉE à partir des deux zones) : la ligne rend DEUX segments. En gris,
-    // ce qui est engendré — le décompte du bloc 3, puis le préfixe « Tu fais en moyenne… »
-    // s'il y en a un ; dans l'encre normale, ce qu'il a écrit — verdict et recommandation,
-    // remplis. `_resultat` rend `prefixe` ET `texte` = préfixe + ' ' + verdict : le préfixe
-    // se retire par sa LONGUEUR, pas par regex. Verdict et recommandation restent UN seul
-    // segment : les séparer exigerait de changer le module de projection (hors périmètre).
-    const segmentsDe = (copie) => {
-        const decompte = window.enoncesAlgo.enonce(critere, 'decompte', { erreurs: copie.erreurs, mots: copie.mots });
-        const projection = window.projectionAlgo.calculer(critere, { erreurs: copie.erreurs, mots: copie.mots });
-        const prefixe = projection.applicable ? (projection.prefixe || '') : '';
-        const texte = projection.applicable ? (projection.texte || '') : '';
-        return {
-            engendre: [decompte, prefixe].filter(Boolean).join(' '),
-            ecrit: (prefixe && texte.startsWith(prefixe)) ? texte.slice(prefixe.length).trim() : texte
-        };
+    const aideReco = (aide) => {
+        if (/[:—–-]\s*\{service\}/.test(aide || '')) return T.aideReco.apposition;
+        if ((aide || '').indexOf('{service}') >= 0) return T.aideReco.service;
+        return T.aideReco.toujours;
     };
-    const ligneApercu = (pal) => {
-        const copie = copies.find((c) => c.corrigee && c.cle === pal.cle);
-        if (!copie) return '';
-        const s = segmentsDe(copie);
-        const vide = !s.engendre && !s.ecrit;
-        // Étape 2a (22 oct. 2026) : la copie fictive se dit avec les deux noms du critère.
-        const nomsCopie = window.enoncesAlgo.noms(critere);
-        return `
-                            <div class="palier-apercu">
-                                <span class="palier-apercu-mot">L'élève lira :</span>
-                                <span class="palier-apercu-engendre">${esc(s.engendre)}</span>
-                                <span class="palier-apercu-ecrit">${esc(s.ecrit)}</span>${vide ? '<em class="palier-apercu-vide">aucune phrase — le décompte est vide et ce palier ne dit rien</em>' : ''}
-                                <span class="palier-apercu-copie">— copie fictive, ${esc(copie.erreurs)} ${esc(window.enoncesAlgo.accorder(copie.erreurs, nomsCopie.erreurs))} pour ${esc(copie.mots)} ${esc(window.enoncesAlgo.accorder(copie.mots, nomsCopie.mots))}</span>
-                            </div>`;
-    };
-
-    const nomZonePalier = (i, champ) => (typeof window.paletteAlgo !== 'undefined')
+    const nomZone = (i, champ) => (typeof window.paletteAlgo !== 'undefined')
         ? window.paletteAlgo.nomDeZone({ palierIndex: i, champ: champ }, critere) : '';
-    const paliers = p.paliers.map((pal, i) => {
-        const mpe = window.projectionAlgo.motsParErreurDuRatio(critere, pal.ratioMax);
-        const seuilCol = pal.sansErreur
-            ? `<span style="font-size: 0.78rem; color: var(--gris-clair);">aucune erreur</span>`
-            : (pal.ratioMax === null
-                ? `<span style="font-size: 0.78rem; color: var(--gris-clair);">au-delà du dernier seuil</span>`
-                : `<input type="number" class="controle-form sous-critere-input-standard"
-                          value="${esc(pal.ratioMax)}" min="0.01" max="100" step="0.05"
-                          data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="ratioMax"
-                          title="Seuil en ratio normalisé. 1 = exactement au seuil de l'épreuve.">
-                   <small style="font-size: 0.72rem; color: var(--gris-clair);">soit 1 erreur / ${mpe === null ? '?' : esc(Math.round(mpe * 10) / 10)} mots</small>`);
-        const retirer = retirerBloc(estTemp
-            ? { action: actionRetrait, param: ctx.index, param2: i, coin: true, titre: 'Supprimer ce palier' }
-            : { action: actionRetrait, param: ctx.grilleId, param2: ctx.index, param3: i, coin: true, titre: 'Supprimer ce palier' });
+
+    const quand = (pal, i) => {
+        if (pal.sansErreur) {
+            return `<strong>${esc(T.rienCompte)}</strong><span class="table-cas-petit">0 ${esc(N.erreurs.singulier)}</span>`;
+        }
+        if (pal.ratioMax === null) {
+            const t = p.params.erreursTolerees, l = p.params.motsReference;
+            return `<strong>${esc(T.auDela)}</strong>${complete ? `<span class="table-cas-petit">${esc(T.plusDe(
+                fmt(t) + ' ' + E.accorder(t, N.erreurs), fmt(l) + ' ' + E.accorder(l, N.mots)))}</span>` : ''}`;
+        }
+        const k = complete ? P.motsParErreurDuRatio(critere, pal.ratioMax) : null;
+        const kArrondi = k === null ? null : Math.round(k * 10) / 10;
+        return `<span class="table-cas-borne"><strong>${esc(T.jusqua)}</strong>
+                                    <input type="text" inputmode="decimal" class="controle-form table-cas-seuil" id="${ident('seuil-' + i)}"
+                                           value="${esc(fmt(P.pourcentDuRatio(pal.ratioMax)))}" aria-label="${esc(T.seuilLecteur)}"
+                                           data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="seuilPourcent">
+                                    <span>${esc(T.pctLimite)}</span></span>${kArrondi === null ? '' : `
+                                <span class="table-cas-petit">${esc(T.soit(N.erreurs.singulier, fmt(kArrondi), E.accorder(kArrondi, N.mots)))}</span>`}`;
+    };
+
+    const rangees = p.paliers.map((pal, i) => {
+        const aide = pal.texteAide || '';
+        const retirer = estTemp
+            ? `data-action="${actionRetrait}" data-param="${ctx.index}" data-param2="${i}"`
+            : `data-action="${actionRetrait}" data-param="${esc(ctx.grilleId)}" data-param2="${ctx.index}" data-param3="${i}"`;
         return `
-                        <div class="sous-critere-item palier-projection">
-                            <div class="grille-form-2col palier-rangee">
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Palier ${i + 1}</label>
-                                    <input type="text" class="controle-form sous-critere-input-standard palier-nom"
-                                           value="${esc(pal.libelle || pal.cle)}"
-                                           data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="libelle">
-                                </div>
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Jusqu'à</label>
-                                    ${seuilCol}
+                        <div class="table-cas-rangee" data-palier-rangee="${i}">
+                            <div class="table-cas-quand">${quand(pal, i)}</div>
+                            <div class="table-cas-nom">
+                                <label class="table-cas-nom-etiq" for="${ident('nom-' + i)}">${esc(T.nomCourt)}</label>
+                                <input type="text" class="controle-form palier-nom" id="${ident('nom-' + i)}" value="${esc(pal.libelle || pal.cle)}"
+                                       aria-label="${esc(T.nomCourtLecteur)}" data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="libelle">
+                            </div>
+                            <div class="table-cas-textes">
+                                <div class="groupe-form table-cas-zone">
+                                    <span class="table-cas-zone-tete"><span class="table-cas-zone-nom">${esc(T.verdict)}</span><span class="table-cas-public">${esc(T.public)}</span></span>
+                                    <textarea class="controle-form sous-critere-textarea" rows="2" aria-label="${esc(nomZone(i, 'texte'))}"
+                                              data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texte" data-nom-zone="${esc(nomZone(i, 'texte'))}">${esc(pal.texte || '')}</textarea>
+                                </div>${aide ? '' : `
+                                <button type="button" class="table-cas-lien table-cas-ajout-reco" data-action="atelierAlgo.ouvrirRecommandation">${esc(T.ajouterReco)}</button>`}
+                                <div class="groupe-form table-cas-zone" data-recommandation${aide ? '' : ' hidden'}>
+                                    <span class="table-cas-zone-tete"><span class="table-cas-zone-nom">${esc(T.recommandation)}</span><span class="table-cas-public">${esc(T.public)}</span></span>
+                                    <textarea class="controle-form sous-critere-textarea" rows="2" aria-label="${esc(nomZone(i, 'texteAide'))}"
+                                              data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide" data-nom-zone="${esc(nomZone(i, 'texteAide'))}">${esc(aide)}</textarea>
+                                    <small class="table-cas-petit">${esc(aideReco(aide))}</small>
+                                </div>${ligneInconnus(pal)}
+                                <label class="palier-leve-signalement">
+                                    <input type="checkbox" ${pal.leveSignalement ? 'checked' : ''}
+                                           data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="leveSignalement">
+                                    <span>${esc(T.signal)} <small>${esc(T.signalPrecision)}</small></span>
+                                </label>
+                                <div class="table-cas-pied">
+                                    <span class="table-cas-ici" data-palier-ici hidden>${esc(T.ici)}</span>
+                                    <button type="button" class="table-cas-voir" data-apercu-geste="palier" data-palier="${i}">${esc(T.voir)}</button>
+                                    <button type="button" class="table-cas-lien" ${retirer}>${esc(T.retirerPalier)}</button>
                                 </div>
                             </div>
-                            <div class="grille-form-2col palier-rangee">
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Verdict</label>
-                                    <textarea class="controle-form sous-critere-textarea" rows="2"
-                                              data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texte" data-nom-zone="${esc(nomZonePalier(i, 'texte'))}">${esc(pal.texte || '')}</textarea>
-                                </div>
-                                <div class="groupe-form">
-                                    <label class="sous-critere-label-petit">Recommandation (facultative)</label>
-                                    <textarea class="controle-form sous-critere-textarea" rows="2"
-                                              placeholder="Laisser vide pour ne rien recommander à ce palier"
-                                              data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="texteAide" data-nom-zone="${esc(nomZonePalier(i, 'texteAide'))}">${esc(pal.texteAide || '')}</textarea>
-                                </div>
-                            </div>
-                            <label class="palier-leve-signalement">
-                                <input type="checkbox" ${pal.leveSignalement ? 'checked' : ''}
-                                       data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="leveSignalement">
-                                <span>Ce palier lève un signalement <small>— pour toi, à côté du palier RàI de l'élève. Rien n'est écrit sur sa copie.</small></span>
-                            </label>
-                            ${ligneInconnus(pal)}
-                            ${ligneApercu(pal)}
-                            ${retirer}
                         </div>`;
     }).join('');
 
-    const basApercu = apercuPossible ? `
-                <small class="palier-apercu-non-corrigee" style="font-size: 0.78rem; color: var(--gris-moyen); display: block; margin-top: 8px;">
-                    Copie non corrigée : aucune phrase avant la correction.
-                </small>
-                <small class="palier-apercu-note" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
-                    Copies fictives, calculées depuis tes paliers — aucune donnée d'élève. L'aperçu ne montre pas la rétroaction du sous-critère dominant : elle dépend des codes posés sur une vraie copie.
-                </small>` : '';
+    return `
+                <section class="table-cas" aria-labelledby="${ident('titre')}">${tete}
+                    <div class="table-cas-corps">
+                        <p class="table-cas-ou">${esc(T.intro(N))}</p>
+                        <div class="table-cas-reglages table-cas-reglages--3">${champ('motsReference', T.longueur(N), T.exemples.longueur)}${champ('erreursTolerees', T.tolerance(N), T.exemples.tolerance)}${champ('nomServiceAide', T.service, T.exemples.service)}
+                        </div>
+                        <div class="table-cas-reglages table-cas-reglages--2">${champ('libelleSignalement', T.signalement, T.exemples.signalement, T.signalementAide)}${champ('lienServiceAide', T.lien, T.exemples.lien)}
+                        </div>
+                        <p class="table-cas-petit table-cas-limite">${esc(complete ? T.limite(seuil) : T.incomplete)}</p>
+                        <p class="table-cas-petit">${esc(T.independance)}</p>
+                        <div class="table-cas-entete" aria-hidden="true">${T.colonnes.map((c) => `<span>${esc(c)}</span>`).join('')}</div>
+                        <div class="table-cas-rangees">${rangees}
+                        </div>
+                        <button type="button" class="table-cas-lien table-cas-ajouter" data-action="${actionAjout}" ${paramsAction}>${esc(T.ajouterPalier)}</button>
+                        <div class="table-cas-collections">${rendreSaisieCollectionProjection(critere, ctx)}${listeCollections}
+                        </div>
+                    </div>
+                </section>${rendreChoixAppAlgo(critere)}`;
+}
 
-    return `${enTete}
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-                    ${champsParams}
-                </div>
-                <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 10px 0 0 0;">
-                    <strong>Seuil de l'épreuve :</strong> ${esc(window.projectionAlgo.libelleSeuil(critere))}
-                </p>
-                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
-                    Ce seuil est indépendant du facteur de normalisation de la formule : l'élève est noté selon la norme du cours, et situé selon celle de l'épreuve.
-                </small>
-                <small class="palier-note-composer" style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 8px;">
-                    Un bloc sans valeur disparaît.
-                    Sans bloc, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un bloc, elle est entière : c'est toi qui l'écris.
-                </small>
-                <div class="sous-criteres-liste-conteneur" style="margin-top: 10px;">
-                    ${paliers}
-                </div>
-${basApercu}
-                <button class="btn btn-secondaire btn-tres-compact" style="margin-top: 8px;"
-                        data-action="${actionAjout}" ${paramsAction}>+ Ajouter un palier</button>${rendreSaisieCollectionProjection(critere, ctx)}${listeCollections}`;
+/**
+ * « Ce que l'application choisit sans toi » (lot 3a) — les quatre choix que l'application fait seule, avec
+ * leur condition ; « Modifier son texte » ouvre la zone qui l'écrit (`data-vers-zone`, l'atelier), sauf le
+ * code le plus fréquent, qui n'a pas de texte. ⚠ Ce que l'ébauche ajoute (« ajoute une table selon… ») vient
+ * avec les tables de l'enseignant·e (lot 3b) : rien ici ne mène à un geste qui n'existe pas encore.
+ */
+function rendreChoixAppAlgo(critere) {
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const C = window.atelierAlgo.TEXTES.choix;
+    const neuf = window.projectionAlgo.estNeuf(critere);
+    const item = (titre, texte, zone) => `
+                        <div class="choix-app-item"><dt>${esc(titre)}</dt><dd>${esc(texte)}${zone ? ` <button type="button" class="table-cas-lien" data-vers-zone="${esc(zone)}">${esc(C.modifier)}</button>` : ''}</dd></div>`;
+    return `
+                <div class="choix-app">
+                    <h4 class="choix-app-titre">${esc(C.titre)}</h4>
+                    <p class="table-cas-petit">${esc(C.intro)}</p>
+                    <dl class="choix-app-liste">${item(C.frequent, C.frequentTexte(neuf), '')}${item(C.priorite, C.prioriteTexte, 'enonce:priorite')}${item(C.concentre, C.concentreTexte, 'enonce:concentre')}${item(C.aucune, C.aucuneTexte, 'enonce:aucune')}
+                    </dl>
+                </div>`;
 }
 
 /**
@@ -4389,7 +4388,7 @@ async function enregistrerCollectionProjection(cible, index) {
     }
     delete _etatSaisieCollection[cleCritere];
     if (typeof notifications !== 'undefined' && notifications.succes) {
-        notifications.succes(`Collection « ${r.collection.nom} » enregistrée.`, 'Tu la retrouveras dans le menu de projection de tes grilles.');
+        notifications.succes(`Collection « ${r.collection.nom} » enregistrée.`, window.atelierAlgo ? window.atelierAlgo.TEXTES.cas.collectionEnregistree : '');
     }
     await _redessinerCible(cible);
 }
@@ -4402,11 +4401,6 @@ async function supprimerCollectionProjection(id, cible, index) {
     if (!confirm(`Supprimer la collection « ${c.nom} » ? Les grilles qui l'ont copiée ne changent pas.`)) return;
     await window.collectionsProjection.supprimer(id);
     await _redessinerCible(cible);
-}
-
-/** Un choix du menu de projection est-il une collection ? Rend son id, ou null. */
-function _idCollectionChoisie(valeur) {
-    return (typeof valeur === 'string' && valeur.indexOf('collection:') === 0) ? valeur.slice('collection:'.length) : null;
 }
 
 function _direCollectionDisparue() {
@@ -4471,15 +4465,25 @@ function pliGabaritAlgoFerme(clePli, fermeParDefaut) {
  * `esc()` sur tout : ce sont des mots tapés. Textes validés le 22 oct. (TEXTES-2026-10-22-…).
  */
 const TEXTES_NOMS_ALGO = {
-    erreurs: 'Ce que tu comptes',
-    mots: 'Ce à quoi tu le rapportes',
+    // ↻ Lot 3a (ébauche du 26 oct.) : les deux rangées, et les deux exemples — du texte d'aide FIXE, qui ne
+    // nomme aucune discipline. « étudiant·e » remplace « élève » dans tout l'atelier.
+    erreurs: 'Ce que tu relèves et comptes',
+    mots: 'Ce à quoi tu rapportes ce compte',
+    exemples: {
+        titre: 'Deux exemples',
+        colonnes: ['Ce que tu relèves et comptes', 'Ce à quoi tu rapportes ce compte', 'L’étudiant·e lit, par exemple'],
+        rangees: [
+            ['erreur / erreurs', 'mot / mots', '« Ta production contient 12 erreurs pour 600 mots. »'],
+            ['unité manquante / unités manquantes', 'calcul / calculs', '« Ta production contient 3 unités manquantes pour 12 calculs. »']
+        ]
+    },
     singulier: 'Singulier',
     pluriel: 'Pluriel',
     exemple: {
         erreurs: { singulier: 'Ex. : unité manquante', pluriel: 'Ex. : unités manquantes' },
         mots: { singulier: 'Ex. : calcul', pluriel: 'Ex. : calculs' }
     },
-    invitation: 'Nomme ce que tu comptes et ce à quoi tu le rapportes, au singulier et au pluriel : l\'élève lit ces noms dans la phrase du décompte et dans son PDF.',
+    invitation: 'Nomme ce que tu comptes et ce à quoi tu le rapportes, au singulier et au pluriel : l’étudiant·e lit ces noms dans la phrase du décompte et dans son PDF.',
     aide: 'Ces noms remplacent « erreur » et « mot » dans les champs de l\'évaluation, la phrase du décompte et la ligne du PDF.'
 };
 
@@ -4511,7 +4515,16 @@ function rendreNomsCritereAlgo(critere, ctx) {
                         <div class="noms-algo-formes">${champ(k, 'singulier')}${champ(k, 'pluriel')}
                         </div>
                     </div>`;
-    return `
+    const X = TEXTES_NOMS_ALGO.exemples;
+    const exemples = `
+                <div class="noms-algo-exemples">
+                    <p class="noms-algo-exemples-titre">${esc(X.titre)}</p>
+                    <div class="noms-algo-exemples-defile"><table>
+                        <thead><tr>${X.colonnes.map((c) => `<th scope="col">${esc(c)}</th>`).join('')}</tr></thead>
+                        <tbody>${X.rangees.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td class="noms-algo-exemples-phrase">${esc(r[2])}</td></tr>`).join('')}</tbody>
+                    </table></div>
+                </div>`;
+    return `${exemples}
                 <div class="noms-algo" data-noms-algo="${esc(grilleId)}:${ctx.index}">
                     ${rangee('erreurs')}
                     ${rangee('mots')}${manquants.length ? `
@@ -6205,10 +6218,38 @@ function _valeurChampPalier(el) {
     return (el && el.type === 'checkbox') ? !!el.checked : (el ? el.value : '');
 }
 
+/** Le refus d'un seuil : en pourcentage (la table du lot 3a), ou en ratio (un champ d'avant). */
+function _refusSeuil(el) {
+    return (el && el.dataset && el.dataset.champ === 'seuilPourcent' && window.atelierAlgo)
+        ? window.atelierAlgo.TEXTES.cas.seuilRefuse : 'Le seuil doit être un nombre supérieur à zéro.';
+}
+
+/**
+ * Le gabarit se redessine à chaque modification enregistrée (au `change`, quand le champ perd le focus) : le
+ * champ où le focus est PARTI se perdrait au redessin. Lot 3a, piège 3 : on le rend, par son `id` (les champs
+ * de la table des paliers en portent un), le curseur au bout.
+ */
+async function _redessinerEnGardantLeFocus(cible) {
+    const actif = document.activeElement;
+    const id = (actif && actif.id && actif.closest && actif.closest('#listeCriteres')) ? actif.id : '';
+    await _redessinerCible(cible);
+    if (!id) return;
+    const x = document.getElementById(id);
+    if (!x) return;
+    x.focus();
+    if (typeof x.value === 'string') { const n = x.value.length; try { x.setSelectionRange(n, n); } catch (e) { /* champ sans sélection */ } }
+}
+
 function _muterPalier(critere, index, champ, valeur) {
     const paliers = _paliersEditablesDuCritere(critere);
     if (!paliers[index]) return false;
-    if (champ === 'ratioMax') {
+    if (champ === 'seuilPourcent') {
+        // Lot 3a : le seuil se SAISIT en pourcentage de la limite (virgule ou point, arrondi au dixième) et
+        // s'enregistre comme avant, en ratio. ≤ 0 ou illisible : le geste est refusé, rien n'est écrit.
+        const r = window.projectionAlgo.ratioDuPourcent(valeur);
+        if (r === null) return false;
+        paliers[index].ratioMax = r;
+    } else if (champ === 'ratioMax') {
         const n = parseFloat(valeur);
         // Un seuil illisible n'est pas « zéro » : on refuse le geste plutôt que
         // de déplacer un palier vers une valeur que personne n'a voulue.
@@ -6226,22 +6267,6 @@ function _muterPalier(critere, index, champ, valeur) {
     return true;
 }
 
-function modifierModeleProjectionTempHandler(el) {
-    var index = parseInt(el.dataset.critereIndex);
-    if (!window.tempCriteres || !window.tempCriteres[index]) return;
-    // Lot B : une collection choisie se COPIE dans le critère (paliers compris).
-    var idCollection = _idCollectionChoisie(el.value);
-    if (idCollection !== null) {
-        if (!window.collectionsProjection.appliquer(window.tempCriteres[index], idCollection)) _direCollectionDisparue();
-        afficherCriteresTemp();
-        return;
-    }
-    // params null ET paliers null : le nouveau modèle repart de SES défauts.
-    window.projectionAlgo.appliquerAuCritere(window.tempCriteres[index], el.value, null, null);
-    delete window.tempCriteres[index].paliersProjection;
-    afficherCriteresTemp();
-}
-
 function modifierParamProjectionTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
@@ -6250,43 +6275,61 @@ function modifierParamProjectionTempHandler(el) {
     var params = Object.assign({}, p.params);
     params[el.dataset.paramCle] = el.value;
     window.projectionAlgo.appliquerAuCritere(critere, p.modeleId, params, critere.paliersProjection);
-    afficherCriteresTemp();
+    _redessinerEnGardantLeFocus('temp');
 }
 
 function modifierPalierProjectionTempHandler(el) {
     var index = parseInt(el.dataset.critereIndex);
     if (!window.tempCriteres || !window.tempCriteres[index]) return;
     if (_muterPalier(window.tempCriteres[index], parseInt(el.dataset.palierIndex), el.dataset.champ, _valeurChampPalier(el)) === false) {
-        if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, 'Le seuil doit être un nombre supérieur à zéro.');
+        if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, _refusSeuil(el));
         return;
     }
-    afficherCriteresTemp();
+    _redessinerEnGardantLeFocus('temp');
 }
 
-async function modifierModeleProjectionGrilleHandler(el) {
-    var grilleId = el.dataset.grilleId;
-    var index = parseInt(el.dataset.critereIndex);
-    var valeur = el.value;
-    // Lot B : une collection choisie se COPIE dans le critère (paliers compris) ; un id
-    // disparu entre le rendu et le clic n'écrit rien (le mutateur rend false).
-    var idCollection = _idCollectionChoisie(valeur);
-    if (idCollection !== null) {
-        var appliquee = false;
-        await modifierProjectionCritereGrille(grilleId, index, function(critere) {
-            appliquee = window.collectionsProjection.appliquer(critere, idCollection);
-            return appliquee ? undefined : false;
-        });
-        if (!appliquee) _direCollectionDisparue();
-        afficherCriteresGrille(await obtenirGrilleParId(grilleId));
-        return;
-    }
-    await modifierProjectionCritereGrille(grilleId, index, function(critere) {
-        window.projectionAlgo.appliquerAuCritere(critere, valeur, null, null);
-        delete critere.paliersProjection;
+/**
+ * Lot 3a (26 oct. 2026) — « Fixer une limite » / « Retirer la limite » remplacent le menu « Modèle de
+ * projection ». Le registre décide de ce que chacun écrit (`projectionAlgo.fixerLimite`, `retirerLimite`) :
+ * retirer GARDE ce qui est écrit, fixer le retrouve ; un critère neuf part de champs vides et des paliers du
+ * 25 oct. Mêmes cibles que les autres gestes du critère (`temp`, ou une grille enregistrée).
+ */
+async function fixerLimiteAlgo(cible, index) {
+    const ecrit = await _modifierCritereCible(cible, index, (c) => {
+        if (c.type !== 'algorithmique') return false;
+        window.projectionAlgo.fixerLimite(c);
     });
-    // ⚠ obtenirGrilleParId est ASYNC (#466/CO-21) : sans await, le renderer
-    // reçoit une Promise et affiche « Aucun critère défini ».
-    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+    if (ecrit) await _redessinerCible(cible);
+}
+
+async function retirerLimiteAlgo(cible, index) {
+    const ecrit = await _modifierCritereCible(cible, index, (c) => {
+        if (c.type !== 'algorithmique') return false;
+        window.projectionAlgo.retirerLimite(c);
+    });
+    if (ecrit) await _redessinerCible(cible);
+}
+
+/**
+ * « Reprendre une de tes collections… » (lot 3a ; lot B du 5 sept. pour le geste) : la collection se COPIE
+ * dans le critère, paliers et limite compris ; un id disparu entre le rendu et le choix n'écrit rien.
+ */
+async function reprendreCollectionProjectionHandler(el) {
+    const cible = el.dataset.grilleId;
+    const index = parseInt(el.dataset.critereIndex);
+    const id = el.value;
+    if (!id) return;
+    const c = window.collectionsProjection.obtenir(id);
+    let appliquee = false;
+    await _modifierCritereCible(cible, index, (critere) => {
+        appliquee = window.collectionsProjection.appliquer(critere, id);
+        return appliquee ? undefined : false;
+    });
+    if (!appliquee) _direCollectionDisparue();
+    else if (c && typeof notifications !== 'undefined' && notifications.info) {
+        notifications.info(window.atelierAlgo.TEXTES.cas.collectionCopiee(c.nom));
+    }
+    await _redessinerCible(cible);
 }
 
 async function modifierParamProjectionGrilleHandler(el) {
@@ -6300,7 +6343,7 @@ async function modifierParamProjectionGrilleHandler(el) {
         params[cleParam] = valeur;
         window.projectionAlgo.appliquerAuCritere(critere, p.modeleId, params, critere.paliersProjection);
     });
-    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+    await _redessinerEnGardantLeFocus(grilleId);
 }
 
 /* ---------------------------------------------------------------------
@@ -6533,6 +6576,11 @@ function _zoneCibleDeLaPalette(palette) {
  */
 function ciblerPaletteAlgo(palette, zone) {
     if (!palette || !zone || typeof window.paletteAlgo === 'undefined') return;
+    // Lot 3a (26 oct. 2026) : la zone se mesure AVANT que la palette ne change — ses blocs paraissent (avec leur
+    // valeur) et la font grandir là où elle est ; mesurée après, la compensation n'en voyait que le déplacement
+    // (la zone touchée sautait de 420 px, iPad portrait, mesuré).
+    var repere = _vueBadgesDe(zone) || zone;
+    var avant = (typeof repere.getBoundingClientRect === 'function') ? repere.getBoundingClientRect().top : null;
     var T = window.paletteAlgo.TEXTES;
     var offerts = {};
     window.paletteAlgo.reperesDeZone(null, zone.dataset).forEach(function(r) { offerts[r.jeton] = true; });
@@ -6555,7 +6603,7 @@ function ciblerPaletteAlgo(palette, zone) {
         if (g.querySelector('.palette-algo-bloc:not([data-hors-zone])')) delete g.dataset.vide;
         else g.dataset.vide = '1';
     });
-    placerPaletteAlgo(palette, zone);
+    placerPaletteAlgo(palette, zone, avant);
 }
 
 /**
@@ -6607,12 +6655,14 @@ function _paletteCompacte(palette) {
  * le doigt. Chrome compense de lui-même (ancrage du défilement) : l'écart mesuré après coup y est
  * nul, et rien n'est rendu deux fois (mesuré au banc dans les deux moteurs, 22 oct.).
  */
-function placerPaletteAlgo(palette, zone) {
+function placerPaletteAlgo(palette, zone, avantMesure) {
     var ancre = _ancreDeLaPalette(palette, zone);
-    if (!ancre || ancre === palette || palette.nextElementSibling === ancre) return;
     var repere = _vueBadgesDe(zone) || zone;
-    var avant = repere.getBoundingClientRect().top;
-    ancre.parentNode.insertBefore(palette, ancre);
+    var mesurable = typeof repere.getBoundingClientRect === 'function';
+    var avant = (typeof avantMesure === 'number') ? avantMesure : (mesurable ? repere.getBoundingClientRect().top : null);
+    if (ancre && ancre !== palette && palette.nextElementSibling !== ancre) ancre.parentNode.insertBefore(palette, ancre);
+    if (!mesurable || avant === null) return;
+    // La zone reste sous le doigt : ce que la palette a changé au-dessus d'elle (sa place, sa taille) se compense.
     var ecart = repere.getBoundingClientRect().top - avant;
     if (ecart && typeof window.scrollBy === 'function') window.scrollBy(0, ecart);
 }
@@ -6627,7 +6677,7 @@ function _ancreDeLaPalette(palette, zone) {
     var atelier = gabarit ? gabarit.querySelector('.gabarit-algo-atelier') : null;
     if (!atelier) return null;
     if (!_paletteCompacte(palette)) return atelier.firstElementChild;
-    var ancre = zone.closest('.palier-rangee') || zone.closest('.groupe-form');
+    var ancre = zone.closest('.table-cas-rangee') || zone.closest('.groupe-form');   // lot 3a : la rangée du palier
     return (ancre && ancre.parentNode) ? ancre : null;
 }
 
@@ -6677,10 +6727,10 @@ async function modifierPalierProjectionGrilleHandler(el) {
         return _muterPalier(critere, palierIndex, champ, valeur);
     });
     if (!res) {
-        if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, 'Le seuil doit être un nombre supérieur à zéro.');
+        if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, _refusSeuil(el));
         return;
     }
-    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+    await _redessinerEnGardantLeFocus(grilleId);
 }
 
 /** Un palier neuf naît AU-DESSUS du terminal, avec un seuil visible et vide de texte. */
@@ -6897,14 +6947,16 @@ window.modifierCritereTempHandler = modifierCritereTempHandler;
 // #667 — le dispatcher data-on-change résout les handlers par NOM dans window.
 // Sans ces quatre lignes, le bloc « formule » du gabarit s'affiche et ne réagit
 // à rien, en silence.
-window.modifierModeleProjectionTempHandler = modifierModeleProjectionTempHandler;
+window.fixerLimiteAlgo = fixerLimiteAlgo;
+window.revenirAuModeleEnonce = revenirAuModeleEnonce;
+window.retirerLimiteAlgo = retirerLimiteAlgo;
+window.reprendreCollectionProjectionHandler = reprendreCollectionProjectionHandler;
 window.ouvrirSaisieCollectionProjection = ouvrirSaisieCollectionProjection;         // Lot B (5 sept. 2026)
 window.annulerSaisieCollectionProjection = annulerSaisieCollectionProjection;
 window.enregistrerCollectionProjection = enregistrerCollectionProjection;
 window.supprimerCollectionProjection = supprimerCollectionProjection;
 window.modifierParamProjectionTempHandler = modifierParamProjectionTempHandler;
 window.modifierPalierProjectionTempHandler = modifierPalierProjectionTempHandler;
-window.modifierModeleProjectionGrilleHandler = modifierModeleProjectionGrilleHandler;
 window.modifierParamProjectionGrilleHandler = modifierParamProjectionGrilleHandler;
 window.modifierPalierProjectionGrilleHandler = modifierPalierProjectionGrilleHandler;
 window.modifierModeleEnoncesTempHandler = modifierModeleEnoncesTempHandler;

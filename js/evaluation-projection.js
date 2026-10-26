@@ -51,11 +51,12 @@
    AU MOT PRÈS — nom du service compris, même si ce nom est devenu faux. La
    fidélité au comportement existant prime : corriger le texte est un geste de
    l'utilisateur dans le gabarit, pas une décision du code.
-   ⚠ Ne pas confondre avec `PALIERS_GABARIT_NEUF`, plus bas : le gabarit livré
-   aux NOUVEAUX utilisateurs ne charrie aucune particularité d'établissement.
+   ⚠ Ne pas confondre avec `PALIERS_GABARIT_NEUF`, plus bas : les paliers qu'un
+   critère NEUF écrit quand il fixe sa limite (lot 3a, 26 oct. 2026) ne
+   charrient ni discipline ni particularité d'établissement.
 
    LE TEXTE TROUÉ, ÉTAPE 2 (4 septembre 2026) — LES DEUX TEXTES D'UN PALIER SE
-   COMPOSENT AVEC DES BADGES. Le registre déclare ses huit jetons (`REPERES`),
+   COMPOSENT AVEC DES BADGES. Le registre déclare ses jetons (`REPERES`),
    les remplit par copie (`remplir`, `_valeursJetons`) et DIT ceux qu'il ne
    connaît pas (`jetonsInconnus`). Le format qui voyage ne change pas : `texte`
    et `texteAide` restent du texte libre avec accolades ; un texte sans jeton
@@ -77,6 +78,27 @@
 // charge avant ce module ; un banc Node (`require`) le requiert.
 var _formaterNombre = (typeof formaterNombre === 'function')
     ? formaterNombre : require('./note-pourcentage.js').formaterNombre;
+
+// Lot 3a (26 oct. 2026) : les deux noms de l'enseignant·e, lus À L'APPEL au registre des énoncés (leur
+// source), sur `window` ou par `require` (un banc Node). Sans lui, les phrases d'hier.
+function _E() {
+    if (typeof window !== 'undefined' && window.enoncesAlgo) return window.enoncesAlgo;
+    if (typeof require === 'function') {
+        try { return require('./evaluation-enonces.js'); } catch (err) { return null; }
+    }
+    return null;
+}
+
+/**
+ * LE CRITÈRE NEUF DU LOT 3a — la marque des noms (`nomsAttendus`, `enoncesAlgo.MARQUE_NOMS`), posée à la
+ * naissance depuis l'étape 2a (22 oct. 2026). ⚠ PAS la marque des codes (`codesSousCriteresSeulement`),
+ * que la consigne nommait : celle-là est en ligne depuis la 1.213.0, et la relecture de Cowork du 22 oct.
+ * (17 h 40) l'a écartée pour tout ce que lit l'élève — la lire changerait sans geste les critères créés en
+ * 1.213 et 1.214. Un critère sans la marque lit ce qu'il lit aujourd'hui.
+ */
+function estNeuf(critere) {
+    return !!critere && critere.nomsAttendus === true;
+}
 
 // ---------------------------------------------------------------------
 // Le jeton de substitution du nom de service
@@ -115,6 +137,11 @@ var JETON_MOYENNE    = '{moyenne}';
 var JETON_PROJECTION = '{projection}';
 var JETON_PALIER     = '{palier}';
 var JETON_PLURIEL    = '{s}';
+// Lot 3a de la table de cas (26 oct. 2026, consigne § 3.8) : les deux noms de l'enseignant·e, comme dans
+// le décompte. ⚠ Ils ne font PAS tomber le préfixe engendré : seuls les jetons de projection le font
+// (décision du 4 sept.) — `JETONS_PROJECTION`, plus bas.
+var JETON_NOM_ERREURS = '{nomErreurs}';
+var JETON_NOM_MOTS    = '{nomMots}';
 
 var REPERES = [
     { jeton: JETON_SERVICE,    famille: 'posee',   libelle: 'nom du service',
@@ -132,11 +159,17 @@ var REPERES = [
     { jeton: JETON_PROJECTION, famille: 'remplie', libelle: 'erreurs projetées',
       aide: 'Le nombre d\'erreurs que la copie ferait sur la longueur de référence, au même rythme.' },
     { jeton: JETON_PALIER,     famille: 'remplie', libelle: 'palier atteint',
-      aide: 'Le nom du palier que la copie atteint, tel qu\'il est écrit dans la colonne « Palier ».' }
+      aide: 'Le nom du palier que la copie atteint, tel qu\'il est écrit dans la colonne « Palier ».' },
+    { jeton: JETON_NOM_ERREURS, famille: 'posee', libelle: 'ce que tu comptes',
+      aide: 'Le nom de ce que tu comptes : au singulier sous 2, au pluriel à partir de 2.' },
+    { jeton: JETON_NOM_MOTS,    famille: 'posee', libelle: 'ce à quoi tu le rapportes',
+      aide: 'Le nom de ce à quoi tu rapportes le compte : au singulier sous 2, au pluriel à partir de 2.' }
 ];
 
-// Ce que le rendu CONNAÎT : les huit repères, plus l'accord du pluriel.
+// Ce que le rendu CONNAÎT : les dix repères, plus l'accord du pluriel.
 var JETONS = REPERES.map(function(r) { return r.jeton; }).concat([JETON_PLURIEL]);
+// Ce qui fait tomber le préfixe engendré : les jetons de projection, pas les deux noms (consigne 3a, § 3.8).
+var JETONS_PROJECTION = JETONS.filter(function(j) { return j !== JETON_NOM_ERREURS && j !== JETON_NOM_MOTS; });
 
 /** La palette des badges posables dans les deux zones d'un palier — jamais {s}. */
 function listerReperes() {
@@ -145,11 +178,15 @@ function listerReperes() {
     });
 }
 
-/** Le texte porte-t-il au moins un jeton que ce registre sait remplir ? */
-function porteJetonConnu(texte) {
+function _porteUnDe(texte, liste) {
     if (typeof texte !== 'string' || !texte) return false;
-    for (var i = 0; i < JETONS.length; i++) if (texte.indexOf(JETONS[i]) !== -1) return true;
+    for (var i = 0; i < liste.length; i++) if (texte.indexOf(liste[i]) !== -1) return true;
     return false;
+}
+
+/** Le texte porte-t-il au moins un jeton de PROJECTION (ce qui fait tomber le préfixe) ? Les deux noms n'en sont pas. */
+function porteJetonConnu(texte) {
+    return _porteUnDe(texte, JETONS_PROJECTION);
 }
 
 /**
@@ -185,7 +222,7 @@ function _echapperRegExp(texte) {
  * (`jetonsInconnus`).
  */
 function remplir(texte, valeurs) {
-    if (!porteJetonConnu(texte)) return (typeof texte === 'string') ? texte : '';
+    if (!_porteUnDe(texte, JETONS)) return (typeof texte === 'string') ? texte : '';
     var v = (valeurs && typeof valeurs === 'object') ? valeurs : {};
     var sortie = texte;
     JETONS.forEach(function(jeton) {
@@ -213,10 +250,17 @@ function _valeursJetons(x) {
     var projection = (isFinite(erreurs) && isFinite(mots) && mots > 0 && isFinite(Number(params.motsReference)))
         ? String(Math.round(Number(params.motsReference) * erreurs / mots))
         : '';
+    // Les deux noms (lot 3a) : accordés au compte et à l'étendue, par la règle unique des énoncés.
+    var n = x.noms;
+    var E = _E();
+    var accorder = function(k, paire) { return (E && paire) ? E.accorder(k, paire) : ''; };
     return {
         service: nom,
-        seuil: (params.erreursTolerees === undefined) ? '' : _nb(params.erreursTolerees),
-        longueur: (params.motsReference === undefined) ? '' : _nb(params.motsReference),
+        // `== null` : un critère neuf aux champs vides (lot 3a) ne porte pas la valeur ; jamais « ? ».
+        seuil: (params.erreursTolerees == null) ? '' : _nb(params.erreursTolerees),
+        longueur: (params.motsReference == null) ? '' : _nb(params.motsReference),
+        nomErreurs: n ? accorder(erreurs, n.erreurs) : '',
+        nomMots: n ? accorder(mots, n.mots) : '',
         erreurs: isFinite(erreurs) ? _nb(erreurs) : '',
         mots: isFinite(mots) ? _nb(mots) : '',
         // Le nombre du préfixe engendré d'hier. Vide sur le palier « zéro
@@ -296,33 +340,26 @@ var PALIERS_MIGRATION = [
     }
 ];
 
-// Le gabarit « critères EUF » proposé aux NOUVEAUX utilisateurs. Mêmes seuils,
-// mais aucun nom d'établissement : ni « CAF », ni « Passerelle + ». Le nom du
-// service se règle dans le gabarit, il ne s'hérite pas de la pratique d'un
-// autre. Voir §6 de la consigne : deux voies, à ne pas confondre.
-//
-// ⚠ LA PRÉPOSITION VOYAGE AVEC LE NOM, PAS AVEC LE CODE. « t'inscrire AU
-// Centre d'aide » se dit ; « t'inscrire AU Passerelle + » ne se dit pas. La
-// phrase de recommandation est donc du texte libre, éditable à côté du nom :
-// changer l'un sans relire l'autre produit une phrase fautive, et aucun code
-// ne peut deviner le genre d'un nom que l'utilisateur n'a pas encore écrit.
-// Le gabarit neuf emploie une tournure qui n'impose rien : deux-points.
-var PALIERS_GABARIT_NEUF = PALIERS_MIGRATION.map(function(p) {
-    return {
-        cle: p.cle,
-        libelle: p.libelle,
-        sansErreur: p.sansErreur,
-        ratioMax: p.ratioMax,
-        texte: p.texte.replace(/En prévision de l'EUF/g, 'En prévision de l\'épreuve uniforme'),
-        // Sans jeton : la phrase générique se rend telle quelle, sans nom à
-        // fournir. Un nouvel utilisateur qui inscrit le sien réécrit la phrase
-        // en même temps — les deux champs sont côte à côte dans le gabarit.
-        texteAide: p.texteAide
-            ? p.texteAide.split('au ' + JETON_SERVICE + '.')
-                         .join('au service d\'aide de ton collège : ' + JETON_SERVICE + '.')
-            : ''
-    };
-});
+// LES PALIERS D'UN CRITÈRE NEUF QUI FIXE SA LIMITE (lot 3a, 26 oct. 2026) — les textes tranchés par
+// Grégoire le 25 oct. à 17 h 19 (`TEXTES-2026-10-25-table-de-cas-a-corriger.md`), au caractère près de
+// l'ébauche validée le 26. Ils s'ÉCRIVENT sur le critère au geste « Fixer une limite » (`fixerLimite`) :
+// jamais à la lecture, jamais sur un critère sans la marque, qui garde `PALIERS_MIGRATION`.
+// Aucune discipline, aucun accord sur les noms de l'enseignant·e, le conditionnel dans l'aide.
+// ⚠ LA PRÉPOSITION VOYAGE AVEC LE NOM, PAS AVEC LE CODE : le service vient après un deux-points (une
+// apposition), et sans nom de service la phrase s'arrête avant (`_texteDuPalier`).
+// Seuils : ceux d'aujourd'hui (30, 40, 50, 100 % de la limite). La clé du terminal est neuve (`au_dela`) :
+// un identifiant n'est pas un libellé, mais « échec » n'est plus ce que ce palier dit.
+var PALIERS_GABARIT_NEUF = [
+    { cle: 'sans_erreur', libelle: 'Aucune occurrence', sansErreur: true, ratioMax: null,
+      texte: 'C’est exceptionnel.', texteAide: '' },
+    { cle: 'excellent', libelle: 'Excellent', ratioMax: 0.3, texte: 'Ce rapport est excellent.', texteAide: '' },
+    { cle: 'tres_bien', libelle: 'Très bien', ratioMax: 0.4, texte: 'Ce rapport est très bien.', texteAide: '' },
+    { cle: 'bien', libelle: 'Bien', ratioMax: 0.5, texte: 'Ce rapport est bien.', texteAide: '' },
+    { cle: 'risque', libelle: 'Risqué', ratioMax: 1, texte: 'Ce rapport est risqué : il approche de la limite.',
+      texteAide: 'Il pourrait être utile de demander de l’aide : ' + JETON_SERVICE + '.' },
+    { cle: 'au_dela', libelle: 'Au-delà', ratioMax: null, texte: 'Ce rapport dépasse la limite fixée.',
+      texteAide: 'Il serait important de demander de l’aide : ' + JETON_SERVICE + '.' }
+];
 
 // ---------------------------------------------------------------------
 // LES MODÈLES
@@ -438,14 +475,23 @@ function obtenirModele(id) {
 // Lecture d'un critère
 // ---------------------------------------------------------------------
 
-/** Nettoie un paramètre selon sa déclaration. Ne devine jamais : borne. */
-function _valeurParametre(p, brut) {
-    if (p.type === 'texte') {
-        var texte = (brut === undefined || brut === null) ? p.defaut : String(brut);
-        if (p.max !== undefined && texte.length > p.max) texte = texte.slice(0, p.max);
-        return texte;
-    }
-    var valeur = (brut === undefined || brut === null || brut === '') ? p.defaut : Number(brut);
+/**
+ * Nettoie un paramètre selon sa déclaration. Ne devine jamais : borne.
+ * ↻ Lot 3a (consigne § 3.3) : `sansDefaut` — un critère NEUF (`estNeuf`) ne reçoit pas les défauts de
+ * l'épreuve de français (900, 30, « Centre d'aide du collège ») : un nombre absent reste `null`, un
+ * texte absent reste vide. Les critères existants lisent exactement ce qu'ils lisaient.
+ */
+function _valeurTexte(p, brut, sansDefaut) {
+    var texte = (brut === undefined || brut === null) ? (sansDefaut ? '' : p.defaut) : String(brut);
+    if (p.max !== undefined && texte.length > p.max) texte = texte.slice(0, p.max);
+    return texte;
+}
+
+function _valeurParametre(p, brut, sansDefaut) {
+    if (p.type === 'texte') return _valeurTexte(p, brut, sansDefaut);
+    var absent = (brut === undefined || brut === null || brut === '');
+    if (sansDefaut && (absent || isNaN(Number(brut)))) return null;
+    var valeur = absent ? p.defaut : Number(brut);
     if (isNaN(valeur)) valeur = p.defaut;
     if (p.min !== undefined && valeur < p.min) valeur = p.min;
     if (p.max !== undefined && valeur > p.max) valeur = p.max;
@@ -515,8 +561,9 @@ function normaliser(critere) {
     var source = (critere.paramsProjection && typeof critere.paramsProjection === 'object')
         ? critere.paramsProjection : {};
     var params = {};
+    var neuf = estNeuf(critere);
     modele.parametres.forEach(function(p) {
-        params[p.cle] = _valeurParametre(p, source[p.cle]);
+        params[p.cle] = _valeurParametre(p, source[p.cle], neuf);
     });
 
     var paliers = _paliersRetenus(critere.paliersProjection) || modele.paliersParDefaut;
@@ -618,6 +665,14 @@ function calculer(critere, donnees) {
         return _nonApplicable(base, 'projection-desactivee');
     }
 
+    // Lot 3a (§ 3.3) : la limite d'un critère neuf naît vide. Tant que la longueur ou la tolérance manque,
+    // AUCUNE copie n'atteint de palier — pas même « Aucune occurrence ». Un critère existant a toujours ses
+    // deux nombres (défauts bornés à 1) : cette garde ne le touche pas.
+    if (!(Number(p.params.motsReference) > 0 && Number(p.params.erreursTolerees) > 0)) {
+        return _nonApplicable(base, 'limite-incomplete');
+    }
+    base.noms = (function() { var E = _E(); return E ? E.noms(critere) : null; })();
+
     // ⚠ DÉVIATION NOMMÉE — LE BESOIN EN MOTS DE LA PROJECTION EST INCONDITIONNEL.
     //
     // L'ancienne fonction testait `erreurs === 0` AVANT `mots === 0` : une copie
@@ -650,7 +705,7 @@ function calculer(critere, donnees) {
         if (!sansErreur) return _nonApplicable(base, 'palier-zero-erreur-absent');
         return _resultat(base, {
             applicable: true, ratio: 0, motsParErreur: null,
-            palier: sansErreur, indice: 0, params: p.params, erreurs: erreurs, mots: mots
+            palier: sansErreur, indice: 0, params: p.params, erreurs: erreurs, mots: mots, noms: base.noms
         });
     }
 
@@ -681,7 +736,7 @@ function calculer(critere, donnees) {
     return _resultat(base, {
         applicable: true, ratio: ratio, motsParErreur: motsParErreur,
         palier: choisi, indice: indice, params: p.params, erreurs: erreurs, mots: mots,
-        seuilMotsParErreur: seuilMotsParErreur
+        seuilMotsParErreur: seuilMotsParErreur, noms: base.noms
     });
 }
 
@@ -693,6 +748,23 @@ function _nonApplicable(base, raison) {
         modeleId: base.modeleId, params: base.params, paliers: base.paliers,
         herite: base.herite, lienServiceAide: base.lienServiceAide
     };
+}
+
+/**
+ * Le préfixe engendré — « Tu fais en moyenne 1 erreur à chaque N mots. ». ↻ Lot 3a (consigne § 3.6, la
+ * supposition 6 de l'ébauche, la seule qui touche ce que lit l'étudiant·e) : les noms de l'enseignant·e,
+ * même structure — le singulier de ce qu'il compte, l'étendue accordée à N (`enoncesAlgo.accorder`).
+ * ⚠ UN CRITÈRE QUI LIT « erreur » ET « mot » LIT LA PHRASE D'HIER, À L'OCTET (« 1 mots » compris) : le
+ * critère d'avant sans noms, comme celui qui a écrit ces quatre formes.
+ */
+function prefixeMoyenne(n, noms) {
+    var hier = 'Tu fais en moyenne 1 erreur à chaque ' + n + ' mots.';
+    var E = _E();
+    if (!noms || !E) return hier;
+    var francais = noms.erreurs.singulier === 'erreur' && noms.erreurs.pluriel === 'erreurs'
+        && noms.mots.singulier === 'mot' && noms.mots.pluriel === 'mots';
+    if (francais) return hier;
+    return 'Tu fais en moyenne 1 ' + noms.erreurs.singulier + ' à chaque ' + n + ' ' + E.accorder(n, noms.mots) + '.';
 }
 
 function _resultat(base, x) {
@@ -708,9 +780,7 @@ function _resultat(base, x) {
     // tomber le préfixe. Il ne lit que « Ce que l'élève lit » (`texte`) : une
     // recommandation composée sous un verdict d'hier garde le préfixe d'hier.
     var compose = porteJetonConnu(x.palier.texte || '');
-    var prefixe = (x.motsParErreur === null || compose)
-        ? ''
-        : 'Tu fais en moyenne 1 erreur à chaque ' + Math.round(x.motsParErreur) + ' mots.';
+    var prefixe = (x.motsParErreur === null || compose) ? '' : prefixeMoyenne(Math.round(x.motsParErreur), x.noms);
     var verdict = _texteDuPalier(x.palier, x.params, valeurs);
     var texte = prefixe ? (verdict ? prefixe + ' ' + verdict : prefixe) : verdict;
 
@@ -734,14 +804,99 @@ function _resultat(base, x) {
 // Libellés pour le gabarit
 // ---------------------------------------------------------------------
 
-/** Le seuil dit dans les DEUX unités — comme libelleSymbolique dit la formule. */
-function libelleSeuil(critere) {
+/**
+ * Le seuil dit dans les DEUX unités — comme libelleSymbolique dit la formule.
+ * ↻ Lot 3a (§ 3.6) : avec `noms` (`enoncesAlgo.noms`), les noms de l'enseignant·e, accordés ; sans eux,
+ * la ligne d'hier. Une limite incomplète (critère neuf) ne dit rien.
+ */
+function libelleSeuil(critere, noms) {
     var p = normaliser(critere);
     if (!p.modele.projette) return '';
+    if (!(Number(p.params.motsReference) > 0 && Number(p.params.erreursTolerees) > 0)) return '';
     var seuil = p.modele.seuil(p.params);
     if (!seuil || !isFinite(seuil)) return '';
-    return '1 erreur à chaque ' + _nb(seuil) + ' mots ('
-        + _nb(p.params.erreursTolerees) + ' erreurs pour ' + _nb(p.params.motsReference) + ' mots)';
+    var E = _E();
+    if (!noms || !E) {
+        return '1 erreur à chaque ' + _nb(seuil) + ' mots ('
+            + _nb(p.params.erreursTolerees) + ' erreurs pour ' + _nb(p.params.motsReference) + ' mots)';
+    }
+    var t = p.params.erreursTolerees, l = p.params.motsReference;
+    return '1 ' + noms.erreurs.singulier + ' à chaque ' + _nb(seuil) + ' ' + E.accorder(seuil, noms.mots) + ' ('
+        + _nb(t) + ' ' + E.accorder(t, noms.erreurs) + ' pour ' + _nb(l) + ' ' + E.accorder(l, noms.mots) + ')';
+}
+
+/** La limite est-elle fixée (le critère projette) ? */
+function limiteFixee(critere) {
+    return !!normaliser(critere).modele.projette;
+}
+
+/** La limite fixée a-t-elle ses deux nombres (longueur et tolérance au-dessus de 0) ? Sans limite : vrai. */
+function limiteComplete(critere) {
+    var p = normaliser(critere);
+    if (!p.modele.projette) return true;
+    return Number(p.params.motsReference) > 0 && Number(p.params.erreursTolerees) > 0;
+}
+
+/**
+ * « Fixer une limite » (lot 3a, § 3.1-3.4) — remplace le choix du modèle « Projection à l'EUF » au menu.
+ * Trois cas, dans cet ordre :
+ *   · le critère garde ce que « Retirer la limite » a laissé (paramètres ou paliers écrits) : on le
+ *     RETROUVE, tel quel ;
+ *   · un critère NEUF (`estNeuf`) : des champs vides (ni 900, ni 30, ni « Centre d'aide du collège ») et
+ *     les paliers du 25 oct. (`PALIERS_GABARIT_NEUF`), écrits sur le critère ;
+ *   · un critère existant : ce que le menu faisait — les défauts du modèle, les paliers de migration
+ *     (lus, pas écrits).
+ * Rend le critère, muté.
+ */
+function fixerLimite(critere) {
+    critere = critere || {};
+    var garde = (critere.paramsProjection && typeof critere.paramsProjection === 'object'
+        && Object.keys(critere.paramsProjection).length > 0) || !!_paliersRetenus(critere.paliersProjection);
+    if (garde) {
+        critere.modeleProjection = 'norme_externe';
+        return critere;
+    }
+    if (estNeuf(critere)) {
+        appliquerAuCritere(critere, 'norme_externe', {}, paliersGabaritNeuf());
+        return critere;
+    }
+    appliquerAuCritere(critere, 'norme_externe', null, null);
+    delete critere.paliersProjection;
+    return critere;
+}
+
+/**
+ * « Retirer la limite » (lot 3a, § 3.1) — le critère cesse de projeter ; ce qui est écrit RESTE (longueur,
+ * tolérance, service, signalement, lien, paliers) : « Fixer une limite » le retrouve. Grégoire : « je ne
+ * veux pas qu'on efface des données de façon irréversible ». Sous « aucune », `normaliser` ignore ces
+ * paramètres (le modèle n'en déclare aucun), `calculer` ne projette rien ; l'export et le partage les
+ * acceptent (leurs schémas ne dépendent pas du modèle).
+ */
+function retirerLimite(critere) {
+    critere = critere || {};
+    critere.modeleProjection = 'aucune';
+    return critere;
+}
+
+/** Le seuil d'un palier en POURCENTAGE de la limite, pour l'écran (arrondi au dixième) ; null sans seuil. */
+function pourcentDuRatio(ratioMax) {
+    if (ratioMax === null || ratioMax === undefined || ratioMax === '') return null;
+    var r = Number(ratioMax);
+    if (!isFinite(r)) return null;
+    return Math.round(r * 1000) / 10;
+}
+
+/**
+ * Le ratio enregistré (`ratioMax`) d'un pourcentage saisi : virgule ou point décimal, arrondi au
+ * dixième de pour cent. ≤ 0 ou illisible : null — le geste est refusé, rien n'est écrit.
+ */
+function ratioDuPourcent(saisie) {
+    var t = String(saisie == null ? '' : saisie).trim().replace(/\s|%/g, '').replace(',', '.');
+    if (!t || !/^-?\d*\.?\d+$/.test(t)) return null;
+    // En millièmes, pour que l'arrondi tombe juste (« 33,3 » donne 0,333, pas 0,33299…).
+    var milliemes = Math.round(Number(t) * 10);
+    if (!isFinite(milliemes) || milliemes <= 0) return null;
+    return milliemes / 1000;
 }
 
 /**
@@ -768,8 +923,12 @@ function appliquerAuCritere(critere, modeleId, params, paliers) {
 
     var source = (params && typeof params === 'object') ? params : {};
     var propres = {};
+    var neuf = estNeuf(critere);
     modele.parametres.forEach(function(p) {
-        propres[p.cle] = _valeurParametre(p, source[p.cle]);
+        var v = _valeurParametre(p, source[p.cle], neuf);
+        // Un champ vide d'un critère neuf n'est pas ÉCRIT (lot 3a) : l'absence voyage sans `null`, que les
+        // schémas d'import et de partage ne connaissent pas pour ces nombres.
+        if (v !== null) propres[p.cle] = v;
     });
     critere.paramsProjection = propres;
 
@@ -809,9 +968,9 @@ function paliersGabaritNeuf() {
  * ▣ MESURÉ le 4 sept. : jusqu'à ce lot, cette fonction n'avait AUCUN appelant
  * dans l'application — le « gabarit livré » (EUF, 900 / 30, paliers en apposition
  * `PALIERS_GABARIT_NEUF`) n'a jamais été écrit sur le critère de personne ; un
- * critère neuf lisait le repli de migration comme les anciens. Les paliers en
- * apposition restent définis (`paliersGabaritNeuf`) sans être servis : inscrit,
- * à décider avec « ce qu'un collègue reçoit quand il choisit la norme externe ».
+ * critère neuf lisait le repli de migration comme les anciens.
+ * ↻ Lot 3a (26 oct. 2026) : ce qu'un critère neuf reçoit quand il fixe sa limite est décidé — des champs
+ * vides et les paliers du 25 oct. (`fixerLimite`, `PALIERS_GABARIT_NEUF`).
  */
 function gabaritNeuf() {
     return { modeleProjection: 'aucune', paramsProjection: {} };
@@ -828,52 +987,9 @@ function poserDefautNeuf(critere) {
     return Object.assign(critere, gabaritNeuf());
 }
 
-/**
- * Des copies FICTIVES pour prévisualiser le gabarit (le texte troué, étape 2,
- * arrêtés 4 et 5) — une par palier, plus une non corrigée.
- *
- * ▣ Pourquoi dérivées des PALIERS plutôt que trois copies fixes (carte du
- * 4 sept., §e) : avec 7 / 460 et 24 / 380, deux paliers sur six ne seraient
- * jamais vus, et un seuil déplacé par l'enseignant·e pourrait faire tomber les
- * copies fixes sur le même palier. Ici, mots = la longueur de référence et
- * erreurs = le milieu du palier en ratio, ramené à un entier ; le terminal se
- * place au-delà du dernier seuil. Chaque phrase de chaque palier est vue,
- * quelle que soit la grille.
- * ⛔ Aucune donnée de personne : les nombres sortent du gabarit lui-même.
- * ⚠ Un arrondi peut faire tomber une copie sur le palier voisin quand deux
- * seuils sont très proches : le rendu nomme le palier ATTEINT (par `calculer`),
- * jamais le palier visé.
- *
- * @returns {Array<{cle: string, libelle: string, erreurs: number|null, mots: number|null, corrigee: boolean}>}
- */
-function copiesExemple(critere) {
-    var p = normaliser(critere);
-    var copies = [];
-    if (p.modele.projette) {
-        var mots = p.params.motsReference;
-        var tolerees = p.params.erreursTolerees;
-        var precedent = 0;
-        p.paliers.forEach(function(pal) {
-            if (pal.sansErreur) {
-                copies.push({ cle: pal.cle, libelle: pal.libelle, erreurs: 0, mots: mots, corrigee: true });
-                return;
-            }
-            var ratio;
-            if (pal.ratioMax === null) {
-                ratio = precedent > 0 ? precedent * 1.5 : 1.5;
-            } else {
-                ratio = (precedent + pal.ratioMax) / 2;
-                precedent = pal.ratioMax;
-            }
-            copies.push({ cle: pal.cle, libelle: pal.libelle, erreurs: Math.max(1, Math.round(ratio * tolerees)), mots: mots, corrigee: true });
-        });
-    }
-    // 22 oct. 2026 (verdict du miroir) : plus de copie ordinaire « 3 erreurs, 300 mots » sous « Aucune
-    // projection » — une constante de rédaction, que rien n'affichait (l'aperçu ne se rend que sous un
-    // palier). Le miroir de la carte « Formule » (`miroirAlgo`) montre le décompte, tiré des réglages.
-    copies.push({ cle: 'non_corrigee', libelle: '', erreurs: null, mots: null, corrigee: false });
-    return copies;
-}
+// ↻ Lot 3a (26 oct. 2026) : `copiesExemple` (une copie fictive par palier, pour la ligne « L'élève lira : »
+// sous chaque palier) est RETIRÉE avec cette ligne. La simulation de l'atelier règle sa copie sur un palier
+// (« Voir ce que l'étudiant·e lirait à ce palier », `atelierAlgo.copiePourPalier`), par le même `calculer`.
 
 /** Les paliers de migration — reproduction au mot près de l'existant. */
 function paliersMigration() {
@@ -899,7 +1015,14 @@ var api = {
     motsParErreurDuRatio: motsParErreurDuRatio,
     appliquerAuCritere: appliquerAuCritere,
     paliersGabaritNeuf: paliersGabaritNeuf,
-    copiesExemple: copiesExemple,
+    estNeuf: estNeuf,
+    prefixeMoyenne: prefixeMoyenne,
+    limiteFixee: limiteFixee,
+    limiteComplete: limiteComplete,
+    fixerLimite: fixerLimite,
+    retirerLimite: retirerLimite,
+    pourcentDuRatio: pourcentDuRatio,
+    ratioDuPourcent: ratioDuPourcent,
     gabaritNeuf: gabaritNeuf,
     poserDefautNeuf: poserDefautNeuf,
     paliersMigration: paliersMigration

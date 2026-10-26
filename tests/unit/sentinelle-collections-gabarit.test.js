@@ -13,6 +13,13 @@
 //   D. LA SUPPRESSION — après confirmation, la collection part, la grille qui l'a copiée ne bouge pas ;
 //   E. jetons et CSS scopé.
 //
+// ↻ LOT 3a DE LA TABLE DE CAS (26 oct. 2026, consigne § 3.2) : le menu « Modèle de projection » est parti ;
+//   les collections se reprennent par « Reprendre une de tes collections… », dans l'en-tête de la table des
+//   paliers (`reprendreCollectionProjectionHandler`, cible `temp` ou une grille) — même geste : une COPIE,
+//   aucun lien. La liste « Mes collections » et sa ligne d'aide restent en fin de table ; la corbeille devient
+//   le lien « Supprimer la collection » (ébauche validée). « Fixer une limite » / « Retirer la limite »
+//   remplacent le choix d'un modèle livré (banc `critere-algorithmique-table-de-cas`).
+//
 // BREAK-TESTS (faits le 5 septembre 2026, chacun restauré, `cmp` identique) :
 //   · le handler grille traite `collection:<id>` comme un modèle → B.a rougit ;
 //   · l'optgroup rendu même sans collection → A.a rougit ;
@@ -133,78 +140,67 @@ function rendu(m, grille) {
     const html = m.liste().innerHTML;
     return { html, projection: carteProjection(html, grille.criteres[0].id) };
 }
-const selectDe = (projection) => (projection.match(/<select class="controle-form" data-on-change="modifierModeleProjection(?:Grille|Temp)Handler"[\s\S]*?<\/select>/) || [''])[0];
+const selectDe = (projection) => (projection.match(/<select class="controle-form" data-on-change="reprendreCollectionProjectionHandler"[\s\S]*?<\/select>/) || [''])[0];
+const AIDE = 'collections-aide">Reprendre une collection copie ses paliers et sa limite dans ce critère. La corriger ou la supprimer ensuite ne change pas cette grille, ni ce qu’un·e étudiant·e a déjà reçu.</small>';
 
 /* ============================================================ A — LE MENU */
 
-describe('collections · A — le menu de projection', () => {
-    it('A.a sans collection : ni sous-titre, ni liste, ni ligne d\'aide — les modèles livrés seuls ; le bouton d\'enregistrement est là', () => {
+describe('collections · A — « Reprendre une de tes collections… »', () => {
+    it('A.a sans collection : ni menu, ni liste, ni ligne d\'aide ; le bouton d\'enregistrement est là', () => {
         const m = monter([G1]);
         const { projection } = rendu(m, G1);
-        const select = selectDe(projection);
-        expect(select).toContain('<option value="norme_externe" selected>');
-        expect(select).toContain('<option value="aucune">');
-        expect(select).not.toContain('optgroup');
+        expect(selectDe(projection)).toBe('');
+        expect(projection).not.toContain('Reprendre une de tes collections');
         expect(projection).not.toContain('collections-liste');
         expect(projection).not.toContain('collections-aide');
         expect(projection).toContain('data-action="ouvrirSaisieCollectionProjection" data-param="G1" data-param2="0"');
         expect(projection).toContain('Enregistrer ces paliers sous un nom…');
     });
 
-    it('A.b avec collections : « Mes collections » APRÈS les modèles, une option par jeu, la liste avec corbeille, la ligne de la copie — noms échappés', () => {
+    it('A.b avec collections : le menu dans l\'en-tête, une option par jeu (par nom), la liste en fin de table avec « Supprimer la collection », la ligne de la copie — noms échappés', () => {
         const m = monter([G1], [PHILO, EUF]);
         const { projection } = rendu(m, G1);
         const select = selectDe(projection);
-        expect(select).toContain('<optgroup label="Mes collections">');
-        expect(select.indexOf('<optgroup')).toBeGreaterThan(select.indexOf('<option value="aucune">'));
-        expect(select).toContain('<option value="collection:coll_euf">EUF &lt;b&gt;2026&lt;/b&gt;</option>');
-        expect(select).toContain('<option value="collection:coll_philo">Philo</option>');
+        expect(select).toContain('data-grille-id="G1" data-critere-index="0"');
+        expect(select).toContain('<option value="">Reprendre une de tes collections…</option>');
+        expect(select).toContain('<option value="coll_euf">EUF &lt;b&gt;2026&lt;/b&gt;</option>');
+        expect(select).toContain('<option value="coll_philo">Philo</option>');
         expect(select).not.toContain('<b>2026</b>');
-        // Par nom : EUF avant Philo.
         expect(select.indexOf('coll_euf')).toBeLessThan(select.indexOf('coll_philo'));
-        // La liste, avec la corbeille et son triplet ; puis la ligne d'aide. ↻ 21 oct. 2026 (constat 11, Grégoire,
-        // 8 h 31) : sous son titre « Mes collections », en fin de carte, après « Enregistrer ces paliers sous un nom… »
-        // — plus sous le menu, où « Labo Anatomie » se lisait comme une propriété du critère.
+        // Le menu vit dans l'en-tête, avant les rangées ; la liste en fin de table, après le bouton d'enregistrement.
+        expect(projection.indexOf('reprendreCollectionProjectionHandler')).toBeLessThan(projection.indexOf('table-cas-rangee'));
         const liste = projection.slice(projection.indexOf('collections-liste'), projection.indexOf('collections-aide'));
-        expect(projection.indexOf('collections-liste')).toBeGreaterThan(projection.indexOf('</select>'));
-        expect(projection).toContain('<h4 class="collections-titre">Mes collections</h4>');
+        expect(projection).toContain('<h5 class="collections-titre">Mes collections</h5>');
         expect(projection.indexOf('collections-titre')).toBeGreaterThan(projection.indexOf('data-action="ouvrirSaisieCollectionProjection"'));
-        expect(projection.indexOf('collections-liste')).toBeGreaterThan(projection.indexOf('collections-titre'));
         expect(projection.indexOf('collections-titre')).toBeGreaterThan(projection.indexOf('+ Ajouter un palier'));
+        expect(projection.indexOf('collections-liste')).toBeGreaterThan(projection.indexOf('collections-titre'));
         expect((liste.match(/class="collection-ligne"/g) || []).length).toBe(2);
         expect(liste).toContain('<span class="collection-nom">EUF &lt;b&gt;2026&lt;/b&gt;</span>');
-        expect(liste).toMatch(/data-action="supprimerCollectionProjection" data-param="coll_euf" data-param2="G1" data-param3="0"/);
-        expect(liste).toMatch(/title="Supprimer la collection « EUF &lt;b&gt;2026&lt;\/b&gt; »"/);
-        expect(liste).toContain('icons8-trash.svg');
-        expect(projection).toContain('collections-aide">Choisir une collection copie ses paliers et ses réglages dans ce critère. Corriger ou supprimer la collection ensuite ne change pas cette grille, ni ce qu\'un élève a déjà lu.</small>');
-        // Sous « Aucune projection » aussi (le menu est le même), et en création (cible `temp`).
-        const { projection: sansProj } = rendu(m, G2);
-        expect(selectDe(sansProj)).toContain('<optgroup label="Mes collections">');
-        expect(sansProj).toMatch(/data-action="supprimerCollectionProjection" data-param="coll_euf" data-param2="G2" data-param3="0"/);
+        expect(liste).toMatch(/data-action="supprimerCollectionProjection" data-param="coll_euf" data-param2="G1" data-param3="0">Supprimer la collection<\/button>/);
+        expect(projection).toContain(AIDE);
+        // Sans limite aussi (les collections restent accessibles), et en création (cible `temp`).
+        const { projection: sansLimite } = rendu(m, G2);
+        expect(selectDe(sansLimite)).toContain('<option value="coll_euf">');
+        expect(sansLimite).toMatch(/data-action="supprimerCollectionProjection" data-param="coll_euf" data-param2="G2" data-param3="0"/);
         m.win.tempCriteres = [{ ...ALGO, id: 'T' }];
         m.win.afficherCriteresTemp();
         const temp = carteProjection(m.liste().innerHTML, 'T');
-        expect(selectDe(temp)).toContain('<option value="collection:coll_euf">');
+        expect(selectDe(temp)).toContain('data-grille-id="temp" data-critere-index="0"');
         expect(temp).toMatch(/data-action="supprimerCollectionProjection" data-param="coll_euf" data-param2="temp" data-param3="0"/);
     });
 });
 
 /* ============================================================ B — LE CHOIX */
 
-describe('collections · B — choisir une collection COPIE ses valeurs dans le critère', () => {
-    it('B.a grille enregistrée : le handler reconnaît `collection:<id>`, la grille reçoit modèle, paramètres et paliers — copiés ; le menu montre ensuite le modèle', async () => {
+describe('collections · B — reprendre une collection COPIE ses valeurs dans le critère', () => {
+    it('B.a grille enregistrée : la grille reçoit modèle, paramètres et paliers — copiés ; le menu revient à son invitation', async () => {
         const m = monter([G2], [EUF]);
         rendu(m, G2);
-        await m.win.modifierModeleProjectionGrilleHandler({ value: 'collection:coll_euf', dataset: { grilleId: 'G2', critereIndex: '0' } });
+        await m.win.reprendreCollectionProjectionHandler({ value: 'coll_euf', dataset: { grilleId: 'G2', critereIndex: '0' } });
         const c = m.store[CLE_G][0].criteres[0];
         expect(c.modeleProjection).toBe('norme_externe');
-        // #790 (8 sept. 2026) — LA RÉTRO-COMPAT SE LIT ICI, et c'est pour ça que l'oracle
-        // n'est plus `EUF.params` tel quel : `EUF` est une collection enregistrée AVANT
-        // que `libelleSignalement` existe. Elle s'applique quand même, et le paramètre
-        // neuf arrive à son défaut (vide = aucun signalement levé). Une collection
-        // partagée par un collègue en juin se pose donc toujours, sans rien lever.
+        // #790 (8 sept. 2026) — une collection d'avant `libelleSignalement` se pose : le paramètre arrive vide.
         expect(c.paramsProjection).toEqual({ ...EUF.params, libelleSignalement: '' });
-        // L'oracle : ce que le registre écrit pour la même entrée (les paliers sont normalisés à l'écriture).
         expect(c.paliersProjection).toEqual(P.appliquerAuCritere({}, 'norme_externe', EUF.params, EUF.paliers).paliersProjection);
         expect(c.paliersProjection.length).toBe(6);
         expect(c.paliersProjection.find((p) => p.cle === 'risque').texte).toBe('Bilan : {projection} erreurs sur {mots} mots.');
@@ -214,40 +210,46 @@ describe('collections · B — choisir une collection COPIE ses valeurs dans le 
         m.store[CLE_C][0].params.nomServiceAide = 'Autre';
         expect(m.store[CLE_G][0].criteres[0].paliersProjection[4].texte).toBe('Bilan : {projection} erreurs sur {mots} mots.');
         expect(m.store[CLE_G][0].criteres[0].paramsProjection.nomServiceAide).toBe('Passerelle +');
-        // Le rendu suit : le modèle copié est sélectionné, six paliers, le service réglé.
+        // Le rendu suit : six rangées, le service réglé ; le menu ne retient aucune collection.
         const projection = carteProjection(m.liste().innerHTML, 'CR2');
-        expect(selectDe(projection)).toContain('<option value="norme_externe" selected>');
-        expect(selectDe(projection)).not.toMatch(/collection:coll_euf"[^>]*selected/);
-        expect((projection.match(/class="sous-critere-item palier-projection"/g) || []).length).toBe(6);
+        expect(selectDe(projection)).not.toContain('selected');
+        expect((projection.match(/class="table-cas-rangee"/g) || []).length).toBe(6);
         expect(projection).toContain('value="Passerelle +"');
         expect(m.notes.filter((n) => n[0] === 'warning')).toEqual([]);
+        expect(m.notes.some((n) => n[0] === 'info' && n[1] === 'Collection « EUF <b>2026</b> » copiée dans ce critère. La corriger ensuite ne change pas ce critère.')).toBe(true);
     });
 
     it('B.b un id disparu : rien n\'est écrit, le critère ne bouge pas, et on le dit', async () => {
         const m = monter([G2], [EUF]);
         rendu(m, G2);
         const avant = JSON.stringify(m.store[CLE_G]);
-        await m.win.modifierModeleProjectionGrilleHandler({ value: 'collection:coll_disparue', dataset: { grilleId: 'G2', critereIndex: '0' } });
+        await m.win.reprendreCollectionProjectionHandler({ value: 'coll_disparue', dataset: { grilleId: 'G2', critereIndex: '0' } });
         expect(JSON.stringify(m.store[CLE_G])).toBe(avant);
         expect(m.ecrits).toEqual([]);
         expect(m.notes.some((n) => n[0] === 'warning' && /n'existe plus/.test(n[1]))).toBe(true);
+        // L'invitation (valeur vide) n'écrit rien non plus.
+        await m.win.reprendreCollectionProjectionHandler({ value: '', dataset: { grilleId: 'G2', critereIndex: '0' } });
+        expect(m.ecrits).toEqual([]);
     });
 
-    it('B.c en création : le handler temp copie dans `tempCriteres` ; un modèle livré passe toujours par le chemin d\'avant', () => {
+    it('B.c en création : la cible `temp` copie dans `tempCriteres`, rien en base ; « Retirer la limite » garde ce qui est copié', async () => {
         const m = monter([], [EUF]);
         m.win.tempCriteres = [{ ...NEUF, id: 'T' }];
         m.win.afficherCriteresTemp();
-        m.win.modifierModeleProjectionTempHandler({ value: 'collection:coll_euf', dataset: { critereIndex: '0' } });
+        await m.win.reprendreCollectionProjectionHandler({ value: 'coll_euf', dataset: { grilleId: 'temp', critereIndex: '0' } });
         const t = m.win.tempCriteres[0];
         expect(t.modeleProjection).toBe('norme_externe');
         expect(t.paramsProjection.nomServiceAide).toBe('Passerelle +');
         expect(t.paliersProjection.length).toBe(6);
         expect(t.paliersProjection).not.toBe(m.store[CLE_C][0].paliers);
         expect(m.ecrits).toEqual([]);
-        // Puis « Aucune projection » au menu : les paliers copiés partent, comme avant ce lot.
-        m.win.modifierModeleProjectionTempHandler({ value: 'aucune', dataset: { critereIndex: '0' } });
+        // ↻ Lot 3a : « Retirer la limite » ne fait plus partir les paliers copiés — « Fixer une limite » les retrouve.
+        await m.win.retirerLimiteAlgo('temp', 0);
         expect(m.win.tempCriteres[0].modeleProjection).toBe('aucune');
-        expect(m.win.tempCriteres[0].paliersProjection).toBeUndefined();
+        expect(m.win.tempCriteres[0].paliersProjection.length).toBe(6);
+        await m.win.fixerLimiteAlgo('temp', 0);
+        expect(m.win.tempCriteres[0].modeleProjection).toBe('norme_externe');
+        expect(m.win.tempCriteres[0].paramsProjection.nomServiceAide).toBe('Passerelle +');
     });
 });
 
@@ -293,7 +295,7 @@ describe('collections · C — enregistrer sous un nom, inline, avec un état en
         const projection = carteProjection(m.liste().innerHTML, 'CR');
         expect(projection).not.toContain('collection-saisie');
         expect(projection).toContain('ouvrirSaisieCollectionProjection');
-        expect(selectDe(projection)).toContain('<option value="collection:' + c.id + '">EUF</option>');
+        expect(selectDe(projection)).toContain('<option value="' + c.id + '">EUF</option>');
         expect(m.notes.some((n) => n[0] === 'succes' && n[1] === 'Collection « EUF » enregistrée.')).toBe(true);
         // La grille, elle, n'a pas bougé.
         expect(m.store[CLE_G][0].criteres[0]).toEqual(ALGO);
@@ -333,16 +335,16 @@ describe('collections · D — supprimer une collection, après confirmation, ne
     it('D.a la collection part du stock, le rendu suit ; la grille qui l\'avait copiée garde ses paliers ; un id inconnu ne demande rien', async () => {
         const m = monter([G2], [EUF]);
         rendu(m, G2);
-        await m.win.modifierModeleProjectionGrilleHandler({ value: 'collection:coll_euf', dataset: { grilleId: 'G2', critereIndex: '0' } });
+        await m.win.reprendreCollectionProjectionHandler({ value: 'coll_euf', dataset: { grilleId: 'G2', critereIndex: '0' } });
         const copie = JSON.stringify(m.store[CLE_G][0].criteres[0]);
         await m.win.supprimerCollectionProjection('coll_euf', 'G2', 0);
         expect(m.confirmations).toEqual(['Supprimer la collection « EUF <b>2026</b> » ? Les grilles qui l\'ont copiée ne changent pas.']);
         expect(m.store[CLE_C]).toEqual([]);
         expect(JSON.stringify(m.store[CLE_G][0].criteres[0])).toBe(copie);
         const projection = carteProjection(m.liste().innerHTML, 'CR2');
-        expect(projection).not.toContain('optgroup');
+        expect(selectDe(projection)).toBe('');
         expect(projection).not.toContain('collections-liste');
-        expect((projection.match(/class="sous-critere-item palier-projection"/g) || []).length).toBe(6);
+        expect((projection.match(/class="table-cas-rangee"/g) || []).length).toBe(6);
         await m.win.supprimerCollectionProjection('coll_inconnue', 'G2', 0);
         expect(m.confirmations.length).toBe(1);
     });
@@ -354,7 +356,7 @@ describe('collections · D — supprimer une collection, après confirmation, ne
         expect(m.confirmations.length).toBe(1);
         expect(m.store[CLE_C].length).toBe(1);
         expect(m.ecrits).toEqual([]);
-        expect(selectDe(carteProjection(m.liste().innerHTML, 'CR'))).toContain('collection:coll_euf');
+        expect(selectDe(carteProjection(m.liste().innerHTML, 'CR'))).toContain('value="coll_euf"');
     });
 });
 
@@ -375,6 +377,8 @@ describe('collections · E — jetons et règles scopées', () => {
         expect(lot.length).toBeGreaterThan(1000);
         expect(lot).not.toMatch(/prompt\(|alert\(/);
         expect(lot).not.toMatch(/onclick=|onchange=/);
-        expect((code.match(/_idCollectionChoisie\(/g) || []).length).toBe(3);   // la déclaration + les deux handlers
+        // ↻ Lot 3a : le préfixe `collection:` est parti avec le menu ; un handler, deux cibles.
+        expect(code).not.toContain('_idCollectionChoisie');
+        expect((code.match(/function reprendreCollectionProjectionHandler\(/g) || []).length).toBe(1);
     });
 });

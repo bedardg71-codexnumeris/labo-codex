@@ -656,7 +656,22 @@ function _appliquerResultatsAlgoCategories(critereId, noteCalculee, pctFinal, ni
     }
 }
 
-function _trouverCodeDominant(codesSousCriteres) {
+/**
+ * Le code dominant du mode Catégories. ↻ Lot 3a (26 oct. 2026, règle de Grégoire du 25) : `liste`, l'ordre
+ * des sous-critères d'un critère NEUF — à égalité, le premier de la liste (`codesAnnotation.lePlusFrequent`).
+ * Sans elle, un critère existant : le premier à atteindre ce nombre, comme hier, à l'identique.
+ */
+/** Lot 3a : la liste des sous-critères tranche l'égalité d'un critère NEUF (la marque des noms) ; sinon null. */
+function _listeDesCodesSiNeuf(critereId, sousCriteres) {
+    const neuf = window.enoncesAlgo && window.enoncesAlgo.estNeuf(_critereEnoncesPour(critereId));
+    return neuf ? sousCriteres.map(s => s.code) : null;
+}
+
+function _trouverCodeDominant(codesSousCriteres, liste) {
+    if (liste && window.codesAnnotation && typeof window.codesAnnotation.lePlusFrequent === 'function') {
+        const r = window.codesAnnotation.lePlusFrequent(codesSousCriteres, liste);
+        return r ? { codeDominant: r.code, maxFreq: r.max } : { codeDominant: null, maxFreq: 0 };
+    }
     const frequences = {};
     let maxFreq = 0;
     let codeDominant = null;
@@ -761,7 +776,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
         mots: mots
     });
 
-    const { codeDominant, maxFreq } = _trouverCodeDominant(codesSousCriteres);
+    const { codeDominant, maxFreq } = _trouverCodeDominant(codesSousCriteres, _listeDesCodesSiNeuf(critereId, sousCriteres));
 
     // #704 — SANS AUCUN CODE, IL N'Y A PAS DE CATÉGORIE DOMINANTE, MAIS IL Y A UNE NOTE.
     // Cette branche (`codeDominant === null`) était inatteignable tant que la garde du

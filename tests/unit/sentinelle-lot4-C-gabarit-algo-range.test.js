@@ -164,7 +164,7 @@ describe('lot 4 · C.A — ↻ #1150 : l\'ordre des étapes, et UNE seule ouvert
         // Les sous-critères sont dans l'étape « Codes », la formule dans « Note », les paliers dans « Paliers ».
         expect(contenuCarte(html, 'codes')).toContain('sous-criteres-conteneur--en-tete');
         expect(contenuCarte(html, 'formule')).toContain('Formule appliquée');
-        expect(contenuCarte(html, 'projection')).toContain('Modèle de projection');
+        expect(contenuCarte(html, 'projection')).toContain('class="table-cas"');   // ↻ lot 3a : la table des paliers
         expect(html).not.toContain('gabarit-algo-carte');
         expect(html).not.toContain('data-pli="CR:codes"');
     });
@@ -214,7 +214,7 @@ describe('lot 4 · C.B — les libellés', () => {
         const { win, liste } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
-        expect(html).toContain('Modèle des phrases (bilan et décompte)');
+        expect(html).toContain('Modèle des phrases</label>');   // ↻ lot 3a (ébauche du 26 oct.) : « Modèle des phrases »
         expect(html).not.toContain('Modèle d\'observation');
         expect(html).not.toContain('Modèle de rétroaction');
         expect(html).not.toContain('Modèle de commentaire');
@@ -234,10 +234,15 @@ describe('lot 4 · C.B — les libellés', () => {
         expect(norme).toBeTruthy();
         expect(norme.nom).toBe('Projection à l\'EUF');
         expect(modeles.map(m => m.nom)).not.toContain('Norme externe (épreuve uniforme)');
-        // Et le gabarit rendu offre ce nom au menu, avec l'id inchangé comme valeur.
-        const { win, liste } = monter([GRILLE]);
+        // ↻ Lot 3a (26 oct. 2026) : le menu des modèles est parti ; un critère sous `norme_externe` montre sa
+        // limite fixée (« Retirer la limite »), et l'id ne change pas dans la grille.
+        const { win, liste, store } = monter([GRILLE]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
-        expect(liste().innerHTML).toMatch(/<option value="norme_externe" selected>Projection à l&#x27;EUF|<option value="norme_externe" selected>Projection à l'EUF/);
+        expect(liste().innerHTML).toContain('data-action="retirerLimiteAlgo"');
+        expect(liste().innerHTML).not.toContain('<option value="norme_externe"');
+        // Un critère d'avant ne porte pas le champ : il LIT `norme_externe` (la migration), rien n'est écrit.
+        expect(store[CLE][0].criteres[0].modeleProjection).toBeUndefined();
+        expect(P.normaliser(store[CLE][0].criteres[0]).modeleId).toBe('norme_externe');
     });
 
     it('B.c les titres des étapes sont ceux de la maquette validée (↻ #1150) : « Formule » devient « Note », la projection « Paliers », « Bilan » « Ce que l\'élève lit »', () => {
@@ -245,7 +250,8 @@ describe('lot 4 · C.B — les libellés', () => {
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE)));
         const html = liste().innerHTML;
         const titres = [...html.matchAll(/<span class="atelier-algo-etape-nom">([^<]+)<\/span>/g)].map((m) => m[1].replace(/&#x27;|&#39;/g, "'"));
-        expect(titres).toEqual(['Ce que tu comptes', 'Codes', 'Note', 'Paliers', 'Ce que l\'élève lit']);
+        // ↻ Lot 3a (26 oct. 2026) : les noms de l'ébauche validée.
+        expect(titres).toEqual(['Ce que tu relèves et comptes', 'Codes utilisés', 'Note calculée', 'Cas d’interprétation', 'Ce que l’étudiant·e lit']);
         expect(html).not.toMatch(/<span class="accordeon-chevron">[▶▼]<\/span> (?:Formule|Bilan|Ce que l)/);
         expect(html).not.toMatch(/<\/span> Codes d(?:'|&#x27;|&#39;)annotation/);
     });
@@ -495,7 +501,7 @@ describe('lot 4 · C.F — C.3 : un critère algorithmique NEUF naît sans proje
         const b = monter([AVANT]);
         b.win.afficherCriteresGrille(JSON.parse(JSON.stringify(AVANT)));
         expect(b.store[CLE][0].criteres[0].modeleProjection).toBeUndefined();
-        expect(b.liste().innerHTML).toContain('<option value="norme_externe" selected>');
+        expect(b.liste().innerHTML).toContain('data-action="retirerLimiteAlgo"');   // ↻ lot 3a : sa limite est fixée
         // Création : naissance, changement de type au menu du critère, retypage par le menu de la grille.
         const c = monter([]);
         c.win.tempTypeGrille = 'algorithmique'; c.win.tempCriteres = [];
@@ -508,10 +514,10 @@ describe('lot 4 · C.F — C.3 : un critère algorithmique NEUF naît sans proje
         const menu = c.document.getElementById('typeGrille'); menu.value = 'algorithmique';
         await c.win.modifierTypeGrilleHandler(menu);
         expect(c.win.tempCriteres[0].modeleProjection).toBe('aucune');
-        // Et l'écran d'un critère neuf dit « Aucune projection ».
+        // Et l'écran d'un critère neuf le dit (↻ lot 3a : « Aucune limite fixée », et « Fixer une limite »).
         c.win.afficherCriteresTemp();
-        expect(c.liste().innerHTML).toContain('<option value="aucune" selected>Aucune projection</option>');
-        expect(c.liste().innerHTML).toContain('Aucune projection ne sera proposée');
+        expect(c.liste().innerHTML).toContain('data-action="fixerLimiteAlgo"');
+        expect(c.liste().innerHTML).toContain('Aucune limite fixée : l’étudiant·e ne lit aucun palier.');
         // Un critère qui reste holistique n'écrit rien.
         c.win.tempCriteres = [{ id: 'T3', nom: 'z', type: 'holistique', ponderation: 0 }];
         c.win.modifierCritereTemp(0, 'nom', 'z2');
@@ -530,11 +536,13 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
         const edition = a.liste().innerHTML;
         expect(edition).not.toContain('btn-supprimer');
         expect(edition).not.toContain('✕');
-        // Critère, deux sous-critères, et chaque palier de la norme externe : une corbeille chacun.
+        // Critère et deux sous-critères : une corbeille chacun. ↻ Lot 3a (ébauche du 26 oct.) : un palier se retire
+        // par le lien « Retirer ce palier », au pied de sa rangée — même action, même identifiant.
         const corbeilles = (edition.match(/icons8-trash\.svg/g) || []).length;
-        const paliers = (edition.match(/class="sous-critere-item palier-projection"/g) || []).length;
+        const paliers = (edition.match(/class="table-cas-rangee"/g) || []).length;
         expect(paliers).toBeGreaterThan(1);
-        expect(corbeilles).toBe(1 + 2 + paliers);
+        expect(corbeilles).toBe(1 + 2);
+        expect((edition.match(/>Retirer ce palier<\/button>/g) || []).length).toBe(paliers);
         expect(edition).toMatch(/data-action="supprimerPalierProjectionGrille" data-param="G9" data-param2="0" data-param3="0"/);
         expect(edition).toMatch(/data-action="supprimerCritereGrille" data-param="G9" data-param2="0"/);
         // En création, même chose : le palier s'identifie par (critère, index).
@@ -545,7 +553,7 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
         const creation = c.liste().innerHTML;
         expect(creation).not.toContain('btn-supprimer');
         expect(creation).not.toContain('✕');
-        expect(creation).toMatch(/data-action="supprimerPalierProjectionTemp" data-param="0" data-param2="0"[^>]*><img src="icons\/icons8-trash\.svg"/);
+        expect(creation).toMatch(/data-action="supprimerPalierProjectionTemp" data-param="0" data-param2="0">Retirer ce palier<\/button>/);
         expect(creation).toMatch(/data-action="supprimerCritereTemp" data-param="0"[^>]*><img src="icons\/icons8-trash\.svg"/);
     });
 
@@ -574,33 +582,25 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
         expect(c.liste().innerHTML).toMatch(/bloc-coin-outils[\s\S]*?data-action="deplacerCritereTempHaut" data-param="0" disabled/);
     });
 
-    it('G.c un palier tient sur deux rangées côte à côte (la grille du formulaire groupe-cours), le nom a sa colonne, la note du composeur une seule fois', () => {
+    // ↻ Lot 3a de la table de cas (26 oct. 2026) : un palier est une RANGÉE de la table (Quand · Nom court ·
+    // L'étudiant·e lit), l'introduction de la table porte la décision sur le préfixe, une fois, en tête.
+    it('G.c un palier tient sur une rangée de trois colonnes, le nom a sa colonne, l\'introduction une seule fois', () => {
         const { win, liste } = monter([GRILLE_PALIERS]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE_PALIERS)));
         const projection = contenuCarte(liste().innerHTML, 'projection');
-        const paliers = projection.split('class="sous-critere-item palier-projection"').slice(1);
+        const paliers = projection.split('class="table-cas-rangee"').slice(1);
         expect(paliers.length).toBeGreaterThan(1);
         for (const pal of paliers) {
-            const bloc = pal.split('class="sous-critere-item palier-projection"')[0];
-            expect((bloc.match(/class="grille-form-2col palier-rangee"/g) || []).length, 'deux rangées').toBe(2);
-            expect(bloc).toContain('class="controle-form sous-critere-input-standard palier-nom"');
-            expect(bloc).not.toContain('sous-critere-champs-grid');
-            expect(bloc).not.toContain('sous-critere-description-groupe');
+            for (const col of ['table-cas-quand', 'table-cas-nom', 'table-cas-textes']) expect(pal, col).toContain('class="' + col + '"');
+            expect(pal).toContain('class="controle-form palier-nom"');
         }
-        // La note sous les paliers : UNE fois par critère, plus dans chaque palier. ↻ Texte troué,
-        // étape 2 (4 sept.) : la note « Écris {service}… » enseignait une syntaxe que le bouton rend
-        // inutile ; elle est remplacée par la note du composeur, qui porte la décision de Grégoire sur
-        // le préfixe engendré — au mot.
         expect((projection.match(/palier-note-service/g) || []).length).toBe(0);
-        expect((projection.match(/palier-note-composer/g) || []).length).toBe(1);
-        // ↻ Étape 2b (22 oct. 2026) : « badge » devient « bloc », le mot de la palette.
-        expect((projection.match(/avec un bloc, elle est entière : c'est toi qui l'écris\./g) || []).length).toBe(1);
-        // ↻ §7 (5 sept.) : la note vient EN TÊTE de la carte, avant le premier palier — à six paliers
-        // de la rangée « Poser : », elle n'aidait personne.
-        expect(projection.indexOf('palier-note-composer')).toBeLessThan(projection.indexOf('palier-projection'));
+        expect((projection.match(/class="table-cas-ou"/g) || []).length).toBe(1);
+        expect((projection.match(/Un verdict sans bloc est précédé de la moyenne/g) || []).length).toBe(1);
+        expect(projection.indexOf('table-cas-ou')).toBeLessThan(projection.indexOf('table-cas-rangee'));
         expect(projection).toContain('value="Sans erreur"');
-        // Les champs et leurs clés n'ont pas bougé (ce qui est enregistré non plus).
-        for (const champ of ['libelle', 'ratioMax', 'texte', 'texteAide']) expect(projection).toContain('data-champ="' + champ + '"');
+        // Les champs : ceux d'hier, le seuil en pourcentage (il s'enregistre en `ratioMax`, banc table-de-cas).
+        for (const champ of ['libelle', 'seuilPourcent', 'texte', 'texteAide', 'leveSignalement']) expect(projection).toContain('data-champ="' + champ + '"');
     });
 
     it('G.d les règles sont SCOPÉES à l\'éditeur, et la grille à deux colonnes est celle du formulaire groupe-cours', () => {
@@ -618,19 +618,19 @@ describe('lot 4 · C.G — coup d\'œil de Grégoire : corbeille partout, chevro
 describe('lot 4 · C.H — second coup d\'œil : paliers numérotés, sous-critères déplaçables, « Descripteur »', () => {
     const GRILLE_PALIERS = { id: 'G9', nom: 'EUF', criteres: [{ ...ALGO, modeleProjection: 'norme_externe' }] };
 
-    it('H.e les paliers sont numérotés par rang, « Sans erreur » compris, et n\'ont PAS de chevrons — l\'ordre est le seuil', () => {
+    // ↻ Lot 3a (26 oct. 2026) : les rangées ne portent plus de numéro — chacune dit QUAND elle s'applique (rien de
+    // compté, jusqu'à N % de la limite, au-delà du dernier seuil) ; toujours sans chevrons : l'ordre est le seuil.
+    it('H.e les paliers se lisent dans l\'ordre du calcul, « Sans erreur » en tête, et n\'ont PAS de chevrons — l\'ordre est le seuil', () => {
         const { win, liste } = monter([GRILLE_PALIERS]);
         win.afficherCriteresGrille(JSON.parse(JSON.stringify(GRILLE_PALIERS)));
         const projection = contenuCarte(liste().innerHTML, 'projection');
-        const paliers = projection.split('class="sous-critere-item palier-projection"').slice(1);
+        const paliers = projection.split('class="table-cas-rangee"').slice(1);
         expect(paliers.length).toBeGreaterThan(1);
-        paliers.forEach((pal, i) => {
-            expect(pal, 'palier ' + (i + 1)).toContain('<label class="sous-critere-label-petit">Palier ' + (i + 1) + '</label>');
-            expect(pal).not.toContain('pipeline-btn-reorder');
-        });
+        paliers.forEach((pal) => expect(pal).not.toContain('pipeline-btn-reorder'));
         expect(paliers[0]).toContain('value="Sans erreur"');
-        expect(projection).not.toContain('<label class="sous-critere-label-petit">Palier</label>');
-        // Le calcul lit les paliers dans leur ordre : aucun tri à la saisie (mesuré, inscrit).
+        expect(paliers[0]).toContain('<strong>Rien de compté</strong>');
+        expect(paliers[paliers.length - 1]).toContain('<strong>Au-delà du dernier seuil</strong>');
+        expect(projection).not.toContain('<label class="sous-critere-label-petit">Palier');
         const P = source('js/evaluation-projection.js');
         expect(P).toContain('function _paliersDeRatio(paliers) {\n    return paliers.filter(function(p) { return !p.sansErreur; });');
     });

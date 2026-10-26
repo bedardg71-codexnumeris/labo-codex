@@ -1,0 +1,1688 @@
+{
+ "francaisSansChamp": {
+  "libelleSeuil": "1 erreur à chaque 30 mots (30 erreurs pour 900 mots)",
+  "enonces": {
+   "decompte": "Ta rédaction contient 7 erreurs de français pour 450 mots.",
+   "priorite": "la qualité du français écrit est à travailler en priorité",
+   "concentre": "Concentre-toi sur la qualité du français",
+   "aucune": "Aucun tampon ni erreur de français annotés."
+  },
+  "projection": {
+   "0/0": [
+    "—",
+    "mots-absents"
+   ],
+   "1/0": [
+    "—",
+    "mots-absents"
+   ],
+   "2/0": [
+    "—",
+    "mots-absents"
+   ],
+   "3/0": [
+    "—",
+    "mots-absents"
+   ],
+   "5/0": [
+    "—",
+    "mots-absents"
+   ],
+   "8/0": [
+    "—",
+    "mots-absents"
+   ],
+   "12/0": [
+    "—",
+    "mots-absents"
+   ],
+   "17/0": [
+    "—",
+    "mots-absents"
+   ],
+   "20/0": [
+    "—",
+    "mots-absents"
+   ],
+   "30/0": [
+    "—",
+    "mots-absents"
+   ],
+   "45/0": [
+    "—",
+    "mots-absents"
+   ],
+   "0/120": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/120": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/120": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 60 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "3/120": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 40 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "5/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 24 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "8/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "12/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "17/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 7 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 6 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 4 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 3 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/450": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 225 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 150 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/450": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 90 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "8/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 56 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "12/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 38 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "17/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 26 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 23 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/600": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 600 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 200 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/600": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "12/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 50 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "17/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 35 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 13 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/900": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 900 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 113 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/900": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "17/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 53 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 45 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/900": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/1300": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 1300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 650 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 433 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 260 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 163 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 108 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "17/1300": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 76 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "20/1300": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 65 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "30/1300": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 43 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/1300": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 29 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ]
+  },
+  "principal": [
+   "Français écrit : 4 erreurs (principalement : Subordonnée employée seule)",
+   "Français écrit : 7 erreurs (principalement : Ponctuation / guillemets)",
+   "Français écrit : 1 erreur (principalement : Ponctuation / guillemets)",
+   "Français écrit : 9 erreurs (principalement : Orthographe d’usage / typographie)"
+  ]
+ },
+ "philoEuf": {
+  "libelleSeuil": "1 erreur à chaque 30 mots (20 erreurs pour 600 mots)",
+  "enonces": {
+   "decompte": "Ta production contient 7 erreurs pour 450 mots.",
+   "priorite": "Rigueur est à travailler en priorité",
+   "concentre": "Concentre-toi sur Rigueur",
+   "aucune": "Aucun tampon ni erreurs annotés."
+  },
+  "projection": {
+   "0/0": [
+    "—",
+    "mots-absents"
+   ],
+   "1/0": [
+    "—",
+    "mots-absents"
+   ],
+   "2/0": [
+    "—",
+    "mots-absents"
+   ],
+   "3/0": [
+    "—",
+    "mots-absents"
+   ],
+   "5/0": [
+    "—",
+    "mots-absents"
+   ],
+   "8/0": [
+    "—",
+    "mots-absents"
+   ],
+   "12/0": [
+    "—",
+    "mots-absents"
+   ],
+   "17/0": [
+    "—",
+    "mots-absents"
+   ],
+   "20/0": [
+    "—",
+    "mots-absents"
+   ],
+   "30/0": [
+    "—",
+    "mots-absents"
+   ],
+   "45/0": [
+    "—",
+    "mots-absents"
+   ],
+   "0/120": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/120": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/120": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 60 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "3/120": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 40 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "5/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 24 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "8/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "12/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "17/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 7 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "20/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 6 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "30/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 4 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "45/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 3 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "0/450": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 225 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 150 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/450": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 90 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "8/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 56 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "12/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 38 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "17/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 26 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "20/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 23 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "30/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "45/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "0/600": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 600 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 200 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/600": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "12/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 50 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "17/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 35 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "20/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "30/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "45/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 13 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "0/900": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 900 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 113 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/900": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "17/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 53 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "20/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 45 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "30/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "45/900": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ],
+   "0/1300": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 1300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 650 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 433 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 260 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 163 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 108 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "17/1300": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 76 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "20/1300": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 65 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "30/1300": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 43 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Atelier fictif."
+   ],
+   "45/1300": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 29 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Atelier fictif."
+   ]
+  },
+  "principal": [
+   "Rigueur : 4 erreurs (principalement : Subordonnée employée seule)",
+   "Rigueur : 7 erreurs (principalement : Ponctuation / guillemets)",
+   "Rigueur : 1 erreur (principalement : Ponctuation / guillemets)",
+   "Rigueur : 9 erreurs (principalement : Orthographe d’usage / typographie)"
+  ]
+ },
+ "paliersPerso": {
+  "libelleSeuil": "1 erreur à chaque 30 mots (30 erreurs pour 900 mots)",
+  "enonces": {
+   "decompte": "Ta production contient 7 erreurs pour 450 mots.",
+   "priorite": "Langue est à travailler en priorité",
+   "concentre": "Continue : Langue",
+   "aucune": "Aucun tampon ni erreurs annotés."
+  },
+  "projection": {
+   "0/0": [
+    "—",
+    "mots-absents"
+   ],
+   "1/0": [
+    "—",
+    "mots-absents"
+   ],
+   "2/0": [
+    "—",
+    "mots-absents"
+   ],
+   "3/0": [
+    "—",
+    "mots-absents"
+   ],
+   "5/0": [
+    "—",
+    "mots-absents"
+   ],
+   "8/0": [
+    "—",
+    "mots-absents"
+   ],
+   "12/0": [
+    "—",
+    "mots-absents"
+   ],
+   "17/0": [
+    "—",
+    "mots-absents"
+   ],
+   "20/0": [
+    "—",
+    "mots-absents"
+   ],
+   "30/0": [
+    "—",
+    "mots-absents"
+   ],
+   "45/0": [
+    "—",
+    "mots-absents"
+   ],
+   "0/120": [
+    "sans_erreur",
+    "Aucune faute : bravo."
+   ],
+   "1/120": [
+    "ok",
+    "Ton rythme : 120 mots par erreur, palier Correct."
+   ],
+   "2/120": [
+    "ok",
+    "Ton rythme : 60 mots par erreur, palier Correct."
+   ],
+   "3/120": [
+    "limite",
+    "Tu fais en moyenne 1 erreur à chaque 40 mots. Attention."
+   ],
+   "5/120": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 24 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "8/120": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "12/120": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "17/120": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 7 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "20/120": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 6 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "30/120": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 4 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "45/120": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 3 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "0/450": [
+    "sans_erreur",
+    "Aucune faute : bravo."
+   ],
+   "1/450": [
+    "ok",
+    "Ton rythme : 450 mots par erreur, palier Correct."
+   ],
+   "2/450": [
+    "ok",
+    "Ton rythme : 225 mots par erreur, palier Correct."
+   ],
+   "3/450": [
+    "ok",
+    "Ton rythme : 150 mots par erreur, palier Correct."
+   ],
+   "5/450": [
+    "ok",
+    "Ton rythme : 90 mots par erreur, palier Correct."
+   ],
+   "8/450": [
+    "ok",
+    "Ton rythme : 56 mots par erreur, palier Correct."
+   ],
+   "12/450": [
+    "limite",
+    "Tu fais en moyenne 1 erreur à chaque 38 mots. Attention."
+   ],
+   "17/450": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 26 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "20/450": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 23 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "30/450": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "45/450": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "0/600": [
+    "sans_erreur",
+    "Aucune faute : bravo."
+   ],
+   "1/600": [
+    "ok",
+    "Ton rythme : 600 mots par erreur, palier Correct."
+   ],
+   "2/600": [
+    "ok",
+    "Ton rythme : 300 mots par erreur, palier Correct."
+   ],
+   "3/600": [
+    "ok",
+    "Ton rythme : 200 mots par erreur, palier Correct."
+   ],
+   "5/600": [
+    "ok",
+    "Ton rythme : 120 mots par erreur, palier Correct."
+   ],
+   "8/600": [
+    "ok",
+    "Ton rythme : 75 mots par erreur, palier Correct."
+   ],
+   "12/600": [
+    "ok",
+    "Ton rythme : 50 mots par erreur, palier Correct."
+   ],
+   "17/600": [
+    "limite",
+    "Tu fais en moyenne 1 erreur à chaque 35 mots. Attention."
+   ],
+   "20/600": [
+    "limite",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. Attention."
+   ],
+   "30/600": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "45/600": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 13 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "0/900": [
+    "sans_erreur",
+    "Aucune faute : bravo."
+   ],
+   "1/900": [
+    "ok",
+    "Ton rythme : 900 mots par erreur, palier Correct."
+   ],
+   "2/900": [
+    "ok",
+    "Ton rythme : 450 mots par erreur, palier Correct."
+   ],
+   "3/900": [
+    "ok",
+    "Ton rythme : 300 mots par erreur, palier Correct."
+   ],
+   "5/900": [
+    "ok",
+    "Ton rythme : 180 mots par erreur, palier Correct."
+   ],
+   "8/900": [
+    "ok",
+    "Ton rythme : 113 mots par erreur, palier Correct."
+   ],
+   "12/900": [
+    "ok",
+    "Ton rythme : 75 mots par erreur, palier Correct."
+   ],
+   "17/900": [
+    "ok",
+    "Ton rythme : 53 mots par erreur, palier Correct."
+   ],
+   "20/900": [
+    "limite",
+    "Tu fais en moyenne 1 erreur à chaque 45 mots. Attention."
+   ],
+   "30/900": [
+    "limite",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. Attention."
+   ],
+   "45/900": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. Trop d’erreurs. Inscris-toi."
+   ],
+   "0/1300": [
+    "sans_erreur",
+    "Aucune faute : bravo."
+   ],
+   "1/1300": [
+    "ok",
+    "Ton rythme : 1300 mots par erreur, palier Correct."
+   ],
+   "2/1300": [
+    "ok",
+    "Ton rythme : 650 mots par erreur, palier Correct."
+   ],
+   "3/1300": [
+    "ok",
+    "Ton rythme : 433 mots par erreur, palier Correct."
+   ],
+   "5/1300": [
+    "ok",
+    "Ton rythme : 260 mots par erreur, palier Correct."
+   ],
+   "8/1300": [
+    "ok",
+    "Ton rythme : 163 mots par erreur, palier Correct."
+   ],
+   "12/1300": [
+    "ok",
+    "Ton rythme : 108 mots par erreur, palier Correct."
+   ],
+   "17/1300": [
+    "ok",
+    "Ton rythme : 76 mots par erreur, palier Correct."
+   ],
+   "20/1300": [
+    "ok",
+    "Ton rythme : 65 mots par erreur, palier Correct."
+   ],
+   "30/1300": [
+    "limite",
+    "Tu fais en moyenne 1 erreur à chaque 43 mots. Attention."
+   ],
+   "45/1300": [
+    "fin",
+    "Tu fais en moyenne 1 erreur à chaque 29 mots. Trop d’erreurs. Inscris-toi."
+   ]
+  },
+  "principal": [
+   "Langue : 4 erreurs (principalement : Subordonnée employée seule)",
+   "Langue : 7 erreurs (principalement : Ponctuation / guillemets)",
+   "Langue : 1 erreur (principalement : Ponctuation / guillemets)",
+   "Langue : 9 erreurs (principalement : Orthographe d’usage / typographie)"
+  ]
+ },
+ "marqueDesCodes": {
+  "libelleSeuil": "1 erreur à chaque 25 mots (12 erreurs pour 300 mots)",
+  "enonces": {
+   "decompte": "Ta production contient 7 erreurs pour 450 mots.",
+   "priorite": "Précision est à travailler en priorité",
+   "concentre": "Concentre-toi sur Précision",
+   "aucune": "Aucun tampon ni erreurs annotés."
+  },
+  "projection": {
+   "0/0": [
+    "—",
+    "mots-absents"
+   ],
+   "1/0": [
+    "—",
+    "mots-absents"
+   ],
+   "2/0": [
+    "—",
+    "mots-absents"
+   ],
+   "3/0": [
+    "—",
+    "mots-absents"
+   ],
+   "5/0": [
+    "—",
+    "mots-absents"
+   ],
+   "8/0": [
+    "—",
+    "mots-absents"
+   ],
+   "12/0": [
+    "—",
+    "mots-absents"
+   ],
+   "17/0": [
+    "—",
+    "mots-absents"
+   ],
+   "20/0": [
+    "—",
+    "mots-absents"
+   ],
+   "30/0": [
+    "—",
+    "mots-absents"
+   ],
+   "45/0": [
+    "—",
+    "mots-absents"
+   ],
+   "0/120": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/120": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/120": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 60 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "3/120": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 40 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "5/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 24 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "8/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "12/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "17/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 7 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "20/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 6 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "30/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 4 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "45/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 3 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "0/450": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 225 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 150 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 90 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/450": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 56 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "12/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 38 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "17/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 26 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "20/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 23 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "30/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "45/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "0/600": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 600 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 200 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/600": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "12/600": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 50 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "17/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 35 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "20/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "30/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "45/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 13 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "0/900": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 900 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 113 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/900": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "17/900": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 53 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "20/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 45 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "30/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "45/900": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Service fictif."
+   ],
+   "0/1300": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 1300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 650 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 433 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 260 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 163 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 108 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "17/1300": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 76 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "20/1300": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 65 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "30/1300": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 43 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ],
+   "45/1300": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 29 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Service fictif."
+   ]
+  },
+  "principal": [
+   "Précision : 4 erreurs (principalement : Ponctuation)",
+   "Précision : 7 erreurs (principalement : Lexique)",
+   "Précision : 1 erreur (principalement : Lexique)",
+   "Précision : 9 erreurs"
+  ]
+ },
+ "drapeau": {
+  "libelleSeuil": "1 erreur à chaque 30 mots (30 erreurs pour 900 mots)",
+  "enonces": {
+   "decompte": "Ta production contient 7 erreurs pour 450 mots.",
+   "priorite": "Rédaction est à travailler en priorité",
+   "concentre": "Concentre-toi sur Rédaction",
+   "aucune": "Aucun tampon ni erreurs annotés."
+  },
+  "projection": {
+   "0/0": [
+    "—",
+    "mots-absents"
+   ],
+   "1/0": [
+    "—",
+    "mots-absents"
+   ],
+   "2/0": [
+    "—",
+    "mots-absents"
+   ],
+   "3/0": [
+    "—",
+    "mots-absents"
+   ],
+   "5/0": [
+    "—",
+    "mots-absents"
+   ],
+   "8/0": [
+    "—",
+    "mots-absents"
+   ],
+   "12/0": [
+    "—",
+    "mots-absents"
+   ],
+   "17/0": [
+    "—",
+    "mots-absents"
+   ],
+   "20/0": [
+    "—",
+    "mots-absents"
+   ],
+   "30/0": [
+    "—",
+    "mots-absents"
+   ],
+   "45/0": [
+    "—",
+    "mots-absents"
+   ],
+   "0/120": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/120": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/120": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 60 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "3/120": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 40 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "5/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 24 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "8/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "12/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "17/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 7 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 6 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 4 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/120": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 3 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/450": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 225 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/450": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 150 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/450": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 90 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "8/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 56 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "12/450": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 38 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "17/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 26 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 23 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 15 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/450": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 10 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/600": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 600 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 200 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/600": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 120 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/600": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "12/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 50 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "17/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 35 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/600": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/600": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 13 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/900": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 900 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 450 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 180 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/900": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 113 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/900": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 75 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "17/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 53 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "20/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 45 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "30/900": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 30 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/900": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 20 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "0/1300": [
+    "sans_erreur",
+    "En prévision de l'EUF, l'absence d'erreur est exceptionnelle."
+   ],
+   "1/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 1300 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "2/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 650 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "3/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 433 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "5/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 260 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "8/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 163 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "12/1300": [
+    "excellent",
+    "Tu fais en moyenne 1 erreur à chaque 108 mots. En prévision de l'EUF, ce ratio est excellent."
+   ],
+   "17/1300": [
+    "tres_bien",
+    "Tu fais en moyenne 1 erreur à chaque 76 mots. En prévision de l'EUF, ce ratio est très bien."
+   ],
+   "20/1300": [
+    "bien",
+    "Tu fais en moyenne 1 erreur à chaque 65 mots. En prévision de l'EUF, ce ratio est bien."
+   ],
+   "30/1300": [
+    "risque",
+    "Tu fais en moyenne 1 erreur à chaque 43 mots. En prévision de l'EUF, ce ratio est risqué parce qu'il est près du seuil de l'échec. Il est recommandé de t'inscrire au Centre d'aide du collège."
+   ],
+   "45/1300": [
+    "echec",
+    "Tu fais en moyenne 1 erreur à chaque 29 mots. En prévision de l'EUF, ce ratio mènerait à un échec automatique. Il est fortement recommandé de t'inscrire au Centre d'aide du collège."
+   ]
+  },
+  "principal": [
+   "Rédaction : 4 erreurs (principalement : Ponctuation)",
+   "Rédaction : 7 erreurs (principalement : Lexique)",
+   "Rédaction : 1 erreur (principalement : Lexique)",
+   "Rédaction : 9 erreurs"
+  ]
+ },
+ "sansProjection": {
+  "libelleSeuil": "",
+  "enonces": {
+   "decompte": "Ta production contient 7 erreurs pour 450 mots.",
+   "priorite": "Calculs est à travailler en priorité",
+   "concentre": "Concentre-toi sur Calculs",
+   "aucune": "Aucun tampon ni erreurs annotés."
+  },
+  "projection": {
+   "0/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "1/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "2/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "3/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "5/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "8/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "12/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "17/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "20/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "30/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "45/0": [
+    "—",
+    "projection-desactivee"
+   ],
+   "0/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "1/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "2/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "3/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "5/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "8/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "12/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "17/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "20/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "30/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "45/120": [
+    "—",
+    "projection-desactivee"
+   ],
+   "0/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "1/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "2/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "3/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "5/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "8/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "12/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "17/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "20/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "30/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "45/450": [
+    "—",
+    "projection-desactivee"
+   ],
+   "0/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "1/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "2/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "3/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "5/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "8/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "12/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "17/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "20/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "30/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "45/600": [
+    "—",
+    "projection-desactivee"
+   ],
+   "0/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "1/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "2/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "3/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "5/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "8/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "12/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "17/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "20/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "30/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "45/900": [
+    "—",
+    "projection-desactivee"
+   ],
+   "0/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "1/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "2/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "3/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "5/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "8/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "12/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "17/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "20/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "30/1300": [
+    "—",
+    "projection-desactivee"
+   ],
+   "45/1300": [
+    "—",
+    "projection-desactivee"
+   ]
+  },
+  "principal": [
+   "Calculs : 4 erreurs (principalement : Subordonnée employée seule)",
+   "Calculs : 7 erreurs (principalement : Ponctuation / guillemets)",
+   "Calculs : 1 erreur (principalement : Ponctuation / guillemets)",
+   "Calculs : 9 erreurs (principalement : Orthographe d’usage / typographie)"
+  ]
+ }
+}

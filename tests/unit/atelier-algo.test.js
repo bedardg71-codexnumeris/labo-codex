@@ -61,7 +61,8 @@ describe('atelier · A — les cinq étapes, dans l\'ordre de la maquette, chacu
     it('A.0 l\'ordre, les libellés, le point d\'arrivée', () => {
         const liste = A.etapes(REDACTION);
         expect(liste.map((e) => e.id)).toEqual(['compte', 'codes', 'note', 'paliers', 'eleve']);
-        expect(liste.map((e) => e.libelle)).toEqual(['Ce que tu comptes', 'Codes', 'Note', 'Paliers', 'Ce que l\'élève lit']);
+        // ↻ Lot 3a de la table de cas (26 oct. 2026) : les noms de l'ébauche validée.
+        expect(liste.map((e) => e.libelle)).toEqual(['Ce que tu relèves et comptes', 'Codes utilisés', 'Note calculée', 'Cas d’interprétation', 'Ce que l’étudiant·e lit']);
         expect(liste.map((e) => e.arrivee)).toEqual([false, false, false, false, true]);
     });
 
@@ -97,12 +98,18 @@ describe('atelier · A — les cinq étapes, dans l\'ordre de la maquette, chacu
         expect(etat({ ...REDACTION, modeleFormule: 'ratio_cible', paramsFormule: { motsParErreurCible: 60 } }, 'note').info).toBe('ratio visé');
     });
 
-    it('A.d « Paliers » : aucune projection, ou une longueur et une tolérance au-dessus de 0', () => {
-        expect(etat(REDACTION, 'paliers')).toMatchObject({ reglee: true, info: '6 paliers', resume: 'Projection à l\'EUF, 6 paliers' });
-        expect(etat(CHIMIE, 'paliers')).toMatchObject({ reglee: true, info: 'aucun', resume: 'Aucune projection' });
-        // Mesuré : le registre borne la tolérance (0 → 1) ; « à régler » n'arrive pas avec les registres d'aujourd'hui.
-        expect(etat({ ...REDACTION, paramsProjection: { motsReference: 900, erreursTolerees: 0 } }, 'paliers').reglee).toBe(true);
-        expect(P.normaliser({ ...REDACTION, paramsProjection: { motsReference: 900, erreursTolerees: 0 } }).params.erreursTolerees).toBe(1);
+    // ↻ Lot 3a (26 oct. 2026) : « Cas d'interprétation ». Sans limite, réglée ; une limite fixée l'est quand sa longueur
+    // et sa tolérance dépassent 0 — un critère NEUF (la marque des noms) part de champs vides : « à régler ».
+    it('A.d « Cas d\'interprétation » : sans limite, ou une longueur et une tolérance au-dessus de 0', () => {
+        expect(etat(REDACTION, 'paliers')).toMatchObject({ reglee: true, info: '1 table', resume: 'Paliers selon la limite fixée' });
+        expect(etat(CHIMIE, 'paliers')).toMatchObject({ reglee: true, info: '0 table', resume: 'Aucune limite, aucun palier' });
+        // Un critère existant : le registre borne la tolérance (0 → 1), il reste réglé.
+        const existant = { ...REDACTION, nomsAttendus: undefined, paramsProjection: { motsReference: 900, erreursTolerees: 0 } };
+        expect(etat(existant, 'paliers').reglee).toBe(true);
+        expect(P.normaliser(existant).params.erreursTolerees).toBe(1);
+        // Un critère neuf qui vient de fixer sa limite : champs vides, à régler.
+        const vide = P.fixerLimite({ ...CHIMIE, modeleProjection: 'aucune', paramsProjection: {} });
+        expect(etat(vide, 'paliers')).toMatchObject({ reglee: false, info: 'à régler', resume: 'Paliers selon la limite fixée : écris sa longueur et sa tolérance' });
     });
 
     it('A.e « Ce que l\'élève lit » : au moins un des trois textes non vide', () => {
@@ -134,7 +141,8 @@ describe('atelier · B — l\'étape d\'une zone, et où un bloc peut se poser',
         expect(A.etapesDuJeton(REDACTION, '{erreurs}')).toEqual(['paliers', 'eleve']);
         expect(A.etapesDuJeton(REDACTION, '{service}')).toEqual(['paliers']);
         expect(A.etapesDuJeton(CHIMIE, '{service}')).toEqual([]);
-        expect(A.etapesDuJeton(REDACTION, '{nomErreurs}')).toEqual(['codes', 'eleve']);
+        // ↻ Lot 3a (§ 3.8) : les zones des paliers acceptent aussi les deux noms.
+        expect(A.etapesDuJeton(REDACTION, '{nomErreurs}')).toEqual(['codes', 'paliers', 'eleve']);
     });
 });
 
@@ -215,7 +223,8 @@ describe('atelier · D — la copie fictive : « Quelques » au départ, les cop
     it('D.b les copies de référence sont celles du miroir, nommées ; la pondérée paraît en chimie', () => {
         expect(A.copiesDeReference(REDACTION).map((c) => c.libelle)).toEqual(['Aucune', 'Quelques', 'Beaucoup']);
         const chimie = A.copiesDeReference(CHIMIE);
-        expect(chimie.map((c) => c.libelle)).toEqual(['Aucune', 'Quelques', 'Beaucoup', 'Pondérée']);
+        // ↻ Lot 3a : « Égalité » quand le critère a au moins deux codes (banc `critere-algorithmique-table-de-cas`).
+        expect(chimie.map((c) => c.libelle)).toEqual(['Aucune', 'Quelques', 'Beaucoup', 'Pondérée', 'Égalité']);
         expect(chimie.map(({ libelle, ...c }) => c)).toEqual(M.copies(CHIMIE));
     });
 
@@ -276,7 +285,7 @@ describe('atelier · E — la page : une étape ouverte, la chaîne, l\'aperçu,
         expect(etapes[4].classList.contains('bc-destination')).toBe(true);
         expect(etapes.every((b) => b.querySelector('.bc-crayon'))).toBe(true);
         expect(texte(etapes[4].querySelector('.u-lecteur-ecran'))).toBe(', réglée, ouverte');
-        expect(etapes.map((b) => texte(b.querySelector('.bc-info')))).toEqual(['erreurs / mots', 'palette générale', 'pénalité normalisée', '6 paliers', '3 textes']);
+        expect(etapes.map((b) => texte(b.querySelector('.bc-info')))).toEqual(['erreurs / mots', 'palette générale', 'pénalité normalisée', '1 table', '3 textes']);
     });
 
     it('E.b toucher une étape de la chaîne l\'ouvre et ferme l\'autre ; l\'en-tête ouverte se referme ; la mémoire tient au redessin', () => {

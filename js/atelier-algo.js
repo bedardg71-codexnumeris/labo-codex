@@ -6,9 +6,15 @@
 
    Vocation
      Sous les champs d'en-tête d'un critère « Algorithmique », un atelier en trois colonnes : la palette
-     des blocs (étape 2b, rendue par grilles.js), les ÉTAPES du critère, et « Ce que l'élève lira ». En
-     tête, la chaîne des cinq étapes (`ChaineEtapes`) : Ce que tu comptes → Codes → Note → Paliers →
-     Ce que l'élève lit (le point d'arrivée). Une seule étape ouverte à la fois.
+     des blocs (étape 2b, rendue par grilles.js), les ÉTAPES du critère, et la simulation de ce que
+     l'étudiant·e lirait. En tête, la chaîne des cinq étapes (`ChaineEtapes`). Une seule étape ouverte.
+     ↻ LOT 3a DE LA TABLE DE CAS (26 oct. 2026, consigne
+     `plans de travail/CONSIGNE-LOT-2026-10-26-critere-algorithmique-table-de-cas-3a.md`, ébauche validée
+     `plans de travail/EBAUCHE-2026-10-26-table-de-cas.html`) : Ce que tu relèves et comptes → Codes utilisés →
+     Note calculée → Cas d'interprétation → Ce que l'étudiant·e lit. L'étape des paliers (son id reste
+     `paliers`) porte la table des paliers et « Ce que l'application choisit sans toi » ; la simulation lit
+     aussi le bilan (« principalement », le défi, tout maîtrisé) et le signalement, chaque condition au
+     conditionnel ; « Égalité » et « Voir ce que l'étudiant·e lirait à ce palier » règlent la copie fictive.
 
    LA PRÉSENTATION CHANGE, RIEN DE CE QUI EST CALCULÉ NI ENREGISTRÉ
      Le contenu des étapes est celui des blocs de grilles.js, déplacé. La copie fictive se calcule par
@@ -46,24 +52,121 @@ function _C() { return _reg('codesAnnotation', './codes-annotation.js'); }
 function _Pal() { return _reg('paletteAlgo', './palette-algo.js'); }
 
 /* Les mots de l'atelier : ceux de la maquette validée (24 oct.), sauf ceux que la maquette n'avait pas
-   à dire (un critère d'avant sans noms, les codes qui vont au premier critère algorithmique). */
+   à dire (un critère d'avant sans noms, les codes qui vont au premier critère algorithmique).
+   ↻ Lot 3a de la table de cas (26 oct. 2026) : ceux de l'ÉBAUCHE validée par Grégoire le 26 oct. (12 h 56 ;
+   paliers à 13 h 23, `plans de travail/EBAUCHE-2026-10-26-table-de-cas.html`), au caractère près. Le temps
+   des verbes (Grégoire, 26 oct.) : le présent pour ce que le critère fait, le conditionnel pour ce que la
+   simulation montre, jamais le futur. « étudiant·e » remplace « élève » dans tout l'atelier. `grilles.js`
+   lit `TEXTES.cas` et `TEXTES.choix` pour la table des paliers. */
 var TEXTES = {
     chaine: 'Les étapes du critère algorithmique',
     etapes: {
-        compte: 'Ce que tu comptes',
-        codes: 'Codes',
-        note: 'Note',
-        paliers: 'Paliers',
-        eleve: 'Ce que l\'élève lit'
+        compte: 'Ce que tu relèves et comptes',
+        codes: 'Codes utilisés',
+        note: 'Note calculée',
+        paliers: 'Cas d’interprétation',
+        eleve: 'Ce que l’étudiant·e lit'
     },
     buts: {
-        codes: 'Ce que tu poses sur la copie dans Annoter. Chaque code posé compte pour son poids.',
-        note: 'Comment le compte devient une note, sur la pondération du critère.',
-        paliers: 'Où la copie se situe face à une norme externe, et ce que tu en dis à l\'élève à chaque palier.',
-        eleve: 'Les phrases que l\'app écrit à ta place pour chaque copie. Le verdict de chaque palier s\'écrit dans l\'étape Paliers.'
+        compte: 'Ce que tu relèves sur la copie, et ce à quoi tu rapportes ce compte (des mots, des calculs, des mesures…). Ces noms s’écrivent dans les phrases destinées à l’étudiant·e.',
+        codes: 'Tes codes sont les sous-critères de ce critère : tu les configures ici (numéro, nom, pondération, observation). Dans Annoter, la palette les affiche pour que tu les poses sur la copie, sans les modifier. Chaque code posé compte selon sa pondération.',
+        note: 'Comment ce que tu identifies et comptes construit la note, en fonction de la pondération du critère.',
+        paliers: [
+            'Les paliers situent la copie par rapport à la limite que tu fixes, d’après le compte que l’application fait pour toi.',
+            'Selon la valeur établie sur sa copie, l’étudiant·e reçoit un commentaire précis qui s’adresse à son cas. Ci-dessous, chaque table choisit un seul cas pour l’étudiant·e. La simulation te montre de quel cas il s’agirait.'
+        ],
+        eleve: 'Les phrases que l’application écrit à ta place sur chaque copie. Ce que dit chaque cas s’écrit dans l’étape « Cas d’interprétation ».'
+    },
+    resumes: {
+        avecLimite: 'Paliers selon la limite fixée',
+        incomplete: 'Paliers selon la limite fixée : écris sa longueur et sa tolérance',
+        sansLimite: 'Aucune limite, aucun palier'
+    },
+    // Les aides des zones de l'étape « Ce que l'étudiant·e lit » et de « Aucune annotation » (ébauche).
+    aides: {
+        decompte: 'Sous le critère, et repris dans le PDF de l’étudiant·e. Toujours.',
+        priorite: 'En tête de son bilan, quand la note de ce critère tombe à 0 alors que la copie porte au moins un code.',
+        concentre: 'Dans son bilan, quand tous les critères de la grille sont acquis et que la copie porte au moins un code. L’application écrit après lui le compte entre parenthèses, puis le point.',
+        aucune: 'S’affiche pour toi seul·e, quand la copie ne porte ni tampon ni code.'
+    },
+    modele: 'Revenir au modèle',
+    modelePhrases: 'Modèle des phrases',
+    // La table des paliers (`grilles.js`, `rendreBlocProjectionAlgo`).
+    cas: {
+        titre: 'Paliers',
+        selon: 'Selon',
+        repere: 'La part de la limite atteinte par la copie',
+        reprendre: 'Reprendre une de tes collections…',
+        reprendreLecteur: 'Reprendre une collection',
+        retirer: 'Retirer la limite',
+        fixer: 'Fixer une limite',
+        sansLimite: 'Aucune limite fixée : l’étudiant·e ne lit aucun palier. C’est l’état d’un critère neuf. Une limite fait paraître les paliers, du « rien de compté » à « au-delà du dernier seuil ».',
+        intro: function(n) {
+            return 'L’étudiant·e lit le cas de sa copie sous le critère, après le décompte. Le nom court s’imprime dans la rangée des paliers de son PDF. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas : « Tu fais en moyenne 1 '
+                + n.erreurs.singulier + ' à chaque N ' + n.mots.pluriel + '. » Un bloc sans valeur disparaît.';
+        },
+        longueur: function(n) { return 'Longueur de référence (' + n.mots.pluriel + ')'; },
+        tolerance: function(n) { return 'Tolérance sur cette longueur (' + n.erreurs.pluriel + ')'; },
+        service: 'Nom du service d’aide',
+        signalement: 'Ce que le signalement t’affiche',
+        signalementAide: 'À côté du palier RàI de l’étudiant·e, jamais sur sa copie.',
+        lien: 'Lien d’inscription au service (facultatif)',
+        exemples: { longueur: 'ex. : 12', tolerance: 'ex. : 4', service: 'Aucun', signalement: 'Vide : aucun signalement', lien: 'Aucun' },
+        limite: function(seuil) { return 'Limite : ' + seuil + '.'; },
+        incomplete: 'Écris la longueur de référence et la tolérance : les paliers s’appliquent dès que les deux dépassent 0.',
+        independance: 'La limite est indépendante de la formule de la note : la note suit la formule, le palier situe la copie par rapport à la limite.',
+        colonnes: ['Quand', 'Nom court', 'L’étudiant·e lit'],
+        rienCompte: 'Rien de compté',
+        auDela: 'Au-delà du dernier seuil',
+        plusDe: function(t, l) { return 'plus de ' + t + ' pour ' + l; },
+        jusqua: 'Jusqu’à',
+        pctLimite: '% de la limite',
+        soit: function(e1, k, m) { return 'soit au plus 1 ' + e1 + ' à chaque ' + k + ' ' + m; },
+        seuilLecteur: 'Seuil du palier, en pourcentage de la limite',
+        seuilRefuse: 'Le seuil est un pourcentage de la limite, au-dessus de 0.',
+        nomCourt: 'Nom court',
+        nomCourtLecteur: 'Nom court du palier',
+        verdict: 'Verdict',
+        recommandation: 'Recommandation',
+        public: 'L’étudiant·e le lit',
+        ajouterReco: '+ Ajouter une recommandation',
+        aideReco: {
+            apposition: 'Sans nom de service, la phrase s’arrête avant le deux-points.',
+            service: 'Jointe seulement si un service d’aide est nommé.',
+            toujours: 'Toujours jointe à ce palier.'
+        },
+        signal: 'Ce palier lève un signalement',
+        signalPrecision: '(pour toi, à côté du palier RàI de l’étudiant·e ; rien n’est écrit sur sa copie)',
+        ici: 'cas de la copie fictive',
+        voir: 'Voir ce que l’étudiant·e lirait à ce palier',
+        retirerPalier: 'Retirer ce palier',
+        ajouterPalier: '+ Ajouter un palier',
+        collections: 'Mes collections',
+        supprimerCollection: 'Supprimer la collection',
+        collectionsAide: 'Reprendre une collection copie ses paliers et sa limite dans ce critère. La corriger ou la supprimer ensuite ne change pas cette grille, ni ce qu’un·e étudiant·e a déjà reçu.',
+        collectionCopiee: function(nom) { return 'Collection « ' + nom + ' » copiée dans ce critère. La corriger ensuite ne change pas ce critère.'; },
+        collectionEnregistree: 'Tu la reprends par « Reprendre une de tes collections… », dans l’en-tête des paliers de tes grilles.'
+    },
+    // « Ce que l'application choisit sans toi » (l'encadré sous la table).
+    choix: {
+        titre: 'Ce que l’application choisit sans toi',
+        intro: 'Leurs conditions sont celles de l’application ; leurs textes se modifient là où le lien te mène.',
+        modifier: 'Modifier son texte',
+        frequent: 'Le code le plus fréquent',
+        frequentTexte: function(neuf) {
+            return 'Quand la copie porte au moins un code, l’étudiant·e lit le nom du plus fréquent dans son bilan, à la ligne « principalement ». À égalité : '
+                + (neuf ? 'le premier de ta liste des codes (ta règle du 25 octobre, pour un critère neuf).' : 'le premier posé, comme aujourd’hui (critère existant).');
+        },
+        priorite: 'Défi prioritaire',
+        prioriteTexte: 'Quand la note de ce critère tombe à 0 alors que la copie porte au moins un code : en tête de son bilan.',
+        concentre: 'Quand tout est maîtrisé',
+        concentreTexte: 'Quand tous les critères de la grille sont acquis et que la copie porte au moins un code : dans son bilan.',
+        aucune: 'Aucune annotation',
+        aucuneTexte: 'Quand la copie ne porte ni tampon ni code : toi seul·e le lis.'
     },
     apercu: {
-        titre: 'Ce que l\'élève lira',
+        titre: 'Simulation de ce que l’étudiant·e lirait',
+        but: 'En fonction de ce que tu as établi dans les tables, observe si le cas d’interprétation te convient.',
         reduire: 'Réduire',
         toutVoir: 'Tout voir',
         copie: 'Copie fictive',
@@ -79,26 +182,40 @@ var TEXTES = {
         palier: 'Palier',
         pdf: 'Sous le critère, dans son PDF',
         bilan: 'Dans son bilan',
-        siEffondre: 'Si ce critère est effondré, en tête :',
-        siAcquis: 'Si tous ses critères sont acquis :',
+        siCode: 'Si la copie portait au moins un code, dans « Points récurrents » :',
+        siEffondre: 'Si la note de ce critère tombait à 0, en tête :',
+        siAcquis: 'Si tous ses critères étaient acquis :',
         toi: 'Pour toi seul·e',
-        siAucunCode: 'Si la copie ne porte aucun code :',
-        sources: 'Montrer d\'où vient chaque phrase',
-        astuce: 'Clique une phrase : la zone qui l\'écrit s\'ouvre.',
+        siAucunCode: 'Si la copie ne portait aucun code :',
+        siSignalement: 'Si son palier levait un signalement, à côté du palier RàI :',
+        etats: { oui: 's’afficherait', non: 'ne s’afficherait pas', depend: 'dépendrait des autres critères' },
+        tousMaitrises: 'Tous les critères sont maîtrisés.',
+        sources: 'Montrer d’où vient chaque phrase',
+        astuce: 'Clique une phrase : la zone qui l’écrit s’ouvre.',
         aucunePhrase: 'Aucune phrase.',
-        rien: 'Rien ne s\'affiche.',
-        engendre: 'Ajoutée par l\'app. Elle disparaît dès que le verdict porte un bloc : « Mots par erreur » remet ce nombre où tu veux.',
-        codesPoses: 'Codes posés : '
+        rien: 'Rien ne s’afficherait.',
+        sansSignalement: 'Rien : aucun texte de signalement n’est écrit dans la limite.',
+        engendre: function(bloc) { return 'Ajoutée par l’application. Elle disparaît dès que le verdict porte un bloc : « ' + bloc + ' » remet ce nombre où tu veux.'; },
+        codesPoses: 'Codes posés : ',
+        plusFrequent: 'Le plus fréquent : ',
+        code: function(numero, nom) { return 'code ' + numero + ', ' + nom; },
+        egalite: function(autres, liste) { return ' (à égalité avec ' + autres + ' : ' + (liste ? 'le premier de ta liste' : 'le premier posé') + ')'; },
+        regle: function(nom, occ, eten) { return 'Copie réglée sur le palier « ' + nom + ' » : ' + occ + ' pour ' + eten + '.'; },
+        regleImpossible: 'Aucune copie n’atteindrait ce palier avec cette limite.',
+        regleSansLimite: 'Écris d’abord la longueur de référence et la tolérance.',
+        regleEgalite: function(a, b) { return 'Copie réglée : les codes ' + a + ' et ' + b + ', deux fois chacun, le ' + a + ' posé le premier.'; }
     },
-    copies: { aucune: 'Aucune', quelques: 'Quelques', beaucoup: 'Beaucoup', ponderee: 'Pondérée' },
+    copies: { aucune: 'Aucune', quelques: 'Quelques', beaucoup: 'Beaucoup', ponderee: 'Pondérée', egalite: 'Égalité' },
     sources: {
         decompte: 'Décompte',
-        prefixe: 'ajoutée par l\'app',
+        prefixe: 'Ajoutée par l’application',
         verdict: function(libelle) { return libelle ? 'Verdict · ' + libelle : 'Verdict'; },
         aide: 'Recommandation',
+        recurrent: 'Le code le plus fréquent',
         priorite: 'Défi prioritaire',
         concentre: 'Quand tout est maîtrisé',
-        aucune: 'Aucune annotation'
+        aucune: 'Aucune annotation',
+        signalement: 'Signalement'
     }
 };
 
@@ -166,14 +283,14 @@ function _etapeNote(c) {
         resume: 'Formule : ' + court + (pondOk ? ', sur ' + _fmt(pond) : ', sans pondération') };
 }
 
-/** Paliers — aucune projection, ou une longueur et une tolérance au-dessus de 0 (même bornage mesuré : la
- *  règle tient pour un registre qui laisserait passer 0). */
+/** Cas d'interprétation (lot 3a) — sans limite, réglée ; une limite fixée l'est quand sa longueur et sa
+ *  tolérance dépassent 0 (un critère neuf part de champs vides). L'info compte les tables : les paliers en
+ *  sont une, quand la limite est fixée (les tables de l'enseignant·e viendront avec le lot 3b). */
 function _etapePaliers(c) {
-    var p = _P().normaliser(c);
-    if (!(p.modele && p.modele.projette)) return { id: 'paliers', reglee: true, info: 'aucun', resume: 'Aucune projection' };
-    var nb = _pluriel((p.paliers || []).length, 'palier', 'paliers');
-    return { id: 'paliers', reglee: Number(p.params.motsReference) > 0 && Number(p.params.erreursTolerees) > 0,
-        info: nb, resume: p.modele.nom + ', ' + nb };
+    var P = _P(), R = TEXTES.resumes;
+    if (!P.limiteFixee(c)) return { id: 'paliers', reglee: true, info: '0 table', resume: R.sansLimite };
+    var complete = P.limiteComplete(c);
+    return { id: 'paliers', reglee: complete, info: complete ? '1 table' : 'à régler', resume: complete ? R.avecLimite : R.incomplete };
 }
 
 /** Ce que l'élève lit (le point d'arrivée) — au moins un des trois textes non vide. */
@@ -246,6 +363,7 @@ function copieAvec(copie, changement) {
     if (x.erreurs !== undefined) {
         var e = Math.max(0, Math.round(Number(x.erreurs) || 0));
         c = Object.assign({}, c, { cle: null, erreurs: e, erreursFormule: e, codes: [] });
+        delete c.poses;   // l'ordre des codes posés ne tient plus : le compte est tapé
     }
     if (x.mots !== undefined) {
         var brut = x.mots;
@@ -256,9 +374,29 @@ function copieAvec(copie, changement) {
 }
 
 /**
- * Ce que l'élève lira pour une copie, rangé par destination. Les phrases sortent de
- * `miroirAlgo.essayer` et de `enoncesAlgo.enonce` (comme l'évaluation : `{}` pour le bilan).
- * @returns {{essai, palier, pdf: Array<{source, texte, etape?, zone?, engendre?, palier?}>, priorite, concentre, aucune}}
+ * Le code le plus fréquent d'une copie fictive (lot 3a) — seulement si elle dit l'ORDRE de ses codes
+ * (`poses` : « Égalité », « Pondérée »). La règle de l'évaluation (`codesAnnotation.lePlusFrequent`) : à
+ * égalité, le premier de la liste pour un critère neuf, le premier posé pour un critère existant.
+ * @returns {{code, egaux: Array, liste: boolean}|null} des entrées de `apercuCodes`
+ */
+function dominantDeLaCopie(critere, copie) {
+    var C = _C(), P = _P();
+    var poses = (copie && Array.isArray(copie.poses)) ? copie.poses : [];
+    if (!C || !poses.length) return null;
+    var codes = C.apercuCodes(critere);
+    var liste = P.estNeuf(critere) ? codes.map(function(c) { return c.id; }) : null;
+    var r = C.lePlusFrequent(poses, liste);
+    if (!r) return null;
+    var entree = function(id) { return codes.filter(function(c) { return c.id === id; })[0] || { id: id, code: id, nom: id }; };
+    return { code: entree(r.code), egaux: r.egaux.filter(function(id) { return id !== r.code; }).map(entree), liste: !!liste };
+}
+
+/**
+ * Ce que l'étudiant·e lirait pour une copie, rangé par destination. Les phrases sortent de
+ * `miroirAlgo.essayer` et de `enoncesAlgo.enonce` (comme l'évaluation : `{}` pour le bilan) ; les phrases
+ * du bilan ont la forme que l'évaluation leur donne (`_rendreAlgoA0Bilan`, `_rendreTousMaitrisesBilan`,
+ * `construireFrancaisResume`). `etats` : ce que chaque condition dirait sur cette copie.
+ * @returns {{essai, palier, pdf, priorite, concentre, aucune, recurrent, dominant, signalement, etats}}
  */
 function lecture(critere, copie) {
     var E = _E(), P = _P();
@@ -272,14 +410,108 @@ function lecture(critere, copie) {
         var morceaux = _morceauxDeLaProjection(proj, essai.projection);
         morceaux.forEach(function(m) { pdf.push(m); });
     }
-    return {
+    return Object.assign({
         essai: essai,
         palier: palier,
-        pdf: pdf,
+        indicePalier: (proj.applicable && proj.palier) ? (proj.paliers || []).indexOf(proj.palier) : -1,
+        pdf: pdf
+    }, _lectureDuBilan(critere, copie, essai, proj));
+}
+
+/** Le bilan et « Pour toi seul·e » d'une copie (voir `lecture`). */
+function _lectureDuBilan(critere, copie, essai, proj) {
+    var E = _E();
+    var n = Number(copie.erreurs) || 0, m = copie.mots || 0;
+    var N = E.noms(critere);
+    var dominant = dominantDeLaCopie(critere, copie);
+    var nom = E.libelleCritere(critere);
+    var principal = dominant ? ' (principalement : ' + dominant.code.nom + ')' : '';
+    var signal = !!(proj.applicable && proj.palier && proj.palier.leveSignalement === true);
+    var libelleSignal = (proj.params && typeof proj.params.libelleSignalement === 'string') ? proj.params.libelleSignalement.trim() : '';
+    var etat = function(oui) { return oui ? 'oui' : 'non'; };
+    return {
         priorite: E.enonce(critere, 'priorite', {}),
+        // Ce qui suit la phrase du défi dans le bilan (`_rendreAlgoA0Bilan`).
+        prioriteSuite: ' (' + nom + ' : ' + n + ' ' + E.accorder(n, N.erreurs) + ' sur ' + m + ' ' + E.accorder(m, N.mots) + ', Incomplet)',
         concentre: E.enonce(critere, 'concentre', {}),
-        aucune: E.enonce(critere, 'aucune', {})
+        // Ce qui l'entoure (`_rendreTousMaitrisesBilan`) : sans point final, il est suivi du compte.
+        concentreSuite: ' (' + E.nombreEtNom(n, critere) + ').',
+        aucune: E.enonce(critere, 'aucune', {}),
+        recurrent: n > 0 ? nom + ' : ' + E.nombreEtNom(n, critere) + principal : '',
+        dominant: dominant,
+        signalement: libelleSignal,
+        etats: {
+            recurrent: etat(n > 0),
+            priorite: etat(essai.applicable && essai.pourcentage <= 0 && n > 0),
+            concentre: n > 0 ? 'depend' : 'non',
+            aucune: etat(n === 0),
+            signalement: etat(signal && !!libelleSignal)
+        }
     };
+}
+
+function _nbVide(x) { return (x === null || x === undefined || x === '') ? '' : _fmt(x); }
+
+/** Les trois blocs écrits dans la limite (service, tolérance, longueur) ; vides sans limite. */
+function _valeursDeLaLimite(critere) {
+    var p = _P().normaliser(critere);
+    if (!p.modele.projette) return { '{service}': '', '{seuil}': '', '{longueur}': '' };
+    return {
+        '{service}': String(p.params.nomServiceAide || '').trim(),
+        '{seuil}': _nbVide(p.params.erreursTolerees),
+        '{longueur}': _nbVide(p.params.motsReference)
+    };
+}
+
+/**
+ * Ce que chaque bloc de la palette vaudrait sur cette copie (« Après la flèche ») — les valeurs que les
+ * deux registres donnent à leurs jetons : celles du décompte (`enonce`) et celles de la projection
+ * (`calculer().jetons`). Un bloc sans valeur rend '' (« vide »).
+ */
+function valeursDesBlocs(critere, copie) {
+    var E = _E(), P = _P(), N = E.noms(critere);
+    var n = Number(copie.erreurs) || 0, m = copie.mots;
+    var proj = P.calculer(critere, { erreurs: n, mots: m || 0 });
+    var nom = E.libelleCritere(critere);
+    var v = Object.assign({
+        '{critere}': nom === E.LIBELLE_SANS_CRITERE ? E.CRITERE_SANS_NOM : nom,
+        '{nomErreurs}': E.accorder(n, N.erreurs),
+        '{nomMots}': E.accorder(m || 0, N.mots),
+        '{erreurs}': _nbVide(n),
+        '{mots}': _nbVide(m),
+        '{points}': E.mentionPonderee(copie.erreurs, copie.erreursFormule).trim()
+    }, _valeursDeLaLimite(critere));
+    var j = (proj.applicable && proj.jetons) ? proj.jetons : {};
+    v['{moyenne}'] = j.moyenne || '';
+    v['{projection}'] = j.projection || '';
+    v['{palier}'] = j.palier || '';
+    return v;
+}
+
+/**
+ * « Voir ce que l'étudiant·e lirait à ce palier » (décision 10 du verdict du 24 oct.) — une copie qui
+ * atteint le palier `indice`, par le calcul de l'évaluation : le compte monte de 0 sur l'étendue de la
+ * copie fictive (sinon la longueur de référence) ; si aucun compte entier n'y suffit, l'étendue s'allonge
+ * (comme l'ébauche, `regleSurPalier`). Rend `{copie, raison}` : `raison` = 'limite' (limite incomplète),
+ * 'impossible', ou ''.
+ */
+function copiePourPalier(critere, copieActuelle, indice) {
+    var P = _P();
+    if (!P.limiteComplete(critere) || !P.limiteFixee(critere)) return { copie: null, raison: 'limite' };
+    var p = P.normaliser(critere);
+    var m0 = Number(copieActuelle && copieActuelle.mots) > 0 ? Number(copieActuelle.mots) : Number(p.params.motsReference);
+    var facteurs = [1, 2, 3, 4, 5, 8, 10, 20, 50];
+    for (var a = 0; a < facteurs.length; a++) {
+        var m = m0 * facteurs[a];
+        var plafond = Math.min(2000, Math.max(200, Math.ceil(m)));
+        for (var n = 0; n <= plafond; n++) {
+            var r = P.calculer(critere, { erreurs: n, mots: m });
+            if (r.applicable && (r.paliers || []).indexOf(r.palier) === indice) {
+                return { copie: { cle: null, erreurs: n, erreursFormule: n, mots: m, codes: [] }, raison: '' };
+            }
+        }
+    }
+    return { copie: null, raison: 'impossible' };
 }
 
 /**
@@ -331,7 +563,7 @@ function _cle(ctx, critere) {
 }
 function _etat(ctx, critere) {
     var k = _cle(ctx, critere);
-    if (!etats[k]) etats[k] = { ouverte: 'eleve', copie: null };
+    if (!etats[k]) etats[k] = { ouverte: 'eleve', copie: null, flash: '' };
     return etats[k];
 }
 
@@ -339,6 +571,13 @@ function _esc(t) {
     var s = String(t == null ? '' : t);
     if (typeof window !== 'undefined' && typeof window.echapperHtml === 'function') return window.echapperHtml(s);
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/** Une lecture conditionnelle de la simulation : la condition, son état (rempli au montage), la phrase. */
+function _condition(si, quoi) {
+    return '<div class="apercu-algo-condition"><p class="apercu-algo-si"><span>' + _esc(si) + '</span>'
+        + '<span class="apercu-algo-etat" data-etat-lecture="' + quoi + '"></span></p>'
+        + '<p class="apercu-algo-texte" data-lecture="' + quoi + '"></p></div>';
 }
 
 /**
@@ -361,7 +600,7 @@ function rendre(critere, ctx, contenus) {
             + '<span class="u-lecteur-ecran" data-etat>' + (e.reglee ? ', réglée' : ', à régler') + '</span>'
             + '<span class="atelier-algo-etape-chevron" aria-hidden="true">▾</span></button></h3>'
             + '\n                        <div class="atelier-algo-etape-corps" id="' + idCorps + '"' + (ouverte ? '' : ' hidden') + '>'
-            + (but ? '\n                            <p class="atelier-algo-etape-but">' + _esc(but) + '</p>' : '')
+            + [].concat(but || []).map(function(t) { return '\n                            <p class="atelier-algo-etape-but">' + _esc(t) + '</p>'; }).join('')
             + (k[e.id] || '')
             + '\n                        </div>\n                    </section>';
     }).join('');
@@ -371,8 +610,10 @@ function rendre(critere, ctx, contenus) {
         + (page.sources ? '' : ' data-sans-sources') + (_reduit() ? ' data-reduit' : '') + '>'
         + '\n                    <div class="apercu-algo-tete"><h3 class="apercu-algo-titre">' + _esc(A.titre) + '</h3>'
         + '<button type="button" class="btn btn-secondaire btn-tres-compact apercu-algo-reduire" data-apercu-geste="reduire" aria-expanded="' + !_reduit() + '">' + _esc(_reduit() ? A.toutVoir : A.reduire) + '</button></div>'
+        + '\n                    <p class="apercu-algo-but">' + _esc(A.but) + '</p>'
         + '\n                    <div class="apercu-algo-copie apercu-algo-detail">'
         + '<span class="apercu-algo-copie-titre">' + _esc(A.copie) + '</span>'
+        + '<span class="apercu-algo-references-nom" aria-hidden="true">' + _esc(A.references) + '</span>'
         + '<div class="apercu-algo-references" role="group" aria-label="' + _esc(A.references) + '"></div>'
         + '<div class="apercu-algo-ligne">'
         + '<button type="button" class="apercu-algo-pas" data-apercu-geste="moins" aria-label="' + _esc(A.moins) + '">−</button>'
@@ -385,14 +626,14 @@ function rendre(critere, ctx, contenus) {
         + '<span data-apercu-nom="mots"></span></div>'
         + '<label class="u-lecteur-ecran" for="' + id('curseur') + '">' + _esc(A.curseur) + '</label>'
         + '<input type="range" class="apercu-algo-curseur" id="' + id('curseur') + '" min="0" step="1" data-apercu-champ="curseur">'
-        + '<small class="apercu-algo-codes"></small><small class="apercu-algo-etendue"></small></div>'
+        + '<small class="apercu-algo-codes"></small><small class="apercu-algo-dominant"></small><small class="apercu-algo-etendue"></small></div>'
+        + '\n                    <p class="apercu-algo-flash" aria-live="polite"></p>'
         + '\n                    <div class="apercu-algo-resultats"></div><small class="apercu-algo-raison"></small>'
         + '\n                    <div class="apercu-algo-lecture"><h4>' + _esc(A.pdf) + '</h4><p class="apercu-algo-texte" data-lecture="pdf"></p></div>'
         + '\n                    <div class="apercu-algo-lecture apercu-algo-detail"><h4>' + _esc(A.bilan) + '</h4>'
-        + '<div class="apercu-algo-condition"><span class="apercu-algo-si">' + _esc(A.siEffondre) + '</span><p class="apercu-algo-texte" data-lecture="priorite"></p></div>'
-        + '<div class="apercu-algo-condition"><span class="apercu-algo-si">' + _esc(A.siAcquis) + '</span><p class="apercu-algo-texte" data-lecture="concentre"></p></div></div>'
+        + _condition(A.siCode, 'recurrent') + _condition(A.siEffondre, 'priorite') + _condition(A.siAcquis, 'concentre') + '</div>'
         + '\n                    <div class="apercu-algo-lecture apercu-algo-detail"><h4>' + _esc(A.toi) + '</h4>'
-        + '<div class="apercu-algo-condition"><span class="apercu-algo-si">' + _esc(A.siAucunCode) + '</span><p class="apercu-algo-texte" data-lecture="aucune"></p></div></div>'
+        + _condition(A.siAucunCode, 'aucune') + _condition(A.siSignalement, 'signalement') + '</div>'
         + '\n                    <label class="apercu-algo-bascule apercu-algo-detail"><input type="checkbox" data-apercu-champ="sources"' + (page.sources ? ' checked' : '') + '> ' + _esc(A.sources) + '</label>'
         + '\n                    <p class="apercu-algo-astuce apercu-algo-detail">' + _esc(A.astuce) + '</p>'
         + '\n                </aside>';
@@ -597,13 +838,39 @@ function _remplirApercu(atelier) {
     if (!ap || !critere || !_M()) return;
     var copie = _copieDe(atelier);
     var lec = lecture(critere, copie);
-    _remplirCopie(ap, critere, copie);
+    _remplirCopie(ap, critere, copie, lec);
     _remplirResultats(ap, critere, lec);
-    _remplirPhrases(ap, lec);
+    _remplirPhrases(ap, lec, critere);
+    var flash = ap.querySelector('.apercu-algo-flash');
+    if (flash) flash.textContent = _etatDe(atelier).flash || '';
+    _marquerPaliers(atelier, lec.indicePalier);
+    _remplirValeursDesBlocs(atelier, critere, copie);
+}
+
+/** La rangée du palier que la copie fictive atteint : marquée (`data-atteint`), son repère montré. */
+function _marquerPaliers(atelier, indice) {
+    atelier.querySelectorAll('[data-palier-rangee]').forEach(function(r) {
+        var oui = r.dataset.palierRangee === String(indice);
+        if (oui) r.setAttribute('data-atteint', ''); else r.removeAttribute('data-atteint');
+        var ici = r.querySelector('[data-palier-ici]');
+        if (ici) ici.hidden = !oui;
+    });
+}
+
+/** « Après la flèche » : la valeur de chaque bloc de la palette sur la copie fictive. */
+function _remplirValeursDesBlocs(atelier, critere, copie) {
+    var v = valeursDesBlocs(critere, copie);
+    atelier.querySelectorAll('.palette-algo-bloc[data-jeton]').forEach(function(b) {
+        var x = b.querySelector('.palette-algo-bloc-valeur');
+        if (!x) return;
+        var val = v[b.dataset.jeton];
+        x.textContent = val ? val : 'vide';
+        x.classList.toggle('palette-algo-bloc-valeur--vide', !val);
+    });
 }
 
 /** La copie fictive : les copies de référence, les deux nombres, le curseur, les codes posés, l'étendue. */
-function _remplirCopie(ap, critere, copie) {
+function _remplirCopie(ap, critere, copie, lec) {
     var A = TEXTES.apercu, E = _E(), M = _M();
     var L = M.libelles(critere), N = E.noms(critere);
     var refs = copiesDeReference(critere);
@@ -628,6 +895,15 @@ function _remplirCopie(ap, critere, copie) {
     var codes = (copie.codes || []).map(function(x) { return L.code(x.nombre, x.nom, x.poids); }).join(', ');
     var mention = (copie.erreursFormule !== copie.erreurs) ? E.mentionPonderee(copie.erreurs, copie.erreursFormule).trim() : '';
     ap.querySelector('.apercu-algo-codes').textContent = codes ? A.codesPoses + codes + (mention ? ' ' + mention : '') : '';
+    // « Le plus fréquent : code N, nom » (et l'égalité, quand il y en a une) — lot 3a.
+    var dom = ap.querySelector('.apercu-algo-dominant');
+    dom.textContent = '';
+    var d = lec && lec.dominant;
+    if (d) {
+        dom.appendChild(document.createTextNode(A.plusFrequent));
+        dom.appendChild(_el('strong', '', A.code(d.code.code, d.code.nom)));
+        if (d.egaux.length) dom.appendChild(document.createTextNode(A.egalite(d.egaux.map(function(x) { return 'code ' + x.code; }).join(', '), d.liste)));
+    }
     ap.querySelector('.apercu-algo-etendue').textContent = sansEtendue ? L.sansEtendue
         : (M.sourceEtendue(critere).origine === 'facteur' ? L.etendueDuFacteur : '');
 }
@@ -657,41 +933,73 @@ function _remplirResultats(ap, critere, lec) {
         : ((isFinite(pond) && pond > 0) ? L.noteImpossible : L.sansPonderation);
 }
 
-/** Les phrases, rangées par destination : le PDF (par morceaux), le bilan, « Pour toi seul·e ». */
-function _remplirPhrases(ap, lec) {
-    var A = TEXTES.apercu;
+/** Les phrases, rangées par destination : le PDF (par morceaux), le bilan, « Pour toi seul·e » ; chaque
+ *  condition dit, au conditionnel, si elle s'afficherait sur cette copie. */
+function _remplirPhrases(ap, lec, critere) {
+    var A = TEXTES.apercu, S = TEXTES.sources;
+    var Pal = _Pal();
+    var moyenne = Pal ? Pal.blocs(critere).filter(function(x) { return x.jeton === '{moyenne}'; })[0] : null;
+    var titreEngendre = A.engendre(moyenne ? moyenne.nom : '');
     var pdf = ap.querySelector('[data-lecture="pdf"]');
     pdf.textContent = '';
     if (!lec.pdf.length) pdf.appendChild(_el('span', 'apercu-algo-rien', A.aucunePhrase));
     lec.pdf.forEach(function(m, n) {
         if (n) pdf.appendChild(document.createTextNode(' '));
-        var nom = m.source === 'verdict' ? TEXTES.sources.verdict(m.palier) : TEXTES.sources[m.source];
-        pdf.appendChild(_segment(m.engendre ? null : cleDeZone(m.zone), nom, m.texte));
+        var nom = m.source === 'verdict' ? S.verdict(m.palier) : S[m.source];
+        pdf.appendChild(_segment(m.engendre ? null : cleDeZone(m.zone), nom, m.texte, m.engendre ? titreEngendre : ''));
     });
-    [['priorite', lec.priorite], ['concentre', lec.concentre], ['aucune', lec.aucune]].forEach(function(x) {
-        var boite = ap.querySelector('[data-lecture="' + x[0] + '"]');
-        boite.textContent = '';
-        boite.appendChild(x[1] ? _segment('enonce:' + x[0], TEXTES.sources[x[0]], x[1]) : _el('span', 'apercu-algo-rien', A.rien));
-    });
+    var boite = function(quoi) {
+        var b = ap.querySelector('[data-lecture="' + quoi + '"]');
+        b.textContent = '';
+        var etat = lec.etats[quoi];
+        b.classList.toggle('apercu-algo-texte--eteint', etat !== 'oui');
+        var e = ap.querySelector('[data-etat-lecture="' + quoi + '"]');
+        if (e) { e.textContent = A.etats[etat]; e.dataset.etat = etat; }
+        return b;
+    };
+    var rien = function(b, texte) { b.appendChild(_el('span', 'apercu-algo-rien', texte || A.rien)); };
+
+    var b = boite('recurrent');
+    if (lec.recurrent) b.appendChild(_segment(null, S.recurrent, lec.recurrent)); else rien(b);
+
+    b = boite('priorite');
+    if (lec.priorite) {
+        var fort = _segment('enonce:priorite', S.priorite, lec.priorite);
+        fort.classList.add('apercu-algo-segment--fort');
+        b.appendChild(fort);
+        b.appendChild(document.createTextNode(lec.prioriteSuite));
+    } else rien(b);
+
+    b = boite('concentre');
+    b.appendChild(document.createTextNode(A.tousMaitrises));
+    if (lec.concentre) { b.appendChild(document.createTextNode(' ')); b.appendChild(_segment('enonce:concentre', S.concentre, lec.concentre)); }
+    b.appendChild(document.createTextNode(lec.concentreSuite));
+
+    b = boite('aucune');
+    if (lec.aucune) b.appendChild(_segment('enonce:aucune', S.aucune, lec.aucune)); else rien(b);
+
+    b = boite('signalement');
+    if (lec.signalement) b.appendChild(_segment(null, S.signalement, lec.signalement)); else rien(b, A.sansSignalement);
 }
 
 /** Un morceau de phrase : un bouton qui mène à sa zone, ou (engendré par l'app) un simple texte. */
-function _segment(cleZone, source, texte) {
+function _segment(cleZone, source, texte, titre) {
     var s;
     if (cleZone) {
         s = _el('button', 'apercu-algo-segment');
         s.type = 'button';
         s.dataset.versZone = cleZone;
     } else {
+        // Engendrée par l'application (le préfixe, `titre` dit d'où), ou écrite ailleurs que dans une zone.
         s = _el('span', 'apercu-algo-segment apercu-algo-segment--engendre');
-        s.title = TEXTES.apercu.engendre;
+        if (titre) s.title = titre;
     }
     s.appendChild(_el('span', 'apercu-algo-source', source));
     s.appendChild(document.createTextNode(texte));
     return s;
 }
 
-/** Sous 760 px, « Ce que l'élève lira » devient un tiroir collé en bas : celui du premier atelier à l'écran. */
+/** Sous 760 px, la simulation devient un tiroir collé en bas : celui du premier atelier à l'écran. */
 var _observateur = null;
 var _aLEcran = new Set();
 function _observerTiroirs() {
@@ -718,7 +1026,44 @@ function _poserTiroir() {
 function _changerCopie(atelier, changement) {
     var etat = _etatDe(atelier);
     etat.copie = copieAvec(_copieDe(atelier), changement);
+    etat.flash = '';
     _remplirApercu(atelier);
+}
+
+/** « Voir ce que l'étudiant·e lirait à ce palier » : la copie fictive réglée sur lui ; la simulation dit ce qu'elle a réglé. */
+function voirPalier(atelier, indice) {
+    if (!atelier) return;
+    var A = TEXTES.apercu, E = _E(), critere = atelier._critere;
+    var etat = _etatDe(atelier);
+    var r = copiePourPalier(critere, _copieDe(atelier), indice);
+    if (r.copie) {
+        var N = E.noms(critere);
+        var pal = _P().normaliser(critere).paliers[indice] || {};
+        etat.copie = r.copie;
+        etat.flash = A.regle(pal.libelle || pal.cle || '', _fmt(r.copie.erreurs) + ' ' + E.accorder(r.copie.erreurs, N.erreurs),
+            _fmt(r.copie.mots) + ' ' + E.accorder(r.copie.mots, N.mots));
+    } else {
+        etat.flash = r.raison === 'limite' ? A.regleSansLimite : A.regleImpossible;
+    }
+    _remplirApercu(atelier);
+    var ap = atelier.querySelector('.apercu-algo');
+    if (ap && _sousTiroir() && _reduit()) {
+        page.reduit = false;
+        ap.removeAttribute('data-reduit');
+    }
+}
+
+/** « + Ajouter une recommandation » : la zone repliée d'un palier paraît, le curseur y va. Rien n'est écrit. */
+function ouvrirRecommandation(el) {
+    var groupe = el && el.closest ? el.closest('.table-cas-textes') : null;
+    if (!groupe) return;
+    var zone = groupe.querySelector('[data-recommandation]');
+    if (!zone) return;
+    zone.hidden = false;
+    el.hidden = true;
+    var t = zone.querySelector('textarea');
+    var v = t ? _visible(t) : null;
+    if (v) { try { v.focus(); } catch (err) { /* rien : la zone est montrée */ } }
 }
 
 function _brancher() {
@@ -728,7 +1073,7 @@ function _brancher() {
     document.addEventListener('click', function(e) {
         var t = e.target;
         if (!t || typeof t.closest !== 'function') return;
-        var seg = t.closest('.apercu-algo-segment[data-vers-zone]');
+        var seg = t.closest('[data-vers-zone]');
         if (seg) { allerA(atelierDe(seg), seg.dataset.versZone); return; }
         var geste = t.closest('[data-apercu-geste]');
         if (!geste) return;
@@ -747,9 +1092,15 @@ function _brancher() {
         var copie = _copieDe(atelier);
         if (g === 'moins') _changerCopie(atelier, { erreurs: copie.erreurs - 1 });
         else if (g === 'plus') _changerCopie(atelier, { erreurs: copie.erreurs + 1 });
+        else if (g === 'palier') voirPalier(atelier, parseInt(geste.dataset.palier, 10));
         else if (g === 'reference') {
             var r = copiesDeReference(atelier._critere).filter(function(x) { return x.cle === geste.dataset.copie; })[0];
-            if (r) { _etatDe(atelier).copie = r; _remplirApercu(atelier); }
+            if (r) {
+                var et = _etatDe(atelier);
+                et.copie = r;
+                et.flash = (r.cle === 'egalite' && r.codes.length > 1) ? TEXTES.apercu.regleEgalite(r.codes[0].code, r.codes[1].code) : '';
+                _remplirApercu(atelier);
+            }
         }
     });
 
@@ -820,7 +1171,12 @@ var api = {
     ouvrir: ouvrir,
     basculerEtape: basculerEtape,
     montrer: montrer,
-    allerA: allerA
+    allerA: allerA,
+    dominantDeLaCopie: dominantDeLaCopie,
+    valeursDesBlocs: valeursDesBlocs,
+    copiePourPalier: copiePourPalier,
+    voirPalier: voirPalier,
+    ouvrirRecommandation: ouvrirRecommandation
 };
 
 if (typeof window !== 'undefined') {

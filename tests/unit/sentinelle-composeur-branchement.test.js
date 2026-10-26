@@ -234,7 +234,7 @@ describe('branchement · C — la vue focalisée vaut sa zone', () => {
         expect(zone.dataset.curseurVu).toBe('1');
         expect(palette._zoneCible).toBe(zone);
         expect(palette.dataset.cible).toBe('Verdict, palier 5');
-        expect(palette._ligne.textContent).toBe('Tu écris dans : « Verdict, palier 5 »');
+        expect(palette._ligne.textContent).toBe('Zone choisie : Verdict, palier 5');   // ↻ lot 3a : les mots de l'ébauche
         // Un palier offre {erreurs} et {projection}, pas {critere} : inactif, et dit.
         const [critere, erreurs, projection] = palette._blocs;
         expect(critere.attrs['aria-disabled']).toBe('true');

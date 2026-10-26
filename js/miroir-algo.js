@@ -32,6 +32,7 @@
        par la formule elle-même ; une formule qui n'y arrive jamais (ratio visé) : le premier
        nombre où elle tombe à la moitié.
      · « Quelques-unes » : le quart de « beaucoup », arrondi, au moins 1.
+     · « Égalité » (lot 3a, 26 oct.) : au moins deux codes posables ; voir `_copieEgalite`.
      · « Pondérée » : seulement si le critère tire ses codes de ses sous-critères
        (`donneSesCodes`) et qu'un code ne pèse pas 1. Autant d'erreurs que « quelques-unes »,
        partagées entre le code le plus lourd et le plus léger (le plus lourd prend la moitié
@@ -172,23 +173,51 @@ function _copiePonderee(critere, nombre, mots) {
     });
     var compteurs = {};
     var repartition = [];
+    var poses = [];
+    var poser = function(c, k) { for (var i = 0; i < k; i++) poses.push(c.id); };
     if (lourd.id === leger.id) {
         compteurs[lourd.id] = nombre;
-        repartition.push({ nom: lourd.nom, poids: Number(lourd.poids), nombre: nombre });
+        repartition.push({ code: lourd.code, nom: lourd.nom, poids: Number(lourd.poids), nombre: nombre });
+        poser(lourd, nombre);
     } else {
         var nLourd = Math.ceil(nombre / 2);
         var nLeger = nombre - nLourd;
         compteurs[lourd.id] = nLourd;
-        repartition.push({ nom: lourd.nom, poids: Number(lourd.poids), nombre: nLourd });
+        repartition.push({ code: lourd.code, nom: lourd.nom, poids: Number(lourd.poids), nombre: nLourd });
+        poser(lourd, nLourd);
         if (nLeger > 0) {
             compteurs[leger.id] = nLeger;
-            repartition.push({ nom: leger.nom, poids: Number(leger.poids), nombre: nLeger });
+            repartition.push({ code: leger.code, nom: leger.nom, poids: Number(leger.poids), nombre: nLeger });
+            poser(leger, nLeger);
         }
     }
     return {
         cle: 'ponderee', erreurs: nombre, mots: mots,
         erreursFormule: C.sommePonderee(_grilleDe(critere), compteurs),
-        codes: repartition
+        codes: repartition, poses: poses
+    };
+}
+
+/**
+ * LA COPIE « ÉGALITÉ » (lot 3a de la table de cas, 26 oct. 2026) — seulement si le critère a au moins deux
+ * codes posables : les deux premiers de sa liste, posés deux fois chacun, LE SECOND POSÉ LE PREMIER. C'est
+ * la copie où la règle d'égalité se voit : un critère neuf lit le premier de sa liste, un critère existant
+ * le premier posé (`codesAnnotation.lePlusFrequent`). `codes` dit l'ordre de pose.
+ */
+function _copieEgalite(critere, mots) {
+    var C = _reg('codesAnnotation');
+    if (!C || !C.donneSesCodes(critere)) return null;
+    var codes = C.apercuCodes(critere);
+    if (codes.length < 2) return null;
+    var premier = codes[0], second = codes[1];
+    var compteurs = {};
+    compteurs[premier.id] = 2;
+    compteurs[second.id] = 2;
+    return {
+        cle: 'egalite', erreurs: 4, mots: mots,
+        erreursFormule: C.sommePonderee(_grilleDe(critere), compteurs),
+        codes: [second, premier].map(function(c) { return { code: c.code, nom: c.nom, poids: Number(c.poids), nombre: 2 }; }),
+        poses: [second.id, premier.id, second.id, premier.id]
     };
 }
 
@@ -212,12 +241,16 @@ function copies(critere) {
         var ponderee = _copiePonderee(critere, quelques, mots);
         if (ponderee) liste.push(ponderee);
     }
+    var egalite = _copieEgalite(critere, mots);
+    if (egalite) liste.push(egalite);
     return liste.map(function(c) {
-        return {
+        var copie = {
             cle: c.cle, erreurs: c.erreurs, mots: mots,
             erreursFormule: (c.erreursFormule !== undefined) ? c.erreursFormule : c.erreurs,
             codes: c.codes || []
         };
+        if (c.poses) copie.poses = c.poses.slice();
+        return copie;
     });
 }
 

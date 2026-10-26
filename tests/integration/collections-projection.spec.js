@@ -49,7 +49,11 @@ const deplier = async (page, id) => {
     if (await carte(page, id).getAttribute('data-ouverte') === null) await cliquerDom(carte(page, id).locator('.atelier-algo-etape-tete'));
     await expect(carte(page, id)).toHaveAttribute('data-ouverte', '');
 };
-const menu = (page) => page.locator('#listeCriteres select[data-on-change="modifierModeleProjectionGrilleHandler"]');
+// ↻ Lot 3a de la table de cas (26 oct. 2026) : le menu du modèle est parti ; les collections se reprennent par
+// « Reprendre une de tes collections… », dans l'en-tête de la table des paliers (là aussi sans limite) ; la corbeille
+// devient « Supprimer la collection » ; un critère sans limite la fixe par « Fixer une limite ».
+const menu = (page) => page.locator('#listeCriteres select[data-on-change="reprendreCollectionProjectionHandler"]');
+const rangees = (page) => page.locator('#listeCriteres .table-cas-rangee');
 const choisir = (page, valeur) => menu(page).evaluate((el, v) => { el.value = v; el.dispatchEvent(new Event('change', { bubbles: true })); }, valeur);
 const grilleEnBase = (page, id) => page.evaluate(async (g) => ((await db.get(cle('grillesTemplates'))) || []).find((x) => x.id === g), id);
 
@@ -62,7 +66,7 @@ test('collections · enregistrer « EUF » sur une grille, la retrouver et la co
 
     // 1 — G1 : aucune collection, le bouton sous les paliers.
     await deplier(page, 'CR');
-    await expect(menu(page).locator('optgroup')).toHaveCount(0);
+    await expect(menu(page)).toHaveCount(0);
     const bouton = page.locator('#listeCriteres [data-action="ouvrirSaisieCollectionProjection"]');
     await expect(bouton).toHaveCount(1);
     await expect(bouton).toHaveText('Enregistrer ces paliers sous un nom…');
@@ -74,12 +78,12 @@ test('collections · enregistrer « EUF » sur une grille, la retrouver et la co
     await champ.fill('EUF');
     await cliquerDom(page.locator('#listeCriteres [data-action="enregistrerCollectionProjection"]'));
     await expect(page.locator('#listeCriteres .collection-saisie')).toHaveCount(0);
-    await expect(menu(page).locator('optgroup')).toHaveAttribute('label', 'Mes collections');
-    const option = menu(page).locator('optgroup option');
+    await expect(menu(page).locator('option').first()).toHaveText('Reprendre une de tes collections…');
+    const option = menu(page).locator('option:not([value=""])');
     await expect(option).toHaveCount(1);
     await expect(option).toHaveText('EUF');
     await expect(page.locator('#listeCriteres .collections-liste .collection-nom')).toHaveText('EUF');
-    await expect(page.locator('#listeCriteres .collections-aide')).toContainText('copie ses paliers et ses réglages');
+    await expect(page.locator('#listeCriteres .collections-aide')).toContainText('copie ses paliers et sa limite');
     const enBase = await page.evaluate(() => db.getSync(cle('collectionsProjection'), []));
     console.log('COLLECTION EN BASE →', JSON.stringify(enBase.map((c) => [c.nom, c.modeleId, c.params.nomServiceAide, c.paliers.length])));
     expect(enBase.length).toBe(1);
@@ -87,22 +91,23 @@ test('collections · enregistrer « EUF » sur une grille, la retrouver et la co
     expect(enBase[0].params.nomServiceAide).toBe('Passerelle +');
     expect(enBase[0].paliers.find((p) => p.cle === 'risque').texte).toBe('Bilan : {projection} erreurs sur {mots} mots.');
     const idEuf = enBase[0].id;
-    // Le menu montre toujours le modèle de G1, et G1 n'a pas bougé.
-    await expect(menu(page)).toHaveValue('norme_externe');
+    // Le menu revient à son invitation, et G1 n'a pas bougé.
+    await expect(menu(page)).toHaveValue('');
     expect((await grilleEnBase(page, 'G1')).criteres[0].paramsProjection.nomServiceAide).toBe('Passerelle +');
 
     // 3 — un nom pris (« euf ») sur G2 : le message, rien d'écrit ; annuler.
     await page.evaluate(async () => { await window.chargerGrillePourModif('G2'); });
     await deplier(page, 'CR2');
-    await expect(menu(page)).toHaveValue('aucune');
-    await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(0);
-    await expect(page.locator('#listeCriteres [data-action="ouvrirSaisieCollectionProjection"]'), 'sous « Aucune projection », rien à nommer').toHaveCount(0);
+    await expect(page.locator('#listeCriteres [data-action="fixerLimiteAlgo"]')).toHaveCount(1);
+    await expect(rangees(page)).toHaveCount(0);
+    await expect(page.locator('#listeCriteres [data-action="ouvrirSaisieCollectionProjection"]'), 'sans limite, rien à nommer').toHaveCount(0);
     await expect(option).toHaveText('EUF');
 
-    // 4 — choisir « EUF » : les paliers et le service arrivent réglés, COPIÉS ; le menu montre le modèle copié.
-    await choisir(page, 'collection:' + idEuf);
-    await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(6);
-    await expect(menu(page)).toHaveValue('norme_externe');
+    // 4 — reprendre « EUF » (sans limite, le menu est là) : la limite, les paliers et le service arrivent, COPIÉS.
+    await choisir(page, idEuf);
+    await expect(rangees(page)).toHaveCount(6);
+    await expect(page.locator('#listeCriteres [data-action="retirerLimiteAlgo"]')).toHaveCount(1);
+    await expect(menu(page)).toHaveValue('');
     await expect(page.locator('#listeCriteres input[data-param-cle="nomServiceAide"]')).toHaveValue('Passerelle +');
     await expect(page.locator('#listeCriteres textarea[data-palier-index="4"][data-champ="texte"]')).toHaveValue('Bilan : {projection} erreurs sur {mots} mots.');
     let g2 = await grilleEnBase(page, 'G2');
@@ -119,15 +124,15 @@ test('collections · enregistrer « EUF » sur une grille, la retrouver et la co
     await cliquerDom(page.locator('#listeCriteres [data-action="annulerSaisieCollectionProjection"]'));
     await expect(page.locator('#listeCriteres .collection-saisie')).toHaveCount(0);
 
-    // 5 — supprimer « EUF » (la corbeille, confirmation acceptée) : la collection part ; G2 ne bouge pas.
+    // 5 — supprimer « EUF » (« Supprimer la collection », confirmation acceptée) : la collection part ; G2 ne bouge pas.
     const avant = JSON.stringify(g2.criteres[0]);
-    await cliquerDom(page.locator('#listeCriteres .collection-ligne .btn-icone-nu'));
-    await expect(menu(page).locator('optgroup')).toHaveCount(0);
+    await cliquerDom(page.locator('#listeCriteres .collection-ligne [data-action="supprimerCollectionProjection"]'));
+    await expect(menu(page)).toHaveCount(0);
     await expect(page.locator('#listeCriteres .collections-liste')).toHaveCount(0);
     expect(await page.evaluate(() => db.getSync(cle('collectionsProjection'), []))).toEqual([]);
     g2 = await grilleEnBase(page, 'G2');
     expect(JSON.stringify(g2.criteres[0])).toBe(avant);
-    await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(6);
+    await expect(rangees(page)).toHaveCount(6);
     await expect(page.locator('#listeCriteres textarea[data-palier-index="4"][data-champ="texte"]')).toHaveValue('Bilan : {projection} erreurs sur {mots} mots.');
     // Et ce que l'élève lira, calculé par la grille elle-même, est ce que la collection disait.
     const lu = await page.evaluate(async () => {

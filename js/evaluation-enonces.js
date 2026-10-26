@@ -467,6 +467,14 @@ var ENONCES_GENERIQUES = {
     aucune:    'Aucun tampon ni ' + JETON_NOM_ERREURS + ' annotés.'
 };
 
+// ↻ LOT 3a DE LA TABLE DE CAS (26 oct. 2026, consigne § 3.5) — « Quand tout est maîtrisé » d'un critère
+// NEUF (la marque des noms, `_estNeuf`) : le texte tranché par Grégoire le 25 oct., SANS POINT FINAL — les
+// deux sites du bilan écrivent après lui « (3 unités manquantes). » (supposition 7 de l'ébauche, acceptée).
+// ⚠ `ENONCES_GENERIQUES.concentre` NE CHANGE PAS : `normaliser` lit le défaut du modèle à chaque rendu, le
+// changer changerait le stock. Le modèle générique a donc DEUX défauts pour cette clé, choisis par la marque
+// (`_enoncesParDefautDe`) ; « Revenir au modèle » rend celui du critère (`defautEnonce`).
+var CONCENTRE_NEUF = 'Tu pourrais encore raffiner : ' + JETON_CRITERE;
+
 // L'ordre et les libellés des clés, pour le gabarit de la grille.
 //
 // `reperes` : ce que CHAQUE zone offre à la pose — et rien d'autre. ⚠ MESURÉ
@@ -543,6 +551,25 @@ function _nomDitFrancais(nom) {
     nu = nu.replace(/[àâä]/g, 'a').replace(/[çÇ]/g, 'c').replace(/[éèêë]/g, 'e')
            .replace(/[îï]/g, 'i').replace(/[ôö]/g, 'o').replace(/[ùûü]/g, 'u');
     return /(^|[^a-z])francais(e|es)?([^a-z]|$)/.test(nu);
+}
+
+/** Les défauts d'un modèle POUR CE CRITÈRE : le générique d'un critère neuf a son « Quand tout est maîtrisé ». */
+function _enoncesParDefautDe(modele, critere) {
+    if (modele.id !== 'generique' || !_estNeuf(critere)) return modele.enoncesParDefaut;
+    var d = {};
+    Object.keys(modele.enoncesParDefaut).forEach(function(k) { d[k] = modele.enoncesParDefaut[k]; });
+    d.concentre = CONCENTRE_NEUF;
+    return d;
+}
+
+/**
+ * Le texte du modèle pour une clé de CE critère — ce que « Revenir au modèle » remet (lot 3a). Le modèle
+ * est celui que le critère lit (`normaliser`), jamais un autre.
+ */
+function defautEnonce(critere, cleEnonce) {
+    var p = normaliser(critere);
+    var d = _enoncesParDefautDe(obtenirModele(p.modeleId), critere);
+    return (typeof d[cleEnonce] === 'string') ? d[cleEnonce] : '';
 }
 
 function listerModeles() {
@@ -717,12 +744,13 @@ function normaliser(critere) {
     }
 
     var source = (critere.enonces && typeof critere.enonces === 'object') ? critere.enonces : {};
+    var defauts = _enoncesParDefautDe(modele, critere);
     var enonces = {};
     CLES.forEach(function(c) {
         var brut = source[c.cle];
         // Une chaîne VIDE est un choix : elle fait taire l'énoncé. C'est
         // `undefined` — l'absence de réglage — qui retombe sur le défaut.
-        enonces[c.cle] = (typeof brut === 'string') ? brut : modele.enoncesParDefaut[c.cle];
+        enonces[c.cle] = (typeof brut === 'string') ? brut : defauts[c.cle];
     });
 
     return { modeleId: modele.id, enonces: enonces, herite: herite };
@@ -825,12 +853,13 @@ function appliquerAuCritere(critere, modeleId, enonces) {
     critere.modeleEnonces = modele.id;
 
     var source = (enonces && typeof enonces === 'object') ? enonces : {};
+    var defauts = _enoncesParDefautDe(modele, critere);
     var propres = {};
     var aQuelqueChose = false;
     CLES.forEach(function(c) {
         var brut = source[c.cle];
         if (typeof brut !== 'string') return;
-        if (brut === modele.enoncesParDefaut[c.cle]) return;
+        if (brut === defauts[c.cle]) return;
         propres[c.cle] = brut;
         aQuelqueChose = true;
     });
@@ -938,6 +967,7 @@ var api = {
     criteresAlgorithmiques: criteresAlgorithmiques,
     critereAlgorithmiqueOuNomme: critereAlgorithmiqueOuNomme,
     appliquerAuCritere: appliquerAuCritere,
+    defautEnonce: defautEnonce,
     enoncesRediges: enoncesRediges,
     enoncesParDefaut: enoncesParDefaut
 };

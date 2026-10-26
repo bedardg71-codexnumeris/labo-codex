@@ -182,17 +182,21 @@ const REGISTRE = Object.fromEntries(E.listerCles().map((c) => [c.cle, c]));
 /* ====================================================== A — L'ÉTAPE « CE QUE L'ÉLÈVE LIT » */
 
 const etapeNommee = (t) => new RegExp('<span class="atelier-algo-etape-nom">' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '</span>');
+// ↻ Lot 3a de la table de cas (26 oct. 2026) : l'étape s'appelle « Ce que l'étudiant·e lit » (ébauche validée) ; chaque
+// zone porte son nom dans un `span` (avec qui la lit et « Revenir au modèle »), et l'aide de l'atelier.
+const ETAPE_ELEVE = 'Ce que l’étudiant·e lit';
+const nomDeZone = (t) => 'class="table-cas-zone-nom">' + t + '</span>';
 
 describe('carte « Bilan » · A — ↻ #1150 : l\'étape « Ce que l\'élève lit » — le menu, le décompte, puis les deux phrases du bilan', () => {
     it('A.a en ÉDITION : l\'étape, ouverte au départ ; le menu, puis le décompte, « Défi prioritaire » et « Quand tout est maîtrisé » ; ni « Aucune annotation » ni titre « Bilan »', () => {
         const { html, bilan } = rendu();
         expect(bilan.length).toBeGreaterThan(0);
-        expect(html).toMatch(etapeNommee('Ce que l\'élève lit'));
+        expect(html).toMatch(etapeNommee(ETAPE_ELEVE));
         expect(html).not.toMatch(titre('Bilan'));
         expect(etapeOuverte(html, 'CR', 'eleve')).toBe(true);
         expect(clesDe(bilan)).toEqual(['decompte', 'priorite', 'concentre']);
-        expect(bilan).toContain('>' + REGISTRE.priorite.libelle + '</label>');
-        expect(bilan).toContain('>' + REGISTRE.concentre.libelle + '</label>');
+        expect(bilan).toContain(nomDeZone(REGISTRE.priorite.libelle));
+        expect(bilan).toContain(nomDeZone(REGISTRE.concentre.libelle));
         expect(bilan.indexOf('<select')).toBeLessThan(bilan.indexOf('data-enonce-cle="decompte"'));
         expect(bilan).not.toContain('data-enonce-cle="aucune"');
         expect(bilan).not.toContain('Aucune annotation');
@@ -202,7 +206,7 @@ describe('carte « Bilan » · A — ↻ #1150 : l\'étape « Ce que l\'élève 
 
     it('A.b en CRÉATION (mode temp) : la même étape, par le handler temp — « Aucune annotation » avec les codes, comme en édition (#1131)', () => {
         const { html, bilan } = renduTemp();
-        expect(html).toMatch(etapeNommee('Ce que l\'élève lit'));
+        expect(html).toMatch(etapeNommee(ETAPE_ELEVE));
         expect(clesDe(bilan)).toEqual(['decompte', 'priorite', 'concentre']);
         expect(bilan).toMatch(/<textarea[^>]*data-on-change="modifierTexteEnonceTempHandler" data-critere-index="0" data-enonce-cle="concentre"/);
         expect(clesDe(html)).toEqual(['aucune', 'decompte', 'priorite', 'concentre']);
@@ -234,8 +238,9 @@ describe('carte « Bilan » · B — ↻ #1150 : « Aucune annotation » vit dan
         // La zone est celle d'avant : même handler, même grille, même index, même clé, même valeur, même étiquette, même aide.
         expect(zone).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="aucune"/);
         expect(zone).toContain('>' + echapper(E.normaliser(ALGO).enonces.aucune) + '</textarea>');
-        expect(zone).toContain('>' + REGISTRE.aucune.libelle + '</label>');
-        expect(zone).toContain(echapper(REGISTRE.aucune.aide));
+        expect(zone).toContain(nomDeZone(REGISTRE.aucune.libelle));
+        expect(zone).toContain('S’affiche pour toi seul·e, quand la copie ne porte ni tampon ni code.');   // l'aide de l'atelier (lot 3a)
+        expect(zone).toContain('>Toi seul·e</span>');
         // Ce qu'elle offre : {critere} et {nomErreurs} — jamais {erreurs}, qui y vaudrait toujours vide (le cas qui a
         // fait trancher Grégoire le 3 sept.).
         expect(E.reperesDeCle('aucune').map((r) => [r.jeton, r.famille])).toEqual([['{critere}', 'posee'], ['{nomErreurs}', 'posee']]);
@@ -297,7 +302,7 @@ describe('carte « Bilan » · C — « Modèle des phrases (bilan et décompte)
 
     it('C.a le menu est dans « Ce que l\'élève lit », étiqueté au mot ; la ligne d\'aide suit le menu et précède la description du modèle ; « Modèle d\'observation » n\'existe plus', () => {
         const { bilan, projection } = rendu();
-        expect(bilan).toContain('>Modèle des phrases (bilan et décompte)</label>');
+        expect(bilan).toContain('>Modèle des phrases</label>');   // ↻ lot 3a : le mot de l'ébauche
         expect(bilan).toContain('<small class="modele-phrases-aide">' + AIDE + '</small>');
         expect(compter(bilan, 'modele-phrases-aide')).toBe(1);
         const select = bilan.indexOf('</select>');

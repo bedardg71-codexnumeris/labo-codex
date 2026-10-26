@@ -87,16 +87,16 @@ test('1 440 px · trois colonnes, la chaîne et ses cinq états, une seule étap
     expect(ap.gauche, '« Ce que l\'élève lira » à droite des étapes').toBeGreaterThanOrEqual(corps.droite);
     expect(Math.round(ap.largeur)).toBe(340);
     // La palette dit à quoi elle sert (les mots de la maquette).
-    await expect(atelier(page).locator('.palette-algo-titre')).toContainText('Blocs du critère algorithmique');
-    await expect(atelier(page).locator('.palette-algo-but')).toHaveText('Ils servent à écrire les phrases que ce critère rédige seul, copie par copie. Chaque bloc prend la valeur de la copie corrigée.');
+    await expect(atelier(page).locator('.palette-algo-titre')).toContainText('Blocs de textes');   // ↻ lot 3a : les mots de l'ébauche
+    await expect(atelier(page).locator('.palette-algo-but')).toHaveText('Ces blocs servent à composer les phrases que ce critère écrit seul sur chaque copie. Chaque bloc prend la valeur réelle de la copie évaluée.');   // ↻ lot 3a
     await expect(atelier(page).locator('.palette-algo-gestes li')).toHaveText(['1Clique dans une zone violette.', '2Touche un bloc : il se pose au curseur.']);
     await expect(atelier(page).locator('.palette-algo-cible')).toHaveText('Aucune zone choisie.');
 
     // La chaîne : cinq étapes, réglées, l'arrivée est « Ce que l'élève lit », ouverte au départ, seule.
     const bc = atelier(page).locator('.atelier-algo-chaine .bc-etape');
     await expect(bc).toHaveCount(5);
-    await expect(bc.locator('.bc-label')).toHaveText(['Ce que tu comptes', 'Codes', 'Note', 'Paliers', 'Ce que l\'élève lit']);
-    await expect(bc.locator('.bc-info')).toHaveText(['erreurs / mots', '2 codes', 'pénalité normalisée', '6 paliers', '3 textes']);
+    await expect(bc.locator('.bc-label')).toHaveText(['Ce que tu relèves et comptes', 'Codes utilisés', 'Note calculée', 'Cas d’interprétation', 'Ce que l’étudiant·e lit']);   // ↻ lot 3a
+    await expect(bc.locator('.bc-info')).toHaveText(['erreurs / mots', '2 codes', 'pénalité normalisée', '1 table', '3 textes']);
     expect(await bc.evaluateAll((els) => els.map((b) => b.classList.contains('bc-complet')))).toEqual([true, true, true, true, true]);
     expect(await ouvertes(page)).toEqual(['eleve']);
     await expect(chaine(page, 'eleve')).toHaveClass(/bc-ouvert/);
@@ -107,7 +107,7 @@ test('1 440 px · trois colonnes, la chaîne et ses cinq états, une seule étap
     expect(await ouvertes(page)).toEqual(['paliers']);
     await expect(chaine(page, 'paliers')).toHaveClass(/bc-ouvert/);
     await expect(chaine(page, 'eleve')).not.toHaveClass(/bc-ouvert/);
-    await expect(etape(page, 'paliers').locator('.atelier-algo-etape-resume')).toHaveText('Projection à l\'EUF, 6 paliers');
+    await expect(etape(page, 'paliers').locator('.atelier-algo-etape-resume')).toHaveText('Paliers selon la limite fixée');   // ↻ lot 3a
     // L'en-tête de l'étape ouverte la referme ; celui d'une autre l'ouvre.
     await etape(page, 'paliers').locator('.atelier-algo-etape-tete').click();
     expect(await ouvertes(page)).toEqual([]);
@@ -118,7 +118,7 @@ test('1 440 px · trois colonnes, la chaîne et ses cinq états, une seule étap
     // Les états non réglés : un critère neuf, sans noms, sans pondération, cochée sans code, sans texte.
     await page.evaluate(() => window.chargerGrillePourModif('GN'));
     const bn = atelier(page, 'CN').locator('.atelier-algo-chaine .bc-etape');
-    await expect(bn.locator('.bc-info')).toHaveText(['à nommer', '0 code', 'pénalité normalisée', 'aucun', '0 texte']);
+    await expect(bn.locator('.bc-info')).toHaveText(['à nommer', '0 code', 'pénalité normalisée', '0 table', '0 texte']);
     expect(await bn.evaluateAll((els) => els.map((b) => b.classList.contains('bc-complet')))).toEqual([false, false, false, true, false]);
     expect(await bn.evaluateAll((els) => els.map((b) => b.querySelector('.u-lecteur-ecran').textContent))).toEqual(
         [', à régler', ', à régler', ', à régler', ', réglée', ', à régler, ouverte']);
@@ -156,7 +156,7 @@ test('1 440 px · un bloc survolé allume ses zones et le crayon de ses étapes 
     await vue.scrollIntoViewIfNeeded();
     const avant = await zone.inputValue();
     await caretA(vue, avant.length);
-    await expect(atelier(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Verdict, palier 2 »');
+    await expect(atelier(page).locator('.palette-algo-cible')).toHaveText('Zone choisie : Verdict, palier Excellent');   // ↻ lot 3a : le palier par son nom court
     await service.hover();
     await expect(vue).toHaveClass(/atelier-algo-peut/);
     await service.click();
@@ -175,7 +175,7 @@ test('1 440 px · un bloc survolé allume ses zones et le crayon de ses étapes 
 test('1 440 px · − / + et les copies de référence changent la note et les phrases ; toucher une phrase ouvre son étape', async ({ page }) => {
     const erreurs = await ouvrir(page, 'GR', 1440, 900);
     const ap = apercu(page);
-    await expect(ap.locator('.apercu-algo-reference')).toHaveText(['Aucune', 'Quelques', 'Beaucoup', 'Pondérée']);
+    await expect(ap.locator('.apercu-algo-reference')).toHaveText(['Aucune', 'Quelques', 'Beaucoup', 'Pondérée', 'Égalité']);   // ↻ lot 3a
     await expect(ap.locator('.apercu-algo-reference[aria-pressed="true"]')).toHaveText('Quelques');
     const resultat = () => texte(ap.locator('.apercu-algo-resultats'));
     const depart = { note: await resultat(), phrase: await phrasePdf(page) };
@@ -207,7 +207,7 @@ test('1 440 px · − / + et les copies de référence changent la note et les p
     expect(await ouvertes(page)).toEqual(['paliers']);
     const zone = etape(page, 'paliers').locator(`textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
     expect(await vueDe(zone).evaluate((el) => document.activeElement === el)).toBe(true);
-    await expect(atelier(page).locator('.palette-algo-cible')).toHaveText(`Tu écris dans : « Verdict, palier ${Number(i) + 1} »`);
+    await expect(atelier(page).locator('.palette-algo-cible')).toHaveText(`Zone choisie : Verdict, palier ${['Sans erreur', 'Excellent', 'Très bien', 'Bien', 'Risqué', 'Échec'][Number(i)]}`);
     // « Aucune annotation » : l'étape « Codes ».
     await ap.locator('[data-lecture="aucune"] .apercu-algo-segment').click();
     expect(await ouvertes(page)).toEqual(['codes']);
@@ -283,8 +283,8 @@ for (const [largeur, hauteur] of [[1180, 820], [820, 1180]]) {
             await vueDe(zone).evaluate((el) => el.scrollIntoView({ block: 'center' }));
             const b = await boite(vueDe(zone));
             await page.mouse.click(b.gauche + 8, b.haut + 8);
-            await expect(pal.locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Verdict, palier 4 »');
-            expect(await zone.evaluate((z) => { const a = z.closest('.palier-rangee'); return !!a && a.previousElementSibling && a.previousElementSibling.matches('.palette-algo'); })).toBe(true);
+            await expect(pal.locator('.palette-algo-cible')).toHaveText('Zone choisie : Verdict, palier Bien');
+            expect(await zone.evaluate((z) => { const a = z.closest('.table-cas-rangee'); return !!a && a.previousElementSibling && a.previousElementSibling.matches('.palette-algo'); })).toBe(true);
             // Cibles : les pas, les copies de référence, les en-têtes des étapes.
             const hauteurs = await atelier(page).locator('.apercu-algo-pas, .apercu-algo-reference, .atelier-algo-etape-tete').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
             expect(Math.min(...hauteurs)).toBeGreaterThanOrEqual(44);

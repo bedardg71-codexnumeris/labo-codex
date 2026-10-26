@@ -106,7 +106,7 @@ test('texte troué · chaque zone, visée, active ses repères dans la palette ;
                 noms: actifs.map((b) => b.querySelector('.palette-algo-bloc-nom').textContent.trim()),
                 visibles: actifs.every((b) => b.offsetParent !== null),
                 cible: document.querySelector('#listeCriteres .palette-algo .palette-algo-cible').textContent.trim(),
-                etiquette: g.querySelector('label').textContent.trim(),
+                etiquette: g.querySelector('.table-cas-zone-nom').textContent.trim(),   // ↻ lot 3a : le nom de la zone
                 aideApresZone: !!(t.compareDocumentPosition(g.querySelector('small')) & Node.DOCUMENT_POSITION_FOLLOWING)
             };
         }, cle));
@@ -122,7 +122,7 @@ test('texte troué · chaque zone, visée, active ses repères dans la palette ;
     expect(parCle.concentre).toEqual(['{critere}']);
     expect(parCle.aucune, '« Aucune annotation » en création : les repères de la modification').toEqual(['{critere}', '{nomErreurs}']);
     expect(offerts.every(o => o.visibles), 'les blocs actifs sont à l\'écran').toBe(true);
-    expect(offerts.every(o => o.cible === 'Tu écris dans : « ' + o.etiquette + ' »'), 'la palette nomme la zone par son étiquette').toBe(true);
+    expect(offerts.every(o => o.cible === 'Zone choisie : ' + o.etiquette), 'la palette nomme la zone par son étiquette').toBe(true);
     expect(offerts.every(o => o.aideApresZone), 'l\'aide reste attachée au champ, sous lui').toBe(true);
     expect(offerts.flatMap(o => o.reperes)).not.toContain('{s}');
 });
@@ -225,7 +225,7 @@ test('texte troué · sans zone visitée depuis le rendu, un bloc ne pose rien, 
     // Compacte (iPad portrait) : sans zone choisie, ni bloc à l'écran, ni geste possible ; l'astuce le dit.
     await page.setViewportSize({ width: 820, height: 1180 });
     await expect(page.locator('#listeCriteres .palette-algo .palette-algo-astuce')).toBeVisible();
-    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-astuce')).toHaveText('Clique dans une zone violette : les blocs qu\'elle accepte paraîtront ici.');
+    await expect(page.locator('#listeCriteres .palette-algo .palette-algo-astuce')).toHaveText('Touche une zone violette : ses blocs paraissent ici.');   // ↻ lot 3a : les mots de l'ébauche, au présent
     await expect(page.locator('#listeCriteres .palette-algo .palette-algo-bloc:visible')).toHaveCount(0);
 });
 
