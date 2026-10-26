@@ -71,12 +71,16 @@ test('lot C · l\'éditeur d\'échelles : plus de colonne « Ordre », un niveau
 
 // Règle 3 du lot C — l'empilement sous 768 px se MESURE ici (règle 1 des portes terrain : aucune porte
 // quand une machine peut répondre) : à 700 px de large, la grille à deux colonnes du formulaire de
-// groupe-cours et la rangée d'un sous-critère n'ont plus qu'une colonne ; à 1200 px, deux.
+// groupe-cours et la rangée d'un sous-critère n'ont plus qu'une colonne ; à 1200 px, deux et trois.
+// ↻ LOT 3a (26 oct. 2026) : la rangée d'un palier est celle de la table des paliers, étape « Cas
+// d'interprétation » ouverte (`[data-palier-rangee]`) ; elle se règle sur la largeur de la TABLE
+// (`@container table-cas (max-width: 560px)`), plus sur celle de la fenêtre : trois colonnes à 1200 px,
+// une à 700 px — les valeurs que mesure `critere-algorithmique-table-de-cas` aux largeurs voisines.
 test('lot C · sous 768 px, la grille à deux colonnes du formulaire de groupe-cours et la rangée d\'un sous-critère s\'empilent', async ({ page }) => {
     const colonnes = () => page.evaluate(() => {
         const nb = (el) => (el ? getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length : -1);
         const groupeCours = document.querySelector('#v2-codeCours') && document.querySelector('#v2-codeCours').closest('.grille-form-2col');
-        return { groupeCours: nb(groupeCours), palier: nb(document.querySelector('#listeCriteres .palier-rangee')), sousCritere: nb(document.querySelector('#listeCriteres .sous-critere-champs-grid')) };
+        return { groupeCours: nb(groupeCours), palier: nb(document.querySelector('#listeCriteres [data-palier-rangee]')), sousCritere: nb(document.querySelector('#listeCriteres .sous-critere-champs-grid')) };
     });
     await page.setViewportSize({ width: 1200, height: 900 });
     await page.goto(indexHtml);
@@ -93,9 +97,12 @@ test('lot C · sous 768 px, la grille à deux colonnes du formulaire de groupe-c
         window.afficherSousSection('conception-grille-criteres');
         await window.chargerGrillePourModif('G1');
     });
+    const atelier = page.locator('#listeCriteres .gabarit-algo[data-critere-id="CR"]');
+    await atelier.locator('.atelier-algo-chaine .bc-etape[data-etape="paliers"]').evaluate((el) => el.click());
+    await expect(atelier.locator('.atelier-algo-etape[data-etape="paliers"]')).toHaveAttribute('data-ouverte', '');
     const large = await colonnes();
     console.log('COLONNES À 1200 px →', JSON.stringify(large));
-    expect(large).toEqual({ groupeCours: 2, palier: 2, sousCritere: 3 });
+    expect(large).toEqual({ groupeCours: 2, palier: 3, sousCritere: 3 });
     await page.setViewportSize({ width: 700, height: 1000 });
     const etroit = await colonnes();
     console.log('COLONNES À 700 px →', JSON.stringify(etroit));
