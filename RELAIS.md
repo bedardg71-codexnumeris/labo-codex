@@ -7,6 +7,14 @@
 
 ---
 
+## 26 OCT. 2026, 5 H 20 (Claude Code) : **FUSIONNÉ ET RELEASÉ SUR `main` LOCAL (1.218.0, 1.219.0 = `d4d78d34`), NON POUSSÉ : VERDICT ROUGE, 7 SPECS DE LA CARTE D'ALIGNEMENT, FAUTIF `27056905` (#1148)**
+
+**Où vit le travail** : `main` local = `d4d78d34`, 64 commits d’avance (65 avec ce relais) sur `origin/main` = `973ad366` (1.217.0, toujours en ligne). La fusion `f2ac8e64` (bibliothèques en deux colonnes, #1154 à #1159), puis `726d200f` (1.218.0) et `d4d78d34` (1.219.0), les Nouvelles validées par Grégoire. La branche `bibliotheques-deux-colonnes` est fusionnée, **pas encore supprimée** (elle le sera après le push).
+
+**Le verdict** : en 10 morceaux (option B de Grégoire, mémoire stable tout du long), fusionnés et jugés contre la baseline du Mac : 1 019 verts, **7 rouges nouveaux** (`planif-drag-pointer-148` ×2, `planif-menu-vue` ×4, `planif-tout-voir-loupe`). Rejoués seuls : verts sur `28f379d5`, rouges dès **`27056905`** (#1148, la Carte à l'apparence de la rangée). Rapport : `plans de travail/RAPPORT-2026-10-26-verdict-rouge-1219.md`, pour Cowork.
+
+**La suite** : Cowork tranche (code ou specs) ; le correctif ; un verdict complet sur le nouveau sommet de `main` ; puis le push par `scripts/pousser.sh` et le § 4 de la consigne du soir. La table de cas attend ce push.
+
 ## 25 OCT. 2026, FIN DE SOIRÉE (Claude Code) : **LES BIBLIOTHÈQUES EN DEUX COLONNES, LOTS 1 À 5, VIVENT SUR LA BRANCHE `bibliotheques-deux-colonnes` = `d8cbe5dd` ; LE LOT 5 (LES TAMPONS) ET LA RETOUCHE DU LOT 4 SONT EN RELECTURE ; LA FUSION ATTEND LE LOT 6**
 
 **Où vit le travail** : branche locale `bibliotheques-deux-colonnes` = `d8cbe5dd`, non poussée : `cfcf61d8` (verdict du lot 4, consigne du lot 5), `b481e947` (retouche du lot 4 : l'aide validée posée, « de ce trimestre » dans la Carte, le plan réécrit), `39e1c202` (le lot 5 : les tampons en deux colonnes, la phrase de Grégoire sous « + Ajouter une catégorie », ce bouton réparé, #1166 et #1167 inscrites), `d8cbe5dd` (demande de relecture, captures, lignes du plan). La copie de travail est revenue sur `main`.
