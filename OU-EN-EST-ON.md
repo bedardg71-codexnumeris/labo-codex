@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 26 OCTOBRE 2026, 18 H 27 : LA 1.220 EST EN LIGNE** (la table de cas, ses deux lots, et le groupe-cours qui naît sans ses élèves). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que décrivent les trois entrées ci-dessous (« Cas d'interprétation » et ses paliers en table, « + Ajouter une table de cas », la question avant de créer un groupe-cours sans élèves). Aucune vérification à faire de ton côté : ni la table de cas ni le groupe-cours n'en demandent.
+
+**Ce qui reste à toi** : l'étape suivante du critère algorithmique, « les calculs que tu composes », attend ta décision sur ce que veulent dire les calculs tout faits.
+
+**Vérifié comment** : la vérification complète du navigateur, sur le Mac, n'a trouvé qu'une seule erreur, et elle était dans un test : il cherchait encore les anciennes rangées des paliers. Le test a été corrigé pour lire la nouvelle table, puis prouvé capable d'échouer ; rien dans l'application n'a changé. La mise en ligne a été constatée chez Netlify, sur ce commit. La vérification de GitHub, elle, n'a pas pu conclure (quatre morceaux coupés à 30 minutes ; six tests en échec sous Linux seulement, réussis sur le Mac, à trier).
+
 📝 **LE 26 OCTOBRE 2026, 16 H : LE GROUPE-COURS QUI NAÎT SANS SES ÉLÈVES LE DIT, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : créer un groupe-cours dont le groupe n'a aucun·e élève dans le cours choisi, alors que ses élèves sont rattaché·es à un autre cours, pose d'abord une question (« Le groupe 00001 n'a aucun·e étudiant·e dans … Créer quand même le groupe-cours ? ») ; « Annuler » n'écrit rien. À l'import des travaux, quand le cours actif n'a aucune production mais que le trimestre en a sous un autre cours, une ligne sous « Production » le dit. Rien n'est déplacé : qui a les mêmes élèves dans deux cours garde son second groupe-cours vide, averti. C'est ce qui a bloqué Mathieu quatre semaines (#1038).

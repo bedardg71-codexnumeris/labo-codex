@@ -1,5 +1,15 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 26 octobre 2026, 19 h 03 (Toronto) : `1.220.0` EN LIGNE** (build `1026-1646`) — Netlify
+> `6adfd3c6`, `commit_ref` `10b7093d`, `state: ready`, publié à 22:27:35 Z (18 h 27). Porte : la table de cas (lots 3a
+> `cddfd207`, 3b `27d5d610`) et #1038. Verdict complet de `1473b15a` (10 morceaux, 1 046 essais, 1 rouge : la spec du lot C
+> périmée par 3a) **reporté** sur `10b7093d` (tests seulement, la spec recalée et rejouée ; consigne
+> `plans de travail/CONSIGNE-LOT-2026-10-26-verdict-rouge-1220-retouche.md`), jeton écrit à la main, `git push`. ⚠ **GitHub NON
+> JUGÉ** (run 40412553265) : 12 rapports sur 16 (morceaux 3 à 6 coupés à 30 min) ; jugés à la main contre la baseline Linux :
+> 6 rouges neuves, toutes vertes sur le Mac (tri du 25 oct., rien corrigé), 18 de la baseline redevenues vertes (`RELAIS.md`).
+> Portes terrain : aucune (verdicts 3a, 3b, #1038, § 4). **Ouverts** : #1093 (`ci/verdict-morceaux`, à Grégoire).
+> **MANDAT COURANT** : l'étape 4 du plan du 21 oct. (les calculs que l'enseignant·e compose) attend la décision de Grégoire.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 26 octobre 2026, 9 h 30 (Toronto) : `1.219.1` EN LIGNE** (build `1026-0718`) — Netlify
 > `6adf4dd6`, `commit_ref` `403c39cc`, `state: ready`, publié à 12:56:09 Z (8 h 56). Verdict Playwright complet vert sur
 > `403c39cc` en 10 morceaux (1 027 verts, 0 rouge, 0 instable ; secteur, mémoire stable), jeton écrit au format de
