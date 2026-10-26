@@ -7,6 +7,20 @@
 
 ---
 
+## 26 OCT. 2026, 9 H 30 (Claude Code) : **POUSSÉ, EN LIGNE : 1.219.1 = `403c39cc` ; AUCUN TRAVAIL EN AVANCE AILLEURS ; LA BRANCHE `bibliotheques-deux-colonnes` SUPPRIMÉE EN LOCAL**
+
+**Les sept rouges de #1148** (consigne `plans de travail/CONSIGNE-LOT-2026-10-26-carte-verdict-rouge.md`, § 1) : **les specs, pas l'application.** Mesuré sur `28f379d5` puis `27056905` (1280 × 720, 1440 × 900, 820 × 1180, avec et sans démo) : le débordement de page est identique avant et après #1148 (516 / 474 / 422 px sans démo) ; la barre de la Carte passe de 28 à 56 px, le canevas perd 28 px en haut, son bas ne bouge pas. Loupe : les clics du menu « Vue » défilent la page de 8 px (0 avant), la cible était lue avant ; relue après, écart 13,6 (< 20). Drag B/D : la poignée tombe sous le bandeau du mode démo (y 684, bandeau 679-720). Menu-vue : zone à 594 px, blocs posés 120-150 px plus bas hors de la fenêtre de 720. Correctif `af528587` : `teleporter` défile jusqu'au haut du canevas avant de viser ; la loupe relit sa cible après les clics. Preuve : 40 / 40 seules ; break-tests (pointermove du nœud libre coupé → CAS D et « glisser » rouges, −1575 et 899 ; visée de la loupe décalée de 8 px → 26,1, le chiffre du verdict). Vitest 9 712 / 9 712.
+
+**Verdict complet** sur `403c39cc` (1.219.1, build `1026-0718`) : 10 morceaux (`scripts/morceau-playwright.mjs`, `caffeinate -d -i -s`, secteur), fusionnés et jugés contre `playwright-baseline.json` : **1 027 verts, 0 rouge, 0 instable**, 11 sautés ; 79-80 % de mémoire libre et échange 431 Mo à chacun des dix relevés. Jeton écrit à la main au format de `verifier-playwright.mjs` (`garde.raison` le dit), push par `git push` (hook : Vitest vert, « verdict vert à jour pour ce commit ») — `pousser.sh` aurait relancé la suite entière, précédent du 22 oct. `origin/main` = `403c39cc`, Netlify `6adf4dd6` `ready` sur ce SHA (8 h 56).
+
+**GitHub** (run 40326337181) : **NON JUGÉ** — les morceaux 6, 8 et 12 coupés au plafond de 30 min, 13 rapports sur 16. Jugés à la main contre `playwright-baseline-linux.json` (810 essais) : 7 rouges absents de la baseline, tous verts sur le Mac (`bibliotheque-liste-1159` ×3, `exporter-des-travaux-une-carte-895`, `lot-a-anonymisation-enregistre`, `lot-e3-creer-ou-modifier` ×2), un instable (`comptes-erreurs-stock-1142`), 10 specs de la baseline redevenues vertes (`bareme-1` ×3, `materiel-1119` ×2, `materiel-dissection-11`, `-2a`, `lot-i-bis`, `planif-menu-vue` ×2). Rien corrigé : tri du 25 oct. au matin, pour Cowork ; le premier essai du critère de bascule (#1114) n'a pas pu se faire.
+
+**Complexité** (1.217.0 en ligne `973ad366` → 1.219.1) : fichiers de plus de 1 000 lignes 37 → 38, leurs lignes 88 618 → 90 053 (Δ +1 435, dont `js/bibliotheque-ui.js` neuf, 1 176) ; au-dessus de 15 : 450 → 447 (Δ −3) ; au-dessus de 30 : 86 → 84 (Δ −2, maximum 130) ; somme au-dessus de 15 : 11 350 → 11 258 (Δ −92).
+
+**Vu en chemin, pour Cowork (non inscrit, aucun symptôme vécu)** : dans le banc, le canevas de la Carte commence sous ~500 px de page à toutes les tailles, avant #1148 comme après — d'où la fragilité de ces specs. Non mesuré sur le corpus réel.
+
+**La suite** : la table de cas (`plans de travail/TEXTES-2026-10-25-table-de-cas-a-corriger.md`, non suivi) ; la porte terrain des bibliothèques (`PORTES-TERRAIN-2026-10-25-bibliotheques-deux-colonnes.md`), dont Cowork publiera l'artefact.
+
 ## 26 OCT. 2026, 5 H 20 (Claude Code) : **FUSIONNÉ ET RELEASÉ SUR `main` LOCAL (1.218.0, 1.219.0 = `d4d78d34`), NON POUSSÉ : VERDICT ROUGE, 7 SPECS DE LA CARTE D'ALIGNEMENT, FAUTIF `27056905` (#1148)**
 
 **Où vit le travail** : `main` local = `d4d78d34`, 64 commits d’avance (65 avec ce relais) sur `origin/main` = `973ad366` (1.217.0, toujours en ligne). La fusion `f2ac8e64` (bibliothèques en deux colonnes, #1154 à #1159), puis `726d200f` (1.218.0) et `d4d78d34` (1.219.0), les Nouvelles validées par Grégoire. La branche `bibliotheques-deux-colonnes` est fusionnée, **pas encore supprimée** (elle le sera après le push).
