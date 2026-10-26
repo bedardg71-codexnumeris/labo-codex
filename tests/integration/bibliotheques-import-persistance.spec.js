@@ -37,14 +37,21 @@ const SEMER_CARTOUCHES = `async () => {
     })));
 }`;
 
+// ↻ #1155 (25 oct. 2026) — RÉANCRÉ : la bibliothèque des cartouches passe en deux colonnes. La section
+// d'import y est un repli (`<details data-repli="import-trimestre">`, fermé par défaut) au pied de
+// « Dans ce trimestre » : l'enseignant l'ouvre d'abord, et le repli ouvert fait partie de ce qui doit
+// survivre (`_capturerDeuxColonnes`). La fenêtre étant plus large et plus haute, la page est réduite à
+// 560 px de haut pour qu'elle défile réellement. La garantie éprouvée ne change pas.
 test('PREUVE · cartouches · après un import, le trimestre, l\'aperçu et le défilement sont conservés', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 560 });
     await ouvrir(page);
     const r = await page.evaluate(async (semer) => {
         await eval(semer)();
         await afficherBibliothequeCartouches();
         await new Promise(res => setTimeout(res, 400));
 
-        // L'enseignant choisit son trimestre, déplie l'aperçu, puis fait défiler.
+        // L'enseignant ouvre la section, choisit son trimestre, déplie l'aperçu, puis fait défiler.
+        document.querySelector('#modalBibliothequeCartouches details[data-repli="import-trimestre"]').open = true;
         document.getElementById('selectTrimestreImportCartouches').value = 'h2026';
         await afficherCartouchesTrimestreModal();
         await new Promise(res => setTimeout(res, 300));
@@ -60,7 +67,9 @@ test('PREUVE · cartouches · après un import, le trimestre, l\'aperçu et le d
         const select = document.getElementById('selectTrimestreImportCartouches');
         const apercu = document.getElementById('previewCartouchesTrimestre');
         const contenuApres = document.querySelector('#modalBibliothequeCartouches .modal-js-contenu');
+        const repli = document.querySelector('#modalBibliothequeCartouches details[data-repli="import-trimestre"]');
         return {
+            repliOuvert: !!(repli && repli.open),
             defilementAvant,
             trimestreConserve: select ? select.value : null,
             apercuOuvert: !!(apercu && !apercu.classList.contains('u-hide')),
@@ -71,6 +80,7 @@ test('PREUVE · cartouches · après un import, le trimestre, l\'aperçu et le d
 
     console.log('CARTOUCHES →', JSON.stringify(r, null, 1));
     expect(r.defilementAvant, 'le modal défile bien dans ce montage').toBeGreaterThan(0);
+    expect(r.repliOuvert, 'la section d\'import reste ouverte').toBe(true);
     expect(r.trimestreConserve, 'le trimestre choisi est conservé').toBe('h2026');
     expect(r.apercuOuvert, 'l\'aperçu est toujours déplié — c\'est la plainte').toBe(true);
     expect(r.apercuGarni, 'et il est réellement garni, pas juste visible').toBeGreaterThan(0);

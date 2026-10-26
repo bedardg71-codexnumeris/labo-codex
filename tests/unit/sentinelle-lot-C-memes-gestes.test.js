@@ -67,11 +67,26 @@ const compter = (h, m) => h.split(m).length - 1;
 
 describe('lot C · A — le dossier de la bibliothèque : la corbeille, la confirmation intacte', () => {
     it('A.a plus de « ✕ » ni de bouton plein ; la corbeille porte le même geste, les mêmes paramètres, le même `data-confirm`, et l\'étiquette', () => {
+        // ↻ #1156 (25 oct. 2026) : la zone « Mes dossiers » (`genererZone`) est retirée ; la gestion des dossiers vit
+        // dans la barre de la fenêtre en deux colonnes (« Gérer les dossiers… »), qui pose la même corbeille. Le banc
+        // rend donc la fenêtre et lit cette barre. BREAK-TEST (25 oct.) : `window.boutonRetirerBloc(...)` remplacé par
+        // un bouton plein « ✕ » dans `_renderBarreDossiers` → ROUGE.
+        let html = '';
+        const document = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [],
+            body: { appendChild() {}, insertAdjacentHTML: (_ou, h) => { html += h; } },
+            createElement: () => ({}), addEventListener() {}, removeEventListener() {} };
         const { win } = monter('js/bibliotheque-ui.js', {
-            obtenirIdentiteCCUtilisateur: () => 'banc', obtenirProfilAuteurActifSync: () => ({ auteur_original: 'banc' }), nommerCopie: (n) => n + ' (copie)'
+            document, echapperAttribut: echapper, obtenirIdentiteCCUtilisateur: () => 'banc', obtenirProfilAuteurActifSync: () => ({ auteur_original: 'banc' }), nommerCopie: (n) => n + ' (copie)'
         });
-        win.repertoiresBibliotheque = { obtenir: () => [{ id: 'R1', nom: 'Dossier <b>un</b>' }, { id: 'R2', nom: 'Deux' }] };
-        const html = win.BibliothequeUI.repertoires.genererZone('echelles');
+        win.repertoiresBibliotheque = { obtenir: () => [] };
+        win.BibliothequeUI.creerFenetreDeuxColonnes({
+            modalId: 'banc', titre: 'Banc', menuFichiers: [],
+            trimestre: { titre: 'Dans ce trimestre', rangees: [] },
+            bibliotheque: { titre: 'Dans ta bibliothèque', rangees: [],
+                dossiers: { biblio: 'echelles', reps: [{ id: 'R1', nom: 'Dossier <b>un</b>' }, { id: 'R2', nom: 'Deux' }], refreshFn: 'x', masquerLibelle: 'Masquer' } }
+        });
+        html = (html.match(/class="biblio2-dossiers"[\s\S]*$/) || [''])[0];
+        expect(html).toContain('Mes dossiers');
         expect(html).not.toContain('✕');
         expect(html).not.toContain('btn-supprimer');
         expect(compter(html, 'icons8-trash.svg')).toBe(2);

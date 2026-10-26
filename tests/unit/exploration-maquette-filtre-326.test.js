@@ -50,12 +50,16 @@ describe('#326 R1 · sentinelle : sidebar + bibliothèque filtrent les maquettes
     const SITES = [
         { fichier: 'pratiques.js', fn: 'afficherListePratiquesSidebar' },
         { fichier: 'pratiques-gestion.js', fn: 'afficherListePratiquesMateriel' },
-        { fichier: 'pratiques-gestion.js', fn: 'afficherBibliothequePratiques' }
+        // ↻ #1156 (25 oct. 2026) : la fenêtre passe en deux colonnes ; ses données sont préparées par
+        // `preparerDonneesBibliothequePratiques`, où le filtre vit désormais, UNE FOIS PAR COLONNE (`sites: 2`).
+        // BREAK-TEST (25 oct.) : `filtrerParMaquette` retiré de la seule colonne « Dans ce trimestre » → ROUGE
+        // (avant `sites: 2`, l'autre colonne suffisait à le garder vert).
+        { fichier: 'pratiques-gestion.js', fn: 'preparerDonneesBibliothequePratiques', sites: 2 }
     ];
 
     it('chaque site de présentation des pratiques applique le filtre maquette', () => {
         const manquants = [];
-        SITES.forEach(({ fichier, fn }) => {
+        SITES.forEach(({ fichier, fn, sites }) => {
             const code = readFileSync(path.join(racineJs, fichier), 'utf8');
             const i = code.indexOf('function ' + fn);
             expect(i, `${fn} introuvable dans ${fichier}`).toBeGreaterThan(-1);
@@ -63,6 +67,9 @@ describe('#326 R1 · sentinelle : sidebar + bibliothèque filtrent les maquettes
             const corps = code.slice(i, i + 2500);
             if (!/filtrerParMaquette|estMaquette\s*!==\s*true/.test(corps)) {
                 manquants.push(`${fichier}:${fn}`);
+            }
+            if (sites && (corps.match(/filtrerParMaquette\(/g) || []).length < sites) {
+                manquants.push(`${fichier}:${fn} (${sites} colonnes)`);
             }
         });
         expect(

@@ -453,14 +453,16 @@ const TOOLTIPS = {
         'Quatre vues : aperçu du groupe, liste des individus, profil étudiant·e et interventions RàI.',
 
     // --- Textes relus par Grégoire (15 oct. 2026) : « Tout importer » (bloc 2) ---
+    // ↻ Échelles et productions : « dans ta bibliothèque », texte corrigé par Grégoire le 25 oct. 2026 (leur
+    // import écrit dans la bibliothèque, pas dans le trimestre actif ; #1156, consigne du lot 3, § 3.2).
     'import-trimestre-tout-grilles':
         'Copie toutes les grilles de ce trimestre dans ton trimestre actif, avec leurs rétroactions. Les originales restent intactes.',
     'import-trimestre-tout-echelles':
-        'Copie toutes les échelles de ce trimestre dans ton trimestre actif. Les originales restent intactes.',
+        'Copie toutes les échelles de ce trimestre dans ta bibliothèque. Les originales restent intactes.',
     'import-trimestre-tout-cartouches':
         'Copie toutes les cartouches de ce trimestre dans ton trimestre actif. Les originales restent intactes.',
     'import-trimestre-tout-productions':
-        'Copie toutes les productions de ce trimestre dans ton trimestre actif. Les originales restent intactes.',
+        'Copie toutes les productions de ce trimestre dans ta bibliothèque. Les originales restent intactes.',
     'import-trimestre-tout-pratiques':
         'Copie toutes les pratiques de ce trimestre dans ton trimestre actif. Les originales restent intactes. Vérifie ensuite leur échelle et leur grille.',
 

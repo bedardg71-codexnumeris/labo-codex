@@ -216,19 +216,9 @@ function trierListeProductions() {
     afficherListeProductions();
 }
 
-/**
- * ✅ AJOUT (28 janvier 2026) : Générer un badge de source pour une production
- * @param {Object} prod - La production
- * @param {Array} productionsLocales - Productions locales pour vérifier la source
- * @returns {string} HTML du badge
- */
-function genererBadgeSourceProduction(prod, productionsLocales) {
-    return BibliothequeUI.genererBadgeSource(prod, productionsLocales);
-}
 
-function genererIdCourtProduction(id) {
-    return BibliothequeUI.genererIdCourt(id);
-}
+// #1159 (verdict du lot 6, § 2.2) — `genererBadgeSourceProduction` et `genererIdCourtProduction` sont
+// retirés : plus aucun lecteur depuis les rangées en deux colonnes (#1156).
 
 /* ===============================
    FONCTION: AFFICHER TABLEAU DES PRODUCTIONS

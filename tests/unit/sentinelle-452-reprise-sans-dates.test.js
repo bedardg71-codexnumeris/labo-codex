@@ -96,9 +96,8 @@ function monterBanc({ productionsDuCours = [], bibliotheque = [] } = {}) {
         BibliothequeUI: {
             genererBadgeSource: () => '', genererIdCourt: (id) => String(id).slice(0, 6),
             filtrerParModeDemo: (arr) => arr, formaterTitreDemo: (t) => t,
-            estItemDemo: () => false, formaterMetadonnees: () => '',
-            formaterInspireDe: () => '', renderCarteSelection: () => '',
-            renderCarteDisponible: () => '', creerModal: () => {}, fermerModal: () => {},
+            estItemDemo: () => false,
+            formaterInspireDe: () => '', fermerModal: () => {},
             renderAvertissementDoublons: () => '', obtenirAuteurActif: () => 'Test',
             forkerItem: (item, prefix) => ({ ...item, id: prefix + 'TEST' }),
             repertoires: { enregistrer() {}, genererZone: () => '', initialiserZone() {} }

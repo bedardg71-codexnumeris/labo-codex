@@ -402,46 +402,87 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'bibliotheque-fonctionnement': {
+        // #1157 (retouche du lot 4) — le texte validé par Grégoire (25 oct. 2026, 16 h 53), mot pour
+        // mot : la fenêtre en deux colonnes. « le ramène » est vrai des six fenêtres de la Conception :
+        // « ← Utiliser » remet en service l'élément retiré lui-même (par `id` ou `idOriginal` ; une
+        // production, aussi par sa propre rangée « Retirée de ce trimestre »).
         titre: "Comment fonctionne la bibliothèque",
         sections: [
             {
-                type: 'texte',
-                contenu: "La bibliothèque te permet de gérer ton matériel pédagogique : grilles, échelles, cartouches, pratiques et productions. Tu peux ajouter, retirer, dupliquer, exporter ou supprimer des éléments."
-            },
-            {
                 type: 'liste',
-                titre: "Comprendre les badges de source",
+                titre: "Deux colonnes",
                 items: [
-                    "<strong class='badge-source-locale'>Locale</strong> : élément que tu as créé ou modifié toi-même",
-                    "<strong class='badge-source-bibliotheque'>Bibliothèque</strong> : élément provenant de la Bibliothèque (gabarits)",
-                    "<strong class='badge-source-retiree'>Retirée</strong> : élément retiré de ta sélection mais conservé dans tes données"
+                    "« Dans ce trimestre » : ce que le menu de l'écran te propose pendant ce trimestre.",
+                    "« Dans ta bibliothèque » : ce que tu gardes pour tous tes trimestres."
                 ]
             },
             {
-                type: 'alerte',
-                niveau: 'important',
-                contenu: "<strong>Retirer ≠ Supprimer</strong><br><br><strong>Retirer</strong> : masque l'élément de ta sélection, mais il reste dans tes données. Tu peux le réajouter plus tard depuis « Disponibles ».<br><br><strong>Supprimer</strong> : efface définitivement l'élément de tes données. Cette action est irréversible."
-            },
-            {
-                type: 'conseil',
-                contenu: "Utilise <strong>Retirer</strong> pour désencombrer ta sélection sans perdre tes configurations. Utilise <strong>Supprimer</strong> uniquement pour les éléments dont tu es certain de ne plus avoir besoin."
-            },
-            {
                 type: 'liste',
-                titre: "Les autres boutons",
+                titre: "Passer d'une colonne à l'autre",
                 items: [
-                    "<strong>Dupliquer</strong> : crée une copie indépendante avec un nouvel ID, idéal pour créer une variante",
-                    "<strong>Exporter</strong> : télécharge l'élément en fichier JSON pour le partager ou le garder",
-                    "<strong>Ajouter</strong> : transfère un élément disponible vers ta sélection"
+                    "« Garder dans ma bibliothèque → » copie un élément de ce trimestre dans ta bibliothèque.",
+                    "« ← Utiliser dans ce trimestre » copie un élément de ta bibliothèque dans ce trimestre.",
+                    "Chaque colonne garde son propre exemplaire : ce que tu modifies dans ce trimestre ne change pas celui de ta bibliothèque."
                 ]
             },
             {
-                type: 'exemple',
-                titre: "Détection des doublons",
-                contenu: "Si tu vois un avertissement jaune « Doublons détectés », cela signifie que plusieurs éléments portent le même nom. Utilise les ID courts (#abc123) pour les distinguer et supprimer les copies inutiles."
+                type: 'liste',
+                titre: "Retirer ou supprimer (dans le menu ⋮)",
+                items: [
+                    "« Retirer de ce trimestre » : l'élément quitte le menu de l'écran, ses données restent. S'il est dans ta bibliothèque, « ← Utiliser dans ce trimestre » le ramène.",
+                    "« Supprimer définitivement » : l'élément est effacé de ce trimestre. Son exemplaire de ta bibliothèque reste.",
+                    "« Supprimer de ma bibliothèque » : l'exemplaire de ta bibliothèque est effacé ; ce trimestre n'est pas touché."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Les dossiers",
+                items: [
+                    "Au-dessus de ta bibliothèque, le menu « Tous les dossiers » n'en montre qu'un à la fois ; « Gérer les dossiers… » les crée et les renomme ; dans ⋮, « Classer dans » y range un élément."
+                ]
             }
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'construction-cartouches', 'construction-pratiques']
+    },
+
+    'bibliotheque-tampons-fonctionnement': {
+        // #1158 (retouche du lot 5) — la variante courte de la fenêtre des tampons, sur son bouton ⓘ
+        // seulement : le texte validé par Grégoire (25 oct. 2026, 18 h 42), mot pour mot. La palette et
+        // la bibliothèque des tampons sont communes à tous les trimestres : ni « Dans ce trimestre »,
+        // ni « Retirer ».
+        titre: "Comment fonctionne la bibliothèque des tampons",
+        sections: [
+            {
+                type: 'liste',
+                titre: "Deux colonnes",
+                items: [
+                    "« Dans ta palette » : les tampons que tu poses sur les copies, dans tous tes trimestres.",
+                    "« Dans ta bibliothèque » : les tampons que tu gardes de côté pour les retrouver plus tard."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Passer d'une colonne à l'autre",
+                items: [
+                    "« Garder dans ma bibliothèque → » copie un tampon de ta palette dans ta bibliothèque.",
+                    "« ← Utiliser dans ma palette » ajoute à ta palette un tampon de ta bibliothèque."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Les catégories",
+                items: [
+                    "Dans ta palette, les tampons sont rangés par catégorie. Le menu ⋮ d'une catégorie la garde tout entière dans ta bibliothèque, ou l'exporte."
+                ]
+            },
+            {
+                type: 'liste',
+                titre: "Supprimer",
+                items: [
+                    "« Supprimer de ma bibliothèque » (dans le menu ⋮) efface l'exemplaire de ta bibliothèque ; ta palette n'est pas touchée."
+                ]
+            }
+        ]
     },
 
     'evaluations-importer': {

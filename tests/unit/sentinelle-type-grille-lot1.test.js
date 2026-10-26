@@ -423,7 +423,6 @@ describe('lot 1 · E — le badge de composition ne lit JAMAIS `grille.type`', (
     it('E.a déclarée analytique, un critère passé en algorithmique : MIXTE', () => {
         const g = { type: 'analytique', criteres: [crit('1', 'analytique'), crit('2', 'algorithmique')] };
         expect(G.compositionGrille(g)).toBe('MIXTE');
-        expect(G.genererBadgeComposition(g)).toContain('>MIXTE<');
     });
 
     it('E.b déclarée analytique, critères tous holistiques : HOLIS — le badge dit ce qui est, pas ce qui est déclaré', () => {
@@ -432,7 +431,8 @@ describe('lot 1 · E — le badge de composition ne lit JAMAIS `grille.type`', (
 
     it('E.c déclarée, sans critère : rien — le type déclaré ne remplit pas le badge', () => {
         expect(G.compositionGrille({ type: 'analytique', criteres: [] })).toBe('');
-        expect(G.genererBadgeComposition({ type: 'analytique' })).toBe('');
+        // #1154 : le badge est parti ; la composition, elle, reste vide.
+        expect(G.compositionGrille({ type: 'analytique' })).toBe('');
     });
 });
 

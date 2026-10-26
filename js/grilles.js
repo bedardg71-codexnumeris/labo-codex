@@ -2122,7 +2122,7 @@ window.confirmerImportGrilles = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) grille(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} grille(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Grilles disponibles » pour les ajouter à ta sélection.');
+        details.push(ligneMasquee || 'Elles sont dans ta bibliothèque : « Utiliser dans ce trimestre » les ajoute à ce trimestre.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {
@@ -2206,6 +2206,7 @@ window.dupliquerEtEditerGrille = dupliquerEtEditerGrille;
 window.supprimerGrilleDefinitivement = supprimerGrilleDefinitivement;
 window.supprimerGrilleDeBibliothequePartagee = supprimerGrilleDeBibliothequePartagee;
 window.ajouterMesGrillesALaBibliotheque = ajouterMesGrillesALaBibliotheque;
+window.garderGrilleDansBibliotheque = garderGrilleDansBibliotheque;
 
 /* ===============================
    FONCTIONS SIDEBAR (Beta 80.5+)
@@ -2254,9 +2255,51 @@ async function afficherListeGrilles() {
 }
 
 /**
- * ✅ AJOUT (8 décembre 2025) : Afficher le modal de gestion de la bibliothèque de grilles
- * Permet d'ajouter/retirer des grilles de la barre latérale
- * Avec filtre par discipline
+ * #1154 (25 oct. 2026) — LA LIGNE EN CLAIR D'UNE RANGÉE : les types des critères en
+ * mots, le nombre de critères, l'auteur quand ce n'est pas l'utilisateur actif.
+ * Remplace les badges HOLIS / MIXTE et la ligne « 3 critère(s) • par … • discipline ».
+ * Texte brut : la fenêtre l'échappe.
+ */
+function ligneGrilleBibliotheque(grille, auteurActif) {
+    const criteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres.filter(Boolean) : [];
+    const parts = [];
+    const types = [];
+    criteres.forEach(c => { if (TYPES_GRILLE.includes(c.type) && !types.includes(c.type)) types.push(c.type); });
+    if (types.length) {
+        parts.push(types.map((t, i) => i === 0 ? getTypeCritereLabel(t) : getTypeCritereLabel(t).toLowerCase()).join(' et '));
+    }
+    parts.push(criteres.length + (criteres.length > 1 ? ' critères' : ' critère'));
+    // Le bloc CC d'abord, puis le champ racine (la lecture de l'ancien `formaterAttribution`, retiré au #1159).
+    const auteur = (grille.metadata_cc && grille.metadata_cc.auteur_original) || grille.auteur || '';
+    if (auteur && auteur !== auteurActif) parts.push('par ' + auteur);
+    return parts.join(' · ');
+}
+
+/**
+ * #1154 — L'aperçu qu'ouvre le nom d'une rangée : la description, puis les critères et le total.
+ * Les pondérations et le total disent les mots de l'éditeur (`texteDePonderationDuCritere`,
+ * `texteDuTotal`) ; le total est celui de l'éditeur (`etatPonderation`, la règle unique de #1149).
+ */
+function apercuGrilleBibliotheque(grille) {
+    const criteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres.filter(Boolean) : [];
+    const ponderation = etatPonderation(criteres);
+    const paragraphes = [grille.description || '', BibliothequeUI.formaterInspireDe(grille)];
+    if (!criteres.length) paragraphes.push('Aucun critère.');
+    return {
+        paragraphes: paragraphes,
+        lignes: criteres.map(c => [c.nom || 'Sans nom', c.type ? getTypeCritereLabel(c.type) : '', texteDePonderationDuCritere(c, ponderation.enPoints)]),
+        total: criteres.length ? ['Total', texteDuTotal(criteres, ponderation.total)] : null
+    };
+}
+
+// #1154 (verdict du 25 oct., § 5.2) — la relation entre une grille du trimestre et un exemplaire de
+// la bibliothèque (`id`, ou `idOriginal` après « ← Utiliser ») est UNE pour les deux colonnes et la
+// question de la suppression ; #1155 l'a montée dans `BibliothequeUI.lieeAExemplaire`, que les
+// échelles et les cartouches lisent aussi.
+
+/**
+ * Les données de la bibliothèque des grilles. #1154 : des rangées pour la fenêtre en
+ * deux colonnes (`BibliothequeUI.creerFenetreDeuxColonnes`), plus aucun HTML.
  */
 async function preparerDonneesBibliothequeGrilles() {
     const grilles = await db.get(cle('grillesTemplates')) || [];
@@ -2264,15 +2307,20 @@ async function preparerDonneesBibliothequeGrilles() {
     const grillesDansBibliotheque = BibliothequeUI.filtrerParModeDemo(
         grilles.filter(g => g.dansBibliotheque !== false)
     );
-    const grillesDisponibles = BibliothequeUI.filtrerParModeDemo(
-        await obtenirToutesLesGrillesBibliotheque()
-    );
+    const toutesBibliotheque = await obtenirToutesLesGrillesBibliotheque();
+    const grillesDisponibles = BibliothequeUI.filtrerParModeDemo(toutesBibliotheque);
     // #291 — `reunirSources` évite la fausse collision : la même grille vit
     // légitimement dans la sélection ET dans la Bibliothèque, avec
     // le même `id` (ajouterGrilleALaBibliotheque le conserve).
     const doublonsDetectes = analyserDoublons(
         reunirSources(grillesDansBibliotheque, grillesDisponibles), 'nom');
+    // #291 — la puce d'identifiant ne s'affiche que sur une rangée que le bandeau nomme.
+    const idsNommes = new Set();
+    doublonsDetectes.forEach(groupe => groupe.exemplaires.forEach(ex => idsNommes.add(ex.id)));
 
+    // « Aussi dans ta bibliothèque » : la relation de `BibliothequeUI.lieeAExemplaire`, la même que
+    // « Déjà dans ce trimestre » plus bas. Pas `dansBibliotheque`, qui veut dire « dans le menu
+    // de l'écran » sur une grille du trimestre.
     // #327 — dossiers de classement (couche par-dessus, range par identité).
     const repsGrilles = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
         ? window.repertoiresBibliotheque.obtenir('grilles')
@@ -2280,180 +2328,152 @@ async function preparerDonneesBibliothequeGrilles() {
     const repParGrille = {};
     repsGrilles.forEach(r => (r.itemIds || []).forEach(id => { repParGrille[id] = r.id; }));
 
-    // Section 1 : cartes pour les grilles dans la sélection
-    const cartesSection1 = grillesDansBibliotheque.map(grille => ({
-        nom: BibliothequeUI.formaterTitreDemo(echapperHtml(grille.nom || 'Sans titre'), BibliothequeUI.estItemDemo(grille)),
-        id: grille.id,
-        afficherId: true,
-        badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-        badgesPratiques: typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgeComposition(grille) : '',
-        metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
-            quantite: `${grille.criteres?.length || 0} critère(s)`,
-            discipline: true
-        }),
-        description: grille.description || '',
-        inspireDe: BibliothequeUI.formaterInspireDe(grille),
-        boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerGrilleBibliotheque', param: grille.id, classe: 'btn-confirmer', title: 'Créer une copie' },
-        actionsMenu: [
-            { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'grille', param2: grille.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-            { label: 'Retirer', action: 'retirerGrilleDeBibliotheque', param: grille.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
-            { label: 'Supprimer', action: 'supprimerGrilleDefinitivement', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-        ]
-    }));
+    const auteurActif = BibliothequeUI.obtenirAuteurActif();
 
-    // Section 2 : #327 — cartes à plat (le groupage par dossier se fait au rendu
-    // via repertoiresBibliotheque.grouper). Chaque carte porte au menu ⋮ les
-    // actions « Classer dans … » / « Retirer du dossier » selon son dossier courant.
-    const cartesSection2 = grillesDisponibles.map(grille => {
-        const dejaPresent = grilles.some(g => (g.id === grille.id || g.idOriginal === grille.id) && g.dansBibliotheque !== false);
+    const rangeesTrimestre = grillesDansBibliotheque.map(grille => {
+        const rangee = {
+            id: grille.id,
+            nom: BibliothequeUI.formaterTitre(grille.nom || 'Sans titre'),
+            ligne: ligneGrilleBibliotheque(grille, auteurActif),
+            afficherId: idsNommes.has(grille.id),
+            apercu: apercuGrilleBibliotheque(grille),
+            dansBibliotheque: toutesBibliotheque.some(ex => BibliothequeUI.lieeAExemplaire(grille, ex)),
+            menu: [
+                { label: 'Dupliquer', action: 'dupliquerGrilleBibliotheque', param: grille.id, title: 'Créer une copie' },
+                { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'grille', param2: grille.id, title: 'Générer un fichier .lcz signé à transmettre (#329)' },
+                { separateur: true },
+                { label: 'Retirer de ce trimestre', action: 'retirerGrilleDeBibliotheque', param: grille.id, classe: 'btn-supprimer', title: 'La grille quitte le menu de l\'écran ; ses données sont conservées' },
+                { label: 'Supprimer définitivement', action: 'supprimerGrilleDefinitivement', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+            ]
+        };
+        if (rangee.dansBibliotheque) {
+            rangee.etat = 'Aussi dans ta bibliothèque';
+        } else {
+            rangee.passage = { label: 'Garder dans ma bibliothèque', action: 'garderGrilleDansBibliotheque', param: grille.id, sens: 'versBibliotheque' };
+        }
+        return rangee;
+    });
+
+    // #327 — rangées à plat, chacune avec son dossier ; le menu de la barre filtre.
+    const rangeesBibliotheque = grillesDisponibles.map(grille => {
+        const dejaPresent = grilles.some(g => BibliothequeUI.lieeAExemplaire(g, grille) && g.dansBibliotheque !== false);
         const repCourant = repParGrille[grille.id] || null;
-        const actionsMenu = [];
+        const menu = [];
         repsGrilles.forEach(r => {
             if (r.id !== repCourant) {
-                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'grilles', param2: grille.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+                menu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'grilles', param2: grille.id, param3: r.id, title: 'Ranger dans ce dossier' });
             }
         });
         if (repCourant) {
-            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'grilles', param2: grille.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+            menu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'grilles', param2: grille.id, title: 'Sortir du dossier (repasse en non classées)' });
         }
-        actionsMenu.push({ label: 'Supprimer', action: 'supprimerGrilleDeBibliothequePartagee', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque', showAlways: true });
+        if (menu.length) menu.push({ separateur: true });
+        menu.push({ label: 'Supprimer de ma bibliothèque', action: 'supprimerGrilleDeBibliothequePartagee', param: grille.id, classe: 'btn-supprimer', title: 'Supprimer définitivement de la bibliothèque' });
 
-        return {
-            nom: BibliothequeUI.formaterTitreDemo(echapperHtml(grille.nom || 'Sans titre'), BibliothequeUI.estItemDemo(grille)),
-            libelle: BibliothequeUI.formaterTitre(grille.nom || 'Sans titre'),   // #467 : texte brut, pour le select des dossiers
+        const rangee = {
             id: grille.id,
-            afficherId: true,
-            badgeSource: BibliothequeUI.genererBadgeSource(grille, grillesDansBibliotheque),
-            badgesPratiques: (typeof GabaritsUtils !== 'undefined' ? GabaritsUtils.genererBadgeComposition(grille) : '') + genererBadgeGrilleDepistage(grille),
-            metadonnees: BibliothequeUI.formaterMetadonnees(grille, {
-                quantite: `${grille.criteres?.length || 0} critère(s)`,
-                discipline: true
-            }),
-            inspireDe: BibliothequeUI.formaterInspireDe(grille),
-            description: grille.description || '',
+            nom: BibliothequeUI.formaterTitre(grille.nom || 'Sans titre'),
+            ligne: ligneGrilleBibliotheque(grille, auteurActif),
+            afficherId: idsNommes.has(grille.id),
+            marqueHtml: genererBadgeGrilleDepistage(grille),
+            dossier: repCourant,
+            apercu: apercuGrilleBibliotheque(grille),
             dejaPresent: dejaPresent,
-            classeItem: 'grille-disponible-item',
-            boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterGrilleIndividuelle', param: grille.id, classe: 'btn-confirmer', title: 'Ajouter cette grille à ta sélection' },
-            actionsMenu: actionsMenu
+            menu: menu
         };
+        if (dejaPresent) {
+            rangee.etat = 'Déjà dans ce trimestre';
+        } else {
+            rangee.passage = { label: 'Utiliser dans ce trimestre', action: 'ajouterGrilleIndividuelle', param: grille.id, sens: 'versTrimestre' };
+        }
+        return rangee;
     });
 
-    return { cartesSection1, cartesSection2, doublonsDetectes, repsGrilles, grillesDansBibliotheque };
+    return { rangeesTrimestre, rangeesBibliotheque, doublonsDetectes, repsGrilles, grillesDansBibliotheque };
 }
 
 async function afficherBibliothequeGrilles() {
-    // #327 — enregistre la biblio « grilles » auprès du helper générique de
-    // répertoires (idempotent). Les items de Section 2 sont des cartes-config
-    // déjà libellées : labelItem lit leur .libelle (texte brut ; le .nom est du HTML
-    // échappé depuis #467, et le select l'échapperait une seconde fois).
+    // #327 — la biblio « grilles » auprès du moteur des dossiers (idempotent) : ses
+    // gestes (créer, renommer, classer…) redessinent la fenêtre par ce rappel.
     BibliothequeUI.repertoires.enregistrer('grilles', {
-        rafraichir: afficherBibliothequeGrilles,
-        ajouterItem: (id) => ajouterGrilleIndividuelle(id),
-        supprimerItem: (id) => supprimerGrilleDeBibliothequePartagee(id),
-        labelItem: (c) => c.libelle,
-        labelPluriel: 'grilles'
+        rafraichir: afficherBibliothequeGrilles
     });
 
     const data = await preparerDonneesBibliothequeGrilles();
 
-    // Section 1
-    let contenuSection1 = '';
-    if (data.cartesSection1.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille dans ta sélection</p>';
-    } else {
-        data.cartesSection1.forEach(carte => {
-            contenuSection1 += BibliothequeUI.renderCarteSelection(carte);
-        });
-    }
+    // #293 — « Masquer ce qui est déjà dans ce trimestre » (même préférence qu'avant).
+    const rangeesBibliotheque = BibliothequeUI.filtrerParDejaPresent(data.rangeesBibliotheque);
+    const toutesMasquees = data.rangeesBibliotheque.length > 0 && rangeesBibliotheque.length === 0;
+    const horsBibliotheque = data.rangeesTrimestre.filter(r => !r.dansBibliotheque).length;
 
-    // Boutons après Section 1
-    const boutonsApresSection1 = `
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
-            <button data-action="ajouterMesGrillesALaBibliotheque" class="btn btn-principal btn-mini">Ajouter mes grilles à la bibliothèque</button>
-            <button data-action="exporterGrilles" class="btn btn-secondaire btn-mini">Exporter toutes mes grilles (JSON)</button>
-            <button data-action="ouvrirFilePickerImportGrilles" class="btn btn-secondaire btn-mini">Importer des grilles (JSON)</button>
-            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">Importer un partage (.lcz)</button>
-            <input type="file" id="fichier-import-grilles-modal" accept=".json" style="display: none;" data-on-change="importerGrilles">
-        </div>`;
-
-    // Section import inter-trimestre (Brique C namespacing — pas 4, modèle COPIE).
-    // listerTrimestresAvecGrilles() ne retient que les trimestres ayant une COPIE
-    // PROPRE de grilles (clé namespacée <id>_grillesTemplates) = trimestres archivés
-    // (golden master). Les trimestres vivants partagent le catalogue global → rien à
-    // importer d'eux. Destination de la copie = trimestre ACTIF (cf. dupliquerGrillePartagee).
-    let sectionImportTrimestre = '';
+    // Brique C namespacing — pas 4, modèle COPIE. listerTrimestresAvecGrilles() ne
+    // retient que les trimestres ayant une COPIE PROPRE de grilles (trimestres archivés).
     const trimestresAvecGrilles = listerTrimestresAvecGrilles();
-    if (trimestresAvecGrilles.length > 0) {
-        sectionImportTrimestre = `
-            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre" aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h4>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <select id="selectTrimestreImportGrilles" class="controle-form" style="flex: 1; min-width: 200px;">
-                        <option value="">-- Choisir un trimestre --</option>
-                        ${trimestresAvecGrilles.map(t => `<option value="${echapperHtml(t.id)}">${echapperHtml(t.nom)} (${t.nombre} grille${t.nombre > 1 ? 's' : ''})</option>`).join('')}
-                    </select>
-                    <button data-action="afficherGrillesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les grilles</button>
-                    <button data-action="importerToutGrillesTrimestreModal" class="btn btn-principal btn-compact" data-tooltip="import-trimestre-tout-grilles">Tout importer</button>
-                </div>
-                <div id="previewGrillesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
-            </div>`;
-    }
 
-    // Filtres Section 2 : #327 — le filtre discipline est retiré (incohérent avec
-    // l'organisation par dossiers). La zone « Mes dossiers » (repliable) tient lieu
-    // de tête de section ; le toggle « masquer déjà présents » (#293) est conservé.
-    const filtresHTML = BibliothequeUI.repertoires.genererZone('grilles') +
-        BibliothequeUI.renderToggleMasquerDejaPresent('afficherBibliothequeGrilles');
-
-    // Section 2 — #293 (masquer déjà présents) puis #327 (groupage par dossier).
-    const cartesAffichables = BibliothequeUI.filtrerParDejaPresent(data.cartesSection2);
-    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
-
-    let contenuSection2 = '';
-    if (cartesAffichables.length === 0) {
-        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille disponible à ajouter</p>';
-    } else if (data.repsGrilles && data.repsGrilles.length === 0) {
-        // Aucun dossier → liste à plat (comportement d'origine)
-        cartesAffichables.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
-    } else {
-        // Dossier → select compact ; « Non classées » → cartes (ce qui reste à ranger).
-        const groupes = window.repertoiresBibliotheque.grouper(cartesAffichables, 'grilles');
-        groupes.forEach(g => {
-            const cleGroupe = g.id || '__nonclasse__';
-            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
-            contenuSection2 += enteteGroupe(g.titre);
-            if (g.id) {
-                contenuSection2 += BibliothequeUI.repertoires.renderLigneDossierSelect('grilles', g);
-            } else {
-                g.items.forEach(carte => { contenuSection2 += BibliothequeUI.renderCarteDisponible(carte); });
-            }
-            contenuSection2 += `</div>`;
-        });
-    }
-
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: 'modalBibliothequeGrilles',
         titre: 'Bibliothèque de grilles de critères',
-        sousTitre: 'Gère les grilles de critères de ta sélection.',
-        onFermer: 'fermerModalBibliothequeGrilles',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+        aide: 'bibliotheque-fonctionnement',
+        menuFichiers: [
+            { label: 'Importer des grilles', action: 'ouvrirFilePickerImportGrilles' },
+            { label: 'Importer le partage d\'une ou d\'un collègue', action: 'partageImport.ouvrirSelecteurFichier' },
+            { separateur: true },
+            { label: 'Exporter les grilles de ce trimestre', action: 'exporterGrilles' },
+            { note: 'Fichiers .json et .lcz' }
+        ],
+        champsFichier: [{ id: 'fichier-import-grilles-modal', accept: '.json', onChange: 'importerGrilles' }],
+        avantColonnes: BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
             itemsSelection: data.grillesDansBibliotheque,
+            mots: { selection: 'Dans ce trimestre', bibliotheque: 'Dans ta bibliothèque', retirer: 'Retirer de ce trimestre (données conservées)' },
             actions: {
                 retirer: 'retirerGrilleDeBibliotheque',
                 supprimer: 'supprimerGrilleDefinitivement',
                 supprimerPartagee: 'supprimerGrilleDeBibliothequePartagee'
             }
         }),
-        titreSection1: 'Grilles dans ta sélection',
-        contenuIdListe1: 'listeGrillesDansBibliotheque',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: boutonsApresSection1,
-        sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Grilles disponibles à ajouter à ta sélection',
-        filtresSection2: filtresHTML,
-        contenuIdListe2: 'listeGrillesDisponibles',
-        contenuSection2: contenuSection2,
-        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('grille') : ''
+        trimestre: {
+            titre: 'Dans ce trimestre',
+            phrase: 'Les grilles que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+            idListe: 'listeGrillesDansBibliotheque',
+            rangees: data.rangeesTrimestre,
+            vide: 'Aucune grille dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle grille ».',
+            boutonEntete: horsBibliotheque >= 2
+                ? { label: 'Tout garder dans ma bibliothèque', action: 'ajouterMesGrillesALaBibliotheque' }
+                : null,
+            importAutreTrimestre: {
+                titre: 'Importer depuis un autre trimestre',
+                selectId: 'selectTrimestreImportGrilles',
+                apercuId: 'previewGrillesTrimestre',
+                options: trimestresAvecGrilles.map(t => ({ value: t.id, label: `${t.nom} (${t.nombre} grille${t.nombre > 1 ? 's' : ''})` })),
+                actionVoir: 'afficherGrillesTrimestreModal',
+                libelleVoir: 'Voir les grilles',
+                actionTout: 'importerToutGrillesTrimestreModal',
+                tooltipTout: 'import-trimestre-tout-grilles',
+                aide: 'import-autre-trimestre'
+            }
+        },
+        bibliotheque: {
+            titre: 'Dans ta bibliothèque',
+            // La seconde phrase de l'ébauche (« C'est d'ici que tu peux les partager. ») est retirée : le ⋮ de
+            // cette colonne n'a pas de geste de partage aujourd'hui (il est sur la rangée du trimestre), et le
+            // lot n'en crée pas. Soumis à Grégoire par la demande de relecture.
+            phrase: 'Les grilles que tu gardes pour tous tes trimestres.',
+            idListe: 'listeGrillesDisponibles',
+            compte: data.rangeesBibliotheque.length,
+            rangees: rangeesBibliotheque,
+            vide: toutesMasquees
+                ? 'Toutes les grilles de ta bibliothèque sont déjà dans ce trimestre.'
+                : 'Ta bibliothèque est vide. Garde-y une grille de ce trimestre pour la retrouver plus tard.',
+            videFiltre: 'Aucune grille dans ce dossier.',
+            dossiers: {
+                biblio: 'grilles',
+                reps: data.repsGrilles.map(r => ({ id: r.id, nom: r.nom })),
+                refreshFn: 'afficherBibliothequeGrilles',
+                masquerLibelle: 'Masquer ce qui est déjà dans ce trimestre',
+                labelPluriel: 'grilles'
+            },
+            partages: window.partageSection ? partageSection.rangeesDeuxColonnes('grille') : null
+        }
     });
 }
 
@@ -2548,27 +2568,28 @@ function afficherGrillesTrimestreModal() {
 
     const grilles = db.getSync(cleSource('grillesTemplates', srcId), []) || [];
     if (grilles.length === 0) {
-        preview.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucune grille trouvée.</p>';
+        preview.innerHTML = '<p class="biblio2-phrase">Aucune grille trouvée.</p>';
         preview.classList.remove('u-hide');
         return;
     }
 
-    let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
+    // #1154 — l'aperçu vit dans la fenêtre en deux colonnes : des classes, aucun style en ligne.
+    let html = '<ul class="biblio2-import-liste">';
     grilles.forEach(grille => {
         const nbCriteres = Array.isArray(grille.criteres) ? grille.criteres.length : 0;
         html += `
-            <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
+            <li class="biblio2-import-rangee">
                 <div>
                     <strong>${echapperHtml(grille.nom || 'Sans titre')}</strong>
-                    <br><small style="color: var(--gris-moyen);">${nbCriteres} critère${nbCriteres > 1 ? 's' : ''}</small>
+                    <p class="biblio2-rangee-meta">${nbCriteres} critère${nbCriteres > 1 ? 's' : ''}</p>
                 </div>
-                <button data-action="importerUneGrilleTrimestre" data-param="${echapperHtml(srcId)}" data-param2="${echapperHtml(grille.id)}" class="btn btn-confirmer btn-tres-compact">
+                <button type="button" data-action="importerUneGrilleTrimestre" data-param="${echapperAttribut(srcId)}" data-param2="${echapperAttribut(grille.id)}" class="btn btn-secondaire">
                     Importer
                 </button>
-            </div>
+            </li>
         `;
     });
-    html += '</div>';
+    html += '</ul>';
 
     preview.innerHTML = html;
     preview.classList.remove('u-hide');
@@ -2707,7 +2728,7 @@ async function ajouterGrilleIndividuelle(id) {
         if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('grillesTemplates'));   // lot F : geste hors témoin (ajouterGrilleIndividuelle)
 
         if (nomEnConflit) {
-            alert(`« ${nomEnConflit} » est déjà dans ta sélection.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
+            alert(`« ${nomEnConflit} » est déjà dans ce trimestre.\n\nPour en avoir un second exemplaire, utilise « Dupliquer ».`);
             return;
         }
         if (sourceIntrouvable) {
@@ -2733,7 +2754,7 @@ async function ajouterGrilleIndividuelle(id) {
             return;
         }
 
-        notifications.succes('Grille ajoutée à ta sélection !');
+        notifications.succes('Grille ajoutée à ce trimestre !');
     } catch (error) {
         console.error('Erreur lors de l\'ajout:', error);
         alert('Erreur lors de l\'ajout de la grille');
@@ -2929,6 +2950,9 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
     }
 
     const utilisation = await verifierUtilisationGrille(grilleId);
+    // #1154 — lue AVANT le codex, pour les deux questions : rien ne s'intercale entre son appel
+    // et la question (sentinelle #1007).
+    const phraseBibliotheque = await _phraseExemplaireDeBibliotheque(grille);
 
     if (utilisation.utilisee) {
         const autresGrilles = grilles.filter(g => g.id !== grilleId);
@@ -2949,7 +2973,7 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
         }
 
         message += 'Ces cartouches deviendraient introuvables si la grille partait sans elles.\n\n';
-        message += 'Veux-tu les déplacer vers une autre grille ?';
+        message += 'Veux-tu les déplacer vers une autre grille ?' + phraseBibliotheque;
 
         // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
         if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('grille'))) return false;
@@ -3013,7 +3037,7 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
 
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('grille'))) return false;
-    if (!confirm(`Supprimer la grille « ${nomGrille} » ?`)) return false;
+    if (!confirm(`Supprimer la grille « ${nomGrille} » ?${phraseBibliotheque}`)) return false;
 
     const supprimee = await _retirerGrilleDeLaListe(grilleId, options);
     if (supprimee) {
@@ -3021,6 +3045,19 @@ async function supprimerGrilleAvecPorteDeSortie(grilleId, options = {}) {
         notifications.succes(`Grille « ${nomGrille} » supprimée`);
     }
     return supprimee;
+}
+
+/**
+ * #1154 (25 oct. 2026, décision de Grégoire) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE, ET LES
+ * DEUX QUESTIONS DE LA SUPPRESSION (avec ou sans cartouches) LE DISENT quand il y en a un, selon
+ * la relation des deux colonnes (`BibliothequeUI.lieeAExemplaire`). Aucun des quatre appelants de
+ * `supprimerGrilleAvecPorteDeSortie` ne le retire : la phrase est vraie par tous les chemins.
+ * @returns {Promise<string>} la phrase, précédée d'une ligne vide, ou ''.
+ */
+async function _phraseExemplaireDeBibliotheque(grille) {
+    if (typeof obtenirToutesLesGrillesBibliotheque !== 'function') return '';
+    const biblio = await obtenirToutesLesGrillesBibliotheque();
+    return biblio.some(ex => BibliothequeUI.lieeAExemplaire(grille, ex)) ? '\n\nSon exemplaire de ta bibliothèque reste.' : '';
 }
 
 /**
@@ -3059,13 +3096,14 @@ async function supprimerGrilleDefinitivement(id) {
     // l'enseignant sans autre recours que de les supprimer une a une. Il passe
     // desormais par le chemin unique, qui bloque, NOMME les cartouches, et offre de
     // les deplacer vers une autre grille.
+    //
+    // #1154 (25 oct. 2026, décision de Grégoire) — L'EXEMPLAIRE DE LA BIBLIOTHÈQUE RESTE. Ce
+    // chemin le retirait aussi, sans le dire ; la fenêtre en deux colonnes présente deux
+    // exemplaires séparés, et « Utiliser dans ce trimestre » ramène la grille (sous un
+    // identifiant neuf qui nomme sa source, `idOriginal` : mesuré au banc #1154).
+    // Stock : les grilles déjà supprimées ont perdu le leur ; rien ne se répare.
     await supprimerGrilleAvecPorteDeSortie(id, {
         apres: async () => {
-            // Le store partage n'est pas touche par le chemin unique : il ne connait
-            // que la collection locale. On le retire ici, apres la suppression.
-            if (typeof retirerGrilleDeLaBibliotheque === 'function') {
-                await retirerGrilleDeLaBibliotheque(id);
-            }
             fermerModalBibliothequeGrilles();
             await afficherListeGrilles();
             await afficherBibliothequeGrilles();
@@ -3131,6 +3169,38 @@ async function ajouterMesGrillesALaBibliotheque() {
     } catch (error) {
         console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
         alert('Erreur lors de l\'ajout des grilles à la bibliothèque.');
+    }
+}
+
+/**
+ * #1154 — « Garder dans ma bibliothèque → » : pour UNE grille, ce que « Tout garder dans
+ * ma bibliothèque » fait pour toutes — la même écriture (`importerGrillesDansBibliotheque`).
+ * Sans la confirmation du geste groupé : il n'ajoute qu'un exemplaire, qui se supprime
+ * d'un geste.
+ * @param {string} id - ID de la grille du trimestre
+ */
+async function garderGrilleDansBibliotheque(id) {
+    try {
+        const grilles = await db.get(cle('grillesTemplates')) || [];
+        const grille = grilles.find(g => g.id === id);
+        if (!grille) {
+            alert('Grille introuvable');
+            return;
+        }
+
+        const resultat = await importerGrillesDansBibliotheque([grille]);
+
+        fermerModalBibliothequeGrilles();
+        await afficherBibliothequeGrilles();
+
+        if (resultat.ajoutees > 0) {
+            notifications.succes('Grille ajoutée à la bibliothèque !');
+        } else {
+            notifications.info('Cette grille était déjà dans la bibliothèque.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'ajout à la bibliothèque:', error);
+        alert('Erreur lors de l\'ajout de la grille à la bibliothèque.');
     }
 }
 

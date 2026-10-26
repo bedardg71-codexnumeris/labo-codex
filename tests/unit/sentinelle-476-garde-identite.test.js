@@ -159,7 +159,8 @@ describe('#476 · les cinq points d\'écriture sont gardés', () => {
             // ⚠ TOUTES les occurrences, pas la première : `pratiques-gestion.js`
             // porte d'abord un message générique sans nom, et le refus nommé
             // vient après. Chercher la première aurait rendu un faux rouge.
-            const positions = [...src.matchAll(/est déjà dans ta sélection/g)].map((m) => m.index);
+            // #1154 : la fenêtre des grilles, en deux colonnes, dit « ce trimestre » ; les autres, « ta sélection ».
+            const positions = [...src.matchAll(/est déjà dans (?:ta sélection|ce trimestre)/g)].map((m) => m.index);
             expect(positions.length, `${fichier} : message de refus absent`).toBeGreaterThan(0);
 
             const noms = [];

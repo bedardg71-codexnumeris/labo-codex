@@ -276,107 +276,77 @@ async function reprendreCoursDansTrimestreActif(coursId) {
    =============================== */
 
 /**
- * Ouvre le modal de la bibliothèque de cours
+ * Ouvre la bibliothèque des cours.
  *
- * FONCTIONNEMENT:
- * - Section 1 : Cours dans ma sélection (dansBibliotheque === true)
- * - Section 2 : Cours disponibles à ajouter (dansBibliotheque === false)
- * - Boutons simplifiés (sans export/import avec métadonnées CC)
+ * #1159 (lot 6, 25 oct. 2026) — une seule liste ; les fiches mises de côté
+ * (`dansBibliotheque === false`) en bas, sous « Mis de côté (n) », replié. Mots et forme
+ * validés par Grégoire (25 oct., 16 h 56). « Mettre de côté » remplace « Retirer de ma
+ * sélection » et « Déposer dans les cours disponibles » : il prend l'action du premier ;
+ * le second écrivait en plus des métadonnées Creative Commons sur la fiche, que plus rien
+ * n'écrit (`partagerCours`, retiré).
  *
  * NOTE: Contrairement aux productions/grilles, les cours ne nécessitent
  * PAS de métadonnées CC car il s'agit de données ministérielles publiques
  */
 async function ouvrirModalBibliothequeCours() {
     const tousLesCours = await db.get('cours') || [];
-    // #458 : « ta sélection » tolère le champ ABSENT (fiche née en cours de
-    // session avant que la migration de boot pose le drapeau, ou tout futur
-    // chemin de création qui l'oublierait). Seul un retrait EXPLICITE
-    // (dansBibliotheque === false) envoie une fiche dans « disponibles » —
-    // une fiche ne doit jamais être invisible des DEUX sections.
+    // #458 : la liste tolère le champ ABSENT (fiche née en cours de session avant que la
+    // migration de boot pose le drapeau, ou tout futur chemin de création qui l'oublierait).
+    // Seul un retrait EXPLICITE (dansBibliotheque === false) la met de côté — une fiche ne
+    // doit jamais être invisible des DEUX groupes.
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque !== false);
     const coursDisponibles = tousLesCours.filter(c => c.dansBibliotheque === false);
 
-    // Phase C #267 — migration vers BibliothequeUI (carte + menu ⋮)
-    let contenuSection1 = '';
-    if (coursDansBibliotheque.length === 0) {
-        contenuSection1 = '<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours dans ta sélection</p>';
-    } else {
-        coursDansBibliotheque.forEach(cours => {
-            const actifBadge = cours.actif ? '<span class="badge-info" style="margin-left: 10px;">Actif</span>' : '';
-            const titre = (cours.nature === 'service'
-                ? echapperHtml(cours.nomCours) + ' - ' + motNature(cours) // le mot vient du point unique (js/mots-nature.js, 12 sept. 2026)
-                : echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours)) + actifBadge;
-            const ens = (echapperHtml(cours.prenomEnseignant || '') + ' ' + echapperHtml(cours.nomEnseignant || '')).trim();
-            const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
-            const meta = [ens, sess].filter(Boolean).join(' • ');
-            contenuSection1 += BibliothequeUI.renderCarteSelection({
-                nom: titre,
-                id: cours.id,
-                badgeSource: '',
-                metadonnees: meta,
-                description: cours.competence || '',
-                boutonPrincipal: { label: 'Reprendre dans ce trimestre', action: 'reprendreCoursDansTrimestreActif', param: cours.id, classe: 'btn-confirmer', title: 'Créer un groupe-cours pour ce cours dans le trimestre actif (sans dupliquer le cours)' },
-                // #449 : le réversible et le définitif coexistent — l'écart
-                // se voit (libellés + seule la suppression est en rouge).
-                actionsMenu: [
-                    // #468/CT-13 : « Exporter » téléchargeait ZÉRO fichier — il
-                    // déposait la fiche dans « à ajouter » et la sortait de la
-                    // sélection, sans le dire. Les deux gestes existent
-                    // maintenant côte à côte, chacun sous son vrai nom.
-                    { label: 'Exporter', action: 'exporterUnCours', param: cours.id, classe: 'btn-secondaire', title: 'Télécharger ce cours en JSON (fichier à partager)' },
-                    { label: 'Déposer dans les cours disponibles', action: 'partagerCours', param: cours.id, classe: 'btn-secondaire', title: 'Réversible : la fiche quitte ta sélection et rejoint « Cours disponibles à ajouter », avec ses métadonnées Creative Commons' },
-                    { label: 'Retirer de ma sélection', action: 'retirerCoursDeBibliotheque', param: cours.id, classe: 'btn-secondaire', title: 'Réversible : la fiche reste disponible dans « à ajouter »' },
-                    { label: 'Supprimer la fiche', action: 'supprimerFicheCours', param: cours.id, classe: 'btn-supprimer', title: 'Définitif, TOUS les trimestres — refusé si le cours porte des données' }
-                ]
-            });
-        });
-    }
+    const nomCours = (cours) => cours.nature === 'service'
+        ? (cours.nomCours || '') + ' - ' + motNature(cours) // le mot vient du point unique (js/mots-nature.js, 12 sept. 2026)
+        : (cours.codeCours || '') + ' - ' + (cours.nomCours || '');
+    const apercu = (cours) => cours.competence ? { paragraphes: [cours.competence] } : null;
 
-    const boutonsApresSection1 = '<div style="text-align: center; margin-top: 15px;">' +
-        '<button data-action="partagerTousLesCours" class="btn btn-secondaire" title="Exporter tous tes cours en un seul fichier JSON">Exporter tous mes cours</button>' +
-        '</div>';
+    const rangees = coursDansBibliotheque.map(cours => {
+        const ens = ((cours.prenomEnseignant || '') + ' ' + (cours.nomEnseignant || '')).trim();
+        const sess = (cours.session || '') + (cours.annee || '');
+        return {
+            id: cours.id,
+            nom: nomCours(cours),
+            ligne: [cours.actif ? 'Actif' : '', ens, sess].filter(Boolean).join(' • '),
+            apercu: apercu(cours),
+            passage: { label: 'Reprendre dans ce trimestre', action: 'reprendreCoursDansTrimestreActif', param: cours.id, title: 'Créer un groupe-cours pour ce cours dans le trimestre actif (sans dupliquer le cours)' },
+            // #449 : le réversible et le définitif coexistent — l'écart se voit (seule la
+            // suppression est en rouge).
+            menu: [
+                // #468/CT-13 : « Exporter » télécharge un fichier, rien d'autre.
+                { label: 'Exporter', action: 'exporterUnCours', param: cours.id, title: 'Télécharger ce cours en JSON (fichier à partager)' },
+                { label: 'Mettre de côté', action: 'retirerCoursDeBibliotheque', param: cours.id },
+                { separateur: true },
+                { label: 'Supprimer la fiche', action: 'supprimerFicheCours', param: cours.id, classe: 'btn-supprimer', title: 'Définitif, TOUS les trimestres — refusé si le cours porte des données' }
+            ]
+        };
+    });
 
-    let contenuSection2 = '';
-    if (coursDisponibles.length === 0) {
-        contenuSection2 = '<p class="text-muted" style="font-style: italic; padding: 20px 0;">Aucun cours disponible</p>';
-    } else {
-        coursDisponibles.forEach(cours => {
-            const titre = cours.nature === 'service'
-                ? echapperHtml(cours.nomCours) + ' - ' + motNature(cours) // le mot vient du point unique (js/mots-nature.js, 12 sept. 2026)
-                : echapperHtml(cours.codeCours) + ' - ' + echapperHtml(cours.nomCours);
-            const sess = echapperHtml((cours.session || '') + (cours.annee || ''));
-            contenuSection2 += BibliothequeUI.renderCarteDisponible({
-                nom: titre,
-                id: cours.id,
-                badgeSource: '',
-                metadonnees: sess,
-                description: cours.competence || '',
-                dejaPresent: false,
-                boutonPrincipal: { label: 'Ajouter à ma sélection', action: 'ajouterCoursIndividuel', param: cours.id, classe: 'btn-confirmer', title: 'Ajouter ce cours à ta sélection' },
-                // #449 : une fiche déjà hors sélection se supprime aussi d'ici.
-                actionsMenu: [
-                    { label: 'Supprimer la fiche', action: 'supprimerFicheCours', param: cours.id, classe: 'btn-supprimer', title: 'Définitif, TOUS les trimestres — refusé si le cours porte des données' }
-                ]
-            });
-        });
-        contenuSection2 += '<div style="text-align: center; margin-top: 15px;">' +
-            '<button data-action="ouvrirFilePickerImportCours" class="btn btn-confirmer" title="Importer des cours depuis un fichier JSON">Importer des cours</button>' +
-            '<input type="file" id="fichier-import-cours-modal" accept=".json" style="display: none;" data-on-change="importerCoursSimple">' +
-            '</div>';
-    }
+    const rangeesDeCote = coursDisponibles.map(cours => ({
+        id: cours.id,
+        nom: nomCours(cours),
+        ligne: (cours.session || '') + (cours.annee || ''),
+        apercu: apercu(cours),
+        passage: { label: 'Remettre dans mes cours', action: 'ajouterCoursIndividuel', param: cours.id },
+        // #449 : une fiche mise de côté se supprime aussi d'ici.
+        menu: [
+            { label: 'Supprimer la fiche', action: 'supprimerFicheCours', param: cours.id, classe: 'btn-supprimer', title: 'Définitif, TOUS les trimestres — refusé si le cours porte des données' }
+        ]
+    }));
 
-    BibliothequeUI.creerModal({
+    BibliothequeUI.creerFenetreListe({
         modalId: 'modalBibliothequeCours',
         titre: 'Bibliothèque de cours',
-        sousTitre: 'Gère tes configurations de cours',
-        onFermerAction: 'fermerModalBibliothequeCours',
-        doublonsHTML: '',
-        titreSection1: 'Cours dans ta sélection (' + coursDansBibliotheque.length + ')',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: boutonsApresSection1,
-        titreSection2: 'Cours disponibles à ajouter',
-        filtresSection2: '',
-        contenuSection2: contenuSection2
+        phrase: 'Gère tes configurations de cours',
+        menuFichiers: [
+            { label: 'Importer des cours', action: 'ouvrirFilePickerImportCours', title: 'Importer des cours depuis un fichier JSON' },
+            { separateur: true },
+            { label: 'Exporter tous mes cours', action: 'partagerTousLesCours', title: 'Exporter tous tes cours en un seul fichier JSON' }
+        ],
+        champsFichier: [{ id: 'fichier-import-cours-modal', accept: '.json', onChange: 'importerCoursSimple' }],
+        liste: { vide: 'Aucun cours pour l\'instant.', rangees },
+        repli: { titre: 'Mis de côté', rangees: rangeesDeCote }
     });
 }
 
@@ -385,6 +355,17 @@ async function ouvrirModalBibliothequeCours() {
  */
 function fermerModalBibliothequeCours() {
     BibliothequeUI.fermerModal('modalBibliothequeCours');
+}
+
+/**
+ * #1159 — la bibliothèque ouverte se redessine après « Mettre de côté » et « Remettre dans mes
+ * cours » : la rangée passe d'un groupe à l'autre sous les yeux (même geste que les trimestres).
+ * Fermée, elle reste fermée.
+ */
+async function rafraichirBibliothequeCours() {
+    if (!document.getElementById('modalBibliothequeCours')) return;
+    fermerModalBibliothequeCours();
+    await ouvrirModalBibliothequeCours();
 }
 
 /**
@@ -405,8 +386,8 @@ async function retirerCoursDeBibliotheque(id) {
 
     if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (retirer un cours de ma sélection)
-        fermerModalBibliothequeCours();
-        notifications.succes('Cours retiré de ta sélection');
+        await rafraichirBibliothequeCours();
+        notifications.succes('Cours mis de côté.');   // #1159 : mots de Cowork (verdict du lot 6, § 2.1)
     }
 }
 
@@ -608,8 +589,8 @@ async function ajouterCoursIndividuel(id) {
 
     if (ecrite) {
         if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (ajouter un cours à ma sélection)
-        fermerModalBibliothequeCours();
-        notifications.succes('Cours ajouté à ta sélection avec succès !');
+        await rafraichirBibliothequeCours();
+        notifications.succes('Cours remis dans tes cours.');   // #1159 : mots de Cowork (verdict du lot 6, § 2.1)
     }
 }
 
@@ -773,65 +754,6 @@ async function importerCoursSimple(eventOuEl) {
    =============================== */
 
 /**
- * Partage un cours individuel avec métadonnées Creative Commons
- *
- * FONCTIONNEMENT:
- * 1. Demande les métadonnées CC enrichies à l'utilisateur
- * 2. Marque le cours comme partagé (dansBibliotheque = false)
- * 3. Ajoute les métadonnées CC au cours
- * 4. Rafraîchit le modal et la sidebar
- *
- * @param {string} id - ID du cours à partager
- */
-async function partagerCours(id) {
-    try {
-        const cours = await db.get('cours') || [];
-        const coursAPartager = cours.find(c => c.id === id);
-
-        if (!coursAPartager) {
-            notifications.erreur('Cours introuvable');
-            return;
-        }
-
-        // Demander métadonnées CC enrichies
-        const nomAffiche = `${coursAPartager.codeCours} - ${coursAPartager.nomCours}`;
-        const metadata = await demanderMetadonneesEnrichies('cours', nomAffiche);
-        if (!metadata) {
-            return; // Annulé par l'utilisateur
-        }
-
-        // Marquer comme partagé (retirer de ma sélection) : dans la file, plus bas.
-        // #468/CT-13 : `actif` suit, comme dans retirerCoursDeBibliotheque — un
-        // cours qui a quitté la sélection ne peut pas rester le cours actif.
-        // #522 lot 5 : la question est posée sur la liste lue plus haut ; l'écriture
-        // relit DANS la file — ce qui s'est enregistré pendant la question reste.
-        const ecrite = await db.modifier('cours', (lus) => {
-            const liste = lus || [];
-            const cible = liste.find(c => c.id === id);
-            if (!cible) return undefined;
-            cible.dansBibliotheque = false;
-            cible.actif = false;
-            cible.metadata_cc = metadata;   // Ajouter métadonnées CC
-            return liste;
-        }, []);
-        if (!ecrite) {
-            notifications.erreur('Cours introuvable');
-            return;
-        }
-        if (window.annoncerEcritureUsager) window.annoncerEcritureUsager('cours');   // lot F : geste hors témoin (déposer un cours)
-
-        // Rafraîchir modal
-        fermerModalBibliothequeCours();
-        await ouvrirModalBibliothequeCours();
-
-        notifications.succes('Cours partagé avec succès !', 'Il est maintenant disponible dans la section "Cours disponibles à ajouter".');
-    } catch (error) {
-        console.error('Erreur lors du partage:', error);
-        notifications.erreur('Erreur lors du partage du cours');
-    }
-}
-
-/**
  * Partage tous les cours de la sélection avec métadonnées Creative Commons
  *
  * FONCTIONNEMENT:
@@ -844,7 +766,7 @@ async function partagerTousLesCours() {
     const coursDansBibliotheque = tousLesCours.filter(c => c.dansBibliotheque === true);
 
     if (coursDansBibliotheque.length === 0) {
-        notifications.info('Aucun cours à partager dans ta sélection');
+        notifications.info('Aucun cours à exporter.');   // #1159 : plus de « ta sélection » (verdict du lot 6, § 2.1)
         return;
     }
 
@@ -1059,7 +981,6 @@ window.supprimerFicheCours = supprimerFicheCours;
 window.ajouterCoursIndividuel = ajouterCoursIndividuel;
 window.exporterUnCours = exporterUnCours;
 window.importerCoursSimple = importerCoursSimple;
-window.partagerCours = partagerCours;
 window.partagerTousLesCours = partagerTousLesCours;
 window.ouvrirFilePickerImportCours = ouvrirFilePickerImportCours;
 

@@ -14,6 +14,14 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // (handlers paramétrés par `biblio`, ids préfixés rep-pratiques-*). Mêmes
 // comportements vérifiés, sélecteurs mis à jour.
 
+//
+// ↻ #1156 (25 oct. 2026) — RÉANCRÉ : la zone « Mes dossiers » repliable (`genererZone`, `basculer`) est retirée
+// avec la fenêtre d'avant. La gestion des dossiers vit dans la barre de « Dans ta bibliothèque » : cachée
+// d'abord, ouverte par « Gérer les dossiers… » (le menu des dossiers), refermée par « Fermer ». Mêmes
+// comportements éprouvés : le champ de création, le message « aucun dossier », un dossier créé apparaît au
+// ré-affichage (renommable, supprimable), et le dépliage suit le geste.
+// BREAK-TEST (25 oct.) : `zone.hidden = false` retiré de `BibliothequeUI.ouvrirGestionDossiers` → ROUGE.
+
 const patternsAttendus = [
     /version\.json.*access control/i,
     /Cross origin requests are only supported/i,
@@ -34,7 +42,7 @@ function brancherErreurs(page, erreurs) {
     });
 }
 
-test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît', async ({ page }) => {
+test('L1 · la gestion des dossiers se rend et un répertoire créé apparaît', async ({ page }) => {
     const erreurs = [];
     brancherErreurs(page, erreurs);
 
@@ -52,49 +60,41 @@ test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît',
 
         // Partir d'une collection vide (état déterministe)
         window.db.setSync('repertoiresBibliotheques', []);
+        window.BibliothequeUI.repertoires.poserDeplie('pratiques', false);
 
-        // 1er rendu : zone présente, champ de création, message « aucun dossier »
+        // 1er rendu : la gestion, son champ de création, le message « aucun dossier »
         await window.afficherBibliothequePratiques();
-        const modal = document.getElementById('modalBibliothequePratiques');
-        const html1 = modal ? modal.innerHTML : '';
-        const aZone = html1.includes('Mes dossiers');
+        const zone = () => document.getElementById('modalBibliothequePratiques-dossiers');
+        const aZone = !!zone() && zone().textContent.includes('Mes dossiers');
         const aChampCreation = !!document.getElementById('rep-pratiques-nouveau-nom');
-        const aMessageVide = html1.includes('Aucun dossier');
+        const aMessageVide = !!zone() && zone().textContent.includes('Aucun dossier');
 
         // Création via le module + ré-affichage (simule le handler)
         const cree = window.repertoiresBibliotheque.creer('Essais L1', 'pratiques');
         await window.afficherBibliothequePratiques();
         const modal2 = document.getElementById('modalBibliothequePratiques');
-        const champRenomme = modal2
-            ? modal2.querySelector('input[data-rep-id="' + cree.id + '"]')
-            : null;
-        // #327 — supprimer(biblio, repId) : biblio=param, repId=param2.
+        const champRenomme = modal2 ? modal2.querySelector('input[data-rep-id="' + cree.id + '"]') : null;
         const aBoutonSupprimer = !!(modal2 && modal2.querySelector('[data-action="BibliothequeUI.repertoires.supprimer"][data-param2="' + cree.id + '"]'));
 
-        // #320 — zone repliable. Ici le dossier a été créé via le module (pas le
-        // handler), donc l'état de dépliage reste à son défaut : avec 1 dossier,
-        // la zone est REPLIÉE. Le toggle doit la déplier.
-        const aBoutonBascule = !!document.querySelector('[data-action="BibliothequeUI.repertoires.basculer"]');
-        const contenu = document.getElementById('rep-pratiques-zone-contenu');
-        const replieParDefaut = contenu ? getComputedStyle(contenu).display === 'none' : null;
-        window.BibliothequeUI.repertoires.basculer('pratiques');
-        const deplieApresToggle = contenu ? getComputedStyle(contenu).display !== 'none' : null;
+        // Cachée par défaut ; « Gérer les dossiers… » l'ouvre, « Fermer » la referme
+        const repliee = zone().hidden === true;
+        const select = document.querySelector('#modalBibliothequePratiques .biblio2-barre select');
+        const aOptionGerer = !!select && [...select.options].some(o => o.value === '__gerer__');
+        select.value = '__gerer__';
+        window.BibliothequeUI.choisirDossier('modalBibliothequePratiques', select);
+        const ouverteApresGeste = zone().hidden === false;
+        const filtreIntact = select.value === '__tous__';
+        window.BibliothequeUI.fermerGestionDossiers('modalBibliothequePratiques');
+        const fermeeApresFermer = zone().hidden === true;
 
-        // Les handlers génériques existent et sont branchés
         const aHandlers = typeof window.BibliothequeUI.repertoires.creer === 'function'
             && typeof window.BibliothequeUI.repertoires.renommer === 'function'
             && typeof window.BibliothequeUI.repertoires.supprimer === 'function';
 
         return {
-            aZone,
-            aChampCreation,
-            aMessageVide,
+            aZone, aChampCreation, aMessageVide,
             valeurChamp: champRenomme ? champRenomme.value : null,
-            aBoutonSupprimer,
-            aBoutonBascule,
-            replieParDefaut,
-            deplieApresToggle,
-            aHandlers
+            aBoutonSupprimer, repliee, aOptionGerer, ouverteApresGeste, filtreIntact, fermeeApresFermer, aHandlers
         };
     });
 
@@ -104,9 +104,11 @@ test('L1 · zone « Mes dossiers » se rend et un répertoire créé apparaît',
     expect(resultat.aMessageVide).toBe(true);
     expect(resultat.valeurChamp).toBe('Essais L1');
     expect(resultat.aBoutonSupprimer).toBe(true);
-    expect(resultat.aBoutonBascule).toBe(true);
-    expect(resultat.replieParDefaut).toBe(true);
-    expect(resultat.deplieApresToggle).toBe(true);
+    expect(resultat.repliee).toBe(true);
+    expect(resultat.aOptionGerer).toBe(true);
+    expect(resultat.ouverteApresGeste).toBe(true);
+    expect(resultat.filtreIntact).toBe(true);
+    expect(resultat.fermeeApresFermer).toBe(true);
     expect(resultat.aHandlers).toBe(true);
     expect(erreurs).toEqual([]);
 });

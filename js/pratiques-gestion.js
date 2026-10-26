@@ -35,39 +35,9 @@ let pratiqueEnEditionMateriel = null;
  */
 let enChargementFormulaire = false;
 
-/* ===============================
-   ✅ AJOUT (28 janvier 2026) : DÉTECTION DES DOUBLONS
-   Fonctions pour identifier les pratiques avec des noms similaires
-   =============================== */
-
-/**
- * Générer un badge de source pour une pratique
- * @param {Object} pratique - La pratique
- * @param {Array} pratiquesLocales - Pratiques locales pour vérifier la source
- * @returns {string} HTML du badge
- */
-function genererBadgeSourcePratique(pratique /*, pratiquesLocales */) {
-    // Beta 99.39 Phase B : Retirée + Gabarit (spécifique pratiques, signal qu'il
-    // s'agit d'un modèle livré avec l'app vs une pratique éditable).
-    const parts = [];
-    if (pratique && pratique.dansBibliotheque === false) {
-        parts.push('<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Retirée</span>');
-    }
-    if (pratique && pratique.estGabarit) {
-        parts.push('<span class="badge-source badge-source--retiree" style="margin-left: 6px;">Gabarit</span>');
-    }
-    return parts.join(' ');
-}
-
-/**
- * Générer un ID court pour affichage
- * @param {string} id - L'ID complet
- * @returns {string} Les 6 derniers caractères
- */
-function genererIdCourtPratique(id) {
-    if (!id || id.length < 6) return id || '?';
-    return id.slice(-6);
-}
+// #1156 (25 oct. 2026) — `genererBadgeSourcePratique` (marques « Retirée » et « Gabarit ») et
+// `genererIdCourtPratique` retirés, faute de lecteur : la fenêtre en deux colonnes ne porte plus de
+// badge, et la puce d'identifiant vient du composant (`BibliothequeUI.renderPuceId`).
 
 /* ===============================
    INITIALISATION DU MODULE
@@ -147,20 +117,25 @@ async function afficherListePratiquesMateriel() {
 }
 
 /**
+ * Descriptions taxonomiques complètes selon le type (clés canoniques). #1156 : la table est éclatée
+ * en ses trois parties, pour que la fenêtre de bibliothèque dise la famille en français
+ * (`familleDeLaPratique`) avec les mêmes mots ; `obtenirDescriptionCourtePratique` la recompose
+ * telle qu'avant.
+ */
+const FAMILLES_TAXONOMIQUES = {
+    'sommative': { nom: 'Sommative', anglais: 'Traditional Grading', resume: 'Moyenne pondérée des évaluations' },
+    'standards': { nom: 'PAN-Standards', anglais: 'Standards-Based Grading', resume: 'Maîtrise de standards/objectifs' },
+    'specifications': { nom: 'PAN-Spécifications', anglais: 'Specifications Grading', resume: 'Évaluation dichotomique par forfaits' },
+    'denotation': { nom: 'PAN-Dénotation', resume: 'Note finale certificative posée (non calculée) selon l\'atteinte de cibles d\'apprentissage' }
+};
+
+/**
  * Retourne la description courte (taxonomique) d'une pratique pour la sidebar
  * @param {Object} pratique - La configuration de pratique
  * @returns {string} Description courte
  */
 function obtenirDescriptionCourtePratique(pratique) {
     if (!pratique) return '';
-
-    // Descriptions taxonomiques complètes selon le type (clés canoniques).
-    const descriptions = {
-        'sommative': 'Sommative (Traditional Grading) - Moyenne pondérée des évaluations',
-        'standards': 'PAN-Standards (Standards-Based Grading) - Maîtrise de standards/objectifs',
-        'specifications': 'PAN-Spécifications (Specifications Grading) - Évaluation dichotomique par forfaits',
-        'denombrement': 'Dénombrement (Counting-Based) - Comptage de réussites'
-    };
 
     // Retourner la description personnalisée si disponible, sinon la taxonomique
     if (pratique.description && pratique.description.trim().length > 0) {
@@ -172,7 +147,8 @@ function obtenirDescriptionCourtePratique(pratique) {
     // Normalisation à la lecture (A-2 4c) : la table est indexée en canonique,
     // mais pratique.type peut encore être legacy tant que le select n'est pas migré.
     const typeCanon = (typeof normaliserIdPratique === 'function' ? normaliserIdPratique(pratique.type) : pratique.type);
-    return descriptions[typeCanon] || pratique.type || '';
+    const f = FAMILLES_TAXONOMIQUES[typeCanon];
+    return f ? `${f.nom}${f.anglais ? ` (${f.anglais})` : ''} - ${f.resume}` : (pratique.type || '');
 }
 
 /**
@@ -233,22 +209,64 @@ function genererBadgeTypePratique(pratique) {
 // PAR IDENTITÉ) est inchangé.
 
 /**
- * Affiche le modal de gestion de la bibliothèque de pratiques
- * Section 1: Pratiques dans la sélection (avec boutons Partager/Retirer)
- * Section 2: Pratiques disponibles avec filtres
+ * #1156 (lot 3 des bibliothèques en deux colonnes) — LA FAMILLE D'UNE PRATIQUE, EN MOTS : la partie
+ * française de la description taxonomique (`FAMILLES_TAXONOMIQUES`), à la place des badges SOM, STD,
+ * SPE, DEN. Le code vient du registre (`obtenirRepresentationPratiqueStricte`, source unique), lu sur
+ * `pratiques[0]`, puis `type`, puis `configuration.type` (la lecture du moteur,
+ * `PratiqueConfigurable._typeFamille` : les pratiques de la démo n'ont que celui-là).
  */
-async function afficherBibliothequePratiques() {
-    // #327 — enregistre la biblio « pratiques » auprès du helper générique de
-    // répertoires (idempotent). Callbacks spécifiques : rafraîchir la modale,
-    // ajouter à la sélection, supprimer de la biblio, libeller un item.
-    BibliothequeUI.repertoires.enregistrer('pratiques', {
-        rafraichir: afficherBibliothequePratiques,
-        ajouterItem: (id) => ajouterPratiqueALaSelection(id),
-        supprimerItem: (id) => supprimerPratiqueDeBibliothequePartagee(id),
-        labelItem: (p) => BibliothequeUI.formaterTitre((p && p.nom) || 'Sans titre'),
-        labelPluriel: 'pratiques'
-    });
+function familleDeLaPratique(pratique) {
+    if (!pratique) return null;
+    const PAR_CODE = { SOM: 'sommative', STD: 'standards', SPE: 'specifications', DEN: 'denotation' };
+    const source = (Array.isArray(pratique.pratiques) && pratique.pratiques[0]) || pratique.type ||
+        (pratique.configuration && pratique.configuration.type) || '';
+    let code = PAR_CODE[source] ? source : null;
+    if (!code && typeof obtenirRepresentationPratiqueStricte === 'function') {
+        const rep = obtenirRepresentationPratiqueStricte(source);
+        code = rep ? rep.code : null;
+    }
+    return code ? FAMILLES_TAXONOMIQUES[PAR_CODE[code]] || null : (FAMILLES_TAXONOMIQUES[source] || null);
+}
 
+/** #1156 — la ligne en clair : la famille, puis l'auteur quand ce n'est pas l'utilisateur actif. */
+function lignePratiqueBibliotheque(pratique, auteurActif) {
+    const parts = [];
+    const famille = familleDeLaPratique(pratique);
+    if (famille) parts.push(famille.nom);
+    const auteur = (pratique.metadata_cc && pratique.metadata_cc.auteur_original) || pratique.auteur || '';
+    if (auteur && auteur !== auteurActif) parts.push('par ' + auteur);
+    return parts.join(' · ');
+}
+
+/**
+ * #1156 — L'aperçu qu'ouvre le nom d'une rangée : la description de la pratique, ou sa description
+ * taxonomique sans la parenthèse anglaise ; la provenance ; puis l'échelle et la grille qu'elle
+ * emploie (`configuration.echelleId`, `configuration.grilleId`), cherchées dans ce trimestre puis
+ * dans la bibliothèque. Un identifiant qu'aucun des deux ne connaît n'est pas montré.
+ */
+function apercuPratiqueBibliotheque(pratique, catalogues) {
+    const famille = familleDeLaPratique(pratique);
+    const description = (pratique.description && pratique.description.trim())
+        || (famille ? famille.nom + ' - ' + famille.resume : '');
+    const conf = pratique.configuration || {};
+    const nomDans = (liste, id) => {
+        const x = id ? liste.find(e => e && (e.id === id || e.idOriginal === id)) : null;
+        return x ? (x.nom || '') : '';
+    };
+    const lignes = [];
+    const echelle = nomDans(catalogues.echelles, conf.echelleId);
+    if (echelle) lignes.push(['Échelle de performance', echelle, '']);
+    const grille = nomDans(catalogues.grilles, conf.grilleId);
+    if (grille) lignes.push(['Grille de critères d\'évaluation', grille, '']);
+    return { paragraphes: [description, BibliothequeUI.formaterInspireDe(pratique)], lignes: lignes };
+}
+
+/**
+ * Les données de la bibliothèque des pratiques. #1156 : des rangées pour la fenêtre en deux colonnes
+ * (`BibliothequeUI.creerFenetreDeuxColonnes`), plus aucun HTML. Mêmes gestes, mêmes fonctions de
+ * données qu'avant ; seuls la place et le libellé changent.
+ */
+async function preparerDonneesBibliothequePratiques() {
     // Beta 99.39 Phase B : migration vers BibliothequeUI (sortir de l'outlier).
     const configurations = db.getSync(cle('pratiquesConfigurables'), null) || [];
 
@@ -258,50 +276,18 @@ async function afficherBibliothequePratiques() {
         configurations.filter(p => p.dansBibliotheque !== false)
     ));
 
-    let pratiquesDisponibles = [];
+    let toutesBibliotheque = [];
     if (typeof obtenirToutesLesPratiquesBibliotheque === 'function') {
-        pratiquesDisponibles = await obtenirToutesLesPratiquesBibliotheque();
+        toutesBibliotheque = await obtenirToutesLesPratiquesBibliotheque();
     }
-    pratiquesDisponibles = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(pratiquesDisponibles));
+    const pratiquesDisponibles = BibliothequeUI.filtrerParMaquette(BibliothequeUI.filtrerParModeDemo(toutesBibliotheque));
 
     // #291 — réunion des deux magasins avant analyse (cf. grilles.js).
     const doublonsDetectes = analyserDoublons(
         reunirSources(pratiquesDansBibliotheque, pratiquesDisponibles), 'nom');
-
-    // Section 1 : pratiques dans la sélection
-    let contenuSection1 = '';
-    if (pratiquesDansBibliotheque.length === 0) {
-        contenuSection1 = '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique dans ta sélection</p>';
-    } else {
-        pratiquesDansBibliotheque.forEach(pratique => {
-            contenuSection1 += BibliothequeUI.renderCarteSelection({
-                nom: BibliothequeUI.formaterTitre(echapperHtml(pratique.nom || 'Sans titre')),
-                id: pratique.id,
-                afficherId: true,
-                badgesPratiques: genererBadgeTypePratique(pratique),
-                badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
-                metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
-                description: pratique.description || '',
-                inspireDe: BibliothequeUI.formaterInspireDe(pratique),
-                boutonPrincipal: { label: 'Dupliquer', action: 'dupliquerPratiqueBibliotheque', param: pratique.id, classe: 'btn-confirmer', title: 'Créer une copie' },
-                actionsMenu: [
-                    { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'pratique', param2: pratique.id, classe: 'btn-secondaire', title: 'Générer un fichier .lcz signé à transmettre (#329)' },
-                    // Legacy JSON — retrait prévu à la convergence des formats (P8 #329)
-                    { label: 'Exporter (JSON)', action: 'partagerPratiqueMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Exporter en JSON (ancien format)' },
-                    { label: 'Retirer', action: 'retirerPratiqueDeBibliothequeMateriel', param: pratique.id, classe: 'btn-secondaire', title: 'Retirer de ta sélection (données conservées)' },
-                    { label: 'Supprimer', action: 'supprimerPratiqueDefinitivement', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
-                ]
-            });
-        });
-    }
-
-    // Message d'aide intégré au début de Section 1
-    const messageAide = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
-        '<p style="margin: 0; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
-            '<strong>Pour éditer une pratique</strong>, transfère-la d\'abord dans ta sélection en cliquant sur « Ajouter », puis clique dessus pour l\'ouvrir en mode édition.' +
-        '</p>' +
-    '</div>';
-    contenuSection1 = messageAide + contenuSection1;
+    // #291 — la puce d'identifiant ne s'affiche que sur une rangée que le bandeau nomme.
+    const idsNommes = new Set();
+    doublonsDetectes.forEach(groupe => groupe.exemplaires.forEach(ex => idsNommes.add(ex.id)));
 
     // #326 (demande terrain 17 juin) — Découvrabilité des maquettes. Les maquettes
     // d'exploration sont VOLONTAIREMENT masquées de cette bibliothèque (D-2 : elles
@@ -311,167 +297,194 @@ async function afficherBibliothequePratiques() {
     const nbMaquettes = BibliothequeUI.filtrerParModeDemo(
         configurations.filter(p => p.dansBibliotheque !== false)
     ).filter(p => BibliothequeUI.estMaquette(p)).length;
-    // #345 — la bannière pointe vers le comparateur (Labo) ; masquée tant que
-    // COMPARATEUR_VISIBLE est false (sinon = lien entrant vers une page masquée).
-    const comparateurVisible = (typeof COMPARATEUR_VISIBLE === 'undefined' || COMPARATEUR_VISIBLE);
-    if (nbMaquettes > 0 && comparateurVisible) {
-        const motMaquette = nbMaquettes > 1 ? 'maquettes' : 'maquette';
-        const banniereMaquettes = '<div style="background: var(--bleu-tres-pale, #e8f4f8); border-left: 3px solid var(--bleu-clair, #5dade2); padding: 10px 15px; margin-bottom: 20px; border-radius: 0 6px 6px 0;">' +
-            '<p style="margin: 0 0 8px; font-size: 0.9rem; color: var(--texte-secondaire, #555);">' +
-                'Tu as <strong>' + nbMaquettes + ' ' + motMaquette + '</strong> d\'exploration. ' +
-                'Les maquettes ne s\'affichent pas ici : elles vivent dans le <strong>Labo → Comparateur</strong>, ' +
-                'où tu peux les comparer, les adopter ou les jeter.' +
-            '</p>' +
-            '<button type="button" class="btn btn-secondaire btn-mini" data-action="ouvrirExplorationMaquettes">Gérer mes maquettes</button>' +
-        '</div>';
-        contenuSection1 = banniereMaquettes + contenuSection1;
-    }
 
-    // Boutons import/export après Section 1
-    const boutonsApresSection1 = `
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-            <button data-action="exporterPratiquesUtilisateur" class="btn btn-secondaire btn-mini">
-                Exporter toutes mes pratiques (JSON)
-            </button>
-            <button data-action="ouvrirFilePickerImportPratiques" class="btn btn-secondaire btn-mini">
-                Importer des pratiques (JSON)
-            </button>
-            <button data-action="partageImport.ouvrirSelecteurFichier" class="btn btn-secondaire btn-mini">
-                Importer un partage (.lcz)
-            </button>
-            <input type="file" id="fichier-import-pratiques-modal" accept=".json" style="display: none;" data-on-change="importerPratiquesUtilisateur">
-        </div>
-    `;
-
-    // Section import inter-trimestre (Brique C namespacing — pas 5, modèle COPIE).
-    // DIVERGENCE vs grilles : pratiquesConfigurables est NAMESPACÉE par trimestre, donc
-    // listerTrimestresAvecPratiques() liste TOUS les trimestres ≠ actif ayant des pratiques
-    // (pas seulement les archivés à copie propre comme les grilles). Destination = trimestre
-    // ACTIF. Garde D-C7 (cible jamais archivée) incluse dans le listing.
-    let sectionImportTrimestre = '';
-    const trimestresAvecPratiques = (typeof listerTrimestresAvecPratiques === 'function') ? listerTrimestresAvecPratiques() : [];
-    if (trimestresAvecPratiques.length > 0) {
-        sectionImportTrimestre = `
-            <div style="margin-top: 20px; padding: 15px; background: var(--gris-tres-pale); border-radius: 6px; border: 1px solid var(--bordure-claire);">
-                <h4 style="color: var(--accent-primaire); font-size: 1rem; margin: 0 0 10px 0;">Importer depuis un autre trimestre <button class="btn-aide-contextuelle" data-aide="import-autre-trimestre" aria-label="Aide : importer depuis un autre trimestre" title="Aide : importer depuis un autre trimestre"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h4>
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <select id="selectTrimestreImportPratiques" class="controle-form" style="flex: 1; min-width: 200px;">
-                        <option value="">-- Choisir un trimestre --</option>
-                        ${trimestresAvecPratiques.map(t => `<option value="${echapperHtml(t.id)}">${echapperHtml(t.nom)} (${t.nombre} pratique${t.nombre > 1 ? 's' : ''})</option>`).join('')}
-                    </select>
-                    <button data-action="afficherPratiquesTrimestreModal" class="btn btn-secondaire btn-compact">Voir les pratiques</button>
-                    <button data-action="importerToutPratiquesTrimestreModal" class="btn btn-principal btn-compact" data-tooltip="import-trimestre-tout-pratiques">Tout importer</button>
-                </div>
-                <div id="previewPratiquesTrimestre" class="u-hide" style="margin-top: 10px;"></div>
-            </div>`;
-    }
-
-    // #320 — répertoires de classement (lus une fois : filtre L3 + groupage L2)
+    // #320 — répertoires de classement (couche par-dessus, range par identité).
     const repsPratiques = (window.repertoiresBibliotheque && typeof window.repertoiresBibliotheque.obtenir === 'function')
         ? window.repertoiresBibliotheque.obtenir('pratiques')
         : [];
     const repParPratique = {};
     repsPratiques.forEach(r => (r.itemIds || []).forEach(id => { repParPratique[id] = r.id; }));
 
-    // #320 (9 juin) — filtres type/discipline/dossier RETIRÉS : avec l'organisation
-    // par dossiers (selects), ils étaient incohérents (n'agissaient plus que sur les
-    // cartes « Non classées »). La zone « Mes dossiers » (repliable) tient lieu de
-    // section de tête de la Section 2. #327 — rendue par le helper générique.
-    const filtresHTML = BibliothequeUI.repertoires.genererZone('pratiques');
+    const auteurActif = BibliothequeUI.obtenirAuteurActif();
+    const catalogues = {
+        echelles: [].concat(db.getSync(cle('echellesTemplates'), []) || [],
+            typeof obtenirToutesLesEchellesBibliotheque === 'function' ? (await obtenirToutesLesEchellesBibliotheque() || []) : []),
+        grilles: [].concat(db.getSync(cle('grillesTemplates'), []) || [],
+            typeof obtenirToutesLesGrillesBibliotheque === 'function' ? (await obtenirToutesLesGrillesBibliotheque() || []) : [])
+    };
 
-    // Section 2 : pool (pratiques disponibles à ajouter)
-    const idsDejaPresents = new Set(pratiquesDansBibliotheque.map(p => p.id));
-    const pratiquesAAfficher = pratiquesDisponibles.filter(p => !idsDejaPresents.has(p.id));
+    // Colonne « Dans ce trimestre ». Pas de « Garder → » ni de « Tout garder » : aucun geste d'avant ne
+    // versait une pratique du trimestre dans la bibliothèque (`importerPratiquesDansBibliotheque` n'a
+    // pas d'appelant ; consigne du lot 3, § 2.1 ; inscrit). L'état calme paraît quand la relation unique
+    // (`BibliothequeUI.lieeAExemplaire`) le dit — un gabarit livré avec l'app compte : il est listé dans
+    // la bibliothèque.
+    const rangeesTrimestre = pratiquesDansBibliotheque.map(pratique => {
+        const rangee = {
+            id: pratique.id,
+            nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
+            ligne: lignePratiqueBibliotheque(pratique, auteurActif),
+            afficherId: idsNommes.has(pratique.id),
+            apercu: apercuPratiqueBibliotheque(pratique, catalogues),
+            menu: [
+                { label: 'Dupliquer', action: 'dupliquerPratiqueBibliotheque', param: pratique.id, title: 'Créer une copie' },
+                { label: 'Exporter pour partager', action: 'partageExport.exporterPourPartager', param: 'pratique', param2: pratique.id, title: 'Générer un fichier .lcz signé à transmettre (#329)' },
+                // Legacy JSON — retrait prévu à la convergence des formats (P8 #329)
+                { label: 'Exporter (JSON)', action: 'partagerPratiqueMateriel', param: pratique.id, title: 'Exporter en JSON (ancien format)' },
+                { separateur: true },
+                { label: 'Retirer de ce trimestre', action: 'retirerPratiqueDeBibliothequeMateriel', param: pratique.id, classe: 'btn-supprimer', title: 'La pratique quitte le menu de l\'écran ; ses données sont conservées' },
+                { label: 'Supprimer définitivement', action: 'supprimerPratiqueDefinitivement', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer définitivement' }
+            ]
+        };
+        if (toutesBibliotheque.some(ex => BibliothequeUI.lieeAExemplaire(pratique, ex))) rangee.etat = 'Aussi dans ta bibliothèque';
+        return rangee;
+    });
 
-    // Rendu d'une carte du pool, menu d'actions enrichi de l'assignation.
-    const renderCartePool = (pratique) => {
-        const estGabarit = pratique.estGabarit;
+    // Colonne « Dans ta bibliothèque », gabarits compris (leur marque « Gabarit » part, comme les badges
+    // de type). « Déjà dans ce trimestre » par la même relation.
+    const rangeesBibliotheque = pratiquesDisponibles.map(pratique => {
+        const dejaPresent = pratiquesDansBibliotheque.some(p => BibliothequeUI.lieeAExemplaire(p, pratique));
         const repCourant = repParPratique[pratique.id] || null;
-        const actionsMenu = [];
+        const menu = [];
         repsPratiques.forEach(r => {
             if (r.id !== repCourant) {
-                actionsMenu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'pratiques', param2: pratique.id, param3: r.id, classe: 'btn-secondaire', title: 'Ranger dans ce dossier' });
+                menu.push({ label: 'Classer dans : ' + r.nom, action: 'BibliothequeUI.repertoires.classer', param: 'pratiques', param2: pratique.id, param3: r.id, title: 'Ranger dans ce dossier' });
             }
         });
         if (repCourant) {
-            actionsMenu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'pratiques', param2: pratique.id, classe: 'btn-secondaire', title: 'Sortir du dossier (repasse en non classées)' });
+            menu.push({ label: 'Retirer du dossier', action: 'BibliothequeUI.repertoires.retirer', param: 'pratiques', param2: pratique.id, title: 'Sortir du dossier (repasse en non classées)' });
         }
-        actionsMenu.push({ label: 'Supprimer', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque', showAlways: true });
+        if (menu.length) menu.push({ separateur: true });
+        menu.push({ label: 'Supprimer de ma bibliothèque', action: 'supprimerPratiqueDeBibliothequePartagee', param: pratique.id, classe: 'btn-supprimer', title: 'Supprimer de la bibliothèque' });
 
-        return BibliothequeUI.renderCarteDisponible({
-            nom: BibliothequeUI.formaterTitre(echapperHtml(pratique.nom || 'Sans titre')),
+        const rangee = {
             id: pratique.id,
-            afficherId: true,
-            badgesPratiques: genererBadgeTypePratique(pratique),
-            badgeSource: genererBadgeSourcePratique(pratique, pratiquesDansBibliotheque),
-            metadonnees: BibliothequeUI.formaterMetadonnees(pratique, { discipline: true }),
-            description: pratique.description || '',
-            inspireDe: BibliothequeUI.formaterInspireDe(pratique),
-            classeItem: 'pratique-dispo-item',
-            dataAttrs: `data-type="${echapperHtml(pratique.type || '')}" data-discipline="${echapperHtml(pratique.discipline || '')}"`,
-            styleExtra: estGabarit ? 'background: var(--gris-tres-pale);' : '',
-            boutonPrincipal: { label: 'Ajouter', action: 'ajouterPratiqueALaSelection', param: pratique.id, classe: 'btn-principal', title: 'Ajouter à ta sélection' },
-            actionsMenu: actionsMenu
-        });
+            nom: BibliothequeUI.formaterTitre(pratique.nom || 'Sans titre'),
+            ligne: lignePratiqueBibliotheque(pratique, auteurActif),
+            afficherId: idsNommes.has(pratique.id),
+            dossier: repCourant,
+            apercu: apercuPratiqueBibliotheque(pratique, catalogues),
+            dejaPresent: dejaPresent,
+            menu: menu
+        };
+        if (dejaPresent) {
+            rangee.etat = 'Déjà dans ce trimestre';
+        } else {
+            rangee.passage = { label: 'Utiliser dans ce trimestre', action: 'ajouterPratiqueALaSelection', param: pratique.id, sens: 'versTrimestre' };
+        }
+        return rangee;
+    });
+
+    return {
+        rangeesTrimestre,
+        rangeesBibliotheque,
+        doublonsDetectes,
+        pratiquesDansBibliotheque,
+        repsPratiques,
+        nbMaquettes,
+        trimestresAvecPratiques: (typeof listerTrimestresAvecPratiques === 'function') ? listerTrimestresAvecPratiques() : []
     };
+}
 
-    const enteteGroupe = (titre) => `<h4 style="margin:18px 0 8px; padding-bottom:4px; border-bottom:1px solid var(--bordure, #ddd); color:var(--texte-secondaire, #555); font-size:0.95rem;">${echapperHtml(titre)}</h4>`;
+/**
+ * #326 — la note des maquettes, au-dessus des colonnes : elles ne s'affichent dans aucune des deux,
+ * et l'utilisateur les cherche ici. Mêmes mots, même geste qu'avant ; des classes, aucun style en
+ * ligne. #345 — masquée tant que COMPARATEUR_VISIBLE est false (lien vers une page masquée).
+ */
+function noteMaquettesBibliotheque(nbMaquettes) {
+    const comparateurVisible = (typeof COMPARATEUR_VISIBLE === 'undefined' || COMPARATEUR_VISIBLE);
+    if (!(nbMaquettes > 0 && comparateurVisible)) return '';
+    const motMaquette = nbMaquettes > 1 ? 'maquettes' : 'maquette';
+    return '<div class="biblio2-note">' +
+        '<p>Tu as <strong>' + nbMaquettes + ' ' + motMaquette + '</strong> d\'exploration. ' +
+            'Les maquettes ne s\'affichent pas ici : elles vivent dans le <strong>Labo → Comparateur</strong>, ' +
+            'où tu peux les comparer, les adopter ou les jeter.</p>' +
+        '<button type="button" class="btn btn-secondaire" data-action="ouvrirExplorationMaquettes">Gérer mes maquettes</button>' +
+    '</div>';
+}
 
-    // #327 — ligne compacte d'un dossier (select + Ajouter + menu ⋮) rendue par le
-    // helper générique, paramétré par `biblio`. Les callbacks d'ajout/suppression
-    // proviennent de l'enregistrement en tête de fonction.
-    const renderLigneDossierSelect = (g) => BibliothequeUI.repertoires.renderLigneDossierSelect('pratiques', g);
+/**
+ * Affiche la bibliothèque des pratiques de notation. #1156 : en deux colonnes. L'encadré « Pour
+ * éditer une pratique, transfère-la d'abord dans ta sélection… » est parti : les deux colonnes le
+ * disent (plan du 24 oct., lot 3).
+ */
+async function afficherBibliothequePratiques() {
+    // #327 — la biblio « pratiques » auprès du moteur des dossiers (idempotent) : ses gestes
+    // (créer, renommer, classer…) redessinent la fenêtre par ce rappel. #1156 : plus de « select »
+    // de dossier par cartes (`renderLigneDossierSelect`), donc plus de `labelItem`.
+    BibliothequeUI.repertoires.enregistrer('pratiques', {
+        rafraichir: afficherBibliothequePratiques
+    });
 
-    let contenuSection2 = '';
-    if (pratiquesAAfficher.length === 0) {
-        contenuSection2 = '<p style="color: var(--gris-clair); font-style: italic;">Toutes les pratiques sont déjà dans ta sélection</p>';
-    } else if (repsPratiques.length === 0) {
-        // Aucun dossier → liste à plat (comportement d'origine, zéro régression)
-        pratiquesAAfficher.forEach(p => { contenuSection2 += renderCartePool(p); });
-    } else {
-        // #320 L3 — groupage via le helper transversal repertoiresBibliotheque.
-        // Chaque groupe est ENVELOPPÉ (data-repertoire-id) pour que le filtre
-        // « par dossier » puisse masquer/afficher un groupe entier (en-tête + cartes).
-        // L'assignation au menu ⋮ couvre TOUS les dossiers, même vides ici.
-        const groupes = window.repertoiresBibliotheque.grouper(pratiquesAAfficher, 'pratiques');
-        groupes.forEach(g => {
-            const cleGroupe = g.id || '__nonclasse__';
-            contenuSection2 += `<div class="biblio-groupe-repertoire" data-repertoire-id="${echapperHtml(cleGroupe)}">`;
-            contenuSection2 += enteteGroupe(g.titre);
-            if (g.id) {
-                // Dossier → select compact (gain d'espace vertical)
-                contenuSection2 += renderLigneDossierSelect(g);
-            } else {
-                // « Non classées » → cartes (on y voit ce qui reste à ranger)
-                g.items.forEach(p => { contenuSection2 += renderCartePool(p); });
-            }
-            contenuSection2 += `</div>`;
-        });
-    }
+    const data = await preparerDonneesBibliothequePratiques();
 
-    BibliothequeUI.creerModal({
+    // #293 — « Masquer ce qui est déjà dans ce trimestre » (même préférence qu'avant).
+    const rangeesBibliotheque = BibliothequeUI.filtrerParDejaPresent(data.rangeesBibliotheque);
+    const toutesMasquees = data.rangeesBibliotheque.length > 0 && rangeesBibliotheque.length === 0;
+
+    BibliothequeUI.creerFenetreDeuxColonnes({
         modalId: 'modalBibliothequePratiques',
         titre: 'Bibliothèque de pratiques de notation',
-        sousTitre: 'Gère les pratiques de notation de ta sélection.',
-        onFermer: 'fermerModalBibliothequePratiques',
-        doublonsHTML: BibliothequeUI.renderAvertissementDoublons(doublonsDetectes, {
-            itemsSelection: pratiquesDansBibliotheque,
-            actions: {
-                retirer: 'retirerPratiqueDeBibliothequeMateriel',
-                supprimer: 'supprimerPratiqueDefinitivement',
-                supprimerPartagee: 'supprimerPratiqueDeBibliothequePartagee'
+        aide: 'bibliotheque-fonctionnement',
+        menuFichiers: [
+            { label: 'Importer des pratiques', action: 'ouvrirFilePickerImportPratiques' },
+            { label: 'Importer le partage d\'une ou d\'un collègue', action: 'partageImport.ouvrirSelecteurFichier' },
+            { separateur: true },
+            { label: 'Exporter les pratiques de ce trimestre', action: 'exporterPratiquesUtilisateur' },
+            { note: 'Fichiers .json et .lcz' }
+        ],
+        champsFichier: [{ id: 'fichier-import-pratiques-modal', accept: '.json', onChange: 'importerPratiquesUtilisateur' }],
+        avantColonnes: noteMaquettesBibliotheque(data.nbMaquettes) +
+            BibliothequeUI.renderAvertissementDoublons(data.doublonsDetectes, {
+                itemsSelection: data.pratiquesDansBibliotheque,
+                mots: { selection: 'Dans ce trimestre', bibliotheque: 'Dans ta bibliothèque', retirer: 'Retirer de ce trimestre (données conservées)' },
+                actions: {
+                    retirer: 'retirerPratiqueDeBibliothequeMateriel',
+                    supprimer: 'supprimerPratiqueDefinitivement',
+                    supprimerPartagee: 'supprimerPratiqueDeBibliothequePartagee'
+                }
+            }),
+        trimestre: {
+            titre: 'Dans ce trimestre',
+            phrase: 'Les pratiques que le menu de l\'écran te propose pendant ce trimestre. Ce que tu y modifies ne change pas l\'exemplaire de ta bibliothèque.',
+            idListe: 'listePratiquesDansBibliotheque',
+            rangees: data.rangeesTrimestre,
+            vide: 'Aucune pratique dans ce trimestre. Prends-en une dans ta bibliothèque, ou crée-la avec « + Nouvelle pratique ».',
+            // Brique C namespacing — pas 5, modèle COPIE. DIVERGENCE vs grilles : pratiquesConfigurables
+            // est NAMESPACÉE par trimestre, donc listerTrimestresAvecPratiques() liste TOUS les trimestres
+            // ≠ actif ayant des pratiques. Destination = trimestre ACTIF (`copierPratiqueDepuisTrimestre`) :
+            // la ligne reste au pied de « Dans ce trimestre ». Garde D-C7 (cible jamais archivée) incluse.
+            importAutreTrimestre: {
+                titre: 'Importer depuis un autre trimestre',
+                selectId: 'selectTrimestreImportPratiques',
+                apercuId: 'previewPratiquesTrimestre',
+                options: data.trimestresAvecPratiques.map(t => ({ value: t.id, label: `${t.nom} (${t.nombre} pratique${t.nombre > 1 ? 's' : ''})` })),
+                actionVoir: 'afficherPratiquesTrimestreModal',
+                libelleVoir: 'Voir les pratiques',
+                actionTout: 'importerToutPratiquesTrimestreModal',
+                tooltipTout: 'import-trimestre-tout-pratiques',
+                aide: 'import-autre-trimestre'
             }
-        }),
-        titreSection1: 'Pratiques dans ta sélection',
-        contenuIdListe1: 'listePratiquesDansBibliotheque',
-        contenuSection1: contenuSection1,
-        boutonsApresSection1: boutonsApresSection1,
-        sectionImportTrimestre: sectionImportTrimestre,
-        titreSection2: 'Pratiques disponibles à ajouter à ta sélection',
-        filtresSection2: filtresHTML,
-        contenuIdListe2: 'listePratiquesDisponibles',
-        contenuSection2: contenuSection2,
-        sectionPartages: window.partageSection ? partageSection.genererSectionHTML('pratique') : ''
+        },
+        bibliotheque: {
+            titre: 'Dans ta bibliothèque',
+            // Sans « C'est d'ici que tu peux les partager. » : même raison qu'aux lots 1 et 2.
+            phrase: 'Les pratiques que tu gardes pour tous tes trimestres.',
+            idListe: 'listePratiquesDisponibles',
+            compte: data.rangeesBibliotheque.length,
+            rangees: rangeesBibliotheque,
+            vide: toutesMasquees
+                ? 'Toutes les pratiques de ta bibliothèque sont déjà dans ce trimestre.'
+                : 'Ta bibliothèque est vide.',
+            videFiltre: 'Aucune pratique dans ce dossier.',
+            dossiers: {
+                biblio: 'pratiques',
+                reps: data.repsPratiques.map(r => ({ id: r.id, nom: r.nom })),
+                refreshFn: 'afficherBibliothequePratiques',
+                masquerLibelle: 'Masquer ce qui est déjà dans ce trimestre',
+                labelPluriel: 'pratiques'
+            },
+            partages: window.partageSection ? partageSection.rangeesDeuxColonnes('pratique') : null
+        }
     });
 }
 
@@ -603,26 +616,27 @@ function afficherPratiquesTrimestreModal() {
     const pratiques = (db.getSync(cleSource('pratiquesConfigurables', srcId), []) || [])
         .filter(p => p && p.dansBibliotheque !== false);
     if (pratiques.length === 0) {
-        preview.innerHTML = '<p style="color: var(--gris-clair); font-style: italic;">Aucune pratique trouvée.</p>';
+        preview.innerHTML = '<p class="biblio2-phrase">Aucune pratique trouvée.</p>';
         preview.classList.remove('u-hide');
         return;
     }
 
-    let html = '<div style="max-height: 200px; overflow-y: auto; border: 1px solid var(--bordure-claire); border-radius: 4px; padding: 10px;">';
+    // #1156 — l'aperçu vit dans la fenêtre en deux colonnes : des classes, aucun style en ligne.
+    let html = '<ul class="biblio2-import-liste">';
     pratiques.forEach(pratique => {
-        const desc = pratique.description ? `<br><small style="color: var(--gris-moyen);">${echapperHtml(pratique.description)}</small>` : '';
+        const desc = pratique.description ? `<p class="biblio2-rangee-meta">${echapperHtml(pratique.description)}</p>` : '';
         html += `
-            <div style="padding: 8px; border-bottom: 1px solid var(--bordure-claire); display: flex; justify-content: space-between; align-items: center;">
+            <li class="biblio2-import-rangee">
                 <div>
                     <strong>${echapperHtml(pratique.nom || 'Sans titre')}</strong>${desc}
                 </div>
-                <button data-action="importerUnePratiqueTrimestre" data-param="${echapperHtml(srcId)}" data-param2="${echapperHtml(pratique.id)}" class="btn btn-confirmer btn-tres-compact">
+                <button type="button" data-action="importerUnePratiqueTrimestre" data-param="${echapperAttribut(srcId)}" data-param2="${echapperAttribut(pratique.id)}" class="btn btn-secondaire">
                     Importer
                 </button>
-            </div>
+            </li>
         `;
     });
-    html += '</div>';
+    html += '</ul>';
 
     preview.innerHTML = html;
     preview.classList.remove('u-hide');
@@ -818,12 +832,12 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     if (ecritLotF !== undefined && window.annoncerEcritureUsager) window.annoncerEcritureUsager(cle('pratiquesConfigurables'));   // lot F : geste hors témoin (ajouterPratiqueALaSelection)
 
     if (verdict === 'deja') {
-        notifications.info('Cette pratique est déjà dans ta sélection.');
+        notifications.info('Cette pratique est déjà dans ce trimestre.');
         return;
     }
     if (verdict === 'conflit') {
         notifications.info(
-            `« ${nomEnPlace || 'Cette pratique'} » est déjà dans ta sélection.`,
+            `« ${nomEnPlace || 'Cette pratique'} » est déjà dans ce trimestre.`,
             'Pour en avoir un second exemplaire, utilise « Dupliquer ».');
         return;
     }
@@ -833,9 +847,12 @@ async function ajouterPratiqueALaSelection(pratiqueId) {
     // depuis l'appelant. On relit avant d'annoncer quoi que ce soit.
     const verifPratiques = await db.get(cle('pratiquesConfigurables'), null) || [];
 
-    // Rafraîchir la sidebar et fermer le modal
+    // Rafraîchir la sidebar, puis la fenêtre. #1156 : la fenêtre se redessine, à la même position de
+    // défilement, comme après un passage dans les quatre autres (consigne du lot 1, § 1.7) ; avant, elle
+    // se fermait.
     await afficherListePratiquesMateriel();
     fermerModalBibliothequePratiques();
+    await afficherBibliothequePratiques();
 
     if (!verifPratiques.some(p => p.id === pratiqueId && p.dansBibliotheque !== false)) {
         console.error('[pratiques-gestion] Écriture non confirmée —', pratiqueId,
@@ -875,7 +892,7 @@ async function retirerPratiqueDeLaSelection(pratiqueId) {
         fermerModalBibliothequePratiques();
         await afficherBibliothequePratiques();
 
-        notifications.succes('Pratique retirée de la sélection');
+        notifications.succes('Pratique retirée de ce trimestre');
     }
 }
 
@@ -895,9 +912,17 @@ async function supprimerPratiqueDefinitivement(pratiqueId) {
     if (!pratique) return;
 
     // Confirmation
+    // #1156 — ce chemin n'efface pas l'exemplaire de la bibliothèque (il n'écrit que
+    // `pratiquesConfigurables`) ; la question le dit, quand la relation unique le lie à un exemplaire
+    // (gabarit compris : il reste dans la bibliothèque). Ses deux chemins (⋮ de « Dans ce trimestre »,
+    // bandeau des doublons) passent ici. Même `confirm` qu'avant.
+    const biblio = typeof obtenirToutesLesPratiquesBibliotheque === 'function'
+        ? (await obtenirToutesLesPratiquesBibliotheque() || []) : [];
+    const phraseBibliotheque = biblio.some(ex => BibliothequeUI.lieeAExemplaire(pratique, ex))
+        ? '\n\nSon exemplaire de ta bibliothèque reste.' : '';
     // #1007 : le codex proposé s'il n'est pas à jour, avant la question habituelle.
     if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('pratique'))) return;
-    if (!confirm(`Supprimer définitivement la pratique «${pratique.nom}» ?\n\nCette action est irréversible.`)) {
+    if (!confirm(`Supprimer définitivement la pratique «${pratique.nom}» ?\n\nCette action est irréversible.${phraseBibliotheque}`)) {
         return;
     }
 
@@ -2559,7 +2584,8 @@ window.confirmerImportPratiques = async function(donnees) {
         const details = [];
         if (nbAjoutees > 0) details.push(`${nbAjoutees} nouvelle(s) pratique(s) ajoutée(s).`);
         if (nbMisesAJour > 0) details.push(`${nbMisesAJour} pratique(s) mise(s) à jour.`);
-        details.push(ligneMasquee || 'Consulte « Pratiques disponibles » pour les ajouter à ta sélection.');
+        // #1156 — « Pratiques disponibles » n'existe plus : les mots des grilles, des échelles et des cartouches.
+        details.push(ligneMasquee || 'Elles sont dans ta bibliothèque : « Utiliser dans ce trimestre » les ajoute à ce trimestre.');
         notifications.succes('Import réussi', details.join(' '));
 
     } catch (error) {

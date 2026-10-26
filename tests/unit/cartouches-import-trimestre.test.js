@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 // Sentinelle — import inter-trimestre de cartouches (24 août 2026).
 //
@@ -355,12 +360,17 @@ describe('Cartouches · import depuis un autre trimestre', () => {
         expect(await ctx2.win.listerTrimestresAvecCartouches()).toEqual([]);
     });
 
-    it('8 · sans trimestre source, la section HTML n\'est pas rendue du tout', () => {
-        const { win } = ctx;
-        expect(win.genererSectionImportTrimestreCartouches([])).toBe('');
-        const html = win.genererSectionImportTrimestreCartouches([{ id: 'a2025', nom: 'Automne 2025', nombre: 2 }]);
-        expect(html).toContain('selectTrimestreImportCartouches');
-        expect(html).toContain('2 cartouches');
-        expect(html, 'zéro handler inline — règle de sécurité 2').not.toMatch(/onclick=|onchange=/);
+    // #1155 (25 oct. 2026) — RÉANCRÉ : `genererSectionImportTrimestreCartouches` est retirée ; la section
+    // est rendue par le composant des deux colonnes (`_renderImportAutreTrimestre`, qui ne rend rien sans
+    // trimestre source, sans gestionnaire en ligne), d'après la configuration que cartouches.js lui passe.
+    // Ce qui reste propre aux cartouches, et que l'essai garde : l'identifiant du sélecteur (lu par
+    // `importerToutCartouchesTrimestreModal` et `etatImportCartouches`) et le compte au pluriel. Le rendu
+    // dans la vraie fenêtre est éprouvé par `cartouches-import-trimestre.spec.js`.
+    it('8 · la section passe par le composant : son sélecteur et son compte', () => {
+        const src = readFileSync(path.join(racine, 'js/cartouches.js'), 'utf8');
+        expect(src).not.toMatch(/function genererSectionImportTrimestreCartouches/);
+        expect(src).toMatch(/selectId: 'selectTrimestreImportCartouches'/);
+        expect(src).toMatch(/\$\{t\.nombre\} cartouche\$\{t\.nombre > 1 \? 's' : ''\}/);
+        expect(src).toMatch(/document\.getElementById\('selectTrimestreImportCartouches'\)/);
     });
 });

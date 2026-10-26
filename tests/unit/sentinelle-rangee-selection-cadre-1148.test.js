@@ -119,7 +119,8 @@ describe('#1148 · E — l\'apparence de la rangée tient dans le Cadre', () => 
     });
     it('le sous-titre de la bibliothèque des groupes-cours tutoie et dit « menu »', () => {
         const gc = lire('js/trimestre-v2-groupes-cours.js');
-        expect(gc).toContain("sousTitre: 'Gère les groupes-cours affichés dans le menu de l\\'en-tête.'");
+        // #1159 (lot 6) : la phrase validée par Grégoire (25 oct., 19 h 06) remplace celle du #1148.
+        expect(gc).toContain("phrase: 'Les groupes-cours que le menu de l\\'en-tête te propose.'");
         expect(gc).not.toMatch(/Gérez|dropdown de l/);
     });
 });
