@@ -1,5 +1,15 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 26 octobre 2026, 9 h 30 (Toronto) : `1.219.1` EN LIGNE** (build `1026-0718`) — Netlify
+> `6adf4dd6`, `commit_ref` `403c39cc`, `state: ready`, publié à 12:56:09 Z (8 h 56). Verdict Playwright complet vert sur
+> `403c39cc` en 10 morceaux (1 027 verts, 0 rouge, 0 instable ; secteur, mémoire stable), jeton écrit au format de
+> `verifier-playwright.mjs`, poussé par `git push`. Porte 1.217.0 → 1.219.1 : bibliothèques en menu puis en deux colonnes
+> (#1154-#1159), le Cadre en rangées (#1148), le profil en rangée (#1151) ; la 1.219.1 corrige les sept specs de la Carte que
+> #1148 avait périmées (les specs, pas l'application : `RELAIS.md`). ⚠ **GitHub NON JUGÉ** (run 40326337181) : trois morceaux
+> coupés au plafond de 30 min ; sur les 13 reçus, 7 rouges propres à Linux, verts sur le Mac (détail dans `RELAIS.md`), à trier.
+> **Ouverts** : #1093 (`ci/verdict-morceaux`, à Grégoire). **MANDAT COURANT** : la table de cas
+> (`plans de travail/TEXTES-2026-10-25-table-de-cas-a-corriger.md`), selon la prochaine consigne de Cowork.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 23 octobre 2026, 19 h 47 (Toronto) : `1.216.2` EN LIGNE** (build `1023-1818`) — Netlify
 > `6adbf197`, `commit_ref` `dbd4a79d`, `state: ready`, publié à 23:45:40 Z (19 h 45). Verdict Playwright complet vert sur
 > `dbd4a79d` (code 0, 0 échec connu, aucun instable ; 0 veille, éveil complet tenu, sur batterie). La 1.216.2 porte #1145

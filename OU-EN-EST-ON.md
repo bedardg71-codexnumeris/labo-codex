@@ -15,6 +15,17 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 26 OCTOBRE 2026, 8 H 56 : LA 1.219.1 EST EN LIGNE** (tes Nouvelles 1.218 et 1.219 validées le 25 ; la 1.217 était en ligne depuis le 24). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** :
+- les six bibliothèques de Conception s'ouvrent en deux colonnes, « Dans ce trimestre » et « Dans ta bibliothèque », un seul bouton par rangée pour passer d'un côté à l'autre ; tes tampons ont la même fenêtre ;
+- dans le Cadre, les six parties du Trimestre s'ouvrent par la même bande, sur toute la largeur ; la Carte d'alignement a la même apparence ;
+- en tête d'une grille, d'une échelle, d'une cartouche, d'une production ou d'une pratique, les étapes qui la rendent prête ; une case « Incomplet ; travail en cours » dans Évaluer.
+
+**Ce qui reste à toi** : la porte terrain des bibliothèques en deux colonnes (Cowork en publiera la liste) ; la table de cas à corriger.
+
+**Vérifié comment** : verdict complet du navigateur vert sur le commit poussé (1 027 essais, aucun échec, aucune spec instable, joué en dix morceaux, Mac sur secteur), puis la mise en ligne constatée chez Netlify sur ce commit. La vérification de GitHub, elle, n'a pas pu conclure (trois morceaux coupés au plafond de temps).
+
 📝 **LE 23 OCTOBRE 2026, 19 H 45 : LA 1.216.2 EST EN LIGNE** (ta ligne des Nouvelles validée à 18 h 17). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :
