@@ -141,7 +141,7 @@ test('calculs · la table : un seuil en pourcentage, ajouter et retirer un palie
         await window.fixerLimiteAlgo('GC', 0);
         const lues = await db.get(cle('grillesTemplates'));
         Object.assign(lues.find((g) => g.id === 'GC').criteres[0].paramsProjection, { motsReference: 12, erreursTolerees: 4, nomServiceAide: 'Atelier des sciences', libelleSignalement: 'Revoir les unités' });
-        await db.set(cle('grillesTemplates'), lues);
+        await db.set(cle('grillesTemplates'), lues);   // security-ok: la grille fictive du spec, relue et réécrite par lui
         await window.chargerGrillePourModif('GC');
     });
     await ouvrirCas(page, 'CC');
@@ -256,7 +256,7 @@ test('captures · 1 440, 1 180, 820 px, clair et sombre, « Cas d\'interprétati
                         await window.fixerLimiteAlgo('GC', 0);
                         const lues = await db.get(cle('grillesTemplates'));
                         Object.assign(lues.find((x) => x.id === 'GC').criteres[0].paramsProjection, { motsReference: 12, erreursTolerees: 4, nomServiceAide: 'Atelier des sciences' });
-                        await db.set(cle('grillesTemplates'), lues);
+                        await db.set(cle('grillesTemplates'), lues);   // security-ok: la grille fictive du spec, relue et réécrite par lui
                         await window.chargerGrillePourModif('GC');
                     });
                 }

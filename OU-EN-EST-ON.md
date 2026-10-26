@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 26 OCTOBRE 2026, APRÈS-MIDI : LA TABLE DE CAS (PREMIER DES DEUX LOTS) EST PRÊTE, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : l'étape « Paliers » du critère algorithmique devient « Cas d'interprétation » et montre les paliers en table ; « Fixer une limite » et « Retirer la limite » remplacent le menu des modèles, et retirer ne perd plus rien ; un critère créé maintenant part de champs vides et des paliers que tu as tranchés le 25 ; la simulation, à droite, dit aussi ce que l'étudiant·e lirait dans son bilan. Tes critères existants lisent exactement ce qu'ils lisaient.
+
+**Ce qui reste à toi** : le signal pour le verdict complet, la version et la mise en ligne ; six décisions et trois gestes sur l'iPad (`plans de travail/PORTES-TERRAIN-2026-10-26-table-de-cas-3a.md`).
+
+**Vérifié comment** : Vitest entier vert (9 724) ; les 20 specs touchées vertes dans WebKit (61 essais) ; ce que lisent six critères existants comparé, à l'octet, à un relevé fait avant le lot. Pas encore : la suite complète du navigateur, Safari et l'iPad réels.
+
 📝 **LE 26 OCTOBRE 2026, 8 H 56 : LA 1.219.1 EST EN LIGNE** (tes Nouvelles 1.218 et 1.219 validées le 25 ; la 1.217 était en ligne depuis le 24). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** :

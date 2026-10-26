@@ -1,6 +1,6 @@
 # Demande de relecture – La table de cas, lot 3a (26 oct. 2026)
 
-> Claude Code, lundi 26 oct. 2026, après-midi, sur `main` (parti de `c07270a6`, 1.219.1 en ligne). Consigne : `CONSIGNE-LOT-2026-10-26-critere-algorithmique-table-de-cas-3a.md` ; ébauche validée : `EBAUCHE-2026-10-26-table-de-cas.html`. Commits : `56bc6be5` (docs : consigne, ébauche, textes, plan) et le commit du lot qui suit ce fichier. **Ni release, ni verdict, ni push** (consigne § 9).
+> Claude Code, lundi 26 oct. 2026, après-midi, sur `main` (parti de `c07270a6`, 1.219.1 en ligne). Consigne : `CONSIGNE-LOT-2026-10-26-critere-algorithmique-table-de-cas-3a.md` ; ébauche validée : `EBAUCHE-2026-10-26-table-de-cas.html`. Commits : `56bc6be5` (docs : consigne, ébauche, textes, plan), `cddfd207` (le lot) et celui qui acquitte deux avertissements du hook dans la spec neuve. **Ni release, ni verdict, ni push** (consigne § 9).
 
 ## Vue d'ensemble
 
