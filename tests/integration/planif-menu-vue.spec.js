@@ -65,9 +65,18 @@ async function ouvrirCarte(page) {
 
 // Téléporte un nœud (et ses enfants) vers un point VISIBLE de la zone de
 // travail — idiome de planif-drag-pointer-148.spec.js.
+// ⚠ La page défile d'abord jusqu'au haut de la zone (26 oct. 2026). La zone
+// commence sous ~600 px de page dans la fenêtre de 720 du banc : un décalage
+// fixe sous son bord dépend de tout ce qui est au-dessus (même piège que le
+// 16 oct., cf. `pointVisibleDeLaZone`). #1148 a grandi la barre de la Carte de
+// 28 px et les blocs posés à 120-150 px sous le bord sont sortis de la fenêtre :
+// les gestes « glisser », « alt-glisser », « multi-sélection » ne prenaient
+// plus. On défile comme l'utilisateur qui descend jusqu'à sa carte ; les
+// boîtes se lisent APRÈS.
 async function teleporter(page, id, ecranX, ecranY) {
     await page.evaluate((args) => {
         const zone = document.getElementById('planif-zone-travail');
+        window.scrollBy(0, zone.getBoundingClientRect().top);
         const el = document.getElementById(args.id);
         const zr = zone.getBoundingClientRect();
         const r = el.getBoundingClientRect();
@@ -280,8 +289,8 @@ const ESSAIS_RACCOURCIS = {
         await glisserParLaPrise(page, 'mv_c', 120, 0);
         expect(await etat(page, () => window.planificationCarte.etat.noeuds.get('mv_c').x)).toBeGreaterThan(xc + 60);
         // Le cadre d'une leçon emporte son contenu.
-        // ⚠ La zone commence vers 490 px dans une fenêtre de 720 : tout se
-        // joue dans les 230 px du haut, hors de la palette « Nœuds » (≈ 12-193 px).
+        // ⚠ `teleporter` amène le haut de la zone en haut de la fenêtre : le
+        // bloc se pose hors de la palette « Nœuds » (≈ 12-193 px).
         await teleporter(page, 'mv_l', 300, 10);
         const avant = await etat(page, () => ({
             l: window.planificationCarte.etat.noeuds.get('mv_l').x,

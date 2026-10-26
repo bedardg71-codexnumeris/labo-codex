@@ -117,12 +117,18 @@ test('la loupe montre CE QU’ON VISE, et l’atterrissage y mène', async ({ pa
     await page.click('#planif-vue-tout-voir');
     await page.waitForTimeout(400);
 
-    const cible = await centreDe(page, 'planif-noeud_cible');
     // La loupe est la « longue-vue » du menu « Vue » depuis le lot 3 (9 oct. 2026).
     await page.click('#planif-btn-vue');
     await page.click('#planif-vue-longue-vue');
     expect(await page.getAttribute('#planif-vue-longue-vue', 'aria-pressed')).toBe('true');
 
+    // ⚠ La cible se lit APRÈS les deux clics, juste avant le geste (26 oct. 2026).
+    // Le canevas commence sous ~600 px de page dans la fenêtre de 720 du banc :
+    // pour atteindre l'entrée du menu, Playwright fait défiler la page. Depuis
+    // #1148 (barre de la Carte plus haute de 28 px), ce défilement vaut 8 px,
+    // et le centre lu avant les clics visait 8 px trop bas — grossis par la loupe,
+    // un écart de 26 au lieu de moins de 20.
+    const cible = await centreDe(page, 'planif-noeud_cible');
     await page.mouse.move(cible[0], cible[1]);
     await page.waitForTimeout(250);
 
