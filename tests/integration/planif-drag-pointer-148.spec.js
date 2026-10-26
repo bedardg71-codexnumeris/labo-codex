@@ -43,9 +43,17 @@ async function ouvrirCarte(page) {
 
 // Téléporte un nœud (et ses enfants) vers un point VISIBLE du canevas —
 // même idiome que planif-toolbar.spec.js (le bas est masqué par le popup démo).
+// ⚠ La page défile d'abord jusqu'au haut du canevas (26 oct. 2026). Le canevas
+// commence sous ~550 px de page dans la fenêtre de 720 du banc : un décalage
+// fixe sous son bord dépend de tout ce qui est au-dessus. #1148 a grandi la
+// barre de la Carte de 28 px (le bas du canevas, lui, n'a pas bougé) et la
+// poignée visée est passée sous le bandeau du mode démo, fixé au bas de la
+// fenêtre : le pointerdown n'atteignait plus le nœud. On défile comme le fait
+// l'utilisateur qui descend jusqu'à sa carte ; les boîtes se lisent APRÈS.
 async function teleporter(page, id, ecranX, ecranY) {
     await page.evaluate((args) => {
         const zone = document.getElementById('planif-zone-travail');
+        window.scrollBy(0, zone.getBoundingClientRect().top);
         const el = document.getElementById(args.id);
         const zr = zone.getBoundingClientRect();
         const r = el.getBoundingClientRect();
