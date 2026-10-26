@@ -1,6 +1,6 @@
 # Demande de relecture – La table de cas, lot 3b (26 oct. 2026)
 
-> Claude Code, lundi 26 oct. 2026, fin d'après-midi, sur `main` (parti de `a46312ad` ; le lot 3a, `cddfd207`, commité, non poussé). Consigne : `CONSIGNE-LOT-2026-10-26-critere-algorithmique-table-de-cas-3b.md` ; ébauche validée : `EBAUCHE-2026-10-26-table-de-cas.html`. Commits : `c4666c7e` (docs : consigne, verdict 3a, note des portes 3a), le lot, puis le relais. **Ni release, ni verdict, ni push** (consigne § 9) : les lots 3a et 3b partiront ensemble au signal de Grégoire.
+> Claude Code, lundi 26 oct. 2026, fin d'après-midi, sur `main` (parti de `a46312ad` ; le lot 3a, `cddfd207`, commité, non poussé). Consigne : `CONSIGNE-LOT-2026-10-26-critere-algorithmique-table-de-cas-3b.md` ; ébauche validée : `EBAUCHE-2026-10-26-table-de-cas.html`. Commits : `c4666c7e` (docs : consigne, verdict 3a, note des portes 3a), `27d5d610` (le lot), puis le relais (plan, où en est-on). **Ni release, ni verdict, ni push** (consigne § 9) : les lots 3a et 3b partiront ensemble au signal de Grégoire.
 
 ## Vue d'ensemble
 

@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 26 OCTOBRE 2026, FIN D'APRÈS-MIDI : LA TABLE DE CAS EST COMPLÈTE (LES DEUX LOTS), PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : sous les paliers, « + Ajouter une table de cas » ; chaque table lit une valeur de la copie (le compte, ce à quoi tu le rapportes, la note du critère, la part de la limite, la moyenne, le code le plus fréquent) et tu écris un texte par cas ; l'étudiant·e lit le texte de son cas sous le critère, après les paliers, et dans son PDF. Une table neuve est vide : rien ne change pour un·e étudiant·e tant que tu n'écris rien. Retirer une table écrite, ou changer ce qu'elle lit, te le demande d'abord. Tes tables partent avec la grille (export, partage, bibliothèque).
+
+**Ce qui reste à toi** : le signal pour le verdict complet, la version et la mise en ligne des deux lots ; sept décisions et trois gestes sur l'iPad (`plans de travail/PORTES-TERRAIN-2026-10-26-table-de-cas-3b.md`).
+
+**Vérifié comment** : Vitest entier vert (9 756) ; les 27 specs du navigateur qui touchent ce critère, vertes dans WebKit (100 essais), dont une vraie copie évaluée avec des codes posés : la phrase sous le critère et le PDF portent le texte des cas ; sans table, la phrase est identique à l'octet à celle d'avant. Pas encore : la suite complète du navigateur, Safari et l'iPad réels.
+
 📝 **LE 26 OCTOBRE 2026, APRÈS-MIDI : LA TABLE DE CAS (PREMIER DES DEUX LOTS) EST PRÊTE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : l'étape « Paliers » du critère algorithmique devient « Cas d'interprétation » et montre les paliers en table ; « Fixer une limite » et « Retirer la limite » remplacent le menu des modèles, et retirer ne perd plus rien ; un critère créé maintenant part de champs vides et des paliers que tu as tranchés le 25 ; la simulation, à droite, dit aussi ce que l'étudiant·e lirait dans son bilan. Tes critères existants lisent exactement ce qu'ils lisaient.
