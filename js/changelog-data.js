@@ -21,6 +21,25 @@
 
     var CHANGELOG = [
         {
+            // 1.220 (la table de cas, lots 3a et 3b : l'étape « Cas d'interprétation », la limite fixée ou retirée,
+            // les tables de cas ; le groupe-cours qui naît sans ses élèves, #1038) — titre et huit items validés par
+            // Grégoire, mot pour mot, le 26 oct. 2026 à 15 h 31 (consigne de la mise en ligne du soir, § 1).
+            // Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.220',
+            couleur: 'vert',
+            titre: 'Des commentaires selon le cas de chaque copie',
+            items: [
+                'Critère algorithmique&nbsp;: l’étape «&nbsp;Paliers&nbsp;» devient «&nbsp;Cas d’interprétation&nbsp;». Les paliers s’y lisent en table&nbsp;: quand chacun s’applique, son nom court et ce que l’étudiant·e lit.',
+                'Le seuil de chaque palier se règle en pourcentage de la limite. «&nbsp;Voir ce que l’étudiant·e lirait à ce palier&nbsp;» règle la copie fictive sur ce palier.',
+                '«&nbsp;Fixer une limite&nbsp;» et «&nbsp;Retirer la limite&nbsp;» remplacent le menu «&nbsp;Modèle de projection&nbsp;». Retirer la limite ne fait plus rien perdre&nbsp;: la fixer de nouveau retrouve tes réglages. Tes collections se reprennent depuis l’en-tête des paliers.',
+                'Nouveau&nbsp;: «&nbsp;+&nbsp;Ajouter une table de cas&nbsp;». Une table choisit le texte que lit l’étudiant·e selon une valeur de sa copie&nbsp;: le compte, la note, la part de la limite, la moyenne ou le code le plus fréquent. Ce texte s’ajoute après les paliers, jusque dans le PDF. Une table neuve est vide&nbsp;: rien ne change tant que tu n’écris rien.',
+                '«&nbsp;Ce que l’application choisit sans toi&nbsp;» montre les textes que le critère écrit seul, et dans quels cas.',
+                'Un critère neuf part de champs vides quand tu fixes sa limite, sans les valeurs de l’épreuve uniforme de français. Ses noms («&nbsp;unités manquantes&nbsp;», «&nbsp;calculs&nbsp;»…) remplacent «&nbsp;erreur&nbsp;» et «&nbsp;mots&nbsp;» dans toutes ses phrases. Un critère existant dit exactement ce qu’il disait.',
+                'La simulation de ce que l’étudiant·e lirait montre aussi son bilan et le signalement d’un palier.',
+                'Corrigé&nbsp;: quand tu enregistres un groupe-cours dont les étudiant·es sont rattaché·es à un autre cours, l’application te le dit. L’import te le dit aussi quand tes productions appartiennent à un autre cours.'
+            ]
+        },
+        {
             // 1.219 (les bibliothèques en deux colonnes, #1154 à #1159 : les six bibliothèques de la Conception,
             // les tampons, les cours, trimestres et groupes-cours, l'ancien composant retiré) — titre et huit items
             // validés par Grégoire, mot pour mot, le 25 oct. 2026 à 19 h 59 (consigne de la mise en ligne du soir,
