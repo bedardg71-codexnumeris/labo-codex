@@ -21,6 +21,26 @@
 
     var CHANGELOG = [
         {
+            // 1.218 (les lots du 24 et du 25 oct. qui attendaient sur `main` : la bande du Trimestre et de la Carte,
+            // #1149 ; la bande du profil, #1151 ; les chaînes d'étapes ; le total des pondérations ; l'atelier du
+            // critère algorithmique, #1150 ; le statut « Incomplet ; travail en cours » ; #1153 ; la refonte de
+            // l'Aide) — titre et huit items validés par Grégoire, mot pour mot, le 25 oct. 2026 à 20 h (consigne de
+            // la mise en ligne du soir, § 2). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.218',
+            couleur: 'vert',
+            titre: 'Des étapes à suivre, et des écrans plus larges',
+            items: [
+                'Cadre&nbsp;: les six parties de la page Trimestre s’ouvrent par la même bande que les bibliothèques. La colonne de gauche est partie et la page prend toute la largeur. La Carte d’alignement prend la même apparence.',
+                'Suivi&nbsp;: dans le profil d’un élève, une bande remplace la barre latérale, avec l’élève en haut et ses sections en boutons dessous.',
+                'Conception&nbsp;: en tête d’une grille, d’une échelle, d’une cartouche, d’une production ou d’une pratique, tu vois les étapes qui la rendent prête à servir. Touche une étape pour aller là où elle se règle. Une case de Préférences&nbsp;› Expérience visuelle les masque.',
+                'Le total des pondérations d’une grille dit la même chose partout&nbsp;: orange sous 100&nbsp;%, rouge au-dessus.',
+                'Critère algorithmique&nbsp;: ses réglages se suivent en cinq étapes, une seule ouverte à la fois. «&nbsp;Ce que l’élève lira&nbsp;» s’affiche à droite, sur une copie fictive que tu règles.',
+                'Évaluer&nbsp;: une case «&nbsp;Incomplet&nbsp;; travail en cours&nbsp;» apparaît dans la palette Paramètres. Cochée, la production ne compte pas dans la note de l’élève, mais elle compte comme remise. Quand le travail est terminé, tu remplaces la copie, puis tu décoches.',
+                'Corrigé&nbsp;: «&nbsp;+ Nouvelle cartouche&nbsp;» ouvre maintenant une cartouche vide&nbsp;; avant, elle renommait parfois la cartouche ouverte. Changer la grille d’une cartouche déjà enregistrée en fait une copie, et l’originale reste intacte.',
+                'Aide&nbsp;: elle est rangée en huit sous-onglets, nommés comme l’application.'
+            ]
+        },
+        {
             // 1.217 (les cinq bibliothèques de la Conception en menu déroulant, #1147 ; le verrou dans la palette
             // Annotation ; les mots de l'aperçu du codex) — titre et trois items validés par Grégoire, mot pour mot,
             // le 24 oct. 2026 vers 13 h 45. Insécables en `&nbsp;`, apostrophes typographiques.
