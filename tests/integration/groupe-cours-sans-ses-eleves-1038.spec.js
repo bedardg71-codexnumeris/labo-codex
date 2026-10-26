@@ -49,7 +49,7 @@ async function ouvrir(page) {
             { id: SN4, codeCours: '203-SN4-DM', nomCours: 'Cours fictif B' },
             { id: XXX, codeCours: '203-XXX-DM', nomCours: 'Cours fictif C' }
         ]);
-        db.setSync('infoCours', { id: GM6, codeCours: '203-GM6-DM', nomCours: 'Cours fictif A', actif: true });
+        db.setSync('infoCours', { id: GM6, codeCours: '203-GM6-DM', nomCours: 'Cours fictif A', actif: true }); // security-ok: jeu d'essai littéral d'un test
         // security-ok: jeu d'essai littéral d'un test, aucune source externe.
         db.setSync('enseignants', [{ id: 'ENS1', prenom: 'Enseignant', nom: 'Fictif' }, { id: 'ENS2', prenom: 'Autre', nom: 'Fictive' }]);
         // L'horaire se résout par son groupe associé (mettreAJourNomGroupeCoursV2), comme à l'écran.
