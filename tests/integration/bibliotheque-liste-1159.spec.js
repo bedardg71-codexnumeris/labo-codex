@@ -38,6 +38,9 @@ const dossierCaptures = process.env.CAPTURES_1159 || null;
 //   · trimestre actif : `} else if (!estActif) {` → `} else {` → « les trimestres » ROUGIT ;
 //   · dropdown : la bulle 'Afficher dans le dropdown' remise sur « Remettre dans le menu » → « les
 //     groupes-cours » ROUGIT ;
+//   · notifications (verdict du lot 6, § 2.1) : 'Cours mis de côté.' → l'ancien 'Cours retiré de ta sélection'
+//     → « les cours : « Mettre de côté » » ROUGIT ; 'Groupe-cours remis dans le menu.' → 'Groupe-cours affiché'
+//     → « les groupes-cours : « Mettre de côté » » ROUGIT ;
 //   · échappement : `echapperHtml(r.nom)` → `r.nom` dans `_renderRangee` → « nom hostile » ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
@@ -121,6 +124,13 @@ const gestes = (rangee) => rangee.evaluate((li) => {
     };
 });
 const ligne = (rangee) => texte(rangee.locator('.biblio2-rangee-meta'));
+/** Les notifications de succès, relevées au passage (la notification reste affichée comme d'habitude). */
+const releverNotes = (page) => page.evaluate(() => {
+    window.__notes1159 = [];
+    const succes = window.notifications.succes;
+    window.notifications.succes = function (m) { window.__notes1159.push(m); return succes.apply(this, arguments); };
+});
+const notes = (page) => page.evaluate(() => window.__notes1159);
 
 for (const largeur of [1440, 820]) {
     test.describe(`à ${largeur} px`, () => {
@@ -172,6 +182,7 @@ for (const largeur of [1440, 820]) {
         test('les cours : « Mettre de côté » envoie la rangée dans le groupe replié, « Remettre dans mes cours » la ramène', async ({ page }) => {
             const erreurs = await ouvrirDemo(page, largeur);
             let fen = await ouvrir(page, 'cours');
+            await releverNotes(page);
             const n = await rangeesRepli(fen).count();
             const r1 = rangeeId(fen, 'COURS_BANC_1');
             await r1.locator('.biblio2-kebab').click();
@@ -182,6 +193,7 @@ for (const largeur of [1440, 820]) {
             const apres = await page.evaluate(async () => (await db.get('cours')).find(c => c.id === 'COURS_BANC_1'));
             expect(apres).toMatchObject({ dansBibliotheque: false, actif: false });
             expect(apres.metadata_cc).toBeUndefined();
+            expect(await notes(page)).toEqual(['Cours mis de côté.']);   // verdict du lot 6, § 2.1
 
             await repli(fen).locator('summary').click();
             const deCote = repli(fen).locator('.biblio2-rangee[data-biblio-item-id="COURS_BANC_1"]');
@@ -189,6 +201,7 @@ for (const largeur of [1440, 820]) {
             await deCote.locator('.biblio2-passage').click();
             await expect(repli(fen).locator('summary')).toHaveText(`Mis de côté (${n})`);
             await expect(liste(fen).and(page.locator('[data-biblio-item-id="COURS_BANC_1"]'))).toHaveCount(1);
+            expect(await notes(page)).toEqual(['Cours mis de côté.', 'Cours remis dans tes cours.']);
             // Le repli ouvert le reste au redessin.
             await expect(repli(fen)).toHaveAttribute('open', '');
             expect(erreurs).toEqual([]);
@@ -294,6 +307,7 @@ for (const largeur of [1440, 820]) {
         test('les groupes-cours : « Mettre de côté » envoie la rangée dans le groupe replié, « Remettre dans le menu » la ramène', async ({ page }) => {
             const erreurs = await ouvrirDemo(page, largeur);
             const fen = await ouvrir(page, 'groupesCours');
+            await releverNotes(page);
             const n = await rangeesRepli(fen).count();
             const rv = rangeeId(fen, 'GC_BANC_VISIBLE');
             await rv.locator('.biblio2-kebab').click();
@@ -307,6 +321,7 @@ for (const largeur of [1440, 820]) {
             await expect(repli(fen).locator('summary')).toHaveText(`Mis de côté (${n})`);
             await expect(liste(fen).and(page.locator('[data-biblio-item-id="GC_BANC_VISIBLE"]'))).toHaveCount(1);
             expect(await page.evaluate(() => db.getSync(cle('groupesCours'), []).find(g => g.id === 'GC_BANC_VISIBLE').dansSidebar)).toBe(true);
+            expect(await notes(page)).toEqual(['Groupe-cours mis de côté.', 'Groupe-cours remis dans le menu.']);   // verdict du lot 6, § 2.1
             expect(erreurs).toEqual([]);
         });
 

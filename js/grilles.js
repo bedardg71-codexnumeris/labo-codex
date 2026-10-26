@@ -2269,7 +2269,7 @@ function ligneGrilleBibliotheque(grille, auteurActif) {
         parts.push(types.map((t, i) => i === 0 ? getTypeCritereLabel(t) : getTypeCritereLabel(t).toLowerCase()).join(' et '));
     }
     parts.push(criteres.length + (criteres.length > 1 ? ' critères' : ' critère'));
-    // Même lecture que `formaterAttribution` : le bloc CC d'abord, puis le champ racine.
+    // Le bloc CC d'abord, puis le champ racine (la lecture de l'ancien `formaterAttribution`, retiré au #1159).
     const auteur = (grille.metadata_cc && grille.metadata_cc.auteur_original) || grille.auteur || '';
     if (auteur && auteur !== auteurActif) parts.push('par ' + auteur);
     return parts.join(' · ');

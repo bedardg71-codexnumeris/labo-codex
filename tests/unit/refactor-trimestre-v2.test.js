@@ -51,7 +51,6 @@ beforeAll(() => {
             filtrerParModeDemo: (arr) => arr,
             formaterTitreDemo: (titre) => titre,
             estItemDemo: () => false,
-            formaterMetadonnees: () => '',
             formaterTitre: (s) => s,
             renderMenuActions: () => '',
             creerFenetreListe: () => {},   // #1159 : les cartes et `creerModal` sont retirés

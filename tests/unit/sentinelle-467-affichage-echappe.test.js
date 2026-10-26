@@ -53,17 +53,9 @@ describe('#467 · A — les cartes de la Bibliothèque', () => {
     const win = chargerScript('js/bibliotheque-ui.js', { echapperHtml, echapperAttribut: echapperHtml, document });
     const B = win.BibliothequeUI;
 
-    it('A.a la ligne de métadonnées échappe l\'auteur reçu et la discipline', () => {
-        const ligne = B.formaterMetadonnees(
-            { metadata_cc: { auteur_original: CHARGE + 'Autrice' }, discipline: CHARGE + 'Français' },
-            { quantite: '3 critère(s)', discipline: true });
-        expect(ligne).not.toContain('<img');
-        expect(ligne).toContain('&lt;img');
-    });
-
-    it('A.b l\'auteur de repli (`item.auteur`) aussi', () => {
-        expect(B.formaterMetadonnees({ auteur: CHARGE + 'Autrice' })).not.toContain('<img');
-    });
+    // #1159 (verdict du lot 6, § 2.2) — A.a et A.b partis avec `formaterMetadonnees` et `formaterAttribution`,
+    // qu'ils étaient seuls à lire (la ligne de métadonnées des cartes) ; les rangées reçoivent leur ligne en
+    // texte et `_renderRangee` l'échappe (banc `bibliotheque-liste-1159`, nom hostile).
 
     it('A.c l\'identifiant de contexte du menu d\'actions (un id importé) ne sort pas de son attribut', () => {
         const html = B.renderMenuActions([{ label: 'Supprimer', action: 'x', param: 'y' }], '"><img src=x onerror=alert(1)>');
@@ -221,7 +213,7 @@ describe('#467 · C — aucune interpolation brute d\'un champ nommé dans le ba
     // ↻ 25 oct. 2026 (#1158) : tampons-bibliotheque.js 4 → 0, à la BAISSE — la fenêtre des tampons passe des
     // données au composant en deux colonnes ; ses chaînes (`htmlMesTampons`, `boutonsApres`) sont parties.
     const NUES = {
-        'js/bibliotheque-ui.js': 21 /* #1159 (25 oct.) : −2, `renderCarteDisponible` (`classeItem`) et `creerModal` (`fermerAttr`) partis */, 'js/pratiques-gestion.js': 21, /* #1137 (22 oct.) : −5, passées par formaterPourcentage ; #1147 (24 oct.) : −3, la barre latérale et ses badges partis */ 'js/echelles.js': 19, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie ; #1147 : −2, la barre latérale */
+        'js/bibliotheque-ui.js': 19 /* #1159 (25 oct.) : −2, `renderCarteDisponible` (`classeItem`) et `creerModal` (`fermerAttr`) partis ; verdict du lot 6 : −2, `onclickToDataAttrs` (ses paramètres bruts) parti */, 'js/pratiques-gestion.js': 21, /* #1137 (22 oct.) : −5, passées par formaterPourcentage ; #1147 (24 oct.) : −3, la barre latérale et ses badges partis */ 'js/echelles.js': 19, /* #469 (12 oct. 2026) : −3, exporterEchelleActive partie ; #1147 : −2, la barre latérale */
         'js/grilles.js': 66 /* étape 2b : −1, la rangée « Poser : » des paliers ; #1147 : −4, la barre latérale ; #1150 : −2, le miroir et les cartes du gabarit */, 'js/cartouches.js': 15 /* #1147 : −1 */, 'js/objectifs.js': 3 /* #1137 : −1 */, 'js/productions.js': 11 /* #1147 : −2, le surlignage de la barre latérale */,
         'js/productions-bibliotheque-ui.js': 0, 'js/tampons-bibliotheque.js': 0,
         'js/planification-bibliotheque.js': 0, 'js/travaux-outils.js': 89,

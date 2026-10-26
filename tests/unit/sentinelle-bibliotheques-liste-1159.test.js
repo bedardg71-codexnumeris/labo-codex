@@ -21,7 +21,10 @@ import { chargerScript } from './_helpers/charger-script.js';
 // BREAK-TESTS (25 oct. 2026, chacun rougit puis l'original est remis) :
 //   · `BibliothequeUI.creerModal({ modalId: 'x' });` ajouté au bout de js/cours.js → A ROUGIT ;
 //   · `.biblio-carte-meta { color: red; }` ajouté à styles.css → A ROUGIT ;
-//   · « Aucun trimestre ouvert. » → « Aucun trimestre actif » → B ROUGIT.
+//   · « Aucun trimestre ouvert. » → « Aucun trimestre actif » → B ROUGIT ;
+//   · (verdict, § 2.2) `function genererIdCourtProduction(id) {}` remis dans productions.js → A ROUGIT ;
+//     la branche `if (btn.onclick) return onclickToDataAttrs(btn.onclick);` remise (avec sa fonction)
+//     → A ET « un bouton `{onclick}` » ROUGISSENT.
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -38,7 +41,13 @@ const RETIRES = [
     /\b_renderBoutonPrincipal\b/,
     /\btronquerDescription\b/,
     /biblio-carte(?!--pointee)(?:-[\w-]+|--[\w-]+|(?![\w-]))/,
-    /biblio-section-titre/
+    /biblio-section-titre/,
+    // Verdict du lot 6, § 2.2 : le code mort de l'ancien composant part avec lui.
+    /\bformaterMetadonnees\b/,
+    /\bformaterAttribution\b/,
+    /\bonclickToDataAttrs\b/,
+    /\bgenererBadgeSourceProduction\b/,
+    /\bgenererIdCourtProduction\b/
 ];
 const trouver = (src) => RETIRES.filter(m => m.test(sansCommentaires(src))).map(String);
 
@@ -61,13 +70,27 @@ describe('#1159 · A — l\'ancien rendu en cartes est retiré', () => {
         expect(trouver("el.classList.add('biblio-carte--pointee');")).toEqual([]);
         expect(trouver('// #1159 — `creerModal` est retiré')).toEqual([]);
         expect(trouver('cc.creerModalMetadonneesEnrichies();')).toEqual([]);
+        expect(trouver('var l = BibliothequeUI.formaterMetadonnees(item, {});')).toHaveLength(1);
+    });
+
+    // Verdict du lot 6, § 2.2 : la branche `{onclick}` de `_btnAttrs` n'échappait pas ses paramètres ; partie,
+    // un bouton qui la passerait encore ne reçoit plus aucun geste (et rien de brut dans ses attributs).
+    it('un bouton `{onclick}` ne reçoit plus d\'attributs : la branche héritée est retirée', () => {
+        const e = chargerScript('js/securite-echappement.js');
+        // `echapperHtml` : fidèle à config.js (encode &, <, >, laisse les guillemets) ; `echapperAttribut` : le vrai.
+        const echapperHtml = (t) => t == null ? '' : String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const B = chargerScript('js/bibliotheque-ui.js', { echapperHtml, echapperAttribut: e.echapperAttribut }).BibliothequeUI;
+        const html = B.renderMenuActions([{ label: 'Vieux', onclick: `fn('a" data-x="1')` }], 'ctx');
+        expect(html).not.toContain('data-action="fn"');
+        expect(html).not.toContain('data-x');
     });
 
     it('le composant expose la fenêtre à une seule liste, et plus l\'ancienne API', () => {
         const B = chargerScript('js/bibliotheque-ui.js').BibliothequeUI;
         expect(typeof B.creerFenetreListe).toBe('function');
         expect(typeof B.creerFenetreDeuxColonnes).toBe('function');
-        for (const f of ['creerModal', 'renderCarteSelection', 'renderCarteDisponible', 'tronquerDescription']) {
+        for (const f of ['creerModal', 'renderCarteSelection', 'renderCarteDisponible', 'tronquerDescription',
+            'formaterMetadonnees', 'formaterAttribution']) {
             expect(B[f], f).toBeUndefined();
         }
     });
