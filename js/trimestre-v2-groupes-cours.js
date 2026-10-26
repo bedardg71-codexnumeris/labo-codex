@@ -754,6 +754,46 @@ function _fermerFormGroupeCoursV2() {
 }
 
 /**
+ * #1038 — la question posée quand le numéro choisi n'a aucun·e élève dans le cours choisi et en a
+ * ailleurs. Mots validés par Grégoire le 26 oct. 2026 (15 h 01). null : rien à dire — le groupe a des
+ * élèves dans ce cours, ou des fiches sans cours (elles comptent partout), ou n'en a nulle part.
+ */
+function _questionGroupeSansSesElevesV2(coursId, groupeNum, creation) {
+    if (typeof window.repartitionGroupeParCoursV2 !== 'function') return null;
+    const r = window.repartitionGroupeParCoursV2(db.getSync(cle('groupeEtudiants'), []), coursId, groupeNum);
+    if (r.duCours > 0 || r.sansCours > 0 || r.ailleurs.length === 0) return null;
+    const cours = window.libelleCoursParIdV2(coursId);
+    const n = r.ailleurs.reduce((total, a) => total + a.n, 0);
+    const ou = r.ailleurs.length === 1
+        ? window.libelleCoursParIdV2(r.ailleurs[0].coursId)
+        : 'd\'autres cours (' + r.ailleurs.map(a => window.libelleCoursParIdV2(a.coursId)).sort().join(', ') + ')';
+    return 'Le groupe ' + groupeNum + ' n\'a aucun·e étudiant·e dans ' + cours + '. '
+        + (n === 1 ? 'Son étudiant·e est rattaché·e à ' : 'Ses ' + n + ' étudiant·es sont rattaché·es à ') + ou + '.\n\n'
+        + 'Ce groupe-cours restera vide tant qu\'aucun·e étudiant·e n\'est rattaché·e à ' + cours + '.\n\n'
+        + (creation ? 'Créer' : 'Modifier') + ' quand même le groupe-cours ?';
+}
+
+/**
+ * #1038 (26 oct. 2026) — UN GROUPE-COURS QUI NAÎT SANS SES ÉLÈVES. Mathieu a créé « 203-SN4 + 00001 »
+ * alors que les élèves de 00001 étaient rattachés à 203-GM6 : groupe-cours vide, import sans
+ * production, quatre semaines avant qu'il le signale. ⚠ On ne déplace rien : qui a les MÊMES élèves
+ * dans deux cours ne peut les rattacher qu'à un seul (l'import refuse un DA déjà inscrit), et son
+ * second groupe-cours est vide sans que rien ne soit mal rangé. Le geste reste possible ; il n'est
+ * plus silencieux. En modification, seulement si le cours ou le groupe change ; « Annuler » y remet
+ * la fiche, comme le refus de CT-15.
+ * @returns {boolean} false : la personne a annulé, rien ne s'écrit
+ */
+function _groupeSansSesElevesAccepteV2(groupesCours, coursId, groupeNum) {
+    const creation = !groupeCoursEnEditionId;
+    const avant = creation ? null : groupesCours.find(g => g.id === groupeCoursEnEditionId);
+    const change = creation || (avant && (avant.coursId !== coursId || String(avant.groupeNum) !== String(groupeNum)));
+    const question = change ? _questionGroupeSansSesElevesV2(coursId, groupeNum, creation) : null;
+    if (!question || confirm(question)) return true;
+    if (!creation) _remettreGroupeCoursEnBaseV2();
+    return false;
+}
+
+/**
  * L'écrivain unique d'un groupe-cours : « Créer le groupe-cours » en création, chaque champ
  * en modification (lot E2, D3). Mêmes vérifications dans les deux cas ; un refus dit
  * « Non enregistré – ‹geste› : ‹raison› » par le témoin commun.
@@ -804,6 +844,9 @@ function sauvegarderGroupeCoursV2() {
     let groupesCours = JSON.parse(JSON.stringify(db.getSync(cleGC, []) || []));
     let idEcrit = groupeCoursEnEditionId;
     let premierActif = null;
+
+    // #1038 (26 oct. 2026) : un groupe-cours qui naît sans ses élèves le dit (`_groupeSansSesElevesAccepteV2`).
+    if (!_groupeSansSesElevesAccepteV2(groupesCours, coursId, groupeNum)) return false;
 
     // CT-15 (23 août 2026) — GARDE SUR LE TRIPLET (trimestre, cours, groupe).
     //
