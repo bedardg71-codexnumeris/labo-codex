@@ -1825,12 +1825,6 @@
     }
 
     /**
-     * Genere l'etape 2 en layout 3 colonnes
-     * @param {Array} queue - File d'attente
-     * @param {Map} groupes - Groupes de documents
-     * @returns {string} HTML
-     */
-    /**
      * #1038 (26 oct. 2026) — le sélecteur « Production » vide sans le dire : les productions du
      * trimestre étaient rangées sous un autre cours, seul « Jeton de reprise » restait. Une ligne
      * les nomme ; rien quand le cours actif en a au moins une. Mots validés par Grégoire le 26 oct.
@@ -1856,6 +1850,12 @@
         return `<p class="texte-muted u-texte-petit" id="pipeline-productions-ailleurs" style="margin:4px 0 0 0;">${echapperHtml(phrase)}</p>`;
     }
 
+    /**
+     * Genere l'etape 2 en layout 3 colonnes
+     * @param {Array} queue - File d'attente
+     * @param {Map} groupes - Groupes de documents
+     * @returns {string} HTML
+     */
     function genererEtape2Colonnes(queue) {
         const nbImages = queue.filter(f => f.estImage).length;
         const productions = obtenirDonneesSelonMode('productions');
