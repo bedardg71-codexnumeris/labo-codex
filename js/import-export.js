@@ -574,6 +574,17 @@ function nombreImporte(valeur) {
 }
 
 /**
+ * La table de cas, lot 3b (26 oct. 2026) — les tables de cas d'un critère, relues par leur registre
+ * (`tablesCasAlgo.assainir`) : une table illisible est écartée, ses textes passent par `assainirChaine`.
+ * Rend `{ tablesCas }`, ou `{}` quand aucune table n'est lisible : un critère sans table n'a pas le champ.
+ */
+function _assainirTablesCas(valeur) {
+    const T = (typeof window !== 'undefined') ? window.tablesCasAlgo : null;
+    const tables = T ? T.assainir(valeur, assainirChaine) : [];
+    return tables.length ? { tablesCas: tables } : {};
+}
+
+/**
  * Assainit un objet importé selon un schéma (whitelist de propriétés)
  * @param {Object} obj - Objet à assainir
  * @param {Object} schema - Schéma { nomProp: { type, maxLen?, schema? } }
@@ -583,7 +594,8 @@ function nombreImporte(valeur) {
  *                    'numberOrNull' (nombre dont `null` est une valeur signifiante,
  *                                    non un vide : `'number'` le coercerait en 0),
  *                    'arrayStrings' (tableau de chaînes, chacune assainie),
- *                    'stringOrNumber' (id qui peut arriver soit en string soit en number).
+ *                    'stringOrNumber' (id qui peut arriver soit en string soit en number),
+ *                    'tablesCas' (lot 3b : les tables de cas d'un critère, relues par `tablesCasAlgo.assainir`).
  * @returns {Object} Objet nettoyé (seules les clés du schéma sont conservées)
  */
 function assainirObjet(obj, schema) {
@@ -658,6 +670,9 @@ function assainirObjet(obj, schema) {
                     // compromis assumé que l'échappement à l'affichage (lot 2) couvre.
                     resultat[cle] = valeur;
                 }
+                break;
+            case 'tablesCas':
+                Object.assign(resultat, _assainirTablesCas(valeur));   // lot 3b : voir `_assainirTablesCas`
                 break;
             case 'mapStrings':
                 // Object à clés dynamiques dont toutes les valeurs doivent être
@@ -953,6 +968,12 @@ const SCHEMAS_IMPORT = {
                         texteAide: { type: 'string', maxLen: 5000 }
                     }
                 },
+                // La table de cas, lot 3b (26 oct. 2026) — LES TABLES DE L'ENSEIGNANT·E voyagent avec le critère
+                // (« si la valeur est…, ce texte ») : sans elles, une grille importée perdrait les textes que ses
+                // étudiant·es lisent sous le critère. Type dédié : la lecture de leur registre
+                // (`tablesCasAlgo.assainir`), qui ÉCARTE une table illisible au lieu de la deviner — le type
+                // `array` coercerait une borne illisible en 0, un seuil que personne n'a écrit.
+                tablesCas: { type: 'tablesCas' },
 
                 // #581 — LES ÉNONCÉS DU CRITÈRE SE PERDRAIENT DE MÊME. Même
                 // classe que #667 et #668 : un critère dont l'auteur·e a

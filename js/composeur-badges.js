@@ -239,6 +239,10 @@ function paletteDe(textarea) {
     if (textarea.dataset.palierIndex !== undefined) {
         return (win.projectionAlgo && typeof win.projectionAlgo.listerReperes === 'function') ? win.projectionAlgo.listerReperes() : [];
     }
+    // Lot 3b de la table de cas (26 oct. 2026) : le texte d'un cas offre ce qu'offre un palier, plus {points}.
+    if (textarea.dataset.tableCas !== undefined) {
+        return (win.paletteAlgo && typeof win.paletteAlgo.reperesDesTables === 'function') ? win.paletteAlgo.reperesDesTables() : [];
+    }
     if (textarea.dataset.enonceCle !== undefined) {
         return (win.enoncesAlgo && typeof win.enoncesAlgo.reperesDeCle === 'function') ? win.enoncesAlgo.reperesDeCle(textarea.dataset.enonceCle) : [];
     }
@@ -401,11 +405,11 @@ function monter(textarea, nommer) {
     }
 }
 
-/** Pose une vue sur chaque zone à badges d'une racine (les paliers, les énoncés). `nommer` : voir `monter`. */
+/** Pose une vue sur chaque zone à badges d'une racine (les paliers, les énoncés, les cas des tables). `nommer` : voir `monter`. */
 function monterTout(racine, nommer) {
     var r = racine || _document();
     if (!r || typeof r.querySelectorAll !== 'function' || !disponible()) return 0;
-    var zones = r.querySelectorAll('textarea[data-palier-index], textarea[data-enonce-cle]');
+    var zones = r.querySelectorAll('textarea[data-palier-index], textarea[data-enonce-cle], textarea[data-table-cas]');
     var n = 0;
     for (var i = 0; i < zones.length; i++) if (monter(zones[i], nommer)) n++;
     return n;

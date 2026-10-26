@@ -39,7 +39,7 @@
   "(anonyme)": 35
  },
  "js/import-export.js": {
-  "assainirObjet": 43,
+  "assainirObjet": 44,
   "afficherModalPreviewLocalStorageBrut": 62,
   "executerImportConfigComplete": 36,
   "executerImportSelectif": 130,

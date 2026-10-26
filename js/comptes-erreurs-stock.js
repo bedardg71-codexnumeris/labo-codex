@@ -225,6 +225,22 @@ function mesurer(evaluations) {
     return rapport;
 }
 
+/**
+ * Lot 3b de la table de cas (26 oct. 2026) — ce que les tables d'un critère lisent de la copie réparée : ses codes
+ * posés, dans l'ordre, seulement pour le premier critère algorithmique (#1132) ; la note se recalcule par la
+ * formule. Sans table du code, rien n'est lu : la phrase d'un critère sans table reste celle d'hier.
+ */
+function _contexteTables(evaluation, grille, critere) {
+    var T = window.tablesCasAlgo, E = window.enoncesAlgo;
+    if (!T || !T.lire(critere).some(function(t) { return t.selon === 'code'; })) return undefined;
+    var premier = (E && typeof E.criteresAlgorithmiques === 'function') ? E.criteresAlgorithmiques(grille)[0] : null;
+    if (!premier || premier.id !== critere.id) return { code: null };
+    var res = window.travauxResolution, ts = window.travauxStockage, C = window.codesAnnotation;
+    var fichier = (res && ts && C) ? res.trouverFichierPourEvaluation(evaluation) : null;
+    var annotation = fichier ? ts.obtenirAnnotationFichier(fichier.id) : null;
+    return { poses: annotation ? C.posesDeLAnnotation(annotation) : [] };
+}
+
 /** La réparation : `donneesAlgorithmiques[c]` des seules copies proposées, par le calcul de l'application. */
 function reparer(evaluations, proposees) {
     var grilles = db.getSync(cle('grillesTemplates'), []) || [];
@@ -241,7 +257,7 @@ function reparer(evaluations, proposees) {
             noteCalculee: ligne._resultat.note,
             pourcentage: ligne._resultat.pctBorne,
             niveau: ligne._niveau,
-            retroaction: window.phraseDecompteAlgo(critere, critere, v, ligne._entree, ligne.mots)
+            retroaction: window.phraseDecompteAlgo(critere, critere, v, ligne._entree, ligne.mots, _contexteTables(evaluation, grille, critere))
         });
         if (Math.abs(ligne._entree - v) >= 0.005) neuves.sommePonderee = ligne._entree;
         else delete neuves.sommePonderee;

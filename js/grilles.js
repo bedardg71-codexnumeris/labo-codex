@@ -4129,7 +4129,7 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                         <p class="table-cas-vide">${esc(T.sansLimite)}</p>
                         <button type="button" class="btn btn-secondaire btn-tres-compact table-cas-fixer" data-action="fixerLimiteAlgo" ${paramsCible}>${esc(T.fixer)}</button>${listeCollections}
                     </div>
-                </section>${rendreChoixAppAlgo(critere)}`;
+                </section>${rendreTablesCasAlgo(critere, ctx)}${rendreChoixAppAlgo(critere)}`;
     }
 
     // Les cinq réglages : les champs du registre, nommés pour CE critère (ses noms, § 3.6).
@@ -4245,14 +4245,14 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                         <div class="table-cas-collections">${rendreSaisieCollectionProjection(critere, ctx)}${listeCollections}
                         </div>
                     </div>
-                </section>${rendreChoixAppAlgo(critere)}`;
+                </section>${rendreTablesCasAlgo(critere, ctx)}${rendreChoixAppAlgo(critere)}`;
 }
 
 /**
  * « Ce que l'application choisit sans toi » (lot 3a) — les quatre choix que l'application fait seule, avec
  * leur condition ; « Modifier son texte » ouvre la zone qui l'écrit (`data-vers-zone`, l'atelier), sauf le
- * code le plus fréquent, qui n'a pas de texte. ⚠ Ce que l'ébauche ajoute (« ajoute une table selon… ») vient
- * avec les tables de l'enseignant·e (lot 3b) : rien ici ne mène à un geste qui n'existe pas encore.
+ * code le plus fréquent, qui n'a pas de texte. ↻ Lot 3b : sa ligne dit le geste qui lui en donne un (« ajoute
+ * une table selon « Le code le plus fréquent » ») — retirée au lot 3a, elle revient avec ce geste.
  */
 function rendreChoixAppAlgo(critere) {
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
@@ -4267,6 +4267,263 @@ function rendreChoixAppAlgo(critere) {
                     <dl class="choix-app-liste">${item(C.frequent, C.frequentTexte(neuf), '')}${item(C.priorite, C.prioriteTexte, 'enonce:priorite')}${item(C.concentre, C.concentreTexte, 'enonce:concentre')}${item(C.aucune, C.aucuneTexte, 'enonce:aucune')}
                     </dl>
                 </div>`;
+}
+
+/**
+ * LES TABLES DE L'ENSEIGNANT·E — lot 3b de la table de cas (26 oct. 2026, consigne
+ * `CONSIGNE-LOT-2026-10-26-critere-algorithmique-table-de-cas-3b.md` ; ébauche validée,
+ * `EBAUCHE-2026-10-26-table-de-cas.html`, `tableEnseignant`). Sous la table des paliers, dans leur ordre, puis
+ * « + Ajouter une table de cas ». Chacune : « Selon » et son menu (six valeurs, nommées avec les noms du
+ * critère ; « La part de la limite » désactivée sans limite fixée), « Retirer cette table », puis ses cas en
+ * deux colonnes (Quand · L'étudiant·e lit). Le texte d'un cas est une zone violette comme celles des paliers
+ * (`data-table-cas`, `data-cas` : la palette, le composeur, `insererRepereEnonce`). La donnée et ses règles :
+ * `tablesCasAlgo` (js/tables-cas-algo.js) ; les mots de la carte : `atelierAlgo.TEXTES.tables`.
+ * Les confirmations (retirer une table, changer la valeur d'une table qui porte des textes) vivent en mémoire
+ * (`_etatTablesCas`), dans la carte : jamais `confirm()`, rien n'est effacé sans être vu.
+ * Zéro handler inline ; tout ce que l'enseignant·e écrit passe par `esc()`.
+ */
+const _etatTablesCas = {};
+
+function _cleEtatTablesCas(cible, critere, index) {
+    return cible + ':' + ((critere && critere.id) || ('critere-' + index));
+}
+
+/** L'identifiant d'un champ des tables : le même au rendu et au geste qui y rend le focus. */
+function _identTableCas(cible, index, x) {
+    return 'tcas-' + cible + '-' + index + '-' + x;
+}
+
+function rendreTablesCasAlgo(critere, ctx) {
+    if (!critere || critere.type !== 'algorithmique') return '';
+    if (typeof window.tablesCasAlgo === 'undefined' || typeof window.atelierAlgo === 'undefined') return '';
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const fmt = (v) => (typeof window.formaterNombre === 'function' ? window.formaterNombre(v) : String(v));
+    const TC = window.tablesCasAlgo, X = window.atelierAlgo.TEXTES.tables, P = window.projectionAlgo;
+    const cible = ctx.mode === 'temp' ? 'temp' : ctx.grilleId;
+    const ident = (x) => esc(_identTableCas(cible, ctx.index, x));
+    const geste = `data-cible="${esc(cible)}" data-critere-index="${ctx.index}"`;
+    const zone = ctx.mode === 'temp' ? `data-critere-index="${ctx.index}"` : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
+    const limite = P.limiteFixee(critere);
+    const etat = _etatTablesCas[_cleEtatTablesCas(cible, critere, ctx.index)] || {};
+    const tables = TC.lire(critere);
+    const cap = (t) => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+
+    const quand = (t, r, tid) => {
+        const u = TC.unite(t.selon, critere).trim();
+        if (r.genre === 'max') {
+            return `<span class="table-cas-borne"><strong>${esc(X.jusqua)}</strong>
+                                    <input type="text" inputmode="decimal" class="controle-form table-cas-seuil" id="${ident(t.id + '-borne-' + r.cle)}"
+                                           value="${esc(fmt(r.borne))}" aria-label="${esc(X.borneLecteur)}"
+                                           data-on-change="modifierBorneTableCasHandler" ${geste} data-table="${tid}" data-cas="${esc(r.cle)}">${u ? `
+                                    <span>${esc(u)}</span>` : ''}</span>
+                                <button type="button" class="table-cas-lien" data-action="retirerCasTableAlgo" ${geste} data-table="${tid}" data-cas="${esc(r.cle)}">${esc(X.retirerCas)}</button>`;
+        }
+        if (r.genre === 'code') return `<strong>${esc(X.code(r.code))}</strong><span class="table-cas-petit">${esc(r.nom)}</span>`;
+        if (r.genre === 'aucun') return `<strong>${esc(X.aucunCode)}</strong>`;
+        if (r.genre === 'vide') return `<strong>${esc(X.sansValeur)}</strong><span class="table-cas-petit">${esc(TC.TEXTES.raisons[t.selon] || '')}</span>`;
+        return `<strong>${esc(cap(TC.libelleCas(t, r.index, critere)))}</strong>`;
+    };
+
+    const confirmation = (t, tid) => {
+        if (etat.retirer === t.id) {
+            return `
+                        <div class="table-cas-confirmer" role="group" aria-label="${esc(X.confirmerRetrait)}">
+                            <p>${esc(X.confirmerRetrait)}</p>
+                            <button type="button" class="btn btn-danger btn-tres-compact" id="${ident(t.id + '-confirmer')}" data-action="confirmerTableCasAlgo" ${geste} data-table="${tid}">${esc(X.retirerConfirme)}</button>
+                            <button type="button" class="btn btn-secondaire btn-tres-compact" data-action="annulerTableCasAlgo" ${geste}>${esc(X.annuler)}</button>
+                        </div>`;
+        }
+        if (etat.selon && etat.selon.table === t.id) {
+            return `
+                        <div class="table-cas-confirmer" role="group" aria-label="${esc(X.confirmerSelon(TC.libelleSelon(etat.selon.valeur, critere)))}">
+                            <p>${esc(X.confirmerSelon(TC.libelleSelon(etat.selon.valeur, critere)))}</p>
+                            <button type="button" class="btn btn-danger btn-tres-compact" id="${ident(t.id + '-confirmer')}" data-action="confirmerTableCasAlgo" ${geste} data-table="${tid}">${esc(X.changerConfirme)}</button>
+                            <button type="button" class="btn btn-secondaire btn-tres-compact" data-action="annulerTableCasAlgo" ${geste}>${esc(X.annuler)}</button>
+                        </div>`;
+        }
+        return '';
+    };
+
+    const cartes = tables.map((t) => {
+        const tid = esc(t.id);
+        const options = TC.SELONS.map((s) => {
+            const off = s === 'part' && !limite;
+            return `
+                                <option value="${s}"${s === t.selon ? ' selected' : ''}${off ? ' disabled' : ''}>${esc(TC.libelleSelon(s, critere) + (off ? X.aucuneLimite : ''))}</option>`;
+        }).join('');
+        const rangees = TC.rangees(t, critere).map((r) => {
+            const nomZone = TC.nomDeZone(critere, t.id, r.cle);
+            return `
+                        <div class="table-cas-rangee" data-cas-rangee="${tid}:${esc(r.cle)}">
+                            <div class="table-cas-quand">${quand(t, r, tid)}</div>
+                            <div class="table-cas-textes">
+                                <div class="groupe-form table-cas-zone">
+                                    <span class="table-cas-zone-tete"><span class="table-cas-zone-nom">${esc(X.texteCas)}</span><span class="table-cas-public">${esc(X.public)}</span></span>
+                                    <textarea class="controle-form sous-critere-textarea" rows="2" id="${ident(t.id + '-texte-' + r.cle)}" aria-label="${esc(nomZone)}" placeholder="${esc(X.vide)}"
+                                              data-on-change="modifierTexteTableCasHandler" ${zone} data-table-cas="${tid}" data-cas="${esc(r.cle)}" data-nom-zone="${esc(nomZone)}">${esc(r.texte)}</textarea>
+                                </div>
+                                <div class="table-cas-pied">
+                                    <span class="table-cas-ici" data-cas-ici hidden>${esc(X.ici)}</span>
+                                    <button type="button" class="table-cas-voir" data-apercu-geste="cas" data-table="${tid}" data-cas="${esc(r.cle)}">${esc(X.voir)}</button>
+                                </div>
+                            </div>
+                        </div>`;
+        }).join('');
+        const pied = t.selon === 'code'
+            ? `<p class="table-cas-petit">${esc(P.estNeuf(critere) ? X.egaliteNeuf : X.egaliteExistant)}</p>`
+            : (t.cas.length < TC.MAX_CAS ? `<button type="button" class="table-cas-lien table-cas-ajouter" data-action="ajouterCasTableAlgo" ${geste} data-table="${tid}">${esc(X.ajouterCas)}</button>` : '');
+        return `
+                <section class="table-cas table-cas--enseignant" aria-labelledby="${ident(t.id + '-titre')}" data-table-cas-carte="${tid}">
+                    <div class="table-cas-tete">
+                        <h4 class="table-cas-titre" id="${ident(t.id + '-titre')}">${esc(X.titre)}</h4>
+                        <label class="table-cas-selon">${esc(X.selon)}
+                            <select class="controle-form" id="${ident(t.id + '-selon')}" data-on-change="changerSelonTableCasHandler" ${geste} data-table="${tid}">${options}
+                            </select>
+                        </label>
+                        <button type="button" class="table-cas-lien table-cas-retirer" data-action="retirerTableCasAlgo" ${geste} data-table="${tid}">${esc(X.retirer)}</button>
+                    </div>
+                    <div class="table-cas-corps">${confirmation(t, tid)}
+                        <p class="table-cas-ou">${esc(X.intro)}</p>
+                        <div class="table-cas-entete" aria-hidden="true">${X.colonnes.map((c) => `<span>${esc(c)}</span>`).join('')}</div>
+                        <div class="table-cas-rangees">${rangees}
+                        </div>
+                        ${pied}
+                    </div>
+                </section>`;
+    }).join('');
+    const ajouter = tables.length < TC.MAX_TABLES
+        ? `
+                <button type="button" class="btn btn-secondaire btn-tres-compact table-cas-ajouter-table" data-action="ajouterTableCasAlgo" ${geste}>${esc(X.ajouterTable)}</button>`
+        : '';
+    return cartes + ajouter;
+}
+
+/** Ce qu'un geste des tables désigne : la cible, le critère, la table, le cas. */
+function _gesteTableCas(el) {
+    const d = (el && el.dataset) || {};
+    return { cible: d.cible || d.grilleId || 'temp', index: parseInt(d.critereIndex, 10), table: d.table || d.tableCas, cas: d.cas };
+}
+
+/** Un geste qui écrit sur le critère : `muter(c)` rend `false` pour ne rien écrire. Rend le critère écrit, ou null. */
+async function _ecrireTableCas(x, muter) {
+    return _modifierCritereCible(x.cible, x.index, (c) => {
+        if (!c || c.type !== 'algorithmique') return false;
+        return muter(c) === false ? false : undefined;
+    });
+}
+
+/** Le focus revient au champ nommé, après le redessin. */
+function _focusTableCas(x, suffixe) {
+    const el = document.getElementById(_identTableCas(x.cible, x.index, suffixe));
+    if (!el) return;
+    try { el.focus({ preventScroll: false }); } catch (e) { /* le champ est là, sans focus */ }
+    if (typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'center' });
+}
+
+function _oublierEtatTablesCas(x) {
+    const c = _critereLuCible(x.cible, x.index);
+    delete _etatTablesCas[_cleEtatTablesCas(x.cible, c, x.index)];
+}
+
+/** « + Ajouter une table de cas » : selon « Le compte des … », vide ; le focus va à son menu « Selon ». */
+async function ajouterTableCasAlgo(el) {
+    const x = _gesteTableCas(el);
+    let id = null;
+    const ecrit = await _ecrireTableCas(x, (c) => { id = window.tablesCasAlgo.ajouterTable(c); return id ? undefined : false; });
+    if (!ecrit) return;
+    await _redessinerCible(x.cible);
+    _focusTableCas(x, id + '-selon');
+}
+
+/** « Retirer cette table » : vide, elle part ; avec un texte, la carte demande d'abord (règle du 20 sept.). */
+async function retirerTableCasAlgo(el) {
+    const x = _gesteTableCas(el);
+    const c = _critereLuCible(x.cible, x.index);
+    const t = window.tablesCasAlgo.lire(c).filter((y) => y.id === x.table)[0];
+    if (!t) return;
+    if (window.tablesCasAlgo.aDesTextes(t)) {
+        _etatTablesCas[_cleEtatTablesCas(x.cible, c, x.index)] = { retirer: t.id };
+        await _redessinerCible(x.cible);
+        _focusTableCas(x, t.id + '-confirmer');
+        return;
+    }
+    if (await _ecrireTableCas(x, (k) => window.tablesCasAlgo.retirerTable(k, x.table))) {
+        _oublierEtatTablesCas(x);
+        await _redessinerCible(x.cible);
+    }
+}
+
+/** Le menu « Selon » : changer de valeur remplace les cas ; une table qui porte un texte le demande d'abord. */
+async function changerSelonTableCasHandler(el) {
+    const x = _gesteTableCas(el);
+    const valeur = el.value;
+    const c = _critereLuCible(x.cible, x.index);
+    const t = window.tablesCasAlgo.lire(c).filter((y) => y.id === x.table)[0];
+    if (!t || t.selon === valeur) return;
+    if (window.tablesCasAlgo.aDesTextes(t)) {
+        _etatTablesCas[_cleEtatTablesCas(x.cible, c, x.index)] = { selon: { table: t.id, valeur: valeur } };
+        await _redessinerCible(x.cible);
+        _focusTableCas(x, t.id + '-confirmer');
+        return;
+    }
+    await _ecrireTableCas(x, (k) => window.tablesCasAlgo.changerSelon(k, x.table, valeur));
+    await _redessinerCible(x.cible);
+    _focusTableCas(x, x.table + '-selon');
+}
+
+/** « Retirer » ou « Changer », dans la carte : le geste demandé s'accomplit. */
+async function confirmerTableCasAlgo(el) {
+    const x = _gesteTableCas(el);
+    const c = _critereLuCible(x.cible, x.index);
+    const e = _etatTablesCas[_cleEtatTablesCas(x.cible, c, x.index)] || {};
+    _oublierEtatTablesCas(x);
+    if (e.retirer === x.table) await _ecrireTableCas(x, (k) => window.tablesCasAlgo.retirerTable(k, x.table));
+    else if (e.selon && e.selon.table === x.table) await _ecrireTableCas(x, (k) => window.tablesCasAlgo.changerSelon(k, x.table, e.selon.valeur));
+    await _redessinerCible(x.cible);
+    if (e.selon) _focusTableCas(x, x.table + '-selon');
+}
+
+async function annulerTableCasAlgo(el) {
+    const x = _gesteTableCas(el);
+    _oublierEtatTablesCas(x);
+    await _redessinerCible(x.cible);
+}
+
+/** « + Ajouter un cas » : une borne au-dessus de la dernière ; le focus va à son champ. */
+async function ajouterCasTableAlgo(el) {
+    const x = _gesteTableCas(el);
+    let rang = null;
+    const ecrit = await _ecrireTableCas(x, (k) => {
+        if (!window.tablesCasAlgo.ajouterCas(k, x.table)) return false;
+        const t = window.tablesCasAlgo.lire(k).filter((y) => y.id === x.table)[0];
+        rang = String(t.cas.map((cas) => cas.genre).lastIndexOf('max'));
+    });
+    if (!ecrit) return;
+    await _redessinerCible(x.cible);
+    _focusTableCas(x, x.table + '-borne-' + rang);
+}
+
+async function retirerCasTableAlgo(el) {
+    const x = _gesteTableCas(el);
+    if (await _ecrireTableCas(x, (k) => window.tablesCasAlgo.retirerCas(k, x.table, x.cas))) await _redessinerCible(x.cible);
+}
+
+/** La borne d'un cas : illisible ou sous 0, refusée, le champ le dit ; rien n'est écrit. */
+async function modifierBorneTableCasHandler(el) {
+    const x = _gesteTableCas(el);
+    const ecrit = await _ecrireTableCas(x, (k) => window.tablesCasAlgo.ecrireBorne(k, x.table, x.cas, el.value));
+    if (!ecrit) {
+        if (typeof marquerChampRefuse === 'function') marquerChampRefuse(el, window.atelierAlgo.TEXTES.tables.borneRefusee);
+        return;
+    }
+    await _redessinerEnGardantLeFocus(x.cible);
+}
+
+/** Le texte d'un cas (la frappe, à la sortie de la zone ; un bloc posé passe par `insererRepereEnonce`). */
+async function modifierTexteTableCasHandler(el) {
+    const x = _gesteTableCas(el);
+    const ecrit = await _ecrireTableCas(x, (k) => window.tablesCasAlgo.ecrireTexte(k, x.table, x.cas, el.value));
+    if (ecrit) await _redessinerEnGardantLeFocus(x.cible);
 }
 
 /**
@@ -6488,6 +6745,14 @@ function insererRepereEnonce(el) {
     }
 
     var index = parseInt(zone.dataset.critereIndex);
+    if (zone.dataset.tableCas !== undefined) {
+        // Lot 3b : le texte d'un cas, par le même geste que sa frappe (`tablesCasAlgo.ecrireTexte`), sans le rendu.
+        var x = _gesteTableCas(zone);
+        _ecrireTableCas(x, function(c) { return window.tablesCasAlgo.ecrireTexte(c, x.table, x.cas, r.texte); })
+            .then(function(c) { if (c && window.atelierAlgo) window.atelierAlgo.suivre(index, c); })
+            .catch(function(err) { console.warn('[tables de cas] le bloc est à l\'écran mais pas enregistré :', err); });
+        return;
+    }
     if (estPalier) {
         // Même chemin d'écriture que la frappe dans la zone (`_muterPalier`,
         // qui matérialise les paliers d'un critère migré au premier geste),
@@ -6543,10 +6808,10 @@ function _zoneDeFocus(el) {
     return null;
 }
 
-/** Une zone d'écriture du gabarit algorithmique : un énoncé, ou l'une des deux zones d'un palier. */
+/** Une zone d'écriture du gabarit algorithmique : un énoncé, l'une des deux zones d'un palier, le texte d'un cas (lot 3b). */
 function _estZoneAlgo(zone) {
     return !!(zone && zone.tagName === 'TEXTAREA' && zone.dataset
-        && (zone.dataset.enonceCle !== undefined || zone.dataset.palierIndex !== undefined));
+        && (zone.dataset.enonceCle !== undefined || zone.dataset.palierIndex !== undefined || zone.dataset.tableCas !== undefined));
 }
 
 /** La palette du gabarit qui contient une zone, s'il y en a une. */
@@ -6951,6 +7216,16 @@ window.fixerLimiteAlgo = fixerLimiteAlgo;
 window.revenirAuModeleEnonce = revenirAuModeleEnonce;
 window.retirerLimiteAlgo = retirerLimiteAlgo;
 window.reprendreCollectionProjectionHandler = reprendreCollectionProjectionHandler;
+// Lot 3b de la table de cas (26 oct. 2026) : les gestes des tables de l'enseignant·e (data-action, data-on-change).
+window.ajouterTableCasAlgo = ajouterTableCasAlgo;
+window.retirerTableCasAlgo = retirerTableCasAlgo;
+window.confirmerTableCasAlgo = confirmerTableCasAlgo;
+window.annulerTableCasAlgo = annulerTableCasAlgo;
+window.ajouterCasTableAlgo = ajouterCasTableAlgo;
+window.retirerCasTableAlgo = retirerCasTableAlgo;
+window.changerSelonTableCasHandler = changerSelonTableCasHandler;
+window.modifierBorneTableCasHandler = modifierBorneTableCasHandler;
+window.modifierTexteTableCasHandler = modifierTexteTableCasHandler;
 window.ouvrirSaisieCollectionProjection = ouvrirSaisieCollectionProjection;         // Lot B (5 sept. 2026)
 window.annulerSaisieCollectionProjection = annulerSaisieCollectionProjection;
 window.enregistrerCollectionProjection = enregistrerCollectionProjection;

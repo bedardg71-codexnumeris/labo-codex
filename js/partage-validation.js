@@ -487,6 +487,16 @@
                                 { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].bareme' }));
                         }
                     });
+                    // La table de cas, lot 3b (26 oct. 2026) — de même, les tables de cas : la règle de leur
+                    // registre (`tablesCasAlgo.refusStructure`), celle que la lecture applique.
+                    item.criteres.forEach(function (c, j) {
+                        if (!c || !('tablesCas' in c)) return;
+                        var raison = window.tablesCasAlgo ? window.tablesCasAlgo.refusStructure(c.tablesCas) : 'module des tables de cas absent';
+                        if (raison) {
+                            erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'tables de cas : ' + raison,
+                                { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].tablesCas' }));
+                        }
+                    });
                 }
             });
         });

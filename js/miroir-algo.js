@@ -51,7 +51,7 @@
 
    LECTURE SEULE : rien n'est écrit dans le critère, la grille ni le stockage.
    Dépendances (lues à l'appel, sur `window`) : formulesAlgo, enoncesAlgo, projectionAlgo,
-   codesAnnotation.
+   codesAnnotation, tablesCasAlgo (lot 3b : le texte des tables de l'enseignant·e).
    =============================== */
 
 (function() {
@@ -268,16 +268,23 @@ function essayer(critere, copie) {
     var decompte = E ? E.enonce(critere, 'decompte', { erreurs: copie.erreurs, mots: mots, points: mention }) : '';
     var proj = P ? P.calculer(critere, { erreurs: copie.erreurs, mots: mots }) : null;
     var projection = (proj && proj.applicable) ? (proj.texte || '') : '';
+    var points = res.applicable ? res.pctBorne * ponderation / 100 : null;
+    // Lot 3b (26 oct. 2026) : les tables de l'enseignant·e, après la projection — le calcul de l'évaluation
+    // (`tablesCasAlgo.appliquer`), sur la note retenue et les codes posés de la copie fictive, dans leur ordre.
+    var T = _reg('tablesCasAlgo');
+    var tables = T ? T.appliquer(critere, { erreurs: copie.erreurs, erreursFormule: copie.erreursFormule, mots: mots, note: points, poses: copie.poses })
+        : { morceaux: [], atteints: {}, texte: '' };
     return {
         copie: copie,
         applicable: res.applicable,
-        points: res.applicable ? res.pctBorne * ponderation / 100 : null,
+        points: points,
         pourcentage: res.applicable ? res.pctBorne : null,
         plancher: res.applicable && res.pctBorne <= 0,
         mention: mention,
         decompte: decompte,
         projection: projection,
-        eleve: [decompte, projection].filter(Boolean).join(' ')
+        tables: tables,
+        eleve: [decompte, projection, tables.texte].filter(Boolean).join(' ')
     };
 }
 
