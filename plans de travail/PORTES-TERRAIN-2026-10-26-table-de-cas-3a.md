@@ -1,5 +1,7 @@
 # Portes terrain – La table de cas, lot 3a (26 oct. 2026)
 
+> ⮕ **Cowork, 26 oct. 2026, 14 h 45 : aucune porte due, pas d'artefact** (`VERDICT-RELECTURE-2026-10-26-table-de-cas-3a.md`, § 4). Les trois gestes du § 2 sont du comportement et du confort, sans écriture de données : règle 2 du skill (un raté se corrige quand Grégoire le rencontre). Ils restent des angles morts, à observer en usage sur l'iPad. Les six décisions du § 3 sont prises par Cowork (verdict, § 2) : toutes gardées telles que Claude Code les a faites.
+
 > Écrites par Claude Code le 26 oct. 2026, sur le lot commité sur `main` (non poussé). **Cowork publie l'artefact jumeau** (bouton « Copier mes résultats »). Ce qui échoue devient un item du BACKLOG, pas une note mentale.
 > **Deux règles de tête appliquées** : tout ce qu'une machine peut dire est dans les bancs (Vitest : 28 cas neufs et le relevé du stock ; WebKit : 8 essais neufs, 4 largeurs). Aucune porte n'est due pour des données : le lot n'écrit dans un critère qu'au geste de l'enseignant·e, et « Retirer la limite » ne perd plus rien. Restent **trois portes**, toutes sur l'iPad réel, et **six décisions**.
 
