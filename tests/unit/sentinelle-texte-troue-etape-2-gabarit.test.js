@@ -129,7 +129,8 @@ const GRILLE = { id: 'G1', nom: 'Philo', dansBibliotheque: true, criteres: [ALGO
 function carteProjection(html) {
     return etapeDe(html, 'CR', 'paliers');
 }
-const paliersDe = (projection) => projection.split('class="sous-critere-item palier-projection"').slice(1);
+// ↻ Lot 3a de la table de cas (26 oct. 2026) : un palier est une RANGÉE de la table des paliers.
+const paliersDe = (projection) => projection.split('class="table-cas-rangee"').slice(1);
 
 /* ================================================================ A — LA POSE */
 
@@ -184,30 +185,30 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
 
     it('B.b les zones portent leur index, leur champ et leur nom — celui que la palette dit', () => {
         const projection = rendu();
+        // ↻ Lot 3a : la zone d'un palier se nomme par son nom court (« Verdict, palier Risqué »).
+        const noms = P.paliersMigration().map((x) => x.libelle);
         paliersDe(projection).forEach((pal, i) => {
-            const bloc = pal.split('class="sous-critere-item palier-projection"')[0];
-            expect([...bloc.matchAll(/class="grille-form-2col palier-rangee"/g)].length, 'deux rangées').toBe(2);
-            expect(bloc).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texte" data-nom-zone="Verdict, palier ${i + 1}"`));
-            expect(bloc).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texteAide" data-nom-zone="Recommandation, palier ${i + 1}"`));
+            expect(pal).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texte" data-nom-zone="Verdict, palier ${noms[i]}"`));
+            expect(pal).toMatch(new RegExp(`<textarea[^>]*data-palier-index="${i}" data-champ="texteAide" data-nom-zone="Recommandation, palier ${noms[i]}"`));
         });
     });
 
-    it('B.c la note « Écris {service}… » est partie ; la note du composeur dit la décision sur le préfixe, au mot, une fois — ↻ §7 : EN TÊTE, avant le premier palier, et les zones s\'appellent « Verdict » et « Recommandation »', () => {
+    // ↻ Lot 3a (26 oct. 2026) : la note du composeur devient la phrase d'introduction de la table des paliers
+    // (ébauche validée), qui dit la même décision du 4 sept. sur le préfixe, avec les noms du critère ; les zones
+    // s'appellent toujours « Verdict » et « Recommandation ».
+    it('B.c la note « Écris {service}… » reste partie ; l\'introduction de la table dit la décision sur le préfixe, une fois, EN TÊTE, avant le premier palier ; les zones s\'appellent « Verdict » et « Recommandation »', () => {
         const projection = rendu();
         expect(projection).not.toContain('palier-note-service');
         expect(projection).not.toContain('là où le nom du service doit apparaître');
-        expect((projection.match(/palier-note-composer/g) || []).length).toBe(1);
-        expect(projection).toContain('Sans bloc, la phrase est précédée de « Tu fais en moyenne 1 erreur à chaque N mots » ; avec un bloc, elle est entière : c\'est toi qui l\'écris.');
-        // ↻ 2b : plus de « sans curseur, dans « Verdict » » — sans zone visitée, rien ne se pose ; ni d'explication des couleurs.
+        expect((projection.match(/class="table-cas-ou"/g) || []).length).toBe(1);
+        expect(projection).toContain('Un verdict sans bloc est précédé de la moyenne, sauf au premier cas : « Tu fais en moyenne 1 erreur à chaque N mots. » Un bloc sans valeur disparaît.');
         expect(projection).not.toContain('sans curseur');
         expect(projection).not.toContain('bleus sont écrits');
-        const note = projection.indexOf('palier-note-composer');
+        const note = projection.indexOf('table-cas-ou');
         expect(note).toBeGreaterThan(-1);
-        expect(note).toBeLessThan(projection.indexOf('palier-projection'));
-        // Les étiquettes des deux zones (mots de Grégoire, 5 sept., 6 h 35) — et plus aucune trace des anciennes.
-        expect((projection.match(/>Verdict<\/label>/g) || []).length).toBe(6);
-        expect((projection.match(/>Recommandation \(facultative\)<\/label>/g) || []).length).toBe(6);
-        // ↻ §8 : « Ce que l'élève lit » est désormais le TITRE de la carte — c'est l'ancienne étiquette de zone qui ne doit plus exister.
+        expect(note).toBeLessThan(projection.indexOf('table-cas-rangee'));
+        expect((projection.match(/class="table-cas-zone-nom">Verdict</g) || []).length).toBe(6);
+        expect((projection.match(/class="table-cas-zone-nom">Recommandation</g) || []).length).toBe(6);
         expect(projection).not.toContain('>Ce que l\'élève lit</label>');
         expect(projection).not.toContain('Phrase de recommandation');
     });
@@ -220,7 +221,9 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         expect(rendu()).not.toContain('data-enonce-cle="decompte"');
         const decompte = eleve.slice(eleve.indexOf('Décompte des erreurs'), eleve.indexOf('data-enonce-cle="priorite"'));
         expect(decompte).toContain('data-enonce-cle="decompte" data-nom-zone="Décompte des erreurs"');
-        expect(decompte).not.toContain('<button');
+        // ↻ Lot 3a : le seul bouton de la zone est « Revenir au modèle » ; aucune rangée « Poser : ».
+        expect(decompte).not.toContain('insererRepereEnonce');
+        expect(decompte).toContain('data-action="revenirAuModeleEnonce"');
         expect(source('js/grilles.js')).not.toMatch(/rendreBoutonsReperes/);
     });
 
@@ -229,8 +232,10 @@ describe('texte troué 2 · B — une palette par palier, les huit badges, la no
         win.afficherCriteresGrille({ ...GRILLE, criteres: [{ ...ALGO, modeleProjection: 'aucune' }] });
         const html = liste().innerHTML;
         const projection = carteProjection(html);
-        expect(projection).not.toContain('palier-note-composer');
-        expect(projection).toContain('Aucune projection ne sera proposée');
+        expect(projection).not.toContain('table-cas-ou');
+        // ↻ Lot 3a : sans limite, la phrase de l'ébauche et « Fixer une limite ».
+        expect(projection).toContain('Aucune limite fixée : l’étudiant·e ne lit aucun palier.');
+        expect(projection).toContain('data-action="fixerLimiteAlgo"');
         const palette = tranche(html, '<aside class="palette-algo"', '</aside>');
         for (const j of ['{service}', '{seuil}', '{longueur}', '{moyenne}', '{projection}', '{palier}']) expect(palette, j).not.toContain(`data-jeton="${j}"`);
         expect(palette).toContain('data-jeton="{erreurs}"');
@@ -253,7 +258,7 @@ describe('texte troué 2 · C — un jeton inconnu se dit sous son palier', () =
         ]);
         const paliers = paliersDe(projection);
         expect(paliers[0]).toContain('palier-jetons-inconnus');
-        expect(paliers[0]).toContain('Le badge « {truc} » est inconnu de cette version de l\'application : l\'élève le lirait tel quel.');
+        expect(paliers[0]).toContain('Le badge « {truc} » est inconnu de cette version de l\'application : l\'étudiant·e le lirait tel quel.');
         expect(paliers[1]).not.toContain('palier-jetons-inconnus');
     });
 
@@ -262,7 +267,7 @@ describe('texte troué 2 · C — un jeton inconnu se dit sous son palier', () =
             { cle: 'a', libelle: 'A', ratioMax: null, texte: '{truc} et {truc}', texteAide: 'puis {<b>}' }
         ]);
         const pal = paliersDe(projection)[0];
-        expect(pal).toContain('Les badges « {truc} », « {&lt;b&gt;} » sont inconnus de cette version de l\'application : l\'élève les lirait tels quels.');
+        expect(pal).toContain('Les badges « {truc} », « {&lt;b&gt;} » sont inconnus de cette version de l\'application : l\'étudiant·e les lirait tels quels.');
         expect(pal).not.toContain('{<b>}');
     });
 

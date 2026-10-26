@@ -40,7 +40,14 @@ const ouvrirCarte = async (page, section) => {
     if (await c.getAttribute('data-ouverte') === null) await cliquerDom(c.locator('.atelier-algo-etape-tete'));
     await expect(c).toHaveAttribute('data-ouverte', '');
 };
-const palier = (page, i) => page.locator('#listeCriteres .palier-projection').nth(i);
+// ↻ Lot 3a de la table de cas (26 oct. 2026) : un palier est une rangée de la table des paliers.
+const palier = (page, i) => page.locator('#listeCriteres .table-cas-rangee').nth(i);
+/** « Voir ce que l'étudiant·e lirait à ce palier » (lot 3a), puis la phrase du PDF dans la simulation, sans étiquettes. */
+const lireAuPalier = async (page, i) => {
+    await cliquerDom(palier(page, i).locator('[data-apercu-geste="palier"]'));
+    return page.locator('#listeCriteres .gabarit-algo[data-critere-id="CR"] .apercu-algo [data-lecture="pdf"]').evaluate((p) =>
+        [...p.querySelectorAll('.apercu-algo-segment')].map((s) => s.lastChild.textContent).join(' '));
+};
 const zone = (page, i, champ) => palier(page, i).locator(`textarea[data-palier-index="${i}"][data-champ="${champ}"]`);
 const vue = (page, i, champ) => zone(page, i, champ).locator('xpath=following-sibling::*[1]');
 // ↻ Étape 2b (22 oct. 2026) : les blocs se posent depuis LA palette du critère, qui vise la zone où est le curseur.
@@ -62,8 +69,8 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
     // 1 — la carte dépliée : chaque zone de palier porte sa vue, le textarea est caché et garde sa valeur.
     await expect(carte(page)).not.toHaveAttribute('data-ouverte', '');
     await ouvrirCarte(page);
-    await expect(page.locator('#listeCriteres .palier-projection')).toHaveCount(6);
-    await expect(page.locator('#listeCriteres .palier-projection .composeur-badges')).toHaveCount(12);
+    await expect(page.locator('#listeCriteres .table-cas-rangee')).toHaveCount(6);   // ↻ lot 3a : la table des paliers
+    await expect(page.locator('#listeCriteres .table-cas-rangee .composeur-badges')).toHaveCount(12);
     // ↻ #1150 : « Ce que l'élève lit » porte le décompte et les deux phrases du bilan ; « Aucune annotation » vit avec les codes.
     await expect(carte(page, 'commentaire').locator('.composeur-badges')).toHaveCount(3);
     const verdictDHier = 'En prévision de l\'EUF, ce ratio est risqué parce qu\'il est près du seuil de l\'échec.';
@@ -84,7 +91,7 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveCount(1);
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveAttribute('data-jeton', '{projection}');
     // ↻ 2b : la chip montre le NOM du bloc, plus le nom de code.
-    await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toContainText('Erreurs projetées');
+    await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toContainText('Compte projeté');   // ↻ lot 3a : le bloc sans « erreurs »
     await expect(zone(page, 4, 'texte')).toHaveValue(verdictDHier + ' {projection}');
     expect(await page.evaluate(() => document.activeElement && document.activeElement.classList.contains('composeur-badges'))).toBe(true);
 
@@ -107,9 +114,9 @@ test('texte troué 3 · le badge posé s\'affiche en pastille, on tape autour, o
     expect(g.criteres[0].paliersProjection[4].texte).toBe(attendu);
     await expect(vue(page, 4, 'texte').locator('.composeur-chip')).toHaveCount(1);
     await expect(vue(page, 4, 'texte').locator('br')).toHaveCount(1);
-    // L'aperçu sous le palier lit la phrase remplie, saut de ligne compris.
-    await expect(palier(page, 4).locator('.palier-apercu-ecrit')).toContainText('23 erreurs');
-    await expect(palier(page, 4).locator('.palier-apercu-ecrit')).toContainText('Ligne 2');
+    // ↻ Lot 3a : la simulation, réglée sur le palier, lit la phrase remplie, saut de ligne compris.
+    const lu4 = await lireAuPalier(page, 4);
+    expect(lu4).toMatch(/\d+ erreurs\nLigne 2/);
 
     // 5 — recharger sans frappe : la chip est là, la donnée n'a pas bougé (au caractère), rien n'est réécrit.
     const avant = JSON.stringify(g);

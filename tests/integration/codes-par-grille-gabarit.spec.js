@@ -66,7 +66,7 @@ test('codes par grille · gabarit — cocher active, décocher retire, la couleu
     const bloc = page.locator('#listeCriteres .sous-criteres-conteneur--en-tete .sous-criteres-codes');
     const caseCodes = bloc.locator('input[type="checkbox"]');
     await expect(caseCodes).not.toBeChecked();
-    await expect(bloc.locator('.sous-criteres-codes-note')).toContainText('Décochée');
+    await expect(bloc.locator('.sous-criteres-codes-note')).toContainText('Ce critère utilise encore les dix codes de la palette générale');   // ↻ lot 3a : la ligne de l'ébauche
     await expect(bloc.locator('.sous-criteres-codes-note')).toContainText('pondération 0');
     await expect(bloc.locator('.sous-criteres-codes-palette')).toContainText('palette générale');
     await expect(page.locator('#listeCriteres .sous-critere-couleur-groupe')).toHaveCount(0);

@@ -87,7 +87,7 @@ const reduitASonNom = (loc) => loc.evaluate((b) => {
 const blocsVus = (page) => palette(page).locator('.palette-algo-bloc').evaluateAll((els) => els.filter((b) => b.getClientRects().length).map((b) => b.dataset.jeton));
 /** La palette est-elle juste au-dessus de cette zone : de la rangée de ses deux zones (palier), de son champ (énoncé) ? */
 const justeAuDessus = (zone) => zone.evaluate((z) => {
-    const ancre = z.closest('.palier-rangee') || z.closest('.groupe-form');
+    const ancre = z.closest('.table-cas-rangee') || z.closest('.groupe-form');   // ↻ lot 3a : la rangée du palier
     return !!ancre && !!ancre.previousElementSibling && ancre.previousElementSibling.matches('.palette-algo');
 });
 
@@ -113,7 +113,7 @@ test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un pal
     await v.scrollIntoViewIfNeeded();
     const texteDHier = await verdict.inputValue();
     await caretA(v, texteDHier.length);
-    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Verdict, palier 6 »');
+    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Zone choisie : Verdict, palier Échec');   // ↻ lot 3a : les mots de l'ébauche, le palier par son nom court
     const zoneB = await boite(v);
     const paletteB = await boite(palette(page));
     console.log('MAC · ZONE →', JSON.stringify(zoneB), 'PALETTE →', JSON.stringify(paletteB));
@@ -131,7 +131,7 @@ test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un pal
     expect(e.valeur).toBe(texteDHier + ' {projection}');
     expect(e.focalisee, 'la zone garde le focus').toBe(true);
     expect(e.curseur, 'le curseur est après le bloc').toBe(e.valeur.length);
-    await expect(v.locator('.composeur-chip')).toHaveText(/Erreurs projetées/);
+    await expect(v.locator('.composeur-chip')).toHaveText(/Compte projeté/);   // ↻ lot 3a : le bloc sans « erreurs »
 
     // 2 — un énoncé, « Défi prioritaire » (carte « Bilan »), après une frappe : le bloc {critere}.
     const priorite = zoneEnonce(page, 'priorite');
@@ -140,7 +140,7 @@ test(`${nomEcran} · la palette, à gauche et collante, pose un bloc dans un pal
     await vp.scrollIntoViewIfNeeded();
     await caretA(vp, (await priorite.inputValue()).length);
     await page.keyboard.type(' (dès maintenant)');
-    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Défi prioritaire »');
+    await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Zone choisie : Défi prioritaire');
     await expect(bloc(page, '{erreurs}')).toHaveAttribute('aria-disabled', 'true');
     // Retouche 2 : un bloc inactif n'est plus que son nom, sur une ligne ; sa mention est dans son `title`.
     await expect(bloc(page, '{erreurs}')).toHaveAttribute('title', 'Ce texte ne le remplit pas.');
@@ -209,7 +209,7 @@ for (const [sens, largeur, hauteur] of [['portrait', 820, 1180], ['paysage', 118
             const priorite = zoneEnonce(page, 'priorite');
             expect(Math.abs(await toucher(priorite)), 'la zone touchée ne saute pas').toBeLessThanOrEqual(2);
             expect(await justeAuDessus(priorite), 'la palette est juste au-dessus du champ').toBe(true);
-            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Défi prioritaire »');
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Zone choisie : Défi prioritaire');
             expect(await blocsVus(page), 'seulement les blocs que la zone offre').toEqual(await offerts('priorite'));
             await tousCompacts();
 
@@ -219,7 +219,7 @@ for (const [sens, largeur, hauteur] of [['portrait', 820, 1180], ['paysage', 118
             expect(await justeAuDessus(verdict), 'la palette a suivi : juste au-dessus du palier').toBe(true);
             expect(await justeAuDessus(priorite), 'elle a quitté le champ d\'avant').toBe(false);
             await expect(palette(page)).toHaveCount(1);
-            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Tu écris dans : « Verdict, palier 4 »');
+            await expect(palette(page).locator('.palette-algo-cible')).toHaveText('Zone choisie : Verdict, palier Bien');
             expect([...await blocsVus(page)].sort()).toEqual([...await offerts('palier')].sort());
             await tousCompacts();
 

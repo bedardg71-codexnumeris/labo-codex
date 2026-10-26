@@ -50,18 +50,21 @@ function _P() { return _reg('projectionAlgo', './evaluation-projection.js'); }
 // `plans de travail/TEXTES-2026-10-22-palette-critere-algorithmique.md`. Cowork les tranche.
 // ↻ #1150, lot 4 (24 oct. 2026) : l'en-tête, l'état sans cible et la cible — les mots de la maquette validée.
 var TEXTES = {
-    titre: 'Blocs du critère algorithmique',
-    but: 'Ils servent à écrire les phrases que ce critère rédige seul, copie par copie. Chaque bloc prend la valeur de la copie corrigée.',
+    // ↻ Lot 3a de la table de cas (26 oct. 2026) : les mots de l'ébauche validée (« Blocs de textes »), au présent.
+    titre: 'Blocs de textes',
+    but: 'Ces blocs servent à composer les phrases que ce critère écrit seul sur chaque copie. Chaque bloc prend la valeur réelle de la copie évaluée.',
     gestes: ['Clique dans une zone violette.', 'Touche un bloc : il se pose au curseur.'],
+    legende: 'Après la flèche : la valeur que le bloc prendrait sur la copie fictive.',
     groupes: {
         posee: 'Ce que tu écris dans la grille',
-        remplie: 'Ce qui se remplit à la correction'
+        remplie: 'Ce qui se remplit quand tu évalues la copie'
     },
     invitation: 'Aucune zone choisie.',
-    astuce: 'Clique dans une zone violette : les blocs qu\'elle accepte paraîtront ici.',
+    astuce: 'Touche une zone violette : ses blocs paraissent ici.',
     inactif: 'Ce texte ne le remplit pas.',
-    dans: function(zone) { return 'Tu écris dans : « ' + zone + ' »'; },
-    zonePalier: function(champ, rang) { return champ + ', palier ' + rang; },
+    vide: 'vide',
+    dans: function(zone) { return 'Zone choisie : ' + zone; },
+    zonePalier: function(champ, nom) { return champ + ', palier ' + nom; },
     champsPalier: { texte: 'Verdict', texteAide: 'Recommandation' }
 };
 
@@ -82,6 +85,28 @@ var NOMMES = {
     '{nomMots}': function(n) {
         return { nom: '« ' + n.mots.pluriel + ' »',
                  aide: 'Le nom de ce à quoi tu rapportes le compte, écrit sous le critère : au singulier sous 2, au pluriel à partir de 2.' };
+    },
+    // Lot 3a (ébauche du 26 oct.) : les blocs de la limite se disent sans « erreur » ni « mot » — la moyenne
+    // dans les noms du critère, les autres dans les mots de l'ébauche.
+    '{moyenne}': function(n) {
+        return { nom: 'Moyenne de ' + n.mots.pluriel + ' par ' + n.erreurs.singulier,
+                 aide: 'En moyenne, 1 à chaque N : c’est ce N. Vide sans occurrence.' };
+    },
+    '{seuil}': function() {
+        return { nom: 'Tolérance', aide: 'Combien tu en tolères sur la longueur de référence.' };
+    },
+    '{longueur}': function() {
+        return { nom: 'Longueur de référence', aide: 'La longueur sur laquelle tu fixes la limite.' };
+    },
+    '{service}': function() {
+        return { nom: 'Nom du service', aide: 'Le nom du service d’aide. Vide : l’application retire ce qui le présente.' };
+    },
+    '{palier}': function() {
+        return { nom: 'Palier atteint', aide: 'Le nom court du palier que la copie atteint.' };
+    },
+    // Absent de l'ébauche (elle ne le montre pas) ; ses mots d'hier nommaient les erreurs : dits sans discipline.
+    '{projection}': function() {
+        return { nom: 'Compte projeté', aide: 'Ce que la copie compterait sur la longueur de référence, au même rythme.' };
     }
 };
 
@@ -174,8 +199,12 @@ function reperesDeZone(critere, zone) {
 function nomDeZone(zone, critere) {
     var d = zone || {};
     if (d.palierIndex !== undefined) {
+        // Lot 3a : le palier se nomme par son nom court (« Verdict, palier Risqué »), sinon par son rang.
         var champ = TEXTES.champsPalier[d.champ] || TEXTES.champsPalier.texte;
-        return TEXTES.zonePalier(champ, Number(d.palierIndex) + 1);
+        var P = _P();
+        var pal = (P && critere) ? (P.normaliser(critere).paliers || [])[Number(d.palierIndex)] : null;
+        var nom = pal ? String(pal.libelle || pal.cle || '').trim() : '';
+        return TEXTES.zonePalier(champ, nom || String(Number(d.palierIndex) + 1));
     }
     if (d.enonceCle === 'decompte') return 'Décompte des ' + _noms(critere).erreurs.pluriel;
     var E = _E();

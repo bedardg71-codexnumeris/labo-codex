@@ -57,6 +57,7 @@ const require = createRequire(import.meta.url);
 const E = require(path.join(racine, 'js/evaluation-enonces.js'));
 const P = require(path.join(racine, 'js/evaluation-projection.js'));
 const PA = require(path.join(racine, 'js/palette-algo.js'));
+const AT = require(path.join(racine, 'js/atelier-algo.js'));
 
 /* ------------------------------------------------------------------ harnais */
 
@@ -181,10 +182,11 @@ describe('une seule carte · A — le décompte est rendu UNE fois, dans « Ce q
         expect(clesDe(projection)).toEqual([]);
         // « Aucune annotation » vit avec les codes (sentinelle `carte-bilan`, B) — l'étape « Codes », avant.
         expect(clesDe(html)).toEqual(['aucune', 'decompte', 'priorite', 'concentre']);
-        // Témoin : le décompte est bien celui du registre — étiquette et aide au mot.
+        // Témoin : le décompte est bien celui du registre — son étiquette au mot ; ↻ lot 3a : l'aide est celle
+        // de l'atelier (ébauche validée du 26 oct.), qui dit qui lit la phrase, et quand.
         const c = E.listerCles().find((x) => x.cle === 'decompte');
-        expect(commentaire).toContain('>' + c.libelle + '</label>');
-        expect(blocDecompte(commentaire)).toContain(echapper(c.aide));
+        expect(commentaire).toContain('class="table-cas-zone-nom">' + c.libelle + '</span>');
+        expect(blocDecompte(commentaire)).toContain(echapper(AT.TEXTES.aides.decompte));
     });
 
     it('A.b en CRÉATION (mode temp) : la même chose, par le handler temp', () => {
@@ -206,24 +208,24 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
     it('B.a « Paliers » : modèle et réglages → aide → paliers → notes du bas → bouton ; « Ce que l\'élève lit » : menu → décompte → bilan', () => {
         const { projection, commentaire } = rendu();
         expect(projection).not.toContain('data-enonce-cle="decompte"');
-        const menu = commentaire.indexOf('Modèle des phrases (bilan et décompte)');
+        const menu = commentaire.indexOf('Modèle des phrases</label>');   // ↻ lot 3a : le mot de l'ébauche
         expect(menu).toBeGreaterThan(-1);
         expect(menu).toBeLessThan(commentaire.indexOf('data-enonce-cle="decompte"'));
         expect(commentaire.indexOf('data-enonce-cle="decompte"')).toBeLessThan(commentaire.indexOf('data-enonce-cle="priorite"'));
         const pos = (motif) => { const i = projection.indexOf(motif); expect(i, motif).toBeGreaterThan(-1); return i; };
-        const modele = pos('Modèle de projection');
+        // ↻ Lot 3a (26 oct. 2026) : la table des paliers de l'ébauche — l'en-tête (« Retirer la limite »),
+        // l'introduction, les réglages, la ligne « Limite : », les rangées, « + Ajouter un palier ».
+        const modele = pos('data-action="retirerLimiteAlgo"');
+        const aide = pos('class="table-cas-ou"');
         const reglage = pos('data-param-cle="motsReference"');
-        const seuil = pos('Seuil de l\'épreuve');
-        const aide = pos('palier-note-composer');
-        const paliers = pos('class="sous-critere-item palier-projection"');
-        const nonCorrigee = pos('palier-apercu-non-corrigee');
+        const seuil = pos('Limite : 1 erreur à chaque');
+        const paliers = pos('class="table-cas-rangee"');
         const bouton = projection.lastIndexOf('+ Ajouter un palier');
-        expect(modele).toBeLessThan(reglage);
+        expect(modele).toBeLessThan(aide);
+        expect(aide).toBeLessThan(reglage);
         expect(reglage).toBeLessThan(seuil);
-        expect(seuil).toBeLessThan(aide);
-        expect(aide).toBeLessThan(paliers);
-        expect(paliers).toBeLessThan(nonCorrigee);
-        expect(nonCorrigee).toBeLessThan(bouton);
+        expect(seuil).toBeLessThan(paliers);
+        expect(paliers).toBeLessThan(bouton);
         // ↻ Étape 2b (22 oct. 2026) : plus aucune rangée « Poser : » dans la carte — la palette du critère la sert.
         expect(projection).not.toContain('Poser :');
     });
@@ -235,10 +237,10 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
         expect(clesDe(commentaire)).toEqual(['decompte', 'priorite', 'concentre']);
         // ↻ 2b : ce que la zone offre se lit par `paletteAlgo.reperesDeZone`, la source de la palette et de la pose.
         expect(PA.reperesDeZone(ALGO, { enonceCle: 'decompte' }).map((b) => b.jeton)).toEqual(['{critere}', '{erreurs}', '{nomErreurs}', '{mots}', '{nomMots}', '{points}']);
-        expect(projection).toContain('Aucune projection ne sera proposée');
+        expect(projection).toContain('Aucune limite fixée : l’étudiant·e ne lit aucun palier.');   // ↻ lot 3a
         expect(projection).not.toContain('data-enonce-cle="decompte"');
-        expect(projection).not.toContain('palier-projection');
-        expect(projection).not.toContain('palier-note-composer');
+        expect(projection).not.toContain('table-cas-rangee');
+        expect(projection).not.toContain('table-cas-ou');
         expect(projection).not.toContain('reperes-palier');
         expect(projection).not.toContain('palier-apercu');
     });
@@ -249,13 +251,13 @@ describe('une seule carte · B — la carte se lit de haut en bas dans l\'ordre 
 describe('une seule carte · C — les titres que Grégoire lira, la clé de pli inchangée, la ligne « Texte de départ », l\'aide reprise', () => {
     const titre = (t) => new RegExp('<span class="accordeon-chevron">[▶▼]</span> ' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '\\s*<');
 
-    // ↻ #1150 : les titres sont ceux des étapes de la maquette validée — « Paliers » et « Ce que l'élève lit » ;
-    // ni « Projection », ni « Bilan », ni « Observation » ; plus de carte ni de clé de pli.
-    const etape = (t) => new RegExp('<span class="atelier-algo-etape-nom">' + t.replace(/'/g, "(?:'|&#x27;|&#39;)") + '</span>');
-    it('C.a les étapes « Paliers » et « Ce que l\'élève lit » ; plus de carte titrée « Projection » ni « Bilan » ; plus de clé de pli de carte', () => {
+    // ↻ #1150 : les titres sont ceux des étapes de la maquette validée ; ↻ lot 3a (ébauche du 26 oct.) :
+    // « Cas d'interprétation » et « Ce que l'étudiant·e lit » ; ni « Projection », ni « Bilan », ni « Observation ».
+    const etape = (t) => new RegExp('<span class="atelier-algo-etape-nom">' + t.replace(/’/g, "(?:’|&#x2019;)") + '</span>');
+    it('C.a les étapes « Cas d\'interprétation » et « Ce que l\'étudiant·e lit » ; plus de carte titrée « Projection » ni « Bilan » ; plus de clé de pli de carte', () => {
         const { html } = rendu();
-        expect(html).toMatch(etape('Ce que l\'élève lit'));
-        expect(html).toMatch(etape('Paliers'));
+        expect(html).toMatch(etape('Ce que l’étudiant·e lit'));
+        expect(html).toMatch(etape('Cas d’interprétation'));
         expect(html).not.toMatch(titre('Projection'));
         expect(html).not.toMatch(titre('Bilan'));
         expect(html).not.toContain('data-pli="CR:projection"');
@@ -267,18 +269,21 @@ describe('une seule carte · C — les titres que Grégoire lira, la clé de pli
         const { html, projection, commentaire } = rendu();
         expect(html).not.toContain('decompte-texte-depart');
         expect(html).not.toContain('Texte de départ : le modèle des phrases');
-        expect(commentaire).toContain('Modèle des phrases (bilan et décompte)');
-        expect(projection).not.toContain('Modèle des phrases (bilan et décompte)</label>');
+        expect(commentaire).toContain('Modèle des phrases</label>');
+        expect(projection).not.toContain('Modèle des phrases</label>');
         const css = source('styles.css');
         expect(css).not.toMatch(/\.decompte-eleve \{/);
         expect(css).not.toMatch(/\.decompte-texte-depart \{/);
     });
 
-    it('C.c l\'aide de la carte ne dit plus où le bloc se pose (la palette le dit) ; la ligne d\'aperçu redevient « L\'élève lira : »', () => {
+    // ↻ Lot 3a (26 oct. 2026) : la ligne d'aperçu sous chaque palier est partie ; « Voir ce que l'étudiant·e
+    // lirait à ce palier » règle la simulation de l'atelier sur lui (banc `critere-algorithmique-table-de-cas`).
+    it('C.c l\'aide de la carte ne dit plus où le bloc se pose (la palette le dit) ; chaque palier a son « Voir ce que l\'étudiant·e lirait à ce palier »', () => {
         const { projection } = rendu();
         expect(projection).not.toContain('le pose dans la zone où est le curseur');
         expect(projection).not.toContain('la zone du palier où est le curseur');
-        expect(compter(projection, '<span class="palier-apercu-mot">L\'élève lira :</span>')).toBe(6);
+        expect(projection).not.toContain('palier-apercu');
+        expect(compter(projection, 'data-apercu-geste="palier"')).toBe(6);
         expect(projection).not.toContain('décompte, puis tes deux phrases');
     });
 });
@@ -292,7 +297,7 @@ describe('une seule carte · D — même zone, mêmes attributs, même palette ;
         expect(bloc).toMatch(/<textarea class="controle-form" rows="2"\s+data-on-change="modifierTexteEnonceGrilleHandler" data-grille-id="G1" data-critere-index="0" data-enonce-cle="decompte"/);
         expect(bloc).toContain('>' + echapper(E.normaliser(ALGO).enonces.decompte) + '</textarea>');
         expect(bloc).toContain('data-enonce-cle="decompte" data-nom-zone="Décompte des erreurs"');
-        expect(bloc).not.toContain('<button');
+        expect(bloc).not.toContain('insererRepereEnonce');   // ↻ lot 3a : le seul bouton est « Revenir au modèle »
         expect(bloc.indexOf('<textarea')).toBeLessThan(bloc.indexOf('<small'));
     });
 

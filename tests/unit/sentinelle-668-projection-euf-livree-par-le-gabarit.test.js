@@ -437,9 +437,11 @@ describe('#668 · F — le service d\'aide est un réglage, et son absence se re
         // phrase encore utile vaut mieux qu'une phrase qui disparaît.
         // ↻ Lot 4, C.3 (4 sept. 2026) : un critère NEUF naît sans projection ; ce cas lit
         // donc la norme externe CHOISIE, avec les paliers en apposition du gabarit.
+        // ↻ Lot 3a (26 oct. 2026) : les paliers d'un critère neuf sont ceux du 25 oct. — « Il pourrait être
+        // utile de demander de l’aide : {service}. » ; sans nom, l'apposition part.
         const neuf = P.appliquerAuCritere({}, 'norme_externe', { nomServiceAide: '' }, P.paliersGabaritNeuf());
         const t = P.calculer(neuf, donnees).texte;
-        expect(t).toContain('service d\'aide de ton collège.');
+        expect(t).toContain('Il pourrait être utile de demander de l’aide.');
         expect(t).not.toContain(P.JETON_SERVICE);
         expect(t).not.toMatch(/[:—–-]\s*\./);
     });
@@ -448,7 +450,7 @@ describe('#668 · F — le service d\'aide est un réglage, et son absence se re
         const neuf = P.appliquerAuCritere({}, 'norme_externe', { nomServiceAide: '' }, P.paliersGabaritNeuf());
         neuf.paramsProjection.nomServiceAide = 'Passerelle +';
         const t = P.calculer(neuf, donnees).texte;
-        expect(t).toContain('de ton collège : Passerelle +.');
+        expect(t).toContain('demander de l’aide : Passerelle +.');
     });
 
     it('le gabarit livré ne charrie AUCUN nom d\'établissement', () => {
@@ -526,7 +528,9 @@ describe('#668 · G — aucune dépendance, aucune surface d\'exécution neuve',
 
     it('ni DOM, ni db, ni evaluationEnCours', () => {
         expect(code).not.toMatch(/\bdocument\./);
-        expect(code).not.toMatch(/\bwindow\.(?!projectionAlgo)/);
+        // ↻ Lot 3a (26 oct. 2026) : le registre lit les deux noms de l'enseignant·e à leur source, le registre
+        // des énoncés (`window.enoncesAlgo`, ou `require` en Node) — un registre, pas le DOM.
+        expect(code).not.toMatch(/\bwindow\.(?!projectionAlgo|enoncesAlgo)/);
         expect(code).not.toMatch(/\bdb\./);
         expect(code).not.toMatch(/evaluationEnCours/);
         expect(code).not.toMatch(/localStorage|indexedDB/);
@@ -657,8 +661,10 @@ describe('#668 · I — le bloc projection du gabarit', () => {
         // Un export manquant produit un ReferenceError MUET : le champ ne fait
         // simplement rien, et l'enseignant·e croit avoir réglé quelque chose.
         [
-            'modifierModeleProjectionTempHandler', 'modifierParamProjectionTempHandler',
-            'modifierPalierProjectionTempHandler', 'modifierModeleProjectionGrilleHandler',
+            // ↻ Lot 3a (26 oct. 2026) : le menu du modèle est parti ; « Fixer / Retirer la limite » et
+            // « Reprendre une de tes collections… » le remplacent.
+            'fixerLimiteAlgo', 'retirerLimiteAlgo', 'reprendreCollectionProjectionHandler',
+            'modifierParamProjectionTempHandler', 'modifierPalierProjectionTempHandler',
             'modifierParamProjectionGrilleHandler', 'modifierPalierProjectionGrilleHandler',
             'ajouterPalierProjectionTemp', 'supprimerPalierProjectionTemp',
             'ajouterPalierProjectionGrille', 'supprimerPalierProjectionGrille'
@@ -683,11 +689,13 @@ describe('#668 · I — le bloc projection du gabarit', () => {
                                 code.indexOf('function modifierProjectionCritereGrille'));
         // Les quatre porteurs de texte libre : libellé, verdict, phrase d'aide,
         // et le nom du service. Aucun ne doit atteindre le DOM sans esc().
-        ['pal.libelle', 'pal.texte', 'pal.texteAide'].forEach((champ) => {
+        // ↻ Lot 3a : la recommandation passe par `aide` (`const aide = pal.texteAide || ''`), échappée de même.
+        ['pal.libelle', 'pal.texte', 'aide'].forEach((champ) => {
             const motif = new RegExp('\\$\\{esc\\(' + champ.replace('.', '\\.'), 'g');
             expect(bloc, champ).toMatch(motif);
         });
-        expect(bloc).toContain('esc(p.params[par.cle])');
+        expect(bloc).toContain("const aide = pal.texteAide || '';");
+        expect(bloc).toContain('esc(p.params[cleParam])');
     });
 
     it('un seuil illisible est REFUSÉ, jamais interprété comme zéro', () => {
@@ -697,11 +705,15 @@ describe('#668 · I — le bloc projection du gabarit', () => {
         expect(code).toContain('marquerChampRefuse');
     });
 
-    it('changer de modèle repart des défauts du NOUVEAU modèle', () => {
-        // Garder les paliers de l'ancien modèle laisserait une grille dont les
-        // seuils ne veulent plus rien dire pour le modèle affiché.
-        expect(code).toContain('delete critere.paliersProjection;');
-        expect(code).toMatch(/appliquerAuCritere\(window\.tempCriteres\[index\], el\.value, null, null\)/);
+    it('fixer la limite d\'un critère existant repart des défauts du modèle — comme le menu d\'hier', () => {
+        // ↻ Lot 3a (26 oct. 2026) : le menu « Modèle de projection » est parti ; « Fixer une limite » fait ce
+        // qu'il faisait pour un critère existant — les défauts déclarés, les paliers de migration (lus).
+        const c = P.fixerLimite({ type: 'algorithmique', modeleProjection: 'aucune', paramsProjection: {} });
+        expect(c.modeleProjection).toBe('norme_externe');
+        expect(c.paramsProjection).toMatchObject({ motsReference: 900, erreursTolerees: 30, nomServiceAide: 'Centre d\'aide du collège' });
+        expect(c.paliersProjection).toBeUndefined();
+        expect(P.normaliser(c).paliers).toEqual(P.paliersMigration());
+        expect(code).toContain('window.projectionAlgo.fixerLimite(c);');
     });
 
     it('l\'écriture côté grille enregistrée est UNIQUE, pas trois appels', () => {

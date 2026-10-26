@@ -1009,18 +1009,44 @@
      * Elle porte maintenant le nom du critère, exactement comme l'en-tête de la
      * section du PDF : les deux disent le même mot du même décompte.
      */
+    /**
+     * Le code « principalement » : le plus compté. Égalité (lot 3a) : avec `liste` (critère neuf), le premier de
+     * la liste ; sans elle, le tri stable d'hier — le premier compté parmi les égaux.
+     */
+    function codePrincipal(frequences, liste) {
+        const principal = Object.keys(frequences).sort((a, b) => frequences[b] - frequences[a])[0];
+        if (!principal || !liste) return principal;
+        const premier = liste.find(c => frequences[c.id] === frequences[principal]);
+        return premier ? premier.id : principal;
+    }
+
+    /**
+     * Le nom du code « principalement ». Lot 3a (26 oct. 2026, règle de Grégoire du 25) — à égalité, un critère
+     * NEUF (la marque des noms) prend le premier code de SA liste ; un critère existant garde la règle d'hier.
+     * 3 sept. 2026 — le nom vient de la liste de la grille (`codesAnnotation`) ; un identifiant inconnu ne nomme
+     * rien, comme hier.
+     */
+    function nomDuPrincipal(frequences, grille, critereAlgo, codes, E) {
+        const liste = (codes && E && E.estNeuf(critereAlgo)) ? codes.listeCodes(grille) : null;
+        const principal = codePrincipal(frequences, liste);
+        const meta = (principal && codes) ? codes.code(grille, principal) : null;
+        return (meta && !meta.inconnu) ? meta.nom : '';
+    }
+
     function construireFrancaisResume(stats, grille, evaluation) {
         if (!stats || !stats.totalErreursFr) return '';
-        const codes = (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
+        const w = (typeof window !== 'undefined') ? window : {};
+        const codes = w.codesAnnotation || null;
+        const E = w.enoncesAlgo || null;
         const total = stats.totalErreursFr;
-        const principal = Object.keys(stats.erreursFr || {})
-            .sort((a, b) => stats.erreursFr[b] - stats.erreursFr[a])[0];
-        // 3 sept. 2026 — le nom vient de la liste de la grille (`codesAnnotation`) ;
-        // un identifiant inconnu ne nomme rien, comme hier.
-        const meta = (principal && codes) ? codes.code(grille, principal) : null;
-        const nomPrinc = (meta && !meta.inconnu) ? meta.nom : '';
+        const critereAlgo = E ? E.critereAlgorithmiqueOuNomme(grille, evaluation) : null;
+        const nomPrinc = nomDuPrincipal(stats.erreursFr || {}, grille, critereAlgo, codes, E);
         const titre = libelleErreurs(grille, evaluation);
-        return `${titre} : ${total} erreur${total > 1 ? 's' : ''}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;
+        // Lot 3a (§ 3.6) — le nom de ce que le critère compte, accordé (`nombreEtNom`, comme « Tous les critères
+        // sont maîtrisés »). Un critère sans noms lit « erreur(s) » : la ligne d'hier, à l'octet (un compte est
+        // entier, `> 1` et la règle unique `>= 2` y disent la même chose).
+        const compte = E ? E.nombreEtNom(total, critereAlgo) : `${total} erreur${total > 1 ? 's' : ''}`;
+        return `${titre} : ${compte}${nomPrinc ? ` (principalement : ${nomPrinc})` : ''}`;
     }
 
     /**
@@ -1699,6 +1725,9 @@
 
     window.syntheseRetroactionData = {
         construireFeedback: construireFeedback,
+        // Lot 3a (26 oct. 2026) — la ligne « principalement » de « Points récurrents », exposée pour le banc
+        // `critere-algorithmique-table-de-cas` (ses noms et sa règle d'égalité).
+        construireFrancaisResume: construireFrancaisResume,
         // #942 — LE groupe-cours d'un élève, exposé pour que le profil (leçon manquée d'une
         // absence) résolve le groupe comme le PDF le fait pour les échéances : une seule règle.
         groupeCoursIdDeLEleve: obtenirGcIdEleve,

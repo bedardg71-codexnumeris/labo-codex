@@ -2510,15 +2510,6 @@ span.header-icon {
     right: 2px;
 }
 
-#listeCriteres .palier-rangee {
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-#listeCriteres .palier-rangee:last-of-type {
-    margin-bottom: 0;
-}
-
 /* ============================================
    BOUTON « GUIDE » DES EN-TÊTES DE CARTE
    Réglages > Observation et dépistage (SOLO, ACP, RàI) et
@@ -3767,6 +3758,155 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
     .atelier-algo-etape-chevron, .apercu-algo-segment { transition: none; }
 }
 
+/* ===============================
+   LA TABLE DE CAS, LOT 3a (26 oct. 2026) — l'étape « Cas d'interprétation » (ébauche validée,
+   `plans de travail/EBAUCHE-2026-10-26-table-de-cas.html` ; `grilles.js`, `rendreBlocProjectionAlgo`).
+   Une rangée par palier, trois colonnes (Quand · Nom court · L'étudiant·e lit) qui s'empilent quand la
+   largeur de la table manque (requête de conteneur) ; l'ambre marque le cas que la copie fictive atteint.
+   =============================== */
+.table-cas {
+    container-type: inline-size; container-name: table-cas;
+    border: 1px solid var(--bordure-moyenne); border-radius: var(--radius-moyen); background: var(--surface-carte); min-width: 0;
+}
+.table-cas-tete {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px;
+    border-bottom: 1px solid var(--bordure-claire); background: var(--surface-element);
+    border-radius: var(--radius-moyen) var(--radius-moyen) 0 0;
+}
+.table-cas-titre { margin: 0; font-size: 0.98rem; font-weight: 700; color: var(--texte-principal); }
+.table-cas-selon { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.86rem; color: var(--texte-secondaire); min-width: 0; }
+.table-cas-repere {
+    display: inline-flex; align-items: center; padding: 2px 10px; border-radius: var(--radius-pill); font-size: 0.82rem; font-weight: 600;
+    background: var(--alerte-fond-succes); border: 1px solid var(--alerte-bordure-succes); color: var(--texte-principal);
+}
+.table-cas-reprendre select.controle-form { width: auto; max-width: 100%; min-height: 40px; }
+.table-cas-retirer { margin-left: auto; }
+.table-cas-lien {
+    background: none; border: 0; padding: 6px 2px; min-height: 36px; cursor: pointer; font: inherit; font-size: 0.85rem;
+    color: var(--accent-primaire); text-decoration: underline; text-underline-offset: 2px; text-align: left;
+}
+.table-cas-lien:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+.table-cas-corps { padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.table-cas-vide, .table-cas-ou { margin: 0; font-size: 0.88rem; color: var(--texte-secondaire); max-width: 72ch; }
+.table-cas-fixer, .table-cas-ajouter, .table-cas-ajout-reco { align-self: flex-start; }
+.table-cas-petit { display: block; margin: 0; font-size: 0.8rem; color: var(--texte-muted); }
+.table-cas-limite { font-variant-numeric: tabular-nums; }
+#listeCriteres .table-cas .table-cas-etiquette { font-size: 0.82rem; color: var(--texte-secondaire); font-weight: 500; }
+.table-cas-reglages { display: grid; gap: 12px; }
+.table-cas-reglages--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.table-cas-reglages--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.table-cas-reglages .groupe-form { margin: 0; min-width: 0; }
+.table-cas-entete, .table-cas-rangee { display: grid; grid-template-columns: 150px 170px minmax(0, 1fr); gap: 8px 12px; }
+.table-cas-entete {
+    padding: 0 11px; font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--texte-muted); font-weight: 600;
+}
+.table-cas-rangees { display: flex; flex-direction: column; gap: 6px; }
+.table-cas-rangee {
+    align-items: start; padding: 10px; border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: var(--surface-carte);
+}
+.table-cas-rangee[data-atteint] { border-color: var(--alerte-bordure-attention); background: var(--alerte-fond-attention); }
+.table-cas-quand { display: flex; flex-direction: column; gap: 3px; font-size: 0.86rem; padding-top: 6px; min-width: 0; color: var(--texte-principal); }
+.table-cas-borne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.table-cas-borne .table-cas-seuil { width: 76px; min-height: 40px; padding: 4px 8px; text-align: center; font-variant-numeric: tabular-nums; }
+.table-cas-nom { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.table-cas-nom .controle-form { min-height: 40px; font-weight: 600; }
+.table-cas-nom-etiq { display: none; font-size: 0.78rem; color: var(--texte-secondaire); }
+.table-cas-textes { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.table-cas-zone { margin: 0; }
+.table-cas-zone[hidden] { display: none; }
+.table-cas-zone-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-bottom: 4px; }
+.table-cas-zone-nom { font-weight: 700; font-size: 0.88rem; color: var(--texte-principal); }
+.table-cas-public {
+    font-size: 0.72rem; font-weight: 600; padding: 1px 8px; border-radius: var(--radius-pill);
+    border: 1px solid var(--alerte-bordure-succes); color: var(--alerte-texte-succes);
+}
+.table-cas-public--toi { border-color: var(--bordure-moyenne); color: var(--texte-secondaire); }
+.zone-revenir { margin-left: auto; min-height: 32px; padding: 2px; font-size: 0.8rem; }
+.table-cas-pied { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.table-cas-voir {
+    border: 1px solid var(--bordure-moyenne); background: var(--surface-carte); color: var(--texte-principal);
+    border-radius: var(--radius-moyen); padding: 6px 12px; min-height: 40px; cursor: pointer; font: inherit; font-size: 0.85rem; text-align: left;
+}
+.table-cas-voir:hover { border-color: var(--accent-primaire); }
+.table-cas-voir:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+#listeCriteres .table-cas .collection-bouton-enregistrer { align-self: flex-start; width: auto; }
+.table-cas-ici {
+    font-size: 0.72rem; font-weight: 700; color: var(--alerte-texte-attention); background: var(--surface-carte);
+    border: 1px solid var(--alerte-bordure-attention); border-radius: var(--radius-pill); padding: 1px 8px; white-space: nowrap;
+}
+.table-cas-ici[hidden] { display: none; }
+.table-cas-collections { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 1px solid var(--bordure-claire); }
+.table-cas-collections .collections-liste { margin: 0; padding: 0; list-style: none; }
+.table-cas .palier-jetons-inconnus { display: block; font-size: 0.78rem; color: var(--orange-accent); }
+@container table-cas (max-width: 560px) {
+    .table-cas-entete { display: none; }
+    .table-cas-rangee { grid-template-columns: minmax(0, 1fr); }
+    .table-cas-quand { padding-top: 0; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+    .table-cas-nom-etiq { display: block; }
+    .table-cas-retirer { margin-left: 0; }
+    .table-cas-reglages--3, .table-cas-reglages--2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* « Ce que l'application choisit sans toi » */
+.choix-app {
+    container-type: inline-size; container-name: choix-app; margin-top: 12px;
+    border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); padding: 12px;
+    display: flex; flex-direction: column; gap: 8px; background: var(--surface-carte);
+}
+.choix-app-titre { margin: 0; font-size: 0.98rem; color: var(--texte-principal); }
+.choix-app-liste { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.choix-app-item { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 2px 12px; font-size: 0.86rem; }
+.choix-app-item dt { font-weight: 700; color: var(--texte-principal); }
+.choix-app-item dd { margin: 0; color: var(--texte-secondaire); }
+.choix-app-item .table-cas-lien { padding: 0 2px; min-height: 0; font-size: inherit; }
+@container choix-app (max-width: 520px) { .choix-app-item { grid-template-columns: minmax(0, 1fr); } }
+
+/* « Ce que tu relèves et comptes » : les deux exemples (texte d'aide fixe) */
+.noms-algo-exemples {
+    border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: var(--surface-element);
+    padding: 10px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; max-width: 72ch;
+}
+.noms-algo-exemples-titre { margin: 0; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texte-muted); font-weight: 600; }
+.noms-algo-exemples-defile { overflow-x: auto; }
+.noms-algo-exemples table { border-collapse: collapse; font-size: 0.86rem; width: 100%; color: var(--texte-principal); }
+.noms-algo-exemples th { text-align: left; font-weight: 600; color: var(--texte-secondaire); padding: 4px 10px 4px 0; border-bottom: 1px solid var(--bordure-moyenne); }
+.noms-algo-exemples td { padding: 5px 10px 5px 0; vertical-align: top; }
+.noms-algo-exemples-phrase { color: var(--texte-secondaire); font-style: italic; }
+
+/* La palette : « Après la flèche », la valeur de chaque bloc sur la copie fictive */
+.palette-algo-legende { margin: 0; font-size: 0.76rem; color: var(--texte-muted); }
+.palette-algo-bloc-valeur { font-size: 0.78rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
+.palette-algo-bloc-valeur:empty { display: none; }
+.palette-algo-bloc-valeur::before { content: "→ "; color: var(--texte-muted); }
+.palette-algo-bloc-valeur--vide { font-style: italic; }
+.palette-algo-bloc[data-hors-zone] .palette-algo-bloc-valeur { display: none; }
+/* Compacte (sous le seuil), un bloc se réduit à son nom (retouches du 22 oct.) : ni la légende ni la valeur. */
+@container gabarit-algo (max-width: 753px) {
+    .palette-algo-legende, .palette-algo-bloc-valeur { display: none; }
+}
+
+/* La simulation : son but, ce qu'elle a réglé, le code le plus fréquent, l'état de chaque condition */
+.apercu-algo-but { margin: 0; font-size: 0.84rem; color: var(--texte-secondaire); }
+.apercu-algo-references-nom { font-size: 0.78rem; color: var(--texte-muted); }
+.apercu-algo-dominant { font-size: 0.78rem; color: var(--texte-muted); font-variant-numeric: tabular-nums; }
+.apercu-algo-dominant strong { color: var(--texte-secondaire); }
+.apercu-algo-dominant:empty { display: none; }
+.apercu-algo-flash { margin: 0; font-size: 0.8rem; color: var(--alerte-texte-attention); }
+.apercu-algo-flash:empty { display: none; }
+p.apercu-algo-si { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 8px; }
+.apercu-algo-etat {
+    font-size: 0.7rem; font-weight: 700; border-radius: var(--radius-pill); padding: 0 7px; border: 1px dashed var(--bordure-moyenne);
+    white-space: nowrap; color: var(--texte-muted);
+}
+.apercu-algo-etat[data-etat="oui"] { color: var(--alerte-texte-succes); border: 1px solid var(--alerte-bordure-succes); background: var(--alerte-fond-succes); }
+/* Une phrase qui ne s'afficherait pas sur cette copie : grisée, ses segments (des boutons) compris. */
+.apercu-algo .apercu-algo-texte--eteint,
+.apercu-algo .apercu-algo-texte--eteint .apercu-algo-segment { color: var(--texte-muted); }
+.apercu-algo-segment--fort { font-weight: 700; }
+@media (max-width: 759px) {
+    .apercu-algo[data-reduit] .apercu-algo-but { display: none; }
+}
+
 /* La pastille d'un bloc dans la phrase (`composeur-badges.js`, chip) : les deux
    familles de la palette, en petit. Elle porte le nom du bloc en mots (étape 2b). */
 .repere-enonce {
@@ -3833,53 +3973,8 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
     opacity: 1;
 }
 
-/* Étape 2b (22 oct. 2026) — la rangée de badges qui séparait « Palier · Jusqu'à » des deux zones
-   est partie (la palette du critère la remplace) : l'écart qu'elle donnait reste entre les rangées. */
-#listeCriteres .palier-projection .palier-rangee + .palier-rangee {
-    margin-top: 8px;
-}
-
-/* Le texte troué, étape 2 (§5, 4 sept.) — l'aperçu SOUS CHAQUE PALIER : « L'élève lira… »
-   suivi de la phrase remplie pour la copie fictive de ce palier. Rendu pur, aucun contrôle.
-   ↻ §7 (5 sept.) — deux segments : en gris ce qui est ENGENDRÉ (décompte, préfixe), dans
-   l'encre normale ce que l'enseignant·e a ÉCRIT (verdict, recommandation). Un segment vide
-   ne prend pas de place. */
-#listeCriteres .palier-apercu {
-    margin-top: 6px;
-    padding: 6px 10px;
-    border-left: 3px solid var(--accent-primaire);
-    background: var(--surface-input);
-    border-radius: 4px;
-    font-size: 0.88rem;
-    line-height: 1.45;
-    color: var(--texte-principal);
-}
-
-#listeCriteres .palier-apercu-mot {
-    font-size: 0.78rem;
-    color: var(--gris-moyen);
-    margin-right: 4px;
-}
-
-#listeCriteres .palier-apercu-engendre {
-    color: var(--gris-moyen);
-}
-
-#listeCriteres .palier-apercu-ecrit {
-    color: var(--texte-principal);
-}
-
-#listeCriteres .palier-apercu-engendre:empty,
-#listeCriteres .palier-apercu-ecrit:empty {
-    display: none;
-}
-
-#listeCriteres .palier-apercu-copie {
-    font-size: 0.78rem;
-    color: var(--gris-clair);
-    margin-left: 4px;
-    white-space: nowrap;
-}
+/* ↻ Lot 3a de la table de cas (26 oct. 2026) : la carte des paliers et l'aperçu « L'élève lira… » sous chaque
+   palier sont partis ; la table des paliers (`.table-cas`) et la simulation de l'atelier les remplacent. */
 
 /* iPad : la cible tactile des repères monte à 44 px dans le bloc `@media
    (pointer: coarse)` de #568, plus bas — un seul bloc tactile, que la

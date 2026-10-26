@@ -64,15 +64,18 @@ const calc = (critere, e, m) => P.calculer(critere, { erreurs: e, mots: m });
 describe('texte troué 2 · A — la palette est celle que Grégoire a arrêtée', () => {
     const palette = P.listerReperes();
 
-    it('A.a huit badges, dans cet ordre : service · seuil · longueur | erreurs · mots · moyenne · projection · palier', () => {
+    // ↻ Lot 3a de la table de cas (26 oct. 2026, consigne § 3.8) : les zones des paliers acceptent aussi les deux
+    // noms de l'enseignant·e, comme le décompte — dix badges, les deux noms en fin de liste, famille « posée ».
+    it('A.a dix badges, dans cet ordre : service · seuil · longueur | erreurs · mots · moyenne · projection · palier | les deux noms', () => {
         expect(palette.map((r) => r.jeton)).toEqual([
             '{service}', '{seuil}', '{longueur}',
-            '{erreurs}', '{mots}', '{moyenne}', '{projection}', '{palier}'
+            '{erreurs}', '{mots}', '{moyenne}', '{projection}', '{palier}',
+            '{nomErreurs}', '{nomMots}'
         ]);
     });
 
-    it('A.b deux familles : les trois posés (bleu), les cinq remplis (vert)', () => {
-        expect(palette.filter((r) => r.famille === 'posee').map((r) => r.jeton)).toEqual(['{service}', '{seuil}', '{longueur}']);
+    it('A.b deux familles : les cinq posés (bleu, dont les deux noms), les cinq remplis (vert)', () => {
+        expect(palette.filter((r) => r.famille === 'posee').map((r) => r.jeton)).toEqual(['{service}', '{seuil}', '{longueur}', '{nomErreurs}', '{nomMots}']);
         expect(palette.filter((r) => r.famille === 'remplie').map((r) => r.jeton)).toEqual(['{erreurs}', '{mots}', '{moyenne}', '{projection}', '{palier}']);
     });
 
@@ -81,7 +84,7 @@ describe('texte troué 2 · A — la palette est celle que Grégoire a arrêtée
         for (const interdit of ['{niveau}', '{note}', '{lien}', '{facteur}', '{s}']) expect(jetons).not.toContain(interdit);
         // Le rendu, lui, connaît {s} : un texte qui porte {erreurs} porte l'accord.
         expect(P.JETONS).toContain('{s}');
-        expect(P.JETONS.length).toBe(9);
+        expect(P.JETONS.length).toBe(11);   // lot 3a : + {nomErreurs}, {nomMots}
     });
 
     it('A.d chaque badge est un jeton que le rendu connaît, et porte un libellé et une aide', () => {
@@ -121,7 +124,8 @@ describe('texte troué 2 · B — chaque jeton rend sa valeur exacte, sur les qu
     it('B.j les valeurs elles-mêmes, pour 15 / 584 — celles de la carte, §b', () => {
         expect(calc(c, 15, 584).jetons).toEqual({
             service: 'Passerelle +', seuil: '30', longueur: '900',
-            erreurs: '15', mots: '584', moyenne: '39', projection: '23', palier: 'Risqué', s: 's'
+            erreurs: '15', mots: '584', moyenne: '39', projection: '23', palier: 'Risqué', s: 's',
+            nomErreurs: 'erreurs', nomMots: 'mots'   // lot 3a : un critère sans noms lit « erreur » et « mot »
         });
     });
 

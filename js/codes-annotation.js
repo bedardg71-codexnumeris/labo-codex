@@ -325,6 +325,34 @@ function sommePonderee(grille, compteurs) {
 }
 
 /**
+ * LE CODE LE PLUS FRÉQUENT (lot 3a de la table de cas, 26 oct. 2026 ; règle d'égalité de Grégoire,
+ * 25 oct.). `poses` : les codes posés, DANS L'ORDRE où ils l'ont été ; `liste` : l'ordre de la liste des
+ * codes, ou rien. À égalité :
+ *   · avec `liste` (un critère NEUF) : le premier dans la liste — l'étudiant·e lit toujours la même
+ *     observation pour les mêmes nombres ;
+ *   · sans elle (un critère existant) : le premier à ATTEINDRE ce nombre, la règle d'hier
+ *     (`_trouverCodeDominant`, evaluation-calcul.js).
+ * Rend `{code, max, egaux, frequences}`, ou null sans code posé. Pure.
+ */
+function lePlusFrequent(poses, liste) {
+    var codes = Array.isArray(poses) ? poses : [];
+    if (!codes.length) return null;
+    var frequences = {}, max = 0, premier = null;
+    codes.forEach(function(k) {
+        frequences[k] = (frequences[k] || 0) + 1;
+        if (frequences[k] > max) { max = frequences[k]; premier = k; }
+    });
+    var egaux = Object.keys(frequences).filter(function(k) { return frequences[k] === max; });
+    var choisi = premier;
+    if (Array.isArray(liste)) {
+        for (var i = 0; i < liste.length; i++) {
+            if (frequences[liste[i]] === max) { choisi = liste[i]; break; }
+        }
+    }
+    return { code: choisi, max: max, egaux: egaux, frequences: frequences };
+}
+
+/**
  * La grille d'une copie : copie → production → grille.
  *
  * Mesuré le 3 septembre 2026 : ce chemin n'est ni toujours vrai (une copie
@@ -366,6 +394,7 @@ var api = {
     listeCodes: listeCodes,
     code: code,
     sommePonderee: sommePonderee,
+    lePlusFrequent: lePlusFrequent,
     grilleDeCopie: grilleDeCopie
 };
 

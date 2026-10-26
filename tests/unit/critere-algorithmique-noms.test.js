@@ -431,7 +431,8 @@ describe('noms · D — une rédaction et une discipline sans texte, sur chaque 
         // l'atelier — « Quelques » au départ, sur l'étendue du miroir (900 : la longueur de la projection).
         it(`D.d ${d.nom} : le gabarit — l’aide sous la formule, « Ce que l’élève lira », la copie fictive d’un palier`, () => {
             const c = Object.assign({}, d.c, { sousCriteres: SC, modeleFormule: 'penalite_normalisee', paramsFormule: { facteurNormalisation: 500 },
-                modeleProjection: 'norme_externe', paramsProjection: { motsReference: 900 } });
+                // ↻ Lot 3a : un critère neuf (la marque des noms) ne reçoit plus la tolérance de 30 par défaut — écrite ici.
+                modeleProjection: 'norme_externe', paramsProjection: { motsReference: 900, erreursTolerees: 30 } });
             const liste = editeur(c).liste();
             const t = plat(liste.textContent);
             expect(t).toContain(`Lors de l'évaluation, « ${d.champE} » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « ${d.champM} » se tape.`);
@@ -439,11 +440,14 @@ describe('noms · D — une rédaction et une discipline sans texte, sur chaque 
             expect(apercu.querySelector('[data-apercu-champ="mots"]').value).toBe('900');
             expect(plat(apercu.querySelector('[data-apercu-nom="mots"]').textContent)).toBe(d.mp);
             expect(plat(apercu.querySelector('[data-lecture="pdf"]').textContent)).toMatch(new RegExp(`Ta production contient \\d+ (${d.s}|${d.p}) pour 900 ${d.mp}\\.`));
-            expect(t).toMatch(new RegExp(`— copie fictive, \\d+ (${d.s}|${d.p}) pour 900 ${d.mp}`));   // un palier
+            // ↻ Lot 3a (26 oct. 2026) : la ligne « copie fictive » sous chaque palier est partie ; la table dit, dans
+            // les noms du critère, ce que chaque seuil vaut et ce que la limite tolère.
+            expect(t).toMatch(new RegExp(`Limite : 1 ${d.s} à chaque 30 ${d.mp} \\(30 ${d.p} pour 900 ${d.mp}\\)\\.`));
+            expect(t).toContain(`soit au plus 1 ${d.s} à chaque 100 ${d.mp}`);
             // Ce que l'aperçu dit de la copie ne garde aucun mot de la rédaction. (Hors du lot : la formule,
             // « Erreurs pondérées ÷ Mots », attend l'étape 4 ; les textes de la projection EUF, l'étape 3.)
             if (d.nom === 'chimie') {
-                const donnees = [...liste.querySelectorAll('[data-apercu-nom], .apercu-algo-codes, .apercu-algo-etendue, .palier-apercu-copie')].map((x) => x.textContent).join(' ');
+                const donnees = [...liste.querySelectorAll('[data-apercu-nom], .apercu-algo-codes, .apercu-algo-etendue, .table-cas-quand, .table-cas-limite')].map((x) => x.textContent).join(' ');
                 expect(donnees.toLowerCase()).not.toMatch(/\berreurs?\b|\bmots?\b/);
             }
         });

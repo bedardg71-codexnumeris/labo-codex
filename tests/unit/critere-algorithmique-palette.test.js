@@ -250,7 +250,7 @@ describe('palette · N — des blocs nommés en mots, deux groupes ; les chips m
         const m = rendu([REDACTION]);
         const { palette } = domDe(m, 'CR');
         const groupes = [...palette.querySelectorAll('.palette-algo-groupe')];
-        expect(groupes.map((g) => texteVisible(g.querySelector('.palette-algo-groupe-nom')))).toEqual(['Ce que tu écris dans la grille', 'Ce qui se remplit à la correction']);
+        expect(groupes.map((g) => texteVisible(g.querySelector('.palette-algo-groupe-nom')))).toEqual(['Ce que tu écris dans la grille', 'Ce qui se remplit quand tu évalues la copie']   /* ↻ lot 3a : les mots de l'ébauche */);
         expect(groupes[0].querySelectorAll('.palette-algo-bloc--remplie').length).toBe(0);
         expect(groupes[1].querySelectorAll('.palette-algo-bloc--posee').length).toBe(0);
         for (const b of palette.querySelectorAll('.palette-algo-bloc')) {
@@ -281,12 +281,14 @@ describe('palette · N — des blocs nommés en mots, deux groupes ; les chips m
         expect(nom(neuf, '{erreurs}')).toBe('Compte des éléments relevés');
     });
 
-    it('N.c les blocs propres aux paliers gardent leurs libellés (avec leur majuscule) ; {critere} et {points} aussi', () => {
+    // ↻ Lot 3a de la table de cas (26 oct. 2026) : l'étape 3 a repris les blocs des paliers — leurs noms et leurs aides
+    // sont ceux de l'ébauche validée, sans « erreur » ni « mot » ; la moyenne porte les noms du critère.
+    it('N.c les blocs des paliers portent les mots de l\'ébauche ; {critere} et {points} gardent leurs libellés', () => {
         const parJeton = Object.fromEntries(PA.blocs(REDACTION).map((b) => [b.jeton, b]));
-        for (const r of P.listerReperes().filter((x) => x.jeton !== '{erreurs}' && x.jeton !== '{mots}')) {
-            expect(parJeton[r.jeton].nom).toBe(r.libelle.charAt(0).toUpperCase() + r.libelle.slice(1));
-            expect(parJeton[r.jeton].aide).toBe(r.aide);
-        }
+        expect(['{service}', '{seuil}', '{longueur}', '{moyenne}', '{projection}', '{palier}'].map((j) => parJeton[j].nom))
+            .toEqual(['Nom du service', 'Tolérance', 'Longueur de référence', 'Moyenne de mots par erreur', 'Compte projeté', 'Palier atteint']);
+        expect(PA.blocs({ ...CHIMIE, modeleProjection: 'norme_externe' }).find((b) => b.jeton === '{moyenne}').nom).toBe('Moyenne de calculs par unité manquante');
+        expect(parJeton['{moyenne}'].aide).toBe('En moyenne, 1 à chaque N : c’est ce N. Vide sans occurrence.');
         expect(parJeton['{critere}'].nom).toBe('Nom du critère');
         expect(parJeton['{points}'].nom).toBe('Somme pondérée');
         expect(parJeton['{points}'].precision.length).toBeGreaterThan(10);
@@ -322,7 +324,7 @@ describe('palette · G — une rédaction et une chimie : la seconde ne lit ni �
         for (const z of zones) expect(z.dataset.nomZone).not.toMatch(MOTS_REDACTION);
         // La palette ciblée sur chaque zone dit son nom, sans erreur ni mot.
         for (const z of zones) { m.win.ciblerPaletteAlgo(palette, z); expect(texteVisible(palette)).not.toMatch(MOTS_REDACTION); }
-        expect(m.html).toContain('>Décompte des unités manquantes</label>');
+        expect(m.html).toContain('class="table-cas-zone-nom">Décompte des unités manquantes</span>');
         expect(m.html).toContain('data-nom-zone="Décompte des unités manquantes"');
     });
 
@@ -331,15 +333,15 @@ describe('palette · G — une rédaction et une chimie : la seconde ne lit ni �
         const { palette } = domDe(m, 'CR');
         expect(texteVisible(palette)).toContain('Compte des erreurs');
         expect(texteVisible(palette)).toContain('Compte des mots');
-        expect(m.html).toContain('>Décompte des erreurs</label>');
+        expect(m.html).toContain('class="table-cas-zone-nom">Décompte des erreurs</span>');
     });
 
-    it('G.c avec une projection, seuls les cinq libellés des paliers (que l\'étape 3 reprend) parlent encore d\'erreurs ou de mots', () => {
+    // ↻ Lot 3a (26 oct. 2026) : l'étape 3 a levé la limite que ce cas disait — plus aucun bloc ne parle d'erreurs
+    // ou de mots chez la chimie, paliers compris.
+    it('G.c avec une limite fixée, aucun bloc (paliers compris) ne parle d\'erreurs ni de mots', () => {
         const chimieProjetee = { ...CHIMIE, modeleProjection: 'norme_externe' };
         const fautifs = PA.blocs(chimieProjetee).filter((b) => MOTS_REDACTION.test(b.nom + ' ' + b.aide + ' ' + b.precision)).map((b) => b.jeton);
-        // La limite connue, dite : elle existe (l'étape 3 la lèvera), et elle ne déborde pas des paliers.
-        expect(fautifs.length).toBeGreaterThan(0);
-        for (const j of fautifs) expect(['{seuil}', '{longueur}', '{moyenne}', '{projection}', '{palier}']).toContain(j);
+        expect(fautifs).toEqual([]);
     });
 });
 
@@ -350,7 +352,7 @@ describe('palette · X — un nom piégé reste du texte', () => {
         const m = rendu([PIEGEE]);
         expect(m.html).not.toContain(PIEGE);
         expect(m.html).toContain(echapper('Compte des ' + PIEGE));
-        expect(m.html).toContain('>Décompte des ' + echapper(PIEGE) + '</label>');
+        expect(m.html).toContain('class="table-cas-zone-nom">Décompte des ' + echapper(PIEGE) + '</span>');
         const { palette } = domDe(m, 'CP');
         expect(palette.querySelector('img')).toBeNull();
         expect(texteVisible(palette)).toContain('Compte des ' + PIEGE);
@@ -381,7 +383,7 @@ describe('palette · S — rien n\'est écrit dans le stock ; un critère d\'ava
         expect(m.ecrits).toEqual([]);
         expect(m.store).toEqual(m.avantRendu);
         expect(m.store.a2026_grillesTemplates[0].criteres[0]).toEqual(avant);
-        expect(m.html).toContain('>Décompte des erreurs</label>');
+        expect(m.html).toContain('class="table-cas-zone-nom">Décompte des erreurs</span>');
         const { palette } = domDe(m, 'CS');
         m.win.ciblerPaletteAlgo(palette, palette.ownerDocument.querySelector('textarea[data-enonce-cle="decompte"]'));
         expect(m.ecrits).toEqual([]);
