@@ -201,12 +201,61 @@ function _projectionEUF(critereId, erreurs, mots, critere) {
  * @param {Object} critereEnonces - le critère dont les énoncés se lisent (#686)
  * @param {Object} critereGrille - le critère de grille, qui porte la projection
  */
-function phraseDecompteAlgo(critereEnonces, critereGrille, erreurs, erreursFormule, mots) {
+function phraseDecompteAlgo(critereEnonces, critereGrille, erreurs, erreursFormule, mots, contexte) {
     // #581 — la phrase est celle que le gabarit de la grille porte, et elle ne nomme aucune
     // discipline que son auteur·e n'a pas écrite.
-    return window.enoncesAlgo.enonce(critereEnonces, 'decompte',
+    const phrase = window.enoncesAlgo.enonce(critereEnonces, 'decompte',
         { erreurs: erreurs, mots: mots, points: window.enoncesAlgo.mentionPonderee(erreurs, erreursFormule) })   // #686
         + _projectionEUF(critereGrille && critereGrille.id, erreurs, mots, critereGrille);   // puis la projection EUF
+    return _avecTablesCas(phrase, critereGrille, erreurs, erreursFormule, mots, contexte);
+}
+
+/**
+ * La table de cas, lot 3b (26 oct. 2026) — LES TABLES DE L'ENSEIGNANT·E, JUSTE APRÈS LA PROJECTION : le texte du
+ * cas atteint de chaque table, dans leur ordre (`tablesCasAlgo.ajouterALaPhrase`). Sans table, ou sans texte
+ * atteint, la phrase reste celle d'hier, à l'octet. `contexte` : {note, code, poses} — la note retenue et le code
+ * le plus fréquent de la copie (ou ses codes posés, dans l'ordre) ; une clé absente se calcule (la note, par la
+ * formule) ou se lit vide (le code : « Aucun code »).
+ */
+function _avecTablesCas(phrase, critereGrille, erreurs, erreursFormule, mots, contexte) {
+    if (!critereGrille || !window.tablesCasAlgo) return phrase;
+    const copie = Object.assign({ erreurs: erreurs, erreursFormule: erreursFormule, mots: mots }, contexte || {});
+    return window.tablesCasAlgo.ajouterALaPhrase(phrase, critereGrille, copie);
+}
+
+/**
+ * Lot 3b — le code le plus fréquent de la COPIE évaluée, pour une table selon « Le code le plus fréquent » : la
+ * même source que la ligne « principalement » du bilan, les codes posés dans Annoter. Ils ne vont qu'au premier
+ * critère algorithmique de la grille (#1132) : un autre critère tape son compte, et lit « Aucun code ». Rien
+ * n'est lu sans une telle table (la phrase d'un critère sans elle ne dépend d'aucune annotation).
+ * @returns {string|null|undefined} le numéro du code, null (aucun code), undefined (aucune table du code)
+ */
+function _codeDeLaCopiePourTables(critereGrille) {
+    const T = window.tablesCasAlgo;
+    if (!T || !critereGrille || !T.lire(critereGrille).some(t => t.selon === 'code')) return undefined;
+    try {
+        const grille = (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.id === evaluationEnCours?.grilleId);
+        const E = window.enoncesAlgo;
+        const premier = (grille && E && typeof E.criteresAlgorithmiques === 'function') ? E.criteresAlgorithmiques(grille)[0] : null;
+        if (!premier || premier.id !== critereGrille.id) return null;
+        const annotation = _annotationDeLaCopie();
+        const poses = (annotation && window.codesAnnotation) ? window.codesAnnotation.posesDeLAnnotation(annotation) : [];
+        return T.codeLePlusFrequent(critereGrille, poses);
+    } catch (e) {
+        console.warn('[tables de cas] les codes posés ne se lisent pas : la table lit « Aucun code ».', e);
+        return null;
+    }
+}
+
+/** L'annotation de la copie évaluée : celle qu'Annoter a ouverte, si c'est bien la sienne (#1142) ; sinon par l'évaluation. */
+function _annotationDeLaCopie() {
+    const ta = window.travauxAnnotation, ts = window.travauxStockage;
+    const courante = (ta && typeof ta.getAnnotationCourante === 'function') ? ta.getAnnotationCourante() : null;
+    if (courante && courante.fichierId && copieEstCelleDeLEvaluationEnCours(courante.fichierId)) return courante;
+    const res = window.travauxResolution;
+    const fichier = (res && typeof res.trouverFichierPourEvaluation === 'function' && evaluationEnCours)
+        ? res.trouverFichierPourEvaluation(evaluationEnCours) : null;
+    return (fichier && ts && typeof ts.obtenirAnnotationFichier === 'function') ? ts.obtenirAnnotationFichier(fichier.id) : null;
 }
 
 /**
@@ -685,7 +734,7 @@ function _trouverCodeDominant(codesSousCriteres, liste) {
     return { codeDominant, maxFreq };
 }
 
-function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant) {
+function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant, contexte) {
     // #581 — LA PHRASE VIENT DU GABARIT DE LA GRILLE, PLUS DU MOTEUR. Elle
     // disait « Ta rédaction contient N erreurs de français » à TOUT critère
     // algorithmique : celui qui compte des erreurs de calcul comme celui qui
@@ -712,6 +761,8 @@ function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePond
     // verdicts déjà rendus — pas un ajustement de code.
     const retroactionEUF = _projectionEUF(critereId, totalErreurs, mots);
     if (retroactionEUF) retroaction += retroactionEUF;
+    // Lot 3b (26 oct. 2026) — les tables de l'enseignant·e, après la projection, avant l'observation du code dominant.
+    retroaction = _avecTablesCas(retroaction, _critereDeGrille(critereId), totalErreurs, sommePonderee, mots, contexte);
     if (scDominant && scDominant.retroaction) retroaction += ` ${scDominant.retroaction}`;
     return retroaction;
 }
@@ -796,7 +847,8 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
             `${nomDominant} (${maxFreq} occurrence${maxFreq > 1 ? 's' : ''} du code ${codeDominant})`;
     }
 
-    const retroaction = _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant);
+    const retroaction = _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePonderee, mots, scDominant,
+        { note: pctFinal * ponderation / 100, code: codeDominant === null ? null : String(codeDominant) });   // lot 3b
     const commDiv = document.getElementById(`comm_${critereId}`);
     if (commDiv) commDiv.textContent = retroaction;
 
@@ -937,7 +989,12 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     _appliquerStyleResultatAlgo(critereId, niveauIDME);
 
     // Construire la rétroaction générique simple (#581, #686, EUF) — `phraseDecompteAlgo`.
-    const retroactionGenerique = phraseDecompteAlgo(_critereEnoncesPour(critereId), _critereDeGrille(critereId), erreurs, erreursFormule, mots);
+    // Lot 3b (26 oct. 2026) : les tables de l'enseignant·e lisent la note retenue et le code le plus fréquent de la copie.
+    const critereGrilleAlgo = _critereDeGrille(critereId);
+    const contexteTables = { note: pctFinal * ponderation / 100 };
+    const codeTables = _codeDeLaCopiePourTables(critereGrilleAlgo);
+    if (codeTables !== undefined) contexteTables.code = codeTables;
+    const retroactionGenerique = phraseDecompteAlgo(_critereEnoncesPour(critereId), critereGrilleAlgo, erreurs, erreursFormule, mots, contexteTables);
 
     // #672 — `textContent`, PAS `.value`. `comm_<critereId>` est un `<div>`
     // (evaluation-chargement.js:1028 et :1194, les deux chemins de rendu) : `.value`

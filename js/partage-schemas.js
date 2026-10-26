@@ -275,6 +275,27 @@
                                 texteAide: { type: 'chaine', max: 5000 }
                             }
                         },
+                        // La table de cas, lot 3b (26 oct. 2026) — LES TABLES DE L'ENSEIGNANT·E VOYAGENT. Même classe
+                        // que #667/#668/#581 : non déclarées ici, elles disparaîtraient au partage, et l'étudiant·e du
+                        // collègue ne lirait pas les textes de ses cas. Ce que le schéma ne dit pas (une valeur et des
+                        // genres connus, une borne lisible, des identifiants uniques) : `tablesCasAlgo.refusStructure`,
+                        // appelé par partage-validation (niveau 3), comme le barème.
+                        tablesCas: {
+                            type: 'tableau', max: 10,
+                            schema: {
+                                id: { type: 'chaine', requis: true, max: 40 },
+                                selon: { type: 'chaine', requis: true, max: 20 },
+                                cas: {
+                                    type: 'tableau', max: 40,
+                                    schema: {
+                                        genre: { type: 'chaine', requis: true, max: 20 },
+                                        borne: { type: 'nombre' },
+                                        code: { type: 'chaine', max: 20 },
+                                        texte: { type: 'chaine', max: 5000 }
+                                    }
+                                }
+                            }
+                        },
                         // #581 — LES ÉNONCÉS D'UN CRITÈRE ALGORITHMIQUE VOYAGENT.
                         // Troisième fois que ce trou se creuse, après #667 (la
                         // formule) et #668 (la projection) : la projection ne

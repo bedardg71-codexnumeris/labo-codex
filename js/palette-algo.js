@@ -7,7 +7,8 @@
    Vocation
      UNE palette par critère algorithmique, sur le côté de son gabarit, sur le modèle de celle de
      la dissection (nom, aide, précision, groupe). Elle sert toutes les zones d'écriture du
-     critère : les quatre énoncés et les deux zones de chaque palier. Ce module dit QUOI montrer ;
+     critère : les quatre énoncés, les deux zones de chaque palier et (lot 3b, 26 oct. 2026) le texte de
+     chaque cas des tables de l'enseignant·e. Ce module dit QUOI montrer ;
      `grilles.js` le rend et pose le bloc au curseur.
 
    LES BLOCS — les repères des deux registres, réunis
@@ -45,6 +46,7 @@ function _reg(nom, fichier) {
 }
 function _E() { return _reg('enoncesAlgo', './evaluation-enonces.js'); }
 function _P() { return _reg('projectionAlgo', './evaluation-projection.js'); }
+function _T() { return _reg('tablesCasAlgo', './tables-cas-algo.js'); }
 
 // Les textes de la palette — provisoires, réunis avec leur site dans
 // `plans de travail/TEXTES-2026-10-22-palette-critere-algorithmique.md`. Cowork les tranche.
@@ -153,15 +155,21 @@ function aDesPaliers(critere) {
     return !!(p && p.modele && p.modele.projette);
 }
 
+/** Le critère a-t-il des tables de cas (lot 3b) ? Leurs zones offrent les blocs des paliers. */
+function _aDesTables(critere) {
+    var T = _T();
+    return !!(T && critere && T.aDesTables(critere));
+}
+
 /**
  * Les blocs de la palette d'un critère, dans l'ordre : le groupe `posee`, puis `remplie` ; dans
- * chaque groupe, ceux des énoncés puis ceux des paliers. Sans paliers, aucun bloc des paliers.
+ * chaque groupe, ceux des énoncés puis ceux des paliers. Sans paliers ni table de cas, aucun bloc des paliers.
  * @returns {Array<{jeton, famille, groupe, nom, aide, precision, espaceDeTete}>}
  */
 function blocs(critere) {
     var E = _E(), P = _P();
     var noms = _noms(critere);
-    var sources = (E ? E.listerReperes() : []).concat(aDesPaliers(critere) && P ? P.listerReperes() : []);
+    var sources = (E ? E.listerReperes() : []).concat((aDesPaliers(critere) || _aDesTables(critere)) && P ? P.listerReperes() : []);
     var vus = {};
     var tous = [];
     sources.forEach(function(r) {
@@ -176,6 +184,16 @@ function blocs(critere) {
 }
 
 /**
+ * Ce qu'une zone de table de cas offre (lot 3b, consigne § 2.4) : les blocs des paliers, plus la somme
+ * pondérée ({points}, celle du décompte). Les repères bruts des deux registres, comme `listerReperes`.
+ */
+function reperesDesTables() {
+    var E = _E(), P = _P();
+    var points = (E ? E.listerReperes() : []).filter(function(r) { return r.jeton === '{points}'; });
+    return (P ? P.listerReperes() : []).concat(points);
+}
+
+/**
  * Les repères qu'une zone OFFRE, nommés pour ce critère — ce que la palette active, ce que le
  * composeur montre dans la phrase, ce que la pose accepte. `zone` : le `dataset` d'une zone
  * (`enonceCle`, ou `palierIndex`). Une zone inconnue n'offre rien.
@@ -185,6 +203,7 @@ function reperesDeZone(critere, zone) {
     var d = zone || {};
     var liste = [];
     if (d.palierIndex !== undefined) liste = P ? P.listerReperes() : [];
+    else if (d.tableCas !== undefined) liste = reperesDesTables();
     else if (d.enonceCle !== undefined) liste = E ? E.reperesDeCle(d.enonceCle) : [];
     var noms = _noms(critere);
     return liste.map(function(r) { return _nommer(r, noms); });
@@ -198,14 +217,8 @@ function reperesDeZone(critere, zone) {
  */
 function nomDeZone(zone, critere) {
     var d = zone || {};
-    if (d.palierIndex !== undefined) {
-        // Lot 3a : le palier se nomme par son nom court (« Verdict, palier Risqué »), sinon par son rang.
-        var champ = TEXTES.champsPalier[d.champ] || TEXTES.champsPalier.texte;
-        var P = _P();
-        var pal = (P && critere) ? (P.normaliser(critere).paliers || [])[Number(d.palierIndex)] : null;
-        var nom = pal ? String(pal.libelle || pal.cle || '').trim() : '';
-        return TEXTES.zonePalier(champ, nom || String(Number(d.palierIndex) + 1));
-    }
+    if (d.palierIndex !== undefined) return _nomDeZonePalier(d, critere);
+    if (d.tableCas !== undefined) return _nomDeZoneTable(d, critere);
     if (d.enonceCle === 'decompte') return 'Décompte des ' + _noms(critere).erreurs.pluriel;
     var E = _E();
     var cles = E ? E.listerCles() : [];
@@ -213,11 +226,27 @@ function nomDeZone(zone, critere) {
     return '';
 }
 
+/** Lot 3a : le palier se nomme par son nom court (« Verdict, palier Risqué »), sinon par son rang. */
+function _nomDeZonePalier(d, critere) {
+    var champ = TEXTES.champsPalier[d.champ] || TEXTES.champsPalier.texte;
+    var P = _P();
+    var pal = (P && critere) ? (P.normaliser(critere).paliers || [])[Number(d.palierIndex)] : null;
+    var nom = pal ? String(pal.libelle || pal.cle || '').trim() : '';
+    return TEXTES.zonePalier(champ, nom || String(Number(d.palierIndex) + 1));
+}
+
+/** Lot 3b — une zone de table de cas : « Table selon le compte des erreurs, cas jusqu’à 2 » (`tablesCasAlgo`). */
+function _nomDeZoneTable(d, critere) {
+    var T = _T();
+    return (T && critere) ? T.nomDeZone(critere, d.tableCas, d.cas) : '';
+}
+
 var api = {
     TEXTES: TEXTES,
     aDesPaliers: aDesPaliers,
     blocs: blocs,
     reperesDeZone: reperesDeZone,
+    reperesDesTables: reperesDesTables,
     nomDeZone: nomDeZone
 };
 

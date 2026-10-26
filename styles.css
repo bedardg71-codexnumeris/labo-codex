@@ -3847,6 +3847,32 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
     .table-cas-reglages--3, .table-cas-reglages--2 { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* LA TABLE DE CAS, LOT 3b (26 oct. 2026) — les tables de l'enseignant·e (`grilles.js`, `rendreTablesCasAlgo`) :
+   la carte des paliers, en deux colonnes (Quand · L'étudiant·e lit), qui s'empilent de même ; la confirmation
+   d'un retrait vit dans la carte (jamais `confirm()`). */
+.table-cas--enseignant { margin-top: 12px; }
+.table-cas--enseignant .table-cas-entete, .table-cas--enseignant .table-cas-rangee { grid-template-columns: 170px minmax(0, 1fr); }
+/* Le menu « Selon » (et « Reprendre une de tes collections… », même étiquette) : WebKit ignore la hauteur d'un menu
+   natif (mesuré : 23 px) — l'apparence du système retirée, le chevron dessiné, comme les menus de la bibliothèque.
+   L'id du conteneur : `.mode-clair .contenu select { background: white }` (0,2,1) emporterait le chevron (vu en capture). */
+#listeCriteres .table-cas-selon select.controle-form {
+    width: auto; max-width: 100%; height: 40px; min-height: 40px; padding: 0 32px 0 12px;
+    color: var(--texte-principal); background-color: var(--surface-carte);
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+}
+.table-cas-confirmer {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px;
+    border: 1px solid var(--alerte-bordure-attention); background: var(--alerte-fond-attention); border-radius: var(--radius-moyen);
+}
+.table-cas-confirmer p { margin: 0; flex: 1 1 220px; font-size: 0.88rem; font-weight: 600; color: var(--texte-principal); }
+.table-cas-confirmer .btn { min-height: 40px; }
+.table-cas-ajouter-table { align-self: flex-start; margin-top: 12px; min-height: 40px; }
+@container table-cas (max-width: 560px) {
+    .table-cas--enseignant .table-cas-rangee { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* « Ce que l'application choisit sans toi » */
 .choix-app {
     container-type: inline-size; container-name: choix-app; margin-top: 12px;

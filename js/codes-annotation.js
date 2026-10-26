@@ -353,6 +353,25 @@ function lePlusFrequent(poses, liste) {
 }
 
 /**
+ * LES CODES POSÉS SUR UNE ANNOTATION, DANS L'ORDRE (lot 3b de la table de cas, 26 oct. 2026) : les
+ * identifiants `errfr_*` de ses formes, page après page, dans l'ordre où elles sont écrites — la source de
+ * `compterCodesAnnotation` (travaux-outils.js) et de la ligne « principalement », gardée en ordre pour la
+ * règle d'égalité (`lePlusFrequent`). Tout code compte, connu de la liste ou non, comme au total. Pure.
+ */
+function posesDeLAnnotation(annotation) {
+    var poses = [];
+    if (!annotation || !annotation.pages || typeof annotation.pages !== 'object') return poses;
+    Object.keys(annotation.pages).forEach(function(k) {
+        var page = annotation.pages[k];
+        if (!page || !Array.isArray(page.shapes)) return;
+        page.shapes.forEach(function(f) {
+            if (f && typeof f.type === 'string' && f.type.indexOf(PREFIXE) === 0) poses.push(f.type);
+        });
+    });
+    return poses;
+}
+
+/**
  * La grille d'une copie : copie → production → grille.
  *
  * Mesuré le 3 septembre 2026 : ce chemin n'est ni toujours vrai (une copie
@@ -395,6 +414,7 @@ var api = {
     code: code,
     sommePonderee: sommePonderee,
     lePlusFrequent: lePlusFrequent,
+    posesDeLAnnotation: posesDeLAnnotation,
     grilleDeCopie: grilleDeCopie
 };
 

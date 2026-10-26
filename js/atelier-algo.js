@@ -50,6 +50,7 @@ function _P() { return _reg('projectionAlgo', './evaluation-projection.js'); }
 function _M() { return _reg('miroirAlgo', './miroir-algo.js'); }
 function _C() { return _reg('codesAnnotation', './codes-annotation.js'); }
 function _Pal() { return _reg('paletteAlgo', './palette-algo.js'); }
+function _T() { return _reg('tablesCasAlgo', './tables-cas-algo.js'); }
 
 /* Les mots de l'atelier : ceux de la maquette validée (24 oct.), sauf ceux que la maquette n'avait pas
    à dire (un critère d'avant sans noms, les codes qui vont au premier critère algorithmique).
@@ -155,7 +156,9 @@ var TEXTES = {
         frequent: 'Le code le plus fréquent',
         frequentTexte: function(neuf) {
             return 'Quand la copie porte au moins un code, l’étudiant·e lit le nom du plus fréquent dans son bilan, à la ligne « principalement ». À égalité : '
-                + (neuf ? 'le premier de ta liste des codes (ta règle du 25 octobre, pour un critère neuf).' : 'le premier posé, comme aujourd’hui (critère existant).');
+                + (neuf ? 'le premier de ta liste des codes (ta règle du 25 octobre, pour un critère neuf).' : 'le premier posé, comme aujourd’hui (critère existant).')
+                // Lot 3b : la phrase retirée au lot 3a revient avec le geste qu'elle désigne.
+                + ' Pour lui écrire un texte par code, ajoute une table selon « Le code le plus fréquent ».';
         },
         priorite: 'Défi prioritaire',
         prioriteTexte: 'Quand la note de ce critère tombe à 0 alors que la copie porte au moins un code : en tête de son bilan.',
@@ -203,7 +206,46 @@ var TEXTES = {
         regle: function(nom, occ, eten) { return 'Copie réglée sur le palier « ' + nom + ' » : ' + occ + ' pour ' + eten + '.'; },
         regleImpossible: 'Aucune copie n’atteindrait ce palier avec cette limite.',
         regleSansLimite: 'Écris d’abord la longueur de référence et la tolérance.',
-        regleEgalite: function(a, b) { return 'Copie réglée : les codes ' + a + ' et ' + b + ', deux fois chacun, le ' + a + ' posé le premier.'; }
+        regleEgalite: function(a, b) { return 'Copie réglée : les codes ' + a + ' et ' + b + ', deux fois chacun, le ' + a + ' posé le premier.'; },
+        // Lot 3b : « Voir ce que l'étudiant·e lirait dans ce cas » (l'ébauche, `regleSurCas`).
+        regleCas: function(occ, eten) { return 'Copie réglée : ' + occ + (eten ? ' pour ' + eten : '') + '.'; },
+        regleCode: function(code) { return 'Copie réglée : trois fois le code ' + code + '.'; },
+        regleAucunCode: 'Copie réglée : aucun code.',
+        regleCasImpossible: 'Aucune copie fictive n’atteindrait ce cas.'
+    },
+    // Lot 3b (26 oct. 2026) — les tables de l'enseignant·e (`grilles.js`, `rendreTablesCasAlgo`) : les mots de
+    // l'ébauche (`tableEnseignant`), au caractère près. Ceux des valeurs et des cas : `tablesCasAlgo.TEXTES`.
+    tables: {
+        titre: 'Table de cas',
+        selon: 'Selon',
+        aucuneLimite: ' (aucune limite)',
+        retirer: 'Retirer cette table',
+        intro: 'L’étudiant·e lit le cas de sa copie sous le critère, après les paliers. Une table neuve naît vide : un cas laissé vide n’ajoute rien à ce que lit l’étudiant·e.',
+        colonnes: ['Quand', 'L’étudiant·e lit'],
+        jusqua: 'Jusqu’à',
+        borneLecteur: 'Borne du cas',
+        borneRefusee: 'La borne est un nombre, 0 ou plus.',
+        retirerCas: 'Retirer ce cas',
+        ajouterCas: '+ Ajouter un cas',
+        sansValeur: 'Sans valeur',
+        code: function(n) { return 'Code ' + n; },
+        aucunCode: 'Aucun code',
+        texteCas: 'Texte de ce cas',
+        public: 'L’étudiant·e le lit',
+        vide: 'Vide : ce cas n’ajoute rien.',
+        ici: 'cas de la copie fictive',
+        voir: 'Voir ce que l’étudiant·e lirait dans ce cas',
+        egaliteNeuf: 'À égalité, le premier de ta liste des codes.',
+        egaliteExistant: 'À égalité, le premier posé, comme aujourd’hui pour ce critère.',
+        ajouterTable: '+ Ajouter une table de cas',
+        // La règle du 20 sept. : aucun effacement sans le voir. Dans la carte, jamais `confirm()`.
+        confirmerRetrait: 'Retirer cette table et ses textes ?',
+        retirerConfirme: 'Retirer',
+        confirmerSelon: function(valeur) { return 'Passer à « ' + valeur + ' » remplace les cas de cette table et efface leurs textes ?'; },
+        changerConfirme: 'Changer',
+        annuler: 'Annuler',
+        // Le résumé de l'étape (« une table selon le compte des unités manquantes »).
+        resume: function(libelleSelon) { return 'une table selon ' + libelleSelon.toLowerCase(); }
     },
     copies: { aucune: 'Aucune', quelques: 'Quelques', beaucoup: 'Beaucoup', ponderee: 'Pondérée', egalite: 'Égalité' },
     sources: {
@@ -215,7 +257,8 @@ var TEXTES = {
         priorite: 'Défi prioritaire',
         concentre: 'Quand tout est maîtrisé',
         aucune: 'Aucune annotation',
-        signalement: 'Signalement'
+        signalement: 'Signalement',
+        table: function(libelle) { return 'Table · ' + libelle; }   // lot 3b
     }
 };
 
@@ -285,12 +328,17 @@ function _etapeNote(c) {
 
 /** Cas d'interprétation (lot 3a) — sans limite, réglée ; une limite fixée l'est quand sa longueur et sa
  *  tolérance dépassent 0 (un critère neuf part de champs vides). L'info compte les tables : les paliers en
- *  sont une, quand la limite est fixée (les tables de l'enseignant·e viendront avec le lot 3b). */
+ *  sont une, quand la limite est fixée. ↻ Lot 3b : les tables de l'enseignant·e s'y ajoutent, et le résumé
+ *  les nomme (« une table selon le compte des unités manquantes »). */
 function _etapePaliers(c) {
-    var P = _P(), R = TEXTES.resumes;
-    if (!P.limiteFixee(c)) return { id: 'paliers', reglee: true, info: '0 table', resume: R.sansLimite };
-    var complete = P.limiteComplete(c);
-    return { id: 'paliers', reglee: complete, info: complete ? '1 table' : 'à régler', resume: complete ? R.avecLimite : R.incomplete };
+    var P = _P(), R = TEXTES.resumes, T = _T();
+    var tables = T ? T.lire(c) : [];
+    var fixee = P.limiteFixee(c);
+    var complete = fixee && P.limiteComplete(c);
+    var k = (fixee ? 1 : 0) + tables.length;
+    var resume = [!fixee ? R.sansLimite : (complete ? R.avecLimite : R.incomplete)]
+        .concat(tables.map(function(t) { return TEXTES.tables.resume(T.libelleSelon(t.selon, c)); })).join(' · ');
+    return { id: 'paliers', reglee: !fixee || complete, info: (fixee && !complete) ? 'à régler' : _pluriel(k, 'table', 'tables'), resume: resume };
 }
 
 /** Ce que l'élève lit (le point d'arrivée) — au moins un des trois textes non vide. */
@@ -318,7 +366,7 @@ function etapes(critere, criteres) {
 /** L'étape qui porte une zone d'écriture (son `dataset`) : un palier, « Aucune annotation », ou un énoncé. */
 function etapeDeZone(zone) {
     var d = zone || {};
-    if (d.palierIndex !== undefined) return 'paliers';
+    if (d.palierIndex !== undefined || d.tableCas !== undefined) return 'paliers';
     if (d.enonceCle === 'aucune') return 'codes';
     if (d.enonceCle !== undefined) return 'eleve';
     return null;
@@ -330,6 +378,7 @@ function etapesDuJeton(critere, jeton) {
     if (!Pal) return [];
     var zones = E.listerCles().map(function(c) { return { enonceCle: c.cle }; });
     if (Pal.aDesPaliers(critere)) zones.push({ palierIndex: '0', champ: 'texte' });
+    if (_T() && _T().aDesTables(critere)) zones.push({ tableCas: '', cas: '' });   // lot 3b
     var ids = {};
     zones.forEach(function(z) {
         if (Pal.reperesDeZone(critere, z).some(function(r) { return r.jeton === jeton; })) ids[etapeDeZone(z)] = true;
@@ -410,10 +459,16 @@ function lecture(critere, copie) {
         var morceaux = _morceauxDeLaProjection(proj, essai.projection);
         morceaux.forEach(function(m) { pdf.push(m); });
     }
+    // Lot 3b : le texte du cas atteint de chaque table, après la projection, avec sa source (« Table · jusqu’à 2 »).
+    var tables = essai.tables || { morceaux: [], atteints: {} };
+    tables.morceaux.forEach(function(m) {
+        pdf.push({ source: 'table', etape: 'paliers', zone: { tableCas: m.tableId, cas: m.cle }, libelle: m.libelle, texte: m.texte });
+    });
     return Object.assign({
         essai: essai,
         palier: palier,
         indicePalier: (proj.applicable && proj.palier) ? (proj.paliers || []).indexOf(proj.palier) : -1,
+        casAtteints: tables.atteints,
         pdf: pdf
     }, _lectureDuBilan(critere, copie, essai, proj));
 }
@@ -482,7 +537,8 @@ function valeursDesBlocs(critere, copie) {
         '{points}': E.mentionPonderee(copie.erreurs, copie.erreursFormule).trim()
     }, _valeursDeLaLimite(critere));
     var j = (proj.applicable && proj.jetons) ? proj.jetons : {};
-    v['{moyenne}'] = j.moyenne || '';
+    // Lot 3b : sans limite, une table de cas remplit encore la moyenne (`tablesCasAlgo`) — la même valeur, arrondie.
+    v['{moyenne}'] = j.moyenne || ((n > 0 && m > 0) ? String(Math.round(m / n)) : '');
     v['{projection}'] = j.projection || '';
     v['{palier}'] = j.palier || '';
     return v;
@@ -515,6 +571,45 @@ function copiePourPalier(critere, copieActuelle, indice) {
 }
 
 /**
+ * « Voir ce que l'étudiant·e lirait dans ce cas » (lot 3b, l'ébauche `regleSurCas`) — une copie qui atteint le
+ * cas `cle` de la table `tableId`, par le calcul de l'évaluation (`tablesCasAlgo.valeurs`, `casChoisi`) : un
+ * code, trois fois posé ; « Aucun code », aucun ; sinon le compte monte de 0 sur l'étendue de la copie fictive,
+ * puis, à compte égal, l'étendue de 0. Rend `{copie, raison, code?}` : `raison` = 'impossible', ou ''.
+ */
+function copiePourCas(critere, copieActuelle, tableId, cleDuCas) {
+    var T = _T();
+    var table = T ? T.lire(critere).filter(function(t) { return t.id === tableId; })[0] : null;
+    if (!table) return { copie: null, raison: 'impossible' };
+    var actuelle = copieActuelle || {};
+    var m0 = (actuelle.mots === null || actuelle.mots === undefined) ? null : Number(actuelle.mots);
+    var cleTexte = String(cleDuCas);
+    if (cleTexte.indexOf('code:') === 0) return _copieDuCode(critere, cleTexte.slice(5), m0);
+    if (cleTexte === 'aucun') return { raison: '', code: null, copie: { cle: null, erreurs: 0, erreursFormule: 0, mots: m0, codes: [] } };
+    var essai = function(n, m) {
+        var copie = { cle: null, erreurs: n, erreursFormule: n, mots: m, codes: [] };
+        return T.casChoisi(table, T.valeurs(critere, copie)) === cleTexte ? copie : null;
+    };
+    var n, trouvee;
+    for (n = 0; n <= 400; n++) { trouvee = essai(n, m0); if (trouvee) return { copie: trouvee, raison: '' }; }
+    var n0 = Math.max(0, Math.round(Number(actuelle.erreurs) || 0));
+    for (var m = 0; m <= 5000; m++) { trouvee = essai(n0, m); if (trouvee) return { copie: trouvee, raison: '' }; }
+    return { copie: null, raison: 'impossible' };
+}
+
+/** Une copie qui porte trois fois le code `numero` (sa somme pondérée, l'ordre de ses poses). */
+function _copieDuCode(critere, numero, mots) {
+    var T = _T(), C = _C();
+    var grille = { criteres: [critere] };
+    var k = T.codesDuCritere(critere).filter(function(c) { return c.code === numero; })[0];
+    var id = k ? k.id : C.PREFIXE + numero;
+    var compteurs = {};
+    compteurs[id] = 3;
+    var poids = Number(C.code(grille, id).poids);
+    return { raison: '', code: numero, copie: { cle: null, erreurs: 3, erreursFormule: C.sommePonderee(grille, compteurs), mots: mots,
+        codes: [{ code: numero, nom: k ? k.nom : 'Code ' + numero, poids: isFinite(poids) ? poids : 1, nombre: 3 }], poses: [id, id, id] } };
+}
+
+/**
  * La phrase de projection, découpée : le préfixe engendré, le verdict, la recommandation. Le verdict
  * est le texte du palier rempli par le module (`remplir`, ce que `_texteDuPalier` fait) ; si les
  * morceaux ne redonnent pas la phrase entière, elle reste un seul morceau, rattaché au verdict.
@@ -543,11 +638,22 @@ function _decouperProjection(proj, phrase) {
     return null;
 }
 
-/** La clé d'une zone, telle que la porte un morceau cliquable : `enonce:<cle>` ou `palier:<i>:<champ>`. */
+/** La clé d'une zone, telle que la porte un morceau cliquable : `enonce:<cle>`, `palier:<i>:<champ>`, `table:<id>:<cas>`. */
 function cleDeZone(zone) {
     var d = zone || {};
     if (d.palierIndex !== undefined) return 'palier:' + d.palierIndex + ':' + (d.champ || 'texte');
+    if (d.tableCas !== undefined) return 'table:' + d.tableCas + ':' + d.cas;   // lot 3b (`cas` peut porter « code:3 »)
     return 'enonce:' + d.enonceCle;
+}
+
+/** Une zone répond-elle à cette clé (`cleDeZone`) ? */
+function _zoneVisee(z, cleZone) {
+    var s = String(cleZone || '');
+    var p = s.split(':');
+    if (p[0] === 'enonce') return z.dataset.enonceCle === p[1];
+    if (p[0] === 'palier') return z.dataset.palierIndex === p[1] && z.dataset.champ === p[2];
+    if (p[0] === 'table') return z.dataset.tableCas === p[1] && z.dataset.cas === s.slice(('table:' + p[1] + ':').length);
+    return false;
 }
 
 /* ---------------------------------------------------------------------
@@ -675,7 +781,7 @@ function _copieDe(atelier) {
 
 /** Les zones d'écriture d'un atelier, et l'élément qu'on voit de chacune (la vue à badges, sinon le champ). */
 function _zones(atelier) {
-    return Array.prototype.slice.call(atelier.querySelectorAll('textarea[data-enonce-cle], textarea[data-palier-index]'));
+    return Array.prototype.slice.call(atelier.querySelectorAll('textarea[data-enonce-cle], textarea[data-palier-index], textarea[data-table-cas]'));
 }
 function _visible(zone) {
     var C = (typeof window !== 'undefined') ? window.composeurBadges : null;
@@ -786,12 +892,8 @@ function montrer(atelier, jeton, oui) {
 
 /** Un morceau de phrase touché : son étape s'ouvre, sa zone vient sous les yeux, le curseur au bout. */
 function allerA(atelier, cleZone) {
-    var parties = String(cleZone || '').split(':');
     var zone = null;
-    _zones(atelier).forEach(function(z) {
-        if (parties[0] === 'enonce' && z.dataset.enonceCle === parties[1]) zone = z;
-        if (parties[0] === 'palier' && z.dataset.palierIndex === parties[1] && z.dataset.champ === parties[2]) zone = z;
-    });
+    _zones(atelier).forEach(function(z) { if (!zone && _zoneVisee(z, cleZone)) zone = z; });
     if (!zone) return;
     ouvrir(atelier, etapeDeZone(zone.dataset), false);
     var v = _visible(zone);
@@ -844,7 +946,20 @@ function _remplirApercu(atelier) {
     var flash = ap.querySelector('.apercu-algo-flash');
     if (flash) flash.textContent = _etatDe(atelier).flash || '';
     _marquerPaliers(atelier, lec.indicePalier);
+    _marquerCas(atelier, lec.casAtteints || {});
     _remplirValeursDesBlocs(atelier, critere, copie);
+}
+
+/** Lot 3b — dans chaque table, la rangée du cas que la copie fictive atteint : marquée, son repère montré. */
+function _marquerCas(atelier, atteints) {
+    atelier.querySelectorAll('[data-cas-rangee]').forEach(function(r) {
+        var v = String(r.dataset.casRangee);
+        var tid = v.slice(0, v.indexOf(':'));
+        var oui = atteints[tid] !== undefined && atteints[tid] !== null && (tid + ':' + atteints[tid]) === v;
+        if (oui) r.setAttribute('data-atteint', ''); else r.removeAttribute('data-atteint');
+        var ici = r.querySelector('[data-cas-ici]');
+        if (ici) ici.hidden = !oui;
+    });
 }
 
 /** La rangée du palier que la copie fictive atteint : marquée (`data-atteint`), son repère montré. */
@@ -945,7 +1060,7 @@ function _remplirPhrases(ap, lec, critere) {
     if (!lec.pdf.length) pdf.appendChild(_el('span', 'apercu-algo-rien', A.aucunePhrase));
     lec.pdf.forEach(function(m, n) {
         if (n) pdf.appendChild(document.createTextNode(' '));
-        var nom = m.source === 'verdict' ? S.verdict(m.palier) : S[m.source];
+        var nom = m.source === 'verdict' ? S.verdict(m.palier) : (m.source === 'table' ? S.table(m.libelle) : S[m.source]);
         pdf.appendChild(_segment(m.engendre ? null : cleDeZone(m.zone), nom, m.texte, m.engendre ? titreEngendre : ''));
     });
     var boite = function(quoi) {
@@ -1053,6 +1168,30 @@ function voirPalier(atelier, indice) {
     }
 }
 
+/** « Voir ce que l'étudiant·e lirait dans ce cas » (lot 3b) : la copie fictive réglée sur lui ; la simulation dit ce qu'elle a réglé. */
+function voirCas(atelier, tableId, cleDuCas) {
+    if (!atelier) return;
+    var A = TEXTES.apercu, E = _E(), critere = atelier._critere;
+    var etat = _etatDe(atelier);
+    var r = copiePourCas(critere, _copieDe(atelier), tableId, cleDuCas);
+    if (r.copie) {
+        var N = E.noms(critere);
+        etat.copie = r.copie;
+        if (r.code !== undefined) etat.flash = r.code === null ? A.regleAucunCode : A.regleCode(r.code);
+        else etat.flash = A.regleCas(_fmt(r.copie.erreurs) + ' ' + E.accorder(r.copie.erreurs, N.erreurs),
+            // Une copie sans étendue (le champ vide) ne dit pas « pour 0 calcul ».
+            (r.copie.mots === null || r.copie.mots === undefined) ? '' : _fmt(r.copie.mots) + ' ' + E.accorder(r.copie.mots, N.mots));
+    } else {
+        etat.flash = A.regleCasImpossible;
+    }
+    _remplirApercu(atelier);
+    var ap = atelier.querySelector('.apercu-algo');
+    if (ap && _sousTiroir() && _reduit()) {
+        page.reduit = false;
+        ap.removeAttribute('data-reduit');
+    }
+}
+
 /** « + Ajouter une recommandation » : la zone repliée d'un palier paraît, le curseur y va. Rien n'est écrit. */
 function ouvrirRecommandation(el) {
     var groupe = el && el.closest ? el.closest('.table-cas-textes') : null;
@@ -1093,6 +1232,7 @@ function _brancher() {
         if (g === 'moins') _changerCopie(atelier, { erreurs: copie.erreurs - 1 });
         else if (g === 'plus') _changerCopie(atelier, { erreurs: copie.erreurs + 1 });
         else if (g === 'palier') voirPalier(atelier, parseInt(geste.dataset.palier, 10));
+        else if (g === 'cas') voirCas(atelier, geste.dataset.table, geste.dataset.cas);
         else if (g === 'reference') {
             var r = copiesDeReference(atelier._critere).filter(function(x) { return x.cle === geste.dataset.copie; })[0];
             if (r) {
@@ -1132,10 +1272,8 @@ function _brancher() {
         if (seg) {
             if (!oui && e.relatedTarget && seg.contains(e.relatedTarget)) return;
             var a = atelierDe(seg);
-            var p = String(seg.dataset.versZone).split(':');
             if (a) _zones(a).forEach(function(z) {
-                var vise = (p[0] === 'enonce' && z.dataset.enonceCle === p[1]) || (p[0] === 'palier' && z.dataset.palierIndex === p[1] && z.dataset.champ === p[2]);
-                if (vise) _visible(z).classList.toggle('atelier-algo-montree', oui);
+                if (_zoneVisee(z, seg.dataset.versZone)) _visible(z).classList.toggle('atelier-algo-montree', oui);
             });
             return;
         }
@@ -1176,6 +1314,8 @@ var api = {
     valeursDesBlocs: valeursDesBlocs,
     copiePourPalier: copiePourPalier,
     voirPalier: voirPalier,
+    copiePourCas: copiePourCas,
+    voirCas: voirCas,
     ouvrirRecommandation: ouvrirRecommandation
 };
 
