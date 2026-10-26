@@ -21,6 +21,25 @@
 
     var CHANGELOG = [
         {
+            // 1.219 (les bibliothèques en deux colonnes, #1154 à #1159 : les six bibliothèques de la Conception,
+            // les tampons, les cours, trimestres et groupes-cours, l'ancien composant retiré) — titre et huit items
+            // validés par Grégoire, mot pour mot, le 25 oct. 2026 à 19 h 59 (consigne de la mise en ligne du soir,
+            // § 2). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.219',
+            couleur: 'vert',
+            titre: 'Les bibliothèques, plus simples',
+            items: [
+                'Conception&nbsp;: les six bibliothèques (grilles, échelles, cartouches, productions, pratiques, cartes d’alignement) s’ouvrent en deux colonnes, «&nbsp;Dans ce trimestre&nbsp;» à gauche et «&nbsp;Dans ta bibliothèque&nbsp;» à droite. Sur l’iPad en portrait, elles s’empilent.',
+                'Un seul bouton par rangée fait passer un élément d’une colonne à l’autre&nbsp;: «&nbsp;Garder dans ma bibliothèque&nbsp;→&nbsp;» ou «&nbsp;←&nbsp;Utiliser dans ce trimestre&nbsp;». Une coche te dit quand il est déjà de l’autre côté. Les autres gestes sont dans le menu&nbsp;⋮.',
+                'Touche le nom d’un élément pour voir ce qu’il contient, sans quitter la fenêtre.',
+                'Tes tampons ont la même fenêtre&nbsp;: «&nbsp;Dans ta palette&nbsp;» et «&nbsp;Dans ta bibliothèque&nbsp;», rangés par catégorie.',
+                'Cours, trimestres et groupes-cours, dans le Cadre&nbsp;: une seule liste, «&nbsp;Actif&nbsp;» écrit en clair. Ce que tu mets de côté se range en bas, sous «&nbsp;Mis de côté&nbsp;» («&nbsp;Clos&nbsp;» pour les trimestres), replié.',
+                '«&nbsp;Supprimer définitivement&nbsp;» efface l’élément de ce trimestre, mais garde son exemplaire de ta bibliothèque, et te le dit avant.',
+                'Les fichiers sont réunis dans «&nbsp;Importer ou exporter&nbsp;▾&nbsp;», en haut de chaque fenêtre.',
+                'Carte d’alignement&nbsp;: «&nbsp;Partager&nbsp;» s’appelle maintenant «&nbsp;Garder dans ma bibliothèque&nbsp;→&nbsp;».'
+            ]
+        },
+        {
             // 1.218 (les lots du 24 et du 25 oct. qui attendaient sur `main` : la bande du Trimestre et de la Carte,
             // #1149 ; la bande du profil, #1151 ; les chaînes d'étapes ; le total des pondérations ; l'atelier du
             // critère algorithmique, #1150 ; le statut « Incomplet ; travail en cours » ; #1153 ; la refonte de
