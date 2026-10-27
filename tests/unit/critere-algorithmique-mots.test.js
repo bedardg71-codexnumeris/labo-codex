@@ -32,7 +32,9 @@ const apostrophes = (s) => s.replace(/’/g, "'");
 // « (5 après pondération) » ; leurs nouveaux textes, provisoires, sont dans le fichier du 22 oct.
 const REGLES = apostrophes(lire('plans de travail/TEXTES-2026-10-21-critere-algorithmique.md')
     + '\n' + lire('plans de travail/TEXTES-2026-10-22-noms-critere-algorithmique.md')
-    + '\n' + lire('plans de travail/TEXTES-2026-10-26-calculs-tout-faits.md'));   // étape 4a : les trois calculs tout faits
+    + '\n' + lire('plans de travail/TEXTES-2026-10-26-calculs-tout-faits.md')   // étape 4a : les trois calculs tout faits
+    // ↻ #1152, lot 2b (27 oct. 2026) : D0, D2, D2d, D2e, D7, D7a, D7b et D8 de l'entrée de l'Aide, proposés, à valider par Grégoire.
+    + '\n' + lire('plans de travail/TEXTES-2026-10-27-aide-critere-algorithmique.md'));
 
 /* ======================================================= T — LES TEXTES À LEURS SITES */
 
@@ -49,19 +51,27 @@ const F1 = 'Chaque occurrence retire des points en proportion de la longueur de 
 const D = {
     // ↻ #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11 : l'Aide rangée par onglet) : le titre perd son numéro de tête « 5c. », le reste est inchangé.
     D1: 'Les critères algorithmiques',
-    // ↻ Étape 4a (27 oct. 2026) : les trois noms et les trois textes validés le 26 oct. ; le calcul se choisit dans l'étape « Note calculée ».
-    D2: 'Un critère algorithmique calcule sa note à partir de ce que tu comptes sur la copie. Tu choisis le calcul dans l\'étape « Note calculée » du critère, puis tu en fixes le réglage.',
+    // ↻ #1152, lot 2b (27 oct. 2026) : D0, D2e, D7a et D7b ajoutés ; D2, D2d, D7 et D8 réécrits. La remesure du 27 oct.
+    // (audit-aide-2026-10-24/REMESURE-2026-10-27.md, `sous-criteres`) les dit faux ou incomplets : un calcul composé n'a pas
+    // de réglage (D2) ; l'écran dit « Le calcul, en blocs » (D2d) ; l'étudiant·e lit aussi le cas de sa copie et le nom court
+    // de son palier (D7) ; la règle d'une copie déjà évaluée est celle de l'étape « Note calculée » (D8, #1173). Consigne
+    // CONSIGNE-LOT-2026-10-27-aide-lot-2b-conception.md, § 2, entrée 7. Textes : TEXTES-2026-10-27-aide-critere-algorithmique.md.
+    D0: 'Le critère s\'ouvre en atelier, une étape à la fois, à côté de la « Simulation de ce que l\'étudiant·e lirait ». Ses étapes : voir « Les chaînes d\'étapes ».',
+    D2: 'Un critère algorithmique calcule sa note à partir de ce que tu comptes sur la copie. Tu choisis le calcul dans l\'étape « Note calculée » du critère. Un calcul tout fait a un réglage ; un calcul que tu composes n\'en a pas : ses nombres sont dans ses blocs.',
     D2a: 'Pénalité proportionnelle à la longueur : Chaque occurrence retire des points en proportion de la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.',
     D2b: 'Rapport visé : Tu fixes le rapport qui donne la note entière, par exemple une occurrence à chaque 60 mots. Une copie qui l’atteint a la note entière ; en deçà, la note baisse en proportion. Une copie sans occurrence a la note entière.',
     D2c: 'Pénalité fixe : Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la copie. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.',
-    D2d: 'La formule, avec tes valeurs, s\'affiche dans le gabarit et sous le résultat au moment d\'évaluer.',
+    D2d: '« Le calcul, en blocs » montre le calcul choisi, tes réglages compris. Au moment d\'évaluer, il s\'affiche en chiffres sous le résultat ; sur une copie verrouillée que le calcul actuel ne redonne plus, cette ligne se cache.',
+    D2e: '« Retoucher ce calcul » ouvre « Composer ton propre calcul » sur une copie du calcul choisi ; l\'original ne change pas. « Ce calcul sert » dit si ton calcul donne la note ou sert seulement à tes phrases et à tes tables. « Quand une donnée de la copie vaut 0 » dit ce que vaut alors la note.',
     D3: 'Tu nommes, au singulier et au pluriel, ce que tu comptes et ce à quoi tu le rapportes : « erreur » sur des « mots » pour une rédaction, « unité manquante » sur des « calculs » en chimie, « faute de rythme » sur des « mesures » en musique. Ces noms s\'écrivent dans les champs de l\'évaluation, dans la phrase du décompte et dans le PDF de l\'étudiant·e. Un critère créé avant ces noms se lit « erreur » et « mot ».',
     D4: 'Les sous-critères sont les catégories de ce que tu comptes. Chacun porte un code, un nom, une pondération et une observation : ce que l\'étudiant·e lit à propos de ce code. La pondération dit ce que pèse une occurrence : 1 par défaut, 0,5 pour la compter à moitié ; un sous-critère de pondération 0 ne se pose pas.',
     D4b: 'Exemple : sept codes posés, trois d\'un sous-critère qui pèse 1 et quatre d\'un sous-critère qui pèse 0,5. La formule reçoit 3 + 2 = 5, et l\'étudiant·e lit « 7 erreurs (5 après pondération) ».',
     D5: 'Sous le critère, « + Ajouter un sous-critère » en crée un. « Partir de la liste du français écrit » crée d\'un coup dix catégories d\'une correction du français (codes 1 à 10), toutes de pondération 1, que tu modifies ensuite comme les tiennes.',
     D6: 'Dans Annoter, les sous-critères sont les codes que tu poses, sur toute copie évaluée avec cette grille. Chaque code posé compte une occurrence de son sous-critère ; le champ de ce que tu comptes se remplit tout seul, et la formule reçoit le nombre pondéré. Sans code posé, tu tapes le nombre : il compte tel quel, sans pondération. Une grille plus ancienne montre la case « Utiliser ces sous-critères comme codes d\'annotation » ; décochée, sa palette garde les dix codes de départ, des codes de correction du français.',
-    D7: 'L\'étudiant·e lit la phrase du décompte écrite dans la grille et, dans son PDF, la ligne du calcul : « 7 erreurs (5 après pondération) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.',
-    D8: 'Règle les pondérations avant de corriger. Une copie déjà évaluée garde sa note jusqu\'à ce que tu y ajoutes ou retires un code ; la pondération s\'applique alors à toute la copie.'
+    D7a: 'L\'étape « Cas d\'interprétation » situe la copie par des paliers, d\'après une limite : une longueur de référence et une tolérance sur cette longueur. « Fixer une limite » en pose une ; « Retirer la limite » la retire sans effacer ce qui est écrit. Chaque palier a un seuil, en pourcentage de la limite, un nom court et ce que l\'étudiant·e lit. La limite ne touche pas la note.',
+    D7b: '« + Ajouter une table de cas » choisit un texte selon une valeur de la copie : un compte, la note, la part de la limite, la moyenne, le code le plus fréquent ou l\'un de tes calculs. Une table neuve est vide.',
+    D7: 'L\'étudiant·e lit, sous le critère, la phrase du décompte, puis le cas de sa copie dans les paliers, puis le texte des tables de cas. Son PDF imprime aussi le nom court de son palier et la ligne du calcul : « 7 erreurs (5 après pondération) sur 400 mots → 13,75/20 (68,8 %) ». La parenthèse ne paraît que si le nombre pondéré diffère du nombre posé.',
+    D8: 'Règle les pondérations avant de corriger. Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies. Verrouillée, si le calcul actuel lui donnerait une autre note, une ligne sous sa note le dit.'
 };
 
 let cat, section;
@@ -79,11 +89,10 @@ describe('lot de mots · T — chaque texte à son site', () => {
     it('T.0 chaque chaîne du banc est celle du fichier réglé', () => {
         // F1 n'a pas de texte réglé : « retirer la phrase […] ; le reste de la description ne change pas ».
         // ↻ Étape 4a (27 oct.) : D2a à D2c sont « nom : texte validé » — le texte se lit dans les TEXTES du 26 oct. ;
-        // D2 est la phrase de l'étape 4a (consigne § 2 : l'Aide « dit qu'on choisit le calcul dans l'étape “Note
-        // calculée” »), écrite par Claude Code et nommée dans la demande de relecture : aucun fichier réglé ne la porte.
+        // ↻ #1152, lot 2b : D2, réécrit, est maintenant dans le fichier du 27 oct. (TEXTES-2026-10-27-aide-critere-algorithmique.md) :
+        // plus d'exception.
         const aRegler = (k, s) => (/^D2[abc]$/.test(k) ? s.split(' : ').slice(1).join(' : ') : s);
         for (const [k, s] of Object.entries({ A1, A2, A3, B1, B2, B3, C1, C2, ...D })) {
-            if (k === 'D2') continue;
             expect(REGLES.includes(apostrophes(aRegler(k, s))), k).toBe(true);
         }
     });
@@ -111,7 +120,7 @@ describe('lot de mots · T — chaque texte à son site', () => {
         expect(chargerScript('js/evaluation-formules.js').formulesAlgo.obtenirModele('penalite_normalisee').texte).toBe(F1);
     });
 
-    it('D1 à D8 dans la section 5c, D9 parti', () => {
+    it('D0 à D8 dans la section 5c, D9 parti', () => {
         expect(plat(section.querySelector('h3').textContent).replace(/^▼ /, '')).toBe(D.D1);
         const blocs = [...section.querySelectorAll('.accordeon-contenu > p, .accordeon-contenu li, .accordeon-contenu > .alerte')].map((e) => plat(e.textContent));
         for (const [k, s] of Object.entries(D)) {

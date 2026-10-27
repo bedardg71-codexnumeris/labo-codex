@@ -375,12 +375,14 @@ describe('Décloner (3 sept. 2026) : un mot, deux entrées, une fonction', () =>
         expect(html).toMatch(/id="planif-btn-detacher-clone"[^>]*>Décloner la sélection<\/button>/);
         // L'aide longue nomme les DEUX chemins — sinon elle envoie à un seul
         // endroit alors qu'il y en a deux, le défaut d'origine.
-        const aide = html.match(/<p><strong>Décloner un bloc :<\/strong>.*?<\/p>/);
-        expect(aide, 'l’aide longue n’a plus de paragraphe « Décloner un bloc »').not.toBeNull();
-        expect(aide[0]).toMatch(/Inspecteur/);
-        expect(aide[0]).toMatch(/Actions/);
-        expect(popup).toMatch(/Décloner/);
-        expect(popup).toMatch(/Inspecteur/);
+        // ↻ #1152, lot 2b (27 oct. 2026) : l'entrée `lecons` de l'onglet Aide perd son paragraphe « Décloner un bloc »
+        // (audit de l'Aide du 24 oct., `lecons` : « Copier, cloner […] redisent le panneau Vue › Raccourcis clavier et
+        // l'infobulle `planif-detacher-clone` » ; verdict « corriger et resserrer », ~200 mots ; consigne
+        // CONSIGNE-LOT-2026-10-27-aide-lot-2b-conception.md, § 2, entrée 3). L'aide longue qui reste est l'aide « i » de
+        // la carte : c'est elle qui doit nommer les deux chemins.
+        expect(html).not.toMatch(/<strong>Décloner un bloc :<\/strong>/);
+        const aide = popup.match(/Décloner<\/em>, dans l’Inspecteur[^']*Actions ▸ Décloner la sélection[^']*'/);
+        expect(aide, 'l’aide « i » de la carte ne nomme plus les deux chemins de « Décloner »').not.toBeNull();
         for (const [nom, texte] of [['index.html', html], ['hover', hover], ['popup', popup]]) {
             expect(texte, nom + ' parle encore de « famille de clones »').not.toMatch(/famille de clones/i);
         }
