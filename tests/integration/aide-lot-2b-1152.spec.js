@@ -13,7 +13,8 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Le pendant OBSERVABLE de `tests/unit/sentinelle-aide-2026-10-27-lot-2b.test.js` : la recherche de l'Aide trouve
 // « Cas d'interprétation » et « Composer ton propre calcul » dans « Les critères algorithmiques », et « IDME » ne
 // mène plus qu'à une entrée de la Conception, « SOLO et l'échelle de départ (IDME) » (`idme` absorbée).
-// CAPTURES_AIDE_2B=<dossier> enregistre, à 1 440 et 820 px, les entrées `sous-criteres` et `solo` ouvertes.
+// CAPTURES_AIDE_2B=<dossier> enregistre, à 1 440 et 820 px, les entrées `sous-criteres` et `solo` ouvertes ; `solo` aussi
+// en mode sombre (retouche du 27 oct., les icônes SOLO).
 //
 // Lecture seule : ce fichier ne pose ni ne retire aucune clé de stockage.
 
@@ -75,6 +76,16 @@ test('#1152 lot 2b · la recherche trouve l\'atelier du critère algorithmique ;
             // La page ne défile pas de côté (les deux tableaux de `solo` compris).
             expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
         }
+        // Retouche du 27 oct. (verdict, § 4.2) : les icônes SOLO en mode sombre (les captures ci-dessus sont en clair).
+        await page.evaluate(() => document.body.classList.remove('mode-clair'));
+        for (const largeur of [1440, 820]) {
+            await page.setViewportSize({ width: largeur, height: 900 });
+            const carte = page.locator('#accordeon-aide-solo');
+            await carte.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(200);
+            await carte.screenshot({ path: path.join(dossier, `aide-solo-${largeur}-sombre.png`) });
+        }
+        await page.evaluate(() => document.body.classList.add('mode-clair'));
     }
 
     expect(erreurs).toEqual([]);
