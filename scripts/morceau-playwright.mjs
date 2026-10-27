@@ -31,6 +31,11 @@ export function fichiersDuMorceau(fichiers, morceau, total) {
     return [...fichiers].sort().filter((_, i) => i % total === morceau - 1);
 }
 
+/** Le filtre ANCRÉ d'une spec, tel que `playwright test` le lit (voir USAGE). */
+export function filtreDe(fichier) {
+    return `integration/${fichier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`;
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
     const morceau = Number(process.argv[2]);
     const total = Number(process.argv[3]);
@@ -45,5 +50,5 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         process.stderr.write(`morceau-playwright : le morceau ${morceau}/${total} ne reçoit aucun fichier.\n`);
         process.exit(2);
     }
-    process.stdout.write(choisis.map((f) => `integration/${f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`).join('\n') + '\n');
+    process.stdout.write(choisis.map(filtreDe).join('\n') + '\n');
 }

@@ -230,6 +230,16 @@ describe('CI · Playwright juge à la demande et sur un push observable, en morc
         expect(workflow).toMatch(/PLAYWRIGHT_BLOB_OUTPUT_NAME: report-\$\{\{ matrix\.morceau \}\}\.zip/);
     });
 
+    it('point 10 : l’étape apt est bornée — un miroir lent ne coupe plus le morceau entier', () => {
+        const etape = tranche(workflow, '- name: Dépendances système de WebKit\n', '\n      - name:');
+        // Les 8 morceaux coupés des runs 40326337181 et 40412553265 l'étaient dans apt.
+        expect(etape, 'plafond propre à l’étape').toMatch(/^        timeout-minutes: \d+$/m);
+        expect(etape, 'chaque essai borné').toMatch(/timeout --kill-after=\d+ \d+ npx playwright install-deps webkit/);
+        expect(etape, 'plusieurs essais').toMatch(/for essai in 1 2 3; do/);
+        expect(etape, 'le miroir lent quitte la liste après un échec').toMatch(/sed -i '\/azure\\\.archive\\\.ubuntu\\\.com\/d' \/etc\/apt\/apt-mirrors\.txt/);
+        expect(etape, 'un nu `npx playwright install-deps` sans borne est revenu').not.toMatch(/^\s*(run: )?npx playwright install-deps webkit$/m);
+    });
+
     it('un morceau ne juge pas : il garde le code de Playwright et dépose son rapport, ou rougit', () => {
         const etapes = tranche(workflow, '\n  playwright:\n', '\n  verdict:\n');
         expect(etapes).toMatch(/\|\| code=\$\?/);
