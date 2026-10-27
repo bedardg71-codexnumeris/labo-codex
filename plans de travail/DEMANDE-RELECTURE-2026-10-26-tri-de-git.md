@@ -1,7 +1,7 @@
 # Demande de relecture – Le tri de Git (26 octobre 2026, soir)
 
 > Écrite par Claude Code sur la branche `tri-git` (copie `.claude/worktrees/tri-git`, partie de `85d35ed9`), en parallèle de la session du dossier principal. Consigne : `plans de travail/CONSIGNE-LOT-2026-10-26-tri-de-git.md`.
-> Commits : `646ad3ce` (la consigne déplacée), `290c9a67` (A), `a5815268` (B), puis celui de ce fichier. **Ni push, ni release, ni fusion.** Aucun essai Playwright lancé ; Vitest ciblé seulement.
+> Commits : `646ad3ce` (la consigne déplacée), `8e8c11e5` (A), `a5815268` (B), puis celui de ce fichier. **Ni push, ni release, ni fusion.** Aucun essai Playwright lancé ; Vitest ciblé seulement.
 
 ## Vue d'ensemble
 
@@ -27,7 +27,7 @@
 
 **Correction** (`tests.yml`, point (10) du journal en tête) : l'étape apt est bornée à 3 min par essai (`timeout --kill-after=30 180` ; le plus long apt sain mesuré : 2,2 min), trois essais ; après un essai raté, le miroir d'Azure est retiré de `/etc/apt/apt-mirrors.txt` (apt passe à `archive.ubuntu.com`) ; plafond de l'étape : 11 min. Un essai raté coûte ~3,5 min : avec le morceau le plus lourd (23 min), on reste sous 30. Plafond du job (30) et `total=16` inchangés, conformément à la règle du point (4a). Sentinelle : `sentinelle-ci-paths-ignore.test.js`, essai « point 10 » ; break-test fait (la borne retirée → rouge).
 
-⚠ **Non éprouvé** : aucun runner n'a encore traversé cette étape. Le premier run poussé dira si elle tient ; les essais se lisent dans son journal (`::warning::install-deps, essai N`). Deux essais ratés sur un morceau lourd dépassent encore 30 min : le morceau serait coupé et le verdict dirait NON JUGÉ, comme aujourd'hui. ⚠ Le message du commit `290c9a67` dit « le plus long morceau dure 20,6 min » et « 4 min par essai » : recalés dans le commit suivant (23 min, toutes courses confondues ; 3 min).
+⚠ **Non éprouvé** : aucun runner n'a encore traversé cette étape. Le premier run poussé dira si elle tient ; les essais se lisent dans son journal (`::warning::install-deps, essai N`). Deux essais ratés sur un morceau lourd dépassent encore 30 min : le morceau serait coupé et le verdict dirait NON JUGÉ, comme aujourd'hui. ⚠ Le message du commit `8e8c11e5` dit « le plus long morceau dure 20,6 min » et « 4 min par essai » : recalés dans le commit suivant (23 min, toutes courses confondues ; 3 min).
 
 ### A.2 Une cause pour chaque rouge neuve
 
