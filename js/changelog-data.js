@@ -21,6 +21,25 @@
 
     var CHANGELOG = [
         {
+            // 1.221 (les calculs 4a, 4b, 4c ; la note remise d'une copie verrouillée, #1173 ; le barème à l'évaluation,
+            // #1120 ; la chaîne d'étapes de la Carte d'alignement, #1172 ; la corbeille de la sélection, #1174) — titre et
+            // huit items validés par Grégoire, mot pour mot, le 27 oct. 2026 à 12 h 01 (« ça convient » ; consigne de la
+            // mise en ligne du soir, § 1). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.221',
+            couleur: 'vert',
+            titre: 'Tes propres calculs, et le barème à l’évaluation',
+            items: [
+                'Critère algorithmique&nbsp;: l’étape «&nbsp;Note calculée&nbsp;» présente trois calculs tout faits, «&nbsp;Pénalité proportionnelle à la longueur&nbsp;», «&nbsp;Rapport visé&nbsp;» et «&nbsp;Pénalité fixe&nbsp;». Chacun s’affiche en blocs, avec ce qu’il donne sur la copie fictive. Tu dis aussi ce que vaut la note quand une donnée de la copie vaut 0. Un critère existant donne exactement les mêmes notes.',
+                'Nouveau&nbsp;: «&nbsp;Retoucher ce calcul&nbsp;» part d’un calcul tout fait, et «&nbsp;Composer ton propre calcul&nbsp;» bâtit le tien avec les données de la copie, des nombres et les quatre opérations. Une fois gardé, ton calcul donne la note.',
+                'Nouveau&nbsp;: un calcul peut aussi servir à tes phrases et à tes tables de cas. Il entre dans la palette et dans le menu «&nbsp;Selon&nbsp;», sans toucher la note.',
+                'Une copie verrouillée affiche la note remise. Si le calcul actuel de la grille en donnerait une autre, une ligne te le dit. La copie ne change que si tu la déverrouilles et la modifies.',
+                'Barème&nbsp;: à l’évaluation, les tranches d’un critère analytique se lisent sous lui. Touche une tranche, puis ses points. L’étudiant·e lit le chiffre, et dessous le texte de la tranche.',
+                'Carte d’alignement&nbsp;: une chaîne d’étapes montre ce que ta carte contient déjà, de la compétence aux évaluations. Un clic ouvre le guide à la bonne page.',
+                'Liste des évaluations&nbsp;: «&nbsp;Mettre à la corbeille (N)&nbsp;» envoie d’un coup les copies cochées à la corbeille, où elles restent restaurables pendant 30&nbsp;jours.',
+                'Corrigé&nbsp;: en plein écran, le guide de la carte s’ouvre au premier plan, et la barre d’espace active les boutons des palettes quand une copie est ouverte.'
+            ]
+        },
+        {
             // 1.220 (la table de cas, lots 3a et 3b : l'étape « Cas d'interprétation », la limite fixée ou retirée,
             // les tables de cas ; le groupe-cours qui naît sans ses élèves, #1038) — titre et huit items validés par
             // Grégoire, mot pour mot, le 26 oct. 2026 à 15 h 31 (consigne de la mise en ligne du soir, § 1).
