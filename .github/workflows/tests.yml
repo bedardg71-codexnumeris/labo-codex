@@ -222,6 +222,27 @@
 #        chaque push (décision de Grégoire, 10 oct.). Ce lot prépare de quoi la
 #        revoir ; il ne la change pas.
 #
+# (10) 26 OCT. 2026 — LES MORCEAUX COUPÉS À 30 MIN : CE N'EST PAS LA SUITE,
+#      C'EST `apt`. Mesuré dans les journaux des deux runs NON JUGÉS (40326337181,
+#      1.219.1 ; 40412553265, 1.220.0) et du dernier complet (40128243995) :
+#      a) L'étape « Dépendances système de WebKit » prend 0,4 à 0,9 min d'ordinaire
+#         (117 Mo en 16 s). Sur 8 des 32 morceaux des deux runs, elle a pris 13,8
+#         à 18,2 min (« Fetched 117 MB in 17min 31s (111 kB/s) ») ou n'a jamais
+#         fini (morceaux 4 et 6 de la 1.220, 8 et 6 de la 1.219.1 : 30 min dans
+#         `apt`, aucun essai joué). Le miroir en tête de /etc/apt/apt-mirrors.txt
+#         du runner est azure.archive.ubuntu.com. TOUS les morceaux coupés le sont
+#         par là ; le 10/16 de la 1.220 a fini à 28,4 min après 16,5 min d'apt.
+#      b) La suite, elle, tient : hors apt, le morceau le plus long dure 20,6 min
+#         (107 essais) — sous le plafond de 30. Le plafond ne bouge donc pas
+#         (règle du point 4a), ni le nombre de morceaux (plus de morceaux, plus
+#         de tirages au miroir).
+#      ⮕ L'étape apt est BORNÉE : 4 min par essai, trois essais, et après un
+#        essai raté le miroir d'Azure est retiré de la liste (apt passe aux
+#        suivants, archive.ubuntu.com). Plafond de l'étape : 14 min. ⚠ NON
+#        ÉPROUVÉ sur un runner au moment de l'écrire (aucun push pendant ce lot) :
+#        le premier run qui le traverse dit s'il tient — les essais se lisent
+#        dans le journal de l'étape (« ::warning::install-deps, essai N »).
+#
 # Deux leviers, dans l'ordre de poids :
 #   1. `paths-ignore` — un commit qui ne touche que de la doc ne déclenche plus
 #      rien. ⚠ La liste est VÉRIFIÉE par un cliquet
@@ -394,6 +415,8 @@ jobs:
     # lourds se regroupent. À 16, en alternance, ~49 essais chacun : projection
     # ≤ 20 min, PAS une mesure. Un morceau coupé n'est pas
     # vert : son rapport manque, et le verdict dit NON JUGÉ.
+    # Point 10 (mesuré, 26 oct.) : la suite seule tient en 20,6 min au plus ; les
+    # coupes venaient de l'étape apt, désormais bornée à 14 min.
     timeout-minutes: 30
 
     steps:
@@ -422,9 +445,30 @@ jobs:
 
       # Les dépendances SYSTÈME (apt) ne se cachent pas utilement : elles
       # s'installent hors du workspace. On les repose à chaque run.
+      # ⚠ BORNÉES (point 10) : un miroir lent coupait le morceau entier à 30 min.
+      # `timeout` tue le groupe de processus (sudo relaie à apt-get) ; le verrou
+      # d'apt est libéré avant l'essai suivant.
       - name: Dépendances système de WebKit
         working-directory: tests
-        run: npx playwright install-deps webkit
+        shell: bash
+        timeout-minutes: 14
+        run: |
+          set -uo pipefail
+          for essai in 1 2 3; do
+            if timeout --kill-after=30 240 npx playwright install-deps webkit; then
+              echo "Dépendances système : posées à l'essai $essai."
+              exit 0
+            fi
+            echo "::warning::install-deps, essai $essai : échec ou plus de 4 min (miroir apt lent, point 10 du journal)."
+            sudo pkill -x apt-get || true
+            sudo dpkg --configure -a || true
+            if [ -f /etc/apt/apt-mirrors.txt ]; then
+              sudo sed -i '/azure\.archive\.ubuntu\.com/d' /etc/apt/apt-mirrors.txt
+              echo "Miroirs restants :"; cat /etc/apt/apt-mirrors.txt
+            fi
+          done
+          echo "::error::dépendances système de WebKit non posées en trois essais — ce morceau ne jouera rien, le verdict dira NON JUGÉ"
+          exit 1
 
       - name: Navigateur WebKit (seulement si absent du cache)
         if: steps.cache-webkit.outputs.cache-hit != 'true'
