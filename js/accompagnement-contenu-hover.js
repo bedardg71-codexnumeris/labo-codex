@@ -275,6 +275,14 @@ const TOOLTIPS = {
         'Cette tranche n’a pas encore de points : donne-les-lui pour qu’elle compte dans le barème.',
     'bareme-hors-bareme':
         'Ces points dépassent la pondération du critère, qui a baissé depuis : corrige les points de la tranche, ou la pondération.',
+    // #1120, lot 3 (27 oct. 2026) : le barème à l'évaluation (evaluation-chargement.js, `_saisiePointsHtml`).
+    // H1, H3 et H4, validés G. 27 oct. 10 h 31 (plans de travail/TEXTES-2026-10-27-bareme-evaluation.md), tels quels.
+    'bareme-eval':
+        'Touche la tranche qui décrit la copie, puis ses points.',
+    'bareme-eval-hors-bareme':
+        'Aucune tranche ne couvre ces points : l’étudiant·e lira le chiffre seul.',
+    'bareme-eval-a-completer':
+        'Cette tranche n’a pas encore de points : tu la complètes dans Grilles de critères.',
     'cn-grille-ponderation-totale':
         'Somme des pondérations de tous les critères. Doit atteindre 100\u00a0% pour que la grille soit valide.',
 

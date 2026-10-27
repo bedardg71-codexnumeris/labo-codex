@@ -401,6 +401,12 @@
         // pondération du critère (grille). Aucun hard-code.
         const ligneAlgo = critere.algo ? ligneCalculAlgo(critere.algo) : '';
 
+        // #1120, lot 3 (geste 4) — le texte de la tranche que les points atteignent (reçu de `construireCriteres`),
+        // sous le chiffre et avant le commentaire de la cartouche ; ses sauts de ligne gardés (`pre-line`).
+        const texteTranche = critere.tranche
+            ? `<div style="white-space: pre-line;${critere.comment ? ' margin-bottom: 4px;' : ''}">${esc(critere.tranche)}</div>`
+            : '';
+
         return `
             <div style="display: grid; grid-template-columns: 130px 135px 1fr; gap: 10px; align-items: center; padding: 8px 10px; ${isLast ? '' : `border-bottom: 1px solid ${LINE};`}">
                 <div>
@@ -410,6 +416,7 @@
                 <div style="display: flex; gap: 3px; align-items: center;">${segments}</div>
                 <div style="font-size: 10px; line-height: 1.35;">
                     ${ligneAlgo}
+                    ${texteTranche}
                     ${esc(critere.comment || '')}
                 </div>
             </div>`;

@@ -145,6 +145,12 @@ function _rendreAdresseEtudiant() {
     return etudiant ? `\nBonjour ${etudiant.prenom} !\n\n` : '';
 }
 
+/** #1120, lot 3 — le texte de la tranche que les points atteignent (`bareme.texteAtteint`) ; « » sans points ni barème. */
+function _texteTrancheBilan(critere, points) {
+    if (typeof points !== 'number' || isNaN(points) || !window.bareme) return '';
+    return window.bareme.texteAtteint(critere, points);
+}
+
 function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAvant) {
     let texte = '';
     let positionCritereActif = -1;
@@ -185,7 +191,10 @@ function _rendreCommentairesCriteres(grille, cartouche, critereActifId, texteAva
             algorithmique: critere.type === 'algorithmique' ? evaluationEnCours.donneesAlgorithmiques?.[critere.id]?.retroaction : '',
             cartouche, critereId: critere.id, niveau
         });
-        texte += commentaire ? `${enteteCritere}\n${commentaire}\n\n` : `${enteteCritere}\n\n`;
+        // #1120, lot 3 (geste 4) — sous le chiffre, le texte de la tranche atteinte (sans son nom), puis le commentaire :
+        // la même lecture que le PDF (`bareme.texteAtteint`). Hors barème ou sans barème, rien de plus qu'hier.
+        const corps = [_texteTrancheBilan(critere, ptsAnalytiques), commentaire].filter(Boolean).join('\n');
+        texte += corps ? `${enteteCritere}\n${corps}\n\n` : `${enteteCritere}\n\n`;
     });
 
     return { texte, positionCritereActif };

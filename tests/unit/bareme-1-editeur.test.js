@@ -508,9 +508,15 @@ describe('barème 1 · I — aucun calcul ne lit le barème', () => {
         // entre par la lecture unique (`bareme.tranchesDuCritere`, `bareme.ligneEleve`) : un affichage, aucun calcul.
         // #1125 (22 oct.) : « Apporter mon matériel » ÉCRIT le barème d'une grille créée (`materiel-assistant.js`)
         // et le compte dans son résumé (`materiel-creation.js`) : une création, aucun calcul.
+        // #1120, lot 3 (27 oct.) : l'évaluation MONTRE le barème (`evaluation-chargement.js`, ses tranches au-dessus du champ ;
+        // `evaluation.js`, leur verrou et leur marque) et l'étudiant·e lit le texte de la tranche atteinte
+        // (`synthese-retroaction-data.js` pour le PDF, `evaluation-retroaction.js` pour le bilan), par `bareme.texteAtteint` :
+        // des affichages ; seuls les points entrent dans le champ, puis dans la note, comme avant. `evaluation-calcul.js`
+        // n'y est toujours pas (I.c, et la sentinelle du lot 3 : `bareme-3-evaluer.test.js`).
         expect(lecteurs.sort()).toEqual(['accompagnement-contenu-hover.js', 'accompagnement-contenu-popup.js', 'accompagnement-contenu-terme.js',
-            'bareme.js', 'export-pdf.js', 'grilles.js', 'import-export.js', 'materiel-assistant.js', 'materiel-creation.js',
-            'partage-schemas.js', 'partage-validation.js']);
+            'bareme.js', 'evaluation-chargement.js', 'evaluation-retroaction.js', 'evaluation.js', 'export-pdf.js', 'grilles.js',
+            'import-export.js', 'materiel-assistant.js', 'materiel-creation.js', 'partage-schemas.js', 'partage-validation.js',
+            'synthese-retroaction-data.js']);
     });
 
     it('I.b ni les réponses ni le barème : aucun module d’évaluation, de note ou de bilan ne lit `descripteurs`', () => {

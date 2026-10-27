@@ -17388,6 +17388,43 @@ tr.ligne-import-ecartee td {
     display: inline;
 }
 
+/* #1120, lot 3 (27 oct. 2026) — le barème d'un critère analytique, à l'évaluation : les tranches se lisent avant
+   de toucher ; ses valeurs paraissent SOUS la tranche touchée (rien ne bouge sous le doigt) ; cibles de 44 px,
+   espacées. « hors barème » et « à compléter » : ni alerte de dépistage, ni erreur — une marque neutre. */
+.eval-bareme { margin-bottom: 8px; min-width: 0; }
+.eval-bareme-tranches { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.eval-bareme-tranche { min-width: 0; }
+.eval-bareme-choix, .eval-bareme-lecture {
+    display: flex; flex-direction: column; align-items: stretch; gap: 2px; width: 100%; min-height: 44px; box-sizing: border-box;
+    padding: 8px 12px; border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen);
+    background: var(--surface-element); color: var(--texte-principal); font: inherit; font-size: 0.86rem; line-height: 1.4; text-align: left;
+}
+.eval-bareme-choix { cursor: pointer; }
+.eval-bareme-choix:focus-visible, .eval-bareme-valeur:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.eval-bareme-choix:disabled, .eval-bareme-valeur:disabled { opacity: 1; cursor: default; }
+.eval-bareme-tranche--choisie .eval-bareme-choix { border: 2px solid var(--accent-primaire); padding: 7px 11px; background: var(--bleu-tres-pale); }
+@media (hover: hover) {
+    .eval-bareme-choix:not(:disabled):hover, .eval-bareme-valeur:not(:disabled):hover { border-color: var(--accent-primaire); }
+}
+.eval-bareme-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+.eval-bareme-nom { overflow-wrap: anywhere; }
+.eval-bareme-points { font-variant-numeric: tabular-nums; color: var(--texte-secondaire); }
+.eval-bareme-texte { white-space: pre-line; overflow-wrap: anywhere; color: var(--texte-principal); }
+.eval-bareme-tranche--a-completer .eval-bareme-lecture { border-style: dashed; color: var(--texte-secondaire); }
+.eval-bareme-valeurs { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0 0 12px; }
+.eval-bareme-valeurs[hidden] { display: none; }
+.eval-bareme-valeur {
+    min-width: 44px; min-height: 44px; padding: 0 12px; border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen);
+    background: var(--surface-input); color: var(--texte-principal); font: inherit; font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.eval-bareme-ou { margin: 0; font-size: 0.86rem; color: var(--texte-secondaire); }
+.eval-bareme-marque {
+    align-self: flex-start; display: inline-block; padding: 1px 8px; border: 1px dashed var(--bordure-claire); border-radius: var(--radius-moyen);
+    font-size: 0.8rem; color: var(--texte-secondaire); background: transparent;
+}
+.eval-bareme-marque[hidden] { display: none; }
+.eval-saisie-points { flex-wrap: wrap; }
+
 /* Badge ALGORITHMIQUE */
 .eval-badge-algo {
     font-size: 0.7rem;

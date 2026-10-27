@@ -546,6 +546,8 @@ function verifierEtChargerEvaluationExistante() {
         }
         // Lot 2 — vider aussi les champs de points des critères analytiques
         document.querySelectorAll('input[id^="eval_pts_"]').forEach(champ => { champ.value = ''; });
+        // #1120, lot 3 — vidés sans passer par la frappe : les tranches du barème ne restent pas choisies.
+        if (typeof window.marquerBaremesEvaluation === 'function') window.marquerBaremesEvaluation();
 
         // Vider les champs algorithmiques dans le DOM
         // IDs: eval_categories_*, eval_erreurs_*, eval_mots_*, resultat_algo_*
@@ -2299,6 +2301,11 @@ function desactiverFormulaireEvaluation(desactiver) {
     const inputsAlgorithmiques = document.querySelectorAll('#listeCriteresGrille1 input[type="text"], #listeCriteresGrille1 input[type="number"]');
     inputsAlgorithmiques.forEach(input => {
         input.disabled = desactiver;
+    });
+
+    // #1120, lot 3 — le barème d'une copie verrouillée se lit, il ne se touche pas.
+    document.querySelectorAll('#listeCriteresGrille1 .eval-bareme button').forEach(bouton => {
+        bouton.disabled = desactiver;
     });
 
     // Désactiver la zone de rétroaction finale

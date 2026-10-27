@@ -1224,16 +1224,9 @@ function cartoucheSelectionnee() {
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
         </div>
     `) : estAnalytique ? `
-        <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids du critère.
-             Le maximum EST le poids ; la note en bas de la palette se fait depuis les points.
-             Le champ vide montre « – », pas « 0 » : un vrai zéro se tape (retouche du 4 sept.,
-             vécu par Grégoire — « je ne savais pas que le zéro prérempli était une absence »). -->
-        <div class="eval-saisie-points">
-            <input type="number" id="eval_pts_${critere.id}" class="controle-form eval-input-points"
-                   min="0" max="${ponderation}" step="any" placeholder="–" inputmode="decimal"
-                   data-on-input="pointsSaisis" data-param="${critere.id}">
-            <small class="eval-label">sur ${ponderation}</small>
-        </div>
+        <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids du critère ; son barème au-dessus
+             (#1120, lot 3). Gabarit commun aux deux surfaces : _saisiePointsHtml. -->
+        ${_saisiePointsHtml(critere, ponderation)}
     ` : `
         <!-- Interface standard (holistique) -->
         <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
@@ -1418,14 +1411,8 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                         ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
                     </select>
                 ` : estAnalytique ? `
-                    <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids.
-                         Le champ vide montre « – », pas « 0 » : un vrai zéro se tape (retouche du 4 sept.). -->
-                    <div class="eval-saisie-points">
-                        <input type="number" id="eval_pts_${critere.id}" class="controle-form eval-input-points"
-                               min="0" max="${ponderation}" step="any" placeholder="–" inputmode="decimal"
-                               data-on-input="pointsSaisis" data-param="${critere.id}">
-                        <small class="eval-label">sur ${ponderation}</small>
-                    </div>
+                    <!-- Interface analytique (lot 2, 4 sept. 2026) : le même gabarit que l'autre surface. -->
+                    ${_saisiePointsHtml(critere, ponderation)}
                 ` : `
                     <!-- Interface standard -->
                     <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
@@ -1738,9 +1725,131 @@ function pointsSaisis(critereId, el) {
     evaluationEnCours._dernierCritereModifie = critereId;
     genererRetroaction(1);
     evaluationEnCours._dernierCritereModifie = null;
+    // #1120, lot 3 — la tranche des points saisis se montre choisie, qu'ils viennent d'un toucher ou de la frappe.
+    _marquerBaremeEval(critereId);
 
     // Auto-sauvegarder apres un delai
     _debouncerAutoSave();
+}
+
+/* ===============================
+   LE BARÈME À L'ÉVALUATION (#1120, lot 3 — geste 3, 27 oct. 2026)
+   Consigne : plans de travail/CONSIGNE-LOT-2026-10-27-bareme-3-evaluer.md.
+   Sous un critère analytique qui a un barème : ses tranches, lisibles avant de toucher (le nom s'il y en a
+   un, les points, le texte). Toucher une tranche fait paraître ses valeurs SOUS elle (rien ne bouge sous
+   le doigt) ; une tranche d'une seule valeur pose ses points d'un coup. Une valeur touchée entre dans le
+   champ par le MÊME CHEMIN que la frappe : l'événement `input` du champ, donc `pointsSaisis`.
+   ⚠ LE BARÈME N'ENTRE DANS AUCUN CALCUL (invariant 1) : seuls les points s'enregistrent, comme avant.
+   =============================== */
+
+// H2 à H4 : validés par Grégoire le 27 oct. 2026 à 10 h 31 (plans de travail/TEXTES-2026-10-27-bareme-evaluation.md),
+// tels quels. Les bulles H1, H3 et H4 vivent au catalogue (accompagnement-contenu-hover.js), sous ces clés.
+const TEXTES_BAREME_EVAL = { ouTape: 'Ou tape les points :', horsBareme: 'hors barème', aCompleter: 'à compléter' };
+const BULLES_BAREME_EVAL = { bareme: 'bareme-eval', horsBareme: 'bareme-eval-hors-bareme', aCompleter: 'bareme-eval-a-completer' };
+
+// Les tranches de chaque critère affiché, lues UNE fois au rendu par la lecture unique (`bareme.tranchesDuCritere`).
+const _tranchesEval = new Map();
+
+/** Le champ des points d'un critère analytique, précédé de son barème quand il en a un (les deux surfaces). */
+function _saisiePointsHtml(critere, ponderation) {
+    const bareme = _baremeEvalHtml(critere);
+    const id = String(critere.id);
+    return `${bareme}
+        <div class="eval-saisie-points">${bareme ? `
+            <label class="eval-bareme-ou" for="eval_pts_${echapperHtml(id)}">${TEXTES_BAREME_EVAL.ouTape}</label>` : ''}
+            <input type="number" id="eval_pts_${critere.id}" class="controle-form eval-input-points"
+                   min="0" max="${ponderation}" step="any" placeholder="–" inputmode="decimal"
+                   data-on-input="pointsSaisis" data-param="${critere.id}">
+            <small class="eval-label">sur ${ponderation}</small>${bareme ? `
+            <span class="eval-bareme-marque" id="eval_pts_hors_${echapperHtml(id)}" data-tooltip="${BULLES_BAREME_EVAL.horsBareme}" hidden>${TEXTES_BAREME_EVAL.horsBareme}</span>` : ''}
+        </div>`;
+}
+
+/** Les tranches d'un critère, dans l'ordre du barème ; « » sans barème (rien ne change à l'écran). */
+function _baremeEvalHtml(critere) {
+    const B = window.bareme;
+    const id = String(critere.id);
+    const tranches = B ? B.tranchesDuCritere(critere) : [];
+    if (!tranches.length) { _tranchesEval.delete(id); return ''; }
+    _tranchesEval.set(id, tranches);
+    const items = tranches.map(t => {
+        const nom = String(t.nom || '').trim();
+        const points = B.pointsEnTexte(t);
+        const texte = String(t.texte || '').trim();
+        const lecture = `<span class="eval-bareme-tete">${nom ? `<strong class="eval-bareme-nom">${echapperHtml(nom)}</strong>` : ''}${points ? `<span class="eval-bareme-points">${echapperHtml(points)}</span>` : ''}</span>${texte ? `<span class="eval-bareme-texte">${echapperHtml(texte)}</span>` : ''}`;
+        if (B.aCompleter(t)) {
+            return `
+                <li class="eval-bareme-tranche eval-bareme-tranche--a-completer" data-tranche="${echapperHtml(t.id)}">
+                    <div class="eval-bareme-lecture">${lecture}<span class="eval-bareme-marque" data-tooltip="${BULLES_BAREME_EVAL.aCompleter}">${TEXTES_BAREME_EVAL.aCompleter}</span></div>
+                </li>`;
+        }
+        const valeurs = B.valeursOffertes(t);
+        const plusieurs = valeurs.length > 1;
+        const offre = plusieurs ? `
+                    <div class="eval-bareme-valeurs" hidden>${valeurs.map(v => `<button type="button" class="eval-bareme-valeur" data-action="poserPointsBareme" data-param="${echapperHtml(id)}" data-param2="${echapperHtml(String(v))}">${echapperHtml(B.nombreEnTexte(v))}</button>`).join('')}</div>` : '';
+        return `
+                <li class="eval-bareme-tranche" data-tranche="${echapperHtml(t.id)}">
+                    <button type="button" class="eval-bareme-choix" data-action="toucherTrancheBareme" data-param="${echapperHtml(id)}" data-param2="${echapperHtml(t.id)}" aria-pressed="false"${plusieurs ? ' aria-expanded="false"' : ''}>${lecture}</button>${offre}
+                </li>`;
+    }).join('');
+    return `
+        <div class="eval-bareme" data-bareme-critere="${echapperHtml(id)}">
+            <ul class="eval-bareme-tranches" data-tooltip="${BULLES_BAREME_EVAL.bareme}">${items}
+            </ul>
+        </div>`;
+}
+
+function _blocBaremeEval(critereId) {
+    const id = String(critereId);
+    return Array.from(document.querySelectorAll('.eval-bareme')).find(b => b.dataset.baremeCritere === id) || null;
+}
+
+/** La tranche des points du champ se montre choisie ; des points qu'aucune tranche ne couvre portent « hors barème ». */
+function _marquerBaremeEval(critereId) {
+    const id = String(critereId);
+    const tranches = _tranchesEval.get(id);
+    const bloc = _blocBaremeEval(id);
+    if (!tranches || !bloc || !window.bareme) return;
+    const champ = document.getElementById(`eval_pts_${id}`);
+    const brut = champ ? String(champ.value == null ? '' : champ.value).trim() : '';
+    const lu = window.bareme.lectureDesPoints(tranches, brut === '' || isNaN(Number(brut)) ? null : Number(brut));
+    bloc.querySelectorAll('.eval-bareme-tranche').forEach(li => {
+        const choisie = !!lu.tranche && li.dataset.tranche === lu.tranche.id;
+        li.classList.toggle('eval-bareme-tranche--choisie', choisie);
+        const bouton = li.querySelector('.eval-bareme-choix');
+        if (bouton) bouton.setAttribute('aria-pressed', choisie ? 'true' : 'false');
+    });
+    const hors = document.getElementById(`eval_pts_hors_${id}`);
+    if (hors) hors.hidden = !lu.horsBareme;
+}
+
+/** Toutes les marques, d'un coup (un formulaire vidé sans passer par `pointsSaisis`). */
+function marquerBaremesEvaluation() {
+    _tranchesEval.forEach((_, id) => _marquerBaremeEval(id));
+}
+
+/** Toucher une tranche : une seule valeur se pose ; plusieurs paraissent sous elle (un second toucher les replie). */
+function toucherTrancheBareme(critereId, trancheId) {
+    const id = String(critereId);
+    const t = (_tranchesEval.get(id) || []).find(x => x.id === String(trancheId));
+    const champ = document.getElementById(`eval_pts_${id}`);
+    if (!t || !champ || champ.disabled || window.bareme.aCompleter(t)) return;
+    const valeurs = window.bareme.valeursOffertes(t);
+    if (valeurs.length === 1) { poserPointsBareme(id, valeurs[0]); return; }
+    const bloc = _blocBaremeEval(id);
+    const li = bloc && Array.from(bloc.querySelectorAll('.eval-bareme-tranche')).find(x => x.dataset.tranche === t.id);
+    const offre = li && li.querySelector('.eval-bareme-valeurs');
+    if (!offre) return;
+    offre.hidden = !offre.hidden;
+    li.querySelector('.eval-bareme-choix').setAttribute('aria-expanded', offre.hidden ? 'false' : 'true');
+}
+
+/** Une valeur touchée entre dans le champ, puis l'événement de la frappe : rien de plus qu'une frappe. */
+function poserPointsBareme(critereId, valeur) {
+    const champ = document.getElementById(`eval_pts_${String(critereId)}`);
+    if (!champ || champ.disabled) return;
+    champ.value = String(valeur);
+    champ.dispatchEvent(new Event('input', { bubbles: true }));
 }
 /* ===============================
    AUTO-SAUVEGARDE DEBOUNCE (1.5s)
@@ -2294,6 +2403,9 @@ window.poserCartoucheParChargeur = poserCartoucheParChargeur;   // #944 — eval
 window._evaluationEnregistreeDeLaCopie = _evaluationEnregistreeDeLaCopie;   // #947 — la restauration de la visionneuse (travaux-ui.js)
 window.niveauSelectionne = niveauSelectionne;
 window.pointsSaisis = pointsSaisis;   // lot 2
+window.toucherTrancheBareme = toucherTrancheBareme;   // #1120, lot 3
+window.poserPointsBareme = poserPointsBareme;
+window.marquerBaremesEvaluation = marquerBaremesEvaluation;
 
 // Export dispersé d'origine (L7026 résidu — mise à jour après dup/modif productions) :
 window.chargerProductionsDansSelect = chargerProductionsDansSelect;

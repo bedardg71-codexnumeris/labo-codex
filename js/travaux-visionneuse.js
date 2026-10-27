@@ -1147,7 +1147,9 @@
 
     function onPanKeyDown(e) {
         if (e.key !== ' ' || e.repeat) return;
-        if (e.target.matches('input, select, textarea, [contenteditable]')) return;
+        // #1120, lot 3 (27 oct. 2026) : un bouton qui a le focus garde sa barre d'espace (l'activer au clavier) ; sans
+        // `button`, Espace ne déclenchait aucun bouton des palettes tant qu'un fichier était ouvert.
+        if (e.target.matches('input, select, textarea, button, [contenteditable]')) return;
         if (!fichierActuel) return;
         e.preventDefault();
         panState.spaceActif = true;
