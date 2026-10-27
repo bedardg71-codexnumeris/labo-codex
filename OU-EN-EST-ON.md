@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 27 OCTOBRE 2026, 19 H 15 : LA 1.222 PART CE SOIR** (une Aide plus courte pour Commencer, Cadre et Conception ; le niveau « PS – Préstructurel » sous I dans l'Échelle de départ d'un trimestre neuf). *Écrit par Claude Code, avant la vérification complète ; la mise en ligne se constate après.*
+
+**Ce qui change pour toi** : ce que disent les quatre lignes de la 1.222 dans les Nouvelles. Dans l'Aide, Commencer, Cadre et Conception disent l'écran d'aujourd'hui, en moins de mots, avec deux entrées neuves (« La bibliothèque », « Les chaînes d'étapes ») et SOLO et l'échelle de départ en une seule entrée. Dans un trimestre neuf, l'Échelle de départ a cinq niveaux, PS de 0 à 39,99 % (valeur 0), I à partir de 40 % ; la Cartouche de départ a tes quatre commentaires PS ; au tableau de bord, les étudiant·es PS comptent « en difficulté ». Une copie notée 0 % s'annonce « 0 % » quand tu la supprimes. Tes échelles et tes cartouches actuelles ne changent pas.
+
+**Ce qui reste à toi** : rien pour cette version. La suite : le lot 2c de l'Aide (Évaluation, Suivi), dont Cowork écrit la consigne. Les bornes fixes du niveau RàI (64 / 75 %) attendent toujours ta réponse ; avec PS, une moyenne de 30 % s'y lit encore « I ».
+
+**Vérifié comment** : chaque lot relu et accepté par Cowork (verdicts dans `plans de travail/`, le dernier `VERDICT-RELECTURE-2026-10-27-aide-lot-2b-retouche-2.md`) ; Vitest entier vert (9 983) ; pour PS, chaque correctif a son essai, qui rougit quand on le retire (six sur six, cinq rejoués par Cowork), et un essai au navigateur suit une copie PS de l'évaluation au PDF. La vérification complète du navigateur et la mise en ligne restent à constater ci-dessous.
+
 📝 **LE 27 OCTOBRE 2026, 13 H 43 : LA 1.221 EST EN LIGNE** (tes propres calculs, le barème à l'évaluation, la note remise d'une copie verrouillée, la chaîne d'étapes de la Carte d'alignement, la corbeille de la sélection). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les huit lignes de la 1.221 dans les Nouvelles. Les trois calculs tout faits de « Note calculée » en blocs ; « Retoucher ce calcul » et « Composer ton propre calcul » ; un calcul qui sert à tes phrases et à tes tables sans toucher la note ; la note remise d'une copie verrouillée, et la ligne qui dit si le calcul actuel en donnerait une autre ; les tranches du barème sous chaque critère analytique à l'évaluation ; la chaîne d'étapes de la Carte d'alignement ; « Mettre à la corbeille (N) » dans la Liste des évaluations.

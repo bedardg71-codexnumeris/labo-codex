@@ -21,6 +21,20 @@
 
     var CHANGELOG = [
         {
+            // 1.222 (l'Aide, lots 2a et 2b, #1152 ; le niveau « PS – Préstructurel » de l'Échelle de départ et ce qui
+            // le lit) — titre et quatre items validés par Grégoire, mot pour mot, le 27 oct. 2026 à 19 h 02 (« validé » ;
+            // consigne de la mise en ligne du soir, § 1). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.222',
+            couleur: 'vert',
+            titre: 'Une Aide plus courte, et un niveau sous I',
+            items: [
+                'Aide&nbsp;: Commencer, Cadre et Conception décrivent l’écran d’aujourd’hui, en moins de mots. Deux entrées sont neuves, «&nbsp;La bibliothèque&nbsp;» et «&nbsp;Les chaînes d’étapes&nbsp;», et SOLO et l’échelle de départ se lisent maintenant en une seule entrée.',
+                'Nouveau&nbsp;: dans un trimestre neuf, l’Échelle de départ (IDME) compte cinq niveaux. «&nbsp;PS – Préstructurel&nbsp;» va de 0 à 39,99&nbsp;%, et «&nbsp;I&nbsp;» commence à 40&nbsp;%. Les valeurs ponctuelles sont 0, 40, 65, 75 et 100. Le code «&nbsp;0&nbsp;» reste celui du non recevable. Tes échelles actuelles ne changent pas.',
+                'La Cartouche de départ d’un trimestre neuf a un commentaire PS pour chaque critère. Au tableau de bord, les étudiant·es au niveau PS comptent parmi ceux «&nbsp;en difficulté&nbsp;».',
+                'Corrigé&nbsp;: quand tu supprimes une copie notée 0&nbsp;%, la question dit «&nbsp;0&nbsp;%&nbsp;» au lieu de «&nbsp;--%&nbsp;».'
+            ]
+        },
+        {
             // 1.221 (les calculs 4a, 4b, 4c ; la note remise d'une copie verrouillée, #1173 ; le barème à l'évaluation,
             // #1120 ; la chaîne d'étapes de la Carte d'alignement, #1172 ; la corbeille de la sélection, #1174) — titre et
             // huit items validés par Grégoire, mot pour mot, le 27 oct. 2026 à 12 h 01 (« ça convient » ; consigne de la
