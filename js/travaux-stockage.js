@@ -1048,25 +1048,38 @@
      * @returns {boolean} true si déplacé
      */
     function deplacerEnCorbeille(id) {
-        const fichiers = obtenirFichiersTravaux();
-        const index = fichiers.findIndex(f => f.id === id);
-        if (index === -1) return false;
+        return deplacerEnCorbeilleLot([id]) > 0;
+    }
 
-        // Copier les métadonnées + date de suppression
-        const fichier = Object.assign({}, fichiers[index], {
-            dateSuppression: new Date().toISOString()
+    /**
+     * Déplace plusieurs fichiers dans la corbeille (soft delete), en un seul geste
+     * (#1174) : chaque liste est lue une fois et écrite une fois, et tout le lot
+     * porte la même `dateSuppression`. Les blobs restent intacts ; aucune
+     * évaluation n'est touchée. Un id absent est ignoré.
+     * @param {string[]} ids - IDs des fichiers
+     * @returns {number} le nombre de fichiers déplacés
+     */
+    function deplacerEnCorbeilleLot(ids) {
+        const voulus = new Set(ids || []);
+        if (voulus.size === 0) return 0;
+        const fichiers = obtenirFichiersTravaux();
+        const dateSuppression = new Date().toISOString();
+        const restants = [];
+        const deplaces = [];
+        fichiers.forEach(f => {
+            if (f && voulus.has(f.id)) deplaces.push(Object.assign({}, f, { dateSuppression }));
+            else restants.push(f);
         });
+        if (deplaces.length === 0) return 0;
 
         // Ajouter à la corbeille
         const corbeille = obtenirCorbeilleComplete();
-        corbeille.push(fichier);
-        sauvegarderCorbeille(corbeille);
+        sauvegarderCorbeille(corbeille.concat(deplaces));
 
-        // Retirer de la liste active (blob intact)
-        fichiers.splice(index, 1);
-        sauvegarderFichiersTravaux(fichiers);
+        // Retirer de la liste active (blobs intacts)
+        sauvegarderFichiersTravaux(restants);
 
-        return true;
+        return deplaces.length;
     }
 
     /**
@@ -1476,6 +1489,7 @@
         // Corbeille
         obtenirCorbeille: obtenirCorbeille,
         deplacerEnCorbeille: deplacerEnCorbeille,
+        deplacerEnCorbeilleLot: deplacerEnCorbeilleLot,
         restaurerDeCorbeille: restaurerDeCorbeille,
         supprimerDefinitivement: supprimerDefinitivement,
         supprimerAnnotationsFichiers: supprimerAnnotationsFichiers,   // #572
