@@ -7086,7 +7086,7 @@ body.chaines-etapes-masquees .barre-convergence {
     font-size: 0.85rem;
     line-height: 1.45;
     background: var(--alerte-fond-information);
-    border-left: 3px solid var(--alerte-bordure-information);
+    border: 1px solid var(--alerte-bordure-information);   /* sans liseré : bordures égales (Grégoire, 24 oct.) */
     border-radius: var(--radius-moyen);
     color: var(--alerte-texte-information);
 }
