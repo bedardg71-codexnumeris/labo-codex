@@ -329,6 +329,26 @@ inventé — quand il n'y a ni valeur ni bornes exploitables.
 
 ---
 
+## 7 ter. Le BARÈME d'un critère analytique : il décrit les points, il ne les calcule pas
+
+**#1120, livré du 20 au 27 oct. 2026** (plan : `plans de travail/PLAN-2026-10-19-bareme.md`). Un critère analytique se
+note en points (son maximum est sa pondération). Son **barème** dit ce que valent ces points : des **tranches**
+`{ id, nom, pointsMin, pointsMax, texte }`. L'échelle reste l'instrument des holistiques : avec une échelle, on choisit un
+niveau et l'échelle donne la note ; avec un barème, on donne des points et le barème dit à quoi ils correspondent.
+
+| | Où | Règle |
+|---|---|---|
+| **Lecture unique** | `js/bareme.js` : `tranchesDuCritere`, `trancheDesPoints`, `lectureDesPoints`, `valeursOffertes`, `texteAtteint` | `bareme`, sinon l'ancien `descripteurs.parNiveau` sans `echelleId`, lu sans rien écrire |
+| **Invariant 1** | `evaluation-calcul.js`, `profil-etudiant-calculs.js` ne nomment pas `bareme` | ni la note, ni P, ni le Comparateur, ni l'export, ni le dépistage : tous lisent `pointsAnalytiques` ; sentinelles `bareme-1-editeur.test.js` (I) et `bareme-3-evaluer.test.js` (I) |
+| **À l'évaluation** | `evaluation-chargement.js`, `_saisiePointsHtml` | les tranches guident la saisie ; une valeur touchée entre par l'événement `input` du champ, comme une frappe ; **seuls les points s'enregistrent** |
+| **Ce que l'élève lit** | `synthese-retroaction-data.js` (PDF), `evaluation-retroaction.js` (bilan) | dans le bloc du critère : le chiffre, dessous le TEXTE de la tranche atteinte, sans son nom, puis la cartouche ; hors barème, le chiffre seul ; les lignes du bilan (« Présentement », « Ta force »), le chiffre seul (décision de Grégoire, 27 oct.) |
+
+⚠ **Le zéro est une valeur** ; une tranche sans points est `null`, pas 0 (« à compléter ») et n'est jamais choisie.
+⚠ **Deux tranches du stock qui se chevauchent** (« 3-4 », « 4-5 ») : `trancheDesPoints` rend la PREMIÈRE dans l'ordre écrit.
+⚠ **Le texte du PDF vient du barème ACTUEL** : aucune donnée du barème n'est gardée sur la copie ; un barème réécrit après
+la remise change le texte d'un PDF refait plus tard (la note, elle, ne bouge pas). Seul `retroactionFinale`, le texte
+déjà engendré et enregistré avec la copie, garde la phrase du moment.
+
 ## 8. Calcul par famille (résumé technique)
 
 - **SOM** (fn `calculerPerformance`, `pratique-sommative.js`) : moyenne pondérée de **toutes** les évaluations
