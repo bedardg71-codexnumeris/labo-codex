@@ -66,7 +66,9 @@ describe('#1152 lot 2b · la Conception', () => {
         const titresAide = new Set([...aide.querySelectorAll('.carte.accordeon h3')].map((h) => net(h.textContent).replace(/^▼ /, '')));
         const absents = [];
         let cites = 0;
-        for (const id of ['creer-productions', 'creer-grilles', 'creer-echelles', 'creer-cartouches']) {
+        // ↻ Retouche du 27 oct. (VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 1.1) : les « À régler » de `pratique` ne
+        // nomment que ce qu'un champ règle ; leurs libellés passent au même contrôle.
+        for (const id of ['pratique', 'creer-productions', 'creer-grilles', 'creer-echelles', 'creer-cartouches']) {
             for (const m of texteDe(id).matchAll(/« ([^»]+?) »/g)) {
                 const libelle = m[1];
                 if (titresAide.has(libelle)) continue;
@@ -98,6 +100,30 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
         expect(tableaux).toHaveLength(2);
         const lu = [...tableaux[1].querySelectorAll('tbody tr')].map((tr) => [...tr.querySelectorAll('td')].map((td) => net(td.textContent)));
         expect(lu).toEqual(attendu);
+    });
+
+    it('pratique : plus de « travail non remis » ni d\'« occasions de reprise », qu\'aucun champ ne règle (verdict, § 1.1)', () => {
+        const t = texteDe('pratique');
+        expect(t).not.toMatch(/travail non remis|occasions de reprise/);
+        expect(t).toContain('est fixe : aucun champ ne la règle');
+    });
+
+    it('solo : chaque niveau SOLO porte son icône, dans les deux tableaux ; décorative, le nom la suit (verdict, § 4.2)', () => {
+        const ICONES = { Unistructurel: 'solo-uni-couleur.svg', Multistructurel: 'solo-multi-couleur.svg',
+            Relationnel: 'solo-relationnel-couleur.svg', 'Abstrait étendu': 'solo-etendu-couleur.svg' };
+        const tableaux = [...entree('solo').querySelectorAll('table')];
+        const cellules = [...tableaux[0].querySelectorAll('tbody tr td:first-child'), ...tableaux[1].querySelectorAll('tbody tr td:nth-child(2)')];
+        expect(cellules).toHaveLength(8);
+        for (const td of cellules) {
+            const nom = net(td.textContent);
+            const img = td.querySelector('img.aide-icone-solo');
+            expect(img, nom).toBeTruthy();
+            expect(img.getAttribute('src'), nom).toBe(`icons/${ICONES[nom]}`);
+            expect(img.getAttribute('alt'), nom).toBe('');
+            expect(td.firstChild, nom + ' : l’icône vient avant le nom').toBe(img);   // le premier NŒUD, texte compris
+            expect(statSync(path.join(racine, 'icons', ICONES[nom])).size, nom).toBeGreaterThan(0);
+        }
+        expect(lire('styles.css')).toMatch(/\.aide-icone-solo \{[^}]*height: 1\.1em;[^}]*width: auto;/);
     });
 
     it('sous-criteres : la règle d\'une copie déjà évaluée est la phrase de l\'étape « Note calculée », mot pour mot', () => {

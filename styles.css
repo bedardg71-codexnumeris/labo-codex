@@ -29005,3 +29005,14 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     .dissection-palette { position: static; flex-direction: row; flex-wrap: wrap; max-height: none; overflow: visible; }
     .dissection-groupe { flex: 1 1 200px; }
 }
+
+/* #1152, lot 2b, retouche (27 oct. 2026 ; demande de Grégoire, 17 h 48) : l'icône de chaque niveau SOLO, devant son nom,
+   dans les deux tableaux de l'entrée « SOLO et l'échelle de départ (IDME) » de l'Aide. Décorative (alt="") : le nom la
+   suit. Les quatre SVG n'ont pas la même largeur (un à quatre traits) : la hauteur suit le texte, la largeur suit l'image.
+   Leurs couleurs sont celles des fichiers, dans les deux modes. */
+.aide-icone-solo {
+    height: 1.1em;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 0.4em;
+}
