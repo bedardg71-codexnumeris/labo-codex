@@ -35,16 +35,16 @@ const MONTER = `({ T, sorte }) => {
     window.db.setSync('trimestres', [{ id: T, nom: 'Trimestre témoin', annee: 2026, session: 'A', actif: true }]);
     window.db.setSync('cours', [{ id: coursId, codeCours: 'FIC101', titre: 'Cours fictif' }]);
     window.db.setSync(T + '_groupesCours', [{ id: 'GC1173', trimestreId: T, coursId, groupeNum: '01', pratiqueId: 'sommative', actif: true }]);
-    window.db.setSync(T + '_groupeEtudiants', [{ da: 'DA1173', nom: 'Fictif', prenom: 'Élève', groupe: '01', coursId, groupeCoursId: 'GC1173' }]);
-    window.db.setSync(T + '_productions', [{ id: 'P1173', titre: 'Rédaction fictive', type: 'travail', ponderation: 60, grilleId: 'G1173', echelleId: 'E1173', cartoucheId: 'CT1173', groupeCoursId: 'GC1173' }]);
+    window.db.setSync(T + '_groupeEtudiants', [{ da: 'DA1173', nom: 'Fictif', prenom: 'Élève', groupe: '01', coursId, groupeCoursId: 'GC1173' }]);   // security-ok: fixture littérale du banc
+    window.db.setSync(T + '_productions', [{ id: 'P1173', titre: 'Rédaction fictive', type: 'travail', ponderation: 60, grilleId: 'G1173', echelleId: 'E1173', cartoucheId: 'CT1173', groupeCoursId: 'GC1173' }]);   // security-ok: fixture littérale du banc
     const criteres = algo
         ? [{ id: 'c2', nom: 'Langue écrite', ponderation: 100, type: 'algorithmique', modeleFormule: 'penalite_normalisee', paramsFormule: { facteurNormalisation: 500 }, facteurNormalisation: 500 }]
         : [{ id: 'c1', nom: 'Analyse', ponderation: 50 }, { id: 'c2', nom: 'Structure', ponderation: 50 }];
     const commentaires = {};
     criteres.forEach((c) => ['I', 'D', 'M', 'E'].forEach((n) => { commentaires[c.id + '_' + n] = 'CARTOUCHE ' + c.id + '_' + n; }));
-    window.db.setSync(T + '_cartouches_G1173', [{ id: 'CT1173', nom: 'Cartouche témoin', grilleId: 'G1173', contexte: '', criteres: criteres.map((c) => ({ id: c.id, nom: c.nom })), commentaires }]);
-    window.db.setSync(T + '_grillesTemplates', [{ id: 'G1173', nom: 'Grille témoin', criteres }]);
-    window.db.setSync(T + '_echellesTemplates', [{ id: 'E1173', nom: 'IDME', niveaux }]);
+    window.db.setSync(T + '_cartouches_G1173', [{ id: 'CT1173', nom: 'Cartouche témoin', grilleId: 'G1173', contexte: '', criteres: criteres.map((c) => ({ id: c.id, nom: c.nom })), commentaires }]);   // security-ok: fixture littérale du banc
+    window.db.setSync(T + '_grillesTemplates', [{ id: 'G1173', nom: 'Grille témoin', criteres }]);   // security-ok: fixture littérale du banc
+    window.db.setSync(T + '_echellesTemplates', [{ id: 'E1173', nom: 'IDME', niveaux }]);   // security-ok: fixture littérale du banc
     window.db.setSync(T + '_evaluationsSauvegardees', [{
         id: 'EV1173', etudiantDA: 'DA1173', productionId: 'P1173', groupeCoursId: 'GC1173', grilleId: 'G1173', echelleId: 'E1173', cartoucheId: 'CT1173',
         statutRemise: 'evalue', statutIntegrite: 'recevable', dateEvaluation: '2026-10-20T08:00:00.000Z', noteFinale: 70, niveauFinal: 'D', verrouillee: true,
@@ -57,7 +57,7 @@ const MONTER = `({ T, sorte }) => {
         retroactionFinale: 'Rétroaction remise.', retroactionReecrite: true }]);
     window.trimestreActif = T;
     window.db.setSync('trimestreActif', T);
-    window.db.setSync('infoCours', { id: coursId, codeCours: 'FIC101', groupe: '01', _groupeCoursId: 'GC1173' });
+    window.db.setSync('infoCours', { id: coursId, codeCours: 'FIC101', groupe: '01', _groupeCoursId: 'GC1173' });   // security-ok: fixture littérale du banc
     window.db.setSync('groupeCoursActif', { id: 'GC1173', trimestreId: T });
     // Les deux enveloppes d'observation du PDF (patron du banc #912) : rien ne se télécharge, on garde ce que l'élève lirait.
     window._pdf1173 = [];
@@ -109,7 +109,7 @@ async function changer(page, sorte) {
             const grilles = window.db.getSync(t + '_grillesTemplates', []);
             grilles[0].criteres[0].ponderation = 30;
             grilles[0].criteres[1].ponderation = 70;
-            window.db.setSync(t + '_grillesTemplates', grilles);
+            window.db.setSync(t + '_grillesTemplates', grilles);   // security-ok: fixture littérale du banc
         }, T);
     }
 }
