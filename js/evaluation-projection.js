@@ -200,7 +200,8 @@ function jetonsInconnus(texte) {
     var vus = texte.match(/\{[^{}\s]+\}/g) || [];
     var inconnus = [];
     vus.forEach(function(j) {
-        if (JETONS.indexOf(j) === -1 && inconnus.indexOf(j) === -1) inconnus.push(j);
+        // Étape 4c : le jeton d'un calcul (`{calcN}`) se remplit ou part au rendu, il ne reste jamais en place.
+        if (JETONS.indexOf(j) === -1 && !/^\{calc[1-9][0-9]{0,3}\}$/.test(j) && inconnus.indexOf(j) === -1) inconnus.push(j);
     });
     return inconnus;
 }
@@ -222,9 +223,12 @@ function _echapperRegExp(texte) {
  * (`jetonsInconnus`).
  */
 function remplir(texte, valeurs) {
-    if (!_porteUnDe(texte, JETONS)) return (typeof texte === 'string') ? texte : '';
+    var E = _E();
+    var calcul = !!(E && E.porteUnCalcul(texte));
+    if (!_porteUnDe(texte, JETONS) && !calcul) return (typeof texte === 'string') ? texte : '';
     var v = (valeurs && typeof valeurs === 'object') ? valeurs : {};
-    var sortie = texte;
+    // Étape 4c : les jetons des calculs des phrases (`{calcN}`), par la règle des énoncés — remplis, ou retirés avec leur espace.
+    var sortie = calcul ? E.remplirCalculs(texte, v) : texte;
     JETONS.forEach(function(jeton) {
         var cle = jeton.slice(1, -1);
         var brut = v[cle];
@@ -254,7 +258,8 @@ function _valeursJetons(x) {
     var n = x.noms;
     var E = _E();
     var accorder = function(k, paire) { return (E && paire) ? E.accorder(k, paire) : ''; };
-    return {
+    // Étape 4c : `x.calculs`, les jetons des calculs des phrases (`formulesAlgo.jetonsDesCalculs`), passés par l'appelant.
+    return Object.assign({
         service: nom,
         // `== null` : un critère neuf aux champs vides (lot 3a) ne porte pas la valeur ; jamais « ? ».
         seuil: (params.erreursTolerees == null) ? '' : _nb(params.erreursTolerees),
@@ -271,7 +276,7 @@ function _valeursJetons(x) {
         projection: projection,
         palier: (x.palier && (x.palier.libelle || x.palier.cle)) || '',
         s: (isFinite(erreurs) && Math.abs(erreurs) > 1) ? 's' : ''
-    };
+    }, x.calculs || {});
 }
 
 /** Formate un nombre pour un libellé (pas de décimale inutile). */
@@ -652,6 +657,8 @@ function calculer(critere, donnees) {
     var mots = Number(donnees && donnees.mots);
     if (isNaN(erreurs)) erreurs = 0;
     if (isNaN(mots)) mots = 0;
+    // Étape 4c : les valeurs des calculs des phrases de la copie (`formulesAlgo.jetonsDesCalculs`) ; absentes, leurs jetons partent.
+    var calculs = (donnees && donnees.calculs && typeof donnees.calculs === 'object') ? donnees.calculs : null;
 
     var base = {
         modeleId: p.modeleId,
@@ -705,7 +712,7 @@ function calculer(critere, donnees) {
         if (!sansErreur) return _nonApplicable(base, 'palier-zero-erreur-absent');
         return _resultat(base, {
             applicable: true, ratio: 0, motsParErreur: null,
-            palier: sansErreur, indice: 0, params: p.params, erreurs: erreurs, mots: mots, noms: base.noms
+            palier: sansErreur, indice: 0, params: p.params, erreurs: erreurs, mots: mots, noms: base.noms, calculs: calculs
         });
     }
 
@@ -736,7 +743,7 @@ function calculer(critere, donnees) {
     return _resultat(base, {
         applicable: true, ratio: ratio, motsParErreur: motsParErreur,
         palier: choisi, indice: indice, params: p.params, erreurs: erreurs, mots: mots,
-        seuilMotsParErreur: seuilMotsParErreur, noms: base.noms
+        seuilMotsParErreur: seuilMotsParErreur, noms: base.noms, calculs: calculs
     });
 }
 

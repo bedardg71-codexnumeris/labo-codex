@@ -165,6 +165,9 @@ var CALCULS_MAX = 10;
 var JETONS_MAX = 60;
 var NOM_MAX = 80;
 var PROCHAIN_MAX = 10000;
+/** Étape 4c — ce qu'un calcul composé sert : la note du critère, ou les phrases et les tables. Le jeton d'un calcul dans un texte : `{calcN}`. */
+var SERTS = ['note', 'phrases'];
+var JETON_CALCUL = /^calc[1-9][0-9]{0,3}$/;
 /** Les messages de « Garder » quand le calcul ne s'évalue pas (ceux de l'ébauche, `ERREURS_CALCUL`). */
 var ERREURS_CALCUL = {
     vide: 'Le calcul est vide.',
@@ -178,6 +181,9 @@ var MESSAGES_COMPOSE = {
     trop: 'Ce critère a déjà ' + CALCULS_MAX + ' calculs : retires-en un d’abord.',
     long: 'Le calcul compte plus de ' + JETONS_MAX + ' blocs.',
     garde: function(nom) { return 'Calcul « ' + nom + ' » gardé : il donne maintenant la note.'; },
+    // Étape 4c : un calcul pour les phrases et les tables (les mots de la consigne, § 2 et § 3.5).
+    gardePhrases: function(nom) { return 'Calcul « ' + nom + ' » gardé : il est dans la palette et dans le menu « Selon ».'; },
+    lu: 'Une table ou un texte lit ce calcul : retire-l’en d’abord.',
     donneLaNote: 'Ce calcul donne la note : choisis d’abord un autre calcul.',
     confirmerRetrait: function(nom) { return 'Retirer le calcul « ' + nom + ' » ? Ses blocs seront perdus.'; },
     introuvable: 'Le calcul qui donnait la note est introuvable dans cette grille : choisis un calcul.'
@@ -189,6 +195,8 @@ var ORDRE_CAS = ['etendue', 'compte', 'comptePondere'];
 var CHOIX_CAS = ['calcul', 'aucune', 'entiere', 'zero'];
 /** Les choix du menu « Si [donnée] vaut 0 » (ceux de l'ébauche ; « aucune » s'y dit avec la donnée). */
 var ISSUES = { calcul: 'Calculer normalement', aucune: 'Aucune note : l’évaluation attend cette donnée', entiere: 'La note entière', zero: 'Une note de 0' };
+/** Étape 4c — les choix d'un calcul pour les phrases (ceux de l'ébauche, `casDunCalcul`) : jamais « La note entière ». */
+var ISSUES_PHRASES = { calcul: 'Calculer normalement', aucune: 'Sans valeur', zero: 'La valeur 0' };
 
 // ---------------------------------------------------------------------
 // L'ÉVALUATEUR — pur, sans expression interprétée
@@ -429,7 +437,8 @@ function _departsCompose(jetons) {
 /** Le calcul d'un calcul composé, sous la forme d'un modèle : sans réglage, ses choix « vaut 0 » à lui. */
 function _modeleCompose(calcul) {
     return { id: PREFIXE_COMPOSE + calcul.id, nom: calcul.nom, court: '« ' + calcul.nom + ' »', texte: 'Ton calcul.',
-        parametres: [], jetons: calcul.jetons, cas: _departsCompose(calcul.jetons), compose: calcul };
+        parametres: [], jetons: calcul.jetons, cas: _departsCompose(calcul.jetons), compose: calcul,
+        phrases: calcul.sert === 'phrases' };   // étape 4c : jamais « La note entière » pour un calcul des phrases
 }
 
 /** Pourquoi un calcul ne s'évalue pas sur la copie d'essai (chaque donnée vaut 1) : '' s'il s'évalue. */
@@ -440,8 +449,8 @@ function erreurDuCalcul(jetons) {
 }
 
 /** Les choix « vaut 0 » lisibles d'un calcul composé (une donnée qu'il lit, jamais « calculer » une division). */
-function _casCompose(brut, jetons) {
-    var r = {}, modele = { jetons: jetons };
+function _casCompose(brut, jetons, sert) {
+    var r = {}, modele = { jetons: jetons, phrases: sert === 'phrases' };
     if (!brut || typeof brut !== 'object' || Array.isArray(brut)) return r;
     Object.keys(brut).forEach(function(d) { if (_choixLisible(modele, d, brut[d])) r[d] = brut[d]; });
     return r;
@@ -449,17 +458,18 @@ function _casCompose(brut, jetons) {
 
 /**
  * Un calcul composé relu : {id, nom, sert, jetons, cas}, ou null. `nettoyer` (l'import) passe le nom par
- * l'assainissement des textes. Lisible : un identifiant `calcN`, un nom, `sert: 'note'`, 1 à 60 jetons connus
- * qui s'évaluent sur la copie d'essai sans diviser par le nombre 0. Ses choix « vaut 0 » illisibles sont écartés.
+ * l'assainissement des textes. Lisible : un identifiant `calcN`, un nom, `sert: 'note'` ou (étape 4c) `'phrases'`,
+ * 1 à 60 jetons connus qui s'évaluent sur la copie d'essai sans diviser par le nombre 0. Ses choix « vaut 0 »
+ * illisibles sont écartés.
  */
 function _calculLisible(brut, nettoyer) {
     if (!brut || typeof brut !== 'object' || Array.isArray(brut)) return null;
-    if (typeof brut.id !== 'string' || !ID_CALCUL.test(brut.id) || brut.sert !== 'note') return null;
+    if (typeof brut.id !== 'string' || !ID_CALCUL.test(brut.id) || SERTS.indexOf(brut.sert) < 0) return null;
     var nom = typeof brut.nom === 'string' ? (nettoyer ? nettoyer(brut.nom, NOM_MAX) : brut.nom).trim().slice(0, NOM_MAX) : '';
     if (!nom || !Array.isArray(brut.jetons) || !brut.jetons.length || brut.jetons.length > JETONS_MAX) return null;
     var jetons = brut.jetons.map(_jetonCompose);
     if (jetons.indexOf(null) >= 0 || erreurDuCalcul(jetons)) return null;
-    return { id: brut.id, nom: nom, sert: 'note', jetons: jetons, cas: _casCompose(brut.cas, jetons) };
+    return { id: brut.id, nom: nom, sert: brut.sert, jetons: jetons, cas: _casCompose(brut.cas, jetons, brut.sert) };
 }
 
 /**
@@ -498,9 +508,19 @@ function refusCalculs(brut) {
     return '';
 }
 
-/** Les calculs composés lisibles d'un critère (toujours un tableau). */
+/** Les calculs composés lisibles d'un critère, pour la note comme pour les phrases (toujours un tableau). */
 function calculsDuCritere(critere) {
     return assainirCalculs(critere && critere.calculs) || [];
+}
+
+/** Étape 4c — les calculs qui peuvent donner la note (les cartes de l'étape « Note calculée »). */
+function calculsPourLaNote(critere) {
+    return calculsDuCritere(critere).filter(function(c) { return c.sert === 'note'; });
+}
+
+/** Étape 4c — les calculs pour les phrases et les tables : la palette, le menu « Selon », la liste de l'étape. */
+function calculsPourLesPhrases(critere) {
+    return calculsDuCritere(critere).filter(function(c) { return c.sert === 'phrases'; });
 }
 
 /** Le calcul composé `id` d'un critère, lisible, ou null. */
@@ -513,6 +533,7 @@ function calculParId(critere, id) {
 /** `normaliser` pour `perso:<id>` : le calcul composé, ou un calcul INTROUVABLE (aucun jeton, aucune note). */
 function _normaliserCompose(critere, declare) {
     var calcul = calculParId(critere, declare.slice(PREFIXE_COMPOSE.length));
+    if (calcul && calcul.sert !== 'note') calcul = null;   // étape 4c : un calcul des phrases ne donne jamais la note
     if (calcul) return { modeleId: declare, modele: _modeleCompose(calcul), params: {}, herite: false };
     return { modeleId: declare, params: {}, herite: false, introuvable: true,
         modele: { id: declare, nom: 'Calcul introuvable', court: 'calcul introuvable', texte: '', parametres: [], jetons: [], cas: {} } };
@@ -541,7 +562,46 @@ function refusDuBrouillon(critere, brouillon) {
     var e = jetons.length ? erreurDuCalcul(jetons.map(function(j) { return _jetonCompose(j) || {}; })) : 'vide';
     if (e) return ERREURS_CALCUL[e];
     if (!b.id && calculsDuCritere(critere).length >= CALCULS_MAX) return MESSAGES_COMPOSE.trop;
-    return '';
+    return b.id ? _refusDuChangementDeSert(critere, b.id, _sert(b)) : '';
+}
+
+/** Ce que le brouillon sert : `'note'` sauf s'il dit `'phrases'`. */
+function _sert(brouillon) { return brouillon && brouillon.sert === 'phrases' ? 'phrases' : 'note'; }
+
+/**
+ * Étape 4c (§ 3.5) — changer « Ce calcul sert » d'un calcul gardé : le calcul qui donne la note ne passe pas aux phrases ;
+ * un calcul qu'une table ou un texte lit ne passe pas à la note. '' quand le changement se fait (ou qu'il n'y en a pas).
+ */
+function _refusDuChangementDeSert(critere, id, sert) {
+    var existant = calculParId(critere, id);
+    if (!existant || existant.sert === sert) return '';
+    if (sert === 'phrases' && critere.modeleFormule === PREFIXE_COMPOSE + id) return MESSAGES_COMPOSE.donneLaNote;
+    return (sert === 'note' && calculLu(critere, id)) ? MESSAGES_COMPOSE.lu : '';
+}
+
+/** Les textes d'un critère où un jeton peut être posé : les quatre énoncés écrits, les deux zones des paliers, les cas des tables. */
+function _textesDuCritere(critere) {
+    var t = [];
+    var en = critere && critere.enonces;
+    if (en && typeof en === 'object') Object.keys(en).forEach(function(k) { t.push(en[k]); });
+    (Array.isArray(critere && critere.paliersProjection) ? critere.paliersProjection : []).forEach(function(p) {
+        if (p && typeof p === 'object') t.push(p.texte, p.texteAide);
+    });
+    (Array.isArray(critere && critere.tablesCas) ? critere.tablesCas : []).forEach(function(tb) {
+        (tb && Array.isArray(tb.cas) ? tb.cas : []).forEach(function(c) { if (c && typeof c === 'object') t.push(c.texte); });
+    });
+    return t.filter(function(x) { return typeof x === 'string'; });
+}
+
+/**
+ * Étape 4c (§ 3.5, `calculLu` de l'ébauche) — une table ou un texte du critère lit-il le calcul `id` ? Une table qui le
+ * suit (`selon`), ou son jeton `{id}` dans un énoncé, un palier ou le cas d'une table. Lu sur les champs écrits, tels quels.
+ */
+function calculLu(critere, id) {
+    var jeton = '{' + id + '}';
+    var tables = Array.isArray(critere && critere.tablesCas) ? critere.tablesCas : [];
+    if (tables.some(function(tb) { return tb && tb.selon === id; })) return true;
+    return _textesDuCritere(critere).some(function(x) { return x.indexOf(jeton) >= 0; });
 }
 
 /**
@@ -551,18 +611,20 @@ function refusDuBrouillon(critere, brouillon) {
 function garderCalcul(critere, brouillon) {
     var refus = refusDuBrouillon(critere, brouillon);
     if (refus) return { ok: false, message: refus };
-    var liste = calculsDuCritere(critere), id = brouillon.id;
+    var liste = calculsDuCritere(critere), id = brouillon.id, sert = _sert(brouillon);
     var existant = id ? liste.filter(function(c) { return c.id === id; })[0] : null;
     if (!existant) {
         var n = _prochainNumero(critere);
         id = 'calc' + n;
         critere.calculsProchain = n + 1;
     }
-    var calcul = _calculLisible({ id: id, nom: String(brouillon.nom).trim(), sert: 'note', jetons: brouillon.jetons, cas: brouillon.cas });
+    var calcul = _calculLisible({ id: id, nom: String(brouillon.nom).trim(), sert: sert, jetons: brouillon.jetons, cas: brouillon.cas });
     if (!calcul) return { ok: false, message: ERREURS_CALCUL.incomplet };
     // La liste ÉCRITE, pas la liste lue : une entrée que cette version ne lit pas n'est pas effacée en passant.
     var brutes = Array.isArray(critere.calculs) ? critere.calculs : [];
     critere.calculs = existant ? brutes.map(function(c) { return c && c.id === id ? calcul : c; }) : brutes.concat([calcul]);
+    // Étape 4c : un calcul pour les phrases ne touche pas la note (principe 1).
+    if (sert === 'phrases') return { ok: true, id: id, message: MESSAGES_COMPOSE.gardePhrases(calcul.nom) };
     critere.modeleFormule = PREFIXE_COMPOSE + id;
     return { ok: true, id: id, message: MESSAGES_COMPOSE.garde(calcul.nom) };
 }
@@ -572,7 +634,8 @@ function garderCalcul(critere, brouillon) {
  * Mute le critère. Rend {ok, message}. `calculsProchain` reste : l'identifiant ne se réemploie pas.
  */
 function retirerCalcul(critere, id) {
-    if (critere.modeleFormule === PREFIXE_COMPOSE + id) return { ok: false, message: MESSAGES_COMPOSE.donneLaNote };
+    var refus = refusDuRetrait(critere, id);
+    if (refus) return { ok: false, message: refus };
     var brutes = Array.isArray(critere.calculs) ? critere.calculs : [];
     if (!brutes.some(function(c) { return c && c.id === id; })) return { ok: false, message: '' };
     critere.calculsProchain = _prochainNumero(critere);
@@ -581,9 +644,16 @@ function retirerCalcul(critere, id) {
     return { ok: true, message: '' };
 }
 
-/** Choisir un calcul composé pour la note : seulement s'il existe et se lit. `paramsFormule` n'est pas touché. */
+/** Ce qui empêche de retirer le calcul `id` : il donne la note, ou (étape 4c) une table ou un texte le lit ; '' sinon. */
+function refusDuRetrait(critere, id) {
+    if (critere.modeleFormule === PREFIXE_COMPOSE + id) return MESSAGES_COMPOSE.donneLaNote;
+    return calculLu(critere, id) ? MESSAGES_COMPOSE.lu : '';
+}
+
+/** Choisir un calcul composé pour la note : seulement s'il existe, se lit et sert à la note. `paramsFormule` n'est pas touché. */
 function choisirCalculCompose(critere, modeleId) {
-    if (String(modeleId).indexOf(PREFIXE_COMPOSE) !== 0 || !calculParId(critere, modeleId.slice(PREFIXE_COMPOSE.length))) return false;
+    var calcul = String(modeleId).indexOf(PREFIXE_COMPOSE) === 0 ? calculParId(critere, modeleId.slice(PREFIXE_COMPOSE.length)) : null;
+    if (!calcul || calcul.sert !== 'note') return false;
     critere.modeleFormule = modeleId;
     return true;
 }
@@ -599,6 +669,7 @@ function brouillonRetouche(critere, modeleId) {
     return {
         id: null,
         nom: 'Mon calcul, d’après « ' + m.nom + ' »',
+        sert: 'note',
         jetons: m.jetons.map(function(j) { return j.t === 'p' ? { t: 'n', v: f.params[j.k] } : Object.assign({}, j); }),
         cas: casDuCritere(critere, m.id)
     };
@@ -607,14 +678,15 @@ function brouillonRetouche(critere, modeleId) {
 /** « Modifier ce calcul » : le brouillon d'un calcul composé gardé, ou null. */
 function brouillonDuCalcul(critere, id) {
     var c = calculParId(critere, id);
-    return c ? { id: c.id, nom: c.nom, jetons: _copieJetons(c.jetons), cas: Object.assign({}, c.cas) } : null;
+    return c ? { id: c.id, nom: c.nom, sert: c.sert, jetons: _copieJetons(c.jetons), cas: Object.assign({}, c.cas) } : null;
 }
 
 /** Le brouillon comme un calcul (pour la ligne de la copie fictive et ses choix « vaut 0 ») : {modele, critere}. */
 function _fDuBrouillon(brouillon) {
     var jetons = (brouillon && Array.isArray(brouillon.jetons) ? brouillon.jetons : []).map(function(j) { return _jetonCompose(j) || {}; });
-    var calcul = { id: (brouillon && brouillon.id) || 'brouillon', nom: String((brouillon && brouillon.nom) || ''), jetons: jetons,
-        cas: _casCompose(brouillon && brouillon.cas, jetons) };
+    var sert = _sert(brouillon);
+    var calcul = { id: (brouillon && brouillon.id) || 'brouillon', nom: String((brouillon && brouillon.nom) || ''), sert: sert, jetons: jetons,
+        cas: _casCompose(brouillon && brouillon.cas, jetons, sert) };
     return { modeleId: PREFIXE_COMPOSE + calcul.id, modele: _modeleCompose(calcul), params: {}, herite: false };
 }
 
@@ -626,7 +698,9 @@ function ligneDuBrouillon(critere, brouillon, donnees) {
     var jetons = brouillon && Array.isArray(brouillon.jetons) ? brouillon.jetons : [];
     var e = jetons.length ? erreurDuCalcul(jetons.map(function(j) { return _jetonCompose(j) || {}; })) : 'vide';
     if (e) return ERREURS_CALCUL[e];
-    return _ligne(critere, _fDuBrouillon(brouillon), donnees, TEMPS.conditionnel);
+    var f = _fDuBrouillon(brouillon);
+    if (f.modele.phrases) return _lignePhrases(critere, f, donnees, String(brouillon.nom || '').trim());
+    return _ligne(critere, f, donnees, TEMPS.conditionnel);
 }
 
 /** Les rangées « Si [donnée] vaut 0 » d'un brouillon (comme `casAOffrir`). */
@@ -655,6 +729,7 @@ function _appliquerCasCompose(critere, f, donnee, choix) {
  */
 function _choixLisible(modele, donnee, choix) {
     if (!modele || CHOIX_CAS.indexOf(choix) < 0) return false;
+    if (modele.phrases && choix === 'entiere') return false;   // étape 4c : un calcul des phrases n'a pas de note entière
     if (donneesDuCalcul(modele.jetons).indexOf(donnee) < 0) return false;
     return !(choix === 'calcul' && diviseurs(modele.jetons)[donnee]);
 }
@@ -819,6 +894,74 @@ function _calculerAvec(f, critere, donnees) {
         pourcentage: pourcentage,
         pctBorne: pctBorne
     }, extra, base);
+}
+
+// ---------------------------------------------------------------------
+// ÉTAPE 4c — LA VALEUR D'UN CALCUL POUR LES PHRASES ET LES TABLES
+// ---------------------------------------------------------------------
+
+/**
+ * La valeur du calcul `f` (un calcul des phrases, ou son brouillon) pour une copie : l'évaluateur de 4a, AUCUNE borne.
+ * Ses choix « vaut 0 » : `calcul` (calculer normalement), `aucune` (sans valeur), `zero` (la valeur 0).
+ * @returns {{valeur: number|null, attend?, cas?, issue?, brut?, erreur?}}
+ */
+function _valeurAvec(f, critere, donnees) {
+    var d = _donnees(donnees);
+    var issue = _issueDeLaCopie(f, critere, d, d.ponderation);
+    if (issue && issue.attend) return { valeur: null, attend: issue.attend };
+    if (issue) return { valeur: 0, cas: issue.cas, issue: issue.issue };
+    var r = evaluer(f.modele.jetons, { donnees: d, params: {} });
+    if (r.divZero) return r.divZero[0] === 'nombre' ? { valeur: null, erreur: 'divzero' } : { valeur: null, attend: r.divZero[0] };
+    if (r.erreur) return { valeur: null, erreur: r.erreur };
+    return { valeur: r.v, brut: r.v };
+}
+
+/** La valeur du calcul des phrases `id` pour une copie (`calculer` reçoit les mêmes données) ; null : introuvable ou sans valeur. */
+function valeurCalcul(critere, id, donnees) {
+    var c = calculParId(critere, id);
+    if (!c || c.sert !== 'phrases') return null;
+    return _valeurAvec({ modele: _modeleCompose(c), params: {} }, critere, donnees).valeur;
+}
+
+/** Les valeurs de tous les calculs des phrases d'un critère pour une copie : `{calc3: 12.5, calc4: null}` ; `{}` sans calcul. */
+function valeursCalculs(critere, donnees) {
+    var r = {};
+    calculsPourLesPhrases(critere).forEach(function(c) { r[c.id] = valeurCalcul(critere, c.id, donnees); });
+    return r;
+}
+
+/** Une valeur dite : virgule, deux décimales au plus, le signe moins typographique ; '' sans valeur. */
+function direValeur(v) {
+    return (typeof v === 'number' && isFinite(v)) ? _nb(v) : '';
+}
+
+/**
+ * Les jetons des calculs des phrases pour une copie — ce que `{calcN}` devient dans un texte : `{calc3: '12,5'}`, '' sans
+ * valeur. Un jeton que cet objet ne remplit pas (calcul retiré, introuvable) est retiré du texte (`enoncesAlgo.rendre`).
+ */
+function jetonsDesCalculs(critere, donnees) {
+    var v = valeursCalculs(critere, donnees), r = {};
+    Object.keys(v).forEach(function(id) { r[id] = direValeur(v[id]); });
+    return r;
+}
+
+/** Les données d'une copie pour les calculs des phrases, à partir de ce que la phrase reçoit (le compte brut, pondéré, l'étendue). */
+function donneesDeLaPhrase(critere, erreurs, erreursFormule, mots) {
+    return { ponderation: Number(critere && critere.ponderation), erreurs: (erreursFormule !== undefined && erreursFormule !== null) ? erreursFormule : erreurs,
+        compte: erreurs, mots: mots };
+}
+
+/**
+ * La ligne « Sur la copie fictive : … » d'un calcul des phrases, au conditionnel, sans borne : « Mon taux = 3 ÷ 600 × 100 = 0,5 »,
+ * « Mon taux serait sans valeur. », « Le compte des erreurs vaut 0 : Mon taux vaudrait 0. » (les mots de l'ébauche).
+ */
+function _lignePhrases(critere, f, donnees, nom) {
+    var r = _valeurAvec(f, critere, donnees);
+    var qui = nom || 'Ton calcul';
+    if (r.erreur) return ERREURS_CALCUL[r.erreur] || ERREURS_CALCUL.incomplet;
+    if (r.attend) return qui + ' serait sans valeur.';
+    if (r.cas) return _maj(leDonnee(r.cas, critere)) + ' vaut 0 : ' + (nom || 'ton calcul') + ' vaudrait 0.';
+    return qui + ' = ' + _enChiffresAvec(f, donnees) + ' = ' + _nb(r.valeur);
 }
 
 // ---------------------------------------------------------------------
@@ -1015,13 +1158,14 @@ function _casAOffrirAvec(critere, f) {
         return {
             donnee: d,
             nom: nomDonnee(d, critere),
-            choix: CHOIX_CAS.filter(function(o) { return !(o === 'calcul' && div[d]); }).map(function(o) {
+            choix: CHOIX_CAS.filter(function(o) { return !(o === 'calcul' && div[d]) && !(o === 'entiere' && f.modele.phrases); }).map(function(o) {
+                if (f.modele.phrases) return { valeur: o, libelle: ISSUES_PHRASES[o] };
                 return { valeur: o, libelle: o === 'aucune' ? 'Aucune note : l’évaluation attend ' + leDonnee(d, critere) : ISSUES[o] };
             }),
             actuel: cas[d]
         };
     });
-    return { rangees: rangees, divise: Object.keys(div).length > 0 };
+    return { rangees: rangees, divise: Object.keys(div).length > 0, phrases: !!f.modele.phrases };
 }
 
 
@@ -1060,6 +1204,17 @@ var api = {
     refusCalculs: refusCalculs,
     calculsDuCritere: calculsDuCritere,
     calculParId: calculParId,
+    // Étape 4c — un calcul pour les phrases et les tables
+    JETON_CALCUL: JETON_CALCUL,
+    calculsPourLaNote: calculsPourLaNote,
+    calculsPourLesPhrases: calculsPourLesPhrases,
+    calculLu: calculLu,
+    refusDuRetrait: refusDuRetrait,
+    valeurCalcul: valeurCalcul,
+    valeursCalculs: valeursCalculs,
+    direValeur: direValeur,
+    jetonsDesCalculs: jetonsDesCalculs,
+    donneesDeLaPhrase: donneesDeLaPhrase,
     refusDuBrouillon: refusDuBrouillon,
     garderCalcul: garderCalcul,
     retirerCalcul: retirerCalcul,

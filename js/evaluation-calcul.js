@@ -179,7 +179,7 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
  * @param {number} mots - nombre de mots du texte
  * @returns {string} le fragment à concaténer, ou '' si rien à conclure
  */
-function _projectionEUF(critereId, erreurs, mots, critere) {
+function _projectionEUF(critereId, erreurs, mots, critere, calculs) {
     if (!window.projectionAlgo) {
         // Ne pas deviner un texte de remplacement : un module absent est un
         // défaut de chargement, pas un cas d'usage. Mieux vaut aucune projection
@@ -188,8 +188,9 @@ function _projectionEUF(critereId, erreurs, mots, critere) {
         return '';
     }
     // #1142 — `critere` : le critère de grille déjà résolu (la réparation du stock n'a pas d'évaluation ouverte).
+    // Étape 4c : `calculs`, les jetons des calculs pour les phrases de la copie (`_jetonsDesCalculs`).
     var resultat = window.projectionAlgo.calculer(
-        critere || _critereDeGrille(critereId), { erreurs: erreurs, mots: mots }
+        critere || _critereDeGrille(critereId), { erreurs: erreurs, mots: mots, calculs: calculs }
     );
     return resultat.applicable ? ' ' + resultat.texte : '';
 }
@@ -204,10 +205,24 @@ function _projectionEUF(critereId, erreurs, mots, critere) {
 function phraseDecompteAlgo(critereEnonces, critereGrille, erreurs, erreursFormule, mots, contexte) {
     // #581 — la phrase est celle que le gabarit de la grille porte, et elle ne nomme aucune
     // discipline que son auteur·e n'a pas écrite.
+    const calculs = _jetonsDesCalculs(critereGrille, erreurs, erreursFormule, mots);   // étape 4c
     const phrase = window.enoncesAlgo.enonce(critereEnonces, 'decompte',
-        { erreurs: erreurs, mots: mots, points: window.enoncesAlgo.mentionPonderee(erreurs, erreursFormule) })   // #686
-        + _projectionEUF(critereGrille && critereGrille.id, erreurs, mots, critereGrille);   // puis la projection EUF
+        { erreurs: erreurs, mots: mots, points: window.enoncesAlgo.mentionPonderee(erreurs, erreursFormule), ...calculs })   // #686
+        + _projectionEUF(critereGrille && critereGrille.id, erreurs, mots, critereGrille, calculs);   // puis la projection EUF
     return _avecTablesCas(phrase, critereGrille, erreurs, erreursFormule, mots, contexte);
+}
+
+/**
+ * Étape 4c (27 oct. 2026) — LES CALCULS POUR LES PHRASES, CALCULÉS AVEC LA NOTE : leurs jetons (`{calc3: '12,5'}`) pour le
+ * décompte et les paliers, sur les données de la copie (le compte brut, le compte pondéré, l'étendue, la pondération du
+ * critère), par l'évaluateur de 4a (`formulesAlgo.jetonsDesCalculs`). La phrase enregistrée les porte : le PDF n'a rien à
+ * recalculer. Sans calcul pour les phrases : `{}`, et la phrase est celle d'hier, à l'octet. Les tables les calculent de
+ * la même source (`tablesCasAlgo.valeurs`).
+ */
+function _jetonsDesCalculs(critereGrille, erreurs, erreursFormule, mots) {
+    const F = window.formulesAlgo;
+    if (!critereGrille || !F || typeof F.jetonsDesCalculs !== 'function') return {};
+    return F.jetonsDesCalculs(critereGrille, F.donneesDeLaPhrase(critereGrille, erreurs, erreursFormule, mots));
 }
 
 /**
@@ -749,10 +764,13 @@ function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePond
     // `enoncesAlgo.mentionPonderee` (« (3,5 après pondération) » depuis le 22 oct.) ; elle disait « (3.5 points) », et
     // seulement quand le code dominant portait une rétroaction.
     const mentionPoints = window.enoncesAlgo.mentionPonderee(totalErreurs, sommePonderee);
+    const critereGrille = _critereDeGrille(critereId);
+    const calculs = _jetonsDesCalculs(critereGrille, totalErreurs, sommePonderee, mots);   // étape 4c
     let retroaction = window.enoncesAlgo.enonce(critereEnonces, 'decompte', {
         erreurs: totalErreurs,
         mots: mots,
-        points: mentionPoints
+        points: mentionPoints,
+        ...calculs
     });
     // #668 — LE COMPTE BRUT, PAS LA SOMME PONDÉRÉE. Comportement d'avant,
     // conservé tel quel : la note suit la pondération par catégorie, la
@@ -760,10 +778,10 @@ function _construireRetroactionAlgoCategories(critereId, totalErreurs, sommePond
     // répondent à des questions différentes. Faire suivre la pondération à la
     // projection serait une décision pédagogique — elle déplacerait des
     // verdicts déjà rendus — pas un ajustement de code.
-    const retroactionEUF = _projectionEUF(critereId, totalErreurs, mots);
+    const retroactionEUF = _projectionEUF(critereId, totalErreurs, mots, critereGrille, calculs);
     if (retroactionEUF) retroaction += retroactionEUF;
     // Lot 3b (26 oct. 2026) — les tables de l'enseignant·e, après la projection, avant l'observation du code dominant.
-    retroaction = _avecTablesCas(retroaction, _critereDeGrille(critereId), totalErreurs, sommePonderee, mots, contexte);
+    retroaction = _avecTablesCas(retroaction, critereGrille, totalErreurs, sommePonderee, mots, contexte);
     if (scDominant && scDominant.retroaction) retroaction += ` ${scDominant.retroaction}`;
     return retroaction;
 }

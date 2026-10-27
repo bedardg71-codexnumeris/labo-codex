@@ -13,7 +13,9 @@
 
    LA DONNÉE — `critere.tablesCas`, absente tant qu'aucune table n'existe
      [{ id, selon, cas: [{ genre, borne?, code?, texte }] }]
-       selon ∈ SELONS ; genre ∈ zero | max | audela | vide (valeurs chiffrées), code | aucun (le code).
+       selon ∈ SELONS, ou (étape 4c, 27 oct. 2026) l'identifiant d'un calcul pour les phrases du MÊME critère
+       (`formulesAlgo.calculsPourLesPhrases`) ; genre ∈ zero | max | audela | vide (valeurs chiffrées), code | aucun
+       (le code). Une table qui lit un calcul introuvable est écartée avec lui, jamais devinée.
      Les identifiants ne nomment aucune discipline et ne changent plus une fois écrits. Bornes : 10 tables,
      40 cas par table, 5 000 caractères par texte (comme un palier). Une table illisible (valeur ou genre
      inconnus, borne non numérique, code impossible) est ÉCARTÉE, jamais devinée (`assainir`) ; le partage,
@@ -76,6 +78,7 @@ var TEXTES = {
         moyenne: function(n) { return 'La moyenne de ' + n.mots.pluriel + ' par ' + n.erreurs.singulier; },
         code: function() { return 'Le code le plus fréquent'; }
     },
+    calcul: function(nom) { return 'Ton calcul « ' + nom + ' »'; },
     cas: {
         jusqua: 'jusqu’à ',
         auDela: 'au-delà de ',
@@ -126,11 +129,20 @@ function _casLisible(c, selon, chaine) {
     return propre;
 }
 
-/** Une table lisible, assainie, ou null (voir l'en-tête). */
-function _tableLisible(t, chaine) {
+/** Les identifiants des calculs pour les phrases d'un critère (étape 4c) : ce qu'une table peut suivre, en plus de SELONS. */
+function _calculsLisibles(critere) {
+    var F = _F();
+    return (F && critere && typeof F.calculsPourLesPhrases === 'function') ? F.calculsPourLesPhrases(critere) : [];
+}
+function _estCalcul(selon, critere) {
+    return _calculsLisibles(critere).some(function(c) { return c.id === selon; });
+}
+
+/** Une table lisible, assainie, ou null (voir l'en-tête). `critere` : celui dont elle peut suivre un calcul (étape 4c). */
+function _tableLisible(t, chaine, critere) {
     if (!t || typeof t !== 'object' || Array.isArray(t)) return null;
     if (typeof t.id !== 'string' || !ID_VALIDE.test(t.id)) return null;
-    if (SELONS.indexOf(t.selon) === -1) return null;
+    if (SELONS.indexOf(t.selon) === -1 && !_estCalcul(t.selon, critere)) return null;
     if (!Array.isArray(t.cas) || !t.cas.length || t.cas.length > MAX_CAS) return null;
     var cas = [];
     for (var i = 0; i < t.cas.length; i++) {
@@ -144,16 +156,18 @@ function _tableLisible(t, chaine) {
 /**
  * Les tables lisibles d'une valeur brute, dans leur ordre : une table illisible est écartée, un
  * identifiant déjà vu aussi, au-delà de dix rien n'entre. `chaine` (facultatif) : le nettoyeur des
- * textes venus d'ailleurs (l'import passe `assainirChaine`). Rend toujours un tableau.
+ * textes venus d'ailleurs (l'import passe `assainirChaine`). `critere` (étape 4c) : le critère, ses calculs DÉJÀ
+ * relus, dont une table peut suivre un calcul pour les phrases ; sans lui, une telle table est écartée. Rend toujours
+ * un tableau.
  */
-function assainir(brut, chaine) {
+function assainir(brut, chaine, critere) {
     if (!Array.isArray(brut)) return [];
     var nettoyer = (typeof chaine === 'function') ? function(s) { return String(chaine(s, MAX_TEXTE)); } : function(s) { return s; };
     var vus = {};
     var tables = [];
     brut.forEach(function(t) {
         if (tables.length >= MAX_TABLES) return;
-        var propre = _tableLisible(t, nettoyer);
+        var propre = _tableLisible(t, nettoyer, critere);
         if (!propre || vus[propre.id]) return;
         vus[propre.id] = true;
         tables.push(propre);
@@ -164,7 +178,7 @@ function assainir(brut, chaine) {
 /** Les tables d'un critère, relues (`[]` sans le champ). */
 function lire(critere) {
     if (!critere || !Array.isArray(critere.tablesCas)) return [];
-    return assainir(critere.tablesCas);
+    return assainir(critere.tablesCas, null, critere);
 }
 
 /** Le critère a-t-il au moins une table ? */
@@ -176,14 +190,14 @@ function aDesTables(critere) {
  * Ce qu'une valeur brute doit être pour entrer par le PARTAGE, où rien ne s'écarte en silence
  * (`partage-validation.js`, comme la structure du barème) : la raison du refus, ou null.
  */
-function refusStructure(brut) {
+function refusStructure(brut, critere) {
     if (!Array.isArray(brut)) return 'les tables doivent être une liste';
     if (brut.length > MAX_TABLES) return brut.length + ' tables > max ' + MAX_TABLES;
     var vus = {};
     var identite = function(s) { return s; };
     for (var i = 0; i < brut.length; i++) {
         var t = brut[i];
-        if (!_tableLisible(t, identite)) return 'table ' + (i + 1) + ' illisible';
+        if (!_tableLisible(t, identite, critere)) return 'table ' + (i + 1) + ' illisible';
         if (t.cas.some(function(c) { return typeof c.texte === 'string' && c.texte.length > MAX_TEXTE; })) {
             return 'table ' + (i + 1) + ' : texte > ' + MAX_TEXTE + ' caractères';
         }
@@ -220,7 +234,14 @@ function casParDefaut(selon, critere) {
                 .map(function(k) { return { genre: 'code', code: k.code, texte: '' }; })
                 .concat([{ genre: 'aucun', texte: '' }]);
     }
+    // Étape 4c : un calcul pour les phrases — « Sans valeur », une borne à 1, « Au-delà » (`casParDefaut` de l'ébauche).
+    if (_estCalcul(selon, critere)) return [c('vide'), c('max', 1), c('audela')];
     return [];
+}
+
+/** Étape 4c — les valeurs que le menu « Selon » offre : les six d'hier, puis les calculs pour les phrases du critère. */
+function selonsDuCritere(critere) {
+    return SELONS.concat(_calculsLisibles(critere).map(function(c) { return c.id; }));
 }
 
 /** La clé d'un cas : `code:<n>` ou `aucun` pour la table du code, son rang sinon (en chaîne). */
@@ -292,7 +313,10 @@ function _noms(critere) {
 /** « Le compte des unités manquantes », « La note du critère »… */
 function libelleSelon(selon, critere) {
     var f = TEXTES.selon[selon];
-    return f ? f(_noms(critere)) : '';
+    if (f) return f(_noms(critere));
+    // Étape 4c : « Ton calcul « X » » (le nom, texte de l'enseignant·e : l'appelant échappe).
+    var calcul = _calculsLisibles(critere).filter(function(c) { return c.id === selon; })[0];
+    return calcul ? TEXTES.calcul(calcul.nom) : '';
 }
 
 /** L'unité qui suit le champ d'une borne : « / 20 » pour la note (la pondération), « % » pour la part, rien sinon. */
@@ -383,17 +407,23 @@ function valeurs(critere, copie) {
     var x = copie || {};
     var n = Number(x.erreurs) || 0;
     var m = _etendue(x.mots);
-    var P = _P();
+    var P = _P(), F = _F();
+    // Étape 4c : les calculs pour les phrases, sur les données de la copie (le compte brut, le compte pondéré, l'étendue).
+    var donnees = F ? F.donneesDeLaPhrase(critere, n, x.erreursFormule, m || 0) : null;
+    var calculs = (F && donnees) ? F.valeursCalculs(critere, donnees) : {};
     var proj = P ? P.calculer(critere, { erreurs: n, mots: m || 0 }) : { applicable: false };
-    return {
+    var r = {
         erreurs: n,
         mots: m,
         note: _nombreOuNull(_noteDe(critere, x, n, m)),
         part: (proj.applicable && typeof proj.ratio === 'number') ? proj.ratio * 100 : null,
         moyenne: (n > 0 && m > 0) ? Math.round(m / n) : null,
         code: _codeDe(critere, x),
-        _proj: proj
+        _proj: proj,
+        _calculs: calculs
     };
+    Object.keys(calculs).forEach(function(id) { r[id] = _nombreOuNull(calculs[id]); });
+    return r;
 }
 
 /** L'étendue d'une copie, ou null (champ vide, illisible). */
@@ -472,6 +502,9 @@ function _jetons(critere, copie, v) {
     if (v._proj && v._proj.applicable && v._proj.jetons) {
         Object.keys(v._proj.jetons).forEach(function(k) { j[k] = v._proj.jetons[k]; });
     }
+    // Étape 4c : `{calcN}` — la valeur du calcul sur la copie, dite (`formulesAlgo.direValeur`) ; sans valeur, le jeton part.
+    var F = _F();
+    Object.keys(v._calculs || {}).forEach(function(id) { j[id] = F ? F.direValeur(v._calculs[id]) : ''; });
     return j;
 }
 
@@ -575,7 +608,7 @@ function retirerTable(critere, id) {
 
 /** Changer de valeur remplace les cas par ceux de la nouvelle. « La part » sans limite fixée : refusé. */
 function changerSelon(critere, id, selon) {
-    if (SELONS.indexOf(selon) === -1) return false;
+    if (selonsDuCritere(critere).indexOf(selon) === -1) return false;
     var P = _P();
     if (selon === 'part' && !(P && P.limiteFixee(critere))) return false;
     var tables = lire(critere);
@@ -669,6 +702,7 @@ var api = {
     refusStructure: refusStructure,
     codesDuCritere: codesDuCritere,
     casParDefaut: casParDefaut,
+    selonsDuCritere: selonsDuCritere,
     cleCas: cleCas,
     indexDeCle: indexDeCle,
     derniereBorne: derniereBorne,

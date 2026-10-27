@@ -3671,7 +3671,7 @@ function rendreBlocFormuleAlgo(critere, ctx) {
         ident: (x) => esc(_identTableCas(cible, ctx.index, 'calcul-' + x)) };
     // Étape 4b : après les trois calculs tout faits, les calculs que l'enseignant·e a composés (« Ton calcul. »).
     const cartes = F.listerModeles().map(m => _carteCalculNote(r, m))
-        .concat(F.calculsDuCritere(critere).map(c => _carteCalculNote(r, { id: F.PREFIXE_COMPOSE + c.id, nom: c.nom, texte: 'Ton calcul.', parametres: [], compose: c })));
+        .concat(F.calculsPourLaNote(critere).map(c => _carteCalculNote(r, { id: F.PREFIXE_COMPOSE + c.id, nom: c.nom, texte: 'Ton calcul.', parametres: [], compose: c })));
     const message = K ? K.prendreMessage(k) : '';
 
     return `
@@ -3683,8 +3683,44 @@ function rendreBlocFormuleAlgo(critere, ctx) {
                 </div>
                 <p class="calc-legende">La note reste entre 0 et la pondération du critère.</p>
                 <p class="calc-legende">Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.</p>${f.herite && critere.modeleFormule ? `
-                <p class="calc-legende calc-inconnu">Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.</p>` : ''}${K ? K.rendre(critere, ctx) : ''}
+                <p class="calc-legende calc-inconnu">Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.</p>` : ''}${K ? K.rendre(critere, ctx) : ''}${_calculsPourLesPhrases(r)}
             </div>`;
+}
+
+/**
+ * Étape 4c (27 oct. 2026) — « Tes calculs pour les phrases et les tables », sous le composeur (l'ébauche, rendu de l'étape
+ * `note`) : pour chacun, son nom, ses pastilles, sa valeur sur la copie fictive (remplie par l'atelier à chaque changement
+ * de la copie, `data-calcul-phrases-valeur`), « Modifier » et « Retirer » (confirmé en place, refusé tant qu'une table ou
+ * un texte le lit). Rien sans calcul pour les phrases. Le nom est un texte de l'enseignant·e : `esc()`.
+ */
+function _calculsPourLesPhrases(r) {
+    const { F, esc, datas, ident } = r;
+    const liste = F.calculsPourLesPhrases(r.critere);
+    if (!liste.length) return '';
+    const items = liste.map(c => {
+        const pastilles = F.blocsDesJetons(r.critere, c.jetons).map(b => b.genre === 'operation'
+            ? `<span class="calc-op">${esc(b.texte)}</span>`
+            : `<span class="repere-enonce repere-enonce--${b.genre === 'donnee' ? 'remplie' : 'posee'}">${esc(b.texte)}</span>`).join(' ');
+        const confirmer = r.K && r.K.retraitDe(r.k) === c.id;
+        const q = F.MESSAGES_COMPOSE.confirmerRetrait(c.nom);
+        const gestes = confirmer ? `
+                        <div class="table-cas-confirmer" role="group" aria-label="${esc(q)}">
+                            <p>${esc(q)}</p>
+                            <button type="button" class="btn btn-danger btn-tres-compact" id="${ident('retirer-' + c.id)}" data-action="confirmerRetraitCalculAlgo" ${datas} data-calcul="${esc(c.id)}">Retirer</button>
+                            <button type="button" class="btn btn-secondaire btn-tres-compact" data-action="annulerRetraitCalculAlgo" ${datas}>Annuler</button>
+                        </div>` : `
+                        <div class="calc-actions"><button type="button" class="table-cas-lien" data-composeur-geste="modifier" data-valeur="${esc(c.id)}">Modifier</button><button type="button" class="table-cas-lien" id="${ident('retirer-lien-' + c.id)}" data-action="retirerCalculAlgo" ${datas} data-calcul="${esc(c.id)}">Retirer</button></div>`;
+        return `
+                    <li class="calc-perso-item" data-calcul-phrases="${esc(c.id)}">
+                        <strong class="calc-nom">${esc(c.nom)}</strong>
+                        <div class="calc-formule calc-formule--ligne" aria-label="Le calcul, en blocs">${pastilles}</div>
+                        <p class="calc-legende">Sur la copie fictive, il vaudrait <span data-calcul-phrases-valeur="${esc(c.id)}"></span>. Il est dans la palette et dans le menu « Selon » des tables.</p>${gestes}
+                    </li>`;
+    }).join('');
+    return `
+                <h4 class="calc-titre">Tes calculs pour les phrases et les tables</h4>
+                <ul class="calc-perso">${items}
+                </ul>`;
 }
 
 /**
@@ -4388,10 +4424,11 @@ function rendreTablesCasAlgo(critere, ctx) {
 
     const cartes = tables.map((t) => {
         const tid = esc(t.id);
-        const options = TC.SELONS.map((s) => {
+        // Étape 4c : après les six valeurs, les calculs pour les phrases du critère (« Ton calcul « X » »).
+        const options = TC.selonsDuCritere(critere).map((s) => {
             const off = s === 'part' && !limite;
             return `
-                                <option value="${s}"${s === t.selon ? ' selected' : ''}${off ? ' disabled' : ''}>${esc(TC.libelleSelon(s, critere) + (off ? X.aucuneLimite : ''))}</option>`;
+                                <option value="${esc(s)}"${s === t.selon ? ' selected' : ''}${off ? ' disabled' : ''}>${esc(TC.libelleSelon(s, critere) + (off ? X.aucuneLimite : ''))}</option>`;
         }).join('');
         const rangees = TC.rangees(t, critere).map((r) => {
             const nomZone = TC.nomDeZone(critere, t.id, r.cle);
@@ -6697,7 +6734,7 @@ function insererRepereEnonce(el) {
     var zone = palette ? _zoneCibleDeLaPalette(palette) : null;
     if (!zone) return;
     // La pose est commune (`insererRepere`) ; la palette qu'on lui donne est ce que la zone offre.
-    var offerts = window.paletteAlgo.reperesDeZone(null, zone.dataset);
+    var offerts = window.paletteAlgo.reperesDeZone(_critereDeLaZone(zone), zone.dataset);   // étape 4c : ses calculs
     if (!offerts.some(function(r) { return r.jeton === el.dataset.jeton; })) return;
     var estPalier = zone.dataset.palierIndex !== undefined;
 
@@ -6813,6 +6850,12 @@ function _paletteDeZone(zone) {
  * La cible d'une palette : la zone de SON gabarit où est le curseur, sinon la dernière
  * visitée depuis le rendu (`ciblerPaletteAlgo`), sinon aucune.
  */
+/** Étape 4c — le critère d'une zone : celui de son atelier (`atelierAlgo.monter`), pour les blocs de SES calculs. */
+function _critereDeLaZone(zone) {
+    var atelier = (zone && typeof zone.closest === 'function') ? zone.closest('.gabarit-algo[data-atelier-algo]') : null;
+    return (atelier && atelier._critere) || null;
+}
+
 function _zoneCibleDeLaPalette(palette) {
     var actif = _zoneDeFocus((typeof document !== 'undefined') ? document.activeElement : null);
     if (_estZoneAlgo(actif) && _paletteDeZone(actif) === palette) return actif;
@@ -6837,7 +6880,7 @@ function ciblerPaletteAlgo(palette, zone) {
     var avant = (typeof repere.getBoundingClientRect === 'function') ? repere.getBoundingClientRect().top : null;
     var T = window.paletteAlgo.TEXTES;
     var offerts = {};
-    window.paletteAlgo.reperesDeZone(null, zone.dataset).forEach(function(r) { offerts[r.jeton] = true; });
+    window.paletteAlgo.reperesDeZone(_critereDeLaZone(zone), zone.dataset).forEach(function(r) { offerts[r.jeton] = true; });
     palette._zoneCible = zone;
     palette.dataset.cible = zone.dataset.nomZone || '';
     var ligne = palette.querySelector('.palette-algo-cible');
@@ -7094,8 +7137,10 @@ async function retirerCalculAlgo(el) {
     const c = _critereLuCible(x.cible, x.index);
     if (!c || !K) return;
     const k = K.cle(x.cible, c, x.index);
-    if (c.modeleFormule === window.formulesAlgo.PREFIXE_COMPOSE + el.dataset.calcul) {
-        K.dire(k, window.formulesAlgo.MESSAGES_COMPOSE.donneLaNote);
+    // Le calcul de la note ne se retire pas ; étape 4c : ni un calcul qu'une table ou un texte lit.
+    const refus = window.formulesAlgo.refusDuRetrait(c, el.dataset.calcul);
+    if (refus) {
+        K.dire(k, refus);
     } else {
         K.poserRetrait(k, el.dataset.calcul);
     }

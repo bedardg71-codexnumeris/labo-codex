@@ -61,6 +61,8 @@ function _T() { return _reg('tablesCasAlgo', './tables-cas-algo.js'); }
    lit `TEXTES.cas` et `TEXTES.choix` pour la table des paliers. */
 var TEXTES = {
     chaine: 'Les étapes du critère algorithmique',
+    sansValeur: 'sans valeur',   // étape 4c : un calcul pour les phrases sans valeur sur la copie fictive
+    calculsPhrases: function(n) { return ' · ' + n + ' ' + (n >= 2 ? 'calculs' : 'calcul') + ' pour tes phrases'; },
     etapes: {
         compte: 'Ce que tu relèves et comptes',
         codes: 'Codes utilisés',
@@ -317,8 +319,10 @@ function _etapeNote(c) {
     // Étape 4a (ébauche) : l'info, le nom court du calcul (« pénalité fixe ») ; le résumé, son nom (« Pénalité fixe, sur 20 »).
     // Étape 4b : un calcul composé, son nom entre guillemets (« « Mon taux », sur 20 ») ; introuvable, l'étape est à régler.
     var nom = f.modele.compose ? f.modele.court : f.modele.nom;
+    // Étape 4c (`resumeEtape` de l'ébauche) : « · 2 calculs pour tes phrases » quand il y en a.
+    var np = _F().calculsPourLesPhrases(c).length;
     return { id: 'note', reglee: pondOk && paramsOk && !f.introuvable, info: f.modele.court,
-        resume: nom + (pondOk ? ', sur ' + _fmt(pond) : ', sans pondération') };
+        resume: nom + (pondOk ? ', sur ' + _fmt(pond) : ', sans pondération') + (np ? TEXTES.calculsPhrases(np) : '') };
 }
 
 /** Cas d'interprétation (lot 3a) — sans limite, réglée ; une limite fixée l'est quand sa longueur et sa
@@ -448,7 +452,7 @@ function lecture(critere, copie) {
     var pdf = [];
     if (essai.decompte) pdf.push({ source: 'decompte', etape: 'eleve', zone: { enonceCle: 'decompte' }, texte: essai.decompte });
 
-    var proj = P.calculer(critere, { erreurs: copie.erreurs, mots: copie.mots || 0 });
+    var proj = P.calculer(critere, { erreurs: copie.erreurs, mots: copie.mots || 0, calculs: _M().jetonsDesCalculs(critere, copie) });   // étape 4c
     var palier = (proj.applicable && proj.palier) ? (proj.palier.libelle || proj.palier.cle || '') : '';
     if (essai.projection) {
         var morceaux = _morceauxDeLaProjection(proj, essai.projection);
@@ -536,6 +540,9 @@ function valeursDesBlocs(critere, copie) {
     v['{moyenne}'] = j.moyenne || ((n > 0 && m > 0) ? String(Math.round(m / n)) : '');
     v['{projection}'] = j.projection || '';
     v['{palier}'] = j.palier || '';
+    // Étape 4c : un bloc par calcul pour les phrases, sa valeur sur la copie fictive.
+    var calculs = _M().jetonsDesCalculs(critere, copie);
+    Object.keys(calculs).forEach(function(id) { v['{' + id + '}'] = calculs[id]; });
     return v;
 }
 
@@ -876,7 +883,7 @@ function montrer(atelier, jeton, oui) {
     var Pal = window.paletteAlgo;
     _zones(atelier).forEach(function(z) {
         var v = _visible(z);
-        var offert = !!(oui && Pal && !_cachee(v) && Pal.reperesDeZone(null, z.dataset).some(function(r) { return r.jeton === jeton; }));
+        var offert = !!(oui && Pal && !_cachee(v) && Pal.reperesDeZone(atelier._critere, z.dataset).some(function(r) { return r.jeton === jeton; }));
         v.classList.toggle('atelier-algo-peut', offert);
     });
     var nav = atelier.querySelector('.atelier-algo-chaine');
@@ -958,6 +965,11 @@ function donneesDeLaCopie(atelier) {
 function _remplirCalculDeLaNote(atelier, critere, copie) {
     // Étape 4b : la même copie, dans le composeur (le brouillon en cours).
     if (typeof window !== 'undefined' && window.composeurCalcul) window.composeurCalcul.remplirLigne(atelier);
+    // Étape 4c : la valeur de chaque calcul pour les phrases sur la copie fictive (« sans valeur » quand il n'en a pas).
+    var valeurs = _M().jetonsDesCalculs(critere, copie);
+    atelier.querySelectorAll('[data-calcul-phrases-valeur]').forEach(function(v) {
+        v.textContent = valeurs[v.dataset.calculPhrasesValeur] || TEXTES.sansValeur;
+    });
     var x = atelier.querySelector('[data-calcul-copie-texte]');
     if (!x) return;
     var pond = Number(critere.ponderation);

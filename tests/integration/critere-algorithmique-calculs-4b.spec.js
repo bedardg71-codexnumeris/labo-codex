@@ -357,7 +357,9 @@ for (const [largeur, hauteur] of [[1440, 900], [1180, 820], [820, 1180], [700, 9
         await carteActive(page, 'CM').locator('[data-composeur-geste="modifier"]').click();
         await composeur(page, 'CM').scrollIntoViewIfNeeded();
         expect(await debord(page), 'aucun défilement de côté').toBeLessThanOrEqual(0);
+        // Étape 4c : un bouton radio (« Ce calcul sert ») se touche par son étiquette, c'est elle qui mesure 44 px.
         const petites = await etape(page, 'CM').evaluate((e) => [...e.querySelectorAll('details.calc-composeur button, details.calc-composeur input, details.calc-composeur select, details.calc-composeur summary, .calc-carte .calc-actions button')]
+            .map((x) => (x.type === 'radio' && x.closest('label')) || x)
             .filter((x) => x.getBoundingClientRect().height < 44).map((x) => (x.dataset.composeurGeste || x.dataset.action || x.tagName) + ' ' + Math.round(x.getBoundingClientRect().height)));
         expect(petites, 'cibles de moins de 44 px').toEqual([]);
         const hors = await etape(page, 'CM').evaluate((e) => {

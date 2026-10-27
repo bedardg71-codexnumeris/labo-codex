@@ -3964,6 +3964,20 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
 .calc-composeur-fin .btn[aria-disabled="true"] { opacity: 0.6; }
 .calc-composeur-refus { flex: 1 1 14rem; }
 @media (max-width: 560px) { .calc-groupe { min-width: 0; flex-basis: 100%; } }
+/* Étape 4c (27 oct. 2026) — « Ce calcul sert » et « Tes calculs pour les phrases et les tables » (l'ébauche, `.calc-sert`,
+   `.calc-perso`), aux variables de design-system.html ; cibles de 44 px (iPad). */
+.calc-sert { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.86rem; min-width: 0; }
+.calc-sert legend { font-size: 0.85rem; color: var(--texte-secondaire); padding: 0; margin-bottom: 2px; }
+.calc-sert-choix { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; color: var(--texte-principal); }
+.calc-sert-choix input { width: 18px; height: 18px; accent-color: var(--accent-primaire); flex: none; margin: 0; }
+.calc-sert-choix input:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.calc-perso { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; max-width: 76ch; min-width: 0; }
+.calc-perso-item {
+    border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); padding: 8px 12px;
+    display: flex; flex-direction: column; gap: 6px; min-width: 0; background: var(--surface-element);
+}
+.calc-perso-item .calc-nom { overflow-wrap: anywhere; }
+.calc-formule--ligne { padding: 4px 8px; background: transparent; }
 
 /* « Ce que tu relèves et comptes » : les deux exemples (texte d'aide fixe) */
 .noms-algo-exemples {
