@@ -19572,6 +19572,14 @@ body.planif-plein-ecran-actif #conception-carte > h2,
 body.planif-plein-ecran-actif #conception-carte > .text-muted {
     display: none !important;
 }
+/* #1172 (26 oct. 2026) — le guide de la carte flotte HORS de #conception-carte (z-index 500) : en plein
+   écran (8000), il s'ouvrait dessous, invisible, par le bouton « Guide » comme par la chaîne d'étapes
+   (mesuré dans WebKit). Il passe au-dessus du plein écran, sous la barre d'alignement (8500), la loupe
+   (9000) et les modales (9999). `!important` : un clic sur le guide pose un z-index en ligne (81 et plus,
+   `_zIndexPanneaux`), qui sinon le renverrait dessous. */
+body.planif-plein-ecran-actif #planif-guide-panel {
+    z-index: 8100 !important;
+}
 
 /* Pastilles de fond du canevas, dans le menu Actions (retour testeur du 23 sept. 2026) */
 .travaux-fond-swatch {
@@ -20816,6 +20824,18 @@ body.planif-plein-ecran-actif #conception-carte > .text-muted {
     background: var(--planif-couleur-fond);
     border-radius: 0;
     overflow: hidden;
+}
+
+/* #1172 (26 oct. 2026) — la chaîne d'étapes de la carte, entre la barre et le canevas : collée aux deux,
+   sans marge ni coins, pour prendre au canevas le moins de hauteur possible. Elle ne se compresse pas
+   (le canevas, flex: 1, cède la place) ; masquée par l'option « Afficher les chaînes d'étapes ». */
+#section-conception .planif-chaine.barre-convergence {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 8px 12px 6px;
+    border: none;
+    border-bottom: 1px solid var(--planif-couleur-bordure);
+    border-radius: 0;
 }
 
 /* === BARRE SUPÉRIEURE === */
