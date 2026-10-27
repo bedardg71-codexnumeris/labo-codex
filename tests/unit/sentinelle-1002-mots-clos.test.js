@@ -115,8 +115,11 @@ describe('#1002 — l\'état gelé d\'un trimestre se dit « clos »', () => {
         const lignes = texteHtml(aideCloture);
         const texte = lignes.join(' ');
         expect(texte).toContain('Qu\'est-ce que clore un trimestre ?');
-        // Les mots acceptés par Grégoire le 4 oct. (vrai choix 1).
-        expect(texte).toContain('Clore un trimestre le fige en lecture seule, une fois terminé ; tu peux ensuite en commencer un nouveau. Clore ne libère aucun espace.');
+        // Les mots acceptés par Grégoire le 4 oct. (vrai choix 1), moins « ; tu peux ensuite en commencer un
+        // nouveau », qui inversait l'ordre du code (le trimestre actif ne se clôt pas) : « oui » de Grégoire,
+        // 27 oct., 15 h 39 (VERDICT-RELECTURE-2026-10-27-aide-lot-2a.md, § 2, point 4).
+        expect(texte).toContain('Clore un trimestre le fige en lecture seule, une fois terminé. Clore ne libère aucun espace.');
+        expect(texte).not.toContain('commencer un nouveau');
         expect(lignes.filter((l) => /archiv/i.test(l))).toEqual([]);
     });
 

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE — #1152, lot 2a de la refonte de l'Aide (27 oct. 2026) : Commencer et Cadre disent l'écran
 // d'aujourd'hui, en moins de mots.
@@ -105,5 +106,70 @@ describe('#1152 lot 2a · « La bibliothèque » dit le texte validé de la popu
             items: [...m[2].matchAll(/<li>([\s\S]*?)<\/li>/g)].map((li) => texte(li[1])),
         }));
         expect(lu).toEqual(attendu);
+    });
+});
+
+// Retouche du 27 oct. (VERDICT-RELECTURE-2026-10-27-aide-lot-2a.md, § 1 ; réponses de Grégoire au § 2) : chaque
+// entrée reprend le mot de l'écran, lu dans son fichier source, et lâche la phrase qui le débordait.
+describe('#1152 lot 2a, retouche · les entrées disent le mot de l\'écran', () => {
+    const lire = (...p) => readFileSync(path.join(racine, ...p), 'utf8');
+    const entree = (id) => texte(blocParId(`accordeon-aide-${id}`) || '');
+
+    it('presentation : le refus d\'un fichier non signé est borné au geste qui vérifie la signature', () => {
+        const libelle = 'Importer le partage d\'une ou d\'un collègue';
+        expect(lire('js', 'grilles.js')).toContain(libelle.replace(/'/g, '\\\''));
+        expect(entree('presentation')).toContain(`« ${libelle} » refuse un fichier non signé`);
+        expect(entree('presentation')).not.toContain('l\'application refuse d\'importer');
+    });
+
+    it('prise-en-main : « Assistance » ne règle pas la visite guidée ; « Étapes de configuration » est une entrée de l\'Aide', () => {
+        const t = entree('prise-en-main');
+        const assistance = tranche(t, 'Assistance', 'Pour configurer');
+        expect(assistance).toContain('les info-bulles, l\'aide à l\'écran et les flèches');
+        expect(assistance).not.toMatch(/visite guidée/i);
+        expect(t).toContain('l\'entrée « Étapes de configuration », dans la partie Cadre de cette Aide');
+    });
+
+    it('bibliotheque : la phrase des gestes manquants (#1160 à #1167) suit les listes', () => {
+        const listes = blocParId('aide-bibliotheque-listes');
+        const apres = texte(tranche(blocParId('accordeon-aide-bibliotheque'), listes).substring(listes.length));
+        expect(apres.startsWith('Pour l\'instant, les cartouches et les pratiques ne se gardent pas encore dans ta bibliothèque, une carte d\'alignement ne se retire pas de ce trimestre, et seuls les grilles, les échelles, les productions et les pratiques ont des dossiers.')).toBe(true);
+    });
+
+    it('chaines-etapes : c\'est la case décochée qui masque (elle est cochée par défaut)', () => {
+        expect(html).toMatch(/id="v2-pref-chaines-etapes" checked/);
+        expect(entree('chaines-etapes')).toContain('Décocher « Afficher les chaînes d\'étapes »');
+        expect(entree('chaines-etapes')).toContain('les étapes qui rendent cet outil prêt à servir');
+    });
+
+    it('preferences : la carte Sécurité est nommée par son libellé', () => {
+        const libelle = texte(html.match(/id="pref-fsapi-persistance"[^>]*>\s*<strong[^>]*>([\s\S]*?)<\/strong>/)[1]);
+        expect(libelle).toBe('Mémoriser le dossier Travaux et les Archives entre les sessions');
+        expect(entree('preferences')).toContain(`« ${libelle} »`);
+    });
+
+    it('etapes-config : plus de résumés redits ; la question #1038 vient avant d\'enregistrer', () => {
+        const t = entree('etapes-config');
+        expect(t).not.toMatch(/résumés|n\/5 configurés/);
+        expect(t).toContain('avant d\'enregistrer le groupe-cours');
+    });
+
+    it('cours : la nature dit les mots du menu, lus dans js/mots-nature.js', () => {
+        const mots = [...lire('js', 'mots-nature.js').matchAll(/^\s*nature: '([^']+)'/gm)].map((m) => m[1]);
+        expect(mots).toEqual(['Enseignement', 'Orthopédagogie']);
+        const t = entree('cours');
+        for (const mot of mots) expect(t).toContain(`« ${mot} »`);
+        expect(t).not.toContain('cours ou service');
+        expect(t).toContain('les autres champs sont facultatifs');
+    });
+
+    it('presences-calendrier : le clic vaut pour le « jour de cours régulier » de la légende', () => {
+        const legende = lire('js', 'calendrier-vue.js').match(/<strong>(Jour de cours [^<]+)<\/strong>/)[1];
+        expect(legende).toBe('Jour de cours régulier');
+        expect(entree('presences-calendrier')).toContain(`Un clic sur un ${legende.toLowerCase()} ouvre`);
+    });
+
+    it('archivage : ni la première phrase ni « Quand clore ? » ne disent qu\'on commence un nouveau trimestre après', () => {
+        expect(entree('archivage')).not.toMatch(/commencer un nouveau/);
     });
 });
