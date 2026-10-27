@@ -275,7 +275,8 @@ describe('#704 · zéro erreur donne la note complète, dans les deux modes', ()
         expect(h.win.formulesAlgo.normaliser(critere)).toMatchObject({ modeleId: 'ratio_cible', herite: false });
         const zero = h.win.formulesAlgo.calculer(critere, { ponderation: 20, erreurs: 0, mots: 500 });
         expect(zero).toMatchObject({ applicable: true, note: 20, pctBorne: 100 });
-        expect(h.win.formulesAlgo.libelleChiffre(critere, { ponderation: 20, erreurs: 0, mots: 500 })).toContain('(aucune erreur)');
+        // ↻ Étape 4a (27 oct.) : la ligne dit le cas « vaut 0 » choisi (au départ, la note entière).
+        expect(h.win.formulesAlgo.libelleChiffre(critere, { ponderation: 20, erreurs: 0, mots: 500 })).toBe('Le compte pondéré des erreurs vaut 0 : la note est entière, 20 / 20.');
         // Témoin : le même modèle, avec des erreurs, ne rend PAS la note complète — l'essai distingue.
         expect(h.win.formulesAlgo.calculer(critere, { ponderation: 20, erreurs: 25, mots: 500 }).note).toBeLessThan(20);
     });

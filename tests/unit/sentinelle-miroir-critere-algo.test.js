@@ -280,7 +280,7 @@ describe('miroir · E — ↻ #1150 : le bloc est parti de l\'étape « Note » 
         expect(html()).not.toContain('miroir-algo');
         expect(html()).not.toContain('Essai sur des copies fictives');
         expect(html()).toContain('<aside class="apercu-algo" data-apercu-algo="0"');
-        expect(html()).toContain('Formule appliquée');
+        expect(html()).toContain('Le calcul de la note');   // ↻ étape 4a : les cartes de « Note calculée »
         const temp = monterGrilles([]);
         temp.win.tempCriteres = [{ ...FRANCAIS, id: 'T1' }];
         temp.win.afficherCriteresTemp();
@@ -295,7 +295,7 @@ describe('miroir · E — ↻ #1150 : le bloc est parti de l\'étape « Note » 
     });
 
     it('E.e la ligne du facteur reste un libellé du miroir, qui nomme ce que le critère compte (étape 2a)', () => {
-        const LIGNE = 'Sans projection, ces copies ont la longueur du facteur : chaque erreur y coûte un point, quel que soit le facteur.';
+        const LIGNE = 'Sans projection, ces copies ont la longueur fixée dans le calcul : chaque erreur y coûte un point, quelle que soit cette longueur.';
         expect(registres().miroirAlgo.libelles(FRANCAIS).etendueDuFacteur).toBe(LIGNE);
         expect(registres().miroirAlgo.libelles(CHIMIE).etendueDuFacteur).toBe(LIGNE.replace('chaque erreur', 'chaque unité manquante'));
         expect(registres().miroirAlgo.libelles(FRANCAIS)).not.toHaveProperty('titre');

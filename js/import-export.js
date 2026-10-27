@@ -585,6 +585,21 @@ function _assainirTablesCas(valeur) {
 }
 
 /**
+ * Étape 4a du critère algorithmique (27 oct. 2026) — ce que vaut la note quand une donnée de la copie vaut 0
+ * (`critere.casZero`), relu par le registre des calculs (`formulesAlgo.assainirCasZero`) : une entrée illisible
+ * (calcul, donnée ou choix inconnus, « calcul » sur une donnée par laquelle on divise) est écartée, jamais devinée.
+ * Rend `{ casZero }`, ou `{}` quand rien de lisible ne reste : un critère aux choix de départ n'a pas le champ.
+ */
+function _assainirCasZero(valeur) {
+    const F = (typeof window !== 'undefined') ? window.formulesAlgo : null;
+    const r = F ? F.assainirCasZero(valeur) : undefined;
+    return r ? { casZero: r } : {};
+}
+
+/** Les types de schéma relus par leur registre : chacun rend `{ champ: valeur }`, ou `{}` (le champ ne vient pas). */
+const ASSAINISSEURS_DEDIES = { tablesCas: _assainirTablesCas, casZero: _assainirCasZero };
+
+/**
  * Assainit un objet importé selon un schéma (whitelist de propriétés)
  * @param {Object} obj - Objet à assainir
  * @param {Object} schema - Schéma { nomProp: { type, maxLen?, schema? } }
@@ -595,7 +610,8 @@ function _assainirTablesCas(valeur) {
  *                                    non un vide : `'number'` le coercerait en 0),
  *                    'arrayStrings' (tableau de chaînes, chacune assainie),
  *                    'stringOrNumber' (id qui peut arriver soit en string soit en number),
- *                    'tablesCas' (lot 3b : les tables de cas d'un critère, relues par `tablesCasAlgo.assainir`).
+ *                    'tablesCas' (lot 3b : les tables de cas d'un critère, relues par `tablesCasAlgo.assainir`),
+ *                    'casZero' (étape 4a : « quand une donnée vaut 0 », relu par `formulesAlgo.assainirCasZero`).
  * @returns {Object} Objet nettoyé (seules les clés du schéma sont conservées)
  */
 function assainirObjet(obj, schema) {
@@ -608,6 +624,11 @@ function assainirObjet(obj, schema) {
             continue;
         }
         const valeur = obj[cle];
+        // Les types relus par leur registre (lot 3b, étape 4a) : la donnée lisible entre, l'illisible est écartée.
+        if (ASSAINISSEURS_DEDIES[spec.type]) {
+            Object.assign(resultat, ASSAINISSEURS_DEDIES[spec.type](valeur));
+            continue;
+        }
 
         switch (spec.type) {
             case 'string':
@@ -670,9 +691,6 @@ function assainirObjet(obj, schema) {
                     // compromis assumé que l'échappement à l'affichage (lot 2) couvre.
                     resultat[cle] = valeur;
                 }
-                break;
-            case 'tablesCas':
-                Object.assign(resultat, _assainirTablesCas(valeur));   // lot 3b : voir `_assainirTablesCas`
                 break;
             case 'mapStrings':
                 // Object à clés dynamiques dont toutes les valeurs doivent être
@@ -934,6 +952,10 @@ const SCHEMAS_IMPORT = {
                         pointsParErreur: { type: 'number' }
                     }
                 },
+                // Étape 4a (27 oct. 2026) — CE QUE VAUT LA NOTE QUAND UNE DONNÉE VAUT 0 voyage avec le calcul : sans
+                // lui, une grille importée calculerait autrement que celle de son auteur·e. Type dédié, relu par
+                // le registre des calculs (`_assainirCasZero`).
+                casZero: { type: 'casZero' },
 
                 // #668 Lot 4 — LA PROJECTION EUF SE PERDAIT DE MÊME. Aucun des
                 // trois champs n'était déclaré ici : une grille importée

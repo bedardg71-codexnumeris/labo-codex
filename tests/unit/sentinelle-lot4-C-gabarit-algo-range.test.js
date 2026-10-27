@@ -163,7 +163,7 @@ describe('lot 4 · C.A — ↻ #1150 : l\'ordre des étapes, et UNE seule ouvert
         positions.slice(1).forEach((p, n) => expect(p, ORDRE[n + 1]).toBeGreaterThan(positions[n]));
         // Les sous-critères sont dans l'étape « Codes », la formule dans « Note », les paliers dans « Paliers ».
         expect(contenuCarte(html, 'codes')).toContain('sous-criteres-conteneur--en-tete');
-        expect(contenuCarte(html, 'formule')).toContain('Formule appliquée');
+        expect(contenuCarte(html, 'formule')).toContain('Le calcul de la note');   // ↻ étape 4a : les trois cartes
         expect(contenuCarte(html, 'projection')).toContain('class="table-cas"');   // ↻ lot 3a : la table des paliers
         expect(html).not.toContain('gabarit-algo-carte');
         expect(html).not.toContain('data-pli="CR:codes"');
@@ -195,7 +195,7 @@ describe('lot 4 · C.A — ↻ #1150 : l\'ordre des étapes, et UNE seule ouvert
         expect(html).not.toContain('Les sous-critères se définissent une fois la grille enregistrée.');
         expect(html).toContain('data-action="initialiserSousCriteresParDefaut" data-param="temp" data-param2="0"');
         expect(etapeDe(html, 'TEMP_1', 'codes')).toContain('class="sous-criteres-conteneur');
-        expect(etapeDe(html, 'TEMP_1', 'note')).toContain('modifierParamFormuleTempHandler');
+        expect(etapeDe(html, 'TEMP_1', 'note')).toContain('data-on-change="modifierReglageCalculAlgo" data-cible="temp"');   // ↻ étape 4a
     });
 
     it('A.d un critère holistique ou analytique n\'a aucune carte — le gabarit long est celui de l\'algorithmique seul', () => {

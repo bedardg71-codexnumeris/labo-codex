@@ -71,7 +71,7 @@ var TEXTES = {
     buts: {
         compte: 'Ce que tu relèves sur la copie, et ce à quoi tu rapportes ce compte (des mots, des calculs, des mesures…). Ces noms s’écrivent dans les phrases destinées à l’étudiant·e.',
         codes: 'Tes codes sont les sous-critères de ce critère : tu les configures ici (numéro, nom, pondération, observation). Dans Annoter, la palette les affiche pour que tu les poses sur la copie, sans les modifier. Chaque code posé compte selon sa pondération.',
-        note: 'Comment ce que tu identifies et comptes construit la note, en fonction de la pondération du critère.',
+        note: 'Comment ce que tu identifies et comptes construit la note, en fonction de la pondération du critère. Chaque code posé compte pour la pondération de son sous-critère : c’est le compte pondéré.',   // étape 4a (ébauche)
         paliers: [
             'Les paliers situent la copie par rapport à la limite que tu fixes, d’après le compte que l’application fait pour toi.',
             'Selon la valeur établie sur sa copie, l’étudiant·e reçoit un commentaire précis qui s’adresse à son cas. Ci-dessous, chaque table choisit un seul cas pour l’étudiant·e. La simulation te montre de quel cas il s’agirait.'
@@ -265,13 +265,6 @@ var TEXTES = {
 /** L'ordre des étapes : celui de la chaîne. */
 var ORDRE = ['compte', 'codes', 'note', 'paliers', 'eleve'];
 
-/** Le nom court d'une formule (l'info de l'étape « Note ») ; un modèle inconnu : son nom. */
-var FORMULES_COURTES = {
-    penalite_normalisee: 'pénalité normalisée',
-    ratio_cible: 'ratio visé',
-    penalite_par_erreur: 'pénalité fixe'
-};
-
 function _pluriel(n, singulier, pluriel) { return n + ' ' + (n > 1 ? pluriel : singulier); }
 function _fmt(n) {
     if (typeof window !== 'undefined' && typeof window.formaterNombre === 'function') return window.formaterNombre(n);
@@ -321,9 +314,9 @@ function _etapeNote(c) {
     var pond = Number(c.ponderation);
     var pondOk = isFinite(pond) && pond > 0;
     var paramsOk = (f.modele.parametres || []).every(function(p) { var v = Number(f.params[p.cle]); return isFinite(v) && v > 0; });
-    var court = FORMULES_COURTES[f.modeleId] || String(f.modele.nom || '').toLowerCase();
-    return { id: 'note', reglee: pondOk && paramsOk, info: court,
-        resume: 'Formule : ' + court + (pondOk ? ', sur ' + _fmt(pond) : ', sans pondération') };
+    // Étape 4a (ébauche) : l'info, le nom court du calcul (« pénalité fixe ») ; le résumé, son nom (« Pénalité fixe, sur 20 »).
+    return { id: 'note', reglee: pondOk && paramsOk, info: f.modele.court,
+        resume: f.modele.nom + (pondOk ? ', sur ' + _fmt(pond) : ', sans pondération') };
 }
 
 /** Cas d'interprétation (lot 3a) — sans limite, réglée ; une limite fixée l'est quand sa longueur et sa
@@ -948,6 +941,17 @@ function _remplirApercu(atelier) {
     _marquerPaliers(atelier, lec.indicePalier);
     _marquerCas(atelier, lec.casAtteints || {});
     _remplirValeursDesBlocs(atelier, critere, copie);
+    _remplirCalculDeLaNote(atelier, critere, copie);
+}
+
+/** Étape 4a — « Sur la copie fictive : … » sous le calcul choisi : la ligne du registre, au conditionnel. */
+function _remplirCalculDeLaNote(atelier, critere, copie) {
+    var x = atelier.querySelector('[data-calcul-copie-texte]');
+    if (!x) return;
+    var pond = Number(critere.ponderation);
+    x.textContent = (isFinite(pond) && pond > 0)
+        ? _F().ligneResultat(critere, { ponderation: pond, erreurs: copie.erreursFormule, mots: copie.mots || 0 }, 'conditionnel')
+        : _M().libelles(critere).sansPonderation;
 }
 
 /** Lot 3b — dans chaque table, la rangée du cas que la copie fictive atteint : marquée, son repère montré. */
@@ -1044,8 +1048,12 @@ function _remplirResultats(ap, critere, lec) {
         res.appendChild(p);
     }
     var pond = Number(critere.ponderation);
+    // Étape 4a : sans note, la ligne du registre dit quelle donnée l'évaluation attendrait (« le compte des calculs »).
+    var copie = lec.essai.copie || {};
     ap.querySelector('.apercu-algo-raison').textContent = lec.essai.applicable ? ''
-        : ((isFinite(pond) && pond > 0) ? L.noteImpossible : L.sansPonderation);
+        : ((isFinite(pond) && pond > 0)
+            ? _F().ligneResultat(critere, { ponderation: pond, erreurs: copie.erreursFormule, mots: copie.mots || 0 }, 'conditionnel')
+            : L.sansPonderation);
 }
 
 /** Les phrases, rangées par destination : le PDF (par morceaux), le bilan, « Pour toi seul·e » ; chaque

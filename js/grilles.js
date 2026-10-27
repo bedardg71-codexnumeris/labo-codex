@@ -3640,11 +3640,13 @@ function monterVuesBadges(container, criteres) {
  * Modifie un critère temporaire
  */
 /**
- * #667 — LE BLOC « FORMULE » DU GABARIT, POUR LES DEUX ÉCRANS DE GRILLE.
- *
- * Il était écrit deux fois (critère temporaire et critère enregistré), avec
- * dans chacun le texte de la formule TAPÉ À LA MAIN — donc libre de mentir sur
- * le calcul réellement appliqué. Un seul rendu, engendré par le registre.
+ * #667 — LE BLOC « NOTE CALCULÉE » DU GABARIT, POUR LES DEUX ÉCRANS DE GRILLE.
+ * ↻ Étape 4a du critère algorithmique (27 oct. 2026, ébauche `EBAUCHE-2026-10-26-calculs.html`, qui fait foi) :
+ * trois cartes à bouton radio, une par calcul tout fait ; la carte choisie montre son réglage, « Le calcul, en
+ * blocs : » (les pastilles), « Sur la copie fictive : … » (rempli par l'atelier, `atelierAlgo`, à chaque
+ * changement de la copie) et « Quand une donnée de la copie vaut 0 ». Rien n'est écrit ici à la main : noms,
+ * textes, pastilles et menus sortent du registre (`formulesAlgo`), de la même source que le calcul.
+ * Zéro handler inline ; tout ce qui porte les noms de l'enseignant·e passe par `esc()`.
  *
  * @param {object} critere - le critère de grille
  * @param {object} ctx - {mode: 'temp'|'grille', index, grilleId}
@@ -3652,71 +3654,66 @@ function monterVuesBadges(container, criteres) {
  */
 function rendreBlocFormuleAlgo(critere, ctx) {
     if (!critere || critere.type !== 'algorithmique') return '';
-    if (typeof window.formulesAlgo === 'undefined') return '';
+    if (typeof window.formulesAlgo === 'undefined' || typeof window.enoncesAlgo === 'undefined') return '';
 
-    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t)) : '');
-    const f = window.formulesAlgo.normaliser(critere);
-    const modeles = window.formulesAlgo.listerModeles();
+    const F = window.formulesAlgo;
+    const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
+    const f = F.normaliser(critere);
+    const N = window.enoncesAlgo.noms(critere);
+    const cible = ctx.mode === 'temp' ? 'temp' : ctx.grilleId;
+    const datas = `data-cible="${esc(cible)}" data-critere-index="${ctx.index}"`;
+    const ident = (x) => esc(_identTableCas(cible, ctx.index, 'calcul-' + x));
 
-    const estTemp = ctx.mode === 'temp';
-    const handlerModele = estTemp ? 'modifierModeleFormuleTempHandler' : 'modifierModeleFormuleGrilleHandler';
-    const handlerParam = estTemp ? 'modifierParamFormuleTempHandler' : 'modifierParamFormuleGrilleHandler';
-    const datasCommunes = estTemp
-        ? `data-critere-index="${ctx.index}"`
-        : `data-grille-id="${esc(ctx.grilleId)}" data-critere-index="${ctx.index}"`;
+    const carte = (m) => {
+        const actif = m.id === f.modeleId;
+        const tete = `
+                        <label class="calc-carte-tete">
+                            <input type="radio" name="${ident('note')}" id="${ident(m.id)}" value="${esc(m.id)}"${actif ? ' checked' : ''}
+                                   data-on-change="choisirCalculNoteAlgo" ${datas}>
+                            <span class="calc-nom">${esc(m.nom)}</span>
+                        </label>
+                        <p class="calc-texte">${esc(m.texte)}</p>`;
+        if (!actif) return `
+                    <div class="calc-carte">${tete}
+                    </div>`;
+        const reglages = m.parametres.map(p => `
+                        <div class="groupe-form calc-param">
+                            <label for="${ident('param-' + p.cle)}">${esc(p.libelle(N))}</label>
+                            <input type="number" class="controle-form" id="${ident('param-' + p.cle)}" inputmode="decimal" step="any"
+                                   value="${esc(f.params[p.cle])}" min="${esc(p.min)}" max="${esc(p.max)}"
+                                   data-on-change="modifierReglageCalculAlgo" ${datas} data-param-cle="${esc(p.cle)}">
+                        </div>`).join('');
+        const pastilles = F.blocs(critere).map(b => b.genre === 'operation'
+            ? `<span class="calc-op">${esc(b.texte)}</span>`
+            : `<span class="repere-enonce repere-enonce--${b.genre === 'donnee' ? 'remplie' : 'posee'}">${esc(b.texte)}</span>`).join(' ');
+        const off = F.casAOffrir(critere);
+        const rangees = off.rangees.map(r => `
+                            <div class="calc-cas-rangee">
+                                <span>Si <span class="repere-enonce repere-enonce--remplie">${esc(r.nom)}</span> vaut 0</span>
+                                <select class="controle-form" id="${ident('cas-' + r.donnee)}" aria-label="Si ${esc(r.nom)} vaut 0"
+                                        data-on-change="choisirCasZeroAlgo" ${datas} data-donnee="${esc(r.donnee)}">
+                                    ${r.choix.map(o => `<option value="${esc(o.valeur)}"${o.valeur === r.actuel ? ' selected' : ''}>${esc(o.libelle)}</option>`).join('')}
+                                </select>
+                            </div>`).join('');
+        return `
+                    <div class="calc-carte" data-actif>${tete}${reglages}
+                        <p class="calc-legende">Le calcul, en blocs :</p>
+                        <div class="calc-formule" aria-label="Le calcul, en blocs"><span class="calc-op">Note =</span> ${pastilles}</div>
+                        <p class="calc-copie" data-calcul-copie><span class="calc-legende">Sur la copie fictive : </span><span data-calcul-copie-texte></span></p>${rangees ? `
+                        <div class="calc-cas">
+                            <p class="calc-cas-titre">Quand une donnée de la copie vaut 0</p>${rangees}${off.divise ? `
+                            <p class="calc-legende">Une division par une donnée qui vaut 0 n’a pas de résultat : tu dis ce que vaut alors la note.</p>` : ''}
+                        </div>` : ''}
+                    </div>`;
+    };
 
-    const options = modeles.map(m =>
-        `<option value="${esc(m.id)}"${m.id === f.modeleId ? ' selected' : ''}>${esc(m.nom)}</option>`
-    ).join('');
-
-    const champsParams = f.modele.parametres.map(p => `
-                    <div class="groupe-form">
-                        <label style="font-size: 0.85rem; color: var(--gris-moyen);">${esc(p.libelle)}</label>
-                        <input type="number"
-                               class="controle-form"
-                               value="${esc(f.params[p.cle])}"
-                               min="${esc(p.min)}"
-                               max="${esc(p.max)}"
-                               data-on-change="${handlerParam}" ${datasCommunes} data-param-cle="${esc(p.cle)}"
-                               title="${esc(p.aide)}">
-                    </div>`).join('');
-
-    // ⚠ Le texte de la formule N'EST PAS écrit ici : il sort du registre, de la
-    // même source que le calcul. C'est tout l'objet de #667.
-    //
-    // Lot 4 (4 sept. 2026) : le bloc se dessine SANS cadre — c'est l'étape « Note » de l'atelier
-    // (`rendreCartesGabaritAlgo`, #1150) qui le porte, sur les deux écrans.
     return `
-            <div>
-                <div class="groupe-form">
-                    <label style="font-size: 0.85rem; color: var(--gris-moyen);">Modèle de formule</label>
-                    <select class="controle-form"
-                            data-on-change="${handlerModele}" ${datasCommunes}>
-                        ${options}
-                    </select>
-                    <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">${esc(f.modele.description)}</small>
+            <div class="calc-note">
+                <h4 class="calc-titre">Le calcul de la note</h4>
+                <div class="calc-choix" role="radiogroup" aria-label="Le calcul de la note">${F.listerModeles().map(carte).join('')}
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
-                    ${champsParams}
-                </div>
-                <p style="font-size: 0.85rem; color: var(--gris-moyen); margin: 10px 0 0 0;">
-                    <strong>Formule appliquée :</strong> ${esc(window.formulesAlgo.libelleSymbolique(critere))}
-                </p>
-                <small style="font-size: 0.78rem; color: var(--gris-clair); display: block; margin-top: 4px;">
-                    ${(() => {
-                        // Étape 2a (22 oct. 2026) : les champs portent les noms du critère (`enEtiquette`, comme
-                        // l'évaluation) ; cités entre guillemets, sans « de » devant. Échappés : des mots tapés.
-                        const N = window.enoncesAlgo.noms(critere);
-                        const champE = esc(window.enoncesAlgo.enEtiquette(N.erreurs.pluriel));
-                        const champM = esc(window.enoncesAlgo.enEtiquette(N.mots.pluriel));
-                        return f.modele.utiliseMots
-                            ? `Lors de l'évaluation, « ${champE} » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « ${champM} » se tape.`
-                            : `Lors de l'évaluation, seul le champ « ${champE} » entre dans la note. Le champ « ${champM} » reste saisi pour la rétroaction.`;
-                    })()}
-                </small>${f.herite && critere.modeleFormule ? `
-                <small style="font-size: 0.78rem; color: var(--orange-accent); display: block; margin-top: 4px;">
-                    Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.
-                </small>` : ''}
+                <p class="calc-legende">La note reste entre 0 et la pondération du critère.</p>${f.herite && critere.modeleFormule ? `
+                <p class="calc-legende calc-inconnu">Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.</p>` : ''}
             </div>`;
 }
 
@@ -5420,64 +5417,6 @@ function rendreCartesGabaritAlgo(critere, ctx) {
 }
 
 /**
- * #667 — Écrit le modèle de formule et ses paramètres sur un critère ENREGISTRÉ.
- *
- * Une écriture unique plutôt que trois appels à `modifierCritereGrille` : le
- * modèle, ses paramètres et le miroir `facteurNormalisation` doivent atterrir
- * ensemble. Trois écritures séparées laisseraient, entre deux, une grille dont
- * le modèle ne correspond pas à ses paramètres.
- */
-async function modifierFormuleCritereGrille(grilleId, critereIndex, modeleId, params) {
-    let grilleModifiee = null;
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const grille = grilles.find(g => g.id === grilleId);
-        if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
-        window.formulesAlgo.appliquerAuCritere(grille.criteres[critereIndex], modeleId, params);
-        grille.dateModification = new Date().toISOString();
-        grilleModifiee = grille;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-
-    if (!grilleModifiee) return null;
-    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
-        grilleTemplateActuelle = grilleModifiee;
-    }
-    return grilleModifiee;
-}
-
-/**
- * #667 — Change UN paramètre de formule d'un critère enregistré.
- *
- * La lecture des paramètres actuels et leur réécriture se font DANS le
- * mutateur : lire d'abord la grille pour fusionner ensuite, hors du verrou,
- * rejouerait le bug #510 — deux champs quittés coup sur coup liraient le même
- * instantané et le second écraserait le premier, sans erreur ni message.
- */
-async function modifierParamFormuleCritereGrille(grilleId, critereIndex, cleParam, valeur) {
-    let grilleModifiee = null;
-    await modifierEtAnnoncer(cle('grillesTemplates'), (lues) => {
-        const grilles = lues || [];
-        const grille = grilles.find(g => g.id === grilleId);
-        if (!grille || !grille.criteres || !grille.criteres[critereIndex]) return undefined;
-        const critere = grille.criteres[critereIndex];
-        const f = window.formulesAlgo.normaliser(critere);
-        const params = Object.assign({}, f.params);
-        params[cleParam] = valeur;
-        window.formulesAlgo.appliquerAuCritere(critere, f.modeleId, params);
-        grille.dateModification = new Date().toISOString();
-        grilleModifiee = grille;
-        return grilles;
-    }, [], { geste: 'Modifier la grille' });
-
-    if (!grilleModifiee) return null;
-    if (grilleTemplateActuelle && grilleTemplateActuelle.id === grilleId) {
-        grilleTemplateActuelle = grilleModifiee;
-    }
-    return grilleModifiee;
-}
-
-/**
  * La dissection, lot 9b (`CONSIGNE-LOT-2026-10-18-dissection-9b-la-garde.md`, décision de Grégoire, 18 oct.,
  * 18 h 32) : la pondération d'un critère, saisie ou VIDÉE. Vidé, le champ écrit `null` (plus NaN) et pose la
  * marque `ponderationACompleter` : tant qu'elle y est, la note d'une copie affiche « -- » (`calculerPortee`).
@@ -6489,11 +6428,16 @@ function _refusSeuil(el) {
 async function _redessinerEnGardantLeFocus(cible) {
     const actif = document.activeElement;
     const id = (actif && actif.id && actif.closest && actif.closest('#listeCriteres')) ? actif.id : '';
+    // Étape 4a (piège 6, mesuré sous WebKit le 27 oct.) : le redessin faisait sauter la page de 250 px — le champ
+    // rendu par `focus()` était ramené dans la vue après que la liste, réécrite, eut changé de hauteur. La position
+    // est gardée, et le focus rendu sans défilement.
+    const y = window.scrollY;
     await _redessinerCible(cible);
     if (!id) return;
     const x = document.getElementById(id);
     if (!x) return;
-    x.focus();
+    try { x.focus({ preventScroll: true }); } catch (e) { x.focus(); }
+    if (window.scrollY !== y) window.scrollTo(window.scrollX, y);
     if (typeof x.value === 'string') { const n = x.value.length; try { x.setSelectionRange(n, n); } catch (e) { /* champ sans sélection */ } }
 }
 
@@ -7049,40 +6993,42 @@ async function supprimerPalierProjectionGrille(grilleId, index, palierIndex) {
     afficherCriteresGrille(await obtenirGrilleParId(grilleId));
 }
 
-function modifierModeleFormuleTempHandler(el) {
-    var index = parseInt(el.dataset.critereIndex);
-    if (!window.tempCriteres || !window.tempCriteres[index]) return;
-    // params null : le nouveau modèle repart de SES défauts déclarés — ceux de
-    // l'ancien ne veulent rien dire pour lui.
-    window.formulesAlgo.appliquerAuCritere(window.tempCriteres[index], el.value, null);
-    afficherCriteresTemp();
+/*
+ * Étape 4a (27 oct. 2026) — LES TROIS GESTES DE L'ÉTAPE « NOTE CALCULÉE » : choisir une carte, taper son réglage,
+ * choisir dans un menu « Si [donnée] vaut 0 ». Une cible (`temp` en création, sinon la grille), une écriture par
+ * `_modifierCritereCible` (la file, #510 : la lecture et la réécriture dans le mutateur), puis le redessin qui rend
+ * le focus au champ quitté (lot 3b, piège 6). Changer de carte repart des défauts déclarés du calcul choisi : les
+ * réglages de l'autre ne veulent rien dire pour lui ; ses choix « vaut 0 », rangés par calcul, restent.
+ */
+async function choisirCalculNoteAlgo(el) {
+    const x = _gesteTableCas(el);
+    const ecrit = await _modifierCritereCible(x.cible, x.index, (c) => {
+        if (!c || c.type !== 'algorithmique' || !window.formulesAlgo.obtenirModele(el.value)) return false;
+        if (window.formulesAlgo.normaliser(c).modeleId === el.value && c.modeleFormule === el.value) return false;
+        window.formulesAlgo.appliquerAuCritere(c, el.value, null);
+    });
+    if (ecrit) await _redessinerEnGardantLeFocus(x.cible);
 }
 
-function modifierParamFormuleTempHandler(el) {
-    var index = parseInt(el.dataset.critereIndex);
-    if (!window.tempCriteres || !window.tempCriteres[index]) return;
-    var critere = window.tempCriteres[index];
-    var f = window.formulesAlgo.normaliser(critere);
-    var params = Object.assign({}, f.params);
-    params[el.dataset.paramCle] = el.value;
-    window.formulesAlgo.appliquerAuCritere(critere, f.modeleId, params);
-    afficherCriteresTemp();
+async function modifierReglageCalculAlgo(el) {
+    const x = _gesteTableCas(el);
+    const ecrit = await _modifierCritereCible(x.cible, x.index, (c) => {
+        if (!c || c.type !== 'algorithmique') return false;
+        const f = window.formulesAlgo.normaliser(c);
+        const params = Object.assign({}, f.params);
+        params[el.dataset.paramCle] = el.value;
+        window.formulesAlgo.appliquerAuCritere(c, f.modeleId, params);
+    });
+    if (ecrit) await _redessinerEnGardantLeFocus(x.cible);
 }
 
-async function modifierModeleFormuleGrilleHandler(el) {
-    var grilleId = el.dataset.grilleId;
-    var index = parseInt(el.dataset.critereIndex);
-    await modifierFormuleCritereGrille(grilleId, index, el.value, null);
-    // ⚠ obtenirGrilleParId est ASYNC (cf. #466/CO-21) : sans await, le renderer
-    // reçoit une Promise et affiche « Aucun critère défini ».
-    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
-}
-
-async function modifierParamFormuleGrilleHandler(el) {
-    var grilleId = el.dataset.grilleId;
-    var index = parseInt(el.dataset.critereIndex);
-    await modifierParamFormuleCritereGrille(grilleId, index, el.dataset.paramCle, el.value);
-    afficherCriteresGrille(await obtenirGrilleParId(grilleId));
+async function choisirCasZeroAlgo(el) {
+    const x = _gesteTableCas(el);
+    const ecrit = await _modifierCritereCible(x.cible, x.index, (c) => {
+        if (!c || c.type !== 'algorithmique') return false;
+        return window.formulesAlgo.appliquerCasZero(c, el.dataset.donnee, el.value) ? undefined : false;
+    });
+    if (ecrit) await _redessinerEnGardantLeFocus(x.cible);
 }
 
 /**
@@ -7246,10 +7192,9 @@ window.ajouterPalierProjectionTemp = ajouterPalierProjectionTemp;
 window.supprimerPalierProjectionTemp = supprimerPalierProjectionTemp;
 window.ajouterPalierProjectionGrille = ajouterPalierProjectionGrille;
 window.supprimerPalierProjectionGrille = supprimerPalierProjectionGrille;
-window.modifierModeleFormuleTempHandler = modifierModeleFormuleTempHandler;
-window.modifierParamFormuleTempHandler = modifierParamFormuleTempHandler;
-window.modifierModeleFormuleGrilleHandler = modifierModeleFormuleGrilleHandler;
-window.modifierParamFormuleGrilleHandler = modifierParamFormuleGrilleHandler;
+window.choisirCalculNoteAlgo = choisirCalculNoteAlgo;           // étape 4a : les trois gestes de « Note calculée »
+window.modifierReglageCalculAlgo = modifierReglageCalculAlgo;
+window.choisirCasZeroAlgo = choisirCasZeroAlgo;
 window.modifierTypeCritereTempHandler = modifierTypeCritereTempHandler;
 window.modifierCritereGrilleHandler = modifierCritereGrilleHandler;
 window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;

@@ -948,16 +948,10 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     if (totalErreursElem) totalErreursElem.textContent = erreurs;
     if (motsElem) motsElem.textContent = mots;
 
-    // #667 — la garde ne présume plus que TOUTE formule a besoin des mots :
-    // c'est le modèle choisi dans le gabarit qui le dit (`utiliseMots`). Une
-    // pénalité fixe par erreur se calcule sans nombre de mots.
-    const motsRequisSimple = window.formulesAlgo
-        .normaliser(_critereFormulePourCalcul(critereId, facteur)).modele.utiliseMots;
-    if (motsRequisSimple && mots === 0) {
-        _viderResultatAlgoSimple(critereId, erreurs, mots);
-        return;
-    }
-
+    // Étape 4a (27 oct. 2026) : plus de garde « le modèle a besoin des mots » ici. C'est le registre qui dit
+    // ce que vaut la note quand une donnée vaut 0 (`critere.casZero`) : aux choix de départ, une étendue à 0
+    // rend `applicable: false` (raison 'mots-absents') et la branche ci-dessous vide le résultat, comme la
+    // garde le faisait ; « Une note de 0 » ou « La note entière », choisis par l'enseignant·e, donnent une note.
     // #667 — la formule vient du gabarit de la grille (modèle + paramètres),
     // plus d'une expression écrite ici. Le libellé affiché sort de la MÊME
     // source que le calcul : les deux ne peuvent plus diverger.

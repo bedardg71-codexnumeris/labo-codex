@@ -497,6 +497,15 @@
                                 { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].tablesCas' }));
                         }
                     });
+                    // Étape 4a (27 oct. 2026) — « quand une donnée vaut 0 » : la règle du registre des calculs.
+                    item.criteres.forEach(function (c, j) {
+                        if (!c || !('casZero' in c)) return;
+                        var raison = window.formulesAlgo ? window.formulesAlgo.refusCasZero(c.casZero) : 'module des calculs absent';
+                        if (raison) {
+                            erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'calcul de la note : ' + raison,
+                                { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].casZero' }));
+                        }
+                    });
                 }
             });
         });
