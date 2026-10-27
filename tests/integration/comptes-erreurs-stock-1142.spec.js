@@ -166,3 +166,36 @@ test('#1142 stock · H2026 (et A2025) ne sont pas mesurés : refus, rien lu ni �
     expect.soft(r.reparation).toBeNull();
     expect(r.ecritures).toEqual([]);
 });
+
+// Retouche 1 du verdict de 4b (27 oct. 2026) — la réparation passe le COMPTE BRUT à `formulesAlgo.calculer`, comme
+// l'évaluation. Un calcul composé qui lit le compte brut (« Pondération − Compte × 2 ») sur des codes qui pèsent 2 :
+// la copie DEC1 a été évaluée avec le compte pondéré 2 et le compte brut 1 (90 %, E). Sans le compte brut, la
+// réparation lirait 2 pour les deux, ne retrouverait pas la note, et retomberait sur la lecture brute (sans somme
+// pondérée). BREAK-TEST (27 oct.) : `compte: compte` retiré de `calculer` → cet essai rougit (`sommePonderee` absente).
+test('#1142 stock · un calcul composé qui lit le compte brut redonne à la réparation la note de l\'évaluation', async ({ page }) => {
+    await monter(page);
+    const r = await page.evaluate(async ({ T, MOTS }) => {
+        const jetons = [{ t: 'd', k: 'ponderation' }, { t: 'o', v: '−' }, { t: 'd', k: 'compte' }, { t: 'o', v: '×' }, { t: 'n', v: 2 }];
+        const grilles = window.db.getSync(T + '_grillesTemplates', []);
+        const c2 = grilles[0].criteres[1];
+        Object.assign(c2, { modeleFormule: 'perso:calc1', calculs: [{ id: 'calc1', nom: 'Moins deux', sert: 'note', jetons, cas: {} }] });
+        window.db.setSync(T + '_grillesTemplates', grilles);
+        window.codesAnnotation.sommePonderee = (g, compteurs) => 2 * Object.keys(compteurs).reduce((s, id) => s + compteurs[id], 0);
+        // Ce que l'évaluation a calculé : le compte pondéré 2, le compte brut 1.
+        const aLEvaluation = window.formulesAlgo.calculer(c2, { ponderation: 20, erreurs: 2, compte: 1, mots: MOTS });
+        const evals = window.db.getSync(T + '_evaluationsSauvegardees', []).filter(e => e.id === 'EV_DEC1');
+        evals[0].noteFinale = 0.8 * 80 + 0.2 * aLEvaluation.pctBorne;
+        evals[0].criteres[1].niveauSelectionne = window.niveauDuPourcentage(aLEvaluation.pctBorne, window.db.getSync(T + '_echellesTemplates')[0].niveaux, { sansNiveauZero: true });
+        window.db.setSync(T + '_evaluationsSauvegardees', evals);
+        window.Codex.estAJour = () => true;
+        const rapport = await window.ComptesErreurs.verifier({ reparer: true });
+        const dec1 = window.db.getSync(T + '_evaluationsSauvegardees', [])[0].donneesAlgorithmiques.c2;
+        return { ecrites: rapport.ecrites, dec1, aLEvaluation: { pct: aLEvaluation.pctBorne, note: aLEvaluation.note } };
+    }, { T, MOTS });
+    expect.soft(r.aLEvaluation.pct).toBe(90);
+    expect.soft(r.ecrites).toEqual([{ evaluation: 'EV_DEC1', critere: 'c2', avant: 11, apres: 1 }]);
+    expect.soft(r.dec1.erreurs).toBe(1);
+    expect.soft(r.dec1.sommePonderee, 'le compte pondéré de l\'évaluation, retrouvé').toBe(2);
+    expect.soft(r.dec1.pourcentage).toBe(r.aLEvaluation.pct);
+    expect(r.dec1.noteCalculee).toBe(r.aLEvaluation.note);
+});
