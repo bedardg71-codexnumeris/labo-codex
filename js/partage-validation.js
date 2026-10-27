@@ -113,6 +113,47 @@
         });
     }
 
+    /** Un tableau : sa longueur, puis chaque élément (un objet au schéma fermé, ou une chaîne). Extrait de `validerValeur` (étape 4b). */
+    function validerTableau(valeur, desc, chemin, problemes) {
+        if (!Array.isArray(valeur)) {
+            problemes.push({ champ: chemin, message: 'tableau attendu' });
+            return;
+        }
+        if (desc.max && valeur.length > desc.max) {
+            problemes.push({ champ: chemin, message: valeur.length + ' items > max ' + desc.max });
+        }
+        valeur.forEach(function (item, i) {
+            var cheminItem = chemin + '[' + i + ']';
+            if (desc.schema) {
+                if (!estObjetPlat(item)) {
+                    problemes.push({ champ: cheminItem, message: 'objet attendu' });
+                    return;
+                }
+                validerObjetFerme(item, desc.schema, cheminItem, problemes, null);
+            } else if (desc.element === 'chaine') {
+                if (typeof item !== 'string') {
+                    problemes.push({ champ: cheminItem, message: 'chaîne attendue' });
+                } else if (desc.maxLongueurElement && item.length > desc.maxLongueurElement) {
+                    problemes.push({ champ: cheminItem, message: 'longueur > max ' + desc.maxLongueurElement });
+                }
+            }
+        });
+    }
+
+    /**
+     * Étape 4b (27 oct. 2026) — la valeur d'un jeton de calcul : un nombre fini (un nombre posé) ou une chaîne courte
+     * (une opération). Ce que veut dire le jeton : `formulesAlgo.refusCalculs`.
+     */
+    function validerChaineOuNombre(valeur, desc, chemin, problemes) {
+        if (typeof valeur === 'number') {
+            if (!isFinite(valeur)) problemes.push({ champ: chemin, message: 'nombre fini attendu' });
+        } else if (typeof valeur !== 'string') {
+            problemes.push({ champ: chemin, message: 'chaîne ou nombre attendu' });
+        } else if (desc.max && valeur.length > desc.max) {
+            problemes.push({ champ: chemin, message: 'longueur ' + valeur.length + ' > max ' + desc.max });
+        }
+    }
+
     /**
      * Valide une valeur contre un descripteur. Pousse les problèmes dans
      * `problemes` sous forme { champ, message }.
@@ -154,6 +195,10 @@
                 }
                 break;
 
+            case 'chaine-ou-nombre':
+                validerChaineOuNombre(valeur, desc, chemin, problemes);
+                break;
+
             case 'booleen':
                 if (typeof valeur !== 'boolean') {
                     problemes.push({ champ: chemin, message: 'booléen attendu' });
@@ -161,29 +206,7 @@
                 break;
 
             case 'tableau':
-                if (!Array.isArray(valeur)) {
-                    problemes.push({ champ: chemin, message: 'tableau attendu' });
-                    return;
-                }
-                if (desc.max && valeur.length > desc.max) {
-                    problemes.push({ champ: chemin, message: valeur.length + ' items > max ' + desc.max });
-                }
-                valeur.forEach(function (item, i) {
-                    var cheminItem = chemin + '[' + i + ']';
-                    if (desc.schema) {
-                        if (!estObjetPlat(item)) {
-                            problemes.push({ champ: cheminItem, message: 'objet attendu' });
-                            return;
-                        }
-                        validerObjetFerme(item, desc.schema, cheminItem, problemes, null);
-                    } else if (desc.element === 'chaine') {
-                        if (typeof item !== 'string') {
-                            problemes.push({ champ: cheminItem, message: 'chaîne attendue' });
-                        } else if (desc.maxLongueurElement && item.length > desc.maxLongueurElement) {
-                            problemes.push({ champ: cheminItem, message: 'longueur > max ' + desc.maxLongueurElement });
-                        }
-                    }
-                });
+                validerTableau(valeur, desc, chemin, problemes);
                 break;
 
             case 'objet':
@@ -495,6 +518,15 @@
                         if (raison) {
                             erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'tables de cas : ' + raison,
                                 { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].tablesCas' }));
+                        }
+                    });
+                    // Étape 4b (27 oct. 2026) — les calculs composés : la règle du registre des calculs.
+                    item.criteres.forEach(function (c, j) {
+                        if (!c || !('calculs' in c)) return;
+                        var raison = window.formulesAlgo ? window.formulesAlgo.refusCalculs(c.calculs) : 'module des calculs absent';
+                        if (raison) {
+                            erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'calculs composés : ' + raison,
+                                { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].calculs' }));
                         }
                     });
                     // Étape 4a (27 oct. 2026) — « quand une donnée vaut 0 » : la règle du registre des calculs.

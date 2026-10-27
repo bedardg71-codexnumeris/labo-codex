@@ -130,9 +130,11 @@ function etendue(critere) {
     return sourceEtendue(critere).mots;
 }
 
-/** La note de la formule pour `erreurs` (ce que la formule reçoit) sur une copie de `mots`. */
-function _calculer(critere, ponderation, erreurs, mots) {
-    return _reg('formulesAlgo').calculer(critere, { ponderation: ponderation, erreurs: erreurs, mots: mots || 0 });
+/** La note de la formule pour `erreurs` (ce que la formule reçoit) sur une copie de `mots` ; `compte` : le compte brut (étape 4b). */
+function _calculer(critere, ponderation, erreurs, mots, compte) {
+    var d = { ponderation: ponderation, erreurs: erreurs, mots: mots || 0 };
+    if (compte !== undefined) d.compte = compte;
+    return _reg('formulesAlgo').calculer(critere, d);
 }
 
 /**
@@ -262,7 +264,7 @@ function essayer(critere, copie) {
     var E = _reg('enoncesAlgo');
     var P = _reg('projectionAlgo');
     var ponderation = _ponderation(critere);
-    var res = _calculer(critere, ponderation, copie.erreursFormule, copie.mots);
+    var res = _calculer(critere, ponderation, copie.erreursFormule, copie.mots, copie.erreurs);
     var mots = copie.mots || 0;
     var mention = E ? E.mentionPonderee(copie.erreurs, copie.erreursFormule) : '';
     var decompte = E ? E.enonce(critere, 'decompte', { erreurs: copie.erreurs, mots: mots, points: mention }) : '';

@@ -3924,7 +3924,46 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
 /* Le menu prend la place qui reste, jamais plus : un choix long (« Aucune note : l’évaluation attend… ») s'y tronque
    au lieu de pousser la carte (mesuré à 700 px : 107 px de trop). */
 #listeCriteres .calc-cas-rangee select.controle-form { flex: 1 1 16rem; min-width: 0; box-sizing: border-box; }
+/* Étape 4b (27 oct.) : 44 px, la cible de l'iPad, pour tous les menus « vaut 0 » (cartes et composeur ; c'était 40). */
+#listeCriteres .calc-cas-rangee select.controle-form { height: 44px; min-height: 44px; }
 .calc-inconnu { color: var(--orange-accent); }
+
+/* Étape 4b (27 oct. 2026) — les gestes d'une carte, le message de l'étape, et le composeur (« Composer ton propre calcul »).
+   Ébauche `EBAUCHE-2026-10-26-calculs.html`, ramenée aux variables de design-system.html. Cibles d'au moins 44 px (iPad).
+   Le message : bordures égales sur les quatre côtés, sans liseré (Grégoire, 24 oct.). */
+.calc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+.calc-actions .table-cas-lien { min-height: 44px; }
+.calc-message {
+    margin: 0; padding: 8px 10px; max-width: 76ch; font-size: 0.86rem; color: var(--alerte-texte-information);
+    background: var(--alerte-fond-information); border: 1px solid var(--alerte-bordure-information); border-radius: var(--radius-moyen);
+}
+.calc-composeur { border: 1px dashed var(--bordure-moyenne); border-radius: var(--radius-moyen); max-width: 76ch; min-width: 0; }
+.calc-composeur > summary {
+    cursor: pointer; padding: 12px; line-height: 20px; min-height: 44px; box-sizing: border-box;
+    font-weight: 600; font-size: 0.9rem; color: var(--texte-principal);
+}
+.calc-composeur > summary .calc-legende { font-weight: 400; }
+.calc-composeur > summary:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-moyen); }
+.calc-composeur[open] > summary { border-bottom: 1px dashed var(--bordure-moyenne); }
+.calc-composeur-corps { padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.calc-composeur-corps .calc-param .controle-form { max-width: 100%; }
+.calc-zone { min-height: 48px; border-style: dashed; }
+.calc-rien { font-style: italic; color: var(--texte-muted); font-size: 0.84rem; }
+.calc-boutons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.calc-groupe {
+    font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texte-muted); font-weight: 600; min-width: 92px;
+}
+.calc-btn-donnee {
+    min-height: 44px; padding: 4px 10px; font: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+    white-space: normal; overflow-wrap: anywhere; text-align: left;
+}
+.calc-btn-donnee:focus-visible, .calc-btn-op:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.calc-btn-op { min-width: 44px; min-height: 44px; font-weight: 700; font-size: 1rem; padding-inline: 0; }
+.calc-boutons .btn, .calc-boutons .table-cas-lien { min-height: 44px; }
+.calc-nombre { max-width: 120px; min-height: 44px; }
+.calc-composeur-fin .btn[aria-disabled="true"] { opacity: 0.6; }
+.calc-composeur-refus { flex: 1 1 14rem; }
+@media (max-width: 560px) { .calc-groupe { min-width: 0; flex-basis: 100%; } }
 
 /* « Ce que tu relèves et comptes » : les deux exemples (texte d'aide fixe) */
 .noms-algo-exemples {

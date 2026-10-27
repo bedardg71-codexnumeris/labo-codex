@@ -119,7 +119,7 @@ function calculerNoteAlgorithmique(critereId, ponderation, facteur) {
     // règle vivante. Elle est donc alignée, pas laissée de côté.
     const resFormuleMorte = window.formulesAlgo.calculer(
         _critereFormulePourCalcul(critereId, facteur),
-        { ponderation: ponderation, erreurs: erreurs, mots: mots }
+        { ponderation: ponderation, erreurs: erreurs, compte: erreurs, mots: mots }
     );
     if (!resFormuleMorte.applicable) return;
     const noteCalculee = resFormuleMorte.note;
@@ -653,6 +653,7 @@ function _calculerScoreAlgoCategories(codesSousCriteres, sousCriteres, ponderati
     const res = window.formulesAlgo.calculer(critere, {
         ponderation: ponderation,
         erreurs: sommePonderee,
+        compte: codesSousCriteres.length,   // étape 4b : le compte brut, que lit un calcul composé
         mots: mots
     });
     if (!res.applicable) {
@@ -824,6 +825,7 @@ function calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur
     _afficherFormuleAlgo(critereId, _critereFormulePourCalcul(critereId, facteur), {
         ponderation: ponderation,
         erreurs: sommePonderee,
+        compte: totalErreurs,
         mots: mots
     });
 
@@ -959,6 +961,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     const resFormule = window.formulesAlgo.calculer(critereFormuleAlgo, {
         ponderation: ponderation,
         erreurs: erreursFormule,
+        compte: erreurs,   // étape 4b : le compte brut (le nombre que l'étudiant·e lit), à côté du compte pondéré
         mots: mots
     });
     if (!resFormule.applicable) {
@@ -968,7 +971,7 @@ function calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) {
     const noteCalculee = resFormule.note;
     const pctFinal = resFormule.pctBorne;
     // La formule affichée redonne la note : elle montre ce que la formule a reçu (comme en mode catégories).
-    _afficherFormuleAlgo(critereId, critereFormuleAlgo, { ponderation, erreurs: erreursFormule, mots });
+    _afficherFormuleAlgo(critereId, critereFormuleAlgo, { ponderation, erreurs: erreursFormule, compte: erreurs, mots });
 
     // #701 / #702 — le niveau par la règle unique ; `undefined` quand rien ne se déduit.
     const niveauIDME = _determinerNiveauIDMEAlgo(pctFinal);

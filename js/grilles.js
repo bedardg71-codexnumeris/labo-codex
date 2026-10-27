@@ -3646,6 +3646,9 @@ function monterVuesBadges(container, criteres) {
  * blocs : » (les pastilles), « Sur la copie fictive : … » (rempli par l'atelier, `atelierAlgo`, à chaque
  * changement de la copie) et « Quand une donnée de la copie vaut 0 ». Rien n'est écrit ici à la main : noms,
  * textes, pastilles et menus sortent du registre (`formulesAlgo`), de la même source que le calcul.
+ * ↻ Étape 4b (27 oct. 2026) : les calculs composés prennent leur carte après les trois (« Ton calcul. ») ; « Retoucher
+ * ce calcul » sur la carte d'un calcul tout fait ; le composeur replié sous les cartes (`composeurCalcul`). Un calcul de
+ * la note introuvable : aucune carte choisie, et le gabarit le dit.
  * Zéro handler inline ; tout ce qui porte les noms de l'enseignant·e passe par `esc()`.
  *
  * @param {object} critere - le critère de grille
@@ -3659,63 +3662,104 @@ function rendreBlocFormuleAlgo(critere, ctx) {
     const F = window.formulesAlgo;
     const esc = (t) => (typeof echapperHtml === 'function' ? echapperHtml(String(t == null ? '' : t)) : '');
     const f = F.normaliser(critere);
-    const N = window.enoncesAlgo.noms(critere);
     const cible = ctx.mode === 'temp' ? 'temp' : ctx.grilleId;
-    const datas = `data-cible="${esc(cible)}" data-critere-index="${ctx.index}"`;
-    const ident = (x) => esc(_identTableCas(cible, ctx.index, 'calcul-' + x));
+    const K = window.composeurCalcul;
+    const k = K ? K.cle(cible, critere, ctx.index) : '';
+    const r = { F, esc, f, critere, k, K,
+        N: window.enoncesAlgo.noms(critere),
+        datas: `data-cible="${esc(cible)}" data-critere-index="${ctx.index}"`,
+        ident: (x) => esc(_identTableCas(cible, ctx.index, 'calcul-' + x)) };
+    // Étape 4b : après les trois calculs tout faits, les calculs que l'enseignant·e a composés (« Ton calcul. »).
+    const cartes = F.listerModeles().map(m => _carteCalculNote(r, m))
+        .concat(F.calculsDuCritere(critere).map(c => _carteCalculNote(r, { id: F.PREFIXE_COMPOSE + c.id, nom: c.nom, texte: 'Ton calcul.', parametres: [], compose: c })));
+    const message = K ? K.prendreMessage(k) : '';
 
-    const carte = (m) => {
-        const actif = m.id === f.modeleId;
-        const tete = `
+    return `
+            <div class="calc-note">${message ? `
+                <p class="calc-message" role="status">${esc(message)}</p>` : ''}
+                <h4 class="calc-titre">Le calcul de la note</h4>${f.introuvable ? `
+                <p class="calc-legende calc-inconnu">${esc(F.MESSAGES_COMPOSE.introuvable)}</p>` : ''}
+                <div class="calc-choix" role="radiogroup" aria-label="Le calcul de la note">${cartes.join('')}
+                </div>
+                <p class="calc-legende">La note reste entre 0 et la pondération du critère.</p>
+                <p class="calc-legende">Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.</p>${f.herite && critere.modeleFormule ? `
+                <p class="calc-legende calc-inconnu">Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.</p>` : ''}${K ? K.rendre(critere, ctx) : ''}
+            </div>`;
+}
+
+/**
+ * Une carte de l'étape « Note calculée » (étape 4a ; 4b : les calculs composés). La carte choisie montre son réglage (un
+ * calcul composé n'en a pas : ses nombres sont dans ses blocs), ses pastilles, la ligne de la copie fictive, ses choix
+ * « vaut 0 » et ses gestes. Une carte de calcul composé non choisie garde « Retirer ce calcul ».
+ */
+function _carteCalculNote(r, m) {
+    const { esc, f, datas, ident } = r;
+    const actif = m.id === f.modeleId && !f.introuvable;
+    const tete = `
                         <label class="calc-carte-tete">
                             <input type="radio" name="${ident('note')}" id="${ident(m.id)}" value="${esc(m.id)}"${actif ? ' checked' : ''}
                                    data-on-change="choisirCalculNoteAlgo" ${datas}>
                             <span class="calc-nom">${esc(m.nom)}</span>
                         </label>
                         <p class="calc-texte">${esc(m.texte)}</p>`;
-        if (!actif) return `
-                    <div class="calc-carte">${tete}
+    if (!actif) return `
+                    <div class="calc-carte">${tete}${m.compose ? _gestesCalculCompose(r, m.compose, false) : ''}
                     </div>`;
-        const reglages = m.parametres.map(p => `
+    const reglages = m.parametres.map(p => `
                         <div class="groupe-form calc-param">
-                            <label for="${ident('param-' + p.cle)}">${esc(p.libelle(N))}</label>
+                            <label for="${ident('param-' + p.cle)}">${esc(p.libelle(r.N))}</label>
                             <input type="number" class="controle-form" id="${ident('param-' + p.cle)}" inputmode="decimal" step="any"
                                    value="${esc(f.params[p.cle])}" min="${esc(p.min)}" max="${esc(p.max)}"
                                    data-on-change="modifierReglageCalculAlgo" ${datas} data-param-cle="${esc(p.cle)}">
                         </div>`).join('');
-        const pastilles = F.blocs(critere).map(b => b.genre === 'operation'
-            ? `<span class="calc-op">${esc(b.texte)}</span>`
-            : `<span class="repere-enonce repere-enonce--${b.genre === 'donnee' ? 'remplie' : 'posee'}">${esc(b.texte)}</span>`).join(' ');
-        const off = F.casAOffrir(critere);
-        const rangees = off.rangees.map(r => `
-                            <div class="calc-cas-rangee">
-                                <span>Si <span class="repere-enonce repere-enonce--remplie">${esc(r.nom)}</span> vaut 0</span>
-                                <select class="controle-form" id="${ident('cas-' + r.donnee)}" aria-label="Si ${esc(r.nom)} vaut 0"
-                                        data-on-change="choisirCasZeroAlgo" ${datas} data-donnee="${esc(r.donnee)}">
-                                    ${r.choix.map(o => `<option value="${esc(o.valeur)}"${o.valeur === r.actuel ? ' selected' : ''}>${esc(o.libelle)}</option>`).join('')}
-                                </select>
-                            </div>`).join('');
-        return `
+    const gestes = m.compose ? _gestesCalculCompose(r, m.compose, true) : `
+                        <div class="calc-actions"><button type="button" class="table-cas-lien" data-composeur-geste="retoucher" data-valeur="${esc(m.id)}">Retoucher ce calcul</button></div>`;
+    return `
                     <div class="calc-carte" data-actif>${tete}${reglages}
                         <p class="calc-legende">Le calcul, en blocs :</p>
-                        <div class="calc-formule" aria-label="Le calcul, en blocs"><span class="calc-op">Note =</span> ${pastilles}</div>
-                        <p class="calc-copie" data-calcul-copie><span class="calc-legende">Sur la copie fictive : </span><span data-calcul-copie-texte></span></p>${rangees ? `
+                        <div class="calc-formule" aria-label="Le calcul, en blocs"><span class="calc-op">Note =</span> ${_pastillesDuCalcul(r)}</div>
+                        <p class="calc-copie" data-calcul-copie><span class="calc-legende">Sur la copie fictive : </span><span data-calcul-copie-texte></span></p>${_casZeroDuCalcul(r)}${gestes}
+                    </div>`;
+}
+
+function _pastillesDuCalcul(r) {
+    return r.F.blocs(r.critere).map(b => b.genre === 'operation'
+        ? `<span class="calc-op">${r.esc(b.texte)}</span>`
+        : `<span class="repere-enonce repere-enonce--${b.genre === 'donnee' ? 'remplie' : 'posee'}">${r.esc(b.texte)}</span>`).join(' ');
+}
+
+function _casZeroDuCalcul(r) {
+    const { esc, datas, ident } = r;
+    const off = r.F.casAOffrir(r.critere);
+    const rangees = off.rangees.map(x => `
+                            <div class="calc-cas-rangee">
+                                <span>Si <span class="repere-enonce repere-enonce--remplie">${esc(x.nom)}</span> vaut 0</span>
+                                <select class="controle-form" id="${ident('cas-' + x.donnee)}" aria-label="Si ${esc(x.nom)} vaut 0"
+                                        data-on-change="choisirCasZeroAlgo" ${datas} data-donnee="${esc(x.donnee)}">
+                                    ${x.choix.map(o => `<option value="${esc(o.valeur)}"${o.valeur === x.actuel ? ' selected' : ''}>${esc(o.libelle)}</option>`).join('')}
+                                </select>
+                            </div>`).join('');
+    return rangees ? `
                         <div class="calc-cas">
                             <p class="calc-cas-titre">Quand une donnée de la copie vaut 0</p>${rangees}${off.divise ? `
                             <p class="calc-legende">Une division par une donnée qui vaut 0 n’a pas de résultat : tu dis ce que vaut alors la note.</p>` : ''}
-                        </div>` : ''}
-                    </div>`;
-    };
+                        </div>` : '';
+}
 
+/** « Modifier ce calcul » (la carte choisie) et « Retirer ce calcul », avec sa confirmation en place. */
+function _gestesCalculCompose(r, c, actif) {
+    const { esc, datas, ident } = r;
+    if (r.K && r.K.retraitDe(r.k) === c.id) {
+        const q = r.F.MESSAGES_COMPOSE.confirmerRetrait(c.nom);
+        return `
+                        <div class="table-cas-confirmer" role="group" aria-label="${esc(q)}">
+                            <p>${esc(q)}</p>
+                            <button type="button" class="btn btn-danger btn-tres-compact" id="${ident('retirer-' + c.id)}" data-action="confirmerRetraitCalculAlgo" ${datas} data-calcul="${esc(c.id)}">Retirer</button>
+                            <button type="button" class="btn btn-secondaire btn-tres-compact" data-action="annulerRetraitCalculAlgo" ${datas}>Annuler</button>
+                        </div>`;
+    }
     return `
-            <div class="calc-note">
-                <h4 class="calc-titre">Le calcul de la note</h4>
-                <div class="calc-choix" role="radiogroup" aria-label="Le calcul de la note">${F.listerModeles().map(carte).join('')}
-                </div>
-                <p class="calc-legende">La note reste entre 0 et la pondération du critère.</p>
-                <p class="calc-legende">Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.</p>${f.herite && critere.modeleFormule ? `
-                <p class="calc-legende calc-inconnu">Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.</p>` : ''}
-            </div>`;
+                        <div class="calc-actions">${actif ? `<button type="button" class="table-cas-lien" data-composeur-geste="modifier" data-valeur="${esc(c.id)}">Modifier ce calcul</button>` : ''}<button type="button" class="table-cas-lien" id="${ident('retirer-lien-' + c.id)}" data-action="retirerCalculAlgo" ${datas} data-calcul="${esc(c.id)}">Retirer ce calcul</button></div>`;
 }
 
 /**
@@ -7003,12 +7047,88 @@ async function supprimerPalierProjectionGrille(grilleId, index, palierIndex) {
  */
 async function choisirCalculNoteAlgo(el) {
     const x = _gesteTableCas(el);
+    const F = window.formulesAlgo;
     const ecrit = await _modifierCritereCible(x.cible, x.index, (c) => {
-        if (!c || c.type !== 'algorithmique' || !window.formulesAlgo.obtenirModele(el.value)) return false;
-        if (window.formulesAlgo.normaliser(c).modeleId === el.value && c.modeleFormule === el.value) return false;
-        window.formulesAlgo.appliquerAuCritere(c, el.value, null);
+        if (!c || c.type !== 'algorithmique') return false;
+        // Étape 4b : un calcul composé, s'il existe ; `paramsFormule` n'est pas touché.
+        if (el.value.indexOf(F.PREFIXE_COMPOSE) === 0) return c.modeleFormule !== el.value && F.choisirCalculCompose(c, el.value) ? undefined : false;
+        if (!F.obtenirModele(el.value)) return false;
+        if (F.normaliser(c).modeleId === el.value && c.modeleFormule === el.value) return false;
+        // Depuis un calcul composé, le réglage écrit revient (`paramsFormule` est resté intact) ; sinon, les défauts.
+        const depuisCompose = String(c.modeleFormule || '').indexOf(F.PREFIXE_COMPOSE) === 0;
+        F.appliquerAuCritere(c, el.value, depuisCompose ? c.paramsFormule : null);
     });
     if (ecrit) await _redessinerEnGardantLeFocus(x.cible);
+}
+
+/*
+ * Étape 4b (27 oct. 2026) — GARDER ET RETIRER UN CALCUL COMPOSÉ. Le brouillon vit dans `composeurCalcul` (rien n'est
+ * écrit avant « Garder ») ; les règles et les messages sont ceux du registre (`formulesAlgo.garderCalcul`,
+ * `retirerCalcul`). Le calcul qui donne la note ne se retire pas ; un autre se retire après confirmation, en place.
+ */
+async function garderCalculAlgo(el) {
+    const x = _gesteTableCas(el);
+    const K = window.composeurCalcul, F = window.formulesAlgo;
+    const lu = _critereLuCible(x.cible, x.index);
+    if (!lu || !K) return;
+    const k = K.cle(x.cible, lu, x.index);
+    const brouillon = K.brouillonDe(k);
+    const refus = F.refusDuBrouillon(lu, brouillon);
+    if (refus) { K.refuser(k, refus); return; }
+    let message = '';
+    const ecrit = await _modifierCritereCible(x.cible, x.index, (c) => {
+        if (!c || c.type !== 'algorithmique') return false;
+        const res = F.garderCalcul(c, brouillon);
+        message = res.message;
+        return res.ok ? undefined : false;
+    });
+    if (!ecrit) { K.refuser(k, message); return; }
+    K.fermer(k);
+    K.dire(k, message);
+    await _redessinerEnGardantLeFocus(x.cible);
+}
+
+async function retirerCalculAlgo(el) {
+    const x = _gesteTableCas(el);
+    const K = window.composeurCalcul;
+    const c = _critereLuCible(x.cible, x.index);
+    if (!c || !K) return;
+    const k = K.cle(x.cible, c, x.index);
+    if (c.modeleFormule === window.formulesAlgo.PREFIXE_COMPOSE + el.dataset.calcul) {
+        K.dire(k, window.formulesAlgo.MESSAGES_COMPOSE.donneLaNote);
+    } else {
+        K.poserRetrait(k, el.dataset.calcul);
+    }
+    await _redessinerEnGardantLeFocus(x.cible);
+    const confirmer = document.getElementById(_identTableCas(x.cible, x.index, 'calcul-retirer-' + el.dataset.calcul));
+    if (confirmer) confirmer.focus({ preventScroll: true });
+}
+
+async function confirmerRetraitCalculAlgo(el) {
+    const x = _gesteTableCas(el);
+    const K = window.composeurCalcul;
+    const lu = _critereLuCible(x.cible, x.index);
+    if (!lu || !K) return;
+    const k = K.cle(x.cible, lu, x.index);
+    K.poserRetrait(k, null);
+    let message = '';
+    await _modifierCritereCible(x.cible, x.index, (c) => {
+        if (!c || c.type !== 'algorithmique') return false;
+        const res = window.formulesAlgo.retirerCalcul(c, el.dataset.calcul);
+        message = res.message;
+        return res.ok ? undefined : false;
+    });
+    if (message) K.dire(k, message);
+    await _redessinerCible(x.cible);
+}
+
+async function annulerRetraitCalculAlgo(el) {
+    const x = _gesteTableCas(el);
+    const K = window.composeurCalcul;
+    const c = _critereLuCible(x.cible, x.index);
+    if (!c || !K) return;
+    K.poserRetrait(K.cle(x.cible, c, x.index), null);
+    await _redessinerCible(x.cible);
 }
 
 async function modifierReglageCalculAlgo(el) {
@@ -7016,6 +7136,7 @@ async function modifierReglageCalculAlgo(el) {
     const ecrit = await _modifierCritereCible(x.cible, x.index, (c) => {
         if (!c || c.type !== 'algorithmique') return false;
         const f = window.formulesAlgo.normaliser(c);
+        if (f.modele.compose || f.introuvable) return false;   // étape 4b : un calcul composé n'a pas de réglage
         const params = Object.assign({}, f.params);
         params[el.dataset.paramCle] = el.value;
         window.formulesAlgo.appliquerAuCritere(c, f.modeleId, params);
@@ -7196,6 +7317,10 @@ window.supprimerPalierProjectionGrille = supprimerPalierProjectionGrille;
 window.choisirCalculNoteAlgo = choisirCalculNoteAlgo;           // étape 4a : les trois gestes de « Note calculée »
 window.modifierReglageCalculAlgo = modifierReglageCalculAlgo;
 window.choisirCasZeroAlgo = choisirCasZeroAlgo;
+window.garderCalculAlgo = garderCalculAlgo;                     // étape 4b : garder et retirer un calcul composé
+window.retirerCalculAlgo = retirerCalculAlgo;
+window.confirmerRetraitCalculAlgo = confirmerRetraitCalculAlgo;
+window.annulerRetraitCalculAlgo = annulerRetraitCalculAlgo;
 window.modifierTypeCritereTempHandler = modifierTypeCritereTempHandler;
 window.modifierCritereGrilleHandler = modifierCritereGrilleHandler;
 window.modifierTypeCritereGrilleHandler = modifierTypeCritereGrilleHandler;
