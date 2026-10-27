@@ -283,7 +283,8 @@ describe('texte troué 2 · F — les témoins', () => {
     it('F.a un seul site appelle `projectionAlgo.calculer`, et il passe erreurs et mots — le calcul n\'a pas bougé', () => {
         const src = lire('js/evaluation-calcul.js');
         expect((src.match(/projectionAlgo\.calculer\(/g) || []).length).toBe(1);
-        expect(src).toMatch(/_critereDeGrille\(critereId\), \{ erreurs: erreurs, mots: mots \}/);
+        // ↻ Étape 4c (27 oct. 2026) : les jetons des calculs pour les phrases s'y ajoutent (`calculs`) ; erreurs et mots, eux, n'ont pas bougé.
+        expect(src).toMatch(/_critereDeGrille\(critereId\), \{ erreurs: erreurs, mots: mots, calculs: calculs \}/);
     });
 
     it('F.b le registre ne lit toujours ni DOM, ni db, ni le facteur de normalisation', () => {

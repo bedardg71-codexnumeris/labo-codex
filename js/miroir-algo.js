@@ -311,8 +311,10 @@ function essayer(critere, copie) {
     var res = _calculer(critere, ponderation, copie.erreursFormule, copie.mots, copie.erreurs);
     var mots = copie.mots || 0;
     var mention = E ? E.mentionPonderee(copie.erreurs, copie.erreursFormule) : '';
-    var decompte = E ? E.enonce(critere, 'decompte', { erreurs: copie.erreurs, mots: mots, points: mention }) : '';
-    var proj = P ? P.calculer(critere, { erreurs: copie.erreurs, mots: mots }) : null;
+    // Étape 4c : les calculs pour les phrases, comme à l'évaluation (`phraseDecompteAlgo`) — le décompte et les paliers.
+    var calculs = jetonsDesCalculs(critere, copie);
+    var decompte = E ? E.enonce(critere, 'decompte', Object.assign({ erreurs: copie.erreurs, mots: mots, points: mention }, calculs)) : '';
+    var proj = P ? P.calculer(critere, { erreurs: copie.erreurs, mots: mots, calculs: calculs }) : null;
     var projection = (proj && proj.applicable) ? (proj.texte || '') : '';
     var points = res.applicable ? res.pctBorne * ponderation / 100 : null;
     // Lot 3b (26 oct. 2026) : les tables de l'enseignant·e, après la projection — le calcul de l'évaluation
@@ -334,6 +336,13 @@ function essayer(critere, copie) {
     };
 }
 
+/** Étape 4c — les jetons des calculs pour les phrases d'une copie fictive (`formulesAlgo.jetonsDesCalculs`) ; `{}` sans calcul. */
+function jetonsDesCalculs(critere, copie) {
+    var F = _reg('formulesAlgo');
+    if (!F || typeof F.jetonsDesCalculs !== 'function') return {};
+    return F.jetonsDesCalculs(critere, F.donneesDeLaPhrase(critere, copie.erreurs, copie.erreursFormule, copie.mots || 0));
+}
+
 /** Les copies et leurs résultats, d'un geste. */
 function essais(critere) {
     return copies(critere).map(function(c) { return essayer(critere, c); });
@@ -345,7 +354,8 @@ var api = {
     etendue: etendue,
     copies: copies,
     essayer: essayer,
-    essais: essais
+    essais: essais,
+    jetonsDesCalculs: jetonsDesCalculs
 };
 
 if (typeof window !== 'undefined') window.miroirAlgo = api;

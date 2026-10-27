@@ -30,6 +30,13 @@
      Une zone n'offre que ce qu'un appel remplit (règle du 3 sept.) : `reperesDeCle` pour un énoncé,
      `listerReperes` de la projection pour un palier. Un bloc qu'elle n'offre pas est inactif, et le dit.
 
+   LES CALCULS POUR LES PHRASES (étape 4c, 27 oct. 2026 ; `offreZone` de l'ébauche)
+     Un bloc par calcul pour les phrases du critère (`formulesAlgo.calculsPourLesPhrases`), dans « Ce qui se
+     remplit quand tu évalues la copie », sous SON nom (un texte de l'enseignant·e, tel qu'il l'a écrit), jeton
+     `{calcN}`. Il s'offre dans le décompte, les deux zones de chaque palier et le texte de chaque cas d'une table ;
+     jamais dans les phrases du bilan (défi prioritaire, quand tout est maîtrisé, aucune annotation). Sans critère
+     (un appel qui n'en a pas), aucun bloc de calcul : un bloc ne s'offre que dans les zones de SON critère.
+
    Du texte brut partout : l'appelant échappe. Lecture seule : rien n'est écrit dans le critère.
    Dépendances (lues à l'appel, sur `window` ou par `require`) : enoncesAlgo, projectionAlgo.
    =============================== */
@@ -47,6 +54,7 @@ function _reg(nom, fichier) {
 function _E() { return _reg('enoncesAlgo', './evaluation-enonces.js'); }
 function _P() { return _reg('projectionAlgo', './evaluation-projection.js'); }
 function _T() { return _reg('tablesCasAlgo', './tables-cas-algo.js'); }
+function _F() { return _reg('formulesAlgo', './evaluation-formules.js'); }
 
 // Les textes de la palette — provisoires, réunis avec leur site dans
 // `plans de travail/TEXTES-2026-10-22-palette-critere-algorithmique.md`. Cowork les tranche.
@@ -67,6 +75,7 @@ var TEXTES = {
     vide: 'vide',
     dans: function(zone) { return 'Zone choisie : ' + zone; },
     zonePalier: function(champ, nom) { return champ + ', palier ' + nom; },
+    aideCalcul: 'Ton calcul : sa valeur sur la copie évaluée.',   // étape 4c, les mots de l'ébauche
     champsPalier: { texte: 'Verdict', texteAide: 'Recommandation' }
 };
 
@@ -128,6 +137,7 @@ function _majuscule(t) {
 
 /** Un repère d'un registre, nommé pour CE critère. Garde le jeton, la famille et l'espace de tête. */
 function _nommer(r, noms) {
+    if (r.calcul) return { jeton: r.jeton, famille: 'remplie', espaceDeTete: false, nom: r.libelle, libelle: r.libelle, aide: r.aide, precision: '' };
     var nomme = NOMMES[r.jeton] ? NOMMES[r.jeton](noms) : null;
     return {
         jeton: r.jeton,
@@ -145,6 +155,15 @@ function _noms(critere) {
     var E = _E();
     return E ? E.noms(critere)
         : { erreurs: { singulier: 'erreur', pluriel: 'erreurs' }, mots: { singulier: 'mot', pluriel: 'mots' } };
+}
+
+/** Étape 4c — les repères des calculs pour les phrases du critère : `{calcN}`, son nom tel qu'écrit ; `[]` sans critère. */
+function reperesDesCalculs(critere) {
+    var F = _F();
+    if (!critere || !F || typeof F.calculsPourLesPhrases !== 'function') return [];
+    return F.calculsPourLesPhrases(critere).map(function(c) {
+        return { jeton: '{' + c.id + '}', famille: 'remplie', libelle: c.nom, aide: TEXTES.aideCalcul, espaceDeTete: false, calcul: true };
+    });
 }
 
 /** Le critère a-t-il des paliers (des zones de palier) ? Seulement s'il projette. */
@@ -169,7 +188,8 @@ function _aDesTables(critere) {
 function blocs(critere) {
     var E = _E(), P = _P();
     var noms = _noms(critere);
-    var sources = (E ? E.listerReperes() : []).concat((aDesPaliers(critere) || _aDesTables(critere)) && P ? P.listerReperes() : []);
+    var sources = (E ? E.listerReperes() : []).concat((aDesPaliers(critere) || _aDesTables(critere)) && P ? P.listerReperes() : [])
+        .concat(reperesDesCalculs(critere));   // étape 4c : à la fin de « Ce qui se remplit… »
     var vus = {};
     var tous = [];
     sources.forEach(function(r) {
@@ -205,6 +225,9 @@ function reperesDeZone(critere, zone) {
     if (d.palierIndex !== undefined) liste = P ? P.listerReperes() : [];
     else if (d.tableCas !== undefined) liste = reperesDesTables();
     else if (d.enonceCle !== undefined) liste = E ? E.reperesDeCle(d.enonceCle) : [];
+    // Étape 4c : les calculs pour les phrases, là où la phrase de la copie se compose — pas dans le bilan.
+    var avecCalculs = d.palierIndex !== undefined || d.tableCas !== undefined || d.enonceCle === 'decompte';
+    if (avecCalculs) liste = liste.concat(reperesDesCalculs(critere));
     var noms = _noms(critere);
     return liste.map(function(r) { return _nommer(r, noms); });
 }
@@ -247,6 +270,7 @@ var api = {
     blocs: blocs,
     reperesDeZone: reperesDeZone,
     reperesDesTables: reperesDesTables,
+    reperesDesCalculs: reperesDesCalculs,
     nomDeZone: nomDeZone
 };
 

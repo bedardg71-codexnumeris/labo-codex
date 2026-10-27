@@ -800,7 +800,29 @@ function rendre(texte, valeurs) {
         sortie = sortie.replace(motif, vide ? '' : String(brut));
     });
 
-    return sortie.trim();
+    return remplirCalculs(sortie, v).trim();
+}
+
+// Étape 4c (27 oct. 2026) — LE JETON D'UN CALCUL POUR LES PHRASES : `{calcN}` (l'identifiant du calcul, `formulesAlgo`).
+var JETON_CALCUL = /([ \t]?)\{(calc[1-9][0-9]{0,3})\}/g;
+
+/**
+ * Remplit les jetons des calculs d'un texte : `{calc3}` reçoit `valeurs.calc3`. Un jeton que l'appel ne remplit pas
+ * (calcul sans valeur, retiré, introuvable après un import) part AVEC L'ESPACE QUI LE PRÉCÈDE, comme tout jeton vide
+ * de `rendre` : jamais « {calc3} » sur le PDF d'un·e étudiant·e. Un texte sans tel jeton est rendu à l'octet. Ne trime pas.
+ */
+function remplirCalculs(texte, valeurs) {
+    if (typeof texte !== 'string' || texte.indexOf('{calc') < 0) return (typeof texte === 'string') ? texte : '';
+    var v = (valeurs && typeof valeurs === 'object') ? valeurs : {};
+    return texte.replace(JETON_CALCUL, function(tout, espace, id) {
+        var brut = Object.prototype.hasOwnProperty.call(v, id) ? v[id] : undefined;
+        return (brut === undefined || brut === null || brut === '') ? '' : espace + String(brut);
+    });
+}
+
+/** Le texte porte-t-il un jeton de calcul (`{calcN}`) ? */
+function porteUnCalcul(texte) {
+    return typeof texte === 'string' && /\{calc[1-9][0-9]{0,3}\}/.test(texte);
 }
 
 /**
@@ -960,6 +982,8 @@ var api = {
     obtenirModele: obtenirModele,
     normaliser: normaliser,
     rendre: rendre,
+    remplirCalculs: remplirCalculs,   // étape 4c
+    porteUnCalcul: porteUnCalcul,
     enonce: enonce,
     mentionPonderee: mentionPonderee,
     libelleCritere: libelleCritere,

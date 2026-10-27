@@ -5,7 +5,8 @@
    `plans de travail/EBAUCHE-2026-10-26-calculs.html`, qui fait foi pour ce que l'enseignant·e voit)
 
    Vocation
-     Sous les cartes de l'étape « Note calculée », le composeur : un nom, la zone « Note = » et ses
+     Sous les cartes de l'étape « Note calculée », le composeur : un nom, « Ce calcul sert » (étape 4c : à la
+     note du critère, ou à tes phrases et à tes tables), la zone « Note = » (ou « [Nom du calcul] = ») et ses
      pastilles, les données, un nombre, les opérations ; la ligne « Sur la copie fictive : … » et
      « Quand une donnée de la copie vaut 0 » ; « Garder ce calcul » et « Annuler ».
 
@@ -34,6 +35,11 @@ var TEXTES = {
     nom: 'Nom du calcul',
     exemple: function(N) { return 'ex. : taux pour 100 ' + N.mots.pluriel; },
     note: 'Note =',
+    // Étape 4c — « Ce calcul sert » (les mots de l'ébauche, `composeur`).
+    sert: 'Ce calcul sert',
+    serts: { note: 'à la note du critère', phrases: 'à tes phrases et à tes tables' },
+    tonCalcul: 'Ton calcul',
+    casDivisePhrases: 'Une division par une donnée qui vaut 0 n’a pas de résultat : tu dis ce que vaut alors ton calcul.',
     vide: 'Vide : touche une donnée, un nombre ou une opération.',
     donnees: 'Données',
     nombre: 'Nombre',
@@ -72,7 +78,7 @@ function _esc(t) {
 
 /** Le brouillon du critère (vide au départ). */
 function brouillonDe(k) {
-    if (!brouillons[k]) brouillons[k] = { id: null, nom: '', jetons: [], cas: {} };
+    if (!brouillons[k]) brouillons[k] = { id: null, nom: '', sert: 'note', jetons: [], cas: {} };
     return brouillons[k];
 }
 
@@ -148,7 +154,23 @@ function _cas(critere, b) {
             + '</select></div>';
     }).join('');
     return '<div class="calc-cas"><p class="calc-cas-titre">' + _esc(TEXTES.casTitre) + '</p>' + rangees
-        + (off.divise ? '<p class="calc-legende">' + _esc(TEXTES.casDivise) + '</p>' : '') + '</div>';
+        + (off.divise ? '<p class="calc-legende">' + _esc(off.phrases ? TEXTES.casDivisePhrases : TEXTES.casDivise) + '</p>' : '') + '</div>';
+}
+
+/** Étape 4c — « Ce calcul sert » : deux boutons radio ; changer redessine le composeur seul, le brouillon reste. */
+function _sert(b, k) {
+    var nom = 'compSert-' + k;
+    return '<fieldset class="calc-sert"><legend>' + _esc(TEXTES.sert) + '</legend>'
+        + ['note', 'phrases'].map(function(v) {
+            return '<label class="calc-sert-choix"><input type="radio" name="' + _esc(nom) + '" value="' + v + '" data-composeur-sert="' + v + '"'
+                + ((b.sert || 'note') === v ? ' checked' : '') + '> ' + _esc(TEXTES.serts[v]) + '</label>';
+        }).join('') + '</fieldset>';
+}
+
+/** Ce que la zone dit devant les blocs : « Note = », ou pour les phrases « [Nom du calcul] = » (« Ton calcul = » sans nom). */
+function _teteDeZone(b) {
+    if (b.sert !== 'phrases') return TEXTES.note;
+    return (String(b.nom || '').trim() || TEXTES.tonCalcul) + ' =';
 }
 
 /** Le corps du composeur (redessiné seul à chaque geste). */
@@ -160,7 +182,8 @@ function _corps(critere, ctx, k) {
     return '<p class="calc-legende">' + _esc(TEXTES.intro) + '</p>'
         + '<div class="groupe-form calc-param"><label for="' + _esc('compNom-' + k) + '">' + _esc(TEXTES.nom) + '</label>'
         + '<input type="text" class="controle-form" id="' + _esc('compNom-' + k) + '" maxlength="80" autocomplete="off" value="' + _esc(b.nom) + '" placeholder="' + _esc(TEXTES.exemple(_E().noms(critere))) + '" data-composeur-champ="nom"></div>'
-        + '<div class="calc-formule calc-zone" aria-live="polite"><span class="calc-op">' + _esc(TEXTES.note) + '</span> ' + zone + '</div>'
+        + _sert(b, k)
+        + '<div class="calc-formule calc-zone" aria-live="polite"><span class="calc-op" data-composeur-tete>' + _esc(_teteDeZone(b)) + '</span> ' + zone + '</div>'
         + _boutons(critere)
         + (b.jetons.length ? '<p class="calc-copie"><span class="calc-legende">' + _esc(TEXTES.copie) + '</span><span data-composeur-copie></span></p>' + _cas(critere, b) : '')
         + '<div class="calc-boutons calc-composeur-fin">'
@@ -273,7 +296,10 @@ function _brancher() {
         if (!x || !x.dataset || x.dataset.composeurChamp !== 'nom') return;
         var det = x.closest('details[data-composeur]');
         if (!det) return;
-        brouillonDe(det.dataset.composeur).nom = x.value;
+        var b = brouillonDe(det.dataset.composeur);
+        b.nom = x.value;
+        var tete = det.querySelector('[data-composeur-tete]');
+        if (tete) tete.textContent = _teteDeZone(b);   // étape 4c : « [Nom du calcul] = », sans redessin
         _majRefus(det);
         remplirLigne(_atelierDe(det));
     });
@@ -287,6 +313,16 @@ function _brancher() {
     });
     document.addEventListener('change', function(e) {
         var x = e.target;
+        if (x && x.dataset && x.dataset.composeurSert) {
+            // Étape 4c : « Ce calcul sert » change la zone et les choix « vaut 0 » ; le brouillon reste (piège 3).
+            var dz = x.closest('details[data-composeur]');
+            if (!dz) return;
+            var bz = brouillonDe(dz.dataset.composeur);
+            bz.sert = x.dataset.composeurSert === 'phrases' ? 'phrases' : 'note';
+            if (bz.sert === 'phrases') bz.cas = _sansNoteEntiere(bz.cas);
+            _redessiner(dz, '[data-composeur-sert="' + bz.sert + '"]');
+            return;
+        }
         if (!x || !x.dataset || !x.dataset.composeurCas) return;
         var det = x.closest('details[data-composeur]');
         if (!det) return;
@@ -300,6 +336,13 @@ function _brancher() {
         var det = e.target;
         if (det && det.dataset && det.dataset.composeur) ouverts[det.dataset.composeur] = det.open;
     }, true);
+}
+
+/** Un calcul pour les phrases n'a pas « La note entière » : le choix part, le départ revient. */
+function _sansNoteEntiere(cas) {
+    var r = {};
+    Object.keys(cas || {}).forEach(function(d) { if (cas[d] !== 'entiere') r[d] = cas[d]; });
+    return r;
 }
 
 /** Le refus de « Garder » suit la frappe du nom, sans redessin (le focus reste dans le champ). */

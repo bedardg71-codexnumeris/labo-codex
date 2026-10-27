@@ -67,7 +67,8 @@ describe('4b · A — les calculs composés se lisent : assainir et refuser', ()
         expect(F.assainirCalculs([calcul({ id: 'calc0' })])).toBeUndefined();
         expect(F.assainirCalculs([calcul({ id: 'x1' })])).toBeUndefined();
         expect(F.assainirCalculs([calcul({ nom: '   ' })])).toBeUndefined();
-        expect(F.assainirCalculs([calcul({ sert: 'phrases' })])).toBeUndefined();
+        // ↻ Étape 4c (27 oct.) : `sert: 'phrases'` se lit désormais (calculs-4c-phrases.test.js) ; un autre `sert`, jamais.
+        expect(F.assainirCalculs([calcul({ sert: 'autre' })])).toBeUndefined();
         expect(F.assainirCalculs([calcul({ nom: '  Mon taux  ' })])[0].nom).toBe('Mon taux');
         expect(F.assainirCalculs([calcul({ nom: 'x'.repeat(200) })])[0].nom).toHaveLength(80);
         const long = [d('ponderation')];
@@ -174,7 +175,7 @@ describe('4b · C — l’équivalence de « Retoucher ce calcul » (§ 3.7)', (
         const c = critere({ paramsFormule: { pointsParErreur: 2 }, casZero: { penalite_par_erreur: { comptePondere: 'entiere' } } });
         const avant = clone(c);
         expect(F.brouillonRetouche(c, 'penalite_par_erreur')).toEqual({
-            id: null, nom: 'Mon calcul, d’après « Pénalité fixe »',
+            id: null, nom: 'Mon calcul, d’après « Pénalité fixe »', sert: 'note',   // ↻ 4c : le brouillon dit ce qu'il sert
             jetons: [d('ponderation'), o('−'), d('comptePondere'), o('×'), n(2)], cas: { comptePondere: 'entiere' }
         });
         expect(c).toEqual(avant);

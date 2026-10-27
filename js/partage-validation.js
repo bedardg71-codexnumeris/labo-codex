@@ -514,7 +514,7 @@
                     // registre (`tablesCasAlgo.refusStructure`), celle que la lecture applique.
                     item.criteres.forEach(function (c, j) {
                         if (!c || !('tablesCas' in c)) return;
-                        var raison = window.tablesCasAlgo ? window.tablesCasAlgo.refusStructure(c.tablesCas) : 'module des tables de cas absent';
+                        var raison = window.tablesCasAlgo ? window.tablesCasAlgo.refusStructure(c.tablesCas, c) : 'module des tables de cas absent';   // étape 4c : avec le critère, dont une table peut suivre un calcul
                         if (raison) {
                             erreurs.push(erreur(3, 'ENTITE_INVALIDE', 'tables de cas : ' + raison,
                                 { type: type, id: item.id || null, champ: clePluriel + '[' + i + '].criteres[' + j + '].tablesCas' }));

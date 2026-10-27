@@ -578,9 +578,11 @@ function nombreImporte(valeur) {
  * (`tablesCasAlgo.assainir`) : une table illisible est écartée, ses textes passent par `assainirChaine`.
  * Rend `{ tablesCas }`, ou `{}` quand aucune table n'est lisible : un critère sans table n'a pas le champ.
  */
-function _assainirTablesCas(valeur) {
+function _assainirTablesCas(valeur, critere) {
     const T = (typeof window !== 'undefined') ? window.tablesCasAlgo : null;
-    const tables = T ? T.assainir(valeur, assainirChaine) : [];
+    // Étape 4c : `critere`, ce qui est déjà relu du critère — ses calculs (le schéma les nomme AVANT les tables) : une table
+    // qui suit un calcul introuvable est écartée avec lui, jamais devinée.
+    const tables = T ? T.assainir(valeur, assainirChaine, critere) : [];
     return tables.length ? { tablesCas: tables } : {};
 }
 
@@ -639,7 +641,7 @@ function assainirObjet(obj, schema) {
         const valeur = obj[cle];
         // Les types relus par leur registre (lot 3b, étape 4a) : la donnée lisible entre, l'illisible est écartée.
         if (ASSAINISSEURS_DEDIES[spec.type]) {
-            Object.assign(resultat, ASSAINISSEURS_DEDIES[spec.type](valeur));
+            Object.assign(resultat, ASSAINISSEURS_DEDIES[spec.type](valeur, resultat));
             continue;
         }
 
@@ -971,6 +973,7 @@ const SCHEMAS_IMPORT = {
                 casZero: { type: 'casZero' },
                 // Étape 4b (27 oct. 2026) — LES CALCULS COMPOSÉS voyagent avec le critère (type dédié, relu par le
                 // registre) ; `calculsProchain`, le numéro du prochain : un identifiant retiré ne se réemploie pas.
+                // ⚠ AVANT `tablesCas` (étape 4c) : une table peut suivre un calcul, relue avec les calculs déjà assainis.
                 calculs: { type: 'calculs' },
                 calculsProchain: { type: 'number' },
 
