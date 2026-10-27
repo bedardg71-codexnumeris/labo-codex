@@ -7,6 +7,12 @@
 
 ---
 
+## 27 OCT. 2026, 3 H (Claude Code) : **`main` LOCAL = #1172 (`970a3b91`, EN ATTENTE DE RELECTURE) + FUSION DE `tri-git` (`29016a13`) ; RIEN POUSSÉ ; AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**Le tri de Git** (#1114 ; consigne `CONSIGNE-LOT-2026-10-26-tri-de-git.md`, verdict de Cowork : accepté sans retouche) : l'étape apt de `tests.yml` bornée (3 essais de 3 min, miroir d'Azure écarté après un raté, plafond 11 min ; non éprouvée sur un runner — le prochain push le dira) ; baseline Linux 32 → 33 ; `scripts/verdict-en-morceaux.mjs` (dix morceaux, fusion, jugement, jeton ; `--reporter`), nommé au § 4.5 du skill `fin-de-session`, la procédure à la main gardée en repli. Deux trouvailles rattachées à #1114 (BACKLOG). **Branches** : supprimées `feat/sous-criteres-condensation`, `lot-accueil-textes-cartes`, `fix/anonymisation-travail-affiche`, `fix/tampons-doigt-1123`, `ci/verdict-morceaux-2` (et sa distante), avec leurs copies ; `tri-git` retirée après fusion. Dependabot : les dix PR restent ouvertes.
+
+**Pas de push** : `main` porte #1172, que Cowork n'a pas relu. **Ce soir** : la vérification complète se joue pour la première fois par le script (s'il refuse ou casse : à la main, et le refus au rapport) ; le push qui suivra sera le premier run GitHub à traverser l'étape apt bornée.
+
 ## 26 OCT. 2026, 19 H 03 (Claude Code) : **POUSSÉ, EN LIGNE : 1.220.0 = `1473b15a` + `10b7093d` (tests seulement) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **Le rouge de la 1.220** (`plans de travail/RAPPORT-2026-10-26-verdict-rouge-1220.md`) : `lot-C-echelles-chevrons-corbeille.spec.js` lisait `.palier-rangee`, retirée par 3a (`cddfd207`). Recalée (consigne `CONSIGNE-LOT-2026-10-26-verdict-rouge-1220-retouche.md`) : étape « Cas d'interprétation » ouverte, `[data-palier-rangee]`, 3 colonnes à 1 200 px, 1 à 700 px ; break-test sur `@container table-cas (max-width: 560px)` (rouge à 700 px, `shasum` identique après). Les identifiants retirés par 3a et 3b cherchés dans `tests/` : aucune autre spec périmée.
