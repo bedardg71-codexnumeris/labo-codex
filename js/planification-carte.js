@@ -1913,6 +1913,7 @@ var GUIDE_PAGES = [
                 'Gauthier, C., Bissonnette, S. et Richard, M. (avec la collaboration de M. Castonguay) (2013). <em>Enseignement explicite et réussite des élèves\u00a0: la gestion des apprentissages</em>. ERPI.</p>'
     },
     {
+        id: 'competence',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Commence par le pourquoi',
         contenu:
             '<p class="planif-guide-pourquoi">Chaque cours vise des compétences — c\u2019est ce que l\u2019étudiant sera capable de faire à la fin. Tout le reste de ta carte en découle.</p>' +
@@ -1925,6 +1926,7 @@ var GUIDE_PAGES = [
             '<p>Ces niveaux sont les processus cognitifs de la taxonomie révisée d\u2019Anderson et Krathwohl, du plus simple au plus exigeant\u00a0: mémoriser, comprendre, appliquer, analyser, évaluer, créer. Le verbe que tu choisis ici, tes activités devront le faire exercer et tes évaluations devront l\u2019exiger.</p>'
     },
     {
+        id: 'idees-maitresses',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Ce que l\u2019étudiant doit retenir',
         contenu:
             '<p class="planif-guide-pourquoi">Une idée maîtresse, c\u2019est l\u2019essentiel — ce qui restera quand l\u2019étudiant aura oublié les détails. Chaque compétence se décline en une ou plusieurs idées maîtresses.</p>' +
@@ -1937,6 +1939,7 @@ var GUIDE_PAGES = [
     {
         // #966 — remplacée par le texte validé (27 sept. 2026) : la séquence
         // devient facultative ; la leçon porte sa semaine et sa séance.
+        id: 'lecons',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Organise dans le temps',
         contenu:
             '<p class="planif-guide-pourquoi">Tes leçons structurent ton cours dans le temps\u00a0: chacune porte sa semaine et sa séance.</p>' +
@@ -1952,6 +1955,7 @@ var GUIDE_PAGES = [
         // ne trouvait pas (METHODE-ALIGNEMENT §4.1 bis, 6 août). La cause
         // racine y était diagnostiquée comme un défaut d'affordance ; le badge
         // grisé l'a réglée dans l'interface, le manuel devait suivre.
+        id: 'objectifs',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Ce que la leçon vise',
         contenu:
             '<p class="planif-guide-pourquoi">L’objectif de leçon est la boussole : c’est lui qui dit ce que l’étudiant saura faire à la fin, et c’est par rapport à lui que se choisissent les connaissances, les activités et l’évaluation.</p>' +
@@ -1966,6 +1970,7 @@ var GUIDE_PAGES = [
             '<div class="planif-guide-astuce">Pose aussi la <strong>semaine</strong> de la leçon (Inspecteur) et la <strong>durée</strong> de chaque bloc (dans son en-tête) : la leçon totalise les durées de ce qu’elle contient, et le planificateur place le tout sur les semaines de ton trimestre.</div>'
     },
     {
+        id: 'connaissances',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Ce que tu enseignes concrètement',
         contenu:
             '<p class="planif-guide-pourquoi">Chaque leçon transmet des connaissances. Il en existe 4\u00a0types\u00a0:</p>' +
@@ -1984,6 +1989,7 @@ var GUIDE_PAGES = [
             '<div class="planif-guide-astuce">Si tu hésites entre Factuelle et Conceptuelle\u00a0: un fait se vérifie, un concept s\u2019explique.</div>'
     },
     {
+        id: 'activites',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Comment l\u2019étudiant va apprendre',
         contenu:
             '<p class="planif-guide-pourquoi">Chaque connaissance a besoin d\u2019une activité pour être acquise. Le type d\u2019activité dépend de ce que tu vises\u00a0: un exercice de mémorisation ne développe pas la même chose qu\u2019une analyse de cas.</p>' +
@@ -1998,6 +2004,7 @@ var GUIDE_PAGES = [
         // #966 — remplacée par le texte validé (27 sept. 2026) : l'évaluation
         // coche les objectifs qu'elle vérifie (#964) et porte une pastille (#965).
         // La légende est celle de l'Inspecteur, depuis la même fonction.
+        id: 'evaluations',   // #1172 : l'étape de la chaîne qui mène ici (`etapesChaineCarte`)
         titre: 'Vérifie que c\u2019est acquis',
         contenu:
             '<p class="planif-guide-pourquoi">L\u2019évaluation ferme la boucle\u00a0: elle vérifie ce que tu as enseigné, au niveau que tu as visé, ni plus, ni moins.</p>' +
@@ -2043,11 +2050,37 @@ var GUIDE_PAGES = [
 var _guidePageCourante = 0;
 var _guideOuvert = false;
 
-function ouvrirGuide() {
+/** #1172 — le rang d'une page par son `id` (jamais un indice en dur : une page ajoutée le ferait glisser). */
+function rangPageGuide(idPage) {
+    for (var i = 0; i < GUIDE_PAGES.length; i++) {
+        if (GUIDE_PAGES[i].id && GUIDE_PAGES[i].id === idPage) return i;
+    }
+    return 0;
+}
+
+/**
+ * Ouvre le guide à sa première page, ou (#1172, la chaîne de la carte) à la page `idPage`.
+ * Déjà ouvert et une page demandée : il y est mené, sans être reconstruit.
+ */
+function ouvrirGuide(idPage) {
     var panel = document.getElementById('planif-guide-panel');
     if (!panel) return;
+    var rang = typeof idPage === 'string' ? rangPageGuide(idPage) : 0;
+    var guideOuvert = _guideOuvert && panel.querySelector('.planif-guide');
+    if (guideOuvert && typeof idPage === 'string') {
+        _guidePageCourante = rang;
+        var contenuReplie = panel.querySelector('.planif-guide-panel-contenu');
+        if (contenuReplie && contenuReplie.style.display === 'none') {
+            contenuReplie.style.display = '';
+            var btnDeplier = panel.querySelector('.planif-guide-panel-replier');
+            if (btnDeplier) { btnDeplier.textContent = '−'; btnDeplier.title = 'Replier le guide'; }
+        }
+        rendrePageGuide(guideOuvert);
+        degagerChaineDuGuide(panel);
+        return;
+    }
     _guideOuvert = true;
-    _guidePageCourante = 0;
+    _guidePageCourante = rang;
 
     var conteneur = panel.querySelector('.planif-guide-panel-contenu');
     conteneur.innerHTML = '';
@@ -2105,6 +2138,20 @@ function ouvrirGuide() {
 
     panel.style.display = '';
     rendrePageGuide(guide);
+    degagerChaineDuGuide(panel);
+}
+
+/**
+ * #1172 — le guide flotte (`position: fixed`, 120 px du haut) : il couvrait la chaîne d'étapes qui venait
+ * de l'ouvrir. S'il la chevauche, il descend juste sous elle ; ailleurs (déplacé par sa barre), il reste.
+ */
+function degagerChaineDuGuide(panel) {
+    var chaine = document.getElementById('planif-chaine');
+    if (!chaine || chaine.getClientRects().length === 0) return;
+    var c = chaine.getBoundingClientRect();
+    var g = panel.getBoundingClientRect();
+    var chevauche = g.top < c.bottom && g.bottom > c.top && g.left < c.right && g.right > c.left;
+    if (chevauche) panel.style.top = Math.round(c.bottom + 8) + 'px';
 }
 
 function rendrePageGuide(guide) {
@@ -2134,6 +2181,63 @@ function fermerGuide() {
     var conteneur = panel.querySelector('.planif-guide-panel-contenu');
     if (conteneur) conteneur.innerHTML = '';
     panel.style.display = 'none';
+}
+
+/**
+ * #1172 (26 oct. 2026) — LES SEPT ÉTAPES DE LA CARTE (validées par Grégoire le 26 oct., 21 h 14 à 21 h 16 ;
+ * consigne `plans de travail/CONSIGNE-LOT-2026-10-26-chaine-carte-alignement.md`).
+ * « Il n'y a pas d'ordre comme tel à prescrire » : la chaîne dit ce qui est PRÉSENT dans la carte, dans
+ * l'ordre de sa structure (de la compétence à l'évaluation), pas un ordre de travail. Une étape est réglée
+ * dès qu'un élément existe ; aucune n'est « en attention » : les badges, le ⚠ et les pastilles jugent
+ * déjà l'alignement (#966). Les séquences n'y sont pas : le guide les dit facultatives.
+ * Fonction pure : la liste des nœuds de la carte active. Un clone partage l'identité de sa source
+ * (`cloneSourceId`) : un bloc cloné ne compte qu'une fois. L'id de chaque étape est celui de la page du
+ * guide qui la règle (`GUIDE_PAGES`).
+ */
+function etapesChaineCarte(noeuds) {
+    var liste = Array.isArray(noeuds) ? noeuds : [];
+    var vus = {};
+    var compte = { competence: 0, 'idees-maitresses': 0, lecons: 0, objectifs: 0,
+        connaissances: 0, activites: 0, evaluations: 0 };
+    liste.forEach(function(n) {
+        if (!n || !n.type) return;
+        var identite = n.cloneSourceId || n.id;
+        if (vus[identite]) return;
+        vus[identite] = true;
+        if (n.type === 'competence') compte.competence++;
+        else if (n.type === 'idee-maitresse') compte['idees-maitresses']++;
+        else if (n.type === 'lecon') {
+            compte.lecons++;
+            compte.objectifs += objectifsDeLecon(n).filter(function(o) { return o.texte.trim() !== ''; }).length;
+        }
+        else if (TYPES_CONNAISSANCE.indexOf(n.type) !== -1) compte.connaissances++;
+        else if (TYPES_ACTIVITE.indexOf(n.type) !== -1) compte.activites++;
+        else if (n.type === 'evaluation') compte.evaluations++;
+    });
+    function etape(id, libelle, un, plusieurs, vide, arrivee) {
+        var nb = compte[id];
+        return { id: id, libelle: libelle, reglee: nb > 0, arrivee: !!arrivee,
+            info: nb > 0 ? nb + ' ' + (nb > 1 ? plusieurs : un) : vide };
+    }
+    return [
+        etape('competence', 'Compétence', 'compétence', 'compétences', 'à poser'),
+        etape('idees-maitresses', 'Idées maîtresses', 'idée maîtresse', 'idées maîtresses', 'à poser'),
+        etape('lecons', 'Leçons', 'leçon', 'leçons', 'à poser'),
+        etape('objectifs', 'Objectifs', 'objectif', 'objectifs', 'à écrire'),
+        etape('connaissances', 'Connaissances', 'connaissance', 'connaissances', 'à poser'),
+        etape('activites', 'Activités', 'activité', 'activités', 'à poser'),
+        etape('evaluations', 'Évaluations', 'évaluation', 'évaluations', 'à poser', true)
+    ];
+}
+
+/** Dessine la chaîne entre la barre d'outils et le canevas (`#planif-chaine`). Elle lit la carte, n'écrit rien. */
+function rendreChaineCarte() {
+    var conteneur = document.getElementById('planif-chaine');
+    if (!conteneur || typeof ChaineEtapes === 'undefined') return;
+    ChaineEtapes.dessiner(conteneur, etapesChaineCarte(Array.from(etat.noeuds.values())), {
+        libelle: 'Étapes de la carte',
+        surClic: function(idEtape) { ouvrirGuide(idEtape); }
+    });
 }
 
 function resoudreVerbe(sourceId, cibleId) {
@@ -6400,6 +6504,7 @@ function sauvegarder() {
 
     mettreAJourTousLesBadges();
     rafraichirDateInspecteur();
+    rendreChaineCarte();   // #1172 : le point de passage des écritures (annuler et rétablir compris)
 }
 
 function viderCanvas() {
@@ -6423,7 +6528,7 @@ function chargerCarte(carteId) {
     _ajoutObjectif = null;
     viderCanvas();
     var donnees = window.planificationDonnees.chargerCarte(carteId);
-    if (!donnees) { centrerVueSurContenu(); return; }
+    if (!donnees) { centrerVueSurContenu(); rendreChaineCarte(); return; }
 
     etat.compteur = donnees.compteur || 0;
     etat.compteurLiens = donnees.compteurLiens || 0;
@@ -6577,6 +6682,7 @@ function chargerCarte(carteId) {
     pileUndo = [];
     pileRedo = [];
     majBoutonRetablir();
+    rendreChaineCarte();   // #1172
 }
 
 function centrerVueSurContenu() {
@@ -12144,6 +12250,9 @@ window.planificationCarte = {
     evaluerPastilleEvaluation: evaluerPastilleEvaluation,
     // #966 — les pages du guide (lecture seule), pour la sentinelle des textes validés.
     GUIDE_PAGES: GUIDE_PAGES,
+    // #1172 — la chaîne d'étapes de la carte (fonction pure, et l'ouverture du guide à une page).
+    etapesChaineCarte: etapesChaineCarte,
+    rangPageGuide: rangPageGuide,
     SYMBOLES_PASTILLE_EVALUATION: SYMBOLES_PASTILLE_EVALUATION,
     LEGENDE_PASTILLES_EVALUATION: LEGENDE_PASTILLES_EVALUATION,
     afficherMenuLien: afficherMenuLien,

@@ -45,6 +45,11 @@ async function ouvrirCarte(page) {
     await page.waitForTimeout(800);
     await page.evaluate(() => window.naviguerVers('conception', 'carte'));
     await page.waitForTimeout(1200);
+    // ↻ Recalé le 26 oct. 2026 (#1172) : la chaîne d'étapes de la carte (96 px) pousse le canevas de
+    // 594 à 690 px de page, dans la fenêtre de 720 du banc ; les blocs visés tombaient sous le bord. On
+    // amène la carte en haut de l'écran, comme l'utilisateur qui fait défiler la page jusqu'à elle.
+    await page.evaluate(() => document.querySelector('#conception-carte .planif-wrapper').scrollIntoView({ block: 'start' }));
+    await page.waitForTimeout(200);
 
     // Le gabarit de sa carte : une bande dense de leçons, une séquence isolée
     // très loin. C'est cette forme qui démasque un centrage par la moyenne.
