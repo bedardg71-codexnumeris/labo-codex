@@ -1,6 +1,6 @@
 # Demande de relecture – L'Aide, lot 2b, la retouche (#1152)
 
-> Claude Code, mardi 27 octobre 2026, sur `main`. Verdict : `VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md` (lu à 17 h 39, puis avec le § 4.3 ajouté à 17 h 58). Deux commits : `87b35ccf` pour l'échelle de départ (§ 4.1, code) et `0eff1eaa` pour la retouche de l'Aide (§ 1, § 2, § 3, § 4.2). Ce fichier part dans un troisième commit, de docs. Non poussé, pas de release.
+> Claude Code, mardi 27 octobre 2026, sur `main`. Verdict : `VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md` (lu à 17 h 39, avec le § 4.3 ajouté à 17 h 58, puis le § 4.4 ajouté après la décision de 18 h 06). Commits : `87b35ccf` pour l'échelle de départ (§ 4.1, code), `0eff1eaa` pour la retouche de l'Aide (§ 1, § 2, § 3, § 4.2), `049c257f` pour la première version de cette demande (§ 4.3 arrêté), `e316b1bc` pour le § 4.3 repris par le § 4.4 (le niveau « PS »). Cette mise à jour part dans un commit de docs. Non poussé, pas de release.
 
 ## En bref
 
@@ -8,9 +8,11 @@
 - **§ 3 : deux inscriptions** au tableau « Trouvé hors de la section Aide ».
 - **§ 4.1 : fait.** L'échelle de départ se sème avec les valeurs ponctuelles 40, 65, 75 et 100. Le stock ne bouge pas, et un essai le prouve.
 - **§ 4.2 : fait.** Les quatre icônes SOLO sont posées dans les deux tableaux, en clair et en sombre.
-- **§ 4.3 (le niveau 0) : ARRÊTÉ avant tout code**, comme le § 4.3 le prévoit (« si un lecteur se brise ou invente une valeur pour « 0 », arrête-toi sur ce point et dis-le »). Le code réserve déjà le niveau « 0 » à la copie non recevable, et quatre lecteurs l'écartent ou le détournent ; voir plus bas. Rien du § 4.3 n'est commité, pas même l'icône, la rangée de l'Aide ou la ligne du guide : tout dépend de ce que veut dire « 0 ».
-- Mots de la Conception : 2 698 → **2 746**. Les « À régler » de `pratique` nomment maintenant les libellés de leurs champs.
-- Tests : Vitest complet **9 969 sur 9 969** ; Playwright ciblé de l'Aide **11 sur 11** ; specs de l'échelle de départ **24 réussies, 1 sautée** (le saut existait déjà).
+- **§ 4.3 : d'abord arrêté avant le code** (le « 0 » était déjà le non recevable ; voir plus bas). **Puis fait, repris par le § 4.4** (décision de Grégoire, 18 h 06) : le Préstructurel prend le code « PS », et le « 0 » reste au non recevable. Commit `e316b1bc`.
+- Mots de la Conception : 2 698 → **2 759** (2 746 après le § 1, puis les rangées PS de `solo`). Les « À régler » de `pratique` nomment maintenant les libellés de leurs champs.
+- Tests, au dernier commit :
+  - Vitest complet : **9 975 sur 9 975** ;
+  - Playwright ciblé : **35 réussis, 1 sauté** (le saut existait déjà). Il comprend la spec neuve du niveau PS, les specs de l'échelle de départ et du guide, et celles de l'Aide.
 
 ## § 1 et § 2, point par point
 
@@ -87,7 +89,7 @@ La bordure gauche des encadrés n'est pas inscrite, comme le dit le verdict.
   - `aide-solo-1440-sombre.png`, `aide-solo-820-sombre.png` ;
   - `aide-sous-criteres-1440.png`, `aide-sous-criteres-820.png`.
 
-## § 4.3, le niveau 0 : arrêté, avec ce qui a été mesuré
+## § 4.3, le niveau 0 : d'abord arrêté, avec ce qui a été mesuré (historique)
 
 **Le conflit** : dans le code, le niveau de code « 0 » veut déjà dire « **non recevable** », une copie réservée à l'intégrité académique. Le code le décrit comme « réservé à l'intégrité académique et ne se déduit jamais d'un chiffre » (`js/echelles.js:2344-2345`). Donner ce code à « Préstructurel », un niveau qui se déduit d'un pourcentage, change ce que fait chacun de ces sites :
 
@@ -120,7 +122,127 @@ S'y ajoutent deux constats :
 
 Recommandation de Claude Code : **(a)**. C'est la seule qui ne réécrit le sens d'aucune donnée déjà enregistrée. Ce sont toutefois les mots que liront ses élèves : la décision lui revient.
 
+## § 4.3 repris par le § 4.4 : le niveau « PS – Préstructurel » (commit `e316b1bc`)
+
+### Le semis
+
+`niveauxDefaut` passe à cinq niveaux, avec la même autorisation qu'au § 4.1 ; le commentaire cite la décision.
+
+- **Le niveau neuf, en tête** :
+  - code « PS », nom « Préstructurel », description « Préstructurel » ;
+  - palier `prestructurel` ;
+  - plage 0 à 39,99 %, valeur ponctuelle 0 ;
+  - couleur **`var(--gris-moyen)`**. C'est une variable existante, redéfinie en clair et en sombre ; elle se distingue du rouge de I et dit « aucun aspect pertinent ».
+- **« I »** : sa plage va de 40 à 64,99 % et sa description devient « Unistructurel ». Le reste ne change pas.
+- **Le commentaire du 26 août sur le « I » composite** suit : la nuance a quitté la prose, puisque le préstructurel a son niveau.
+- **La description de l'échelle semée** passe de « Quatre niveaux — … » à « Cinq niveaux — Préstructurel, Incomplet, Développement, Maîtrise, Étendu. ». C'est un texte que lit l'enseignant·e : il serait devenu faux. Le stock garde sa description.
+- **Pour Grégoire** : `sentinelle-542-lot2-solo-echelle` rappelle que les `description` des niveaux partent dans les PDF des élèves. PS dira donc « Préstructurel » et I dira « Unistructurel », les mots du § 4.3.
+- Les jetons d'`index.html` passent à `echelles.js?v=20261027b` et `guides-pedagogiques.js?v=20261027a`.
+
+### Le non recevable ne change en rien
+
+Le code « 0 » reste écarté :
+
+- de la déduction par pourcentage (`sansNiveauZero`) ;
+- de la couverture des plages ;
+- des distributions du tableau de bord.
+
+Un essai le vérifie : un niveau « 0 » posé à côté de PS reste écarté, et 0 % donne PS.
+
+### Les lecteurs, mesurés
+
+- **`[IDME]` des cartouches** (`importerCommentaires`, `parserMarkdownCartouche`) : il ne reste que dans des commentaires. Depuis #531, les deux lisent les codes **de l'échelle**, par alternance, jusqu'à trois caractères (`js/cartouches.js:853-859`).
+  - Il n'y avait rien à élargir. L'essai neuf le prouve : « **Analyse (PS)** : … » se lit.
+  - Break-test : une alternance remise à `I|D|M|E` donne un rouge.
+- **`js/profil-etudiant-calculs.js:1596`** : ce n'est qu'un commentaire, une expression retirée par #529.
+- **Le rang des niveaux, les zones de maîtrise, PAN-Standards** : ils lisent l'échelle (plages et `valeurCalcul` par code, `js/profil-etudiant-calculs.js:149-152, 552-567`). PS y vaut 0 et compte.
+- **Les bornes fixes de la RàI et du dépistage** (64, 75, 85 %) portent sur des pourcentages, pas sur des codes. PS (moins de 40 %) tombe sous la première ; inchangées, comme le veut D3.
+- **Le repli I/D/M/E** d'`afficherCriteresDepuisGrille` (`js/evaluation-chargement.js:1340-1347`) et celui d'`evaluation.js:999` ne servent que sans échelle. Ils ne touchent pas l'échelle de départ.
+- **Inscrire et continuer** (issue 2, code étranger, antérieur) : l'export anonymisé compte `nb_I`, `nb_D`, `nb_M`, `nb_E` en dur (`js/trimestres.js:2578-2610`). Une évaluation PS compte dans le total mais dans aucune case, comme tout code hors IDME, A/B/C comprises. Cela touche ce qui sort de l'application (trou n° 6 du lot 4). Je ne l'ai pas inscrit moi-même au tableau : **je le propose à Cowork**.
+- **Issue 3** (sans conséquence observable, noté ici) :
+  - `obtenirNoteAffichee` (`js/liste-evaluations.js:1319-1326`) prend une note de 0 pour une absence (`noteFinale !== 0`). Son champ `note` n'a aucun lecteur : la cellule affichée passe par `_noteChiffreeAffichee`, qui compte le zéro.
+  - `js/travaux-ui.js:3872` écrit « --% » pour une note de 0, dans une question de confirmation de suppression ; c'est antérieur et cela vaut pour toute note nulle.
+- **Non changés, listés** :
+  - les pratiques prédéfinies (`js/pratiques/pratiques-predefines.js`, leur propre « 0 – Données insuffisantes » et leurs tables) ;
+  - le pack démo ;
+  - le lexique `idme` (`js/accompagnement-contenu-terme.js:352`, « Quatre niveaux de performance… »). Ce dernier relève du glossaire, au lot 3 : **à inscrire**, au choix de Cowork.
+
+### « Elle vaut 0, elle compte, elle s'affiche »
+
+La spec neuve `tests/integration/echelle-depart-prestructurel-1152.spec.js` part du vrai semis (grille, échelle et cartouche de départ).
+
+- **À l'évaluation** :
+  - le menu du critère offre « PS - Préstructurel » ;
+  - tous les critères à PS donnent une note de **0 %**, un vrai zéro (`noteCalculeeCourante === 0`), et le niveau « PS ».
+- **Enregistrée et verrouillée** :
+  - **P sommative = 0** : la copie compte ;
+  - **la Liste** montre « PS » et « 0 % », chacun dans sa cellule ;
+  - **le PDF** est construit sur 0 et PS, chaque critère au code PS.
+- **Break-test, 4 sur 4** :
+  - PS à 20 ;
+  - PS recodé « 0 » ;
+  - la sommative qui prend 0 pour une absence ;
+  - la cellule de la Liste qui prend 0 pour une absence.
+  - Mon premier contrôle de la Liste passait à tort : « 100 % » contient « 0 % ». Je l'ai resserré sur les cellules.
+- **Le profil** : les indices et le dépistage passent par les lecteurs ci-dessus (P sommative, table de conversion, rang par plage), éprouvés. Aucun essai ne rend l'écran du profil lui-même : **je le dis plutôt que de l'affirmer**.
+
+Le banc neuf `tests/unit/sentinelle-echelle-depart-prestructurel-1152.test.js` compte 6 essais :
+
+- 0 à 39,99 % donne PS, avec ou sans `sansNiveauZero`, et 40 % donne I ;
+- le non recevable reste écarté ;
+- l'étape « Pourcentages » ne voit aucun trou ;
+- `valeurNumeriqueDuNiveau(PS) === 0` ;
+- la table de conversion de PAN-Standards donne PS = 0 ;
+- l'import des cartouches lit PS.
+
+**Break-test, 6 sur 6** :
+
+- PS recodé « 0 » ;
+- I qui recommence à 0 ;
+- PS à 10 ;
+- le zéro pris pour une absence dans `valeurNumeriqueDuNiveau` ;
+- PS écarté comme le non recevable ;
+- l'alternance des cartouches réduite à I/D/M/E.
+
+Chaque fichier est restauré par sha256.
+
+### Le stock
+
+Une échelle de départ déjà semée ne change pas : l'essai du § 4.1 couvre aussi le cinquième niveau, car le semis s'arrête dès que `ECHELLE_IDME_DEPART` existe.
+
+### Ce que lit l'étudiant·e au niveau PS avec la « Cartouche de départ » (mesuré, rien écrit)
+
+**Pour Grégoire** : la cartouche n'a aucun commentaire pour PS. Ses niveaux portent I, D, M, E (`js/cartouches.js:149-175`).
+
+- La spec le relève : les quatre commentaires de critère du PDF sont **vides** (`["","","",""]`).
+- L'étudiant·e lit donc, pour chaque critère, son code « PS » sans aucune phrase ; la note est 0 %.
+- Ce sont des mots que l'étudiant·e lit : je n'en ai écrit aucun.
+
+### L'Aide, le guide, l'icône
+
+- **`solo`, le tableau SOLO** : la rangée « Préstructurel » en tête, avec la description de l'application, « Aucun aspect pertinent n'est traité » (`js/echelles.js`, `NIVEAUX_SOLO_ECHELLE`). La phrase d'introduction ne compte pas les niveaux : inchangée.
+- **`solo`, le tableau de l'échelle de départ** :
+  - la rangée « PS – Préstructurel » : 0 à 39,99 %, valeur 0 ;
+  - la rangée de I : 40 à 64,99 %.
+  - Les plages s'écrivent toutes « min à max % », sauf E (« 85 % et plus »). « Moins de 65 % » est parti.
+  - La sentinelle du lot 2b compare les cinq rangées au semis ; `sentinelle-audit-aide-15-oct` vérifie la plage de I.
+- **Le guide SOLO** (`js/guides-pedagogiques.js:96`) : « **PS** ↔ Préstructurel, **I** ↔ Unistructurel, … ». « 0 (Non recevable) » en sort.
+- **L'icône `icons/solo-pre-couleur.svg`** :
+  - un point plein `#CC0000`, dans le même gabarit que celle de l'unistructurel (viewBox 18 × 70, centré sur les barres), placé dans les deux tableaux ;
+  - **le rayon passe de 5 à 8**, le plus grand que permettent les 18 de large : au rayon 5, le point rendu à 1,1 em faisait à peine un pixel (capture). C'est mon choix, à retoucher si besoin.
+  - En sombre, le rouge foncé reste lisible, mais il est plus discret que les autres.
+- Captures dans `captures-2026-10-27-aide-lot-2b-retouche/` : `aide-solo-1440.png`, `aide-solo-820.png`, et `-sombre`.
+
+### Recalés, par décision (§ 4.3-4.4)
+
+- `sentinelle-542-lot2-solo-echelle` : cinq étiquettes, les descriptions « Préstructurel » et « Unistructurel ».
+- `sentinelle-echelle-idme-de-depart` : B (cinq niveaux), I (les noms et la description), F (le premier niveau est PS, valeur 0).
+- `sentinelle-echelle-idme-de-depart-valeurs-1152` : le cinquième niveau.
+- `triptyque-seme-produit-une-note.spec.js` : cinq niveaux semés.
+- La sentinelle du lot 2b et celle du 15 oct.
+
 ## Clôture
 
 - `BACKLOG.md` : sous #1152, la retouche du lot 2b. Le plan reste « codé, en relecture ».
-- Pas de release, de verdict ni de push sans le signal de Grégoire. Sur ce Mac, huit commits ne sont pas poussés (lots 2a et 2b, ce commit de docs compris).
+- Pas de release, de verdict ni de push sans le signal de Grégoire. Sur ce Mac, dix commits ne sont pas poussés (lots 2a et 2b, ce commit de docs compris).
+- **Une ligne des Nouvelles** sera due à la prochaine version : les valeurs ponctuelles 40, 65, 75 et 100, puis le niveau « PS – Préstructurel ». Ses mots reviennent à Grégoire.
