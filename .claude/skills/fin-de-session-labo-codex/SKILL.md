@@ -273,6 +273,32 @@ Les gardes du verdict (éveil complet, veilles, mémoire ; #1008) vivent dans
 `scripts/verifier-playwright.mjs` lui-même : un lancement à la main en est
 couvert comme `pousser.sh`, et un code 2 « non jugé » dit laquelle a refusé.
 
+### Le verdict en dix morceaux : `scripts/verdict-en-morceaux.mjs` (27 octobre 2026)
+
+D'un bloc, la suite ne tient plus dans la mémoire du Mac à côté de Cowork. Le
+geste du soir est désormais :
+
+```bash
+node scripts/verdict-en-morceaux.mjs            # dix morceaux, fusion, jugement, jeton
+node scripts/verdict-en-morceaux.mjs --reporter # reporter un vert sur un commit de tests seulement
+```
+
+Avant : Cowork, Chrome et Safari fermés, Mac sur secteur. Il juge contre
+`playwright-baseline.json`, comme `verifier-playwright.mjs`, et écrit le même
+jeton : le hook le lit sans changement. Puis `git push` (et non `pousser.sh`,
+qui relancerait la suite d'un bloc). Codes : 0 vert, 1 rougeur nouvelle,
+2 NON JUGÉ (la garde qui a refusé est nommée), 3 report refusé (la suite entière
+repasse). `--reporter` n'accepte qu'un diff limité à `plans de travail/`,
+`tests/integration/*.spec.js` et `tests/unit/`, et rejoue chaque spec touchée.
+
+⚠ **Repli, gardé tant que le script n'a pas fait ses preuves** (première course :
+la vérification du soir du 27 oct.) : la procédure à la main —
+`node scripts/morceau-playwright.mjs <n> 10` pour n = 1 à 10 sous
+`caffeinate -d -i -s`, fusion des rapports blob, jugement contre
+`playwright-baseline.json`, jeton écrit au format de `verifier-playwright.mjs`
+(sa `garde.raison` le dit). Si le script refuse ou casse, on reprend à la main,
+et le refus va dans le rapport du soir.
+
 ⚠ **Un commit APRÈS le verdict le périme.** Refaire dans cet ordre, ou accepter
 que le push passe sans jugement, et le DIRE.
 ⚠ **Le verdict est le DERNIER geste avant le push, jamais avant la relecture** :

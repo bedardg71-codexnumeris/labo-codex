@@ -30,6 +30,8 @@ Si un mot se révèle faux à la mesure (un geste ou un endroit qui n'existe pas
 
 ## 3. La vérification complète, sur le commit de release
 
+> **Ajout du 27 oct. (fusion de `tri-git`), pour les mises en ligne suivantes** : les gestes ci-dessous sont outillés par `node scripts/verdict-en-morceaux.mjs` (dix morceaux, fusion, jugement, jeton ; `--reporter` pour un commit de tests seulement). La procédure à la main reste le repli : si le script refuse ou casse, on la reprend, et le refus va dans le rapport. Détail : skill `fin-de-session`, § 4.5.
+
 **En dix morceaux**, comme ce matin (`RELAIS.md`, l'entrée du 26 oct. : `scripts/morceau-playwright.mjs`, `caffeinate -d -i -s`, fusion, jugement contre `playwright-baseline.json`). **Avant de lancer** : dis à Grégoire « ferme Cowork, Chrome et Safari, je lance la vérification » ; Mac sur secteur ; regarde la pression mémoire à chaque morceau (le Mac a redémarré la nuit du 25, mémoire saturée). Si elle n'est pas basse, dis-le et attends.
 
 - **Vert** : écris le jeton de verdict au format de `verifier-playwright.mjs` (sa raison le dit), puis `git push`, comme ce matin : `scripts/pousser.sh` relancerait la suite d'un bloc.
