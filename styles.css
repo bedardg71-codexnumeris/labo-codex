@@ -7076,6 +7076,21 @@ body.chaines-etapes-masquees .barre-convergence {
     color: var(--alerte-texte-attention);
 }
 
+/* #1173 — la note que donnerait le calcul actuel, sous la note remise d'une copie verrouillée.
+   Une information, pas une alerte : la note remise est juste. Variables d'alerte « information » :
+   définies dans les deux modes. */
+.boite-note-finale .note-remise {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    background: var(--alerte-fond-information);
+    border-left: 3px solid var(--alerte-bordure-information);
+    border-radius: var(--radius-moyen);
+    color: var(--alerte-texte-information);
+}
+
 /* Zone de critères d'évaluation */
 .zone-criteres {
     padding: 15px;

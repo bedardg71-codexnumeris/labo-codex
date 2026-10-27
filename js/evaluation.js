@@ -124,6 +124,7 @@ function nouvelleEvaluation() {
     if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);   // #961
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
+    if (typeof window.ecrireLigneNoteRemise === 'function') window.ecrireLigneNoteRemise('');   // #1173
 
     // Masquer les badges de jetons et boutons de jetons
     const section = document.getElementById('gestionJetonsEvaluation');
@@ -175,6 +176,7 @@ function reinitialiserFormulaire() {
     if (typeof window.poserRetroactionReecrite === 'function') window.poserRetroactionReecrite(false);   // #961
     document.getElementById('noteProduction1').textContent = '0.0';
     document.getElementById('niveauProduction1').textContent = '--';
+    if (typeof window.ecrireLigneNoteRemise === 'function') window.ecrireLigneNoteRemise('');   // #1173
 
     // Réinitialiser les checkboxes jetons
     const checkboxDelai = document.getElementById('checkboxJetonDelai');
@@ -2166,6 +2168,8 @@ function _deverrouillerEvaluation(evaluations, index) {
         mettreAJourBoutonVerrouillage(estVerrouillee);
         // Activer/désactiver tous les champs du formulaire (sans reload)
         desactiverFormulaireEvaluation(estVerrouillee);
+        // #1173 — l'écran passe au calcul actuel de la grille ; rien ne s'écrit avant un geste.
+        if (typeof window.afficherCalculActuel === 'function') window.afficherCalculActuel();
     } else {
         // Le formulaire porte une autre copie : seuls les badges et le bouton d'Annotation suivent.
         _poserCadenasDesBadges(estVerrouillee);

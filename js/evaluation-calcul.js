@@ -1384,6 +1384,136 @@ function _ecrirePorteeEcran(portee) {
     el.classList.remove('u-hide');
 }
 
+/* ===============================
+   #1173 — LA NOTE REMISE (décision de Grégoire, 27 oct. 2026, 7 h 28, textes compris)
+   Mesuré au lot 4a : une copie VERROUILLÉE rouverte après un changement de calcul montrait
+   la note recalculée (85) alors que la base et l'étudiant·e ont 70. Elle montre désormais ce
+   que la base garde ; une ligne dit la note que donnerait le calcul actuel de la grille, quelle
+   qu'en soit la cause (calcul, pondération, échelle, pratique). Déverrouillée, la copie suit
+   le calcul actuel, sans ligne, comme avant.
+   =============================== */
+
+/**
+ * La ligne sous la note d'une copie verrouillée. Comparaison À LA PRÉCISION AFFICHÉE : un écart
+ * d'arrondi n'est pas une autre note. Rend '' quand les deux notes s'affichent pareil, ou quand
+ * l'une des deux n'en est pas une. Pure.
+ * @param {number} remise - la note enregistrée
+ * @param {number|null} actuelle - la note du calcul actuel (null : aucune note ne se calcule)
+ * @returns {string}
+ */
+function ligneNoteRemise(remise, actuelle) {
+    const r = formaterNotePourcentage(remise);
+    const a = formaterNotePourcentage(actuelle);
+    if (r === '' || a === '' || r === a) return '';
+    return 'Note remise : ' + r + '. Avec le calcul actuel de la grille, elle serait de ' + a
+        + '. Déverrouille l\'évaluation pour l\'appliquer.';
+}
+
+/** Pose la ligne sous la note, par `textContent` ; vide, elle se masque. */
+function _ecrireLigneNoteRemise(texte) {
+    const el = document.getElementById('noteRemise1');
+    if (!el) return;
+    el.textContent = texte;
+    el.classList.toggle('u-hide', !texte);
+}
+
+/**
+ * L'évaluation enregistrée de la copie ouverte, si elle est VERROUILLÉE et porte une note — sinon
+ * null. Trouvée comme l'auto-save la trouve (élève, production, non remplacée) : c'est elle qu'il
+ * refuserait d'écrire. Sans note (« Incomplet ; travail en cours », note nulle ou absente),
+ * l'écran se comporte comme avant.
+ */
+function evaluationRemiseAffichee() {
+    const c = etatVivantEvaluationEnCours();
+    if (!c.etudiantDA || !c.productionId) return null;
+    const e = (db.getSync(cle('evaluationsSauvegardees'), []) || []).find(x =>
+        x && !x.remplaceeParId && x.etudiantDA === c.etudiantDA && x.productionId === c.productionId);
+    if (!e || e.verrouillee !== true || e.travailEnCours === true) return null;
+    return (typeof e.noteFinale === 'number' && isFinite(e.noteFinale)) ? e : null;
+}
+
+/**
+ * Le résultat enregistré de chaque critère algorithmique : note, pourcentage, niveau et phrase.
+ * La ligne chiffrée ne reste que si le calcul actuel redonne la note enregistrée (à la précision
+ * affichée) : sinon elle décrirait un calcul qui n'a pas produit cette note. Les niveaux des
+ * autres critères et les points reviennent déjà de la base (les deux chargeurs).
+ */
+function _afficherCriteresAlgoRemis(remise) {
+    Object.keys(remise.donneesAlgorithmiques || {}).forEach(critereId => {
+        if (!document.getElementById(`note_algo_${critereId}`)) return;
+        const d = remise.donneesAlgorithmiques[critereId] || {};
+        const critere = (remise.criteres || []).find(c => c && c.critereId === critereId) || {};
+        _afficherResultatAlgoRemis(critereId, d, critere);
+        const phrase = (typeof d.retroaction === 'string') ? d.retroaction : critere.retroaction;
+        const comm = document.getElementById(`comm_${critereId}`);
+        if (comm && typeof phrase === 'string') comm.textContent = phrase;
+        if (!_calculActuelRedonne(critereId, d.noteCalculee)) _masquerFormuleAlgo(critereId);
+    });
+}
+
+/** La note, le pourcentage et le niveau enregistrés d'un critère algorithmique, et leur couleur. */
+function _afficherResultatAlgoRemis(critereId, d, critere) {
+    const niveau = d.niveau || critere.niveauSelectionne;
+    const ecrire = (id, texte) => { const el = document.getElementById(id); if (el) el.textContent = texte || '--'; };
+    ecrire(`note_algo_${critereId}`, formaterNombre(d.noteCalculee, 2));
+    ecrire(`pct_algo_${critereId}`, formaterNombre(d.pourcentage, 1));
+    ecrire(`niveau_algo_${critereId}`, niveau);
+    _appliquerStyleResultatAlgo(critereId, niveau);
+}
+
+/** Le calcul actuel du critère redonne-t-il la note enregistrée, à la précision affichée ? */
+function _calculActuelRedonne(critereId, noteEnregistree) {
+    const actuel = evaluationEnCours.donneesAlgorithmiques && evaluationEnCours.donneesAlgorithmiques[critereId];
+    const note = formaterNombre(actuel && actuel.noteCalculee, 2);
+    return note !== '' && note === formaterNombre(noteEnregistree, 2);
+}
+
+/**
+ * Les notes d'A2025 et d'H2026 ne sont pas rouvertes (décision de Grégoire, 1er sept. 2026, sans retour) :
+ * leur copie verrouillée affiche sa note remise, mais aucune ligne n'y dit ni ne propose une autre note.
+ * Même liste que `comptes-erreurs-stock.js` et `cartouches-decalees.js`.
+ */
+const TRIMESTRES_FERMES = ['a2025', 'h2026'];
+function _trimestreFerme() {
+    const trimestre = (typeof window.obtenirTrimestreId === 'function') ? window.obtenirTrimestreId() : null;
+    return !!trimestre && TRIMESTRES_FERMES.indexOf(String(trimestre).toLowerCase()) !== -1;
+}
+
+/**
+ * Ce que `calculerNote` affiche : la note remise d'une copie verrouillée (et ce que la base garde de
+ * ses critères algorithmiques), sinon le calcul. Pose la ligne sous la note.
+ * @param {{pourcentage: number, niveauGlobal: string, notesCriteres: Array}} calcul
+ */
+function _noteAffichee(calcul, portee) {
+    const remise = evaluationRemiseAffichee();
+    const dire = remise && !_trimestreFerme();
+    _ecrireLigneNoteRemise(dire ? ligneNoteRemise(remise.noteFinale, portee.incomplete ? null : calcul.pourcentage) : '');
+    if (!remise) return Object.assign({ remise: null }, calcul);
+    _afficherCriteresAlgoRemis(remise);
+    return { remise, pourcentage: remise.noteFinale, niveauGlobal: remise.niveauFinal || '--', notesCriteres: _niveauxRemis(remise, portee) };
+}
+
+/** Les niveaux à copier-coller d'une copie verrouillée : ceux de la base, critère par critère. */
+function _niveauxRemis(remise, portee) {
+    const enregistres = {};
+    (remise.criteres || []).forEach(c => { if (c && c.critereId) enregistres[c.critereId] = c.niveauSelectionne; });
+    return portee.criteresComptes.map(({ critere, niveau }) =>
+        (enregistres[critere.id] !== undefined && typeof _pointsAnalytiquesDe(evaluationEnCours, critere) !== 'number')
+            ? enregistres[critere.id] : niveau);
+}
+
+/**
+ * Déverrouillée, la copie passe au calcul actuel : chaque critère algorithmique se recalcule à
+ * l'écran, puis la note. Aucun événement n'est émis : rien ne s'écrit avant un geste.
+ * Appelée par le déverrouillage (`_deverrouillerEvaluation`, evaluation.js).
+ */
+function afficherCalculActuel() {
+    if (!evaluationEnCours) return;
+    const grille = (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.id === evaluationEnCours.grilleId);
+    if (grille) _recalculerCriteresAlgorithmiques(grille);
+    calculerNote();
+}
+
 /**
  * L'instantané que la porte donne à l'auto-save pour écrire le brouillon.
  *
@@ -1665,6 +1795,7 @@ function _montrerNiveauEcran(montrer) {
 function calculerNote() {
     if (!evaluationEnCours) return;
     window.porteeCalculeeCourante = null;   // #674 — inconnue tant qu'elle n'est pas calculée
+    _ecrireLigneNoteRemise('');             // #1173 — elle ne vaut que pour la copie que ce calcul affiche
 
     const grilleId = evaluationEnCours.grilleId;
     const grilles = db.getSync(cle('grillesTemplates'), []);
@@ -1777,6 +1908,15 @@ function calculerNote() {
     // 100 : il ne s'affiche plus comme telle. Le niveau global est retenu avec elle.
     if (portee.incomplete) niveauGlobal = '--';
 
+    // #1173 — UNE COPIE VERROUILLÉE AFFICHE LA NOTE REMISE, celle que la base garde et que
+    // l'étudiant·e a reçue. La note du calcul actuel n'est que DITE, dans la ligne sous la note :
+    // elle ne s'écrit nulle part et n'entre pas dans `noteCalculeeCourante`.
+    const affichee = _noteAffichee({ pourcentage, niveauGlobal, notesCriteres }, portee);
+    const remise = affichee.remise;
+    pourcentage = affichee.pourcentage;
+    niveauGlobal = affichee.niveauGlobal;
+    const notesAffichees = affichee.notesCriteres;
+
     // #572 — LA VALEUR CALCULÉE EST LA SOURCE, l'écran n'en est que l'affichage.
     // La sauvegarde relisait `parseFloat(textContent)` : un rendu arrondi, ou
     // tronqué par un affichage différé (#321), redevenait la note stockée.
@@ -1787,15 +1927,15 @@ function calculerNote() {
     window.porteeCalculeeCourante = portee;
 
     // Mettre à jour l'affichage
-    document.getElementById('noteProduction1').textContent = portee.incomplete ? '--' : formaterNotePourcentage(pourcentage);   // 21 oct. 2026 : une note (virgule, espace insécable)
+    document.getElementById('noteProduction1').textContent = (portee.incomplete && !remise) ? '--' : formaterNotePourcentage(pourcentage);   // 21 oct. 2026 : une note (virgule, espace insécable)
     document.getElementById('niveauProduction1').textContent = niveauGlobal;
-    _ecrirePorteeEcran(portee);
+    _ecrirePorteeEcran(remise ? null : portee);   // #1173 : la portée parle du calcul actuel, pas de la note remise
 
     // Afficher les notes des critères pour copier-coller
     const criteresCopierElement = document.getElementById('criteresCopier');
     if (criteresCopierElement) {
-        if (notesCriteres.length > 0) {
-            criteresCopierElement.textContent = notesCriteres.join('\t');
+        if (notesAffichees.length > 0) {
+            criteresCopierElement.textContent = notesAffichees.join('\t');
         } else {
             criteresCopierElement.textContent = '--';
         }
@@ -1879,6 +2019,16 @@ function _forcerRecalculAlgorithmiqueAvantSauvegarde(grille) {
         catch (e) { console.warn('[_forcerRecalculAlgorithmiqueAvantSauvegarde] mettreAJour échec', e); }
     }
 
+    _recalculerCriteresAlgorithmiques(grille);
+}
+
+/**
+ * Le recalcul de chaque critère algorithmique de la grille, sans événement : le corps de
+ * `_forcerRecalculAlgorithmiqueAvantSauvegarde`, partagé avec le déverrouillage (#1173,
+ * `afficherCalculActuel`), qui ne propage pas les compteurs : ce geste-là écrirait.
+ */
+function _recalculerCriteresAlgorithmiques(grille) {
+    if (!grille || !grille.criteres) return;
     grille.criteres.forEach(function(critere) {
         if (critere.type !== 'algorithmique') return;
         const ponderation = critere.ponderation || 20;
@@ -1896,7 +2046,7 @@ function _forcerRecalculAlgorithmiqueAvantSauvegarde(grille) {
                 calculerNoteAlgorithmiqueSimple(critere.id, ponderation, facteur);
             }
         } catch (e) {
-            console.warn('[_forcerRecalculAlgorithmiqueAvantSauvegarde] échec critère', critere.id, e);
+            console.warn('[_recalculerCriteresAlgorithmiques] échec critère', critere.id, e);
         }
     });
 }
@@ -1925,6 +2075,14 @@ window.obtenirCouleurNiveau = obtenirCouleurNiveau;
 // Restauration fix #110 v3 (24 mai 2026) — appelé par sauvegarderEvaluation
 // (evaluation-sauvegarde.js) et sauvegarderEvaluationModifiee (evaluation.js) :
 window._forcerRecalculAlgorithmiqueAvantSauvegarde = _forcerRecalculAlgorithmiqueAvantSauvegarde;
+
+// #1173 — la note remise d'une copie verrouillée : la ligne (pure, éprouvée par
+// `tests/unit/note-remise-1173.test.js`), l'évaluation lue en base, et le passage au calcul
+// actuel au déverrouillage (evaluation.js).
+window.ligneNoteRemise = ligneNoteRemise;
+window.evaluationRemiseAffichee = evaluationRemiseAffichee;
+window.afficherCalculActuel = afficherCalculActuel;
+window.ecrireLigneNoteRemise = _ecrireLigneNoteRemise;   // les remises à zéro du formulaire la taisent
 
 // #674 — la portée de la note (énoncé 5). `calculerPortee` est la règle unique ;
 // `porteeDepuisEvaluation` la relit sur ce qui est déjà en base (PDF de l'élève,

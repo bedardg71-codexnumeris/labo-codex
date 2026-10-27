@@ -473,6 +473,7 @@ function chargerEvaluationsEtudiant() {
     const niveauElem = document.getElementById('niveauProduction1');
     if (noteElem) noteElem.textContent = '--';
     if (niveauElem) niveauElem.textContent = '--';
+    if (typeof window.ecrireLigneNoteRemise === 'function') window.ecrireLigneNoteRemise('');   // #1173
 
     // Vider la rétroaction finale
     const retroaction = document.getElementById('retroactionFinale1');
