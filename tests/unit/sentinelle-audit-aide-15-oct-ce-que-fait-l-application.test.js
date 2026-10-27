@@ -320,7 +320,11 @@ describe('Les gestes décrits sont ceux du code', () => {
         const echelles = lire('js/echelles.js');
         const minD = parseInt(tranche(echelles, 'nom: \'Développement\'').match(/min: (\d+)/)[1], 10);
         expect(AIDE).not.toMatch(/Incomplet<\/strong> : &lt; 64(&nbsp;)?%|nsuffisant \(&lt; 64(&nbsp;)?%\)/);
-        expect(AIDE).toContain(`<li><strong>I — Incomplet</strong> : &lt; ${minD}&nbsp;%</li>`);
+        // ↻ #1152, lot 2b (27 oct. 2026) : « Exemple IDME » quitte `creer-echelles` et l'échelle passe, sous son nom
+        // d'écran, au tableau de `solo` (audit de l'Aide du 24 oct., `creer-echelles` et `idme` ; remesure du 27 oct. ;
+        // consigne CONSIGNE-LOT-2026-10-27-aide-lot-2b-conception.md, §2, entrées 8 et 9). La borne reste lue ici ;
+        // les quatre rangées sont vérifiées par sentinelle-aide-2026-10-27-lot-2b.test.js.
+        expect(AIDE).toContain(`<td class="text-center">moins de ${minD}&nbsp;%</td>`);
     });
 
     it('plus de langue de code dans l\'Aide', () => {
