@@ -28,7 +28,7 @@ const MONTER = `async ({ T, DA }) => {
     window.db.setSync('trimestres', [{ id: T, nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
     window.db.setSync('trimestreActif', T);
     window.trimestreActif = T;
-    ['echellesTemplates', 'grillesTemplates'].forEach((k) => window.db.setSync(T + '_' + k, []));
+    ['echellesTemplates', 'grillesTemplates'].forEach((k) => window.db.setSync(T + '_' + k, []));   // security-ok: fixture littérale du banc
     await window.assurerGrilleDeDepart();
     await window.assurerEchelleIdmeDeDepart();
     await window.assurerCartoucheDeDepart();
