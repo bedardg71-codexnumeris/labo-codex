@@ -170,25 +170,34 @@ async function assurerCartoucheDeDepart() {
             { id: 'CR_ANALYSE', nom: 'Analyse' },
             { id: 'CR_SYNTHESE', nom: 'Synthèse' }
         ],
+        // #1152 (27 oct. 2026) : « PS – Préstructurel » en tête, comme dans l'Échelle de départ (IDME) ; ses quatre
+        // commentaires sont les mots de Grégoire (27 oct., 18 h 38, « je les garde »). TARIR, PAS RÉPARER : seul le
+        // semis lit cet objet, et il n'écrit pas dans un trimestre qui a déjà `CART_GENERIQUE` ; une cartouche de
+        // départ déjà semée garde ses seize commentaires.
         niveaux: [
+            { code: 'PS', nom: 'Préstructurel' },
             { code: 'I', nom: 'Incomplet' },
             { code: 'D', nom: 'en Développement' },
             { code: 'M', nom: 'Maîtrisé' },
             { code: 'E', nom: 'Étendu' }
         ],
         commentaires: {
+            'CR_COMPREHENSION_PS': 'La réponse ne traite pas encore du sujet demandé. Relis la consigne et repère ce qu\'elle te demande.',
             'CR_COMPREHENSION_I': 'La compréhension du sujet reste insuffisante. Revois les concepts de base.',
             'CR_COMPREHENSION_D': 'Tu saisis les grandes lignes, mais certains aspects restent flous.',
             'CR_COMPREHENSION_M': 'Bonne compréhension du sujet et de ses enjeux.',
             'CR_COMPREHENSION_E': 'Excellente compréhension, tu perçois les nuances et les liens.',
+            'CR_APPLICATION_PS': 'Les connaissances ne sont pas encore appliquées à la tâche demandée. Repars d\'un exemple vu en classe.',
             'CR_APPLICATION_I': 'Difficulté à appliquer les connaissances. Entraîne-toi avec des exemples simples.',
             'CR_APPLICATION_D': 'Application partielle. Continue à pratiquer pour plus d\'aisance.',
             'CR_APPLICATION_M': 'Tu appliques correctement les connaissances dans ce contexte.',
             'CR_APPLICATION_E': 'Application remarquable, tu adaptes tes connaissances avec créativité.',
+            'CR_ANALYSE_PS': 'Aucun élément de l\'analyse demandée n\'est encore présent. Commence par nommer les éléments à examiner.',
             'CR_ANALYSE_I': 'L\'analyse manque de profondeur. Décompose davantage les éléments.',
             'CR_ANALYSE_D': 'Analyse en développement. Pousse plus loin l\'examen des composantes.',
             'CR_ANALYSE_M': 'Bonne capacité d\'analyse, tu identifies bien les éléments clés.',
             'CR_ANALYSE_E': 'Analyse approfondie et nuancée, tu perçois les subtilités.',
+            'CR_SYNTHESE_PS': 'La synthèse demandée n\'est pas encore amorcée. Commence par dégager l\'idée principale.',
             'CR_SYNTHESE_I': 'La synthèse est absente ou incohérente. Travaille l\'intégration des idées.',
             'CR_SYNTHESE_D': 'Synthèse partielle. Cherche à mieux relier les éléments entre eux.',
             'CR_SYNTHESE_M': 'Bonne synthèse, tu intègres les éléments de façon cohérente.',

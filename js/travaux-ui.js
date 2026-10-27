@@ -3864,12 +3864,13 @@
         const evalAssociee = travauxResolution.trouverEvaluationPourFichier(fichier);
 
         // 3. Adapter le message de confirmation
+        // #1152 (27 oct. 2026) : le zéro est une valeur (« PS » vaut 0) — `??`, pas `||`, sinon « --% ».
         // #1007 (2a-2) — la copie (et son évaluation) part sans corbeille. Après l'attente,
         // les évaluations sont relues au moment d'écrire, la copie est effacée par son id.
         if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('copieImportee'))) return;
         if (evalAssociee) {
             const choix = confirm(
-                'Ce fichier a une évaluation associée (' + (formaterNotePourcentage(evalAssociee.noteFinale || evalAssociee.note) || '--%') + ').\n\n' +
+                'Ce fichier a une évaluation associée (' + (formaterNotePourcentage(evalAssociee.noteFinale ?? evalAssociee.note) || '--%') + ').\n\n' +
                 'Veux-tu supprimer le fichier ET l\'évaluation ?\n\n' +
                 '(OK = supprimer les deux, Annuler = ne rien supprimer)'
             );

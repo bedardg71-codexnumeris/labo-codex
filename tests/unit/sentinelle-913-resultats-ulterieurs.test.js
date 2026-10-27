@@ -75,8 +75,8 @@ describe('#913 — la sortie dans l\'export de recherche', () => {
         for (const e of fichier.observations.etudiants) expect(Object.keys(e)).toContain('resultats_ulterieurs');
     });
 
-    it('version_format passe à 1.2', async () => {
-        expect((await exporter(RESULTATS)).fichier.meta.version_format).toBe('1.2');
+    it('version_format passe à 1.2 (1.3 depuis #1152, nb_PS)', async () => {
+        expect((await exporter(RESULTATS)).fichier.meta.version_format).toBe('1.3');
     });
 
     it('VERROU STRUCTUREL : aucun DA, aucun nom dans le fichier produit', async () => {
@@ -123,7 +123,7 @@ describe('#915 lot 3 — l\'export lit le registre par DA, et l\'ancienne clé e
         }
     });
 
-    it('VERROU STRUCTUREL : le registre (rangé par DA, avec noms) ne fait sortir ni DA ni nom ; version_format reste 1.2', async () => {
+    it('VERROU STRUCTUREL : le registre (rangé par DA, avec noms) ne fait sortir ni DA ni nom ; version_format reste 1.3 (#1152)', async () => {
         const { texte, fichier } = await exporter(STOCK_913, registre({ resultatsUlterieurs: [{ cours: '601-103-MQ', trimestre: 'A2026', note: 64 }] }));
         for (const e of ELEVES) {
             expect(texte, 'DA ' + e.da).not.toContain(e.da);
@@ -131,7 +131,7 @@ describe('#915 lot 3 — l\'export lit le registre par DA, et l\'ancienne clé e
         }
         expect(texte).not.toMatch(/"\d{7}"\s*:/);
         expect(texte).not.toMatch(/reprise913|inscritLe|origine/);
-        expect(fichier.meta.version_format).toBe('1.2');
+        expect(fichier.meta.version_format).toBe('1.3');
     });
 });
 

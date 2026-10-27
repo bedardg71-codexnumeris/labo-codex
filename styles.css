@@ -15305,6 +15305,13 @@ tr.ligne-import-ecartee td {
 }
 
 /* Couleurs IDME pour les niveaux */
+/* #1152 : « PS – Préstructurel », la couleur de l'Échelle de départ (redéfinie dans les deux modes) */
+.apercu-niveau-PS,
+.apercu-niveau-ps {
+    color: var(--gris-moyen);
+    font-weight: bold;
+}
+
 .apercu-niveau-I,
 .apercu-niveau-i {
     color: #d32f2f;

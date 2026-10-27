@@ -122,7 +122,7 @@ describe('#902 — indices_finaux porte les valeurs stockées', () => {
         expect(fichier.calculs.unites).toMatch(/note_constructible/);
         // 1.147.1 : depuis #743 (lot D), A_final peut aussi valoir null — la note le dit aux chercheurs.
         expect(fichier.calculs.unites).toMatch(/A_final vaut null/);
-        expect(fichier.meta.version_format).toBe('1.2'); // 1.1 = #902 ; 1.2 = #913 (resultats_ulterieurs, additif)
+        expect(fichier.meta.version_format).toBe('1.3'); // 1.1 = #902 ; 1.2 = #913 (resultats_ulterieurs, additif) ; 1.3 = #1152 (nb_PS, additif)
     });
 });
 
@@ -198,7 +198,7 @@ describe('#908 — l\'en-tête du fichier dit ce que l\'application calcule', ()
         expect(Object.keys(fichier.meta)).toEqual(CLES_META);
         expect(Object.keys(fichier.calculs)).toEqual(CLES_CALCULS);
         expect(Object.keys(fichier.calculs.formules)).toEqual(['indice_A', 'indice_C', 'indice_P']);
-        expect(fichier.meta.version_format).toBe('1.2');
+        expect(fichier.meta.version_format).toBe('1.3');
     });
 });
 
