@@ -93,8 +93,9 @@ describe('§2 · l\'échelle IDME de départ complète le triptyque', () => {
         // Et la SOURCE, elle, dit bien les quatre mots arrêtés : un espace neuf les reçoit.
         const neuf = {};
         await charger(neuf).assurerEchelleIdmeDeDepart();
-        expect(neuf[CLE][0].niveaux.map(n => n.nom)).toEqual(['Incomplet', 'Développement', 'Maîtrise', 'Étendu']);
-        expect(neuf[CLE][0].description).toMatch(/Incomplet, Développement, Maîtrise, Étendu/);
+        // ↻ 27 oct. 2026 : cinq niveaux, « PS – Préstructurel » en tête (VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.3-4.4).
+        expect(neuf[CLE][0].niveaux.map(n => n.nom)).toEqual(['Préstructurel', 'Incomplet', 'Développement', 'Maîtrise', 'Étendu']);
+        expect(neuf[CLE][0].description).toMatch(/Préstructurel, Incomplet, Développement, Maîtrise, Étendu/);
     });
 
     it('B · TOUS ses niveaux portent une `valeurCalcul` exploitable — c\'est LA condition de #574', async () => {
@@ -102,8 +103,9 @@ describe('§2 · l\'échelle IDME de départ complète le triptyque', () => {
         const win = charger(store);
         await win.assurerEchelleIdmeDeDepart();
         const niveaux = store[CLE][0].niveaux;
-        expect(niveaux.length, 'IDME = quatre niveaux').toBe(4);
-        expect(niveaux.map(n => n.code)).toEqual(['I', 'D', 'M', 'E']);
+        // ↻ 27 oct. 2026 : cinq niveaux, « PS – Préstructurel » en tête (VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.3-4.4).
+        expect(niveaux.length, 'cinq niveaux').toBe(5);
+        expect(niveaux.map(n => n.code)).toEqual(['PS', 'I', 'D', 'M', 'E']);
         // La règle du dépôt, pas une seconde règle écrite ici : un niveau sans
         // `valeurCalcul` exploitable rend `null` et sort son critère du total.
         const muets = niveaux.filter(n => n.valeurCalcul == null
@@ -148,8 +150,9 @@ describe('§2 · l\'échelle IDME de départ complète le triptyque', () => {
         // lecteurs de `niveauxDefaut`.
         // ↻ 27 oct. 2026 : la valeur ponctuelle semée de « I » passe de 32 à 40 (décision de Grégoire, 27 oct., 17 h 48-17 h 49 ;
         // VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.1). Le stock : sentinelle-echelle-idme-de-depart-valeurs-1152.test.js.
-        expect(store2[CLE][0].niveaux[0].valeurCalcul).toBe(40);
-        expect(store2[CLE][0].niveaux[0].nom).toBe('Incomplet');
+        // ↻ 27 oct. 2026 : le premier niveau est « PS », de valeur ponctuelle 0 — un VRAI zéro, que la mutation à 999 aurait remplacé.
+        expect(store2[CLE][0].niveaux[0].valeurCalcul).toBe(0);
+        expect(store2[CLE][0].niveaux[0].nom).toBe('Préstructurel');
     });
 
     it('G · rien n\'est semé tant que la clé n\'est pas namespacée (garde #358)', async () => {

@@ -324,7 +324,9 @@ describe('Les gestes décrits sont ceux du code', () => {
         // d'écran, au tableau de `solo` (audit de l'Aide du 24 oct., `creer-echelles` et `idme` ; remesure du 27 oct. ;
         // consigne CONSIGNE-LOT-2026-10-27-aide-lot-2b-conception.md, §2, entrées 8 et 9). La borne reste lue ici ;
         // les quatre rangées sont vérifiées par sentinelle-aide-2026-10-27-lot-2b.test.js.
-        expect(AIDE).toContain(`<td class="text-center">moins de ${minD}&nbsp;%</td>`);
+        // ↻ Retouche du lot 2b (27 oct., § 4.3-4.4 du verdict) : « I » commence à 40 % (le niveau « PS » le précède) ;
+        // la plage de « I » se termine juste sous la borne de « D », lue ici.
+        expect(AIDE).toContain(`<td class="text-center">40 à ${minD - 1},99&nbsp;%</td>`);
     });
 
     it('plus de langue de code dans l\'Aide', () => {

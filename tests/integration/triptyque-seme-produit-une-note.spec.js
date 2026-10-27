@@ -85,7 +85,8 @@ test('§2 · un espace vide reçoit une échelle SEMÉE, et tous ses niveaux sav
 
     expect(r.erreur, `Erreur : ${r.erreur}`).toBeUndefined();
     expect(r.echelles.map(e => e.id), 'aucune échelle semée — le trou du §2 est revenu').toEqual(['ECHELLE_IDME_DEPART']);
-    expect(r.echelles[0].niveaux).toBe(4);
+    // ↻ 27 oct. 2026 : cinq niveaux, « PS – Préstructurel » en tête (VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.3-4.4).
+    expect(r.echelles[0].niveaux).toBe(5);
     // LA condition de #574 : une échelle semée qui ne calcule pas est pire que
     // pas d'échelle du tout, parce qu'elle rend 0,0 % au lieu de « -- ».
     expect(r.echelles[0].niveauxMuets, 'des niveaux semés sans `valeurCalcul`').toBe(0);

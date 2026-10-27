@@ -66,10 +66,10 @@
  *   c'est le patron à ne pas recréer, pas parce qu'il vit encore. Aucune reprise
  *   automatique n'est faite sur les échelles déjà enregistrées : le champ y naît
  *   vide.
- *   ⚠ « I » reçoit `unistructurel` et NON un composite : sa description dit
- *   « Préstructurel, unistructurel », mais le menu ne prend qu'UNE étiquette
- *   (décision du 26 août : pas d'entrée composite, chaque lecteur n'a qu'une
- *   valeur à traiter). La nuance reste dans la prose, qui est faite pour ça.
+ *   ⚠ « I » reçoit `unistructurel` et NON un composite : le menu ne prend qu'UNE
+ *   étiquette (décision du 26 août : pas d'entrée composite, chaque lecteur n'a
+ *   qu'une valeur à traiter). ↻ 27 oct. 2026 : la nuance a quitté sa prose — le
+ *   préstructurel a son propre niveau, « PS », et « I » dit « Unistructurel ».
  * - min: Pourcentage minimum
  * - max: Pourcentage maximum
  * - couleur: Variable CSS pour la couleur
@@ -82,14 +82,32 @@
  *   Seul `valeurCalcul` change ; bornes, codes, noms, paliers SOLO et couleurs restent. TARIR, PAS RÉPARER : seul
  *   le semis lit cette constante, et il n'écrit pas dans un trimestre qui a déjà `ECHELLE_IDME_DEPART` ; une
  *   échelle de départ déjà semée garde ses valeurs (sentinelle-echelle-idme-de-depart-valeurs-1152.test.js).
+ * ↻ 27 oct. 2026 — UN CINQUIÈME NIVEAU, EN TÊTE : « PS – Préstructurel », 0 à 39,99 %, valeur ponctuelle 0, palier
+ *   SOLO `prestructurel` ; « I » commence à 40 % et sa description devient « Unistructurel ». Décision de Grégoire
+ *   (27 oct., 17 h 56-17 h 57, puis 18 h 06 pour le code : « PS », pour ne pas confondre avec l'indice P), même
+ *   autorisation (VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.3 et § 4.4).
+ *   ⚠ LE CODE « 0 » RESTE CELUI DU NON RECEVABLE (intégrité académique) : écarté de la déduction par pourcentage
+ *   (`sansNiveauZero`), de la couverture des plages et des distributions du tableau de bord. « PS » est un niveau
+ *   comme I, D, M et E : un pourcentage de 0 à 39,99 % le donne. ⚠ Sa valeur ponctuelle est un VRAI ZÉRO
+ *   (`valeurNumeriqueDuNiveau` la lit telle quelle, plus bas). Couleur : `--gris-moyen`, redéfinie dans les deux modes.
  */
 const niveauxDefaut = [
     {
+        code: 'PS',
+        nom: 'Préstructurel',
+        description: 'Préstructurel',
+        niveauSOLO: 'prestructurel',
+        min: 0,
+        max: 39.99,
+        valeurCalcul: 0,
+        couleur: 'var(--gris-moyen)'
+    },
+    {
         code: 'I',
         nom: 'Incomplet',
-        description: 'Préstructurel, unistructurel',
+        description: 'Unistructurel',
         niveauSOLO: 'unistructurel',
-        min: 0,
+        min: 40,
         max: 64.99,
         valeurCalcul: 40,
         couleur: 'var(--niveau-attention-critique)'
@@ -381,7 +399,8 @@ async function assurerEchelleIdmeDeDepart() {
         // §3 : « de départ » d'abord, la précision ensuite — c'est le mot commun
         // aux trois pièces semées, et c'est lui qui doit se voir dans une liste.
         nom: 'Échelle de départ (IDME)',
-        description: 'Quatre niveaux — Incomplet, Développement, Maîtrise, Étendu. '
+        // ↻ 27 oct. 2026 : cinq niveaux, avec « PS » (§ 4.4 du verdict du lot 2b de l'Aide). Le stock garde sa description.
+        description: 'Cinq niveaux — Préstructurel, Incomplet, Développement, Maîtrise, Étendu. '
             + 'Les valeurs ponctuelles sont un point de départ : modifie-les, ou remplace '
             + 'l\'échelle entière. Rien ici n\'est une norme du projet.',
         // Copie PROFONDE : la constante partagée ne doit jamais devenir mutable
