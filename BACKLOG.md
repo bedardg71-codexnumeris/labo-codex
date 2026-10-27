@@ -130,7 +130,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 
 ### Mettre à la corbeille la sélection, 27 octobre 2026 (symptôme vécu par Grégoire vers 8 h 40, décision à 9 h 01 ; consigne de Cowork `plans de travail/CONSIGNE-LOT-2026-10-27-corbeille-selection.md`)
 
-- [ ] **#1174 – Mettre à la corbeille toutes les copies cochées en un geste.** **Symptôme vécu** (27 oct. 2026, Chrome, Liste des évaluations, « Artefact 5 ») : 22 copies cochées, et seul « Actions… → Supprimer » ligne par ligne, 22 fois. Décision de Grégoire (9 h 01) : toutes les copies cochées partent, y compris celles déjà évaluées. Un bouton « Mettre à la corbeille (N) » dans la barre de sélection, une seule confirmation qui compte les copies évaluées et celles liées à une reprise, un seul chemin d'écriture (`travauxStockage.deplacerEnCorbeilleLot`). Aucune suppression définitive.
+- [x] **#1174 – Mettre à la corbeille toutes les copies cochées en un geste.** ✅ Codé le 27 oct. 2026 (Claude Code), en relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-27-corbeille-selection.md`. **Symptôme vécu** (27 oct. 2026, Chrome, Liste des évaluations, « Artefact 5 ») : 22 copies cochées, et seul « Actions… → Supprimer » ligne par ligne, 22 fois. Décision de Grégoire (9 h 01) : toutes les copies cochées partent, y compris celles déjà évaluées. Un bouton « Mettre à la corbeille (N) » dans la barre de sélection, une seule confirmation qui compte les copies évaluées et celles liées à une reprise, un seul chemin d'écriture (`travauxStockage.deplacerEnCorbeilleLot`). Aucune suppression définitive.
 
 ### Le statut « Incomplet ; travail en cours », 25 octobre 2026 (verdict de Cowork, 11 h 28 : trouvaille 3, « inscrit » ; hors du lot)
 
