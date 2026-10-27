@@ -15,13 +15,13 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-📝 **LE 27 OCTOBRE 2026, MIDI : LA 1.221 EST PRÊTE, PAS ENCORE EN LIGNE** (tes propres calculs, le barème à l'évaluation, la note remise d'une copie verrouillée, la chaîne d'étapes de la Carte d'alignement, la corbeille de la sélection). *Écrit par Claude Code.*
+📝 **LE 27 OCTOBRE 2026, 13 H 43 : LA 1.221 EST EN LIGNE** (tes propres calculs, le barème à l'évaluation, la note remise d'une copie verrouillée, la chaîne d'étapes de la Carte d'alignement, la corbeille de la sélection). *Écrit par Claude Code.*
 
-**Ce qui changera pour toi, une fois en ligne** : ce que disent les huit lignes de la 1.221 dans les Nouvelles. Les trois calculs tout faits de « Note calculée » en blocs ; « Retoucher ce calcul » et « Composer ton propre calcul » ; un calcul qui sert à tes phrases et à tes tables sans toucher la note ; la note remise d'une copie verrouillée, et la ligne qui dit si le calcul actuel en donnerait une autre ; les tranches du barème sous chaque critère analytique à l'évaluation ; la chaîne d'étapes de la Carte d'alignement ; « Mettre à la corbeille (N) » dans la Liste des évaluations.
+**Ce qui change pour toi** : ce que disent les huit lignes de la 1.221 dans les Nouvelles. Les trois calculs tout faits de « Note calculée » en blocs ; « Retoucher ce calcul » et « Composer ton propre calcul » ; un calcul qui sert à tes phrases et à tes tables sans toucher la note ; la note remise d'une copie verrouillée, et la ligne qui dit si le calcul actuel en donnerait une autre ; les tranches du barème sous chaque critère analytique à l'évaluation ; la chaîne d'étapes de la Carte d'alignement ; « Mettre à la corbeille (N) » dans la Liste des évaluations.
 
-**Ce qui reste à toi** : rien pour cette version. Le toucher sur l'iPad et le zoom du barème à l'évaluation n'ont pas été éprouvés.
+**Ce qui reste à toi** : rien pour cette version. Le toucher sur l'iPad et le zoom du barème à l'évaluation n'ont pas été éprouvés. La suite : la refonte de l'Aide, que Cowork remesure d'abord.
 
-**Vérifié comment** : chaque lot a été relu et accepté par Cowork (les verdicts sont dans `plans de travail/`) ; Vitest entier vert (9 943). La vérification complète du navigateur se prend sur ce commit, juste avant la mise en ligne.
+**Vérifié comment** : chaque lot a été relu et accepté par Cowork (les verdicts sont dans `plans de travail/`) ; Vitest entier vert (9 943) ; la vérification complète du navigateur, sur le Mac, entièrement verte (1 105 essais, un seul rattrapé au second essai), prise pour la première fois par le nouveau script, sans accroc ; la mise en ligne constatée chez Netlify, sur ce commit, avec le bon numéro. La vérification de GitHub, elle, est allée au bout cette fois (seize morceaux sur seize ; le 26, quatre avaient été coupés), mais elle trouve treize tests en échec sous Linux seulement, tous réussis sur le Mac, dont huit dans les tests neufs des calculs : à trier, rien corrigé ce soir.
 
 📝 **LE 26 OCTOBRE 2026, 18 H 27 : LA 1.220 EST EN LIGNE** (la table de cas, ses deux lots, et le groupe-cours qui naît sans ses élèves). *Écrit par Claude Code.*
 

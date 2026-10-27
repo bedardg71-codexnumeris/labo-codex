@@ -1,5 +1,15 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 27 octobre 2026, 14 h 20 (Toronto) : `1.221.0` EN LIGNE** (build `1027-1205`) — Netlify
+> `6ae0e2b0`, `commit_ref` `f8ee0217`, `state: ready`, publié à 17:43:51 Z (13 h 43). Porte : #1172, #1114, les calculs 4a,
+> 4b, 4c, #1173, #1174, #1120 lot 3 (tous acceptés). Verdict du Mac **vert** sur `f8ee0217` par `scripts/verdict-en-morceaux.mjs`
+> (première course, sans refus : 1 105 essais, 0 rouge, 1 instable — `presences-lot-d-enregistrement` (g), la même que le 26),
+> `git push`. ⚠ **GitHub JUGÉ ROUGE** (run 40553224586) : 16 rapports sur 16, l'étape apt bornée tenue (deux essais dans six
+> morceaux, jamais trois) ; 13 neuves sous Linux, vertes sur le Mac (3 revenues du 26, 7 de `calculs-4c`, 1 de `calculs-4b`,
+> 2 de `temoin-enregistrement-lot-b` à 360 px) ; 9 de la baseline redevenues vertes (`RELAIS.md`). Rien corrigé.
+> Portes terrain : aucune. **Ouverts** : le tri des 13 rouges Linux et de l'instable, à Cowork.
+> **MANDAT COURANT** : la refonte de l'Aide (`plans de travail/PLAN-2026-10-24-refonte-de-l-aide.md`), Cowork remesure d'abord.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 26 octobre 2026, 19 h 03 (Toronto) : `1.220.0` EN LIGNE** (build `1026-1646`) — Netlify
 > `6adfd3c6`, `commit_ref` `10b7093d`, `state: ready`, publié à 22:27:35 Z (18 h 27). Porte : la table de cas (lots 3a
 > `cddfd207`, 3b `27d5d610`) et #1038. Verdict complet de `1473b15a` (10 morceaux, 1 046 essais, 1 rouge : la spec du lot C
