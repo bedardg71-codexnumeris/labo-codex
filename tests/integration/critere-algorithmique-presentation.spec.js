@@ -96,7 +96,7 @@ test('1 440 px · trois colonnes, la chaîne et ses cinq états, une seule étap
     const bc = atelier(page).locator('.atelier-algo-chaine .bc-etape');
     await expect(bc).toHaveCount(5);
     await expect(bc.locator('.bc-label')).toHaveText(['Ce que tu relèves et comptes', 'Codes utilisés', 'Note calculée', 'Cas d’interprétation', 'Ce que l’étudiant·e lit']);   // ↻ lot 3a
-    await expect(bc.locator('.bc-info')).toHaveText(['erreurs / mots', '2 codes', 'pénalité normalisée', '1 table', '3 textes']);
+    await expect(bc.locator('.bc-info')).toHaveText(['erreurs / mots', '2 codes', 'pénalité proportionnelle', '1 table', '3 textes']);   // ↻ étape 4a : le nom court du calcul
     expect(await bc.evaluateAll((els) => els.map((b) => b.classList.contains('bc-complet')))).toEqual([true, true, true, true, true]);
     expect(await ouvertes(page)).toEqual(['eleve']);
     await expect(chaine(page, 'eleve')).toHaveClass(/bc-ouvert/);
@@ -118,7 +118,7 @@ test('1 440 px · trois colonnes, la chaîne et ses cinq états, une seule étap
     // Les états non réglés : un critère neuf, sans noms, sans pondération, cochée sans code, sans texte.
     await page.evaluate(() => window.chargerGrillePourModif('GN'));
     const bn = atelier(page, 'CN').locator('.atelier-algo-chaine .bc-etape');
-    await expect(bn.locator('.bc-info')).toHaveText(['à nommer', '0 code', 'pénalité normalisée', '0 table', '0 texte']);
+    await expect(bn.locator('.bc-info')).toHaveText(['à nommer', '0 code', 'pénalité proportionnelle', '0 table', '0 texte']);
     expect(await bn.evaluateAll((els) => els.map((b) => b.classList.contains('bc-complet')))).toEqual([false, false, false, true, false]);
     expect(await bn.evaluateAll((els) => els.map((b) => b.querySelector('.u-lecteur-ecran').textContent))).toEqual(
         [', à régler', ', à régler', ', à régler', ', réglée', ', à régler, ouverte']);
@@ -364,7 +364,7 @@ test('à 820 px, une chimie aux codes pondérés : la copie pondérée, aucun «
     await expect(ap.locator('[data-apercu-nom="mots"]')).toHaveText('calculs');
     await ap.locator('.apercu-algo-reference[data-copie="aucune"]').click();
     expect(await phrasePdf(page, 'CC')).toBe('Ta production contient 0 unité manquante pour 12 calculs.');
-    await expect(ap.locator('.apercu-algo-etendue')).toHaveText('Sans projection, ces copies ont la longueur du facteur : chaque unité manquante y coûte un point, quel que soit le facteur.');
+    await expect(ap.locator('.apercu-algo-etendue')).toHaveText('Sans projection, ces copies ont la longueur fixée dans le calcul : chaque unité manquante y coûte un point, quelle que soit cette longueur.');
     // Ni l'aperçu ni la chaîne ne disent « français » (le menu du modèle des phrases, lui, offre « Français écrit »).
     expect((await texte(ap)).toLowerCase()).not.toContain('français');
     expect((await texte(atelier(page, 'CC').locator('.atelier-algo-chaine'))).toLowerCase()).not.toContain('français');
@@ -389,12 +389,12 @@ test('une grille enregistrée : changer la pondération du critère refait l\'ap
     const ap = apercu(page, 'CR_P');
     await ap.locator('.apercu-algo-reference[data-copie="aucune"]').click();
     await expect(ap.locator('.apercu-algo-resultats')).toContainText('30/30 (100 %)');
-    await expect(etape(page, 'note', 'CR_P').locator('.atelier-algo-etape-resume')).toHaveText('Formule : pénalité fixe, sur 30');
+    await expect(etape(page, 'note', 'CR_P').locator('.atelier-algo-etape-resume')).toHaveText('Pénalité fixe, sur 30')   // ↻ étape 4a (ébauche);
     const pond = page.locator('input[data-on-change="modifierCritereGrilleHandler"][data-champ="ponderation"]').first();
     await pond.fill('20');
     await pond.press('Tab');
     await expect(ap.locator('.apercu-algo-resultats')).toContainText('20/20 (100 %)');
-    await expect(etape(page, 'note', 'CR_P').locator('.atelier-algo-etape-resume')).toHaveText('Formule : pénalité fixe, sur 20');
+    await expect(etape(page, 'note', 'CR_P').locator('.atelier-algo-etape-resume')).toHaveText('Pénalité fixe, sur 20');
     expect(erreurs).toEqual([]);
 });
 

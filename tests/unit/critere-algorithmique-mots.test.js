@@ -31,7 +31,8 @@ const apostrophes = (s) => s.replace(/’/g, "'");
 // ↻ 22 oct. 2026 (étape 2a) : B1, C2, D3, D4b, D6, D7 et G3 changent avec les deux noms et la parenthèse
 // « (5 après pondération) » ; leurs nouveaux textes, provisoires, sont dans le fichier du 22 oct.
 const REGLES = apostrophes(lire('plans de travail/TEXTES-2026-10-21-critere-algorithmique.md')
-    + '\n' + lire('plans de travail/TEXTES-2026-10-22-noms-critere-algorithmique.md'));
+    + '\n' + lire('plans de travail/TEXTES-2026-10-22-noms-critere-algorithmique.md')
+    + '\n' + lire('plans de travail/TEXTES-2026-10-26-calculs-tout-faits.md'));   // étape 4a : les trois calculs tout faits
 
 /* ======================================================= T — LES TEXTES À LEURS SITES */
 
@@ -43,14 +44,16 @@ const B2 = 'Le niveau de chaque évaluation, dans l\'échelle qu\'elle emploie.'
 const B3 = 'Résultat calculé en temps réel : le pourcentage pondéré, et son niveau dans l\'échelle de l\'évaluation.';
 const C1 = 'somme pondérée';
 const C2 = 'Entre parenthèses, le nombre après pondération : « (5 après pondération) ». Il ne paraît que si un sous-critère ne pèse pas 1 ; place-le juste après le nombre. Une phrase sans lui ne montre que le nombre posé, mais la ligne du calcul, dans le PDF, montre la parenthèse.';
-const F1 = 'La pénalité est proportionnelle au taux d’erreurs, ramené à une longueur de référence.';
+// ↻ Étape 4a (27 oct. 2026) : F1 devient le texte de « Pénalité proportionnelle à la longueur », validé par Grégoire le 26 oct.
+const F1 = 'Chaque occurrence retire des points en proportion de la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.';
 const D = {
     // ↻ #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11 : l'Aide rangée par onglet) : le titre perd son numéro de tête « 5c. », le reste est inchangé.
     D1: 'Les critères algorithmiques',
-    D2: 'Un critère algorithmique calcule sa note par une formule, à partir de ce que tu comptes sur la copie. Tu choisis la formule dans le gabarit de la grille : un modèle, puis ses paramètres.',
-    D2a: 'Pénalité normalisée : Note = Pondération − (Erreurs pondérées ÷ Mots × Facteur). Le nombre est ramené à une longueur de référence.',
-    D2b: 'Ratio mots par erreur : atteindre le ratio visé donne la note complète.',
-    D2c: 'Pénalité fixe par erreur : chaque erreur retire un nombre de points donné, sans égard à la longueur.',
+    // ↻ Étape 4a (27 oct. 2026) : les trois noms et les trois textes validés le 26 oct. ; le calcul se choisit dans l'étape « Note calculée ».
+    D2: 'Un critère algorithmique calcule sa note à partir de ce que tu comptes sur la copie. Tu choisis le calcul dans l\'étape « Note calculée » du critère, puis tu en fixes le réglage.',
+    D2a: 'Pénalité proportionnelle à la longueur : Chaque occurrence retire des points en proportion de la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.',
+    D2b: 'Rapport visé : Tu fixes le rapport qui donne la note entière, par exemple une occurrence à chaque 60 mots. Une copie qui l’atteint a la note entière ; en deçà, la note baisse en proportion. Une copie sans occurrence a la note entière.',
+    D2c: 'Pénalité fixe : Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la copie. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.',
     D2d: 'La formule, avec tes valeurs, s\'affiche dans le gabarit et sous le résultat au moment d\'évaluer.',
     D3: 'Tu nommes, au singulier et au pluriel, ce que tu comptes et ce à quoi tu le rapportes : « erreur » sur des « mots » pour une rédaction, « unité manquante » sur des « calculs » en chimie, « faute de rythme » sur des « mesures » en musique. Ces noms s\'écrivent dans les champs de l\'évaluation, dans la phrase du décompte et dans le PDF de l\'étudiant·e. Un critère créé avant ces noms se lit « erreur » et « mot ».',
     D4: 'Les sous-critères sont les catégories de ce que tu comptes. Chacun porte un code, un nom, une pondération et une observation : ce que l\'étudiant·e lit à propos de ce code. La pondération dit ce que pèse une occurrence : 1 par défaut, 0,5 pour la compter à moitié ; un sous-critère de pondération 0 ne se pose pas.',
@@ -75,8 +78,13 @@ beforeAll(() => {
 describe('lot de mots · T — chaque texte à son site', () => {
     it('T.0 chaque chaîne du banc est celle du fichier réglé', () => {
         // F1 n'a pas de texte réglé : « retirer la phrase […] ; le reste de la description ne change pas ».
+        // ↻ Étape 4a (27 oct.) : D2a à D2c sont « nom : texte validé » — le texte se lit dans les TEXTES du 26 oct. ;
+        // D2 est la phrase de l'étape 4a (consigne § 2 : l'Aide « dit qu'on choisit le calcul dans l'étape “Note
+        // calculée” »), écrite par Claude Code et nommée dans la demande de relecture : aucun fichier réglé ne la porte.
+        const aRegler = (k, s) => (/^D2[abc]$/.test(k) ? s.split(' : ').slice(1).join(' : ') : s);
         for (const [k, s] of Object.entries({ A1, A2, A3, B1, B2, B3, C1, C2, ...D })) {
-            expect(REGLES.includes(apostrophes(s)), k).toBe(true);
+            if (k === 'D2') continue;
+            expect(REGLES.includes(apostrophes(aRegler(k, s))), k).toBe(true);
         }
     });
 
@@ -99,8 +107,8 @@ describe('lot de mots · T — chaque texte à son site', () => {
         expect(r.aide).toBe(C2);
     });
 
-    it('F1 : la description de « Pénalité normalisée », sans la phrase de l’origine', () => {
-        expect(chargerScript('js/evaluation-formules.js').formulesAlgo.obtenirModele('penalite_normalisee').description).toBe(F1);
+    it('F1 : le texte de « Pénalité proportionnelle à la longueur », sans la phrase de l’origine', () => {
+        expect(chargerScript('js/evaluation-formules.js').formulesAlgo.obtenirModele('penalite_normalisee').texte).toBe(F1);
     });
 
     it('D1 à D8 dans la section 5c, D9 parti', () => {
@@ -180,6 +188,9 @@ const G1_TERME = 'Sous-critères (critère algorithmique)';
 const G1 = 'Les catégories de ce que compte un critère algorithmique. Chaque sous-critère porte un code, un nom, une pondération (ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié) et une observation, que l\'étudiant·e lit. Le calcul reçoit la somme pondérée des codes posés. « Partir de la liste du français écrit » en crée dix d\'un coup. Configuration : Conception → Grilles de critères → type « Algorithmique ».';
 const G2 = '💡 La pondération dit ce que pèse un code posé : 1 par défaut, 0,5 pour le compter à moitié.';
 // ↻ 22 oct. 2026 (étape 2a) : les champs portent les noms du critère ; la liste du français écrit les pose.
+// ↻ 27 oct. 2026 (étape 4a) : la phrase sous la formule est partie avec le menu des modèles — l'ébauche validée, qui
+// fait foi, ne la porte pas ; l'étape « Note calculée » s'ouvre sur « Chaque code posé compte pour la pondération de
+// son sous-critère : c'est le compte pondéré. », et la carte choisie dit son texte (F1).
 const G3 = 'Lors de l\'évaluation, « Erreurs » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « Mots » se tape.';
 
 /** Le gabarit d'un critère « Français écrit » en création, rendu après la pression du bouton (modèle par défaut). */
@@ -198,10 +209,11 @@ describe('lot de mots 2 · G — trois textes restés faux', () => {
         expect(plat(dt[0].nextElementSibling.textContent)).toBe(G1);
     });
 
-    it('G2 sous les sous-critères, G3 sous la formule (« Pénalité normalisée », qui emploie les mots)', async () => {
+    it('G2 sous les sous-critères ; G3 parti (étape 4a), la carte choisie dit son texte', async () => {
         const gabarit = await gabaritRendu();
         expect(plat(gabarit.querySelector('.sous-criteres-info').textContent)).toBe(G2);
-        expect([...gabarit.querySelectorAll('small')].map((x) => plat(x.textContent))).toContain(G3);
+        expect(plat(gabarit.textContent)).not.toContain(G3);
+        expect(plat(gabarit.querySelector('.calc-carte[data-actif] .calc-texte').textContent)).toBe(F1);
     });
 });
 

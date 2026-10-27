@@ -239,6 +239,18 @@
                                 pointsParErreur: { type: 'nombre', minValeur: 0, maxValeur: 100 }
                             }
                         },
+                        // Étape 4a (27 oct. 2026) — CE QUE VAUT LA NOTE QUAND UNE DONNÉE VAUT 0 VOYAGE avec le calcul.
+                        // Schéma fermé (les trois calculs, leurs données) ; ce qu'il ne dit pas (un choix connu, jamais
+                        // « calculer » une division par 0) : `formulesAlgo.refusCasZero`, appelé par partage-validation
+                        // (niveau 3), comme les tables de cas.
+                        casZero: {
+                            type: 'objet',
+                            schema: {
+                                penalite_normalisee: { type: 'objet', schema: { etendue: { type: 'chaine', max: 10 }, comptePondere: { type: 'chaine', max: 10 } } },
+                                ratio_cible: { type: 'objet', schema: { etendue: { type: 'chaine', max: 10 }, comptePondere: { type: 'chaine', max: 10 } } },
+                                penalite_par_erreur: { type: 'objet', schema: { comptePondere: { type: 'chaine', max: 10 } } }
+                            }
+                        },
                         facteurNormalisation: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
                         // #668 Lot 4 — LA PROJECTION EUF VOYAGE AVEC LA GRILLE.
                         // Même classe de défaut que #667 : sans ces champs, une

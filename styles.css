@@ -3854,8 +3854,10 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
 .table-cas--enseignant .table-cas-entete, .table-cas--enseignant .table-cas-rangee { grid-template-columns: 170px minmax(0, 1fr); }
 /* Le menu « Selon » (et « Reprendre une de tes collections… », même étiquette) : WebKit ignore la hauteur d'un menu
    natif (mesuré : 23 px) — l'apparence du système retirée, le chevron dessiné, comme les menus de la bibliothèque.
-   L'id du conteneur : `.mode-clair .contenu select { background: white }` (0,2,1) emporterait le chevron (vu en capture). */
-#listeCriteres .table-cas-selon select.controle-form {
+   L'id du conteneur : `.mode-clair .contenu select { background: white }` (0,2,1) emporterait le chevron (vu en capture).
+   ↻ Étape 4a (27 oct.) : les menus « Si [donnée] vaut 0 » de « Note calculée », même règle (mesuré : 23 px aussi). */
+#listeCriteres .table-cas-selon select.controle-form,
+#listeCriteres .calc-cas-rangee select.controle-form {
     width: auto; max-width: 100%; height: 40px; min-height: 40px; padding: 0 32px 0 12px;
     color: var(--texte-principal); background-color: var(--surface-carte);
     appearance: none; -webkit-appearance: none; -moz-appearance: none;
@@ -3886,6 +3888,43 @@ button.apercu-algo-segment:hover, button.apercu-algo-segment:focus-visible {
 .choix-app-item dd { margin: 0; color: var(--texte-secondaire); }
 .choix-app-item .table-cas-lien { padding: 0 2px; min-height: 0; font-size: inherit; }
 @container choix-app (max-width: 520px) { .choix-app-item { grid-template-columns: minmax(0, 1fr); } }
+
+/* Étape 4a du critère algorithmique (27 oct. 2026) — « Note calculée » : les trois calculs tout faits en cartes,
+   le calcul en blocs (les pastilles `.repere-enonce` des phrases), « Quand une donnée de la copie vaut 0 ».
+   Ébauche `EBAUCHE-2026-10-26-calculs.html` (`.calc-*`), ramenée aux variables de design-system.html. */
+.calc-note { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.calc-titre { margin: 4px 0 0; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texte-muted); font-weight: 600; }
+.calc-choix { display: flex; flex-direction: column; gap: 8px; max-width: 76ch; min-width: 0; }
+.calc-carte {
+    border: 1px solid var(--bordure-claire); border-radius: var(--radius-moyen); background: var(--surface-carte);
+    padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0;
+}
+.calc-carte[data-actif] { border-color: var(--accent-primaire); box-shadow: 0 0 0 2px var(--bleu-pale); }
+.calc-carte-tete { display: flex; align-items: center; gap: 10px; cursor: pointer; min-height: 44px; margin: 0; }
+.calc-carte-tete input { width: 18px; height: 18px; accent-color: var(--accent-primaire); flex: none; margin: 0; }
+.calc-carte-tete input:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.calc-nom { font-weight: 700; font-size: 0.95rem; color: var(--texte-principal); }
+.calc-texte { margin: 0; font-size: 0.86rem; color: var(--texte-secondaire); max-width: 68ch; }
+.calc-carte:not([data-actif]) .calc-texte { padding-left: 28px; }
+.calc-param { max-width: 380px; margin: 0; }
+.calc-param label { font-size: 0.85rem; color: var(--texte-secondaire); }
+.calc-param .controle-form { max-width: 140px; min-height: 44px; }
+.calc-legende { margin: 0; font-size: 0.84rem; color: var(--texte-secondaire); }
+.calc-formule {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px; min-width: 0;
+    border-radius: var(--radius-moyen); background: var(--surface-element); border: 1px solid var(--bordure-claire);
+}
+.calc-formule .repere-enonce { white-space: normal; overflow-wrap: anywhere; padding: 1px 8px; }
+.calc-op { font-weight: 700; font-size: 0.95rem; color: var(--texte-principal); font-variant-numeric: tabular-nums; }
+.calc-copie { margin: 0; font-size: 0.88rem; color: var(--texte-principal); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.calc-cas { border-top: 1px dashed var(--bordure-moyenne); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.calc-cas-titre { margin: 0; font-size: 0.84rem; font-weight: 600; color: var(--texte-secondaire); }
+.calc-cas-rangee { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.86rem; color: var(--texte-principal); min-width: 0; }
+.calc-cas-rangee .repere-enonce { padding: 1px 8px; white-space: normal; }
+/* Le menu prend la place qui reste, jamais plus : un choix long (« Aucune note : l’évaluation attend… ») s'y tronque
+   au lieu de pousser la carte (mesuré à 700 px : 107 px de trop). */
+#listeCriteres .calc-cas-rangee select.controle-form { flex: 1 1 16rem; min-width: 0; box-sizing: border-box; }
+.calc-inconnu { color: var(--orange-accent); }
 
 /* « Ce que tu relèves et comptes » : les deux exemples (texte d'aide fixe) */
 .noms-algo-exemples {

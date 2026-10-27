@@ -435,7 +435,11 @@ describe('noms · D — une rédaction et une discipline sans texte, sur chaque 
                 modeleProjection: 'norme_externe', paramsProjection: { motsReference: 900, erreursTolerees: 30 } });
             const liste = editeur(c).liste();
             const t = plat(liste.textContent);
-            expect(t).toContain(`Lors de l'évaluation, « ${d.champE} » se remplit avec les codes que tu poses dans Annoter, ou se tape ; « ${d.champM} » se tape.`);
+            // ↻ Étape 4a (27 oct.) : la phrase sous la formule est partie avec le menu ; le réglage et les pastilles
+            // de « Note calculée » portent les noms du critère.
+            expect(t).toContain(`Longueur sur laquelle une occurrence coûte un point (${d.mp})`);
+            expect(t).toContain(`Compte pondéré des ${d.p}`);
+            expect(t).toContain(`Si Compte des ${d.mp} vaut 0`);
             const apercu = liste.querySelector('.apercu-algo');
             expect(apercu.querySelector('[data-apercu-champ="mots"]').value).toBe('900');
             expect(plat(apercu.querySelector('[data-apercu-nom="mots"]').textContent)).toBe(d.mp);

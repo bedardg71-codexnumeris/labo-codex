@@ -86,8 +86,10 @@ describe('atelier · A — les cinq étapes, dans l\'ordre de la maquette, chacu
     });
 
     it('A.c « Note » : une pondération et le paramètre de la formule au-dessus de 0 (la pénalité fixe seule admet 0)', () => {
-        expect(etat(REDACTION, 'note')).toMatchObject({ reglee: true, info: 'pénalité normalisée', resume: 'Formule : pénalité normalisée, sur 20' });
-        expect(etat({ ...REDACTION, ponderation: 0 }, 'note')).toMatchObject({ reglee: false, resume: 'Formule : pénalité normalisée, sans pondération' });
+        // ↻ Étape 4a (27 oct.) : l'info, le nom court du calcul ; le résumé, son nom (l'ébauche : « Pénalité fixe, sur 20 »).
+        expect(etat(REDACTION, 'note')).toMatchObject({ reglee: true, info: 'pénalité proportionnelle', resume: 'Pénalité proportionnelle à la longueur, sur 20' });
+        expect(etat({ ...REDACTION, ponderation: 0 }, 'note')).toMatchObject({ reglee: false, resume: 'Pénalité proportionnelle à la longueur, sans pondération' });
+        expect(etat({ ...REDACTION, modeleFormule: 'penalite_par_erreur' }, 'note').resume).toBe('Pénalité fixe, sur 20');
         // Mesuré : la pénalité normalisée et le ratio visé bornent leur paramètre (0 → 1) ; l'étape suit ce que le calcul applique.
         expect(etat({ ...REDACTION, paramsFormule: { facteurNormalisation: 0 } }, 'note').reglee).toBe(true);
         expect(etat({ ...REDACTION, modeleFormule: 'ratio_cible', paramsFormule: { motsParErreurCible: 0 } }, 'note').reglee).toBe(true);
@@ -95,7 +97,7 @@ describe('atelier · A — les cinq étapes, dans l\'ordre de la maquette, chacu
         const fixe = { ...REDACTION, modeleFormule: 'penalite_par_erreur' };
         expect(etat({ ...fixe, paramsFormule: { pointsParErreur: 0 } }, 'note').reglee).toBe(false);
         expect(etat({ ...fixe, paramsFormule: { pointsParErreur: 1 } }, 'note').reglee).toBe(true);
-        expect(etat({ ...REDACTION, modeleFormule: 'ratio_cible', paramsFormule: { motsParErreurCible: 60 } }, 'note').info).toBe('ratio visé');
+        expect(etat({ ...REDACTION, modeleFormule: 'ratio_cible', paramsFormule: { motsParErreurCible: 60 } }, 'note').info).toBe('rapport visé');
     });
 
     // ↻ Lot 3a (26 oct. 2026) : « Cas d'interprétation ». Sans limite, réglée ; une limite fixée l'est quand sa longueur
@@ -285,7 +287,7 @@ describe('atelier · E — la page : une étape ouverte, la chaîne, l\'aperçu,
         expect(etapes[4].classList.contains('bc-destination')).toBe(true);
         expect(etapes.every((b) => b.querySelector('.bc-crayon'))).toBe(true);
         expect(texte(etapes[4].querySelector('.u-lecteur-ecran'))).toBe(', réglée, ouverte');
-        expect(etapes.map((b) => texte(b.querySelector('.bc-info')))).toEqual(['erreurs / mots', 'palette générale', 'pénalité normalisée', '1 table', '3 textes']);
+        expect(etapes.map((b) => texte(b.querySelector('.bc-info')))).toEqual(['erreurs / mots', 'palette générale', 'pénalité proportionnelle', '1 table', '3 textes']);
     });
 
     it('E.b toucher une étape de la chaîne l\'ouvre et ferme l\'autre ; l\'en-tête ouverte se referme ; la mémoire tient au redessin', () => {

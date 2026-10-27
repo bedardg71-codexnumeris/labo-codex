@@ -55,7 +55,8 @@ describe('#667 · A — le calcul historique est reproduit à l\'identique', () 
         // 100 − (59 ÷ 460 × 300) = 61,52 — et surtout PAS 35,87 (facteur 500).
         const r = F.calculer(grilleReelle, { ponderation: 100, erreurs: 59, mots: 460 });
         expect(r.note.toFixed(2)).toBe('61.52');
-        expect(F.libelleSymbolique(grilleReelle)).toContain('300');
+        // ↻ Étape 4a (27 oct.) : `libelleSymbolique` est parti avec son seul lecteur ; le réglage se lit dans les pastilles.
+        expect(F.blocs(grilleReelle).map((b) => b.texte)).toContain('Longueur fixée (300)');
     });
 
     it('un critère SANS facteur du tout retombe sur 500, comme le faisait `|| 500`', () => {
@@ -109,11 +110,13 @@ describe('#667 · B — le texte affiché dérive du calcul', () => {
         const noteB = F.calculer(b, donnees).note;
         expect(noteA).not.toBeCloseTo(noteB, 2);
 
-        expect(F.libelleSymbolique(a)).toContain('500');
-        expect(F.libelleSymbolique(b)).toContain('250');
-        expect(F.libelleSymbolique(b)).not.toContain('500');
-        expect(F.libelleChiffre(a, donnees)).toContain(noteA.toFixed(2).replace(".", ","));
-        expect(F.libelleChiffre(b, donnees)).toContain(noteB.toFixed(2).replace(".", ","));
+        // ↻ Étape 4a : les pastilles (le texte sans les données) et la ligne chiffrée, qui finit sur la note
+        // arrondie au centième sans zéro inutile (« = 35,87 / 100 »).
+        expect(F.blocs(a).map((x) => x.texte).join(' ')).toContain('500');
+        expect(F.blocs(b).map((x) => x.texte).join(' ')).toContain('250');
+        expect(F.blocs(b).map((x) => x.texte).join(' ')).not.toContain('500');
+        expect(F.libelleChiffre(a, donnees)).toContain('= ' + noteA.toFixed(2).replace(".", ",") + ' / 100');
+        expect(F.libelleChiffre(b, donnees)).toContain('= ' + noteB.toFixed(2).replace(".", ",") + ' / 100');
     });
 
     it('chaque modèle offert sait se calculer ET se dire', () => {
@@ -125,8 +128,8 @@ describe('#667 · B — le texte affiché dérive du calcul', () => {
             const r = F.calculer(critere, donnees);
             expect(r.applicable, m.id).toBe(true);
             expect(Number.isFinite(r.note), m.id).toBe(true);
-            expect(F.libelleSymbolique(critere).length, m.id).toBeGreaterThan(0);
-            expect(F.libelleChiffre(critere, donnees), m.id).toContain(r.note.toFixed(2).replace(".", ","));
+            expect(F.blocs(critere).length, m.id).toBeGreaterThan(0);
+            expect(F.libelleChiffre(critere, donnees), m.id).toContain('= ' + require(path.join(racine, 'js/note-pourcentage.js')).formaterNombre(r.note) + ' / 100');
         });
     });
 
@@ -204,11 +207,9 @@ describe('#667 · D — plus aucun site ne réécrit la formule à la main', () 
         expect((code.match(/id="formule_algo_\$\{critere\.id\}"/g) || []).length).toBe(3);
     });
 
-    it('les quatre handlers du gabarit sont exportés (sinon le bloc ne réagit à rien)', () => {
+    it('les trois gestes de « Note calculée » sont exportés (sinon le bloc ne réagit à rien) — ↻ étape 4a', () => {
         const code = lire('js/grilles.js');
-        ['modifierModeleFormuleTempHandler', 'modifierParamFormuleTempHandler',
-         'modifierModeleFormuleGrilleHandler', 'modifierParamFormuleGrilleHandler'
-        ].forEach((h) => {
+        ['choisirCalculNoteAlgo', 'modifierReglageCalculAlgo', 'choisirCasZeroAlgo'].forEach((h) => {
             expect(code, h).toContain('window.' + h + ' = ' + h + ';');
         });
     });

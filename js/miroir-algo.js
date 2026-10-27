@@ -98,9 +98,9 @@ function libelles(critere) {
         sansEtendue: 'champ ' + champMots + ' vide',
         code: function(nombre, nom, poids) { return _formaterNombre(nombre) + ' × « ' + nom + ' » (poids ' + _formaterNombre(poids) + ')'; },
         plancher: 'la note touche le plancher',
-        noteImpossible: 'aucune note : la formule a besoin du champ ' + champMots,
         sansPonderation: 'Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.',
-        etendueDuFacteur: 'Sans projection, ces copies ont la longueur du facteur : chaque ' + N.erreurs.singulier + ' y coûte un point, quel que soit le facteur.'
+        // Étape 4a (27 oct.) : le « facteur » s'appelle « la longueur fixée » dans l'étape « Note calculée ».
+        etendueDuFacteur: 'Sans projection, ces copies ont la longueur fixée dans le calcul : chaque ' + N.erreurs.singulier + ' y coûte un point, quelle que soit cette longueur.'
     };
 }
 
