@@ -1012,6 +1012,7 @@ function _detecterAlgoA0Bilan(grilleDef, ec, totalErreursFr) {
             var resEstimee = window.formulesAlgo.calculer(gc, {
                 ponderation: pond,
                 erreurs: totalErreursFr,
+                compte: totalErreursFr,   // étape 4b : le compte brut (ici, le même nombre)
                 mots: motsEstime
             });
             var noteEstimee = resEstimee.applicable ? resEstimee.note : null;

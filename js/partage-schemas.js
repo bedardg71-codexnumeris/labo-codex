@@ -251,6 +251,30 @@
                                 penalite_par_erreur: { type: 'objet', schema: { comptePondere: { type: 'chaine', max: 10 } } }
                             }
                         },
+                        // Étape 4b (27 oct. 2026) — LES CALCULS COMPOSÉS VOYAGENT avec le critère. Schéma fermé ; ce qu'il
+                        // ne dit pas (des jetons connus qui s'évaluent, des choix « vaut 0 » lisibles, des identifiants
+                        // uniques) : `formulesAlgo.refusCalculs`, appelé par partage-validation (niveau 3).
+                        calculs: {
+                            type: 'tableau', max: 10,
+                            schema: {
+                                id: { type: 'chaine', requis: true, max: 10 },
+                                nom: { type: 'chaine', requis: true, max: 80 },
+                                sert: { type: 'chaine', requis: true, max: 10 },
+                                jetons: {
+                                    type: 'tableau', max: 60,
+                                    schema: {
+                                        t: { type: 'chaine', requis: true, max: 1 },
+                                        k: { type: 'chaine', max: 20 },
+                                        v: { type: 'chaine-ou-nombre', max: 1 }
+                                    }
+                                },
+                                cas: {
+                                    type: 'objet',
+                                    schema: { etendue: { type: 'chaine', max: 10 }, compte: { type: 'chaine', max: 10 }, comptePondere: { type: 'chaine', max: 10 } }
+                                }
+                            }
+                        },
+                        calculsProchain: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
                         facteurNormalisation: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
                         // #668 Lot 4 — LA PROJECTION EUF VOYAGE AVEC LA GRILLE.
                         // Même classe de défaut que #667 : sans ces champs, une

@@ -315,8 +315,10 @@ function _etapeNote(c) {
     var pondOk = isFinite(pond) && pond > 0;
     var paramsOk = (f.modele.parametres || []).every(function(p) { var v = Number(f.params[p.cle]); return isFinite(v) && v > 0; });
     // Étape 4a (ébauche) : l'info, le nom court du calcul (« pénalité fixe ») ; le résumé, son nom (« Pénalité fixe, sur 20 »).
-    return { id: 'note', reglee: pondOk && paramsOk, info: f.modele.court,
-        resume: f.modele.nom + (pondOk ? ', sur ' + _fmt(pond) : ', sans pondération') };
+    // Étape 4b : un calcul composé, son nom entre guillemets (« « Mon taux », sur 20 ») ; introuvable, l'étape est à régler.
+    var nom = f.modele.compose ? f.modele.court : f.modele.nom;
+    return { id: 'note', reglee: pondOk && paramsOk && !f.introuvable, info: f.modele.court,
+        resume: nom + (pondOk ? ', sur ' + _fmt(pond) : ', sans pondération') };
 }
 
 /** Cas d'interprétation (lot 3a) — sans limite, réglée ; une limite fixée l'est quand sa longueur et sa
@@ -944,13 +946,23 @@ function _remplirApercu(atelier) {
     _remplirCalculDeLaNote(atelier, critere, copie);
 }
 
+/** Étape 4b — les données de la copie fictive d'un atelier, comme `calculer` les reçoit ; null sans pondération. */
+function donneesDeLaCopie(atelier) {
+    var critere = atelier && atelier._critere, pond = Number(critere && critere.ponderation);
+    if (!critere || !(isFinite(pond) && pond > 0)) return null;
+    var copie = _copieDe(atelier);
+    return { ponderation: pond, erreurs: copie.erreursFormule, compte: copie.erreurs, mots: copie.mots || 0 };
+}
+
 /** Étape 4a — « Sur la copie fictive : … » sous le calcul choisi : la ligne du registre, au conditionnel. */
 function _remplirCalculDeLaNote(atelier, critere, copie) {
+    // Étape 4b : la même copie, dans le composeur (le brouillon en cours).
+    if (typeof window !== 'undefined' && window.composeurCalcul) window.composeurCalcul.remplirLigne(atelier);
     var x = atelier.querySelector('[data-calcul-copie-texte]');
     if (!x) return;
     var pond = Number(critere.ponderation);
     x.textContent = (isFinite(pond) && pond > 0)
-        ? _F().ligneResultat(critere, { ponderation: pond, erreurs: copie.erreursFormule, mots: copie.mots || 0 }, 'conditionnel')
+        ? _F().ligneResultat(critere, { ponderation: pond, erreurs: copie.erreursFormule, compte: copie.erreurs, mots: copie.mots || 0 }, 'conditionnel')
         : _M().libelles(critere).sansPonderation;
 }
 
@@ -1052,7 +1064,7 @@ function _remplirResultats(ap, critere, lec) {
     var copie = lec.essai.copie || {};
     ap.querySelector('.apercu-algo-raison').textContent = lec.essai.applicable ? ''
         : ((isFinite(pond) && pond > 0)
-            ? _F().ligneResultat(critere, { ponderation: pond, erreurs: copie.erreursFormule, mots: copie.mots || 0 }, 'conditionnel')
+            ? _F().ligneResultat(critere, { ponderation: pond, erreurs: copie.erreursFormule, compte: copie.erreurs, mots: copie.mots || 0 }, 'conditionnel')
             : L.sansPonderation);
 }
 
@@ -1324,7 +1336,8 @@ var api = {
     voirPalier: voirPalier,
     copiePourCas: copiePourCas,
     voirCas: voirCas,
-    ouvrirRecommandation: ouvrirRecommandation
+    ouvrirRecommandation: ouvrirRecommandation,
+    donneesDeLaCopie: donneesDeLaCopie
 };
 
 if (typeof window !== 'undefined') {

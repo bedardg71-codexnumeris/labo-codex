@@ -114,8 +114,9 @@ describe('miroir · A — la note est celle de formulesAlgo.calculer, pour les t
             expect(e.pourcentage).toBe(37);
             expect(e.points).toBeCloseTo(0.37 * 30, 10);
         });
-        // et elle reçoit ce que la copie porte : la somme pondérée, l'étendue, la pondération du critère
-        essais.forEach((e) => expect(appels).toContainEqual({ ponderation: 30, erreurs: e.copie.erreursFormule, mots: e.copie.mots }));
+        // et elle reçoit ce que la copie porte : la somme pondérée, l'étendue, la pondération du critère ;
+        // ↻ étape 4b (27 oct.) : et le compte brut, que lit un calcul composé.
+        essais.forEach((e) => expect(appels).toContainEqual({ ponderation: 30, erreurs: e.copie.erreursFormule, mots: e.copie.mots, compte: e.copie.erreurs }));
     });
 
     it('A.c la phrase de l\'élève = décompte (avec mentionPonderee) puis projection, comme l\'évaluation', () => {

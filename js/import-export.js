@@ -596,8 +596,20 @@ function _assainirCasZero(valeur) {
     return r ? { casZero: r } : {};
 }
 
+/**
+ * Étape 4b du critère algorithmique (27 oct. 2026) — les calculs que l'enseignant·e compose (`critere.calculs`), relus par
+ * le registre des calculs (`formulesAlgo.assainirCalculs`) : un calcul illisible est écarté, jamais deviné ; leurs noms
+ * passent par `assainirChaine`. S'il donnait la note, le critère n'a plus de note jusqu'à ce qu'on en choisisse un.
+ * Rend `{ calculs }`, ou `{}` quand aucun n'est lisible.
+ */
+function _assainirCalculs(valeur) {
+    const F = (typeof window !== 'undefined') ? window.formulesAlgo : null;
+    const r = F ? F.assainirCalculs(valeur, assainirChaine) : undefined;
+    return r ? { calculs: r } : {};
+}
+
 /** Les types de schéma relus par leur registre : chacun rend `{ champ: valeur }`, ou `{}` (le champ ne vient pas). */
-const ASSAINISSEURS_DEDIES = { tablesCas: _assainirTablesCas, casZero: _assainirCasZero };
+const ASSAINISSEURS_DEDIES = { tablesCas: _assainirTablesCas, casZero: _assainirCasZero, calculs: _assainirCalculs };
 
 /**
  * Assainit un objet importé selon un schéma (whitelist de propriétés)
@@ -611,7 +623,8 @@ const ASSAINISSEURS_DEDIES = { tablesCas: _assainirTablesCas, casZero: _assainir
  *                    'arrayStrings' (tableau de chaînes, chacune assainie),
  *                    'stringOrNumber' (id qui peut arriver soit en string soit en number),
  *                    'tablesCas' (lot 3b : les tables de cas d'un critère, relues par `tablesCasAlgo.assainir`),
- *                    'casZero' (étape 4a : « quand une donnée vaut 0 », relu par `formulesAlgo.assainirCasZero`).
+ *                    'casZero' (étape 4a : « quand une donnée vaut 0 », relu par `formulesAlgo.assainirCasZero`),
+ *                    'calculs' (étape 4b : les calculs composés, relus par `formulesAlgo.assainirCalculs`).
  * @returns {Object} Objet nettoyé (seules les clés du schéma sont conservées)
  */
 function assainirObjet(obj, schema) {
@@ -956,6 +969,10 @@ const SCHEMAS_IMPORT = {
                 // lui, une grille importée calculerait autrement que celle de son auteur·e. Type dédié, relu par
                 // le registre des calculs (`_assainirCasZero`).
                 casZero: { type: 'casZero' },
+                // Étape 4b (27 oct. 2026) — LES CALCULS COMPOSÉS voyagent avec le critère (type dédié, relu par le
+                // registre) ; `calculsProchain`, le numéro du prochain : un identifiant retiré ne se réemploie pas.
+                calculs: { type: 'calculs' },
+                calculsProchain: { type: 'number' },
 
                 // #668 Lot 4 — LA PROJECTION EUF SE PERDAIT DE MÊME. Aucun des
                 // trois champs n'était déclaré ici : une grille importée

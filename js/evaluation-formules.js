@@ -40,6 +40,13 @@
      critere.casZero        : objet  — absent tant que l'enseignant·e garde les choix de départ.
        { <modèle>: { <donnée>: 'calcul' | 'aucune' | 'entiere' | 'zero' } }, une entrée seulement
        là où le choix diffère du départ. Les départs sont le comportement d'avant le lot.
+     critere.calculs        : array  — ÉTAPE 4b (27 oct. 2026) : les calculs que l'enseignant·e compose,
+       absent tant qu'aucun n'est gardé. [{ id: 'calc1', nom, sert: 'note', jetons, cas }] ; les jetons
+       d'un calcul composé n'ont pas de réglage (`p`) : ses nombres sont dans ses blocs. `cas` : ses
+       choix « vaut 0 » (les départs : « Aucune note » pour une donnée qui divise, « Calculer
+       normalement » sinon). Un identifiant ne change plus et ne se réemploie pas : `calculsProchain`
+       (le numéro du prochain) survit au retrait. La note : `modeleFormule = 'perso:<id>'` ; introuvable
+       ou illisible, AUCUNE note (`calcul-introuvable`), jamais le repli vers le modèle historique.
      critere.facteurNormalisation : number — MIROIR DE COMPATIBILITÉ, écrit en
        dérivé pour le seul modèle « penalite_normalisee ». Jamais lu quand
        paramsFormule existe. Sentinelle : tests/unit/sentinelle-650-formule-*.
@@ -150,6 +157,31 @@ var MODELES = [
 ];
 
 var MODELE_PAR_DEFAUT = 'penalite_normalisee';
+
+/** Étape 4b — les calculs composés : le préfixe de `modeleFormule`, la forme d'un identifiant, les bornes. */
+var PREFIXE_COMPOSE = 'perso:';
+var ID_CALCUL = /^calc([1-9][0-9]{0,3})$/;
+var CALCULS_MAX = 10;
+var JETONS_MAX = 60;
+var NOM_MAX = 80;
+var PROCHAIN_MAX = 10000;
+/** Les messages de « Garder » quand le calcul ne s'évalue pas (ceux de l'ébauche, `ERREURS_CALCUL`). */
+var ERREURS_CALCUL = {
+    vide: 'Le calcul est vide.',
+    incomplet: 'Le calcul n’est pas complet : il manque une donnée ou un nombre.',
+    operation: 'Deux opérations ou deux données se suivent.',
+    parentheses: 'Une parenthèse n’est pas fermée.',
+    divzero: 'Le calcul divise par 0.'
+};
+var MESSAGES_COMPOSE = {
+    sansNom: 'Donne un nom à ton calcul.',
+    trop: 'Ce critère a déjà ' + CALCULS_MAX + ' calculs : retires-en un d’abord.',
+    long: 'Le calcul compte plus de ' + JETONS_MAX + ' blocs.',
+    garde: function(nom) { return 'Calcul « ' + nom + ' » gardé : il donne maintenant la note.'; },
+    donneLaNote: 'Ce calcul donne la note : choisis d’abord un autre calcul.',
+    confirmerRetrait: function(nom) { return 'Retirer le calcul « ' + nom + ' » ? Ses blocs seront perdus.'; },
+    introuvable: 'Le calcul qui donnait la note est introuvable dans cette grille : choisis un calcul.'
+};
 
 /** Les données qu'un calcul peut lire, et l'ordre où l'on examine celles qui valent 0. */
 var DONNEES = ['ponderation', 'compte', 'comptePondere', 'etendue'];
@@ -340,6 +372,7 @@ function _valeurParam(p, brut) {
 function normaliser(critere) {
     critere = critere || {};
     var declare = typeof critere.modeleFormule === 'string' ? critere.modeleFormule.trim() : '';
+    if (declare.indexOf(PREFIXE_COMPOSE) === 0) return _normaliserCompose(critere, declare);
     var modele = declare ? obtenirModele(declare) : null;
     var herite = false;
 
@@ -373,6 +406,249 @@ function normaliser(critere) {
     return { modeleId: modele.id, modele: modele, params: params, herite: herite };
 }
 
+// ---------------------------------------------------------------------
+// ÉTAPE 4b — LES CALCULS COMPOSÉS
+// ---------------------------------------------------------------------
+
+/** Un jeton d'un calcul composé, recopié ; null s'il est illisible (un réglage `p` l'est : pas de réglage ici). */
+function _jetonCompose(j) {
+    if (!j || typeof j !== 'object' || Array.isArray(j)) return null;
+    if (j.t === 'd') return DONNEES.indexOf(j.k) >= 0 ? { t: 'd', k: j.k } : null;
+    if (j.t === 'n') return (typeof j.v === 'number' && isFinite(j.v)) ? { t: 'n', v: j.v } : null;
+    if (j.t === 'o') return PRIORITE[j.v] ? { t: 'o', v: j.v } : null;
+    return (j.t === '(' || j.t === ')') ? { t: j.t } : null;
+}
+
+/** Les départs « vaut 0 » d'un calcul composé : « Aucune note » pour une donnée qui divise, « Calculer normalement » sinon. */
+function _departsCompose(jetons) {
+    var div = diviseurs(jetons), r = {};
+    donneesDuCalcul(jetons).forEach(function(d) { r[d] = div[d] ? 'aucune' : 'calcul'; });
+    return r;
+}
+
+/** Le calcul d'un calcul composé, sous la forme d'un modèle : sans réglage, ses choix « vaut 0 » à lui. */
+function _modeleCompose(calcul) {
+    return { id: PREFIXE_COMPOSE + calcul.id, nom: calcul.nom, court: '« ' + calcul.nom + ' »', texte: 'Ton calcul.',
+        parametres: [], jetons: calcul.jetons, cas: _departsCompose(calcul.jetons), compose: calcul };
+}
+
+/** Pourquoi un calcul ne s'évalue pas sur la copie d'essai (chaque donnée vaut 1) : '' s'il s'évalue. */
+function erreurDuCalcul(jetons) {
+    var r = evaluer(jetons, { donnees: { ponderation: 1, compte: 1, comptePondere: 1, etendue: 1 }, params: {} });
+    if (r.erreur) return ERREURS_CALCUL[r.erreur] ? r.erreur : 'incomplet';
+    return (r.divZero && r.divZero[0] === 'nombre') ? 'divzero' : '';
+}
+
+/** Les choix « vaut 0 » lisibles d'un calcul composé (une donnée qu'il lit, jamais « calculer » une division). */
+function _casCompose(brut, jetons) {
+    var r = {}, modele = { jetons: jetons };
+    if (!brut || typeof brut !== 'object' || Array.isArray(brut)) return r;
+    Object.keys(brut).forEach(function(d) { if (_choixLisible(modele, d, brut[d])) r[d] = brut[d]; });
+    return r;
+}
+
+/**
+ * Un calcul composé relu : {id, nom, sert, jetons, cas}, ou null. `nettoyer` (l'import) passe le nom par
+ * l'assainissement des textes. Lisible : un identifiant `calcN`, un nom, `sert: 'note'`, 1 à 60 jetons connus
+ * qui s'évaluent sur la copie d'essai sans diviser par le nombre 0. Ses choix « vaut 0 » illisibles sont écartés.
+ */
+function _calculLisible(brut, nettoyer) {
+    if (!brut || typeof brut !== 'object' || Array.isArray(brut)) return null;
+    if (typeof brut.id !== 'string' || !ID_CALCUL.test(brut.id) || brut.sert !== 'note') return null;
+    var nom = typeof brut.nom === 'string' ? (nettoyer ? nettoyer(brut.nom, NOM_MAX) : brut.nom).trim().slice(0, NOM_MAX) : '';
+    if (!nom || !Array.isArray(brut.jetons) || !brut.jetons.length || brut.jetons.length > JETONS_MAX) return null;
+    var jetons = brut.jetons.map(_jetonCompose);
+    if (jetons.indexOf(null) >= 0 || erreurDuCalcul(jetons)) return null;
+    return { id: brut.id, nom: nom, sert: 'note', jetons: jetons, cas: _casCompose(brut.cas, jetons) };
+}
+
+/**
+ * `critere.calculs` tel qu'il se lit (et voyage à l'import) : les calculs lisibles, sans identifiant en double,
+ * dix au plus ; `undefined` quand il n'en reste aucun ; `null` quand la structure n'est pas un tableau.
+ */
+function assainirCalculs(brut, nettoyer) {
+    if (brut === undefined) return undefined;
+    if (!Array.isArray(brut)) return null;
+    var vus = {}, r = [];
+    brut.forEach(function(x) {
+        var c = _calculLisible(x, nettoyer);
+        if (!c || vus[c.id] || r.length >= CALCULS_MAX) return;
+        vus[c.id] = true;
+        r.push(c);
+    });
+    return r.length ? r : undefined;
+}
+
+/** La règle du PARTAGE : '' quand `calculs` est absent ou entièrement lisible ; sinon la raison du refus. */
+function refusCalculs(brut) {
+    if (brut === undefined) return '';
+    if (!Array.isArray(brut)) return 'structure illisible';
+    if (brut.length > CALCULS_MAX) return 'plus de ' + CALCULS_MAX + ' calculs';
+    var vus = {};
+    for (var i = 0; i < brut.length; i++) {
+        var c = _calculLisible(brut[i]);
+        if (!c) return 'calcul illisible';
+        if (vus[c.id]) return 'identifiant en double : ' + c.id;
+        vus[c.id] = true;
+        var cas = brut[i].cas;
+        if (cas === undefined) continue;
+        if (!cas || typeof cas !== 'object' || Array.isArray(cas)) return 'choix illisibles dans ' + c.id;
+        if (Object.keys(cas).length !== Object.keys(c.cas).length) return 'choix illisible dans ' + c.id;
+    }
+    return '';
+}
+
+/** Les calculs composés lisibles d'un critère (toujours un tableau). */
+function calculsDuCritere(critere) {
+    return assainirCalculs(critere && critere.calculs) || [];
+}
+
+/** Le calcul composé `id` d'un critère, lisible, ou null. */
+function calculParId(critere, id) {
+    var l = calculsDuCritere(critere);
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return null;
+}
+
+/** `normaliser` pour `perso:<id>` : le calcul composé, ou un calcul INTROUVABLE (aucun jeton, aucune note). */
+function _normaliserCompose(critere, declare) {
+    var calcul = calculParId(critere, declare.slice(PREFIXE_COMPOSE.length));
+    if (calcul) return { modeleId: declare, modele: _modeleCompose(calcul), params: {}, herite: false };
+    return { modeleId: declare, params: {}, herite: false, introuvable: true,
+        modele: { id: declare, nom: 'Calcul introuvable', court: 'calcul introuvable', texte: '', parametres: [], jetons: [], cas: {} } };
+}
+
+/** Le numéro du prochain calcul : jamais celui d'un calcul qui existe ou a existé (`calculsProchain`). */
+function _prochainNumero(critere) {
+    var n = Number(critere.calculsProchain);
+    n = (isFinite(n) && n >= 1 && n <= PROCHAIN_MAX) ? Math.floor(n) : 1;
+    (Array.isArray(critere.calculs) ? critere.calculs : []).forEach(function(c) {
+        var m = c && typeof c.id === 'string' ? ID_CALCUL.exec(c.id) : null;
+        if (m) n = Math.max(n, Number(m[1]) + 1);
+    });
+    return n;
+}
+
+/**
+ * Ce qui empêche de garder un brouillon `{id?, nom, jetons, cas}` : '' quand il se garde. Un nom (espaces retirés),
+ * un calcul qui s'évalue sur la copie d'essai, pas de division par le nombre 0 ; dix calculs au plus.
+ */
+function refusDuBrouillon(critere, brouillon) {
+    var b = brouillon || {};
+    if (!String(b.nom || '').trim()) return MESSAGES_COMPOSE.sansNom;
+    var jetons = Array.isArray(b.jetons) ? b.jetons : [];
+    if (jetons.length > JETONS_MAX) return MESSAGES_COMPOSE.long;
+    var e = jetons.length ? erreurDuCalcul(jetons.map(function(j) { return _jetonCompose(j) || {}; })) : 'vide';
+    if (e) return ERREURS_CALCUL[e];
+    if (!b.id && calculsDuCritere(critere).length >= CALCULS_MAX) return MESSAGES_COMPOSE.trop;
+    return '';
+}
+
+/**
+ * « Garder ce calcul » / « Garder les changements » : écrit le calcul sur le critère et le choisit pour la note.
+ * Mute le critère. Rend {ok: true, id, message} ou {ok: false, message} (rien n'est écrit).
+ */
+function garderCalcul(critere, brouillon) {
+    var refus = refusDuBrouillon(critere, brouillon);
+    if (refus) return { ok: false, message: refus };
+    var liste = calculsDuCritere(critere), id = brouillon.id;
+    var existant = id ? liste.filter(function(c) { return c.id === id; })[0] : null;
+    if (!existant) {
+        var n = _prochainNumero(critere);
+        id = 'calc' + n;
+        critere.calculsProchain = n + 1;
+    }
+    var calcul = _calculLisible({ id: id, nom: String(brouillon.nom).trim(), sert: 'note', jetons: brouillon.jetons, cas: brouillon.cas });
+    if (!calcul) return { ok: false, message: ERREURS_CALCUL.incomplet };
+    // La liste ÉCRITE, pas la liste lue : une entrée que cette version ne lit pas n'est pas effacée en passant.
+    var brutes = Array.isArray(critere.calculs) ? critere.calculs : [];
+    critere.calculs = existant ? brutes.map(function(c) { return c && c.id === id ? calcul : c; }) : brutes.concat([calcul]);
+    critere.modeleFormule = PREFIXE_COMPOSE + id;
+    return { ok: true, id: id, message: MESSAGES_COMPOSE.garde(calcul.nom) };
+}
+
+/**
+ * « Retirer ce calcul » : refusé pour le calcul qui donne la note (aucune note à venir ne change sans geste).
+ * Mute le critère. Rend {ok, message}. `calculsProchain` reste : l'identifiant ne se réemploie pas.
+ */
+function retirerCalcul(critere, id) {
+    if (critere.modeleFormule === PREFIXE_COMPOSE + id) return { ok: false, message: MESSAGES_COMPOSE.donneLaNote };
+    var brutes = Array.isArray(critere.calculs) ? critere.calculs : [];
+    if (!brutes.some(function(c) { return c && c.id === id; })) return { ok: false, message: '' };
+    critere.calculsProchain = _prochainNumero(critere);
+    var reste = brutes.filter(function(c) { return !(c && c.id === id); });
+    if (reste.length) critere.calculs = reste; else delete critere.calculs;
+    return { ok: true, message: '' };
+}
+
+/** Choisir un calcul composé pour la note : seulement s'il existe et se lit. `paramsFormule` n'est pas touché. */
+function choisirCalculCompose(critere, modeleId) {
+    if (String(modeleId).indexOf(PREFIXE_COMPOSE) !== 0 || !calculParId(critere, modeleId.slice(PREFIXE_COMPOSE.length))) return false;
+    critere.modeleFormule = modeleId;
+    return true;
+}
+
+/**
+ * « Retoucher ce calcul » : le brouillon d'un calcul tout fait — son nom « Mon calcul, d'après « X » », ses blocs
+ * (son réglage devenu un nombre), ses choix « vaut 0 » tels qu'ils s'appliquent. Rien n'est écrit.
+ */
+function brouillonRetouche(critere, modeleId) {
+    var m = obtenirModele(modeleId);
+    if (!m) return null;
+    var f = normaliser(Object.assign({}, critere, { modeleFormule: m.id }));
+    return {
+        id: null,
+        nom: 'Mon calcul, d’après « ' + m.nom + ' »',
+        jetons: m.jetons.map(function(j) { return j.t === 'p' ? { t: 'n', v: f.params[j.k] } : Object.assign({}, j); }),
+        cas: casDuCritere(critere, m.id)
+    };
+}
+
+/** « Modifier ce calcul » : le brouillon d'un calcul composé gardé, ou null. */
+function brouillonDuCalcul(critere, id) {
+    var c = calculParId(critere, id);
+    return c ? { id: c.id, nom: c.nom, jetons: _copieJetons(c.jetons), cas: Object.assign({}, c.cas) } : null;
+}
+
+/** Le brouillon comme un calcul (pour la ligne de la copie fictive et ses choix « vaut 0 ») : {modele, critere}. */
+function _fDuBrouillon(brouillon) {
+    var jetons = (brouillon && Array.isArray(brouillon.jetons) ? brouillon.jetons : []).map(function(j) { return _jetonCompose(j) || {}; });
+    var calcul = { id: (brouillon && brouillon.id) || 'brouillon', nom: String((brouillon && brouillon.nom) || ''), jetons: jetons,
+        cas: _casCompose(brouillon && brouillon.cas, jetons) };
+    return { modeleId: PREFIXE_COMPOSE + calcul.id, modele: _modeleCompose(calcul), params: {}, herite: false };
+}
+
+/**
+ * La ligne « Sur la copie fictive : … » du composeur, au conditionnel : le message d'erreur quand le brouillon
+ * ne s'évalue pas, sinon la ligne du registre, comme pour un calcul gardé.
+ */
+function ligneDuBrouillon(critere, brouillon, donnees) {
+    var jetons = brouillon && Array.isArray(brouillon.jetons) ? brouillon.jetons : [];
+    var e = jetons.length ? erreurDuCalcul(jetons.map(function(j) { return _jetonCompose(j) || {}; })) : 'vide';
+    if (e) return ERREURS_CALCUL[e];
+    return _ligne(critere, _fDuBrouillon(brouillon), donnees, TEMPS.conditionnel);
+}
+
+/** Les rangées « Si [donnée] vaut 0 » d'un brouillon (comme `casAOffrir`). */
+function casDuBrouillon(critere, brouillon) {
+    return _casAOffrirAvec(critere, _fDuBrouillon(brouillon));
+}
+
+/**
+ * Un choix « vaut 0 » d'un calcul composé gardé, écrit dans SON `cas` : égal au départ, l'entrée part. Mute le critère.
+ */
+function _appliquerCasCompose(critere, f, donnee, choix) {
+    var id = f.modele.compose.id;
+    if (!_choixLisible(f.modele, donnee, choix) || !Array.isArray(critere.calculs)) return false;
+    var cible = critere.calculs.filter(function(c) { return c && c.id === id; })[0];
+    if (!cible) return false;
+    var cas = Object.assign({}, cible.cas && typeof cible.cas === 'object' ? cible.cas : {});
+    if (f.modele.cas[donnee] === choix) delete cas[donnee];
+    else cas[donnee] = choix;
+    cible.cas = cas;
+    return true;
+}
+
 /**
  * Un choix « vaut 0 » est-il lisible pour ce modèle et cette donnée ? La donnée doit être lue
  * par le calcul ; « Calculer normalement » est écarté pour une donnée par laquelle on divise.
@@ -389,7 +665,12 @@ function _choixLisible(modele, donnee, choix) {
  * écarté (on revient au départ), jamais deviné.
  */
 function casDuCritere(critere, modeleId) {
-    var modele = obtenirModele(modeleId) || normaliser(critere).modele;
+    var modele = obtenirModele(modeleId);
+    if (!modele) {
+        var f = normaliser(critere);
+        if (f.modele.compose) return _casAvec(critere, f);   // étape 4b : un calcul composé porte ses choix (`cas`)
+        modele = f.modele;
+    }
     var r = Object.assign({}, modele.cas);
     var brut = critere && critere.casZero && typeof critere.casZero === 'object' ? critere.casZero[modele.id] : null;
     if (brut && typeof brut === 'object') {
@@ -397,6 +678,16 @@ function casDuCritere(critere, modeleId) {
             if (_choixLisible(modele, d, brut[d])) r[d] = brut[d];
         });
     }
+    return r;
+}
+
+/** Les choix « vaut 0 » qui s'appliquent au calcul `f` (un tout fait, un calcul composé, un brouillon). */
+function _casAvec(critere, f) {
+    if (!f.modele.compose) return casDuCritere(critere, f.modeleId);
+    var r = Object.assign({}, f.modele.cas);
+    Object.keys(f.modele.compose.cas || {}).forEach(function(d) {
+        if (_choixLisible(f.modele, d, f.modele.compose.cas[d])) r[d] = f.modele.compose.cas[d];
+    });
     return r;
 }
 
@@ -460,7 +751,7 @@ function _donnees(donnees) {
  * n'est pas positive.
  */
 function _issueDeLaCopie(f, critere, d, ponderation) {
-    var cas = casDuCritere(critere, f.modeleId), lues = donneesDuCalcul(f.modele.jetons);
+    var cas = _casAvec(critere, f), lues = donneesDuCalcul(f.modele.jetons);
     for (var i = 0; i < lues.length; i++) {
         var k = lues[i], issue = cas[k] || 'calcul';
         if (d[k] > 0 || issue === 'calcul') continue;
@@ -485,10 +776,17 @@ function _issueDeLaCopie(f, critere, d, ponderation) {
  *          une note, il dit qu'il ne peut pas (`attend` : la donnée que l'évaluation attend).
  */
 function calculer(critere, donnees) {
-    var f = normaliser(critere);
+    return _calculerAvec(normaliser(critere), critere, donnees);
+}
+
+/** `calculer`, pour un calcul déjà lu (`normaliser`, ou le brouillon du composeur). */
+function _calculerAvec(f, critere, donnees) {
     var d = _donnees(donnees);
     var ponderation = d.ponderation;
     var base = { modeleId: f.modeleId, params: f.params };
+
+    // Étape 4b : le calcul qui donnait la note est introuvable — aucune note, jamais un calcul deviné.
+    if (f.introuvable) return Object.assign({ applicable: false, raison: 'calcul-introuvable' }, base);
 
     if (!ponderation || isNaN(ponderation) || ponderation <= 0) {
         return Object.assign({ applicable: false, raison: 'ponderation-absente' }, base);
@@ -558,7 +856,17 @@ function _param(modele, clef) {
  * @returns {Array<{genre, texte, jeton}>}
  */
 function blocs(critere) {
-    var f = normaliser(critere), N = _noms(critere);
+    return _blocsAvec(critere, normaliser(critere));
+}
+
+/** Étape 4b — les pastilles de jetons quelconques (le brouillon du composeur) ; un jeton illisible n'en donne pas. */
+function blocsDesJetons(critere, jetons) {
+    var lus = (Array.isArray(jetons) ? jetons : []).map(_jetonCompose).filter(Boolean);
+    return _blocsAvec(critere, { modele: { jetons: lus, parametres: [] }, params: {} });
+}
+
+function _blocsAvec(critere, f) {
+    var N = _noms(critere);
     return f.modele.jetons.map(function(j) {
         if (j.t === 'd') return { genre: j.k === 'ponderation' ? 'pose' : 'donnee', texte: nomDonnee(j.k, critere), jeton: Object.assign({}, j) };
         if (j.t === 'p') {
@@ -572,7 +880,11 @@ function blocs(critere) {
 
 /** Le calcul en chiffres : « 20 − 3 × 2 », « 20 × (600 ÷ 12) ÷ 60 ». */
 function enChiffres(critere, donnees) {
-    var f = normaliser(critere), d = _donnees(donnees);
+    return _enChiffresAvec(normaliser(critere), donnees);
+}
+
+function _enChiffresAvec(f, donnees) {
+    var d = _donnees(donnees);
     return f.modele.jetons.map(function(j) {
         if (j.t === 'd') return _nb(d[j.k]);
         if (j.t === 'p') return _nb(f.params[j.k]);
@@ -603,8 +915,12 @@ var TEMPS = {
  * @param {'present'|'conditionnel'} temps
  */
 function ligneResultat(critere, donnees, temps) {
-    var T = TEMPS[temps] || TEMPS.present;
-    var res = calculer(critere, donnees);
+    return _ligne(critere, normaliser(critere), donnees, TEMPS[temps] || TEMPS.present);
+}
+
+/** La ligne de résultat pour un calcul déjà lu. */
+function _ligne(critere, f, donnees, T) {
+    var res = _calculerAvec(f, critere, donnees);
     if (!res.applicable) {
         if (res.raison === 'ponderation-absente' || !res.attend) return '';
         return T.attend(leDonnee(res.attend, critere));
@@ -614,7 +930,7 @@ function ligneResultat(critere, donnees, temps) {
         return _maj(leDonnee(res.cas, critere)) + ' vaut 0 : '
             + (res.issue === 'entiere' ? T.entiere + p + ' / ' + p + '.' : T.zero + '0 / ' + p + '.');
     }
-    var t = 'Note = ' + enChiffres(critere, donnees) + ' = ' + _nb(res.brut);
+    var t = 'Note = ' + _enChiffresAvec(f, donnees) + ' = ' + _nb(res.brut);
     if (res.brut > res.note) return t + T.plafond + p + ' / ' + p + '.';
     if (res.brut < 0) return t + T.plancher + '0 / ' + p + '.';
     return t + ' / ' + p;
@@ -668,6 +984,7 @@ function appliquerAuCritere(critere, modeleId, paramsBruts) {
  */
 function appliquerCasZero(critere, donnee, choix) {
     var f = normaliser(critere), modele = f.modele;
+    if (modele.compose) return _appliquerCasCompose(critere, f, donnee, choix);   // étape 4b : dans son `cas`
     if (!_choixLisible(modele, donnee, choix)) return false;
     var tous = (critere.casZero && typeof critere.casZero === 'object') ? critere.casZero : {};
     var entree = Object.assign({}, tous[modele.id] || {});
@@ -688,7 +1005,11 @@ function appliquerCasZero(critere, donnee, choix) {
  * @returns {{rangees: Array<{donnee, nom, choix: Array<{valeur, libelle}>, actuel}>, divise: boolean}}
  */
 function casAOffrir(critere) {
-    var f = normaliser(critere), cas = casDuCritere(critere, f.modeleId);
+    return _casAOffrirAvec(critere, normaliser(critere));
+}
+
+function _casAOffrirAvec(critere, f) {
+    var cas = _casAvec(critere, f);
     var div = diviseurs(f.modele.jetons);
     var rangees = donneesDuCalcul(f.modele.jetons).map(function(d) {
         return {
@@ -729,7 +1050,25 @@ var api = {
     ligneResultat: ligneResultat,
     libelleChiffre: libelleChiffre,
     appliquerAuCritere: appliquerAuCritere,
-    appliquerCasZero: appliquerCasZero
+    appliquerCasZero: appliquerCasZero,
+    // Étape 4b — les calculs composés
+    PREFIXE_COMPOSE: PREFIXE_COMPOSE,
+    ERREURS_CALCUL: ERREURS_CALCUL,
+    MESSAGES_COMPOSE: MESSAGES_COMPOSE,
+    erreurDuCalcul: erreurDuCalcul,
+    assainirCalculs: assainirCalculs,
+    refusCalculs: refusCalculs,
+    calculsDuCritere: calculsDuCritere,
+    calculParId: calculParId,
+    refusDuBrouillon: refusDuBrouillon,
+    garderCalcul: garderCalcul,
+    retirerCalcul: retirerCalcul,
+    choisirCalculCompose: choisirCalculCompose,
+    brouillonRetouche: brouillonRetouche,
+    brouillonDuCalcul: brouillonDuCalcul,
+    ligneDuBrouillon: ligneDuBrouillon,
+    casDuBrouillon: casDuBrouillon,
+    blocsDesJetons: blocsDesJetons
 };
 
 if (typeof window !== 'undefined') window.formulesAlgo = api;

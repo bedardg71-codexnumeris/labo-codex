@@ -364,11 +364,13 @@ function codeLePlusFrequent(critere, poses) {
 }
 
 /** La note d'une copie sur la pondération, bornée comme le pourcentage retenu ; null sans note. */
-function noteDeLaCopie(critere, erreursFormule, mots) {
+function noteDeLaCopie(critere, erreursFormule, mots, compte) {
     var F = _F();
     var pond = Number(critere && critere.ponderation);
     if (!F || !(isFinite(pond) && pond > 0)) return null;
-    var r = F.calculer(critere, { ponderation: pond, erreurs: erreursFormule, mots: mots || 0 });
+    var d = { ponderation: pond, erreurs: erreursFormule, mots: mots || 0 };
+    if (compte !== undefined) d.compte = compte;   // étape 4b : le compte brut, que lit un calcul composé
+    var r = F.calculer(critere, d);
     return r.applicable ? r.pctBorne * pond / 100 : null;
 }
 
@@ -405,7 +407,7 @@ function _nombreOuNull(v) { return (typeof v === 'number' && isFinite(v)) ? v : 
 /** La note passée par l'évaluation, sinon celle de la formule (la copie fictive). */
 function _noteDe(critere, x, n, m) {
     if (x.note !== undefined) return x.note;
-    return noteDeLaCopie(critere, (x.erreursFormule !== undefined) ? x.erreursFormule : n, m);
+    return noteDeLaCopie(critere, (x.erreursFormule !== undefined) ? x.erreursFormule : n, m, n);
 }
 
 /** Le code passé par l'évaluation, sinon le plus fréquent de ses codes posés. */
