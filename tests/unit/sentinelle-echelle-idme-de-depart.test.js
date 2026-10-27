@@ -146,7 +146,9 @@ describe('§2 · l\'échelle IDME de départ complète le triptyque', () => {
         await win2.assurerEchelleIdmeDeDepart();
         // Une copie de surface aurait propagé la mutation à la douzaine de
         // lecteurs de `niveauxDefaut`.
-        expect(store2[CLE][0].niveaux[0].valeurCalcul).toBe(32);
+        // ↻ 27 oct. 2026 : la valeur ponctuelle semée de « I » passe de 32 à 40 (décision de Grégoire, 27 oct., 17 h 48-17 h 49 ;
+        // VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.1). Le stock : sentinelle-echelle-idme-de-depart-valeurs-1152.test.js.
+        expect(store2[CLE][0].niveaux[0].valeurCalcul).toBe(40);
         expect(store2[CLE][0].niveaux[0].nom).toBe('Incomplet');
     });
 

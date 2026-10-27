@@ -75,6 +75,13 @@
  * - couleur: Variable CSS pour la couleur
  * 
  * ⚠️ NE PAS MODIFIER - Utilisé comme référence par défaut
+ *
+ * ↻ 27 oct. 2026 — LES VALEURS PONCTUELLES DEVIENNENT 40 / 65 / 75 / 100 (au lieu de 32 / 69,5 / 79,5 / 92,5),
+ *   celles de l'échelle de Grégoire. Décision de Grégoire, 27 oct., 17 h 48-17 h 49 (« c'est important »), qui
+ *   autorise ce changement malgré l'avertissement ci-dessus (VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.1).
+ *   Seul `valeurCalcul` change ; bornes, codes, noms, paliers SOLO et couleurs restent. TARIR, PAS RÉPARER : seul
+ *   le semis lit cette constante, et il n'écrit pas dans un trimestre qui a déjà `ECHELLE_IDME_DEPART` ; une
+ *   échelle de départ déjà semée garde ses valeurs (sentinelle-echelle-idme-de-depart-valeurs-1152.test.js).
  */
 const niveauxDefaut = [
     {
@@ -84,7 +91,7 @@ const niveauxDefaut = [
         niveauSOLO: 'unistructurel',
         min: 0,
         max: 64.99,
-        valeurCalcul: 32,
+        valeurCalcul: 40,
         couleur: 'var(--niveau-attention-critique)'
     },
     {
@@ -94,7 +101,7 @@ const niveauxDefaut = [
         niveauSOLO: 'multistructurel',
         min: 65,
         max: 74.99,
-        valeurCalcul: 69.5,
+        valeurCalcul: 65,
         couleur: 'var(--niveau-attention-modere)'
     },
     {
@@ -104,7 +111,7 @@ const niveauxDefaut = [
         niveauSOLO: 'relationnel',
         min: 75,
         max: 84.99,
-        valeurCalcul: 79.5,
+        valeurCalcul: 75,
         couleur: 'var(--niveau-attention-minimal)'
     },
     {
@@ -114,7 +121,7 @@ const niveauxDefaut = [
         niveauSOLO: 'abstrait_etendu',
         min: 85,
         max: 100,
-        valeurCalcul: 92.5,
+        valeurCalcul: 100,
         couleur: 'var(--niveau-attention-nul)'
     }
 ];
