@@ -3712,7 +3712,8 @@ function rendreBlocFormuleAlgo(critere, ctx) {
                 <h4 class="calc-titre">Le calcul de la note</h4>
                 <div class="calc-choix" role="radiogroup" aria-label="Le calcul de la note">${F.listerModeles().map(carte).join('')}
                 </div>
-                <p class="calc-legende">La note reste entre 0 et la pondération du critère.</p>${f.herite && critere.modeleFormule ? `
+                <p class="calc-legende">La note reste entre 0 et la pondération du critère.</p>
+                <p class="calc-legende">Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.</p>${f.herite && critere.modeleFormule ? `
                 <p class="calc-legende calc-inconnu">Le modèle « ${esc(critere.modeleFormule)} » enregistré dans cette grille est inconnu de cette version. Le modèle historique est appliqué en attendant.</p>` : ''}
             </div>`;
 }

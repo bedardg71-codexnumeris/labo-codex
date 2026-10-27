@@ -295,7 +295,7 @@ describe('miroir · E — ↻ #1150 : le bloc est parti de l\'étape « Note » 
     });
 
     it('E.e la ligne du facteur reste un libellé du miroir, qui nomme ce que le critère compte (étape 2a)', () => {
-        const LIGNE = 'Sans projection, ces copies ont la longueur fixée dans le calcul : chaque erreur y coûte un point, quelle que soit cette longueur.';
+        const LIGNE = 'Sans limite fixée, ces copies ont la longueur fixée dans le calcul : à cette longueur, chaque erreur coûte un point.';
         expect(registres().miroirAlgo.libelles(FRANCAIS).etendueDuFacteur).toBe(LIGNE);
         expect(registres().miroirAlgo.libelles(CHIMIE).etendueDuFacteur).toBe(LIGNE.replace('chaque erreur', 'chaque unité manquante'));
         expect(registres().miroirAlgo.libelles(FRANCAIS)).not.toHaveProperty('titre');

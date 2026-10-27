@@ -364,7 +364,7 @@ test('à 820 px, une chimie aux codes pondérés : la copie pondérée, aucun «
     await expect(ap.locator('[data-apercu-nom="mots"]')).toHaveText('calculs');
     await ap.locator('.apercu-algo-reference[data-copie="aucune"]').click();
     expect(await phrasePdf(page, 'CC')).toBe('Ta production contient 0 unité manquante pour 12 calculs.');
-    await expect(ap.locator('.apercu-algo-etendue')).toHaveText('Sans projection, ces copies ont la longueur fixée dans le calcul : chaque unité manquante y coûte un point, quelle que soit cette longueur.');
+    await expect(ap.locator('.apercu-algo-etendue')).toHaveText('Sans limite fixée, ces copies ont la longueur fixée dans le calcul : à cette longueur, chaque unité manquante coûte un point.');
     // Ni l'aperçu ni la chaîne ne disent « français » (le menu du modèle des phrases, lui, offre « Français écrit »).
     expect((await texte(ap)).toLowerCase()).not.toContain('français');
     expect((await texte(atelier(page, 'CC').locator('.atelier-algo-chaine'))).toLowerCase()).not.toContain('français');

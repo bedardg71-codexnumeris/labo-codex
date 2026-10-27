@@ -100,7 +100,7 @@ function libelles(critere) {
         plancher: 'la note touche le plancher',
         sansPonderation: 'Donne une pondération à ce critère : l\'essai montrera la note de chaque copie.',
         // Étape 4a (27 oct.) : le « facteur » s'appelle « la longueur fixée » dans l'étape « Note calculée ».
-        etendueDuFacteur: 'Sans projection, ces copies ont la longueur fixée dans le calcul : chaque ' + N.erreurs.singulier + ' y coûte un point, quelle que soit cette longueur.'
+        etendueDuFacteur: 'Sans limite fixée, ces copies ont la longueur fixée dans le calcul : à cette longueur, chaque ' + N.erreurs.singulier + ' coûte un point.'
     };
 }
 

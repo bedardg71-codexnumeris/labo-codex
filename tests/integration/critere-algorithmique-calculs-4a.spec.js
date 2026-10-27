@@ -14,7 +14,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · une VRAIE copie évaluée en mode simple, codes posés dans Annoter, en pénalité fixe : sa note et sa ligne chiffrée ;
 //     une étendue à 0 avec « Une note de 0 », puis avec « Aucune note » ;
 //   · LA MESURE DU PIÈGE 2 : une grille déjà employée, on change le calcul d'un critère — la base, une copie verrouillée,
-//     une copie déverrouillée ;
+//     une copie déverrouillée (↻ #1173, 27 oct. : verrouillée, elle montre désormais la note remise) ;
 //   · 1 440, 1 180, 820 et 700 px : aucun défilement de côté, des cibles d'au moins 40 px ;
 //   · captures (CAPTURES_CALCULS_4A=<dossier>) : 1 440 et 820 px, clair et sombre, les deux disciplines.
 
@@ -76,6 +76,8 @@ test('calculs · les trois cartes, le réglage, un menu « vaut 0 » ; la copie 
     await expect(e.locator('.calc-titre')).toHaveText('Le calcul de la note');
     expect(await textes(e.locator('.calc-nom'))).toEqual(['Pénalité proportionnelle à la longueur', 'Rapport visé', 'Pénalité fixe']);
     await expect(e.locator('.calc-note > .calc-legende').first()).toHaveText('La note reste entre 0 et la pondération du critère.');
+    // #1173 (27 oct.) : la phrase que la mesure du piège 2 retenait, posée une fois la note remise éprouvée (note-remise-1173.spec.js).
+    await expect(e.locator('.calc-note > .calc-legende').nth(1)).toHaveText('Une copie déjà évaluée garde sa note. Elle ne suit le nouveau calcul que si tu la déverrouilles et la modifies.');
     await expect(atelier(page, 'CC').locator('.bc-etape[data-etape="note"] .bc-info')).toHaveText('pénalité fixe');
     await expect(e.locator('[data-resume]')).toHaveText('Pénalité fixe, sur 20');
 
@@ -311,9 +313,15 @@ for (const verrouillee of [true, false]) {
         // eslint-disable-next-line no-console
         console.log(`PIÈGE 2 · ${verrouillee ? 'verrouillée' : 'déverrouillée'} · écran à la réouverture :`, JSON.stringify(vu));
         expect(vu.champ).toBe('15');
-        // L'écran montre la note RECALCULÉE par le nouveau calcul : 100 − 15 × 1 = 85.
-        expect(vu.ligne).toBe('Note = 100 − 15 × 1 = 85 / 100');
-        expect(vu.note).toBe('85,00');
+        // Déverrouillée, l'écran montre la note RECALCULÉE par le nouveau calcul : 100 − 15 × 1 = 85. Verrouillée, depuis
+        // #1173 (27 oct.), il montre la note remise et la ligne chiffrée se tait : `note-remise-1173.spec.js` l'éprouve.
+        if (verrouillee) {
+            expect(vu.ligne).toBe('');
+            expect(vu.note).toBe('70,00');
+        } else {
+            expect(vu.ligne).toBe('Note = 100 − 15 × 1 = 85 / 100');
+            expect(vu.note).toBe('85,00');
+        }
         expect(apresOuverture, 'rien ne s’écrit à la réouverture, sans geste').toBe(avant);
 
         // Un geste sur la copie (l'auto-save armé comme par une frappe) : une copie verrouillée ne s'écrit pas ;
