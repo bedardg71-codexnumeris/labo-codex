@@ -28,6 +28,7 @@ Pas de catégorisation poussée, pas de templates rigides. L'idée est qu'on cap
 
 - **2026-06-10 · GB** — Import `.lcz` (P3, premier essai terrain) : a cherché l'import dans la modale Bibliothèque de grilles (« Importer des grilles », ancien flux JSON) plutôt que dans Réglages › Données. Réflexe légitime : l'export `.lcz` se fait depuis le menu ⋮ de la bibliothèque, on s'attend à importer au même endroit. Argument pour P4 (items partagés visibles dans les sélecteurs) ; à reconsidérer aussi pour P7 (guide) et peut-être un bouton d'import dans les biblios.
 - **2026-06-10 · GB** — Safari macOS grise TOUS les fichiers d'un sélecteur quand `accept` pointe une extension sans UTI enregistrée (`.lcz`). Corrigé en retirant `accept` (validation par magic bytes, principe D-V1). Coût assumé de l'extension dédiée : à documenter au guide P7.
+- **2026-10-26 · GB** — Conception › Carte d'alignement (Chrome, Mac, 1.220.0) : « la carte d'alignement aurait besoin d'une chaîne d'étapes, comme les autres sous-onglets de conception. Ça pourrait guider les premières actions de l'utilisateur. » Inscrit en #1172 (`plans de travail/CONSIGNE-LOT-2026-10-26-chaine-carte-alignement.md`).
 
 ---
 
