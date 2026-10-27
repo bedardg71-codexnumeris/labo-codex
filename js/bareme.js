@@ -10,8 +10,9 @@
  * compléter » (une ancienne réponse lue sans points). Seuls les critères analytiques en portent un.
  *
  * LA LECTURE UNIQUE (invariant 2). `tranchesDuCritere` est la seule façon de lire un barème :
- * l'éditeur, l'import, la grille du PDF (`export-pdf.js`, `tableauDesCriteres`) et, plus tard,
- * l'évaluation passent par elle. Elle lit `bareme`,
+ * l'éditeur, l'import, la grille du PDF (`export-pdf.js`, `tableauDesCriteres`), l'évaluation
+ * (lot 3 : `evaluation-chargement.js`) et ce que l'étudiant·e lit (`texteAtteint` : le PDF de la
+ * copie et le bilan de l'application) passent par elle. Elle lit `bareme`,
  * sinon l'ancien `descripteurs.parNiveau` SANS `echelleId` (les « réponses » écrites par la
  * dissection, lot 13), sans rien écrire : rien ne se convertit sans geste (invariant 5). La
  * première modification d'un critère écrit ce que cette lecture rend (`grilles.js`).
@@ -162,6 +163,50 @@
     B.horsBareme = function (t, max) {
         var m = Number(max);
         return !B.aCompleter(t) && max !== null && max !== '' && isFinite(m) && t.pointsMax > m;
+    };
+
+    // ------------------------------------------------------------------
+    // L'évaluation d'une copie (#1120, lot 3 : gestes 3 et 4)
+    // ------------------------------------------------------------------
+
+    B.MAX_VALEURS_OFFERTES = 20;
+
+    /**
+     * Les valeurs qu'une tranche offre au toucher (invariant 4 : aucune valeur fabriquée). Une tranche d'une
+     * seule valeur offre cette valeur ; une plage, ses entiers de `pointsMin` à `pointsMax`, bornes incluses
+     * (2,5 à 4 offre 3 et 4). Au-delà de 20 entiers, ou sans aucun entier (2,2 à 2,8), ses deux bornes :
+     * la saisie directe fait le reste. Une tranche à compléter n'offre rien.
+     */
+    B.valeursOffertes = function (t) {
+        if (B.aCompleter(t)) return [];
+        if (t.pointsMin === t.pointsMax) return [t.pointsMin];
+        var bas = Math.ceil(t.pointsMin), haut = Math.floor(t.pointsMax);
+        if (haut < bas || haut - bas + 1 > B.MAX_VALEURS_OFFERTES) return [t.pointsMin, t.pointsMax];
+        var valeurs = [];
+        for (var v = bas; v <= haut; v++) valeurs.push(v);
+        return valeurs;
+    };
+
+    /**
+     * Ce que des points disent d'un barème, à l'évaluation : la tranche qui les couvre (`trancheDesPoints`,
+     * la règle de toujours : deux tranches du stock qui se chevauchent rendent la PREMIÈRE dans l'ordre écrit),
+     * et `horsBareme` quand des points sont saisis sans qu'aucune tranche ne les couvre. Sans points, rien.
+     */
+    B.lectureDesPoints = function (tranches, points) {
+        var liste = Array.isArray(tranches) ? tranches : [];
+        var t = B.trancheDesPoints(liste, points);
+        var saisis = typeof points === 'number' && isFinite(points);
+        return { tranche: t, horsBareme: saisis && liste.length > 0 && !t };
+    };
+
+    /**
+     * Ce que l'étudiant·e lit sous le chiffre d'un critère (le PDF et le bilan de l'application) : le TEXTE de
+     * la tranche atteinte, SANS SON NOM (réponse 4 de Grégoire, 19 oct.) ; « » hors barème, sans barème ou sans
+     * points. Le texte est celui du barème ACTUEL : seuls les points s'enregistrent sur la copie.
+     */
+    B.texteAtteint = function (critere, points) {
+        var t = B.trancheDesPoints(B.tranchesDuCritere(critere), points);
+        return t ? String(t.texte == null ? '' : t.texte).trim() : '';
     };
 
     // ------------------------------------------------------------------

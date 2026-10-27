@@ -356,20 +356,23 @@ describe('lot 2 · E — les points vivent sous leur nom, partout où `donneesAl
 
     it('E.c la palette rend le champ de points dans ses DEUX renderers, et le handler est exposé', () => {
         const chargement = source('js/evaluation-chargement.js');
-        expect((chargement.match(/id="eval_pts_\$\{critere\.id\}"/g) || []).length).toBe(2);
-        expect((chargement.match(/data-on-input="pointsSaisis"/g) || []).length).toBe(2);
+        // #1120, lot 3 (27 oct.) : le champ vit dans UN gabarit (`_saisiePointsHtml`, avec le barème au-dessus), que les
+        // deux renderers appellent ; hier, deux copies du même gabarit.
+        expect((chargement.match(/id="eval_pts_\$\{critere\.id\}"/g) || []).length).toBe(1);
+        expect((chargement.match(/data-on-input="pointsSaisis"/g) || []).length).toBe(1);
+        expect((chargement.match(/\$\{_saisiePointsHtml\(critere, ponderation\)\}/g) || []).length).toBe(2);
         // La branche est bien conditionnée par le TYPE dans les deux renderers (mutation « false ? » attrapée).
         expect((chargement.match(/: estAnalytique \? `/g) || []).length).toBe(2);
         expect(chargement).toMatch(/^window\.pointsSaisis = pointsSaisis;/m);
         // Le champ va de 0 au poids : le maximum EST le poids.
-        expect((chargement.match(/min="0" max="\$\{ponderation\}"/g) || []).length).toBe(2);
+        expect((chargement.match(/min="0" max="\$\{ponderation\}"/g) || []).length).toBe(1);
     });
 
     it('E.e le champ de points VIDE ne ressemble pas à un zéro : « – » en placeholder, jamais « 0 » (retouche du 4 sept., vécu par Grégoire — un vrai zéro se tape)', () => {
         const chargement = source('js/evaluation-chargement.js');
-        // Les deux gabarits du champ de points (les deux renderers) : `max="${ponderation}"` les identifie.
+        // Le gabarit du champ de points, commun aux deux renderers depuis #1120 lot 3 : `max="${ponderation}"` l'identifie.
         const champs = chargement.match(/max="\$\{ponderation\}" step="any" placeholder="[^"]*"/g) || [];
-        expect(champs.length).toBe(2);
+        expect(champs.length).toBe(1);
         champs.forEach((champ) => {
             expect(champ, 'le vide se lit comme un vide').toContain('placeholder="–"');
             expect(champ, '« 0 » redevient une valeur qu\'on tape').not.toContain('placeholder="0"');

@@ -523,6 +523,12 @@
         return typeof enregistre === 'string' && enregistre.trim() === '';
     }
 
+    /** #1120, lot 3 — le texte de la tranche que les points atteignent (`bareme.texteAtteint`) ; « » sans points ni barème. */
+    function texteDeLaTranche(def, points) {
+        if (points === null || typeof window === 'undefined' || !window.bareme) return '';
+        return window.bareme.texteAtteint(def, points);
+    }
+
     function construireCriteres(evaluation, grille, cartouche) {
         const criteres = Array.isArray(evaluation.criteres) ? evaluation.criteres : [];
         const grilleCriteres = (grille && Array.isArray(grille.criteres)) ? grille.criteres : [];
@@ -589,6 +595,11 @@
             // « 24 / 30 » à la place de l'échelle : l'élève ne lit que le chiffre
             // (décision de Grégoire). Le niveau, lui, a servi à choisir le commentaire.
             const points = (typeof c.points === 'number' && !isNaN(c.points)) ? c.points : null;
+            // #1120, lot 3 (geste 4) — et dessous, le TEXTE de la tranche atteinte, sans son nom (réponse 4 de Grégoire,
+            // 19 oct.) ; hors barème ou sans barème, rien : le chiffre seul. La lecture unique (`bareme.texteAtteint`) :
+            // le rendu reçoit le texte, il ne le calcule pas. C'est le barème ACTUEL de la grille : seuls les points
+            // s'enregistrent sur la copie.
+            const tranche = texteDeLaTranche(def, points);
             return {
                 key:     c.critereId || c.critereNom || '',
                 name:    c.critereNom || def.nom || '',
@@ -596,6 +607,7 @@
                 sub:     def.description || '',
                 code:    niveau,
                 points:  points,
+                tranche: tranche,
                 comment: commentaire,
                 algo:    algo
             };
