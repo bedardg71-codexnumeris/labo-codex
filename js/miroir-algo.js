@@ -32,6 +32,13 @@
        par la formule elle-même ; une formule qui n'y arrive jamais (ratio visé) : le premier
        nombre où elle tombe à la moitié.
      · « Quelques-unes » : le quart de « beaucoup », arrondi, au moins 1.
+     · ⚠ UN CALCUL DONT LA NOTE NE BAISSE PAS QUAND LE COMPTE MONTE (retouche 2 du verdict de 4b, 27 oct.
+       2026 : un calcul composé peut compter des réussites) : la note ne dit plus rien du compte, les
+       copies se choisissent PAR LE COMPTE. Avec une limite fixée (longueur et tolérance), « Quelques » est
+       la tolérance et « Beaucoup » quatre fois la tolérance ; sans limite, 2 et 8 — le rapport d'un à
+       quatre de la règle d'hier. Mesuré sur les comptes 0, 1, 2, 4… jusqu'à la borne de la recherche
+       (`_baisseAvecLeCompte`), pour un calcul COMPOSÉ seulement : les trois tout faits gardent leurs copies
+       d'hier, à l'octet (un réglage de 0 point par erreur ne baisse pas non plus, et n'a qu'« Aucune »).
      · « Égalité » (lot 3a, 26 oct.) : au moins deux codes posables ; voir `_copieEgalite`.
      · « Pondérée » : seulement si le critère tire ses codes de ses sous-critères
        (`donneSesCodes`) et qu'un code ne pèse pas 1. Autant d'erreurs que « quelques-unes »,
@@ -157,6 +164,36 @@ function _premier(critere, ponderation, mots, accepte) {
     return haut;
 }
 
+/**
+ * La note baisse-t-elle quand le compte monte ? Mesuré sur les comptes 0, 1, 2, 4… (les seuls où la note se
+ * calcule) : vrai dès qu'un compte donne moins qu'un compte plus petit.
+ */
+function _baisseAvecLeCompte(critere, ponderation, mots) {
+    var meilleur = null;
+    for (var e = 0; e <= PLAFOND_RECHERCHE; e = (e === 0) ? 1 : e * 2) {
+        var r = _calculer(critere, ponderation, e, mots);
+        if (!r.applicable) continue;
+        if (meilleur !== null && r.pctBorne < meilleur - 1e-9) return true;
+        if (meilleur === null || r.pctBorne > meilleur) meilleur = r.pctBorne;
+    }
+    return false;
+}
+
+/** Un calcul composé donne-t-il la note ? Les trois tout faits gardent la règle d'hier, à l'octet. */
+function _estCompose(critere) {
+    var f = _reg('formulesAlgo').normaliser(critere);
+    return !!(f && f.modele && f.modele.compose);
+}
+
+/** Les comptes de « Quelques » et « Beaucoup » d'un calcul qui ne baisse pas (voir « La règle des copies »). */
+function _comptesSansBaisse(critere) {
+    var P = _reg('projectionAlgo');
+    var p = P ? P.normaliser(critere) : null;
+    var tolerance = p && p.modele.projette ? Number(p.params.erreursTolerees) : NaN;
+    var t = (isFinite(tolerance) && tolerance > 0) ? Math.max(1, Math.round(tolerance)) : 2;
+    return { quelques: t, beaucoup: 4 * t };
+}
+
 /** La grille d'un seul critère : pour que les codes posés se lisent sous CE critère. */
 function _grilleDe(critere) {
     return { criteres: [critere] };
@@ -232,12 +269,19 @@ function copies(critere) {
     var ponderation = _ponderation(critere);
     if (ponderation === null || !_reg('formulesAlgo')) return [];
     var mots = etendue(critere);
-    var plancher = _premier(critere, ponderation, mots, function(r) { return r.pctBorne <= 0; });
-    var beaucoup = (plancher !== null) ? plancher
-        : _premier(critere, ponderation, mots, function(r) { return r.pctBorne <= 50; });
+    var beaucoup, quelques;
+    if (!_estCompose(critere) || _baisseAvecLeCompte(critere, ponderation, mots)) {
+        var plancher = _premier(critere, ponderation, mots, function(r) { return r.pctBorne <= 0; });
+        beaucoup = (plancher !== null) ? plancher
+            : _premier(critere, ponderation, mots, function(r) { return r.pctBorne <= 50; });
+        if (beaucoup !== null) quelques = Math.max(1, Math.round(beaucoup / 4));
+    } else {
+        var parLeCompte = _comptesSansBaisse(critere);
+        beaucoup = parLeCompte.beaucoup;
+        quelques = parLeCompte.quelques;
+    }
     var liste = [{ cle: 'aucune', erreurs: 0 }];
     if (beaucoup !== null) {
-        var quelques = Math.max(1, Math.round(beaucoup / 4));
         if (quelques < beaucoup) liste.push({ cle: 'quelques', erreurs: quelques });
         liste.push({ cle: 'beaucoup', erreurs: beaucoup });
         var ponderee = _copiePonderee(critere, quelques, mots);

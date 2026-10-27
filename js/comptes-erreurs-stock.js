@@ -75,9 +75,12 @@ function codesDeLaCopie(evaluation) {
     return { total: total, compteurs: compteurs };
 }
 
-/** Ce que la formule du critère rend pour `entree` erreurs (la somme pondérée, ou le nombre brut). */
-function calculer(critere, entree, mots) {
-    var r = window.formulesAlgo.calculer(critere, { ponderation: critere.ponderation, erreurs: entree, mots: mots });
+/**
+ * Ce que la formule du critère rend pour `entree` erreurs (la somme pondérée, ou le nombre brut), le
+ * compte brut `compte` à côté, comme à l'évaluation : un calcul composé peut lire les deux (étape 4b).
+ */
+function calculer(critere, entree, compte, mots) {
+    var r = window.formulesAlgo.calculer(critere, { ponderation: critere.ponderation, erreurs: entree, compte: compte, mots: mots });
     return r && r.applicable ? r : null;
 }
 
@@ -116,7 +119,7 @@ function lecture(v, ctx) {
     entrees.push(v);
     var premiere = null;
     for (var i = 0; i < entrees.length; i++) {
-        var r = calculer(ctx.critere, entrees[i], ctx.mots);
+        var r = calculer(ctx.critere, entrees[i], v, ctx.mots);
         if (!r) continue;
         var niveau = window.niveauDuPourcentage(r.pctBorne, ctx.niveaux, { sansNiveauZero: true });
         var note = noteRedonnee(ctx.evaluation, ctx.grille, ctx.niveaux, ctx.critere.id, r.pctBorne);
