@@ -26,7 +26,7 @@ Grégoire reprend le chantier (27 oct., 14 h 23). La remesure demandée plus bas
 
 Restent ouverts, sans changement : la consigne `CONSIGNE-LOT-2026-10-24-correction-noms-fictifs.md` (toujours pas exécutée) et D6.
 
-**Consigne du lot 2a écrite** (27 oct., 14 h 55) : `CONSIGNE-LOT-2026-10-27-aide-lot-2a-commencer-cadre.md`. Elle attend que Grégoire la lance.
+**Lot 2a fait** (27 oct.) : `51081606`, retouche `ad6484ea` ; relu par Cowork, accepté (`VERDICT-RELECTURE-2026-10-27-aide-lot-2a.md`, puis `-retouche.md`) ; pas encore en ligne. **Consigne du lot 2b écrite** (27 oct., 16 h 32) : `CONSIGNE-LOT-2026-10-27-aide-lot-2b-conception.md`. Elle attend que Grégoire la lance.
 
 ## Ce que l'utilisateur verra à la fin
 
