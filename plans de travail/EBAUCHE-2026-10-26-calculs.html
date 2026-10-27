@@ -1,0 +1,1837 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Copie de l'ébauche publiée https://claude.ai/artifact/UP4FFHVEs3Q6jG4PNrpjhV (version 1, 1793063190-f88e), validée par Grégoire le 26 oct. 2026 à 21 h 10 (« C'est très bien ! »), déposée par Cowork pour la consigne de l'étape 4 du plan (PLAN-2026-10-21-critere-algorithmique-toute-discipline.md). Textes des calculs tout faits : TEXTES-2026-10-26-calculs-tout-faits.md. Lecture seule : référence de présentation et de mots d'écran, pas du code à reprendre tel quel. -->
+<style>:root{color-scheme:light;box-sizing:border-box}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+<title>Ébauche des calculs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Mise en page : celle de la maquette du 24 octobre (la chaîne en haut, puis trois colonnes : les blocs, les étapes,
+   la simulation de ce que l'étudiant·e lirait). Couleurs de styles.css de Labo Codex, clair et sombre ; le violet marque seulement les zones
+   où se posent les blocs ; l'ambre marque le cas que la copie fictive atteint. */
+:root {
+  --fond: #ffffff;
+  --fond-page: #f3f7fc;
+  --carte: #ffffff;
+  --element: #f0f8ff;
+  --texte: #1a1a2e;
+  --texte-2: #555566;
+  --muted: #666677;
+  --accent: #065dbb;
+  --sur-accent: #ffffff;
+  --accent-pale: #e8f2fd;
+  --bleu-moyen: #2a4a8a;
+  --bordure: rgba(3, 46, 92, 0.14);
+  --bordure-claire: rgba(3, 46, 92, 0.08);
+  --input: #ffffff;
+  --input-bord: rgba(3, 46, 92, 0.2);
+  --vert: #34c759;
+  --sur-vert: #ffffff;
+  --vert-fond: rgba(40, 167, 69, 0.1);
+  --vert-bord: #28a745;
+  --vert-texte: #1e7e34;
+  --zone: #6d28d9;
+  --zone-fond: rgba(109, 40, 217, 0.05);
+  --zone-fond-fort: rgba(109, 40, 217, 0.15);
+  --zone-bord: rgba(109, 40, 217, 0.5);
+  --ambre: #7a5a20;
+  --ambre-bord: #a07830;
+  --ambre-fond: rgba(160, 120, 48, 0.12);
+  --ombre: 0 1px 3px rgba(3, 46, 92, 0.06), 0 2px 6px rgba(3, 46, 92, 0.08);
+  --ombre-haut: 0 -4px 16px rgba(3, 46, 92, 0.14);
+  --r: 6px;
+  --r-grand: 12px;
+  --pill: 20px;
+  --police: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fond: #142428; --fond-page: #0c1a22; --carte: #1a3040; --element: #244858;
+    --texte: #d0e0e4; --texte-2: #a4bac4; --muted: #8fadbb; --accent: #6aacb8; --sur-accent: #0c1a22; --accent-pale: #1f4052;
+    --bleu-moyen: #3a6476; --bordure: rgba(106, 172, 184, 0.35); --bordure-claire: rgba(106, 172, 184, 0.2);
+    --input: #142428; --input-bord: rgba(106, 172, 184, 0.4);
+    --vert: #34c759; --sur-vert: #0c1a22; --vert-fond: rgba(52, 199, 89, 0.12); --vert-bord: #34c759; --vert-texte: #5ae080;
+    --zone: #b79cff; --zone-fond: rgba(183, 156, 255, 0.06); --zone-fond-fort: rgba(183, 156, 255, 0.2); --zone-bord: rgba(183, 156, 255, 0.55);
+    --ambre: #d4b878; --ambre-bord: #c8a060; --ambre-fond: rgba(200, 160, 96, 0.12);
+    --ombre: 0 1px 4px rgba(10, 30, 40, 0.3); --ombre-haut: 0 -4px 16px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fond: #142428; --fond-page: #0c1a22; --carte: #1a3040; --element: #244858;
+  --texte: #d0e0e4; --texte-2: #a4bac4; --muted: #8fadbb; --accent: #6aacb8; --sur-accent: #0c1a22; --accent-pale: #1f4052;
+  --bleu-moyen: #3a6476; --bordure: rgba(106, 172, 184, 0.35); --bordure-claire: rgba(106, 172, 184, 0.2);
+  --input: #142428; --input-bord: rgba(106, 172, 184, 0.4);
+  --vert: #34c759; --sur-vert: #0c1a22; --vert-fond: rgba(52, 199, 89, 0.12); --vert-bord: #34c759; --vert-texte: #5ae080;
+  --zone: #b79cff; --zone-fond: rgba(183, 156, 255, 0.06); --zone-fond-fort: rgba(183, 156, 255, 0.2); --zone-bord: rgba(183, 156, 255, 0.55);
+  --ambre: #d4b878; --ambre-bord: #c8a060; --ambre-fond: rgba(200, 160, 96, 0.12);
+  --ombre: 0 1px 4px rgba(10, 30, 40, 0.3); --ombre-haut: 0 -4px 16px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--fond-page); color: var(--texte); font-family: var(--police); font-size: 15px; line-height: 1.45; }
+button, input, select { font: inherit; color: inherit; }
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.ic { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.page {
+  max-width: 1480px; margin: 0 auto;
+  padding-block: 16px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* Bandeau d'ébauche : bordure égale sur les quatre côtés (règle de Grégoire du 24 oct. : pas de liseré). */
+.bandeau {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
+  padding: 10px 14px; border: 1px solid var(--ambre-bord); border-radius: var(--r);
+  background: var(--ambre-fond); color: var(--ambre); font-size: 0.88rem;
+}
+.bandeau-texte { flex: 1 1 320px; min-width: 0; }
+.bandeau-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bascule-crit { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--bordure); border-radius: var(--pill); background: var(--carte); padding: 2px; gap: 2px; }
+.bascule-crit button { border: 0; background: none; border-radius: var(--pill); padding: 4px 12px; min-height: 34px; cursor: pointer; font-size: 0.84rem; color: var(--texte-2); }
+.bascule-crit button[aria-pressed="true"] { background: var(--accent); color: var(--sur-accent); font-weight: 600; }
+.note-crit { font-size: 0.86rem; color: var(--texte-2); }
+.btn-discret {
+  border: 1px solid var(--bordure); background: var(--carte); border-radius: var(--r);
+  padding: 6px 12px; min-height: 36px; cursor: pointer; font-size: 0.85rem; color: var(--texte);
+}
+.btn-discret:hover { border-color: var(--accent); }
+.lien { background: none; border: 0; color: var(--accent); cursor: pointer; font-size: 0.84rem; padding: 6px 2px; min-height: 32px; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Ce que Cowork a supposé */
+.supposes { background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r); padding: 10px 14px; }
+.supposes summary { cursor: pointer; font-weight: 600; font-size: 0.92rem; min-height: 28px; display: list-item; }
+.supposes ol { margin: 10px 0 4px; padding-left: 1.4em; display: flex; flex-direction: column; gap: 7px; font-size: 0.88rem; color: var(--texte-2); max-width: 92ch; }
+.supposes li strong { color: var(--texte); }
+.revient { display: inline-block; font-size: 0.72rem; font-weight: 700; border: 1px solid var(--ambre-bord); color: var(--ambre); background: var(--ambre-fond); border-radius: var(--pill); padding: 0 7px; margin-left: 4px; white-space: nowrap; }
+
+.fil { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.9rem; color: var(--texte-2); }
+.fil strong { color: var(--texte); }
+
+/* Carte du critère */
+.critere {
+  background: var(--fond); border: 1px solid var(--bordure-claire); border-radius: var(--r-grand);
+  padding: 16px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--ombre); min-width: 0;
+}
+.tete-champs {
+  display: grid; gap: 12px;
+  grid-template-columns: minmax(150px, 1.3fr) minmax(130px, 1fr) minmax(80px, 0.55fr) minmax(140px, 1fr) minmax(180px, 2fr);
+}
+.champ { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.champ > label { font-size: 0.82rem; color: var(--texte-2); font-weight: 500; }
+.saisie {
+  width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid var(--input-bord); border-radius: var(--r);
+  background: var(--input); color: var(--texte);
+}
+.saisie:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-pale); }
+.saisie[disabled] { opacity: 0.75; }
+
+/* La chaîne : la barre de convergence du Trimestre */
+.barre-convergence {
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 16px 12px 12px; background: var(--carte); border: 1px solid var(--bordure-claire);
+  border-radius: var(--r); overflow-x: auto;
+}
+.bc-etape {
+  flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none;
+  cursor: pointer; padding: 4px 6px; min-width: 84px; transition: transform 0.15s ease; position: relative;
+}
+.bc-etape:hover { transform: translateY(-2px); }
+.bc-noeud {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--bleu-moyen); background: transparent;
+  display: flex; align-items: center; justify-content: center; transition: all 0.25s ease;
+}
+.bc-check { font-size: 13px; color: transparent; line-height: 1; }
+.bc-complet .bc-noeud { border-color: var(--vert); background: var(--vert); box-shadow: 0 0 8px rgba(52, 199, 89, 0.3); }
+.bc-complet .bc-check { color: var(--sur-vert); }
+.bc-label { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.02em; text-align: center; white-space: nowrap; color: var(--texte); }
+.bc-info { font-size: 0.68rem; color: var(--accent); min-height: 14px; text-align: center; white-space: nowrap; }
+.bc-liaison { flex: 1; height: 2px; background: var(--vert); margin-top: 17px; min-width: 16px; max-width: 64px; }
+.bc-destination .bc-noeud { width: 34px; height: 34px; border-width: 3px; }
+.bc-destination .bc-label { font-weight: 700; font-size: 0.76rem; }
+.bc-ouvert .bc-noeud { box-shadow: 0 0 0 4px var(--accent-pale), 0 0 0 6px var(--accent); }
+.bc-ouvert .bc-label { color: var(--accent); }
+.bc-neuf { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ambre); background: var(--ambre-fond); border: 1px solid var(--ambre-bord); border-radius: var(--pill); padding: 0 5px; }
+
+/* L'atelier */
+.atelier { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.centre { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; align-items: start; min-width: 0; }
+
+/* La palette */
+.palette {
+  position: sticky; top: 12px; display: flex; flex-direction: column; gap: 12px;
+  max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 2px; min-width: 0;
+}
+.palette-tete {
+  display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1.5px solid var(--zone-bord);
+  border-radius: var(--r-grand); background: var(--zone-fond);
+}
+.palette-titre { display: flex; align-items: center; gap: 8px; font-size: 0.98rem; }
+.palette-titre .ic { color: var(--zone); }
+.palette-but { font-size: 0.84rem; color: var(--texte-2); }
+.palette-mode { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 0.84rem; }
+.palette-mode li { display: flex; gap: 8px; align-items: baseline; }
+.palette-mode .n {
+  flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--zone); color: var(--carte);
+  font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; transform: translateY(-1px);
+}
+.palette-cible { font-size: 0.85rem; color: var(--texte-2); padding: 8px 10px; border-radius: var(--r); background: var(--carte); border: 1px solid var(--bordure-claire); }
+.palette[data-cible] .palette-cible { color: var(--texte); border-color: var(--zone); }
+.palette-cible strong { color: var(--zone); }
+.palette-cible.secoue { animation: secoue 0.4s; }
+.palette-groupe { display: flex; flex-direction: column; gap: 6px; }
+.palette-groupe-nom { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.palette-legende { font-size: 0.76rem; color: var(--muted); }
+.palette-astuce { display: none; font-size: 0.84rem; color: var(--texte-2); }
+.bloc {
+  display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left; min-height: 44px;
+  padding: 6px 10px; border: 1px solid var(--bordure); border-radius: var(--r);
+  background: var(--carte); color: var(--texte); cursor: pointer;
+}
+.bloc--posee { background: var(--accent-pale); border-color: var(--accent); }
+.bloc--remplie { background: var(--vert-fond); border-color: var(--vert-bord); }
+.bloc:hover { filter: brightness(0.97); }
+.bloc-nom { font-weight: 700; font-size: 0.87rem; line-height: 1.3; overflow-wrap: anywhere; }
+.bloc-valeur { font-size: 0.78rem; color: var(--texte-2); overflow-wrap: anywhere; }
+.bloc-valeur::before { content: "→ "; color: var(--muted); }
+.bloc-valeur.vide { font-style: italic; }
+.bloc[aria-disabled="true"] { background: transparent; border-style: dashed; border-color: var(--bordure); min-height: 32px; padding-block: 4px; cursor: default; }
+.bloc[aria-disabled="true"] .bloc-nom { color: var(--muted); font-weight: 600; }
+.bloc[aria-disabled="true"] .bloc-valeur { display: none; }
+
+/* Les étapes */
+.etapes { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.etape h3 { font-size: inherit; font-weight: inherit; }
+.etape { background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r-grand); min-width: 0; scroll-margin-top: 12px; }
+.etape-tete {
+  width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 56px;
+  background: none; border: 0; cursor: pointer; text-align: left; border-radius: var(--r-grand);
+}
+.etape-noeud {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--vert); background: var(--vert);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--sur-vert);
+}
+.etape-titres { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.etape-titre { font-size: 1rem; font-weight: 700; }
+.etape-resume { font-size: 0.84rem; color: var(--texte-2); }
+.etape-chevron { transition: transform 0.2s; color: var(--muted); }
+.etape[data-ouverte] .etape-chevron { transform: rotate(180deg); }
+.etape[data-ouverte] .etape-tete { border-bottom: 1px solid var(--bordure-claire); border-radius: var(--r-grand) var(--r-grand) 0 0; }
+.etape-corps { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 16px; }
+.etape-but { font-size: 0.88rem; color: var(--texte-2); max-width: 68ch; }
+.grille-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.grille-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+.collections { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; border-top: 1px solid var(--bordure-claire); }
+.collection-saisie { display: flex; flex-direction: column; gap: 4px; }
+.collections-liste { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 0.88rem; }
+.collections-liste li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; }
+.tc-selon select.saisie#reprendreCollection { background: var(--input); border-color: var(--input-bord); font-weight: 400; }
+.rangee-noms { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: end; }
+.rangee-noms .quoi { font-size: 0.9rem; color: var(--texte-2); padding-bottom: 10px; }
+.petit { font-size: 0.8rem; color: var(--muted); }
+.formule-copie { font-size: 0.9rem; padding: 8px 10px; border-radius: var(--r); background: var(--element); font-variant-numeric: tabular-nums; }
+.liste-codes { display: flex; flex-direction: column; gap: 6px; }
+.code-rangee { display: grid; grid-template-columns: 52px minmax(0, 1fr) 72px; gap: 8px; align-items: center; font-size: 0.9rem; }
+.code-rangee .num { text-align: center; font-weight: 700; color: var(--accent); }
+.code-rangee .poids { color: var(--muted); font-variant-numeric: tabular-nums; }
+.code-tete { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
+.exemples { border: 1px solid var(--bordure-claire); border-radius: var(--r); background: var(--element); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
+.exemples-titre, .variante-titre { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.exemples-defile { overflow-x: auto; }
+.exemples table { border-collapse: collapse; font-size: 0.86rem; width: 100%; }
+.exemples th { text-align: left; font-weight: 600; color: var(--texte-2); padding: 4px 10px 4px 0; border-bottom: 1px solid var(--bordure); }
+.exemples td { padding: 5px 10px 5px 0; vertical-align: top; }
+.exemples .phrase { color: var(--texte-2); font-style: italic; }
+.variante { border: 1px dashed var(--bordure); border-radius: var(--r); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; font-size: 0.86rem; color: var(--texte-2); max-width: 72ch; }
+
+/* Les zones où se posent les blocs */
+.zone-bloc { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.zone-etiquette { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.zone-etiquette .ic { color: var(--zone); }
+.zone-nom { font-weight: 700; font-size: 0.9rem; }
+.zone-public {
+  font-size: 0.72rem; font-weight: 600; padding: 1px 8px; border-radius: var(--pill);
+  border: 1px solid var(--bordure); color: var(--texte-2);
+}
+.zone-public.eleve { border-color: var(--vert-bord); color: var(--vert-texte); }
+.zone-modele { margin-left: auto; background: none; border: 0; color: var(--accent); font-size: 0.78rem; cursor: pointer; padding: 4px 2px; text-decoration: underline; text-underline-offset: 2px; }
+.zone {
+  min-height: 2.8em; padding: 8px 10px; border: 1.5px dashed var(--zone-bord); border-radius: var(--r);
+  background: var(--zone-fond); line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; cursor: text;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.zone:empty::before { content: attr(data-vide); color: var(--muted); font-style: italic; }
+.zone:focus, .zone.est-cible { outline: none; border-style: solid; border-color: var(--zone); background: var(--carte); box-shadow: 0 0 0 3px var(--zone-fond-fort); }
+.zone.allume { animation: allume 1.6s ease; }
+.zone-aide { font-size: 0.78rem; color: var(--muted); }
+.chip {
+  display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 8px; margin: 0 1px; border: 1px solid;
+  border-radius: var(--pill); font-size: 0.82em; font-weight: 600; line-height: 1.55; vertical-align: baseline;
+  white-space: nowrap; user-select: none; -webkit-user-select: none; cursor: default;
+}
+.chip--posee { background: var(--accent-pale); border-color: var(--accent); }
+.chip--remplie { background: var(--vert-fond); border-color: var(--vert-bord); }
+.chip--fixe { padding-right: 8px; }
+.chip-x { border: 0; background: none; cursor: pointer; padding: 0 5px; line-height: 1; opacity: 0.6; font-size: 1.05em; }
+.chip-x:hover { opacity: 1; }
+
+/* ===== LA TABLE DE CAS ===== */
+.table-cas { container-type: inline-size; border: 1px solid var(--bordure); border-radius: var(--r); background: var(--fond); min-width: 0; }
+.tc-tete {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 12px;
+  border-bottom: 1px solid var(--bordure-claire); background: var(--element); border-radius: var(--r) var(--r) 0 0;
+}
+.tc-titre { font-size: 0.98rem; font-weight: 700; }
+.tc-selon { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.86rem; color: var(--texte-2); min-width: 0; }
+.tc-selon .saisie { width: auto; min-width: 0; max-width: 100%; min-height: 36px; padding: 4px 8px; font-weight: 600; color: var(--texte); background: var(--vert-fond); border-color: var(--vert-bord); }
+.tc-retirer { margin-left: auto; }
+.tc-corps { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.tc-ou { font-size: 0.82rem; color: var(--texte-2); max-width: 72ch; }
+.tc-vide { font-size: 0.9rem; color: var(--texte-2); }
+.tc-entete {
+  display: grid; grid-template-columns: 150px 170px minmax(0, 1fr); gap: 12px; padding: 0 11px;
+  font-size: 0.7rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); font-weight: 600;
+}
+.tc-rangees { display: flex; flex-direction: column; gap: 6px; }
+.tc-rangee {
+  display: grid; grid-template-columns: 150px 170px minmax(0, 1fr); gap: 8px 12px; align-items: start;
+  padding: 10px; border: 1px solid var(--bordure-claire); border-radius: var(--r); background: var(--carte);
+}
+.sans-nom .tc-entete, .sans-nom .tc-rangee { grid-template-columns: 150px minmax(0, 1fr); }
+.tc-rangee[data-atteint] { border-color: var(--ambre-bord); background: var(--ambre-fond); }
+.tc-quand { display: flex; flex-direction: column; gap: 3px; font-size: 0.86rem; padding-top: 6px; min-width: 0; }
+.tc-quand strong { font-size: 0.9rem; }
+.tc-borne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tc-borne .saisie { width: 76px; min-height: 36px; padding: 4px 8px; text-align: center; font-variant-numeric: tabular-nums; }
+.tc-nom { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tc-nom .saisie { min-height: 38px; font-weight: 600; }
+.tc-nom-etiq { display: none; font-size: 0.78rem; color: var(--texte-2); }
+.tc-textes { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.tc-pied { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tc-ici { font-size: 0.72rem; font-weight: 700; color: var(--ambre); background: var(--carte); border: 1px solid var(--ambre-bord); border-radius: var(--pill); padding: 1px 8px; white-space: nowrap; }
+.btn-ajout {
+  align-self: flex-start; border: 1.5px dashed var(--bordure); background: transparent; border-radius: var(--r);
+  padding: 8px 14px; min-height: 42px; cursor: pointer; color: var(--accent); font-weight: 600;
+}
+.btn-ajout:hover { border-color: var(--accent); }
+@container (max-width: 560px) {
+  .tc-entete { display: none; }
+  .tc-rangee, .sans-nom .tc-rangee { grid-template-columns: minmax(0, 1fr); }
+  .tc-quand { padding-top: 0; flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+  .tc-retirer { margin-left: 0; }
+  .tc-nom-etiq { display: block; }
+  .grille-3, .grille-2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Ce que l'app choisit sans toi */
+.choix-app { container-type: inline-size; border: 1px solid var(--bordure-claire); border-radius: var(--r); padding: 12px; display: flex; flex-direction: column; gap: 10px; background: var(--fond); }
+.choix-app h4 { font-size: 0.98rem; }
+.choix-app dl { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.ca { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 2px 12px; font-size: 0.86rem; }
+.ca dt { font-weight: 700; }
+.ca dd { margin: 0; color: var(--texte-2); }
+.ca .lien { padding: 0 2px; min-height: 0; font-size: inherit; }
+@container (max-width: 520px) { .ca { grid-template-columns: minmax(0, 1fr); } }
+
+/* ===== LA SIMULATION ===== */
+.apercu {
+  position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--r-grand); box-shadow: var(--ombre);
+  padding: 14px; display: flex; flex-direction: column; gap: 14px; min-width: 0;
+}
+.apercu-tete { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.apercu-tete h2 { font-size: 1.02rem; }
+.apercu-but { font-size: 0.84rem; color: var(--texte-2); }
+@media (max-width: 759px) { .apercu[data-reduit] .apercu-but { display: none; } }
+.apercu-reduire { display: none; }
+.apercu-detail { display: flex; flex-direction: column; gap: 14px; }
+.copie { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r); background: var(--element); }
+.copie-titre { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.copie-ligne { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.9rem; }
+.pas { width: 36px; height: 36px; border-radius: var(--r); border: 1px solid var(--input-bord); background: var(--input); cursor: pointer; font-weight: 700; }
+.copie-ligne .saisie { width: 72px; min-height: 36px; padding: 4px 8px; text-align: center; font-variant-numeric: tabular-nums; }
+.copie input[type="range"] { width: 100%; accent-color: var(--accent); }
+.copie-codes { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.copie-codes strong { color: var(--texte-2); }
+.refs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.refs-nom { font-size: 0.78rem; color: var(--muted); width: 100%; }
+.ref-btn { border: 1px solid var(--bordure); background: var(--carte); border-radius: var(--pill); padding: 3px 10px; min-height: 32px; cursor: pointer; font-size: 0.8rem; }
+.ref-btn:hover { border-color: var(--accent); }
+.flash { font-size: 0.8rem; color: var(--ambre); min-height: 0; }
+.flash:empty { display: none; }
+.resultats { display: flex; flex-wrap: wrap; gap: 6px; }
+.resultat { display: inline-flex; gap: 6px; align-items: baseline; padding: 4px 10px; border-radius: var(--pill); border: 1px solid var(--bordure); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.resultat span { color: var(--muted); font-size: 0.78rem; }
+.resultat.palier-r { border-color: var(--ambre-bord); background: var(--ambre-fond); }
+.lectures { display: flex; flex-direction: column; gap: 14px; }
+.lecture { display: flex; flex-direction: column; gap: 6px; }
+.lecture h3 { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.texte-eleve { font-size: 0.95rem; line-height: 1.85; padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--bordure-claire); background: var(--fond); overflow-wrap: anywhere; }
+.texte-eleve.eteint { color: var(--muted); }
+.rien { color: var(--muted); font-style: italic; }
+.seg { color: inherit; text-decoration: none; border-radius: 4px; padding: 1px 0; transition: background 0.15s; }
+a.seg { cursor: pointer; }
+a.seg:hover { background: var(--zone-fond-fort); text-decoration: underline dotted var(--zone); text-underline-offset: 3px; }
+.seg--engendre, .seg--fixe { color: var(--texte-2); }
+.seg-fort { font-weight: 700; }
+.seg-src {
+  display: inline-block; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--zone); border: 1px solid var(--zone-bord); border-radius: var(--pill); padding: 0 6px; margin-right: 4px;
+  line-height: 1.5; vertical-align: 1px; white-space: nowrap;
+}
+.seg--engendre .seg-src, .seg--fixe .seg-src { color: var(--muted); border-color: var(--bordure); border-style: dashed; }
+.seg--table .seg-src { color: var(--ambre); border-color: var(--ambre-bord); }
+.apercu[data-sans-sources] .seg-src { display: none; }
+.condition { display: flex; flex-direction: column; gap: 3px; }
+.condition-si { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 8px; font-size: 0.8rem; color: var(--muted); }
+.etat { font-size: 0.7rem; font-weight: 700; border-radius: var(--pill); padding: 0 7px; border: 1px solid var(--bordure); white-space: nowrap; }
+.etat.oui { color: var(--vert-texte); border-color: var(--vert-bord); background: var(--vert-fond); }
+.etat.non { color: var(--muted); border-style: dashed; }
+.bascule { display: flex; gap: 8px; align-items: center; font-size: 0.84rem; color: var(--texte-2); cursor: pointer; }
+.bascule input { width: 18px; height: 18px; accent-color: var(--zone); }
+.tc-textes .bascule { align-items: flex-start; }
+.tc-textes .bascule input { margin-top: 2px; flex: none; }
+.apercu-astuce { font-size: 0.78rem; color: var(--muted); }
+
+@keyframes allume { 0%, 100% { background: var(--zone-fond); } 30%, 70% { background: var(--zone-fond-fort); box-shadow: 0 0 0 4px var(--zone-fond-fort); } }
+@keyframes secoue { 0%, 100% { transform: none; } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Largeurs intermédiaires (iPad couché dans l'app, iPad portrait) : palette compacte, collée en haut */
+@media (max-width: 1179px) {
+  .tete-champs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tete-champs .champ-desc { grid-column: span 2; }
+  .atelier { grid-template-columns: minmax(0, 1fr) 300px; }
+  .centre { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .palette {
+    top: 0; z-index: 5; max-height: none; overflow: visible; gap: 8px; padding: 8px 10px;
+    background: var(--fond); border-bottom: 1px solid var(--bordure-claire);
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  }
+  .palette-tete { flex-direction: row; flex-wrap: wrap; align-items: center; padding: 8px 10px; gap: 4px 10px; }
+  .palette-but, .palette-mode, .palette-legende, .palette-groupe-nom { display: none; }
+  .palette-cible { padding: 4px 0; border: 0; background: none; flex: 1 1 220px; }
+  .palette[data-cible] .palette-cible { border: 0; }
+  .palette-groupe { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .palette:not([data-cible]) .palette-groupe { display: none; }
+  .palette:not([data-cible]) .palette-astuce { display: block; }
+  .bloc { width: auto; flex-direction: row; align-items: baseline; gap: 6px; min-height: 40px; padding: 6px 10px; }
+  .bloc[aria-disabled="true"] { display: none; }
+}
+@media (max-width: 900px) {
+  .tete-champs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tete-champs .champ-desc { grid-column: span 2; }
+}
+/* Téléphone, colonne unique : la simulation devient un tiroir collé en bas */
+@media (max-width: 759px) {
+  .atelier { grid-template-columns: minmax(0, 1fr); }
+  .apercu {
+    top: auto; bottom: 0; max-height: 42vh; z-index: 6; border-radius: var(--r-grand) var(--r-grand) 0 0;
+    box-shadow: var(--ombre-haut); padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  .apercu-reduire { display: inline-flex; }
+  .apercu[data-reduit] .apercu-detail { display: none; }
+  .grille-3 { grid-template-columns: minmax(0, 1fr); }
+  .rangee-noms { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .rangee-noms .quoi { grid-column: span 2; padding-bottom: 0; }
+  .bc-etape { min-width: 64px; padding: 4px 2px; }
+  .bc-label { font-size: 0.66rem; }
+  .bc-liaison { min-width: 12px; flex: none; width: 12px; }
+  .barre-convergence { justify-content: flex-start; }
+  .critere { padding: 12px; }
+  .etape-corps { padding: 12px; }
+}
+@media (max-width: 480px) {
+  .tete-champs { grid-template-columns: minmax(0, 1fr); }
+  .tete-champs .champ-desc { grid-column: auto; }
+}
+
+/* ---------- Étape 4 : les calculs ---------- */
+.calc-titre { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-top: 4px; }
+.calc-message { font-size: 0.86rem; padding: 6px 10px; border-left: 3px solid var(--accent); background: var(--accent-pale); border-radius: var(--r); max-width: 72ch; }
+.calc-choix { display: flex; flex-direction: column; gap: 8px; max-width: 76ch; }
+.calc-carte { border: 1px solid var(--bordure); border-radius: var(--r); background: var(--carte); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.calc-carte[data-actif] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-pale); }
+.calc-carte-tete { display: flex; align-items: center; gap: 10px; cursor: pointer; min-height: 32px; }
+.calc-carte-tete input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; margin: 0; }
+.calc-nom { font-weight: 700; font-size: 0.95rem; }
+.calc-texte { font-size: 0.86rem; color: var(--texte-2); max-width: 68ch; }
+.calc-carte:not([data-actif]) .calc-texte { padding-left: 28px; }
+.calc-param { max-width: 380px; }
+.calc-param .saisie { max-width: 140px; }
+.calc-legende { margin-bottom: -4px; }
+.calc-formule { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px; border-radius: var(--r); background: var(--element); border: 1px solid var(--bordure-claire); min-width: 0; }
+.calc-formule--ligne { display: inline-flex; padding: 4px 8px; margin: 2px 0; }
+.calc-op { font-weight: 700; font-size: 0.95rem; color: var(--texte); font-variant-numeric: tabular-nums; }
+.chip--nombre { background: var(--carte); border-color: var(--bordure); font-variant-numeric: tabular-nums; }
+.calc-cas { border-top: 1px dashed var(--bordure); padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.calc-cas-titre { font-size: 0.84rem; font-weight: 600; color: var(--texte-2); }
+.calc-cas-rangee { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 0.86rem; }
+.calc-cas-rangee .saisie { min-height: 40px; max-width: 100%; }
+.calc-actions { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.calc-composeur { border: 1px dashed var(--bordure); border-radius: var(--r); max-width: 76ch; }
+.calc-composeur > summary { cursor: pointer; padding: 10px 12px; font-weight: 600; font-size: 0.9rem; min-height: 40px; }
+.calc-composeur[open] > summary { border-bottom: 1px dashed var(--bordure); }
+.calc-composeur-corps { padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+.calc-sert { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.86rem; }
+.calc-sert legend { font-size: 0.82rem; color: var(--texte-2); font-weight: 500; padding: 0; margin-bottom: 4px; }
+.calc-sert label { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; cursor: pointer; }
+.calc-zone { min-height: 48px; background: var(--carte); border-style: dashed; border-color: var(--zone-bord); }
+.calc-zone .rien { font-style: italic; color: var(--muted); font-size: 0.84rem; }
+.calc-boutons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.calc-groupe { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; min-width: 92px; }
+.calc-bouton { width: auto; min-height: 36px; padding: 4px 10px; }
+.calc-btn-op { min-width: 44px; font-weight: 700; font-size: 1rem; }
+.calc-btn-op, .calc-boutons .btn-discret { min-height: 40px; }
+.calc-perso { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; max-width: 76ch; }
+.calc-perso li { border: 1px solid var(--bordure-claire); border-radius: var(--r); padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
+.resultat-calcul { flex-basis: 100%; font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) { .calc-groupe { min-width: 0; flex-basis: 100%; } .calc-btn-op { min-width: 40px; padding-inline: 0; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-crayon" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+</svg>
+
+<div class="page">
+  <div class="bandeau" role="note">
+    <span class="bandeau-texte">Ébauche de l’étape 4, les calculs de la note, posée dans l’atelier de la table de cas. Critère fictif, aucune donnée d’étudiant·e, rien n’est enregistré.</span>
+    <div class="bandeau-actions">
+      <div class="bascule-crit" role="group" aria-label="Critère d’exemple">
+        <button type="button" id="critNeuf" data-crit="neuf" aria-pressed="true">Critère neuf · Unités et calculs</button>
+        <button type="button" id="critExistant" data-crit="existant" aria-pressed="false">Critère existant · Français écrit</button>
+      </div>
+      <button type="button" class="btn-discret" id="toutRemettre">Tout remettre au départ</button>
+    </div>
+  </div>
+  <p class="note-crit" id="noteCrit"></p>
+
+  <details class="supposes" id="supposes">
+    <summary>Ce que j’ai supposé pour cette ébauche : sept points</summary>
+    <ol>
+      <li><strong>Les trois calculs tout faits gardent leur calcul, leurs réglages et leurs identifiants enregistrés.</strong> Seuls leurs noms et leurs textes changent : ceux que tu as validés le 26 octobre.</li>
+      <li><strong>Ton propre calcul se compose de blocs, de nombres et des quatre opérations, avec des parenthèses.</strong> Pas de fonctions de tableur (minimum, « si »…) : la note reste toujours entre 0 et la pondération, et les choix « Quand une donnée de la copie vaut 0 » tiennent lieu de « si ».</li>
+      <li><strong>Un calcul qui divise par une donnée de la copie demande ce que vaut la note quand cette donnée vaut 0.</strong> Les choix de départ des trois calculs tout faits sont ceux de l’application d’aujourd’hui : sans longueur, aucune note ; avec le rapport visé, une copie sans occurrence a la note entière.</li>
+      <li><strong>« Retoucher ce calcul » fait une copie</strong> qui porte ton nom ; le calcul tout fait reste offert tel quel.</li>
+      <li><strong>« Composer ton propre calcul » est replié</strong>, comme une fonction avancée : l’étape s’ouvre sur les trois calculs tout faits.</li>
+      <li><strong>Un calcul composé peut servir à tes phrases et à tes tables plutôt qu’à la note.</strong> Il paraît alors dans la palette, comme bloc, et dans le menu « Selon » des tables de cas.</li>
+      <li><strong>Changer de calcul suit la règle d’aujourd’hui</strong> : une copie déjà évaluée garde sa note et suit le nouveau calcul dès que tu la modifies. Je le tire du message que l’application affiche pour un critère retiré de la grille ; je ne l’ai pas mesuré pour un calcul changé.</li>
+    </ol>
+  </details>
+
+  <nav class="fil" aria-label="Où je suis">
+    <span>Grille d’exemple</span><span aria-hidden="true">›</span><strong id="filCritere">Unités et calculs</strong>
+  </nav>
+
+  <section class="critere" aria-label="Le critère">
+    <div class="tete-champs">
+      <div class="champ"><label for="nomCritere">Nom du critère</label><input class="saisie" id="nomCritere" type="text"></div>
+      <div class="champ"><label for="typeCritere">Type</label><select class="saisie" id="typeCritere" disabled><option>Algorithmique</option></select></div>
+      <div class="champ"><label for="pondCritere">Pond. (%)</label><input class="saisie" id="pondCritere" type="text" value="20" readonly></div>
+      <div class="champ"><label for="soloCritere">Complexité SOLO</label><select class="saisie" id="soloCritere"><option>Unistructurel</option><option selected>Multistructurel</option><option>Relationnel</option></select></div>
+      <div class="champ champ-desc"><label for="descCritere">Description</label><input class="saisie" id="descCritere" type="text"></div>
+    </div>
+    <nav class="barre-convergence" id="chaine" aria-label="Les étapes du critère algorithmique"></nav>
+    <div class="atelier">
+      <div class="centre">
+        <aside class="palette" id="palette" aria-label="Blocs de textes"></aside>
+        <div class="etapes" id="etapes"></div>
+      </div>
+      <aside class="apercu" id="apercu" aria-label="Simulation de ce que l’étudiant·e lirait"></aside>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+/* ---------- Petits outils ---------- */
+var NB = ' ';
+function $(id) { return document.getElementById(id); }
+function q(s) { return '«' + NB + s + NB + '»'; }
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+function fmt(x) { return Number(x).toLocaleString('fr-CA', { maximumFractionDigits: 2 }); }
+function pct(x) { return fmt(x) + NB + '%'; }
+function accord(k, s, p) { return Number(k) >= 2 ? p : s; }
+function h(tag, attrs) {
+  var el = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function (k) {
+    var v = attrs[k];
+    if (v === null || v === undefined || v === false) return;
+    if (k === 'class') el.className = v;
+    else if (k === 'text') el.textContent = v;
+    else if (k === 'hidden') el.hidden = !!v;
+    else if (k === 'value') el.value = v;
+    else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  });
+  for (var i = 2; i < arguments.length; i++) ajouter(el, arguments[i]);
+  return el;
+}
+function ajouter(el, c) {
+  if (c === null || c === undefined || c === false) return;
+  if (Array.isArray(c)) { c.forEach(function (x) { ajouter(el, x); }); return; }
+  el.appendChild(typeof c === 'string' || typeof c === 'number' ? document.createTextNode(String(c)) : c);
+}
+function icone(id, cls) {
+  var ns = 'http://www.w3.org/2000/svg';
+  var s = document.createElementNS(ns, 'svg'); s.setAttribute('class', 'ic' + (cls ? ' ' + cls : '')); s.setAttribute('aria-hidden', 'true');
+  var u = document.createElementNS(ns, 'use'); u.setAttribute('href', '#' + id); s.appendChild(u); return s;
+}
+
+/* ---------- Les deux critères d'exemple ---------- */
+var LISTE_FR = [
+  ['1', 'Construction syntaxique ou accord du verbe'], ['2', 'Subordonnées employées seules'], ['3', 'Ponctuation'],
+  ['4', 'Groupe du nom'], ['5', 'Accord du pronom ou le lien avec son antécédent'], ['6', 'Accord du participe passé'],
+  ['7', 'Mots invariables'], ['8', 'Déterminant'], ['9', 'Vocabulaire'], ['10', 'Orthographe d’usage ou éléments de typographie']
+];
+var DECOMPTE = 'Ta production contient {erreurs} {nomErreurs}{points} pour {mots} {nomMots}.';
+
+function paliersNeuf() {
+  // Les textes tranchés par Grégoire le 25 oct. 2026 à 17 h 19 (TEXTES-2026-10-25-table-de-cas-a-corriger.md).
+  return [
+    { cle: 'zero', zero: true, max: null, nom: 'Aucune occurrence', texte: 'C’est exceptionnel.', aide: '' },
+    { cle: 'excellent', max: 0.3, nom: 'Excellent', texte: 'Ce rapport est excellent.', aide: '' },
+    { cle: 'tres_bien', max: 0.4, nom: 'Très bien', texte: 'Ce rapport est très bien.', aide: '' },
+    { cle: 'bien', max: 0.5, nom: 'Bien', texte: 'Ce rapport est bien.', aide: '' },
+    { cle: 'risque', max: 1, nom: 'Risqué', texte: 'Ce rapport est risqué : il approche de la limite.', aide: 'Il pourrait être utile de demander de l’aide : {service}.' },
+    { cle: 'audela', max: null, nom: 'Au-delà', texte: 'Ce rapport dépasse la limite fixée.', aide: 'Il serait important de demander de l’aide : {service}.' }
+  ];
+}
+function paliersExistant() {
+  var e = 'En prévision de l’épreuve uniforme, ';
+  return [
+    { cle: 'zero', zero: true, max: null, nom: 'Sans erreur', texte: e + 'l’absence d’erreur est exceptionnelle.', aide: '' },
+    { cle: 'excellent', max: 0.3, nom: 'Excellent', texte: e + 'ce ratio est excellent.', aide: '' },
+    { cle: 'tres_bien', max: 0.4, nom: 'Très bien', texte: e + 'ce ratio est très bien.', aide: '' },
+    { cle: 'bien', max: 0.5, nom: 'Bien', texte: e + 'ce ratio est bien.', aide: '' },
+    { cle: 'risque', max: 1, nom: 'Risqué', texte: e + 'ce ratio est risqué parce qu’il est près du seuil de l’échec.', aide: 'Il est recommandé de t’inscrire au {service}.' },
+    { cle: 'echec', max: null, nom: 'Échec', texte: e + 'ce ratio mènerait à un échec automatique.', aide: 'Il est fortement recommandé de t’inscrire au {service}.' }
+  ];
+}
+function defauts() {
+  var d = {
+    neuf: {
+      cle: 'neuf', nom: 'Unités et calculs', description: 'Écrire chaque résultat avec son unité',
+      noms: { e1: 'unité manquante', e2: 'unités manquantes', m1: 'calcul', m2: 'calculs' },
+      codes: [['1', 'Unité absente'], ['2', 'Unité erronée'], ['3', 'Chiffres significatifs'], ['4', 'Conversion']],
+      base: [1, 3, 1, 2, 1, 3, 4],
+      calcul: { modele: 'fixe', params: { longueur: 12, rapport: 6, points: 2 }, cas: {}, perso: [], prochain: 1 },
+      limite: { active: true, longueur: 12, tolere: 4, service: '', signalement: '', lien: '' },
+      paliers: paliersNeuf(),
+      textes: { decompte: DECOMPTE, priorite: '{critere} est à travailler en priorité', concentre: 'Tu pourrais encore raffiner : {critere}', aucune: 'Aucun tampon ni {nomErreurs} annotés.' },
+      egalite: 'liste',
+      copie: { n: 3, m: 12 }, nMax: 20, codesExplicites: null, refs: { quelques: 1, beaucoup: 10 },
+      tables: [{ id: 't1', selon: 'erreurs', cas: null }], prochain: 2
+    },
+    existant: {
+      cle: 'existant', nom: 'Français écrit', description: 'Respecter les normes de la langue écrite',
+      noms: { e1: 'erreur', e2: 'erreurs', m1: 'mot', m2: 'mots' },
+      codes: LISTE_FR,
+      base: [1, 3, 10, 1, 3, 10, 1, 3, 10, 1, 3, 1, 4, 6, 9],
+      calcul: { modele: 'proportionnelle', params: { longueur: 500, rapport: 60, points: 1 }, cas: {}, perso: [], prochain: 1 },
+      limite: { active: true, longueur: 900, tolere: 30, service: 'Centre d’aide du collège', signalement: '', lien: '' },
+      paliers: paliersExistant(),
+      textes: { decompte: DECOMPTE, priorite: '{critere} est à travailler en priorité', concentre: 'Concentre-toi sur {critere}', aucune: 'Aucun tampon ni {nomErreurs} annotés.' },
+      egalite: 'pose',
+      copie: { n: 12, m: 600 }, nMax: 60, codesExplicites: null, refs: { quelques: 3, beaucoup: 40 },
+      tables: [], prochain: 1
+    }
+  };
+  d.neuf.tables.forEach(function (t) { t.cas = casParDefaut(t.selon, d.neuf); });
+  return d;
+}
+
+var etat;
+function initEtat() {
+  etat = { crit: 'neuf', crits: defauts(), ouverte: 'note', cible: null, composeur: null, composeurOuvert: false, range: null, rangeZone: null, reduit: false, sources: true, flash: '', collections: [], saisieCollection: null, prochainPalier: 1 };
+  try { var r = localStorage.getItem('tc-reduit'); if (r === '1') etat.reduit = true; } catch (e) { /* stockage indisponible : sans effet */ }
+}
+function C() { return etat.crits[etat.crit]; }
+
+/* ---------- Les blocs ---------- */
+function blocs(c) {
+  var N = c.noms;
+  var B = {
+    critere: { f: 'posee', nom: 'Nom du critère', aide: 'Le nom de ce critère, tel qu’il est écrit dans la grille.' },
+    nomErreurs: { f: 'posee', nom: q(N.e2), aide: 'Ce que tu comptes : au singulier sous 2, au pluriel à partir de 2.' },
+    nomMots: { f: 'posee', nom: q(N.m2), aide: 'Ce à quoi tu le rapportes : au singulier sous 2, au pluriel à partir de 2.' },
+    service: { f: 'posee', nom: 'Nom du service', aide: 'Le nom du service d’aide. Vide : l’application retire ce qui le présente.' },
+    seuil: { f: 'posee', nom: 'Tolérance', aide: 'Combien tu en tolères sur la longueur de référence.' },
+    longueur: { f: 'posee', nom: 'Longueur de référence', aide: 'La longueur sur laquelle tu fixes la limite.' },
+    erreurs: { f: 'remplie', nom: 'Compte des ' + N.e2, aide: 'Le compte, sur la copie évaluée.' },
+    mots: { f: 'remplie', nom: 'Compte des ' + N.m2, aide: 'Saisi à la correction.' },
+    points: { f: 'remplie', nom: 'Somme pondérée', aide: 'Entre parenthèses, le compte après pondération, s’il diffère.' },
+    moyenne: { f: 'remplie', nom: 'Moyenne de ' + N.m2 + ' par ' + N.e1, aide: 'En moyenne, 1 à chaque N : c’est ce N. Vide sans occurrence.' },
+    palier: { f: 'remplie', nom: 'Palier atteint', aide: 'Le nom court du palier que la copie atteint.' }
+  };
+  persoPhrases(c).forEach(function (p) { B[p.id] = { f: 'remplie', nom: p.nom, aide: 'Ton calcul : sa valeur sur la copie évaluée.' }; });
+  return B;
+}
+function ordreBlocs(c, f) { return f === 'remplie' ? ORDRE_BLOCS.remplie.concat(persoPhrases(c).map(function (p) { return p.id; })) : ORDRE_BLOCS[f]; }
+var ORDRE_BLOCS = { posee: ['critere', 'nomErreurs', 'nomMots', 'service', 'seuil', 'longueur'], remplie: ['erreurs', 'mots', 'points', 'moyenne', 'palier'] };
+var OFFRES = {
+  decompte: ['critere', 'nomErreurs', 'nomMots', 'erreurs', 'mots', 'points'],
+  priorite: ['critere'], concentre: ['critere'], aucune: ['critere', 'nomErreurs'],
+  palier: ['critere', 'nomErreurs', 'nomMots', 'service', 'seuil', 'longueur', 'erreurs', 'mots', 'moyenne', 'palier'],
+  table: ['critere', 'nomErreurs', 'nomMots', 'service', 'seuil', 'longueur', 'erreurs', 'mots', 'points', 'moyenne', 'palier']
+};
+var JETONS_PROJECTION = /\{(service|seuil|longueur|erreurs|mots|moyenne|projection|palier)\}/;
+
+/* ---------- Les calculs (étape 4) ---------- */
+// Un calcul s'écrit en jetons : une donnée de la copie ('d'), un réglage écrit dans la grille ('p'), un nombre ('n'),
+// une opération ('o' : + − × ÷), une parenthèse ('(' ou ')'). Les trois calculs tout faits sont écrits ainsi ;
+// leurs noms et leurs textes sont ceux que Grégoire a validés le 26 oct. à 20 h 53.
+var TOUT_FAITS = {
+  proportionnelle: {
+    nom: 'Pénalité proportionnelle à la longueur', court: 'pénalité proportionnelle',
+    texte: 'Chaque occurrence retire des points en proportion de la longueur de la copie : le même nombre d’occurrences coûte moins sur une copie plus longue. Tu fixes la longueur sur laquelle une occurrence coûte un point.',
+    param: 'longueur', libelleParam: function (N) { return 'Longueur sur laquelle une occurrence coûte un point (' + N.m2 + ')'; },
+    jetons: [{ t: 'd', k: 'ponderation' }, { t: 'o', v: '−' }, { t: 'd', k: 'comptePondere' }, { t: 'o', v: '÷' }, { t: 'd', k: 'etendue' }, { t: 'o', v: '×' }, { t: 'p', k: 'longueur' }],
+    cas: { etendue: 'aucune', comptePondere: 'calcul' }
+  },
+  rapport: {
+    nom: 'Rapport visé', court: 'rapport visé',
+    texte: 'Tu fixes le rapport qui donne la note entière, par exemple une occurrence à chaque 60 mots. Une copie qui l’atteint a la note entière ; en deçà, la note baisse en proportion. Une copie sans occurrence a la note entière.',
+    param: 'rapport', libelleParam: function (N) { return 'Rapport qui donne la note entière : 1 ' + N.e1 + ' à chaque … ' + N.m2; },
+    jetons: [{ t: 'd', k: 'ponderation' }, { t: 'o', v: '×' }, { t: '(' }, { t: 'd', k: 'etendue' }, { t: 'o', v: '÷' }, { t: 'd', k: 'comptePondere' }, { t: ')' }, { t: 'o', v: '÷' }, { t: 'p', k: 'rapport' }],
+    cas: { etendue: 'aucune', comptePondere: 'entiere' }
+  },
+  fixe: {
+    nom: 'Pénalité fixe', court: 'pénalité fixe',
+    texte: 'Chaque occurrence retire le même nombre de points, quelle que soit la longueur de la copie. La longueur reste comptée pour les phrases de l’étudiant·e, mais n’entre pas dans la note.',
+    param: 'points', libelleParam: function (N) { return 'Points retirés par ' + N.e1; },
+    jetons: [{ t: 'd', k: 'ponderation' }, { t: 'o', v: '−' }, { t: 'd', k: 'comptePondere' }, { t: 'o', v: '×' }, { t: 'p', k: 'points' }],
+    cas: { comptePondere: 'calcul' }
+  }
+};
+var ORDRE_TOUT_FAITS = ['proportionnelle', 'rapport', 'fixe'];
+var DONNEES = ['ponderation', 'compte', 'comptePondere', 'etendue'];
+function nomDonnee(k, c) {
+  var N = c.noms;
+  return { ponderation: 'Pondération du critère', compte: 'Compte des ' + N.e2, comptePondere: 'Compte pondéré des ' + N.e2, etendue: 'Compte des ' + N.m2 }[k] || k;
+}
+function leDonnee(k, c) { return (k === 'ponderation' ? 'la ' : 'le ') + nomDonnee(k, c).charAt(0).toLowerCase() + nomDonnee(k, c).slice(1); }
+function nomParam(k, c) { return { longueur: 'Longueur fixée', rapport: 'Rapport visé', points: 'Points par ' + c.noms.e1 }[k] || k; }
+var ISSUES = { calcul: 'Calculer normalement', aucune: 'Aucune note : l’évaluation attend cette donnée', entiere: 'La note entière', zero: 'Une note de 0' };
+
+function calculParId(c, id) { for (var i = 0; i < c.calcul.perso.length; i++) if (c.calcul.perso[i].id === id) return c.calcul.perso[i]; return null; }
+/** Le calcul qui donne la note : un tout fait (ses jetons, les réglages du critère) ou un calcul composé. */
+function calculDeLaNote(c) {
+  var m = c.calcul.modele;
+  if (m.indexOf('perso:') === 0) { var p = calculParId(c, m.slice(6)); if (p) return { jetons: p.jetons, cas: p.cas, nom: p.nom, court: p.nom }; }
+  var t = TOUT_FAITS[m] || TOUT_FAITS.fixe;
+  return { jetons: t.jetons, cas: Object.assign({}, t.cas, c.calcul.cas[m] || {}), nom: t.nom, court: t.court, tf: m };
+}
+function donneesDuCalcul(jetons) {
+  var vus = {}; jetons.forEach(function (j) { if (j.t === 'd' && j.k !== 'ponderation') vus[j.k] = true; });
+  return ['etendue', 'compte', 'comptePondere'].filter(function (k) { return vus[k]; });
+}
+function diviseurs(jetons) {
+  var r = {};
+  for (var i = 0; i < jetons.length; i++) {
+    if (jetons[i].t !== 'o' || jetons[i].v !== '÷') continue;
+    var s = jetons[i + 1]; if (!s) continue;
+    if (s.t === 'd') r[s.k] = true;
+    else if (s.t === '(') { var prof = 0; for (var j = i + 1; j < jetons.length; j++) { if (jetons[j].t === '(') prof++; else if (jetons[j].t === ')') { prof--; if (!prof) break; } else if (jetons[j].t === 'd') r[jetons[j].k] = true; } }
+  }
+  return r;
+}
+/** Évalue des jetons (priorités usuelles). Rend {v} ou {erreur} ou {divZero: [données]}. */
+function evaluer(jetons, ctx) {
+  if (!jetons.length) return { erreur: 'vide' };
+  var sortie = [], pile = [], PR = { '+': 1, '−': 1, '×': 2, '÷': 2 }, attendOperande = true;
+  for (var i = 0; i < jetons.length; i++) {
+    var j = jetons[i];
+    if (j.t === 'd' || j.t === 'p' || j.t === 'n') { if (!attendOperande) return { erreur: 'operation' }; sortie.push(j); attendOperande = false; }
+    else if (j.t === 'o') { if (attendOperande) return { erreur: 'operation' }; while (pile.length && pile[pile.length - 1].t === 'o' && PR[pile[pile.length - 1].v] >= PR[j.v]) sortie.push(pile.pop()); pile.push(j); attendOperande = true; }
+    else if (j.t === '(') { if (!attendOperande) return { erreur: 'operation' }; pile.push(j); }
+    else if (j.t === ')') { if (attendOperande) return { erreur: 'incomplet' }; var ok = false; while (pile.length) { var x = pile.pop(); if (x.t === '(') { ok = true; break; } sortie.push(x); } if (!ok) return { erreur: 'parentheses' }; }
+  }
+  if (attendOperande) return { erreur: 'incomplet' };
+  while (pile.length) { var y = pile.pop(); if (y.t === '(') return { erreur: 'parentheses' }; sortie.push(y); }
+  var st = [];
+  for (var k = 0; k < sortie.length; k++) {
+    var s = sortie[k];
+    if (s.t === 'd') st.push({ v: ctx.donnees[s.k], deps: s.k === 'ponderation' ? [] : [s.k] });
+    else if (s.t === 'p') st.push({ v: Number(ctx.params[s.k]), deps: [] });
+    else if (s.t === 'n') st.push({ v: Number(s.v), deps: [] });
+    else {
+      var b = st.pop(), a = st.pop(); if (!a || !b) return { erreur: 'incomplet' };
+      var deps = a.deps.concat(b.deps), v;
+      if (s.v === '+') v = a.v + b.v; else if (s.v === '−') v = a.v - b.v; else if (s.v === '×') v = a.v * b.v;
+      else { if (b.v === 0) return { divZero: b.deps.length ? b.deps : ['nombre'] }; v = a.v / b.v; }
+      st.push({ v: v, deps: deps });
+    }
+  }
+  return st.length === 1 ? { v: st[0].v } : { erreur: 'incomplet' };
+}
+var ERREURS_CALCUL = { vide: 'Le calcul est vide.', incomplet: 'Le calcul n’est pas complet : il manque une donnée ou un nombre.', operation: 'Deux opérations ou deux données se suivent.', parentheses: 'Une parenthèse n’est pas fermée.', divzero: 'Le calcul divise par 0.' };
+/** Le résultat d'un calcul sur une copie : la note bornée, ou ce qui l'empêche. */
+function resultatCalcul(c, calcul, n, m, commeNote) {
+  var ctx = { donnees: { ponderation: 20, compte: n, comptePondere: n, etendue: m }, params: c.calcul.params };
+  var dons = donneesDuCalcul(calcul.jetons), div = diviseurs(calcul.jetons);
+  for (var i = 0; i < dons.length; i++) {
+    var d = dons[i];
+    if (ctx.donnees[d] !== 0) continue;
+    var issue = (calcul.cas && calcul.cas[d]) || (div[d] ? 'aucune' : 'calcul');
+    if (issue === 'calcul' && div[d]) issue = 'aucune';
+    if (issue === 'aucune') return { v: null, attend: d };
+    if (issue === 'entiere') return { v: commeNote ? 20 : null, cas: d, issue: issue };
+    if (issue === 'zero') return { v: 0, cas: d, issue: issue };
+  }
+  var r = evaluer(calcul.jetons, ctx);
+  if (r.erreur) return { v: null, erreur: r.erreur };
+  if (r.divZero) return r.divZero[0] === 'nombre' ? { v: null, erreur: 'divzero' } : { v: null, attend: r.divZero[0] };
+  var v = commeNote ? Math.max(0, Math.min(20, r.v)) : r.v;
+  return { v: Math.round(v * 100) / 100, brut: r.v };
+}
+/** Le calcul écrit en chiffres sur la copie fictive : « 20 − 3 × 2 ». */
+function enChiffres(jetons, c, n, m) {
+  var val = { ponderation: 20, compte: n, comptePondere: n, etendue: m };
+  return jetons.map(function (j) {
+    if (j.t === 'd') return fmt(val[j.k]); if (j.t === 'p') return fmt(c.calcul.params[j.k]); if (j.t === 'n') return fmt(j.v);
+    if (j.t === 'o') return j.v; return j.t;
+  }).join(' ').replace(/\( /g, '(').replace(/ \)/g, ')');
+}
+function chipJeton(j, c, avecValeur) {
+  if (j.t === 'd') return h('span', { class: 'chip chip--fixe chip--' + (j.k === 'ponderation' ? 'posee' : 'remplie'), text: nomDonnee(j.k, c) });
+  if (j.t === 'p') return h('span', { class: 'chip chip--fixe chip--posee', text: nomParam(j.k, c) + (avecValeur ? ' (' + fmt(c.calcul.params[j.k]) + ')' : '') });
+  if (j.t === 'n') return h('span', { class: 'chip chip--fixe chip--nombre', text: fmt(j.v) });
+  return h('span', { class: 'calc-op', text: j.t === 'o' ? j.v : j.t });
+}
+function formuleEnBlocs(jetons, c) {
+  var box = h('div', { class: 'calc-formule', 'aria-label': 'Le calcul, en blocs' }, h('span', { class: 'calc-op', text: 'Note =' }));
+  jetons.forEach(function (j) { box.appendChild(chipJeton(j, c, true)); });
+  return box;
+}
+function persoPhrases(c) { return c.calcul.perso.filter(function (p) { return p.sert === 'phrases'; }); }
+
+/* ---------- Le calcul de la copie fictive (lecture seule, comme le miroir) ---------- */
+function codesPour(c, n) {
+  if (c.codesExplicites && c.codesExplicites.length === n) return c.codesExplicites.slice();
+  var r = []; for (var i = 0; i < n; i++) r.push(String(c.base[i % c.base.length])); return r;
+}
+function dominant(c, codes) {
+  if (!codes.length) return null;
+  var f = {}, max = 0, premierPose = null;
+  codes.forEach(function (k) { f[k] = (f[k] || 0) + 1; if (f[k] > max) { max = f[k]; premierPose = k; } });
+  var ex = Object.keys(f).filter(function (k) { return f[k] === max; });
+  var code = premierPose;
+  if (c.egalite === 'liste') {
+    for (var i = 0; i < c.codes.length; i++) if (f[c.codes[i][0]] === max) { code = c.codes[i][0]; break; }
+  }
+  return { code: code, max: max, egaux: ex, freq: f };
+}
+function nomCode(c, k) { for (var i = 0; i < c.codes.length; i++) if (c.codes[i][0] === k) return c.codes[i][1]; return 'Code ' + k; }
+function calculer(c, n, m) {
+  var L = c.limite, codes = codesPour(c, n);
+  var rn = resultatCalcul(c, calculDeLaNote(c), n, m, true), note = rn.v;
+  var calcs = {}; persoPhrases(c).forEach(function (pp) { calcs[pp.id] = resultatCalcul(c, pp, n, m, false).v; });
+  var ratio = (L.active && m > 0 && L.tolere > 0 && L.longueur > 0) ? (n / m) / (L.tolere / L.longueur) : null;
+  var idx = -1;
+  if (ratio !== null) {
+    if (n === 0) { idx = c.paliers.findIndex(function (p) { return p.zero; }); }
+    else {
+      for (var i = 0; i < c.paliers.length; i++) { var p = c.paliers[i]; if (!p.zero && p.max !== null && ratio <= p.max + 1e-9) { idx = i; break; } }
+      if (idx < 0) idx = c.paliers.findIndex(function (p) { return !p.zero && p.max === null; });
+    }
+  }
+  var moy = (n > 0 && m > 0) ? Math.round(m / n) : null;
+  return { n: n, m: m, codes: codes, note: note, noteInfo: rn, calcs: calcs, ratio: ratio, palierIdx: idx, palier: idx >= 0 ? c.paliers[idx] : null, moy: moy, dom: dominant(c, codes) };
+}
+function calc() { var c = C(); return calculer(c, c.copie.n, c.copie.m); }
+function valeurs(c, k) {
+  var N = c.noms, L = c.limite;
+  var v = {
+    critere: c.nom, nomErreurs: accord(k.n, N.e1, N.e2), nomMots: accord(k.m, N.m1, N.m2),
+    erreurs: fmt(k.n), mots: fmt(k.m), points: '', moyenne: k.moy === null ? '' : fmt(k.moy),
+    palier: k.palier ? k.palier.nom : '', service: L.service || '', seuil: fmt(L.tolere), longueur: fmt(L.longueur)
+  };
+  persoPhrases(c).forEach(function (p) { var x = k.calcs ? k.calcs[p.id] : null; v[p.id] = (x === null || x === undefined) ? '' : fmt(x); });
+  return v;
+}
+function remplir(t, v) {
+  return String(t || '').replace(/\{([a-zA-Z]+)\}/g, function (m, k) { return Object.prototype.hasOwnProperty.call(v, k) ? v[k] : m; })
+    .replace(/\s+/g, ' ').replace(/\s+([.,])/g, '$1').trim();
+}
+function aideRendue(aide, v) {
+  if (!aide) return '';
+  if (aide.indexOf('{service}') >= 0 && !v.service) {
+    var re = /\s*[:—–-]\s*\{service\}/;
+    if (re.test(aide)) aide = aide.replace(re, ''); else return '';
+  }
+  return remplir(aide, v);
+}
+
+/* ---------- Les tables de l'enseignant ---------- */
+var SELONS = ['erreurs', 'mots', 'note', 'part', 'moyenne', 'code'];
+function libelleSelon(s, c) {
+  var N = c.noms, pp = calculParId(c, s);
+  if (pp) return 'Ton calcul ' + q(pp.nom);
+  return { erreurs: 'Le compte des ' + N.e2, mots: 'Le compte des ' + N.m2, note: 'La note du critère', part: 'La part de la limite',
+    moyenne: 'La moyenne de ' + N.m2 + ' par ' + N.e1, code: 'Le code le plus fréquent' }[s];
+}
+function uniteSelon(s) { return s === 'note' ? NB + '/' + NB + '20' : (s === 'part' ? NB + '%' : ''); }
+function pasSelon(s) { return { erreurs: 2, mots: 10, note: 5, part: 25, moyenne: 5 }[s] || 1; }
+function casParDefaut(s, c) {
+  switch (s) {
+    case 'erreurs': return [{ t: 'zero', texte: '' }, { t: 'max', v: 2, texte: '' }, { t: 'audela', texte: '' }];
+    case 'mots': return [{ t: 'max', v: 10, texte: '' }, { t: 'audela', texte: '' }];
+    case 'note': return [{ t: 'vide', texte: '' }, { t: 'zero', texte: '' }, { t: 'max', v: 10, texte: '' }, { t: 'audela', texte: '' }];
+    case 'part': return [{ t: 'vide', texte: '' }, { t: 'zero', texte: '' }, { t: 'max', v: 50, texte: '' }, { t: 'max', v: 100, texte: '' }, { t: 'audela', texte: '' }];
+    case 'moyenne': return [{ t: 'vide', texte: '' }, { t: 'max', v: 5, texte: '' }, { t: 'audela', texte: '' }];
+    case 'code': return c.codes.map(function (k) { return { t: 'code', code: k[0], texte: '' }; }).concat([{ t: 'aucun', texte: '' }]);
+  }
+  if (calculParId(c, s)) return [{ t: 'vide', texte: '' }, { t: 'max', v: 1, texte: '' }, { t: 'audela', texte: '' }];
+  return [];
+}
+function valeurSelon(s, k) {
+  switch (s) {
+    case 'erreurs': return k.n;
+    case 'mots': return k.m;
+    case 'note': return k.note;
+    case 'part': return k.ratio === null ? null : k.ratio * 100;
+    case 'moyenne': return k.moy;
+    case 'code': return k.dom ? k.dom.code : null;
+  }
+  return (k.calcs && Object.prototype.hasOwnProperty.call(k.calcs, s)) ? k.calcs[s] : null;
+}
+function casChoisi(t, k) {
+  var v = valeurSelon(t.selon, k), i;
+  if (t.selon === 'code') {
+    for (i = 0; i < t.cas.length; i++) {
+      if (v === null && t.cas[i].t === 'aucun') return i;
+      if (v !== null && t.cas[i].t === 'code' && t.cas[i].code === v) return i;
+    }
+    return -1;
+  }
+  for (i = 0; i < t.cas.length; i++) {
+    var r = t.cas[i];
+    if (v === null) { if (r.t === 'vide') return i; continue; }
+    if (r.t === 'vide') continue;
+    if (r.t === 'zero' && v === 0) return i;
+    if (r.t === 'max' && v <= Number(r.v) + 1e-9) return i;
+    if (r.t === 'audela') return i;
+  }
+  return -1;
+}
+function derniereBorne(t, avant) {
+  var b = null;
+  for (var i = 0; i < (avant === undefined ? t.cas.length : avant); i++) if (t.cas[i].t === 'max') b = Number(t.cas[i].v);
+  return b;
+}
+function libelleCas(t, i, c) {
+  var r = t.cas[i], u = uniteSelon(t.selon);
+  if (r.t === 'zero') return '0' + u;
+  if (r.t === 'max') return 'jusqu’à ' + fmt(r.v) + u;
+  if (r.t === 'audela') { var b = derniereBorne(t, i); return b === null ? 'toute autre valeur' : 'au-delà de ' + fmt(b) + u; }
+  if (r.t === 'vide') return 'sans valeur';
+  if (r.t === 'code') return 'code ' + r.code;
+  if (r.t === 'aucun') return 'aucun code';
+  return '';
+}
+function tableParId(id) { var c = C(); for (var i = 0; i < c.tables.length; i++) if (c.tables[i].id === id) return c.tables[i]; return null; }
+
+/* ---------- Les zones ---------- */
+function lireZone(cle) {
+  var c = C(), p = cle.split(':');
+  if (p[0] === 'e') return c.textes[p[1]];
+  if (p[0] === 'p') return c.paliers[+p[1]][p[2]];
+  if (p[0] === 't') { var t = tableParId(p[1]); return t && t.cas[+p[2]] ? t.cas[+p[2]].texte : ''; }
+  return '';
+}
+function ecrireZone(cle, v) {
+  var c = C(), p = cle.split(':');
+  if (p[0] === 'e') c.textes[p[1]] = v;
+  else if (p[0] === 'p') c.paliers[+p[1]][p[2]] = v;
+  else if (p[0] === 't') { var t = tableParId(p[1]); if (t && t.cas[+p[2]]) t.cas[+p[2]].texte = v; }
+}
+function offreZone(cle) {
+  var p = cle.split(':'), ids = persoPhrases(C()).map(function (x) { return x.id; });
+  if (p[0] === 'e') return p[1] === 'decompte' ? OFFRES.decompte.concat(ids) : OFFRES[p[1]];
+  return (p[0] === 'p' ? OFFRES.palier : OFFRES.table).concat(ids);
+}
+function etapeZone(cle) { var p = cle.split(':'); if (p[0] === 'p' || p[0] === 't') return 'cas'; return p[1] === 'aucune' ? 'codes' : 'eleve'; }
+function nomZone(cle) {
+  var c = C(), p = cle.split(':');
+  if (p[0] === 'e') return { decompte: 'Décompte', priorite: 'Défi prioritaire', concentre: 'Quand tout est maîtrisé', aucune: 'Aucune annotation' }[p[1]];
+  if (p[0] === 'p') { var pal = c.paliers[+p[1]]; return (p[2] === 'texte' ? 'Verdict' : 'Recommandation') + ', palier ' + pal.nom; }
+  if (p[0] === 't') { var t = tableParId(p[1]); return t ? 'Table selon ' + libelleSelon(t.selon, c).toLowerCase() + ', cas ' + libelleCas(t, +p[2], c) : ''; }
+  return '';
+}
+function creerChip(jeton) {
+  var B = blocs(C()), b = B[jeton];
+  var chip = h('span', { class: 'chip chip--' + b.f, contenteditable: 'false', 'data-jeton': jeton }, b.nom,
+    h('button', { type: 'button', class: 'chip-x', tabindex: '-1', 'aria-label': 'Retirer le bloc ' + b.nom, text: '×' }));
+  return chip;
+}
+function poserTexte(z, texte) {
+  z.textContent = '';
+  var B = blocs(C()), re = /\{([a-zA-Z]+)\}/g, dernier = 0, m, s = String(texte || '');
+  while ((m = re.exec(s))) {
+    if (m.index > dernier) z.appendChild(document.createTextNode(s.slice(dernier, m.index)));
+    z.appendChild(B[m[1]] ? creerChip(m[1]) : document.createTextNode(m[0]));
+    dernier = re.lastIndex;
+  }
+  if (dernier < s.length) z.appendChild(document.createTextNode(s.slice(dernier)));
+}
+function serialiser(z) {
+  var s = '';
+  z.childNodes.forEach(function (n) {
+    if (n.nodeType === 3) s += n.nodeValue;
+    else if (n.nodeType === 1) { if (n.dataset && n.dataset.jeton) s += '{' + n.dataset.jeton + '}'; else if (n.tagName !== 'BR') s += n.textContent; }
+  });
+  return s.replace(/ /g, ' ');
+}
+function enregistrerZone(z) {
+  var v = serialiser(z);
+  if (!v.trim() && !z.querySelector('[data-jeton]')) { z.textContent = ''; v = ''; }
+  ecrireZone(z.dataset.cle, v);
+  majApercu();
+}
+function zoneDe(node) { while (node && node !== document) { if (node.nodeType === 1 && node.classList && node.classList.contains('zone')) return node; node = node.parentNode; } return null; }
+function zoneBloc(cle, o) {
+  var etiq = h('div', { class: 'zone-etiquette' }, icone('i-crayon'), h('span', { class: 'zone-nom', text: o.nom }),
+    h('span', { class: 'zone-public' + (o.toi ? '' : ' eleve'), text: o.toi ? 'Toi seul·e' : 'L’étudiant·e le lit' }));
+  if (o.modele) etiq.appendChild(h('button', { type: 'button', class: 'zone-modele', text: 'Revenir au modèle', onclick: function () { ecrireZone(cle, o.modele()); rendreEtapes(); majApercu(); } }));
+  var z = h('div', { class: 'zone' + (etat.cible === cle ? ' est-cible' : ''), contenteditable: 'true', role: 'textbox', 'aria-multiline': 'false',
+    'aria-label': nomZone(cle), id: 'zone-' + cle.replace(/[^a-z0-9]/gi, '-'), 'data-cle': cle, 'data-vide': o.vide || 'Vide : ce texte ne dit rien.' });
+  poserTexte(z, lireZone(cle));
+  return h('div', { class: 'zone-bloc' }, etiq, z, o.aide ? h('p', { class: 'zone-aide', text: o.aide }) : null);
+}
+function setCible(cle) {
+  etat.cible = cle;
+  document.querySelectorAll('.zone').forEach(function (z) { z.classList.toggle('est-cible', z.dataset.cle === cle); });
+  rendrePalette();
+}
+function poserBloc(jeton) {
+  if (!etat.cible) { var pc = $('paletteCible'); if (pc) { pc.classList.remove('secoue'); void pc.offsetWidth; pc.classList.add('secoue'); } return; }
+  var z = document.querySelector('.zone[data-cle="' + etat.cible + '"]');
+  if (!z || offreZone(etat.cible).indexOf(jeton) < 0) return;
+  var chip = creerChip(jeton);
+  var r = (etat.range && etat.rangeZone === etat.cible && z.contains(etat.range.startContainer)) ? etat.range : null;
+  if (!r) { r = document.createRange(); r.selectNodeContents(z); r.collapse(false); }
+  r.deleteContents(); r.insertNode(chip);
+  var suite = document.createTextNode(''); chip.after(suite);
+  var apres = document.createRange(); apres.setStart(suite, 0); apres.collapse(true);
+  var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(apres);
+  etat.range = apres.cloneRange(); etat.rangeZone = etat.cible;
+  z.focus({ preventScroll: true });
+  enregistrerZone(z);
+}
+function ouvrirZone(cle) {
+  var et = etapeZone(cle);
+  if (etat.ouverte !== et) { etat.ouverte = et; rendreEtapes(); rendreChaine(); }
+  var z = document.querySelector('.zone[data-cle="' + cle + '"]');
+  if (!z) return;
+  setCible(cle);
+  z.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  z.classList.remove('allume'); void z.offsetWidth; z.classList.add('allume');
+}
+
+/* ---------- L'étape « Note calculée » : les cartes, les cas, le composeur ---------- */
+function formuleEnBlocsSans(jetons, c) {
+  var box = h('span', { class: 'calc-formule calc-formule--ligne' });
+  jetons.forEach(function (j) { box.appendChild(chipJeton(j, c, false)); });
+  return box;
+}
+function casDunCalcul(c, calcul, surChange, commeNote) {
+  var dons = donneesDuCalcul(calcul.jetons), div = diviseurs(calcul.jetons);
+  if (!dons.length) return null;
+  var box = h('div', { class: 'calc-cas' }, h('p', { class: 'calc-cas-titre', text: 'Quand une donnée de la copie vaut 0' }));
+  dons.forEach(function (d) {
+    var sel = h('select', { class: 'saisie', id: 'cas-' + (calcul.id || calcul.tf || 'x') + '-' + d, 'aria-label': 'Si ' + nomDonnee(d, c) + ' vaut 0',
+      onchange: function (ev) { surChange(d, ev.target.value); } });
+    ['calcul', 'aucune', 'entiere', 'zero'].forEach(function (o) {
+      if (o === 'calcul' && div[d]) return;   // diviser par 0 n'a pas de sens : jamais « #DIV/0! »
+      if (o === 'entiere' && !commeNote) return;
+      var lib = commeNote ? (o === 'aucune' ? 'Aucune note : l’évaluation attend ' + leDonnee(d, c) : ISSUES[o])
+        : { calcul: 'Calculer normalement', aucune: 'Sans valeur', zero: 'La valeur 0' }[o];
+      var opt = h('option', { value: o, text: lib });
+      var actuel = (calcul.cas && calcul.cas[d]) || (div[d] ? 'aucune' : 'calcul');
+      if (o === actuel) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    box.appendChild(h('div', { class: 'calc-cas-rangee' }, h('span', null, 'Si ', h('span', { class: 'chip chip--fixe chip--remplie', text: nomDonnee(d, c) }), ' vaut 0'), sel));
+  });
+  if (Object.keys(div).length) box.appendChild(h('p', { class: 'petit', text: 'Une division par une donnée qui vaut 0 n’a pas de résultat : tu dis ce que vaut alors ' + (commeNote ? 'la note.' : 'ton calcul.') }));
+  return box;
+}
+function texteResultat(c, calcul, k, commeNote, nom) {
+  var r = resultatCalcul(c, calcul, k.n, k.m, commeNote);
+  if (r.erreur) return ERREURS_CALCUL[r.erreur];
+  if (r.attend) return commeNote ? 'Aucune note : l’évaluation attendrait ' + leDonnee(r.attend, c) + '.' : (nom || 'Ton calcul') + ' serait sans valeur.';
+  if (r.cas) return cap(leDonnee(r.cas, c)) + ' vaut 0 : ' + (commeNote ? (r.issue === 'entiere' ? 'la note serait entière, 20 / 20.' : 'la note serait 0 / 20.') : (nom || 'ton calcul') + ' vaudrait 0.');
+  var brut = Math.round(r.brut * 100) / 100, t = (commeNote ? 'Note' : (nom || 'Ton calcul')) + ' = ' + enChiffres(calcul.jetons, c, k.n, k.m) + ' = ' + fmt(brut).replace('-', '−');
+  if (!commeNote) return t;
+  if (brut > 20) return t + ' ; la note s’arrêterait à la pondération : 20 / 20.';
+  if (brut < 0) return t + ' ; la note ne descendrait pas sous 0 : 0 / 20.';
+  return t + ' / 20';
+}
+function ligneResultat(c, calcul, k, commeNote, nom) {
+  return h('p', { class: 'formule-copie', 'data-resultat-calcul': '' }, h('span', { class: 'petit', text: 'Sur la copie fictive : ' }), texteResultat(c, calcul, k, commeNote, nom));
+}
+function carteCalcul(c, id, def, actif, k) {
+  var N = c.noms;
+  var carte = h('div', { class: 'calc-carte', 'data-actif': actif ? '' : null });
+  carte.appendChild(h('label', { class: 'calc-carte-tete' },
+    h('input', { type: 'radio', name: 'calcul-note', value: id, checked: actif ? true : null, onchange: function () { c.calcul.modele = id; rendreEtapes(); majApercu(); } }),
+    h('span', { class: 'calc-nom', text: def.nom })));
+  carte.appendChild(h('p', { class: 'calc-texte', text: def.texte }));
+  if (!actif) return carte;
+  if (def.param) {
+    carte.appendChild(h('div', { class: 'champ calc-param' }, h('label', { for: 'param-' + def.param, text: def.libelleParam(N) }),
+      h('input', { class: 'saisie', id: 'param-' + def.param, type: 'number', inputmode: 'decimal', min: def.param === 'points' ? '0' : '1', step: 'any', value: String(c.calcul.params[def.param]),
+        oninput: function (ev) { var v = Number(ev.target.value); if (ev.target.value !== '' && !isNaN(v) && (def.param === 'points' ? v >= 0 : v > 0)) { c.calcul.params[def.param] = v; majApercu(); majResultatsNote(); } } })));
+  }
+  carte.appendChild(h('p', { class: 'petit calc-legende', text: 'Le calcul, en blocs :' }));
+  carte.appendChild(formuleEnBlocs(def.jetons, c));
+  var calcul = def.perso ? def.perso : { jetons: def.jetons, cas: Object.assign({}, def.cas, c.calcul.cas[id] || {}), tf: id };
+  carte.appendChild(ligneResultat(c, calcul, k, true));
+  var cas = casDunCalcul(c, calcul, function (d, v) {
+    if (def.perso) def.perso.cas[d] = v; else { c.calcul.cas[id] = c.calcul.cas[id] || {}; c.calcul.cas[id][d] = v; }
+    rendreEtapes(); majApercu();
+  }, true);
+  if (cas) carte.appendChild(cas);
+  carte.appendChild(h('div', { class: 'calc-actions' },
+    def.perso
+      ? [h('button', { type: 'button', class: 'lien', text: 'Modifier ce calcul', onclick: function () { ouvrirComposeur(c, { id: def.perso.id, nom: def.perso.nom, sert: 'note', jetons: def.perso.jetons.slice(), cas: Object.assign({}, def.perso.cas) }); } }),
+         h('button', { type: 'button', class: 'lien', text: 'Retirer ce calcul', onclick: function () { retirerCalcul(c, def.perso.id); } })]
+      : h('button', { type: 'button', class: 'lien', text: 'Retoucher ce calcul', onclick: function () {
+          ouvrirComposeur(c, { id: null, nom: 'Mon calcul, d’après « ' + def.nom + ' »', sert: 'note',
+            jetons: def.jetons.map(function (j) { return j.t === 'p' ? { t: 'n', v: c.calcul.params[j.k] } : Object.assign({}, j); }),
+            cas: Object.assign({}, def.cas, c.calcul.cas[id] || {}) }); } })));
+  return carte;
+}
+function majResultatsNote() {
+  var k = calc(), c = C(), el = document.querySelector('.calc-carte[data-actif] [data-resultat-calcul]');
+  if (el) el.replaceWith(ligneResultat(c, calculDeLaNote(c), k, true));
+  var b = etat.composeur, ec = document.querySelector('#composeur [data-resultat-calcul]');
+  if (b && ec) ec.replaceWith(ligneResultat(c, b, k, b.sert === 'note', b.nom.trim()));
+  document.querySelectorAll('[data-perso-valeur]').forEach(function (x) { var v = k.calcs[x.dataset.persoValeur]; x.textContent = (v === null || v === undefined) ? 'sans valeur' : fmt(v); });
+}
+function calculLu(c, id) {
+  var j = '{' + id + '}', textes = [];
+  Object.keys(c.textes).forEach(function (x) { textes.push(c.textes[x]); });
+  c.paliers.forEach(function (p) { textes.push(p.texte, p.aide); });
+  c.tables.forEach(function (t) { t.cas.forEach(function (r) { textes.push(r.texte); }); });
+  return c.tables.some(function (t) { return t.selon === id; }) || textes.some(function (x) { return String(x || '').indexOf(j) >= 0; });
+}
+function retirerCalcul(c, id) {
+  if (calculLu(c, id)) { direNote('Une table ou un texte lit ce calcul : retire-l’en d’abord.'); rendreEtapes(); majApercu(); return; }
+  c.calcul.perso = c.calcul.perso.filter(function (p) { return p.id !== id; });
+  if (c.calcul.modele === 'perso:' + id) c.calcul.modele = 'fixe';
+  rendreEtapes(); majApercu();
+}
+function ouvrirComposeur(c, brouillon) {
+  etat.composeur = brouillon; etat.composeurOuvert = true; rendreEtapes();
+  var d = $('composeur'); if (d) d.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+function composeur(c) {
+  var b = etat.composeur || (etat.composeur = { id: null, nom: '', sert: 'note', jetons: [], cas: {} });
+  var k = calc();
+  var det = h('details', { class: 'calc-composeur', id: 'composeur', open: etat.composeurOuvert ? true : null,
+    ontoggle: function (ev) { etat.composeurOuvert = ev.target.open; } },
+    h('summary', null, 'Composer ton propre calcul ', h('span', { class: 'petit', text: '(fonction avancée)' })));
+  var corps = h('div', { class: 'calc-composeur-corps' });
+  corps.appendChild(h('p', { class: 'petit', text: 'Comme dans un tableur : tu poses les données de la copie, tes nombres et les opérations. Le résultat se voit sur la copie fictive pendant que tu écris.' }));
+  corps.appendChild(h('div', { class: 'champ' }, h('label', { for: 'compNom', text: 'Nom du calcul' }),
+    h('input', { class: 'saisie', id: 'compNom', type: 'text', value: b.nom, placeholder: 'ex. : taux pour 100 ' + c.noms.m2, oninput: function (ev) { b.nom = ev.target.value; } })));
+  var sert = h('fieldset', { class: 'calc-sert' }, h('legend', { text: 'Ce calcul sert' }));
+  [['note', 'à la note du critère'], ['phrases', 'à tes phrases et à tes tables']].forEach(function (o) {
+    sert.appendChild(h('label', { class: 'bascule' }, h('input', { type: 'radio', name: 'compSert', value: o[0], checked: b.sert === o[0] ? true : null,
+      onchange: function () { b.sert = o[0]; rendreEtapes(); } }), o[1]));
+  });
+  corps.appendChild(sert);
+  var zone = h('div', { class: 'calc-formule calc-zone', 'aria-live': 'polite' }, h('span', { class: 'calc-op', text: b.sert === 'note' ? 'Note =' : (b.nom || 'Ton calcul') + ' =' }));
+  if (!b.jetons.length) zone.appendChild(h('span', { class: 'rien', text: 'Vide : touche une donnée, un nombre ou une opération.' }));
+  b.jetons.forEach(function (j) { zone.appendChild(chipJeton(j, c, false)); });
+  corps.appendChild(zone);
+  function poser(j) { b.jetons.push(j); rendreEtapes(); var z = document.querySelector('.calc-zone'); if (z) z.scrollIntoView({ block: 'nearest' }); }
+  var g1 = h('div', { class: 'calc-boutons', role: 'group', 'aria-label': 'Les données' }, h('span', { class: 'calc-groupe', text: 'Données' }));
+  DONNEES.forEach(function (d) { g1.appendChild(h('button', { type: 'button', class: 'bloc bloc--' + (d === 'ponderation' ? 'posee' : 'remplie') + ' calc-bouton', onclick: function () { poser({ t: 'd', k: d }); } }, h('span', { class: 'bloc-nom', text: nomDonnee(d, c) }))); });
+  corps.appendChild(g1);
+  var nb = h('input', { class: 'saisie', id: 'compNombre', type: 'number', inputmode: 'decimal', step: 'any', placeholder: 'ex. : 100', style: 'width:110px' });
+  corps.appendChild(h('div', { class: 'calc-boutons', role: 'group', 'aria-label': 'Un nombre' }, h('span', { class: 'calc-groupe', text: 'Nombre' }), nb,
+    h('button', { type: 'button', class: 'btn-discret', text: 'Poser ce nombre', onclick: function () { var v = Number(String(nb.value).replace(',', '.')); if (nb.value !== '' && !isNaN(v)) poser({ t: 'n', v: v }); } })));
+  var g3 = h('div', { class: 'calc-boutons', role: 'group', 'aria-label': 'Les opérations' }, h('span', { class: 'calc-groupe', text: 'Opérations' }));
+  ['+', '−', '×', '÷'].forEach(function (o) { g3.appendChild(h('button', { type: 'button', class: 'btn-discret calc-btn-op', 'aria-label': { '+': 'plus', '−': 'moins', '×': 'multiplié par', '÷': 'divisé par' }[o], text: o, onclick: function () { poser({ t: 'o', v: o }); } })); });
+  g3.appendChild(h('button', { type: 'button', class: 'btn-discret calc-btn-op', 'aria-label': 'ouvrir une parenthèse', text: '(', onclick: function () { poser({ t: '(' }); } }));
+  g3.appendChild(h('button', { type: 'button', class: 'btn-discret calc-btn-op', 'aria-label': 'fermer la parenthèse', text: ')', onclick: function () { poser({ t: ')' }); } }));
+  corps.appendChild(g3);
+  corps.appendChild(h('div', { class: 'calc-boutons' },
+    h('button', { type: 'button', class: 'lien', text: 'Retirer le dernier', onclick: function () { b.jetons.pop(); rendreEtapes(); } }),
+    h('button', { type: 'button', class: 'lien', text: 'Tout effacer', onclick: function () { b.jetons = []; rendreEtapes(); } })));
+  if (b.jetons.length) {
+    corps.appendChild(ligneResultat(c, b, k, b.sert === 'note', b.nom.trim()));
+    var cas = casDunCalcul(c, b, function (d, v) { b.cas[d] = v; rendreEtapes(); }, b.sert === 'note');
+    if (cas) corps.appendChild(cas);
+  }
+  var r = b.jetons.length ? evaluer(b.jetons, { donnees: { ponderation: 20, compte: 1, comptePondere: 1, etendue: 1 }, params: c.calcul.params }) : { erreur: 'vide' };
+  var message = !b.nom.trim() ? 'Donne un nom à ton calcul.' : (r.erreur ? ERREURS_CALCUL[r.erreur] : '');
+  corps.appendChild(h('div', { class: 'calc-boutons' },
+    h('button', { type: 'button', class: 'btn-discret', text: b.id ? 'Garder les changements' : 'Garder ce calcul', 'aria-disabled': message ? 'true' : null, onclick: function () {
+      if (message) { direNote(message); rendreEtapes(); return; }
+      var id = b.id || ('calc' + String.fromCharCode(64 + (c.calcul.prochain++)));
+      var p = { id: id, nom: b.nom.trim(), sert: b.sert, jetons: b.jetons.slice(), cas: Object.assign({}, b.cas) };
+      var ex = calculParId(c, id);
+      if (ex) Object.assign(ex, p); else c.calcul.perso.push(p);
+      if (p.sert === 'note') c.calcul.modele = 'perso:' + id;
+      etat.composeur = null; etat.composeurOuvert = false;
+      direNote('Calcul ' + q(p.nom) + ' gardé' + (p.sert === 'note' ? ' : il donne maintenant la note.' : ' : il est dans la palette et dans le menu « Selon ».'));
+      rendreTout(); } }),
+    h('button', { type: 'button', class: 'lien', text: 'Annuler', onclick: function () { etat.composeur = null; etat.composeurOuvert = false; rendreEtapes(); } }),
+    message ? h('span', { class: 'petit', text: message }) : null));
+  det.appendChild(corps);
+  return det;
+}
+
+/* ---------- Les étapes ---------- */
+var ETAPES = [
+  { id: 'compte', nom: 'Ce que tu relèves et comptes' }, { id: 'codes', nom: 'Codes utilisés' }, { id: 'note', nom: 'Note calculée', neuf: true },
+  { id: 'cas', nom: 'Cas d’interprétation' }, { id: 'eleve', nom: 'Ce que l’étudiant·e lit' }
+];
+function infoEtape(id) {
+  var c = C(), N = c.noms;
+  if (id === 'compte') return N.e2 + ' / ' + N.m2;
+  if (id === 'codes') return c.codes.length + ' codes';
+  if (id === 'note') return calculDeLaNote(c).court;
+  if (id === 'cas') { var k = (c.limite.active ? 1 : 0) + c.tables.length; return k + ' ' + accord(k, 'table', 'tables'); }
+  return '3 textes';
+}
+function resumeEtape(id) {
+  var c = C(), N = c.noms;
+  if (id === 'compte') return q(N.e2) + ', rapportées aux ' + q(N.m2);
+  if (id === 'codes') return c.codes.length + ' sous-critères servent de codes';
+  if (id === 'note') { var np = persoPhrases(c).length; return calculDeLaNote(c).nom + ', sur 20' + (np ? ' · ' + np + ' ' + accord(np, 'calcul', 'calculs') + ' pour tes phrases' : ''); }
+  if (id === 'cas') {
+    var parts = [c.limite.active ? 'Paliers selon la limite fixée' : 'Aucune limite, aucun palier'];
+    c.tables.forEach(function (t) { parts.push('une table selon ' + libelleSelon(t.selon, c).toLowerCase()); });
+    return parts.join(' · ');
+  }
+  return 'Décompte et bilan : 3 textes';
+}
+function rendreChaine() {
+  var box = $('chaine'); box.textContent = '';
+  ETAPES.forEach(function (e, i) {
+    var dest = i === ETAPES.length - 1, ouverte = etat.ouverte === e.id;
+    if (i > 0) box.appendChild(h('span', { class: 'bc-liaison', 'aria-hidden': 'true' }));
+    box.appendChild(h('button', { type: 'button', class: 'bc-etape bc-complet' + (dest ? ' bc-destination' : '') + (ouverte ? ' bc-ouvert' : ''),
+      'aria-current': ouverte ? 'step' : null, onclick: function () { ouvrirEtape(e.id, true); } },
+      e.neuf ? h('span', { class: 'bc-neuf', text: 'ébauche' }) : null,
+      h('span', { class: 'bc-noeud' }, h('span', { class: 'bc-check', 'aria-hidden': 'true', text: '✓' })),
+      h('span', { class: 'bc-label', text: e.nom }),
+      h('span', { class: 'bc-info', 'data-info': e.id, text: infoEtape(e.id) })));
+  });
+}
+function ouvrirEtape(id, defiler) {
+  etat.ouverte = id; rendreEtapes(); rendreChaine();
+  if (defiler && id) { var s = $('etape-' + id); if (s) s.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+}
+function rendreEtapes() {
+  var box = $('etapes'); box.textContent = '';
+  ETAPES.forEach(function (e) {
+    var ouverte = etat.ouverte === e.id;
+    var sec = h('section', { class: 'etape', id: 'etape-' + e.id, 'data-ouverte': ouverte ? '' : null });
+    sec.appendChild(h('h3', null, h('button', { type: 'button', class: 'etape-tete', 'aria-expanded': String(ouverte), 'aria-controls': 'corps-' + e.id,
+      onclick: function () { ouvrirEtape(ouverte ? null : e.id); } },
+      h('span', { class: 'etape-noeud', 'aria-hidden': 'true', text: '✓' }),
+      h('span', { class: 'etape-titres' }, h('span', { class: 'etape-titre', text: e.nom }), h('span', { class: 'etape-resume', 'data-resume': e.id, text: resumeEtape(e.id) })),
+      icone('i-chevron', 'etape-chevron'))));
+    var corps = h('div', { class: 'etape-corps', id: 'corps-' + e.id }); corps.hidden = !ouverte;
+    if (ouverte) CORPS[e.id](corps);
+    sec.appendChild(corps); box.appendChild(sec);
+  });
+}
+function champTexte(id, label, valeur, poser, opts) {
+  opts = opts || {};
+  return h('div', { class: 'champ' }, h('label', { for: id, text: label }),
+    h('input', { class: 'saisie', id: id, type: opts.nombre ? 'number' : 'text', inputmode: opts.nombre ? 'decimal' : null, min: opts.nombre ? '1' : null,
+      value: String(valeur), placeholder: opts.placeholder || null,
+      oninput: function (ev) { poser(opts.nombre ? Math.max(0, Number(ev.target.value) || 0) : ev.target.value); majApercu(); },
+      onchange: function () { if (opts.rerendre) rendreEtapes(); } }));
+}
+
+var CORPS = {
+  compte: function (corps) {
+    var c = C(), N = c.noms;
+    corps.appendChild(h('p', { class: 'etape-but', text: 'Ce que tu relèves sur la copie, et ce à quoi tu rapportes ce compte (des mots, des calculs, des mesures…). Ces noms s’écrivent dans les phrases destinées à l’étudiant·e.' }));
+    function rangee(quoi, k1, k2) {
+      return h('div', { class: 'rangee-noms' }, h('span', { class: 'quoi', text: quoi }),
+        champTexte('nom-' + k1, 'Singulier', N[k1], function (v) { N[k1] = v; }, { rerendre: true }),
+        champTexte('nom-' + k2, 'Pluriel', N[k2], function (v) { N[k2] = v; }, { rerendre: true }));
+    }
+    corps.appendChild(h('div', { class: 'exemples' },
+      h('p', { class: 'exemples-titre', text: 'Deux exemples' }),
+      h('div', { class: 'exemples-defile' }, h('table', null,
+        h('thead', null, h('tr', null, h('th', { scope: 'col', text: 'Ce que tu relèves et comptes' }), h('th', { scope: 'col', text: 'Ce à quoi tu rapportes ce compte' }), h('th', { scope: 'col', text: 'L’étudiant·e lit, par exemple' }))),
+        h('tbody', null,
+          h('tr', null, h('td', { text: 'erreur / erreurs' }), h('td', { text: 'mot / mots' }), h('td', { class: 'phrase', text: '« Ta production contient 12 erreurs pour 600 mots. »' })),
+          h('tr', null, h('td', { text: 'unité manquante / unités manquantes' }), h('td', { text: 'calcul / calculs' }), h('td', { class: 'phrase', text: '« Ta production contient 3 unités manquantes pour 12 calculs. »' })))))));
+    corps.appendChild(rangee('Ce que tu relèves et comptes', 'e1', 'e2'));
+    corps.appendChild(rangee('Ce à quoi tu rapportes ce compte', 'm1', 'm2'));
+  },
+  codes: function (corps) {
+    var c = C();
+    corps.appendChild(h('p', { class: 'etape-but', text: 'Tes codes sont les sous-critères de ce critère : tu les configures ici (numéro, nom, pondération, observation). Dans Annoter, la palette les affiche pour que tu les poses sur la copie, sans les modifier. Chaque code posé compte selon sa pondération.' }));
+    var liste = h('div', { class: 'liste-codes' }, h('div', { class: 'code-rangee code-tete' }, h('span', { text: 'Code' }), h('span', { text: 'Nom' }), h('span', { text: 'Pondération' })));
+    c.codes.forEach(function (k) { liste.appendChild(h('div', { class: 'code-rangee' }, h('span', { class: 'num', text: k[0] }), h('span', { text: k[1] }), h('span', { class: 'poids', text: '1' }))); });
+    corps.appendChild(liste);
+    corps.appendChild(h('div', { class: 'variante' },
+      h('p', { class: 'variante-titre', text: 'Ne paraît que pour un critère créé avant le 21 octobre dont la case des codes n’a jamais été cochée' }),
+      h('p', { text: 'Ce critère utilise encore les dix codes de la palette générale ; tu les configures dans Annoter, sous l’engrenage de la palette.' })));
+    corps.appendChild(zoneBloc('e:aucune', { nom: 'Aucune annotation', toi: true, vide: 'Vide : rien ne s’affiche.',
+      aide: 'S’affiche pour toi seul·e, quand la copie ne porte ni tampon ni code.', modele: function () { return defauts()[c.cle].textes.aucune; } }));
+  },
+  note: function (corps) {
+    var c = C(), N = c.noms, k = calc(), actif = c.calcul.modele;
+    corps.appendChild(h('p', { class: 'etape-but', text: 'Comment ce que tu identifies et comptes construit la note, en fonction de la pondération du critère. Chaque code posé compte pour la pondération de son sous-critère : c’est le compte pondéré.' }));
+    if (etat.messageNote) { corps.appendChild(h('p', { class: 'calc-message', role: 'status', text: etat.messageNote })); etat.messageNote = ''; }
+    corps.appendChild(h('h4', { class: 'calc-titre', text: 'Le calcul de la note' }));
+    var liste = h('div', { class: 'calc-choix', role: 'radiogroup', 'aria-label': 'Le calcul de la note' });
+    ORDRE_TOUT_FAITS.forEach(function (id) { liste.appendChild(carteCalcul(c, id, TOUT_FAITS[id], actif === id, k)); });
+    c.calcul.perso.filter(function (p) { return p.sert === 'note'; }).forEach(function (p) {
+      liste.appendChild(carteCalcul(c, 'perso:' + p.id, { nom: p.nom, texte: 'Ton calcul.', jetons: p.jetons, cas: p.cas, perso: p }, actif === 'perso:' + p.id, k));
+    });
+    corps.appendChild(liste);
+    corps.appendChild(h('p', { class: 'petit', text: 'La note reste entre 0 et la pondération du critère. Comme aujourd’hui, une copie déjà évaluée garde sa note ; elle suit le nouveau calcul dès que tu la modifies.' }));
+    corps.appendChild(composeur(c));
+    var autres = persoPhrases(c);
+    if (autres.length) {
+      corps.appendChild(h('h4', { class: 'calc-titre', text: 'Tes calculs pour les phrases et les tables' }));
+      var ul = h('ul', { class: 'calc-perso' });
+      autres.forEach(function (p) {
+        var r = resultatCalcul(c, p, k.n, k.m, false);
+        ul.appendChild(h('li', null, h('strong', { text: p.nom }), ' ', formuleEnBlocsSans(p.jetons, c),
+          h('span', { class: 'petit' }, 'Sur la copie fictive, il vaudrait ', h('span', { 'data-perso-valeur': p.id, text: r.v === null ? 'sans valeur' : fmt(r.v) }), '. Il est dans la palette et dans le menu « Selon » des tables.'),
+          h('span', { class: 'calc-actions' },
+            h('button', { type: 'button', class: 'lien', text: 'Modifier', onclick: function () { ouvrirComposeur(c, { id: p.id, nom: p.nom, sert: p.sert, jetons: p.jetons.slice(), cas: Object.assign({}, p.cas) }); } }),
+            h('button', { type: 'button', class: 'lien', text: 'Retirer', onclick: function () { retirerCalcul(c, p.id); } }))));
+      });
+      corps.appendChild(ul);
+    }
+  },
+  cas: function (corps) {
+    var c = C();
+    corps.appendChild(h('p', { class: 'etape-but', text: 'Les paliers situent la copie par rapport à la limite que tu fixes, d’après le compte que l’application fait pour toi.' }));
+    corps.appendChild(h('p', { class: 'etape-but', text: 'Selon la valeur établie sur sa copie, l’étudiant·e reçoit un commentaire précis qui s’adresse à son cas. Ci-dessous, chaque table choisit un seul cas pour l’étudiant·e. La simulation te montre de quel cas il s’agirait.' }));
+    corps.appendChild(tablePaliers());
+    c.tables.forEach(function (t, i) { corps.appendChild(tableEnseignant(t, i)); });
+    corps.appendChild(h('button', { type: 'button', class: 'btn-ajout', id: 'ajouterTable', text: '+ Ajouter une table de cas', onclick: ajouterTable }));
+    corps.appendChild(choixApp());
+  },
+  eleve: function (corps) {
+    var c = C(), d = function (k) { return function () { return defauts()[c.cle].textes[k]; }; };
+    corps.appendChild(h('p', { class: 'etape-but', text: 'Les phrases que l’application écrit à ta place sur chaque copie. Ce que dit chaque cas s’écrit dans l’étape « Cas d’interprétation ».' }));
+    corps.appendChild(h('div', { class: 'champ' }, h('label', { for: 'modelePhrases', text: 'Modèle des phrases' }),
+      h('select', { class: 'saisie', id: 'modelePhrases', disabled: true }, h('option', { text: 'Générique (nom du critère)' }))));
+    corps.appendChild(zoneBloc('e:decompte', { nom: 'Décompte', aide: 'Sous le critère, et repris dans le PDF de l’étudiant·e. Toujours.', modele: d('decompte') }));
+    corps.appendChild(zoneBloc('e:priorite', { nom: 'Défi prioritaire', aide: 'En tête de son bilan, quand la note de ce critère tombe à 0 alors que la copie porte au moins un code.', modele: d('priorite') }));
+    corps.appendChild(zoneBloc('e:concentre', { nom: 'Quand tout est maîtrisé', modele: d('concentre'),
+      aide: 'Dans son bilan, quand tous les critères de la grille sont acquis et que la copie porte au moins un code. L’application écrit après lui le compte entre parenthèses, puis le point.' }));
+  }
+};
+
+/* ---------- La table des paliers ---------- */
+// Elle reprend tout ce que la carte des paliers fait aujourd'hui dans l'app (grilles.js, rendreBlocProjectionAlgo) :
+// les cinq réglages de la limite, le seuil de chaque palier, « + Ajouter un palier », « Ce palier lève un signalement »,
+// et les collections (« Enregistrer ces paliers sous un nom… », reprendre une collection).
+function limiteValide(L) { return L.active && L.tolere > 0 && L.longueur > 0; }
+function ligneLimite() {
+  var c = C(), N = c.noms, L = c.limite;
+  if (!limiteValide(L)) return 'Écris la longueur de référence et la tolérance : les paliers s’appliquent dès que les deux dépassent 0.';
+  var s = L.longueur / L.tolere;
+  return 'Limite : 1 ' + N.e1 + ' à chaque ' + fmt(s) + ' ' + accord(s, N.m1, N.m2) + ' (' + fmt(L.tolere) + ' ' + accord(L.tolere, N.e1, N.e2) + ' pour ' + fmt(L.longueur) + ' ' + accord(L.longueur, N.m1, N.m2) + ').';
+}
+function quandPalier(p, i) {
+  var c = C(), N = c.noms, L = c.limite, ok = limiteValide(L), s = ok ? L.longueur / L.tolere : null;
+  if (p.zero) return h('div', { class: 'tc-quand' }, h('strong', { text: 'Rien de compté' }), h('span', { class: 'petit', text: '0 ' + N.e1 }));
+  if (p.max === null) return h('div', { class: 'tc-quand' }, h('strong', { text: 'Au-delà du dernier seuil' }),
+    h('span', { class: 'petit', text: ok ? 'plus de ' + fmt(L.tolere) + ' ' + accord(L.tolere, N.e1, N.e2) + ' pour ' + fmt(L.longueur) + ' ' + accord(L.longueur, N.m1, N.m2) : '' }));
+  var champ = h('input', { class: 'saisie', type: 'number', inputmode: 'decimal', step: 'any', min: '1', id: 'seuil-' + p.cle, value: String(Math.round(p.max * 1000) / 10),
+    'aria-label': 'Seuil du palier, en pourcentage de la limite',
+    oninput: function (ev) { var v = Number(ev.target.value); if (v > 0) { p.max = v / 100; majApercu(); } }, onchange: function () { rendreEtapes(); } });
+  var k = ok ? s / p.max : null;
+  return h('div', { class: 'tc-quand' },
+    h('span', { class: 'tc-borne' }, h('strong', { text: 'Jusqu’à' }), champ, h('span', { text: '% de la limite' })),
+    h('span', { class: 'petit', text: k === null ? '' : 'soit au plus 1 ' + N.e1 + ' à chaque ' + fmt(Math.round(k * 10) / 10) + ' ' + accord(k, N.m1, N.m2) }));
+}
+function aideRecommandation(aide) {
+  if (/[:—–-]\s*\{service\}/.test(aide || '')) return 'Sans nom de service, la phrase s’arrête avant le deux-points.';
+  if ((aide || '').indexOf('{service}') >= 0) return 'Jointe seulement si un service d’aide est nommé.';
+  return 'Toujours jointe à ce palier.';
+}
+function champLimite(id, label, valeur, poser, opts) {
+  opts = opts || {};
+  return h('div', { class: 'champ' }, h('label', { for: id, text: label }),
+    h('input', { class: 'saisie', id: id, type: opts.nombre ? 'number' : 'text', inputmode: opts.nombre ? 'decimal' : null, min: opts.nombre ? '1' : null,
+      value: valeur === null || valeur === undefined ? '' : String(valeur), placeholder: opts.placeholder || null,
+      oninput: function (ev) { var v = ev.target.value; poser(opts.nombre ? (v === '' ? null : Math.max(0, Number(v) || 0)) : v); majApercu(); },
+      onchange: function () { if (opts.rerendre) rendreEtapes(); } }),
+    opts.aide ? h('small', { class: 'petit', text: opts.aide }) : null);
+}
+function menuCollections(c) {
+  if (!etat.collections.length) return null;
+  var sel = h('select', { class: 'saisie', id: 'reprendreCollection', onchange: function (ev) {
+    var col = etat.collections.filter(function (x) { return x.id === ev.target.value; })[0]; if (!col) return;
+    c.limite = JSON.parse(JSON.stringify(col.limite)); c.limite.active = true;
+    c.paliers = JSON.parse(JSON.stringify(col.paliers));
+    dire('Collection ' + q(col.nom) + ' copiée dans ce critère. La corriger ensuite ne change pas ce critère.');
+    rendreEtapes(); majApercu(); } },
+    h('option', { value: '', text: 'Reprendre une de tes collections…' }));
+  etat.collections.forEach(function (col) { sel.appendChild(h('option', { value: col.id, text: col.nom })); });
+  return h('label', { class: 'tc-selon' }, h('span', { class: 'sr', text: 'Reprendre une collection' }), sel);
+}
+function blocCollections(c) {
+  var box = h('div', { class: 'collections' });
+  var s = etat.saisieCollection;
+  if (!s) box.appendChild(h('button', { type: 'button', class: 'lien', style: 'align-self:flex-start', text: 'Enregistrer ces paliers sous un nom…',
+    onclick: function () { etat.saisieCollection = { nom: '', erreur: '' }; rendreEtapes(); var x = $('collectionNom'); if (x) x.focus(); } }));
+  else {
+    box.appendChild(h('div', { class: 'collection-saisie' },
+      h('label', { for: 'collectionNom', class: 'petit', text: 'Nom de la collection' }),
+      h('div', { class: 'tc-pied' },
+        h('input', { class: 'saisie', id: 'collectionNom', type: 'text', maxlength: '80', value: s.nom, style: 'width:auto;flex:1 1 180px', oninput: function (ev) { s.nom = ev.target.value; } }),
+        h('button', { type: 'button', class: 'btn-discret', text: 'Enregistrer', onclick: function () {
+          var nom = (s.nom || '').trim();
+          if (!nom) { s.erreur = 'Écris un nom.'; rendreEtapes(); return; }
+          if (etat.collections.some(function (x) { return x.nom === nom; })) { s.erreur = 'Une collection porte déjà ce nom.'; rendreEtapes(); return; }
+          etat.collections.push({ id: 'col' + (etat.collections.length + 1) + '-' + Date.now(), nom: nom, limite: JSON.parse(JSON.stringify(c.limite)), paliers: JSON.parse(JSON.stringify(c.paliers)) });
+          etat.saisieCollection = null; dire('Paliers enregistrés sous ' + q(nom) + '.'); rendreEtapes(); majApercu(); } }),
+        h('button', { type: 'button', class: 'btn-discret', text: 'Annuler', onclick: function () { etat.saisieCollection = null; rendreEtapes(); } })),
+      s.erreur ? h('p', { class: 'petit', role: 'alert', text: s.erreur }) : null));
+  }
+  if (etat.collections.length) {
+    var liste = h('ul', { class: 'collections-liste' });
+    etat.collections.forEach(function (col, i) {
+      liste.appendChild(h('li', null, h('span', { text: col.nom }), h('button', { type: 'button', class: 'lien', text: 'Supprimer la collection', onclick: function () { etat.collections.splice(i, 1); rendreEtapes(); } })));
+    });
+    box.appendChild(h('p', { class: 'variante-titre', text: 'Mes collections' }));
+    box.appendChild(liste);
+    box.appendChild(h('p', { class: 'petit', text: 'Reprendre une collection copie ses paliers et sa limite dans ce critère. La corriger ou la supprimer ensuite ne change pas cette grille, ni ce qu’un·e étudiant·e a déjà reçu.' }));
+  }
+  return box;
+}
+function tablePaliers() {
+  var c = C(), L = c.limite, N = c.noms, k = calc();
+  var sec = h('section', { class: 'table-cas', 'aria-labelledby': 'tc-paliers-titre' },
+    h('div', { class: 'tc-tete' }, h('h4', { class: 'tc-titre', id: 'tc-paliers-titre', text: 'Paliers' }),
+      h('span', { class: 'tc-selon' }, 'Selon', h('span', { class: 'chip chip--remplie chip--fixe', text: 'La part de la limite atteinte par la copie' })),
+      menuCollections(c),
+      L.active ? h('button', { type: 'button', class: 'lien tc-retirer', text: 'Retirer la limite', onclick: function () { L.active = false; rendreEtapes(); majApercu(); } }) : null));
+  var corps = h('div', { class: 'tc-corps' });
+  sec.appendChild(corps);
+  if (!L.active) {
+    corps.appendChild(h('p', { class: 'tc-vide', text: 'Aucune limite fixée : l’étudiant·e ne lit aucun palier. C’est l’état d’un critère neuf. Une limite fait paraître les paliers, du « rien de compté » à « au-delà du dernier seuil ».' }));
+    corps.appendChild(h('button', { type: 'button', class: 'btn-discret', style: 'align-self:flex-start', text: 'Fixer une limite', onclick: function () {
+      L.active = true;
+      if (c.cle === 'neuf') { L.longueur = null; L.tolere = null; L.service = ''; }
+      else { L.longueur = 900; L.tolere = 30; }
+      rendreEtapes(); majApercu(); } }));
+    corps.appendChild(blocCollections(c));
+    return sec;
+  }
+  corps.appendChild(h('p', { class: 'tc-ou', text: 'L’étudiant·e lit le cas de sa copie sous le critère, après le décompte. Le nom court s’imprime dans la rangée des paliers de son PDF. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas : ' + q('Tu fais en moyenne 1 ' + N.e1 + ' à chaque N ' + N.m2 + '.') + ' Un bloc sans valeur disparaît.' }));
+  corps.appendChild(h('div', { class: 'grille-3' },
+    champLimite('limLongueur', 'Longueur de référence (' + N.m2 + ')', L.longueur, function (v) { L.longueur = v; }, { nombre: true, rerendre: true, placeholder: 'ex. : 12' }),
+    champLimite('limTolere', 'Tolérance sur cette longueur (' + N.e2 + ')', L.tolere, function (v) { L.tolere = v; }, { nombre: true, rerendre: true, placeholder: 'ex. : 4' }),
+    champLimite('limService', 'Nom du service d’aide', L.service, function (v) { L.service = v; }, { placeholder: 'Aucun' })));
+  corps.appendChild(h('div', { class: 'grille-2' },
+    champLimite('limSignal', 'Ce que le signalement t’affiche', L.signalement, function (v) { L.signalement = v; }, { placeholder: 'Vide : aucun signalement', aide: 'À côté du palier RàI de l’étudiant·e, jamais sur sa copie.' }),
+    champLimite('limLien', 'Lien d’inscription au service (facultatif)', L.lien, function (v) { L.lien = v; }, { placeholder: 'Aucun' })));
+  corps.appendChild(h('p', { class: 'petit', id: 'limiteLigne', text: ligneLimite() }));
+  corps.appendChild(h('p', { class: 'petit', text: 'La limite est indépendante de la formule de la note : la note suit la formule, le palier situe la copie par rapport à la limite.' }));
+  corps.appendChild(h('div', { class: 'tc-entete', 'aria-hidden': 'true' }, h('span', { text: 'Quand' }), h('span', { text: 'Nom court' }), h('span', { text: 'L’étudiant·e lit' })));
+  var rangees = h('div', { class: 'tc-rangees' });
+  c.paliers.forEach(function (p, i) {
+    var atteint = k.palierIdx === i;
+    var textes = h('div', { class: 'tc-textes' },
+      zoneBloc('p:' + i + ':texte', { nom: 'Verdict', vide: 'Vide : ce palier ne dit rien.' }));
+    if (p.aide || p.aideOuverte) textes.appendChild(zoneBloc('p:' + i + ':aide', { nom: 'Recommandation', vide: 'Vide : aucune recommandation.', aide: aideRecommandation(p.aide) }));
+    else textes.appendChild(h('button', { type: 'button', class: 'lien', style: 'align-self:flex-start', text: '+ Ajouter une recommandation',
+      onclick: function () { p.aideOuverte = true; etat.cible = 'p:' + i + ':aide'; rendreEtapes(); rendrePalette(); } }));
+    textes.appendChild(h('label', { class: 'bascule' },
+      h('input', { type: 'checkbox', id: 'signal-' + p.cle, checked: p.signal ? true : null, onchange: function (ev) { p.signal = ev.target.checked; majApercu(); } }),
+      h('span', null, 'Ce palier lève un signalement ', h('small', { class: 'petit', text: '(pour toi, à côté du palier RàI de l’étudiant·e ; rien n’est écrit sur sa copie)' }))));
+    textes.appendChild(h('div', { class: 'tc-pied' },
+      h('span', { class: 'tc-ici', 'data-ici': 'p' + i, text: 'cas de la copie fictive', hidden: !atteint }),
+      h('button', { type: 'button', class: 'btn-discret', text: 'Voir ce que l’étudiant·e lirait à ce palier', onclick: function () { regleSurPalier(i); } }),
+      h('button', { type: 'button', class: 'lien', text: 'Retirer ce palier', onclick: function () { c.paliers.splice(i, 1); rendreEtapes(); majApercu(); } })));
+    rangees.appendChild(h('div', { class: 'tc-rangee', 'data-rangee': 'p' + i, 'data-atteint': atteint ? '' : null },
+      quandPalier(p, i),
+      h('div', { class: 'tc-nom' }, h('label', { class: 'tc-nom-etiq', for: 'nomCourt-' + p.cle, text: 'Nom court' }), h('input', { class: 'saisie', type: 'text', id: 'nomCourt-' + p.cle, value: p.nom, 'aria-label': 'Nom court du palier',
+        oninput: function (ev) { p.nom = ev.target.value; majApercu(); } })),
+      textes));
+  });
+  corps.appendChild(rangees);
+  corps.appendChild(h('button', { type: 'button', class: 'lien', style: 'align-self:flex-start', text: '+ Ajouter un palier', onclick: function () {
+    var pos = c.paliers.findIndex(function (p) { return !p.zero && p.max === null; }); if (pos < 0) pos = c.paliers.length;
+    var dernier = 0; c.paliers.forEach(function (p) { if (!p.zero && p.max !== null) dernier = Math.max(dernier, p.max); });
+    c.paliers.splice(pos, 0, { cle: 'n' + (etat.prochainPalier++), max: Math.round((dernier + 0.25) * 100) / 100, nom: 'Nouveau palier', texte: '', aide: '', signal: false });
+    rendreEtapes(); majApercu(); } }));
+  corps.appendChild(blocCollections(c));
+  return sec;
+}
+
+/* ---------- Une table de l'enseignant ---------- */
+function tableEnseignant(t, idx) {
+  var c = C(), k = calc(), choisi = casChoisi(t, k);
+  var sel = h('select', { class: 'saisie', id: 'selon-' + t.id, onchange: function (ev) { t.selon = ev.target.value; t.cas = casParDefaut(t.selon, c); rendreEtapes(); majApercu(); } });
+  SELONS.concat(persoPhrases(c).map(function (p) { return p.id; })).forEach(function (s) {
+    var o = h('option', { value: s, text: libelleSelon(s, c) });
+    if (s === 'part' && !c.limite.active) { o.disabled = true; o.textContent += ' (aucune limite)'; }
+    if (s === t.selon) o.selected = true;
+    sel.appendChild(o);
+  });
+  var sec = h('section', { class: 'table-cas sans-nom', 'aria-label': 'Table de cas selon ' + libelleSelon(t.selon, c).toLowerCase() },
+    h('div', { class: 'tc-tete' }, h('h4', { class: 'tc-titre', text: 'Table de cas' }),
+      h('label', { class: 'tc-selon' }, 'Selon', sel),
+      h('button', { type: 'button', class: 'lien tc-retirer', text: 'Retirer cette table', onclick: function () { c.tables.splice(idx, 1); rendreEtapes(); majApercu(); } })));
+  var corps = h('div', { class: 'tc-corps' });
+  corps.appendChild(h('p', { class: 'tc-ou', text: 'L’étudiant·e lit le cas de sa copie sous le critère, après les paliers. Une table neuve naît vide : un cas laissé vide n’ajoute rien à ce que lit l’étudiant·e.' }));
+  corps.appendChild(h('div', { class: 'tc-entete', 'aria-hidden': 'true' }, h('span', { text: 'Quand' }), h('span', { text: 'L’étudiant·e lit' })));
+  var rangees = h('div', { class: 'tc-rangees' });
+  t.cas.forEach(function (r, i) {
+    var atteint = choisi === i, u = uniteSelon(t.selon), quand;
+    if (r.t === 'max') {
+      var champ = h('input', { class: 'saisie', type: 'number', inputmode: 'decimal', step: 'any', id: 'borne-' + t.id + '-' + i, value: String(r.v), 'aria-label': 'Borne du cas',
+        oninput: function (ev) { r.v = Number(ev.target.value) || 0; majApercu(); }, onchange: function () { rendreEtapes(); } });
+      quand = h('div', { class: 'tc-quand' }, h('span', { class: 'tc-borne' }, h('strong', { text: 'Jusqu’à' }), champ, u ? h('span', { text: u.trim() }) : null),
+        h('button', { type: 'button', class: 'lien', style: 'align-self:flex-start;padding:2px', text: 'Retirer ce cas', onclick: function () { t.cas.splice(i, 1); rendreEtapes(); majApercu(); } }));
+    } else if (r.t === 'code') {
+      quand = h('div', { class: 'tc-quand' }, h('strong', { text: 'Code ' + r.code }), h('span', { class: 'petit', text: nomCode(c, r.code) }));
+    } else if (r.t === 'vide') {
+      var pourquoi = { note: 'aucune note calculable', part: 'aucune limite, ou rien à rapporter', moyenne: 'la copie ne porte aucune occurrence' }[t.selon] || (calculParId(c, t.selon) ? 'ton calcul n’a pas de valeur sur cette copie' : '');
+      quand = h('div', { class: 'tc-quand' }, h('strong', { text: 'Sans valeur' }), h('span', { class: 'petit', text: pourquoi }));
+    } else {
+      quand = h('div', { class: 'tc-quand' }, h('strong', { text: cap(libelleCas(t, i, c)) }));
+    }
+    rangees.appendChild(h('div', { class: 'tc-rangee', 'data-rangee': t.id + ':' + i, 'data-atteint': atteint ? '' : null }, quand,
+      h('div', { class: 'tc-textes' },
+        zoneBloc('t:' + t.id + ':' + i, { nom: 'Texte de ce cas', vide: 'Vide : ce cas n’ajoute rien.' }),
+        h('div', { class: 'tc-pied' },
+          h('span', { class: 'tc-ici', 'data-ici': t.id + ':' + i, text: 'cas de la copie fictive', hidden: !atteint }),
+          h('button', { type: 'button', class: 'btn-discret', text: 'Voir ce que l’étudiant·e lirait dans ce cas', onclick: function () { regleSurCas(t, i); } })))));
+  });
+  corps.appendChild(rangees);
+  if (t.selon === 'code') {
+    corps.appendChild(h('p', { class: 'petit', text: c.egalite === 'liste' ? 'À égalité, le premier de ta liste des codes.' : 'À égalité, le premier posé, comme aujourd’hui pour ce critère.' }));
+  } else {
+    corps.appendChild(h('button', { type: 'button', class: 'lien', style: 'align-self:flex-start', text: '+ Ajouter un cas', onclick: function () {
+      var pos = t.cas.findIndex(function (r) { return r.t === 'audela'; }); if (pos < 0) pos = t.cas.length;
+      var b = derniereBorne(t); t.cas.splice(pos, 0, { t: 'max', v: (b === null ? 0 : b) + pasSelon(t.selon), texte: '' });
+      rendreEtapes(); majApercu(); } }));
+  }
+  sec.appendChild(corps);
+  return sec;
+}
+function ajouterTable() {
+  var c = C(), t = { id: 't' + (c.prochain++), selon: 'code', cas: null };
+  t.cas = casParDefaut(t.selon, c); c.tables.push(t);
+  rendreEtapes(); majApercu();
+  var s = document.querySelector('#selon-' + t.id); if (s) { s.focus(); s.scrollIntoView({ block: 'center' }); }
+}
+
+/* ---------- Ce que l'app choisit sans toi ---------- */
+function choixApp() {
+  var c = C();
+  function item(titre, texte, cle) {
+    return h('div', { class: 'ca' }, h('dt', { text: titre }), h('dd', null, texte,
+      cle ? [' ', h('button', { type: 'button', class: 'lien', text: 'Modifier son texte', onclick: function () { ouvrirZone(cle); } })] : null));
+  }
+  return h('div', { class: 'choix-app' },
+    h('h4', { text: 'Ce que l’application choisit sans toi' }),
+    h('p', { class: 'petit', text: 'Leurs conditions sont celles de l’application ; leurs textes se modifient là où le lien te mène.' }),
+    h('dl', null,
+      item('Le code le plus fréquent', 'Quand la copie porte au moins un code, l’étudiant·e lit le nom du plus fréquent dans son bilan, à la ligne ' + q('principalement') + '. À égalité : '
+        + (c.egalite === 'liste' ? 'le premier de ta liste des codes (ta règle du 25 octobre, pour un critère neuf).' : 'le premier posé, comme aujourd’hui (critère existant).')
+        + ' Pour lui écrire un texte par code, ajoute une table selon ' + q('Le code le plus fréquent') + '.'),
+      item('Défi prioritaire', 'Quand la note de ce critère tombe à 0 alors que la copie porte au moins un code : en tête de son bilan.', 'e:priorite'),
+      item('Quand tout est maîtrisé', 'Quand tous les critères de la grille sont acquis et que la copie porte au moins un code : dans son bilan.', 'e:concentre'),
+      item('Aucune annotation', 'Quand la copie ne porte ni tampon ni code : toi seul·e le lis.', 'e:aucune')));
+}
+
+/* ---------- Régler la copie fictive sur un cas ---------- */
+function poserCopie(n, m, explicites) {
+  var c = C();
+  c.codesExplicites = explicites || null;
+  c.copie.n = n; c.copie.m = m;
+  if (n > c.nMax) c.nMax = n;
+}
+function dire(msg) { etat.flash = msg; }
+function direNote(msg) { etat.messageNote = msg; dire(msg); }
+function regleSurPalier(i) {
+  var c = C(), p = c.paliers[i], m0 = c.copie.m || c.limite.longueur || 10, N = c.noms;
+  if (!limiteValide(c.limite)) { dire('Écris d’abord la longueur de référence et la tolérance.'); majApercu(true); return; }
+  var mults = [1, 2, 3, 4, 5, 8, 10, 20, 50];
+  for (var a = 0; a < mults.length; a++) {
+    var m = m0 * mults[a];
+    for (var n = 0; n <= Math.max(200, c.nMax * mults[a]); n++) {
+      if (calculer(c, n, m).palierIdx === i) {
+        poserCopie(n, m);
+        dire('Copie réglée sur le palier ' + q(p.nom) + ' : ' + fmt(n) + ' ' + accord(n, N.e1, N.e2) + ' pour ' + fmt(m) + ' ' + accord(m, N.m1, N.m2) + '.');
+        majApercu(true); return;
+      }
+    }
+  }
+  dire('Aucune copie n’atteindrait ce palier avec cette limite.'); majApercu(true);
+}
+function regleSurCas(t, i) {
+  var c = C(), r = t.cas[i], N = c.noms, n, m;
+  if (r.t === 'code') { poserCopie(3, c.copie.m, [r.code, r.code, r.code]); dire('Copie réglée : trois fois le code ' + r.code + '.'); majApercu(true); return; }
+  if (r.t === 'aucun') { poserCopie(0, c.copie.m); dire('Copie réglée : aucun code.'); majApercu(true); return; }
+  m = c.copie.m;
+  for (n = 0; n <= 400; n++) if (casChoisi(t, calculer(c, n, m)) === i) { poserCopie(n, m); dire('Copie réglée : ' + fmt(n) + ' ' + accord(n, N.e1, N.e2) + ' pour ' + fmt(m) + ' ' + accord(m, N.m1, N.m2) + '.'); majApercu(true); return; }
+  n = c.copie.n;
+  for (m = 0; m <= 5000; m++) if (casChoisi(t, calculer(c, n, m)) === i) { poserCopie(n, m); dire('Copie réglée : ' + fmt(n) + ' ' + accord(n, N.e1, N.e2) + ' pour ' + fmt(m) + ' ' + accord(m, N.m1, N.m2) + '.'); majApercu(true); return; }
+  dire('Aucune copie fictive n’atteindrait ce cas.'); majApercu(true);
+}
+
+/* ---------- La palette ---------- */
+function rendrePalette() {
+  var pal = $('palette'), c = C(), B = blocs(c), k = calc(), v = valeurs(c, k);
+  pal.textContent = '';
+  if (etat.cible) pal.setAttribute('data-cible', ''); else pal.removeAttribute('data-cible');
+  var offre = etat.cible ? offreZone(etat.cible) : null;
+  pal.appendChild(h('div', { class: 'palette-tete' },
+    h('h2', { class: 'palette-titre' }, icone('i-crayon'), h('span', { text: 'Blocs de textes' })),
+    h('p', { class: 'palette-but', text: 'Ces blocs servent à composer les phrases que ce critère écrit seul sur chaque copie. Chaque bloc prend la valeur réelle de la copie évaluée.' }),
+    h('ol', { class: 'palette-mode' },
+      h('li', null, h('span', { class: 'n', text: '1' }), h('span', { text: 'Clique dans une zone violette.' })),
+      h('li', null, h('span', { class: 'n', text: '2' }), h('span', { text: 'Touche un bloc : il se pose au curseur.' }))),
+    h('p', { class: 'palette-cible', id: 'paletteCible' }, etat.cible ? ['Zone choisie : ', h('strong', { text: nomZone(etat.cible) })] : 'Aucune zone choisie.'),
+    h('p', { class: 'palette-astuce', text: 'Touche une zone violette : ses blocs paraissent ici.' })));
+  pal.appendChild(h('p', { class: 'palette-legende', text: 'Après la flèche : la valeur que le bloc prendrait sur la copie fictive.' }));
+  [['posee', 'Ce que tu écris dans la grille'], ['remplie', 'Ce qui se remplit quand tu évalues la copie']].forEach(function (g) {
+    var grp = h('div', { class: 'palette-groupe' }, h('p', { class: 'palette-groupe-nom', text: g[1] }));
+    ordreBlocs(c, g[0]).forEach(function (j) {
+      var val = v[j], off = !offre || offre.indexOf(j) >= 0;
+      grp.appendChild(h('button', { type: 'button', class: 'bloc bloc--' + g[0], 'aria-disabled': off ? null : 'true', title: B[j].aide,
+        onmousedown: function (ev) { ev.preventDefault(); }, onclick: function () { if (off) poserBloc(j); } },
+        h('span', { class: 'bloc-nom', text: B[j].nom }), h('span', { class: 'bloc-valeur' + (val ? '' : ' vide'), text: val || 'vide' })));
+    });
+    pal.appendChild(grp);
+  });
+}
+
+/* ---------- La simulation ---------- */
+function rendreApercu() {
+  var a = $('apercu'), c = C();
+  a.textContent = '';
+  if (etat.reduit) a.setAttribute('data-reduit', ''); else a.removeAttribute('data-reduit');
+  if (etat.sources) a.removeAttribute('data-sans-sources'); else a.setAttribute('data-sans-sources', '');
+  a.appendChild(h('div', { class: 'apercu-tete' }, h('h2', { text: 'Simulation de ce que l’étudiant·e lirait' }),
+    h('button', { type: 'button', class: 'btn-discret apercu-reduire', id: 'apercuReduire', 'aria-expanded': String(!etat.reduit), text: etat.reduit ? 'Tout voir' : 'Réduire',
+      onclick: function () { etat.reduit = !etat.reduit; try { localStorage.setItem('tc-reduit', etat.reduit ? '1' : '0'); } catch (e) { /* sans effet */ } rendreApercu(); majApercu(); } })));
+  a.appendChild(h('p', { class: 'apercu-but', text: 'En fonction de ce que tu as établi dans les tables, observe si le cas d’interprétation te convient.' }));
+  var inN = h('input', { class: 'saisie', id: 'copieN', type: 'number', inputmode: 'numeric', min: '0', 'aria-label': 'Nombre compté',
+    oninput: function (ev) { var v = Math.max(0, Math.round(Number(ev.target.value) || 0)); poserCopie(v, c.copie.m); majApercu(); } });
+  var inM = h('input', { class: 'saisie', id: 'copieM', type: 'number', inputmode: 'numeric', min: '0', 'aria-label': 'Longueur',
+    oninput: function (ev) { var v = Math.max(0, Math.round(Number(ev.target.value) || 0)); poserCopie(c.copie.n, v); majApercu(); } });
+  var curseur = h('input', { type: 'range', id: 'copieCurseur', min: '0', 'aria-label': 'Glisser pour changer le compte',
+    oninput: function (ev) { poserCopie(Number(ev.target.value), c.copie.m); majApercu(); } });
+  function pas(signe) { return h('button', { type: 'button', class: 'pas', 'aria-label': signe < 0 ? 'Une de moins' : 'Une de plus', text: signe < 0 ? '−' : '+',
+    onclick: function () { poserCopie(Math.max(0, c.copie.n + signe), c.copie.m); majApercu(); } }); }
+  function ref(nom, f) { return h('button', { type: 'button', class: 'ref-btn', text: nom, onclick: function () { f(); majApercu(); } }); }
+  a.appendChild(h('div', { class: 'apercu-detail' },
+    h('div', { class: 'copie' },
+      h('p', { class: 'copie-titre', text: 'Copie fictive' }),
+      h('div', { class: 'copie-ligne' }, pas(-1), inN, pas(1), h('span', { id: 'copieNomE' }), h('span', { text: 'pour' })),
+      h('div', { class: 'copie-ligne' }, inM, h('span', { id: 'copieNomM' })),
+      curseur,
+      h('p', { class: 'copie-codes', id: 'copieCodes' }),
+      h('p', { class: 'copie-codes', id: 'copieDominant' }),
+      h('div', { class: 'refs' }, h('span', { class: 'refs-nom', text: 'Copies de référence' }),
+        ref('Aucune', function () { poserCopie(0, c.copie.m); dire(''); }),
+        ref('Quelques', function () { poserCopie(c.refs.quelques, c.copie.m); dire(''); }),
+        ref('Beaucoup', function () { poserCopie(c.refs.beaucoup, c.copie.m); dire(''); }),
+        ref('Égalité', function () { poserCopie(4, c.copie.m, ['3', '1', '3', '1']); dire('Copie réglée : les codes 3 et 1, deux fois chacun, le 3 posé le premier.'); }))),
+    h('p', { class: 'flash', id: 'apercuFlash', 'aria-live': 'polite' }),
+    h('div', { class: 'resultats', id: 'resultats' }),
+    h('div', { class: 'lectures', id: 'lectures' }),
+    h('label', { class: 'bascule' }, h('input', { type: 'checkbox', id: 'basculeSources', checked: etat.sources ? true : null,
+      onchange: function (ev) { etat.sources = ev.target.checked; if (etat.sources) a.removeAttribute('data-sans-sources'); else a.setAttribute('data-sans-sources', ''); } }),
+      'Montrer d’où vient chaque phrase'),
+    h('p', { class: 'apercu-astuce', text: 'Clique une phrase : la zone qui l’écrit s’ouvre.' })));
+}
+function seg(box, src, texte, cle, cls) {
+  if (!texte) return null;
+  var el = cle ? h('a', { class: 'seg' + (cls ? ' ' + cls : ''), href: '#zone-' + cle.replace(/[^a-z0-9]/gi, '-'), onclick: function (ev) { ev.preventDefault(); ouvrirZone(cle); } })
+    : h('span', { class: 'seg seg--fixe' + (cls ? ' ' + cls : '') });
+  if (src) el.appendChild(h('span', { class: 'seg-src', text: src }));
+  el.appendChild(document.createTextNode(texte));
+  box.appendChild(el);
+  return el;
+}
+function espace(box) { if (box.childNodes.length) box.appendChild(document.createTextNode(' ')); }
+function condition(si, etatTxt, oui, contenu) {
+  return h('div', { class: 'condition' }, h('p', { class: 'condition-si' }, h('span', { text: si }), h('span', { class: 'etat ' + (oui ? 'oui' : 'non'), text: etatTxt })), contenu);
+}
+function majApercu(defiler) {
+  var c = C(), N = c.noms, k = calc(), v = valeurs(c, k), L = c.limite;
+  majResultatsNote();
+  // La copie
+  var inN = $('copieN'), inM = $('copieM'), cur = $('copieCurseur');
+  if (inN && document.activeElement !== inN) inN.value = String(k.n);
+  if (inM && document.activeElement !== inM) inM.value = String(k.m);
+  if (cur) { cur.max = String(c.nMax); cur.value = String(Math.min(k.n, c.nMax)); }
+  if ($('copieNomE')) $('copieNomE').textContent = accord(k.n, N.e1, N.e2);
+  if ($('copieNomM')) $('copieNomM').textContent = accord(k.m, N.m1, N.m2);
+  if ($('copieCodes')) {
+    var cc = $('copieCodes'); cc.textContent = '';
+    if (!k.n) cc.textContent = 'Codes posés : aucun.';
+    else if (k.n <= 10) cc.textContent = 'Codes posés, dans l’ordre : ' + k.codes.join(' · ');
+    else cc.textContent = 'Codes posés : ' + Object.keys(k.dom.freq).sort(function (x, y) { return k.dom.freq[y] - k.dom.freq[x] || Number(x) - Number(y); })
+      .map(function (x) { return k.dom.freq[x] + ' × code ' + x; }).join(', ');
+  }
+  if ($('copieDominant')) {
+    var cd = $('copieDominant'); cd.textContent = '';
+    if (k.dom) {
+      cd.appendChild(document.createTextNode('Le plus fréquent : '));
+      cd.appendChild(h('strong', { text: 'code ' + k.dom.code + ', ' + nomCode(c, k.dom.code) }));
+      if (k.dom.egaux.length > 1) {
+        var autres = k.dom.egaux.filter(function (x) { return x !== k.dom.code; }).map(function (x) { return 'code ' + x; }).join(', ');
+        cd.appendChild(document.createTextNode(' (à égalité avec ' + autres + ' : ' + (c.egalite === 'liste' ? 'le premier de ta liste' : 'le premier posé') + ')'));
+      }
+    }
+  }
+  if ($('apercuFlash')) $('apercuFlash').textContent = etat.flash;
+  // Les résultats
+  var res = $('resultats');
+  if (res) {
+    res.textContent = '';
+    res.appendChild(h('span', { class: 'resultat' }, h('span', { text: 'Note' }), k.note === null ? 'aucune' : fmt(k.note) + ' / 20 (' + pct(Math.round(k.note / 20 * 100)) + ')'));
+    res.appendChild(h('span', { class: 'resultat-calcul', text: texteResultat(c, calculDeLaNote(c), k, true) }));
+    if (k.palier) res.appendChild(h('span', { class: 'resultat palier-r' }, h('span', { text: 'Palier' }), k.palier.nom || '(sans nom)'));
+  }
+  // Les lectures
+  var lec = $('lectures');
+  if (lec) {
+    lec.textContent = '';
+    // Sous le critère
+    var t1 = h('div', { class: 'texte-eleve' });
+    seg(t1, 'Décompte', remplir(c.textes.decompte, v), 'e:decompte');
+    if (k.palier) {
+      var i = k.palierIdx, p = k.palier;
+      var compose = JETONS_PROJECTION.test(p.texte || '');
+      if (k.n > 0 && k.moy !== null && !compose) { espace(t1); seg(t1, 'Ajoutée par l’application', 'Tu fais en moyenne 1 ' + N.e1 + ' à chaque ' + fmt(k.moy) + ' ' + accord(k.moy, N.m1, N.m2) + '.', null, 'seg--engendre'); }
+      var verdict = remplir(p.texte, v); if (verdict) { espace(t1); seg(t1, 'Verdict · ' + (p.nom || 'sans nom'), verdict, 'p:' + i + ':texte'); }
+      var aide = aideRendue(p.aide, v); if (aide) { espace(t1); seg(t1, 'Recommandation', aide, 'p:' + i + ':aide'); }
+    }
+    c.tables.forEach(function (t) {
+      var j = casChoisi(t, k); if (j < 0) return;
+      var tx = remplir(t.cas[j].texte, v); if (!tx) return;
+      espace(t1); seg(t1, 'Table · ' + libelleCas(t, j, c), tx, 't:' + t.id + ':' + j, 'seg--table');
+    });
+    lec.appendChild(h('div', { class: 'lecture' }, h('h3', { text: 'Sous le critère, dans son PDF' }), t1));
+    // Le bilan
+    var bil = h('div', { class: 'lecture' }, h('h3', { text: 'Dans son bilan' }));
+    var t2 = h('div', { class: 'texte-eleve' + (k.n > 0 ? '' : ' eteint') });
+    if (k.dom) seg(t2, 'Le code le plus fréquent', c.nom + ' : ' + fmt(k.n) + ' ' + accord(k.n, N.e1, N.e2) + ' (principalement : ' + nomCode(c, k.dom.code) + ')');
+    else t2.appendChild(h('span', { class: 'rien', text: 'Rien ne s’afficherait : la copie fictive ne porte aucun code.' }));
+    bil.appendChild(condition('Si la copie portait au moins un code, dans « Points récurrents » :', k.n > 0 ? 's’afficherait' : 'ne s’afficherait pas', k.n > 0, t2));
+    var defi = k.note !== null && k.note <= 0 && k.n > 0;
+    var t3 = h('div', { class: 'texte-eleve' + (defi ? '' : ' eteint') });
+    var ph = remplir(c.textes.priorite, v);
+    if (ph) { seg(t3, 'Défi prioritaire', ph, 'e:priorite', 'seg-fort'); t3.appendChild(document.createTextNode(' (' + c.nom + ' : ' + fmt(k.n) + ' ' + accord(k.n, N.e1, N.e2) + ' sur ' + fmt(k.m) + ' ' + accord(k.m, N.m1, N.m2) + ', Incomplet)')); }
+    else t3.appendChild(h('span', { class: 'rien', text: 'Rien ne s’afficherait.' }));
+    bil.appendChild(condition('Si la note de ce critère tombait à 0, en tête :', defi ? 's’afficherait' : 'ne s’afficherait pas', defi, t3));
+    var t4 = h('div', { class: 'texte-eleve' + (k.n > 0 ? '' : ' eteint') });
+    var pc = remplir(c.textes.concentre, v);
+    t4.appendChild(document.createTextNode('Tous les critères sont maîtrisés. '));
+    if (pc) seg(t4, 'Quand tout est maîtrisé', pc, 'e:concentre');
+    t4.appendChild(document.createTextNode(' (' + fmt(k.n) + ' ' + accord(k.n, N.e1, N.e2) + ').'));
+    bil.appendChild(condition('Si tous ses critères étaient acquis :', k.n > 0 ? 'dépendrait des autres critères' : 'ne s’afficherait pas', false, t4));
+    lec.appendChild(bil);
+    // Pour toi
+    var t5 = h('div', { class: 'texte-eleve' + (k.n === 0 ? '' : ' eteint') });
+    var au = remplir(c.textes.aucune, Object.assign({}, v, { nomErreurs: N.e1 }));
+    if (au) seg(t5, 'Aucune annotation', au, 'e:aucune'); else t5.appendChild(h('span', { class: 'rien', text: 'Rien ne s’afficherait.' }));
+    var sig = !!(k.palier && k.palier.signal && (L.signalement || '').trim());
+    var t6 = h('div', { class: 'texte-eleve' + (sig ? '' : ' eteint') });
+    if ((L.signalement || '').trim()) seg(t6, 'Signalement', L.signalement.trim());
+    else t6.appendChild(h('span', { class: 'rien', text: 'Rien : aucun texte de signalement n’est écrit dans la limite.' }));
+    lec.appendChild(h('div', { class: 'lecture' }, h('h3', { text: 'Pour toi seul·e' }),
+      condition('Si la copie ne portait aucun code :', k.n === 0 ? 's’afficherait' : 'ne s’afficherait pas', k.n === 0, t5),
+      condition('Si son palier levait un signalement, à côté du palier RàI :', sig ? 's’afficherait' : 'ne s’afficherait pas', sig, t6)));
+  }
+  // Les marques dans les tables
+  document.querySelectorAll('[data-rangee]').forEach(function (row) {
+    var r = row.getAttribute('data-rangee'), at;
+    if (r.charAt(0) === 'p' && r.indexOf(':') < 0) at = ('p' + k.palierIdx) === r;
+    else { var parts = r.split(':'), t = tableParId(parts[0]); at = !!t && casChoisi(t, k) === Number(parts[1]); }
+    if (at) row.setAttribute('data-atteint', ''); else row.removeAttribute('data-atteint');
+    var pill = row.querySelector('[data-ici]'); if (pill) pill.hidden = !at;
+  });
+  if ($('limiteLigne')) $('limiteLigne').textContent = ligneLimite();
+  // La chaîne et les résumés
+  document.querySelectorAll('[data-info]').forEach(function (el) { el.textContent = infoEtape(el.getAttribute('data-info')); });
+  document.querySelectorAll('[data-resume]').forEach(function (el) { el.textContent = resumeEtape(el.getAttribute('data-resume')); });
+  $('filCritere').textContent = c.nom;
+  rendrePalette();
+  if (defiler === true) {
+    var ap = $('apercu');
+    if (ap && matchMedia('(max-width: 759px)').matches && etat.reduit) { etat.reduit = false; rendreApercu(); majApercu(); }
+  }
+}
+
+/* ---------- La page entière ---------- */
+function rendreTout() {
+  var c = C();
+  document.querySelectorAll('.bascule-crit button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.crit === etat.crit)); });
+  $('noteCrit').textContent = etat.crit === 'neuf'
+    ? 'Critère neuf : il reçoit les textes que tu as tranchés le 25 octobre. Il naîtrait sans limite ; elle est fixée ici pour montrer les paliers.'
+    : 'Critère existant : il garde ses textes et sa règle d’égalité ; seule la présentation change.';
+  $('nomCritere').value = c.nom;
+  $('descCritere').value = c.description;
+  rendreChaine(); rendreEtapes(); rendreApercu(); majApercu();
+}
+
+/* ---------- Écouteurs délégués ---------- */
+document.addEventListener('focusin', function (ev) { var z = zoneDe(ev.target); if (z && etat.cible !== z.dataset.cle) setCible(z.dataset.cle); });
+document.addEventListener('input', function (ev) { var z = zoneDe(ev.target); if (z) enregistrerZone(z); });
+document.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' && zoneDe(ev.target)) ev.preventDefault(); });
+document.addEventListener('paste', function (ev) {
+  var z = zoneDe(ev.target); if (!z) return;
+  ev.preventDefault();
+  var t = (ev.clipboardData || window.clipboardData).getData('text/plain').replace(/\s+/g, ' ');
+  var sel = window.getSelection(); if (!sel.rangeCount) return;
+  var r = sel.getRangeAt(0); r.deleteContents(); var n = document.createTextNode(t); r.insertNode(n);
+  r.setStartAfter(n); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+  enregistrerZone(z);
+});
+document.addEventListener('click', function (ev) {
+  var x = ev.target.closest && ev.target.closest('.chip-x'); if (!x) return;
+  var chip = x.closest('.chip'), z = zoneDe(chip); if (!z) return;
+  ev.preventDefault(); chip.remove(); setCible(z.dataset.cle); enregistrerZone(z);
+});
+document.addEventListener('selectionchange', function () {
+  var sel = window.getSelection(); if (!sel || !sel.rangeCount) return;
+  var r = sel.getRangeAt(0), z = zoneDe(r.startContainer);
+  if (z) { etat.range = r.cloneRange(); etat.rangeZone = z.dataset.cle; }
+});
+document.querySelectorAll('.bascule-crit button').forEach(function (b) {
+  b.addEventListener('click', function () { etat.crit = b.dataset.crit; etat.cible = null; etat.flash = ''; etat.composeur = null; etat.composeurOuvert = false; rendreTout(); });
+});
+$('toutRemettre').addEventListener('click', function () { var crit = etat.crit; initEtat(); etat.crit = crit; rendreTout(); });
+$('nomCritere').addEventListener('input', function (ev) { C().nom = ev.target.value; majApercu(); });
+$('descCritere').addEventListener('input', function (ev) { C().description = ev.target.value; });
+
+initEtat();
+rendreTout();
+})();
+</script>
+
+</body></html>
