@@ -64,9 +64,16 @@ const SOUS_SECTIONS = [...AIDE.matchAll(/<div id="([^"]+)" class="sous-section">
 // explicites de Grégoire), dans l'ordre que fixe la consigne du lot 1 (§3, §4). Clés : les ids de config.js.
 const COUPEES = ['monitorage', 'srpnf', 'ssot', 'checklist', 'parcours', 'validation-grille', 'flux-travail',
     'gerer-jetons', 'verification-hebdo', 'temps-estimes', 'presences-apercu', 'seuils-critiques', 'architecture', 'apropos'];
+// ↻ #1152, lot 2a (27 oct. 2026) : Commencer et Cadre prennent leur forme finale (audit du 24 oct., verdicts finals ;
+// remesure du 27 oct. ; consigne CONSIGNE-LOT-2026-10-27-aide-lot-2a-commencer-cadre.md, §2). Quatre entrées
+// absorbées par décision (modes-formation dans modes, fusion confirmée par Grégoire le 24 oct. à 18 h 25 ;
+// trimestre et groupe-cours dans etapes-config ; groupe dans etudiants), deux neuves (bibliotheque, chaines-etapes).
+// Leur détail est vérifié par sentinelle-aide-2026-10-27-lot-2a.test.js.
+const ABSORBEES_2A = ['modes-formation', 'trimestre', 'groupe-cours', 'groupe'];
+const NEUVES_2A = ['bibliotheque', 'chaines-etapes'];
 const PLACES = {
-    commencer: ['presentation', 'prise-en-main', 'demo', 'modes', 'modes-formation', 'preferences'],
-    cadre: ['etapes-config', 'trimestre', 'groupe-cours', 'cours', 'horaire', 'groupe', 'etudiants', 'presences-calendrier', 'archivage'],
+    commencer: ['presentation', 'prise-en-main', 'demo', 'modes', 'bibliotheque', 'chaines-etapes', 'preferences'],
+    cadre: ['etapes-config', 'cours', 'horaire', 'etudiants', 'presences-calendrier', 'archivage'],
     conception: ['pratique', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme', 'sous-criteres', 'creer-echelles', 'solo', 'idme', 'creer-cartouches'],
     evaluation: ['preparer-importer', 'annoter-evaluer', 'evaluer-productions', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
     suivi: ['saisie-presences', 'tableau-bord', 'profil-etudiant', 'guide-profil', 'acp', 'diagnostics', 'rai', 'suivi-apprentissage', 'patterns', 'planifier-rai', 'rai-absences', 'snapshots', 'tirage-sort'],
@@ -77,12 +84,12 @@ const PLACES = {
 const GARDEES = Object.values(PLACES).flat();
 
 describe('#1152 lot 1 · la forme de l\'Aide', () => {
-    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées et 61 rangées, chacune une fois', () => {
+    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves', () => {
         expect(ONGLETS).toHaveLength(8);
         expect(Object.keys(PLACES)).toEqual(ONGLETS.map((o) => o.id));
         expect(COUPEES).toHaveLength(14);
-        expect(GARDEES).toHaveLength(61);
-        expect(new Set([...COUPEES, ...GARDEES]).size).toBe(75);
+        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length);
+        expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES_2A.includes(id)), ...ABSORBEES_2A]).size).toBe(75);
     });
 
     it('les huit sous-sections, dans l\'ordre, ont les ids et les titres du tableau \'aide\' de config.js', () => {
@@ -120,8 +127,10 @@ describe('#1152 lot 1 · la forme de l\'Aide', () => {
 });
 
 describe('#1152 lot 1 · les quatre retraits (§5) : motifs mesurés au texte d\'avant (35745bd et dc39bff2)', () => {
-    it('groupe : plus de phrase sur l\'ancienne colonne « CAF » (intention 2.92, non faite)', () => {
-        const t = texte(carte('groupe'));
+    // ↻ #1152, lot 2a : la ligne « Mesure d'aide » de `groupe` est passée dans `etudiants`, qui l'absorbe.
+    it('etudiants (qui absorbe groupe) : plus de phrase sur l\'ancienne colonne « CAF » (intention 2.92, non faite)', () => {
+        const t = texte(carte('etudiants'));
+        expect(t).toContain('Mesure d\'aide');
         expect(t).not.toMatch(/CAF/);
         expect(t).not.toMatch(/restent lisibles/);
     });

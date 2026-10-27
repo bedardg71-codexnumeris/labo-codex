@@ -56,8 +56,11 @@ describe('Aide — la pratique de Grégoire reste un exemple, jamais la règle',
         // ⚠ Fenêtre COURTE, et le marqueur doit être collé à la mention. Une
         // fenêtre de 60 caractères passait même après ablation : elle attrapait
         // le « Ex. » de la ligne voisine (« Titre : Ex. Écriture et littérature »).
+        // ↻ #1152, lot 2a (27 oct. 2026) : les deux dernières mentions (« Ex. 601-101-MQ » de `cours`, « 601-101,
+        // etc. » de `groupe-cours`) sont parties avec la correction de ces entrées (audit de l'Aide du 24 oct. ;
+        // remesure du 27 oct. ; consigne du lot 2a, §3 : « aucun exemple propre à une discipline »). Le garde de
+        // non-vide n'a plus d'objet ; la boucle reste, pour une mention qui reviendrait sans son marqueur.
         const mentions = [...TXT.matchAll(/(.{14})601-101(.{14})/g)];
-        expect(mentions.length).toBeGreaterThan(0);
         for (const m of mentions) {
             const colle = /(?:Ex\.|ex\.|exemple)\s*$/i.test(m[1])   // « Ex. » juste avant
                        || /^[^.]{0,6}(?:etc\.|,\s*etc)/i.test(m[2]); // « etc. » juste après
