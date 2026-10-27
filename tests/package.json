@@ -14,7 +14,7 @@
     "devDependencies": {
         "@playwright/test": "^1.60.0",
         "acorn": "8.18.0",
-        "esbuild": "^0.21.5",
+        "esbuild": "^0.28.2",
         "jsdom": "25.0.1",
         "jszip": "^3.10.1",
         "vitest": "^2.0.0"
