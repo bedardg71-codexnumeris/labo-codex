@@ -711,6 +711,8 @@ function mettreAJourSelectionEval() {
     if (barre) barre.classList.toggle('u-hide', n === 0);
     if (compte) compte.textContent = n + ' ' + (n > 1 ? 'copies sélectionnées' : 'copie sélectionnée');
     if (bouton) bouton.textContent = 'Réassigner la sélection (' + n + ')';
+    const boutonCorbeille = document.getElementById('eval-btn-corbeille-selection');
+    if (boutonCorbeille) boutonCorbeille.textContent = 'Mettre à la corbeille (' + n + ')';
 
     const cbTout = document.getElementById('eval-tout-selectionner');
     if (cbTout) {
@@ -912,6 +914,152 @@ function reassignerSelectionEval() {
         overlay.remove();
         notifications.succes(nb + (nb > 1 ? ' copies réassignées' : ' copie réassignée') + ' vers « ' + nomCibleCourant + ' »');
         appliquerFiltres();
+    });
+}
+
+// ============================================
+// METTRE LA SÉLECTION À LA CORBEILLE (#1174)
+// ============================================
+// Vécu le 27 oct. 2026 : 22 copies cochées sur « Artefact 5 », et seul « Actions…
+// → Supprimer » ligne par ligne. Décision de Grégoire (9 h 01) : toutes les copies
+// cochées partent, y compris celles déjà évaluées. Le geste est celui de
+// « Supprimer », répété : le fichier va à la corbeille, son blob reste, aucune
+// évaluation n'est touchée. Une seule écriture : `travauxStockage.deplacerEnCorbeilleLot`.
+
+/**
+ * Le travail (élève × production) est-il lié à une reprise ? Supprimer le fichier
+ * ne la défait pas (bug Grégoire 8 juin 2026). Règle partagée par la suppression
+ * d'une copie et celle de la sélection.
+ * @param {Object[]} evaluations
+ * @param {string} da
+ * @param {string} productionId
+ * @returns {boolean}
+ */
+function _travailLieAUneReprise(evaluations, da, productionId) {
+    if (!productionId) return false;
+    return (evaluations || []).some(e => e &&
+        // #360 — un doublon réconcilié porte `remplaceeParId` mais n'est PAS une
+        // reprise : ne pas afficher l'avertissement « lié à une reprise » à tort.
+        e.etudiantDA === da && e.productionId === productionId && (e.repriseDeId || (e.remplaceeParId && !e.reconcilieParDoublon))
+    );
+}
+
+/**
+ * Trie les copies cochées en ce que le geste groupé déplacera, et ce que la
+ * question doit nommer :
+ *   · `aDeplacer` : chaque copie trouvée (un id absent est ignoré) ;
+ *   · `evaluees`  : parmi elles, celles dont l'évaluation est notée — elle reste
+ *                   dans la liste, sans copie liée ;
+ *   · `reprises`  : parmi elles, celles dont le travail est lié à une reprise.
+ * Les noms viennent de `etudiants` tel que l'appelant le lit (anonymisé ou non) ;
+ * jamais le DA en repli. Pure : aucune lecture du DOM ni du stockage. Sentinelle #1174.
+ * @param {string[]} ids
+ * @param {{fichiers?: Object[], evaluations?: Object[], etudiants?: Object[]}} donnees
+ * @returns {{aDeplacer: Object[], evaluees: Object[], reprises: Object[]}}
+ */
+function composerRecapCorbeille(ids, donnees) {
+    const { fichiers = [], evaluations = [], etudiants = [] } = donnees || {};
+    const aDeplacer = [];
+    (ids || []).forEach(id => {
+        const f = fichiers.find(x => x && x.id === id);
+        if (!f || aDeplacer.some(c => c.fichierId === id)) return;
+        const e = f.etudiantDA ? etudiants.find(x => x && x.da === f.etudiantDA) : null;
+        const evaluation = evaluations.find(ev => ev && f.evaluationId && ev.id === f.evaluationId) ||
+            evaluations.find(ev => estDuCoupleDuFichier(ev, f) && !ev.remplaceeParId);
+        aDeplacer.push({
+            fichierId: f.id,
+            nomEleve: e ? ((e.prenom || '') + ' ' + (e.nom || '')).trim() : 'Copie sans élève',
+            nomFichier: f.nomFichier || f.id,
+            evaluee: !!(evaluation && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0),
+            reprise: _travailLieAUneReprise(evaluations, f.etudiantDA, f.productionId)
+        });
+    });
+    return {
+        aDeplacer,
+        evaluees: aDeplacer.filter(c => c.evaluee),
+        reprises: aDeplacer.filter(c => c.reprise)
+    };
+}
+
+/**
+ * Le HTML de la question groupée. Tout ce qui vient des données passe par
+ * `echapperHtml` (règle 1).
+ * @param {Object} recap - rendu par `composerRecapCorbeille`
+ * @returns {string}
+ */
+function genererRecapCorbeilleHTML(recap) {
+    const pl = (k, s, p) => k + ' ' + (k > 1 ? p : s);
+    const noms = (liste) => '<ul class="reassigner-recap-liste">' + liste.map(c => '<li>' + echapperHtml(c.nomEleve) + '</li>').join('') + '</ul>';
+    let html = '<p>Tu pourras les restaurer depuis la corbeille pendant 30 jours.</p>';
+    if (recap.evaluees.length) {
+        html += '<div class="reassigner-recap-bloc"><p><strong>' + pl(recap.evaluees.length, 'copie déjà évaluée', 'copies déjà évaluées') +
+            '</strong> : leur évaluation et leur note restent dans la liste, sans copie liée.</p>' + noms(recap.evaluees) + '</div>';
+    }
+    if (recap.reprises.length) {
+        html += '<div class="reassigner-recap-bloc reassigner-recap-conflit"><p><strong>' + pl(recap.reprises.length, 'copie liée', 'copies liées') +
+            ' à une reprise.</strong> Mettre le fichier à la corbeille ne retire ni la reprise ni le statut « remplacée » de l’évaluation d’origine.</p>' +
+            noms(recap.reprises) + '</div>';
+    }
+    return html;
+}
+
+/**
+ * Après un passage à la corbeille : la liste, la vue Archivage si elle est
+ * ouverte (suppression depuis un badge fichier), et le compteur « Corbeille (n) ».
+ */
+function _rafraichirApresCorbeille() {
+    if (typeof appliquerFiltres === 'function') {
+        appliquerFiltres();
+    }
+    if (typeof travauxUI !== 'undefined' && typeof travauxUI.afficherArchivage === 'function') {
+        const conteneurArchivage = document.getElementById('evaluations-contenu-archivage');
+        if (conteneurArchivage && conteneurArchivage.offsetParent !== null) {
+            travauxUI.afficherArchivage();
+        }
+    }
+    mettreAJourBoutonCorbeille();
+}
+
+/**
+ * « Mettre à la corbeille (N) » : une seule question, puis une seule écriture.
+ */
+function mettreSelectionALaCorbeille() {
+    const ids = obtenirSelectionEval();
+    if (ids.length === 0 || typeof travauxStockage === 'undefined' || typeof travauxStockage.deplacerEnCorbeilleLot !== 'function') return;
+
+    const recap = composerRecapCorbeille(ids, {
+        fichiers: travauxStockage.obtenirFichiersGroupeActif() || [],
+        evaluations: db.getSync(cle('evaluationsSauvegardees'), []) || [],
+        etudiants: obtenirDonneesSelonMode('groupeEtudiants') || []
+    });
+    const n = recap.aDeplacer.length;
+    if (n === 0) return;
+    const copies = n > 1 ? n + ' copies' : 'une copie';
+
+    const existante = document.getElementById('corbeille-selection-overlay');
+    if (existante) existante.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'corbeille-selection-overlay';
+    overlay.className = 'modal-overlay actif';
+    overlay.innerHTML =
+        '<div class="modal-contenu modal-compact" style="max-width: 480px;">' +
+            '<button class="modal-fermer" data-action="fermerOverlayParent"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>' +
+            '<h3 class="modal-titre">Mettre ' + copies + ' à la corbeille ?</h3>' +
+            '<div class="reassigner-recap">' + genererRecapCorbeilleHTML(recap) + '</div>' +
+            '<div class="modal-actions" style="display:flex;gap:8px">' +
+                '<button class="btn btn-danger" id="corbeille-selection-btn-confirmer">Mettre ' + copies + ' à la corbeille</button>' +
+                '<button class="btn btn-secondaire" data-action="fermerOverlayParent">Annuler</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+    document.getElementById('corbeille-selection-btn-confirmer').addEventListener('click', function() {
+        const nb = travauxStockage.deplacerEnCorbeilleLot(recap.aDeplacer.map(c => c.fichierId));
+        overlay.remove();
+        notifications.succes(nb + (nb > 1 ? ' copies mises à la corbeille.' : ' copie mise à la corbeille.'));
+        _rafraichirApresCorbeille();
     });
 }
 
@@ -2037,12 +2185,7 @@ function confirmerSuppressionFichier(fichierId, da) {
     let avertissementReprise = '';
     try {
         const evalsTrim = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-        const prodId = fichier ? fichier.productionId : null;
-        const contexteReprise = prodId && evalsTrim.some(e =>
-            // #360 — un doublon réconcilié porte `remplaceeParId` mais n'est PAS une
-            // reprise : ne pas afficher l'avertissement « lié à une reprise » à tort.
-            e.etudiantDA === da && e.productionId === prodId && (e.repriseDeId || (e.remplaceeParId && !e.reconcilieParDoublon))
-        );
+        const contexteReprise = !!fichier && _travailLieAUneReprise(evalsTrim, da, fichier.productionId);
         if (contexteReprise) {
             avertissementReprise = `
             <p style="margin: 0 0 16px 0; padding: 10px 12px; font-size: 0.85em; background: var(--alerte-fond-attention); color: var(--alerte-texte-attention); border-left: 3px solid var(--alerte-bordure-attention); border-radius: 6px;">
@@ -2084,18 +2227,7 @@ function confirmerSuppressionFichier(fichierId, da) {
         travauxStockage.deplacerEnCorbeille(fichierId);
         overlay.remove();
         notifications.succes(`Fichier de ${nomEtudiant} déplacé à la corbeille.`);
-        if (typeof appliquerFiltres === 'function') {
-            appliquerFiltres();
-        }
-        // Si la vue Archivage est ouverte (suppression depuis un badge fichier),
-        // la rafraîchir aussi pour retirer la carte supprimée.
-        if (typeof travauxUI !== 'undefined' && typeof travauxUI.afficherArchivage === 'function') {
-            const conteneurArchivage = document.getElementById('evaluations-contenu-archivage');
-            if (conteneurArchivage && conteneurArchivage.offsetParent !== null) {
-                travauxUI.afficherArchivage();
-            }
-        }
-        mettreAJourBoutonCorbeille();
+        _rafraichirApresCorbeille();
     };
 }
 
@@ -3180,6 +3312,9 @@ window.mettreAJourSelectionEval = mettreAJourSelectionEval;
 window.basculerToutSelectionnerEval = basculerToutSelectionnerEval;
 window.viderSelectionEval = viderSelectionEval;
 window.reassignerSelectionEval = reassignerSelectionEval;
+window.mettreSelectionALaCorbeille = mettreSelectionALaCorbeille;
+window._composerRecapCorbeille = composerRecapCorbeille;          // sentinelle #1174 (fonction pure)
+window._genererRecapCorbeilleHTML = genererRecapCorbeilleHTML;    // idem
 window._composerRecapReassignation = composerRecapReassignation;     // sentinelle #934 (fonction pure)
 window._genererRecapReassignationHTML = genererRecapReassignationHTML; // idem
 window._trouverFichierDeLigne = trouverFichierDeLigne;               // idem
