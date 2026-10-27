@@ -268,6 +268,9 @@ function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
  *
  * Verrouillé par `tests/unit/sentinelle-542-situer-pourcentage-dans-echelle.test.js`.
  *
+ * ⚠ Compare le pourcentage BRUT ; `niveauDuPourcentage` (evaluation-calcul.js) l'arrondit d'abord à l'entier :
+ * aux bornes, les deux divergent (39,5 % : PS ici, I là-bas). Noté, non aligné (#1152, 27 oct. 2026).
+ *
  * @param {number} pourcentage - Pourcentage sur 0-100 (et non un score 0-1)
  * @param {Object} echelle - Échelle de l'évaluation, avec son tableau `niveaux`
  * @returns {Object|null} - Le niveau atteint (objet complet), ou `null`

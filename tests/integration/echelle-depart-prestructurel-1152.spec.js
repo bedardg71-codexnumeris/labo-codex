@@ -14,10 +14,11 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // VERDICT-RELECTURE-2026-10-27-aide-lot-2b.md, § 4.3 et § 4.4 : « elle vaut 0, elle compte, elle s'affiche ».
 //
 // Le VRAI semis (grille, échelle et cartouche de départ), puis une copie dont tous les critères sont au niveau PS :
-//   · à l'évaluation : la note vaut 0 % (un vrai zéro, pas « -- ») et le niveau global est « PS » ;
+//   · à l'évaluation : la note vaut 0 % (un vrai zéro, pas « -- »), le niveau global est « PS » et chaque critère
+//     montre le commentaire PS de la cartouche ;
 //   · enregistrée et verrouillée : la Liste des évaluations montre 0 % et PS ; la note sommative (P) la compte pour 0 ;
-//     le PDF est construit sur 0 et PS ; et ce que la « Cartouche de départ » donne à lire à ce niveau est relevé
-//     (elle n'a aucun commentaire pour PS : ces mots reviennent à Grégoire, rien n'est écrit ici).
+//     le PDF est construit sur 0 et PS, et chaque critère y porte le commentaire PS de la « Cartouche de départ »
+//     semée dans ce trimestre neuf — les mots de Grégoire (27 oct., 18 h 38 ; seconde retouche, point 2).
 //
 // Données FICTIVES ; lecture de ce que l'application rend, aucun texte d'élève écrit.
 
@@ -61,25 +62,32 @@ test('PS · à l\'évaluation, une copie au niveau Préstructurel vaut 0 % et se
     expect(codes).toEqual(['PS', 'I', 'D', 'M', 'E']);
     const r = await page.evaluate(() => {
         const grille = window.db.getSync('a2026_grillesTemplates', []).find((g) => g.id === 'GRILLE_GENERIQUE');
-        evaluationEnCours = { grilleId: grille.id, echelleId: 'ECHELLE_IDME_DEPART', criteres: {} };
+        evaluationEnCours = { grilleId: grille.id, echelleId: 'ECHELLE_IDME_DEPART', cartoucheId: 'CART_GENERIQUE', criteres: {} };
         window.evaluationEnCours = evaluationEnCours;
         const selEch = document.getElementById('selectEchelle1');
         if (selEch) selEch.value = 'ECHELLE_IDME_DEPART';
         window.afficherCriteresDepuisGrille(grille.id, 'ECHELLE_IDME_DEPART');
         const options = [...document.querySelectorAll('#listeCriteresGrille1 select')][0];
-        grille.criteres.forEach((c) => { evaluationEnCours.criteres[c.id] = 'PS'; });
+        // Le geste du menu : chaque critère au niveau PS, par le gestionnaire réel (`niveauSelectionne`), qui ouvre
+        // la Cartouche de départ au niveau retenu (seconde retouche, point 2).
+        grille.criteres.forEach((c) => { document.getElementById('eval_' + c.id).value = 'PS'; window.niveauSelectionne(c.id); });
         window.calculerNote();
+        const cartouche = window.db.getSync('a2026_cartouches_GRILLE_GENERIQUE', []).find((c) => c.id === 'CART_GENERIQUE');
         return {
             option: options ? [...options.options].map((o) => o.textContent.trim()) : null,
             note: document.getElementById('noteProduction1').textContent,
             niveau: document.getElementById('niveauProduction1').textContent,
-            courante: window.noteCalculeeCourante
+            courante: window.noteCalculeeCourante,
+            commentaires: grille.criteres.map((c) => document.getElementById('comm_' + c.id).textContent.trim()),
+            attendus: grille.criteres.map((c) => cartouche.commentaires[c.id + '_PS'])
         };
     });
     expect(r.option, 'le menu du critère offre le niveau PS').toContain('PS - Préstructurel');
     expect(r.courante, 'un vrai zéro').toBe(0);
     expect(r.note).toBe('0 %');
     expect(r.niveau).toBe('PS');
+    expect(r.attendus.every((t) => typeof t === 'string' && t.length > 0), 'la cartouche a un commentaire PS par critère').toBe(true);
+    expect(r.commentaires, 'le formulaire montre le commentaire PS de la cartouche').toEqual(r.attendus);
     expect(erreurs).toEqual([]);
 });
 
@@ -91,7 +99,9 @@ test('PS · enregistrée : la Liste, la note sommative et le PDF lisent 0 et PS 
             id: 'EV1152', etudiantDA: DA, productionId: 'P1152', groupeCoursId: 'GC1152', grilleId: 'GRILLE_GENERIQUE',
             echelleId: 'ECHELLE_IDME_DEPART', cartoucheId: 'CART_GENERIQUE', statutRemise: 'evalue', statutIntegrite: 'recevable',
             dateEvaluation: '2026-10-27T08:00:00.000Z', noteFinale: 0, niveauFinal: 'PS', verrouillee: true, ponderationCouverte: 100,
-            criteres: criteres.map((c) => ({ critereId: c.id, critereNom: c.nom, niveauSelectionne: 'PS', ponderation: c.ponderation, retroaction: '' })),
+            // Sans `retroaction` : aucun commentaire enregistré, la cartouche répond au niveau retenu (#939 ; un vide
+            // ENREGISTRÉ resterait vide, D6 #960).
+            criteres: criteres.map((c) => ({ critereId: c.id, critereNom: c.nom, niveauSelectionne: 'PS', ponderation: c.ponderation })),
             retroactionFinale: '', retroactionReecrite: false
         }]);   // security-ok: fixture littérale du banc
         window._pdf1152 = [];
@@ -114,7 +124,6 @@ test('PS · enregistrée : la Liste, la note sommative et le PDF lisent 0 et PS 
     const ligne = page.locator('#corps-tableau-evaluations tr', { hasText: 'Travail fictif' }).first();
     await expect(ligne).toBeVisible({ timeout: 15000 });
     const cellules = (await ligne.locator('td').allTextContents()).map((c) => c.replace(/\s+/g, ' ').trim());
-    console.log('1152 · PS · cellules de la Liste :', JSON.stringify(cellules));
     expect(cellules, 'une cellule dit la note, 0 %').toContain('0 %');
     expect(cellules, 'une cellule dit le niveau, PS').toContain('PS');
 
@@ -124,8 +133,12 @@ test('PS · enregistrée : la Liste, la note sommative et le PDF lisent 0 et PS 
     const pdf = await page.evaluate(() => window._feedback1152[window._feedback1152.length - 1]);
     expect([pdf.noteFinale, pdf.niveauFinal]).toEqual([0, 'PS']);
     expect(pdf.criteres.map((c) => c.code)).toEqual(criteres.map(() => 'PS'));
-    // Ce que la Cartouche de départ donne à lire au niveau PS (aucun commentaire n'y est écrit pour ce code) :
-    // relevé pour la demande de relecture, pas fixé ici — ces mots reviennent à Grégoire.
-    console.log('1152 · PS · commentaires de la Cartouche de départ :', JSON.stringify(pdf.criteres.map((c) => c.comment)));
+    // La Cartouche de départ du trimestre neuf donne à chaque critère son commentaire PS (seconde retouche, point 2).
+    const cartouche = await page.evaluate((T) => window.db.getSync(T + '_cartouches_GRILLE_GENERIQUE', [])
+        .find((c) => c.id === 'CART_GENERIQUE'), T);
+    expect(cartouche.niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'M', 'E']);
+    const motsPS = Object.entries(cartouche.commentaires).filter(([k]) => k.endsWith('_PS')).map(([, v]) => v).sort();
+    expect(motsPS).toHaveLength(4);
+    expect(pdf.criteres.map((c) => c.comment).sort(), 'chaque critère du PDF porte son commentaire PS').toEqual(motsPS);
     expect(erreurs).toEqual([]);
 });

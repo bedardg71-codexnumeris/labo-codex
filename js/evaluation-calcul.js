@@ -623,6 +623,11 @@ function _critereFormulePourCalcul(critereId, facteurRecu) {
  * (décision de Cowork, consigne du 19 sept., en ligne avec #701). À égalité, le
  * premier niveau dans l'ordre de l'échelle, comme avant.
  *
+ * ⚠ ARRONDI QUI DIFFÈRE DE `situerPourcentageDansEchelle` (profil-etudiant-helpers.js), qui compare le
+ * pourcentage BRUT : 39,5 % donne « I » ici (arrondi à 40), « PS » là-bas (39,5 ≤ 39,99). Vrai à chaque borne
+ * d'échelle, et depuis avant PS ; sans conséquence observée — noté, non aligné (verdict de la seconde retouche du
+ * lot 2b de l'Aide, 27 oct. 2026, #1152).
+ *
  * @param {number} pourcentage - 0-100, non arrondi
  * @param {Array}  niveaux     - les niveaux de l'échelle (code, min, max)
  * @param {{sansNiveauZero?: boolean}} [options] - le niveau « 0 » (non recevable,

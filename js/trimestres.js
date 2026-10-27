@@ -2056,7 +2056,7 @@
                 meta: {
                     // #908 : la version du code CHARGÉ (version.js, #849) — « 6.0.0-beta95 » était écrit en dur depuis la Beta 95.
                     version_monitorage: typeof window.VERSION_MAJEURE === 'string' ? window.VERSION_MAJEURE : 'inconnue',
-                    version_format: '1.2', // #902 (1.1) : indices_finaux porte null et note_constructible ; #913 (1.2) : resultats_ulterieurs sous chaque élève — ajouts additifs
+                    version_format: '1.3', // #902 (1.1) : indices_finaux porte null et note_constructible ; #913 (1.2) : resultats_ulterieurs sous chaque élève ; #1152 (1.3) : nb_PS dans performance_par_critere — ajouts additifs
                     date_export: new Date().toISOString(),
                     trimestre: {
                         id: trimestre.id,
@@ -2596,6 +2596,11 @@
                     });
 
                     if (evaluationsCritere.length > 0) {
+                        // #1152 (27 oct. 2026) : « PS – Préstructurel » entre en tête de l'Échelle de départ ; sans
+                        // `nb_PS`, une copie PS comptait dans `nb_evaluations` et dans le dénominateur de
+                        // `taux_maitrise`, dans aucun compte. Ajout additif : aucun lecteur dans l'app (fichier pour la
+                        // recherche), un fichier déjà exporté n'a simplement pas la clé.
+                        const nbPS = evaluationsCritere.filter(n => n === 'PS').length;
                         const nbI = evaluationsCritere.filter(n => n === 'I').length;
                         const nbD = evaluationsCritere.filter(n => n === 'D').length;
                         const nbM = evaluationsCritere.filter(n => n === 'M').length;
@@ -2604,6 +2609,7 @@
 
                         perfCriteres[nomNorm] = {
                             nb_evaluations: total,
+                            nb_PS: nbPS,
                             nb_I: nbI,
                             nb_D: nbD,
                             nb_M: nbM,

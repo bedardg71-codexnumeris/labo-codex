@@ -850,8 +850,9 @@ function genererInterpretationPerformance(etudiants, echelle) {
         messages.push(`${dEnProgression.length} ${window.pluriel(dEnProgression.length, 'étudiant·e', 'étudiant·es')} en Développement montrent une progression favorable et pourraient atteindre la maîtrise prochainement`);
     }
 
-    // 3. Parmi les I, combien montrent des progrès (pattern pas difficulté persistante)
-    const niveauI = parNiveau['I'] || [];
+    // 3. Parmi les PS et les I, combien montrent des progrès (pattern pas difficulté persistante)
+    // #1152 (27 oct. 2026) : « PS – Préstructurel » est sous I ; avant lui, ces étudiant·es étaient comptés au niveau I.
+    const niveauI = ['PS', 'I'].flatMap(code => parNiveau[code] || []);
     const iAvecProgres = niveauI.filter(etudiant => {
         const pattern = patterns[etudiant.da];
         return pattern && pattern.pattern !== 'Difficulté persistante';

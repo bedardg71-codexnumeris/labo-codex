@@ -286,7 +286,8 @@ function hexVersRgba(hex, alpha = 0.5) {
             'var(--niveau-attention-critique)': '#dc3545',
             'var(--niveau-attention-modere)': '#fd7e14',
             'var(--niveau-attention-minimal)': '#28a745',
-            'var(--niveau-attention-nul)': '#007bff'
+            'var(--niveau-attention-nul)': '#007bff',
+            'var(--gris-moyen)': '#8aa4b0'   // #1152 : « PS – Préstructurel » (valeur de :root)
         };
         hex = variablesDefaut[hex] || '#888888';
     }
