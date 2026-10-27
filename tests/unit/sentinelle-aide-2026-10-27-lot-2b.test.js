@@ -85,15 +85,16 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
     it('solo : le tableau de l\'« Échelle de départ (IDME) » est l\'échelle que sème js/echelles.js', () => {
         const echelles = lire('js', 'echelles.js');
         expect(echelles).toContain('nom: \'Échelle de départ (IDME)\'');
-        const niveaux = [...echelles.matchAll(/code: '([IDME])',\s*nom: '([^']+)',[\s\S]*?niveauSOLO: '([a-z_]+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/g)]
+        // ↻ Retouche (§ 4.3-4.4 du verdict) : le niveau « PS – Préstructurel » en tête ; le code se lit tel quel (1 à 3 caractères).
+        const niveaux = [...echelles.matchAll(/code: '([A-Z]{1,3})',\s*nom: '([^']+)',[\s\S]*?niveauSOLO: '([a-z_]+)',\s*min: ([\d.]+),\s*max: ([\d.]+),\s*valeurCalcul: ([\d.]+)/g)]
             .map((m) => ({ code: m[1], nom: m[2], solo: m[3], min: Number(m[4]), max: Number(m[5]), valeur: Number(m[6]) }));
-        expect(niveaux.map((n) => n.code)).toEqual(['I', 'D', 'M', 'E']);
+        expect(niveaux.map((n) => n.code)).toEqual(['PS', 'I', 'D', 'M', 'E']);
         const fr = (n) => String(n).replace('.', ',');
-        const SOLO = { unistructurel: 'Unistructurel', multistructurel: 'Multistructurel', relationnel: 'Relationnel', abstrait_etendu: 'Abstrait étendu' };
+        const SOLO = { prestructurel: 'Préstructurel', unistructurel: 'Unistructurel', multistructurel: 'Multistructurel', relationnel: 'Relationnel', abstrait_etendu: 'Abstrait étendu' };
         const attendu = niveaux.map((n, i) => [
             `${n.code} – ${n.nom}`,
             SOLO[n.solo],
-            i === 0 ? `moins de ${fr(niveaux[1].min)} %` : (n.max === 100 ? `${fr(n.min)} % et plus` : `${fr(n.min)} à ${fr(n.max)} %`),
+            n.max === 100 ? `${fr(n.min)} % et plus` : `${fr(n.min)} à ${fr(n.max)} %`,
             fr(n.valeur)
         ]);
         const tableaux = entree('solo').querySelectorAll('table');
@@ -109,11 +110,11 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
     });
 
     it('solo : chaque niveau SOLO porte son icône, dans les deux tableaux ; décorative, le nom la suit (verdict, § 4.2)', () => {
-        const ICONES = { Unistructurel: 'solo-uni-couleur.svg', Multistructurel: 'solo-multi-couleur.svg',
+        const ICONES = { Préstructurel: 'solo-pre-couleur.svg', Unistructurel: 'solo-uni-couleur.svg', Multistructurel: 'solo-multi-couleur.svg',
             Relationnel: 'solo-relationnel-couleur.svg', 'Abstrait étendu': 'solo-etendu-couleur.svg' };
         const tableaux = [...entree('solo').querySelectorAll('table')];
         const cellules = [...tableaux[0].querySelectorAll('tbody tr td:first-child'), ...tableaux[1].querySelectorAll('tbody tr td:nth-child(2)')];
-        expect(cellules).toHaveLength(8);
+        expect(cellules).toHaveLength(10);   // ↻ § 4.3-4.4 : Préstructurel dans les deux tableaux
         for (const td of cellules) {
             const nom = net(td.textContent);
             const img = td.querySelector('img.aide-icone-solo');

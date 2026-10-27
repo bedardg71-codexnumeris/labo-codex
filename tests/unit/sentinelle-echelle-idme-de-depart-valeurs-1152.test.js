@@ -35,13 +35,15 @@ function charger(store) {
 const CLE = 'a2026_echellesTemplates';
 
 describe('Échelle de départ (IDME) · les valeurs ponctuelles de Grégoire, au semis seulement', () => {
-    it('un trimestre neuf reçoit 40 / 65 / 75 / 100 ; bornes, codes, noms, paliers SOLO et couleurs inchangés', async () => {
+    // ↻ 27 oct. 2026 (§ 4.3-4.4) : le cinquième niveau, « PS – Préstructurel », 0 à 39,99 %, valeur 0 ; « I » commence à 40 %.
+    it('un trimestre neuf reçoit PS = 0, puis 40 / 65 / 75 / 100 ; codes, noms, paliers SOLO et couleurs', async () => {
         const store = {};
         await charger(store).assurerEchelleIdmeDeDepart();
         const niveaux = store[CLE][0].niveaux;
-        expect(niveaux.map((n) => [n.code, n.valeurCalcul])).toEqual([['I', 40], ['D', 65], ['M', 75], ['E', 100]]);
+        expect(niveaux.map((n) => [n.code, n.valeurCalcul])).toEqual([['PS', 0], ['I', 40], ['D', 65], ['M', 75], ['E', 100]]);
         expect(niveaux.map((n) => [n.code, n.nom, n.niveauSOLO, n.min, n.max, n.couleur])).toEqual([
-            ['I', 'Incomplet', 'unistructurel', 0, 64.99, 'var(--niveau-attention-critique)'],
+            ['PS', 'Préstructurel', 'prestructurel', 0, 39.99, 'var(--gris-moyen)'],
+            ['I', 'Incomplet', 'unistructurel', 40, 64.99, 'var(--niveau-attention-critique)'],
             ['D', 'Développement', 'multistructurel', 65, 74.99, 'var(--niveau-attention-modere)'],
             ['M', 'Maîtrise', 'relationnel', 75, 84.99, 'var(--niveau-attention-minimal)'],
             ['E', 'Étendu', 'abstrait_etendu', 85, 100, 'var(--niveau-attention-nul)']
