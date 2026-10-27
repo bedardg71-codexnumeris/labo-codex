@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 27 OCTOBRE 2026, MIDI : LA 1.221 EST PRÊTE, PAS ENCORE EN LIGNE** (tes propres calculs, le barème à l'évaluation, la note remise d'une copie verrouillée, la chaîne d'étapes de la Carte d'alignement, la corbeille de la sélection). *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : ce que disent les huit lignes de la 1.221 dans les Nouvelles. Les trois calculs tout faits de « Note calculée » en blocs ; « Retoucher ce calcul » et « Composer ton propre calcul » ; un calcul qui sert à tes phrases et à tes tables sans toucher la note ; la note remise d'une copie verrouillée, et la ligne qui dit si le calcul actuel en donnerait une autre ; les tranches du barème sous chaque critère analytique à l'évaluation ; la chaîne d'étapes de la Carte d'alignement ; « Mettre à la corbeille (N) » dans la Liste des évaluations.
+
+**Ce qui reste à toi** : rien pour cette version. Le toucher sur l'iPad et le zoom du barème à l'évaluation n'ont pas été éprouvés.
+
+**Vérifié comment** : chaque lot a été relu et accepté par Cowork (les verdicts sont dans `plans de travail/`) ; Vitest entier vert (9 943). La vérification complète du navigateur se prend sur ce commit, juste avant la mise en ligne.
+
 📝 **LE 26 OCTOBRE 2026, 18 H 27 : LA 1.220 EST EN LIGNE** (la table de cas, ses deux lots, et le groupe-cours qui naît sans ses élèves). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que décrivent les trois entrées ci-dessous (« Cas d'interprétation » et ses paliers en table, « + Ajouter une table de cas », la question avant de créer un groupe-cours sans élèves). Aucune vérification à faire de ton côté : ni la table de cas ni le groupe-cours n'en demandent.
