@@ -35,3 +35,11 @@ Les huit phrases d'`annoter-evaluer`, d'`irrecevables` et de `preparer-importer`
 ## Clôture
 
 Un commit pour la retouche, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-aide-lot-2c-retouche.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Suite de la retouche 2 (Cowork, 28 oct., 6 h 09)
+
+- **Le défaut, confirmé au code par Cowork** : `js/evaluation-sauvegarde.js:606-607` cherche `select[id^="critere"]` sous `#listeCriteresGrille1`, alors que les menus des critères s'appellent `eval_…` (`js/evaluation-chargement.js:421`) : rien n'est mis à 0, et la copie garde sa note calculée (mesure de Claude Code : 87,5, comptée telle quelle dans P en sommative).
+- **Une nuance à la lecture de Claude Code** (lu, non éprouvé) : en standards, la note du portfolio écarte déjà une copie non recevable (`js/profil-etudiant-actions.js:211-213`, appelée par `calculerDetailsNoteFinale`, `:474`) ; l'indice P de `pratique-pan-standards.js` ne lit que `evaluationEntreDansLaNote`, qui ne regarde pas l'intégrité (`js/pratiques/pratique-registre.js:863-871`).
+- **La règle existe déjà** : décision de Grégoire du 15 oct. 2026, 13 h 47 (`CONSIGNE-LOT-2026-10-15-aide-face-a-l-audit.md:10`) : « Une copie non recevable vaut 0 dans la note, sauf si une reprise la remplace ou si la pratique ne retient que les meilleures productions et qu'elle n'en fait pas partie. » L'Aide dit vrai ; le calcul et le message de l'écran (« Cette évaluation sera exclue des calculs de moyenne. », `js/evaluation-sauvegarde.js:624`) ne la suivent pas. Les deux phrases de l'Aide restent telles quelles.
+- **Ce qui reste à Grégoire** : le stock, les copies non recevables déjà verrouillées de l'automne 2026. Question posée le 28 oct. Le correctif du calcul fera l'objet d'une consigne à part (issue 1 : il touche des notes que des étudiant·es ont en main), écrite après sa réponse.
+- Le reste de la retouche (`2692fd48`) : à relire par Cowork avec ce correctif.
