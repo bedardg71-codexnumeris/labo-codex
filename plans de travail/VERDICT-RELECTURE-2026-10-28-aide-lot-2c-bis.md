@@ -35,3 +35,10 @@ Un commit pour la retouche, un pour les docs ; demande de relecture : `plans de 
 
 - Les quatre textes d'écran du Suivi, inscrits au lot 5 : conformes.
 - Deux vocabulaires pour les niveaux RàI : « Universel, Préventif, Intensif » dans le profil, « Groupe ciblé », « Individuel » dans la fiche d'intervention ; l'Aide recopie chacun là où il paraît. Déjà relevé le 15 oct. ; au lot 5 s'il n'y est pas.
+
+
+## Relecture de la retouche (Cowork, 28 oct., 12 h 44)
+
+> Sur `main` = `81baa318`. Lu : le diff de `967a365f` (`index.html`, la sentinelle du lot).
+
+**Acceptée sans retouche. Le lot 2c bis est clos côté relecture.** La phrase de « Détails » est celle de Grégoire, mot pour mot. La nuance de Claude Code est juste et retenue telle quelle : pour « Suivi » et « RàI 2-3 », l'écran additionne un poids tiré du diagnostic ou du niveau ; « écarts » s'y lit au sens large (ce qui éloigne l'étudiant·e de ce que le filtre attend). Ce sont les mots validés de Grégoire : ils restent.
