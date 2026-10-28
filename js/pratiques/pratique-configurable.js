@@ -346,7 +346,8 @@ class PratiqueConfigurable {
                 const production = productions.find(p => p.id === copie.productionId);
                 if (!production || normaliser(production.titre) !== cible) continue;
                 resultat = this.appliquerDoubleVerrou(
-                    resultat, [{ nom: verrou.condition.evaluation, note: copie.noteFinale }], verrou
+                    // 28 oct. 2026 : une copie non recevable vaut ce que dit le registre (0 par défaut) — le verrou se déclenche.
+                    resultat, [{ nom: verrou.condition.evaluation, note: window.noteRetenueParLeCalcul(copie) }], verrou
                 );
             }
         }

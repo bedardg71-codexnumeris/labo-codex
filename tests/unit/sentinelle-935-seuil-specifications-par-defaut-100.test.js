@@ -13,7 +13,8 @@ function moteur() {
     const win = {
         addEventListener() {}, removeEventListener() {},
         evaluationEntreDansLaNote: () => true,
-        evaluationNonRemise: () => false
+        evaluationNonRemise: () => false,
+        valeurCopieNonRecevable: () => null   // 28 oct. 2026 : les copies de ce banc sont recevables (harnais seulement)
     };
     chargerScript('js/pratiques/pratique-pan-specifications.js', {
         db: { getSync: (k, d) => (d !== undefined ? d : null) }, cle: (k) => k, obtenirDonneesSelonMode: () => []

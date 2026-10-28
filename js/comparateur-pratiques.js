@@ -171,8 +171,7 @@
             if (e.etudiantDA !== da) return false;
             if (e.remplaceeParId) return false;
             if (e.niveauFinal === null || e.niveauFinal === undefined || e.niveauFinal === '') return false;
-            var st = e.statutIntegrite || 'recevable';
-            if (st === 'plagiat' || st === 'ia') return false;
+            if (window.evaluationNonRecevable(e)) return false;   // le prédicat du registre (28 oct. 2026)
             return true;
         }).sort(function(a, b) {
             return new Date(a.dateEvaluation) - new Date(b.dateEvaluation);

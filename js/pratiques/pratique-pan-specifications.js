@@ -793,6 +793,13 @@ class PratiquePanSpecifications {
             return false;
         }
 
+        // 28 oct. 2026 : une copie non recevable vaut ce que dit le registre (par défaut, un travail non satisfaisant),
+        // quelle que soit sa note calculée — et même sous un seuil écrit à 0.
+        const nonRecevable = window.valeurCopieNonRecevable(evaluation);
+        if (nonRecevable) {
+            return nonRecevable.satisfaisante;
+        }
+
         // LOGIQUE BINAIRE : Vérifier toutes les spécifications
         // Pour l'instant, on utilise un seuil simple (sera raffiné avec vraies spécifications)
         // #935 (15 oct. 2026, Grégoire) : sans seuil, 100 % — une copie est satisfaisante quand toutes ses spécifications sont respectées ; un seuil écrit à 0 reste 0.

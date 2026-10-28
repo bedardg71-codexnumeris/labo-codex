@@ -168,23 +168,27 @@ class PratiquePANStandards {
 
         // Filtrer les évaluations de cet étudiant sur les artefacts du pool — #706 : la règle
         // unique du registre (remplacées, sans note, brouillons, portée nulle : hors note).
+        // 28 oct. 2026 : une copie non recevable sort du portfolio (règle par défaut du registre), comme au chemin riche.
         const evaluationsEleve = evaluations.filter(e =>
             e.etudiantDA === da &&
             artefactsIds.includes(e.productionId) &&
-            window.evaluationEntreDansLaNote(e)
+            window.evaluationEntreDansLaNote(e) &&
+            (!window.valeurCopieNonRecevable(e) || window.valeurCopieNonRecevable(e).dansLePortfolio)
         );
 
         if (evaluationsEleve.length === 0) {
             return null;
         }
 
-        // Appliquer la logique de sélection selon la modalité
+        // Appliquer la logique de sélection selon la modalité — triée et sommée sur la note que le calcul retient
+        // (registre, 28 oct. 2026) : un réglage qui garderait la copie non recevable au pool n'aurait rien à changer ici.
+        const noteRetenue = (e) => window.noteRetenueParLeCalcul(e);
         let artefactsRetenus = [];
 
         switch (methodeSelection) {
             case 'meilleurs':
                 // Trier par note décroissante et prendre les N meilleurs
-                evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
+                evaluationsEleve.sort((a, b) => noteRetenue(b) - noteRetenue(a));
                 artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
                 break;
 
@@ -197,7 +201,7 @@ class PratiquePANStandards {
             case 'recents-meilleurs':
                 // Filtrer top 50% par note, puis prendre les N plus récents
                 const nombreMeilleurs = Math.max(1, Math.ceil(evaluationsEleve.length * 0.5));
-                evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
+                evaluationsEleve.sort((a, b) => noteRetenue(b) - noteRetenue(a));
                 const topMeilleurs = evaluationsEleve.slice(0, nombreMeilleurs);
                 topMeilleurs.sort(parRecence);
                 artefactsRetenus = topMeilleurs.slice(0, nombreARetenir);
@@ -210,13 +214,13 @@ class PratiquePANStandards {
 
             default:
                 console.warn(`[PAN] Modalité inconnue: ${methodeSelection}, utilisation de 'meilleurs' par défaut`);
-                evaluationsEleve.sort((a, b) => b.noteFinale - a.noteFinale);
+                evaluationsEleve.sort((a, b) => noteRetenue(b) - noteRetenue(a));
                 artefactsRetenus = evaluationsEleve.slice(0, nombreARetenir);
                 break;
         }
 
         // Calculer la moyenne du pool (N artefacts retenus)
-        const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
+        const somme = artefactsRetenus.reduce((acc, e) => acc + noteRetenue(e), 0);
         const moyennePortfolio = somme / artefactsRetenus.length;
 
         // #394 (D1) : agrégation pool + terminale ALIGNÉE sur le chemin riche.
@@ -261,7 +265,7 @@ class PratiquePANStandards {
 
         const moyennePonderee = (
             (moyennePortfolio * ponderationPortfolio / totalPonderation) +
-            (evalTerminale.noteFinale * ponderationTerminale / totalPonderation)
+            (window.noteRetenueParLeCalcul(evalTerminale) * ponderationTerminale / totalPonderation)   // 28 oct. : non recevable → 0
         );
 
         return moyennePonderee / 100;

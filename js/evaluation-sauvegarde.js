@@ -598,19 +598,15 @@ function changerStatutIntegrite() {
         }
     }
 
-    // Si non recevable (plagiat ou IA), mettre tous les critères à 0 et désactiver
+    // Non recevable (plagiat ou IA) : un avis, et rien d'autre ne change dans le formulaire.
+    // 28 oct. 2026 — LES CRITÈRES GARDENT L'ÉVALUATION DE L'ENSEIGNANT. Ce que vaut la copie dans la note se lit
+    // AU CALCUL, sur le statut (`valeurCopieNonRecevable`, pratique-registre.js) : les menus n'en portent plus la règle.
+    // Le bloc qui les passait à « 0 » est retiré : son sélecteur (`select[id^="critere"]`) ne trouvait aucun menu
+    // (ils s'appellent `eval_…`, evaluation-chargement.js), et une échelle sans niveau « 0 » n'a pas ce choix.
     const estNonRecevable = (statut === 'plagiat' || statut === 'ia');
 
     if (estNonRecevable) {
-        // Récupérer tous les selects de critères
         const listeCriteres = document.getElementById('listeCriteresGrille1');
-        const selectsCriteres = listeCriteres ? listeCriteres.querySelectorAll('select[id^="critere"]') : [];
-
-        selectsCriteres.forEach(select => {
-            select.value = '0'; // Mettre à "0 - Aucun"
-            select.disabled = true; // Désactiver
-            select.style.opacity = '0.5';
-        });
 
         // Afficher un message d'avertissement
         const messageExistant = document.getElementById('message-non-recevable');
@@ -627,19 +623,9 @@ function changerStatutIntegrite() {
             listeCriteres.insertBefore(message, listeCriteres.firstChild);
         }
 
-        // Recalculer la note (qui sera 0)
         // Patch §5.6 — promotion calculerNote vers evaluation-calcul.js (session B 1er sous-module)
         window.calculerNote();
     } else {
-        // Réactiver les selects de critères
-        const listeCriteres = document.getElementById('listeCriteresGrille1');
-        const selectsCriteres = listeCriteres ? listeCriteres.querySelectorAll('select[id^="critere"]') : [];
-
-        selectsCriteres.forEach(select => {
-            select.disabled = false;
-            select.style.opacity = '1';
-        });
-
         // Retirer le message d'avertissement si présent
         const message = document.getElementById('message-non-recevable');
         if (message) {
