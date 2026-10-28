@@ -32,6 +32,7 @@ Restent ouverts, sans changement : la consigne `CONSIGNE-LOT-2026-10-24-correcti
 
 - **Lots 2a et 2b en ligne en 1.222.0** (27 oct., 20 h 44 ; `6cc9ed30`), avec le niveau « PS – Préstructurel » de l'Échelle de départ (seconde retouche `9b55e8ec`, `VERDICT-RELECTURE-2026-10-27-aide-lot-2b-retouche-2.md`).
 - **Découpage (décision de Cowork)** : l'ancien 2c pèse 6 611 mots en 19 entrées. **2c, l'Évaluation** (6 entrées, 1 956 mots) : `CONSIGNE-LOT-2026-10-28-aide-lot-2c-evaluation.md`, qui attend que Grégoire la lance. **2c bis, le Suivi** (13 entrées, 4 655 mots) : consigne à écrire, avec la question « Incomplet » (le niveau I et le statut d'une copie) à soumettre à Grégoire. Le lot 2d garde son nom.
+- **2c : codé, en relecture** (28 oct., Claude Code) : `DEMANDE-RELECTURE-2026-10-28-aide-lot-2c.md`. Non poussé, pas de release.
 
 ## Ce que l'utilisateur verra à la fin
 
