@@ -76,11 +76,18 @@ const NEUVES_2A = ['bibliotheque', 'chaines-etapes'];
 // CONSIGNE-LOT-2026-10-27-aide-lot-2b-conception.md, §2, entrée 9). `idme` est absorbée par `solo`. Le détail est
 // vérifié par sentinelle-aide-2026-10-27-lot-2b.test.js.
 const ABSORBEES_2B = ['idme'];
+// ↻ #1152, lot 2c (28 oct. 2026) : l'Évaluation prend sa forme finale (audit du 24 oct., verdict final
+// d'`evaluer-productions` : « Fusionner dans « Annoter et évaluer un travail » » ; remesure du 27 oct., geste neuf n° 7 ;
+// consigne CONSIGNE-LOT-2026-10-28-aide-lot-2c-evaluation.md, §2, entrées 1 et 3). `evaluer-productions` est absorbée
+// par `annoter-evaluer` ; la Liste des évaluations, sans entrée, en reçoit une, `liste-evaluations`, en tête. Le détail
+// est vérifié par sentinelle-aide-2026-10-28-lot-2c.test.js.
+const ABSORBEES_2C = ['evaluer-productions'];
+const NEUVES_2C = ['liste-evaluations'];
 const PLACES = {
     commencer: ['presentation', 'prise-en-main', 'demo', 'modes', 'bibliotheque', 'chaines-etapes', 'preferences'],
     cadre: ['etapes-config', 'cours', 'horaire', 'etudiants', 'presences-calendrier', 'archivage'],
     conception: ['pratique', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme', 'sous-criteres', 'creer-echelles', 'solo', 'creer-cartouches'],
-    evaluation: ['preparer-importer', 'annoter-evaluer', 'evaluer-productions', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
+    evaluation: ['liste-evaluations', 'preparer-importer', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
     suivi: ['saisie-presences', 'tableau-bord', 'profil-etudiant', 'guide-profil', 'acp', 'diagnostics', 'rai', 'suivi-apprentissage', 'patterns', 'planifier-rai', 'rai-absences', 'snapshots', 'tirage-sort'],
     labo: ['labo', 'modelisation', 'pan', 'grille-depistage', 'criteres', 'rai-solo', 'bilan-reflexif'],
     'codex-archives': ['codex', 'export-import', 'partage', 'collaboration'],
@@ -89,12 +96,13 @@ const PLACES = {
 const GARDEES = Object.values(PLACES).flat();
 
 describe('#1152 lot 1 · la forme de l\'Aide', () => {
-    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée', () => {
+    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée ; au lot 2c, 1 absorbée et 1 neuve', () => {
         expect(ONGLETS).toHaveLength(8);
         expect(Object.keys(PLACES)).toEqual(ONGLETS.map((o) => o.id));
         expect(COUPEES).toHaveLength(14);
-        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length);
-        expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES_2A.includes(id)), ...ABSORBEES_2A, ...ABSORBEES_2B]).size).toBe(75);
+        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length - ABSORBEES_2C.length + NEUVES_2C.length);
+        const NEUVES = [...NEUVES_2A, ...NEUVES_2C];
+        expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES.includes(id)), ...ABSORBEES_2A, ...ABSORBEES_2B, ...ABSORBEES_2C]).size).toBe(75);
     });
 
     it('les huit sous-sections, dans l\'ordre, ont les ids et les titres du tableau \'aide\' de config.js', () => {
