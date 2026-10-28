@@ -21,3 +21,9 @@
 **Validés par Grégoire le 28 oct. 2026 à 13 h 14** (« on garde »), mot pour mot, tels que la demande de relecture les donne : le titre « Glossaire du parcours » et les deux phrases de `pan` (« Une pratique alternative de notation laisse le droit à l'erreur sans pénalité sur la note finale, par des occasions multiples de démontrer sa compétence, et compose cette note à partir des traces les plus récentes ou les plus représentatives. » ; « Deux pratiques de la même famille peuvent y répondre différemment : c'est là que se lit une pratique, plus que dans son étiquette. »). Rien à changer dans ces textes ; note la validation dans le commentaire HTML des deux entrées.
 
 Un commit pour la retouche, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-aide-lot-2d-retouche.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la retouche (Cowork, 28 oct., 13 h 36)
+
+> Sur `main` = `ad56f6f8`. Lu : le diff de `69383dec` ; « A, C, M » ne paraît plus dans `index.html`, « seuils des indices A et C » une fois.
+
+**Acceptée sans retouche. Le lot 2d est clos côté relecture : les huit parties de l'Aide disent l'écran d'aujourd'hui.** La supposition (« les deux entrées » = `pan` et `glossaire`) est la bonne.
