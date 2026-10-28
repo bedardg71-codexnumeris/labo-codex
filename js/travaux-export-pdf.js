@@ -967,6 +967,52 @@
        =============================== */
 
     /**
+     * Les lignes « Note » / « Niveau » de l'aperçu de révision : ce que dira le PDF. Extraites d'`afficherRevisionExport`
+     * le 28 oct. 2026, quand une copie non recevable y a reçu son libellé au lieu de sa note (décision de Grégoire).
+     * @returns {string} HTML, valeurs échappées
+     */
+    function _lignesNoteApercu(evaluation) {
+        let lignes = '';
+        // Respecter le mode d'affichage de la note (lettre vs complet)
+        // Priorité : évaluation sauvegardée > pratique active > défaut
+        let modeNotePreview = 'complet';
+        if (evaluation.optionsAffichage?.affichageNote) {
+            modeNotePreview = evaluation.optionsAffichage.affichageNote;
+        } else {
+            try {
+                // Lot N1b (21 sept. 2026) : l'entrée de bibliothèque que rend LA désignation — par son id,
+                // jamais « la première pratique du même type ». Sans pratique assignée : note complète.
+                const pActive = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive().donnees : null;
+                if (pActive?.affichageNote === 'lettre') modeNotePreview = 'lettre';
+            } catch(e) { console.warn('[PDF-Export] pratique affichageNote preview fallback:', e.message || e); }
+        }
+
+        // #941 lot S1 (décision A) — une copie en points : sa note, jamais un niveau.
+        const enPointsPreview = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
+        // 28 oct. 2026 — l'aperçu dit ce que dira le PDF : une copie non recevable, son libellé au lieu de sa note.
+        const nonRecevablePreview = typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(evaluation);
+        if (nonRecevablePreview) {
+            lignes += `<p><strong>Note :</strong> ${echapperHtml(nonRecevablePreview)}</p>`;
+        } else if (enPointsPreview) {
+            if (evaluation.noteFinale != null) {
+                lignes += `<p><strong>Note :</strong> ${formaterNotePourcentage(evaluation.noteFinale)}</p>`;
+            }
+        } else if (modeNotePreview === 'lettre') {
+            if (evaluation.niveauFinal) {
+                lignes += `<p><strong>Niveau de performance :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
+            }
+        } else {
+            if (evaluation.noteFinale != null) {
+                lignes += `<p><strong>Note :</strong> ${formaterNotePourcentage(evaluation.noteFinale)}</p>`;
+            }
+            if (evaluation.niveauFinal) {
+                lignes += `<p><strong>Niveau :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
+            }
+        }
+        return lignes;
+    }
+
+    /**
      * Affiche un modal de revision avant export
      * @param {string} fichierId - ID du fichier
      */
@@ -1034,38 +1080,7 @@
                 html += '</ul>';
             }
 
-            // Respecter le mode d'affichage de la note (lettre vs complet)
-            // Priorité : évaluation sauvegardée > pratique active > défaut
-            let modeNotePreview = 'complet';
-            if (evaluation.optionsAffichage?.affichageNote) {
-                modeNotePreview = evaluation.optionsAffichage.affichageNote;
-            } else {
-                try {
-                    // Lot N1b (21 sept. 2026) : l'entrée de bibliothèque que rend LA désignation — par son id,
-                    // jamais « la première pratique du même type ». Sans pratique assignée : note complète.
-                    const pActive = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive().donnees : null;
-                    if (pActive?.affichageNote === 'lettre') modeNotePreview = 'lettre';
-                } catch(e) { console.warn('[PDF-Export] pratique affichageNote preview fallback:', e.message || e); }
-            }
-
-            // #941 lot S1 (décision A) — une copie en points : sa note, jamais un niveau.
-            const enPointsPreview = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
-            if (enPointsPreview) {
-                if (evaluation.noteFinale != null) {
-                    html += `<p><strong>Note :</strong> ${formaterNotePourcentage(evaluation.noteFinale)}</p>`;
-                }
-            } else if (modeNotePreview === 'lettre') {
-                if (evaluation.niveauFinal) {
-                    html += `<p><strong>Niveau de performance :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
-                }
-            } else {
-                if (evaluation.noteFinale != null) {
-                    html += `<p><strong>Note :</strong> ${formaterNotePourcentage(evaluation.noteFinale)}</p>`;
-                }
-                if (evaluation.niveauFinal) {
-                    html += `<p><strong>Niveau :</strong> ${echapperHtml(evaluation.niveauFinal)}</p>`;
-                }
-            }
+            html += _lignesNoteApercu(evaluation);   // 28 oct. 2026 : extraites (une copie non recevable, son libellé)
 
             html += '</div>';
         } else {

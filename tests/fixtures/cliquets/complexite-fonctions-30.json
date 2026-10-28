@@ -137,8 +137,7 @@
  },
  "js/travaux-export-pdf.js": {
   "dessinerAnnotationsSurCtx": 32,
-  "dessinerForme": 46,
-  "afficherRevisionExport": 34
+  "dessinerForme": 46
  },
  "js/travaux-import.js": {
   "importerFichier": 39

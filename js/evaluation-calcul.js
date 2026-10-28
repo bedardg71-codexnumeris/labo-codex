@@ -1818,6 +1818,15 @@ function _montrerNiveauEcran(montrer) {
     if (bloc) bloc.classList.toggle('u-hide', !montrer);
 }
 
+/**
+ * L'encadré de la note prend la couleur du niveau seulement s'il AFFICHE ce niveau : pas de niveau (« -- »), pas
+ * en points (#941 lot S1), pas pour une copie non recevable (28 oct. 2026, `afficherCopieNonRecevable`).
+ */
+function _niveauColorable(niveauGlobal, enPoints) {
+    const nonRecevable = typeof libelleCopieNonRecevable === 'function' && !!libelleCopieNonRecevable(evaluationEnCours);
+    return niveauGlobal !== '--' && !enPoints && !nonRecevable;
+}
+
 function calculerNote() {
     if (!evaluationEnCours) return;
     window.porteeCalculeeCourante = null;   // #674 — inconnue tant qu'elle n'est pas calculée
@@ -1969,7 +1978,7 @@ function calculerNote() {
 
     // Colorer l'encadré de la note finale selon le niveau
     const noteContainer = document.getElementById('noteProduction1').closest('div[style*="background"]');
-    if (noteContainer && niveauGlobal !== '--' && !enPoints) {   // #941 lot S1 : pas la couleur d'un niveau non affiché
+    if (noteContainer && _niveauColorable(niveauGlobal, enPoints)) {
         const couleur = obtenirCouleurNiveau(niveauGlobal);
         if (couleur && couleur !== 'transparent') {
             noteContainer.style.background = couleur + '20'; // 20% opacité

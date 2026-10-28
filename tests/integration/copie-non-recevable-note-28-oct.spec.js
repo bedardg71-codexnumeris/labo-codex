@@ -13,6 +13,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · la base : la copie garde 87,5, verrouillée, « plagiat » ;
 //   · le calcul : P = (0 × 40 + 95 × 60) / 100 = 57 (avant le correctif : (87,5 × 40 + 95 × 60) / 100 = 92) ;
 //   · ce que voient l'enseignant et l'élève (la Liste, le PDF) est MESURÉ et journalisé, pas changé (§ 2.4).
+//   ↻ RETOUCHE (verdict du 28 oct., décision 1 de Grégoire, 6 h 46) : sur le formulaire et le PDF, la note et les niveaux
+//     cèdent leur place à « Non recevable (Plagiat) » ; la rétroaction écrite reste ; la base n'est pas touchée.
 // Noms fictifs.
 
 const T = 't1028';
@@ -45,6 +47,15 @@ const MONTER = `({ T }) => {
     window.db.setSync('groupeCoursActif', { id: 'GC1028', trimestreId: T });
     window._pdf1028 = [];
     window._feedback1028 = [];
+    window._html1028 = [];
+    const rendre = window.syntheseRetroactionRendu.rendreSyntheseHTML;
+    window.syntheseRetroactionRendu.rendreSyntheseHTML = function () {
+        const html = rendre.apply(this, arguments);
+        const d = document.createElement('div');
+        d.innerHTML = html;   // security-ok: HTML produit par le module de rendu, lu en texte par le banc
+        window._html1028.push(d.textContent.replace(/\s+/g, ' '));
+        return html;
+    };
     window.jspdf.jsPDF.API.save = function (nom) { window._pdf1028.push(nom); return this; };
     const construire = window.syntheseRetroactionData.construireFeedback;
     window.syntheseRetroactionData.construireFeedback = function (evaluation) {
@@ -127,10 +138,14 @@ test('sommative · « Non recevable (Plagiat) » puis verrouillée : les critèr
     await attendreRepos(page);
     const ecran = await page.evaluate(() => {
         const t = (id) => { const el = document.getElementById(id); return el ? el.textContent.replace(/\s+/g, ' ').trim() : null; };
-        return { note: t('noteProduction1'), niveau: t('niveauProduction1'), ligneRemise: t('noteRemise1') };
+        const vu = (id) => { const el = document.getElementById(id); return !!(el && el.offsetParent !== null && getComputedStyle(el).display !== 'none'); };
+        return { note: t('noteProduction1'), niveau: t('niveauProduction1'), ligneRemise: t('noteRemise1'), libelle: t('libelleNonRecevable1'),
+            vus: { note: vu('noteProduction1'), niveau: vu('niveauProduction1'), libelle: vu('libelleNonRecevable1') } };
     });
     // eslint-disable-next-line no-console
     console.log('1028 · le formulaire, verrouillée :', JSON.stringify(ecran));
+    expect(ecran.vus, 'la note et le niveau cèdent leur place au libellé').toEqual({ note: false, niveau: false, libelle: true });
+    expect(ecran.libelle).toBe('Non recevable (Plagiat)');
 
     await page.evaluate(() => window.travauxExportPDF.exporterDossierComplet('1028001', 'P1'));
     await expect.poll(() => page.evaluate(() => window._pdf1028.length)).toBe(1);
@@ -138,6 +153,10 @@ test('sommative · « Non recevable (Plagiat) » puis verrouillée : les critèr
     // eslint-disable-next-line no-console
     console.log('1028 · le PDF de l’élève :', JSON.stringify(pdf));
     expect(pdf.statutIntegrite).toBe('plagiat');
+    const textePdf = await page.evaluate(() => window._html1028[window._html1028.length - 1]);
+    expect(textePdf).toContain('Non recevable (Plagiat)');
+    expect(textePdf, 'ni sa note').not.toMatch(/87[,.]5/);
+    expect(textePdf, 'ni son niveau général').not.toMatch(/Niveau général · /i);
 
     expect(await copieEnBase(page), 'rien n’a réécrit la copie').toEqual(base);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
