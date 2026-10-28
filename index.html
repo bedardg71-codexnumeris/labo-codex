@@ -10561,7 +10561,27 @@
                 <div id="aide-evaluation" class="sous-section">
                     <h2>Évaluation</h2>
 
-                    <!-- Carte: Préparer et importer les travaux -->
+                    <!-- Carte: La liste des évaluations (#1152, lot 2c, 28 oct. 2026 : entrée neuve ; remesure du 27 oct., gestes neufs n° 7 ;
+                         libellés lus dans index.html et js/liste-evaluations.js). -->
+                    <div class="carte accordeon" id="accordeon-aide-liste-evaluations">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> La liste des évaluations
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Évaluation → Liste des évaluations</p>
+
+                            <p>Une rangée par copie attendue. «&nbsp;Statut&nbsp;» porte sa pastille, de «&nbsp;Non reçu&nbsp;» à «&nbsp;Évalué&nbsp;»&nbsp;; une copie «&nbsp;Non verrouillée&nbsp;» ne compte pas encore dans la note. «&nbsp;Jeton&nbsp;» porte les badges des jetons et de l'intégrité. Le filtre «&nbsp;Statut&nbsp;» isole aussi les jetons.</p>
+
+                            <p>Le menu «&nbsp;Actions&nbsp;» d'une rangée n'offre que ce que la copie permet&nbsp;: «&nbsp;Évaluer&nbsp;», «&nbsp;Annoter&nbsp;», «&nbsp;Consulter&nbsp;», «&nbsp;Modifier&nbsp;» (l'éditeur de pages)… «&nbsp;Réassigner&nbsp;» ouvre les «&nbsp;Propriétés du fichier&nbsp;»&nbsp;: l'étudiant·e, la production et l'évaluation de la copie.</p>
+
+                            <p>«&nbsp;Supprimer&nbsp;», sur une rangée, ou «&nbsp;Mettre à la corbeille (N)&nbsp;», sur les rangées cochées, envoie les copies à la corbeille, après une question. «&nbsp;Corbeille (N)&nbsp;», près des filtres, les montre&nbsp;: elles s'y restaurent pendant 30 jours.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Préparer et importer les travaux (#1152, lot 2c, 28 oct. 2026 : corrigée et resserrée ; audit du 24 oct.,
+                         remesure du 27 oct. Le paragraphe des remises en plusieurs fichiers reste mot pour mot, sentinelle-878). -->
                     <div class="carte accordeon" id="accordeon-aide-preparer-importer">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -10571,47 +10591,30 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Évaluation → Préparer et importer</p>
 
-                            <p>Ce module te permet d'importer les productions étudiantes avant de les annoter et les évaluer.</p>
-
                             <p><strong>1. Déposer les fichiers :</strong></p>
                             <ul>
-                                <li><strong>Zone de dépôt (glisser-déposer)</strong> : Glisse tes fichiers directement dans la zone prévue</li>
-                                <li><strong>Formats acceptés</strong> : PDF, JPEG, PNG, WebP</li>
-                                <li><strong>Photos d'iPhone (HEIC)</strong> : à convertir en JPEG avant l'import. Ouverte directement depuis le disque, l'application ne peut pas décoder ce format — elle te le dira plutôt que de laisser passer une page vide.</li>
-                                <li>Tu peux aussi cliquer sur la zone pour ouvrir le sélecteur de fichiers</li>
+                                <li>Glisse tes fichiers dans la zone «&nbsp;Sélection des fichiers&nbsp;», ou clique-la&nbsp;; elle dit les formats qu'elle lit.</li>
+                                <li><strong>Photos d'iPhone (HEIC)</strong> : en ligne, elles se décodent. Ouverte directement depuis le disque, l'application ne le peut pas et te le dit&nbsp;: convertis-les en JPEG.</li>
                             </ul>
                             <p><strong>Une remise en plusieurs fichiers</strong> : pour que les pages s'assemblent en un seul document, numérote-les à la fin du nom — <code>-p1</code>, <code>-p2</code>… (ou <code>_p 2</code>, <code>page 2</code>, <code>partie 2</code>, <code>part2</code>, <code>(2)</code>). Une lettre — <code>Artefact_1a</code>, <code>1b</code> — crée une AUTRE production : tu obtiens plusieurs documents et des doublons à la confirmation.</p>
 
-                            <p><strong>2. Traitement en 2 étapes :</strong></p>
-                            <ol>
-                                <li><strong>Sélection</strong> : Choisis les fichiers à importer</li>
-                                <li><strong>Optimisation</strong> : Le système ajuste automatiquement la balance des blancs, le DPI, détecte les doublons et assemble les pages multiples</li>
-                            </ol>
+                            <p><strong>2. Optimiser et associer :</strong></p>
+                            <p>À l'étape «&nbsp;Optimisation&nbsp;», «&nbsp;LEA&nbsp;» remplit l'étudiant·e, la production et la date d'après le nom du fichier de Léa&nbsp;; «&nbsp;Autre&nbsp;» te les fait choisir. Les doublons sont repérés, les pages assemblées&nbsp;; «&nbsp;Importer&nbsp;» range les copies.</p>
 
-                            <p><strong>3. Deux modes d'import :</strong></p>
-                            <ul>
-                                <li><strong>Mode Léa</strong> : Extraction automatique du DA, de la production et de la date depuis le nom de fichier (format Léa standard)</li>
-                                <li><strong>Mode Libre</strong> : Nomme librement tes fichiers — idéal pour les travaux hors plateforme</li>
-                            </ul>
+                            <p><strong>3. Suivre les copies :</strong> dans Annoter et évaluer, chaque copie porte une pastille, «&nbsp;Importé&nbsp;», «&nbsp;Annoté&nbsp;» ou «&nbsp;Évalué&nbsp;»&nbsp;; «&nbsp;Incomplet&nbsp;» passe avant les trois.</p>
 
-                            <p><strong>4. Suivi des badges :</strong></p>
-                            <p>Chaque travail importé affiche un badge de statut couleur :</p>
-                            <ul>
-                                <li><strong>En cours</strong> — Import complété, en attente d'annotation</li>
-                                <li><strong>Annoté</strong> — Des annotations ont été ajoutées</li>
-                                <li><strong>Évalué</strong> — L'évaluation est complète</li>
-                            </ul>
-
-                            <p><strong>5. Modifier un document :</strong></p>
-                            <p>Avant d'annoter, tu peux réordonner ou supprimer des pages depuis la zone « Modifier un document ».</p>
+                            <p><strong>4. Modifier les pages :</strong> l'éditeur de pages s'ouvre par «&nbsp;Actions ▾ › Modifier&nbsp;» dans Annoter et évaluer, ou par «&nbsp;Modifier&nbsp;» dans le menu d'une rangée de la Liste des évaluations.</p>
 
                             <div class="alerte alerte-information">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Stockage :</strong> Les fichiers s'enregistrent automatiquement dans l'application. Sur Mac, ils peuvent aussi être rangés directement sur ton disque.
+                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Stockage :</strong> Selon le navigateur, «&nbsp;Configurer le stockage sur disque&nbsp;» range aussi les copies dans un dossier de ton ordinateur&nbsp;; ni Safari, ni Firefox, ni une tablette ne l'offrent.
                             </div>
                         </div>
                     </div>
 
-                    <!-- Carte: Annoter et évaluer un travail -->
+                    <!-- Carte: Annoter et évaluer un travail (#1152, lot 2c, 28 oct. 2026 : corrigée ; absorbe « Évaluer les productions »,
+                         dont seule la phrase sur C et P passe ; gestes neufs n° 5 et 6 de la remesure du 27 oct. ; le geste du barème
+                         dans les mots de TEXTES-2026-10-27-bareme-evaluation.md, H1 à H4, validés le 27 oct. ; la pastille « Évalué »
+                         mesurée à l'écran le 28 oct. : un niveau posé, sans verrou, suffit). -->
                     <div class="carte accordeon" id="accordeon-aide-annoter-evaluer">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -10621,28 +10624,16 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Évaluation → Annoter et évaluer</p>
 
-                            <p>Ce module combine l'annotation visuelle et l'évaluation critériée dans une seule interface.</p>
-
-                            <p><strong>Ouvrir un travail :</strong></p>
-                            <p>Clique sur un badge dans la grille pour ouvrir le document dans la visionneuse.</p>
-
-                            <p><strong>Barre d'outils :</strong></p>
-                            <ul>
-                                <li><strong>Navigation</strong> : Boutons page précédente/suivante pour parcourir le document</li>
-                                <li><strong>Zoom</strong> : Préréglages Largeur, Hauteur, 100&nbsp;%, Recentrer</li>
-                            </ul>
+                            <p>«&nbsp;Annoter&nbsp;», dans le tableau des copies, ouvre la visionneuse&nbsp;; «&nbsp;Actions ▾&nbsp;» passe d'«&nbsp;Annoter&nbsp;» à «&nbsp;Évaluer&nbsp;». À côté de «&nbsp;100&nbsp;%&nbsp;», un bouton passe en plein écran.</p>
 
                             <div class="carte-gradient-bleu">
                                 <h4 class="u-mb-10 u-texte-bleu">✏️ Mode Annoter</h4>
-                                <p>La palette flottante offre les outils suivants :</p>
                                 <ul>
-                                    <li><strong>Crayon</strong> — Dessin libre sur le document</li>
-                                    <li><strong>Surlignage</strong> — Mettre en évidence un passage</li>
-                                    <li><strong>Symboles</strong> — Insérer ✓, ✗, !, → directement sur la page</li>
-                                    <li><strong>Codes</strong> — Poser sur la copie un code numéroté qui identifie un élément du travail et le rattache à un sous-critère de la grille : le code 3 posé sur un passage, c'est le sous-critère 3 de ton critère algorithmique, compté et nommé comme tu l'as défini. Sans réglage, la palette offre dix codes de départ, réglables par « Personnaliser » ; dès que la grille de la production a coché « Utiliser ces sous-critères comme codes d'annotation », la palette montre tes sous-critères, et numéro, nom, couleur et rétroaction viennent de la grille</li>
-                                    <li><strong>Texte</strong> — Ajouter un commentaire textuel</li>
-                                    <li><strong>Autocollants</strong> — Appliquer des marqueurs visuels prédéfinis</li>
-                                    <li><strong>Effacer</strong> — Outil Sélection, toucher l'annotation (ou l'entourer d'un rectangle), puis la corbeille en haut de la palette</li>
+                                    <li><strong>Outils</strong> — «&nbsp;Sélection&nbsp;», «&nbsp;Stylo&nbsp;», «&nbsp;Surligneur&nbsp;», «&nbsp;Texte&nbsp;»</li>
+                                    <li><strong>Formes</strong> — «&nbsp;Cercle&nbsp;», «&nbsp;Rectangle&nbsp;», «&nbsp;Ligne&nbsp;», «&nbsp;Pointillé&nbsp;», «&nbsp;Vague&nbsp;»</li>
+                                    <li><strong>Codes</strong> — Les sous-critères d'un critère algorithmique sont ses codes d'office (la case «&nbsp;Utiliser ces sous-critères comme codes d'annotation&nbsp;» ne reste que sur les critères plus anciens)&nbsp;; avec deux critères algorithmiques, les codes vont au premier (voir «&nbsp;Les critères algorithmiques&nbsp;»). Sans eux, la palette offre dix codes de départ, réglables par «&nbsp;Personnaliser&nbsp;».</li>
+                                    <li><strong>Tampons</strong> — Dont les symboles «&nbsp;Crochet&nbsp;» ✔, «&nbsp;Croix&nbsp;» ✘ et «&nbsp;Interrogation&nbsp;» ?&nbsp;; leur bibliothèque&nbsp;: voir «&nbsp;La bibliothèque&nbsp;».</li>
+                                    <li><strong>Effacer</strong> — Avec «&nbsp;Sélection&nbsp;», touche l'annotation (ou entoure-la), puis la corbeille en haut de la palette</li>
                                     <li><strong>Annuler/Rétablir</strong> — Ctrl+Z / Ctrl+Y</li>
                                 </ul>
                             </div>
@@ -10650,137 +10641,62 @@
                             <div class="carte-gradient-bleu">
                                 <h4 class="u-mb-10 u-texte-bleu"><img src="icons/icon-combo-chart.svg" alt="" class="btn-inline-icon"> Mode Évaluer — 3 panneaux</h4>
                                 <ul>
-                                    <li><strong>Panneau Paramètres</strong> (gauche) : Identité de l'étudiant·e, sélection de la grille/échelle/cartouche, statut d'intégrité, gestion des jetons</li>
-                                    <li><strong>Panneau Critères</strong> (droite) : Attribue un score par critère — la note finale et le niveau se calculent automatiquement</li>
-                                    <li><strong>Panneau Rétroaction</strong> (bas) : Commentaire auto-généré depuis la matrice de la cartouche, avec options d'affichage et bouton copier dans le presse-papiers</li>
+                                    <li><strong>Panneau Paramètres</strong> (gauche) : la copie, la grille, l'échelle, la cartouche, l'«&nbsp;Intégrité académique&nbsp;» et les jetons (voir «&nbsp;Utiliser les jetons&nbsp;»). Cochée, «&nbsp;Incomplet ; travail en cours&nbsp;» met la copie de côté, sans note ni jeton, et elle garde sa pastille «&nbsp;Incomplet&nbsp;»&nbsp;: voir «&nbsp;Copies non remises, non recevables, soupçonnées ou incomplètes&nbsp;».</li>
+                                    <li><strong>Panneau Critères</strong> (droite) : un niveau par critère, et la note se calcule. Sous un critère à barème, touche la tranche qui décrit la copie, puis ses points, ou passe par «&nbsp;Ou tape les points :&nbsp;». Des points qu'aucune tranche ne couvre portent «&nbsp;hors barème&nbsp;»&nbsp;; une tranche «&nbsp;à compléter&nbsp;» n'a pas encore de points. Ce que lit l'étudiant·e&nbsp;: voir «&nbsp;Le barème d’un critère analytique&nbsp;».</li>
+                                    <li><strong>Panneau Rétroaction</strong> (bas) : composée depuis la cartouche, retouchable.</li>
                                 </ul>
                             </div>
 
+                            <p>La complétion (C) et la performance (P) viennent de tes évaluations&nbsp;: la pratique de notation active les calcule.</p>
+
                             <p><strong>Enregistrer et verrouiller :</strong></p>
-                            <p>Ton évaluation s'enregistre toute seule pendant que tu évalues&nbsp;; le témoin «&nbsp;Enregistré&nbsp;» le dit. Quand elle est prête, clique sur <strong>Verrouiller l'évaluation</strong> (ou sur le cadenas&nbsp;; ce bouton est aussi dans la palette Annotation)&nbsp;: elle compte alors dans la note, et le badge de l'étudiant·e passe au statut «&nbsp;Évalué&nbsp;». Une évaluation non verrouillée ne compte pas encore dans la note&nbsp;; la Liste des évaluations la dit «&nbsp;Non verrouillée&nbsp;». Pour la corriger ensuite, déverrouille-la.</p>
-
-                            <div class="alerte alerte-succes">
-                                <strong>✅ Bon à savoir :</strong> La rétroaction se compose automatiquement à partir de la cartouche liée. Tu peux la personnaliser avant de verrouiller.
-                            </div>
+                            <p>L'évaluation s'enregistre toute seule (témoin «&nbsp;Enregistré&nbsp;»). Dès qu'un critère porte un niveau, la copie se dit «&nbsp;Évalué&nbsp;» ici, «&nbsp;Non verrouillée&nbsp;» dans la Liste des évaluations&nbsp;: elle ne compte pas encore dans la note. <strong>Verrouiller l'évaluation</strong> (ou le cadenas) l'y fait entrer&nbsp;; ce bouton est aussi dans la palette Annotation, caché tant que la copie n'a pas d'évaluation.</p>
+                            <p>Verrouillée, la copie montre la note remise, et la ligne «&nbsp;Note remise : … Avec le calcul actuel de la grille, elle serait de …&nbsp;» si le calcul actuel en donnerait une autre. Pour la corriger, déverrouille-la&nbsp;: elle montre la note du calcul actuel, et rien ne s'enregistre avant ton premier geste.</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Évaluer les productions -->
-                    <div class="carte accordeon border-left-succes" id="accordeon-aide-evaluer-productions">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Évaluer les productions
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Évaluation → Annoter et évaluer</p>
-                            <p class="text-succes-bold">C'est de tes évaluations que viennent la complétion (C) et la performance (P) : les autres écrans les lisent sans les recalculer.</p>
-
-                        <p><strong>Processus d'évaluation :</strong></p>
-                        <ol class="lh-relaxed">
-                            <li><strong>Lecture et annotation</strong> : Lire le travail de l'étudiant·e</li>
-                            <li><strong>Attribution des notes</strong> : noter selon les critères de ta grille</li>
-                            <li><strong>Comptage erreurs</strong> : Saisir le nombre d'erreurs linguistiques</li>
-                            <li><strong>Confirmation mots</strong> : Vérifier le nombre de mots</li>
-                            <li><strong>Diagnostic automatique</strong> : Observer forces/défis/parcours</li>
-                            <li><strong>Rétroaction personnalisée</strong> : Basée sur les diagnostics</li>
-                        </ol>
-
-                        <p><strong>Temps estimé :</strong> 15-30 min par production (selon complexité)</p>
-
-                        <div class="alerte alerte-succes">
-                            <strong>Génération automatique :</strong>
-                            <ul class="m-10-0-0-0">
-                                <li>Indices C (Complétion) : % d'artefacts remis</li>
-                                <li>Indices P (Performance) : Qualité moyenne des productions</li>
-                                <li>Historique longitudinal : Évolution dans le temps</li>
-                            </ul>
-                        </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Carte: Utiliser les jetons de reprise -->
+                    <!-- Carte: Utiliser les jetons (#1152, lot 2c, 28 oct. 2026 : l'entrée unique des jetons ; « gerer-jetons », coupée au
+                         lot 1, y verse ce qui était vrai ; « Reprise ciblée » n'y paraît plus, son option est inscrite au lot 5 ;
+                         « Approche stratégique » part, D2). -->
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-jetons-reprise">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Utiliser les jetons de reprise
+                                <span class="accordeon-chevron">▼</span> Utiliser les jetons
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Évaluation → Liste des évaluations</p>
+                            <p><strong>Les régler :</strong> Conception → Pratiques de notation, «&nbsp;Système de jetons&nbsp;». «&nbsp;Activer le système de jetons&nbsp;», puis le plafond, «&nbsp;Nombre de jetons alloués par étudiant·e&nbsp;» (2 par défaut). Les «&nbsp;Jetons de délai&nbsp;» prolongent une échéance&nbsp;; les «&nbsp;Jetons de reprise&nbsp;» font refaire une évaluation complète, et l'évaluation originale est gardée («&nbsp;Garder l'original&nbsp;») ou supprimée («&nbsp;Supprimer&nbsp;»).</p>
 
-                            <p>Les jetons sont des ressources limitées que chaque étudiant·e peut utiliser pour adapter son parcours d'apprentissage. Trois types : <strong>délai</strong> (report d'échéance), <strong>reprise</strong> (refaire l'artefact au complet) et <strong>reprise ciblée</strong> (reprendre un critère spécifique).</p>
+                            <p><strong>Les appliquer :</strong> dans Annoter et évaluer, «&nbsp;Appliquer un jeton :&nbsp;» du panneau Paramètres&nbsp;; dans les «&nbsp;Propriétés du fichier&nbsp;» d'une copie, la case «&nbsp;Cette copie est une reprise : appliquer un jeton de reprise sur la production choisie&nbsp;»&nbsp;; à l'import, «&nbsp;Jeton de reprise&nbsp;» dans le menu de production d'un fichier, ou «&nbsp;Appliquer comme jeton de reprise&nbsp;» quand un doublon est repéré. La reprise devient une nouvelle évaluation, liée à l'originale.</p>
 
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Approche stratégique</h4>
-                                <p>L'enjeu pédagogique des jetons dépasse la mécanique : l'étudiant·e doit développer son <strong>jugement métacognitif</strong>. Brûler ses jetons pour des délais n'est pas une stratégie efficace. L'étudiant·e doit être en mesure d'évaluer si son apprentissage est assez solide pour ne pas prendre de jeton, et plutôt miser sur le prochain artefact.</p>
-                            </div>
-
-                            <p><strong>Appliquer un jeton :</strong></p>
-                            <ol class="lh-2">
-                                <li>Va dans <strong>Évaluation → Liste des évaluations</strong></li>
-                                <li>Sélectionne l'évaluation concernée</li>
-                                <li>Choisis <strong>Jeton de reprise</strong> dans les options d'action</li>
-                                <li>Une nouvelle évaluation est créée, liée à l'originale</li>
-                                <li>L'original est gardé (ses scores sont conservés pour comparaison)</li>
-                            </ol>
-
-                            <p><strong>Import avec reprise :</strong></p>
-                            <ul>
-                                <li>Lors de l'import d'un fichier, l'option <strong>Jeton de reprise</strong> est disponible dans le sélecteur de production</li>
-                                <li>Si un doublon est détecté, la modale propose le bouton <strong>Appliquer comme jeton de reprise</strong></li>
-                            </ul>
-
-                            <p><strong>Badges dans la liste :</strong></p>
-                            <ul>
-                                <li><strong>Reprise</strong> (violet) : évaluation de reprise, affiche « était X · Y% » avec les scores originaux</li>
-                                <li><strong>Remplacée</strong> (violet) : l'original, gardé après application d'un jeton</li>
-                                <li><strong>Reprise ciblée</strong> (rose) : reprise d'un seul critère avec plafond de note configurable</li>
-                                <li><strong>À réévaluer</strong> (orange) : reprise importée mais pas encore évaluée</li>
-                            </ul>
-
-                            <div class="alerte alerte-succes">
-                                <strong>Configuration :</strong> Le nombre de jetons, les types disponibles et le sort de l'original (le garder ou le supprimer) se configurent dans <strong>Conception → Pratiques de notation → Système de jetons</strong>.
-                            </div>
+                            <p><strong>Dans la Liste des évaluations :</strong> le badge «&nbsp;Délai&nbsp;»&nbsp;; «&nbsp;Reprise&nbsp;», avec «&nbsp;était …&nbsp;» et la note d'avant&nbsp;; «&nbsp;Remplacée&nbsp;» sur l'original gardé&nbsp;; la pastille «&nbsp;À réévaluer&nbsp;» sur une reprise pas encore évaluée. Le filtre «&nbsp;Statut&nbsp;» les isole.</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Gestion des travaux irrecevables et non-remis -->
+                    <!-- Carte: Copies non remises, non recevables, soupçonnées ou incomplètes (#1152, lot 2c, 28 oct. 2026 : corrigée et resserrée ;
+                         remesure du 27 oct. : quatre situations. La découpe du banc entre les sous-titres du non recevable et du soupçon, « 7/9 » et
+                         les quatre lignes par famille restent mot pour mot : sentinelle-audit-aide-15-oct ; l'infobulle eval-integrite renvoie au
+                         sous-titre du non recevable, qui ne change pas). -->
                     <div class="carte accordeon" id="accordeon-aide-irrecevables">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Gestion des travaux irrecevables et non-remis
+                                <span class="accordeon-chevron">▼</span> Copies non remises, non recevables, soupçonnées ou incomplètes
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Évaluation → Annoter et évaluer</p>
+                            <p><strong>Navigation :</strong> Évaluation → Annoter et évaluer, panneau Paramètres</p>
 
-                        <p>Le système distingue clairement deux situations différentes qui affectent les calculs de manière distincte :</p>
+                            <p>Quatre situations sortent une copie du cours ordinaire.</p>
 
                         <div class="alerte alerte-information">
                             <h4 class="u-mb-10 u-texte-bleu">Travail NON REMIS</h4>
-                            <p><strong>Définition :</strong> L'étudiant n'a pas soumis de travail.</p>
-                            <p><strong>Affichage :</strong> Badge «Non remis» dans le tableau des évaluations.</p>
-                            <p><strong>Impact sur les calculs :</strong></p>
-                            <ul class="m-10-0-0-0">
-                                <li><strong>Complétion (C)</strong> : Compte dans le dénominateur mais pas dans le numérateur</li>
-                                <li><strong>Performance (P)</strong> : Exclu du calcul de la moyenne</li>
-                                <li><strong>Moyenne</strong> : Exclu du calcul</li>
-                            </ul>
-                            <p><strong>Exemple :</strong> Si un·e étudiant·e a 7 productions remises sur 9 attendues, son indice C = 78&nbsp;%</p>
+                            <p>La Liste montre «&nbsp;Non reçu&nbsp;» et «&nbsp;--&nbsp;»&nbsp;; le profil, «&nbsp;Non remis&nbsp;». Le travail reste au total attendu de la complétion (C). La note dépend de ta pratique&nbsp;: en sommative, il n'y entre pas&nbsp;; en standards hybride, une fois les notes finales cochées, une obligatoire non remise vaut 0.</p>
                         </div>
 
                         <div class="alerte alerte-attention">
                             <h4 class="u-mb-10 u-texte-bleu">Travail NON RECEVABLE (Plagiat ou IA)</h4>
-                            <p><strong>Définition :</strong> Le travail existe mais ne peut être évalué pour des raisons d'intégrité académique.</p>
-                            <p><strong>Affichage :</strong></p>
-                            <ul class="m-10-0-0-0">
-                                <li>Badge rouge «Non recevable (Plagiat)» ou «Non recevable (IA)»</li>
-                                <li>Niveau : 0</li>
-                                <li>Note : -- (deux tirets)</li>
-                            </ul>
-                            <p><strong>Impact sur les calculs :</strong> une copie non recevable compte comme non remise dans la complétion (C) ; elle reste dans le total attendu. Dans la note, son sort dépend de ta pratique :</p>
+                            <p>Une raison d'intégrité&nbsp;: la Liste marque la copie «&nbsp;Non recevable (Plagiat)&nbsp;» ou «&nbsp;Non recevable (IA)&nbsp;», 0 sous «&nbsp;Statut&nbsp;», «&nbsp;--&nbsp;» en note.</p>
+                            <p>Une copie non recevable compte comme non remise dans la complétion (C) ; elle reste dans le total attendu. Dans la note, son sort dépend de ta pratique :</p>
                             <ul class="m-10-0-0-0">
                                 <li>en sommative, elle vaut 0, sauf si une reprise la remplace ;</li>
                                 <li>en spécifications, elle compte comme un travail non satisfaisant ;</li>
@@ -10788,114 +10704,24 @@
                                 <li>en dénotation, ta note est ton jugement : la copie n'y entre pas par calcul.</li>
                             </ul>
                             <p>La moyenne de la Liste des évaluations, elle, l'écarte toujours.</p>
-                            <p><strong>Exemple :</strong> Si un·e étudiant·e a 7 productions recevables + 1 plagiat sur 9 attendues, son indice C = 7/9 = 78&nbsp;% (le plagiat compte comme non remis)</p>
+                            <p><strong>Exemple :</strong> 7 recevables et 1 plagiat sur 9 attendues&nbsp;: C = 7/9 = 78&nbsp;%.</p>
                         </div>
 
                         <div class="alerte alerte-information">
                             <h4 class="u-mb-10 u-texte-bleu">Travail SOUPÇONNÉ (À vérifier)</h4>
-                            <p><strong>Définition :</strong> Cas en investigation, pas encore confirmé.</p>
-                            <p><strong>Affichage :</strong> Badge orange «À vérifier»</p>
-                            <p><strong>Impact sur les calculs :</strong> Aucun - le travail est évalué normalement en attendant la décision finale.</p>
-                            <p><strong>Usage :</strong> Permet de documenter un doute avant de prendre une décision définitive.</p>
+                            <p>«&nbsp;Soupçon à vérifier&nbsp;» note un doute&nbsp;: la Liste montre «&nbsp;À vérifier&nbsp;», et la copie s'évalue normalement d'ici ta décision.</p>
                         </div>
 
                         <div class="alerte alerte-information">
                             <h4 class="u-mb-10 u-texte-bleu">Travail INCOMPLET (travail en cours)</h4>
-                            <p>La case «&nbsp;Incomplet ; travail en cours&nbsp;» de la palette Paramètres met de côté la copie d'un·e étudiant·e qui n'a pas eu le temps de terminer&nbsp;: elle n'a pas de note et ne compte pas dans la note, aucun jeton n'est utilisé, et elle compte comme remise dans la complétion (C) jusqu'à ce que tu décoches la case pour évaluer la copie terminée.</p>
+                            <p>La case «&nbsp;Incomplet ; travail en cours&nbsp;» du panneau Paramètres met de côté une copie inachevée&nbsp;: sans note, hors de la note, sans jeton, elle compte comme remise dans la complétion (C) jusqu'à ce que tu décoches la case pour évaluer la copie terminée.</p>
                         </div>
 
-                        <p><strong>Procédure d'application :</strong></p>
-                        <ol class="lh-relaxed">
-                            <li>Charger l'évaluation (existante ou nouvelle)</li>
-                            <li>Dans le champ «Intégrité académique», sélectionner :
-                                <ul class="mt-5">
-                                    <li><strong>Recevable</strong> : Travail normal (par défaut)</li>
-                                    <li><strong>Soupçon à vérifier</strong> : En investigation</li>
-                                    <li><strong>Non recevable - Plagiat</strong> : Copie confirmée</li>
-                                    <li><strong>Non recevable - IA non autorisée</strong> : Utilisation d'IA détectée</li>
-                                </ul>
-                            </li>
-                            <li>Optionnel : Ajouter des notes (preuves, références, contexte)</li>
-                            <li>Si non recevable : tous les critères passent automatiquement à «0 - Aucun»</li>
-                            <li>Verrouiller l'évaluation (le statut et les notes s'enregistrent tout seuls)</li>
-                        </ol>
-
-                        <div class="alerte alerte-succes">
-                            <strong>Jetons de reprise pour les non recevables :</strong> Un travail non recevable peut recevoir un jeton de reprise pour permettre à l'étudiant·e de soumettre un nouveau travail original. La nouvelle évaluation remplacera l'ancienne dans tous les calculs.
-                        </div>
-
-                        <p><strong>Exemple concret, en standards (étudiant·e avec 9 artefacts, portfolio retenant les meilleurs) :</strong></p>
-                        <table class="tableau">
-                            <thead>
-                                <tr>
-                                    <th>Production</th>
-                                    <th>Statut</th>
-                                    <th class="text-center">Note</th>
-                                    <th>Compte dans C ?</th>
-                                    <th>Compte dans P ?</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Artefact 1</td>
-                                    <td>Recevable</td>
-                                    <td class="text-center">68,5&nbsp;%</td>
-                                    <td>Oui (remis)</td>
-                                    <td>Oui</td>
-                                </tr>
-                                <tr>
-                                    <td>Artefact 2</td>
-                                    <td>Non remis</td>
-                                    <td class="text-center">-</td>
-                                    <td>Non (manquant)</td>
-                                    <td>Non</td>
-                                </tr>
-                                <tr>
-                                    <td>Artefact 3</td>
-                                    <td>Non remis</td>
-                                    <td class="text-center">-</td>
-                                    <td>Non (manquant)</td>
-                                    <td>Non</td>
-                                </tr>
-                                <tr style="background-color: var(--conge-bg);">
-                                    <td>Artefact 4</td>
-                                    <td>Non recevable (Plagiat)</td>
-                                    <td class="text-center">--</td>
-                                    <td>Non (non remis)</td>
-                                    <td>Non (sort du portfolio)</td>
-                                </tr>
-                                <tr>
-                                    <td>Artefact 5</td>
-                                    <td>Recevable</td>
-                                    <td class="text-center">78&nbsp;%</td>
-                                    <td>Oui (remis)</td>
-                                    <td>Oui</td>
-                                </tr>
-                                <tr>
-                                    <td>Artefacts 6-9</td>
-                                    <td>Non remis</td>
-                                    <td class="text-center">-</td>
-                                    <td>Non (manquant)</td>
-                                    <td>Non</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <p><strong>Résultats des calculs :</strong></p>
-                        <ul>
-                            <li><strong>Évaluations comptées :</strong> 2 (Artefacts 1 et 5 seulement)</li>
-                            <li><strong>Moyenne affichée :</strong> (68,5 + 78) / 2 = 73,3&nbsp;%</li>
-                            <li><strong>Indice C :</strong> 2 remis / 9 attendus = 22&nbsp;% (Artefact 4 compte comme non remis)</li>
-                            <li><strong>Indice P :</strong> 73,3&nbsp;%</li>
-                        </ul>
-
-                            <div class="alerte alerte-info">
-                                <strong>Principe clé :</strong> Une copie non recevable compte comme non remise. Ce qu'elle vaut dans la note dépend de ta pratique : 0 en sommative, un travail non satisfaisant en spécifications, hors du portfolio en standards ; en dénotation, ta note est ton jugement.
-                            </div>
+                        <p><strong>La procédure :</strong> dans «&nbsp;Intégrité académique&nbsp;», choisis «&nbsp;Soupçon à vérifier&nbsp;», «&nbsp;Non recevable (Plagiat)&nbsp;» ou «&nbsp;Non recevable (IA non autorisée)&nbsp;» («&nbsp;Recevable&nbsp;» par défaut), et consigne au besoin tes preuves dans «&nbsp;Notes (optionnel)&nbsp;». Non recevable, tous les critères passent à «&nbsp;0 - Aucun&nbsp;»&nbsp;; verrouille ensuite. Un jeton de reprise permet à l'étudiant·e de remettre un nouveau travail, dont l'évaluation remplace l'ancienne dans les calculs (voir «&nbsp;Utiliser les jetons&nbsp;»).</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Exporter les travaux -->
+                    <!-- Carte: Exporter les travaux (#1152, lot 2c, 28 oct. 2026 : resserrée ; chaque case rendue reste nommée, sentinelle-893). -->
                     <div class="carte accordeon" id="accordeon-aide-exporter-archiver">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -10905,17 +10731,14 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Évaluation → Exporter les travaux</p>
 
-                            <p>Cet écran sort tes copies et tes évaluations de l'application, sous forme de fichiers que tu gardes sur ton ordinateur.</p>
+                            <p>Cet écran sort tes copies et tes évaluations de l'application, en fichiers que tu gardes sur ton ordinateur.</p>
 
-                            <p><strong>Deux façons d'exporter :</strong></p>
                             <ol>
-                                <li><strong>Exporter des travaux</strong> : les productions en PDF et les évaluations en JSON, dans un ZIP. Laisse « Toutes » et « Tous » pour l'export de tout le groupe – c'est l'export de fin de session –, ou choisis une production, un·e étudiant·e, ou les deux. Les dossiers se rangent par étudiant·e et par production, ou par étudiant·e seulement ; « Compresser le ZIP » le rend plus léger.</li>
-                                <li><strong>Export Léa</strong> : la copie annotée et son évaluation – note et rétroaction – en un PDF prêt à téléverser dans Léa.</li>
+                                <li><strong>Exporter des travaux</strong> : un ZIP. Laisse « Toutes » et « Tous » pour tout le groupe – c'est l'export de fin de session –, ou choisis une production, un·e étudiant·e, ou les deux. « Compresser le ZIP » l'allège.</li>
+                                <li><strong>Export Léa</strong> : la copie annotée et son évaluation en un PDF à téléverser dans Léa ; « Reprises seulement » limite l'export aux reprises.</li>
                             </ol>
 
-                            <p>Les copies annotées et les évaluations sont toujours incluses. Dans Export Léa, la case « Reprises seulement » limite l'export aux reprises.</p>
-
-                            <p><strong>Espace de stockage :</strong> le bloc au bas de l'écran dit ce que tes copies occupent. Exporte tes anciennes copies avant d'en importer beaucoup d'autres.</p>
+                            <p><strong>Espace de stockage :</strong> le bloc au bas de l'écran dit ce que tes copies occupent.</p>
                         </div>
                     </div>
                 </div>
