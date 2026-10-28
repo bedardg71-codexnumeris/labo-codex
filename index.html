@@ -11054,7 +11054,11 @@
                 <div id="aide-labo" class="sous-section">
                     <h2>Labo</h2>
 
-                    <!-- Carte: Labo — Analyser ta démarche pédagogique -->
+                    <!-- Carte: Labo — vue d'ensemble (#1152, lot 2d, 28 oct. 2026 : le Labo en ses sept sous-onglets, dans l'ordre de
+                         config.js ; `modelisation` absorbée, en une phrase (« + Ouvrir » : PDF, JPG, PNG, HEIC ; la palette sans
+                         les codes, modelisation.js:253, 367) ; les Études réduites à ce que leurs notes « i » ne disent pas, sans
+                         lecture causale (« des pistes de réflexion, pas des preuves », aide contextuelle `labo-etudes`). Audit du
+                         24 oct., verdicts finals de `labo` et de `modelisation` ; consigne CONSIGNE-LOT-2026-10-28-aide-lot-2d-labo-codex-reference.md, §2, entrée 1). -->
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-labo">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11062,216 +11066,30 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Labo → Études</p>
+                            <p><strong>Navigation :</strong> Labo</p>
 
-                            <p>Le Labo est un espace d'analyse longitudinale qui te permet de mesurer l'effet de ta démarche pédagogique au fil du trimestre. Il ne se limite pas à un type de pratique : chaque enseignant·e dont l'approche produit des données mesurables (indices A, C, P) peut y trouver des réponses.</p>
+                            <p>Le Labo a sept sous-onglets.</p>
 
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Deux graphiques interactifs</h4>
-                                <p>Le Labo propose actuellement deux angles d'analyse complémentaires, illustrés ici avec une pratique PAN – Standards utilisant des jetons de reprise.</p>
-                            </div>
-
-                            <h4 class="titre-bleu-mb8">1. Dynamique des corrélations</h4>
-                            <p>Ce graphique montre l'évolution semaine par semaine de la <strong>force du lien</strong> (corrélation de Pearson, r) entre chaque indice et la Performance :</p>
                             <ul>
-                                <li><strong>A ↔ P</strong> (bleu) : l'assiduité prédit-elle la performance ?</li>
-                                <li><strong>C ↔ P</strong> (orange) : la complétion prédit-elle la performance ?</li>
-                            </ul>
-                            <p><strong>Lire le graphique :</strong></p>
-                            <ul>
-                                <li>Plus <strong>r</strong> est élevé (proche de 1), plus le lien est fort</li>
-                                <li>Les points ◎ (cercle vide) indiquent une séance avec dépôt de production</li>
-                                <li>Les triangles ▼ marquent les dates d'interventions (orange = N2, rouge = N3)</li>
+                                <li><strong>«&nbsp;Outils d'observation&nbsp;»</strong>&nbsp;: les réglages de SOLO, des données A-C-P et de la RàI, la grille de critères du dépistage et ses paramètres d'analyse (voir «&nbsp;Options configurables : RàI et SOLO&nbsp;» et «&nbsp;Configurer la grille de critères pour le dépistage&nbsp;»).</li>
+                                <li><strong>«&nbsp;Modélisation&nbsp;»</strong>&nbsp;: «&nbsp;+ Ouvrir&nbsp;» charge un document de ton appareil (PDF, JPG, PNG ou HEIC), que tu projettes et annotes devant le groupe avec la palette d'annotation, sans les codes d'erreurs&nbsp;; les annotations restent d'une séance à l'autre.</li>
+                                <li><strong>«&nbsp;Exploration des pratiques&nbsp;»</strong>&nbsp;: ce que deux ou trois pratiques de notation feraient des mêmes parcours, sur des profils fictifs tirés de ton échelle ou sur ton groupe actif (voir «&nbsp;Les pratiques alternatives de notation (PAN)&nbsp;»).</li>
+                                <li><strong>«&nbsp;Rythme de travail&nbsp;»</strong>&nbsp;: tes durées d'évaluation par activité, mesurées par le chronomètre et les évaluations enregistrées, puis «&nbsp;Estimation de la charge&nbsp;» et «&nbsp;Planification&nbsp;».</li>
+                                <li><strong>«&nbsp;Études&nbsp;»</strong>&nbsp;: «&nbsp;Dynamique des corrélations&nbsp;» et «&nbsp;Impact des jetons sur la performance&nbsp;», que leur icône «&nbsp;i&nbsp;» explique. Le premier ne calcule aucune corrélation sous 5 étudiant·es&nbsp;; le second ne paraît que si un·e étudiant·e a utilisé un jeton. Ce sont des pistes de réflexion, pas des preuves.</li>
+                                <li><strong>«&nbsp;Bilan réflexif&nbsp;»</strong>&nbsp;: un questionnaire, un parcours et ton auto-réflexion (voir «&nbsp;Bilan réflexif — Recueillir l'expérience vécue&nbsp;»).</li>
+                                <li><strong>«&nbsp;Suivi longitudinal&nbsp;»</strong>&nbsp;: «&nbsp;Inscrire au registre&nbsp;» fige une copie datée du dossier d'un·e étudiant·e, cherché·e dans tous les trimestres, et accueille ensuite ses «&nbsp;Résultats ultérieurs&nbsp;». Le registre voyage dans ton codex, pas dans l'archive d'un groupe-cours.</li>
                             </ul>
 
-                            <p><strong>Superpositions optionnelles</strong> (cases à cocher) :</p>
-                            <ul>
-                                <li><strong>Moyennes du groupe</strong> : courbes A, C, P en pourcentage (axe droit)</li>
-                                <li><strong>Courbes d'intervention</strong> : trajectoire P des étudiant·es ciblé·es vs groupe contrôle (étudiant·es non ciblé·es)</li>
-                            </ul>
-
-                            <div class="alerte alerte-attention">
-                                <strong>Rappel :</strong> Corrélation ne signifie pas causalité. Un r élevé entre C et P ne signifie pas que la complétion <em>cause</em> la performance — il signifie que les deux évoluent ensemble. Minimum 5 étudiant·es par semaine pour obtenir une corrélation fiable.
-                            </div>
-
-                            <h4 class="titre-bleu-mb8">2. Impact des jetons sur la performance</h4>
-                            <p>Ce graphique compare la trajectoire de Performance entre deux groupes :</p>
-                            <ul>
-                                <li><strong>P avec jetons</strong> (orange) : étudiant·es ayant utilisé au moins un jeton de reprise</li>
-                                <li><strong>P sans jetons</strong> (bleu) : étudiant·es n'ayant jamais utilisé de jeton</li>
-                            </ul>
-                            <p>Les points ◼ (carrés pleins) marquent les séances où un jeton a été appliqué. Au survol, le tooltip détaille le type de jeton, la production concernée et le gain (original → reprise).</p>
-
-                            <div class="alerte alerte-succes">
-                                <strong>Cas d'usage :</strong> « Mes reprises aident-elles réellement les étudiant·es à progresser ? » Si la courbe orange diverge positivement après les ◼, c'est un signal encourageant. Ce graphique n'apparaît que si au moins un·e étudiant·e a utilisé un jeton.
-                            </div>
+                            <p>«&nbsp;Charger un codex data…&nbsp;», au menu Codex, ouvre un codex data dans le Labo, en lecture seule&nbsp;; le trimestre actif n'est pas touché.</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Modéliser en projection -->
-                    <div class="carte accordeon" id="accordeon-aide-modelisation">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Modéliser en projection
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Labo → Modélisation</p>
-
-                            <p>Ce module reprend les outils d'annotation des copies et les applique à un document que tu projettes en classe : tu ouvres un PDF local, indépendant des travaux de tes étudiant·es, et tu le modélises en direct devant le groupe. C'est le geste de l'exercice fait au tableau, avec la palette d'annotation.</p>
-
-                            <p><strong>Fonctionnalités :</strong></p>
-                            <ol>
-                                <li><strong>Ouvrir un PDF</strong> : Sélectionne un fichier depuis ton ordinateur</li>
-                                <li><strong>Naviguer</strong> : Parcours les pages avec les boutons précédent/suivant</li>
-                                <li><strong>Zoomer</strong> : Ajuste l'affichage pour la projection</li>
-                                <li><strong>Annoter</strong> : Utilise la palette d'annotation (identique à celle des Travaux) pour dessiner, surligner et commenter en direct</li>
-                            </ol>
-
-                            <p><strong>Usage prévu :</strong></p>
-                            <ul>
-                                <li>Projection de documents en classe</li>
-                                <li>Annotation en direct pendant les explications</li>
-                                <li>Démonstration de corrections ou de méthodes</li>
-                            </ul>
-
-                            <div class="alerte alerte-succes">
-                                <strong>✅ Persistance :</strong> Les annotations s'enregistrent sur ton appareil et restent d'une séance à l'autre. Tu retrouves ton document annoté à la prochaine ouverture.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Pratique Alternative de Notation (PAN) -->
-                    <div class="carte accordeon" id="accordeon-aide-pan">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Les pratiques alternatives de notation (PAN)
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p>Les pratiques alternatives de notation regroupent des systèmes qui partagent deux caractéristiques&nbsp;: le <strong>droit à l'erreur sans pénalité</strong> sur la note finale, rendu possible par des occasions multiples de démontrer sa compétence&nbsp;; et une note finale composée à partir des <strong>traces les plus récentes ou les plus représentatives</strong> des apprentissages au terme de la séquence.</p>
-
-                            <p class="u-mt-10">Ce n'est pas une méthode unique. Deux enseignant·es qui se réclament de la même étiquette peuvent mettre en place des systèmes très différents, et produire des effets très différents. C'est pourquoi Labo Codex ne te demande pas de choisir une école, mais de régler des paramètres.</p>
-
-                            <div class="alerte alerte-information u-mt-10">
-                                <p><strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Quatre familles, aucune hiérarchie</strong></p>
-                                <ul>
-                                    <li><strong>Sommative</strong>&nbsp;: la note est la moyenne pondérée des évaluations, chacune comptée au moment où elle a eu lieu.</li>
-                                    <li><strong>PAN – Standards</strong>&nbsp;: la note vise le niveau atteint pour des cibles d'apprentissage, jugé sur une échelle à quelques niveaux. Dans Labo Codex, ce niveau se lit aujourd'hui à travers les artefacts retenus au portfolio&nbsp;: les cibles guident le jugement, les artefacts en portent la trace.</li>
-                                    <li><strong>PAN – Spécifications</strong>&nbsp;: chaque travail est acceptable ou non au regard d'une liste de critères essentiels&nbsp;; la note se compose par forfaits.</li>
-                                    <li><strong>PAN – Dénotation</strong>&nbsp;: les travaux reçoivent de la rétroaction plutôt qu'une note&nbsp;; la note certificative est posée par jugement à la fin, appuyée sur des cibles et des critères qui restent explicites.</li>
-                                </ul>
-                                <p>Les trois dernières sont des PAN. La sommative est pleinement supportée&nbsp;: l'application ne prescrit aucune pratique.</p>
-                            </div>
-
-                            <div class="alerte alerte-information">
-                                <p><strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Six paramètres pour décrire ta pratique</strong></p>
-                                <p class="u-mt-5">La recherche québécoise récente propose de décrire un système de notation par six paramètres plutôt que par son étiquette.</p>
-                                <ol>
-                                    <li><strong>Objet</strong>&nbsp;: de quoi la note dépend-elle&nbsp;? Des apprentissages seulement, ou aussi du parcours, de la participation, des retards&nbsp;?</li>
-                                    <li><strong>Révisabilité</strong>&nbsp;: quelle proportion de la note est révisable, et combien d'occasions par cible&nbsp;?</li>
-                                    <li><strong>Agentivité</strong>&nbsp;: quels choix et quelle flexibilité l'étudiant·e a-t-il&nbsp;? Qui pose le jugement&nbsp;?</li>
-                                    <li><strong>Communication</strong>&nbsp;: les notes se rapportent-elles à des cibles d'apprentissage ou à des instruments d'évaluation&nbsp;? La rétroaction arrive-t-elle avant, avec ou après la note&nbsp;?</li>
-                                    <li><strong>Granularité</strong>&nbsp;: combien de niveaux de performance, aux évaluations et au cours&nbsp;?</li>
-                                    <li><strong>Détermination</strong>&nbsp;: la note vient-elle d'un algorithme, d'un jugement, ou des deux&nbsp;?</li>
-                                </ol>
-                                <p>Deux pratiques de la même famille peuvent répondre différemment à chacune de ces six questions. C'est là que se joue ta pratique, pas dans le choix de l'étiquette.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: 5b. Grille de référence pour dépistage -->
-                    <div class="carte accordeon" id="accordeon-aide-grille-depistage">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Configurer la grille de critères pour le dépistage
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Labo → Outils d'observation (section «Grille de critères pour le dépistage»)</p>
-
-                            <p><strong>Pourquoi configurer une grille de référence ?</strong></p>
-                            <p>Le système de dépistage identifie automatiquement les <strong>forces et défis</strong> de chaque étudiant·e en analysant ses performances sur tes critères d'évaluation. Pour fonctionner, il doit savoir quels critères tu utilises dans ta discipline.</p>
-
-                            <p><strong>Étape 1 : Créer ta grille de critères</strong></p>
-                            <ol>
-                                <li>Aller dans <strong>Conception → Grilles de critères</strong></li>
-                                <li>Cliquer sur «➕ Créer une nouvelle grille»</li>
-                                <li>Nommer ta grille (ex: «Grille SRPNF Littérature», «Rapport de labo - Chimie»)</li>
-                                <li>Ajouter tes critères d'évaluation :
-                                    <ul class="mt-5">
-                                        <li><strong>Nom</strong> : Nom du critère (ex: Structure, Hypothèse, Analyse)</li>
-                                        <li><strong>Pondération</strong> : Importance relative (ex: 20&nbsp;%, 30&nbsp;%)</li>
-                                        <li><strong>Description</strong> : Définition du critère (optionnel)</li>
-                                    </ul>
-                                </li>
-                                <li>Vérifier que la pondération totale = 100&nbsp;%</li>
-                                <li>Enregistrer la grille</li>
-                            </ol>
-
-
-                            <p><strong>Étape 2 : Définir la grille comme référence</strong></p>
-                            <ol>
-                                <li>Retourner dans <strong>Labo → Outils d'observation</strong></li>
-                                <li>Section «Grille de critères pour le dépistage»</li>
-                                <li>Sélectionner ta grille dans le menu déroulant</li>
-                                <li>Cliquer sur «Enregistrer les réglages»</li>
-                            </ol>
-
-                            <div class="alerte alerte-attention">
-                                <strong>Important :</strong> Tu dois utiliser cette même grille pour toutes tes évaluations. Le dépistage lit les niveaux que tu enregistres pour chaque critère (ex: Structure M, Rigueur D), pas le texte de tes rétroactions.
-                            </div>
-
-                            <p><strong>Exemples de grilles par discipline :</strong></p>
-                            <ul>
-                                <li><strong>Littérature</strong> : Structure, Rigueur, Plausibilité, Nuance, Français</li>
-                                <li><strong>Chimie</strong> : Hypothèse, Protocole, Analyse, Conclusion</li>
-                                <li><strong>Anthropologie</strong> : Contextualisation, Méthodologie, Analyse comparative, Réflexivité</li>
-                                <li><strong>Mathématiques</strong> : Compréhension, Démarche, Calculs, Communication</li>
-                                <li><strong>Histoire</strong> : Contextualisation, Analyse de sources, Argumentation, Synthèse</li>
-                            </ul>
-
-                            <p><strong>Comment le système utilise la grille :</strong></p>
-                            <ul>
-                                <li><strong>Diagnostic forces/défis</strong> : Identifie automatiquement les critères maîtrisés (≥70&nbsp;%) et les défis (&lt;70&nbsp;%)</li>
-                                <li><strong>Patterns d'apprentissage</strong> : Détecte progression, difficultés émergentes, difficultés persistantes</li>
-                                <li><strong>Priorisation</strong> : Les critères avec pondération élevée sont priorisés dans les recommandations</li>
-                                <li><strong>Suivi longitudinal</strong> : Calcule l'évolution de chaque critère au fil du temps</li>
-                            </ul>
-
-                            <div class="alerte alerte-succes">
-                                <strong>Validation rapide :</strong> Après configuration, ouvre le profil d'une personne déjà évaluée et vérifie que la section « Développement des habiletés » affiche les forces/défis basés sur tes critères.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Critères d'évaluation et dépistage -->
-                    <div class="carte accordeon" id="accordeon-aide-criteres">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Tes critères d'évaluation : le socle du dépistage
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p>Labo Codex utilise <strong>tes critères d'évaluation</strong> pour calculer la progression de tes étudiant·es et détecter les difficultés d'apprentissage. Ces critères sont entièrement personnalisables selon ta discipline.</p>
-
-                            <div class="alerte alerte-attention" style="margin-top: 10px;">
-                                <p><strong>Règle essentielle pour le dépistage</strong></p>
-                                <p>Les critères que tu choisis doivent <strong>rester les mêmes pendant tout le trimestre</strong>. C'est cette constance qui permet à l'application de calculer une progression cohérente et de repérer les étudiant·es en difficulté d'apprentissage. Si les critères changent en cours de route, la comparaison entre les évaluations perd son sens.</p>
-                            </div>
-
-                            <p class="mt-10">L'exemple qui suit (<strong>SRPNF</strong>) illustre une grille de critères inspirée du modèle ELLAC (<a href="https://ellac.ca" target="_blank" rel="noopener">ellac.ca</a>), développé pour l'enseignement de la lecture littéraire au collégial. Ce sont des critères <strong>holistiques liés à la littératie</strong> — la capacité à lire et à écrire.</p>
-
-                            <div class="alerte alerte-information" style="margin-top: 10px;">
-                                <p><strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Adapte les critères à ta discipline</strong></p>
-                                <p>Un·e enseignant·e de chimie, de philosophie ou de toute autre discipline peut définir ses propres critères. Ce qui compte, c'est qu'ils reflètent les compétences visées dans ton cours et qu'ils restent stables pendant le trimestre.</p>
-                            </div>
-
-                            <p class="mt-10"><strong>Niveau cognitif SOLO</strong>&nbsp;: chaque critère de ta grille peut recevoir un tag indiquant son niveau dans la taxonomie SOLO (multistructurel, relationnel ou abstrait étendu). Ce tag détermine quels critères sont surveillés par le dépistage automatique. Par défaut, tous les critères sont considérés multistructurels — tu peux affiner en étiquetant tes critères de niveau supérieur. Configure le tag dans <strong>Conception → Grilles de critères</strong>.</p>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Options configurables RàI et SOLO -->
+                    <!-- Carte: Options configurables RàI et SOLO (#1152, lot 2d, 28 oct. 2026 : les deux options avec leur libellé exact
+                         et le « active si / désactive si » ; la carte SOLO décrite telle que #542 l'a faite (un bloc par niveau de
+                         l'échelle, sous son nom ; plus de forces et défis), sans nommer les niveaux ; l'encadré « Distinction » et la
+                         note historique partent. Remesure du 27 oct. (plus « 4 niveaux IDME ») ; audit du 24 oct., verdict final de
+                         `rai-solo` ; consigne du lot 2d, §2, entrée 4. Les deux intertitres des options bornent la tranche que lit la
+                         sentinelle du 15 oct. (les six patterns y sont nommés) : ils restent, mot pour mot). -->
                     <div class="carte accordeon" id="accordeon-aide-rai-solo">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11279,49 +11097,77 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Labo → Outils d'observation</p>
 
-                        <p><strong>Le système offre deux fonctionnalités optionnelles</strong> que tu peux activer/désactiver selon ta pratique de notation :</p>
+                            <p>Deux options, cochées au départ, que tu décoches si ta pratique n'en a pas l'usage.</p>
 
-                        <div class="alerte alerte-info u-mt-15">
                             <h4 class="u-mb-10 u-texte-bleu">Option 1 : Détection des patterns et RàI</h4>
-                            <p><strong>Activation :</strong> Labo → Outils d'observation → Cocher «Appliquer une adaptation du modèle de la Réponse à l'intervention»</p>
-                            <p><strong>Fonction :</strong> Identifie automatiquement les patterns d'apprentissage (Stable, Défi spécifique, Difficulté émergente, Difficulté persistante, Non-participation ; «&nbsp;Données insuffisantes&nbsp;» tant que rien n'est jugeable) et recommande des niveaux d'intervention selon le cadre Réponse à l'Intervention (RàI).</p>
-                            <p><strong>Utilisation recommandée :</strong></p>
-                            <ul class="u-mt-5">
-                                <li><strong>✅ Activer si :</strong> Tu utilises une grille de critères cohérente pour toutes les évaluations (ex: SRPNF, compétences disciplinaires)</li>
-                                <li><strong>❌ Désactiver si :</strong> Évaluations hétérogènes sans grille commune, ou système d'intervention non applicable dans ton contexte</li>
-                            </ul>
-                        </div>
+                            <p>«&nbsp;Appliquer une adaptation du modèle de la Réponse à l'intervention&nbsp;» repère les patterns d'apprentissage (Stable, Défi spécifique, Difficulté émergente, Difficulté persistante, Non-participation&nbsp;; «&nbsp;Données insuffisantes&nbsp;» tant que rien n'est jugeable) et propose un niveau d'intervention. Active-la si tes évaluations reprennent les critères de la grille du dépistage&nbsp;; désactive-la si elles n'ont pas de critères communs, ou si un système d'intervention ne s'applique pas à ton contexte.</p>
 
-                        <div class="alerte alerte-info u-mt-15">
                             <h4 class="u-mb-10 u-texte-bleu">Option 2 : Observation de la structure SOLO</h4>
-                            <p><strong>Activation :</strong> Labo → Outils d'observation → Cocher «Afficher l'observation de la structure des résultats d'apprentissage (SOLO)»</p>
-                            <p><strong>Fonction :</strong> Affiche une carte dans le profil étudiant (section Accompagnement) avec les forces et défis identifiés selon les 4 niveaux IDME (Incomplet, Développement, Maîtrise, Étendu) basés sur la taxonomie SOLO de Biggs & Collis.</p>
-                            <p><strong>Utilisation recommandée :</strong></p>
-                            <ul class="u-mt-5">
-                                <li><strong>✅ Activer si :</strong> Ta pratique s'appuie sur la taxonomie SOLO et l'échelle IDME (ex : PAN – Standards)</li>
-                                <li><strong>❌ Désactiver si :</strong> Tu utilises une échelle chiffrée traditionnelle (0-100&nbsp;%) sans référence à la taxonomie SOLO</li>
-                            </ul>
-                        </div>
-
-                        <div class="alerte alerte-warning u-mt-15">
-                            <h4 class="u-mb-10" style="color: var(--gris-fonce)">⚠️ Distinction importante : Défis vs Défi spécifique</h4>
-                            <p><strong>Ces deux concepts sont différents</strong> (quand les deux options sont activées) :</p>
-                            <ul class="u-mt-5">
-                                <li><strong>Défis (I/D)</strong> : Niveaux IDME <strong>individuels par critère</strong> dans «Observation de la structure SOLO»
-                                    <br><em class="u-texte-petit" style="color: var(--gris-fonce)">→ Exemple : L'étudiant a un défi D (Développement 65-74&nbsp;%) en Structure mais une force M (Maîtrise 75-84&nbsp;%) en Français</em>
-                                </li>
-                                <li><strong>Défi spécifique</strong> : <strong>Pattern global</strong> dans l'aperçu (nécessite Performance ≥ 75&nbsp;% avec au moins un défi sur un critère)
-                                    <br><em class="u-texte-petit" style="color: var(--gris-fonce)">→ Exemple : Performance moyenne 78&nbsp;% mais Structure à 68&nbsp;% = Pattern «Défi spécifique» (bon globalement, faiblesse ciblée)</em>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <p class="text-muted u-mt-15 u-texte-09"><em><strong>Note :</strong> Ces options ont été développées dans le cadre de la pratique PAN – Standards mais peuvent être adaptées à d'autres pratiques pédagogiques. Elles ne sont pas obligatoires pour utiliser le système de suivi A-C-P.</em></p>
+                            <p>«&nbsp;Activer l'observation de la structure des résultats d'apprentissage&nbsp;» ajoute à la section Accompagnement du profil la carte «&nbsp;Observation de la structure des résultats d'apprentissage&nbsp;»&nbsp;: un bloc par niveau de l'échelle, sous le nom que tu lui donnes, avec les critères qui y tombent. Elle active aussi la catégorie «&nbsp;Compréhension&nbsp;» de la palette d'annotation. Active-la si ta pratique s'appuie sur la taxonomie SOLO&nbsp;; désactive-la si tes échelles n'y font pas référence.</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Bilan réflexif -->
+                    <!-- Carte: Grille de critères pour le dépistage (#1152, lot 2d, 28 oct. 2026 : `criteres` absorbée ; les sept corrections
+                         du dossier : le réglage s'écrit au changement (lot E3) ; « + Nouvelle grille » puis « Créer la grille » ; le
+                         rapprochement par le nom (profil-etudiant-calculs.js:842-874), pas « la même grille pour toutes tes
+                         évaluations » ; les points d'abord, le niveau sinon (#739) ; le « Seuil de défi spécifique » ; la pondération
+                         ne départage que deux scores égaux (:1331-1344). L'étape 1, qui redisait `creer-grilles` (et son total de 100 %,
+                         faux pour une grille en points), part. De `criteres` : la constance des critères et l'étiquette SOLO (#1117
+                         suite). Audit du 24 oct., verdicts finals de `grille-depistage` et `criteres` ; consigne du lot 2d, §2, entrée 3). -->
+                    <div class="carte accordeon" id="accordeon-aide-grille-depistage">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Configurer la grille de critères pour le dépistage
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Labo → Outils d'observation, carte «&nbsp;Taxonomie SOLO&nbsp;», «&nbsp;Grille de critères pour le dépistage&nbsp;»</p>
+
+                            <p>Le dépistage relève les forces et les défis de chaque étudiant·e d'après les critères de cette grille. Choisis-la dans le menu&nbsp;: le choix s'écrit dès que tu le changes. Une grille se crée dans Conception → Grilles de critères, par «&nbsp;+ Nouvelle grille&nbsp;» puis «&nbsp;Créer la grille&nbsp;» (voir «&nbsp;Créer une grille de critères&nbsp;»).</p>
+
+                            <p><strong>Ce que le dépistage lit.</strong> Il rapproche chaque critère d'une évaluation d'un critère de cette grille par son nom, égal ou qui commence de même, sans tenir compte des accents, de la casse ni des espaces&nbsp;: une autre grille aux mêmes noms de critères est donc lue. Sur chaque critère, il prend les points, le niveau à défaut. Un critère sous le «&nbsp;Seuil de défi spécifique&nbsp;» (70&nbsp;% par défaut, de 60 à 80&nbsp;%, dans «&nbsp;Paramètres d'analyse&nbsp;») est un défi&nbsp;; la pondération ne départage que deux critères de même score.</p>
+
+                            <p><strong>Des critères constants.</strong> D'une évaluation à l'autre, la comparaison n'a de sens que si les critères gardent leur nom au fil du trimestre. Quand «&nbsp;Activer l'observation de la structure des résultats d'apprentissage&nbsp;» est cochée, un critère dont la «&nbsp;Complexité SOLO du critère&nbsp;» est «&nbsp;Aucun&nbsp;» n'est pas surveillé&nbsp;; décochée, tous les critères le sont. Cette étiquette se règle dans Conception → Grilles de critères.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Les pratiques alternatives de notation (#1152, lot 2d, 28 oct. 2026 : les familles, déjà dans `pratique`, partent ;
+                         les six paramètres restent, rattachés à l'écran qui les affiche (pratiques/construction-attributs.js:50-57 ;
+                         comparateur-pratiques.js:367-393), sous les libellés de cet écran ; l'exposé va au guide « Modalités » (D1).
+                         Audit du 24 oct., verdict final de `pan` ; consigne du lot 2d, §2, entrée 2). -->
+                    <div class="carte accordeon" id="accordeon-aide-pan">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Les pratiques alternatives de notation (PAN)
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Labo → Exploration des pratiques</p>
+
+                            <p>Une pratique alternative de notation laisse le droit à l'erreur sans pénalité sur la note finale, par des occasions multiples de démontrer sa compétence, et compose cette note à partir des traces les plus récentes ou les plus représentatives. Ses familles et leurs réglages sont dans «&nbsp;Choisir ta pratique de notation&nbsp;»&nbsp;; la théorie, dans le guide «&nbsp;Modalités&nbsp;» de Conception → Pratiques de notation.</p>
+
+                            <p>«&nbsp;Construction de la note&nbsp;», en haut de l'Exploration, range les réglages de chaque pratique sous six paramètres&nbsp;:</p>
+                            <ol>
+                                <li>Objet — de quoi la note dépend</li>
+                                <li>Révisabilité — ce qui peut être repris</li>
+                                <li>Agentivité — les choix laissés à l'étudiant·e</li>
+                                <li>Communication — ce que la note dit, et quand</li>
+                                <li>Granularité — les niveaux de performance</li>
+                                <li>Détermination — algorithme, jugement, ou les deux</li>
+                            </ol>
+                            <p>Deux pratiques de la même famille peuvent y répondre différemment&nbsp;: c'est là que se lit une pratique, plus que dans son étiquette.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Bilan réflexif (#1152, lot 2d, 28 oct. 2026 : « Copier les questions », sans nommer de service ; l'anonymat
+                         dépend du formulaire externe, que l'écran demande de configurer (bilan-reflexif-editeur.js:73) ; les noms
+                         d'onglets de l'écran (bilan-reflexif.js:108-112). #1054 est toujours ouverte (mesuré le 28 oct. :
+                         bilan-reflexif-csv.js appelle `genId` et `CLE_RESULTATS` sans les déclarer, et les données de démonstration
+                         passent par le même `CLE_RESULTATS`) : l'import des résultats reste retiré (lot 1), et avec lui le rapport
+                         d'analyse, que rien ne peut remplir tant qu'elle n'est pas corrigée. Audit du 24 oct., verdict final de
+                         `bilan-reflexif` ; consigne du lot 2d, §2, entrée 5). -->
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-bilan-reflexif">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11331,50 +11177,13 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Labo → Bilan réflexif</p>
 
-                            <p>Le bilan réflexif sert à recueillir des informations <strong>qualitatives et subjectives</strong> sur l'expérience vécue — par l'étudiant·e et par l'enseignant·e. Ces données ne se trouvent pas dans les indices A, C ou P : sentiment d'efficacité personnelle, motivation, perception du cours, obstacles vécus. Les réponses étudiantes sont <strong>anonymes</strong>, ce qui permet de dégager un portrait du groupe en toute franchise.</p>
+                            <p>Le bilan recueille ce que A, C et P ne disent pas&nbsp;: le vécu des étudiant·es et le tien, sur le cours, la motivation, le sentiment de compétence.</p>
 
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Objectif</h4>
-                                <p>Réaligner le cours, les productions et les résultats en croisant les données quantitatives (indices) avec le vécu réel. Évaluer l'impact de ta démarche sur la motivation, le sentiment de compétence et l'engagement perçu par les étudiant·es.</p>
-                            </div>
-
-                            <h4 class="titre-bleu-mb8">5 onglets</h4>
-
-                            <p><strong>1. Questionnaire</strong> — Éditeur de sondage Likert</p>
                             <ul>
-                                <li>8 blocs thématiques préconstruits (système d'évaluation, rétroaction, approche pédagogique, métacognition, transfert, sentiment d'efficacité, climat de classe, préparation pour la suite)</li>
-                                <li>Questions modifiables, blocs activables/désactivables</li>
-                                <li>Export en texte brut pour distribution via formulaire externe (Google Forms, Microsoft Forms, etc.)</li>
+                                <li><strong>«&nbsp;Questionnaire&nbsp;»</strong>&nbsp;: un sondage de type Likert en huit blocs thématiques, que tu modifies, actives ou désactives. «&nbsp;Copier les questions&nbsp;» les copie pour le formulaire en ligne de ton choix, et l'écran en donne les étapes. L'anonymat des réponses dépend de ce formulaire&nbsp;: règle-le pour qu'il ne collecte ni le nom ni le courriel.</li>
+                                <li><strong>«&nbsp;Parcours&nbsp;»</strong>&nbsp;: l'expérience vécue activité par activité (complétude, effort, émotions, moment marquant), à partir des productions du trimestre ou d'activités ajoutées à la main, et des questions de synthèse.</li>
+                                <li><strong>«&nbsp;Auto-réflexion&nbsp;»</strong>&nbsp;: trois blocs, A (tes réponses aux mêmes questions que les étudiant·es), B (tes observations par activité) et C (ta synthèse).</li>
                             </ul>
-
-                            <p><strong>2. Parcours d'apprentissage</strong> — L'expérience vécue activité par activité</p>
-                            <ul>
-                                <li>Importe les productions du trimestre ou ajoute des activités manuellement</li>
-                                <li>Pour chaque activité : complétude, niveau d'effort, émotions associées, moment marquant</li>
-                                <li>Questions transversales de synthèse (moment pivot, changement de perspective, conseils aux étudiant·es à venir)</li>
-                                <li>Recommandation : 5-7 activités marquantes plutôt que toutes</li>
-                            </ul>
-
-                            <p><strong>3. Auto-réflexion de l'enseignant·e</strong></p>
-                            <ul>
-                                <li><strong>Bloc A — Perception miroir :</strong> Tes réponses aux mêmes questions que les étudiant·es, avant et après la consultation des résultats</li>
-                                <li><strong>Bloc B — Observations par activité :</strong> Intention pédagogique, écart perception/réalité, ajustements envisagés</li>
-                                <li><strong>Bloc C — Synthèse :</strong> Moments forts, ajustements en cours de route, angles morts révélés par les données</li>
-                            </ul>
-
-                            <!-- #1152, lot 1 (24 oct. 2026) : retiré la partie « 4. Importer les résultats » tant que #1054 n'est pas corrigée (l'import s'arrête sur « genId is not defined », vérifié au code le 24 oct. ; audit de l'Aide du 24 oct.). -->
-
-                            <p><strong>5. Rapport d'analyse</strong></p>
-                            <ul>
-                                <li>Score moyen global et taux de réponses favorables</li>
-                                <li>Par bloc : score moyen, signaux forts (≥80&nbsp;% favorables) et signaux faibles (≥30&nbsp;% défavorables)</li>
-                                <li>Graphiques barres empilées Likert par question</li>
-                                <li>Synthèse : forces identifiées et zones de vigilance</li>
-                            </ul>
-
-                            <div class="alerte alerte-succes">
-                                <strong>Workflow recommandé :</strong> Crée ton questionnaire et ton parcours en début de trimestre. Distribue-les en fin de session. Remplis ton auto-réflexion (bloc A) <em>avant</em> de consulter les résultats des étudiant·es, puis compare ta perception avec la leur.
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -11385,7 +11194,13 @@
                 <div id="aide-codex-archives" class="sous-section">
                     <h2>Codex et archives</h2>
 
-                    <!-- Carte: Codex -->
+                    <!-- Carte: Codex (#1152, lot 2d, 28 oct. 2026 : la fenêtre d'aperçu de « Mettre à jour le codex »
+                         (codex.js:440, 634-648 ; aide `modal-export-preview`) ; « Écrire le codex à part » avant une suppression
+                         (codex.js:3687-3715 ; trimestre-v2-liste.js:313, trimestre-v2-groupes-cours.js:971,
+                         trimestre-v2-etudiants.js:1530, import-export.js:2093) ; « Archiver… » archive un groupe-cours, un trimestre
+                         clos s'archive par sa bibliothèque (trimestre-v2-liste.js:213-224 ; reserve-trimestre.js:53) ; le menu tel
+                         qu'il est (index.html, #codex-menu ; les items réservés à un codex ouvert, codex.js:3195-3211). Les trois
+                         redites partent. Remesure du 27 oct. ; audit du 24 oct., verdict final de `codex` ; consigne du lot 2d, §2, entrée 6). -->
                     <div class="carte accordeon" id="accordeon-aide-codex">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11393,50 +11208,32 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Bouton « Codex » dans l'en-tête de l'application</p>
+                            <p><strong>Navigation :</strong> bouton «&nbsp;Codex&nbsp;» de l'en-tête</p>
 
-                            <p>Le <strong>Codex</strong> est un espace de travail portable qui rassemble toutes tes données (étudiant·es, présences, évaluations, fichiers de travaux) dans un fichier ZIP transportable sur clé USB. Il te permet de travailler sur plusieurs appareils (MacBook, iPad, ordinateur du bureau) sans avoir besoin d'un service cloud.</p>
+                            <p>Ton codex est un fichier <code>.zip</code> qui rassemble tes données (étudiant·es, présences, évaluations, configuration) et les fichiers des travaux. Ce que tu fais s'enregistre dans l'application, sur cet appareil&nbsp;; le fichier, lui, ne change qu'à «&nbsp;Mettre à jour le codex&nbsp;». Le menu dit où il en est&nbsp;: «&nbsp;Ton codex est à jour&nbsp;» ou «&nbsp;Ton codex n'a pas tes derniers changements&nbsp;».</p>
 
-                            <div class="carte-gradient-bleu">
-                                <p class="titre-11-bold-bleu-mb15">Qu'est-ce qu'un Codex ?</p>
-                                <p>Un codex est un fichier <code>.zip</code> qui contient :</p>
-                                <ul class="lh-2">
-                                    <li><strong>Toutes tes données</strong> : étudiant·es, présences, évaluations, indices A-C-P, configurations</li>
-                                    <li><strong>Les fichiers de travaux</strong> : les PDF et documents associés aux évaluations</li>
-                                    <li><strong>Un manifeste</strong> : métadonnées du codex (date, appareil, version de l'app)</li>
-                                </ul>
-                                <p style="margin-top: 10px; font-size: 0.9rem; color: var(--texte-secondaire);">
-                                    <em>Pour archiver l'historique d'un trimestre terminé, utilise plutôt les <strong>Archives</strong> (menu Codex → « Archiver »).</em>
-                                </p>
-                            </div>
+                            <p><strong>Mettre à jour.</strong> «&nbsp;Mettre à jour le codex&nbsp;» ouvre d'abord une fenêtre d'aperçu du même nom, où tu confirmes par «&nbsp;Mettre à jour&nbsp;» ou annules&nbsp;; son «&nbsp;i&nbsp;» mène à «&nbsp;Ce que contient le fichier&nbsp;». Chrome et Edge réécrivent ensuite le même fichier&nbsp;; Safari et l'iPad en téléchargent un nouveau.</p>
 
-                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Flux de travail typique</p>
-                            <ol class="lh-2">
-                                <li><strong>Au début du trimestre</strong> : Crée un nouveau codex (Codex → Nouveau codex)</li>
-                                <li><strong>Au bureau (MacBook)</strong> : Travaille normalement. Avant de partir, mets à jour le codex sur ta clé USB (Codex → Mettre à jour le codex)</li>
-                                <li><strong>En classe (iPad ou autre poste)</strong> : Ouvre le codex depuis la clé USB (Codex → Ouvrir). Saisis tes présences, évalue. Mets à jour le codex avant de partir</li>
-                                <li><strong>De retour au bureau</strong> : Ouvre le codex à jour depuis la clé USB. Tes données suivent d'un appareil à l'autre</li>
-                            </ol>
-
-                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Fonctions du menu Codex</p>
-                            <ul class="lh-2">
-                                <li><strong>Ouvrir un codex</strong> : Charge un fichier codex (<code>.zip</code>) depuis ton disque ou ta clé USB</li>
-                                <li><strong>Mettre à jour le codex</strong> : Écrit tes données actuelles dans le fichier du codex. Chrome et Edge réécrivent le même fichier, sans fenêtre ; Safari et l'iPad téléchargent un nouveau fichier</li>
-                                <li><strong>Mettre à jour dans un autre fichier</strong> : Écrit tes données actuelles dans un nouveau fichier, à l'endroit que tu choisis</li>
-                                <li><strong>Nouveau codex</strong> : Crée un codex à partir des données actuelles en mémoire</li>
-                                <li><strong>Archiver</strong> : Archive le groupe-cours d'un trimestre terminé dans tes archives locales (voir l'onglet Archives)</li>
-                                <li><strong>Ouvrir une archive</strong> : Récupère des grilles, échelles ou tampons d'une archive</li>
-                                <li><strong>Fusionner avec un codex</strong> : Combine les données de deux codex (utile quand deux enseignants travaillent sur des groupes différents)</li>
-                                <li><strong>Exporter une sélection</strong> : Exporte un sous-ensemble du codex par trimestre</li>
-                                <li><strong>Fermer le codex</strong> : Détache le codex sans supprimer les données en mémoire</li>
+                            <p><strong>Le reste du menu.</strong></p>
+                            <ul>
+                                <li>«&nbsp;Ouvrir un codex…&nbsp;», «&nbsp;Mettre à jour dans un autre fichier…&nbsp;» (à l'endroit que tu choisis), «&nbsp;Nouveau codex&nbsp;» (à partir des données de l'application)&nbsp;;</li>
+                                <li>avec un codex ouvert&nbsp;: «&nbsp;Détails du codex&nbsp;», «&nbsp;Fusionner avec un codex…&nbsp;», «&nbsp;Comparer avec un codex…&nbsp;» et «&nbsp;Fermer le codex&nbsp;», qui le détache sans effacer les données de l'application&nbsp;;</li>
+                                <li>«&nbsp;Exporter une sélection…&nbsp;», une partie de tes données, par trimestre&nbsp;;</li>
+                                <li>«&nbsp;Archiver…&nbsp;» archive <strong>un groupe-cours</strong>&nbsp;; «&nbsp;Ouvrir une archive…&nbsp;» en récupère des grilles, des échelles ou des tampons&nbsp;;</li>
+                                <li>«&nbsp;Charger un codex data…&nbsp;» (voir «&nbsp;Labo — Analyser ta démarche pédagogique&nbsp;»).</li>
                             </ul>
 
-                            <p class="titre-11-bold-bleu-mb15" style="margin-top: 15px;">Ton codex est-il à jour ?</p>
-                            <p>Tout ce que tu fais s'enregistre dans l'application, sur cet appareil. Le fichier du codex, lui, ne change que lorsque tu choisis « Mettre à jour le codex ». Le menu Codex te dit où il en est : « Ton codex est à jour », ou « Ton codex n'a pas tes derniers changements ».</p>
+                            <p><strong>Archiver un trimestre entier.</strong> Un trimestre clos s'archive par la bibliothèque des trimestres&nbsp;: Cadre › Trimestre, accordéon Trimestre, «&nbsp;Consulter la bibliothèque&nbsp;», repli «&nbsp;Clos (n)&nbsp;», ⋮ › «&nbsp;Archiver le trimestre…&nbsp;» (voir «&nbsp;Qu'est-ce que clore un trimestre ?&nbsp;»).</p>
+
+                            <p><strong>Avant une suppression.</strong> Supprimer un trimestre, un groupe-cours ou des étudiant·es, ou tout réinitialiser, commence par «&nbsp;Écrire le codex à part&nbsp;»&nbsp;: un autre fichier, sous un autre nom, que tes prochaines mises à jour ne touchent pas. Si tu annules, rien n'est supprimé.</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Ouvrir et partager tes données -->
+                    <!-- Carte: Ouverture et partage de tes données (#1152, lot 2d, 28 oct. 2026 : entre trimestres, la bibliothèque et le repli
+                         « Importer depuis un autre trimestre » (bibliotheque-ui.js), au lieu de l'export de configuration ; les deux
+                         options et l'avertissement, qui redisaient l'écran et l'encadré Loi 25, partent, comme les captures, qui ont leur
+                         entrée. L'encadré Loi 25 est inchangé, mot pour mot (#862). Remesure du 27 oct. ; audit du 24 oct., verdict
+                         final d'`export-import` ; consigne du lot 2d, §2, entrée 7). -->
                     <div class="carte accordeon" id="accordeon-aide-export-import">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11446,45 +11243,24 @@
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Réglages → Données</p>
 
-                            <p>La section Données offre deux options pour ouvrir et partager tes données :</p>
+                            <p>D'un trimestre à l'autre, ton matériel se garde dans ta bibliothèque&nbsp;: «&nbsp;Garder dans ma bibliothèque →&nbsp;», dans la fenêtre de la bibliothèque, puis «&nbsp;← Utiliser dans ce trimestre&nbsp;» dans le trimestre suivant (voir «&nbsp;La bibliothèque&nbsp;»). Le repli «&nbsp;Importer depuis un autre trimestre&nbsp;», dans la même fenêtre, copie le matériel d'un trimestre précis.</p>
 
-                            <div class="carte-gradient-bleu">
-                                <p class="titre-11-bold-bleu-mb15">Deux options :</p>
-                                <ol class="lh-2">
-                                    <li><strong>Exporter ma config</strong> : Uniquement les outils (grilles, échelles, productions, cartouches). Pour partager avec des collègues sous licence CC BY-NC-SA.</li>
-                                    <li><strong>Ouvrir un Codex</strong> : Ouvre un codex ou une configuration partagée. Le type est détecté automatiquement.</li>
-                                </ol>
-                            </div>
-
-                            <p>Pour mettre ton travail en sûreté ou le transporter, mets ton codex à jour : menu Codex, en haut de l'écran.</p>
-
-                            <p><strong>Bonnes pratiques :</strong></p>
-                            <ul>
-                                <li><strong>Mets ton codex à jour régulièrement</strong> : menu Codex, en haut de l'écran, puis « Mettre à jour le codex »</li>
-                                <li><strong>Avant un changement majeur</strong> : Mets ton codex à jour avant de modifier tes pratiques ou grilles</li>
-                                <li><strong>Partage entre trimestres</strong> : Utilise l'export de configuration pédagogique pour réutiliser tes outils d'un trimestre à l'autre</li>
-                                <li><strong>Transfert d'appareil</strong> : Mets ton codex à jour sur l'ancien appareil, ouvre-le sur le nouveau</li>
-                            </ul>
-
-                            <div class="alerte alerte-attention">
-                                <strong>⚠️ Important :</strong> Les données sont stockées dans le navigateur. Si tu nettoies les données du navigateur ou utilises la navigation privée, tes données seront perdues. Ton codex est ta seule protection.
-                            </div>
+                            <p>Pour changer d'appareil ou mettre ton travail en sûreté, mets ton codex à jour (voir «&nbsp;Le Codex — Espace de travail portable&nbsp;»).</p>
 
                             <!-- #862 (15 sept. 2026) — ce que la Loi 25 demande à l'enseignant. Texte approuvé par Grégoire. -->
                             <div class="alerte alerte-attention">
                                 <strong>Important — les données de tes étudiant·es et la Loi 25.</strong> Elles restent dans ton navigateur, sur ton appareil&nbsp;: Labo Codex ne les envoie nulle part, et personne d'autre ne peut les consulter. Elles demeurent sous la responsabilité de ton établissement, exactement comme si tu les saisissais dans un chiffrier sur le même ordinateur. Garde donc cet appareil personnel, verrouillé par un mot de passe, avec un disque chiffré. Personne ne met ton codex à jour à ta place&nbsp;: utilise «&nbsp;Mettre à jour le codex&nbsp;» régulièrement. «&nbsp;Réinitialiser toutes les données&nbsp;» efface tout, sans retour possible. Pour le détail&nbsp;: <a href="https://codexnumeris.org/labo-codex-ou-vivent-vos-donnees" target="_blank" rel="noopener noreferrer"><em>Labo Codex&nbsp;: où vivent vos données&nbsp;?</em></a> Une question&nbsp;: labo@codexnumeris.org.
                             </div>
-
-                            <p><strong>Captures de progression (Snapshots) :</strong></p>
-                            <ul>
-                                <li>Les captures enregistrent l'état des indices A-C-P à des moments clés</li>
-                                <li>Captures hebdomadaires automatiques + captures lors des interventions</li>
-                                <li>Consulte les statistiques de captures dans Réglages → Données</li>
-                            </ul>
                         </div>
                     </div>
 
-                    <!-- Carte: Partage et communs éducatifs -->
+                    <!-- Carte: Partager tes ressources pédagogiques (#1152, lot 2d, 28 oct. 2026 : ce qui rassure (fichier signé, licence, rien
+                         de confidentiel ; partage-export.js, partage-format.js:46-47) ; le mode d'emploi renvoie à `collaboration` ;
+                         le repli par trimestre là où il est : au pied de « Dans ce trimestre » pour les grilles, cartouches et pratiques
+                         (grilles.js:2444, cartouches.js, pratiques-gestion.js), de « Dans ta bibliothèque » pour les échelles
+                         et les productions, où la copie arrive (echelles.js, productions-bibliotheque-ui.js). Le nom de fichier
+                         figé, l'échéance d'une production (retirée du paquet) et les « communs éducatifs » partent. Remesure du 27 oct. ;
+                         audit du 24 oct., verdict final de `partage` ; consigne du lot 2d, §2, entrée 8). -->
                     <div class="carte accordeon" id="accordeon-aide-partage">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11492,48 +11268,22 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>L'application comprend un système d'import/export qui permet de <strong>partager du matériel pédagogique</strong> entre collègues :</p>
+                            <p>Cinq ressources se partagent entre collègues&nbsp;: grilles, échelles, cartouches, productions et pratiques de notation. Le fichier, un <code>.lcz</code>, est signé de ta clé et publié sous licence CC BY-NC-SA 4.0&nbsp;; il ne contient aucune donnée confidentielle (ni noms d'étudiant·es, ni notes, ni présences). Le mode d'emploi est dans «&nbsp;Collaboration entre collègues&nbsp;».</p>
 
-                            <ul>
-                                <li><strong>Grilles d'évaluation</strong> : Critères et pondérations</li>
-                                <li><strong>Échelles de performance</strong> : Niveaux et descriptions</li>
-                                <li><strong>Cartouches de rétroaction</strong> : Commentaires prédéfinis par critère</li>
-                                <li><strong>Productions</strong> : Définitions d'artefacts avec échéances</li>
-                                <li><strong>Configurations de pratiques</strong> : Paramètres complets</li>
-                            </ul>
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Import depuis un trimestre précédent</h4>
-                                <p>Réutilise ton matériel d'un trimestre à l'autre sans tout recréer :</p>
-                                <ul class="mt-5">
-                                    <li><strong>Échelles</strong> : Section "Importer depuis un autre trimestre" dans la bibliothèque</li>
-                                    <li><strong>Grilles</strong> : Dropdown de sélection du trimestre source</li>
-                                    <li><strong>Productions</strong> : Filtre par cours pour importer sélectivement</li>
-                                </ul>
-                                <p class="mt-10 text-muted u-texte-09"><em>L'import crée des copies indépendantes - les originaux ne sont pas affectés.</em></p>
-                            </div>
-
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">Licence Creative Commons</h4>
-                                <p>Tout matériel exporté est protégé par la licence <strong>CC BY-NC-SA 4.0</strong>, qui permet le partage et l'adaptation tout en préservant l'attribution à la personne autrice originale.</p>
-                                <p class="mt-10">Cette approche favorise l'émergence de <strong>communs éducatifs</strong> : plutôt que de recommencer à zéro, on peut s'inspirer du travail de ses pairs, l'adapter à son contexte et le redistribuer à son tour.</p>
-                            </div>
-
-                            <div class="alerte alerte-succes">
-                                <p><strong>Protection des données</strong></p>
-                                <p>Les exports de matériel pédagogique ne contiennent <strong>jamais</strong> de données confidentielles (noms d'étudiant·es, notes, présences). Seul le matériel réutilisable est partagé.</p>
-                            </div>
-
-                            <div class="alerte alerte-info">
-                                <p><strong>Nommage des fichiers export</strong></p>
-                                <p>Les fichiers exportés suivent un format standardisé : <code>type-nom-cours-discipline-date.json</code></p>
-                                <p class="mt-5 text-muted u-texte-09">Ex: <em>echelle-IDME-601101-litterature-2026-01-09.json</em></p>
-                            </div>
+                            <p>Ton propre matériel d'un autre trimestre se reprend par le repli «&nbsp;Importer depuis un autre trimestre&nbsp;», qui en fait une copie&nbsp;: au pied de «&nbsp;Dans ce trimestre&nbsp;» pour les grilles, les cartouches et les pratiques&nbsp;; au pied de «&nbsp;Dans ta bibliothèque&nbsp;» pour les échelles et les productions, où la copie arrive.</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Collaboration entre collègues -->
+                    <!-- Carte: Collaboration entre collègues (#1152, lot 2d, 28 oct. 2026 : cinq ressources, les pratiques aussi ; « Exporter
+                         pour partager » dans le ⋮ d'une rangée de « Dans ce trimestre » (grilles.js:2343 et les quatre autres
+                         fenêtres) ; l'import par « Importer ou exporter ▾ » dans les cinq fenêtres ET par Réglages › Données (la
+                         remesure l'emporte sur le dossier, qui disait faux « une seule zone de dépôt ») ; « Partagés par des
+                         collègues » (partage-section.js:648-670) ; l'identité de Cadre › Trimestre, Enseignant·e
+                         (partage-export.js:275-279) ; la chaîne d'attribution à un seul maillon (partage-format.js:296-320) ;
+                         l'import .txt sans casse, accents ni ponctuation, puis par inclusion (cartouches.js:2135-2160) ; une grille
+                         « à compléter » ne part pas (partage-export.js:362-372). Les scénarios, l'exposé de la licence, le mécanisme
+                         d'attribution que le code ne fait pas et l'exemple à trois personnes partent. Remesure du 27 oct. ; audit du
+                         24 oct., verdict final de `collaboration` ; consigne du lot 2d, §2, entrée 9). -->
                     <div class="carte accordeon border-left-purple" id="accordeon-aide-collaboration">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11541,179 +11291,18 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Partage de matériel pédagogique via Import/Export</strong></p>
-
-                        <p>Le système permet de partager facilement du matériel pédagogique entre enseignant·es, favorisant la collaboration départementale et l'harmonisation des pratiques.</p>
-
-                        <div class="carte-purple-my15">
-                            <h4 class="text-purple-mb10">Ressources partageables (.lcz signé)</h4>
-                            <p class="mb-10-only">Chaque type de matériel peut être exporté et partagé :</p>
-                            <ul class="lh-relaxed">
-                                <li><strong>Grilles de critères</strong> (Conception → Grilles de critères)
-                                    <ul class="mt-5-text-95">
-                                        <li>Export («&nbsp;Exporter pour partager&nbsp;») : un fichier <code>.lcz</code> signé dont le nom se compose du type de ressource, de son nom, de ton code de cours et de ta discipline, de la licence, puis de la date et de l'heure.</li>
-                                        <li>Contient : les critères de la grille, leurs pondérations, leurs descriptions</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Échelles de performance</strong> (Conception → Échelles de performance)
-                                    <ul class="mt-5-text-95">
-                                        <li>Export («&nbsp;Exporter pour partager&nbsp;») : un fichier <code>.lcz</code> signé dont le nom se compose du type de ressource, de son nom, de ton code de cours et de ta discipline, de la licence, puis de la date et de l'heure.</li>
-                                        <li>Contient : les niveaux de ton échelle, leurs seuils et leurs descriptions</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Productions</strong> (Conception → Productions étudiantes)
-                                    <ul class="mt-5-text-95">
-                                        <li>Export («&nbsp;Exporter pour partager&nbsp;») : un fichier <code>.lcz</code> signé dont le nom se compose du type de ressource, de son nom, de ton code de cours et de ta discipline, de la licence, puis de la date et de l'heure.</li>
-                                        <li>Contient : artefacts, pondérations, liens avec grilles</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Cartouches de rétroaction</strong> (Conception → Cartouches de rétroaction)
-                                    <ul class="mt-5-text-95">
-                                        <li>Export («&nbsp;Exporter pour partager&nbsp;») : un fichier <code>.lcz</code> signé dont le nom se compose du type de ressource, de son nom, de ton code de cours et de ta discipline, de la licence, puis de la date et de l'heure.</li>
-                                        <li>Contient : commentaires prédéfinis par critère et niveau</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="carte-green-my15">
-                            <h4 class="text-success-dark-mb10">🤝 Scénarios de collaboration</h4>
-
-                            <p><strong>1. Harmonisation départementale</strong></p>
-                            <ul class="mb-15-lh">
-                                <li>Plusieurs enseignant·es du même cours collaborent</li>
-                                <li>Création de grilles et échelles communes</li>
-                                <li>Partage de cartouches standardisées</li>
-                                <li>Cohérence interdépartementale</li>
-                            </ul>
-
-                            <p><strong>2. Mentorat et formation</strong></p>
-                            <ul class="mb-15-lh">
-                                <li>Enseignant·e expérimenté·e partage avec nouvel·le collègue</li>
-                                <li>Exemples de bonnes pratiques</li>
-                                <li>Modèles prêts à adapter</li>
-                                <li>Réduction du temps de préparation initial</li>
-                            </ul>
-
-                            <p><strong>3. Réutilisation entre sessions</strong></p>
-                            <ul class="mb-15-lh">
-                                <li>Exporter son propre matériel en fin de trimestre</li>
-                                <li>Réimporter et ajuster pour la session suivante</li>
-                                <li>Amélioration continue du matériel</li>
-                                <li>Conservation d'une base de départ éprouvée</li>
-                            </ul>
-
-                            <p><strong>4. Communautés de pratique</strong></p>
-                            <ul class="lh-16">
-                                <li>Partage de matériel entre collèges</li>
-                                <li>Contribution à un répertoire commun</li>
-                                <li>Mutualisation des efforts de création</li>
-                            </ul>
-                        </div>
-
-                        <div class="carte-orange-my15">
-                            <h4 class="titre-orange-mb10"><img src="icons/icon-txt.svg" alt="" class="btn-inline-icon"> Import sp&eacute;cial : fichiers .txt Markdown</h4>
-                            <p class="mb-10-only">Pour les <strong>cartouches de rétroaction</strong> uniquement, tu peux aussi :</p>
-                            <ul class="lh-16">
-                                <li>Rédiger tes commentaires dans un document texte (Word, Google Docs, etc.)</li>
-                                <li>Enregistrer au format .txt avec structure Markdown</li>
-                                <li>Importer directement dans une cartouche en édition</li>
-                                <li>Gain de temps : rédaction dans ton environnement préféré</li>
-                            </ul>
-                            <p class="text-09-mt10-deep-orange"><strong>Format requis :</strong> Les noms de critères dans le fichier doivent correspondre exactement à ceux de la grille (ex: STRUCTURE, RIGUEUR, PLAUSIBILITÉ, NUANCE).</p>
-                        </div>
-
-                        <div class="alerte alerte-info">
-                            <strong><img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Protection de la vie privée :</strong> Les exports de matériel pédagogique ne contiennent JAMAIS de données confidentielles (noms d'étudiant·es, numéros DA, notes individuelles, présences). Seul le matériel pédagogique réutilisable est exporté.
-                        </div>
-
-                        <div class="carte-gradient-bleu-mt15">
-                            <h4 class="u-mb-10 u-texte-bleu">Flux typique de partage</h4>
-                            <ol class="lh-relaxed">
-                                <li><strong>Enseignant·e A</strong> : Exporte son matériel (boutons d'export dans chaque section)</li>
-                                <li><strong>Partage</strong> : Fichiers <code>.lcz</code> signés (ou le <code>.json</code> de «&nbsp;Exporter ma config&nbsp;») envoyés par courriel, Drive, Teams, etc.</li>
-                                <li><strong>Enseignant·e B</strong> : Importe les fichiers (boutons d'import dans chaque section)</li>
-                                <li><strong>Adaptation</strong> : Ajuste le matériel selon ses besoins</li>
-                                <li><strong>Utilisation</strong> : Ressources prêtes pour le trimestre</li>
-                            </ol>
-                        </div>
-
-                        <div class="alerte alerte-succes u-mt-20">
-                            <h4 class="u-mb-10 u-texte-succes"><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Licence Creative Commons BY-NC-SA 4.0</h4>
-                            <p><strong>Tout le matériel exporté est automatiquement sous licence CC BY-NC-SA 4.0</strong></p>
-
-                            <p style="margin: 10px 0;"><strong>Cette licence permet :</strong></p>
-                            <ul class="u-mb-15">
-                                <li>✅ <strong>Partager</strong> : Copier et redistribuer le matériel</li>
-                                <li>✅ <strong>Adapter</strong> : Modifier et transformer le matériel</li>
-                                <li>✅ <strong>Utiliser</strong> : Pour ton enseignement</li>
-                            </ul>
-
-                            <p style="margin: 10px 0;"><strong>Avec ces conditions :</strong></p>
-                            <ul class="u-mb-15">
-                                <li><img src="icons/icon-edit.svg" alt="" class="btn-inline-icon"> <strong>Attribution (BY)</strong> : Créditer l'auteur original</li>
-                                <li><img src="icons/icon-unavailable.svg" alt="" class="btn-inline-icon"> <strong>Non-commercial (NC)</strong> : Pas d'usage commercial</li>
-                                <li><img src="icons/icon-refresh.svg" alt="" class="btn-inline-icon"> <strong>Partage dans les mêmes conditions (SA)</strong> : Partager sous la même licence</li>
-                            </ul>
-
-                            <div class="u-mt-15 u-p-12" style="background: var(--alerte-fond-succes); border-radius: 6px">
-                                <p class="u-texte-bold" style="margin: 0 0 10px 0; color: var(--alerte-texte-succes)">🤝 Système automatique d'attribution des contributeurs</p>
-
-                                <p style="margin: 10px 0;"><strong>Comment ça fonctionne :</strong></p>
-
-                                <p style="margin: 5px 0; padding-left: 15px;"><strong>1. Création</strong> : Quand tu crées un document (production, grille, échelle, cartouche, pratique) :</p>
-                                <ul style="margin: 5px 0 10px 20px;">
-                                    <li>Ton nom (enseignant du groupe-cours actif) est enregistré comme <strong>auteur original</strong></li>
-                                    <li>La date de création est automatiquement enregistrée</li>
-                                    <li>La licence CC BY-NC-SA 4.0 est appliquée</li>
-                                </ul>
-
-                                <p style="margin: 5px 0; padding-left: 15px;"><strong>2. Modification par un·e collègue</strong> : Si quelqu'un d'autre modifie ton document :</p>
-                                <ul style="margin: 5px 0 10px 20px;">
-                                    <li>Le système détecte automatiquement que la personne n'est pas l'auteur original</li>
-                                    <li>Son nom est ajouté à la liste des <strong>contributeurs</strong> (une seule fois)</li>
-                                    <li><strong>L'auteur original est toujours préservé</strong></li>
-                                    <li>Aucune action requise - c'est entièrement automatique !</li>
-                                </ul>
-
-                                <p style="margin: 5px 0; padding-left: 15px;"><strong>3. Import de matériel partagé</strong> : Quand tu importes du matériel :</p>
-                                <ul style="margin: 5px 0 10px 20px;">
-                                    <li>L'auteur original et les contributeurs existants sont préservés</li>
-                                    <li>Si tu modifies le document, tu seras ajouté·e automatiquement comme contributeur</li>
-                                </ul>
-
-                                <p style="margin: 5px 0; padding-left: 15px;"><strong>4. Export/Partage</strong> : Le fichier exporté contient :</p>
-                                <ul style="margin: 5px 0 0 20px;">
-                                    <li><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Toutes les informations de licence CC BY-NC-SA 4.0</li>
-                                    <li><img src="icons/icon-profile.svg" alt="" class="btn-inline-icon"> Auteur original : <em>préservé à jamais</em></li>
-                                    <li><img src="icons/icon-profile.svg" alt="" class="btn-inline-icon"> Contributeurs : <em>liste complète avec dates d'ajout</em></li>
-                                    <li><img src="icons/icon-calendar.svg" alt="" class="btn-inline-icon"> Dates de création et dernière modification</li>
-                                </ul>
+                            <div class="carte-purple-my15">
+                                <h4 class="text-purple-mb10">Ressources partageables (.lcz signé)</h4>
+                                <p>Grilles de critères, échelles de performance, cartouches de rétroaction, productions et pratiques de notation. Une grille dont un critère est «&nbsp;à compléter&nbsp;» ne part pas.</p>
                             </div>
 
-                            <div class="u-mt-15 u-p-12" style="background: var(--bleu-pale); border-radius: 6px; border-left: 4px solid var(--bleu-clair)">
-                                <p class="u-texte-bold" style="margin: 0 0 10px 0; color: var(--bleu-clair)"><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Règle simple pour les contributeurs</p>
-                                <ul style="margin: 0;">
-                                    <li>Si tu es l'<strong>auteur original</strong> → Tu restes l'auteur, rien n'est ajouté</li>
-                                    <li>Si tu <strong>n'es pas</strong> l'auteur original → Tu es ajouté comme contributeur (une seule fois, automatiquement)</li>
-                                    <li>Un·e contributeur·trice reste dans la liste peu importe le nombre de modifications qu'il/elle fait</li>
-                                </ul>
-                            </div>
+                            <p><strong>Envoyer.</strong> Dans la fenêtre de la bibliothèque, le ⋮ d'une rangée de «&nbsp;Dans ce trimestre&nbsp;» offre «&nbsp;Exporter pour partager&nbsp;». Aucun nom ne t'est demandé&nbsp;: la fenêtre dit à qui la ressource est attribuée, d'après Cadre › Trimestre, accordéon Enseignant·e. Tu envoies le fichier par le moyen de ton choix.</p>
 
-                            <p class="u-mt-15 u-texte-italic" style="color: var(--gris-moyen)">
-                                <strong>Exemple :</strong> Bruno Modèle crée un ensemble d'objectifs et l'exporte.
-                                Ada Exemple l'importe, l'adapte pour son cours, et l'exporte.
-                                Le fichier crédite Bruno comme auteur original ET Ada comme contributrice.
-                                Si Chloé Essai importe ensuite la version d'Ada et y contribue,
-                                le fichier créditera les trois personnes dans l'ordre chronologique.
-                            </p>
+                            <p><strong>Recevoir.</strong> «&nbsp;Importer ou exporter ▾&nbsp;» › «&nbsp;Importer le partage d'une ou d'un collègue&nbsp;», dans chacune des cinq fenêtres, ou la carte «&nbsp;Partage entre collègues&nbsp;» de Réglages › Données. Le fichier est vérifié avant d'entrer. La ressource arrive dans «&nbsp;Partagés par des collègues&nbsp;», au pied de «&nbsp;Dans ta bibliothèque&nbsp;», non modifiable&nbsp;; «&nbsp;Dupliquer vers mes documents&nbsp;» («&nbsp;Dupliquer avec sa grille&nbsp;» pour une cartouche) en fait une copie que tu adaptes, et l'attribution d'origine est conservée.</p>
 
-                            <p class="alerte alerte-attention u-mt-15">
-                                <span class="icone-info-aide taille-inline" aria-hidden="true"></span> <strong>Conseil :</strong> Même si tu n'as fait que de petites modifications,
-                                entre ton nom lors de l'export. Cela permet de tracer l'évolution du matériel
-                                et de reconnaître le travail de chacun·e dans la communauté pédagogique.
-                            </p>
-                        </div>
+                            <p><strong>L'attribution.</strong> Le fichier crédite une seule personne, l'autrice ou l'auteur d'origine, sous licence CC BY-NC-SA 4.0&nbsp;: partage et adaptation permis, avec attribution, sans usage commercial, sous la même licence.</p>
+
+                            <p><strong>Des commentaires en texte.</strong> Dans une cartouche, «&nbsp;Importer depuis un fichier texte (.txt / .md)&nbsp;» lit des commentaires rédigés ailleurs. Les noms de critères du fichier sont rapprochés de ceux de la grille sans tenir compte de la casse, des accents ni de la ponctuation, puis par inclusion.</p>
                         </div>
                     </div>
                 </div>
@@ -11724,15 +11313,17 @@
                 <div id="aide-reference" class="sous-section">
                     <h2>Référence</h2>
 
-                    <!-- Carte: Glossaire (48 termes) -->
+                    <!-- Carte: Glossaire (#1152, lot 2d, 28 oct. 2026 : titre sans nombre, phrase sans la liste des étapes ; le
+                         catalogue, accompagnement-contenu-terme.js, compte 59 termes et ses filtres six étapes ; ses corrections
+                         sont au lot 3. Audit du 24 oct., verdict final de `glossaire` ; consigne du lot 2d, §2, entrée 10). -->
                     <div class="carte accordeon" id="accordeon-aide-glossaire">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Glossaire — 48 termes du parcours
+                                <span class="accordeon-chevron">▼</span> Glossaire du parcours
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p class="text-muted">Liste alphabétique des termes de Labo Codex, filtrable par étape du parcours (Numérisation → Croisement → Observation → Compétence).</p>
+                            <p class="text-muted">Liste alphabétique des termes de Labo Codex, filtrable par étape du parcours.</p>
                             <div id="glossaire-rendu"></div>
                         </div>
                     </div>
@@ -11918,7 +11509,13 @@
                         </div><!-- fin accordeon-contenu glossaire -->
                     </div>
 
-                    <!-- Carte: FAQ (Phase 2) -->
+                    <!-- Carte: FAQ (#1152, lot 2d, 28 oct. 2026 : les questions qui répètent une carte voisine partent (A-C-P, RàI, hors
+                         ligne, ordre de configuration : le matériel se garde pour tous les trimestres par la bibliothèque) ; « Invalid
+                         Date » passe aux problèmes courants ; l'abandon (colonne « Remarque », trimestre-v2-etudiants.js:434-440 ;
+                         grisé·e et hors des statistiques, etudiants.js:632-640) et la pondération (le total signalé sans bloquer,
+                         productions.js:2826-2852 ; la sommative calcule sur les productions évaluées, pratiques/pratique-sommative.js:98-108)
+                         sont corrigés. Gardés : « Transférer le fichier codex » (D8) et la question des seuils (sentinelle du 15 oct.).
+                         Audit du 24 oct., verdict final de `faq` ; remesure du 27 oct. ; consigne du lot 2d, §2, entrée 11). -->
                     <div class="carte accordeon" id="accordeon-aide-faq">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11928,51 +11525,13 @@
                         <div class="accordeon-contenu">
 
                         <div class="my-20">
-                            <h4 class="titre-bleu-mb8">Questions sur le suivi</h4>
-
-                            <details class="carte-grise-info">
-                                <summary class="titre-cliquable">Quelle est la différence entre Assiduité (A), Complétion (C) et Performance (P) ?</summary>
-                                <div class="mt-10-pl-10">
-                                    <ul>
-                                        <li><strong>Assiduité (A) :</strong> Mesure la présence physique et cognitive en classe. Un étudiant assidu est engagé dans son apprentissage.</li>
-                                        <li><strong>Complétion (C) :</strong> Mesure la remise des travaux demandés. Un taux élevé indique une bonne mobilisation.</li>
-                                        <li><strong>Performance (P) :</strong> Mesure la qualité des productions selon tes critères d'évaluation (ex : SRPNF dans la pratique PAN – Standards). Reflète le niveau de maîtrise.</li>
-                                    </ul>
-                                    <p class="mt-10"><strong>Exemple concret :</strong> Un étudiant peut avoir A=95&nbsp;% (toujours présent), C=80&nbsp;% (remet la plupart des travaux) et P=65&nbsp;% (qualité variable). La lecture croisée des trois indices décrit son engagement actuel.</p>
-                                </div>
-                            </details>
-
-                            <details class="carte-grise-info">
-                                <summary class="titre-cliquable">Qu'est-ce que la Réponse à l'Intervention (RàI) ?</summary>
-                                <div class="mt-10-pl-10">
-                                    <p>La RàI est un système d'intervention à trois niveaux :</p>
-                                    <ul>
-                                        <li><strong>Niveau 1 - Universel :</strong> Enseignement de qualité pour tous (80&nbsp;% des étudiant·es)</li>
-                                        <li><strong>Niveau 2 - Préventif :</strong> Interventions de groupe pour étudiant·es fragiles ou à risque (15&nbsp;% des étudiant·es)</li>
-                                        <li><strong>Niveau 3 - Intensif :</strong> Soutien individualisé pour étudiant·es en situation critique (&lt; 5&nbsp;% des étudiant·es)</li>
-                                    </ul>
-                                    <p class="mt-10"><strong>Dans l'application :</strong> Si l'option RàI est activée (Labo → Outils d'observation), le profil étudiant suggère le niveau RàI et des recommandations d'intervention : le niveau RàI se décide d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (3 par défaut). Ce pattern lit tous les critères de la grille de référence, sauf ceux marqués «&nbsp;Aucun&nbsp;». L'indice de persistance (IPB) nomme la cible de l'intervention ; il ne fixe pas le niveau.</p>
-                                </div>
-                            </details>
-                        </div>
-
-                        <div class="my-20">
                             <h4 class="titre-bleu-mb8">Questions techniques</h4>
 
                             <details class="carte-grise-info">
                                 <summary class="titre-cliquable">Mes données s'enregistrent-elles toutes seules ?</summary>
                                 <div class="mt-10-pl-10">
-                                    <p><strong>Oui, dans l'application.</strong> Ce que tu fais s'enregistre dans ton navigateur, sur cet appareil, et le témoin « Enregistré », en bas de l'écran, te le confirme. Quelques écrans de création (une production, une intervention, une fiche du Cadre) attendent leur bouton : tant que tu ne l'as pas cliqué, rien n'est écrit, et l'application te prévient si tu fermes la fiche ou recharges la page avant.</p>
-                                <p><strong>Le codex</strong> est un fichier, sur ta clé USB par exemple. Il ne change que lorsque tu choisis « Mettre à jour le codex », et le menu Codex te dit s'il est à jour. C'est lui qui te rend tes données si le navigateur les perd.</p>
-                                    <div class="alerte alerte-attention mt-10">
-                                        <strong>⚠️ Important :</strong> Tes données peuvent être perdues si tu :
-                                        <ul class="m-10-0-0-20">
-                                            <li>Utilises le mode navigation privée</li>
-                                            <li>Nettoies l'historique/les données du navigateur</li>
-                                            <li>Changes de navigateur ou d'appareil</li>
-                                        </ul>
-                                    </div>
-                                    <p class="mt-10"><strong>Recommandation :</strong> Mets ton codex à jour régulièrement (menu Codex, en haut de l'écran).</p>
+                                    <p><strong>Oui, dans l'application.</strong> Ce que tu fais s'enregistre dans ton navigateur, sur cet appareil, et le témoin «&nbsp;Enregistré&nbsp;», en bas de l'écran, te le confirme. Quelques écrans de création (une production, une intervention, une fiche du Cadre) attendent leur bouton&nbsp;; l'application te prévient si tu fermes la fiche ou recharges la page avant.</p>
+                                    <p><strong>Le codex</strong> ne change qu'à «&nbsp;Mettre à jour le codex&nbsp;». C'est lui qui te rend tes données si le navigateur les perd&nbsp;: en navigation privée, si tu nettoies les données du navigateur, ou si tu changes de navigateur ou d'appareil.</p>
                                 </div>
                             </details>
 
@@ -11988,81 +11547,22 @@
                                     <p class="mt-10"><strong>Note :</strong> Il n'y a pas de synchronisation automatique pour garantir la protection des données et le fonctionnement hors-ligne.</p>
                                 </div>
                             </details>
-
-                            <details class="carte-grise-info">
-                                <summary class="titre-cliquable">L'application fonctionne-t-elle sans connexion Internet ?</summary>
-                                <div class="mt-10-pl-10">
-                                    <p><strong>Oui, totalement.</strong> L'application est 100&nbsp;% autonome et ne nécessite aucune connexion Internet pour fonctionner.</p>
-                                    <p class="mt-10">Tu peux l'utiliser :</p>
-                                    <ul>
-                                        <li>En mode hors-ligne complet</li>
-                                        <li>Sur un appareil sans accès réseau</li>
-                                        <li>En ouvrant simplement le fichier HTML local</li>
-                                    </ul>
-                                </div>
-                            </details>
-
-                            <details class="carte-grise-info">
-                                <summary class="titre-cliquable">Pourquoi le calendrier affiche «Invalid Date» ?</summary>
-                                <div class="mt-10-pl-10">
-                                    <p><strong>Cause probable :</strong> Le calendrier n'a pas été généré ou a été corrompu.</p>
-                                    <p class="mt-10"><strong>Solution :</strong></p>
-                                    <ol>
-                                        <li>Aller dans Cadre → Trimestre</li>
-                                        <li>Remplir les champs (date début, date fin, nb semaines)</li>
-                                        <li>Cliquer sur «Régénérer»</li>
-                                        <li>Vérifier que le message de succès apparaît</li>
-                                        <li>Retourner dans Cadre → Calendrier scolaire pour confirmer</li>
-                                    </ol>
-                                </div>
-                            </details>
                         </div>
 
                         <div class="my-20">
                             <h4 class="titre-bleu-mb8">Questions sur l'utilisation</h4>
 
                             <details class="carte-grise-info">
-                                <summary class="titre-cliquable">Dans quel ordre dois-je configurer l'application ?</summary>
+                                <summary class="titre-cliquable">Comment gérer un·e étudiant·e qui abandonne en cours de trimestre ?</summary>
                                 <div class="mt-10-pl-10">
-                                    <p><strong>Ordre recommandé :</strong></p>
-                                    <ol>
-                                        <li><strong>Cadre → Trimestre :</strong> Configuration centralisée — trimestre (dates, calendrier), cours, enseignant·e, groupe d'étudiants et horaire</li>
-                                        <li><strong>Conception → Grilles de critères :</strong> Créer tes grilles d'évaluation</li>
-                                        <li><strong>Conception → Échelles de performance :</strong> Personnaliser l'échelle IDME si nécessaire</li>
-                                        <li><strong>Conception → Productions étudiantes :</strong> Définir toutes les évaluations du cours</li>
-                                        <li><strong>Conception → Cartouches de rétroaction :</strong> Créer tes cartouches de rétroaction</li>
-                                    </ol>
-                                    <div class="alerte alerte-succes mt-10">
-                                        <strong>✓ Astuce :</strong> Une fois configuré, tu peux exporter tout le matériel et le réutiliser pour les prochaines sessions !
-                                    </div>
-                                </div>
-                            </details>
-
-                            <details class="carte-grise-info">
-                                <summary class="titre-cliquable">Comment gérer un·e étudiant·e qui abandonne en cours de session ?</summary>
-                                <div class="mt-10-pl-10">
-                                    <ol>
-                                        <li>Aller dans Cadre → Trimestre → Groupe d'étudiants</li>
-                                        <li>Trouver l'étudiant dans la liste</li>
-                                        <li>Changer son statut de «Actif» à «Inactif» ou «Abandon»</li>
-                                        <li>L'étudiant disparaîtra des aperçus actifs mais ses données seront conservées</li>
-                                    </ol>
-                                    <p class="mt-10"><strong>Note :</strong> Tu peux réactiver l'étudiant en changeant à nouveau son statut si nécessaire.</p>
+                                    <p>Dans Cadre → Trimestre, accordéon Groupe d'étudiant·es, choisis «&nbsp;Inactivité&nbsp;» ou «&nbsp;Décrochage&nbsp;» dans la colonne «&nbsp;Remarque&nbsp;» de sa rangée. L'étudiant·e reste visible, grisé·e, et sort des statistiques du groupe&nbsp;; ses données restent. «&nbsp;Aucune&nbsp;» efface la remarque.</p>
                                 </div>
                             </details>
 
                             <details class="carte-grise-info">
                                 <summary class="titre-cliquable">Que faire si la pondération totale n'est pas 100&nbsp;% ?</summary>
                                 <div class="mt-10-pl-10">
-                                    <p>L'application affiche la pondération totale dans Conception → Productions étudiantes. Si elle n'est pas égale à 100&nbsp;% :</p>
-                                    <ol>
-                                        <li>Vérifier que toutes les évaluations sont créées</li>
-                                        <li>Ajuster les pondérations pour atteindre exactement 100&nbsp;%</li>
-                                        <li>Les artefacts d'un portfolio ne comptent PAS dans le total (seul le Portfolio conteneur compte)</li>
-                                    </ol>
-                                    <div class="alerte alerte-attention mt-10">
-                                        <strong>⚠️ Important :</strong> Le calcul de la note finale nécessite que la pondération totale soit exactement 100&nbsp;%.
-                                    </div>
+                                    <p>Conception → Productions étudiantes affiche le total et dit ce qui manque ou ce qui est en trop, sans bloquer. Les artefacts d'un portfolio n'y entrent pas&nbsp;: seul le portfolio compte. En sommative, la note se calcule sur les productions évaluées, chacune au poids de sa pondération.</p>
                                 </div>
                             </details>
 
@@ -12077,7 +11577,11 @@
                         </div>
                     </div>
 
-                    <!-- Carte: Résolution de problèmes -->
+                    <!-- Carte: Résolution de problèmes (#1152, lot 2d, 28 oct. 2026 : aucun bouton ne « régénère » le calendrier ; il se
+                         construit à chaque changement des trois dates obligatoires de Cadre › Trimestre (trimestre-v2-init.js:469-487,
+                         `sauvegarderCadreCalendrierV2`) ; « Invalid Date » rejoint le calendrier vide, sans la cause « bug connu »,
+                         qu'aucune fiche ne documente ; A ne compte que les séances saisies (« Confirmer la séance »,
+                         saisie-presences.js:1161). Audit du 24 oct., verdict final de `problemes` ; consigne du lot 2d, §2, entrée 12). -->
                     <div class="carte accordeon" id="accordeon-aide-problemes">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -12087,26 +11591,14 @@
                         <div class="accordeon-contenu">
 
                         <div class="alerte-info-grise">
-                            <h4 style="color: var(--bleu-principal)">Calendrier vide après rechargement</h4>
-                            <p><strong>Cause :</strong> Le calendrier n'a pas été créé ou est endommagé</p>
-                            <p><strong>Solution :</strong> Aller dans Cadre → Trimestre → Régénérer le calendrier</p>
+                            <h4 style="color: var(--bleu-principal)">Calendrier vide, ou «&nbsp;Invalid Date&nbsp;»</h4>
+                            <p><strong>Solution :</strong> recharge la page. Si le problème reste&nbsp;: le calendrier se construit à partir des trois dates obligatoires de Cadre → Trimestre, «&nbsp;Début du trimestre&nbsp;», «&nbsp;Fin des cours réguliers&nbsp;» et «&nbsp;Fin du trimestre&nbsp;»&nbsp;; vérifie qu'elles sont remplies, et changer l'une d'elles le reconstruit.</p>
                         </div>
 
                         <div class="alerte-info-grise">
                             <h4 style="color: var(--bleu-principal)">Indices A non calculés</h4>
-                            <p><strong>Cause :</strong> Aucune présence n'a encore été saisie</p>
-                            <p><strong>Solution :</strong>
-                                <ol class="m-5-0-0-20">
-                                    <li>Aller dans Suivi → Saisie des présences</li>
-                                    <li>Saisir au moins une présence pour initialiser le calcul</li>
-                                </ol>
-                            </p>
-                        </div>
-
-                        <div class="alerte-info-grise">
-                            <h4 style="color: var(--bleu-principal)">« Invalid Date » dans le calendrier</h4>
-                            <p><strong>Cause :</strong> Bug connu lié à un conflit interne</p>
-                            <p><strong>Solution :</strong> Recharger la page devrait corriger le problème. Si le problème persiste, régénère le calendrier dans Cadre → Trimestre.</p>
+                            <p><strong>Cause :</strong> A ne compte que les séances saisies.</p>
+                            <p><strong>Solution :</strong> dans Suivi → Saisie des présences, saisis une séance, ou «&nbsp;Confirmer la séance&nbsp;» si tout le monde était là.</p>
                         </div>
 
                         <div class="alerte-info-grise">
@@ -12118,7 +11610,10 @@
                         </div>
                     </div>
 
-                    <!-- Carte: Ressources -->
+                    <!-- Carte: Ressources (#1152, lot 2d, 28 oct. 2026 : ne reste que la bibliographie, entière ; les deux puces du site et le
+                         bloc des licences partent (l'écran Réglages › À propos les porte ; la ligne qui y renvoie suit cette carte, et
+                         remplace la mention de « LICENSE.md ») ; les liens s'ouvrent avec rel="noopener noreferrer". Audit du 24 oct.,
+                         verdict final de `ressources` ; consigne du lot 2d, §2, entrée 13). -->
                     <div class="carte accordeon" id="accordeon-aide-ressources">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -12129,13 +11624,13 @@
 
                         <p><strong>Références bibliographiques :</strong></p>
                         <div class="text-09-lh16-pl20-indent">
-                            <p class="my-10">Arseneault-Hubert, F., Cormier, C. et Voisard, B. (2024). Les pratiques alternatives de notation : Pour mieux soutenir les apprentissages et en témoigner. <em>Pédagogie collégiale</em>, <em>37</em>(2), 27. <a href="https://eduq.info/xmlui/bitstream/handle/11515/39399/Voisard-et-al-37-2-24.pdf" target="_blank" style="color: var(--bleu-principal)">https://eduq.info/xmlui/bitstream/handle/11515/39399/Voisard-et-al-37-2-24.pdf</a></p>
+                            <p class="my-10">Arseneault-Hubert, F., Cormier, C. et Voisard, B. (2024). Les pratiques alternatives de notation : Pour mieux soutenir les apprentissages et en témoigner. <em>Pédagogie collégiale</em>, <em>37</em>(2), 27. <a href="https://eduq.info/xmlui/bitstream/handle/11515/39399/Voisard-et-al-37-2-24.pdf" target="_blank" rel="noopener noreferrer" style="color: var(--bleu-principal)">https://eduq.info/xmlui/bitstream/handle/11515/39399/Voisard-et-al-37-2-24.pdf</a></p>
 
-                            <p class="my-10">Bédard, G. (2024). L'enseignement explicite de la littératie. <em>Pédagogie collégiale</em>, <em>37</em>(3), 85-92. <a href="https://eduq.info/xmlui/bitstream/handle/11515/39438/Bedard-37-3-24.pdf?sequence=2&isAllowed=y" target="_blank" style="color: var(--bleu-principal)">https://eduq.info/xmlui/bitstream/handle/11515/39438/Bedard-37-3-24.pdf</a></p>
+                            <p class="my-10">Bédard, G. (2024). L'enseignement explicite de la littératie. <em>Pédagogie collégiale</em>, <em>37</em>(3), 85-92. <a href="https://eduq.info/xmlui/bitstream/handle/11515/39438/Bedard-37-3-24.pdf?sequence=2&isAllowed=y" target="_blank" rel="noopener noreferrer" style="color: var(--bleu-principal)">https://eduq.info/xmlui/bitstream/handle/11515/39438/Bedard-37-3-24.pdf</a></p>
 
-                            <p class="my-10">Bédard, G. (2025). Observer pour mieux accompagner. <em>Pédagogie collégiale</em>, <em>38</em>(2), 38-45. <a href="https://eduq.info/xmlui/bitstream/handle/11515/39749/Bedard-38-2-25.pdf?sequence=2&isAllowed=y" target="_blank" style="color: var(--bleu-principal)">https://eduq.info/xmlui/bitstream/handle/11515/39749/Bedard-38-2-25.pdf</a></p>
+                            <p class="my-10">Bédard, G. (2025). Observer pour mieux accompagner. <em>Pédagogie collégiale</em>, <em>38</em>(2), 38-45. <a href="https://eduq.info/xmlui/bitstream/handle/11515/39749/Bedard-38-2-25.pdf?sequence=2&isAllowed=y" target="_blank" rel="noopener noreferrer" style="color: var(--bleu-principal)">https://eduq.info/xmlui/bitstream/handle/11515/39749/Bedard-38-2-25.pdf</a></p>
 
-                            <p class="my-10">Bélec, C. et Doré, R. (2023). <em>Une recherche collaborative pour renouveler l'enseignement de la littérature au collégial dans une optique de cohérence disciplinaire : l'intérêt d'une approche par compétence de la lecture</em>. Rapport PAREA, Cégep Gérald-Godin. <a href="https://www.cdc.qc.ca/parea/786755-belec-dore-litterature-competence-lecture-gerald-godin-PAREA-2023.pdf" target="_blank" style="color: var(--bleu-principal)">https://www.cdc.qc.ca/parea/786755-belec-dore-litterature-competence-lecture-gerald-godin-PAREA-2023.pdf</a></p>
+                            <p class="my-10">Bélec, C. et Doré, R. (2023). <em>Une recherche collaborative pour renouveler l'enseignement de la littérature au collégial dans une optique de cohérence disciplinaire : l'intérêt d'une approche par compétence de la lecture</em>. Rapport PAREA, Cégep Gérald-Godin. <a href="https://www.cdc.qc.ca/parea/786755-belec-dore-litterature-competence-lecture-gerald-godin-PAREA-2023.pdf" target="_blank" rel="noopener noreferrer" style="color: var(--bleu-principal)">https://www.cdc.qc.ca/parea/786755-belec-dore-litterature-competence-lecture-gerald-godin-PAREA-2023.pdf</a></p>
 
                             <p class="my-10">Biggs, J. B. et Collis, K. F. (1982). <em>Evaluating the quality of learning: The SOLO taxonomy (Structure of the Observed Learning Outcome)</em>. Elsevier Inc.</p>
 
@@ -12156,34 +11651,6 @@
                             <p class="my-10">Nilson, L. B. (2014). <em>Specifications grading: Restoring rigor, motivating students, and saving faculty time</em>. Stylus Publishing.</p>
 
                             <p class="my-10">Viau, R. (2009). <em>La motivation à apprendre en milieu scolaire</em>. Éditions du renouveau pédagogique (ERPI).</p>
-                        </div>
-
-                        <p class="mt-15"><strong>Labo Codex :</strong></p>
-                        <ul>
-                            <li>Site web : <a href="https://codexnumeris.org/apropos" target="_blank" style="color: var(--bleu-principal)">https://codexnumeris.org/apropos</a></li>
-                            <li>Approche systémique complète</li>
-                            <li>Ressources additionnelles et outils</li>
-                        </ul>
-
-                        <p class="mt-15"><strong>Licence et partage :</strong></p>
-                        <div class="carte-bleu-pale-mt10">
-                            <p class="m-0-0-10-0"><strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Double licence :</strong></p>
-                            <ul class="m-0">
-                                <li><strong>Code source (HTML, CSS, JavaScript) :</strong> GNU AGPL v3.0
-                                    <ul class="text-09-mt5">
-                                        <li>Garantit que le code reste libre et open source</li>
-                                        <li>Modifications doivent &ecirc;tre partag&eacute;es sous m&ecirc;me licence, m&ecirc;me en mode SaaS</li>
-                                    </ul>
-                                </li>
-                                <li class="mt-10"><strong>Contenu p&eacute;dagogique (documentation, aide, concepts) :</strong> Creative Commons BY-NC-SA 4.0
-                                    <ul class="text-09-mt5">
-                                        <li>Partage et adaptation autoris&eacute;s avec attribution</li>
-                                        <li>Redistribution sous m&ecirc;me licence</li>
-                                        <li>Usage commercial interdit sans autorisation &eacute;crite</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                            <p class="m-15-0-0-0-sm-bleu"><strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Détails complets :</strong> Voir LICENSE.md dans le dépôt du projet</p>
                         </div>
                         </div><!-- fin accordeon-contenu ressources -->
                     </div>

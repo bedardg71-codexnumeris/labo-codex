@@ -35,10 +35,16 @@ describe('Aide — elle n\'annonce pas ce que le code ne fait pas', () => {
         expect(filtres).toBeNull();
     });
 
+    // ↻ #1152, lot 2d (28 oct. 2026) : `modelisation` est absorbée par `labo`, qui la dit en une phrase (audit du 24 oct.,
+    // verdict final de `modelisation` : « Fusionner avec « Labo — Analyser ta démarche pédagogique » » ; consigne
+    // CONSIGNE-LOT-2026-10-28-aide-lot-2d-labo-codex-reference.md, §2, entrée 1). L'id d'avant n'existe plus : la garde lit
+    // désormais la carte qui porte la Modélisation, et vérifie qu'elle la nomme.
     it('la Modélisation n\'est plus annoncée « en développement »', () => {
-        const i = AIDE.indexOf('accordeon-aide-modelisation');
+        expect(AIDE).not.toContain('accordeon-aide-modelisation');
+        const i = AIDE.indexOf('id="accordeon-aide-labo"');
         expect(i).toBeGreaterThan(-1);
         const carte = AIDE.slice(i, AIDE.indexOf('accordeon-aide-', i + 30));
+        expect(carte).toContain('Modélisation');
         expect(carte).not.toMatch(/en (?:cours de )?développement/i);
         // Le module est bien vivant : il réutilise la chaîne d'annotation.
         const mod = lire('js/modelisation.js');
