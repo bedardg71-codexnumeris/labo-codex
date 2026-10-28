@@ -6,7 +6,7 @@
 ## 0. Avant tout
 
 - Un seul lot à la fois, sur un `main` à jour, aucune suite qui tourne. Rituel de début de session.
-- Commit de docs seul : ce fichier, `TEXTES-2026-10-28-aide-sept-trous.md`, `TEXTES-2026-10-28-textes-d-ecran.md`, `CONSIGNE-LOT-2026-10-28-aide-lot-5-textes-d-ecran.md`, `VERDICT-RELECTURE-2026-10-28-aide-lot-3.md`.
+- Commit de docs seul : ce fichier, `TEXTES-2026-10-28-aide-sept-trous.md`, `TEXTES-2026-10-28-textes-d-ecran.md`, `CONSIGNE-LOT-2026-10-28-aide-lot-5-textes-d-ecran.md`, `VERDICT-RELECTURE-2026-10-28-aide-lot-3.md`, `DECISIONS-2026-10-28-construction-de-la-note.md`, `../CONSIGNE-DEMARRAGE-COWORK.md`, et, s'ils ne sont pas encore suivis, `CONSIGNE-LOT-2026-10-28-standards-sans-portfolio-plan.md` et `PLAN-2026-10-28-standards-sans-portfolio.md` (écrits par une session parallèle qui ne committait pas).
 
 ## 1. Le mandat
 

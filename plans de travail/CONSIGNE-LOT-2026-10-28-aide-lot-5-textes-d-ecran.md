@@ -14,6 +14,10 @@
 2. **Les décisions** : « élève » → « étudiant·e » dans les écrans d'enseignant, sauf ceux du service d'orthopédagogie (liste dans la demande, cas ambigus nommés) ; les noms des niveaux RàI (n° 14) ; le guide ACP, « Exploration des pratiques », la Modélisation, le glossaire, le soulignement aux mots entiers ; le code mort (le retrait de `basculerVerrouillageCritere` attend l'autorisation sur `noms_stables.json`).
 3. **À mesurer, puis proposer, sans changer les mots** : « Système de jetons » sous une pratique Standards ; l'option « Reprise ciblée » ; le champ « Séance concernée » ; le résumé « n/5 configurés ». Chacun : ce que fait le code, ce que dit l'écran, une proposition (technique : faite ; mots : à Grégoire, dans la demande).
 
+4. **Ajout de Cowork (28 oct., 15 h 45, après la relecture de la retouche des correctifs ; mots de Cowork, lus par l'enseignant·e seulement, vrais avant comme pendant la fenêtre de reprise d'E4)** :
+   - `js/evaluation-jetons.js:374`, le refus du délai sur une originale marquée : « Cette évaluation a été remplacée par une reprise » → « Cette évaluation a une reprise : un délai ne s'y applique pas. »
+   - `js/evaluation-jetons.js:715`, la confirmation de restauration : « Cette évaluation est l'ORIGINALE, remplacée par une reprise (X %). » → « Cette évaluation est l'ORIGINALE d'une reprise (X %). » (la suite de la confirmation ne change pas).
+
 ## 2. Le guidage de la démo et la fenêtre « Données démo » (n° 6)
 
 Réécris les 19 bulles de `js/guidage-demo.js` et la fenêtre « Données démo » d'après la mesure (comptes lus dans `js/pack-demo-10.js` ; écrans d'aujourd'hui ; mots validés de l'Aide), **sans les poser** : elles vont dans un fichier `plans de travail/TEXTES-2026-10-28-guidage-demo.md`, en-tête « proposés, à valider par Grégoire », par groupes de trois ou quatre, avant et après. Cowork les lui soumettra ; un lot suivant les posera.
