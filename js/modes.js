@@ -670,6 +670,15 @@ function terminerCacheLecture() {
         _cacheLecturePipeline = null;
     }
 }
+/**
+ * Retouche E4 (28 oct. 2026) — L'IDENTITÉ DU LOT DE CALCULS EN COURS, ou null hors pipeline. Un nouvel objet à chaque
+ * lot (et à chaque invalidation totale) : un lecteur qui garde un dérivé de ce qu'il a lu (l'index des évaluations,
+ * pratique-registre.js) le range sous ce jeton, et le dérivé meurt avec le lot.
+ * @returns {Object|null}
+ */
+function jetonCacheLecture() {
+    return _cacheLecturePipeline;
+}
 
 /**
  * #447 (10 août 2026) — Vide le cache de lecture parce qu'une écriture vient
@@ -1650,6 +1659,7 @@ window.obtenirDonneesSelonMode = obtenirDonneesSelonMode;
 window.demarrerCacheLecture = demarrerCacheLecture;
 window.terminerCacheLecture = terminerCacheLecture;
 window.invaliderCacheLecture = invaliderCacheLecture;
+window.jetonCacheLecture = jetonCacheLecture;   // retouche E4 (28 oct. 2026) : l'index des évaluations vit le temps d'un lot
 
 // #447 — abonnement au crochet d'écriture de `db` : c'est CE branchement qui
 // fait tenir la promesse « jamais de lecture périmée » pour les écritures

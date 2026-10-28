@@ -1093,7 +1093,7 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                 evaluationsTrouvees.forEach(evaluation => {
                     // Le statut et le badge de la ligne (extraits le 25 oct. 2026, statut incomplet)
                     const { statut, badgeType, statutIntegrite, estOriginaleRemplacee, estNouvelleReprise, estTravailEnCours } =
-                        _statutEtBadgeDeLigne(evaluation);
+                        _statutEtBadgeDeLigne(evaluation, evaluations);
 
                     // Formater le nom de production avec description
                     let productionNomComplet = production.titre;
@@ -1407,7 +1407,7 @@ function appliquerFiltresSurLignes(lignes) {
         } else if (filtreStatut === 'tous-jetons') {
             if (!['delai', 'nouvelle-reprise', 'reprise-ciblee'].includes(ligne.badgeType)) return false;
         } else if (filtreStatut === 'remplacees') {
-            if (ligne.statut !== 'remplacee') return false;
+            if (ligne.badgeType !== 'originale-reprise') return false;   // E16 : l'originale qui compte encore n'est pas « Remplacée »
         } else if (filtreStatut && ligne.statut !== filtreStatut) {
             return false;
         }
@@ -1479,13 +1479,17 @@ function _noteChiffreeAffichee(valeur) {
  * Le statut et le badge d'une ligne de la Liste pour une évaluation (extraits du constructeur des
  * lignes le 25 oct. 2026, statut « Incomplet ; travail en cours »).
  * @param {Object} evaluation
+ * @param {Array} [evaluations] - la liste où chercher la reprise d'une originale gardée (E16)
  * @returns {{statut: string, badgeType: string|null, statutIntegrite: string, estOriginaleRemplacee: boolean,
  *            estNouvelleReprise: boolean, estTravailEnCours: boolean}}
  */
-function _statutEtBadgeDeLigne(evaluation) {
+function _statutEtBadgeDeLigne(evaluation, evaluations) {
     // IMPORTANT : Quatre types de badges (par ordre de priorité)
     // 1. Intégrité académique : plagiat ou IA non autorisée (prioritaire)
-    // 2. ORIGINALE remplacée : remplaceeParId existe → grisée, "Remplacée"
+    // 2. ORIGINALE remplacée : sa reprise compte (`originaleEstRemplacee`) → grisée, "Remplacée" ;
+    //    E16 (validé par Grégoire, 28 oct. 2026, 15 h 23) : tant que l'originale compte (E4), ni grisée ni
+    //    « Remplacée », mais « Compte jusqu'à sa reprise ». Le statut de la ligne reste « remplacee » : les
+    //    actions de l'originale gardée (verrouillée par le jeton) ne changent pas.
     // 3. NOUVELLE reprise : repriseDeId existe OU ID commence par EVAL_REPRISE_ → "Jeton de reprise appliqué"
     // 4. Délai : jetonDelaiApplique = true ET pas de repriseDeId → "Jeton de délai appliqué"
 
@@ -1517,9 +1521,9 @@ function _statutEtBadgeDeLigne(evaluation) {
     }
     // Priorité 2 : Jetons (seulement si pas de problème d'intégrité)
     else if (estOriginaleRemplacee) {
-        // L'originale remplacée par une reprise
+        // L'originale remplacée par une reprise ; ou gardée, qui compte jusqu'à sa reprise (E16)
         statut = 'remplacee';
-        badgeType = 'originale-reprise';
+        badgeType = _badgeDeLOriginale(evaluation, evaluations);
     } else if (estRepriseCiblee) {
         // La nouvelle évaluation de reprise ciblée
         statut = 'evalue';
@@ -1537,13 +1541,21 @@ function _statutEtBadgeDeLigne(evaluation) {
     return { statut, badgeType, statutIntegrite, estOriginaleRemplacee, estNouvelleReprise: !!estNouvelleReprise, estTravailEnCours };
 }
 
+/** E16 (28 oct. 2026) — le badge d'une originale marquée : la règle du calcul (E4, `originaleEstRemplacee`), pas `remplaceeParId` seul. */
+function _badgeDeLOriginale(evaluation, evaluations) {
+    const compteEncore = typeof window.originaleEstRemplacee === 'function' && !window.originaleEstRemplacee(evaluation, evaluations);
+    return compteEncore ? 'originale-compte' : 'originale-reprise';
+}
+
 // Les badges d'un statut de la copie, sans valeur variable (statut incomplet, 25 oct. 2026 : en table plutôt
 // qu'en branche de plus dans `genererLigneHTML`).
 const BADGES_STATUT_COPIE = {
     plagiat: ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (Plagiat)</span>',
     ia: ' <span class="badge-jeton badge-jeton-plagiat">Non recevable (IA)</span>',
     soupcon: ' <span class="badge-jeton badge-jeton-soupcon">À vérifier</span>',
-    incomplet: ' <span class="badge-jeton badge-jeton-incomplet">Incomplet ; travail en cours</span>'
+    incomplet: ' <span class="badge-jeton badge-jeton-incomplet">Incomplet ; travail en cours</span>',
+    // E16 (validé par Grégoire, 28 oct. 2026, 15 h 23) : l'originale compte dans la note jusqu'à sa reprise, pas grisée
+    'originale-compte': ' <span class="badge-jeton-reprise-wrapper"><span class="badge-jeton-titre">Compte jusqu\'à sa reprise</span></span>'
 };
 
 /**
@@ -1559,7 +1571,7 @@ function genererLigneHTML(ligne) {
     let classeRemplacee = '';
     let badgeJeton = '';
 
-    // Priorité aux badges d'intégrité, puis au statut incomplet (`BADGES_STATUT_COPIE`)
+    // Priorité aux badges d'intégrité, puis au statut incomplet et à l'originale qui compte encore (`BADGES_STATUT_COPIE`, E16)
     if (Object.prototype.hasOwnProperty.call(BADGES_STATUT_COPIE, ligne.badgeType)) {
         badgeJeton = BADGES_STATUT_COPIE[ligne.badgeType];
     }
@@ -2727,6 +2739,7 @@ function trierLignesParColonne(lignes, tri) {
                     'nouvelle-reprise': 2,
                     'reprise-ciblee': 2,      // #572 — classée avec les reprises, plus avec les lignes sans jeton
                     'originale-reprise': 3,
+                    'originale-compte': 3,    // E16 — l'originale d'une reprise, avec les remplacées
                     'plagiat': 4,
                     'ia': 4,
                     'soupcon': 4

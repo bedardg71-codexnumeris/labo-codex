@@ -262,7 +262,7 @@ function calculerIndicesHistoriques(da, dateLimite, evaluationsCache = null, use
             return evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
-                window.evaluationCompteCommeRemise(e)   // lot A (16 sept.), lot 30 (17 sept.), statut incomplet (25 oct. 2026)
+                window.evaluationCompteCommeRemise(e, evaluations)   // lot A (16 sept.), lot 30 (17 sept.), statut incomplet (25 oct. 2026)
             );
         });
 
@@ -589,7 +589,7 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             evaluationsCache.forEach(e => {
                 if (e.productionId === dernierTravail.id &&
                     dasDuGroupe.has(String(e.etudiantDA)) &&
-                    window.evaluationCompteCommeRemise(e)) {   // lot A (16 sept.), lot 30 (17 sept.), statut incomplet (25 oct. 2026)
+                    window.evaluationCompteCommeRemise(e, evaluationsCache)) {   // lot A (16 sept.), lot 30 (17 sept.), statut incomplet (25 oct. 2026)
                     dasRemis.add(String(e.etudiantDA));
                 }
             });

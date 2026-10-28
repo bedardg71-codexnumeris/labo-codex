@@ -11,6 +11,12 @@
  *   E3 : en hybride, « Nombre d'artefacts retenus » de l'assistant est le N des meilleures ; rouvrir ne le change pas.
  *   E4 : une originale gardée compte jusqu'à ce que sa reprise entre dans la note ; supprimée, rien ne compte.
  *   E7 : l'export dit « provisoire » tant que « Notes finalisées » n'est pas cochée.
+ * LA RETOUCHE (verdict de Cowork, 15 h 25 ; décisions de Grégoire E14 à E16, 15 h 11 à 15 h 23 ; consigne :
+ * plans de travail/CONSIGNE-LOT-2026-10-28-construction-de-la-note-correctifs-retouche.md) :
+ *   E15 : l'originale qui compte dans la note compte aussi comme remise pour l'indice C, jusqu'à sa reprise.
+ *   E16 : pendant la fenêtre, la Liste dit « Compte jusqu'à sa reprise », sans grisé ; « Remplacée », grisée, ensuite.
+ *   IDX : l'index des évaluations ne survit pas au lot qui l'a construit (un tableau modifié en place hors lot).
+ *   E14 : en dénotation, un jugement sans note est non calculable (DEN-4 au banc de la mesure ; ici, le stock).
  * Monte les modules RÉELS (même bac que le banc de la mesure). Données fictives (Alice, Bruno).
  */
 import { describe, it, expect } from 'vitest';
@@ -103,6 +109,8 @@ function note(b, da = DA.ALICE) {
         (x, id) => b.win.simulerIndices(x, id))[0];
     return {
         P: entree ? (entree.noteConstructible === false ? null : entree.P) : null,
+        C: entree ? entree.C : null,                // E15 : l'indice C stocké
+        comparateurC: sim ? sim.C : null,           // E15 : celui du Comparateur et de l'export
         comparateur: sim && sim.noteConstructible !== false ? sim.P : null,
         recit: sim ? sim.recit : null,
         profil: d && typeof d.noteFinale === 'number' ? Math.round(d.noteFinale * 100) / 100 : null,
@@ -297,5 +305,120 @@ describe('E3 — en hybride, le nombre de l\'assistant est le N des meilleures',
         const { reponses, apres } = await rouvrirEtEnregistrer(stock);
         expect(reponses.nbArtefactsRetenus).toBe(4);
         expect(apres.configuration.categories.selection.nombreARetenir).toBe(4);
+    });
+});
+
+/* ================================================================ LA RETOUCHE */
+describe('E15 — l\'originale qui compte dans la note compte aussi comme remise (indice C)', () => {
+    it('E15-a sommative : pendant la fenêtre, P1 reste remise → C 100 (avant : 50) ; réévaluée, la reprise prend le relais (100)', () => {
+        const n = avecSom(reprise(COPIES_SOM, DA.ALICE, 'P1'));
+        expect([n.C, n.comparateurC]).toEqual([100, 100]);
+        expect(avecSom(reprise(COPIES_SOM, DA.ALICE, 'P1', { reevaluee: 95 })).C).toBe(100);
+    });
+    it('E15-b spécifications et standards : pendant la fenêtre, le C est celui d\'avant la reprise', () => {
+        const copiesSpe = [ev(DA.ALICE, 'D1', 80), ev(DA.ALICE, 'X1', 90)];
+        const spec = (copies) => note(banc({ pratique: spe(), productions: PROD_SPE, evaluations: copies })).C;
+        expect(spec(reprise(copiesSpe, DA.ALICE, 'D1'))).toBe(spec(copiesSpe));
+        const stdC = (copies) => note(banc({ pratique: std(), productions: prodSTD(), evaluations: copies })).C;
+        expect(stdC(reprise(COPIES_STD, DA.ALICE, 'A4'))).toBe(stdC(COPIES_STD));
+    });
+    it('E15-c ne deviennent pas remises : l\'originale gardée non recevable, et celle dont la reprise est introuvable (50)', () => {
+        expect(avecSom(reprise(remplacer(COPIES_SOM, DA.ALICE, 'P1', { statutIntegrite: 'plagiat' }), DA.ALICE, 'P1')).C).toBe(50);
+        expect(avecSom(remplacer(COPIES_SOM, DA.ALICE, 'P1', { remplaceeParId: 'EV-DISPARUE', archivee: true })).C).toBe(50);
+    });
+    it('E15-d le prédicat lit la liste fournie quand on la lui donne', () => {
+        const b = banc({ pratique: som(), productions: PROD_SOM, evaluations: COPIES_SOM });
+        const liste = reprise(COPIES_SOM, DA.ALICE, 'P1');
+        const orig = liste.find(e => e.remplaceeParId);
+        expect(b.win.evaluationCompteCommeRemise(orig)).toBe(false);          // le stockage ne connaît pas la reprise
+        expect(b.win.evaluationCompteCommeRemise(orig, liste)).toBe(true);
+    });
+});
+
+describe('IDX — l\'index des évaluations ne survit pas au lot qui l\'a construit', () => {
+    // Hors cours actif, `obtenirDonneesSelonMode` rend la référence de `db.getSync`, et `memoryCache` la même d'un
+    // appel à l'autre : le banc la rend telle quelle, et la modifie en place comme `appliquerJetonReprise`.
+    function registre() {
+        const etat = { liste: [], lot: null };
+        const win = chargerScript('js/pratiques/pratique-registre.js', {
+            obtenirDonneesSelonMode: (k) => (k === 'evaluationsSauvegardees' ? etat.liste : []),
+            jetonCacheLecture: () => etat.lot
+        }, {});
+        return Object.assign(etat, { win });
+    }
+    it('IDX-a hors lot : une reprise ajoutée en place laisse compter l\'originale ; verrouillée en place, elle la remplace (jamais les deux)', () => {
+        const r = registre();
+        r.liste.push(ev(DA.BRUNO, 'P1', 62, { remplaceeParId: 'EV-X' }), ev(DA.ALICE, 'P1', 80));
+        expect(r.win.evaluationEntreDansLaNote(r.liste[0])).toBe(false);   // l'index se construit sur ce tableau
+        const orig = r.liste[1];
+        orig.remplaceeParId = orig.id + '-R';                               // ce que fait appliquerJetonReprise
+        r.liste.push(Object.assign({}, orig, { id: orig.id + '-R', repriseDeId: orig.id, remplaceeParId: undefined, verrouillee: false }));
+        expect(r.win.evaluationEntreDansLaNote(orig)).toBe(true);           // avant : reprise « introuvable », l'originale sortait
+        expect(r.win.evaluationCompteCommeRemise(orig)).toBe(true);
+        r.liste[2] = Object.assign({}, r.liste[2], { noteFinale: 95, verrouillee: true });   // la copie remplacée à son indice
+        expect([r.win.evaluationEntreDansLaNote(orig), r.win.evaluationEntreDansLaNote(r.liste[2])]).toEqual([false, true]);
+    });
+    it('IDX-b dans un lot, l\'index se construit une fois ; un lot neuf le reconstruit', () => {
+        const r = registre();
+        r.liste.push(ev(DA.ALICE, 'P1', 80, { remplaceeParId: 'EV-R' }), ev(DA.ALICE, 'P1', 95, { id: 'EV-R', repriseDeId: 'EV-' + DA.ALICE + '-P1' }));
+        let parcours = 0;
+        r.liste.forEach = function () { parcours++; return Array.prototype.forEach.apply(this, arguments); };
+        r.lot = {};
+        r.win.evaluationEntreDansLaNote(r.liste[0]); r.win.evaluationEntreDansLaNote(r.liste[0]);
+        expect(parcours).toBe(1);
+        r.lot = {};
+        r.win.evaluationEntreDansLaNote(r.liste[0]);
+        expect(parcours).toBe(2);
+        r.lot = null;
+        r.win.evaluationEntreDansLaNote(r.liste[0]); r.win.evaluationEntreDansLaNote(r.liste[0]);
+        expect(parcours).toBe(4);
+    });
+});
+
+describe('E16 — la Liste : « Compte jusqu\'à sa reprise » pendant la fenêtre, « Remplacée » ensuite', () => {
+    const PRODUCTIONS = [{ id: 'P1', titre: 'Dissertation', type: 'travail' }];
+    const ELEVE = { da: DA.ALICE, nom: 'Fictive', prenom: 'Alice', groupe: '01' };
+    function ligneDeLOriginale(evaluations) {
+        const regle = chargerScript('js/pratiques/pratique-registre.js', { obtenirDonneesSelonMode: () => [] }, {});
+        const win = chargerScript('js/liste-evaluations.js', {
+            db: { get: async () => null, getSync: (k, d) => (d !== undefined ? d : null), set: async () => {}, setSync: () => {}, removeSync: () => {} },
+            cle: (k) => 'test_' + k, echapperHtml: (t) => (t == null ? '' : String(t)), obtenirLibelleStatut: (st) => 'Statut ' + st,
+            obtenirDonneesSelonMode: (quoi) => (quoi === 'productions' ? PRODUCTIONS : []), obtenirNomCartouche: () => '-', obtenirNoteAffichee: () => '-',
+            notifications: { succes() {}, erreur() {}, info() {}, warning() {} },
+            travauxStockage: { obtenirFichiersTravaux: () => [], obtenirFichiersGroupeActif: () => [], obtenirFichiersAffiches: () => [], obtenirAnnotationFichier: () => null },
+            travauxResolution: { trouverFichierPourEvaluation: () => null }, annotationContientDuContenu: () => false
+        }, { originaleEstRemplacee: regle.originaleEstRemplacee, evaluationTravailEnCours: regle.evaluationTravailEnCours });
+        const ligne = win._construireLignesEvaluations(evaluations, PRODUCTIONS, [ELEVE]).find(l => l.evaluationId === 'EV-' + DA.ALICE + '-P1');
+        return { ligne, html: win._genererLigneHTML(ligne) };
+    }
+    it('E16-a pendant la fenêtre : « Compte jusqu\'à sa reprise », pas grisée, pas « Remplacée »', () => {
+        const { ligne, html } = ligneDeLOriginale(reprise([ev(DA.ALICE, 'P1', 80)], DA.ALICE, 'P1'));
+        expect(ligne.badgeType).toBe('originale-compte');
+        expect(html).toContain('Compte jusqu\'à sa reprise');
+        expect(html).not.toContain('eval-remplacee');
+        expect(html).not.toContain('>Remplacée<');
+    });
+    it('E16-b la reprise réévaluée et verrouillée : « Remplacée », grisée (inchangé)', () => {
+        const { ligne, html } = ligneDeLOriginale(reprise([ev(DA.ALICE, 'P1', 80)], DA.ALICE, 'P1', { reevaluee: 95 }));
+        expect(ligne.badgeType).toBe('originale-reprise');
+        expect(html).toContain('eval-remplacee');
+        expect(html).toContain('>Remplacée<');
+        expect(html).not.toContain('Compte jusqu\'à sa reprise');
+    });
+});
+
+describe('E14 — en dénotation, un jugement enregistré sans note : le stock suit au calcul', () => {
+    const jugement = (cibles, noteFinale) => ({ 'den-banc': { [DA.ALICE]: { ciblesAtteintes: cibles, noteFinale, justification: 'Banc', date: '2026-10-01' } } });
+    const avecDen = (jugements) => banc({ pratique: den(), productions: PROD_SOM, evaluations: COPIES_SOM, jugements });
+    it('E14-STOCK un jugement déjà enregistré sans note passe de 0 à non calculable sans réécriture ; le récit ne le dit pas plafonné', () => {
+        const b = avecDen(jugement({ c1: true }, null));
+        const avant = JSON.stringify(b.store.test_jugementsDenotation);
+        const n = note(b);
+        expect([n.P, n.comparateur, n.export[1]]).toEqual([null, null, 'non constructible']);
+        expect(n.recit.synthese).toMatchObject({ noteFinale: null, plafonnement: null });
+        expect(JSON.stringify(b.store.test_jugementsDenotation)).toBe(avant);
+    });
+    it('E14-b une note saisie de 0 reste 0', () => {
+        expect(note(avecDen(jugement({ c1: true }, 0))).P).toBe(0);
     });
 });

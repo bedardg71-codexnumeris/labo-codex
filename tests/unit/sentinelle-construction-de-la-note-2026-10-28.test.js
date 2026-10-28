@@ -391,4 +391,10 @@ describe('DEN — le jugement saisi', () => {
         const n = avec({});
         expect([n.P, n.comparateur, n.export[1]]).toEqual([null, null, 'non constructible']);
     });
+    it('DEN-4 un jugement enregistré SANS note, cibles cochées ou non : non constructible (E14, Grégoire, 28 oct. 2026, 15 h 11 : avant 0, ou 0 plafonné)', () => {
+        for (const cibles of [{ c1: true, c2: true }, { c1: true, c2: false }, {}]) {
+            const n = avec(jugement(cibles, null));
+            expect([n.P, n.comparateur, n.export[1]]).toEqual([null, null, 'non constructible']);
+        }
+    });
 });

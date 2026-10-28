@@ -11,6 +11,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   1. E4 : une reprise accordée en sommative, par `appliquerJetonReprise` (originale gardée) : la note ne bouge pas
 //      avant la réévaluation (86 ; avant le correctif : 90, la Dissertation sortait), puis la reprise la remplace (92).
 //   2. E7 : l'export, par le bouton réel, d'une pratique sans « Notes finalisées » : « provisoire » ; cochée : « final ».
+//   3. La retouche (E15, E16 ; consigne `…-correctifs-retouche.md`, § 2) : pendant la fenêtre, la Liste dit
+//      « Compte jusqu'à sa reprise » sur l'originale, sans grisé, et l'indice C la compte remise ; réévaluée, « Remplacée ».
 // Noms fictifs.
 
 const T = 'tn1028';
@@ -98,3 +100,49 @@ for (const [notesFinales, statut] of [[false, 'provisoire'], [true, 'final']]) {
         expect(erreurs).toEqual([]);
     });
 }
+
+test('E16 · la Liste : « Compte jusqu\'à sa reprise » pendant la fenêtre (C 100), puis « Remplacée », grisée, après la réévaluation', async ({ page }) => {
+    test.setTimeout(60000);
+    const erreurs = await ouvrir(page, false);
+    const reprise = await page.evaluate(async () => {
+        const r = await window.appliquerJetonReprise('EVN1', true, { silencieux: true });
+        return r ? { id: r.id } : null;
+    });
+    expect(reprise, 'la reprise est créée').not.toBeNull();
+    const ligneDeLOriginale = async () => {
+        await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-liste'); window.initialiserListeEvaluations(); });
+        await page.waitForTimeout(1500);
+        return page.evaluate(() => {
+            const tr = document.querySelector('tr[data-evaluation-id="EVN1"]');
+            return tr ? { texte: tr.textContent.replace(/\s+/g, ' ').trim(), grisee: tr.classList.contains('eval-remplacee') } : null;
+        });
+    };
+    const lireC = () => page.evaluate((da) => {
+        window.calculerEtStockerIndicesCP();
+        return ((window.db.getSync(window.cle('indicesCP'), {}) || {})[da] || {}).actuel.C;
+    }, DA);
+
+    const pendant = await ligneDeLOriginale();
+    // eslint-disable-next-line no-console
+    console.log('N1028 · la Liste pendant la fenêtre :', JSON.stringify(pendant));
+    expect(pendant, 'la ligne de l\'originale se voit').not.toBeNull();
+    expect(pendant.texte).toContain('Compte jusqu\'à sa reprise');
+    expect(pendant.texte).not.toContain('Remplacée');
+    expect(pendant.grisee, 'pas grisée pendant la fenêtre').toBe(false);
+    expect(await lireC(), 'E15 : la Dissertation reste remise (avant : 50)').toBe(100);
+
+    await page.evaluate((id) => {
+        const k = window.cle('evaluationsSauvegardees');
+        const l = window.db.getSync(k, []);
+        Object.assign(l.find(e => e.id === id), { noteFinale: 95, niveauFinal: 'E', verrouillee: true });
+        window.db.setSync(k, l);
+    }, reprise.id);
+    const apres = await ligneDeLOriginale();
+    // eslint-disable-next-line no-console
+    console.log('N1028 · la Liste après la réévaluation :', JSON.stringify(apres));
+    expect(apres.texte).toContain('Remplacée');
+    expect(apres.texte).not.toContain('Compte jusqu\'à sa reprise');
+    expect(apres.grisee, 'grisée une fois remplacée').toBe(true);
+    expect(await lireC()).toBe(100);
+    expect(erreurs).toEqual([]);
+});

@@ -2714,7 +2714,10 @@ function _calculerEcheanceFormateeProduction(production) {
 }
 
 function _determinerBadgeTypeEvaluation(evaluation) {
-    if (evaluation.remplaceeParId) return 'remplacee';
+    // E16 (28 oct. 2026) : la règle du calcul (E4), pas `remplaceeParId` seul. Mesuré : pendant la fenêtre de reprise,
+    // la ligne du profil montre la REPRISE (`_trouverEvaluationActive`, priorité 2), jamais l'originale ; une copie
+    // marquée n'arrive ici que si sa reprise est introuvable, et elle est alors remplacée.
+    if (evaluation.remplaceeParId && window.originaleEstRemplacee(evaluation)) return 'remplacee';
     if (evaluation.jetonRepriseCibleeApplique === true) return 'reprise-ciblee';
     if (evaluation.repriseDeId || evaluation.id.startsWith('EVAL_REPRISE_')) return 'nouvelle-reprise';
     if (evaluation.jetonDelaiApplique && !evaluation.repriseDeId && !evaluation.jetonRepriseCibleeApplique) return 'delai';
