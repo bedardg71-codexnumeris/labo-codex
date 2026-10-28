@@ -67,3 +67,9 @@ Un commit pour le code, un pour les docs ; demande de relecture : `plans de trav
 **Quatrième retouche, courte (Claude Code), par cohérence avec la décision de Grégoire de 6 h 46** (« ses niveaux ne se lisent nulle part ») : **une reprise accordée à une copie non recevable part vide**, sans les niveaux ni la note de son originale ; une reprise ordinaire garde son comportement (elle part des niveaux de l'originale, pour qu'on les modifie). Ce qui se vide : mesure-le (niveaux des critères, note, niveau final, points, comptes ; la rétroaction suit ce que la cartouche génère pour une évaluation vide), et dis-le. L'originale ne bouge pas. Essais : reprise d'une non recevable, aucun niveau ni note ; reprise d'une recevable, inchangée ; break-test. Décision de Cowork annoncée à Grégoire, qui peut s'y opposer.
 
 Un commit pour le code, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-copie-non-recevable-note-retouche-4.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la quatrième retouche (Cowork, 28 oct., 11 h 08)
+
+> Sur `main` = `8024aab8`. Lu : la demande de relecture de la quatrième retouche, le diff de `fd66e8ee` (`js/evaluation-jetons.js`).
+
+**Acceptée sans retouche. Le lot (#1175) est clos côté relecture.** La reprise d'une copie non recevable perd `noteFinale`, `niveauFinal`, `ponderationCouverte`, la rétroaction et sa marque, et repart avec `criteres`, `pointsAnalytiques` et `donneesAlgorithmiques` vides ; le test lit l'originale par le prédicat du registre, avant le retrait du statut. Les deux suppositions sont retenues (le profil ACO et la durée restent ; les reprises déjà accordées ne sont pas réécrites). Il part avec la prochaine mise en ligne.
