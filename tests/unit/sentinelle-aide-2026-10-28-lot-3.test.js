@@ -116,6 +116,14 @@ describe('#1152 lot 3 · un seul glossaire', () => {
         expect(terme('mode-assistance-icones').definition).toContain('le bouton « Assistance » de l’en-tête, ou par la case « Assistance » de la page d’accueil');
     });
 
+    it('la retouche du verdict (28 oct., 14 h 15) : le menu Codex sans côté ; SRPNF mot pour mot, sa validation notée', () => {
+        // Verdict : plans de travail/VERDICT-RELECTURE-2026-10-28-aide-lot-3.md. Le côté dépend de la largeur de l'écran.
+        expect(terme('codex').definition).toContain('dans le menu Codex, en haut de l’écran.');
+        expect(TERMES.filter((t) => /en haut à (gauche|droite)/.test(t.definition)).map((t) => t.cle)).toEqual([]);
+        expect(terme('srpnf').definition).toBe('Les initiales des critères des grilles de la démonstration : Structure, Rigueur, Plausibilité, Nuance et Français écrit. Une grille d’exemple, et non une structure du logiciel. Toute grille de critères fonctionne de la même façon, quel que soit ton nombre de critères et ta discipline.');
+        expect(tranche(SOURCE, "'srpnf': {", "terme: 'SRPNF'")).toContain('Validé par Grégoire le 28 oct. 2026, 14 h 15');
+    });
+
     it('les contradictions sont levées : une seule définition de chaque terme', () => {
         // PAN : le choix de Grégoire du 17 sept. ; Sous-critère (D5), Pondération, Assiduité : réunis.
         const noms = TERMES.map((t) => t.terme.toLowerCase());
