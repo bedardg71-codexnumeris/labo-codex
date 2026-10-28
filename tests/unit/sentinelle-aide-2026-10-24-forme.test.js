@@ -79,7 +79,8 @@ const ABSORBEES_2B = ['idme'];
 // ↻ #1152, lot 2c (28 oct. 2026) : l'Évaluation prend sa forme finale (audit du 24 oct., verdict final
 // d'`evaluer-productions` : « Fusionner dans « Annoter et évaluer un travail » » ; remesure du 27 oct., geste neuf n° 7 ;
 // consigne CONSIGNE-LOT-2026-10-28-aide-lot-2c-evaluation.md, §2, entrées 1 et 3). `evaluer-productions` est absorbée
-// par `annoter-evaluer` ; la Liste des évaluations, sans entrée, en reçoit une, `liste-evaluations`, en tête. Le détail
+// par `annoter-evaluer` ; la Liste des évaluations, sans entrée, en reçoit une, `liste-evaluations`, deuxième, dans l'ordre des
+// sous-onglets de js/config.js (verdict de relecture du 28 oct., retouche 1). Le détail
 // est vérifié par sentinelle-aide-2026-10-28-lot-2c.test.js.
 const ABSORBEES_2C = ['evaluer-productions'];
 const NEUVES_2C = ['liste-evaluations'];
@@ -87,7 +88,7 @@ const PLACES = {
     commencer: ['presentation', 'prise-en-main', 'demo', 'modes', 'bibliotheque', 'chaines-etapes', 'preferences'],
     cadre: ['etapes-config', 'cours', 'horaire', 'etudiants', 'presences-calendrier', 'archivage'],
     conception: ['pratique', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme', 'sous-criteres', 'creer-echelles', 'solo', 'creer-cartouches'],
-    evaluation: ['liste-evaluations', 'preparer-importer', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
+    evaluation: ['preparer-importer', 'liste-evaluations', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
     suivi: ['saisie-presences', 'tableau-bord', 'profil-etudiant', 'guide-profil', 'acp', 'diagnostics', 'rai', 'suivi-apprentissage', 'patterns', 'planifier-rai', 'rai-absences', 'snapshots', 'tirage-sort'],
     labo: ['labo', 'modelisation', 'pan', 'grille-depistage', 'criteres', 'rai-solo', 'bilan-reflexif'],
     'codex-archives': ['codex', 'export-import', 'partage', 'collaboration'],

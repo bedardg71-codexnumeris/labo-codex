@@ -47,13 +47,28 @@ const codeJs = net(fichiersJs('js').map((f) => lire(f)).join('\n')
     .replace(/&nbsp;/g, ' ')
     .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16))));
 
-const EVALUATION = ['liste-evaluations', 'preparer-importer', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'];
+// ↻ Verdict de relecture du 28 oct. 2026 (VERDICT-RELECTURE-2026-10-28-aide-lot-2c.md, retouche 1) : l'ordre est celui des
+// sous-onglets de js/config.js (« Préparer et importer », « Liste des évaluations »…), pas celui des `div` d'index.html.
+const EVALUATION = ['preparer-importer', 'liste-evaluations', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'];
 
 describe('#1152 lot 2c · l\'Évaluation', () => {
     it('l\'Évaluation a les entrées de la décision (§2), dans cet ordre ; `evaluer-productions` n\'existe plus nulle part', () => {
         expect([...evaluation.querySelectorAll(':scope > .carte.accordeon')].map((c) => c.id.replace('accordeon-aide-', ''))).toEqual(EVALUATION);
         expect(html).not.toContain('accordeon-aide-evaluer-productions');
         expect(net(entree('liste-evaluations').querySelector('h3').textContent).replace(/^▼ /, '')).toBe('La liste des évaluations');
+    });
+
+    it('les entrées qui nomment un sous-onglet (« Navigation : Évaluation → … ») suivent l\'ordre des sous-onglets de config.js', () => {
+        // Verdict de relecture du 28 oct. 2026, retouche 1 : l'ordre de l'écran est celui de config.js, LU ici.
+        const bloc = lire('js', 'config.js').match(/'evaluations': \[([\s\S]*?)\]/)[1];
+        const onglets = [...bloc.matchAll(/label: '([^']+)'/g)].map((m) => m[1]);
+        expect(onglets.slice(0, 2)).toEqual(['Préparer et importer', 'Liste des évaluations']);
+        const rangs = [...evaluation.querySelectorAll(':scope > .carte.accordeon')].map((c) => net(c.textContent).match(/Navigation : Évaluation → ([^,]+?)(?:,| La | Une | «|$)/))
+            .filter(Boolean)
+            .map((m) => onglets.findIndex((o) => m[1].startsWith(o)));
+        expect(rangs.length).toBeGreaterThanOrEqual(4);
+        expect(rangs).not.toContain(-1);
+        expect(rangs).toEqual([...rangs].sort((x, y) => x - y));
     });
 
     it('aucune entrée de l\'Évaluation ne parle de l\'ancien écran ni en jargon', () => {
