@@ -21,6 +21,26 @@
 
     var CHANGELOG = [
         {
+            // 1.223 (l'Aide, lots 2c, 2c bis, 2d et 3, #1152 ; la copie non recevable, #1175 ; la construction de la
+            // note, E1-E4, E7 et la retouche E14-E16, #1177 ; l'accueil à trois portes) — titre et huit items validés
+            // par Grégoire, mot pour mot, le 28 oct. 2026 à 15 h 45 (« c'est bon ! » ; consigne de la mise en ligne
+            // du soir, § 1). « La bannière » de l'item 1 : la carte de l'orthopédagogie pleine largeur, confirmé par
+            // Grégoire le soir même. Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.223',
+            couleur: 'vert',
+            titre: 'Toute l’Aide à jour, et la note revue pratique par pratique',
+            items: [
+                'Accueil&nbsp;: trois portes d’entrée remplacent la bannière&nbsp;: «&nbsp;Tu enseignes&nbsp;?&nbsp;», «&nbsp;Tu es orthopédagogue&nbsp;?&nbsp;» et «&nbsp;Tu es conseiller·ère pédagogique&nbsp;?&nbsp;».',
+                'Aide&nbsp;: l’Évaluation, le Suivi, le Labo, le codex et la Référence décrivent l’écran d’aujourd’hui, en moins de mots. Il n’y a plus qu’un seul glossaire, et «&nbsp;En savoir plus&nbsp;» mène à la fiche du terme.',
+                'Une copie non recevable montre «&nbsp;Non recevable (Plagiat)&nbsp;» ou «&nbsp;Non recevable (IA non autorisée)&nbsp;» à la place de sa note et de ses niveaux, sur le formulaire, le PDF et la Liste&nbsp;; ton évaluation est gardée. Elle vaut 0 en sommative et dans une évaluation terminale de standards, et n’est pas satisfaisante en spécifications&nbsp;: des notes changent.',
+                'Pendant une reprise, la copie originale compte dans la note, et comme remise, jusqu’à ce que la reprise soit évaluée et verrouillée. Dans la Liste, elle porte «&nbsp;Compte jusqu’à sa reprise&nbsp;». Des notes changent.',
+                'Sommative&nbsp;: une production à pondération 0, comme un artefact de portfolio, n’entre plus dans la moyenne. Si toutes sont à 0, il n’y a pas de note, plutôt qu’un 0.',
+                'L’export des Résultats finaux dit «&nbsp;provisoire&nbsp;» tant que «&nbsp;Notes finalisées&nbsp;» n’est pas cochée dans ta pratique&nbsp;: coche-la avant de reporter tes notes dans Léa.',
+                'Assistant de pratique&nbsp;: «&nbsp;Portfolio de progression&nbsp;», qui ne changeait pas la note, est retiré. En «&nbsp;Hybride&nbsp;», le nombre que tu donnes à la création est celui des meilleures productions, auxquelles s’ajoutent les obligatoires.',
+                'Corrigé&nbsp;: en dénotation, un jugement enregistré sans note n’est plus compté comme un 0.'
+            ]
+        },
+        {
             // 1.222 (l'Aide, lots 2a et 2b, #1152 ; le niveau « PS – Préstructurel » de l'Échelle de départ et ce qui
             // le lit) — titre et quatre items validés par Grégoire, mot pour mot, le 27 oct. 2026 à 19 h 02 (« validé » ;
             // consigne de la mise en ligne du soir, § 1). Insécables en `&nbsp;`, apostrophes typographiques.
