@@ -20,6 +20,9 @@ export function chargerPredicatsCopie(win) {
     win.evaluationEntreDansLaNote = registre.evaluationEntreDansLaNote;
     win.evaluationNonRemise = registre.evaluationNonRemise;
     win.evaluationNonRecevable = registre.evaluationNonRecevable;   // lot 30 (17 sept. 2026)
+    // 28 oct. 2026 — ce que vaut une copie non recevable dans la note (la règle par défaut du registre)
+    win.valeurCopieNonRecevable = registre.valeurCopieNonRecevable;
+    win.noteRetenueParLeCalcul = registre.noteRetenueParLeCalcul;
     // Statut « Incomplet ; travail en cours » (25 oct. 2026) — la règle de la remise pour C, et le statut
     win.evaluationCompteCommeRemise = registre.evaluationCompteCommeRemise;
     win.evaluationTravailEnCours = registre.evaluationTravailEnCours;

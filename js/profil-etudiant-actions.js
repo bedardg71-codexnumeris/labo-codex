@@ -208,12 +208,16 @@ function _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, term
         // #706 — la règle unique du registre : remplacées, sans note, brouillons (non
         // verrouillées) et portée nulle n'entrent pas dans la note du cours.
         if (!window.evaluationEntreDansLaNote(e)) return false;
-        // Exclure les évaluations non-recevables (plagiat, IA)
-        const statutIntegrite = e.statutIntegrite || 'recevable';
-        if (statutIntegrite === 'plagiat' || statutIntegrite === 'ia') return false;
+        // Une copie non recevable sort du portfolio : la règle par défaut du registre (28 oct. 2026), pas une relecture du statut.
+        const nonRecevable = window.valeurCopieNonRecevable(e);
+        if (nonRecevable && !nonRecevable.dansLePortfolio) return false;
         return true;
     });
 }
+
+// La note qu'un calcul retient pour une copie (registre, 28 oct. 2026) : sa note, ou ce que vaut une copie non recevable.
+// Les deux sélections trient et somment sur elle : un réglage qui garderait la copie au pool n'aurait rien à changer ici.
+const noteRetenue = (e) => window.noteRetenueParLeCalcul(e);
 
 function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCategories, estFinale, terminalId) {
     const { nombreARetenir: nSelection, ponderation: pondSel } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
@@ -231,7 +235,7 @@ function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCatego
 
     // N meilleures du pool Sélection
     const meilleuresSelection = [...evalsSelection]
-        .sort((a, b) => (b.noteFinale || 0) - (a.noteFinale || 0))
+        .sort((a, b) => (noteRetenue(b) || 0) - (noteRetenue(a) || 0))
         .slice(0, nSelection);
 
     const artefactsRetenus = [...meilleuresSelection, ...evalsObligatoires];
@@ -254,9 +258,9 @@ function _selectionnerArtefactsHybride(evalsArtefacts, productions, configCatego
     let moyennePortfolio = null;
     if (meilleuresSelection.length > 0 || denominateurObl > 0) {
         const moySel = meilleuresSelection.length > 0
-            ? meilleuresSelection.reduce((s, e) => s + e.noteFinale, 0) / meilleuresSelection.length : 0;
+            ? meilleuresSelection.reduce((s, e) => s + noteRetenue(e), 0) / meilleuresSelection.length : 0;
         const moyObl = denominateurObl > 0
-            ? evalsObligatoires.reduce((s, e) => s + e.noteFinale, 0) / denominateurObl : 0;
+            ? evalsObligatoires.reduce((s, e) => s + noteRetenue(e), 0) / denominateurObl : 0;
         if (meilleuresSelection.length > 0 && denominateurObl > 0) {
             moyennePortfolio = (moySel * pondSel + moyObl * pondObl) / (pondSel + pondObl);
         } else if (meilleuresSelection.length > 0) {
@@ -277,12 +281,12 @@ function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelect
     // stockage départage deux notes égales ; la note ne change pas, seul le récit nomme
     // « écartée » l'une plutôt que l'autre. Commenté, pas de fiche.
     if (methodeSelection === 'meilleurs' || methodeSelection === 'hybride') {
-        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+        artefactsRetenus.sort((a, b) => noteRetenue(b) - noteRetenue(a));
     } else if (methodeSelection === 'recents') {
         artefactsRetenus.sort(parRecence);
     } else if (methodeSelection === 'recents-meilleurs') {
         const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRetenus.length * 0.5));
-        artefactsRetenus.sort((a, b) => b.noteFinale - a.noteFinale);
+        artefactsRetenus.sort((a, b) => noteRetenue(b) - noteRetenue(a));
         artefactsRetenus = artefactsRetenus.slice(0, nombreMeilleurs);
         artefactsRetenus.sort(parRecence);
     }
@@ -295,7 +299,7 @@ function _selectionnerArtefactsLegacy(evalsArtefacts, productions, methodeSelect
 
     let moyennePortfolio = null;
     if (artefactsRetenus.length > 0) {
-        const somme = artefactsRetenus.reduce((acc, e) => acc + e.noteFinale, 0);
+        const somme = artefactsRetenus.reduce((acc, e) => acc + noteRetenue(e), 0);
         moyennePortfolio = somme / artefactsRetenus.length;
     }
     return { artefactsRetenus, moyennePortfolio };
@@ -349,7 +353,8 @@ function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale) {
         e.productionId === productionTerminale.id &&
         window.evaluationEntreDansLaNote(e)
     ) || null;
-    const noteTerminale = evaluationTerminale ? evaluationTerminale.noteFinale : null;
+    // 28 oct. 2026 : une terminale non recevable vaut ce que dit le registre (0 par défaut), pas sa note calculée.
+    const noteTerminale = evaluationTerminale ? window.noteRetenueParLeCalcul(evaluationTerminale) : null;
     return { noteTerminale, evaluationTerminale };
 }
 
@@ -574,7 +579,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         date: e.dateEvaluation || null,
         niveau: _niveauVu(e),   // code BRUT — traduit par l'échelle à la vue (neutralité) ; #941 lot S1
         enPoints: typeof evaluationEnPoints === 'function' && evaluationEnPoints(e),
-        note: (e.noteFinale ?? null),
+        note: (noteRetenue(e) ?? null),   // la note que la sélection a retenue (parité)
         sort: sort,
         detail: detail
     });

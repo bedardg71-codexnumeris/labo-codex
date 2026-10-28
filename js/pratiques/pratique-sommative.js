@@ -100,7 +100,8 @@ class PratiqueSommative {
             const production = productions.find(p => p.id === evaluation.productionId);
             const ponderation = production?.ponderation || 1; // Défaut 1 si non trouvée
 
-            scoreTotal += evaluation.noteFinale * ponderation;
+            // 28 oct. 2026 : une copie non recevable vaut ce que dit le registre (0 par défaut), pas sa note calculée.
+            scoreTotal += window.noteRetenueParLeCalcul(evaluation) * ponderation;
             pondTotal += ponderation;
         });
 
@@ -179,7 +180,7 @@ class PratiqueSommative {
                 date: e.dateEvaluation || null,
                 niveau: niveauDuRecit(e),   // code BRUT — traduit par l'échelle à la vue ; #941 lot S1 : aucun en points
                 enPoints: estEnPoints(e),
-                note: (e.noteFinale ?? null),
+                note: (window.noteRetenueParLeCalcul(e) ?? null),   // la note que calculerPerformance retient (parité)
                 sort: 'compte',
                 // #921 — le poids en NOMBRE, pour qui écrit la ligne de calcul (profil) : `ponderation` est celle de la
                 // production (défaut 1, même règle que `calculerPerformance`), `poids` sa part en % des copies comptées.

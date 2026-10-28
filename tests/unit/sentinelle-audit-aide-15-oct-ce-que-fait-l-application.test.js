@@ -338,11 +338,16 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
     const CARTE = tranche(AIDE, 'Travail NON RECEVABLE', 'Travail SOUPÇONNÉ');
     const ACTIONS = lire('js/profil-etudiant-actions.js');
 
-    it('sommative : elle vaut 0 (critères à « 0 - Aucun ») et la note la lit comme une autre ; la reprise la remplace', () => {
+    // ↻ 28 oct. 2026 (CONSIGNE-LOT-2026-10-28-copie-non-recevable-note.md) : le 0 ne venait PAS des menus — leur sélecteur
+    // ne trouvait rien, la copie gardait 87,5. Il se lit désormais au calcul, par le registre ; le bloc des menus est retiré.
+    // Les valeurs, famille par famille, sont jugées par sentinelle-copie-non-recevable-vaut-la-regle-28-oct.test.js.
+    it('sommative : elle vaut 0 au calcul (registre), les critères gardent l\'évaluation ; la reprise la remplace', () => {
         const statut = corps(lire('js/evaluation-sauvegarde.js'), 'changerStatutIntegrite');
         expect(statut).toMatch(/statut === 'plagiat' \|\| statut === 'ia'/);
-        expect(statut).toContain("select.value = '0'");
-        expect(corps(lire('js/pratiques/pratique-sommative.js').replace(/^    calculerPerformance\(/m, 'function calculerPerformance('), 'calculerPerformance')).not.toContain('statutIntegrite');
+        expect(statut).not.toContain("select.value = '0'");
+        const perf = corps(lire('js/pratiques/pratique-sommative.js').replace(/^    calculerPerformance\(/m, 'function calculerPerformance('), 'calculerPerformance');
+        expect(perf).not.toContain('statutIntegrite');
+        expect(perf).toContain('window.noteRetenueParLeCalcul(evaluation) * ponderation');
         expect(corps(lire('js/pratiques/pratique-registre.js'), 'evaluationEntreDansLaNote')).toContain('if (evaluation.remplaceeParId) return false;');
         expect(CARTE).toContain('<li>en sommative, elle vaut 0, sauf si une reprise la remplace ;</li>');
         expect(CARTE, 'la clause des meilleures productions ne joue jamais en sommative').not.toMatch(/meilleures productions/);
@@ -355,8 +360,10 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
     });
 
     it('standards : hors du portfolio ; la terminale, et l\'obligatoire en hybride avec les notes finales, valent 0', () => {
-        expect(corps(ACTIONS, '_filtrerEvaluationsArtefactsValides')).toMatch(/statutIntegrite === 'plagiat' \|\| statutIntegrite === 'ia'\) return false/);
+        // ↻ 28 oct. 2026 : la règle est lue au registre (`valeurCopieNonRecevable`), plus sur le statut ; la terminale vaut 0 par lui.
+        expect(corps(ACTIONS, '_filtrerEvaluationsArtefactsValides')).toMatch(/if \(nonRecevable && !nonRecevable\.dansLePortfolio\) return false;/);
         expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).not.toContain('statutIntegrite');
+        expect(corps(ACTIONS, '_obtenirNoteTerminaleEtudiant')).toContain('window.noteRetenueParLeCalcul(evaluationTerminale)');
         const hybride = corps(ACTIONS, '_selectionnerArtefactsHybride');
         expect(hybride).toContain('const denominateurObl = estFinale ? nombreObligatoiresTotal : evalsObligatoires.length;');
         expect(hybride).toMatch(/const nombreObligatoiresTotal = productionsNonPortfolio\s*\.filter\(p => p\.categorie === 'obligatoire' && p\.id !== terminalId\)\.length;/);

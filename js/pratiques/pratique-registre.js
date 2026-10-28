@@ -903,6 +903,44 @@ function evaluationNonRecevable(evaluation) {
 }
 
 /**
+ * CE QUE VAUT UNE COPIE NON RECEVABLE DANS LE CALCUL DE LA NOTE — la règle par défaut, posée ICI seulement.
+ * Décisions de Grégoire du 15 oct. 2026 (13 h 47, 14 h 36), telles que l'Aide les dit (`accordeon-aide-irrecevables`) :
+ * en sommative elle vaut 0 (une reprise la remplace ; une pratique qui ne retient que les meilleures l'écarte si elle
+ * n'en est pas, puisqu'elle vaut 0) ; en spécifications, un travail non satisfaisant ; en standards, elle sort du
+ * portfolio, et une terminale non recevable vaut 0 (en hybride, notes finales cochées, l'obligatoire absente du pool
+ * compte 0 au dénominateur) ; en dénotation, la note est un jugement saisi : aucune copie n'y entre par calcul.
+ * ⚠ C'EST LA PRATIQUE DE GRÉGOIRE, PAS UNE VÉRITÉ (28 oct. 2026, 6 h 16) : un réglage de la pratique de notation devra
+ * pouvoir la remplacer (chantier au BACKLOG). Il remplacera cet objet, et les familles n'auront rien à changer : aucune
+ * ne relit `statutIntegrite`, toutes lisent `valeurCopieNonRecevable` ou `noteRetenueParLeCalcul`.
+ * ⚠ Se lit AU CALCUL, sur le statut : les copies déjà verrouillées suivent sans qu'on écrive dans leurs données.
+ * Les captures déjà prises gardent leurs valeurs jusqu'à « Recalculer les captures ».
+ */
+const VALEUR_COPIE_NON_RECEVABLE_PAR_DEFAUT = Object.freeze({
+    note: 0,                  // sommative, terminale des standards
+    satisfaisante: false,     // spécifications
+    dansLePortfolio: false    // standards
+});
+
+/**
+ * @param {Object} evaluation
+ * @returns {{note:number, satisfaisante:boolean, dansLePortfolio:boolean}|null} null : la copie est recevable
+ */
+function valeurCopieNonRecevable(evaluation) {
+    return evaluationNonRecevable(evaluation) ? VALEUR_COPIE_NON_RECEVABLE_PAR_DEFAUT : null;
+}
+
+/**
+ * La note qu'un calcul retient pour une copie : la sienne, ou ce que vaut une copie non recevable.
+ * Ne décide pas si la copie entre dans la note (`evaluationEntreDansLaNote`) : seulement ce qu'elle y vaut.
+ * @param {Object} evaluation
+ * @returns {number|null|undefined}
+ */
+function noteRetenueParLeCalcul(evaluation) {
+    const valeur = valeurCopieNonRecevable(evaluation);
+    return valeur ? valeur.note : evaluation.noteFinale;
+}
+
+/**
  * Statut « Incomplet ; travail en cours » (décisions de Grégoire, 25 oct. 2026) — l'élève n'a pas eu
  * le temps de finir et l'enseignant lui donne un délai, SANS jeton. Tant que le statut est posé, la
  * copie n'a pas de note et ne compte jamais dans la note du cours (`evaluationEntreDansLaNote`) ;
@@ -962,6 +1000,9 @@ window.compterEvaluationsEcarteesDeLaNote = compterEvaluationsEcarteesDeLaNote;
 window.evaluationNonRemise = evaluationNonRemise;
 // Lot 30 (17 sept. 2026) — une copie non recevable (plagiat, IA) n'est pas une remise pour la complétion
 window.evaluationNonRecevable = evaluationNonRecevable;
+// 28 oct. 2026 — ce que vaut une copie non recevable dans la note (règle par défaut, un seul endroit)
+window.valeurCopieNonRecevable = valeurCopieNonRecevable;
+window.noteRetenueParLeCalcul = noteRetenueParLeCalcul;
 // Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C
 window.evaluationTravailEnCours = evaluationTravailEnCours;
 window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
