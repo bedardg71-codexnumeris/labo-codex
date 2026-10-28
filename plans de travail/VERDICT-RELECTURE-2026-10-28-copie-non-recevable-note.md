@@ -30,3 +30,15 @@ Le point 4 de la demande (les copies déjà marquées suivent la règle) n'est p
 3. **La ligne de l'Aide** (décision 3), mot pour mot ; les quatre lignes par famille et le « 7/9 » ne bougent pas.
 4. **#1176** : ajoute à sa fiche les six sites du dépistage (§ Trouvailles).
 5. Un commit pour le code, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-copie-non-recevable-note-retouche.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la retouche (Cowork, 28 oct., 7 h 17)
+
+> Sur `main` = `de404707`. Lu : la demande de relecture de la retouche, le diff de `045bccb2`. Rejoué sur la copie de Cowork : la sentinelle de l'affichage (13 sur 13) et celle de la règle (32 sur 32). Les deux textes de Grégoire sont posés mot pour mot (comparés au caractère, insécables compris). Le cliquet de complexité baisse (`afficherRevisionExport` en sort) : il n'est pas relevé.
+
+**Acceptée, avec une seconde retouche** : trois endroits montrent encore les niveaux d'une copie non recevable, alors que la décision de Grégoire (6 h 46) et l'avis qu'il a validé (6 h 49) disent « la copie montre « Non recevable » au lieu de sa note et de ses niveaux ». Ce n'est pas une trouvaille, c'est la décision pas encore tenue partout (décision de Cowork) :
+
+1. **Le formulaire : les menus des critères** se masquent aussi derrière le libellé (la supposition de la demande est écartée : la décision de 6 h 46 nomme le formulaire, et l'avis dit « au lieu de ses niveaux »). Masqués, pas vidés : leurs valeurs restent, la sauvegarde ne lit rien de neuf, et retirer le statut les rend. Essai : statut posé, aucun niveau de critère visible ; statut retiré, E et M reviennent ; aucune écriture.
+2. **La Liste des évaluations** : la colonne du niveau d'une copie non recevable dit « -- », comme la note.
+3. **Le bilan d'une copie postérieure** (PDF et écran, `historiqueAnterieur`) : une copie non recevable antérieure n'y entre pas (« Points récurrents », « Progrès ») ; ses niveaux ne se lisent nulle part ailleurs. Retire ce septième site de #1176, où il avait été versé : il relève de la décision 1, pas du réglage.
+
+Un commit pour le code, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-copie-non-recevable-note-retouche-2.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
