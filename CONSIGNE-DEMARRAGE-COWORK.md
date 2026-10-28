@@ -9,6 +9,77 @@
 
 ---
 
+## 0⁶ · LE 28 OCTOBRE, 15 H 10 : DEUX SESSIONS DE CLAUDE CODE EN COURS, LA SUITE (ajouté le 28 oct. à 15 h 10 par Cowork, relayé parce que le contexte de la session était lourd)
+
+> Le § 0⁵ ci-dessous est **périmé** (le 26 au soir) ; les §§ 1, 2, 5, 6 tiennent. Ordre de lecture : la page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, `Artifact` read : sa source vivait dans le scratchpad de la session précédente, **republie à partir de ce que la lecture te rend**), puis ce paragraphe, puis `plans de travail/DECISIONS-2026-10-28-construction-de-la-note.md`.
+
+**L'état mesuré** (15 h 05, `git log` et `git rev-parse`, sans rien qui touche l'index) : en ligne **1.222.0** (build `1027-1907`). `origin/main` = `ac71f50b` ; `main` local = `cdea722e`, **33 commits d'avance, non poussés**. Ils portent : les lots 2c, 2c bis, 2d et 3 de l'Aide (#1152, tous acceptés et clos : les huit parties réécrites, un seul glossaire) ; #1175 (la copie non recevable vaut ce que dit la règle par défaut, `VALEUR_COPIE_NON_RECEVABLE_PAR_DEFAUT`, `pratique-registre.js:918`, et montre « Non recevable » ; quatre retouches, clos) ; la mesure de la construction de la note (`958d11ea`, `RAPPORT-2026-10-28-construction-de-la-note.md`).
+
+**En cours chez Claude Code : deux sessions en parallèle, même dépôt, même branche.**
+1. **Les correctifs de la note** : `CONSIGNE-LOT-2026-10-28-construction-de-la-note-correctifs.md` (E1, E2, E3, E4, E7, décidés par Grégoire de 14 h 43 à 14 h 46 ; E8, E9, E10, E12 en commentaires). Lancée avant 15 h 02 : inféré de la question de Grégoire, à confirmer par le rapport. À la relecture : E1 (`production?.ponderation || 1`, `pratique-sommative.js:101,151`) ; l'amendement d'E7 (une pratique Standards **sans** terminale ne reste pas « provisoire », ni à l'export ni au profil : STD-4, STD-C4).
+2. **Le plan « des standards sans portfolio ni terminale »** : `CONSIGNE-LOT-2026-10-28-standards-sans-portfolio-plan.md`, lecture seule, produit `PLAN-2026-10-28-standards-sans-portfolio.md`. Amendée à 15 h 04 pour le parallèle : **elle ne committe rien** (le lot 4 de l'Aide committera la consigne et le plan) ; elle décrit d'après la consigne des correctifs les sites qu'E7 change. **Urgent** pour Grégoire (14 h 55). Point de départ décidé à 14 h 56 (`DECISIONS-…`, § « Le point de départ »).
+
+**Ce qui est dû, dans l'ordre** :
+1. **Le texte « Dénotation » du trou 2** (Grégoire, 14 h 50 : « ok, tu peux rédiger ») : la dernière famille de la section « Comment ta pratique construit la note » de `TEXTES-2026-10-28-aide-sept-trous.md` (« À venir : Dénotation »). Même forme que Sommative, Spécifications et Standards (validés 14 h 51 à 14 h 55) ; « Chaque **travail** qui compte », pas « copie ». Faits mesurés (`RAPPORT-…`, § 4) : aucune copie n'entre, la note est le jugement saisi (`pratique-configurable.js:377`) ; toutes les cibles confirmées, la note saisie tient ; une cible non confirmée, 59 au plus ; rien de saisi, pas de note. Proposer à Grégoire **un texte à corriger**, seul dans son tour. ⚠ Le texte Standards dit « aujourd'hui » et « changera avec ce chantier » : il se réécrira après le plan.
+2. **Relire le rapport des correctifs**, puis **le plan Standards** : les mots neufs vont à Grégoire, un par tour, avant tout code ; les questions de didactique nommées (ce que « Portfolio » veut dire une fois facultatif ; la note Standards qui lirait un jour les niveaux, E5) lui reviennent une à la fois, avec une recommandation.
+3. **Les lots 4 (les trous 1, 3, 5, 6) et 5 (seize textes d'écran) de l'Aide** : consignes prêtes et commitées, à relayer après les correctifs et le plan. L'intégration du trou 2 n'est dans aucun lot : à placer par Cowork quand la Dénotation est validée (décision technique ; le texte Standards changera).
+4. **Ce soir, la mise en ligne** (`minor`) : écrire la consigne avec des Nouvelles **à faire valider par Grégoire** ; elles disent la refonte de l'Aide, la copie non recevable (des notes changent en sommative) et E1 à E7 (des notes changent pour certains). Les deux icônes non suivies mises de côté le temps du verdict ; `scripts/verdict-en-morceaux.mjs` ; le SSH rétabli avant le push ; skill `release-et-changelog`.
+5. **Le tri** : l'instable `presences-lot-d-enregistrement` (g), trois soirs de suite ; les rouges de GitHub sous Linux.
+6. **Plus tard** : #1176, la règle de la copie non recevable posée à la création de la pratique (les mots de Grégoire, 28 oct. vers 6 h 20 : « nous sommes en train de coder en dur ma pratique personnelle ») et les six sites du dépistage.
+
+**Zones protégées, autorisations du 28 oct.** : `js/navigation.js`, les deux lignes du mappage des bulles seulement (texte d'écran n° 9) ; `noms_stables.json`, le retrait de `basculerVerrouillageCritere` seulement (14 h 42).
+
+**Ce que la journée du 28 a payé** :
+- **Les « artefacts du portfolio » et la « production terminale » écrits comme s'ils définissaient la pratique Standards** : c'est la pratique de Grégoire, codée en dur ; ailleurs (en chimie), la pratique n'a pas de portfolio. ⮕ **Avant un texte ou une consigne qui décrit une famille de pratique, se demander ce qu'en ferait un·e prof d'une autre discipline**, et mesurer ce qui est réglable plutôt que décrire le cas de Grégoire.
+- **L'ordre des entrées tiré de l'ordre des `div`**, pas de celui des onglets (lot 2c) : lire l'ordre dans `js/config.js:80-83`.
+- **Une phrase d'un dossier reprise sans mesure** (« le seul endroit où l'application range » : faux, la Liste trie aussi) et un mot du code (« urgence ») passé dans un texte d'écran.
+- **« sans fiche » lu « s'en fiche »** : relire un texte à voix intérieure avant de le proposer.
+- **« oui j'autorise » ambigu entre deux questions ouvertes** : une seule question par tour, sans exception.
+
+---
+
+## 0⁵ · (PÉRIMÉ, VOIR 0⁶) LE 26 OCTOBRE AU SOIR : 1.220.0 EN LIGNE, LA SUITE (ajouté le 26 oct. à 19 h 35 par Cowork)
+
+> Le § 0⁗ ci-dessous est **périmé** (le matin du 26) ; les §§ 1, 2, 5, 6 tiennent. L'état vit dans la page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN) : **relis-la d'abord** (`Artifact` read), puis `RELAIS.md` (en-tête) et `OU-EN-EST-ON.md`.
+
+**L'état mesuré** : `origin/main` = `daf259ff`, **1.220.0 en ligne** (Netlify, déploiement `6adfd3c6` sur `10b7093d`, 18 h 27 ; `version.json` lu par Claude Code, le bas de page à faire confirmer par Grégoire). Elle porte la table de cas (étape 3 du plan du 21 oct., lots 3a `cddfd207` et 3b `27d5d610`) et #1038 (`c12ab9b5`), Nouvelles validées par Grégoire à 15 h 31. Verdict complet sur `1473b15a` en dix morceaux : 1 044 verts, 1 instable connu, 1 rouge (une spec du lot C périmée par 3a) ; spec recalée (`10b7093d`, tests seulement), le verdict reporté sur le nouveau sommet à trois conditions (diff tests et docs seulement ; la spec rejouée seule ; aucune autre recalée) : `CONSIGNE-LOT-2026-10-26-verdict-rouge-1220-retouche.md`. GitHub (run 40412553265) **non jugé** : 12 rapports sur 16, 6 rouges propres à Linux, verts sur le Mac ; 18 specs de la baseline Linux redevenues vertes.
+
+**Ce qui est dû, dans l'ordre** :
+
+1. **L'étape 4 du plan du 21 oct.** (les calculs que l'enseignant·e compose) : **la décision de Grégoire d'abord**, ce que veulent dire les calculs tout faits (les trois formules, la projection). Cowork lui **propose un texte à corriger** (sa préférence), mesuré dans `evaluation-formules.js` et `evaluation-projection.js` ; puis une ébauche dans l'atelier, comme pour l'étape 3 ; puis les consignes. Bâtir sur l'existant : l'atelier du lot 3a, la table de cas du 3b (`js/tables-cas-algo.js`).
+2. **Le tri de GitHub** (sans Grégoire) : les rouges propres à Linux des runs du 25 (7) et du 26 (6), la baseline Linux à élaguer (18), les morceaux coupés à 30 min (#1114).
+3. **L'outil du verdict en dix morceaux** : écrit à la main deux fois le 26 (le jeton ; le report d'un verdict quand seuls des tests changent). À outiller, avec les trois conditions du report.
+4. **La porte terrain des bibliothèques** : l'artefact jumeau n'est toujours pas publié (`PORTES-TERRAIN-2026-10-25-bibliotheques-deux-colonnes.md`). **Juge d'abord** s'il est dû : règle 2 du skill `portes-terrain` (les verdicts de 3a et 3b ont conclu « aucune porte due » pour du comportement et du confort).
+5. **Corriger au prochain relais** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` dit #1093 ouverte « à Grégoire » ; elle est **close depuis le 22 oct.** (`BACKLOG.md`, l. 304). Claude Code l'a redite à Grégoire le 26 au soir.
+
+**Ce que la journée du 26 a payé** :
+- **Deux consignes de Cowork fausses, corrigées par Claude Code** : la marque d'un critère neuf (`codesSousCriteresSeulement`), écartée par Cowork lui-même le 22 oct. au profit de `nomsAttendus` ; la moyenne tirée de la projection, toujours « Sans valeur » sans limite. ⮕ **Avant d'écrire une consigne, `grep` les verdicts antérieurs sur la même donnée** (`grep -l "<clé>" "plans de travail"/VERDICT-*`), et passer chaque valeur au cas « sans limite / sans code / sans étendue ».
+- **Une ébauche validée qui contredisait l'application** : « les seuils des paliers sont fixes » (ils se modifient) ; ajouter un palier, le signalement, le lien et les collections omis. Rattrapé avant la consigne, Grégoire a revalidé. ⮕ **Avant une ébauche qui remplace un écran, inventorier tout ce que l'écran fait aujourd'hui en lisant son rendu** (ici `rendreBlocProjectionAlgo`), pas seulement le plan.
+- **Un rouge du soir venu d'un test choisi par écran** : la spec du lot C lisait une classe retirée par 3a ; les « specs touchées » de 3a et 3b avaient été choisies par écran. ⮕ **Un lot qui retire une classe ou un identifiant fait `grep -rn` dans `tests/` pour chacun.**
+- **Les portes terrain** : Claude Code en a proposé trois par lot ; toutes de comportement et de confort. Règle 2 du skill : aucune due. À juger à chaque lot, pas à recopier.
+
+---
+
+## 0⁗ · (PÉRIMÉ, VOIR 0⁵) LE 26 OCTOBRE AU MATIN : 1.219.1 EN LIGNE, LA SUITE (ajouté le 26 oct. à 9 h 50 par Cowork)
+
+> Les §§ 0‴ à 0 ci-dessous sont **périmés** (17 et 18 oct.) ; les §§ 1, 2, 5, 6 tiennent. L'état vit dans la page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN), mise à jour à chaque lot : **relis-la d'abord** (`Artifact` read), puis `RELAIS.md` (en-tête) et `OU-EN-EST-ON.md`.
+
+**L'état mesuré** : `origin/main` = `c07270a6`, **1.219.1 en ligne** (Netlify, 26 oct., 8 h 56). Elle porte les lots du 24 et du 25 (Nouvelles 1.218, validées par Grégoire le 25 à 20 h) et les dix fenêtres de bibliothèque en deux colonnes ou en liste (Nouvelles 1.219, validées le 25 à 19 h 59). Vérification complète verte, jouée **en dix morceaux** (`scripts/morceau-playwright.mjs`), la mémoire stable. La branche `bibliotheques-deux-colonnes` est fusionnée et supprimée. Seul fichier non suivi : `plans de travail/TEXTES-2026-10-25-table-de-cas-a-corriger.md` (à commiter avec le prochain lot de docs).
+
+**Ce qui est dû, dans l'ordre** :
+
+1. **L'ébauche de la table de cas** (étape 3 de `PLAN-2026-10-21-critere-algorithmique-toute-discipline.md`). Grégoire a dit **oui** le 26 à 9 h 41 : une ébauche à valider **avant** la consigne, parce que la maquette du 24 (`MAQUETTE-2026-10-24-critere-algorithmique.html`) ne montre pas la table, et que sans elle Claude Code inventerait la forme. Ses textes sont tranchés (`TEXTES-2026-10-25-table-de-cas-a-corriger.md`, toutes les propositions retenues le 25 à 17 h 19). L'ébauche se pose **dans l'atelier en cinq étapes** livré le 24 (#1150 : la chaîne, la palette, « Ce que l'élève lira » à droite) ; elle reprend le bouton « Voir ce que l'élève lirait à ce palier » (décision 10 du verdict du 24, non fait). Bâtir sur l'existant (règle du 17 oct.) : lire d'abord `js/atelier-algo.js`, `js/evaluation-enonces.js`, `js/evaluation-projection.js`. Question laissée ouverte par Cowork le 25 : « la tendance » du plan (non trouvée dans le code).
+2. **La porte terrain des bibliothèques** : le markdown `plans de travail/PORTES-TERRAIN-2026-10-25-bibliotheques-deux-colonnes.md` est complet pour les dix fenêtres ; **Cowork publie l'artefact jumeau** (skill `portes-terrain`, bouton « Copier mes résultats »). L'iPad et Safari réels.
+3. **Le tri de GitHub** (règle du 25 oct. au matin, `VERDICT-RELECTURE-2026-10-25-rouge-github-1217.md`) : sur le run 40326337181 du push, **trois morceaux (6, 8, 12) atteignent le plafond de 30 minutes** (13 rapports sur 16) ; jugés à la main contre la baseline Linux, **7 rouges neufs, tous verts sur le Mac** : `bibliotheque-liste-1159` (3), `exporter-des-travaux-une-carte-895`, `lot-a-anonymisation-enregistre`, `lot-e3-creer-ou-modifier` (2) ; 10 specs de la baseline redevenues vertes. Le premier essai du critère de bascule de #1114 n'a pas pu se faire. Rien ne retient une version : le Mac reste le juge.
+4. **L'outillage du verdict en morceaux** : `pousser.sh` relance toute la suite ; le 26, Claude Code a écrit le jeton de verdict lui-même après un verdict complet vert en morceaux, puis `git push` (le hook a lu le jeton). À outiller si le verdict en morceaux devient la règle (il l'est de fait depuis deux nuits : la suite d'un bloc sature la mémoire du Mac).
+
+**Ce que la session du 24 au 26 a payé** :
+- **Une hypothèse de Cowork réfutée** (26 oct., 7 h 15) : « la barre de la Carte fait déborder la page ». Faux : les sept rouges venaient de specs qui visaient trop tôt. La consigne exigeait de départager **avant** de corriger, et c'est ce qui a évité un correctif dans l'application : garder ce patron (trois issues, chiffres à l'appui).
+- **Une consigne contradictoire** (le soir du 25) : « écris le jeton comme `pousser.sh`, puis pousse par `pousser.sh` », qui relance la suite. Claude Code a dévié à raison. Relire chaque ordre de clôture contre l'outil.
+- **Le Mac sature pendant la suite Playwright d'un bloc**, Cowork ouvert ou non (25 oct. au soir : seuls Terminal et Finder ouverts). En dix morceaux, la mémoire tient. Redémarrages nocturnes : 9, 10, 11 sept. et 25 oct. (panique du chien de garde, 2 h 48).
+
+---
+
 ## 0‴ · FIN DU 17 OCTOBRE : 1.203.0 EN LIGNE, LA PORTE DE LUNDI (ajouté le 17 oct. à 20 h 04 par Cowork)
 
 - Le plan « prêt pour lundi » est fini : ses huit étapes cochées. 1.203.0 poussée le 17 vers 19 h 55 (`71cdde64`), vérification complète verte, après la correction C1 de la relecture de 17 h 49 (`VERDICT-RELECTURE-2026-10-17-version-1.203.0.md`). Netlify : pas encore constaté, c'est le §0 de la porte.
