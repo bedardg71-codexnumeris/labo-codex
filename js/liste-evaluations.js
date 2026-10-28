@@ -1604,7 +1604,9 @@ function genererLigneHTML(ligne) {
     const libelleStatut = statutW === 'a-reevaluer' ? 'À réévaluer' : obtenirLibelleStatut(statutW);
     let affichageNiveau;
     if (ligne.statut === 'non-recevable') {
-        affichageNiveau = '<strong style="color: var(--gris-clair);">0</strong>';
+        // #1175, troisième retouche (28 oct. 2026) — « -- », comme la note et le niveau : le « 0 » était faux en standards,
+        // et une copie non recevable ne montre ni note ni niveau (décision de Grégoire, 6 h 46).
+        affichageNiveau = '<strong style="color: var(--gris-clair);">--</strong>';
     } else {
         // Lot C (D1) — l'aide courte de « Non verrouillée ».
         const titreStatut = statutW === 'non-enregistree' ? 'Non verrouillée : ne compte pas encore dans la note.' : '';

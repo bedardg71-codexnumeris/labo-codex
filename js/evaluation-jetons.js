@@ -589,9 +589,12 @@ async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, o
     // l'originale portait comme copie jugée. Le délai déjà accordé (qui comptait un second jeton
     // au quota), le remplacement et l'archivage (qui l'excluaient de la note), la marque de
     // réconciliation et la reprise ciblée retirée restent sur l'originale.
+    // #1175, troisième retouche (relecture de Cowork, 28 oct. 2026, 7 h 33) — le statut d'intégrité et ses preuves aussi :
+    // la reprise est une nouvelle remise, que rien n'a encore jugée. Depuis que le statut fait la note et l'affichage, une
+    // reprise accordée après un plagiat valait 0 et se montrait « Non recevable ». L'originale garde les siens.
     ['jetonDelaiApplique', 'dateApplicationJetonDelai', 'delaiAccorde', 'dureeDelaiJours',
         'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee',
-        'dateArchivage', 'reconcilieParDoublon'].forEach(champ => { delete nouvelleEvaluation[champ]; });
+        'dateArchivage', 'reconcilieParDoublon', 'statutIntegrite', 'notesIntegrite'].forEach(champ => { delete nouvelleEvaluation[champ]; });
 
 
     // Journal de bord — jeton de reprise (avant splice pour garder la bonne référence)
