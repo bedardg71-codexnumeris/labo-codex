@@ -45,6 +45,11 @@ test('#1152 lot 2c · la recherche trouve la corbeille, les tranches et la note 
     await page.waitForFunction(() => typeof window.afficherSection === 'function');
     await page.evaluate(() => window.afficherSection('aide'));
 
+    // Verdict de relecture du 28 oct. 2026, retouche 1 : « La liste des évaluations » vient après « Préparer et importer
+    // les travaux », dans l'ordre des sous-onglets.
+    const titres = await page.locator('#aide-evaluation > .carte.accordeon h3').allTextContents();
+    expect(titres.slice(0, 2).map((t) => t.replace(/[▼▶]/, '').replace(/\s+/g, ' ').trim())).toEqual(['Préparer et importer les travaux', 'La liste des évaluations']);
+
     const resultats = page.locator('#aide-recherche-resultats');
     for (const [mot, id] of [['corbeille', 'liste-evaluations'], ['tranche', 'annoter-evaluer'], ['note remise', 'annoter-evaluer'], ['barème', 'annoter-evaluer']]) {
         await chercher(page, mot);
