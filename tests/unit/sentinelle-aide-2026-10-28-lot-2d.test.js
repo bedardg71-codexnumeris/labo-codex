@@ -296,6 +296,17 @@ describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () =>
         expect(texteDe('glossaire')).not.toMatch(/\d|Numérisation|Croisement/);
     });
 
+    it('les mots de Grégoire (28 oct. 2026, 13 h 14, « on garde ») : le titre du glossaire, les deux phrases de `pan`', () => {
+        expect(titreDe('glossaire')).toBe('Glossaire du parcours');
+        const t = texteDe('pan');
+        expect(t).toContain('Une pratique alternative de notation laisse le droit à l\'erreur sans pénalité sur la note finale, par des occasions multiples de démontrer sa compétence, et compose cette note à partir des traces les plus récentes ou les plus représentatives.');
+        expect(t).toContain('Deux pratiques de la même famille peuvent y répondre différemment : c\'est là que se lit une pratique, plus que dans son étiquette.');
+        for (const id of ['pan', 'glossaire']) {
+            const avant = html.slice(0, html.indexOf(`id="accordeon-aide-${id}"`));
+            expect(avant.slice(avant.lastIndexOf('<!--')), id).toContain('validé par Grégoire le 28 oct. 2026 à 13 h 14');
+        }
+    });
+
     it('faq : les questions qui doublaient une carte voisine sont parties ; l\'abandon et la pondération disent l\'écran', () => {
         const questions = [...entree('faq').querySelectorAll('summary')].map((s) => net(s.textContent));
         expect(questions).toEqual([
@@ -303,8 +314,10 @@ describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () =>
             'Puis-je utiliser l\'application sur plusieurs appareils ?',
             'Comment gérer un·e étudiant·e qui abandonne en cours de trimestre ?',
             'Que faire si la pondération totale n\'est pas 100 % ?',
-            'Puis-je modifier les seuils des indices A, C, M ?',
+            'Puis-je modifier les seuils des indices A et C ?',
         ]);
+        // Retouche du 28 oct. (verdict de Cowork) : pas d'indice M ; « M » est le nom interne du filtre « A ou C ».
+        expect(texteDe('faq')).not.toMatch(/indices? (A, C, M|A\/C\/M)/);
         const etudiants = lire('js', 'trimestre-v2-etudiants.js');
         expect(etudiants).toContain('<th>Remarque</th>');
         expect(etudiants).toMatch(/<option value="">[^<]*Aucune<\/option>|>Aucune<\/option>/);
