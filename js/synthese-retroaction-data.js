@@ -82,6 +82,11 @@
     function construireFeedback(evaluation, fichier, annotation) {
         if (!evaluation) return null;
         evaluation = sansNiveauxSiTravailEnCours(evaluation);
+        // 28 oct. 2026 — une copie non recevable montre son libellé au lieu de sa note et de ses niveaux ; sa
+        // rétroaction écrite reste. `vue` est ce que l'élève lit de la copie ; `evaluation` reste entière (la base
+        // n'est pas touchée), pour les commentaires par critère qu'une cartouche choisit au niveau.
+        const nonRecevable = libelleNonRecevable(evaluation);
+        const vue = sansNoteNiNiveauxSiNonRecevable(evaluation);
 
         const grille = lireGrille(evaluation.grilleId);
         const cartouche = lireCartouche(evaluation.grilleId, evaluation.cartoucheId);
@@ -91,16 +96,17 @@
         return {
             // #941 lot S1 (D1, décision A) — une copie en points ne montre aucun nom de niveau.
             enPoints:  estEnPoints(evaluation),
+            nonRecevable: nonRecevable,
             student:   construireStudent(evaluation),
             course:    construireCourse(evaluation),
             artefact:  construireArtefact(evaluation, cartouche),
             // Demande de Grégoire, 2 septembre 2026 : le nom de la grille sur le PDF.
             // Le nom vivant d'abord ; celui gravé sur l'évaluation si la grille a disparu.
             grille:    { nom: (grille && grille.nom) || evaluation.grilleNom || '' },
-            trimestre: construireTrimestre(evaluation),
+            trimestre: construireTrimestre(vue),
             scale:     echelle,
-            criteria:  construireCriteres(evaluation, grille, cartouche),
-            overall:   construireOverall(evaluation, echelle),
+            criteria:  sansNiveauxDesCriteres(construireCriteres(evaluation, grille, cartouche), nonRecevable),
+            overall:   construireOverall(vue, echelle, nonRecevable),
             stamps:    construireStamps(stats),
             errors:    construireErrors(stats, grille),
             errorsTotal: stats ? stats.totalErreursFr : 0,
@@ -110,7 +116,7 @@
             // chimie voyait son critère rebaptisé. Le nom existe déjà dans la
             // grille, il n'y avait rien à créer pour aller le chercher.
             errorsLabel: libelleErreurs(grille, evaluation),
-            bilan:     construireBilan(evaluation, grille, echelle, stats),
+            bilan:     construireBilan(vue, grille, echelle, stats),
             // Drapeau « vue recalculée a posteriori » (#347). Vrai quand des
             // artefacts ultérieurs sont entrés dans le portfolio agrégé depuis
             // la remise de CET artefact — auquel cas la synthèse ne reflète plus
@@ -119,8 +125,33 @@
             // #674 — SUR QUOI PORTE LA NOTE. Relue sur l'évaluation telle qu'elle est
             // en base (rétroactif : les copies muettes d'avant ce lot sont vues) ;
             // le rendu refuse de conclure et NOMME ce qui manque.
-            portee: construirePortee(evaluation, grille)
+            portee: nonRecevable ? null : construirePortee(evaluation, grille)
         };
+    }
+
+    /**
+     * Copie non recevable (décision de Grégoire, 28 oct. 2026, 6 h 46) — LE PDF MONTRE « Non recevable (Plagiat) » ou
+     * « Non recevable (IA non autorisée) » AU LIEU DE SA NOTE ET DE SES NIVEAUX, comme la Liste des évaluations.
+     * Le libellé est celui du registre (`libelleCopieNonRecevable`), pas une recopie. Une VUE, jamais une écriture :
+     * l'évaluation de l'enseignant·e reste en base, et retirer le statut fait tout revenir. Sans niveaux, le bilan
+     * de la copie ne nomme ni force, ni critère à travailler, ni progrès.
+     */
+    function libelleNonRecevable(evaluation) {
+        return (typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(evaluation)) || null;
+    }
+
+    function sansNoteNiNiveauxSiNonRecevable(evaluation) {
+        if (!libelleNonRecevable(evaluation)) return evaluation;
+        const criteres = Array.isArray(evaluation.criteres)
+            ? evaluation.criteres.map(c => Object.assign({}, c, { niveauSelectionne: '', points: null }))
+            : evaluation.criteres;
+        return Object.assign({}, evaluation, { noteFinale: null, niveauFinal: '', criteres });
+    }
+
+    /** Les critères d'une copie non recevable gardent leur nom et leur commentaire ; ni niveau, ni points, ni calcul. */
+    function sansNiveauxDesCriteres(criteres, nonRecevable) {
+        if (!nonRecevable) return criteres;
+        return criteres.map(c => Object.assign({}, c, { code: '', points: null, tranche: '', algo: null }));
     }
 
     /**
@@ -327,7 +358,8 @@
 
         const da = evaluation.etudiantDA;
         const evaluations = lireDonneesNamespace('evaluationsSauvegardees');
-        const evalsEleve = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId);
+        const evalsEleve = evaluations.filter(e => e.etudiantDA === da && !e.remplaceeParId)
+            .map(sansNoteNiNiveauxSiNonRecevable);   // 28 oct. 2026 : aucune case ne porte le niveau d'une copie non recevable
 
         // IDs des productions retenues dans le portfolio (les N meilleures selon
         // la pratique de notation). Permet de marquer ces cases visuellement
@@ -618,7 +650,9 @@
        G. NIVEAU GLOBAL
        ===================================================================== */
 
-    function construireOverall(evaluation, echelle) {
+    function construireOverall(evaluation, echelle, nonRecevable) {
+        // 28 oct. 2026 — une copie non recevable : son libellé, aucun niveau, aucune note.
+        if (nonRecevable) return { code: '', label: '', color: '#767169', nonRecevable: nonRecevable };
         // #941 lot S1 (D1, D4) — une copie en points n'a pas de niveau général : le bloc porte
         // la note de la copie (« Note de la copie : 74 % »), rien d'autre.
         if (estEnPoints(evaluation)) {
@@ -1447,10 +1481,13 @@
         const obligatoiresTous = estHybride
             ? artefactsPortfolio.filter(p => p.categorie === 'obligatoire').map(prod => {
                 const evalObl = evaluations.find(e => e.productionId === prod.id && e.etudiantDA === da && !e.remplaceeParId && e.noteFinale != null);
+                // 28 oct. 2026 — une obligatoire non recevable montre son libellé, sans note : le calcul du rendu la
+                // traite alors comme une obligatoire non remise (0 en notes finales, hors du calcul avant), la règle.
+                const libelleObl = evalObl ? libelleNonRecevable(evalObl) : null;
                 return {
                     titre:    prod.titre || 'Production',
-                    niveau:   evalObl ? (evalObl.niveauFinal || null) : null,
-                    note:     evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null,
+                    niveau:   libelleObl || (evalObl ? (evalObl.niveauFinal || null) : null),
+                    note:     !libelleObl && evalObl && typeof evalObl.noteFinale === 'number' ? evalObl.noteFinale : null,
                     activite: prod.activiteApprentissage || prod.description || '',
                     echeance: obtenirEcheance(prod)
                 };

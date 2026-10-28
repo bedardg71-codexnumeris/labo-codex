@@ -570,6 +570,37 @@ function changerStatutRemise(num) {
 }
 
 /**
+ * L'avis « Travail non recevable » du formulaire — mots de Grégoire, validés le 28 oct. 2026 à 6 h 49 (« je garde »),
+ * mot pour mot. La phrase du jeton, pour le plagiat seulement.
+ */
+const AVIS_COPIE_NON_RECEVABLE = Object.freeze({
+    titre: 'Travail non recevable',
+    corps: 'Ton évaluation est gardée, mais la copie montre «\u00a0Non recevable\u00a0» au lieu de sa note et de ses niveaux, '
+        + 'jusque sur le PDF de l\'étudiant·e. Dans la note du cours, elle vaut ce que dit ta pratique\u00a0: 0 en sommative, '
+        + 'un travail non satisfaisant en spécifications, hors du portfolio en standards. Dans la complétion, elle compte '
+        + 'comme non remise. Retirer le statut fait tout revenir.',
+    jeton: 'Un jeton de reprise peut être appliqué pour permettre une nouvelle remise.'
+});
+
+/**
+ * Décision de Grégoire (28 oct. 2026, 6 h 46) — SUR LE FORMULAIRE, LA NOTE ET LE NIVEAU D'UNE COPIE NON RECEVABLE CÈDENT
+ * LEUR PLACE à son libellé (`libelleCopieNonRecevable`, pratique-registre.js), comme dans la Liste des évaluations.
+ * Une classe sur le panneau, comme le statut incomplet : `calculerNote` écrit toujours la note et le niveau, masqués,
+ * parce que la sauvegarde relit `niveauProduction1` — y écrire le libellé l'aurait enregistré comme `niveauFinal`.
+ * Les menus des critères restent : c'est l'évaluation de l'enseignant·e, gardée. Rien ne s'écrit dans la copie.
+ * @param {string|null} libelle - null : la copie est recevable
+ */
+function afficherCopieNonRecevable(libelle) {
+    const panneau = document.getElementById('travaux-eval-droite');
+    if (panneau) panneau.classList.toggle('copie-non-recevable', !!libelle);
+    const el = document.getElementById('libelleNonRecevable1');
+    if (el) {
+        el.textContent = libelle || '';
+        el.classList.toggle('u-hide', !libelle);
+    }
+}
+
+/**
  * Gère le changement de statut d'intégrité académique
  */
 function changerStatutIntegrite() {
@@ -604,22 +635,26 @@ function changerStatutIntegrite() {
     // Le bloc qui les passait à « 0 » est retiré : son sélecteur (`select[id^="critere"]`) ne trouvait aucun menu
     // (ils s'appellent `eval_…`, evaluation-chargement.js), et une échelle sans niveau « 0 » n'a pas ce choix.
     const estNonRecevable = (statut === 'plagiat' || statut === 'ia');
+    afficherCopieNonRecevable(typeof libelleCopieNonRecevable === 'function'
+        ? libelleCopieNonRecevable({ statutIntegrite: statut }) : null);
 
     if (estNonRecevable) {
         const listeCriteres = document.getElementById('listeCriteresGrille1');
 
-        // Afficher un message d'avertissement
+        // L'avis, réécrit à chaque changement : de « Plagiat » à « IA », la phrase du jeton part.
         const messageExistant = document.getElementById('message-non-recevable');
-        if (!messageExistant && listeCriteres) {
+        if (messageExistant) messageExistant.remove();
+        if (listeCriteres) {
             const message = document.createElement('div');
             message.id = 'message-non-recevable';
             message.className = 'alerte alerte-info';
             message.style.marginBottom = '15px';
-            message.innerHTML = `
-                <strong>Travail non recevable</strong><br>
-                Les critères sont automatiquement à 0. Cette évaluation sera exclue des calculs de moyenne.
-                ${statut === 'plagiat' ? 'Un jeton de reprise peut être appliqué pour permettre une nouvelle remise.' : ''}
-            `;
+            const titre = document.createElement('strong');
+            titre.textContent = AVIS_COPIE_NON_RECEVABLE.titre;
+            message.appendChild(titre);
+            message.appendChild(document.createElement('br'));
+            message.appendChild(document.createTextNode(AVIS_COPIE_NON_RECEVABLE.corps
+                + (statut === 'plagiat' ? ' ' + AVIS_COPIE_NON_RECEVABLE.jeton : '')));
             listeCriteres.insertBefore(message, listeCriteres.firstChild);
         }
 
@@ -1155,6 +1190,7 @@ window.changerStatutIntegrite = changerStatutIntegrite;
 // Statut « Incomplet ; travail en cours » (25 oct. 2026)
 window.changerTravailEnCours = changerTravailEnCours;
 window.afficherTravailEnCours = afficherTravailEnCours;
+window.afficherCopieNonRecevable = afficherCopieNonRecevable;   // 28 oct. 2026
 window.refuserVerrouTravailEnCours = refuserVerrouTravailEnCours;
 window.peuplementOptJetons = peuplementOptJetons;
 window.gererChangementCheckboxJetonDelai = gererChangementCheckboxJetonDelai;

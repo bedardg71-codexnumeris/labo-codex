@@ -324,7 +324,8 @@
         // moins un critère rendu passe par la rangée de niveaux. Sur une grille entièrement
         // analytique, aucun critère ne la lit : « 0 Aucun · I · D · M · E » ne dirait rien à
         // l'élève qui ne voit que des chiffres. Grille mixte : elle reste.
-        const legende = criteres.some(c => typeof c.points !== 'number') ? renderLegende(ctx) : '';
+        // 28 oct. 2026 — une copie non recevable n'a aucun niveau à situer : pas de légende.
+        const legende = (!ctx.feedback.nonRecevable && criteres.some(c => typeof c.points !== 'number')) ? renderLegende(ctx) : '';
         const lignes = criteres.map((c, i) => renderCritere(ctx, c, i === criteres.length - 1)).join('');
 
         return `
@@ -373,7 +374,9 @@
         // Lot 3 (4 sept. 2026) — CE QUE L'ÉLÈVE LIT D'UN CRITÈRE ANALYTIQUE : LE CHIFFRE,
         // rien d'autre (décision de Grégoire). Le niveau déduit a choisi le commentaire ;
         // il ne s'imprime pas. « 24 / 30 » prend la place de la rangée de l'échelle.
-        const segments = (typeof critere.points === 'number')
+        // 28 oct. 2026 — une copie non recevable : ni rangée de l'échelle, ni points (décision de Grégoire) ; le
+        // commentaire reste. Le libellé se lit une fois, dans le bandeau du niveau général.
+        const segments = ctx.feedback.nonRecevable ? '' : (typeof critere.points === 'number')
             ? `<div style="font-family: ${FONT_MONO}; font-size: 11px; font-weight: 800; color: ${INK};">${esc(formaterNombre(critere.points))} / ${esc(formaterNombre(critere.weight))}</div>`
             : scale.map((s, i) => {
             const atteint = i <= idx;
@@ -469,8 +472,24 @@
             </section>`;
     }
 
+    /**
+     * 28 oct. 2026 (décision de Grégoire, 6 h 46) — une copie non recevable : à la place du niveau général et de la
+     * note, le libellé du registre (« Non recevable (Plagiat) », « Non recevable (IA non autorisée) »), dans la forme
+     * neutre du bloc d'une copie en points.
+     */
+    function renderNonRecevable(o) {
+        return `
+            <section style="margin-bottom: 10px;">
+                <div style="padding: 10px 12px; border: 1.5px solid ${MUTED}; border-radius: 3px; color: ${INK};">
+                    <div style="${styleMonoLabel()} margin-bottom: 4px;">Niveau général</div>
+                    <div style="font-size: 16px; font-weight: 800;">${esc(o.nonRecevable)}</div>
+                </div>
+            </section>`;
+    }
+
     function renderNiveauGlobal(ctx) {
         const o = ctx.feedback.overall || {};
+        if (o.nonRecevable) return renderNonRecevable(o);
         // #674 — LE PDF REFUSE DE CONCLURE quand la note ne porte pas sur toute la
         // grille, ou quand des critères ont un niveau mais qu'aucun niveau général
         // n'a pu être établi (copie muette d'avant ce lot). Avant, le bandeau était

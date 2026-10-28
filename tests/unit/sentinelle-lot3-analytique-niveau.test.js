@@ -797,7 +797,8 @@ describe('lot 3 · F — témoins de source', () => {
         // #940 — priorités et signalés partagent une seule ligne (`ligneCritereATravailler`) : deux sites.
         expect((data.match(/lectureNiveauCritere\(echelle, (d|meilleur)\)/g) || []).length, 'ligne d\'un critère à travailler, force').toBe(2);
         expect(data).not.toMatch(/libelleNiveau\(echelle, [a-z]+\.niveauSelectionne\)/);
-        expect(source('js/synthese-retroaction-rendu.js')).toContain("criteres.some(c => typeof c.points !== 'number') ? renderLegende(ctx) : ''");
+        // ↻ 28 oct. 2026 : et pas de légende pour une copie non recevable (sentinelle-copie-non-recevable-affichage-28-oct).
+        expect(source('js/synthese-retroaction-rendu.js')).toContain("criteres.some(c => typeof c.points !== 'number')) ? renderLegende(ctx) : ''");
         // Retouche du 4 sept. : les trois rendus du bilan passent par la même lecture, et plus aucun n'appelle `_nomBilan` sur un critère.
         const retro = source('js/evaluation-retroaction.js');
         // #940 — défis et signalés passent par `_ligneCritereBilan` : deux sites, une lecture.

@@ -941,6 +941,25 @@ function noteRetenueParLeCalcul(evaluation) {
 }
 
 /**
+ * CE QUE MONTRE UNE COPIE NON RECEVABLE à la place de sa note et de ses niveaux, sur le formulaire et sur le PDF
+ * de l'étudiant·e (décision de Grégoire, 28 oct. 2026, 6 h 46). Les libellés du menu « Intégrité académique »
+ * (`index.html`), à la casse de l'écran. Un AFFICHAGE : l'évaluation de l'enseignant·e reste en base, intacte, et
+ * retirer le statut fait tout revenir.
+ */
+const LIBELLES_COPIE_NON_RECEVABLE = Object.freeze({
+    plagiat: 'Non recevable (Plagiat)',
+    ia: 'Non recevable (IA non autorisée)'
+});
+
+/**
+ * @param {Object} evaluation
+ * @returns {string|null} null : la copie est recevable
+ */
+function libelleCopieNonRecevable(evaluation) {
+    return evaluationNonRecevable(evaluation) ? LIBELLES_COPIE_NON_RECEVABLE[evaluation.statutIntegrite] : null;
+}
+
+/**
  * Statut « Incomplet ; travail en cours » (décisions de Grégoire, 25 oct. 2026) — l'élève n'a pas eu
  * le temps de finir et l'enseignant lui donne un délai, SANS jeton. Tant que le statut est posé, la
  * copie n'a pas de note et ne compte jamais dans la note du cours (`evaluationEntreDansLaNote`) ;
@@ -1003,6 +1022,7 @@ window.evaluationNonRecevable = evaluationNonRecevable;
 // 28 oct. 2026 — ce que vaut une copie non recevable dans la note (règle par défaut, un seul endroit)
 window.valeurCopieNonRecevable = valeurCopieNonRecevable;
 window.noteRetenueParLeCalcul = noteRetenueParLeCalcul;
+window.libelleCopieNonRecevable = libelleCopieNonRecevable;   // ce que la copie montre à la place
 // Statut « Incomplet ; travail en cours » (25 oct. 2026) — hors de la note, remise pour C
 window.evaluationTravailEnCours = evaluationTravailEnCours;
 window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
