@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -89,8 +90,15 @@ describe('Aide — la pratique de Grégoire reste un exemple, jamais la règle',
     // #847 — l'exemple de titre d'une intervention ne nomme plus les critères de Grégoire. Texte approuvé par
     // lui (13 sept.), lu par les collègues de la communauté de pratique. Les deux autres sites de #847
     // (js/interventions.js) sont figés par sentinelle-rencontre-sans-criteres-cibles-lot-c.
-    it('#847 — l\'Aide donne l\'exemple de titre approuvé', () => {
-        expect(AIDE).toContain('<li>Titre (ex: « Intervention sur deux critères ciblés »)</li>');
+    // ↻ #1152, lot 2c bis (28 oct. 2026) : la marche à suivre de « Interventions RàI avec absences motivées », où vivait la puce
+    // « Titre (ex: … ) », part avec l'entrée, absorbée par `planifier-rai` (audit du 24 oct., verdict final de `rai-absences` ;
+    // consigne CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md, §2, entrée 9). L'exemple approuvé reste, dans l'entrée qui
+    // l'absorbe, et il est LU à l'écran (le texte d'exemple du champ « Titre » des interventions), plus recopié ici.
+    it('#847 — l\'Aide donne l\'exemple de titre approuvé, celui du champ « Titre » de l\'écran', () => {
+        const m = readFileSync(path.join(racine, 'js/interventions.js'), 'utf8').match(/placeholderTitre: 'Ex\. ([^']+)'/);
+        expect(m, 'l\'exemple du champ « Titre » a disparu de js/interventions.js').toBeTruthy();
+        const planifier = tranche(AIDE, 'id="accordeon-aide-planifier-rai"', 'id="accordeon-aide-tirage-sort"');
+        expect(planifier).toContain(`le titre (par exemple «&nbsp;${m[1]}&nbsp;»)`);
     });
 
     it('#847 — les deux exemples retirés ne reviennent pas dans l\'Aide', () => {

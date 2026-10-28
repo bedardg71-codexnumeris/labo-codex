@@ -149,7 +149,10 @@ describe('Les patterns : toutes les énumérations nomment ceux que le code rend
     const enumerations = {
         'infobulle du filtre de la liste': () => bulle('liste-filtre-pattern'),
         'carte « Options configurables »': () => tranche(AIDE, 'Option 1 : Détection des patterns', 'Option 2 : Observation'),
-        'carte « Repérer les patterns »': () => tranche(AIDE, 'id="accordeon-aide-patterns"', 'RàI et mobilisation : deux systèmes'),
+        // ↻ #1152, lot 2c bis (28 oct. 2026) : l'encadré « RàI et mobilisation » (théorie) part de la carte (audit du 24 oct.,
+        // verdict final de `patterns` ; consigne CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md, §2, entrée 8) : la tranche
+        // finit au niveau « En attente », dernière phrase de la carte, qui suit « Données insuffisantes ».
+        'carte « Repérer les patterns »': () => tranche(AIDE, 'id="accordeon-aide-patterns"', 'le niveau RàI «&nbsp;En attente&nbsp;»'),
         'guide RàI': () => tranche(GUIDES, 'patterns observables', 'guide-pedagogique-astuce'),
     };
     for (const [nom, extraire] of Object.entries(enumerations)) {

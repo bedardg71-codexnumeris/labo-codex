@@ -84,12 +84,18 @@ const ABSORBEES_2B = ['idme'];
 // est vérifié par sentinelle-aide-2026-10-28-lot-2c.test.js.
 const ABSORBEES_2C = ['evaluer-productions'];
 const NEUVES_2C = ['liste-evaluations'];
+// ↻ #1152, lot 2c bis (28 oct. 2026) : le Suivi prend sa forme finale (audit du 24 oct., verdicts finals de `guide-profil`
+// et `rai-absences` : « Fusionner » ; remesure du 27 oct., section Suivi ; consigne CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md,
+// §1 et §2, entrées 3 et 9). `guide-profil` est absorbée par `profil-etudiant`, `rai-absences` par `planifier-rai`. L'ordre est
+// celui des sous-onglets de js/config.js ; une entrée qui explique un calcul se range à côté de l'écran qui l'affiche. Le
+// détail est vérifié par sentinelle-aide-2026-10-28-lot-2c-bis.test.js.
+const ABSORBEES_2C_BIS = ['guide-profil', 'rai-absences'];
 const PLACES = {
     commencer: ['presentation', 'prise-en-main', 'demo', 'modes', 'bibliotheque', 'chaines-etapes', 'preferences'],
     cadre: ['etapes-config', 'cours', 'horaire', 'etudiants', 'presences-calendrier', 'archivage'],
     conception: ['pratique', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme', 'sous-criteres', 'creer-echelles', 'solo', 'creer-cartouches'],
     evaluation: ['preparer-importer', 'liste-evaluations', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
-    suivi: ['saisie-presences', 'tableau-bord', 'profil-etudiant', 'guide-profil', 'acp', 'diagnostics', 'rai', 'suivi-apprentissage', 'patterns', 'planifier-rai', 'rai-absences', 'snapshots', 'tirage-sort'],
+    suivi: ['tableau-bord', 'acp', 'suivi-apprentissage', 'snapshots', 'saisie-presences', 'profil-etudiant', 'diagnostics', 'rai', 'patterns', 'planifier-rai', 'tirage-sort'],
     labo: ['labo', 'modelisation', 'pan', 'grille-depistage', 'criteres', 'rai-solo', 'bilan-reflexif'],
     'codex-archives': ['codex', 'export-import', 'partage', 'collaboration'],
     reference: ['glossaire', 'glossaire-statique', 'faq', 'problemes', 'ressources'],
@@ -97,13 +103,13 @@ const PLACES = {
 const GARDEES = Object.values(PLACES).flat();
 
 describe('#1152 lot 1 · la forme de l\'Aide', () => {
-    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée ; au lot 2c, 1 absorbée et 1 neuve', () => {
+    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée ; au lot 2c, 1 absorbée et 1 neuve ; au lot 2c bis, 2 absorbées', () => {
         expect(ONGLETS).toHaveLength(8);
         expect(Object.keys(PLACES)).toEqual(ONGLETS.map((o) => o.id));
         expect(COUPEES).toHaveLength(14);
-        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length - ABSORBEES_2C.length + NEUVES_2C.length);
+        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length - ABSORBEES_2C.length + NEUVES_2C.length - ABSORBEES_2C_BIS.length);
         const NEUVES = [...NEUVES_2A, ...NEUVES_2C];
-        expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES.includes(id)), ...ABSORBEES_2A, ...ABSORBEES_2B, ...ABSORBEES_2C]).size).toBe(75);
+        expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES.includes(id)), ...ABSORBEES_2A, ...ABSORBEES_2B, ...ABSORBEES_2C, ...ABSORBEES_2C_BIS]).size).toBe(75);
     });
 
     it('les huit sous-sections, dans l\'ordre, ont les ids et les titres du tableau \'aide\' de config.js', () => {
@@ -148,8 +154,14 @@ describe('#1152 lot 1 · les quatre retraits (§5) : motifs mesurés au texte d\
         expect(t).not.toMatch(/CAF/);
         expect(t).not.toMatch(/restent lisibles/);
     });
-    it('rai-absences : plus de promesse que les présences suivent toute modification (intention 7.65, non faite)', () => {
-        expect(texte(carte('rai-absences'))).not.toMatch(/se propagent automatiquement aux présences/);
+    // ↻ #1152, lot 2c bis (28 oct. 2026) : `rai-absences` est absorbée par `planifier-rai`, qui n'en garde que la case de report
+    // (audit du 24 oct., verdict final ; consigne CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md, §2, entrée 9). Le retrait
+    // se vérifie donc dans l'entrée qui l'absorbe, et l'entrée dit désormais le contraire, comme l'écran.
+    it('planifier-rai (qui absorbe rai-absences) : plus de promesse que les présences suivent toute modification (intention 7.65, non faite)', () => {
+        expect(carte('rai-absences')).toBeNull();
+        const t = texte(carte('planifier-rai'));
+        expect(t).not.toMatch(/se propagent automatiquement aux présences/);
+        expect(t).toContain('Le report se fait une seule fois.');
     });
     it('bilan-reflexif : plus de partie « Importer les résultats » tant que #1054 n\'est pas corrigée', () => {
         const t = texte(carte('bilan-reflexif'));

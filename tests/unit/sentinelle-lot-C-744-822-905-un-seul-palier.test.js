@@ -110,7 +110,10 @@ describe('A · #744 — la carte RàI donne seule le palier, sur les écrans du 
 
     it('A6 · l\'Aide dit ce que le code rend : huit diagnostics, « Difficulté récente », « Progression lente », plus de colonne « Niveau RàI »', () => {
         const html = lire('index.html');
-        const table = tranche(html, 'Comment interpréter les diagnostics', '</table>', { longueurMin: 500 });
+        // ↻ #1152, lot 2c bis (28 oct. 2026) : le sous-titre « Comment interpréter les diagnostics ? » part avec le resserrement de la
+        // carte, le tableau reste (audit du 24 oct., verdict final de `suivi-apprentissage` ; consigne
+        // CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md, §2, entrée 7) : la tranche part de l'entrée elle-même.
+        const table = tranche(html, 'id="accordeon-aide-suivi-apprentissage"', '</table>', { longueurMin: 500 });
         const calculs = lire('js/profil-etudiant-calculs.js');
         const rendus = [...tranche(calculs, 'function diagnostiquerSuiviApprentissage(', 'function diagnostiquerForcesChallenges(').matchAll(/diagnostic = '([^']+)'/g)].map((m) => m[1]);
         expect(rendus).toHaveLength(8);

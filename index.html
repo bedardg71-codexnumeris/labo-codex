@@ -10750,12 +10750,114 @@
                 </div>
 
                 <!-- ===================================
-                     SOUS-SECTION 5 : SUIVI (#1152, lot 1 : audit de l'Aide du 24 oct. 2026, D11)
+                     SOUS-SECTION 5 : SUIVI (#1152, lot 1 : audit de l'Aide du 24 oct. 2026, D11 ; lot 2c bis, 28 oct. 2026 :
+                     13 entrées en font 11, dans l'ordre des sous-onglets de js/config.js ; une entrée qui explique un calcul
+                     se range à côté de l'écran qui l'affiche. CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md)
                      =================================== -->
                 <div id="aide-suivi" class="sous-section">
                     <h2>Suivi</h2>
 
-                    <!-- Carte: Saisir les présences -->
+                    <!-- Carte: Consulter le suivi du groupe (#1152, lot 2c bis, 28 oct. 2026 : corrigée ; plus d'onglet « Aperçu » ;
+                         l'écran recalcule à chaque affichage ; le panneau « Détails » au lieu des puces générales. Audit du 24 oct.,
+                         remesure du 27 oct. Le titre est neuf : à Grégoire). -->
+                    <div class="carte accordeon border-left-primary" id="accordeon-aide-tableau-bord">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Consulter le suivi du groupe
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Suivi → Suivi du groupe</p>
+
+                            <p>À chaque affichage, l'écran recalcule A, C et P, et les patterns si la RàI est activée.</p>
+
+                            <p>«&nbsp;Détails&nbsp;» montre A, C et P sur chaque étudiant·e, et un clic sur l'un d'eux ouvre son profil. C'est le seul endroit où l'application range les étudiant·es&nbsp;: les filtres «&nbsp;P &lt; 65&nbsp;%&nbsp;», «&nbsp;A ou C &lt; 70&nbsp;%&nbsp;», «&nbsp;Suivi&nbsp;» et «&nbsp;RàI 2-3&nbsp;» se combinent, ne gardent que les étudiant·es qui répondent à tous et les rangent par ordre d'urgence&nbsp;; sans filtre, l'ordre est alphabétique.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Indices A-C-P (#1152, lot 2c bis, 28 oct. 2026 : les trois définitions de calcul au lieu des trois
+                         « mesure… » ; la théorie au guide ACP, D1. Audit du 24 oct., verdict final d'`acp`). -->
+                    <div class="carte accordeon" id="accordeon-aide-acp">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Lire les indices A-C-P de tes étudiant·es
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>A, l'assiduité</strong>&nbsp;: les périodes où l'étudiant·e était présent·e, divisées par les périodes offertes, sur les seules séances saisies. Tant qu'aucune séance ne compte, A est inconnue.</p>
+
+                            <p><strong>C, la complétion</strong>&nbsp;: les travaux remis, divisés par les travaux comptés. Un travail facultatif n'y entre pas, et un travail n'y entre qu'une fois qu'une copie, au moins, compte dans la note.</p>
+
+                            <p><strong>P, la performance</strong>&nbsp;: la note que calcule ta pratique de notation&nbsp;; elle ne se construit pas de la même façon d'une pratique à l'autre.</p>
+
+                            <p>La théorie est dans le guide ACP&nbsp;: Labo → Outils d'observation, bouton «&nbsp;Guide&nbsp;».</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Suivi des fondamentaux (#1152, lot 2c bis, 28 oct. 2026 : la carte suit le réglage SOLO, nomme le seuil de
+                         défi spécifique et la grille du dépistage ; l'exposé, l'exemple d'une autre discipline (D2), l'encadré du plateau
+                         (doublon de l'aide contextuelle) partent. Le diagnostic se lit au Suivi du groupe, plus dans le profil
+                         (js/profil-etudiant-sections-affichage.js, #552). Audit du 24 oct., verdict final de `suivi-apprentissage`). -->
+                    <div class="carte accordeon" id="accordeon-aide-suivi-apprentissage">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Suivi de l'apprentissage et dépistage SOLO
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Suivi → Suivi du groupe, «&nbsp;Structure des apprentissages fondamentaux (SOLO)&nbsp;», et le filtre «&nbsp;Suivi&nbsp;» de «&nbsp;Détails&nbsp;»</p>
+
+                            <p>Le suivi des fondamentaux lit la grille choisie dans «&nbsp;Grille de critères pour le dépistage&nbsp;» (Labo → Outils d'observation)&nbsp;; sans grille, il ne montre rien. Quand «&nbsp;Activer l'observation de la structure des résultats d'apprentissage&nbsp;» est cochée, il ne lit que les critères multistructurels de cette grille (un critère sans étiquette compte comme tel, «&nbsp;Aucun&nbsp;» l'écarte)&nbsp;; décochée, il lit tous les critères.</p>
+
+                            <p>Pour chaque artefact évalué, il calcule un score pondéré sur ces critères. L'indice de persistance (IPB) compte les artefacts consécutifs les plus récents dont le score est sous le «&nbsp;Seuil de défi spécifique&nbsp;» (70&nbsp;% par défaut), dans la «&nbsp;Fenêtre d'analyse&nbsp;» (3 dernières productions par défaut). La direction compare les deux derniers scores&nbsp;: ↗ ou ↘ quand l'écart atteint «&nbsp;Progression des artefacts&nbsp;» (10 points par défaut), → sinon.</p>
+
+                            <table class="tableau" style="margin-top: 10px;">
+                                <thead>
+                                    <tr>
+                                        <th>IPB</th>
+                                        <th>Direction</th>
+                                        <th>Diagnostic</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>0</td><td>—</td><td>Maîtrise acquise</td></tr>
+                                    <tr><td>1</td><td>↗</td><td>Difficulté résolue</td></tr>
+                                    <tr><td>1</td><td>→ ou ↘</td><td>Difficulté récente</td></tr>
+                                    <tr><td>2</td><td>↗</td><td>Progression</td></tr>
+                                    <tr><td>2</td><td>→</td><td>Plateau</td></tr>
+                                    <tr><td>2</td><td>↘</td><td>Difficulté constante</td></tr>
+                                    <tr><td>≥ 3</td><td>↗</td><td>Progression lente</td></tr>
+                                    <tr><td>≥ 3</td><td>→ ou ↘</td><td>Difficulté persistante</td></tr>
+                                </tbody>
+                            </table>
+
+                            <p class="u-mt-10">Ce diagnostic nomme la cible de l'intervention&nbsp;; il ne fixe pas le niveau RàI, qui lit P et le pattern sur tous les critères que le dépistage surveille (voir «&nbsp;La Réponse à l'Intervention (RàI)&nbsp;»). Quand les deux vues divergent, c'est un signal pour ton jugement.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Captures de progression (#1152, lot 2c bis, 28 oct. 2026 : ce que la capture enregistre, où se voient les
+                         courbes ; A en périodes ; justifications, exemple et redites retirés ; une capture prise garde ses valeurs (#1175,
+                         js/snapshots.js). Audit du 24 oct., verdict final de `snapshots`). -->
+                    <div class="carte accordeon" id="accordeon-aide-snapshots">
+                        <div class="accordeon-header">
+                            <h3 class="carte-titre-bleu">
+                                <span class="accordeon-chevron">▼</span> Captures de progression hebdomadaires
+                            </h3>
+                        </div>
+                        <div class="accordeon-contenu">
+                            <p><strong>Navigation :</strong> Réglages → Données → Captures de progression</p>
+
+                            <p>L'application capture les indices une fois par semaine&nbsp;: à l'ouverture, si la semaine en cours n'a pas encore de capture, elle en prend une pour chacune de ses séances déjà passées. Une capture enregistre, pour chaque étudiant·e, A cumulatif (en périodes), C et P depuis le début du trimestre&nbsp;; le pattern et le niveau RàI n'y sont pas calculés. Chaque intervention garde aussi l'état des indices de ses étudiant·es au moment où tu les y inscris.</p>
+
+                            <p>Les captures dessinent «&nbsp;Progression temporelle ACP&nbsp;», dans le profil, et «&nbsp;Développement du groupe, semaine par semaine&nbsp;», dans Suivi du groupe, une courbe par étudiant·e&nbsp;; toutes les courbes sont cumulatives.</p>
+
+                            <p>Une capture déjà prise garde ses valeurs. Si tu corriges des présences ou des évaluations passées, «&nbsp;Recalculer les captures&nbsp;» les refait toutes depuis le début du trimestre.</p>
+                        </div>
+                    </div>
+
+                    <!-- Carte: Saisir les présences (#1152, lot 2c bis, 28 oct. 2026 : les périodes par pas de 0,5, plafonnées à la séance ;
+                         plus d'assiduité alternative (#224) ; l'absence motivée d'une intervention, à part. Audit du 24 oct., verdict
+                         final de `saisie-presences`). -->
                     <div class="carte accordeon border-left-succes" id="accordeon-aide-saisie-presences">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -10764,464 +10866,58 @@
                         </div>
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Suivi → Saisie des présences</p>
-                            <p class="text-succes-bold">C'est d'ici que vient l'assiduité (A) : les autres écrans la lisent sans la recalculer.</p>
+                            <p class="text-succes-bold">C'est d'ici que vient l'assiduité (A).</p>
 
-                        <p><strong>Interface de saisie rapide :</strong></p>
-                        <ul>
-                            <li><strong>Périodes</strong> : Saisir les périodes de présence de chaque étudiant·e, de 0 au nombre de périodes de la séance</li>
-                            <li><strong>Retards</strong> : Décompter proportionnellement
-                                <ul class="mt-5">
-                                    <li>Ex: 20 min de retard sur 2h = 1.7h</li>
-                                </ul>
-                            </li>
-                            <li><strong>Départs anticipés</strong> : Décompter de même</li>
-                            <li><strong>Absences justifiées</strong> : Même traitement (le système ne distingue pas)</li>
-                        </ul>
+                            <p>Pour chaque étudiant·e, saisis les périodes de présence, de 0 aux périodes de la séance, par pas de 0,5&nbsp;: un retard ou un départ se compte en périodes (par exemple 1,5 sur 2). «&nbsp;Mettre tout le monde présent&nbsp;» remplit la séance, «&nbsp;Verrouiller la saisie&nbsp;» la fige.</p>
 
-                        <p><strong>Cas particulier - Reprises :</strong></p>
-                        <ul>
-                            <li>Si un·e étudiant·e rattrape dans un autre groupe : additionner les heures</li>
-                            <li>Ex: 2h cours officiel + 2h reprise = 4h dans la cellule</li>
-                        </ul>
-
-                        <div class="alerte alerte-succes">
-                            <strong>Calcul automatique :</strong> Le système génère immédiatement les indices d'assiduité (A) qui alimentent tous les diagnostics.
-                        </div>
-
-
-                        <p><strong>Périodes configurables :</strong></p>
-                        <ul>
-                            <li>Assiduité sommative : sur tout le trimestre</li>
-                            <li>Assiduité alternative : sur les 3, 7 ou 12 derniers artefacts</li>
-                        </ul>
+                            <p>Seules les séances saisies entrent dans A&nbsp;: tant que la barre dit «&nbsp;Séance non saisie&nbsp;», «&nbsp;Confirmer la séance&nbsp;» l'enregistre telle qu'elle est affichée. Une absence motivée, que pose une intervention, se marque à part, en ambre (voir «&nbsp;Planifier les interventions RàI&nbsp;»).</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Tableau de bord Aperçu -->
-                    <div class="carte accordeon border-left-primary" id="accordeon-aide-tableau-bord">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Consulter l'aperçu
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Aperçu</p>
-                            <p class="text-primary-bold">Cet écran lit l'assiduité, la complétion et la performance déjà calculées ; il ne les recalcule pas.</p>
-
-                        <p><strong>Vue d'ensemble :</strong></p>
-                        <ul>
-                            <li>Liste complète des étudiant·es</li>
-                            <li>Indices A-C-P en un coup d'œil</li>
-                            <li>Codes couleur pour identification rapide des risques</li>
-                                                    </ul>
-
-                        <p><strong>Action :</strong> Identifier rapidement qui nécessite une intervention.</p>
-
-
-                            <div class="alerte alerte-information">
-                                <strong>Rechargement automatique :</strong> Les données se mettent à jour automatiquement après chaque saisie.
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Profil étudiant -->
+                    <!-- Carte: Lire le profil (#1152, lot 2c bis, 28 oct. 2026 : absorbe le « Guide détaillé » ; la bande à deux lignes de
+                         #1151 au lieu de la colonne et des trois sections ; une à trois phrases par section ; D4 en deux phrases. Les
+                         stratégies, exemples de profils, la marche à suivre, la liste hebdomadaire, les graphiques de Labo et la boîte du
+                         tableau des critères partent. Remesure du 27 oct. ; audit du 24 oct., verdicts finals de `profil-etudiant` et
+                         `guide-profil`. L'astuce de l'étoile reste (#803). Le titre est neuf : à Grégoire). -->
                     <div class="carte accordeon border-left-primary" id="accordeon-aide-profil-etudiant">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Interpréter le profil d'un·e étudiant·e
+                                <span class="accordeon-chevron">▼</span> Lire le profil d'un·e étudiant·e
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Suivi → Profils individuels</p>
-                            <p class="text-primary-bold">Ce module LIT toutes les sources de données</p>
+                            <p><strong>Navigation :</strong> Suivi → Profils individuels, ou un clic sur une rangée de Liste des étudiant·es</p>
 
-                        <p><strong>Disposition 2 colonnes :</strong></p>
-                        <ul>
-                            <li><strong>Sidebar gauche</strong> : Navigation Précédent/Suivant entre étudiant·es</li>
-                            <li><strong>Zone principale</strong> : 3 sections structurées</li>
-                        </ul>
+                            <p>En haut, une bande à deux lignes. Sur la première&nbsp;: «&nbsp;Liste des étudiant·es&nbsp;», pour y revenir&nbsp;; ‹ le menu des étudiant·es › et le rang (par exemple 3 sur 28)&nbsp;; les étiquettes de l'étudiant·e (groupe, programme, «&nbsp;Services adaptés&nbsp;», «&nbsp;Mesure d'aide&nbsp;»). Sur la seconde, jusqu'à huit sections en boutons, selon tes réglages&nbsp;: le bouton plein est la section ouverte, sur toute la largeur.</p>
 
-                        <div class="carte-bleu-pale">
-                            <h4 style="color: var(--bleu-principal)">Section 1 : Accompagnement</h4>
-                            <ul class="mt-10">
-                                <li><strong>Contexte d'apprentissage</strong> : un badge qui décrit la présence et la remise (par exemple «&nbsp;Absences rares, quelques travaux manquants&nbsp;»), avec A et C</li>
-                                <li><strong>RàI (Niveau d'intervention)</strong> : 1, 2 ou 3, avec le pattern et le défi principal</li>
-                                <li><strong>Recommandations</strong> : selon le contexte d'apprentissage</li>
+                            <ul>
+                                <li><strong>«&nbsp;Productions&nbsp;»</strong>, ouverte d'abord&nbsp;: une rangée par production, avec sa note, son jeton et l'accès à l'évaluation.</li>
+                                <li><strong>«&nbsp;Jugement&nbsp;»</strong>, sous une pratique de dénotation seulement&nbsp;: tu y saisis ta note.</li>
+                                <li><strong>«&nbsp;Engagement ACP&nbsp;»</strong>&nbsp;: trois fiches, «&nbsp;Assiduité&nbsp;», «&nbsp;Complétion&nbsp;» et «&nbsp;Performance&nbsp;», avec les absences, les remises et les jetons. Sous une pratique qui ne retient qu'une partie des productions, la fiche Performance montre celles que retient la modalité réglée dans ta pratique. L'étoile, elle, signale un jeton de reprise ou de délai.</li>
+                                <li><strong>«&nbsp;Progression temporelle ACP&nbsp;»</strong>&nbsp;: les courbes de A, C et P semaine par semaine, une case par courbe et «&nbsp;P sans reprises&nbsp;»&nbsp;; des marqueurs signalent les productions dues, les jetons et les interventions.</li>
+                                <li><strong>«&nbsp;Développement des habiletés&nbsp;»</strong>&nbsp;: P, puis les onglets «&nbsp;Critères&nbsp;», «&nbsp;Forces et défis&nbsp;» et, avec l'option «&nbsp;Observation des actions&nbsp;», «&nbsp;Gestes cognitifs&nbsp;». Un critère est un défi sous le «&nbsp;Seuil de défi spécifique&nbsp;» (70&nbsp;% par défaut, réglable dans Labo → Outils d'observation).</li>
+                                <li><strong>«&nbsp;Accompagnement&nbsp;»</strong>, si la RàI est activée&nbsp;: les cartes «&nbsp;Contexte d'apprentissage&nbsp;» (un badge et le bouton «&nbsp;Confidentiel&nbsp;»), «&nbsp;Observation de la structure des résultats d'apprentissage&nbsp;» (si l'observation SOLO est activée) et «&nbsp;Modèle de la Réponse à l'intervention (RàI)&nbsp;» (le niveau, le pattern, le défi principal), puis l'historique des interventions et «&nbsp;+ Nouvelle intervention&nbsp;».</li>
+                                <li><strong>«&nbsp;Travaux soumis&nbsp;»</strong>&nbsp;: les fichiers importés de l'étudiant·e.</li>
+                                <li><strong>«&nbsp;Rapport&nbsp;»</strong>&nbsp;: un rapport dont tu choisis les sections, à copier.</li>
                             </ul>
-                        </div>
 
-                        <div class="carte-bleu-pale-mt15">
-                            <h4 style="color: var(--bleu-principal)">Section 2 : Développement des habiletés</h4>
-                            <ul class="mt-10">
-                                <li><strong>Performance par critère</strong> : le détail, critère par critère, de ta grille</li>
-                                <li><strong>Forces identifiées</strong> : Critères ≥ 75&nbsp;%</li>
-                                <li><strong>Défis identifiés</strong> : Critères &lt; 75&nbsp;%</li>
-                                <li><strong>Diagnostic pattern</strong> : Stable / Défi spécifique / Difficulté émergente / Difficulté persistante / Non-participation (ou «&nbsp;Données insuffisantes&nbsp;» tant que rien n'est jugeable)</li>
-                            </ul>
-                        </div>
+                            <p>La couleur du badge «&nbsp;Contexte d'apprentissage&nbsp;» suit trois paliers fixes, 85, 75 et 65&nbsp;%, que A et C doivent atteindre ensemble. Le rappel «&nbsp;Mobilisation&nbsp;» de la carte RàI paraît dès que A ou C passe sous 75&nbsp;%.</p>
 
-                        <div class="carte-bleu-pale-mt15">
-                            <h4 style="color: var(--bleu-principal)">Section 3 : Mobilisation</h4>
-                            <ul class="mt-10">
-                                <li><strong>Assiduité (A)</strong> : Sommative et alternative avec interprétation</li>
-                                <li><strong>Complétion (C)</strong> : % d'artefacts remis</li>
-                                <li><strong>Historique artefacts</strong> : Notes et évolution</li>
-                            </ul>
-                        </div>
-
-
-                            <p class="mt-15"><strong>Navigation intuitive :</strong> Boutons centrés Précédent/Suivant pour parcourir rapidement tous les profils.</p>
+                            <p>L'icône «&nbsp;i&nbsp;» d'«&nbsp;Engagement ACP&nbsp;», de «&nbsp;Développement des habiletés&nbsp;» et d'«&nbsp;Accompagnement&nbsp;» explique leurs calculs. Les mots du badge&nbsp;: «&nbsp;Les mots qui décrivent A et C&nbsp;»&nbsp;; ce qui fixe le niveau&nbsp;: «&nbsp;Repérer les patterns de progression&nbsp;».</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Guide détaillé du profil étudiant (Phase 2) -->
-                    <div class="carte accordeon bg-f0f8ff" id="accordeon-aide-guide-profil">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Guide détaillé : Profil étudiant
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-
-                        <p class="mb-20">Le profil étudiant est l'outil central de diagnostic et d'intervention. Il est organisé en 3 grandes sections, chacune fournissant des informations complémentaires pour une vision complète de la progression de l'étudiant·e.</p>
-
-                        <div class="alerte alerte-info">
-                            <strong>Accès :</strong> Suivi → Profils individuels OU Suivi → Liste des étudiant·es → Cliquer sur un nom
-                        </div>
-
-                        <hr class="separateur-section">
-
-                        <h4 class="titre-section-haut">Section 1 : Accompagnement</h4>
-
-                        <p><strong>Cette section affiche trois cartes :</strong></p>
-                        <ul>
-                            <li><strong>Contexte d'apprentissage</strong> : un badge qui décrit ce qu'on observe de la présence et de la remise (par exemple «&nbsp;Absences rares, quelques travaux manquants&nbsp;»), les valeurs de A et de C, une recommandation, les services adaptés et le bouton «&nbsp;Confidentiel&nbsp;»</li>
-                            <li><strong>Observation de la structure des résultats d'apprentissage</strong> : la progression par critère, lue avec la taxonomie SOLO (si les descriptions SOLO sont affichées)</li>
-                            <li><strong>Modèle de la Réponse à l'intervention (RàI)</strong> : le niveau RàI, le pattern, le défi principal et, quand A ou C passe sous 75&nbsp;%, un rappel «&nbsp;Mobilisation&nbsp;»</li>
-                        </ul>
-                        <p>Sous les cartes, l'historique des interventions auxquelles l'étudiant·e a participé.</p>
-
-                        <hr class="separateur-section">
-
-                        <h4 class="titre-section-haut">Section 2 : Développement des habiletés</h4>
-
-                        <p><strong>Cette section affiche :</strong></p>
-                        <ul>
-                            <li><strong>Performance IDME</strong> : niveau moyen selon l'échelle (I/D/M/E)</li>
-                            <li><strong>Scores par critère</strong> : tableau détaillé avec badges colorés</li>
-                            <li><strong>Diagnostic pédagogique</strong> : forces et défis identifiés automatiquement</li>
-                        </ul>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Comment lire le tableau des critères ?</h5>
-                            <p>Le tableau présente 5 lignes (un critère par ligne) avec 3 colonnes :</p>
-
-                            <ol>
-                                <li><strong>Critère</strong> : Nom du critère avec sa pondération (ex: Structure 15&nbsp;%)</li>
-                                <li><strong>Score pondéré</strong> : Moyenne pondérée des évaluations (ex: 0.72)</li>
-                                <li><strong>Niveau</strong> : badge coloré indiquant le niveau atteint, dans les codes et les couleurs de ton échelle. Avec l'échelle IDME fournie :
-                                    <ul class="mt-5">
-                                        <li>Badge rouge : Incomplet (&lt; .64)</li>
-                                        <li>Badge orange : Développement (.65-.74)</li>
-                                        <li>Badge bleu : Maîtrise (.75-.84)</li>
-                                        <li>Badge vert : Étendu (≥ .85)</li>
-                                    </ul>
-                                </li>
-                            </ol>
-
-                            <p class="mt-15"><strong>Exemple d'interprétation :</strong></p>
-                            <div class="carte-code-light-sm">
-                                Structure (15&nbsp;%) : 0,68 [Badge orange : Développement]<br>
-                                Rigueur (20&nbsp;%)   : 0,72 [Badge orange : Développement]<br>
-                                Plausibilité (10&nbsp;%) : 0,80 [Badge bleu : Maîtrise]<br>
-                                Nuance (25&nbsp;%)    : 0,58 [Badge rouge : Incomplet]<br>
-                                Français (30&nbsp;%)  : 0,75 [Badge bleu : Maîtrise]
-                            </div>
-
-                            <p class="mt-10"><strong>→ Diagnostic :</strong> Forces en Plausibilité et Français (maîtrisés). Défi majeur en Nuance (insuffisant). Structure et Rigueur en développement.</p>
-                        </div>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Comment utiliser le diagnostic pédagogique ?</h5>
-
-                            <p>Le diagnostic automatique identifie :</p>
-                            <ul>
-                                <li><strong>Forces</strong> : Critères ≥ .75 (Maîtrise ou Étendu)</li>
-                                <li><strong>Défis</strong> : Critères &lt; .75 (Incomplet ou Développement)</li>
-                            </ul>
-
-                            <p class="mt-15"><strong>Stratégies d'intervention différenciée :</strong></p>
-
-                            <table class="tableau mt-10">
-                                <thead>
-                                    <tr>
-                                        <th>Situation</th>
-                                        <th>Approche recommandée</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Défi Incomplet (&lt; .64)</strong></td>
-                                        <td>
-                                            • Remédiation intensive individuelle<br>
-                                            • Enseignement explicite du critère<br>
-                                            • Pratique guidée avec rétroaction immédiate<br>
-                                            • Référer aux services d'aide si difficulté persistante
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Défi Développement (.65-.74)</strong></td>
-                                        <td>
-                                            • Pratique guidée additionnelle<br>
-                                            • S'appuyer sur les forces pour consolider<br>
-                                            • Exercices ciblés sur le critère<br>
-                                            • Rétroaction formative fréquente
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Force Maîtrise (.75-.84)</strong></td>
-                                        <td>
-                                            • Valoriser et encourager<br>
-                                            • Proposer transfert à d'autres contextes<br>
-                                            • Tutorat par les pairs (si applicable)<br>
-                                            • Maintenir avec pratique autonome
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Force Étendue (≥ .85)</strong></td>
-                                        <td>
-                                            • Enrichissement et approfondissement<br>
-                                            • Tâches complexes et créatives<br>
-                                            • Mentorat des pairs<br>
-                                            • Autonomie accrue
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="alerte-warning-or">
-                            <h5 class="text-warning-856-mt0">Astuce : Bascule «Voir formules»</h5>
-                            <p>Affiche les formules exactes de calcul pour chaque critère :</p>
-                            <ul class="m-5-0-0-20">
-                                <li>Score pondéré = (Score1 × Pond1 + Score2 × Pond2 + ...) / Σ Pondérations</li>
-                                <li>Seuils IDME pour chaque niveau (I/D/M/E)</li>
-                                <li>Nombre d'évaluations prises en compte dans la moyenne</li>
-                            </ul>
-                        </div>
-
-                        <hr class="separateur-section">
-
-                        <h4 class="titre-section-haut">Section 3 : Mobilisation (A-C-P)</h4>
-
-                        <p><strong>Cette section affiche :</strong></p>
-                        <ul>
-                            <li><strong>Assiduité (A)</strong> : Taux de présence + ce qu'on observe (par exemple «&nbsp;Absences rares&nbsp;»)</li>
-                            <li><strong>Complétion (C)</strong> : Taux de remise des travaux + ce qu'on observe (par exemple «&nbsp;Quelques travaux manquants&nbsp;»)</li>
-                            <li><strong>Liste des artefacts</strong> : Tableau détaillé de toutes les productions évaluées</li>
-                        </ul>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Comment interpréter les indices A et C ?</h5>
-
-                            <p>Sous chaque indice, le profil écrit ce qu'on observe (par exemple «&nbsp;Absences rares&nbsp;» ou «&nbsp;Quelques travaux manquants&nbsp;»). Les bornes et les mots sont dans la table de «&nbsp;Comprendre les diagnostics automatiques&nbsp;».</p>
-
-                            <p class="mt-15"><strong>Exemples de profils :</strong></p>
-                            <ul>
-                                <li><strong>A=95&nbsp;%, C=90&nbsp;%</strong> → Étudiant très mobilisé, présent et productif</li>
-                                <li><strong>A=85&nbsp;%, C=65&nbsp;%</strong> → Présent mais ne remet pas tous les travaux (procrastination ?)</li>
-                                <li><strong>A=60&nbsp;%, C=85&nbsp;%</strong> → Absent souvent mais remet les travaux (maladie ? travail ?)</li>
-                                <li><strong>A=55&nbsp;%, C=50&nbsp;%</strong> → Désengagement généralisé, intervention urgente</li>
-                            </ul>
-                        </div>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Comment lire le tableau des artefacts ?</h5>
-
-                            <p>Le tableau affiche une ligne par production évaluée avec :</p>
-                            <ol>
-                                <li><strong>Production</strong> : Nom de l'évaluation (ex: Dissertation 1, Examen mi-session)</li>
-                                <li><strong>Statut</strong> : Complété ✓ (vert) ou Non complété ✗ (rouge)</li>
-                                <li><strong>Score</strong> : Pourcentage selon l'échelle IDME (ex: 78&nbsp;%)</li>
-                                <li><strong>Niveau</strong> : badge coloré portant le code de ton échelle (I/D/M/E dans l'échelle fournie)</li>
-                                <li><strong>Retenu</strong> : les artefacts qui comptent dans la note finale du portfolio sont pleinement opaques et portent une bordure plus marquée ; les autres sont estompés</li>
-                            </ol>
-
-                            <div class="alerte alerte-info mt-15">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Astuce :</strong> Les artefacts retenus pour la note apparaissent en tête de liste, en pleine opacité et avec une bordure plus marquée ; les autres sont estompés. Ce qui décide de la sélection, c'est la modalité réglée dans ta pratique. Exemple : si ta pratique retient 3 artefacts sur 9, ces 3 sont en tête. ⚠ L'étoile, elle, signale autre chose : un jeton de reprise ou de délai.
-                            </div>
-
-                            <p class="mt-15"><strong>Actions possibles depuis ce tableau :</strong></p>
-                            <ul>
-                                <li>Identifier rapidement les travaux non remis</li>
-                                <li>Voir la progression de la performance dans le temps</li>
-                                <li>Vérifier quels artefacts comptent réellement pour la note (ceux qui ne sont pas estompés)</li>
-                                <li>Détecter des patterns (ex: toujours faible en Structure)</li>
-                            </ul>
-                        </div>
-
-                        <hr class="separateur-section">
-
-                        <h4 class="titre-section-haut">Navigation entre étudiant·es</h4>
-
-                        <div class="alerte-info-grise-my20">
-                            <p>Les boutons <strong>« ← Précédent »</strong> et <strong>« Suivant → »</strong> en haut de la page permettent de naviguer rapidement entre les profils sans retourner à la liste.</p>
-
-                            <p class="mt-10"><strong>Workflow recommandé pour révision complète :</strong></p>
-                            <ol>
-                                <li>Aller dans Suivi → Liste des étudiant·es</li>
-                                <li>Cliquer sur le premier étudiant</li>
-                                <li>Consulter les 3 sections du profil</li>
-                                <li>Prendre des notes d'intervention si nécessaire</li>
-                                <li>Cliquer «Suivant →» pour passer au prochain</li>
-                                <li>Répéter jusqu'au dernier étudiant</li>
-                            </ol>
-
-                            <div class="alerte alerte-succes mt-15">
-                                <strong>✓ Astuce :</strong> Les boutons sont désactivés visuellement (grisés) quand tu es au premier ou au dernier étudiant de la liste. Le curseur change pour indiquer qu'ils ne sont pas cliquables.
-                            </div>
-                        </div>
-
-                        <hr class="separateur-section">
-
-                        <h4 class="titre-section-haut">Graphiques du profil individuel</h4>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Progression temporelle ACP</h5>
-                            <p>Courbes d'évolution des indices Assiduité, Complétion et Performance semaine par semaine.</p>
-                            <p><strong>Marqueurs d'événements pédagogiques :</strong></p>
-                            <ul>
-                                <li><strong>◎ Double cercle vide</strong> — séance avec une production due (artefact). Visible sur les 3 courbes.</li>
-                                <li><strong>◉ Cercle plein contrasté</strong> — séance avec un jeton de reprise appliqué. Visible sur la courbe P.</li>
-                                <li><strong>▼ Triangle orange</strong> — intervention RàI de niveau 2 (préventif). Dessiné au-dessus des courbes.</li>
-                                <li><strong>▼ Triangle rouge</strong> — intervention RàI de niveau 3 (intensif). Dessiné au-dessus des courbes.</li>
-                            </ul>
-                            <p class="mt-10"><strong>Interaction :</strong> Survole un point pour voir la date, les valeurs A-C-P, les artefacts dus, les jetons et les interventions. Clique sur une courbe pour la verrouiller.</p>
-                        </div>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Développement des habiletés (critères)</h5>
-                            <p>Graphique d'évolution de chaque critère d'évaluation au fil des productions. Nécessite au moins 2 évaluations avec détails par critère.</p>
-                            <p><strong>Marqueurs :</strong></p>
-                            <ul>
-                                <li><strong>◉ Cercle plein</strong> — évaluation avec jeton de reprise (délai ou reprise).</li>
-                                <li><strong>▼ Triangle</strong> — intervention RàI proche de la date d'évaluation.</li>
-                            </ul>
-                            <p class="mt-10">Le graphique s'affiche même sans portfolio configuré, tant que des évaluations avec critères existent.</p>
-                        </div>
-
-                        <hr class="separateur-section">
-
-                        <h4 class="titre-section-haut">Graphiques de l'aperçu</h4>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Dynamique des corrélations</h5>
-                            <p>Évolution des corrélations de Pearson (r) entre chaque indice et la Performance (P) au fil des séances.</p>
-                            <ul>
-                                <li><strong>◎ Double cercle vide</strong> — séance avec dépôt de production.</li>
-                                <li><strong>▼ Triangle</strong> — séance avec intervention de groupe (orange N2, rouge N3).</li>
-                                <li><strong>Courbes pointillées</strong> — moyenne P des étudiant·es ciblé·es par intervention (groupe figé) et P contrôle (jamais ciblés).</li>
-                            </ul>
-                        </div>
-
-                        <div class="carte-encadree">
-                            <h5 class="titre-sans-marge-haut">Impact des jetons sur la performance</h5>
-                            <p>Compare la trajectoire P des étudiant·es ayant utilisé des jetons de reprise à celle des autres.</p>
-                            <ul>
-                                <li><strong>☐ Carré vide</strong> — séance sans jeton appliqué.</li>
-                                <li><strong>◼ Carré plein</strong> — séance avec au moins un jeton de reprise appliqué.</li>
-                                <li><strong>Menu « Étudiant·e »</strong> — affiche la courbe individuelle d'un·e étudiant·e ayant utilisé un jeton.</li>
-                            </ul>
-                            <p class="mt-10"><strong>Tooltip :</strong> pointe un ◼ pour voir la production concernée, la note originale → note de reprise, et le delta.</p>
-                            <p>Le graphique se masque automatiquement si aucun jeton de reprise n'a été utilisé dans le trimestre.</p>
-                        </div>
-
-                        <hr class="separateur-section">
-
-                        <h4 class="titre-section-haut">Checklist d'utilisation hebdomadaire</h4>
-
-                        <div class="carte-bleu-border">
-                            <p><strong>Pour un suivi efficace, consulte les profils régulièrement :</strong></p>
-
-                            <table class="tableau mt-15">
-                                <thead>
-                                    <tr>
-                                        <th class="w-15">Fréquence</th>
-                                        <th class="w-40">Action</th>
-                                        <th class="w-45">Objectif</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Hebdomadaire</strong></td>
-                                        <td>Consulter l'Aperçu</td>
-                                        <td>Vue d'ensemble, identifier rapidement les étudiant·es en difficulté (zones orange/rouge)</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Hebdomadaire</strong></td>
-                                        <td>Profils des étudiant·es au niveau RàI 2 ou 3</td>
-                                        <td>Planifier interventions ciblées, vérifier l'évolution</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Bi-hebdomadaire</strong></td>
-                                        <td>Profils des étudiant·es «Fragile»</td>
-                                        <td>Prévenir la dégradation, offrir soutien proactif</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Mi-session</strong></td>
-                                        <td>Révision complète de tous les profils</td>
-                                        <td>Bilan global, ajustements pédagogiques, rencontres individuelles</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Fin session</strong></td>
-                                        <td>Analyse longitudinale des profils</td>
-                                        <td>Évaluer l'efficacité des interventions, documenter les cas critiques</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Concepts clés A-C-P -->
-                    <div class="carte accordeon" id="accordeon-aide-acp">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Lire les indices A-C-P de tes étudiant·es
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">A - Assiduité</h4>
-                                <p><strong>Présence en classe</strong> - Mesure l'engagement cognitif</p>
-                                <p>Une présence assidue expose davantage au contenu, aux explications et aux pratiques guidées.</p>
-                            </div>
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">C - Complétion</h4>
-                                <p><strong>Remise des travaux</strong> - Mesure la mobilisation</p>
-                                <p>Reflète la constance et la persévérance dans les efforts, la régularité d'exécution et le respect des délais.</p>
-                            </div>
-
-                            <div class="alerte alerte-information">
-                                <h4 class="u-mb-10 u-texte-bleu">P - Performance</h4>
-                                <p><strong>Qualité des productions</strong> - Mesure la maîtrise</p>
-                                <p>Évalue la qualité des travaux selon tes critères et ton échelle de notation.</p>
-                                <p class="text-muted u-mt-10 u-texte-09"><em>Le calcul dépend de ta pratique : en Sommative, P est la moyenne pondérée de toutes les évaluations. Dans une PAN, il porte sur les traces retenues par ta pratique, selon l'échelle et la méthode de sélection que tu as réglées.</em></p>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Carte: Interpréter les seuils -->
+                    <!-- Carte: Les mots de A et C (#1152, lot 2c bis, 28 oct. 2026 : les mots forment une seule phrase, le badge de la carte
+                         « Contexte d'apprentissage » ; la table aide-table-paliers-a-c reste (sentinelle du 15 oct.). Audit du 24 oct.,
+                         verdict final de `diagnostics`. Le titre est celui du dossier, neuf : à Grégoire ; la FAQ le suit). -->
                     <div class="carte accordeon" id="accordeon-aide-diagnostics">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Comprendre les diagnostics automatiques
+                                <span class="accordeon-chevron">▼</span> Les mots qui décrivent A et C
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>Sous A et sous C, le profil écrit ce qu'on observe de la présence et de la remise. Les mots dépendent de la proportion, selon cinq paliers :</p>
+                            <p>Le badge de la carte «&nbsp;Contexte d'apprentissage&nbsp;», dans la section Accompagnement du profil, décrit en une phrase la présence et la remise (par exemple «&nbsp;Absences rares, quelques travaux manquants&nbsp;»). Chaque moitié dépend de la proportion, selon cinq paliers&nbsp;:</p>
 
                         <table class="tableau" id="aide-table-paliers-a-c">
                             <thead>
@@ -11260,12 +10956,14 @@
                             </tbody>
                         </table>
 
-                        <p class="u-mt-10">Les bornes de 85&nbsp;%, 80&nbsp;% et 70&nbsp;% sont celles de départ : tu les règles dans <strong>Labo → Outils d'observation</strong>. La borne de 60&nbsp;% est fixe. Dans la liste des étudiant·es, les mêmes trois bornes colorent le chiffre de A, de C et de P : bleu, vert, jaune, puis rouge sous la troisième.</p>
-                        <p>Ces paliers ne fixent pas le niveau RàI : voir «&nbsp;Repérer les patterns de progression&nbsp;».</p>
+                        <p class="u-mt-10">Les bornes de 85&nbsp;%, 80&nbsp;% et 70&nbsp;% sont celles de départ&nbsp;: tu les règles dans <strong>Labo → Outils d'observation</strong>. La borne de 60&nbsp;% est fixe. Les mêmes trois bornes colorent A, C et P dans la liste des étudiant·es.</p>
+                        <p>Ces paliers ne fixent ni la couleur du badge (voir «&nbsp;Lire le profil d'un·e étudiant·e&nbsp;») ni le niveau RàI (voir «&nbsp;Repérer les patterns de progression&nbsp;»).</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Modèle RàI (Réponse à l'Intervention) -->
+                    <!-- Carte: La RàI (#1152, lot 2c bis, 28 oct. 2026 : ce qui décide du niveau, l'option ; D3, les bornes telles qu'elles
+                         sont, fixes (#551, question de Grégoire, non tranchée) ; D13 mot pour mot ; le cycle et l'objectif au guide RàI (D1) ;
+                         l'encadré de différence ne reste que dans le suivi des fondamentaux. Audit du 24 oct., verdict final de `rai`). -->
                     <div class="carte accordeon" id="accordeon-aide-rai">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11273,101 +10971,18 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>La Réponse à l'Intervention (RàI) est un modèle de suivi en quatre temps : <strong>dépister</strong> les étudiant·es en difficulté d'apprentissage, <strong>agir</strong> rapidement avec des interventions adaptées, <strong>observer</strong> l'effet de ces interventions, puis <strong>s'ajuster</strong> selon les résultats.</p>
+                            <p>La RàI est une option&nbsp;: la case «&nbsp;Appliquer une adaptation du modèle de la Réponse à l'intervention&nbsp;» (Labo → Outils d'observation), cochée au départ. Elle dépiste des difficultés et classe des niveaux de besoin, pour éclairer et soutenir tes décisions d'intervention et d'accompagnement.</p>
 
-                            <p class="mt-10">Labo Codex structure ce cycle en trois niveaux d'intervention&nbsp;:</p>
+                            <p>Le niveau (1 Universel, 2 Préventif, 3 Intensif) se décide d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (3 par défaut). Ses bornes sont 64&nbsp;% et 75&nbsp;%, fixes (voir «&nbsp;Repérer les patterns de progression&nbsp;»). Quand l'observation SOLO est activée, le pattern lit tous les critères de la grille du dépistage, sauf ceux marqués «&nbsp;Aucun&nbsp;»&nbsp;; sinon, tous.</p>
 
-                            <div class="alerte alerte-succes" style="margin-top: 10px;">
-                                <p><strong>Universel</strong> — le suivi de base pour l'ensemble des étudiant·es (indices A-C-P, progression dans le trimestre).</p>
-                            </div>
-                            <div class="alerte alerte-attention" style="margin-top: 8px;">
-                                <p><strong>Préventif</strong> — un suivi plus attentif pour les étudiant·es dont les indices signalent des difficultés d'apprentissage.</p>
-                            </div>
-                            <div class="alerte alerte-erreur" style="margin-top: 8px;">
-                                <p><strong>Intensif</strong> — un accompagnement individualisé pour les étudiant·es en situation critique.</p>
-                            </div>
-
-                            <div class="alerte alerte-information" style="margin-top: 15px;">
-                                <p>L'objectif n'est pas de classer les étudiant·es, mais de <strong>détecter tôt les difficultés</strong> pour intervenir avant qu'elles ne s'aggravent. Le cycle dépister → agir → observer → ajuster se répète tout au long du trimestre.</p>
-                            </div>
-
-                            <p class="mt-10">Le <strong>suivi de l'apprentissage des fondamentaux</strong> (visible dans le profil de chaque étudiant·e) complète ce modèle&nbsp;: l'indice de persistance (IPB) nomme la cible de l'intervention ; il ne fixe pas le niveau RàI. Voir la carte <em>Suivi de l'apprentissage et dépistage SOLO</em> pour les détails.</p>
-
-                            <div class="alerte alerte-attention" style="margin-top: 15px;">
-                                <p><strong>Quelle différence avec le Suivi des fondamentaux&nbsp;?</strong></p>
-                                <p>Dans le modèle RàI, le niveau RàI se décide d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de la grille de référence sauf ceux marqués «&nbsp;Aucun&nbsp;». Le suivi des fondamentaux regarde uniquement les <strong>critères multistructurels</strong> — les bases. Les deux vues sont complémentaires&nbsp;: un·e étudiant·e peut maîtriser les fondamentaux mais avoir une performance globale faible (difficultés sur les critères de niveau supérieur), ou l'inverse.</p>
-                            </div>
+                            <p>Le suivi des fondamentaux, lui, nomme la cible de l'intervention sans fixer le niveau (voir «&nbsp;Suivi de l'apprentissage et dépistage SOLO&nbsp;»). La théorie est dans le guide RàI&nbsp;: Labo → Outils d'observation, bouton «&nbsp;Guide&nbsp;».</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Suivi de l'apprentissage et dépistage SOLO -->
-                    <div class="carte accordeon" id="accordeon-aide-suivi-apprentissage">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Suivi de l'apprentissage et dépistage SOLO
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p><strong>Qu'est-ce que le suivi de l'apprentissage&nbsp;?</strong></p>
-                            <p>L'application observe la progression de chaque étudiant·e sur les <strong>critères fondamentaux</strong> (multistructurels) de ta grille d'évaluation. Un signal de dépistage apparaît quand la progression stagne sur ces fondations pendant plusieurs artefacts consécutifs.</p>
-
-                            <p class="mt-10"><strong>Comment ça fonctionne&nbsp;?</strong></p>
-                            <ul class="u-mt-5">
-                                <li>Chaque critère de ta grille est associé à un <strong>niveau cognitif</strong> (taxonomie SOLO)&nbsp;: multistructurel (fondation), relationnel (mise en relation), abstrait étendu (transfert).</li>
-                                <li>L'application calcule un <strong>score pondéré</strong> sur tes critères multistructurels pour chaque artefact évalué.</li>
-                                <li>L'<strong>indice de persistance (IPB)</strong> compte combien d'artefacts consécutifs récents sont sous le seuil de maîtrise configurable.</li>
-                                <li>Le croisement IPB × direction de progression donne un <strong>diagnostic en langage clair</strong>&nbsp;: maîtrise acquise, progression, plateau, difficulté récente, constante ou persistante.</li>
-                            </ul>
-
-                            <p class="mt-10"><strong>Pourquoi les critères multistructurels&nbsp;?</strong></p>
-                            <p>La taxonomie SOLO montre que les habiletés de base (organiser, être rigoureux, s'exprimer correctement) sont <strong>prérequises</strong> aux habiletés de niveau supérieur (interpréter, nuancer, transférer). Un·e étudiant·e qui stagne sur les fondations aura du mal à progresser sur les critères plus complexes — c'est un signal d'intervention précoce.</p>
-
-                            <div class="alerte alerte-information" style="margin-top: 10px;">
-                                <p><strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Transférable à toute discipline</strong></p>
-                                <p>Un prof de chimie avec «&nbsp;Manipulation&nbsp;» (multistructurel) et «&nbsp;Interprétation&nbsp;» (relationnel) devrait observer le même phénomène. Les fondations varient d'une discipline à l'autre, mais le principe reste le même.</p>
-                            </div>
-
-                            <p class="mt-10"><strong>Comment configurer&nbsp;?</strong></p>
-                            <ul class="u-mt-5">
-                                <li><strong>Conception → Grilles de critères</strong>&nbsp;: étiquette chaque critère avec son niveau SOLO (multistructurel, relationnel ou abstrait étendu).</li>
-                                <li><strong>Labo → Outils d'observation → Seuil de défi</strong>&nbsp;: ajuste selon ton exigence (70&nbsp;% par défaut).</li>
-                                <li><strong>Labo → Outils d'observation → Fenêtre d'analyse</strong>&nbsp;: nombre de productions récentes à observer (3 par défaut).</li>
-                            </ul>
-
-                            <p class="mt-10"><strong>Comment interpréter les diagnostics&nbsp;?</strong></p>
-
-                            <table class="tableau" style="margin-top: 10px;">
-                                <thead>
-                                    <tr>
-                                        <th>IPB</th>
-                                        <th>Direction</th>
-                                        <th>Diagnostic</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>0</td><td>—</td><td>Maîtrise acquise</td></tr>
-                                    <tr><td>1</td><td>↗</td><td>Difficulté résolue</td></tr>
-                                    <tr><td>1</td><td>→ ou ↘</td><td>Difficulté récente</td></tr>
-                                    <tr><td>2</td><td>↗</td><td>Progression</td></tr>
-                                    <tr><td>2</td><td>→</td><td>Plateau</td></tr>
-                                    <tr><td>2</td><td>↘</td><td>Difficulté constante</td></tr>
-                                    <tr><td>≥ 3</td><td>↗</td><td>Progression lente</td></tr>
-                                    <tr><td>≥ 3</td><td>→ ou ↘</td><td>Difficulté persistante</td></tr>
-                                </tbody>
-                            </table>
-
-                            <div class="alerte alerte-attention" style="margin-top: 15px;">
-                                <p><strong>«&nbsp;Plateau&nbsp;» n'est pas un verdict négatif</strong> — un score stable en zone de développement peut indiquer une consolidation ou une stagnation. Le jugement professionnel est toujours essentiel. L'application révèle les conditions, l'enseignant·e décide de l'action.</p>
-                            </div>
-
-                            <div class="alerte alerte-information" style="margin-top: 10px;">
-                                <p><strong>Quelle différence avec le modèle RàI&nbsp;?</strong></p>
-                                <p>Le suivi des fondamentaux surveille les <strong>critères multistructurels</strong> que tu as identifiés dans ta grille — est-ce que l'étudiant·e progresse sur les bases&nbsp;? Dans le modèle RàI, le niveau RàI se décide d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de la grille de référence sauf ceux marqués «&nbsp;Aucun&nbsp;». Les deux vues se complètent&nbsp;: quand elles divergent, c'est un signal intéressant pour ton jugement professionnel.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Patterns d'apprentissage (optionnel) -->
+                    <!-- Carte: Les patterns (#1152, lot 2c bis, 28 oct. 2026 : la règle unique du niveau, P et pattern ; « Stable » exige aussi une
+                         performance d'au moins 64 % ; ce qu'est un défi. Les lignes « Action » (prescriptions) et l'encadré sur la mobilisation
+                         (théorie) partent ; la tranche de la sentinelle du 15 oct. finit maintenant au niveau « En attente ». Audit du 24 oct.,
+                         verdict final de `patterns`). -->
                     <div class="carte accordeon" id="accordeon-aide-patterns">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11375,55 +10990,25 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-                            <p>Lorsque l'option RàI est activée, le système analyse la <strong>performance (P) sur les derniers artefacts</strong> et les <strong>défis identifiés par critère</strong> pour déterminer un pattern :</p>
+                            <p>Avec la RàI activée, l'application lit la performance des derniers artefacts de chaque étudiant·e et ses défis&nbsp;: un critère est un défi sous le «&nbsp;Seuil de défi spécifique&nbsp;» (70&nbsp;% par défaut). Le pattern en découle&nbsp;:</p>
+                            <ul>
+                                <li><strong>Difficulté persistante</strong>&nbsp;: une performance sous 64&nbsp;%&nbsp;;</li>
+                                <li><strong>Difficulté émergente</strong>&nbsp;: sous 75&nbsp;%, avec au moins un défi&nbsp;;</li>
+                                <li><strong>Défi spécifique</strong>&nbsp;: 75&nbsp;% ou plus, avec au moins un défi&nbsp;;</li>
+                                <li><strong>Stable</strong>&nbsp;: aucun défi, et une performance d'au moins 64&nbsp;%&nbsp;;</li>
+                                <li><strong>Non-participation</strong>&nbsp;: présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une copie du groupe évaluée).</li>
+                            </ul>
 
-                        <div class="alerte-success-dark">
-                            <h4 class="text-success-mb10">Stable</h4>
-                            <p><strong>Conditions :</strong> Aucun défi identifié sur les critères de la grille de référence</p>
-                            <p><strong>Intervention :</strong> RàI Niveau 1 — Enseignement universel avec suivi régulier</p>
-                            <p><strong>Action :</strong> Maintenir la mobilisation, possibilités d'enrichissement</p>
-                        </div>
+                            <p>Le niveau suit une seule règle&nbsp;: P sous 75&nbsp;% donne au moins le niveau 2, sous 64&nbsp;% le niveau 3, quel que soit le pattern. Pour le reste, «&nbsp;Difficulté persistante&nbsp;» et «&nbsp;Non-participation&nbsp;» donnent le niveau 3, «&nbsp;Difficulté émergente&nbsp;» et «&nbsp;Défi spécifique&nbsp;» le niveau 2, «&nbsp;Stable&nbsp;» le niveau 1.</p>
 
-                        <div class="alerte-warning-jaune">
-                            <h4 class="text-warning-856-mb10">Défi spécifique</h4>
-                            <p><strong>Conditions :</strong> Performance ≥ 75&nbsp;% ET au moins un défi identifié sur un critère</p>
-                            <p><strong>Intervention :</strong> RàI Niveau 2 — Préventif, soutien en petit groupe</p>
-                            <p><strong>Action :</strong> Pratique guidée sur le critère en difficulté, en s'appuyant sur les forces</p>
-                        </div>
-
-                        <div class="alerte-danger-rouge">
-                            <h4 class="u-mb-10" style="color: var(--niveau-attention-tres-eleve)">Difficulté émergente</h4>
-                            <p><strong>Conditions :</strong> Performance &lt; 75&nbsp;% (en développement) ET au moins un défi identifié sur un critère</p>
-                            <p><strong>Intervention :</strong> RàI Niveau 2 — Intervention préventive ciblée</p>
-                            <p><strong>Action :</strong> Remédiation ciblée sur le critère en difficulté</p>
-                        </div>
-
-                        <div class="alerte-danger-dark">
-                            <h4 class="text-white-mb10">Difficulté persistante</h4>
-                            <p><strong>Conditions :</strong> Performance &lt; 64&nbsp;% (insuffisant — compréhension unistructurelle)</p>
-                            <p><strong>Intervention :</strong> RàI Niveau 3 — Intervention intensive individualisée</p>
-                            <p><strong>Action :</strong> Rencontre individuelle, ré-enseignement, référence aux services adaptés si nécessaire</p>
-                        </div>
-
-                        <div class="alerte-danger-dark">
-                            <h4 class="text-white-mb10">Non-participation</h4>
-                            <p><strong>Conditions :</strong> Présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une copie du groupe évaluée)</p>
-                            <p><strong>Intervention :</strong> RàI Niveau 3 — Intensif</p>
-                        </div>
-
-                        <p>Tant que rien n'est jugeable, le pattern est «&nbsp;Données insuffisantes&nbsp;» et le niveau RàI «&nbsp;En attente&nbsp;».</p>
-
-                        <div class="alerte alerte-info u-mt-15">
-                            <h4 class="u-mb-10 u-texte-bleu">RàI et mobilisation : deux systèmes complémentaires</h4>
-                            <p>Le <strong>niveau RàI</strong> évalue la progression <strong>cognitive</strong> (performance et patterns sur les critères). Il répond à la question : <em>est-ce que l'étudiant·e comprend et progresse ?</em></p>
-                            <p class="u-mt-10">La <strong>mobilisation</strong> évalue le <strong>comportement</strong> (assiduité A + complétion C). Elle répond à la question : <em>est-ce que l'étudiant·e se présente et fait le travail ?</em></p>
-                            <p class="u-mt-10">Les deux systèmes sont <strong>indépendants</strong>. Un·e étudiant·e peut être Niveau 1 (bonne performance) mais avoir une alerte de mobilisation (absences). Inversement, un·e étudiant·e très mobilisé·e (A et C élevés) peut quand même avoir besoin d'un soutien pédagogique intensif (Niveau 3).</p>
-                            <p class="u-mt-10"><strong>Pourquoi ne pas combiner P avec A et C ?</strong> Parce que la performance ne reflète pas toujours l'engagement cognitif. Un·e étudiant·e avec un P encore faible peut être cognitivement très engagé·e — sa progression est visible, mais il/elle n'a pas encore atteint les seuils de maîtrise.</p>
-                        </div>
+                            <p>Tant que rien n'est jugeable, le pattern est «&nbsp;Données insuffisantes&nbsp;» et le niveau RàI «&nbsp;En attente&nbsp;».</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Planifier interventions -->
+                    <!-- Carte: Planifier les interventions (#1152, lot 2c bis, 28 oct. 2026 : absorbe « Interventions RàI avec absences motivées »,
+                         dont seule la case de report passe ; « Suggérer » au clic ; les blocs de l'écran, « Observations générales » et
+                         « Gestion des absences » compris ; ce que le report écrit selon le contexte, une seule fois ; la durée en périodes.
+                         Audit du 24 oct., verdicts finals de `planifier-rai` et `rai-absences` ; décision de Grégoire du 28 sept. sur le report). -->
                     <div class="carte accordeon" id="accordeon-aide-planifier-rai">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
@@ -11431,322 +11016,33 @@
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
-
-                        <p>Le formulaire unifié te guide en 5 sections pour planifier, documenter et évaluer tes interventions RàI.</p>
-
-                        <div class="alerte alerte-information">
-                            <h4 style="color: var(--bleu-principal)">Les 3 niveaux</h4>
-                            <ul>
-                                <li><strong>Niveau 1</strong> — Enseignement universel. Pas besoin de documenter ici.</li>
-                                <li><strong>Niveau 2</strong> — Préventif : soutien ciblé. Séance de rattrapage ou petit groupe en classe. Pour les étudiant·es en difficulté émergente ou en développement.</li>
-                                <li><strong>Niveau 3</strong> — Intervention intensive. Rencontre individuelle hors classe. Pour les difficultés persistantes malgré le niveau 2.</li>
-                            </ul>
-                        </div>
-
-                        <h4 style="margin-top: 20px; color: var(--accent-primaire);">Le formulaire unifié</h4>
-                        <ol>
-                            <li><strong>Logistique</strong> — Titre, niveau RàI, contexte, date, durée. Le statut (en préparation / complétée) est modifiable à tout moment.</li>
-                            <li><strong>Ciblage</strong> — Coche les étudiant·es concerné·es. L'aperçu du sous-groupe (patterns, niveaux RàI) s'affiche en temps réel à gauche.</li>
-                            <li><strong>Critères ciblés</strong> — Pré-cochés selon les défis communs du sous-groupe (grille de dépistage). Chaque critère indique combien d'étudiant·es sont en défi.</li>
-                            <li><strong>Objectif visé</strong> — Suggestion automatique basée sur le critère le plus faible. Tu peux la modifier ou écrire ton propre objectif.</li>
-                            <li><strong>Bilan</strong> — Apparaît quand tu marques l'intervention comme complétée. Tableau comparatif avant/après automatique, objectif atteint, suite envisagée.</li>
-                        </ol>
-
-                        <div class="alerte alerte-information" style="margin-top: 15px;">
-                            <h4 style="color: var(--bleu-principal)">Depuis le profil étudiant</h4>
-                            <p>Tu peux créer une intervention directement depuis l'onglet Accompagnement d'un·e étudiant·e. L'étudiant·e sera pré-coché·e et le niveau RàI dérivé de son profil.</p>
-                        </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Interventions RàI avec présences facultatives -->
-                    <div class="carte accordeon border-left-primary" id="accordeon-aide-rai-absences">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Interventions RàI avec absences motivées
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Suivi → Interventions</p>
 
-                        <p>Le système permet de documenter des interventions de Réponse à l'Intervention (RàI) de niveau 2 ou 3 tout en justifiant les absences des étudiant·es qui ne participent pas, sans pénaliser leur assiduité.</p>
+                            <p>«&nbsp;Planifier une intervention&nbsp;» ouvre une fiche&nbsp;: le titre (par exemple «&nbsp;Intervention sur deux critères ciblés&nbsp;»), «&nbsp;Niveau 2 (Groupe ciblé)&nbsp;» ou «&nbsp;Niveau 3 (Individuel)&nbsp;», au niveau 2 le «&nbsp;Contexte de l'intervention&nbsp;», la date, la «&nbsp;Durée (périodes)&nbsp;», 2 par défaut, et le statut, «&nbsp;En préparation&nbsp;» ou «&nbsp;Complétée&nbsp;». En rattrapage, «&nbsp;Gestion des absences&nbsp;» porte la séance concernée. Coche les étudiant·es dans «&nbsp;Marquer les présences et notes individuelles&nbsp;»&nbsp;: l'«&nbsp;Aperçu du sous-groupe&nbsp;» montre leurs patterns et leurs niveaux, et les «&nbsp;Critères ciblés&nbsp;» se pré-cochent d'après leurs défis communs. L'«&nbsp;Objectif visé&nbsp;» est vide&nbsp;; «&nbsp;Suggérer&nbsp;» en propose un. «&nbsp;Observations générales&nbsp;» documente la séance&nbsp;; le «&nbsp;Bilan post-intervention&nbsp;» paraît à la complétion.</p>
 
+                            <p>Marquer l'intervention complétée pose une question, avec la case «&nbsp;Reporter les présences dans la saisie des présences…&nbsp;», décochée par défaut. Cochée, elle écrit aux participant·es la durée de l'intervention, qui compense une absence au cours&nbsp;; en «&nbsp;Séance de rattrapage — les non-participants ont congé&nbsp;», les autres reçoivent une absence motivée, qui ne compte pas dans A&nbsp;; en «&nbsp;Petit groupe ciblé pendant le cours régulier&nbsp;» ou au niveau 3, rien pour eux. Le report se fait une seule fois.</p>
 
-                        <div class="carte-gradient-bleu">
-                            <h4 class="u-mb-10 u-texte-bleu"><img src="icons/icon-copy.svg" alt="" class="btn-inline-icon"> Contexte pédagogique</h4>
-                            <p>Lorsque tu planifies une intervention RàI ciblée :</p>
-                            <ul class="lh-16">
-                                <li>Des étudiant·es ont besoin de soutien spécifique (niveau 2 ou 3)</li>
-                                <li>Les autres étudiant·es reçoivent un congé ou travaillent de façon autonome</li>
-                                <li>Les absents ne devraient PAS être pénalisés dans leur calcul d'assiduité</li>
-                                <li><strong>Important :</strong> Les séances restent obligatoires, mais les absences sont justifiées</li>
-                            </ul>
-                        </div>
-
-                        <div class="alerte alerte-info">
-                            <h4 class="titre-11-mb10">🎯 Objectif du système</h4>
-                            <p class="mb-0-only">Permettre de <strong>documenter les présences</strong> aux interventions tout en <strong>marquant les absences comme motivées</strong>, afin qu'elles ne pénalisent pas l'indice d'assiduité.</p>
-                        </div>
-
-                        <div class="carte-gradient-bleu">
-                            <h4 class="u-mb-10 u-texte-bleu"><img src="icons/icon-advanced-search.svg" alt="" class="btn-inline-icon"> Distinction entre niveaux 2 et 3</h4>
-                            <p class="mb-10"><strong>Le système traite différemment les interventions selon leur nature :</strong></p>
-
-                            <div class="u-mb-12 u-p-12" style="background: var(--surface-carte, #1a3040); border-radius: 6px">
-                                <p class="mb-5"><strong style="color: var(--orange-accent);">Niveau 2 (Préventif - en classe ou en période de disponibilité)</strong></p>
-                                <ul class="lh-16">
-                                    <li><strong>Contexte :</strong> Intervention en classe pendant le cours régulier</li>
-                                    <li><strong>Participants</strong> (niveaux 2-3 qui ont besoin de soutien) :
-                                        <ul class="mt-5-text-95">
-                                            <li>2 heures enregistrées</li>
-                                            <li>Compte au numérateur ET au dénominateur de l'assiduité</li>
-                                        </ul>
-                                    </li>
-                                    <li><strong>Non-participants</strong> (niveau 1 qui n'ont pas besoin de soutien) :
-                                        <ul class="mt-5-text-95">
-                                            <li>0 heures enregistrées (absence motivée)</li>
-                                            <li>Affichage en couleur ambre</li>
-                                            <li>Ne compte NI au numérateur NI au dénominateur</li>
-                                            <li><strong>Résultat :</strong> L'assiduité n'est pas pénalisée</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="u-p-12" style="background: var(--surface-carte, #1a3040); border-radius: 6px">
-                                <p class="mb-5"><strong style="color: var(--bleu-moyen);">Niveau 3 (Intensif - hors classe, au bureau)</strong></p>
-                                <ul class="lh-16">
-                                    <li><strong>Contexte :</strong> Rencontre individuelle ou petit groupe à ton bureau</li>
-                                    <li><strong>Participant·es uniquement</strong> (étudiant·es convoqué·es) :
-                                        <ul class="mt-5-text-95">
-                                            <li>2 heures enregistrées</li>
-                                            <li>Compte au numérateur ET au dénominateur de l'assiduité</li>
-                                            <li><strong>Résultat :</strong> L'assiduité augmente (heures supplémentaires)</li>
-                                        </ul>
-                                    </li>
-                                    <li><strong>Non-participant·es</strong> (autres étudiant·es) :
-                                        <ul class="mt-5-text-95">
-                                            <li>Aucune entrée créée (pas concernés par l'intervention)</li>
-                                            <li>Aucun impact sur leur assiduité</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="carte-orange-my15">
-                            <h4 class="titre-orange-mb10"><img src="icons/icon-edit.svg" alt="" class="btn-inline-icon"> Processus en 3 étapes</h4>
-
-                            <p class="mb-5"><strong>ÉTAPE 1 : Planifier l'intervention</strong></p>
-                            <ol class="lh-relaxed-mb15">
-                                <li>Aller dans <strong>Suivi → Interventions</strong></li>
-                                <li>Cliquer sur « Planifier une intervention »</li>
-                                <li>Remplir le formulaire :
-                                    <ul class="mt-5-text-95">
-                                        <li>Titre (ex: « Intervention sur deux critères ciblés »)</li>
-                                        <li>Date et heure</li>
-                                        <li>Type : Groupe (niveau 2) ou Individuel (niveau 3)</li>
-                                        <li>Description optionnelle</li>
-                                    </ul>
-                                </li>
-                                <li>Cliquer sur « Planifier l'intervention »</li>
-                            </ol>
-
-                            <p class="mb-5"><strong>ÉTAPE 2 : Marquer les présences pendant l'intervention</strong></p>
-                            <ol class="lh-relaxed-mb15">
-                                <li>Cliquer sur « Ouvrir » sur l'intervention créée</li>
-                                <li>Cocher les étudiant·es présent·es à l'intervention</li>
-                                <li>Ajouter des observations générales et notes individuelles (optionnel)</li>
-                                <li>Cliquer sur « Marquer comme complétée »</li>
-                            </ol>
-
-                            <p class="mb-5"><strong>ÉTAPE 3 : Transfert automatique des présences</strong></p>
-                            <p class="text-095-lh-16">Dès que tu marques l'intervention comme complétée, le système transfère automatiquement les données vers le module de saisie des présences :</p>
-
-                            <p class="mb-5-mt-10"><strong>Pour intervention niveau 2 (en classe) :</strong></p>
-                            <ul class="lh-16">
-                                <li><strong>Participants</strong> :
-                                    <ul class="mt-5-text-95">
-                                        <li>2 heures enregistrées</li>
-                                        <li>Note : « Intervention RàI : [titre de l'intervention] »</li>
-                                        <li>Compte au numérateur ET au dénominateur de l'assiduité</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Non-participants</strong> :
-                                    <ul class="mt-5-text-95">
-                                        <li>0 heures enregistrées (affichage en couleur ambre)</li>
-                                        <li>Note : « Absence motivée RàI »</li>
-                                        <li>Ne compte NI au numérateur NI au dénominateur (absence justifiée)</li>
-                                    </ul>
-                                </li>
-                            </ul>
-
-                            <p class="mb-5-mt-10"><strong>Pour intervention niveau 3 (hors classe) :</strong></p>
-                            <ul class="lh-16">
-                                <li><strong>Participants uniquement</strong> :
-                                    <ul class="mt-5-text-95">
-                                        <li>2 heures enregistrées</li>
-                                        <li>Note : « Intervention RàI : [titre de l'intervention] »</li>
-                                        <li>Compte au numérateur ET au dénominateur (augmente l'assiduité)</li>
-                                    </ul>
-                                </li>
-                                <li><strong>Non-participants</strong> : Aucune entrée créée (pas concernés)</li>
-                            </ul>
-                        </div>
-
-                        <div class="alerte alerte-succes">
-                            <h4 class="titre-11-mb10">✅ Résultat : Assiduité préservée</h4>
-                            <p class="mb-10-only">Les étudiant·es qui n'ont pas participé à l'intervention (absence motivée) ne voient <strong>pas leur indice d'assiduité diminuer</strong>.</p>
-                            <p class="text-095"><strong>Exemple :</strong> Un étudiant avec 85&nbsp;% d'assiduité qui a une absence motivée RàI conservera son 85&nbsp;%. Sans ce système, son assiduité chuterait automatiquement.</p>
-                        </div>
-
-                        <div class="carte-green-my15">
-                            <h4 class="text-success-dark-mb10"><img src="icons/icon-advanced-search.svg" alt="" class="btn-inline-icon"> Vérification du transfert</h4>
-                            <p class="mb-10">Pour vérifier que le transfert a fonctionné correctement :</p>
-                            <ol class="lh-relaxed">
-                                <li>Aller dans <strong>Suivi → Saisie des présences</strong></li>
-                                <li>Sélectionner la date de l'intervention</li>
-                                <li>Vérifier dans le tableau :
-                                    <ul class="mt-5-text-95">
-                                        <li><strong>Pour niveau 2 (en classe) :</strong>
-                                            <ul class="u-mt-5">
-                                                <li>Participants : 2h (vert) avec la note d'intervention</li>
-                                                <li>Non-participants : 0h (ambre) avec « Absence motivée RàI »</li>
-                                            </ul>
-                                        </li>
-                                        <li><strong>Pour niveau 3 (hors classe) :</strong>
-                                            <ul class="u-mt-5">
-                                                <li>Participants : 2h (vert) avec la note d'intervention</li>
-                                                <li>Non-participants : 2h par défaut (affichage normal, pas concernés)</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>Pour niveau 2, consulter le profil d'une personne non participante pour confirmer que son assiduité n'a pas baissé</li>
-                            </ol>
-                        </div>
-
-                        <div class="alerte alerte-attention">
-                            <h4 class="titre-11-mb10">⚠️ Important</h4>
-                            <ul class="m-10-0-0-0-lh">
-                                <li>Le transfert automatique se déclenche quand tu cliques sur « Marquer comme complétée »</li>
-                                <!-- #1152, lot 1 (24 oct. 2026) : retiré la promesse que les présences suivent toute modification de l'intervention ; le report se fait une seule fois (intention 7.65, non faite ; interventions.js ; audit de l'Aide du 24 oct.). Le reste du mécanisme se réécrit au lot 2b. -->
-                                <li>Le tableau de présences se recharge automatiquement quand tu reviens sur la section</li>
-                                <li>Si tu enregistres sans compléter, les données restent dans le module Interventions seulement</li>
-                                <li>Le recalcul des indices d'assiduité se fait automatiquement après chaque modification</li>
-                            </ul>
-                        </div>
-
-                            <p class="titre-mt15-fw-bold-bleu">Temps estimé : 5-10 minutes par intervention (planification + saisie présences)</p>
+                            <p>Depuis le profil, «&nbsp;+ Nouvelle intervention&nbsp;» pré-coche l'étudiant·e et dérive le niveau de son profil.</p>
                         </div>
                     </div>
 
-                    <!-- Carte: Captures de progression (Snapshots) -->
-                    <div class="carte accordeon" id="accordeon-aide-snapshots">
-                        <div class="accordeon-header">
-                            <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Captures de progression hebdomadaires
-                            </h3>
-                        </div>
-                        <div class="accordeon-contenu">
-                            <p><strong>Navigation :</strong> Réglages → Données → Captures de progression</p>
-
-                        <p>Le système capture automatiquement l'état des indices A-C-P de chaque étudiant·e une fois par semaine, ce qui crée un historique pour suivre la progression au fil du trimestre.</p>
-
-                        <div class="carte-gradient-bleu">
-                            <p class="titre-11-bold-bleu-mb15">Fonctionnement automatique :</p>
-                            <ol class="lh-2">
-                                <li><strong>Capture automatique</strong> : À l'ouverture de l'application, si la semaine en cours n'a pas encore de capture, une capture est créée pour ses séances déjà passées. Chaque intervention garde aussi l'état des indices de ses élèves au moment où tu les y inscris.</li>
-                                <li><strong>Données capturées</strong> : A ponctuel, A cumulatif, C cumulatif, P cumulatif, pattern, niveau RàI</li>
-                                <li><strong>Graphiques générés</strong> : Évolution individuelle et évolution du groupe</li>
-                                <li><strong>Reconstruction possible</strong> : Recalcul rétroactif de toutes les captures historiques</li>
-                            </ol>
-                        </div>
-
-                        <p><strong>Distinction ponctuel vs cumulatif :</strong></p>
-
-                        <div class="alerte alerte-information">
-                            <h4 class="u-mb-10 u-texte-bleu">Graphique INDIVIDUEL (Profil étudiant)</h4>
-                            <p><strong>Tous les indices sont CUMULATIFS</strong> (depuis le début du trimestre) :</p>
-                            <ul class="m-10-0-0-0">
-                                <li><strong>A cumulatif</strong> : Assiduité sur les séances saisies depuis le début (ex: 24h présentes / 26h offertes dans les séances saisies = 92&nbsp;%)</li>
-                                <li><strong>C cumulatif</strong> : Travaux remis / travaux dus jusqu'à cette date (ex: 7/9 = 78&nbsp;%)</li>
-                                <li><strong>P cumulatif</strong> : Moyenne des évaluations jusqu'à cette date (ex: 73,5&nbsp;%)</li>
-                            </ul>
-                            <p class="text-muted u-mt-10 u-texte-09"><em>Justification pédagogique : Les indices cumulatifs permettent de mieux dépister l'impact à long terme sur l'apprentissage. Une absence passée ou un travail non remis peuvent avoir des conséquences durables.</em></p>
-                        </div>
-
-                        <div class="alerte alerte-information">
-                            <h4 class="u-mb-10 u-texte-bleu">Graphique GROUPE (Aperçu)</h4>
-                            <p><strong>Indices mixtes</strong> pour détecter les variations récentes :</p>
-                            <ul class="m-10-0-0-0">
-                                <li><strong>A ponctuel</strong> : Taux de présence à cette séance spécifique (ex: 28/30 présents = 93&nbsp;%)</li>
-                                <li><strong>C ponctuel</strong> : Taux de remise du dernier artefact dû (ex: 25/30 remis = 83&nbsp;%)</li>
-                                <li><strong>P cumulatif</strong> : Moyenne des évaluations jusqu'à cette date (ex: 75,2&nbsp;%)</li>
-                            </ul>
-                            <p class="text-muted u-mt-10 u-texte-09"><em>Justification pédagogique : Les indices ponctuels permettent de détecter rapidement les problèmes émergents dans le groupe (ex: séance difficile, échéance problématique).</em></p>
-                        </div>
-
-                        <p><strong>Reconstruction des captures :</strong></p>
-                        <p>Si tu modifies rétroactivement des présences ou des évaluations, tu dois reconstruire les captures pour mettre à jour les graphiques :</p>
-                        <ol class="lh-relaxed">
-                            <li>Va dans <strong>Réglages → Données → Captures de progression</strong></li>
-                            <li>Clique sur <strong>«Recalculer les captures»</strong></li>
-                            <li>Le système recalcule toutes les captures depuis le début du trimestre</li>
-                            <li>Les graphiques sont mis à jour avec les données corrigées</li>
-                        </ol>
-
-                        <div class="alerte alerte-attention">
-                            <strong>Important :</strong> Si tu corriges une erreur de saisie (ex: séance fantôme un jour sans cours, absence motivée non marquée), pense à reconstruire les captures pour que les graphiques reflètent les données correctes.
-                        </div>
-
-                        <p><strong>Exemple concret :</strong></p>
-                        <p>Ada a été présente à tous les cours mais son graphique affichait 92&nbsp;% d'assiduité. Investigation a révélé une «séance fantôme» le 30 septembre (un mardi sans cours). Après suppression de cette séance et reconstruction des captures, son assiduité est correctement affichée à 100&nbsp;%.</p>
-
-                        <div class="alerte alerte-succes">
-                            <strong>Avantages des captures :</strong>
-                            <ul class="m-10-0-0-0">
-                                <li><strong>Historique complet</strong> : Visualisation de la progression semaine par semaine</li>
-                                <li><strong>Détection patterns</strong> : Identification des moments critiques (chutes, paliers, rebonds)</li>
-                                <li><strong>Comparaison groupe</strong> : Analyse des tendances collectives vs individuelles</li>
-                                <li><strong>Reconstruction rétroactive</strong> : Correction d'erreurs sans perte de données</li>
-                            </ul>
-                        </div>
-                        </div>
-                    </div>
-
-                    <!-- Carte: Utiliser le tirage au sort -->
+                    <!-- Carte: L'Animation (#1152, lot 2c bis, 28 oct. 2026 : une phrase par outil, « Équipes » compris (#1039) ; les réglages
+                         dans « Paramètres du tirage » et les infobulles ; l'écran mesuré au HEAD (index.html, l'Animation). Audit du 24 oct.,
+                         verdict final de `tirage-sort`. Le titre est neuf : à Grégoire). -->
                     <div class="carte accordeon" id="accordeon-aide-tirage-sort">
                         <div class="accordeon-header">
                             <h3 class="carte-titre-bleu">
-                                <span class="accordeon-chevron">▼</span> Utiliser le tirage au sort
+                                <span class="accordeon-chevron">▼</span> Questions flash, tirage au sort et équipes
                             </h3>
                         </div>
                         <div class="accordeon-contenu">
                             <p><strong>Navigation :</strong> Suivi → Animation</p>
 
-                            <p>Ce module propose deux outils interactifs pour dynamiser tes cours.</p>
-
-                            <p><strong>2 cartes disponibles :</strong></p>
                             <ul>
-                                <li><strong>Questions Flash</strong> : Banque de questions organisées par catégorie — idéal pour les révisions rapides ou l'activation des connaissances</li>
-                                <li><strong>Tirage au sort</strong> : Sélection aléatoire d'étudiant·es avec animation roulette</li>
+                                <li><strong>«&nbsp;Questions flash&nbsp;»</strong> tire une question de ta banque, filtrée par catégorie&nbsp;; l'engrenage ouvre «&nbsp;Gestion des Questions Flash&nbsp;», où tu la remplis.</li>
+                                <li><strong>«&nbsp;Tirage au sort&nbsp;»</strong> tire des étudiant·es au hasard&nbsp;; le nombre, la remise et les exclusions se règlent dans «&nbsp;Paramètres du tirage&nbsp;» (l'engrenage), où «&nbsp;Réinitialiser&nbsp;» remet les tirages à zéro.</li>
+                                <li><strong>«&nbsp;Équipes&nbsp;»</strong> forme des équipes de 2, 3 ou 4 avec les présent·es du jour (tout le groupe si les présences ne sont pas prises)&nbsp;; «&nbsp;Retenir ces équipes&nbsp;» évite de remettre ensemble les mêmes étudiant·es aux tirages suivants.</li>
                             </ul>
-
-                            <p><strong>Configurer le tirage :</strong></p>
-                            <ol>
-                                <li>Choisis le nombre d'étudiant·es à tirer (1 à 5)</li>
-                                <li>Active ou désactive le <strong>mode avec remise</strong> (un même étudiant peut être tiré plusieurs fois)</li>
-                                <li>Exclus manuellement des étudiant·es si nécessaire</li>
-                                <li>Lance le tirage — une animation roulette affiche le résultat</li>
-                            </ol>
-
-                            <p><strong>Réglages :</strong></p>
-                            <p>Ouvre la modal de réglages pour consulter la liste d'étudiant·es, voir les badges « tiré » et réinitialiser les tirages.</p>
-
-                            <div class="alerte alerte-information">
-                                <strong><span class="icone-info-aide taille-inline" aria-hidden="true"></span> Astuce :</strong> L'état des tirages persiste entre les sessions automatiquement. Tu retrouves tes données même après avoir fermé le navigateur.
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -12772,7 +12068,7 @@
                             <details class="carte-grise-info">
                                 <summary class="titre-cliquable">Puis-je modifier les seuils des indices A, C, M ?</summary>
                                 <div class="mt-10-pl-10">
-                                    <p><strong>Oui</strong>, dans <strong>Labo → Outils d'observation</strong>. Les trois bornes de départ sont 70&nbsp;%, 80&nbsp;% et 85&nbsp;%. Elles décident des mots qui décrivent A et C dans le profil et de la couleur des chiffres dans la liste des étudiant·es (voir «&nbsp;Comprendre les diagnostics automatiques&nbsp;»). La borne de 60&nbsp;% est fixe.</p>
+                                    <p><strong>Oui</strong>, dans <strong>Labo → Outils d'observation</strong>. Les trois bornes de départ sont 70&nbsp;%, 80&nbsp;% et 85&nbsp;%. Elles décident des mots qui décrivent A et C dans le profil et de la couleur des chiffres dans la liste des étudiant·es (voir «&nbsp;Les mots qui décrivent A et C&nbsp;»). La borne de 60&nbsp;% est fixe.</p>
                                     <p class="mt-10">Ces seuils ne fixent pas le niveau RàI, et les bornes de la carte «&nbsp;Mobilisation&nbsp;» du profil sont fixes.</p>
                                 </div>
                             </details>
