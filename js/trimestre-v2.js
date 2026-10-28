@@ -605,6 +605,8 @@ function ouvrirAccordeonDeLEtape(idEtape) {
 }
 
 window.mettreAJourBarreContexte = mettreAJourBarreContexte;
+// La porte « Tu enseignes ? » de l'accueil (accueil.js) ouvre l'étape Trimestre par ce chemin.
+window.ouvrirAccordeonDeLEtape = ouvrirAccordeonDeLEtape;
 
 /* ===============================
    INITIALISATION AUTOMATIQUE

@@ -25741,7 +25741,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    ne sont pas redéfinies : la palette --acc-* est globale et identique aux 2 modes) */
 .mode-clair .accueil-action,
 .mode-clair .accueil-utilitaire-demi,
-.mode-clair .accueil-porte-ortho {
+.mode-clair .accueil-portes {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.08);
     box-shadow: var(--shadow-normal);
@@ -25756,15 +25756,24 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 
 .mode-clair .accueil-action-titre,
 .mode-clair .accueil-utilitaire-titre,
-.mode-clair .accueil-porte-ortho-titre,
-.mode-clair .accueil-porte-ortho-lien {
+.mode-clair .accueil-porte-titre,
+.mode-clair .accueil-porte-lien {
     color: var(--bleu-principal);
 }
 
 .mode-clair .accueil-action-desc,
 .mode-clair .accueil-utilitaire-desc,
-.mode-clair .accueil-porte-ortho-desc {
+.mode-clair .accueil-porte-desc {
     color: var(--texte-secondaire);
+}
+
+/* Les filets entre les trois portes : la couleur du trait de la carte, en mode clair aussi. */
+.mode-clair .accueil-porte + .accueil-porte {
+    border-color: rgba(3, 46, 92, 0.08);
+}
+
+.mode-clair .accueil-porte-lien:focus-visible {
+    outline-color: var(--bleu-principal);
 }
 
 /* ===============================

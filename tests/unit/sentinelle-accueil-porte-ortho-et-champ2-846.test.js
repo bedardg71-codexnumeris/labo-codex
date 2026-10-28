@@ -22,6 +22,10 @@ import { tranche } from './_helpers/tranche.js';
 //   B3. les mots de la carte et du bandeau viennent du RENDU, et un seul endroit les écrit ;
 //   B4. la carte est blanche comme les autres : même fond, même trait, même rayon, même ombre en
 //      mode clair ; ni bord gauche épais, ni couleur propre (la sarcelle signe la démo).
+//   B5. (28 oct. 2026) la carte devient UN encadré de trois portes d'entrée — « Tu enseignes ? »,
+//      la porte de l'orthopédagogie (au milieu, inchangée), « Tu es conseiller·ère pédagogique ? » ;
+//      trois colonnes séparées par des filets, empilées sous 760 px ; « Commencer → » de la
+//      première mène à l'étape Trimestre du Cadre, « Explorer → » passe par la case « Données démo ».
 //
 // BREAK-TESTS VÉRIFIÉS le 12 septembre 2026 — journal en fin de fichier.
 
@@ -156,32 +160,47 @@ const MOTS_BANDEAU = [
     'Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».',
     'Tu entres ton adresse de courriel, tu reçois un code et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à redemander de code. Tes données restent sur ton appareil. Il n’y a pas de commerce. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).',
 ];
-const MOTS_CARTE = ['Tu es orthopédagogue ?', 'Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.', 'Commencer →'];
+// 28 oct. 2026 : les trois portes, dans l'ordre (mots donnés par Grégoire). « Commencer → » est écrit
+// deux fois (deux portes) : il est vérifié dans l'ordre du rendu, pas par l'unicité de B3.
+const MOTS_PORTES = [
+    'Tu enseignes ?', 'Crée ton trimestre, ton cours et ton groupe, puis apporte ta grille d’évaluation.', 'Commencer →',
+    'Tu es orthopédagogue ?', 'Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.', 'Commencer →',
+    'Tu es conseiller·ère pédagogique ?', 'Explore un cours fictif déjà configuré, séparé de tes vraies données.', 'Explorer →'];
+const MOTS_UNIQUES_PORTES = MOTS_PORTES.filter(m => m !== 'Commencer →');
 
-function rendreAccueil() {
+function rendreAccueil(options) {
+    const opts = options || {};
     const elements = {};
     const appels = [];
+    const doc = fauxDocument(elements);
     const win = chargerScript('js/accueil.js', {
-        document: fauxDocument(elements), obtenirPreference: () => false, definirPreference() {}, estEnModeDemo: () => false,
+        document: doc, obtenirPreference: () => false, definirPreference() {}, estEnModeDemo: () => !!opts.demo,
         afficherSection: (s) => appels.push(['section', s]), afficherSousSection: (s) => appels.push(['sous-section', s]),
+        activerModeDemo: () => appels.push(['activerModeDemo']), desactiverModeDemo: () => appels.push(['desactiverModeDemo']),
         setTimeout: (f) => f(),
-    }, { addEventListener() {} });
+    }, {
+        addEventListener() {},
+        // Lus sur `window` par accueil.js : l'export de trimestre-v2.js et la garde de l'import (T7).
+        ouvrirAccordeonDeLEtape: (e) => appels.push(['etape', e]),
+        importEmpecheLaBascule: opts.importEmpeche ? () => true : undefined,
+    });
     win.afficherAccueil();
-    return { html: elements['accueil-contenu'].innerHTML, win, appels };
+    return { html: elements['accueil-contenu'].innerHTML, win, appels, doc };
 }
 
 describe('B1 · la carte est au-dessus des tâches, et les huit tâches sont toujours là', () => {
     it('ordre : le bandeau, puis la carte, puis le label « Tâches », puis la grille des tâches', () => {
         const { html } = rendreAccueil();
         const iBandeau = html.indexOf('id="banniere-bienvenue"');
-        const iCarte = html.indexOf('class="accueil-porte-ortho"');
+        const iCarte = html.indexOf('class="accueil-portes"');
         const iTaches = html.indexOf('<div class="accueil-section-label">Tâches</div>');
         const iGrille = html.indexOf('class="accueil-grille-actions"');
         expect(iBandeau).toBeGreaterThanOrEqual(0);
         expect(iCarte, 'la carte est rendue').toBeGreaterThan(iBandeau);
         expect(iTaches, 'au-dessus du label « Tâches »').toBeGreaterThan(iCarte);
         expect(iGrille).toBeGreaterThan(iTaches);
-        expect(html.match(/class="accueil-porte-ortho"/g), 'une seule carte').toHaveLength(1);
+        expect(html.match(/class="accueil-portes"/g), 'un seul encadré').toHaveLength(1);
+        expect(html).not.toContain('accueil-porte-ortho');
     });
 
     it('les huit cartes de tâches, dans leur ordre, et la carte n\'en est pas une', () => {
@@ -189,7 +208,7 @@ describe('B1 · la carte est au-dessus des tâches, et les huit tâches sont tou
         const titres = [...html.matchAll(/<div class="accueil-action-titre">([^<]*)<\/div>/g)].map(m => m[1]);
         expect(titres).toEqual(TACHES);
         expect(html.match(/class="accueil-action"/g)).toHaveLength(8);
-        const carte = tranche(html, 'class="accueil-porte-ortho"', '<div class="accueil-section-label">Tâches</div>');
+        const carte = tranche(html, 'class="accueil-portes"', '<div class="accueil-section-label">Tâches</div>');
         expect(carte).not.toContain('accueil-action');
     });
 
@@ -208,7 +227,7 @@ describe('B1 · la carte est au-dessus des tâches, et les huit tâches sont tou
 describe('B2 · le lien de la carte prend le chemin de la sous-navigation', () => {
     it('« Commencer → » mène à Suivi › Rencontres par naviguerAccueilCarte, la route de la sous-navigation', () => {
         const { html, win, appels } = rendreAccueil();
-        const m = html.match(/<button type="button" class="accueil-porte-ortho-lien" data-action="([^"]+)" data-param="([^"]+)">Commencer →<\/button>/);
+        const m = html.match(/<button type="button" class="accueil-porte-lien" data-action="([^"]+)" data-param="([^"]+)">Commencer →<\/button>/);
         expect(m, 'le lien est un bouton natif (clavier, Entrée/Espace)').not.toBeNull();
         expect(m[1]).toBe('naviguerAccueilCarte');
         expect(m[2]).toBe('suivi|suivi-rencontres');
@@ -230,9 +249,9 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
             expect(i, mot).toBeGreaterThan(curseur);
             curseur = i;
         }
-        const iCarte = html.indexOf('class="accueil-porte-ortho"');
+        const iCarte = html.indexOf('class="accueil-portes"');
         curseur = iCarte;
-        for (const mot of MOTS_CARTE) {
+        for (const mot of MOTS_PORTES) {
             // Cherché À PARTIR de la carte : « Tu es orthopédagogue ? » est aussi dans le bandeau.
             const i = html.indexOf(mot, curseur + 1);
             expect(i, mot).toBeGreaterThan(curseur);
@@ -255,7 +274,7 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
 
     it('les étapes sont une vraie liste numérotée ; la ligne de l\'orthopédagogue suit la liste, à part ; aucun « — » dans le bandeau', () => {
         const { html } = rendreAccueil();
-        const bandeau = tranche(html, 'id="banniere-bienvenue"', 'class="accueil-porte-ortho"');
+        const bandeau = tranche(html, 'id="banniere-bienvenue"', 'class="accueil-portes"');
         const liste = bandeau.match(/<ol[^>]*>([\s\S]*?)<\/ol>/);
         expect(liste, 'une <ol>').not.toBeNull();
         expect((liste[1].match(/<li>/g) || []).length).toBe(3);
@@ -282,7 +301,7 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
     it('chaque mot n\'est écrit qu\'une fois, dans js/accueil.js — ni ailleurs dans js/, ni dans index.html', () => {
         const sources = readdirSync(path.join(RACINE, 'js')).filter(f => f.endsWith('.js')).map(f => ['js/' + f, sansCommentaires(lire('js/' + f))]);
         sources.push(['index.html', lire('index.html')]);
-        for (const mot of [...MOTS_CARTE, ...MOTS_BANDEAU]) {
+        for (const mot of [...MOTS_UNIQUES_PORTES, ...MOTS_BANDEAU]) {
             const lieux = sources.flatMap(([f, code]) => Array(code.split(mot).length - 1).fill(f));
             expect(lieux, mot).toEqual(['js/accueil.js']);
         }
@@ -296,20 +315,98 @@ describe('B4 · la carte est blanche comme les autres cartes de l\'accueil', () 
     };
     it('index.html : même fond, même trait fin, même rayon que .accueil-action ; ni bord gauche, ni ombre ni couleur propres', () => {
         const html = lire('index.html');
-        const carte = regle(html, '.accueil-porte-ortho');
+        const carte = regle(html, '.accueil-portes');
         const action = regle(html, '.accueil-action');
         expect(carte).not.toBeNull();
         for (const p of ['background', 'border', 'border-radius']) expect(carte[p], p).toBe(action[p]);
         const declarations = Object.keys(carte).join(' ');
         expect(declarations).not.toMatch(/border-left|box-shadow|color/);
-        expect(html).not.toMatch(/\.accueil-porte-ortho[\w-]*\s*\{[^}]*(sarcelle|--acc-)/);
+        expect(html).not.toMatch(/\.accueil-porte[\w-]*\s*\{[^}]*(sarcelle|--acc-)/);
     });
     it('styles.css : en mode clair, la carte est dans la MÊME règle que les cartes de tâches (fond blanc, même ombre)', () => {
         const css = lire('styles.css');
         const m = css.match(/((?:\.mode-clair \.[\w-]+,\s*)+\.mode-clair \.[\w-]+)\s*\{\s*background: #ffffff;\s*border-color: rgba\(3, 46, 92, 0\.08\);\s*box-shadow: var\(--shadow-normal\);\s*\}/);
         expect(m, 'la règle des cartes accueil V3 en mode clair').not.toBeNull();
         expect(m[1]).toContain('.mode-clair .accueil-action');
-        expect(m[1]).toContain('.mode-clair .accueil-porte-ortho');
+        expect(m[1]).toContain('.mode-clair .accueil-portes');
+    });
+});
+
+describe('B5 · trois portes d\'entrée dans un seul encadré (28 oct. 2026)', () => {
+    const portes = (html) => tranche(html, 'class="accueil-portes"', '<div class="accueil-section-label">Tâches</div>')
+        .split('<div class="accueil-porte">').slice(1);
+    const regle = (css, sel) => {
+        const m = css.match(new RegExp('\\n\\s*' + sel.replace(/[.+]/g, '\\$&') + '\\s*\\{([^}]*)\\}'));
+        return m ? m[1] : null;
+    };
+
+    it('trois colonnes, chacune : une question en titre, une phrase, un bouton natif', () => {
+        const { html } = rendreAccueil();
+        const p = portes(html);
+        expect(p).toHaveLength(3);
+        const titres = p.map(c => c.match(/<div class="accueil-porte-titre">([^<]*)<\/div>/)[1]);
+        expect(titres).toEqual(['Tu enseignes ?', 'Tu es orthopédagogue ?', 'Tu es conseiller·ère pédagogique ?']);
+        p.forEach((c) => {
+            expect(c).toMatch(/<div class="accueil-porte-desc">[^<]+<\/div>/);
+            expect(c).toMatch(/<button type="button" class="accueil-porte-lien" data-action="[^"]+"[^>]*>[^<]+<\/button>/);
+        });
+    });
+
+    it('« Tu enseignes ? » : Cadre › Trimestre, puis l\'étape Trimestre de la barre de convergence', () => {
+        const { html, win, appels } = rendreAccueil();
+        expect(portes(html)[0]).toContain('data-action="commencerParLeTrimestre">Commencer →</button>');
+        win.commencerParLeTrimestre();
+        expect(appels).toEqual([['section', 'calendrier'], ['sous-section', 'calendrier-trimestre'], ['etape', 'trimestre']]);
+        // La même étape qu'un clic dans la barre : la table de trimestre-v2.js, exportée pour l'accueil.
+        const t = lire('js/trimestre-v2.js');
+        expect(t).toMatch(/'trimestre': 'accordeon-gestion-trimestres'/);
+        expect(t).toContain('window.ouvrirAccordeonDeLEtape = ouvrirAccordeonDeLEtape;');
+    });
+
+    it('« Explorer → » passe par la case « Données démo » : cochée, puis son gestionnaire', () => {
+        const { html, win, appels, doc } = rendreAccueil();
+        expect(portes(html)[2]).toContain('data-action="explorerDonneesDemo">Explorer →</button>');
+        const cb = doc.getElementById('checkbox-demo-accueil');
+        cb.checked = false;
+        win.explorerDonneesDemo();
+        expect(cb.checked, 'la case suit').toBe(true);
+        expect(appels).toEqual([['activerModeDemo']]);
+    });
+
+    it('« Explorer → » garde la case comme elle quand un import empêche la bascule', () => {
+        const { win, appels, doc } = rendreAccueil({ importEmpeche: true });
+        const cb = doc.getElementById('checkbox-demo-accueil');
+        cb.checked = false;
+        win.explorerDonneesDemo();
+        expect(cb.checked).toBe(false);
+        expect(appels).toEqual([]);
+    });
+
+    it('« Explorer → » ne réactive rien quand la démo est déjà active', () => {
+        const { win, appels, doc } = rendreAccueil({ demo: true });
+        const cb = doc.getElementById('checkbox-demo-accueil');
+        cb.checked = true;
+        win.explorerDonneesDemo();
+        expect(cb.checked).toBe(true);
+        expect(appels).toEqual([]);
+    });
+
+    it('index.html : trois colonnes égales, filets verticaux du trait de la carte, horizontaux sous 760 px ; focus visible', () => {
+        const html = lire('index.html');
+        expect(regle(html, '.accueil-portes')).toMatch(/grid-template-columns: repeat\(3, 1fr\)/);
+        const trait = regle(html, '.accueil-portes').match(/border: 1px solid ([^;]+);/)[1];
+        expect(regle(html, '.accueil-porte + .accueil-porte')).toContain('border-left: 1px solid ' + trait);
+        expect(regle(html, '.accueil-porte'), 'pas de boîte autour d\'une colonne').not.toMatch(/border|background|box-shadow/);
+        const media = html.match(/@media \(max-width: 760px\) \{\s*\.accueil-portes \{\s*grid-template-columns: 1fr;\s*\}\s*\.accueil-porte \+ \.accueil-porte \{([^}]*)\}/);
+        expect(media, 'empilées sous 760 px').not.toBeNull();
+        expect(media[1]).toContain('border-left: none');
+        expect(media[1]).toContain('border-top: 1px solid ' + trait);
+        expect(regle(html, '.accueil-porte-lien:focus-visible')).toContain('outline: 2px solid');
+    });
+
+    it('styles.css : en mode clair, les filets prennent le trait de la carte', () => {
+        const css = lire('styles.css');
+        expect(regle(css, '.mode-clair .accueil-porte + .accueil-porte')).toContain('border-color: rgba(3, 46, 92, 0.08)');
     });
 });
 
@@ -333,3 +430,9 @@ describe('B4 · la carte est blanche comme les autres cartes de l\'accueil', () 
 //   C1 accueil.js — « Apprends pas à pas. » redevient « Apprends geste par geste. »                          → 3 rouges
 //   C2 accueil.js — la barre redevient « Bienvenue dans Labo Codex ! »                                         → 2 rouges
 //   C3 accueil.js — l'amorce « Ton courriel, une fois par mois. » remise devant le paragraphe d'accès          → 1 rouge
+//
+// BREAK-TESTS DU 28 octobre 2026 (trois portes d'entrée) — copie de référence, mutation, restauration (empreinte identique).
+//   D1 accueil.js — explorerDonneesDemo sans la garde « démo déjà active »                                   → 1 rouge
+//   D2 accueil.js — « Tu enseignes ? » ouvre l'étape Cours au lieu de Trimestre                               → 1 rouge
+//   D3 index.html — les colonnes s'empilent sous 768 px au lieu de 760 px                                      → 1 rouge
+//   D4 accueil.js — « Explorer → » appelle activerModeDemo en contournant la case et sa garde                  → 2 rouges

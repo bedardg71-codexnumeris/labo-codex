@@ -146,11 +146,13 @@ function basculerBanniereBienvenue() {
  *
  *   - Hero « Que souhaites-tu faire ? »
  *   - bannière de bienvenue (nouvel utilisateur)
- *   - porte de l'orthopédagogie (consigne du 12 sept. 2026) : une carte blanche, pleine
- *     largeur, au-dessus des tâches — elle n'en remplace aucune ; son lien prend le même
- *     chemin que la sous-navigation (Suivi › Rencontres, les trois questions). Grégoire :
- *     « Je veux que l'orthopédagogue sente qu'elle entre par la porte principale. »
- *     Ses mots, et ceux du bandeau, ne s'écrivent qu'ici.
+ *   - trois portes d'entrée (28 oct. 2026), dans un seul encadré blanc pleine largeur,
+ *     au-dessus des tâches — elles n'en remplacent aucune. Elles succèdent à la porte de
+ *     l'orthopédagogie (consigne du 12 sept. 2026 ; Grégoire : « Je veux que
+ *     l'orthopédagogue sente qu'elle entre par la porte principale. »), qui reste la
+ *     colonne du milieu, mots et chemin inchangés (Suivi › Rencontres). L'enseignant·e
+ *     entre par la première étape du Cadre, le ou la CP par les données démo. Leurs mots,
+ *     et ceux du bandeau, ne s'écrivent qu'ici.
  *   - Raccourcis : grille 4×2 de 8 cartes d'action
  *   - Utilitaires (gauche) | Aide (droite) : rangée de 4 demi-cartes
  *       · 2 utilitaires neutres (Sauvegarder, Nouveautés)
@@ -173,12 +175,22 @@ function afficherAccueilContenu(conteneur) {
     conteneur.innerHTML = `
         ${banniereBienvenueHTML}
 
-        <div class="accueil-porte-ortho" id="accueil-porte-ortho">
-            <div>
-                <div class="accueil-porte-ortho-titre">${QUESTION_ORTHOPEDAGOGUE}</div>
-                <div class="accueil-porte-ortho-desc">Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.</div>
+        <div class="accueil-portes" id="accueil-portes">
+            <div class="accueil-porte">
+                <div class="accueil-porte-titre">Tu enseignes ?</div>
+                <div class="accueil-porte-desc">Crée ton trimestre, ton cours et ton groupe, puis apporte ta grille d’évaluation.</div>
+                <button type="button" class="accueil-porte-lien" data-action="commencerParLeTrimestre">Commencer →</button>
             </div>
-            <button type="button" class="accueil-porte-ortho-lien" data-action="naviguerAccueilCarte" data-param="suivi|suivi-rencontres">Commencer →</button>
+            <div class="accueil-porte">
+                <div class="accueil-porte-titre">${QUESTION_ORTHOPEDAGOGUE}</div>
+                <div class="accueil-porte-desc">Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.</div>
+                <button type="button" class="accueil-porte-lien" data-action="naviguerAccueilCarte" data-param="suivi|suivi-rencontres">Commencer →</button>
+            </div>
+            <div class="accueil-porte">
+                <div class="accueil-porte-titre">Tu es conseiller·ère pédagogique ?</div>
+                <div class="accueil-porte-desc">Explore un cours fictif déjà configuré, séparé de tes vraies données.</div>
+                <button type="button" class="accueil-porte-lien" data-action="explorerDonneesDemo">Explorer →</button>
+            </div>
         </div>
 
         <div class="accueil-section-label">Tâches</div>
@@ -408,6 +420,31 @@ function deplacerFocusVersSection(section) {
     cible.focus();
 }
 
+/**
+ * Porte « Tu enseignes ? » : Cadre › Trimestre, puis la première étape de la barre de
+ * convergence (l'accordéon Trimestre) — le geste d'un clic sur cette étape, pas un second.
+ * Le délai suit celui de naviguerAccueilCarte : la sous-section doit être affichée.
+ */
+function commencerParLeTrimestre() {
+    naviguerAccueilCarte('calendrier|calendrier-trimestre');
+    setTimeout(function() {
+        if (typeof window.ouvrirAccordeonDeLEtape === 'function') window.ouvrirAccordeonDeLEtape('trimestre');
+    }, 200);
+}
+
+/**
+ * Porte « Tu es conseiller·ère pédagogique ? » : coche la case « Données démo » et passe
+ * par son propre gestionnaire — mêmes gardes, même case synchronisée. Si la démo est déjà
+ * active, rien n'est réactivé.
+ */
+function explorerDonneesDemo() {
+    if (typeof estEnModeDemo === 'function' && estEnModeDemo()) return;
+    const cb = document.getElementById('checkbox-demo-accueil');
+    if (!cb) return;
+    cb.checked = true;
+    toggleDemoHandler(cb);
+}
+
 /** Ouvre le wizard de pratique de notation par-dessus l'accueil (modale, pas de navigation). */
 function ouvrirWizardPratique() {
     if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2();
@@ -427,6 +464,8 @@ window.toggleAccompagnementHandler = toggleAccompagnementHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.basculerBanniereBienvenue = basculerBanniereBienvenue;
 window.ouvrirWizardPratique = ouvrirWizardPratique;
+window.commencerParLeTrimestre = commencerParLeTrimestre;
+window.explorerDonneesDemo = explorerDonneesDemo;
 window.ouvrirModalBackup = ouvrirModalBackup;
 
 })();
