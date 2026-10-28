@@ -247,3 +247,83 @@ test('une reprise accordée après un plagiat naît « Recevable » : sa ligne, 
     expect(ecran).toEqual({ statut: 'recevable', notes: '', libelle: false, note: true, avis: false });
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
 });
+
+// ↻ QUATRIÈME RETOUCHE (relecture de Cowork, 28 oct., 8 h 20) — UNE REPRISE ACCORDÉE À UNE COPIE NON RECEVABLE PART VIDE.
+// La décision de Grégoire de 6 h 46 : les niveaux d'une copie non recevable ne se lisent nulle part. La reprise les recopiait
+// (« l'enseignant les modifiera ») : « M » et « 87,5 % » sur sa ligne, E et M dans ses menus, jusqu'à la réévaluation.
+// Une reprise ORDINAIRE garde ce comportement (témoin : EV2, recevable). Les deux originales ne bougent pas.
+test('une reprise accordée à une copie non recevable part vide ; celle d’une copie recevable garde ses niveaux ; les originales ne bougent pas', async ({ page }) => {
+    test.setTimeout(150000);
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    page.on('dialog', (d) => { erreurs.push('DIALOGUE : ' + d.message()); d.dismiss().catch(() => {}); });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(indexHtml);
+    await page.waitForFunction(() => window.dbReady === true && typeof window.modifierEvaluation === 'function'
+        && typeof window.appliquerJetonReprise === 'function' && window.syntheseRetroactionData, null, { timeout: 20000 });
+    await page.evaluate('(' + MONTER + ')(' + JSON.stringify({ T }) + ')');
+    // L'originale porte tout ce qu'une copie évaluée peut porter : niveaux, note, portée, rétroaction réécrite, points, comptes.
+    await page.evaluate((t) => {
+        const evs = window.db.getSync(t + '_evaluationsSauvegardees', []);
+        Object.assign(evs.find(e => e.id === 'EV1'), { statutIntegrite: 'plagiat', notesIntegrite: 'Preuves fictives.', verrouillee: true,
+            retroactionReecrite: true, pointsAnalytiques: { c1: 9 }, donneesAlgorithmiques: { c2: { erreurs: 3, mots: 300 } } });
+        window.db.setSync(t + '_evaluationsSauvegardees', evs);   // security-ok: fixture littérale du banc
+    }, T);
+    const originales = await page.evaluate((t) => window.db.getSync(t + '_evaluationsSauvegardees', []), T);
+
+    const CHAMPS = ['criteres', 'noteFinale', 'niveauFinal', 'ponderationCouverte', 'pointsAnalytiques', 'donneesAlgorithmiques',
+        'retroactionFinale', 'retroactionReecrite'];
+    const reprises = await page.evaluate(async (champs) => {
+        const lire = (r) => r ? Object.assign({ id: r.id }, ...champs.map(c => ({ [c]: r[c] }))) : null;
+        return { nr: lire(await window.appliquerJetonReprise('EV1', true, { silencieux: true })),
+            rec: lire(await window.appliquerJetonReprise('EV2', true, { silencieux: true })) };
+    }, CHAMPS);
+    // eslint-disable-next-line no-console
+    console.log('1028 · reprise de la non recevable, en base :', JSON.stringify(reprises.nr));
+    // eslint-disable-next-line no-console
+    console.log('1028 · reprise de la recevable (témoin) :', JSON.stringify(reprises.rec));
+    expect(reprises.nr && reprises.rec, 'les deux reprises sont créées').toBeTruthy();
+    expect(reprises.nr, 'aucun niveau, aucune note, aucun point, aucun compte, aucune rétroaction de l’originale').toEqual({ id: reprises.nr.id,
+        criteres: [], noteFinale: undefined, niveauFinal: undefined, ponderationCouverte: undefined, pointsAnalytiques: {},
+        donneesAlgorithmiques: {}, retroactionFinale: undefined, retroactionReecrite: undefined });
+    const ev2 = originales.find(e => e.id === 'EV2');
+    expect(reprises.rec, 'témoin : la reprise ordinaire part des niveaux de l’originale').toEqual(Object.assign({ id: reprises.rec.id },
+        ...CHAMPS.map(c => ({ [c]: ev2[c] }))));
+
+    const apres = await page.evaluate((t) => window.db.getSync(t + '_evaluationsSauvegardees', []), T);
+    const sansMarques = (e) => { const c = Object.assign({}, e); ['remplaceeParId', 'dateRemplacement', 'archivee', 'dateArchivage', 'journal'].forEach(k => delete c[k]); return c; };
+    for (const id of ['EV1', 'EV2']) {
+        expect(sansMarques(apres.find(e => e.id === id)), id + ' : l’originale ne bouge pas (hors les marques du remplacement)')
+            .toEqual(sansMarques(originales.find(e => e.id === id)));
+    }
+
+    // Ce que l'écran en montre : la ligne de la Liste, puis le formulaire.
+    await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-liste'); if (typeof window.initialiserListeEvaluations === 'function') window.initialiserListeEvaluations(); });
+    await page.waitForTimeout(2000);
+    const ligne = await page.evaluate((id) => {
+        const tr = document.querySelector(`tr[data-evaluation-id="${id}"]`);
+        return tr ? Array.from(tr.querySelectorAll('td')).map(td => td.textContent.replace(/\s+/g, ' ').trim()) : null;
+    }, reprises.nr.id);
+    // eslint-disable-next-line no-console
+    console.log('1028 · la Liste (ligne de la reprise vide) :', JSON.stringify(ligne));
+    expect(ligne, 'la ligne de la reprise se voit').not.toBeNull();
+    expect(ligne, 'ni « M »').not.toContain('M');
+    expect(ligne.join(' | '), 'ni « 87,5 »').not.toMatch(/87[,.]5/);
+    expect(ligne, 'elle attend sa réévaluation').toContain('À réévaluer');
+
+    await page.evaluate((id) => window.modifierEvaluation(id), reprises.nr.id);
+    await page.waitForFunction((id) => window.evaluationEnCours && window.evaluationEnCours.idModification === id, reprises.nr.id, { timeout: 15000 });
+    await page.waitForTimeout(3500);
+    const ecran = await page.evaluate(() => {
+        const t = (id) => { const el = document.getElementById(id); return el ? el.textContent.replace(/\s+/g, ' ').trim() : null; };
+        const menu = (id) => { const el = document.getElementById('eval_' + id); return el ? el.value : null; };
+        return { c1: menu('c1'), c2: menu('c2'), note: t('noteProduction1'), niveau: t('niveauProduction1'),
+            retroaction: (document.getElementById('retroactionFinale1') || {}).value };
+    });
+    // eslint-disable-next-line no-console
+    console.log('1028 · le formulaire de la reprise vide :', JSON.stringify(ecran));
+    expect([ecran.c1, ecran.c2], 'aucun niveau de critère choisi').toEqual(['', '']);
+    expect(ecran.note, 'ni sa note').not.toMatch(/87[,.]5/);
+    expect(ecran.retroaction, 'ni la rétroaction de l’originale').not.toContain('Rétroaction fictive.');
+    expect(erreurs, erreurs.join(' | ')).toEqual([]);
+});

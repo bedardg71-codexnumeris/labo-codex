@@ -571,7 +571,7 @@ async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, o
     const copieOriginale = structuredClone(evaluationOriginale);
 
     // Créer la nouvelle évaluation (duplicata) avec un nouvel ID unique
-    // Les scores de l'originale sont conservés — l'enseignant les modifiera lors de la réévaluation
+    // Les scores de l'originale sont conservés — l'enseignant les modifiera lors de la réévaluation (sauf d'une copie non recevable, ci-dessous)
     const nouvelId = genererIdUnique('EVAL_');
     const nouvelleEvaluation = {
         ...copieOriginale,
@@ -595,6 +595,15 @@ async function appliquerJetonReprise(evaluationOriginaleId, archiverOriginale, o
     ['jetonDelaiApplique', 'dateApplicationJetonDelai', 'delaiAccorde', 'dureeDelaiJours',
         'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee',
         'dateArchivage', 'reconcilieParDoublon', 'statutIntegrite', 'notesIntegrite'].forEach(champ => { delete nouvelleEvaluation[champ]; });
+    // #1175, quatrième retouche (relecture de Cowork, 28 oct. 2026, 8 h 20) — la reprise d'une copie NON RECEVABLE part vide :
+    // ses niveaux ne se lisent nulle part (décision de Grégoire, 6 h 46), pas même sur la reprise qui les recopiait. Vidé :
+    // les niveaux des critères, la note, le niveau final, la portée, les points, les comptes, la rétroaction et sa marque —
+    // l'état d'un formulaire neuf. Une reprise ordinaire part toujours des niveaux de l'originale. L'originale ne bouge pas.
+    if (typeof evaluationNonRecevable === 'function' && evaluationNonRecevable(evaluationOriginale)) {   // le prédicat du registre
+        ['noteFinale', 'niveauFinal', 'ponderationCouverte', 'retroactionFinale', 'retroactionReecrite']
+            .forEach(champ => { delete nouvelleEvaluation[champ]; });
+        Object.assign(nouvelleEvaluation, { criteres: [], pointsAnalytiques: {}, donneesAlgorithmiques: {} });
+    }
 
 
     // Journal de bord — jeton de reprise (avant splice pour garder la bonne référence)
