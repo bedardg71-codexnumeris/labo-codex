@@ -50,7 +50,8 @@ describe('Bloc 1 — l\'aide du Comparateur', () => {
             const e = entree(TERME, cle);
             expect(e).toContain(`terme: '${terme}'`);
             expect(e).toContain("categorie: 'Pratiques de notation'");
-            expect(e).toContain("voir: 'Labo > Comparateur de pratiques'");
+            // ↻ #1152, lot 3 (28 oct. 2026) : le libellé de js/config.js, « Exploration des pratiques » (consigne du lot 3, §2.1).
+            expect(e).toContain("voir: 'Labo › Exploration des pratiques'");
             expect(e, `${cle} : un mot du code`).not.toMatch(/souche|pratique aboutie/i);
         }
         expect(entree(TERME, 'maquette-pratique')).toContain('« dormant »');

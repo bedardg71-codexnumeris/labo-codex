@@ -106,7 +106,11 @@ describe('« Apporter mon matériel » — le lexique et la section de l’ongle
         lignes.forEach((m, i) => {
             const t = terme(TERMES[i]);
             expect(t.terme.startsWith(m[1]), m[1]).toBe(true);
-            expect(t.definition.charAt(0).toLowerCase() + t.definition.slice(1), m[1]).toBe(m[2]);
+            const def = t.definition.charAt(0).toLowerCase() + t.definition.slice(1);
+            // ↻ #1152, lot 3 (28 oct. 2026) : « Pondération » porte deux sens ; le premier, celui du 19 oct., reste mot pour
+            // mot en tête (consigne CONSIGNE-LOT-2026-10-28-aide-lot-3-un-seul-glossaire.md, §2.2). Les cinq autres : égalité.
+            if (TERMES[i] === 'ponderation') expect(def.startsWith(m[2] + ' Pour une production'), m[1]).toBe(true);
+            else expect(def, m[1]).toBe(m[2]);
         });
     });
 });

@@ -1592,10 +1592,25 @@ function creerFicheGlossaire(t) {
     return fiche;
 }
 
+// #1152, lot 3 (28 oct. 2026) : la fiche est dans Aide › Référence, sous l'accordéon du glossaire, qui n'est rendu
+// qu'à l'ouverture de Référence ; afficherSection('aide') seul ouvrait Commencer. L'aide contextuelle d'où vient le
+// terme se referme : elle couvrirait la fiche.
 function afficherTermeGlossaire(cle) {
     const t = glossaireDict()[cle];
     if (!t) return;
+    fermerAideContextuelle();
     if (typeof afficherSection === 'function') afficherSection('aide');
+    if (typeof afficherSousSection === 'function') afficherSousSection('aide-reference');
+    const conteneur = document.getElementById('glossaire-rendu');
+    if (conteneur && (!_glossaireRenduAideFait || !document.getElementById('glossaire-' + cle))) {
+        if (_etapeFiltre && t.etape !== _etapeFiltre) _etapeFiltre = '';
+        afficherDansConteneurGlossaire(conteneur);
+        _glossaireRenduAideFait = true;
+    }
+    const carte = document.getElementById('accordeon-aide-glossaire');
+    if (carte && carte.classList.contains('ferme') && typeof toggleAccordeonV2 === 'function') {
+        toggleAccordeonV2(carte.querySelector('.accordeon-header'));
+    }
     setTimeout(function() {
         const fiche = document.getElementById('glossaire-' + cle);
         if (fiche) {

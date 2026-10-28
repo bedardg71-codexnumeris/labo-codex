@@ -117,7 +117,10 @@ describe('Ce qui fixe le niveau RàI : une seule version, celle du code', () => 
         const phrase = `pattern des derniers artefacts (${fenetre} par défaut)`;
         expect(bulle('tdb-rai')).toContain(phrase);
         expect(TERME).toContain(phrase);
-        expect(AIDE.split(phrase).length - 1, 'la section Aide ne dit plus la règle du code').toBeGreaterThanOrEqual(3);
+        // ↻ #1152, lot 3 (28 oct. 2026) : « au moins trois fois » comptait deux redites du glossaire statique (Indice RàI, RàI),
+        // parti avec lui (consigne CONSIGNE-LOT-2026-10-28-aide-lot-3-un-seul-glossaire.md, §2.5). La règle reste dite là où
+        // l'Aide décrit le niveau (l'entrée du Suivi) et dans le seul glossaire (TERME, ci-dessus).
+        expect(AIDE.split(phrase).length - 1, 'la section Aide ne dit plus la règle du code').toBeGreaterThanOrEqual(1);
         expect(TERME).toContain('il ne fixe pas le niveau');
         expect(AIDE).toContain('nomme la cible de l\'intervention');
     });
@@ -264,6 +267,7 @@ describe('Les gestes décrits sont ceux du code', () => {
             expect(texte).not.toMatch(/Taux de présence cumulé de l’étudiant·e depuis le début du trimestre|nombre de présences \/ nombre de séances|la proportion des périodes du trimestre/);
         }
         expect(AIDE).toContain('Séance non saisie');
+        expect(TERME).toContain('« Séance non saisie »');   // #1152, lot 3 : la formule de A, versée du glossaire statique
         expect(GUIDES).toContain('sur les seules séances saisies');
     });
 
@@ -309,7 +313,9 @@ describe('Les gestes décrits sont ceux du code', () => {
         const n = (bloc.match(/^\s{8}id: \d+,/gm) || []).length;
         expect(n).toBeGreaterThan(0);
         expect(TERME).toContain(`Un parcours en ${n} étapes`);
-        expect(AIDE).toContain(`Parcours en ${n} &eacute;tapes`);
+        // ↻ #1152, lot 3 (28 oct. 2026) : « Parcours en N étapes » n'était, dans l'Aide, que dans le glossaire statique, parti ;
+        // le seul glossaire le dit (TERME, ci-dessus ; consigne du lot 3, §2.5).
+        expect(AIDE).not.toContain('Parcours en 7 &eacute;tapes');
         expect(INDEX).toMatch(/data-action="afficherAideContextuelle" data-param="tour-guide"/);
         expect(TERME).not.toContain('depuis les Préférences');
     });

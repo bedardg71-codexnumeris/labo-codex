@@ -900,7 +900,7 @@ body.aide-contextuelle-active .btn-aide-contextuelle,
 /* Micro-popup positionné en absolu */
 .glossaire-micropopup {
     position: absolute;
-    z-index: 1000;
+    z-index: 10003; /* #1152, lot 3 : les termes soulignés vivent dans la modal d'aide (10002) ; à 1000, il s'ouvrait dessous */
     min-width: 240px;
     max-width: 360px;
     padding: 12px 14px;
