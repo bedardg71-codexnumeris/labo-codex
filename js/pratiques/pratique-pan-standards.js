@@ -380,7 +380,7 @@ class PratiquePANStandards {
             remis: evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === travail.id &&
-                window.evaluationCompteCommeRemise(e)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
+                window.evaluationCompteCommeRemise(e, evaluations)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
             )
         }));
 

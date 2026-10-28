@@ -320,7 +320,7 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         // qui lit les trois prédicats — les sites ne les recopient plus (un site qui en oubliait un rougissait ici).
         const regle = sansCommentaires(tranche(source('js/pratiques/pratique-registre.js'), 'function evaluationCompteCommeRemise(', 'function compterEvaluationsEcarteesDeLaNote('));
         expect(/evaluationEntreDansLaNote\(/.test(regle) && /!evaluationNonRemise\(/.test(regle) && /evaluationNonRecevable\(/.test(regle)).toBe(true);
-        const deux = (s) => /window\.evaluationCompteCommeRemise\(e\)/.test(s);
+        const deux = (s) => /window\.evaluationCompteCommeRemise\(e, evaluations\)/.test(s);   // E15 (28 oct. 2026) : avec la liste où chercher la reprise
         expect(deux(corps('js/pratiques/pratique-sommative.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         expect(deux(corps('js/pratiques/pratique-configurable.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
         expect(deux(corps('js/pratiques/pratique-pan-standards.js', '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))).toBe(true);
@@ -328,7 +328,7 @@ describe('D · un seul endroit pour chaque règle — aucun site ne recopie « n
         ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-configurable.js', 'js/pratiques/pratique-pan-standards.js'].forEach(fichier =>
             expect([fichier, /evaluationNonRemise\(|evaluationNonRecevable\(/.test(corps(fichier, '    calculerDetailsCompletion(da) {', '    calculerCompletion(da) {'))]).toEqual([fichier, false]));
         const snapshots = sansCommentaires(source('js/snapshots.js'));
-        expect((snapshots.match(/window\.evaluationCompteCommeRemise\(e\)/g) || []).length).toBe(2);
+        expect((snapshots.match(/window\.evaluationCompteCommeRemise\(e, evaluations(Cache)?\)/g) || []).length).toBe(2);
         // Lot N2 (#716, 22 sept. 2026) : le troisième lecteur — le filtre du repli du P historique — est parti avec
         // le repli. Le P historique est la note du cours : il lit les copies par les accesseurs de la pratique.
         expect((snapshots.match(/window\.evaluationNonRecevable\(e\)\) return false/g) || []).length).toBe(0);

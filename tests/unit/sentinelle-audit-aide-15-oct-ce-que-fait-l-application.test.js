@@ -275,7 +275,7 @@ describe('Les gestes décrits sont ceux du code', () => {
         // Le code : la complétion de chaque famille qui compte des productions lit la règle unique de la remise
         // (25 oct. 2026), et cette règle écarte une copie non recevable.
         for (const f of ['js/pratiques/pratique-sommative.js', 'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-configurable.js']) {
-            expect(lire(f), f).toContain('window.evaluationCompteCommeRemise(e)');
+            expect(lire(f), f).toContain('window.evaluationCompteCommeRemise(e, evaluations)');   // E15 (28 oct. 2026) : avec la liste où chercher la reprise
         }
         expect(tranche(lire('js/pratiques/pratique-registre.js'), 'function evaluationCompteCommeRemise(', 'function compterEvaluationsEcarteesDeLaNote(')).toContain('if (evaluationNonRecevable(evaluation)) return false;');
         const carte = tranche(AIDE, 'Travail NON RECEVABLE', 'Travail SOUPÇONNÉ');

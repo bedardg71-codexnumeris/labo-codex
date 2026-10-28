@@ -905,17 +905,35 @@ function _lireEvaluationsDuCalcul() {
     return (typeof db !== 'undefined' && typeof cle === 'function') ? (db.getSync(cle('evaluationsSauvegardees'), []) || []) : [];
 }
 
-// Un index par tableau lu : pendant un lot de calculs, le lecteur rend le même tableau, indexé une fois.
-const _indexParListe = new WeakMap();
+// Retouche E4 (mesure du 28 oct. 2026) — L'INDEX NE SURVIT PAS AU LOT QUI L'A CONSTRUIT. Hors cours actif,
+// `obtenirDonneesSelonMode` rend la référence de `db.getSync`, et `memoryCache` rend la même d'un appel à l'autre ;
+// `appliquerJetonReprise` (evaluation-jetons.js) modifie CE tableau en place (`remplaceeParId` posé, `push` de la
+// reprise) puis le réécrit. Un index gardé par tableau y lisait la reprise « introuvable » : l'originale sortait de la
+// note. D'où : un index par lot de calculs (`jetonCacheLecture`, modes.js : un objet neuf à chaque lot) ou par jeu
+// simulé (le Comparateur, le P des snapshots : des tableaux construits pour le calcul) ; partout ailleurs, reconstruit
+// à chaque lecture. Les trois lots (indices.js, portfolio.js, tableau-bord-apercu.js) sont synchrones et n'écrivent
+// pas les évaluations : rien ne modifie le tableau pendant leur durée.
+const _indexParLot = new WeakMap();
 function _indexDesEvaluations(liste) {
     if (!Array.isArray(liste)) return new Map();
-    let index = _indexParListe.get(liste);
+    const lot = _lotQuiGardeLIndex(liste);
+    let parListe = lot ? _indexParLot.get(lot) : null;
+    let index = parListe ? parListe.get(liste) : null;
     if (!index) {
         index = new Map();
         liste.forEach(e => { if (e && e.id) index.set(e.id, e); });
-        _indexParListe.set(liste, index);
+        if (lot) {
+            if (!parListe) { parListe = new WeakMap(); _indexParLot.set(lot, parListe); }
+            parListe.set(liste, index);
+        }
     }
     return index;
+}
+
+function _lotQuiGardeLIndex(liste) {
+    const simule = typeof obtenirDonneesSimulationOuNull === 'function' ? obtenirDonneesSimulationOuNull('evaluationsSauvegardees') : null;
+    if (simule === liste) return liste;
+    return typeof jetonCacheLecture === 'function' ? jetonCacheLecture() : null;
 }
 
 /**
@@ -1031,16 +1049,18 @@ function evaluationTravailEnCours(evaluation) {
  * configurable, STD, et les deux des snapshots). Une copie qui compte (#706), qui n'est ni non remise
  * ni non recevable ; ou une copie « Incomplet ; travail en cours » non remplacée (l'élève a remis à
  * temps, le délai vient de l'enseignant : Grégoire, 25 oct. 2026). Une non recevable ne l'est jamais.
+ * E15 (décision de Grégoire, 28 oct. 2026, 15 h 22) : l'originale gardée qui compte dans la note (E4) compte aussi
+ * comme remise, jusqu'à ce que sa reprise la remplace ; l'élève a remis ce travail. Se lit au calcul.
  * @param {Object} evaluation
+ * @param {Array} [evaluations] - la liste où chercher la reprise d'une originale gardée (sinon : le stockage)
  * @returns {boolean}
  */
-function evaluationCompteCommeRemise(evaluation) {
-    // E4 (28 oct. 2026) ne touche que la NOTE : une originale gardée, qui compte maintenant jusqu'à la réévaluation de
-    // sa reprise, n'est toujours pas une remise pour l'indice C pendant cette fenêtre (inchangé ; question posée au relais).
-    if (!evaluation || evaluation.remplaceeParId) return false;
+function evaluationCompteCommeRemise(evaluation, evaluations) {
+    if (!evaluation) return false;
+    if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;
     if (evaluationNonRecevable(evaluation)) return false;
     if (evaluationTravailEnCours(evaluation)) return true;
-    return evaluationEntreDansLaNote(evaluation) && !evaluationNonRemise(evaluation);
+    return evaluationEntreDansLaNote(evaluation, evaluations) && !evaluationNonRemise(evaluation);
 }
 
 /**

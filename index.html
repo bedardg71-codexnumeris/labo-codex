@@ -11567,7 +11567,7 @@
     <script src="js/navigation.js?v=20261018a"></script> <!-- « Apporter mon matériel » lot 1 (16 oct.) : info-bulle du sous-onglet (autorisation de Grégoire) · #345 (22 juin) : filtre comparateur sous-nav Labo ; Refonte nav SP5 : tables migrées calendrier-* + nav-calendrier-* -->
     <script src="js/preferences.js?v=20261025b"></script> <!-- #1149 (24 oct.) : défaut afficherChainesEtapes · Lot 2 de la carte (8 oct.) : défaut planifReserveDisposition retiré · API centralisée préférences + migration V3 (doit précéder modes.js) ; #485 : défaut rapportPresencesOptions -->
 
-    <script src="js/modes.js?v=20261027a"></script> <!-- #1038 (26 oct.) : productionsRangeesAilleurs, la condition de la ligne sous « Production » · #1075, point 2 (22 oct.) : un trimestre clos ne s’écrit pas · Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
+    <script src="js/modes.js?v=20261027b"></script> <!-- Retouche E4 (28 oct.) : jetonCacheLecture, l’index des évaluations vit le temps d’un lot · #1038 (26 oct.) : productionsRangeesAilleurs, la condition de la ligne sous « Production » · #1075, point 2 (22 oct.) : un trimestre clos ne s’écrit pas · Lot E1 de l'enregistrement : modifierEtAnnoncer, le témoin pour les écritures par db.modifier · Refonte nav SP5 : commentaire et clé calendrier-trimestre ; #851 vue « tous groupes » -->
     <script src="js/utils-notifications.js?v=20260521a"></script> <!-- Cat-B Track 4 chantier E (21 mai 2026) : source unique notifications toast — window.notifications.{succes,erreur,info} -->
     <script src="js/temoin-enregistrement.js?v=20261006a"></script> <!-- Lot B de l'enregistrement (27 sept. 2026) : témoin commun « Enregistré » / « Non enregistré » · lot F : émet donnees-enregistrees pour le codex -->
     <script src="js/ui-dialogues.js?v=20261012a"></script> <!-- #315/#316 : modales async réutilisables — window.uiDialogues.{confirmerAction,demanderSaisie} (remplace confirm()/prompt() natifs) -->
@@ -11668,13 +11668,13 @@
     <!-- #717 : éditeur des cibles DEN, commun à l'assistant et à la gestion des pratiques -->
     <script src="js/pratiques/editeur-cibles.js?v=20261004b"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
-    <script src="js/pratiques/pratique-configurable.js?v=20261027b"></script>
-    <script src="js/pratiques/pratique-registre.js?v=20261027c"></script>
+    <script src="js/pratiques/pratique-configurable.js?v=20261027c"></script>
+    <script src="js/pratiques/pratique-registre.js?v=20261027d"></script>
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
-    <script src="js/pratiques/pratique-pan-standards.js?v=20261027b"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=20261027b"></script>
+    <script src="js/pratiques/pratique-pan-standards.js?v=20261027c"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=20261027c"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=20261027a"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
@@ -11714,7 +11714,7 @@
     <script src="js/profil-etudiant-diagnostics.js?v=20261022b"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20261027b"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20261025k"></script> <!-- #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20261027a"></script> <!-- E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20261022b"></script>
     <script src="js/presences-rapport.js?v=20261022b"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20261008a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
@@ -11799,9 +11799,9 @@
     <script src="js/partage-section.js?v=20261025c"></script> <!-- #1156 (25 oct.) : genererSectionHTML retirée, rangeesDeuxColonnes seule · #1154 (25 oct.) : rangeesDeuxColonnes, « Partagés par des collègues » en données · #1075, point 9 (22 oct.) : l’échelle partagée d’une pratique -->
     <script src="js/import-export.js?v=20261027b"></script> <!-- #1135 (21 oct.) : étape 0, un critère algorithmique neuf ne reçoit plus les codes du français · #1120, lot 1 (20 oct.) : le barème d’un critère à l’import (numberOrNull) · « Apporter mon matériel » lot 1 (16 oct.) : descripteurs au schéma d'import, rebranchés au partage · #1028 (5 oct., verdict) : copie sans fichier, fusion, notifications · #1028 (5 oct.) : les copies aux archives · #1012 (2 oct.) : les copies d'un ancien fichier ouvert par la case s'ajoutent à celles de l'espace · Lot I bis (1er oct.) : un codex choisi dans la case « Ouvrir un Codex » part au codex, avant la limite de taille et sans lecture complète · Lot I bis (30 sept.) : la fenêtre des clés et son export retirés ; un ancien fichier s'ouvre toujours · Fusion #374 : journeesSansCours + noms hérités en lecture (5 août) · schéma d'échelle complété (audit du 28 août) -->
     <script src="js/codex.js?v=20261025a"></script> <!-- 24 oct. : l’aperçu dit « Mettre à jour le codex », et « Écrire le codex à part » pour le codex à part · #1075, point 4 (22 oct.) : le geste « copieRemplacee » · #976 : la fenêtre du codex dit « corriger » pour un déplacement · #1028 (5 oct.) : les copies aux archives · Lot I bis (1er oct.) : ouvrirFichier (un fichier déjà choisi, même chemin que le menu) et estUnFichierDeCodex (par le répertoire du ZIP) · Lot A1 (30 sept.) : l'assemblage, le téléchargement et sa confirmation vivent dans fichier-sortant.js · Lot J0 ter (#988) : le message d'attente avant la feuille de partage (30 sept.) · Lot J0 bis (#988) : toucher expiré avant le partage, la fenêtre « Ton codex est prêt » (30 sept.) · Lot J0 (#988) : le fichier du codex est assemblé sans faire passer les copies par la mémoire (30 sept.) · Lot F (D4) : le témoin du codex dit vrai ; l'enregistrement automatique retiré (Grégoire, 29 sept.) · #614 : la fusion valide les magic bytes -->
-    <script src="js/liste-evaluations.js?v=20261027d"></script> <!-- #1174 (27 oct.) : « Mettre à la corbeille (N) » dans la barre de sélection · #1075, point 1 (22 oct.) : le DA affiché en anonymisation, menu Étudiant·e des Propriétés · #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
+    <script src="js/liste-evaluations.js?v=20261027e"></script> <!-- E16 (28 oct.) : « Compte jusqu’à sa reprise » sur l’originale pendant la fenêtre · #1174 (27 oct.) : « Mettre à la corbeille (N) » dans la barre de sélection · #1075, point 1 (22 oct.) : le DA affiché en anonymisation, menu Étudiant·e des Propriétés · #934 (22 sept.) : « Réassigner la sélection » en masse — cases, barre, question groupée qui nomme fichiers et conflits ; #932 : Propriétés montre la copie -->
     <script src="js/journal.js?v=20261022a"></script>
-    <script src="js/snapshots.js?v=20261025k"></script> <!-- #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
+    <script src="js/snapshots.js?v=20261027a"></script> <!-- E15 (28 oct.) : la remise pour C cherche la reprise dans la liste lue · #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
     <script src="js/graphiques-progression.js?v=20261027b"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
     <script src="js/correlations-longitudinales.js?v=20261022b"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->

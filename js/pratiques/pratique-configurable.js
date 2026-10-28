@@ -363,12 +363,15 @@ class PratiqueConfigurable {
      *
      * Contrat (SPEC §5.1) :
      *  - aucune saisie → null (« non calculable » : pas encore jugé, pas un zéro) ;
+     *  - E14 (décision de Grégoire, 28 oct. 2026, 15 h 11) : une saisie SANS note (champ « Note finale » vide :
+     *    les cibles se cochent peu à peu) → null aussi, jamais 0. Se lit au calcul : un jugement déjà
+     *    enregistré sans note passe de 0 à « non calculable » sans réécriture. Une note saisie de 0 reste 0 ;
      *  - garde « cibles atteintes » (DEN-B) : si une cible n'est pas confirmée
      *    atteinte, la certification est plafonnée à 59 (RREC échec), jamais ≥ 60 —
      *    la garde CONDITIONNE la certification, elle ne fabrique pas la note ;
      *  - toutes cibles confirmées → la note saisie telle quelle (≥ 60 attendue).
      *
-     * RREC : dès qu'une saisie existe, produit TOUJOURS un chiffre (59 ou la note),
+     * RREC : dès qu'une note est saisie, produit TOUJOURS un chiffre (59 ou la note),
      * jamais « pas de note ». DEN abandonne le TRI, garde la CERTIFICATION.
      *
      * @param {string} da - DA de l'étudiant
@@ -394,7 +397,9 @@ class PratiqueConfigurable {
         const toutesAtteintes = cibles.length > 0
             && cibles.every(cible => confirmations[cible.id] === true);
 
-        const note = (typeof saisie.noteFinale === 'number') ? saisie.noteFinale : 0;
+        // E14 : sans note saisie, rien à garder ni à plafonner : non calculable, comme sans jugement.
+        if (typeof saisie.noteFinale !== 'number' || !Number.isFinite(saisie.noteFinale)) return null;
+        const note = saisie.noteFinale;
 
         if (!toutesAtteintes) {
             // Non certifié : plafonné à 59 (RREC échec), jamais ≥ 60.
@@ -637,7 +642,7 @@ class PratiqueConfigurable {
             remis: evaluations.some(e =>
                 e.etudiantDA === da &&
                 e.productionId === production.id &&
-                window.evaluationCompteCommeRemise(e)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
+                window.evaluationCompteCommeRemise(e, evaluations)   // lot 30 (17 sept.) et le statut incomplet (25 oct. 2026) : la règle de pratique-registre.js
             )
         }));
 
