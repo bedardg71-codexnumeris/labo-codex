@@ -84,7 +84,9 @@ describe('#1152 lot 2c bis · le Suivi', () => {
     });
 
     it('aucune entrée du Suivi ne parle de l\'ancien écran, de l\'onglet « Aperçu » ni du risque', () => {
-        const interdits = /sidebar|barre latérale|3 sections|voir formules|navigation : aperçu|risque|Préc\.|Suiv\./i;
+        // Retouche du 28 oct. (verdict de Cowork) : « seul endroit » était faux (la Liste se trie par colonnes, etudiants.js) ;
+        // « urgence » est le nom d'une fonction, le vocabulaire qui jugeait l'élève (#821).
+        const interdits = /sidebar|barre latérale|3 sections|voir formules|navigation : aperçu|risque|seul endroit|urgence|Préc\.|Suiv\./i;
         const fautives = SUIVI.map((id) => [id, texteDe(id)])
             .filter(([, t]) => interdits.test(t))
             .map(([id, t]) => `${id} : ${t.match(interdits)[0]}`);
@@ -217,6 +219,27 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         const t = texteDe('tableau-bord');
         expect(t).toContain(`« P < 65 % », « A ou C < ${critique} % », « Suivi » et « RàI 2-3 »`);
         expect(t).toContain('Navigation : Suivi → Suivi du groupe');
+        // Les mots de Grégoire (28 oct., 12 h 07) ⟷ le tri de `appliquerFiltres` : sans filtre, l'ordre alphabétique ; avec
+        // filtres, un score qui s'ADDITIONNE d'un filtre à l'autre (« cumulent ») et range le plus grand en tête.
+        const filtrer = tranche(tdb, 'function appliquerFiltres(', '\nfunction ');
+        const sansFiltre = tranche(filtrer, 'if (_filtresActifs.length === 0)', 'return;');
+        expect(sansFiltre).toMatch(/localeCompare/);
+        expect(filtrer).toMatch(/for \(var i = 0; i < _filtresActifs\.length; i\+\+\)/);
+        expect((filtrer.match(/score \+= /g) || []).length).toBe(4);
+        expect(filtrer).toMatch(/var diff = urgence\(b\) - urgence\(a\);/);
+        expect(t).toContain('se combinent : ils ne gardent que les étudiant·es qui répondent à tous, et mettent en tête ceux qui cumulent les plus grands écarts ; sans filtre, l\'ordre est alphabétique.');
+    });
+
+    it('les quatre titres neufs sont ceux que Grégoire a validés (28 oct. 2026, 12 h 07, « on garde »)', () => {
+        const titre = (id) => net(entree(id).querySelector('h3').textContent).replace(/^▼ /, '');
+        expect(['tableau-bord', 'profil-etudiant', 'diagnostics', 'tirage-sort'].map(titre)).toEqual([
+            'Consulter le suivi du groupe', 'Lire le profil d\'un·e étudiant·e', 'Les mots qui décrivent A et C',
+            'Questions flash, tirage au sort et équipes',
+        ]);
+        for (const id of ['tableau-bord', 'profil-etudiant', 'diagnostics', 'tirage-sort']) {
+            const avant = html.slice(0, html.indexOf(`id="accordeon-aide-${id}"`));
+            expect(avant.slice(avant.lastIndexOf('<!--')), id).toContain('validé par Grégoire le 28 oct. 2026 à 12 h 07');
+        }
     });
 
     it('planifier-rai : la case de report et ses mots sont ceux de l\'écran ; la durée par défaut est celle du champ', () => {
