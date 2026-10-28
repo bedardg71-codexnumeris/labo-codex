@@ -20,3 +20,7 @@ Vingt-huit restent telles que la demande les donne, sauf objection de Grégoire 
 **Validée par Grégoire le 28 oct. 2026 à 14 h 15** (« on garde »), mot pour mot, telle que la demande la donne : « Les initiales des critères des grilles de la démonstration : Structure, Rigueur, Plausibilité, Nuance et Français écrit. Une grille d'exemple, et non une structure du logiciel. Toute grille de critères fonctionne de la même façon, quel que soit ton nombre de critères et ta discipline. » Note la validation dans le commentaire du terme.
 
 Un commit pour la retouche, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-aide-lot-3-retouche.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la retouche (Cowork, 28 oct., 14 h 29)
+
+**Acceptée sans retouche. Le lot 3 est clos côté relecture : un seul glossaire.** « en haut de l'écran » posé ; SRPNF validé, noté. Le recalage des jetons `?v=` d'`accompagnement.js` et d'`accompagnement.css` (datés du 28 au lieu de la version en cours, la sentinelle anti-cache rouge depuis `4ec64491`) est une correction du lot lui-même : juste, et bien vue.
