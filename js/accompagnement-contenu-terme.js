@@ -590,6 +590,7 @@ const GLOSSAIRE = {
 
     'srpnf': {
         cle: 'srpnf',
+        // Validé par Grégoire le 28 oct. 2026, 14 h 15 (« on garde »), mot pour mot (#1152, lot 3) : sa grille de référence, une grille d'exemple.
         terme: 'SRPNF',
         categorie: 'Structure',
         etape: 'numerisation',
@@ -667,7 +668,7 @@ const GLOSSAIRE = {
         terme: 'Codex (le fichier)',
         categorie: 'Données',
         etape: 'interface',
-        definition: 'Ton codex est un fichier .zip qui rassemble tes données et les fichiers des travaux. Il ne change qu’à « Mettre à jour le codex », dans le menu Codex, en haut à gauche de l’écran. C’est lui qui te rend tes données si le navigateur les perd, et qui les porte d’un appareil à l’autre.',
+        definition: 'Ton codex est un fichier .zip qui rassemble tes données et les fichiers des travaux. Il ne change qu’à « Mettre à jour le codex », dans le menu Codex, en haut de l’écran. C’est lui qui te rend tes données si le navigateur les perd, et qui les porte d’un appareil à l’autre.',
         voir: 'En-tête › Codex'
     },
 
