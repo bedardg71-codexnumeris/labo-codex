@@ -38,6 +38,12 @@ function creerStockage(fichiers) {
     };
 }
 
+// #1175, quatrième retouche (28 oct. 2026) — le VRAI prédicat du registre, comme index.html le charge avant les jetons.
+const REGISTRE = (() => {
+    const win = chargerScript('js/pratiques/pratique-configurable.js', {});
+    return chargerScript('js/pratiques/pratique-registre.js', { PratiqueConfigurable: win.PratiqueConfigurable }, win);
+})();
+
 /** evaluation-jetons.js RÉEL ; configuration des jetons = défauts du module (délai 2/élève, reprise 2, 1 par production). */
 function monter({ evaluations, fichiers = [], retourEcriture = true }) {
     const stores = { evaluationsSauvegardees: evaluations.map(e => JSON.parse(JSON.stringify(e))) };
@@ -56,6 +62,7 @@ function monter({ evaluations, fichiers = [], retourEcriture = true }) {
         },
         confirm: () => true,
         genererIdUnique: (p) => p + 'NEUF',
+        evaluationNonRecevable: REGISTRE.evaluationNonRecevable,
         travauxStockage
     };
     const win = chargerScript('js/evaluation-jetons.js', globaux);
@@ -132,7 +139,7 @@ describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise n
             'statutIntegrite', 'notesIntegrite']) {
             expect(r[champ], champ).toBeUndefined();
         }
-        expect(r.noteFinale).toBe(55);
+        expect(r.noteFinale, '↻ quatrième retouche : la reprise d\'une non recevable part vide (essai suivant)').toBeUndefined();
         expect(r.repriseDeId).toBe('EVAL_O');
         expect(r.jetonRepriseApplique).toBe(true);
         // L'originale, elle, garde son délai : c'est le jeton réellement accordé.
@@ -141,6 +148,35 @@ describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise n
         expect([o.statutIntegrite, o.notesIntegrite], 'l\'originale garde son statut et ses preuves').toEqual(['plagiat', 'Preuves fictives.']);
         expect(o.remplaceeParId).toBe(r.id);
     });
+
+    // ↻ #1175, quatrième retouche (relecture de Cowork, 28 oct. 2026, 8 h 20) — les niveaux d'une copie non recevable ne se
+    // lisent nulle part (décision de Grégoire, 6 h 46) : sa reprise part vide. Une reprise ordinaire part des niveaux de l'originale.
+    const EVALUEE = { etudiantDA: DA, noteFinale: 87.5, niveauFinal: 'M', ponderationCouverte: 100,
+        criteres: [{ critereId: 'c1', niveauSelectionne: 'E', retroaction: 'Fictive.' }, { critereId: 'c2', niveauSelectionne: 'M', retroaction: '' }],
+        pointsAnalytiques: { c1: 9 }, donneesAlgorithmiques: { c2: { erreurs: 3, mots: 300 } },
+        retroactionFinale: 'Rétroaction fictive.', retroactionReecrite: true, grilleId: 'G1', echelleId: 'E1', cartoucheId: 'K1' };
+    const VIDE = { criteres: [], pointsAnalytiques: {}, donneesAlgorithmiques: {}, noteFinale: undefined, niveauFinal: undefined,
+        ponderationCouverte: undefined, retroactionFinale: undefined, retroactionReecrite: undefined };
+    for (const statut of ['plagiat', 'ia']) {
+        it(`« ${statut} » : la reprise part vide (niveaux, note, niveau final, portée, points, comptes, rétroaction) ; grille, échelle et cartouche restent ; l'originale ne bouge pas`, async () => {
+            const origine = Object.assign({ id: 'EVAL_O', productionId: P, statutIntegrite: statut }, JSON.parse(JSON.stringify(EVALUEE)));
+            const b = monter({ evaluations: [origine] });
+            const r = await b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
+            expect(r).not.toBeNull();
+            expect(Object.fromEntries(Object.keys(VIDE).map(k => [k, r[k]]))).toEqual(VIDE);
+            expect([r.grilleId, r.echelleId, r.cartoucheId]).toEqual(['G1', 'E1', 'K1']);
+            const o = b.stores.evaluationsSauvegardees.find(e => e.id === 'EVAL_O');
+            for (const k of Object.keys(VIDE)) expect(o[k], 'originale · ' + k).toEqual(origine[k]);
+        });
+    }
+    for (const statut of ['recevable', undefined]) {
+        it(`témoin « ${statut} » : la reprise part des niveaux, de la note et de la rétroaction de l'originale`, async () => {
+            const origine = Object.assign({ id: 'EVAL_O', productionId: P, statutIntegrite: statut }, JSON.parse(JSON.stringify(EVALUEE)));
+            const b = monter({ evaluations: [origine] });
+            const r = await b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
+            for (const k of Object.keys(VIDE)) expect(r[k], k).toEqual(origine[k]);
+        });
+    }
 
     it('quota de délais compté juste après une reprise : 1 utilisé sur 2, un nouveau délai reste possible ailleurs', async () => {
         const b = monter({ evaluations: [
