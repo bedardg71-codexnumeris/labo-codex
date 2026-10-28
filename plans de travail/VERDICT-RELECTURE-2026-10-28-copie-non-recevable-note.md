@@ -42,3 +42,16 @@ Le point 4 de la demande (les copies déjà marquées suivent la règle) n'est p
 3. **Le bilan d'une copie postérieure** (PDF et écran, `historiqueAnterieur`) : une copie non recevable antérieure n'y entre pas (« Points récurrents », « Progrès ») ; ses niveaux ne se lisent nulle part ailleurs. Retire ce septième site de #1176, où il avait été versé : il relève de la décision 1, pas du réglage.
 
 Un commit pour le code, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-copie-non-recevable-note-retouche-2.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la seconde retouche (Cowork, 28 oct., 7 h 33)
+
+> Sur `main` = `d072ca6c`. Lu : la demande de relecture de la seconde retouche, le diff de `301da325` (CSS du formulaire, `_celluleNiveau`, le badge de reprise, `historiqueAnterieur`).
+
+**Acceptée.** Les trois endroits sont tenus ; le badge « Reprise » d'une originale non recevable entre à bon droit dans le lot (même décision, même code). La supposition sur les cartes masquées entières est retenue (décision de Cowork : une étiquette « Niveau » sans rien dessous ne vaut pas mieux).
+
+**Troisième retouche, courte (Claude Code)** :
+
+1. **Une reprise naît « Recevable ».** Lu par Cowork : `appliquerJetonReprise` (`js/evaluation-jetons.js:571-593`) recopie l'originale et retire une liste de champs, sans `statutIntegrite` ni `notesIntegrite`. Depuis `c177cc36`, le statut fait la note et l'affichage : une reprise accordée après un plagiat vaudrait 0 et se montrerait « Non recevable ». C'est une conséquence de ce lot, donc le lot (décision de Cowork) : ajoute `statutIntegrite` et `notesIntegrite` aux champs retirés ; la reprise est une nouvelle remise, que rien n'a encore jugée. **Mesure d'abord** à l'écran sur un banc fictif (plagiat, puis jeton de reprise) ; essai qui rougit sans le correctif. Le stock (une reprise déjà créée avec le statut de son originale) n'est pas réécrit : la question est posée à Grégoire pour ses données.
+2. **La colonne « Statut » de la Liste** dit « 0 » pour une copie non recevable (`js/liste-evaluations.js`, `affichageNiveau`) : en standards, ce 0 est faux, et la décision de 6 h 46 ne montre ni note ni niveau. Elle dit « -- », comme la note et le niveau (décision de Cowork).
+
+Un commit pour le code, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-copie-non-recevable-note-retouche-3.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
