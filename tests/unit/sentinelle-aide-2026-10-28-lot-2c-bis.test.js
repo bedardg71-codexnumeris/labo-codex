@@ -75,6 +75,8 @@ describe('#1152 lot 2c bis · le Suivi', () => {
         const bloc = lire('js', 'config.js').match(/'suivi': \[([\s\S]*?)\]/)[1];
         const onglets = [...bloc.matchAll(/label: '([^']+)'/g)].map((m) => m[1]);
         expect(onglets).toContain('Profils individuels');
+        // Note (#1152, lot 2d, 28 oct. 2026) : cet essai lit l'ordre de la constante SUIVI, pas celui de la page ; l'essai
+        // précédent, qui lit la page, couvre l'ordre. Sans conséquence aujourd'hui.
         const rangs = SUIVI.map((id) => texteDe(id).match(/Navigation : Suivi → (.+?)(?:,|$| [A-ZÀ-Ý«])/))
             .filter(Boolean)
             .map((m) => onglets.findIndex((o) => m[1].startsWith(o)));
