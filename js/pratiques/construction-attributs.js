@@ -257,13 +257,13 @@
     // « plafonnement ». Rien ne les applique (l'assistant ne collectait pas de quoi), et
     // cette table les annonçait « Actif ». Une pratique ancienne peut encore PORTER leurs
     // clés (on n'efface pas ses données) : elles sont tues, pas rendues en mot brut.
-    var REGLES_RETIREES = ['remplacement', 'plafonnement'];
+    // ⮕ E2 (28 oct. 2026, décision de Grégoire) — « Portfolio de progression » (`portfolio`) les rejoint : aucun
+    // calcul ne la lisait (SOM-C11). Tue à l'affichage, gardée dans les données de la pratique.
+    var REGLES_RETIREES = ['remplacement', 'plafonnement', 'portfolio'];
     var REGLES_SOMMATIVES = {
         double_verrou: { axe: 'regleVerrou', libelle: 'Verrou sur une évaluation',
                          valeur: 'Actif (une évaluation doit être réussie)',
-                         parametre: 'determination' },
-        portfolio:     { axe: 'reglePortfolio', libelle: 'Portfolio de progression',
-                         valeur: 'Actif', parametre: 'objet' }
+                         parametre: 'determination' }
     };
 
     /**

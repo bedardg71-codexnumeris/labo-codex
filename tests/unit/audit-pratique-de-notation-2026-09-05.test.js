@@ -542,7 +542,7 @@ describe('N1a · la pratique active se trouve d\'une seule façon', () => {
         expect(m.etat).toBe('ok');
         expect(m.profil).toBe(79.45);
         expect(m.indice).toEqual({ P: 79, noteConstructible: true, pratique: 'standards' });
-        expect(m.export).toEqual({ id: 'standards', note: 79, statut: 'final' });   // même statut que B2 (pratique assignée par son id)
+        expect(m.export).toEqual({ id: 'standards', note: 79, statut: 'provisoire' });   // même statut que B2 (pratique assignée par son id) ; E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(b.store.test_groupesCours[0].pratiqueId).toBe('pan-standards');          // lecture tolérante : le pointeur n'est PAS réécrit
     });
 
@@ -573,18 +573,18 @@ describe('N1a · la pratique active se trouve d\'une seule façon', () => {
         const m = noter('N6', quatreSurfaces(b, DA.DEN));
         expect(m.indice).toEqual({ P: 78, noteConstructible: true, pratique: 'den-banc' });
         expect(m.profil).toBeNull();                       // pas de note « portfolio » pour une dénotation : le profil rend sa carte de jugement
-        expect(m.export).toEqual({ id: 'den-banc', note: 78, statut: 'final' });
+        expect(m.export).toEqual({ id: 'den-banc', note: 78, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(m.raisonNiveau).toBe('note-chiffree');     // la pratique ASSIGNÉE répond (la configurable de dénotation)
         const lettre = b.win.lireNiveauNoteGlobale(DA.DEN, 78);
         expect(lettre.niveau).toBeNull();
         expect(lettre.raison).toBe('note-chiffree');
     });
 
-    it('N7 · le pointeur « sommative » nu reste une pratique assignée (la seule famille du registre sans configuration) : 87 partout, comme avant', () => {
+    it('N7 · le pointeur « sommative » nu reste une pratique assignée (la seule famille du registre sans configuration) : 88 partout (87 avant E1)', () => {
         const m = noter('N7', quatreSurfaces(monter(jeuSOM(), { pratiqueId: 'sommative' }), DA.SOM));
         expect(m.etat).toBe('ok');
-        expect(m.indice).toEqual({ P: 87, noteConstructible: true, pratique: 'sommative' });
-        expect(m.export.note).toBe(87);
+        expect(m.indice).toEqual({ P: 88, noteConstructible: true, pratique: 'sommative' });   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (87,6)
+        expect(m.export.note).toBe(88);
     });
 });
 
@@ -671,17 +671,17 @@ describe('N7 · le niveau de la note globale : la règle des évaluations, et el
    B · LES DEUX SYSTÈMES DE CALCUL, PAR FAMILLE — le nœud
    ============================================================================================= */
 describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, le profil', () => {
-    it('B1 · SOM — attendu 87,43 : (84×40 + 90×60 + 70×1) / (40+60+1) = 8830/101 (↻ #706 : le brouillon 0 est écarté ; avant 8830/102 = 86,57) ; P 0,87 ; profil et export « 87 »', () => {
+    it('B1 · SOM — attendu 87,6 : (84×40 + 90×60) / (40+60) = 8760/100 (↻ E1, 28 oct. 2026 : l\'Exercice à pondération 0 n\'entre plus ; avant 8830/101 = 87,43 ; ↻ #706 : le brouillon 0 est écarté ; avant 8830/102 = 86,57) ; P 0,88 ; profil et export « 88 »', () => {
         const b = monter(jeuSOM());
         const m = noter('B1', mesurerEleve(b, DA.SOM, 'som-banc'));
         expect(m.famille).toBe('SOM');
         expect(m.riche).toBeNull();                       // le chemin riche ne répond pas pour SOM
-        expect(m.registreP).toBe(0.87);                   // 0,8657 arrondi au centième
-        expect(m.configurableP).toBe(0.87);
-        expect(m.simule).toEqual({ P: 87, noteFinale: null, noteConstructible: true });
-        expect(m.indicesPasse1).toEqual({ P: 87, noteConstructible: true });  // ↻ #709 : juste dès la 1re passe (avant : { P: 0, noteConstructible: true }, voir F1)
-        expect(m.indicesPasse2).toEqual({ P: 87, noteConstructible: true });
-        expect(m.export).toEqual({ note: 87, statut: 'final' });
+        expect(m.registreP).toBe(0.88);                   // 0,876 arrondi au centième (E1 ; avant 0,87)
+        expect(m.configurableP).toBe(0.88);
+        expect(m.simule).toEqual({ P: 88, noteFinale: null, noteConstructible: true });
+        expect(m.indicesPasse1).toEqual({ P: 88, noteConstructible: true });  // ↻ #709 : juste dès la 1re passe (avant : { P: 0, noteConstructible: true }, voir F1)
+        expect(m.indicesPasse2).toEqual({ P: 88, noteConstructible: true });
+        expect(m.export).toEqual({ note: 88, statut: 'provisoire' });   // E1 (avant 87) ; E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(m.profilNiveau).toBeNull(); expect(m.profilRaison).toBe('note-chiffree');
     });
 
@@ -694,7 +694,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         expect(m.configurableP).toBe(0.79);               // lu dans indicesCP (après deux passes) — un cache
         expect(m.simule).toEqual({ P: 79, noteFinale: 79.45, noteConstructible: true });
         expect(m.indicesPasse2).toEqual({ P: 79, noteConstructible: true });
-        expect(m.export).toEqual({ note: 79, statut: 'final' });
+        expect(m.export).toEqual({ note: 79, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(m.profilNiveau).toBe('M');
     });
 
@@ -753,7 +753,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         expect(m.configurableP).toBe(0.7);
         expect(m.simule).toEqual({ P: 70, noteFinale: null, noteConstructible: true });
         expect(m.indicesPasse2).toEqual({ P: 70, noteConstructible: true });
-        expect(m.export).toEqual({ note: 70, statut: 'final' });
+        expect(m.export).toEqual({ note: 70, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(m.profilNiveau).toBeNull(); expect(m.profilRaison).toBe('pratique-sans-methode');
     });
 
@@ -765,7 +765,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         expect(m.configurableP).toBe(0.78);
         expect(m.simule).toEqual({ P: 78, noteFinale: null, noteConstructible: true });
         expect(m.indicesPasse1).toEqual({ P: 78, noteConstructible: true });   // DEN court-circuite le cache : juste dès la 1re passe
-        expect(m.export).toEqual({ note: 78, statut: 'final' });
+        expect(m.export).toEqual({ note: 78, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         // ↻ Lot N1a (21 sept. 2026, #719) : plus de lettre « M » qu'aucune règle de la dénotation ne donne — voir E5.
         expect(m.profilNiveau).toBeNull();
         expect(m.profilRaison).toBe('note-chiffree');
@@ -806,15 +806,15 @@ describe('C · brouillon « 0 » à portée incomplète, brouillon « 95 sur 50 
         const jeu = jeuSOM(); jeu.evaluations = jeu.evaluations.filter(e => e.id !== 'EV_S4');
         const sans = monter(jeu);
         const m = noter('C1', { avec: r2(avec.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100), sans: r2(sans.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100) });
-        expect(m.avec).toBe(87.43);   // avant #706 : 86.57
-        expect(m.sans).toBe(87.43);
+        expect(m.avec).toBe(87.6);   // avant #706 : 86.57 ; avant E1 (28 oct. 2026) : 87,43
+        expect(m.sans).toBe(87.6);
     });
 
     it('C2 · SOM — le brouillon « 95 sur 50 % » est écarté (↻ #706) : 87,43 (avant : il comptait 95, (8830 + 95) / 102 = 87,5 — H-1 du premier audit)', () => {
         const jeu = jeuSOM(); Object.assign(jeu.evaluations.find(e => e.id === 'EV_S4'), BROUILLON95);
         const b = monter(jeu);
         const p = noter('C2', r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100));
-        expect(p).toBe(87.43);   // avant #706 : 87.5
+        expect(p).toBe(87.6);   // avant #706 : 87.5 ; avant E1 (28 oct. 2026) : 87,43
     });
 
     it('C3 · STD — le brouillon 0 entre dans le pool (écarté sous « meilleurs » N = 4) ; sous « tous », les DEUX systèmes prennent tout : 77,32 (↻ #715 ; avant : le riche tronquait à N, 76,75)', () => {
@@ -886,15 +886,15 @@ describe('D · SOM', () => {
         const b = monter(jeu);
         const recit = b.win.obtenirPratiqueParId('sommative').decrireCalcul(DA.SOM);
         noter('D2', { P: r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100), comptees: recit.resultats.filter(x => x.sort === 'compte').length });
-        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(79.65);   // avant #706 : 79.08
+        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(79.71);   // avant #706 : 79.08 ; avant E1 (28 oct. 2026) : 79,65 (11230/141 → 11160/140, l'Exercice à pondération 0 sort)
     });
-    it('D3 · production à pondération 0 ou sans pondération : poids 1, comptée (le « poids 1 » de #483) — récit « poids 1 % »', () => {
+    it('D3 · production à pondération 0 : n\'entre pas, nommée « pondération 0 · non comptée » (↻ E1, 28 oct. 2026 ; avant : poids 1, comptée, le « poids 1 » de #483). Sans pondération : poids 1, comme avant', () => {
         const b = monter(jeuSOM());
         const recit = b.win.obtenirPratiqueParId('sommative').decrireCalcul(DA.SOM);
         const p3 = recit.resultats.find(x => x.label === 'Exercice (pondération 0)');
         noter('D3', { detailP3: p3 && p3.detail });
-        expect(p3.sort).toBe('compte');
-        expect(p3.detail).toMatch(/poids 1\u00A0%/);
+        expect(p3.sort).toBe('ecarte');
+        expect(p3.detail).toBe('pondération 0 · non comptée');
     });
 });
 
@@ -906,13 +906,15 @@ describe('D · STD', () => {
         expect(r2(d.noteFinale)).toBe(77.32);   // avant #706 : 69.9
         expect(d.portfolio.nombreRetenus).toBe(5);   // avant : 6
     });
-    it('D5 · terminale absente des productions : note = pool seul 77,75, provisoire ; terminale présente non évaluée : 77,75, provisoire ; l\'export dit « provisoire »', () => {
+    it('D5 · terminale absente des productions : note = pool seul 77,75, non provisoire (E7, 28 oct. 2026 ; avant : provisoire) ; terminale présente non évaluée : 77,75, provisoire ; l\'export dit « provisoire »', () => {
         const sans = monter(jeuSTD({ sansTerminale: true }));
         const nonEval = monter(jeuSTD({ terminaleNonEvaluee: true }));
         const ds = sans.win.calculerDetailsNoteFinale(DA.STD), dn = nonEval.win.calculerDetailsNoteFinale(DA.STD);
         const l = nonEval.win._exportResultats.construireLignesSynthese([ETUDIANTS[1]], { pratiqueId: 'std-banc' }, nonEval.win.simulerIndices)[0];
         noter('D5', { sansTerminale: { note: r2(ds.noteFinale), provisoire: ds.estProvisoire, terminalePresente: ds.terminal.present }, nonEvaluee: { note: r2(dn.noteFinale), provisoire: dn.estProvisoire }, export: [l[8], l[9]] });
-        expect(r2(ds.noteFinale)).toBe(77.75); expect(ds.estProvisoire).toBe(true);
+        // E7, ajout de Cowork (28 oct. 2026, 14 h 55) : sans production terminale, rien n'est attendu — la note n'est plus
+        // provisoire pour cette raison (avant : true). Une terminale PRÉVUE non évaluée le reste (ci-dessous).
+        expect(r2(ds.noteFinale)).toBe(77.75); expect(ds.estProvisoire).toBe(false);
         expect(r2(dn.noteFinale)).toBe(77.75); expect(dn.estProvisoire).toBe(true);
         expect(l[9]).toBe('provisoire');
     });
@@ -954,7 +956,7 @@ describe('D · SPE', () => {
         const l = b.win._exportResultats.construireLignesSynthese([ETUDIANTS[2]], { pratiqueId: 'spe-gabarit' }, b.win.simulerIndices)[0];
         noter('D9', { configurableP: b.win.obtenirPratiqueParId('spe-gabarit').calculerPerformance(DA.SPE), indicesP: p.P, noteConstructible: p.noteConstructible, simule: { P: s.P, noteConstructible: s.noteConstructible }, export: [l[8], l[9]], recit: b.win.obtenirPratiqueParId('spe-gabarit').decrireCalcul(DA.SPE) });
         expect(p.P).toBe(60); expect(p.noteConstructible).toBe(true);   // avant #708 : P 0
-        expect(l[8]).toBe(60); expect(l[9]).toBe('final');               // avant #708 : [0, 'final']
+        expect(l[8]).toBe(60); expect(l[9]).toBe('provisoire');          // avant #708 : [0, 'final'] ; E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
     });
 });
 
@@ -1052,8 +1054,8 @@ describe('F · le zéro qui a l\'air d\'un résultat', () => {
         const s1 = som.win.calculerEtStockerIndicesCP()[DA.SOM].actuel, s2 = som.win.calculerEtStockerIndicesCP()[DA.SOM].actuel;
         const p1 = spe.win.calculerEtStockerIndicesCP()[DA.SPE].actuel, p2 = spe.win.calculerEtStockerIndicesCP()[DA.SPE].actuel;
         noter('F1', { SOM: [{ P: s1.P, c: s1.noteConstructible }, { P: s2.P, c: s2.noteConstructible }], SPE: [{ P: p1.P, c: p1.noteConstructible }, { P: p2.P, c: p2.noteConstructible }] });
-        expect([s1.P, s1.noteConstructible]).toEqual([87, true]);   // avant #709 : [0, true]
-        expect([s2.P, s2.noteConstructible]).toEqual([87, true]);
+        expect([s1.P, s1.noteConstructible]).toEqual([88, true]);   // avant #709 : [0, true] ; avant E1 (28 oct. 2026) : 87
+        expect([s2.P, s2.noteConstructible]).toEqual([88, true]);
         expect([p1.P, p1.noteConstructible]).toEqual([70, true]);   // avant #709 : [0, true]
         expect([p2.P, p2.noteConstructible]).toEqual([70, true]);
     });
@@ -1063,8 +1065,8 @@ describe('F · le zéro qui a l\'air d\'un résultat', () => {
         b.win.calculerEtStockerIndicesCP();
         const apres = b.win._exportResultats.construireLignesSynthese([ETUDIANTS[0]], { pratiqueId: 'som-banc' }, b.win.simulerIndices)[0];
         noter('F2', { avant: [avant[8], avant[9]], apres: [apres[8], apres[9]] });
-        expect([avant[8], avant[9]]).toEqual([87, 'final']);   // avant #709 : [0, 'final']
-        expect([apres[8], apres[9]]).toEqual([87, 'final']);
+        expect([avant[8], avant[9]]).toEqual([88, 'provisoire']);   // avant #709 : [0, 'final'] ; E1 (avant 87) ; E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
+        expect([apres[8], apres[9]]).toEqual([88, 'provisoire']);   // E1 et E7 (28 oct. 2026) : avant [87, 'final']
     });
     it('F3 · l\'export arrondit à l\'ENTIER (P) : 86,57 → 87 ; 79,45 → 79, alors que la section « Note finale de session » du profil affiche « 79.4 » (79,45 flottant → toFixed(1))', () => {
         const std = monter(jeuSTD()); std.win.calculerEtStockerIndicesCP(); std.win.calculerEtStockerIndicesCP();
@@ -1088,7 +1090,7 @@ describe('G · reprise, retrait, héritage', () => {
         const orig = evals.find(e => e.id === 'EV_S2_OLD');
         const apres = r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100);
         noter('G1', { ok, avant, apres, origRemplacee: orig.remplaceeParId, origArchivee: orig.archivee, repriseSubsiste: !!evals.find(e => e.id === 'EV_S2_NEW'), notifs: b.notifs.map(n => n.type + ':' + n.t) });
-        expect(ok).toBe(true); expect(avant).toBe(87.43); expect(apres).toBe(63.66);   // avant #706 : 86.57 → 63.04
+        expect(ok).toBe(true); expect(avant).toBe(87.6); expect(apres).toBe(63.6);   // avant #706 : 86.57 → 63.04 ; avant E1 (28 oct. 2026) : 87,43 → 63,66
         expect(orig.remplaceeParId).toBeUndefined(); expect(orig.archivee).toBeUndefined();
     });
     it('G2 · (N2, ↻ #720) la reprise ne recopie plus `jetonDelaiApplique` : après un jeton de délai puis une reprise, l\'élève a « 1 » délai utilisé pour un accordé (avant #720 : 2)', async () => {
@@ -1158,6 +1160,6 @@ describe('G · reprise, retrait, héritage', () => {
         // À la main : les deux P2 comptent (50×60 + 90×60) → (3360 + 3000 + 5400 + 70) / (40+60+60+1) = 11830/161 = 73,48
         // (↻ #706 : sans le brouillon ; avant 11830/162 = 73,02).
         const p = noter('G8', r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100));
-        expect(p).toBe(73.48);   // avant #706 : 73.02
+        expect(p).toBe(73.5);   // avant #706 : 73.02 ; avant E1 (28 oct. 2026) : 73,48 (11830/161 → 11760/160)
     });
 });

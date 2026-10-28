@@ -304,13 +304,23 @@ describe('six paramètres · règles spéciales éclatées (le cas tranché)', (
         const r = extraire({ type: 'sommative',
             reglesSpeciales: ['remplacement', 'double_verrou', 'plafonnement', 'portfolio'] });
         expect(param(r, 'regleVerrou')).toBe('determination');
-        expect(param(r, 'reglePortfolio')).toBe('objet');
+        expect(axes(r)).not.toContain('reglePortfolio');   // E2 (28 oct. 2026) : retirée, tue (avant : « objet »)
     });
 
     it('une règle absente ne produit aucune ligne', () => {
+        const r = extraire({ type: 'sommative', reglesSpeciales: ['double_verrou'] });
+        expect(axes(r)).toContain('regleVerrou');
+        expect(axes(r)).not.toContain('reglePortfolio');
+    });
+
+    // E2 (28 oct. 2026, décision de Grégoire) — « Portfolio de progression » rejoint les règles de #903 : aucun calcul
+    // ne la lisait (SOM-C11). Une pratique qui la porte la garde ; aucune ligne ne l'annonce, pas même en mot brut.
+    it('E2 · une pratique qui porte « portfolio » seule : « Aucune », ni « Actif » ni mot brut', () => {
         const r = extraire({ type: 'sommative', reglesSpeciales: ['portfolio'] });
-        expect(axes(r)).toContain('reglePortfolio');
-        expect(axes(r)).not.toContain('regleVerrou');
+        expect(axes(r)).not.toContain('reglePortfolio');
+        expect(axes(r).filter(a => /^regle_/.test(a))).toEqual([]);
+        expect(val(r, 'reglesSpeciales')).toBe('Aucune');
+        expect(JSON.stringify(r)).not.toMatch(/Portfolio de progression/);
     });
 
     // #903 (21 sept. 2026) — le remplacement et le plafonnement étaient annoncés « Actif »
@@ -346,7 +356,7 @@ describe('six paramètres · règles spéciales éclatées (le cas tranché)', (
     it('règles portées par un objet plutôt qu\'un tableau : même rangement', () => {
         const r = extraire({ type: 'sommative', reglesSpeciales: { double_verrou: true, portfolio: true } });
         expect(param(r, 'regleVerrou')).toBe('determination');
-        expect(param(r, 'reglePortfolio')).toBe('objet');
+        expect(axes(r)).not.toContain('reglePortfolio');   // E2 : tue sous forme d'objet aussi
     });
 
     it('une règle inconnue est rendue telle quelle plutôt que perdue', () => {
@@ -398,8 +408,8 @@ describe('#809 · une seule table de libellés de règles sommatives', () => {
     const { libelleRegleSommative } = win.ConstructionAttributs;
 
     it('le module expose le libellé, et rend la clé brute si elle est inconnue', () => {
-        expect(libelleRegleSommative('portfolio')).toBe('Portfolio de progression');
-        // #903 : sorties de la table — plus aucun écran ne demande leur libellé.
+        // #903, puis E2 (28 oct. 2026) : sorties de la table — plus aucun écran ne demande leur libellé.
+        expect(libelleRegleSommative('portfolio')).toBe('portfolio');
         expect(libelleRegleSommative('remplacement')).toBe('remplacement');
         expect(libelleRegleSommative('plafonnement')).toBe('plafonnement');
         // mieux un mot brut qu'un trou
@@ -430,19 +440,18 @@ describe('#809 · une seule table de libellés de règles sommatives', () => {
         // Vider le corps du helper (`? cle : cle`) laissait le nom dans la
         // condition et l'essai restait vert. C'est l'appel qui compte.
         expect(CODE_WIZARD).toMatch(/window\.ConstructionAttributs\.libelleRegleSommative\s*\(\s*cle\s*\)/);
-        expect(CODE_WIZARD).toMatch(/_libelleRegle\('portfolio'\)/);
         expect(CODE_WIZARD).toMatch(/_libelleRegle\('double_verrou'\)/);
     });
 
-    it('les deux clés du wizard sont exactement celles que le module connaît (#903 : elles étaient quatre)', () => {
+    it('la clé du wizard est exactement celle que le module connaît (#903 : elles étaient quatre ; E2, 28 oct. : deux)', () => {
         // Les `value` sont PERSISTÉES : elles ne doivent pas bouger, et aucune
         // règle de l'écran ne doit manquer à la table.
-        ['double_verrou', 'portfolio'].forEach((cle) => {
+        ['double_verrou'].forEach((cle) => {
             expect(CODE_WIZARD).toMatch(new RegExp("value: '" + cle + "'"));
             expect(libelleRegleSommative(cle)).not.toBe(cle);   // le module la connaît
         });
-        // #903 — cliquet d'absence : les deux cases retirées ne reviennent pas.
-        ['remplacement', 'plafonnement'].forEach((cle) => {
+        // #903 et E2 — cliquet d'absence : les trois cases retirées ne reviennent pas.
+        ['remplacement', 'plafonnement', 'portfolio'].forEach((cle) => {
             expect(CODE_WIZARD).not.toMatch(new RegExp("value: '" + cle + "'"));
         });
     });

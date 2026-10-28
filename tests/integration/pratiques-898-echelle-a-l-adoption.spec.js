@@ -176,8 +176,9 @@ test('#898 · les deux gestes d\'adoption demandent l\'échelle, et les trois é
         expect(ligne).not.toMatch(/non constructible/i);
         // La note est la cellule qui précède le statut ; l'export écrit la note entière.
         const cellules = ligne.split(/[;,]/).map(c => c.replace(/"/g, '').trim());
-        const iStatut = cellules.indexOf('final');
-        expect(iStatut, 'le statut « final » dans la ligne exportée').toBeGreaterThan(0);
+        // E7 (28 oct. 2026) : « provisoire » tant que « Notes finalisées » n'est pas cochée (avant : « final »).
+        const iStatut = cellules.indexOf('provisoire');
+        expect(iStatut, 'le statut « provisoire » dans la ligne exportée').toBeGreaterThan(0);
         expect(cellules[iStatut - 1]).toBe(String(Math.round(ecrans.comparateur)));
     }
     expect(erreurs).toEqual([]);

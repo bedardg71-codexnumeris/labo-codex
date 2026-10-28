@@ -52,7 +52,8 @@ describe('#333 — construction des lignes de synthèse', () => {
     ];
     const contexte = {
         groupe: '00001', cours: 'Littérature', trimestre: 'H2026',
-        pratiqueId: 'prat-1', pratiqueCode: 'STD', pratiqueNom: 'PAN-Standards'
+        pratiqueId: 'prat-1', pratiqueCode: 'STD', pratiqueNom: 'PAN-Standards',
+        notesFinales: true   // E7 (28 oct. 2026) : « final » exige la case « Notes finalisées »
     };
     // note constructible / non constructible / provisoire
     const simuler = (da) => {
@@ -80,6 +81,12 @@ describe('#333 — construction des lignes de synthèse', () => {
         expect(lignes[2][9]).toBe('provisoire');
     });
 
+    it('E7 (28 oct. 2026) — « Notes finalisées » non cochée : « provisoire », même quand la note est complète', () => {
+        const lignes = X.construireLignesSynthese(etudiants, Object.assign({}, contexte, { notesFinales: false }), simuler);
+        expect(lignes.map(l => l[9])).toEqual(['provisoire', 'non constructible', 'provisoire']);
+        expect(X.construireLignesSynthese(etudiants, { pratiqueId: 'prat-1' }, simuler)[0][9]).toBe('provisoire');   // case absente
+    });
+
     it('simuler absent / null → non constructible (jamais d\'exception)', () => {
         const lignes = X.construireLignesSynthese(etudiants, contexte, null);
         expect(lignes).toHaveLength(3);
@@ -91,7 +98,7 @@ describe('#333 — CSV complet', () => {
     it('BOM UTF-8, en-têtes, CRLF', () => {
         const csv = X.genererCSVSynthese(
             [{ da: '1', nom: 'A', prenom: 'B' }],
-            { pratiqueId: 'p', pratiqueCode: 'SOM', pratiqueNom: 'Sommative' },
+            { pratiqueId: 'p', pratiqueCode: 'SOM', pratiqueNom: 'Sommative', notesFinales: true },   // E7
             () => ({ P: 90, noteConstructible: true, details: {} })
         );
         expect(csv.charCodeAt(0)).toBe(0xFEFF);                 // BOM

@@ -12,7 +12,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 const DA = '1234567';
 
-// p3 a une pondération 0 → défaut 1 (même règle que calculerPerformance, piège SOM).
+// p3 a une pondération 0 → poids 0 depuis E1 (décision de Grégoire, 28 oct. 2026 ; avant : défaut 1, le piège SOM) :
+// nommée « pondération 0 · non comptée », hors de la moyenne.
 const PRODUCTIONS = [
     { id: 'p1', titre: 'Dissertation 1', ponderation: 60 },
     { id: 'p2', titre: 'Examen final', ponderation: 40 },
@@ -29,8 +30,8 @@ const EVALS = [
 
 const SORTS_VALIDES = ['compte', 'ecarte', 'remplace', 'obligatoire', 'non-exige', 'satisfait', 'manquant'];
 
-// Golden master : (80×60 + 50×1 + 90×40) / 101 = 8450 / 101 = 83,663…
-const GOLDEN = 8450 / 101;
+// Golden master : (80×60 + 90×40) / 100 = 84 (E1, 28 oct. 2026 ; avant (… + 50×1) / 101 = 83,663…)
+const GOLDEN = 8400 / 100;
 
 let win, som, recit;
 
@@ -54,7 +55,7 @@ describe('C2-b · récit de calcul SOM (traçabilité additive)', () => {
         expect(typeof som.decrireCalcul).toBe('function');
     });
 
-    it('PARITÉ : la note du récit == calculerPerformance × 100 (golden ≈ 83,66)', () => {
+    it('PARITÉ : la note du récit == calculerPerformance × 100 (golden 84 ; 83,66 avant E1)', () => {
         const p = som.calculerPerformance(DA);
         expect(recit.synthese.noteFinale).toBe(p * 100);
         expect(recit.synthese.noteFinale).toBeCloseTo(GOLDEN, 1);
@@ -63,7 +64,7 @@ describe('C2-b · récit de calcul SOM (traçabilité additive)', () => {
     it('CONTRAT : recit rempli, sorts dans l\'énumération, detail en texte', () => {
         expect(recit.famille).toBe('SOM');
         expect(recit.pratiqueNom).toBe('Sommative traditionnelle');
-        expect(recit.resultats.length).toBe(4); // 3 comptées + 1 remplacée
+        expect(recit.resultats.length).toBe(4); // 2 comptées + 1 à pondération 0 (E1) + 1 remplacée
         recit.resultats.forEach(r => {
             expect(SORTS_VALIDES).toContain(r.sort);
             expect(typeof r.detail).toBe('string');
@@ -71,9 +72,10 @@ describe('C2-b · récit de calcul SOM (traçabilité additive)', () => {
         expect(recit.synthese.plafonnement).toBeNull();
     });
 
-    it('SÉMANTIQUE SOM : 3 comptées une fois + 1 remplacée hors moyenne', () => {
+    it('SÉMANTIQUE SOM : 2 comptées une fois + 1 à pondération 0 nommée (E1 ; avant : 3 comptées) + 1 remplacée hors moyenne', () => {
         const parSort = (s) => recit.resultats.filter(r => r.sort === s);
-        expect(parSort('compte').length).toBe(3);
+        expect(parSort('compte').length).toBe(2);
+        expect(parSort('ecarte')).toEqual([expect.objectContaining({ label: 'Exercice', detail: 'pondération 0 · non comptée' })]);
         expect(parSort('remplace').length).toBe(1);
         parSort('compte').forEach(r => expect(r.detail).toMatch(/comptée une fois/));
         // La version remplacée (note 30) n'entre pas dans la moyenne (parité golden).
@@ -84,7 +86,7 @@ describe('C2-b · récit de calcul SOM (traçabilité additive)', () => {
 
     it('résultats comptés triés par date croissante', () => {
         const comptes = recit.resultats.filter(r => r.sort === 'compte').map(r => r.label);
-        expect(comptes).toEqual(['Dissertation 1', 'Exercice', 'Examen final']);
+        expect(comptes).toEqual(['Dissertation 1', 'Examen final']);   // E1 : l'Exercice (pondération 0) n'est plus compté
     });
 
     it('NEUTRALITÉ : le niveau est un code BRUT, jamais un libellé d\'échelle', () => {

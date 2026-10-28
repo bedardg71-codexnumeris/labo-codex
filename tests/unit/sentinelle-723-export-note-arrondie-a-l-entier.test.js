@@ -30,7 +30,8 @@ function csvDuBanc() {
     };
     return X.genererCSVSynthese(
         [{ da: '1', nom: 'Tremblay, fils', prenom: 'Zoé' }, { da: '2', nom: '=Gagnon', prenom: 'Léo' }, { da: '3', nom: 'Roy', prenom: 'Max' }],
-        { pratiqueId: 'p', pratiqueCode: 'STD', pratiqueNom: 'PAN "tous"', groupe: '01', cours: '601-101', trimestre: 'A2026' },
+        // E7 (28 oct. 2026) : « Notes finalisées » cochée, sans quoi l'élève 1 sortirait « provisoire » — ce banc juge le libellé.
+        { pratiqueId: 'p', pratiqueCode: 'STD', pratiqueNom: 'PAN "tous"', groupe: '01', cours: '601-101', trimestre: 'A2026', notesFinales: true },
         (da) => notes[da]);
 }
 

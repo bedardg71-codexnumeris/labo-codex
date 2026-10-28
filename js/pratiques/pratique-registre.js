@@ -855,19 +855,67 @@ function creerComparateurRecenceStd(productions) {
    =============================== */
 
 /**
- * Vrai si l'évaluation compte dans la note du cours ; faux pour une remplacée, une sans note,
+ * Vrai si l'évaluation compte dans la note du cours ; faux pour une remplacée (voir E4 ci-dessous), une sans note,
  * un brouillon (non verrouillée), une portée nulle ou une copie « Incomplet ; travail en cours ».
  * @param {Object} evaluation
+ * @param {Array} [evaluations] - la liste où chercher la reprise d'une originale gardée (sinon : le stockage)
  * @returns {boolean}
  */
-function evaluationEntreDansLaNote(evaluation) {
+function evaluationEntreDansLaNote(evaluation, evaluations) {
     if (!evaluation) return false;
-    if (evaluation.remplaceeParId) return false;
+    if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;
+    return _copieCompteParElleMeme(evaluation);
+}
+
+/** Tout ce qui décide qu'une copie compte, sauf son remplacement. */
+function _copieCompteParElleMeme(evaluation) {
     if (evaluationTravailEnCours(evaluation)) return false;   // statut incomplet (25 oct. 2026) : verrouillée ou non
     if (evaluation.noteFinale === null || evaluation.noteFinale === undefined) return false;
     if (evaluation.verrouillee === false) return false;
     if (evaluation.ponderationCouverte === 0) return false;
     return true;
+}
+
+/**
+ * E4 (décision de Grégoire, 28 oct. 2026, 14 h 45) — UNE ORIGINALE GARDÉE COMPTE JUSQU'À CE QUE SA REPRISE
+ * ENTRE DANS LA NOTE. `appliquerJetonReprise` marque l'originale (`remplaceeParId`) dès l'octroi, et la reprise
+ * naît déverrouillée : avant E4, ni l'une ni l'autre ne comptait, et la production sortait de la note jusqu'à la
+ * réévaluation (SOM-C7, SPE-C4, STD-C5 du banc du 28 oct.). Maintenant l'originale compte tant que sa reprise ne
+ * compte pas d'elle-même (évaluée, verrouillée, ni « Incomplet » ni de portée 0) ; la reprise la remplace alors.
+ * Une reprise de reprise se lit maillon par maillon : chaque originale ne regarde que SA reprise.
+ * Restent remplacés comme avant : un doublon réconcilié (#360, `reconcilieParDoublon`), et une originale dont la
+ * reprise est introuvable (dans la liste fournie, sinon dans le stockage). Une originale SUPPRIMÉE (réglage
+ * « Supprimer ») n'est plus là : rien ne reste à compter, la production reste hors de la note d'ici là.
+ * ⚠ Se lit AU CALCUL : les copies déjà marquées suivent sans écriture ; les captures déjà prises gardent leurs valeurs.
+ * @param {Object} evaluation - une copie qui porte `remplaceeParId`
+ * @param {Array} [evaluations]
+ * @returns {boolean} vrai si la copie est hors de la note parce que remplacée
+ */
+function originaleEstRemplacee(evaluation, evaluations) {
+    if (!evaluation || !evaluation.remplaceeParId) return false;
+    if (evaluation.reconcilieParDoublon) return true;
+    const reprise = _indexDesEvaluations(Array.isArray(evaluations) ? evaluations : _lireEvaluationsDuCalcul())
+        .get(evaluation.remplaceeParId);
+    return !reprise || _copieCompteParElleMeme(reprise);
+}
+
+function _lireEvaluationsDuCalcul() {
+    // Le lecteur des calculs : il suit la simulation du Comparateur et la mémoïsation d'un lot de calculs (modes.js).
+    if (typeof obtenirDonneesSelonMode === 'function') return obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    return (typeof db !== 'undefined' && typeof cle === 'function') ? (db.getSync(cle('evaluationsSauvegardees'), []) || []) : [];
+}
+
+// Un index par tableau lu : pendant un lot de calculs, le lecteur rend le même tableau, indexé une fois.
+const _indexParListe = new WeakMap();
+function _indexDesEvaluations(liste) {
+    if (!Array.isArray(liste)) return new Map();
+    let index = _indexParListe.get(liste);
+    if (!index) {
+        index = new Map();
+        liste.forEach(e => { if (e && e.id) index.set(e.id, e); });
+        _indexParListe.set(liste, index);
+    }
+    return index;
 }
 
 /**
@@ -881,6 +929,10 @@ function evaluationEntreDansLaNote(evaluation) {
  * @param {Object} evaluation
  * @returns {boolean}
  */
+// E8 (mesure du 28 oct. 2026) — une copie « Non reçu » qui PORTE une note ne vaut pas la même chose partout : la
+// sommative la compte, les standards la gardent au pool, les spécifications la refusent (SOM-C2, STD-C2, SPE-C1).
+// Non mesuré que l'écran puisse produire cet état (`statutRemise` est réécrit « evalue » à chaque verrouillage) :
+// commenté, pas corrigé.
 function evaluationNonRemise(evaluation) {
     if (!evaluation) return false;
     return evaluation.statutRemise === 'non-remis' || evaluation.statutRemise === 'non-recu';
@@ -983,6 +1035,8 @@ function evaluationTravailEnCours(evaluation) {
  * @returns {boolean}
  */
 function evaluationCompteCommeRemise(evaluation) {
+    // E4 (28 oct. 2026) ne touche que la NOTE : une originale gardée, qui compte maintenant jusqu'à la réévaluation de
+    // sa reprise, n'est toujours pas une remise pour l'indice C pendant cette fenêtre (inchangé ; question posée au relais).
     if (!evaluation || evaluation.remplaceeParId) return false;
     if (evaluationNonRecevable(evaluation)) return false;
     if (evaluationTravailEnCours(evaluation)) return true;
@@ -1014,6 +1068,7 @@ function compterEvaluationsEcarteesDeLaNote(da, evaluations) {
 window.enregistrerPratique = enregistrerPratique;
 // #706 — la règle unique de ce qui entre dans la note du cours, et son compte
 window.evaluationEntreDansLaNote = evaluationEntreDansLaNote;
+window.originaleEstRemplacee = originaleEstRemplacee;   // E4 (28 oct. 2026) — pour les récits qui nomment les remplacées
 window.compterEvaluationsEcarteesDeLaNote = compterEvaluationsEcarteesDeLaNote;
 // Lot A (16 sept. 2026) — la règle unique de ce qui est « non remis » (deux chaînes, un lecteur)
 window.evaluationNonRemise = evaluationNonRemise;

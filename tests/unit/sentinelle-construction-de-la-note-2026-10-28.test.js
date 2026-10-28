@@ -2,10 +2,13 @@
  * SENTINELLE (28 oct. 2026) — COMMENT CHAQUE PRATIQUE CONSTRUIT LA NOTE (#1152, trou 2 de l'Aide, mesure en lecture seule).
  *
  * Gardée comme sentinelle : les textes du trou 2 décrivent ce que ce banc mesure. Si un cas rougit, la note ne se
- * construit plus comme l'Aide le dit — corriger le cas ET le texte. ⚠ Trois cas figent des écarts nommés au rapport,
- * à trancher par Grégoire (SOM-2/SOM-4 : un artefact pèse 1 ; SOM-C11 : « Portfolio de progression » sans effet ;
- * STD-H2 : le N de l'assistant ignoré en hybride) : ils rougiront le jour où l'écart se corrige, et c'est voulu.
- * Break-test du 28 oct. : `|| 1` → `?? 1` dans pratique-sommative.js rougit SOM-2, SOM-4 et SOM-C11.
+ * construit plus comme l'Aide le dit — corriger le cas ET le texte.
+ * ⮕ LES DÉCISIONS DE GRÉGOIRE DU 28 OCT. (14 h 43 à 14 h 46, plans de travail/DECISIONS-2026-10-28-construction-de-la-note.md),
+ * lot des correctifs : chaque cas qui a changé dit « avant → après » et la décision. E1 : une pondération de 0 vaut 0
+ * (SOM-2, SOM-4, SOM-C11) ; E4 : l'originale gardée compte jusqu'à la réévaluation de sa reprise (SOM-C7, SPE-C4,
+ * STD-C5) ; E7 : l'export dit « provisoire » tant que « Notes finalisées » n'est pas cochée (la colonne statut de SOM-1,
+ * SOM-7, SPE-1, STD-1, STD-9, DEN-1). E2 et E3 changent l'assistant, pas le calcul : STD-H2 reste vrai pour une
+ * configuration donnée ; leurs essais sont dans sentinelle-construction-de-la-note-correctifs-2026-10-28.test.js.
  *
  * Consigne : plans de travail/CONSIGNE-LOT-2026-10-28-mesure-construction-de-la-note.md ; rapport :
  * plans de travail/RAPPORT-2026-10-28-construction-de-la-note.md (chaque mesure y renvoie par son nom de cas).
@@ -137,7 +140,8 @@ function note(b, da = DA.ALICE) {
     const entree = b.store.test_indicesCP[da] && b.store.test_indicesCP[da].actuel;
     const ex = b.win._exportResultats;
     const ligne = ex
-        ? ex.construireLignesSynthese([{ da, nom: 'X', prenom: 'Y' }], { pratiqueId: b.pratiqueId }, (x, id) => b.win.simulerIndices(x, id))[0] : null;
+        ? ex.construireLignesSynthese([{ da, nom: 'X', prenom: 'Y' }], { pratiqueId: b.pratiqueId, notesFinales: ex.notesFinaliseesDe(b.pratiqueId) },
+            (x, id) => b.win.simulerIndices(x, id))[0] : null;   // E7 : la case, lue comme l'export la lit
     return {
         P: entree ? (entree.noteConstructible === false ? null : entree.P) : null,
         comparateur: sim && sim.noteConstructible !== false ? sim.P : null,
@@ -148,31 +152,32 @@ function note(b, da = DA.ALICE) {
 
 /* ================================================================ SOMMATIVE */
 describe('SOM — ce qui entre, comment ça se combine', () => {
-    it('SOM-1 base : (80 × 40 + 90 × 60) / 100 = 86', () => {
-        expect(note(banc({ pratique: somConfigurable(), productions: PROD_SOM, evaluations: COPIES_SOM }))).toMatchObject({ P: 86, comparateur: 86, profil: null, export: [86, 'final'] });
+    it('SOM-1 base : (80 × 40 + 90 × 60) / 100 = 86 ; export « provisoire » sans « Notes finalisées » (E7 : avant « final »), « final » avec', () => {
+        expect(note(banc({ pratique: somConfigurable(), productions: PROD_SOM, evaluations: COPIES_SOM }))).toMatchObject({ P: 86, comparateur: 86, profil: null, export: [86, 'provisoire'] });
+        expect(note(banc({ pratique: somConfigurable({ configuration: { notesFinales: true } }), productions: PROD_SOM, evaluations: COPIES_SOM })).export).toEqual([86, 'final']);
     });
     it('SOM-1b la sommative codée en dur (id « sommative ») calcule la même chose', () => {
         expect(note(banc({ pratique: null, pratiqueId: 'sommative', productions: PROD_SOM, evaluations: COPIES_SOM })).comparateur).toBe(86);
     });
-    it('SOM-2 un ARTEFACT évalué (pondération 0) pèse 1 : (80 × 40 + 90 × 60 + 50 × 1) / 101 = 85,64 → 86 ; à 0 : 85,15 → 85', () => {
+    it('SOM-2 un ARTEFACT évalué (pondération 0) n\'entre pas (E1) : 86 à 50 comme à 0 (avant : 85,64 → 86 et 85,15 → 85)', () => {
         const prod = PROD_SOM.concat([{ id: 'PF', titre: 'Portfolio', type: 'portfolio', ponderation: 0, coursId: 'GC1' },
             { id: 'A1', titre: 'Artefact 1', type: 'artefact-portfolio', ponderation: 0, coursId: 'GC1' }]);
         const b = banc({ pratique: somConfigurable(), productions: prod, evaluations: COPIES_SOM.concat([ev(DA.ALICE, 'A1', 50)]) });
         expect(note(b).P).toBe(86);
-        expect(b.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(8650 / 101, 6);
+        expect(b.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(86, 9);
         const zero = banc({ pratique: somConfigurable(), productions: prod, evaluations: COPIES_SOM.concat([ev(DA.ALICE, 'A1', 0)]) });
-        expect(zero.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(8600 / 101, 6);
-        expect(note(zero).P).toBe(85);
+        expect(zero.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(86, 9);
+        expect(note(zero).P).toBe(86);
     });
     it('SOM-3 le conteneur « portfolio » évalué compte à sa pondération, comme une production (PF 20 %, 70) : (3200 + 5400 + 1400) / 120 = 83,33', () => {
         const prod = PROD_SOM.concat([{ id: 'PF', titre: 'Portfolio', type: 'portfolio', ponderation: 20, coursId: 'GC1' }]);
         const b = banc({ pratique: somConfigurable(), productions: prod, evaluations: COPIES_SOM.concat([ev(DA.ALICE, 'PF', 70)]) });
         expect(b.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(10000 / 120, 6);
     });
-    it('SOM-4 une production à pondération 0 (type « travail ») pèse 1 aussi', () => {
+    it('SOM-4 une production à pondération 0 (type « travail ») n\'entre pas non plus (E1) : 86 (avant : 85,64)', () => {
         const prod = PROD_SOM.concat([{ id: 'P3', titre: 'Exercice', type: 'travail', ponderation: 0, coursId: 'GC1' }]);
         const b = banc({ pratique: somConfigurable(), productions: prod, evaluations: COPIES_SOM.concat([ev(DA.ALICE, 'P3', 50)]) });
-        expect(b.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(8650 / 101, 6);
+        expect(b.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale).toBeCloseTo(86, 9);
     });
     it('SOM-5 une production FACULTATIVE évaluée entre dans la note (P3 facultative 20 %, 50) : (3200 + 5400 + 1000) / 120 = 80', () => {
         const prod = PROD_SOM.concat([{ id: 'P3', titre: 'Bonus', type: 'travail', ponderation: 20, facultatif: true, coursId: 'GC1' }]);
@@ -186,7 +191,7 @@ describe('SOM — ce qui entre, comment ça se combine', () => {
     it('SOM-7 la note se recalcule sur les productions évaluées : Examen seul → 90', () => {
         const n = note(banc({ pratique: somConfigurable(), productions: PROD_SOM, evaluations: retirer(COPIES_SOM, DA.ALICE, 'P1') }));
         expect(n.P).toBe(90);
-        expect(n.export).toEqual([90, 'final']);   // l'export ne dit « provisoire » qu'en standards
+        expect(n.export).toEqual([90, 'provisoire']);   // E7 : avant « final » (l'export ne disait « provisoire » qu'en standards)
     });
 });
 
@@ -212,8 +217,8 @@ describe('SOM — les cas qui changent la note', () => {
     it('SOM-C6 jeton de délai : aucun effet → 86', () => {
         expect(avec(remplacer(COPIES_SOM, DA.ALICE, 'P1', { jetonDelaiApplique: true, delaiAccorde: true })).P).toBe(86);
     });
-    it('SOM-C7 jeton de reprise, reprise pas encore réévaluée : ni l\'originale ni la reprise ne comptent → 90 (gardée ou supprimée)', () => {
-        expect(avec(reprise(COPIES_SOM, DA.ALICE, 'P1', { garder: true })).P).toBe(90);
+    it('SOM-C7 jeton de reprise, reprise pas encore réévaluée : l\'originale GARDÉE compte → 86 (E4 : avant 90) ; SUPPRIMÉE, rien ne compte → 90 (inchangé)', () => {
+        expect(avec(reprise(COPIES_SOM, DA.ALICE, 'P1', { garder: true })).P).toBe(86);
         expect(avec(reprise(COPIES_SOM, DA.ALICE, 'P1', { garder: false })).P).toBe(90);
     });
     it('SOM-C8 reprise réévaluée à 95 : (95 × 40 + 90 × 60) / 100 = 92 (gardée ou supprimée)', () => {
@@ -229,7 +234,7 @@ describe('SOM — les cas qui changent la note', () => {
         expect(avec(remplacer(COPIES_SOM, DA.ALICE, 'P2', { noteFinale: 50 }), p).P).toBe(55);
         expect(avec(COPIES_SOM, p).P).toBe(86);
     });
-    it('SOM-C11 « Portfolio de progression » (`reglesSpeciales: [\'portfolio\']`, la forme de l\'assistant) : aucune différence, avec ou sans artefact', () => {
+    it('SOM-C11 « Portfolio de progression » (`reglesSpeciales: [\'portfolio\']`, retirée de l\'assistant, E2) : aucune différence ; les artefacts à 0 n\'entrent pas (E1 : avant 85,64)', () => {
         const prod = PROD_SOM.concat([{ id: 'A1', titre: 'Artefact 1', type: 'artefact-portfolio', ponderation: 0, coursId: 'GC1' },
             { id: 'A2', titre: 'Artefact 2', type: 'artefact-portfolio', ponderation: 0, coursId: 'GC1' }]);
         const copies = COPIES_SOM.concat([ev(DA.ALICE, 'A1', 40), ev(DA.ALICE, 'A2', 95)]);
@@ -237,7 +242,7 @@ describe('SOM — les cas qui changent la note', () => {
         const avecRegle = banc({ pratique: somConfigurable({ reglesSpeciales: ['portfolio'], variante: 'portfolio' }), productions: prod, evaluations: copies });
         const r = (b) => b.win.simulerIndices(DA.ALICE, 'som-banc').recit.synthese.noteFinale;
         expect(r(avecRegle)).toBeCloseTo(r(sans), 9);
-        expect(r(sans)).toBeCloseTo((3200 + 5400 + 40 + 95) / 102, 6);
+        expect(r(sans)).toBeCloseTo(86, 9);
     });
     it('SOM-C12 arrondi : 57,5 → P 58 (profil et Comparateur lisent 57,5 dans le récit)', () => {
         const b = banc({ pratique: somConfigurable(), productions: PROD_SOM, evaluations: remplacer(remplacer(COPIES_SOM, DA.ALICE, 'P1', { noteFinale: 50 }), DA.ALICE, 'P2', { noteFinale: 62.5 }) });
@@ -255,7 +260,7 @@ describe('SPE — paliers et forfaits (forme écrite par l\'application)', () =>
     const avec = (copies, pratique = speForfaits()) => note(banc({ pratique, productions: PROD_SPE, evaluations: copies }));
     it('SPE-1 base, seuil 70 : Alice 2 dissertations + examen + dossier → A (100) ; Bruno examen 50 → aucun palier, F (50)', () => {
         const b = banc({ pratique: speForfaits(), productions: PROD_SPE, evaluations: COPIES_SPE });
-        expect(note(b)).toMatchObject({ P: 100, comparateur: 100, export: [100, 'final'] });
+        expect(note(b)).toMatchObject({ P: 100, comparateur: 100, export: [100, 'provisoire'] });   // E7 : avant « final »
         expect(note(b, DA.BRUNO).P).toBe(50);
     });
     it('SPE-2 la note est le palier, pas une moyenne : dossier 72 → 69 fait passer d\'A (100) à B (80)', () => {
@@ -279,8 +284,8 @@ describe('SPE — paliers et forfaits (forme écrite par l\'application)', () =>
     it('SPE-C3 incomplet ; travail en cours → C (60)', () => {
         expect(avec(remplacer(COPIES_SPE, DA.ALICE, 'D2', { travailEnCours: true })).P).toBe(60);
     });
-    it('SPE-C4 reprise pas encore réévaluée → C (60) ; réévaluée à 90 → A (100)', () => {
-        expect(avec(reprise(COPIES_SPE, DA.ALICE, 'D2')).P).toBe(60);
+    it('SPE-C4 reprise pas encore réévaluée : l\'originale compte → A (100) (E4 : avant C, 60) ; réévaluée à 90 → A (100)', () => {
+        expect(avec(reprise(COPIES_SPE, DA.ALICE, 'D2')).P).toBe(100);
         expect(avec(reprise(COPIES_SPE, DA.ALICE, 'D2', { reevaluee: 90 })).P).toBe(100);
     });
     it('SPE-C5 jeton de délai : aucun effet (100)', () => {
@@ -292,7 +297,7 @@ describe('SPE — paliers et forfaits (forme écrite par l\'application)', () =>
 describe('STD — sélection, portfolio, terminale', () => {
     const avec = (pratique, copies = COPIES_STD, productions = prodSTD()) => note(banc({ pratique, productions, evaluations: copies }));
     it('STD-1 « N meilleurs », N = 3 : (92 + 88 + 80) / 3 = 86,67 × 60 % + 82 × 40 % = 84,8 → P 85', () => {
-        expect(avec(std())).toMatchObject({ P: 85, comparateur: 85, profil: 84.8, export: [85, 'final'] });
+        expect(avec(std())).toMatchObject({ P: 85, comparateur: 85, profil: 84.8, export: [85, 'provisoire'] });   // E7 : avant « final »
     });
     it('STD-2 « Tous » : 77,5 × 60 % + 82 × 40 % = 79,3', () => {
         expect(avec(std({ methodeSelection: 'tous' })).profil).toBe(79.3);
@@ -321,7 +326,7 @@ describe('STD — sélection, portfolio, terminale', () => {
     });
     it('STD-9 le « Minimum d\'artefacts avant calcul formatif » (3) ne retient pas le calcul : un seul artefact (A4, 92) → 92 × 60 % + 32,8 = 88', () => {
         const copies = COPIES_STD.filter(e => !(e.etudiantDA === DA.ALICE && ['A1', 'A2', 'A3', 'A5', 'A6'].includes(e.productionId)));
-        expect(avec(std({ minimumCompletion: 3 }), copies)).toMatchObject({ profil: 88, export: [88, 'final'] });
+        expect(avec(std({ minimumCompletion: 3 }), copies)).toMatchObject({ profil: 88, export: [88, 'provisoire'] });   // E7 : avant « final »
     });
 });
 
@@ -357,8 +362,8 @@ describe('STD — les cas qui changent la note', () => {
     it('STD-C4 terminale « Incomplet » : hors note → provisoire, portfolio seul (86,67)', () => {
         expect(avec(remplacer(COPIES_STD, DA.ALICE, 'T1', { travailEnCours: true }))).toMatchObject({ profil: 86.67, export: [87, 'provisoire'] });
     });
-    it('STD-C5 reprise de A4 pas encore réévaluée : A4 hors pool → 81,4 ; réévaluée à 60 → 88, 80, 75 → 81,4 ; reprise de A1 réévaluée à 95 → 95, 92, 88', () => {
-        expect(avec(reprise(COPIES_STD, DA.ALICE, 'A4')).profil).toBe(81.4);
+    it('STD-C5 reprise de A4 pas encore réévaluée : l\'originale reste au pool → 84,8 (E4 : avant 81,4) ; réévaluée à 60 → 88, 80, 75 → 81,4 ; reprise de A1 réévaluée à 95 → 95, 92, 88', () => {
+        expect(avec(reprise(COPIES_STD, DA.ALICE, 'A4')).profil).toBe(84.8);
         expect(avec(reprise(COPIES_STD, DA.ALICE, 'A4', { reevaluee: 60 })).profil).toBe(81.4);
         expect(avec(reprise(COPIES_STD, DA.ALICE, 'A1', { reevaluee: 95 })).profil).toBe(Math.round(((95 + 92 + 88) / 3 * 0.6 + 32.8) * 100) / 100);
     });
@@ -375,7 +380,7 @@ describe('STD — les cas qui changent la note', () => {
 describe('DEN — le jugement saisi', () => {
     const avec = (jugements, copies = COPIES_SOM) => note(banc({ pratique: DEN, productions: PROD_SOM, evaluations: copies, jugements }));
     it('DEN-1 deux cibles confirmées, 78 : 78 (les copies n\'y entrent pas)', () => {
-        expect(avec(jugement({ c1: true, c2: true }, 78))).toMatchObject({ P: 78, comparateur: 78, export: [78, 'final'] });
+        expect(avec(jugement({ c1: true, c2: true }, 78))).toMatchObject({ P: 78, comparateur: 78, export: [78, 'provisoire'] });   // E7 : avant « final »
         expect(avec(jugement({ c1: true, c2: true }, 78), [])).toMatchObject({ P: 78 });
     });
     it('DEN-2 une cible non confirmée : 78 ramené à 59 ; 45 reste 45', () => {

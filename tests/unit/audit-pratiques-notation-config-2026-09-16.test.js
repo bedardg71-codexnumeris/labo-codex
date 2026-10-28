@@ -321,7 +321,7 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         expect(inst.config.calcul_note.conditions_speciales).toEqual(p0.configuration.conditions_speciales);   // le moteur les voit
         expect(note.perf).toBe(50);                                               // verrou : 84 < 90 → max 50
         expect(note.simule.P).toBe(50);
-        expect(note.export).toEqual({ note: 50, statut: 'final' });
+        expect(note.export).toEqual({ note: 50, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(reponses).toMatchObject({ reglesSommatives: ['double_verrou'], nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50 });
         for (const retire of ['nbPairesRemplacement', 'conditionPlafonnement', 'valeurPlafonnement', 'reprisesPermises']) expect(reponses[retire]).toBeUndefined();
         expect(d).toEqual([]);                                                    // rouvrir ne change rien, dateCreation comprise
@@ -371,7 +371,7 @@ describe('A · l\'assistant comme écrivain : ce qu\'il écrit, ce que le moteur
         expect(attributs.attributs.find(x => x.axe === 'nbProductions').valeur).toBe('Toutes les productions évaluées (2 minimum)');
         expect(note.riche).toBe(77.32);
         expect(note.simule.noteFinale).toBe(77.32);
-        expect(note.export).toEqual({ note: 77, statut: 'final' });
+        expect(note.export).toEqual({ note: 77, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         // `note.perf` n'est pas jugé ici : dans ce banc, calculerPerformance rend null pour toute STD (A2 aussi — mesuré, cause
         // non cherchée). L'accord du chemin riche avec l'instance PAN-Standards est jugé par
         // sentinelle-715-tous-prend-toutes-les-productions.test.js.
@@ -490,7 +490,7 @@ describe('B · les modèles offerts, adoptés par l\'assistant, calculent-ils ?'
         expect(Object.keys(res).length).toBeGreaterThanOrEqual(5);
         for (const id of ['STD-n-meilleurs', 'STD-n-recents']) {
             expect([id, res[id].echelleId, res[id].instance]).toEqual([id, 'E1', true]);
-            expect([id, res[id].note.export.statut]).toEqual([id, 'final']);
+            expect([id, res[id].note.export.statut]).toEqual([id, 'provisoire']);   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
             expect([id, res[id].note.riche]).toEqual([id, res[id].note.simule.noteFinale]);
         }
         for (const id of ['SOM-litterature', 'SPE-simple', 'DEN-base']) expect([id, res[id].echelleId == null]).toEqual([id, true]);   // sans question
@@ -530,7 +530,7 @@ describe('B · les modèles offerts, adoptés par l\'assistant, calculent-ils ?'
         expect(apres2.configuration.varianteCalcul).toBeUndefined();   // #900 (lot N6) : ni le gabarit ni l'assistant ne l'écrivent
         expect(avant.riche).toBe(78.52);
         expect(apresNote.riche).toBe(78.52);                          // « derniers » = « recents » (alias du moteur) : la note n'a pas bougé
-        expect(apresNote.export).toEqual({ note: 79, statut: 'final' });
+        expect(apresNote.export).toEqual({ note: 79, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
     });
 
     it('B2 bis · la table de relecture connaît tout le vocabulaire du moteur', async () => {
@@ -589,10 +589,10 @@ describe('D · appliquer une pratique au groupe-cours, en changer, la retirer', 
         expect(journal[0].riche).toBe(75.7);
         // ↻ Lot N1a (21 sept. 2026, #710 ajout D-1) : `changerPratiqueActive` recalcule les indices — l'indice suit la
         // pratique qu'on vient d'assigner (avant : 76, celui de STD, survivait au changement jusqu'au premier recalcul).
-        expect(journal[1].indicesAvantRecalcul).toBe(85);
-        // OBTENU : 85, pas 87,43 — sous SOM, les six artefacts STD (pondération 0) pèsent chacun 1 (« ponderation || 1 »,
-        // skill §10) et entrent dans la moyenne avec les productions sommatives : (84×40 + 90×60 + 70 + 85+60+78+70+78 + 82×1)/…
-        expect(journal[1].indicesApresRecalcul).toBe(85);
+        expect(journal[1].indicesAvantRecalcul).toBe(86);
+        // OBTENU : 86 depuis E1 (28 oct. 2026) — sous SOM, l'Exercice et les six artefacts STD (pondération 0) n'entrent plus :
+        // (84×40 + 90×60 + 82×40) / 140 = 12040 / 140 = 86. Avant E1 : 85, chacun pesait 1 (« ponderation || 1 »).
+        expect(journal[1].indicesApresRecalcul).toBe(86);
         expect(journal[2].riche).toBe(75.7);
         // ↻ Lot N1a : RETIRER la pratique rend « non constructible », à l'indice comme au profil (avant : un 76
         // « constructible » restait à l'indice pendant que le profil disait qu'aucune pratique n'était assignée).
@@ -712,7 +712,7 @@ describe('G-1 · SPE : le seuil d\'acceptabilité écrit est celui qui décide d
             expect(note.perf).toBe(attendu);
             expect(note.export).toEqual(attendu === null
                 ? { note: '', statut: 'non constructible – Ta pratique ne dit pas quelle note donner quand aucun forfait n\'est atteint.' }
-                : { note: attendu, statut: 'final' });
+                : { note: attendu, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         });
     }
 });
@@ -750,7 +750,7 @@ describe('G-1 · SOM : les reprises ne sont plus écrites (#903) ; celles d\'une
         expect(reponses.reprisesPermises).toBeUndefined();
         expect(diff(stock, apres, [])).toEqual([]);
         expect(apres.configuration.reprises).toEqual({ permises: true, mode: 'limite' });
-        expect(noteDe(b, DA.SOM, stock.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, stock.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
     });
 });
 
@@ -771,15 +771,15 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         const n = noteDe(b, DA.SOM, p0.id);
         expect(n.perf).toBe(50);
         expect(n.simule).toMatchObject({ P: 50, noteConstructible: true });
-        expect(n.export).toEqual({ note: 50, statut: 'final' });
+        expect(n.export).toEqual({ note: 50, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
     });
 
     it('non déclenché (84 ≥ 80) : la moyenne 87,43 ne bouge pas ; un plafond plus haut que la moyenne non plus', async () => {
         const b = monter(jeuSOM());
         const p80 = await creerParAssistant(b, SOM_VERROU({ seuilVerrou: 80 }));
         const p95 = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM plafond haut', plafondVerrou: 95 }));
-        expect(noteDe(b, DA.SOM, p80.id).perf).toBe(87.43);
-        expect(noteDe(b, DA.SOM, p95.id).perf).toBe(87.43);   // min(87,43 ; 95) : un verrou plafonne, il ne hausse jamais
+        expect(noteDe(b, DA.SOM, p80.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
+        expect(noteDe(b, DA.SOM, p95.id).perf).toBe(87.6);   // min(87,6 ; 95) : un verrou plafonne, il ne hausse jamais (E1 : avant 87,43)
     });
 
     it('note SUR le seuil (84 = 84) : non plafonnée — « sous le seuil » est strict ; un point plus haut (85), elle l\'est', async () => {
@@ -788,7 +788,7 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         const b = monter(jeuSOM());
         const pSur = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM seuil égal', seuilVerrou: 84 }));
         const pAuDessus = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM seuil 85', seuilVerrou: 85 }));
-        expect(noteDe(b, DA.SOM, pSur.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, pSur.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
         expect(noteDe(b, DA.SOM, pAuDessus.id).perf).toBe(50);   // témoin : le même montage plafonne dès que 84 < seuil
     });
 
@@ -797,13 +797,13 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         const pCasse = await creerParAssistant(b, SOM_VERROU({ nomEvalVerrouillee: '  dissertation ' }));
         const pAbsent = await creerParAssistant(b, SOM_VERROU({ nom: 'SOM absent', nomEvalVerrouillee: 'Analyse finale' }));
         expect(noteDe(b, DA.SOM, pCasse.id).perf).toBe(50);
-        expect(noteDe(b, DA.SOM, pAbsent.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, pAbsent.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
     });
 
     it('seule la copie qui ENTRE dans la note compte : l\'Examen à 50 REMPLACÉ par 90 ne déclenche pas un verrou à 60', async () => {
         const b = monter(jeuSOM());
         const p = await creerParAssistant(b, SOM_VERROU({ nomEvalVerrouillee: 'Examen', seuilVerrou: 60, plafondVerrou: 55 }));
-        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
     });
 
     it('le plafonnement et le remplacement d\'une pratique enregistrée ne s\'appliquent PAS et ne lèvent pas (#903) : 87,43', () => {
@@ -817,7 +817,7 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         const b = monter(jeuSOM(), { pratiques: [stock] });
         const inst = b.win.obtenirPratiqueParId(stock.id);
         expect(inst.config.calcul_note.conditions_speciales).toHaveLength(1);
-        expect(noteDe(b, DA.SOM, stock.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, stock.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
     });
 
     it('la copie d\'un·e AUTRE élève ne déclenche rien : Bruno a 40 à la Dissertation, Alice (84 ≥ 60) garde 87,43', async () => {
@@ -825,14 +825,14 @@ describe('lot 29 · SOM : le verrou écrit par l\'assistant s\'applique à la no
         jeu.evaluations.push(ev('EV_AUTRE', DA.STD, 'P1', 40, 'I'));
         const b = monter(jeu);
         const p = await creerParAssistant(b, SOM_VERROU({ seuilVerrou: 60, plafondVerrou: 55 }));
-        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, p.id).perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
         expect(noteDe(b, DA.STD, p.id).perf).toBe(40);        // lui : une seule copie, 40 < 60 → min(40 ; 55) = 40
     });
 
     it('seul le type « double_verrou » verrouille : une autre règle qui nommerait une évaluation n\'agit pas', () => {
         const b = monter(jeuSOM(), { pratiques: [{ id: 'PT', nom: 'Autre type', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee',
             conditions_speciales: [{ type: 'plafonnement', condition: { evaluation: 'Dissertation', comparateur: '<', seuil: 90 }, consequence: { action: 'plafonner', valeur: 50 } }] } }] });
-        expect(noteDe(b, DA.SOM, 'PT').perf).toBe(87.43);
+        expect(noteDe(b, DA.SOM, 'PT').perf).toBe(87.6);   // E1 (28 oct. 2026) : l'Exercice à pondération 0 n'entre plus (avant : 87,43)
     });
 
     it('une pratique qui porte déjà ses conditions sous calcul_note (forme des gabarits) garde les siennes', () => {
@@ -855,7 +855,8 @@ describe('lot 29 · SOM : rouvrir une pratique ne change aucune règle (A-2, la 
         const b = monter(jeuSOM(), { pratiques: [p0] });
         activer(b, p0.id);
         const { reponses, apres } = await rouvrirEtResauver(b, p0.id);
-        expect(reponses).toMatchObject({ reglesSommatives: ['double_verrou', 'portfolio'], nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50 });
+        // E2 (28 oct. 2026) : « portfolio » rejoint les règles retirées — elle n'est plus relue comme réponse, l'objet la garde.
+        expect(reponses).toMatchObject({ reglesSommatives: ['double_verrou'], nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50 });
         // #900 (lot N6) : les deux questions du portfolio sommatif sont retirées (aucun lecteur) ; leurs valeurs ne sont
         // plus relues comme réponses, et l'objet enregistré les garde tel quel (diff vide ci-dessous).
         expect(reponses.nbArtefactsPortfolio).toBeUndefined();
@@ -941,7 +942,7 @@ describe('lot N4 · #713 : aucun forfait atteint, aucun palier d\'échec créé 
         // Un forfait atteint : la note du forfait, inchangée, et aucune cause.
         const chloe = noteDe(b, DA.SPE, MODELE_SIMPLE.id);
         expect(chloe.perf).toBe(70);
-        expect(chloe.export).toEqual({ note: 70, statut: 'final' });
+        expect(chloe.export).toEqual({ note: 70, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(b.win.causeNoteNonConstructible(DA.SPE)).toBeNull();
         expect(b.win.simulerIndices(DA.SPE, MODELE_SIMPLE.id).causeNonConstructible).toBeNull();
     });
@@ -952,7 +953,7 @@ describe('lot N4 · #713 : aucun forfait atteint, aucun palier d\'échec créé 
         const b = monterN4(avecEchec);
         const alice = noteDe(b, DA.SOM, avecEchec.id);
         expect(alice.perf).toBe(45);
-        expect(alice.export).toEqual({ note: 45, statut: 'final' });
+        expect(alice.export).toEqual({ note: 45, statut: 'provisoire' });   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         expect(b.win.causeNoteNonConstructible(DA.SOM)).toBeNull();
         expect(noteDe(b, DA.SPE, avecEchec.id).perf).toBe(70);
     });
@@ -1098,7 +1099,7 @@ describe('lot N6 · une pratique NEUVE ne porte plus les champs sans lecteur (#9
             nomEvalVerrouillee: 'Dissertation', seuilVerrou: 90, plafondVerrou: 50, afficherRang: true, afficherMoyenneGroupe: true,
             nbArtefactsPortfolio: 8, portfolioQualitatif: true });
         for (const cle of MORTS_SOM) expect(p0.configuration[cle], cle).toBeUndefined();
-        expect(p0.reglesSpeciales).toEqual(['double_verrou', 'portfolio']);                // la règle vit ici
+        expect(p0.reglesSpeciales).toEqual(['double_verrou']);                // la règle vit ici ; E2 (28 oct. 2026) : « portfolio », retirée, ne s'écrit plus
         expect(p0.configuration.conditions_speciales.map(c => c.type)).toEqual(['double_verrou']);
         activer(b, p0.id);
         expect(noteDe(b, DA.SOM, p0.id).perf).toBe(50);                                   // le verrou calcule toujours

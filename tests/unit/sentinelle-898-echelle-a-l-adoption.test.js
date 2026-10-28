@@ -304,7 +304,7 @@ describe('#898 · B — après le choix : l\'échelle est posée, l\'instance se
             expect(typeof e.comparateur, 'simulerIndices rend un nombre là où il rendait null').toBe('number');
             expect(e.comparateur).toBe(78.52);
             expect(e.profil).toBe(e.comparateur);
-            expect(e.exportStatut).toBe('final');
+            expect(e.exportStatut).toBe('provisoire');   // E7 (28 oct. 2026) : avant « final » ; « Notes finalisées » n'est pas cochée
             expect(e.exportNote).toBe(Math.round(e.comparateur));
         });
         it(`B.2 [${nom}] « N meilleures » + E1 : même parité`, async () => {
@@ -316,7 +316,7 @@ describe('#898 · B — après le choix : l\'échelle est posée, l\'instance se
             // À LA MAIN : 7 à retenir, 6 valides → les six : (85+60+78+70+78+95)/6 = 77,67 ; 0,6 × 77,67 + 0,4 × 82 = 79,4.
             expect(e.comparateur).toBe(79.4);
             expect(e.profil).toBe(e.comparateur);
-            expect(e.exportStatut).toBe('final');
+            expect(e.exportStatut).toBe('provisoire');   // E7 (28 oct. 2026) : avant « final » ; « Notes finalisées » n'est pas cochée
             expect(e.exportNote).toBe(Math.round(e.comparateur));
         });
         it(`B.3 [${nom}] c'est l'échelle CHOISIE qui est posée, pas la première de la liste`, async () => {

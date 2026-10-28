@@ -98,15 +98,20 @@ class PratiqueSommative {
         evaluationsEleve.forEach(evaluation => {
             // Trouver la production correspondante
             const production = productions.find(p => p.id === evaluation.productionId);
-            const ponderation = production?.ponderation || 1; // Défaut 1 si non trouvée
+            const ponderation = this._ponderationDe(production);
 
             // 28 oct. 2026 : une copie non recevable vaut ce que dit le registre (0 par défaut), pas sa note calculée.
             scoreTotal += window.noteRetenueParLeCalcul(evaluation) * ponderation;
             pondTotal += ponderation;
         });
 
+        // E1 : toutes les copies qui comptent sont à pondération 0 — la note n'est pas constructible (ni 0 ni NaN).
+        if (pondTotal <= 0) {
+            return null;
+        }
+
         // Calculer moyenne pondérée
-        const moyennePonderee = pondTotal > 0 ? scoreTotal / pondTotal : 0;
+        const moyennePonderee = scoreTotal / pondTotal;
         const indiceP = moyennePonderee / 100;
 
         // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
@@ -145,16 +150,16 @@ class PratiqueSommative {
             const p = productions.find(pr => pr.id === pid);
             return p?.titre || p?.activiteApprentissage || p?.description || pid;
         };
-        // MÊME règle que calculerPerformance : pondération de la production, défaut 1.
-        const pondProd = (pid) => {
-            const p = productions.find(pr => pr.id === pid);
-            return p?.ponderation || 1;
-        };
+        // MÊME règle que calculerPerformance : la pondération de la production (E1 : 0 vaut 0, absente vaut 1).
+        const pondProd = (pid) => this._ponderationDe(productions.find(pr => pr.id === pid));
 
         // MÊMES critères de validité que calculerPerformance (garantit la parité) — #706.
-        const valides = evaluations.filter(e =>
+        const copiesQuiComptent = evaluations.filter(e =>
             e.etudiantDA === da && window.evaluationEntreDansLaNote(e)
         );
+        // E1 — une production à pondération 0 n'entre pas dans la moyenne : nommée, non comptée (plus bas).
+        const valides = copiesQuiComptent.filter(e => pondProd(e.productionId) > 0);
+        const sansPoids = copiesQuiComptent.filter(e => pondProd(e.productionId) <= 0);
 
         if (valides.length === 0) {
             return null;
@@ -190,6 +195,19 @@ class PratiqueSommative {
             });
         });
 
+        // E1 — pondération 0 : nommée, non comptée.
+        sansPoids.slice().sort(parDate).forEach(e => {
+            resultats.push({
+                label: titreProd(e.productionId),
+                date: e.dateEvaluation || null,
+                niveau: niveauDuRecit(e),
+                enPoints: estEnPoints(e),
+                note: (window.noteRetenueParLeCalcul(e) ?? null),
+                sort: 'ecarte',
+                detail: 'pondération 0 · non comptée'
+            });
+        });
+
         // #706 — brouillons (non verrouillées) et portée nulle : nommés, non comptés.
         evaluations
             .filter(e => e.etudiantDA === da && !e.remplaceeParId
@@ -211,8 +229,10 @@ class PratiqueSommative {
         // Remplacées par reprise : exclues de la moyenne (parité), nommées pour l'honnêteté.
         // #360 — exclure les doublons réconciliés : ils portent remplaceeParId SANS
         // être des reprises ; les étiqueter « par une reprise » serait mensonger.
+        // E4 (28 oct. 2026) — une originale gardée dont la reprise ne compte pas encore est COMPTÉE (plus haut), pas nommée ici.
         evaluations
-            .filter(e => e.etudiantDA === da && e.remplaceeParId && !e.reconcilieParDoublon)
+            .filter(e => e.etudiantDA === da && e.remplaceeParId && !e.reconcilieParDoublon
+                && window.originaleEstRemplacee(e))
             .slice().sort(parDate)
             .forEach(e => {
                 resultats.push({
@@ -720,6 +740,22 @@ class PratiqueSommative {
             return obtenirDonneesSelonMode('productions') || [];
         }
         return db.getSync(cle('productions'), []);
+    }
+
+    /**
+     * E1 (décision de Grégoire, 28 oct. 2026, 14 h 43) — LE POIDS D'UNE PRODUCTION DANS LA MOYENNE : sa pondération,
+     * et une pondération de 0 vaut 0 (la production n'entre pas dans la note). Une pondération absente (champ vide)
+     * ou une production introuvable garde le poids de 1. Avant : `ponderation || 1` lisait 0 comme absent, et un
+     * artefact pesait 1 (SOM-2, SOM-4 du banc du 28 oct.). Se lit au calcul : le stock suit sans écriture.
+     * @param {Object|undefined} production
+     * @returns {number}
+     * @private
+     */
+    _ponderationDe(production) {
+        const brute = production ? production.ponderation : undefined;
+        if (brute === undefined || brute === null || brute === '') return 1;
+        const n = Number(brute);
+        return Number.isFinite(n) ? n : 1;
     }
 
     /**

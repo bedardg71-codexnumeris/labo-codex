@@ -237,7 +237,7 @@ for (const [code, F] of Object.entries(FAMILLES)) {
             expect(R.profil.indiceP).toBe(50);
             const ligneSom = (R.export.lignes || []).find(l => l.includes(F.da));
             expect(ligneSom, 'la ligne de l\'élève est dans le CSV').toBeTruthy();
-            expect(ligneSom).toMatch(/,50,final/);
+            expect(ligneSom).toMatch(/,50,provisoire/);   // E7 (28 oct. 2026) : « provisoire » sans « Notes finalisées » (avant : « final »)
         }
         if (code === 'SPE') {
             expect(R.chemin899, 'le chemin promis par #899 existe dans la page').toMatchObject({ types: true, forfaits: true });
