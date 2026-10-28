@@ -23,6 +23,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -213,11 +214,24 @@ async function gabaritRendu() {
 }
 
 describe('lot de mots 2 · G — trois textes restés faux', () => {
-    it('G1 au lexique de l’onglet Aide : le terme et sa définition', () => {
-        const dt = [...new JSDOM(lire('index.html')).window.document.querySelectorAll('dt.titre-section-aide')]
-            .filter((d) => /^Sous-critères/.test(plat(d.textContent)));
-        expect(dt.map((d) => plat(d.textContent))).toEqual([G1_TERME]);
-        expect(plat(dt[0].nextElementSibling.textContent)).toBe(G1);
+    // ↻ #1152, lot 3 (28 oct. 2026) : le lexique de l'onglet Aide (le glossaire statique) est parti ; G1 passe dans le seul
+    // glossaire, js/accompagnement-contenu-terme.js, sous « Sous-critère » : une seule définition (D5 de l'audit du 24 oct.),
+    // l'élément observable du 19 oct. complété du sens algorithmique. Les phrases de G1 sur ce que porte un sous-critère
+    // restent mot pour mot ; « Configuration : … » cède à l'étape où ils se règlent (remesure du 27 oct.) ; consigne
+    // CONSIGNE-LOT-2026-10-28-aide-lot-3-un-seul-glossaire.md, §2.2 et §2.5.
+    it('G1 au seul glossaire : « Sous-critère », une seule définition', () => {
+        expect([...new JSDOM(lire('index.html')).window.document.querySelectorAll('dt.titre-section-aide')]
+            .filter((d) => /^Sous-critères/.test(plat(d.textContent)))).toEqual([]);
+        const cat = {};
+        const win = { accompagnement: { ajouterEntrees: (e) => Object.assign(cat, e) } };
+        new Function('window', lire('js/accompagnement-contenu-terme.js'))(win);
+        const t = cat['terme-sous-critere'].terme;
+        expect(t.terme).toBe(G1_TERME.replace(/s \(critère algorithmique\)$/, ''));
+        const observable = cat['terme-element-observable'].terme.definition.replace(/ On dit aussi sous-critère\.$/, '');
+        expect(t.definition.startsWith('Un élément observable : ' + observable.charAt(0).toLowerCase() + observable.slice(1))).toBe(true);
+        expect(t.definition).toContain(tranche(G1, 'Chaque sous-critère porte', ' Configuration :'));
+        expect(t.definition.endsWith('Ils se règlent à l’étape « Codes utilisés » du critère.')).toBe(true);
+        expect(lire('js/atelier-algo.js')).toContain("codes: 'Codes utilisés',");
     });
 
     it('G2 sous les sous-critères ; G3 parti (étape 4a), la carte choisie dit son texte', async () => {

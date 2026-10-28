@@ -61,7 +61,8 @@ describe('#426 · l’onglet porte son nouveau nom, partout où il est nommé', 
     it('le glossaire renvoie à Conception, plus à la section « Planification » disparue', () => {
         expect(sourceTerme).not.toContain("voir: 'Planification > Alignement'");
         expect(sourceTerme).not.toContain("voir: 'Planification > Organisateur'");
-        expect(sourceTerme).toContain("voir: 'Conception > Carte d\\'alignement'");
+        // ↻ #1152, lot 3 (28 oct. 2026) : « › » et les libellés de js/config.js (consigne du lot 3, §2.1).
+        expect(sourceTerme).toContain("voir: 'Conception › Carte d\\'alignement'");
     });
 
     it('le CONCEPT « alignement pédagogique » n’a PAS été renommé', () => {

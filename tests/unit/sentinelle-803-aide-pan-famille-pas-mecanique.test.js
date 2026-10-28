@@ -2,10 +2,20 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
 const html = readFileSync(path.join(racine, 'index.html'), 'utf8');
+
+// ↻ #1152, lot 3 (28 oct. 2026) : le glossaire statique de l'Aide est parti ; le seul glossaire est celui de
+// js/accompagnement-contenu-terme.js, exécuté ici comme dans la page. Sa définition de PAN est le choix de Grégoire du
+// 17 sept. (STD et SPE ; la dénotation est une PRÉN, badgée « PAN » par commodité) : « PAN – Dénotation » ne s'exige plus
+// (décision de la consigne CONSIGNE-LOT-2026-10-28-aide-lot-3-un-seul-glossaire.md, §2.2).
+const TERMES = {};
+vm.runInNewContext(readFileSync(path.join(racine, 'js', 'accompagnement-contenu-terme.js'), 'utf8'),
+    { window: { accompagnement: { ajouterEntrees: (e) => Object.assign(TERMES, e) } } });
+const definition = (cle) => TERMES['terme-' + cle].terme.definition;
 
 // SENTINELLE — #803 — l'Aide présentait « les N meilleurs artefacts » comme LA
 // règle des PAN. Or PAN est une FAMILLE de pratiques (STD, SPE, DEN), et « les N
@@ -42,22 +52,21 @@ describe('#803 — l\'Aide dit que PAN est une famille, pas une mécanique', () 
         expect(AIDE).not.toMatch(/sélectionnés? automatiquement par les règles/i);
     });
 
-    it('le glossaire définit PAN comme une famille de pratiques', () => {
-        const dt = AIDE.indexOf('PAN (Pratique Alternative de Notation)');
-        expect(dt).toBeGreaterThan(-1);
-        const definition = AIDE.slice(dt, dt + 900);
-        expect(definition).toMatch(/famille de pratiques/i);
-        // L'acquis de 1.126.1 : la définition nomme les trois familles réglables
-        // au lieu d'une seule mécanique.
-        expect(definition).toMatch(/PAN – Standards/);
-        expect(definition).toMatch(/PAN – Spécifications/);
-        expect(definition).toMatch(/PAN – Dénotation/);
-        expect(definition).not.toMatch(/N meilleurs/);
+    it('le glossaire définit PAN par des pratiques, pas par une mécanique', () => {
+        expect(AIDE).not.toContain('PAN (Pratique Alternative de Notation)');
+        const pan = definition('pan-pratique-alternative-de-notation');
+        expect(pan).toMatch(/Standards \(STD\) et Spécifications \(SPE\)/);
+        expect(pan).toMatch(/La Dénotation \(DEN\) est une PRÉN/);
+        expect(pan).not.toMatch(/N meilleurs/);
     });
 
     it('la sélection est rattachée à la pratique réglée, jamais à une valeur figée', () => {
         expect(AIDE).toMatch(/modalité réglée dans ta pratique/);
-        expect(AIDE).toMatch(/modalité de sélection que tu as réglée/);
+        expect(definition('artefact')).toMatch(/modalité de sélection que tu as réglée/);
+        // L'erreur #803 était restée dans ce glossaire-ci (Portfolio, Artefact) : `sentinelle-803` ne lisait que l'Aide.
+        for (const [cle, entree] of Object.entries(TERMES)) {
+            expect(entree.terme.definition, cle).not.toMatch(/meilleurs sont retenus|N meilleures démonstrations|retient les meilleures/);
+        }
     });
 
     it('l\'Aide n\'attribue aucune étoile aux artefacts retenus', () => {

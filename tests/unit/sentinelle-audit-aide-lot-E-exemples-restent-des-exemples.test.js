@@ -12,6 +12,10 @@ const DEB = html.indexOf('id="section-aide"');
 const FIN = html.indexOf('fin section-aide');
 const AIDE = html.slice(DEB, FIN);
 const TXT = AIDE.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+// ↻ #1152, lot 3 (28 oct. 2026) : l'entrée SRPNF du glossaire statique est versée dans le seul glossaire
+// (consigne CONSIGNE-LOT-2026-10-28-aide-lot-3-un-seul-glossaire.md, §2.3 et §2.5) ; ses deux cadrages l'y suivent.
+const TERME = readFileSync(path.join(racine, 'js', 'accompagnement-contenu-terme.js'), 'utf8');
+const SRPNF = tranche(TERME, "'srpnf': {", '},');
 
 // SENTINELLE — lot E de l'audit de conformité de l'Aide (10 sept. 2026).
 //
@@ -31,8 +35,9 @@ describe('Aide — la pratique de Grégoire reste un exemple, jamais la règle',
     it('les cadrages qui désamorcent l\'exemple sont toujours là', () => {
         // Ces phrases sont ce qui empêche un lecteur de prendre SRPNF ou IDME
         // pour la structure de l'application. Les perdre serait la régression.
-        expect(TXT).toMatch(/et non une structure du logiciel/);
-        expect(TXT).toMatch(/Toute grille de critères fonctionne de la même façon/);
+        expect(SRPNF).toMatch(/et non une structure du logiciel/);
+        expect(SRPNF).toMatch(/Toute grille de critères fonctionne de la même façon/);
+        expect(TXT).not.toMatch(/SRPNF \(Critères\)/);
         expect(TXT).toMatch(/Autres échelles possibles/);
         expect(TXT).toMatch(/adaptable à ton contexte/);
     });

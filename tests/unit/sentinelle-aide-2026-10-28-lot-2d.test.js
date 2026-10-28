@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
@@ -14,7 +13,7 @@ import { tranche } from './_helpers/tranche.js';
 //
 // Ce que le banc confronte, calculé des deux côtés :
 //   · les entrées de chaque partie ⟷ la décision, dans l'ordre ; `modelisation` et `criteres`, absorbées, absentes ;
-//     `glossaire-statique` (lot 3) intacte, à l'empreinte près ;
+//     `glossaire-statique` intacte au lot 2d, à l'empreinte près, puis partie au lot 3 ;
 //   · le texte visible des trois parties ⟷ les mots de l'ancien écran et les affirmations que le dossier a dites fausses ;
 //   · chaque libellé cité entre « » dans `codex`, `export-import`, `partage` et `collaboration` ⟷ l'écran, lu dans
 //     index.html (hors de l'Aide, attributs compris) et dans js/ ;
@@ -61,13 +60,10 @@ const aLEcran = (libelle) => pageHorsAide.includes(libelle) || sourceHorsAide.in
 const PARTIES = {
     labo: ['labo', 'rai-solo', 'grille-depistage', 'pan', 'bilan-reflexif'],
     'codex-archives': ['codex', 'export-import', 'partage', 'collaboration'],
-    reference: ['glossaire', 'glossaire-statique', 'faq', 'problemes', 'ressources'],
+    // ↻ #1152, lot 3 (28 oct. 2026) : `glossaire-statique` est partie (consigne du lot 3, §1).
+    reference: ['glossaire', 'faq', 'problemes', 'ressources'],
 };
-const DU_LOT = Object.values(PARTIES).flat().filter((id) => id !== 'glossaire-statique');
-
-// `glossaire-statique` part au lot 3 (un seul glossaire) : ce lot n'y touche pas. Empreinte de sa tranche à `0e8da317`,
-// inchangée par le lot.
-const EMPREINTE_GLOSSAIRE_STATIQUE = '55cfac01e7157b857af3d834955f7e39f1aea989f7b7044b3de556f69ec07cf8';
+const DU_LOT = Object.values(PARTIES).flat();
 
 describe('#1152 lot 2d · la forme des trois parties', () => {
     it('chaque partie a les entrées de la décision, dans cet ordre ; `modelisation` et `criteres` n\'existent plus nulle part', () => {
@@ -76,9 +72,10 @@ describe('#1152 lot 2d · la forme des trois parties', () => {
         expect(html).not.toContain('accordeon-aide-criteres');
     });
 
-    it('`glossaire-statique` est intacte (lot 3)', () => {
-        const t = tranche(html, '<div class="carte accordeon bg-fff9e6" id="accordeon-aide-glossaire-statique">', '<!-- fin accordeon-contenu glossaire -->');
-        expect(createHash('sha256').update(t).digest('hex')).toBe(EMPREINTE_GLOSSAIRE_STATIQUE);
+    // ↻ #1152, lot 3 (28 oct. 2026) : ce lot ne touchait pas `glossaire-statique` (empreinte de sa tranche à `0e8da317` :
+    // 55cfac01…07cf8) ; elle est partie au lot 3 (consigne du lot 3, §1), dont le banc vérifie ce qui en a été versé.
+    it('`glossaire-statique` est partie au lot 3', () => {
+        expect(html).not.toContain('accordeon-aide-glossaire-statique');
     });
 
     it('les entrées du Labo qui nomment un sous-onglet (« Navigation : Labo → … ») suivent l\'ordre de config.js', () => {

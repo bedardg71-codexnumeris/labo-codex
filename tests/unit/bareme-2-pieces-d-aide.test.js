@@ -77,13 +77,19 @@ describe('barème 2 · le fichier des textes est bien lu', () => {
 describe('barème 2 · A — le lexique', () => {
     const terme = (k) => cat['terme-' + k] && cat['terme-' + k].terme;
 
-    it('A1 « Barème » et A2 « Tranche », termes neufs, catégorie Structure, voir Conception > Grilles', () => {
-        expect(terme('bareme')).toMatchObject({ terme: 'Barème', categorie: 'Structure', voir: 'Conception > Grilles', definition: un('A1') });
-        expect(terme('tranche')).toMatchObject({ terme: 'Tranche', categorie: 'Structure', voir: 'Conception > Grilles', definition: un('A2') });
+    // ↻ #1152, lot 3 (28 oct. 2026) : les chemins « Voir : » prennent les libellés de js/config.js (consigne du lot 3, §2.1).
+    it('A1 « Barème » et A2 « Tranche », termes neufs, catégorie Structure, voir Conception › Grilles de critères', () => {
+        expect(terme('bareme')).toMatchObject({ terme: 'Barème', categorie: 'Structure', voir: 'Conception › Grilles de critères', definition: un('A1') });
+        expect(terme('tranche')).toMatchObject({ terme: 'Tranche', categorie: 'Structure', voir: 'Conception › Grilles de critères', definition: un('A2') });
     });
 
     it('A3 et A4 remplacent les définitions d’« Échelle de performance » et de « Type de critère »', () => {
-        expect(terme('echelle-de-performance').definition).toBe(un('A3'));
+        // ↻ #1152, lot 3 (28 oct. 2026) : A3 reste mot pour mot, sauf la phrase des niveaux par défaut, que la remesure
+        // du 27 oct. a trouvée fausse (cinq niveaux, « PS – Préstructurel » en tête, depuis e316b1bc ; consigne du lot 3, §2.1).
+        const A3_NIVEAUX = 'Par défaut, quatre niveaux alignés sur IDME : Incomplet, Développement, Maîtrise, Étendu.';
+        expect(un('A3')).toContain(A3_NIVEAUX);
+        expect(terme('echelle-de-performance').definition).toBe(un('A3').replace(A3_NIVEAUX,
+            'L’« Échelle de départ (IDME) » que l’application installe a cinq niveaux : « PS – Préstructurel » en tête, puis Incomplet, Développement, Maîtrise, Étendu.'));
         // ↻ 21 oct. : la parenthèse d'« algorithmique » est réglée par le lot de mots (critere-algorithmique-mots.test.js, A1).
         const avantAlgo = (t) => t.slice(0, t.indexOf('algorithmique ('));
         expect(avantAlgo(terme('type-de-critere').definition)).toBe(avantAlgo(un('A4')));
