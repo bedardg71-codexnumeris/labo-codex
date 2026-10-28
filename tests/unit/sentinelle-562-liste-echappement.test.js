@@ -88,7 +88,9 @@ describe('#562 · B — cliquet : aucune interpolation non échappée hors liste
         'labelAssoc', 'label', "options.join('')",
         // #1055 : la marque « Diagnostique », constante de l'entité (`ProductionDiagnostique.marqueHTML`),
         // posée par le constructeur de la ligne ; aucune donnée d'utilisateur n'y entre.
-        'ligne.marque'
+        'ligne.marque',
+        // 28 oct. 2026 (seconde retouche de #1175) : la cellule du niveau, extraite ; son corps est scanné ci-dessous.
+        '_celluleNiveau(ligne)'
     ]);
     function corps(src, nom) {
         const i = src.indexOf('function ' + nom + '(');
@@ -126,7 +128,7 @@ describe('#562 · B — cliquet : aucune interpolation non échappée hors liste
             return sous.length > 0 && sous.every(ok);
         };
         const suspects = [];
-        for (const nom of ['genererLigneHTML', 'genererDropdownActions']) {
+        for (const nom of ['genererLigneHTML', 'genererDropdownActions', '_celluleNiveau']) {
             for (const expr of interpolations(corps(src, nom))) {
                 if (!ok(expr)) suspects.push(nom + ' : ${' + expr.slice(0, 80) + '}');
             }

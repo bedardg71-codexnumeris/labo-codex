@@ -1109,9 +1109,11 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                     if (estNouvelleReprise && evaluation.repriseDeId) {
                         var originale = evaluations.find(function(e) { return e.id === evaluation.repriseDeId; });
                         if (originale) {
+                            // 28 oct. 2026 — une originale non recevable : « (était Non recevable (Plagiat)) », ni niveau ni note.
+                            const libelleOriginale = _libelleNonRecevable(originale);
                             scoresOriginaux = {
-                                niveauFinal: _niveauAffiche(originale) || '-',   // #941 lot S1
-                                noteFinale: originale.noteFinale != null ? originale.noteFinale : null
+                                niveauFinal: libelleOriginale || _niveauAffiche(originale) || '-',   // #941 lot S1
+                                noteFinale: !libelleOriginale && originale.noteFinale != null ? originale.noteFinale : null
                             };
                         }
                     }
@@ -1136,7 +1138,9 @@ function construireLignesEvaluations(evaluations, productions, etudiants) {
                         cartoucheNom: obtenirNomCartouche(evaluation.grilleId, evaluation.cartoucheId),
                         note: obtenirNoteAffichee(evaluation, estPAN),
                         noteChiffree: evaluation.noteFinale != null ? evaluation.noteFinale : null,
-                        niveauFinal: _niveauAffiche(evaluation) || '-',   // #941 lot S1 — aucun niveau pour une copie en points
+                        // #941 lot S1 — aucun niveau pour une copie en points ; 28 oct. 2026 — ni pour une copie non recevable
+                        // (la colonne dit « -- », comme la note ; le tri ne lui trouve pas de rang)
+                        niveauFinal: statut === 'non-recevable' ? '-' : (_niveauAffiche(evaluation) || '-'),
                         // #575 — le code voyage avec SON échelle. Sans elle, le
                         // tri de la colonne « Niveau » n'a aucun ordre à lire.
                         echelleId: evaluation.echelleId || null,
@@ -1314,6 +1318,20 @@ function obtenirNomCartouche(grilleId, cartoucheId) {
 function _niveauAffiche(evaluation) {
     if (typeof niveauFinalAffichable === 'function') return niveauFinalAffichable(evaluation);
     return (evaluation && evaluation.niveauFinal) || '';
+}
+
+/**
+ * La colonne du niveau d'une ligne. 28 oct. 2026 (seconde retouche de #1175) — une copie non recevable dit « -- »,
+ * comme sa note : ses niveaux ne se lisent nulle part (décision de Grégoire, 6 h 46).
+ */
+function _celluleNiveau(ligne) {
+    if (ligne.statut === 'non-recevable') return '<strong style="color: var(--gris-clair);">--</strong>';
+    return ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${echapperHtml(ligne.niveauFinal)}</strong>` : '-';
+}
+
+/** 28 oct. 2026 — le libellé d'une copie non recevable (registre, `libelleCopieNonRecevable`), null sinon. */
+function _libelleNonRecevable(evaluation) {
+    return (typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(evaluation)) || null;
 }
 
 function obtenirNoteAffichee(evaluation, estPAN) {
@@ -1645,7 +1663,7 @@ function genererLigneHTML(ligne) {
                     : echapperHtml(ligne.productionNom)}${ligne.marque}</td>
             <td class="td-center">${badgeJeton}</td>
             <td class="td-center">${affichageNiveau}</td>
-            <td class="td-center">${ligne.niveauFinal && ligne.niveauFinal !== '-' ? `<strong>${echapperHtml(ligne.niveauFinal)}</strong>` : '-'}</td>
+            <td class="td-center">${_celluleNiveau(ligne)}</td>
             <td class="td-center">${affichageNoteChiffree}</td>
             <td class="td-center">${boutons}</td>
         </tr>

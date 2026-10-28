@@ -216,7 +216,8 @@ describe('Le formulaire — la note et le niveau cèdent leur place au libellé 
 
     it('le CSS masque la note, le niveau, la portée et la ligne de la note remise sous la classe ; la couleur du niveau n’est pas posée', () => {
         const css = readFileSync(path.join(RACINE, 'styles.css'), 'utf8');
-        expect(css).toMatch(/\.travaux-panneau-droite\.copie-non-recevable #noteFinale1 > \.u-flex-between,\s*\.travaux-panneau-droite\.copie-non-recevable #porteeNote1,\s*\.travaux-panneau-droite\.copie-non-recevable #noteRemise1 \{\s*display: none;/);
+        // ↻ seconde retouche : la même règle masque aussi les cartes des critères (essai plus bas)
+        expect(css).toMatch(/\.travaux-panneau-droite\.copie-non-recevable #noteFinale1 > \.u-flex-between,\s*\.travaux-panneau-droite\.copie-non-recevable #porteeNote1,\s*\.travaux-panneau-droite\.copie-non-recevable #noteRemise1,/);
         const calcul = readFileSync(path.join(RACINE, 'js/evaluation-calcul.js'), 'utf8');
         expect(calcul).toContain("if (noteContainer && _niveauColorable(niveauGlobal, enPoints)) {");
         expect(calcul).toContain("return niveauGlobal !== '--' && !enPoints && !nonRecevable;");
@@ -238,5 +239,100 @@ describe('L’Aide — la ligne de la procédure, mot pour mot ; les quatre lign
         const aide = readFileSync(path.join(RACINE, 'index.html'), 'utf8');
         expect(aide).toContain('Non recevable, ton évaluation est gardée, mais la copie montre «&nbsp;Non recevable&nbsp;» au lieu de sa note et de ses niveaux, jusque sur le PDF&nbsp;; dans la note, elle vaut ce que dit la règle ci-dessus. Verrouille ensuite.');
         expect(aide).not.toContain('tes critères gardent ton évaluation');
+    });
+});
+
+// ── SECONDE RETOUCHE (relecture de Cowork, 28 oct., 7 h 17) — la décision tenue partout : trois endroits montraient encore
+// les niveaux d'une copie non recevable (les menus du formulaire, la colonne du niveau de la Liste, le bilan d'une copie
+// postérieure). Un quatrième, mesuré en chemin : le badge « Reprise » d'une copie dont l'originale est non recevable.
+
+describe('Seconde retouche — le bilan d’une copie POSTÉRIEURE : la copie non recevable antérieure n’y entre pas', () => {
+    const data = () => chargerScript('js/synthese-retroaction-data.js', {
+        db: { getSync: (k, d) => d, setSync() {} }, cle: (k) => k, libelleCopieNonRecevable: registre.libelleCopieNonRecevable
+    }).syntheseRetroactionData;
+
+    it('`historiqueAnterieur` (la règle unique du PDF et de l’écran) l’écarte ; témoin recevable, il la garde', () => {
+        const h = (ev) => data().historiqueAnterieur([ev, AUTRE], { da: '1028001', idCopie: 'EV2', date: AUTRE.dateEvaluation }).map(e => e.id);
+        expect(h(copie())).toEqual([]);
+        expect(h(copie({ statutIntegrite: 'ia' }))).toEqual([]);
+        expect(h(copie({ statutIntegrite: 'recevable' }))).toEqual(['EV1']);
+        expect(h(copie({ statutIntegrite: 'soupcon' }))).toEqual(['EV1']);
+    });
+
+    it('le PDF de la copie suivante : ni « Tu as progressé en Structure », ni « Progrès : M → … » ; témoin recevable, le progrès se lit', () => {
+        const ev = copie();
+        // TÉMOIN — la copie antérieure recevable : « Tu as progressé en Structure » (M → E) se lit sur elle.
+        const temoin = pdf([copie({ statutIntegrite: 'recevable' }), AUTRE]);
+        expect(temoin.texte(AUTRE)).toContain('Tu as progressé en Structure');
+        const banc = pdf([ev, AUTRE]);
+        const t = banc.texte(AUTRE);
+        expect(t).not.toContain('Tu as progressé');
+        expect(t).not.toMatch(/Progrès : M/);
+        banc.intactes();
+    });
+});
+
+describe('Seconde retouche — la Liste des évaluations : la colonne du niveau dit « -- », comme la note', () => {
+    const liste = () => chargerScript('js/liste-evaluations.js', {
+        db: { get: async () => null, getSync: (k, d) => (d !== undefined ? d : null), set: async () => {}, setSync: () => {} },
+        cle: (k) => 'test_' + k, echapperHtml: (t) => String(t == null ? '' : t),
+        obtenirLibelleStatut: (s) => 'Statut ' + s, obtenirDonneesSelonMode: () => [],
+        libelleCopieNonRecevable: registre.libelleCopieNonRecevable,
+        ProductionDiagnostique: { estDiagnostique: () => false, marqueHTML: () => '' },
+        notifications: { succes() {}, erreur() {}, info() {}, warning() {} }
+    });
+    const ETUDIANTS = [{ da: '1028001', nom: 'Fictif', prenom: 'Élève', groupe: '01' }];
+    const PRODS = [{ id: 'P1', titre: 'Dissertation fictive', type: 'travail' }];
+    // Les cellules d'une ligne, en texte : la colonne du niveau est l'avant-dernière avant la note et les actions.
+    const cellules = (html) => [...new JSDOM(`<table><tbody>${html}</tbody></table>`).window.document.querySelectorAll('td')]
+        .map(td => td.textContent.replace(/\s+/g, ' ').trim());
+
+    it('« Plagiat » : la ligne ne porte pas « M » (donnée et rendu) ; la note dit « -- » ; témoin recevable : « M »', () => {
+        const win = liste();
+        const [ligne] = win._construireLignesEvaluations([copie({ statutRemise: 'remis' })], PRODS, ETUDIANTS);
+        expect([ligne.statut, ligne.niveauFinal]).toEqual(['non-recevable', '-']);
+        const cols = cellules(win._genererLigneHTML(ligne));
+        expect(cols).not.toContain('M');
+        expect(cols.filter(c => c === '--')).toHaveLength(2);   // le niveau ET la note
+        const [temoin] = win._construireLignesEvaluations([copie({ statutRemise: 'remis', statutIntegrite: 'recevable' })], PRODS, ETUDIANTS);
+        expect(temoin.niveauFinal).toBe('M');
+        expect(cellules(win._genererLigneHTML(temoin))).toContain('M');
+    });
+
+    it('le badge « Reprise » d’une originale non recevable : « (était Non recevable (Plagiat)) », ni M ni 87,5 ; témoin recevable', () => {
+        const win = liste();
+        const originale = copie({ remplaceeParId: 'EV_REPRISE', statutRemise: 'remis' });
+        const reprise = copie({ id: 'EV_REPRISE', repriseDeId: 'EV1', statutIntegrite: 'recevable', statutRemise: 'remis', noteFinale: 70, niveauFinal: 'D' });
+        const ligneReprise = (orig) => win._construireLignesEvaluations([orig, reprise], PRODS, ETUDIANTS).find(l => l.evaluationId === 'EV_REPRISE');
+        expect(ligneReprise(originale).scoresOriginaux).toEqual({ niveauFinal: 'Non recevable (Plagiat)', noteFinale: null });
+        const html = win._genererLigneHTML(ligneReprise(originale));
+        expect(html).toContain('(était Non recevable (Plagiat))');
+        expect(html).not.toMatch(/87[,.]5/);
+        expect(ligneReprise(Object.assign({}, originale, { statutIntegrite: 'recevable' })).scoresOriginaux).toEqual({ niveauFinal: 'M', noteFinale: 87.5 });
+    });
+});
+
+describe('Seconde retouche — le formulaire : les cartes des critères se masquent sous la classe ; masquées, pas vidées', () => {
+    it('le CSS masque les cartes des critères et l’avis des critères hors grille ; l’avis « Travail non recevable » n’est pas visé', () => {
+        const css = readFileSync(path.join(RACINE, 'styles.css'), 'utf8');
+        expect(css).toMatch(/\.travaux-panneau-droite\.copie-non-recevable #noteRemise1,\s*\.travaux-panneau-droite\.copie-non-recevable #listeCriteresGrille1 \.eval-critere-carte,\s*\.travaux-panneau-droite\.copie-non-recevable #avisCriteresHorsGrille \{\s*display: none;/);
+        expect(css).not.toMatch(/copie-non-recevable[^{]*#message-non-recevable/);
+        expect(css).not.toMatch(/copie-non-recevable #listeCriteresGrille1\s*[,{]/);
+    });
+
+    it('les menus gardent leurs valeurs sous la classe : poser puis retirer le statut ne les touche pas', () => {
+        const f = formulaire();
+        const liste = f.document.getElementById('listeCriteresGrille1');
+        liste.innerHTML = '<div class="eval-critere-carte"><select id="eval_c1"><option value=""></option><option value="E">E</option></select></div>'
+            + '<div class="eval-critere-carte"><select id="eval_c2"><option value=""></option><option value="M">M</option></select></div>';
+        f.document.getElementById('eval_c1').value = 'E';
+        f.document.getElementById('eval_c2').value = 'M';
+        f.poser('plagiat');
+        expect(f.panneau.classList.contains('copie-non-recevable')).toBe(true);
+        expect(liste.querySelectorAll('.eval-critere-carte')).toHaveLength(2);
+        expect([f.document.getElementById('eval_c1').value, f.document.getElementById('eval_c2').value]).toEqual(['E', 'M']);
+        f.poser('recevable');
+        expect(f.panneau.classList.contains('copie-non-recevable')).toBe(false);
+        expect([f.document.getElementById('eval_c1').value, f.document.getElementById('eval_c2').value]).toEqual(['E', 'M']);
     });
 });

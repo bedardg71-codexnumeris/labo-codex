@@ -1580,6 +1580,9 @@
         return evaluations
             .filter(e => e && e.etudiantDA === da && !e.remplaceeParId && !(idCopie && e.id === idCopie))
             .filter(e => isNaN(limite) || !e.dateEvaluation || !(quand(e) > limite))
+            // 28 oct. 2026 (seconde retouche) — une copie non recevable n'y entre pas : ses niveaux ne se lisent nulle
+            // part (décision de Grégoire, 6 h 46), ni dans « Points récurrents » ni dans « Progrès » d'une copie suivante.
+            .filter(e => !libelleNonRecevable(e))
             .sort((a, b) => quand(b) - quand(a))
             .map(sansNiveauxSiTravailEnCours);
     }
