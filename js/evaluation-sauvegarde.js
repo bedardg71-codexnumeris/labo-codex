@@ -587,7 +587,8 @@ const AVIS_COPIE_NON_RECEVABLE = Object.freeze({
  * LEUR PLACE à son libellé (`libelleCopieNonRecevable`, pratique-registre.js), comme dans la Liste des évaluations.
  * Une classe sur le panneau, comme le statut incomplet : `calculerNote` écrit toujours la note et le niveau, masqués,
  * parce que la sauvegarde relit `niveauProduction1` — y écrire le libellé l'aurait enregistré comme `niveauFinal`.
- * Les menus des critères restent : c'est l'évaluation de l'enseignant·e, gardée. Rien ne s'écrit dans la copie.
+ * Les cartes des critères se masquent sous la même classe (seconde retouche, verdict de Cowork du 28 oct., 7 h 17) :
+ * masquées, pas vidées — l'évaluation de l'enseignant·e, gardée, revient quand le statut part. Rien ne s'écrit dans la copie.
  * @param {string|null} libelle - null : la copie est recevable
  */
 function afficherCopieNonRecevable(libelle) {

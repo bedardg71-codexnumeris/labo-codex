@@ -15,6 +15,8 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //   · ce que voient l'enseignant et l'élève (la Liste, le PDF) est MESURÉ et journalisé, pas changé (§ 2.4).
 //   ↻ RETOUCHE (verdict du 28 oct., décision 1 de Grégoire, 6 h 46) : sur le formulaire et le PDF, la note et les niveaux
 //     cèdent leur place à « Non recevable (Plagiat) » ; la rétroaction écrite reste ; la base n'est pas touchée.
+//   ↻ SECONDE RETOUCHE (relecture de Cowork, 28 oct., 7 h 17) : les menus des critères se masquent aussi (masqués, pas
+//     vidés : retirer le statut rend E et M) ; la colonne du niveau de la Liste dit « -- ».
 // Noms fictifs.
 
 const T = 't1028';
@@ -106,6 +108,27 @@ test('sommative · « Non recevable (Plagiat) » puis verrouillée : les critèr
     expect(apresStatut.avis).toContain('Travail non recevable');
     expect(apresStatut.courante).toBe(87.5);
 
+    // Seconde retouche — aucun niveau de critère visible ; retirer le statut rend E et M, puis on le repose.
+    const menusVus = () => page.evaluate(() => ['c1', 'c2'].map(id => {
+        const el = document.getElementById('eval_' + id);
+        return el && el.offsetParent !== null && getComputedStyle(el).display !== 'none' ? el.value : null;
+    }));
+    expect(await menusVus(), 'statut posé : aucun menu de critère visible').toEqual([null, null]);
+    const panneauVu = await page.evaluate(() => document.getElementById('travaux-eval-droite').innerText.replace(/\s+/g, ' '));
+    // eslint-disable-next-line no-console
+    console.log('1028 · le panneau, « Plagiat » :', panneauVu.slice(0, 1200));
+    const poser = (statut) => page.evaluate((v) => {
+        const s = document.getElementById('statutIntegrite');
+        s.value = v;
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+    }, statut);
+    await poser('recevable');
+    await page.waitForTimeout(1500);
+    expect(await menusVus(), 'statut retiré : E et M reviennent').toEqual(['E', 'M']);
+    await poser('plagiat');
+    await page.waitForTimeout(2500);
+    expect(await menusVus()).toEqual([null, null]);
+
     // Verrouiller.
     await page.evaluate(() => window.basculerVerrouillageEvaluationCourante());
     await page.waitForTimeout(2500);
@@ -133,6 +156,8 @@ test('sommative · « Non recevable (Plagiat) » puis verrouillée : les critèr
     // eslint-disable-next-line no-console
     console.log('1028 · la Liste (ligne EV1) :', JSON.stringify(liste));
     expect(liste, 'la ligne de la copie se voit').not.toBeNull();
+    expect(liste, 'seconde retouche : aucune cellule ne dit « M »').not.toContain('M');
+    expect(liste.filter(c => c === '--'), 'le niveau et la note disent « -- »').toHaveLength(2);
 
     await page.evaluate(() => window.modifierEvaluation('EV1'));
     await attendreRepos(page);

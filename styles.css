@@ -26437,10 +26437,15 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 /* Copie non recevable (28 oct. 2026, décision de Grégoire) — la note, le niveau et ce qui se dit de la note cèdent leur
-   place au libellé `#libelleNonRecevable1` ; une classe sur le panneau, comme le statut incomplet. Les critères restent. */
+   place au libellé `#libelleNonRecevable1` ; une classe sur le panneau, comme le statut incomplet. Seconde retouche
+   (verdict de Cowork, 28 oct., 7 h 17) : les cartes des critères aussi (menu, ligne du calcul, points et barème portent
+   tous un niveau), et l'avis des critères hors grille, qui les nomme avec leur niveau. Masquées, pas vidées : la
+   sauvegarde relit leurs valeurs, et retirer le statut les rend. L'avis « Travail non recevable » reste. */
 .travaux-panneau-droite.copie-non-recevable #noteFinale1 > .u-flex-between,
 .travaux-panneau-droite.copie-non-recevable #porteeNote1,
-.travaux-panneau-droite.copie-non-recevable #noteRemise1 {
+.travaux-panneau-droite.copie-non-recevable #noteRemise1,
+.travaux-panneau-droite.copie-non-recevable #listeCriteresGrille1 .eval-critere-carte,
+.travaux-panneau-droite.copie-non-recevable #avisCriteresHorsGrille {
     display: none;
 }
 
