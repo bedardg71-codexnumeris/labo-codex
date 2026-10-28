@@ -55,3 +55,15 @@ Un commit pour le code, un pour les docs ; demande de relecture : `plans de trav
 2. **La colonne « Statut » de la Liste** dit « 0 » pour une copie non recevable (`js/liste-evaluations.js`, `affichageNiveau`) : en standards, ce 0 est faux, et la décision de 6 h 46 ne montre ni note ni niveau. Elle dit « -- », comme la note et le niveau (décision de Cowork).
 
 Un commit pour le code, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-copie-non-recevable-note-retouche-3.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la troisième retouche (Cowork, 28 oct., 8 h 20)
+
+> Sur `main` = `dd5e1a5e`. Lu : la demande de relecture de la troisième retouche, le diff de `087bd396` (`js/evaluation-jetons.js`, `js/liste-evaluations.js`).
+
+**Acceptée.** La reprise ne recopie plus `statutIntegrite` ni `notesIntegrite` ; lue sans statut, elle est « Recevable » (`e.statutIntegrite || 'recevable'`). La colonne « Statut » dit « -- ».
+
+**Le stock (question de la demande)** : réponse A, décision de Cowork. Grégoire n'a qu'une copie non recevable cet automne (dit le 28 oct., 6 h 10) : si une reprise lui a été accordée, il remet « Recevable » à la main dans son menu. Aucun outil à la console.
+
+**Quatrième retouche, courte (Claude Code), par cohérence avec la décision de Grégoire de 6 h 46** (« ses niveaux ne se lisent nulle part ») : **une reprise accordée à une copie non recevable part vide**, sans les niveaux ni la note de son originale ; une reprise ordinaire garde son comportement (elle part des niveaux de l'originale, pour qu'on les modifie). Ce qui se vide : mesure-le (niveaux des critères, note, niveau final, points, comptes ; la rétroaction suit ce que la cartouche génère pour une évaluation vide), et dis-le. L'originale ne bouge pas. Essais : reprise d'une non recevable, aucun niveau ni note ; reprise d'une recevable, inchangée ; break-test. Décision de Cowork annoncée à Grégoire, qui peut s'y opposer.
+
+Un commit pour le code, un pour les docs ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-28-copie-non-recevable-note-retouche-4.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
