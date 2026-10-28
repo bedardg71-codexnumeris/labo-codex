@@ -10208,7 +10208,7 @@
                             <div class="alerte alerte-information u-mt-10">
                                 <h4 class="u-mb-10 u-texte-bleu">Sommative</h4>
                                 <p>La note est la moyenne pondérée des évaluations.</p>
-                                <p class="u-mt-5"><strong>À régler&nbsp;:</strong> une règle spéciale, s'il y a lieu («&nbsp;Verrou sur une évaluation&nbsp;» ou «&nbsp;Portfolio de progression&nbsp;»)&nbsp;; la pondération de chaque production se règle dans Conception → Productions étudiantes.</p>
+                                <p class="u-mt-5"><strong>À régler&nbsp;:</strong> une règle spéciale, s'il y a lieu («&nbsp;Verrou sur une évaluation&nbsp;»)&nbsp;; la pondération de chaque production se règle dans Conception → Productions étudiantes.</p>
                             </div>
 
                             <div class="alerte alerte-information">
@@ -11649,13 +11649,13 @@
     <!-- #717 : éditeur des cibles DEN, commun à l'assistant et à la gestion des pratiques -->
     <script src="js/pratiques/editeur-cibles.js?v=20261004b"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
-    <script src="js/pratiques/pratique-configurable.js?v=20261027a"></script>
-    <script src="js/pratiques/pratique-registre.js?v=20261027b"></script>
+    <script src="js/pratiques/pratique-configurable.js?v=20261027b"></script>
+    <script src="js/pratiques/pratique-registre.js?v=20261027c"></script>
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
-    <script src="js/pratiques/pratique-pan-standards.js?v=20261027a"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=20261027a"></script>
+    <script src="js/pratiques/pratique-pan-standards.js?v=20261027b"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=20261027b"></script>
     <script src="js/pratiques/pratique-pan-specifications.js?v=20261027a"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
@@ -11667,7 +11667,7 @@
     <script src="js/pratiques/pratiques-exploration.js?v=20260821a"></script>
 
     <!-- Attributs de construction de la note (#326 R3) — config résolue → lignes de construction par famille. Pur, lecture seule. -->
-    <script src="js/pratiques/construction-attributs.js?v=20261022b"></script>
+    <script src="js/pratiques/construction-attributs.js?v=20261027a"></script>
 
     <!-- Générateur de profils-types (#326 R2) — corpus fictif déterministe dérivé de l'échelle (banc de décision). Pur. -->
     <script src="js/pratiques/profils-types-generateur.js?v=20260913b"></script>
@@ -11680,7 +11680,7 @@
 
     <!-- Interface de gestion des pratiques configurables -->
     <script src="js/pratiques.js?v=20261014a"></script> <!-- #326 (28 juin) : T3 copie en forme canonique + T4 dérivation = arbre sans wizard ; Beta 99.38 b0508-1425 : nettoyage wizard V1 fantôme (-1772 l.) -->
-    <script src="js/wizard-pratique-v2.js?v=20261022b"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
+    <script src="js/wizard-pratique-v2.js?v=20261027a"></script> <!-- #345 (22 juin) : lien « Ouvrir le comparateur » du récap gaté · #577 : l'étape « Échelle de performance » pose les deux repères de maîtrise de l'échelle choisie -->
     <script src="js/objectifs.js?v=20261022b"></script> <!-- Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20261017a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
@@ -11694,7 +11694,7 @@
     <script src="js/profil-etudiant-rapport.js?v=20261022b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20261022b"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
-    <script src="js/profil-etudiant-actions.js?v=20261027a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
+    <script src="js/profil-etudiant-actions.js?v=20261027b"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
     <script src="js/profil-etudiant-sections-affichage.js?v=20261025k"></script> <!-- #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20261022b"></script>
     <script src="js/presences-rapport.js?v=20261022b"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
@@ -11829,7 +11829,7 @@
     <script src="js/accompagnement-contenu-terme.js?v=20261027a"></script> <!-- #1152, lot 3, retouche (28 oct.) : « en haut de l’écran », SRPNF validé · #1152, lot 3 (28 oct.) : le seul glossaire, le statique y est versé, les chemins aux libellés de config.js · #1120, lot 2 (20 oct.) : « Barème » et « Tranche » au lexique, A3 et A4 · L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
     <script src="js/guides-pedagogiques.js?v=20261027b"></script> <!-- Le guide SOLO (27 oct.) : « PS ↔ Préstructurel », le non recevable sorti de la correspondance · Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20261027a"></script> <!-- #1075, point 1 (22 oct.) : le DA affiché en anonymisation, libellé et CSV · Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
-    <script src="js/export-resultats-finaux.js?v=20260923b"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
+    <script src="js/export-resultats-finaux.js?v=20261027a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 
     <!-- PRIORITÉ 8: Initialisation finale (TOUJOURS EN DERNIER) -->
     <script src="js/main.js?v=20261027b"></script> <!-- #374-bis : re-scan de la fusion à db-ready (congés IDB-only, 6 août) -->

@@ -113,9 +113,9 @@ const CHAMPS_RETIRES = ['nbPairesRemplacement', 'infoRemplacement', 'conditionPl
     'infoPlafonnement', 'reprisesPermises', 'infoReprisesPedago'];
 
 describe('#903 · A — les cases ont quitté l\'assistant', () => {
-    it('A.1 « Utilises-tu des règles spéciales ? » : verrou, portfolio, aucune — rien d\'autre', () => {
+    it('A.1 « Utilises-tu des règles spéciales ? » : verrou, aucune — rien d\'autre (E2, 28 oct. 2026 : le portfolio sort aussi)', () => {
         const options = win.ETAPES_WIZARD['regles-sommative'].champs[0].options.map(o => o.value);
-        expect(options).toEqual(['double_verrou', 'portfolio', 'aucune']);
+        expect(options).toEqual(['double_verrou', 'aucune']);
     });
     it('A.2 aucune étape n\'offre un des sept champs retirés, même si les clés retirées traînent dans les réponses', () => {
         const reponses = { reglesSommatives: ['remplacement', 'double_verrou', 'portfolio', 'plafonnement'] };
@@ -126,10 +126,11 @@ describe('#903 · A — les cases ont quitté l\'assistant', () => {
             expect(champs.map(c => c.id).filter(id => CHAMPS_RETIRES.includes(id))).toEqual([]);
         }
         expect(vus).toBeGreaterThan(20);           // le banc a bien parcouru des champs
-        // Le verrou et le portfolio, eux, sont toujours configurés.
+        // Le verrou, lui, est toujours configuré.
         const ids = win.ETAPES_WIZARD['config-sommative-regles'].getChampsDynamiques(reponses).map(c => c.id);
-        // #900 (lot N6) : « nombre d'artefacts » et « qualitatif » du portfolio sommatif sont retirés (aucun lecteur).
-        expect(ids).toEqual(['infoVerrou', 'nomEvalVerrouillee', 'seuilVerrou', 'plafondVerrou', 'infoPortfolio']);
+        // #900 (lot N6) : « nombre d'artefacts » et « qualitatif » du portfolio sommatif sont retirés (aucun lecteur) ;
+        // E2 (28 oct. 2026) : son texte d'information aussi (`infoPortfolio`), la règle n'ayant aucun calcul.
+        expect(ids).toEqual(['infoVerrou', 'nomEvalVerrouillee', 'seuilVerrou', 'plafondVerrou']);
     });
     it('A.3 les phrases qui promettaient ces règles ne sont plus dans l\'assistant', () => {
         const src = lire('js/wizard-pratique-v2.js');
@@ -194,9 +195,10 @@ describe('#903 · C — une pratique DÉJÀ enregistrée garde ce qu\'elle porte
         expect(canon(apres)).toBe(canon(STOCK_STD));
     });
     it('C.4 une VRAIE retouche passe, et n\'emporte pas le reste : le verrou décoché s\'en va, les trois champs restent', async () => {
-        const { apres } = await rouvrirEtEnregistrer(STOCK_SOM, (r) => { r.reglesSommatives = ['portfolio']; });
-        expect(apres.reglesSpeciales).toEqual(['remplacement', 'plafonnement', 'portfolio']);
-        expect(apres.configuration.reglesSommatives).toEqual(['remplacement', 'plafonnement', 'portfolio']);
+        // E2 (28 oct. 2026) : la retouche cochait « portfolio », retiré depuis ; elle décoche maintenant le verrou (« aucune »).
+        const { apres } = await rouvrirEtEnregistrer(STOCK_SOM, (r) => { r.reglesSommatives = ['aucune']; });
+        expect(apres.reglesSpeciales).toEqual(['remplacement', 'plafonnement']);
+        expect(apres.configuration.reglesSommatives).toEqual(['remplacement', 'plafonnement']);
         expect(apres.configuration.conditions_speciales).toEqual([STOCK_SOM.configuration.conditions_speciales[1]]);
         expect(apres.configuration.remplacement).toEqual({ actif: true, nbPaires: 3 });
         expect(apres.configuration.reprises).toEqual({ permises: true, mode: 'limite' });

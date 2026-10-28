@@ -10,7 +10,8 @@
  * combien ont été écartées : « 2 évaluations non verrouillées, non comptées ».
  *
  * Les quatre élèves de banc de l'audit, AVANT le correctif (mesuré au banc) :
- *   SOM  C2 : le brouillon « 95 sur 50 % » comptait 95 → 87,5  (sans lui : 8830/101 = 87,43)
+ *   SOM  C2 : le brouillon « 95 sur 50 % » comptait 95 → 87,5  (sans lui : 8830/101 = 87,43 ; 87,6 depuis E1, 28 oct. 2026 :
+ *        l'Exercice à pondération 0 n'entre plus)
  *   STD  C4 : il entrait en tête de sélection → 83,2       (sans lui : 79,45)
  *   SPE  C5 : il rendait un examen acceptable → A = 100    (sans lui : B = 80)
  *   DEN     : jamais touché → 78
@@ -142,18 +143,20 @@ function phraseDuProfil() {
 }
 
 describe('#706 · un brouillon n\'entre pas dans la note du cours — les quatre familles, les deux systèmes', () => {
-    it('SOM · le brouillon « 95 sur 50 % » ne compte plus : 87,43 (8830/101), par l\'instance ET par la configurable ; le récit le nomme « évaluation non verrouillée · non comptée »', () => {
+    it('SOM · le brouillon « 95 sur 50 % » ne compte plus : 87,6 (8760/100 depuis E1 ; 8830/101 avant), par l\'instance ET par la configurable ; le récit le nomme « évaluation non verrouillée · non comptée »', () => {
         const b = monter(jeuSOM(BROUILLON95));
         const som = b.win.obtenirPratiqueParId('sommative');
-        expect(r2(som.calculerPerformance(DA.SOM) * 100)).toBe(87.43);                       // avant : 87,5
-        expect(r2(b.win.obtenirPratiqueParId('som-banc').calculerPerformance(DA.SOM) * 100)).toBe(87.43);
-        const ecartee = som.decrireCalcul(DA.SOM).resultats.find(x => x.sort === 'ecarte');
-        expect(ecartee).toMatchObject({ label: 'Quiz', note: 95, detail: 'évaluation non verrouillée · non comptée' });
+        expect(r2(som.calculerPerformance(DA.SOM) * 100)).toBe(87.6);                        // avant : 87,5 ; E1 (28 oct.) : 87,43 tant que l'Exercice à pondération 0 pesait 1
+        expect(r2(b.win.obtenirPratiqueParId('som-banc').calculerPerformance(DA.SOM) * 100)).toBe(87.6);   // E1 (28 oct. 2026) : (84×40 + 90×60) / 100 ; avant 87,43, l'Exercice à pondération 0 pesait 1
+        const ecartees = som.decrireCalcul(DA.SOM).resultats.filter(x => x.sort === 'ecarte');
+        expect(ecartees.find(x => x.label === 'Quiz')).toMatchObject({ note: 95, detail: 'évaluation non verrouillée · non comptée' });
+        // E1 (28 oct. 2026) : l'Exercice à pondération 0 est nommé, non compté (avant : compté au poids 1)
+        expect(ecartees.find(x => x.label === 'Exercice')).toMatchObject({ detail: 'pondération 0 · non comptée' });
         expect(b.win.compterEvaluationsEcarteesDeLaNote(DA.SOM)).toEqual({ brouillons: 1, sansPortee: 0, total: 1 });
     });
-    it('SOM · le brouillon « 0 sur 50 % » ne pèse plus 0 : 87,43 aussi (avant : 86,57)', () => {
+    it('SOM · le brouillon « 0 sur 50 % » ne pèse plus 0 : 87,6 aussi (avant : 86,57 ; 87,43 avant E1)', () => {
         const b = monter(jeuSOM(BROUILLON0));
-        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(87.43);
+        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(87.6);   // E1 (28 oct. 2026) : (84×40 + 90×60) / 100 ; avant 87,43, l'Exercice à pondération 0 pesait 1
     });
     it('STD · le brouillon « 95 » n\'entre plus en tête de sélection : 79,45 par le chemin riche ET par l\'instance ; `ecartees` porté par les détails', () => {
         const b = monter(jeuSTD(BROUILLON95));
@@ -191,15 +194,16 @@ describe('#706 · un brouillon n\'entre pas dans la note du cours — les quatre
     });
     it('la portée NULLE verrouillée (évaluation enregistrée sans aucun critère, fossile #697) est écartée aussi, et comptée à part', () => {
         const b = monter(jeuSOM(PORTEE_NULLE));
-        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(87.43);
+        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(87.6);   // E1 (28 oct. 2026) : (84×40 + 90×60) / 100 ; avant 87,43, l'Exercice à pondération 0 pesait 1
         expect(b.win.compterEvaluationsEcarteesDeLaNote(DA.SOM)).toEqual({ brouillons: 0, sansPortee: 1, total: 1 });
     });
     it('une évaluation d\'AVANT le 2 septembre (sans portée déclarée, sans verrou déclaré) compte comme avant', () => {
         const jeu = jeuSOM(); const ancienne = jeu.evaluations.find(e => e.id === 'EV_S4');
         delete ancienne.ponderationCouverte; delete ancienne.verrouillee; ancienne.noteFinale = 70; ancienne.niveauFinal = 'D';
         const b = monter(jeu);
-        // (84×40 + 90×60 + 70×1 + 70×1) / 102 = 8900 / 102 = 87,25
-        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(87.25);
+        // E1 (28 oct. 2026) : (84×40 + 90×60 + 70×1) / 101 = 8830 / 101 = 87,43 — le Quiz SANS pondération garde 1,
+        // l'Exercice à pondération 0 n'entre plus (avant : (… + 70×1 + 70×1) / 102 = 87,25)
+        expect(r2(b.win.obtenirPratiqueParId('sommative').calculerPerformance(DA.SOM) * 100)).toBe(87.43);
         expect(b.win.compterEvaluationsEcarteesDeLaNote(DA.SOM).total).toBe(0);
     });
     it('la règle est UNE fonction, et elle dit non aux quatre cas', () => {
@@ -220,7 +224,7 @@ describe('#706 · le profil et l\'export DISENT combien ont été écartées', (
         const X = b.win._exportResultats;
         expect(X.ENTETES_SYNTHESE[10]).toBe('Non comptées');
         const ligne = X.construireLignesSynthese([{ da: DA.STD, nom: 'N', prenom: 'P' }], { pratiqueId: 'std-banc' }, b.win.simulerIndices)[0];
-        expect(ligne.slice(8)).toEqual([79, 'final', 1]);
+        expect(ligne.slice(8)).toEqual([79, 'provisoire', 1]);   // E7 (28 oct. 2026) : avant « final » ; « Notes finalisées » n'est pas cochée
         const sans = X.construireLignesSynthese([{ da: DA.STD, nom: 'N', prenom: 'P' }], { pratiqueId: 'x' }, () => ({ P: 80, noteConstructible: true }))[0];
         expect(sans[10]).toBe('');
     });

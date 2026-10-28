@@ -345,6 +345,15 @@ function _appliquerPlafonnementConformite(moyennePortfolio, reglesConformite, de
     return { moyenne: moyennePortfolio, plafonnement: null };
 }
 
+/**
+ * E7, ajout de Cowork (28 oct. 2026, 14 h 55) — seule une terminale PRÉVUE (une production de ce type existe) qui ne
+ * compte pas encore rend la note provisoire. Sans production terminale (des standards sans terminale, en chimie par
+ * exemple), la note est celle du pool, à 100 % : elle n'attend rien. Avant : « provisoire » pour toujours à l'export.
+ */
+function _noteAttendSaTerminale(productionTerminale, noteTerminale) {
+    return productionTerminale !== null && noteTerminale === null;
+}
+
 function _obtenirNoteTerminaleEtudiant(evaluations, da, productionTerminale) {
     if (!productionTerminale) return { noteTerminale: null, evaluationTerminale: null };
     // #706 : un brouillon de terminale n'est pas une terminale — la note reste provisoire.
@@ -588,11 +597,12 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const _artefactsEcartes = evaluationsArtefacts.filter(e => !artefactsRetenus.includes(e));
     // Remplacées par reprise : exclues dès le filtrage des valides (remplaceeParId),
     // relues ici dans les évaluations brutes pour les nommer dans le récit.
+    // E4 (28 oct. 2026) : une originale gardée dont la reprise ne compte pas encore est au pool, pas ici.
     const _remplacees = evaluations.filter(e =>
         e.etudiantDA === da &&
         artefactsIds.includes(e.productionId) &&
         e.productionId !== terminalId &&
-        e.remplaceeParId
+        e.remplaceeParId && window.originaleEstRemplacee(e, evaluations)
     );
     const _resultatsRecit = [];
     artefactsRetenus.forEach(e => {
@@ -676,7 +686,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
             present: productionTerminale !== null
         },
         noteFinale: noteFinale,
-        estProvisoire: noteTerminale === null,
+        estProvisoire: _noteAttendSaTerminale(productionTerminale, noteTerminale),
         ponderationParComplement: ponderationParComplement,
         ecartees: ecartees,   // #706 : { brouillons, sansPortee, total }
         recit: recit

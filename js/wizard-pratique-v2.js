@@ -81,7 +81,9 @@ function _libelleRegle(cle) {
  * On a retiré des CASES, pas des données : une pratique déjà enregistrée garde ce
  * qu'elle porte — voir `conserverReglesRetirees`, appelée par `sauvegarderPratique`.
  */
-const REGLES_SOMMATIVES_RETIREES = ['remplacement', 'plafonnement'];
+const REGLES_SOMMATIVES_RETIREES = ['remplacement', 'plafonnement', 'portfolio'];
+// E2 (décision de Grégoire, 28 oct. 2026, 14 h 44) — « Portfolio de progression » les rejoint : aucun calcul ne lisait
+// `reglesSpeciales: ['portfolio']` (SOM-C11 du banc du 28 oct.). Même traitement : la case sort, la clé reste.
 
 // ───────────────────────────────────────────────────────────────────────────
 // INFÉRENCE COMPORTEMENTALE (bug testeur 8 juin : « pas-certain »)
@@ -480,11 +482,6 @@ const ETAPES_WIZARD = {
                         description: 'Une évaluation spécifique (ex: la finale) doit être réussie pour passer le cours.'
                     },
                     {
-                        value: 'portfolio',
-                        label: _libelleRegle('portfolio'),
-                        description: 'Un portfolio d\'artefacts contribue à la note, avec progression prise en compte.'
-                    },
-                    {
                         value: 'aucune',
                         label: 'Aucune règle spéciale',
                         description: 'Moyenne pondérée classique sans règle particulière.',
@@ -554,17 +551,6 @@ const ETAPES_WIZARD = {
                     default: 55,
                     required: true
                 });
-            }
-
-            if (regles.includes('portfolio')) {
-                champs.push({
-                    id: 'infoPortfolio',
-                    type: 'info',
-                    texte: 'Portfolio de progression : les artefacts contribuent à la note avec prise en compte de la progression.'
-                });
-                // #900 (lot N6) : « Nombre d'artefacts dans le portfolio » et « Portfolio qualitatif »
-                // sont retirés — leurs réponses (`portfolio.nbArtefacts`, `portfolio.qualitatif`)
-                // n'étaient lues par rien.
             }
 
             return champs;
@@ -676,6 +662,9 @@ const ETAPES_WIZARD = {
                 required: true
             },
             {
+                // E9 (mesure du 28 oct. 2026) : ce minimum ne retient pas le calcul — un seul artefact donne déjà une
+                // note (STD-9). Il ne sert qu'aux messages du profil et au plafonnement de conformité, que l'assistant
+                // n'active pas (`reglesConformite`, STD-8). L'Aide ne doit pas le présenter comme un seuil de calcul.
                 id: 'minAvantCalculFormatif',
                 label: 'Minimum d\'artefacts avant calcul formatif',
                 type: 'number',
@@ -1907,7 +1896,6 @@ function genererRecapitulatif() {
         const varianteLabels = {
             'classique': 'Classique',
             'verrou': 'Avec verrou d\'évaluation',
-            'portfolio': 'Avec portfolio',
             // #901 (C-1) : sans parenthèse — la méthode ne se dit qu'à « Construction de la note ».
             'n-meilleurs': 'Par artefacts',
             'objectifs-ponderes': 'Par objectifs pondérés',
@@ -2372,7 +2360,6 @@ function deduireTypePratique(reponses) {
         let variante = 'classique';
 
         if (regles.includes('double_verrou')) variante = 'verrou';
-        else if (regles.includes('portfolio')) variante = 'portfolio';
 
         return { type: 'sommative', variante, regles, confiance: 1.0 };
     }
@@ -2591,7 +2578,7 @@ async function creerPratiqueV2() {
                 pratique.configuration.categories = {
                     actif: true,
                     selection: {
-                        nombreARetenir: parseInt(modalites.categories?.selection?.nombreARetenir) || 4,
+                        nombreARetenir: _nombreRetenuDeLaSelection(estHybride, nbRetenus, modalites),
                         ponderation: parseInt(modalites.categories?.selection?.ponderation) || 65
                     },
                     obligatoires: {
@@ -2715,6 +2702,27 @@ async function finaliserCreationPratique(pratique) {
 }
 
 /**
+ * E3 (décision de Grégoire, 28 oct. 2026, 14 h 45) — EN HYBRIDE, « Nombre d'artefacts retenus pour la note finale »
+ * EST le N des meilleures (les obligatoires s'y ajoutent). Avant : lu de `modalitesEvaluation`, sinon 4, et la réponse
+ * de l'assistant ignorée (STD-H2 du banc du 28 oct.). Hors hybride (catégories activées par les modalités), inchangé.
+ * Une pratique déjà créée garde son nombre : rien n'est réécrit (voir `_nombreRetenuARelire`).
+ */
+function _nombreRetenuDeLaSelection(estHybride, nbRetenus, modalites) {
+    if (estHybride) return nbRetenus;
+    return parseInt(modalites.categories?.selection?.nombreARetenir) || 4;
+}
+
+/**
+ * E3 — rouvrir une hybride montre le N que le calcul lit (`categories.selection.nombreARetenir`), pour que
+ * ré-enregistrer ne le change pas ; ailleurs, `portfolio.nombreARetenir`, comme avant.
+ */
+function _nombreRetenuARelire(config, modeSelection) {
+    const nSelection = config.categories?.selection?.nombreARetenir;
+    if (modeSelection === 'hybride' && typeof nSelection === 'number') return nSelection;
+    return config.portfolio.nombreARetenir;
+}
+
+/**
  * #903 — UNE PRATIQUE DÉJÀ ENREGISTRÉE GARDE CE QU'ELLE PORTE (limite de Grégoire du
  * 20 sept. 2026 : « Je ne veux pas qu'on efface des données de façon irréversible »).
  * L'assistant reconstruit l'objet à neuf et ne connaît plus le plafonnement, le
@@ -2769,6 +2777,7 @@ function conserverReglesRetirees(pratique, existante) {
     const portees = pratique.reglesSpeciales || [];
     if (portees.includes('remplacement')) pratique.variante = 'progressive';
     else if (portees.includes('plafonnement') && pratique.variante === 'classique') pratique.variante = 'plafonnement';
+    else if (portees.includes('portfolio') && pratique.variante === 'classique') pratique.variante = 'portfolio';   // E2
     return pratique;
 }
 
@@ -3123,7 +3132,6 @@ function chargerPratiqueExistante(pratiqueId) {
                 // était écrasée par les défauts à la re-sauvegarde. On relit les bons noms.
                 wizardState.reponses.utiliserPortfolio = config.portfolio.utiliser;
                 wizardState.reponses.nbArtefactsSoumis = config.portfolio.nombreTotal;
-                wizardState.reponses.nbArtefactsRetenus = config.portfolio.nombreARetenir;
                 wizardState.reponses.minAvantCalculFormatif = config.portfolio.minimumCompletion;
                 // Restaurer la méthode de sélection (sinon le round-trip repart sur 'n_meilleurs').
                 // L'écriture stocke 'meilleurs' pour le mode 'n_meilleurs' → mapping inverse.
@@ -3141,6 +3149,7 @@ function chargerPratiqueExistante(pratiqueId) {
                 wizardState.reponses.modeSelectionPortfolio = (config.portfolio.hybride || config.categories?.actif)
                     ? 'hybride'
                     : (methodeVersMode[config.portfolio.methodeSelection] || 'n_meilleurs');
+                wizardState.reponses.nbArtefactsRetenus = _nombreRetenuARelire(config, wizardState.reponses.modeSelectionPortfolio);
             }
 
             // #443 (10 août 2026) — NORMALISATION d'une pratique legacy « par

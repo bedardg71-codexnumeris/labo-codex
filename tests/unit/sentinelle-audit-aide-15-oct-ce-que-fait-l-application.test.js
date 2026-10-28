@@ -359,7 +359,8 @@ describe('Une copie non recevable dans la note, famille par famille (décisions 
         const perf = corps(lire('js/pratiques/pratique-sommative.js').replace(/^    calculerPerformance\(/m, 'function calculerPerformance('), 'calculerPerformance');
         expect(perf).not.toContain('statutIntegrite');
         expect(perf).toContain('window.noteRetenueParLeCalcul(evaluation) * ponderation');
-        expect(corps(lire('js/pratiques/pratique-registre.js'), 'evaluationEntreDansLaNote')).toContain('if (evaluation.remplaceeParId) return false;');
+        // E4 (28 oct. 2026) : la reprise remplace l'originale quand elle entre elle-même dans la note (`originaleEstRemplacee`).
+        expect(corps(lire('js/pratiques/pratique-registre.js'), 'evaluationEntreDansLaNote')).toContain('if (evaluation.remplaceeParId && originaleEstRemplacee(evaluation, evaluations)) return false;');
         expect(CARTE).toContain('<li>en sommative, elle vaut 0, sauf si une reprise la remplace ;</li>');
         expect(CARTE, 'la clause des meilleures productions ne joue jamais en sommative').not.toMatch(/meilleures productions/);
     });

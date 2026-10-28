@@ -81,7 +81,8 @@ var ENTETES_SYNTHESE = [
  * simulation sont fournis par l'appelant (testable en isolation).
  *
  * @param {Array<{da, nom, prenom}>} etudiants
- * @param {{groupe, cours, trimestre, pratiqueId, pratiqueCode, pratiqueNom}} contexte
+ * @param {{groupe, cours, trimestre, pratiqueId, pratiqueCode, pratiqueNom, notesFinales}} contexte
+ *        `notesFinales` : la case « Notes finalisées » de la pratique exportée (E7)
  * @param {function(da, pratiqueId): ({P, noteFinale, noteConstructible, details, ecartees}|null)} simuler
  * @returns {Array<Array<*>>}
  */
@@ -98,7 +99,10 @@ function construireLignesSynthese(etudiants, contexte, simuler) {
             statut = (r && r.causeNonConstructible) ? 'non constructible – ' + r.causeNonConstructible : 'non constructible';
         } else {
             note = r.P;
-            statut = (r.details && r.details.estProvisoire) ? 'provisoire' : 'final';
+            // E7 (décision de Grégoire, 28 oct. 2026, 14 h 46) — « provisoire » tant que « Notes finalisées » n'est
+            // pas cochée, pour toutes les familles ; en standards, une terminale qui ne compte pas encore garde aussi
+            // « provisoire ». Avant : « final » pour toute sommative, spécification ou dénotation, case cochée ou non.
+            statut = (ctx.notesFinales === true && !(r.details && r.details.estProvisoire)) ? 'final' : 'provisoire';
         }
         // #706 : le compte des écartées (brouillons + portée nulle), ou vide si inconnu.
         var nonComptees = (r && r.ecartees && typeof r.ecartees.total === 'number') ? r.ecartees.total : '';
@@ -150,9 +154,17 @@ function _collecterContexteActif() {
             trimestre: trimestre,
             pratiqueId: pratiqueId,
             pratiqueCode: (pratique && pratique.obtenirCode) ? pratique.obtenirCode() : '',
-            pratiqueNom: (pratique && pratique.obtenirNom) ? pratique.obtenirNom() : ''
+            pratiqueNom: (pratique && pratique.obtenirNom) ? pratique.obtenirNom() : '',
+            notesFinales: _notesFinaliseesDe(pratiqueId)
         }
     };
+}
+
+// E7 — la case « Notes finalisées » de la pratique exportée, lue comme le calcul la lit (`configuration.notesFinales`).
+// La sommative codée en dur (id « sommative ») n'a pas de configuration : son export reste « provisoire ».
+function _notesFinaliseesDe(pratiqueId) {
+    var cfg = (typeof obtenirConfigPratiqueActive === 'function') ? obtenirConfigPratiqueActive(pratiqueId || null) : null;
+    return !!(cfg && cfg.notesFinales === true);
 }
 
 function _telechargerCSV(csv, nomBase) {
@@ -202,7 +214,8 @@ window._exportResultats = {
     construireCSV: construireCSV,
     construireLignesSynthese: construireLignesSynthese,
     genererCSVSynthese: genererCSVSynthese,
-    ENTETES_SYNTHESE: ENTETES_SYNTHESE
+    ENTETES_SYNTHESE: ENTETES_SYNTHESE,
+    notesFinaliseesDe: _notesFinaliseesDe   // E7
 };
 
 })();

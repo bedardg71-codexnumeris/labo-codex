@@ -284,7 +284,7 @@ class PratiqueConfigurable {
     /**
      * #395 — Performance « moyenne_ponderee » (Sommative configurable) : délègue à
      * la vraie logique de PratiqueSommative (moyenne pondérée des évaluations
-     * actives, production.ponderation || 1), au lieu de relire le format dual
+     * actives, au poids `_ponderationDe` : 0 vaut 0, absente vaut 1, E1), au lieu de relire le format dual
      * d'indicesCP retiré en Beta 95.5. Patron identique à la délégation SPE
      * (_calculerPerformanceSpecifications, 6 juin 2026). Lecture seule, instance
      * jetable.
@@ -776,6 +776,7 @@ class PratiqueConfigurable {
         if (conditionRemplie) {
             if (condition.consequence.action === 'echec') {
                 // Note plafonnée au maximum spécifié (ex: 55%)
+                // E10 (mesure du 28 oct. 2026) : un plafond de 0 se lit 55 ici. Sans conséquence pratique (un verrou à 0 n'a pas de sens) : commenté, pas corrigé.
                 const noteMax = condition.consequence.note_max || 55;
                 return Math.min(noteActuelle, noteMax);
             } else if (condition.consequence.action === 'plafonner') {

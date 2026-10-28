@@ -60,7 +60,7 @@ describe('#709 · le zéro du premier calcul', () => {
     it('l\'export lancé AVANT toute passe d\'indices écrit la note, pas « 0, final »', () => {
         const { win } = monter(SOM, EVALS);
         const ligne = win._exportResultats.construireLignesSynthese([{ da: DA, nom: 'N', prenom: 'P' }], { pratiqueId: 'som-cfg' }, win.simulerIndices)[0];
-        expect([ligne[8], ligne[9]]).toEqual([86, 'final']);                                          // avant : [0, 'final']
+        expect([ligne[8], ligne[9]]).toEqual([86, 'provisoire']);                                     // avant : [0, 'final'] ; E7 (28 oct.) : « provisoire » sans « Notes finalisées »
     });
     it('SPE configurable, cache vide : le palier dès le premier appel (0,8) ; SANS évaluation : null et « non constructible », jamais « 0, final »', () => {
         const avec = monter(SPE, EVALS);

@@ -227,8 +227,10 @@ test('#903 · une sommative du stock rouverte par « Éditer la pratique » du C
         // Le Comparateur : le verrou est toujours annoncé ; ni le remplacement ni le plafonnement.
         expect(vu.matrice).toMatch(/Verrou sur une évaluation/);
         expect(vu.matrice).not.toMatch(/Remplacement automatique|remplace la mi-session|Plafonnement conditionnel/);
+        // E2 (28 oct. 2026) : « Portfolio de progression » a quitté l'étape, comme le remplacement et le plafonnement.
         expect(vu.cartesRegles, 'l\'étape des règles spéciales a été traversée').toEqual([
-            { valeur: 'double_verrou', coche: true }, { valeur: 'portfolio', coche: false }, { valeur: 'aucune', coche: false }]);
+            { valeur: 'double_verrou', coche: true }, { valeur: 'aucune', coche: false }]);
+        expect(vu.matrice).not.toMatch(/Portfolio de progression/);
         expect(vu.etapes).toContain('config-sommative-regles');
         expect(vu.texte).toMatch(/Verrou/);                              // le banc a bien lu l'écran
         expect(vu.texte).not.toMatch(/remplacement|plafonn|Reprises permises/i);

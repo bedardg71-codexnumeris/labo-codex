@@ -580,6 +580,9 @@ class PratiquePANStandards {
         return {
             nombreCours: 3,                                                        // fenêtre « récents » du dépistage (3 cours = 6 artefacts)
             portfolioActif: portfolio ? portfolio.actif !== false : true,
+            // E12 (mesure du 28 oct. 2026) : ces défauts ne sont pas ceux du chemin riche (N = 4, profil-etudiant-actions.js),
+            // et l'instance n'a ni hybride ni plafonnement. Sans conséquence : `calculerNoteDuCours` (portfolio.js) ne
+            // l'atteint jamais pour une standards ; la note est celle de `calculerDetailsNoteFinale`.
             nombreARetenir: (portfolio && portfolio.nombreARetenir) || 3,
             minimumCompletion: (portfolio && portfolio.minimumCompletion) || 7,
             nombreTotal: (portfolio && portfolio.nombreTotal) || 10,
