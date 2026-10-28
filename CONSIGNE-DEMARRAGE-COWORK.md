@@ -9,7 +9,25 @@
 
 ---
 
-## 0⁶ · LE 28 OCTOBRE, 15 H 10 : DEUX SESSIONS DE CLAUDE CODE EN COURS, LA SUITE (ajouté le 28 oct. à 15 h 10 par Cowork, relayé parce que le contexte de la session était lourd)
+## 0⁷ · LE 28 OCTOBRE, 15 H 50 : LA MISE EN LIGNE DE LA 1.223 RELAYÉE, LA SUITE (ajouté le 28 oct. à 15 h 50 par Cowork)
+
+> Le § 0⁶ ci-dessous est **périmé** ; les §§ 1, 2, 5, 6 tiennent. Ordre de lecture : la page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, `Artifact` read, **republie à partir de ce que la lecture te rend**), puis ce paragraphe, puis `plans de travail/DECISIONS-2026-10-28-construction-de-la-note.md` (E1 à E16, puis Q1 à Q6 du plan Standards et le mot neuf 1).
+
+**L'état** (15 h 47, `git --no-optional-locks log`) : `main` = `96750af7`, 37 commits non poussés ; en ligne 1.222.0. **Relayée à 15 h 50** : `plans de travail/CONSIGNE-LOT-2026-10-28-mise-en-ligne-du-soir-1223.md` (Nouvelles validées par Grégoire à 15 h 45, mot pour mot ; `minor`). **À vérifier d'abord** : son rapport (vert et poussé ? la 1.223 en bas de page ? le run GitHub ?).
+
+**Fait et relu le 28 après 15 h 10** : le texte Dénotation du trou 2 (validé 15 h 11) ; E14 à E16 ; les correctifs E1-E4, E7 (`19db734c`) et leur retouche (`96750af7`), acceptés (`VERDICT-RELECTURE-2026-10-28-construction-de-la-note-correctifs*.md`), #1177 clos côté relecture ; l'accueil, trois portes (`d5aef7d3`, relu par une autre session Cowork, vu par Grégoire sur l'iPad) ; le plan « standards sans portfolio » relu, **ses six questions tranchées** (Q1 à Q6) et un mot neuf validé (la formule du récit).
+
+**Ce qui est dû, dans l'ordre** :
+1. **Le rapport de la mise en ligne** ; un rouge va à Cowork.
+2. **Le lot 1 du chantier « standards sans portfolio »** (urgent pour Grégoire) : avant d'écrire la consigne, **un mot neuf à Grégoire** : la phrase qui dit pourquoi la note manque (pool vide ; terminale seule, Q3). Puis la consigne : le § 3 du plan, lot 1, avec Q3 (non constructible, cause dite), le mot neuf 1 (la formule), la question 3 de la relecture des correctifs (le doublon réconcilié dit « remplacée par une reprise » au récit standards et à la tuile du registre longitudinal), et la fiche BACKLOG du chantier. Les mots du § 4 du plan pour les lots 3 à 5 : un par tour, plus tard ; déjà tranchés par Q1 : « production » au profil, « Productions à venir » au PDF, pour une pratique sans « Artefact ».
+3. **Les lots 4 et 5 de l'Aide** (consignes prêtes ; le lot 5 a un § 1.4 ajouté par Cowork, deux phrases d'`evaluation-jetons.js`). L'intégration du trou 2 (les quatre familles validées ; Standards se réécrira après le chantier) : à placer par Cowork.
+4. **Le tri** : l'instable des présences ; les rouges de GitHub sous Linux. **Plus tard** : #1176 (la règle de la copie non recevable posée à la création de la pratique).
+
+**Ce que la journée a encore payé** : un `git status` lancé sur le Mac pendant que deux sessions travaillaient (il peut écrire `.git/index.lock`) : sans dégât, mais **toujours `git --no-optional-locks`** côté Cowork.
+
+---
+
+## 0⁶ · (PÉRIMÉ, VOIR 0⁷) LE 28 OCTOBRE, 15 H 10 : DEUX SESSIONS DE CLAUDE CODE EN COURS, LA SUITE (ajouté le 28 oct. à 15 h 10 par Cowork, relayé parce que le contexte de la session était lourd)
 
 > Le § 0⁵ ci-dessous est **périmé** (le 26 au soir) ; les §§ 1, 2, 5, 6 tiennent. Ordre de lecture : la page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, `Artifact` read : sa source vivait dans le scratchpad de la session précédente, **republie à partir de ce que la lecture te rend**), puis ce paragraphe, puis `plans de travail/DECISIONS-2026-10-28-construction-de-la-note.md`.
 
