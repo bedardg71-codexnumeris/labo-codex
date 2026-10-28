@@ -1,5 +1,17 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 28 octobre 2026, 19 h 40 (Toronto) : `1.223.0` EN LIGNE** (build `1028-1724`) — Netlify
+> `6ae27e6c`, `commit_ref` `d1d581b7`, `state: ready`, publié à 23:00:15 Z (19 h 00). Porte : l'Aide, lots 2c, 2c bis, 2d et 3
+> (#1152), la copie non recevable (#1175), la note E1-E4, E7 et E14-E16 (#1177), l'accueil à trois portes ; tous acceptés.
+> Verdict du Mac **vert** sur `d1d581b7` par `scripts/verdict-en-morceaux.mjs` (1 120 essais, 0 rouge, 1 instable —
+> `grilles-sous-criteres-condense` ; `presences-lot-d-enregistrement` n'est pas revenue), `git push`. ⚠ **GitHub JUGÉ ROUGE**
+> (run 40784135640) : 16 rapports sur 16 ; 18 neuves sous Linux, vertes sur le Mac, aucune dans les specs du soir (12 de
+> `calculs-4b`/`-4c`, `nettoyage-892`, `statut-incomplet` déjà le 27 ; neuves : `bibliotheque-liste-1159`,
+> `comptes-erreurs-stock-1142`, 2 de `lot-e3-creer-ou-modifier`) ; 7 de la baseline redevenues vertes (`RELAIS.md`). Rien corrigé.
+> Portes terrain : aucune. **Ouverts** : le tri des rouges Linux, à Cowork.
+> **MANDAT COURANT** : le lot 1 du chantier « standards sans portfolio » (`plans de travail/PLAN-2026-10-28-standards-sans-portfolio.md` ;
+> décisions `plans de travail/DECISIONS-2026-10-28-construction-de-la-note.md`, §§ Q1 à Q6), dont Cowork écrit la consigne ; puis les lots 4 et 5 de l'Aide.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 27 octobre 2026, 21 h 15 (Toronto) : `1.222.0` EN LIGNE** (build `1027-1907`) — Netlify
 > `6ae14571`, `commit_ref` `6cc9ed30`, `state: ready`, publié à 00:44:50 Z (20 h 44). Porte : l'Aide, lots 2a et 2b (#1152 ;
 > l'Échelle de départ à cinq niveaux avec « PS – Préstructurel », et ce qui la lit), tous acceptés. Verdict du Mac **vert** sur
