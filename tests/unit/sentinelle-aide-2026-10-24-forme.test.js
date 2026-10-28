@@ -90,26 +90,34 @@ const NEUVES_2C = ['liste-evaluations'];
 // celui des sous-onglets de js/config.js ; une entrée qui explique un calcul se range à côté de l'écran qui l'affiche. Le
 // détail est vérifié par sentinelle-aide-2026-10-28-lot-2c-bis.test.js.
 const ABSORBEES_2C_BIS = ['guide-profil', 'rai-absences'];
+// ↻ #1152, lot 2d (28 oct. 2026) : le Labo, Codex et archives et la Référence prennent leur forme finale (audit du 24 oct.,
+// verdicts finals de `modelisation` : « Fusionner avec « Labo — Analyser ta démarche pédagogique » », et de `criteres` :
+// « Fusionner dans « 5b. Configurer la grille de critères pour le dépistage » » ; remesure du 27 oct. ; consigne
+// CONSIGNE-LOT-2026-10-28-aide-lot-2d-labo-codex-reference.md, §2, entrées 1 et 3). `modelisation` est absorbée par `labo`,
+// `criteres` par `grille-depistage`. L'ordre du Labo : la vue d'ensemble, puis les entrées dans l'ordre des sous-onglets de
+// js/config.js, chacune à côté de l'écran qui porte son réglage (Outils d'observation : `rai-solo`, `grille-depistage` ;
+// Exploration des pratiques : `pan` ; Bilan réflexif). Le détail est vérifié par sentinelle-aide-2026-10-28-lot-2d.test.js.
+const ABSORBEES_2D = ['modelisation', 'criteres'];
 const PLACES = {
     commencer: ['presentation', 'prise-en-main', 'demo', 'modes', 'bibliotheque', 'chaines-etapes', 'preferences'],
     cadre: ['etapes-config', 'cours', 'horaire', 'etudiants', 'presences-calendrier', 'archivage'],
     conception: ['pratique', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme', 'sous-criteres', 'creer-echelles', 'solo', 'creer-cartouches'],
     evaluation: ['preparer-importer', 'liste-evaluations', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
     suivi: ['tableau-bord', 'acp', 'suivi-apprentissage', 'snapshots', 'saisie-presences', 'profil-etudiant', 'diagnostics', 'rai', 'patterns', 'planifier-rai', 'tirage-sort'],
-    labo: ['labo', 'modelisation', 'pan', 'grille-depistage', 'criteres', 'rai-solo', 'bilan-reflexif'],
+    labo: ['labo', 'rai-solo', 'grille-depistage', 'pan', 'bilan-reflexif'],
     'codex-archives': ['codex', 'export-import', 'partage', 'collaboration'],
     reference: ['glossaire', 'glossaire-statique', 'faq', 'problemes', 'ressources'],
 };
 const GARDEES = Object.values(PLACES).flat();
 
 describe('#1152 lot 1 · la forme de l\'Aide', () => {
-    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée ; au lot 2c, 1 absorbée et 1 neuve ; au lot 2c bis, 2 absorbées', () => {
+    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée ; au lot 2c, 1 absorbée et 1 neuve ; au lot 2c bis, 2 absorbées ; au lot 2d, 2 absorbées', () => {
         expect(ONGLETS).toHaveLength(8);
         expect(Object.keys(PLACES)).toEqual(ONGLETS.map((o) => o.id));
         expect(COUPEES).toHaveLength(14);
-        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length - ABSORBEES_2C.length + NEUVES_2C.length - ABSORBEES_2C_BIS.length);
+        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length - ABSORBEES_2C.length + NEUVES_2C.length - ABSORBEES_2C_BIS.length - ABSORBEES_2D.length);
         const NEUVES = [...NEUVES_2A, ...NEUVES_2C];
-        expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES.includes(id)), ...ABSORBEES_2A, ...ABSORBEES_2B, ...ABSORBEES_2C, ...ABSORBEES_2C_BIS]).size).toBe(75);
+        expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES.includes(id)), ...ABSORBEES_2A, ...ABSORBEES_2B, ...ABSORBEES_2C, ...ABSORBEES_2C_BIS, ...ABSORBEES_2D]).size).toBe(75);
     });
 
     it('les huit sous-sections, dans l\'ordre, ont les ids et les titres du tableau \'aide\' de config.js', () => {

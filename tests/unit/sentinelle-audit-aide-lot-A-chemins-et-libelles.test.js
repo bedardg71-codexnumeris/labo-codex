@@ -92,21 +92,24 @@ describe('Aide — les boutons qu\'elle dit de cliquer existent', () => {
         });
     }
 
-    it('« Régénérer » : le seul bouton de ce nom refait la rétroaction ; l\'Aide l\'envoie encore au calendrier, deux fois (dette nommée)', () => {
+    it('« Régénérer » : le seul bouton de ce nom refait la rétroaction ; l\'Aide ne l\'envoie plus au calendrier', () => {
         const boutonsRegenerer = [...INTERFACE.matchAll(/<button\b[^>]*>\s*Régénérer\s*<\/button>/g)].map((m) => m[0]);
         expect(boutonsRegenerer).toHaveLength(1);
         expect(boutonsRegenerer[0]).toContain('data-action="regenererRetroactionAvecFeedback"');
         // Aucune autre surface de l'interface ne nomme « Régénérer le calendrier ».
         expect(INTERFACE).not.toContain('Régénérer le calendrier');
-        // Les deux mentions fausses vivent dans `problemes` et `faq` : le lot 2c (#1152) les réécrit. Ce compte
-        // tombe alors à 0, et cette ligne se met à jour avec lui ; d'ici là, une troisième mention rougit ici.
+        // ↻ #1152, lot 2d (28 oct. 2026) : les deux mentions fausses, dans `problemes` et `faq`, sont réécrites (audit du
+        // 24 oct., lot-6-reference.md, `problemes` : « deux des quatre solutions renvoient à un bouton qui n'existe pas » ;
+        // verdict final de `faq` ; consigne CONSIGNE-LOT-2026-10-28-aide-lot-2d-labo-codex-reference.md, §2, entrées 11
+        // et 12) : le calendrier se construit à partir des trois dates du Cadre. Le compte tombe à 0 ; une mention qui
+        // reviendrait rougit ici.
         const entrees = [...AIDE.matchAll(/id="accordeon-aide-([a-z0-9-]+)"/g)].map((m) => m[1]);
         const parEntree = entrees.map((id, k) => {
             const debut = AIDE.indexOf(`id="accordeon-aide-${id}"`);
             const fin = k + 1 < entrees.length ? AIDE.indexOf(`id="accordeon-aide-${entrees[k + 1]}"`) : AIDE.length;
             return [id, (AIDE.slice(debut, fin).match(/Régénérer/g) || []).length];
         }).filter(([, n]) => n > 0);
-        expect(Object.fromEntries(parEntree)).toEqual({ faq: 1, problemes: 1 });
+        expect(Object.fromEntries(parEntree)).toEqual({});
     });
 
     it('les libellés périmés ont disparu de l\'Aide', () => {
