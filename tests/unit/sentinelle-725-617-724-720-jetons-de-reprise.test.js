@@ -118,15 +118,18 @@ describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise n
         expect(b.notifs.map(n => n.type + ':' + n.t)).toEqual(['erreur:Conflit']);
     });
 
-    it('la reprise naît SANS délai, remplacement, archivage, réconciliation ni reprise ciblée hérités ; la note est conservée', async () => {
+    // ↻ #1175, troisième retouche (28 oct. 2026) : ni le statut d'intégrité ni ses preuves — la reprise est une nouvelle remise.
+    it('la reprise naît SANS délai, remplacement, archivage, réconciliation, reprise ciblée ni statut d\'intégrité hérités ; la note est conservée', async () => {
         const origine = { id: 'EVAL_O', etudiantDA: DA, productionId: P, noteFinale: 55,
+            statutIntegrite: 'plagiat', notesIntegrite: 'Preuves fictives.',
             jetonDelaiApplique: true, dateApplicationJetonDelai: '2026-09-02', delaiAccorde: true, dureeDelaiJours: 2,
             jetonRepriseCibleeApplique: true, archivee: true, dateArchivage: '2026-09-02' };
         const b = monter({ evaluations: [origine] });
         const r = await b.win.appliquerJetonReprise('EVAL_O', true, { silencieux: true });
         expect(r).not.toBeNull();
         for (const champ of ['jetonDelaiApplique', 'dateApplicationJetonDelai', 'delaiAccorde', 'dureeDelaiJours',
-            'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee', 'dateArchivage', 'reconcilieParDoublon']) {
+            'jetonRepriseCibleeApplique', 'remplaceeParId', 'dateRemplacement', 'archivee', 'dateArchivage', 'reconcilieParDoublon',
+            'statutIntegrite', 'notesIntegrite']) {
             expect(r[champ], champ).toBeUndefined();
         }
         expect(r.noteFinale).toBe(55);
@@ -135,6 +138,7 @@ describe('Geste 2 · accorder une reprise : garde d\'entrée (#724) et reprise n
         // L'originale, elle, garde son délai : c'est le jeton réellement accordé.
         const o = b.stores.evaluationsSauvegardees.find(e => e.id === 'EVAL_O');
         expect(o.jetonDelaiApplique).toBe(true);
+        expect([o.statutIntegrite, o.notesIntegrite], 'l\'originale garde son statut et ses preuves').toEqual(['plagiat', 'Preuves fictives.']);
         expect(o.remplaceeParId).toBe(r.id);
     });
 

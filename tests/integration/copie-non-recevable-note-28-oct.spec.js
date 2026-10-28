@@ -17,6 +17,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 //     cèdent leur place à « Non recevable (Plagiat) » ; la rétroaction écrite reste ; la base n'est pas touchée.
 //   ↻ SECONDE RETOUCHE (relecture de Cowork, 28 oct., 7 h 17) : les menus des critères se masquent aussi (masqués, pas
 //     vidés : retirer le statut rend E et M) ; la colonne du niveau de la Liste dit « -- ».
+//   ↻ TROISIÈME RETOUCHE (7 h 33) : la colonne « Statut » dit « -- » au lieu de « 0 » ; une reprise naît « Recevable » (test 2).
 // Noms fictifs.
 
 const T = 't1028';
@@ -157,7 +158,8 @@ test('sommative · « Non recevable (Plagiat) » puis verrouillée : les critèr
     console.log('1028 · la Liste (ligne EV1) :', JSON.stringify(liste));
     expect(liste, 'la ligne de la copie se voit').not.toBeNull();
     expect(liste, 'seconde retouche : aucune cellule ne dit « M »').not.toContain('M');
-    expect(liste.filter(c => c === '--'), 'le niveau et la note disent « -- »').toHaveLength(2);
+    expect(liste, 'troisième retouche : la colonne « Statut » ne dit plus « 0 »').not.toContain('0');
+    expect(liste.filter(c => c === '--'), 'le statut, le niveau et la note disent « -- »').toHaveLength(3);
 
     await page.evaluate(() => window.modifierEvaluation('EV1'));
     await attendreRepos(page);
@@ -184,5 +186,64 @@ test('sommative · « Non recevable (Plagiat) » puis verrouillée : les critèr
     expect(textePdf, 'ni son niveau général').not.toMatch(/Niveau général · /i);
 
     expect(await copieEnBase(page), 'rien n’a réécrit la copie').toEqual(base);
+    expect(erreurs, erreurs.join(' | ')).toEqual([]);
+});
+
+// ↻ TROISIÈME RETOUCHE (relecture de Cowork, 28 oct., 7 h 33) — UNE REPRISE NAÎT « RECEVABLE ». Depuis c177cc36, le statut
+// fait la note et l'affichage : une reprise accordée après un plagiat, qui recopiait le statut de son originale, valait 0
+// et se montrait « Non recevable ». La reprise est une nouvelle remise, que rien n'a encore jugée. L'originale garde le sien.
+test('une reprise accordée après un plagiat naît « Recevable » : sa ligne, son formulaire ; l’originale garde « plagiat »', async ({ page }) => {
+    test.setTimeout(120000);
+    const erreurs = [];
+    page.on('pageerror', (e) => erreurs.push(e.message));
+    page.on('dialog', (d) => { erreurs.push('DIALOGUE : ' + d.message()); d.dismiss().catch(() => {}); });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(indexHtml);
+    await page.waitForFunction(() => window.dbReady === true && typeof window.modifierEvaluation === 'function'
+        && typeof window.appliquerJetonReprise === 'function' && window.syntheseRetroactionData, null, { timeout: 20000 });
+    await page.evaluate('(' + MONTER + ')(' + JSON.stringify({ T }) + ')');
+    await page.evaluate((t) => {
+        const evs = window.db.getSync(t + '_evaluationsSauvegardees', []);
+        Object.assign(evs.find(e => e.id === 'EV1'), { statutIntegrite: 'plagiat', notesIntegrite: 'Preuves fictives.', verrouillee: true });
+        window.db.setSync(t + '_evaluationsSauvegardees', evs);   // security-ok: fixture littérale du banc
+    }, T);
+
+    const reprise = await page.evaluate(async () => {
+        const r = await window.appliquerJetonReprise('EV1', true, { silencieux: true });
+        return r ? { id: r.id, statutIntegrite: r.statutIntegrite, notesIntegrite: r.notesIntegrite } : null;
+    });
+    // eslint-disable-next-line no-console
+    console.log('1028 · la reprise, en base :', JSON.stringify(reprise));
+    expect(reprise, 'la reprise est créée').not.toBeNull();
+    const enBase = await page.evaluate((t) => (window.db.getSync(t + '_evaluationsSauvegardees', []) || [])
+        .filter(e => e.productionId === 'P1').map(e => ({ id: e.id, statut: e.statutIntegrite, notes: e.notesIntegrite, remplacee: !!e.remplaceeParId })), T);
+    expect(enBase.find(e => e.id === 'EV1'), 'l’originale garde son statut et ses preuves').toEqual({ id: 'EV1', statut: 'plagiat', notes: 'Preuves fictives.', remplacee: true });
+    expect(enBase.find(e => e.id === reprise.id), 'la reprise ne recopie ni le statut ni les preuves').toEqual({ id: reprise.id, statut: undefined, notes: undefined, remplacee: false });
+
+    await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-liste'); if (typeof window.initialiserListeEvaluations === 'function') window.initialiserListeEvaluations(); });
+    await page.waitForTimeout(2000);
+    const ligne = await page.evaluate((id) => {
+        const tr = document.querySelector(`tr[data-evaluation-id="${id}"]`);
+        return tr ? Array.from(tr.querySelectorAll('td')).map(td => td.textContent.replace(/\s+/g, ' ').trim()) : null;
+    }, reprise.id);
+    // eslint-disable-next-line no-console
+    console.log('1028 · la Liste (ligne de la reprise) :', JSON.stringify(ligne));
+    expect(ligne, 'la ligne de la reprise se voit').not.toBeNull();
+    // Sa pastille est celle d'une reprise ; « (était Non recevable (Plagiat)) » y nomme l'ORIGINALE (seconde retouche).
+    expect(ligne, 'la reprise ne porte pas la pastille « Non recevable »').not.toContain('Non recevable (Plagiat)');
+    expect(ligne).toContain('Reprise (était Non recevable (Plagiat))');
+    expect(ligne, 'elle attend sa réévaluation').toContain('À réévaluer');
+
+    await page.evaluate((id) => window.modifierEvaluation(id), reprise.id);
+    await page.waitForFunction((id) => window.evaluationEnCours && window.evaluationEnCours.idModification === id, reprise.id, { timeout: 15000 });
+    await page.waitForTimeout(2500);
+    const ecran = await page.evaluate(() => {
+        const vu = (id) => { const el = document.getElementById(id); return !!(el && el.offsetParent !== null && getComputedStyle(el).display !== 'none'); };
+        return { statut: document.getElementById('statutIntegrite').value, notes: document.getElementById('notesIntegrite').value,
+            libelle: vu('libelleNonRecevable1'), note: vu('noteProduction1'), avis: !!document.getElementById('message-non-recevable') };
+    });
+    // eslint-disable-next-line no-console
+    console.log('1028 · le formulaire de la reprise :', JSON.stringify(ecran));
+    expect(ecran).toEqual({ statut: 'recevable', notes: '', libelle: false, note: true, avis: false });
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
 });

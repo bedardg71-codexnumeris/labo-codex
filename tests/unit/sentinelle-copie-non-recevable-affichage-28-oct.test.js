@@ -287,13 +287,15 @@ describe('Seconde retouche — la Liste des évaluations : la colonne du niveau 
     const cellules = (html) => [...new JSDOM(`<table><tbody>${html}</tbody></table>`).window.document.querySelectorAll('td')]
         .map(td => td.textContent.replace(/\s+/g, ' ').trim());
 
-    it('« Plagiat » : la ligne ne porte pas « M » (donnée et rendu) ; la note dit « -- » ; témoin recevable : « M »', () => {
+    it('« Plagiat » : la ligne ne porte ni « M » ni « 0 » (donnée et rendu) ; statut, niveau et note disent « -- » ; témoin recevable : « M »', () => {
         const win = liste();
         const [ligne] = win._construireLignesEvaluations([copie({ statutRemise: 'remis' })], PRODS, ETUDIANTS);
         expect([ligne.statut, ligne.niveauFinal]).toEqual(['non-recevable', '-']);
         const cols = cellules(win._genererLigneHTML(ligne));
         expect(cols).not.toContain('M');
-        expect(cols.filter(c => c === '--')).toHaveLength(2);   // le niveau ET la note
+        // ↻ troisième retouche (28 oct., 7 h 33) : la colonne « Statut » disait « 0 », faux en standards
+        expect(cols).not.toContain('0');
+        expect(cols.filter(c => c === '--')).toHaveLength(3);   // le statut, le niveau ET la note
         const [temoin] = win._construireLignesEvaluations([copie({ statutRemise: 'remis', statutIntegrite: 'recevable' })], PRODS, ETUDIANTS);
         expect(temoin.niveauFinal).toBe('M');
         expect(cellules(win._genererLigneHTML(temoin))).toContain('M');
