@@ -41,6 +41,7 @@ Restent ouverts, sans changement : la consigne `CONSIGNE-LOT-2026-10-24-correcti
 - **Interruption** : la relecture du 2c a trouvé qu'une copie non recevable ne valait pas ce que la règle dit ; corrigé par #1175 (`c177cc36` et quatre retouches, jusqu'à `fd66e8ee`), relu et accepté.
 - **2c bis, le Suivi** : consigne `CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md`, qui attend que Grégoire la lance.
 - **2c bis : codé, en relecture** (28 oct., Claude Code) : `DEMANDE-RELECTURE-2026-10-28-aide-lot-2c-bis.md`. Non poussé, pas de release.
+- **2c bis : verdict « accepté avec une retouche »** (Cowork, 12 h 05 ; les mots de Grégoire rendus à 12 h 07). Retouche faite (`967a365f`) : `DEMANDE-RELECTURE-2026-10-28-aide-lot-2c-bis-retouche.md`. « Incomplet », deux sens : close par Cowork, rien ne change. Non poussé, pas de release.
 
 ## Ce que l'utilisateur verra à la fin
 
