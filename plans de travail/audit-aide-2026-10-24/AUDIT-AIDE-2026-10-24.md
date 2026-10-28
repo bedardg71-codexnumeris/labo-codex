@@ -178,6 +178,10 @@ Ce sont des textes neufs : Cowork les propose à Grégoire, qui les corrige, ava
 | Un test du 10 sept. reste vert à tort : il trouve « Régénérer » sur le bouton de la rétroaction | `tests/unit/sentinelle-audit-aide-lot-A-chemins-et-libelles.test.js` ; `index.html:8701` | inscrit #1152, lot 1 (le test resserré avec la coupe) |
 | À l'import, le menu de production d'un fichier porte l'étiquette « Modifier » ; trouvé au lot 2c (28 oct. 2026) | `js/travaux-ui.js:2072` (à `c83fb744`) | inscrit #1152, lot 5 |
 | Les bornes du niveau RàI fixes (64 %, 75 %), sans lien avec l'échelle de l'utilisateur | `js/interpretation-config.js:43-46` | inscrit à part (D3) : rattaché à #551, déjà ouverte sur la même question (note du 24 oct.), en attente de Grégoire, sans code |
+| L'aide « i » de la section Accompagnement du profil annonce des « Indicateurs de risque » ; le vocabulaire du risque est retiré partout ailleurs (15 oct.) ; trouvé au lot 2c bis (28 oct. 2026) | `js/profil-etudiant-sections-affichage.js:1081` (à `c223bd7e`) | inscrit #1152, lot 5 |
+| Deux textes d'écran du Suivi disent « élève » : « Les élèves non sélectionnés pour cette séance de rattrapage… » (Gestion des absences) et « Pour ouvrir un profil : clique sur A, C ou P d'un élève. » (Suivi du groupe, Détails) ; trouvé au lot 2c bis | `js/interventions.js:1080` ; `index.html:7395` (à `c223bd7e`) | inscrit #1152, lot 5 |
+| L'aide contextuelle de la planification des interventions dit « Objectif visé — Suggestion automatique » ; le champ est vide et « Suggérer » propose au clic ; trouvé au lot 2c bis | `js/accompagnement-contenu-popup.js:737` ; `js/interventions.js:1138` (à `c223bd7e`) | inscrit #1152, lot 5 |
+| Le guide ACP cite « Vue d'ensemble du tableau de bord (Aperçu) » ; l'onglet s'appelle Suivi › Suivi du groupe depuis le 27 mai ; trouvé au lot 2c bis | `js/guides-pedagogiques.js:126` (à `c223bd7e`) | inscrit #1152, lot 5 |
 
 ## Limites
 

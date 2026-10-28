@@ -35,6 +35,13 @@ Restent ouverts, sans changement : la consigne `CONSIGNE-LOT-2026-10-24-correcti
 - **2c : codé, en relecture** (28 oct., Claude Code) : `DEMANDE-RELECTURE-2026-10-28-aide-lot-2c.md`. Non poussé, pas de release.
 - **2c : verdict « accepté avec une retouche »** (Cowork, 5 h 49). Retouches 1, 3 à 6 faites (`2692fd48`) ; **la 2 arrêtée** : une copie non recevable garde sa note calculée dans la sommative, question à Grégoire. `DEMANDE-RELECTURE-2026-10-28-aide-lot-2c-retouche.md`.
 
+## État au 28 octobre 2026, 11 h 10 : 2c fait, 2c bis lancé
+
+- **2c, l'Évaluation** : fait, retouché, relu et accepté (`ec61e6b5`, `2692fd48` ; `VERDICT-RELECTURE-2026-10-28-aide-lot-2c.md`) ; les mots de Grégoire rendus à 5 h 49 ; la ligne de la procédure des copies non recevables posée par le lot #1175 (mots de Grégoire, 6 h 49). Pas encore en ligne.
+- **Interruption** : la relecture du 2c a trouvé qu'une copie non recevable ne valait pas ce que la règle dit ; corrigé par #1175 (`c177cc36` et quatre retouches, jusqu'à `fd66e8ee`), relu et accepté.
+- **2c bis, le Suivi** : consigne `CONSIGNE-LOT-2026-10-28-aide-lot-2c-bis-suivi.md`, qui attend que Grégoire la lance.
+- **2c bis : codé, en relecture** (28 oct., Claude Code) : `DEMANDE-RELECTURE-2026-10-28-aide-lot-2c-bis.md`. Non poussé, pas de release.
+
 ## Ce que l'utilisateur verra à la fin
 
 Une Aide rangée comme l'application : huit parties (Commencer, Cadre, Conception, Évaluation, Suivi, Labo, Codex et archives, Référence), une soixantaine d'entrées au lieu de 75, environ 8 400 mots au lieu de 20 900. Chaque entrée dit ce que fait l'application aujourd'hui ; la théorie est dans les guides intégrés ; plus rien n'y décrit un bouton disparu ; ce qui manquait le plus y est.
