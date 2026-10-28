@@ -203,7 +203,9 @@ describe('Les seuils A et C : une seule table, bornes et mots lus à la source',
     });
 
     it('la FAQ dit que les seuils se règlent, et où, avec les défauts lus à la source', () => {
-        const faq = tranche(AIDE, 'Puis-je modifier les seuils des indices A, C, M ?', '</details>');
+        // Ancre retouchée le 28 oct. (verdict de Cowork, lot 2d de #1152) : il n'y a pas d'indice M (« M » nomme le filtre
+        // « A ou C », tableau-bord-apercu.js) ; la question dit « A et C ».
+        const faq = tranche(AIDE, 'Puis-je modifier les seuils des indices A et C ?', '</details>');
         expect(faq).not.toContain('ne sont pas modifiables');
         expect(faq).toContain('Labo → Outils d\'observation');
         for (const v of [acceptable, bon, excellent, pct(fixe)]) expect(faq).toContain(`${v}&nbsp;%`);
