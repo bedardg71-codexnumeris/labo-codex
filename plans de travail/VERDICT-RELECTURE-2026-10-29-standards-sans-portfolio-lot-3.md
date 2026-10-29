@@ -16,3 +16,7 @@
 « Quel que soit le type » allait trop loin, et c'est la consigne de Cowork qui le disait. En Standards, **la pondération reste exigée (plus de 0 %) pour les deux types dont le calcul lit la pondération** : l'« Évaluation terminale » (sa part de la note) et le « Portfolio (conteneur) » (la part du pool). Une terminale à 0 % ne compterait pour rien ; avec un conteneur à 0 %, la note devient « Pondérations nulles ». Pour tous les autres types, la levée du lot 3 tient. Les autres familles ne changent pas. Le message de refus est celui d'aujourd'hui (« la pondération est requise : plus de 0 % »), aucun mot neuf.
 
 Tests : en Standards, une terminale à 0 % et un conteneur à 0 % refusés ; un laboratoire à 0 % accepté ; en Sommative, tout reste refusé à 0 % comme avant. Break-test (arbre restauré par sha256). Vitest depuis `tests/`. Un commit pour la retouche, un pour les docs (ce fichier) ; demande de relecture courte : `plans de travail/DEMANDE-RELECTURE-2026-10-29-standards-sans-portfolio-lot-3-retouche.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la retouche (Cowork, 29 oct., 9 h 34)
+
+**Acceptée sans retouche. Le lot 3 est clos côté relecture.** `0be3ac74` : une seule condition (`ponderationExigee`), la terminale et le conteneur en Standards, le reste inchangé ; deux break-tests qui tombent chacun sur le bon type. Le jeton `20261028b` suit la règle du dernier build ; rien à réparer, rien n'étant poussé.
