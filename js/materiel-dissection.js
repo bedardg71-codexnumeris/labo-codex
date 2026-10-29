@@ -152,7 +152,7 @@
         if (typeof window.cle === 'function') db.removeSync(window.cle(CLE_BROUILLON));
     }
 
-    /** #1119 : un brouillon existe (lisible ou non) — la confirmation offre alors « Revenir à ma dissection ». */
+    /** #1119 : un brouillon existe (lisible ou non) — la confirmation offre alors « Revenir à mon étiquetage » (#1152, lot 5). */
     function aUnBrouillon() {
         return typeof window.cle === 'function' && db.getSync(window.cle(CLE_BROUILLON), null) != null;
     }

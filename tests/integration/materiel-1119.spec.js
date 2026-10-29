@@ -8,7 +8,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // « APPORTER MON MATÉRIEL », #1119 — revenir à sa dissection après « Créer ma grille » (consigne du 20 oct. 2026),
 // dans un vrai WebKit.
 //
-//   · disséquer (étiquettes, plages des niveaux, nom saisi), créer, « Revenir à ma dissection » → la dissection
+//   · disséquer (étiquettes, plages des niveaux, nom saisi), créer, « Revenir à mon étiquetage » (« Revenir à ma dissection » jusqu'au 28 oct.) → la dissection
 //     telle qu'elle était, avec le mot de la reprise ; le nom saisi est là, tel quel (déjà pris : refusé, jamais
 //     changé d'office) ; renommé, créé de nouveau → DEUX grilles et deux échelles, la première grille, son
 //     échelle et ses cartouches identiques à l'octet près ; le brouillon est resté tout du long ;
@@ -129,7 +129,7 @@ test('#1119 · créer, revenir à sa dissection telle quelle, la recréer : deux
     expect(brouillonApresCreation).not.toBeNull();
 
     // Le bouton, secondaire, à côté de « Coller une autre grille » ; au doigt sur l'iPad, puis au Mac.
-    await expect(revenir(page)).toHaveText('Revenir à ma dissection');
+    await expect(revenir(page)).toHaveText('Revenir à mon étiquetage');   // ↻ #1152, lot 5 (29 oct. 2026) : plans de travail/TEXTES-2026-10-28-textes-d-ecran.md (n° 12)
     await expect(revenir(page)).toHaveClass(/btn-secondaire/);
     await expect(page.locator('.materiel-confirmation .materiel-retours [data-action="materiel.recommencer"]')).toHaveText('Coller une autre grille');
     const ipad = await mesurer(page);

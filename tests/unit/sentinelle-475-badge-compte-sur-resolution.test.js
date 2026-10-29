@@ -8,7 +8,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 // présence de leur id : un enseignant ou une pratique supprimés laissaient « Complet ». Ils sont
 // résolus là où le formulaire les propose : `enseignants` (ou le profil, `'profil'`), les pratiques du
 // trimestre (ids legacy normalisés), le registre des pratiques prédéfinies, le démo. Le dénominateur
-// reste 5 (la pratique « facultative » au formulaire : question de produit, hors du lot). Noms fictifs.
+// reste 5. ↻ #1152, lot 5 (29 oct. 2026, mesure du § 1.3 de CONSIGNE-LOT-2026-10-28-aide-lot-5-textes-d-ecran.md) :
+// les cinq éléments comptés sont ceux que l'écran dit obligatoires — le TRIMESTRE compte, la pratique (facultative)
+// ne compte plus. Noms fictifs.
 
 const echapper = (s) => String(s == null ? '' : s);
 function elementDom(id) {
@@ -42,7 +44,7 @@ function badge(gc, { enseignants = [{ id: 'ENS1', prenom: 'Léa', nom: 'Fictive'
         obtenirTrimestreActif: () => store.trimestres[0],
         motsNature: () => ({ Objet: 'Cours', personneCourt: 'Enseignant·e' }), motNature: () => 'service'
     }, win);
-    win.mettreAJourCarteResumeGroupeCoursV2(Object.assign({ id: 'GC_1', coursId: 'C1', groupeNum: '00001', horaireId: 'HOR1' }, gc));
+    win.mettreAJourCarteResumeGroupeCoursV2(Object.assign({ id: 'GC_1', trimestreId: 'test', coursId: 'C1', groupeNum: '00001', horaireId: 'HOR1' }, gc));
     return (document.getElementById('v2-carteResumeGroupeCours').innerHTML.match(/score-valeur">([^<]*)</) || [])[1];
 }
 
@@ -53,14 +55,19 @@ describe('#475 — le badge ne compte que ce qui existe', () => {
     it('1. un enseignant supprimé ne compte plus (avant : « Complet »)', () => {
         expect(badge({ enseignantId: 'ENS_PARTI', pratiqueId: 'PRAT1' })).toBe('4/5 configurés');
     });
-    it('2. une pratique supprimée ne compte plus (avant : « Complet »)', () => {
-        expect(badge({ enseignantId: 'ENS1', pratiqueId: 'PRAT_PARTIE' })).toBe('4/5 configurés');
+    it('2. ↻ lot 5 : la pratique, facultative, ne compte plus — supprimée ou absente, le badge reste « Complet »', () => {
+        expect(badge({ enseignantId: 'ENS1', pratiqueId: 'PRAT_PARTIE' })).toBe('Complet');
+        expect(badge({ enseignantId: 'ENS1' })).toBe('Complet');
+    });
+    it('2 bis. lot 5 : le trimestre compte — absent ou supprimé, il manque (pas de repli sur le trimestre actif)', () => {
+        expect(badge({ enseignantId: 'ENS1', trimestreId: undefined })).toBe('4/5 configurés');
+        expect(badge({ enseignantId: 'ENS1', trimestreId: 'PARTI' })).toBe('4/5 configurés');
     });
     it('3. le profil (`profil`) compte s\'il est rempli, pas s\'il est vide', () => {
         expect(badge({ enseignantId: 'profil', pratiqueId: 'PRAT1' }, { profil: { prenom: 'Léa', nom: 'Fictive' } })).toBe('Complet');
         expect(badge({ enseignantId: 'profil', pratiqueId: 'PRAT1' }, { profil: {} })).toBe('4/5 configurés');
     });
-    it('4. une pratique prédéfinie du registre compte', () => {
+    it('4. ↻ lot 5 : une pratique prédéfinie ne change rien au compte', () => {
         expect(badge({ enseignantId: 'ENS1', pratiqueId: 'sommative' }, { registre: ['sommative'] })).toBe('Complet');
     });
 });

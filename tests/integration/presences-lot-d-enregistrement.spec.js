@@ -215,7 +215,7 @@ test('(c)(d) « Confirmer la séance » ; verrouiller une séance non saisie : u
     expect(d.fiches).toBeGreaterThan(0);
     await expect(page.locator('#etat-seance-presences')).toHaveText('Séance verrouillée');
     expect(d.toasts).toHaveLength(1);
-    expect(d.toasts[0]).toContain('Séance saisie et verrouillée : les élèves non marqué·es comptent présent·es.');
+    expect(d.toasts[0]).toContain('Séance saisie et verrouillée : les étudiant·es non marqué·es comptent présent·es.');
     expect(await page.locator('#periodes_' + (await page.evaluate(() => document.querySelector('#tbody-saisie-presences input[id^="periodes_"]').id.slice(9)))).isDisabled()).toBe(true);
     expect(erreurs).toEqual([]);
 });

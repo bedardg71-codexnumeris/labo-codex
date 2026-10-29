@@ -1632,7 +1632,8 @@ function regexEnrichissement() {
     const dict = glossaireDict();
     const termes = Object.keys(dict).map(k => dict[k].terme);
     termes.sort((a, b) => b.length - a.length);
-    const escaped = termes.map(t => t.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
+    // Le trait d'union n'est pas échappé : sous le drapeau `u`, « \- » hors d'une classe est une erreur de syntaxe.
+    const escaped = termes.map(t => t.replace(/[\/\\^$*+?.()|[\]{}]/g, '\\$&'));
     // #1152, lot 5 (décision de Cowork du 28 oct. 2026) : aux mots ENTIERS — « critère » n'est plus souligné dans
     // « critères », ni « cours » dans « parcours ». `\b` ignore les lettres accentuées : la borne est une lettre ou un
     // chiffre Unicode. Le caractère qui précède est capturé (groupe 1) plutôt que lu en arrière, comme _MOTIF_ELEVE_N.
