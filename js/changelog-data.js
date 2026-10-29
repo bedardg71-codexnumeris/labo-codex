@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.225 (fusionner deux codex copie par copie, #1182) — titre et deux items validés par Grégoire, mot pour
+            // mot, le 29 oct. 2026 (consigne de Cowork `CONSIGNE-LOT-2026-10-29-mise-en-ligne-1225-fusion.md`, § 1,
+            // collée par lui). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.225',
+            couleur: 'orange',
+            titre: 'Fusionner deux codex sans rien perdre',
+            items: [
+                'Corrigé&nbsp;: «&nbsp;Fusionner avec un codex&nbsp;» réunit maintenant deux codex copie par copie. Les évaluations et les annotations faites sur deux appareils s’additionnent&nbsp;; avant, celles d’un des deux pouvaient disparaître sans avertissement.',
+                'Une fusion n’efface rien&nbsp;: ce qui n’existe que d’un côté est gardé. Quand une même copie diffère des deux côtés, la fusion te montre sa date de modification de chaque côté et te laisse choisir.'
+            ]
+        },
+        {
             // 1.224 (des standards sans portfolio, lots 1 à 4 et la retouche, #1178 ; les jetons par défaut, #1179 ; les
             // totems de la démo, #1180 ; l'Aide, lots 4 et 5, et le guidage de la démo, #1152 ; l'accueil) — titre et huit
             // items validés par Grégoire, mot pour mot, le 29 oct. 2026 vers 10 h 15. Insécables en `&nbsp;`, apostrophes
