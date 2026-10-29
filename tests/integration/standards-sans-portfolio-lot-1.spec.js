@@ -9,8 +9,9 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // `plans de travail/CONSIGNE-LOT-2026-10-28-standards-sans-portfolio-lot-1.md`, § 3, et sa retouche, R2).
 // Retouche R2 : une cause propre à l'étudiant·e n'est pas une erreur de configuration. CHIM-6 (laboratoires et examens,
 // l'Examen 2 typé « Évaluation terminale », seule la terminale évaluée) et GREG-3 (six artefacts, aucun évalué) gardent la
-// carte de la note, sans note, la phrase du mot neuf 2 à la place du nombre ; ni l'alerte ni « Réglages de la pratique ».
-// Une erreur de configuration (la terminale sans pondération) garde l'alerte et le bouton.
+// carte de la note, sans note, la phrase du mot neuf 2 à la place du nombre. Retouche R2 bis : le bouton de la carte
+// (« Modifier le statut… ») reste ; ni l'alerte ni son bouton (« … corriger ses paramètres »).
+// Une erreur de configuration (la terminale sans pondération) garde l'alerte et son bouton.
 // L'unitaire (sentinelle-standards-sans-portfolio) juge la chaîne ; ici, qu'elle s'affiche. Noms fictifs.
 
 const T = 'tstd1028';
@@ -56,14 +57,16 @@ async function ouvrirProfil(page, { productions, evaluations }) {
 for (const [cas, productions, evaluations, phrase] of [
     ['CHIM-6 · seule la terminale évaluée', CHIMIE, [[DA, 'X2', 85], [TEMOIN, 'L1', 70], [TEMOIN, 'X2', 80]], TERMINALE_SEULE],
     ['GREG-3 · aucun artefact évalué', GREG, [[TEMOIN, 'A1', 70], [TEMOIN, 'T1', 80]], AUCUN_ARTEFACT]]) {
-    test(cas + ' : la carte de la note, sans note, la phrase à la place du nombre ; ni alerte ni réglages', async ({ page }) => {
+    test(cas + ' : la carte de la note, sans note, la phrase à la place du nombre, le bouton de la carte ; ni alerte ni son bouton', async ({ page }) => {
         const erreurs = [];
         page.on('pageerror', (e) => erreurs.push(e.message));
         const carte = await ouvrirProfil(page, { productions, evaluations });
         await expect(carte.locator('.note-finale-resultat .note-finale-non-evalue')).toHaveText(phrase);
         await expect(carte.locator('.note-finale-titre')).toContainText('Note provisoire de session');
         await expect(carte.locator('.alerte-attention')).toHaveCount(0);
-        await expect(carte.locator('.lien-reglages')).toHaveCount(0);
+        await expect(carte.locator('.lien-reglages')).toHaveCount(1);
+        await expect(carte.locator('.lien-reglages')).toHaveText('Réglages de la pratique');
+        await expect(carte.locator('.lien-reglages')).toHaveAttribute('title', /^Modifier le statut \(provisoire \/ finale\)/);
         await expect(carte.locator('.note-finale-total')).toHaveCount(0);
         expect(erreurs).toEqual([]);
     });
@@ -76,5 +79,6 @@ test('une erreur de configuration (la terminale sans pondération) garde l\'aler
     const carte = await ouvrirProfil(page, { productions: sansPoids, evaluations: [[TEMOIN, 'L1', 70]] });
     await expect(carte.locator('.alerte-attention')).toContainText('Note finale non calculable.');
     await expect(carte.locator('.lien-reglages')).toHaveText('Réglages de la pratique');
+    await expect(carte.locator('.lien-reglages')).toHaveAttribute('title', /corriger ses paramètres/);
     expect(erreurs).toEqual([]);
 });

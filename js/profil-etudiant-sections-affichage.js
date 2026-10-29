@@ -2798,11 +2798,12 @@ function _totalCarteNote(details) {
 }
 
 /**
- * Le bouton des réglages de la carte de la note. Retouche R2 (28 oct. 2026) : absent quand la note manque pour une cause
- * propre à l'étudiant·e — il n'y a rien à régler.
+ * Le bouton des réglages de la carte de la note. Retouche R2 bis (28 oct. 2026) : présent aussi quand la note manque pour
+ * une cause propre à l'étudiant·e — il mène au statut et aux pondérations, pas à une correction ; seul le bouton de
+ * l'alerte (erreur de configuration) disparaît alors.
  */
 function _boutonReglagesCarteNote(details) {
-    if (!details.pratiqueId || details.causeNoteAbsente) return '';
+    if (!details.pratiqueId) return '';
     return `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(details.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>`;
 }
 
@@ -2861,7 +2862,7 @@ function genererSectionProductions(da) {
     let htmlNoteFinale = '';
     // Retouche R2 du lot 1 des standards sans portfolio (28 oct. 2026) : une cause propre à l'étudiant·e (aucune production
     // du pool notée, `causeNoteAbsente`) n'est pas une erreur de configuration. Le profil garde sa carte, sans note, la
-    // phrase à la place du nombre ; ni l'alerte, ni le bouton des réglages, qui restent à l'erreur de configuration.
+    // phrase à la place du nombre, et le bouton de la carte ; ni l'alerte ni son bouton, qui restent à l'erreur de configuration.
     const causeNoteAbsente = (detailsNoteFinale && detailsNoteFinale.causeNoteAbsente) || null;
     if (detailsNoteFinale && detailsNoteFinale.erreur && !causeNoteAbsente) {
         htmlNoteFinale = `
