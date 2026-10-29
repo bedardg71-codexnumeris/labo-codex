@@ -7,6 +7,24 @@
 
 ---
 
+## 29 OCT. 2026, 14 H 00 (Claude Code) : **POUSSÉ, EN LIGNE : 1.224.0 = `363a9b0b`, SOMMET `03f2cf5d` ; GITHUB EN COURS (RUN 40926271259, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**La 1.224.0** (release demandée par Grégoire vers 10 h 05, « 51 commits, c'est beaucoup » ; le lot 5 de #1178 viendra après) porte les standards sans portfolio, lots 1 à 4 et la retouche du lot 4 (`032c7f91`, #1178), les jetons par défaut (#1179), les totems de la démo (#1180), l'Aide, lots 4 et 5, et le guidage de la démo (#1152), l'accueil. Nouvelles 1.224 : titre et huit items validés par Grégoire mot pour mot vers 10 h 15. Rituel de fin de session : audit statique propre sur `ace09fa2..HEAD` (`navigation.js` et `noms_stables.json` touchés sous autorisation écrite du 28 oct.) ; break-test J2 des jetons rejoué, 1 rouge, restauré.
+
+**Premier verdict du Mac, sur `363a9b0b` : ROUGE, push bloqué** — 10 neuves, toutes reproduites seules. Six specs restées aux anciens mots du lot 5 de l'Aide (« étudiant·e », `6f65ecbf` ; le bloc masqué « À propos de cette section » du profil, `6c954d61`) : corrigées en `03f2cf5d`. Quatre cas de `temoin-enregistrement-lot-b` (1024 et 1180 px) : vrai chevauchement en démo, trouvé par bisection sur `433cd2da` ; décision de Grégoire : inscrit **#1181**, les quatre cas à `scripts/playwright-baseline.json` (à retirer avec le correctif).
+
+**Second verdict du Mac : vert sur `03f2cf5d`, par `scripts/verdict-en-morceaux.mjs`, sans refus** : 1 134 essais, 1 129 verts, 1 au second essai (`grilles-sous-criteres-condense`, encore), 4 rouges (4 connus, #1181), 19 sautés. `git push` : « verdict vert à jour pour ce commit ».
+
+**Netlify** : `6ae38915`, `commit_ref` `03f2cf5d`, `ready`, publié à 17:58:00 Z (13 h 58) ; le `version.js` du déploiement (permalien) dit `1.224.0`, build `1029-1011`.
+
+**GitHub, run 40926271259** : en cours à l'écriture, non jugé ici.
+
+**Complexité** (1.223.0 `d1d581b7` → 1.224.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 93 020 → 92 876 (Δ −144) ; au-dessus de 15 : 446 → 446 (Δ 0) ; au-dessus de 30 : 83 → 83 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 244 → 11 238 (Δ −6).
+
+**Portes terrain** : aucune. **La suite** : le lot 5 de #1178 (l'assistant et les mots), dont Cowork écrit la consigne ; #1181 attend une décision (la place du témoin, ou la bulle) ; la trouvaille de l'hybride, inscrite sous #1178.
+
+---
+
 ## 28 OCT. 2026, 19 H 40 (Claude Code) : **POUSSÉ, EN LIGNE : 1.223.0 = `d1d581b7` ; GITHUB ROUGE (18 NEUVES SOUS LINUX, VERTES SUR LE MAC, AUCUNE DANS LES LOTS DU SOIR) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **La 1.223.0** (consigne `plans de travail/CONSIGNE-LOT-2026-10-28-mise-en-ligne-du-soir-1223.md`) porte l'Aide, lots 2c, 2c bis, 2d et 3 (#1152), la copie non recevable (#1175), les correctifs de la note E1-E4, E7 (`19db734c`) et leur retouche E14-E16 (`96750af7`, #1177), l'accueil à trois portes (`d5aef7d3`), tous acceptés par Cowork (verdicts `plans de travail/VERDICT-RELECTURE-2026-10-28-*.md`). Commit de docs seul d'abord (`754cc8d4`, les sept fichiers du § 0). Nouvelles : l'entrée 1.223, titre et huit items validés par Grégoire le 28 oct. à 15 h 45, comparés au caractère près à la consigne (insécables comptés comme espaces) ; chaque libellé mesuré dans le code (`accueil.js:79,180,190`, `pratique-registre.js:1019-1022`, `liste-evaluations.js:1558`, `export-resultats-finaux.js:102`, `accompagnement.js:1428`, `wizard-pratique-v2.js:649`). **Un arrêt** : l'item 1 dit « remplacent la bannière », alors que la bannière « À propos » est toujours là (`accueil.js:172`) et que les portes remplacent la carte de l'orthopédagogie ; Grégoire a tranché « garder tel quel » (« la bannière » = cette carte), noté dans le commentaire de l'entrée. `node scripts/release.mjs minor` : build `1028-1724`, 37 jetons ; **le hook #826 a refusé le premier commit** (`accompagnement-contenu-terme.js?v=20261028a`, déjà servi par `4ec64491`) : jeton `20261028b` posé, comme le hook le propose. Rituel : audit statique des 1 355 lignes ajoutées depuis `ac71f50b` sans motif, aucune zone protégée ; Vitest 844 / 10 183 ; break-test E1 (`_ponderationDe` neutralisé) : 2 rouges sur 29 dans la sentinelle des correctifs, restauré. Réserve § 4.1 bis : des `waitForTimeout` dans les specs des lots du soir (`copie-non-recevable-note-28-oct` ×6, `construction-de-la-note-correctifs-28-oct`, `aide-lot-2c`, `-2c-bis`, `-2d`), non corrigés.
