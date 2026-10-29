@@ -1163,59 +1163,6 @@ async function dupliquerGrille(grilleId) {
 }
 
 /* ===============================
-   🔒 FONCTION: BASCULER VERROUILLAGE CRITÈRE
-   Verrouille ou déverrouille un critère
-   ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
-   =============================== */
-
-/**
- * Bascule le verrouillage d'un critère
- * 
- * @param {string} critereId - ID du critère
- * 
- * UTILISÉ PAR:
- * - Checkbox "🔒" dans la liste
- * 
- * FONCTIONNEMENT:
- * 1. Trouve le critère
- * 2. Inverse son statut verrouille
- * 3. Sauvegarde si grille existante
- * 4. Rafraîchit l'affichage
- */
-async function basculerVerrouillageCritere(critereId) {
-    if (!grilleTemplateActuelle && (!window.tempCriteres || window.tempCriteres.length === 0)) {
-        return;
-    }
-
-    if (grilleTemplateActuelle) {
-        // #957 : basculé sur la version EN BASE, pas sur l'objet mémoire.
-        // Sauvegarder en mode silencieux pour éviter la notification "Grille sauvegardée"
-        let bascule = null;
-        await sauvegarderGrilleTemplate(true, (g) => {
-            const c = (g.criteres || []).find(x => x.id === critereId);
-            if (!c) return;
-            c.verrouille = !c.verrouille;
-            bascule = c;
-        });
-        if (!bascule) return;
-
-        // Afficher une notification spécifique au verrouillage
-        const statut = bascule.verrouille ? 'verrouillé' : 'déverrouillé';
-        notifications.succes(`Critère "${bascule.nom}" ${statut}`);
-        afficherListeCriteres(grilleTemplateActuelle.criteres, grilleTemplateActuelle.id);
-        return;
-    }
-
-    const criteres = window.tempCriteres;
-    const index = criteres.findIndex(c => c.id === critereId);
-    if (index !== -1) {
-        // Basculer directement l'état (pas de checkbox, juste un span cliquable)
-        criteres[index].verrouille = !criteres[index].verrouille;
-        afficherListeCriteres(criteres, null);
-    }
-}
-
-/* ===============================
    FONCTION: GET TYPE CRITÈRE LABEL
    Retourne le libellé d'un type
    ⚠️ NE PAS RENOMMER - Référencé dans noms_stables.json
@@ -1847,7 +1794,6 @@ async function initialiserModuleGrilles() {
  * - chargerGrilleEnEdition(grilleId)
  * - supprimerGrille(grilleId)
  * - dupliquerGrille(grilleId)
- * - basculerVerrouillageCritere(critereId)
  * - getTypeCritereLabel(type)
  * - calculerTotalPonderationCriteres(criteres)
  * - enregistrerCommeGrille()
@@ -2177,7 +2123,6 @@ window.verifierUtilisationGrille = verifierUtilisationGrille;
 window.deplacerCartouchesVersAutreGrille = deplacerCartouchesVersAutreGrille;
 window.supprimerGrilleAvecPorteDeSortie = supprimerGrilleAvecPorteDeSortie;
 window.dupliquerGrille = dupliquerGrille;
-window.basculerVerrouillageCritere = basculerVerrouillageCritere;
 window.getTypeCritereLabel = getTypeCritereLabel;
 window.calculerTotalPonderationCriteres = calculerTotalPonderationCriteres;
 

@@ -91,7 +91,8 @@ describe('#853 · appliquerJetonDelai sur une reprise suit le réglage de la pra
         const b = monterMoteur({ pratique: PLATE(true) });
         expect(b.win.appliquerJetonDelai('O')).toBe(false);
         expect(b.notifs.map(n => n.type + ':' + n.t)).toEqual(['erreur:Conflit']);
-        expect(b.notifs[0].m).toMatch(/remplacée par une reprise/);
+        // ↻ #1152, lot 5 (29 oct. 2026) : la phrase de Cowork du § 1.4 (plans de travail/CONSIGNE-LOT-2026-10-28-aide-lot-5-textes-d-ecran.md).
+        expect(b.notifs[0].m).toBe('Cette évaluation a une reprise : un délai ne s\'y applique pas.');
     });
     it('une évaluation ordinaire reçoit toujours son délai, réglage décoché', () => {
         const b = monterMoteur({ pratique: PLATE(false), evaluations: [{ id: 'E', etudiantDA: '1111111', productionId: 'P2', noteFinale: 60 }] });

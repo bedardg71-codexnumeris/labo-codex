@@ -711,7 +711,7 @@ function obtenirEchelleCommuneDesEvaluations(da) {
         return {
             echelle: null,
             raison: 'aucune-evaluation',
-            message: 'Aucune évaluation retenue pour cet élève : il n\'y a pas de note globale à situer.'
+            message: 'Aucune évaluation retenue pour cet·te étudiant·e : il n\'y a pas de note globale à situer.'
         };
     }
 
@@ -753,7 +753,7 @@ function obtenirEchelleCommuneDesEvaluations(da) {
         return {
             echelle: null,
             raison: 'echelle-non-resolue',
-            message: 'Aucune des échelles désignées par les évaluations de cet élève n\'est '
+            message: 'Aucune des échelles désignées par les évaluations de cet·te étudiant·e n\'est '
                 + 'trouvable dans ce trimestre. Sa note globale ne peut pas être située tant '
                 + 'qu\'elles ne sont pas rétablies.'
         };
@@ -763,7 +763,7 @@ function obtenirEchelleCommuneDesEvaluations(da) {
         return {
             echelle: null,
             raison: 'echelles-divergentes',
-            message: 'Les évaluations de cet élève emploient ' + resolues.length + ' échelles '
+            message: 'Les évaluations de cet·te étudiant·e emploient ' + resolues.length + ' échelles '
                 + 'différentes, toutes les deux présentes dans ce trimestre. Sa note globale '
                 + 'n\'est donc située dans aucune — choisir la « bonne » reviendrait à en '
                 + 'écarter une autre sans le dire.'
@@ -825,11 +825,11 @@ function diagnostiquerConversionNiveaux(da) {
         nonConverties: nonConverties,
         raisons: raisons,
         message: (toutes
-            ? 'Aucune des ' + evaluations.length + ' évaluations de cet élève n\'a pu être convertie'
-            : nonConverties + ' des ' + evaluations.length + ' évaluations de cet élève n\'ont pas pu être converties')
+            ? 'Aucune des ' + evaluations.length + ' évaluations de cet·te étudiant·e n\'a pu être convertie'
+            : nonConverties + ' des ' + evaluations.length + ' évaluations de cet·te étudiant·e n\'ont pas pu être converties')
             + ' : ' + causes.join(' ; ') + '. '
             + (toutes
-                ? 'Les critères, les défis et le pattern ci-dessous ne reposent donc sur AUCUNE donnée de performance — ne les lis pas comme un portrait de l\'élève.'
+                ? 'Les critères, les défis et le pattern ci-dessous ne reposent donc sur AUCUNE donnée de performance — ne les lis pas comme un portrait de l\'étudiant·e.'
                 : 'Le portrait ci-dessous est calculé sur les autres seulement.')
     };
 }

@@ -1419,7 +1419,7 @@ function genererSectionAccompagnement(da) {
                 if (!lectureStructure.echelle) {
                     return enteteCarte + `
                 <p class="profil-texte-italique-gris">
-                    ${echapperHtml(lectureStructure.message || 'La structure des résultats ne peut pas être observée : aucune échelle commune n\'a pu être établie pour cet élève.')}
+                    ${echapperHtml(lectureStructure.message || 'La structure des résultats ne peut pas être observée : aucune échelle commune n\'a pu être établie pour cet·te étudiant·e.')}
                 </p>` + piedCarte;
                 }
 

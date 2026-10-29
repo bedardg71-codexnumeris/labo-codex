@@ -389,7 +389,7 @@ var MODELES = [
         // est paramétrable et sert toute norme externe). Le NOM seul change ; l'`id`
         // `norme_externe` voyage avec les grilles partagées et ne bouge pas.
         nom: 'Projection à l\'EUF',
-        description: 'Situe l\'élève face à une norme indépendante du cours, exprimée en erreurs tolérées pour une longueur de référence.',
+        description: 'Situe l\'étudiant·e face à une norme indépendante du cours, exprimée en erreurs tolérées pour une longueur de référence.',
         projette: true,
         parametres: [
             {
@@ -429,7 +429,7 @@ var MODELES = [
                 cle: 'libelleSignalement',
                 type: 'texte',
                 libelle: 'Ce que le signalement affiche à l\'enseignant',
-                aide: 'Une phrase courte, dans tes mots : « Aide en français recommandée », « Reprise du module 2 à prévoir »… Elle apparaît à côté du palier RàI de l\'élève, jamais sur sa copie. Laisser vide pour ne lever aucun signalement.',
+                aide: 'Une phrase courte, dans tes mots : « Aide en français recommandée », « Reprise du module 2 à prévoir »… Elle apparaît à côté du palier RàI de l\'étudiant·e, jamais sur sa copie. Laisser vide pour ne lever aucun signalement.',
                 defaut: '',
                 max: 200
             },
@@ -451,7 +451,7 @@ var MODELES = [
     {
         id: 'aucune',
         nom: 'Aucune projection',
-        description: 'Le critère est noté, mais aucune projection n\'est proposée à l\'élève. À employer partout où la grille algorithmique ne sert pas une rédaction.',
+        description: 'Le critère est noté, mais aucune projection n\'est proposée à l\'étudiant·e. À employer partout où la grille algorithmique ne sert pas une rédaction.',
         projette: false,
         parametres: [],
         paliersParDefaut: [],

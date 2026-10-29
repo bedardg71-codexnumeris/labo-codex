@@ -212,7 +212,8 @@ describe('lot D · 6. le verrou enregistre et le dit', () => {
         try { b.win.basculerVerrouillageDate(DATE); } catch { /* idem */ }
         expect(fichesDu(store, DATE)).toHaveLength(3);
         expect(store[K_VERROU]).toEqual([DATE]);
-        expect(b.notifs.map((n) => n.t)).toEqual(['Séance saisie et verrouillée : les élèves non marqué·es comptent présent·es.']);
+        // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+        expect(b.notifs.map((n) => n.t)).toEqual(['Séance saisie et verrouillée : les étudiant·es non marqué·es comptent présent·es.']);
     });
 
     it('séance déjà saisie : « Séance verrouillée. »', () => {

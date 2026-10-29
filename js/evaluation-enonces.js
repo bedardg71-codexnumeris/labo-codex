@@ -492,7 +492,7 @@ var CONCENTRE_NEUF = 'Tu pourrais encore raffiner : ' + JETON_CRITERE;
 // copie ne porte NI tampon NI erreur. La sentinelle du texte troué relit les
 // sites et rougit si cette table s'en écarte, dans un sens comme dans l'autre.
 var CLES = [
-    { cle: 'decompte',  libelle: 'Décompte des erreurs',        aide: 'La phrase engendrée sous le critère, et reprise dans le PDF de l\'élève.',
+    { cle: 'decompte',  libelle: 'Décompte des erreurs',        aide: 'La phrase engendrée sous le critère, et reprise dans le PDF de l\'étudiant·e.',
       reperes: [JETON_CRITERE, JETON_ERREURS, JETON_NOM_ERREURS, JETON_MOTS, JETON_NOM_MOTS, JETON_POINTS] },
     { cle: 'priorite',  libelle: 'Défi prioritaire',            aide: 'Mise en tête du bilan quand ce critère est effondré.',
       reperes: [JETON_CRITERE] },

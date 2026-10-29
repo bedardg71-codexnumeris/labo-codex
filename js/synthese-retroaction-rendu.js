@@ -276,7 +276,7 @@
 
     function renderMarqueurRecalcul(ctx) {
         if (!ctx.feedback || ctx.feedback.recalculee !== true) return '';
-        const message = 'Vue recalculée — peut différer de la rétroaction reçue par l’élève au moment de la remise.';
+        const message = 'Vue recalculée — peut différer de la rétroaction reçue par l’étudiant·e au moment de la remise.';
         return `
             <div style="margin-bottom: 10px; padding: 6px 9px; background: ${CARD}; border-left: 3px solid ${MUTED}; border-radius: 2px; font-size: 9px; font-style: italic; color: ${MUTED}; line-height: 1.4;">
                 ${esc(message)}

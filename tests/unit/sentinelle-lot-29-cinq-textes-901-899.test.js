@@ -28,7 +28,7 @@ describe('lot 29 · #901 — quatre phrases de l\'Aide disent ce que fait le cod
     it('C-2 · la dénotation : titre sans « à l\'horizon », encadré « disponible »', () => {
         const src = mots(lire('js/guides-pedagogiques.js'));
         expect(src).toContain("titre: 'La dénotation : une PRÉN',");
-        expect(src).toContain("<strong>Statut dans Labo Codex.</strong> La dénotation est disponible : l'assistant de création la propose, et le jugement sur chaque cible se saisit dans le profil de l'élève.</div>");
+        expect(src).toContain("<strong>Statut dans Labo Codex.</strong> La dénotation est disponible : l'assistant de création la propose, et le jugement sur chaque cible se saisit dans le profil de l'étudiant·e.</div>"); // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
         expect(src).not.toMatch(/PRÉN à l.horizon/);
         expect(src).not.toContain('pas encore activable');
         expect(src).not.toContain('ne décrit pas une fonction disponible');

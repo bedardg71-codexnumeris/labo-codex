@@ -646,14 +646,14 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Barres par critère (habiletés)",
                 items: [
                     "Une barre par critère de TA grille, dans ton ordre à toi.",
-                    "La longueur de la barre est la moyenne de l'élève sur ce critère, tous artefacts confondus.",
+                    "La longueur de la barre est la moyenne de l'étudiant·e sur ce critère, tous artefacts confondus.",
                     "Un critère sans évaluation n'a pas de barre — plutôt qu'une barre à zéro, qui se lirait comme un échec.",
                     "La flèche à droite indique la direction : en amélioration, plateau, en détérioration."
                 ]
             },
             {
                 type: 'conseil',
-                contenu: "Compare les barres entre elles pour identifier les forces et les défis récurrents. Deux élèves ayant la même note globale peuvent avoir des profils opposés d'un critère à l'autre — et appeler des accompagnements différents. C'est ce que la note seule ne montre pas."
+                contenu: "Compare les barres entre elles pour identifier les forces et les défis récurrents. Deux étudiant·es ayant la même note globale peuvent avoir des profils opposés d'un critère à l'autre — et appeler des accompagnements différents. C'est ce que la note seule ne montre pas."
             },
             {
                 type: 'liste',
@@ -1794,11 +1794,11 @@ const AIDE_CONTEXTUELLE = {
     // =========================================================================
 
     'comparateur-pratiques': {
-        titre: "Comprendre le Comparateur de pratiques",
+        titre: "Comprendre l'Exploration des pratiques",
         sections: [
             {
                 type: 'texte',
-                contenu: "Le Comparateur montre ce que deux ou trois pratiques de notation feraient des mêmes parcours d'élèves. Seules les règles de la pratique changent d'une colonne à l'autre."
+                contenu: "L'Exploration des pratiques montre ce que deux ou trois pratiques de notation feraient des mêmes parcours d'étudiant·es. Seules les règles de la pratique changent d'une colonne à l'autre."
             },
             {
                 type: 'texte',

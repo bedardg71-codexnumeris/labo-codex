@@ -621,7 +621,7 @@
      */
     function _texteNomsManquants() {
         var p = window.enoncesAlgo.NOMS_DE_REPLI;   // le repli que l'élève lit : une seule source
-        return 'Ton critère algorithmique n’a pas encore ses deux noms : ce que tu comptes, et ce à quoi tu le rapportes. Écris-les dans la grille ; d’ici là, l’élève lit « '
+        return 'Ton critère algorithmique n’a pas encore ses deux noms : ce que tu comptes, et ce à quoi tu le rapportes. Écris-les dans la grille ; d’ici là, l’étudiant·e lit « '
             + p.erreurs.singulier + ' » et « ' + p.mots.singulier + ' ».';
     }
     function _critereDeLaCopie() {
@@ -1960,7 +1960,7 @@
         // Info étudiant/production (même info que palette Paramètres)
         html += '<div id="travaux-annot-identite" class="travaux-eval-identite" style="margin-top: 6px;">';
         html += '<div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-annot-label-etudiant" style="font-weight: 600;">--</span>';
-        html += '<button class="btn-profil-rapide" id="travaux-annot-btn-profil" data-action="ouvrirProfilDepuisAnnotation" title="Voir le profil de l\u2019\u00e9l\u00e8ve"><img src="' + ICONS_DIR + 'icon-profile.svg" alt="" class="outil-svg-icon"></button></div>';
+        html += '<button class="btn-profil-rapide" id="travaux-annot-btn-profil" data-action="ouvrirProfilDepuisAnnotation" title="Voir le profil de l\u2019\u00e9tudiant\u00b7e"><img src="' + ICONS_DIR + 'icon-profile.svg" alt="" class="outil-svg-icon"></button></div>';
         html += '<span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-annot-label-production">--</span>';
         html += '</div>';
         html += '</div>';
@@ -2623,7 +2623,7 @@
 
         let html = '<div class="modal-contenu travaux-retro-modal">';
         html += '<h2 style="margin-top:0">R\u00e9troactions \u2014 Observations</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9l\u00e8ve lorsque le tampon correspondant est utilis\u00e9. Clique sur l\'image pour la remplacer. Glissez \u2630 pour r\u00e9ordonner.</p>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces textes appara\u00eetront dans la r\u00e9troaction g\u00e9n\u00e9r\u00e9e pour l\'\u00e9tudiant\u00b7e lorsque le tampon correspondant est utilis\u00e9. Clique sur l\'image pour la remplacer. Glissez \u2630 pour r\u00e9ordonner.</p>';
 
         // Noms des categories editables
         var catsPerso = obtenirCategoriesPerso();
@@ -3680,7 +3680,7 @@
         // dit plus la discipline ; la phrase dit à quoi servent ces dix codes (le
         // repli) depuis qu'une grille peut porter les siens.
         html += '<h2 style="margin-top:0">Rétroactions — Codes d\'annotation</h2>';
-        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces dix codes servent à toute copie dont la grille ne porte pas ses propres codes (une grille active les siens dans Conception, sous son critère algorithmique). Ces textes apparaîtront dans la rétroaction générée pour l\'élève lorsque le code correspondant est posé. Clique sur la pastille pour changer sa couleur. Glissez \u2630 pour réordonner.</p>';
+        html += '<p style="color:var(--texte-secondaire);font-size:0.85rem;margin-bottom:16px;">Ces dix codes servent à toute copie dont la grille ne porte pas ses propres codes (une grille active les siens dans Conception, sous son critère algorithmique). Ces textes apparaîtront dans la rétroaction générée pour l\'étudiant·e lorsque le code correspondant est posé. Clique sur la pastille pour changer sa couleur. Glissez \u2630 pour réordonner.</p>';
 
         const modeSynthese = obtenirModeSyntheseErrFr();
         html += '<div class="travaux-errfr-reglage">';

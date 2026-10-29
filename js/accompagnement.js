@@ -1633,7 +1633,10 @@ function regexEnrichissement() {
     const termes = Object.keys(dict).map(k => dict[k].terme);
     termes.sort((a, b) => b.length - a.length);
     const escaped = termes.map(t => t.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
-    _regexEnrichissement = new RegExp('(' + escaped.join('|') + ')', 'gi');
+    // #1152, lot 5 (décision de Cowork du 28 oct. 2026) : aux mots ENTIERS — « critère » n'est plus souligné dans
+    // « critères », ni « cours » dans « parcours ». `\b` ignore les lettres accentuées : la borne est une lettre ou un
+    // chiffre Unicode. Le caractère qui précède est capturé (groupe 1) plutôt que lu en arrière, comme _MOTIF_ELEVE_N.
+    _regexEnrichissement = new RegExp('(^|[^\\p{L}\\p{N}_])(' + escaped.join('|') + ')(?![\\p{L}\\p{N}_])', 'giu');
     return _regexEnrichissement;
 }
 
@@ -1651,11 +1654,11 @@ function enrichirTermesGlossaire(html) {
     if (typeof html !== 'string' || !html) return html;
     const regex = regexEnrichissement();
     const vus = {};
-    return html.replace(regex, function(match) {
-        const cle = trouverCleParTerme(match);
+    return html.replace(regex, function(match, avant, terme) {
+        const cle = trouverCleParTerme(terme);
         if (!cle || vus[cle]) return match;
         vus[cle] = true;
-        return '<span class="glossaire-terme" data-glossaire="' + cle + '" role="button" tabindex="0">' + match + '</span>';
+        return avant + '<span class="glossaire-terme" data-glossaire="' + cle + '" role="button" tabindex="0">' + terme + '</span>';
     });
 }
 

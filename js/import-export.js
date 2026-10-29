@@ -1844,8 +1844,8 @@ function compterDatesPresences(valeur) {
 function ligneElevesEcartes(n) {
     if (!n) return '';
     return n === 1
-        ? '1 élève que tu avais supprimé n\'a pas été ramené.'
-        : n + ' élèves que tu avais supprimés n\'ont pas été ramenés.';
+        ? '1 étudiant·e que tu avais supprimé·e n\'a pas été ramené·e.'
+        : n + ' étudiant·es que tu avais supprimé·es n\'ont pas été ramené·es.';
 }
 
 /**

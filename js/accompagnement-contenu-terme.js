@@ -32,7 +32,7 @@ const GLOSSAIRE = {
         terme: 'Cours',
         categorie: 'Réglages',
         etape: 'numerisation',
-        definition: 'Le cours tel qu\'il apparaît dans ton plan de cours. Le code suit le format 000-000-XX (discipline-cours-lettres). Un seul cours peut être actif à la fois dans l\'application. Tu peux dupliquer un cours pour créer rapidement une nouvelle session.',
+        definition: 'Le cours tel qu\'il apparaît dans ton plan de cours. Le code suit le format 000-000-XX (discipline-cours-lettres). C\'est le groupe-cours, pas le cours, qui est actif : un seul à la fois. Tu peux dupliquer un cours : son formulaire s\'ouvre rempli, et « Créer la copie » l\'enregistre.',
         voir: 'Cadre › Trimestre'
     },
 
@@ -59,7 +59,7 @@ const GLOSSAIRE = {
         terme: 'Groupe-cours',
         categorie: 'Réglages',
         etape: 'numerisation',
-        definition: 'L\'assemblage qui relie ton trimestre, ton cours, ton groupe d\'étudiant·es, ton horaire et ta pratique de notation. C\'est lui qui détermine ce que tu vois partout dans l\'application. Il faut au minimum un trimestre, un cours, un groupe et un horaire pour l\'assembler.',
+        definition: 'L\'assemblage qui relie ton trimestre, ton cours, ton groupe d\'étudiant·es, ton horaire et ta pratique de notation. C\'est lui qui détermine ce que tu vois partout dans l\'application. Il assemble les éléments obligatoires que l\'écran nomme (pour un cours : trimestre, cours, numéro de groupe, horaire et enseignant·e) ; la pratique de notation est facultative.',
         voir: 'Cadre › Trimestre'
     },
 
@@ -68,7 +68,7 @@ const GLOSSAIRE = {
         terme: 'Production',
         categorie: 'Structure',
         etape: 'numerisation',
-        definition: 'Une occasion pour tes étudiant·es de mettre en pratique ce qu\'ils et elles apprennent — un exercice, un travail, un examen. Chaque production a une pondération et une échéance. L\'ensemble des productions totalise 100\u00a0% de la note finale. Dans le module Planification, les productions sont d\'abord des mises en pratique liées aux objectifs d\'apprentissage.',
+        definition: 'Une occasion pour tes étudiant·es de mettre en pratique ce qu\'ils et elles apprennent — un exercice, un travail, un examen. Chaque production a une pondération et une échéance. L\'ensemble des productions totalise 100\u00a0% de la note finale. Dans la Carte d\'alignement, les productions sont d\'abord des mises en pratique liées aux objectifs d\'apprentissage.',
         voir: 'Conception › Productions étudiantes'
     },
 
@@ -542,10 +542,10 @@ const GLOSSAIRE = {
     // Bloc 1 des textes relus (15 oct. 2026, #364 T3) : le Comparateur et ses maquettes.
     'comparateur-pratiques': {
         cle: 'comparateur-pratiques',
-        terme: 'Comparateur de pratiques',
+        terme: 'Exploration des pratiques',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Un écran du Labo qui montre, côte à côte, la note que deux ou trois pratiques donneraient aux mêmes parcours d’élèves. Il sert à choisir ou à ajuster une pratique avant de l’adopter. Il ne modifie aucune note.',
+        definition: 'Un écran du Labo qui montre, côte à côte, la note que deux ou trois pratiques donneraient aux mêmes parcours d’étudiant·es. Il sert à choisir ou à ajuster une pratique avant de l’adopter. Il ne modifie aucune note.',
         voir: 'Labo › Exploration des pratiques'
     },
 
@@ -554,7 +554,7 @@ const GLOSSAIRE = {
         terme: 'Maquette (de pratique)',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Une copie d’essai d’une de tes pratiques, faite pour être comparée. Elle reste dans le Comparateur : tu ne peux pas l’appliquer à un groupe tant que tu ne l’as pas adoptée. Une maquette dont tu ne te sers pas depuis 30 jours porte la mention « dormant ».',
+        definition: 'Une copie d’essai d’une de tes pratiques, faite pour être comparée. Elle reste dans l’Exploration des pratiques : tu ne peux pas l’appliquer à un groupe tant que tu ne l’as pas adoptée. Une maquette dont tu ne te sers pas depuis 30 jours porte la mention « dormant ».',
         voir: 'Labo › Exploration des pratiques'
     },
 

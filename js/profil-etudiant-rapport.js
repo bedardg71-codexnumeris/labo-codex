@@ -268,7 +268,7 @@ function genererSectionRapport(da) {
                           rows="6"
                           ${enAnonymisation ? 'disabled' : 'data-on-input="planifierEnregistrementNotesRapport" data-on-change="enregistrerNotesRapport"'}
                           data-param="${echapperHtml(da)}"
-                          placeholder="${enAnonymisation ? 'Tes notes sur cet élève ne sont pas affichées quand l\'écran est montré.' : 'Tes observations sur cet élève. Elles restent ici, et s\'ajoutent au bas du rapport quand tu le copies.'}"
+                          placeholder="${enAnonymisation ? 'Tes notes sur cet·te étudiant·e ne sont pas affichées quand l\'écran est montré.' : 'Tes observations sur cet·te étudiant·e. Elles restent ici, et s\'ajoutent au bas du rapport quand tu le copies.'}"
                           style="line-height: 1.6; resize: vertical;">${enAnonymisation ? '' : echapperHtml(obtenirNotesRapport(da))}</textarea>
             </div>
         </div>

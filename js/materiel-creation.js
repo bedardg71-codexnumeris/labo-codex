@@ -92,11 +92,10 @@
         return {
             nom: o.grille.nom,
             nbC: o.grille.criteres.length,
-            retro: !!o.cartouche,
             // #1125 : un barème décrit ses tranches comme des descripteurs décrivent leurs niveaux.
             descr: o.grille.criteres.some(function (c) { return !!c.descripteurs || Array.isArray(c.bareme); }),
             // Lot 3b1 : les boutons « La voir dans … » de la confirmation ouvrent ces objets-ci.
-            ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null, cartouche: o.cartouche ? o.cartouche.id : null },
+            ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null },
             // Étape 5 : une grille en points, et son total (« sur 64 »).
             enPoints: !o.echelle,
             totalPoints: o.echelle ? null : o.grille.criteres.reduce(function (t, c) { return t + (c.ponderation == null ? 0 : c.ponderation); }, 0),
@@ -109,8 +108,7 @@
     }
 
     /**
-     * Crée l'échelle, la grille et (rétroactions) la cartouche d'un modèle complet ; une grille
-     * en points, seule.
+     * Crée l'échelle et la grille d'un modèle complet ; une grille en points, seule.
      * @param {Object} m - modèle de l'assistant, sans manque (`materielAssistant.calculs`)
      * @returns {Promise<{objets: Object, resume: Object}|{erreur: string}>}
      */
@@ -121,7 +119,6 @@
         var cles = { echelles: window.cle('echellesTemplates'), grilles: window.cle('grillesTemplates') };
         var o = window.materielAssistant.construire(m, contexte(cles));
         var plan = (o.echelle ? [{ cle: cles.echelles, objet: o.echelle }] : []).concat([{ cle: cles.grilles, objet: o.grille }]);
-        if (o.cartouche) plan.push({ cle: window.cle('cartouches_' + o.grille.id), objet: o.cartouche });
         var ecrites = [];
         try {
             for (var k = 0; k < plan.length; k++) {

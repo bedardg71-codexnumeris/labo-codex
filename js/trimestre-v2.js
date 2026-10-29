@@ -504,41 +504,6 @@ window.afficherAvertissementsCadreV2 = afficherAvertissementsCadreV2;
 // [Chantier 1] exports demo supprimes
 
 /* ===============================
-   NAVIGATION VERS AIDE
-   =============================== */
-
-/**
- * Navigue vers la section AIDE et ouvre un accordéon spécifique
- * @param {string} idAccordeon - ID de l'accordéon à ouvrir (ex: 'aide-archivage')
- */
-function allerVersAide(idAccordeon) {
-    // 1. Naviguer vers la section AIDE
-    if (typeof afficherSection === 'function') {
-        afficherSection('aide');
-    }
-
-    // 2. Attendre un court délai pour que la section soit visible
-    setTimeout(() => {
-        const accordeon = document.getElementById('accordeon-' + idAccordeon);
-        if (accordeon) {
-            // 3. Ouvrir l'accordéon s'il est fermé
-            const contenu = accordeon.querySelector('.accordeon-contenu');
-            const chevron = accordeon.querySelector('.accordeon-chevron');
-            if (contenu && contenu.classList.contains('u-hide')) {
-                contenu.classList.remove('u-hide');
-                if (chevron) chevron.textContent = '▼';
-                accordeon.classList.add('ouvert');
-            }
-
-            // 4. Scroller vers l'accordéon
-            accordeon.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            console.warn('[Trimestre V2] Accordéon non trouvé:', idAccordeon);
-        }
-    }, 100);
-}
-
-/* ===============================
    BARRE DE CONVERGENCE (statut configuration)
    =============================== */
 

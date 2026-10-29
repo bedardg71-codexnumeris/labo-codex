@@ -291,7 +291,8 @@ describe('#915 lot 3 — retirer du registre (décision 3.1 : un geste de répar
         const b = banc();
         const texte = b.mots.confirmerRetrait('Absent, Bruno', b.api.accorder(1, b.mots.dossiers), '2026-09-18', [], 0);
         expect(texte).toContain('Sa copie du 2026-09-18 (1 dossier) sera effacée');
-        expect(texte).toContain('Aucun résultat ultérieur n\'a été saisi pour cet·te élève.');
+        // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+        expect(texte).toContain('Aucun résultat ultérieur n\'a été saisi pour cet·te étudiant·e.');
         expect(texte).not.toContain('Cadre');
         // UN résultat : toute la phrase s'accorde au singulier ; sans date de copie, la phrase n'invente pas de date.
         const unSeul = b.mots.confirmerRetrait('X, Y', '1 dossier', '', ['A · B · 60'], 0);

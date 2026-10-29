@@ -34,8 +34,8 @@ function rendreParcours() {
 
     // Description d'introduction + recommandation
     html.push('<div class="bilan-info">');
-    html.push('Cet outil recueille l\u2019exp\u00e9rience v\u00e9cue de l\u2019\u00e9l\u00e8ve \u00e0 travers les productions du trimestre. ');
-    html.push('Pour chaque activit\u00e9 d\u2019apprentissage, l\u2019\u00e9l\u00e8ve situe son effort, ses \u00e9motions et les moments marquants de son parcours. ');
+    html.push('Cet outil recueille l\u2019exp\u00e9rience v\u00e9cue de l\u2019\u00e9tudiant\u00b7e \u00e0 travers les productions du trimestre. ');
+    html.push('Pour chaque activit\u00e9 d\u2019apprentissage, l\u2019\u00e9tudiant\u00b7e situe son effort, ses \u00e9motions et les moments marquants de son parcours. ');
     html.push('Le portrait de groupe qui en \u00e9merge r\u00e9v\u00e8le les zones de friction, les moments de bascule et les r\u00e9ussites collectives.');
     html.push('<br><br>');
     html.push('S\u00e9lectionne <strong>5 \u00e0 7 activit\u00e9s marquantes</strong> du trimestre plut\u00f4t que l\u2019int\u00e9gralit\u00e9. ');

@@ -707,7 +707,7 @@
                     '<div>' +
                         '<h2 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' + titre +
                             // Bloc 1 des textes relus (15 oct. 2026, #364 T3) : l'aide du Comparateur.
-                            ' <button class="btn-aide-contextuelle" data-aide="comparateur-pratiques" aria-label="Aide : le Comparateur de pratiques" title="Aide : le Comparateur de pratiques"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>' +
+                            ' <button class="btn-aide-contextuelle" data-aide="comparateur-pratiques" aria-label="Aide : l’Exploration des pratiques" title="Aide : l’Exploration des pratiques"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>' +
                         '</h2>' +
                     '</div>' +
                 '</div>';
@@ -717,7 +717,7 @@
     function construireInvitationEchelle(panel) {
         panel.innerHTML =
             '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
-                entete('Comparateur de pratiques') +
+                entete('Exploration des pratiques') +
                 '<div class="comparateur-corps">' +
                     '<p>Le comparateur s’appuie sur des <strong>profils-types fictifs</strong> générés ' +
                     'depuis ton <strong>échelle de performance</strong> — pour comparer ce que chaque ' +
@@ -1045,7 +1045,7 @@
     function construireVue(panel) {
         panel.innerHTML =
             '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
-                entete('Comparateur de pratiques') +
+                entete('Exploration des pratiques') +
                 '<div class="comparateur-corps">' +
                     '<p class="comparateur-finalite">Des pratiques différentes mesurent des choses ' +
                     'différentes. Un écart entre des points n’est ni un bonus ni une erreur. Le ' +

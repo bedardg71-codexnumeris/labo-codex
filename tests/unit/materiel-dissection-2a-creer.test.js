@@ -65,7 +65,7 @@ describe('M — de la lecture à la grille construite', () => {
     it('M.a — (a) sections et niveaux nommés : une tranche du barème par niveau, ses points en nombres (#1125)', () => {
         const o = cree(comprise(GRILLE_A));
         expect(o.echelle).toBeNull();
-        expect(o.cartouche).toBeNull();
+        expect(o).not.toHaveProperty('cartouche');   // ↻ #1152, lot 5 : plus de cartouche
         const g = o.grille;
         expect(g.nom).toBe('Carnet d’observation fictif');
         expect(g.description).toBe('Noter des observations et en dégager une idée d’ensemble.');

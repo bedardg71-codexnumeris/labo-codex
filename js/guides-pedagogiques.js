@@ -123,7 +123,7 @@
 <ul>
     <li>Section « Engagement ACP » du profil individuel</li>
     <li>Section « Progression temporelle ACP » du profil (si Graphiques d'évolution activé)</li>
-    <li>Vue d'ensemble du tableau de bord (Aperçu)</li>
+    <li>Vue d'ensemble du tableau de bord (Suivi du groupe)</li>
 </ul>
 <div class="guide-pedagogique-astuce">ACP est un cadre de lecture interne à Labo Codex, sans référence académique externe. C'est un outil de bord pour l'enseignant·e, pas un instrument de mesure standardisé.</div>`
                 },
@@ -328,7 +328,7 @@
                     titre: 'La dénotation : une PRÉN',
                     contenu: `
 <p>La troisième voie documentée par la recherche est la <strong>dénotation</strong> (ou <em>ungrading</em>) – une PRÉN. Plutôt que de noter chaque travail, l'enseignant·e mise sur la <strong>rétroaction qualitative</strong> et des <strong>cibles d'apprentissage</strong>, et n'établit une note certificative qu'à la fin. <strong>Ce n'est jamais «&nbsp;pas de note&nbsp;»</strong> : le règlement exige toujours une note finale ; c'est le rôle de <em>tri</em> de la note qui est abandonné, pas la certification.</p>
-<div class="guide-pedagogique-astuce"><strong>Statut dans Labo Codex.</strong> La dénotation est disponible&nbsp;: l'assistant de création la propose, et le jugement sur chaque cible se saisit dans le profil de l'élève.</div>
+<div class="guide-pedagogique-astuce"><strong>Statut dans Labo Codex.</strong> La dénotation est disponible&nbsp;: l'assistant de création la propose, et le jugement sur chaque cible se saisit dans le profil de l'étudiant·e.</div>
 <h4>Deux garde-fous à connaître</h4>
 <p><strong>Équité.</strong> Une note finale fondée sur un jugement global est la plus exposée aux biais implicites. C'est pourquoi une dénotation responsable s'appuie toujours sur des <strong>traces et des critères explicites</strong> (cibles nommées, atteinte consignée), jamais sur une impression d'ensemble.</p>
 <p><strong>Santé mentale.</strong> La dénotation n'est pas un bien universel : la recherche note que <strong>certain·es étudiant·es sont déstabilisé·es par l'absence de repères</strong> habituels comme les notes. La transition demande de l'accompagnement et de la transparence.</p>`

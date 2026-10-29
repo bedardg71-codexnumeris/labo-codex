@@ -424,7 +424,7 @@ const ETAPES_WIZARD = {
                 id: 'sortReprise',
                 type: 'radio-cards',
                 required: true,
-                question: 'Un élève rate un travail, le reprend et réussit. La première note…',
+                question: 'Un·e étudiant·e rate un travail, le reprend et réussit. La première note…',
                 options: [
                     { value: 'compte', label: 'Compte encore dans la moyenne', description: 'Les deux résultats pèsent dans la note finale.' },
                     { value: 'remplacee', label: 'Est remplacée — seul le meilleur niveau compte', description: 'On retient le meilleur résultat, pas l\'historique.' },
@@ -450,7 +450,7 @@ const ETAPES_WIZARD = {
                 id: 'departagePratique',
                 type: 'radio-cards',
                 required: true,
-                question: 'À la fin de la session, la note d\'un élève reflète surtout…',
+                question: 'À la fin de la session, la note d\'un·e étudiant·e reflète surtout…',
                 options: [
                     { value: 'somme', label: 'La somme de ses résultats accumulés', description: 'La note additionne ou moyenne ce qui a été obtenu au fil de la session.' },
                     { value: 'maitrise', label: 'Son niveau de maîtrise le plus avancé', description: 'Ce qui compte est le meilleur niveau atteint, pas l\'historique des essais.' },
@@ -1676,7 +1676,7 @@ function genererReperesEchelle(champ) {
     const avertissement = manque
         ? genererInfo({
             variante: 'attention',
-            texte: 'Sans ces deux repères, la rétroaction remise à l\'élève ne peut ni nommer ses priorités ni dire ce qui est acquis. Tu peux les poser ici, ou plus tard dans ' + renvoi + '.'
+            texte: 'Sans ces deux repères, la rétroaction remise à l\'étudiant·e ne peut ni nommer ses priorités ni dire ce qui est acquis. Tu peux les poser ici, ou plus tard dans ' + renvoi + '.'
         })
         : '';
     const apercu = (typeof window.apercuNiveauxEchelleHtml === 'function')

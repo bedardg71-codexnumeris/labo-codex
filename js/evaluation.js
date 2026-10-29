@@ -863,7 +863,7 @@ function mettreAJourNavigationSansCopie() {
     if (index === -1) return;
 
     const position = document.getElementById('eval-navigation-position');
-    if (position) position.textContent = `Élève ${index + 1} de ${options.length}`;
+    if (position) position.textContent = `Étudiant·e ${index + 1} de ${options.length}`;
     const precedent = barre.querySelector('[data-action="naviguerEtudiantPrecedent"]');
     const suivant = barre.querySelector('[data-action="naviguerEtudiantSuivant"]');
     if (precedent) precedent.disabled = index === 0;
