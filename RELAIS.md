@@ -7,6 +7,22 @@
 
 ---
 
+## 29 OCT. 2026, 17 H 35 (Claude Code) : **POUSSÉ, EN LIGNE : 1.225.0 = `24ca0dde` ; GITHUB EN COURS (RUN 40958563710, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**La 1.225.0** (mise en ligne en urgence à la demande de Grégoire, consigne de Cowork `plans de travail/CONSIGNE-LOT-2026-10-29-mise-en-ligne-1225-fusion.md`) porte la fusion copie par copie (#1182, `1d10728e`), relue et acceptée par Cowork (`VERDICT-RELECTURE-2026-10-29-fusion-copie-par-copie.md`). Commit de docs d'abord (`6bc350d0`) : la consigne, le verdict, la consigne des copies aux archives, et **#1183** inscrit (la palette des tampons coupée en deux familles, trouvaille du § 2 du verdict). Nouvelles 1.225 : titre et deux items validés par Grégoire, mot pour mot, quand il a collé la consigne ; mesurés contre `js/codex.js` (« modifiée le … » de chaque côté, choix par conflit), aucun mot faux. Release par `scripts/release.mjs minor` ; les quatre points de vérité à 1.225.0 / `1029-1555`.
+
+**Rituel** : diff de la release = l'entrée des Nouvelles (chaînes statiques) et les jetons ; aucun motif. Vitest entier vert (850 fichiers, 10 310). Break-test rejoué sur `_analyserFusion` (la comparaison par id neutralisée) : 8 essais de `sentinelle-1182-fusion-copie-par-copie` rougissent ; `js/codex.js` restauré, sha256 identique avant et après (`e403404b…`).
+
+**Verdict du Mac, sur `24ca0dde`, par `scripts/verdict-en-morceaux.mjs`, sans refus** : vert, 1 135 essais, 1 130 verts, 1 au second essai (`grilles-sous-criteres-condense`, encore), 4 rouges (4 connus, #1181), 19 sautés. Cowork, Chrome et Safari fermés (Grégoire, « tout est fermé ») ; le jeton note l'alimentation sur **batterie**, pression mémoire 1 tout du long. `git push` : « verdict vert à jour pour ce commit ».
+
+**Netlify** : `6ae3bb478625cdb0017a01e5`, `commit_ref` `24ca0dde`, `ready`, publié à 21:32:08 Z (17 h 32) ; le `version.js` du déploiement (permalien) dit `1.225.0`, build `1029-1555`.
+
+**Complexité** (1.224.0 `03f2cf5d` → 1.225.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 92 876 → 92 964 (Δ +88) ; au-dessus de 15 : 446 → 445 (Δ −1) ; au-dessus de 30 : 83 → 82 (Δ −1, maximum 130) ; somme au-dessus de 15 : 11 238 → 11 173 (Δ −65).
+
+**Laissés de côté, non commités** (autres lots) : `plans de travail/VERDICT-RELECTURE-2026-10-29-standards-sans-portfolio-lot-4.md` (modifié), `plans de travail/TEXTES-2026-10-29-standards-lot-5.md` (non suivi).
+
+**La suite** : la fusion réelle de Grégoire, guidée par Cowork conflit par conflit ; puis le lot des copies aux archives avec la retouche des mots (§ 3 du verdict), en 1.225.x.
+
 ## 29 OCT. 2026, 14 H 00 (Claude Code) : **POUSSÉ, EN LIGNE : 1.224.0 = `363a9b0b`, SOMMET `03f2cf5d` ; GITHUB EN COURS (RUN 40926271259, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **La 1.224.0** (release demandée par Grégoire vers 10 h 05, « 51 commits, c'est beaucoup » ; le lot 5 de #1178 viendra après) porte les standards sans portfolio, lots 1 à 4 et la retouche du lot 4 (`032c7f91`, #1178), les jetons par défaut (#1179), les totems de la démo (#1180), l'Aide, lots 4 et 5, et le guidage de la démo (#1152), l'accueil. Nouvelles 1.224 : titre et huit items validés par Grégoire mot pour mot vers 10 h 15. Rituel de fin de session : audit statique propre sur `ace09fa2..HEAD` (`navigation.js` et `noms_stables.json` touchés sous autorisation écrite du 28 oct.) ; break-test J2 des jetons rejoué, 1 rouge, restauré.

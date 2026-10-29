@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 29 OCTOBRE 2026, 17 H 32 : LA 1.225 EST EN LIGNE** (fusionner deux codex sans rien perdre). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : « Fusionner avec un codex… » réunit maintenant deux codex copie par copie. Les évaluations et les annotations faites sur le Mac et sur l'iPad s'additionnent ; ce qui n'existe que d'un côté est gardé. Quand une même copie diffère des deux côtés, la fusion montre sa date de modification de chaque côté et te laisse choisir. Avant, les évaluations d'un des deux appareils pouvaient disparaître sans avertissement.
+
+**Ce qui reste à toi** : ta fusion, maintenant. Sur le Mac, dans Chrome, recharge jusqu'à voir 1.225.0 ; menu Codex › « Mettre à jour le codex » d'abord ; puis « Fusionner avec un codex… » avec le dernier codex fait sur l'iPad. Ne choisis pas « 1. Garder la version d'ici pour tous » : Cowork te guide conflit par conflit. Un point connu : les réglages de la palette des tampons restent à l'appareil, tandis que leurs textes sont proposés comme des données ; Cowork t'en parle au moment de la fusion. La suite : les copies aux archives et des mots plus clairs dans la fenêtre des conflits.
+
+**Vérifié comment** : la fusion relue et acceptée par Cowork, qui a refait les comptes sur tes trois codex (151 évaluations, 164 annotations, aucun élément touché des deux côtés) ; Vitest entier vert (10 310) ; un essai de la fusion rejoué sans son correctif, qui rougit (huit essais), puis restauré à l'identique ; le texte des Nouvelles écrit mot pour mot depuis celui de la consigne que tu as collée ; la vérification complète du navigateur, sur le Mac, verte (1 135 essais, un rattrapé au second essai, celui des sous-critères de grille, encore) ; la mise en ligne constatée chez Netlify sur ce commit, et le fichier de version du déploiement dit 1.225.0. La vérification de GitHub tournait encore à l'écriture.
+
 📝 **LE 29 OCTOBRE 2026, 13 H 58 : LA 1.224 EST EN LIGNE** (des standards sans portfolio ; les jetons par défaut ; les totems de la démo ; l'Aide, lots 4 et 5). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les huit lignes de la 1.224 dans les Nouvelles. En standards sans production « Artefact », la note se fait sur tes productions, hors portfolio et évaluation terminale, et « Productions qui comptent dans la note » te laisse décocher celles qui n'y entrent pas (dans le cours actif seulement). Une note qui ne peut pas se calculer dit pourquoi. Une pratique neuve n'offre les jetons que si tu les actives. Les dix étudiant·es de la démo portent des totems. **Des notes changent** en standards sans artefact : c'est dit dans les Nouvelles, et tout se lit au calcul, sans écriture dans tes données.
