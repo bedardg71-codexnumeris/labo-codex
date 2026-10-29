@@ -139,26 +139,20 @@ const DESCRIPTIONS_TACHES = [
 // repliable s'intitule « À propos » (TITRE_BANDEAU, épinglé à part : « À propos » s'écrit aussi
 // ailleurs dans js/, Réglages › À propos), le corps s'ouvre sur « Bienvenue dans Labo Codex ! »,
 // et le paragraphe d'accès perd son amorce « Ton courriel, une fois par mois. ».
+// 28 oct. 2026 — texte remplacé en entier par Grégoire (verdict « Tout remplacer ») : « Par où
+// commencer ? » et la ligne de l'orthopédagogue quittent le bandeau, les trois portes les portent.
 const TITRE_BANDEAU = 'À propos';
 const MOTS_BANDEAU = [
     'Bienvenue dans Labo Codex !',
     'Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.',
-    'L’application te propose de numériser ton travail et de traiter les micro-données que tu crées et recueilles dans ton enseignement et elle les rend visibles et interprétables. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.',
-    'Il n’y a aucune intelligence artificielle dans l’application. Aucune décision n’est prise à ta place. L’outil ne fait que t’éclairer et ton jugement professionnel est souverain.',
-    'Labo Codex n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.',
-    'Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que d’habitude, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !',
-    'Par où commencer ?',
-    'Pose ton cadre.',
-    'Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les crées une fois et l’application s’en sert par la suite.',
-    'Conçois tes productions et tes évaluations.',
-    'Tu peux les élaborer seul·e ou les partager avec tes collègues.',
-    'Apprends pas à pas.',
-    'Les tutoriels de Labo Codex, sur le blogue Codex Numeris, te montrent chaque étape en images.',
-    'Tu es orthopédagogue ?',
-    'Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.',
+    'C’est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.',
+    'Une de ses particularités est qu’il n’y a aucune intelligence artificielle dans l’application. Ton jugement professionnel est souverain et l’outil ne fait que l’éclairer. Labo Codex n’impose aucune pratique, est entièrement configurable et aucune décision n’est prise à ta place. L’application n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.',
+    'Tu peux faire les mêmes gestes que d’habitude – planifier, concevoir, évaluer et suivre la progression de tes étudiant·es – mais dans un seul outil numérique intégré. Labo Codex t’offre un espace autonome, indépendant, confidentiel, gratuit, ouvert, portable et sobre en carbone ! L’objectif est d’inventer et d’organiser avec cette ressource un commun éducatif, pérenne et ouvert, en marge des grosses plateformes.',
+    'Tu entres ton adresse de courriel, tu reçois un code de sécurité et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à renouveler ton accès. Tes données restent 100 % sur ton appareil. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).',
     'Certains concepts sont nouveaux ?',
-    'Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».',
-    'Tu entres ton adresse de courriel, tu reçois un code et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à redemander de code. Tes données restent sur ton appareil. Il n’y a pas de commerce. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).',
+    'Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.',
+    'Tu as besoin de support humain ?',
+    'L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex. C’est le lieu tout désigné pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres.',
 ];
 // 28 oct. 2026 : les trois portes, dans l'ordre (mots donnés par Grégoire). « Commencer → » est écrit
 // deux fois (deux portes) : il est vérifié dans l'ordre du rendu, pas par l'unicité de B3.
@@ -252,7 +246,7 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         const iCarte = html.indexOf('class="accueil-portes"');
         curseur = iCarte;
         for (const mot of MOTS_PORTES) {
-            // Cherché À PARTIR de la carte : « Tu es orthopédagogue ? » est aussi dans le bandeau.
+            // Cherché À PARTIR de la carte : les portes suivent le bandeau.
             const i = html.indexOf(mot, curseur + 1);
             expect(i, mot).toBeGreaterThan(curseur);
             curseur = i;
@@ -272,14 +266,14 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         expect(html).not.toContain('l’application s’en sert partout');
     });
 
-    it('les étapes sont une vraie liste numérotée ; la ligne de l\'orthopédagogue suit la liste, à part ; aucun « — » dans le bandeau', () => {
+    it('le bandeau n\'a plus ni étapes ni ligne de l\'orthopédagogue : les portes les portent (28 oct. 2026) ; aucun « — » dans le bandeau', () => {
         const { html } = rendreAccueil();
         const bandeau = tranche(html, 'id="banniere-bienvenue"', 'class="accueil-portes"');
-        const liste = bandeau.match(/<ol[^>]*>([\s\S]*?)<\/ol>/);
-        expect(liste, 'une <ol>').not.toBeNull();
-        expect((liste[1].match(/<li>/g) || []).length).toBe(3);
-        const apres = tranche(bandeau, '</ol>');
-        expect(apres.indexOf('<p><strong>Tu es orthopédagogue ?</strong>'), 'paragraphe à part, après la liste').toBeGreaterThan(0);
+        expect(bandeau).not.toMatch(/<ol[\s>]/);
+        expect(bandeau).not.toContain('Par où commencer ?');
+        expect(bandeau).not.toContain('Tu es orthopédagogue ?');
+        expect(html).not.toContain('Décris ton service dans Suivi › Rencontres');
+        expect(html).not.toContain('Une belle occasion de développement professionnel');
         expect(bandeau).not.toContain('—');
         expect(bandeau).not.toContain('<br>');
     });
@@ -436,3 +430,8 @@ describe('B5 · trois portes d\'entrée dans un seul encadré (28 oct. 2026)', (
 //   D2 accueil.js — « Tu enseignes ? » ouvre l'étape Cours au lieu de Trimestre                               → 1 rouge
 //   D3 index.html — les colonnes s'empilent sous 768 px au lieu de 760 px                                      → 1 rouge
 //   D4 accueil.js — « Explorer → » appelle activerModeDemo en contournant la case et sa garde                  → 2 rouges
+//
+// BREAK-TESTS DU 28 octobre 2026, soir (nouveau texte « À propos ») — copie de référence, mutation, restauration (empreinte identique).
+//   E1 accueil.js — « sobre en carbone ! » devient « sobre en carbone. »                                     → 2 rouges
+//   E2 accueil.js — « Par où commencer ? » et une <ol> remis dans le bandeau                                  → 1 rouge
+//   E1 reproduit le 29 oct. 2026 (5 h 57), avant commit : 2 rouges, empreinte sha256 identique après restauration.
