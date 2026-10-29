@@ -72,7 +72,7 @@ if (joues === 0) nonJuge('Le rapport ne contient aucun essai joué.');
 const echecs = echecsDuRapport(rapport);
 const instables = flakyDuRapport(rapport);
 const baseline = JSON.parse(readFileSync(BASELINE, 'utf8'));
-const { nouveaux, reparees, nonJouees, intermittentesRouges } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport) }, baseline);
+const { nouveaux, reparees, aPasserAuxIntermittentes, nonJouees, intermittentesRouges } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport), instables }, baseline);
 const nIntermittentes = (baseline.echecsIntermittents ?? []).length;
 
 dire(nouveaux.length > 0
@@ -85,6 +85,8 @@ if (instables.length > 0) { dire(''); dire(`⚠ ${instables.length} spec(s) VERT
 // La commune se régénère sur le Mac ; une autre (Linux) se tient à la main.
 const commentRetirer = process.argv[3] ? `de ${path.basename(BASELINE)}, à la main` : '(node scripts/verifier-playwright.mjs --ecrire, sur le Mac)';
 if (reparees.length > 0) { dire(''); dire(`✓ ${reparees.length} spec(s) de la baseline REDEVENUES VERTES — à retirer ${commentRetirer} :`); liste(reparees); }
+// Rouge puis verte : une intermittente, pas une réparée — la retirer la ferait rougir « nouvelle ».
+if (aPasserAuxIntermittentes.length > 0) { dire(''); dire(`⚠ ${aPasserAuxIntermittentes.length} spec(s) connue(s) VERTE(S) AU SECOND ESSAI — à passer aux intermittentes de ${path.basename(BASELINE)}, à la main, pas à retirer :`); liste(aPasserAuxIntermittentes); }
 // Une connue absente du rapport n'a pas été jouée : rien à en conclure.
 if (nonJouees.length > 0) { dire(''); dire(`${nonJouees.length} spec(s) de la baseline NON JOUÉE(S) dans ce rapport — ni rouge ni verte, rien à conclure :`); liste(nonJouees); }
 conclure(nouveaux.length > 0 ? 1 : 0);

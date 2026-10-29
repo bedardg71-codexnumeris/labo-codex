@@ -28,6 +28,9 @@ import { readdirSync } from 'node:fs';
 // #1114 (28 oct. 2026) — l'ancienne règle de `reparees` (toute connue absente des
 // échecs) → E.c, E.d, E.e et E.g rouges ; `echecsIntermittents` ignorée par le
 // juge → E.b et E.g rouges. Arbre restauré, sha256 vérifié.
+// #1114 (29 oct. 2026, retouche du verdict de Cowork) — la garde `!rattrapees.has(e)`
+// retirée de `reparees` → E.e et E.i rouges ; `instables` retiré de l'appel du
+// juge de la CI → E.i et E.j rouges.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -97,9 +100,9 @@ describe('A — les règles partagées par le Mac et la CI', () => {
 
     it('A.c seule une rougeur absente de la baseline est nouvelle ; une connue redevenue verte se dit', () => {
         expect(comparerALaBaseline({ echecs: ['x › 1', 'x › 2'], verts: ['x › 3'] }, { echecsConnus: ['x › 2', 'x › 3'] })).toEqual({
-            nouveaux: ['x › 1'], reparees: ['x › 3'], nonJouees: [], intermittentesRouges: []
+            nouveaux: ['x › 1'], reparees: ['x › 3'], aPasserAuxIntermittentes: [], nonJouees: [], intermittentesRouges: []
         });
-        expect(comparerALaBaseline({ echecs: [], verts: [] }, undefined)).toEqual({ nouveaux: [], reparees: [], nonJouees: [], intermittentesRouges: [] });
+        expect(comparerALaBaseline({ echecs: [], verts: [] }, undefined)).toEqual({ nouveaux: [], reparees: [], aPasserAuxIntermittentes: [], nonJouees: [], intermittentesRouges: [] });
     });
 
     it('A.d le juge du Mac lit ces règles-là, il n’en porte pas de copie', () => {
@@ -223,7 +226,7 @@ describe('E — #1114 (28 oct. 2026) : les intermittentes de Linux, et « redeve
     const base = { echecsConnus: ['c.spec.js › connue', 'c.spec.js › absente'], echecsIntermittents: ['i.spec.js › va-et-vient'] };
     const comparer = (specs, baseline = base) => {
         const r = rapport(specs);
-        return comparerALaBaseline({ echecs: echecsDuRapport(r), verts: vertsDuRapport(r) }, baseline);
+        return comparerALaBaseline({ echecs: echecsDuRapport(r), verts: vertsDuRapport(r), instables: flakyDuRapport(r) }, baseline);
     };
 
     it('E.a une rouge hors des deux listes est nouvelle', () => {
@@ -249,10 +252,12 @@ describe('E — #1114 (28 oct. 2026) : les intermittentes de Linux, et « redeve
         expect(j.nonJouees).toEqual(['c.spec.js › absente']);
     });
 
-    it('E.e une connue sautée n’est pas jouée ; une connue rattrapée au second essai est jouée verte', () => {
+    it('E.e une connue sautée n’est pas jouée ; une connue verte au SECOND essai n’est pas réparée : elle passe aux intermittentes (verdict du 29 oct.)', () => {
         const j = comparer([{ titre: 'connue', statut: 'flaky', file: 'c.spec.js' }, { titre: 'absente', statut: 'skipped', file: 'c.spec.js' }]);
-        expect(j.reparees).toEqual(['c.spec.js › connue']);
+        expect(j.reparees).toEqual([]);
+        expect(j.aPasserAuxIntermittentes).toEqual(['c.spec.js › connue']);
         expect(j.nonJouees).toEqual(['c.spec.js › absente']);
+        expect(j.nouveaux).toEqual([]);
     });
 
     it('E.f une baseline sans `echecsIntermittents` juge comme avant', () => {
@@ -280,6 +285,25 @@ describe('E — #1114 (28 oct. 2026) : les intermittentes de Linux, et « redeve
         expect(ko.code).toBe(1);
         expect(ko.resume).toContain('n.spec.js › neuve');
         expect(ko.resume).not.toContain('- i.spec.js › va-et-vient');
+    });
+
+    it('E.i le juge de la CI : une connue verte au second essai ⮕ 0, « à passer aux intermittentes », jamais « redevenue verte »', () => {
+        const { code, resume } = juger(rapport([
+            { titre: 'connue', statut: 'flaky', file: 'c.spec.js' },
+            { titre: 'absente', statut: 'unexpected', file: 'c.spec.js' }
+        ]), base);
+        expect(code).toBe(0);
+        expect(resume).toContain('1 spec(s) connue(s) VERTE(S) AU SECOND ESSAI — à passer aux intermittentes');
+        expect(resume).toContain('- c.spec.js › connue');
+        expect(resume).not.toContain('REDEVENUES VERTES');
+    });
+
+    it('E.j les trois juges passent leurs instables à comparerALaBaseline', () => {
+        for (const juge of ['juger-rapport-playwright.mjs', 'verifier-playwright.mjs', 'verdict-en-morceaux.mjs']) {
+            const source = readFileSync(path.join(racine, 'scripts', juge), 'utf8');
+            expect(source, juge).toMatch(/comparerALaBaseline\(\{ echecs, verts: vertsDuRapport\(rapport\), instables \}/);
+            expect(source, juge).toContain('aPasserAuxIntermittentes');
+        }
     });
 
     it('E.h la baseline Linux : deux listes disjointes, bien formées, aux totaux justes', () => {
