@@ -1107,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // dérivations sont retirées : la porte d'entrée est la même pour tout le monde.
     //
     // Le motif est le parcours de rentrée, pas la simplification. Un enseignant qui
-    // explore en démo gagne à voir « Par où commencer ? », les guides et l'invitation
+    // explore en démo gagne à voir les trois portes de l'accueil, les guides et l'invitation
     // à la communauté de pratique, plutôt qu'un tableau de bord déjà rempli de
     // données fictives dont il ne sait pas encore lire les indices. Constaté le
     // 31 août sur l'application en ligne : la démo laissée active renvoyait

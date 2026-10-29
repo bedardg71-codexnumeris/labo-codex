@@ -27888,17 +27888,9 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     text-decoration: none;
 }
 
-/* « Par où commencer ? » : trois étapes numérotées (liste), puis la ligne de l'orthopédagogue. */
+/* « Bienvenue dans Labo Codex ! » : la ligne-titre du corps. */
 .banniere-bienvenue .banniere-bienvenue-titre-etapes {
     margin-bottom: 4px;
-}
-.banniere-bienvenue-etapes {
-    margin: 0 0 12px 0;
-    padding-left: 1.4em;
-    line-height: 1.6;
-}
-.banniere-bienvenue-etapes li + li {
-    margin-top: 4px;
 }
 
 /* =============================================================================

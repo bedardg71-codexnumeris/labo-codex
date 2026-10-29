@@ -74,8 +74,12 @@ function afficherAccueil() {
  * 14 octobre 2026 : texte réécrit par Grégoire (mots arrêtés par lui, recopiés tels
  * quels) ; la barre repliable s'intitule « À propos ». L'amorce « Ton courriel, une
  * fois par mois. » disparaît : le paragraphe d'accès est désormais sans amorce.
+ *
+ * 28 octobre 2026 : texte remplacé en entier par Grégoire (mots recopiés tels quels ; « 100 % » prend l'insécable (#1137) et les
+ * « — » d'incise deviennent « – »). « Par où commencer ? » et la ligne de l'orthopédagogue
+ * partent : les trois portes de l'encadré qui suit portent désormais ces entrées.
  */
-// La question de l'orthopédagogue, que disent le bandeau ET la carte : écrite une fois (sentinelle #846, B3).
+// La question de l'orthopédagogue, que dit la porte du milieu : écrite une fois (sentinelle #846, B3).
 const QUESTION_ORTHOPEDAGOGUE = 'Tu es orthopédagogue ?';
 
 function genererBanniereBienvenue() {
@@ -83,7 +87,7 @@ function genererBanniereBienvenue() {
 
     const paragrapheCommunaute = `
             <div class="banniere-bienvenue-acces">
-                <p>L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex : le lieu idéal pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres. Une belle occasion de développement professionnel !</p>
+                <p><strong>Tu as besoin de support humain ?</strong> L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex. C’est le lieu tout désigné pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres.</p>
             </div>`;
 
     return `
@@ -95,19 +99,11 @@ function genererBanniereBienvenue() {
             <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
             <p class="banniere-bienvenue-titre-etapes"><strong>Bienvenue dans Labo Codex !</strong></p>
             <p>Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.</p>
-            <p>L’application te propose de numériser ton travail et de traiter les micro-données que tu crées et recueilles dans ton enseignement et elle les rend visibles et interprétables. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.</p>
-            <p>Il n’y a aucune intelligence artificielle dans l’application. Aucune décision n’est prise à ta place. L’outil ne fait que t’éclairer et ton jugement professionnel est souverain.</p>
-            <p>Labo Codex n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.</p>
-            <p>Tu peux planifier, concevoir, évaluer et suivre la progression de tes étudiant·es. Les mêmes gestes que d’habitude, mais dans un seul outil numérique et portable ! Labo Codex est gratuit, ouvert et indépendant !</p>
-            <p class="banniere-bienvenue-titre-etapes"><strong>Par où commencer ?</strong></p>
-            <ol class="banniere-bienvenue-etapes">
-                <li><strong>Pose ton cadre.</strong> Dans l’onglet Cadre, saisis ton trimestre, ton cours et ton groupe. Tu les crées une fois et l’application s’en sert par la suite.</li>
-                <li><strong>Conçois tes productions et tes évaluations.</strong> Tu peux les élaborer seul·e ou les partager avec tes collègues.</li>
-                <li><strong>Apprends pas à pas.</strong> Les tutoriels de Labo Codex, sur le blogue Codex Numeris, te montrent chaque étape en images.</li>
-            </ol>
-            <p><strong>${QUESTION_ORTHOPEDAGOGUE}</strong> Décris ton service dans Suivi › Rencontres : tes rencontres se tiennent là.</p>
-            <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides expliquent la taxonomie SOLO, les micro-données et le modèle RàI, accessibles en tout temps par les boutons « Guide ».</p>
-            <p>Tu entres ton adresse de courriel, tu reçois un code et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à redemander de code. Tes données restent sur ton appareil. Il n’y a pas de commerce. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).</p>
+            <p>C’est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.</p>
+            <p>Une de ses particularités est qu’il n’y a aucune intelligence artificielle dans l’application. Ton jugement professionnel est souverain et l’outil ne fait que l’éclairer. Labo Codex n’impose aucune pratique, est entièrement configurable et aucune décision n’est prise à ta place. L’application n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.</p>
+            <p>Tu peux faire les mêmes gestes que d’habitude – planifier, concevoir, évaluer et suivre la progression de tes étudiant·es – mais dans un seul outil numérique intégré. Labo Codex t’offre un espace autonome, indépendant, confidentiel, gratuit, ouvert, portable et sobre en carbone ! L’objectif est d’inventer et d’organiser avec cette ressource un commun éducatif, pérenne et ouvert, en marge des grosses plateformes.</p>
+            <p>Tu entres ton adresse de courriel, tu reçois un code de sécurité et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à renouveler ton accès. Tes données restent 100 % sur ton appareil. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).</p>
+            <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.</p>
             ${paragrapheCommunaute}
             <div class="banniere-bienvenue-actions">
                 <button class="btn btn-principal" data-action="demarrerTourGuide">
