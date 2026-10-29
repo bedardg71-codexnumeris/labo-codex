@@ -15,6 +15,9 @@ import { pontsResolution } from './_helpers/ponts-resolution.js';   // lot N1a (
 //  1. terminale = type === 'terminale' STRICT, partagé (SSOT pratique-registre.js) ;
 //  2. conteneur « portfolio » OPTIONNEL → règle du complément (pool = 100 − p) ;
 //  3. transparence : avertissements non bloquants (validerProductionsStd) ;
+//     ⚠ Lot 3 des standards sans portfolio (29 oct. 2026, plans de travail/CONSIGNE-LOT-2026-10-29-standards-sans-portfolio-
+//     lot-3.md) : les règles 3 et 5 ne valent plus qu'AVEC au moins un « Artefact » — le corpus L2 en a quatre, ses cas
+//     restent tels quels. Sans artefact : sentinelle-standards-sans-portfolio, section G ;
 //  4. « non constructible » STOCKÉ (noteConstructible additif, parité simulerIndices) ;
 //  5. migration legacy par GESTE explicite (candidate unique → productionId exposé).
 
