@@ -655,7 +655,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         _resultatsRecit.push(_resArtefact(e, 'remplace', 'remplacée par une reprise'));
     });
     _doublons.forEach(e => {
-        _resultatsRecit.push(_resArtefact(e, 'remplace', 'doublon note-égale'));
+        _resultatsRecit.push(_resArtefact(e, 'remplace', 'en double · comptée une seule fois'));
     });
     // #706 — brouillons et portée nulle (pool et terminale) : nommés, non comptés.
     evaluations

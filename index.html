@@ -11669,12 +11669,12 @@
     <script src="js/pratiques/editeur-cibles.js?v=20261004b"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
     <script src="js/pratiques/pratique-configurable.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : la pratique Standards déclare la cause d’une note qui manque -->
-    <script src="js/pratiques/pratique-registre.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : le pool sans « Artefact », quelle que soit la pondération ; la phrase de la cause -->
+    <script src="js/pratiques/pratique-registre.js?v=20261028c"></script> <!-- Retouche du lot 1 (28 oct.) : une catégorie ne compte qu’en hybride · Standards sans portfolio, lot 1 (28 oct.) : le pool sans « Artefact », quelle que soit la pondération ; la phrase de la cause -->
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
     <script src="js/pratiques/pratique-pan-standards.js?v=20261028a"></script>
-    <script src="js/pratiques/pratique-sommative.js?v=20261028a"></script>
+    <script src="js/pratiques/pratique-sommative.js?v=20261028b"></script> <!-- Retouche du lot 1 des standards sans portfolio (28 oct.) : le doublon « en double · comptée une seule fois » -->
     <script src="js/pratiques/pratique-pan-specifications.js?v=20261028a"></script>
 
     <!-- Pratiques prédéfinies (Beta 92 - Jour 1) -->
@@ -11713,8 +11713,8 @@
     <script src="js/profil-etudiant-rapport.js?v=20261022b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20261022b"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
-    <script src="js/profil-etudiant-actions.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : la cause dans `erreur`, la formule du récit, le doublon réconcilié · Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : le panneau des habiletés garde sa règle quand la cause est dite · E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-actions.js?v=20261028c"></script> <!-- Retouche du lot 1 (28 oct.) : le doublon « en double · comptée une seule fois » · Standards sans portfolio, lot 1 (28 oct.) : la cause dans `erreur`, la formule du récit, le doublon réconcilié · Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20261028c"></script> <!-- Retouche du lot 1 (28 oct.) : une cause propre à l’étudiant·e garde la carte, la phrase à la place du nombre · Standards sans portfolio, lot 1 (28 oct.) : le panneau des habiletés garde sa règle quand la cause est dite · E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20261022b"></script>
     <script src="js/presences-rapport.js?v=20261022b"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20261008a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->

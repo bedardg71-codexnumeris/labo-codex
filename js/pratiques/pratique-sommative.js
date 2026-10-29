@@ -258,7 +258,7 @@ class PratiqueSommative {
                     enPoints: estEnPoints(e),
                     note: (e.noteFinale ?? null),
                     sort: 'remplace',
-                    detail: 'doublon note-égale · exclu de la moyenne'
+                    detail: 'en double · comptée une seule fois'
                 });
             });
 

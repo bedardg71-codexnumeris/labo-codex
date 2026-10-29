@@ -2787,6 +2787,26 @@ function _construireLigneProductionNonRemise(production, indexArtefact) {
 }
 
 /**
+ * Retouche R2 du lot 1 des standards sans portfolio (28 oct. 2026) — le total de la carte de la note : le nombre, ou, quand
+ * la note manque pour une cause propre à l'étudiant·e (`causeNoteAbsente`), la phrase à sa place.
+ */
+function _totalCarteNote(details) {
+    if (details.causeNoteAbsente) return `<div class="note-finale-non-evalue">${echapperHtml(details.causeNoteAbsente)}</div>`;
+    return `<div class="note-finale-total ${details.noteFinale === null ? 'note-finale-tiret' : ''}">
+                        ${details.noteFinale !== null ? formaterNotePourcentage(details.noteFinale) : '—'}
+                    </div>`;
+}
+
+/**
+ * Le bouton des réglages de la carte de la note. Retouche R2 (28 oct. 2026) : absent quand la note manque pour une cause
+ * propre à l'étudiant·e — il n'y a rien à régler.
+ */
+function _boutonReglagesCarteNote(details) {
+    if (!details.pratiqueId || details.causeNoteAbsente) return '';
+    return `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(details.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>`;
+}
+
+/**
  * Génère la section Productions et évaluations pour un élève
  * Affiche un tableau similaire à celui de la liste des évaluations
  */
@@ -2839,7 +2859,11 @@ function genererSectionProductions(da) {
 
     // Générer le HTML de la section Note finale
     let htmlNoteFinale = '';
-    if (detailsNoteFinale && detailsNoteFinale.erreur) {
+    // Retouche R2 du lot 1 des standards sans portfolio (28 oct. 2026) : une cause propre à l'étudiant·e (aucune production
+    // du pool notée, `causeNoteAbsente`) n'est pas une erreur de configuration. Le profil garde sa carte, sans note, la
+    // phrase à la place du nombre ; ni l'alerte, ni le bouton des réglages, qui restent à l'erreur de configuration.
+    const causeNoteAbsente = (detailsNoteFinale && detailsNoteFinale.causeNoteAbsente) || null;
+    if (detailsNoteFinale && detailsNoteFinale.erreur && !causeNoteAbsente) {
         htmlNoteFinale = `
         <div class="note-finale-section">
             <h3 class="note-finale-titre">
@@ -2996,7 +3020,7 @@ function genererSectionProductions(da) {
                 <h3 class="note-finale-titre">
                     ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
                     ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
-                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
+                    ${_boutonReglagesCarteNote(detailsNoteFinale)}
                 </h3>
 
                 ${enteteBandeauPlafonnement}
@@ -3017,9 +3041,7 @@ function genererSectionProductions(da) {
 
                 <div class="note-finale-resultat">
                     <div class="note-finale-formule">${formule}</div>
-                    <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
-                        ${detailsNoteFinale.noteFinale !== null ? formaterNotePourcentage(detailsNoteFinale.noteFinale) : '—'}
-                    </div>
+                    ${_totalCarteNote(detailsNoteFinale)}
                     ${_phraseEvaluationsEcartees(detailsNoteFinale.ecartees, 'note-finale-message-provisoire')}
                 </div>
             </div>
@@ -3054,7 +3076,7 @@ function genererSectionProductions(da) {
                 <h3 class="note-finale-titre">
                     ${detailsNoteFinale.estFinale ? 'Note finale de session' : 'Note provisoire de session'}
                     ${(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique) ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(detailsNoteFinale.pratiqueNom || detailsNoteFinale.pratique)}</span>` : ''}
-                    ${detailsNoteFinale.pratiqueId ? `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(detailsNoteFinale.pratiqueId)}" title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>` : ''}
+                    ${_boutonReglagesCarteNote(detailsNoteFinale)}
                 </h3>
 
                 ${enteteBandeauPlafonnement}
@@ -3087,11 +3109,9 @@ function genererSectionProductions(da) {
 
                 <div class="note-finale-resultat">
                     <div class="note-finale-formule">${formuleClassique}</div>
-                    <div class="note-finale-total ${detailsNoteFinale.noteFinale === null ? 'note-finale-tiret' : ''}">
-                        ${detailsNoteFinale.noteFinale !== null ? formaterNotePourcentage(detailsNoteFinale.noteFinale) : '—'}
-                    </div>
+                    ${_totalCarteNote(detailsNoteFinale)}
                     ${_phraseEvaluationsEcartees(detailsNoteFinale.ecartees, 'note-finale-message-provisoire')}
-                    ${detailsNoteFinale.estProvisoire && terminal.present ? '<div class="note-finale-message-provisoire">Basée uniquement sur le portfolio (évaluation terminale non complétée)</div>' : ''}
+                    ${detailsNoteFinale.estProvisoire && terminal.present && !causeNoteAbsente ? '<div class="note-finale-message-provisoire">Basée uniquement sur le portfolio (évaluation terminale non complétée)</div>' : ''}
                 </div>
             </div>
             `;
