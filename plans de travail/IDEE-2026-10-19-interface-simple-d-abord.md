@@ -9,6 +9,13 @@
 - 14 h 43 : « on pourrait avoir une interface d'expert et une interface simplifiée. Et le passage d'une interface à l'autre se fait progressivement dans des options d'affichage qui sont dans les réglages. […] un enseignant pourrait décider d'appliquer le modèle de la réponse à l'intervention et coche. Un autre pourrait décider d'utiliser la taxonomie solo, il coche. Un autre pourrait décider de mettre une pratique de notation alternative, il la configure. […] pas de façon binaire. » Ces fonctionnalités pourraient être « bilingues » : parler à la fois orthopédagogie et enseignement.
 - 14 h 50 : « Il ne faut pas trop se formaliser de l'usage qui est fait par les membres de la communauté de pratique, parce que l'application est en bêta publique. […] il y a très peu d'utilisateurs, alors c'est un moindre mal que de changer des éléments dans l'application pour avoir une base plus solide pour plus tard. […] Je crois qu'il faudrait remettre en question les choix que j'ai faits. L'application devrait d'abord être simplifiée et progressivement, les utilisateurs ajoutent des fonctionnalités au fil de leur propre développement. »
 
+## La formulation du principe (Grégoire, 28 oct. 2026)
+
+- 21 h 36 : « Il n'y a que différents niveaux de complexité qui s'additionnent et pas de mode expert monolithique. »
+- 21 h 38, **la phrase qu'il retient** : « on passe progressivement d'une interface simple à une interface complexe, en activant progressivement des fonctionnalités, selon les besoins, à son propre rythme. »
+- 21 h 39 : la phrase porte deux fois « progressivement » ; à revoir avec lui « en temps opportun », à l'ouverture du chantier.
+- Conséquence déjà tirée : « Mode expert » ne désigne aucun écran ; ne pas l'écrire dans un texte d'écran ni dans une consigne (`VERDICT-RELECTURE-2026-10-28-standards-sans-portfolio-lot-1.md`, notes pour le lot 5).
+
 ## Ce que la mesure a trouvé (Cowork, lecture seule, `main` à `d55abef4`)
 
 - [VÉRIFIÉ] Labo › Outils d'observation porte huit cases, rangées dans `preferencesUtilisateur` (`js/preferences.js:54-75`, lues et écrites par `js/preferences-v2.js:76-328`). Défauts : **cochées** SOLO (`afficherDescriptionsSOLO`), RàI (`activerRai`), dépistage ACP (`depistageAcp`), graphiques (`afficherGraphiques`), seuils visuels (`afficherSeuilsVisuels`), développement des habiletés (`afficherDeveloppementHabiletes`) ; **décochées** actions de repérage, liaison et ouverture (`activerActionsRLO`), note différée (`noteDifferee`). Six sur huit : un nouvel utilisateur arrive dans l'interface d'expert.
