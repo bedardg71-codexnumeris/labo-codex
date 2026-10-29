@@ -25,7 +25,7 @@ Mots lus par l'enseignant·e seulement : décisions de Cowork, conséquences de 
 ## Ce qui attend Grégoire (rien à coder avant sa réponse)
 
 - ~~**« Séance concernée »**~~ **tranchée : A, par Grégoire le 29 oct. à 6 h 46** (« oui » ; voir « Retouche 2 »). Recommandation de Cowork **A** (retirer le champ et la phrase de l'Aide) : le report des présences écrit tout à la date de l'intervention, présent·es comme absences motivées (`interventions.js:1838-1845`) ; le congé n'a de sens que si le rattrapage prend la place d'une séance du cours, à sa date : le champ redit cette date. B changerait où s'écrivent les absences motivées des prochains reports, et celles déjà reportées resteraient à la date de l'intervention (tarir n'est pas réparer) : deux conventions côte à côte.
-- **Les jetons actifs par défaut** (le moteur retombe sur « actif » quand la case s'affiche décochée) : à mesurer par Cowork, puis à Grégoire.
+- **Les jetons actifs par défaut** (le moteur retombe sur « actif » quand la case s'affiche décochée) : à mesurer par Cowork, puis à Grégoire. ↻ **Tranchée par Grégoire le 29 oct. à 7 h 51** : consigne `CONSIGNE-LOT-2026-10-29-jetons-par-defaut.md`, après le lot 2 des standards.
 - **Les bulles de la démo** (`TEXTES-2026-10-28-guidage-demo.md`) : Cowork les relit en entier d'abord, puis les soumet à Grégoire par groupes de trois ou quatre.
 
 Un commit pour la retouche, un pour les docs (ce fichier, `TEXTES-2026-10-28-textes-d-ecran.md`) ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-29-aide-lot-5-retouche.md`. Pas de release, de verdict ni de push sans le signal de Grégoire.
@@ -42,3 +42,9 @@ Si la retouche 1 est déjà faite, celle-ci se fait à part, dans son propre com
 
 La demande de relecture de la retouche couvre les deux.
 
+
+## Relecture des deux retouches (Cowork, 29 oct., 7 h 47)
+
+**Acceptées sans retouche. Le lot 5 est clos côté relecture.** `f6a3827f` et `809c7d04` lus. Les trois écarts sont justes : la ligne ↻ de TEXTES commitée avec le code que la sentinelle lit ; la phrase entière de l'Aide retirée (« porte la séance concernée » ôté, il ne restait rien : c'est ce que Grégoire a accepté, « avec la phrase de l'Aide qui en parle ») ; `js/config.js:123`, un commentaire en zone protégée, laissé. Le « Labo → Comparateur » de la bibliothèque des pratiques, trouvé en plus : juste. Une intervention qui porte `seanceConcernee` la garde (essai neuf de #772, `sauvegarderPresencesIntervention`) ; `_construireIntervention` ne sert qu'aux interventions neuves.
+
+Restent, hors de ce lot : les jetons actifs par défaut et les bulles de la démo (Cowork, puis Grégoire).
