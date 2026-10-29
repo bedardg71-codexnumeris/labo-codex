@@ -261,7 +261,7 @@ describe('#872 — créer un 2e groupe d\'élèves', () => {
 
     it('H. une ligne d\'en-tête n\'est pas un élève ; une vraie ligne l\'est', () => {
         const b = monter(storeUnGroupe());
-        const fiches = b.win.analyserListeEtudiantsCollee('DA,Groupe,Nom,Prénom,Programme,SA\nDEMO004,0demo,Césaire,Aimé,310.B1,\n2000001,00002,Caron,Zoé,200.B1,');
+        const fiches = b.win.analyserListeEtudiantsCollee('DA,Groupe,Nom,Prénom,Programme,SA\nDEMO004,0demo,Jovial,Castor,310.B1,\n2000001,00002,Caron,Zoé,200.B1,');
         expect(fiches.map(f => f.da)).toEqual(['DEMO004', '2000001']);
         expect(fiches.some(f => f.groupe.toLowerCase().includes('groupe'))).toBe(false);
     });

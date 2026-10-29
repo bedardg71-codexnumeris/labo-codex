@@ -171,7 +171,7 @@ test('(a)(c) une évaluation modifiée en anonymisation est encore là après re
 test('R4 notes d\'intégrité en anonymisation : masquées à l\'écran, gardées en base à l\'enregistrement', async ({ page }) => {
     test.setTimeout(90000);
     brancherEcouteurs(page);
-    const NOTES = 'Passages repris de la copie de Curie';
+    const NOTES = 'Passages repris de la copie de Joyeuse';
     await ouvrirEvaluationTemoin(page, { statut: 'ia', notes: NOTES });
     // Le statut d'intégrité se recharge par « Modifier » (Liste des évaluations), pas par la copie.
     await page.evaluate(() => window.modifierEvaluation('EV699'));
@@ -202,7 +202,7 @@ test('(b)(c)(d) présences en anonymisation : le geste s\'enregistre, le DA et l
     await expect(page.locator('#tbody-saisie-presences input[id^="periodes_"]').first()).toBeAttached({ timeout: 8000 });
 
     // Témoin en mode normal : une note posée sur DEMO004, visible, avec son DA.
-    const NOTE = 'Rencontre prévue avec Césaire';
+    const NOTE = 'Rencontre prévue avec Jovial';
     await page.evaluate((note) => {
         // Lot D (27 sept. 2026) : plus de bouton « Enregistrer » — la frappe arme l'écriture, le
         // vidage la fait partir tout de suite.
@@ -232,7 +232,7 @@ test('(b)(c)(d) présences en anonymisation : le geste s\'enregistre, le DA et l
     expect(anonyme.desactive).toBe(true);
     expect(anonyme.placeholder).toBe('Masqué en anonymisation');
     expect(anonyme.texte).not.toContain('DEMO004');
-    expect(anonyme.texte).not.toContain('Césaire');
+    expect(anonyme.texte).not.toContain('Jovial');
 
     // (b) Le geste : DEMO006 absent, l'écriture en attente vidée.
     const date = await page.evaluate(() => {
@@ -259,7 +259,7 @@ test('(c)(d) intervention en anonymisation : description, observations et notes 
     test.setTimeout(90000);
     brancherEcouteurs(page);
     await packDemo(page);
-    const TEXTES = { description: 'Atelier pour Curie et Kahlo', observations: 'Curie a bien réagi', note: 'Kahlo : revoir la thèse', bilan: 'Suivi avec Curie' };
+    const TEXTES = { description: 'Atelier pour Joyeuse et Fière', observations: 'Joyeuse a bien réagi', note: 'Fière : revoir la thèse', bilan: 'Suivi avec Joyeuse' };
     await page.evaluate((t) => {
         const gc = typeof obtenirIdContexteActif === 'function' ? obtenirIdContexteActif() : null;
         // security-ok: fixture littérale du banc.
@@ -346,7 +346,7 @@ test('(d) volet confidentiel : ses notes s\'affichent en mode normal, rien ne s\
     test.setTimeout(90000);
     brancherEcouteurs(page);
     await packDemo(page);
-    const NOTE = 'Suivi médical, voir avec Césaire';
+    const NOTE = 'Suivi médical, voir avec Jovial';
     const NOTE_PRESENCE = 'Absent : rendez-vous';
     await page.evaluate(({ note, notePresence }) => {
         // security-ok: fixtures littérales du banc.

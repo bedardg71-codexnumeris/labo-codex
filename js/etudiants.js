@@ -623,7 +623,7 @@ window.toggleFiltreMinimum = toggleFiltreMinimum;
  */
 /**
  * L-3 (#749 lot 2) — UNE normalisation pour la recherche et le filtre pattern :
- * minuscules, sans accents. « aime » trouve Aimé, « cesaire » Césaire,
+ * minuscules, sans accents. « herisson » trouve Hérisson, « fiere » Fière,
  * « comaneci » Comăneci. Le tri par nom, lui, reste `localeCompare`.
  */
 function normaliserTexteRecherche(texte) {

@@ -20,7 +20,7 @@ import { tranche } from './_helpers/tranche.js';
 //      sans lui ;
 //   B. « # » trie sur l'ordre d'origine dans les deux sens ; « DA » trie en
 //      numérique ;
-//   C. la recherche ignore accents et casse (« aime » → Aimé, « comaneci » →
+//   C. la recherche ignore accents et casse (« herisson » → Hérisson, « comaneci » →
 //      Comăneci) — une seule fonction, partagée avec le filtre pattern ;
 //   D. un rendu n'appelle plus `calculerEtStockerIndicesCP` directement
 //      (la chaîne d'indices.js le fait) ; la saisie passe par une enveloppe
@@ -98,7 +98,7 @@ function storeBase() {
         groupeCoursActif: { id: 'GC1', trimestreId: 'test', coursId: 'GC1', groupeNum: '00001' },
         test_groupesCours: [{ id: 'GC1', coursId: 'GC1', trimestreId: 'test', actif: true, groupeNum: '00001' }],
         test_groupeEtudiants: [
-            { da: '2000001', nom: 'Césaire', prenom: 'Aimé', groupe: '00001', coursId: 'GC1', statut: 'actif' },
+            { da: '2000001', nom: 'Chaleureux', prenom: 'Hérisson', groupe: '00001', coursId: 'GC1', statut: 'actif' },
             { da: '2000002', nom: 'Absent', prenom: 'Bruno', groupe: '00001', coursId: 'GC1', statut: 'actif' },
             { da: '2000003', nom: 'Comăneci', prenom: 'Nadia', groupe: '1', coursId: 'GC1', statut: 'actif' },   // groupe non padé (stock d'avant)
         ],
@@ -184,7 +184,7 @@ describe('#749 lot 2 · A — les abandons visibles, grisés ; les statistiques 
         const b0 = monter(sans, { indices: { '2000001': { A: 100, C: 100, P: 80 }, '2000002': { A: 40, C: 100, P: 60 }, '2000003': { A: 80, C: 100, P: 70 } } });
         b0.win.afficherListeEtudiantsConsultation();
         const moySansAbandon = b0.moyA();
-        expect(b0.das()).toEqual(['2000002', '2000001', '2000003']);   // tri par nom : Absent, Césaire, Comăneci
+        expect(b0.das()).toEqual(['2000002', '2000001', '2000003']);   // tri par nom : Absent, Chaleureux, Comăneci
 
         const avec = storeBase();
         avec.test_groupeEtudiants.push({ da: '2000004', nom: 'Parti', prenom: 'Paul', groupe: '00001', coursId: 'GC1', statut: 'abandon' });
@@ -206,7 +206,7 @@ describe('#749 lot 2 · A — les abandons visibles, grisés ; les statistiques 
         store.test_groupeEtudiants[2].statut = 'décrochage';
         const b = monter(store);
         b.win.afficherListeEtudiantsConsultation();
-        // tri par nom : Absent (inactif), Césaire (actif), Comăneci (décrochage)
+        // tri par nom : Absent (inactif), Chaleureux (actif), Comăneci (décrochage)
         expect(b.lignes()[0].innerHTML).toContain('(Inactivité)');
         expect(b.lignes()[2].innerHTML).toContain('(Décrochage)');
         expect(b.lignes()[1].classList.contains('etudiant-inactif')).toBe(false);
@@ -232,11 +232,11 @@ describe('#749 lot 2 · B — les tris trient', () => {
 });
 
 describe('#749 lot 2 · C — la recherche sans accents', () => {
-    it('« aime », « cesaire », « comaneci » trouvent ; la casse ne compte pas', () => {
+    it('« herisson », « chaleureux », « comaneci » trouvent ; la casse ne compte pas', () => {
         const b = monter(storeBase());
         const chercher = (t) => { b.document.getElementById('recherche-nom-liste').value = t; b.win.afficherListeEtudiantsConsultation(); return b.das(); };
-        expect(chercher('aime')).toEqual(['2000001']);
-        expect(chercher('CESAIRE')).toEqual(['2000001']);
+        expect(chercher('herisson')).toEqual(['2000001']);
+        expect(chercher('CHALEUREUX')).toEqual(['2000001']);
         expect(chercher('comaneci')).toEqual(['2000003']);
         expect(chercher('zzz')).toEqual([]);
     });
@@ -314,7 +314,7 @@ describe('#749 lot 2 · G — un DA en double refusé ; le groupe padé à l\'é
         await b.win.soumettreEtudiantV2();
         expect(store.test_groupeEtudiants.filter(e => e.da === '2000001').length).toBe(1);
         // ↻ Lot E2 : « Non enregistré – Ajouter l'étudiant·e : ce DA est déjà dans le groupe : … », par le témoin.
-        expect(b.notifs.some(n => n.type === 'nonEnregistre' && n.t === 'ce DA est déjà dans le groupe : Aimé Césaire.' && n.geste === 'Ajouter l\'étudiant·e')).toBe(true);
+        expect(b.notifs.some(n => n.type === 'nonEnregistre' && n.t === 'ce DA est déjà dans le groupe : Hérisson Chaleureux.' && n.geste === 'Ajouter l\'étudiant·e')).toBe(true);
         expect(b.notifs.some(n => n.type === 'succes')).toBe(false);
     });
 
@@ -332,7 +332,7 @@ describe('#749 lot 2 · G — un DA en double refusé ; le groupe padé à l\'é
         b.interne.donneesImportEnAttenteV2 = lot();
         await b.win.confirmerImportV2();
         expect(store.test_groupeEtudiants.length).toBe(4);                                         // 3 + Ivan
-        expect(store.test_groupeEtudiants.find(e => e.da === '2000001').nom).toBe('Césaire');     // intact, pas écrasé
+        expect(store.test_groupeEtudiants.find(e => e.da === '2000001').nom).toBe('Chaleureux');     // intact, pas écrasé
         expect(store.test_groupeEtudiants.filter(e => e.da === '3000001').length).toBe(1);
         expect(b.notifs.some(n => n.type === 'succes' && n.t === '1 étudiant·e ajouté·e à Cours banc, 2 déjà présent·es (ignoré·es) — 4 au total dans le groupe')).toBe(true);   // #887 : le message nomme le cours
         b.interne.donneesImportEnAttenteV2 = lot();

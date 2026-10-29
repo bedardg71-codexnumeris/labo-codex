@@ -115,7 +115,7 @@ test('profil · un élève en décrochage : son profil s\'ouvre, calculé par sa
     // (2) Le profil s'ouvre, sans dialogue ; le statut est la première étiquette de la rangée (#1151) ; le sélecteur le montre.
     expect(dialogues).toEqual([]);
     expect(m.profil.profilActuelDA).toBe(DA);
-    expect(m.profil.nom).toMatch(/^Mandela, Nelson\b/);
+    expect(m.profil.nom).toMatch(/^Loyal, Suricate\b/);
     expect(m.profil.ligne).toBe('Décrochage · hors des moyennes du groupe');
     expect(m.profil.ligneSousLeNom).toBe(true);
     expect(m.profil.selection).toBe(DA);

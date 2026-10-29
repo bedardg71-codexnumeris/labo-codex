@@ -39,7 +39,7 @@ function stock() {
             { da: DA2, nom: 'Absent', prenom: 'Bruno', groupe: '00001', coursId: 'C101', statut: 'abandon' }
         ],
         h2026_groupeEtudiants: [{ da: DA, nom: 'Assidu', prenom: 'Alice', groupe: '00002', coursId: 'C102' }],
-        demo_groupeEtudiants: [{ da: 'DEMO004', nom: 'Césaire', prenom: 'Aimé', groupe: 'demo', coursId: 'demo-cours' }],
+        demo_groupeEtudiants: [{ da: 'DEMO004', nom: 'Jovial', prenom: 'Castor', groupe: 'demo', coursId: 'demo-cours' }],
         a2024_evaluationsSauvegardees: [
             { id: 'E1', etudiantDA: DA, coursId: 'C101', productionId: 'P1', grilleId: 'G1', echelleId: 'ECH1', criteres: [{ id: 'CR1', niveau: 'M' }], dateEvaluation: '2024-10-01T12:00:00.000Z', retroactionFinale: 'Bien.' },
             { id: 'E2', etudiantDA: DA, coursId: 'C101', productionId: 'P2', grilleId: 'G1', echelleId: 'ECH1', criteres: [{ id: 'CR1', niveau: 'D' }], dateEvaluation: '2024-11-01T12:00:00.000Z' },
@@ -107,7 +107,7 @@ describe('#915 lot 2 — les élèves de tous les trimestres, sauf la démo', ()
             { trimestreId: 'a2024', trimestreNom: 'Automne 2024', coursId: 'C101', coursCode: '601-101-MQ', groupe: '00001' }
         ]);
         expect(b.api.trimestres().map((t) => t.id)).toEqual(['h2026', 'a2024']);
-        expect(JSON.stringify(eleves)).not.toMatch(/DEMO004|Césaire/);
+        expect(JSON.stringify(eleves)).not.toMatch(/DEMO004|Jovial/);
         expect(b.journal).toEqual([]);
     });
 
