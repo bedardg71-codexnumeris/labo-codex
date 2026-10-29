@@ -13,6 +13,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // L'ancienne fusion décidait par clé entière contre le dernier codex de l'appareil, et prenait
 // la liste de l'autre sans annoncer de conflit.
 //
+// Retouche (29 oct.) : les données d'ici passent par IndexedDB avec une propriété `undefined` ;
+// la fusion les compare comme le codex les écrit, et n'annonce pas de faux conflit.
+//
 // CE QUE CE BANC JUGE, par le vrai geste (menu Codex › « Fusionner avec un codex… ») : un codex
 // « de l'iPad » est fabriqué par le vrai `Codex.generer` dans un autre contexte (l'ancêtre +14
 // évaluations, +14 annotations) ; l'espace « du Mac » (l'ancêtre +3, +4) le fusionne. Le résumé
@@ -86,14 +89,23 @@ test.describe('#1182 — Fusionner, copie par copie', () => {
         await fabriquerLeCodexDeLIPad(browser, fichier, await lireLEspace(page));
 
         // L'espace « du Mac », avec un codex actif (le menu ne propose « Fusionner » qu'alors).
-        await page.evaluate(async (donnees) => {
+        // Ses évaluations de l'ancêtre portent `dateModification: undefined`, comme en pose
+        // evaluation-jetons.js : IndexedDB la garde, le JSON du codex de l'iPad ne l'a pas
+        // (retouche de #1182 — elle faisait de chaque évaluation un faux conflit).
+        await page.evaluate(async ({ donnees, cleE }) => {
+            donnees[cleE].forEach((e) => { if (e.id.indexOf('EV_ancetre') === 0) e.dateModification = undefined; });
             Object.keys(donnees).forEach((k) => db.setSync(k, donnees[k]));
             db.setSync('_codex_etat', { actif: true, nom: 'Codex du Mac', derniereSauvegarde: new Date().toISOString(), modificationsDepuis: null, manifeste: null, temoinFiable: true });
             await db.flush();
-        }, MAC);
+        }, { donnees: MAC, cleE: EVALS });
         await page.reload();
         await page.waitForFunction(() => typeof window.auDbPret === 'function' && !!window.Codex);
         await page.evaluate(() => new Promise((r) => window.auDbPret(r)));
+        const gardee = await page.evaluate(async (cleE) => {
+            const e = ((await db.get(cleE, [])) || []).find((x) => x.id === 'EV_ancetre_1');
+            return !!e && Object.prototype.hasOwnProperty.call(e, 'dateModification') && e.dateModification === undefined;
+        }, EVALS);
+        expect(gardee, 'témoin : IndexedDB a gardé la propriété undefined (ce que la fusion lit ici)').toBe(true);
 
         await page.locator('#btn-codex').click();
         const item = page.locator('#codex-menu-fusionner');
