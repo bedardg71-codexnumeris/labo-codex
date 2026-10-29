@@ -16,7 +16,8 @@
  *   F. Lot 2 (29 oct. 2026) : les lecteurs secondaires (dépistage, panneau « Engagement », « ≥ Min. », export recherche et
  *      profils RLO, « à venir » du PDF) lisent le pool de la note ; GREG-0 à 2 inchangés, CHIM-1, 3, 5 : le pool, ni plus ni moins.
  *   G. Lot 3 (29 oct. 2026) : sans « Artefact », la zone « À vérifier » des Productions dit le texte 1 (TEXTES, lu dans le fichier)
- *      au lieu des règles 3a, 3b et 5 ; la pondération n'est plus exigée en Standards ; la définition « Évaluation terminale »
+ *      au lieu des règles 3a, 3b et 5 ; la pondération n'est plus exigée en Standards, sauf pour la terminale et le conteneur
+ *      (retouche du verdict) ; la définition « Évaluation terminale »
  *      dit le texte 2. Avec des artefacts (GREG), les avertissements d'avant, mot pour mot.
  *
  * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
@@ -528,18 +529,24 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         expect(n.erreur).toMatch(/^Pondération manquante \(pondération de l'évaluation terminale\)/);
     });
 
-    it('pondération 0 : s\'enregistre en Standards, quel que soit le type ; reste refusée en Sommative', () => {
+    it('pondération 0 : s\'enregistre en Standards, sauf la terminale et le conteneur (le calcul lit leur pondération) ; reste refusée en Sommative', () => {
         const REFUS = 'la pondération est requise : plus de 0 %.';
         const sansPoids = (type) => ({ titre: 'Laboratoire 4', type, ponderation: 0 });
         const enStd = productionsSous(std()).win;
-        for (const type of ['laboratoire', 'examen', 'terminale', 'portfolio']) {
+        for (const type of ['laboratoire', 'examen', 'artefact-portfolio']) {
             expect(enStd.raisonChampsObligatoiresProduction(sansPoids(type)), type).toBe('');
+        }
+        // Retouche du verdict (29 oct.) : à 0 %, une terminale ne compterait pour rien ; un conteneur rend « Pondérations nulles ».
+        for (const type of ['terminale', 'portfolio']) {
+            expect(enStd.raisonChampsObligatoiresProduction(sansPoids(type)), type).toBe(REFUS);
+            expect(enStd.raisonChampsObligatoiresProduction({ titre: 'Analyse finale', type, ponderation: 40 }), type + ' à 40 %').toBe('');
         }
         expect(enStd.raisonChampsObligatoiresProduction({ type: 'examen', ponderation: 0 })).toBe('le nom de la production est requis.');
         const enSom = productionsSous(SOM).win;
         expect(enSom.obtenirTypePratiqueActive()).toBe('sommative');
-        expect(enSom.raisonChampsObligatoiresProduction(sansPoids('laboratoire'))).toBe(REFUS);
-        expect(enSom.raisonChampsObligatoiresProduction(sansPoids('terminale'))).toBe(REFUS);
+        for (const type of ['laboratoire', 'examen', 'terminale', 'portfolio']) {
+            expect(enSom.raisonChampsObligatoiresProduction(sansPoids(type)), type).toBe(REFUS);
+        }
         expect(enSom.raisonChampsObligatoiresProduction(sansPoids('artefact-portfolio'))).toBe('');
     });
 
@@ -614,3 +621,6 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
 //   C2 productions.js — l'ancien `raisonChampsObligatoiresProduction`                          → 1 rouge (pondération 0 en Standards)
 //   C3 productions.js — les anciennes définitions « Artefact » et « Évaluation terminale »     → 1 rouge (texte 2, tutoiement)
 //   Playwright (WebKit, standards-sans-portfolio-lot-3.spec.js) : C1 → CHIM-1 rouge, GREG vert.
+// RETOUCHE DU LOT 3 (29 oct. 2026, verdict de Cowork) — même procédure :
+//   C4 productions.js — en Standards, plus aucun type n'exige la pondération (le lot 3 avant retouche)  → 1 rouge (terminale à 0 %)
+//   C5 productions.js — en Standards, la terminale seule l'exige (le conteneur oublié)                  → 1 rouge (conteneur à 0 %)
