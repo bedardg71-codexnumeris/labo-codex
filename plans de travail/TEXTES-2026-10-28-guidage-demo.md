@@ -279,10 +279,10 @@ Mesuré : « affiché partout sous le nom « Labo Codex » » est faux. Les gril
 - **Pratique guidée** — Ouvre une grille ou une échelle démo pour comprendre sa structure. Le formulaire est en lecture seule (aucun risque de modifier accidentellement le matériel).
 - **Autonomie** — Clique sur « Dupliquer » (ou ta propre échelle, cartouche, production, pratique, groupe-cours) et renomme. Tu pars du modèle mais tu deviens l'auteur.
 
-**APRÈS** :
-- **Modélisation** — Active la démo : Suivi du groupe s'ouvre, déjà rempli. Tu vois ce que l'outil produit avec des données réalistes.
-- **Pratique guidée** — Ouvre une grille ou une échelle de la démo pour voir sa structure. Elle est en lecture seule : tu ne peux pas la modifier par accident.
-- **Autonomie** — Clique sur « Dupliquer pour créer ma grille » (ou mon échelle, ma cartouche, ma production, ma pratique) et renomme la copie. Tu pars du modèle ; la copie est à toi.
+**APRÈS** (↻ Cowork, 29 oct. : « – » au lieu de « — » ; la fin d'« Autonomie » réécrite par la décision de Grégoire de 8 h 00, ci-dessous) :
+- **Modélisation** – Active la démo : Suivi du groupe s'ouvre, déjà rempli. Tu vois ce que l'outil produit avec des données réalistes.
+- **Pratique guidée** – Ouvre une grille ou une échelle de la démo pour voir sa structure. Elle est en lecture seule : tu ne peux pas la modifier par accident.
+- **Autonomie** – Clique sur « Dupliquer pour créer ma grille » (ou mon échelle, ma cartouche, ma production, ma pratique) et renomme la copie. Elle reste dans la démo : une nouvelle version du pack l'efface.
 
 Mesuré : lieu d'ouverture (Aide `demo`) ; lecture seule, champs désactivés (`js/bibliotheque-ui.js:309-319`) ; les cinq boutons « Dupliquer pour créer ma grille / mon échelle / ma cartouche / ma production / ma pratique » (`js/grilles.js:5638`, `js/echelles.js:2177`, `js/cartouches.js:1612`, `js/productions-liste.js:192`, `js/pratiques-gestion.js:1074`). Le groupe-cours n'a pas ce bouton : il part de la liste.
 
@@ -332,3 +332,21 @@ Mesuré : espace `demo_*` (`js/demo-namespace.js`, `cleDemo`) ; bouton « Quitte
 - **Le « survole un point » est retiré** de la bulle 1 : sur iPad, l'attribut `title` ne s'affiche pas ; « Détails » marche sur les deux appareils.
 - **Typographie** : les espaces avant « ; », « : » et dans « … » sont des espaces ordinaires ici ; à l'intégration, ils deviennent insécables (` `), comme dans le code actuel.
 - **Hors périmètre, constaté en chemin** : les définitions du glossaire « Cartouche de rétroaction » (« automatiquement ») et « Niveau RàI » (« tableau de bord », « recommandée ») gardent des mots que les bulles abandonnent. Je ne les ai pas touchées.
+
+---
+
+## Relecture de Cowork (29 oct. 2026, 7 h 53)
+
+- **Les bulles 1 à 18** : vérifiées par sondage contre le code et les entrées validées de l'Aide (la bulle 1 reprend mot pour mot la phrase validée de `tableau-bord`, `index.html:10821`). Rien de faux trouvé. Soumises à Grégoire par groupes, dans l'ordre du fichier ; sa validation s'inscrit ci-dessous, groupe par groupe.
+- **Bloc 4, « Autonomie » : l'inférence du § « Ce que je n'ai pas pu mesurer », point 2, tient à la lecture du code.** « Dupliquer pour créer ma grille » écrit dans `cle('grillesTemplates')` (`js/grilles.js:5656`), qui rend `demo_grillesTemplates` pendant la démo, et `peuplerNamespace` réécrit cette clé à chaque nouvelle version du pack (`js/demo-namespace.js:177-191`). Une copie faite en démo reste dans la démo et disparaît à la version suivante du pack. « la copie est à toi » ne peut pas s'écrire tel quel : la question va à Grégoire avec la fenêtre « Données démo » (ce que l'enseignant·e croit garder).
+- **Typographie** : dans le bloc 4, les « — » qui suivent les trois noms deviennent « – » (la règle de Grégoire, appliquée à l'accueil le 28 oct.).
+
+## Validations de Grégoire
+- **Groupe 1 (bulles 1 à 4, le Suivi) : validé par Grégoire le 29 oct. 2026 à 7 h 53** (« on garde »), mot pour mot.
+- **Groupe 2 (bulles 6 à 8 ; la bulle 5, clé morte, retirée par décision de Cowork) : validé par Grégoire le 29 oct. 2026 à 7 h 54** (« on garde »), mot pour mot.
+- **Groupe 3 (bulles 9 à 11, les copies) : validé par Grégoire le 29 oct. 2026 à 7 h 54** (« on garde »), mot pour mot.
+- **Groupe 4 (bulles 12 à 15, la Conception) : validé par Grégoire le 29 oct. 2026 à 7 h 55** (« on garde »), mot pour mot.
+- **Groupe 5 (bulles 16 à 18) : validé par Grégoire le 29 oct. 2026 à 7 h 57** (« on garde »), mot pour mot. Les 17 bulles sont validées ; reste la fenêtre « Données démo ».
+- **La copie faite en démo : décision de Grégoire le 29 oct. 2026 à 8 h 00** (« oui » à la recommandation de Cowork). La fenêtre dit la vérité : « Elle reste dans la démo : une nouvelle version du pack l'efface. » (bloc 4, « Autonomie », remplace « Tu pars du modèle ; la copie est à toi. »). Un chantier est inscrit sur la page du tri : qu'une copie faite pendant la démo puisse rejoindre la bibliothèque de l'enseignant·e, ce qui rendrait l'étape « Autonomie » réelle.
+- **Fenêtre « Données démo », titre et blocs 1, 3 et 4 : validés par Grégoire le 29 oct. 2026 à 8 h 02** (« on garde »), mot pour mot (bloc 4 dans sa version ↻ du 29 oct.). Le bloc 2 reste celui du 7 oct.
+- **Fenêtre « Données démo », blocs 5, 6 et 7 : validés par Grégoire le 29 oct. 2026 à 8 h 03** (« on garde »), mot pour mot. **Tout le fichier est validé** : 17 bulles, la bulle 5 retirée, la fenêtre (titre, blocs 1 et 3 à 7 ; bloc 2 du 7 oct.). À poser : `CONSIGNE-LOT-2026-10-29-guidage-demo.md`.
