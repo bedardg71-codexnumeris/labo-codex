@@ -2671,6 +2671,11 @@ async function finaliserCreationPratique(pratique) {
         wizardState.grilleDeBase = null;
     }
 
+    // Jetons par défaut (décision de Grégoire, 29 oct. 2026) : une pratique CRÉÉE sans réglage de jetons les refuse
+    // explicitement. Seule une Spécifications pose la question ; les autres familles en naissaient sans réglage, donc
+    // avec les jetons du défaut. En modification, rien : la pratique enregistrée garde ce qu'elle fait.
+    if (!enModification) window.poserJetonsRefusesSiAucunReglage(pratique);
+
     // Un échec : le témoin l'a dit ; l'assistant reste ouvert, rien n'est perdu.
     if (!(await sauvegarderPratique(pratique))) return;
 

@@ -126,6 +126,27 @@ const NOMS_NOTE_POURCENTAGE = ['formaterNombre', 'formaterPourcentage', 'formate
 
 let poolStdDuRegistre = null;   // lot 2 des standards sans portfolio : voir chargerScript
 
+/**
+ * Jetons par défaut (29 oct. 2026) — `configJetonsResolueDeLaPratique` et `poserJetonsRefusesSiAucunReglage`
+ * (js/evaluation-jetons.js) sont lus par window.… dans le formulaire de la pratique et dans l'assistant. Comme le pool :
+ * le VRAI moteur, chargé une fois dans un bac jetable, fourni quand le harnais ne le donne pas.
+ */
+let jetonsResolusDuMoteur = null;   // la fenêtre du moteur des jetons, chargée une fois
+// Un module chargé dans un bac jetable pour un complément par défaut ne reçoit pas lui-même ces compléments (sans quoi le
+// registre et le moteur des jetons se chargeraient l'un l'autre sans fin).
+let chargementAuxiliaire = false;
+function chargerAuxiliaire(chemin) {
+    chargementAuxiliaire = true;
+    try { return chargerScript(chemin, {}, {}); } finally { chargementAuxiliaire = false; }
+}
+export function completerJetonsResolusParDefaut(fauxWindow, cheminRelatifProjet) {
+    if (chargementAuxiliaire || fauxWindow.configJetonsResolueDeLaPratique || cheminRelatifProjet.endsWith('evaluation-jetons.js')) return;
+    jetonsResolusDuMoteur = jetonsResolusDuMoteur || chargerAuxiliaire('js/evaluation-jetons.js');
+    // Le formulaire lit la résolution ; l'assistant pose le refus d'une pratique neuve.
+    fauxWindow.configJetonsResolueDeLaPratique = jetonsResolusDuMoteur.configJetonsResolueDeLaPratique;
+    fauxWindow.poserJetonsRefusesSiAucunReglage = jetonsResolusDuMoteur.poserJetonsRefusesSiAucunReglage;
+}
+
 export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExistant = null) {
     const chemin = path.join(racineProjet, cheminRelatifProjet);
     const code = readFileSync(chemin, 'utf8');
@@ -275,10 +296,11 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     // note, est lu par window.… dans le dépistage, le panneau « Engagement », « ≥ Min. », l'export recherche et le PDF.
     // Comme `ProductionDiagnostique` : le VRAI registre (chargé dans un bac jetable, une fois par fichier), fourni quand le
     // harnais ne le donne pas ; un banc qui charge le registre lui-même le réécrit à l'identique.
-    if (!fauxWindow.obtenirIdsPoolStdDuCorpus && !cheminRelatifProjet.endsWith('pratique-registre.js')) {
-        poolStdDuRegistre = poolStdDuRegistre || chargerScript('js/pratiques/pratique-registre.js', {}, {}).obtenirIdsPoolStdDuCorpus;
+    if (!chargementAuxiliaire && !fauxWindow.obtenirIdsPoolStdDuCorpus && !cheminRelatifProjet.endsWith('pratique-registre.js')) {
+        poolStdDuRegistre = poolStdDuRegistre || chargerAuxiliaire('js/pratiques/pratique-registre.js').obtenirIdsPoolStdDuCorpus;
         fauxWindow.obtenirIdsPoolStdDuCorpus = poolStdDuRegistre;
     }
+    completerJetonsResolusParDefaut(fauxWindow, cheminRelatifProjet);   // jetons par défaut (29 oct. 2026)
 
     // #876 (15 sept. 2026) — `sessionStorage` aussi : une file d'import persistée
     // se restaure au CHARGEMENT de travaux-import.js, donc elle doit être là avant.

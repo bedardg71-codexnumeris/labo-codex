@@ -184,7 +184,10 @@ describe('#853 · aller-retour : formulaire de gestion → pratique enregistrée
         expect(caseHtml[0]).not.toMatch(/\bchecked\b/);
         const note = html.split('id="mat-jetons-regles-ailleurs"')[1].split('</p>')[0];
         expect(note).toMatch(/^ class="u-hide\b/);
-        expect(note).toMatch(/ne peut pas les modifier, et les valeurs affichées ici ne sont pas celles qui s'appliquent/);
+        // Jetons par défaut (29 oct. 2026) : les valeurs affichées SONT celles qui s'appliquent (le formulaire lit la résolution
+        // du moteur) ; la demi-phrase qui disait le contraire est retirée.
+        expect(note).toMatch(/ne peut pas les modifier\.\s*$/);
+        expect(note).not.toMatch(/valeurs affichées/);
     });
 });
 

@@ -42,15 +42,35 @@ function _optionDelaiSurReprise(valeur) {
     return valeur === true ? { surReprise: true } : {};
 }
 
+/**
+ * Les jetons d'une pratique qui n'en règle aucun : la configuration du moteur par défaut (actifs, 2 / 2 / 2).
+ * Une seule source pour le moteur (`obtenirConfigJetons`) et pour le formulaire de la pratique (jetons par défaut,
+ * 29 oct. 2026 : la case s'affiche cochée pour une pratique sans réglage, parce que c'est ce que fait le moteur).
+ */
+function jetonsParDefaut() {
+    return {
+        actif: true,
+        delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
+        reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
+        repriseCiblee: { actif: true, nombre: 2, plafondNote: null }
+    };
+}
+
 function _normaliserConfigJetons(brut) {
     if (!brut || typeof brut !== 'object') return null;
+
+    // Jetons par défaut (décision de Grégoire, 29 oct. 2026) — UN « NON » EXPLICITE EST RESPECTÉ, quelle que soit la
+    // forme. Avant : `{ activer: false }` seul (l'assistant, réponse « non ») n'était reconnu par aucune forme (null,
+    // donc le défaut, actif) ; et la forme imbriquée lisait `actif` avant `activer` (la classe Spécifications étale
+    // `{ activer: false }` sur un défaut `actif: true`) : actifs.
+    const refuse = brut.actif === false || brut.activer === false;
 
     // Forme PLATE (marqueurs `nombre`/`delaiDuree`/`repriseOriginale`/`cibleeActif`).
     const estPlat = brut.nombre !== undefined || brut.delaiDuree !== undefined
         || brut.repriseOriginale !== undefined || brut.cibleeActif !== undefined;
     if (estPlat) {
         return {
-            actif: brut.actif !== false,
+            actif: !refuse,
             delai: Object.assign({ nombre: brut.nombre || 2, dureeJours: brut.delaiDuree || 2 },
                 _optionDelaiSurReprise(brut.delaiSurReprise)),
             reprise: {
@@ -71,7 +91,7 @@ function _normaliserConfigJetons(brut) {
         const r = brut.reprise || {};
         const rc = brut.repriseCiblee || null;
         return {
-            actif: (brut.actif !== undefined ? brut.actif : brut.activer) !== false,
+            actif: !refuse,
             delai: Object.assign({ nombre: d.nombre != null ? d.nombre : 2, dureeJours: d.dureeJours != null ? d.dureeJours : 2 },
                 _optionDelaiSurReprise(d.surReprise)),
             reprise: {
@@ -80,7 +100,7 @@ function _normaliserConfigJetons(brut) {
                 archiverOriginale: r.archiverOriginale !== false
             },
             // #328 L2-c (décision Grégoire, 27 juin) : repriseCiblee NON configurée sur la forme
-            // imbriquée → défaut de l'app (ACTIF), cohérent avec jetonsDefaut et avec le comportement
+            // imbriquée → défaut de l'app (ACTIF), cohérent avec jetonsParDefaut et avec le comportement
             // antérieur d'une pratique sans miroir. Une pratique qui veut l'éteindre pose actif:false.
             repriseCiblee: rc
                 ? { actif: rc.actif !== false, nombre: rc.nombre != null ? rc.nombre : 2, plafondNote: rc.plafondNote != null ? rc.plafondNote : null }
@@ -92,8 +112,45 @@ function _normaliserConfigJetons(brut) {
         };
     }
 
+    // Le seul drapeau (`{ activer: false }`, `{ actif: false }`) : les jetons sont refusés, les valeurs sont celles du défaut.
+    if (refuse) return Object.assign(jetonsParDefaut(), { actif: false });
+
     // Forme non reconnue → null (repli LOUD : obtenirConfigJetons retombe sur le défaut).
     return null;
+}
+
+/**
+ * Le réglage de jetons que porte une pratique, à l'emplacement que le moteur lit en premier :
+ * configuration.jetons (assistant) → config.jetons → jetons (plat, formulaire). `null` sans réglage.
+ */
+function _jetonsBrutsDeLaPratique(pratique) {
+    if (!pratique) return null;
+    return (pratique.configuration && pratique.configuration.jetons)
+        || (pratique.config && pratique.config.jetons)
+        || pratique.jetons
+        || null;
+}
+
+/**
+ * Jetons par défaut (29 oct. 2026) — CE QUE LE MOTEUR RÉSOUT POUR UNE PRATIQUE DONNÉE : son réglage normalisé, sinon le
+ * défaut. Lu par le formulaire de la pratique (la case et les valeurs affichées), qui n'a plus sa propre lecture.
+ * (Le repli `modalitesEvaluation.configurationJetons` du trimestre n'a plus d'écrivain : il n'est pas reflété ici.)
+ * @param {object} pratique - une entrée de `pratiquesConfigurables`
+ * @returns {object} configuration canonique
+ */
+function configJetonsResolueDeLaPratique(pratique) {
+    return _normaliserConfigJetons(_jetonsBrutsDeLaPratique(pratique)) || jetonsParDefaut();
+}
+
+/**
+ * Jetons par défaut (décision de Grégoire, 29 oct. 2026) — UNE PRATIQUE NEUVE PORTE UN CHOIX EXPLICITE : sans réglage de
+ * jetons, elle les refuse (`jetons: { actif: false }`, le bloc plat que le formulaire relit et que sa case change). Une
+ * pratique qui porte déjà un réglage n'est pas touchée. Appelée à la CRÉATION seulement (l'assistant) : une pratique
+ * existante sans réglage garde les jetons du défaut. Mute et rend la pratique.
+ */
+function poserJetonsRefusesSiAucunReglage(pratique) {
+    if (pratique && !_jetonsBrutsDeLaPratique(pratique)) pratique.jetons = { actif: false };
+    return pratique;
 }
 
 /**
@@ -119,12 +176,7 @@ function obtenirConfigJetonsPratique(pratiqueIdDemande = null) {
     const pratique = pratiques.find(p => p && p.id === pratiqueId);
     if (!pratique) return null;
 
-    // Emplacement canonique → legacy : configuration.jetons (wizard) → config.jetons → jetons (plat).
-    const brut = (pratique.configuration && pratique.configuration.jetons)
-        || (pratique.config && pratique.config.jetons)
-        || pratique.jetons
-        || null;
-    return _normaliserConfigJetons(brut);
+    return _normaliserConfigJetons(_jetonsBrutsDeLaPratique(pratique));
 }
 
 /**
@@ -141,13 +193,6 @@ function obtenirConfigJetons() {
         return depuisPratique;
     }
 
-    // Valeurs par défaut si aucune config jetons résolue
-    const jetonsDefaut = {
-        actif: true,
-        delai: { nombre: 2, dureeJours: 2 },  // 🆕 Beta 95.7 : défaut 2 jours
-        reprise: { nombre: 2, maxParProduction: 1, archiverOriginale: true },
-        repriseCiblee: { actif: true, nombre: 2, plafondNote: null }
-    };
 
     // Fallback: configurationJetons (format plat du module v2) et convertir
     const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
@@ -171,7 +216,7 @@ function obtenirConfigJetons() {
         };
     }
 
-    return jetonsDefaut;
+    return jetonsParDefaut();
 }
 
 /**
@@ -1038,7 +1083,9 @@ function retirerJetonPersonnalise(da, jetonId) {
 // Exporter les fonctions vers window pour qu'elles soient accessibles globalement
 window.obtenirConfigJetons = obtenirConfigJetons;
 window.jetonsDeclares = jetonsDeclares;   // #941 lot S3 (D5)
-window.obtenirConfigJetonsPratique = obtenirConfigJetonsPratique;  // #328 L2-c (réutilisé par les lecteurs migrés)
+window.obtenirConfigJetonsPratique = obtenirConfigJetonsPratique;
+window.configJetonsResolueDeLaPratique = configJetonsResolueDeLaPratique;   // jetons par défaut (29 oct. 2026) : le formulaire
+window.poserJetonsRefusesSiAucunReglage = poserJetonsRefusesSiAucunReglage;   // jetons par défaut (29 oct. 2026) : l'assistant  // #328 L2-c (réutilisé par les lecteurs migrés)
 window.compterJetonsUtilises = compterJetonsUtilises;
 window.verifierDisponibiliteJeton = verifierDisponibiliteJeton;
 window.appliquerJetonDelai = appliquerJetonDelai;
