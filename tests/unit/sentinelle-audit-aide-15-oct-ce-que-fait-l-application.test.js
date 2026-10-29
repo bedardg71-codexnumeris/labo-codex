@@ -266,7 +266,9 @@ describe('Les gestes décrits sont ceux du code', () => {
         for (const texte of [HOVER, AIDE, GUIDES]) {
             expect(texte).not.toMatch(/Taux de présence cumulé de l’étudiant·e depuis le début du trimestre|nombre de présences \/ nombre de séances|la proportion des périodes du trimestre/);
         }
-        expect(AIDE).toContain('Séance non saisie');
+        // ↻ #1152, lot 4 (29 oct. 2026) : « tant que la barre dit « Séance non saisie »… » est remplacé par le trou 3 validé
+        // (consigne CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md, §1) ; le fait qu'on verrouille ici reste dit, par la phrase d'avant qu'on garde.
+        expect(AIDE).toContain('Seules les séances saisies entrent dans A.');
         expect(TERME).toContain('« Séance non saisie »');   // #1152, lot 3 : la formule de A, versée du glossaire statique
         expect(GUIDES).toContain('sur les seules séances saisies');
     });

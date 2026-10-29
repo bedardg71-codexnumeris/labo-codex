@@ -101,25 +101,29 @@ const ABSORBEES_2D = ['modelisation', 'criteres'];
 // ↻ #1152, lot 3 (28 oct. 2026) : `glossaire-statique` part ; ce qu'il avait d'unique et de juste est versé dans
 // js/accompagnement-contenu-terme.js, le glossaire que rend `glossaire` (consigne CONSIGNE-LOT-2026-10-28-aide-lot-3-un-seul-glossaire.md, §1).
 const ABSORBEES_3 = ['glossaire-statique'];
+// ↻ #1152, lot 4 (29 oct. 2026) : trois entrées neuves, les trous 2, 5 et 6 (consigne CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md, §1) —
+// `construction-note` après `pratique`, `rencontres` entre `planifier-rai` et `tirage-sort` (l'ordre des sous-onglets de
+// js/config.js), `ce-qui-sort` après `export-import`. Le détail est vérifié par sentinelle-aide-2026-10-28-lot-4.test.js.
+const NEUVES_4 = ['construction-note', 'rencontres', 'ce-qui-sort'];
 const PLACES = {
     commencer: ['presentation', 'prise-en-main', 'demo', 'modes', 'bibliotheque', 'chaines-etapes', 'preferences'],
     cadre: ['etapes-config', 'cours', 'horaire', 'etudiants', 'presences-calendrier', 'archivage'],
-    conception: ['pratique', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme', 'sous-criteres', 'creer-echelles', 'solo', 'creer-cartouches'],
+    conception: ['pratique', 'construction-note', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme', 'sous-criteres', 'creer-echelles', 'solo', 'creer-cartouches'],
     evaluation: ['preparer-importer', 'liste-evaluations', 'annoter-evaluer', 'jetons-reprise', 'irrecevables', 'exporter-archiver'],
-    suivi: ['tableau-bord', 'acp', 'suivi-apprentissage', 'snapshots', 'saisie-presences', 'profil-etudiant', 'diagnostics', 'rai', 'patterns', 'planifier-rai', 'tirage-sort'],
+    suivi: ['tableau-bord', 'acp', 'suivi-apprentissage', 'snapshots', 'saisie-presences', 'profil-etudiant', 'diagnostics', 'rai', 'patterns', 'planifier-rai', 'rencontres', 'tirage-sort'],
     labo: ['labo', 'rai-solo', 'grille-depistage', 'pan', 'bilan-reflexif'],
-    'codex-archives': ['codex', 'export-import', 'partage', 'collaboration'],
+    'codex-archives': ['codex', 'export-import', 'ce-qui-sort', 'partage', 'collaboration'],
     reference: ['glossaire', 'faq', 'problemes', 'ressources'],
 };
 const GARDEES = Object.values(PLACES).flat();
 
 describe('#1152 lot 1 · la forme de l\'Aide', () => {
-    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée ; au lot 2c, 1 absorbée et 1 neuve ; au lot 2c bis, 2 absorbées ; au lot 2d, 2 absorbées ; au lot 3, 1 absorbée', () => {
+    it('les sources se lisent : huit onglets ; 75 entrées à l\'audit, 14 coupées, 61 rangées ; au lot 2a, 4 absorbées et 2 neuves ; au lot 2b, 1 absorbée ; au lot 2c, 1 absorbée et 1 neuve ; au lot 2c bis, 2 absorbées ; au lot 2d, 2 absorbées ; au lot 3, 1 absorbée ; au lot 4, 3 neuves', () => {
         expect(ONGLETS).toHaveLength(8);
         expect(Object.keys(PLACES)).toEqual(ONGLETS.map((o) => o.id));
         expect(COUPEES).toHaveLength(14);
-        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length - ABSORBEES_2C.length + NEUVES_2C.length - ABSORBEES_2C_BIS.length - ABSORBEES_2D.length - ABSORBEES_3.length);
-        const NEUVES = [...NEUVES_2A, ...NEUVES_2C];
+        expect(GARDEES).toHaveLength(61 - ABSORBEES_2A.length + NEUVES_2A.length - ABSORBEES_2B.length - ABSORBEES_2C.length + NEUVES_2C.length - ABSORBEES_2C_BIS.length - ABSORBEES_2D.length - ABSORBEES_3.length + NEUVES_4.length);
+        const NEUVES = [...NEUVES_2A, ...NEUVES_2C, ...NEUVES_4];
         expect(new Set([...COUPEES, ...GARDEES.filter((id) => !NEUVES.includes(id)), ...ABSORBEES_2A, ...ABSORBEES_2B, ...ABSORBEES_2C, ...ABSORBEES_2C_BIS, ...ABSORBEES_2D, ...ABSORBEES_3]).size).toBe(75);
     });
 

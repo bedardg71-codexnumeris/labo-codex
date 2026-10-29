@@ -59,7 +59,8 @@ const aLEcran = (libelle) => pageHorsAide.includes(libelle) || sourceHorsAide.in
 // Référence gardent leur ordre.
 const PARTIES = {
     labo: ['labo', 'rai-solo', 'grille-depistage', 'pan', 'bilan-reflexif'],
-    'codex-archives': ['codex', 'export-import', 'partage', 'collaboration'],
+    // ↻ #1152, lot 4 (29 oct. 2026) : `ce-qui-sort`, neuve, après `export-import` (consigne CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md, §1, trou 6).
+    'codex-archives': ['codex', 'export-import', 'ce-qui-sort', 'partage', 'collaboration'],
     // ↻ #1152, lot 3 (28 oct. 2026) : `glossaire-statique` est partie (consigne du lot 3, §1).
     reference: ['glossaire', 'faq', 'problemes', 'ressources'],
 };
@@ -237,7 +238,8 @@ describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () =>
         const appelants = ['trimestre-v2-liste.js', 'trimestre-v2-groupes-cours.js', 'trimestre-v2-etudiants.js', 'import-export.js']
             .filter((f) => lire('js', f).includes('Codex.ecrireAPartAvantSuppression('));
         expect(appelants).toHaveLength(4);
-        expect(t).toContain('Supprimer un trimestre, un groupe-cours ou des étudiant·es, ou tout réinitialiser, commence par « Écrire le codex à part »');
+        // ↻ #1152, lot 4 (29 oct. 2026) : le paragraphe « Avant une suppression » est remplacé par le trou 1 validé (consigne CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md, §1) ; « plutôt ».
+        expect(t).toContain('Supprimer un trimestre, un groupe-cours ou des étudiant·es, ou tout réinitialiser, commence plutôt par « Écrire le codex à part »');
         // « Archiver… » : un groupe-cours ; le trimestre clos, par le ⋮ de sa rangée.
         expect(sourceHorsAide).toContain('Archive d\'un groupe-cours.');
         expect(lire('js', 'reserve-trimestre.js')).toContain('menu: \'Archiver le trimestre…\'');
