@@ -19,6 +19,8 @@
  *      au lieu des règles 3a, 3b et 5 ; la pondération n'est plus exigée en Standards, sauf pour la terminale et le conteneur
  *      (retouche du verdict) ; la définition « Évaluation terminale »
  *      dit le texte 2. Avec des artefacts (GREG), les avertissements d'avant, mot pour mot.
+ *   H. Lot 4 (29 oct. 2026) : sans « Artefact » et hors hybride, « Productions qui comptent dans la note » (TEXTES, lus dans le
+ *      fichier) ; une production décochée sort de la note et des lecteurs du lot 2 ; GREG ne change pas ; le partage ne l'emporte pas.
  *
  * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
  * Stock : rien n'est réécrit ; tout se lit au calcul (les captures déjà prises gardent leur P).
@@ -27,6 +29,7 @@
 import { describe, it, expect } from 'vitest';
 import { monter, storeBase, clone } from './_helpers/bac-suivi.js';
 import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 const DA = { ALICE: '2000001', BRUNO: '2000002' };
 const E0 = { id: 'E0', nom: 'IDME banc', seuilMaitrise: 'M', niveaux: [
@@ -584,6 +587,136 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
     });
 });
 
+/* ================================================================ H. LES PRODUCTIONS QUI COMPTENT (LOT 4) */
+// Consigne : plans de travail/CONSIGNE-LOT-2026-10-29-standards-sans-portfolio-lot-4.md. La désignation vit dans la pratique,
+// `configuration.productionsExclues` (des ids), lue par le pool (`obtenirArtefactsIdsPoolStd`) — une liste d'exclusions, pas
+// une catégorie (R1). Les mots : TEXTES-2026-10-29-standards-lot-4.md, lus dans le fichier.
+const exclure = (pratique, ids) => { pratique.configuration.productionsExclues = ids; return pratique; };
+const L4 = { id: 'L4', titre: 'Laboratoire 4', type: 'laboratoire', numero: 6, ponderation: 15, coursId: 'GC1' };
+CAS['CHIM-1 sans L1'] = () => ({ pratique: exclure(std({ methodeSelection: 'tous' }), ['L1']), productions: prodChimie(), evaluations: COPIES_CHIMIE });
+CAS['GREG-0 A4 exclu'] = () => ({ pratique: exclure(std(), ['A4']), productions: prodGreg(), evaluations: COPIES_GREG });
+async function texteLot4() {
+    const { readFileSync } = await import('node:fs');
+    const path = await import('node:path');
+    const lire = (f) => readFileSync(path.join(path.resolve(import.meta.dirname, '..', '..'), f), 'utf8');   // la forme de bareme-2
+    return lire('plans de travail/TEXTES-2026-10-29-standards-lot-4.md').split('\n').filter(l => l.startsWith('> ') && !l.startsWith('> Proposés')).map(l => l.slice(2).trim());
+}
+/** Le formulaire réel de la pratique (pratiques-gestion.js), ouvert sur la pratique du banc. */
+async function formulaire(pratique, productions) {
+    const b = banc({ pratique, productions, evaluations: [], modules: [{ chemin: 'js/pratiques-gestion.js', internes: [] }],
+        globauxEnPlus: { toggleDisplay: (el, montrer) => { el.style.display = montrer ? '' : 'none'; } } });
+    b.win.EditeurCibles = { poser() {}, lire: () => [], motifRefus: () => '' };
+    await b.win.chargerPratiquePourModif(pratique.id);
+    await new Promise(r => setTimeout(r, 0));
+    const etat = async () => {
+        await b.win.afficherProductionsQuiComptentMat();
+        const html = b.document.getElementById('mat-productions-comptees-liste').innerHTML;
+        return {
+            visible: b.document.getElementById('mat-productions-comptees').style.display !== 'none',
+            cases: [...html.matchAll(/<input type="checkbox" (checked)? ?(disabled)?[\s\S]*?data-prod-id="([^"]+)"/g)].map(m => m[3] + (m[1] ? '✓' : '·') + (m[2] ? '⊘' : ''))
+        };
+    };
+    return Object.assign(b, { etat, basculer: (id, compte) => b.win.basculerProductionQuiCompteHandler({ dataset: { prodId: id }, checked: compte }) });
+}
+
+describe('H · lot 4 : les productions qui comptent, choisies à l\'écran', () => {
+    it('CHIM-1, L1 exclue : la note la retire, 77 → 78,75, aux quatre chemins ; un id inconnu n\'exclut rien', () => {
+        expect(avec(std({ methodeSelection: 'tous' }), prodChimie(), COPIES_CHIMIE)).toMatchObject({ profil: 77, P: 77, comparateur: 77, export: [77, 'provisoire'] });
+        // (80 + 90 + 60 + 85) / 4 : sans le Laboratoire 1 (70).
+        expect(avec(exclure(std({ methodeSelection: 'tous' }), ['L1']), prodChimie(), COPIES_CHIMIE))
+            .toMatchObject({ profil: 78.75, P: 79, comparateur: 79, export: [79, 'provisoire'], erreur: null });
+        expect(avec(exclure(std({ methodeSelection: 'tous' }), ['PROD_ailleurs']), prodChimie(), COPIES_CHIMIE).profil).toBe(77);
+        // « N meilleurs » (N = 3) : 90, 85, 80 avant comme après — L1 n'était pas retenue ; X2 exclue : 90, 80, 70 = 80.
+        expect(avec(std(), prodChimie(), COPIES_CHIMIE).profil).toBe(85);
+        expect(avec(exclure(std(), ['X2']), prodChimie(), COPIES_CHIMIE).profil).toBe(80);
+    });
+
+    it('le Comparateur lit les exclusions de la pratique DEMANDÉE, pas celles de l\'active', () => {
+        const b = banc({ pratique: std({ methodeSelection: 'tous' }), productions: prodChimie(), evaluations: COPIES_CHIMIE });
+        const autre = exclure(std({ methodeSelection: 'tous' }), ['L1']); autre.id = 'std-autre';
+        b.store.test_pratiquesConfigurables.push(autre);
+        expect(Math.round(b.win.calculerDetailsNoteFinale(DA.ALICE).noteFinale * 100) / 100).toBe(77);
+        expect(b.win.calculerDetailsNoteFinale(DA.ALICE, 'std-autre').noteFinale).toBe(78.75);
+        expect(b.win.simulerIndices(DA.ALICE, 'std-autre').P).toBe(79);
+    });
+
+    it('chaque lecteur du lot 2 retire L1 (avant : le pool des cinq)', async () => {
+        const avant = await lecteurs('CHIM-1');
+        expect(avant).toMatchObject({ note: 77, depistage: POOL_CHIMIE, exportArtefacts: POOL_CHIMIE, minimum: 5 });
+        const SANS_L1 = ['L2', 'L3', 'X1', 'X2'];
+        const l = await lecteurs('CHIM-1 sans L1');
+        expect(l).toMatchObject({ note: 78.75, depistage: SANS_L1, exportArtefacts: SANS_L1, minimum: 4, aVenir: [], obligatoires: [] });
+        expect(trie(l.remises)).toEqual(SANS_L1);
+        expect(trie(l.retenues)).toEqual(SANS_L1);
+        expect(l.numerosRLO.L1).toBeNull();
+        const p = await lecteurs('CHIM-1 sans L1', { partiel: true });
+        expect(p).toMatchObject({ depistage: SANS_L1, minimum: 2, aVenir: ['Laboratoire 3', 'Examen 2'] });
+        expect(trie(p.remises)).toEqual(['L2', 'X1']);
+    });
+
+    it('une production créée après l\'exclusion compte d\'office : 83', () => {
+        // (80 + 90 + 60 + 85 + 100) / 5 : L1 exclue, L4 (neuve, jamais vue par la liste) au pool.
+        expect(avec(exclure(std({ methodeSelection: 'tous' }), ['L1']), prodChimie().concat([L4]), COPIES_CHIMIE.concat([ev(DA.ALICE, 'L4', 100)])).profil).toBe(83);
+    });
+
+    it('R1 épinglé : une catégorie restée d\'un ancien hybride ne restreint toujours rien, exclusions ou pas', () => {
+        const p = prodChimie(); p.find(x => x.id === 'L1').categorie = 'selection';
+        expect(avec(std({ methodeSelection: 'tous' }), p, COPIES_CHIMIE).profil).toBe(77);
+        // X1 exclue, L1 « sélection » : (70 + 80 + 90 + 85) / 4.
+        expect(avec(exclure(std({ methodeSelection: 'tous' }), ['X1']), p, COPIES_CHIMIE).profil).toBe(81.25);
+    });
+
+    it('l\'hybride garde ses deux listes : une exclusion restée n\'y change rien (80,63)', () => {
+        expect(avec(exclure(std({ categories: CATEGORIES }), ['L2', 'X1']), prodChimie({ categories: CATEGORIES_CHIMIE }), COPIES_CHIMIE).profil).toBe(80.63);
+    });
+
+    it('GREG ne change pas (84,8), même avec un artefact dans la liste ; ses lecteurs non plus', async () => {
+        expect(avec(exclure(std(), ['A4', 'T1']), prodGreg(), COPIES_GREG)).toMatchObject({ profil: 84.8, P: 85, comparateur: 85 });
+        expect(await lecteurs('GREG-0 A4 exclu')).toMatchObject({ note: 84.8, depistage: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'], retenues: ['A4', 'A3', 'A6'], minimum: 6 });
+    });
+
+    it('l\'écran : la liste paraît sans « Artefact », avec les deux textes ; toutes cochées par défaut', async () => {
+        const [TITRE, AIDE] = await texteLot4();
+        const { readFileSync } = await import('node:fs');
+        const path = await import('node:path');
+        const html = readFileSync(path.join(path.resolve(import.meta.dirname, '..', '..'), 'index.html'), 'utf8');
+        const bloc = tranche(html, 'id="mat-productions-comptees"', 'id="mat-productions-comptees-liste"');
+        expect(bloc).toContain('>' + TITRE + '</p>');
+        expect(bloc).toContain('>' + AIDE + '</p>');
+        const f = await formulaire(std({ methodeSelection: 'tous' }), prodChimie({ terminale: true }).concat([D0]));
+        // Ni la terminale (X2), ni la diagnostique (D0) : le pool de la note.
+        expect(await f.etat()).toEqual({ visible: true, cases: ['L1✓', 'L2✓', 'L3✓', 'X1✓'] });
+    });
+
+    it('l\'écran : décocher écrit l\'exclusion dans la pratique, recocher la retire ; la dernière case refusée', async () => {
+        const f = await formulaire(std({ methodeSelection: 'tous' }), prodChimie().slice(0, 2));
+        const config = () => f.store.test_pratiquesConfigurables[0].configuration;
+        expect(config().productionsExclues).toBeUndefined();   // aucune donnée écrite à l'ouverture
+        await f.basculer('L1', false);
+        expect(config().productionsExclues).toEqual(['L1']);
+        expect(await f.etat()).toEqual({ visible: true, cases: ['L1·', 'L2✓⊘'] });   // L2, la dernière : désactivée
+        await f.basculer('L2', false);                                            // et refusée si le geste arrive quand même
+        expect(config().productionsExclues).toEqual(['L1']);
+        await f.basculer('L1', true);
+        expect(config().productionsExclues).toBeUndefined();
+        expect(await f.etat()).toEqual({ visible: true, cases: ['L1✓', 'L2✓'] });
+    });
+
+    it('l\'écran : la liste n\'existe pas pour GREG (des artefacts), ni en hybride', async () => {
+        expect((await (await formulaire(std(), prodGreg())).etat()).visible).toBe(false);
+        expect((await (await formulaire(std({ categories: CATEGORIES }), prodChimie({ categories: CATEGORIES_CHIMIE }))).etat()).visible).toBe(false);
+    });
+
+    it('le partage `.lcz` n\'emporte pas la liste ; la pratique de l\'auteur la garde', () => {
+        const b = banc({ pratique: exclure(std(), ['L1']), productions: prodChimie(), evaluations: [], modules: ['js/partage-schemas.js', 'js/partage-format.js'] });
+        const source = b.store.test_pratiquesConfigurables[0];
+        const projection = b.win.partageFormat.projeterEntite(source, 'pratique');
+        expect(projection.configuration).not.toHaveProperty('productionsExclues');
+        expect(projection.configuration.portfolio.methodeSelection).toBe('meilleurs');
+        expect(source.configuration.productionsExclues).toEqual(['L1']);
+    });
+});
+
 // JOURNAL DES BREAK-TESTS (28 oct. 2026) — copie de référence, mutation, lancement, restauration (empreinte sha256 identique).
 //   M1 pratique-registre.js — le repli d'avant (les seules productions non pondérées)          → 6 rouges (CHIM-1, 3, 4 ; l'égarée ;
 //      la terminale « obligatoire » ; la note qui se calcule)
@@ -624,3 +757,12 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
 // RETOUCHE DU LOT 3 (29 oct. 2026, verdict de Cowork) — même procédure :
 //   C4 productions.js — en Standards, plus aucun type n'exige la pondération (le lot 3 avant retouche)  → 1 rouge (terminale à 0 %)
 //   C5 productions.js — en Standards, la terminale seule l'exige (le conteneur oublié)                  → 1 rouge (conteneur à 0 %)
+// LOT 4 (29 oct. 2026, section H) — même procédure (copie de référence, mutation, lancement, restauration ; sha256 identique) :
+//   D1 pratique-registre.js — le pool sans les exclusions                                     → 5 rouges (CHIM 78,75 ; Comparateur ;
+//      lecteurs ; production neuve ; R1 avec exclusion) ; GREG vert
+//   D2 pratique-registre.js — la désignation réécrite en `categorie: 'selection'`              → 5 rouges (dont la catégorie restée, A et H)
+//   D3 profil-etudiant-actions.js — le pool sans la pratique demandée (l'active)               → 1 rouge (Comparateur)
+//   D4 pratiques-gestion.js — la dernière case cochée reste active                             → 1 rouge (l'écran)
+//   D5 pratiques-gestion.js — le geste décoche la dernière                                     → 1 rouge (l'écran)
+//   D6 partage-format.js — la liste part avec la pratique                                      → 1 rouge (partage)
+//   D7 pratique-registre.js — les exclusions lues aussi en hybride                             → 1 rouge (hybride 80,63)

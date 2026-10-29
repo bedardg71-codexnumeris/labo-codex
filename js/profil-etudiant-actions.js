@@ -191,7 +191,8 @@ function _obtenirConfigPortfolioCalcul(modalites, pratiqueIdDemande = null) {
         methodeSelection,
         reglesConformite: configPortfolio.reglesConformite || { actif: false },
         modeHybride: !!(configCategories && configCategories.actif),
-        configCategories
+        configCategories,
+        configPratique: configPratiqueActive   // lot 4 : ses productions exclues, pour le pool (la pratique demandée, #307)
     };
 }
 
@@ -524,7 +525,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const productionTerminale = window.identifierProductionTerminale(productions);
     const terminalId = productionTerminale?.id || null;
 
-    const artefactsIds = window.obtenirArtefactsIdsPoolStd(productions, terminalId);
+    const artefactsIds = window.obtenirArtefactsIdsPoolStd(productions, terminalId, cfg.configPratique);
     const evaluationsArtefacts = _filtrerEvaluationsArtefactsValides(evaluations, da, artefactsIds, terminalId);
 
     // Statut Provisoire/Finale lu tôt — pilote la règle « obligatoires non
