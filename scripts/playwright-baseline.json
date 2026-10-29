@@ -1,6 +1,12 @@
 {
     "_lisezMoi": "Cliché des specs Playwright rouges CONNUES (#456). Une rougeur absente de cette liste bloque le push. Cette liste doit RÉTRÉCIR : chaque spec réparée s'en retire. Régénérer : node scripts/verifier-playwright.mjs --ecrire",
-    "genereLe": "2026-09-09",
-    "totalEchecsConnus": 0,
-    "echecsConnus": []
+    "genereLe": "2026-10-29",
+    "totalEchecsConnus": 4,
+    "echecsConnus": [
+        "temoin-enregistrement-lot-b.spec.js › lot B · placement 1024 px, clair : aucun bouton des présences ni de la barre d'Annoter sous le témoin",
+        "temoin-enregistrement-lot-b.spec.js › lot B · placement 1024 px, sombre : aucun bouton des présences ni de la barre d'Annoter sous le témoin",
+        "temoin-enregistrement-lot-b.spec.js › lot B · placement 1180 px, clair : aucun bouton des présences ni de la barre d'Annoter sous le témoin",
+        "temoin-enregistrement-lot-b.spec.js › lot B · placement 1180 px, sombre : aucun bouton des présences ni de la barre d'Annoter sous le témoin"
+    ],
+    "_note1181": "29 oct. 2026 : les quatre cas iPad du témoin, connus sous #1181 (la bulle « Saisie des présences » de la démo descend la barre de séance sous « Non enregistré »). Décision de Grégoire : inscrire et pousser la 1.224. À retirer quand #1181 est réglé."
 }

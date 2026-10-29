@@ -155,7 +155,11 @@ async function monterProfil(page, echelle, options) {
 
         const container = document.getElementById('contenuProfilEtudiant');
         if (!container) return { erreur: '#contenuProfilEtudiant absent' };
-        const html = container.innerHTML;
+        // Sans le bloc masqué « À propos de cette section » (`.carte-info-toggle`) : depuis les textes du lot 5 de l'Aide
+        // (#1152), il nomme la carte « Observation de la structure » avant elle.
+        const copie = container.cloneNode(true);
+        copie.querySelectorAll('.carte-info-toggle').forEach((n) => n.remove());
+        const html = copie.innerHTML;
 
         // Isoler la carte « Observation de la structure » — c'est elle, et elle
         // seule, que ce pas modifie. Le reste de l'écran a ses propres specs.
