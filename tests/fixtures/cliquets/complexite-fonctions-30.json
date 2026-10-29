@@ -91,7 +91,7 @@
  "js/profil-etudiant-sections-affichage.js": {
   "genererSectionMobilisationEngagement": 64,
   "genererSectionAccompagnement": 31,
-  "genererSectionProductions": 66
+  "genererSectionProductions": 64
  },
  "js/rencontres.js": {
   "creerMonService": 38

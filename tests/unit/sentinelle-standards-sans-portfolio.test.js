@@ -4,14 +4,15 @@
  * Chantier de Grégoire (28 oct., 14 h 54) : « La [PAN] standard peut ne pas avoir de portfolio dans d'autres disciplines
  * que la littérature, par exemple en chimie. » Plan : plans de travail/PLAN-2026-10-28-standards-sans-portfolio.md (§ 1,
  * le banc ; § 3, lot 1) ; décisions : DECISIONS-2026-10-28-construction-de-la-note.md (Q1 à Q6, mots neufs 1 et 2,
- * erratum de Q3) ; consigne : CONSIGNE-LOT-2026-10-28-standards-sans-portfolio-lot-1.md.
+ * erratum de Q3, mot neuf 3) ; consignes : CONSIGNE-LOT-2026-10-28-standards-sans-portfolio-lot-1.md et sa retouche (R1-R3).
  *
  * VERROUILLÉ ICI :
  *   A. Le pool sans « Artefact » prend les productions quelle que soit leur pondération (avant : les seules non pondérées) ;
- *      avec une catégorie, celles-là seulement. Avec un « Artefact », le pool d'aujourd'hui (l'invariant : GREG-0 à 2).
+ *      une catégorie n'y restreint rien hors hybride (retouche R1). Avec un « Artefact », le pool d'aujourd'hui (GREG-0 à 2).
  *   B. La cause d'une note qui manque (mot neuf 2), au caractère près : une source, trois lecteurs (profil, rapport, export).
  *   C. La formule du récit (mot neuf 1) : une partie absente ne s'écrit pas ; jamais « terminale × 0 % ».
- *   D. Le doublon réconcilié n'est plus dit « remplacée par une reprise » : ni au récit, ni à la tuile du registre.
+ *   D. Le doublon réconcilié n'est plus dit « remplacée par une reprise » : ni au récit, ni à la tuile du registre ; aux deux
+ *      récits (Standards, sommatif), il se dit « en double · comptée une seule fois » (mot neuf 3, retouche R3).
  *
  * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
  * Stock : rien n'est réécrit ; tout se lit au calcul (les captures déjà prises gardent leur P).
@@ -163,12 +164,12 @@ describe('A · le pool sans « Artefact » prend les productions évaluées, que
         expect(avec(std({ methodeSelection: 'tous' }), prodChimie({ terminale: true }), COPIES_CHIMIE)).toMatchObject({ profil: 78, P: 78, export: [78, 'provisoire'] });
     });
 
-    it('une catégorie égarée hors hybride, sans « Artefact » : le pool est fait des productions qui en portent une (L1 seule, 70)', () => {
-        // Mesuré au lot : avant, 77 si les productions étaient non pondérées (le repli les prenait toutes), non constructible si
-        // elles étaient pondérées. La catégorie est écrite sur la PRODUCTION et survit au retrait de l'hybride.
+    it('une catégorie restée hors hybride, sans « Artefact » : elle ne restreint rien, toutes les productions sont au pool (77)', () => {
+        // Retouche R1 (28 oct. 2026) : une catégorie ne compte qu'en hybride. La catégorie est écrite sur la PRODUCTION et
+        // survit au retrait de l'hybride ; au lot 1, elle restreignait le pool à L1 (70).
         for (const ponderees of [true, false]) {
             const p = prodChimie({ ponderees }); p.find(x => x.id === 'L1').categorie = 'selection';
-            expect(avec(std({ methodeSelection: 'tous' }), p, COPIES_CHIMIE).profil, ponderees ? 'pondérées' : 'non pondérées').toBe(70);
+            expect(avec(std({ methodeSelection: 'tous' }), p, COPIES_CHIMIE).profil, ponderees ? 'pondérées' : 'non pondérées').toBe(77);
         }
     });
 
@@ -203,13 +204,40 @@ describe('B · une note qui manque dit pourquoi (mot neuf 2), au profil, au rapp
         expect(n.cause).toBeNull();
     });
 
-    it('la source unique : l\'encadré du profil, le rapport et l\'export rendent la même chaîne (CHIM-6)', () => {
+    it('la source unique : la carte du profil, le rapport et l\'export rendent la même chaîne (CHIM-6)', () => {
         const b = banc({ pratique: std({ methodeSelection: 'tous' }), productions: prodChimie({ terminale: true }), evaluations: seulement(['X2']),
             modules: ['js/profil-etudiant-rapport.js', { chemin: 'js/profil-etudiant-sections-affichage.js', internes: ['genererSectionProductions'] }] });
-        const encadre = b.win.__audit['profil-etudiant-sections-affichage.js'].genererSectionProductions(DA.ALICE);
-        expect(encadre).toContain('<strong>Note finale non calculable.</strong> ' + b.win.echapperHtml(TERMINALE_SEULE_PRODUCTIONS));
+        const carte = b.win.__audit['profil-etudiant-sections-affichage.js'].genererSectionProductions(DA.ALICE);
+        expect(carte).toContain('<div class="note-finale-non-evalue">' + b.win.echapperHtml(TERMINALE_SEULE_PRODUCTIONS) + '</div>');
         expect(b.win.genererRapportAPI(DA.ALICE)).toContain('Performance : non constructible (' + TERMINALE_SEULE_PRODUCTIONS + ')');
         expect(note(b).export[1]).toBe('non constructible – ' + TERMINALE_SEULE_PRODUCTIONS);
+    });
+
+    it('retouche R2 : une cause propre à l\'étudiant·e garde la carte (son titre), sans note, sans alerte ni réglages (CHIM-6, GREG-3)', () => {
+        const carte = (pratique, productions, evaluations, phrase) => {
+            const { win } = banc({ pratique, productions, evaluations,
+                modules: [{ chemin: 'js/profil-etudiant-sections-affichage.js', internes: ['genererSectionProductions'] }] });
+            return [win.__audit['profil-etudiant-sections-affichage.js'].genererSectionProductions(DA.ALICE), win.echapperHtml(phrase)];
+        };
+        for (const [cas, [html, phrase]] of [
+            ['CHIM-6', carte(std({ methodeSelection: 'tous' }), prodChimie({ terminale: true }), seulement(['X2']), TERMINALE_SEULE_PRODUCTIONS)],
+            ['GREG-3', carte(std(), prodGreg(), [], AUCUN_ARTEFACT)]]) {
+            expect(html, cas).toContain('Note provisoire de session');
+            expect(html, cas).toContain('<div class="note-finale-non-evalue">' + phrase + '</div>');
+            expect(html, cas).not.toContain('Note finale non calculable');
+            expect(html, cas).not.toContain('Réglages de la pratique');
+            expect(html, cas).not.toContain('note-finale-total');
+            expect(html, cas).not.toContain('Basée uniquement sur le portfolio');
+        }
+    });
+
+    it('retouche R2 : une erreur de configuration garde l\'alerte et le bouton des réglages', () => {
+        const sansPoidsTerminale = prodChimie({ terminale: true }); delete sansPoidsTerminale.find(x => x.id === 'X2').ponderation;
+        const html = banc({ pratique: std({ methodeSelection: 'tous' }), productions: sansPoidsTerminale, evaluations: seulement([]),
+            modules: [{ chemin: 'js/profil-etudiant-sections-affichage.js', internes: ['genererSectionProductions'] }] })
+            .win.__audit['profil-etudiant-sections-affichage.js'].genererSectionProductions(DA.ALICE);
+        expect(html).toContain('<strong>Note finale non calculable.</strong> Pondération manquante');
+        expect(html).toContain('Ouvrir les réglages de cette pratique pour corriger ses paramètres');
     });
 
     it('le panneau « Développement des habiletés » garde sa règle et son « aucun évalué » : la cause n\'est pas une erreur de configuration (GREG-3)', () => {
@@ -256,11 +284,22 @@ describe('D · un doublon réconcilié n\'est pas « remplacée par une reprise 
         : e.productionId === 'A3' ? Object.assign({}, e, { id: 'DBL-A3', remplaceeParId: 'EV-' + DA.ALICE + '-A3', reconcilieParDoublon: true }) : e))
         .concat([ev(DA.ALICE, 'A2', 74, { id: 'R-A2', repriseDeId: 'EV-' + DA.ALICE + '-A2' }), ev(DA.ALICE, 'A3', 88)]);
 
-    it('au récit Standards : la reprise garde « remplacée par une reprise », le doublon dit « doublon note-égale »', () => {
+    it('au récit Standards : la reprise garde « remplacée par une reprise », le doublon dit « en double · comptée une seule fois »', () => {
         const n = avec(std(), prodGreg(), copies());
         const sort = (id) => n.recit.filter(r => r.sort === 'remplace' && r.label === id).map(r => r.detail);
         expect(sort('Artefact 2')).toEqual(['remplacée par une reprise']);
-        expect(sort('Artefact 3')).toEqual(['doublon note-égale']);
+        expect(sort('Artefact 3')).toEqual(['en double · comptée une seule fois']);
+    });
+
+    it('au récit sommatif : le doublon dit « en double · comptée une seule fois » (mot neuf 3, le même mot qu\'en standards)', () => {
+        const som = { id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration: {} };
+        const prods = [{ id: 'P1', titre: 'Dissertation', type: 'travail', ponderation: 40, coursId: 'GC1' }, { id: 'P2', titre: 'Examen', type: 'examen', ponderation: 60, coursId: 'GC1' }];
+        const copies = [ev(DA.ALICE, 'P1', 80), ev(DA.ALICE, 'P2', 90),
+            ev(DA.ALICE, 'P1', 80, { id: 'DBL-P1', remplaceeParId: 'EV-' + DA.ALICE + '-P1', reconcilieParDoublon: true })];
+        const b = banc({ pratique: som, productions: prods, evaluations: copies });
+        const recit = b.win.simulerIndices(DA.ALICE, b.pratiqueId).recit;
+        expect(recit.resultats.filter(r => r.sort === 'remplace' && r.label === 'Dissertation').map(r => r.detail))
+            .toEqual(['en double · comptée une seule fois']);
     });
 
     it('à la tuile du registre longitudinal : ni le doublon ni l\'originale qui compte encore (E4) ne le disent ; la reprise réévaluée, si', () => {
@@ -313,5 +352,13 @@ describe('D · un doublon réconcilié n\'est pas « remplacée par une reprise 
 //   M4 profil-etudiant-actions.js — la formule écrit toujours « … + terminale × … »             → 2 rouges (les deux « moyenne … »)
 //   M5 profil-etudiant-actions.js — le doublon retourne parmi les « remplacée par une reprise » → 1 rouge (récit)
 //   M6 registre-longitudinal.js — la tuile d'avant (tout `remplaceeParId`)                     → 1 rouge (tuile)
-//   M7 pratique-registre.js — la catégorie ne désigne plus le pool                              → 1 rouge (l'égarée)
+//   M7 pratique-registre.js — la catégorie ne désigne plus le pool                              → 1 rouge (l'égarée) [périmé : c'est R1]
 //   M8 profil-etudiant-sections-affichage.js — le panneau relit toute `erreur`                  → 1 rouge (panneau)
+// RETOUCHE R1-R3 (28 oct. 2026, 24 essais) — même procédure, arbre restauré identique (sha256) :
+//   R-M1 pratique-registre.js — la restriction aux catégories remise                           → 1 rouge (la catégorie restée)
+//   R-M2 profil-etudiant-actions.js — « doublon note-égale »                                    → 1 rouge (récit Standards)
+//   R-M3 pratique-sommative.js — « doublon note-égale · exclu de la moyenne »                   → 1 rouge (récit sommatif)
+//   R-M4 profil-etudiant-sections-affichage.js — toute `erreur` rend l'alerte                   → 2 rouges (source unique ; R2 carte)
+//   R-M5 profil-etudiant-sections-affichage.js — `_boutonReglagesCarteNote` ignore la cause      → 1 rouge (R2 carte)
+//   R-M6 profil-etudiant-sections-affichage.js — `_totalCarteNote` rend le total, pas la phrase  → 2 rouges (source unique ; R2 carte)
+//   Playwright (WebKit) : R-M4 → CHIM-6 et GREG-3 rouges, l'erreur de configuration verte.

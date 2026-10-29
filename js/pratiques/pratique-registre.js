@@ -774,10 +774,10 @@ function obtenirTypePratiqueActive() {
    - une production joue le rôle de terminale ssi type === 'terminale'
      (déclaration explicite au formulaire Productions, JAMAIS une inférence
      par pondération) ;
-   - le pool = artefacts déclarés, sinon toutes les productions (ou celles
-     qui portent une catégorie), quelle que soit leur pondération (lot 1 des
+   - le pool = artefacts déclarés, sinon toutes les productions hors
+     conteneur et terminale, quelle que soit leur pondération (lot 1 des
      standards sans portfolio, 28 oct. 2026) — le conteneur « portfolio » est
-     optionnel ;
+     optionnel ; une catégorie ne compte qu'en hybride ;
    - la récence = numéro de production décroissant (correctif 24 jan 2026),
      pas la date d'évaluation.
    =============================== */
@@ -804,9 +804,10 @@ function poolStdFaitDArtefacts(productions, terminalId) {
 /**
  * Ids du pool STD. Avec un « Artefact » : les artefacts déclarés, comme avant (décision Q2 de Grégoire, 28 oct. 2026).
  * Sans aucun « Artefact » (lot 1 des standards sans portfolio, 28 oct. 2026) : toutes les productions hors conteneur
- * et terminale, QUELLE QUE SOIT LEUR PONDÉRATION — si au moins une porte une catégorie (« sélection » ou
- * « obligatoire »), celles-là seulement. Avant : les seules productions non pondérées, alors que le formulaire
+ * et terminale, QUELLE QUE SOIT LEUR PONDÉRATION. Avant : les seules productions non pondérées, alors que le formulaire
  * Productions exige une pondération hors « Artefact » — une pratique de laboratoires et d'examens n'avait aucune note.
+ * Une catégorie (« sélection », « obligatoire ») ne compte qu'en hybride, où `_selectionnerArtefactsHybride` la lit ;
+ * ailleurs, c'est un reste (l'hybride retiré) et elle ne restreint rien (retouche R1, 28 oct. 2026).
  * Les diagnostiques sont retirées en amont, par les appelants (#883).
  */
 function obtenirArtefactsIdsPoolStd(productions, terminalId) {
@@ -817,10 +818,9 @@ function obtenirArtefactsIdsPoolStd(productions, terminalId) {
             .map(p => p.id);
     }
     // Les anciens types « …-formatif » (que les cases des catégories écartent) n'ont plus aucun écrivain (grep, 28 oct. 2026) : non filtrés ici.
-    const candidates = productions.filter(p =>
-        p && p.type !== 'portfolio' && p.type !== 'terminale' && p.id !== terminalId);
-    const designees = candidates.filter(p => p.categorie === 'selection' || p.categorie === 'obligatoire');
-    return (designees.length > 0 ? designees : candidates).map(p => p.id);
+    return productions
+        .filter(p => p && p.type !== 'portfolio' && p.type !== 'terminale' && p.id !== terminalId)
+        .map(p => p.id);
 }
 
 /**
