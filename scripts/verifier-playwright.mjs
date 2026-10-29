@@ -332,7 +332,7 @@ if (!existsSync(BASELINE)) {
     process.exit(2);
 }
 
-const { nouveaux, reparees, nonJouees } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport) }, JSON.parse(readFileSync(BASELINE, 'utf8')));
+const { nouveaux, reparees, aPasserAuxIntermittentes, nonJouees } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport), instables }, JSON.parse(readFileSync(BASELINE, 'utf8')));
 
 // Une spec réparée n'a jamais à bloquer un push — mais si personne ne le dit, la
 // baseline se met à couvrir des specs vertes et devient un mensonge silencieux.
@@ -341,6 +341,12 @@ if (reparees.length > 0) {
     for (const spec of reparees) process.stderr.write(`    · ${spec}\n`);
     process.stderr.write(`${JAUNE}  ⮕ Retire-les de la baseline, sinon elle couvre du vert :${RAZ}\n`);
     process.stderr.write('     node scripts/verifier-playwright.mjs --ecrire\n');
+}
+// Rouge puis verte : une intermittente, pas une réparée — la retirer la ferait
+// rougir « nouvelle » au soir suivant.
+if (aPasserAuxIntermittentes.length > 0) {
+    process.stderr.write(`\n${JAUNE}⚠ ${aPasserAuxIntermittentes.length} spec(s) connue(s) VERTE(S) AU SECOND ESSAI — à passer aux intermittentes, pas à retirer :${RAZ}\n`);
+    for (const spec of aPasserAuxIntermittentes) process.stderr.write(`    · ${spec}\n`);
 }
 // #1114 : une connue absente du rapport (une spec filtrée, un fichier qui ne
 // charge plus) n'a pas été jouée — ce n'est pas du vert.

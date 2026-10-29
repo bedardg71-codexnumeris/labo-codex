@@ -95,15 +95,22 @@ export function vertsDuRapport(rapport) {
  * un run partiel), elle est `nonJouee`, sans conclusion — le 26 oct., 14 des 18
  * « redevenues vertes » d'un jugement n'avaient pas tourné. Une intermittente ne
  * bloque ni rouge ni verte : on dit seulement combien sont rouges.
+ *
+ * Une connue verte au SECOND essai (`instables`, de `flakyDuRapport`) n'est pas
+ * réparée : rouge puis verte, elle est par définition intermittente — retirée des
+ * connues, elle rougirait « nouvelle » au soir suivant. Elle se dit
+ * `aPasserAuxIntermittentes` (verdict de Cowork du 29 oct. 2026).
  */
-export function comparerALaBaseline({ echecs, verts }, { echecsConnus = [], echecsIntermittents = [] } = {}) {
+export function comparerALaBaseline({ echecs, verts, instables }, { echecsConnus = [], echecsIntermittents = [] } = {}) {
     const connus = new Set(echecsConnus);
     const intermittentes = new Set(echecsIntermittents);
     const rouges = new Set(echecs);
     const vus = new Set(verts);
+    const rattrapees = new Set(instables);
     return {
         nouveaux: echecs.filter((e) => !connus.has(e) && !intermittentes.has(e)),
-        reparees: [...connus].filter((e) => vus.has(e) && !rouges.has(e)).sort(),
+        reparees: [...connus].filter((e) => vus.has(e) && !rouges.has(e) && !rattrapees.has(e)).sort(),
+        aPasserAuxIntermittentes: [...connus].filter((e) => rattrapees.has(e) && !rouges.has(e)).sort(),
         nonJouees: [...connus].filter((e) => !vus.has(e) && !rouges.has(e)).sort(),
         intermittentesRouges: echecs.filter((e) => intermittentes.has(e))
     };

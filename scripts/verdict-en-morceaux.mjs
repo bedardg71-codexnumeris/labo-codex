@@ -108,10 +108,10 @@ export function jugerRapportFusionne(rapport, baseline, fichiersPrevus = []) {
     if (absents.length > 0) return { code: CODES.NON_JUGE, raison: `${absents.length} spec(s) prévue(s) absente(s) du rapport : ${absents.join(', ')}` };
     const echecs = echecsDuRapport(rapport);
     const instables = flakyDuRapport(rapport);
-    const { nouveaux, reparees, nonJouees } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport) }, baseline);
+    const { nouveaux, reparees, aPasserAuxIntermittentes, nonJouees } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport), instables }, baseline);
     return {
         code: nouveaux.length > 0 ? CODES.ROUGE : CODES.VERT,
-        echecs, instables, nouveaux, reparees, nonJouees,
+        echecs, instables, nouveaux, reparees, aPasserAuxIntermittentes, nonJouees,
         stats: { joues, verts: stats.expected ?? 0, instables: stats.flaky ?? 0, rouges: stats.unexpected ?? 0, sautes: stats.skipped ?? 0 }
     };
 }
@@ -242,6 +242,7 @@ export async function executerVerdict(effets, { total = 10 } = {}) {
     garde.raison = `${s.joues} essais en ${total} morceaux : ${s.verts} verts, ${s.instables} au second essai, ${s.rouges} rouges (${juge.echecs.length - juge.nouveaux.length} connus), ${s.sautes} sautés`;
     if (juge.instables.length > 0) dire(`⚠ ${juge.instables.length} spec(s) verte(s) au second essai (ne bloque pas, #534) :\n${juge.instables.map((x) => `    · ${x}`).join('\n')}`);
     if (juge.reparees.length > 0) dire(`✓ ${juge.reparees.length} spec(s) de la baseline redevenues vertes — à retirer (node scripts/verifier-playwright.mjs --ecrire, ou à la main).`);
+    if (juge.aPasserAuxIntermittentes.length > 0) dire(`⚠ ${juge.aPasserAuxIntermittentes.length} spec(s) connue(s) verte(s) au second essai — à passer aux intermittentes, pas à retirer :\n${juge.aPasserAuxIntermittentes.map((x) => `    · ${x}`).join('\n')}`);
     if (juge.nonJouees.length > 0) dire(`${juge.nonJouees.length} spec(s) de la baseline non jouée(s) — ni rouges ni vertes, rien à conclure (#1114).`);
     if (juge.code === CODES.ROUGE) {
         if (garde.nombreVeilles > 0) dire(`⚠ VERDICT ROUGE RENDU APRÈS ${garde.nombreVeilles} VEILLE(S) (${garde.dureeVeillesS} s) — relancer, Mac éveillé, avant d'y croire.`);
