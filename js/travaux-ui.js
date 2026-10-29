@@ -2060,7 +2060,7 @@
 
             // Champs communs LEA et Autre (auto-remplis en LEA, vides/editables en Autre)
             colCentre += `<div class="pipeline-champ">
-                <label>\u00c9tudiant</label>
+                <label>\u00c9tudiant\u00b7e</label>
                 <input type="text" class="pipeline-input-etudiant" id="pipeline-etudiant-${idx}"
                     value="${modeLea ? nomEtudiant : echapperHtml(f.etudiantManuel || '')}" placeholder="Rechercher..."
                     data-on-input="travauxUI.rechercherEtudiant" data-param="${idx}"
@@ -2069,13 +2069,13 @@
                 <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${idx}"></div>
             </div>`;
             colCentre += `<div class="pipeline-champ">
-                <label>Modifier</label>
+                <label>Production de ce fichier</label>
                 <select class="controle-form pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">—</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
                     ${jetonsActifs ? `<option value="__jeton_reprise__" ${f.estReprise ? 'selected' : ''}>Jeton de reprise</option>` : ''}
                 </select>
-                <p class="texte-muted u-texte-petit" style="margin:4px 0 0 0;">Ce fichier seulement — le sélecteur global « Production » ne l'écrasera pas.</p>
+                <p class="texte-muted u-texte-petit" style="margin:4px 0 0 0;">Le sélecteur « Production » commun à tous les fichiers ne l'écrasera pas.</p>
             </div>`;
             // Sous-sélecteur par fichier pour jeton
             if (f.estReprise) {

@@ -1505,7 +1505,7 @@ async function sauvegarderMetadonnees() {
 
 /**
  * Génère un nom de fichier export standardisé selon la convention #262.
- * Format : `type-{nom}-{cours}-{discipline}-{CC-BY-SA}-{date[-heure]}.{ext}`.
+ * Format : `type-{nom}-{cours}-{discipline}-{CC-BY-NC-SA}-{date[-heure]}.{ext}`.
  * - séparateur tiret partout (pas d'underscore)
  * - accents préservés dans `nom` (regex Unicode-aware)
  * - extension simple sans double point (.zip, .json, .pdf, .txt, .md, .csv)
@@ -1519,7 +1519,7 @@ async function sauvegarderMetadonnees() {
  * @param {string} [options.nom] - Nom de l'élément (sera sanitisé, accents préservés).
  * @param {string} [options.cours] - Code du cours.
  * @param {string} [options.discipline] - Discipline.
- * @param {boolean} [options.inclureLicence] - Ajouter `CC-BY-SA` au nom.
+ * @param {boolean} [options.inclureLicence] - Ajouter `CC-BY-NC-SA` au nom (la licence de `partageSchemas.LICENCE`, #1152 lot 5, texte n° 10).
  * @param {string} [options.extension='.json'] - Extension du fichier (avec point).
  * @param {string} [options.precisionDate='jour'] - 'jour' (YYYY-MM-DD) ou
  *   'minute' (YYYY-MM-DD-HHhMM).
@@ -1562,7 +1562,7 @@ function genererNomFichierExport(type, options = {}) {
     if (options.nom) ajouter(options.nom);
     if (cours) ajouter(cours);
     if (discipline) ajouter(discipline);
-    if (options.inclureLicence) parties.push('CC-BY-SA');
+    if (options.inclureLicence) parties.push('CC-BY-NC-SA');
 
     parties.push(horodatage);
 

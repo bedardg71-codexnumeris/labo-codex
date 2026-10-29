@@ -105,7 +105,7 @@ var TEXTES = {
         fixer: 'Fixer une limite',
         sansLimite: 'Aucune limite fixée : l’étudiant·e ne lit aucun palier. C’est l’état d’un critère neuf. Une limite fait paraître les paliers, du « rien de compté » à « au-delà du dernier seuil ».',
         intro: function(n) {
-            return 'L’étudiant·e lit le cas de sa copie sous le critère, après le décompte. Le nom court s’imprime dans la rangée des paliers de son PDF. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas : « Tu fais en moyenne 1 '
+            return 'L’étudiant·e lit le cas de sa copie sous le critère, après le décompte. Un verdict sans bloc est précédé de la moyenne, sauf au premier cas : « Tu fais en moyenne 1 '
                 + n.erreurs.singulier + ' à chaque N ' + n.mots.pluriel + '. » Un bloc sans valeur disparaît.';
         },
         longueur: function(n) { return 'Longueur de référence (' + n.mots.pluriel + ')'; },

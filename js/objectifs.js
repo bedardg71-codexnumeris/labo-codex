@@ -749,7 +749,7 @@ function exporterTousObjectifs() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `tous-objectifs-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `tous-objectifs-CC-BY-NC-SA-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
 }

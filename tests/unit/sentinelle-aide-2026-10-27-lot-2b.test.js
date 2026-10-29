@@ -156,7 +156,9 @@ describe('#1152 lot 2b · ce que les entrées affirment, lu dans le code', () =>
     it('apporter-grille : le retour à l\'étiquetage est décrit sans citer son bouton, posé à côté de « Coller une autre grille »', () => {
         const materiel = lire('js', 'materiel.js');
         expect(materiel).toContain('e(\'Coller une autre grille\')');
-        expect(texteDe('apporter-grille')).toContain('un bouton à côté de « Coller une autre grille » te ramène à ton étiquetage');
+        // Le bouton a reçu son nom le 28 oct. (texte n° 12 de plans de travail/TEXTES-2026-10-28-textes-d-ecran.md,
+        // #1152 lot 5) : l'entrée le cite désormais.
+        expect(texteDe('apporter-grille')).toContain('« Revenir à mon étiquetage », à côté de « Coller une autre grille », te ramène à ton étiquetage');
         expect(texteDe('apporter-grille')).toContain('« Ajouter ces codes »');
         expect(lire('js', 'materiel-dissection.js')).toContain('bouton: \'Ajouter ces codes\'');
     });

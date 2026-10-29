@@ -180,9 +180,11 @@ const TOOLTIPS_SOUS_NAV = {
     // Boîte à outils
     'labo-accompagnement': 'nav-labo-accompagnement',
     'labo-modelisation': 'nav-labo-modelisation',
+    'labo-comparateur': 'nav-labo-comparateur',   // #1152, lot 5 (texte n° 9) : autorisation de Grégoire, 28 oct. 2026, 14 h 36
     'labo-rythme': 'nav-labo-rythme',
     'labo-etudes': 'nav-labo-etudes',
     'labo-bilan': 'nav-labo-bilan',
+    'labo-longitudinal': 'nav-labo-longitudinal',   // #1152, lot 5 (texte n° 9) : même autorisation
     // Aide (tooltips gérés séparément si existants)
     // Réglages
     'reglages-preferences': 'nav-reg-preferences',

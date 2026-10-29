@@ -6,7 +6,8 @@
  *
  * Ce que ce banc verrouille, sur le résumé que rend la VRAIE création (`materielCreation.creer`) et le VRAI
  * `materielDissection.aUnBrouillon` (la clé du brouillon dans le faux `db`) :
- *   B — LE BOUTON « Revenir à ma dissection » : dans les deux confirmations (en points, à niveaux) quand un
+ *   B — LE BOUTON « Revenir à mon étiquetage » (« Revenir à ma dissection » jusqu'au 28 oct. ; texte n° 12 de
+ *       plans de travail/TEXTES-2026-10-28-textes-d-ecran.md, #1152 lot 5) : dans les deux confirmations (en points, à niveaux) quand un
  *       brouillon existe, absent sans brouillon ; « Coller une autre grille » est là dans les deux cas.
  *   H — AUCUN HANDLER INLINE : le bouton passe par `data-action`, que le dispatcher de main.js résout.
  *
@@ -87,7 +88,7 @@ const MODELES = {
     'à niveaux': () => fige('plus-loin · à niveaux')
 };
 
-describe('B — « Revenir à ma dissection » dans les deux confirmations', () => {
+describe('B — « Revenir à mon étiquetage » dans les deux confirmations', () => {
     for (const [nom, modele] of Object.entries(MODELES)) {
         it('B.' + nom + ' — rendu quand un brouillon existe, bouton secondaire à côté de « Coller une autre grille »', async () => {
             brouillon();
@@ -95,7 +96,7 @@ describe('B — « Revenir à ma dissection » dans les deux confirmations', () 
             expect(resume.enPoints).toBe(nom === 'en points');
             const b = div.querySelector(REVENIR);
             expect(b).not.toBeNull();
-            expect(b.textContent).toBe('Revenir à ma dissection');
+            expect(b.textContent).toBe('Revenir à mon étiquetage');
             expect(b.getAttribute('type')).toBe('button');
             expect(b.classList.contains('btn-secondaire')).toBe(true);
             // À côté des gestes existants : dans le même rang que « Coller une autre grille », avant lui.
