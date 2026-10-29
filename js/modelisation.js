@@ -78,7 +78,7 @@
                     '<!-- Toolbar unique (badges + outils) -->' +
                     '<div class="annot-toolbar" id="model-toolbar">' +
                         '<div class="annot-toolbar-fichiers">' +
-                            '<button class="model-btn-ouvrir-compact" data-action="modelisation.ouvrirFichierLocal" title="Ouvrir un fichier">+ Ouvrir</button>' +
+                            '<button class="model-btn-ouvrir-compact" data-action="modelisation.ouvrirFichierLocal" title="Ouvrir un fichier : PDF, JPG, PNG ; HEIC selon le navigateur">+ Ouvrir</button>' +
                             '<div id="model-carrousel-badges" class="annot-toolbar-badges-zone"></div>' +
                         '</div>' +
                         '<div class="annot-toolbar-separateur"></div>' +
@@ -246,10 +246,9 @@
     function ouvrirFichierLocal() {
         var input = document.createElement('input');
         input.type = 'file';
-        // #597 : ce sélecteur annonce le .heic, que ce contexte ne sait pas
-        // toujours décoder (aucun décodage possible quand l'application est
-        // ouverte par double-clic — voir HeicDecodeur.decodagePossible). Le
-        // pipeline d'import le DIT désormais ; ce chemin-ci ne le dit pas encore.
+        // #597 : ce sélecteur annonce le .heic, que ce chemin ne convertit pas (le blob est rangé tel quel,
+        // sans HeicDecodeur) : seul un navigateur qui décode le HEIC l'affiche. #1152, lot 5 (29 oct. 2026) :
+        // le bouton « + Ouvrir » le dit, « HEIC selon le navigateur » (décision de Cowork du 28 oct.).
         input.accept = '.pdf,.jpg,.jpeg,.png,.heic';
         input.style.display = 'none';
 

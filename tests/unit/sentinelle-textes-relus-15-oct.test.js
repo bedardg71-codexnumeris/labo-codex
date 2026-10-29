@@ -35,9 +35,11 @@ describe('Bloc 1 — l\'aide du Comparateur', () => {
     it('le titre dessiné par le Comparateur porte le bouton d\'aide, et sa fenêtre existe', () => {
         const entete = tranche(lire('js/comparateur-pratiques.js'), 'function entete(titre) {', '\n    }');
         expect(entete).toContain('data-aide="comparateur-pratiques"');
-        expect(entete).toContain('aria-label="Aide : le Comparateur de pratiques"');
+        // ↻ #1152, lot 5 (29 oct. 2026) : l'écran porte le nom de son sous-onglet, « Exploration des pratiques » (décision de
+        // Cowork du 28 oct., plans de travail/TEXTES-2026-10-28-textes-d-ecran.md, « Décisions de Cowork sur le reste »).
+        expect(entete).toContain('aria-label="Aide : l’Exploration des pratiques"');
         const fenetre = entree(POPUP, 'comparateur-pratiques');
-        expect(fenetre).toContain('titre: "Comprendre le Comparateur de pratiques"');
+        expect(fenetre).toContain('titre: "Comprendre l\'Exploration des pratiques"');
         for (const bout of ['deux ou trois pratiques de notation', '« Construction de la note »', '« Résultat – profils-types »',
             'comparer n\'écrit rien', 'une copie d\'essai d\'une de tes pratiques', '« non constructible » n\'est pas un zéro',
             '« Ce que ces réglages changent »']) {
@@ -46,7 +48,7 @@ describe('Bloc 1 — l\'aide du Comparateur', () => {
     });
 
     it('les trois termes du glossaire, et ni « souche » ni « pratique aboutie »', () => {
-        for (const [cle, terme] of [['comparateur-pratiques', 'Comparateur de pratiques'], ['maquette-pratique', 'Maquette (de pratique)'], ['deriver-maquette', 'Dériver une maquette']]) {
+        for (const [cle, terme] of [['comparateur-pratiques', 'Exploration des pratiques'], ['maquette-pratique', 'Maquette (de pratique)'], ['deriver-maquette', 'Dériver une maquette']]) {
             const e = entree(TERME, cle);
             expect(e).toContain(`terme: '${terme}'`);
             expect(e).toContain("categorie: 'Pratiques de notation'");

@@ -371,7 +371,7 @@ function appliquerJetonDelai(evaluationId) {
 
     // Une copie REMPLACÉE ne compte plus : jamais de délai sur elle.
     if (evaluation.remplaceeParId) {
-        notifications.erreur('Conflit', 'Cette évaluation a été remplacée par une reprise');
+        notifications.erreur('Conflit', 'Cette évaluation a une reprise : un délai ne s\'y applique pas.');
         return false;
     }
     // #853 (13 sept. 2026) — un délai SUR une reprise dépend du réglage de la pratique
@@ -712,7 +712,7 @@ async function retirerJetonReprise(evaluationId, options) {
             return retirerJetonReprise(evaluationId, { codexPropose: true });
         }
         const confirmer = confirm(
-            'Cette évaluation est l\'ORIGINALE, remplacée par une reprise'
+            'Cette évaluation est l\'ORIGINALE d\'une reprise'
             + (noteRepriseLiee !== null ? ` (${formaterNotePourcentage(noteRepriseLiee)})` : '') + '.\n\n'
             + 'La restaurer supprimera la reprise.'
             + (nbFichiersLiesAnnonces

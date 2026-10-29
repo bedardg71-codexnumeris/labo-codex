@@ -270,7 +270,8 @@ describe('#749 · d/e — les refus de l\'ajout', () => {
         expect(b.i.ajouterEtudiantSuivi('2000007')).toBe(false);
         expect(b.notifs.length).toBe(1);
         expect(b.notifs[0].m).toBe(b.i.MESSAGE_SUIVI_COMPLET);
-        expect(b.i.MESSAGE_SUIVI_COMPLET).toMatch(/Cinq élèves suivis au maximum/);
+        // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+        expect(b.i.MESSAGE_SUIVI_COMPLET).toMatch(/Cinq étudiant·es suivi·es au maximum/);
     });
 
     it('e · un DA hors du groupe actif est refusé à l\'ajout, sans notification ni écriture', () => {

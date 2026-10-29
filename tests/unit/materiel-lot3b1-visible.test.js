@@ -130,10 +130,11 @@ describe('lot 3b1 · H — un critère sans données (↻ 20 oct. : sa section �
 });
 
 describe('lot 3b1 · C et T — la confirmation, les textes', () => {
-    it('C.a le résumé de la création porte les identifiants de la grille, de l’échelle, de la cartouche', () => {
+    it('C.a le résumé de la création porte les identifiants de la grille et de l’échelle', () => {
         const src = readFileSync(path.join(racine, 'js', 'materiel-creation.js'), 'utf8');
         // Étape 5 (17 oct.) : une grille en points n'a pas d'échelle — son identifiant est alors null.
-        expect(src).toContain("ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null, cartouche: o.cartouche ? o.cartouche.id : null }");
+        // ↻ #1152, lot 5 (29 oct. 2026) : la branche des rétroactions de l'ancien assistant est retirée (code mort, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+        expect(src).toContain("ids: { grille: o.grille.id, echelle: o.echelle ? o.echelle.id : null }");
     });
 
     // 19 oct. 2026 : le message « aucun tableau » est parti avec l'assistant en sept étapes, qui seul l'affichait.

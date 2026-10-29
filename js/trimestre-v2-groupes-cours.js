@@ -118,25 +118,6 @@ function chargerGroupeCoursV2() {
     }
 }
 
-/**
- * Affiche l'aide pour la création d'un groupe-cours
- * Beta 95.2 (8 jan 2026)
- */
-function ouvrirAideGroupeCours() {
-    alert(
-        "Comment créer un groupe-cours ?\n\n" +
-        "Un groupe-cours associe 4 éléments pour créer une instance d'enseignement :\n\n" +
-        "1. COURS : Le cours que tu enseignes (ex: 601-101-MQ)\n" +
-        "   → Crée-le d'abord dans la section « Cours »\n\n" +
-        "2. GROUPE D'ÉTUDIANTS : Le numéro de groupe (ex: 00001)\n" +
-        "   → Importe tes étudiants dans la section « Groupe d'étudiants »\n\n" +
-        "3. HORAIRE : Les jours et heures de cours\n" +
-        "   → Crée-le dans la section « Horaire »\n\n" +
-        "4. ENSEIGNANT·E : Le responsable du cours\n" +
-        "   → Configuré dans la section « Enseignant·e »\n\n" +
-        "Clique sur « + Nouveau groupe-cours » puis sélectionne chaque élément dans les 4 menus déroulants."
-    );
-}
 
 /**
  * Peuple le dropdown des groupe-cours existants
@@ -1227,8 +1208,8 @@ function afficherGroupeCoursDepuisBibliotheque(gcId) {
     }
 }
 
-// Exports — 14 fonctions migrées du bloc exports résidu L1197-1209 + L181 (ouvrirAideGroupeCours).
-window.ouvrirAideGroupeCours = ouvrirAideGroupeCours;
+// Exports — 13 fonctions migrées du bloc exports résidu L1197-1209 (ouvrirAideGroupeCours, sans appelant,
+// retiré le 29 oct. 2026 : #1152, lot 5).
 window.chargerGroupeCoursV2 = chargerGroupeCoursV2;
 window.populerDropdownGroupeCoursV2 = populerDropdownGroupeCoursV2;
 // #446 (10 août 2026) — ces deux-là étaient APPELÉES depuis

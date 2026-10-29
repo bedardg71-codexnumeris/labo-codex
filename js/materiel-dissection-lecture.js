@@ -63,7 +63,7 @@
         { k: 'code', nom: 'Code', aide: 'Ce que tu écris sur la copie', precision: 'Un code d’annotation : des lettres ou des chiffres (par ex. « 3 », « S »)', groupe: 'Les codes' },
         { k: 'nomcode', nom: 'Nom du code', aide: 'Ce que le code désigne', groupe: 'Les codes' },
         { k: 'poids', nom: 'Poids', aide: 'Ce que pèse un code posé', precision: 'Un nombre plus grand que 0 ; sans poids, le code pèse 1. Il devient la pondération de son sous-critère.', groupe: 'Les codes' },
-        { k: 'commentaire', nom: 'Commentaire', aide: 'Ce que l’élève lit pour ce code', precision: 'Il passe tel quel dans la rétroaction', groupe: 'Les codes' },
+        { k: 'commentaire', nom: 'Commentaire', aide: 'Ce que l’étudiant·e lit pour ce code', precision: 'Il passe tel quel dans la rétroaction', groupe: 'Les codes' },
         { k: 'suite', nom: 'Suite', aide: 'La fin d’un morceau coupé en deux par la mise en page', groupe: 'Le reste' },
         { k: 'ignorer', nom: 'À ignorer', aide: 'Un symbole, une décoration', groupe: 'Le reste' }
     ];

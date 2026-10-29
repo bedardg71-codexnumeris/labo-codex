@@ -161,7 +161,7 @@ describe('B — construire les trois objets', () => {
         const m = exempleComplet();
         m.criteres[2].cases[3] = { valeur: '', etat: 'vide' };
         const o = A.construire(m, ctx());
-        expect(o.cartouche).toBeNull();
+        expect(o).not.toHaveProperty('cartouche');
         expect(o.grille.criteres[0].descripteurs).toEqual({
             echelleId: o.echelle.id,
             parNiveau: { E: m.criteres[0].cases[0].valeur, S: m.criteres[0].cases[1].valeur, A: m.criteres[0].cases[2].valeur, I: m.criteres[0].cases[3].valeur }
@@ -171,21 +171,11 @@ describe('B — construire les trois objets', () => {
         expect(o.grille.criteres.every(c => c.type === 'holistique')).toBe(true);
     });
 
-    it('B.d des rétroactions : une cartouche liée à la grille et à l’échelle, et une grille sans descripteurs', () => {
-        const m = retroactions();
-        const o = A.construire(m, ctx());
-        expect(o.grille.criteres.some(c => c.descripteurs)).toBe(false);
-        expect(o.cartouche).toMatchObject({ grilleId: o.grille.id, echelleId: o.echelle.id });
-        const cr = o.grille.criteres[1].id;
-        expect(o.cartouche.commentaires[cr + '_S']).toBe(m.criteres[1].cases[1].valeur);
-        expect(Object.keys(o.cartouche.commentaires)).toHaveLength(12);
-        expect(o.cartouche.niveaux).toEqual([{ code: 'E', nom: 'Excellent' }, { code: 'S', nom: 'Satisfaisant' }, { code: 'A', nom: 'À améliorer' }, { code: 'I', nom: 'Insuffisant' }]);
-    });
-
-    it('B.e des rétroactions sans aucun texte : pas de cartouche vide', () => {
-        const m = retroactions();
-        m.criteres.forEach(c => c.cases.forEach(d => { d.valeur = ''; }));
-        expect(A.construire(m, ctx()).cartouche).toBeNull();
+    // ↻ #1152, lot 5 (29 oct. 2026) : la branche des rétroactions de l'ancien assistant est retirée (code mort, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+    it('B.d la nature « rétroactions » ne crée plus de cartouche : ses cases deviennent des descripteurs', () => {
+        const o = A.construire(retroactions(), ctx());
+        expect(o).not.toHaveProperty('cartouche');
+        expect(o.grille.criteres.some(c => c.descripteurs)).toBe(true);
     });
 
     it('B.f l’échelle prend un nom libre ; les identifiants viennent du générateur', () => {
@@ -205,9 +195,10 @@ describe('W — écrire : trois objets neufs, rien d’autre', () => {
         h2026_grillesTemplates: [{ id: 'GRILLE_H', nom: 'Une grille d’un autre trimestre' }]
     };
 
-    it('W.a « Créer » ajoute l’échelle, la grille et la cartouche au trimestre actif ; aucun objet existant ne change', async () => {
+    // ↻ #1152, lot 5 (29 oct. 2026) : la branche des rétroactions de l'ancien assistant est retirée (code mort, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md) : deux objets neufs, plus de cartouche.
+    it('W.a « Créer » ajoute l’échelle et la grille au trimestre actif ; aucun objet existant ne change', async () => {
         db.reset(EXISTANTS);
-        const r = await C.creer(retroactions());
+        const r = await C.creer(exempleComplet());
         expect(r.erreur).toBeUndefined();
         const grilles = db.getSync('a2032_grillesTemplates');
         const echelles = db.getSync('a2032_echellesTemplates');
@@ -217,9 +208,10 @@ describe('W — écrire : trois objets neufs, rien d’autre', () => {
         expect(echelles[0]).toEqual(EXISTANTS.a2032_echellesTemplates[0]);
         expect(db.getSync('a2032_cartouches_GRILLE_GENERIQUE')).toEqual(EXISTANTS.a2032_cartouches_GRILLE_GENERIQUE);
         expect(db.getSync('h2026_grillesTemplates')).toEqual(EXISTANTS.h2026_grillesTemplates);
-        expect(db.getSync('a2032_cartouches_' + grilles[1].id)).toEqual([r.objets.cartouche]);
-        expect(r.resume).toMatchObject({ nom: 'Exposé oral : grille d’évaluation', nbC: 3, retro: true, descr: false });
-        expect([...db.store.keys()].sort()).toEqual([...Object.keys(EXISTANTS), 'a2032_cartouches_' + grilles[1].id].sort());
+        expect(r.objets).not.toHaveProperty('cartouche');
+        expect(r.resume).toMatchObject({ nom: 'Exposé oral : grille d’évaluation', nbC: 3 });
+        expect(r.resume).not.toHaveProperty('retro');
+        expect([...db.store.keys()].sort()).toEqual(Object.keys(EXISTANTS).sort());
     });
 
     it('W.b aucun trimestre actif : refus clair, rien n’est écrit', async () => {
@@ -244,15 +236,6 @@ describe('W — écrire : trois objets neufs, rien d’autre', () => {
         const r = await C.creer(exempleComplet());
         expect(r.erreur).toBe(C.MESSAGES.echec);
         db.echouerSur = null;
-        expect(db.getSync('a2032_echellesTemplates')).toEqual(EXISTANTS.a2032_echellesTemplates);
-        expect(db.getSync('a2032_grillesTemplates')).toEqual(EXISTANTS.a2032_grillesTemplates);
-    });
-
-    it('W.e la cartouche ne s’écrit pas : la grille et l’échelle sont retirées', async () => {
-        db.reset(EXISTANTS);
-        db.echouerSur = (k) => k.indexOf('a2032_cartouches_GRILLE_') === 0 && k !== 'a2032_cartouches_GRILLE_GENERIQUE';
-        const r = await C.creer(retroactions());
-        expect(r.erreur).toBe(C.MESSAGES.echec);
         expect(db.getSync('a2032_echellesTemplates')).toEqual(EXISTANTS.a2032_echellesTemplates);
         expect(db.getSync('a2032_grillesTemplates')).toEqual(EXISTANTS.a2032_grillesTemplates);
     });

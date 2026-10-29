@@ -230,8 +230,6 @@
         return 'La note retenue de « ' + (texte(hors.titre) || 'sans nom') + ' » (' + formaterPourcentage(A.nombre(hors.note.valeur)) + ') est hors de sa plage : il pourrait être utile de la vérifier.';
     }
 
-    A.estRetro = function (m) { return !!(m.nature && m.nature.valeur === 'retroactions'); };
-
     // ------------------------------------------------------------------
     // 2. CONSTRUIRE : du modèle aux trois objets NEUFS
     // ------------------------------------------------------------------
@@ -294,7 +292,6 @@
      * l'assistant n'en ont pas : ce qu'il produit pour eux ne change pas.
      */
     function construireGrille(m, ctx, nomGrille, echelleId) {
-        var retro = A.estRetro(m);
         var g = Object.assign(base(ctx, 'GRILLE_', nomGrille), {
             criteres: m.criteres.map(function (c) {
                 // Lot 3a : la forme d'un critère créé à la main (`grilles.js`, « Créer l'objet
@@ -323,7 +320,7 @@
                 }
                 var par = textesParNiveau(m, c);
                 // Les descripteurs vivent dans la grille (décision 2 du cadrage), liés à l'échelle créée avec eux.
-                if (!retro && Object.keys(par).length) cr.descripteurs = { echelleId: echelleId, parNiveau: par };
+                if (Object.keys(par).length) cr.descripteurs = { echelleId: echelleId, parNiveau: par };
                 return cr;
             })
         });
@@ -370,38 +367,19 @@
         return g;
     }
 
-    /** La cartouche, seulement pour des rétroactions, et seulement s'il y a au moins un texte. */
-    function construireCartouche(m, ctx, nomGrille, grille, echelleId) {
-        if (!A.estRetro(m)) return null;
-        var commentaires = {};
-        m.criteres.forEach(function (c, i) {
-            var par = textesParNiveau(m, c);
-            Object.keys(par).forEach(function (code) { commentaires[grille.criteres[i].id + '_' + code] = par[code]; });
-        });
-        if (!Object.keys(commentaires).length) return null;
-        var o = Object.assign(base(ctx, 'CART_', 'Rétroactions – ' + nomGrille), {
-            grilleId: grille.id, echelleId: echelleId, contexte: '', description: '',
-            criteres: grille.criteres.map(function (c) { return { id: c.id, nom: c.nom }; }),
-            niveaux: m.niveaux.map(function (n) { return { code: texte(n.code), nom: texte(n.titre) }; }),
-            commentaires: commentaires
-        });
-        delete o.isDemo;   // la forme des cartouches créées à la main (cartouches.js) n'en a pas
-        return o;
-    }
-
     /**
-     * Les trois objets NEUFS, dans l'ordre d'écriture : échelle, grille, cartouche (ou null).
-     * Une grille en points : la grille seule (échelle et cartouche null).
+     * Les objets NEUFS, dans l'ordre d'écriture : échelle, grille. Une grille en points : la grille seule
+     * (échelle null). #1152, lot 5 (29 oct. 2026) : la branche des rétroactions de l'ancien assistant
+     * (`estRetro`, `construireCartouche`) est retirée — l'étiquetage ne pose jamais que `'descripteurs'`.
      * @param {Object} m - un modèle complet (`calculs(m).manquants` vide)
      * @param {{id: function(string): string, maintenant: string, auteur?: string,
      *          metadataCc?: Object, nomsEchelles?: string[]}} ctx
      */
     A.construire = function (m, ctx) {
         var nomGrille = texte(m.nom);
-        if (A.estEnPoints(m)) return { echelle: null, grille: construireGrilleEnPoints(m, ctx, nomGrille), cartouche: null };
+        if (A.estEnPoints(m)) return { echelle: null, grille: construireGrilleEnPoints(m, ctx, nomGrille) };
         var echelle = construireEchelle(m, ctx, nomGrille);
-        var grille = construireGrille(m, ctx, nomGrille, echelle.id);
-        return { echelle: echelle, grille: grille, cartouche: construireCartouche(m, ctx, nomGrille, grille, echelle.id) };
+        return { echelle: echelle, grille: construireGrille(m, ctx, nomGrille, echelle.id) };
     };
 
     window.materielAssistant = A;

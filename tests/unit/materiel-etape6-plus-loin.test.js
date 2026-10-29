@@ -94,10 +94,11 @@ describe('étape 6 · P — le paragraphe dépend de la grille créée', () => {
     it('P.b une grille à niveaux (descripteurs) : le paragraphe « à niveaux », puis la phrase commune', async () => {
         expect(paragraphes(await aNiveaux())).toEqual([A_NIVEAUX, COMMUNE]);
     });
-    it('P.c une grille à niveaux dont les cases étaient des rétroactions : la phrase commune seule', async () => {
+    // ↻ #1152, lot 5 (29 oct. 2026) : la branche des rétroactions de l'ancien assistant est retirée (code mort, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md) : la nature « rétroactions » donne une grille à niveaux comme une autre.
+    it('P.c une grille à niveaux dont les cases étaient des rétroactions : plus de cartouche, le paragraphe « à niveaux »', async () => {
         const d = await aRetroactions();
-        expect(d.querySelector('[data-param="retroactions"]')).not.toBeNull();   // la cartouche a bien été créée
-        expect(paragraphes(d)).toEqual([COMMUNE]);
+        expect(d.querySelector('[data-param="retroactions"]')).toBeNull();
+        expect(paragraphes(d)).toEqual([A_NIVEAUX, COMMUNE]);
     });
 });
 

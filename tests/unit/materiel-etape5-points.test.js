@@ -100,7 +100,7 @@ describe('étape 5 · G — une grille de la forme de 1995, sans rien toucher', 
         const g = db.getSync('a2032_grillesTemplates')[0];
         expect(grilleEntierementEnPoints(g)).toBe(true);
         expect(g.criteres.map(c => c.ponderation)).toEqual([4, 3, 18, 15, 10, 6, 8]);
-        expect(r.resume).toMatchObject({ enPoints: true, totalPoints: 64, nbC: 7, ids: { echelle: null, cartouche: null } });
+        expect(r.resume).toMatchObject({ enPoints: true, totalPoints: 64, nbC: 7, ids: { echelle: null } });   // ↻ #1152, lot 5 : plus d'identifiant de cartouche
     });
 });
 
@@ -140,7 +140,7 @@ describe('étape 5 · C — la grille seule, en points', () => {
     it('C.a `type: \'analytique\'` sur la grille et chaque critère ; pondération = ses points ; aucun descripteur', () => {
         const o = A.construire(avecParties(), ctx());
         expect(o.echelle).toBeNull();
-        expect(o.cartouche).toBeNull();
+        expect(o).not.toHaveProperty('cartouche');   // ↻ #1152, lot 5 : plus de cartouche
         expect(o.grille.type).toBe('analytique');
         expect(o.grille.criteres.every(c => c.type === 'analytique' && !('descripteurs' in c))).toBe(true);
         expect(o.grille.criteres[1]).toMatchObject({ nom: 'Introduction – Sujet posé', description: 'La question est formulée clairement.\nElle reprend les termes du sujet.', ponderation: 3 });

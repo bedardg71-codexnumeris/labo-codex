@@ -43,7 +43,7 @@ function rendreEditeur() {
 
     // Description d'introduction
     html.push('<div class="bilan-info">');
-    html.push('Cet outil te permet de construire un questionnaire anonyme \u00e0 distribuer \u00e0 tes \u00e9l\u00e8ves en fin de trimestre. ');
+    html.push('Cet outil te permet de construire un questionnaire anonyme \u00e0 distribuer \u00e0 tes \u00e9tudiant\u00b7es en fin de trimestre. ');
     html.push('Il recueille leurs perceptions sur la qualit\u00e9 de l\u2019enseignement, du syst\u00e8me d\u2019\u00e9valuation et de l\u2019accompagnement re\u00e7u. ');
     html.push('Les r\u00e9ponses te donneront un portrait du v\u00e9cu de ton groupe.');
     html.push('</div>');

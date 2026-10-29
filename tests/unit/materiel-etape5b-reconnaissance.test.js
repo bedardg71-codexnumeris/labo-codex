@@ -125,7 +125,7 @@ describe('étape 5b · C — une grille en points à niveaux se crée sans éche
         const g = db.getSync('a2032_grillesTemplates')[0];
         expect(grilleEntierementEnPoints(g)).toBe(true);
         expect(g.criteres.map(c => [c.type, c.ponderation])).toEqual([['analytique', 10], ['analytique', 5], ['analytique', 5]]);
-        expect(r.resume).toMatchObject({ enPoints: true, totalPoints: 20, descr: true, ids: { echelle: null, cartouche: null } });
+        expect(r.resume).toMatchObject({ enPoints: true, totalPoints: 20, descr: true, ids: { echelle: null } });   // ↻ #1152, lot 5 : plus d'identifiant de cartouche
     });
 
     it('C.b les descripteurs deviennent un barème, une tranche par NOM de niveau (#1125) ; la nature des cases n’y change rien', () => {
@@ -138,7 +138,7 @@ describe('étape 5b · C — une grille en points à niveaux se crée sans éche
             ['PALIER B', null, null, 'Souvent\n7-8'], ['PALIER C', null, null, 'Toujours\n9-10']]);
         expect(g.criteres[2]).not.toHaveProperty('bareme');   // « / 5 » fusionné : aucun texte de niveau
         const retro = A.construire(fige('étape 5b · F5 complétée, rétroactions'), ctx());
-        expect(retro.cartouche).toBeNull();
+        expect(retro).not.toHaveProperty('cartouche');   // ↻ #1152, lot 5 : plus de cartouche
         expect(retro.grille.criteres[0].bareme).toHaveLength(4);
     });
 

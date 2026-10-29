@@ -1078,7 +1078,7 @@ function ouvrirIntervention(interventionId, options) {
                     <div id="interventionAbsencesBloc" class="carte" style="background: var(--bleu-tres-pale); padding: 15px; margin: 0; height: fit-content;">
                         <h4 style="margin: 0 0 10px 0; color: var(--accent-primaire);" data-tooltip="interv-gestion-absences">Gestion des absences</h4>
                         <p class="text-muted" style="margin: 0 0 15px 0; font-size: 0.9rem;">
-                            Les \u00e9l\u00e8ves non s\u00e9lectionn\u00e9s pour cette s\u00e9ance de rattrapage
+                            Les \u00e9tudiant\u00b7es non s\u00e9lectionn\u00e9\u00b7es pour cette s\u00e9ance de rattrapage
                             b\u00e9n\u00e9ficieront d\u2019un cong\u00e9 (absence motiv\u00e9e).
                         </p>
 

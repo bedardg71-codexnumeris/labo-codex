@@ -116,7 +116,8 @@ describe('#1174 · R — le récapitulatif compte ce qui part et nomme ce qui re
 
     it('R.g un élève introuvable ne sort jamais son DA ; un nom est échappé', () => {
         const r = recap(['F1', 'F2'], { etudiants: [{ da: '2000002', prenom: '<b>Cam', nom: 'Roy' }], evaluations: [EVAL_NOTEE, { id: 'EVX', etudiantDA: '2000001', productionId: A5, criteres: [{}] }] });
-        expect(r.aDeplacer[0].nomEleve).toBe('Copie sans élève');
+        // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+        expect(r.aDeplacer[0].nomEleve).toBe('Copie sans étudiant·e');
         const html = win._genererRecapCorbeilleHTML(r);
         expect(html).not.toContain('2000001');
         expect(html).toContain('&lt;b&gt;Cam Roy');

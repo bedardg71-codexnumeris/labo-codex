@@ -17,7 +17,6 @@
    - populerDropdownsAssemblageV2 (hub critique, Écart #4 et #5)
    - mettreAJourBarreContexte
    - afficherStatistiquesTrimestreV2
-   - allerVersAide
    - mettreAJourOptionsFormatHoraire/mettreAJourFormatHoraire/mettreAJourInfoDuree
 
 

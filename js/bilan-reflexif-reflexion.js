@@ -36,7 +36,7 @@ function rendreReflexion() {
     html.push('<div class="bilan-info">');
     html.push('Cet outil t\u2019accompagne dans une introspection sur ta propre pratique. ');
     html.push('Tu y consignes ta perception de l\u2019enseignement offert et tes observations sur chaque activit\u00e9. ');
-    html.push('Apr\u00e8s avoir consult\u00e9 les r\u00e9sultats de tes \u00e9l\u00e8ves, tu peux revenir sur tes r\u00e9ponses et identifier les \u00e9carts entre ta perception et la leur. ');
+    html.push('Apr\u00e8s avoir consult\u00e9 les r\u00e9sultats de tes \u00e9tudiant\u00b7es, tu peux revenir sur tes r\u00e9ponses et identifier les \u00e9carts entre ta perception et la leur. ');
     html.push('C\u2019est un espace personnel \u2014 rien n\u2019est partag\u00e9.');
     html.push('</div>');
 

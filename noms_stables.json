@@ -60,7 +60,6 @@
         { "nom": "chargerGrilleEnEdition", "type": "async function", "ligne": 894, "role": "Charge une grille depuis le modal pour édition" },
         { "nom": "supprimerGrille", "type": "async function", "ligne": 926, "role": "Supprime une grille après confirmation" },
         { "nom": "dupliquerGrille", "type": "async function", "ligne": 978, "role": "Duplique une grille depuis le modal" },
-        { "nom": "basculerVerrouillageCritere", "type": "async function", "ligne": 1132, "role": "Verrouille ou déverrouille un critère" },
         { "nom": "getTypeCritereLabel", "type": "function", "ligne": 1185, "role": "Retourne le libellé d'un type de critère" },
         { "nom": "calculerTotalPonderationCriteres", "type": "function", "ligne": 1216, "role": "Calcule et affiche le total des pondérations" },
         { "nom": "enregistrerCommeGrille", "type": "function", "ligne": 1252, "role": "Alias de sauvegarde (compatibilité)" }

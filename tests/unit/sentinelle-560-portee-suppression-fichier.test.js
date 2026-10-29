@@ -94,7 +94,8 @@ describe('#560 · A — un seul prédicat « du couple »', () => {
 describe('#560 · B — les mots arrêtés par Grégoire, et le témoin négatif', () => {
     it('la phrase, telle quelle, choisie seulement si une évaluation du couple existe', () => {
         const modale = corps(liste, 'supprimerFichierDefinitivement');
-        expect(modale).toContain("nbEvaluations > 0\n        ? 'Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production seront effacés.'");
+        // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+        expect(modale).toContain("nbEvaluations > 0\n        ? 'Le fichier, ses annotations et toutes les évaluations de cet·te étudiant·e pour cette production seront effacés.'");
     });
 
     it('sans évaluation liée : la phrase d\'avant, mot pour mot', () => {

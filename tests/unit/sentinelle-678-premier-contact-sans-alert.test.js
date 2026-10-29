@@ -18,7 +18,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   trimestre-v2-horaires.js ×3 — confirmerSeanceV2 : aucun appelant, et son bouton
 //     `v2-btnConfirmerSeance` n'existe pas dans index.html ;
 //   trimestre-v2-etudiants.js ×1 — sauvegarderGroupeEtudiantsV2 : aucun appelant ;
-//   trimestre-v2-groupes-cours.js ×1 — ouvrirAideGroupeCours : aucun appelant.
+//   (trimestre-v2-groupes-cours.js : ouvrirAideGroupeCours, sans appelant, retiré le 29 oct. 2026, #1152 lot 5.)
 // Un site qui gagne un déclencheur sort de cette liste et passe aux notifications.
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -48,7 +48,8 @@ describe('#678 · A — les alertes restantes du parcours sont toutes nommées',
         'js/trimestre-v2-cours.js': { supprimerCoursV2: 1, modifierCoursSelectionneV2: 2, dupliquerCoursSelectionneV2: 2 },
         'js/trimestre-v2-horaires.js': { confirmerSeanceV2: 3 },
         'js/trimestre-v2-etudiants.js': { sauvegarderGroupeEtudiantsV2: 1 },
-        'js/trimestre-v2-groupes-cours.js': { ouvrirAideGroupeCours: 1 }
+        // ↻ #1152, lot 5 (29 oct. 2026) : ouvrirAideGroupeCours, sans appelant, est retiré (code mort, TEXTES-2026-10-28-textes-d-ecran.md).
+        'js/trimestre-v2-groupes-cours.js': {}
     };
     for (const [fichier, attendu] of Object.entries(ATTENDU)) {
         it(`${fichier} : ${Object.keys(attendu).length ? 'seulement ' + Object.keys(attendu).join(', ') : 'aucun alert()'}`, () => {
@@ -60,7 +61,7 @@ describe('#678 · A — les alertes restantes du parcours sont toutes nommées',
         const fichiers = readdirSync(path.join(RACINE, 'js')).filter((f) => f.endsWith('.js')).map((f) => 'js/' + f);
         const lignes = fichiers.concat(['index.html']).flatMap((f) => lire(f).split('\n'))
             .filter((l) => !/^\s*(\/\/|\*)/.test(l));
-        for (const nom of ['confirmerSeanceV2', 'sauvegarderGroupeEtudiantsV2', 'ouvrirAideGroupeCours']) {
+        for (const nom of ['confirmerSeanceV2', 'sauvegarderGroupeEtudiantsV2']) {
             const appels = lignes.filter((l) => new RegExp('\\b' + nom + '\\b').test(l))
                 .filter((l) => !new RegExp('function ' + nom + '\\b|window\\.' + nom + '\\s*=').test(l));
             expect(appels, nom + ' a gagné un appelant : convertir son alert()').toEqual([]);

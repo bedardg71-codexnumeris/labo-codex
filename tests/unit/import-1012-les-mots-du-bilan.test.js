@@ -64,9 +64,10 @@ describe('#1012 (3) — le compte des dates de présences', () => {
 
 describe('#1012 (4) — la ligne des élèves écartés', () => {
     it('les mots exacts, accords compris ; aucune ligne pour zéro', () => {
-        expect(w.ligneElevesEcartes(1)).toBe('1 élève que tu avais supprimé n\'a pas été ramené.');
-        expect(w.ligneElevesEcartes(2)).toBe('2 élèves que tu avais supprimés n\'ont pas été ramenés.');
-        expect(w.ligneElevesEcartes(7)).toBe('7 élèves que tu avais supprimés n\'ont pas été ramenés.');
+        // ↻ #1152, lot 5 (29 oct. 2026) : « étudiant·e » dans les écrans d'enseignant (décision de Cowork, plans de travail/TEXTES-2026-10-28-textes-d-ecran.md).
+        expect(w.ligneElevesEcartes(1)).toBe('1 étudiant·e que tu avais supprimé·e n\'a pas été ramené·e.');
+        expect(w.ligneElevesEcartes(2)).toBe('2 étudiant·es que tu avais supprimé·es n\'ont pas été ramené·es.');
+        expect(w.ligneElevesEcartes(7)).toBe('7 étudiant·es que tu avais supprimé·es n\'ont pas été ramené·es.');
         expect(w.ligneElevesEcartes(0)).toBe('');
     });
 

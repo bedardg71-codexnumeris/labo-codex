@@ -90,12 +90,12 @@
     }
 
     const MOTS = Object.freeze({
-        sousTitre: 'Les élèves que tu suis d\'un trimestre à l\'autre : une copie figée de leur dossier, et les notes qu\'ils obtiennent ensuite.',
+        sousTitre: 'Les étudiant·es que tu suis d\'un trimestre à l\'autre : une copie figée de leur dossier, et les notes qu\'ils et elles obtiennent ensuite.',
         perennite: 'Le registre voyage dans ton codex ; pas dans l\'archive d\'un groupe-cours.',
-        rechercheTitre: 'Inscrire un·e élève',
+        rechercheTitre: 'Inscrire un·e étudiant·e',
         rechercheAide: 'Cherche par nom, dans tous les trimestres de l\'application.',
         recherchePlaceholder: 'Nom ou prénom…',
-        aucunResultat: 'Aucun·e élève ne porte ce nom.',
+        aucunResultat: 'Aucun·e étudiant·e ne porte ce nom.',
         tropDeResultats: 'Précise le nom : seuls les 30 premiers sont affichés.',
         aucunTrimestre: 'Aucun trimestre dans l\'application.',
         inscrire: 'Inscrire au registre',
@@ -107,10 +107,10 @@
             + ' sera remplacée par l\'état d\'aujourd\'hui, et l\'ancienne ne pourra pas être retrouvée. '
             + 'Tes trimestres ne sont pas modifiés ; la date d\'inscription et les résultats ultérieurs sont conservés.',
         captureFaite: 'Copie du',
-        aucunInscrit: 'Aucun·e élève inscrit·e au registre.',
+        aucunInscrit: 'Aucun·e étudiant·e inscrit·e au registre.',
         inscritLe: 'Inscrit·e le',
         indiceAbsent: 'non calculé au moment de la copie',
-        refusInconnu: 'Cet·te élève n\'est dans aucun trimestre.',
+        refusInconnu: 'Cet·te étudiant·e n\'est dans aucun trimestre.',
         // Formes [singulier, pluriel], accordées par accorder() — 0 ou 1 : singulier.
         evaluations: ['évaluation', 'évaluations'],
         seances: ['séance', 'séances'],
@@ -119,9 +119,9 @@
         resultats: MOTS_RESULTATS,
         // La saisie : les mots du bloc #913, relus et confirmés par Grégoire le 17 sept. 2026.
         saisieTitre: 'Résultats ultérieurs',
-        saisieAide: 'Les notes que ces élèves ont obtenues dans les cours qui ont suivi.',
-        saisieSansInscrit: 'Inscris d\'abord un·e élève : ses résultats se rangent sous son nom.',
-        eleve: 'Élève',
+        saisieAide: 'Les notes que ces étudiant·es ont obtenues dans les cours qui ont suivi.',
+        saisieSansInscrit: 'Inscris d\'abord un·e étudiant·e : ses résultats se rangent sous son nom.',
+        eleve: 'Étudiant·e',
         cours: 'Cours',
         exempleCours: '601-102-MQ',
         trimestre: 'Trimestre',
@@ -131,8 +131,8 @@
         retirer: 'Retirer',
         refusNote: 'La note doit être un nombre entre 0 et 100.',
         refusTexte: 'Indique le cours et le trimestre.',
-        refusEleve: 'Choisis un·e élève inscrit·e au registre.',
-        inscritsTitre: 'Élèves inscrit·es',
+        refusEleve: 'Choisis un·e étudiant·e inscrit·e au registre.',
+        inscritsTitre: 'Étudiant·es inscrit·es',
         // Le dossier déplié (lot 4). Mots relus par Grégoire avec Cowork le 18 sept. 2026 ; un seul corrigé (1.146.1).
         voirDossier: 'Voir le dossier',
         indicesTitre: 'Indices au moment de la copie',
@@ -151,7 +151,7 @@
         programme: 'programme',
         // Le stock de #913. Mots relus et corrigés par Grégoire avec Cowork le 18 sept. 2026 (1.146.1).
         duCadre: 'saisi dans le Cadre',
-        enAttenteTitre: 'Ces élèves ont des résultats saisis dans le Cadre, avant que le registre existe :',
+        enAttenteTitre: 'Ces étudiant·es ont des résultats saisis dans le Cadre, avant que le registre existe :',
         enAttenteAide: 'Inscris-les pour retrouver leurs résultats sous leur nom. D\'ici là, rien n\'est perdu : ils restent dans leur trimestre et dans l\'export de recherche.',
         // Décision 3.1 (Grégoire, 18 sept. 2026) : retirer du registre « pour corriger une erreur » — un geste de
         // réparation : il confirme, et il DIT ce qu'il emporte.
@@ -166,7 +166,7 @@
                 ? 'Son résultat ultérieur sera effacé aussi : ' + resultats.join(' ; ') + '. '
                 : resultats.length
                     ? 'Ses ' + resultats.length + ' résultats ultérieurs seront effacés aussi : ' + resultats.join(' ; ') + '. '
-                    : 'Aucun résultat ultérieur n\'a été saisi pour cet·te élève. ')
+                    : 'Aucun résultat ultérieur n\'a été saisi pour cet·te étudiant·e. ')
             + (nbDuCadre ? 'Ce qui avait été saisi dans le Cadre reste rangé dans son trimestre. ' : '')
             + 'Tes trimestres ne sont pas modifiés.'
     });

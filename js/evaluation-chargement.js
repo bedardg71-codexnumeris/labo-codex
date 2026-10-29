@@ -2050,7 +2050,7 @@ function _signalerCriteresAjoutesDepuis(conteneur, grille) {
     detail.textContent = ajoutes.map(c => `${c.nom} (${formaterPourcentage(c.ponderation)})`).join(' · ');
     const explication = document.createElement('small');
     explication.textContent = (un ? 'La note enregistrée ne le couvre pas' : 'La note enregistrée ne les couvre pas')
-        + ' et reste valable : le PDF de l\'élève conclut normalement. Si tu modifies cette copie, il faudra '
+        + ' et reste valable : le PDF de l\'étudiant·e conclut normalement. Si tu modifies cette copie, il faudra '
         + (un ? 'lui' : 'leur') + ' donner un niveau avant de verrouiller.';
     avis.append(titre, detail, explication);
     conteneur.prepend(avis);

@@ -864,7 +864,7 @@ function basculerVerrouillageDate(dateStr) {
         }
         datesVerrouillees.push(dateStr);
         message = nonSaisie
-            ? 'Séance saisie et verrouillée : les élèves non marqué·es comptent présent·es.'
+            ? 'Séance saisie et verrouillée : les étudiant·es non marqué·es comptent présent·es.'
             : 'Séance verrouillée.';
     }
 

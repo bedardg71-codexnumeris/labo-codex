@@ -38,7 +38,7 @@ const MAX_ETUDIANTS_SUIVIS = 5;
 // une fois, pour le semis (voir obtenirEtudiantsSuivis) — jamais réécrite.
 const CLE_SUIVI = 'etudiantsSuivis';
 // Mots lus par les collègues (proposition Cowork du 11 sept., soumise à Grégoire).
-const MESSAGE_SUIVI_COMPLET = 'Cinq élèves suivis au maximum. Retires-en un pour en ajouter un autre.';
+const MESSAGE_SUIVI_COMPLET = 'Cinq étudiant·es suivi·es au maximum. Retires-en un·e pour en ajouter un·e autre.';
 
 /* ===============================
    ÉCHELLE DES DISTRIBUTIONS A-C-P (#818, 10 sept. 2026)
@@ -1990,7 +1990,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
             if (distribution) {
                 const mentionSansNote = nbSansNote > 0
-                    ? `<div class="u-mt-6">${nbSansNote} ${window.pluriel(nbSansNote, 'élève', 'élèves')} sans note constructible ${window.pluriel(nbSansNote, 'n\'est pas réparti·e', 'ne sont pas réparti·es')}.</div>`
+                    ? `<div class="u-mt-6">${nbSansNote} ${window.pluriel(nbSansNote, 'étudiant·e', 'étudiant·es')} sans note constructible ${window.pluriel(nbSansNote, 'n\'est pas réparti·e', 'ne sont pas réparti·es')}.</div>`
                     : '';
                 interpretationHTML = `
                     <div class="tb-texte-description">

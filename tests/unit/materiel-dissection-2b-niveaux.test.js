@@ -74,7 +74,7 @@ describe('N — de la lecture à l’échelle et à la grille en niveaux', () =>
         const R = comprise(GRILLE_A);
         expect(D.bilan(R).logique).toBe('deux');
         const o = cree(R, enNiveaux(R, QUATRE));
-        expect(o.cartouche).toBeNull();
+        expect(o).not.toHaveProperty('cartouche');   // ↻ #1152, lot 5 : plus de cartouche
         const e = o.echelle;
         expect(e.nom).toBe('Échelle – Carnet d’observation fictif');
         expect(e.niveaux.map((n) => [n.code, n.nom, n.min, n.max, n.valeurCalcul])).toEqual([

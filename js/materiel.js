@@ -43,9 +43,7 @@
 
     function confirmationHtml(r) {
         if (r.enPoints) return confirmationPointsHtml(r);
-        var phrase = r.retro
-            ? 'Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + ' ; tes rétroactions sont prêtes à servir quand tu évalueras. Rien d’autre n’a changé dans l’application.'
-            : 'Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + (r.descr ? ' et leurs descripteurs' : '') + '. Rien d’autre n’a changé dans l’application.';
+        var phrase = 'Elle est rangée dans tes grilles, avec ' + pluriel(r.nbC, 'critère', 'critères') + (r.descr ? ' et leurs descripteurs' : '') + '. Rien d’autre n’a changé dans l’application.';
         var carteGrille = pluriel(r.nbC, 'critère', 'critères') + (r.descr ? ', avec leurs descripteurs.' : '.');
         return '<section class="materiel-confirmation" aria-labelledby="materiel-titre-cree">' +
             '<div class="materiel-confirmation-titre"><svg aria-hidden="true" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21"></circle><path d="M14 25l7 7 13-15"></path></svg>' +
@@ -53,7 +51,6 @@
             '<p>' + e(phrase) + '</p>' + aCompleterHtml(r) + '<div class="materiel-cartes-cree">' +
             carteCree('Ta grille', carteGrille, 'grille-criteres', 'La voir dans Grilles de critères') +
             carteCree('Ses niveaux', r.niveaux.join(' · '), 'echelle-performance', 'Les voir dans Échelles de performance') +
-            (r.retro ? carteCree('Tes rétroactions', 'Un commentaire par critère et par niveau, que tes étudiant·es liront après l’évaluation.', 'retroactions', 'Les voir dans Cartouches de rétroaction') : '') +
             '</div>' + plusLoinHtml(r) + '<div class="materiel-suite"><span>Pour t’en servir, associe-la à une production, puis évalue une première copie avec elle.</span>' +
             '<button type="button" class="btn btn-principal" data-action="materiel.voir" data-param="productions">Aller aux productions</button></div>' +
             retoursHtml() + '</section>';
@@ -79,7 +76,7 @@
 
     function plusLoinHtml(r) {
         // Étape 5b : une grille en points qui décrit déjà ses niveaux a, elle aussi, la phrase commune seule.
-        var propre = r.enPoints ? (r.descr ? '' : PLUS_LOIN.enPoints) : (r.retro ? '' : PLUS_LOIN.aNiveaux);
+        var propre = r.enPoints ? (r.descr ? '' : PLUS_LOIN.enPoints) : PLUS_LOIN.aNiveaux;
         return '<aside class="materiel-plus-loin" aria-labelledby="materiel-titre-plus-loin">' +
             '<h3 id="materiel-titre-plus-loin">' + e(PLUS_LOIN.titre) + '</h3>' +
             (propre ? '<p>' + e(propre) + '</p>' : '') + '<p>' + e(PLUS_LOIN.commune) + '</p>' +
@@ -234,7 +231,6 @@
             if (!ids) return;
             if (id === 'grille-criteres' && typeof window.ouvrirGrilleDepuisListe === 'function') await window.ouvrirGrilleDepuisListe(ids.grille);
             else if (id === 'echelle-performance' && typeof window.ouvrirEchelleDepuisListe === 'function') await window.ouvrirEchelleDepuisListe(ids.echelle);
-            else if (id === 'retroactions' && ids.cartouche && typeof window.ouvrirCartoucheDepuisListe === 'function') await window.ouvrirCartoucheDepuisListe(ids.cartouche, ids.grille);
         },
         confirmationHtml: confirmationHtml
     };

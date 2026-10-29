@@ -161,15 +161,15 @@ const TOOLTIPS = {
     'depist-restaurer':
         'Réinitialise tous les seuils de détection à leurs valeurs par défaut.',
     'depist-seuil-acceptable':
-        'À partir de ce seuil, le profil écrit « Absences rares » (A) et « Travaux manquants rares » (C). Dans la liste des élèves, un chiffre entre le seuil précédent et celui-ci est jaune.',
+        'À partir de ce seuil, le profil écrit « Absences rares » (A) et « Travaux manquants rares » (C). Dans la liste des étudiant·es, un chiffre entre le seuil précédent et celui-ci est jaune.',
     'depist-seuil-bon':
-        'À partir de ce seuil, le profil écrit « Aucune absence ou presque » (A) et « Aucun travail manquant ou presque » (C). Dans la liste des élèves, un chiffre à partir de ce seuil est bleu ; entre le seuil précédent et celui-ci, vert.',
+        'À partir de ce seuil, le profil écrit « Aucune absence ou presque » (A) et « Aucun travail manquant ou presque » (C). Dans la liste des étudiant·es, un chiffre à partir de ce seuil est bleu ; entre le seuil précédent et celui-ci, vert.',
     'depist-seuil-defi':
         'Score (%) sous lequel un critère est identifié comme un défi nécessitant attention. Seuil bas = plus exigeant, seuil élevé = moins exigeant. Règle le dépistage seulement.',
     'depist-seuil-direction':
         'Variation minimale de la moyenne d\'un critère, d\'une fenêtre d\'analyse à la précédente (la même, décalée d\'une production), pour afficher une flèche (→ ou ←) après ce critère.',
     'depist-seuil-fragile':
-        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences fréquentes » et « Travaux manquants fréquents » (« très fréquents » sous 60\u00a0%, borne fixe). Dans la liste des élèves, un chiffre sous ce seuil est rouge.',
+        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences fréquentes » et « Travaux manquants fréquents » (« très fréquents » sous 60\u00a0%, borne fixe). Dans la liste des étudiant·es, un chiffre sous ce seuil est rouge.',
     'depist-seuil-progression':
         'Différence minimale (%) pour signaler une progression ou une régression entre deux productions. Seuil bas = sensible, seuil élevé = moins sensible.',
     'depist-seuils-interpretation':
@@ -486,7 +486,7 @@ const TOOLTIPS = {
     'wizard-etape-config-specifications':
         'Un travail est « acceptable » quand son résultat atteint ce seuil. À 100\u00a0%, toutes ses spécifications doivent être respectées.',
     'wizard-etape-config-jetons':
-        'Un jeton de délai donne quelques jours de plus pour remettre un travail ; un jeton de reprise permet de refaire un travail déjà évalué. Tu fixes combien chaque élève en reçoit.',
+        'Un jeton de délai donne quelques jours de plus pour remettre un travail ; un jeton de reprise permet de refaire un travail déjà évalué. Tu fixes combien chaque étudiant·e en reçoit.',
     'wizard-etape-choix-modele-bundles':
         'Un forfait dit ce qu’il faut réussir pour obtenir une note. La note finale est celle du plus haut forfait atteint.',
     'wizard-etape-config-denotation':
@@ -666,7 +666,7 @@ const TOOLTIPS = {
     'planif-quoi-enseigner':
         'Quoi enseigner : types de connaissances (Anderson) — factuelle, conceptuelle, procédurale et métacognitive.',
     'planif-comment-enseigner':
-        'Comment enseigner : exposés, activités, soutien et occasions de révision — tout ce qui occupe le temps de classe, le tien comme celui de tes élèves.',
+        'Comment enseigner : exposés, activités, soutien et occasions de révision — tout ce qui occupe le temps de classe, le tien comme celui de tes étudiant·es.',
     'planif-enseignement-explicite':
         'Les cinq étapes du modèle : Ouverture, Modélisation, Pratique guidée, Pratique autonome, Clôture. Ce sont des activités à part entière — elles se placent dans une leçon, et rien ne t\'oblige à les utiliser.',
     'planif-structure':
@@ -868,7 +868,7 @@ const TOOLTIPS = {
     // =================================================================
 
     'presences-saisie':
-        'Marque qui est présent·e à cette séance. Chaque changement s’enregistre tout seul, et les élèves que tu n’as pas marqué·es comptent présent·es. Les présences alimentent le taux d’assiduité de chaque étudiant·e et le suivi du groupe.',
+        'Marque qui est présent·e à cette séance. Chaque changement s’enregistre tout seul, et les étudiant·es que tu n’as pas marqué·es comptent présent·es. Les présences alimentent le taux d’assiduité de chaque étudiant·e et le suivi du groupe.',
     'presences-date':
         'La séance dont tu saisis les présences. Les flèches « Précédent » / « Suivant » passent d’une séance de cours à l’autre.',
     'presences-tri':

@@ -4035,7 +4035,7 @@
                 // recensé ici — mais son élève EST trouvé. Ce qu'il perd, c'est le
                 // regroupement multi-pages, et rien d'autre.
                 // ⮕ La règle : dire la conséquence RÉELLE et le geste qui la lève.
-                + '<p class="texte-muted u-texte-petit">Ces fichiers ne portent pas de DA. L\'élève peut tout de même être trouvé par son nom, mais les pages d\'une même production ne seront pas regroupées automatiquement. Ajoutez le DA au nom du fichier pour que le regroupement se fasse.</p>'
+                + '<p class="texte-muted u-texte-petit">Ces fichiers ne portent pas de DA. L\'étudiant·e peut tout de même être trouvé·e par son nom, mais les pages d\'une même production ne seront pas regroupées automatiquement. Ajoutez le DA au nom du fichier pour que le regroupement se fasse.</p>'
                 + '</div>';
         }
 
@@ -4055,9 +4055,9 @@
                 return '<li>' + echapperHtml(nomAff) + ' <span class="texte-muted">(DA ' + echapperHtml(f.daDetecte || '?') + ')</span></li>';
             }).join('');
             bandeauDAInconnu = '<div class="travaux-bandeau-da-inconnu">'
-                + '<p><strong>DA sans élève dans ce groupe :</strong></p>'
+                + '<p><strong>DA sans étudiant·e dans ce groupe :</strong></p>'
                 + '<ul>' + lignesDI + '</ul>'
-                + '<p class="texte-muted u-texte-petit">Le DA lu dans ces noms de fichiers ne correspond à aucun·e élève inscrit·e dans le groupe-cours actif. Les fichiers seront importés et apparaîtront dans la liste des évaluations comme non associés, sans note possible. Vérifiez le DA dans le nom du fichier, ou basculez sur le groupe-cours auquel appartiennent ces élèves.</p>'
+                + '<p class="texte-muted u-texte-petit">Le DA lu dans ces noms de fichiers ne correspond à aucun·e étudiant·e inscrit·e dans le groupe-cours actif. Les fichiers seront importés et apparaîtront dans la liste des évaluations comme non associés, sans note possible. Vérifiez le DA dans le nom du fichier, ou basculez sur le groupe-cours auquel appartiennent ces étudiant·es.</p>'
                 + '</div>';
         }
 

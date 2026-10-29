@@ -968,7 +968,7 @@ function composerRecapCorbeille(ids, donnees) {
             evaluations.find(ev => estDuCoupleDuFichier(ev, f) && !ev.remplaceeParId);
         aDeplacer.push({
             fichierId: f.id,
-            nomEleve: e ? ((e.prenom || '') + ' ' + (e.nom || '')).trim() : 'Copie sans élève',
+            nomEleve: e ? ((e.prenom || '') + ' ' + (e.nom || '')).trim() : 'Copie sans étudiant·e',
             nomFichier: f.nomFichier || f.id,
             evaluee: !!(evaluation && Array.isArray(evaluation.criteres) && evaluation.criteres.length > 0),
             reprise: _travailLieAUneReprise(evaluations, f.etudiantDA, f.productionId)
@@ -3130,7 +3130,7 @@ async function supprimerFichierDefinitivement(id) {
     // TOUT ce qui touche le couple élève × production part — originale, reprises,
     // évaluation d'un fichier réimporté).
     const phrasePortee = nbEvaluations > 0
-        ? 'Le fichier, ses annotations et toutes les évaluations de cet élève pour cette production seront effacés.'
+        ? 'Le fichier, ses annotations et toutes les évaluations de cet·te étudiant·e pour cette production seront effacés.'
         : 'Le fichier sera supprimé de façon permanente.';
 
     const existante = document.getElementById('supprimer-definitif-modal-overlay');
