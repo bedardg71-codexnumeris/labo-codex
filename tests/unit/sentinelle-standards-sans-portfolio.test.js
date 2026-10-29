@@ -13,6 +13,8 @@
  *   C. La formule du récit (mot neuf 1) : une partie absente ne s'écrit pas ; jamais « terminale × 0 % ».
  *   D. Le doublon réconcilié n'est plus dit « remplacée par une reprise » : ni au récit, ni à la tuile du registre ; aux deux
  *      récits (Standards, sommatif), il se dit « en double · comptée une seule fois » (mot neuf 3, retouche R3).
+ *   F. Lot 2 (29 oct. 2026) : les lecteurs secondaires (dépistage, panneau « Engagement », « ≥ Min. », export recherche et
+ *      profils RLO, « à venir » du PDF) lisent le pool de la note ; GREG-0 à 2 inchangés, CHIM-1, 3, 5 : le pool, ni plus ni moins.
  *
  * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
  * Stock : rien n'est réécrit ; tout se lit au calcul (les captures déjà prises gardent leur P).
@@ -77,7 +79,7 @@ const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 
     'js/profil-etudiant-actions.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js', 'js/snapshots.js', 'js/export-resultats-finaux.js'];
 const OBJETS_EXPORTES = ['PratiqueManager', 'denotationJugements', 'modalitesEvaluation', 'profilActuelDA', 'etudiantsListeCache', 'PRATIQUE_DEFAUT', 'SEUILS_PAR_DEFAUT', '__audit', 'ProductionDiagnostique', '_exportResultats'];
 
-function banc({ pratique, productions, evaluations, modules = [] }) {
+function banc({ pratique, productions, evaluations, modules = [], prefs = {}, globauxEnPlus = {} }) {
     const store = storeBase();
     store.test_groupeEtudiants = store.test_groupeEtudiants.filter(e => e.da === DA.ALICE || e.da === DA.BRUNO);
     store.test_groupesCours[0].pratiqueId = pratique.id;
@@ -89,13 +91,13 @@ function banc({ pratique, productions, evaluations, modules = [] }) {
     let win = null;
     const classe = (nom) => function (config) { return new win[nom](config); };
     const b = monter(store, {
-        modules: MODULES.concat(modules), objetsExportes: OBJETS_EXPORTES, aujourdhui: '2026-10-28', journal: [],
+        modules: MODULES.concat(modules), objetsExportes: OBJETS_EXPORTES, aujourdhui: '2026-10-28', journal: [], prefs,
         globaux: {
             PratiqueConfigurable: classe('PratiqueConfigurable'), PratiqueSommative: classe('PratiqueSommative'), PratiquePANStandards: classe('PratiquePANStandards'),
             PratiquePanSpecifications: classe('PratiquePanSpecifications'),
             obtenirEcheanceEffective: (production) => ({ date: production.dateEcheance || null, assignee: true }),
             resoudreModeleParId: (type, id) => { const l = store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')] || []; return clone(l.find(m => m && m.id === id) || null); },
-            obtenirInterventionsEtudiant: () => [], aDesInfosConfidentielles: () => false
+            obtenirInterventionsEtudiant: () => [], aDesInfosConfidentielles: () => false, ...globauxEnPlus
         }
     });
     win = b.win;
@@ -355,6 +357,134 @@ describe('E · l\'Aide, lot 4 (29 oct. 2026) : « Une production retenue non rec
     });
 });
 
+/* ================================================================ F. LES LECTEURS SECONDAIRES LISENT LE MÊME POOL (LOT 2) */
+// Consigne : plans de travail/CONSIGNE-LOT-2026-10-29-standards-sans-portfolio-lot-2.md. Six lecteurs choisissaient leurs
+// productions eux-mêmes (les seuls « Artefact », ou un repli à eux) ; ils lisent maintenant `obtenirIdsPoolStdDuCorpus`.
+// GREG-0 à 2 : chaque lecteur rend ce qu'il rendait avant (valeurs relevées sur l'ancien code, `8ecdcb70`, le 29 oct.).
+// CHIM-1, 3 et 5 : chaque lecteur rend les productions du pool, ni plus ni moins ; une diagnostique jamais.
+const D0 = { id: 'D0', titre: 'Test diagnostique', type: 'quiz', numero: 0, diagnostique: true, coursId: 'GC1' };
+const CAS = {
+    'GREG-0': () => ({ pratique: std(), productions: prodGreg(), evaluations: COPIES_GREG }),
+    'GREG-1': () => { const s = std(); s.configuration.portfolio.utiliser = false; return { pratique: s, productions: prodGreg(), evaluations: COPIES_GREG }; },
+    'GREG-2': () => {
+        const g2 = prodGreg().concat([{ id: 'W1', titre: 'Exercice', type: 'travail', numero: 8, ponderation: 10, coursId: 'GC1', categorie: 'obligatoire' }]);
+        g2.find(p => p.id === 'A1').categorie = 'selection';
+        return { pratique: std(), productions: g2, evaluations: COPIES_GREG.concat([ev(DA.ALICE, 'W1', 50)]) };
+    },
+    'CHIM-1': () => ({ pratique: std({ methodeSelection: 'tous' }), productions: prodChimie(), evaluations: COPIES_CHIMIE }),
+    'CHIM-3': () => ({ pratique: std({ categories: CATEGORIES }), productions: prodChimie({ categories: CATEGORIES_CHIMIE }), evaluations: COPIES_CHIMIE }),
+    'CHIM-4': () => ({ pratique: std({ methodeSelection: 'tous' }), productions: prodChimie({ terminale: true }), evaluations: COPIES_CHIMIE }),
+    'CHIM-5': () => ({ pratique: std({ methodeSelection: 'tous' }), productions: prodChimie({ ponderees: false }).concat([D0]), evaluations: COPIES_CHIMIE.concat([ev(DA.ALICE, 'D0', 10)]) })
+};
+/* « partiel » : Alice n'a pas encore remis les deux dernières (ce qui fait une liste « à venir » et des non-remises). */
+const PAS_REMIS = { GREG: ['A6', 'T1'], CHIM: ['L3', 'X2'] };
+
+/** Ce que rend chaque lecteur pour Alice, sur les modules réels. */
+async function lecteurs(nom, { partiel = false } = {}) {
+    const c = CAS[nom]();
+    if (partiel) c.evaluations = c.evaluations.filter(e => e.etudiantDA !== DA.ALICE || !PAS_REMIS[nom.slice(0, 4)].includes(e.productionId));
+    c.evaluations = c.evaluations.map(e => Object.assign({}, e, { actionsRLO: null }));   // le profil RLO : une entrée par copie
+    const blobs = [];
+    const b = banc(Object.assign(c, {
+        prefs: { activerActionsRLO: true },
+        globauxEnPlus: { Blob: function (parts) { blobs.push(parts.join('')); }, URL: { createObjectURL: () => 'blob:banc', revokeObjectURL() {} }, crypto: globalThis.crypto, TextEncoder },
+        modules: [{ chemin: 'js/profil-etudiant-sections-affichage.js', internes: ['genererSectionMobilisationEngagement'] },
+            { chemin: 'js/synthese-retroaction-data.js', internes: ['construireNoteProvisoire'] },
+            { chemin: 'js/etudiants.js', internes: ['compterEvaluationsPourMinimum'] }, 'js/trimestres.js']
+    }));
+    Object.assign(b.store, { trimestres: [{ id: 'test', nom: 'Automne banc', session: 'A', annee: 2026, actif: true }],
+        cours: [{ id: 'GC1', sigle: '601-101', titre: 'Cours banc', groupe: '01', actif: true }], test_snapshots: { hebdomadaires: [], interventions: [] } });
+    const w = b.win;
+    const html = w.__audit['profil-etudiant-sections-affichage.js'].genererSectionMobilisationEngagement(DA.ALICE);
+    const ids = (classe) => [...html.matchAll(new RegExp('class="' + classe + '[^"]*"[\\s\\S]*?data-param2="([^"]+)"', 'g'))].map(m => m[1]);
+    const pdf = w.__audit['synthese-retroaction-data.js'].construireNoteProvisoire(DA.ALICE, false);
+    try {
+        await w.exporterFormatRecherche({ cleSecrete: 'CLE-DE-BANC-0123456789abcdefghij' });
+    } finally { b.restaurerHorloge(); }
+    const fichier = JSON.parse(blobs[0]);
+    const numeros = {};
+    (fichier.profilsRLO || []).forEach(x => { numeros[x.id_artefact] = x.numero_artefact; });
+    return {
+        note: Math.round(w.calculerDetailsNoteFinale(DA.ALICE).noteFinale * 100) / 100,
+        depistage: w.obtenirIdsProductionsEvaluables(b.store.test_productions),
+        remises: ids('badge-completion-remis'),
+        retenues: ids('badge-artefact'),
+        minimum: w.__audit['etudiants.js'].compterEvaluationsPourMinimum(b.store.test_productions, b.store.test_evaluationsSauvegardees).get(DA.ALICE) || 0,
+        exportArtefacts: fichier.contexte.artefacts.map(a => a.id),
+        numerosRLO: numeros,
+        aVenir: pdf ? pdf.avenir.map(a => a.titre) : null,
+        obligatoires: pdf ? pdf.obligatoires.map(a => a.titre) : null
+    };
+}
+const POOL_CHIMIE = ['L1', 'L2', 'L3', 'X1', 'X2'];
+const trie = (l) => l.slice().sort();
+
+describe('F · lot 2 : les lecteurs secondaires lisent le pool de la note', () => {
+    it('GREG-0 à GREG-2 : chaque lecteur rend ce qu\'il rendait avant (épinglé sur l\'ancien code)', async () => {
+        const ARTEFACTS = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'];
+        for (const nom of ['GREG-0', 'GREG-1', 'GREG-2']) {
+            expect(await lecteurs(nom), nom).toEqual({
+                note: 84.8, depistage: ARTEFACTS, remises: ARTEFACTS, retenues: ['A4', 'A3', 'A6'], minimum: 6, exportArtefacts: ARTEFACTS,
+                numerosRLO: { A1: 1, A2: 2, A3: 3, A4: 4, A5: 5, A6: 6, T1: null, ...(nom === 'GREG-2' ? { W1: null } : {}) },
+                aVenir: [], obligatoires: []
+            });
+            expect(await lecteurs(nom, { partiel: true }), nom + ' partiel').toMatchObject({
+                depistage: ARTEFACTS, remises: ['A1', 'A2', 'A3', 'A4', 'A5'], retenues: ['A4', 'A3', 'A5'], minimum: 5, exportArtefacts: ARTEFACTS,
+                aVenir: ['Artefact 6'], obligatoires: []
+            });
+        }
+    });
+
+    it('CHIM-1 et CHIM-5 (« Tous ») : chaque lecteur rend le pool, et la note reste 77 (avant : tous vides, 0 au « ≥ Min. »)', async () => {
+        for (const nom of ['CHIM-1', 'CHIM-5']) {
+            const l = await lecteurs(nom);
+            expect(l, nom).toMatchObject({ note: 77, depistage: POOL_CHIMIE, exportArtefacts: POOL_CHIMIE, minimum: 5, aVenir: [], obligatoires: [] });
+            expect(trie(l.remises), nom).toEqual(POOL_CHIMIE);
+            expect(trie(l.retenues), nom).toEqual(POOL_CHIMIE);
+            expect(l.numerosRLO, nom).toEqual({ L1: 1, L2: 2, L3: 3, X1: 4, X2: 5, ...(nom === 'CHIM-5' ? { D0: null } : {}) });
+            const p = await lecteurs(nom, { partiel: true });
+            expect(p, nom + ' partiel').toMatchObject({ depistage: POOL_CHIMIE, exportArtefacts: POOL_CHIMIE, minimum: 3, aVenir: ['Laboratoire 3', 'Examen 2'] });
+            expect(trie(p.remises)).toEqual(['L1', 'L2', 'X1']);
+            expect(trie(p.retenues)).toEqual(['L1', 'L2', 'X1']);
+        }
+    });
+
+    it('CHIM-3 hybride : la note reste 80,63 ; les retenues du panneau sont celles de la note (L2, L3 et les deux obligatoires)', async () => {
+        const l = await lecteurs('CHIM-3');
+        expect(l).toMatchObject({ note: 80.63, depistage: POOL_CHIMIE, exportArtefacts: POOL_CHIMIE, minimum: 5, obligatoires: ['Examen 1', 'Examen 2'] });
+        expect(trie(l.remises)).toEqual(POOL_CHIMIE);
+        expect(trie(l.retenues)).toEqual(['L2', 'L3', 'X1', 'X2']);
+        expect((await lecteurs('CHIM-3', { partiel: true })).aVenir).toEqual(['Laboratoire 3']);
+    });
+
+    it('CHIM-4 : la terminale n\'est ni au pool des lecteurs, ni annoncée « à venir » (avant : « Examen 2 » dans la liste du PDF)', async () => {
+        const l = await lecteurs('CHIM-4', { partiel: true });
+        const SANS_TERMINALE = ['L1', 'L2', 'L3', 'X1'];
+        expect(l).toMatchObject({ depistage: SANS_TERMINALE, exportArtefacts: SANS_TERMINALE, minimum: 3, aVenir: ['Laboratoire 3'] });
+    });
+
+    it('ÉCART NOMMÉ : une diagnostique de type « Artefact » sort de l\'export recherche, comme de la note (avant : listée, numérotée 1 au RLO)', async () => {
+        // Mesuré le 29 oct. sur l'ancien `trimestres.js` : `artefacts` = A0 à A6, `numero_artefact` A0 = 1, A1 = 2… A6 = 7.
+        // Les autres lecteurs l'écartaient déjà (#790, #883, #1055) ; l'export suit leur pool (consigne du lot 2, § 2.1).
+        CAS['GREG-D'] = () => {
+            const p = prodGreg();
+            p.splice(1, 0, { id: 'A0', titre: 'Portrait diagnostique', type: 'artefact-portfolio', numero: 0, diagnostique: true, ponderation: 0, coursId: 'GC1' });
+            return { pratique: std(), productions: p, evaluations: COPIES_GREG.concat([ev(DA.ALICE, 'A0', 40)]) };
+        };
+        const l = await lecteurs('GREG-D');
+        expect(l).toMatchObject({ note: 84.8, depistage: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'], exportArtefacts: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'], minimum: 6 });
+        expect(l.numerosRLO).toMatchObject({ A0: null, A1: 1, A6: 6 });
+    });
+
+    it('les fonctions retirées le restent : `calculerPerformanceRecente` et `genererSectionCompletion`', async () => {
+        const { readFileSync } = await import('node:fs');
+        const path = await import('node:path');
+        const racine = path.resolve(import.meta.dirname, '..', '..');
+        expect(readFileSync(path.join(racine, 'js/pratiques/pratique-pan-standards.js'), 'utf8')).not.toMatch(/calculerPerformanceRecente\s*\(/);
+        expect(readFileSync(path.join(racine, 'js/profil-etudiant-sections-affichage.js'), 'utf8')).not.toMatch(/function genererSectionCompletion\s*\(/);
+    });
+});
+
 // JOURNAL DES BREAK-TESTS (28 oct. 2026) — copie de référence, mutation, lancement, restauration (empreinte sha256 identique).
 //   M1 pratique-registre.js — le repli d'avant (les seules productions non pondérées)          → 6 rouges (CHIM-1, 3, 4 ; l'égarée ;
 //      la terminale « obligatoire » ; la note qui se calcule)
@@ -375,3 +505,14 @@ describe('E · l\'Aide, lot 4 (29 oct. 2026) : « Une production retenue non rec
 //   Playwright (WebKit) : R-M4 → CHIM-6 et GREG-3 rouges, l'erreur de configuration verte.
 // RETOUCHE R2 bis (28 oct. 2026) : `|| details.causeNoteAbsente` remis dans `_boutonReglagesCarteNote`, arbre restauré
 //   → Vitest : 1 rouge (R2 carte) ; Playwright (WebKit) : CHIM-6 et GREG-3 rouges (0 bouton au lieu de 1).
+// LOT 2 (29 oct. 2026, section F) — même procédure (copie de référence, mutation, `-t "F ·"`, restauration ; sha256 identique) :
+//   B1 profil-etudiant-helpers.js — le dépistage rendu aux seuls « Artefact »                  → 3 rouges (CHIM-1/5, CHIM-3, CHIM-4)
+//   B2 profil-etudiant-sections-affichage.js — la liste du panneau rendue aux « Artefact »     → 2 rouges (CHIM-1/5, CHIM-3)
+//   B3 profil-etudiant-sections-affichage.js — les retenues : sa sélection propre (N meilleurs) → 2 rouges (CHIM-1/5, CHIM-3)
+//   B4 etudiants.js — « ≥ Min. » rendu aux « Artefact »                                       → 3 rouges (CHIM-1/5, CHIM-3, CHIM-4)
+//   B5 trimestres.js — l'export rendu aux « Artefact »                                         → 3 rouges (CHIM-1/5, CHIM-3, CHIM-4)
+//   B6 trimestres.js — l'export sans le filtre des diagnostiques                               → 1 rouge (CHIM-5)
+//   B7 synthese-retroaction-data.js — le repli « non-portfolio » remis (terminale comprise)    → 1 rouge (CHIM-4)
+//   B8 pratique-registre.js — `obtenirIdsPoolStdDuCorpus` garde la terminale au pool           → 2 rouges (GREG, CHIM-4)
+//   GREG-0 à 2 restent verts sous B1 à B7 : chaque lecteur rendait déjà, pour la pratique de Grégoire, ce que rend le pool.
+//   Playwright (WebKit, standards-sans-portfolio-lot-2.spec.js) : B2 → CHIM-1 rouge (0 badge au lieu de 3), GREG vert.

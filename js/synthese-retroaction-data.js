@@ -1451,15 +1451,15 @@
             ? retenusDecrits.filter(r => r.categorie === 'obligatoire')
             : [];
 
-        // Sélection des artefacts portfolio (priorité au type explicite, fallback non-portfolio)
+        // Le pool de la note (lot 2 des standards sans portfolio, 29 oct. 2026) : `obtenirIdsPoolStdDuCorpus`. Avant, une
+        // troisième définition : les « Artefact », sinon toute production hors conteneur, TERMINALE COMPRISE (annoncée
+        // « à venir » parmi les artefacts).
         // #883 — une production diagnostique n'est ni « à venir » ni obligatoire : elle ne compte pas.
         const productionsNotees = (typeof window.ProductionDiagnostique !== 'undefined')
             ? window.ProductionDiagnostique.filtrerProductions(productions)
             : productions;
-        let artefactsPortfolio = productionsNotees.filter(p => p.type === 'artefact-portfolio');
-        if (!artefactsPortfolio.length) {
-            artefactsPortfolio = productionsNotees.filter(p => p.type !== 'portfolio');
-        }
+        const idsPool = new Set(window.obtenirIdsPoolStdDuCorpus(productionsNotees));
+        const artefactsPortfolio = productionsNotees.filter(p => idsPool.has(p.id));
 
         const idsEvalues = new Set();
         evaluations
