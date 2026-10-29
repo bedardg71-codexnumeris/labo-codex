@@ -1,5 +1,13 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 29 octobre 2026, 14 h 00 (Toronto) : `1.224.0` EN LIGNE** (build `1029-1011`) — Netlify
+> `6ae38915`, `commit_ref` `03f2cf5d`, `state: ready`, publié à 17:58:00 Z (13 h 58). Porte : les standards sans portfolio, lots 1 à 4
+> et la retouche (#1178), les jetons par défaut (#1179), les totems de la démo (#1180), l'Aide, lots 4 et 5 (#1152), l'accueil.
+> Verdict du Mac **vert** sur `03f2cf5d` (1 134 essais, 4 rouges connus — #1181, 1 instable — `grilles-sous-criteres-condense`),
+> après un premier verdict rouge sur `363a9b0b` (six specs aux anciens mots, corrigées ; #1181 inscrit). GitHub (run 40926271259) :
+> en cours à l'écriture. **Ouverts** : #1181 (le témoin en démo sur l'iPad, décision de Grégoire) ; l'hybride sous #1178.
+> **MANDAT COURANT** : le lot 5 de #1178 (l'assistant et les mots), dont Cowork écrit la consigne.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 28 octobre 2026, 19 h 40 (Toronto) : `1.223.0` EN LIGNE** (build `1028-1724`) — Netlify
 > `6ae27e6c`, `commit_ref` `d1d581b7`, `state: ready`, publié à 23:00:15 Z (19 h 00). Porte : l'Aide, lots 2c, 2c bis, 2d et 3
 > (#1152), la copie non recevable (#1175), la note E1-E4, E7 et E14-E16 (#1177), l'accueil à trois portes ; tous acceptés.
