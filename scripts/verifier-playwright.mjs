@@ -32,7 +32,7 @@ import {
     lireAssertionsSysteme, lireAssertionsDuProcessus, jugerEveil,
     jugerMemoire, jugerLancementMemoire, memoireAuPlusHaut, lireVeillesDuJournal, formaterMo
 } from './garde-eveil.mjs';
-import { echecsDuRapport, flakyDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
+import { echecsDuRapport, flakyDuRapport, vertsDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -306,15 +306,21 @@ if (instables.length > 0) {
 
 // ── Mode écriture ─────────────────────────────────────────────────────────────
 if (ecrire) {
+    // #1114 (28 oct. 2026) : une liste `echecsIntermittents` déjà tenue se garde
+    // telle quelle, et ses rouges du soir ne passent pas dans les connues.
+    const intermittentes = existsSync(BASELINE) ? JSON.parse(readFileSync(BASELINE, 'utf8')).echecsIntermittents : undefined;
+    const connus = Array.isArray(intermittentes) ? echecs.filter((e) => !intermittentes.includes(e)) : echecs;
     const contenu = {
         _lisezMoi: 'Cliché des specs Playwright rouges CONNUES (#456). Une rougeur absente de cette liste bloque le push. Cette liste doit RÉTRÉCIR : chaque spec réparée s\'en retire. Régénérer : node scripts/verifier-playwright.mjs --ecrire',
         genereLe: new Date().toISOString().slice(0, 10),
-        totalEchecsConnus: echecs.length,
-        echecsConnus: echecs
+        totalEchecsConnus: connus.length,
+        ...(Array.isArray(intermittentes) ? { totalEchecsIntermittents: intermittentes.length } : {}),
+        echecsConnus: connus,
+        ...(Array.isArray(intermittentes) ? { echecsIntermittents: intermittentes } : {})
     };
     writeFileSync(BASELINE, `${JSON.stringify(contenu, null, 4)}\n`, 'utf8');
-    process.stderr.write(`${VERT}✓ Baseline écrite : ${echecs.length} échec(s) connu(s).${RAZ}\n`);
-    for (const echec of echecs) process.stderr.write(`    · ${echec}\n`);
+    process.stderr.write(`${VERT}✓ Baseline écrite : ${connus.length} échec(s) connu(s).${RAZ}\n`);
+    for (const echec of connus) process.stderr.write(`    · ${echec}\n`);
     process.exit(0);
 }
 
@@ -326,7 +332,7 @@ if (!existsSync(BASELINE)) {
     process.exit(2);
 }
 
-const { nouveaux, reparees } = comparerALaBaseline(echecs, JSON.parse(readFileSync(BASELINE, 'utf8')).echecsConnus);
+const { nouveaux, reparees, nonJouees } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport) }, JSON.parse(readFileSync(BASELINE, 'utf8')));
 
 // Une spec réparée n'a jamais à bloquer un push — mais si personne ne le dit, la
 // baseline se met à couvrir des specs vertes et devient un mensonge silencieux.
@@ -335,6 +341,12 @@ if (reparees.length > 0) {
     for (const spec of reparees) process.stderr.write(`    · ${spec}\n`);
     process.stderr.write(`${JAUNE}  ⮕ Retire-les de la baseline, sinon elle couvre du vert :${RAZ}\n`);
     process.stderr.write('     node scripts/verifier-playwright.mjs --ecrire\n');
+}
+// #1114 : une connue absente du rapport (une spec filtrée, un fichier qui ne
+// charge plus) n'a pas été jouée — ce n'est pas du vert.
+if (nonJouees.length > 0) {
+    process.stderr.write(`\n${JAUNE}${nonJouees.length} spec(s) de la baseline NON JOUÉE(S) — ni rouges ni vertes, rien à conclure :${RAZ}\n`);
+    for (const spec of nonJouees) process.stderr.write(`    · ${spec}\n`);
 }
 
 if (nouveaux.length > 0) {

@@ -49,7 +49,7 @@ import { readFileSync, writeFileSync, existsSync, mkdtempSync, mkdirSync, copyFi
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { echecsDuRapport, flakyDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
+import { echecsDuRapport, flakyDuRapport, vertsDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
 import { fichiersDuMorceau, filtreDe } from './morceau-playwright.mjs';
 import {
     lireEchangeMo, lirePression, lireCapacites, lireAlimentation, lireAssertionsSysteme,
@@ -92,8 +92,10 @@ export function fichiersDuRapport(rapport) {
  * Juge un rapport FUSIONNÉ. Une spec prévue absente du rapport n'a pas été
  * jouée : NON JUGÉ — jamais « verte ». (Le 26 oct., 14 des 18 « redevenues
  * vertes » d'un jugement à la main sur 12 rapports sur 16 n'avaient pas tourné.)
+ * `baseline` : l'objet du fichier (`echecsConnus`, et `echecsIntermittents` s'il
+ * y en a, #1114).
  */
-export function jugerRapportFusionne(rapport, echecsConnus, fichiersPrevus = []) {
+export function jugerRapportFusionne(rapport, baseline, fichiersPrevus = []) {
     const erreurs = rapport.errors ?? [];
     if (erreurs.length > 0) {
         return { code: CODES.NON_JUGE, raison: `${erreurs.length} erreur(s) hors essai : ${(erreurs[0].message ?? String(erreurs[0])).split('\n')[0]}` };
@@ -106,10 +108,10 @@ export function jugerRapportFusionne(rapport, echecsConnus, fichiersPrevus = [])
     if (absents.length > 0) return { code: CODES.NON_JUGE, raison: `${absents.length} spec(s) prévue(s) absente(s) du rapport : ${absents.join(', ')}` };
     const echecs = echecsDuRapport(rapport);
     const instables = flakyDuRapport(rapport);
-    const { nouveaux, reparees } = comparerALaBaseline(echecs, echecsConnus);
+    const { nouveaux, reparees, nonJouees } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport) }, baseline);
     return {
         code: nouveaux.length > 0 ? CODES.ROUGE : CODES.VERT,
-        echecs, instables, nouveaux, reparees,
+        echecs, instables, nouveaux, reparees, nonJouees,
         stats: { joues, verts: stats.expected ?? 0, instables: stats.flaky ?? 0, rouges: stats.unexpected ?? 0, sautes: stats.skipped ?? 0 }
     };
 }
@@ -240,6 +242,7 @@ export async function executerVerdict(effets, { total = 10 } = {}) {
     garde.raison = `${s.joues} essais en ${total} morceaux : ${s.verts} verts, ${s.instables} au second essai, ${s.rouges} rouges (${juge.echecs.length - juge.nouveaux.length} connus), ${s.sautes} sautés`;
     if (juge.instables.length > 0) dire(`⚠ ${juge.instables.length} spec(s) verte(s) au second essai (ne bloque pas, #534) :\n${juge.instables.map((x) => `    · ${x}`).join('\n')}`);
     if (juge.reparees.length > 0) dire(`✓ ${juge.reparees.length} spec(s) de la baseline redevenues vertes — à retirer (node scripts/verifier-playwright.mjs --ecrire, ou à la main).`);
+    if (juge.nonJouees.length > 0) dire(`${juge.nonJouees.length} spec(s) de la baseline non jouée(s) — ni rouges ni vertes, rien à conclure (#1114).`);
     if (juge.code === CODES.ROUGE) {
         if (garde.nombreVeilles > 0) dire(`⚠ VERDICT ROUGE RENDU APRÈS ${garde.nombreVeilles} VEILLE(S) (${garde.dureeVeillesS} s) — relancer, Mac éveillé, avant d'y croire.`);
         dire(`✗ ${juge.nouveaux.length} spec(s) NOUVELLEMENT rouge(s) — push bloqué :\n${juge.nouveaux.map((x) => `    · ${x}`).join('\n')}`);
@@ -279,7 +282,7 @@ export async function executerReport(effets) {
             return refuser(`rejeu impossible : ${erreur.message}`);
         }
         // Ici, aucune baseline : une spec qu'on vient de toucher doit être VERTE.
-        const juge = jugerRapportFusionne(rapport, [], conditions.aRejouer);
+        const juge = jugerRapportFusionne(rapport, { echecsConnus: [] }, conditions.aRejouer);
         if (juge.code !== CODES.VERT) return refuser(juge.raison ?? `rouge au rejeu : ${juge.nouveaux.join(' ; ')}`);
         instables = juge.instables;
     }
@@ -401,7 +404,7 @@ async function principal() {
                 if (!existsSync(fichier)) throw new Error(`merge-reports n'a rien produit (code ${r.status}) : ${(r.stderr || '').split('\n')[0]}`);
                 return JSON.parse(readFileSync(fichier, 'utf8'));
             },
-            baseline: () => JSON.parse(readFileSync(BASELINE, 'utf8')).echecsConnus,
+            baseline: () => JSON.parse(readFileSync(BASELINE, 'utf8')),
             veilles: (debut, fin) => (surMac ? lireVeillesDuJournal(lire('pmset', ['-g', 'log']), debut, fin) : [])
         }, { total });
         process.exitCode = code;

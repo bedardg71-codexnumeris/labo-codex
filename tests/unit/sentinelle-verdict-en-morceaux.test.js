@@ -51,27 +51,27 @@ const vert = (file, titre = 't') => ({ file, titre, statut: 'expected' });
 
 describe('A — le jugement du rapport fusionné', () => {
     it('A.a tout vert ⮕ 0 ; une rougeur connue de la baseline ⮕ 0 ; une neuve ⮕ 1, nommée', () => {
-        expect(jugerRapportFusionne(rapport([vert('a.spec.js')]), [], ['a.spec.js']).code).toBe(CODES.VERT);
+        expect(jugerRapportFusionne(rapport([vert('a.spec.js')]), { echecsConnus: [] }, ['a.spec.js']).code).toBe(CODES.VERT);
         const connu = rapport([vert('a.spec.js'), { file: 'b.spec.js', titre: 'x', statut: 'unexpected' }]);
-        expect(jugerRapportFusionne(connu, ['b.spec.js › x'], ['a.spec.js', 'b.spec.js']).code).toBe(CODES.VERT);
-        const j = jugerRapportFusionne(connu, [], ['a.spec.js', 'b.spec.js']);
+        expect(jugerRapportFusionne(connu, { echecsConnus: ['b.spec.js › x'] }, ['a.spec.js', 'b.spec.js']).code).toBe(CODES.VERT);
+        const j = jugerRapportFusionne(connu, { echecsConnus: [] }, ['a.spec.js', 'b.spec.js']);
         expect(j.code).toBe(CODES.ROUGE);
         expect(j.nouveaux).toEqual(['b.spec.js › x']);
     });
 
     it('A.b aucun essai joué, ou une erreur hors essai ⮕ 2 (NON JUGÉ), jamais 0', () => {
-        expect(jugerRapportFusionne(rapport([]), [], []).code).toBe(CODES.NON_JUGE);
-        expect(jugerRapportFusionne(rapport([vert('a.spec.js')], { errors: [{ message: 'Error: chargement\n at' }] }), [], ['a.spec.js']).code).toBe(CODES.NON_JUGE);
+        expect(jugerRapportFusionne(rapport([]), { echecsConnus: [] }, []).code).toBe(CODES.NON_JUGE);
+        expect(jugerRapportFusionne(rapport([vert('a.spec.js')], { errors: [{ message: 'Error: chargement\n at' }] }), { echecsConnus: [] }, ['a.spec.js']).code).toBe(CODES.NON_JUGE);
     });
 
     it('A.c une spec PRÉVUE absente du rapport ⮕ 2 : non jouée n’est pas verte', () => {
-        const j = jugerRapportFusionne(rapport([vert('a.spec.js')]), [], ['a.spec.js', 'b.spec.js']);
+        const j = jugerRapportFusionne(rapport([vert('a.spec.js')]), { echecsConnus: [] }, ['a.spec.js', 'b.spec.js']);
         expect(j.code).toBe(CODES.NON_JUGE);
         expect(j.raison).toContain('b.spec.js');
     });
 
     it('A.d une verte au second essai ne bloque pas, mais se garde', () => {
-        const j = jugerRapportFusionne(rapport([{ file: 'a.spec.js', titre: 'r', statut: 'flaky' }]), [], ['a.spec.js']);
+        const j = jugerRapportFusionne(rapport([{ file: 'a.spec.js', titre: 'r', statut: 'flaky' }]), { echecsConnus: [] }, ['a.spec.js']);
         expect(j.code).toBe(CODES.VERT);
         expect(j.instables).toEqual(['a.spec.js › r']);
     });
@@ -155,7 +155,7 @@ function effetsVerdict(surcharges = {}) {
         jouerMorceau: async (k) => { joues.push(k); return 0; },
         blobs: () => joues.map((k) => `report-${k}.zip`),
         fusionner: () => rapport(specs.map((f) => vert(f))),
-        baseline: () => [],
+        baseline: () => ({ echecsConnus: [] }),
         ecrireJeton: (j) => ecrits.push(j), dire: () => {},
         ...surcharges
     };
@@ -208,7 +208,7 @@ describe('D — le verdict en morceaux (effets en doublures)', () => {
         const neuve = effetsVerdict({ fusionner: rouge });
         expect((await executerVerdict(neuve.effets, { total: 3 })).code).toBe(CODES.ROUGE);
         expect(neuve.ecrits[0].code).toBe(1);
-        const connue = effetsVerdict({ fusionner: rouge, baseline: () => ['c.spec.js › t'] });
+        const connue = effetsVerdict({ fusionner: rouge, baseline: () => ({ echecsConnus: ['c.spec.js › t'] }) });
         expect((await executerVerdict(connue.effets, { total: 3 })).code).toBe(CODES.VERT);
     });
 });

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-    echecsDuRapport, flakyDuRapport, comparerALaBaseline
+    echecsDuRapport, flakyDuRapport, vertsDuRapport, comparerALaBaseline
 } from '../../scripts/rapport-playwright.mjs';
 import { fichiersDuMorceau } from '../../scripts/morceau-playwright.mjs';
 import { readdirSync } from 'node:fs';
@@ -25,6 +25,9 @@ import { readdirSync } from 'node:fs';
 // dans morceau-playwright.mjs → B.b et B.c rouges.
 // #1114 (25 oct. 2026) — `process.argv[3]` ignoré par le juge (la commune toujours lue) → C.f
 // rouge ; la baseline Linux retirée de l'étape du workflow → D.a rouge.
+// #1114 (28 oct. 2026) — l'ancienne règle de `reparees` (toute connue absente des
+// échecs) → E.c, E.d, E.e et E.g rouges ; `echecsIntermittents` ignorée par le
+// juge → E.b et E.g rouges. Arbre restauré, sha256 vérifié.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -51,7 +54,7 @@ function rapport(specs, { errors = [] } = {}) {
     };
 }
 
-/** `baseline` : null (la commune), une liste d'échecs connus (écrite dans un fichier), ou un chemin. */
+/** `baseline` : null (la commune), une liste d'échecs connus ou un objet de baseline (écrits dans un fichier), ou un chemin. */
 function juger(contenu, baseline = null) {
     const dossier = mkdtempSync(path.join(tmpdir(), 'juge-pw-'));
     try {
@@ -60,9 +63,9 @@ function juger(contenu, baseline = null) {
         writeFileSync(fichier, JSON.stringify(contenu), 'utf8');
         writeFileSync(resume, '', 'utf8');
         const args = [JUGE, fichier];
-        if (Array.isArray(baseline)) {
+        if (baseline && typeof baseline === 'object') {
             const chemin = path.join(dossier, 'baseline.json');
-            writeFileSync(chemin, JSON.stringify({ echecsConnus: baseline }), 'utf8');
+            writeFileSync(chemin, JSON.stringify(Array.isArray(baseline) ? { echecsConnus: baseline } : baseline), 'utf8');
             args.push(chemin);
         } else if (baseline) {
             args.push(baseline);
@@ -93,10 +96,10 @@ describe('A — les règles partagées par le Mac et la CI', () => {
     });
 
     it('A.c seule une rougeur absente de la baseline est nouvelle ; une connue redevenue verte se dit', () => {
-        expect(comparerALaBaseline(['x › 1', 'x › 2'], ['x › 2', 'x › 3'])).toEqual({
-            nouveaux: ['x › 1'], reparees: ['x › 3']
+        expect(comparerALaBaseline({ echecs: ['x › 1', 'x › 2'], verts: ['x › 3'] }, { echecsConnus: ['x › 2', 'x › 3'] })).toEqual({
+            nouveaux: ['x › 1'], reparees: ['x › 3'], nonJouees: [], intermittentesRouges: []
         });
-        expect(comparerALaBaseline([], undefined)).toEqual({ nouveaux: [], reparees: [] });
+        expect(comparerALaBaseline({ echecs: [], verts: [] }, undefined)).toEqual({ nouveaux: [], reparees: [], nonJouees: [], intermittentesRouges: [] });
     });
 
     it('A.d le juge du Mac lit ces règles-là, il n’en porte pas de copie', () => {
@@ -184,6 +187,8 @@ describe('C — le juge de la CI (scripts/juger-rapport-playwright.mjs)', () => 
         ]);
         // La commune (vide) ne connaît ni l'une ni l'autre ; la nommée en connaît une.
         expect(juger(r).resume).toContain('2 spec(s) Playwright NOUVELLEMENT');
+        r.suites[0].suites[0].specs.push({ file: 'r.spec.js', title: 'réparée', ok: true, tests: [{ status: 'expected' }] });
+        r.stats.expected += 1;
         const { code, resume } = juger(r, ['l.spec.js › propre à Linux', 'r.spec.js › réparée']);
         expect(code).toBe(1);
         expect(resume).toContain('1 spec(s) Playwright NOUVELLEMENT');
@@ -211,5 +216,79 @@ describe('D — #1114 : GitHub juge contre la baseline Linux', () => {
         expect(linux.echecsConnus.length).toBe(linux.totalEchecsConnus);
         for (const e of linux.echecsConnus) expect(e).toMatch(/^[^/›]+\.spec\.js › ./);
         expect(new Set(linux.echecsConnus).size).toBe(linux.echecsConnus.length);
+    });
+});
+
+describe('E — #1114 (28 oct. 2026) : les intermittentes de Linux, et « redevenue verte » seulement jouée verte', () => {
+    const base = { echecsConnus: ['c.spec.js › connue', 'c.spec.js › absente'], echecsIntermittents: ['i.spec.js › va-et-vient'] };
+    const comparer = (specs, baseline = base) => {
+        const r = rapport(specs);
+        return comparerALaBaseline({ echecs: echecsDuRapport(r), verts: vertsDuRapport(r) }, baseline);
+    };
+
+    it('E.a une rouge hors des deux listes est nouvelle', () => {
+        expect(comparer([{ titre: 'neuve', statut: 'unexpected', file: 'n.spec.js' }]).nouveaux).toEqual(['n.spec.js › neuve']);
+    });
+
+    it('E.b une intermittente rouge n’est pas nouvelle ; elle se compte', () => {
+        const j = comparer([{ titre: 'va-et-vient', statut: 'unexpected', file: 'i.spec.js' }]);
+        expect(j.nouveaux).toEqual([]);
+        expect(j.intermittentesRouges).toEqual(['i.spec.js › va-et-vient']);
+    });
+
+    it('E.c une intermittente verte n’est ni nouvelle ni « redevenue verte »', () => {
+        const j = comparer([{ titre: 'va-et-vient', statut: 'expected', file: 'i.spec.js' }]);
+        expect(j.nouveaux).toEqual([]);
+        expect(j.reparees).toEqual([]);
+        expect(j.intermittentesRouges).toEqual([]);
+    });
+
+    it('E.d une connue jouée verte est réparée ; une connue absente du rapport est « non jouée », pas réparée', () => {
+        const j = comparer([{ titre: 'connue', statut: 'expected', file: 'c.spec.js' }]);
+        expect(j.reparees).toEqual(['c.spec.js › connue']);
+        expect(j.nonJouees).toEqual(['c.spec.js › absente']);
+    });
+
+    it('E.e une connue sautée n’est pas jouée ; une connue rattrapée au second essai est jouée verte', () => {
+        const j = comparer([{ titre: 'connue', statut: 'flaky', file: 'c.spec.js' }, { titre: 'absente', statut: 'skipped', file: 'c.spec.js' }]);
+        expect(j.reparees).toEqual(['c.spec.js › connue']);
+        expect(j.nonJouees).toEqual(['c.spec.js › absente']);
+    });
+
+    it('E.f une baseline sans `echecsIntermittents` juge comme avant', () => {
+        const sans = { echecsConnus: base.echecsConnus };
+        const j = comparer([{ titre: 'va-et-vient', statut: 'unexpected', file: 'i.spec.js' }, { titre: 'connue', statut: 'unexpected', file: 'c.spec.js' }], sans);
+        expect(j.nouveaux).toEqual(['i.spec.js › va-et-vient']);
+        expect(j.intermittentesRouges).toEqual([]);
+    });
+
+    it('E.g le juge de la CI : une intermittente rouge ⮕ 0, comptée ; une rouge hors des listes ⮕ 1 ; une connue absente ⮕ « non jouée »', () => {
+        const ok = juger(rapport([
+            { titre: 'va-et-vient', statut: 'unexpected', file: 'i.spec.js' },
+            { titre: 'connue', statut: 'unexpected', file: 'c.spec.js' }
+        ]), base);
+        expect(ok.code).toBe(0);
+        expect(ok.resume).toContain('aucune rougeur nouvelle');
+        expect(ok.resume).toContain('1 intermittente(s) rouge(s) sur 1');
+        expect(ok.resume).toContain('NON JOUÉE(S)');
+        expect(ok.resume).toContain('c.spec.js › absente');
+        expect(ok.resume).not.toContain('REDEVENUES VERTES');
+        const ko = juger(rapport([
+            { titre: 'va-et-vient', statut: 'unexpected', file: 'i.spec.js' },
+            { titre: 'neuve', statut: 'unexpected', file: 'n.spec.js' }
+        ]), base);
+        expect(ko.code).toBe(1);
+        expect(ko.resume).toContain('n.spec.js › neuve');
+        expect(ko.resume).not.toContain('- i.spec.js › va-et-vient');
+    });
+
+    it('E.h la baseline Linux : deux listes disjointes, bien formées, aux totaux justes', () => {
+        const linux = JSON.parse(readFileSync(path.join(racine, 'scripts', 'playwright-baseline-linux.json'), 'utf8'));
+        expect(Array.isArray(linux.echecsIntermittents)).toBe(true);
+        expect(linux.echecsIntermittents.length).toBe(linux.totalEchecsIntermittents);
+        for (const e of linux.echecsIntermittents) expect(e).toMatch(/^[^/›]+\.spec\.js › ./);
+        expect(new Set(linux.echecsIntermittents).size).toBe(linux.echecsIntermittents.length);
+        const connues = new Set(linux.echecsConnus);
+        expect(linux.echecsIntermittents.filter((e) => connues.has(e))).toEqual([]);
     });
 });
