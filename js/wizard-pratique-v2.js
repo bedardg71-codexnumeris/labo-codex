@@ -2059,7 +2059,7 @@ function genererRecapitulatif() {
         html += '<div class="wizard-v2-recap-section">';
         html += '<h4>Comparer ce type de notation</h4>';
         html += '<p class="wizard-v2-recap-aide">Le banc de décision du Labo met plusieurs pratiques en regard, sur des profils-types, pour voir ce que chaque réglage change sur les notes.</p>';
-        html += '<button type="button" class="btn btn-secondaire" data-action="ouvrirComparateurDepuisWizard">Ouvrir le comparateur du Labo</button>';
+        html += '<button type="button" class="btn btn-secondaire" data-action="ouvrirComparateurDepuisWizard">Ouvrir l\'Exploration des pratiques</button>';
         html += '</div>';
     }
 

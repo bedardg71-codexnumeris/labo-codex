@@ -141,7 +141,7 @@ describe('lot N6 · #899 — la flèche des pratiques de notation', () => {
     const CHEMINS = {
         'js/wizard-pratique-v2.js': ['Conception → Pratiques de notation (clique sur la pratique)'],
         'js/pratiques/construction-attributs.js': ['Par production (réglée dans Conception → Productions)', 'Réglage global (note différée), dans Réglages → Préférences'],
-        'js/pratiques-gestion.js': ['<strong>Labo → Comparateur</strong>'],
+        'js/pratiques-gestion.js': ['<strong>Labo → Exploration des pratiques</strong>'],   // ↻ #1152, retouche du lot 5 (29 oct. 2026) : plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md.
         'js/comparateur-pratiques.js': ['<strong>Conception → Échelles</strong>'],
         'js/etudiants.js': ['<strong>Conception → Pratiques de notation</strong>']
     };

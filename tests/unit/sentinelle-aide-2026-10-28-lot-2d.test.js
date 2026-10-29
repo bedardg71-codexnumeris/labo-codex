@@ -135,7 +135,8 @@ describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () =>
         expect(mod).toContain('input.accept = \'.pdf,.jpg,.jpeg,.png,.heic\';');
         expect(mod).toMatch(/afficherCodes: false/);
         const t = texteDe('labo');
-        expect(t).toContain('« + Ouvrir » charge un document de ton appareil (PDF, JPG, PNG ou HEIC)');
+        // ↻ #1152, retouche du lot 5 (29 oct. 2026) : plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md.
+        expect(t).toContain('« + Ouvrir » charge un document de ton appareil (PDF, JPG, PNG ; HEIC selon le navigateur)');
         expect(t).toContain('sans les codes d\'erreurs');
         // Les Études : ce que leurs notes « i » ne disent pas, et aucune lecture causale.
         expect(lire('js', 'correlations-longitudinales.js')).toMatch(/var SEUIL_MIN_ETUDIANTS = 5;/);

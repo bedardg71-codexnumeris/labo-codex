@@ -78,7 +78,8 @@ Preuves : `js/correlations-longitudinales.js:406-431` (style `circle` partout ; 
 ✅ **Validé par Grégoire le 28 oct. 2026 à 14 h 36** (« oui, on garde »), **avec son autorisation de toucher `js/navigation.js`** (zone protégée) pour les deux lignes qui relient les deux onglets sans bulle à leur clé (la table des onglets vers les clés `nav-*`, ~l. 149-191 ; rien d'autre dans ce fichier).
 
 - `nav-labo` : « Analyser ta démarche : observation, modélisation, exploration des pratiques, rythme de travail, études, bilan réflexif et suivi longitudinal. »
-- `nav-labo-modelisation` : « Ouvre un document (PDF, JPG, PNG ou HEIC) pour le projeter et l'annoter devant le groupe. »
+- `nav-labo-modelisation` : « Ouvre un document (PDF, JPG, PNG ; HEIC selon le navigateur) pour le projeter et l'annoter devant le groupe. »
+  ↻ **29 oct. 2026, Cowork** : « ou HEIC » devient « ; HEIC selon le navigateur », par la décision de Cowork du 28 oct. sur « + Ouvrir » (ci-dessous), que la mesure du lot 5 a confirmée : la Modélisation range le HEIC sans le décoder, seul Safari l'affiche (`js/modelisation.js:249-253`). Dit à Grégoire le 29 oct. ; le reste de la bulle ne bouge pas.
 - `nav-labo-rythme` : « Tes durées d'évaluation par activité, l'estimation de ta charge et sa planification. »
 - `nav-labo-etudes` : « Deux études de ton groupe, « Dynamique des corrélations » et « Impact des jetons sur la performance » : des pistes de réflexion, pas des preuves. »
 - `nav-labo-bilan` : « Composer et exploiter un bilan réflexif de fin de trimestre auprès des étudiant·es. »

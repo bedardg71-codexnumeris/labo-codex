@@ -233,10 +233,6 @@ const AIDE_CONTEXTUELLE = {
                 type: 'texte',
                 contenu: 'Chaque cellule de la matrice correspond à un commentaire pour un niveau de performance donné sur un critère spécifique. Tu peux utiliser les codes de ta grille (ex.\u00a0: I, D, M, E) et le format proposé pour structurer tes commentaires.'
             },
-            {
-                type: 'conseil',
-                contenu: 'Les cartouches peuvent être verrouillées une fois finalisées pour éviter les modifications accidentelles.'
-            },
         ],
         voirAussi: ['construction-grilles', 'construction-echelles', 'evaluations-proceder']
     },
@@ -1644,7 +1640,7 @@ const AIDE_CONTEXTUELLE = {
                     "<strong>1. Informations de base</strong> — nom et description de la pratique.",
                     "<strong>2. Type d'évaluation</strong> — sommative classique, portfolio de progression, ou variante.",
                     "<strong>3. Règles de remplacement</strong> — comment les nouvelles évaluations affectent les anciennes.",
-                    "<strong>4. Système de jetons</strong> — délai, reprise, reprise ciblée (optionnel).",
+                    "<strong>4. Système de jetons</strong> — délai, reprise (optionnel).",
                     "<strong>5. Échelle de performance</strong> — niveaux et leur poids dans la note.",
                     "<strong>6. Critères</strong> — modèle de grille par défaut.",
                     "<strong>7. Rétroaction</strong> — modèle de cartouche par défaut.",
