@@ -1,8 +1,9 @@
 /**
  * Lecture d'un rapport JSON de Playwright, et jugement contre la baseline.
  *
- * Fonctions PURES, sans effet de bord : deux juges les partagent.
+ * Fonctions PURES, sans effet de bord : trois juges les partagent.
  *   · scripts/verifier-playwright.mjs — le verdict du Mac, qui lance la suite ;
+ *   · scripts/verdict-en-morceaux.mjs — le verdict du Mac, en morceaux ;
  *   · scripts/juger-rapport-playwright.mjs — le verdict de la CI, qui juge le
  *     rapport FUSIONNÉ des morceaux (shards) de GitHub (16 oct. 2026).
  * Deux copies de ces règles finiraient par diverger : le Mac et GitHub
@@ -62,15 +63,48 @@ export function flakyDuRapport(rapport) {
 }
 
 /**
- * Compare les échecs à la dette connue. Seule une rougeur absente de la
- * baseline est `nouvelle` ; une spec de la baseline redevenue verte est
- * `reparee` — elle ne bloque rien, mais elle se dit, sinon la baseline se met
- * à couvrir du vert.
+ * Specs JOUÉES ET VERTES (#1114, 28 oct. 2026) : au moins un essai `expected`
+ * ou `flaky` (vert au second essai — passée, comme le dit Playwright par
+ * `ok`). Une spec sautée n'est ni rouge ni verte : elle n'a pas été jouée. Le
+ * juge en a besoin pour ne dire « redevenue verte » que ce qu'il a VU vert.
  */
-export function comparerALaBaseline(echecs, echecsConnus) {
-    const connus = new Set(echecsConnus ?? []);
+export function vertsDuRapport(rapport) {
+    const trouves = [];
+    const descendre = (suites) => {
+        for (const suite of suites ?? []) {
+            for (const spec of suite.specs ?? []) {
+                const jouee = (spec.tests ?? []).some((t) => t.status === 'expected' || t.status === 'flaky');
+                if (spec.ok !== false && jouee) trouves.push(identite(spec.file ?? suite.file ?? '?', spec.title));
+            }
+            descendre(suite.suites);
+        }
+    };
+    descendre(rapport.suites);
+    return trouves.sort();
+}
+
+/**
+ * Compare les échecs à la baseline, qui tient deux listes (#1114, 28 oct. 2026) :
+ *   · `echecsConnus` — rouges à chaque fois ; elles doivent le rester ;
+ *   · `echecsIntermittents` — rouges un soir, vertes un autre (sous Linux) ;
+ *     absente, elle vaut `[]`. Le nom les distingue des « instables » du juge
+ *     (`flakyDuRapport`, les vertes au second essai).
+ *
+ * Seule une rougeur absente des DEUX listes est `nouvelle`. Une connue n'est
+ * `reparee` que JOUÉE ET VERTE dans ce rapport ; absente du rapport (un morceau,
+ * un run partiel), elle est `nonJouee`, sans conclusion — le 26 oct., 14 des 18
+ * « redevenues vertes » d'un jugement n'avaient pas tourné. Une intermittente ne
+ * bloque ni rouge ni verte : on dit seulement combien sont rouges.
+ */
+export function comparerALaBaseline({ echecs, verts }, { echecsConnus = [], echecsIntermittents = [] } = {}) {
+    const connus = new Set(echecsConnus);
+    const intermittentes = new Set(echecsIntermittents);
+    const rouges = new Set(echecs);
+    const vus = new Set(verts);
     return {
-        nouveaux: echecs.filter((e) => !connus.has(e)),
-        reparees: [...connus].filter((e) => !echecs.includes(e)).sort()
+        nouveaux: echecs.filter((e) => !connus.has(e) && !intermittentes.has(e)),
+        reparees: [...connus].filter((e) => vus.has(e) && !rouges.has(e)).sort(),
+        nonJouees: [...connus].filter((e) => !vus.has(e) && !rouges.has(e)).sort(),
+        intermittentesRouges: echecs.filter((e) => intermittentes.has(e))
     };
 }

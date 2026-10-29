@@ -20,6 +20,12 @@
  * de GitHub passe scripts/playwright-baseline-linux.json, les rougeurs propres
  * à Linux. Les règles du jugement ne changent pas.
  *
+ * #1114 (28 oct. 2026) : la baseline peut porter une seconde liste,
+ * `echecsIntermittents` — les essais qui changent de côté d'un soir à l'autre
+ * sous Linux. Seule une rouge hors des deux listes fait échouer ; une connue
+ * n'est « redevenue verte » que jouée et verte (absente : « non jouée ») ; une
+ * intermittente ne bloque ni rouge ni verte, le juge dit combien sont rouges.
+ *
  * Code de sortie : 0 = rien de neuf · 1 = échec nouveau · 2 = impossible à juger.
  * Si GITHUB_STEP_SUMMARY est posée, le verdict s'y écrit aussi : c'est ce que
  * l'application GitHub du téléphone affiche.
@@ -28,7 +34,7 @@
 import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { echecsDuRapport, flakyDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
+import { echecsDuRapport, flakyDuRapport, vertsDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BASELINE = process.argv[3] ? path.resolve(process.argv[3]) : path.join(__dirname, 'playwright-baseline.json');
@@ -65,16 +71,20 @@ if (joues === 0) nonJuge('Le rapport ne contient aucun essai joué.');
 
 const echecs = echecsDuRapport(rapport);
 const instables = flakyDuRapport(rapport);
-const { nouveaux, reparees } = comparerALaBaseline(echecs, JSON.parse(readFileSync(BASELINE, 'utf8')).echecsConnus);
+const baseline = JSON.parse(readFileSync(BASELINE, 'utf8'));
+const { nouveaux, reparees, nonJouees, intermittentesRouges } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport) }, baseline);
+const nIntermittentes = (baseline.echecsIntermittents ?? []).length;
 
 dire(nouveaux.length > 0
     ? `## ✗ ${nouveaux.length} spec(s) Playwright NOUVELLEMENT rouge(s)`
     : `## ✓ Playwright : aucune rougeur nouvelle`);
 dire('');
-dire(`${joues} essais joués : ${stats.expected ?? 0} verts, ${stats.flaky ?? 0} verts au second essai, ${stats.unexpected ?? 0} rouges, ${stats.skipped ?? 0} sautés. ${echecs.length - nouveaux.length} échec(s) connu(s) de la baseline (${path.basename(BASELINE)}).`);
+dire(`${joues} essais joués : ${stats.expected ?? 0} verts, ${stats.flaky ?? 0} verts au second essai, ${stats.unexpected ?? 0} rouges, ${stats.skipped ?? 0} sautés. ${echecs.length - nouveaux.length - intermittentesRouges.length} échec(s) connu(s) de la baseline (${path.basename(BASELINE)})${nIntermittentes > 0 ? ` ; ${intermittentesRouges.length} intermittente(s) rouge(s) sur ${nIntermittentes} (ne bloque ni rouge ni verte)` : ''}.`);
 if (nouveaux.length > 0) { dire(''); dire('Absentes de la baseline — une régression :'); liste(nouveaux); }
 if (instables.length > 0) { dire(''); dire(`⚠ ${instables.length} spec(s) VERTE(S) AU SECOND ESSAI — passées, mais instables (ne bloque pas, #534) :`); liste(instables); }
 // La commune se régénère sur le Mac ; une autre (Linux) se tient à la main.
 const commentRetirer = process.argv[3] ? `de ${path.basename(BASELINE)}, à la main` : '(node scripts/verifier-playwright.mjs --ecrire, sur le Mac)';
 if (reparees.length > 0) { dire(''); dire(`✓ ${reparees.length} spec(s) de la baseline REDEVENUES VERTES — à retirer ${commentRetirer} :`); liste(reparees); }
+// Une connue absente du rapport n'a pas été jouée : rien à en conclure.
+if (nonJouees.length > 0) { dire(''); dire(`${nonJouees.length} spec(s) de la baseline NON JOUÉE(S) dans ce rapport — ni rouge ni verte, rien à conclure :`); liste(nonJouees); }
 conclure(nouveaux.length > 0 ? 1 : 0);
