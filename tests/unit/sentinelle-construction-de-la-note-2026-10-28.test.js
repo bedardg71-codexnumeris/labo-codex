@@ -372,7 +372,8 @@ describe('STD — les cas qui changent la note', () => {
     });
     it('STD-C7 aucun artefact qui compte et pas de terminale : non constructible', () => {
         const n = avec(COPIES_STD.filter(e => e.etudiantDA === DA.BRUNO));
-        expect([n.P, n.comparateur, n.profil, n.export[1]]).toEqual([null, null, null, 'non constructible']);
+        // ↻ lot 1 des standards sans portfolio (28 oct. 2026) : l'export dit la cause (avant : 'non constructible').
+        expect([n.P, n.comparateur, n.profil, n.export[1]]).toEqual([null, null, null, 'non constructible – Aucun artefact du portfolio n\'est encore évalué.']);
     });
 });
 

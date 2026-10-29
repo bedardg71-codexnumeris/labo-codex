@@ -774,8 +774,10 @@ function obtenirTypePratiqueActive() {
    - une production joue le rôle de terminale ssi type === 'terminale'
      (déclaration explicite au formulaire Productions, JAMAIS une inférence
      par pondération) ;
-   - le pool = artefacts déclarés, sinon productions non pondérées (repli) —
-     le conteneur « portfolio » est optionnel ;
+   - le pool = artefacts déclarés, sinon toutes les productions (ou celles
+     qui portent une catégorie), quelle que soit leur pondération (lot 1 des
+     standards sans portfolio, 28 oct. 2026) — le conteneur « portfolio » est
+     optionnel ;
    - la récence = numéro de production décroissant (correctif 24 jan 2026),
      pas la date d'évaluation.
    =============================== */
@@ -790,26 +792,54 @@ function identifierProductionTerminale(productions) {
 }
 
 /**
- * Ids du pool d'artefacts STD : les artefacts déclarés (type 'artefact-portfolio'),
- * sinon repli sur les productions non pondérées (hors conteneur et terminale).
+ * Vrai si le pool STD est fait d'artefacts : au moins une production de type « Artefact » (hors terminale).
+ * La règle du calcul (l'invariant du chantier « standards sans portfolio », 28 oct. 2026) et celle des mots
+ * (décision Q1 : « portfolio » et « artefact » avec un « Artefact », « productions » sans) : une seule condition.
+ */
+function poolStdFaitDArtefacts(productions, terminalId) {
+    return Array.isArray(productions)
+        && productions.some(p => p && p.type === 'artefact-portfolio' && p.id !== terminalId);
+}
+
+/**
+ * Ids du pool STD. Avec un « Artefact » : les artefacts déclarés, comme avant (décision Q2 de Grégoire, 28 oct. 2026).
+ * Sans aucun « Artefact » (lot 1 des standards sans portfolio, 28 oct. 2026) : toutes les productions hors conteneur
+ * et terminale, QUELLE QUE SOIT LEUR PONDÉRATION — si au moins une porte une catégorie (« sélection » ou
+ * « obligatoire »), celles-là seulement. Avant : les seules productions non pondérées, alors que le formulaire
+ * Productions exige une pondération hors « Artefact » — une pratique de laboratoires et d'examens n'avait aucune note.
+ * Les diagnostiques sont retirées en amont, par les appelants (#883).
  */
 function obtenirArtefactsIdsPoolStd(productions, terminalId) {
     if (!Array.isArray(productions)) return [];
-    let ids = productions
-        .filter(p => p && p.type === 'artefact-portfolio' && p.id !== terminalId)
-        .map(p => p.id);
-    if (ids.length === 0) {
-        ids = productions
-            .filter(p =>
-                p &&
-                p.type !== 'portfolio' &&
-                p.type !== 'terminale' &&
-                p.id !== terminalId &&
-                (p.ponderation === 0 || p.ponderation === undefined || p.ponderation === null)
-            )
+    if (poolStdFaitDArtefacts(productions, terminalId)) {
+        return productions
+            .filter(p => p && p.type === 'artefact-portfolio' && p.id !== terminalId)
             .map(p => p.id);
     }
-    return ids;
+    // Les anciens types « …-formatif » (que les cases des catégories écartent) n'ont plus aucun écrivain (grep, 28 oct. 2026) : non filtrés ici.
+    const candidates = productions.filter(p =>
+        p && p.type !== 'portfolio' && p.type !== 'terminale' && p.id !== terminalId);
+    const designees = candidates.filter(p => p.categorie === 'selection' || p.categorie === 'obligatoire');
+    return (designees.length > 0 ? designees : candidates).map(p => p.id);
+}
+
+/**
+ * Mot neuf 2 du chantier (validé par Grégoire le 28 oct. 2026, 20 h 13) — POURQUOI UNE NOTE STANDARDS MANQUE quand
+ * aucune production du pool n'a de note. Source unique de la phrase : le profil (`calculerDetailsNoteFinale`, champ
+ * `erreur`), le rapport et l'export (`expliquerNoteNonConstructible` de la pratique) la lisent ici.
+ * @param {boolean} avecArtefacts - `poolStdFaitDArtefacts` : la variante « artefact » (décision Q1)
+ * @param {boolean} terminaleNotee - seule la terminale a une note (décision Q3 : la note ne se calcule pas)
+ * @returns {string}
+ */
+function causeNoteStdSansProductionNotee(avecArtefacts, terminaleNotee) {
+    if (terminaleNotee) {
+        return 'Seule l\'évaluation terminale a une note. En standards, la note du cours s\'appuie aussi sur '
+            + (avecArtefacts ? 'les artefacts du portfolio' : 'les productions retenues')
+            + ' : elle ne se calcule pas sur la terminale seule.';
+    }
+    return avecArtefacts
+        ? 'Aucun artefact du portfolio n\'est encore évalué.'
+        : 'Aucune production retenue pour la note n\'est encore évaluée.';
 }
 
 /**
@@ -1104,6 +1134,8 @@ window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;
+window.poolStdFaitDArtefacts = poolStdFaitDArtefacts;
+window.causeNoteStdSansProductionNotee = causeNoteStdSansProductionNotee;
 window.creerComparateurRecenceStd = creerComparateurRecenceStd;
 window.obtenirPratiqueActive = obtenirPratiqueActive;
 window.obtenirIdPratiqueActive = obtenirIdPratiqueActive;

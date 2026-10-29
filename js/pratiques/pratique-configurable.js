@@ -560,10 +560,17 @@ class PratiqueConfigurable {
      * Lot N4 (#713) — la cause d'une note absente, lue au moteur de la famille (source unique :
      * `PratiquePanSpecifications.expliquerNoteNonConstructible`). Hors spécifications : null.
      * Configuration sans types ou sans forfaits : l'instance ne se construit pas, et c'est la cause.
+     * Standards (lot 1 des standards sans portfolio, 28 oct. 2026) : la phrase que rend le calcul de la note quand aucune
+     * production du pool n'a de note (`causeNoteAbsente`, source : `causeNoteStdSansProductionNotee` du registre).
      * @param {string} da
      * @returns {string|null}
      */
     expliquerNoteNonConstructible(da) {
+        if (this.obtenirCode() === 'STD') {
+            const details = (typeof window.calculerDetailsNoteFinale === 'function')
+                ? window.calculerDetailsNoteFinale(da, this.config.id) : null;
+            return (details && details.causeNoteAbsente) || null;
+        }
         if (!this.config.calcul_note || this.config.calcul_note.methode !== 'specifications') return null;
         const inst = this._instanceSpecifications();
         if (inst) return inst.expliquerNoteNonConstructible(da);

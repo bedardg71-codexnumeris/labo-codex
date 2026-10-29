@@ -3925,7 +3925,9 @@ function _phraseEvaluationsEcartees(ecartees, classeBloc) {
  */
 function _lireNotePourPanneauHabiletes(da, productions) {
     const details = (typeof calculerDetailsNoteFinale === 'function') ? calculerDetailsNoteFinale(da) : null;
-    if (!details || details.erreur || !details.portfolio) return null;
+    // Lot 1 des standards sans portfolio (28 oct. 2026) : un pool sans note porte sa cause dans `erreur` ; ce n'est pas une
+    // erreur de configuration, et le panneau garde sa règle et son « aucun évalué », comme avant.
+    if (!details || (details.erreur && !details.causeNoteAbsente) || !details.portfolio) return null;
     const portfolio = details.portfolio;
     const hybride = portfolio.methodeSelectionCle === 'hybride';
     const cats = (hybride && typeof obtenirConfigCategories === 'function') ? obtenirConfigCategories() : null;

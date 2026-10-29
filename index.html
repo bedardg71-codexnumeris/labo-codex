@@ -11597,7 +11597,7 @@
     <script src="js/trimestre-v2-cours.js?v=20261025b"></script> <!-- consigne du 12 sept. 2026 (les étiquettes) : le menu Nature et ses libellés viennent de js/mots-nature.js -->
     <script src="js/trimestre-v2-etudiants.js?v=20261027a"></script> <!-- #1038 (26 oct.) : repartitionGroupeParCoursV2, libelleCoursParIdV2 · 12 oct. : « Colle des données à importer. » (#678, tutoiement) · #976 : « Corriger le DA… », les globales suivent · Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-1014 + handlers 2188-2200, zone 4) -->
     <script src="js/correction-da.js?v=20261008f"></script> <!-- #976 (8 oct. 2026) : corriger le DA d'une fiche — passe à blanc, déplacement clé par clé, vérification -->
-    <script src="js/registre-longitudinal.js?v=20261022b"></script> <!-- Lot I bis (30 sept.) : le registre voyage dans le codex · #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
+    <script src="js/registre-longitudinal.js?v=20261028a"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : la tuile ne dit plus « remplacée par une reprise » d’un doublon ni d’une originale qui compte · Lot I bis (30 sept.) : le registre voyage dans le codex · #915 : registre longitudinal (Labo › Suivi longitudinal), seul écrivain de la clé globale registreLongitudinal -->
     <script src="js/trimestre-v2-groupes-cours.js?v=20261027a"></script> <!-- #1038 (26 oct.) : la question du groupe-cours qui naît sans ses élèves · #1159, retouche (25 oct.) : « Groupe-cours mis de côté. », « Groupe-cours remis dans le menu. » · #1159 (25 oct.) : la bibliothèque des groupes-cours en une seule liste, « Mis de côté (n) » replié · Refactor étape 3 session B (17 mai 2026) : extrait de trimestre-v2.js (lignes 119-219 + 360-1149, zone 6 — hub populerDropdownsAssemblageV2 reste résidu) -->
     <script src="js/trimestre-v2-orchestre.js?v=20261012a"></script> <!-- #306 Lot 1 (3 juil.) : retrait des fonctions enseignant mortes (zéro-dette) -->
 
@@ -11668,8 +11668,8 @@
     <!-- #717 : éditeur des cibles DEN, commun à l'assistant et à la gestion des pratiques -->
     <script src="js/pratiques/editeur-cibles.js?v=20261004b"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
-    <script src="js/pratiques/pratique-configurable.js?v=20261028a"></script>
-    <script src="js/pratiques/pratique-registre.js?v=20261028a"></script>
+    <script src="js/pratiques/pratique-configurable.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : la pratique Standards déclare la cause d’une note qui manque -->
+    <script src="js/pratiques/pratique-registre.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : le pool sans « Artefact », quelle que soit la pondération ; la phrase de la cause -->
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
@@ -11713,8 +11713,8 @@
     <script src="js/profil-etudiant-rapport.js?v=20261022b"></script> <!-- Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20261022b"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
-    <script src="js/profil-etudiant-actions.js?v=20261028a"></script> <!-- Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20261028a"></script> <!-- E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-actions.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : la cause dans `erreur`, la formule du récit, le doublon réconcilié · Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : le panneau des habiletés garde sa règle quand la cause est dite · E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20261022b"></script>
     <script src="js/presences-rapport.js?v=20261022b"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20261008a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->

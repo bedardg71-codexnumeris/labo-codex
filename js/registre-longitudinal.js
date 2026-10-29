@@ -756,7 +756,7 @@
      * date, note et niveau — sert de <summary>, donc AUCUN mot neuf ; critères et rétroaction se déplient DEDANS. Une
      * évaluation qui n'a ni critère ni rétroaction est une tuile simple : un triangle qui n'ouvrirait sur rien mentirait.
      */
-    function rendreEvaluation(liste, ev, echelles, eleve, pseudos) {
+    function rendreEvaluation(liste, ev, echelles, eleve, pseudos, evaluationsDuDossier) {
         const echelle = echelles[ev.echelleId] || null;
         const criteres = (Array.isArray(ev.criteres) ? ev.criteres : []).filter(Boolean);
         const depliable = criteres.length > 0 || !!ev.retroactionFinale;
@@ -772,7 +772,7 @@
         if (note.length) poser(entete, 'span', 'rl-tuile-note', note.join(' · '));
         const contexte = [];
         if (ev.grilleNom) contexte.push(String(ev.grilleNom));
-        if (ev.remplaceeParId) contexte.push(MOTS.remplacee);
+        if (estRemplaceeParUneReprise(ev, evaluationsDuDossier)) contexte.push(MOTS.remplacee);
         if (contexte.length) poser(entete, 'span', 'rl-meta', contexte.join(' · '));
         if (!depliable) return;
         if (criteres.length) {
@@ -788,6 +788,19 @@
             poser(tuile, 'p', 'rl-sous-titre', MOTS.retroaction);
             poser(tuile, 'p', 'rl-retroaction-texte', texteAffiche(ev.retroactionFinale, eleve, pseudos));
         }
+    }
+
+    /**
+     * Lot 1 des standards sans portfolio (28 oct. 2026, décision de Cowork) — « remplacée par une reprise » ne se dit plus
+     * d'un doublon réconcilié (#360), ni d'une originale qui compte encore (E4 : sa reprise ne compte pas d'elle-même) ; rien
+     * ne s'écrit à leur place. La reprise se cherche dans les copies du même dossier, par la règle du registre de la note
+     * (`originaleEstRemplacee`). Une copie dont la reprise n'est pas dans le dossier, ou un doublon rangé sans son drapeau,
+     * reste « remplacée par une reprise », comme avant : la tuile ne peut pas le savoir.
+     */
+    function estRemplaceeParUneReprise(ev, evaluationsDuDossier) {
+        if (!ev.remplaceeParId || ev.reconcilieParDoublon) return false;
+        if (typeof window.originaleEstRemplacee !== 'function') return true;
+        return window.originaleEstRemplacee(ev, Array.isArray(evaluationsDuDossier) ? evaluationsDuDossier : []);
     }
 
     /** Le dossier d'un·e inscrit·e, replié par défaut. Rend, n'écrit rien. */
@@ -815,7 +828,7 @@
             // Le flux des badges du profil (`.badges-centres` : flex, wrap, gap 10 px), aligné à gauche et en haut par `.rl-tuiles` :
             // l'ordre du DOM reste l'ordre chronologique, lu de gauche à droite puis de haut en bas.
             const liste = poser(bloc, 'div', 'badges-centres rl-tuiles');
-            evaluations.forEach((ev) => rendreEvaluation(liste, ev, echelles, eleve, pseudos));
+            evaluations.forEach((ev) => rendreEvaluation(liste, ev, echelles, eleve, pseudos, evaluations));
         });
     }
 

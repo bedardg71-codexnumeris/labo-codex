@@ -789,7 +789,7 @@ describe('B · les deux systèmes, la simulation, l\'indice stocké, l\'export, 
         }
         noter('B6', res);
         expect(res.SOM.export).toEqual(['', 'non constructible']);
-        expect(res.STD.export).toEqual(['', 'non constructible']);
+        expect(res.STD.export).toEqual(['', 'non constructible – Aucun artefact du portfolio n\'est encore évalué.']);   // ↻ lot 1 des standards sans portfolio (28 oct. 2026) : la cause est dite (avant : 'non constructible')
         expect(res.DEN.export).toEqual(['', 'non constructible']);
         expect(res.SPE.registreP).toBeNull();
         expect(res.SPE.configurableP).toBeNull();              // ↻ #709 (avant : 0 là où l'instance rend null)

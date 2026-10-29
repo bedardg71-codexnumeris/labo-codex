@@ -86,7 +86,7 @@
   "construireConfigComplete": 49
  },
  "js/profil-etudiant-actions.js": {
-  "calculerDetailsNoteFinale": 48
+  "calculerDetailsNoteFinale": 49
  },
  "js/profil-etudiant-sections-affichage.js": {
   "genererSectionMobilisationEngagement": 64,
