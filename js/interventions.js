@@ -96,9 +96,11 @@ function _texteDuChamp(champ, valeurEnBase) {
    module, avec le vocabulaire « rencontre » (mots tranchés par Grégoire le 11 sept.,
    19 h 35). Pas de copie du module : un paramètre de vocabulaire et un conteneur.
    `rencontres.js` pose le vocabulaire avant d'afficher ; l'observateur de la sous-
-   section Interventions le remet. Sur un SERVICE (contexteActifEstService), le champ
-   « séance concernée » et la case « non-participants motivés » sont cachés : ils
-   supposent une séance de groupe.
+   section Interventions le remet. Sur un SERVICE (contexteActifEstService), le contexte
+   et le bloc « Gestion des absences » sont cachés : ils supposent une séance de groupe.
+   (Le champ « Séance concernée », écrit et jamais lu, est retiré le 29 oct. 2026 : #1152,
+   retouche 2 du lot 5, décision de Grégoire. Une intervention qui porte `seanceConcernee`
+   la garde, sans lecteur ; le report des présences écrit à la date de l'intervention.)
    =============================== */
 const VOCABULAIRES = {
     interventions: {
@@ -266,7 +268,6 @@ function _construireIntervention(data) {
         contexte: data.contexte || null,
         titre: data.titre || '',
         description: data.description || '',
-        seanceConcernee: data.seanceConcernee || null,
         marquerNonParticipantsMotives: data.marquerNonParticipantsMotives || false,
         etudiants: [],
         analyse: null,
@@ -783,7 +784,7 @@ function gererVisibiliteContexteIntervention() {
 
     if (!niveau || !contexteBloc || !absencesBloc) return;
 
-    // Sur un service : ni contexte de classe, ni séance concernée — ces deux blocs supposent
+    // Sur un service : ni contexte de classe, ni gestion des absences — ces deux blocs supposent
     // une séance de groupe (cadrage « Rencontres », § C).
     if (_surService()) {
         contexteBloc.style.display = 'none';
@@ -800,12 +801,6 @@ function gererVisibiliteContexteIntervention() {
         var ctx = contexteSelect ? contexteSelect.value : '';
         if (ctx === 'rattrapage') {
             absencesBloc.style.display = '';
-            // Pré-remplir la date de séance depuis la date de l'intervention
-            var dateIntervention = document.getElementById('interventionDate');
-            var dateSeance = document.getElementById('interventionSeance');
-            if (dateIntervention && dateSeance && !dateSeance.value) {
-                dateSeance.value = dateIntervention.value;
-            }
         } else {
             absencesBloc.style.display = 'none';
         }
@@ -1081,11 +1076,6 @@ function ouvrirIntervention(interventionId, options) {
                             Les \u00e9tudiant\u00b7es non s\u00e9lectionn\u00e9\u00b7es pour cette s\u00e9ance de rattrapage
                             b\u00e9n\u00e9ficieront d\u2019un cong\u00e9 (absence motiv\u00e9e).
                         </p>
-
-                        <div class="champ-formulaire u-m-0">
-                            <label for="interventionSeance" class="label-formulaire">S\u00e9ance concern\u00e9e :</label>
-                            <input type="date" id="interventionSeance" class="controle-form" value="${echapperHtml(intervention.seanceConcernee || '')}">
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1550,11 +1540,10 @@ function _poserFormulaireSurIntervention(intervention) {
     intervention.description = _texteDuChamp(document.getElementById('interventionDescription'), intervention.description);
 
     // Absences seulement si rattrapage
+    // #1152, retouche 2 du lot 5 : `seanceConcernee` n'est plus écrite ; une intervention qui la porte la garde.
     if (contexteSave === 'rattrapage') {
-        intervention.seanceConcernee = document.getElementById('interventionSeance').value || null;
         intervention.marquerNonParticipantsMotives = true;
     } else {
-        intervention.seanceConcernee = null;
         intervention.marquerNonParticipantsMotives = false;
     }
 
@@ -1899,52 +1888,6 @@ function initialiserModuleInterventions() {
 
 }
 
-/**
- * Obtenir la liste des DAs avec absence motivée pour une date donnée
- * @param {string} date - Date au format YYYY-MM-DD
- * @returns {Array} Liste des DAs avec absence motivée
- */
-function obtenirAbsencesMotiveesParDate(date) {
-    const interventions = obtenirInterventions();
-    const dasMotives = [];
-
-    // Filtrer les interventions qui:
-    // 1. Ont marquerNonParticipantsMotives = true
-    // 2. Ont seanceConcernee = date
-    const interventionsConcernees = interventions.filter(intervention =>
-        intervention.marquerNonParticipantsMotives === true &&
-        intervention.seanceConcernee === date
-    );
-
-    if (interventionsConcernees.length === 0) {
-        return [];
-    }
-
-    // Récupérer tous les étudiants du groupe (filtrés par groupe-cours actif)
-    const tousLesEtudiants = typeof obtenirEtudiantsCoursActif === 'function'
-        ? obtenirEtudiantsCoursActif()
-        : (obtenirDonneesSelonMode('groupeEtudiants') || []);
-    const tousLesDas = tousLesEtudiants.map(e => e.da);
-
-    // Pour chaque intervention concernée
-    interventionsConcernees.forEach(intervention => {
-        // Les participants à l'intervention
-        const participants = intervention.etudiants || [];
-
-        // Les non-participants = tous les étudiants - participants
-        const nonParticipants = tousLesDas.filter(da => !participants.includes(da));
-
-        // Ajouter à la liste des DAs motivés (sans doublons)
-        nonParticipants.forEach(da => {
-            if (!dasMotives.includes(da)) {
-                dasMotives.push(da);
-            }
-        });
-    });
-
-    return dasMotives;
-}
-
 /* ===============================
    WRAPPERS DELEGATION (Phase 5)
    =============================== */
@@ -1983,7 +1926,6 @@ window.transfererPresencesVersModule = transfererPresencesVersModule;
 window.initialiserModuleInterventions = initialiserModuleInterventions;
 window.formaterDateLisible = formaterDateLisible;
 window.genererBadgeStatut = genererBadgeStatut;
-window.obtenirAbsencesMotiveesParDate = obtenirAbsencesMotiveesParDate;
 window.supprimerInterventionEtRafraichir = supprimerInterventionEtRafraichir;
 window.interventionsDuContexteActif = interventionsDuContexteActif;
 window.definirVocabulaireInterventions = definirVocabulaireInterventions;

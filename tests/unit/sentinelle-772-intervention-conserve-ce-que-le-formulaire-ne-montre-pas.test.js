@@ -14,15 +14,21 @@
  * Break-test attendu : remettre `notesIndividuelles = {}` sur les seuls cochés → cas 1 rouge ; remettre
  * `marquerPresences(id, dasSelectionnes)` → cas 2 rouge.
  */
+// ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
+
+const lireSource = () => readFileSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'js', 'interventions.js'), 'utf8');
 
 const GLOBAUX = {
     determinerNiveauRaiPedagogique: () => ({ niveau: 2, pattern: 'Stable', label: 'x' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),
     calculerMoyennesCriteres: () => ({ structure: 0.7 }), obtenirGrilleReferenceDepistage: () => null, libelleNiveauSOLO: () => '', obtenirSeuil: () => 0.7,
     calculerProgressionArtefacts: () => null, anonymiserTexteRetroaction: (t) => t
 };
-const champs = (valeurs) => Object.assign({ interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'T' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) }, valeurs);
+const champs = (valeurs) => Object.assign({ interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'T' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) }, valeurs);
 const intervention = (extra) => Object.assign({ id: 'I1', titre: 'T', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '', etudiants: [], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }, extra);
 
 describe('#772 · enregistrer une intervention', () => {
@@ -57,3 +63,33 @@ describe('#772 · enregistrer une intervention', () => {
         expect(store.test_interventions[0].etudiants.sort()).toEqual(['2000001', '2000004']);
     });
 });
+
+describe('#1152, retouche 2 du lot 5 — « Séance concernée » retirée (décision de Grégoire, 29 oct. 2026, 6 h 46)', () => {
+    it('le formulaire d\'un rattrapage n\'a plus de « Séance concernée » ; « Gestion des absences » et sa phrase restent', () => {
+        const store = storeBase();
+        store.test_interventions = [intervention({ seanceConcernee: '2026-08-30' })];
+        const conteneur = elementDom({ id: 'conteneurPrincipal' });
+        const b = monter(store, { modules: ['js/interventions.js'], globaux: GLOBAUX, elements: { conteneurPrincipal: conteneur } });
+        b.win.ouvrirIntervention('I1', {});
+        const html = conteneur.innerHTML;
+        expect(html).toContain('Gestion des absences');
+        expect(html).toContain('pour cette séance de rattrapage');
+        expect(html).not.toContain('interventionSeance');
+        expect(html).not.toMatch(/S(é|\\u00e9)ance concern/);
+        expect(html).not.toContain('2026-08-30');
+    });
+
+    it('une intervention qui portait la clé la garde après enregistrement ; une neuve ne l\'écrit plus', () => {
+        const store = storeBase();
+        store.test_interventions = [intervention({ seanceConcernee: '2026-08-30' })];
+        const b = monter(store, { modules: ['js/interventions.js'], globaux: GLOBAUX, elements: champs({}),
+            selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]': [], '#listeEtudiantsIntervention input[type="checkbox"]:checked': [] } });
+        b.win.sauvegarderPresencesIntervention('I1');
+        const i = store.test_interventions[0];
+        expect(i.seanceConcernee).toBe('2026-08-30');
+        expect(i.marquerNonParticipantsMotives).toBe(true);
+        expect(typeof b.win.obtenirAbsencesMotiveesParDate).toBe('undefined');
+        expect(lireSource()).not.toMatch(/seanceConcernee:\s*data\./);
+    });
+});
+

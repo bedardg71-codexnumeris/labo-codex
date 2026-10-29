@@ -19,6 +19,7 @@
  *
  *   cd tests && npx vitest run unit/audit-sous-onglets-suivi-2026-09-06.test.js
  */
+// ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -223,7 +224,7 @@ describe('5 · Interventions — gestes et écritures', () => {
         // Le formulaire, tel que l'enseignant le laisse : Alice cochée, Bruno décoché (il n'est pas venu), ses champs de note intacts.
         const cbAlice = elementDom({ value: '2000001', checked: true }), cbBruno = elementDom({ value: '2000002', checked: false });
         const b = monterI(store, {
-            elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'Rattrapage' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '10:00' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: 'obs' }), objectifVise: elementDom({ value: '' }), 'note-2000001': elementDom({ value: 'Alice progresse.' }), 'note-2000002': elementDom({ value: 'Bruno absent, à revoir.' }) },
+            elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'Rattrapage' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '10:00' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: 'obs' }), objectifVise: elementDom({ value: '' }), 'note-2000001': elementDom({ value: 'Alice progresse.' }), 'note-2000002': elementDom({ value: 'Bruno absent, à revoir.' }) },
             selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]': [cbAlice, cbBruno], '#listeEtudiantsIntervention input[type="checkbox"]:checked': [cbAlice], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] }
         });
         b.win.sauvegarderPresencesIntervention('I1');
@@ -242,7 +243,7 @@ describe('5 · Interventions — gestes et écritures', () => {
             etudiants: ['2000004'], analyse: null, observations: '', notesIndividuelles: { 2000004: 'Plan de travail convenu.' }, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', jamaisSauvegardee: false }];
         // GC1 est actif : le formulaire ne construit des cases que pour ses élèves (obtenirEtudiantsCoursActif) — Dario n'a pas de case.
         const conteneur = elementDom();
-        const b = monterI(store, { elements: { conteneurPrincipal: conteneur, interventionNiveau: elementDom({ value: '3' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'Suivi Dario' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) },
+        const b = monterI(store, { elements: { conteneurPrincipal: conteneur, interventionNiveau: elementDom({ value: '3' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'Suivi Dario' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) },
             selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]': ['2000001', '2000002', '2000003'].map(da => elementDom({ value: da })), '#listeEtudiantsIntervention input[type="checkbox"]:checked': [], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] } });
         b.win.ouvrirIntervention('I2', {});
         const html = conteneur.innerHTML;
@@ -295,7 +296,7 @@ describe('5 · Interventions — gestes et écritures', () => {
     it('I-6 · Rechargement : ce qui est écrit se relit à l\'identique ; le tableau est namespacé (test_interventions) ; la date passe d\'ISO à timestamp', () => {
         const store = storeBase(); store.test_interventions = [];
         const b = monterI(store, { selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]:checked': [elementDom({ value: '2000001', checked: true })], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] },
-            elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'T' }), interventionDate: elementDom({ value: '2026-09-02' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '1.5' }), interventionDescription: elementDom({ value: 'd' }), interventionSeance: elementDom({ value: '2026-09-01' }), observationsIntervention: elementDom({ value: 'o' }), objectifVise: elementDom({ value: 'obj' }), 'note-2000001': elementDom({ value: 'n1' }) } });
+            elements: { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'rattrapage' }), interventionTitre: elementDom({ value: 'T' }), interventionDate: elementDom({ value: '2026-09-02' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '1.5' }), interventionDescription: elementDom({ value: 'd' }), observationsIntervention: elementDom({ value: 'o' }), objectifVise: elementDom({ value: 'obj' }), 'note-2000001': elementDom({ value: 'n1' }) } });
         b.win.afficherFormulaireIntervention();
         // Lot 5 du cadrage 11 : le brouillon vit en mémoire — son id se lit sur le bouton « Enregistrer ».
         const id = (b.document.getElementById('conteneurPrincipal').innerHTML.match(/data-action="sauvegarderPresencesIntervention" data-param="([^"]+)"/) || [])[1];

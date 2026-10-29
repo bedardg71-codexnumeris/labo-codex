@@ -13,6 +13,7 @@
  *
  * Harnais : `bac-suivi.js` (modes.js RÉEL, store partagé). Noms fictifs.
  */
+// ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect, vi } from 'vitest';
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
 
@@ -26,7 +27,7 @@ function banc({ interventions = [], vue = 'interventions', statut = 'en-cours', 
     store.test_presences = [{ da: '2000001', date: '2026-08-25', heures: 2, coursId: 'GC1' }];
     const champs = { interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: contexte }),
         interventionTitre: elementDom({ value: 'Rattrapage' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }),
-        interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }),
+        interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }),
         observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) };
     const cocheAlice = elementDom({ value: '2000001', checked: true });
     const radioStatut = elementDom({ name: 'interventionStatut', value: statut, checked: true });

@@ -92,6 +92,9 @@ describe('#733 · règle 1 — observations et attributs', () => {
         expect(htmlForm).toContain('desc &lt;/textarea&gt;&lt;img src=x onerror=&quot;alert(2)&quot;&gt;</textarea>');
         expect(htmlForm).not.toContain('value="10:00" onfocus=');
         expect(htmlForm).toContain('value="10:00&quot; onfocus=&quot;alert(1)"');
-        expect(htmlForm).toContain('value="2026-09-01&quot; data-x=&quot;"');
+        // ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ
+        // « Séance concernée » est retiré ; la valeur piégée qu'il échappait ne se rend plus du tout.
+        expect(htmlForm).not.toContain('interventionSeance');
+        expect(htmlForm).not.toContain('2026-09-01" data-x=');
     });
 });
