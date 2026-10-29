@@ -256,21 +256,22 @@ describe('T2 · (c) ouvrir un codex d\'avant G1 ne touche pas le démo installé
 });
 
 describe('T2 · (d) fusionner : le démo n\'est ni écrit, ni supprimé, ni compté', () => {
+    // #1182 : la fusion n'a plus d'ancêtre. Le démo de l'autre codex ne vient pas ; celui d'ici
+    // n'est ni compté ni montré.
     const local = { h2026_productions: [1], demo_productions: [{ id: 'PD1' }], demo_fichiersTravaux: [{ id: 'FT_demo_1' }], thumbnail_FT_demo_1: 'x' };
-    const externe = { h2026_productions: [1] };
-    const ancetre = { cles: { h2026_productions: 'h', demo_productions: 'h', demo_fichiersTravaux: 'h', thumbnail_FT_demo_1: 'h' } };
+    const externe = { h2026_productions: [1], demo_productions: [{ id: 'PD_autre' }], demo_fichiersTravaux: [{ id: 'FT_demo_2' }], thumbnail_FT_demo_1: 'y' };
 
-    const touche = (a) => [].concat(a.ajouteesLocal, a.ajouteesExterne, a.modifieesLocal, a.modifieesExterne,
-        a.supprimeesLocal, a.supprimeesExterne, a.conflits.map((c) => c.cle || c));
+    const touche = (a) => [].concat(a.importees, Object.keys(a.ajouts), Object.keys(a.parContenu),
+        Object.keys(a.vignettes), a.conflits.map((c) => c.cle), a.appareil, a.calculees);
 
     it('l\'analyse ignore les clés et les vignettes du démo', async () => {
-        const analyse = await monterCodex(creerDb({}), creerMagasin())._analyserFusion(local, externe, ancetre);
+        const analyse = monterCodex(creerDb({}), creerMagasin())._analyserFusion(local, externe);
         expect(touche(analyse).filter((c) => /demo/i.test(String(c)))).toEqual([]);
     });
 
-    it('break-test : sans le saut, le démo local est donné supprimé par l\'externe (rouge attendu)', async () => {
-        const analyse = await monterCodex(creerDb({}), creerMagasin(), (s) => s.replace(
-            '        if (_estCleDuDemo(cle) || horsFusion[cle]) continue;\n', ''))._analyserFusion(local, externe, ancetre);
+    it('break-test : sans le saut, le démo de l\'autre codex est fusionné (rouge attendu)', async () => {
+        const analyse = monterCodex(creerDb({}), creerMagasin(), (s) => s.replace(
+            '        if (_estCleDuDemo(nomCle) || horsFusion[nomCle]) continue;\n', ''))._analyserFusion(local, externe);
         expect(touche(analyse).filter((c) => /demo/i.test(String(c))).length).toBeGreaterThan(0);
     });
 

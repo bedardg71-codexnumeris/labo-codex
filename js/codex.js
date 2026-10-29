@@ -45,13 +45,9 @@ const LISTES_DE_FICHIERS = ['fichiersTravaux', 'corbeilleFichiers', 'fichiersMod
 // Clés de stockage (non namespacées — globales)
 // Migré de _classeur_* vers _codex_* — voir _migrerClesClasseurVersCodex()
 const CLE_ETAT_CODEX = '_codex_etat';
-// Snapshot de référence : utilisé par actionFusionner comme ancêtre 3-way.
-// Le TimeMachine (#250) a été retiré le 28 avril 2026, mais ce snapshot reste utile.
-const CLE_SNAPSHOT_AVANT = '_codex_snapshot_avant';
-// #334 session C : la clé ne contient plus le dataset intégral mais un index
-// de hachés {__format, cles: {clé: sha256hex(JSON)}} — quelques Ko au lieu de
-// plusieurs Mo dupliqués en IDB + memoryCache à chaque boot.
-const FORMAT_SNAPSHOT_HASH = 'codex-snapshot-hash-v1';
+// #1182 (29 oct. 2026) : le snapshot de référence (`_codex_snapshot_avant`), ancêtre de l'ancienne
+// fusion 3-way, est retiré avec elle : la fusion copie par copie n'a pas d'ancêtre. La clé déjà
+// écrite chez les gens reste (stock assumé, quelques dizaines de Ko que plus rien ne lit).
 // Flag de purge unique des clés _codex_hist_* / _classeur_hist_* (ex-TimeMachine, #250)
 const CLE_PURGE_TIMEMACHINE_FAITE = '_codex_purge_timemachine_done';
 
@@ -88,7 +84,6 @@ var _compteurModifications = 0;
 
 // Anciennes clés (classeur) — pour la migration uniquement
 const CLE_ETAT_ANCIEN = '_classeur_etat';
-const CLE_SNAPSHOT_AVANT_ANCIEN = '_classeur_snapshot_avant';
 
 // Drapeau pour ne migrer qu'une seule fois
 const CLE_MIGRATION_FAITE = '_codex_migration_classeur_done';
@@ -124,8 +119,7 @@ async function _migrerClesClasseurVersCodex() {
     //  plus migrés depuis le retrait du TimeMachine (#250) — ils sont purgés par
     //  _purgerCodexHistLegacy au démarrage)
     var clesFixes = [
-        { ancien: CLE_ETAT_ANCIEN,           nouveau: CLE_ETAT_CODEX },
-        { ancien: CLE_SNAPSHOT_AVANT_ANCIEN, nouveau: CLE_SNAPSHOT_AVANT }
+        { ancien: CLE_ETAT_ANCIEN,           nouveau: CLE_ETAT_CODEX }
     ];
 
     // 1. Migrer les clés fixes
@@ -235,11 +229,6 @@ function initialiserCodex() {
     _purgerCodexHistLegacy().catch(function(e) {
         console.error('[Codex] Erreur purge TimeMachine :', e);
     });
-
-    // Conversion unique du snapshot de fusion legacy en index haché (#334 C)
-    // — sinon un utilisateur qui n'enregistre jamais son codex garde la
-    // duplication IDB + memoryCache du dataset intégral.
-    _migrerSnapshotVersIndexHash();
 
     // #336 : réafficher le plan de purge persisté par le dernier import (le
     // reload post-import efface la console — constat terrain 11 juin). Après
@@ -576,9 +565,6 @@ async function genererCodex(options = {}) {
         _afficherProgression('Génération du codex');
         _prog(70, 'Préparation du ZIP…', _nombreDeFichiers(nbBlobs) + ', ' + window.TailleFichier.dire(tailleTotale));
     }
-
-    // 3. Le snapshot de référence pour la fusion 3-way n'est plus écrit ici : il décrit
-    //    le FICHIER, et le fichier n'existe qu'après son écriture (lot F, _marquerCodexAJour).
 
     // 4. Manifeste
     const maintenant = new Date().toISOString();
@@ -975,8 +961,7 @@ async function chargerCodex(fichierZip) {
 
         // Marquer les fichiers sans blob pour que la visionneuse affiche l'état
         // manquant au lieu d'un visualiseur vide. Les entrées de `fichiers` sont
-        // des références dans donnees[cle] : réécrire les clés après marquage
-        // (le snapshot 3-way de l'étape 5 reflète alors l'état réellement stocké).
+        // des références dans donnees[cle] : réécrire les clés après marquage.
         var idsManquants = {};
         blobsRefusesMagic.forEach(function(id) { idsManquants[id] = true; });
         blobsAbsentsDuZip.forEach(function(id) { idsManquants[id] = true; });
@@ -986,8 +971,8 @@ async function chargerCodex(fichierZip) {
             // refusée elle aussi. Elle ne doit pas emporter l'ouverture : les
             // données sont écrites, le bilan de l'ouverture incomplète doit être rendu
             // et le rechargement proposé. Une clé dont le marquage n'a pas pu
-            // s'écrire reprend ses statuts d'avant, pour que la mémoire et le
-            // snapshot de l'étape 5 disent ce qui est réellement stocké.
+            // s'écrire reprend ses statuts d'avant, pour que la mémoire dise ce qui
+            // est réellement stocké.
             for (var k = 0; k < clesFTImport.length; k++) {
                 var listeFT = donnees[clesFTImport[k]];
                 if (!Array.isArray(listeFT)) continue;
@@ -1008,22 +993,6 @@ async function chargerCodex(fichierZip) {
                     console.warn('[Codex] Marquage des copies manquantes non écrit pour ' + clesFTImport[k] + ' :', eMarquage && (eMarquage.message || eMarquage.name));
                 }
             }
-        }
-    }
-
-    // 5. Stocker l'index haché des données chargées comme snapshot de référence
-    //    pour la fusion 3-way — #334 C (le TimeMachine a été retiré le 28 avril 2026 — #250)
-    //    #1011 : un snapshot refusé (espace plein) n'emporte pas l'ouverture non
-    //    plus. On tente alors de retirer l'ancien, pour qu'une fusion ne se
-    //    réfère pas au codex précédent.
-    try {
-        await _ecrireSnapshotAvant(donnees);
-    } catch (eSnapshot) {
-        console.warn('[Codex] Snapshot de référence non écrit :', eSnapshot && (eSnapshot.message || eSnapshot.name));
-        try {
-            await db.remove(CLE_SNAPSHOT_AVANT);
-        } catch (eRetrait) {
-            console.warn('[Codex] Ancien snapshot de référence non retiré :', eRetrait && (eRetrait.message || eRetrait.name));
         }
     }
 
@@ -1578,16 +1547,12 @@ function marquerModification() {
 
 /**
  * Lot F (D4) : pose l'état « Ton codex est à jour », APRÈS l'écriture réussie du
- * fichier, et seulement là. Le snapshot de référence de la fusion 3-way décrit lui
- * aussi le fichier : il est écrit ici, pas avant (un aperçu annulé le laissait
- * pointer vers un fichier qui n'existait pas).
+ * fichier, et seulement là.
  * Une modification survenue pendant la génération n'est pas dans le fichier : le
  * codex reste alors « pas à jour ».
  * @param {{manifeste: Object, donnees: Object, compteurAuDebut: number}} resultat - rendu par genererCodex
  */
 async function _marquerCodexAJour(resultat) {
-    var donnees = resultat.donnees;
-    await _ecrireSnapshotAvant(donnees);
     _etat.actif = true;
     _etat.nom = resultat.manifeste.nom;
     _etat.derniereSauvegarde = resultat.manifeste.dateDerniereModification;
@@ -1617,9 +1582,6 @@ function fermerCodex() {
     _fileHandle = null;
     _sauvegarderEtat();
     _mettreAJourIndicateur();
-    // Effacer le snapshot de référence (utilisé par la fusion 3-way) — il appartenait
-    // au codex qu'on vient de fermer
-    db.remove(CLE_SNAPSHOT_AVANT);
 }
 
 /* ===============================
@@ -1831,141 +1793,6 @@ function _yield() {
 var _afficherProgression = window.afficherProgression;
 var _majProgression = window.majProgression;
 var _masquerProgression = window.masquerProgression;
-
-/* ===============================
-   UTILITAIRES DE FUSION
-   =============================== */
-
-/**
- * Regroupe une liste de clés par préfixe commun (ex: h2026_).
- * Si un préfixe a plus de 3 clés, les condense en "préfixe_* (N clés)".
- * @param {string[]} cles
- * @returns {string[]} Lignes formatées
- */
-function _grouperParPrefixe(cles) {
-    var groupes = {};
-    for (var i = 0; i < cles.length; i++) {
-        var parts = cles[i].split('_');
-        var prefixe = parts.length > 1 ? parts[0] + '_' : '';
-        var reste = prefixe ? cles[i].substring(prefixe.length) : cles[i];
-        if (!groupes[prefixe]) groupes[prefixe] = [];
-        groupes[prefixe].push(reste);
-    }
-
-    var lignes = [];
-    var prefixes = Object.keys(groupes);
-    for (var j = 0; j < prefixes.length; j++) {
-        var p = prefixes[j];
-        var items = groupes[p];
-        if (items.length <= 3) {
-            for (var k = 0; k < items.length; k++) {
-                lignes.push(p + items[k]);
-            }
-        } else {
-            lignes.push(p + '* (' + items.length + ' clés)');
-        }
-    }
-
-    return lignes;
-}
-
-/* ===============================
-   SNAPSHOT DE FUSION — INDEX HACHÉ (#334 session C)
-   =============================== */
-
-/**
- * SHA-256 hexadécimal d'une chaîne. Helper local (même patron que
- * reserve.js) plutôt qu'une dépendance inter-modules : codex.js ne doit pas
- * exiger que reserve.js soit chargé.
- * @param {string} str
- * @returns {Promise<string|null>} hex, ou null si crypto.subtle indisponible
- */
-async function _sha256Hex(str) {
-    if (typeof crypto === 'undefined' || !crypto.subtle) return null;
-    try {
-        var data = new TextEncoder().encode(str);
-        var buffer = await crypto.subtle.digest('SHA-256', data);
-        return Array.from(new Uint8Array(buffer))
-            .map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-    } catch (e) {
-        console.warn('[Codex] Calcul SHA-256 échoué :', e.message || e);
-        return null;
-    }
-}
-
-/**
- * Construit l'index de hachés d'un dataset pour la fusion 3-way.
- * _analyserFusion n'utilise jamais les VALEURS de l'ancêtre — uniquement la
- * présence de clé et l'égalité JSON (audit D4 du plan #334) : un index
- * {clé: hash} est donc sémantiquement identique au dataset intégral.
- * Ignore les clés `_codex_*`, exactement comme _analyserFusion.
- * @param {Object} donnees - Dataset complet (format data.json du codex)
- * @returns {Promise<{__format: string, cles: Object}|null>} null si crypto indisponible
- */
-async function _indexerSnapshot(donnees) {
-    if (!donnees || typeof donnees !== 'object') return null;
-    if (typeof crypto === 'undefined' || !crypto.subtle) {
-        console.warn('[Codex] crypto.subtle indisponible — snapshot de fusion non indexé (prochaines fusions en diff 2 parties).');
-        return null;
-    }
-    var index = { __format: FORMAT_SNAPSHOT_HASH, cles: {} };
-    var cles = Object.keys(donnees);
-    for (var i = 0; i < cles.length; i++) {
-        if (cles[i].startsWith('_codex_')) continue;
-        index.cles[cles[i]] = await _sha256Hex(JSON.stringify(donnees[cles[i]]));
-    }
-    return index;
-}
-
-/**
- * Écrit le snapshot de référence sous forme d'index haché.
- * Si l'indexation est impossible, retire la clé : un vieux dataset intégral
- * qui traîne vaut moins qu'un diff 2 parties assumé.
- */
-async function _ecrireSnapshotAvant(donnees) {
-    var index = await _indexerSnapshot(donnees);
-    if (index) {
-        await db.set(CLE_SNAPSHOT_AVANT, index);
-    } else {
-        await db.remove(CLE_SNAPSHOT_AVANT);
-    }
-}
-
-/**
- * Lit le snapshot de référence. Un snapshot legacy (dataset intégral écrit
- * avant la session C) est converti à la volée — l'ancien format n'est plus
- * jamais écrit (migration de données, pas un alias de compat).
- * @returns {Promise<Object|null>} index haché ou null
- */
-async function _lireSnapshotAvant() {
-    var brut = await db.get(CLE_SNAPSHOT_AVANT, null);
-    if (!brut) return null;
-    if (brut.__format === FORMAT_SNAPSHOT_HASH) return brut;
-    return await _indexerSnapshot(brut);
-}
-
-/**
- * Migration one-shot au boot : convertit un gros snapshot legacy en index
- * haché — sinon un utilisateur qui n'enregistre jamais son codex garderait
- * la duplication IDB + memoryCache indéfiniment.
- */
-async function _migrerSnapshotVersIndexHash() {
-    try {
-        var brut = await db.get(CLE_SNAPSHOT_AVANT, null);
-        if (!brut || brut.__format === FORMAT_SNAPSHOT_HASH) return false;
-        var index = await _indexerSnapshot(brut);
-        if (index) {
-            await db.set(CLE_SNAPSHOT_AVANT, index);
-        } else {
-            await db.remove(CLE_SNAPSHOT_AVANT);
-        }
-        console.warn('[Codex] Snapshot de fusion legacy converti en index haché (' + FORMAT_SNAPSHOT_HASH + ').');
-        return true;
-    } catch (e) {
-        console.warn('[Codex] Conversion du snapshot de fusion échouée :', e.message || e);
-        return false;
-    }
-}
 
 /**
  * Cours référencés par les données d'un trimestre (productions, évaluations,
@@ -2258,241 +2085,489 @@ async function purgerEspacePrecedent() {
 }
 
 /* ===============================
-   ANALYSE DE FUSION (Phase 3)
+   FUSION COPIE PAR COPIE (#1182)
    =============================== */
 
-/**
- * Analyse les différences entre deux codex pour préparer une fusion.
+/*
+ * #1182 (29 oct. 2026) — la fusion réunit deux codex élément par élément, sans ancêtre.
+ * L'ancienne comparait des clés entières à un ancêtre, le dernier codex écrit ou ouvert SUR
+ * L'APPAREIL : entre deux appareils partis du même codex, il contient déjà les changements de
+ * celui qui fusionne, qui se voyait « inchangé » ; la fusion prenait la liste de l'autre sans
+ * annoncer de conflit, et les évaluations faites ici disparaissaient en silence.
+ * Décision de Grégoire (29 oct., 14 h 36) : un élément présent d'un seul côté est gardé, la
+ * fusion n'efface rien. Faire voyager les suppressions d'un appareil à l'autre est une suite
+ * possible (#1182), non faite.
  *
- * Trois modes selon la disponibilité d'un ancêtre commun :
- * - Avec ancêtre : diff 3 parties (détecte les vrais conflits)
- * - Sans ancêtre : diff 2 parties (toute différence = conflit potentiel)
- *
- * @param {Object} local - Données du codex local (actuellement dans IDB)
- * @param {Object} externe - Données du codex externe (lu en mémoire)
- * @param {Object|null} [ancetre=null] - Index haché du dernier état commun
- *        ({__format, cles} via _indexerSnapshot / _lireSnapshotAvant), ou null
- * @returns {Promise<{
- *   ajouteesLocal: string[],    - Clés nouvelles seulement dans local
- *   ajouteesExterne: string[],  - Clés nouvelles seulement dans externe
- *   modifieesLocal: string[],   - Clés modifiées seulement dans local (auto-merge: garder local)
- *   modifieesExterne: string[], - Clés modifiées seulement dans externe (auto-merge: prendre externe)
- *   supprimeesLocal: string[],  - Clés supprimées seulement dans local
- *   supprimeesExterne: string[],- Clés supprimées seulement dans externe
- *   conflits: string[],         - Clés modifiées/supprimées des DEUX côtés (choix utilisateur requis)
- *   identiques: number          - Nombre de clés identiques (pas de stats, juste le compte)
- * }>}
+ * Les familles de clés (_familleDeLaCle) :
+ *   - l'appareil : les clés `_*` (internes, dont la marque des archives), REGLAGES_DE_L_APPAREIL
+ *     et les drapeaux de migration — la valeur d'ici, sans question ; rien n'est importé ;
+ *   - calculées (CLES_CALCULEES, DATA-OWNERSHIP « Indices ») : ni d'ici ni de l'autre, leur
+ *     module les recalcule après la fusion (_recalculerApresFusion) ;
+ *   - une vignette `thumbnail_<id>` suit sa copie ;
+ *   - une liste d'objets à `id` : union par `id` ; un même `id` différent des deux côtés est
+ *     le conflit de CET élément ;
+ *   - une liste à règle d'écrivain (LISTES_PAR_CONTENU) : union par le contenu, puis la règle ;
+ *   - le reste (objets, valeurs simples, autres listes) : absent d'un côté, gardé ; différent
+ *     des deux côtés, montré.
  */
-async function _analyserFusion(local, externe, ancetre) {
-    // L'ancêtre est un index de hachés (#334 C) : présence de clé dans
-    // ancetre.cles, égalité par sha256(JSON) — image fidèle de l'ancien
-    // JSON.stringify(ancetre[cle]), qui n'était jamais utilisé autrement.
-    var clesAncetre = (ancetre && ancetre.cles) ? ancetre.cles : null;
-    var toutesLesCles = new Set(
-        Object.keys(local).concat(Object.keys(externe))
-    );
-    if (clesAncetre) {
-        Object.keys(clesAncetre).forEach(function(c) { toutesLesCles.add(c); });
-    }
 
+// Ce qui règle l'affichage de CET appareil (mesuré le 29 oct. sur les codex du Mac et de
+// l'iPad) : vus, rappels, onglets, positions, la palette d'annotation, les accès aux dossiers.
+var REGLAGES_DE_L_APPAREIL = [
+    'backupProchainRappel', 'bienvenue_vu', 'tutoriel_demo_vu', 'nouveautes-beta-93-vue',
+    'monitorage-version-vue', 'monitorage-build-vu', 'monitorage-bandeau-vu', 'manifeste-masque',
+    'profilOngletDeveloppementActif', 'etatsAccordeonsV2', 'biblio_active_tab', 'biblio-masquer-deja-present',
+    'filtresListeEvaluations', 'preferenceTriEvaluations', 'dernieresSelectionsEvaluation',
+    'etudiantEnCours', 'exportPDF_derniersReglages', 'rythmeColonnesT1',
+    'travaux-fond-canvas', 'travaux-palette-eval-droite-pos', 'travaux-palette-eval-gauche-pos',
+    'planif-fond-canvas', 'planif-liens-contourner',
+    'elementsMasques', 'categoriesMasquees', 'couleursCategories', 'ordreCategories', 'raccourcisAnnotation',
+    'modeApplication', 'trimestreActif', 'groupeCoursActif', 'demo-chargees', 'demo-version-installee',
+    'fsapi_persistance_handles'
+];
+
+// Les valeurs calculées (nues ou préfixées d'un trimestre).
+var CLES_CALCULEES = ['indicesCP', 'indicesAssiduite', 'indicesAssiduiteDetailles', 'indicesPatternsRaI'];
+
+// Les listes sans `id` dont l'écrivain a une règle : chronoEvaluations (travaux-ui.js, le
+// chronomètre) garde les 200 dernières entrées, dans l'ordre où elles ont été écrites.
+var LISTES_PAR_CONTENU = {
+    chronoEvaluations: function(liste) {
+        var triee = liste.slice().sort(function(a, b) {
+            var da = (a && a.date) || '', db_ = (b && b.date) || '';
+            return da < db_ ? -1 : (da > db_ ? 1 : 0);
+        });
+        return triee.length > 200 ? triee.slice(-200) : triee;
+    }
+};
+
+// Ce que la fin de la fusion nomme, en mots d'utilisateur (tous féminins : « venues »).
+var MOTS_DES_ELEMENTS = {
+    evaluationsSauvegardees: ['évaluation', 'évaluations'],
+    annotationsTravaux: ['annotation', 'annotations'],
+    fichiersTravaux: ['copie', 'copies'],
+    corbeilleFichiers: ['copie à la corbeille', 'copies à la corbeille'],
+    fichiersModelisation: ['copie de modélisation', 'copies de modélisation'],
+    chronoEvaluations: ['mesure du chronomètre', 'mesures du chronomètre']
+};
+var MOTS_AUTRES = ['autre donnée', 'autres données'];
+
+function _a(objet, nomCle) { return Object.prototype.hasOwnProperty.call(objet, nomCle); }
+
+/** Le nom d'une clé sans son trimestre (`a2026_evaluationsSauvegardees` → `evaluationsSauvegardees`). */
+function _nomDeBase(nomCle) {
+    return nomCle.replace(/^[aeh]\d{4}_/, '');
+}
+
+/** #1182 — la famille d'une clé pour la fusion : 'appareil', 'calculee', 'vignette' ou 'donnee'. */
+function _familleDeLaCle(nomCle) {
+    if (nomCle.charAt(0) === '_') return 'appareil';
+    if (REGLAGES_DE_L_APPAREIL.indexOf(nomCle) !== -1) return 'appareil';
+    if (/migration/i.test(nomCle) || /_done$/.test(nomCle) || /^fichierIds_nettoyes_v\d+$/.test(nomCle)) return 'appareil';
+    if (CLES_CALCULEES.indexOf(_nomDeBase(nomCle)) !== -1) return 'calculee';
+    if (nomCle.indexOf('thumbnail_') === 0) return 'vignette';
+    return 'donnee';
+}
+
+/** JSON aux propriétés triées : deux appareils peuvent écrire le même objet dans un autre ordre. */
+function _jsonStable(v) {
+    if (Array.isArray(v)) return '[' + v.map(_jsonStable).join(',') + ']';
+    if (v && typeof v === 'object') {
+        return '{' + Object.keys(v).sort().map(function(k) {
+            return JSON.stringify(k) + ':' + _jsonStable(v[k]);
+        }).join(',') + '}';
+    }
+    return JSON.stringify(v);
+}
+
+function _aUnId(e) {
+    return !!e && typeof e === 'object' && !Array.isArray(e) &&
+        ((typeof e.id === 'string' && e.id !== '') || typeof e.id === 'number');
+}
+
+/** Une liste dont chaque élément porte un `id` (une liste vide en est une). */
+function _estListeAId(v) {
+    return Array.isArray(v) && v.every(_aUnId);
+}
+
+function _estListeDeFichiers(nomCle) {
+    return _clesDesListesDeFichiers([nomCle], LISTES_DE_FICHIERS).length > 0;
+}
+
+function _unionParContenu(local, externe, regle) {
+    var vus = {};
+    var union = [];
+    local.concat(externe).forEach(function(e) {
+        var j = _jsonStable(e);
+        if (vus[j]) return;
+        vus[j] = true;
+        union.push(e);
+    });
+    return regle(union);
+}
+
+/** L'identifiant d'un conflit dans les choix (`cle`, ou `cle` + `id` pour un élément). */
+function _cleDuConflit(c) {
+    return c.id === undefined ? c.cle : c.cle + '\n' + c.id;
+}
+
+/**
+ * #1182 — ce que la fusion ferait de chaque clé (fonction pure, sans ancêtre).
+ * @param {Object} local - les données d'ici
+ * @param {Object} externe - les données du codex externe
+ * @param {{auxArchives?: Object<string, boolean>}} [options] - les ids que la marque D'ICI
+ *   (`_copiesAuxArchives`) dit aux archives : ni leur fichier ni leur fiche ne viennent de l'autre
+ * @returns {{
+ *   identiques: number,
+ *   importees: string[],     clés absentes ici, prises de l'autre codex
+ *   ajouts: Object<string, Object[]>,   par liste à id : les éléments venus de l'autre
+ *   parContenu: Object<string, {ajouts: number}>,  listes à règle d'écrivain (la valeur se
+ *                            recalcule à l'écriture, sur ce qui est lu)
+ *   conflits: Array<{cle: string, id?: (string|number)}>,  ce qui est montré
+ *   vignettes: Object<string, string>,  vignette différente des deux côtés → l'id de sa copie
+ *   versLaCorbeille: Object<string, Array>,  liste des copies → ids qui partent à la corbeille
+ *   calculees: string[], appareil: string[], auxArchives: number
+ * }}
+ */
+function _analyserFusion(local, externe, options) {
+    var auxArchives = (options && options.auxArchives) || {};
     // T2 : le démo ne se fusionne pas — ni écrit, ni supprimé, ni compté.
     var horsFusion = _partDuDemo(local).cles;
-
-    var resultat = {
-        ajouteesLocal: [],
-        ajouteesExterne: [],
-        modifieesLocal: [],
-        modifieesExterne: [],
-        supprimeesLocal: [],
-        supprimeesExterne: [],
-        conflits: [],
-        identiques: 0
+    var res = {
+        identiques: 0, importees: [], ajouts: {}, parContenu: {}, conflits: [], vignettes: {},
+        versLaCorbeille: {}, calculees: [], appareil: [], auxArchives: 0
     };
+    var toutesLesCles = new Set(Object.keys(local).concat(Object.keys(externe)));
 
-    for (var cle of toutesLesCles) {
-        // Ignorer les clés internes du codex
-        if (cle.startsWith('_codex_')) continue;
-        if (_estCleDuDemo(cle) || horsFusion[cle]) continue;
+    for (var nomCle of toutesLesCles) {
+        if (nomCle.startsWith('_codex_')) continue;
+        if (_estCleDuDemo(nomCle) || horsFusion[nomCle]) continue;
 
-        var dansLocal = cle in local;
-        var dansExterne = cle in externe;
-        var dansAncetre = clesAncetre ? (cle in clesAncetre) : false;
+        var dansLocal = nomCle in local;
+        var dansExterne = nomCle in externe;
+        if (dansLocal && dansExterne && JSON.stringify(local[nomCle]) === JSON.stringify(externe[nomCle])) {
+            res.identiques++;
+            continue;
+        }
+        var famille = _familleDeLaCle(nomCle);
+        if (famille === 'appareil') { res.appareil.push(nomCle); continue; }
+        if (famille === 'calculee') { res.calculees.push(nomCle); continue; }
+        if (famille === 'vignette' && auxArchives[nomCle.slice('thumbnail_'.length)]) {
+            if (dansExterne) res.auxArchives++;
+            continue;
+        }
+        if (!dansExterne) continue;                                   // seulement ici : gardée
+        // Une liste à id absente d'ici se fusionne comme une liste vide : ses éléments sont comptés,
+        // et une copie aux archives n'en vient pas.
+        var listeVenue = !dansLocal && _estListeAId(externe[nomCle]) && externe[nomCle].length > 0;
+        if (!dansLocal && !listeVenue) { res.importees.push(nomCle); continue; }
+        var valeurIci = dansLocal ? local[nomCle] : [];
+        if (_jsonStable(valeurIci) === _jsonStable(externe[nomCle])) { res.identiques++; continue; }
+        if (famille === 'vignette') { res.vignettes[nomCle] = nomCle.slice('thumbnail_'.length); continue; }
 
-        var jsonLocal = dansLocal ? JSON.stringify(local[cle]) : undefined;
-        var jsonExterne = dansExterne ? JSON.stringify(externe[cle]) : undefined;
-
-        // Cas trivial : valeurs identiques
-        if (dansLocal && dansExterne && jsonLocal === jsonExterne) {
-            resultat.identiques++;
+        var regle = LISTES_PAR_CONTENU[_nomDeBase(nomCle)];
+        if (regle && Array.isArray(valeurIci) && Array.isArray(externe[nomCle])) {
+            var dejaIci = {};
+            valeurIci.forEach(function(e) { dejaIci[_jsonStable(e)] = true; });
+            res.parContenu[nomCle] = {
+                ajouts: _unionParContenu(valeurIci, externe[nomCle], regle)
+                    .filter(function(e) { return !dejaIci[_jsonStable(e)]; }).length
+            };
             continue;
         }
 
-        if (clesAncetre) {
-            // ── Diff 3 parties (avec ancêtre) ──
-            // Mêmes sémantiques qu'avant : un côté absent garde un hash
-            // undefined, donc « change » vrai face à un ancêtre présent —
-            // exactement comme jsonLocal !== jsonAncetre avec undefined.
-            var hashAncetre = dansAncetre ? clesAncetre[cle] : undefined;
-            var hashLocal = dansLocal ? await _sha256Hex(jsonLocal) : undefined;
-            var hashExterne = dansExterne ? await _sha256Hex(jsonExterne) : undefined;
-            var localChange = hashLocal !== hashAncetre;
-            var externeChange = hashExterne !== hashAncetre;
-
-            if (!dansAncetre && dansLocal && !dansExterne) {
-                // Ajoutée dans local seulement
-                resultat.ajouteesLocal.push(cle);
-            } else if (!dansAncetre && !dansLocal && dansExterne) {
-                // Ajoutée dans externe seulement
-                resultat.ajouteesExterne.push(cle);
-            } else if (!dansAncetre && dansLocal && dansExterne) {
-                // Ajoutée des deux côtés avec valeurs différentes → conflit
-                resultat.conflits.push(cle);
-            } else if (dansAncetre && !dansLocal && dansExterne && !externeChange) {
-                // Supprimée dans local, inchangée dans externe → garder suppression
-                resultat.supprimeesLocal.push(cle);
-            } else if (dansAncetre && dansLocal && !dansExterne && !localChange) {
-                // Supprimée dans externe, inchangée dans local → garder suppression
-                resultat.supprimeesExterne.push(cle);
-            } else if (dansAncetre && !dansLocal && dansExterne && externeChange) {
-                // Supprimée dans local, modifiée dans externe → conflit
-                resultat.conflits.push(cle);
-            } else if (dansAncetre && dansLocal && !dansExterne && localChange) {
-                // Modifiée dans local, supprimée dans externe → conflit
-                resultat.conflits.push(cle);
-            } else if (dansAncetre && !dansLocal && !dansExterne) {
-                // Supprimée des deux côtés → rien à faire
-                resultat.identiques++;
-            } else if (localChange && !externeChange) {
-                // Modifiée seulement dans local
-                resultat.modifieesLocal.push(cle);
-            } else if (!localChange && externeChange) {
-                // Modifiée seulement dans externe
-                resultat.modifieesExterne.push(cle);
-            } else if (localChange && externeChange) {
-                // Modifiée des deux côtés → conflit
-                resultat.conflits.push(cle);
-            }
-        } else {
-            // ── Diff 2 parties (sans ancêtre) ──
-            // Sans ancêtre, on ne peut pas savoir qui a ajouté/modifié quoi.
-            // Seul dans local → garder ; seul dans externe → ajouter ; les deux différents → conflit.
-            if (dansLocal && !dansExterne) {
-                resultat.ajouteesLocal.push(cle);
-            } else if (!dansLocal && dansExterne) {
-                resultat.ajouteesExterne.push(cle);
-            } else {
-                // dansLocal && dansExterne && valeurs différentes (identiques déjà filtré)
-                resultat.conflits.push(cle);
-            }
+        if (_estListeAId(valeurIci) && _estListeAId(externe[nomCle])) {
+            _comparerListeAId(nomCle, valeurIci, externe[nomCle], _estListeDeFichiers(nomCle) ? auxArchives : {}, res);
+            continue;
         }
+
+        res.conflits.push({ cle: nomCle });
     }
 
-    return resultat;
+    _verserALaCorbeille(local, externe, res);
+    return res;
 }
 
 /**
- * Analyse les différences entre les fichiers travaux de deux codex.
- *
- * @param {string[]} travauxLocal - Chemins des fichiers travaux locaux (ex: "travaux/FT_abc.pdf")
- * @param {string[]} travauxExterne - Chemins des fichiers travaux externes
- * @returns {{uniquementLocal: string[], uniquementExterne: string[], communs: string[]}}
+ * #1182 — une liste à id : un élément seulement là-bas vient (sauf une copie aux archives ici) ;
+ * un même id différent des deux côtés est le conflit de cet élément. Écrit dans `res`.
  */
-function _analyserFusionTravaux(travauxLocal, travauxExterne) {
-    var setLocal = new Set(travauxLocal);
-    var setExterne = new Set(travauxExterne);
-
-    var uniquementLocal = [];
-    var uniquementExterne = [];
-    var communs = [];
-
-    travauxLocal.forEach(function(chemin) {
-        if (setExterne.has(chemin)) {
-            communs.push(chemin);
-        } else {
-            uniquementLocal.push(chemin);
-        }
+function _comparerListeAId(nomCle, ici, labas, ignorer, res) {
+    var parId = {};
+    ici.forEach(function(e) { if (!_a(parId, e.id)) parId[e.id] = _jsonStable(e); });
+    var vus = {};
+    var ajouts = [];
+    labas.forEach(function(e) {
+        if (_a(vus, e.id)) return;
+        vus[e.id] = true;
+        if (ignorer[e.id]) { res.auxArchives++; return; }
+        if (!_a(parId, e.id)) { ajouts.push(e); return; }
+        if (parId[e.id] !== _jsonStable(e)) res.conflits.push({ cle: nomCle, id: e.id });
     });
+    if (ajouts.length > 0) res.ajouts[nomCle] = ajouts;
+}
 
-    travauxExterne.forEach(function(chemin) {
-        if (!setLocal.has(chemin)) {
-            uniquementExterne.push(chemin);
+/**
+ * #1182 — une copie à la corbeille d'un côté et dans les travaux de l'autre va à la corbeille
+ * (la corbeille se reprend, rien n'est perdu) : elle ne vient pas de l'autre dans les travaux,
+ * n'y est pas un conflit, et la liste d'ici la retire.
+ */
+function _verserALaCorbeille(local, externe, res) {
+    var vues = {};
+    Object.keys(local).concat(Object.keys(externe)).forEach(function(cleT) {
+        if (vues[cleT] || _nomDeBase(cleT) !== 'fichiersTravaux' || _estCleDuDemo(cleT)) return;
+        vues[cleT] = true;
+        var cleC = cleT.replace('fichiersTravaux', 'corbeilleFichiers');
+        var aLaCorbeille = {};
+        [local[cleC], externe[cleC]].forEach(function(liste) {
+            if (Array.isArray(liste)) liste.forEach(function(e) { if (_aUnId(e)) aLaCorbeille[e.id] = true; });
+        });
+        if (Object.keys(aLaCorbeille).length === 0) return;
+        if (res.ajouts[cleT]) {
+            res.ajouts[cleT] = res.ajouts[cleT].filter(function(e) { return !aLaCorbeille[e.id]; });
+            if (res.ajouts[cleT].length === 0) delete res.ajouts[cleT];
         }
+        res.conflits = res.conflits.filter(function(c) {
+            return !(c.cle === cleT && c.id !== undefined && aLaCorbeille[c.id]);
+        });
+        var aRetirer = (Array.isArray(local[cleT]) ? local[cleT] : [])
+            .filter(function(e) { return _aUnId(e) && aLaCorbeille[e.id]; })
+            .map(function(e) { return e.id; });
+        if (aRetirer.length > 0) res.versLaCorbeille[cleT] = aRetirer;
     });
+}
 
+/**
+ * #1182 — les copies dont la fusion prend la version de l'autre codex : venues de l'autre, ou
+ * leur conflit tranché pour l'autre. Leur fichier (et leur vignette) vient avec elles.
+ * @returns {Object<string, boolean>} ids
+ */
+function _copiesPrisesDeLAutre(analyse, choix) {
+    var ids = {};
+    Object.keys(analyse.ajouts).forEach(function(nomCle) {
+        if (!_estListeDeFichiers(nomCle)) return;
+        analyse.ajouts[nomCle].forEach(function(e) { ids[e.id] = true; });
+    });
+    analyse.conflits.forEach(function(c) {
+        if (c.id !== undefined && _estListeDeFichiers(c.cle) && choix[_cleDuConflit(c)] === 'externe') ids[c.id] = true;
+    });
+    return ids;
+}
+
+/**
+ * #1182 — la valeur d'une clé après la fusion (fonction pure), calculée sur la valeur LUE dans la
+ * file de la clé (db.modifier) : un geste fait pendant la fusion n'est pas écrasé.
+ * @param {string} cle
+ * @param {*} lue - la valeur d'ici au moment d'écrire (null si absente)
+ * @param {Object} externe - les données du codex externe
+ * @param {Object} analyse - rendue par _analyserFusion
+ * @param {Object<string, 'local'|'externe'>} choix - par _cleDuConflit ; sans choix, ici
+ * @param {Object<string, boolean>} [manquants] - copies prises de l'autre dont le fichier n'a pas
+ *   pu venir : marquées « manquant », comme à l'ouverture
+ * @returns {*} la valeur à écrire, ou undefined : rien à écrire
+ */
+function _valeurApresFusion(nomCle, lue, externe, analyse, choix, manquants) {
+    manquants = manquants || {};
+    if (analyse.importees.indexOf(nomCle) !== -1) {
+        return (lue === null || lue === undefined) ? externe[nomCle] : undefined;
+    }
+    if (choix[nomCle] === 'externe' && analyse.conflits.some(function(c) { return c.cle === nomCle && c.id === undefined; })) {
+        return externe[nomCle];
+    }
+    if (analyse.parContenu[nomCle]) {
+        var regle = LISTES_PAR_CONTENU[_nomDeBase(nomCle)];
+        return _unionParContenu(Array.isArray(lue) ? lue : [], externe[nomCle], regle);
+    }
+    if (_a(analyse.vignettes, nomCle)) {
+        return _copiesPrisesDeLAutre(analyse, choix)[analyse.vignettes[nomCle]] ? externe[nomCle] : undefined;
+    }
+
+    var ajouts = analyse.ajouts[nomCle] || [];
+    var remplaces = {};
+    analyse.conflits.forEach(function(c) {
+        if (c.cle === nomCle && c.id !== undefined && choix[_cleDuConflit(c)] === 'externe') remplaces[c.id] = true;
+    });
+    var retires = {};
+    (analyse.versLaCorbeille[nomCle] || []).forEach(function(id) { retires[id] = true; });
+    if (ajouts.length === 0 && Object.keys(remplaces).length === 0 && Object.keys(retires).length === 0) return undefined;
+
+    var deLAutre = {};
+    (Array.isArray(externe[nomCle]) ? externe[nomCle] : []).forEach(function(e) { if (_aUnId(e) && !_a(deLAutre, e.id)) deLAutre[e.id] = e; });
+    var fichiers = _estListeDeFichiers(nomCle);
+    function venu(e) {
+        if (!fichiers || !manquants[e.id]) return e;
+        var copie = Object.assign({}, e);
+        copie.blobStatut = 'manquant';
+        return copie;
+    }
+
+    var liste = (Array.isArray(lue) ? lue : []).filter(function(e) { return !(_aUnId(e) && retires[e.id]); });
+    var remplace = {};
+    liste = liste.map(function(e) {
+        if (!_aUnId(e) || !remplaces[e.id] || remplace[e.id] || !deLAutre[e.id]) return e;
+        remplace[e.id] = true;
+        return venu(deLAutre[e.id]);
+    });
+    var ici = {};
+    liste.forEach(function(e) { if (_aUnId(e)) ici[e.id] = true; });
+    ajouts.forEach(function(e) {
+        if (ici[e.id]) return;
+        ici[e.id] = true;
+        liste.push(venu(e));
+    });
+    return liste;
+}
+
+/** Les clés que la fusion écrit ; la corbeille avant les travaux (une copie y arrive avant de partir). */
+function _clesAEcrire(analyse, choix) {
+    var cles = {};
+    analyse.importees.forEach(function(c) { cles[c] = true; });
+    Object.keys(analyse.ajouts).forEach(function(c) { cles[c] = true; });
+    Object.keys(analyse.parContenu).forEach(function(c) { cles[c] = true; });
+    Object.keys(analyse.vignettes).forEach(function(c) { cles[c] = true; });
+    Object.keys(analyse.versLaCorbeille).forEach(function(c) { cles[c] = true; });
+    analyse.conflits.forEach(function(c) { if (choix[_cleDuConflit(c)] === 'externe') cles[c.cle] = true; });
+    return Object.keys(cles).sort(function(a, b) {
+        var ca = _nomDeBase(a) === 'corbeilleFichiers' ? 0 : 1;
+        var cb = _nomDeBase(b) === 'corbeilleFichiers' ? 0 : 1;
+        return ca - cb;
+    });
+}
+
+/* ----- Les mots ----- */
+
+function _motsDe(nomCle) {
+    return MOTS_DES_ELEMENTS[_nomDeBase(nomCle)] || MOTS_AUTRES;
+}
+
+/** « 14 évaluations, 14 annotations et 2 copies », dans l'ordre de MOTS_DES_ELEMENTS ; '' si rien. */
+function _direLesComptes(comptes) {
+    var ordre = Object.keys(MOTS_DES_ELEMENTS).map(function(k) { return MOTS_DES_ELEMENTS[k][1]; });
+    ordre.push(MOTS_AUTRES[1]);
+    var parties = [];
+    ordre.forEach(function(mot) {
+        var c = comptes[mot];
+        if (c && c.n > 0) parties.push(c.n + ' ' + (c.n > 1 ? c.mots[1] : c.mots[0]));
+    });
+    if (parties.length <= 1) return parties.join('');
+    return parties.slice(0, -1).join(', ') + ' et ' + parties[parties.length - 1];
+}
+
+function _compter(comptes, nomCle, n) {
+    var mots = _motsDe(nomCle);
+    if (!comptes[mots[1]]) comptes[mots[1]] = { mots: mots, n: 0 };
+    comptes[mots[1]].n += n;
+}
+
+/**
+ * #1182 — ce qui entre, compté en mots d'utilisateur. Une clé venue entière de l'autre compte
+ * ses éléments si c'est une liste nommée, sinon pour une « autre donnée ». Les vignettes ne
+ * comptent pas : elles suivent leur copie.
+ * @returns {{venues: string, nbVenues: number, remplacees: string, nbRemplacees: number,
+ *   versLaCorbeille: string, nbVersLaCorbeille: number}}
+ */
+function _direCeQuiEntre(analyse, externe, choix) {
+    var venues = {};
+    var remplacees = {};
+    var corbeille = {};
+    Object.keys(analyse.ajouts).forEach(function(nomCle) { _compter(venues, nomCle, analyse.ajouts[nomCle].length); });
+    Object.keys(analyse.parContenu).forEach(function(nomCle) { _compter(venues, nomCle, analyse.parContenu[nomCle].ajouts); });
+    analyse.importees.forEach(function(nomCle) {
+        if (_familleDeLaCle(nomCle) === 'vignette') return;
+        var v = externe[nomCle];
+        if (v === null || v === undefined || (typeof v === 'object' && Object.keys(v).length === 0)) return;   // une liste vide n'apporte rien
+        var nomme = _a(MOTS_DES_ELEMENTS, _nomDeBase(nomCle)) && Array.isArray(v);
+        _compter(venues, nomme ? cle : '', nomme ? v.length : 1);
+    });
+    analyse.conflits.forEach(function(c) {
+        if (choix[_cleDuConflit(c)] === 'externe') _compter(remplacees, c.id !== undefined ? c.cle : '', 1);
+    });
+    Object.keys(analyse.versLaCorbeille).forEach(function(nomCle) { _compter(corbeille, nomCle, analyse.versLaCorbeille[nomCle].length); });
+    var total = function(comptes) {
+        return Object.keys(comptes).reduce(function(n, mot) { return n + comptes[mot].n; }, 0);
+    };
     return {
-        uniquementLocal: uniquementLocal,
-        uniquementExterne: uniquementExterne,
-        communs: communs
+        venues: _direLesComptes(venues), nbVenues: total(venues),
+        remplacees: _direLesComptes(remplacees), nbRemplacees: total(remplacees),
+        versLaCorbeille: _direLesComptes(corbeille), nbVersLaCorbeille: total(corbeille)
+    };
+}
+
+/** Ce qui nomme un élément à l'écran : sa production et son élève (jamais dans un rapport). */
+function _nommerElement(nomCle, e, donnees) {
+    var prefixe = (/^([aeh]\d{4})_/.exec(nomCle) || [])[1];
+    function cleDe(nom) { return prefixe ? prefixe + '_' + nom : nom; }
+    var production = e.productionNom || '';
+    if (!production && e.productionId && Array.isArray(donnees[cleDe('productions')])) {
+        var p = donnees[cleDe('productions')].find(function(x) { return x && x.id === e.productionId; });
+        if (p) production = p.titre || p.nom || '';
+    }
+    var eleve = e.etudiantNom || '';
+    if (!eleve && e.etudiantDA && Array.isArray(donnees[cleDe('groupeEtudiants')])) {
+        var et = donnees[cleDe('groupeEtudiants')].find(function(x) { return x && x.da === e.etudiantDA; });
+        if (et) eleve = [et.prenom, et.nom].filter(Boolean).join(' ');
+    }
+    var mot = _motsDe(nomCle)[0];
+    var nom = [production, eleve].filter(Boolean).join(' · ') || e.nomFichier || e.titre || e.nom || String(e.id);
+    return mot.charAt(0).toUpperCase() + mot.slice(1) + ' — ' + nom;
+}
+
+function _dateDe(e) {
+    var d = e && (e.dateModification || e.dateEvaluation || e.dateCreation || e.dateImport);
+    return d ? _formaterDateLocale(d) : 'date inconnue';
+}
+
+/** Un conflit dit à l'écran : ce qu'il touche, puis ce qu'il vaut ici et dans l'autre codex. */
+function _direLeConflit(c, donneesLocales, donneesExternes) {
+    if (c.id === undefined) {
+        return {
+            titre: 'La donnée « ' + c.cle + ' »',
+            ici: _resumerValeur(donneesLocales[c.cle]),
+            autre: _resumerValeur(donneesExternes[c.cle])
+        };
+    }
+    var trouver = function(liste) {
+        return (Array.isArray(liste) ? liste : []).find(function(e) { return _aUnId(e) && e.id === c.id; });
+    };
+    var eLocal = trouver(donneesLocales[c.cle]);
+    var eExterne = trouver(donneesExternes[c.cle]);
+    return {
+        titre: _nommerElement(c.cle, eLocal || eExterne, donneesLocales),
+        ici: 'modifiée le ' + _dateDe(eLocal),
+        autre: 'modifiée le ' + _dateDe(eExterne)
     };
 }
 
 /**
- * Formate le résultat d'une analyse de fusion pour affichage utilisateur.
- *
- * @param {Object} analyse - Retour de _analyserFusion()
- * @param {Object} [analyseTravaux] - Retour de _analyserFusionTravaux() (optionnel)
+ * Le résumé d'avant la fusion, en mots d'utilisateur.
+ * @param {Object} analyse - rendue par _analyserFusion
+ * @param {Object} donneesLocales
+ * @param {Object} donneesExternes
  * @returns {string}
  */
-function _formaterAnalyseFusion(analyse, analyseTravaux) {
+function _formaterAnalyseFusion(analyse, donneesLocales, donneesExternes) {
     var lignes = [];
-
-    // Résumé global
-    var totalAuto = analyse.ajouteesLocal.length + analyse.ajouteesExterne.length +
-        analyse.modifieesLocal.length + analyse.modifieesExterne.length +
-        analyse.supprimeesLocal.length + analyse.supprimeesExterne.length;
-    var nbConflits = analyse.conflits.length;
-
-    lignes.push('═══ Analyse de fusion ═══\n');
-    lignes.push('Clés identiques : ' + analyse.identiques);
-    lignes.push('Résolution automatique : ' + totalAuto + ' clé(s)');
-    lignes.push('Conflits à résoudre : ' + nbConflits + '\n');
-
-    // Détails auto-merge
-    if (analyse.ajouteesLocal.length > 0) {
-        lignes.push('Garder (nouvelles locales) : ' + analyse.ajouteesLocal.length);
-        var gl = _grouperParPrefixe(analyse.ajouteesLocal);
-        for (var a = 0; a < gl.length; a++) lignes.push('  + ' + gl[a]);
+    var entre = _direCeQuiEntre(analyse, donneesExternes, {});
+    lignes.push(entre.venues
+        ? 'Viendront de l\'autre codex : ' + entre.venues + '.'
+        : 'Rien de neuf ne viendra de l\'autre codex.');
+    if (entre.versLaCorbeille) {
+        lignes.push('Iront à la corbeille, comme dans l\'autre codex : ' + entre.versLaCorbeille + '.');
+    }
+    lignes.push('Rien n\'est effacé : ce qui n\'est qu\'ici est gardé.');
+    if (analyse.auxArchives > 0) {
+        lignes.push('Les copies aux archives ici ne sont pas reprises de l\'autre codex.');
+    }
+    if (analyse.calculees.length > 0) {
+        lignes.push('Les indices seront recalculés après la fusion.');
+    }
+    if (analyse.conflits.length > 0) {
         lignes.push('');
+        lignes.push('Différent des deux côtés (' + analyse.conflits.length + ') :');
+        analyse.conflits.forEach(function(c) {
+            lignes.push('  ⚠ ' + _direLeConflit(c, donneesLocales, donneesExternes).titre);
+        });
     }
-
-    if (analyse.ajouteesExterne.length > 0) {
-        lignes.push('Importer (nouvelles externes) : ' + analyse.ajouteesExterne.length);
-        var ge = _grouperParPrefixe(analyse.ajouteesExterne);
-        for (var b = 0; b < ge.length; b++) lignes.push('  ← ' + ge[b]);
-        lignes.push('');
-    }
-
-    if (analyse.modifieesLocal.length > 0) {
-        lignes.push('Garder (modifiées localement) : ' + analyse.modifieesLocal.length);
-        var gml = _grouperParPrefixe(analyse.modifieesLocal);
-        for (var c = 0; c < gml.length; c++) lignes.push('  ✓ ' + gml[c]);
-        lignes.push('');
-    }
-
-    if (analyse.modifieesExterne.length > 0) {
-        lignes.push('Importer (modifiées dans externe) : ' + analyse.modifieesExterne.length);
-        var gme = _grouperParPrefixe(analyse.modifieesExterne);
-        for (var d = 0; d < gme.length; d++) lignes.push('  ← ' + gme[d]);
-        lignes.push('');
-    }
-
-    if (nbConflits > 0) {
-        lignes.push('⚠ CONFLITS (' + nbConflits + ') :');
-        var gc = _grouperParPrefixe(analyse.conflits);
-        for (var e = 0; e < gc.length; e++) lignes.push('  ⚠ ' + gc[e]);
-        lignes.push('');
-    }
-
-    // Travaux
-    if (analyseTravaux) {
-        if (analyseTravaux.uniquementExterne.length > 0) {
-            lignes.push('Fichiers travaux à importer : ' + analyseTravaux.uniquementExterne.length);
-        }
-        if (analyseTravaux.communs.length > 0) {
-            lignes.push('Fichiers travaux communs : ' + analyseTravaux.communs.length);
-        }
-    }
-
     return lignes.join('\n');
 }
 
@@ -2526,87 +2601,41 @@ function _resumerValeur(val) {
  * Pilote la résolution interactive des conflits de fusion.
  *
  * Flux :
- * 1. Affiche le résumé global (auto-merge + conflits)
+ * 1. Affiche le résumé (ce qui viendra de l'autre, ce qui diffère des deux côtés)
  * 2. Si conflits > 0, propose une stratégie globale ou "un par un"
- * 3. Retourne un plan de résolution complet
+ * 3. Retourne les choix, par conflit (_cleDuConflit) ; sans choix, la version d'ici
  *
  * @param {Object} analyse - Retour de _analyserFusion()
- * @param {Object} donneesLocales - Données du codex local
+ * @param {Object} donneesLocales - Données d'ici
  * @param {Object} donneesExternes - Données du codex externe
- * @param {Object} [analyseTravaux] - Retour de _analyserFusionTravaux() (optionnel)
- * @returns {{
- *   resolutions: Object.<string, 'local'|'externe'|'supprimer'>,
- *   importerTravaux: string[],
- *   annule: boolean
- * }}
+ * @returns {Promise<{choix: Object<string, 'local'|'externe'>, annule: boolean}>}
  */
-async function _resoudreConflits(analyse, donneesLocales, donneesExternes, analyseTravaux) {
-    // 1. Construire les résolutions automatiques
-    var resolutions = {};
+async function _resoudreConflits(analyse, donneesLocales, donneesExternes) {
+    var choix = {};
+    var resume = _formaterAnalyseFusion(analyse, donneesLocales, donneesExternes);
+    var conflits = analyse.conflits;
 
-    // Clés ajoutées localement → garder (déjà dans IDB)
-    for (var i = 0; i < analyse.ajouteesLocal.length; i++) {
-        resolutions[analyse.ajouteesLocal[i]] = 'local';
-    }
-
-    // Clés ajoutées dans l'externe → importer
-    for (var j = 0; j < analyse.ajouteesExterne.length; j++) {
-        resolutions[analyse.ajouteesExterne[j]] = 'externe';
-    }
-
-    // Modifiées seulement localement → garder
-    for (var k = 0; k < analyse.modifieesLocal.length; k++) {
-        resolutions[analyse.modifieesLocal[k]] = 'local';
-    }
-
-    // Modifiées seulement dans l'externe → importer
-    for (var l = 0; l < analyse.modifieesExterne.length; l++) {
-        resolutions[analyse.modifieesExterne[l]] = 'externe';
-    }
-
-    // Supprimées localement (et inchangées dans externe) → supprimer
-    for (var m = 0; m < analyse.supprimeesLocal.length; m++) {
-        resolutions[analyse.supprimeesLocal[m]] = 'supprimer';
-    }
-
-    // Supprimées dans l'externe (et inchangées dans local) → supprimer
-    for (var n = 0; n < analyse.supprimeesExterne.length; n++) {
-        resolutions[analyse.supprimeesExterne[n]] = 'supprimer';
-    }
-
-    // Travaux à importer (fichiers présents seulement dans l'externe)
-    var importerTravaux = analyseTravaux ? analyseTravaux.uniquementExterne.slice() : [];
-
-    // 2. Afficher le résumé et demander confirmation
-    var resume = _formaterAnalyseFusion(analyse, analyseTravaux);
-
-    if (analyse.conflits.length === 0) {
-        // Pas de conflit — confirmer l'auto-merge
-        var totalActions = Object.keys(resolutions).length + importerTravaux.length;
-        if (totalActions === 0) {
+    if (conflits.length === 0) {
+        if (_clesAEcrire(analyse, choix).length === 0) {
             notifications.info('Les deux codex sont identiques. Rien à fusionner.');
-            return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
+            return { choix: choix, annule: true };
         }
 
         const okAuto = await uiDialogues.confirmerAction({
-            titre: 'Fusion automatique',
-            message: resume + '\n\nAucun conflit. Procéder à la fusion automatique ?',
+            titre: 'Fusionner',
+            message: resume + '\n\nAucun conflit. Fusionner ?',
             texteConfirmer: 'Fusionner',
             preformate: true
         });
-        if (!okAuto) {
-            return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
-        }
-
-        return { resolutions: resolutions, importerTravaux: importerTravaux, annule: false };
+        return { choix: choix, annule: !okAuto };
     }
 
-    // 3. Conflits présents — proposer une stratégie
-    var nbConflits = analyse.conflits.length;
+    // Conflits présents — proposer une stratégie
+    var nbConflits = conflits.length;
     var strategieTexte = resume + '\n\n' +
         'Comment résoudre les ' + nbConflits + ' conflit(s) ?\n\n' +
-        '1. Garder local pour tous les conflits\n' +
-        '2. Prendre externe pour tous les conflits\n' +
+        '1. Garder la version d\'ici pour tous\n' +
+        '2. Prendre celle de l\'autre codex pour tous\n' +
         '3. Résoudre un par un\n' +
         '4. Annuler la fusion\n\n' +
         'Entrer 1, 2, 3 ou 4 :';
@@ -2617,33 +2646,22 @@ async function _resoudreConflits(analyse, donneesLocales, donneesExternes, analy
         preformate: true
     });
     if (!choixStrategie || choixStrategie.trim() === '4') {
-        return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
+        return { choix: choix, annule: true };
     }
 
     var strategie = parseInt(choixStrategie.trim(), 10);
 
-    if (strategie === 1) {
-        // Tout garder local
-        for (var p = 0; p < analyse.conflits.length; p++) {
-            resolutions[analyse.conflits[p]] = 'local';
-        }
-    } else if (strategie === 2) {
-        // Tout prendre externe
-        for (var q = 0; q < analyse.conflits.length; q++) {
-            resolutions[analyse.conflits[q]] = 'externe';
-        }
+    if (strategie === 1 || strategie === 2) {
+        conflits.forEach(function(c) { choix[_cleDuConflit(c)] = strategie === 1 ? 'local' : 'externe'; });
     } else if (strategie === 3) {
-        // Résoudre un par un
-        for (var r = 0; r < analyse.conflits.length; r++) {
-            var cle = analyse.conflits[r];
-            var valLocal = donneesLocales[cle];
-            var valExterne = donneesExternes[cle];
+        for (var r = 0; r < conflits.length; r++) {
+            var dit = _direLeConflit(conflits[r], donneesLocales, donneesExternes);
 
-            var texteConflit = 'Conflit ' + (r + 1) + '/' + nbConflits + ' : ' + cle + '\n\n' +
-                'Local :  ' + _resumerValeur(valLocal) + '\n' +
-                'Externe : ' + _resumerValeur(valExterne) + '\n\n' +
-                '1. Garder local\n' +
-                '2. Prendre externe\n' +
+            var texteConflit = 'Conflit ' + (r + 1) + '/' + nbConflits + ' : ' + dit.titre + '\n\n' +
+                'Ici :           ' + dit.ici + '\n' +
+                'Autre codex :   ' + dit.autre + '\n\n' +
+                '1. Garder la version d\'ici\n' +
+                '2. Prendre celle de l\'autre codex\n' +
                 '3. Ignorer (ne pas toucher)\n\n' +
                 'Entrer 1, 2 ou 3 :';
 
@@ -2660,7 +2678,7 @@ async function _resoudreConflits(analyse, donneesLocales, donneesExternes, analy
                     texteConfirmer: 'Annuler la fusion',
                     variante: 'danger'
                 })) {
-                    return { resolutions: {}, importerTravaux: [], annule: true };
+                    return { choix: {}, annule: true };
                 }
                 // Re-poser la question pour ce conflit
                 r--;
@@ -2669,19 +2687,19 @@ async function _resoudreConflits(analyse, donneesLocales, donneesExternes, analy
 
             var choixNum = parseInt(choixConflit.trim(), 10);
             if (choixNum === 1) {
-                resolutions[cle] = 'local';
+                choix[_cleDuConflit(conflits[r])] = 'local';
             } else if (choixNum === 2) {
-                resolutions[cle] = 'externe';
+                choix[_cleDuConflit(conflits[r])] = 'externe';
             }
-            // choixNum === 3 ou autre → pas de résolution, on ne touche pas
+            // choixNum === 3 ou autre → pas de choix : la version d'ici reste
         }
     } else {
         // Choix invalide → annuler
         notifications.warning('Choix invalide. Fusion annulée.');
-        return { resolutions: resolutions, importerTravaux: importerTravaux, annule: true };
+        return { choix: choix, annule: true };
     }
 
-    return { resolutions: resolutions, importerTravaux: importerTravaux, annule: false };
+    return { choix: choix, annule: false };
 }
 
 /* ===============================
@@ -2805,33 +2823,45 @@ function _filtrerTravauxPourExport(donneesFiltrees, tousLesTravauxChemins) {
    FUSION DES TRAVAUX / BLOBS (Phase 3)
    =============================== */
 
+/** L'id d'une copie d'après son chemin dans le codex (« travaux/FT_abc.pdf » → « FT_abc »). */
+function _idDuChemin(chemin) {
+    var nom = chemin.replace(DOSSIER_TRAVAUX + '/', '');
+    var point = nom.lastIndexOf('.');
+    return point > 0 ? nom.substring(0, point) : nom;
+}
+
 /**
- * Importe les blobs travaux d'un codex externe qui ne sont pas dans le codex local.
+ * Importe les fichiers des copies que la fusion prend de l'autre codex. Leurs fiches, elles, sont
+ * écrites par la fusion (_ecrireLaFusion, #1182) : ici, seulement les fichiers.
  *
  * @param {JSZip} zipExterne - Instance JSZip du codex externe (de lireCodexExterne._zip)
  * @param {Object} donneesExternes - donnees.json du codex externe
  * @param {string[]} cheminsAImporter - Chemins des fichiers à importer (ex: "travaux/FT_abc.pdf")
  * @param {Function} [onProgression] - Callback optionnel (pourcentage, message)
- * @returns {Promise<{importes: number, ignores: number, erreurs: string[]}>}
+ * @returns {Promise<{importes: number, ignores: number, erreurs: string[], manquants: Object<string, boolean>}>}
+ *   `manquants` : les ids dont le fichier n'est pas venu
  */
 async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, onProgression) {
     if (!cheminsAImporter || cheminsAImporter.length === 0) {
-        return { importes: 0, ignores: 0, erreurs: [] };
+        return { importes: 0, ignores: 0, erreurs: [], manquants: {} };
     }
 
+    var manquants = {};
     if (typeof travauxStockage === 'undefined') {
         console.warn('📂 Fusion : travauxStockage non disponible, blobs ignorés');
-        return { importes: 0, ignores: cheminsAImporter.length, erreurs: ['travauxStockage non disponible'] };
+        cheminsAImporter.forEach(function(ch) { manquants[_idDuChemin(ch)] = true; });
+        return { importes: 0, ignores: cheminsAImporter.length, erreurs: ['travauxStockage non disponible'], manquants: manquants };
     }
 
-    // Construire un index id → métadonnées depuis donneesExternes.fichiersTravaux
-    var cleFT = Object.keys(donneesExternes).find(function(c) { return c.includes('fichiersTravaux'); });
+    // Un index id → fiche, depuis TOUTES les listes de fichiers, tous trimestres (H5, #1014,
+    // #1182 : `.find` ne lisait que la première).
     var indexFT = {};
-    if (cleFT && Array.isArray(donneesExternes[cleFT])) {
-        donneesExternes[cleFT].forEach(function(f) {
-            indexFT[f.id] = f;
+    _clesDesListesDeFichiers(Object.keys(donneesExternes), LISTES_DE_FICHIERS).forEach(function(c) {
+        if (!Array.isArray(donneesExternes[c.cle])) return;
+        donneesExternes[c.cle].forEach(function(f) {
+            if (f && !indexFT[f.id]) indexFT[f.id] = f;
         });
-    }
+    });
 
     var importes = 0;
     var ignores = 0;
@@ -2840,10 +2870,8 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
     for (var i = 0; i < cheminsAImporter.length; i++) {
         var chemin = cheminsAImporter[i];
 
-        // Extraire l'ID du chemin (ex: "travaux/FT_abc123.pdf" → "FT_abc123")
-        var nomFichier = chemin.replace(DOSSIER_TRAVAUX + '/', '');
-        var pointIndex = nomFichier.lastIndexOf('.');
-        var idFichier = pointIndex > 0 ? nomFichier.substring(0, pointIndex) : nomFichier;
+        var idFichier = _idDuChemin(chemin);
+        manquants[idFichier] = true;
 
         try {
             var entree = zipExterne.file(chemin);
@@ -2882,6 +2910,7 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
             var productionId = meta ? meta.productionId : '';
 
             await travauxStockage.stockerBlob(idFichier, blobData, etudiantDA, productionId);
+            delete manquants[idFichier];
             importes++;
         } catch (e) {
             erreurs.push(chemin + ' : ' + e.message);
@@ -2897,40 +2926,7 @@ async function _fusionnerTravaux(zipExterne, donneesExternes, cheminsAImporter, 
         }
     }
 
-    // Fusionner la liste fichiersTravaux locale avec les nouvelles entrées
-    // #522 lot 5 : la liste locale est lue, complétée et écrite dans la file de la clé
-    // (db.modifier) — une copie enregistrée pendant la fusion n'est plus écrasée.
-    if (cleFT && importes > 0) {
-
-        // Set d'IDs reellement importes : on extrait l'id depuis chaque chemin
-        // avec la meme logique que dans la boucle d'import (lastIndexOf('.')).
-        // Plus sur que l'ancien `ch.indexOf(f.id) !== -1` qui acceptait toute
-        // sous-chaine -- ex: f.id = 'FT_abc' matchait faussement chemin
-        // 'travaux/FT_abc_extended.pdf'. (H4)
-        var idsImportes = new Set();
-        cheminsAImporter.forEach(function(ch) {
-            var nom = ch.replace(DOSSIER_TRAVAUX + '/', '');
-            var pi = nom.lastIndexOf('.');
-            var id = pi > 0 ? nom.substring(0, pi) : nom;
-            idsImportes.add(id);
-        });
-
-        await db.modifier(cleFT, function(lue) {
-            var listeLocale = lue || [];
-            var idsLocaux = new Set(listeLocale.map(function(f) { return f.id; }));
-            var ajoutees = 0;
-            donneesExternes[cleFT].forEach(function(f) {
-                if (!idsLocaux.has(f.id) && idsImportes.has(f.id)) {
-                    listeLocale.push(f);
-                    ajoutees++;
-                }
-            });
-            return ajoutees > 0 ? listeLocale : undefined;
-        }, []);
-    }
-
-
-    return { importes: importes, ignores: ignores, erreurs: erreurs };
+    return { importes: importes, ignores: ignores, erreurs: erreurs, manquants: manquants };
 }
 
 /* ===============================
@@ -3976,6 +3972,88 @@ async function actionRenommer() {
  * Fusionner un codex externe avec le codex local.
  * Flux complet : file picker → lecture externe → analyse → résolution → application → notification.
  */
+/** #1182 — les ids que la marque d'ICI dit aux archives (reserve-copies.js, son propriétaire). */
+function _copiesAuxArchivesIci() {
+    return (window.ReserveCopies && typeof window.ReserveCopies.tousLesIdsMarques === 'function')
+        ? window.ReserveCopies.tousLesIdsMarques() : {};
+}
+
+/**
+ * #1182 — écrit la fusion clé par clé, chacune dans sa file (db.modifier) : la valeur est
+ * recalculée sur ce qui est lu au moment d'écrire, un geste fait entre-temps n'est pas écrasé.
+ * @returns {Promise<number>} le nombre de clés écrites
+ */
+async function _ecrireLaFusion(analyse, externe, choix, manquants, onProgression) {
+    var cles = _clesAEcrire(analyse, choix);
+    var ecrites = 0;
+    for (var i = 0; i < cles.length; i++) {
+        var nomCle = cles[i];
+        var ecrite = await db.modifier(nomCle, function(lue) {
+            return _valeurApresFusion(nomCle, lue, externe, analyse, choix, manquants);
+        }, null);
+        if (ecrite !== undefined) ecrites++;
+        if (onProgression && i % 10 === 0) {
+            onProgression(Math.round((i / cles.length) * 100), (i + 1) + '/' + cles.length);
+            await _yield();
+        }
+    }
+    return ecrites;
+}
+
+/**
+ * #1182 — les valeurs calculées ne viennent ni d'ici ni de l'autre codex : leur module les
+ * recalcule. Mesuré le 29 oct. : rien ne le garantit au retour à l'écran (le drapeau de
+ * démarrage `recalculerIndicesCP` de main.js n'a aucun écrivain), d'où l'appel. L'assiduité
+ * (indices.js) recalcule A, puis C et P, pour le trimestre actif ; les patterns RàI se
+ * recalculent à l'affichage du tableau de bord (tableau-bord-apercu.js). Les autres trimestres
+ * gardent leurs valeurs d'ici.
+ * @returns {boolean} recalculé
+ */
+function _recalculerApresFusion() {
+    if (typeof window.calculerEtSauvegarderIndicesAssiduite !== 'function') return false;
+    try {
+        window.calculerEtSauvegarderIndicesAssiduite();
+        return true;
+    } catch (e) {
+        console.warn('[Codex] Recalcul des indices après la fusion :', e && e.message);
+        return false;
+    }
+}
+
+/** #1182 — la fin de la fusion, en mots d'utilisateur. */
+function _direLaFinDeLaFusion(nomExterne, analyse, externe, choix, statsTravaux, recalcule) {
+    var entre = _direCeQuiEntre(analyse, externe, choix);
+    var lignes = ['Codex externe : « ' + nomExterne + ' »', ''];
+    lignes.push(entre.venues
+        ? entre.venues + ' ' + (entre.nbVenues > 1 ? 'venues' : 'venue') + ' de l\'autre codex.'
+        : 'Rien de neuf n\'est venu de l\'autre codex.');
+    if (entre.remplacees) {
+        lignes.push(entre.remplacees + ' ' + (entre.nbRemplacees > 1 ? 'remplacées' : 'remplacée') +
+            ' par la version de l\'autre codex.');
+    }
+    if (entre.versLaCorbeille) {
+        lignes.push(entre.versLaCorbeille + ' ' + (entre.nbVersLaCorbeille > 1 ? 'mises' : 'mise') +
+            ' à la corbeille, comme dans l\'autre codex.');
+    }
+    var gardes = analyse.conflits.filter(function(c) { return choix[_cleDuConflit(c)] !== 'externe'; }).length;
+    if (gardes > 0) {
+        lignes.push(gardes + (gardes > 1 ? ' différences gardées' : ' différence gardée') + ' telles qu\'ici.');
+    }
+    if (statsTravaux.importes > 0) {
+        lignes.push(statsTravaux.importes + (statsTravaux.importes > 1 ? ' fichiers de copies reçus.' : ' fichier de copie reçu.'));
+    }
+    if (statsTravaux.erreurs.length > 0) {
+        lignes.push(statsTravaux.erreurs.length + ' fichier(s) de copie non reçu(s) : leur copie est dite « manquante ».');
+    }
+    if (analyse.auxArchives > 0) {
+        lignes.push('Les copies aux archives ici n\'ont pas été reprises de l\'autre codex.');
+    }
+    if (recalcule) lignes.push('Les indices ont été recalculés.');
+    lignes.push('');
+    lignes.push('Pense à mettre à jour le codex pour y mettre la fusion.');
+    return lignes.join('\n');
+}
+
 async function actionFusionner() {
     _fermerMenu();
 
@@ -4016,14 +4094,8 @@ async function actionFusionner() {
         }
     }
 
-    // 4. Chercher un ancêtre commun (dernier snapshot partagé, index haché)
-    _majProgression(30, 'Recherche d\'un ancêtre commun…');
-    await _yield();
-    var ancetre = await _lireSnapshotAvant();
-
-    // 4 bis. Garde de modèle antérieur (#335 Lot A) : un externe d'un modèle
-    // divergent régresserait silencieusement toute clé non modifiée localement
-    // (mécanique 3-way correcte, résultat désastreux).
+    // 4. Garde de modèle antérieur (#335 Lot A) : un externe d'un modèle divergent
+    // apporterait des éléments d'un autre modèle de données.
     var detectionModeleFusion = _detecterModeleAnterieur(externe.donnees, externe.manifeste || null);
     if (detectionModeleFusion) {
         _masquerProgression();
@@ -4037,79 +4109,50 @@ async function actionFusionner() {
             notifications.warning('Fusion annulée', 'Ton espace de travail n\'a pas été modifié.');
             return;
         }
-        _majProgression(35, 'Analyse des différences…');
     }
 
-    // 5. Analyser les différences (données)
+    // 5. Analyser, élément par élément (#1182)
     _majProgression(35, 'Analyse des différences…');
     await _yield();
-
-    var analyse = await _analyserFusion(donneesLocales, externe.donnees, ancetre);
-
-    // 6. Analyser les différences (travaux/blobs)
-    // Construire la liste des chemins locaux
-    var travauxLocaux = [];
-    var cleFTLocale = toutesLesCles.find(function(c) { return c.includes('fichiersTravaux'); });
-    if (cleFTLocale && donneesLocales[cleFTLocale] && Array.isArray(donneesLocales[cleFTLocale])) {
-        donneesLocales[cleFTLocale].forEach(function(f) {
-            var ext = (f.nomFichier || 'bin').split('.').pop();
-            travauxLocaux.push(DOSSIER_TRAVAUX + '/' + f.id + '.' + ext);
-        });
-    }
-
-    var analyseTravaux = _analyserFusionTravaux(travauxLocaux, externe.travauxListe);
+    var auxArchives = _copiesAuxArchivesIci();
+    var analyse = _analyserFusion(donneesLocales, externe.donnees, { auxArchives: auxArchives });
 
     _masquerProgression();
 
-    // 7. Résolution des conflits (interaction utilisateur)
-    var plan = await _resoudreConflits(analyse, donneesLocales, externe.donnees, analyseTravaux);
+    // 6. Résolution des conflits (interaction utilisateur)
+    var plan = await _resoudreConflits(analyse, donneesLocales, externe.donnees);
 
     if (plan.annule) {
         return;
     }
 
-    // 8. Appliquer les résolutions dans IndexedDB
+    // 7. Les fichiers des copies prises de l'autre codex, avant leurs fiches : une fiche dont le
+    //    fichier n'a pas pu venir est écrite « manquante ». Jamais une copie aux archives ici.
     _afficherProgression('Application de la fusion');
-    var clesResolution = Object.keys(plan.resolutions);
-    var nbAppliquees = 0;
-    var nbSupprimees = 0;
-
-    for (var j = 0; j < clesResolution.length; j++) {
-        var cle = clesResolution[j];
-        var action = plan.resolutions[cle];
-
-        if (action === 'externe') {
-            // Écrire la valeur externe dans IDB
-            await db.set(cle, externe.donnees[cle]);
-            nbAppliquees++;
-        } else if (action === 'supprimer') {
-            // Supprimer la clé de IDB
-            await db.remove(cle);
-            nbSupprimees++;
+    var prises = _copiesPrisesDeLAutre(analyse, plan.choix);
+    var chemins = (externe.travauxListe || []).filter(function(ch) {
+        var id = _idDuChemin(ch);
+        return prises[id] && !auxArchives[id];
+    });
+    var statsTravaux = await _fusionnerTravaux(
+        externe._zip, externe.donnees, chemins,
+        function(pct, msg) {
+            _majProgression(Math.round(pct * 0.5), 'Import des fichiers des copies…', msg);
         }
-        // 'local' → rien à faire, la valeur est déjà en IDB
+    );
 
-        if (j % 10 === 0) {
-            _majProgression(Math.round((j / clesResolution.length) * 60),
-                'Écriture des données…', (j + 1) + '/' + clesResolution.length);
-            await _yield();
-        }
-    }
+    // 8. Les données, clé par clé
+    var nbEcrites = await _ecrireLaFusion(analyse, externe.donnees, plan.choix, statsTravaux.manquants,
+        function(pct, msg) {
+            _majProgression(50 + Math.round(pct * 0.4), 'Écriture des données…', msg);
+        });
 
     // 9. Synchroniser le cache localStorage
-    _majProgression(60, 'Synchronisation du cache…');
+    _majProgression(90, 'Synchronisation du cache…');
     await db.syncToLocalStorageCache();
 
-    // 10. Importer les blobs travaux externes
-    var statsTravaux = { importes: 0, ignores: 0, erreurs: [] };
-    if (plan.importerTravaux.length > 0) {
-        statsTravaux = await _fusionnerTravaux(
-            externe._zip, externe.donnees, plan.importerTravaux,
-            function(pct, msg) {
-                _majProgression(60 + Math.round(pct * 0.35), 'Import des fichiers travaux…', msg);
-            }
-        );
-    }
+    // 10. Les valeurs calculées
+    var recalcule = nbEcrites > 0 ? _recalculerApresFusion() : false;
 
     // 11. Marquer comme modifié (il faudra réenregistrer le codex)
     marquerModification();
@@ -4119,30 +4162,11 @@ async function actionFusionner() {
     await new Promise(function(r) { setTimeout(r, 800); });
     _masquerProgression();
 
-    var nbExternes = 0;
-    var nbLocaux = 0;
-    for (var k = 0; k < clesResolution.length; k++) {
-        if (plan.resolutions[clesResolution[k]] === 'externe') nbExternes++;
-        else if (plan.resolutions[clesResolution[k]] === 'local') nbLocaux++;
-    }
-
-    var resume = 'Fusion terminée !\n\n' +
-        'Codex externe : "' + externe.manifeste.nom + '"\n\n' +
-        'Clés identiques : ' + analyse.identiques + '\n' +
-        'Gardées (locales) : ' + nbLocaux + '\n' +
-        'Importées (externes) : ' + nbExternes + '\n' +
-        'Supprimées : ' + nbSupprimees + '\n';
-
-    if (statsTravaux.importes > 0) {
-        resume += 'Fichiers travaux importés : ' + statsTravaux.importes + '\n';
-    }
-    if (statsTravaux.erreurs.length > 0) {
-        resume += 'Erreurs fichiers : ' + statsTravaux.erreurs.length + '\n';
-    }
-
-    resume += '\nPense à mettre à jour le codex pour y mettre la fusion.';
-
-    await uiDialogues.informer({ titre: 'Fusion terminée', message: resume, preformate: true });
+    await uiDialogues.informer({
+        titre: 'Fusion terminée',
+        message: _direLaFinDeLaFusion(externe.manifeste.nom, analyse, externe.donnees, plan.choix, statsTravaux, recalcule),
+        preformate: true
+    });
 
 
     } catch (erreur) {
@@ -4197,28 +4221,20 @@ async function actionComparer() {
             if (val !== null) donneesLocales[clesFiltrees[i]] = val;
         }
 
-        _majProgression(50, 'Recherche d\'un ancêtre commun…');
-        await _yield();
-        var ancetre = await _lireSnapshotAvant();
-
         _majProgression(65, 'Analyse des différences…');
         await _yield();
-        var analyse = await _analyserFusion(donneesLocales, externe.donnees, ancetre);
-
-        var travauxLocaux = [];
-        var cleFTLocale = toutesLesCles.find(function(c) { return c.includes('fichiersTravaux'); });
-        if (cleFTLocale && donneesLocales[cleFTLocale] && Array.isArray(donneesLocales[cleFTLocale])) {
-            donneesLocales[cleFTLocale].forEach(function(f) {
-                var ext = (f.nomFichier || 'bin').split('.').pop();
-                travauxLocaux.push(DOSSIER_TRAVAUX + '/' + f.id + '.' + ext);
-            });
-        }
-        var analyseTravaux = _analyserFusionTravaux(travauxLocaux, externe.travauxListe);
+        var auxArchives = _copiesAuxArchivesIci();
+        var analyse = _analyserFusion(donneesLocales, externe.donnees, { auxArchives: auxArchives });
+        var prises = _copiesPrisesDeLAutre(analyse, {});
+        var fichiersAImporter = (externe.travauxListe || []).filter(function(ch) {
+            var id = _idDuChemin(ch);
+            return prises[id] && !auxArchives[id];
+        }).length;
 
         _majProgression(90, 'Construction du rapport…');
         await _yield();
 
-        var rapport = _construireRapportComparaison(externe, analyse, analyseTravaux);
+        var rapport = _construireRapportComparaison(externe, analyse, fichiersAImporter);
 
         _masquerProgression();
         _afficherModalComparaison(externe, analyse, rapport);
@@ -4234,7 +4250,7 @@ async function actionComparer() {
  * Construit le rapport texte détaillé (liste exhaustive des clés par catégorie).
  * @returns {string}
  */
-function _construireRapportComparaison(externe, analyse, analyseTravaux) {
+function _construireRapportComparaison(externe, analyse, fichiersAImporter) {
     var lignes = [];
     var nomLocal = _etat.nom || '(codex local)';
     var nomExterne = (externe.manifeste && externe.manifeste.nom) || '(codex externe)';
@@ -4256,41 +4272,43 @@ function _construireRapportComparaison(externe, analyse, analyseTravaux) {
     }
     lignes.push('');
 
-    var totalAuto = analyse.ajouteesLocal.length + analyse.ajouteesExterne.length +
-        analyse.modifieesLocal.length + analyse.modifieesExterne.length +
-        analyse.supprimeesLocal.length + analyse.supprimeesExterne.length;
+    var entre = _direCeQuiEntre(analyse, externe.donnees, {});
 
     lignes.push('───────── Synthèse ─────────');
-    lignes.push('Clés identiques            : ' + analyse.identiques);
-    lignes.push('Différences sans conflit   : ' + totalAuto);
-    lignes.push('Conflits (modif. des deux) : ' + analyse.conflits.length);
-    if (analyseTravaux) {
-        lignes.push('Fichiers travaux communs   : ' + analyseTravaux.communs.length);
-        lignes.push('Fichiers travaux externes  : ' + analyseTravaux.uniquementExterne.length);
-    }
+    lignes.push('Clés identiques             : ' + analyse.identiques);
+    lignes.push('Viendraient de l\'autre codex : ' + (entre.venues || 'rien'));
+    if (entre.versLaCorbeille) lignes.push('Iraient à la corbeille      : ' + entre.versLaCorbeille);
+    lignes.push('Différents des deux côtés   : ' + analyse.conflits.length);
+    lignes.push('Fichiers de copies à recevoir : ' + fichiersAImporter);
+    if (analyse.auxArchives > 0) lignes.push('Aux archives ici, non repris : ' + analyse.auxArchives);
+    lignes.push('Rien n\'est effacé : ce qui n\'est qu\'ici est gardé.');
     lignes.push('');
 
-    function bloc(titre, cles, marqueur) {
-        if (!cles || cles.length === 0) return;
-        lignes.push('───────── ' + titre + ' (' + cles.length + ') ─────────');
-        var triees = cles.slice().sort();
-        for (var i = 0; i < triees.length; i++) {
-            lignes.push('  ' + marqueur + ' ' + triees[i]);
+    function bloc(titre, items, marqueur) {
+        if (!items || items.length === 0) return;
+        lignes.push('───────── ' + titre + ' (' + items.length + ') ─────────');
+        var tries = items.slice().sort();
+        for (var i = 0; i < tries.length; i++) {
+            lignes.push('  ' + marqueur + ' ' + tries[i]);
         }
         lignes.push('');
     }
 
-    bloc('Présent uniquement dans local', analyse.ajouteesLocal, '+');
-    bloc('Présent uniquement dans externe', analyse.ajouteesExterne, '←');
-    bloc('Modifié dans local seulement', analyse.modifieesLocal, '✓');
-    bloc('Modifié dans externe seulement', analyse.modifieesExterne, '←');
-    bloc('Supprimé dans local seulement', analyse.supprimeesLocal, '✗');
-    bloc('Supprimé dans externe seulement', analyse.supprimeesExterne, '✗');
-    bloc('CONFLITS — modifié des deux côtés', analyse.conflits, '⚠');
-
-    if (analyseTravaux && analyseTravaux.uniquementExterne.length > 0) {
-        bloc('Fichiers travaux présents uniquement dans externe', analyseTravaux.uniquementExterne, '←');
-    }
+    // Le rapport se copie et s'envoie : des clés et des ids, jamais de noms.
+    bloc('Éléments qui viendraient de l\'autre codex, par clé', Object.keys(analyse.ajouts).map(function(c) {
+        return c + ' : ' + analyse.ajouts[c].length;
+    }).concat(Object.keys(analyse.parContenu).map(function(c) {
+        return c + ' : ' + analyse.parContenu[c].ajouts;
+    })), '←');
+    bloc('Clés absentes ici, qui viendraient de l\'autre codex', analyse.importees, '←');
+    bloc('Vers la corbeille, par clé', Object.keys(analyse.versLaCorbeille).map(function(c) {
+        return c + ' : ' + analyse.versLaCorbeille[c].length;
+    }), '✗');
+    bloc('CONFLITS — différent des deux côtés', analyse.conflits.map(function(c) {
+        return c.id === undefined ? c.cle : c.cle + ' · ' + c.id;
+    }), '⚠');
+    bloc('Réglages de cet appareil (gardés tels qu\'ici)', analyse.appareil, '·');
+    bloc('Valeurs calculées (recalculées après la fusion)', analyse.calculees, '·');
 
     lignes.push('───────── Fin du rapport ─────────');
     return lignes.join('\n');
@@ -4308,13 +4326,10 @@ function _afficherModalComparaison(externe, analyse, rapport) {
 
     var resume = document.getElementById('codex-comparer-resume');
     if (resume) {
-        var nbTotal = analyse.ajouteesLocal.length + analyse.ajouteesExterne.length +
-            analyse.modifieesLocal.length + analyse.modifieesExterne.length +
-            analyse.supprimeesLocal.length + analyse.supprimeesExterne.length +
-            analyse.conflits.length;
+        var entre = _direCeQuiEntre(analyse, externe.donnees, {});
         resume.textContent = 'Comparaison avec « ' + nomExterne + ' » : ' +
-            analyse.identiques + ' clé(s) identique(s), ' +
-            nbTotal + ' différence(s), ' +
+            analyse.identiques + ' clé(s) identique(s) ; ' +
+            (entre.venues ? entre.venues + ' viendraient de l\'autre codex' : 'rien de neuf ne viendrait de l\'autre codex') + ' ; ' +
             analyse.conflits.length + ' conflit(s).';
     }
 
@@ -4700,10 +4715,16 @@ window.Codex = {
     construireAvertissementCopiesManquantes: construireAvertissementCopiesManquantes,
     construireAvertissementSelectionIncomplete: construireAvertissementSelectionIncomplete,
     evaluerPrevolStockage: evaluerPrevolStockage,
-    // Internes exposés pour les tests Vitest (#334 C — fusion 3-way sensible ;
+    // Internes exposés pour les tests Vitest (#1182 — la fusion copie par copie ;
     // #335 C — vérification de persistance post-import ; #336 D — purge)
     _analyserFusion: _analyserFusion,
-    _indexerSnapshot: _indexerSnapshot,
+    _valeurApresFusion: _valeurApresFusion,
+    _clesAEcrire: _clesAEcrire,
+    _copiesPrisesDeLAutre: _copiesPrisesDeLAutre,
+    _direLaFinDeLaFusion: _direLaFinDeLaFusion,
+    _ecrireLaFusion: _ecrireLaFusion,
+    _recalculerApresFusion: _recalculerApresFusion,
+    _familleDeLaCle: _familleDeLaCle,
     _verifierEcritureTemoins: _verifierEcritureTemoins,
     _detecterModeleAnterieur: _detecterModeleAnterieur,
     _planifierPurgeEspace: _planifierPurgeEspace,

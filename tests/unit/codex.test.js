@@ -77,11 +77,6 @@ describe('codex.js — sanity load', () => {
 //     it.todo('NOM_MANIFESTE_ANCIEN ("classeur-manifeste.json") accepté à l\'import');
 // });
 //
-// describe('codex.js — fusion 3-way', () => {
-//     it.todo('_analyserFusion détecte les conflits sur valeurs scalaires divergentes');
-//     it.todo('_analyserFusionTravaux gère un travail supprimé localement et modifié externe');
-// });
-//
 // describe('codex.js — comparaison (#243)', () => {
 //     it.todo('_construireRapportComparaison produit toutes les catégories attendues');
 // });

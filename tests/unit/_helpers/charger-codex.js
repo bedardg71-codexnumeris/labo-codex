@@ -19,8 +19,10 @@ const racineProjet = path.resolve(__dirname, '..', '..', '..');
 // `window.travauxImport`. Ils sont injectables par `globaux`, et valent
 // `undefined` quand on ne les passe pas : `typeof travauxStockage` répond
 // alors toujours 'undefined', donc les appels existants ne changent pas.
-export function chargerCodex(dbOverride = null, globaux = {}) {
-    const code = readFileSync(path.join(racineProjet, 'js/codex.js'), 'utf8');
+// #1182 : `transformer` réécrit la source avant de l'évaluer — le break-test d'un banc (le
+// défaut remis, le banc doit rougir).
+export function chargerCodex(dbOverride = null, globaux = {}, transformer = (source) => source) {
+    const code = transformer(readFileSync(path.join(racineProjet, 'js/codex.js'), 'utf8'));
 
     const fauxWindow = {
         addEventListener: () => {},
