@@ -15,6 +15,9 @@
  *      récits (Standards, sommatif), il se dit « en double · comptée une seule fois » (mot neuf 3, retouche R3).
  *   F. Lot 2 (29 oct. 2026) : les lecteurs secondaires (dépistage, panneau « Engagement », « ≥ Min. », export recherche et
  *      profils RLO, « à venir » du PDF) lisent le pool de la note ; GREG-0 à 2 inchangés, CHIM-1, 3, 5 : le pool, ni plus ni moins.
+ *   G. Lot 3 (29 oct. 2026) : sans « Artefact », la zone « À vérifier » des Productions dit le texte 1 (TEXTES, lu dans le fichier)
+ *      au lieu des règles 3a, 3b et 5 ; la pondération n'est plus exigée en Standards ; la définition « Évaluation terminale »
+ *      dit le texte 2. Avec des artefacts (GREG), les avertissements d'avant, mot pour mot.
  *
  * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
  * Stock : rien n'est réécrit ; tout se lit au calcul (les captures déjà prises gardent leur P).
@@ -485,6 +488,95 @@ describe('F · lot 2 : les lecteurs secondaires lisent le pool de la note', () =
     });
 });
 
+/* ================================================================ G. LES PRODUCTIONS (LOT 3) */
+// Consigne : plans de travail/CONSIGNE-LOT-2026-10-29-standards-sans-portfolio-lot-3.md. Les mots : TEXTES-2026-10-29-standards-lot-3.md,
+// lus dans le fichier (la source), « % » rendu insécable comme dans l'application (#1137).
+async function texteValide(numero) {
+    const { readFileSync } = await import('node:fs');
+    const path = await import('node:path');
+    const lire = (f) => readFileSync(path.join(path.resolve(import.meta.dirname, '..', '..'), f), 'utf8');   // la forme de bareme-2
+    const section = lire('plans de travail/TEXTES-2026-10-29-standards-lot-3.md').split(/^## /m).find(s => s.startsWith(numero + '.'));
+    const ligne = section.split('\n').find(l => l.startsWith('> '));
+    return ligne.slice(2).trim().replace(/ %/g, ' %');
+}
+const MODULES_PRODUCTIONS = ['js/note-pourcentage.js', 'js/productions.js'];
+const productionsSous = (pratique, productions = []) => banc({ pratique, productions, evaluations: [], modules: MODULES_PRODUCTIONS });
+const SOM = { id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration: { type: 'sommative' } };
+const avertir = (productions) => productionsSous(std(), productions).win.validerProductionsStd(clone(productions));
+const exercice = (id, numero, ponderation) => ({ id, titre: 'Exercice ' + numero, type: 'examen', numero: 10 + numero, ponderation, coursId: 'GC1' });
+
+describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () => {
+    it('CHIM sans « Artefact » (pondérés, non pondérés, avec terminale, avec conteneur) : la seule ligne du texte 1, sans bouton', async () => {
+        const TEXTE_1 = await texteValide(1);
+        const avecConteneur = [{ id: 'PF', titre: 'Portfolio', type: 'portfolio', ponderation: 60, coursId: 'GC1' }].concat(prodChimie());
+        const cas = { 'CHIM-1': prodChimie(), 'CHIM-2': prodChimie({ ponderees: false }), 'CHIM-4': prodChimie({ terminale: true }), 'CHIM conteneur': avecConteneur };
+        for (const [nom, productions] of Object.entries(cas)) {
+            // toEqual : ni « n'entre pas dans le calcul STD », ni « Choisis laquelle… », ni complément, ni productionId (« Typer comme terminale »).
+            expect(avertir(productions), nom).toEqual([{ message: TEXTE_1 }]);
+        }
+    });
+
+    it('mesure du point 2.2 : sans artefact, une terminale sans pondération rend encore la note non constructible — son avertissement reste', async () => {
+        const productions = prodChimie({ terminale: true });
+        delete productions.find(p => p.id === 'X2').ponderation;
+        expect(avertir(productions)).toEqual([
+            { message: await texteValide(1) },
+            { message: 'L\'évaluation terminale « Examen 2 » n\'a pas de pondération : la note finale n\'est pas constructible tant qu\'elle n\'est pas saisie.' }
+        ]);
+        const n = avec(std({ methodeSelection: 'tous' }), productions, COPIES_CHIMIE);
+        expect(n.profil).toBeNull();
+        expect(n.erreur).toMatch(/^Pondération manquante \(pondération de l'évaluation terminale\)/);
+    });
+
+    it('pondération 0 : s\'enregistre en Standards, quel que soit le type ; reste refusée en Sommative', () => {
+        const REFUS = 'la pondération est requise : plus de 0 %.';
+        const sansPoids = (type) => ({ titre: 'Laboratoire 4', type, ponderation: 0 });
+        const enStd = productionsSous(std()).win;
+        for (const type of ['laboratoire', 'examen', 'terminale', 'portfolio']) {
+            expect(enStd.raisonChampsObligatoiresProduction(sansPoids(type)), type).toBe('');
+        }
+        expect(enStd.raisonChampsObligatoiresProduction({ type: 'examen', ponderation: 0 })).toBe('le nom de la production est requis.');
+        const enSom = productionsSous(SOM).win;
+        expect(enSom.obtenirTypePratiqueActive()).toBe('sommative');
+        expect(enSom.raisonChampsObligatoiresProduction(sansPoids('laboratoire'))).toBe(REFUS);
+        expect(enSom.raisonChampsObligatoiresProduction(sansPoids('terminale'))).toBe(REFUS);
+        expect(enSom.raisonChampsObligatoiresProduction(sansPoids('artefact-portfolio'))).toBe('');
+    });
+
+    it('GREG (avec artefacts) : les avertissements d\'avant, mot pour mot (épinglés sur l\'ancien code)', () => {
+        const sans = (ids, plus = []) => prodGreg().filter(p => !ids.includes(p.id)).concat(plus);
+        expect(avertir(prodGreg())).toEqual([]);
+        expect(avertir(sans([], [exercice('W1', 1, 10)]))).toEqual([
+            { message: '« Exercice 1 » porte une pondération (10 %) mais n\'entre pas dans le calcul STD : seuls le pool d\'artefacts et l\'évaluation terminale comptent.' }
+        ]);
+        expect(avertir(sans(['PF']))).toEqual([
+            { message: 'Aucune production « Portfolio (conteneur) » : le pool d\'artefacts vaut le complément de la terminale, soit 60 % (100 − 40). C\'est permis — vérifie que c\'est voulu.' }
+        ]);
+        expect(avertir(sans(['T1'], [exercice('W1', 1, 10)]))).toEqual([
+            { message: '« Exercice 1 » est pondérée (10 %) mais son type est « Examen » : sans le type « Évaluation terminale », elle n\'entre pas dans le calcul STD.', productionId: 'W1' }
+        ]);
+        expect(avertir(sans(['T1'], [exercice('W1', 1, 10), exercice('W2', 2, 20)]))).toEqual([
+            { message: '2 productions pondérées sans évaluation terminale typée : « Exercice 1 », « Exercice 2 ». Choisis laquelle est l\'évaluation terminale dans son formulaire (type « Évaluation terminale ») — l\'outil ne choisit pas à ta place.' }
+        ]);
+        const t1SansPoids = prodGreg();
+        delete t1SansPoids.find(p => p.id === 'T1').ponderation;
+        expect(avertir(t1SansPoids)).toEqual([
+            { message: 'L\'évaluation terminale « Analyse finale » n\'a pas de pondération : la note finale n\'est pas constructible tant qu\'elle n\'est pas saisie.' }
+        ]);
+    });
+
+    it('la définition du type « Évaluation terminale » dit le texte 2 ; celle de l\'« Artefact » tutoie', async () => {
+        const b = productionsSous(std());
+        const definition = (type) => {
+            b.document.getElementById('productionType').value = type;
+            b.win.gererChangementTypeProduction();
+            return b.document.getElementById('texteDefinitionType').innerHTML;
+        };
+        expect(definition('terminale')).toBe('<strong>Évaluation terminale :</strong> ' + await texteValide(2));
+        expect(definition('artefact-portfolio')).toContain('<em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>');
+    });
+});
+
 // JOURNAL DES BREAK-TESTS (28 oct. 2026) — copie de référence, mutation, lancement, restauration (empreinte sha256 identique).
 //   M1 pratique-registre.js — le repli d'avant (les seules productions non pondérées)          → 6 rouges (CHIM-1, 3, 4 ; l'égarée ;
 //      la terminale « obligatoire » ; la note qui se calcule)
@@ -516,3 +608,9 @@ describe('F · lot 2 : les lecteurs secondaires lisent le pool de la note', () =
 //   B8 pratique-registre.js — `obtenirIdsPoolStdDuCorpus` garde la terminale au pool           → 2 rouges (GREG, CHIM-4)
 //   GREG-0 à 2 restent verts sous B1 à B7 : chaque lecteur rendait déjà, pour la pratique de Grégoire, ce que rend le pool.
 //   Playwright (WebKit, standards-sans-portfolio-lot-2.spec.js) : B2 → CHIM-1 rouge (0 badge au lieu de 3), GREG vert.
+// LOT 3 (29 oct. 2026, section G) — même procédure (copie de référence, mutation, `-t "G ·"`, restauration ; sha256 identique) :
+//   C1 productions.js — l'ancien `validerProductionsStd`                                       → 2 rouges (CHIM, la mesure 2.2) ;
+//      GREG reste vert : ses attentes sont celles de l'ancien code
+//   C2 productions.js — l'ancien `raisonChampsObligatoiresProduction`                          → 1 rouge (pondération 0 en Standards)
+//   C3 productions.js — les anciennes définitions « Artefact » et « Évaluation terminale »     → 1 rouge (texte 2, tutoiement)
+//   Playwright (WebKit, standards-sans-portfolio-lot-3.spec.js) : C1 → CHIM-1 rouge, GREG vert.

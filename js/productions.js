@@ -355,6 +355,20 @@ function validerProductionsStd(productions) {
         : (window.identifierProductionTerminale ? window.identifierProductionTerminale(productions) : null);
     const conteneur = productions.find(p => p && p.type === 'portfolio');
     const nomDe = (p) => p.titre || p.activiteApprentissage || p.description || p.id;
+    const terminaleSansPonderation = (t) => ({
+        message: `L'évaluation terminale « ${nomDe(t)} » n'a pas de pondération : la note finale n'est pas constructible tant qu'elle n'est pas saisie.`
+    });
+
+    // Lot 3 des standards sans portfolio (29 oct. 2026) : sans aucun « Artefact », le pool prend toutes les productions,
+    // quelle que soit leur pondération (lot 1) ; les règles 3a, 3b et 5 (« seuls le pool d'artefacts et la terminale
+    // comptent », « choisis la terminale ») sont devenues fausses. À leur place, ce que fait le calcul (texte 1 de
+    // TEXTES-2026-10-29-standards-lot-3.md, validé par Grégoire à 8 h 52). Une terminale sans pondération rend
+    // toujours la note non constructible (`calculerDetailsNoteFinale`, erreurConfiguration) : son avertissement reste.
+    if (!window.poolStdFaitDArtefacts(productions, terminale ? terminale.id : null)) {
+        avertissements.push({ message: 'Sans aucun artefact, la note se calcule à partir de toutes tes productions évaluées, sauf les diagnostiques, quels que soient leur type et leur pondération. Une évaluation terminale est facultative.' });
+        if (terminale && terminale.ponderation == null) avertissements.push(terminaleSansPonderation(terminale));
+        return avertissements;
+    }
 
     // Candidates au rôle de terminale : pondérées, hors conteneur/artefacts/terminale.
     const candidates = productions.filter(p =>
@@ -382,9 +396,7 @@ function validerProductionsStd(productions) {
             });
         // Pondération de la terminale manquante → note non constructible.
         if (terminale.ponderation == null) {
-            avertissements.push({
-                message: `L'évaluation terminale « ${nomDe(terminale)} » n'a pas de pondération : la note finale n'est pas constructible tant qu'elle n'est pas saisie.`
-            });
+            avertissements.push(terminaleSansPonderation(terminale));
         } else if (!conteneur) {
             // Règle 3b : pondération du pool obtenue par complément.
             avertissements.push({
@@ -1854,7 +1866,11 @@ const GESTE_MODIFIER_PRODUCTION = 'Modifier la production';
 function raisonChampsObligatoiresProduction(d) {
     if (!d.titre) return 'le nom de la production est requis.';
     if (!d.type) return 'choisis le type de la production.';
-    if (d.type !== 'artefact-portfolio' && d.ponderation === 0) return 'la pondération est requise : plus de 0\u00a0%.';
+    // Lot 3 des standards sans portfolio (29 oct. 2026) : en Standards, quel que soit le type, la pondération n'est plus
+    // exigée — le pool prend les productions sans condition de pondération (lot 1). La famille se lit sur la désignation
+    // du groupe-cours (stockage, `obtenirTypePratiqueActive`), pas sur le DOM ; les autres familles ne changent pas.
+    const enStandards = typeof window.obtenirTypePratiqueActive === 'function' && window.obtenirTypePratiqueActive() === 'standards';
+    if (!enStandards && d.type !== 'artefact-portfolio' && d.ponderation === 0) return 'la pondération est requise : plus de 0\u00a0%.';
     return '';
 }
 
@@ -2602,8 +2618,8 @@ function gererChangementTypeProduction() {
         'stage': '<strong>Stage :</strong> Expérience pratique dans une entreprise pour découvrir un métier, un secteur ou valider un projet professionnel. Le stage vise l\'apprentissage (découverte/exploration) plutôt que la production. Sa durée varie de quelques heures à quelques semaines et il est suivi par un tuteur.',
         'autre': '<strong>Autre :</strong> Tout autre type de production (participation, activités, etc.).',
         'portfolio': '<strong>Portfolio (conteneur) :</strong> Regroupement d\'artefacts permettant d\'évaluer la progression. Le portfolio inclura automatiquement toutes les productions de type «Artefact». Il n\'est pas comptabilisé dans l\'indice de <strong>Complétion (C)</strong>.',
-        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, allez dans « Structure des évaluations » dans les Pratiques de notation.</em>',
-        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt la session et qui s\'ajoute au portfolio dans le calcul de la note finale. Sa pondération est explicite (par exemple 40\u00a0%) et elle se combine au portfolio (par exemple 60\u00a0%) pour produire la note finale.<br><br>Une seule production de ce type par trimestre.'
+        'artefact-portfolio': '<strong>Artefact :</strong> Production ciblée sur une tâche de nature variée et rattachée au portfolio.<br><br>Les artefacts n\'ont pas de pondération propre. C\'est le portfolio conteneur qui définit la pondération globale.<br><br><em>Pour paramétrer la valeur des artefacts, va dans « Structure des évaluations » dans les Pratiques de notation.</em>',
+        'terminale': '<strong>Évaluation terminale :</strong> Production qui clôt le trimestre ; une seule par trimestre, et facultative. En PAN – Standards, elle entre dans le calcul avec sa pondération (par exemple 40\u00a0%), le reste allant aux artefacts du portfolio ou, sans artefact, aux productions retenues (par exemple 60\u00a0%).'
     };
 
     // Éléments Définition (carte dynamique)
