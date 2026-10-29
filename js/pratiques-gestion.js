@@ -2842,7 +2842,8 @@ async function toggleProductionCategorie(prodId, categorie, checked) {
 /**
  * Lot 4 des standards sans portfolio (29 oct. 2026) — ce que lit la liste « Productions qui comptent dans la note » :
  * la pratique en édition, telle qu'enregistrée, et les productions du pool SANS exclusions (`obtenirArtefactsIdsPoolStd`
- * avec `{}` : hors conteneur, terminale et diagnostiques). `null` quand la liste ne paraît pas : un « Artefact » au
+ * avec `{}` : hors conteneur, terminale et diagnostiques), celles du COURS ACTIF — ce que le profil, à côté, calcule,
+ * même quand la pratique sert aussi à un autre groupe-cours. `null` quand la liste ne paraît pas : un « Artefact » au
  * corpus (le pool est fait d'artefacts, la pratique ne change pas), ou l'hybride (ses deux listes désignent).
  * La configuration se lit où le calcul la lit (`configuration`, sinon `config`, #712).
  */
@@ -2852,7 +2853,9 @@ async function _etatProductionsQuiComptent() {
     const pratique = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueEnEditionMateriel);
     const config = pratique && (pratique.configuration || pratique.config);
     if (!config || (config.categories && config.categories.actif)) return null;
-    const brutes = await db.get(cle('productions')) || [];
+    // Retouche du lot 4 (verdict de Cowork, 29 oct.) : la source du calcul (`calculerDetailsNoteFinale`), filtrée sur le
+    // cours actif — `cle('productions')` rend tout le trimestre, et une double préparation mêlait les deux cours.
+    const brutes = obtenirDonneesSelonMode('productions') || [];
     const productions = window.ProductionDiagnostique ? window.ProductionDiagnostique.filtrerProductions(brutes) : brutes;
     const terminale = window.identifierProductionTerminale(productions);
     const terminalId = terminale ? terminale.id : null;
@@ -2915,6 +2918,9 @@ async function basculerProductionQuiCompte(prodId, compte) {
         const configurations = lues || [];
         const pratique = configurations.find(p => p.id === pratiqueEnEditionMateriel);
         if (!pratique) return undefined;
+        // Une pratique rangée sous `.config` seul (forme d'import, #712) : la case écrit dans `.config`, mais le premier
+        // enregistrement du formulaire crée `.configuration`, que le calcul lit d'abord (#465) — la liste cesse alors
+        // d'agir. Jamais observé sur une pratique créée dans l'app (verdict de Cowork, 29 oct. 2026).
         const config = pratique.configuration || pratique.config || (pratique.configuration = {});
         const exclues = new Set(Array.isArray(config.productionsExclues) ? config.productionsExclues : []);
         if (compte) exclues.delete(prodId); else exclues.add(prodId);

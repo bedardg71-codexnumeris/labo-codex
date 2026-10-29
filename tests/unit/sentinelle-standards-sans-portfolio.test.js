@@ -707,6 +707,29 @@ describe('H · lot 4 : les productions qui comptent, choisies à l\'écran', () 
         expect((await (await formulaire(std({ categories: CATEGORIES }), prodChimie({ categories: CATEGORIES_CHIMIE }))).etat()).visible).toBe(false);
     });
 
+    // Retouche du lot 4 (verdict de Cowork, 29 oct.) : une double préparation — un second cours (GC2) au trimestre. La liste
+    // lit la source du calcul (le cours actif, GC1), pas tout le trimestre.
+    const AUTRE_COURS = (prod) => Object.assign({ titre: 'Autre cours', numero: 9, ponderation: 20, coursId: 'GC2' }, prod);
+
+    it('double préparation : la liste ne montre que les productions du cours actif', async () => {
+        const f = await formulaire(std({ methodeSelection: 'tous' }), prodChimie().concat([AUTRE_COURS({ id: 'M1', type: 'laboratoire' })]));
+        expect(await f.etat()).toEqual({ visible: true, cases: ['L1✓', 'L2✓', 'L3✓', 'X1✓', 'X2✓'] });
+    });
+
+    it('double préparation : la dernière production du cours actif reste refusée, même si l\'autre cours en a de cochées', async () => {
+        const f = await formulaire(std({ methodeSelection: 'tous' }), prodChimie().slice(0, 2).concat([AUTRE_COURS({ id: 'M1', type: 'laboratoire' })]));
+        const config = () => f.store.test_pratiquesConfigurables[0].configuration;
+        await f.basculer('L1', false);
+        expect(await f.etat()).toEqual({ visible: true, cases: ['L1·', 'L2✓⊘'] });
+        await f.basculer('L2', false);
+        expect(config().productionsExclues).toEqual(['L1']);
+    });
+
+    it('double préparation : un « Artefact » dans l\'autre cours ne cache pas la liste', async () => {
+        const f = await formulaire(std({ methodeSelection: 'tous' }), prodChimie().concat([AUTRE_COURS({ id: 'Z1', type: 'artefact-portfolio', ponderation: 0 })]));
+        expect((await f.etat()).visible).toBe(true);
+    });
+
     it('le partage `.lcz` n\'emporte pas la liste ; la pratique de l\'auteur la garde', () => {
         const b = banc({ pratique: exclure(std(), ['L1']), productions: prodChimie(), evaluations: [], modules: ['js/partage-schemas.js', 'js/partage-format.js'] });
         const source = b.store.test_pratiquesConfigurables[0];
@@ -766,3 +789,5 @@ describe('H · lot 4 : les productions qui comptent, choisies à l\'écran', () 
 //   D5 pratiques-gestion.js — le geste décoche la dernière                                     → 1 rouge (l'écran)
 //   D6 partage-format.js — la liste part avec la pratique                                      → 1 rouge (partage)
 //   D7 pratique-registre.js — les exclusions lues aussi en hybride                             → 1 rouge (hybride 80,63)
+// RETOUCHE DU LOT 4 (29 oct. 2026, verdict de Cowork) — même procédure :
+//   D8 pratiques-gestion.js — la liste rendue à `db.get(cle('productions'))` (tout le trimestre)  → 3 rouges (les trois de la double préparation)
