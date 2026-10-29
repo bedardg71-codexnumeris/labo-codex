@@ -118,8 +118,9 @@ const VOCABULAIRES = {
         caseReport: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.',
         caseReportUneFois: 'Le report se fait une seule fois : il ne se refait pas si tu modifies l\'intervention ensuite.',
         labelNiveau: 'Niveau R\u00e0I :',
-        niveau2: 'Niveau 2 (Groupe cibl\u00e9)',
-        niveau3: 'Niveau 3 (Individuel)',
+        // #1152, lot 5 (texte n° 14, décidé par Grégoire le 28 oct. 2026) : le niveau porte son nom d'intensité.
+        niveau2: 'Niveau 2 – Préventif, en groupe ciblé',
+        niveau3: 'Niveau 3 – Intensif, individuel',
         placeholderTitre: 'Ex. Intervention sur deux critères ciblés',
         titreApercu: 'Aperçu du sous-groupe',
         titrePresences: 'Marquer les présences et notes individuelles',

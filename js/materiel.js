@@ -107,12 +107,13 @@
     }
 
     /**
-     * #1119 (consigne du 20 oct.) : « Revenir à ma dissection », à côté de « Coller une autre grille », seulement
-     * si un brouillon existe ; il le rouvre par le chemin de la reprise (`revenirDissection`). Texte PROVISOIRE.
+     * #1119 (consigne du 20 oct.) : « Revenir à mon étiquetage », à côté de « Coller une autre grille », seulement
+     * si un brouillon existe ; il le rouvre par le chemin de la reprise (`revenirDissection`). Texte validé par
+     * Grégoire le 28 oct. 2026 (#1152, lot 5, texte n° 12).
      */
     function retoursHtml() {
         var revenir = window.materielDissection && window.materielDissection.aUnBrouillon()
-            ? '<button type="button" class="btn btn-secondaire" data-action="materiel.revenirDissection">' + e('Revenir à ma dissection') + '</button>' : '';
+            ? '<button type="button" class="btn btn-secondaire" data-action="materiel.revenirDissection">' + e('Revenir à mon étiquetage') + '</button>' : '';
         return '<div class="materiel-retours">' + revenir +
             '<button type="button" class="materiel-btn-lien" data-action="materiel.recommencer">' + e('Coller une autre grille') + '</button></div>';
     }

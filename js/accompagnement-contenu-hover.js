@@ -146,7 +146,7 @@ const TOOLTIPS = {
     'pref-outils-acp':
         'Affiche les indices Assiduité (A), Complétion (C) et Performance (P) dans la section «Engagement ACP» du profil individuel.',
     'pref-outils-rai':
-        'Active les niveaux d\'intervention RàI et les recommandations personnalisées. Structure le soutien à tes étudiant·es en trois niveaux d\'intensité : universel, ciblé, intensif.',
+        'Active les niveaux d\'intervention RàI et les recommandations personnalisées. Structure le soutien à tes étudiant·es en trois niveaux d\'intensité : universel, préventif, intensif.',
     'pref-tooltips':
         'Affiche ces descriptions contextuelles au survol. Désactive si tu maîtrises déjà l\'application.',
     'pref-visuel':
@@ -194,7 +194,7 @@ const TOOLTIPS = {
     'donnees-voute':
         'Importe les ressources partagées par tes collègues (fichiers .lcz signés). Chaque fichier est vérifié : structure, signature, continuité de la clé de la personne.',
     'donnees-config-export':
-        'ZIP léger sans données étudiants : grilles, échelles, productions, cartouches. Pour partager avec un·e collègue (CC BY-NC-SA).',
+        'Deux fichiers sans données d\'étudiant·es, un .json et un LISEZMOI.txt : tes grilles, échelles, productions et cartouches, et quelques réglages de ta pratique. Pour partager avec des collègues (CC BY-NC-SA).',
     'donnees-export-recherche':
         'Export anonymisé des indices A-C-P et statistiques agrégées pour la recherche. Aucune donnée nominative incluse.',
     'donnees-gestion-ressources':
@@ -775,11 +775,11 @@ const TOOLTIPS = {
     'nav-suivi-rencontres':
         'Tiens tes rencontres d’orthopédagogie, individuelles ou en sous-groupe : date, participants, notes par élève, bilan. Un ' + motsNature('service').objetLong + ' se crée ici en trois questions.',
     'nav-labo-etudes':
-        'Analyse les résultats de ta démarche pédagogique : graphiques de progression, corrélations et trajectoires.',
+        'Deux études de ton groupe, « Dynamique des corrélations » et « Impact des jetons sur la performance » : des pistes de réflexion, pas des preuves.',
     'nav-labo-rythme':
-        'Rythme des évaluations : portrait des copies imposées vs restantes par étudiant et par production.',
+        'Tes durées d\'évaluation par activité, l\'estimation de ta charge et sa planification.',
     'nav-labo-bilan':
-        'Composer et exploiter un bilan réflexif de fin de trimestre auprès des étudiants.',
+        'Composer et exploiter un bilan réflexif de fin de trimestre auprès des étudiant·es.',
 
     // --- Planification ---
 
@@ -792,11 +792,16 @@ const TOOLTIPS = {
     // --- Labo ---
 
     'nav-labo':
-        'Utilitaires complémentaires pour l\'enseignement en classe.',
+        'Analyser ta démarche : observation, modélisation, exploration des pratiques, rythme de travail, études, bilan réflexif et suivi longitudinal.',
     'nav-labo-modelisation':
-        'Démonstrations interactives et modélisations visuelles pour illustrer des concepts en classe.',
+        'Ouvre un document (PDF, JPG, PNG ou HEIC) pour le projeter et l\'annoter devant le groupe.',
+    // #1152, lot 5 (texte n° 9, validé par Grégoire le 28 oct. 2026, 14 h 36) : les deux sous-onglets sans bulle.
+    'nav-labo-comparateur':
+        'Ce que deux ou trois pratiques de notation feraient des mêmes parcours, sur des profils fictifs ou sur ton groupe.',
+    'nav-labo-longitudinal':
+        'Inscris le dossier d\'un·e étudiant·e au registre, et retrouve ses résultats dans les cours suivants.',
     'nav-suivi-animation':
-        'Tirage au sort aléatoire et questions flash pour l\'animation en classe.',
+        'Questions flash, tirage au sort et formation d\'équipes pour l\'animation en classe.',
 
     // --- Labo > Études ---
 

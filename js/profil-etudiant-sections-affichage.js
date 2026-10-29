@@ -1078,9 +1078,9 @@ function genererSectionAccompagnement(da) {
             <br><br>
             <strong>Objectif :</strong> Cette section centralise les indicateurs de suivi et l'historique complet des interventions RàI (Réponse à l'Intervention). Elle permet d'orienter les décisions d'accompagnement pédagogique et de documenter les observations spécifiques.
             <br><br>
-            <strong>Contenu :</strong> Niveau d'intervention RàI recommandé (1, 2 ou 3) • Indicateurs de risque, pattern d'apprentissage et progression • Services adaptés (SA, mesure d'aide) pour contextualiser l'accompagnement • Échelle visuelle de positionnement du risque • Liste chronologique des interventions documentées
+            <strong>Contenu :</strong> la carte « Contexte d'apprentissage » (un badge sur A et C, et le bouton « Confidentiel ») • la carte « Observation de la structure des résultats d'apprentissage », si l'observation SOLO est activée • la carte « Modèle de la Réponse à l'intervention (RàI) » : le niveau, le pattern, le défi principal • l'historique des interventions et « + Nouvelle intervention »
             <br><br>
-            <strong>Utilisation :</strong> Planifier intervention (base-toi sur le niveau RàI et les indicateurs affichés) • Nouvelle intervention (clique sur «Nouvelle intervention») • Consulter historique (clique sur «Consulter» pour voir les détails complets) • Notes individuelles (visibles directement sous chaque intervention)
+            <strong>Utilisation :</strong> Planifier intervention (base-toi sur le niveau RàI et les indicateurs affichés) • Nouvelle intervention (clique sur « + Nouvelle intervention ») • Consulter historique (clique sur «Consulter» pour voir les détails complets) • Notes individuelles (visibles directement sous chaque intervention)
         </div>
 
         <!-- 🆕 NOUVEAU : Trois cartes côte à côte (RàI pédagogique + Contexte + Observation SOLO) -->

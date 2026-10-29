@@ -53,12 +53,13 @@ describe('Aide — elle n\'annonce pas ce que le code ne fait pas', () => {
 
     it('les noms de fichiers d\'export sont décrits, pas figés', () => {
         // genererNomFichierExport (cc-license.js) compose
-        // <type>-[nom]-[cours]-[discipline]-[CC-BY-SA]-<horodatage>.json :
-        // aucun nom figé ne peut rester juste.
+        // <type>-[nom]-[cours]-[discipline]-[CC-BY-NC-SA]-<horodatage>.json :
+        // aucun nom figé ne peut rester juste. La partie de licence suit la licence réelle
+        // (texte n° 10 de plans de travail/TEXTES-2026-10-28-textes-d-ecran.md, #1152 lot 5).
         expect(TXT).not.toMatch(/YYYY-MM-DD/);
         const cc = lire('js/cc-license.js');
         expect(cc).toMatch(/function genererNomFichierExport/);
-        expect(cc).toMatch(/parties\.push\('CC-BY-SA'\)/);
+        expect(cc).toMatch(/parties\.push\('CC-BY-NC-SA'\)/);
         // les quatre exports passent bien par cette fonction
         for (const f of ['js/grilles.js', 'js/echelles.js',
                          'js/productions-import-export.js', 'js/cartouches.js']) {

@@ -154,7 +154,7 @@ async function exporterProductionActive() {
     // 🆕 Beta 95.3 : Nommage standardisé
     const nomExport = typeof genererNomFichierExport === 'function'
         ? genererNomFichierExport('production', { nom: production.activiteApprentissage || production.description || production.titre, discipline: production.discipline, inclureLicence: true })
-        : `production-${(production.activiteApprentissage || production.description || production.titre || 'production').replace(/[^a-z0-9]/gi, '-')}-CC-BY-SA-${new Date().toISOString().split('T')[0]}.json`;
+        : `production-${(production.activiteApprentissage || production.description || production.titre || 'production').replace(/[^a-z0-9]/gi, '-')}-CC-BY-NC-SA-${new Date().toISOString().split('T')[0]}.json`;
     a.download = nomExport;
     a.click();
     URL.revokeObjectURL(url);

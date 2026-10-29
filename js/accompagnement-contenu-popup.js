@@ -174,16 +174,15 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Pour certains critères (ex.\u00a0: français écrit), quand une notation négative est appliquée, tu peux utiliser le type algorithmique avec la formule (nb_erreurs\u00a0/\u00a0nb_mots)\u00a0×\u00a0100. Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types de productions.'
+                contenu: 'Un critère qui se calcule à partir de ce que tu comptes sur la copie (des erreurs, des éléments manquants, des calculs…) peut être de type algorithmique : son atelier propose trois calculs tout faits, que tu peux retoucher, ou te laisse composer le tien (voir l\'Aide, « Les critères algorithmiques »). Les grilles peuvent être dupliquées et modifiées pour créer des variantes adaptées à différents types de productions.'
             },
             {
                 type: 'conseil',
                 contenu: 'Nomme tes grilles de façon descriptive (ex.\u00a0: «\u00a0Grille analyse littéraire\u00a0», «\u00a0Grille laboratoire\u00a0») — tu les retrouveras plus facilement.'
             },
             {
-                type: 'alerte',
-                niveau: 'attention',
-                contenu: 'La somme des pondérations des critères doit totaliser 100\u00a0%.'
+                type: 'conseil',
+                contenu: 'Le total des pondérations se colore : orange sous 100\u00a0%, rouge au-dessus, vert à 100\u00a0%. Une grille en points ne se mesure pas à 100.'
             },
         ],
         voirAussi: ['construction-echelles', 'construction-cartouches', 'evaluations-proceder']
@@ -547,11 +546,11 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'exemple',
                 titre: 'Formats de noms reconnus',
-                contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Exemple_Ada_1234567.pdf », « Essai_1234567_Artefact-8a.jpeg » (multi-pages : a, b, c…)'
+                contenu: '« 1234567_essai.pdf », « DA1234567_travail.jpg », « Exemple_Ada_1234567.pdf », « Essai_1234567_Artefact-8-p1_Remis_le_2026-09-15_09h46m45s.jpeg » (plusieurs pages : -p1, -p2…)'
             },
             {
                 type: 'conseil',
-                contenu: 'Pour un travail multi-pages, nomme chaque page avec le même DA et la même production (ex: « Essai_1234567_Artefact-8a.jpeg », « ...8b.jpeg »). Les pages seront automatiquement assemblées en un seul PDF dans l\'ordre alphabétique du nom de fichier.'
+                contenu: 'Une remise en plusieurs fichiers : pour que les pages s\'assemblent en un seul document, numérote-les à la fin du nom — -p1, -p2… (ou _p 2, page 2, partie 2, part2, (2)). Une lettre — Artefact_1a, 1b — crée une AUTRE production : tu obtiens plusieurs documents et des doublons à la confirmation.'
             },
             {
                 type: 'liste',
@@ -732,9 +731,9 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Le formulaire unifié",
                 items: [
                     "Logistique — Titre, niveau RàI, contexte (rattrapage ou en classe), date, durée.",
-                    "Ciblage — Coche les étudiants concernés. L'aperçu du sous-groupe (patterns, niveaux RàI) s'affiche en temps réel.",
+                    "Ciblage — Coche les étudiant·es concerné·es. L'aperçu du sous-groupe (patterns, niveaux RàI) s'affiche en temps réel.",
                     "Critères ciblés — Pré-cochés automatiquement depuis les défis communs du sous-groupe (grille de dépistage). Tu peux ajuster.",
-                    "Objectif visé — Suggestion automatique basée sur le critère le plus faible et le prochain seuil IDME. Tu peux modifier librement.",
+                    "Objectif visé — Vide au départ ; « Suggérer » en propose un, d'après le critère ciblé le plus faible du sous-groupe et le prochain seuil (64\u00a0% ou 75\u00a0%). Tu peux le modifier librement.",
                     "Observations — Notes générales et individuelles par étudiant.",
                     "Bilan — Apparaît quand tu marques l'intervention comme complétée. Comparaison automatique avant/après sur les critères ciblés."
                 ]
