@@ -22,3 +22,9 @@ Conforme :
 ## Clôture
 
 Consigne de la retouche : `CONSIGNE-LOT-2026-10-28-standards-sans-portfolio-lot-1-retouche.md` (21 h 32). D'ici là, rien ne part : ni release, ni verdict, ni push.
+
+## Pour les lots 4 et 5 (notes de Cowork, 28 oct., 21 h 35)
+
+- **Lot 4** : le plan y écrit `categorie: 'selection'` hors hybride. Après R1, une catégorie ne compte qu'en hybride : la consigne du lot 4 dira comment la pratique lit sa désignation hors hybride (une désignation propre à la pratique, ou la catégorie lue seulement quand la pratique le dit), sans réveiller les catégories restées.
+- **Lot 5** (l'assistant) : Q1 fait suivre les mots à la présence d'un « Artefact », mais à la création d'une pratique, les productions n'existent souvent pas encore ; l'assistant ne peut pas savoir lequel des deux vocabulaires s'applique. À soumettre à Grégoire au moment du lot 5, pas avant.
+- **Lot 5, vocabulaire** (Grégoire, 21 h 35) : le « Mode expert » n'est pas un écran ; c'est l'interface à laquelle un utilisateur arrive en activant des options. Dans les consignes, dire « les réglages de la pratique » (le formulaire hors assistant, `index.html:5830-5861`), jamais « Mode expert ». Texte d'écran à corriger au lot 5 : l'aide de l'option « Hybride » de l'assistant dit « Configuration détaillée en Mode Expert. » (`wizard-pratique-v2.js:653`), un nom qui n'existe nulle part à l'écran. Sans lien : la préférence nommée `modeExpert` dans le code n'est que « Ouvrir directement sur le tableau de bord » (Préférences › Navigation).
