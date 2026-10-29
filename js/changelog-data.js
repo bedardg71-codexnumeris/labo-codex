@@ -21,6 +21,25 @@
 
     var CHANGELOG = [
         {
+            // 1.224 (des standards sans portfolio, lots 1 à 4 et la retouche, #1178 ; les jetons par défaut, #1179 ; les
+            // totems de la démo, #1180 ; l'Aide, lots 4 et 5, et le guidage de la démo, #1152 ; l'accueil) — titre et huit
+            // items validés par Grégoire, mot pour mot, le 29 oct. 2026 vers 10 h 15. Insécables en `&nbsp;`, apostrophes
+            // typographiques.
+            version: '1.224',
+            couleur: 'vert',
+            titre: 'Des standards sans portfolio',
+            items: [
+                'Standards&nbsp;: sans production «&nbsp;Artefact&nbsp;», la note se fait sur tes productions, hors portfolio et évaluation terminale, quelle que soit leur pondération. Avec des artefacts, rien ne change. Des notes changent.',
+                'Nouveau&nbsp;: dans une telle pratique, «&nbsp;Productions qui comptent dans la note&nbsp;» te laisse décocher celles qui n’y entrent pas. Le dépistage, le panneau «&nbsp;Engagement&nbsp;» et le PDF suivent ton choix.',
+                'Quand une note ne peut pas se calculer, le profil, le rapport et l’export disent pourquoi.',
+                'Productions&nbsp;: en standards, la pondération n’est plus exigée, sauf pour l’évaluation terminale et le portfolio.',
+                'Jetons&nbsp;: une pratique neuve n’offre les jetons que si tu coches «&nbsp;Activer le système de jetons&nbsp;». Une pratique existante garde les siens, et sa case s’affiche maintenant cochée. Un «&nbsp;non&nbsp;» donné dans l’assistant est respecté.',
+                'Aide&nbsp;: trois entrées neuves, «&nbsp;Comment ta pratique construit la note&nbsp;», «&nbsp;Les rencontres d’un service d’orthopédagogie&nbsp;» et «&nbsp;Ce qui sort de l’application&nbsp;». Les écrans disent «&nbsp;étudiant·e&nbsp;» et «&nbsp;Exploration des pratiques&nbsp;».',
+                'Démo&nbsp;: les dix étudiant·es portent des totems, et le guidage dit les textes revus.',
+                'Accueil&nbsp;: le bandeau laisse «&nbsp;Par où commencer&nbsp;?&nbsp;» aux trois portes. La fiche d’un rattrapage perd «&nbsp;Séance concernée&nbsp;», que rien ne lisait.'
+            ]
+        },
+        {
             // 1.223 (l'Aide, lots 2c, 2c bis, 2d et 3, #1152 ; la copie non recevable, #1175 ; la construction de la
             // note, E1-E4, E7 et la retouche E14-E16, #1177 ; l'accueil à trois portes) — titre et huit items validés
             // par Grégoire, mot pour mot, le 28 oct. 2026 à 15 h 45 (« c'est bon ! » ; consigne de la mise en ligne
