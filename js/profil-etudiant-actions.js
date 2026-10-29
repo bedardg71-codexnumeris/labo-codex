@@ -374,6 +374,46 @@ function _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, pondP, pon
 }
 
 /**
+ * Lot 1 des standards sans portfolio (28 oct. 2026), mot neuf 2 — aucune production du pool n'a de note : la note manque,
+ * et l'on dit pourquoi (avant : `erreur: null`). Seule la terminale notée passe avant (décision Q3). Une note qui manque
+ * pour une autre raison n'a pas de phrase ici. La phrase vient du registre (`causeNoteStdSansProductionNotee`).
+ * @returns {string|null}
+ */
+function _causeNoteAbsenteStd(erreurConfiguration, noteFinale, nombreEvaluesAuPool, avecArtefacts, noteTerminale) {
+    if (erreurConfiguration || noteFinale !== null || nombreEvaluesAuPool > 0) return null;
+    return window.causeNoteStdSansProductionNotee(avecArtefacts, noteTerminale !== null);
+}
+
+/**
+ * Mot neuf 1 du lot 1 (validé par Grégoire le 28 oct. 2026, 15 h 20) — la formule du récit : une partie absente ne
+ * s'écrit pas ; « portfolio » avec un « Artefact », « productions retenues » sans (décision Q1).
+ * @param {boolean} avecArtefacts
+ * @param {Object|null} productionTerminale
+ * @param {number} ponderationTerminale - sans poids, la terminale ne s'écrit pas (jamais « terminale × 0 % »)
+ * @param {string} pctPool - pondération normalisée du pool
+ * @param {string} pctTerminale - pondération normalisée de la terminale
+ */
+function _formuleRecitStd(avecArtefacts, productionTerminale, ponderationTerminale, pctPool, pctTerminale) {
+    if (productionTerminale === null || !(ponderationTerminale > 0)) return avecArtefacts ? 'moyenne du portfolio' : 'moyenne des productions retenues';
+    return (avecArtefacts ? 'portfolio' : 'productions retenues') + ' × ' + formaterPourcentage(pctPool)
+        + ' + terminale × ' + formaterPourcentage(pctTerminale);
+}
+
+/**
+ * Les copies du pool qu'une autre remplace, relues pour les nommer dans le récit. E4 (28 oct. 2026) : une originale
+ * gardée dont la reprise ne compte pas encore est au pool, pas ici. Lot 1 (28 oct. 2026) : un doublon réconcilié (#360)
+ * n'est pas une reprise — nommé à part, comme au récit sommatif.
+ * @returns {{remplacees: Array, doublons: Array}}
+ */
+function _copiesRemplaceesDuPoolStd(evaluations, da, artefactsIds, terminalId) {
+    const duPool = evaluations.filter(e => e.etudiantDA === da && artefactsIds.includes(e.productionId) && e.productionId !== terminalId);
+    return {
+        remplacees: duPool.filter(e => e.remplaceeParId && !e.reconcilieParDoublon && window.originaleEstRemplacee(e, evaluations)),
+        doublons: duPool.filter(e => e.reconcilieParDoublon)
+    };
+}
+
+/**
  * Calcule les détails de la note finale de session pour un étudiant (pratique PAN-Standards)
  * Retourne les informations nécessaires pour afficher la construction de la note
  *
@@ -554,6 +594,9 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const noteFinale = erreurConfiguration
         ? null
         : _calculerNoteFinaleAggregee(moyennePortfolio, noteTerminale, ponderationPortfolio, ponderationTerminale, totalPonderation);
+    // Lot 1 des standards sans portfolio (28 oct. 2026) : la règle des mots est celle du pool (décision Q1).
+    const avecArtefacts = window.poolStdFaitDArtefacts(productions, terminalId);
+    const causeNoteAbsente = _causeNoteAbsenteStd(erreurConfiguration, noteFinale, evaluationsArtefacts.length, avecArtefacts, noteTerminale);
 
     // Label méthode de sélection en français (forcer 'hybride' si actif)
     if (modeHybrideNote) methodeSelection = 'hybride';
@@ -597,13 +640,7 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     const _artefactsEcartes = evaluationsArtefacts.filter(e => !artefactsRetenus.includes(e));
     // Remplacées par reprise : exclues dès le filtrage des valides (remplaceeParId),
     // relues ici dans les évaluations brutes pour les nommer dans le récit.
-    // E4 (28 oct. 2026) : une originale gardée dont la reprise ne compte pas encore est au pool, pas ici.
-    const _remplacees = evaluations.filter(e =>
-        e.etudiantDA === da &&
-        artefactsIds.includes(e.productionId) &&
-        e.productionId !== terminalId &&
-        e.remplaceeParId && window.originaleEstRemplacee(e, evaluations)
-    );
+    const { remplacees: _remplacees, doublons: _doublons } = _copiesRemplaceesDuPoolStd(evaluations, da, artefactsIds, terminalId);
     const _resultatsRecit = [];
     artefactsRetenus.forEach(e => {
         const obl = _estObligatoireHybride(e.productionId);
@@ -616,6 +653,9 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
     });
     _remplacees.forEach(e => {
         _resultatsRecit.push(_resArtefact(e, 'remplace', 'remplacée par une reprise'));
+    });
+    _doublons.forEach(e => {
+        _resultatsRecit.push(_resArtefact(e, 'remplace', 'doublon note-égale'));
     });
     // #706 — brouillons et portée nulle (pool et terminale) : nommés, non comptés.
     evaluations
@@ -644,7 +684,8 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
         resultats: _resultatsRecit,
         synthese: {
             formuleTexte: erreurConfiguration ? null
-                : ('portfolio × ' + formaterPourcentage(normaliser(ponderationPortfolio)) + ' + terminale × ' + formaterPourcentage(normaliser(ponderationTerminale))),
+                : _formuleRecitStd(avecArtefacts, productionTerminale, ponderationTerminale,
+                    normaliser(ponderationPortfolio), normaliser(ponderationTerminale)),
             noteFinale: noteFinale,
             plafonnement: plafonnement
         }
@@ -652,7 +693,9 @@ function calculerDetailsNoteFinale(da, pratiqueIdDemande = null) {
 
     return {
         pratique: 'PAN-Standards',
-        erreur: erreurConfiguration,
+        erreur: erreurConfiguration || causeNoteAbsente,
+        // La même phrase, seule : ce que la pratique déclare au rapport et à l'export (`expliquerNoteNonConstructible`).
+        causeNoteAbsente: causeNoteAbsente,
         pratiqueId: pratiqueId,
         pratiqueNom: pratiqueNom,
         estFinale: estFinale,
