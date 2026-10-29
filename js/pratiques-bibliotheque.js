@@ -22,6 +22,10 @@ const CLE_BIBLIOTHEQUE_PRATIQUES = 'bibliothequePratiques';
 /**
  * Modèles prédéfinis (gabarits de base fournis avec l'application)
  * Ces modèles sont toujours disponibles même si la bibliothèque est vide
+ * Jetons par défaut (décision de Grégoire, 29 oct. 2026) : chacun porte `jetons: { actif: false }`. Toutes les voies qui
+ * installent un modèle le recopient (« Utiliser dans ce trimestre », « Partir d'un modèle », « Dupliquer pour créer ma
+ * pratique ») : la pratique installée n'offre les jetons que si l'enseignant·e coche « Activer le système de jetons ». Une
+ * pratique déjà installée d'un modèle n'est pas touchée (elle garde les jetons du défaut).
  */
 const MODELES_PRATIQUES_PREDEFINIS = {
     // === PAN-DÉNOTATION (#318) ===
@@ -42,6 +46,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         auteur: 'Gabarit Labo Codex',
         discipline: 'Général',
         estGabarit: true,
+        jetons: { actif: false },   // jetons par défaut (29 oct. 2026) : une pratique installée d'un modèle les refuse jusqu'à ce qu'on coche « Activer »
         pratiques: ['DEN'],
         configuration: {
             type: 'denotation',
@@ -66,6 +71,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         auteur: 'Demo Labo Codex',
         discipline: 'Général',
         estGabarit: true,
+        jetons: { actif: false },   // jetons par défaut (29 oct. 2026) : une pratique installée d'un modèle les refuse jusqu'à ce qu'on coche « Activer »
         pratiques: ['SPE'],
         configuration: {
             seuilAcceptable: 75,
@@ -106,6 +112,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         auteur: 'Gabarit Labo Codex',
         discipline: 'Général',
         estGabarit: true,
+        jetons: { actif: false },   // jetons par défaut (29 oct. 2026) : une pratique installée d'un modèle les refuse jusqu'à ce qu'on coche « Activer »
         pratiques: ['SOM'],
         configuration: {
             methodeCalcul: 'moyenne-ponderee',
@@ -170,6 +177,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         auteur: 'Demo Labo Codex',
         discipline: 'Général',
         estGabarit: true,
+        jetons: { actif: false },   // jetons par défaut (29 oct. 2026) : une pratique installée d'un modèle les refuse jusqu'à ce qu'on coche « Activer »
         pratiques: ['STD'],
         configuration: {
             portfolio: {
@@ -188,6 +196,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
         auteur: 'Demo Labo Codex',
         discipline: 'Général',
         estGabarit: true,
+        jetons: { actif: false },   // jetons par défaut (29 oct. 2026) : une pratique installée d'un modèle les refuse jusqu'à ce qu'on coche « Activer »
         pratiques: ['STD'],
         configuration: {
             portfolio: {

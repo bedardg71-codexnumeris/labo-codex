@@ -79,7 +79,7 @@
   "construireDonneesModele": 31
  },
  "js/pratiques-gestion.js": {
-  "remplirFormulairePratique": 64,
+  "remplirFormulairePratique": 60,
   "appliquerFormulaireDansCollection": 33
  },
  "js/pratiques/pratique-registre.js": {

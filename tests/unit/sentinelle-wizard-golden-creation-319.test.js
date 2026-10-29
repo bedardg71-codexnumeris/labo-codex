@@ -75,7 +75,10 @@ const GOLDEN = {
         id: 'fixe-SOM', nom: 'Golden SOM', auteur: '', etablissement: '', description: '', discipline: '',
         type: 'sommative', variante: 'classique', pratiques: ['SOM'], dansBibliotheque: true,
         configuration: {},
-        calcul_note: { methode: 'moyenne_ponderee' }   // bloc 9 (15 oct. 2026) : plus de nbEvaluationsPrevues
+        calcul_note: { methode: 'moyenne_ponderee' },   // bloc 9 (15 oct. 2026) : plus de nbEvaluationsPrevues
+        // Jetons par défaut (décision de Grégoire, 29 oct. 2026) — LE CONTRAT CHANGE, DÉLIBÉRÉMENT : une pratique créée sans
+        // réglage de jetons les refuse explicitement (sentinelle-jetons-par-defaut-2026-10-29, section D).
+        jetons: { actif: false }
     },
     // #443 (10 août 2026) : le golden STD_obj est RETIRÉ AVEC la fonctionnalité.
     // Un golden décrit un parcours que l'application OFFRE ; le parcours « par
@@ -90,7 +93,8 @@ const GOLDEN = {
             portfolio: { utiliser: true, nombreTotal: 12, nombreARetenir: 7, methodeSelection: 'meilleurs',
                 minimumCompletion: 3 }
         },
-        calcul_note: { methode: 'conversion_niveaux' }
+        calcul_note: { methode: 'conversion_niveaux' },
+        jetons: { actif: false }   // jetons par défaut (29 oct. 2026), comme SOM ; SPE porte sa réponse, rien d'autre
     },
     SPE: {
         id: 'fixe-SPE', nom: 'Golden SPE', auteur: '', etablissement: '', description: '', discipline: '',

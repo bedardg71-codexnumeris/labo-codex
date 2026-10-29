@@ -1342,23 +1342,27 @@ function remplirFormulairePratique(pratique) {
         peuplerDropdownNoteMaximaleMat(); // 🆕 Beta 95.7 : Peupler dropdown note maximale
     }
 
-    // Système de jetons
-    const jetons = pratique.jetons || {};
-    setCheckbox('mat-jetons-actif', jetons.actif || false);
+    // Système de jetons — jetons par défaut (29 oct. 2026) : la case et les valeurs disent CE QUE LE MOTEUR RÉSOUT pour
+    // cette pratique (`configJetonsResolueDeLaPratique`, evaluation-jetons.js), une seule source. Avant, seule la forme
+    // plate était lue : une pratique sans réglage, dont le moteur offre les jetons, s'affichait DÉCOCHÉE — et le premier
+    // enregistrement d'un champ voisin les éteignait. Même écart, plus discret, pour « reprise ciblée » et « l'originale »
+    // absentes du bloc plat : le moteur les lit « non », l'écran disait « oui ».
+    const jetons = window.configJetonsResolueDeLaPratique(pratique);
+    setCheckbox('mat-jetons-actif', jetons.actif);
     toggleSystemeJetonsMat(); // Afficher/masquer le contenu
-    setValeurChamp('mat-jetons-nombre', jetons.nombre || 2);  // 🆕 Beta 95.7 : défaut 2
-    setValeurChamp('mat-delai-duree', jetons.delaiDuree || 2);  // 🆕 Beta 95.7 : défaut 2 jours
-    setCheckbox('mat-delai-sur-reprise', jetons.delaiSurReprise === true);  // #853 : absent = non (comportement antérieur)
+    setValeurChamp('mat-jetons-nombre', jetons.delai.nombre);
+    setValeurChamp('mat-delai-duree', jetons.delai.dureeJours);
+    setCheckbox('mat-delai-sur-reprise', jetons.delai.surReprise === true);  // #853 : absent = non (comportement antérieur)
     // Radio pour l'évaluation originale
     const radioArchiver = document.querySelector('input[name="mat-reprise-originale"][value="archiver"]');
     const radioSupprimer = document.querySelector('input[name="mat-reprise-originale"][value="supprimer"]');
-    if (jetons.repriseOriginale === 'supprimer' && radioSupprimer) {
+    if (!jetons.reprise.archiverOriginale && radioSupprimer) {
         radioSupprimer.checked = true;
     } else if (radioArchiver) {
         radioArchiver.checked = true;
     }
-    setCheckbox('mat-jeton-ciblee-actif', jetons.cibleeActif !== false);
-    setValeurChamp('mat-ciblee-plafond', jetons.cibleePlafond || ''); // 🆕 Beta 95.7 : Pas de défaut, l'utilisateur doit choisir
+    setCheckbox('mat-jeton-ciblee-actif', jetons.repriseCiblee.actif);
+    setValeurChamp('mat-ciblee-plafond', jetons.repriseCiblee.plafondNote || ''); // 🆕 Beta 95.7 : Pas de défaut, l'utilisateur doit choisir
     // #853 (relecture de Cowork) : jetons réglés à la création (assistant, import) → ce formulaire
     // est inerte pour le moteur. On le DIT, et on désactive ses champs, au lieu de laisser cocher en vain.
     const jetonsAilleurs = jetonsReglesAilleurs(pratique);
