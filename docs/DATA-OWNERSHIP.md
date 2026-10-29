@@ -299,6 +299,8 @@ clés (`fichiersTravaux`, `evaluationsSauvegardees`…).
 > #334 C par un index de hachés (`codex-snapshot-hash-v1`, format interne de
 > `js/codex.js` : `{__format, cles: {clé: sha256(JSON)}}`) — quelques Ko au lieu
 > du dataset intégral, donc repassée sous le seuil et sortie du `memoryCache`.
+> **#1182 (29 oct. 2026)** : la clé n'est plus ni écrite ni lue — la fusion copie par copie
+> n'a pas d'ancêtre. Le stock déjà écrit chez les gens reste (quelques dizaines de Ko, sans lecteur).
 
 ---
 
