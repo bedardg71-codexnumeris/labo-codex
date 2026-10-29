@@ -2169,13 +2169,30 @@ function _familleDeLaCle(nomCle) {
     return 'donnee';
 }
 
-/** JSON aux propriétés triées : deux appareils peuvent écrire le même objet dans un autre ordre. */
-function _jsonStable(v) {
-    if (Array.isArray(v)) return '[' + v.map(_jsonStable).join(',') + ']';
+/**
+ * JSON aux propriétés triées : deux appareils peuvent écrire le même objet dans un autre ordre.
+ * Suit la sémantique de JSON.stringify, parce que l'autre côté vient d'un fichier JSON et celui
+ * d'ici d'IndexedDB : une propriété `undefined` (ou fonction, symbole) est absente, `null` dans
+ * une liste ; `toJSON` est respecté (une Date devient sa chaîne). Sinon, un élément gardé ici avec
+ * `dateModification: undefined` diffère de lui-même relu d'un codex (retouche de #1182, 29 oct.).
+ */
+function _jsonStable(v, propriete) {
+    if (v && typeof v.toJSON === 'function') v = v.toJSON(propriete === undefined ? '' : propriete);
+    if (v instanceof Number || v instanceof String || v instanceof Boolean) v = v.valueOf();
+    if (v === undefined || typeof v === 'function' || typeof v === 'symbol') return undefined;
+    if (Array.isArray(v)) {
+        return '[' + v.map(function(e, i) {
+            var j = _jsonStable(e, String(i));
+            return j === undefined ? 'null' : j;
+        }).join(',') + ']';
+    }
     if (v && typeof v === 'object') {
-        return '{' + Object.keys(v).sort().map(function(k) {
-            return JSON.stringify(k) + ':' + _jsonStable(v[k]);
-        }).join(',') + '}';
+        var parties = [];
+        Object.keys(v).sort().forEach(function(k) {
+            var j = _jsonStable(v[k], k);
+            if (j !== undefined) parties.push(JSON.stringify(k) + ':' + j);
+        });
+        return '{' + parties.join(',') + '}';
     }
     return JSON.stringify(v);
 }
