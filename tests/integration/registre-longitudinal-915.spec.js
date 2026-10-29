@@ -198,7 +198,7 @@ test.describe('#915 lot 2 — Suivi longitudinal, 768 px, trimestre actif archiv
         await ouvrirLeSousOnglet(page);
         await chercher(page, 'zzz');
         await page.waitForFunction(() => document.querySelectorAll('#rl-resultats .rl-vide').length === 1);
-        expect(await page.evaluate(() => document.querySelector('#rl-resultats .rl-vide').textContent)).toBe('Aucun·e élève ne porte ce nom.');
+        expect(await page.evaluate(() => document.querySelector('#rl-resultats .rl-vide').textContent)).toBe('Aucun·e étudiant·e ne porte ce nom.');
         expect(await page.evaluate(() => window.db.getSync('registreLongitudinal', null))).toBeNull();
         expect(erreurs).toEqual([]);
     });

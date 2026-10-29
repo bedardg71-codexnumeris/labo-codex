@@ -89,13 +89,13 @@ test('#920 · sans copie : les flèches mènent d\'un élève à l\'autre, la sa
     await page.evaluate(() => window.executerActionEval({ value: 'evaluer|TEST920A|p920' }));
     await attendreEleve(page, 'TEST920A', 'M');
     await page.waitForFunction(() => !document.getElementById('eval-navigation-sans-copie').classList.contains('u-hide'));
-    expect(await barre(page)).toMatchObject({ visible: true, position: 'Élève 1 de 3', precedentEteint: true, suivantEteint: false });
+    expect(await barre(page)).toMatchObject({ visible: true, position: 'Étudiant·e 1 de 3', precedentEteint: true, suivantEteint: false });
 
     // → Bouchard : formulaire vide, étiquette et position suivent.
     await fleche(page, 'naviguerEtudiantSuivant');
     await attendreEleve(page, 'TEST920B', '');
     const surB = await barre(page);
-    expect(surB).toMatchObject({ position: 'Élève 2 de 3', precedentEteint: false, suivantEteint: false, da: 'TEST920B' });
+    expect(surB).toMatchObject({ position: 'Étudiant·e 2 de 3', precedentEteint: false, suivantEteint: false, da: 'TEST920B' });
     expect(surB.eleve).toContain('Tom Bouchard');
     expect(surB.production, 'la production reste nommée (vue « Non associée » à la capture du 18 sept.)').toBe('Analyse');
 
@@ -110,7 +110,7 @@ test('#920 · sans copie : les flèches mènent d\'un élève à l\'autre, la sa
     });
     await fleche(page, 'naviguerEtudiantSuivant');
     await attendreEleve(page, 'TEST920C', '');
-    expect(await barre(page)).toMatchObject({ position: 'Élève 3 de 3', suivantEteint: true });
+    expect(await barre(page)).toMatchObject({ position: 'Étudiant·e 3 de 3', suivantEteint: true });
     expect(await stock(page)).toEqual([
         { id: 'EVAL920A', da: 'TEST920A', c1: 'M' },
         { id: 'neuve', da: 'TEST920B', c1: 'E' }
@@ -122,7 +122,7 @@ test('#920 · sans copie : les flèches mènent d\'un élève à l\'autre, la sa
     await fleche(page, 'naviguerEtudiantPrecedent');
     await attendreEleve(page, 'TEST920A', 'M');
     const retour = await barre(page);
-    expect(retour).toMatchObject({ position: 'Élève 1 de 3', precedentEteint: true });
+    expect(retour).toMatchObject({ position: 'Étudiant·e 1 de 3', precedentEteint: true });
     expect(retour.eleve).toContain('Léa Allard');
 
     expect(erreurs, 'aucune erreur de page, aucun dialogue').toEqual([]);
@@ -146,7 +146,7 @@ test('#920 · par « Consulter », évaluation verrouillée : la barre est là, 
     });
     await attendreEleve(page, 'TEST920A', 'M');
     await page.waitForFunction(() => !document.getElementById('eval-navigation-sans-copie').classList.contains('u-hide'), null, { timeout: 10000 });
-    expect(await barre(page)).toMatchObject({ visible: true, position: 'Élève 1 de 3', precedentEteint: true, suivantEteint: false });
+    expect(await barre(page)).toMatchObject({ visible: true, position: 'Étudiant·e 1 de 3', precedentEteint: true, suivantEteint: false });
 
     await fleche(page, 'naviguerEtudiantSuivant');
     await attendreEleve(page, 'TEST920B', 'I');
@@ -185,8 +185,8 @@ test('#920 · après « Évaluer » la dernière élève, « Consulter » la pre
 
     await page.evaluate(() => window.executerActionEval({ value: 'evaluer|TEST920C|p920' }));
     await attendreEleve(page, 'TEST920C', '');
-    await page.waitForFunction(() => (document.getElementById('eval-navigation-position') || {}).textContent === 'Élève 3 de 3', null, { timeout: 10000 });
-    expect(await barre(page)).toMatchObject({ position: 'Élève 3 de 3', suivantEteint: true });
+    await page.waitForFunction(() => (document.getElementById('eval-navigation-position') || {}).textContent === 'Étudiant·e 3 de 3', null, { timeout: 10000 });
+    expect(await barre(page)).toMatchObject({ position: 'Étudiant·e 3 de 3', suivantEteint: true });
 
     await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-liste'); });
     await page.waitForFunction(() => !!document.querySelector('.eval-actions-select option[value="consulter|EVAL920A"]'), null, { timeout: 10000 });
@@ -196,7 +196,7 @@ test('#920 · après « Évaluer » la dernière élève, « Consulter » la pre
         menu.dispatchEvent(new Event('change', { bubbles: true }));
     });
     await attendreEleve(page, 'TEST920A', 'M');
-    await page.waitForFunction(() => (document.getElementById('eval-navigation-position') || {}).textContent === 'Élève 1 de 3', null, { timeout: 10000 }).catch(() => {});
-    expect(await barre(page)).toMatchObject({ visible: true, position: 'Élève 1 de 3', precedentEteint: true, suivantEteint: false });
+    await page.waitForFunction(() => (document.getElementById('eval-navigation-position') || {}).textContent === 'Étudiant·e 1 de 3', null, { timeout: 10000 }).catch(() => {});
+    expect(await barre(page)).toMatchObject({ visible: true, position: 'Étudiant·e 1 de 3', precedentEteint: true, suivantEteint: false });
     expect(erreurs).toEqual([]);
 });

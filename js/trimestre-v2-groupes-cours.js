@@ -425,20 +425,14 @@ function _enseignantExistePourGC(gc) {
 }
 
 /**
- * #475 : la pratique désignée existe — dans les pratiques du trimestre (avec la normalisation des ids
- * legacy, `trouverPratiqueEnBibliotheque`), dans le registre des pratiques prédéfinies, ou au démo.
- * Aucune instance construite.
+ * #1152, lot 5 (29 oct. 2026) : le trimestre désigné existe. Les cinq éléments que la carte compte sont ceux que
+ * l'écran nomme obligatoires (trimestre, cours, numéro de groupe, horaire, enseignant·e) ; la pratique, facultative,
+ * ne compte plus. Pas de repli sur le trimestre actif (`_nomTrimestrePourGC` en a un) : un trimestre absent ne compte pas.
  */
-function _pratiqueExistePourGC(gc) {
-    if (!gc.pratiqueId) return false;
-    if (typeof window.trouverPratiqueEnBibliotheque === 'function' && window.trouverPratiqueEnBibliotheque(gc.pratiqueId)) return true;
-    if (typeof window.pratiqueEstDisponible === 'function') {
-        const canonique = typeof window.normaliserIdPratique === 'function' ? window.normaliserIdPratique(gc.pratiqueId) : gc.pratiqueId;
-        if (window.pratiqueEstDisponible(canonique)) return true;
-    }
-    const listes = [db.getSync(cle('pratiquesConfigurables'), []) || []];
-    if (typeof cleDemo === 'function') listes.push(db.getSync(cleDemo('pratiquesConfigurables'), []) || []);
-    return listes.some(l => Array.isArray(l) && l.some(p => p && p.id === gc.pratiqueId));
+function _trimestreExistePourGC(gc) {
+    if (!gc.trimestreId) return false;
+    const trimestres = typeof window.obtenirTrimestres === 'function' ? window.obtenirTrimestres() : db.getSync('trimestres', []);
+    return Array.isArray(trimestres) && trimestres.some(t => t && t.id === gc.trimestreId);
 }
 
 function mettreAJourCarteResumeGroupeCoursV2(gc) {
@@ -463,10 +457,11 @@ function mettreAJourCarteResumeGroupeCoursV2(gc) {
     // Un service sans horaire est complet : l'horaire n'est pas attendu (cadrage « Rencontres »).
     if ((gc.horaireId && horaireObj) || (coursObj && coursObj.nature === 'service' && !gc.horaireId)) score++;
     // #475 (lot 8, 11 oct. 2026, constat CT-14) : une référence ne compte que si ce qu'elle désigne
-    // existe, comme le cours et l'horaire ci-dessus. Avant, un enseignant ou une pratique supprimés
-    // comptaient encore : « Complet » pour un groupe-cours qui pointait dans le vide.
+    // existe, comme le cours et l'horaire ci-dessus. Avant, un enseignant supprimé comptait encore :
+    // « Complet » pour un groupe-cours qui pointait dans le vide.
     if (_enseignantExistePourGC(gc)) score++;
-    if (_pratiqueExistePourGC(gc)) score++;
+    // #1152, lot 5 : le trimestre, obligatoire à l'écran, au lieu de la pratique, facultative.
+    if (_trimestreExistePourGC(gc)) score++;
 
     const estComplet = score === 5;
     const classeCompletude = estComplet ? 'complet' : 'incomplet';

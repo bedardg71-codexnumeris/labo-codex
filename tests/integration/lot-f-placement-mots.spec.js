@@ -97,7 +97,7 @@ for (const [largeur, hauteur] of LARGEURS) {
             ancienBouton: 0,
             coteACote: true,
             cases: [
-                { titre: 'Exporter ma config', texte: 'ZIP léger sans données étudiants : grilles, échelles, productions, cartouches. Pour partager avec des collègues (CC BY-NC-SA).', bouton: 'Exporter ma config', action: 'exporterConfigurationComplete', boutonDeborde: false, boutonDansLaCase: true, dansLEcran: true },
+                { titre: 'Exporter ma config', texte: 'Deux fichiers sans données d\'étudiant·es, un .json et un LISEZMOI.txt : tes grilles, échelles, productions et cartouches, et quelques réglages de ta pratique. Pour partager avec des collègues (CC BY-NC-SA).', bouton: 'Exporter ma config', action: 'exporterConfigurationComplete', boutonDeborde: false, boutonDansLaCase: true, dansLEcran: true },
                 { titre: 'Ouvrir un Codex', texte: 'Ouvre un codex ou une configuration partagée. Le type est détecté automatiquement.', bouton: 'Ouvrir un Codex…', action: 'ouvrirModalImport', boutonDeborde: false, boutonDansLaCase: true, dansLEcran: true }
             ]
         });
