@@ -142,7 +142,12 @@
         if (!schema) {
             throw new Error('[partage-format] Type d\'entité inconnu : ' + type);
         }
-        return projeterChamps(item, schema.champs);
+        var projection = projeterChamps(item, schema.champs);
+        // Lot 4 des standards sans portfolio (29 oct. 2026) : les productions exclues d'une pratique sont des ids de
+        // productions de l'AUTEUR, posés par son geste. Elles ne partent pas : chez qui reçoit, tout compte par défaut.
+        // (`configuration` est un objet-libre, déjà copié en profondeur : le retrait ne touche pas la pratique source.)
+        if (type === 'pratique' && projection.configuration) delete projection.configuration.productionsExclues;
+        return projection;
     }
     partageFormat.projeterEntite = projeterEntite;
 

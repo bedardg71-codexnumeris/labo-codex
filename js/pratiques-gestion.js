@@ -1299,6 +1299,8 @@ function remplirFormulairePratique(pratique) {
             toggleCategoriesMat(); // Afficher/masquer les détails
         }
 
+        // Lot 4 des standards sans portfolio : sans « Artefact » et hors hybride, les productions qui comptent.
+        afficherProductionsQuiComptentMat();
     }
     // Note : sommative n'a pas de section ici — aucune configuration spécifique requise
     //        (utilise uniquement les pondérations des productions)
@@ -2431,9 +2433,21 @@ async function exporterPratiquesUtilisateur() {
         return;
     }
 
+    // Lot 4 des standards sans portfolio (29 oct. 2026) : comme au partage `.lcz` (`projeterEntite`), les productions
+    // exclues ne partent pas — des ids de productions d'ici ; chez qui reçoit, tout compte par défaut.
+    const aExporter = configurations.map(c => {
+        const copie = Object.assign({}, c);
+        for (const champ of ['configuration', 'config']) {   // où le calcul la lit (#712)
+            if (!copie[champ] || !('productionsExclues' in copie[champ])) continue;
+            copie[champ] = Object.assign({}, copie[champ]);
+            delete copie[champ].productionsExclues;
+        }
+        return copie;
+    });
+
     // Emballer avec métadonnées CC enrichies
     const donnees = ajouterMetadonnéesCC(
-        { pratiques: configurations },
+        { pratiques: aExporter },
         'pratiques',
         'Pratiques de notation',
         metaEnrichies
@@ -2706,8 +2720,8 @@ function toggleCategoriesMat() {
         recalculerPonderationsUnitaires();
     }
 
-    // Sauvegarder automatiquement
-    sauvegarderConfigPratiqueMat();
+    // Sauvegarder automatiquement — puis la liste du lot 4, qui lit l'hybride dans la pratique enregistrée
+    sauvegarderConfigPratiqueMat().then(afficherProductionsQuiComptentMat);
 }
 
 /**
@@ -2826,6 +2840,92 @@ async function toggleProductionCategorie(prodId, categorie, checked) {
 }
 
 /**
+ * Lot 4 des standards sans portfolio (29 oct. 2026) — ce que lit la liste « Productions qui comptent dans la note » :
+ * la pratique en édition, telle qu'enregistrée, et les productions du pool SANS exclusions (`obtenirArtefactsIdsPoolStd`
+ * avec `{}` : hors conteneur, terminale et diagnostiques). `null` quand la liste ne paraît pas : un « Artefact » au
+ * corpus (le pool est fait d'artefacts, la pratique ne change pas), ou l'hybride (ses deux listes désignent).
+ * La configuration se lit où le calcul la lit (`configuration`, sinon `config`, #712).
+ */
+async function _etatProductionsQuiComptent() {
+    if (typeof window.obtenirArtefactsIdsPoolStd !== 'function' || typeof window.poolStdFaitDArtefacts !== 'function'
+        || typeof window.identifierProductionTerminale !== 'function') return null;   // le registre (pratique-registre.js) absent
+    const pratique = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueEnEditionMateriel);
+    const config = pratique && (pratique.configuration || pratique.config);
+    if (!config || (config.categories && config.categories.actif)) return null;
+    const brutes = await db.get(cle('productions')) || [];
+    const productions = window.ProductionDiagnostique ? window.ProductionDiagnostique.filtrerProductions(brutes) : brutes;
+    const terminale = window.identifierProductionTerminale(productions);
+    const terminalId = terminale ? terminale.id : null;
+    if (window.poolStdFaitDArtefacts(productions, terminalId)) return null;
+    const ids = window.obtenirArtefactsIdsPoolStd(productions, terminalId, {});
+    return {
+        candidates: ids.map(id => productions.find(p => p.id === id)),
+        exclues: new Set(Array.isArray(config.productionsExclues) ? config.productionsExclues : [])
+    };
+}
+
+/**
+ * Lot 4 : la liste, toutes cochées par défaut ; décochée = exclue de la note et de ses lecteurs (le pool, registre).
+ * La dernière case cochée est désactivée : un pool vide n'a pas de note, et la phrase « Aucune production retenue pour la
+ * note n'est encore évaluée. » le dirait à tort.
+ */
+async function afficherProductionsQuiComptentMat() {
+    const bloc = document.getElementById('mat-productions-comptees');
+    const liste = document.getElementById('mat-productions-comptees-liste');
+    if (!bloc || !liste) return;
+    const etat = await _etatProductionsQuiComptent();
+    toggleDisplay(bloc, !!etat);
+    if (!etat) return;
+    if (etat.candidates.length === 0) {
+        liste.innerHTML = '<p style="padding: 15px; color: var(--gris-moyen); text-align: center;">Aucune production</p>';
+        return;
+    }
+    const nbComptees = etat.candidates.filter(p => !etat.exclues.has(p.id)).length;
+    liste.innerHTML = etat.candidates.map(prod => {
+        const compte = !etat.exclues.has(prod.id);
+        const derniere = compte && nbComptees === 1;
+        return `
+            <label style="display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+                         border-bottom: 1px solid var(--gris-tres-clair); cursor: ${derniere ? 'not-allowed' : 'pointer'};"
+                   class="hover-fond-subtil">
+                <input type="checkbox" ${compte ? 'checked' : ''} ${derniere ? 'disabled' : ''}
+                       data-on-change="basculerProductionQuiCompteHandler" data-prod-id="${echapperHtml(prod.id)}"
+                       style="width: 16px; height: 16px; accent-color: var(--accent-primaire);">
+                <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem;">
+                    ${echapperHtml(prod.titre || 'Sans titre')}
+                </span>
+            </label>
+        `;
+    }).join('');
+}
+
+/**
+ * Lot 4 : le geste de l'enseignant·e, seul écrivain de `productionsExclues` (aucune donnée réécrite ailleurs). On ne
+ * retire que l'id coché ou décoché : un id resté d'une production supprimée demeure, inerte (le pool l'ignore).
+ * Décocher la dernière production qui compte est refusé (la case est déjà désactivée ; ceci garde la règle).
+ */
+async function basculerProductionQuiCompte(prodId, compte) {
+    const etat = await _etatProductionsQuiComptent();
+    if (!etat) return;
+    if (!compte && !etat.candidates.some(p => p.id !== prodId && !etat.exclues.has(p.id))) {
+        await afficherProductionsQuiComptentMat();
+        return;
+    }
+    await modifierEtAnnoncer(cle('pratiquesConfigurables'), (lues) => {
+        const configurations = lues || [];
+        const pratique = configurations.find(p => p.id === pratiqueEnEditionMateriel);
+        if (!pratique) return undefined;
+        const config = pratique.configuration || pratique.config || (pratique.configuration = {});
+        const exclues = new Set(Array.isArray(config.productionsExclues) ? config.productionsExclues : []);
+        if (compte) exclues.delete(prodId); else exclues.add(prodId);
+        if (exclues.size > 0) config.productionsExclues = [...exclues];
+        else delete config.productionsExclues;
+        return configurations;
+    }, [], { geste: 'Modifier la pratique' });
+    await afficherProductionsQuiComptentMat();
+}
+
+/**
  * 🆕 Beta 95.4 : Recalcule et affiche les pondérations unitaires
  */
 async function recalculerPonderationsUnitaires() {
@@ -2927,6 +3027,11 @@ function modifierTravailForfaitMatHandler(el) {
     modifierTravailForfaitMat(index, typeId, el.value);
 }
 
+/** Lot 4 : handler pour basculerProductionQuiCompte(prodId, compte) */
+function basculerProductionQuiCompteHandler(el) {
+    return basculerProductionQuiCompte(el.dataset.prodId, el.checked);
+}
+
 /** Handler pour toggleProductionCategorie(prodId, categorie, checked) */
 function toggleProductionCategorieHandler(el) {
     toggleProductionCategorie(el.dataset.prodId, el.dataset.categorie, el.checked);
@@ -3020,6 +3125,7 @@ window.toggleCategoriesMat = toggleCategoriesMat;  // 🆕 Beta 95.4
 window.onPortfolioSelectionChangeMat = onPortfolioSelectionChangeMat;  // 🆕 #24
 window.chargerProductionsPourCategories = chargerProductionsPourCategories;  // 🆕 Beta 95.4
 window.toggleProductionCategorie = toggleProductionCategorie;  // 🆕 Beta 95.4
+window.afficherProductionsQuiComptentMat = afficherProductionsQuiComptentMat;   // lot 4 des standards sans portfolio
 window.recalculerPonderationsUnitaires = recalculerPonderationsUnitaires;  // 🆕 Beta 95.4
 window.validerPonderationsCategoriesMat = validerPonderationsCategoriesMat;  // 🆕 Beta 95.4
 
@@ -3065,6 +3171,7 @@ window.modifierTypeTravailMatHandler = modifierTypeTravailMatHandler;
 window.modifierForfaitMatHandler = modifierForfaitMatHandler;
 window.modifierTravailForfaitMatHandler = modifierTravailForfaitMatHandler;
 window.toggleProductionCategorieHandler = toggleProductionCategorieHandler;
+window.basculerProductionQuiCompteHandler = basculerProductionQuiCompteHandler;   // lot 4 des standards sans portfolio
 // #468/CO-18 : exporté pour la sentinelle de rendu (le HTML des cases du mode
 // hybride est vérifié hors navigateur — une balise laissée béante y est fatale).
 window.genererCheckboxesCategorie = genererCheckboxesCategorie;

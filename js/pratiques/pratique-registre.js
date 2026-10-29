@@ -777,7 +777,8 @@ function obtenirTypePratiqueActive() {
    - le pool = artefacts déclarés, sinon toutes les productions hors
      conteneur et terminale, quelle que soit leur pondération (lot 1 des
      standards sans portfolio, 28 oct. 2026) — le conteneur « portfolio » est
-     optionnel ; une catégorie ne compte qu'en hybride ;
+     optionnel ; une catégorie ne compte qu'en hybride ; hors hybride, moins les
+     productions que la pratique exclut (lot 4, 29 oct. 2026) ;
    - la récence = numéro de production décroissant (correctif 24 jan 2026),
      pas la date d'évaluation.
    =============================== */
@@ -808,19 +809,36 @@ function poolStdFaitDArtefacts(productions, terminalId) {
  * Productions exige une pondération hors « Artefact » — une pratique de laboratoires et d'examens n'avait aucune note.
  * Une catégorie (« sélection », « obligatoire ») ne compte qu'en hybride, où `_selectionnerArtefactsHybride` la lit ;
  * ailleurs, c'est un reste (l'hybride retiré) et elle ne restreint rien (retouche R1, 28 oct. 2026).
+ * Sans « Artefact » et hors hybride, la pratique en retire ses productions exclues (lot 4, `productionsExcluesDuPoolStd`).
  * Les diagnostiques sont retirées en amont, par les appelants (#883).
  */
-function obtenirArtefactsIdsPoolStd(productions, terminalId) {
+function obtenirArtefactsIdsPoolStd(productions, terminalId, configPratique) {
     if (!Array.isArray(productions)) return [];
     if (poolStdFaitDArtefacts(productions, terminalId)) {
         return productions
             .filter(p => p && p.type === 'artefact-portfolio' && p.id !== terminalId)
             .map(p => p.id);
     }
+    const exclues = productionsExcluesDuPoolStd(configPratique);
     // Les anciens types « …-formatif » (que les cases des catégories écartent) n'ont plus aucun écrivain (grep, 28 oct. 2026) : non filtrés ici.
     return productions
-        .filter(p => p && p.type !== 'portfolio' && p.type !== 'terminale' && p.id !== terminalId)
+        .filter(p => p && p.type !== 'portfolio' && p.type !== 'terminale' && p.id !== terminalId && !exclues.has(p.id))
         .map(p => p.id);
+}
+
+/**
+ * Lot 4 des standards sans portfolio (29 oct. 2026) — les productions décochées sous « Productions qui comptent dans la
+ * note » : `configuration.productionsExclues`, des ids, écrits au seul geste de l'enseignant·e. Une liste d'EXCLUSIONS et
+ * non une catégorie (la catégorie hors hybride est un reste, retouche R1) : une production créée plus tard compte d'office,
+ * un id sans production n'exclut rien. Hors hybride seulement : l'hybride désigne par ses deux listes.
+ * `configPratique` absent : la pratique active — les appels d'avant le lot 4 gardent leur sens ; `{}` : aucune exclusion.
+ */
+function productionsExcluesDuPoolStd(configPratique) {
+    const config = configPratique === undefined
+        ? (typeof window.obtenirConfigPratiqueActive === 'function' ? window.obtenirConfigPratiqueActive() : null)
+        : configPratique;
+    if (!config || (config.categories && config.categories.actif)) return new Set();   // l'hybride : `modeHybride` du profil
+    return new Set(Array.isArray(config.productionsExclues) ? config.productionsExclues : []);
 }
 
 /**

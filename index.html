@@ -5865,6 +5865,15 @@
                                             </div>
                                         </div>
 
+                                        <!-- Lot 4 des standards sans portfolio (29 oct. 2026) : sans « Artefact » et hors hybride,
+                                             les productions qui comptent (afficherProductionsQuiComptentMat). Mots validés par
+                                             Grégoire : plans de travail/TEXTES-2026-10-29-standards-lot-4.md -->
+                                        <div id="mat-productions-comptees" class="u-mt-20" style="display: none; padding-top: 20px; border-top: 1px solid var(--gris-clair)">
+                                            <p class="u-texte-gras" style="margin: 0 0 4px 0">Productions qui comptent dans la note</p>
+                                            <p class="text-muted u-mb-10 u-texte-09" style="margin-top: 0">Toutes, par défaut. Décoche celles qui ne doivent pas compter.</p>
+                                            <div id="mat-productions-comptees-liste" style="max-height: 260px; overflow-y: auto; border: 1px solid var(--gris-clair); border-radius: var(--radius-moyen); background: var(--surface-carte, #1a3040);"></div>
+                                        </div>
+
                                         <!-- Config Catégories Sélection/Obligatoires (Beta 95.5) -->
                                         <div id="mat-config-categories" class="u-mt-20" style="padding-top: 20px; border-top: 1px solid var(--gris-clair)">
                                             <div class="u-mb-15">
@@ -11686,7 +11695,7 @@
     <script src="js/menu-selection.js?v=20261025a"></script> <!-- #1147 (24 oct.) : la sélection des bibliothèques de la Conception, en menu déroulant au-dessus de la fiche ; un composant pour les cinq écrans -->
     <script src="js/repertoires-bibliotheque.js?v=20261006a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20261028a"></script> <!-- Jetons par défaut (29 oct.) : les modèles fournis refusent les jetons · #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
-    <script src="js/pratiques-gestion.js?v=20261028i"></script> <!-- Jetons par défaut (29 oct.) : la case et les valeurs disent ce que le moteur résout · #1152, retouche du lot 5 (29 oct.) : « Labo → Exploration des pratiques » · #1156 (25 oct.) : retouche, « PAN-Dénotation » et la phrase de colonne vide · la bibliothèque des pratiques en deux colonnes ; la phrase de l’exemplaire dans « Supprimer définitivement » · Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
+    <script src="js/pratiques-gestion.js?v=20261028j"></script> <!-- Standards sans portfolio, lot 4 (29 oct.) : « Productions qui comptent dans la note » ; l’export JSON n’emporte pas les exclusions · Jetons par défaut (29 oct.) : la case et les valeurs disent ce que le moteur résout · #1152, retouche du lot 5 (29 oct.) : « Labo → Exploration des pratiques » · #1156 (25 oct.) : retouche, « PAN-Dénotation » et la phrase de colonne vide · la bibliothèque des pratiques en deux colonnes ; la phrase de l’exemplaire dans « Supprimer définitivement » · Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
     <script src="js/preferences-v2.js?v=20261025b"></script> <!-- #1149 (24 oct.) : la case « Afficher les chaînes d'étapes » · #829 (9 oct.) : en démo, la grille de dépistage n'écrit plus la préférence réelle · Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20261022b"></script> <!-- #1075, point 3 (22 oct.) : Données compte aussi les copies d’une production · #649 : un seul chemin de suppression des productions, le garde mort est parti -->
     <script src="js/etudiants.js?v=20261028b"></script> <!-- Totems de la démo (#1180, 29 oct.) : l'exemple du commentaire de la recherche suit les noms -->
@@ -11739,7 +11748,7 @@
     <script src="js/pratiques/editeur-cibles.js?v=20261004b"></script>
     <!-- IMPORTANT: pratique-configurable.js doit être chargé EN PREMIER car pratique-registre.js l'utilise -->
     <script src="js/pratiques/pratique-configurable.js?v=20261028b"></script> <!-- Standards sans portfolio, lot 1 (28 oct.) : la pratique Standards déclare la cause d’une note qui manque -->
-    <script src="js/pratiques/pratique-registre.js?v=20261028d"></script> <!-- Standards sans portfolio, lot 2 (29 oct.) : obtenirIdsPoolStdDuCorpus, le pool que lisent les lecteurs secondaires · Retouche du lot 1 (28 oct.) : une catégorie ne compte qu’en hybride · Standards sans portfolio, lot 1 (28 oct.) : le pool sans « Artefact », quelle que soit la pondération ; la phrase de la cause -->
+    <script src="js/pratiques/pratique-registre.js?v=20261028e"></script> <!-- Standards sans portfolio, lot 4 (29 oct.) : le pool retire les productions exclues de la pratique · Standards sans portfolio, lot 2 (29 oct.) : obtenirIdsPoolStdDuCorpus, le pool que lisent les lecteurs secondaires · Retouche du lot 1 (28 oct.) : une catégorie ne compte qu’en hybride · Standards sans portfolio, lot 1 (28 oct.) : le pool sans « Artefact », quelle que soit la pondération ; la phrase de la cause -->
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
@@ -11783,7 +11792,7 @@
     <script src="js/profil-etudiant-rapport.js?v=20261028f"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20261022b"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
-    <script src="js/profil-etudiant-actions.js?v=20261028c"></script> <!-- Retouche du lot 1 (28 oct.) : le doublon « en double · comptée une seule fois » · Standards sans portfolio, lot 1 (28 oct.) : la cause dans `erreur`, la formule du récit, le doublon réconcilié · Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
+    <script src="js/profil-etudiant-actions.js?v=20261028d"></script> <!-- Standards sans portfolio, lot 4 (29 oct.) : le pool reçoit la pratique demandée · Retouche du lot 1 (28 oct.) : le doublon « en double · comptée une seule fois » · Standards sans portfolio, lot 1 (28 oct.) : la cause dans `erreur`, la formule du récit, le doublon réconcilié · Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
     <script src="js/profil-etudiant-sections-affichage.js?v=20261028g"></script> <!-- Standards sans portfolio, lot 2 (29 oct.) : le panneau Engagement nomme le pool et les retenues de la note ; genererSectionCompletion retirée, sans appelant · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : l’aide de la section Accompagnement · R2 bis (28 oct.) : la carte garde son bouton quand la cause est propre à l’étudiant·e · Retouche du lot 1 (28 oct.) : une cause propre à l’étudiant·e garde la carte, la phrase à la place du nombre · Standards sans portfolio, lot 1 (28 oct.) : le panneau des habiletés garde sa règle quand la cause est dite · E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20261022b"></script>
     <script src="js/presences-rapport.js?v=20261022b"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
@@ -11863,7 +11872,7 @@
     <script src="js/partage-validation.js?v=20261027b"></script> <!-- #1120, lot 1 (20 oct.) : la structure du barème, contrôlée par bareme.js · « Apporter mon matériel » lot 1 (16 oct.) : maxCles d'un dictionnaire -->
     <script src="js/signature.js?v=2026061002"></script>
     <script src="js/trust-tofu.js?v=20260902f"></script>
-    <script src="js/partage-format.js?v=20261022b"></script> <!-- #1075, point 9 (22 oct.) : un paquet de pratique emporte son échelle -->
+    <script src="js/partage-format.js?v=20261028a"></script> <!-- Standards sans portfolio, lot 4 (29 oct.) : une pratique part sans ses productions exclues · #1075, point 9 (22 oct.) : un paquet de pratique emporte son échelle -->
     <script src="js/partage-export.js?v=20261019a"></script>
     <script src="js/partage-import.js?v=20261017a"></script>
     <script src="js/partage-section.js?v=20261025c"></script> <!-- #1156 (25 oct.) : genererSectionHTML retirée, rangeesDeuxColonnes seule · #1154 (25 oct.) : rangeesDeuxColonnes, « Partagés par des collègues » en données · #1075, point 9 (22 oct.) : l’échelle partagée d’une pratique -->
