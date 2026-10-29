@@ -42,7 +42,8 @@ const fichiersJs = (d) => readdirSync(path.join(racine, d)).flatMap((n) => {
 });
 const codeJs = net(fichiersJs('js').map((f) => lire(f)).join('\n').replace(/\\'/g, '\'').replace(/&nbsp;/g, ' ').replace(/\\u00a0/g, ' '));
 
-const CONCEPTION = ['pratique', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme',
+// ↻ #1152, lot 4 (29 oct. 2026) : `construction-note`, neuve, après `pratique` (consigne CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md, §1, trou 2).
+const CONCEPTION = ['pratique', 'construction-note', 'creer-productions', 'lecons', 'creer-grilles', 'apporter-grille', 'bareme',
     'sous-criteres', 'creer-echelles', 'solo', 'creer-cartouches'];
 
 describe('#1152 lot 2b · la Conception', () => {

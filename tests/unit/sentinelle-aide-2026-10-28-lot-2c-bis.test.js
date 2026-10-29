@@ -53,7 +53,8 @@ const codeJs = net(fichiersJs('js').map((f) => lire(f)).join('\n')
 // (« Structure des apprentissages fondamentaux (SOLO) », filtre « Suivi ») et les captures (« Développement du groupe ») ;
 // Saisie des présences ; Profils individuels, puis les mots de A et C, la RàI et les patterns (cartes d'Accompagnement) ;
 // Interventions ; Animation. « Rencontres » n'a pas d'entrée (un des sept trous, lot 4).
-const SUIVI = ['tableau-bord', 'acp', 'suivi-apprentissage', 'snapshots', 'saisie-presences', 'profil-etudiant', 'diagnostics', 'rai', 'patterns', 'planifier-rai', 'tirage-sort'];
+// ↻ #1152, lot 4 (29 oct. 2026) : `rencontres`, neuve, entre `planifier-rai` et `tirage-sort` (consigne CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md, §1, trou 5).
+const SUIVI = ['tableau-bord', 'acp', 'suivi-apprentissage', 'snapshots', 'saisie-presences', 'profil-etudiant', 'diagnostics', 'rai', 'patterns', 'planifier-rai', 'rencontres', 'tirage-sort'];
 
 /** Une valeur numérique de SEUILS_PAR_DEFAUT (interpretation-config.js). */
 const CONFIG = lire('js', 'interpretation-config.js');

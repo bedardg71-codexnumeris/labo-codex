@@ -345,6 +345,16 @@ describe('D · un doublon réconcilié n\'est pas « remplacée par une reprise 
     });
 });
 
+/* ================================================================ E. LA PHRASE DE L'AIDE QUI N'ÉTAIT QUE LUE */
+describe('E · l\'Aide, lot 4 (29 oct. 2026) : « Une production retenue non recevable sort du calcul », mesurée hors artefact', () => {
+    // Consigne : plans de travail/CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md (§ 1, trou 2) ; la phrase de la réécriture
+    // Standards validée le 29 oct. à 5 h 12 était « lue, non mesurée pour une production qui n'est pas un artefact ».
+    it('CHIM-1, Laboratoire 1 non recevable (plagiat) : hors du pool, (80 + 90 + 60 + 85) / 4 = 78,75 — pas un 0 (63)', () => {
+        const copies = COPIES_CHIMIE.map(c => (c.etudiantDA === DA.ALICE && c.productionId === 'L1' ? Object.assign(clone(c), { statutIntegrite: 'plagiat' }) : c));
+        expect(avec(std({ methodeSelection: 'tous' }), prodChimie(), copies)).toMatchObject({ profil: 78.75, P: 79, erreur: null });
+    });
+});
+
 // JOURNAL DES BREAK-TESTS (28 oct. 2026) — copie de référence, mutation, lancement, restauration (empreinte sha256 identique).
 //   M1 pratique-registre.js — le repli d'avant (les seules productions non pondérées)          → 6 rouges (CHIM-1, 3, 4 ; l'égarée ;
 //      la terminale « obligatoire » ; la note qui se calcule)
