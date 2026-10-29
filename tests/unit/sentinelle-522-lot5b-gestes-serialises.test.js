@@ -14,7 +14,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 //   cc-license.js — enregistrer les métadonnées d'une ressource ;
 //   snapshots.js — capturer une séance ;
 //   reserve-ouvrir.js — réimporter des tampons ;
-//   codex.js — fusionner les copies d'un codex (`_fusionnerTravaux`).
+//   codex.js — fusionner un codex (`_ecrireLaFusion`, #1182 ; avant, `_fusionnerTravaux`).
 // Deux sites de la fiche ne sont plus en course (devenus synchrones, R3) : la suppression
 // définitive de `donnees-v2.js` et la migration d'évaluations d'`echelles.js`. Rien à convertir.
 //
@@ -236,7 +236,8 @@ describe('#522 lot 5b · C — les huit gestes lisent et écrivent DANS la file 
         ['js/cc-license.js', 'sauvegarderMetadonnees', 'cleStockage'],
         ['js/snapshots.js', 'capturerSnapshotSeance', 'cleSnapshots()'],
         ['js/reserve-ouvrir.js', 'appliquerReimport', "'tamponsPersonnalises'"],
-        ['js/codex.js', '_fusionnerTravaux', 'cleFT']
+        // #1182 : la fusion écrit ses clés par `_ecrireLaFusion` ; `_fusionnerTravaux` n'écrit plus de fiches.
+        ['js/codex.js', '_ecrireLaFusion', 'nomCle']
     ];
     for (const [fichier, nom, cleExpr] of SITES) {
         it(`${fichier} · ${nom} : db.modifier(${cleExpr}), aucun db.set(${cleExpr})`, () => {

@@ -23,9 +23,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //      Depuis #1012, le bilan est porté par la fenêtre de rechargement (mots de Grégoire du
 //      1er oct., 12 h 40), plus par un bandeau qui s'en va.
 //      La liste garde ses statuts d'avant, en mémoire comme dans le stockage ;
-//  (3) toute écriture refusée après les copies (l'espace est plein pour de bon) → même fin ;
-//      un ancien snapshot de référence est retiré plutôt que laissé au codex précédent ; le
-//      codex est encore actif après un rechargement ;
+//  (3) toute écriture refusée après les copies (l'espace est plein pour de bon) → même fin ; le
+//      codex est encore actif après un rechargement (#1182 : le snapshot de référence, ancêtre
+//      de l'ancienne fusion, est retiré du code, et ses témoins de ce banc avec lui) ;
 //  (4) le cœur de #1012 (verdict de relecture de Cowork) : après une ouverture INCOMPLÈTE par
 //      le menu, l'application oublie le fichier d'origine — « Mettre à jour le codex » ne peut
 //      plus le réécrire en place sans les copies qui manquent ; après une ouverture COMPLÈTE,
@@ -46,7 +46,6 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 const CLE_GROUPE = 'a2031_groupeEtudiants';
 const CLE_COPIES = 'a2031_fichiersTravaux';
-const CLE_SNAPSHOT = '_codex_snapshot_avant';
 const NOM_CODEX = 'Codex du banc';
 const GROUPE_FICTIF = [
     { da: '9000001', nom: 'Fictif', prenom: 'Alix', groupe: '00001' },
@@ -169,7 +168,7 @@ async function ouvrirParLeMenu(page, fichier) {
     }, base64);
 }
 
-const etatDeLEspace = (page) => page.evaluate(async ({ cleGroupe, cleCopies, cleSnapshot }) => {
+const etatDeLEspace = (page) => page.evaluate(async ({ cleGroupe, cleCopies }) => {
     const statuts = (liste) => Array.isArray(liste) ? liste.map((c) => c.id + ':' + c.blobStatut) : liste;
     // Lu dans IndexedDB même, en lecture seule : `db.get` répondrait par la mémoire quand la clé y vit.
     const lireLeStockage = (cle) => new Promise((ok, ko) => {
@@ -184,11 +183,10 @@ const etatDeLEspace = (page) => page.evaluate(async ({ cleGroupe, cleCopies, cle
         fichierTenu: Codex.etat().handleFSAPI === true,
         copiesStockees: statuts(await lireLeStockage(cleCopies)),
         copiesEnMemoire: statuts(db.getSync(cleCopies, null)),
-        snapshot: await lireLeStockage(cleSnapshot),
         messages: window.__messages || null,
         journal: window.__journal || null
     };
-}, { cleGroupe: CLE_GROUPE, cleCopies: CLE_COPIES, cleSnapshot: CLE_SNAPSHOT });
+}, { cleGroupe: CLE_GROUPE, cleCopies: CLE_COPIES });
 
 /** La fin attendue : le bilan, la question du rechargement, le codex actif, pas d'erreur. */
 async function attendreLeBilan(page) {
@@ -225,7 +223,6 @@ test.describe('#1011 — un codex ouvert sans assez d\'espace va jusqu\'à son b
         // Le marquage n'a pas pu s'écrire : la liste dit partout ce qui est stocké.
         expect(etat.copiesStockees, 'le stockage garde les statuts d\'avant').toEqual(STATUTS_D_AVANT);
         expect(etat.copiesEnMemoire, 'la mémoire dit la même chose que le stockage').toEqual(etat.copiesStockees);
-        expect(etat.snapshot, 'le snapshot de référence est écrit').not.toBeNull();
         // La trace que porterait un rapport de bug (« AVERTISSEMENTS DU CODEX »).
         expect(neuf.avertissements.some((l) => l.indexOf('[Codex] Marquage des copies manquantes non écrit pour ' + CLE_COPIES) === 0)).toBe(true);
         await neuf.contexte.close();
@@ -255,17 +252,9 @@ test.describe('#1011 — un codex ouvert sans assez d\'espace va jusqu\'à son b
         await fabriquerCodex(page, fichier);
 
         const neuf = await ouvrirEspaceNeuf(browser);
-        // Le snapshot d'un codex précédent : il ne doit pas survivre à une ouverture qui ne peut
-        // pas écrire le sien.
-        await neuf.page.evaluate(async (cle) => { await db.set(cle, { duCodexPrecedent: true }); }, CLE_SNAPSHOT);
-        expect((await etatDeLEspace(neuf.page)).snapshot, 'témoin : l\'ancien snapshot est là').toEqual({ duCodexPrecedent: true });
-
         await injecterLeManqueDEspace(neuf.page, { toutRefuser: true });
         await ouvrirParLaCase(neuf.page, fichier);
         const etat = await attendreLeBilan(neuf.page);
-        expect(etat.journal, 'témoin : le snapshot a été refusé').toContain('clé refusée ' + CLE_SNAPSHOT);
-        expect(etat.snapshot, 'l\'ancien snapshot est retiré').toBeNull();
-        expect(neuf.avertissements.some((l) => l.indexOf('[Codex] Snapshot de référence non écrit') === 0)).toBe(true);
 
         // Ce que vivrait quelqu'un qui recharge : ses données sont là, son codex est actif.
         await neuf.page.getByRole('button', { name: 'Annuler', exact: true }).click();

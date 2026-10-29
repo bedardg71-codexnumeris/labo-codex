@@ -203,6 +203,11 @@ function estAuxArchives(id) {
     return !!id && trimestreDeLaCopie(id) !== null;
 }
 
+/** #1182 — tous les ids marqués ici, tous trimestres (la fusion n'en reprend aucun). Sans attente. */
+function tousLesIdsMarques() {
+    return idsDansDonnees({ _copiesAuxArchives: _lireMarque() });
+}
+
 /** Une marque lue dans d'autres données (un codex qu'on ouvre) : l'ensemble de ses ids. */
 function idsDansDonnees(donnees) {
     var ids = {};
@@ -601,6 +606,7 @@ window.ReserveCopies = {
     trimestreDeLaCopie: trimestreDeLaCopie,
     estAuxArchives: estAuxArchives,
     idsDansDonnees: idsDansDonnees,
+    tousLesIdsMarques: tousLesIdsMarques,
     nomDuTrimestre: _nomDe,
     lever: lever,
     copiesParties: copiesParties,

@@ -131,9 +131,9 @@ describe('#522 lot 20 · A — la migration des cartouches et un geste rapproch�
     });
 });
 
-/* ------------------------------------------- C — le cliquet : les neuf sites restants */
+/* ------------------------------------------- C — le cliquet : les huit sites restants (neuf avant #1182) */
 
-describe('#522 lot 20 · C — le geste entre dans la file ; les neuf restes sont NOMMÉS', () => {
+describe('#522 lot 20 · C — le geste entre dans la file ; les huit restes sont NOMMÉS', () => {
     it('C.a la migration des cartouches lit et écrit par db.modifier, sans db.get ni db.set sur la clé', () => {
         const { interieur } = corps('js/cartouches.js', 'migrerCartouchesVersBibliotheque');
         expect((interieur.match(/db\.modifier\(cleCartouches,/g) || []).length).toBe(1);
@@ -148,8 +148,7 @@ describe('#522 lot 20 · C — le geste entre dans la file ; les neuf restes son
             'démarrage seulement (initialiserCodex) ; écrit une constante'],
         ['js/codex.js', '_purgerCodexHistLegacy', 'CLE_PURGE_TIMEMACHINE_FAITE',
             'démarrage seulement ; écrit une constante'],
-        ['js/codex.js', '_migrerSnapshotVersIndexHash', 'CLE_SNAPSHOT_AVANT',
-            'démarrage seulement ; le format converti n\'est plus jamais écrit, une seule conversion par poste'],
+        // #1182 (29 oct. 2026) : `_migrerSnapshotVersIndexHash` est parti avec l'ancêtre de la fusion.
         ['js/snapshots.js', 'initialiserModuleSnapshots', 'cleSnap',
             'démarrage seulement ; n\'écrit que si la clé est vide en IndexedDB'],
         ['js/main.js', 'auDbReady', "'migration_modeles_namespacees_done'",

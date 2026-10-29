@@ -122,7 +122,7 @@ describe('#335 A · câblage des gardes (sentinelle statique)', () => {
 
     it('actionFusionner : garde AVANT _analyserFusion', () => {
         const idxGarde = src.indexOf('_detecterModeleAnterieur(externe.donnees');
-        const idxAnalyse = src.indexOf('var analyse = await _analyserFusion(donneesLocales');
+        const idxAnalyse = src.indexOf('var analyse = _analyserFusion(donneesLocales');
         expect(idxGarde).toBeGreaterThan(-1);
         expect(idxAnalyse).toBeGreaterThan(-1);
         expect(idxGarde).toBeLessThan(idxAnalyse);
