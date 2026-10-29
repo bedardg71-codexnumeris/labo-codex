@@ -9,6 +9,18 @@
 
 ---
 
+## 0⁸ · LE 28 OCTOBRE, 20 H 20 : LA 1.223.0 EN LIGNE, GITHUB TRIÉ (ajouté le 28 oct. à 20 h 20 par Cowork)
+
+> Le § 0⁷ ci-dessous est **périmé pour l'état** ; sa liste « Ce qui est dû » tient, points 2 et 3, avec l'ajout ci-dessous. Page du tri republiée à 20 h 20 (version 450).
+
+**L'état** (rapport de Claude Code, 19 h 40 ; `git --no-optional-locks log`) : `main` = `origin/main` = `ace09fa2`. **1.223.0 en ligne** (`d1d581b7`, build `1028-1724`, Netlify `6ae27e6c`, 19 h 00 ; le bas de page à faire confirmer par Grégoire). Verdict du Mac vert (1 120 essais, 0 rouge ; les présences ne sont pas revenues).
+
+**GitHub trié** : `plans de travail/VERDICT-RELECTURE-2026-10-28-rouge-github-1223.md`. Aucune régression ; les « quatre nouvelles » étaient connues (25, 26, et #1114 (b) du 27). Décision de Cowork : la baseline Linux en deux listes (`echecsConnus` / `instables`), « redevenue verte » seulement jouée et verte, critère de bascule réécrit. **Un lot du juge à écrire** (`scripts/` seul), à relayer après le lot 1 des standards et **avant la prochaine mise en ligne du soir**.
+
+**Ce qui est dû, dans l'ordre** : (1) ~~le mot neuf du lot 1~~ validé par Grégoire à 20 h 13 (DECISIONS, mot neuf 2, avec un erratum de Q3 sur CHIM-4) ; (2) la consigne du lot 1 : **écrite à 20 h 20** (`plans de travail/CONSIGNE-LOT-2026-10-28-standards-sans-portfolio-lot-1.md`), à relayer ; à la relecture : la sentinelle (CHIM-6, CHIM-7, GREG-3, GREG-4), l'encadré du profil devant une cause propre à l'étudiant·e ; (3) la consigne du lot du juge ; (4) les lots 4 et 5 de l'Aide ; (5) l'instable des présences (absent ce soir : à surveiller, rien à faire).
+
+---
+
 ## 0⁷ · LE 28 OCTOBRE, 15 H 50 : LA MISE EN LIGNE DE LA 1.223 RELAYÉE, LA SUITE (ajouté le 28 oct. à 15 h 50 par Cowork)
 
 > Le § 0⁶ ci-dessous est **périmé** ; les §§ 1, 2, 5, 6 tiennent. Ordre de lecture : la page du tri (https://claude.ai/artifact/1qhNTJjv1peETqedTQr6bN, `Artifact` read, **republie à partir de ce que la lecture te rend**), puis ce paragraphe, puis `plans de travail/DECISIONS-2026-10-28-construction-de-la-note.md` (E1 à E16, puis Q1 à Q6 du plan Standards et le mot neuf 1).

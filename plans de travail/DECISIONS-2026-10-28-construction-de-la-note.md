@@ -88,6 +88,15 @@ Relu par Cowork le 28 oct. à 15 h 14 : les deux constats porteurs vérifiés da
 - Sans évaluation terminale : « moyenne du portfolio » ; sans « Artefact » : « moyenne des productions retenues ».
 (`formuleTexte`, `profil-etudiant-actions.js:~647` ; affichée au Comparateur, `comparateur-pratiques.js:990` ; au profil et au PDF selon le plan, non vérifié par Cowork.)
 
+### Mot neuf 2 (lot 1) – La cause d'une note qui manque, en standards
+
+✅ **Validé par Grégoire le 28 oct. 2026 à 20 h 13** (« ok »), proposé par Cowork. Lu à trois endroits : l'encadré « Note finale non calculable » du profil, le rapport de bilan (« Performance : non constructible (…) »), l'export des résultats finaux (« non constructible – … »).
+- **Aucune production du pool n'a de note** : « Aucune production retenue pour la note n'est encore évaluée. » Avec un « Artefact » : « Aucun artefact du portfolio n'est encore évalué. »
+- **Seule la terminale a une note** (Q3) : « Seule l'évaluation terminale a une note. En standards, la note du cours s'appuie aussi sur les productions retenues : elle ne se calcule pas sur la terminale seule. » Avec un « Artefact » : « … s'appuie aussi sur les artefacts du portfolio : … »
+- La variante suit la règle de Q1 (la présence d'un « Artefact », l'invariant du calcul) ; elle n'est pas un mot neuf.
+
+**Erratum de Cowork (28 oct., 20 h 15)** : Q3 écrit « Pour le lot 1 : CHIM-4 reste « non constructible » ». C'est faux au sens du plan : CHIM-4 (X2 terminale à 30 %, le reste pondéré, tout évalué) a un pool non vide après le lot 1 et rend 78, comme le plan le prévoit (§ 3, lot 1). Le cas de Q3, un·e étudiant·e dont **seule** la terminale a une note, est un cas neuf de la sentinelle (CHIM-6 dans la consigne du lot 1) ; c'est lui qui reste non constructible. La décision de Grégoire ne change pas.
+
 ## E15 – L'indice C pendant la fenêtre de reprise (question 1 de la relecture des correctifs)
 
 ✅ **Décidé par Grégoire le 28 oct. 2026 à 15 h 22** (« oui », sur la recommandation de Cowork) : **l'originale qui compte dans la note (E4) compte aussi comme remise** dans l'indice C, jusqu'à ce que la reprise la remplace. Motif : l'étudiant·e a remis ce travail ; même logique que « Incomplet ; travail en cours » (remise pour C, 25 oct.), à distinguer de la copie non recevable (non remise : ce n'est pas le travail de l'élève, 28 oct.). Se lit au calcul (`evaluationCompteCommeRemise`, avec la règle d'E4 du registre) : le stock suit sans écriture. Va à la retouche des correctifs.
