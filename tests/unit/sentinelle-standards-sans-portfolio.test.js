@@ -213,7 +213,7 @@ describe('B · une note qui manque dit pourquoi (mot neuf 2), au profil, au rapp
         expect(note(b).export[1]).toBe('non constructible – ' + TERMINALE_SEULE_PRODUCTIONS);
     });
 
-    it('retouche R2 : une cause propre à l\'étudiant·e garde la carte (son titre), sans note, sans alerte ni réglages (CHIM-6, GREG-3)', () => {
+    it('retouche R2 et R2 bis : une cause propre à l\'étudiant·e garde la carte (son titre) et son bouton, sans note, sans l\'alerte ni son bouton (CHIM-6, GREG-3)', () => {
         const carte = (pratique, productions, evaluations, phrase) => {
             const { win } = banc({ pratique, productions, evaluations,
                 modules: [{ chemin: 'js/profil-etudiant-sections-affichage.js', internes: ['genererSectionProductions'] }] });
@@ -225,7 +225,8 @@ describe('B · une note qui manque dit pourquoi (mot neuf 2), au profil, au rapp
             expect(html, cas).toContain('Note provisoire de session');
             expect(html, cas).toContain('<div class="note-finale-non-evalue">' + phrase + '</div>');
             expect(html, cas).not.toContain('Note finale non calculable');
-            expect(html, cas).not.toContain('Réglages de la pratique');
+            expect(html, cas).toContain('title="Modifier le statut (provisoire / finale) et les pondérations dans les réglages de la pratique">Réglages de la pratique</button>');
+            expect(html, cas).not.toContain('corriger ses paramètres');
             expect(html, cas).not.toContain('note-finale-total');
             expect(html, cas).not.toContain('Basée uniquement sur le portfolio');
         }
@@ -359,6 +360,8 @@ describe('D · un doublon réconcilié n\'est pas « remplacée par une reprise 
 //   R-M2 profil-etudiant-actions.js — « doublon note-égale »                                    → 1 rouge (récit Standards)
 //   R-M3 pratique-sommative.js — « doublon note-égale · exclu de la moyenne »                   → 1 rouge (récit sommatif)
 //   R-M4 profil-etudiant-sections-affichage.js — toute `erreur` rend l'alerte                   → 2 rouges (source unique ; R2 carte)
-//   R-M5 profil-etudiant-sections-affichage.js — `_boutonReglagesCarteNote` ignore la cause      → 1 rouge (R2 carte)
+//   R-M5 [périmé : R2 bis, le bouton de la carte reste quand la cause est propre à l'étudiant·e]
 //   R-M6 profil-etudiant-sections-affichage.js — `_totalCarteNote` rend le total, pas la phrase  → 2 rouges (source unique ; R2 carte)
 //   Playwright (WebKit) : R-M4 → CHIM-6 et GREG-3 rouges, l'erreur de configuration verte.
+// RETOUCHE R2 bis (28 oct. 2026) : `|| details.causeNoteAbsente` remis dans `_boutonReglagesCarteNote`, arbre restauré
+//   → Vitest : 1 rouge (R2 carte) ; Playwright (WebKit) : CHIM-6 et GREG-3 rouges (0 bouton au lieu de 1).
