@@ -33,6 +33,7 @@
  *
  *   cd tests && npx vitest run unit/audit-onglet-suivi-2026-09-05.test.js
  */
+// ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect, afterAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -782,7 +783,7 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
     function creer(b, extra) {
         const d = Object.assign({ date: '2026-02-09', duree: 2, niveauRai: 2, titre: 'Rattrapage banc', contexte: 'rattrapage', seanceConcernee: '2026-02-09' }, extra || {});
         const champs = { interventionNiveau: d.niveauRai, interventionContexte: d.contexte, interventionTitre: d.titre, interventionDate: d.date, interventionHeure: '',
-            interventionDuree: d.duree, interventionDescription: '', interventionSeance: d.seanceConcernee || '', observationsIntervention: '' };
+            interventionDuree: d.duree, interventionDescription: '', observationsIntervention: '' };
         for (const [idChamp, v] of Object.entries(champs)) b.elements[idChamp] = elementDom({ value: String(v) });
         if (!b.elements.conteneurPrincipal) b.elements.conteneurPrincipal = elementDom();
         b.win.afficherFormulaireIntervention();

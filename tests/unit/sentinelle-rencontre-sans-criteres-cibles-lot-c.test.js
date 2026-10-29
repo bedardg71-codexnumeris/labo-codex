@@ -21,6 +21,7 @@
  *
  * BREAK-TESTS VÉRIFIÉS le 12 septembre 2026 — journal en fin de fichier.
  */
+// ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect } from 'vitest';
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
 
@@ -35,7 +36,7 @@ const intervention = (extra) => Object.assign({ id: 'I1', titre: 'Rencontre de L
     bilan: null, statut: 'en-cours', jamaisSauvegardee: false, groupeCoursId: 'GC1' }, extra);
 const champs = () => ({ interventionNiveau: elementDom({ value: '3' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'Rencontre de Léa' }),
     interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '1' }),
-    interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }) });
+    interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }) });
 
 /** Un banc sur GC1 ; `service` fait de son cours un service d'orthopédagogie (le point d'accroche : contexteActifEstService). */
 function banc({ service, vue = 'rencontres', extra, globaux } = {}) {

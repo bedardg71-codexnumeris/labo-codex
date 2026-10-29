@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+// ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
 
 // SENTINELLE #834 — LOT D DU CADRAGE « RENCONTRES » (12 sept. 2026) : UNE INTERVENTION PORTE SON
@@ -35,7 +36,7 @@ const troisInterventions = () => [
     intervention({ id: 'I_GC2', titre: 'Née sous GC2', groupeCoursId: 'GC2' }),
     intervention({ id: 'I_OLD', titre: 'D\'avant le lot' }),
 ];
-const champs = () => ({ interventionNiveau: elementDom({ value: '3' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'T' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) });
+const champs = () => ({ interventionNiveau: elementDom({ value: '3' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'T' }), interventionDate: elementDom({ value: '2026-09-01' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }), interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) });
 const selecteurs = () => ({ '#listeEtudiantsIntervention input[type="checkbox"]': [], '#listeEtudiantsIntervention input[type="checkbox"]:checked': [], 'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] });
 const sousGC2 = (store) => { store.infoCours = { id: 'GC2', nom: 'Autre', groupe: '02', _groupeCoursId: 'GC2' }; store.groupeCoursActif = { id: 'GC2', trimestreId: 'test', coursId: 'GC2', groupeNum: '02' }; };
 const idsRendus = (b) => (b.elements.listeInterventions.innerHTML.match(/data-action="ouvrirIntervention" data-param="([^"]+)"/g) || []).map(m => m.match(/data-param="([^"]+)"/)[1]).sort();

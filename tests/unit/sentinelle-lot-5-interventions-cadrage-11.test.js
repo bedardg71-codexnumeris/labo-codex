@@ -18,6 +18,7 @@
  *
  * BREAK-TESTS VÉRIFIÉS le 12 septembre 2026 — journal en fin de fichier.
  */
+// ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
 import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
@@ -31,7 +32,7 @@ const globaux = (seuils, moyenne) => ({
 });
 const champs = () => ({ interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'Rattrapage' }),
     interventionDate: elementDom({ value: '2026-09-12' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }),
-    interventionDescription: elementDom({ value: '' }), interventionSeance: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) });
+    interventionDescription: elementDom({ value: '' }), observationsIntervention: elementDom({ value: '' }), objectifVise: elementDom({ value: '' }) });
 const selecteurs = () => ({ '#listeEtudiantsIntervention input[type="checkbox"]': [], '#listeEtudiantsIntervention input[type="checkbox"]:checked': [],
     'input[name="interventionStatut"]:checked': elementDom({ value: 'en-cours' }), '#criteresCiblesContainer .critere-cible-cb:checked': [] });
 const intervention = (extra) => Object.assign({ id: 'I', titre: 'T', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'hors-classe',
