@@ -1248,11 +1248,13 @@ const AIDE_CONTEXTUELLE = {
     },
 
     'accueil-donnees-demo': {
-        titre: "Mode démonstration & duplication CC",
+        // Le guidage de la démo (29 oct. 2026) : titre et blocs 1, 3 à 7 validés par Grégoire le 29 oct. à 8 h 02 et 8 h 03,
+        // posés mot pour mot (plans de travail/TEXTES-2026-10-28-guidage-demo.md) ; le bloc 2 reste celui du 7 oct. (G4).
+        titre: "Données démo",
         sections: [
             {
                 type: 'texte',
-                contenu: "Labo Codex embarque un jeu complet de données de démonstration : un cours fictif « Écriture et littérature », 10 étudiants, 11 productions, 101 évaluations, 313 présences, 3 grilles, 2 échelles et une carte mentale d'alignement pédagogique. Coche la case « Données démo » sur l'accueil pour activer ce matériel et explorer l'outil sans toucher à tes vraies données."
+                contenu: "La démo est un cours fictif, «\u00a0Écriture et littérature (Démo)\u00a0»\u00a0: 10 étudiant·es, 11 productions (1 portfolio, 9 artefacts et une évaluation terminale), 101 évaluations, 32 dates de présences (du 25 août au 10 décembre), 3 grilles de critères, 2 échelles de performance, 9 cartouches et une carte d'alignement. Coche «\u00a0Données démo\u00a0»\u00a0: elle s'ouvre dans Suivi › Suivi du groupe, à part de tes vraies données."
             },
             {
                 // T6 du chantier du démo (décision G4 de Grégoire, 7 oct. 2026, par Cowork) : phrase validée.
@@ -1261,29 +1263,29 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Ce matériel est publié sous licence CC BY-NC-SA 4.0 (Attribution, pas d'utilisation commerciale, partage à l'identique). L'auteur est affiché partout sous le nom « Labo Codex ». Il sert de modèle et t'accompagne vers l'autonomie selon le modèle de l'enseignement explicite."
+                contenu: "Ce matériel est publié sous licence CC BY-NC-SA 4.0 (attribution, pas d'utilisation commerciale, partage dans les mêmes conditions). Il sert de modèle et t'accompagne vers l'autonomie, selon l'enseignement explicite."
             },
             {
                 type: 'liste',
                 titre: "Le parcours en trois temps",
                 items: [
-                    "<strong>Modélisation</strong> — Active la démo et explore l'aperçu peuplé. Tu vois directement ce que l'outil produit avec des données réalistes.",
-                    "<strong>Pratique guidée</strong> — Ouvre une grille ou une échelle démo pour comprendre sa structure. Le formulaire est en lecture seule (aucun risque de modifier accidentellement le matériel).",
-                    "<strong>Autonomie</strong> — Clique sur « Dupliquer » (ou ta propre échelle, cartouche, production, pratique, groupe-cours) et renomme. Tu pars du modèle mais tu deviens l'auteur."
+                    "<strong>Modélisation</strong> – Active la démo\u00a0: Suivi du groupe s'ouvre, déjà rempli. Tu vois ce que l'outil produit avec des données réalistes.",
+                    "<strong>Pratique guidée</strong> – Ouvre une grille ou une échelle de la démo pour voir sa structure. Elle est en lecture seule\u00a0: tu ne peux pas la modifier par accident.",
+                    "<strong>Autonomie</strong> – Clique sur «\u00a0Dupliquer pour créer ma grille\u00a0» (ou mon échelle, ma cartouche, ma production, ma pratique) et renomme la copie. Elle reste dans la démo\u00a0: une nouvelle version du pack l'efface."
                 ]
             },
             {
                 type: 'exemple',
-                contenu: "Tu ouvres la grille démo « Analyse littéraire ». Tu cliques sur « Dupliquer ». Une copie apparaît dans ta bibliothèque, prête à être renommée. Dans les métadonnées de ta copie, une ligne « Inspiré de : Analyse littéraire par Labo Codex » reste visible — c'est la reconnaissance d'origine exigée par la licence CC."
+                contenu: "Tu ouvres la grille «\u00a0Grille-5 FR-HOLIS-20 H26\u00a0» de la démo et tu cliques sur «\u00a0Dupliquer pour créer ma grille\u00a0». Ta copie porte la ligne «\u00a0Inspiré de Grille-5 FR-HOLIS-20 H26 par Labo Codex\u00a0»\u00a0: c'est la reconnaissance d'origine qu'exige la licence."
             },
             {
                 type: 'conseil',
-                contenu: "Les sélecteurs (grilles, échelles, pratiques, groupes-cours, etc.) affichent deux sections : « Mes documents » pour tes créations, « Démo » pour le matériel original. Tu peux mélanger les deux dans les dropdowns, mais au moment d'enregistrer un item utilisateur, Labo Codex refuse les références mixtes (ex. une vraie grille qui pointerait sur une échelle démo) — duplique l'échelle démo d'abord, puis référence ta copie."
+                contenu: "Dans les menus de Cadre › Trimestre (cours, horaire, enseignant·e, pratique, groupe-cours), le matériel de la démo paraît grisé, sous «\u00a0Démo (par Labo Codex – à dupliquer pour utiliser)\u00a0». Ton matériel ne peut pas pointer vers un modèle de la démo\u00a0: duplique-le d'abord, puis choisis ta copie."
             },
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Les données démo vivent en permanence dans un espace séparé. Cocher/décocher la case ne touche jamais à tes vrais trimestres (H2026, A2025, etc.). Tu peux activer la démo, explorer, et décocher à tout moment — ton état réel revient intact."
+                contenu: "Les données démo vivent dans un espace à part\u00a0: cocher ou décocher la case ne touche jamais à tes vrais trimestres. Pour en sortir, «\u00a0Quitter la démo\u00a0» dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0; tes vraies données reviennent telles quelles."
             }
         ],
         voirAussi: ['bibliotheque-fonctionnement', 'construction-objectifs-reflexion']
