@@ -1866,11 +1866,14 @@ const GESTE_MODIFIER_PRODUCTION = 'Modifier la production';
 function raisonChampsObligatoiresProduction(d) {
     if (!d.titre) return 'le nom de la production est requis.';
     if (!d.type) return 'choisis le type de la production.';
-    // Lot 3 des standards sans portfolio (29 oct. 2026) : en Standards, quel que soit le type, la pondération n'est plus
-    // exigée — le pool prend les productions sans condition de pondération (lot 1). La famille se lit sur la désignation
-    // du groupe-cours (stockage, `obtenirTypePratiqueActive`), pas sur le DOM ; les autres familles ne changent pas.
+    // Lot 3 des standards sans portfolio (29 oct. 2026) : en Standards, la pondération n'est plus exigée — le pool prend
+    // les productions sans condition de pondération (lot 1) — SAUF pour les deux types dont le calcul la lit : la terminale
+    // (sa part de la note ; à 0 %, elle ne compterait pour rien) et le conteneur (la part du pool ; à 0 %, « Pondérations
+    // nulles »). Retouche du verdict de Cowork, 29 oct. La famille se lit sur la désignation du groupe-cours (stockage,
+    // `obtenirTypePratiqueActive`), pas sur le DOM ; les autres familles ne changent pas.
     const enStandards = typeof window.obtenirTypePratiqueActive === 'function' && window.obtenirTypePratiqueActive() === 'standards';
-    if (!enStandards && d.type !== 'artefact-portfolio' && d.ponderation === 0) return 'la pondération est requise : plus de 0\u00a0%.';
+    const ponderationExigee = enStandards ? (d.type === 'terminale' || d.type === 'portfolio') : d.type !== 'artefact-portfolio';
+    if (ponderationExigee && d.ponderation === 0) return 'la pondération est requise : plus de 0\u00a0%.';
     return '';
 }
 
