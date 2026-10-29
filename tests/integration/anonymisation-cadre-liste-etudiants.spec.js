@@ -13,11 +13,11 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Signalé par Grégoire pendant la première rencontre de la CoP : en mode
 // anonymisation, Cadre › Trimestre › « Groupe d'étudiant·es » montrait les vrais
 // noms, même après un rechargement. Mesuré sur le pack démo dans Chrome avant le
-// correctif : « DEMO004 0demo Césaire Aimé » en mode normal ET en anonymisation.
+// correctif : « DEMO004 0demo Césaire Aimé » (noms d'avant les totems, #1180) en mode normal ET en anonymisation.
 //
 // ⚠ Chaque essai part d'un stockage VIDÉ (les specs partagent l'origine file://).
 
-const NOMS_REELS = ['Césaire', 'Curie', 'Kahlo'];
+const NOMS_REELS = ['Jovial', 'Joyeuse', 'Fière'];   // DEMO004, DEMO006, DEMO011 (totems, #1180)
 
 async function packDemoSurLeCadre(page) {
     await page.goto(indexHtml);

@@ -36,8 +36,8 @@
  *    c'est ce qu'il faudra refaire la prochaine fois. Les trois mentions qui
  *    restent dans js/ sont le témoin : un zéro là serait un défaut.
  * 2. LE PACK DE DÉMONSTRATION EST HORS PÉRIMÈTRE (#351). `pack-demo-10.js` et
- *    `demo-namespace.js` portent des noms d'élèves FICTIFS, choisis exprès parmi
- *    des figures historiques et culturelles. Ce sont des données de démonstration
+ *    `demo-namespace.js` portent des noms d'élèves FICTIFS : des totems scouts (animal + qualité)
+ *    depuis #1180 (29 oct. 2026), des figures historiques et culturelles avant. Ce sont des données de démonstration
  *    assumées, pas des personnes réelles.
  * 3. `config.js` EST HORS PÉRIMÈTRE — zone protégée (`noms_stables.json`), et sa
  *    `listeEtudiants` est du même statut que le pack : des fiches fictives.
@@ -99,8 +99,8 @@ describe('#690 · aucun nom de personne dans le code applicatif', () => {
     //
     // ⮕ POURQUOI PAS LE PACK DE DÉMONSTRATION COMME TÉMOIN. C'était l'idée de
     // départ, et la mesure du 2 septembre l'a écartée : le pack ne contient AUCUN
-    // de ces prénoms. Ses dix élèves fictifs sont des figures historiques et
-    // culturelles (#351), pas les collègues dont ce lot retire les noms. Un
+    // de ces prénoms. Ses dix élèves fictifs étaient alors des figures historiques
+    // et culturelles (#351 ; des totems scouts depuis #1180), pas les collègues dont ce lot retire les noms. Un
     // témoin qu'on n'a pas mesuré est une supposition de plus.
 
     it('témoin 1 — le balayage lit RÉELLEMENT le code applicatif', () => {

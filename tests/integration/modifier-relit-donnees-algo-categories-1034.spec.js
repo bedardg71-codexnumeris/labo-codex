@@ -9,7 +9,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // #1034 — « MODIFIER » RELIT LE NOMBRE D'ERREURS ET LES CODES D'UN CRITÈRE ALGORITHMIQUE.
 //
 // Mesuré par Grégoire le 6 oct. 2026 (BUG_grégoire_2026-10-06_15-34-54, démo) : l'Évaluation
-// terminale de Marie Curie vaut 83,3 % (M) dans la Liste ; rouverte depuis sa copie, le
+// terminale de DEMO006 (Marie Curie avant les totems, #1180) vaut 83,3 % (M) dans la Liste ; rouverte depuis sa copie, le
 // formulaire affiche 86,3 % (E) et « 0 erreur de français pour 729 mots ». Le pack porte
 // pourtant ses données au format des codes : `{ codes, mots, totalErreurs }`, sans `erreurs`.
 //
@@ -59,7 +59,7 @@ async function monter(page, { donnees }) {
         window.db.setSync(T + '_productions', [
             { id: 'p1034', titre: 'Analyse', type: 'travail', ponderation: 60, grilleId: 'G1034', echelleId: 'E1034', cartoucheId: 'CT1034', groupeCoursId: 'GC1034' }
         ]);
-        // Une cartouche, comme l'évaluation de Curie : c'est le rendu par cartouche (`cartoucheSelectionnee`)
+        // Une cartouche, comme l'évaluation de DEMO006 : c'est le rendu par cartouche (`cartoucheSelectionnee`)
         // qui fait naître le mode des codes. Le rendu sans cartouche n'en a pas (hors de ce lot).
         const commentaires = {};
         ['I', 'D', 'M', 'E'].forEach((n) => { commentaires['c1_' + n] = 'CARTOUCHE c1_' + n; commentaires['c2_' + n] = 'CARTOUCHE c2_' + n; });

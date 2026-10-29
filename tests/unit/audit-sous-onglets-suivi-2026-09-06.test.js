@@ -499,14 +499,14 @@ describe('2 · Liste des étudiant·es — tris, filtres, écritures par rendu, 
         expect(ligneIndex).toBeLessThan(debutSaisie + 1);
     });
 
-    it('L-3 · La recherche par nom : insensible à la casse ET aux accents — valeur d\'après #749 lot 2 (constat d\'origine : « cesaire » ne trouvait pas Césaire)', () => {
+    it('L-3 · La recherche par nom : insensible à la casse ET aux accents — valeur d\'après #749 lot 2 (constat d\'origine : un nom accentué cherché sans accent ne se trouvait pas ; élève en totem depuis #1180)', () => {
         const store = storeBase();
-        store.test_groupeEtudiants[0] = { da: '2000001', nom: 'Césaire', prenom: 'Aimé', groupe: '01', coursId: 'GC1', statut: 'actif' };
+        store.test_groupeEtudiants[0] = { da: '2000001', nom: 'Chaleureux', prenom: 'Hérisson', groupe: '01', coursId: 'GC1', statut: 'actif' };
         const b = monterL(store);
         const chercher = (t) => { b.document.getElementById('recherche-nom-liste').value = t; b.win.afficherListeEtudiantsConsultation(); return dasDuTbody(b).length; };
-        const r = { 'césaire': chercher('césaire'), 'CÉSAIRE': chercher('CÉSAIRE'), 'cesaire': chercher('cesaire'), 'aime': chercher('aime') };
+        const r = { 'hérisson': chercher('hérisson'), 'HÉRISSON': chercher('HÉRISSON'), 'herisson': chercher('herisson'), 'chaleureux': chercher('chaleureux') };
         noter('L3', r);
-        expect(r['césaire']).toBe(1); expect(r['CÉSAIRE']).toBe(1); expect(r['cesaire']).toBe(1); expect(r['aime']).toBe(1);
+        expect(r['hérisson']).toBe(1); expect(r['HÉRISSON']).toBe(1); expect(r['herisson']).toBe(1); expect(r['chaleureux']).toBe(1);
     });
 
     it('L-4 · Chaque rendu relance l\'assiduité ×1, qui chaîne CP — plus d\'appel direct à CP depuis etudiants.js — valeur d\'après #749 lot 2 (constat d\'origine : CP ×2 par rendu)', () => {

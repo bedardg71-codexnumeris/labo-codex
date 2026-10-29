@@ -5,7 +5,8 @@ import { chargerScript } from './_helpers/charger-script.js';
 //
 // Symptôme vécu par Grégoire le 5 oct. : deux photos d'une même remise, au
 // format Léa et portant un DA du pack démo (« Curie_DEMO011_Artefact_n9_revise
-// _Remis_le_…_12h31m39s.jpg » puis « …_12h32m13s.jpg »), ouvrent « Doublon
+// _Remis_le_…_12h31m39s.jpg » puis « …_12h32m13s.jpg » ; nom d'élève d'avant les
+// totems, #1180), ouvrent « Doublon
 // détecté » au lieu de s'assembler. Cause : aucun motif de `PATTERNS_DA` ne lit
 // `DEMO011` (ils cherchent sept chiffres), donc `parseLea.da` est vide, donc
 // pas de `groupeDocumentId`, donc chaque page est un document — et la seconde
@@ -20,7 +21,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // changement hors démo.
 
 const ETUDIANTS = [
-    { da: 'DEMO011', nom: 'Curie', prenom: 'Marie' },
+    { da: 'DEMO011', nom: 'Fiere', prenom: 'Vigogne' },
     { da: 'DEMO004', nom: 'Fictif', prenom: 'Lubin' },
     { da: '9000058', nom: 'Exemple', prenom: 'Alma' }
 ];
@@ -34,8 +35,8 @@ function faireFichier(nom) {
     return blob;
 }
 
-const PAGE_1 = 'Curie_DEMO011_Artefact_n9_revise_Remis_le_2026-05-11_12h31m39s.jpg';
-const PAGE_2 = 'Curie_DEMO011_Artefact_n9_revise_Remis_le_2026-05-11_12h32m13s.jpg';
+const PAGE_1 = 'Fiere_DEMO011_Artefact_n9_revise_Remis_le_2026-05-11_12h31m39s.jpg';
+const PAGE_2 = 'Fiere_DEMO011_Artefact_n9_revise_Remis_le_2026-05-11_12h32m13s.jpg';
 
 let win;
 let enDemo;
@@ -65,7 +66,7 @@ describe('T1 — en démo, le DA du pack est lu', () => {
     it('lit DEMO011 dans un nom au format Léa', () => {
         const r = win.travauxImport.parserNomFichierLea(PAGE_1);
         expect(r.da).toBe('DEMO011');
-        expect(r.nom).toBe('Curie');
+        expect(r.nom).toBe('Fiere');
         expect(r.nomProduction).toBe('Artefact n9 revise');
     });
 
@@ -82,8 +83,8 @@ describe('T1 — en démo, le DA du pack est lu', () => {
     });
 
     it('ne lit pas un DEMO suivi de plus de trois chiffres, ni collé à un mot', () => {
-        expect(win.travauxImport.detecterDA('Curie_DEMO0111_x.jpg')).toBe('');
-        expect(win.travauxImport.detecterDA('Curie_pseudodemo011_x.jpg')).toBe('');
+        expect(win.travauxImport.detecterDA('Fiere_DEMO0111_x.jpg')).toBe('');
+        expect(win.travauxImport.detecterDA('Fiere_pseudodemo011_x.jpg')).toBe('');
     });
 
     it('les sept chiffres gardent la priorité', () => {
