@@ -1186,7 +1186,7 @@ function cartoucheSelectionnee() {
                 <option value="">— Utiliser le niveau calculé —</option>
                 ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
-            <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
+            <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifie uniquement si nécessaire.</small>
         </div>
     ` : `
         <!-- Interface algorithmique SIMPLE (sans catégorisation) -->
@@ -1221,7 +1221,7 @@ function cartoucheSelectionnee() {
                 <option value="">— Utiliser le niveau calculé —</option>
                 ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
             </select>
-            <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifiez uniquement si nécessaire (ex: jeton de reprise ciblée).</small>
+            <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifie uniquement si nécessaire.</small>
         </div>
     `) : estAnalytique ? `
         <!-- Interface analytique (lot 2, 4 sept. 2026) : des points, sur le poids du critère ; son barème au-dessus

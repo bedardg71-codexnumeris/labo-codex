@@ -150,6 +150,36 @@ describe('#1152, lot 5 — les mots retirés ne sont plus à l\'écran', () => {
     }
 });
 
+describe('#1152, retouche du lot 5 (verdict du 29 oct., VERDICT-RELECTURE-2026-10-29-aide-lot-5.md)', () => {
+    const ecrans = readdirSync(path.join(racine, 'js')).filter((f) => f.endsWith('.js') && f !== 'changelog-data.js')
+        .map((f) => [`js/${f}`, lire('js', f).replace(/\/\*[\s\S]*?\*\//g, '')])
+        .concat([['index.html', lire('index.html').replace(/<!--[\s\S]*?-->/g, '')]])
+        // Les lignes de commentaire ne s'affichent pas : elles peuvent garder l'ancien nom.
+        .map(([f, src]) => [f, src.split('\n').filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join('\n')]);
+    // Le mot entier : « cellule comparateur » (une classe CSS) ne contient pas « le comparateur ».
+    const ou = (mot) => {
+        const motif = new RegExp('(?<![\\p{L}\\p{N}_-])' + mot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'u');
+        return ecrans.filter(([, src]) => motif.test(src)).map(([f]) => f);
+    };
+    // « le comparateur » nommait l'écran ; la reprise ciblée, offerte comme un jeton qu'on accorde ; la cartouche
+    // verrouillée (champ inerte) ; le HEIC sans réserve. Restent : ce qui nomme une reprise ciblée déjà faite.
+    for (const mot of ['Le comparateur', 'le comparateur', 'Labo → Comparateur', 'Reprise (refaire la production) ou Reprise ciblée', 'reprise, reprise ciblée',
+        '(ex. : reprise ciblée)', 'jeton de reprise ciblée)', 'Modifiez uniquement', 'cartouches peuvent être verrouillées', 'PNG ou HEIC']) {
+        it(`« ${mot} » n'est plus à l'écran`, () => expect(ou(mot), mot).toEqual([]));
+    }
+    it('ce qui nomme une reprise ciblée déjà faite reste (bulles des types de jetons, badge de la Liste)', () => {
+        contient('js/accompagnement-contenu-hover.js', 'Délai (orange), Reprise (vert) ou Reprise ciblée (violet).');
+        contient('js/liste-evaluations.js', '<span class="badge-jeton-titre">Reprise ciblée</span>');
+    });
+    it('n° 9 : la Modélisation dit « HEIC selon le navigateur », dans la bulle (lue dans TEXTES), au bouton et dans l\'Aide', () => {
+        const bulle = section(9).split('\n').find((l) => l.startsWith('- `nav-labo-modelisation`')).match(/ : « (.*) »$/)[1];
+        expect(bulle).toContain('HEIC selon le navigateur');
+        contient('js/accompagnement-contenu-hover.js', bulle);
+        expect(lire('js/modelisation.js')).toContain('title="Ouvrir un fichier : PDF, JPG, PNG ; HEIC selon le navigateur"');
+        contient('index.html', '(PDF, JPG, PNG ; HEIC selon le navigateur), que tu projettes');
+    });
+});
+
 describe('#1152, lot 5 — les mesures', () => {
     it('n° 4 : l\'exemple de l\'aide est un nom que l\'import lit (production « Artefact-8 », page 1)', () => {
         const popup = lire('js/accompagnement-contenu-popup.js');

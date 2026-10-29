@@ -396,7 +396,7 @@ function noteMaquettesBibliotheque(nbMaquettes) {
     const motMaquette = nbMaquettes > 1 ? 'maquettes' : 'maquette';
     return '<div class="biblio2-note">' +
         '<p>Tu as <strong>' + nbMaquettes + ' ' + motMaquette + '</strong> d\'exploration. ' +
-            'Les maquettes ne s\'affichent pas ici : elles vivent dans le <strong>Labo → Comparateur</strong>, ' +
+            'Les maquettes ne s\'affichent pas ici : elles vivent dans <strong>Labo → Exploration des pratiques</strong>, ' +
             'où tu peux les comparer, les adopter ou les jeter.</p>' +
         '<button type="button" class="btn btn-secondaire" data-action="ouvrirExplorationMaquettes">Gérer mes maquettes</button>' +
     '</div>';

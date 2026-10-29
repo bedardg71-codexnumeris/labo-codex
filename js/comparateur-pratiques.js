@@ -56,7 +56,7 @@
     // est expérimental ; invite à signaler les anomalies pour contribuer à son
     // amélioration. (Le recentrage anti-palmarès reste porté par le paragraphe de
     // finalité en tête : « un écart entre des points n’est ni un bonus ni une erreur ».)
-    var LIGNE_GARDE = 'Le comparateur est un outil expérimental et peut présenter des erreurs. Partage tes observations et participe à son amélioration en utilisant l’icône « Signaler un bug », en haut à droite de l’en-tête.';
+    var LIGNE_GARDE = 'L’Exploration des pratiques est un outil expérimental et peut présenter des erreurs. Partage tes observations et participe à son amélioration en utilisant l’icône « Signaler un bug », en haut à droite de l’en-tête.';
 
     // Note « outil en développement » (demande Grégoire, 17 juin) — placée EN TÊTE du
     // banc, distincte de la garde « expérimental » de bas de page. Cadre la lecture
@@ -66,7 +66,7 @@
     // affiche alors 0. Ce n'est pas nécessairement une erreur : c'est un état attendu
     // d'un outil encore en construction.
     var NOTE_DEV_TITRE = 'Outil en développement';
-    var NOTE_DEV_TEXTE = 'Le comparateur est en construction. Pour certaines pratiques — surtout PAN-Standards — une note peut s’afficher à 0 : le plus souvent, cela veut dire que la note ne peut pas être construite à partir des paramètres choisis et des résultats réels disponibles, pas qu’il y a forcément une erreur. Lis les résultats avec prudence.';
+    var NOTE_DEV_TEXTE = 'L’Exploration des pratiques est en construction. Pour certaines pratiques — surtout PAN-Standards — une note peut s’afficher à 0 : le plus souvent, cela veut dire que la note ne peut pas être construite à partir des paramètres choisis et des résultats réels disponibles, pas qu’il y a forcément une erreur. Lis les résultats avec prudence.';
 
     /* ── Source de données du banc (#326 R4) ───────────────────
        'fictif' (défaut) = profils-types GÉNÉRÉS depuis l'échelle de l'utilisateur
@@ -719,7 +719,7 @@
             '<div class="comparateur-contenu carte" role="region" aria-labelledby="comparateur-titre-texte">' +
                 entete('Exploration des pratiques') +
                 '<div class="comparateur-corps">' +
-                    '<p>Le comparateur s’appuie sur des <strong>profils-types fictifs</strong> générés ' +
+                    '<p>L’Exploration des pratiques s’appuie sur des <strong>profils-types fictifs</strong> générés ' +
                     'depuis ton <strong>échelle de performance</strong> — pour comparer ce que chaque ' +
                     'pratique ferait de la même trajectoire d’apprentissage, avant d’en adopter une.</p>' +
                     '<p>Crée d’abord une échelle dans <strong>Conception → Échelles</strong>, puis reviens ici.</p>' +

@@ -319,7 +319,7 @@ const TOOLTIPS = {
     'cn-pratique-echelle':
         'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles de performance.',
     'cn-pratique-jetons':
-        'Ressources limitées que tu accordes à tes étudiant·es : Délai (prolonger l\'échéance), Reprise (refaire la production) ou Reprise ciblée (reprendre un aspect spécifique).',
+        'Ressources limitées que tu accordes à tes étudiant·es : Délai (prolonger l\'échéance) ou Reprise (refaire la production).',
     'cn-pratique-discipline':
         'Discipline académique associée. Filtre les ressources de la bibliothèque par pertinence.',
     'cn-pratique-appliquer':
@@ -357,7 +357,7 @@ const TOOLTIPS = {
     'eval-note-finale':
         'Résultat calculé en temps réel : le pourcentage pondéré, et son niveau dans l\'échelle de l\'évaluation.',
     'eval-niveau-idme':
-        'Niveau calculé automatiquement. Modifie uniquement si nécessaire (ex. : reprise ciblée).',
+        'Niveau calculé automatiquement. Modifie uniquement si nécessaire.',
     'eval-col-niveau':
         'Le niveau de chaque évaluation, dans l\'échelle qu\'elle emploie.',
     'eval-statut-remise':
@@ -794,7 +794,7 @@ const TOOLTIPS = {
     'nav-labo':
         'Analyser ta démarche : observation, modélisation, exploration des pratiques, rythme de travail, études, bilan réflexif et suivi longitudinal.',
     'nav-labo-modelisation':
-        'Ouvre un document (PDF, JPG, PNG ou HEIC) pour le projeter et l\'annoter devant le groupe.',
+        'Ouvre un document (PDF, JPG, PNG ; HEIC selon le navigateur) pour le projeter et l\'annoter devant le groupe.',
     // #1152, lot 5 (texte n° 9, validé par Grégoire le 28 oct. 2026, 14 h 36) : les deux sous-onglets sans bulle.
     'nav-labo-comparateur':
         'Ce que deux ou trois pratiques de notation feraient des mêmes parcours, sur des profils fictifs ou sur ton groupe.',
