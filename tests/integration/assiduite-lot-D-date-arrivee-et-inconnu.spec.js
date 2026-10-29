@@ -48,6 +48,14 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
     const m = await page.evaluate(async (ARRIVEE) => {
         const pause = (ms) => new Promise((res) => setTimeout(res, ms));
         const texte = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : null);
+        // L'Accompagnement sans son bloc masqué « À propos de cette section » (`.carte-info-toggle`) : depuis les textes
+        // du lot 5 de l'Aide (#1152), il nomme la carte « Contexte d'apprentissage » avant elle.
+        const texteSansAPropos = (el) => {
+            if (!el) return null;
+            const copie = el.cloneNode(true);
+            copie.querySelectorAll('.carte-info-toggle').forEach((n) => n.remove());
+            return texte(copie);
+        };
         await window.activerModeDemo();
         await pause(1500);
 
@@ -138,7 +146,7 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         changerSectionProfil('mobilisation'); await pause(800);
         const engagement = texte(document.getElementById('profil-contenu-dynamique')) || '';
         changerSectionProfil('accompagnement'); await pause(800);
-        const accompagnement = texte(document.getElementById('profil-contenu-dynamique')) || '';
+        const accompagnement = texteSansAPropos(document.getElementById('profil-contenu-dynamique')) || '';
         // Le profil de Tardif : aucune absence listée avant son arrivée.
         const absencesTardif = obtenirDetailsAssiduite('9100001').absences.map(a => a.date);
 
@@ -165,7 +173,7 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         // La carte de contexte de cet élève (des copies, pas d'assiduité) : un tiret à la place du palier.
         afficherProfilComplet('DEMO004'); await pause(900);
         changerSectionProfil('accompagnement'); await pause(800);
-        const accompagnement004 = texte(document.getElementById('profil-contenu-dynamique')) || '';
+        const accompagnement004 = texteSansAPropos(document.getElementById('profil-contenu-dynamique')) || '';
         filtreSurA.contexte = (accompagnement004.match(/Contexte d'apprentissage (.{0,45})/) || [null, null])[1];
         filtreSurA.profilNul = /null|NaN|undefined/.test(accompagnement004);
         // 1.147.1 : la phrase de Grégoire sous le tiret, lue à l'écran (de « L'assiduité » au point final).

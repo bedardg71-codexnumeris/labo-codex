@@ -731,12 +731,12 @@ test.describe('#1012 — un élève supprimé ne revient plus par un ancien fich
             expect.soft((await lireCopies(neuf.page)).depots).toEqual([COPIE_DE_BAO]);
         });
         await test.step('le bilan le dit, en une ligne qui compte les élèves (Camille écartée dans cinq familles : un élève)', async () => {
-            expect.soft(r.bilan).toContain('\n\n1 élève que tu avais supprimé n\'a pas été ramené.\n\nTotal : ');
-            expect.soft(r.bilan).not.toContain('élèves que tu avais supprimés');
+            expect.soft(r.bilan).toContain('\n\n1 étudiant·e que tu avais supprimé·e n\'a pas été ramené·e.\n\nTotal : ');   // « étudiant·e » : #1152, lot 5
+            expect.soft(r.bilan).not.toContain('étudiant·es que tu avais supprimé·es');
         });
         await test.step('rien d\'autre n\'entre : la ligne paraît quand même, sous « Aucune nouvelle donnée à importer. »', async () => {
             const rien = await ouvrirParLaCase(neuf.page, ancien, { seulement: ['import-etudiants', 'import-presences', 'import-evaluations', 'import-annotationsTravaux', 'import-fichiersTravaux'] });
-            expect.soft(rien.bilan).toBe('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).\n\n1 élève que tu avais supprimé n\'a pas été ramené.');
+            expect.soft(rien.bilan).toBe('Aucune nouvelle donnée à importer.\n\nLes éléments sélectionnés existent déjà (même nom).\n\n1 étudiant·e que tu avais supprimé·e n\'a pas été ramené·e.');
         });
         await test.step('la trace ne bouge pas, et ce qui restait de Camille dans l\'espace non plus', async () => {
             expect.soft(apres[CLE_TRACE]).toEqual(avant[CLE_TRACE]);

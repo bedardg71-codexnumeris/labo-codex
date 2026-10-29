@@ -99,7 +99,7 @@ test('#612 · cas 1 — un DA qui n\'existe pas dans le groupe est ANNONCÉ avan
     expect(r.daDetecte, 'le DA doit être lu dans le nom du fichier').toBe('9999999');
     expect(r.associe, 'aucun élève ne porte ce DA').toBe(false);
     expect(r.daInconnu, 'le bandeau « DA sans élève » doit être RENDU, pas seulement calculé').toBe(true);
-    expect(r.texteDAInconnu).toMatch(/DA sans élève dans ce groupe/);
+    expect(r.texteDAInconnu).toMatch(/DA sans étudiant·e dans ce groupe/);   // « étudiant·e » : #1152, lot 5
     // La règle de rédaction : la conséquence réelle, puis le geste qui la lève.
     expect(r.texteDAInconnu).toMatch(/non associés/);
     expect(r.texteDAInconnu).toMatch(/Vérifiez le DA|basculez sur le groupe-cours/);
