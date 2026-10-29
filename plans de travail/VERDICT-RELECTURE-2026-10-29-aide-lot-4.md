@@ -21,3 +21,9 @@
 3. Vitest depuis `tests/`. L'essai Playwright du lot 4 n'est pas touché par cette phrase : ne le relance pas.
 
 Un commit pour la retouche (`index.html`), un pour les docs (ce fichier et `TEXTES-2026-10-28-aide-sept-trous.md`, modifiés par Cowork) ; demande de relecture : `plans de travail/DEMANDE-RELECTURE-2026-10-29-aide-lot-4-retouche.md`, courte. Pas de release, de verdict ni de push sans le signal de Grégoire.
+
+## Relecture de la retouche (Cowork, 29 oct., 5 h 53)
+
+**Acceptée sans retouche. Le lot 4 est clos côté relecture : les sept trous de l'Aide sont comblés.** `78f5d642` ne touche qu'`index.html` : la phrase est en place, mot pour mot (comparaison indépendante refaite), entre les deux phrases qui ne bougent pas ; la validation est notée dans le commentaire de la carte. La sentinelle a rougi avant, sur le bon paragraphe, et verdi après.
+
+Le « 1 error » hors des tests du premier passage Vitest, absent du second : sans suite pour l'instant (aucun symptôme vécu, rien de bloqué). S'il revient au verdict du soir, l'isoler à ce moment.
