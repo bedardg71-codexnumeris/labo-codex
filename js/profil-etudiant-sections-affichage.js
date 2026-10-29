@@ -117,8 +117,19 @@ function _construireArtefactMobilisation(art, evaluation) {
     };
 }
 
+// Lot 2 des standards sans portfolio (29 oct. 2026) — LES PRODUCTIONS QUE LE PANNEAU NOMME : en standards, le pool de la
+// note (`obtenirIdsPoolStdDuCorpus`) ; avant, les seuls « Artefact », et une pratique sans artefacts listait vide. Hors
+// standards, les « Artefact », comme avant : une sommative n'en a pas, et sa carte lit le récit (#922).
+function _productionsNommeesMobilisation(productions) {
+    if ((typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) !== 'standards') {
+        return productions.filter(p => p.type === 'artefact-portfolio');
+    }
+    const idsPool = new Set(window.obtenirIdsPoolStdDuCorpus(productions));
+    return productions.filter(p => idsPool.has(p.id));
+}
+
 function _construireListeArtefactsMobilisation(da, productions, evaluations) {
-    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+    const artefactsPortfolio = _productionsNommeesMobilisation(productions);
     const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
     const artefactsDonnes = [];
     evaluations.forEach(evaluation => {
@@ -138,70 +149,23 @@ function _construireListeArtefactsMobilisation(da, productions, evaluations) {
     return { artefacts, evaluationsEleve, artefactsPortfolio };
 }
 
-function _selectionnerArtefactsMobilisation(artefactsRemis, productions, configCategories, methodeSelection, nombreARetenir, modeHybride, portfolioActif) {
+/**
+ * Lot 2 des standards sans portfolio (29 oct. 2026) — LES RETENUES SONT CELLES DE LA NOTE : `calculerDetailsNoteFinale`,
+ * comme le panneau « Développement des habiletés » depuis #714. Avant : une sélection propre (« N meilleurs », « N plus
+ * récents » triés par DATE quand la note trie par numéro (L9), hybride recopié), sur les seuls « Artefact ». Les mots
+ * (méthode, N) restent ceux de la configuration ; « Productions indépendantes » ne retient rien, comme avant.
+ */
+function _selectionnerArtefactsMobilisation(da, configCategories, methodeSelection, nombreARetenir, modeHybride, portfolioActif) {
     if (!portfolioActif) {
-        return { artefactsSelectionnes: [], nombreARetenir, methodeSelection };
+        return { idsRetenus: new Set(), nombreARetenir, methodeSelection };
     }
+    const details = (typeof calculerDetailsNoteFinale === 'function') ? calculerDetailsNoteFinale(da) : null;
+    const idsRetenus = new Set(((details && details.portfolio && details.portfolio.artefactsRetenus) || []).map(a => a.productionId));
     if (modeHybride) {
-        // MODE HYBRIDE : N meilleures Sélection + toutes les Obligatoires
-        const { nombreARetenir: nSelection } = configCategories.selection || { nombreARetenir: 4, ponderation: 65 };
-        const productionsNonPortfolio = productions.filter(p => p.type !== 'portfolio');
-        const artefactsSelection = artefactsRemis.filter(a => {
-            const prod = productionsNonPortfolio.find(p => p.id === a.id);
-            return prod && prod.categorie === 'selection';
-        });
-        const artefactsObligatoires = artefactsRemis.filter(a => {
-            const prod = productionsNonPortfolio.find(p => p.id === a.id);
-            return prod && prod.categorie === 'obligatoire';
-        });
-        const meilleuresSelection = [...artefactsSelection]
-            .sort((a, b) => (b.note || 0) - (a.note || 0))
-            .slice(0, nSelection);
-        return {
-            artefactsSelectionnes: [...meilleuresSelection, ...artefactsObligatoires],
-            nombreARetenir: nSelection,
-            methodeSelection: 'hybride-categories'
-        };
+        const { nombreARetenir: nSelection } = configCategories.selection || { nombreARetenir: 4 };
+        return { idsRetenus, nombreARetenir: nSelection, methodeSelection: 'hybride-categories' };
     }
-    // Legacy switch sur la méthode de sélection
-    switch (methodeSelection) {
-        case 'meilleurs':
-            return {
-                artefactsSelectionnes: [...artefactsRemis]
-                    .sort((a, b) => (b.note || 0) - (a.note || 0))
-                    .slice(0, nombreARetenir),
-                nombreARetenir, methodeSelection
-            };
-        case 'recents':
-            return {
-                artefactsSelectionnes: [...artefactsRemis]
-                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
-                    .slice(0, nombreARetenir),
-                nombreARetenir, methodeSelection
-            };
-        case 'recents-meilleurs': {
-            const nombreMeilleurs = Math.max(1, Math.ceil(artefactsRemis.length * 0.5));
-            const topMeilleurs = [...artefactsRemis]
-                .sort((a, b) => (b.note || 0) - (a.note || 0))
-                .slice(0, nombreMeilleurs);
-            return {
-                artefactsSelectionnes: [...topMeilleurs]
-                    .sort((a, b) => new Date(b.dateRemise || b.dateEvaluation || 0) - new Date(a.dateRemise || a.dateEvaluation || 0))
-                    .slice(0, nombreARetenir),
-                nombreARetenir, methodeSelection
-            };
-        }
-        case 'tous':
-            return { artefactsSelectionnes: artefactsRemis, nombreARetenir, methodeSelection };
-        default:
-            // Fallback meilleurs
-            return {
-                artefactsSelectionnes: [...artefactsRemis]
-                    .sort((a, b) => (b.note || 0) - (a.note || 0))
-                    .slice(0, nombreARetenir),
-                nombreARetenir, methodeSelection
-            };
-    }
+    return { idsRetenus, nombreARetenir, methodeSelection };
 }
 
 function _genererTexteMethodePerformanceMobilisation(performanceInsuffisante, portfolioActif, methodeSelection, nombreARetenir, configCategories, nbRemis, minimumCompletion) {
@@ -425,15 +389,14 @@ function genererSectionMobilisationEngagement(da) {
         || (typeof obtenirConfigCategories === 'function' ? obtenirConfigCategories() : null);
     const modeHybride = !!(configCategories && configCategories.actif);
 
-    // Sélection des artefacts selon la modalité configurée (Hybride ou Legacy)
+    // Les retenues de la note (lot 2 des standards sans portfolio) ; les mots, de la configuration
     const artefactsRemis = artefacts.filter(a => a.remis);
-    const resultatSelection = _selectionnerArtefactsMobilisation(artefactsRemis, productions, configCategories, methodeSelection, nombreARetenir, modeHybride, portfolioActif);
-    const artefactsSelectionnes = resultatSelection.artefactsSelectionnes;
+    const resultatSelection = _selectionnerArtefactsMobilisation(da, configCategories, methodeSelection, nombreARetenir, modeHybride, portfolioActif);
+    const idsRetenus = resultatSelection.idsRetenus;
     nombreARetenir = resultatSelection.nombreARetenir;
     methodeSelection = resultatSelection.methodeSelection;
 
-    // Marquer les artefacts sélectionnés comme retenus
-    const idsRetenus = new Set(artefactsSelectionnes.map(a => a.id));
+    // Marquer les artefacts retenus par la note
     artefacts.forEach(art => {
         art.retenu = idsRetenus.has(art.id);
     });
@@ -3370,184 +3333,9 @@ function genererSectionProgression(da) {
 
 
 
-/**
- * Génère le HTML de la section Complétion détaillée
- *
- * @param {string} da - Numéro de DA
- * @returns {string} - HTML de la section
- */
-function genererSectionCompletion(da) {
-    const productions = obtenirDonneesSelonMode('productions') || [];
-    const evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-    const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
-
-    // Identifier les artefacts-portfolio réellement donnés
-    const artefactsPortfolioIds = new Set(artefactsPortfolio.map(a => a.id));
-    const artefactsDonnes = [];
-
-    evaluations.forEach(evaluation => {
-        if (artefactsPortfolioIds.has(evaluation.productionId)) {
-            if (!artefactsDonnes.find(a => a.id === evaluation.productionId)) {
-                const production = artefactsPortfolio.find(p => p.id === evaluation.productionId);
-                if (production) {
-                    artefactsDonnes.push(production);
-                }
-            }
-        }
-    });
-
-    // Récupérer les évaluations de l'élève
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da);
-
-    // Construire la liste des artefacts avec leur statut
-    const artefacts = artefactsDonnes.map(art => {
-        // Trouver l'évaluation ACTIVE (non remplacée) pour cette production
-        const evaluationsProduction = evaluationsEleve.filter(e => e.productionId === art.id);
-        let evaluation = null;
-        if (evaluationsProduction.length > 0) {
-            // PRIORITÉ 1 : Chercher une reprise active (repriseDeId ET non remplacée)
-            evaluation = evaluationsProduction.find(e => e.repriseDeId && !e.remplaceeParId);
-
-            // PRIORITÉ 2 : Si pas de reprise, chercher une évaluation avec jeton de délai actif
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => e.jetonDelaiApplique && !e.remplaceeParId);
-            }
-
-            // PRIORITÉ 3 : Si pas de jeton, chercher toute évaluation active (non remplacée)
-            if (!evaluation) {
-                evaluation = evaluationsProduction.find(e => !e.remplaceeParId);
-            }
-
-            // PRIORITÉ 4 : Si toutes sont remplacées, prendre la première (cas rare)
-            if (!evaluation) {
-                evaluation = evaluationsProduction[0];
-            }
-        }
-
-        return {
-            id: art.id,
-            titre: art.titre,
-            description: art.description || art.titre, // Utiliser description ou fallback sur titre
-            remis: !!evaluation,
-            note: evaluation?.noteFinale ?? null,  // Utiliser ?? pour supporter la note 0
-            niveau: _niveauVuProfil(evaluation),   // #941 lot S1
-            jetonReprise: evaluation?.repriseDeId ? true : false,
-            jetonDelai: evaluation?.jetonDelaiApplique ? true : false
-        };
-    }).sort((a, b) => {
-        if (a.remis && !b.remis) return -1;
-        if (!a.remis && b.remis) return 1;
-        return (a.description || a.titre).localeCompare(b.description || b.titre);
-    });
-
-    const nbTotal = artefacts.length;
-    const nbRemis = artefacts.filter(a => a.remis).length;
-    const indices = calculerTousLesIndices(da);
-
-    // Interprétation de la complétion
-    const interpC = interpreterCompletion(indices.C);
-
-    // Séparer artefacts remis et non remis
-    const artefactsRemis = artefacts.filter(a => a.remis);
-    const artefactsNonRemis = artefacts.filter(a => !a.remis);
-
-    return `
-        <!-- ENCADRÉ UNIQUE: COMPLÉTION -->
-        <div class="profil-carte-bordure-blanche">
-
-            <h3 class="profil-titre-section-majeur">
-                COMPLÉTION
-            </h3>
-
-            <!-- Badge avec interprétation -->
-            <div class="u-mb-15">
-                <span class="pastille-rai" style="background:${interpC.couleur}"></span>
-                <strong style="font-size: 1.1rem; color: ${interpC.couleur};">${interpC.niveau}</strong>
-                <span style="font-size: 1.3rem; font-weight: bold; color: ${interpC.couleur}; margin-left: 10px;">(${formaterPourcentage(indices.C)})</span>
-            </div>
-
-            <!-- Statistiques -->
-            <ul class="profil-liste-simple">
-                <li><strong>• Artefacts remis :</strong> ${nbRemis}/${nbTotal}</li>
-                <li><strong>• Indice C :</strong> ${formaterPourcentage(indices.C)}</li>
-            </ul>
-
-            <hr class="profil-separateur">
-
-            <!-- Gestion des jetons (placeholder) -->
-            <h4 class="profil-titre-sous-section">
-                GESTION DES JETONS
-            </h4>
-            <div style="background: var(--alerte-fond-attention); border: 2px dashed var(--btn-annuler); border-radius: 8px; padding: 20px; margin-bottom: 20px; text-align: center;">
-                <div style="font-size: 1.2rem; color: var(--alerte-texte-attention); margin-bottom: 10px;">
-                    <strong>Jetons disponibles :</strong> 2 / 2
-                </div>
-                <div class="profil-texte-italique-gris">
-                    Système de jetons (reprise/délai) à implémenter
-                </div>
-            </div>
-
-            <hr class="profil-separateur">
-
-            <!-- Artefacts remis -->
-            <h4 class="profil-titre-sous-section">
-                ${obtenirTermeProduction('pluriel', true).toUpperCase()} ${accordTermeProduction('remis', artefactsRemis.length).toUpperCase()} (${artefactsRemis.length})
-            </h4>
-            ${artefactsRemis.length > 0 ? `
-                <div class="badges-centres u-mb-20">
-                    ${artefactsRemis.map(art => `
-                        <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                    background: var(--vert-pale, #d4edda); border-left: 3px solid var(--vert-succes);">
-                            <div style="color: var(--alerte-texte-succes); font-weight: 500; margin-bottom: 5px;">
-                                ${echapperHtml(art.description)}
-                                ${art.jetonReprise ? '<span style="color: #9c27b0; margin-left: 6px;" title="Jeton de reprise appliqué">★</span>' : ''}
-                                ${art.jetonDelai ? '<span style="color: #ff6f00; margin-left: 6px;" title="Jeton de délai appliqué">★</span>' : ''}
-                            </div>
-                            <div class="profil-texte-detail">
-                                ${(typeof noteDiffereeActive === 'function' && noteDiffereeActive()) ? badgeNoteDifferee() : `<strong>${art.note}</strong>`}${art.niveau ? ` · ${art.niveau}` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : `
-                <div class="profil-zone-centre-grise">
-                    ${accordTermeProduction('aucun', 1, true)} ${obtenirTermeProduction('singulier')} ${accordTermeProduction('remis', 1)}
-                </div>
-            `}
-
-            <!-- Artefacts non remis -->
-            <h4 class="profil-titre-sous-section">
-                ${obtenirTermeProduction('pluriel', true).toUpperCase()} NON ${accordTermeProduction('remis', artefactsNonRemis.length).toUpperCase()} (${artefactsNonRemis.length})
-            </h4>
-            ${artefactsNonRemis.length > 0 ? `
-                <div class="badges-centres u-mb-20">
-                    ${artefactsNonRemis.map(art => `
-                        <div style="flex: 0 0 auto; min-width: 200px; max-width: 250px; padding: 12px;
-                                    background: var(--gris-tres-pale); border-left: 3px solid var(--bordure-claire); opacity: 0.6;">
-                            <div style="color: var(--gris-moyen); font-weight: 500; margin-bottom: 5px;">
-                                ${echapperHtml(art.description)}
-                            </div>
-                            <div class="text-muted" style="font-size: 0.9rem;">Non remis</div>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : `
-                <div class="profil-zone-centre-verte">
-                    ${accordTermeProduction('tous', 2, true)} les ${obtenirTermeProduction('pluriel')} ont été ${accordTermeProduction('remis', 2)}.
-                </div>
-            `}
-
-            <hr class="profil-separateur">
-
-            <!-- Placeholder graphique (en conclusion) -->
-            <div style="background: var(--bleu-tres-pale); border: 2px dashed var(--bleu-pale); border-radius: 8px;
-                        padding: 30px 20px; text-align: center; color: var(--texte-secondaire); font-style: italic;">
-                Évolution temporelle de la complétion (à venir)
-            </div>
-
-        </div>
-    `;
-}
+// Lot 2 des standards sans portfolio (29 oct. 2026) : `genererSectionCompletion` est retirée — aucun appelant (git grep),
+// et sa liste des seuls « Artefact » était une quatrième définition du pool. La carte Complétion du profil est celle du
+// panneau « Engagement » (`genererSectionMobilisationEngagement`).
 
 
 // ⮕ #575 (lot 4 du plan SOLO) — `_obtenirNiveauxEtGradientSRPNF` A ÉTÉ REMPLACÉE

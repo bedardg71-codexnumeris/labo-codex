@@ -824,6 +824,17 @@ function obtenirArtefactsIdsPoolStd(productions, terminalId) {
 }
 
 /**
+ * Ids du pool STD d'un corpus, terminale identifiée ici : ce que lisent les lecteurs secondaires (dépistage, panneau
+ * « Engagement », colonne « ≥ Min. », export recherche, « à venir » du PDF ; lot 2 des standards sans portfolio, 29 oct.
+ * 2026). Ils parlaient chacun des seuls « Artefact » ; ils parlent maintenant des mêmes productions que la note.
+ * Les diagnostiques sont retirées en amont, par les appelants (#883), comme pour le pool.
+ */
+function obtenirIdsPoolStdDuCorpus(productions) {
+    const terminale = identifierProductionTerminale(productions);
+    return obtenirArtefactsIdsPoolStd(productions, terminale ? terminale.id : null);
+}
+
+/**
  * Mot neuf 2 du chantier (validé par Grégoire le 28 oct. 2026, 20 h 13) — POURQUOI UNE NOTE STANDARDS MANQUE quand
  * aucune production du pool n'a de note. Source unique de la phrase : le profil (`calculerDetailsNoteFinale`, champ
  * `erreur`), le rapport et l'export (`expliquerNoteNonConstructible` de la pratique) la lisent ici.
@@ -1134,6 +1145,7 @@ window.evaluationCompteCommeRemise = evaluationCompteCommeRemise;
 // #394 — rôles des productions STD (SSOT des deux systèmes de calcul)
 window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;
+window.obtenirIdsPoolStdDuCorpus = obtenirIdsPoolStdDuCorpus;
 window.poolStdFaitDArtefacts = poolStdFaitDArtefacts;
 window.causeNoteStdSansProductionNotee = causeNoteStdSansProductionNotee;
 window.creerComparateurRecenceStd = creerComparateurRecenceStd;

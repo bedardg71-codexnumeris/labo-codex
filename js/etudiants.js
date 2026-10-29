@@ -751,6 +751,28 @@ function afficherListeEtudiantsConsultationDifferee() {
     }, 200);
 }
 
+/**
+ * Le compte de la colonne « ≥ Min. » : les évaluations notées et non remplacées de chaque élève, rangées par DA (une passe).
+ * #1055 : une production diagnostique n'y entre pas. Lot 2 des standards sans portfolio (29 oct. 2026) : en standards,
+ * les productions comptées sont le pool de la note (`obtenirIdsPoolStdDuCorpus`) ; avant, les seuls « Artefact », et une
+ * pratique sans artefacts mettait tout le groupe sous le minimum. Hors standards, les « Artefact », comme avant.
+ * @returns {Map<string, number>}
+ */
+function compterEvaluationsPourMinimum(productions, evaluations) {
+    const productionsTab = window.ProductionDiagnostique.filtrerProductions(productions);
+    const estStandards = (typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) === 'standards';
+    const idsComptes = new Set(estStandards ? window.obtenirIdsPoolStdDuCorpus(productionsTab)
+        : productionsTab.filter(p => p.type === 'artefact-portfolio').map(p => p.id));
+    const evalsParDA = new Map();
+    evaluations.forEach(ev => {
+        if (idsComptes.has(ev.productionId) && !ev.remplaceeParId &&
+            ev.noteFinale !== null && ev.noteFinale !== undefined) {
+            evalsParDA.set(ev.etudiantDA, (evalsParDA.get(ev.etudiantDA) || 0) + 1);
+        }
+    });
+    return evalsParDA;
+}
+
 function afficherListeEtudiantsConsultation() {
 
     // 🔄 FORCER le recalcul des indices A, C et P avant affichage.
@@ -905,20 +927,8 @@ function afficherListeEtudiantsConsultation() {
     const configPortfolioTab = configPratiqueActiveTab?.portfolio || {};
     const minimumCompletionTab = configPortfolioTab.minimumCompletion || 3;
 
-    // Compter les évaluations par étudiant (artefacts-portfolio évalués)
-    // Pré-indexé par DA pour éviter O(N*M) — une seule passe sur les évaluations
-    // #1055 : une production diagnostique n'entre pas dans le compte « ≥ Min. ».
-    const productionsTab = window.ProductionDiagnostique.filtrerProductions(obtenirDonneesSelonMode('productions') || []);
-    const artefactIds = new Set(productionsTab.filter(p => p.type === 'artefact-portfolio').map(p => p.id));
-    const evaluationsTab = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-
-    const evalsParDA = new Map();
-    evaluationsTab.forEach(ev => {
-        if (artefactIds.has(ev.productionId) && !ev.remplaceeParId &&
-            ev.noteFinale !== null && ev.noteFinale !== undefined) {
-            evalsParDA.set(ev.etudiantDA, (evalsParDA.get(ev.etudiantDA) || 0) + 1);
-        }
-    });
+    const evalsParDA = compterEvaluationsPourMinimum(obtenirDonneesSelonMode('productions') || [],
+        obtenirDonneesSelonMode('evaluationsSauvegardees') || []);
 
     etudiantsFiltres.forEach(e => {
         const nbEvals = evalsParDA.get(e.da) || 0;

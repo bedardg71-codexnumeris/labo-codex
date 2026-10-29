@@ -124,6 +124,8 @@ export function completerMenuSelectionParDefaut(globaux, fauxWindow, document) {
 const NOMS_NOTE_POURCENTAGE = ['formaterNombre', 'formaterPourcentage', 'formaterNotePourcentage',
     'formaterNoteNombre', 'formaterPoints', 'ESPACE_INSECABLE'];
 
+let poolStdDuRegistre = null;   // lot 2 des standards sans portfolio : voir chargerScript
+
 export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExistant = null) {
     const chemin = path.join(racineProjet, cheminRelatifProjet);
     const code = readFileSync(chemin, 'utf8');
@@ -268,6 +270,15 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     }
 
     globaux = completerMenuSelectionParDefaut(globaux, fauxWindow, globaux.document || fauxDocument);   // #1147
+
+    // Lot 2 des standards sans portfolio (29 oct. 2026) — `obtenirIdsPoolStdDuCorpus` (pratique-registre.js), le pool de la
+    // note, est lu par window.… dans le dépistage, le panneau « Engagement », « ≥ Min. », l'export recherche et le PDF.
+    // Comme `ProductionDiagnostique` : le VRAI registre (chargé dans un bac jetable, une fois par fichier), fourni quand le
+    // harnais ne le donne pas ; un banc qui charge le registre lui-même le réécrit à l'identique.
+    if (!fauxWindow.obtenirIdsPoolStdDuCorpus && !cheminRelatifProjet.endsWith('pratique-registre.js')) {
+        poolStdDuRegistre = poolStdDuRegistre || chargerScript('js/pratiques/pratique-registre.js', {}, {}).obtenirIdsPoolStdDuCorpus;
+        fauxWindow.obtenirIdsPoolStdDuCorpus = poolStdDuRegistre;
+    }
 
     // #876 (15 sept. 2026) — `sessionStorage` aussi : une file d'import persistée
     // se restaure au CHARGEMENT de travaux-import.js, donc elle doit être là avant.

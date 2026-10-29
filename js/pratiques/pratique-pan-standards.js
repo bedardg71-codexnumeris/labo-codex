@@ -271,59 +271,8 @@ class PratiquePANStandards {
         return moyennePonderee / 100;
     }
 
-    /**
-     * Calcule la performance RÉCENTE (P_recent) pour le calcul du risque
-     * Toujours basé sur les N dernières productions, peu importe la modalité choisie
-     *
-     * @param {string} da - Numéro de dossier d'admission
-     * @returns {number} Indice P_recent entre 0 et 1, ou null si pas de données
-     */
-    calculerPerformanceRecente(da) {
-        if (!da || da.length !== 7) {
-            // console.warn('[PAN] DA invalide:', da);
-            return null;
-        }
-
-        // Lire configuration
-        const config = this._lireConfiguration();
-        const portfolioActif = config.portfolioActif;
-        const nombreARetenir = config.nombreARetenir;
-
-        // Si portfolio désactivé, retourner null (productions indépendantes)
-        if (!portfolioActif) {
-            return null;
-        }
-
-        // Lire les évaluations et productions
-        const evaluations = this._lireEvaluations();
-        const artefactsIds = this._lireArtefactsPortfolio();
-
-        // Filtrer les évaluations de cet étudiant sur les artefacts portfolio (#706)
-        const evaluationsEleve = evaluations.filter(e =>
-            e.etudiantDA === da &&
-            artefactsIds.includes(e.productionId) &&
-            window.evaluationEntreDansLaNote(e)
-        );
-
-        if (evaluationsEleve.length === 0) {
-            return null;
-        }
-
-        // TOUJOURS utiliser les N plus récents pour le dépistage
-        evaluationsEleve.sort((a, b) => new Date(b.dateEvaluation) - new Date(a.dateEvaluation));
-        const artefactsRecents = evaluationsEleve.slice(0, nombreARetenir);
-
-        // Calculer la moyenne
-        const somme = artefactsRecents.reduce((acc, e) => acc + e.noteFinale, 0);
-        const moyenne = somme / artefactsRecents.length;
-
-        // Convertir en indice 0-1
-        const indicePRecent = moyenne / 100;
-
-        // ✅ DÉSACTIVÉ (7 déc 2025): Pour performance Safari
-
-        return indicePRecent;
-    }
+    // Lot 2 des standards sans portfolio (29 oct. 2026) : `calculerPerformanceRecente` est retirée — aucun appelant
+    // (git grep sur js/ et tests/), et elle refaisait sa propre sélection (« N plus récents » par date).
 
     /**
      * Calcule l'indice C (Complétion) selon PAN-Standards

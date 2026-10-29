@@ -2194,7 +2194,8 @@
                         annee: cadreCalendrier.annee || trimestre.annee
                     },
                     // 🆕 Beta 98.3 : Résoudre via obtenirEcheanceEffective (multi-groupe)
-                    artefacts: productions.filter(p => p.type === 'artefact-portfolio').map(p => {
+                    // Lot 2 des standards sans portfolio : la clé reste `artefacts` (format qui voyage), le contenu suit le pool.
+                    artefacts: productionsNommeesArtefacts(productions).map(p => {
                         const dateEchTrim = (typeof obtenirEcheanceEffective === 'function')
                             ? obtenirEcheanceEffective(p, null).date : p.dateEcheance;
                         return {
@@ -2472,6 +2473,23 @@
     }
 
     /**
+     * Les productions que l'export recherche nomme « artefacts » (`contexte.artefacts`, `numero_artefact` des profils RLO).
+     * Lot 2 des standards sans portfolio (29 oct. 2026) : en standards, le pool de la note (`obtenirIdsPoolStdDuCorpus`),
+     * sans les productions diagnostiques (#1055, comme `performance_par_critere`) ; avant, les seuls « Artefact », et une
+     * pratique sans artefacts exportait une liste vide. Hors standards, les « Artefact », comme avant. Aucune clé ne change.
+     * @param {Array} productions - Productions du trimestre actif
+     * @returns {Array}
+     */
+    function productionsNommeesArtefacts(productions) {
+        const liste = Array.isArray(productions) ? productions : [];
+        if ((typeof obtenirTypePratiqueActive === 'function' ? obtenirTypePratiqueActive() : null) !== 'standards') {
+            return liste.filter(p => p.type === 'artefact-portfolio');
+        }
+        const idsPool = new Set(window.obtenirIdsPoolStdDuCorpus(window.ProductionDiagnostique.filtrerProductions(liste)));
+        return liste.filter(p => idsPool.has(p.id));
+    }
+
+    /**
      * Construit la section `profilsRLO` de l'export recherche.
      *
      * Produit une entrée par évaluation qui contient le champ `actionsRLO`,
@@ -2486,7 +2504,7 @@
      */
     function construireProfilsRLO(evaluations, productions, daVersAnonyme) {
         // Numéro d'artefact = ordre chronologique par date d'échéance
-        const artefactsPortfolio = productions.filter(p => p.type === 'artefact-portfolio');
+        const artefactsPortfolio = productionsNommeesArtefacts(productions);
         const artefactsOrdonnes = artefactsPortfolio.slice().sort((a, b) => {
             const da = obtenirDateEcheance(a.id, productions) || '';
             const db = obtenirDateEcheance(b.id, productions) || '';

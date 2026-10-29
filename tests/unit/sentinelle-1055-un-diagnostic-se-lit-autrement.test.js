@@ -197,7 +197,7 @@ describe('#1055 · D — chaque site qui compile, compte ou trace passe par l\'e
         ['js/graphiques-progression.js', 'obtenirDonneesCriteres', 'ProductionDiagnostique.filtrerEvaluations('],
         ['js/graphiques-progression.js', 'chargerProductionsTrajectoires', 'ProductionDiagnostique.filtrerProductions(productions)'],
         ['js/tableau-bord-apercu.js', 'afficherMetriquesGlobales', 'ProductionDiagnostique.filtrerEvaluations(evaluations'],
-        ['js/etudiants.js', 'afficherListeEtudiantsConsultation', 'ProductionDiagnostique.filtrerProductions('],
+        ['js/etudiants.js', 'compterEvaluationsPourMinimum', 'ProductionDiagnostique.filtrerProductions('],   // lot 2 std sans portfolio (29 oct.) : le compte « ≥ Min. » sorti de la liste
         ['js/comparateur-pratiques.js', '_donnees', 'ProductionDiagnostique.filtrerEvaluations('],
     ];
     for (const [rel, nom, appel] of SITES) {

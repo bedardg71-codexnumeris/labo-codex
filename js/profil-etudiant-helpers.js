@@ -449,7 +449,9 @@ function formaterNombrePeriodes(n) {
 
 /**
  * Retourne les IDs des productions évaluables selon la pratique active.
- * PAN/Standards : artefacts de portfolio uniquement (type 'artefact-portfolio')
+ * PAN/Standards : le pool de la note (`obtenirIdsPoolStdDuCorpus`, pratique-registre.js) — les « Artefact » s'il y en a,
+ *   sinon toutes les productions hors conteneur et terminale (lot 2 des standards sans portfolio, 29 oct. 2026 ; avant :
+ *   les seuls « Artefact », et le dépistage d'une pratique sans artefacts ne voyait rien)
  * Sommative : toutes les productions sauf le conteneur portfolio
  * @param {Array} productions - Liste des productions
  * @returns {Array<string>} - IDs des productions évaluables
@@ -471,7 +473,7 @@ function obtenirIdsProductionsEvaluables(productions) {
     var estPAN = ((typeof obtenirTypePratiqueActive === 'function')
         ? obtenirTypePratiqueActive() : null) === 'standards';
     if (estPAN) {
-        return evaluables.filter(function(p) { return p.type === 'artefact-portfolio'; }).map(function(p) { return p.id; });
+        return window.obtenirIdsPoolStdDuCorpus(evaluables);
     }
     // Sommative : toutes les productions sauf le conteneur portfolio
     return evaluables.filter(function(p) { return p.type !== 'portfolio'; }).map(function(p) { return p.id; });

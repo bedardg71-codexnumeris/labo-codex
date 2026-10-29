@@ -27,5 +27,7 @@ export function chargerPredicatsCopie(win) {
     // Statut « Incomplet ; travail en cours » (25 oct. 2026) — la règle de la remise pour C, et le statut
     win.evaluationCompteCommeRemise = registre.evaluationCompteCommeRemise;
     win.evaluationTravailEnCours = registre.evaluationTravailEnCours;
+    // Lot 2 des standards sans portfolio (29 oct. 2026) — le pool de la note, lu par les lecteurs secondaires
+    win.obtenirIdsPoolStdDuCorpus = registre.obtenirIdsPoolStdDuCorpus;
     return win;
 }
