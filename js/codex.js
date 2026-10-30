@@ -425,6 +425,31 @@ function _extensionDansLeCodex(nomFichier) {
     return /^[A-Za-z0-9]+$/.test(ext) ? ext : 'bin';
 }
 
+/** #1028/#1184 — les ids que la marque portée par `donnees` dit aux archives (reserve-copies.js). */
+function _idsAuxArchives(donnees) {
+    return (window.ReserveCopies && typeof window.ReserveCopies.idsDansDonnees === 'function')
+        ? window.ReserveCopies.idsDansDonnees(donnees) : {};
+}
+
+/**
+ * #1184 — l'entrée d'un codex ouvert est-elle écrite ici ? Les clés `_…` restent à l'appareil,
+ * sauf la marque des archives (reserve-copies.js) : portée par le codex, elle remplace celle
+ * d'ici ; absente (codex d'avant #1028), rien ne bouge. `_manifesteReserve` décrit le dossier
+ * d'archives de CET appareil : il reste chez lui.
+ */
+function _entreeEcriteALOuverture(entree) {
+    var cleDeLaMarque = window.ReserveCopies ? window.ReserveCopies.CLE : null;
+    if (cleDeLaMarque && entree[0] === cleDeLaMarque) {
+        return !!entree[1] && typeof entree[1] === 'object' && !Array.isArray(entree[1]);
+    }
+    return !entree[0].startsWith('_');
+}
+
+/** #1184 — la vignette `thumbnail_<id>` d'une copie marquée aux archives ? */
+function _estVignetteAuxArchives(nomCle, auxArchives) {
+    return nomCle.indexOf('thumbnail_') === 0 && !!auxArchives[nomCle.slice('thumbnail_'.length)];
+}
+
 /** Les mots de l'aperçu pour « Mettre à jour le codex » et « Enregistrer sous » (Grégoire, 24 oct. 2026). */
 const MOTS_APERCU_CODEX = { titre: 'Mettre à jour le codex', texteConfirmer: 'Mettre à jour' };
 
@@ -469,7 +494,12 @@ async function genererCodex(options = {}) {
     //        vignettes). Les listes de fichiers et le manifeste se lisent après ce retrait.
     const partDuDemo = _partDuDemo(donnees);
     donnees = _sansLeDemo(donnees, partDuDemo);
-    const clesDuCodex = clesFiltrees.filter(function(c) { return !partDuDemo.cles[c]; });
+    // 1 ter. #1184 : une copie marquée aux archives (la marque des données qu'on écrit, comme à
+    //        l'ouverture) ne part pas, même si son fichier est encore ici : ni son fichier, ni sa
+    //        vignette. Sans risque : la marque n'est posée que si l'archive rend le même fichier.
+    const auxArchives = _idsAuxArchives(donnees);
+    Object.keys(auxArchives).forEach(function(id) { delete donnees['thumbnail_' + id]; });
+    const clesDuCodex = clesFiltrees.filter(function(c) { return !partDuDemo.cles[c] && !_estVignetteAuxArchives(c, auxArchives); });
 
     // 2. Construire le ZIP
     _prog(20, 'Préparation du ZIP…');
@@ -496,7 +526,7 @@ async function genererCodex(options = {}) {
     const rangDeLaCopie = {};
     // #1012 — le signal de l'avertissement, COMPTÉ ici et non lu dans les statuts (cf.
     // _creerCompteDesCopies). Le statut ne décide de rien d'autre : tout fichier présent part dans
-    // le codex, « exporte » et « manquant » compris.
+    // le codex, « exporte » et « manquant » compris — sauf celui d'une copie marquée aux archives.
     const compteDesCopies = _creerCompteDesCopies();
 
     if (clesFT.length > 0 && typeof travauxStockage !== 'undefined') {
@@ -507,6 +537,8 @@ async function genererCodex(options = {}) {
         clesFT.forEach(function(c) {
             if (Array.isArray(donnees[c.cle])) {
                 donnees[c.cle].forEach(function(f) {
+                    // #1184 : ni lue, ni écrite, ni comptée (attendue ou manquante).
+                    if (f && auxArchives[f.id]) return;
                     fichiers.push(f);
                     estUneCopie.push(c.liste === 'fichiersTravaux');
                 });
@@ -841,7 +873,8 @@ async function chargerCodex(fichierZip) {
     // adopte le fichier choisi, une fois l'ouverture complète.
     _fileHandle = null;
 
-    var entreesData = Object.entries(donnees).filter(function(e) { return !e[0].startsWith('_'); });
+    // #1184 : les clés `_…` restent à l'appareil, sauf la marque des archives.
+    var entreesData = Object.entries(donnees).filter(_entreeEcriteALOuverture);
     let nbCles = 0;
     for (var i = 0; i < entreesData.length; i++) {
         var cleEntree = entreesData[i][0];
@@ -903,8 +936,7 @@ async function chargerCodex(fichierZip) {
         ? LISTES_DE_FICHIERS.filter(function(l) { return l === 'fichiersTravaux' || manifeste.contenu.listesDeFichiers.indexOf(l) !== -1; })
         : ['fichiersTravaux'];
     const clesFTImport = _clesDesListesDeFichiers(Object.keys(donnees), listesDeclarees).map(function(c) { return c.cle; });
-    var auxArchives = (window.ReserveCopies && typeof window.ReserveCopies.idsDansDonnees === 'function')
-        ? window.ReserveCopies.idsDansDonnees(donnees) : {};
+    var auxArchives = _idsAuxArchives(donnees);
     if (clesFTImport.length > 0 && typeof travauxStockage !== 'undefined') {
         var fichiers = [];
         clesFTImport.forEach(function(cle) {

@@ -21,10 +21,15 @@
    La marque : `_copiesAuxArchives` (clé globale, hors de tout trimestre)
      { <trimestre>: { dossier, uuid, date, ids: { <id>: true } } }
      Hors des clés `<trimestre>_*` : E3 ne la compare pas (le trimestre reste « identique » à son
-     archive), E1 ne l'archive pas. Elle voyage dans le codex (toutes les clés y vont) : un codex
-     ouvert ailleurs sait que ces copies sont aux archives, et ne les dit pas « manquantes ».
-     Une copie est « aux archives » quand elle est marquée ET que son fichier n'est pas là : une
-     copie marquée dont le fichier existe encore (un geste interrompu) se montre normalement.
+     archive), E1 ne l'archive pas. Elle voyage dans le codex (toutes les clés y vont) et
+     s'installe sur l'appareil qui l'ouvre (#1184, chargerCodex) : elle y REMPLACE la marque
+     locale ; un codex sans marque (d'avant #1028) laisse la marque locale telle quelle. Levée en
+     entier, elle reste écrite `{}` : c'est ce qui lève celle de l'autre appareil.
+     L'écriture du codex n'emporte ni le fichier ni la vignette d'une copie marquée, même présent
+     sur l'appareil (un iPad qui a gardé les fichiers d'un codex plus ancien) ; elle ne la compte
+     pas « manquante ». À l'ouverture non plus, une copie marquée n'est jamais « manquante ».
+     Ailleurs, une copie est « aux archives » quand elle est marquée ET que son fichier n'est pas
+     là : une copie marquée dont le fichier existe encore se montre normalement.
 
    Ce qui est retiré, dans cet ordre
      1. la marque est posée pour toutes les copies identiques (une écriture, relue) ;
@@ -39,8 +44,8 @@
      - E1 (reserve-trimestre.js) et l'archive d'un groupe (reserve.js) refusent tant que des
        copies sont aux archives : une nouvelle archive ne les contiendrait pas.
      - E3 (reserve-renvoyer.js) lève la marque du trimestre qu'il renvoie.
-     - le codex (codex.js) : une copie aux archives n'est ni « manquante » à l'écriture ni à
-       l'ouverture.
+     - le codex (codex.js) : une copie marquée n'est ni écrite ni « manquante » à l'écriture,
+       ni « manquante » à l'ouverture ; l'ouverture installe la marque du codex.
      - les lecteurs du fichier d'une copie disent « aux archives » (MOTS.copie).
 
    Dépendances
@@ -227,11 +232,10 @@ function _nomDe(trimestre) {
     return RE_TRIMESTRE.test(s) ? SAISONS[s.charAt(0)] + ' ' + s.slice(1) : s;
 }
 
+// #1184 : une marque levée en entier s'écrit `{}`, elle n'est plus retirée. Elle voyage ainsi dans
+// le codex, et l'appareil qui l'ouvre lève la sienne ; une clé absente dirait « codex d'avant ».
 async function _ecrireMarque(m) {
-    if (Object.keys(m).length) await window.db.set(CLE, m);
-    else {
-        await window.db.remove(CLE);
-    }
+    await window.db.set(CLE, m);
 }
 
 /**

@@ -362,10 +362,10 @@ describe('sentinelle #635 · le trajet nominal — les cartouches reviennent dan
         const source = monterCodex(creerDb(CORPUS));
         const zip = await source.generer({ silencieux: true });
         const arrivee = monterCodex(cible, {
-            // Mutation du filtre d'écriture de chargerCodex (:621).
+            // Mutation du filtre d'écriture de chargerCodex (`_entreeEcriteALOuverture` depuis #1184).
             muter: (src) => src.replace(
-                "return !e[0].startsWith('_');",
-                "return !e[0].startsWith('_') && e[0].indexOf('cartouches_') === -1;"
+                "return !entree[0].startsWith('_');",
+                "return !entree[0].startsWith('_') && entree[0].indexOf('cartouches_') === -1;"
             )
         });
         await arrivee.charger(enFichier(zip.blob));
