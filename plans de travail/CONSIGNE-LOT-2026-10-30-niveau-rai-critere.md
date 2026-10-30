@@ -31,6 +31,14 @@ Comme ce matin : un script dans `scripts/mesures-depistage/`, sur son codex, aux
 
 Suppositions à trancher toi-même et à nommer au rapport : la fenêtre et la règle de la « difficulté sur un critère de fondation » (même ligne que la note, lue comme le fait la détection des défis, à vérifier) ; ce qui se passe avant la première note provisoire (diagnostic et non-participation seulement ; le rôle de A et C attend la mesure en file).
 
+## 3 bis. Décisions de Grégoire après la mesure (30 oct., 15 h 40)
+
+Sur la page privée de la mesure (\`7e5704eb\`), ses deux réponses :
+1. **Quand la note fixe le niveau** : ton option C, dans cette formulation : avant le minimum de la pratique (là où l'écran écrit « — »), une note sous la ligne donne **au plus le niveau 2** (par « Difficulté persistante », telle que le code la calcule) ; le niveau 3 par la note n'arrive qu'avec la note provisoire affichée. Diagnostic et non-participation gardent leur règle.
+2. **La fondation au niveau 3** : ton option A, la règle telle quelle ; sur son codex, sous la ligne, c'est toujours le niveau 3. L'Aide le dira.
+
+Les suppositions de ta page sont retenues telles quelles. Tu peux coder (§ 4).
+
 ## 4. Le code, après son accord
 
 **L'Aide part avec le code, jamais après** (Grégoire, 15 h 28 : « absolument transparent sur le fonctionnement de l'application »). La section qui décrit le dépistage et l'application de la RàI est réécrite par Cowork, à partir du modèle tel que codé, et validée par Grégoire ; tu l'intègres dans le même lot. Aucun niveau du nouveau modèle ne part en ligne avec l'ancienne Aide.

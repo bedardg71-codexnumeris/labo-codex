@@ -49,3 +49,7 @@ Un commit pour la retouche, un pour les docs ; demande de relecture courte : `pl
 - **La retouche** : faite, `032c7f91`. Demande : `DEMANDE-RELECTURE-2026-10-29-standards-sans-portfolio-lot-4-retouche.md`.
 - **Les deux listes de l'hybride** : *inscrit*, BACKLOG sous #1178 (« Hors lot – Les deux listes de l'hybride lisent tout le trimestre »).
 - **`.config` seul** : *commenté*, à `basculerProductionQuiCompte` (`032c7f91`).
+
+## Relecture de la retouche (Cowork, 29 oct., 14 h 10)
+
+**Acceptée sans retouche, a posteriori : elle est déjà en ligne en 1.224.0. Le lot 4 est clos côté relecture.** `032c7f91` : `_etatProductionsQuiComptent` lit `obtenirDonneesSelonMode('productions')` ; la liste, la garde de la dernière case et `poolStdFaitDArtefacts` passent par la même fonction, donc par le cours actif. Trois essais sur un corpus à deux cours, break-test D8 (les trois rougissent, aucun autre). Le commentaire `.config` est posé. Le jeton `20261028k` suit la règle du dernier build.
