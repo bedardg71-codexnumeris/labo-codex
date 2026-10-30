@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 15 H 35 : LE NIVEAU AU CRITÈRE EST MESURÉ, PAS CODÉ.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : rien dans l'application. Les chiffres sont sur ta page privée « Niveau RàI au critère ».
+
+**Ce qui reste à toi** : deux décisions, formulées sur la page : quand la note commence à fixer le niveau, et ce que devient la fondation au niveau 3. Le code attend ces réponses.
+
+**Vérifié comment** : les scripts ont tourné sur le code du commit `beee4b01`, dans un navigateur jetable, sur ton codex du 30 oct., 11 h 25, 0 erreur de page ; le modèle décidé passe par un témoin de 14 cas qui arrête le script s'il diverge. Ce qui n'est pas vérifié : le modèle lui-même sur un écran, puisqu'il n'est pas codé.
+
 📝 **LE 30 OCTOBRE 2026, 14 H 27 : TES NOUVELLES DE LA 1.227 SONT PRÊTES, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : les Nouvelles de la 1.227 disent ton texte validé à 14 h 15, mot pour mot. Dans l'Aide, « Repérer les patterns » ajoute : « Seule « Non-participation », sans copie à comparer, donne le niveau 3. » La note du cours ne change pas.
