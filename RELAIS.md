@@ -7,6 +7,26 @@
 
 ---
 
+## 30 OCT. 2026, 7 H 35 (Claude Code) : **POUSSÉ, EN LIGNE : 1.226.0 = `4117fa16` ; GITHUB EN COURS (RUN 41048587052, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**La 1.226.0** (consigne de Cowork `plans de travail/CONSIGNE-LOT-2026-10-30-mise-en-ligne-1226.md`) porte les copies aux archives (#1184), la fenêtre de fusion et sa retouche (#1186), le lot 5 des standards (#1178). `main` = `4117fa16` à la release ; le commit de ce relais la suit.
+
+**Les Nouvelles : un écart à la mesure, tranché par Grégoire.** « Avec des artefacts, rien ne change » était faux : avec des artefacts aussi, l'assistant ne pose plus « Utiliser un portfolio ? » ni « Nombre d'artefacts à soumettre », la fiche perd « Total d'artefacts prévus », et le récit sans terminale passe de « moyenne du portfolio » à « portfolio × 100 % » (`e08e6c03`). Arrêt, question, son choix : « Avec des artefacts, la note ne change pas. » Titre et autres lignes : mot pour mot. La retouche est notée dans le commentaire de l'entrée.
+
+**Rituel** : diff `c176cb84..4117fa16` sans motif interdit, sans `only`/`skip`, sans `page.click`/`waitForTimeout` ajouté (ceux de `1028-archiver-copies.spec.js` sont antérieurs). Vitest entier vert (852 fichiers, 10 348). Break-test rejoué sur la pile : sans `if (f && auxArchives[f.id]) return;` (`js/codex.js`), 1 essai sur 4 de `codex-1184-copies-aux-archives.spec.js` rougit, celui de l'écriture ; le fichier restauré à l'identique (même `shasum`), 4 verts. Les break-tests du lot 5 et de la retouche n'ont pas été rejoués : ceux de la session de 5 h 40 tiennent.
+
+**Verdict du Mac, sur `4117fa16`, par `scripts/verdict-en-morceaux.mjs`, sans refus** : vert, 1 143 essais, 1 139 verts, 0 au second essai, 4 rouges (4 connus, #1181), 19 sautés. Cowork, Chrome et Safari fermés (dit par Grégoire, `ps` ne montre que deux extensions système de Safari) ; Mac sur **secteur**, pression mémoire 1 tout du long, aucune veille. Hook : « verdict vert à jour pour ce commit ». Le commit de ce relais, de documents seulement, part sans verdict propre.
+
+**Netlify** : `6ae47fe044f9ea2b286b09a0`, `commit_ref` `4117fa16`, `ready`, publié à 11:31:00 Z (7 h 31) ; le `version.js` du déploiement (permalien) dit `1.226.0`, build `1030-0554`, et son `js/changelog-data.js` porte l'entrée 1.226 avec la ligne retouchée. Le domaine `app.codexnumeris.org` est derrière Cloudflare Access : non lu d'ici.
+
+**Complexité** (1.225.1 `960d017d` → 1.226.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 92 975 → 92 983 (Δ +8) ; au-dessus de 15 : 445 → 443 (Δ −2) ; au-dessus de 30 : 82 → 82 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 173 → 11 127 (Δ −46).
+
+**Reste à Grégoire, les deux gestes du § 4 de la consigne** : (1) sur l'iPad, rechargé jusqu'à 1.226.0, ouvrir le dernier codex écrit par le Mac, puis « Mettre à jour le codex » : l'aperçu annonce environ 355 Mo, plus 1,5 Go ; (2) à la prochaine fusion, la fenêtre en deux colonnes, rien de choisi d'office. Non éprouvés d'ici : l'iPad, Chrome, le corpus réel.
+
+**Reste à Cowork** : `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` dit encore 1.224.0 et le lot 5 pour mandat (constat de l'audit de ce matin, pas corrigé ici).
+
+**Laissés de côté, non commités** (autres lots) : `plans de travail/VERDICT-RELECTURE-2026-10-29-standards-sans-portfolio-lot-4.md` (modifié), `plans de travail/captures/` (non suivi).
+
 ## 30 OCT. 2026, 5 H 40 (Claude Code) : **TOUT SUR `main`, LOCAL, NON POUSSÉ ; EN LIGNE : TOUJOURS 1.225.1**
 
 `main` porte, sans release : les copies aux archives (#1184), la fenêtre de fusion et sa retouche (#1186), le lot 5 des standards (#1178). Deux demandes de relecture attendent Cowork : `DEMANDE-RELECTURE-2026-10-29-fenetre-de-fusion-retouche.md` et `DEMANDE-RELECTURE-2026-10-29-standards-sans-portfolio-lot-5.md`. Verdict complet, release et push attendent le signal de Grégoire. Aucune autre branche.
