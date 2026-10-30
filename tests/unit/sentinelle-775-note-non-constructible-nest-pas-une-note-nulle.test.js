@@ -112,16 +112,17 @@ const groupe = (n, drapeau) => Array.from({ length: n }, (_, i) => ({
 describe('#775 · le palier RàI ne se décide pas sur une note qui n\'existe pas encore', () => {
     it('note NON constructible (PAN-STD qui attend ses résultats) : le palier vient du dépistage, pas du 0', () => {
         // Avant : un P à 0 sous la borne → « Niveau 3 - Intensif » pour tout le groupe dès le premier artefact.
+        // Lot 3 des seuils (30 oct. 2026) : le niveau ne se fixe pas par la note ; le pattern reste. Rien ne le signale ici : « En attente ».
         const rai = monter({ noteConstructible: false }).determinerNiveauRaiPedagogique(DA);
-        expect(rai.niveau).toBe(1);
-        expect(rai.label).toBe('Niveau 1 - Universel');
+        expect(rai.niveau).toBe(0);
+        expect(rai.label).toBe('En attente');
         expect(rai.pattern).toBe('Stable');
     });
 
-    it('lot 2 des seuils (30 oct. 2026) : le palier ne lit plus P du tout, seulement les copies', () => {
-        // Avant : un P stocké à 0, constructible, donnait le palier 3. Ici, l'unique copie vaut 96 %.
+    it('lot 3 des seuils (30 oct. 2026) : une note constructible se lit, telle que la pratique la construit', () => {
+        // P = 0, constructible, sous la ligne (60 % : E0 ne porte pas de repère). L'unique copie vaut 96 % : aucune fondation en difficulté, niveau 2.
         const rai = monter({ noteConstructible: true }).determinerNiveauRaiPedagogique(DA);
-        expect(rai.niveau).toBe(1);
+        expect(rai.niveau).toBe(2);
     });
 });
 

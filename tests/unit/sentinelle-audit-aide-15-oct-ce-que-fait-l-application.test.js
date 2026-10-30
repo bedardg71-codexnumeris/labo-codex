@@ -93,9 +93,9 @@ describe('Ce qui fixe le niveau RàI : une seule version, celle du code', () => 
     const NIVEAU = corps(lire('js/profil-etudiant-calculs.js'), 'determinerNiveauRaiPedagogique');
     const fenetre = defaut(null, 'nombreProductionsAnalyse');
 
-    it('le code décide par la moyenne des copies comparée au groupe (lot 2 des seuils) — pas par l\'IPB, et le pattern reste à côté', () => {
-        expect(NIVEAU).toContain('identifierPatternActuel(');
-        expect(NIVEAU).toContain('classerNiveauDansLeGroupe(');
+    it('le code décide par la note provisoire devant la ligne (lot 3 des seuils) — pas par l\'IPB', () => {
+        expect(corps(lire('js/profil-etudiant-calculs.js'), '_besoinDesCopies')).toContain('identifierPatternActuel(');
+        expect(NIVEAU).toContain('classerNiveauAuCritere(');
         expect(NIVEAU, 'le niveau RàI lit maintenant l\'IPB : l\'Aide est à revoir').not.toMatch(/calculerIPB\(/);
         // ↻ #1117, suite (20 oct. 2026) : « Aucun » n'exclut que si l'observation SOLO est activée.
         expect(lire('js/profil-etudiant-helpers.js')).toMatch(/function estCritereSurveilleParDepistage\(critere\)\s*\{\s*if \(!critere\) return false;\s*if \(!etiquettesSOLOLuesParDepistage\(\)\) return true;\s*return critere\.niveauSOLO !== 'aucun';/);
@@ -141,7 +141,7 @@ describe('Ce qui fixe le niveau RàI : une seule version, celle du code', () => 
 describe('Les patterns : toutes les énumérations nomment ceux que le code rend', () => {
     const CALCULS = lire('js/profil-etudiant-calculs.js');
     const PATTERN = corps(CALCULS, 'identifierPatternActuel');
-    const NIVEAU = corps(CALCULS, 'determinerNiveauRaiPedagogique');
+    const NIVEAU = corps(CALCULS, '_niveauNonParticipation') + corps(CALCULS, '_besoinSansCopie');
     const PATTERNS = [
         ...[...PATTERN.matchAll(/return '([^']+)';/g)].map((m) => m[1]),
         ...[...NIVEAU.matchAll(/pattern: '([^']+)'/g)].map((m) => m[1]),

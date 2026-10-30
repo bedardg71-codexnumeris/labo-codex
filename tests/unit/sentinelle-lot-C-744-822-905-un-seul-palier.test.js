@@ -104,7 +104,8 @@ describe('A · #744 — la carte RàI donne seule le palier, sur les écrans du 
         expect(corpsSuivi).not.toMatch(/mergente|niveau\s*:|niveau\s*=/);
         // La cible lit la carte : le palier qu'elle rend est une lecture de `determinerNiveauRaiPedagogique`, jamais du suivi.
         const corpsCible = tranche(calculs, 'function determinerCibleIntervention(', 'window.obtenirEchelleResolue', { longueurMin: 500 });
-        expect(corpsCible).toMatch(/palierCarte\s*=\s*determinerNiveauRaiPedagogique\(da\)\.niveau/);
+        expect(corpsCible).toMatch(/carte\s*=\s*determinerNiveauRaiPedagogique\(da\)/);
+        expect(corpsCible).toMatch(/palierCarte\s*=\s*carte\.niveau/);
         expect(corpsCible).not.toMatch(/niveau\s*:\s*suivi\./);
     });
 

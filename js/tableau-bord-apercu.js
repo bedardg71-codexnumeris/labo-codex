@@ -1495,13 +1495,13 @@ function genererInterpretationRai(rai, totalEtudiants) {
     const pctNiveau2 = Math.round((niveau2 / totalEtudiants) * 100);
     const pctNiveau3 = Math.round((niveau3 / totalEtudiants) * 100);
 
-    // Lot 2 des seuils (30 oct. 2026) : les niveaux se comparent au groupe, donc la part du niveau 1 ne dit plus rien
-    // de l'enseignement universel. C'est la moyenne du groupe sous la note de passage qui le dit.
+    // Lot 3 des seuils (30 oct. 2026) : en attendant « la réponse du groupe », la moyenne des notes provisoires du groupe
+    // sous la ligne dit l'enseignement universel. Elle s'ajoute aux signaux individuels, elle n'en enlève aucun.
     let interpretation = '';
     const signaux = typeof signauxDeGroupeDepistage === 'function' ? signauxDeGroupeDepistage() : [];
     signaux.forEach(signal => {
         const nom = signal.groupe ? `du groupe ${echapperHtml(signal.groupe)}` : 'du groupe';
-        interpretation += `La moyenne ${nom} (${formaterPourcentage(signal.moyenne, 1)}) est sous la note de passage (${formaterPourcentage(signal.passage)}) : c'est l'enseignement universel qu'il faut renforcer, pour tous. `;
+        interpretation += `La moyenne des notes provisoires ${nom} (${formaterPourcentage(signal.moyenne, 1)}) est sous le seuil minimal de réussite (${formaterPourcentage(signal.ligne)}) : c'est l'enseignement universel qu'il faut renforcer, pour tous. `;
     });
 
     // Compléter avec Niveau 2 et 3
@@ -1510,7 +1510,12 @@ function genererInterpretationRai(rai, totalEtudiants) {
     }
 
     if (niveau3 > 0) {
-        interpretation += `${niveau3} étudiants (${formaterPourcentage(pctNiveau3)}) requièrent un accompagnement intensif individualisé.`;
+        interpretation += `${niveau3} étudiants (${formaterPourcentage(pctNiveau3)}) requièrent un accompagnement intensif individualisé. `;
+    }
+
+    const enAttente = totalEtudiants - rai.reduce((somme, r) => somme + r.count, 0);
+    if (enAttente > 0) {
+        interpretation += enAttente > 1 ? `${enAttente} étudiant·es en attente de leur note provisoire.` : '1 étudiant·e en attente de sa note provisoire.';
     }
 
     return interpretation;
@@ -2642,8 +2647,9 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
     }
 
     // Calculer les pourcentages pour chaque niveau
-    const totalSOM = etudiantsSOM.length || 1;
-    const totalPAN = etudiantsPAN.length || 1;
+    // Lot 3 des seuils : tout le groupe, « En attente » compris. Avant la note provisoire, les seuls élèves à niveau feraient 100 %.
+    const totalSOM = Math.max(nbTotal, etudiantsSOM.length, 1);
+    const totalPAN = Math.max(nbTotal, etudiantsPAN.length, 1);
 
     const niveau1SOM = compteursSOM[1] || 0;
     const niveau1PAN = compteursPAN[1] || 0;
@@ -2687,14 +2693,14 @@ function genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, n
                 { niveau: 2, count: niveau2SOM },
                 { niveau: 3, count: niveau3SOM }
             ];
-            interpretation = genererInterpretationRai(raiDistributionSOM, etudiantsSOM.length);
+            interpretation = genererInterpretationRai(raiDistributionSOM, totalSOM);
         } else if (afficherPan) {
             const raiDistributionPAN = [
                 { niveau: 1, count: niveau1PAN },
                 { niveau: 2, count: niveau2PAN },
                 { niveau: 3, count: niveau3PAN }
             ];
-            interpretation = genererInterpretationRai(raiDistributionPAN, etudiantsPAN.length);
+            interpretation = genererInterpretationRai(raiDistributionPAN, totalPAN);
         }
     }
 

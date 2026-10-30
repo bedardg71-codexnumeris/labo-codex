@@ -1003,6 +1003,7 @@ const SCHEMAS_IMPORT = {
                         libelle: { type: 'string', maxLen: 200 },
                         sansErreur: { type: 'boolean' },
                         leveSignalement: { type: 'boolean' },   // Lot 3 — #790
+                        niveauSignalement: { type: 'numberOrNull' },   // lot 3 des seuils : 2, 3, ou aucun
                         // `null` = palier TERMINAL. Voir `numberOrNull` : le
                         // type `'number'` en ferait un 0, c'est-à-dire un seuil.
                         ratioMax: { type: 'numberOrNull' },

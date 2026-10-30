@@ -306,6 +306,8 @@
                                 cle: { type: 'chaine', requis: true, max: 100 },
                                 libelle: { type: 'chaine', max: 200 },
                                 sansErreur: { type: 'booleen' },
+                                leveSignalement: { type: 'booleen' },
+                                niveauSignalement: { type: 'nombre', nullable: true, minValeur: 2, maxValeur: 3 },
                                 ratioMax: { type: 'nombre', nullable: true, minValeur: 0, maxValeur: 100 },
                                 texte: { type: 'chaine', max: 5000 },
                                 texteAide: { type: 'chaine', max: 5000 }

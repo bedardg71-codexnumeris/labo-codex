@@ -99,6 +99,8 @@ for (const plan of PLANS) {
         decide:compte(0),diag2:compte(2),diag3:compte(3),code:compte(0,'fond','Pcode'),variantes:{seuilDefi:compte(0,'fondDefi').n,fenetrePatterns:compte(0,'fondRecent').n,ipb2:compte(0,'fondIPB2').n,ipb3:compte(0,'fondIPB3').n},
         parCritere:(()=>{const t={};sous.forEach(r=>r.defis.forEach(d=>{t[d]=(t[d]||0)+1;}));return t;})(),
         avecNoteCode:res.filter(r=>r.Pcode!==null).length,sousLigneCode:sousCode.length,sousCodeSansSignalEnLigne:sousCode.filter(r=>r.enLigne<2).length,
+        // Le témoin du lot 3, sur un commit qui le porte : le code rend-il le modèle décidé (§ 3 bis, 1 C : la persistante donne le niveau 2 avant la note) ? Attendu : 0 à toutes les dates. Le diagnostic n'y entre pas : aucun palier réglé sur ce codex.
+        ecartCodeModele:res.filter(r=>r.enLigne!==(r.P===null&&!r.np&&r.persist?2:m({P:r.P,ligne:r.ligne,persist:r.persist,fond:r.fond,np:r.np,diag:0})[0])).length,
         sousLigne:sous.length,sousSansSignalEnLigne:sous.filter(r=>r.enLigne<2).length,
         sousSansSignalDecide:sous.filter(r=>m({P:r.P,ligne:r.ligne,persist:r.persist,fond:r.fond,np:r.np,diag:0})[0]<2).length,
         persistanteAuDessus:res.filter(r=>r.P!==null&&r.P>=r.ligne&&r.persist&&!r.np).length,
@@ -109,6 +111,6 @@ for (const plan of PLANS) {
   }
   sortie[plan.t]={info:{grille:info.grille,groupes:info.gcs.length,cadre:info.cadre},lignes}; nbErr+=erreurs(); await b.close();
   console.log('==',plan.t,info.grille,'groupes',info.gcs.length,JSON.stringify(info.cadre));
-  lignes.forEach(l=>console.log(l.cut,'élèves',l.effectif,'notes écran',l.avecNote,'code',l.avecNoteCode,'| en ligne',l.enLigne.join('-'),'| décidé',[0,1,2,3].map(v=>l.decide.n[v]).join('-'),'| décidé (code)',[0,1,2,3].map(v=>l.code.n[v]).join('-'),'| N2',JSON.stringify(l.decide.sources[2]),'N3',JSON.stringify(l.decide.sources[3]),'| <ligne',l.sousLigne,'sans signal en ligne',l.sousSansSignalEnLigne,'décidé',l.sousSansSignalDecide,'| persist. au-dessus',l.persistanteAuDessus,'avant note',l.persistanteAvantNote,'| ipb2',[0,1,2,3].map(v=>l.variantes.ipb2[v]).join('-'),'ipb3',[0,1,2,3].map(v=>l.variantes.ipb3[v]).join('-'),JSON.stringify(l.parCritere),'| signalés',l.signales,'| groupes <ligne',l.groupesSousLigne));
+  lignes.forEach(l=>console.log(l.cut,'élèves',l.effectif,'notes écran',l.avecNote,'code',l.avecNoteCode,'| en ligne',l.enLigne.join('-'),'| décidé',[0,1,2,3].map(v=>l.decide.n[v]).join('-'),'| décidé (code)',[0,1,2,3].map(v=>l.code.n[v]).join('-'),'| N2',JSON.stringify(l.decide.sources[2]),'N3',JSON.stringify(l.decide.sources[3]),'| <ligne',l.sousLigne,'sans signal en ligne',l.sousSansSignalEnLigne,'décidé',l.sousSansSignalDecide,'| persist. au-dessus',l.persistanteAuDessus,'avant note',l.persistanteAvantNote,'| ipb2',[0,1,2,3].map(v=>l.variantes.ipb2[v]).join('-'),'ipb3',[0,1,2,3].map(v=>l.variantes.ipb3[v]).join('-'),JSON.stringify(l.parCritere),'| écart code-modèle',l.ecartCodeModele,'| signalés',l.signales,'| groupes <ligne',l.groupesSousLigne));
 }
 ecrireAgregat('niveau-rai-critere.json', sortie); console.log('erreurs',nbErr);

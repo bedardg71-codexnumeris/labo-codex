@@ -278,8 +278,8 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Les trois niveaux",
                 items: [
                     "<strong>Niveau 1 — Universel</strong>\u00a0: enseignement de qualité pour tout le groupe.",
-                    "<strong>Niveau 2 — Préventif</strong>\u00a0: interventions préventives pour les étudiant·es nettement sous la moyenne du groupe ou sous la note de passage.",
-                    "<strong>Niveau 3 — Intensif</strong>\u00a0: soutien individualisé pour les étudiant·es à plus d'un écart-type sous la moyenne du groupe."
+                    "<strong>Niveau 2 — Préventif</strong>\u00a0: interventions préventives pour les étudiant·es dont la note provisoire est sous le seuil minimal de réussite, ou en difficulté persistante.",
+                    "<strong>Niveau 3 — Intensif</strong>\u00a0: soutien individualisé quand la note provisoire est sous ce seuil avec une difficulté sur un critère de fondation, ou en non-participation."
                 ]
             },
             {
@@ -655,9 +655,9 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Niveaux RàI (Réponse à l'Intervention)",
                 items: [
-                    "Niveau 1 (vert) — Dans la moyenne du groupe. L'enseignement universel suffit, sauf si la moyenne du groupe est sous la note de passage.",
-                    "Niveau 2 (jaune) — Entre un demi et un écart-type sous la moyenne du groupe, ou sous la note de passage. Interventions préventives ciblées recommandées.",
-                    "Niveau 3 (rouge) — Plus d'un écart-type sous la moyenne du groupe. Intervention intensive et soutien individualisé recommandés."
+                    "Niveau 1 (vert) — Note provisoire au seuil minimal de réussite ou au-dessus. L'enseignement universel suffit.",
+                    "Niveau 2 (jaune) — Note provisoire sous ce seuil, ou difficulté persistante. Interventions préventives ciblées recommandées.",
+                    "Niveau 3 (rouge) — Note provisoire sous ce seuil avec une difficulté sur un critère de fondation, ou non-participation. Intervention intensive et soutien individualisé recommandés."
                 ]
             },
             {
@@ -718,8 +718,8 @@ const AIDE_CONTEXTUELLE = {
                 titre: "Les 3 niveaux RàI",
                 items: [
                     "Niveau 1 — Enseignement universel. C'est ce que tu fais pour tout le groupe. Pas besoin de le documenter ici.",
-                    "Niveau 2 — Interventions préventives ciblées. Pour les étudiants entre un demi et un écart-type sous la moyenne du groupe, ou sous la note de passage. Séance de rattrapage ou petit groupe en classe.",
-                    "Niveau 3 — Interventions intensives. Pour les étudiants à plus d'un écart-type sous la moyenne du groupe. Rencontre individuelle hors classe, référence aux services."
+                    "Niveau 2 — Interventions préventives ciblées. Pour les étudiants dont la note provisoire est sous le seuil minimal de réussite, ou en difficulté persistante. Séance de rattrapage ou petit groupe en classe.",
+                    "Niveau 3 — Interventions intensives. Pour les étudiants sous ce seuil avec une difficulté sur un critère de fondation, ou en non-participation. Rencontre individuelle hors classe, référence aux services."
                 ]
             },
             {

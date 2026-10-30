@@ -612,6 +612,7 @@ function toggleFiltreMinimum(actif) {
     }
 }
 window.toggleFiltreMinimum = toggleFiltreMinimum;
+window.compterEvaluationsPourMinimum = compterEvaluationsPourMinimum;   // lot 3 des seuils : le minimum de la note provisoire
 
 /* ===============================
    🔍 FILTRAGE ET RECHERCHE

@@ -57,7 +57,7 @@ const PRATIQUES = [
             portfolio: { utiliser: true, nombreARetenir: 2, minimumCompletion: 1, methodeSelection: 'meilleurs', reglesConformite: { actif: false } }, notesFinales: false } }
 ];
 
-const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 'js/pratiques/pratique-configurable.js',
+const MODULES = [{ chemin: 'js/etudiants.js', internes: [] }, 'js/interpretation-config.js', 'js/contexte-qualification.js', 'js/pratiques/pratique-configurable.js',
     'js/pratiques/pratique-registre.js', 'js/pratiques/pratique-manager.js', 'js/pratiques/pratique-sommative.js',
     'js/pratiques/pratique-pan-standards.js', 'js/pratiques/pratique-pan-specifications.js',
     'js/pratiques/denotation-jugements.js', 'js/portfolio.js', 'js/indices.js', { chemin: 'js/saisie-presences.js', internes: [] },

@@ -256,6 +256,17 @@ function borneBassePerformance(reperes) {
 }
 
 /**
+ * Le seuil minimal de réussite que l'enseignant·e a posé : le repère « Suffisant à partir de » de l'échelle des copies ;
+ * sans ce repère, la note de passage. Une échelle qui ne porte que la maîtrise : la note de passage.
+ * @param {Object} [reperes] - `reperesPerformance()`, déjà lus par l'appelant d'une boucle
+ * @returns {number} 0-100
+ */
+function ligneDeReussite(reperes) {
+    const r = reperes || reperesPerformance();
+    return r.suffisance !== null ? r.suffisance : r.passage;
+}
+
+/**
  * Les deux bornes du dépistage, en proportions 0-1 : `bas` (sous le repère de suffisance, ou sous la
  * note de passage quand il n'est pas posé) et `maitrise` (null quand il n'est pas posé : le test
  * « sous la maîtrise » n'existe alors pas, puisque l'échelle ne dit pas où elle commence).
@@ -263,7 +274,7 @@ function borneBassePerformance(reperes) {
 function bornesDepistage(reperes) {
     const r = reperes || reperesPerformance();
     return {
-        bas: (r.suffisance !== null ? r.suffisance : r.passage) / 100,
+        bas: ligneDeReussite(r) / 100,
         maitrise: r.maitrise !== null ? r.maitrise / 100 : null
     };
 }
@@ -507,6 +518,7 @@ window.reperesPerformance = reperesPerformance;
 window.zonePerformance = zonePerformance;
 window.borneBassePerformance = borneBassePerformance;
 window.bornesDepistage = bornesDepistage;
+window.ligneDeReussite = ligneDeReussite;
 window.classePastilleDeLaZone = classePastilleDeLaZone;
 window.obtenirCouleurSelonSeuils = obtenirCouleurSelonSeuils;
 window.obtenirCouleurPerformanceSelonEchelle = obtenirCouleurPerformanceSelonEchelle;
