@@ -44,46 +44,42 @@ const MESSAGE_SUIVI_COMPLET = 'Cinq étudiant·es suivi·es au maximum. Retires-
    ÉCHELLE DES DISTRIBUTIONS A-C-P (#818, 10 sept. 2026)
    =============================== */
 
-// ⚠ CES BORNES NE CLASSENT RIEN. Aucun `if (valeur >= 0.80)` n'existe dans ce
-// module : la barre est un dégradé CONTINU et la couleur d'un point est
-// INTERPOLÉE (obtenirCouleurGradient). Les repères de la légende situent des
-// changements de teinte sur une échelle continue — ils ne découpent pas des
-// catégories, et ne sont pas les seuils d'interprétation (70/80/85), qui sont
-// une autre échelle, celle-là réglable.
-//
-// L'axe ne part pas de 0 : il montre 30 → 100 %. Les arrêts du dégradé sont
-// posés en POSITION sur la barre (0, 25, 50, 75 %), donc en scores 30 / 47,5 /
-// 65 / 82,5 %. La légende qui les affichait est retirée le 15 oct. 2026 (bloc 6b
-// des textes relus) : ces repères ne fondaient rien de pédagogique.
+// L'axe ne part pas de 0 : il montre 30 → 100 %. Il ne porte aucun seuil : les zones de couleur viennent
+// des mêmes sources que les pastilles (`zonesDeLaBarre`, contexte-qualification.js, 30 oct. 2026).
 const ECHELLE_DISTRIBUTION_MIN = 0.30;
 const ECHELLE_DISTRIBUTION_MAX = 1.00;
 
-// LA table du dégradé : position sur la barre + teinte. Elle sert aux trois
-// endroits qui en portaient chacun une copie — la chaîne CSS, l'interpolation
-// de couleur, et les libellés de la légende.
-const ARRETS_DEGRADE = [
-    { position: 0,  couleur: '#ff9800' }, // orange
-    { position: 25, couleur: '#ffc107' }, // jaune
-    { position: 50, couleur: '#28a745' }, // vert
-    { position: 75, couleur: '#2196F3' }  // bleu
-];
-
-/** Position (0-100 sur la barre) d'un score 0-1. */
 function positionSurEchelleDistribution(valeur) {
     const etendue = ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN;
     return Math.max(0, Math.min((valeur - ECHELLE_DISTRIBUTION_MIN) / etendue * 100, 100));
 }
 
-/** Réciproque : le score 0-1 qu'une position 0-100 sur la barre représente. */
-function scoreALaPositionDistribution(position) {
-    return ECHELLE_DISTRIBUTION_MIN + (position / 100) * (ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN);
+/** Le fond d'une barre : ses zones de couleur, à bords nets, sur l'axe de la barre. */
+function fondDeLaBarre(zones) {
+    const arrets = zones.map((z) => {
+        const de = positionSurEchelleDistribution(z.de);
+        const a = positionSurEchelleDistribution(z.a);
+        return `${z.couleur} ${de}%, ${z.couleur} ${a}%`;
+    });
+    return `linear-gradient(to right, ${arrets.join(', ')})`;
 }
 
-// #821 lot A (10 sept. 2026) — `contexte-qualification.js` LIT la géométrie du
-// dégradé (bandesLegendeApercu) pour la poser à côté des trois autres règles
-// qui qualifient un contexte ; il ne la recopie pas. Exposée ici, à sa source.
-window.ARRETS_DEGRADE = ARRETS_DEGRADE;
-window.scoreALaPositionDistribution = scoreALaPositionDistribution;
+/** La zone qui contient une valeur (0-1). La dernière ferme à 100 %, valeur comprise. */
+function zoneDeLaValeur(zones, valeur) {
+    return zones.find((z) => valeur >= z.de && valeur < z.a) || zones[zones.length - 1];
+}
+
+/**
+ * Le décalage qui évite la superposition des points ne fait pas changer de zone : un·e élève signalé·e
+ * dans une pastille reste dans la couleur de son palier, même là où les zones sont étroites (5 points).
+ */
+function positionDansSaZone(positionVoulue, valeur, zones) {
+    const zone = zoneDeLaValeur(zones, valeur);
+    const min = positionSurEchelleDistribution(zone.de);
+    const max = positionSurEchelleDistribution(zone.a);
+    const marge = Math.min(0.5, (max - min) / 2);
+    return Math.max(min + marge, Math.min(positionVoulue, max - marge));
+}
 
 let _etudiantsPrioritaires = [];
 let _tousEtudiantsEnrichis = []; // Tous les étudiants avec indices calculés
@@ -91,7 +87,7 @@ let _filtresActifs = []; // Filtres toggle : 'P', 'M', 'suivi', 'rai'
 // #828 (lot F, 16 sept. 2026) : l'identifiant 'M' est gardé tel quel — il n'est écrit nulle part
 // (ni préférence, ni stockage : `_filtresActifs` vit en mémoire, `data-tri` est relu au clic).
 // Il ne désigne plus la moyenne (A + C) / 2 : le filtre retient l'élève dont l'assiduité OU la
-// complétion est sous la borne « critique » du profil (voir `borneCritiqueEngagement`).
+// complétion est au palier le plus bas (voir `borneBasseAssiduiteCompletion`, contexte-qualification.js).
 
 /**
  * #749 — LA CLÉ DE LA LISTE SUIVIE : PAR TRIMESTRE ET PAR GROUPE-COURS.
@@ -287,19 +283,9 @@ function calculerEtudiantsPrioritaires() {
 }
 
 /**
- * #828 (lot F du cadrage du 16 sept. 2026) : la borne du filtre « A ou C < N% » est la
- * borne « critique » de la carte Mobilisation du profil (`BORNES_MOBILISATION`,
- * `contexte-qualification.js`), lue à l'appel et jamais recopiée : si la borne change,
- * la règle et le libellé du bouton suivent. En pourcentage entier (0,7 → 70).
- */
-function borneCritiqueEngagement() {
-    return Math.round(window.BORNES_MOBILISATION.critique * 100);
-}
-
-/**
  * Un indice n'est « sous la borne » que s'il est un nombre montré (G-4, #749 : on filtre
  * sur ce qui est MONTRÉ). Un A ou un C absent — null, non constructible, barre vide
- * (#830) — s'affiche « — » et ne peut pas être « < 70 % » : en JavaScript, `null < 70`
+ * (#830) — s'affiche « — » et ne peut pas être sous une borne : en JavaScript, `null < 85`
  * est vrai, d'où cette garde.
  */
 function indiceSousBorne(valeur, borne) {
@@ -320,8 +306,9 @@ function appliquerFiltres() {
         return;
     }
 
-    // #828 : la borne n'est lue que si le filtre M est actif (les autres filtres n'en dépendent pas).
-    var borneM = _filtresActifs.indexOf('M') >= 0 ? borneCritiqueEngagement() : null;
+    // Les bornes ne sont lues que si leur filtre est actif (30 oct. 2026 : une seule source par famille).
+    var borneM = _filtresActifs.indexOf('M') >= 0 ? window.borneBasseAssiduiteCompletion() : null;
+    var borneP = _filtresActifs.indexOf('P') >= 0 ? window.borneBassePerformance() : null;
 
     // Intersection (AND) : chaque filtre doit matcher
     _etudiantsPrioritaires = _tousEtudiantsEnrichis.filter(function(e) {
@@ -329,11 +316,11 @@ function appliquerFiltres() {
             switch (_filtresActifs[i]) {
                 case 'P':
                     // G-4 (#749) : filtrer sur ce qui est MONTRÉ — un P non
-                    // constructible s'affiche « — », il ne peut pas être « < 65 % ».
-                    if (e.noteConstructible === false || e.P >= 65) return false;
+                    // constructible s'affiche « — », il ne peut pas être sous la borne.
+                    if (e.noteConstructible === false || e.P >= borneP) return false;
                     break;
                 case 'M':
-                    // #828 : assiduité OU complétion sous la borne critique du profil.
+                    // #828 : assiduité OU complétion au palier le plus bas.
                     if (!indiceSousBorne(e.A, borneM) && !indiceSousBorne(e.C, borneM)) return false;
                     break;
                 case 'suivi':
@@ -354,7 +341,7 @@ function appliquerFiltres() {
             var score = 0;
             for (var i = 0; i < _filtresActifs.length; i++) {
                 switch (_filtresActifs[i]) {
-                    case 'P': if (e.noteConstructible !== false) score += Math.max(0, 65 - e.P); break;
+                    case 'P': if (e.noteConstructible !== false) score += Math.max(0, borneP - e.P); break;
                     case 'M': {
                         // #828 : l'urgence est celle du pire des deux indices montrés.
                         var montres = [e.A, e.C].filter(function(v) { return typeof v === 'number' && Number.isFinite(v); });
@@ -435,14 +422,17 @@ function genererPanneauSuiviEtudiants() {
 
     if (compteur) compteur.textContent = '(' + suivis.length + '/' + MAX_ETUDIANTS_SUIVIS + ')';
 
+    // Lus une fois pour tout le panneau : le libellé du filtre et les pastilles de P.
+    var reperesP = filtrePrio ? window.reperesPerformance() : null;
+
     // Zone de filtres (visible uniquement en mode Détails)
     var zoneTri = document.getElementById('suivi-tri-boutons');
     if (zoneTri) {
         if (filtrePrio) {
             var filtres = [
                 { id: 'alpha', label: 'A→Z' },
-                { id: 'P', label: 'P < 65\u00a0%' },
-                { id: 'M', label: 'A ou C < ' + formaterPourcentage(borneCritiqueEngagement()) },   // #828 : lu à la borne, jamais recopié
+                { id: 'P', label: 'P < ' + formaterPourcentage(window.borneBassePerformance(reperesP)) },
+                { id: 'M', label: 'A ou C < ' + formaterPourcentage(window.borneBasseAssiduiteCompletion()) },   // lus à la source, jamais recopiés
                 { id: 'suivi', label: 'Suivi' },
                 { id: 'rai', label: 'RàI 2-3' }
             ];
@@ -533,7 +523,8 @@ function genererPanneauSuiviEtudiants() {
                 + _badgeIndiceSuivi('A', enrichi.A) + _badgeIndiceSuivi('C', enrichi.C)
                 + _badgeIndiceSuivi('P', enrichi.noteConstructible === false ? null : enrichi.P,
                     // Lot N4 (#713) : la cause, quand la pratique en déclare une (source unique, portfolio.js).
-                    (enrichi.noteConstructible === false && typeof causeNoteNonConstructible === 'function') ? causeNoteNonConstructible(e.da) : null)
+                    (enrichi.noteConstructible === false && typeof causeNoteNonConstructible === 'function') ? causeNoteNonConstructible(e.da) : null,
+                    reperesP)
                 + '</span>';
         }
 
@@ -551,15 +542,15 @@ function genererPanneauSuiviEtudiants() {
  *  #743 (lot D) : un A inconnu passe aussi par ici — le tiret, SANS la bulle de P (elle parlerait
  *  d'une note). La bulle de A est de Grégoire (validée le 19 sept. 2026). C n'a pas de bulle.
  *  Lot N4 (#713) : `cause` — la phrase de la pratique, quand elle en déclare une — remplace la bulle générique de P. */
-function _badgeIndiceSuivi(label, valeur, cause) {
+function _badgeIndiceSuivi(label, valeur, cause, reperesP) {
     if (valeur === null || valeur === undefined) {
         var bulle = label === 'P' ? ' title="' + (cause ? echapperHtml(cause) : 'Note non constructible avec la configuration actuelle') + '"'
             : label === 'A' ? ' title="Assiduité inconnue : aucune séance saisie ne compte encore pour cet·te étudiant·e."' : '';
         return '<span class="prioritaire-indice"' + bulle + '>' + label + ' —</span>';
     }
-    var cls = 'prioritaire-indice';
-    if (valeur < 65) cls += ' prioritaire-indice-critique';
-    else if (valeur < 75) cls += ' prioritaire-indice-attention';
+    // A et C : les paliers de Labo › Outils d'observation. P : les repères de l'échelle de l'enseignant.
+    var zone = label === 'P' ? window.zonePerformance(valeur, reperesP) : window.zoneAssiduiteCompletion(valeur);
+    var cls = 'prioritaire-indice' + window.classePastilleDeLaZone(zone);
     return '<span class="' + cls + '">' + label + ' ' + formaterPourcentage(valeur) + '</span>';
 }
 
@@ -741,7 +732,7 @@ function genererSvgGauss(valeurs, hauteur = 55) {
 }
 
 /**
- * 🆕 BETA 91: Génère un diagnostic basique basé sur la note de passage (60%)
+ * 🆕 BETA 91: Génère un diagnostic basique basé sur la note de passage (`NOTE_DE_PASSAGE`)
  * Utilisé quand SOLO et RàI sont désactivés
  * @param {Array} etudiants - [{da, valeur: 0-1}, ...] étudiants avec leur performance
  * @returns {string} - Message de diagnostic basique
@@ -759,7 +750,8 @@ function genererDiagnosticNotePassage(etudiants) {
         return '';
     }
 
-    const notePassage = 0.60; // 60%
+    const notePassage = window.NOTE_DE_PASSAGE;
+    const notePassageTexte = formaterPourcentage(Math.round(notePassage * 100));
     const total = etudiants.length;
 
     const enReussite = etudiants.filter(e => e.valeur >= notePassage).length;
@@ -771,11 +763,11 @@ function genererDiagnosticNotePassage(etudiants) {
     const messages = [];
 
     if (enReussite > 0) {
-        messages.push(`${enReussite} ${window.pluriel(enReussite, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pctReussite)}) ont une performance égale ou supérieure à la note de passage (60\u00a0%)`);
+        messages.push(`${enReussite} ${window.pluriel(enReussite, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pctReussite)}) ont une performance égale ou supérieure à la note de passage (${notePassageTexte})`);
     }
 
     if (enDifficulte > 0) {
-        messages.push(`${enDifficulte} ${window.pluriel(enDifficulte, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pctDifficulte)}) sont en difficulté avec une performance inférieure à 60\u00a0%`);
+        messages.push(`${enDifficulte} ${window.pluriel(enDifficulte, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pctDifficulte)}) sont en difficulté avec une performance inférieure à ${notePassageTexte}`);
     }
 
     return messages.length > 0 ? messages.join('. ') + '.' : '';
@@ -900,25 +892,10 @@ function calculerDistributionPerformance(etudiants) {
         return null;
     }
 
-    // Lire l'échelle de performance active depuis localStorage
-    // #575 — la mention d'un repli sur `echellesPerformance` est retirée : cette clé
-    // n'était écrite nulle part, et son dernier lecteur (`convertirNiveauEnPourcentage`,
-    // `portfolio.js`) a été supprimé avec le repli IDME qu'elle servait.
-    let echelles = db.getSync(cle('echellesTemplates'), []);
-    let echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
-
-
-    // Trouver l'échelle active (par ID ou par défaut)
-    let echelle = echelles.find(e => e.id === echelleId);
-
-    if (!echelle) {
-        // Fallback : chercher l'échelle par défaut
-        echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
-    }
-
-
+    // L'échelle des copies du groupe (30 oct. 2026). Sans échelle unique, il n'y a pas de répartition à
+    // dire : on n'en choisit pas une dans la bibliothèque du trimestre (`reperesPerformance`).
+    const echelle = window.reperesPerformance().echelle;
     if (!echelle || !echelle.niveaux) {
-        console.warn('📊 Distribution P : Échelle ou niveaux introuvables');
         return null;
     }
 
@@ -1847,10 +1824,8 @@ function afficherMetriquesGlobales(etudiants) {
         genererPanneauSuiviEtudiants();
     }
 
-    // Bloc 6b des textes relus (15 oct. 2026, Grégoire) : plus de légende chiffrée sous le dégradé.
-    // Elle ne portait que quatre repères (30-47,5 % … ≥ 82,5 %), la barre coupée en quarts, que rien
-    // de pédagogique ne fonde ; la bulle « Observer » dit ce que le point représente. Le dégradé et
-    // la position des couleurs ne bougent pas (`ARRETS_DEGRADE`).
+    // Bloc 6b des textes relus (15 oct. 2026, Grégoire) : pas de légende chiffrée sous les barres ;
+    // la bulle « Observer » dit ce que le point représente.
 
     // 🆕 BETA 95.7 (22 jan) : Passer le texte explicite "en attente" à chaque barre
     const nbTotal = etudiants.length;
@@ -1926,14 +1901,9 @@ function genererCarteMetrique(label, valeurSom, valeurPan, afficherSom, afficher
  */
 function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, afficherSom, afficherPan, correlation = null, texteAttente = '', nbTotal = 0) {
 
-    // Dégradé CONTINU, sans mot (#821, 15 oct. 2026) : orange,
-    // jaune, vert, bleu, posés aux positions 0 / 25 / 50 / 75 % de la barre.
-    // ⚠ Ce commentaire portait « 30-49% → 50-64% → 65-79% → ≥80% » : les mêmes
-    // arrondis faits à la main que la légende, et faux comme elle. Les scores
-    // réels des arrêts sont calculés par scoreALaPositionDistribution().
-    // #818 — construite depuis ARRETS_DEGRADE : la chaîne CSS, l'interpolation
-    // de couleur et les libellés de la légende ne peuvent plus diverger.
-    const gradient = `linear-gradient(to right, ${ARRETS_DEGRADE.map(a => `${a.couleur} ${a.position}%`).join(', ')})`;
+    // Les zones de la barre, aux mêmes bornes que les pastilles (30 oct. 2026) : le fond, la couleur de la
+    // moyenne et la place des points les lisent toutes les trois.
+    const zonesBarre = window.zonesDeLaBarre(type);
 
     // Calculer les moyennes pour affichage
     // 🆕 BETA 98.9: Exclure les élèves sansEvaluation du calcul de moyenne P
@@ -1978,13 +1948,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
             if (raiActive) {
                 // Interprétation pédagogique avancée avec patterns
-                const echelles = db.getSync(cle('echellesTemplates'), []);
-                const echelleId = db.getSync('echellePerformanceActive', 'idme-5niv');
-                let echelle = echelles.find(e => e.id === echelleId);
-                if (!echelle) {
-                    echelle = echelles.find(e => e.parDefaut === true) || echelles[0];
-                }
-
+                const echelle = window.reperesPerformance().echelle;
                 interpretation = echelle ? genererInterpretationPerformance(etudiants, echelle) : '';
             }
 
@@ -2051,41 +2015,6 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             </div>
         `;
     }
-    // 🆕 BETA 96: Fonction pour interpoler la couleur du gradient selon la position
-    // Gradient: orange (0%) → jaune (25%) → vert (50%) → bleu (75%+)
-    function obtenirCouleurGradient(positionPourcent) {
-        // Stops du gradient (position en % de la barre → couleur)
-        // #818 — les MÊMES arrêts que la chaîne CSS et la légende, plus un
-        // plateau jusqu'à 100 % : passé le dernier arrêt, la teinte ne bouge plus.
-        const rvb = (hex) => ({
-            r: parseInt(hex.slice(1, 3), 16),
-            g: parseInt(hex.slice(3, 5), 16),
-            b: parseInt(hex.slice(5, 7), 16)
-        });
-        const stops = ARRETS_DEGRADE.map((a) => ({ pos: a.position, ...rvb(a.couleur) }));
-        stops.push({ pos: 100, ...rvb(ARRETS_DEGRADE[ARRETS_DEGRADE.length - 1].couleur) });
-
-        // Trouver les deux stops entre lesquels interpoler
-        let stopInf = stops[0];
-        let stopSup = stops[stops.length - 1];
-        for (let i = 0; i < stops.length - 1; i++) {
-            if (positionPourcent >= stops[i].pos && positionPourcent <= stops[i + 1].pos) {
-                stopInf = stops[i];
-                stopSup = stops[i + 1];
-                break;
-            }
-        }
-
-        // Interpolation linéaire
-        const range = stopSup.pos - stopInf.pos;
-        const t = range > 0 ? (positionPourcent - stopInf.pos) / range : 0;
-        const r = Math.round(stopInf.r + t * (stopSup.r - stopInf.r));
-        const g = Math.round(stopInf.g + t * (stopSup.g - stopInf.g));
-        const b = Math.round(stopInf.b + t * (stopSup.b - stopInf.b));
-
-        return `rgb(${r}, ${g}, ${b})`;
-    }
-
     // Note: valeursHTML sera généré plus tard avec la couleur dynamique
 
     // Générer les points pour SOM avec jitter aléatoire
@@ -2111,7 +2040,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
-                const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
+                const positionFinale = positionDansSaZone(position + jitterH, e.valeur, zonesBarre);
                 // Anonymiser le nom si en mode anonymisation
                 const modeActif = db.getSync('modeApplication', 'normal');
                 let nomAffiche;
@@ -2170,7 +2099,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                 const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
-                const positionFinale = Math.max(0, Math.min(position + jitterH, 100));
+                const positionFinale = positionDansSaZone(position + jitterH, e.valeur, zonesBarre);
                 // Anonymiser le nom si en mode anonymisation
                 const modeActif = db.getSync('modeApplication', 'normal');
                 let nomAffiche;
@@ -2255,8 +2184,10 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
         positionMoyenne = positionSurEchelleDistribution(moyenneDecimal);
     }
 
-    // Obtenir la couleur dynamique correspondant à la position dans le gradient
-    const couleurMoyenne = obtenirCouleurGradient(positionMoyenne);
+    // La couleur de la zone où tombe la moyenne
+    const couleurMoyenne = (moyenneAffichee !== null && !tousEnAttente)
+        ? zoneDeLaValeur(zonesBarre, moyenneAffichee / 100).couleur
+        : zonesBarre[zonesBarre.length - 1].couleur;
 
     // HTML de la moyenne positionnée au-dessus de la barre avec couleur dynamique
     let moyennePositionneeHTML = '';
@@ -2277,7 +2208,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             <h4 class="tb-titre-simple" style="margin-bottom: 4px;" data-tooltip="${{A:'tdb-assiduite',C:'tdb-completion',P:'tdb-performance'}[type]}">${label}</h4>
             <div style="position: relative; margin-top: 20px; margin-bottom: ${interpretationFinale ? '8px' : '0'};">
                 ${moyennePositionneeHTML}
-                <div class="barre-indicateur">
+                <div class="barre-indicateur" style="background: ${fondDeLaBarre(zonesBarre)};">
                     <div class="barre-indicateur-overlay"></div>
                     ${svgGauss}
                     ${lignesSOM}

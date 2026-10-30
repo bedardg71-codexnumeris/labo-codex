@@ -61,6 +61,9 @@ const EMPLOIS_CONNUS = {
     // libellé du repère orphelin retiré à la réception (`LIBELLES_REPERES`).
     'js/partage-schemas.js': 1,
     'js/partage-validation.js': 1,
+    // 30 oct. 2026 : `reperesPerformance` lit le CODE posé sur l'échelle, et le transporte quand deux échelles
+    // aux mêmes plages se fondent en une.
+    'js/contexte-qualification.js': 4,
     // `rangDuCode(echelle.seuilMaitrise)` dans `zoneDuCodeDansNiveaux`.
     'js/profil-etudiant-calculs.js': 1,
     // #577 : l'assistant LIT le repère de l'échelle choisie (avertissement si
@@ -104,17 +107,12 @@ describe('#555 (d) · « seuilMaitrise » ne désigne plus que le code de niveau
     });
 
 
-    it('la préférence IDME porte son nom, dans les trois fonctions qui la lisent', () => {
+    it('la préférence IDME a disparu (30 oct. 2026) : plus aucune lecture de `idme.*`, l\'échelle fait foi', () => {
         for (const rel of ['js/profil-etudiant-helpers.js', 'js/profil-etudiant-calculs.js']) {
             const src = lire(rel);
-            // Chaque lecture de la préférence est rangée sous un nom `seuilIdme*`…
-            const lectures = src.match(/const\s+(\w+)\s*=\s*obtenirSeuil\('idme\.(maitrise|developpement|insuffisant)'\)/g) || [];
-            expect(lectures.length, rel + ' : lectures de la préférence IDME').toBeGreaterThan(0);
-            for (const l of lectures) {
-                expect(l, rel).toMatch(/const\s+seuilIdme(Maitrise|Developpement|Insuffisant)\s*=/);
-            }
-            // …et aucun ancien nom nu ne subsiste pour les désigner.
-            expect(src).not.toMatch(/\bconst\s+seuil(Maitrise|Developpement|Insuffisant)\s*=/);
+            expect(src, rel).not.toMatch(/obtenirSeuil\('idme\./);
+            expect(src, rel).not.toMatch(/\bseuilIdme(Maitrise|Developpement|Insuffisant)\b/);
+            expect(src, rel).not.toMatch(/\bconst\s+seuil(Maitrise|Developpement|Insuffisant)\s*=/);
         }
     });
 });

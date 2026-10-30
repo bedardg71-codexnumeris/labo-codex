@@ -169,13 +169,13 @@ const TOOLTIPS = {
     'depist-seuil-direction':
         'Variation minimale de la moyenne d\'un critère, d\'une fenêtre d\'analyse à la précédente (la même, décalée d\'une production), pour afficher une flèche (→ ou ←) après ce critère.',
     'depist-seuil-fragile':
-        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences fréquentes » et « Travaux manquants fréquents » (« très fréquents » sous 60\u00a0%, borne fixe). Dans la liste des étudiant·es, un chiffre sous ce seuil est rouge.',
+        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences très fréquentes » et « Travaux manquants très fréquents ». Dans la liste des étudiant·es, un chiffre sous ce seuil est rouge.',
     'depist-seuil-progression':
         'Différence minimale (%) pour signaler une progression ou une régression entre deux productions. Seuil bas = sensible, seuil élevé = moins sensible.',
     'depist-seuils-interpretation':
         'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). Détermine les alertes du tableau de bord.',
     'depist-seuils-restaurer':
-        'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut (70 / 80 / 85\u00a0%).',
+        'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut.',
     'depist-seuils-visuels':
         'Lignes pointillées et étiquettes des niveaux de ton échelle (ex. : Incomplet, Développement, Maîtrise, Étendu) sur le graphique par critère du profil individuel et sur les trajectoires du Suivi du groupe, en mode Habiletés. Les indices A-C-P (profil et groupe) et la note finale n\'en portent pas : un pourcentage agrégé ne se situe pas dans une échelle de performance.',
 

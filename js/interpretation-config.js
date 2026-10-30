@@ -37,26 +37,22 @@ const SEUILS_PAR_DEFAUT = {
     // Nombre de productions récentes à analyser pour détecter les patterns
     nombreProductionsAnalyse: 3,  // 3 dernières productions (recommandé pour détection précoce)
 
-    // Taxonomie SOLO - Niveaux IDME
-    // Seuils de passage entre les niveaux de compréhension
-    idme: {
-        insuffisant: 0.64,      // < 64% = Incomplet (unistructurel)
-        developpement: 0.75,    // 64-74% = en Développement (multistructurel)
-        maitrise: 0.85          // 75-84% = Maîtrisé (relationnel), ≥85% = Étendu (abstrait)
-    },
-
     // Identification des défis SRPNF
     // Score en dessous duquel un critère est considéré comme un défi
     defiSpecifique: 0.70,  // 70% - Seuil conventionnel ; non validé empiriquement (voir RELECTURE-2026-09-17)
 
-    // Seuils d'interprétation A-C-M (Assiduité, Complétion, Mobilisation)
-    // Utilisés pour classifier les niveaux de performance
+    // Paliers de l'assiduité et de la complétion (décision de Grégoire, 30 oct. 2026). LA source de tous
+    // les signaux de A et de C (`contexte-qualification.js`), réglable dans Labo › Outils d'observation.
     interpretation: {
-        excellent: 0.85,    // ≥85% = Excellent
-        bon: 0.80,          // 80-84% = Bon
-        acceptable: 0.70    // 70-79% = Acceptable, <70% = Fragile/Critique
+        excellent: 0.95,    // ≥ 95 % : « Aucune absence ou presque »
+        bon: 0.90,          // 90-94 % : « Absences rares »
+        acceptable: 0.85    // 85-89 % : « Quelques absences » ; sous 85 %, le palier le plus bas
     }
 };
+
+// La note de passage du collégial. Une seule source, hors de l'objet enregistré : elle n'est pas un
+// réglage, et elle ne se fige donc chez personne.
+const NOTE_DE_PASSAGE = 0.60;
 
 /* ===============================
    FONCTIONS D'ACCÈS AUX SEUILS
@@ -157,12 +153,16 @@ function chargerSeuilsInterpretation() {
     // elle, il serait perdu : les clés plates ne figurent pas dans le modèle.
     const migre = migrerSeuilsPlats(copie);
     const fusion = fusionnerAvecDefauts(copie, SEUILS_PAR_DEFAUT);
+    // 30 oct. 2026 — une clé sortie du modèle reste dans l'objet : c'est le cas de `idme` (0,64 / 0,75 /
+    // 0,85), que plus aucun code ne lit depuis que l'échelle de l'enseignant fait foi pour P. Tarir n'est
+    // pas réparer : on n'efface rien chez l'utilisateur.
+    const valeur = Object.assign({}, copie, fusion.valeur);
     if (!fusion.complete || migre) {
         // Auto-guérison : l'objet stocké manquait de clés ajoutées depuis, ou
         // portait un réglage à plat qu'on vient de rebrancher.
-        db.setSync('seuilsInterpretation', fusion.valeur);
+        db.setSync('seuilsInterpretation', valeur);
     }
-    return fusion.valeur;
+    return valeur;
 }
 
 /**
@@ -189,7 +189,7 @@ function reinitialiserSeuilsInterpretation() {
 
 /**
  * Obtient un seuil spécifique
- * @param {string} chemin - Chemin vers le seuil (ex: 'progressionArtefacts', 'idme.maitrise')
+ * @param {string} chemin - Chemin vers le seuil (ex: 'progressionArtefacts', 'interpretation.bon')
  * @returns {number} - Valeur du seuil
  */
 function obtenirSeuil(chemin) {
@@ -233,6 +233,7 @@ function initialiserModuleInterpretation() {
     window.reinitialiserSeuilsInterpretation = reinitialiserSeuilsInterpretation;
     window.obtenirSeuil = obtenirSeuil;
     window.SEUILS_PAR_DEFAUT = SEUILS_PAR_DEFAUT;
+    window.NOTE_DE_PASSAGE = NOTE_DE_PASSAGE;
 
 }
 

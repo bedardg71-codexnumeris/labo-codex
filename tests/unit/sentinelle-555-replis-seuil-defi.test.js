@@ -122,41 +122,18 @@ describe('#555 lot 2 · le seuil de défi n\'a qu\'une source', () => {
         ).toBe(false);
     });
 
-    it('5 bis. (#551, 13 sept. 2026) les deux seuils idme.* de la suggestion d\'objectif : même séparation, mêmes miroirs', () => {
-        // Le filtre du cas 5 ne visait que `defiSpecifique` : `idme.developpement` et `idme.insuffisant`
-        // (suggererObjectifIntervention) portaient encore l'ancienne forme `: null) || 0.75`, qui écrase un 0
-        // délibéré. Le comportement (un 0 propagé) est éprouvé par la sentinelle #746-#551 ; ceci est le
-        // cliquet de FORME, et le miroir de dernier recours est comparé à la source, jamais codé ici.
-        const config = lireCodeSansCommentaires('js/interpretation-config.js');
+    it('5 bis. (#551, ↻ 30 oct. 2026) la suggestion d\'objectif lit les repères de l\'échelle : plus aucun seuil idme.*, plus aucun repli', () => {
+        // Le comportement (un repère à 0 reste 0) est éprouvé par la sentinelle #746-#551 ; ceci est le cliquet de FORME.
         const code = lireCodeSansCommentaires('js/interventions.js');
-        for (const cle of ['developpement', 'insuffisant']) {
-            const ancienneForme = new RegExp(`\\?\\s*obtenirSeuil\\(\\s*['"]idme\\.${cle}['"]\\s*\\)\\s*:\\s*null\\s*\\)\\s*\\|\\|`);
-            expect(ancienneForme.test(code), `\`idme.${cle}\` : la forme qui confond garde et repli est revenue`).toBe(false);
-            const repliDirect = new RegExp(`obtenirSeuil\\(\\s*['"]idme\\.${cle}['"]\\s*\\)\\s*\\|\\|\\s*[0-9]`);
-            expect(repliDirect.test(code), `\`idme.${cle}\` : un repli local masque la source`).toBe(false);
-            const garde = code.match(new RegExp(`typeof\\s+obtenirSeuil\\s*===\\s*['"]function['"]\\s*\\?\\s*obtenirSeuil\\(\\s*['"]idme\\.${cle}['"]\\s*\\)\\s*:\\s*([0-9.]+)`));
-            expect(garde, `la garde de \`idme.${cle}\` a disparu ou changé de forme`).not.toBeNull();
-            const source = config.match(new RegExp(`${cle}:\\s*([0-9.]+)`));
-            expect(parseFloat(garde[1]), `la garde de \`idme.${cle}\` diverge de SEUILS_PAR_DEFAUT`).toBe(parseFloat(source[1]));
-        }
+        expect(code).not.toMatch(/obtenirSeuil\(\s*['"]idme\./);
+        expect(code).toMatch(/window\.bornesDepistage\(\)/);
+        expect(code).not.toMatch(/bornes\.(bas|maitrise)\s*\|\|/);
     });
 
-    it('6. les deux autres valeurs de la table miroir concordent avec la source', () => {
-        // `idme.insuffisant` et `idme.developpement` concordaient déjà au moment
-        // du chantier : ce cas les EMPÊCHE de diverger à leur tour, sans rien
-        // corriger aujourd'hui.
+    it('6. la table miroir ne porte plus que le seuil de défi : idme.* est sorti du modèle et du miroir', () => {
         const config = lireCodeSansCommentaires('js/interpretation-config.js');
         const code = lireCodeSansCommentaires('js/pratiques/pratique-pan-standards.js');
-
-        for (const cle of ['insuffisant', 'developpement']) {
-            const attendu = config.match(new RegExp(`${cle}:\\s*([0-9.]+)`));
-            const miroir = code.match(new RegExp(`['"]idme\\.${cle}['"]\\s*:\\s*([0-9.]+)`));
-            expect(attendu, `\`idme.${cle}\` a disparu de SEUILS_PAR_DEFAUT`).not.toBeNull();
-            expect(miroir, `\`idme.${cle}\` a disparu de la table miroir`).not.toBeNull();
-            expect(
-                parseFloat(miroir[1]),
-                `le miroir de \`idme.${cle}\` diverge de SEUILS_PAR_DEFAUT`
-            ).toBe(parseFloat(attendu[1]));
-        }
+        expect(config).not.toMatch(/\bidme\s*:/);
+        expect(code).not.toMatch(/['"]idme\./);
     });
 });

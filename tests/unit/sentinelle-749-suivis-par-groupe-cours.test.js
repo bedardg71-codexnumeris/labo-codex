@@ -116,7 +116,7 @@ function monter(store) {
     const document = fauxDocument(elements);
     const notifs = [];
     const exclu = (e) => !!(e && ['inactif', 'décrochage', 'abandon'].includes(e.statut));
-    const win = { addEventListener() {}, trimestreActif: 'test', obtenirTrimestreId: () => 'test', cle, db, ARRETS_DEGRADE: null };
+    const win = { addEventListener() {}, trimestreActif: 'test', obtenirTrimestreId: () => 'test', cle, db };
     const globaux = {
         document, db, cle,
         echapperHtml: (s) => String(s == null ? '' : s),
@@ -133,7 +133,10 @@ function monter(store) {
         setTimeout: (f) => 0, requestAnimationFrame: (f) => 0,
     };
     for (const [k, v] of Object.entries(globaux)) if (!(k in win)) win[k] = v;
-    chargerAvecInterne('js/contexte-qualification.js', globaux, win, []);   // #828 (16 sept.) : le bouton « A ou C < 70% » lit la borne du profil
+    // 30 oct. 2026 : les seuils (interpretation-config.js) et leurs lecteurs (contexte-qualification.js), les VRAIS.
+    chargerAvecInterne('js/interpretation-config.js', globaux, win, []);
+    globaux.obtenirSeuil = win.obtenirSeuil;
+    chargerAvecInterne('js/contexte-qualification.js', globaux, win, []);   // #828 (16 sept.) : le bouton « A ou C < … » lit le palier le plus bas
     chargerAvecInterne('js/tableau-bord-apercu.js', globaux, win, INTERNES);
     return { win, store, journal, elements, notifs, i: win.__audit['tableau-bord-apercu.js'] };
 }
@@ -294,11 +297,11 @@ describe('#749 · d/e — les refus de l\'ajout', () => {
 // f · « Filtrer » filtre sur ce qui est montré
 // ---------------------------------------------------------------------------
 describe('#749 · f — le filtre P écarte un P non constructible', () => {
-    it('un P affiché « — » n\'est ni « < 65 % » ni urgent', () => {
+    it('un P affiché « — » n\'est ni sous la borne ni urgent', () => {
         const b = monter(storeBase());
         b.i._tousEtudiantsEnrichis = [
             { da: '2000001', nom: 'Assidu', A: 90, C: 100, P: 80, M: 95, niveau: 1, suivi: null, noteConstructible: true },
-            { da: '2000002', nom: 'Absent', A: 40, C: 100, P: 63, M: 70, niveau: 1, suivi: null, noteConstructible: true },
+            { da: '2000002', nom: 'Absent', A: 40, C: 100, P: 58, M: 70, niveau: 1, suivi: null, noteConstructible: true },   // sous la note de passage : le banc n'a pas d'échelle
             { da: '2000003', nom: 'Silence', A: 90, C: 0, P: 0, M: 45, niveau: 1, suivi: null, noteConstructible: false },
         ];
         b.i._filtresActifs = ['P'];

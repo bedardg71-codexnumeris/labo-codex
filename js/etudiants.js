@@ -335,7 +335,7 @@ function calculerPerformance(da) {
  * @returns {string} - Code couleur CSS
  */
 function obtenirCouleurPerformance(performance) {
-    return obtenirCouleurSelonSeuils(performance);
+    return window.obtenirCouleurPerformanceSelonEchelle(performance);
 }
 
 // calculerCorrelationPearson → déplacé dans indices.js (#206)
@@ -1545,15 +1545,6 @@ function mettreAJourStatistiques(etudiants) {
     // Cette fonction ne fait plus rien car les cartes métriques ont été retirées (Beta 90)
     // Elle est conservée pour éviter les erreurs si appelée ailleurs dans le code
     return;
-}
-
-/**
- * Obtient la couleur appropriée pour la mobilisation
- * @param {number} mobilisation - Valeur de mobilisation (0-1)
- * @returns {string} - Code couleur hexadécimal
- */
-function obtenirCouleurMobilisation(mobilisation) {
-    return obtenirCouleurSelonSeuils(mobilisation * 100);
 }
 
 /**

@@ -7275,6 +7275,8 @@ const PACK_DEMARRAGE = {
   "echellesTemplates": [
     {
       "id": "ECH_DEMO_1759264511178",
+      "seuilSuffisance": "D",
+      "seuilMaitrise": "M",
       "nom": "IDME et niv 0",
       "estDemo": true,
       "niveaux": [
@@ -7334,6 +7336,8 @@ const PACK_DEMARRAGE = {
     },
     {
       "id": "ECH_DEMO_1762273745231",
+      "seuilSuffisance": "D",
+      "seuilMaitrise": "M",
       "nom": "IDME 4 niv",
       "estDemo": true,
       "niveaux": [

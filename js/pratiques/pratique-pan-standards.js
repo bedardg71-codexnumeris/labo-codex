@@ -389,8 +389,8 @@ class PratiquePANStandards {
      * Identifie le pattern d'apprentissage de l'étudiant
      *
      * Patterns PAN :
-     * - Difficulté persistante : Performance < 64% (unistructurel)
-     * - Difficulté émergente : Performance < 75% ET a un défi
+     * - Difficulté persistante : sous le repère de suffisance de l'échelle
+     * - Difficulté émergente : sous le repère de maîtrise ET a un défi
      * - Défi spécifique : Performance acceptable mais a un défi récurrent
      * - Stable : Pas de défi ou performance maîtrisée
      *
@@ -908,27 +908,8 @@ class PratiquePANStandards {
      * @returns {string} 'Difficulté persistante'|'Difficulté émergente'|'Défi spécifique'|'Stable'
      */
     _identifierPatternActuel(performancePAN3, aUnDefi) {
-        // Seuils IDME configurables
-        const seuilInsuffisant = this._obtenirSeuil('idme.insuffisant') || 0.64;
-        const seuilDeveloppement = this._obtenirSeuil('idme.developpement') || 0.75;
-
-        // Difficulté persistante : < 64% (unistructurel)
-        if (performancePAN3 < seuilInsuffisant) {
-            return 'Difficulté persistante';
-        }
-
-        // Difficulté émergente : < 75% (multistructurel) ET a un défi
-        if (performancePAN3 < seuilDeveloppement && aUnDefi) {
-            return 'Difficulté émergente';
-        }
-
-        // Défi spécifique : Performance acceptable mais défi récurrent
-        if (aUnDefi) {
-            return 'Défi spécifique';
-        }
-
-        // Stable : Pas de défi majeur
-        return 'Stable';
+        // Une seule règle : celle de la carte RàI (30 oct. 2026), qui lit les repères de l'échelle.
+        return window.identifierPatternActuel(performancePAN3, aUnDefi);
     }
 
     /**
@@ -1102,12 +1083,10 @@ class PratiquePANStandards {
         // dans `SEUILS_PAR_DEFAUT` (`interpretation-config.js`). Cette table est
         // un MIROIR de la source, atteignable seulement quand `obtenirSeuil` n'est
         // pas chargée (cas de test) : elle doit lui être identique, jamais une
-        // seconde convention. Les deux autres valeurs concordaient déjà.
+        // seconde convention.
         // Verrouillé par la sentinelle #555 des replis.
         const seuilsDefaut = {
-            'defiSpecifique': 0.70,
-            'idme.insuffisant': 0.64,
-            'idme.developpement': 0.75
+            'defiSpecifique': 0.70
         };
 
         // Un seuil inconnu est une ERREUR d'appel, pas un cas à deviner : rendre

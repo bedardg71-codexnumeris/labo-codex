@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
+import { monter, storeBase, elementDom, echelleAReperes, globauxEchelle, copieSurEchelle } from './_helpers/bac-suivi.js';
 
 // SENTINELLE #746 (moitié restante) ET #551 (garde seule) — consigne du 13 septembre 2026.
 //
@@ -96,32 +96,42 @@ describe('#746 · contre-épreuve sur un écran réel : le compteur de la Liste 
     });
 });
 
-describe('#551 · un seuil IDME réglé à zéro reste à zéro dans la suggestion d\'objectif', () => {
-    const DEFAUTS = { 'idme.insuffisant': 0.64, 'idme.developpement': 0.75, 'idme.maitrise': 0.85, defiSpecifique: 0.70 };
-    const suggestion = ({ seuils, moyenne }) => {
-        const globaux = Object.assign({}, GLOBAUX_INTERVENTIONS, { calculerMoyennesCriteres: () => ({ structure: moyenne }), obtenirSeuil: seuils ? (n) => seuils[n] : undefined });
-        const b = monter(storeBase(), { modules: ['js/interventions.js'], globaux,
+describe('#551, ↻ 30 oct. 2026 · un repère à zéro reste à zéro dans la suggestion d\'objectif', () => {
+    const suggestion = ({ echelle, moyenne }) => {
+        const store = storeBase();
+        if (echelle) store.test_evaluationsSauvegardees = [copieSurEchelle(echelle)];
+        const globaux = Object.assign({}, GLOBAUX_INTERVENTIONS, { calculerMoyennesCriteres: () => ({ structure: moyenne }) }, echelle ? globauxEchelle(echelle) : {});
+        delete globaux.obtenirSeuil;
+        const b = monter(store, { modules: ['js/interventions.js'], globaux,
             elements: { objectifVise: elementDom({ value: '' }) },
             selecteurs: { '#listeEtudiantsIntervention input[type="checkbox"]:checked': [elementDom({ value: '2000001', checked: true })], '.critere-cible-cb:checked': [elementDom({ value: 'Structure', checked: true })] } });
         b.win.suggererObjectifIntervention('I');
         return b.document.getElementById('objectifVise').value;
     };
 
-    it('(a) obtenirSeuil ABSENTE : la garde tient, et les valeurs de dernier recours sont celles de SEUILS_PAR_DEFAUT', () => {
-        expect(suggestion({ seuils: null, moyenne: 0.5 })).toBe('Amener Structure à 64\u00A0%');
-        expect(suggestion({ seuils: null, moyenne: 0.7 })).toBe('Amener Structure à 75\u00A0%');
+    it('(a) sans échelle : la note de passage seule, jamais un 64 ni un 75 d\'autrefois', () => {
+        expect(suggestion({ echelle: null, moyenne: 0.5 })).toBe('Amener Structure à 60\u00A0%');
+        expect(suggestion({ echelle: null, moyenne: 0.7 })).toBe('Stabiliser Structure au-dessus de 60\u00A0%');
     });
-    it('(b) idme.insuffisant réglé à 0 : aucun élève n\'est sous ce seuil — la suggestion vise 75 %, pas 64 %', () => {
-        expect(suggestion({ seuils: Object.assign({}, DEFAUTS, { 'idme.insuffisant': 0 }), moyenne: 0.5 })).toBe('Amener Structure à 75\u00A0%');
+    it('(a) avec repères : le prochain repère de l\'échelle', () => {
+        const echelle = echelleAReperes({ plages: [['I', 0, 49], ['D', 50, 69], ['M', 70, 89], ['E', 90, 100]] });
+        expect(suggestion({ echelle, moyenne: 0.4 })).toBe('Amener Structure à 50\u00A0%');
+        expect(suggestion({ echelle, moyenne: 0.6 })).toBe('Amener Structure à 70\u00A0%');
+        expect(suggestion({ echelle, moyenne: 0.8 })).toBe('Stabiliser Structure au-dessus de 70\u00A0%');
     });
-    it('(b) idme.developpement réglé à 0 : le seuil est à 0 % — la suggestion le dit, sans le remplacer par 75 %', () => {
-        // Sous l'ancienne forme `|| 0.75`, la moyenne 0,7 retomberait sous 75 % : « Amener Structure à 75 % ». Ce cas
-        // distingue donc toujours le correctif #551 de l'ancien code, lettres retirées ou non.
-        expect(suggestion({ seuils: Object.assign({}, DEFAUTS, { 'idme.developpement': 0 }), moyenne: 0.7 })).toBe('Stabiliser Structure au-dessus de 0\u00A0%');
+    it('(b) le repère de suffisance sur un niveau qui part de 0 : aucun élève n\'est dessous — la suggestion vise la maîtrise', () => {
+        const echelle = echelleAReperes({ plages: [['D', 0, 74], ['M', 75, 100]] });
+        expect(suggestion({ echelle, moyenne: 0.5 })).toBe('Amener Structure à 75\u00A0%');
+    });
+    it('(b) le repère de maîtrise sur un niveau qui part de 0 : le seuil est à 0 % — la suggestion le dit, sans le remplacer', () => {
+        const echelle = echelleAReperes({ plages: [['M', 0, 100]], suffisance: undefined });
+        delete echelle.seuilSuffisance;
+        expect(suggestion({ echelle, moyenne: 0.7 })).toBe('Stabiliser Structure au-dessus de 0\u00A0%');
     });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// (Le 30 oct. 2026, les seuils idme.* sont retirés : les mutations #551 ci-dessous visaient leur forme d'alors.)
 // JOURNAL DES BREAK-TESTS — 13 septembre 2026. Mutations une à une sur js/interventions.js (chaque mutation
 // comptée « posée » avant lecture), ce banc + sentinelle-555 relancés, fichier restauré à empreinte SHA-256 identique.
 //   M1 #746 : retour au filtre par DA seul                               → 2 rouges (la fonction, le compteur de la Liste)

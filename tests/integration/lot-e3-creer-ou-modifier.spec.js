@@ -404,7 +404,7 @@ test('(R-a) seuils mal ordonnés : « Non enregistré – Seuils : … », les c
     const avant = await page.evaluate(() => JSON.stringify(db.getSync('seuilsInterpretation', null)));
     const valeurs = await page.evaluate(() => ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon'].map(id => document.getElementById(id).value));
     await page.evaluate(() => { window.__toasts = []; });
-    await changer(page, '#v2-seuil-fragile', '89');
+    await changer(page, '#v2-seuil-fragile', String(Number(valeurs[1]) + 1));   // au-dessus du palier suivant
     expect(await temoinEchec(page)).toBe('Non enregistré – Seuils : les seuils doivent aller du plus bas au plus haut (Fragile < Acceptable < Bon).');
     expect(await temoinSucces(page)).toBe(false);
     expect(await page.evaluate(() => ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon'].map(id => document.getElementById(id).value))).toEqual(valeurs);

@@ -20,8 +20,8 @@
  * À la main, pour les trois variantes : P1-P3 sont les trois copies lues partout → C = 3 / 4 = 75 ;
  * IPB : trois artefacts, score actuel P3 (0,75) ; Rigueur = (0,65 + 0,75 + 0,75) / 3 = 0,7167 (P2 compte :
  * sans elle, 0,70) ; performance des 3 derniers = (0,80 + 0,70 + 0,60) / 3 = 0,70 ; note du cours sans P4
- * = (60·20 + 70·20 + 80·30) / 70 = 71 ; RàI : 0,71 < 0,75 et 0,70 dans [0,64 ; 0,75[ avec un défi → niveau 2
- * « Difficulté émergente » ; l'échelle commune se résout (E0), sans raison.
+ * = (60·20 + 70·20 + 80·30) / 70 = 71 ; RàI : le banc est sommatif, sans échelle pour la note (30 oct. 2026), 0,71 et
+ * 0,70 sont au-dessus de la note de passage, avec un défi → niveau 2 « Défi spécifique » ; l'échelle commune se résout (E0), sans raison.
  *
  * BREAK-TESTS (16 sept. 2026, journal dans RELAIS.md) : voir le rapport du lot.
  *
@@ -175,7 +175,7 @@ function attenduTroisCopies(l) {
     expect(l.rigueur).toBe(r3((0.65 + 0.75 + 0.75) / 3));             // 0,717 — P2 (sans texte) est dedans ; sans elle : 0,70
     expect(l.structure).toBe(r3((0.65 + 0.65 + 0.75) / 3));
     expect([l.performance3, l.nbArtefacts]).toEqual([0.7, 3]);        // 80, 70, 60
-    expect(l.rai).toEqual({ niveau: 2, pattern: 'Difficulté émergente' });
+    expect(l.rai).toEqual({ niveau: 2, pattern: 'Défi spécifique' });
     expect([l.echelleCommune, l.raisonCommune]).toEqual(['E0', null]);
 }
 

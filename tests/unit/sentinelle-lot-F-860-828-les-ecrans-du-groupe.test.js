@@ -2,11 +2,11 @@
  * SENTINELLE LOT F — « Les écrans du groupe » (#860, #828), cadrage « Les règles du dépistage »
  * du 16 septembre 2026, tranché par Grégoire à 17 h 18.
  *
- * #828 — le filtre du Suivi du groupe › Détails retient l'élève dont l'assiduité OU la complétion
- * est sous la borne « critique » du profil (`BORNES_MOBILISATION.critique`, contexte-qualification.js),
- * lue à l'appel : le libellé du bouton (« A ou C < 70% ») et la règle suivent la borne. Un A ou un C
- * absent (null) n'est pas « sous 70 » (G-4, #749 : on filtre sur ce qui est MONTRÉ). Avant : la
- * moyenne M = (A + C) / 2 < 65, un nombre qu'aucun écran n'affichait.
+ * #828, ↻ 30 oct. 2026 — le filtre du Suivi du groupe › Détails retient l'élève dont l'assiduité OU la
+ * complétion est au palier le plus bas (`borneBasseAssiduiteCompletion`, contexte-qualification.js),
+ * lu à l'appel aux champs de Labo › Outils d'observation : le libellé du bouton et la règle suivent le
+ * réglage. Un A ou un C absent (null) n'est pas sous la borne (G-4, #749 : on filtre sur ce qui est
+ * MONTRÉ). Avant le 16 sept. : la moyenne M = (A + C) / 2 < 65, un nombre qu'aucun écran n'affichait.
  *
  * #860 — plus aucune zone de niveaux (lignes de seuil, lettres de la marge) sur les courbes du
  * groupe (indice P compris) ni sur les trajectoires en mode Note finale : un pourcentage agrégé
@@ -28,15 +28,16 @@ const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
 const sansCommentaires = (code) => code.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
 
 /* =============================================================================================
-   A · #828 — le filtre « A ou C < 70% »
+   A · #828 — le filtre « A ou C < … », ici réglé à 70 pour lire ses cas
    ============================================================================================= */
 const INTERNES_TB = ['appliquerFiltres', '_filtresActifs', '_tousEtudiantsEnrichis', '_etudiantsPrioritaires', 'genererPanneauSuiviEtudiants'];
 const GLOBAUX_TB = {
     calculerTousLesIndices: () => ({ A: 90, C: 100, P: 80, noteConstructible: true }),
     determinerNiveauRaiPedagogique: () => ({ niveau: 1, pattern: 'Stable' }), diagnostiquerSuiviApprentissage: () => null,
     obtenirTypePratiqueActive: () => 'standards', obtenirTermeProduction: () => 'artefact', accordTermeProduction: (n) => n + ' artefact(s)',
-    obtenirLabelNoteFinale: () => 'Note', obtenirCodePratique: () => 'STD', obtenirSeuil: () => 0.7
+    obtenirLabelNoteFinale: () => 'Note', obtenirCodePratique: () => 'STD'
 };
+const reglage = (acceptable) => ({ interpretation: { excellent: 0.95, bon: 0.90, acceptable } });
 // Un élève par cas de la consigne ; P et le reste identiques pour tous, seuls A et C varient.
 const eleve = (da, nom, A, C) => ({ da, nom, prenom: 'X', pattern: 'Stable', niveau: 1, A, C, P: 80, noteConstructible: true, scoreMulti: null, suivi: null });
 const ELEVES = [
@@ -56,7 +57,7 @@ const ELEVES = [
     eleve('3000010', 'Abel', 69, 95)
 ];
 function monterSuivi() {
-    const b = monter(storeBase(), { modules: ['js/contexte-qualification.js', { chemin: 'js/tableau-bord-apercu.js', internes: INTERNES_TB }], globaux: GLOBAUX_TB });
+    const b = monter(Object.assign(storeBase(), { seuilsInterpretation: reglage(0.70) }), { modules: ['js/contexte-qualification.js', { chemin: 'js/tableau-bord-apercu.js', internes: INTERNES_TB }], globaux: GLOBAUX_TB });
     const i = b.interne['tableau-bord-apercu.js'];
     i._tousEtudiantsEnrichis = ELEVES.map((e) => Object.assign({}, e));
     return { b, i };
@@ -68,10 +69,12 @@ function boutons(b, i) {
     return b.document.getElementById('suivi-tri-boutons').innerHTML;
 }
 
-describe('A · #828 — le filtre retient l\'élève dont l\'assiduité OU la complétion est sous la borne critique', () => {
-    it('A1 · la borne vient du profil, non recopiée : 0,7 dans contexte-qualification.js', () => {
+describe('A · #828 — le filtre retient l\'élève dont l\'assiduité OU la complétion est au palier le plus bas', () => {
+    it('A1 · la borne vient du réglage, non recopiée', () => {
         const { b } = monterSuivi();
-        expect(b.win.BORNES_MOBILISATION.critique).toBe(0.7);
+        expect(b.win.borneBasseAssiduiteCompletion()).toBe(70);
+        b.store.seuilsInterpretation = reglage(0.85);
+        expect(b.win.borneBasseAssiduiteCompletion()).toBe(85);
     });
 
     it('A2 · A 65 / C 90 retenu, A 90 / C 65 retenu, A 60 / C 80 retenu ; A 72 / C 72 écarté ; A ou C absent écarté — tri par le pire indice', () => {
@@ -84,18 +87,18 @@ describe('A · #828 — le filtre retient l\'élève dont l\'assiduité OU la co
         const { b, i } = monterSuivi();
         expect(boutons(b, i)).toContain('data-tri="M">A ou C < 70\u00A0%<');
         expect(boutons(b, i)).not.toContain('A+C');
-        b.win.BORNES_MOBILISATION.critique = 0.6;   // mute la borne
+        b.store.seuilsInterpretation = reglage(0.60);   // déplace le réglage
         expect(boutons(b, i)).toContain('data-tri="M">A ou C < 60\u00A0%<');
         expect(filtrer(i, ['M'])).toEqual(['Zed', 'A55C90']);   // 60 n'est pas < 60 ; 65 non plus
     });
 
-    it('A4 · le filtre P (G-4, #749) ne dépend pas de la borne, et le code ne recopie ni 65 ni 70 pour M', () => {
-        const { b, i } = monterSuivi();
-        delete b.win.BORNES_MOBILISATION;   // un banc qui n'active que P n'a pas besoin du profil
-        expect(filtrer(i, ['P'])).toEqual([]);   // tous les P valent 80
+    it('A4 · le filtre P (G-4, #749) ne dépend pas du réglage de A et C, et le code ne recopie aucune borne', () => {
+        const { i } = monterSuivi();
+        expect(filtrer(i, ['P'])).toEqual([]);   // tous les P valent 80 ; sans échelle, la borne est la note de passage
         const code = sansCommentaires(lire('js/tableau-bord-apercu.js'));
-        expect(code).not.toMatch(/e\.M\b|65 - e\.M|A\+C < 65|< 70%'/);   // `65 - e.P` reste : le filtre P a sa propre borne (G-4)
-        expect(code).toMatch(/window\.BORNES_MOBILISATION\.critique/);
+        expect(code).not.toMatch(/e\.M\b|\b65 - e\.|A\+C < 65|< 70%'|e\.P >= \d/);
+        expect(code).toMatch(/window\.borneBasseAssiduiteCompletion\(\)/);
+        expect(code).toMatch(/window\.borneBassePerformance\(/);
     });
 });
 

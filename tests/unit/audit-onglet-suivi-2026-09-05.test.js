@@ -491,7 +491,8 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         // À la main : Assidu, P4 en brouillon. Note du cours sans P4 = (60·20 + 70·20 + 80·30) / 70 = 71,43 → 71.
         // ↻ Valeur D'APRÈS #737 (lot A du 16 sept. 2026) : un brouillon ne compte nulle part. C sommatif = 3 remises sur
         // 4 productions évaluées (P4 l'est par les autres) = 75 ; la fenêtre du dépistage (3 derniers) lit 80, 70, 60 → 0,70 ;
-        // le RàI pédagogique croise P = 0,71 (< 0,75) et 0,70 (< 0,75, ≥ 0,64) → niveau 2, « Difficulté émergente ».
+        // le RàI croise P = 0,71 et 0,70 : le banc est sommatif, sans échelle pour la note (30 oct. 2026) → seule la note de
+        // passage borne le bas, aucun repère de maîtrise ; un défi → niveau 2, « Défi spécifique ».
         // Avant : C 100 (« noteFinale !== null » suffisait), 90/80/70 → 0,80, niveau 2 « Stable ».
         const jeu = jeuBase(); jeu.evaluations.find(e => e.id === 'E1P4').verrouillee = false;
         const b = monter(jeu); b.calculerTout();
@@ -503,7 +504,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(p.C).toBe(75);                     // le brouillon n'est PAS remis pour C — avant 100
         expect(p.performance3).toBe(0.7);         // ni un artefact du dépistage — avant 0,80 (90, 80, 70)
         expect(p.nbArtefacts).toBe(3);
-        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Difficulté émergente' });   // avant : « Stable »
+        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Défi spécifique' });   // avant #737 : « Stable » ; du 16 sept. au 30 oct. : « Difficulté émergente » (0,70 < 0,75)
     });
 
     it('B3 · une REPRISE : la note du cours remplace, et le dépistage aussi (#730 ; avant, il comptait l\'originale ET la reprise)', () => {
@@ -525,7 +526,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(p.performance3).toBe(0.65);                           // 50, 75, 70 — avant 0,60 (50, 75, 55 : l'originale remplacée était dedans)
         expect(ipb.historiqueComplet.length).toBe(4);                // quatre artefacts pour quatre productions — avant 5
         expect(r3(moy.structure)).toBe(r3((0.75 + 0.65 + 0.75 + 0.40) / 4)); // 0,6375 — avant 0,59 (l'originale pesait)
-        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Difficulté émergente' });   // avant : niveau 3 « Difficulté persistante » (0,60 < 0,64)
+        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Défi spécifique' });   // avant #730 : niveau 3 (0,60 < 0,64) ; sommative sans repère depuis le 30 oct. : aucun test « sous la maîtrise »
     });
 
     it('B4 · un « non remis » enregistré avec 0 : écarté par le C sommatif COMME par le C des snapshots — valeur d\'après #738 (constat d\'origine : C sommatif 25)', () => {
@@ -598,9 +599,10 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
     });
 
 
-    it('C4 · une échelle 60 / 75 / 90 : 62 est « D » sur l\'échelle, « Difficulté persistante » niveau 3 pour le RàI', () => {
-        // À la main : trois travaux à 62, critères « D » (valeur 67, sous le seuil de défi 0,70 → défis). P 0,62 < idme.insuffisant 0,64
-        // → niveau 3. Sur son échelle, 62 tombe dans D (60-74), le deuxième palier sur quatre.
+    it('C4 · une échelle 60 / 75 / 90 : 62 est « D » sur l\'échelle, et le RàI ne le lit plus sous 64 (30 oct. 2026 : le constat d\'origine, deux réponses, est fermé)', () => {
+        // À la main : trois travaux à 62, critères « D » (valeur 67, sous le seuil de défi 0,70 → défis). Constat d'origine :
+        // P 0,62 < idme.insuffisant 0,64 → niveau 3, alors que 62 tombe dans D. Le banc est sommatif : la note n'a pas d'échelle,
+        // seule la note de passage borne le bas ; 62 n'est donc pas sous la borne → niveau 2, le défi reste nommé.
         const jeu = jeuBase();
         jeu.echelles = [clone(E60)]; jeu.grilles[0].echelleId = 'E60'; jeu.productions.forEach(p => { p.echelleId = 'E60'; });
         jeu.evaluations = ['P1', 'P2', 'P3'].map(pid => ev('E1' + pid, DA.ASSIDU, pid, 62, 'D', ['D', 'D', 'D'], { echelleId: 'E60' }));
@@ -609,7 +611,7 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
         const situe = b.win.situerPourcentageDansEchelle(62, E60);
         noter('C4', { rai: p.rai, P: p.P, niveauEchelle: situe && situe.code, suivi: p.suivi });
         expect(situe.code).toBe('D');
-        expect(p.rai).toMatchObject({ niveau: 3, pattern: 'Difficulté persistante' });
+        expect(p.rai).toMatchObject({ niveau: 2, pattern: 'Défi spécifique' });
         expect(p.suivi).toMatchObject({ ipb: 3, diagnostic: 'Difficulté persistante' });   // 0,67 < 0,70 : les fondations sont « en défi » sur cette échelle
     });
 
@@ -865,10 +867,10 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
         expect(res.setSync).toBe(2);
     });
 
-    it('E5 · le bilan avant/après traduisait une moyenne 0-1 en lettre par 0,85 / 0,75 / 0,65 écrits en clair — depuis le lot 5 du cadrage 11, par les seuils configurés (valeur d\'après ; le comportement : audit du 6, I-5, et la sentinelle du lot)', () => {
+    it('E5 · le bilan avant/après traduisait une moyenne 0-1 en lettre par 0,85 / 0,75 / 0,65 écrits en clair — depuis le 30 oct. 2026, par l\'échelle des copies du groupe (valeur d\'après ; le comportement : audit du 6, I-5, et la sentinelle du lot)', () => {
         const src = readFileSync(path.join(RACINE, 'js/interventions.js'), 'utf8');
         const enClair = /(avant|apres) >= 0\.(85|75|65) \?/.test(src);
-        const parSeuils = /obtenirNiveauIDMEDepuisPourcentage\(pct\)/.test(src);
+        const parSeuils = /situerPourcentageDansEchelle\(pct, echelleDuBilan\)/.test(src);
         noter('E5', { enClair, parSeuils });
         expect(enClair).toBe(false);   // constat d'origine : true
         expect(parSeuils).toBe(true);
@@ -894,10 +896,11 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
    F · SUIVI DU GROUPE ET LISTE — les agrégats
    ============================================================================================= */
 describe('F · les nombres du groupe sont-ils la somme des profils', () => {
-    it('F1 · le panneau du Suivi du groupe enrichit chaque élève avec les MÊMES fonctions que le profil ; les filtres P < 65 et « A ou C < 70 » retiennent qui on attend', () => {
+    it('F1 · le panneau du Suivi du groupe enrichit chaque élève avec les MÊMES fonctions que le profil ; les filtres sur P et sur A ou C retiennent qui on attend', () => {
         // À la main : Assidu (A 100, C 100, P 77, niveau 1), Absent (40, 100, 63, niveau 3), Silence (100, 0, P non constructible, niveau 3).
-        // Filtre P < 65 : Absent (63) seulement — depuis #749 (11 sept.), Silence (P non constructible, affiché « — ») est ÉCARTÉ.
-        // Filtre « A ou C < 70 » (#828, lot F du 16 sept.) : Silence (C 0) puis Absent (A 40), le pire indice d'abord.
+        // Filtre sur P : le banc est sommatif, sans échelle, la borne est la note de passage (30 oct. 2026) → personne : Absent est
+        // à 63 ; depuis #749 (11 sept.), Silence (P non constructible, affiché « — ») est ÉCARTÉ. Avec des repères : la sentinelle du lot.
+        // Filtre sur A ou C (#828, lot F du 16 sept.), au palier le plus bas : Silence (C 0) puis Absent (A 40), le pire indice d'abord.
         // Avant le 16 : M = (A + C) / 2 < 65 → Silence (50) seulement (Absent : 70) ; M n'est plus calculé.
         const b = monter(jeuBase()); b.calculerTout();
         b.win.calculerEtudiantsPrioritaires();
@@ -912,7 +915,7 @@ describe('F · les nombres du groupe sont-ils la somme des profils', () => {
             { da: DA.ABSENT, A: 40, C: 100, P: 63, niveau: 3, pattern: 'Difficulté persistante', ipb: 3 },
             { da: DA.SILENCE, A: 100, C: 0, P: 0, niveau: 3, pattern: 'Non-participation', ipb: null }
         ]);
-        expect(filtreP).toEqual([DA.ABSENT]);
+        expect(filtreP).toEqual([]);
         expect(filtreM).toEqual([DA.SILENCE, DA.ABSENT]);
     });
 

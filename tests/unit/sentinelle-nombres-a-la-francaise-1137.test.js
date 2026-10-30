@@ -71,6 +71,8 @@ const LISTE_BLANCHE = [
       motif: 'la largeur CSS d’une colonne de niveau dans l’aperçu du PDF (`width: ${largeurNiveau}`), pas un nombre lu' },
     { fichier: 'js/export-pdf.js', extrait: ": `${((100 - 28) / nbNiveaux).toFixed(1)}%`",
       motif: 'la même largeur CSS, sans cartouche longue' },
+    { fichier: 'js/tableau-bord-apercu.js', extrait: "return `${z.couleur} ${de}%, ${z.couleur} ${a}%`;",
+      motif: 'les arrêts CSS du fond d’une barre de l’Aperçu (`fondDeLaBarre`), des positions sur la barre, pas un nombre lu' },
     { fichier: 'js/materiel-creation.js', extrait: "' à ' + String(n.max.valeur).trim() + ' %)'",
       motif: 'l’écho d’une saisie : les bornes telles que la personne les a tapées dans le matériel (« 64,99 », « 85 % »), une chaîne, pas un nombre' }
 ];

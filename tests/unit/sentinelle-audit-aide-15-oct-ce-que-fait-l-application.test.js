@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { JSDOM } from 'jsdom';
+import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -170,7 +172,7 @@ describe('Les patterns : toutes les énumérations nomment ceux que le code rend
     }
 });
 
-describe('Les seuils A et C : une seule table, bornes et mots lus à la source', () => {
+describe('Les seuils A et C : une seule table, bornes et mots lus à la source (quatre paliers, 30 oct. 2026)', () => {
     const QUALIF = lire('js/contexte-qualification.js');
     const mots = (nom) => {
         const m = QUALIF.match(new RegExp(`const ${nom} = \\[([^\\]]+)\\]`));
@@ -179,22 +181,39 @@ describe('Les seuils A et C : une seule table, bornes et mots lus à la source',
     };
     const PRESENCE = mots('MOTS_PRESENCE');
     const REMISE = mots('MOTS_REMISE');
-    const fixe = parseFloat(QUALIF.match(/const BORNE_FIXE_INSUFFISANT = ([0-9.]+);/)[1]);
     const pct = (x) => Math.round(x * 100);
     const [excellent, bon, acceptable] = ['excellent', 'bon', 'acceptable'].map((c) => pct(defaut('interpretation', c)));
-    // #1137 (verdict du 22 oct.) : l'aide écrit l'insécable avant « % », en entité dans index.html.
-    const bornes = [`≥ ${excellent}&nbsp;%`, `${bon}-${excellent - 1}&nbsp;%`, `${acceptable}-${bon - 1}&nbsp;%`, `${pct(fixe)}-${acceptable - 1}&nbsp;%`, `&lt; ${pct(fixe)}&nbsp;%`];
 
-    const table = tranche(AIDE, 'id="aide-table-paliers-a-c"', '</table>');
-    const lignes = [...table.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].slice(1)
-        .map((m) => [...m[1].matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((c) => c[1].trim()));
+    // 30 oct. 2026 : l'Aide n'a plus de copie : `remplirAideSeuilsDeDepart` écrit le tableau, depuis les défauts et les mots.
+    const aideRemplie = () => {
+        const fenetre = new JSDOM(INDEX).window;
+        const db = { getSync: (k, d) => (d !== undefined ? d : null), setSync() {}, get: async () => null, set: async () => {} };
+        const win = chargerScript('js/interpretation-config.js', { db });
+        chargerScript('js/contexte-qualification.js', { obtenirSeuil: win.obtenirSeuil }, win);
+        win.remplirAideSeuilsDeDepart(fenetre.document);
+        return fenetre.document;
+    };
+    const ins = '\u00A0';
+    const bornes = [`≥ ${excellent}${ins}%`, `${bon}-${excellent - 1}${ins}%`, `${acceptable}-${bon - 1}${ins}%`, `< ${acceptable}${ins}%`];
 
-    it('cinq rangées, chacune avec la borne lue et les deux mots de son palier, dans l\'ordre', () => {
-        expect(PRESENCE).toHaveLength(5);
-        expect(lignes).toHaveLength(5);
+    it('quatre rangées, chacune avec la borne lue et les deux mots de son palier, dans l\'ordre', () => {
+        expect(PRESENCE).toHaveLength(4);
+        const lignes = [...aideRemplie().querySelectorAll('#aide-table-paliers-a-c tbody tr')].map((tr) => [...tr.querySelectorAll('td')].map((c) => c.textContent));
+        expect(lignes).toHaveLength(4);
         lignes.forEach((ligne, i) => {
             expect(ligne, `rangée ${i}`).toEqual([bornes[i], PRESENCE[i], REMISE[i]]);
         });
+    });
+
+    it('dans `index.html`, le tableau n\'a aucune rangée : aucune copie des bornes ni des mots', () => {
+        const table = tranche(AIDE, 'id="aide-table-paliers-a-c"', '</table>');
+        expect(tranche(table, '<tbody>', '</tbody>')).not.toMatch(/<tr|\d&nbsp;%/);
+    });
+
+    it('les bornes citées sous le tableau sont lues à la même source, note de passage comprise', () => {
+        const doc = aideRemplie();
+        const lus = Object.fromEntries([...doc.querySelectorAll('[data-seuil-depart]')].map((el) => [el.getAttribute('data-seuil-depart'), el.textContent]));
+        expect(lus).toEqual({ excellent: `${excellent}${ins}%`, bon: `${bon}${ins}%`, acceptable: `${acceptable}${ins}%`, notePassage: `60${ins}%` });
     });
 
     it('les deux autres tables ont disparu, et leurs mots avec elles', () => {
@@ -211,7 +230,9 @@ describe('Les seuils A et C : une seule table, bornes et mots lus à la source',
         const faq = tranche(AIDE, 'Puis-je modifier les seuils des indices A et C ?', '</details>');
         expect(faq).not.toContain('ne sont pas modifiables');
         expect(faq).toContain('Labo → Outils d\'observation');
-        for (const v of [acceptable, bon, excellent, pct(fixe)]) expect(faq).toContain(`${v}&nbsp;%`);
+        // 30 oct. 2026 : défauts lus à la source, plus de borne fixe, et la carte Mobilisation lit les mêmes champs.
+        expect(faq, 'la FAQ recopie des bornes').not.toMatch(/\d&nbsp;%/);
+        expect(faq, 'la FAQ dit encore qu\'une borne est fixe').not.toMatch(/est fixe|sont fixes/);
         // et l'écran qui les règle existe, avec ces trois champs
         for (const id of ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon']) expect(INDEX).toContain(`id="${id}"`);
     });

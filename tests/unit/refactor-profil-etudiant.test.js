@@ -153,7 +153,6 @@ describe('profil-etudiant — régression refactoring 2026-mai (canari + sentine
             // `js/profil-etudiant-helpers.js`.
             'obtenirTermeProduction',
             'obtenirCouleurNiveauIDME',
-            'obtenirNiveauIDMEDepuisPourcentage',
             'obtenirNombreProductionsPourPatterns',
             'obtenirIdsProductionsEvaluables',
             'obtenirGrilleReferenceDepistage',

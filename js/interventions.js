@@ -1174,18 +1174,15 @@ function ouvrirIntervention(interventionId, options) {
                         if (avant === null && apres === null) return '';
 
                         // Lot 5 du cadrage 11 (12 sept. 2026, audit du 6 sept. I-5, produit de #742) : la lettre
-                        // sort de la fonction qu'emploie le reste de l'application (seuils idme.insuffisant /
-                        // idme.developpement / idme.maitrise — 0,64 / 0,75 / 0,85 par défaut), calculée sur le
-                        // pourcentage AFFICHÉ à côté d'elle. Avant : 0,65 / 0,75 / 0,85 en clair, et un arrondi
-                        // indépendant — « I 65 % » sur l'écran où la suggestion disait « seuil D (64 %) ». La
-                        // SOURCE change, pas les bornes (#821, #822). Qu'un bilan traduise une moyenne en lettre
-                        // reste une règle, citée (#742). Garde de chargement seulement : sans la fonction, pas de
-                        // lettre inventée.
+                        // est calculée sur le pourcentage AFFICHÉ à côté d'elle. Depuis le 30 oct. 2026 (#551),
+                        // elle se lit dans l'échelle des copies du groupe : 30 % y dit « PS » si l'échelle le dit.
+                        // Sans échelle unique, pas de lettre inventée.
+                        var echelleDuBilan = window.reperesPerformance().echelle;
                         var pctAvant = avant !== null ? Math.round(avant * 100) : null;
                         var pctApres = apres !== null ? Math.round(apres * 100) : null;
                         var lettre = function(pct) {
-                            return (pct !== null && typeof obtenirNiveauIDMEDepuisPourcentage === 'function')
-                                ? obtenirNiveauIDMEDepuisPourcentage(pct) : '—';
+                            var niveau = (pct !== null && echelleDuBilan) ? situerPourcentageDansEchelle(pct, echelleDuBilan) : null;
+                            return niveau ? niveau.code : '—';
                         };
                         var niveauAvant = lettre(pctAvant);
                         var niveauApres = lettre(pctApres);
@@ -1440,11 +1437,11 @@ function suggererObjectifIntervention(interventionId) {
         return;
     }
 
-    // #551, garde seule (13 sept. 2026) — la même séparation que `seuilDefi` plus haut (#555 lot 2) : la garde
-    // de chargement subsiste, le repli de valeur est retiré — un seuil délibérément réglé à 0 reste 0. Les 0,75
-    // et 0,64 MIROITENT `SEUILS_PAR_DEFAUT.idme`, verrouillés par la sentinelle #555 des replis.
-    var seuilDeveloppement = typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.developpement') : 0.75;
-    var seuilInsuffisant = typeof obtenirSeuil === 'function' ? obtenirSeuil('idme.insuffisant') : 0.64;
+    // Les repères de l'échelle de l'enseignant (30 oct. 2026) : sans repère de maîtrise, il n'y a pas de
+    // second palier à viser.
+    var bornes = window.bornesDepistage();
+    var seuilInsuffisant = bornes.bas;
+    var seuilDeveloppement = bornes.maitrise;
 
     // Calculer la moyenne du sous-groupe pour chaque critère ciblé
     var plusFaible = null;
@@ -1474,12 +1471,14 @@ function suggererObjectifIntervention(interventionId) {
     // étaient les lettres de l'échelle de Grégoire, et cette phrase s'enregistre dans le dossier de l'élève.
     // Textes approuvés par Grégoire le 13 sept. 2026, au caractère près.
     var suggestion = '';
-    if (scorePlusFaible < seuilInsuffisant) {
+    // Comparé au pourcentage AFFICHÉ, comme la lettre du bilan : 64,5 % s'y lit « 65 % », donc déjà au repère.
+    var scoreAffiche = Math.round(scorePlusFaible * 100) / 100;
+    if (scoreAffiche < seuilInsuffisant) {
         suggestion = 'Amener ' + plusFaible + ' à ' + formaterPourcentage(Math.round(seuilInsuffisant * 100));
-    } else if (scorePlusFaible < seuilDeveloppement) {
+    } else if (seuilDeveloppement !== null && scoreAffiche < seuilDeveloppement) {
         suggestion = 'Amener ' + plusFaible + ' à ' + formaterPourcentage(Math.round(seuilDeveloppement * 100));
     } else {
-        suggestion = 'Stabiliser ' + plusFaible + ' au-dessus de ' + formaterPourcentage(Math.round(seuilDeveloppement * 100));
+        suggestion = 'Stabiliser ' + plusFaible + ' au-dessus de ' + formaterPourcentage(Math.round((seuilDeveloppement !== null ? seuilDeveloppement : seuilInsuffisant) * 100));
     }
 
     _poserObjectif(objectifField, suggestion);

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { chargerScript } from './_helpers/charger-script.js';
 
@@ -136,10 +137,11 @@ describe('#542 lot 3 pas 2 · interpreterNiveauAtteint', () => {
         win.interpreterNiveauAtteint(null);
         expect(seuilsConsultes).toEqual([]);
 
-        // Contrôle du mouchard : sans cette ligne, un `obtenirSeuil` muet rendrait
-        // l'assertion ci-dessus verte pour une mauvaise raison.
-        win.obtenirNiveauIDMEDepuisPourcentage(70);
-        expect(seuilsConsultes.length).toBeGreaterThan(0);
+        // 30 oct. 2026 : le contrôle du mouchard passait par `obtenirNiveauIDMEDepuisPourcentage`, retirée. Plus aucun
+        // lecteur de seuil dans ce module : c'est le source qui le prouve.
+        const src = readFileSync(new URL('../../js/profil-etudiant-helpers.js', import.meta.url), 'utf-8')
+            .replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
+        expect(src).not.toMatch(/\bobtenirSeuil\(/);
     });
 
     it('9. la VRAIE table du dépôt porte une description pour les CINQ niveaux SOLO', async () => {

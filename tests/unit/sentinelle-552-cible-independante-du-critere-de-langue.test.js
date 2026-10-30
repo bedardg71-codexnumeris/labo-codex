@@ -145,9 +145,7 @@ beforeAll(() => {
         // cible vienne du dépistage et non d'un court-circuit en amont.
         calculerTousLesIndices: () => ({ A: 90, C: 90, P: 55, M: 0, E: 0 }),
         obtenirSeuil: (chemin) => ({
-            'defiSpecifique': 0.75,
-            'idme.insuffisant': 0.64,
-            'idme.developpement': 0.75
+            'defiSpecifique': 0.75
         })[chemin],
         chargerSeuilsInterpretation: () => ({}),
         obtenirEtudiantsCoursActif: () => [],
@@ -162,6 +160,8 @@ beforeAll(() => {
         calculerEtStockerIndicesCP: () => {}
     };
     win = chargerScript('js/profil-etudiant-helpers.js', stubs);
+    // 30 oct. 2026 : la note de passage, seule borne d'une échelle sans repères (celle du banc), vit dans interpretation-config.js.
+    chargerScript('js/interpretation-config.js', stubs, win);
     // #821 lot A (10 sept. 2026) : `interpreterMobilisation`, que calculs.js appelle,
     // vit dans contexte-qualification.js — chargé dans le même sandbox, avant calculs.
     chargerScript('js/contexte-qualification.js', stubs, win);

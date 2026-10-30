@@ -1215,7 +1215,7 @@ function calculerIPB(da) {
  * PERSISTANCE (IPB × direction). Le champ `niveauRaI` qu'il portait disait un second
  * palier, que la cible d'intervention suivait. Le mot « Difficulté récente » (IPB = 1,
  * direction → ou ↘) est celui de Grégoire, choisi le 17 sept. : « Difficulté émergente »
- * reste le pattern de la carte RàI (P < 75 % et un défi), et lui seul.
+ * reste le pattern de la carte RàI (sous le repère de maîtrise, et un défi), et lui seul.
  * @param {string} da - Numéro de DA
  * @returns {Object|null} - { diagnostic, ipb, direction, scoreActuel, criteresEnDefi, couleur }
  */
@@ -1680,18 +1680,16 @@ function identifierDefiSpecifique(da) {
  * @returns {string} - Pattern: 'Difficulté persistante', 'Difficulté émergente', 'Défi spécifique', 'Stable'
  */
 function identifierPatternActuel(performancePAN3, aUnDefi) {
-    // Utiliser les seuils configurables IDME
-    const seuilIdmeInsuffisant = obtenirSeuil('idme.insuffisant');      // Par défaut 0.64 (64%)
-    const seuilIdmeDeveloppement = obtenirSeuil('idme.developpement');  // Par défaut 0.75 (75%)
+    // Les repères de l'échelle de l'enseignant (30 oct. 2026) : `maitrise` vaut null quand il n'est pas posé.
+    const bornes = window.bornesDepistage();
 
-
-    // Difficulté persistante : Performance < 64% (Incomplet - unistructurel)
-    if (performancePAN3 < seuilIdmeInsuffisant) {
+    // Difficulté persistante : sous le repère de suffisance (ou sous la note de passage, sans ce repère)
+    if (performancePAN3 < bornes.bas) {
         return 'Difficulté persistante';
     }
 
-    // Difficulté émergente : Performance < 75% (En développement - multistructurel) ET a un défi
-    if (performancePAN3 < seuilIdmeDeveloppement && aUnDefi) {
+    // Difficulté émergente : sous le repère de maîtrise ET a un défi
+    if (bornes.maitrise !== null && performancePAN3 < bornes.maitrise && aUnDefi) {
         return 'Difficulté émergente';
     }
 
@@ -1839,16 +1837,15 @@ function determinerNiveauRaiPedagogique(da) {
     // Déterminer le pattern basé uniquement sur la performance
     const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
 
-    // Seuils configurables
-    const seuilIdmeMaitrise = obtenirSeuil('idme.maitrise');
-    const seuilIdmeDeveloppement = obtenirSeuil('idme.developpement');
-    const seuilIdmeInsuffisant = obtenirSeuil('idme.insuffisant');
+    // Les repères de l'échelle de l'enseignant (30 oct. 2026), comme le pattern ci-dessus.
+    const bornes = window.bornesDepistage();
+    const sousLaMaitrise = noteConstructible && bornes.maitrise !== null && P < bornes.maitrise;
 
 
     // LOGIQUE PÉDAGOGIQUE (basée uniquement sur P et SRPNF)
 
-    // Niveau 3 - Intensif : Difficulté persistante (P < insuffisant OU plusieurs critères < développement)
-    if (pattern === 'Difficulté persistante' || (noteConstructible && P < seuilIdmeInsuffisant)) {
+    // Niveau 3 - Intensif : Difficulté persistante, ou P sous le repère de suffisance
+    if (pattern === 'Difficulté persistante' || (noteConstructible && P < bornes.bas)) {
         return {
             niveau: 3,
             label: 'Niveau 3 - Intensif',
@@ -1862,13 +1859,13 @@ function determinerNiveauRaiPedagogique(da) {
         };
     }
 
-    // Niveau 2 - Préventif : Performance en développement (<75%) OU Difficulté émergente OU Défi spécifique
-    // Un élève avec P en zone "Développement" (65-74%) nécessite un accompagnement préventif,
+    // Niveau 2 - Préventif : P sous le repère de maîtrise OU Difficulté émergente OU Défi spécifique
+    // Un élève entre les deux repères nécessite un accompagnement préventif,
     // même si son pattern est "Stable" (pas de défi identifié).
-    if ((noteConstructible && P < seuilIdmeDeveloppement) || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
+    if (sousLaMaitrise || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
         // Déterminer la description selon le contexte
         let description;
-        if (noteConstructible && P < seuilIdmeDeveloppement && pattern === 'Stable') {
+        if (sousLaMaitrise && pattern === 'Stable') {
             description = 'Performance en développement nécessitant un accompagnement préventif.';
         } else if (pattern === 'Difficulté émergente') {
             description = 'Difficultés émergentes nécessitant une intervention préventive ciblée.';
@@ -1893,7 +1890,7 @@ function determinerNiveauRaiPedagogique(da) {
         };
     }
 
-    // Niveau 1 - Universel : Performance maîtrisée (≥75%) et stable
+    // Niveau 1 - Universel : ni sous les repères, ni défi
     return {
         niveau: 1,
         label: 'Niveau 1 - Universel',

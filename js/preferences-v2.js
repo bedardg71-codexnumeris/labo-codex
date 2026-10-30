@@ -230,17 +230,17 @@
         // attend 0,10 : flèches et défis faux pour tout le monde.
         const seuilProgression = document.getElementById('v2-seuil-progression');
         if (seuilProgression) {
-            seuilProgression.value = _fractionEnPoints(seuils.progressionArtefacts, 0.10);
+            seuilProgression.value = _fractionEnPoints(seuils.progressionArtefacts, window.SEUILS_PAR_DEFAUT.progressionArtefacts);
         }
 
         const seuilRisque = document.getElementById('v2-seuil-risque');
         if (seuilRisque) {
-            seuilRisque.value = _fractionEnPoints(seuils.directionRisque, 0.05);
+            seuilRisque.value = _fractionEnPoints(seuils.directionRisque, window.SEUILS_PAR_DEFAUT.directionRisque);
         }
 
         const seuilDefi = document.getElementById('v2-seuil-defi');
         if (seuilDefi) {
-            seuilDefi.value = _fractionEnPoints(seuils.defiSpecifique, 0.70);
+            seuilDefi.value = _fractionEnPoints(seuils.defiSpecifique, window.SEUILS_PAR_DEFAUT.defiSpecifique);
         }
     }
 
@@ -369,9 +369,11 @@
         // Lot E3 : la collection lue est COPIÉE avant d'être modifiée (lot E2, R1).
         const seuils = JSON.parse(JSON.stringify(db.getSync('seuilsInterpretation') || {}));
 
-        const fragile = parseInt(document.getElementById('v2-seuil-fragile')?.value) || 70;
-        const acceptable = parseInt(document.getElementById('v2-seuil-acceptable')?.value) || 80;
-        const bon = parseInt(document.getElementById('v2-seuil-bon')?.value) || 85;
+        // Un champ vide retombe sur le défaut, lu à sa source (`SEUILS_PAR_DEFAUT`).
+        const defauts = window.SEUILS_PAR_DEFAUT;
+        const fragile = parseInt(document.getElementById('v2-seuil-fragile')?.value) || Math.round(defauts.interpretation.acceptable * 100);
+        const acceptable = parseInt(document.getElementById('v2-seuil-acceptable')?.value) || Math.round(defauts.interpretation.bon * 100);
+        const bon = parseInt(document.getElementById('v2-seuil-bon')?.value) || Math.round(defauts.interpretation.excellent * 100);
 
         // Validation : fragile < acceptable < bon.
         // Lot E3 (D0, D3) : le refus parle par le témoin — une alerte PUIS « Préférences enregistrées »
@@ -405,24 +407,24 @@
         // `obtenirNombreProductionsPourPatterns` lit, et nulle part ailleurs.
         const fenetreAnalyse = document.getElementById('v2-pref-fenetre-patterns');
         if (fenetreAnalyse) {
-            seuils.nombreProductionsAnalyse = parseInt(fenetreAnalyse.value) || 3;
+            seuils.nombreProductionsAnalyse = parseInt(fenetreAnalyse.value) || defauts.nombreProductionsAnalyse;
         }
 
         // Seuils de détection — les champs sont en POINTS, la clé en FRACTION
         // (voir le chargement). Une valeur vide ou absurde retombe sur le défaut.
         const seuilProgression = document.getElementById('v2-seuil-progression');
         if (seuilProgression) {
-            seuils.progressionArtefacts = _pointsEnFraction(seuilProgression.value, 0.10);
+            seuils.progressionArtefacts = _pointsEnFraction(seuilProgression.value, defauts.progressionArtefacts);
         }
 
         const seuilRisque = document.getElementById('v2-seuil-risque');
         if (seuilRisque) {
-            seuils.directionRisque = _pointsEnFraction(seuilRisque.value, 0.05);
+            seuils.directionRisque = _pointsEnFraction(seuilRisque.value, defauts.directionRisque);
         }
 
         const seuilDefi = document.getElementById('v2-seuil-defi');
         if (seuilDefi) {
-            seuils.defiSpecifique = _pointsEnFraction(seuilDefi.value, 0.70);
+            seuils.defiSpecifique = _pointsEnFraction(seuilDefi.value, defauts.defiSpecifique);
         }
 
         // Lot E3 (D0 point 2) : par le témoin commun (clé globale, inscrite à CLES_GLOBALES).
@@ -448,9 +450,10 @@
         const seuilAcceptable = document.getElementById('v2-seuil-acceptable');
         const seuilBon = document.getElementById('v2-seuil-bon');
 
-        if (seuilFragile) seuilFragile.value = 70;
-        if (seuilAcceptable) seuilAcceptable.value = 80;
-        if (seuilBon) seuilBon.value = 85;
+        const defauts = window.SEUILS_PAR_DEFAUT.interpretation;
+        if (seuilFragile) seuilFragile.value = Math.round(defauts.acceptable * 100);
+        if (seuilAcceptable) seuilAcceptable.value = Math.round(defauts.bon * 100);
+        if (seuilBon) seuilBon.value = Math.round(defauts.excellent * 100);
 
         // Lot E3 : le message du geste ne suit qu'une écriture réussie.
         if (sauvegarderSeuilsV2()) notifications.succes('Seuils d\'interprétation restaurés');
@@ -465,12 +468,13 @@
         const seuilRisque = document.getElementById('v2-seuil-risque');
         const seuilDefi = document.getElementById('v2-seuil-defi');
 
-        if (fenetreAnalyse) fenetreAnalyse.value = 3;
+        const defauts = window.SEUILS_PAR_DEFAUT;
+        if (fenetreAnalyse) fenetreAnalyse.value = defauts.nombreProductionsAnalyse;
 
-        // En points, comme les champs (10 · 5 · 70) ; la fraction est posée à l'écriture.
-        if (seuilProgression) seuilProgression.value = 10;
-        if (seuilRisque) seuilRisque.value = 5;
-        if (seuilDefi) seuilDefi.value = 70;
+        // En points, comme les champs ; la fraction est posée à l'écriture.
+        if (seuilProgression) seuilProgression.value = _fractionEnPoints(defauts.progressionArtefacts);
+        if (seuilRisque) seuilRisque.value = _fractionEnPoints(defauts.directionRisque);
+        if (seuilDefi) seuilDefi.value = _fractionEnPoints(defauts.defiSpecifique);
 
         // #823 : la fenêtre y passe aussi. Lot E3 : le message ne suit qu'une écriture réussie.
         if (sauvegarderSeuilsV2()) notifications.succes('Seuils de détection restaurés');
