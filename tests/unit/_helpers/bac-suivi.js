@@ -67,6 +67,22 @@ export function dbBanc(store, journal) {
     };
 }
 
+/**
+ * 30 oct. 2026 — une échelle à repères, pour les bancs qui lisent la performance : l'échelle de l'enseignant fait foi.
+ * Plages et repères sont des données du banc, jamais un défaut de l'application.
+ */
+export function echelleAReperes({ id = 'E_BANC', plages = [['I', 0, 64], ['D', 65, 74], ['M', 75, 84], ['E', 85, 100]], suffisance = 'D', maitrise = 'M' } = {}) {
+    return { id, nom: 'Échelle du banc', seuilSuffisance: suffisance, seuilMaitrise: maitrise, niveaux: plages.map(([code, min, max]) => ({ code, nom: code, min, max })) };
+}
+/** Les globaux qui font de `echelle` celle des copies du groupe : une pratique Standards, et le résolveur. */
+export function globauxEchelle(echelle) {
+    return { designerPratiqueActive: () => ({ etat: 'ok', famille: 'standards' }), obtenirEchelleResolue: (id) => (id === echelle.id ? clone(echelle) : null) };
+}
+/** Une copie qui compte, posée sur `echelle` : c'est par les copies que le groupe dit son échelle. */
+export function copieSurEchelle(echelle, da = '2000001') {
+    return { id: 'COPIE_' + echelle.id, etudiantDA: da, productionId: 'P_BANC', echelleId: echelle.id, noteFinale: 70, verrouillee: true, coursId: 'GC1', groupe: '01' };
+}
+
 /** Un store de départ : un groupe-cours GC1 de trois élèves, un autre GC2 avec un quatrième. */
 export function storeBase() {
     return {
@@ -141,14 +157,21 @@ export function monter(store, opts = {}) {
         contexteImposeNoteProvisoire: winModes.contexteImposeNoteProvisoire
     });
     Object.assign(globaux, opts.globaux || {});
-    // Lot 5 du cadrage 11 (12 sept. 2026) : la lettre du bilan d'une intervention sort d'`obtenirNiveauIDMEDepuisPourcentage`
-    // (js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app). Le banc fournit la VRAIE, branchée sur
-    // l'`obtenirSeuil` qu'il reçoit — une copie ici dériverait sans que personne le voie.
-    if (!('obtenirNiveauIDMEDepuisPourcentage' in globaux)) {
+    // Lot 5 du cadrage 11 (12 sept. 2026), ↻ 30 oct. : la lettre du bilan d'une intervention se situe dans l'échelle
+    // (`situerPourcentageDansEchelle`, js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app). Le banc
+    // fournit la VRAIE : une copie ici dériverait sans que personne le voie.
+    if (!('situerPourcentageDansEchelle' in globaux)) {
         const winHelpers = {};
         chargerScript('js/profil-etudiant-helpers.js', globaux, winHelpers);
-        globaux.obtenirNiveauIDMEDepuisPourcentage = winHelpers.obtenirNiveauIDMEDepuisPourcentage;
+        globaux.situerPourcentageDansEchelle = winHelpers.situerPourcentageDansEchelle;
     }
+    // 30 oct. 2026 (une seule source par famille de seuils) : les seuils et leurs lecteurs sont les VRAIS, comme dans
+    // l'app (`interpretation-config.js`, sur le store du banc), sauf si le banc fournit son propre `obtenirSeuil`.
+    const winConfig = {};
+    chargerScript('js/interpretation-config.js', { db }, winConfig);
+    win.NOTE_DE_PASSAGE = winConfig.NOTE_DE_PASSAGE;
+    win.SEUILS_PAR_DEFAUT = winConfig.SEUILS_PAR_DEFAUT;
+    if (!('obtenirSeuil' in globaux)) globaux.obtenirSeuil = winConfig.obtenirSeuil;
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;
     // Lot A du 16 sept. 2026 : les calculs du profil, les complétions, snapshots.js et le rapport appellent
     // `window.evaluationEntreDansLaNote` / `window.evaluationNonRemise` (pratique-registre.js). Posés en VRAI,
@@ -159,7 +182,9 @@ export function monter(store, opts = {}) {
     if (!('evaluationNonRecevable' in globaux)) globaux.evaluationNonRecevable = win.evaluationNonRecevable;
     if (!('evaluationCompteCommeRemise' in globaux)) globaux.evaluationCompteCommeRemise = win.evaluationCompteCommeRemise;   // 25 oct. 2026
     if (!('evaluationTravailEnCours' in globaux)) globaux.evaluationTravailEnCours = win.evaluationTravailEnCours;
-    const modules = opts.modules || [];
+    const modulesDemandes = opts.modules || [];
+    const contexteQualification = 'js/contexte-qualification.js';
+    const modules = modulesDemandes.includes(contexteQualification) ? modulesDemandes : [contexteQualification, ...modulesDemandes];
     const exportsWindow = new Set();
     for (const f of modules) for (const m of readFileSync(path.join(RACINE, f.chemin || f), 'utf8').matchAll(/^\s*window\.([A-Za-z_$][\w$]*)\s*=/gm)) exportsWindow.add(m[1]);
     for (const nom of exportsWindow) if (!(nom in globaux) && !/^[A-Z]/.test(nom) && !(opts.objetsExportes || []).includes(nom)) globaux[nom] = fwd(nom);

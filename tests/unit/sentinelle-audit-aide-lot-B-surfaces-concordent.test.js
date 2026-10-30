@@ -24,39 +24,38 @@ const TERME = lire('js/accompagnement-contenu-terme.js');
 
 describe('Infobulles — les chiffres qu\'elles donnent sont ceux du code', () => {
 
-    it('le dégradé du tableau de bord : aucun chiffre de repère, ni dessiné ni dans les bulles (bloc 6b, 15 oct. 2026)', () => {
+    it('les barres du tableau de bord : aucun chiffre de repère, ni dessiné ni dans les bulles (bloc 6b, 15 oct. 2026)', () => {
         // #818 (10 sept.) faisait CALCULER les quatre repères (30-47,5 % … ≥ 82,5 %) au lieu de les
         // recopier. Le 15 oct., Grégoire les a retirés : « Je ne sais pas d'où viennent ces chiffres
         // […] Je préférerais ne pas les afficher, seulement les commentaires sur A et C. » Ce sont les
-        // quarts de la barre (axe 30 → 100 %), rien de pédagogique. Le dégradé, lui, ne bouge pas.
+        // quarts de la barre (axe 30 → 100 %), rien de pédagogique. ↻ 30 oct. 2026 : les zones de couleur suivent les sources.
         const tdb = lire('js/tableau-bord-apercu.js');
         expect(tdb, 'la légende chiffrée est revenue').not.toMatch(/libelleBandeDistribution|const legendeUnique/);
         expect(tdb, 'la légende chiffrée est revenue').not.toContain('distribution-legende-commune');
-        // La géométrie du dégradé reste là où elle vit (contexte-qualification.js la lit).
-        expect((tdb.match(/\{\s*position:\s*(\d+),\s*couleur:/g) || []).length).toBe(4);
+        // Aucune géométrie écrite : le fond et les points lisent `zonesDeLaBarre` (contexte-qualification.js).
+        expect((tdb.match(/\{\s*position:\s*(\d+),\s*couleur:/g) || []).length).toBe(0);
+        expect(tdb).toContain('window.zonesDeLaBarre(type)');
         expect(HOVER, 'la bulle des quatre repères est revenue').not.toMatch(/'tdb-zones-couleur':/);
         const observer = HOVER.match(/'tdb-observer':\s*\n?\s*'((?:[^'\\]|\\.)*)'/);
         expect(observer).toBeTruthy();
         expect(observer[1], 'la bulle « Observer » donne un chiffre').not.toMatch(/\d/);
-        // Elle parle avec les mots du profil, lus à leur source (mécanisme 2 de contexte-qualification.js).
+        // Elle parle avec les mots du profil, lus à leur source (contexte-qualification.js) : le premier et le dernier palier.
         const qualif = lire('js/contexte-qualification.js');
         const mots = (nom) => [...qualif.match(new RegExp(`const ${nom} = \\[([^\\]]+)\\]`))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
         const [presence, remise] = [mots('MOTS_PRESENCE'), mots('MOTS_REMISE')];
-        for (const mot of [presence[0], presence[4], remise[0], remise[4]]) {
+        for (const mot of [presence[0], presence[presence.length - 1], remise[0], remise[remise.length - 1]]) {
             expect(observer[1], `« ${mot} » manque à la bulle`).toContain(`« ${mot} »`);
         }
     });
 
-    it('les défauts des seuils d\'interprétation sont ceux de preferences-v2.js', () => {
+    it('les défauts des seuils d\'interprétation : une seule source, que preferences-v2.js lit et que la bulle ne recopie pas (30 oct. 2026)', () => {
         const prefs = lire('js/preferences-v2.js');
-        const defauts = ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon'].map(id => {
-            const m = prefs.match(new RegExp(`getElementById\\('${id}'\\)\\?\\.value\\)\\s*\\|\\|\\s*(\\d+)`));
-            expect(m).toBeTruthy();
-            return m[1];
-        });
+        for (const [id, cle] of [['v2-seuil-fragile', 'acceptable'], ['v2-seuil-acceptable', 'bon'], ['v2-seuil-bon', 'excellent']]) {
+            expect(prefs, id).toMatch(new RegExp(`getElementById\\('${id}'\\)\\?\\.value\\)\\s*\\|\\|\\s*Math\\.round\\(defauts\\.interpretation\\.${cle} \\* 100\\)`));
+        }
         const bulle = HOVER.match(/'depist-seuils-restaurer':\s*\n?\s*'((?:[^'\\]|\\.)*)'/);
         expect(bulle).toBeTruthy();
-        expect(bulle[1]).toContain(defauts.join(' / ') + '\\u00a0%');   // #1137 : l'insécable avant « % », échappé dans la source
+        expect(bulle[1]).not.toMatch(/\d/);
     });
 });
 

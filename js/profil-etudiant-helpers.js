@@ -149,57 +149,6 @@ function obtenirCouleurNiveauIDME(codeNiveau) {
 }
 
 /**
- * Détermine le niveau d'un pourcentage selon les seuils configurés.
- *
- * ⚠⚠ LE DÉFAUT CORRIGÉ ICI : DEUX UNITÉS COMPARÉES SANS CONVERSION (#541,
- * 26 août 2026).
- *
- * Cette fonction reçoit un POURCENTAGE, sur 0-100. C'est son nom, c'est son
- * contrat documenté, et c'est ce que passent ses appelants — `critere.score
- * * 100` dans `profil-etudiant-diagnostics`, `P` dans `sections-affichage`
- * (comparé deux lignes plus bas à `seuil * 100`).
- *
- * Les seuils, eux, viennent d'`obtenirSeuil('idme.*')` et valent 0-1 : 0.64,
- * 0.75, 0.85. Les deux étaient comparés TELS QUELS. Conséquence : tout
- * pourcentage supérieur à 0.85 — c'est-à-dire tout score au-dessus de 1 %,
- * donc à peu près tous — traversait les trois `if` sans en satisfaire aucun et
- * tombait dans le dernier `return`. **Un critère à 12 % était classé « E »,
- * Étendu.**
- *
- * Le bloc « Forces et défis » du diagnostic ne pouvait donc afficher que des
- * forces exceptionnelles, pour tout le monde, y compris pour un élève en
- * difficulté sur tous ses critères — et rien ne le signalait. Le défaut est
- * antérieur au décodage-en-dur de #529 : il existe au moins depuis
- * l'extraction du 17 mai 2026 (d9c67936), et aucun test ne l'exerçait.
- *
- * ⮕ CE QUI N'A PAS ÉTÉ CHANGÉ, ET POURQUOI. Le contrat reste 0-100 : le nom
- * de la fonction l'annonce, les deux appelants le respectent déjà, et le
- * déplacer aurait demandé de toucher des sites d'appel que ce correctif n'a
- * pas à rouvrir. C'est la conversion qui manquait, pas le contrat.
- *
- * Verrouillé par `tests/unit/sentinelle-541-niveau-depuis-pourcentage.test.js`.
- *
- * @param {number} pourcentage - Pourcentage sur 0-100 (et non un score 0-1)
- * @returns {string} - Code du niveau, selon les seuils configurés
- */
-function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
-    const seuilIdmeInsuffisant = obtenirSeuil('idme.insuffisant'); // 0-1 — défaut 0.64
-    const seuilIdmeDeveloppement = obtenirSeuil('idme.developpement'); // 0-1 — défaut 0.75
-    const seuilIdmeMaitrise = obtenirSeuil('idme.maitrise'); // 0-1 — défaut 0.85
-
-    // Ramener l'entrée sur l'échelle des seuils. PAS de détection du genre
-    // « si c'est petit, c'est sans doute déjà 0-1 » : 0.8 serait alors
-    // indistinguable de 0,8 % et de 80 %, et la fonction deviendrait un
-    // devineur. Un seul contrat, celui que le nom annonce.
-    const score = pourcentage / 100;
-
-    if (score < seuilIdmeInsuffisant) return 'I';
-    if (score < seuilIdmeDeveloppement) return 'D';
-    if (score < seuilIdmeMaitrise) return 'M';
-    return 'E';
-}
-
-/**
  * Situe un pourcentage dans les PLAGES de l'échelle fournie et rend le NIVEAU
  * atteint — l'objet complet, pas seulement son code.
  *
@@ -209,13 +158,9 @@ function obtenirNiveauIDMEDepuisPourcentage(pourcentage) {
  * l'utilisateur. Situer ne demande que des plages, présentes dans toute
  * échelle ; interpréter demande une étiquette SOLO, facultative.
  *
- * POURQUOI ELLE EXISTE. `obtenirNiveauIDMEDepuisPourcentage` (juste au-dessus)
- * compare la moyenne à `idme.insuffisant` / `idme.developpement` /
- * `idme.maitrise` — 0,64 / 0,75 / 0,85. Mesuré le 26 août 2026 sur les données
- * réelles : ce sont les bornes de l'échelle de Grégoire, au chiffre près,
- * recopiées dans le code il y a des mois. Le dépistage d'un utilisateur qui note
- * autrement lit donc l'échelle d'un autre. Ici, les bornes viennent de SON
- * échelle.
+ * POURQUOI ELLE EXISTE. Les bornes de l'échelle de Grégoire ont longtemps été recopiées
+ * dans le code (0,64 / 0,75 / 0,85, retirées le 30 oct. 2026) : le dépistage d'un utilisateur
+ * qui note autrement lisait l'échelle d'un autre. Ici, les bornes viennent de SON échelle.
  *
  * CE QUI RESTE NUMÉRIQUE, ET POURQUOI. Agréger plusieurs évaluations exige une
  * moyenne, donc des nombres. Ce qui doit disparaître n'est pas le calcul : c'est
@@ -1143,7 +1088,6 @@ window.obtenirTermeProduction = obtenirTermeProduction;
 window.genreTermeProduction = genreTermeProduction;
 window.accordTermeProduction = accordTermeProduction;
 window.obtenirCouleurNiveauIDME = obtenirCouleurNiveauIDME;
-window.obtenirNiveauIDMEDepuisPourcentage = obtenirNiveauIDMEDepuisPourcentage;
 window.situerPourcentageDansEchelle = situerPourcentageDansEchelle;
 window.interpreterNiveauAtteint = interpreterNiveauAtteint;
 window.obtenirNombreProductionsPourPatterns = obtenirNombreProductionsPourPatterns;

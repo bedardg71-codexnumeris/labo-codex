@@ -25,6 +25,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript, completerNoteParDefaut } from './_helpers/charger-script.js';
+import { echelleAReperes, globauxEchelle, copieSurEchelle } from './_helpers/bac-suivi.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MESURES = {};
@@ -167,16 +169,24 @@ function monter(store, opts = {}) {
         win.temoinEnregistrement = { nonEnregistre(raison, geste) { notifs.push({ type: 'nonEnregistre', t: raison, geste }); }, enregistre() {} };
         win.raisonPourTemoin = (r) => { const t = String(r || '').trim(); const d = t.charAt(0).toLowerCase() + t.slice(1); return /[.!?]$/.test(d) ? d : d + '.'; };
     }
-    // Lot 5 du cadrage 11 (12 sept. 2026) : la lettre du bilan d'une intervention sort d'`obtenirNiveauIDMEDepuisPourcentage`
-    // (js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app) — la VRAIE, branchée sur l'`obtenirSeuil` du banc.
-    if (!('obtenirNiveauIDMEDepuisPourcentage' in globaux)) {
+    // Lot 5 du cadrage 11 (12 sept. 2026), ↻ 30 oct. : la lettre du bilan d'une intervention se situe dans l'échelle —
+    // la VRAIE `situerPourcentageDansEchelle` (js/profil-etudiant-helpers.js, chargé avant interventions.js dans l'app).
+    if (!('situerPourcentageDansEchelle' in globaux)) {
         const winHelpers = {};
         chargerScript('js/profil-etudiant-helpers.js', globaux, winHelpers);
-        globaux.obtenirNiveauIDMEDepuisPourcentage = winHelpers.obtenirNiveauIDMEDepuisPourcentage;
+        globaux.situerPourcentageDansEchelle = winHelpers.situerPourcentageDansEchelle;
     }
+    // 30 oct. 2026 : les seuils et leurs lecteurs sont les VRAIS, comme dans l'app (voir bac-suivi.js).
+    const winConfig = {};
+    chargerScript('js/interpretation-config.js', { db }, winConfig);
+    win.NOTE_DE_PASSAGE = winConfig.NOTE_DE_PASSAGE;
+    win.SEUILS_PAR_DEFAUT = winConfig.SEUILS_PAR_DEFAUT;
+    if (!('obtenirSeuil' in globaux)) globaux.obtenirSeuil = winConfig.obtenirSeuil;
+    if (typeof win.evaluationEntreDansLaNote !== 'function') chargerPredicatsCopie(win);
     for (const [k, v] of Object.entries(globaux)) if (!(k in win) && k !== 'document' && k !== 'db') win[k] = v;   // les modules lisent aussi window.X
     // Les exports window des modules montés : aiguillés à l'appel (résolution tardive).
-    const modules = opts.modules || [];
+    const modulesDemandes = opts.modules || [];
+    const modules = modulesDemandes.includes('js/contexte-qualification.js') ? modulesDemandes : ['js/contexte-qualification.js', ...modulesDemandes];
     const exportsWindow = new Set();
     for (const f of modules) for (const m of readFileSync(path.join(RACINE, f.chemin || f), 'utf8').matchAll(/^\s*window\.([A-Za-z_$][\w$]*)\s*=/gm)) exportsWindow.add(m[1]);
     for (const nom of exportsWindow) if (!(nom in globaux) && !/^[A-Z]/.test(nom) && !(opts.objetsExportes || []).includes(nom)) globaux[nom] = fwd(nom);
@@ -191,10 +201,12 @@ function monter(store, opts = {}) {
    ============================================================================================= */
 describe('5 · Interventions — gestes et écritures', () => {
     const MODULES_I = [{ chemin: 'js/interventions.js', internes: ['genererAffichageNotesIndividuelles'] }];   // ↻ lot E3 : `sauvegarderInterventions` retirée (écritures par le témoin)
+    const ECHELLE_I = echelleAReperes();   // 30 oct. 2026 : le bilan se lit dans l'échelle des copies du groupe
     const GLOBAUX_I = {
         determinerNiveauRaiPedagogique: () => ({ niveau: 2, pattern: 'Stable', label: 'x' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),
         calculerMoyennesCriteres: () => ({ structure: 0.645, rigueur: 0.75 }), obtenirGrilleReferenceDepistage: () => null, libelleNiveauSOLO: () => '',
-        obtenirSeuil: (n) => ({ 'idme.insuffisant': 0.64, 'idme.developpement': 0.75, 'idme.maitrise': 0.85, defiSpecifique: 0.70 }[n] || 0.7),
+        obtenirSeuil: (n) => ({ defiSpecifique: 0.70 }[n] || 0.7),
+        ...globauxEchelle(ECHELLE_I),
         calculerProgressionArtefacts: () => null, anonymiserTexteRetroaction: (t) => t
     };
     const monterI = (store, opts = {}) => monter(store, Object.assign({ modules: MODULES_I, globaux: GLOBAUX_I }, opts));
@@ -274,8 +286,9 @@ describe('5 · Interventions — gestes et écritures', () => {
         expect(conteneur.innerHTML).toContain('desc &lt;i&gt;z&lt;/i&gt;</textarea>'); // avant #769 : brute dans son textarea
     });
 
-    it('I-5 · Le bilan : ses lettres venaient de 0,65/0,75/0,85 en clair, quand la suggestion d\'objectif du même écran lit idme.insuffisant = 0,64 — depuis le lot 5 du cadrage 11, la lettre sort des mêmes seuils (valeur d\'après)', () => {
+    it('I-5 · Le bilan : ses lettres venaient de 0,65/0,75/0,85 en clair, quand la suggestion d\'objectif du même écran lisait 0,64 — depuis le 30 oct. 2026, les deux lisent l\'échelle ; depuis le lot 5 du cadrage 11, la lettre sort des mêmes seuils (valeur d\'après)', () => {
         const store = storeBase();
+        store.test_evaluationsSauvegardees = [copieSurEchelle(ECHELLE_I)];
         store.test_interventions = [{ id: 'I4', titre: 'Fini', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'rattrapage', description: '',
             etudiants: ['2000001'], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: ['Structure'], objectifVise: '', statut: 'completee',
             snapshotAvant: { 2000001: { P: 60, criteres: { structure: 0.645 } } }, bilan: { atteint: 'oui', suite: 'aucune', observationsBilan: '', dateBilan: 1 }, jamaisSauvegardee: false }];
@@ -283,7 +296,7 @@ describe('5 · Interventions — gestes et écritures', () => {
         const b = monterI(store, { elements: { conteneurPrincipal: conteneur } });
         b.win.ouvrirIntervention('I4', {});
         const html = conteneur.innerHTML;
-        // La moyenne « avant » vaut 0,645 : au-dessus d'idme.insuffisant (0,64) = D pour le reste de l'app ; le bilan la lit sous 0,65 = I.
+        // La moyenne « avant » vaut 0,645, affichée 65 % : D dans l'échelle du banc (D à partir de 65).
         const bloc = html.slice(html.indexOf('Structure', html.indexOf('Bilan')));
         const m = bloc.match(/<td[^>]*>\s*([IDME—])\s+(\d+)\u00A0%/);
         noter('I5', { lettreAvant: m && m[1], pctAvant: m && m[2], present: html.includes('Bilan'), cellule: (bloc.match(/<td[^>]*>\s*[IDME—]\s+\d+\u00A0%/) || [''])[0].replace(/<[^>]+>/g, '').trim() });
@@ -417,7 +430,7 @@ describe('1 · Suivi du groupe — liste suivie, filtres, états', () => {
         expect(String(badge)).not.toMatch(/aucune pratique/i);
     });
 
-    it('G-5 · Le filtre « P < 65 % » ÉCARTE un élève dont le P n\'est pas constructible (affiché « — ») — valeur d\'après #749 (constat d\'origine : retenu)', () => {
+    it('G-5 · Le filtre sur P ÉCARTE un élève dont le P n\'est pas constructible (affiché « — ») — valeur d\'après #749 (constat d\'origine : retenu)', () => {
         const store = storeSix();
         const b = monterG(store);
         const i = b.interne['tableau-bord-apercu.js'];
@@ -429,7 +442,7 @@ describe('1 · Suivi du groupe — liste suivie, filtres, états', () => {
         i.appliquerFiltres();
         const retenus = i._etudiantsPrioritaires.map(e => e.da);
         noter('G5', { retenus });
-        expect(retenus).toEqual([]);   // 2000003 affiche « — » : il ne peut pas être « < 65 % »
+        expect(retenus).toEqual([]);   // 2000003 affiche « — » : il ne peut pas être sous la borne
     });
 });
 

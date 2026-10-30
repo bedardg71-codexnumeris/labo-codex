@@ -21,14 +21,16 @@
 // ↻ #1152, retouche 2 du lot 5 (29 oct. 2026, plans de travail/VERDICT-RELECTURE-2026-10-29-aide-lot-5.md) : le champ « Séance concernée » (interventionSeance) est retiré.
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFileSync } from 'fs';
-import { monter, storeBase, elementDom } from './_helpers/bac-suivi.js';
+import { monter, storeBase, elementDom, echelleAReperes, globauxEchelle, copieSurEchelle } from './_helpers/bac-suivi.js';
 import { tranche } from './_helpers/tranche.js';
 
-const SEUILS_DEFAUT = { 'idme.insuffisant': 0.64, 'idme.developpement': 0.75, 'idme.maitrise': 0.85, defiSpecifique: 0.70 };
-const globaux = (seuils, moyenne) => ({
+// 30 oct. 2026 : l'échelle des copies du groupe fait foi, plus 0,64 / 0,75 / 0,85. Le banc pose la sienne.
+const ECHELLE_DEFAUT = echelleAReperes();
+const globaux = (echelle, moyenne) => ({
+    ...globauxEchelle(echelle),
     determinerNiveauRaiPedagogique: () => ({ niveau: 2, pattern: 'Stable', label: 'x' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),
     calculerMoyennesCriteres: () => ({ structure: moyenne }), obtenirGrilleReferenceDepistage: () => ({ criteres: [{ nom: 'Structure', niveauSOLO: 'multi' }] }),
-    libelleNiveauSOLO: () => '', obtenirSeuil: (n) => seuils[n], calculerProgressionArtefacts: () => null, anonymiserTexteRetroaction: (t) => t
+    libelleNiveauSOLO: () => '', calculerProgressionArtefacts: () => null, anonymiserTexteRetroaction: (t) => t
 });
 const champs = () => ({ interventionNiveau: elementDom({ value: '2' }), interventionContexte: elementDom({ value: 'hors-classe' }), interventionTitre: elementDom({ value: 'Rattrapage' }),
     interventionDate: elementDom({ value: '2026-09-12' }), interventionHeure: elementDom({ value: '' }), interventionDuree: elementDom({ value: '2' }),
@@ -38,10 +40,11 @@ const selecteurs = () => ({ '#listeEtudiantsIntervention input[type="checkbox"]'
 const intervention = (extra) => Object.assign({ id: 'I', titre: 'T', date: '2026-09-01', heure: '', duree: 2, type: 'groupe', niveauRai: 2, contexte: 'hors-classe',
     description: '', etudiants: [], analyse: null, observations: '', notesIndividuelles: {}, criteresCibles: [], objectifVise: '', bilan: null, statut: 'en-cours', groupeCoursId: 'GC1' }, extra);
 
-function banc({ interventions = [], vue = 'interventions', seuils = SEUILS_DEFAUT, moyenne = 0.645, store } = {}) {
+function banc({ interventions = [], vue = 'interventions', echelle = ECHELLE_DEFAUT, moyenne = 0.645, store } = {}) {
     store = store || storeBase();
     store.test_interventions = interventions;
-    const b = monter(store, { modules: ['js/interventions.js'], globaux: globaux(seuils, moyenne),
+    store.test_evaluationsSauvegardees = [...(store.test_evaluationsSauvegardees || []), copieSurEchelle(echelle)];
+    const b = monter(store, { modules: ['js/interventions.js'], globaux: globaux(echelle, moyenne),
         elements: Object.assign({ conteneurPrincipal: elementDom(), conteneurRencontres: elementDom(), listeInterventions: elementDom(), listeRencontres: elementDom() }, champs()),
         selecteurs: selecteurs() });
     b.win.definirVocabulaireInterventions(vue);
@@ -162,7 +165,7 @@ describe('A\' · le stock : un brouillon d\'avant le lot, resté en base', () =>
     });
 });
 
-describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', () => {
+describe('B · le bilan lit les mêmes repères que la suggestion d\'objectif', () => {
     const complete = () => intervention({ id: 'I_B', titre: 'Fini', etudiants: ['2000001'], criteresCibles: ['Structure'], statut: 'completee',
         snapshotAvant: { 2000001: { P: 60, criteres: { structure: 0.645 } } } });
     const cellules = (html) => [...html.matchAll(/<td style="padding: 6px 12px; text-align: center;">([IDME—]) (\d+)\u00A0%<\/td>/g)].map(m => m[1] + ' ' + m[2]);
@@ -175,26 +178,29 @@ describe('B · le bilan lit les mêmes seuils que la suggestion d\'objectif', ()
 
     // Le couplage : la suggestion vise le seuil qui borne PAR LE HAUT le niveau que le bilan affiche. Il passait par la
     // lettre (« D » au bilan ⇔ « au seuil M ») ; la lettre retirée de la suggestion (#551), il passe par le nombre : la
-    // cible attendue se DÉDUIT de la lettre lue dans le bilan et des seuils du banc, pas d'une chaîne recopiée.
-    const cibleAuDessusDe = (lettre, seuils) => ({ I: seuils['idme.insuffisant'], D: seuils['idme.developpement'] })[lettre];
-    const suggestionAttendue = (bilan, seuils) => 'Amener Structure à ' + Math.round(cibleAuDessusDe(bilan[0][0], seuils) * 100) + '\u00A0%';
+    // cible attendue se DÉDUIT de la lettre lue dans le bilan et des plages de l'échelle du banc, pas d'une chaîne recopiée.
+    const cibleAuDessusDe = (lettre, echelle) => {
+        const i = echelle.niveaux.findIndex((n) => n.code === lettre);
+        return echelle.niveaux[i + 1].min;
+    };
+    const suggestionAttendue = (bilan, echelle) => 'Amener Structure à ' + cibleAuDessusDe(bilan[0][0], echelle) + '\u00A0%';
 
-    it('seuils par défaut : 0,645 → « D 65 % » avant ET après ; la suggestion vise la borne haute de D (75 %)', () => {
+    it('D à partir de 65 : 0,645 → « D 65 % » avant ET après ; la suggestion vise la borne haute de D (75 %)', () => {
         const b = banc({ interventions: [complete()] });
         b.win.ouvrirIntervention('I_B');
         const bilan = cellules(b.conteneur().innerHTML);
         expect(bilan).toEqual(['D 65', 'D 65']);
-        expect(suggerer(b)).toBe(suggestionAttendue(bilan, SEUILS_DEFAUT));
+        expect(suggerer(b)).toBe(suggestionAttendue(bilan, ECHELLE_DEFAUT));
         expect(suggerer(b)).toBe('Amener Structure à 75\u00A0%');   // le texte approuvé, figé
     });
 
-    it('idme.insuffisant déplacé à 0,66 : le bilan dit « I 65 % » et la suggestion vise 66 % — les deux ensemble', () => {
-        const seuils = Object.assign({}, SEUILS_DEFAUT, { 'idme.insuffisant': 0.66 });
-        const b = banc({ interventions: [complete()], seuils });
+    it('le repère de suffisance déplacé à 66 : le bilan dit « I 65 % » et la suggestion vise 66 % — les deux ensemble', () => {
+        const echelle = echelleAReperes({ plages: [['I', 0, 65], ['D', 66, 74], ['M', 75, 84], ['E', 85, 100]] });
+        const b = banc({ interventions: [complete()], echelle });
         b.win.ouvrirIntervention('I_B');
         const bilan = cellules(b.conteneur().innerHTML);
         expect(bilan).toEqual(['I 65', 'I 65']);
-        expect(suggerer(b)).toBe(suggestionAttendue(bilan, seuils));
+        expect(suggerer(b)).toBe(suggestionAttendue(bilan, echelle));
         expect(suggerer(b)).toBe('Amener Structure à 66\u00A0%');
     });
 

@@ -134,15 +134,15 @@ describe('B · #822 — le palier « Insuffisant » n\'existe plus', () => {
     chargerScript('js/contexte-qualification.js', { obtenirSeuil: win.obtenirSeuil }, win);
 
     it('B1 · comportement : tout ce qui n\'est pas « Modéré » est « Fragile », jusqu\'à 0 / 0 et jusqu\'à une valeur illisible', () => {
-        const niveaux = [[0.9, 0.9], [0.8, 0.8], [0.7, 0.7], [0.64, 0.9], [0.9, 0.64], [0, 0], [NaN, 0.9]].map(([A, C]) => win.qualifierContexteApprentissage(A, C).niveau);
+        const niveaux = [[0.96, 0.96], [0.92, 0.92], [0.87, 0.87], [0.84, 0.96], [0.96, 0.84], [0, 0], [NaN, 0.9]].map(([A, C]) => win.qualifierContexteApprentissage(A, C).niveau);
         expect(niveaux).toEqual(['tres-favorable', 'favorable', 'modere', 'fragile', 'fragile', 'fragile', 'fragile']);
     });
 
-    it('B2 · aucune borne n\'a bougé (gel d\'octobre, #742) : 85 / 75 / 65, et la borne fixe 60 garde ses deux lecteurs', () => {
-        expect(win.BORNES_CONTEXTE).toEqual({ tresFavorable: 0.85, favorable: 0.75, modere: 0.65 });
-        expect(win.BORNE_FIXE_INSUFFISANT).toBe(0.60);
-        expect(win.qualifierContexteApprentissage(0.65, 0.65).niveau).toBe('modere');
-        expect(win.qualifierContexteApprentissage(0.649, 0.65).niveau).toBe('fragile');
+    it('B2 · ↻ 30 oct. 2026 : les bornes du contexte sont les trois champs (défauts 95 / 90 / 85), et la borne fixe 60 est partie', () => {
+        expect(win.BORNES_CONTEXTE).toBeUndefined();
+        expect(win.BORNE_FIXE_INSUFFISANT).toBeUndefined();
+        expect(win.qualifierContexteApprentissage(0.85, 0.85).niveau).toBe('modere');
+        expect(win.qualifierContexteApprentissage(0.849, 0.85).niveau).toBe('fragile');
     });
 
     it('B3 · le mot, le niveau et la classe sont partis du code et de la feuille de styles', () => {

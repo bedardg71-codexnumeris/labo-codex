@@ -178,7 +178,7 @@ describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () =>
         expect(calculs).toMatch(/if \(Math\.abs\(b\.score - a\.score\) > 0\.01\) return b\.score - a\.score;\s*\/\/ Tri secondaire : par pondération[^\n]*\n\s*return b\.ponderation - a\.ponderation;/);
         const defi = Math.round(parseFloat(lire('js', 'interpretation-config.js').match(/\bdefiSpecifique:\s*([0-9.]+)/)[1]) * 100);
         const champ = doc.getElementById('v2-seuil-defi');
-        expect(Number(champ.getAttribute('value'))).toBe(defi);
+        expect(champ.getAttribute('value')).toBeNull();   // 30 oct. 2026 : le défaut se lit à la source, le champ n'en porte plus de copie
         const t = texteDe('grille-depistage');
         expect(t).toContain(`« Seuil de défi spécifique » (${defi} % par défaut, de ${champ.getAttribute('min')} à ${champ.getAttribute('max')} %`);
         expect(t).toContain('par son nom, égal ou qui commence de même, sans tenir compte des accents, de la casse ni des espaces');

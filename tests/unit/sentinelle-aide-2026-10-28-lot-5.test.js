@@ -119,7 +119,11 @@ describe('#1152, lot 5 — chaque texte validé paraît mot pour mot à sa place
         // La chaîne ENTIÈRE, entre ses apostrophes : « individuelle » contiendrait « individuel ».
         for (const niveau of citations(14)) expect(lire('js/interventions.js'), niveau).toContain(`'${niveau}'`);
         contient('js/accompagnement-contenu-hover.js', 'universel, préventif, intensif');
-        contient('js/accompagnement-contenu-popup.js', citations(16)[0]);
+        // ↻ 30 oct. 2026 : le texte validé n° 16 citait « le prochain seuil (64 % ou 75 %) » ; les bornes viennent désormais
+        // des repères de l'échelle. La nouvelle phrase est soumise à Grégoire avec le lot.
+        const seuilDAvant = /le prochain seuil \(64\s*%\s*ou\s*75\s*%\)/;
+        expect(citations(16)[0]).toMatch(seuilDAvant);
+        contient('js/accompagnement-contenu-popup.js', citations(16)[0].replace(seuilDAvant, 'le prochain repère de ton échelle'));
         contient('js/accompagnement-contenu-popup.js', 'Coche les étudiant·es concerné·es');
     });
 

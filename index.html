@@ -8779,7 +8779,7 @@
                             <div class="groupe-form u-mb-0">
                                 <label for="v2-pref-fenetre-patterns" data-tooltip="depist-fenetre">Fenêtre d'analyse</label>
                                 <div class="champ-unite">
-                                    <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" value="3" min="3" max="12" data-on-change="sauvegarderSeuilsV2">
+                                    <input type="number" id="v2-pref-fenetre-patterns" class="controle-form" min="3" max="12" data-on-change="sauvegarderSeuilsV2">
                                     <span class="u-texte-petit text-muted">dernières productions</span>
                                 </div>
                                 <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
@@ -8791,7 +8791,7 @@
                             <div class="groupe-form u-mb-0">
                                 <label for="v2-seuil-progression" data-tooltip="depist-seuil-progression">Progression des artefacts</label>
                                 <div class="champ-unite">
-                                    <input type="number" id="v2-seuil-progression" class="controle-form" value="10" min="5" max="20" data-on-change="sauvegarderSeuilsV2">
+                                    <input type="number" id="v2-seuil-progression" class="controle-form" min="5" max="20" data-on-change="sauvegarderSeuilsV2">
                                     <span class="u-texte-petit text-muted">points</span>
                                 </div>
                                 <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
@@ -8803,7 +8803,7 @@
                             <div class="groupe-form u-mb-0">
                                 <label for="v2-seuil-risque" data-tooltip="depist-seuil-direction">Sensibilité des flèches par critère</label>
                                 <div class="champ-unite">
-                                    <input type="number" id="v2-seuil-risque" class="controle-form" value="5" min="3" max="15" data-on-change="sauvegarderSeuilsV2">
+                                    <input type="number" id="v2-seuil-risque" class="controle-form" min="3" max="15" data-on-change="sauvegarderSeuilsV2">
                                     <span class="u-texte-petit text-muted">points</span>
                                 </div>
                                 <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
@@ -8815,7 +8815,7 @@
                             <div class="groupe-form u-mb-0">
                                 <label for="v2-seuil-defi" data-tooltip="depist-seuil-defi">Seuil de défi spécifique</label>
                                 <div class="champ-unite">
-                                    <input type="number" id="v2-seuil-defi" class="controle-form" value="70" min="60" max="80" data-on-change="sauvegarderSeuilsV2">
+                                    <input type="number" id="v2-seuil-defi" class="controle-form" min="60" max="80" data-on-change="sauvegarderSeuilsV2">
                                     <span class="u-texte-petit text-muted">%</span>
                                 </div>
                                 <small class="u-texte-mini text-muted" style="display: block; margin-top: 4px">
@@ -8906,21 +8906,21 @@
                             <div class="groupe-form u-mb-0">
                                 <label for="v2-seuil-fragile" data-tooltip="depist-seuil-fragile">« Quelques absences » à partir de</label>
                                 <div class="champ-unite">
-                                    <input type="number" id="v2-seuil-fragile" class="controle-form" value="70" min="50" max="80" data-on-change="sauvegarderSeuilsV2">
+                                    <input type="number" id="v2-seuil-fragile" class="controle-form" min="50" max="98" data-on-change="sauvegarderSeuilsV2">
                                     <span class="u-texte-petit text-muted">%</span>
                                 </div>
                             </div>
                             <div class="groupe-form u-mb-0">
                                 <label for="v2-seuil-acceptable" data-tooltip="depist-seuil-acceptable">« Absences rares » à partir de</label>
                                 <div class="champ-unite">
-                                    <input type="number" id="v2-seuil-acceptable" class="controle-form" value="80" min="60" max="90" data-on-change="sauvegarderSeuilsV2">
+                                    <input type="number" id="v2-seuil-acceptable" class="controle-form" min="51" max="99" data-on-change="sauvegarderSeuilsV2">
                                     <span class="u-texte-petit text-muted">%</span>
                                 </div>
                             </div>
                             <div class="groupe-form u-mb-0">
                                 <label for="v2-seuil-bon" data-tooltip="depist-seuil-bon">« Aucune absence ou presque » à partir de</label>
                                 <div class="champ-unite">
-                                    <input type="number" id="v2-seuil-bon" class="controle-form" value="85" min="70" max="95" data-on-change="sauvegarderSeuilsV2">
+                                    <input type="number" id="v2-seuil-bon" class="controle-form" min="52" max="100" data-on-change="sauvegarderSeuilsV2">
                                     <span class="u-texte-petit text-muted">%</span>
                                 </div>
                             </div>
@@ -10818,7 +10818,7 @@
 
                             <p>À chaque affichage, l'écran recalcule A, C et P, et les patterns si la RàI est activée.</p>
 
-                            <p>«&nbsp;Détails&nbsp;» montre A, C et P sur chaque étudiant·e, et un clic sur l'un d'eux ouvre son profil. Les filtres «&nbsp;P &lt; 65&nbsp;%&nbsp;», «&nbsp;A ou C &lt; 70&nbsp;%&nbsp;», «&nbsp;Suivi&nbsp;» et «&nbsp;RàI 2-3&nbsp;» se combinent&nbsp;: ils ne gardent que les étudiant·es qui répondent à tous, et mettent en tête ceux qui cumulent les plus grands écarts&nbsp;; sans filtre, l'ordre est alphabétique.</p>
+                            <p>«&nbsp;Détails&nbsp;» montre A, C et P sur chaque étudiant·e, et un clic sur l'un d'eux ouvre son profil. Les filtres sur P, sur A ou C, «&nbsp;Suivi&nbsp;» et «&nbsp;RàI 2-3&nbsp;» se combinent&nbsp;: ils ne gardent que les étudiant·es qui répondent à tous, et mettent en tête ceux qui cumulent les plus grands écarts&nbsp;; sans filtre, l'ordre est alphabétique. Le filtre sur P part du repère «&nbsp;Suffisant à partir de&nbsp;» de ton échelle, ou de la note de passage sans repère&nbsp;; celui sur A ou C, du palier le plus bas réglé dans Labo → Outils d'observation.</p>
                         </div>
                     </div>
 
@@ -10950,7 +10950,7 @@
                                 <li><strong>«&nbsp;Rapport&nbsp;»</strong>&nbsp;: un rapport dont tu choisis les sections, à copier.</li>
                             </ul>
 
-                            <p>La couleur du badge «&nbsp;Contexte d'apprentissage&nbsp;» suit trois paliers fixes, 85, 75 et 65&nbsp;%, que A et C doivent atteindre ensemble. Le rappel «&nbsp;Mobilisation&nbsp;» de la carte RàI paraît dès que A ou C passe sous 75&nbsp;%.</p>
+                            <p>La couleur du badge «&nbsp;Contexte d'apprentissage&nbsp;» suit les trois bornes réglées dans Labo → Outils d'observation, que A et C doivent atteindre ensemble. Le rappel «&nbsp;Mobilisation&nbsp;» de la carte RàI paraît dès que A ou C passe sous «&nbsp;Absences rares&nbsp;».</p>
 
                             <p>L'icône «&nbsp;i&nbsp;» d'«&nbsp;Engagement ACP&nbsp;», de «&nbsp;Développement des habiletés&nbsp;» et d'«&nbsp;Accompagnement&nbsp;» explique leurs calculs. Les mots du badge&nbsp;: «&nbsp;Les mots qui décrivent A et C&nbsp;»&nbsp;; ce qui fixe le niveau&nbsp;: «&nbsp;Repérer les patterns de progression&nbsp;».</p>
                         </div>
@@ -10976,36 +10976,10 @@
                                     <th>Complétion (C)</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-center">≥ 85&nbsp;%</td>
-                                    <td>Aucune absence ou presque</td>
-                                    <td>Aucun travail manquant ou presque</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">80-84&nbsp;%</td>
-                                    <td>Absences rares</td>
-                                    <td>Travaux manquants rares</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">70-79&nbsp;%</td>
-                                    <td>Quelques absences</td>
-                                    <td>Quelques travaux manquants</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">60-69&nbsp;%</td>
-                                    <td>Absences fréquentes</td>
-                                    <td>Travaux manquants fréquents</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">&lt; 60&nbsp;%</td>
-                                    <td>Absences très fréquentes</td>
-                                    <td>Travaux manquants très fréquents</td>
-                                </tr>
-                            </tbody>
+                            <tbody><!-- rempli par remplirAideSeuilsDeDepart (contexte-qualification.js) : une seule source --></tbody>
                         </table>
 
-                        <p class="u-mt-10">Les bornes de 85&nbsp;%, 80&nbsp;% et 70&nbsp;% sont celles de départ&nbsp;: tu les règles dans <strong>Labo → Outils d'observation</strong>. La borne de 60&nbsp;% est fixe. Les mêmes trois bornes colorent A, C et P dans la liste des étudiant·es.</p>
+                        <p class="u-mt-10">Les bornes de <span data-seuil-depart="excellent"></span>, <span data-seuil-depart="bon"></span> et <span data-seuil-depart="acceptable"></span> sont celles de départ&nbsp;: tu les règles dans <strong>Labo → Outils d'observation</strong>. Les mêmes trois bornes colorent A et C dans la liste des étudiant·es, dans les pastilles de «&nbsp;Détails&nbsp;» et dans les barres de l'Aperçu. P se lit dans les repères de ton échelle, «&nbsp;Suffisant à partir de&nbsp;» et «&nbsp;Maîtrisé à partir de&nbsp;»&nbsp;; sans repère, seule la note de passage (<span data-seuil-depart="notePassage"></span>) le signale.</p>
                         <p>Ces paliers ne fixent ni la couleur du badge (voir «&nbsp;Lire le profil d'un·e étudiant·e&nbsp;») ni le niveau RàI (voir «&nbsp;Repérer les patterns de progression&nbsp;»).</p>
                         </div>
                     </div>
@@ -11022,7 +10996,7 @@
                         <div class="accordeon-contenu">
                             <p>La RàI est une option&nbsp;: la case «&nbsp;Appliquer une adaptation du modèle de la Réponse à l'intervention&nbsp;» (Labo → Outils d'observation), cochée au départ. Elle dépiste des difficultés et classe des niveaux de besoin, pour éclairer et soutenir tes décisions d'intervention et d'accompagnement.</p>
 
-                            <p>Le niveau (1 Universel, 2 Préventif, 3 Intensif) se décide d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (3 par défaut). Ses bornes sont 64&nbsp;% et 75&nbsp;%, fixes (voir «&nbsp;Repérer les patterns de progression&nbsp;»). Quand l'observation SOLO est activée, le pattern lit tous les critères de la grille du dépistage, sauf ceux marqués «&nbsp;Aucun&nbsp;»&nbsp;; sinon, tous.</p>
+                            <p>Le niveau (1 Universel, 2 Préventif, 3 Intensif) se décide d'après la performance P, quand la note existe, et d'après le pattern des derniers artefacts (3 par défaut). Ses bornes sont les repères de ton échelle, «&nbsp;Suffisant à partir de&nbsp;» et «&nbsp;Maîtrisé à partir de&nbsp;» (voir «&nbsp;Repérer les patterns de progression&nbsp;»). Quand l'observation SOLO est activée, le pattern lit tous les critères de la grille du dépistage, sauf ceux marqués «&nbsp;Aucun&nbsp;»&nbsp;; sinon, tous.</p>
 
                             <p>Le suivi des fondamentaux, lui, nomme la cible de l'intervention sans fixer le niveau (voir «&nbsp;Suivi de l'apprentissage et dépistage SOLO&nbsp;»). La théorie est dans le guide RàI&nbsp;: Labo → Outils d'observation, bouton «&nbsp;Guide&nbsp;».</p>
                         </div>
@@ -11041,14 +11015,14 @@
                         <div class="accordeon-contenu">
                             <p>Avec la RàI activée, l'application lit la performance des derniers artefacts de chaque étudiant·e et ses défis&nbsp;: un critère est un défi sous le «&nbsp;Seuil de défi spécifique&nbsp;» (70&nbsp;% par défaut). Le pattern en découle&nbsp;:</p>
                             <ul>
-                                <li><strong>Difficulté persistante</strong>&nbsp;: une performance sous 64&nbsp;%&nbsp;;</li>
-                                <li><strong>Difficulté émergente</strong>&nbsp;: sous 75&nbsp;%, avec au moins un défi&nbsp;;</li>
-                                <li><strong>Défi spécifique</strong>&nbsp;: 75&nbsp;% ou plus, avec au moins un défi&nbsp;;</li>
-                                <li><strong>Stable</strong>&nbsp;: aucun défi, et une performance d'au moins 64&nbsp;%&nbsp;;</li>
+                                <li><strong>Difficulté persistante</strong>&nbsp;: une performance sous le repère de suffisance (sans ce repère, sous la note de passage)&nbsp;;</li>
+                                <li><strong>Difficulté émergente</strong>&nbsp;: sous le repère de maîtrise, avec au moins un défi&nbsp;;</li>
+                                <li><strong>Défi spécifique</strong>&nbsp;: au repère de maîtrise ou au-dessus, avec au moins un défi&nbsp;;</li>
+                                <li><strong>Stable</strong>&nbsp;: aucun défi, et une performance au repère de suffisance ou au-dessus&nbsp;;</li>
                                 <li><strong>Non-participation</strong>&nbsp;: présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une copie du groupe évaluée).</li>
                             </ul>
 
-                            <p>Le niveau suit une seule règle&nbsp;: P sous 75&nbsp;% donne au moins le niveau 2, sous 64&nbsp;% le niveau 3, quel que soit le pattern. Pour le reste, «&nbsp;Difficulté persistante&nbsp;» et «&nbsp;Non-participation&nbsp;» donnent le niveau 3, «&nbsp;Difficulté émergente&nbsp;» et «&nbsp;Défi spécifique&nbsp;» le niveau 2, «&nbsp;Stable&nbsp;» le niveau 1.</p>
+                            <p>Le niveau suit une seule règle&nbsp;: P sous le repère de maîtrise donne au moins le niveau 2, sous le repère de suffisance le niveau 3, quel que soit le pattern. Pour le reste, «&nbsp;Difficulté persistante&nbsp;» et «&nbsp;Non-participation&nbsp;» donnent le niveau 3, «&nbsp;Difficulté émergente&nbsp;» et «&nbsp;Défi spécifique&nbsp;» le niveau 2, «&nbsp;Stable&nbsp;» le niveau 1.</p>
 
                             <p>Tant que rien n'est jugeable, le pattern est «&nbsp;Données insuffisantes&nbsp;» et le niveau RàI «&nbsp;En attente&nbsp;».</p>
                         </div>
@@ -11484,8 +11458,8 @@
                             <details class="carte-grise-info">
                                 <summary class="titre-cliquable">Puis-je modifier les seuils des indices A et C ?</summary>
                                 <div class="mt-10-pl-10">
-                                    <p><strong>Oui</strong>, dans <strong>Labo → Outils d'observation</strong>. Les trois bornes de départ sont 70&nbsp;%, 80&nbsp;% et 85&nbsp;%. Elles décident des mots qui décrivent A et C dans le profil et de la couleur des chiffres dans la liste des étudiant·es (voir «&nbsp;Les mots qui décrivent A et C&nbsp;»). La borne de 60&nbsp;% est fixe.</p>
-                                    <p class="mt-10">Ces seuils ne fixent pas le niveau RàI, et les bornes de la carte «&nbsp;Mobilisation&nbsp;» du profil sont fixes.</p>
+                                    <p><strong>Oui</strong>, dans <strong>Labo → Outils d'observation</strong>. Ses trois bornes décident de tous les signaux de A et de C&nbsp;: les mots du profil, la couleur des chiffres dans la liste des étudiant·es, les pastilles de «&nbsp;Détails&nbsp;», le filtre sur A ou C et les barres de l'Aperçu (voir «&nbsp;Les mots qui décrivent A et C&nbsp;»).</p>
+                                    <p class="mt-10">Ces seuils ne fixent pas le niveau RàI. Ils commandent aussi le badge du contexte et la carte «&nbsp;Mobilisation&nbsp;» du profil.</p>
                                 </div>
                             </details>
                         </div>
@@ -11688,9 +11662,9 @@
     <script src="js/repertoires-bibliotheque.js?v=20261006a"></script> <!-- #320 L0 : répertoires de classement (couche par-dessus les biblios) -->
     <script src="js/pratiques-bibliotheque.js?v=20261030a"></script> <!-- #1178, lot 5 (30 oct.) : les gabarits n'écrivent plus nombreTotal · Jetons par défaut (29 oct.) : les modèles fournis refusent les jetons · #318 (22 juin) : gabarit DEN « Modèle de base » ; Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <script src="js/pratiques-gestion.js?v=20261030a"></script> <!-- #1178, lot 5 (30 oct.) : les libellés de la fiche suivent la variante, le total retiré · Standards sans portfolio, retouche du lot 4 (29 oct.) : la liste lit les productions du cours actif · Standards sans portfolio, lot 4 (29 oct.) : « Productions qui comptent dans la note » ; l’export JSON n’emporte pas les exclusions · Jetons par défaut (29 oct.) : la case et les valeurs disent ce que le moteur résout · #1152, retouche du lot 5 (29 oct.) : « Labo → Exploration des pratiques » · #1156 (25 oct.) : retouche, « PAN-Dénotation » et la phrase de colonne vide · la bibliothèque des pratiques en deux colonnes ; la phrase de l’exemplaire dans « Supprimer définitivement » · Brique C namespacing pas 5 : import inter-trimestre de pratiques (modèle COPIE) + vérif dépendances echelleId/grilleId (option A : avertir) · #522 lot 4 : les deux descripteurs de pratique écrivent par db.modifier -->
-    <script src="js/preferences-v2.js?v=20261025b"></script> <!-- #1149 (24 oct.) : la case « Afficher les chaînes d'étapes » · #829 (9 oct.) : en démo, la grille de dépistage n'écrit plus la préférence réelle · Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
+    <script src="js/preferences-v2.js?v=20261030a"></script> <!-- #1149 (24 oct.) : la case « Afficher les chaînes d'étapes » · #829 (9 oct.) : en démo, la grille de dépistage n'écrit plus la préférence réelle · Beta 99.30 b0501-0735 : fix listener db-ready sur window (au lieu de document) — la pref animationPoints=false est maintenant appliquée au démarrage -->
     <script src="js/donnees-v2.js?v=20261022b"></script> <!-- #1075, point 3 (22 oct.) : Données compte aussi les copies d’une production · #649 : un seul chemin de suppression des productions, le garde mort est parti -->
-    <script src="js/etudiants.js?v=20261029b"></script> <!-- Totems de la démo (#1180, 29 oct.) : l'exemple du commentaire de la recherche suit les noms -->
+    <script src="js/etudiants.js?v=20261030a"></script> <!-- Totems de la démo (#1180, 29 oct.) : l'exemple du commentaire de la recherche suit les noms -->
     <script src="js/productions-bibliotheque.js?v=20261006a"></script> <!-- Beta 99.36 b0506-1450 : B-β passage obligé par assainirObjet -->
     <!-- #504 : les boutons d'un bloc réordonnable, partagés par cinq écrans.
          Chargé AVANT eux — ils l'appellent au rendu, pas au chargement, mais
@@ -11730,8 +11704,8 @@
     <script src="js/contexte.js?v=20261012a"></script> <!-- Beta 95.2 : Support groupe-cours -->
 
     <!-- PRIORITÉ 3: Configuration et calcul des indices (AVANT affichage) -->
-    <script src="js/interpretation-config.js?v=20261006a"></script>
-    <script src="js/contexte-qualification.js?v=20261022b"></script> <!-- #821 lot A (10 sept. 2026) : les quatre règles qui qualifient un contexte, écrites en un seul endroit — lit obtenirSeuil et la géométrie du dégradé à l'appel -->
+    <script src="js/interpretation-config.js?v=20261030a"></script>
+    <script src="js/contexte-qualification.js?v=20261030a"></script> <!-- #821 lot A (10 sept. 2026) : les quatre règles qui qualifient un contexte, écrites en un seul endroit — lit obtenirSeuil et la géométrie du dégradé à l'appel -->
 
     <!-- Système de pratiques de notation (Beta 90-91) -->
     <!-- DEN couche 2 (#318, DEN-0) : SSOT de jugementsDenotation, lu par le moteur (DEN-1) -->
@@ -11744,7 +11718,7 @@
     <!-- migration-pratiques.js retiré (Lot 3 #328, 11 juin 2026) : migration des ids
          legacy sur la clé nue pré-namespacing, morte sur tout appareil courant ;
          normaliserIdPratique résout de toute façon les ids legacy à la volée -->
-    <script src="js/pratiques/pratique-pan-standards.js?v=20261030a"></script> <!-- #1178, lot 5 (30 oct.) : nombreTotal, sans lecteur, n'est plus recopié · Standards sans portfolio, lot 2 (29 oct.) : calculerPerformanceRecente retirée, sans appelant -->
+    <script src="js/pratiques/pratique-pan-standards.js?v=20261030b"></script> <!-- #1178, lot 5 (30 oct.) : nombreTotal, sans lecteur, n'est plus recopié · Standards sans portfolio, lot 2 (29 oct.) : calculerPerformanceRecente retirée, sans appelant -->
     <script src="js/pratiques/pratique-sommative.js?v=20261029b"></script> <!-- Retouche du lot 1 des standards sans portfolio (28 oct.) : le doublon « en double · comptée une seule fois » -->
     <script src="js/pratiques/pratique-pan-specifications.js?v=20261029a"></script>
 
@@ -11774,18 +11748,18 @@
     <script src="js/objectifs.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : CC-BY-NC-SA dans le nom du fichier · Beta 99.39 b0509-0719 : #262 Phase 2 + precisionDate:minute -->
 
     <script src="js/portfolio.js?v=20261017a"></script> <!-- #326 (28 juin) : T1 simulerIndices — note STD non bâtie = « non constructible » (plus de 0 trompeur du repli) -->
-    <script src="js/saisie-presences.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · Refonte nav SP5 : naviguerVers calendrier -->
+    <script src="js/saisie-presences.js?v=20261030a"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · Refonte nav SP5 : naviguerVers calendrier -->
     <script src="js/indices.js?v=20261017a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
-    <script src="js/profil-etudiant-helpers.js?v=20261030a"></script> <!-- #1178, lot 5 (30 oct.) : obtenirTermeProduction suit la variante · Standards sans portfolio, lot 2 (29 oct.) : le dépistage lit le pool de la note · #1117, suite (20 oct.) : SOLO désactivé, le dépistage et le suivi des fondations lisent tous les critères ; le survol du niveau sans palier SOLO · Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
-    <script src="js/profil-etudiant-calculs.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : l’IPB lit criteresSuiviFondations · #1117 (19 oct.) : la cible nomme le défi sans étiquette SOLO si le réglage est désactivé · Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/tableau-bord-apercu.js?v=20261030a"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
+    <script src="js/profil-etudiant-helpers.js?v=20261030b"></script> <!-- #1178, lot 5 (30 oct.) : obtenirTermeProduction suit la variante · Standards sans portfolio, lot 2 (29 oct.) : le dépistage lit le pool de la note · #1117, suite (20 oct.) : SOLO désactivé, le dépistage et le suivi des fondations lisent tous les critères ; le survol du niveau sans palier SOLO · Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
+    <script src="js/profil-etudiant-calculs.js?v=20261030a"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : l’IPB lit criteresSuiviFondations · #1117 (19 oct.) : la cible nomme le défi sans étiquette SOLO si le réglage est désactivé · Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-rapport.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
     <script src="js/profil-etudiant-diagnostics.js?v=20261022b"></script> <!-- Refactor session B : zone diagnostics SRPNF/Critères + blocs RLO + onglets (11 fonctions, ~830 LOC) · #555 (d) : lit scoreMaitriseDeduit / scoreMaitriseRaison -->
     <script src="js/profil-etudiant-confidentiel.js?v=20260929a"></script> <!-- Refactor session B : modal PII confidentiel + services adaptés + sous-catégories médicales (8 fonctions, ~300 LOC) -->
     <script src="js/profil-etudiant-actions.js?v=20261030a"></script> <!-- #1178, lot 5 (30 oct.) : le récit sans terminale, « × 100 % » · Standards sans portfolio, lot 4 (29 oct.) : le pool reçoit la pratique demandée · Retouche du lot 1 (28 oct.) : le doublon « en double · comptée une seule fois » · Standards sans portfolio, lot 1 (28 oct.) : la cause dans `erreur`, la formule du récit, le doublon réconcilié · Refactor session C : actions cascade consulterEvaluation + calculerDetailsNoteFinale + jetons + patterns groupe (8 fonctions, ~560 LOC) -->
-    <script src="js/profil-etudiant-sections-affichage.js?v=20261029b"></script> <!-- Standards sans portfolio, lot 2 (29 oct.) : le panneau Engagement nomme le pool et les retenues de la note ; genererSectionCompletion retirée, sans appelant · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : l’aide de la section Accompagnement · R2 bis (28 oct.) : la carte garde son bouton quand la cause est propre à l’étudiant·e · Retouche du lot 1 (28 oct.) : une cause propre à l’étudiant·e garde la carte, la phrase à la place du nombre · Standards sans portfolio, lot 1 (28 oct.) : le panneau des habiletés garde sa règle quand la cause est dite · E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
+    <script src="js/profil-etudiant-sections-affichage.js?v=20261030a"></script> <!-- Standards sans portfolio, lot 2 (29 oct.) : le panneau Engagement nomme le pool et les retenues de la note ; genererSectionCompletion retirée, sans appelant · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : l’aide de la section Accompagnement · R2 bis (28 oct.) : la carte garde son bouton quand la cause est propre à l’étudiant·e · Retouche du lot 1 (28 oct.) : une cause propre à l’étudiant·e garde la carte, la phrase à la place du nombre · Standards sans portfolio, lot 1 (28 oct.) : le panneau des habiletés garde sa règle quand la cause est dite · E16 (28 oct.) : le badge de l’originale lit la règle du calcul · #1151 (24 oct.) : la rangée de sélection au lieu de la barre latérale ; un seul rendu de section · #1117, suite (20 oct.) : le survol par critère passe par survolNiveauAtteint · Refactor session D : zone HIGH partie 2 — sections d'affichage + afficherProfilComplet orchestrateur + 3 variables module-scope encapsulées (renommage profil-etudiant.js, ~4640 LOC, 38 fonctions) -->
     <script src="js/presences-apercu.js?v=20261022b"></script>
     <script src="js/presences-rapport.js?v=20261022b"></script> <!-- #485 : grille imprimable des présences (rapport + formulaire papier) -->
     <script src="js/boite-outils.js?v=20261008a"></script> <!-- Beta 96.1 : Boîte à outils pédagogiques -->
@@ -11851,7 +11825,7 @@
     <!-- PRIORITÉ 5: Modules fonctionnels -->
     <script src="js/calendrier-vue.js?v=20260805b"></script> <!-- #366+#374 relais : stats fonction pure + clé unique (5 août) -->
     <script src="js/horaire.js?v=20261012a"></script> <!-- #416 lot C : lecture stricte des séances d'un groupe DÉSIGNÉ (jamais de génération) -->
-    <script src="js/interventions.js?v=20261029b"></script> <!-- #1152, retouche 2 du lot 5 (29 oct.) : « Séance concernée » retirée, obtenirAbsencesMotiveesParDate aussi (décision de Grégoire) · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : les niveaux Préventif et Intensif de la fiche · #1117 (19 oct.) : pas de badge SOLO si le réglage est désactivé · cadrage « Rencontres » : vocabulaire, conteneur, service · lot 5 du cadrage 11 : le brouillon en mémoire, le bilan par les seuils, les notes d'un élève parti -->
+    <script src="js/interventions.js?v=20261030a"></script> <!-- #1152, retouche 2 du lot 5 (29 oct.) : « Séance concernée » retirée, obtenirAbsencesMotiveesParDate aussi (décision de Grégoire) · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : les niveaux Préventif et Intensif de la fiche · #1117 (19 oct.) : pas de badge SOLO si le réglage est désactivé · cadrage « Rencontres » : vocabulaire, conteneur, service · lot 5 du cadrage 11 : le brouillon en mémoire, le bilan par les seuils, les notes d'un élève parti -->
     <script src="js/rencontres.js?v=20261006a"></script> <!-- cadrage « Rencontres » (12 sept. 2026) : le sous-onglet Suivi › Rencontres, les trois questions -->
 
     <!-- PRIORITÉ 6: Modules avancés (Beta 91.5 - Import/Export) -->
@@ -11915,10 +11889,10 @@
     <script src="js/accompagnement.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : le trait d’union n’est plus échappé (regex sous u) · #1152, lot 5 (29 oct.) : le soulignement du glossaire aux mots entiers · #1152, lot 3 (28 oct.) : « En savoir plus » ouvre Aide › Référence sur la fiche du terme · L’aide d’« Apporter mon matériel » (19 oct.) : l’étape « Conception » de la visite correspond aussi à l’onglet (#1092) · Relecture de Cowork du 17 oct. (C3) : une icône « i » qui désigne une clé du catalogue ouvre son aide · #305 (2 juil.) : popup Conseil — nom accessible + focus -->
     <!-- Catalogues de contenu (hover, popup, terme). DOIVENT charger après accompagnement.js :
          chaque fichier appelle window.accompagnement.ajouterEntrees() directement. -->
-    <script src="js/accompagnement-contenu-hover.js?v=20261029b"></script> <!-- #1152, retouche du lot 5 (29 oct.) : la reprise ciblée n’est plus offerte ; HEIC selon le navigateur · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : les bulles du Labo et de l’Animation, « Exporter ma config », les niveaux RàI · #1156 (25 oct.) : les bulles « Tout importer » des échelles et des productions disent « dans ta bibliothèque » · #1151 (24 oct.) : la bulle du menu de l'élève dit ‹ et › · #1120, lot 2 (20 oct.) : les bulles du barème, C2 · L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
-    <script src="js/accompagnement-contenu-popup.js?v=20261029b"></script> <!-- Le guidage de la démo (29 oct.) : la fenêtre « Données démo » validée · #1152, retouche du lot 5 (29 oct.) : la reprise ciblée et la cartouche verrouillée parties · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : les aides « i » d’Annoter et évaluer, des grilles, des interventions · #1158, retouche (25 oct.) : l’aide courte de la fenêtre des tampons, validée par Grégoire · #1157, retouche (25 oct.) : l’aide « Comment fonctionne la bibliothèque » validée par Grégoire · #1152, lot 1 (24 oct.) : noms d’exemple fictifs dans « Formats de noms reconnus » (D10) · 24 oct. : l’aide de la fenêtre d’aperçu, « Ce que contient le fichier » · #1120, lot 2 (20 oct.) : l’aide « i » du barème, les trois types (C1) · L’aide d’« Apporter mon matériel » (19 oct.) : l’aide « i » conception-materiel · Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
-    <script src="js/accompagnement-contenu-terme.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : le glossaire : Exploration des pratiques, cours, groupe-cours, production ; « étudiant·es » · #1152, lot 3, retouche (28 oct.) : « en haut de l’écran », SRPNF validé · #1152, lot 3 (28 oct.) : le seul glossaire, le statique y est versé, les chemins aux libellés de config.js · #1120, lot 2 (20 oct.) : « Barème » et « Tranche » au lexique, A3 et A4 · L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
-    <script src="js/guides-pedagogiques.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : le guide ACP cite « Suivi du groupe » ; « étudiant·e » · Le guide SOLO (27 oct.) : « PS ↔ Préstructurel », le non recevable sorti de la correspondance · Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
+    <script src="js/accompagnement-contenu-hover.js?v=20261030a"></script> <!-- #1152, retouche du lot 5 (29 oct.) : la reprise ciblée n’est plus offerte ; HEIC selon le navigateur · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : les bulles du Labo et de l’Animation, « Exporter ma config », les niveaux RàI · #1156 (25 oct.) : les bulles « Tout importer » des échelles et des productions disent « dans ta bibliothèque » · #1151 (24 oct.) : la bulle du menu de l'élève dit ‹ et › · #1120, lot 2 (20 oct.) : les bulles du barème, C2 · L’aide d’« Apporter mon matériel » (19 oct.) : bulle du menu réécrite, onze bulles neuves · « Apporter mon matériel », étape 7 (17 oct.) : bulle validée par Grégoire · « Apporter mon matériel » lot 1 (16 oct.) : texte de l'info-bulle nav-conception-materiel · Lot 1 de la carte (8 oct.) : infobulle du zoom, menu « Vue » · Lot I bis (30 sept.) : infobulles de la carte Ouverture et partage · Clé orga-vue-calendrier retirée avec la vue (lot 2, 6 août) -->
+    <script src="js/accompagnement-contenu-popup.js?v=20261030a"></script> <!-- Le guidage de la démo (29 oct.) : la fenêtre « Données démo » validée · #1152, retouche du lot 5 (29 oct.) : la reprise ciblée et la cartouche verrouillée parties · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1152, lot 5 (29 oct.) : les aides « i » d’Annoter et évaluer, des grilles, des interventions · #1158, retouche (25 oct.) : l’aide courte de la fenêtre des tampons, validée par Grégoire · #1157, retouche (25 oct.) : l’aide « Comment fonctionne la bibliothèque » validée par Grégoire · #1152, lot 1 (24 oct.) : noms d’exemple fictifs dans « Formats de noms reconnus » (D10) · 24 oct. : l’aide de la fenêtre d’aperçu, « Ce que contient le fichier » · #1120, lot 2 (20 oct.) : l’aide « i » du barème, les trois types (C1) · L’aide d’« Apporter mon matériel » (19 oct.) : l’aide « i » conception-materiel · Lot I bis (30 sept.) : aide de la fenêtre des clés retirée · Beta 99.42 b0512-0738 : #277 retrait entrée modal-reparation -->
+    <script src="js/accompagnement-contenu-terme.js?v=20261030a"></script> <!-- #1152, lot 5 (29 oct.) : le glossaire : Exploration des pratiques, cours, groupe-cours, production ; « étudiant·es » · #1152, lot 3, retouche (28 oct.) : « en haut de l’écran », SRPNF validé · #1152, lot 3 (28 oct.) : le seul glossaire, le statique y est versé, les chemins aux libellés de config.js · #1120, lot 2 (20 oct.) : « Barème » et « Tranche » au lexique, A3 et A4 · L’aide d’« Apporter mon matériel » (19 oct.) : six termes des étiquettes -->
+    <script src="js/guides-pedagogiques.js?v=20261030a"></script> <!-- #1152, lot 5 (29 oct.) : le guide ACP cite « Suivi du groupe » ; « étudiant·e » · Le guide SOLO (27 oct.) : « PS ↔ Préstructurel », le non recevable sorti de la correspondance · Module unifié des guides pédagogiques : SOLO, ACP, RàI (plan du 23 mai, contenu validé 4 juin 2026) -->
     <script src="js/comparateur-pratiques.js?v=20261029b"></script> <!-- #1152, retouche du lot 5 (29 oct.) : « L’Exploration des pratiques » dans trois phrases · #1152, lot 5 (29 oct.) : le titre « Exploration des pratiques » · #1075, point 1 (22 oct.) : le DA affiché en anonymisation, libellé et CSV · Comparateur de pratiques (lot C1-a : squelette + garde démo, 6 juin 2026) -->
     <script src="js/export-resultats-finaux.js?v=20261029a"></script> <!-- #333 Lot 2 : export CSV des résultats finaux (module dédié, consomme simulerIndices) -->
 

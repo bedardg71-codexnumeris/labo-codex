@@ -68,7 +68,7 @@
 <p>L'étudiant·e identifie plusieurs éléments pertinents, mais ils restent juxtaposés sans relation explicite entre eux. La réponse est riche mais fragmentée. Code IDME : <strong>D</strong> (Développement).</p>
 <p><em>Exemple : pour la même question, l'étudiant·e énumère « la pauvreté, les inégalités sociales, les idées des Lumières et la crise financière » sans expliquer comment ces facteurs interagissent.</em></p>
 <div class="guide-pedagogique-astuce">C'est la <strong>zone critique de consolidation</strong>. L'étudiant·e a les éléments mais pas encore la structure. L'intervention pédagogique vise à amener à <em>relier</em> : « Comment ces facteurs s'influencent-ils les uns les autres ? »</div>
-<p>Dans l'évaluation IDME, ce niveau correspond à un seuil situé entre 64\u00a0% et 74\u00a0% : la performance est en développement, pas encore aboutie.</p>`
+<p>Dans l'évaluation IDME, ce niveau correspond au D : la performance est en développement, pas encore aboutie.</p>`
                 },
                 {
                     titre: 'Relationnel et Abstrait étendu',
@@ -194,9 +194,9 @@
 <p>L'app classe automatiquement chaque étudiant·e dans des «patterns» multifactoriels. Ces patterns sont en réalité une combinaison d'observations faites à partir de ses productions récentes. Les plages de pourcentages sont basées sur des données empiriques recueillies avec Labo Codex par Grégoire Bédard à l'automne 2025. Étant donné les limites de l'échantillon, ce sont des hypothèses qui restent encore à valider empiriquement. Ces plages reposent sur SOLO et ACP :</p>
 <ul class="guide-pedagogique-patterns-liste">
     <li><span class="badge-pattern-stable">Progression stable</span> — pas de défi identifié, performance suffisante.</li>
-    <li><span class="badge-pattern-defi-specifique">Défi spécifique</span> — performance générale ≥ 75\u00a0%, mais un défi récurrent identifié sur un ou plusieurs critères.</li>
-    <li><span class="badge-pattern-difficulte-emergente">Difficulté émergente</span> — performance entre 64\u00a0% et 74\u00a0% avec présence d'un défi. Zone de surveillance.</li>
-    <li><span class="badge-pattern-difficulte-persistante">Difficulté persistante</span> — performance inférieure à 64\u00a0% sur les artefacts récents. Zone d'intervention prioritaire.</li>
+    <li><span class="badge-pattern-defi-specifique">Défi spécifique</span> — performance générale au repère de maîtrise de l'échelle ou au-dessus, mais un défi récurrent identifié sur un ou plusieurs critères.</li>
+    <li><span class="badge-pattern-difficulte-emergente">Difficulté émergente</span> — performance sous le repère de maîtrise avec présence d'un défi. Zone de surveillance.</li>
+    <li><span class="badge-pattern-difficulte-persistante">Difficulté persistante</span> — performance sous le repère de suffisance sur les artefacts récents. Zone d'intervention prioritaire.</li>
     <li><span class="badge-pattern-difficulte-persistante">Non-participation</span> — présent·e en classe, mais aucune production évaluée, quand le groupe permet d'en juger (un travail dû et au moins une copie du groupe évaluée).</li>
 </ul>
 <p>Tant que rien n'est jugeable, l'app affiche «&nbsp;Données insuffisantes&nbsp;» plutôt qu'un pattern.</p>

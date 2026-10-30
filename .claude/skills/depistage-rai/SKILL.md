@@ -126,9 +126,9 @@ La fonction `identifierPatternActuel()` (`js/profil-etudiant-calculs.js`) déter
 
 | Pattern | Condition | Badge |
 |---------|-----------|-------|
-| **Difficulté persistante** | P < 64 % (Insuffisant) | `badge-pattern-difficulte-persistante` |
-| **Difficulté émergente** | P < 75 % (Développement) ET présence d'un défi | `badge-pattern-difficulte-emergente` |
-| **Défi spécifique** | P ≥ 75 % mais un défi récurrent identifié | `badge-pattern-defi-specifique` |
+| **Difficulté persistante** | sous le repère de suffisance de l'échelle (sans ce repère, sous la note de passage) | `badge-pattern-difficulte-persistante` |
+| **Difficulté émergente** | sous le repère de maîtrise ET présence d'un défi | `badge-pattern-difficulte-emergente` |
+| **Défi spécifique** | au repère de maîtrise ou au-dessus, mais un défi récurrent identifié | `badge-pattern-defi-specifique` |
 | **Stable** | Pas de défi identifié | `badge-pattern-stable` |
 | **En progression** | Amélioration sur la fenêtre d'analyse | (via tableau de bord) |
 
@@ -136,9 +136,11 @@ La fonction `identifierPatternActuel()` (`js/profil-etudiant-calculs.js`) déter
 
 La fonction `determinerNiveauRaiPedagogique()` (`js/profil-etudiant-calculs.js`) dérive les niveaux à partir des patterns et de P :
 
-- **Niveau 3 — Intensif** : Pattern «Difficulté persistante» OU P < seuil insuffisant
-- **Niveau 2 — Préventif** : P < seuil développement OU «Difficulté émergente» OU «Défi spécifique»
-- **Niveau 1 — Universel** : Performance maîtrisée (≥ 75 %) et stable
+- **Niveau 3 — Intensif** : Pattern «Difficulté persistante» OU P sous le repère de suffisance
+- **Niveau 2 — Préventif** : P sous le repère de maîtrise OU «Difficulté émergente» OU «Défi spécifique»
+- **Niveau 1 — Universel** : ni l'un ni l'autre
+
+**Une seule source par famille de seuils (décision de Grégoire, 30 oct. 2026)** : `js/contexte-qualification.js`. A et C lisent les trois champs de Labo › Outils d'observation (défauts 95 · 90 · 85, quatre paliers) ; P lit les repères de l'échelle des copies du groupe (`reperesPerformance`) ; la note de passage, `NOTE_DE_PASSAGE`. Sans repère, seule la note de passage signale, et le test « sous la maîtrise » n'existe pas. Mesures de ce chantier : `scripts/mesures-depistage/`, résultats en page privée seulement.
 
 Cas spéciaux : «Non-participation» (présent mais aucune production → Niveau 3), «En attente» (aucune donnée).
 

@@ -128,6 +128,9 @@ test('lot D · date d\'arrivée par le formulaire, tiret de l\'assiduité inconn
         const cellules = (tr) => (tr ? Array.from(tr.querySelectorAll('td')).map(td => texte(td)) : null);
         const liste = { moyA: texte(document.getElementById('moy-a')), tardif: cellules(ligneDe('Tardif')), absent: cellules(ligneDe('Absent')), inconnu: cellules(ligneDe('Inconnue')) };
 
+        // ↻ 30 oct. 2026 : le filtre suit le palier le plus bas de Labo › Outils d'observation. Réglé ici à 70, pour que
+        // DEMO004 (C = 80 %) soit jugé sur son seul A : c'est l'intention de ce cas, pas une valeur de l'application.
+        db.setSync('seuilsInterpretation', { interpretation: { excellent: 0.95, bon: 0.90, acceptable: 0.70 } });
         // LE SUIVI DU GROUPE : la barre A, puis le panneau Détails et le filtre « A ou C < 70% ».
         chargerTableauBordApercu(); await pause(900);
         const carte = texte(document.getElementById('carte-indicateurs-acpe')) || '';

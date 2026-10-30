@@ -729,7 +729,7 @@ const AIDE_CONTEXTUELLE = {
                     "Logistique — Titre, niveau RàI, contexte (rattrapage ou en classe), date, durée.",
                     "Ciblage — Coche les étudiant·es concerné·es. L'aperçu du sous-groupe (patterns, niveaux RàI) s'affiche en temps réel.",
                     "Critères ciblés — Pré-cochés automatiquement depuis les défis communs du sous-groupe (grille de dépistage). Tu peux ajuster.",
-                    "Objectif visé — Vide au départ ; « Suggérer » en propose un, d'après le critère ciblé le plus faible du sous-groupe et le prochain seuil (64\u00a0% ou 75\u00a0%). Tu peux le modifier librement.",
+                    "Objectif visé — Vide au départ ; « Suggérer » en propose un, d'après le critère ciblé le plus faible du sous-groupe et le prochain repère de ton échelle. Tu peux le modifier librement.",
                     "Observations — Notes générales et individuelles par étudiant.",
                     "Bilan — Apparaît quand tu marques l'intervention comme complétée. Comparaison automatique avant/après sur les critères ciblés."
                 ]

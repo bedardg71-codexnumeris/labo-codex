@@ -77,11 +77,13 @@ describe('#818 suite · les curseurs d\'interprétation atteignent enfin les cal
     });
 
     it('3. les autres seuils du même objet ne sont pas emportés par la reprise', () => {
-        const { win } = monter({ fragile: 0.55, defiSpecifique: 0.62, idme: { maitrise: 0.9 } });
+        const { win, store } = monter({ fragile: 0.55, defiSpecifique: 0.62, idme: { maitrise: 0.9 } });
         expect(win.obtenirSeuil('defiSpecifique')).toBe(0.62);
-        expect(win.obtenirSeuil('idme.maitrise')).toBe(0.9);
+        // 30 oct. 2026 : `idme` est sorti du modèle, plus personne ne le lit ; il reste dans l'objet enregistré (tarir n'est pas réparer).
+        expect(win.chargerSeuilsInterpretation().idme).toEqual({ maitrise: 0.9 });
+        expect(store.seuilsInterpretation.idme).toEqual({ maitrise: 0.9 });
         // Les branches absentes retombent sur le modèle, pas sur du vide.
-        expect(win.obtenirSeuil('idme.insuffisant')).toBe(win.SEUILS_PAR_DEFAUT.idme.insuffisant);
+        expect(win.obtenirSeuil('interpretation.bon')).toBe(win.SEUILS_PAR_DEFAUT.interpretation.bon);
     });
 
     it('4. sans clé plate, rien ne bouge — la reprise ne réécrit pas pour rien', () => {

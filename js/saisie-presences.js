@@ -1802,18 +1802,6 @@ function mettreAJourLigne(da, dateStr) {
 /* #224 : calculerTotalPeriodesAvecCalendrier, calculerTotalHeuresPresence,
    calculerTauxAssiduite supprimées — remplacées par calculerAssiduitePourAffichage() dans indices.js */
 
-/**
- * Obtient la classe CSS selon le taux d'assiduité
- * VERSION SIMPLIFIÉE - Sans badges, juste les couleurs
- */
-function obtenirClasseTaux(taux) {
-    if (taux >= 95) return 'taux-excellent';
-    if (taux >= 85) return 'taux-bon';
-    if (taux >= 75) return 'taux-moyen';
-    if (taux >= 65) return 'taux-faible';
-    return 'taux-critique';
-}
-
 /* ===============================
    🔄 ACTIONS RAPIDES
    =============================== */

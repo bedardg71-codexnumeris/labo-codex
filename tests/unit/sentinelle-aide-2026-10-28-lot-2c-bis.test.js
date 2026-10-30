@@ -130,35 +130,31 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(texteDe('rai')).toContain('Elle dépiste des difficultés et classe des niveaux de besoin, pour éclairer et soutenir tes décisions d\'intervention et d\'accompagnement.');
     });
 
-    it('rai et patterns : les bornes du niveau sont celles que lit `determinerNiveauRaiPedagogique`, et aucun écran ne les règle (D3)', () => {
+    it('rai et patterns : les bornes du niveau sont les repères de l\'échelle que lit `determinerNiveauRaiPedagogique` (décision du 30 oct. 2026)', () => {
         const calculs = lire('js', 'profil-etudiant-calculs.js');
         const niveau = tranche(calculs, 'function determinerNiveauRaiPedagogique(', '\nfunction ');
-        expect(niveau).toMatch(/noteConstructible && P < seuilIdmeInsuffisant/);
-        expect(niveau).toMatch(/noteConstructible && P < seuilIdmeDeveloppement/);
-        expect(niveau).toContain('obtenirSeuil(\'idme.insuffisant\')');
-        expect(niveau).toContain('obtenirSeuil(\'idme.developpement\')');
-        const bas = pct('idme', 'insuffisant');
-        const haut = pct('idme', 'developpement');
-        // « fixes » : aucun champ de l'écran ni des préférences n'écrit ces deux seuils.
+        expect(niveau).toMatch(/noteConstructible && P < bornes\.bas/);
+        expect(niveau).toMatch(/noteConstructible && bornes\.maitrise !== null && P < bornes\.maitrise/);
+        expect(niveau).toContain('window.bornesDepistage()');
+        expect(niveau).not.toContain('idme.');
+        // Aucun champ de l'écran ni des préférences n'écrit de seuil de performance : les repères se posent sur l'échelle.
         expect(html + lire('js', 'preferences-v2.js')).not.toMatch(/idme\.(insuffisant|developpement)|seuil-idme/);
-        expect(texteDe('rai')).toContain(`Ses bornes sont ${bas} % et ${haut} %, fixes`);
-        expect(texteDe('rai')).not.toMatch(/suivent? (ton|l')échelle/);
-        expect(texteDe('patterns')).toContain(`P sous ${haut} % donne au moins le niveau 2, sous ${bas} % le niveau 3, quel que soit le pattern.`);
+        expect(texteDe('rai')).toContain('Ses bornes sont les repères de ton échelle, « Suffisant à partir de » et « Maîtrisé à partir de »');
+        expect(texteDe('rai')).not.toMatch(/\b(64|75) %/);
+        expect(texteDe('patterns')).toContain('P sous le repère de maîtrise donne au moins le niveau 2, sous le repère de suffisance le niveau 3, quel que soit le pattern.');
     });
 
     it('patterns : chaque ligne est la condition de `identifierPatternActuel`', () => {
         const calculs = lire('js', 'profil-etudiant-calculs.js');
         const fn = tranche(calculs, 'function identifierPatternActuel(', '\nfunction ');
-        expect(fn).toMatch(/performancePAN3 < seuilIdmeInsuffisant\) \{\s*return 'Difficulté persistante';/);
-        expect(fn).toMatch(/performancePAN3 < seuilIdmeDeveloppement && aUnDefi\) \{\s*return 'Difficulté émergente';/);
+        expect(fn).toMatch(/performancePAN3 < bornes\.bas\) \{\s*return 'Difficulté persistante';/);
+        expect(fn).toMatch(/bornes\.maitrise !== null && performancePAN3 < bornes\.maitrise && aUnDefi\) \{\s*return 'Difficulté émergente';/);
         expect(fn).toMatch(/if \(aUnDefi\) \{\s*return 'Défi spécifique';/);
-        const bas = pct('idme', 'insuffisant');
-        const haut = pct('idme', 'developpement');
         const t = texteDe('patterns');
-        expect(t).toContain(`Difficulté persistante : une performance sous ${bas} %`);
-        expect(t).toContain(`Difficulté émergente : sous ${haut} %, avec au moins un défi`);
-        expect(t).toContain(`Défi spécifique : ${haut} % ou plus, avec au moins un défi`);
-        expect(t).toContain(`Stable : aucun défi, et une performance d'au moins ${bas} %`);
+        expect(t).toContain('Difficulté persistante : une performance sous le repère de suffisance (sans ce repère, sous la note de passage)');
+        expect(t).toContain('Difficulté émergente : sous le repère de maîtrise, avec au moins un défi');
+        expect(t).toContain('Défi spécifique : au repère de maîtrise ou au-dessus, avec au moins un défi');
+        expect(t).toContain('Stable : aucun défi, et une performance au repère de suffisance ou au-dessus');
         expect(t).not.toMatch(/Action :|RàI et mobilisation/);
     });
 
@@ -167,8 +163,11 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         for (const id of ['profil-etudiant', 'patterns', 'suivi-apprentissage']) {
             expect(texteDe(id), id).toContain(`« Seuil de défi spécifique » (${defi} % par défaut`);
         }
-        const fenetre = doc.getElementById('v2-pref-fenetre-patterns').getAttribute('value');
-        const progression = doc.getElementById('v2-seuil-progression').getAttribute('value');
+        // 30 oct. 2026 : les champs n'ont plus de `value` en dur ; `preferences-v2.js` les remplit depuis la source.
+        const fenetre = pct(null, 'nombreProductionsAnalyse') / 100;
+        const progression = pct(null, 'progressionArtefacts');
+        expect(doc.getElementById('v2-pref-fenetre-patterns').getAttribute('value')).toBeNull();
+        expect(doc.getElementById('v2-seuil-progression').getAttribute('value')).toBeNull();
         const t = texteDe('suivi-apprentissage');
         expect(t).toContain(`« Fenêtre d'analyse » (${fenetre} dernières productions par défaut)`);
         expect(t).toContain(`« Progression des artefacts » (${progression} points par défaut)`);
@@ -183,15 +182,15 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(t).not.toMatch(/organiser, être rigoureux|seuil de maîtrise|prof de chimie/);
     });
 
-    it('profil : D4, les paliers du badge et le rappel « Mobilisation » sont ceux du code', () => {
+    it('profil : les paliers du badge et le rappel « Mobilisation » lisent les trois champs (décision du 30 oct. 2026)', () => {
         const qualif = lire('js', 'contexte-qualification.js');
-        const bornes = ['tresFavorable', 'favorable', 'modere'].map((c) => Math.round(parseFloat(qualif.match(new RegExp(`\\b${c}: ([0-9.]+),?`))[1]) * 100));
-        expect(qualif).toMatch(/A >= BORNES_CONTEXTE\.modere && C >= BORNES_CONTEXTE\.modere/);
-        const rappel = lire('js', 'profil-etudiant-sections-affichage.js').match(/aVal < (\d+)\) alertes\.push\('Assiduité '/);
-        expect(rappel).toBeTruthy();
+        for (const borne of ['excellent', 'bon', 'acceptable']) expect(qualif).toContain(`A >= s.${borne} && C >= s.${borne}`);
+        const affichage = lire('js', 'profil-etudiant-sections-affichage.js');
+        expect(affichage).toMatch(/window\.sousLePalierRares\(aVal\)\) alertes\.push\('Assiduité '/);
+        expect(affichage).not.toMatch(/aVal < \d+/);
         const t = texteDe('profil-etudiant');
-        expect(t).toContain(`suit trois paliers fixes, ${bornes[0]}, ${bornes[1]} et ${bornes[2]} %, que A et C doivent atteindre ensemble`);
-        expect(t).toContain(`paraît dès que A ou C passe sous ${rappel[1]} %`);
+        expect(t).toContain('suit les trois bornes réglées dans Labo → Outils d\'observation, que A et C doivent atteindre ensemble');
+        expect(t).toContain('paraît dès que A ou C passe sous « Absences rares »');
     });
 
     it('profil : la bande à deux lignes et les huit sections, lues dans `SECTIONS_PROFIL`', () => {
@@ -215,12 +214,13 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
 
     it('tableau-bord : les filtres de « Détails » sont ceux de `tableau-bord-apercu.js`', () => {
         const tdb = lire('js', 'tableau-bord-apercu.js');
-        expect(tdb).toContain('{ id: \'P\', label: \'P < 65\\u00a0%\' }');
+        expect(tdb).toContain('{ id: \'P\', label: \'P < \' + formaterPourcentage(window.borneBassePerformance(reperesP)) }');
         expect(tdb).toContain('{ id: \'rai\', label: \'RàI 2-3\' }');
         expect(tdb).toContain('{ id: \'suivi\', label: \'Suivi\' }');
-        const critique = Math.round(parseFloat(lire('js', 'contexte-qualification.js').match(/critique: ([0-9.]+),/)[1]) * 100);
+        expect(tdb).toContain('label: \'A ou C < \' + formaterPourcentage(window.borneBasseAssiduiteCompletion())');
         const t = texteDe('tableau-bord');
-        expect(t).toContain(`« P < 65 % », « A ou C < ${critique} % », « Suivi » et « RàI 2-3 »`);
+        expect(t).toContain('Les filtres sur P, sur A ou C, « Suivi » et « RàI 2-3 » se combinent');
+        expect(t).toContain('Le filtre sur P part du repère « Suffisant à partir de » de ton échelle, ou de la note de passage sans repère ; celui sur A ou C, du palier le plus bas réglé dans Labo → Outils d\'observation.');
         expect(t).toContain('Navigation : Suivi → Suivi du groupe');
         // Les mots de Grégoire (28 oct., 12 h 07) ⟷ le tri de `appliquerFiltres` : sans filtre, l'ordre alphabétique ; avec
         // filtres, un score qui s'ADDITIONNE d'un filtre à l'autre (« cumulent ») et range le plus grand en tête.

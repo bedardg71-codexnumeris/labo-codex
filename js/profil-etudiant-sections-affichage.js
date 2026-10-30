@@ -1236,13 +1236,13 @@ function genererSectionAccompagnement(da) {
 
                 ${(() => {
                     // Indicateur de mobilisation dans la carte RàI
-                    // Visible quand A ou C est sous le seuil de mobilisation favorable (75%)
+                    // Visible quand A ou C porte une couleur : sous « Absences rares » (contexte-qualification.js)
                     if (alerteContexte.niveau === 'attente') return '';
                     const alertes = [];
                     const aVal = parseFloat(alerteContexte.A);
                     const cVal = parseFloat(alerteContexte.C);
-                    if (!isNaN(aVal) && aVal < 75) alertes.push('Assiduité ' + alerteContexte.A);
-                    if (!isNaN(cVal) && cVal < 75) alertes.push('Complétion ' + alerteContexte.C);
+                    if (!isNaN(aVal) && window.sousLePalierRares(aVal)) alertes.push('Assiduité ' + alerteContexte.A);
+                    if (!isNaN(cVal) && window.sousLePalierRares(cVal)) alertes.push('Complétion ' + alerteContexte.C);
                     if (alertes.length === 0) return '';
                     return '<div style="margin-top: 12px; padding: 8px 12px; background: var(--alerte-fond-attention, rgba(232,168,56,0.08)); border-left: 3px solid var(--orange-attention, #e8a838); border-radius: 0 4px 4px 0; font-size: 0.85rem; color: var(--orange-attention, #e8a838);">' +
                         '<strong>Mobilisation :</strong> ' + alertes.join(' · ') +
@@ -1603,10 +1603,10 @@ function genererSectionMobilisation(da) {
     const interpM = interpreterMobilisation(A, C);
 
     // #821 lot A (10 sept. 2026) — les bornes de l'interprétation A-C ont UNE
-    // source, `BORNES_MOBILISATION` (contexte-qualification.js). Les blocs de
+    // source, les champs de Labo › Outils d'observation (`bornesMobilisation`). Les blocs de
     // recommandation les lisent. Depuis le 15 oct. 2026 (bloc 7 des textes relus), la prose ne cite
     // plus de pourcentage : elle propose des pistes, au conditionnel, sous la phrase qui décrit.
-    const B = BORNES_MOBILISATION;
+    const B = bornesMobilisation();
 
     return `
         <!-- STATISTIQUES -->
