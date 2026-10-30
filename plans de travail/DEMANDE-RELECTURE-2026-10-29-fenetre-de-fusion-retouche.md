@@ -22,4 +22,8 @@ Les autres noms du point 2 n'ont pas bougé. « 1 autre différence » reste : l
 - `sentinelle-1186-fenetre-de-fusion` : 14 verts (4 neufs : le nom suit la clé, la rangée de la grille en cours, le haut de la fenêtre, la fin), `sentinelle-1182` et `sentinelle-contenir-complexite` verts.
 - **Break-test** : le nom de `brouillonDissection` rendu à l'ancien → 2 rouges (la fin, le haut de la fenêtre) ; arbre restauré, sha256 identique.
 - WebKit : `codex-1186-fenetre-de-fusion` et `codex-1182-fusion-copie-par-copie`, 3 verts.
-- Vitest complet et Playwright complet : pas rejoués ici, ils le seront avec le lot 5.
+- Vitest complet : vert avec le lot 5 (10 348). Playwright complet : pas rejoué, il attend le signal de Grégoire.
+
+## Un défaut du lot, trouvé par le rituel de début de session
+
+`codex-1186-fenetre-de-fusion.spec.js` écrivait ses captures sous `plans de travail/captures/`, ce qui rougissait deux essais de `sentinelle-ci-paths-ignore` depuis `f3da42f8`. La demande de relecture #1186 annonçait pourtant Vitest entier vert (10 325) : les captures ont été ajoutées après cette mesure (inférence). Le push aurait été refusé. Corrigé par `7cc503d1` : elles vont au dossier de sortie du banc. Issue : le lot pas fini, pas une trouvaille. Les deux fichiers déjà dans `plans de travail/captures/` restent là, non versionnés.

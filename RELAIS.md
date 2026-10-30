@@ -7,6 +7,10 @@
 
 ---
 
+## 30 OCT. 2026, 5 H 40 (Claude Code) : **TOUT SUR `main`, LOCAL, NON POUSSÉ ; EN LIGNE : TOUJOURS 1.225.1**
+
+`main` porte, sans release : les copies aux archives (#1184), la fenêtre de fusion et sa retouche (#1186), le lot 5 des standards (#1178). Deux demandes de relecture attendent Cowork : `DEMANDE-RELECTURE-2026-10-29-fenetre-de-fusion-retouche.md` et `DEMANDE-RELECTURE-2026-10-29-standards-sans-portfolio-lot-5.md`. Verdict complet, release et push attendent le signal de Grégoire. Aucune autre branche.
+
 ## 29 OCT. 2026, 20 H 30 (Claude Code) : **POUSSÉ, EN LIGNE : 1.225.1 = `960d017d` ; GITHUB EN COURS (RUN 40979224528, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **La 1.225.1** (consigne de Cowork `plans de travail/CONSIGNE-LOT-2026-10-29-mise-en-ligne-1225-1.md`) porte la retouche de la fusion (#1182, `64033140`) : `_jsonStable` suit la sémantique de `JSON.stringify` (propriété `undefined` absente, `toJSON` respecté), donc plus de faux conflits entre l'espace d'ici (IndexedDB) et un codex (JSON). Relue et acceptée par Cowork (`VERDICT-RELECTURE-2026-10-29-fusion-retouche-valeurs-indefinies.md`). Commit de docs d'abord (`68892eec`), puis la release (`960d017d`), sans entrée neuve aux Nouvelles.

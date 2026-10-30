@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 5 H 40 : LA FENÊTRE DE FUSION ET LES MOTS DES STANDARDS SANS PORTFOLIO SONT PRÊTS, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : « Fusionner avec un codex… » s'ouvre sur une fenêtre à deux colonnes, avec tes mots (« ta grille en cours dans « Apporter mon matériel » », « Versions de l'autre codex retenues »). Une pratique Standards sans aucun « Artefact » parle de productions dans l'assistant et sa fiche, et le profil écrit « productions retenues × 100 % » sans terminale. Ta pratique, avec ses artefacts, garde ses mots, sauf les textes que tu as validés pour toutes les pratiques ; sans terminale, « portfolio × 100 % ». L'assistant ne pose plus « Utiliser un portfolio ? » ni le nombre d'artefacts à soumettre. **Aucune note ne change.**
+
+**Ce qui reste à toi** : le signal pour le verdict complet et la mise en ligne, après les relectures de Cowork, et les Nouvelles à valider. Plus tard, un lot de mots : l'Exploration des pratiques et un message du profil parlent encore d'artefacts (#1187, #1188).
+
+**Vérifié comment** : Vitest entier vert (10 348) ; cinq essais rejoués sans leur correctif pour le lot des standards, et un pour le nom de ta grille, qui rougissent, puis restaurés à l'identique ; dans WebKit, l'écran du lot et les 34 fichiers d'essais qui parlent d'artefacts (100 verts, 1 sauté). Pas encore : la vérification complète du navigateur, Chrome, l'iPad, le rendu d'une vraie pratique de chimie au profil et au PDF.
+
 📝 **LE 29 OCTOBRE 2026, 20 H 22 : LA 1.225.1 EST EN LIGNE** (la fusion sans faux conflits). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : « Fusionner avec un codex… » ne montre plus de conflits qui n'existent pas. En 1.225.0, la fusion de ton codex de l'iPad annonçait 127 éléments « différents des deux côtés » alors que les deux codex n'en avaient que 6 de différents : elle comparait les données du Mac telles qu'elles sont gardées dans le navigateur, et celles de l'iPad telles qu'elles sont écrites dans le fichier. Elle les compare maintenant de la même façon. Rien de tes données n'est réécrit. Les Nouvelles ne changent pas : l'entrée de la 1.225 dit déjà ce que la fusion doit faire.
