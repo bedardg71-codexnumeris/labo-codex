@@ -131,7 +131,7 @@ Voir le plan de travail détaillé dans `plans de travail/PLAN-TRAVAIL-26-MAI.md
 ### Le chantier dépistage, trouvailles du lot 1, 30 octobre 2026 (bloquent ou touchent le chantier en cours ; `plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`)
 
 - [ ] **#1190 – La phrase sous la barre P nomme les codes M, E, D, PS, I en dur.** `genererInterpretationPerformance` (`js/tableau-bord-apercu.js`) ne vaut que pour une échelle IDME : à lire dans les repères de l'échelle.
-- [ ] **#1191 – La phrase sous la barre RàI porte 70 et 60 % au niveau 1, en dur.** `genererInterpretationRai` : à régler avec le lot 2.
+- [x] **#1191 – La phrase sous la barre RàI porte 70 et 60 % au niveau 1, en dur.** Réglé par le lot 2 (30 oct. 2026) : la phrase lit le signal de groupe. Vérifié : sentinelle `sentinelle-niveau-compare-au-groupe-2026-10-30`, et phrase lue dans l'écran réel par `temoin-tous-les-groupes.mjs`.
 - [ ] **#1192 – L'aide de la section dit « Progression : 5 points », le défaut est 10.** `js/accompagnement-contenu-popup.js`.
 - [ ] **#1193 – Défauts `seuilReussite: 60` et `seuilExcellence: 80` d'une pratique par spécifications.** `js/pratiques/pratique-pan-specifications.js:159` : réglage de pratique, à rapprocher de `NOTE_DE_PASSAGE`.
 - [ ] **#1194 – H2026 a montré 3 grilles au lieu de 7 dans une mesure enchaînée.** Écritures directes et horloge figée dans un navigateur jetable ; non reproduit par une bascule simple. Cause non établie.
