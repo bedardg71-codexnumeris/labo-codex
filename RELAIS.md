@@ -7,6 +7,22 @@
 
 ---
 
+## 29 OCT. 2026, 20 H 30 (Claude Code) : **POUSSÉ, EN LIGNE : 1.225.1 = `960d017d` ; GITHUB EN COURS (RUN 40979224528, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**La 1.225.1** (consigne de Cowork `plans de travail/CONSIGNE-LOT-2026-10-29-mise-en-ligne-1225-1.md`) porte la retouche de la fusion (#1182, `64033140`) : `_jsonStable` suit la sémantique de `JSON.stringify` (propriété `undefined` absente, `toJSON` respecté), donc plus de faux conflits entre l'espace d'ici (IndexedDB) et un codex (JSON). Relue et acceptée par Cowork (`VERDICT-RELECTURE-2026-10-29-fusion-retouche-valeurs-indefinies.md`). Commit de docs d'abord (`68892eec`), puis la release (`960d017d`), sans entrée neuve aux Nouvelles.
+
+**Rituel** : diff `746426c2..960d017d` sans motif interdit, sans `only`/`skip`, sans `page.click`/`waitForTimeout`. Vitest entier vert (851 fichiers, 10 317). Break-test rejoué sur HEAD (l'ancienne `_jsonStable` remise) : 6 essais sur 7 de `sentinelle-1182-fusion-valeurs-indefinies` rougissent ; `js/codex.js` restauré, sha256 identique (`0e0773ea…`). Le banc WebKit `codex-1182-…` rougit lui aussi sans le correctif (break-test de la session de la retouche).
+
+**Verdict du Mac, sur `960d017d`, par `scripts/verdict-en-morceaux.mjs`, sans refus** : vert, 1 135 essais, 1 131 verts, 0 au second essai, 4 rouges (4 connus, #1181), 19 sautés. Cowork, Chrome et Safari mesurés fermés (`pgrep`) avant le lancement ; Mac sur **secteur**, pression mémoire 1 tout du long. `git push` : « verdict vert à jour pour ce commit ».
+
+**Netlify** : `6ae3e325c040a944431cd32d`, `commit_ref` `960d017d`, `ready`, publié à 00:22:12 Z (20 h 22) ; le `version.js` du déploiement (permalien) dit `1.225.1`, build `1029-1846`, et son `js/codex.js` porte la nouvelle `_jsonStable`. Le domaine `app.codexnumeris.org` est derrière Cloudflare Access : non lu d'ici.
+
+**Laissés de côté, non commités** (autres lots) : `plans de travail/VERDICT-RELECTURE-2026-10-29-standards-sans-portfolio-lot-4.md` (modifié), `plans de travail/TEXTES-2026-10-29-standards-lot-5.md` (non suivi).
+
+**La suite** : la fusion réelle de Grégoire sur le Mac, six conflits attendus (trois copies, trois réglages) ; au-delà, il annule (4) et Cowork mesure dans son navigateur. Puis le lot des copies aux archives avec la retouche des mots, en 1.225.x.
+
+---
+
 ## 29 OCT. 2026, 17 H 35 (Claude Code) : **POUSSÉ, EN LIGNE : 1.225.0 = `24ca0dde` ; GITHUB EN COURS (RUN 40958563710, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **La 1.225.0** (mise en ligne en urgence à la demande de Grégoire, consigne de Cowork `plans de travail/CONSIGNE-LOT-2026-10-29-mise-en-ligne-1225-fusion.md`) porte la fusion copie par copie (#1182, `1d10728e`), relue et acceptée par Cowork (`VERDICT-RELECTURE-2026-10-29-fusion-copie-par-copie.md`). Commit de docs d'abord (`6bc350d0`) : la consigne, le verdict, la consigne des copies aux archives, et **#1183** inscrit (la palette des tampons coupée en deux familles, trouvaille du § 2 du verdict). Nouvelles 1.225 : titre et deux items validés par Grégoire, mot pour mot, quand il a collé la consigne ; mesurés contre `js/codex.js` (« modifiée le … » de chaque côté, choix par conflit), aucun mot faux. Release par `scripts/release.mjs minor` ; les quatre points de vérité à 1.225.0 / `1029-1555`.
