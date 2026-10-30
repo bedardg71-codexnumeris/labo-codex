@@ -105,3 +105,26 @@ Principe : le terme de l'Aide validée, « note du cours à ce jour », et « no
 - **Inscrit ici, à l'attention de Grégoire, rien de corrigé** : sur le codex du 30 oct. (`e0b3a87b…`, code `086f60f8`), le critère « Français écrit » de G5M a le palier « Échec » coché et sa phrase « Ce que le signalement affiche à l'enseignant » vide. Le code ne lève rien sans cette phrase (`js/entites/signalement-depistage.js:96-98`, #790). Lu lors de la mesure annulée ; aucune écriture dans ses données : Grégoire l'écrit lui-même.
 - **Vérifié et corrigé, sur décision de Grégoire (30 oct.)** : les copies de G5M et de G1A portent leur compte sous le nom `erreurs`, jamais `totalErreurs` (`scripts/mesures-depistage/champ-erreurs-copies.mjs`, noms de champs seulement ; codex `e0b3a87b…`). `js/entites/signalement-depistage.js` ne lisait que `totalErreurs` : une copie saisie comptait 0, donc « sans erreur », et ne levait jamais de signalement. La lecture accepte maintenant les deux, `erreurs` d'abord, comme `js/comptes-erreurs-stock.js`. **Source seulement, aucun stock** : le signalement se recalcule à chaque lecture ; ni migration, ni écriture dans le codex. **Effet en ligne, à la prochaine release** : tout palier coché avec sa phrase se met à lever sur les copies déjà saisies, et son niveau, s'il en a un, joue jusqu'à ce que la note du cours s'affiche. Chez Grégoire, rien tant que la phrase de G5M reste vide : c'est sa donnée, il l'écrit lui-même.
   Éprouvé : `sentinelle-790-signalement-vient-du-gabarit`, 6 tests neufs ; l'ancienne lecture en rend 3 rouges, le code restauré. Vitest entier vert sur ce correctif (854 fichiers, 10 448).
+
+## Retouche du verdict (consigne `CONSIGNE-LOT-2026-10-30-niveau-rai-critere-retouche.md`)
+
+- **C1** : la barre des patterns écarte par le pattern « Données insuffisantes ». ⚠ Élargi par nécessité : `determinerCibleIntervention` lit maintenant le pattern de la carte, sinon un élève jamais présent et sans copie entrait en « Difficulté persistante » (performance à 0).
+- **C2** : `libelleSignalement` déclaré au partage (chaîne, 200 max). **La case cochée voyage maintenant : le palier lève son signalement chez qui reçoit la grille ; elle tombait avant.** Le schéma étant fermé, une application d'avant cette version rejette un paquet qui porte ce champ.
+- **C3** : `noteDuCoursAffichee` exporté (renommé depuis `_noteProvisoireAffichee`, un seul nom), lu par le niveau, la phrase du groupe et la carte RàI, qui écrit « — » sans note affichée, aussi pour un élève sans copie. Les autres lecteurs : #1206.
+- **C4** : le guide RàI dit « En attente » avant la note, la non-participation et le diagnostic. Phrase à valider ci-dessous.
+- **C5** : badge « En attente » aux Interventions ; 0 non compté. **Source et stock** : `analyserSousGroupe` n'écrit plus de clé 0 ; une analyse déjà enregistrée qui en porte une n'est ni réécrite ni affichée, le filtre vit à la lecture.
+- **C6** : `caf: 'Oui'`, `sa` gardé (comportement et lecture du code), trois cas du signalement par le vrai registre, dont `erreurs` et `totalErreurs`.
+- **T3** : `Note ${estFinale ? 'finale' : 'provisoire'}` (`js/profil-etudiant-sections-affichage.js`) ajouté à la garde, qui voit maintenant le mot composé par un gabarit ; il y figure comme exception nommée, ouverte à Grégoire.
+- **Inscrits** : #1204, #1205, #1206, #1207 (T2).
+- **Nouvelles** : entrée `1.228`, écrite mot pour mot. Deux imprécisions signalées, mots non touchés : un palier sans niveau réglé laisse « En attente » ; le signalement exige aussi le nombre de mots.
+
+**Vérifié comment** : Vitest entier vert (855 fichiers, 10 485) ; 18 mutations, chacune rouge, journal en fin de `sentinelle-niveau-au-critere-2026-10-30.test.js`, code restauré à l'identique (empreinte du diff comparée) ; texte des Nouvelles comparé à la consigne par script ; 7 specs WebKit (profil, dépistage, partage, paliers) : 25 verts, 1 sauté (captures sur demande).
+
+**Non éprouvés** : la suite Playwright complète ; aucune spec n'ouvre le badge des Interventions ni la carte RàI sous le minimum dans un navigateur (leurs gardes : le rendu HTML au banc pour le badge, le source pour la carte) ; Safari hors banc et l'iPad.
+
+### Mots à valider (retouche)
+
+| Où | Mots |
+|---|---|
+| Guide RàI, `js/guides-pedagogiques.js:216` (la formulation « En attente » avant la note est tranchée, la phrase est de Claude Code) | Note du cours à ce jour sous ce seuil, palier 2 ; avec une difficulté sur un critère de fondation, palier 3 ; « Difficulté persistante », au moins le palier 2, même avant la note ; « Non-participation », palier 3 ; un signalement diagnostique que tu as réglé, le palier que tu lui as donné, jusqu'à ce que la note du cours s'affiche ; le reste, palier 1 une fois la note du cours affichée, et « En attente » avant. |
+| Badge de la liste, Interventions | En attente (libellé déjà en usage) |

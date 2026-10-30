@@ -325,8 +325,8 @@ function analyserSousGroupe(dasEtudiants) {
             ? determinerNiveauRaiPedagogique(da) : null;
         var niveauEtud = niveauRaiEtud ? niveauRaiEtud.niveau : 1;
 
-        // Compter les niveaux RàI
-        niveauxRai[niveauEtud] = (niveauxRai[niveauEtud] || 0) + 1;
+        // Compter les niveaux RàI ; « En attente » (0) n'en est pas un.
+        if (niveauEtud) niveauxRai[niveauEtud] = (niveauxRai[niveauEtud] || 0) + 1;
 
         // Compter les patterns
         var patternEtud = niveauRaiEtud ? niveauRaiEtud.pattern : 'Données insuffisantes';
@@ -684,7 +684,9 @@ function genererAffichageAnalyseCartes(analyse) {
     html += '<div class="profil-carte">';
 
     // Calculer le nombre de niveaux distincts présents
-    const nbNiveauxRai = analyse.niveauxRai ? Object.values(analyse.niveauxRai).filter(c => c > 0).length : 0;
+    // Une analyse déjà enregistrée peut porter une clé '0' : on l'écarte à la lecture, sans réécrire le stock.
+    const niveauxComptes = Object.entries(analyse.niveauxRai || {}).filter(([niveau, count]) => niveau !== '0' && count > 0);
+    const nbNiveauxRai = niveauxComptes.length;
 
     html += `
         <div class="carte-metrique-header">
@@ -693,10 +695,9 @@ function genererAffichageAnalyseCartes(analyse) {
         </div>
     `;
 
-    if (analyse.niveauxRai && Object.values(analyse.niveauxRai).some(c => c > 0)) {
+    if (nbNiveauxRai > 0) {
         html += '<div class="badges-centres">';
-        Object.entries(analyse.niveauxRai)
-            .filter(([niveau, count]) => count > 0)
+        niveauxComptes
             .forEach(([niveau, count]) => {
                 html += `
                     <span class="badge-analyse badge-rai-analyse-${niveau}">
@@ -938,7 +939,7 @@ function ouvrirIntervention(interventionId, options) {
                 <textarea id="note-${etudiant.da}" class="controle-form" rows="1"
                           ${_attributsTexteLibre('Note individuelle…')}
                           style="font-size: 0.85rem; resize: vertical;">${_valeurTexteLibre(noteExistante)}</textarea>
-                <span class="badge-rai-${niveauBadge}">Niveau ${niveauBadge}</span>
+                <span class="${niveauBadge ? `badge-rai-${niveauBadge}` : 'badge-attente'}">${niveauBadge ? `Niveau ${niveauBadge}` : 'En attente'}</span>
             </div>
         `;
     });

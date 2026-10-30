@@ -22,6 +22,8 @@ const NOTE_PROVISOIRE = /\bnotes?(?:\s|&nbsp;)+provisoires?\b/gi;
 // Les anciens mots qui opposent « provisoire » à « finale » sont HORS DU LOT et restent ouverts à
 // Grégoire (RELAIS.md, 30 oct.) : quand il en décide, leur ligne part d'ici.
 const ANCIENS_MOTS = 'oppose « provisoire » à « finale », ouvert au RELAIS du 30 oct.';
+// Un gabarit peut composer le mot : `Note ${estFinale ? 'finale' : 'provisoire'}`. Aucune chaîne seule ne le porte.
+const GABARIT_COMPOSE = 'Note provisoire (gabarit composé)';
 
 const EXCEPTIONS = [
     { fichier: 'index.html', contient: '(en pratique alternative de notation, la note provisoire)', nb: 1, motif: 'pratique alternative, le mot que le principe garde' },
@@ -31,6 +33,7 @@ const EXCEPTIONS = [
     { fichier: 'index.html', contient: 'Active le titre « Note finale » sur les PDFs de rétroaction (au lieu de « Note provisoire »)', nb: 1, motif: ANCIENS_MOTS },
     { fichier: 'js/accompagnement-contenu-terme.js', contient: '« Note finale » au lieu de « Note provisoire »', nb: 1, motif: ANCIENS_MOTS },
     { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 3, motif: ANCIENS_MOTS },
+    { fichier: 'js/profil-etudiant-sections-affichage.js', contient: GABARIT_COMPOSE, nb: 1, motif: ANCIENS_MOTS },
 ];
 
 function fichiersJs(dossier) {
@@ -53,6 +56,22 @@ function textesDuJs(source) {
     return textes;
 }
 
+// Les gabarits qui composent le mot : un morceau finit par « note », et son `${…}` rend « provisoire ».
+function textesComposesDuJs(source) {
+    const jetons = [...acorn.tokenizer(source, { ecmaVersion: 'latest', sourceType: 'script', allowReturnOutsideFunction: true })];
+    const textes = [];
+    jetons.forEach((jeton, i) => {
+        if (jeton.type.label !== 'template' || !/\bnotes?(?:\s|&nbsp;)+$/i.test(String(jeton.value))) return;
+        for (let j = i + 2, profondeur = 0; j < jetons.length; j++) {
+            const nature = jetons[j].type.label;
+            if (nature === '{' || nature === '${') profondeur++;
+            if (nature === '}' && profondeur-- === 0) break;
+            if (nature === 'string' && /^provisoires?$/i.test(jetons[j].value)) { textes.push(GABARIT_COMPOSE); break; }
+        }
+    });
+    return textes;
+}
+
 function textesDuHtml(source) {
     return source.replace(/<!--[\s\S]*?-->/g, '').split('\n');
 }
@@ -67,7 +86,7 @@ function occurrences(fichier, textes) {
 
 function toutesLesOccurrences() {
     const js = fichiersJs(path.join(racine, 'js')).flatMap(chemin =>
-        occurrences(path.relative(racine, chemin).split(path.sep).join('/'), textesDuJs(readFileSync(chemin, 'utf8'))));
+        occurrences(path.relative(racine, chemin).split(path.sep).join('/'), [...textesDuJs(readFileSync(chemin, 'utf8')), ...textesComposesDuJs(readFileSync(chemin, 'utf8'))]));
     return [...js, ...occurrences('index.html', textesDuHtml(readFileSync(path.join(racine, 'index.html'), 'utf8')))];
 }
 
@@ -96,6 +115,12 @@ describe('« note provisoire » : réservée aux pratiques alternatives', () => 
         ].join('\n');
         expect(occurrences('témoin.js', textesDuJs(source)).length).toBe(4);
         expect(occurrences('témoin.html', textesDuHtml('<!-- note provisoire -->\n<p>Note provisoire</p>')).length).toBe(1);
+    });
+
+    it('le détecteur voit le mot composé par un gabarit, et pas ses voisins', () => {
+        expect(textesComposesDuJs('const a = `Note ${f ? \'finale\' : \'provisoire\'} = 1`;')).toEqual([GABARIT_COMPOSE]);
+        expect(textesComposesDuJs('const a = `Note ${f ? \'finale\' : \'de passage\'} = 1`;')).toEqual([]);
+        expect(textesComposesDuJs('const a = `Note ${f} et ${g ? \'provisoire\' : \'x\'}`;')).toEqual([]);
     });
 });
 

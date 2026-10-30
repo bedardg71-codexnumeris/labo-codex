@@ -1867,7 +1867,7 @@ function _minimumDeLaNoteProvisoire() {
  * @param {Object} indices - `calculerTousLesIndices(da)`
  * @returns {(number|null)} 0-100 ; null : pas de note, ou pas encore
  */
-function _noteProvisoireAffichee(da, indices) {
+function noteDuCoursAffichee(da, indices) {
     const { copies, comptes, minimum } = _lireLesCopiesDuDepistage();
     if (!(copies.get(da) || { notes: [] }).notes.length) return null;
     if (indices.noteConstructible === false || typeof indices.P !== 'number') return null;
@@ -1909,7 +1909,7 @@ function signauxDeGroupeDepistage() {
     if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
     try {
         etudiants.filter((e) => !estEtudiantExclu(e)).forEach((e) => {
-            const note = _noteProvisoireAffichee(e.da, calculerTousLesIndices(e.da));
+            const note = noteDuCoursAffichee(e.da, calculerTousLesIndices(e.da));
             if (note === null) return;
             notesParGroupe.set(groupeDe(e), (notesParGroupe.get(groupeDe(e)) || []).concat(note));
         });
@@ -1983,7 +1983,7 @@ function determinerNiveauRaiPedagogique(da) {
 
     const besoin = sansCopie ? _besoinSansCopie() : _besoinDesCopies(indices3Derniers, diagnostic);
     const ligne = window.ligneDeReussite();
-    const note = _noteProvisoireAffichee(da, indices);
+    const note = noteDuCoursAffichee(da, indices);
     const { niveau, motif } = classerNiveauAuCritere({
         note,
         ligne,
@@ -2246,7 +2246,8 @@ function determinerCibleIntervention(da) {
         if (sansCopie) return sansCopie;
     }
 
-    const M = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
+    // Le pattern de la carte, comme son palier : sans copie, « Données insuffisantes », et non le pattern d'une performance à 0.
+    const M = carte.pattern;
 
     // La mobilisation prime sur le dépistage : un élève décroché ne se lit pas
     // dans ses critères. #554 : le statut vient de la fiche du groupe-cours actif.
@@ -2332,6 +2333,7 @@ window.identifierPatternActuel = identifierPatternActuel;
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.classerNiveauAuCritere = classerNiveauAuCritere;         // lot 3 des seuils : la règle nue
 window.signauxDeGroupeDepistage = signauxDeGroupeDepistage;     // la phrase sous la barre RàI
+window.noteDuCoursAffichee = noteDuCoursAffichee;               // la carte RàI lit la même note affichée que le niveau
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.libelleNiveauSOLO = libelleNiveauSOLO;
 window.nommerDefiAvecSOLO = nommerDefiAvecSOLO;   // lot 4, volet B

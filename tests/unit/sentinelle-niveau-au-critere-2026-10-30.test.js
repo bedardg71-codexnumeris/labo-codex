@@ -14,7 +14,8 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { tranche } from './_helpers/tranche.js';
-import { monter, storeBase, RACINE } from './_helpers/bac-suivi.js';
+import { monter, storeBase, RACINE, elementDom } from './_helpers/bac-suivi.js';
+import { chargerScript } from './_helpers/charger-script.js';
 
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
 const sansCommentaires = (code) => code.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((l) => !/^\s*\/\//.test(l)).join('\n');
@@ -38,7 +39,7 @@ const GRILLE = { id: 'G1', nom: 'Dépistage', criteres: [
  * `nuance` (le niveau de ses critères), et au besoin `A`, `constructible`, `statut`, `caf`, `groupe`.
  * `minimum` : la pratique porte ce minimum (0 ou absent : pas de portfolio).
  */
-function classe(eleves, { minimum = 0, ech = echelle(), famille = 'standards', type = 'standards', paliers = null, enPlus = [], vue = null } = {}) {
+function classe(eleves, { minimum = 0, ech = echelle(), famille = 'standards', type = 'standards', paliers = null, enPlus = [], vue = null, elements = {} } = {}) {
     const store = storeBase();
     if (vue === 'tous') store.infoCours = { id: 'GC1', nom: 'Cours banc', groupe: null, _groupeCoursId: 'GC1', _modeCours: true };
     store.test_echellesTemplates = [ech];
@@ -46,7 +47,7 @@ function classe(eleves, { minimum = 0, ech = echelle(), famille = 'standards', t
     const nbCopies = Math.max(1, ...eleves.map((e) => (e.copies || []).length));
     store.test_productions = Array.from({ length: nbCopies }, (_, i) => ({ id: 'P' + i, titre: 'P' + i, type: 'artefact-portfolio', dateEcheance: '2026-08-30' }))
         .concat({ id: 'PD', titre: 'Diagnostique', type: 'artefact-portfolio', dateEcheance: '2026-08-30', diagnostique: true });
-    store.test_groupeEtudiants = eleves.map((e, i) => ({ da: DA_DU_RANG(i), nom: 'Nom' + i, prenom: 'P', groupe: e.groupe || '01', coursId: 'GC1', statut: e.statut || 'actif', ...(e.caf ? { caf: e.caf } : {}) }));
+    store.test_groupeEtudiants = eleves.map((e, i) => ({ da: DA_DU_RANG(i), nom: 'Nom' + i, prenom: 'P', groupe: e.groupe || '01', coursId: 'GC1', statut: e.statut || 'actif', ...(e.caf ? { caf: e.caf } : {}), ...(e.sa ? { sa: e.sa } : {}) }));
     store.test_evaluationsSauvegardees = eleves.flatMap((e, i) => (e.copies || []).map((note, c) => ({
         id: `C${i}-${c}`, etudiantDA: DA_DU_RANG(i), productionId: 'P' + c, noteFinale: note, verrouillee: true, coursId: 'GC1', echelleId: ech.id, grilleId: 'G1',
         dateEvaluation: `2026-09-${String(c + 1).padStart(2, '0')}T12:00:00.000Z`, ponderationCouverte: 100,
@@ -54,10 +55,11 @@ function classe(eleves, { minimum = 0, ech = echelle(), famille = 'standards', t
     }))).concat(enPlus);
     const indices = (da) => { const e = eleves[store.test_groupeEtudiants.findIndex((f) => f.da === da)] || {}; return { A: e.A === undefined ? 100 : e.A, C: 100, P: e.P === undefined ? 0 : e.P, noteConstructible: e.constructible !== false }; };
     const b = monter(store, {
+        elements,
         prefs: { grilleReferenceDepistage: 'G1' },
         modules: ['js/entites/production-diagnostique.js', 'js/entites/signalement-depistage.js', 'js/evaluation-projection.js', 'js/contexte-qualification.js', 'js/profil-etudiant-helpers.js', 'js/profil-etudiant-calculs.js',
             { chemin: 'js/etudiants.js', internes: ['compterEvaluationsPourMinimum'] },
-            { chemin: 'js/tableau-bord-apercu.js', internes: ['genererInterpretationRai', 'phraseSansRepartition', 'genererInterpretationPerformance', 'genererBarreRaI'] }],
+            { chemin: 'js/tableau-bord-apercu.js', internes: ['genererInterpretationRai', 'phraseSansRepartition', 'genererInterpretationPerformance', 'genererBarreRaI', 'afficherPatternsApprentissage'] }],
         globaux: { designerPratiqueActive: () => ({ etat: 'ok', famille }), obtenirTypePratiqueActive: () => type, calculerTousLesIndices: indices,
             obtenirConfigPratiqueActive: () => (minimum ? { portfolio: { minimumCompletion: minimum } } : {}),
             obtenirEchelleResolue: (id) => (id === ech.id ? JSON.parse(JSON.stringify(ech)) : null),
@@ -190,12 +192,14 @@ describe('§ 1 — ce qui reste, ce qui ne compte jamais', () => {
     });
 
     it('la « Mesure d\'aide » de la fiche ne fixe ni n\'influence aucun niveau', () => {
+        // 'Oui' : la valeur que l'application écrit (`etudiant.caf === 'Oui'`, `etudiant.sa === 'Oui'`).
         for (const e of [{ P: 90, copies: [90] }, { P: 50, copies: [70] }, { P: 50, copies: [70], structure: 'I' }, { P: 80, copies: [50, 50] }]) {
-            expect(seul({ ...e, caf: 'oui' }).n()).toBe(seul(e).n());
+            expect(seul({ ...e, caf: 'Oui' }).n()).toBe(seul(e).n());
+            expect(seul({ ...e, sa: 'Oui' }).n()).toBe(seul(e).n());
         }
         const calcul = sansCommentaires(lire('js/profil-etudiant-calculs.js'));
-        expect(calcul).not.toMatch(/\.caf\b|mesureAide|Mesure d'aide/);
-        expect(sansCommentaires(lire('js/entites/signalement-depistage.js'))).not.toMatch(/\.caf\b|mesureAide/);
+        expect(calcul).not.toMatch(/\.caf\b|\.sa\b|mesureAide|Mesure d'aide/);
+        expect(sansCommentaires(lire('js/entites/signalement-depistage.js'))).not.toMatch(/\.caf\b|\.sa\b|mesureAide/);
     });
 
     it('le groupe ne change aucun niveau : le même élève, dans un groupe fort ou faible', () => {
@@ -460,6 +464,181 @@ describe('le panneau des seuils (retouche du lot 1, constat 2)', () => {
     });
 });
 
+// CONSIGNE-LOT-2026-10-30-niveau-rai-critere-retouche.md, § 1 : les constats du verdict, chacun par ce que le code rend.
+// Le critère réglé par le vrai registre, et la copie de la production diagnostique : aucun faux `projectionAlgo`.
+const critereReel = (win) => {
+    const critere = { id: 'alg', nom: 'Français écrit', ponderation: 0, niveauSOLO: 'aucun' };
+    win.projectionAlgo.appliquerAuCritere(critere, 'norme_externe', { motsReference: 500, erreursTolerees: 5, libelleSignalement: 'À référer' }, [
+        { cle: 'zero', libelle: 'Zéro', sansErreur: true, ratioMax: null },
+        { cle: 'ok', libelle: 'Ok', sansErreur: false, ratioMax: 1 },
+        { cle: 'bas', libelle: 'Bas', sansErreur: false, ratioMax: null, leveSignalement: true, niveauSignalement: 3 }
+    ]);
+    return critere;
+};
+const copieDiagnostique = (saisie) => ({ id: 'CD', etudiantDA: DA_DU_RANG(0), productionId: 'PD', noteFinale: 40, verrouillee: true, coursId: 'GC1', grilleId: 'G1', donneesAlgorithmiques: { alg: saisie } });
+
+describe('retouche — C1 : la barre des patterns écarte par le pattern, pas par le niveau', () => {
+    const barre = (eleves, opts = {}) => {
+        const conteneur = elementDom({ id: 'conteneur-indicateurs-apprentissage' });
+        const c = classe(eleves, { ...opts, elements: { 'conteneur-indicateurs-apprentissage': conteneur } });
+        const liste = eleves.map((e, i) => ({ da: DA_DU_RANG(i), nom: 'Nom' + i, prenom: 'P', sommatif: { completion: 1, performance: 1 }, alternatif: { completion: 1, performance: 1 } }));
+        c.interne.afficherPatternsApprentissage(liste);
+        return { ...c, html: conteneur.innerHTML };
+    };
+    const ATTENTE = 'En attente de données';
+
+    it('sous le minimum, le niveau est 0 et le pattern reste dans la barre', () => {
+        const { html, n } = barre([{ P: 80, copies: [80] }], { minimum: 4 });
+        expect(n()).toBe(0);
+        expect(html).toContain(`data-da="${DA_DU_RANG(0)}"`);
+        expect(html).toContain('data-pattern="stable"');
+        expect(html).not.toContain(ATTENTE);
+    });
+
+    it('un élève au seul diagnostic a un niveau, et n\'entre pas dans la barre', () => {
+        const conteneur = elementDom({ id: 'conteneur-indicateurs-apprentissage' });
+        const c = classe([{ copies: [] }], { enPlus: [copieDiagnostique({ erreurs: 50, mots: 500 })], elements: { 'conteneur-indicateurs-apprentissage': conteneur } });
+        c.store.test_grillesTemplates[0].criteres.push(critereReel(c.win));
+        expect(c.n()).toBe(3);
+        c.interne.afficherPatternsApprentissage([{ da: DA_DU_RANG(0), nom: 'N', prenom: 'P', sommatif: { completion: 1, performance: 1 }, alternatif: { completion: 1, performance: 1 } }]);
+        expect(conteneur.innerHTML).toContain(ATTENTE);
+        expect(conteneur.innerHTML).not.toContain(`data-da="${DA_DU_RANG(0)}"`);
+    });
+
+    it('un élève jamais présent, sans copie, n\'y entre pas non plus : la cible lit le pattern de la carte', () => {
+        const { html, win } = barre([{ A: 0, copies: [] }, { P: 80, copies: [80] }]);
+        expect(win.determinerCibleIntervention(DA_DU_RANG(0))).toMatchObject({ niveau: 0, pattern: 'Données insuffisantes' });
+        expect(html).not.toContain(`data-da="${DA_DU_RANG(0)}"`);
+        expect(html).toContain(`data-da="${DA_DU_RANG(1)}"`);
+    });
+});
+
+describe('retouche — C2 : la phrase du palier voyage avec la grille', () => {
+    const db = { getSync: (k, d) => (d !== undefined ? d : null) };
+    const win = chargerScript('js/partage-schemas.js');
+    chargerScript('js/partage-validation.js', { db }, win);
+    chargerScript('js/partage-format.js', { db }, win);
+    const critere = { id: 'alg', nom: 'Français écrit', ponderation: 100, type: 'algorithmique', modeleProjection: 'norme_externe',
+        paramsProjection: { motsReference: 500, erreursTolerees: 5, libelleSignalement: 'À référer' },
+        paliersProjection: [{ cle: 'ok', libelle: 'Ok', sansErreur: false, ratioMax: 1 }, { cle: 'bas', libelle: 'Bas', sansErreur: false, ratioMax: null, leveSignalement: true, niveauSignalement: 3 }] };
+    const grille = { id: 'G', nom: 'Grille', criteres: [critere] };
+
+    const paquet = (entite) => ({
+        format: 'labo-codex-partage-v1',
+        manifest: { licence: 'CC BY-NC-SA 4.0', dateExport: '2026-09-01T12:00:00Z', auteur: { nom: 'Banc' }, item_principal: { type: 'grille', id: entite.id }, chaineAttribution: [], signature: null, clePublique: null, algorithme: null },
+        entites: { grilles: [entite] }, references: [], medias: []
+    });
+
+    it('la projection garde la case, le niveau et la phrase, et le paquet reste valide', () => {
+        const projete = win.partageFormat.projeterEntite(grille, 'grille');
+        expect(projete.criteres[0].paramsProjection.libelleSignalement).toBe('À référer');
+        expect(projete.criteres[0].paliersProjection[1]).toMatchObject({ leveSignalement: true, niveauSignalement: 3 });
+        expect(win.partageValidation.validerPackage(paquet(projete)).erreurs).toEqual([]);
+    });
+
+    it('une phrase de plus de 200 caractères fait rejeter le paquet', () => {
+        const projete = win.partageFormat.projeterEntite(grille, 'grille');
+        projete.criteres[0].paramsProjection.libelleSignalement = 'x'.repeat(201);
+        expect(win.partageValidation.validerPackage(paquet(projete)).valide).toBe(false);
+    });
+
+    it('le schéma borne la phrase à 200 caractères, comme l\'éditeur et l\'import du codex', () => {
+        expect(lire('js/partage-schemas.js')).toMatch(/libelleSignalement: \{ type: 'chaine', max: 200 \}/);
+        expect(tranche(lire('js/evaluation-projection.js'), "cle: 'libelleSignalement'", '},')).toContain('max: 200');
+        expect(lire('js/import-export.js')).toMatch(/libelleSignalement: \{ type: 'string', maxLen: 200 \}/);
+    });
+});
+
+describe('retouche — C3 : la note affichée a une seule source', () => {
+    it('le prédicat exporté dit ce que le niveau lit : pas de note sous le minimum, la note au minimum', () => {
+        const indices = (P) => ({ A: 100, C: 100, P, noteConstructible: true });
+        expect(seul({ P: 80, copies: [80, 80, 80] }, { minimum: 4 }).win.noteDuCoursAffichee(DA_DU_RANG(0), indices(80))).toBe(null);
+        expect(seul({ P: 80, copies: [80, 80, 80, 80] }, { minimum: 4 }).win.noteDuCoursAffichee(DA_DU_RANG(0), indices(80))).toBe(80);
+        expect(seul({ copies: [] }).win.noteDuCoursAffichee(DA_DU_RANG(0), indices(0))).toBe(null);
+    });
+
+    it('la carte RàI le lit, avant d\'écrire le pourcentage de P', () => {
+        const carte = sansCommentaires(lire('js/profil-etudiant-sections-affichage.js'));
+        expect(tranche(carte, '<strong>Performance globale (P) :</strong>', 'lireNiveauNoteGlobale(da, pct)')).toContain("if (window.noteDuCoursAffichee(da, indices) === null) return '—';");
+    });
+
+    it('le niveau et la phrase du groupe lisent ce même prédicat, sans second nom', () => {
+        const calcul = lire('js/profil-etudiant-calculs.js');
+        expect(calcul).not.toContain('_noteProvisoireAffichee');
+        expect(calcul.match(/noteDuCoursAffichee\(/g)).toHaveLength(3);
+    });
+});
+
+describe('retouche — C4 : le guide RàI ne dit plus que le reste est au palier 1', () => {
+    it('« En attente » avant la note, la non-participation et le diagnostic', () => {
+        const guide = lire('js/guides-pedagogiques.js');
+        expect(guide).not.toContain('le reste, palier 1.');
+        expect(guide).toContain('« Non-participation », palier 3 ; un signalement diagnostique que tu as réglé, le palier que tu lui as donné, jusqu\'à ce que la note du cours s\'affiche ; le reste, palier 1 une fois la note du cours affichée, et « En attente » avant.');
+    });
+});
+
+describe('retouche — C5 : aux Interventions, « En attente » n\'est pas un niveau', () => {
+    const NIVEAUX = { A: 0, B: 2, C: 0 };
+    const INTERVENTION = { id: 'I1', titre: 'Atelier', statut: 'en-cours', niveauRai: 2, etudiants: [], type: 'ponctuelle', date: '2026-09-06', criteresCibles: [] };
+    const montage = (elements = {}) => {
+        const store = storeBase();
+        store.test_interventions = [INTERVENTION];
+        store.test_groupeEtudiants = Object.keys(NIVEAUX).map((da) => ({ da, nom: 'Nom' + da, prenom: 'P', groupe: '01', coursId: 'GC1', statut: 'actif' }));
+        return monter(store, { elements, modules: [{ chemin: 'js/interventions.js', internes: ['genererAffichageAnalyseCartes'] }], globaux: {
+            determinerNiveauRaiPedagogique: (da) => ({ niveau: NIVEAUX[da], pattern: 'Stable', label: 'x' }), calculerTousLesIndices: () => ({ A: 100, C: 100, P: 80 }),
+            calculerMoyennesCriteres: () => null, obtenirGrilleReferenceDepistage: () => null, libelleNiveauSOLO: () => '', obtenirSeuil: () => 0.7, calculerProgressionArtefacts: () => null, anonymiserTexteRetroaction: (t) => t
+        } });
+    };
+
+    it('l\'analyse d\'un sous-groupe ne le compte pas', () => {
+        const b = montage();
+        expect(b.win.analyserSousGroupe(Object.keys(NIVEAUX)).niveauxRai).toEqual({ 1: 0, 2: 1, 3: 0 });
+        b.restaurerHorloge();
+    });
+
+    it('une analyse déjà enregistrée avec une clé 0 ne l\'affiche pas et ne la compte pas (lecture du stock)', () => {
+        const b = montage();
+        const html = b.interne['interventions.js'].genererAffichageAnalyseCartes({ nbEtudiants: 3, patternsCommuns: {}, progressions: {}, niveauxRai: { 0: 2, 1: 0, 2: 1, 3: 0 } });
+        b.restaurerHorloge();
+        expect(html).toContain('Niveau 2');
+        expect(html).not.toContain('Niveau 0');
+        expect(html).toMatch(/Niveaux RàI<\/h4>\s*<strong>1<\/strong>/);
+    });
+
+    it('le badge de la liste écrit « En attente », jamais « Niveau 0 »', () => {
+        const principal = elementDom({ id: 'conteneurPrincipal' });
+        const b = montage({ conteneurPrincipal: principal });
+        b.win.ouvrirIntervention('I1');
+        b.restaurerHorloge();
+        const html = principal.innerHTML;
+        expect(html).toContain('badge-attente">En attente</span>');
+        expect(html).toContain('badge-rai-2">Niveau 2</span>');
+        expect(html).not.toContain('Niveau 0');
+        expect(html).not.toContain('badge-rai-0');
+    });
+});
+
+describe('retouche — C6 : le signalement par le vrai calcul', () => {
+    const niveau = (saisie) => {
+        const c = seul({ copies: [] }, { enPlus: [copieDiagnostique(saisie)] });
+        c.store.test_grillesTemplates[0].criteres.push(critereReel(c.win));
+        return c.n();
+    };
+
+    it('la saisie directe (`erreurs`) lève le palier et fixe son niveau, sans aucun faux registre', () => {
+        expect(niveau({ erreurs: 50, mots: 500 })).toBe(3);
+    });
+
+    it('le mode des codes (`totalErreurs`) aussi', () => {
+        expect(niveau({ totalErreurs: 50, mots: 500 })).toBe(3);
+    });
+
+    it('sous le palier, ou sans nombre de mots, rien ne se lève', () => {
+        expect(niveau({ erreurs: 1, mots: 500 })).toBe(0);
+        expect(niveau({ erreurs: 50 })).toBe(0);
+    });
+});
+
 /* Break-tests du 30 oct. 2026 : chaque mutation, puis ce fichier, puis le code restauré (git diff identique avant et après).
  *   ligne : la note de passage seule : 3 rouges ; la maîtrise à défaut de suffisance : 1
  *   borne de la ligne non stricte : 4
@@ -479,4 +658,12 @@ describe('le panneau des seuils (retouche du lot 1, constat 2)', () => {
  *   Aide (index.html) : niveau 1 sans « En attente » : 1 ; fondation retirée du niveau 3 : 1 ; 60 % devenu 65 % : 1 ; au plus le niveau 3 avant le minimum : 1 ;
  *   signalement sans sa durée : 1 ; persistante au niveau 3 : 1 ; le groupe-cours revenu dans le suivi : 1
  * Mutant équivalent, nommé : lire le diagnostic aussi après la note (0 rouge) : `classerNiveauAuCritere` l'ignore déjà ; le `note === null` évite seulement une lecture.
+ * Retouche, même méthode (avec sentinelle-note-provisoire-reservee.test.js) :
+ *   C1 : retour au filtre par niveau : 2 ; aucun filtre : 2 ; la cible recalcule son pattern : 1
+ *   C2 : phrase non déclarée : 2 ; borne élargie : 2
+ *   C3 : la carte ne lit plus le prédicat : 1 ; prédicat non exporté : 1 ; prédicat sans minimum : 7
+ *   C4 : ancienne phrase du guide : 1
+ *   C5 : le 0 compté : 1 ; la clé 0 du stock affichée : 1 ; ancien badge : 1
+ *   C6 : le signalement ne lit que totalErreurs : 2 ; que erreurs : 1 ; la mesure d'aide fixe le niveau : 1 ; les services adaptés aussi : 1
+ *   T3 : le mot composé retiré : 1 ; un second mot composé : 1
  */
