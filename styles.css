@@ -5619,6 +5619,88 @@ body:not(.mode-clair) .badge-source--partage {
     .biblio2-chevron { transition: none; }
 }
 
+/* ============================================================
+   #1186 (29 oct. 2026) — LA FENÊTRE DE FUSION EN DEUX COLONNES (codex-fusion-fenetre.js)
+   Sœur de la fenêtre de bibliothèque : ses jetons, ses classes `biblio2-*`, ses cibles de 44 px.
+   Une rangée par conflit, « Ici » à gauche, « L'autre codex » à droite ; les deux côtés
+   s'empilent quand la fenêtre est trop étroite (flex-wrap, 300 px par côté).
+   Référence : l'ébauche approuvée par Grégoire le 29 oct. (artifact Xq457R7bW6F7sdUBbuckbF).
+   ============================================================ */
+.fusion2-resume {
+    background: var(--gris-tres-pale);
+    border-radius: var(--radius-moyen);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.fusion2-resume p { margin: 0; }
+.fusion2-resume-fort { font-weight: 700; }
+.fusion2-resume-fin { font-size: 0.9rem; color: var(--texte-secondaire); }
+.fusion2-section-tete { display: flex; align-items: baseline; gap: 6px 14px; flex-wrap: wrap; }
+.fusion2-section-titre { margin: 0; font-size: 1.1rem; line-height: 1.3; }
+.fusion2-consigne { margin: 0; font-size: 0.9rem; color: var(--texte-secondaire); }
+.fusion2-raccourcis { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
+.fusion2-colonnes, .fusion2-cotes { display: flex; flex-wrap: wrap; gap: 12px; }
+.fusion2-colonne {
+    flex: 1 1 300px;
+    min-width: 0;
+    border-radius: var(--radius-moyen);
+    padding: 10px 14px;
+    background: var(--gris-tres-pale);
+}
+.fusion2-colonne--ici { background: var(--bleu-tres-pale); }
+.fusion2-colonne p { margin: 0; }
+.fusion2-etiquette {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--texte-secondaire);
+}
+.fusion2-appareil { margin-top: 2px; font-weight: 700; }
+.fusion2-sous { font-size: 0.86rem; color: var(--texte-secondaire); }
+.fusion2-rangees { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.fusion2-rangee { border-top: 1px solid var(--bordure-moyenne); padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.fusion2-rangee-tete { display: flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
+.fusion2-rangee-titre { margin: 0; font-size: 0.98rem; line-height: 1.3; }
+.fusion2-qui { font-size: 0.86rem; color: var(--texte-secondaire); }
+.fusion2-cellule {
+    flex: 1 1 300px;
+    min-width: 0;
+    border: 2px solid var(--bordure-moyenne);
+    border-radius: var(--radius-moyen);
+    padding: 10px 14px 12px;
+}
+.fusion2-cellule--gardee { border-color: var(--accent-primaire); background: var(--bleu-tres-pale); }
+.fusion2-cellule-tete { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fusion2-recente {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--vert-pale);
+    color: var(--texte-principal);
+}
+.fusion2-texte { margin: 4px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.fusion2-detail { margin: 0; font-size: 0.86rem; color: var(--texte-secondaire); overflow-wrap: anywhere; }
+.biblio2-fenetre .btn.fusion2-garder { margin-top: 10px; }
+.biblio2-fenetre .btn.fusion2-garder[aria-pressed="true"] { background: var(--btn-principal); color: white; }
+.fusion2-pied {
+    border-top: 1px solid var(--bordure-moyenne);
+    padding-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+/* Le pied reste visible au bas de la fenêtre qui défile : « Fusionner » ne se cherche pas sous vingt rangées. */
+.fusion2-fenetre > .fusion2-pied { position: sticky; bottom: -18px; background: var(--surface-carte); padding-bottom: 4px; }
+.fusion2-reste { margin: 0; font-size: 0.92rem; font-weight: 600; color: var(--texte-secondaire); }
+.fusion2-reste--complet { color: var(--texte-principal); }
+.fusion2-pied-droite { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.biblio2-fenetre .btn.biblio2-passage:disabled { opacity: 0.45; cursor: not-allowed; }
+
 /* Changelog entries — remplace inline style="background: linear-gradient(...); border-left: 3px solid ..." */
 .changelog-entry {
     border-left: 3px solid;

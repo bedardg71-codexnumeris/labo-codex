@@ -409,53 +409,16 @@ document.addEventListener('click', (event) => {
 // ===============================
 
 /**
- * Obtient les informations sur le navigateur et le système
+ * Obtient les informations sur le navigateur et le système. #1186 : par la lecture unique
+ * (appareil.js), partagée avec le manifeste du codex ; les trois lignes du rapport gardent leur forme.
  */
 function obtenirInfosSysteme() {
-    const ua = navigator.userAgent;
-    let navigateur = 'Inconnu';
-    let os = 'Inconnu';
-    let appareil = '';
-
-    // Détecter le navigateur
-    if (ua.includes('Safari') && !ua.includes('Chrome')) {
-        const match = ua.match(/Version\/(\d+\.\d+)/);
-        navigateur = `Safari ${match ? match[1] : ''}`;
-    } else if (ua.includes('Chrome')) {
-        const match = ua.match(/Chrome\/(\d+)/);
-        navigateur = `Chrome ${match ? match[1] : ''}`;
-    } else if (ua.includes('Firefox')) {
-        const match = ua.match(/Firefox\/(\d+)/);
-        navigateur = `Firefox ${match ? match[1] : ''}`;
-    } else if (ua.includes('Edge')) {
-        navigateur = 'Edge';
-    }
-
-    // Détecter l'OS et l'appareil
-    // Depuis iPadOS 13, l'iPad se fait passer pour macOS dans le user agent.
-    // On le detecte via maxTouchPoints (iPad=5, Mac=0).
-    const estIPad = (ua.includes('Mac OS X') && navigator.maxTouchPoints > 1) || ua.includes('iPad');
-    const estIPhone = ua.includes('iPhone');
-
-    if (estIPad) {
-        os = 'iPadOS';
-        appareil = 'iPad';
-    } else if (estIPhone) {
-        os = 'iOS';
-        appareil = 'iPhone';
-    } else if (ua.includes('Mac OS X')) {
-        const match = ua.match(/Mac OS X (\d+[._]\d+[._]?\d*)/);
-        os = `macOS ${match ? match[1].replace(/_/g, '.') : ''}`;
-        appareil = 'Mac';
-    } else if (ua.includes('Windows')) {
-        os = 'Windows';
-        appareil = 'PC';
-    } else if (ua.includes('Linux')) {
-        os = 'Linux';
-        appareil = 'PC';
-    }
-
-    return { navigateur, os, appareil };
+    const info = window.Appareil ? window.Appareil.ici() : { appareil: '', navigateur: 'Inconnu', version: '', systeme: 'Inconnu', versionSysteme: '' };
+    return {
+        navigateur: (info.navigateur + ' ' + info.version).trim(),
+        os: (info.systeme + ' ' + info.versionSysteme).trim(),
+        appareil: info.appareil === 'Inconnu' ? '' : info.appareil
+    };
 }
 
 /**

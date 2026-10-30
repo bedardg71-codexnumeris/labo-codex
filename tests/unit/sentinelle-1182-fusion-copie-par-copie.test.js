@@ -77,7 +77,7 @@ describe('#1182 — le cas du Mac et de l\'iPad', () => {
     it('la fin dit ce qui est entré, en mots d\'utilisateur', () => {
         const analyse = Codex._analyserFusion(MAC, IPAD);
         const fin = Codex._direLaFinDeLaFusion('Codex de l\'iPad', analyse, IPAD, {}, { importes: 0, erreurs: [] }, false);
-        expect(fin).toContain('14 évaluations et 14 annotations venues de l\'autre codex.');
+        expect(fin).toContain('De l\'autre codex : 14 évaluations et 14 annotations.');   // #1186 : sans participe
         expect(fin).not.toMatch(/a2031_|evaluationsSauvegardees/);
     });
 
