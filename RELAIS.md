@@ -7,6 +7,26 @@
 
 ---
 
+## 30 OCT. 2026, 14 H 27 (Claude Code) : **LES NOUVELLES 1.227 ET LA PHRASE DE L'AIDE SONT SUR `main`, NON POUSSÉES ; EN LIGNE : TOUJOURS 1.227.0**
+
+**Consigne** : `plans de travail/CONSIGNE-LOT-2026-10-30-nouvelles-1227-et-aide.md`.
+
+**§1 Nouvelles** : titre et cinq items écrits dans l'entrée 1.227 ; comparés par script au texte de la consigne, `&nbsp;` ramenés : 6 sur 6 identiques. Le jeton anti-cache de `changelog-data.js` passe à `20261030d`, exigé par le hook de commit.
+
+**§1 Vérifications** : les trois sont vraies. « 2 copies et 5 » = `COPIES_MINIMUM_COMPARAISON`, `EFFECTIF_MINIMUM_GROUPE` ; « au-dessus du repère, pas de signal » : 0 signal sur la grille de `classerNiveauDansLeGroupe` quand le repère est au moins à la note de passage ; le bouton (`index.html:8899`) dit « Remettre les valeurs par défaut (95 · 90 · 85) » et écrit `SEUILS_PAR_DEFAUT`.
+
+**§2 Aide** : la phrase est posée (`index.html:11026`). La garde lit le vrai `determinerNiveauRaiPedagogique` ; 4 mutations rougissent chacune sa propre assertion (Non-participation au niveau 2 ; la présence retirée de la condition ; une autre voie au niveau 3 ; la phrase retirée), le code restauré à l'identique.
+
+**§3 Tests** : Vitest entier vert (854 fichiers, 10 426) ; WebKit, `aide-lot-2c-bis-1152` et `aide-forme-1152`, 2 verts. Aucune spec n'ouvre les Nouvelles : leur rendu n'est pas éprouvé au navigateur. Pas de release, pas de verdict complet, pas de push : la 1.227.1 attend le signal de Grégoire.
+
+**Supposition nommée** : un repère de maîtrise SOUS la note de passage (aucune garde dans `echelles.js`) ferait mentir « pas de signal » entre les deux ; la règle de la note de passage l'emporte alors. Jugé marginal, phrase gardée.
+
+**À confirmer par Grégoire** : la phrase de l'Aide lui a été soumise, mais son « ok » cité par la consigne vise les Nouvelles. Le bouton « Remettre les valeurs par défaut » existe deux fois dans Outils d'observation ; seule la parenthèse les distingue.
+
+**Trouvailles hors lot, non inscrites (aucun symptôme vécu)** : la fenêtre `depistage-interpretation` (`js/accompagnement-contenu-popup.js:904-908`) dit « Restaurer les valeurs par défaut » et « Progression : 5 points » (défaut réel : 10). Le run GitHub de la 1.227.0 (41102649077) est `cancelled`, pas en attente, et celui qui l'a suivi (`f0bd1590`) n'a pas lancé Playwright ; `4117fa16` aussi est `cancelled` : le jeton du Mac est le seul verdict navigateur de la 1.227.0, et de la 1.226.0 selon l'audit de début de session.
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, le verdict du lot 4 des standards, `plans de travail/captures/`. `CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md` dit encore les Nouvelles non validées.
+
 ## 30 OCT. 2026, 13 H 58 (Claude Code) : **POUSSÉ, EN LIGNE : 1.227.0 = `3ef83f49` ; GITHUB EN ATTENTE (RUN 41102649077, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **Porte** : le lot 1 des seuils, le lot 2 du niveau (question 1), leurs retouches et la retouche 2 (`1aa8393c`, rapport `plans de travail/RAPPORT-2026-10-30-retouches-seuils-et-niveau.md`, dernière section).

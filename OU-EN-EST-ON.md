@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 14 H 27 : TES NOUVELLES DE LA 1.227 SONT PRÊTES, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : les Nouvelles de la 1.227 disent ton texte validé à 14 h 15, mot pour mot. Dans l'Aide, « Repérer les patterns » ajoute : « Seule « Non-participation », sans copie à comparer, donne le niveau 3. » La note du cours ne change pas.
+
+**Ce qui reste à toi** : le signal pour la 1.227.1, ce soir. Confirmer la phrase de l'Aide : elle t'a été soumise, mais ton « ok » de 14 h 15 visait les Nouvelles.
+
+**Vérifié comment** : les trois affirmations à vérifier sont vraies dans le code ; le texte comparé par script à celui de la consigne ; Vitest entier vert (10 426) ; la garde de la phrase rejouée sur 4 mutations, qui rougissent, puis le code restauré à l'identique ; dans WebKit, les 2 essais de l'Aide touchés sont verts. Pas encore : l'affichage des Nouvelles au navigateur, la relecture de Cowork, la vérification complète du navigateur, l'iPad.
+
 📝 **LE 30 OCTOBRE 2026, 13 H 57 : LA 1.227 EST EN LIGNE** (le niveau RàI comparé au groupe-cours ; les seuils du suivi à une seule source). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les deux entrées ci-dessous, et les cinq lignes de la 1.227 dans les Nouvelles. La note du cours ne change pas. Tes propres seuils restent à 75 · 70 · 65 tant que tu ne les changes pas.
