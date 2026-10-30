@@ -15,7 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-📝 **LE 30 OCTOBRE 2026 : LES SEUILS DU SUIVI ONT UNE SEULE SOURCE, PRÊT, PAS EN LIGNE.** *Écrit par Claude Code.*
+📝 **LE 30 OCTOBRE 2026, 13 H 57 : LA 1.227 EST EN LIGNE** (le niveau RàI comparé au groupe-cours ; les seuils du suivi à une seule source). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les deux entrées ci-dessous, et les cinq lignes de la 1.227 dans les Nouvelles. La note du cours ne change pas. Tes propres seuils restent à 75 · 70 · 65 tant que tu ne les changes pas.
+
+**Ce qui reste à toi** : relire les mots, tous en ligne sans ta validation, y compris les cinq lignes des Nouvelles (`plans de travail/RAPPORT-2026-10-30-retouches-seuils-et-niveau.md`, `js/changelog-data.js`) ; la paire « niveau 1 / Difficulté persistante » et les questions 2 à 5 du lot 2 ; changer tes seuils dans Labo › Outils d'observation, « Restaurer », si tu veux les nouveaux.
+
+**Vérifié comment** : Vitest entier vert (10 425) ; six gardes neuves rougies une à une, le code restauré à l'identique ; la vérification complète du navigateur, sur le Mac, verte (1 147 essais, 2 rattrapés au second essai, les 4 rouges connus) ; la mise en ligne constatée chez Netlify sur ce commit, et le fichier de version du déploiement dit 1.227.0. Pas encore : la relecture de Cowork de la dernière retouche (la release est passée avant, à ta demande), l'iPad, Chrome, la vérification de GitHub, qui attendait encore à l'écriture.
+
+📝 **LE 30 OCTOBRE 2026 : LES SEUILS DU SUIVI ONT UNE SEULE SOURCE, EN LIGNE EN 1.227.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : A et C suivent les trois champs de Labo › Outils d'observation, partout (défauts 95 · 90 · 85, quatre paliers). P suit les repères de ton échelle ; sans repère, seule la note de passage le signale. Les barres de l'Aperçu ont les mêmes bornes que les pastilles.
 
@@ -23,7 +31,7 @@
 
 **Vérifié comment** : Vitest entier vert ; la sentinelle neuve a rougi sur 12 mutations du code ; dans WebKit, les 28 essais des specs touchées sont verts. Le verdict complet n'est pas pris : il attend la relecture de Cowork.
 
-📝 **LE 30 OCTOBRE 2026 : LE NIVEAU RàI SE COMPARE AU GROUPE-COURS, PRÊT, PAS EN LIGNE.** *Écrit par Claude Code.*
+📝 **LE 30 OCTOBRE 2026 : LE NIVEAU RàI SE COMPARE AU GROUPE-COURS, EN LIGNE EN 1.227.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : le niveau d'un·e élève compare la moyenne de ses copies à celle de son groupe-cours, à partir de 2 copies. Sous la note de passage, au moins le niveau 2, sauf si la moyenne du groupe l'est aussi : la phrase sous la barre RàI le dit alors pour tout le groupe. Le pattern et le défi restent affichés sans fixer le niveau. Une intervention déjà enregistrée garde son niveau d'alors.
 
