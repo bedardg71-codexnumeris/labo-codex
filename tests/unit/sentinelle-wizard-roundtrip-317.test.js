@@ -49,11 +49,11 @@ describe('#132 · round-trip d\'édition — portfolio (par-artefacts)', () => {
         pratiquesStore = [pratique];
         win.chargerPratiqueExistante('p-port');
         const r = win.wizardState.reponses;
-        expect(r.nbArtefactsSoumis).toBe(10);       // ← nombreTotal
+        expect(r.nbArtefactsSoumis).toBeUndefined();  // lot 5 des standards sans portfolio : plus relu ; la pratique le garde
         expect(r.nbArtefactsRetenus).toBe(6);       // ← nombreARetenir
         expect(r.minAvantCalculFormatif).toBe(2);   // ← minimumCompletion
         expect(r.reprisesPermises).toBeUndefined();  // #903 : plus relu ; l'objet enregistré le garde (sentinelle-903-909)
-        expect(r.utiliserPortfolio).toBe(true);
+        expect(r.utiliserPortfolio).toBeUndefined();  // lot 5 : de même
     });
 
     it('restaure la méthode de sélection (meilleurs → n_meilleurs)', () => {

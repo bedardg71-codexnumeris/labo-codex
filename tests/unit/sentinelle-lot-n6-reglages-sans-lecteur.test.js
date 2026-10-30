@@ -84,9 +84,12 @@ describe('lot N6 · #900 — aucun écrivain frais des champs sans lecteur', () 
         expect(occurrences(/\.varianteCalcul\s*=(?!=)/)).toEqual([
             'js/wizard-pratique-v2.js: if (avant.varianteCalcul !== undefined) pratique.configuration.varianteCalcul = clone(avant.varianteCalcul);'
         ]);
-        expect(occurrences(/\.decouplerPN\s*=(?!=)/)).toEqual([
-            'js/wizard-pratique-v2.js: if (avant.portfolio.decouplerPN !== undefined) portfolio.decouplerPN = clone(avant.portfolio.decouplerPN);',
-            'js/pratiques-gestion.js: if (decouplerAvant !== undefined) configurations[index].configuration.portfolio.decouplerPN = decouplerAvant;'
+        // Lot 5 des standards sans portfolio : `decouplerPN`, `utiliser` et `nombreTotal` passent par une même boucle, aux deux endroits.
+        expect(occurrences(/\.decouplerPN\s*=(?!=)/)).toEqual([]);
+        expect(occurrences(/\['decouplerPN', 'utiliser', 'nombreTotal'\]/)).toHaveLength(2);
+        expect(occurrences(/portfolio\[champ\]\s*=(?!=)/)).toEqual([
+            'js/wizard-pratique-v2.js: if (avant.portfolio[champ] !== undefined) portfolio[champ] = clone(avant.portfolio[champ]);',
+            'js/pratiques-gestion.js: if (avant[champ] !== undefined) portfolio[champ] = avant[champ];'
         ].sort((a, b) => JS.indexOf(a.split(':')[0]) - JS.indexOf(b.split(':')[0])));
         expect(occurrences(/configuration\.reglesSommatives\s*=(?!=)/)).toEqual([
             'js/wizard-pratique-v2.js: if (reglesSommatives !== undefined) pratique.configuration.reglesSommatives = reglesSommatives;'
@@ -148,7 +151,8 @@ describe('lot N6 · #899 — la flèche des pratiques de notation', () => {
     for (const [f, phrases] of Object.entries(CHEMINS)) {
         it(`${f} : « → », et plus aucun « › » dans son code`, () => {
             for (const p of phrases) expect(CODE[f], p).toContain(p);
-            expect(CODE[f].includes('›'), f).toBe(false);
+            // Le texte 5 du lot 5 des standards (validé par Grégoire le 29 oct., 21 h 39) est posé mot pour mot, avec son « › ».
+            expect(CODE[f].replace('dans Conception › Pratiques de notation.', '').includes('›'), f).toBe(false);
         });
     }
 });

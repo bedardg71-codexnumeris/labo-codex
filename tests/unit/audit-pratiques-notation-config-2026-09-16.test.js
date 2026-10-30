@@ -526,7 +526,7 @@ describe('B · les modèles offerts, adoptés par l\'assistant, calculent-ils ?'
         expect(reponses.modeSelectionPortfolio).toBe('derniers');
         expect(reponses.approcheEvaluation).toBe('par-artefacts');
         expect(diff(p0, apres)).toEqual([]);                          // sans échelle : refus, rien d'écrit (inchangé)
-        expect(apres2.configuration.portfolio).toMatchObject({ nombreARetenir: 5, minimumCompletion: 5, nombreTotal: 10, methodeSelection: 'derniers' });
+        expect(apres2.configuration.portfolio).toMatchObject({ nombreARetenir: 5, minimumCompletion: 5, methodeSelection: 'derniers' });
         expect(apres2.configuration.varianteCalcul).toBeUndefined();   // #900 (lot N6) : ni le gabarit ni l'assistant ne l'écrivent
         expect(avant.riche).toBe(78.52);
         expect(apresNote.riche).toBe(78.52);                          // « derniers » = « recents » (alias du moteur) : la note n'a pas bougé
@@ -656,7 +656,7 @@ describe('G-1 · STD : la méthode de sélection écrite est celle relue et cell
             expect(f.elements['mat-portfolio-selection'].value).toBe(methode);
             // L'enseignant·e enregistre sans rien toucher.
             const ecrite = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables))[0];
-            expect(ecrite.configuration.portfolio).toMatchObject({ methodeSelection: methode, nombreARetenir: 4, minimumCompletion: 2, nombreTotal: 6 });
+            expect(ecrite.configuration.portfolio).toMatchObject({ methodeSelection: methode, nombreARetenir: 4, minimumCompletion: 2 });
             expect(ecrite.configuration.varianteCalcul, `avant N6 : ${variante}`).toBeUndefined();   // #900 (lot N6)
             expect(ecrite.configuration.echelleId).toBe('E1');
             const b2 = monter(jeuSTD({ a6Valide: true }), { pratiques: [ecrite], pratiqueId: p0.id });

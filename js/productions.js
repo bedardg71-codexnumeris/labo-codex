@@ -362,10 +362,10 @@ function validerProductionsStd(productions) {
     // Lot 3 des standards sans portfolio (29 oct. 2026) : sans aucun « Artefact », le pool prend toutes les productions,
     // quelle que soit leur pondération (lot 1) ; les règles 3a, 3b et 5 (« seuls le pool d'artefacts et la terminale
     // comptent », « choisis la terminale ») sont devenues fausses. À leur place, ce que fait le calcul (texte 1 de
-    // TEXTES-2026-10-29-standards-lot-3.md, validé par Grégoire à 8 h 52). Une terminale sans pondération rend
+    // TEXTES-2026-10-29-standards-lot-3.md, validé par Grégoire à 8 h 52 ; retouché par le texte 8 du lot 5, 21 h 43). Une terminale sans pondération rend
     // toujours la note non constructible (`calculerDetailsNoteFinale`, erreurConfiguration) : son avertissement reste.
     if (!window.poolStdFaitDArtefacts(productions, terminale ? terminale.id : null)) {
-        avertissements.push({ message: 'Sans aucun artefact, la note se calcule à partir de toutes tes productions évaluées, sauf les diagnostiques, quels que soient leur type et leur pondération. Une évaluation terminale est facultative.' });
+        avertissements.push({ message: 'Sans aucun artefact, la note se calcule à partir de toutes tes productions évaluées, quels que soient leur type et leur pondération, sauf les diagnostiques et celles que tu décoches dans ta pratique, sous « Productions qui comptent dans la note ». Une évaluation terminale est facultative.' });
         if (terminale && terminale.ponderation == null) avertissements.push(terminaleSansPonderation(terminale));
         return avertissements;
     }

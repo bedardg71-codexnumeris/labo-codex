@@ -21,12 +21,17 @@
  *      dit le texte 2. Avec des artefacts (GREG), les avertissements d'avant, mot pour mot.
  *   H. Lot 4 (29 oct. 2026) : sans « Artefact » et hors hybride, « Productions qui comptent dans la note » (TEXTES, lus dans le
  *      fichier) ; une production décochée sort de la note et des lecteurs du lot 2 ; GREG ne change pas ; le partage ne l'emporte pas.
+ *   I. Lot 5 (29 oct. 2026) : une seule fonction pour la variante des mots ; sans « Artefact » (ou sans aucune production), l'assistant,
+ *      la fiche, le récit et `obtenirTermeProduction` disent « productions » (TEXTES, lus dans le fichier) ; GREG garde les siens, 84,8
+ *      compris ; `utiliser` et `nombreTotal` ne s'écrivent plus, une pratique qui les porte les garde.
  *
  * Données fictives (Alice, Bruno). Banc : les modules RÉELS (le bac du banc du 28 oct.). Aucune écriture dans `js/`.
  * Stock : rien n'est réécrit ; tout se lit au calcul (les captures déjà prises gardent leur P).
  * BREAK-TESTS : journal en fin de fichier.
  */
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { monter, storeBase, clone } from './_helpers/bac-suivi.js';
 import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
@@ -276,13 +281,14 @@ describe('C · la formule du récit (mot neuf 1) : une partie absente ne s\'écr
     it('sans « Artefact », avec une terminale : « productions retenues × 70 % + terminale × 30 % »', () => {
         expect(avec(std({ methodeSelection: 'tous' }), prodChimie({ terminale: true }), COPIES_CHIMIE).formule).toBe('productions retenues × 70 % + terminale × 30 %');
     });
-    it('avec un « Artefact », sans terminale : « moyenne du portfolio »', () => {
+    // Texte 10 du lot 5 (21 h 45) : la même forme qu'avec une terminale, sans le terme absent.
+    it('avec un « Artefact », sans terminale : « portfolio × 100 % »', () => {
         const sansTerminale = prodGreg().filter(p => p.type !== 'terminale' && p.type !== 'portfolio');
-        expect(avec(std(), sansTerminale, COPIES_GREG).formule).toBe('moyenne du portfolio');
+        expect(avec(std(), sansTerminale, COPIES_GREG).formule).toBe('portfolio × 100\u00a0%');
     });
-    it('sans « Artefact » ni terminale : « moyenne des productions retenues » (avant : « portfolio × 100 % + terminale × 0 % »)', () => {
+    it('sans « Artefact » ni terminale : « productions retenues × 100 % » (jamais « terminale × 0 % »)', () => {
         const n = avec(std({ methodeSelection: 'tous' }), prodChimie(), COPIES_CHIMIE);
-        expect(n.formule).toBe('moyenne des productions retenues');
+        expect(n.formule).toBe('productions retenues × 100\u00a0%');
         expect(n.formule).not.toContain('terminale');
     });
 });
@@ -503,6 +509,14 @@ async function texteValide(numero) {
     const ligne = section.split('\n').find(l => l.startsWith('> '));
     return ligne.slice(2).trim().replace(/ %/g, ' %');
 }
+/** L'encadré « À vérifier » : le texte 1 du lot 3, retouché par le texte 8 du lot 5 (sa seconde citation). */
+async function encadreDesProductions() {
+    const { readFileSync } = await import('node:fs');
+    const path = await import('node:path');
+    const section = readFileSync(path.join(path.resolve(import.meta.dirname, '..', '..'), 'plans de travail/TEXTES-2026-10-29-standards-lot-5.md'), 'utf8')
+        .split(/^## /m).find(s => s.startsWith('8.'));
+    return section.split('\n').filter(l => l.startsWith('> '))[1].slice(2).trim();
+}
 const MODULES_PRODUCTIONS = ['js/note-pourcentage.js', 'js/productions.js'];
 const productionsSous = (pratique, productions = []) => banc({ pratique, productions, evaluations: [], modules: MODULES_PRODUCTIONS });
 const SOM = { id: 'som-banc', nom: 'SOM banc', type: 'sommative', calcul_note: { methode: 'moyenne_ponderee' }, dansBibliotheque: true, configuration: { type: 'sommative' } };
@@ -511,7 +525,7 @@ const exercice = (id, numero, ponderation) => ({ id, titre: 'Exercice ' + numero
 
 describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () => {
     it('CHIM sans « Artefact » (pondérés, non pondérés, avec terminale, avec conteneur) : la seule ligne du texte 1, sans bouton', async () => {
-        const TEXTE_1 = await texteValide(1);
+        const TEXTE_1 = await encadreDesProductions();
         const avecConteneur = [{ id: 'PF', titre: 'Portfolio', type: 'portfolio', ponderation: 60, coursId: 'GC1' }].concat(prodChimie());
         const cas = { 'CHIM-1': prodChimie(), 'CHIM-2': prodChimie({ ponderees: false }), 'CHIM-4': prodChimie({ terminale: true }), 'CHIM conteneur': avecConteneur };
         for (const [nom, productions] of Object.entries(cas)) {
@@ -524,7 +538,7 @@ describe('G · lot 3 : les Productions ne poussent plus vers une terminale', () 
         const productions = prodChimie({ terminale: true });
         delete productions.find(p => p.id === 'X2').ponderation;
         expect(avertir(productions)).toEqual([
-            { message: await texteValide(1) },
+            { message: await encadreDesProductions() },
             { message: 'L\'évaluation terminale « Examen 2 » n\'a pas de pondération : la note finale n\'est pas constructible tant qu\'elle n\'est pas saisie.' }
         ]);
         const n = avec(std({ methodeSelection: 'tous' }), productions, COPIES_CHIMIE);
@@ -740,6 +754,189 @@ describe('H · lot 4 : les productions qui comptent, choisies à l\'écran', () 
     });
 });
 
+/* ================================================================ I. LOT 5 : L'ASSISTANT ET LES MOTS */
+
+const lireDuDepot = (f) => readFileSync(join(resolve(import.meta.dirname, '..', '..'), f), 'utf8');   // la forme de bareme-2
+const LOT_5 = lireDuDepot('plans de travail/TEXTES-2026-10-29-standards-lot-5.md');
+const sectionLot5 = (n) => LOT_5.split(/^## /m).find(s => s.startsWith(n + '.'));
+/** Les citations `> …` du texte n, lues dans le fichier. */
+const citations = (n) => sectionLot5(n).split('\n').filter(l => l.startsWith('> ') && !l.startsWith('> **')).map(l => l.slice(2).trim());
+/** La colonne « Sans Artefact » de la table du texte 4, par endroit. */
+const nombreRetenu = (ou) => sectionLot5(4).split('\n').find(l => l.startsWith('| ' + ou)).split('|')[3].trim();
+const HYBRIDE = 'Hybride (N meilleures + Obligatoires)';
+const net = (t) => t.replace(/&nbsp;/g, ' ').replace(/ /g, ' ').replace(/<\/?strong>/g, '').replace(/’/g, '\'').replace(/\s+/g, ' ');
+
+const assistant = (pratique, productions) => banc({ pratique, productions, evaluations: [],
+    modules: [{ chemin: 'js/pratiques-bibliotheque.js', internes: [] }, { chemin: 'js/wizard-pratique-v2.js', internes: [] }] });
+const champ = (etape, id) => etape.champs.find(c => c.id === id);
+const REPONSES = { typePratique: 'standards', nom: 'STD neuve', calcNoteFinale: 'niveaux', approcheEvaluation: 'par-artefacts', echelleId: 'E0', grilleId: null,
+    modeSelectionPortfolio: 'n_meilleurs', nbArtefactsRetenus: 3, minAvantCalculFormatif: 2 };
+function lireAssistant(w) {
+    const approche = w.ETAPES_WIZARD['approche-evaluation'];
+    const config = w.ETAPES_WIZARD['config-portfolio'];
+    const carte = approche.champs[0].options[0];
+    w.wizardState.reponses = { ...REPONSES };
+    return {
+        approche: [carte.label, carte.description, approche.champs[1].texte],
+        etape: [config.titre, config.description],
+        modes: champ(config, 'modeSelectionPortfolio').options.map(o => o.label),
+        aideHybride: champ(config, 'modeSelectionPortfolio').aide,
+        retenu: champ(config, 'nbArtefactsRetenus').label,
+        minimum: champ(config, 'minAvantCalculFormatif').label,
+        champs: config.champs.map(c => c.id),
+        recap: net(w.genererRecapitulatif())
+    };
+}
+/** La fiche de la pratique, ouverte par le vrai geste : les libellés que `poserLesMotsDeLaFicheStd` y pose. */
+async function fiche(pratique, productions) {
+    const b = banc({ pratique, productions, evaluations: [], modules: [{ chemin: 'js/pratiques-gestion.js', internes: ['appliquerFormulaireDansCollection'] }],
+        globauxEnPlus: { toggleDisplay: (el, montrer) => { el.style.display = montrer ? '' : 'none'; } } });
+    b.win.EditeurCibles = { poser() {}, lire: () => [], motifRefus: () => '' };
+    const libelles = {};
+    const lecture = b.document.querySelector;
+    b.document.querySelector = (s) => (/^#mat-portfolio-selection option|^label\[for="mat-portfolio-/.test(s) ? (libelles[s] = libelles[s] || { textContent: '' }) : lecture(s));
+    await b.win.chargerPratiquePourModif(pratique.id);
+    await new Promise(r => setTimeout(r, 0));
+    const texte = (s) => (libelles[s] || {}).textContent;
+    return Object.assign(b, {
+        modes: ['meilleurs', 'derniers', 'tous'].map(v => texte('#mat-portfolio-selection option[value="' + v + '"]')),
+        retenu: texte('label[for="mat-portfolio-nombre"]'),
+        minimum: texte('label[for="mat-portfolio-minimum"]'),
+        interne: b.win.__audit['pratiques-gestion.js']
+    });
+}
+
+describe('I · lot 5 : l\'assistant et les mots', () => {
+    it('les douze textes sont bien lus dans le fichier', () => {
+        expect(citations(1)).toHaveLength(3);
+        expect(citations(3)).toEqual(['N meilleures productions', 'Toutes les productions', 'N dernières productions']);
+        expect(citations(6)).toHaveLength(2);
+        expect(citations(10)).toEqual(['portfolio × 100 %', 'productions retenues × 100 %']);
+    });
+
+    it('CHIM : l\'assistant dit « productions », ses deux champs morts partis', () => {
+        const a = lireAssistant(assistant(std(), prodChimie()).win);
+        expect(a.approche).toEqual(citations(1));
+        expect(a.etape).toEqual(citations(2));
+        expect(a.modes).toEqual([citations(3)[0], citations(3)[1], citations(3)[2], HYBRIDE]);
+        expect(a.retenu).toBe(nombreRetenu('Assistant'));
+        expect(a.minimum).toBe(citations(6)[1]);
+        expect(a.aideHybride).toBe(citations(5)[0]);
+        expect(a.champs).not.toContain('utiliserPortfolio');
+        expect(a.champs).not.toContain('nbArtefactsSoumis');
+        expect(a.recap).toContain('Approche : ' + citations(1)[0]);
+        expect(a.recap).toContain(nombreRetenu('Récapitulatif') + ' : 3');
+        expect(a.recap).toContain('Construction de la note : ' + citations(3)[0]);
+        expect(a.recap).not.toMatch(/artefact/i);
+    });
+
+    it('GREG : les mots d\'aujourd\'hui, sauf les textes pour toutes les pratiques', () => {
+        const a = lireAssistant(assistant(std(), prodGreg()).win);
+        expect(a.approche).toEqual(['Par artefacts (portfolio)', 'Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.',
+            'PAN-Standards s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.']);
+        expect(a.etape).toEqual(['Configuration du portfolio', 'Paramètre la gestion des artefacts']);
+        expect(a.modes).toEqual(['N meilleurs artefacts', 'Tous les artefacts', 'N derniers artefacts', HYBRIDE]);
+        expect(a.retenu).toBe('Nombre d\'artefacts retenus pour la note finale');
+        expect(a.minimum).toBe(citations(6)[0]);
+        expect(a.aideHybride).toBe(citations(5)[0]);
+        expect(a.champs).not.toContain('utiliserPortfolio');
+        expect(a.champs).not.toContain('nbArtefactsSoumis');
+        expect(a.recap).toContain('Artefacts retenus : 3');
+        expect(a.recap).not.toContain('Artefacts à soumettre');
+    });
+
+    it('la fiche de la pratique : les libellés suivent la variante, à l\'ouverture', async () => {
+        const chimie = await fiche(std(), prodChimie());
+        expect(chimie.modes).toEqual([citations(3)[0], citations(3)[2], citations(3)[1]]);
+        expect(chimie.retenu).toBe(nombreRetenu('Fiche'));
+        expect(chimie.minimum).toBe(citations(6)[1]);
+        const greg = await fiche(std(), prodGreg());
+        expect(greg.modes).toEqual(['N meilleurs artefacts', 'N derniers artefacts', 'Tous les artefacts']);
+        expect(greg.retenu).toBe('Artefacts pour la note finale');
+        expect(greg.minimum).toBe(citations(6)[0]);
+    });
+
+    it('un corpus vide : la variante « productions »', () => {
+        const w = assistant(std(), []).win;
+        expect(w.coursActifFaitDArtefacts()).toBe(false);
+        expect(lireAssistant(w).approche).toEqual(citations(1));
+    });
+
+    it('un « Artefact » seulement dans l\'autre cours ne change pas la variante : c\'est le cours actif qui décide', () => {
+        const autreCours = prodChimie().concat([{ id: 'AX', titre: 'Artefact d\'ailleurs', type: 'artefact-portfolio', numero: 9, coursId: 'GC-AUTRE' }]);
+        expect(banc({ pratique: std(), productions: autreCours, evaluations: [] }).win.coursActifFaitDArtefacts()).toBe(false);
+    });
+
+    it('`obtenirTermeProduction` et ses accords suivent la variante', () => {
+        const chimie = banc({ pratique: std(), productions: prodChimie(), evaluations: [] }).win;
+        expect([chimie.obtenirTermeProduction('singulier'), chimie.obtenirTermeProduction('pluriel'), chimie.obtenirTermeProduction('partitif')]).toEqual(['production', 'productions', 'de production']);
+        expect(chimie.accordTermeProduction('retenu', 2)).toBe('retenues');
+        const greg = banc({ pratique: std(), productions: prodGreg(), evaluations: [] }).win;
+        expect([greg.obtenirTermeProduction('singulier'), greg.obtenirTermeProduction('pluriel'), greg.obtenirTermeProduction('partitif')]).toEqual(['artefact', 'artefacts', 'd\'artefact']);
+        expect(greg.accordTermeProduction('retenu', 2)).toBe('retenus');
+    });
+
+    it('le récit : les textes du fichier sans terminale ; la forme avec terminale et 84,8 ne bougent pas', () => {
+        const [portfolio, productions] = citations(10);
+        const sansTerminale = prodGreg().filter(p => p.type !== 'terminale' && p.type !== 'portfolio');
+        expect(net(avec(std(), sansTerminale, COPIES_GREG).formule)).toBe(portfolio);
+        expect(net(avec(std({ methodeSelection: 'tous' }), prodChimie(), COPIES_CHIMIE).formule)).toBe(productions);
+        const greg = avec(std(), prodGreg(), COPIES_GREG);
+        expect(net(greg.formule)).toBe('portfolio × 60 % + terminale × 40 %');
+        expect(greg.profil).toBe(84.8);
+    });
+
+    it('une pratique neuve par l\'assistant n\'écrit ni `utiliser` ni `nombreTotal`', async () => {
+        const w = assistant(std(), prodChimie());
+        w.win.wizardState.reponses = { ...REPONSES };
+        w.win.wizardState.pratiqueId = null;
+        w.win.wizardState.modeEdition = false;
+        await w.win.creerPratiqueV2();
+        const liste = w.store.test_pratiquesConfigurables;
+        const portfolio = liste[liste.length - 1].configuration.portfolio;
+        expect(portfolio).toMatchObject({ nombreARetenir: 3, minimumCompletion: 2 });
+        expect(portfolio).not.toHaveProperty('utiliser');
+        expect(portfolio).not.toHaveProperty('nombreTotal');
+    });
+
+    it('une pratique qui les porte les garde : par la fiche et par l\'assistant', async () => {
+        const f = await fiche(std(), prodGreg());
+        const apres = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables))[0].configuration.portfolio;
+        expect(apres).toMatchObject({ utiliser: true, nombreTotal: 6 });
+        const w = assistant(std(), prodGreg());
+        w.win.wizardState.reponses = { ...REPONSES };
+        w.win.wizardState.pratiqueId = 'std-banc';
+        w.win.wizardState.modeEdition = true;
+        await w.win.creerPratiqueV2();
+        expect(w.store.test_pratiquesConfigurables.find(p => p.id === 'std-banc').configuration.portfolio).toMatchObject({ utiliser: true, nombreTotal: 6 });
+    });
+
+    it('une pratique qui ne les porte pas ne les gagne pas à l\'enregistrement de la fiche', async () => {
+        const sans = std();
+        delete sans.configuration.portfolio.utiliser;
+        delete sans.configuration.portfolio.nombreTotal;
+        const f = await fiche(sans, prodChimie());
+        const apres = f.interne.appliquerFormulaireDansCollection(clone(f.store.test_pratiquesConfigurables))[0].configuration.portfolio;
+        expect(apres).not.toHaveProperty('utiliser');
+        expect(apres).not.toHaveProperty('nombreTotal');
+    });
+
+    it('`modalitesEvaluation.termeProduction` n\'est plus lu ; le champ « Total d\'artefacts prévus » a quitté la fiche', () => {
+        expect(lireDuDepot('js/profil-etudiant-helpers.js')).not.toContain('termeProduction');
+        expect(lireDuDepot('index.html')).not.toContain('mat-portfolio-total');
+    });
+
+    it('les textes statiques : la fiche (7), l\'Aide (8, 9, 11, 12), au caractère près sauf l\'insécable', () => {
+        const page = net(lireDuDepot('index.html'));
+        const attendus = [citations(7)[0], citations(8)[0], ...citations(9), ...citations(11), ...citations(12)];
+        expect(attendus).toHaveLength(7);
+        for (const t of attendus) expect(page, t).toContain(net(t));
+        for (const ancien of ['Le meilleur résultat est retenu pour chaque standard', 'traces retenues au portfolio', 'C\'est une moyenne de notes', 'Minimum d\'artefacts avant calcul formatif']) {
+            expect(page, ancien).not.toContain(ancien);
+        }
+    });
+});
+
 // JOURNAL DES BREAK-TESTS (28 oct. 2026) — copie de référence, mutation, lancement, restauration (empreinte sha256 identique).
 //   M1 pratique-registre.js — le repli d'avant (les seules productions non pondérées)          → 6 rouges (CHIM-1, 3, 4 ; l'égarée ;
 //      la terminale « obligatoire » ; la note qui se calcule)
@@ -791,3 +988,10 @@ describe('H · lot 4 : les productions qui comptent, choisies à l\'écran', () 
 //   D7 pratique-registre.js — les exclusions lues aussi en hybride                             → 1 rouge (hybride 80,63)
 // RETOUCHE DU LOT 4 (29 oct. 2026, verdict de Cowork) — même procédure :
 //   D8 pratiques-gestion.js — la liste rendue à `db.get(cle('productions'))` (tout le trimestre)  → 3 rouges (les trois de la double préparation)
+// LOT 5 (30 oct. 2026, section I) — même procédure (copie de référence, mutation, lancement, restauration ; sha256 identique) :
+//   E1 pratique-registre.js — `coursActifFaitDArtefacts` forcée à vrai                         → 5 rouges (CHIM, la fiche, le corpus vide,
+//      l'autre cours, le terme) ; les cas GREG restent verts
+//   E2 profil-etudiant-actions.js — le récit rendu à « moyenne du … »                          → 3 rouges (C, I)
+//   E3 pratiques-gestion.js — le patron de `decouplerPN` retiré pour `nombreTotal` (la fiche)  → 1 rouge (« les garde »)
+//   E4 wizard-pratique-v2.js — le même, côté assistant                                         → 1 rouge (« les garde »)
+//   E5 pratique-registre.js — la variante lue sur tout le trimestre (`cle('productions')`)     → 5 rouges (H, I : l'autre cours)

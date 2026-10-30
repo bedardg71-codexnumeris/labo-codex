@@ -387,7 +387,8 @@ function _causeNoteAbsenteStd(erreurConfiguration, noteFinale, nombreEvaluesAuPo
 
 /**
  * Mot neuf 1 du lot 1 (validé par Grégoire le 28 oct. 2026, 15 h 20) — la formule du récit : une partie absente ne
- * s'écrit pas ; « portfolio » avec un « Artefact », « productions retenues » sans (décision Q1).
+ * s'écrit pas ; « portfolio » avec un « Artefact », « productions retenues » sans (décision Q1). Texte 10 du lot 5
+ * (validé le 29 oct. 2026, 21 h 45) : sans terminale, la même forme, sans le terme absent (« portfolio × 100 % »).
  * @param {boolean} avecArtefacts
  * @param {Object|null} productionTerminale
  * @param {number} ponderationTerminale - sans poids, la terminale ne s'écrit pas (jamais « terminale × 0 % »)
@@ -395,8 +396,9 @@ function _causeNoteAbsenteStd(erreurConfiguration, noteFinale, nombreEvaluesAuPo
  * @param {string} pctTerminale - pondération normalisée de la terminale
  */
 function _formuleRecitStd(avecArtefacts, productionTerminale, ponderationTerminale, pctPool, pctTerminale) {
-    if (productionTerminale === null || !(ponderationTerminale > 0)) return avecArtefacts ? 'moyenne du portfolio' : 'moyenne des productions retenues';
-    return (avecArtefacts ? 'portfolio' : 'productions retenues') + ' × ' + formaterPourcentage(pctPool)
+    const pool = avecArtefacts ? 'portfolio' : 'productions retenues';
+    if (productionTerminale === null || !(ponderationTerminale > 0)) return pool + ' × ' + formaterPourcentage(100);
+    return pool + ' × ' + formaterPourcentage(pctPool)
         + ' + terminale × ' + formaterPourcentage(pctTerminale);
 }
 

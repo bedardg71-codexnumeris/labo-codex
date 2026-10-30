@@ -90,7 +90,7 @@ const GOLDEN = {
         type: 'standards', variante: 'n-meilleurs', pratiques: ['STD'], dansBibliotheque: true,
         configuration: {
             approcheEvaluation: 'par-artefacts', echelleId: 'ech1', grilleId: 'gr1',
-            portfolio: { utiliser: true, nombreTotal: 12, nombreARetenir: 7, methodeSelection: 'meilleurs',
+            portfolio: { nombreARetenir: 7, methodeSelection: 'meilleurs',
                 minimumCompletion: 3 }
         },
         calcul_note: { methode: 'conversion_niveaux' },

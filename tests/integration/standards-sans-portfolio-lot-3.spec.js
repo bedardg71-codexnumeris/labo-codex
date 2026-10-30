@@ -16,8 +16,9 @@ const indexHtml = 'file://' + path.join(racine, 'index.html');
 
 const T = 'tstd1029b';
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');   // la forme de bareme-2
-const TEXTE_1 = lire('plans de travail/TEXTES-2026-10-29-standards-lot-3.md')
-    .split(/^## /m).find(s => s.startsWith('1.')).split('\n').find(l => l.startsWith('> ')).slice(2).trim();
+// Le texte 1 du lot 3, retouché par le texte 8 du lot 5 (sa seconde citation : l'encadré).
+const TEXTE_1 = lire('plans de travail/TEXTES-2026-10-29-standards-lot-5.md')
+    .split(/^## /m).find(s => s.startsWith('8.')).split('\n').filter(l => l.startsWith('> '))[1].slice(2).trim();
 
 const CHIMIE = [['L1', 'Laboratoire 1', 'laboratoire', 15], ['L2', 'Laboratoire 2', 'laboratoire', 15], ['L3', 'Laboratoire 3', 'laboratoire', 15],
     ['X1', 'Examen 1', 'examen', 25], ['X2', 'Examen 2', 'examen', 30]];

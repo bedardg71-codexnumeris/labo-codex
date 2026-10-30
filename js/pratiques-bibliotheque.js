@@ -183,8 +183,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             portfolio: {
                 methodeSelection: 'meilleurs',
                 nombreARetenir: 7,
-                minimumCompletion: 7,
-                nombreTotal: 10
+                minimumCompletion: 7
             }
         }
     },
@@ -202,8 +201,7 @@ const MODELES_PRATIQUES_PREDEFINIS = {
             portfolio: {
                 methodeSelection: 'recents',
                 nombreARetenir: 5,
-                minimumCompletion: 5,
-                nombreTotal: 10
+                minimumCompletion: 5
             }
         }
     },

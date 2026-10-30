@@ -803,6 +803,74 @@ function poolStdFaitDArtefacts(productions, terminalId) {
 }
 
 /**
+ * Lot 5 des standards sans portfolio (29 oct. 2026) — les productions et la terminale du COURS ACTIF, diagnostiques
+ * retirées : la lecture de la liste du lot 4 et celle du calcul (`calculerDetailsNoteFinale`).
+ * @returns {{productions: Array, terminalId: (string|null)}}
+ */
+function lireProductionsStdDuCoursActif() {
+    const brutes = obtenirDonneesSelonMode('productions') || [];
+    const productions = window.ProductionDiagnostique ? window.ProductionDiagnostique.filtrerProductions(brutes) : brutes;
+    const terminale = identifierProductionTerminale(productions);
+    return { productions, terminalId: terminale ? terminale.id : null };
+}
+
+/**
+ * Lot 5 — LA règle de la variante des mots : « artefact » si le cours actif a au moins un « Artefact », « production »
+ * sinon, y compris sans aucune production encore créée (un artefact en est une, la phrase reste vraie). L'assistant, la
+ * fiche de la pratique et `obtenirTermeProduction` la lisent ; aucun ne recopie la règle.
+ * @returns {boolean}
+ */
+function coursActifFaitDArtefacts() {
+    const { productions, terminalId } = lireProductionsStdDuCoursActif();
+    return poolStdFaitDArtefacts(productions, terminalId);
+}
+
+/**
+ * Lot 5 — les mots de l'assistant et de la fiche de la pratique, selon la variante. Validés par Grégoire le 29 oct. 2026
+ * (21 h 08 à 21 h 40), un à un : plans de travail/TEXTES-2026-10-29-standards-lot-5.md, textes 1 à 4 et 6.
+ */
+const MOTS_POOL_STD = {
+    artefacts: {
+        approche: 'Par artefacts (portfolio)',
+        variante: 'Par artefacts',
+        approcheDescription: 'Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.',
+        approcheInfo: 'PAN-Standards s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.',
+        etapeTitre: 'Configuration du portfolio',
+        etapeDescription: 'Paramètre la gestion des artefacts',
+        modeMeilleurs: 'N meilleurs artefacts',
+        modeTous: 'Tous les artefacts',
+        modeDerniers: 'N derniers artefacts',
+        retenusAssistant: 'Nombre d\'artefacts retenus pour la note finale',
+        retenusFiche: 'Artefacts pour la note finale',
+        retenusRecapitulatif: 'Artefacts retenus',
+        minimum: 'Minimum d\'artefacts évalués pour un indice P fiable'
+    },
+    productions: {
+        approche: 'Par productions',
+        variante: 'Par productions',
+        approcheDescription: 'La note se calcule à partir de tes productions évaluées, sauf les diagnostiques.',
+        approcheInfo: 'En PAN – Standards, la note repose sur plusieurs productions : à l\'étape suivante, tu choisis lesquelles elle retient (les meilleures, les dernières ou toutes).',
+        etapeTitre: 'Les productions qui font la note',
+        etapeDescription: 'Choisis combien en retenir, et lesquelles.',
+        modeMeilleurs: 'N meilleures productions',
+        modeTous: 'Toutes les productions',
+        modeDerniers: 'N dernières productions',
+        retenusAssistant: 'Nombre de productions retenues pour la note finale',
+        retenusFiche: 'Productions pour la note finale',
+        retenusRecapitulatif: 'Productions retenues',
+        minimum: 'Minimum de productions évaluées pour un indice P fiable'
+    }
+};
+
+/**
+ * Lot 5 — les mots d'une variante ; sans argument, celle du cours actif.
+ * @param {boolean} [avecArtefacts]
+ */
+function motsPoolStd(avecArtefacts = coursActifFaitDArtefacts()) {
+    return avecArtefacts ? MOTS_POOL_STD.artefacts : MOTS_POOL_STD.productions;
+}
+
+/**
  * Ids du pool STD. Avec un « Artefact » : les artefacts déclarés, comme avant (décision Q2 de Grégoire, 28 oct. 2026).
  * Sans aucun « Artefact » (lot 1 des standards sans portfolio, 28 oct. 2026) : toutes les productions hors conteneur
  * et terminale, QUELLE QUE SOIT LEUR PONDÉRATION. Avant : les seules productions non pondérées, alors que le formulaire
@@ -1165,6 +1233,9 @@ window.identifierProductionTerminale = identifierProductionTerminale;
 window.obtenirArtefactsIdsPoolStd = obtenirArtefactsIdsPoolStd;
 window.obtenirIdsPoolStdDuCorpus = obtenirIdsPoolStdDuCorpus;
 window.poolStdFaitDArtefacts = poolStdFaitDArtefacts;
+window.lireProductionsStdDuCoursActif = lireProductionsStdDuCoursActif;
+window.coursActifFaitDArtefacts = coursActifFaitDArtefacts;
+window.motsPoolStd = motsPoolStd;
 window.causeNoteStdSansProductionNotee = causeNoteStdSansProductionNotee;
 window.creerComparateurRecenceStd = creerComparateurRecenceStd;
 window.obtenirPratiqueActive = obtenirPratiqueActive;

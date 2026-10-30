@@ -324,7 +324,7 @@ describe('STD — sélection, portfolio, terminale', () => {
         expect(avec(std({ minimumCompletion: 7, reglesConformite: regles })).profil).toBe(74.8);
         expect(avec(std({ minimumCompletion: 7 })).profil).toBe(84.8);   // le minimum seul ne fait rien
     });
-    it('STD-9 le « Minimum d\'artefacts avant calcul formatif » (3) ne retient pas le calcul : un seul artefact (A4, 92) → 92 × 60 % + 32,8 = 88', () => {
+    it('STD-9 le « Minimum d\'artefacts évalués pour un indice P fiable » (3) ne retient pas le calcul : un seul artefact (A4, 92) → 92 × 60 % + 32,8 = 88', () => {
         const copies = COPIES_STD.filter(e => !(e.etudiantDA === DA.ALICE && ['A1', 'A2', 'A3', 'A5', 'A6'].includes(e.productionId)));
         expect(avec(std({ minimumCompletion: 3 }), copies)).toMatchObject({ profil: 88, export: [88, 'provisoire'] });   // E7 : avant « final »
     });

@@ -534,7 +534,6 @@ class PratiquePANStandards {
             // l'atteint jamais pour une standards ; la note est celle de `calculerDetailsNoteFinale`.
             nombreARetenir: (portfolio && portfolio.nombreARetenir) || 3,
             minimumCompletion: (portfolio && portfolio.minimumCompletion) || 7,
-            nombreTotal: (portfolio && portfolio.nombreTotal) || 10,
             methodeSelection: methodeSelection
         };
     }
