@@ -532,14 +532,9 @@ function _yield() {
     });
 }
 
+/** #1186 — la lecture unique (appareil.js) ; la forme reste « Mac — Chrome ». */
 function _identifierAppareil() {
-    var ua = navigator.userAgent;
-    if (/iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document)) return 'iPad — Safari';
-    if (/Chrome/.test(ua) && !/Edg/.test(ua)) return 'Mac — Chrome';
-    if (/Edg/.test(ua)) return 'Mac — Edge';
-    if (/Safari/.test(ua)) return 'Mac — Safari';
-    if (/Firefox/.test(ua)) return 'Mac — Firefox';
-    return navigator.platform || 'Inconnu';
+    return window.Appareil ? window.Appareil.pourLeManifeste().appareil : 'Inconnu';
 }
 
 function _versionApp() {

@@ -610,8 +610,8 @@ async function genererCodex(options = {}) {
         auteur: auteur,
         dateCreation: _etat.manifeste?.dateCreation || maintenant,
         dateDerniereModification: maintenant,
-        appareil: _identifierAppareil(),
-        navigateur: _identifierNavigateur(),        // #244 (11 mai 2026)
+        appareil: _appareilPourLeManifeste().appareil,
+        navigateur: _appareilPourLeManifeste().navigateur,   // #244 (11 mai 2026) · #1186 : la lecture unique
         userAgent: navigator.userAgent,             // #244 (string complète pour diagnostic)
         trimestre: trimestreActif,
         contenu: {
@@ -2173,16 +2173,15 @@ var LISTES_PAR_CONTENU = {
     }
 };
 
-// Ce que la fin de la fusion nomme, en mots d'utilisateur (tous féminins : « venues »).
+// Ce que la fusion compte, en mots d'utilisateur ; le reste est nommé par LIBELLES_DES_CLES (#1186).
 var MOTS_DES_ELEMENTS = {
     evaluationsSauvegardees: ['évaluation', 'évaluations'],
     annotationsTravaux: ['annotation', 'annotations'],
     fichiersTravaux: ['copie', 'copies'],
     corbeilleFichiers: ['copie à la corbeille', 'copies à la corbeille'],
     fichiersModelisation: ['copie de modélisation', 'copies de modélisation'],
-    chronoEvaluations: ['mesure du chronomètre', 'mesures du chronomètre']
+    chronoEvaluations: ['durée d\'évaluation', 'durées d\'évaluation']   // #1186 : le mot de l'écran Rythme
 };
-var MOTS_AUTRES = ['autre donnée', 'autres données'];
 
 function _a(objet, nomCle) { return Object.prototype.hasOwnProperty.call(objet, nomCle); }
 
@@ -2485,270 +2484,308 @@ function _clesAEcrire(analyse, choix) {
 
 /* ----- Les mots ----- */
 
-function _motsDe(nomCle) {
-    return MOTS_DES_ELEMENTS[_nomDeBase(nomCle)] || MOTS_AUTRES;
-}
-
-/** « 14 évaluations, 14 annotations et 2 copies », dans l'ordre de MOTS_DES_ELEMENTS ; '' si rien. */
-function _direLesComptes(comptes) {
-    var ordre = Object.keys(MOTS_DES_ELEMENTS).map(function(k) { return MOTS_DES_ELEMENTS[k][1]; });
-    ordre.push(MOTS_AUTRES[1]);
+/**
+ * « 14 évaluations, 14 annotations et le brouillon de dissection » : les comptes dans l'ordre de
+ * MOTS_DES_ELEMENTS, puis les noms (#1186 : ce qui n'est pas compté est nommé, par
+ * LIBELLES_DES_CLES, au lieu de « N autres données ») ; '' si rien.
+ */
+function _direLesComptes(bilan) {
     var parties = [];
-    ordre.forEach(function(mot) {
-        var c = comptes[mot];
-        if (c && c.n > 0) parties.push(c.n + ' ' + (c.n > 1 ? c.mots[1] : c.mots[0]));
+    Object.keys(MOTS_DES_ELEMENTS).forEach(function(k) {
+        var c = bilan.comptes[k];
+        if (c > 0) parties.push(c + ' ' + MOTS_DES_ELEMENTS[k][c > 1 ? 1 : 0]);
     });
+    bilan.noms.forEach(function(nom) { if (parties.indexOf(nom) === -1) parties.push(nom); });
     if (parties.length <= 1) return parties.join('');
     return parties.slice(0, -1).join(', ') + ' et ' + parties[parties.length - 1];
 }
 
-function _compter(comptes, nomCle, n) {
-    var mots = _motsDe(nomCle);
-    if (!comptes[mots[1]]) comptes[mots[1]] = { mots: mots, n: 0 };
-    comptes[mots[1]].n += n;
+function _nouveauBilan() { return { comptes: {}, noms: [], n: 0 }; }
+
+/** Des éléments d'une liste : comptés si la liste a ses mots, sinon nommés avec leur nombre. */
+function _compter(bilan, nomCle, n) {
+    if (n <= 0) return;
+    var base = _nomDeBase(nomCle);
+    if (_a(MOTS_DES_ELEMENTS, base)) bilan.comptes[base] = (bilan.comptes[base] || 0) + n;
+    else bilan.noms.push(_libelleDeLaCle(nomCle) + ' (' + n + ')');
+    bilan.n += n;
+}
+
+/** Une clé venue entière : ses éléments si c'est une liste qui a ses mots, sinon son nom. Une valeur vide n'apporte rien. */
+function _compterLaCleEntiere(bilan, nomCle, v) {
+    if (_familleDeLaCle(nomCle) === 'vignette') return;
+    if (v === null || v === undefined || (typeof v === 'object' && Object.keys(v).length === 0)) return;
+    if (_a(MOTS_DES_ELEMENTS, _nomDeBase(nomCle)) && Array.isArray(v)) { _compter(bilan, nomCle, v.length); return; }
+    bilan.noms.push(_libelleDeLaCle(nomCle));
+    bilan.n += 1;
 }
 
 /**
- * #1182 — ce qui entre, compté en mots d'utilisateur. Une clé venue entière de l'autre compte
- * ses éléments si c'est une liste nommée, sinon pour une « autre donnée ». Les vignettes ne
- * comptent pas : elles suivent leur copie.
+ * #1182 — ce qui entre, en mots d'utilisateur. Les vignettes ne comptent pas : elles suivent
+ * leur copie. #1186 : une clé entière est nommée (« le rythme de travail »).
  * @returns {{venues: string, nbVenues: number, remplacees: string, nbRemplacees: number,
  *   versLaCorbeille: string, nbVersLaCorbeille: number}}
  */
 function _direCeQuiEntre(analyse, externe, choix) {
-    var venues = {};
-    var remplacees = {};
-    var corbeille = {};
+    var venues = _nouveauBilan();
+    var remplacees = _nouveauBilan();
+    var corbeille = _nouveauBilan();
     Object.keys(analyse.ajouts).forEach(function(nomCle) { _compter(venues, nomCle, analyse.ajouts[nomCle].length); });
     Object.keys(analyse.parContenu).forEach(function(nomCle) { _compter(venues, nomCle, analyse.parContenu[nomCle].ajouts); });
-    analyse.importees.forEach(function(nomCle) {
-        if (_familleDeLaCle(nomCle) === 'vignette') return;
-        var v = externe[nomCle];
-        if (v === null || v === undefined || (typeof v === 'object' && Object.keys(v).length === 0)) return;   // une liste vide n'apporte rien
-        var nomme = _a(MOTS_DES_ELEMENTS, _nomDeBase(nomCle)) && Array.isArray(v);
-        _compter(venues, nomme ? cle : '', nomme ? v.length : 1);
-    });
+    analyse.importees.forEach(function(nomCle) { _compterLaCleEntiere(venues, nomCle, externe[nomCle]); });
     analyse.conflits.forEach(function(c) {
-        if (choix[_cleDuConflit(c)] === 'externe') _compter(remplacees, c.id !== undefined ? c.cle : '', 1);
+        if (choix[_cleDuConflit(c)] !== 'externe') return;
+        if (c.id !== undefined) _compter(remplacees, c.cle, 1);
+        else { remplacees.noms.push(_libelleDeLaCle(c.cle)); remplacees.n += 1; }
     });
     Object.keys(analyse.versLaCorbeille).forEach(function(nomCle) { _compter(corbeille, nomCle, analyse.versLaCorbeille[nomCle].length); });
-    var total = function(comptes) {
-        return Object.keys(comptes).reduce(function(n, mot) { return n + comptes[mot].n; }, 0);
-    };
     return {
-        venues: _direLesComptes(venues), nbVenues: total(venues),
-        remplacees: _direLesComptes(remplacees), nbRemplacees: total(remplacees),
-        versLaCorbeille: _direLesComptes(corbeille), nbVersLaCorbeille: total(corbeille)
+        venues: _direLesComptes(venues), nbVenues: venues.n,
+        remplacees: _direLesComptes(remplacees), nbRemplacees: remplacees.n,
+        versLaCorbeille: _direLesComptes(corbeille), nbVersLaCorbeille: corbeille.n
     };
 }
 
-/** Ce qui nomme un élément à l'écran : sa production et son élève (jamais dans un rapport). */
-function _nommerElement(nomCle, e, donnees) {
+/* ----- Ce que la fenêtre de fusion montre (#1186) ----- */
+
+/** Le nom d'un tampon : celui d'un tampon personnalisé, sinon celui du catalogue de la palette. */
+function _nomDuTampon(id, ici, labas) {
+    var perso = [ici, labas].find(function(v) { return v && typeof v === 'object' && typeof v.nom === 'string' && v.nom; });
+    var catalogue = (window.travauxOutils && Array.isArray(window.travauxOutils.AUTOCOLLANTS)) ? window.travauxOutils.AUTOCOLLANTS : [];
+    var t = perso || catalogue.find(function(a) { return a && a.id === id; });
+    return t && t.nom ? 'Tampon « ' + t.nom + ' »' : id;
+}
+
+/**
+ * #1186 — LA table des libellés : le titre d'une rangée et le nom de ce qui arrive en entier.
+ * Par nom de base (sans trimestre). `nom` : la clé entière, avec son article (il se lit dans une
+ * énumération) ; `ou` : où elle se règle ; `entrees` : le libellé d'une entrée d'une clé-objet,
+ * table ou fonction. Une clé ou une entrée inconnue garde son nom technique, jamais d'erreur.
+ */
+var LIBELLES_DES_CLES = {
+    preferencesRythme: { nom: 'le rythme de travail', ou: 'Rythme de travail',
+        entrees: { dateObjectif: 'Date objectif (remise)', heureObjectif: 'Heure objectif (remise)' } },
+    retroactionsObservations: { nom: 'les textes de tes tampons', ou: 'Annotation › Tampons', entrees: _nomDuTampon },
+    personnalisationObservations: { nom: 'tes tampons personnalisés', ou: 'Annotation › Tampons', entrees: _nomDuTampon },
+    brouillonDissection: { nom: 'le brouillon de dissection' },
+    interventions: { nom: 'les interventions' }
+};
+
+function _majuscule(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/** Le nom d'une clé dans une énumération (« le rythme de travail »), sinon « « nomTechnique » ». */
+function _libelleDeLaCle(nomCle) {
+    var l = LIBELLES_DES_CLES[_nomDeBase(nomCle)];
+    return l ? l.nom : '« ' + _nomDeBase(nomCle) + ' »';
+}
+
+function _libelleDeLEntree(nomCle, entree, ici, labas) {
+    var l = LIBELLES_DES_CLES[_nomDeBase(nomCle)];
+    var e = l && l.entrees;
+    if (typeof e === 'function') return e(entree, ici, labas);
+    return (e && e[entree]) || entree;
+}
+
+function _heure(d) { return d.getHours() + ' h ' + String(d.getMinutes()).padStart(2, '0'); }
+
+/** « 30 octobre 2026 », ou « 29 octobre 2026 à 17 h 45 » avec l'heure. */
+function _dateLongue(iso, avecHeure) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso);
+    var jour = d.getDate() + ' ' + d.toLocaleDateString('fr-CA', { month: 'long' }) + ' ' + d.getFullYear();
+    return avecHeure ? jour + ' à ' + _heure(d) : jour;
+}
+
+/** « 27 oct. à 14 h 18 » (l'année quand ce n'est pas celle-ci). */
+function _dateCourte(iso) {
+    var d = new Date(iso);
+    if (!iso || isNaN(d.getTime())) return 'date inconnue';
+    var annee = d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '';
+    return d.getDate() + ' ' + d.toLocaleDateString('fr-CA', { month: 'short' }) + annee + ' à ' + _heure(d);
+}
+
+function _texteCourt(s) {
+    if (s === '') return 'vide';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return _dateLongue(s + 'T12:00:00', false);
+    return '« ' + (s.length > 60 ? s.slice(0, 57) + '…' : s) + ' »';
+}
+
+/** Une valeur dite en peu de mots ; « absente » quand l'entrée manque de ce côté. */
+function _valeurCourte(v) {
+    if (v === undefined || v === null) return 'absente';
+    if (typeof v === 'boolean') return v ? 'oui' : 'non';
+    if (typeof v === 'number') return window.formaterNombre ? window.formaterNombre(v) : String(v);
+    if (typeof v === 'string') return _texteCourt(v);
+    if (Array.isArray(v)) return v.length + (v.length > 1 ? ' éléments' : ' élément');
+    if (typeof v.nom === 'string' && v.nom) return '« ' + v.nom + ' »';
+    var n = Object.keys(v).length;
+    return n + (n > 1 ? ' propriétés' : ' propriété');
+}
+
+function _estObjetSimple(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+
+/** Les entrées présentes d'un côté ou de l'autre (ordre d'ici, puis celles de là-bas). */
+function _entreesDesDeux(ici, labas) { return Object.keys(Object.assign({}, ici, labas)); }
+
+var MOTS_DES_PROPRIETES = { imageBase64: 'image', image: 'image', nom: 'nom', couleur: 'couleur', texte: 'texte' };
+
+/** « Diffère par : image » quand deux objets se disent pareil (même nom) mais diffèrent. */
+function _differePar(a, b) {
+    if (!_estObjetSimple(a) || !_estObjetSimple(b)) return '';
+    var mots = _entreesDesDeux(a, b).filter(function(p) { return _jsonStable(a[p]) !== _jsonStable(b[p]); })
+        .map(function(p) { return MOTS_DES_PROPRIETES[p] || p; });
+    return mots.length ? 'Diffère par : ' + mots.join(', ') : '';
+}
+
+/**
+ * #1186 — un conflit de clé entière, de chaque côté. Une clé-objet dit les entrées qui changent
+ * (« absente » quand une entrée manque) et « N autres identiques » ; une entrée seule devient le
+ * titre de la rangée. Pas de date : « La plus récente » ne se dit pas.
+ */
+function _decrireLaCle(nomCle, ici, labas) {
+    var l = LIBELLES_DES_CLES[_nomDeBase(nomCle)] || {};
+    if (!_estObjetSimple(ici) || !_estObjetSimple(labas)) {
+        return { titre: _majuscule(_libelleDeLaCle(nomCle)), qui: l.ou || '',
+            ici: { texte: _valeurCourte(ici), detail: '' }, autre: { texte: _valeurCourte(labas), detail: '' }, recente: null };
+    }
+    var toutes = _entreesDesDeux(ici, labas);
+    var diff = toutes.filter(function(e) { return _jsonStable(ici[e]) !== _jsonStable(labas[e]); });
+    var premiere = diff[0];
+    var nomEntree = _libelleDeLEntree(nomCle, premiere, ici[premiere], labas[premiere]);
+    var identiques = toutes.length - diff.length;
+    var reste = [
+        diff.length > 1 ? (diff.length - 1) + (diff.length > 2 ? ' autres différences' : ' autre différence') : '',
+        identiques > 0 ? identiques + (identiques > 1 ? ' autres identiques' : ' autre identique') : ''
+    ];
+    var cote = function(v, w) {
+        var texte = (diff.length > 1 ? nomEntree + ' : ' : '') + _valeurCourte(v);
+        return { texte: texte, detail: [_differePar(v, w)].concat(reste).filter(Boolean).join(' · ') };
+    };
+    return {
+        titre: diff.length > 1 ? _majuscule(_libelleDeLaCle(nomCle)) : nomEntree,
+        qui: diff.length > 1 ? (l.ou || '') : _majuscule(_libelleDeLaCle(nomCle)),
+        ici: cote(ici[premiere], labas[premiere]), autre: cote(labas[premiere], ici[premiere]), recente: null
+    };
+}
+
+/** La production et l'élève d'un élément (jamais dans un rapport). */
+function _nomsDeLElement(nomCle, e, donnees) {
     var prefixe = (/^([aeh]\d{4})_/.exec(nomCle) || [])[1];
     function cleDe(nom) { return prefixe ? prefixe + '_' + nom : nom; }
-    var production = e.productionNom || '';
-    if (!production && e.productionId && Array.isArray(donnees[cleDe('productions')])) {
-        var p = donnees[cleDe('productions')].find(function(x) { return x && x.id === e.productionId; });
-        if (p) production = p.titre || p.nom || '';
+    function trouver(nom, champ, valeur) {
+        var liste = donnees[cleDe(nom)];
+        return (valeur && Array.isArray(liste)) ? liste.find(function(x) { return x && x[champ] === valeur; }) : null;
     }
-    var eleve = e.etudiantNom || '';
-    if (!eleve && e.etudiantDA && Array.isArray(donnees[cleDe('groupeEtudiants')])) {
-        var et = donnees[cleDe('groupeEtudiants')].find(function(x) { return x && x.da === e.etudiantDA; });
-        if (et) eleve = [et.prenom, et.nom].filter(Boolean).join(' ');
-    }
-    var mot = _motsDe(nomCle)[0];
-    var nom = [production, eleve].filter(Boolean).join(' · ') || e.nomFichier || e.titre || e.nom || String(e.id);
-    return mot.charAt(0).toUpperCase() + mot.slice(1) + ' — ' + nom;
+    var p = e.productionNom ? null : trouver('productions', 'id', e.productionId);
+    var et = e.etudiantNom ? null : trouver('groupeEtudiants', 'da', e.etudiantDA);
+    return {
+        production: e.productionNom || (p && (p.titre || p.nom)) || '',
+        eleve: e.etudiantNom || (et ? [et.prenom, et.nom].filter(Boolean).join(' ') : '')
+    };
 }
 
 function _dateDe(e) {
-    var d = e && (e.dateModification || e.dateEvaluation || e.dateCreation || e.dateImport);
-    return d ? _formaterDateLocale(d) : 'date inconnue';
+    return (e && (e.dateModification || e.dateEvaluation || e.dateCreation || e.dateImport)) || '';
 }
 
-/** Un conflit dit à l'écran : ce qu'il touche, puis ce qu'il vaut ici et dans l'autre codex. */
-function _direLeConflit(c, donneesLocales, donneesExternes) {
-    if (c.id === undefined) {
-        return {
-            titre: 'La donnée « ' + c.cle + ' »',
-            ici: _resumerValeur(donneesLocales[c.cle]),
-            autre: _resumerValeur(donneesExternes[c.cle])
-        };
+/** La plus récente des deux dates : 'local', 'externe', ou null (une date manque, ou elles sont égales). */
+function _laPlusRecente(dIci, dLabas) {
+    var a = dIci ? new Date(dIci).getTime() : NaN;
+    var b = dLabas ? new Date(dLabas).getTime() : NaN;
+    if (isNaN(a) || isNaN(b) || a === b) return null;
+    return a > b ? 'local' : 'externe';
+}
+
+function _estAnnotee(nomCle, id, donnees) {
+    var prefixe = (/^([aeh]\d{4})_/.exec(nomCle) || [])[1];
+    var liste = donnees[(prefixe ? prefixe + '_' : '') + 'annotationsTravaux'];
+    return Array.isArray(liste) && liste.some(function(a) {
+        return a && a.fichierId === id && _estObjetSimple(a.pages) && Object.keys(a.pages).length > 0;
+    });
+}
+
+/** Un côté d'un élément : une copie dit la date de son fichier, sa taille, annotée ou non ; une évaluation, sa note si elle diffère. */
+function _coteDeLElement(nomCle, e, autre, donnees) {
+    if (!e) return { texte: 'absente', detail: '' };
+    if (_estListeDeFichiers(nomCle)) {
+        var taille = (typeof e.tailleFichier === 'number' && window.TailleFichier) ? window.TailleFichier.dire(e.tailleFichier) : '';
+        return { texte: 'Fichier du ' + _dateCourte(_dateDe(e)),
+            detail: [taille, _estAnnotee(nomCle, e.id, donnees) ? 'annotée' : 'sans annotation'].filter(Boolean).join(' · ') };
     }
+    var note = (_nomDeBase(nomCle) === 'evaluationsSauvegardees' && autre && autre.noteFinale !== e.noteFinale)
+        ? 'Note : ' + _valeurCourte(e.noteFinale) : '';
+    return { texte: 'Modifiée le ' + _dateCourte(_dateDe(e)), detail: note };
+}
+
+/** #1186 — un conflit d'élément (même id, différent des deux côtés), de chaque côté. */
+function _decrireLElement(c, local, externe) {
     var trouver = function(liste) {
         return (Array.isArray(liste) ? liste : []).find(function(e) { return _aUnId(e) && e.id === c.id; });
     };
-    var eLocal = trouver(donneesLocales[c.cle]);
-    var eExterne = trouver(donneesExternes[c.cle]);
+    var eIci = trouver(local[c.cle]);
+    var eLabas = trouver(externe[c.cle]);
+    var e = eIci || eLabas;
+    var noms = _nomsDeLElement(c.cle, e, local);
+    var mots = MOTS_DES_ELEMENTS[_nomDeBase(c.cle)];
+    var sujet = mots ? _majuscule(mots[0]) : _majuscule(_libelleDeLaCle(c.cle));
+    var objet = noms.production ? ' d\'« ' + noms.production + ' »' : ' — ' + (e.nomFichier || e.titre || e.nom || String(e.id));
     return {
-        titre: _nommerElement(c.cle, eLocal || eExterne, donneesLocales),
-        ici: 'modifiée le ' + _dateDe(eLocal),
-        autre: 'modifiée le ' + _dateDe(eExterne)
+        titre: sujet + objet, qui: noms.eleve,
+        ici: _coteDeLElement(c.cle, eIci, eLabas, local), autre: _coteDeLElement(c.cle, eLabas, eIci, externe),
+        recente: _laPlusRecente(_dateDe(eIci), _dateDe(eLabas))
+    };
+}
+
+/** #1186 — une rangée de la fenêtre : `cle` (celle des choix), son titre, et ses deux côtés. */
+function _decrireLeConflit(c, local, externe) {
+    var d = c.id === undefined ? _decrireLaCle(c.cle, local[c.cle], externe[c.cle]) : _decrireLElement(c, local, externe);
+    d.cle = _cleDuConflit(c);
+    return d;
+}
+
+/** Le haut de la fenêtre : ce qui viendra sans question (fort), puis ce qui est vrai de la fusion. */
+function _phrasesDeLaFusion(analyse, externe) {
+    var entre = _direCeQuiEntre(analyse, externe, {});
+    var fort = [entre.venues
+        ? 'Viendront de l\'autre codex, sans question : ' + entre.venues + '.'
+        : 'Rien de neuf ne viendra de l\'autre codex sans question.'];
+    if (entre.versLaCorbeille) fort.push('Iront à la corbeille, comme dans l\'autre codex : ' + entre.versLaCorbeille + '.');
+    var fin = ['Rien n\'est effacé : ce qui n\'est qu\'ici est gardé.'];
+    if (analyse.auxArchives > 0) fin.push('Les copies aux archives ici ne sont pas reprises.');
+    if (analyse.calculees.length > 0) fin.push('Les indices seront recalculés après la fusion.');
+    return { fort: fort.join(' '), fin: fin.join(' ') };
+}
+
+/** « Codex du 29 octobre 2026 à 17 h 45 » (la date du manifeste), sinon son nom. */
+function _direLaDateDuCodex(manifeste) {
+    var m = manifeste || {};
+    var d = m.dateDerniereModification || m.dateCreation;
+    return d ? 'Codex du ' + _dateLongue(d, true) : (m.nom || 'L\'autre codex');
+}
+
+/** #1186 — ce que la fenêtre de fusion montre (fonction pure, sauf la lecture de cet appareil). */
+function _modeleDeLaFenetre(analyse, local, externe, manifesteExterne) {
+    var A = window.Appareil;
+    return {
+        phrases: _phrasesDeLaFusion(analyse, externe),
+        conflits: analyse.conflits.map(function(c) { return _decrireLeConflit(c, local, externe); }),
+        ici: { appareil: A ? A.libelle(A.ici()) : '', sous: 'Ton espace actuel' },
+        autre: { appareil: A ? A.libelleDuManifeste(manifesteExterne) : '', sous: _direLaDateDuCodex(manifesteExterne) }
     };
 }
 
 /**
- * Le résumé d'avant la fusion, en mots d'utilisateur.
- * @param {Object} analyse - rendue par _analyserFusion
- * @param {Object} donneesLocales
- * @param {Object} donneesExternes
- * @returns {string}
- */
-function _formaterAnalyseFusion(analyse, donneesLocales, donneesExternes) {
-    var lignes = [];
-    var entre = _direCeQuiEntre(analyse, donneesExternes, {});
-    lignes.push(entre.venues
-        ? 'Viendront de l\'autre codex : ' + entre.venues + '.'
-        : 'Rien de neuf ne viendra de l\'autre codex.');
-    if (entre.versLaCorbeille) {
-        lignes.push('Iront à la corbeille, comme dans l\'autre codex : ' + entre.versLaCorbeille + '.');
-    }
-    lignes.push('Rien n\'est effacé : ce qui n\'est qu\'ici est gardé.');
-    if (analyse.auxArchives > 0) {
-        lignes.push('Les copies aux archives ici ne sont pas reprises de l\'autre codex.');
-    }
-    if (analyse.calculees.length > 0) {
-        lignes.push('Les indices seront recalculés après la fusion.');
-    }
-    if (analyse.conflits.length > 0) {
-        lignes.push('');
-        lignes.push('Différent des deux côtés (' + analyse.conflits.length + ') :');
-        analyse.conflits.forEach(function(c) {
-            lignes.push('  ⚠ ' + _direLeConflit(c, donneesLocales, donneesExternes).titre);
-        });
-    }
-    return lignes.join('\n');
-}
-
-/* ===============================
-   RÉSOLUTION DE CONFLITS (Phase 3)
-   =============================== */
-
-/**
- * Produit un résumé lisible d'une valeur pour l'affichage dans les prompts de conflit.
- * @param {*} val
- * @returns {string}
- */
-function _resumerValeur(val) {
-    if (val === null || val === undefined) return '(vide)';
-    if (typeof val === 'string') {
-        if (val.length <= 60) return '"' + val + '"';
-        return 'Texte (' + val.length + ' car.)';
-    }
-    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
-    if (Array.isArray(val)) {
-        return 'Liste [' + val.length + ' élément' + (val.length > 1 ? 's' : '') + ']';
-    }
-    if (typeof val === 'object') {
-        var nb = Object.keys(val).length;
-        return 'Objet {' + nb + ' propriété' + (nb > 1 ? 's' : '') + '}';
-    }
-    return typeof val;
-}
-
-/**
- * Pilote la résolution interactive des conflits de fusion.
- *
- * Flux :
- * 1. Affiche le résumé (ce qui viendra de l'autre, ce qui diffère des deux côtés)
- * 2. Si conflits > 0, propose une stratégie globale ou "un par un"
- * 3. Retourne les choix, par conflit (_cleDuConflit) ; sans choix, la version d'ici
- *
- * @param {Object} analyse - Retour de _analyserFusion()
- * @param {Object} donneesLocales - Données d'ici
- * @param {Object} donneesExternes - Données du codex externe
+ * Recueille les choix de la fusion. Rien à fusionner : on le dit, sans fenêtre. Sinon, la fenêtre
+ * à deux colonnes (codex-fusion-fenetre.js, #1186) : rien n'y est choisi d'office, « Fusionner »
+ * attend un choix par rangée, « Annuler » n'écrit rien.
  * @returns {Promise<{choix: Object<string, 'local'|'externe'>, annule: boolean}>}
  */
-async function _resoudreConflits(analyse, donneesLocales, donneesExternes) {
-    var choix = {};
-    var resume = _formaterAnalyseFusion(analyse, donneesLocales, donneesExternes);
-    var conflits = analyse.conflits;
-
-    if (conflits.length === 0) {
-        if (_clesAEcrire(analyse, choix).length === 0) {
-            notifications.info('Les deux codex sont identiques. Rien à fusionner.');
-            return { choix: choix, annule: true };
-        }
-
-        const okAuto = await uiDialogues.confirmerAction({
-            titre: 'Fusionner',
-            message: resume + '\n\nAucun conflit. Fusionner ?',
-            texteConfirmer: 'Fusionner',
-            preformate: true
-        });
-        return { choix: choix, annule: !okAuto };
+async function _resoudreConflits(analyse, donneesLocales, donneesExternes, manifesteExterne) {
+    if (analyse.conflits.length === 0 && _clesAEcrire(analyse, {}).length === 0) {
+        notifications.info('Les deux codex sont identiques. Rien à fusionner.');
+        return { choix: {}, annule: true };
     }
-
-    // Conflits présents — proposer une stratégie
-    var nbConflits = conflits.length;
-    var strategieTexte = resume + '\n\n' +
-        'Comment résoudre les ' + nbConflits + ' conflit(s) ?\n\n' +
-        '1. Garder la version d\'ici pour tous\n' +
-        '2. Prendre celle de l\'autre codex pour tous\n' +
-        '3. Résoudre un par un\n' +
-        '4. Annuler la fusion\n\n' +
-        'Entrer 1, 2, 3 ou 4 :';
-
-    var choixStrategie = await uiDialogues.demanderSaisie({
-        titre: 'Résoudre les conflits',
-        message: strategieTexte,
-        preformate: true
-    });
-    if (!choixStrategie || choixStrategie.trim() === '4') {
-        return { choix: choix, annule: true };
-    }
-
-    var strategie = parseInt(choixStrategie.trim(), 10);
-
-    if (strategie === 1 || strategie === 2) {
-        conflits.forEach(function(c) { choix[_cleDuConflit(c)] = strategie === 1 ? 'local' : 'externe'; });
-    } else if (strategie === 3) {
-        for (var r = 0; r < conflits.length; r++) {
-            var dit = _direLeConflit(conflits[r], donneesLocales, donneesExternes);
-
-            var texteConflit = 'Conflit ' + (r + 1) + '/' + nbConflits + ' : ' + dit.titre + '\n\n' +
-                'Ici :           ' + dit.ici + '\n' +
-                'Autre codex :   ' + dit.autre + '\n\n' +
-                '1. Garder la version d\'ici\n' +
-                '2. Prendre celle de l\'autre codex\n' +
-                '3. Ignorer (ne pas toucher)\n\n' +
-                'Entrer 1, 2 ou 3 :';
-
-            var choixConflit = await uiDialogues.demanderSaisie({
-                titre: 'Conflit ' + (r + 1) + '/' + nbConflits,
-                message: texteConflit,
-                preformate: true
-            });
-            if (!choixConflit) {
-                // Annulation en cours de résolution — demander confirmation
-                if (await uiDialogues.confirmerAction({
-                    titre: 'Annuler la fusion',
-                    message: 'Annuler toute la fusion ? (Les conflits déjà résolus seront perdus.)',
-                    texteConfirmer: 'Annuler la fusion',
-                    variante: 'danger'
-                })) {
-                    return { choix: {}, annule: true };
-                }
-                // Re-poser la question pour ce conflit
-                r--;
-                continue;
-            }
-
-            var choixNum = parseInt(choixConflit.trim(), 10);
-            if (choixNum === 1) {
-                choix[_cleDuConflit(conflits[r])] = 'local';
-            } else if (choixNum === 2) {
-                choix[_cleDuConflit(conflits[r])] = 'externe';
-            }
-            // choixNum === 3 ou autre → pas de choix : la version d'ici reste
-        }
-    } else {
-        // Choix invalide → annuler
-        notifications.warning('Choix invalide. Fusion annulée.');
-        return { choix: choix, annule: true };
-    }
-
-    return { choix: choix, annule: false };
+    return window.CodexFusionFenetre.ouvrir(_modeleDeLaFenetre(analyse, donneesLocales, donneesExternes, manifesteExterne));
 }
 
 /* ===============================
@@ -3039,60 +3076,11 @@ function _genererNomFichier(nomCodex) {
 }
 
 /**
- * Identifie l'appareil courant (pour le manifeste)
+ * #1186 — l'appareil et le navigateur du manifeste, par la lecture unique (appareil.js) ; leur
+ * forme ne change pas : « Mac — Chrome », « Chrome 156 / macOS ».
  */
-function _identifierAppareil() {
-    const ua = navigator.userAgent;
-    if (/iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document)) {
-        return 'iPad — Safari';
-    }
-    if (/Chrome/.test(ua) && !/Edg/.test(ua)) {
-        return 'Mac — Chrome';
-    }
-    if (/Edg/.test(ua)) {
-        return 'Mac — Edge';
-    }
-    if (/Safari/.test(ua)) {
-        return 'Mac — Safari';
-    }
-    if (/Firefox/.test(ua)) {
-        return 'Mac — Firefox';
-    }
-    return navigator.platform || 'Inconnu';
-}
-
-/**
- * Identifie le navigateur + version + OS (pour le diagnostic codex Safari ↔ Chrome).
- * Format : "Chrome 146 / macOS", "Safari 17 / iPadOS", etc.
- * Gère les variantes iOS (CriOS, EdgiOS, FxiOS) qui sont du WebKit re-brandé.
- * (#244)
- */
-function _identifierNavigateur() {
-    const ua = navigator.userAgent;
-    let nom = 'Inconnu';
-    let version = '';
-    let m;
-
-    // iOS browsers (forcés WebKit par Apple, UA différent)
-    if ((m = ua.match(/CriOS\/(\d+)/))) { nom = 'Chrome'; version = m[1]; }
-    else if ((m = ua.match(/EdgiOS\/(\d+)/))) { nom = 'Edge'; version = m[1]; }
-    else if ((m = ua.match(/FxiOS\/(\d+)/))) { nom = 'Firefox'; version = m[1]; }
-    // Desktop browsers — Edge avant Chrome (Edge contient "Chrome" dans son UA)
-    else if ((m = ua.match(/Edg\/(\d+)/))) { nom = 'Edge'; version = m[1]; }
-    else if (!/Edg/.test(ua) && (m = ua.match(/Chrome\/(\d+)/))) { nom = 'Chrome'; version = m[1]; }
-    else if ((m = ua.match(/Firefox\/(\d+)/))) { nom = 'Firefox'; version = m[1]; }
-    // Safari en dernier (Chrome contient aussi "Safari" dans son UA)
-    else if ((m = ua.match(/Version\/(\d+).*Safari/))) { nom = 'Safari'; version = m[1]; }
-
-    let os = 'Inconnu';
-    if (/iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document)) os = 'iPadOS';
-    else if (/iPhone|iPod/.test(ua)) os = 'iOS';
-    else if (/Macintosh|Mac OS X/.test(ua)) os = 'macOS';
-    else if (/Windows/.test(ua)) os = 'Windows';
-    else if (/Android/.test(ua)) os = 'Android';
-    else if (/Linux/.test(ua)) os = 'Linux';
-
-    return version ? `${nom} ${version} / ${os}` : `${nom} / ${os}`;
+function _appareilPourLeManifeste() {
+    return window.Appareil ? window.Appareil.pourLeManifeste() : { appareil: 'Inconnu', navigateur: 'Inconnu' };
 }
 
 /**
@@ -4069,21 +4057,18 @@ function _recalculerApresFusion() {
     }
 }
 
-/** #1182 — la fin de la fusion, en mots d'utilisateur. */
+/**
+ * #1182 — la fin de la fusion, en mots d'utilisateur. #1186 : « Fusion terminée. » d'abord ; les
+ * bilans sans participe, qui ne s'accorderait pas avec des noms de genres mêlés.
+ */
 function _direLaFinDeLaFusion(nomExterne, analyse, externe, choix, statsTravaux, recalcule) {
     var entre = _direCeQuiEntre(analyse, externe, choix);
-    var lignes = ['Codex externe : « ' + nomExterne + ' »', ''];
+    var lignes = ['Fusion terminée.', ''];
     lignes.push(entre.venues
-        ? entre.venues + ' ' + (entre.nbVenues > 1 ? 'venues' : 'venue') + ' de l\'autre codex.'
+        ? 'De l\'autre codex : ' + entre.venues + '.'
         : 'Rien de neuf n\'est venu de l\'autre codex.');
-    if (entre.remplacees) {
-        lignes.push(entre.remplacees + ' ' + (entre.nbRemplacees > 1 ? 'remplacées' : 'remplacée') +
-            ' par la version de l\'autre codex.');
-    }
-    if (entre.versLaCorbeille) {
-        lignes.push(entre.versLaCorbeille + ' ' + (entre.nbVersLaCorbeille > 1 ? 'mises' : 'mise') +
-            ' à la corbeille, comme dans l\'autre codex.');
-    }
+    if (entre.remplacees) lignes.push('Version de l\'autre codex gardée pour : ' + entre.remplacees + '.');
+    if (entre.versLaCorbeille) lignes.push('À la corbeille, comme dans l\'autre codex : ' + entre.versLaCorbeille + '.');
     var gardes = analyse.conflits.filter(function(c) { return choix[_cleDuConflit(c)] !== 'externe'; }).length;
     if (gardes > 0) {
         lignes.push(gardes + (gardes > 1 ? ' différences gardées' : ' différence gardée') + ' telles qu\'ici.');
@@ -4097,9 +4082,8 @@ function _direLaFinDeLaFusion(nomExterne, analyse, externe, choix, statsTravaux,
     if (analyse.auxArchives > 0) {
         lignes.push('Les copies aux archives ici n\'ont pas été reprises de l\'autre codex.');
     }
-    if (recalcule) lignes.push('Les indices ont été recalculés.');
     lignes.push('');
-    lignes.push('Pense à mettre à jour le codex pour y mettre la fusion.');
+    lignes.push((recalcule ? 'Les indices ont été recalculés. ' : '') + 'Pense à mettre à jour le codex pour y garder la fusion.');
     return lignes.join('\n');
 }
 
@@ -4169,7 +4153,7 @@ async function actionFusionner() {
     _masquerProgression();
 
     // 6. Résolution des conflits (interaction utilisateur)
-    var plan = await _resoudreConflits(analyse, donneesLocales, externe.donnees);
+    var plan = await _resoudreConflits(analyse, donneesLocales, externe.donnees, externe.manifeste);
 
     if (plan.annule) {
         return;
@@ -4211,11 +4195,15 @@ async function actionFusionner() {
     await new Promise(function(r) { setTimeout(r, 800); });
     _masquerProgression();
 
-    await uiDialogues.informer({
-        titre: 'Fusion terminée',
+    // #1186 : la fin propose le geste qui garde la fusion (« Mettre à jour le codex », le geste existant).
+    var mettreAJour = await uiDialogues.confirmerAction({
+        titre: 'Fusionner avec un codex',
         message: _direLaFinDeLaFusion(externe.manifeste.nom, analyse, externe.donnees, plan.choix, statsTravaux, recalcule),
+        texteConfirmer: 'Mettre à jour le codex',
+        texteAnnuler: 'Fermer',
         preformate: true
     });
+    if (mettreAJour) await actionEnregistrer();
 
 
     } catch (erreur) {
@@ -4636,8 +4624,8 @@ async function actionExporterSelection() {
         auteur: _etat.manifeste ? _etat.manifeste.auteur : '',
         dateCreation: maintenant,
         dateDerniereModification: maintenant,
-        appareil: _identifierAppareil(),
-        navigateur: _identifierNavigateur(),        // #244 (11 mai 2026)
+        appareil: _appareilPourLeManifeste().appareil,
+        navigateur: _appareilPourLeManifeste().navigateur,   // #244 (11 mai 2026) · #1186 : la lecture unique
         userAgent: navigator.userAgent,             // #244 (string complète pour diagnostic)
         trimestre: trimestresChoisis.join(', '),
         exportSelectif: true,
@@ -4771,6 +4759,8 @@ window.Codex = {
     _clesAEcrire: _clesAEcrire,
     _copiesPrisesDeLAutre: _copiesPrisesDeLAutre,
     _direLaFinDeLaFusion: _direLaFinDeLaFusion,
+    _modeleDeLaFenetre: _modeleDeLaFenetre,   // #1186 — ce que la fenêtre de fusion montre
+    _decrireLeConflit: _decrireLeConflit,
     _ecrireLaFusion: _ecrireLaFusion,
     _recalculerApresFusion: _recalculerApresFusion,
     _familleDeLaCle: _familleDeLaCle,

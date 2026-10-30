@@ -114,13 +114,13 @@ test.describe('#1182 — Fusionner, copie par copie', () => {
         await choix.setFiles(fichier);
 
         // Le résumé d'avant : ce qui viendra, et aucun conflit.
-        const resume = page.getByText('Viendront de l\'autre codex : 14 évaluations et 14 annotations.', { exact: false });
+        const resume = page.getByText('Viendront de l\'autre codex, sans question : 14 évaluations et 14 annotations.', { exact: false })   // #1186 : la fenêtre en deux colonnes;
         await expect(resume).toBeVisible({ timeout: 30000 });
         await expect(page.getByText('Différent des deux côtés')).toHaveCount(0);
         await page.getByRole('button', { name: 'Fusionner', exact: true }).click();
 
         // La fin, en mots d'utilisateur.
-        await expect(page.getByText('14 évaluations et 14 annotations venues de l\'autre codex.', { exact: false })).toBeVisible({ timeout: 30000 });
+        await expect(page.getByText('De l\'autre codex : 14 évaluations et 14 annotations.', { exact: false })).toBeVisible({ timeout: 30000 });
 
         const apres = await page.evaluate(async ({ cleE, cleA }) => ({
             evaluations: ((await db.get(cleE, [])) || []).map((e) => e.id),
