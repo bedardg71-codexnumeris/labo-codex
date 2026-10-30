@@ -7,6 +7,22 @@
 
 ---
 
+## 30 OCT. 2026, 13 H 58 (Claude Code) : **POUSSÉ, EN LIGNE : 1.227.0 = `3ef83f49` ; GITHUB EN ATTENTE (RUN 41102649077, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**Porte** : le lot 1 des seuils, le lot 2 du niveau (question 1), leurs retouches et la retouche 2 (`1aa8393c`, rapport `plans de travail/RAPPORT-2026-10-30-retouches-seuils-et-niveau.md`, dernière section).
+
+**⚠ Sur ordre de Grégoire (« je voudrais qu'on fasse la release maintenant », 30 oct., vers 12 h 15), contre la consigne de la retouche 2** (pas de push, pas de bump, pas de verdict complet, Cowork relira) : **la retouche 2 n'est PAS relue par Cowork** ; **les mots ne sont PAS validés**, y compris les cinq lignes des Nouvelles 1.227, écrites par Claude Code. Les paires et questions du lot 2 restent ouvertes : « niveau 1 / Difficulté persistante », questions 2 à 5.
+
+**Verdict du Mac, sur `3ef83f49`, par `scripts/verdict-en-morceaux.mjs`, sans refus** : vert, 1 147 essais, 1 141 verts, 2 au second essai (`grilles-sous-criteres-condense`, `presences-lot-d-enregistrement` (g), toutes deux déjà vues instables), 4 rouges (4 connus), 19 sautés. Mac sur secteur, pression mémoire 1. Hook : « verdict vert à jour pour ce commit ». Vitest entier : 854 fichiers, 10 425.
+
+**Netlify** : `6ae4da6a972c6912d81c35f0`, `commit_ref` `3ef83f49`, `ready`, publié à 17:57:19 Z (13 h 57) ; le `version.js` du déploiement (permalien) dit `1.227.0`, build `1030-1219` ; son `js/changelog-data.js` porte l'entrée 1.227. Le domaine `app.codexnumeris.org` est derrière Cloudflare Access : non lu d'ici.
+
+**Complexité** (1.226.0 `4117fa16` → 1.227.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 92 983 → 93 061 (Δ +78) ; au-dessus de 15 : 443 → 442 (Δ −1) ; au-dessus de 30 : 82 → 82 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 127 → 11 105 (Δ −22).
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, le verdict du lot 4 des standards, `plans de travail/captures/`.
+
+**Non éprouvés d'ici** : Safari hors banc, iPad, Chrome, le corpus réel, le domaine public.
+
 ## 30 OCT. 2026 (Claude Code) : **LE LOT 1 DES SEUILS EST SUR `main`, NON POUSSÉ, NON LIVRÉ ; EN LIGNE : TOUJOURS 1.226.0**
 
 **Ce qui est en avance sur `origin/main`** : le lot 1 « une seule source par famille de seuils » (`b6b74585` et sa retouche d'échappement), les scripts `scripts/mesures-depistage/`, ce relais. Rapport : `plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`.

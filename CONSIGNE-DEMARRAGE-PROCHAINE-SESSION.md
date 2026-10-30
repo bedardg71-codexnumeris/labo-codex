@@ -1,5 +1,11 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 30 octobre 2026, 13 h 58 (Toronto) : `1.227.0` EN LIGNE** (build `1030-1219`) — Netlify
+> `6ae4da6a`, `commit_ref` `3ef83f49`, `state: ready`, publié à 17:57:19 Z (13 h 57). Porte : lots 1 et 2 des seuils et du niveau, leurs retouches.
+> Verdict du Mac **vert** sur `3ef83f49` (1 147 essais, 4 rouges connus, 2 instables). GitHub (run 41102649077) : en attente à l'écriture.
+> ⚠ **Release demandée par Grégoire avant la relecture de Cowork de la retouche 2 et avant la validation des mots, Nouvelles 1.227 comprises** (`RELAIS.md`).
+> **Ouverts** : ces mots ; la paire « niveau 1 / Difficulté persistante » et les questions 2 à 5 du lot 2 ; #1201, #1202.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 30 octobre 2026 : EN LIGNE `1.226.0`. `main` local en avance, non poussé** : lot 1 des seuils (`b6b74585` et retouche), scripts `scripts/mesures-depistage/`. Vitest entier vert ; WebKit : specs touchées seulement. Verdict complet non pris. Lot 2, question 1 : codée (`9e2be4b4`), retouches des deux lots `d20bd5f5` (rapport `plans de travail/RAPPORT-2026-10-30-retouches-seuils-et-niveau.md`), non poussées, Vitest entier vert, WebKit : specs touchées seulement. Rapports : `plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`, `plans de travail/RAPPORT-2026-10-30-niveau-compare-au-groupe-lot-2.md`.
 >
 > ↻ **ÉTAT MESURÉ par Claude Code le 29 octobre 2026, 14 h 00 (Toronto) : `1.224.0` EN LIGNE** (build `1029-1011`) — Netlify
