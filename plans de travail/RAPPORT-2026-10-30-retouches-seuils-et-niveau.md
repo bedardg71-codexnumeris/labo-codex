@@ -89,14 +89,15 @@ Rien n'est posé comme validé. Grégoire les reçoit un écran à la fois, apr�
 - « Sous la note de passage, alors que la moyenne de son groupe est au-dessus. »
 - « Sous la note de passage, comme la moyenne de son groupe : un signal pour l'enseignement universel. »
 - « Une seule copie corrigée : pas encore de comparaison au groupe. »
-- « Moins de 5 élèves ont une copie corrigée dans son groupe : pas de comparaison possible. »
+- « Moins de 5 étudiant·es ont une copie corrigée dans son groupe : pas de comparaison possible. »
+- « Sous la note de passage. Moins de 5 étudiant·es ont une copie corrigée dans son groupe : pas de comparaison possible. » (neuve, constat 2)
 - « Au repère de maîtrise de l'échelle ou au-dessus, même si sa note est sous la moyenne de son groupe. »
 - « Dans la moyenne de son groupe. Suivi régulier en classe. »
 - « Aucune note à comparer pour l'instant. »
 
 **Aperçu**
 - Sous la barre RàI : « La moyenne du groupe (X %) est sous la note de passage (60 %) : c'est l'enseignement universel qu'il faut renforcer, pour tous. »
-- Sous la barre P : « Les copies de ce groupe n'ont pas d'échelle unique : pas de répartition par niveaux. », suivi au besoin de « N étudiant·es sans note constructible ne sont pas compté·es. »
+- Sous la barre P, échelles divergentes : « Les copies de ce groupe n'ont pas d'échelle unique : pas de répartition par niveaux. » ; sans échelle : « Les copies de ce groupe sont notées sans échelle : pas de répartition par niveaux. » (neuve, constat 5) ; suivi au besoin de « N étudiant·es sans note constructible ne sont pas compté·es. »
 
 **Labo › Outils d'observation**
 - Étiquette : « Liste des étudiant·es › couleur des colonnes A et C »
@@ -106,4 +107,25 @@ Rien n'est posé comme validé. Grégoire les reçoit un écran à la fois, apr�
 
 **Le niveau expliqué (les quatre surfaces du lot 2, avec le minimum de 5)** : la section RàI de l'Aide (`index.html`), le guide RàI (`guides-pedagogiques.js`), le glossaire (`accompagnement-contenu-terme.js`), la bulle `tdb-rai` et les listes de niveaux des fenêtres d'aide (`accompagnement-contenu-popup.js`). Plus les deux phrases d'`index.html` et de la bulle du suivi : « qui compare la moyenne des copies au groupe-cours ».
 
+**Aide, « Repérer les patterns »** (neuve, constat 1) : « Le pattern nomme le besoin sans fixer le niveau : le niveau compare la moyenne des copies au groupe-cours (voir la carte juste au-dessus). »
+
 **Du lot 1, déjà au rapport du lot 1** : ils restent à valider. Aucune phrase de l'Aide ne disait que la sommative n'a pas d'échelle pour ses signaux : rien à ajouter pour le § 4.
+
+## Retouche 2 (consigne `CONSIGNE-LOT-2026-10-30-retouches-seuils-et-niveau-2.md`, verdict de Cowork du même jour)
+
+Commit `1aa8393c`. **Écart demandé par Grégoire (30 oct., vers 12 h 15)** : « je voudrais qu'on fasse la release maintenant » ; la consigne disait pas de push, pas de bump, pas de verdict complet, et Cowork relira. Cette retouche part donc en ligne **sans relecture de Cowork**, et ses mots **sans validation** : ils restent à valider après coup.
+
+| Point | État | Vérifié comment |
+|---|---|---|
+| Constat 1, Aide « Repérer les patterns » | Fait ; phrase périmée retirée, moitié « texte » de la sentinelle recalée | Mutation « ancienne phrase » : 1 rouge |
+| Constat 2, sans référence de groupe | Fait : motif `sous-la-note-sans-groupe`, sa phrase | Mutation « motif retiré » : 2 rouges |
+| Constat 3, garde par famille | Inscrit : #1201 | `BACKLOG.md` |
+| Constat 4, le test sans échelle en bibliothèque | Fait : échelle à repères en bibliothèque, témoin en standards | Mutation « garde retirée » : 1 rouge |
+| Constat 5, barre P selon `raison` | Fait | Mutations « raison ignorée » et « raison non transmise » : 1 rouge chacune |
+| Constat 6, « élèves » → « étudiant·es » | Fait, aux cinq endroits | Mutation sur la carte du profil : 1 rouge ; les quatre autres : `grep`, plus aucun « 5 élèves » |
+| Constat 7, service d'orthopédagogie sans banc | Inscrit : #1202 | `BACKLOG.md` |
+| Constat 10, commentaire de l'audit | Fait | Diff |
+| Paire « niveau 1 / Difficulté persistante » | Non touchée, en attente de Grégoire | Diff |
+| Vitest entier | 854 fichiers, 10 425 essais verts | `cd tests && npx vitest run`, avant le commit |
+
+**Supposition** : sous la barre P, « notées sans échelle » couvre toute `raison` autre que `echelles-divergentes`, donc aussi `sans-pratique`, sans phrase à part : le verdict demandait la phrase selon `raison`, et une note construite sans pratique assignée n'a pas été observée. Non vérifié ici : Safari, iPad, ce rendu à l'écran.

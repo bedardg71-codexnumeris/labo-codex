@@ -21,6 +21,21 @@
 
     var CHANGELOG = [
         {
+            // 1.227 (une seule source par famille de seuils ; le niveau RàI comparé au groupe-cours, question 1 du lot 2).
+            // Release demandée par Grégoire le 30 oct. 2026, vers 12 h 15, avant la validation de ses mots : texte de Claude
+            // Code, NON VALIDÉ par lui, à relire comme les autres mots du lot (`RAPPORT-2026-10-30-retouches-seuils-et-niveau.md`).
+            version: '1.227',
+            couleur: 'bleu',
+            titre: 'Le niveau RàI comparé au groupe-cours, et des seuils à une seule source',
+            items: [
+                'Le niveau RàI compare la moyenne des copies à celle du groupe-cours, à partir de 2&nbsp;copies et de 5&nbsp;étudiant·es avec copie. Sous la note de passage, c’est au moins le niveau&nbsp;2, sauf si la moyenne du groupe l’est aussi&nbsp;: le signal vise alors tout le groupe.',
+                'Le pattern et le défi nomment le besoin sans fixer le niveau. Une intervention déjà enregistrée garde son niveau d’alors.',
+                'A et C suivent partout les trois seuils de Labo › Outils d’observation. Pour qui n’a rien changé&nbsp;: 95, 90 et 85&nbsp;%, en quatre paliers.',
+                'P suit les repères de ton échelle, dans toutes les pratiques&nbsp;; sans repère, seule la note de passage le signale. Les barres de l’Aperçu ont les mêmes bornes que les pastilles.',
+                'La note du cours ne change pas.'
+            ]
+        },
+        {
             // 1.226 (la fenêtre de fusion, #1186 ; le codex sans les copies aux archives, #1184 ; le lot 5 des standards sans
             // portfolio, #1178) — titre et quatre items validés par Grégoire, mot pour mot, le 30 oct. 2026 (consigne de Cowork
             // `CONSIGNE-LOT-2026-10-30-mise-en-ligne-1226.md`, § 1, collée par lui). Une retouche, de lui aussi, à la mesure :
