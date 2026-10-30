@@ -7,6 +7,22 @@
 
 ---
 
+## 30 OCT. 2026, 15 H 35 (Claude Code) : **LES DEUX MESURES SONT RENDUES, ARRÊT DEVANT LES CHIFFRES ; LE CODE DU LOT 3 ATTEND GRÉGOIRE ; `main` NON POUSSÉ ; EN LIGNE : TOUJOURS 1.227.0**
+
+**Consignes** : `plans de travail/CONSIGNE-LOT-2026-10-30-mesure-a-c-annoncent-la-note.md` (faite) ; `plans de travail/CONSIGNE-LOT-2026-10-30-niveau-rai-critere.md` (§ 3 fait ; § 4 non commencé, aucun code de l'application touché). Nouvelles et Aide : déjà faites (`beee4b01`).
+
+**Scripts** : `scripts/mesures-depistage/a-c-annoncent-la-note.mjs`, `niveau-rai-critere.mjs`, `signalement-grille-cochee.mjs`. Résultats : page privée seulement, https://claude.ai/artifact/6Lbx3Gcc7aJ69GufoULFct (« Niveau RàI au critère »). Code mesuré `beee4b01` ; codex du 30 oct., 11 h 25, SHA-256 `e0b3a87b672a1852d2b00ce859a58be38aec521761c45a44d0ce5458c939fdd7`. Aucun résultat ici, selon la règle du chantier.
+
+**Écart à la prémisse des consignes** : `noteConstructible` est vrai dès la première copie, sur les trois trimestres ; c'est l'écran qui écrit « — » sous `minimumCompletion` (4 en H2026 et A2026, 7 en A2025). « Les 4 artefacts » de Grégoire ne sont donc pas une règle du calcul. Les deux scripts mesurent les deux définitions ; le code du lot 3 devra en choisir une.
+
+**Attend Grégoire, deux décisions de sens** (formulées sur la page) : quand la note commence à fixer le niveau ; ce que devient la fondation au niveau 3.
+
+**Suppositions** : sur la page, section « Suppositions tranchées ».
+
+**Trouvaille, inscrite ici et non corrigée (issue 2, elle touche le lot en cours)** : en A2026, aucune copie de la production diagnostique n'est sur la grille qui porte le palier coché ; `signalement-grille-cochee.mjs` le mesure. Le § 2 de la consigne ne rendra rien sur ce codex tant que cela reste ainsi. Données de Grégoire : rien écrit.
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, le verdict du lot 4 des standards, `plans de travail/captures/`, `plans de travail/REFLEXION-2026-10-30-seuils-normatif-critere-ipsatif.md`.
+
 ## 30 OCT. 2026, 14 H 27 (Claude Code) : **LES NOUVELLES 1.227 ET LA PHRASE DE L'AIDE SONT SUR `main`, NON POUSSÉES ; EN LIGNE : TOUJOURS 1.227.0**
 
 **Consigne** : `plans de travail/CONSIGNE-LOT-2026-10-30-nouvelles-1227-et-aide.md`.
