@@ -1922,13 +1922,13 @@ function signauxDeGroupeDepistage() {
 }
 
 const DESCRIPTION_DU_MOTIF = {
-    'sous-la-ligne-fondation': 'Note provisoire sous le seuil minimal de réussite, avec une difficulté sur un critère de fondation.',
-    'sous-la-ligne': 'Note provisoire sous le seuil minimal de réussite.',
-    'persistante': 'Note provisoire au seuil minimal de réussite ou au-dessus, mais ses derniers résultats sont sous ce seuil.',
-    'persistante-avant-la-note': 'Ses derniers résultats sont sous le seuil minimal de réussite. La note provisoire ne s\'affiche pas encore.',
-    'diagnostic': 'Signalement de la production diagnostique : il fixe le niveau jusqu\'à la première note provisoire.',
-    'au-dessus-de-la-ligne': 'Note provisoire au seuil minimal de réussite ou au-dessus. Suivi régulier en classe.',
-    'en-attente': 'La note provisoire ne s\'affiche pas encore : le niveau l\'attend.'
+    'sous-la-ligne-fondation': 'Note du cours à ce jour sous le seuil minimal de réussite, avec une difficulté sur un critère de fondation.',
+    'sous-la-ligne': 'Note du cours à ce jour sous le seuil minimal de réussite.',
+    'persistante': 'Note du cours à ce jour au seuil minimal de réussite ou au-dessus, mais ses derniers résultats sont sous ce seuil.',
+    'persistante-avant-la-note': 'Ses derniers résultats sont sous le seuil minimal de réussite. La note du cours ne s\'affiche pas encore.',
+    'diagnostic': 'Signalement de la production diagnostique : il fixe le niveau jusqu\'à ce que la note du cours s\'affiche.',
+    'au-dessus-de-la-ligne': 'Note du cours à ce jour au seuil minimal de réussite ou au-dessus. Suivi régulier en classe.',
+    'en-attente': 'La note du cours ne s\'affiche pas encore : le niveau l\'attend.'
 };
 const AFFICHAGE_DU_NIVEAU = {
     1: { label: 'Niveau 1 - Universel', badgeClasse: 'badge-rai-1' },

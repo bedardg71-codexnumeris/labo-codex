@@ -213,8 +213,8 @@
 <h4>Palier 3 — Intensif</h4>
 <p>Intervention individualisée pour les étudiant·es dont la difficulté persiste malgré le palier 2. Plus de temps, plus de fréquence, plus de personnalisation. C'est rare et coûteux en ressources — à utiliser pour les cas où c'est nécessaire – et à répartir dans une équipe intégrée.</p>
 <div class="guide-pedagogique-astuce"><strong>Principe contre-intuitif</strong> : si plus de 20\u00a0% de tes étudiant·es sont en difficulté, c'est ton <em>palier 1</em> qu'il faut renforcer en premier, pas multiplier les interventions de palier 2 ou 3. Quand l'enseignement universel échoue à grande échelle, intensifier individuellement masque le vrai problème.</div>
-<p>Dans Labo Codex, l'app suggère un niveau d'intervention à partir de ton seuil minimal de réussite : le repère « Suffisant à partir de » de ton échelle, ou la note de passage sans ce repère. Note provisoire sous ce seuil, palier 2 ; avec une difficulté sur un critère de fondation, palier 3 ; « Difficulté persistante », au moins le palier 2, même avant la note ; le reste, palier 1.</p>
-<p>Quand la moyenne des notes provisoires du groupe est sous ce seuil, l'app le signale pour le palier 1, sans enlever aucun signal individuel. Le pattern et le défi nomment le besoin, mais c'est <strong>toi qui décides</strong>. L'app éclaire, tu juges.</p>`
+<p>Dans Labo Codex, l'app suggère un niveau d'intervention à partir de ton seuil minimal de réussite : le repère « Suffisant à partir de » de ton échelle, ou la note de passage sans ce repère. Note du cours à ce jour sous ce seuil, palier 2 ; avec une difficulté sur un critère de fondation, palier 3 ; « Difficulté persistante », au moins le palier 2, même avant la note ; le reste, palier 1.</p>
+<p>Quand la moyenne du groupe, pour la note du cours à ce jour, est sous ce seuil, l'app le signale pour le palier 1, sans enlever aucun signal individuel. Le pattern et le défi nomment le besoin, mais c'est <strong>toi qui décides</strong>. L'app éclaire, tu juges.</p>`
                 },
                 {
                     titre: 'La RàI en pratique dans Labo Codex',

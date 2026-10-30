@@ -537,9 +537,9 @@ const TOOLTIPS = {
     // --- Patterns et RàI ---
 
     'tdb-patterns':
-        'Progression sur les critères multistructurels (fondations SOLO) identifiés dans ta grille. Complémentaire au niveau RàI, qui situe la note provisoire devant le seuil minimal de réussite.',
+        'Progression sur les critères multistructurels (fondations SOLO) identifiés dans ta grille. Complémentaire au niveau RàI, qui situe la note du cours à ce jour devant le seuil minimal de réussite.',
     'tdb-rai':
-        'Niveau d\'intervention d’après la note provisoire, devant le seuil minimal de réussite de ton échelle (la note de passage, sans ce repère). Sous ce seuil, niveau 2 ; niveau 3 avec une difficulté sur un critère de fondation. « Difficulté persistante » donne au moins le niveau 2, même avant la note. Le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de ta grille de référence sauf ceux marqués « Aucun », nomme le besoin. Complémentaire au suivi des fondamentaux, qui cible uniquement les critères multistructurels.',
+        'Niveau d\'intervention d’après la note du cours à ce jour, devant le seuil minimal de réussite de ton échelle (la note de passage, sans ce repère). Sous ce seuil, niveau 2 ; niveau 3 avec une difficulté sur un critère de fondation. « Difficulté persistante » donne au moins le niveau 2, même avant la note. Le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de ta grille de référence sauf ceux marqués « Aucun », nomme le besoin. Complémentaire au suivi des fondamentaux, qui cible uniquement les critères multistructurels.',
     'tdb-intervenir':
         'Suivi de l\'apprentissage des fondamentaux (taxonomie SOLO) et répartition par niveaux d\'intervention RàI.',
     'tdb-interventions-rai':

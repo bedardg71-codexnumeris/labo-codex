@@ -7,6 +7,22 @@
 
 ---
 
+## 30 OCT. 2026, FIN DE JOURNÉE (Claude Code) : **« NOTE PROVISOIRE » REMPLACÉE HORS PRATIQUES ALTERNATIVES ET GARDÉE ; TROIS COMMITS SUR `main`, NON POUSSÉS, À RELIRE ENSEMBLE ; AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
+
+**Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`, section « Note provisoire ».
+
+**Fait** : les remplacements validés par Grégoire, dans le profil, le palier, la barre RàI, les bulles, le glossaire, les fenêtres d'aide et le guide RàI. Garde : `tests/unit/sentinelle-note-provisoire-reservee.test.js`.
+
+**Couvert par une seule relecture de Cowork et un seul verdict** : le mandat dit « les trois commits » ; supposition : `0f237eac` (l'Aide), `8e14b131` (le signalement) et le commit de ce relais. ⚠ Mesuré : aucun `VERDICT-RELECTURE` du niveau au critère au dépôt, donc `a8bf7778` (le code) et `086f60f8` sont sans relecture eux aussi. Le verdict du navigateur, lui, porte sur HEAD et couvre tout. **Ordre : relecture, puis verdict, Cowork fermé, puis push. Le verdict n'est pas lancé** : Grégoire a dit « tout est fermé » pendant le lot, mais la relecture doit passer avant.
+
+**⚠ RESTE OUVERT, À GRÉGOIRE, NON TOUCHÉ** : les anciens mots qui opposent « provisoire » à « finale ». Le profil (`js/profil-etudiant-sections-affichage.js`, « Note provisoire de session » trois fois, et « Note ${estFinale ? 'finale' : 'provisoire'} »), le réglage de fin de session (`index.html`, `js/accompagnement-contenu-terme.js`), le PDF de l'élève (`js/synthese-retroaction-rendu.js`, mots validés le 24 sept.). Mesuré : ils s'affichent aussi en sommative (`profil-921-note-de-session-sommative.spec.js:83`, `audit-parcours-sommatif-2026-09-24.spec.js:345` et `:392` l'exigent). La garde les nomme : quand il en décide, leur ligne part de la liste.
+
+**⚠ Supposition nommée** : les mots remplacés s'affichent dans toutes les pratiques, donc « note du cours à ce jour » se lit aussi en pratique alternative. Seule la parenthèse de l'Aide y dit « note provisoire ». Faire varier ces phrases selon la pratique serait un autre lot, à sa demande.
+
+**Toujours à valider** : les autres mots du rapport, sans « note provisoire » (l'éditeur du palier, « Signalement diagnostique »).
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, les deux consignes, le verdict du lot 4 des standards, la réflexion, les textes de l'Aide, `plans de travail/captures/`.
+
 ## 30 OCT. 2026, FIN D'APRÈS-MIDI (Claude Code) : **L'AIDE DU NIVEAU AU CRITÈRE ET LA LECTURE DU SIGNALEMENT SONT COMMITÉES SUR `main`, NON POUSSÉES ; AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
 
 **Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`.

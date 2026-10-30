@@ -19,7 +19,9 @@
 
 **Ce qui changera pour toi, une fois en ligne** : l'Aide dit le niveau au critère avec tes textes validés, dans « La Réponse à l'Intervention (RàI) » et « Repérer les patterns de progression ». Un palier coché qui a sa phrase lèvera aussi son signalement sur les copies déjà saisies : jusqu'ici, le code y lisait 0 erreur. Sur G5M, rien tant que tu n'écris pas la phrase du palier « Échec ».
 
-**Ce qui reste à toi** : valider les remplacements de « note provisoire » et les autres mots du rapport (`plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`) ; écrire la phrase du palier de G5M dans ton codex. Rien n'est poussé avant la suite complète du navigateur, verte.
+**Fait depuis** : « note provisoire » est remplacée hors pratiques alternatives (ton principe, le 30 oct.), et une garde rougit si le mot revient. Les mots qui l'opposent à « finale » (profil, réglage, PDF de l'élève) restent à décider.
+
+**Ce qui reste à toi** : valider les autres mots du rapport (`plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`) ; écrire la phrase du palier de G5M dans ton codex. Rien n'est poussé avant la suite complète du navigateur, verte.
 
 **Vérifié comment** : Vitest entier vert ; 7 changements volontaires de l'Aide font rougir la garde ; l'ancienne lecture du signalement rend 3 tests rouges ; textes comparés par script ; les noms de champs lus sur ton codex du 30 oct., 11 h 25, sans valeurs ni noms d'élèves. Ce qui n'est pas éprouvé : la suite complète du navigateur, Safari hors banc, l'iPad.
 

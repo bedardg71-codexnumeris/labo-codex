@@ -144,7 +144,7 @@ var TEXTES = {
         signalNiveauAucun: 'Aucun : le signalement reste à côté',
         signalNiveau2: 'Niveau 2 – Préventif',
         signalNiveau3: 'Niveau 3 – Intensif',
-        signalNiveauAide: 'Jusqu’à la première note provisoire. Ensuite, la note et la trajectoire décident, et le signalement reste affiché.',
+        signalNiveauAide: 'Jusqu’à ce que la note du cours s’affiche. Ensuite, la note et la trajectoire décident, et le signalement reste affiché.',
         ici: 'cas de la copie fictive',
         voir: 'Voir ce que l’étudiant·e lirait à ce palier',
         retirerPalier: 'Retirer ce palier',
