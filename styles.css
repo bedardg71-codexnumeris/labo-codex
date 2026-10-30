@@ -28680,6 +28680,11 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     padding-left: 30px;
 }
 
+.palier-niveau-signalement label {
+    font-size: 0.82rem;
+    font-weight: normal;
+}
+
 .palier-niveau-signalement select {
     min-height: 44px;
 }

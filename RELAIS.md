@@ -7,6 +7,16 @@
 
 ---
 
+## 30 OCT. 2026, 16 H 07 (Claude Code) : **LE NIVEAU AU CRITÈRE EST CODÉ SUR `main`, NON POUSSÉ ; L'AIDE ATTEND : AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
+
+**Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md` (modèle tel que codé, suppositions, mots à valider, écarts).
+
+**⚠ Bloque toute release** : `index.html` garde l'ancienne Aide (lignes `10881`, `10999`, `11026`). Les textes de Cowork sont « proposés, non validés », et trois écarts avec le code y sont relevés au rapport. Ils ne sont pas intégrés.
+
+**Vérifié** : Vitest entier vert (10 437) ; 34 mutations sur 35 rougissent, une équivalente nommée ; 4 specs WebKit ; témoin sur le corpus, écart 0, `a8bf7778`, codex `e0b3a87b…`. **Non éprouvés** : la suite Playwright complète, Safari hors banc, iPad.
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, les deux consignes, le verdict du lot 4 des standards, la réflexion, les textes de l'Aide, `plans de travail/captures/`.
+
 ## 30 OCT. 2026, 15 H 35 (Claude Code) : **LES DEUX MESURES SONT RENDUES, ARRÊT DEVANT LES CHIFFRES ; LE CODE DU LOT 3 ATTEND GRÉGOIRE ; `main` NON POUSSÉ ; EN LIGNE : TOUJOURS 1.227.0**
 
 **Consignes** : `plans de travail/CONSIGNE-LOT-2026-10-30-mesure-a-c-annoncent-la-note.md` (faite) ; `plans de travail/CONSIGNE-LOT-2026-10-30-niveau-rai-critere.md` (§ 3 fait ; § 4 non commencé, aucun code de l'application touché). Nouvelles et Aide : déjà faites (`beee4b01`).

@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 16 H 07 : LE NIVEAU AU CRITÈRE EST CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : le niveau situe chaque étudiant·e devant ton seuil minimal de réussite et sa propre trajectoire, plus devant son groupe. Avant la note provisoire, la plupart des étudiant·es seront « En attente », et la barre RàI le dira. Sur un palier coché, tu pourras choisir le niveau qu'il fixe jusqu'à la première note provisoire.
+
+**Ce qui reste à toi** : valider les textes de l'Aide, une fois repris par Cowork, et les mots du rapport (`plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`). Rien ne part en ligne avant : l'Aide de l'application décrit encore l'ancien modèle.
+
+**Vérifié comment** : Vitest entier vert (10 437) ; 34 changements volontaires du code sur 35 font rougir la sentinelle, le dernier ne change rien par construction ; quatre specs WebKit vertes ; sur ton codex du 30 oct., 11 h 25, dans un navigateur jetable, le code rend le modèle décidé à toutes les dates. Ce qui n'est pas éprouvé : la suite complète du navigateur, Safari hors banc, l'iPad.
+
 📝 **LE 30 OCTOBRE 2026, 15 H 35 : LE NIVEAU AU CRITÈRE EST MESURÉ, PAS CODÉ.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : rien dans l'application. Les chiffres sont sur ta page privée « Niveau RàI au critère ».
