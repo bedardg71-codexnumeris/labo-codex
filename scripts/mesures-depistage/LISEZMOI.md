@@ -7,6 +7,7 @@ Scripts qui rejouent le dépistage du module Suivi sur un codex. **Scripts seule
 | `rejeu-rai.mjs` | La répartition des niveaux RàI, semaine par semaine, et ce que retient chaque test |
 | `double-discordance.mjs` | La double discordance (niveau ET pente sous le groupe), sa stabilité, ce que deviennent les signalés |
 | `comparaison-au-groupe.mjs` | Le niveau comparé au groupe-cours, avec plancher à la note de passage, à côté du modèle en place |
+| `niveaux-sans-plancher.mjs` | Les niveaux 2 et 3 relatifs au groupe-cours, sans plancher, avec et sans la condition du repère de maîtrise, et le signal de groupe |
 | `rejeu-demo.mjs` | Le rejeu sur le pack de démonstration (élèves fictifs, sans codex) |
 
 ## Relancer une mesure

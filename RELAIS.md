@@ -13,7 +13,7 @@
 
 **Attend** : la relecture de Cowork, la validation des mots par Grégoire, puis le verdict complet Cowork fermé. Pas de bump. Vitest entier vert ; navigateur : seuls les 28 essais des specs touchées ont été rejoués.
 
-**Lot 2** (RàI comparée au groupe) : mesuré, rien de codé, en attente de l'accord de Grégoire. Résultats en page privée seulement, jamais dans le dépôt (règle de Grégoire du 30 oct. : `scripts/mesures-depistage/LISEZMOI.md`).
+**Lot 2** (RàI comparée au groupe) : mesuré, rien de codé, en attente de l'accord de Grégoire. Résultats en page privée seulement, jamais dans le dépôt (règle de Grégoire du 30 oct. : `scripts/mesures-depistage/LISEZMOI.md`). Question 1 : Grégoire retient de retirer le plancher des niveaux individuels ; modèle mesuré par `niveaux-sans-plancher.mjs`, rien à coder avant son accord sur les chiffres. Questions 2 à 5 : attendent la relecture de Cowork.
 
 ## 30 OCT. 2026, 7 H 35 (Claude Code) : **POUSSÉ, EN LIGNE : 1.226.0 = `4117fa16` ; GITHUB EN COURS (RUN 41048587052, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
