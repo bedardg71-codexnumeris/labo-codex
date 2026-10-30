@@ -133,9 +133,10 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
     it('rai et patterns : les bornes du niveau sont les repères de l\'échelle que lit `determinerNiveauRaiPedagogique` (décision du 30 oct. 2026)', () => {
         const calculs = lire('js', 'profil-etudiant-calculs.js');
         const niveau = tranche(calculs, 'function determinerNiveauRaiPedagogique(', '\nfunction ');
-        expect(niveau).toMatch(/noteConstructible && P < bornes\.bas/);
-        expect(niveau).toMatch(/noteConstructible && bornes\.maitrise !== null && P < bornes\.maitrise/);
-        expect(niveau).toContain('window.bornesDepistage()');
+        // Lot 2 des seuils (30 oct. 2026) : le niveau compare au groupe ; les bornes de l'échelle restent celles du pattern.
+        expect(niveau).toContain('classerNiveauDansLeGroupe(');
+        expect(niveau).toContain('reperesPerformance()');
+        expect(tranche(calculs, 'function identifierPatternActuel(', '\nfunction ')).toContain('window.bornesDepistage()');
         expect(niveau).not.toContain('idme.');
         // Aucun champ de l'écran ni des préférences n'écrit de seuil de performance : les repères se posent sur l'échelle.
         expect(html + lire('js', 'preferences-v2.js')).not.toMatch(/idme\.(insuffisant|developpement)|seuil-idme/);

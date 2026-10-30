@@ -175,7 +175,7 @@ function attenduTroisCopies(l) {
     expect(l.rigueur).toBe(r3((0.65 + 0.75 + 0.75) / 3));             // 0,717 — P2 (sans texte) est dedans ; sans elle : 0,70
     expect(l.structure).toBe(r3((0.65 + 0.65 + 0.75) / 3));
     expect([l.performance3, l.nbArtefacts]).toEqual([0.7, 3]);        // 80, 70, 60
-    expect(l.rai).toEqual({ niveau: 2, pattern: 'Défi spécifique' });
+    expect(l.rai).toEqual({ niveau: 1, pattern: 'Défi spécifique' });   // lot 2 des seuils : banc sous 5 élèves, moyenne au-dessus de 60
     expect([l.echelleCommune, l.raisonCommune]).toEqual(['E0', null]);
 }
 
