@@ -64,7 +64,11 @@ Les trois écarts relevés, et ce qu'ils sont devenus :
 
 ## « Note provisoire » : remplacements proposés, à valider par Grégoire
 
+**Validé par Grégoire et appliqué le 30 oct. 2026.** La liste ci-dessous est faite, occurrence par occurrence ; « Aujourd'hui » y dit donc l'état d'avant. Garde : `tests/unit/sentinelle-note-provisoire-reservee.test.js`. Les autres mots de la section précédente, sans « note provisoire », restent à valider.
+
 Principe : le terme de l'Aide validée, « note du cours à ce jour », et « note du cours » quand elle s'affiche ou non.
+
+**Supposition à connaître** : ces mots s'affichent quelle que soit la pratique. Appliqués tels que proposés, ils disent donc aussi « note du cours à ce jour » dans une pratique alternative. Le seul endroit de cette liste qui nomme la pratique alternative est la parenthèse de l'Aide (`index.html`, carte RàI), gardée.
 
 | Où | Aujourd'hui | Proposé |
 |---|---|---|

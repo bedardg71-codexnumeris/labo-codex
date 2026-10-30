@@ -253,7 +253,7 @@ describe('§ 1 — la phrase du groupe', () => {
         expect(phrase).not.toContain('en attente');
         const attente = classe([{ P: 90, copies: [90] }]).interne.genererInterpretationRai([{ niveau: 1, count: 0 }, { niveau: 2, count: 4 }, { niveau: 3, count: 0 }], 25);
         expect(attente.replace(/\s/g, ' ')).toContain('4 étudiants (16 %)');
-        expect(attente).toContain('21 étudiant·es en attente de leur note provisoire');
+        expect(attente).toContain('21 étudiant·es en attente de leur note du cours');
     });
 });
 

@@ -1501,7 +1501,7 @@ function genererInterpretationRai(rai, totalEtudiants) {
     const signaux = typeof signauxDeGroupeDepistage === 'function' ? signauxDeGroupeDepistage() : [];
     signaux.forEach(signal => {
         const nom = signal.groupe ? `du groupe ${echapperHtml(signal.groupe)}` : 'du groupe';
-        interpretation += `La moyenne des notes provisoires ${nom} (${formaterPourcentage(signal.moyenne, 1)}) est sous le seuil minimal de réussite (${formaterPourcentage(signal.ligne)}) : c'est l'enseignement universel qu'il faut renforcer, pour tous. `;
+        interpretation += `La moyenne ${nom}, pour la note du cours à ce jour (${formaterPourcentage(signal.moyenne, 1)}), est sous le seuil minimal de réussite (${formaterPourcentage(signal.ligne)}) : c'est l'enseignement universel qu'il faut renforcer, pour tous. `;
     });
 
     // Compléter avec Niveau 2 et 3
@@ -1515,7 +1515,7 @@ function genererInterpretationRai(rai, totalEtudiants) {
 
     const enAttente = totalEtudiants - rai.reduce((somme, r) => somme + r.count, 0);
     if (enAttente > 0) {
-        interpretation += enAttente > 1 ? `${enAttente} étudiant·es en attente de leur note provisoire.` : '1 étudiant·e en attente de sa note provisoire.';
+        interpretation += enAttente > 1 ? `${enAttente} étudiant·es en attente de leur note du cours.` : '1 étudiant·e en attente de sa note du cours.';
     }
 
     return interpretation;
