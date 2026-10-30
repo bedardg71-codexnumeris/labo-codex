@@ -19,7 +19,7 @@
 
 **Ce qui changera pour toi, une fois en ligne** : A et C suivent les trois champs de Labo › Outils d'observation, partout (défauts 95 · 90 · 85, quatre paliers). P suit les repères de ton échelle ; sans repère, seule la note de passage le signale. Les barres de l'Aperçu ont les mêmes bornes que les pastilles.
 
-**Ce qui reste à toi** : valider les mots (`plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`), trancher le cas des pratiques sommatives et les repères de l'échelle de départ. Une fois en ligne, changer tes réglages (aujourd'hui 75 · 70 · 65) : Labo › Outils d'observation, « Restaurer ».
+**Ce qui reste à toi** : valider les mots (`plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`), trancher les repères de l'échelle de départ (le cas des pratiques sommatives est tranché : les repères de l'échelle des copies se lisent dans toutes les pratiques, décision du 30 oct., 11 h 33). Une fois en ligne, changer tes réglages (aujourd'hui 75 · 70 · 65) : Labo › Outils d'observation, « Restaurer ».
 
 **Vérifié comment** : Vitest entier vert ; la sentinelle neuve a rougi sur 12 mutations du code ; dans WebKit, les 28 essais des specs touchées sont verts. Le verdict complet n'est pas pris : il attend la relecture de Cowork.
 
@@ -29,7 +29,7 @@
 
 **Ce qui reste à toi** : relire les mots de la carte du profil et de la phrase (`plans de travail/RAPPORT-2026-10-30-niveau-compare-au-groupe-lot-2.md`) ; les questions 2 à 5 du lot, après la relecture de Cowork.
 
-**Vérifié comment** : sur ton codex, le code redonne le modèle que tu as accepté, à 0 écart sur 47 dates ; Vitest entier vert ; la sentinelle neuve a rougi sur 11 mutations ; dans WebKit, les 27 essais des specs touchées sont verts. Verdict complet, Safari et iPad : pas encore.
+**Vérifié comment** : sur ton codex, après les retouches de Cowork, le code redonne le modèle que tu as accepté, à 0 écart sur 47 dates ; Vitest entier vert ; la sentinelle neuve a rougi sur 24 mutations ; dans WebKit, les 28 essais des specs touchées sont verts. Les repères dans toutes les pratiques ne sont vérifiés que par le banc : ton codex n'a pas de trimestre concerné. Verdict complet, Safari et iPad : pas encore.
 
 📝 **LE 30 OCTOBRE 2026, 7 H 31 : LA 1.226 EST EN LIGNE** (la fenêtre de fusion ; le codex qui garde sa taille ; les mots des standards sans artefact). *Écrit par Claude Code.*
 
