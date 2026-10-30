@@ -142,7 +142,9 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(html + lire('js', 'preferences-v2.js')).not.toMatch(/idme\.(insuffisant|developpement)|seuil-idme/);
         expect(texteDe('rai')).toContain('Ses bornes sont les repères de ton échelle, « Suffisant à partir de » et « Maîtrisé à partir de »');
         expect(texteDe('rai')).not.toMatch(/\b(64|75) %/);
-        expect(texteDe('patterns')).toContain('P sous le repère de maîtrise donne au moins le niveau 2, sous le repère de suffisance le niveau 3, quel que soit le pattern.');
+        // Retouche 2 du lot 2 (constat 1) : la moitié « texte » de cette sentinelle gardait la règle retirée.
+        expect(texteDe('patterns')).toContain('Le pattern nomme le besoin sans fixer le niveau : le niveau compare la moyenne des copies au groupe-cours');
+        expect(texteDe('patterns')).not.toMatch(/Le niveau suit une seule règle|donnent le niveau [123]/);
     });
 
     it('patterns : chaque ligne est la condition de `identifierPatternActuel`', () => {

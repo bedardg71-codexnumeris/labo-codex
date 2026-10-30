@@ -1793,7 +1793,8 @@ function classerNiveauDansLeGroupe(note, nbCopies, reference, repereMaitrise, pa
     const rang = _rangSousLeGroupe(note, reference);
     if (assezDeCopies && !auRepere && rang > 1) return { niveau: rang, motif: rang === 3 ? 'sous-un-ecart-type' : 'sous-un-demi-ecart-type' };
     if (note < passage) {
-        return (reference && reference.moyenne < passage) ? { niveau: 1, motif: 'signal-de-groupe' } : { niveau: 2, motif: 'sous-la-note-de-passage' };
+        if (!reference) return { niveau: 2, motif: 'sous-la-note-sans-groupe' };
+        return reference.moyenne < passage ? { niveau: 1, motif: 'signal-de-groupe' } : { niveau: 2, motif: 'sous-la-note-de-passage' };
     }
     if (!assezDeCopies) return { niveau: 1, motif: 'une-seule-copie' };
     if (!reference) return { niveau: 1, motif: 'groupe-trop-petit' };
@@ -1901,9 +1902,10 @@ const DESCRIPTION_DU_MOTIF = {
     'sous-un-ecart-type': 'Plus d\'un écart-type sous la moyenne de son groupe.',
     'sous-un-demi-ecart-type': 'Entre un demi et un écart-type sous la moyenne de son groupe.',
     'sous-la-note-de-passage': 'Sous la note de passage, alors que la moyenne de son groupe est au-dessus.',
+    'sous-la-note-sans-groupe': `Sous la note de passage. Moins de ${EFFECTIF_MINIMUM_GROUPE} étudiant·es ont une copie corrigée dans son groupe : pas de comparaison possible.`,
     'signal-de-groupe': 'Sous la note de passage, comme la moyenne de son groupe : un signal pour l\'enseignement universel.',
     'une-seule-copie': 'Une seule copie corrigée : pas encore de comparaison au groupe.',
-    'groupe-trop-petit': `Moins de ${EFFECTIF_MINIMUM_GROUPE} élèves ont une copie corrigée dans son groupe : pas de comparaison possible.`,
+    'groupe-trop-petit': `Moins de ${EFFECTIF_MINIMUM_GROUPE} étudiant·es ont une copie corrigée dans son groupe : pas de comparaison possible.`,
     'au-dessus-de-la-maitrise': 'Au repère de maîtrise de l\'échelle ou au-dessus, même si sa note est sous la moyenne de son groupe.',
     'dans-le-groupe': 'Dans la moyenne de son groupe. Suivi régulier en classe.'
 };
