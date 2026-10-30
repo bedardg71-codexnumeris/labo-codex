@@ -17,7 +17,7 @@ async function demo(page, avant) {
     await page.evaluate(() => window.activerModeDemo());
     await page.waitForFunction(() => window.estEnModeDemo && window.estEnModeDemo() && window.dbReady === true, null, { timeout: 30000 });
     await page.evaluate(() => naviguerVers('tableau-bord', 'apercu'));
-    await page.locator('#btn-toggle-panneau-prioritaire').click();
+    await page.evaluate(() => document.getElementById('btn-toggle-panneau-prioritaire').click());
     await expect(page.locator('.prioritaire-tri-btn').first()).toBeVisible();
 }
 

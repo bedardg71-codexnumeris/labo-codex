@@ -1182,7 +1182,7 @@ function ouvrirIntervention(interventionId, options) {
                         var pctApres = apres !== null ? Math.round(apres * 100) : null;
                         var lettre = function(pct) {
                             var niveau = (pct !== null && echelleDuBilan) ? situerPourcentageDansEchelle(pct, echelleDuBilan) : null;
-                            return niveau ? niveau.code : '—';
+                            return niveau ? echapperHtml(String(niveau.code)) : '—';   // le code vient de l'échelle de l'enseignant
                         };
                         var niveauAvant = lettre(pctAvant);
                         var niveauApres = lettre(pctApres);

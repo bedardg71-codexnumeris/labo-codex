@@ -415,3 +415,10 @@ describe('(h) les barres : un point reste dans la zone de son palier', () => {
 //   M11 RàI : la maîtrise à 75 en dur ...................... 2 rouges (c)
 //   M12 la borne fixe à 60 de retour ....................... 1 rouge  (a)
 // 37/37 verts sans mutation.
+
+describe('Le code d\u2019un niveau vient de l\u2019échelle de l\u2019enseignant : il s\u2019échappe dans le bilan', () => {
+    it('la lettre du bilan passe par echapperHtml', () => {
+        const src = readFileSync(new URL('../../js/interventions.js', import.meta.url), 'utf-8');
+        expect(src).toMatch(/return niveau \? echapperHtml\(String\(niveau\.code\)\) : '—';/);
+    });
+});
