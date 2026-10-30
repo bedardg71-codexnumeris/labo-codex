@@ -19,7 +19,7 @@
 
 **Ce qui change pour toi** : ce que disent les deux entrées ci-dessous, et les cinq lignes de la 1.227 dans les Nouvelles. La note du cours ne change pas. Tes propres seuils restent à 75 · 70 · 65 tant que tu ne les changes pas.
 
-**Ce qui reste à toi** : relire les mots, tous en ligne sans ta validation, y compris les cinq lignes des Nouvelles (`plans de travail/RAPPORT-2026-10-30-retouches-seuils-et-niveau.md`, `js/changelog-data.js`) ; la paire « niveau 1 / Difficulté persistante » et les questions 2 à 5 du lot 2 ; changer tes seuils dans Labo › Outils d'observation, « Restaurer », si tu veux les nouveaux.
+**Ce qui reste à toi** : relire les mots, tous en ligne sans ta validation, y compris les cinq lignes des Nouvelles (`plans de travail/RAPPORT-2026-10-30-retouches-seuils-et-niveau.md`, `js/changelog-data.js`) ; la paire « niveau 1 / Difficulté persistante » et les questions 2 à 5 du lot 2 ; changer tes seuils dans Labo › Outils d'observation, « Remettre les valeurs par défaut », si tu veux les nouveaux.
 
 **Vérifié comment** : Vitest entier vert (10 425) ; six gardes neuves rougies une à une, le code restauré à l'identique ; la vérification complète du navigateur, sur le Mac, verte (1 147 essais, 2 rattrapés au second essai, les 4 rouges connus) ; la mise en ligne constatée chez Netlify sur ce commit, et le fichier de version du déploiement dit 1.227.0. Pas encore : la relecture de Cowork de la dernière retouche (la release est passée avant, à ta demande), l'iPad, Chrome, la vérification de GitHub, qui attendait encore à l'écriture.
 
