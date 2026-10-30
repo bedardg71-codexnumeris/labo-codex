@@ -75,7 +75,7 @@ describe('#1186 · la lecture unique de l\'appareil', () => {
 });
 
 describe('#1186 · ce que montre une rangée', () => {
-    it('une clé-objet dont une entrée change : l\'entrée devient le titre, « N autres identiques »', () => {
+    it('une clé-objet dont une entrée change : l\'entrée devient le titre, « N autres réglages identiques »', () => {
         const ici = { preferencesRythme: { heuresJour: 6, dateObjectif: '2026-10-30', marge: 1.25 } };
         const labas = { preferencesRythme: { heuresJour: 6, dateObjectif: '2026-10-02', marge: 1.25 } };
         const analyse = Codex._analyserFusion(ici, labas);
@@ -83,8 +83,8 @@ describe('#1186 · ce que montre une rangée', () => {
         const r = Codex._decrireLeConflit(analyse.conflits[0], ici, labas);
         expect(r).toEqual({
             cle: 'preferencesRythme', titre: 'Date objectif (remise)', qui: 'Le rythme de travail',
-            ici: { texte: '30 octobre 2026', detail: '2 autres identiques' },
-            autre: { texte: '2 octobre 2026', detail: '2 autres identiques' },
+            ici: { texte: '30 octobre 2026', detail: '2 autres réglages identiques' },
+            autre: { texte: '2 octobre 2026', detail: '2 autres réglages identiques' },
             recente: null
         });
     });
@@ -95,7 +95,7 @@ describe('#1186 · ce que montre une rangée', () => {
         const r = Codex._decrireLeConflit({ cle: 'retroactionsObservations' }, ici, labas);
         expect(r.titre).toBe('Les textes de tes tampons');
         expect(r.qui).toBe('Annotation › Tampons');
-        expect(r.ici).toEqual({ texte: 'comp-uni : « Texte fictif un. »', detail: '1 autre différence · 1 autre identique' });
+        expect(r.ici).toEqual({ texte: 'comp-uni : « Texte fictif un. »', detail: '1 autre différence · 1 autre texte identique' });
         expect(r.autre.texte).toBe('comp-uni : absente');
     });
 
@@ -111,6 +111,32 @@ describe('#1186 · ce que montre une rangée', () => {
         const r = Codex._decrireLeConflit({ cle: 'a2031_cleInventee' }, { a2031_cleInventee: { x: 1 } }, { a2031_cleInventee: { x: 2 } });
         expect(r.titre).toBe('x');
         expect(r.qui).toBe('« cleInventee »');
+    });
+
+    it('le nom de ce qui reste identique suit la clé ; « élément » en repli', () => {
+        const identiques = (cle, n) => {
+            const pareil = Object.fromEntries(Array.from({ length: n }, (_, i) => ['e' + i, 1]));
+            return Codex._decrireLeConflit({ cle }, { [cle]: { ...pareil, x: 1 } }, { [cle]: { ...pareil, x: 2 } }).ici.detail;
+        };
+        expect(identiques('preferencesRythme', 1)).toBe('1 autre réglage identique');
+        expect(identiques('retroactionsObservations', 1)).toBe('1 autre texte identique');
+        expect(identiques('retroactionsObservations', 3)).toBe('3 autres textes identiques');
+        expect(identiques('personnalisationObservations', 2)).toBe('2 autres tampons identiques');
+        expect(identiques('a2031_cleInventee', 1)).toBe('1 autre élément identique');
+        expect(identiques('a2031_cleInventee', 2)).toBe('2 autres éléments identiques');
+    });
+
+    it('la grille en cours en conflit : son titre, où elle se trouve, son nom ; aucun mot technique', () => {
+        const cle = 'a2031_brouillonDissection';
+        const grille = (nomSaisi, liens) => ({ format: 'dissection-1', doc: { a: 1 }, liens, coupes: [], rattachements: {}, nomSaisi, compte: 'points', valeurs: {} });
+        const r = Codex._decrireLeConflit({ cle }, { [cle]: grille('Grille fictive', { m1: 'critere' }) }, { [cle]: grille(null, {}) });
+        expect(r).toEqual({
+            cle, titre: 'Ta grille en cours', qui: 'Conception › Apporter mon matériel',
+            ici: { texte: '« Grille fictive »', detail: '' },
+            autre: { texte: 'Grille sans nom', detail: '' },
+            recente: null
+        });
+        expect(JSON.stringify(r).replace(cle, ''), 'le mot ne paraît nulle part à l\'écran').not.toMatch(/issection/);
     });
 
     it('une évaluation : « La plus récente » quand les deux dates diffèrent ; sa note si elle diffère', () => {
@@ -131,8 +157,29 @@ describe('#1186 · ce que montre une rangée', () => {
         const labas = { a2031_brouillonDissection: { doc: 'fictif' }, a2031_inventee: { a: 1 }, interventions: [] };
         const analyse = Codex._analyserFusion({}, labas);
         const fin = Codex._direLaFinDeLaFusion('Codex fictif', analyse, labas, {}, { importes: 0, erreurs: [] }, false);
-        expect(fin).toContain('De l\'autre codex : le brouillon de dissection et « inventee ».');
+        expect(fin).toContain('De l\'autre codex : ta grille en cours dans « Apporter mon matériel » et « inventee ».');
         expect(fin, 'une liste vide n\'apporte rien').not.toContain('interventions');
         expect(fin).not.toContain('autres données');
+        expect(fin, 'le mot ne paraît nulle part à l\'écran').not.toMatch(/issection/);
+    });
+
+    it('le haut de la fenêtre : les comptes, puis la grille en cours', () => {
+        const liste = (prefixe, n) => Array.from({ length: n }, (_, i) => ({ id: prefixe + i }));
+        const labas = {
+            a2031_evaluationsSauvegardees: liste('EV_', 18), a2031_annotationsTravaux: liste('AN_', 18),
+            a2031_chronoEvaluations: durees(18), a2031_brouillonDissection: { doc: 'fictif' }
+        };
+        const analyse = Codex._analyserFusion({}, labas);
+        expect(Codex._modeleDeLaFenetre(analyse, {}, labas, null).phrases.fort).toBe('Viendront de l\'autre codex, sans question : 18 évaluations, 18 annotations, 18 durées d\'évaluation et ta grille en cours dans « Apporter mon matériel ».');
+    });
+
+    it('la fin : les trois bilans, mot pour mot', () => {
+        const ici = { preferencesRythme: { a: 1 }, interventions: { b: 1 } };
+        const labas = { preferencesRythme: { a: 2 }, interventions: { b: 2 } };
+        const analyse = Codex._analyserFusion(ici, labas);
+        const choix = { preferencesRythme: 'externe', interventions: 'externe' };
+        const fin = Codex._direLaFinDeLaFusion('Codex fictif', analyse, labas, choix, { importes: 0, erreurs: [] }, false);
+        expect(fin).toContain('Versions de l\'autre codex retenues : le rythme de travail et les interventions.');
+        expect(fin).not.toContain('gardée pour');
     });
 });
