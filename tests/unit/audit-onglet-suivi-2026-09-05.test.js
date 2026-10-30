@@ -504,7 +504,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(p.C).toBe(75);                     // le brouillon n'est PAS remis pour C — avant 100
         expect(p.performance3).toBe(0.7);         // ni un artefact du dépistage — avant 0,80 (90, 80, 70)
         expect(p.nbArtefacts).toBe(3);
-        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Défi spécifique' });   // lot 2 des seuils : banc de 3 élèves, pas de comparaison au groupe, et 70 n'est pas sous 60. Avant #737 : « Stable » ; du 16 sept. au 30 oct. : « Difficulté émergente » (0,70 < 0,75)
+        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Difficulté émergente' });   // décision de Grégoire du 30 oct. 2026, 11 h 33 : les repères de l'échelle des copies se lisent dans toutes les pratiques : 0,70 < 0,75. Niveau : lot 2, banc de 3 élèves, 70 n'est pas sous 60. Avant #737 : « Stable » ; du 16 sept. au 30 oct. : « Difficulté émergente » (0,70 < 0,75)
     });
 
     it('B3 · une REPRISE : la note du cours remplace, et le dépistage aussi (#730 ; avant, il comptait l\'originale ET la reprise)', () => {
@@ -526,7 +526,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(p.performance3).toBe(0.65);                           // 50, 75, 70 — avant 0,60 (50, 75, 55 : l'originale remplacée était dedans)
         expect(ipb.historiqueComplet.length).toBe(4);                // quatre artefacts pour quatre productions — avant 5
         expect(r3(moy.structure)).toBe(r3((0.75 + 0.65 + 0.75 + 0.40) / 4)); // 0,6375 — avant 0,59 (l'originale pesait)
-        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Défi spécifique' });   // lot 2 des seuils : banc de 3 élèves, 65 n'est pas sous 60. Avant #730 : niveau 3 (0,60 < 0,64) ; sommative sans repère depuis le 30 oct. : aucun test « sous la maîtrise »
+        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Difficulté émergente' });   // décision de Grégoire du 30 oct. 2026, 11 h 33 : les repères de l'échelle des copies se lisent dans toutes les pratiques : 0,65 < 0,75. Niveau : lot 2, 65 n'est pas sous 60. Avant #730 : niveau 3 (0,60 < 0,64) ; sommative sans repère depuis le 30 oct. : aucun test « sous la maîtrise »
     });
 
     it('B4 · un « non remis » enregistré avec 0 : écarté par le C sommatif COMME par le C des snapshots — valeur d\'après #738 (constat d\'origine : C sommatif 25)', () => {
@@ -601,8 +601,7 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
 
     it('C4 · une échelle 60 / 75 / 90 : 62 est « D » sur l\'échelle, et le RàI ne le lit plus sous 64 (30 oct. 2026 : le constat d\'origine, deux réponses, est fermé)', () => {
         // À la main : trois travaux à 62, critères « D » (valeur 67, sous le seuil de défi 0,70 → défis). Constat d'origine :
-        // P 0,62 < idme.insuffisant 0,64 → niveau 3, alors que 62 tombe dans D. Le banc est sommatif : la note n'a pas d'échelle,
-        // seule la note de passage borne le bas ; 62 n'est donc pas sous la borne. Lot 2 des seuils : banc de 3 élèves, pas de comparaison au groupe → niveau 1, le défi reste nommé.
+        // P 0,62 < idme.insuffisant 0,64 → niveau 3, alors que 62 tombe dans D. Banc sommatif ; décision de Grégoire du 30 oct. 2026, 11 h 33 : les repères de l'échelle des copies se lisent dans toutes les pratiques : 62 est sous la maîtrise de E60, donc « Difficulté émergente ». Lot 2 : banc de 3 élèves, pas de comparaison au groupe → niveau 1, le défi reste nommé.
         const jeu = jeuBase();
         jeu.echelles = [clone(E60)]; jeu.grilles[0].echelleId = 'E60'; jeu.productions.forEach(p => { p.echelleId = 'E60'; });
         jeu.evaluations = ['P1', 'P2', 'P3'].map(pid => ev('E1' + pid, DA.ASSIDU, pid, 62, 'D', ['D', 'D', 'D'], { echelleId: 'E60' }));
@@ -611,7 +610,7 @@ describe('C · le palier que chaque écran rend, et l\'échelle qu\'il lit', () 
         const situe = b.win.situerPourcentageDansEchelle(62, E60);
         noter('C4', { rai: p.rai, P: p.P, niveauEchelle: situe && situe.code, suivi: p.suivi });
         expect(situe.code).toBe('D');
-        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Défi spécifique' });
+        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Difficulté émergente' });
         expect(p.suivi).toMatchObject({ ipb: 3, diagnostic: 'Difficulté persistante' });   // 0,67 < 0,70 : les fondations sont « en défi » sur cette échelle
     });
 
@@ -898,8 +897,7 @@ describe('E · le cycle d\'une intervention et ce qu\'il écrit', () => {
 describe('F · les nombres du groupe sont-ils la somme des profils', () => {
     it('F1 · le panneau du Suivi du groupe enrichit chaque élève avec les MÊMES fonctions que le profil ; les filtres sur P et sur A ou C retiennent qui on attend', () => {
         // À la main : Assidu (A 100, C 100, P 77, niveau 1), Absent (40, 100, 63, niveau 1 : lot 2 des seuils, banc de 3 élèves), Silence (100, 0, P non constructible, niveau 3).
-        // Filtre sur P : le banc est sommatif, sans échelle, la borne est la note de passage (30 oct. 2026) → personne : Absent est
-        // à 63 ; depuis #749 (11 sept.), Silence (P non constructible, affiché « — ») est ÉCARTÉ. Avec des repères : la sentinelle du lot.
+        // Filtre sur P : décision de Grégoire du 30 oct. 2026, 11 h 33 : les repères de l'échelle des copies se lisent dans toutes les pratiques : la borne est le repère de suffisance de E0, 65 → Absent (63) ; depuis #749 (11 sept.), Silence (P non constructible, affiché « — ») est ÉCARTÉ.
         // Filtre sur A ou C (#828, lot F du 16 sept.), au palier le plus bas : Silence (C 0) puis Absent (A 40), le pire indice d'abord.
         // Avant le 16 : M = (A + C) / 2 < 65 → Silence (50) seulement (Absent : 70) ; M n'est plus calculé.
         const b = monter(jeuBase()); b.calculerTout();
@@ -915,7 +913,7 @@ describe('F · les nombres du groupe sont-ils la somme des profils', () => {
             { da: DA.ABSENT, A: 40, C: 100, P: 63, niveau: 1, pattern: 'Difficulté persistante', ipb: 3 },
             { da: DA.SILENCE, A: 100, C: 0, P: 0, niveau: 3, pattern: 'Non-participation', ipb: null }
         ]);
-        expect(filtreP).toEqual([]);
+        expect(filtreP).toEqual([DA.ABSENT]);
         expect(filtreM).toEqual([DA.SILENCE, DA.ABSENT]);
     });
 

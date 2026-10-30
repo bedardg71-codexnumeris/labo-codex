@@ -173,7 +173,7 @@ const TOOLTIPS = {
     'depist-seuil-progression':
         'Différence minimale (%) pour signaler une progression ou une régression entre deux productions. Seuil bas = sensible, seuil élevé = moins sensible.',
     'depist-seuils-interpretation':
-        'Seuils de couleur pour les indices A-C-P. Fragile (rouge), Acceptable (jaune), Bon (vert). Détermine les alertes du tableau de bord.',
+        'Seuils de couleur pour les indices A et C, en quatre paliers. P suit les repères de ton échelle. Détermine les alertes du tableau de bord.',
     'depist-seuils-restaurer':
         'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut.',
     'depist-seuils-visuels':
@@ -539,7 +539,7 @@ const TOOLTIPS = {
     'tdb-patterns':
         'Progression sur les critères multistructurels (fondations SOLO) identifiés dans ta grille. Complémentaire au niveau RàI, qui compare la moyenne des copies au groupe-cours.',
     'tdb-rai':
-        'Niveau d\'intervention d’après la moyenne des copies, comparée au groupe-cours à partir de 2 copies : plus d’un écart-type sous la moyenne, niveau 3 ; entre un demi et un écart-type, niveau 2. Sous la note de passage, au moins le niveau 2, sauf si la moyenne du groupe l’est aussi : le signal vise alors tout le groupe. Le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de ta grille de référence sauf ceux marqués « Aucun », nomme le besoin. Complémentaire au suivi des fondamentaux, qui cible uniquement les critères multistructurels.',
+        'Niveau d\'intervention d’après la moyenne des copies, comparée au groupe-cours à partir de 2 copies et de 5 élèves avec copie : plus d’un écart-type sous la moyenne, niveau 3 ; entre un demi et un écart-type, niveau 2. Sous la note de passage, au moins le niveau 2, sauf si la moyenne du groupe l’est aussi : le signal vise alors tout le groupe. Le pattern des derniers artefacts (3 par défaut), qui lit tous les critères de ta grille de référence sauf ceux marqués « Aucun », nomme le besoin. Complémentaire au suivi des fondamentaux, qui cible uniquement les critères multistructurels.',
     'tdb-intervenir':
         'Suivi de l\'apprentissage des fondamentaux (taxonomie SOLO) et répartition par niveaux d\'intervention RàI.',
     'tdb-interventions-rai':

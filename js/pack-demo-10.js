@@ -15,7 +15,7 @@
 const PACK_DEMARRAGE = {
   "_metadata": {
     "nom": "Pack démo A2025",
-    "version": "21.2",
+    "version": "21.3",
     "date": "2026-09-13",
     "description": "10 étudiants anonymisés • 11 productions • 101 évaluations • 313 présences",
     "source": "Données réelles A2025 anonymisées",

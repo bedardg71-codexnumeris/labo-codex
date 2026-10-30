@@ -23,7 +23,12 @@ for (const plan of PLANS.filter((p) => p.t === 'h2026')) {
     const horsLot = chrono(passage);
     demarrerCacheLecture(); const dansUnLot = chrono(passage); terminerCacheLecture();
     db.setSync('infoCours', info);
-    return { groupes: gcs.length, parGroupe: parGroupe.size, tous: liste.length, ecarts, msHorsLot: horsLot, msDansUnLot: dansUnLot };
+    // Les écrans eux-mêmes : médiane de 5 passages, pour comparer deux commits.
+    const mediane = (f) => { const t = [1, 2, 3, 4, 5].map(() => chrono(f)).sort((a, b) => a - b); return t[2]; };
+    await changerGroupeCoursActifV2(gcs[0]); naviguerVers('etudiants', 'liste'); await new Promise((r) => setTimeout(r, 1000));
+    const msListe = mediane(() => window.afficherListeEtudiantsConsultation());
+    const msPatterns = mediane(() => window.calculerEtStockerPatternsGroupe());
+    return { groupes: gcs.length, parGroupe: parGroupe.size, tous: liste.length, ecarts, msHorsLot: horsLot, msDansUnLot: dansUnLot, msListe, msPatterns };
   });
   // La phrase sous la barre, dans l'écran réel, à une date où un groupe est sous la note de passage, puis aujourd'hui.
   const phrase = () => page.evaluate(async () => {

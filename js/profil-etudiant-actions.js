@@ -767,7 +767,8 @@ function calculerEtStockerPatternsGroupe() {
     const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
     const patternsGroupe = {};
 
-
+    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+    try {
     etudiants.forEach(etudiant => {
         const da = etudiant.da;
 
@@ -797,6 +798,9 @@ function calculerEtStockerPatternsGroupe() {
             };
         }
     });
+    } finally {
+        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
+    }
 
     // Stocker avec namespace trimestre
     db.setSyncSiChange(cle('indicesPatternsRaI'), patternsGroupe, ['dateCalcul']);   // #1040

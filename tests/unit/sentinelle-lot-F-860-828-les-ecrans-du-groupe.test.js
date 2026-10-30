@@ -94,7 +94,11 @@ describe('A · #828 — le filtre retient l\'élève dont l\'assiduité OU la co
 
     it('A4 · le filtre P (G-4, #749) ne dépend pas du réglage de A et C, et le code ne recopie aucune borne', () => {
         const { i } = monterSuivi();
-        expect(filtrer(i, ['P'])).toEqual([]);   // tous les P valent 80 ; sans échelle, la borne est la note de passage
+        // Sans échelle, la borne est la note de passage : 59 passe, 60 non (retouche du lot 1 : avec tous les P à 80, ce test ne pouvait pas échouer).
+        expect(filtrer(i, ['P'])).toEqual([]);
+        i._tousEtudiantsEnrichis[0].P = 59;
+        i._tousEtudiantsEnrichis[1].P = 60;
+        expect(filtrer(i, ['P'])).toEqual([ELEVES[0].nom]);
         const code = sansCommentaires(lire('js/tableau-bord-apercu.js'));
         expect(code).not.toMatch(/e\.M\b|\b65 - e\.|A\+C < 65|< 70%'|e\.P >= \d/);
         expect(code).toMatch(/window\.borneBasseAssiduiteCompletion\(\)/);

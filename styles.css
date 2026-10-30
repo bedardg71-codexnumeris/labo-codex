@@ -13434,15 +13434,6 @@ label:has(+ textarea:disabled) {
     height: 55px;
     border-radius: var(--radius-grand);
     position: relative;
-    background: linear-gradient(to right,
-        #ff8c00 0%,   /* Orange foncé */
-        #ffa500 10%,  /* Orange */
-        #98d025 30%,  /* Vert citron */
-        #22c55e 50%,  /* Vert */
-        #14b8a6 65%,  /* Cyan/Sarcelle */
-        #06b6d4 80%,  /* Bleu ciel clair */
-        #0ea5e9 100%  /* Bleu ciel */
-    );
     box-shadow: var(--shadow-subtil);
     overflow: hidden;
     perspective: 500px;
