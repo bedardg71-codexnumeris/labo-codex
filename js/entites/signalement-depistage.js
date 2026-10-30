@@ -57,6 +57,14 @@ function _evaluationActive(e) {
 }
 
 /**
+ * La saisie du nombre écrit `erreurs` ; seul le mode des codes écrit `totalErreurs`. Même lecture que
+ * `js/comptes-erreurs-stock.js`. Sans `erreurs`, une copie saisie comptait 0 : « sans erreur », jamais de signalement.
+ */
+function _compteDErreurs(saisie) {
+    return saisie.erreurs !== undefined ? saisie.erreurs : saisie.totalErreurs;
+}
+
+/**
  * Les signalements que porte UNE évaluation, tous critères confondus.
  *
  * @param {Object} evaluation - une évaluation enregistrée
@@ -81,7 +89,7 @@ function _signalementsDUneEvaluation(evaluation, grilles, registre) {
 
         var saisie = donnees[critereId] || {};
         var resultat = registre.calculer(critere, {
-            erreurs: saisie.totalErreurs,
+            erreurs: _compteDErreurs(saisie),
             mots: saisie.mots
         });
         // `applicable: false` couvre les cas nommés du registre — pas de mots

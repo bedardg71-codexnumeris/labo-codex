@@ -295,3 +295,44 @@ describe('#790 volet B · ⛔ LA PRODUCTION DIAGNOSTIQUE DOIT ÊTRE LUE ICI', ()
         expect(codeSeul).not.toContain('ProductionDiagnostique');
     });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════════
+// 30 oct. 2026 : les copies du codex portent `erreurs` (la saisie du nombre) ; le signalement ne lisait que `totalErreurs`,
+// que seul le mode des codes écrit. Une telle copie comptait 0 : « sans erreur », jamais de signalement.
+// Break-test : l'ancienne lecture (`saisie.totalErreurs`) rend 3 rouges, les trois premiers ci-dessous.
+describe('#790 · le compte d\'erreurs, sous les deux noms qu\'il porte', () => {
+    const copieSaisie = (donnees) => ({ id: 'E1', etudiantDA: '2000001', productionId: 'P1', grilleId: 'G1', noteFinale: 55,
+        donneesAlgorithmiques: { CR_LANGUE: donnees } });
+    const lire = (donnees, critere = critereEUF({ cochés: ['echec'], libelle: 'Aide recommandée' })) =>
+        signalement().pourEleve('2000001', { evaluations: [copieSaisie(donnees)], grilles: grilles(critere), registre: registre() });
+
+    it('une copie saisie (`erreurs`, la forme du stock) lève le signalement de son palier', () => {
+        const r = lire({ erreurs: 20, mots: 300, niveau: 'I', noteCalculee: 40, pourcentage: 40, retroaction: '' });
+        expect(r).toHaveLength(1);
+        expect(r[0]).toMatchObject({ palierCle: 'echec', libelle: 'Aide recommandée' });
+    });
+
+    it('elle porte le niveau que le palier fixe', () => {
+        const c = critereEUF({ cochés: ['echec'], libelle: 'Aide recommandée' });
+        c.paliersProjection.find((p) => p.cle === 'echec').niveauSignalement = 3;
+        expect(lire({ erreurs: 20, mots: 300 }, c)[0].niveauFixe).toBe(3);
+    });
+
+    it('`erreurs` l\'emporte sur un `totalErreurs` resté d\'un autre mode', () => {
+        expect(lire({ erreurs: 20, totalErreurs: 0, mots: 300 })).toHaveLength(1);
+    });
+
+    it('le mode des codes (`totalErreurs`) lève toujours', () => {
+        expect(lire({ codes: [], totalErreurs: 20, mots: 300 })).toHaveLength(1);
+    });
+
+    it('une copie saisie sous le palier coché ne lève rien', () => {
+        expect(lire({ erreurs: 1, mots: 900 })).toEqual([]);
+    });
+
+    it('la saisie écrit bien `erreurs` : si le nom change, cette lecture doit suivre', () => {
+        const calcul = readFileSync(path.join(RACINE, 'js', 'evaluation-calcul.js'), 'utf8');
+        expect(calcul).toMatch(/donneesAlgorithmiques\[critereId\] = \{\s*erreurs: erreurs,\s*mots: mots,/);
+    });
+});
+

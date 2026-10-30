@@ -13,6 +13,7 @@ Scripts qui rejouent le dépistage du module Suivi sur un codex. **Scripts seule
 | `a-c-annoncent-la-note.mjs` | L'assiduité et la complétion, avant la première note provisoire, croisées avec cette note ; deux définitions de la première note (minimum de la pratique, première copie) |
 | `niveau-rai-critere.mjs` | Le modèle en ligne à côté du modèle décidé le 30 oct. à 15 h 19 : niveaux par date, d'où vient chaque niveau, qui reste sans signal, les lectures de la fondation ; sur un commit qui porte le lot 3, l'écart entre le code et le modèle (attendu : 0) |
 | `signalement-grille-cochee.mjs` | Pourquoi aucun signalement ne se lève en A2026 : la grille de la production diagnostique et celle du palier coché |
+| `champ-erreurs-copies.mjs` | Sous quel nom les copies de G5M et de G1A stockent leur compte d'erreurs : les seuls noms de champs, comptés, sans navigateur (ne demande que `MESURE_CODEX`) |
 | `temoin-tous-les-groupes.mjs` | La vue « tous les groupes » rend le même niveau que le groupe-cours de chaque élève |
 | `rejeu-demo.mjs` | Le rejeu sur le pack de démonstration (élèves fictifs, sans codex) |
 

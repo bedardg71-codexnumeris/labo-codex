@@ -52,7 +52,7 @@ Les trois écarts relevés, et ce qu'ils sont devenus :
 
 ## Mots à valider (aucun n'est validé)
 
-⚠ Ils portent presque tous « note provisoire », que Grégoire vient de réserver aux pratiques alternatives (en-tête des textes de l'Aide) ; en sommative, l'écran dirait donc un mot que l'Aide évite. Inchangés : c'est aux mots à valider de le trancher.
+⚠ Ils portent presque tous « note provisoire », que Grégoire réserve aux pratiques alternatives (en-tête des textes de l'Aide). Ces mots s'affichent quelle que soit la pratique : la section suivante propose un remplacement pour chacun. **Rien n'est changé dans le code avant sa validation.**
 
 | Où | Mots |
 |---|---|
@@ -62,6 +62,34 @@ Les trois écarts relevés, et ce qu'ils sont devenus :
 | Cible d'intervention | Signalement diagnostique |
 | Bulles, glossaire, fenêtres d'aide, guide RàI | `accompagnement-contenu-hover.js` (`tdb-rai` et la bulle voisine), `-popup.js` (trois listes), `-terme.js` (niveau RàI), `guides-pedagogiques.js` (les deux paragraphes « Dans Labo Codex ») : réécrits pour ne plus décrire l'ancien modèle |
 
+## « Note provisoire » : remplacements proposés, à valider par Grégoire
+
+Principe : le terme de l'Aide validée, « note du cours à ce jour », et « note du cours » quand elle s'affiche ou non.
+
+| Où | Aujourd'hui | Proposé |
+|---|---|---|
+| `js/profil-etudiant-calculs.js:1925` | Note provisoire sous le seuil minimal de réussite, avec une difficulté sur un critère de fondation. | Note du cours à ce jour sous le seuil minimal de réussite, avec une difficulté sur un critère de fondation. |
+| `:1926` | Note provisoire sous le seuil minimal de réussite. | Note du cours à ce jour sous le seuil minimal de réussite. |
+| `:1927` | Note provisoire au seuil minimal de réussite ou au-dessus, mais ses derniers résultats sont sous ce seuil. | Note du cours à ce jour au seuil minimal de réussite ou au-dessus, mais ses derniers résultats sont sous ce seuil. |
+| `:1928` | Ses derniers résultats sont sous le seuil minimal de réussite. La note provisoire ne s'affiche pas encore. | Ses derniers résultats sont sous le seuil minimal de réussite. La note du cours ne s'affiche pas encore. |
+| `:1929` | Signalement de la production diagnostique : il fixe le niveau jusqu'à la première note provisoire. | Signalement de la production diagnostique : il fixe le niveau jusqu'à ce que la note du cours s'affiche. |
+| `:1930` | Note provisoire au seuil minimal de réussite ou au-dessus. Suivi régulier en classe. | Note du cours à ce jour au seuil minimal de réussite ou au-dessus. Suivi régulier en classe. |
+| `:1931` | La note provisoire ne s'affiche pas encore : le niveau l'attend. | La note du cours ne s'affiche pas encore : le niveau l'attend. |
+| `js/atelier-algo.js:147` | Jusqu'à la première note provisoire. Ensuite, la note et la trajectoire décident, et le signalement reste affiché. | Jusqu'à ce que la note du cours s'affiche. Ensuite, la note et la trajectoire décident, et le signalement reste affiché. |
+| `js/tableau-bord-apercu.js:1504` | La moyenne des notes provisoires du groupe (x) est sous le seuil minimal de réussite (y) : … | La moyenne du groupe, pour la note du cours à ce jour (x), est sous le seuil minimal de réussite (y) : … |
+| `:1518` | N étudiant·es en attente de leur note provisoire. · 1 étudiant·e en attente de sa note provisoire. | N étudiant·es en attente de leur note du cours. · 1 étudiant·e en attente de sa note du cours. |
+| `js/accompagnement-contenu-hover.js:540` | …au niveau RàI, qui situe la note provisoire devant le seuil minimal de réussite. | …au niveau RàI, qui situe la note du cours à ce jour devant le seuil minimal de réussite. |
+| `:542` | Niveau d'intervention d'après la note provisoire, devant le seuil… | Niveau d'intervention d'après la note du cours à ce jour, devant le seuil… |
+| `js/accompagnement-contenu-popup.js:281` | …dont la note provisoire est sous le seuil minimal de réussite… | …dont la note du cours à ce jour est sous le seuil minimal de réussite… |
+| `:282` | …quand la note provisoire est sous ce seuil… | …quand la note du cours à ce jour est sous ce seuil… |
+| `:658`, `:659`, `:660` | Note provisoire au seuil… · Note provisoire sous ce seuil… (deux fois) | Note du cours à ce jour au seuil… · Note du cours à ce jour sous ce seuil… (deux fois) |
+| `:721` | …dont la note provisoire est sous le seuil minimal de réussite… | …dont la note du cours à ce jour est sous le seuil minimal de réussite… |
+| `js/accompagnement-contenu-terme.js:337` | Niveau 2 : note provisoire sous le seuil… · Avant la note provisoire, un signalement diagnostique fixe le niveau que son palier porte. · Quand la moyenne des notes provisoires du groupe est sous ce seuil… | Niveau 2 : note du cours à ce jour sous le seuil… · Tant que la note du cours ne s'affiche pas, un signalement diagnostique fixe le niveau que son palier porte. · Quand la moyenne du groupe, pour la note du cours à ce jour, est sous ce seuil… |
+| `js/guides-pedagogiques.js:216` | Note provisoire sous ce seuil, palier 2 ; | Note du cours à ce jour sous ce seuil, palier 2 ; |
+| `:217` | Quand la moyenne des notes provisoires du groupe est sous ce seuil… | Quand la moyenne du groupe, pour la note du cours à ce jour, est sous ce seuil… |
+
+**Hors de cette liste, sans proposition** : les mots qui opposent « provisoire » à « finale » et qui existaient avant ce lot. Le profil (`js/profil-etudiant-sections-affichage.js:2985`, `:3041`, `:3678`), le réglage de fin de session (`index.html:5787`, `js/accompagnement-contenu-terme.js:606`) et le PDF de l'élève (`js/synthese-retroaction-rendu.js:749`, `:874-875`, mots validés le 24 sept.). Je n'ai pas vérifié dans quelles pratiques chacun s'affiche ; ils restent à décider par Grégoire s'il veut les inclure. Les commentaires du code et les anciennes Nouvelles ne sont pas des mots à l'écran d'aujourd'hui.
+
 ## Questions 2 à 5 du lot 2
 
 **Leur énoncé n'est nulle part dans le dépôt** (seulement des renvois) : je ne peux pas dire lesquelles tombent. Seule certitude : la paire « niveau 1 / Difficulté persistante » (L2-2) est caduque, « persistante » donne maintenant au moins le niveau 2. Cowork a l'énoncé ou sait où il est.
@@ -70,5 +98,6 @@ Les trois écarts relevés, et ce qu'ils sont devenus :
 
 - **Inscrit (#1203)** : l'écart du « — » entre le profil et le niveau.
 - **Classé, rien à corriger (Grégoire, 30 oct.)** : le palier « lève un signalement » sur G5M et non sur G1A est voulu. La grille à 5 critères localise les difficultés dès le premier artefact ; G1A, à un seul critère (français écrit), sert au texte diagnostique avant le premier artefact. La configuration reste telle quelle ; la mesure demandée puis annulée n'a pas de suite et son script n'est pas conservé.
-- **Inscrit ici, à l'attention de Grégoire, rien de corrigé** : sur le codex du 30 oct. (`e0b3a87b…`, code `086f60f8`), le critère « Français écrit » de G5M a le palier « Échec » coché et sa phrase « Ce que le signalement affiche à l'enseignant » vide. Le code ne lève rien sans cette phrase (`js/entites/signalement-depistage.js:96-98`, #790). Lu lors de la mesure annulée ; aucune écriture dans ses données.
-- **Inscrit ici, non vérifié sur les données, rien de corrigé** : `js/entites/signalement-depistage.js:84` ne lit que `totalErreurs`, mais la saisie du nombre d'erreurs écrit `erreurs` (`js/evaluation-calcul.js:147`, `:1036`) ; seul le mode des codes écrit `totalErreurs` (`:827-833`). `calculer` ramène alors le compte absent à 0 (`js/evaluation-projection.js:665`) : une telle copie tombe à « sans erreur » et ne lève jamais de signalement, même avec la phrase. Le banc de #790 ne monte que le mode des codes. C'est une lecture du code ; la mesure qui l'aurait éprouvée est annulée.
+- **Inscrit ici, à l'attention de Grégoire, rien de corrigé** : sur le codex du 30 oct. (`e0b3a87b…`, code `086f60f8`), le critère « Français écrit » de G5M a le palier « Échec » coché et sa phrase « Ce que le signalement affiche à l'enseignant » vide. Le code ne lève rien sans cette phrase (`js/entites/signalement-depistage.js:96-98`, #790). Lu lors de la mesure annulée ; aucune écriture dans ses données : Grégoire l'écrit lui-même.
+- **Vérifié et corrigé, sur décision de Grégoire (30 oct.)** : les copies de G5M et de G1A portent leur compte sous le nom `erreurs`, jamais `totalErreurs` (`scripts/mesures-depistage/champ-erreurs-copies.mjs`, noms de champs seulement ; codex `e0b3a87b…`). `js/entites/signalement-depistage.js` ne lisait que `totalErreurs` : une copie saisie comptait 0, donc « sans erreur », et ne levait jamais de signalement. La lecture accepte maintenant les deux, `erreurs` d'abord, comme `js/comptes-erreurs-stock.js`. **Source seulement, aucun stock** : le signalement se recalcule à chaque lecture ; ni migration, ni écriture dans le codex. **Effet en ligne, à la prochaine release** : tout palier coché avec sa phrase se met à lever sur les copies déjà saisies, et son niveau, s'il en a un, joue jusqu'à ce que la note du cours s'affiche. Chez Grégoire, rien tant que la phrase de G5M reste vide : c'est sa donnée, il l'écrit lui-même.
+  Éprouvé : `sentinelle-790-signalement-vient-du-gabarit`, 6 tests neufs ; l'ancienne lecture en rend 3 rouges, le code restauré. Vitest entier vert sur ce correctif (854 fichiers, 10 448).
