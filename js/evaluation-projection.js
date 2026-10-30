@@ -503,6 +503,10 @@ function _valeurParametre(p, brut, sansDefaut) {
     return valeur;
 }
 
+function _niveauDuSignalement(valeur) {
+    return (valeur === 2 || valeur === 3) ? valeur : null;
+}
+
 /** Nettoie un palier venu des données. Un palier illisible est écarté, pas deviné. */
 function _paliersRetenus(brut) {
     if (!Array.isArray(brut) || brut.length === 0) return null;
@@ -526,7 +530,10 @@ function _paliersRetenus(brut) {
             // #668 a retiré d'ici. L'enseignant de chimie coche les siens.
             // ⚠ `=== true` : un gabarit d'avant le 8 sept. 2026 n'a pas le champ, et
             // un champ absent ne lève rien. Aucune grille existante ne change.
-            leveSignalement: p.leveSignalement === true
+            leveSignalement: p.leveSignalement === true,
+            // Lot 3 des seuils (30 oct. 2026) — LE NIVEAU QUE CE PALIER FIXE : 2 ou 3, le choix de l'enseignant·e.
+            // Absent d'un gabarit coché avant cette date : aucun défaut, le palier ne fixe rien.
+            niveauSignalement: _niveauDuSignalement(p.niveauSignalement)
         });
     });
     if (!propres.length) return null;

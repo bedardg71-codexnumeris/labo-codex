@@ -2,7 +2,8 @@
    ENTITÉ : LE SIGNALEMENT DE DÉPISTAGE (#790)
 
    Un élève franchit un palier que l'enseignant a coché « lève un signalement » ?
-   Alors son nom remonte, à côté de son palier RàI — pas dedans.
+   Alors son nom remonte, à côté de son palier RàI. Le palier peut aussi porter un niveau
+   (lot 3 des seuils, 30 oct. 2026) : il le fixe jusqu'à la première note provisoire.
 
    ⚠ RIEN ICI N'EST DISCIPLINAIRE. Le déclencheur est une CASE SUR UN PALIER du
    gabarit de la grille ; le texte affiché est un PARAMÈTRE de ce même gabarit.
@@ -18,9 +19,10 @@
    partout, immédiatement, sans qu'une seule ligne n'ait été écrite nulle part.
 
    ── CE QU'IL N'EST PAS ──────────────────────────────────────────────────────
-   · Ce n'est PAS un palier RàI, et il ne le modifie jamais. Le palier se construit
-     sur les artefacts complets du trimestre ; le signalement dit une autre chose,
-     à côté.
+   · Ce n'est PAS un palier RàI. Sans niveau choisi sur le palier, il ne le modifie
+     pas : une case cochée en septembre ne dit pas ce qu'elle ne disait pas. Avec un
+     niveau, `determinerNiveauRaiPedagogique` le lit, puis la note prend le relais ; le
+     signalement reste affiché à côté, trace de l'orientation.
    · Ce n'est PAS le champ « Mesure d'aide » de la fiche. Celui-là dit que l'élève
      EST inscrit ; celui-ci dit qu'il DEVRAIT être référé. Les fondre ferait perdre
      la trace de qui n'a jamais donné suite.
@@ -99,6 +101,7 @@ function _signalementsDUneEvaluation(evaluation, grilles, registre) {
             libelle: libelle,
             palier: resultat.palier.libelle || resultat.palier.cle,
             palierCle: resultat.palier.cle,
+            niveauFixe: resultat.palier.niveauSignalement,
             critereId: critereId,
             critereNom: critere.nom || critere.titre || '',
             productionId: evaluation.productionId || null,

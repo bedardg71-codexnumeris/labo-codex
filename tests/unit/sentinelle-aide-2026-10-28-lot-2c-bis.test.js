@@ -184,9 +184,9 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
     it('rai et patterns : les bornes du niveau sont les repères de l\'échelle que lit `determinerNiveauRaiPedagogique` (décision du 30 oct. 2026)', () => {
         const calculs = lire('js', 'profil-etudiant-calculs.js');
         const niveau = tranche(calculs, 'function determinerNiveauRaiPedagogique(', '\nfunction ');
-        // Lot 2 des seuils (30 oct. 2026) : le niveau compare au groupe ; les bornes de l'échelle restent celles du pattern.
-        expect(niveau).toContain('classerNiveauDansLeGroupe(');
-        expect(niveau).toContain('reperesPerformance()');
+        // Lot 3 des seuils (30 oct. 2026) : le niveau lit la ligne, tirée de l'échelle ; les bornes de l'échelle sont aussi celles du pattern.
+        expect(niveau).toContain('classerNiveauAuCritere(');
+        expect(niveau).toContain('window.ligneDeReussite()');
         expect(tranche(calculs, 'function identifierPatternActuel(', '\nfunction ')).toContain('window.bornesDepistage()');
         expect(niveau).not.toContain('idme.');
         // Aucun champ de l'écran ni des préférences n'écrit de seuil de performance : les repères se posent sur l'échelle.
@@ -200,18 +200,12 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
 
     // Consigne du 30 oct. 2026 (`CONSIGNE-LOT-2026-10-30-nouvelles-1227-et-aide.md`, § 2) : plus aucun texte d'aide ne disait
     // ce niveau 3. Le texte est lié à ce que rend le code, pas seulement à sa présence.
-    it('patterns : « Seule Non-participation donne le niveau 3 » est ce que rend `determinerNiveauRaiPedagogique`', () => {
-        expect(texteDe('patterns')).toContain('Seule « Non-participation », sans copie à comparer, donne le niveau 3.');
-
+    // Lot 3 des seuils (30 oct. 2026) : la phrase « Seule Non-participation… » est périmée par le modèle au critère. Cowork réécrit
+    // la section avec Grégoire ; sa nouvelle garde viendra avec le texte. Reste ce que le code rend de cette règle.
+    it('patterns : « Non-participation » donne le niveau 3, et c\'est la présence sans copie qui le donne', () => {
         const present = niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 100 });
         expect(present).toMatchObject({ niveau: 3, pattern: 'Non-participation' });
-
-        // Absent·e et sans copie : pas de niveau 3. C'est bien la présence sans copie qui le donne.
         expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 0 })).toMatchObject({ niveau: 0, label: 'En attente' });
-
-        // « Seule » : un autre pattern, sous la note de passage, ne donne pas le niveau 3.
-        const copieFaible = { ...COPIE_DE_L_AUTRE, id: 'E2', etudiantDA: DA_BANC, noteFinale: 40, niveauFinal: 'I', criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: 'I' }, { critereId: 'c2', critereNom: 'Nuance', niveauSelectionne: 'I' }] };
-        expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE, copieFaible], A: 100 })).toMatchObject({ niveau: 2, pattern: 'Difficulté persistante' });
     });
 
     it('patterns : chaque ligne est la condition de `identifierPatternActuel`', () => {

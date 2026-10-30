@@ -216,8 +216,8 @@ describe('#552 · la cible d\'intervention ne vient plus du critère de langue',
         // Avant, c'était 3 pour le premier et 1 pour les deux autres.
         expect(cibles[0].niveau, 'langue à 15 %').toBe(cibles[1].niveau);
         expect(cibles[1].niveau, 'langue à 60 %').toBe(cibles[2].niveau);
-        expect(cibles[0].niveau, 'sous la note de passage, seul au banc : règle 1 du lot 2 des seuils')
-            .toBe(2);
+        expect(cibles[0].niveau, 'P 55 sous la ligne, avec une fondation en difficulté : lot 3 des seuils')
+            .toBe(3);
 
         for (const cible of cibles) {
             // La difficulté réelle est NOMMÉE — avant, celle du deuxième et du
@@ -290,7 +290,7 @@ describe('#552 · la cible d\'intervention ne vient plus du critère de langue',
         const cible = win.determinerCibleIntervention('TEST552');
 
         expect(cible.cible, 'le critère en défi de CETTE grille doit être nommé').toContain('Méthode');
-        expect(cible.niveau, 'et son intensité doit être calculée, pas repliée sur le minimum').toBe(2);
+        expect(cible.niveau, 'et son intensité doit être calculée, pas repliée sur le minimum').toBe(3);
     });
 
     it('#537 · le niveau SOLO affiché est celui que l\'utilisateur a configuré', () => {

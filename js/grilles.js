@@ -4241,7 +4241,16 @@ function rendreBlocProjectionAlgo(critere, ctx) {
                                     <input type="checkbox" ${pal.leveSignalement ? 'checked' : ''}
                                            data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="leveSignalement">
                                     <span>${esc(T.signal)} <small>${esc(T.signalPrecision)}</small></span>
-                                </label>
+                                </label>${pal.leveSignalement ? `
+                                <div class="groupe-form palier-niveau-signalement">
+                                    <label for="${ident('niveau-signalement-' + i)}">${esc(T.signalNiveau)}</label>
+                                    <select id="${ident('niveau-signalement-' + i)}" class="controle-form" data-on-change="${hPalier}" ${datas} data-palier-index="${i}" data-champ="niveauSignalement">
+                                        <option value="" ${pal.niveauSignalement ? '' : 'selected'}>${esc(T.signalNiveauAucun)}</option>
+                                        <option value="2" ${pal.niveauSignalement === 2 ? 'selected' : ''}>${esc(T.signalNiveau2)}</option>
+                                        <option value="3" ${pal.niveauSignalement === 3 ? 'selected' : ''}>${esc(T.signalNiveau3)}</option>
+                                    </select>
+                                    <small class="table-cas-petit">${esc(T.signalNiveauAide)}</small>
+                                </div>` : ''}
                                 <div class="table-cas-pied">
                                     <span class="table-cas-ici" data-palier-ici hidden>${esc(T.ici)}</span>
                                     <button type="button" class="table-cas-voir" data-apercu-geste="palier" data-palier="${i}">${esc(T.voir)}</button>
@@ -6488,6 +6497,11 @@ function _muterPalier(critere, index, champ, valeur) {
         // `el.checked` pour lui et `el.value` pour les autres ; le `String(valeur)`
         // de la branche générale en aurait fait la chaîne « false », qui est vraie.
         paliers[index].leveSignalement = (valeur === true || valeur === 'true');
+        // Lot 3 des seuils : décocher reprend le niveau. Recocher ne fait pas revenir un choix oublié.
+        if (!paliers[index].leveSignalement) delete paliers[index].niveauSignalement;
+    } else if (champ === 'niveauSignalement') {
+        if (valeur === '2' || valeur === '3') paliers[index].niveauSignalement = Number(valeur);
+        else delete paliers[index].niveauSignalement;
     } else {
         paliers[index][champ] = String(valeur);
     }

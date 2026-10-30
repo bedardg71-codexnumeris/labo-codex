@@ -134,21 +134,20 @@ La fonction `identifierPatternActuel()` (`js/profil-etudiant-calculs.js`) déter
 
 ### Le niveau RàI pédagogique
 
-La fonction `determinerNiveauRaiPedagogique()` (`js/profil-etudiant-calculs.js`) compare la moyenne des copies de l'élève à son groupe-cours (décision de Grégoire, 30 oct. 2026, lot 2 ; règle nue : `classerNiveauDansLeGroupe`) :
+La fonction `determinerNiveauRaiPedagogique()` (`js/profil-etudiant-calculs.js`) situe l'élève devant un critère et sa propre trajectoire, plus devant son groupe (décisions de Grégoire, 30 oct. 2026, lot 3 ; règle nue : `classerNiveauAuCritere`).
 
-- **Niveau 3 — Intensif** : plus d'un écart-type sous la moyenne du groupe
-- **Niveau 2 — Préventif** : entre un demi et un écart-type sous la moyenne
-- **Niveau 1 — Universel** : le reste
-- **Condition des niveaux 2 et 3** : être aussi sous le repère de maîtrise de l'échelle ; sans repère, elle se lève
-- **Règle 1** : signal de groupe éteint, sous la note de passage, au moins le niveau 2, dès la première copie
-- **Règle 2** : pas de comparaison au groupe avant 2 copies corrigées, ni sous 5 élèves avec copie
-- **Signal de groupe** (`signauxDeGroupeDepistage`) : moyenne du groupe sous la note de passage, un signal pour le palier 1, pas pour un élève
+- **La ligne** (`ligneDeReussite`) : le repère de suffisance de l'échelle des copies ; sans lui, `NOTE_DE_PASSAGE`. Une échelle qui ne porte que la maîtrise : la note de passage.
+- **Le résultat comparé** : la note provisoire affichée, P tel que la pratique le construit, le minimum de la pratique atteint. Le minimum est une règle du portfolio des standards ; sans lui (sommative), la note se lit dès la première copie. Note non constructible : pas de note.
+- **Note affichée** : niveau 3, sous la ligne avec un critère de fondation (`criteresSuiviFondations`) sous la ligne ; niveau 2, sous la ligne, ou « Difficulté persistante » même au-dessus ; niveau 1, le reste.
+- **Avant la note** : le signalement diagnostique fixe le niveau de son palier (`niveauSignalement`, 2 ou 3) ; « Difficulté persistante » donne le niveau 2 ; sinon « En attente », pas le niveau 1. Aucun niveau 3 par la note.
+- **« Non-participation »** : niveau 3, règle inchangée.
+- **Jamais** : la « Mesure d'aide » de la fiche ; le groupe. La phrase sous la barre RàI (`signauxDeGroupeDepistage`) dit la moyenne des notes affichées sous la ligne, sans enlever aucun signal, en attendant « la réponse du groupe ».
+- **Signalement** : un palier coché sans niveau n'en fixe aucun (aucun défaut silencieux). Après la première note affichée, il reste affiché à côté et ne fixe plus rien.
 
-Le pattern et le défi nomment le besoin ; ils ne fixent plus le niveau, et P n'y entre plus. Un élève inactif reste hors de la référence. Les références se calculent sur tout le cours, par numéro de groupe : les vues « un groupe » et « tous les groupes » coïncident. Sur le corpus, le code rend exactement le modèle mesuré : rejouer `scripts/mesures-depistage/regles-1-et-2.mjs`, colonne « en place » égale à « règles ».
+Une intervention enregistrée garde son niveau d'alors. Sur le corpus : `scripts/mesures-depistage/niveau-rai-critere.mjs`, colonne « écart code-modèle », attendu 0.
 
-**Une seule source par famille de seuils (décision de Grégoire, 30 oct. 2026)** : `js/contexte-qualification.js`. A et C lisent les trois champs de Labo › Outils d'observation (défauts 95 · 90 · 85, quatre paliers) ; P lit les repères de l'échelle des copies du groupe (`reperesPerformance`), dans toutes les pratiques (décision de Grégoire, 30 oct. 2026, 11 h 33) ; `lireEchelleNoteGlobale` régit seulement l'expression de la note du cours ; la note de passage, `NOTE_DE_PASSAGE`. Sans repère, seule la note de passage signale, et le test « sous la maîtrise » n'existe pas. Mesures de ce chantier : `scripts/mesures-depistage/`, résultats en page privée seulement.
+**Une seule source par famille de seuils (décision de Grégoire, 30 oct. 2026)** : `js/contexte-qualification.js`. A et C lisent les trois champs de Labo › Outils d'observation (défauts 95 · 90 · 85, quatre paliers) ; P lit les repères de l'échelle des copies du groupe (`reperesPerformance`), dans toutes les pratiques (décision de Grégoire, 30 oct. 2026, 11 h 33) ; `lireEchelleNoteGlobale` régit seulement l'expression de la note du cours ; la note de passage, `NOTE_DE_PASSAGE`. Sans repère, seule la note de passage signale, et le test « sous la maîtrise » n'existe pas. La ligne du niveau, `ligneDeReussite`, vit au même endroit. Mesures de ce chantier : `scripts/mesures-depistage/`, résultats en page privée seulement.
 
-Cas spéciaux : «Non-participation» (présent mais aucune production → Niveau 3), «En attente» (aucune donnée).
 
 ---
 

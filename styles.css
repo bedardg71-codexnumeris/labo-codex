@@ -28675,6 +28675,15 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     font-size: 0.76rem;
 }
 
+.palier-niveau-signalement {
+    margin: 0 0 8px;
+    padding-left: 30px;
+}
+
+.palier-niveau-signalement select {
+    min-height: 44px;
+}
+
 /* ============================================================================
    #790 — LE SIGNALEMENT DE DÉPISTAGE, au profil de l'élève.
    Placé SOUS le badge RàI : à côté du palier, jamais dedans. Il dit une autre

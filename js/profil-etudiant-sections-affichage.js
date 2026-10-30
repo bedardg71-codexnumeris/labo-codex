@@ -907,10 +907,10 @@ function genererSectionAccompagnement(da) {
     const conversionAveugle = (typeof diagnostiquerConversionNiveaux === 'function')
         ? diagnostiquerConversionNiveaux(da) : null;
     const alerteContexte = determinerAlerteContextuelle(da);
-    // #790 — LE SIGNALEMENT, RECALCULÉ ICI ET JAMAIS LU D'UN STOCKAGE. Il ne touche
-    // pas au palier RàI : celui-ci se construit sur les artefacts complets du
-    // trimestre, le signalement dit une autre chose, à côté. Décocher un palier du
-    // gabarit le fait disparaître au rechargement suivant, sans migration.
+    // #790 — LE SIGNALEMENT, RECALCULÉ ICI ET JAMAIS LU D'UN STOCKAGE. Son niveau, s'il en
+    // porte un, entre dans le palier RàI jusqu'à la première note provisoire (lot 3 des seuils) ;
+    // ici, il reste affiché à côté. Décocher un palier du gabarit le fait disparaître au
+    // rechargement suivant, sans migration.
     const signalements = (typeof window.SignalementDepistage !== 'undefined')
         ? window.SignalementDepistage.pourEleve(da, {
             evaluations: obtenirDonneesSelonMode('evaluationsSauvegardees') || [],

@@ -154,6 +154,18 @@ test('calculs · la table : un seuil en pourcentage, ajouter et retirer un palie
     // Le signalement d'« Au-delà » coché ; « Voir ce que l'étudiant·e lirait » à ce palier : la copie réglée, la rangée marquée.
     await rangees(page, 'CC').nth(5).locator('label.palier-leve-signalement input').evaluate((el) => { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); });
     await expect.poll(async () => (await enBase(page, 'GC')).paliersProjection[5].leveSignalement).toBe(true);
+    // Lot 3 des seuils (30 oct. 2026) : le palier coché propose le niveau qu'il fixe, sans en poser aucun ; décocher le reprend.
+    const niveau = () => rangees(page, 'CC').nth(5).locator('.palier-niveau-signalement select');
+    await expect(niveau()).toHaveValue('');
+    expect((await enBase(page, 'GC')).paliersProjection[5].niveauSignalement).toBeFalsy();
+    await niveau().selectOption('3');
+    await expect.poll(async () => (await enBase(page, 'GC')).paliersProjection[5].niveauSignalement).toBe(3);
+    await expect(niveau()).toHaveValue('3');
+    await rangees(page, 'CC').nth(5).locator('label.palier-leve-signalement input').evaluate((el) => { el.checked = false; el.dispatchEvent(new Event('change', { bubbles: true })); });
+    await expect(niveau()).toHaveCount(0);
+    await expect.poll(async () => (await enBase(page, 'GC')).paliersProjection[5].niveauSignalement).toBeFalsy();
+    await rangees(page, 'CC').nth(5).locator('label.palier-leve-signalement input').evaluate((el) => { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); });
+    await expect(niveau()).toHaveValue('');
     await cliquerDom(rangees(page, 'CC').nth(5).locator('[data-apercu-geste="palier"]'));
     const ap = apercu(page, 'CC');
     await expect(ap.locator('.apercu-algo-flash')).toHaveText(/^Copie réglée sur le palier « Au-delà » : \d+ unités manquantes pour 12 calculs\.$/);
