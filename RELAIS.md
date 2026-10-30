@@ -7,6 +7,20 @@
 
 ---
 
+## 30 OCT. 2026, FIN D'APRÈS-MIDI (Claude Code) : **L'AIDE DU NIVEAU AU CRITÈRE EST INTÉGRÉE, NON COMMITÉE ; AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
+
+**Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`, section des textes (validés, puis intégrés).
+
+**Fait** : les textes validés dans `index.html`, avec la décision A de Grégoire sur le niveau 1 et la phrase retenue à `index.html:10881` ; gardes réécrites et garde neuve ; #1203 inscrit (l'écart du « — », sans cas vécu, non corrigé).
+
+**Vérifié** : Vitest entier vert (10 442) ; 7 mutations de l'Aide rouges, `index.html` restauré ; textes comparés par script. **Non éprouvés** : la suite Playwright complète, exigée avant toute release ; Safari hors banc ; iPad.
+
+**Reste avant une release** : le commit (non fait : le rituel attend la demande de Grégoire), les mots du rapport à valider, dont « note provisoire » ; la relecture de Cowork ; puis le verdict Playwright, Cowork fermé.
+
+**Classé (Grégoire)** : le palier sur G5M et non sur G1A est voulu ; mesure annulée, script retiré. À son attention, sans geste : la phrase du signalement de ce palier est vide, et le code ne lève rien sans elle (rapport, Trouvailles). Autre lecture du code, non éprouvée : le signalement lit `totalErreurs`, la saisie du nombre d'erreurs écrit `erreurs` (rapport, Trouvailles).
+
+**Non commités, à Cowork, laissés tels quels** : les mêmes fichiers que ci-dessous.
+
 ## 30 OCT. 2026, 16 H 07 (Claude Code) : **LE NIVEAU AU CRITÈRE EST CODÉ SUR `main`, NON POUSSÉ ; L'AIDE ATTEND : AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
 
 **Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md` (modèle tel que codé, suppositions, mots à valider, écarts).

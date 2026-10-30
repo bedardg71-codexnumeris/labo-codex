@@ -122,7 +122,8 @@ describe('Ce qui fixe le niveau RàI : une seule version, celle du code', () => 
         // ↻ #1152, lot 3 (28 oct. 2026) : « au moins trois fois » comptait deux redites du glossaire statique (Indice RàI, RàI),
         // parti avec lui (consigne CONSIGNE-LOT-2026-10-28-aide-lot-3-un-seul-glossaire.md, §2.5). La règle reste dite là où
         // l'Aide décrit le niveau (l'entrée du Suivi) et dans le seul glossaire (TERME, ci-dessus).
-        expect(AIDE.split(phrase).length - 1, 'la section Aide ne dit plus la règle du code').toBeGreaterThanOrEqual(1);
+        // ↻ Lot 3 des seuils (30 oct. 2026) : la carte RàI validée ne nomme plus cette fenêtre ; l'Aide la dit au Suivi de l'apprentissage.
+        expect(AIDE, 'la section Aide ne dit plus la fenêtre du code').toContain(`(${fenetre} dernières productions par défaut)`);
         expect(TERME).toContain('il ne fixe pas le niveau');
         expect(AIDE).toContain('nomme la cible de l\'intervention');
     });

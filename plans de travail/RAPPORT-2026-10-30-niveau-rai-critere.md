@@ -34,15 +34,25 @@
 
 La source change. Le stock reste, et rien n'est écrit dans les données : le cache `indicesPatternsRaI` d'un trimestre garde l'ancien niveau jusqu'à son prochain calcul, et le registre longitudinal lit ce cache par trimestre ; les interventions gardent leur niveau d'alors ; un palier déjà coché reste sans niveau jusqu'au choix de l'enseignant·e.
 
-## Les textes de Cowork (`TEXTES-2026-10-30-aide-rai-niveau-critere.md`) : non intégrés
+## Les textes de Cowork (`TEXTES-2026-10-30-aide-rai-niveau-critere.md`) : validés, puis intégrés
 
-Statut « proposé, non validé » : `index.html` garde l'ancienne Aide. **Aucune release tant que ce n'est pas réglé.** Écarts avec le code, selon la règle du fichier :
+**Validés** par Grégoire le 30 oct. (16 h 07), **intégrés** dans `index.html` : la carte « La Réponse à l'Intervention (RàI) » entière et les deux changements de « Repérer les patterns de progression ». Comparaison par script au fichier des textes, entités ramenées : 10 paragraphes sur 10 et les 2 changements identiques, la ligne du niveau 1 comparée à sa décision ci-dessous.
 
-1. **« Niveau 1 : tous les autres » est faux avant la note** : le reste est « En attente ». Proposition : « **Niveau 1 (Universel)** : tous les autres, une fois la note provisoire affichée. Avant, sans ces signaux, le niveau reste « En attente ». »
-2. **« l'écran écrit « — » »** n'est pas exact partout. Le profil écrit « — » sous `minimumCompletion || 3` dès que la pratique n'a pas désactivé le portfolio, même en sommative, si ses productions sont des « Artefact » ; le niveau, lui, y lit la note dès la première copie (supposition 1). À trancher : ajuster la phrase (« tant que ta pratique exige un minimum de copies ») ou aligner le profil. Non corrigé : aucun symptôme vécu.
-3. **Deux endroits manquent aux textes** : `index.html:10881` (« il ne fixe pas le niveau RàI, qui compare la moyenne des copies au groupe-cours ») ; et, dans « Repérer les patterns », la dernière phrase (« Tant que rien n'est jugeable… »), qui ne couvre pas l'attente sous le minimum.
+Les trois écarts relevés, et ce qu'ils sont devenus :
+
+1. **« Niveau 1 : tous les autres »** : décision de Grégoire, option A. La ligne est maintenant « **Niveau 1 (Universel)** : tous les autres, une fois la note du cours affichée. Avant, sans ces signaux, le niveau reste « En attente ». » Le § 3 bis tient, le code ne change pas. Le fichier des textes de Cowork garde son ancienne ligne : non touché.
+2. **« l'écran écrit « — » »** : phrase gardée, code inchangé, inscrit au backlog comme écart connu, sans cas vécu (**#1203**), sur décision de Grégoire.
+3. **`index.html:10881`** : la phrase de remplacement est retenue, mot pour mot. Relue entière : « Ce diagnostic nomme la cible de l'intervention ; il ne fixe pas le niveau RàI (voir « La Réponse à l'Intervention (RàI) »). Quand les deux vues divergent, c'est un signal pour ton jugement. » Elle tient ; rien d'ajusté. **La dernière phrase de « Repérer les patterns »** (« Tant que rien n'est jugeable… ») reste telle quelle : elle demeure vraie et personne ne l'a changée ; elle ne couvre pas l'attente sous le minimum, que dit maintenant la ligne du niveau 1.
+
+**Ce que la carte ne dit plus**, par le remplacement validé : la fenêtre du pattern (3 par défaut, toujours dite au Suivi de l'apprentissage) et les critères qu'il lit (toujours dits par la bulle et le glossaire).
+
+**Vérifié comment** : Vitest entier vert (854 fichiers, 10 442) ; garde neuve dans `sentinelle-niveau-au-critere-2026-10-30.test.js` ; 7 mutations de l'Aide, chacune rouge sur 1 test, `index.html` restauré à l'identique (empreinte comparée). Deux gardes anciennes réécrites, car elles citaient l'ancienne Aide (`sentinelle-aide-2026-10-28-lot-2c-bis`, `sentinelle-audit-aide-15-oct`) ; le plancher des renvois du Suivi passe de 6 à 5.
+
+**Non éprouvés** : la suite Playwright complète, exigée par Grégoire avant toute release ; **Safari hors banc et l'iPad**. L'Aide n'a été rendue dans aucun navigateur : ses gardes lisent le source.
 
 ## Mots à valider (aucun n'est validé)
+
+⚠ Ils portent presque tous « note provisoire », que Grégoire vient de réserver aux pratiques alternatives (en-tête des textes de l'Aide) ; en sommative, l'écran dirait donc un mot que l'Aide évite. Inchangés : c'est aux mots à valider de le trancher.
 
 | Où | Mots |
 |---|---|
@@ -58,5 +68,7 @@ Statut « proposé, non validé » : `index.html` garde l'ancienne Aide. **Aucun
 
 ## Trouvailles
 
-- **Inscrit ici, non corrigé** : l'écart du « — » entre le profil et le niveau (écart 2 ci-dessus).
-- **Déjà dit, toujours vrai** : en A2026, aucune copie diagnostique n'est sur la grille qui porte le palier coché ; le § 2 ne rendra rien sur ce codex tant que c'est ainsi. Rien n'est écrit dans les données.
+- **Inscrit (#1203)** : l'écart du « — » entre le profil et le niveau.
+- **Classé, rien à corriger (Grégoire, 30 oct.)** : le palier « lève un signalement » sur G5M et non sur G1A est voulu. La grille à 5 critères localise les difficultés dès le premier artefact ; G1A, à un seul critère (français écrit), sert au texte diagnostique avant le premier artefact. La configuration reste telle quelle ; la mesure demandée puis annulée n'a pas de suite et son script n'est pas conservé.
+- **Inscrit ici, à l'attention de Grégoire, rien de corrigé** : sur le codex du 30 oct. (`e0b3a87b…`, code `086f60f8`), le critère « Français écrit » de G5M a le palier « Échec » coché et sa phrase « Ce que le signalement affiche à l'enseignant » vide. Le code ne lève rien sans cette phrase (`js/entites/signalement-depistage.js:96-98`, #790). Lu lors de la mesure annulée ; aucune écriture dans ses données.
+- **Inscrit ici, non vérifié sur les données, rien de corrigé** : `js/entites/signalement-depistage.js:84` ne lit que `totalErreurs`, mais la saisie du nombre d'erreurs écrit `erreurs` (`js/evaluation-calcul.js:147`, `:1036`) ; seul le mode des codes écrit `totalErreurs` (`:827-833`). `calculer` ramène alors le compte absent à 0 (`js/evaluation-projection.js:665`) : une telle copie tombe à « sans erreur » et ne lève jamais de signalement, même avec la phrase. Le banc de #790 ne monte que le mode des codes. C'est une lecture du code ; la mesure qui l'aurait éprouvée est annulée.
