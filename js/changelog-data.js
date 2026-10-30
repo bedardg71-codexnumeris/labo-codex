@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.226 (la fenêtre de fusion, #1186 ; le codex sans les copies aux archives, #1184 ; le lot 5 des standards sans
+            // portfolio, #1178) — titre et quatre items validés par Grégoire, mot pour mot, le 30 oct. 2026 (consigne de Cowork
+            // `CONSIGNE-LOT-2026-10-30-mise-en-ligne-1226.md`, § 1, collée par lui). Une retouche, de lui aussi, à la mesure :
+            // « Avec des artefacts, rien ne change » devient « la note ne change pas » (les questions de l'assistant et le récit
+            // sans terminale changent aussi avec des artefacts). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.226',
+            couleur: 'bleu',
+            titre: 'Une fenêtre de fusion lisible, et un codex qui garde sa taille',
+            items: [
+                'Fusionner avec un codex&nbsp;: deux colonnes, «&nbsp;Ici&nbsp;» et «&nbsp;L’autre codex&nbsp;», chacune nommée par son appareil. Chaque différence montre ce qui change de chaque côté&nbsp;; rien n’est choisi pour toi, et «&nbsp;Fusionner&nbsp;» attend que chaque ligne ait sa version.',
+                'Le codex ne transporte plus les copies envoyées aux archives, même quand un autre appareil les a encore&nbsp;: il garde sa taille d’un appareil à l’autre.',
+                'Standards sans artefact&nbsp;: l’assistant et la fiche de la pratique parlent de productions, et le récit de la note dit «&nbsp;productions retenues&nbsp;». Avec des artefacts, la note ne change pas.',
+                'Le rapport de bug reconnaît les PC Windows, Edge, Android et les Chromebooks.'
+            ]
+        },
+        {
             // 1.225 (fusionner deux codex copie par copie, #1182) — titre et deux items validés par Grégoire, mot pour
             // mot, le 29 oct. 2026 (consigne de Cowork `CONSIGNE-LOT-2026-10-29-mise-en-ligne-1225-fusion.md`, § 1,
             // collée par lui). Insécables en `&nbsp;`, apostrophes typographiques.
