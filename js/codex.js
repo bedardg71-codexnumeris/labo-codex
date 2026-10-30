@@ -2485,7 +2485,7 @@ function _clesAEcrire(analyse, choix) {
 /* ----- Les mots ----- */
 
 /**
- * « 14 évaluations, 14 annotations et le brouillon de dissection » : les comptes dans l'ordre de
+ * « 14 évaluations, 14 annotations et le rythme de travail » : les comptes dans l'ordre de
  * MOTS_DES_ELEMENTS, puis les noms (#1186 : ce qui n'est pas compté est nommé, par
  * LIBELLES_DES_CLES, au lieu de « N autres données ») ; '' si rien.
  */
@@ -2556,18 +2556,26 @@ function _nomDuTampon(id, ici, labas) {
     return t && t.nom ? 'Tampon « ' + t.nom + ' »' : id;
 }
 
+/** Une grille en cours dit son nom : ses entrées (`doc`, `liens`…) ne parlent à personne. */
+function _coteDeLaGrilleEnCours(v) {
+    return { texte: v && v.nomSaisi ? '« ' + v.nomSaisi + ' »' : 'Grille sans nom', detail: '' };
+}
+
 /**
  * #1186 — LA table des libellés : le titre d'une rangée et le nom de ce qui arrive en entier.
  * Par nom de base (sans trimestre). `nom` : la clé entière, avec son article (il se lit dans une
- * énumération) ; `ou` : où elle se règle ; `entrees` : le libellé d'une entrée d'une clé-objet,
- * table ou fonction. Une clé ou une entrée inconnue garde son nom technique, jamais d'erreur.
+ * énumération) ; `ou` : où elle se règle ; `titre` : le titre de sa rangée, si ce n'est pas `nom` ;
+ * `unite` : le nom d'une de ses entrées (« 1 autre réglage identique ») ; `entrees` : le libellé
+ * d'une entrée d'une clé-objet, table ou fonction ; `cote` : ce que dit un côté de la rangée, quand
+ * ses entrées ne se lisent pas. Une clé ou une entrée inconnue garde son nom technique, jamais d'erreur.
  */
 var LIBELLES_DES_CLES = {
-    preferencesRythme: { nom: 'le rythme de travail', ou: 'Rythme de travail',
+    preferencesRythme: { nom: 'le rythme de travail', ou: 'Rythme de travail', unite: 'réglage',
         entrees: { dateObjectif: 'Date objectif (remise)', heureObjectif: 'Heure objectif (remise)' } },
-    retroactionsObservations: { nom: 'les textes de tes tampons', ou: 'Annotation › Tampons', entrees: _nomDuTampon },
-    personnalisationObservations: { nom: 'tes tampons personnalisés', ou: 'Annotation › Tampons', entrees: _nomDuTampon },
-    brouillonDissection: { nom: 'le brouillon de dissection' },
+    retroactionsObservations: { nom: 'les textes de tes tampons', ou: 'Annotation › Tampons', unite: 'texte', entrees: _nomDuTampon },
+    personnalisationObservations: { nom: 'tes tampons personnalisés', ou: 'Annotation › Tampons', unite: 'tampon', entrees: _nomDuTampon },
+    brouillonDissection: { nom: 'ta grille en cours dans « Apporter mon matériel »', titre: 'Ta grille en cours',
+        ou: 'Conception › Apporter mon matériel', cote: _coteDeLaGrilleEnCours },
     interventions: { nom: 'les interventions' }
 };
 
@@ -2637,15 +2645,24 @@ function _differePar(a, b) {
     return mots.length ? 'Diffère par : ' + mots.join(', ') : '';
 }
 
+/** « 1 autre réglage identique », « 2 autres réglages identiques » ; le nom suit la clé (`unite`). */
+function _direLesIdentiques(n, unite) {
+    if (n <= 0) return '';
+    var u = unite || 'élément';
+    return n > 1 ? n + ' autres ' + u + 's identiques' : '1 autre ' + u + ' identique';
+}
+
 /**
  * #1186 — un conflit de clé entière, de chaque côté. Une clé-objet dit les entrées qui changent
- * (« absente » quand une entrée manque) et « N autres identiques » ; une entrée seule devient le
- * titre de la rangée. Pas de date : « La plus récente » ne se dit pas.
+ * (« absente » quand une entrée manque) et « N autres réglages identiques » ; une entrée seule
+ * devient le titre de la rangée. Pas de date : « La plus récente » ne se dit pas.
  */
 function _decrireLaCle(nomCle, ici, labas) {
     var l = LIBELLES_DES_CLES[_nomDeBase(nomCle)] || {};
+    var titre = l.titre || _majuscule(_libelleDeLaCle(nomCle));
+    if (l.cote) return { titre: titre, qui: l.ou || '', ici: l.cote(ici), autre: l.cote(labas), recente: null };
     if (!_estObjetSimple(ici) || !_estObjetSimple(labas)) {
-        return { titre: _majuscule(_libelleDeLaCle(nomCle)), qui: l.ou || '',
+        return { titre: titre, qui: l.ou || '',
             ici: { texte: _valeurCourte(ici), detail: '' }, autre: { texte: _valeurCourte(labas), detail: '' }, recente: null };
     }
     var toutes = _entreesDesDeux(ici, labas);
@@ -2655,15 +2672,15 @@ function _decrireLaCle(nomCle, ici, labas) {
     var identiques = toutes.length - diff.length;
     var reste = [
         diff.length > 1 ? (diff.length - 1) + (diff.length > 2 ? ' autres différences' : ' autre différence') : '',
-        identiques > 0 ? identiques + (identiques > 1 ? ' autres identiques' : ' autre identique') : ''
+        _direLesIdentiques(identiques, l.unite)
     ];
     var cote = function(v, w) {
         var texte = (diff.length > 1 ? nomEntree + ' : ' : '') + _valeurCourte(v);
         return { texte: texte, detail: [_differePar(v, w)].concat(reste).filter(Boolean).join(' · ') };
     };
     return {
-        titre: diff.length > 1 ? _majuscule(_libelleDeLaCle(nomCle)) : nomEntree,
-        qui: diff.length > 1 ? (l.ou || '') : _majuscule(_libelleDeLaCle(nomCle)),
+        titre: diff.length > 1 ? titre : nomEntree,
+        qui: diff.length > 1 ? (l.ou || '') : titre,
         ici: cote(ici[premiere], labas[premiere]), autre: cote(labas[premiere], ici[premiere]), recente: null
     };
 }
@@ -4067,7 +4084,7 @@ function _direLaFinDeLaFusion(nomExterne, analyse, externe, choix, statsTravaux,
     lignes.push(entre.venues
         ? 'De l\'autre codex : ' + entre.venues + '.'
         : 'Rien de neuf n\'est venu de l\'autre codex.');
-    if (entre.remplacees) lignes.push('Version de l\'autre codex gardée pour : ' + entre.remplacees + '.');
+    if (entre.remplacees) lignes.push('Versions de l\'autre codex retenues : ' + entre.remplacees + '.');
     if (entre.versLaCorbeille) lignes.push('À la corbeille, comme dans l\'autre codex : ' + entre.versLaCorbeille + '.');
     var gardes = analyse.conflits.filter(function(c) { return choix[_cleDuConflit(c)] !== 'externe'; }).length;
     if (gardes > 0) {
