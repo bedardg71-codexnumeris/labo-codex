@@ -118,9 +118,10 @@ describe('#775 · le palier RàI ne se décide pas sur une note qui n\'existe pa
         expect(rai.pattern).toBe('Stable');
     });
 
-    it('note CONSTRUCTIBLE à 0 % : c\'est une vraie performance nulle, le palier 3 reste', () => {
+    it('lot 2 des seuils (30 oct. 2026) : le palier ne lit plus P du tout, seulement les copies', () => {
+        // Avant : un P stocké à 0, constructible, donnait le palier 3. Ici, l'unique copie vaut 96 %.
         const rai = monter({ noteConstructible: true }).determinerNiveauRaiPedagogique(DA);
-        expect(rai.niveau).toBe(3);
+        expect(rai.niveau).toBe(1);
     });
 });
 

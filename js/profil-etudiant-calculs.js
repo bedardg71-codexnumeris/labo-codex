@@ -1760,29 +1760,147 @@ function depistagePeutJugerLaNonParticipation() {
     return { possible: true, raison: null };
 }
 
+/* ===============================
+   LE NIVEAU COMPARÉ AU GROUPE-COURS — décision de Grégoire, 30 oct. 2026 (lot 2 des seuils)
+   Mesuré avant d'être codé : scripts/mesures-depistage/regles-1-et-2.mjs.
+
+   Niveau 3 : plus d'un écart-type sous la moyenne du groupe-cours.
+   Niveau 2 : entre un demi et un écart-type sous la moyenne.
+   Niveau 1 : le reste.
+   Condition commune aux niveaux 2 et 3 : être aussi sous le repère de maîtrise de l'échelle. Sans ce
+   repère, la condition se lève (même lecture que `bornesDepistage`).
+   Règle 1 : signal de groupe éteint (moyenne à la note de passage ou plus), un élève sous la note de
+   passage est au moins au niveau 2. Signal allumé : rien ne change, c'est l'enseignement universel
+   qui est en cause, pas un signalement individuel.
+   Règle 2 : pas de comparaison au groupe avant 2 copies corrigées. La règle 1 s'applique, elle, dès la
+   première copie : la note de passage n'est pas une comparaison au groupe.
+   =============================== */
+const COPIES_MINIMUM_COMPARAISON = 2;
+const EFFECTIF_MINIMUM_GROUPE = 5;
+
 /**
- * Détermine le Modèle de la Réponse à l'intervention (RàI) basé UNIQUEMENT sur P et SRPNF
- * (sans tenir compte de la mobilisation A-C)
+ * La règle nue, sans lecture du stockage.
+ * @param {number} note - la moyenne des copies de l'élève, 0-100
+ * @param {number} nbCopies - ses copies corrigées
+ * @param {{moyenne:number, ecartType:number}|null} reference - son groupe ; null sous l'effectif minimum
+ * @param {number|null} repereMaitrise - 0-100 ; null : l'échelle n'en pose pas
+ * @param {number} passage - 0-100
+ * @returns {{niveau:(1|2|3), motif:string}}
+ */
+function classerNiveauDansLeGroupe(note, nbCopies, reference, repereMaitrise, passage) {
+    const comparable = nbCopies >= COPIES_MINIMUM_COMPARAISON && !!reference
+        && (repereMaitrise === null || note < repereMaitrise);
+    if (comparable && note < reference.moyenne - reference.ecartType) return { niveau: 3, motif: 'sous-un-ecart-type' };
+    if (comparable && note < reference.moyenne - reference.ecartType / 2) return { niveau: 2, motif: 'sous-un-demi-ecart-type' };
+    if (note < passage) {
+        const signalAllume = !!reference && reference.moyenne < passage;
+        return signalAllume ? { niveau: 1, motif: 'signal-de-groupe' } : { niveau: 2, motif: 'sous-la-note-de-passage' };
+    }
+    return { niveau: 1, motif: nbCopies < COPIES_MINIMUM_COMPARAISON ? 'une-seule-copie' : 'dans-le-groupe' };
+}
+
+const _lectureDuGroupeParLot = new WeakMap();
+
+/**
+ * Les copies de chaque élève et la référence de chaque groupe-cours, lues en un seul passage. Gardées le temps
+ * d'un lot de calculs (`jetonCacheLecture`, même raison que l'index de pratique-registre.js) ; reconstruites à
+ * chaque lecture hors lot. Les élèves exclus par statut restent hors de la référence (#745), mais se classent.
+ * En mode « tous les groupes », chaque élève reste comparé à SON groupe-cours.
+ */
+function _lireLeGroupeDuDepistage() {
+    const simule = typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('evaluationsSauvegardees');
+    const lot = (!simule && typeof jetonCacheLecture === 'function') ? jetonCacheLecture() : null;
+    if (lot && _lectureDuGroupeParLot.has(lot)) return _lectureDuGroupeParLot.get(lot);
+
+    const productions = obtenirDonneesSelonMode('productions') || [];
+    const brutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
+    const diag = window.ProductionDiagnostique;
+    const evaluations = diag ? diag.filtrerEvaluations(brutes, productions) : brutes;
+    const evaluables = new Set(obtenirIdsProductionsEvaluables(productions));
+
+    const copies = new Map();
+    evaluations.forEach((c) => {
+        if (!evaluables.has(c.productionId) || !window.evaluationEntreDansLaNote(c, brutes) || window.evaluationNonRemise(c)) return;
+        const lignes = copies.get(c.etudiantDA) || { remises: 0, notes: [] };
+        lignes.remises++;
+        const note = window.noteRetenueParLeCalcul(c);
+        if (typeof note === 'number') lignes.notes.push(note);
+        copies.set(c.etudiantDA, lignes);
+    });
+    const moyenneDe = (notes) => notes.reduce((a, b) => a + b, 0) / notes.length;
+
+    // Un groupe-cours actif ne rend que ses élèves ; « tous les groupes » les rend tous. Un service n'a qu'un groupe,
+    // quel que soit le numéro porté par ses fiches (cadrage « Rencontres », lot A).
+    const etudiants = obtenirEtudiantsCoursActif();
+    const normaliser = window.normaliserNumeroGroupe || String;
+    const numeroDe = (e) => normaliser(e.groupeReel || e.groupe);
+    const plusieursGroupes = new Set(etudiants.map(numeroDe)).size > 1
+        && !(typeof contexteActifEstService === 'function' && contexteActifEstService());
+    const cleDe = (e) => plusieursGroupes ? numeroDe(e) : 'groupe';
+
+    const groupeDe = new Map(etudiants.map((e) => [e.da, cleDe(e)]));
+    const notesParGroupe = new Map();
+    etudiants.filter((e) => !estEtudiantExclu(e)).forEach((e) => {
+        const notes = (copies.get(e.da) || { notes: [] }).notes;
+        if (!notes.length) return;
+        const groupe = cleDe(e);
+        notesParGroupe.set(groupe, (notesParGroupe.get(groupe) || []).concat(moyenneDe(notes)));
+    });
+    const references = new Map();
+    notesParGroupe.forEach((valeurs, groupe) => {
+        if (valeurs.length < EFFECTIF_MINIMUM_GROUPE) return;
+        const moyenne = moyenneDe(valeurs);
+        const ecartType = Math.sqrt(valeurs.reduce((a, v) => a + (v - moyenne) ** 2, 0) / (valeurs.length - 1));
+        references.set(groupe, { moyenne, ecartType });
+    });
+
+    const lecture = { copies, groupeDe, references, plusieursGroupes, moyenneDe };
+    if (lot) _lectureDuGroupeParLot.set(lot, lecture);
+    return lecture;
+}
+
+/**
+ * Le signal de groupe : les groupes-cours dont la moyenne est sous la note de passage. Un signal pour le niveau
+ * universel, pas pour un élève. `groupe` : le numéro, seulement quand l'écran montre plusieurs groupes.
+ * @returns {Array<{groupe:(string|null), moyenne:number, passage:number}>}
+ */
+function signauxDeGroupeDepistage() {
+    const { references, plusieursGroupes } = _lireLeGroupeDuDepistage();
+    const passage = reperesPerformance().passage;
+    return [...references.entries()]
+        .filter(([, r]) => r.moyenne < passage)
+        .map(([groupe, r]) => ({ groupe: plusieursGroupes ? groupe : null, moyenne: r.moyenne, passage }));
+}
+
+const DESCRIPTION_DU_MOTIF = {
+    'sous-un-ecart-type': 'Plus d\'un écart-type sous la moyenne de son groupe.',
+    'sous-un-demi-ecart-type': 'Entre un demi et un écart-type sous la moyenne de son groupe.',
+    'sous-la-note-de-passage': 'Sous la note de passage, alors que la moyenne de son groupe est au-dessus.',
+    'signal-de-groupe': 'Sous la note de passage, comme la moyenne de son groupe : un signal pour l\'enseignement universel.',
+    'une-seule-copie': 'Une seule copie corrigée : pas encore de comparaison au groupe.',
+    'dans-le-groupe': 'Dans la moyenne de son groupe. Suivi régulier en classe.'
+};
+const AFFICHAGE_DU_NIVEAU = {
+    1: { label: 'Niveau 1 - Universel', badgeClasse: 'badge-rai-1' },
+    2: { label: 'Niveau 2 - Préventif', badgeClasse: 'badge-rai-2' },
+    3: { label: 'Niveau 3 - Intensif', badgeClasse: 'badge-rai-3' }
+};
+const BADGE_DU_PATTERN = {
+    'Difficulté persistante': 'badge-pattern-difficulte-persistante',
+    'Difficulté émergente': 'badge-pattern-difficulte-emergente',
+    'Défi spécifique': 'badge-pattern-defi-specifique'
+};
+
+/**
+ * Détermine le niveau de la Réponse à l'intervention (RàI) : la moyenne des copies de l'élève, comparée à son
+ * groupe-cours (voir le bloc ci-dessus). Sans tenir compte de la mobilisation A-C. Le pattern et le défi restent
+ * à côté : ils nomment le besoin, ils ne fixent plus le niveau.
  * @param {string} da - Numéro de DA
  * @returns {Object} - Modèle de la Réponse à l'intervention (RàI) avec pattern et descriptif
  */
 function determinerNiveauRaiPedagogique(da) {
-    // Récupérer les indices de performance
+    // Récupérer les indices
     const indices = calculerTousLesIndices(da);
-    const P = indices.P / 100; // Convertir en décimal 0-1
-    // #775 — UNE NOTE QUI N'EXISTE PAS ENCORE N'EST PAS UNE NOTE DE ZÉRO.
-    // `portfolio.js` stocke `P = 0` quand la note du cours n'est pas constructible
-    // (PAN-Standards qui attend ses N résultats, config portfolio en erreur…) et le
-    // dit par `noteConstructible: false` (#394, règle 4). Ce palier lisait le 0 comme
-    // une performance nulle : au premier artefact d'un trimestre, TOUT le groupe
-    // passait « Niveau 3 — Intensif » pendant que la barre des patterns, elle, lisait
-    // les copies et disait « Stable » (retour terrain du 7 septembre 2026, capture à
-    // l'appui : 24 stables, 27 en palier intensif).
-    // RÈGLE ARRÊTÉE PAR GRÉGOIRE (7 septembre 2026) : tant que la note n'est pas
-    // constructible, le palier se décide SUR LE DÉPISTAGE SEUL — le pattern des N
-    // derniers artefacts, la même donnée que la barre SOLO. La note n'entre dans le
-    // calcul qu'une fois qu'elle existe.
-    const noteConstructible = indices.noteConstructible !== false;
 
     // Déterminer quelle fonction utiliser selon la pratique
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
@@ -1800,8 +1918,13 @@ function determinerNiveauRaiPedagogique(da) {
 
     const indices3Derniers = calculerIndicesNDerniersArtefacts(da, true);
 
+    const lecture = _lireLeGroupeDuDepistage();
+    const copies = lecture.copies.get(da) || { remises: 0, notes: [] };
+
     // 🆕 BETA 98.9: Vérifier si données suffisantes avant interprétation
-    if (indices3Derniers.nbArtefacts === 0) {
+    // Lot 2 (30 oct. 2026) : une copie « non remise » n'est pas une production remise. Avant ce lot, un élève qui n'en
+    // avait que de telles tombait au niveau 3 par sa performance de 0 ; il garde ce niveau, sous son vrai nom.
+    if (indices3Derniers.nbArtefacts === 0 || copies.remises === 0) {
         // Élève présent mais aucune production → Non-participation (signal prioritaire)
         // #731 — seulement si le groupe permet de le juger : un travail dû ET une copie évaluée
         // (règle de Grégoire, 5 sept. 2026). Sinon la branche « En attente » ci-dessous vaut pour tous.
@@ -1834,71 +1957,40 @@ function determinerNiveauRaiPedagogique(da) {
         };
     }
 
-    // Déterminer le pattern basé uniquement sur la performance
+    // Le pattern nomme le besoin, sur les N derniers artefacts. Il ne fixe plus le niveau.
     const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
+    const defi = diagnostic.principalDefi?.nom || 'Aucun';
 
-    // Les repères de l'échelle de l'enseignant (30 oct. 2026), comme le pattern ci-dessus.
-    const bornes = window.bornesDepistage();
-    const sousLaMaitrise = noteConstructible && bornes.maitrise !== null && P < bornes.maitrise;
-
-
-    // LOGIQUE PÉDAGOGIQUE (basée uniquement sur P et SRPNF)
-
-    // Niveau 3 - Intensif : Difficulté persistante, ou P sous le repère de suffisance
-    if (pattern === 'Difficulté persistante' || (noteConstructible && P < bornes.bas)) {
+    // Des copies remises sans aucune note chiffrée : rien à comparer.
+    if (copies.notes.length === 0) {
         return {
-            niveau: 3,
-            label: 'Niveau 3 - Intensif',
+            niveau: 0,
+            label: 'En attente',
             pattern: pattern,
-            defi: diagnostic.principalDefi?.nom || 'Aucun',
-            description: 'Difficultés pédagogiques majeures nécessitant un soutien intensif.',
-            badgeClasse: 'badge-rai-3',
-            patternBadge: 'badge-pattern-difficulte-persistante',
+            defi: defi,
+            description: 'Aucune note à comparer pour l\'instant.',
+            badgeClasse: 'badge-attente',
+            patternBadge: BADGE_DU_PATTERN[pattern] || 'badge-pattern-stable',
+            signalGroupe: false,
             nbArtefacts: indices3Derniers.nbArtefacts,
             fenetreAnalyse: obtenirNombreProductionsPourPatterns()
         };
     }
 
-    // Niveau 2 - Préventif : P sous le repère de maîtrise OU Difficulté émergente OU Défi spécifique
-    // Un élève entre les deux repères nécessite un accompagnement préventif,
-    // même si son pattern est "Stable" (pas de défi identifié).
-    if (sousLaMaitrise || pattern === 'Difficulté émergente' || pattern === 'Défi spécifique') {
-        // Déterminer la description selon le contexte
-        let description;
-        if (sousLaMaitrise && pattern === 'Stable') {
-            description = 'Performance en développement nécessitant un accompagnement préventif.';
-        } else if (pattern === 'Difficulté émergente') {
-            description = 'Difficultés émergentes nécessitant une intervention préventive ciblée.';
-        } else {
-            description = 'Défi spécifique identifié nécessitant un accompagnement ciblé.';
-        }
+    const reperes = reperesPerformance();
+    const reference = lecture.references.get(lecture.groupeDe.get(da)) || null;
+    const { niveau, motif } = classerNiveauDansLeGroupe(
+        lecture.moyenneDe(copies.notes), copies.notes.length, reference, reperes.maitrise, reperes.passage);
 
-        return {
-            niveau: 2,
-            label: 'Niveau 2 - Préventif',
-            pattern: pattern,
-            defi: diagnostic.principalDefi?.nom || 'Aucun',
-            description: description,
-            badgeClasse: 'badge-rai-2',
-            patternBadge: pattern === 'Difficulté émergente'
-                ? 'badge-pattern-difficulte-emergente'
-                : pattern === 'Défi spécifique'
-                    ? 'badge-pattern-defi-specifique'
-                    : 'badge-pattern-stable',
-            nbArtefacts: indices3Derniers.nbArtefacts,
-            fenetreAnalyse: obtenirNombreProductionsPourPatterns()
-        };
-    }
-
-    // Niveau 1 - Universel : ni sous les repères, ni défi
     return {
-        niveau: 1,
-        label: 'Niveau 1 - Universel',
+        niveau: niveau,
+        label: AFFICHAGE_DU_NIVEAU[niveau].label,
         pattern: pattern,
-        defi: diagnostic.principalDefi?.nom || 'Aucun',
-        description: 'Performance stable. Suivi régulier en classe.',
-        badgeClasse: 'badge-rai-1',
-        patternBadge: 'badge-pattern-stable',
+        defi: defi,
+        description: DESCRIPTION_DU_MOTIF[motif],
+        badgeClasse: AFFICHAGE_DU_NIVEAU[niveau].badgeClasse,
+        patternBadge: BADGE_DU_PATTERN[pattern] || 'badge-pattern-stable',
+        signalGroupe: motif === 'signal-de-groupe',
         nbArtefacts: indices3Derniers.nbArtefacts,
         fenetreAnalyse: obtenirNombreProductionsPourPatterns()
     };
@@ -2193,6 +2285,8 @@ window.calculerProgressionEleve = calculerProgressionEleve;
 window.identifierDefiSpecifique = identifierDefiSpecifique;
 window.identifierPatternActuel = identifierPatternActuel;
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
+window.classerNiveauDansLeGroupe = classerNiveauDansLeGroupe;   // lot 2 des seuils : la règle nue
+window.signauxDeGroupeDepistage = signauxDeGroupeDepistage;     // la phrase sous la barre RàI
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.libelleNiveauSOLO = libelleNiveauSOLO;
 window.nommerDefiAvecSOLO = nommerDefiAvecSOLO;   // lot 4, volet B

@@ -334,7 +334,7 @@ const GLOSSAIRE = {
         terme: 'Niveau RàI',
         categorie: 'Tableau de bord',
         etape: 'observation',
-        definition: 'Le niveau de soutien attribué à un·e étudiant·e selon les signaux du tableau de bord. Niveau 1 : aucune intervention spécifique nécessaire. Niveau 2 : difficultés émergentes détectées — intervention préventive recommandée. Niveau 3 : difficultés persistantes — accompagnement intensif recommandé. Le niveau se décide d’après la performance P, quand la note existe, et d’après le pattern des derniers artefacts (3 par défaut), Quand l’observation SOLO est activée, le pattern lit tous les critères de la grille du dépistage, sauf ceux marqués « Aucun » ; sinon, tous. L’indice de persistance (IPB) nomme la cible de l’intervention ; il ne fixe pas le niveau.',
+        definition: 'Le niveau de soutien attribué à un·e étudiant·e selon les signaux du tableau de bord. Niveau 1 : aucune intervention spécifique nécessaire. Niveau 2 : entre un demi et un écart-type sous la moyenne du groupe-cours, ou sous la note de passage — intervention préventive recommandée. Niveau 3 : plus d’un écart-type sous la moyenne du groupe-cours — accompagnement intensif recommandé. La comparaison au groupe commence à 2 copies corrigées. Quand la moyenne du groupe est sous la note de passage, un signal vise l’enseignement universel. Le pattern des derniers artefacts (3 par défaut) nomme le besoin. Quand l’observation SOLO est activée, le pattern lit tous les critères de la grille du dépistage, sauf ceux marqués « Aucun » ; sinon, tous. L’indice de persistance (IPB) nomme la cible de l’intervention ; il ne fixe pas le niveau.',
         voir: 'Suivi › Interventions'
     },
 

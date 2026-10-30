@@ -93,9 +93,9 @@ describe('Ce qui fixe le niveau RàI : une seule version, celle du code', () => 
     const NIVEAU = corps(lire('js/profil-etudiant-calculs.js'), 'determinerNiveauRaiPedagogique');
     const fenetre = defaut(null, 'nombreProductionsAnalyse');
 
-    it('le code décide par P et par le pattern des N derniers artefacts — pas par l\'IPB', () => {
+    it('le code décide par la moyenne des copies comparée au groupe (lot 2 des seuils) — pas par l\'IPB, et le pattern reste à côté', () => {
         expect(NIVEAU).toContain('identifierPatternActuel(');
-        expect(NIVEAU).toContain('noteConstructible && P <');
+        expect(NIVEAU).toContain('classerNiveauDansLeGroupe(');
         expect(NIVEAU, 'le niveau RàI lit maintenant l\'IPB : l\'Aide est à revoir').not.toMatch(/calculerIPB\(/);
         // ↻ #1117, suite (20 oct. 2026) : « Aucun » n'exclut que si l'observation SOLO est activée.
         expect(lire('js/profil-etudiant-helpers.js')).toMatch(/function estCritereSurveilleParDepistage\(critere\)\s*\{\s*if \(!critere\) return false;\s*if \(!etiquettesSOLOLuesParDepistage\(\)\) return true;\s*return critere\.niveauSOLO !== 'aucun';/);
@@ -128,7 +128,7 @@ describe('Ce qui fixe le niveau RàI : une seule version, celle du code', () => 
     });
 
     it('le niveau 2 porte le mot que l\'application affiche, et lui seul', () => {
-        const m = NIVEAU.match(/label: 'Niveau 2 - ([^']+)'/);
+        const m = lire('js/profil-etudiant-calculs.js').match(/label: 'Niveau 2 - ([^']+)'/);
         expect(m).toBeTruthy();
         const mot = m[1];
         expect(mot).toBe('Préventif');   // ce que l'écran affiche ; s'il change, l'Aide suit

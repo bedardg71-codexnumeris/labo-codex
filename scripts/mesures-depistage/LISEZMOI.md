@@ -10,6 +10,7 @@ Scripts qui rejouent le dépistage du module Suivi sur un codex. **Scripts seule
 | `niveaux-sans-plancher.mjs` | Les niveaux 2 et 3 relatifs au groupe-cours, sans plancher, avec et sans la condition du repère de maîtrise, et le signal de groupe |
 | `regles-1-et-2.mjs` | Le modèle sans plancher avec ses deux règles : au moins le niveau 2 sous la note de passage, signal de groupe éteint ; pas de signal relatif avant 2 copies |
 | `decrochage.mjs` | Les élèves partis, réintégrés jusqu'à leur départ supposé : quels signaux s'allumaient avant, et combien de semaines avant |
+| `temoin-tous-les-groupes.mjs` | La vue « tous les groupes » rend le même niveau que le groupe-cours de chaque élève |
 | `rejeu-demo.mjs` | Le rejeu sur le pack de démonstration (élèves fictifs, sans codex) |
 
 ## Relancer une mesure

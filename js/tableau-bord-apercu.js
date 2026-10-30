@@ -1464,30 +1464,25 @@ function genererInterpretationSuiviFondamentaux() {
 function genererInterpretationRai(rai, totalEtudiants) {
     if (!rai || totalEtudiants === 0) return '';
 
-    let niveau1 = 0;
     let niveau2 = 0;
     let niveau3 = 0;
 
     rai.forEach(r => {
-        if (r.niveau === 1) niveau1 = r.count;
         if (r.niveau === 2) niveau2 = r.count;
         if (r.niveau === 3) niveau3 = r.count;
     });
 
-    const pctNiveau1 = Math.round((niveau1 / totalEtudiants) * 100);
     const pctNiveau2 = Math.round((niveau2 / totalEtudiants) * 100);
     const pctNiveau3 = Math.round((niveau3 / totalEtudiants) * 100);
 
-    // Analyse de l'efficacité pédagogique (seuils recommandés : 70-80% N1, 15-20% N2, 5-10% N3)
+    // Lot 2 des seuils (30 oct. 2026) : les niveaux se comparent au groupe, donc la part du niveau 1 ne dit plus rien
+    // de l'enseignement universel. C'est la moyenne du groupe sous la note de passage qui le dit.
     let interpretation = '';
-
-    if (pctNiveau1 >= 70) {
-        interpretation = `La répartition RàI indique une efficacité satisfaisante de l'enseignement universel (${niveau1} étudiants, ${formaterPourcentage(pctNiveau1)} au Niveau 1). `;
-    } else if (pctNiveau1 >= 60) {
-        interpretation = `La répartition RàI indique une efficacité acceptable de l'enseignement universel (${niveau1} étudiants, ${formaterPourcentage(pctNiveau1)} au Niveau 1). `;
-    } else {
-        interpretation = `La répartition RàI suggère que l'enseignement universel pourrait être renforcé (${niveau1} étudiants, ${formaterPourcentage(pctNiveau1)} au Niveau 1). `;
-    }
+    const signaux = typeof signauxDeGroupeDepistage === 'function' ? signauxDeGroupeDepistage() : [];
+    signaux.forEach(signal => {
+        const nom = signal.groupe ? `du groupe ${echapperHtml(signal.groupe)}` : 'du groupe';
+        interpretation += `La moyenne ${nom} (${formaterPourcentage(signal.moyenne, 1)}) est sous la note de passage (${formaterPourcentage(signal.passage)}) : c'est l'enseignement universel qu'il faut renforcer, pour tous. `;
+    });
 
     // Compléter avec Niveau 2 et 3
     if (niveau2 > 0) {
