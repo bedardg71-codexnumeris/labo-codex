@@ -136,9 +136,9 @@ test.describe('#1186 — la fenêtre de fusion en deux colonnes', () => {
         // Les captures : la souris hors du bouton Codex (son infobulle couvrirait le titre).
         await page.mouse.move(640, 700);
         await page.setViewportSize({ width: 1280, height: 1100 });
-        await page.screenshot({ path: path.join(racineProjet, 'plans de travail', 'captures', 'fenetre-de-fusion-1280.png'), fullPage: false });
+        await page.screenshot({ path: test.info().outputPath('fenetre-de-fusion-1280.png'), fullPage: false });
         await page.setViewportSize({ width: 820, height: 1180 });
-        await page.screenshot({ path: path.join(racineProjet, 'plans de travail', 'captures', 'fenetre-de-fusion-820.png'), fullPage: false });
+        await page.screenshot({ path: test.info().outputPath('fenetre-de-fusion-820.png'), fullPage: false });
         await page.setViewportSize({ width: 1280, height: 720 });
 
         // « Prendre les plus récentes » ne choisit que la rangée datée.
