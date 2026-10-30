@@ -4,6 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { tranche } from './_helpers/tranche.js';
+import { chargerScript } from './_helpers/charger-script.js';
+import { chargerPredicatsCopie } from './_helpers/predicats-copie.js';
 
 // SENTINELLE — #1152, lot 2c bis de la refonte de l'Aide (28 oct. 2026) : le Suivi dit vrai, en moins de mots.
 // Audit : plans de travail/audit-aide-2026-10-24/AUDIT-AIDE-2026-10-24.md (D3, D4, D13 ; verdicts finals) ; remesure du
@@ -125,6 +127,55 @@ describe('#1152 lot 2c bis · le Suivi', () => {
     });
 });
 
+// Le vrai `determinerNiveauRaiPedagogique` sur un groupe de deux, même banc que `sentinelle-731` : `evaluations` du groupe,
+// `A` de l'élève témoin, deux travaux dus.
+const DA_BANC = '2000003', DA_AUTRE = '2000001';
+const COPIE_DE_L_AUTRE = { id: 'E1', etudiantDA: DA_AUTRE, productionId: 'P1', noteFinale: 80, niveauFinal: 'M', echelleId: 'E0', ponderationCouverte: 100, verrouillee: true,
+    dateEvaluation: '2026-02-02T12:00:00.000Z', retroactionFinale: 'R.', criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: 'M' }, { critereId: 'c2', critereNom: 'Nuance', niveauSelectionne: 'M' }] };
+function niveauRaiDuBanc({ evaluations, A }) {
+    const clone = (x) => JSON.parse(JSON.stringify(x));
+    const store = {
+        test_evaluationsSauvegardees: clone(evaluations),
+        test_productions: [{ id: 'P1', titre: 'Analyse 1', type: 'travail', ponderation: 50, dateEcheance: '2026-02-01' }, { id: 'P2', titre: 'Analyse 2', type: 'travail', ponderation: 50, dateEcheance: '2026-02-01' }],
+        test_echellesTemplates: [{ id: 'E0', nom: 'IDME0', niveaux: [{ code: 'I', min: 0, max: 64, valeurCalcul: 40 }, { code: 'D', min: 65, max: 74, valeurCalcul: 65 }, { code: 'M', min: 75, max: 84, valeurCalcul: 75 }, { code: 'E', min: 85, max: 100, valeurCalcul: 100 }] }],
+        test_grillesTemplates: [{ id: 'G1', nom: 'Dépistage', criteres: [{ id: 'c1', nom: 'Structure', ponderation: 50, niveauSOLO: 'multistructurel' }, { id: 'c2', nom: 'Nuance', ponderation: 50, niveauSOLO: 'relationnel' }] }],
+        test_groupeEtudiants: [{ da: DA_BANC, nom: 'Témoin', prenom: 'Fictif', groupe: '01' }, { da: DA_AUTRE, nom: 'Autre', prenom: 'Fictif', groupe: '01' }],
+        infoCours: { id: 'GC1', groupe: '01', _groupeCoursId: 'GC1' }
+    };
+    const MODULES = ['js/interpretation-config.js', 'js/contexte-qualification.js', 'js/profil-etudiant-calculs.js', 'js/profil-etudiant-helpers.js'];
+    const db = { getSync: (k, d) => (k in store ? clone(store[k]) : (d !== undefined ? d : null)), setSync: (k, v) => { store[k] = clone(v); }, get: async () => null, set: async () => {} };
+    const win = { addEventListener() {}, removeEventListener() {}, obtenirTrimestreId: () => 'test', dateLocaleYMD: () => '2026-02-10' };
+    const classes = { add() {}, remove() {}, contains() { return false; } };
+    const globaux = {
+        document: { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], createElement: () => ({ style: {}, classList: classes }), addEventListener() {}, body: { classList: classes }, documentElement: {}, readyState: 'complete' },
+        db,
+        cle: (k) => (String(k).startsWith('test_') ? k : 'test_' + k),
+        obtenirDonneesSelonMode: (k) => { const n = 'test_' + String(k).replace(/^test_/, ''); return n in store ? clone(store[n]) : []; },
+        obtenirPreference: (n) => (n === 'grilleReferenceDepistage' ? 'G1' : null),
+        definirPreference() {},
+        echapperHtml: (s) => String(s == null ? '' : s),
+        obtenirTypePratiqueActive: () => 'sommative',
+        estEtudiantExclu: () => false,
+        filtrerEtudiantsParMode: (a) => a,
+        estModeeLectureSeule: () => false,
+        obtenirEtudiantsCoursActif: () => clone(store.test_groupeEtudiants),
+        calculerTousLesIndices: (da) => (da === DA_BANC ? { A, C: 0, P: 0, M: A / 2, noteConstructible: false } : { A: 100, C: 100, P: 80, M: 100, noteConstructible: true }),
+        obtenirEcheanceEffective: (p) => ({ date: p.dateEcheance || null, assignee: true }),
+        resoudreModeleParId: (type, id) => clone(store['test_' + (type === 'echelle' ? 'echellesTemplates' : 'grillesTemplates')].find((m) => m.id === id) || null),
+        accordTermeProduction: (m) => m,
+        obtenirTermeProduction: () => 'travail',
+        anonymiserNom: undefined
+    };
+    for (const f of MODULES) {
+        for (const m of lire(f).matchAll(/^\s*window\.([A-Za-z_$][\w$]*)\s*=/gm)) {
+            if (!(m[1] in globaux) && !/^[A-Z]/.test(m[1]) && m[1] !== 'SEUILS_PAR_DEFAUT') globaux[m[1]] = (...a) => win[m[1]](...a);
+        }
+    }
+    chargerPredicatsCopie(win);
+    MODULES.forEach((f) => chargerScript(f, globaux, win));
+    return win.determinerNiveauRaiPedagogique(DA_BANC);
+}
+
 describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', () => {
     it('rai : D13 mot pour mot', () => {
         expect(texteDe('rai')).toContain('Elle dépiste des difficultés et classe des niveaux de besoin, pour éclairer et soutenir tes décisions d\'intervention et d\'accompagnement.');
@@ -145,6 +196,22 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         // Retouche 2 du lot 2 (constat 1) : la moitié « texte » de cette sentinelle gardait la règle retirée.
         expect(texteDe('patterns')).toContain('Le pattern nomme le besoin sans fixer le niveau : le niveau compare la moyenne des copies au groupe-cours');
         expect(texteDe('patterns')).not.toMatch(/Le niveau suit une seule règle|donnent le niveau [123]/);
+    });
+
+    // Consigne du 30 oct. 2026 (`CONSIGNE-LOT-2026-10-30-nouvelles-1227-et-aide.md`, § 2) : plus aucun texte d'aide ne disait
+    // ce niveau 3. Le texte est lié à ce que rend le code, pas seulement à sa présence.
+    it('patterns : « Seule Non-participation donne le niveau 3 » est ce que rend `determinerNiveauRaiPedagogique`', () => {
+        expect(texteDe('patterns')).toContain('Seule « Non-participation », sans copie à comparer, donne le niveau 3.');
+
+        const present = niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 100 });
+        expect(present).toMatchObject({ niveau: 3, pattern: 'Non-participation' });
+
+        // Absent·e et sans copie : pas de niveau 3. C'est bien la présence sans copie qui le donne.
+        expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 0 })).toMatchObject({ niveau: 0, label: 'En attente' });
+
+        // « Seule » : un autre pattern, sous la note de passage, ne donne pas le niveau 3.
+        const copieFaible = { ...COPIE_DE_L_AUTRE, id: 'E2', etudiantDA: DA_BANC, noteFinale: 40, niveauFinal: 'I', criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: 'I' }, { critereId: 'c2', critereNom: 'Nuance', niveauSelectionne: 'I' }] };
+        expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE, copieFaible], A: 100 })).toMatchObject({ niveau: 2, pattern: 'Difficulté persistante' });
     });
 
     it('patterns : chaque ligne est la condition de `identifierPatternActuel`', () => {
