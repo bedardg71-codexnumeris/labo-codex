@@ -1,5 +1,7 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 30 octobre 2026 : EN LIGNE `1.226.0`. `main` local en avance, non poussé** : lot 1 des seuils (`b6b74585` et retouche), scripts `scripts/mesures-depistage/`. Vitest entier vert ; WebKit : specs touchées seulement. Verdict complet non pris. Lot 2 mesuré, non codé. Rapport : `plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 29 octobre 2026, 14 h 00 (Toronto) : `1.224.0` EN LIGNE** (build `1029-1011`) — Netlify
 > `6ae38915`, `commit_ref` `03f2cf5d`, `state: ready`, publié à 17:58:00 Z (13 h 58). Porte : les standards sans portfolio, lots 1 à 4
 > et la retouche (#1178), les jetons par défaut (#1179), les totems de la démo (#1180), l'Aide, lots 4 et 5 (#1152), l'accueil.

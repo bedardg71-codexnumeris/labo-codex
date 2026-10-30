@@ -7,6 +7,14 @@
 
 ---
 
+## 30 OCT. 2026 (Claude Code) : **LE LOT 1 DES SEUILS EST SUR `main`, NON POUSSÉ, NON LIVRÉ ; EN LIGNE : TOUJOURS 1.226.0**
+
+**Ce qui est en avance sur `origin/main`** : le lot 1 « une seule source par famille de seuils » (`b6b74585` et sa retouche d'échappement), les scripts `scripts/mesures-depistage/`, ce relais. Rapport : `plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`.
+
+**Attend** : la relecture de Cowork, la validation des mots par Grégoire, puis le verdict complet Cowork fermé. Pas de bump. Vitest entier vert ; navigateur : seuls les 28 essais des specs touchées ont été rejoués.
+
+**Lot 2** (RàI comparée au groupe) : mesuré, rien de codé, en attente de l'accord de Grégoire. Résultats en page privée seulement, jamais dans le dépôt (règle de Grégoire du 30 oct. : `scripts/mesures-depistage/LISEZMOI.md`).
+
 ## 30 OCT. 2026, 7 H 35 (Claude Code) : **POUSSÉ, EN LIGNE : 1.226.0 = `4117fa16` ; GITHUB EN COURS (RUN 41048587052, NON JUGÉ À L'ÉCRITURE) ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **La 1.226.0** (consigne de Cowork `plans de travail/CONSIGNE-LOT-2026-10-30-mise-en-ligne-1226.md`) porte les copies aux archives (#1184), la fenêtre de fusion et sa retouche (#1186), le lot 5 des standards (#1178). `main` = `4117fa16` à la release ; le commit de ce relais la suit.
