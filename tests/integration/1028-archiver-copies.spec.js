@@ -334,7 +334,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             await fermerFenetre(page);
             const retour = await photo(page);
             for (const id of COPIES_H) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
-            expect(retour.cles._copiesAuxArchives).toBeUndefined();
+            expect(retour.cles._copiesAuxArchives).toBe('{}');   // #1184 : levée, elle reste écrite `{}`
         } finally {
             rmSync(dossierTmp, { recursive: true, force: true });
         }
@@ -470,7 +470,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             await fermerFenetre(page);
             const retour = await photo(page);
             for (const id of COPIES_H) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
-            expect(retour.cles._copiesAuxArchives).toBeUndefined();
+            expect(retour.cles._copiesAuxArchives).toBe('{}');   // #1184 : levée, elle reste écrite `{}`
         } finally {
             rmSync(dossierTmp, { recursive: true, force: true });
         }
@@ -596,7 +596,7 @@ test.describe('#1028 — « Archiver les copies » d\'un trimestre clos (mode fi
             await fermerFenetre(page);
             const retour = await photo(page);
             for (const id of ['FT_h1', 'FT_h2', 'FT_hc']) expect([id, retour.copies[id]]).toEqual([id, avant.copies[id]]);
-            expect(retour.cles._copiesAuxArchives).toBeUndefined();
+            expect(retour.cles._copiesAuxArchives).toBe('{}');   // #1184 : levée, elle reste écrite `{}`
         } finally {
             rmSync(dossierTmp, { recursive: true, force: true });
         }

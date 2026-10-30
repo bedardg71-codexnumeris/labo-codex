@@ -259,9 +259,10 @@ async function allerRetour(banc) {
     if (b.etat !== 'fait') defauts.push('retour : ' + b.etat);
     const retour = await photo(banc);
     for (const id of COPIES_H) if (retour.copies[id] !== avant.copies[id]) defauts.push('copie revenue différente : ' + id);
-    if (retour.cles[CLE_MARQUE] !== undefined) defauts.push('marque non levée');
+    // #1184 : levée en entier, la marque reste écrite `{}` (elle voyage et lève celle de l'autre appareil).
+    if (JSON.stringify(JSON.parse(retour.cles[CLE_MARQUE] || 'null')) !== '{}') defauts.push('marque non levée');
     const sansMarque = sauf(avantRetour, [CLE_MARQUE]);
-    if (JSON.stringify(sauf(retour, [])) !== JSON.stringify(sansMarque)) defauts.push('le retour a changé une clé');
+    if (JSON.stringify(sauf(retour, [CLE_MARQUE])) !== JSON.stringify(sansMarque)) defauts.push('le retour a changé une clé');
     return defauts;
 }
 
@@ -356,7 +357,7 @@ describe('#1028 · (b) E3 sur un trimestre dont les copies sont aux archives', (
         const r = await banc.win.ReserveRenvoyer.renvoyer(banc.win.ReserveVerifier.sourceFichier(banc.zip), TRIM);
         expect(r.comparaison.etat).toBe('identique');
         expect(r.bilan.etat).toBe('fait');
-        expect(banc.db._map.has(CLE_MARQUE)).toBe(false);
+        expect(banc.db._map.get(CLE_MARQUE)).toEqual({});   // #1184 : levée, elle reste écrite `{}`
         const entree = Object.assign({ dossier: DOSSIER }, banc.win.Reserve.lireManifesteLocal().archives[DOSSIER]);
         const e2 = await banc.win.ReserveEmprunter.emprunter(banc.win.ReserveVerifier.sourceFichier(banc.zip), entree);
         expect(e2.etat).toBe('fait');
@@ -407,7 +408,7 @@ describe('#1028 · (c) aucune nouvelle archive sans les copies parties', () => {
         const n = banc.journal.telechargements.length;
         await banc.win.ReserveTrimestre.archiverTrimestre(TRIM, { sansConfirmation: true });
         expect(banc.journal.telechargements.length).toBe(n + 1);
-        expect(banc.db._map.has(CLE_MARQUE)).toBe(false);
+        expect(banc.db._map.get(CLE_MARQUE)).toEqual({});   // #1184 : levée, elle reste écrite `{}`
     });
 });
 
