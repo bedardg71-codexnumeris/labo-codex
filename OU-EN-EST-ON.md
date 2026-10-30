@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 29 OCTOBRE 2026, 20 H 22 : LA 1.225.1 EST EN LIGNE** (la fusion sans faux conflits). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : « Fusionner avec un codex… » ne montre plus de conflits qui n'existent pas. En 1.225.0, la fusion de ton codex de l'iPad annonçait 127 éléments « différents des deux côtés » alors que les deux codex n'en avaient que 6 de différents : elle comparait les données du Mac telles qu'elles sont gardées dans le navigateur, et celles de l'iPad telles qu'elles sont écrites dans le fichier. Elle les compare maintenant de la même façon. Rien de tes données n'est réécrit. Les Nouvelles ne changent pas : l'entrée de la 1.225 dit déjà ce que la fusion doit faire.
+
+**Ce qui reste à toi** : ta fusion. Sur le Mac, dans Chrome, recharge jusqu'à voir 1.225.1, puis « Fusionner avec un codex… » avec le dernier codex fait sur l'iPad. **Six conflits attendus** (trois copies, trois réglages). Si tu en vois beaucoup plus, tape 4 (annuler) et préviens Cowork.
+
+**Vérifié comment** : la retouche relue et acceptée par Cowork (`VERDICT-RELECTURE-2026-10-29-fusion-retouche-valeurs-indefinies.md`) ; Vitest entier vert (10 317) ; l'essai neuf de la fusion et celui du navigateur rejoués sans le correctif, qui rougissent, puis le code restauré à l'identique ; la vérification complète du navigateur, sur le Mac, verte (1 135 essais, aucun rattrapé au second essai, les 4 rouges connus) ; la mise en ligne constatée chez Netlify sur ce commit, et le fichier de version du déploiement dit 1.225.1. Ce qui n'est pas vérifié : le compte de six conflits vient de la mesure de Cowork sur tes deux fichiers, et ta fusion en sera le témoin. La vérification de GitHub tournait encore à l'écriture.
+
 📝 **LE 29 OCTOBRE 2026, 17 H 32 : LA 1.225 EST EN LIGNE** (fusionner deux codex sans rien perdre). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : « Fusionner avec un codex… » réunit maintenant deux codex copie par copie. Les évaluations et les annotations faites sur le Mac et sur l'iPad s'additionnent ; ce qui n'existe que d'un côté est gardé. Quand une même copie diffère des deux côtés, la fusion montre sa date de modification de chaque côté et te laisse choisir. Avant, les évaluations d'un des deux appareils pouvaient disparaître sans avertissement.
