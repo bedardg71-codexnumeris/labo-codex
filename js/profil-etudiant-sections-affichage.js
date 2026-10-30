@@ -1093,6 +1093,8 @@ function genererSectionAccompagnement(da) {
                             const cause = (typeof causeNoteNonConstructible === 'function') ? causeNoteNonConstructible(da) : null;
                             return '—' + (cause ? `<span class="u-texte-petit u-texte-gris-clair" style="font-weight: normal; display: block; margin-top: 2px;">${echapperHtml(cause)}</span>` : '');
                         }
+                        // Lot 3 des seuils, retouche : la carte lit la même note affichée que son niveau. Le motif, sous le pattern, dit pourquoi.
+                        if (window.noteDuCoursAffichee(da, indices) === null) return '—';
 
                         // ⚠⚠ #542 lot 3, pas 3c — LE NIVEAU VIENT DE LA PRATIQUE,
                         // PLUS D'UN TERNAIRE.

@@ -7,6 +7,20 @@
 
 ---
 
+## 30 OCT. 2026, SOIR (Claude Code) : **LA RETOUCHE DU NIVEAU AU CRITÈRE ET LES NOUVELLES 1.228 SONT COMMITÉES SUR `main`, NON POUSSÉES ; AUCUNE RELEASE ; À RELIRE PAR COWORK ; EN LIGNE : TOUJOURS 1.227.0**
+
+**Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`, section « Retouche du verdict ». **Consigne** : `plans de travail/CONSIGNE-LOT-2026-10-30-niveau-rai-critere-retouche.md`.
+
+**Fait** : C1 à C6 et T3, chacun avec sa garde ; #1204 à #1207 inscrits ; les Nouvelles de la 1.228 écrites, mot pour mot.
+
+**À Grégoire** : valider la phrase du guide RàI (C4), au rapport ; T2 au prochain lot.
+
+**Supposition nommée** : l'entrée des Nouvelles porte `1.228`, couleur `bleu` ; la release fixera le numéro réel.
+
+**Non éprouvés** : la suite Playwright complète, exigée avant la release ; aucune spec n'ouvre le badge des Interventions ni la carte RàI sous le minimum dans un navigateur ; Safari hors banc et l'iPad.
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, les consignes (dont celle de cette retouche), le verdict du lot 4 des standards, la réflexion, `plans de travail/captures/`.
+
 ## 30 OCT. 2026, FIN DE JOURNÉE (Claude Code) : **« NOTE PROVISOIRE » REMPLACÉE HORS PRATIQUES ALTERNATIVES ET GARDÉE ; TROIS COMMITS SUR `main`, NON POUSSÉS, À RELIRE ENSEMBLE ; AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
 
 **Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`, section « Note provisoire ».

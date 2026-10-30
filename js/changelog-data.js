@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.228 (le niveau RàI au critère, lot 3 des seuils) — titre et six items validés par Grégoire, mot pour mot,
+            // le 30 oct. 2026 à 18 h 07, proposés par Cowork (`CONSIGNE-LOT-2026-10-30-niveau-rai-critere-retouche.md`, § 2).
+            // La 1.227 reste telle quelle. Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.228',
+            couleur: 'bleu',
+            titre: 'Le niveau RàI suit ton seuil de réussite',
+            items: [
+                'Le niveau RàI d’un·e étudiant·e ne dépend plus de son groupe&nbsp;: il suit ton seuil minimal de réussite, le repère «&nbsp;Suffisant à partir de&nbsp;» de ton échelle, ou 60&nbsp;% sans repère.',
+                'Niveau&nbsp;2&nbsp;: la note du cours à ce jour sous ce seuil, ou «&nbsp;Difficulté persistante&nbsp;» même si la note tient. Niveau&nbsp;3&nbsp;: la note sous ce seuil avec un critère des fondations aussi en dessous, ou «&nbsp;Non-participation&nbsp;».',
+                'Avant que la note du cours s’affiche, le niveau reste «&nbsp;En attente&nbsp;», sauf «&nbsp;Difficulté persistante&nbsp;», «&nbsp;Non-participation&nbsp;» ou un signalement diagnostique.',
+                'Un palier qui lève un signalement diagnostique peut maintenant fixer le niveau&nbsp;2 ou&nbsp;3, jusqu’à ce que la note du cours s’affiche. Le signalement se lève aussi quand le nombre d’erreurs est saisi directement.',
+                'L’Aide dit tout ce qui fixe le niveau, et ce qui ne le fixe jamais&nbsp;: la place dans le groupe, l’inscription aux services adaptés, l’assiduité et la complétion.',
+                'La note du cours ne change pas.'
+            ]
+        },
+        {
             // 1.227 (une seule source par famille de seuils ; le niveau RàI comparé au groupe-cours, question 1 du lot 2).
             // Titre et cinq items validés par Grégoire le 30 oct. 2026 à 14 h 15, proposés par Cowork
             // (`CONSIGNE-LOT-2026-10-30-nouvelles-1227-et-aide.md`, § 1). Ils remplacent le texte de Claude Code parti en 1.227.0.

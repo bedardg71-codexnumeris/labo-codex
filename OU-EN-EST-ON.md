@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, SOIR : LA RETOUCHE DU NIVEAU AU CRITÈRE EST FAITE, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : tes Nouvelles validées à 18 h 07. En standards sous le minimum, la barre des patterns garde les élèves, et un élève au seul diagnostic n'y entre pas. Une grille partagée garde la phrase de son palier, donc son signalement. La carte RàI écrit « — » tant que la note du cours ne s'affiche pas. Aux Interventions, « En attente » remplace « Niveau 0 » et n'est plus compté.
+
+**Ce qui reste à toi** : valider la phrase du guide RàI (au rapport, `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`). Rien ne part en ligne avant la relecture de Cowork et ton signal.
+
+**Vérifié comment** : Vitest entier vert (10 485) ; 18 changements volontaires du code font tous rougir une garde, le code restauré à l'identique ; texte des Nouvelles comparé par script à la consigne ; 25 essais de 7 specs WebKit verts, 1 sauté (captures sur demande). Pas encore : la vérification complète du navigateur, l'iPad, et aucun navigateur n'a ouvert le badge des Interventions ni la carte RàI sous le minimum.
+
 📝 **LE 30 OCTOBRE 2026, FIN D'APRÈS-MIDI : L'AIDE DU NIVEAU AU CRITÈRE EST INTÉGRÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : l'Aide dit le niveau au critère avec tes textes validés, dans « La Réponse à l'Intervention (RàI) » et « Repérer les patterns de progression ». Un palier coché qui a sa phrase lèvera aussi son signalement sur les copies déjà saisies : jusqu'ici, le code y lisait 0 erreur. Sur G5M, rien tant que tu n'écris pas la phrase du palier « Échec ».

@@ -2936,9 +2936,10 @@ function afficherPatternsApprentissage(etudiants) {
         try {
             if (typeof determinerCibleIntervention === 'function') {
                 const cibleInfo = determinerCibleIntervention(e.da);
-                // #731 — « En attente » (niveau 0) n'est pas un pattern : l'élève n'entre pas dans la barre,
-                // comme la barre RàI l'écarte déjà (`if (niveau)`).
-                if (cibleInfo && cibleInfo.niveau === 0) return;
+                // #731, retouche du lot 3 des seuils — on écarte par le pattern, pas par le niveau : le niveau 0 veut dire
+                // aussi « des copies, pas encore de note affichée », et leur pattern compte ; un élève au seul diagnostic a un
+                // niveau, et aucun pattern à montrer.
+                if (cibleInfo && cibleInfo.pattern === 'Données insuffisantes') return;
                 const pattern = cibleInfo ? cibleInfo.pattern : null;
 
                 // Normaliser le pattern

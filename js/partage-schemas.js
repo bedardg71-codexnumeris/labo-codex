@@ -293,7 +293,8 @@
                                 motsReference: { type: 'nombre', minValeur: 1, maxValeur: 100000 },
                                 erreursTolerees: { type: 'nombre', minValeur: 1, maxValeur: 10000 },
                                 nomServiceAide: { type: 'chaine', max: 200 },
-                                lienServiceAide: { type: 'chaine', max: 500 }
+                                lienServiceAide: { type: 'chaine', max: 500 },
+                                libelleSignalement: { type: 'chaine', max: 200 }   // sans sa phrase, un palier coché ne lève rien (#790)
                             }
                         },
                         // ⚠ `ratioMax: null` est le palier TERMINAL — une valeur
