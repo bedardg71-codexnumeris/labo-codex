@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026 : LES SEUILS DU SUIVI ONT UNE SEULE SOURCE, PRÊT, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : A et C suivent les trois champs de Labo › Outils d'observation, partout (défauts 95 · 90 · 85, quatre paliers). P suit les repères de ton échelle ; sans repère, seule la note de passage le signale. Les barres de l'Aperçu ont les mêmes bornes que les pastilles.
+
+**Ce qui reste à toi** : valider les mots (`plans de travail/RAPPORT-2026-10-30-seuils-une-source-lot-1.md`), trancher le cas des pratiques sommatives et les repères de l'échelle de départ. Une fois en ligne, changer tes réglages (aujourd'hui 75 · 70 · 65) : Labo › Outils d'observation, « Restaurer ». Et décider du lot 2 sur les chiffres de ta page privée.
+
+**Vérifié comment** : Vitest entier vert ; la sentinelle neuve a rougi sur 12 mutations du code ; dans WebKit, les 28 essais des specs touchées sont verts. Le verdict complet n'est pas pris : il attend la relecture de Cowork.
+
 📝 **LE 30 OCTOBRE 2026, 7 H 31 : LA 1.226 EST EN LIGNE** (la fenêtre de fusion ; le codex qui garde sa taille ; les mots des standards sans artefact). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les quatre lignes de la 1.226 dans les Nouvelles. « Fusionner avec un codex… » s'ouvre sur deux colonnes, « Ici » et « L'autre codex », et rien n'est choisi d'office. Le codex n'emporte plus les copies envoyées aux archives. Une pratique Standards sans artefact parle de productions. Le rapport de bug reconnaît les PC Windows, Edge, Android et les Chromebooks. **Aucune note ne change.** Avec des artefacts aussi, l'assistant ne pose plus « Utiliser un portfolio ? » ni le nombre d'artefacts à soumettre, et c'est pourquoi la ligne 3 dit, de ta main, « la note ne change pas » plutôt que « rien ne change ».
