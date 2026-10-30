@@ -1455,15 +1455,17 @@ function genererInterpretationSuiviFondamentaux() {
 
 /**
  * Pourquoi la carte n'a pas de répartition par niveaux, en deux cas qui ne se confondent pas. #775 : personne n'a de
- * note constructible. Retouche du lot 1 : des notes existent, mais les copies n'ont pas d'échelle unique.
+ * note constructible. Retouche du lot 1 : des notes existent, mais les copies n'ont pas d'échelle unique. Retouche 2
+ * (constat 5) : depuis la décision du 30 oct., 11 h 33, le cas le plus fréquent est la copie en points, qui n'a pas à
+ * être réparée ; seule la divergence le dit.
  */
-function phraseSansRepartition(nbSansNote, nbEtudiants) {
+function phraseSansRepartition(nbSansNote, nbEtudiants, raison) {
     const nonComptes = nbSansNote > 0
         ? ` ${nbSansNote} ${window.pluriel(nbSansNote, 'étudiant·e', 'étudiant·es')} sans note constructible ${window.pluriel(nbSansNote, 'n\'est', 'ne sont')} pas compté·es.`
         : '';
     const mots = nbSansNote === nbEtudiants
         ? `La note du cours ne se construit pas encore : il n'y a rien à répartir. Le dépistage, lui, s'appuie sur les ${echapperHtml(obtenirTermeProduction('pluriel'))} déjà ${accordTermeProduction('evalue', 2)}.`
-        : `Les copies de ce groupe n'ont pas d'échelle unique : pas de répartition par niveaux.${nonComptes}`;
+        : `${raison === 'echelles-divergentes' ? 'Les copies de ce groupe n\'ont pas d\'échelle unique' : 'Les copies de ce groupe sont notées sans échelle'} : pas de répartition par niveaux.${nonComptes}`;
     return `
                     <div class="tb-texte-description">
                         ${mots}
@@ -1977,7 +1979,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                     </div>
                 `;
             } else if (etudiants.length > 0) {
-                interpretationHTML = phraseSansRepartition(nbSansNote, etudiants.length);
+                interpretationHTML = phraseSansRepartition(nbSansNote, etudiants.length, window.reperesPerformance().raison);
             }
         } else {
             // 🆕 BETA 91: Diagnostic basique note de passage (SOLO désactivé)

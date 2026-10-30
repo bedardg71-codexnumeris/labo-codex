@@ -88,7 +88,9 @@ describe('la règle nue', () => {
     });
 
     it('sans référence, sous l\'effectif minimum : seule la règle 1 parle', () => {
-        expect(c(59, 2, null, null, 60).niveau).toBe(2);
+        // Retouche 2 (constat 2) : le motif, pas seulement le niveau. Sans référence, rien ne se dit de la moyenne du groupe.
+        expect(c(59, 2, null, null, 60)).toEqual({ niveau: 2, motif: 'sous-la-note-sans-groupe' });
+        expect(c(59, 1, null, null, 60)).toEqual({ niveau: 2, motif: 'sous-la-note-sans-groupe' });
         expect(c(60, 2, null, null, 60)).toEqual({ niveau: 1, motif: 'groupe-trop-petit' });
     });
 });
@@ -168,7 +170,11 @@ describe('les cas qui départagent (retouche du lot 2, constat 6)', () => {
     it('le minimum est 5 élèves avec copie : à 5, on compare ; à 4, non', () => {
         expect(groupe([90, 90, 90, 90, 62]).niveaux()).toEqual([1, 1, 1, 1, 3]);
         expect(groupe([90, 90, 90, 62]).niveaux()).toEqual([1, 1, 1, 1]);
-        expect(groupe([90, 90, 90, 62]).win.determinerNiveauRaiPedagogique(DA_DU_RANG(3)).description).toContain('Moins de 5 élèves');
+        expect(groupe([90, 90, 90, 62]).win.determinerNiveauRaiPedagogique(DA_DU_RANG(3)).description).toContain('Moins de 5 étudiant·es');
+        const sousLePassage = groupe([90, 90, 90, 55]).win.determinerNiveauRaiPedagogique(DA_DU_RANG(3));
+        expect(sousLePassage.niveau).toBe(2);
+        expect(sousLePassage.description).toContain('Sous la note de passage. Moins de 5 étudiant·es');
+        expect(sousLePassage.description).not.toContain('moyenne de son groupe');
     });
 
     it('une copie remplacée sort du calcul, sa reprise y entre', () => {
@@ -227,10 +233,11 @@ describe('décision de Grégoire du 30 oct. 2026, 11 h 33 : les repères de l\'�
     });
 
     it('sommative sans échelle, copies en points : il reste au niveau 3, même si la bibliothèque compte une échelle', () => {
-        const avecBiblio = groupe(FORT, { famille: 'sommative' });
-        expect(avecBiblio.niveaux()).toEqual([1, 1, 1, 1, 1, 3]);
-        const store = groupe(FORT, { famille: 'sommative', parCopie: () => ({ echelleId: undefined }) });
-        expect(store.niveaux()[5]).toBe(3);
+        const enPoints = { echelle: echelle(), parCopie: () => ({ echelleId: undefined }) };   // l'échelle à repères est en bibliothèque, aucune copie ne la porte
+        expect(groupe(FORT, { famille: 'sommative', ...enPoints }).niveaux()).toEqual([1, 1, 1, 1, 1, 3]);
+        expect(groupe(FORT, { famille: 'specifications', ...enPoints }).niveaux()).toEqual([1, 1, 1, 1, 1, 3]);
+        // Le témoin : le même banc, en standards, prête l'échelle de la bibliothèque (lecture de toujours).
+        expect(groupe(FORT, { famille: 'standards', ...enPoints }).niveaux()).toEqual([1, 1, 1, 1, 1, 1]);
     });
 
     it('spécifications : même règle', () => {
@@ -267,14 +274,18 @@ describe('la barre P sans répartition (retouche du lot 1, constat 1)', () => {
     it('deux cas, deux phrases : personne n\'a de note, ou pas d\'échelle unique', () => {
         const { interne } = groupe(SIX);
         expect(interne.phraseSansRepartition(4, 4)).toContain('ne se construit pas encore');
-        const sansEchelle = interne.phraseSansRepartition(0, 4);
-        expect(sansEchelle).toContain('pas d\'échelle unique');
-        expect(sansEchelle).not.toContain('ne se construit pas encore');
-        expect(interne.phraseSansRepartition(1, 4)).toContain('1 étudiant·e sans note constructible');
+        const divergentes = interne.phraseSansRepartition(0, 4, 'echelles-divergentes');
+        expect(divergentes).toContain('pas d\'échelle unique');
+        expect(divergentes).not.toContain('ne se construit pas encore');
+        // Retouche 2 (constat 5) : une copie en points n'est pas une divergence à réparer.
+        const enPoints = interne.phraseSansRepartition(0, 4, 'aucune-copie');
+        expect(enPoints).toContain('notées sans échelle');
+        expect(enPoints).not.toContain('pas d\'échelle unique');
+        expect(interne.phraseSansRepartition(1, 4, 'aucune-copie')).toContain('1 étudiant·e sans note constructible');
     });
 
     it('le chemin les appelle dès qu\'il y a des élèves, y compris tous avec une note', () => {
-        expect(lire('js/tableau-bord-apercu.js')).toMatch(/else if \(etudiants\.length > 0\) \{\s*interpretationHTML = phraseSansRepartition\(nbSansNote, etudiants\.length\);/);
+        expect(lire('js/tableau-bord-apercu.js')).toMatch(/else if \(etudiants\.length > 0\) \{\s*interpretationHTML = phraseSansRepartition\(nbSansNote, etudiants\.length, window\.reperesPerformance\(\)\.raison\);/);
     });
 });
 

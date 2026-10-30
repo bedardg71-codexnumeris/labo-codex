@@ -526,7 +526,7 @@ describe('B · ce que C compte comme remis, et quel P le Suivi lit', () => {
         expect(p.performance3).toBe(0.65);                           // 50, 75, 70 — avant 0,60 (50, 75, 55 : l'originale remplacée était dedans)
         expect(ipb.historiqueComplet.length).toBe(4);                // quatre artefacts pour quatre productions — avant 5
         expect(r3(moy.structure)).toBe(r3((0.75 + 0.65 + 0.75 + 0.40) / 4)); // 0,6375 — avant 0,59 (l'originale pesait)
-        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Difficulté émergente' });   // décision de Grégoire du 30 oct. 2026, 11 h 33 : les repères de l'échelle des copies se lisent dans toutes les pratiques : 0,65 < 0,75. Niveau : lot 2, 65 n'est pas sous 60. Avant #730 : niveau 3 (0,60 < 0,64) ; sommative sans repère depuis le 30 oct. : aucun test « sous la maîtrise »
+        expect(p.rai).toMatchObject({ niveau: 1, pattern: 'Difficulté émergente' });   // décision de Grégoire du 30 oct. 2026, 11 h 33 : les repères de l'échelle des copies se lisent dans toutes les pratiques : 0,65 < 0,75. Niveau : lot 2, 65 n'est pas sous 60. Avant #730 : niveau 3 (0,60 < 0,64)
     });
 
     it('B4 · un « non remis » enregistré avec 0 : écarté par le C sommatif COMME par le C des snapshots — valeur d\'après #738 (constat d\'origine : C sommatif 25)', () => {
