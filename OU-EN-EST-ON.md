@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 7 H 31 : LA 1.226 EST EN LIGNE** (la fenêtre de fusion ; le codex qui garde sa taille ; les mots des standards sans artefact). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les quatre lignes de la 1.226 dans les Nouvelles. « Fusionner avec un codex… » s'ouvre sur deux colonnes, « Ici » et « L'autre codex », et rien n'est choisi d'office. Le codex n'emporte plus les copies envoyées aux archives. Une pratique Standards sans artefact parle de productions. Le rapport de bug reconnaît les PC Windows, Edge, Android et les Chromebooks. **Aucune note ne change.** Avec des artefacts aussi, l'assistant ne pose plus « Utiliser un portfolio ? » ni le nombre d'artefacts à soumettre, et c'est pourquoi la ligne 3 dit, de ta main, « la note ne change pas » plutôt que « rien ne change ».
+
+**Ce qui reste à toi** : deux gestes. Sur l'iPad, recharge jusqu'à 1.226.0, ouvre le dernier codex écrit par le Mac, puis « Mettre à jour le codex » : l'aperçu annonce environ 355 Mo, plus 1,5 Go. À la prochaine fusion : la fenêtre en deux colonnes, rien de choisi d'office. Plus tard, le lot de mots qui reste (l'Exploration des pratiques et un message du profil, #1187, #1188).
+
+**Vérifié comment** : les trois lots relus et acceptés par Cowork (le dernier : `VERDICT-RELECTURE-2026-10-30-fenetre-de-fusion-retouche-et-standards-lot-5.md`) ; Vitest entier vert (10 348) ; un essai du codex rejoué sans son correctif, qui rougit, puis le code restauré à l'identique ; la vérification complète du navigateur, sur le Mac, verte (1 143 essais, aucun rattrapé au second essai, les 4 rouges connus) ; la mise en ligne constatée chez Netlify sur ce commit, et le fichier de version du déploiement dit 1.226.0. Pas encore : l'iPad, Chrome, la taille réelle de ton codex (tes gestes en seront le témoin). La vérification de GitHub tournait encore à l'écriture.
+
 📝 **LE 30 OCTOBRE 2026, 5 H 40 : LA FENÊTRE DE FUSION ET LES MOTS DES STANDARDS SANS PORTFOLIO SONT PRÊTS, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : « Fusionner avec un codex… » s'ouvre sur une fenêtre à deux colonnes, avec tes mots (« ta grille en cours dans « Apporter mon matériel » », « Versions de l'autre codex retenues »). Une pratique Standards sans aucun « Artefact » parle de productions dans l'assistant et sa fiche, et le profil écrit « productions retenues × 100 % » sans terminale. Ta pratique, avec ses artefacts, garde ses mots, sauf les textes que tu as validés pour toutes les pratiques ; sans terminale, « portfolio × 100 % ». L'assistant ne pose plus « Utiliser un portfolio ? » ni le nombre d'artefacts à soumettre. **Aucune note ne change.**
