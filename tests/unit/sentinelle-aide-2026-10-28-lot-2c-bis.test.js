@@ -120,7 +120,7 @@ describe('#1152 lot 2c bis · le Suivi', () => {
     it('chaque renvoi du Suivi à une autre entrée (« voir « … » ») nomme un titre de l\'Aide, et la FAQ suit le titre neuf', () => {
         const titresAide = new Set([...aide.querySelectorAll('.carte.accordeon h3')].map((h) => net(h.textContent).replace(/^▼ /, '')));
         const renvois = SUIVI.flatMap((id) => [...texteDe(id).matchAll(/voir « ([^»]+?) »/g)].map((m) => m[1]));
-        expect(renvois.length).toBeGreaterThanOrEqual(6);
+        expect(renvois.length).toBeGreaterThanOrEqual(5); // 5 depuis la carte RàI du 30 oct. : le plancher garde le test de la vacuité
         expect(renvois.filter((r) => !titresAide.has(r))).toEqual([]);
         expect(net(entree('diagnostics').querySelector('h3').textContent).replace(/^▼ /, '')).toBe('Les mots qui décrivent A et C');
         expect(net(aide.textContent)).not.toContain('Comprendre les diagnostics automatiques');
@@ -191,21 +191,24 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(niveau).not.toContain('idme.');
         // Aucun champ de l'écran ni des préférences n'écrit de seuil de performance : les repères se posent sur l'échelle.
         expect(html + lire('js', 'preferences-v2.js')).not.toMatch(/idme\.(insuffisant|developpement)|seuil-idme/);
-        expect(texteDe('rai')).toContain('Ses bornes sont les repères de ton échelle, « Suffisant à partir de » et « Maîtrisé à partir de »');
+        // Lot 3 des seuils : les textes validés le 30 oct. ; la garde du modèle lui-même vit dans sentinelle-niveau-au-critere-2026-10-30.test.js.
+        expect(texteDe('rai')).toContain('Ce seuil est le repère « Suffisant à partir de » de l\'échelle de tes copies');
         expect(texteDe('rai')).not.toMatch(/\b(64|75) %/);
         // Retouche 2 du lot 2 (constat 1) : la moitié « texte » de cette sentinelle gardait la règle retirée.
-        expect(texteDe('patterns')).toContain('Le pattern nomme le besoin sans fixer le niveau : le niveau compare la moyenne des copies au groupe-cours');
+        expect(texteDe('patterns')).toContain('Les autres nomment le besoin sans fixer le niveau (voir la carte juste au-dessus).');
+        expect(texteDe('patterns')).not.toContain('groupe-cours');
         expect(texteDe('patterns')).not.toMatch(/Le niveau suit une seule règle|donnent le niveau [123]/);
     });
 
     // Consigne du 30 oct. 2026 (`CONSIGNE-LOT-2026-10-30-nouvelles-1227-et-aide.md`, § 2) : plus aucun texte d'aide ne disait
     // ce niveau 3. Le texte est lié à ce que rend le code, pas seulement à sa présence.
-    // Lot 3 des seuils (30 oct. 2026) : la phrase « Seule Non-participation… » est périmée par le modèle au critère. Cowork réécrit
-    // la section avec Grégoire ; sa nouvelle garde viendra avec le texte. Reste ce que le code rend de cette règle.
+    // Lot 3 des seuils (30 oct. 2026) : la phrase « Seule Non-participation… » est périmée par le modèle au critère ; le texte validé
+    // la remplace, et il reste lié à ce que rend le code.
     it('patterns : « Non-participation » donne le niveau 3, et c\'est la présence sans copie qui le donne', () => {
         const present = niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 100 });
         expect(present).toMatchObject({ niveau: 3, pattern: 'Non-participation' });
         expect(niveauRaiDuBanc({ evaluations: [COPIE_DE_L_AUTRE], A: 0 })).toMatchObject({ niveau: 0, label: 'En attente' });
+        expect(texteDe('patterns')).toContain('« Non-participation » le niveau 3.');
     });
 
     it('patterns : chaque ligne est la condition de `identifierPatternActuel`', () => {
@@ -235,7 +238,6 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         const t = texteDe('suivi-apprentissage');
         expect(t).toContain(`« Fenêtre d'analyse » (${fenetre} dernières productions par défaut)`);
         expect(t).toContain(`« Progression des artefacts » (${progression} points par défaut)`);
-        expect(texteDe('rai')).toContain(`pattern des derniers artefacts (${pct(null, 'nombreProductionsAnalyse') / 100} par défaut)`);
     });
 
     it('suivi-apprentissage : la carte suit le réglage SOLO de `criteresSuiviFondations`', () => {

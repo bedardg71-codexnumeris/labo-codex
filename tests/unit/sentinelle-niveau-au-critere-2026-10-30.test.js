@@ -356,6 +356,47 @@ describe('§ 4 — les lecteurs suivent', () => {
     });
 });
 
+// Textes de Cowork validés par Grégoire le 30 oct. (TEXTES-2026-10-30-aide-rai-niveau-critere.md), avec sa décision sur le niveau 1 :
+// l'Aide part avec le code, et chaque phrase de règle est gardée ici, à côté du banc qui la prouve.
+describe('§ 4 — l\'Aide dit le modèle tel que codé', () => {
+    const html = lire('index.html');
+    const net = (s) => s.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').replace(/ ([,.)])/g, '$1').trim();
+    const carteRai = net(tranche(html, 'id="accordeon-aide-rai"', '<!-- Carte: Les patterns'));
+    const cartePatterns = net(tranche(html, 'id="accordeon-aide-patterns"', '<!-- Carte: Planifier les interventions'));
+    const carteSuivi = net(tranche(html, 'id="accordeon-aide-suivi-apprentissage"', '<!-- Carte: Captures de progression'));
+
+    it('les trois niveaux, tels que le banc les rend', () => {
+        expect(carteRai).toContain('Niveau 3 (Intensif) : la note du cours à ce jour (en pratique alternative de notation, la note provisoire) est sous ton seuil, et au moins un critère des fondations l\'est aussi');
+        expect(carteRai).toContain('ou un signalement diagnostique que tu as réglé au niveau 3 ; ou « Non-participation ».');
+        expect(carteRai).toContain('Niveau 2 (Préventif) : la note du cours à ce jour est sous ton seuil ; ou « Difficulté persistante », même si la note tient au-dessus ; ou un signalement diagnostique que tu as réglé au niveau 2.');
+        expect(carteRai).toContain('Niveau 1 (Universel) : tous les autres, une fois la note du cours affichée. Avant, sans ces signaux, le niveau reste « En attente ».');
+    });
+
+    it('la ligne : le repère de suffisance, sinon la note de passage, lue à la source', () => {
+        const passage = Number(lire('js/interpretation-config.js').match(/const NOTE_DE_PASSAGE = ([\d.]+);/)[1]) * 100;
+        expect(carteRai).toContain(`Ce seuil est le repère « Suffisant à partir de » de l'échelle de tes copies ; si ton échelle n'en a pas, c'est la note de passage, ${passage} %.`);
+    });
+
+    it('avant le minimum, le signalement, ce qui ne fixe jamais, la phrase du groupe', () => {
+        expect(carteRai).toContain('la note ne mène pas au niveau 3 : un début sous ton seuil donne au plus le niveau 2.');
+        expect(carteRai).toContain('Un signalement diagnostique fixe son niveau jusqu\'à ce que la note du cours s\'affiche ; ensuite, il reste affiché à côté du niveau.');
+        expect(carteRai).toContain('Ne fixent jamais le niveau : la place de l\'étudiant·e dans son groupe, l\'inscription aux services adaptés, l\'assiduité et la complétion');
+        expect(carteRai).toContain('une phrase sous la barre RàI le dit pour tout le groupe. Elle n\'enlève aucun signal individuel.');
+    });
+
+    it('les deux patterns qui fixent un niveau', () => {
+        expect(cartePatterns).toContain('sur les derniers artefacts ; en début de trimestre, une seule copie peut l\'allumer ;');
+        expect(cartePatterns).toContain('Deux patterns fixent un niveau : « Difficulté persistante » donne au moins le niveau 2, « Non-participation » le niveau 3.');
+    });
+
+    it('l\'ancien modèle a quitté les trois cartes', () => {
+        for (const carte of [carteRai, cartePatterns, carteSuivi]) {
+            expect(carte).not.toMatch(/groupe-cours|écart-type|moyenne des copies/);
+        }
+        expect(carteSuivi).toContain('il ne fixe pas le niveau RàI (voir « La Réponse à l\'Intervention (RàI) »). Quand les deux vues divergent, c\'est un signal pour ton jugement.');
+    });
+});
+
 describe('ce qui entoure le niveau (retouches du lot 2)', () => {
     it('la phrase de progression favorable ne compte que le pattern Stable', () => {
         const ech = { id: 'I', niveaux: [{ code: 'D', min: 50, max: 74 }, { code: 'M', min: 75, max: 100 }], seuilMaitrise: 'M' };
@@ -435,5 +476,7 @@ describe('le panneau des seuils (retouche du lot 1, constat 2)', () => {
  *   cible figée : 1 ; cible qui oublie le signalement : 1
  *   palier coché sans niveau, défaut silencieux : 1 ; valeur illisible gardée : 1 ; registre qui perd le niveau : 1 ; décocher qui garde le niveau : 1
  *   barre sur les seuls élèves à niveau : 1 ; phrase sans les élèves en attente : 2
+ *   Aide (index.html) : niveau 1 sans « En attente » : 1 ; fondation retirée du niveau 3 : 1 ; 60 % devenu 65 % : 1 ; au plus le niveau 3 avant le minimum : 1 ;
+ *   signalement sans sa durée : 1 ; persistante au niveau 3 : 1 ; le groupe-cours revenu dans le suivi : 1
  * Mutant équivalent, nommé : lire le diagnostic aussi après la note (0 rouge) : `classerNiveauAuCritere` l'ignore déjà ; le `note === null` évite seulement une lecture.
  */

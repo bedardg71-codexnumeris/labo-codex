@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, FIN D'APRÈS-MIDI : L'AIDE DU NIVEAU AU CRITÈRE EST INTÉGRÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : l'Aide dit le niveau au critère avec tes textes validés, dans « La Réponse à l'Intervention (RàI) » et « Repérer les patterns de progression ».
+
+**Ce qui reste à toi** : valider les mots du rapport (`plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`), dont « note provisoire » à l'écran ; dire si on committe. Avant toute release, la suite complète du navigateur.
+
+**Vérifié comment** : Vitest entier vert (10 442) ; 7 changements volontaires de l'Aide font rougir la garde, puis `index.html` restauré ; textes comparés par script. Ce qui n'est pas éprouvé : la suite complète du navigateur, Safari hors banc, l'iPad.
+
 📝 **LE 30 OCTOBRE 2026, 16 H 07 : LE NIVEAU AU CRITÈRE EST CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : le niveau situe chaque étudiant·e devant ton seuil minimal de réussite et sa propre trajectoire, plus devant son groupe. Avant la note provisoire, la plupart des étudiant·es seront « En attente », et la barre RàI le dira. Sur un palier coché, tu pourras choisir le niveau qu'il fixe jusqu'à la première note provisoire.
