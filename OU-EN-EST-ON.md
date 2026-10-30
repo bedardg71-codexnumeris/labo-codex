@@ -17,11 +17,11 @@
 
 📝 **LE 30 OCTOBRE 2026, FIN D'APRÈS-MIDI : L'AIDE DU NIVEAU AU CRITÈRE EST INTÉGRÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
-**Ce qui changera pour toi, une fois en ligne** : l'Aide dit le niveau au critère avec tes textes validés, dans « La Réponse à l'Intervention (RàI) » et « Repérer les patterns de progression ».
+**Ce qui changera pour toi, une fois en ligne** : l'Aide dit le niveau au critère avec tes textes validés, dans « La Réponse à l'Intervention (RàI) » et « Repérer les patterns de progression ». Un palier coché qui a sa phrase lèvera aussi son signalement sur les copies déjà saisies : jusqu'ici, le code y lisait 0 erreur. Sur G5M, rien tant que tu n'écris pas la phrase du palier « Échec ».
 
-**Ce qui reste à toi** : valider les mots du rapport (`plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`), dont « note provisoire » à l'écran ; dire si on committe. Avant toute release, la suite complète du navigateur.
+**Ce qui reste à toi** : valider les remplacements de « note provisoire » et les autres mots du rapport (`plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`) ; écrire la phrase du palier de G5M dans ton codex. Rien n'est poussé avant la suite complète du navigateur, verte.
 
-**Vérifié comment** : Vitest entier vert (10 442) ; 7 changements volontaires de l'Aide font rougir la garde, puis `index.html` restauré ; textes comparés par script. Ce qui n'est pas éprouvé : la suite complète du navigateur, Safari hors banc, l'iPad.
+**Vérifié comment** : Vitest entier vert ; 7 changements volontaires de l'Aide font rougir la garde ; l'ancienne lecture du signalement rend 3 tests rouges ; textes comparés par script ; les noms de champs lus sur ton codex du 30 oct., 11 h 25, sans valeurs ni noms d'élèves. Ce qui n'est pas éprouvé : la suite complète du navigateur, Safari hors banc, l'iPad.
 
 📝 **LE 30 OCTOBRE 2026, 16 H 07 : LE NIVEAU AU CRITÈRE EST CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
 

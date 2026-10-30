@@ -7,19 +7,23 @@
 
 ---
 
-## 30 OCT. 2026, FIN D'APRÈS-MIDI (Claude Code) : **L'AIDE DU NIVEAU AU CRITÈRE EST INTÉGRÉE, NON COMMITÉE ; AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
+## 30 OCT. 2026, FIN D'APRÈS-MIDI (Claude Code) : **L'AIDE DU NIVEAU AU CRITÈRE ET LA LECTURE DU SIGNALEMENT SONT COMMITÉES SUR `main`, NON POUSSÉES ; AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
 
-**Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`, section des textes (validés, puis intégrés).
+**Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`.
 
-**Fait** : les textes validés dans `index.html`, avec la décision A de Grégoire sur le niveau 1 et la phrase retenue à `index.html:10881` ; gardes réécrites et garde neuve ; #1203 inscrit (l'écart du « — », sans cas vécu, non corrigé).
+**Fait** : l'Aide validée dans `index.html` ; #1203 inscrit (l'écart du « — », sans cas vécu, non corrigé) ; le signalement lit `erreurs` et `totalErreurs`, les copies du codex portant `erreurs` (décision de Grégoire, sans migration, rien écrit dans le codex).
 
-**Vérifié** : Vitest entier vert (10 442) ; 7 mutations de l'Aide rouges, `index.html` restauré ; textes comparés par script. **Non éprouvés** : la suite Playwright complète, exigée avant toute release ; Safari hors banc ; iPad.
+**Vérifié** : Vitest entier vert ; 7 mutations de l'Aide rouges ; l'ancienne lecture du signalement rend 3 rouges ; textes comparés par script ; noms de champs lus sur le codex `e0b3a87b…`. **Non éprouvés** : la suite Playwright complète ; Safari hors banc ; iPad.
 
-**Reste avant une release** : le commit (non fait : le rituel attend la demande de Grégoire), les mots du rapport à valider, dont « note provisoire » ; la relecture de Cowork ; puis le verdict Playwright, Cowork fermé.
+**⚠ Bloque push et release (Grégoire)** : la suite Playwright complète, verte. Ordre : relecture de Cowork, puis verdict, Cowork fermé, puis push. Tout commit après le verdict le périme.
 
-**Classé (Grégoire)** : le palier sur G5M et non sur G1A est voulu ; mesure annulée, script retiré. À son attention, sans geste : la phrase du signalement de ce palier est vide, et le code ne lève rien sans elle (rapport, Trouvailles). Autre lecture du code, non éprouvée : le signalement lit `totalErreurs`, la saisie du nombre d'erreurs écrit `erreurs` (rapport, Trouvailles).
+**⚠ POINT OUVERT, À VALIDER PAR GRÉGOIRE** : les remplacements de « note provisoire » hors pratiques alternatives, proposés occurrence par occurrence au rapport (section « Note provisoire »), avec les autres mots à valider. **Le code n'est pas changé.** Hors de la liste, sans proposition : les mots qui opposent « provisoire » à « finale » (profil, réglage, PDF de l'élève).
 
-**Non commités, à Cowork, laissés tels quels** : les mêmes fichiers que ci-dessous.
+**À Grégoire, sans geste de notre part** : la phrase du signalement du palier « Échec » de G5M est vide, et rien ne se lève sans elle. Il l'écrit lui-même dans son codex.
+
+**Classé (Grégoire)** : le palier sur G5M et non sur G1A est voulu ; rien à corriger.
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, les deux consignes, le verdict du lot 4 des standards, la réflexion, les textes de l'Aide, `plans de travail/captures/`.
 
 ## 30 OCT. 2026, 16 H 07 (Claude Code) : **LE NIVEAU AU CRITÈRE EST CODÉ SUR `main`, NON POUSSÉ ; L'AIDE ATTEND : AUCUNE RELEASE ; EN LIGNE : TOUJOURS 1.227.0**
 
