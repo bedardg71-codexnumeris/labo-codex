@@ -21,7 +21,9 @@ const mots = (s) => s.replace(/&nbsp;| |\\u00a0/g, ' ');
 describe('lot 29 · #901 — quatre phrases de l\'Aide disent ce que fait le code', () => {
     it('C-1 · le récapitulatif de l\'assistant dit « Par artefacts », sans la parenthèse', () => {
         const src = lire('js/wizard-pratique-v2.js');
-        expect(src).toContain("'n-meilleurs': 'Par artefacts',");
+        // Lot 5 des standards sans portfolio : le mot suit la variante ; celle des artefacts reste « Par artefacts ».
+        expect(src).toContain("'n-meilleurs': window.motsPoolStd().variante,");
+        expect(mots(lire('js/pratiques/pratique-registre.js'))).toContain("variante: 'Par artefacts',");
         expect(src).not.toContain('Par artefacts (N meilleurs)');
     });
 
@@ -57,7 +59,8 @@ describe('lot 29 · #899 — le récapitulatif d\'une spécification dit où ré
         const src = mots(lire('js/wizard-pratique-v2.js'));
         // Lot N6 (#899, la flèche) : « → », comme les autres chemins des pratiques de notation ; le reste mot pour mot.
         expect(src).toContain('<strong>Types de productions et forfaits :</strong> à régler après la création, dans Conception → Pratiques de notation (clique sur la pratique). Tant qu\\\'ils manquent, aucune note ne peut être calculée.');
-        expect(src).not.toContain('Conception › Pratiques de notation');
+        // Le seul « › » de ce chemin : le texte 5 du lot 5 des standards (validé par Grégoire le 29 oct., 21 h 39), mot pour mot.
+        expect(src.split('Conception › Pratiques de notation')).toHaveLength(2);
     });
 
     it('le chemin qu\'elle promet existe : section « Pratiques de notation » sous Conception, et les deux titres de l\'éditeur', () => {

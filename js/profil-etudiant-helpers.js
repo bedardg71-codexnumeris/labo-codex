@@ -31,6 +31,11 @@
    📚 FONCTION HELPER POUR TERMINOLOGIE CONFIGURABLE
    =============================== */
 
+/** Lot 5 : la règle est celle du registre (`coursActifFaitDArtefacts`), jamais recopiée ici. */
+function _termeEstArtefact(pratique) {
+    return pratique === 'standards' && window.coursActifFaitDArtefacts();
+}
+
 /**
  * Retourne le terme approprié pour désigner les productions évaluées selon la pratique de notation
  * Évite le terme "artefact" codé en dur qui est spécifique au portfolio
@@ -48,33 +53,11 @@ function obtenirTermeProduction(context = 'singulier', majuscule = false) {
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
         ? obtenirTypePratiqueActive() : null);   // lot N1b : null sans pratique assignée — aucun repli
 
-    // Définir les termes selon la pratique
-    let termes = {
-        singulier: 'artefact',
-        pluriel: 'artefacts',
-        partitif: "d'artefact"
-    };
-
-    // Standards : terme "artefact" (portfolio d'apprentissage)
-    if (pratique === 'standards') {
-        // Terme personnalisé configurable — champ PROPRE des modalités
-        // (pas un miroir ; seule la dérivation du type a migré en L2-b1)
-        const config = db.getSync(cle('modalitesEvaluation'), null) || {};
-        const termePerso = config.termeProduction || 'artefact';
-        termes = {
-            singulier: termePerso,
-            pluriel: termePerso + 's',
-            partitif: "d'" + termePerso
-        };
-    }
-    // Sommative ou autre : terme "production" (neutre et non ambigu)
-    else {
-        termes = {
-            singulier: 'production',
-            pluriel: 'productions',
-            partitif: 'de production'
-        };
-    }
+    // Standards avec au moins un « Artefact » au cours actif : « artefact » (lot 5 des standards sans
+    // portfolio, 29 oct. 2026). Standards sans artefact, sommative ou autre : « production » (neutre et non ambigu).
+    const termes = _termeEstArtefact(pratique)
+        ? { singulier: 'artefact', pluriel: 'artefacts', partitif: "d'artefact" }
+        : { singulier: 'production', pluriel: 'productions', partitif: 'de production' };
 
     let terme = termes[context] || termes.singulier;
 
@@ -107,8 +90,7 @@ const _ACCORDS_TERME_PRODUCTION = {
 
 /**
  * Genre du terme production/artefact selon la pratique active. #309.
- * 'standards' (portfolio) → « artefact » masculin (terme perso = masculin par défaut,
- * décision Grégoire 2 juin 2026) ; toute autre pratique → « production » féminin.
+ * Standards avec un « Artefact » au cours actif → « artefact » masculin ; sinon → « production » féminin (lot 5).
  * Même résolution de pratique que obtenirTermeProduction (id canonique normalisé).
  * @returns {'m'|'f'}
  */
@@ -116,7 +98,7 @@ function genreTermeProduction() {
     // #328 L2-b1 : type dérivé de la SSOT (groupesCours), plus du miroir.
     const pratique = ((typeof obtenirTypePratiqueActive === 'function')
         ? obtenirTypePratiqueActive() : null);   // lot N1b : null sans pratique assignée — aucun repli
-    return pratique === 'standards' ? 'm' : 'f';
+    return _termeEstArtefact(pratique) ? 'm' : 'f';
 }
 
 /**

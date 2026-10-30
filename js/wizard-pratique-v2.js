@@ -598,15 +598,15 @@ const ETAPES_WIZARD = {
                 options: [
                     {
                         value: 'par-artefacts',
-                        label: 'Par artefacts (portfolio)',
-                        description: 'Les étudiant·es soumettent des artefacts. La note finale est calculée à partir des N meilleurs artefacts.'
+                        get label() { return window.motsPoolStd().approche; },
+                        get description() { return window.motsPoolStd().approcheDescription; }
                     }
                 ]
             },
             {
                 id: 'infoApprocheUnique',
                 type: 'info',
-                texte: 'PAN-Standards s\'appuie sur le portfolio : c\'est la progression à travers les artefacts qui construit la note.'
+                get texte() { return window.motsPoolStd().approcheInfo; }
             }
         ],
         suivant: () => 'config-portfolio',   // bloc 9 (15 oct. 2026) : directement, sans les deux étapes retirées
@@ -617,44 +617,29 @@ const ETAPES_WIZARD = {
 
     'config-portfolio': {
         id: 'config-portfolio',
-        titre: 'Configuration du portfolio',
-        description: 'Paramètre la gestion des artefacts',
+        get titre() { return window.motsPoolStd().etapeTitre; },
+        get description() { return window.motsPoolStd().etapeDescription; },
         branche: 'standards-artefacts',
         ordre: 5,
         champs: [
-            {
-                id: 'utiliserPortfolio',
-                label: 'Utiliser un portfolio ?',
-                type: 'toggle',
-                default: true
-            },
-            {
-                id: 'nbArtefactsSoumis',
-                label: 'Nombre d\'artefacts à soumettre',
-                type: 'number',
-                min: 1,
-                max: 20,
-                default: 12,
-                required: true
-            },
             // 🆕 #24 : Mode de sélection pour construction de la note
             {
                 id: 'modeSelectionPortfolio',
                 label: 'Construction de la note',
                 type: 'select',
                 options: [
-                    { value: 'n_meilleurs', label: 'N meilleurs artefacts' },
-                    { value: 'tous', label: 'Tous les artefacts' },
-                    { value: 'derniers', label: 'N derniers artefacts' },
+                    { value: 'n_meilleurs', get label() { return window.motsPoolStd().modeMeilleurs; } },
+                    { value: 'tous', get label() { return window.motsPoolStd().modeTous; } },
+                    { value: 'derniers', get label() { return window.motsPoolStd().modeDerniers; } },
                     { value: 'hybride', label: 'Hybride (N meilleures + Obligatoires)' }
                 ],
                 default: 'n_meilleurs',
                 required: true,
-                aide: 'Hybride : combine N meilleures productions + productions obligatoires (ex: examen final). Configuration détaillée en Mode Expert.'
+                aide: 'Hybride : combine les N meilleures productions et les productions obligatoires (par exemple, un examen final). Une fois la pratique créée, tu choisis lesquelles sont obligatoires dans Conception › Pratiques de notation.'
             },
             {
                 id: 'nbArtefactsRetenus',
-                label: 'Nombre d\'artefacts retenus pour la note finale',
+                get label() { return window.motsPoolStd().retenusAssistant; },
                 type: 'number',
                 min: 1,
                 max: 12,
@@ -666,7 +651,7 @@ const ETAPES_WIZARD = {
                 // note (STD-9). Il ne sert qu'aux messages du profil et au plafonnement de conformité, que l'assistant
                 // n'active pas (`reglesConformite`, STD-8). L'Aide ne doit pas le présenter comme un seuil de calcul.
                 id: 'minAvantCalculFormatif',
-                label: 'Minimum d\'artefacts avant calcul formatif',
+                get label() { return window.motsPoolStd().minimum; },
                 type: 'number',
                 min: 0,
                 max: 5,
@@ -1897,7 +1882,7 @@ function genererRecapitulatif() {
             'classique': 'Classique',
             'verrou': 'Avec verrou d\'évaluation',
             // #901 (C-1) : sans parenthèse — la méthode ne se dit qu'à « Construction de la note ».
-            'n-meilleurs': 'Par artefacts',
+            'n-meilleurs': window.motsPoolStd().variante,   // lot 5 des standards sans portfolio : suit la variante des mots
             'objectifs-ponderes': 'Par objectifs pondérés',
             'moyenne-ponderee': 'Moyenne pondérée des objectifs',
             'comptage': 'Comptage d\'objectifs',
@@ -1949,21 +1934,20 @@ function genererRecapitulatif() {
         // `|| r.approcheEvaluation` reste : une pratique stockée qui porte encore
         // l'ancienne valeur s'affiche telle quelle plutôt que « undefined ».
         const approcheLabels = {
-            'par-artefacts': 'Par artefacts (portfolio)'
+            'par-artefacts': window.motsPoolStd().approche
         };
         html += `<p><strong>Approche\u00a0:</strong> ${approcheLabels[r.approcheEvaluation] || r.approcheEvaluation}</p>`;
 
         if (r.approcheEvaluation === 'par-artefacts') {
             // #133 : le wizard prime — on affiche les réponses saisies, défauts
             // alignés sur l'écriture (plus de lecture prioritaire de Primo).
-            const nbSoumis = r.nbArtefactsSoumis || 12;
             const nbRetenus = r.nbArtefactsRetenus || 7;
-            html += `<p><strong>Artefacts à soumettre\u00a0:</strong> ${nbSoumis}</p>`;
-            html += `<p><strong>Artefacts retenus\u00a0:</strong> ${nbRetenus}</p>`;
+            const mots = window.motsPoolStd();
+            html += `<p><strong>${mots.retenusRecapitulatif}\u00a0:</strong> ${nbRetenus}</p>`;
             const modeSelectionLabels = {
-                'n_meilleurs': 'N meilleurs artefacts',
-                'tous': 'Tous les artefacts',
-                'derniers': 'N derniers artefacts',
+                'n_meilleurs': mots.modeMeilleurs,
+                'tous': mots.modeTous,
+                'derniers': mots.modeDerniers,
                 'hybride': 'Hybride (N meilleures + Obligatoires)'
             };
             const modeSelection = r.modeSelectionPortfolio || 'n_meilleurs';
@@ -2554,19 +2538,18 @@ async function creerPratiqueV2() {
         };
 
         if (r.approcheEvaluation === 'par-artefacts') {
-            // #133 : le wizard prime — nbSoumis/retenus/min viennent des réponses
+            // #133 : le wizard prime — retenus/min viennent des réponses
             // saisies, plus du SSOT global modalitesEvaluation (Primo n'écrase plus
             // ce que l'utilisateur tape). modalites reste lu ci-dessous pour les
-            // catégories hybrides détaillées (Mode Expert), non collectées ici.
+            // catégories hybrides détaillées (la fiche de la pratique), non collectées ici.
             const modalites = db.getSync(cle('modalitesEvaluation'), null) || {};
-            const nbSoumis = parseInt(r.nbArtefactsSoumis) || 12;
             const nbRetenus = parseInt(r.nbArtefactsRetenus) || 7;
             const minFormatif = parseInt(r.minAvantCalculFormatif) || 3;
 
+            // Lot 5 des standards sans portfolio : ni `utiliser` ni `nombreTotal`, sans lecteur ; une pratique
+            // qui les porte les garde (`conserverReglagesSansLecteur`).
             pratique.configuration.portfolio = {
-                utiliser: r.utiliserPortfolio !== false,
                 // Noms standardisés (cohérents avec pratiques-gestion.js)
-                nombreTotal: nbSoumis,
                 nombreARetenir: nbRetenus,
                 methodeSelection: estHybride ? 'meilleurs' : (modeSelection === 'n_meilleurs' ? 'meilleurs' : modeSelection),
                 minimumCompletion: minFormatif
@@ -2815,7 +2798,9 @@ function conserverReglagesSansLecteur(pratique, existante) {
         if (avant.varianteCalcul !== undefined) pratique.configuration.varianteCalcul = clone(avant.varianteCalcul);
         const portfolio = pratique.configuration.portfolio;
         if (portfolio && avant.portfolio) {
-            if (avant.portfolio.decouplerPN !== undefined) portfolio.decouplerPN = clone(avant.portfolio.decouplerPN);
+            for (const champ of ['decouplerPN', 'utiliser', 'nombreTotal']) {   // lot 5 : `utiliser`, `nombreTotal`
+                if (avant.portfolio[champ] !== undefined) portfolio[champ] = clone(avant.portfolio[champ]);
+            }
             if (avant.portfolio.hybride !== undefined) portfolio.hybride = !!(pratique.configuration.categories && pratique.configuration.categories.actif);
         }
     }
@@ -3131,12 +3116,10 @@ function chargerPratiqueExistante(pratiqueId) {
             wizardState.reponses.grilleId = config.grilleId;
 
             if (config.portfolio) {
-                // #132 : la création écrit les noms standardisés (nombreTotal /
-                // nombreARetenir / methodeSelection / minimumCompletion). Relire les
-                // anciens noms (nbArtefactsSoumis…) rendait undefined → la config réelle
-                // était écrasée par les défauts à la re-sauvegarde. On relit les bons noms.
-                wizardState.reponses.utiliserPortfolio = config.portfolio.utiliser;
-                wizardState.reponses.nbArtefactsSoumis = config.portfolio.nombreTotal;
+                // #132 : la création écrit les noms standardisés (nombreARetenir /
+                // methodeSelection / minimumCompletion). Relire d'anciens noms rendait
+                // undefined → la config réelle était écrasée par les défauts à la
+                // re-sauvegarde. On relit les bons noms.
                 wizardState.reponses.minAvantCalculFormatif = config.portfolio.minimumCompletion;
                 // Restaurer la méthode de sélection (sinon le round-trip repart sur 'n_meilleurs').
                 // L'écriture stocke 'meilleurs' pour le mode 'n_meilleurs' → mapping inverse.

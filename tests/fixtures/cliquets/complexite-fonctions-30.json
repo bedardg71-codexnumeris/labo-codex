@@ -78,8 +78,8 @@
   "construireDonneesModele": 31
  },
  "js/pratiques-gestion.js": {
-  "remplirFormulairePratique": 60,
-  "appliquerFormulaireDansCollection": 33
+  "remplirFormulairePratique": 58,
+  "appliquerFormulaireDansCollection": 31
  },
  "js/pratiques/pratique-registre.js": {
   "construireConfigComplete": 49
@@ -165,8 +165,8 @@
   "exporterFormatRecherche": 34
  },
  "js/wizard-pratique-v2.js": {
-  "genererRecapitulatif": 44,
-  "creerPratiqueV2": 77,
+  "genererRecapitulatif": 43,
+  "creerPratiqueV2": 76,
   "chargerPratiqueExistante": 40
  }
 }

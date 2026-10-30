@@ -91,7 +91,6 @@ function migrerConfigurationsSpecifiques() {
                 actif: true,
                 nombreARetenir: 5,
                 minimumCompletion: 7,
-                nombreTotal: 10,
                 methodeSelection: 'meilleurs'
             };
         }

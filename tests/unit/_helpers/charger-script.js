@@ -125,6 +125,7 @@ const NOMS_NOTE_POURCENTAGE = ['formaterNombre', 'formaterPourcentage', 'formate
     'formaterNoteNombre', 'formaterPoints', 'ESPACE_INSECABLE'];
 
 let poolStdDuRegistre = null;   // lot 2 des standards sans portfolio : voir chargerScript
+let motsDuRegistre = null;      // lot 5 des standards sans portfolio : voir chargerScript
 
 /**
  * Jetons par défaut (29 oct. 2026) — `configJetonsResolueDeLaPratique` et `poserJetonsRefusesSiAucunReglage`
@@ -299,6 +300,14 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     if (!chargementAuxiliaire && !fauxWindow.obtenirIdsPoolStdDuCorpus && !cheminRelatifProjet.endsWith('pratique-registre.js')) {
         poolStdDuRegistre = poolStdDuRegistre || chargerAuxiliaire('js/pratiques/pratique-registre.js').obtenirIdsPoolStdDuCorpus;
         fauxWindow.obtenirIdsPoolStdDuCorpus = poolStdDuRegistre;
+    }
+    // Lot 5 des standards sans portfolio (29 oct. 2026) — les mots de la variante (registre), lus par window.… dans l'assistant,
+    // la fiche de la pratique et `obtenirTermeProduction`. Un harnais sans registre n'a pas de cours actif : la variante
+    // « artefacts », les mots du VRAI registre. Un banc qui charge le registre lui-même les réécrit.
+    if (!chargementAuxiliaire && !fauxWindow.motsPoolStd && !cheminRelatifProjet.endsWith('pratique-registre.js')) {
+        motsDuRegistre = motsDuRegistre || chargerAuxiliaire('js/pratiques/pratique-registre.js').motsPoolStd(true);
+        fauxWindow.motsPoolStd = () => motsDuRegistre;
+        fauxWindow.coursActifFaitDArtefacts = () => true;
     }
     completerJetonsResolusParDefaut(fauxWindow, cheminRelatifProjet);   // jetons par défaut (29 oct. 2026)
 

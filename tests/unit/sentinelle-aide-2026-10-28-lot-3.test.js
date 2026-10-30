@@ -65,7 +65,10 @@ describe('#1152 lot 3 · un seul glossaire', () => {
         // La formule de A et les méthodes du portfolio vont dans les entrées existantes.
         expect(terme('indice-a-assiduite').definition).toContain('divisées par les périodes offertes, sur les seules séances saisies');
         expect(terme('indice-a-assiduite').definition).toContain('Ce n\'est pas un jugement sur la qualité de sa participation');
-        const modes = [...tranche(html, '<select id="mat-portfolio-selection"', '</select>').matchAll(/<option value="[a-z]+">([^<]+)<\/option>/g)].map((m) => m[1]);
+        // Lot 5 des standards sans portfolio : `index.html` laisse les trois modes vides, le registre les pose (ici, la variante « artefacts »).
+        const registre = lire('js', 'pratiques', 'pratique-registre.js');
+        const modes = [...tranche(registre, 'artefacts: {', 'productions: {').matchAll(/mode[A-Z][a-z]+: '([^']+)'/g)].map((m) => m[1])
+            .concat([...tranche(html, '<select id="mat-portfolio-selection"', '</select>').matchAll(/<option value="[a-z]+">([^<]+)<\/option>/g)].map((m) => m[1]));
         expect(modes).toHaveLength(4);
         for (const mode of modes) expect(terme('portfolio').definition).toContain(`« ${mode} »`);
     });

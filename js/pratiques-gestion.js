@@ -1272,6 +1272,9 @@ function remplirFormulairePratique(pratique) {
                 + modeSelection + ' ». Sa configuration parObjectifs est ignorée.');
         }
 
+        // Lot 5 des standards sans portfolio : les libellés suivent la variante du cours actif.
+        poserLesMotsDeLaFicheStd();
+
         // Le mode de sélection se pose TOUJOURS — y compris sans `config.portfolio`,
         // ce qui est précisément le cas d'une pratique par objectifs.
         setValeurChamp('mat-portfolio-selection', modeSelection);
@@ -1284,7 +1287,6 @@ function remplirFormulairePratique(pratique) {
 
             setValeurChamp('mat-portfolio-nombre', valNombre);
             setValeurChamp('mat-portfolio-minimum', config.portfolio.minAvantCalculFormatif || config.portfolio.minimumCompletion || 7);
-            setValeurChamp('mat-portfolio-total', config.portfolio.nbArtefactsSoumis || config.portfolio.nombreTotal || 10);
             // (#900, lot N6 : la case `mat-decoupler-pn` n'existait plus dans la page ; `decouplerPN` n'est plus écrit.)
         }
 
@@ -1693,15 +1695,13 @@ function appliquerFormulaireDansCollection(lues) {
         // Configuration Portfolio (#435 : plus de branche « par objectifs » —
         // le portfolio est LA configuration STD, toujours écrite)
         {
-            const decouplerAvant = configurations[index].configuration.portfolio?.decouplerPN;
+            const portfolioAvant = configurations[index].configuration.portfolio;
             configurations[index].configuration.portfolio = {
                 methodeSelection: modeSelection,
                 nombreARetenir: parseInt(getValeurChamp('mat-portfolio-nombre')) || 5,
-                minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7,
-                nombreTotal: parseInt(getValeurChamp('mat-portfolio-total')) || 10
+                minimumCompletion: parseInt(getValeurChamp('mat-portfolio-minimum')) || 7
             };
-            // #900 (lot N6) : `decouplerPN` n'est plus écrit ; une pratique qui le porte le garde.
-            if (decouplerAvant !== undefined) configurations[index].configuration.portfolio.decouplerPN = decouplerAvant;
+            _garderLesChampsSansLecteur(configurations[index].configuration.portfolio, portfolioAvant);
 
             // 🆕 Beta 95.4 : Configuration Catégories Sélection/Obligatoires
             const categoriesActif = getCheckbox('mat-categories-actif');
@@ -2656,6 +2656,31 @@ const DESCRIPTIONS_MODE_SELECTION = {
 };
 
 /**
+ * #900 (lot N6) : `decouplerPN` n'est plus écrit ; une pratique qui le porte le garde. Lot 5 des standards sans
+ * portfolio : de même pour `utiliser` et `nombreTotal`.
+ */
+function _garderLesChampsSansLecteur(portfolio, avant) {
+    if (!avant) return;
+    for (const champ of ['decouplerPN', 'utiliser', 'nombreTotal']) {
+        if (avant[champ] !== undefined) portfolio[champ] = avant[champ];
+    }
+}
+
+/**
+ * Lot 5 des standards sans portfolio (29 oct. 2026) — les libellés de la fiche, selon la variante (`motsPoolStd`, registre) :
+ * ils n'existent qu'ici, `index.html` les laisse vides.
+ */
+function poserLesMotsDeLaFicheStd() {
+    const mots = window.motsPoolStd();
+    const poser = (selecteur, texte) => { const el = document.querySelector(selecteur); if (el) el.textContent = texte; };
+    poser('#mat-portfolio-selection option[value="meilleurs"]', mots.modeMeilleurs);
+    poser('#mat-portfolio-selection option[value="derniers"]', mots.modeDerniers);
+    poser('#mat-portfolio-selection option[value="tous"]', mots.modeTous);
+    poser('label[for="mat-portfolio-nombre"]', mots.retenusFiche);
+    poser('label[for="mat-portfolio-minimum"]', mots.minimum);
+}
+
+/**
  * Handler : changement du mode de sélection du portfolio.
  *
  * ⚠ #434 — c'est désormais l'UNIQUE commande de la construction de la note.
@@ -2849,16 +2874,13 @@ async function toggleProductionCategorie(prodId, categorie, checked) {
  */
 async function _etatProductionsQuiComptent() {
     if (typeof window.obtenirArtefactsIdsPoolStd !== 'function' || typeof window.poolStdFaitDArtefacts !== 'function'
-        || typeof window.identifierProductionTerminale !== 'function') return null;   // le registre (pratique-registre.js) absent
+        || typeof window.lireProductionsStdDuCoursActif !== 'function') return null;   // le registre (pratique-registre.js) absent
     const pratique = (db.getSync(cle('pratiquesConfigurables'), null) || []).find(p => p.id === pratiqueEnEditionMateriel);
     const config = pratique && (pratique.configuration || pratique.config);
     if (!config || (config.categories && config.categories.actif)) return null;
     // Retouche du lot 4 (verdict de Cowork, 29 oct.) : la source du calcul (`calculerDetailsNoteFinale`), filtrée sur le
     // cours actif — `cle('productions')` rend tout le trimestre, et une double préparation mêlait les deux cours.
-    const brutes = obtenirDonneesSelonMode('productions') || [];
-    const productions = window.ProductionDiagnostique ? window.ProductionDiagnostique.filtrerProductions(brutes) : brutes;
-    const terminale = window.identifierProductionTerminale(productions);
-    const terminalId = terminale ? terminale.id : null;
+    const { productions, terminalId } = window.lireProductionsStdDuCoursActif();
     if (window.poolStdFaitDArtefacts(productions, terminalId)) return null;
     const ids = window.obtenirArtefactsIdsPoolStd(productions, terminalId, {});
     return {
