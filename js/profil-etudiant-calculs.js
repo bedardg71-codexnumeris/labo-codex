@@ -1788,30 +1788,52 @@ const EFFECTIF_MINIMUM_GROUPE = 5;
  * @returns {{niveau:(1|2|3), motif:string}}
  */
 function classerNiveauDansLeGroupe(note, nbCopies, reference, repereMaitrise, passage) {
-    const comparable = nbCopies >= COPIES_MINIMUM_COMPARAISON && !!reference
-        && (repereMaitrise === null || note < repereMaitrise);
-    if (comparable && note < reference.moyenne - reference.ecartType) return { niveau: 3, motif: 'sous-un-ecart-type' };
-    if (comparable && note < reference.moyenne - reference.ecartType / 2) return { niveau: 2, motif: 'sous-un-demi-ecart-type' };
+    const assezDeCopies = nbCopies >= COPIES_MINIMUM_COMPARAISON;
+    const auRepere = repereMaitrise !== null && note >= repereMaitrise;
+    const rang = _rangSousLeGroupe(note, reference);
+    if (assezDeCopies && !auRepere && rang > 1) return { niveau: rang, motif: rang === 3 ? 'sous-un-ecart-type' : 'sous-un-demi-ecart-type' };
     if (note < passage) {
-        const signalAllume = !!reference && reference.moyenne < passage;
-        return signalAllume ? { niveau: 1, motif: 'signal-de-groupe' } : { niveau: 2, motif: 'sous-la-note-de-passage' };
+        return (reference && reference.moyenne < passage) ? { niveau: 1, motif: 'signal-de-groupe' } : { niveau: 2, motif: 'sous-la-note-de-passage' };
     }
-    return { niveau: 1, motif: nbCopies < COPIES_MINIMUM_COMPARAISON ? 'une-seule-copie' : 'dans-le-groupe' };
+    if (!assezDeCopies) return { niveau: 1, motif: 'une-seule-copie' };
+    if (!reference) return { niveau: 1, motif: 'groupe-trop-petit' };
+    return { niveau: 1, motif: rang > 1 ? 'au-dessus-de-la-maitrise' : 'dans-le-groupe' };
+}
+
+/** 3 : plus d'un écart-type sous la moyenne ; 2 : entre un demi et un écart-type ; 1 : le reste, ou pas de référence. */
+function _rangSousLeGroupe(note, reference) {
+    if (!reference) return 1;
+    if (note < reference.moyenne - reference.ecartType) return 3;
+    return note < reference.moyenne - reference.ecartType / 2 ? 2 : 1;
 }
 
 const _lectureDuGroupeParLot = new WeakMap();
 
 /**
- * Les copies de chaque élève et la référence de chaque groupe-cours, lues en un seul passage. Gardées le temps
- * d'un lot de calculs (`jetonCacheLecture`, même raison que l'index de pratique-registre.js) ; reconstruites à
- * chaque lecture hors lot. Les élèves exclus par statut restent hors de la référence (#745), mais se classent.
- * En mode « tous les groupes », chaque élève reste comparé à SON groupe-cours.
+ * Les copies de chaque élève et la référence de chaque groupe-cours du COURS, lues en un seul passage : les vues
+ * « un groupe » et « tous les groupes » coïncident par construction, et `indicesPatternsRaI`, qui parcourt tout le
+ * cours, est juste pour chaque groupe. Gardées le temps d'un lot de calculs (`jetonCacheLecture`, même raison que
+ * l'index de pratique-registre.js) ; reconstruites à chaque lecture hors lot. Les élèves exclus par statut restent
+ * hors de la référence (#745), mais se classent.
  */
 function _lireLeGroupeDuDepistage() {
     const simule = typeof obtenirDonneesSimulationOuNull === 'function' && obtenirDonneesSimulationOuNull('evaluationsSauvegardees');
     const lot = (!simule && typeof jetonCacheLecture === 'function') ? jetonCacheLecture() : null;
     if (lot && _lectureDuGroupeParLot.has(lot)) return _lectureDuGroupeParLot.get(lot);
 
+    // Un lot, même court : `evaluationEntreDansLaNote` n'y reconstruit pas son index à chaque copie remplacée.
+    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+    try {
+        const lecture = _construireLeGroupeDuDepistage();
+        if (lot) _lectureDuGroupeParLot.set(lot, lecture);
+        return lecture;
+    } finally {
+        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
+    }
+}
+
+/** Les copies qui comptent, par élève : celles que la note retient, hors « non remises ». */
+function _copiesDuDepistage() {
     const productions = obtenirDonneesSelonMode('productions') || [];
     const brutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const diag = window.ProductionDiagnostique;
@@ -1827,23 +1849,27 @@ function _lireLeGroupeDuDepistage() {
         if (typeof note === 'number') lignes.notes.push(note);
         copies.set(c.etudiantDA, lignes);
     });
+    return copies;
+}
+
+function _construireLeGroupeDuDepistage() {
+    const copies = _copiesDuDepistage();
     const moyenneDe = (notes) => notes.reduce((a, b) => a + b, 0) / notes.length;
 
-    // Un groupe-cours actif ne rend que ses élèves ; « tous les groupes » les rend tous. Un service n'a qu'un groupe,
-    // quel que soit le numéro porté par ses fiches (cadrage « Rencontres », lot A).
-    const etudiants = obtenirEtudiantsCoursActif();
+    // Tout le cours, par numéro de groupe. Un service n'a qu'un groupe, quel que soit le numéro porté par ses fiches
+    // (cadrage « Rencontres », lot A).
+    const fiches = obtenirDonneesSelonMode('groupeEtudiants') || [];
+    const etudiants = typeof filtrerEtudiantsParMode === 'function' ? filtrerEtudiantsParMode(fiches) : fiches;
+    const estUnService = typeof contexteActifEstService === 'function' && contexteActifEstService();
     const normaliser = window.normaliserNumeroGroupe || String;
-    const numeroDe = (e) => normaliser(e.groupeReel || e.groupe);
-    const plusieursGroupes = new Set(etudiants.map(numeroDe)).size > 1
-        && !(typeof contexteActifEstService === 'function' && contexteActifEstService());
-    const cleDe = (e) => plusieursGroupes ? numeroDe(e) : 'groupe';
+    const groupeDeLaFiche = (e) => estUnService ? 'service' : normaliser(e.groupeReel || e.groupe);
 
-    const groupeDe = new Map(etudiants.map((e) => [e.da, cleDe(e)]));
+    const groupeDe = new Map(etudiants.map((e) => [e.da, groupeDeLaFiche(e)]));
     const notesParGroupe = new Map();
     etudiants.filter((e) => !estEtudiantExclu(e)).forEach((e) => {
         const notes = (copies.get(e.da) || { notes: [] }).notes;
         if (!notes.length) return;
-        const groupe = cleDe(e);
+        const groupe = groupeDeLaFiche(e);
         notesParGroupe.set(groupe, (notesParGroupe.get(groupe) || []).concat(moyenneDe(notes)));
     });
     const references = new Map();
@@ -1854,22 +1880,21 @@ function _lireLeGroupeDuDepistage() {
         references.set(groupe, { moyenne, ecartType });
     });
 
-    const lecture = { copies, groupeDe, references, plusieursGroupes, moyenneDe };
-    if (lot) _lectureDuGroupeParLot.set(lot, lecture);
-    return lecture;
+    return { copies, groupeDe, references, groupeDeLaFiche, moyenneDe };
 }
 
 /**
- * Le signal de groupe : les groupes-cours dont la moyenne est sous la note de passage. Un signal pour le niveau
- * universel, pas pour un élève. `groupe` : le numéro, seulement quand l'écran montre plusieurs groupes.
+ * Le signal de groupe : les groupes-cours à l'écran dont la moyenne est sous la note de passage. Un signal pour le
+ * niveau universel, pas pour un élève. `groupe` : le numéro, seulement quand l'écran montre plusieurs groupes.
  * @returns {Array<{groupe:(string|null), moyenne:number, passage:number}>}
  */
 function signauxDeGroupeDepistage() {
-    const { references, plusieursGroupes } = _lireLeGroupeDuDepistage();
+    const { references, groupeDeLaFiche } = _lireLeGroupeDuDepistage();
     const passage = reperesPerformance().passage;
+    const aLEcran = new Set(obtenirEtudiantsCoursActif().map(groupeDeLaFiche));
     return [...references.entries()]
-        .filter(([, r]) => r.moyenne < passage)
-        .map(([groupe, r]) => ({ groupe: plusieursGroupes ? groupe : null, moyenne: r.moyenne, passage }));
+        .filter(([groupe, r]) => aLEcran.has(groupe) && r.moyenne < passage)
+        .map(([groupe, r]) => ({ groupe: aLEcran.size > 1 ? groupe : null, moyenne: r.moyenne, passage }));
 }
 
 const DESCRIPTION_DU_MOTIF = {
@@ -1878,6 +1903,8 @@ const DESCRIPTION_DU_MOTIF = {
     'sous-la-note-de-passage': 'Sous la note de passage, alors que la moyenne de son groupe est au-dessus.',
     'signal-de-groupe': 'Sous la note de passage, comme la moyenne de son groupe : un signal pour l\'enseignement universel.',
     'une-seule-copie': 'Une seule copie corrigée : pas encore de comparaison au groupe.',
+    'groupe-trop-petit': `Moins de ${EFFECTIF_MINIMUM_GROUPE} élèves ont une copie corrigée dans son groupe : pas de comparaison possible.`,
+    'au-dessus-de-la-maitrise': 'Au repère de maîtrise de l\'échelle ou au-dessus, même si sa note est sous la moyenne de son groupe.',
     'dans-le-groupe': 'Dans la moyenne de son groupe. Suivi régulier en classe.'
 };
 const AFFICHAGE_DU_NIVEAU = {
@@ -1971,7 +1998,6 @@ function determinerNiveauRaiPedagogique(da) {
             description: 'Aucune note à comparer pour l\'instant.',
             badgeClasse: 'badge-attente',
             patternBadge: BADGE_DU_PATTERN[pattern] || 'badge-pattern-stable',
-            signalGroupe: false,
             nbArtefacts: indices3Derniers.nbArtefacts,
             fenetreAnalyse: obtenirNombreProductionsPourPatterns()
         };
@@ -1990,7 +2016,6 @@ function determinerNiveauRaiPedagogique(da) {
         description: DESCRIPTION_DU_MOTIF[motif],
         badgeClasse: AFFICHAGE_DU_NIVEAU[niveau].badgeClasse,
         patternBadge: BADGE_DU_PATTERN[pattern] || 'badge-pattern-stable',
-        signalGroupe: motif === 'signal-de-groupe',
         nbArtefacts: indices3Derniers.nbArtefacts,
         fenetreAnalyse: obtenirNombreProductionsPourPatterns()
     };
@@ -2187,7 +2212,7 @@ function determinerCibleIntervention(da) {
 
     // Élève présent, aucune production remise : il n'y a rien à mesurer, et
     // c'est en soi le signal le plus fort. Conséquence logique, pas seuil.
-    if (indices3Derniers.nbArtefacts === 0) {
+    if (indices3Derniers.nbArtefacts === 0 || !(_lireLeGroupeDuDepistage().copies.get(da) || { remises: 0 }).remises) {
         // #731 — même garde que la carte RàI : sans travail dû ou sans copie évaluée dans le groupe,
         // « En attente » (niveau 0), pas un palier inventé.
         if (!depistagePeutJugerLaNonParticipation().possible) {

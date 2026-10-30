@@ -194,10 +194,15 @@ describe('(c) P : l\'échelle de l\'enseignant fait foi', () => {
         expect([71, 72].map((v) => a.zonePerformance(v, ra))).toEqual(['bas', 'acquis']);
     });
 
-    it('une sommative n\'a pas d\'échelle pour sa note, même avec des repères posés : la note de passage reste', () => {
+    it('décision du 30 oct., 11 h 33 : une sommative lit les repères de l\'échelle de ses copies ; une copie en points n\'en a pas', () => {
         const { win } = suivi({ echelles: [ECHELLE()], copies, famille: 'sommative' });
         const r = win.reperesPerformance();
-        expect([r.echelle, r.raison, win.borneBassePerformance(r)]).toEqual([null, 'note-chiffree', 60]);
+        expect([r.echelle.id, r.raison, win.borneBassePerformance(r)]).toEqual(['E_ARB', null, 50]);
+        const specif = suivi({ echelles: [ECHELLE()], copies, famille: 'specifications' }).win.reperesPerformance();
+        expect([specif.echelle.id, specif.maitrise]).toEqual(['E_ARB', 72]);
+        // Copies en points : pas d'échelle, même quand la bibliothèque n'en compte qu'une (`obtenirEchelleResolue(null)` la prêterait).
+        const enPoints = suivi({ echelles: [ECHELLE()], copies: [{ echelleId: undefined }], famille: 'sommative' }).win.reperesPerformance();
+        expect([enPoints.echelle, win.borneBassePerformance(enPoints)]).toEqual([null, 60]);
     });
 });
 
@@ -361,7 +366,8 @@ describe('(g) plus aucune borne de P écrite pour le Suivi', () => {
         expect(tdb).not.toMatch(/note de passage \(\d/);
         const etud = sansCommentaires(lire('js/etudiants.js'));
         expect(etud).not.toMatch(/\b(performance|taux)\s*(>=|<=|<|>)\s*\d/);
-        expect(etud).toContain('window.obtenirCouleurPerformanceSelonEchelle(performance)');
+        expect(etud).toContain('window.obtenirCouleurPerformanceSelonEchelle(performance, reperes)');
+        expect(etud.match(/window\.reperesPerformance\(\)/g), 'lus une fois par rendu').toHaveLength(1);
     });
 
     it('le RàI et la suggestion d\'objectif ne portent plus de borne', () => {

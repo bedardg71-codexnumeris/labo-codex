@@ -332,10 +332,11 @@ function calculerPerformance(da) {
 /**
  * Obtient la couleur d'affichage selon la performance
  * @param {number} performance - Performance en pourcentage
+ * @param {Object} [reperes] - `reperesPerformance()`, lus une fois par rendu
  * @returns {string} - Code couleur CSS
  */
-function obtenirCouleurPerformance(performance) {
-    return window.obtenirCouleurPerformanceSelonEchelle(performance);
+function obtenirCouleurPerformance(performance, reperes) {
+    return window.obtenirCouleurPerformanceSelonEchelle(performance, reperes);
 }
 
 // calculerCorrelationPearson → déplacé dans indices.js (#206)
@@ -630,6 +631,19 @@ function normaliserTexteRecherche(texte) {
     return String(texte || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+/**
+ * Lot 2 des seuils : un lot de calculs par passage sur le groupe. Le niveau RàI lit tout le cours : hors lot, il le
+ * relirait pour chaque élève.
+ */
+function dansUnLotDeCalculs(calcul) {
+    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+    try {
+        return calcul();
+    } finally {
+        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
+    }
+}
+
 function filtrerEtudiants(etudiants) {
     let resultats = etudiants.slice(); // Copie
 
@@ -662,24 +676,24 @@ function filtrerEtudiants(etudiants) {
     const filtreRai = document.getElementById('filtre-rai-liste');
     if (filtreRai && filtreRai.value) {
         const niveauRai = parseInt(filtreRai.value);
-        resultats = resultats.filter(function (e) {
+        resultats = dansUnLotDeCalculs(() => resultats.filter(function (e) {
             // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
             return niveauInfo.niveau === niveauRai;
-        });
+        }));
     }
 
     // NOUVEAU: Filtre par pattern d'apprentissage
     const filtrePattern = document.getElementById('filtre-pattern-liste');
     if (filtrePattern && filtrePattern.value) {
         const patternFiltre = filtrePattern.value;
-        resultats = resultats.filter(function (e) {
+        resultats = dansUnLotDeCalculs(() => resultats.filter(function (e) {
             // 🆕 BETA 90+ : Utiliser determinerNiveauRaiPedagogique (Single Source of Truth)
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
             // Normaliser le pattern : minuscules, sans accents, espaces → tirets
             const pattern = normaliserTexteRecherche(niveauInfo.pattern).replace(/\s+/g, '-');
             return pattern === patternFiltre;
-        });
+        }));
     }
 
     // Recherche par nom/prénom/DA
@@ -905,7 +919,7 @@ function afficherListeEtudiantsConsultation() {
     const r_CP = calculerCorrelationPearson(pairesCP.map(paire => paire[0]), pairesCP.map(paire => paire[1]));
 
     // NOUVEAU: Enrichir les données pour le tri (sans assigner les numéros encore)
-    etudiantsFiltres = etudiantsFiltres.map((e) => {
+    etudiantsFiltres = dansUnLotDeCalculs(() => etudiantsFiltres.map((e) => {
         const indices = typeof window.calculerTousLesIndices === 'function'
             ? calculerTousLesIndices(e.da)
             : calculerIndicesEtudiant(e.da); // Fallback
@@ -916,7 +930,7 @@ function afficherListeEtudiantsConsultation() {
             indicesCalcules: indices,
             cibleCalculee: niveauInfo
         };
-    });
+    }));
 
     // Déterminer le seuil minimum d'évaluations pour P
     // G2-b (#436, 9 août 2026) : la SSOT `pratiquesConfigurables` était déjà lue en
@@ -1000,7 +1014,7 @@ function afficherListeEtudiantsConsultation() {
     var valeursP_rai = [];
     var valeursP_interv = [];
 
-    etudiants.forEach(function(e, idx) {
+    dansUnLotDeCalculs(() => etudiants.forEach(function(e, idx) {
         // Exclure les inactifs/abandons des corrélations (cohérence avec moyennes et Aperçu)
         if (estExclu(e)) return;
         var rai = typeof determinerNiveauRaiPedagogique === 'function' ? determinerNiveauRaiPedagogique(e.da) : null;
@@ -1022,7 +1036,7 @@ function afficherListeEtudiantsConsultation() {
         var nbInterv = typeof obtenirInterventionsEtudiant === 'function' ? obtenirInterventionsEtudiant(e.da).length : 0;
         valeursInterv.push(nbInterv);
         valeursP_interv.push(pVal);
-    });
+    }));
 
     var r_PatternP = calculerCorrelationPearson(valeursPattern, valeursP_pattern);
     var r_RaiP = calculerCorrelationPearson(valeursRai, valeursP_rai);
@@ -1134,6 +1148,7 @@ function afficherListeEtudiantsConsultation() {
     // Générer le HTML
     tbody.innerHTML = '';
 
+    const reperesP = window.reperesPerformance();   // une fois par rendu (règle de contexte-qualification.js)
     etudiantsFiltres.forEach(function (etudiant) {
         // Utiliser les indices précalculés
         const indices = etudiant.indicesCalcules;
@@ -1200,7 +1215,7 @@ function afficherListeEtudiantsConsultation() {
         // Colonnes A-C-P avec couleurs
         const couleurA = assiduiteConnue ? obtenirCouleurAssiduite(Math.round(indices.A)) : '';
         const couleurC = obtenirCouleurCompletion(Math.round(indices.C));
-        const couleurP = obtenirCouleurPerformance(Math.round(indices.P));
+        const couleurP = obtenirCouleurPerformance(Math.round(indices.P), reperesP);
 
         // Colonne A : afficher si l'assiduité est connue (même 0 %), sinon tiret
         if (assiduiteConnue) {

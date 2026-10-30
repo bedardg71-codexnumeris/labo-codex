@@ -37,7 +37,7 @@ Non fait : le verdict Playwright complet, Safari et iPad.
 - **Sous 5 élèves avec copie dans un groupe :** pas de comparaison, seule la règle 1 parle. Repris de la mesure, où le cas ne se produit jamais.
 - **Élèves à une copie :** ils comptent dans la moyenne du groupe.
 - **Élèves exclus par statut :** hors de la référence, mais classés quand on ouvre leur profil (#745).
-- **Élève qui n'a que des copies « non remises » :** non-participation, au niveau 3. Le code d'avant le mettait au niveau 3 par une performance de 0.
+- **Élève qui n'a que des copies « non remises » :** non-participation, au niveau 3, si A > 0 et si la règle du 5 sept. est remplie ; sinon, en attente (corrigé après le verdict de Cowork). Le code d'avant le mettait au niveau 3 par une performance de 0.
 - **Copies remises sans note chiffrée :** en attente, rien à comparer.
 - **Pratiques sommative et spécifications :** même règle ; sans échelle, la condition du repère se lève.
 - **Les mots de la carte du profil et de la phrase :** écrits par Claude Code. Écrans d'enseignant : ils ne remontaient pas d'office, ils se corrigent en une ligne (`DESCRIPTION_DU_MOTIF`).
@@ -56,7 +56,7 @@ Non fait : le verdict Playwright complet, Safari et iPad.
 
 ## Tarir n'est pas réparer
 
-Le niveau se calcule à la lecture : il change partout dès ce commit. **Stock assumé :** une intervention déjà enregistrée garde le niveau et l'analyse du jour où elle a été écrite. Rien n'est écrit dans les données de personne.
+Le niveau se calcule à la lecture : il change partout dès ce commit. **Stock assumé :** une intervention déjà enregistrée garde le niveau et l'analyse du jour où elle a été écrite. **Corrigé après le verdict de Cowork :** « rien n'est écrit » était inexact. Le cache dérivé `indicesPatternsRaI`, copié par le registre longitudinal, est réécrit au prochain chargement de l'Aperçu. Les notes, copies, présences et réglages ne sont pas touchés.
 
 ## Ce qui attend
 

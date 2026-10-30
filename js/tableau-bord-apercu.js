@@ -835,7 +835,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
     const niveauD = parNiveau['D'] || [];
     const dEnProgression = niveauD.filter(etudiant => {
         const pattern = patterns[etudiant.da];
-        return pattern && (pattern.pattern === 'Stable' || pattern.niveauRai === 1);
+        return pattern && pattern.pattern === 'Stable';   // lot 2 : le niveau 1 se lit au groupe, il ne dit plus une progression
     });
 
     if (dEnProgression.length > 0) {
@@ -1454,6 +1454,24 @@ function genererInterpretationSuiviFondamentaux() {
 }
 
 /**
+ * Pourquoi la carte n'a pas de répartition par niveaux, en deux cas qui ne se confondent pas. #775 : personne n'a de
+ * note constructible. Retouche du lot 1 : des notes existent, mais les copies n'ont pas d'échelle unique.
+ */
+function phraseSansRepartition(nbSansNote, nbEtudiants) {
+    const nonComptes = nbSansNote > 0
+        ? ` ${nbSansNote} ${window.pluriel(nbSansNote, 'étudiant·e', 'étudiant·es')} sans note constructible ${window.pluriel(nbSansNote, 'n\'est', 'ne sont')} pas compté·es.`
+        : '';
+    const mots = nbSansNote === nbEtudiants
+        ? `La note du cours ne se construit pas encore : il n'y a rien à répartir. Le dépistage, lui, s'appuie sur les ${echapperHtml(obtenirTermeProduction('pluriel'))} déjà ${accordTermeProduction('evalue', 2)}.`
+        : `Les copies de ce groupe n'ont pas d'échelle unique : pas de répartition par niveaux.${nonComptes}`;
+    return `
+                    <div class="tb-texte-description">
+                        ${mots}
+                    </div>
+                `;
+}
+
+/**
  * 🆕 BETA 91: Génère une interprétation du modèle RàI du groupe
  * Focus : efficacité pédagogique (taux Niveau 1 indique si enseignement universel fonctionne)
  * Format : nombres absolus ET pourcentages (ex: "17 étudiants, 68%")
@@ -1958,15 +1976,8 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
                         ${mentionSansNote}
                     </div>
                 `;
-            } else if (nbSansNote > 0) {
-                // #775 — personne n'a encore de note constructible : le dire, plutôt que
-                // de laisser la barre muette ou, pire, de ranger tout le groupe dans le
-                // premier niveau de l'échelle.
-                interpretationHTML = `
-                    <div class="tb-texte-description">
-                        La note du cours ne se construit pas encore : il n'y a rien à répartir. Le dépistage, lui, s'appuie sur les ${echapperHtml(obtenirTermeProduction('pluriel'))} déjà ${accordTermeProduction('evalue', 2)}.
-                    </div>
-                `;
+            } else if (etudiants.length > 0) {
+                interpretationHTML = phraseSansRepartition(nbSansNote, etudiants.length);
             }
         } else {
             // 🆕 BETA 91: Diagnostic basique note de passage (SOLO désactivé)
@@ -3061,6 +3072,8 @@ function afficherNiveauxRaI(etudiants) {
     // Utiliser la même fonction pour SOM et PAN (niveau RàI pédagogique identique)
     // 🆕 BETA 98.9: Inclut tous les étudiants — non-participants classés Niveau 3
     if (typeof determinerNiveauRaiPedagogique === 'function') {
+        if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+        try {
         etudiantsAvecDonneesCP.forEach(e => {
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
             const niveau = niveauInfo ? niveauInfo.niveau : null;
@@ -3078,6 +3091,9 @@ function afficherNiveauxRaI(etudiants) {
                 etudiantsPAN.push({...etudiantData});
             }
         });
+        } finally {
+            if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
+        }
     } else {
         console.warn('⚠️ [RàI] Fonction determinerNiveauRaiPedagogique non disponible');
     }

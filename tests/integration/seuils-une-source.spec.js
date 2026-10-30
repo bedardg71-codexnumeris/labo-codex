@@ -53,6 +53,12 @@ test('un réglage enregistré n’est pas réécrit, et tout le suit ; idme fig�
     expect(await page.evaluate(() => db.getSync('seuilsInterpretation', null))).toEqual(enregistre);
 });
 
+test('le bouton des seuils lit ses valeurs à la source (retouche du lot 1)', async ({ page }) => {
+    await demo(page);
+    const texte = await page.evaluate(() => document.querySelector('[data-action="restaurerSeuilsInterpretationDefautV2"]').textContent.replace(/\s+/g, ' ').trim());
+    expect(texte).toBe('Remettre les valeurs par défaut (85 % · 90 % · 95 %)');
+});
+
 test('Outils d’observation : le champ du bas accepte 85, le désordre est refusé, « Restaurer » lit les défauts, l’Aide aussi', async ({ page }) => {
     await demo(page);
     await page.evaluate(() => naviguerVers('labo', 'outils-observation')).catch(() => {});

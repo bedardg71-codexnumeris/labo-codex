@@ -150,16 +150,18 @@ function _signatureDesPlages(echelle) {
 /**
  * L'échelle dans laquelle se lit la performance du groupe : celle des copies qui comptent, pas celle
  * rangée dans la bibliothèque du trimestre (une bibliothèque peut en contenir plusieurs, sans qu'aucune
- * ne serve). Mêmes familles que `lireEchelleNoteGlobale` : une sommative et une spécification n'ont pas
- * d'échelle pour leur note. Plusieurs échelles aux plages différentes : aucune n'est choisie, parce que
+ * ne serve). DÉCISION DE GRÉGOIRE (30 oct. 2026, 11 h 33) : dans TOUTES les pratiques, quand cette échelle
+ * en porte. La règle du 27 août (`lireEchelleNoteGlobale`) tient pour l'expression de la note du cours ; elle
+ * ne régit plus les signaux. Plusieurs échelles aux plages différentes : aucune n'est choisie, parce que
  * « choisir la bonne reviendrait à en écarter une autre sans le dire » ; la note de passage reste.
  * @returns {{echelle: (Object|null), raison: (string|null)}}
  */
 function _echelleDeLaPerformance() {
     const designation = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive() : null;
     if (!designation || designation.etat !== 'ok') return { echelle: null, raison: 'sans-pratique' };
-    if (designation.famille === 'sommative') return { echelle: null, raison: 'note-chiffree' };
-    if (designation.famille === 'specifications') return { echelle: null, raison: 'pratique-sans-methode' };
+    // Une copie en points n'a pas d'échelle, et rien ne change pour elle. Sans cette garde, `obtenirEchelleResolue(null)`
+    // lui prêterait la seule échelle de la bibliothèque. Standards et dénotation gardent leur lecture de toujours.
+    const sansEchelleSiNonDesignee = designation.famille === 'sommative' || designation.famille === 'specifications';
 
     const toutes = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
     const productions = obtenirDonneesSelonMode('productions') || [];
@@ -169,6 +171,7 @@ function _echelleDeLaPerformance() {
 
     const parSignature = new Map();
     new Set(copies.map((e) => e.echelleId || '')).forEach((id) => {
+        if (!id && sansEchelleSiNonDesignee) return;
         const echelle = window.obtenirEchelleResolue(id || null);
         if (!echelle) return;
         const signature = _signatureDesPlages(echelle);

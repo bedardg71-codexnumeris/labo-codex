@@ -144,9 +144,9 @@ La fonction `determinerNiveauRaiPedagogique()` (`js/profil-etudiant-calculs.js`)
 - **Règle 2** : pas de comparaison au groupe avant 2 copies corrigées, ni sous 5 élèves avec copie
 - **Signal de groupe** (`signauxDeGroupeDepistage`) : moyenne du groupe sous la note de passage, un signal pour le palier 1, pas pour un élève
 
-Le pattern et le défi nomment le besoin ; ils ne fixent plus le niveau, et P n'y entre plus. Un élève inactif reste hors de la référence. Sur le corpus, le code rend exactement le modèle mesuré : rejouer `scripts/mesures-depistage/regles-1-et-2.mjs`, colonne « en place » égale à « règles ».
+Le pattern et le défi nomment le besoin ; ils ne fixent plus le niveau, et P n'y entre plus. Un élève inactif reste hors de la référence. Les références se calculent sur tout le cours, par numéro de groupe : les vues « un groupe » et « tous les groupes » coïncident. Sur le corpus, le code rend exactement le modèle mesuré : rejouer `scripts/mesures-depistage/regles-1-et-2.mjs`, colonne « en place » égale à « règles ».
 
-**Une seule source par famille de seuils (décision de Grégoire, 30 oct. 2026)** : `js/contexte-qualification.js`. A et C lisent les trois champs de Labo › Outils d'observation (défauts 95 · 90 · 85, quatre paliers) ; P lit les repères de l'échelle des copies du groupe (`reperesPerformance`) ; la note de passage, `NOTE_DE_PASSAGE`. Sans repère, seule la note de passage signale, et le test « sous la maîtrise » n'existe pas. Mesures de ce chantier : `scripts/mesures-depistage/`, résultats en page privée seulement.
+**Une seule source par famille de seuils (décision de Grégoire, 30 oct. 2026)** : `js/contexte-qualification.js`. A et C lisent les trois champs de Labo › Outils d'observation (défauts 95 · 90 · 85, quatre paliers) ; P lit les repères de l'échelle des copies du groupe (`reperesPerformance`), dans toutes les pratiques (décision de Grégoire, 30 oct. 2026, 11 h 33) ; `lireEchelleNoteGlobale` régit seulement l'expression de la note du cours ; la note de passage, `NOTE_DE_PASSAGE`. Sans repère, seule la note de passage signale, et le test « sous la maîtrise » n'existe pas. Mesures de ce chantier : `scripts/mesures-depistage/`, résultats en page privée seulement.
 
 Cas spéciaux : «Non-participation» (présent mais aucune production → Niveau 3), «En attente» (aucune donnée).
 
