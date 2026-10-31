@@ -7,6 +7,18 @@
 
 ---
 
+## 31 OCT. 2026, 16 H 17 (Claude Code) : **1.229.0 COMMITÉE SUR `main` (`b554565d`), NON POUSSÉE : VERDICT ROUGE ; EN LIGNE : TOUJOURS 1.228.0**
+
+**Porte** : `CONSIGNE-LOT-2026-10-31-mise-en-ligne-1229.md`, branche « Rouge » du § 3. Rapport pour Cowork : `plans de travail/RAPPORT-2026-10-31-verdict-rouge-1229.md`.
+
+**Verdict du Mac, sur `b554565d`, sans refus de garde** : code 1 ; 1 220 essais, 1 215 verts, 5 rouges (4 connus), 23 sautés. Nouvelle rougeur : `presences-lot-d-enregistrement.spec.js`, essai (g). Seul, 20 répétitions sans reprise : 3 rouges sur `b554565d`, 3 rouges sur `eb08f1af`. Aucun lot de la 1.229 n'en est la cause (#1212).
+
+**Attend** : la décision de Grégoire et de Cowork. Le jeton est rouge : tout push exige une suite entière repassée au vert.
+
+**Complexité** (1.228.0 `ee9f340a` → 1.229.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 93 104 → 93 352 (Δ +248) ; au-dessus de 15 : 442 → 440 (Δ −2) ; au-dessus de 30 : 82 → 81 (Δ −1, maximum 130) ; somme au-dessus de 15 : 11 104 → 11 043 (Δ −61).
+
+**Non commités, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, `REFLEXION-2026-10-30-seuils-normatif-critere-ipsatif.md`, `captures/fenetre-de-fusion-*.png`, et trois pièces de ce lot : `VERDICT-RELECTURE-2026-10-31-palettes-annotation.md`, `TEXTES-2026-10-31-palettes-annotation.md`, `TEXTES-2026-10-31-note-actuelle-sommative.md`.
+
 ## 31 OCT. 2026 (Claude Code) : **LA RÉPONSE DU GROUPE COMMITÉE SUR `main`, NON POUSSÉE ; EN LIGNE : TOUJOURS 1.228.0**
 
 **Porte** : `CONSIGNE-LOT-2026-10-30-reponse-du-groupe.md`. Rapport : `plans de travail/RAPPORT-2026-10-31-reponse-du-groupe.md`. Sans release ni push, à la demande de Grégoire.

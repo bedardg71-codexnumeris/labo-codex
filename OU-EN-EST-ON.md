@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 31 OCTOBRE 2026, 16 h 17 : LA 1.229 EST PRÊTE, PAS EN LIGNE : LA VÉRIFICATION COMPLÈTE EST ROUGE.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : rien pour l'instant. L'application en ligne reste la 1.228. Tout ce que décrivent les entrées ci-dessous attend, et les gestes de vérification aussi.
+
+**Ce qui reste à toi** : décider de la suite avec Cowork. Un essai des présences échoue de temps en temps : il simule un échec d'enregistrement et, parfois, l'enregistrement n'est même pas tenté. Il échoue aussi souvent sur la 1.228 : les lots de la 1.229 n'en sont pas la cause. Reste à savoir si c'est le banc d'essai ou l'application qui perd le geste. Personne n'a signalé ce symptôme (#1212, `plans de travail/RAPPORT-2026-10-31-verdict-rouge-1229.md`).
+
+**Vérifié comment** : vérification complète sur le Mac, tout fermé : 1 220 essais, 5 rouges dont 4 connus. L'essai seul, 20 fois de suite : 3 rouges sur la release, 3 rouges sur la 1.228. Vitest entier vert (10 615), avant la pose de deux jetons d'anti-cache. 8 changements volontaires du code font tous rougir une garde. Pas encore : l'iPad, ton vrai codex, la cause de l'essai.
+
 📝 **LE 31 OCTOBRE 2026 : GARDER UNE COPIE DE LA DÉMO EST CODÉ POUR LA GRILLE SEULEMENT, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : en démo, une copie de grille propose « Garder dans ma bibliothèque » là où elle s'ouvre. Hors démo, « Utiliser dans ce trimestre » la ramène, avec « Inspiré de … par Labo Codex ». Rien ne s'écrit sans ce geste. Hors démo, rien ne change à l'écran.
