@@ -508,11 +508,13 @@
 
         // Barre de titre
         let html = '<div class="palette-flottante-barre">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
+        html += '<div class="palette-barre-gauche">';
         html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Tampons</span>';
-        html += '<div style="display:flex; gap:2px;">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-tampons" title="Disposition horizontale">\u2194</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-tampons" title="Disposition verticale">\u2195</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
+        html += '</div>';
+        html += '<div class="palette-barre-droite">';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-tampons" title="Disposition horizontale">\u2194\uFE0E</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-tampons" title="Disposition verticale">\u2195\uFE0E</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteTamponsReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
@@ -1600,11 +1602,13 @@
         // Copie gouvernée par sa grille : l'engrenage reste (coup d'œil de Grégoire),
         // il porte la phrase et l'écran qu'il ouvre ne montre qu'elle.
         var titreEngrenage = _copieGouvernee() ? _phraseSourceCodes() : 'Personnaliser';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="' + echapperHtml(titreEngrenage) + '"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
+        html += '<div class="palette-barre-gauche">';
         html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
-        html += '<div style="display:flex; gap:2px;">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" title="Disposition verticale">\u2195</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="' + echapperHtml(titreEngrenage) + '"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
+        html += '</div>';
+        html += '<div class="palette-barre-droite">';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194\uFE0E</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" title="Disposition verticale">\u2195\uFE0E</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteErrFrReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
@@ -1899,10 +1903,13 @@
 
         // Barre de titre (draggable + toggle)
         html += '<div class="palette-flottante-barre">';
+        html += '<div class="palette-barre-gauche">';
         html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Annotation</span>';
         html += '<button class="palette-flottante-toggle" id="travaux-btn-reglages-annotation" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
-        html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
+        html += '<div class="palette-barre-droite">';
+        html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
+        html += '</div></div>';
 
         // Contenu (ébauche validée du 31 oct. 2026, plans de travail/EBAUCHE-2026-10-31-palette-annotation.dc.html)
         html += '<div class="palette-flottante-contenu">';
@@ -1940,7 +1947,7 @@
         html += '<div class="annot-bloc">';
         const modes = [
             { val: 'debut', label: '\u2190', titre: 'Pointe au d\u00e9but (\u2190)' },
-            { val: 'double', label: '\u2194', titre: 'Double pointe (\u2194)' },
+            { val: 'double', label: '\u2194\uFE0E', titre: 'Double pointe (\u2194\uFE0E)' },
             { val: 'fin', label: '\u2192', titre: 'Pointe \u00e0 la fin (\u2192)' },
             { val: 'aucune', label: '\u2014', titre: 'Aucune pointe (\u2014)' }
         ];

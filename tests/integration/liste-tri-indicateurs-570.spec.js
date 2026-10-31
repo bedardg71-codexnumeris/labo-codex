@@ -27,7 +27,7 @@ test('trier par DA change la flèche de la Liste, et seulement elle', async ({ p
     expect(await page.locator('#tri-da').textContent()).toBe(avantEtudiants);
     // Une autre colonne de la Liste retombe au repos.
     await page.evaluate(() => window.trierTableauParColonne('nom'));
-    await expect(page.locator('#tri-eval-da')).toHaveText('↕');
+    await expect(page.locator('#tri-eval-da')).toHaveText('↕\uFE0E');
     await expect(page.locator('#tri-eval-nom')).toHaveText('↑');
 });
 

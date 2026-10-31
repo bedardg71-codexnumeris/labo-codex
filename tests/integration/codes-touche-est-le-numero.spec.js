@@ -39,6 +39,10 @@ test.describe('La touche d’un code est son numéro', () => {
         await page.keyboard.press('d');
         expect(await outil(page)).toBe('stylo'); // témoin : une lettre va toujours à son outil
         expect(await page.evaluate(() => window.db.getSync('raccourcisAnnotation', null))).toMatchObject(avant);
+        // Une lettre gardée d'avant sur un code n'est plus lue non plus.
+        await page.evaluate((c4) => { window.db.setSync('raccourcisAnnotation', { [c4]: 'k' }); window.travauxOutils.invaliderCacheRaccourcis(); }, c4);
+        await page.keyboard.press('k');
+        expect(await outil(page)).toBe('stylo');
     });
 
     test('un chiffre va au code, même si un tampon avait reçu ce chiffre', async ({ page }) => {

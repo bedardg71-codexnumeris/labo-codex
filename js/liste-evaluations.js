@@ -2648,7 +2648,7 @@ function mettreAJourIndicateursTri() {
     // et trier la Liste par DA ne changeait jamais sa propre flèche.
     ['da', 'nom', 'prenom', 'production', 'jetons', 'niveau', 'niveauIDME', 'note'].forEach(col => {
         const elem = document.getElementById(`tri-eval-${col}`);
-        if (elem) elem.textContent = '↕';
+        if (elem) elem.textContent = '↕\uFE0E';
     });
 
     // Mettre à jour l'indicateur actif
