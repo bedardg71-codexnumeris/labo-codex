@@ -9,7 +9,7 @@ const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'in
 // autres familles sont arrêtées à l'étape 0 : plans de travail/RAPPORT-2026-10-31-copie-demo-bibliotheque.md).
 // Le parcours entier, avec un vrai rechargement avant le vrai trimestre. Noms fictifs.
 
-const LIGNE = 'Cette copie reste dans la démo. Garde-la dans ta bibliothèque pour la retrouver dans tes vrais trimestres.';
+const LIGNE = 'Cette copie reste dans la démo. Quand elle est prête, garde-la dans ta bibliothèque pour la retrouver dans tes vrais trimestres.';
 const SOURCE = 'GRILLE_DEMO_1759243306842';
 
 async function ouvrirSection(page) {
