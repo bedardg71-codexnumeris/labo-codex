@@ -22,15 +22,16 @@ const GRILLE = { id: 'G1', nom: 'Dépistage', criteres: [
     { id: 'c2', nom: 'Nuance', ponderation: 50, niveauSOLO: 'relationnel' }] };
 
 /** `eleves` : { P, copies, statut }. `prefs` : les préférences enregistrées. `minimum` : le minimum de la pratique. */
-function banc(eleves, { prefs = {}, minimum = 0, echelle = ECHELLE } = {}) {
+function banc(eleves, { prefs = {}, minimum = 0, echelle = ECHELLE, autreEchelle = null, designation = { etat: 'ok', famille: 'standards' } } = {}) {
     const store = storeBase();
-    store.test_echellesTemplates = [echelle];
+    const echelles = autreEchelle ? [echelle, autreEchelle] : [echelle];
+    store.test_echellesTemplates = echelles;
     store.test_grillesTemplates = [GRILLE];
     const nb = Math.max(1, ...eleves.map((e) => (e.copies || []).length));
     store.test_productions = Array.from({ length: nb }, (_, i) => ({ id: 'P' + i, titre: 'P' + i, type: 'artefact-portfolio', dateEcheance: '2026-08-30' }));
     store.test_groupeEtudiants = eleves.map((e, i) => ({ da: DA(i), nom: 'Nom' + i, prenom: 'P', groupe: '01', coursId: 'GC1', statut: e.statut || 'actif' }));
     store.test_evaluationsSauvegardees = eleves.flatMap((e, i) => (e.copies || []).map((note, c) => ({
-        id: `C${i}-${c}`, etudiantDA: DA(i), productionId: 'P' + c, noteFinale: note, verrouillee: true, coursId: 'GC1', echelleId: echelle.id, grilleId: 'G1',
+        id: `C${i}-${c}`, etudiantDA: DA(i), productionId: 'P' + c, noteFinale: note, verrouillee: true, coursId: 'GC1', echelleId: e.echelleId || echelle.id, grilleId: 'G1',
         dateEvaluation: `2026-09-${String(c + 1).padStart(2, '0')}T12:00:00.000Z`, ponderationCouverte: 100,
         criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: e.structure || 'M' }, { critereId: 'c2', critereNom: 'Nuance', niveauSelectionne: 'M' }]
     })));
@@ -43,10 +44,10 @@ function banc(eleves, { prefs = {}, minimum = 0, echelle = ECHELLE } = {}) {
         modules: ['js/entites/production-diagnostique.js', 'js/entites/signalement-depistage.js', 'js/evaluation-projection.js', 'js/contexte-qualification.js', 'js/profil-etudiant-helpers.js', 'js/profil-etudiant-calculs.js',
             { chemin: 'js/etudiants.js', internes: ['compterEvaluationsPourMinimum'] },
             { chemin: 'js/tableau-bord-apercu.js', internes: ['genererCarteReponseDuGroupe', 'genererInterpretationRai'] }],
-        globaux: { designerPratiqueActive: () => ({ etat: 'ok', famille: 'standards' }), obtenirTypePratiqueActive: () => 'standards', calculerTousLesIndices: indices,
+        globaux: { designerPratiqueActive: () => designation, obtenirTypePratiqueActive: () => 'standards', calculerTousLesIndices: indices,
             obtenirConfigPratiqueActive: () => (minimum ? { portfolio: { minimumCompletion: minimum } } : {}),
-            obtenirEchelleResolue: (id) => (id === echelle.id ? JSON.parse(JSON.stringify(echelle)) : null),
-            resoudreModeleParId: (t, id) => { const l = t === 'echelle' ? [echelle] : [GRILLE]; return JSON.parse(JSON.stringify(l.find((m) => m.id === id) || null)); },
+            obtenirEchelleResolue: (id) => JSON.parse(JSON.stringify(echelles.find((m) => m.id === id) || null)),
+            resoudreModeleParId: (t, id) => { const l = t === 'echelle' ? echelles : [GRILLE]; return JSON.parse(JSON.stringify(l.find((m) => m.id === id) || null)); },
             obtenirTermeProduction: () => 'artefacts', accordTermeProduction: () => 'évalués', chargerSeuilsInterpretation: () => ({}), obtenirSeuil: () => 0.7, obtenirNombreProductionsPourPatterns: () => 3 }
     });
     b.win.pluriel = (n, un, plusieurs) => (n > 1 ? plusieurs : un);
@@ -331,6 +332,36 @@ describe('la ligne d\'en-tête du réglage : d\'où vient le seuil', () => {
         expect(ligne(b)).toContain('la note de passage');
     });
 
+    describe('aucune échelle lue : la raison dit pourquoi', () => {
+        const AUTRE_PLAGES = { ...ECHELLE, id: 'E_P', niveaux: ECHELLE.niveaux.map((n) => (n.code === 'D' ? { ...n, min: 66 } : n)) };
+        const AUTRE_REPERE = { ...ECHELLE, id: 'E_R', seuilSuffisance: 'M' };
+        const DEUX = [{ P: 90, copies: [90] }, { P: 80, copies: [80] }];
+
+        it('des plages différentes : pas d\'échelle unique', () => {
+            const b = banc([DEUX[0], { ...DEUX[1], echelleId: AUTRE_PLAGES.id }], { autreEchelle: AUTRE_PLAGES });
+            expect(b.win.reperesPerformance().raison).toBe('echelles-divergentes');
+            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (tes copies n\'ont pas d\'échelle unique).');
+        });
+
+        it('mêmes plages, repères contradictoires : pas d\'échelle unique', () => {
+            const b = banc([DEUX[0], { ...DEUX[1], echelleId: AUTRE_REPERE.id }], { autreEchelle: AUTRE_REPERE });
+            expect(b.win.reperesPerformance().raison).toBe('echelles-divergentes');
+            expect(ligne(b)).toContain('60 %, la note de passage (tes copies n\'ont pas d\'échelle unique).');
+        });
+
+        it('aucune copie : aucune échelle ne le fixe encore', () => {
+            const b = banc([{ P: 0, copies: [] }, { P: 0, copies: [] }]);
+            expect(b.win.reperesPerformance().raison).toBe('aucune-copie');
+            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (aucune échelle de tes copies ne le fixe encore).');
+        });
+
+        it('sans pratique : aucune échelle ne le fixe encore', () => {
+            const b = banc([{ P: 90, copies: [90] }, { P: 80, copies: [80] }], { designation: { etat: 'aucune' } });
+            expect(b.win.reperesPerformance().raison).toBe('sans-pratique');
+            expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (aucune échelle de tes copies ne le fixe encore).');
+        });
+    });
+
     it('le réglage lit cette phrase, sans en garder une autre', () => {
         const v2 = lire('js/preferences-v2.js');
         expect(tranche(v2, 'function voirCeQueMesSeuilsDonnentV2(', '\n    }\n')).toContain('window.phraseDuSeuilDuGroupe(r)');
@@ -381,4 +412,6 @@ describe('les textes validés du réglage (31 oct. 2026)', () => {
  *   mise en garde ancienne : 1 ; réglage sans la phrase hors des pourcentages : 1 ; intertitre ancien : 1 ; ligne avant le clic ancienne : 1 ; ligne de l'activation ancienne : 1
  *   Aide, début ancien : 1, fin ancienne : 1, 70 écrit en dur : 1 ; guide ancien : 1 ; phrase de la barre RàI changée : 1
  *   dans la spec WebKit, « + N signalé·es » : 1 ; sensibilité sans son accord : 1
+ * Texte 6, deux variantes de plus (31 oct. 2026), même méthode :
+ *   raison non transmise : 4 ; divergentes sans sa variante : 2 ; aucune-copie sans sa variante : 1 ; sans-pratique sans sa variante : 1 ; divergentes retouchée : 2 ; aucune-copie retouchée : 1 ; sans-pratique retouchée : 1 ; deux raisons échangées : 1 ; variante sans repère prise par la raison absente : 1
  */

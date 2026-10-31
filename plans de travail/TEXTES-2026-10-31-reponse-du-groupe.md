@@ -32,3 +32,22 @@ Restent tels quels, validés le 30 oct. : le texte de la case « Afficher la ré
 5. Tout test qui fige une ancienne formulation suit la nouvelle.
 6. Commit avec ce fichier et `VERDICT-RELECTURE-2026-10-31-reponse-du-groupe.md` (la relecture de la retouche B y est ajoutée). Sans release ni push. Relecture de Cowork ensuite.
 
+## Relecture de Cowork (`51561f38`), 31 oct., 8 h 47
+
+**Accepté.** Les seize textes retrouvés dans le code par script (insécables et apostrophes ramenées), anciennes formulations absentes. Les « Labo → » qui restent dans `index.html` sont antérieurs au lot (Aide, plusieurs cartes) : #1189, inscrit. Rien exécuté.
+
+## Texte 6, deux variantes de plus (Grégoire, 8 h 48)
+
+Cas relevé par Claude Code : sans échelle lue, le code retombait sur « ton échelle n'a pas de repère », faux dans ces cas. Mesuré : `_echelleDeLaPerformance` (`js/contexte-qualification.js`) rend `raison` = `echelles-divergentes`, `aucune-copie` ou `sans-pratique`. Validé :
+
+| Cas | Fin de la ligne |
+|---|---|
+| Échelle lue, repère « Suffisant à partir de » | « … {X} %, le repère « Suffisant à partir de » de ton échelle. » (inchangé) |
+| Échelle lue, sans ce repère | « … {X} %, la note de passage (ton échelle n'a pas de repère « Suffisant à partir de »). » (inchangé) |
+| `echelles-divergentes` | « … {X} %, la note de passage (tes copies n'ont pas d'échelle unique). » |
+| `aucune-copie`, `sans-pratique` | « … {X} %, la note de passage (aucune échelle de tes copies ne le fixe encore). » |
+
+### Pour Claude Code
+
+Ajouter les deux variantes à `phraseDuSeuilDuGroupe`, selon `reperesPerformance().raison`, au caractère près ; une garde par variante, avec break-test. Retirer de `OU-EN-EST-ON.md` le cas noté comme ouvert. Commit avec ce fichier, sans release ni push.
+
