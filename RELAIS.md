@@ -7,6 +7,22 @@
 
 ---
 
+## 31 OCT. 2026, 19 H 20 (Claude Code) : **1.229.0 EN LIGNE, `main` = `origin/main`**
+
+**Porte** : `CONSIGNE-LOT-2026-10-31-cause-essai-g-presences.md`, issue A, § 3, au signal de Grégoire (« Cowork, Chrome et Safari sont fermés »). Rapport de cause : `plans de travail/RAPPORT-2026-10-31-cause-essai-g.md`. #1212 fait.
+
+**Verdict du Mac, sur `6ab4f080`, par `scripts/verdict-en-morceaux.mjs`, sans refus** : vert, 1 220 essais, 1 216 verts, 0 au second essai, 4 rouges (4 connus), 23 sautés. Mac sur secteur, éveil tenu, 0 veille, pression mémoire 1. Hook : Vitest vert, « verdict vert à jour pour ce commit ». `git push` : `eb08f1af..6ab4f080`.
+
+**Netlify** : `6ae6779be4dcd3ab6cb843ae`, `commit_ref` `6ab4f080`, `ready`, publié à 23:20:13 Z (19 h 20) ; le `version.js` du déploiement (permalien) dit `1.229.0`, build `1031-1415` ; son `js/changelog-data.js` porte l'entrée 1.229. Le domaine `app.codexnumeris.org` est derrière Cloudflare Access : non lu d'ici.
+
+**GitHub** : run 41252074275 de `6ab4f080` en cours à l'écriture ; ce commit de relais l'annule (`cancel-in-progress`, décision du 4 sept.), et un run de docs seul ne lance pas Playwright : le jeton du Mac est alors le seul verdict navigateur de la 1.229.0.
+
+**Attend** : les gestes de Grégoire du § 4 de `CONSIGNE-LOT-2026-10-31-mise-en-ligne-1229.md` ; l'artefact jumeau de la porte des palettes, à publier par Cowork.
+
+**Non éprouvés** : Safari hors banc, l'iPad, le vrai codex.
+
+**Non commités, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, `REFLEXION-2026-10-30-seuils-normatif-critere-ipsatif.md`, `captures/fenetre-de-fusion-*.png`.
+
 ## 31 OCT. 2026, 16 H 17 (Claude Code) : **1.229.0 COMMITÉE SUR `main` (`b554565d`), NON POUSSÉE : VERDICT ROUGE ; EN LIGNE : TOUJOURS 1.228.0**
 
 **Porte** : `CONSIGNE-LOT-2026-10-31-mise-en-ligne-1229.md`, branche « Rouge » du § 3. Rapport pour Cowork : `plans de travail/RAPPORT-2026-10-31-verdict-rouge-1229.md`.

@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 31 OCTOBRE 2026, 19 H 20 : LA 1.229 EST EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent tes Nouvelles validées de la 1.229 et les entrées ci-dessous. La note du cours ne change pas. L'essai des présences qui échouait venait du banc d'essai : il tapait avant que le tableau ait fini de se refaire. L'application n'a pas changé sur ce point.
+
+**Ce qui reste à toi** : sur l'iPad, rechargé jusqu'à 1.229.0, la porte terrain des palettes d'annotation (`plans de travail/PORTES-TERRAIN-2026-10-31-palettes-annotation.md`) et vider toi-même les raccourcis X et S. Dans Labo › Outils d'observation, « Voir ce que mes seuils donnent » sur ton groupe, avant de décider si tu coches « Afficher la réponse du groupe ». Le PDF d'un·e élève en sommative, s'il y en a : « Note actuelle du cours » et sa ligne de calcul. Si tu as déjà vu une valeur de périodes revenir toute seule à l'ouverture d'une séance, dis-le : le rapport juge ce risque négligeable sans l'avoir mesuré sur l'iPad.
+
+**Vérifié comment** : vérification complète sur le Mac, tout fermé, sur le commit poussé : 1 220 essais, 1 216 verts, 0 au second essai, 4 rouges tous connus, 23 sautés. Netlify : déploiement `6ae6779b`, `ready`, sur `6ab4f080`, publié à 19 h 20 ; il dit `1.229.0` et porte les Nouvelles 1.229. Pas encore : l'iPad, ton vrai codex, l'adresse `app.codexnumeris.org` elle-même (non lisible d'ici). L'artefact de la porte des palettes reste à publier par Cowork.
+
 📝 **LE 31 OCTOBRE 2026, 16 h 17 : LA 1.229 EST PRÊTE, PAS EN LIGNE : LA VÉRIFICATION COMPLÈTE EST ROUGE.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : rien pour l'instant. L'application en ligne reste la 1.228. Tout ce que décrivent les entrées ci-dessous attend, et les gestes de vérification aussi.
