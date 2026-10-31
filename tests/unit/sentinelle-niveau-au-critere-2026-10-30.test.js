@@ -217,47 +217,28 @@ describe('§ 1 — ce qui reste, ce qui ne compte jamais', () => {
     });
 });
 
-describe('§ 1 — la phrase du groupe', () => {
+describe('§ 1 — sous la barre RàI, les signaux individuels', () => {
     const FAIBLE = [{ P: 40, copies: [40] }, { P: 50, copies: [50] }, { P: 55, copies: [55] }];
 
-    it('moyenne des notes affichées sous la ligne : un signal, et les niveaux individuels restent', () => {
+    // Décision de Grégoire du 31 oct. 2026 : la réponse du groupe REMPLACE la phrase de groupe.
+    it('une moyenne de groupe sous la ligne : aucune lecture du groupe, et les niveaux individuels restent', () => {
         const c = classe(FAIBLE);
-        const signaux = c.win.signauxDeGroupeDepistage();
-        expect(signaux).toHaveLength(1);
-        expect(signaux[0].moyenne).toBeCloseTo(48.33, 1);
-        expect(signaux[0].ligne).toBe(65);
+        const phrase = c.interne.genererInterpretationRai([{ niveau: 1, count: 0 }, { niveau: 2, count: 3 }, { niveau: 3, count: 0 }], 3);
+        expect(phrase).not.toMatch(/moyenne|seuil minimal|enseignement universel|renforcer/);
+        expect(phrase.replace(/\s/g, ' ')).toContain('3 étudiants (100 %)');
+        expect(phrase).not.toContain('en attente');
         expect([c.n(0), c.n(1), c.n(2)]).toEqual([2, 2, 2]);
     });
 
-    it('à la ligne, pas de signal ; sans aucun minimum de 5 élèves ; un seul élève suffit', () => {
-        expect(classe([{ P: 65, copies: [65] }]).win.signauxDeGroupeDepistage()).toEqual([]);
-        expect(classe([{ P: 64, copies: [64] }]).win.signauxDeGroupeDepistage()).toHaveLength(1);
-    });
-
-    it('seules les notes affichées y entrent : sous le minimum, pas de signal', () => {
-        expect(classe(FAIBLE, { minimum: 4 }).win.signauxDeGroupeDepistage()).toEqual([]);
-    });
-
-    it('un élève exclu par statut n\'y entre pas (#745)', () => {
-        const c = classe([{ P: 90, copies: [90] }, { P: 10, copies: [10], statut: 'inactif' }]);
-        expect(c.win.signauxDeGroupeDepistage()).toEqual([]);
-    });
-
-    it('en mode « tous les groupes », le signal nomme le groupe en cause', () => {
-        const c = classe([{ P: 90, copies: [90], groupe: '01' }, { P: 40, copies: [40], groupe: '02' }], { vue: 'tous' });
-        expect(c.win.signauxDeGroupeDepistage().map((s) => s.groupe)).toEqual(['00002']);
-    });
-
-    it('la phrase dit la ligne, et les élèves en attente', () => {
-        const c = classe(FAIBLE);
-        const rai = [{ niveau: 1, count: 0 }, { niveau: 2, count: 3 }, { niveau: 3, count: 0 }];
-        const phrase = c.interne.genererInterpretationRai(rai, 3);
-        expect(phrase).toContain('sous le seuil minimal de réussite');
-        expect(phrase).toContain('renforcer, pour tous');
-        expect(phrase).not.toContain('en attente');
+    it('la phrase dit les élèves en attente', () => {
         const attente = classe([{ P: 90, copies: [90] }]).interne.genererInterpretationRai([{ niveau: 1, count: 0 }, { niveau: 2, count: 4 }, { niveau: 3, count: 0 }], 25);
         expect(attente.replace(/\s/g, ' ')).toContain('4 étudiants (16 %)');
         expect(attente).toContain('21 étudiant·es en attente de leur note du cours');
+    });
+
+    it('le signal de groupe n\'existe plus', () => {
+        expect(classe(FAIBLE).win.signauxDeGroupeDepistage).toBeUndefined();
+        for (const f of ['js/profil-etudiant-calculs.js', 'js/tableau-bord-apercu.js']) expect(lire(f)).not.toContain('signauxDeGroupeDepistage');
     });
 });
 
@@ -381,11 +362,10 @@ describe('§ 4 — l\'Aide dit le modèle tel que codé', () => {
         expect(carteRai).toContain(`Ce seuil est le repère « Suffisant à partir de » de l'échelle de tes copies ; si ton échelle n'en a pas, c'est la note de passage, ${passage} %.`);
     });
 
-    it('avant le minimum, le signalement, ce qui ne fixe jamais, la phrase du groupe', () => {
+    it('avant le minimum, le signalement, ce qui ne fixe jamais', () => {
         expect(carteRai).toContain('la note ne mène pas au niveau 3 : un début sous ton seuil donne au plus le niveau 2.');
         expect(carteRai).toContain('Un signalement diagnostique fixe son niveau jusqu\'à ce que la note du cours s\'affiche ; ensuite, il reste affiché à côté du niveau.');
         expect(carteRai).toContain('Ne fixent jamais le niveau : la place de l\'étudiant·e dans son groupe, l\'inscription aux services adaptés, l\'assiduité et la complétion');
-        expect(carteRai).toContain('une phrase sous la barre RàI le dit pour tout le groupe. Elle n\'enlève aucun signal individuel.');
     });
 
     it('les deux patterns qui fixent un niveau', () => {
@@ -562,10 +542,10 @@ describe('retouche — C3 : la note affichée a une seule source', () => {
         expect(tranche(carte, '<strong>Performance globale (P) :</strong>', 'lireNiveauNoteGlobale(da, pct)')).toContain("if (window.noteDuCoursAffichee(da, indices) === null) return '—';");
     });
 
-    it('le niveau et la phrase du groupe lisent ce même prédicat, sans second nom', () => {
+    it('le niveau lit ce prédicat, sans second nom', () => {
         const calcul = lire('js/profil-etudiant-calculs.js');
         expect(calcul).not.toContain('_noteProvisoireAffichee');
-        expect(calcul.match(/noteDuCoursAffichee\(/g)).toHaveLength(3);
+        expect(calcul.match(/noteDuCoursAffichee\(/g)).toHaveLength(2);
     });
 });
 
@@ -652,6 +632,7 @@ describe('retouche — C6 : le signalement par le vrai calcul', () => {
  *   note non constructible lue : 1 ; moyenne des copies au lieu de P : 7
  *   non-participation retirée : 1 ; mesure d'aide au niveau 3 : 1
  *   le signal de groupe enlève le signal individuel : 7 ; à la ligne : 1 ; les exclus y entrent : 1 ; P sous le minimum y entre : 1 ; minimum de 5 élèves : 4
+ *     (↻ 31 oct. 2026 : le signal de groupe est retiré, remplacé par la réponse du groupe ; ces cinq mutants n'ont plus d'objet)
  *   cible figée : 1 ; cible qui oublie le signalement : 1
  *   palier coché sans niveau, défaut silencieux : 1 ; valeur illisible gardée : 1 ; registre qui perd le niveau : 1 ; décocher qui garde le niveau : 1
  *   barre sur les seuls élèves à niveau : 1 ; phrase sans les élèves en attente : 2

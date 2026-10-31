@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 31 OCTOBRE 2026 : LA RÉPONSE DU GROUPE EST CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : la phrase sur la moyenne du groupe disparaît de l'Aperçu. Dans Labo › Outils d'observation, après tes seuils, tu vois ce qu'ils donnent sur ton groupe, puis tu choisis d'afficher ou non la réponse du groupe, éteinte au départ. Activée, une carte de l'Aperçu compare ta répartition au repère 80-15-5.
+
+**Ce qui reste à toi** : une décision et des mots (`plans de travail/RAPPORT-2026-10-31-reponse-du-groupe.md`). Tant que les notes montent, les étudiant·es sans note faussent la part au niveau 1 : le rapport propose trois issues. Les phrases de l'Aide sont à valider avant la release. Les mots du réglage des barres, eux, sont tranchés.
+
+**Vérifié comment** : Vitest entier vert (10 553) ; 25 changements volontaires du code font tous rougir une garde ; les specs WebKit touchées vertes (6/6) ; captures dans WebKit, sur le pack de démo. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+
 📝 **LE 30 OCTOBRE 2026, 23 H 05 : LE JAUNE EST ÉCLAIRCI, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : en mode sombre, le jaune des chiffres de la liste et des pastilles est plus clair ; en mode clair, le fond de la pastille jaune est plus franc. La liste en clair et les barres ne bougent pas.

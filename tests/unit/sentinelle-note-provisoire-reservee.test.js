@@ -132,12 +132,11 @@ describe('Les mots qui la remplacent, aux surfaces du niveau RàI', () => {
         ['js/profil-etudiant-calculs.js', 'il fixe le niveau jusqu\\\'à ce que la note du cours s\\\'affiche.'],
         ['js/profil-etudiant-calculs.js', 'La note du cours ne s\\\'affiche pas encore : le niveau l\\\'attend.'],
         ['js/atelier-algo.js', 'Jusqu’à ce que la note du cours s’affiche. Ensuite,'],
-        ['js/tableau-bord-apercu.js', 'La moyenne ${nom}, pour la note du cours à ce jour ('],
         ['js/tableau-bord-apercu.js', 'en attente de sa note du cours.'],
         ['js/accompagnement-contenu-hover.js', 'd’après la note du cours à ce jour, devant le seuil'],
         ['js/accompagnement-contenu-popup.js', 'Niveau 1 (vert) — Note du cours à ce jour au seuil'],
         ['js/accompagnement-contenu-terme.js', 'Tant que la note du cours ne s’affiche pas, un signalement diagnostique'],
-        ['js/guides-pedagogiques.js', 'Quand la moyenne du groupe, pour la note du cours à ce jour, est sous ce seuil'],
+        ['js/guides-pedagogiques.js', 'Note du cours à ce jour sous ce seuil, palier 2'],
     ])('%s : « %s »', (fichier, mots) => {
         expect(lire(fichier)).toContain(mots);
     });

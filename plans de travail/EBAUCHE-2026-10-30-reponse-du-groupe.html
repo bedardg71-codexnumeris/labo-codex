@@ -1,0 +1,344 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Réglages et réponse du groupe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Mise en page : la bande marine de Labo Codex, puis trois étapes numérotées (elles sont une vraie séquence : poser ses seuils, voir ce qu'ils donnent, choisir d'afficher la réponse du groupe). */
+:root {
+  --bg: #eaf0f3;
+  --surface: #ffffff;
+  --sunk: #f3f7f9;
+  --ink: #13232c;
+  --muted: #557079;
+  --line: #d3e0e6;
+  --band: #0f2a3a;
+  --band-ink: #f2f7f9;
+  --band-muted: #a9c4cf;
+  --accent: #1a6a8a;
+  --n1: #1f9d55;
+  --n2: #b98200;
+  --n3: #d32f2f;
+  --repere: #8aa4b0;
+  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1a22; --surface: #13262f; --sunk: #0f2029; --ink: #e3edf1; --muted: #8fa8b3; --line: #26424e;
+    --band: #081419; --band-ink: #eef5f8; --band-muted: #8fb0bd; --accent: #6aacb8;
+    --n1: #46c47c; --n2: #e2b33a; --n3: #f0646d; --repere: #7d97a2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1a22; --surface: #13262f; --sunk: #0f2029; --ink: #e3edf1; --muted: #8fa8b3; --line: #26424e;
+  --band: #081419; --band-ink: #eef5f8; --band-muted: #8fb0bd; --accent: #6aacb8;
+  --n1: #46c47c; --n2: #e2b33a; --n3: #f0646d; --repere: #7d97a2;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--ui); font-size: 15px; line-height: 1.5; }
+.page { max-width: 980px; margin: 0 auto; padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.entete { background: var(--band); color: var(--band-ink); border-radius: 12px; padding: 22px 24px; display: grid; gap: 10px; }
+.entete .sur { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--band-muted); }
+.entete h1 { font-size: 26px; font-weight: 650; }
+.entete p { color: var(--band-muted); max-width: 70ch; }
+.entete .choix { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.entete .choix span { font-size: 13px; color: var(--band-muted); }
+.segments { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.entete .segments { border-color: #2c4b5b; }
+.segments button { font: inherit; font-size: 14px; border: 0; background: transparent; color: inherit; padding: 7px 12px; cursor: pointer; border-right: 1px solid var(--line); }
+.entete .segments button { border-right-color: #2c4b5b; }
+.segments button:last-child { border-right: 0; }
+.segments button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.etape { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; min-width: 0; }
+.etape > header { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: baseline; }
+.etape .num { grid-row: span 2; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.etape h2 { font-size: 18px; font-weight: 650; }
+.etape header p { color: var(--muted); font-size: 14px; max-width: 70ch; }
+.etape[data-verrou="true"] { opacity: .55; }
+.champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.champ { display: grid; gap: 6px; background: var(--sunk); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+.champ label, .champ .etiquette { font-weight: 600; font-size: 14px; }
+.champ .aide { font-size: 13px; color: var(--muted); }
+select, input[type="number"] { font: inherit; font-size: 15px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+input[type="number"] { width: 5.2em; font-variant-numeric: tabular-nums; }
+.trio { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.trio div { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+.action { justify-self: start; font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--surface); cursor: pointer; }
+.action[disabled] { opacity: .5; cursor: default; }
+.niveaux { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.niveau { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px; }
+.niveau .t { font-size: 13px; color: var(--muted); }
+.niveau .n { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.niveau .pc { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.niveau.n1 .n { color: var(--n1); } .niveau.n2 .n { color: var(--n2); } .niveau.n3 .n { color: var(--n3); }
+.sources { display: grid; gap: 6px; font-size: 14px; }
+.sources h3 { font-size: 14px; font-weight: 600; }
+.sources ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+.sources li { font-variant-numeric: tabular-nums; }
+.sensib { background: var(--sunk); border-radius: 10px; padding: 12px 14px; font-size: 14px; display: grid; gap: 4px; }
+.sensib b { font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--muted); }
+.interrupteur { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: start; border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.interrupteur input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--accent); }
+.interrupteur label { font-weight: 650; }
+.interrupteur p { grid-column: 2; font-size: 14px; max-width: 70ch; }
+.reponse { border-radius: 10px; border: 1px solid var(--line); padding: 16px; display: grid; gap: 12px; }
+.reponse h3 { font-size: 16px; }
+.barres { display: grid; gap: 8px; }
+.barre-ligne { display: grid; grid-template-columns: 7.5em 1fr; gap: 10px; align-items: center; font-size: 13px; color: var(--muted); }
+.barre { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: var(--sunk); }
+.barre span { display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; white-space: nowrap; }
+.s1 { background: var(--n1); } .s2 { background: var(--n2); } .s3 { background: var(--n3); }
+.barre.repere span { background: var(--repere); border-right: 2px solid var(--surface); }
+.message { border-left: 0; border-radius: 8px; padding: 10px 12px; font-size: 14px; background: color-mix(in srgb, var(--n2) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--n2) 55%, var(--surface)); }
+.message.calme { background: color-mix(in srgb, var(--n1) 10%, var(--surface)); border-color: color-mix(in srgb, var(--n1) 45%, var(--surface)); }
+.trancher { display: grid; gap: 10px; margin: 0; padding-left: 20px; }
+.trancher li { max-width: 80ch; }
+.carte { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 12px; }
+.carte h2 { font-size: 17px; }
+@media (max-width: 560px) { .niveaux { grid-template-columns: 1fr; } .barre-ligne { grid-template-columns: 1fr; } }
+</style>
+
+<div class="page">
+  <header class="entete">
+    <div class="sur">Ébauche · données fictives · rien n'est codé</div>
+    <h1>Réglages et réponse du groupe</h1>
+    <p>Le moment où l'enseignant·e règle le dépistage, dans l'ordre retenu le 30 octobre&nbsp;: poser ses seuils, voir ce qu'ils donnent sur son groupe, puis choisir d'afficher la réponse du groupe.</p>
+    <div class="choix">
+      <span id="lbl-groupe">Groupe affiché&nbsp;:</span>
+      <div class="segments" role="group" aria-labelledby="lbl-groupe">
+        <button type="button" id="g-automne" data-groupe="automne" aria-pressed="true">Automne, dans la séquence</button>
+        <button type="button" id="g-hiver" data-groupe="hiver" aria-pressed="false">Hiver, hors séquence</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="etape" aria-labelledby="t1">
+    <header><span class="num" aria-hidden="true">1</span><h2 id="t1">Tes seuils</h2>
+      <p>Pose-les pour ce qu'ils disent d'un travail suffisant et d'une présence suffisante, avant de regarder ton groupe.</p></header>
+    <div class="champs">
+      <div class="champ">
+        <label for="ligne">Seuil minimal de réussite</label>
+        <select id="ligne">
+          <option value="65" selected>Repère «&nbsp;Suffisant à partir de&nbsp;» de ton échelle&nbsp;: 65&nbsp;%</option>
+          <option value="70">Repère «&nbsp;Suffisant à partir de&nbsp;» de ton échelle&nbsp;: 70&nbsp;%</option>
+          <option value="60">Ton échelle n'a pas de repère&nbsp;: 60&nbsp;% (RREC)</option>
+        </select>
+        <p class="aide">Lu dans l'échelle de tes copies. Sous ce seuil, la note provisoire place l'étudiant·e au moins au niveau&nbsp;2. Dans l'application, il se change dans l'échelle&nbsp;; ici, le menu simule trois échelles.</p>
+      </div>
+      <div class="champ">
+        <span class="etiquette" id="lbl-ac">Assiduité et complétion</span>
+        <div class="trio" role="group" aria-labelledby="lbl-ac">
+          <div><label for="s-excellent">Aucune absence ou presque</label><input type="number" id="s-excellent" value="95" min="50" max="100"></div>
+          <div><label for="s-bon">Absences rares</label><input type="number" id="s-bon" value="90" min="50" max="100"></div>
+          <div><label for="s-acceptable">Quelques absences</label><input type="number" id="s-acceptable" value="85" min="50" max="100"></div>
+        </div>
+        <p class="aide">Ils décrivent la présence et la remise. Leur place dans le niveau attend la mesure en cours&nbsp;: ici, ils ne font que répartir le groupe en paliers.</p>
+      </div>
+    </div>
+    <button type="button" class="action" id="voir">Voir ce que mes seuils donnent</button>
+  </section>
+
+  <section class="etape" id="etape2" aria-labelledby="t2" data-verrou="true">
+    <header><span class="num" aria-hidden="true">2</span><h2 id="t2">Ce que tes seuils donnent sur ce groupe</h2>
+      <p id="sous2">S'affiche une fois tes seuils posés.</p></header>
+    <div id="contenu2" hidden>
+      <div style="display:grid; gap:16px">
+        <div class="niveaux" id="niveaux"></div>
+        <div class="sources" id="sources"></div>
+        <div class="sensib" id="sensib"></div>
+        <p class="note" id="paliers"></p>
+        <p class="note">Tu peux changer tes seuils. Change-les pour ce qu'ils disent d'un travail suffisant, pas pour obtenir une autre répartition.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="etape" id="etape3" aria-labelledby="t3" data-verrou="true">
+    <header><span class="num" aria-hidden="true">3</span><h2 id="t3">La réponse du groupe</h2>
+      <p>Facultative. Rien ne s'affiche tant que tu ne l'actives pas.</p></header>
+    <div class="interrupteur">
+      <input type="checkbox" id="afficher" disabled>
+      <label for="afficher">Afficher la réponse du groupe</label>
+      <p>Tes seuils placent chaque étudiant·e à un niveau. Activé, ce réglage compare la répartition de ton groupe au repère de la RàI (environ 80&nbsp;% au niveau&nbsp;1). Un écart dit que le groupe demande un enseignement universel renforcé, quelle qu'en soit la cause.</p>
+    </div>
+    <div class="reponse" id="reponse" hidden aria-live="polite"></div>
+  </section>
+
+  <section class="carte">
+    <h2>Le niveau, tel que décidé le 30 octobre</h2>
+    <ol class="trancher">
+      <li><b>Niveau 2</b>&nbsp;: note provisoire sous ton seuil minimal&nbsp;; ou «&nbsp;Difficulté persistante&nbsp;» (trois dernières productions sous le seuil), même si la note tient&nbsp;; ou un signalement diagnostique que tu as réglé à 2.</li>
+      <li><b>Niveau 3</b>&nbsp;: note provisoire sous ton seuil ET difficulté sur un critère que tu as désigné comme fondation&nbsp;; ou un signalement diagnostique réglé à 3&nbsp;; ou «&nbsp;Non-participation&nbsp;».</li>
+      <li><b>Jamais</b>&nbsp;: l'inscription aux services adaptés ne fixe aucun niveau.</li>
+    </ol>
+  </section>
+
+  <section class="carte">
+    <h2>À trancher</h2>
+    <ol class="trancher">
+      <li><b>Le signalement diagnostique fixe-t-il le niveau tout le trimestre&nbsp;?</b> Dans le groupe d'automne, Loutre Joyeuse a un signalement réglé à 3 en début de trimestre, et une note provisoire de 66&nbsp;% aujourd'hui. Elle reste au niveau&nbsp;3 dans cette ébauche.</li>
+      <li><b>À partir de quel écart la phrase «&nbsp;enseignement universel renforcé&nbsp;» s'affiche-t-elle&nbsp;?</b> L'ébauche suppose&nbsp;: moins de 70&nbsp;% du groupe au niveau&nbsp;1.</li>
+      <li><b>Les mots ajoutés à la carte de la réponse du groupe</b> (la phrase qui dit que le repère est une heuristique) sont à valider.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  // [nom, note provisoire (null : aucune copie), A, C, persistante, fondation faible, signalement diagnostique (0, 2 ou 3), non-participation]
+  var GROUPES = {
+    automne: [
+      ['Gazelle Sereine', 88, 100, 100, false, false, 0, false], ['Condor Courageux', 84, 98, 100, false, false, 0, false],
+      ['Loutre Joyeuse', 66, 97, 100, false, false, 3, false], ['Koala Paisible', 82, 100, 96, false, false, 0, false],
+      ['Panthère Loyale', 80, 95, 100, false, false, 0, false], ['Tigre Généreux', 79, 96, 100, false, false, 0, false],
+      ['Hirondelle Fidèle', 78, 100, 100, false, false, 0, false], ['Bison Tranquille', 77, 92, 92, false, false, 0, false],
+      ['Girafe Bienveillante', 76, 98, 100, false, false, 0, false], ['Kangourou Enjoué', 75, 94, 96, false, false, 0, false],
+      ['Mouette Rieuse', 75, 100, 100, false, false, 0, false], ['Panda Attentionné', 74, 97, 100, false, false, 0, false],
+      ['Tortue Sage', 73, 96, 96, false, false, 0, false], ['Jaguar Discret', 72, 93, 92, false, false, 0, false],
+      ['Antilope Gracieuse', 71, 100, 100, false, false, 0, false], ['Lynx Serviable', 70, 88, 83, true, false, 0, false],
+      ['Grue Patiente', 70, 98, 100, false, false, 0, false], ['Wombat Fiable', 69, 95, 96, false, false, 0, false],
+      ['Cigogne Accueillante', 68, 91, 92, false, false, 0, false], ['Caribou Chaleureux', 67, 97, 100, false, false, 0, false],
+      ['Autruche Spontanée', 67, 90, 88, false, false, 0, false], ['Yak Calme', 64, 87, 88, false, false, 0, false],
+      ['Belette Vive', 58, 86, 73, false, false, 0, false], ['Ornithorynque Rêveur', 52, 80, 70, false, true, 0, false],
+      ['Hermine Tendre', null, 71, 0, false, false, 0, true]
+    ],
+    hiver: [
+      ['Mangouste Agile', 82, 96, 100, false, false, 0, false], ['Lama Placide', 78, 92, 96, false, false, 0, false],
+      ['Chouette Espiègle', 75, 94, 92, false, false, 2, false], ['Okapi Pudique', 73, 90, 92, false, false, 0, false],
+      ['Marmotte Câline', 72, 88, 88, false, false, 0, false], ['Orignal Débonnaire', 70, 85, 83, true, false, 0, false],
+      ['Lionne Altière', 68, 91, 88, false, false, 0, false], ['Héron Songeur', 67, 84, 80, false, false, 0, false],
+      ['Gerboise Pétillante', 66, 82, 78, true, false, 0, false], ['Dingo Franc', 65, 86, 85, false, false, 0, false],
+      ['Biche Douce', 64, 80, 75, false, false, 0, false], ['Zèbre Aimable', 63, 83, 80, false, false, 0, false],
+      ['Martre Franche', 62, 78, 72, false, false, 0, false], ['Tapir Affable', 61, 81, 70, false, false, 3, false],
+      ['Baleine Majestueuse', 60, 76, 68, false, false, 0, false], ['Pingouin Jovial', 59, 79, 72, false, false, 0, false],
+      ['Libellule Légère', 58, 74, 65, false, false, 0, false], ['Ibis Posé', 56, 72, 60, false, true, 0, false],
+      ['Salamandre Tenace', 55, 77, 62, false, false, 0, false], ['Raton Malicieux', 52, 70, 55, false, true, 0, false],
+      ['Pie Taquine', 50, 73, 58, false, false, 0, false], ['Fennec Rusé', 47, 66, 45, false, true, 0, false],
+      ['Oie Avenante', 44, 62, 40, false, true, 0, false], ['Gorille Prévenant', null, 58, 0, false, false, 0, true],
+      ['Faucon Intrépide', null, 64, 0, false, false, 0, true]
+    ]
+  };
+  var etat = { groupe: 'automne', vu: false, affiche: false };
+  var NBSP = ' ';
+
+  function niveauDe(e, ligne) {
+    var P = e[1], pers = e[4], fond = e[5], diag = e[6], nonPart = e[7];
+    var sous = P !== null && P < ligne;
+    if (nonPart) return { n: 3, source: 'non-participation' };
+    if (diag === 3) return { n: 3, source: 'diagnostic' };
+    if (sous && fond) return { n: 3, source: 'fondation' };
+    if (sous) return { n: 2, source: 'note' };
+    if (pers) return { n: 2, source: 'persistante' };
+    if (diag === 2) return { n: 2, source: 'diagnostic' };
+    return { n: 1, source: null };
+  }
+  var NOM_SOURCE = {
+    'note': 'note provisoire sous ton seuil',
+    'persistante': '«' + NBSP + 'Difficulté persistante' + NBSP + '», note au-dessus du seuil',
+    'fondation': 'note sous ton seuil et critère de fondation en difficulté',
+    'diagnostic': 'signalement diagnostique',
+    'non-participation': '«' + NBSP + 'Non-participation' + NBSP + '»'
+  };
+
+  function compter(liste, ligne) {
+    var c = { 1: 0, 2: 0, 3: 0 }, src = { 2: {}, 3: {} };
+    liste.forEach(function (e) { var r = niveauDe(e, ligne); c[r.n]++; if (r.source) src[r.n][r.source] = (src[r.n][r.source] || 0) + 1; });
+    return { c: c, src: src, total: liste.length };
+  }
+  function pc(n, t) { return Math.round(n / t * 100); }
+  function el(tag, attrs, texte) { var e = document.createElement(tag); if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]); if (texte != null) e.textContent = texte; return e; }
+  function seuils() {
+    var v = ['s-excellent', 's-bon', 's-acceptable'].map(function (id) { return Number(document.getElementById(id).value) || 0; });
+    return { excellent: v[0], bon: v[1], acceptable: v[2] };
+  }
+
+  function rendre() {
+    document.querySelectorAll('[data-groupe]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.groupe === etat.groupe)); });
+    var liste = GROUPES[etat.groupe];
+    var ligne = Number(document.getElementById('ligne').value);
+    var r = compter(liste, ligne);
+
+    var e2 = document.getElementById('etape2'), e3 = document.getElementById('etape3');
+    e2.dataset.verrou = String(!etat.vu); e3.dataset.verrou = String(!etat.vu);
+    document.getElementById('contenu2').hidden = !etat.vu;
+    document.getElementById('afficher').disabled = !etat.vu;
+    document.getElementById('voir').disabled = etat.vu;
+    document.getElementById('sous2').textContent = etat.vu
+      ? liste.length + ' étudiant·es, groupe ' + (etat.groupe === 'automne' ? 'd’automne' : 'd’hiver') + ' (noms inventés). Seuil minimal de réussite' + NBSP + ': ' + ligne + NBSP + '%.'
+      : 'S’affiche une fois tes seuils posés.';
+
+    if (etat.vu) {
+      var niv = document.getElementById('niveaux'); niv.textContent = '';
+      [[1, 'Niveau 1 · universel'], [2, 'Niveau 2 · ciblé'], [3, 'Niveau 3 · intensif']].forEach(function (x) {
+        var d = el('div', { class: 'niveau n' + x[0] });
+        d.appendChild(el('span', { class: 't' }, x[1]));
+        d.appendChild(el('span', { class: 'n' }, String(r.c[x[0]])));
+        d.appendChild(el('span', { class: 'pc' }, pc(r.c[x[0]], r.total) + NBSP + '% du groupe'));
+        niv.appendChild(d);
+      });
+      var so = document.getElementById('sources'); so.textContent = '';
+      so.appendChild(el('h3', {}, 'D’où viennent les niveaux 2 et 3'));
+      var ul = el('ul');
+      [3, 2].forEach(function (n) {
+        Object.keys(r.src[n]).forEach(function (k) { ul.appendChild(el('li', {}, 'Niveau ' + n + NBSP + ': ' + r.src[n][k] + ', ' + NOM_SOURCE[k])); });
+      });
+      if (!ul.childNodes.length) ul.appendChild(el('li', {}, 'Aucun.'));
+      so.appendChild(ul);
+      var haut = compter(liste, ligne + 5), bas = compter(liste, ligne - 5);
+      var signalHaut = haut.c[2] + haut.c[3] - (r.c[2] + r.c[3]);
+      var signalBas = (r.c[2] + r.c[3]) - (bas.c[2] + bas.c[3]);
+      var se = document.getElementById('sensib'); se.textContent = '';
+      se.appendChild(el('b', {}, 'Sensibilité de ton seuil'));
+      se.appendChild(el('span', {}, 'À ' + (ligne + 5) + NBSP + '%, ' + signalHaut + ' étudiant·e' + (signalHaut > 1 ? 's' : '') + ' de plus aux niveaux 2 ou 3. À ' + (ligne - 5) + NBSP + '%, ' + signalBas + ' de moins.'));
+      var s = seuils(), paliers = [0, 0, 0, 0];
+      liste.forEach(function (e) { var a = e[2]; paliers[a >= s.excellent ? 0 : a >= s.bon ? 1 : a >= s.acceptable ? 2 : 3]++; });
+      document.getElementById('paliers').textContent = 'Assiduité, à titre de description' + NBSP + ': ' + paliers[0] + ' «' + NBSP + 'aucune absence ou presque' + NBSP + '», ' + paliers[1] + ' «' + NBSP + 'absences rares' + NBSP + '», ' + paliers[2] + ' «' + NBSP + 'quelques absences' + NBSP + '», ' + paliers[3] + ' sous ' + s.acceptable + NBSP + '%.';
+    }
+
+    var rep = document.getElementById('reponse');
+    rep.hidden = !(etat.vu && etat.affiche);
+    if (etat.vu && etat.affiche) {
+      rep.textContent = '';
+      rep.appendChild(el('h3', {}, 'La réponse du groupe'));
+      var barres = el('div', { class: 'barres' });
+      function ligneBarre(titre, parts, cls) {
+        var l = el('div', { class: 'barre-ligne' }); l.appendChild(el('span', {}, titre));
+        var b = el('div', { class: 'barre' + (cls ? ' ' + cls : '') });
+        parts.forEach(function (p, i) { if (p <= 0) return; var s = el('span', { class: 's' + (i + 1) }, p + NBSP + '%'); s.style.width = p + '%'; b.appendChild(s); });
+        l.appendChild(b); return l;
+      }
+      var p1 = pc(r.c[1], r.total), p2 = pc(r.c[2], r.total), p3 = 100 - p1 - p2;
+      barres.appendChild(ligneBarre('Ton groupe', [p1, p2, p3]));
+      barres.appendChild(ligneBarre('Repère de la RàI', [80, 15, 5], 'repere'));
+      rep.appendChild(barres);
+      var m;
+      if (p1 < 70) {
+        m = el('p', { class: 'message' });
+        m.appendChild(el('b', {}, p1 + NBSP + '% de ton groupe est au niveau 1. '));
+        m.appendChild(document.createTextNode('Ce groupe demande un enseignement universel renforcé, quelle qu’en soit la cause' + NBSP + ': le parcours des étudiant·es, l’enseignement, ou les deux.'));
+      } else {
+        m = el('p', { class: 'message calme' });
+        m.appendChild(el('b', {}, p1 + NBSP + '% de ton groupe est au niveau 1. '));
+        m.appendChild(document.createTextNode('La répartition est proche du repère de la RàI.'));
+      }
+      rep.appendChild(m);
+      rep.appendChild(el('p', { class: 'note' }, 'Le repère 80-15-5 est une heuristique de la RàI, pas une proportion mesurée au collégial. Il situe le groupe, il ne juge ni les étudiant·es ni l’enseignant·e.'));
+    }
+  }
+
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.groupe) { etat.groupe = b.dataset.groupe; rendre(); }
+    else if (b.id === 'voir') { etat.vu = true; rendre(); }
+  });
+  document.getElementById('afficher').addEventListener('change', function (ev) { etat.affiche = ev.target.checked; rendre(); });
+  ['ligne', 's-excellent', 's-bon', 's-acceptable'].forEach(function (id) { document.getElementById(id).addEventListener('input', rendre); });
+  rendre();
+})();
+</script>
+
+</body></html>

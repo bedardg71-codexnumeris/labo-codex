@@ -13515,6 +13515,118 @@ label:has(+ textarea:disabled) {
     margin-top: 8px;
 }
 
+/* La réponse du groupe (30 oct. 2026). Les parts s'écrivent à côté des barres, jamais dessus : le contraste d'un texte
+   sur ces couleurs change d'un mode à l'autre, et un segment de 5 % n'a pas la place de le porter. */
+.reponse-groupe {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-grand);
+}
+
+.reponse-groupe .tb-titre-metrique {
+    margin-bottom: 10px;
+}
+
+.reponse-groupe-barres {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.reponse-groupe-ligne {
+    display: grid;
+    grid-template-columns: 8.5em minmax(0, 1fr) 10.5em;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.reponse-groupe-titre-ligne,
+.reponse-groupe-parts {
+    color: var(--texte-secondaire);
+}
+
+.reponse-groupe-parts {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.reponse-groupe-barre {
+    display: flex;
+    gap: 2px;
+    height: 20px;
+    border-radius: var(--radius-petit);
+    overflow: hidden;
+}
+
+.reponse-groupe-segment {
+    display: block;
+    min-width: 2px;
+}
+
+.reponse-groupe-niveau-1 { background: var(--bleu-clair); }
+.reponse-groupe-niveau-2 { background: var(--rai-niveau-2); }
+.reponse-groupe-niveau-3 { background: var(--rai-niveau-3); }
+/* En clair, ces deux jetons tombent sous 3:1 sur le blanc (2,98 et 2,72, mesuré le 31 oct.) : les teintes de la légende de la barre RàI. */
+.mode-clair .reponse-groupe-niveau-2 { background: #6366f1; }
+.mode-clair .reponse-groupe-niveau-3 { background: #7c3aed; }
+
+.reponse-groupe-barre-repere .reponse-groupe-segment {
+    background: var(--texte-muted);
+}
+
+.reponse-groupe-message {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--texte-principal);
+}
+
+.reponse-groupe-note {
+    margin: 0 0 4px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--texte-secondaire);
+}
+
+.seuils-donnent {
+    margin-top: 12px;
+}
+
+.seuils-donnent-niveaux {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.seuils-donnent-niveau {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: var(--radius-grand);
+}
+
+.seuils-donnent-compte {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    color: var(--texte-principal);
+}
+
+.seuils-donnent-sources {
+    margin: 4px 0 10px;
+    padding-left: 18px;
+}
+
+@media (max-width: 560px) {
+    .reponse-groupe-ligne { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .seuils-donnent-niveaux { grid-template-columns: minmax(0, 1fr); }
+}
+
 .barre-exemple {
     position: relative;
     height: 34px;
