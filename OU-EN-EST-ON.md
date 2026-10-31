@@ -17,11 +17,11 @@
 
 📝 **LE 31 OCTOBRE 2026 : LA RÉPONSE DU GROUPE EST CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
-**Ce qui changera pour toi, une fois en ligne** : la phrase sur la moyenne du groupe disparaît de l'Aperçu. Dans Labo › Outils d'observation, après tes seuils, tu vois ce qu'ils donnent sur ton groupe, puis tu choisis d'afficher ou non la réponse du groupe, éteinte au départ. Activée, une carte de l'Aperçu compare ta répartition au repère 80-15-5.
+**Ce qui changera pour toi, une fois en ligne** : la phrase sur la moyenne du groupe disparaît de l'Aperçu. Dans Labo › Outils d'observation, après tes seuils, tu vois ce qu'ils donnent sur ton groupe, puis tu choisis d'afficher ou non la réponse du groupe, éteinte au départ. Activée, une carte de l'Aperçu compare ta répartition au repère 80-15-5, sur les étudiant·es dont la note s'affiche, plus « Non-participation » (ta décision B). Tous les signaux restent visibles dans le réglage.
 
-**Ce qui reste à toi** : une décision et des mots (`plans de travail/RAPPORT-2026-10-31-reponse-du-groupe.md`). Tant que les notes montent, les étudiant·es sans note faussent la part au niveau 1 : le rapport propose trois issues. Les phrases de l'Aide sont à valider avant la release. Les mots du réglage des barres, eux, sont tranchés.
+**Ce qui reste à toi** : les mots (`plans de travail/RAPPORT-2026-10-31-reponse-du-groupe.md`), à valider avant la release, dont les phrases de l'Aide. Les mots du réglage des barres, eux, sont tranchés.
 
-**Vérifié comment** : Vitest entier vert (10 553) ; 25 changements volontaires du code font tous rougir une garde ; les specs WebKit touchées vertes (6/6) ; captures dans WebKit, sur le pack de démo. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+**Vérifié comment** : Vitest entier vert (10 560) ; 33 changements volontaires du code font tous rougir une garde, dont un qui passait d'abord et a appelé une garde de plus ; les specs WebKit touchées vertes (7/7) ; captures dans WebKit, sur le pack de démo. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
 
 📝 **LE 30 OCTOBRE 2026, 23 H 05 : LE JAUNE EST ÉCLAIRCI, PAS EN LIGNE.** *Écrit par Claude Code.*
 

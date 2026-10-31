@@ -11,7 +11,7 @@
 
 **Porte** : `CONSIGNE-LOT-2026-10-30-reponse-du-groupe.md`. Rapport : `plans de travail/RAPPORT-2026-10-31-reponse-du-groupe.md`. Sans release ni push, à la demande de Grégoire.
 
-**Attend** : la relecture de Cowork ; Grégoire : la part au niveau 1 pendant la montée des notes (A, B ou C, au rapport) et les mots de l'Aide, avant la release ; puis le verdict complet du Mac, Cowork fermé. Vitest entier vert (10 553) ; seules les specs WebKit touchées ont tourné (6/6).
+**Attend** : la relecture de la retouche B par Cowork ; les mots par Grégoire, avant la release ; puis le verdict complet du Mac, Cowork fermé. Lot accepté (`VERDICT-RELECTURE-2026-10-31-reponse-du-groupe.md`), décision B appliquée. Vitest entier vert (10 560) ; seules les specs WebKit touchées ont tourné (7/7).
 
 ## 30 OCT. 2026, 23 H 05 (Claude Code) : **LE JAUNE « SIGNALÉ » COMMITÉ SUR `main`, NON POUSSÉ ; EN LIGNE : TOUJOURS 1.228.0**
 

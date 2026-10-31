@@ -16,7 +16,9 @@
 
 Rien n'écrit dans les données : la préférence est neuve et absente par défaut. Pas de stock à réparer.
 
-## Une question pour Grégoire : les étudiant·es sans note dans la part au niveau 1
+## Décidé : B (Grégoire, 31 oct., 8 h 14) – les étudiant·es sans note dans la part au niveau 1
+
+Appliqué, voir « La retouche B » en fin de rapport. La question telle que posée :
 
 La consigne met « En attente » hors des pourcentages (supposition de Cowork, nommée). Or, sans note affichée, un·e étudiant·e ne peut pas être au niveau 1 : seuls ceux et celles qui portent un signal ont un niveau. Le code le disait déjà : « Avant la note provisoire, les seuls élèves à niveau feraient 100 % » (`genererBarreRaI`).
 
@@ -31,8 +33,9 @@ Validés, repris tels quels : le texte du réglage, les deux phrases de la carte
 
 **À valider avant la release :**
 
-- **Aide, carte RàI** (remplace la phrase de groupe) : « La réponse du groupe est facultative et éteinte au départ : la case « Afficher la réponse du groupe » (Labo → Outils d'observation). Activée, une carte de l'Aperçu compare la répartition de ton groupe au repère de la RàI (80 % au niveau 1, 15 % au niveau 2, 5 % au niveau 3). Sous 70 % au niveau 1, elle dit que le groupe demande un enseignement universel renforcé, quelle qu'en soit la cause. Les étudiant·es « En attente » restent hors des pourcentages, et la carte attend qu'au moins une note du cours s'affiche. Elle n'enlève aucun signal individuel. »
+- **Aide, carte RàI** (remplace la phrase de groupe) : « La réponse du groupe est facultative et éteinte au départ : la case « Afficher la réponse du groupe » (Labo → Outils d'observation). Activée, une carte de l'Aperçu compare la répartition de ton groupe au repère de la RàI (80 % au niveau 1, 15 % au niveau 2, 5 % au niveau 3). Sous 70 % au niveau 1, elle dit que le groupe demande un enseignement universel renforcé, quelle qu'en soit la cause. La part se calcule sur les étudiant·es dont la note du cours s'affiche, plus « Non-participation » ; les autres sont en attente, hors des pourcentages, et la carte attend qu'au moins une note du cours s'affiche. Elle n'enlève aucun signal individuel. »
 - **Guide RàI** (la phrase de groupe y était aussi) : « Si tu l'actives, la réponse du groupe compare ta répartition au repère de la RàI, sans enlever aucun signal individuel. »
+- **Ajouté par la retouche B** : « + {N} avant la note du cours », dans la case d'un niveau.
 - **Ajoutés par moi** : « {N} étudiant·es en attente de la note du cours, hors des pourcentages. » (la consigne s'arrête à « du cours ») ; « La note du cours ne s'affiche encore pour aucun·e étudiant·e : la comparaison attend. » ; « lu dans l'échelle de tes copies » ; l'étiquette « Aperçu › La réponse du groupe » ; « Ton groupe » et « Repère de la RàI » viennent de l'ébauche.
 - **Repris de l'ébauche, corrigés selon la consigne** : « Ce que tes seuils donnent sur ce groupe » ; « S'affiche une fois tes seuils posés. » ; « Voir ce que mes seuils donnent » ; « D'où viennent les niveaux 2 et 3 » et ses sources (« note du cours à ce jour sous ton seuil » ; « note du cours à ce jour sous ton seuil et critère de fondation en difficulté » ; « « Difficulté persistante », note au-dessus du seuil » ; « « Difficulté persistante », avant la note du cours », qui est neuve ; « signalement diagnostique » ; « « Non-participation » ») ; « Sensibilité de ton seuil. À {X} %, {N} étudiant·e(s) de plus aux niveaux 2 ou 3. À {Y} %, {M} de moins. » ; « Tu peux changer tes seuils. Change-les pour ce qu'ils disent d'un travail suffisant, pas pour obtenir une autre répartition. » ; « Facultative. Rien ne s'affiche tant que tu ne l'actives pas. » Les niveaux disent « Universel · Préventif · Intensif ».
 
@@ -41,7 +44,7 @@ Validés, repris tels quels : le texte du réglage, les deux phrases de la carte
 - **Le geste « Voir »**, repris du script de l'ébauche : la répartition ne se calcule qu'au clic, et la case attend ce clic. Déjà activée, elle reste accessible pour pouvoir s'éteindre.
 - **Le seuil se lit sur le chiffre écrit** : 69,6 % s'écrit 70 % et donne « proche du repère ». La phrase ne dit jamais « 70 % » et « renforcé » ensemble.
 - **La sensibilité simule tout le seuil** : « Difficulté persistante » suit le seuil déplacé, comme si l'échelle changeait. Rien n'est écrit.
-- **Deux pourcentages différents à l'écran** tant que des étudiant·es sont en attente : la barre RàI compte tout le groupe (lot 3 des seuils), la carte seulement ceux et celles qui ont un niveau.
+- **Deux pourcentages différents à l'écran** tant que des étudiant·es sont en attente : la barre RàI compte tout le groupe (lot 3 des seuils), la carte seulement celles et ceux que retient la décision B.
 - **« Tous les groupes »** : une seule carte, sur tout ce que montre la barre RàI. L'ancienne phrase nommait le groupe en cause ; la carte ne le fait pas.
 - **RàI décochée** : pas de carte, comme la barre. Le réglage reste visible.
 - **Couleurs** : celles de la RàI dans l'application (bleu, indigo, violet), pas le vert, l'ambre et le rouge de l'ébauche. Les parts s'écrivent à côté des barres : un segment de 5 % ne peut pas les porter. En clair, les jetons des niveaux 2 et 3 étaient sous 3:1 sur le blanc (2,98 et 2,72) : la carte y prend les teintes de la légende de la barre RàI.
@@ -58,3 +61,22 @@ Validés, repris tels quels : le texte du réglage, les deux phrases de la carte
 ## Hors du lot
 
 La popup de l'Aide (`js/accompagnement-contenu-popup.js`) dit « Niveau 1 (vert), Niveau 2 (jaune), Niveau 3 (rouge) », alors que barre et badges sont bleu, indigo et violet. Issue : relevé ici, sans correctif ; le BACKLOG attend un symptôme vécu.
+
+## La retouche B (31 oct.)
+
+Exécute la section « Pour Claude Code » de `VERDICT-RELECTURE-2026-10-31-reponse-du-groupe.md`.
+
+| Point | Fait | Où |
+|---|---|---|
+| 1. La part : note affichée, plus « Non-participation » ; les autres en attente ; la garde reste | Oui | `repartitionDuGroupe` |
+| 2. Une seule source | Oui : la carte et le réglage passent tous deux par cette fonction | `genererCarteReponseDuGroupe`, `ceQueTesSeuilsDonnent` |
+| 3. Aucun signal ne disparaît du réglage | Oui | « D'où viennent les niveaux 2 et 3 », la sensibilité, et la case du niveau |
+| 4. La garde sur l'exemple du rapport : 100 %, « proche du repère » | Oui, en comptes posés et sur la vraie règle du niveau | sentinelle |
+
+**Tranché (technique)** : dans le réglage, la case d'un niveau garde le nombre qui entre dans le pourcentage, et ajoute dessous « + 5 avant la note du cours » quand des signaux attendent leur note. Le niveau et la liste des sources se recoupent ainsi d'un coup d'œil. La sensibilité compte tous les signaux, avec ou sans note.
+
+**À savoir** : ces étudiant·es comptent dans « en attente de la note du cours » tout en portant un niveau 2 ou 3 sur la barre RàI et dans leur profil. Le niveau de personne ne change.
+
+**Aussi modifiée** : la phrase proposée pour la carte RàI de l'Aide, qui décrivait l'ancienne règle. Elle reste à valider, et « Labo → » reste à corriger avec elle (verdict).
+
+**Vérifié comment** : Vitest entier et specs WebKit touchées, chiffres dans `OU-EN-EST-ON.md`. 8 changements volontaires du code font tous rougir une garde : journal en fin de sentinelle. Le huitième, l'Aide revenue à l'ancienne règle, passait d'abord sans rougir : une garde a été ajoutée. Les captures du 31 oct. restent justes : le pack de démo a toutes ses notes, la retouche n'y change rien.

@@ -193,7 +193,22 @@ describe('§ 2 — la carte, le réglage activé', () => {
         expect(html).not.toContain('renforcé');
         expect(html).not.toContain('reponse-groupe-barre');
         expect(texte(html)).toContain('la comparaison attend');
-        expect(texte(html)).toContain('22 étudiant·es en attente');
+        // Décision B : les 3 signaux sans note sont en attente eux aussi.
+        expect(texte(html)).toContain('25 étudiant·es en attente');
+    });
+
+    it('décision B : le groupe qui monte vers ses notes, l\'exemple du rapport', () => {
+        const persistants = Array.from({ length: 5 }, () => ({ niveau: 2, motif: 'persistante-avant-la-note', noteAffichee: false }));
+        const html = texte(carte([...repete(10, 1, true), ...persistants, ...repete(10, 0, false)]));
+        expect(html).toContain('100 % de ton groupe est au niveau 1. La répartition est proche du repère de la RàI.');
+        expect(html).not.toContain('renforcé');
+        expect(html).toContain('15 étudiant·es en attente de la note du cours, hors des pourcentages.');
+    });
+
+    it('décision B : « Non-participation » reste dans les pourcentages, sans note', () => {
+        const html = texte(carte([lecture(1), { niveau: 3, motif: 'non-participation', noteAffichee: false }]));
+        expect(html).toContain('50 % de ton groupe est au niveau 1');
+        expect(html).not.toContain('en attente');
     });
 
     it('le banc complet : sous le minimum de la pratique, la carte attend', () => {
@@ -214,6 +229,48 @@ describe('§ 2 — la carte, le réglage activé', () => {
         const avant = b.lectures().map((l) => l.niveau);
         b.carte();
         expect(b.lectures().map((l) => l.niveau)).toEqual(avant);
+    });
+});
+
+describe('décision B, sur la vraie règle du niveau — la carte et le réglage disent les mêmes pourcentages', () => {
+    const groupe = () => banc([
+        ...Array.from({ length: 10 }, () => ({ P: 80, copies: [80, 80, 80, 80] })),
+        ...Array.from({ length: 5 }, () => ({ P: 40, copies: [40] })),
+        ...Array.from({ length: 10 }, () => ({ P: 80, copies: [80] }))
+    ], { ...ACTIVE, minimum: 4 });
+
+    it('le banc porte bien les trois situations', () => {
+        const motifs = groupe().lectures().map((l) => l.motif);
+        expect(motifs.filter((m) => m === 'au-dessus-de-la-ligne')).toHaveLength(10);
+        expect(motifs.filter((m) => m === 'persistante-avant-la-note')).toHaveLength(5);
+        expect(motifs.filter((m) => m === 'en-attente')).toHaveLength(10);
+    });
+
+    it('la carte : 100 %, proche du repère', () => {
+        const html = texte(groupe().carte());
+        expect(html).toContain('100 % de ton groupe est au niveau 1. La répartition est proche du repère de la RàI.');
+        expect(html).toContain('15 étudiant·es en attente');
+    });
+
+    it('le réglage : les mêmes parts, et aucun signal ne disparaît', () => {
+        const r = groupe().win.ceQueTesSeuilsDonnent();
+        expect(r.parts).toEqual({ 1: 100, 2: 0, 3: 0 });
+        expect(r.comptes).toEqual({ 1: 10, 2: 0, 3: 0 });
+        expect(r.enAttente).toBe(15);
+        expect(r.signauxSansNote).toEqual({ 2: 5, 3: 0 });
+        expect(r.sources[2]).toEqual({ 'persistante-avant-la-note': 5 });
+    });
+
+    it('la sensibilité compte tous les signaux, avec ou sans note', () => {
+        const r = groupe().win.ceQueTesSeuilsDonnent();
+        expect(r.sensibilite.bas).toEqual({ seuil: 60, deMoins: 0 });
+        expect(r.sensibilite.haut).toEqual({ seuil: 70, dePlus: 0 });
+        expect(groupe().win.determinerNiveauRaiPedagogique(DA(10), 30).niveau).toBe(0);
+    });
+
+    it('une seule source : la carte et le réglage passent par `repartitionDuGroupe`', () => {
+        expect(tranche(lire('js/tableau-bord-apercu.js'), 'function genererCarteReponseDuGroupe(', '\n}\n')).toContain('repartitionDuGroupe(lectures)');
+        expect(tranche(lire('js/profil-etudiant-calculs.js'), 'function ceQueTesSeuilsDonnent(', '\n}\n')).toContain('...repartitionDuGroupe(lectures)');
     });
 });
 
@@ -241,6 +298,7 @@ describe('§ 3 — l\'Aide et le guide ne disent plus l\'ancienne phrase', () =>
         expect(carteRai).toContain('La réponse du groupe est facultative et éteinte au départ');
         expect(carteRai).toContain('« Afficher la réponse du groupe » (Labo → Outils d\'observation)');
         expect(carteRai).not.toContain('sous la barre RàI');
+        expect(carteRai).toContain('La part se calcule sur les étudiant·es dont la note du cours s\'affiche, plus « Non-participation »');
     });
 
     it('le guide RàI non plus', () => {
@@ -256,4 +314,8 @@ describe('§ 3 — l\'Aide et le guide ne disent plus l\'ancienne phrase', () =>
  *   repère changé : 2 ; carte hors du rendu : 1 ; texte validé retouché : 1 ; case libre au départ : 1 ; case activée qu'on ne peut éteindre : 1
  *   chargement qui écrit : 1 ; phrase de groupe revenue : 1 ; Aide au chiffre écrit en dur : 1 ; phrase validée retouchée : 1 ; note validée retouchée : 1
  *   motif non-participation perdu : 1
+ * Retouche B (31 oct. 2026), même méthode, sur cette sentinelle seule :
+ *   retour au dénominateur de tous les niveaux : 4 ; non-participation hors des pourcentages : 2 ; signaux sans note perdus : 1
+ *   en attente sans les signaux : 4 ; sources limitées aux notes affichées : 2 ; garde retirée : 2 ; Aide sur l'ancienne règle : 1
+ *   (ce dernier passait d'abord sans rougir : garde ajoutée) ; dans la spec WebKit, réglage sans les signaux sans note : 1
  */

@@ -611,6 +611,7 @@
                 <span class="u-texte-petit text-muted">${NOM_DU_NIVEAU[n]}</span>
                 <strong class="seuils-donnent-compte">${r.comptes[n]}</strong>
                 <span class="u-texte-petit text-muted">${r.classes ? `${formaterPourcentage(Math.round(r.parts[n]))} du groupe` : '—'}</span>
+                ${r.signauxSansNote[n] ? `<span class="u-texte-petit text-muted">+ ${r.signauxSansNote[n]} avant la note du cours</span>` : ''}
             </div>`).join('');
         const sources = [3, 2].flatMap((n) => Object.entries(r.sources[n])
             .map(([motif, compte]) => `<li>Niveau ${n}\u00a0: ${compte}, ${NOM_DE_LA_SOURCE[motif]}</li>`));
