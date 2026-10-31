@@ -169,7 +169,7 @@ const TOOLTIPS = {
     'depist-seuil-direction':
         'Variation minimale de la moyenne d\'un critère, d\'une fenêtre d\'analyse à la précédente (la même, décalée d\'une production), pour afficher une flèche (→ ou ←) après ce critère.',
     'depist-seuil-fragile':
-        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences très fréquentes » et « Travaux manquants très fréquents ». Dans la liste des étudiant·es, un chiffre sous ce seuil est rouge.',
+        'À partir de ce seuil, le profil écrit « Quelques absences » (A) et « Quelques travaux manquants » (C) ; sous lui, « Absences très fréquentes » et « Travaux manquants très fréquents ». Dans la liste des étudiant·es, un chiffre sous ce seuil est orange brûlé.',
     'depist-seuil-progression':
         'Différence minimale (%) pour signaler une progression ou une régression entre deux productions. Seuil bas = sensible, seuil élevé = moins sensible.',
     'depist-seuils-interpretation':

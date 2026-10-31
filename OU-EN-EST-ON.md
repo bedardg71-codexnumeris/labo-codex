@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 22 H 50 : L'ORANGE BRÛLÉ ET LE PASSAGE SYMÉTRIQUE SONT CODÉS, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : la zone sous le seuil passe du rouge à l'orange brûlé dans les barres de l'Aperçu, les chiffres de la liste et les pastilles, avec une teinte propre à chaque mode. Les badges du niveau RàI restent rouges. En deux segments, le passage au seuil de la cassure a maintenant la même largeur des deux côtés : le rouge qui s'arrêtait net de l'entrée ci-dessous, c'est réglé.
+
+**Ce qui reste à toi** : dire si on éclaircit le jaune. L'orange s'en distingue bien en vision typique, mais en simulation de daltonisme rouge-vert ils se confondent dans la liste en mode sombre et dans les pastilles ; la proposition chiffrée est au rapport (`plans de travail/RAPPORT-2026-10-30-orange-brule-et-passage-symetrique.md`), rien n'est appliqué. Les mots du réglage des barres restent à valider, plus une phrase de l'aide du seuil, qui disait « rouge ». Le bouton de filtre actif reste rouge : dis-le si ça te gêne.
+
+**Vérifié comment** : Vitest entier vert (10 521) ; 22 changements volontaires du code font tous rougir une garde ; les specs WebKit touchées vertes, dont une qui mesure le contraste à l'écran dans les deux modes ; captures dans Chrome sur le Mac, clair et sombre, sur le pack de démo. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex, une personne daltonienne.
+
 📝 **LE 30 OCTOBRE 2026, 22 H 20 : LES BARRES COLORÉES DE L'APERÇU SONT CODÉES, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : les couleurs des barres passent de l'une à l'autre par un dégradé large, centré sur chaque seuil, avec le voile gardé. Dans Labo › Outils d'observation, tu peux choisir l'axe de A et de C : proportionnel, comme aujourd'hui et par défaut, ou en deux segments. P ne change pas d'axe.

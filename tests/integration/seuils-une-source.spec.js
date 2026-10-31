@@ -34,10 +34,10 @@ test('sans rien d’enregistré : les défauts 95 · 90 · 85 et les repères de
     expect(r.filtres).toContain('P < 65 %');
     // La fiche fictive de la capture du 30 oct. : A 84 et C 80 au palier le plus bas, P 68 entre les deux repères.
     expect(r.pastilles.flat()).toEqual(expect.arrayContaining(['A 84 % R', 'C 80 % R', 'P 68 % J']));
-    // Aucune fiche à P sous le premier repère dans ce pack : le rouge de P n'y paraît pas.
+    // Aucune fiche à P sous le premier repère dans ce pack : l'orange brûlé de P n'y paraît pas.
     expect(r.pastilles.flat().some((t) => t.startsWith('P') && t.endsWith(' R'))).toBe(false);
     expect(r.fond).toHaveLength(3);
-    // A : la première zone (rouge) ferme à 85 %, soit (85 − 30) / 70 de la barre.
+    // A : la première zone (orange brûlé) ferme à 85 %, soit (85 − 30) / 70 de la barre.
     expect(r.fond[0]).toContain('78.57');
     // P : la première zone ferme au repère de suffisance, 65 %, soit la moitié de la barre.
     expect(r.fond[2]).toContain('50%');
@@ -90,4 +90,39 @@ test('Outils d’observation : le champ du bas accepte 85, le désordre est refu
         ['85-89 %', 'Quelques absences', 'Quelques travaux manquants'],
         ['< 85 %', 'Absences très fréquentes', 'Travaux manquants très fréquents']
     ]);
+});
+
+// L'orange brûlé (Grégoire, 30 oct. 2026, « Attention au mode sombre ») : lu à l'écran, sur les fonds empilés tels qu'ils paraissent.
+const MESURER_CONTRASTE = `(selecteur) => {
+    const element = [...document.querySelectorAll(selecteur)].find((e) => e.getClientRects().length > 0);
+    if (!element) return null;
+    const canaux = (c) => c.match(/[\\d.]+/g).map(Number);
+    const couches = [];
+    for (let n = element; n; n = n.parentElement) {
+        const c = canaux(getComputedStyle(n).backgroundColor);
+        if (c.length === 3 || c[3] > 0) couches.push(c);
+        if (c.length === 3 || c[3] === 1) break;
+    }
+    const fond = couches.reduceRight((dessous, [r, g, b, a = 1]) => [r, g, b].map((v, i) => v * a + dessous[i] * (1 - a)), [255, 255, 255]);
+    const lum = (rgb) => rgb.map((c) => { const v = c / 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }).reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0);
+    const [haut, bas] = [lum(canaux(getComputedStyle(element).color)), lum(fond)].sort((x, y) => y - x);
+    return { couleur: getComputedStyle(element).color, contraste: (haut + 0.05) / (bas + 0.05) };
+}`;
+
+test('la zone sous le seuil est en orange brûlé dans les deux modes, à 4,5:1 au moins, dans les pastilles et la liste', async ({ page }) => {
+    await demo(page);
+    for (const [clair, pastille] of [[false, 'rgb(255, 154, 92)'], [true, 'rgb(148, 60, 0)']]) {
+        await page.evaluate((c) => document.body.classList.toggle('mode-clair', c), clair);
+        const p = await page.evaluate(`(${MESURER_CONTRASTE})('.prioritaire-indice-critique')`);
+        expect(p.couleur).toBe(pastille);
+        expect(p.contraste).toBeGreaterThanOrEqual(4.5);
+    }
+    await page.evaluate(() => naviguerVers('suivi', 'liste'));
+    await expect(page.locator('td strong[style*="--zone-bas-texte"]').first()).toBeAttached();
+    for (const [clair, liste] of [[false, 'rgb(240, 126, 51)'], [true, 'rgb(168, 68, 0)']]) {
+        await page.evaluate((c) => document.body.classList.toggle('mode-clair', c), clair);
+        const l = await page.evaluate(`(${MESURER_CONTRASTE})('td strong[style*="--zone-bas-texte"]')`);
+        expect(l.couleur).toBe(liste);
+        expect(l.contraste).toBeGreaterThanOrEqual(4.5);
+    }
 });

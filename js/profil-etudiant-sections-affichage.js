@@ -1594,6 +1594,7 @@ function genererSectionAccompagnement(da) {
  * @param {string} da - Numéro de DA
  * @returns {string} - HTML de la section
  */
+// Sans appelant (mesuré le 30 oct. 2026) : ses couleurs ne paraissent nulle part à l'écran.
 function genererSectionMobilisation(da) {
     const indices = calculerTousLesIndices(da);
 
@@ -3944,6 +3945,7 @@ ${noteLue ? `
 /**
  * Génère le HTML de la section assiduité - VERSION CSS NATIVE
  */
+// Sans appelant (mesuré le 30 oct. 2026) : ses couleurs ne paraissent nulle part à l'écran.
 function genererSectionAssiduiteLegacy(da) {
     const details = obtenirDetailsAssiduite(da);
     const taux = details.periodesOffertes > 0

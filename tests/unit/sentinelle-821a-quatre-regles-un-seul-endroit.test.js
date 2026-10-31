@@ -136,8 +136,8 @@ describe('La carte Mobilisation (A ET C, mêmes bornes 95 / 90 / 85 par défaut)
         expect(m(1, 1, true)).toEqual({ code: 'decrochage', niveau: 'Décrochage', couleur: '#9e9e9e' });
     });
 
-    it('les couleurs n\'ont pas bougé', () => {
-        expect(m(0.5, 0.5).couleur).toBe('#dc3545');
+    it('les couleurs n\'ont pas bougé, sauf les deux sous le seuil : orange brûlé (Grégoire, 30 oct. 2026)', () => {
+        expect(m(0.5, 0.5).couleur).toBe('#CC5500');
         expect(m(0.5, 0.9).couleur).toBe('#ff9800');
         expect(m(0.87, 0.87).couleur).toBe('#ffc107');
         expect(m(0.92, 0.92).couleur).toBe('#28a745');
@@ -185,9 +185,10 @@ describe('Les mots et les couleurs de A et C — un seuil sur un scalaire, régl
         const { win } = monter();
         const attendu = [
             // [valeur, niveau A, niveau C, couleur]
-            [59, 'Absences très fréquentes', 'Travaux manquants très fréquents', '#dc2626'],
-            [60, 'Absences très fréquentes', 'Travaux manquants très fréquents', '#dc2626'],
-            [84, 'Absences très fréquentes', 'Travaux manquants très fréquents', '#dc2626'],
+            // Sous le seuil : l'orange brûlé de chaque mode (Grégoire, 30 oct. 2026).
+            [59, 'Absences très fréquentes', 'Travaux manquants très fréquents', 'var(--zone-bas-texte)'],
+            [60, 'Absences très fréquentes', 'Travaux manquants très fréquents', 'var(--zone-bas-texte)'],
+            [84, 'Absences très fréquentes', 'Travaux manquants très fréquents', 'var(--zone-bas-texte)'],
             [85, 'Quelques absences', 'Quelques travaux manquants', '#ca8a04'],
             [86, 'Quelques absences', 'Quelques travaux manquants', '#ca8a04'],
             [89, 'Quelques absences', 'Quelques travaux manquants', '#ca8a04'],
