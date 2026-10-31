@@ -8932,7 +8932,7 @@
                             <div class="etiquettes-effet"><span class="etiquette-effet">Aperçu › barres Assiduité et Complétion</span></div>
                         </div>
                         <p class="text-muted u-mb-8 u-texte-petit">
-                            Comment les barres Assiduité et Complétion répartissent leur largeur. La barre Performance reste proportionnelle. Ce choix ne change ni les seuils, ni les couleurs, ni aucun calcul.
+                            Choisis comment les barres Assiduité et Complétion répartissent leur largeur. La barre Performance reste proportionnelle. Ce choix ne touche que l'affichage&nbsp;: aucun seuil ni aucun calcul ne change.
                         </p>
                         <div class="grille-2col">
                             <div class="bloc-option">
@@ -8941,7 +8941,7 @@
                                     <span class="u-texte-gras">Proportionnel (par défaut)</span>
                                 </label>
                                 <small class="bloc-option-aide u-texte-petit">
-                                    Chaque point de pourcentage a la même largeur, de 30 à 100&nbsp;%. Les distances se comparent à l'œil, mais un groupe régulier se tasse à droite.
+                                    Chaque point de pourcentage a la même largeur, de 30 à 100&nbsp;%. Les écarts se comparent à l'œil, mais quand presque tout le groupe dépasse tes seuils, il se tasse à droite de la barre.
                                 </small>
                                 <div class="barre-exemple-axe" data-exemple-axe="proportionnel" aria-hidden="true"></div>
                             </div>
@@ -8951,7 +8951,7 @@
                                     <span class="u-texte-gras">Deux segments</span>
                                 </label>
                                 <small class="bloc-option-aide u-texte-petit">
-                                    De 30&nbsp;% à ton seuil le plus bas, l'axe tient dans le premier quart de la barre&nbsp;; de ce seuil à 100&nbsp;%, dans les trois autres. Un groupe régulier s'étale, mais les distances de part et d'autre du seuil ne se comparent plus.
+                                    De 30&nbsp;% à ton seuil le plus bas, l'axe tient dans le premier quart de la barre&nbsp;; de ce seuil à 100&nbsp;%, dans les trois autres. Quand presque tout le groupe dépasse tes seuils, il s'étale sur la barre, mais les écarts ne se comparent plus d'un segment à l'autre.
                                 </small>
                                 <div class="barre-exemple-axe" data-exemple-axe="deuxSegments" aria-hidden="true"></div>
                             </div>
@@ -11799,7 +11799,7 @@
     <script src="js/indices.js?v=20261017a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=20261030q"></script> <!-- Les barres de l’Aperçu (30 oct.) : passages larges, axe au choix ·Lot 2 des seuils (30 oct.) : la phrase sous la barre RàI lit le signal de groupe (#1191) · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
+    <script src="js/tableau-bord-apercu.js?v=20261030r"></script> <!-- Les barres de l’Aperçu (30 oct.) : passages larges, axe au choix ·Lot 2 des seuils (30 oct.) : la phrase sous la barre RàI lit le signal de groupe (#1191) · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20261030d"></script> <!-- #1178, lot 5 (30 oct.) : obtenirTermeProduction suit la variante · Standards sans portfolio, lot 2 (29 oct.) : le dépistage lit le pool de la note · #1117, suite (20 oct.) : SOLO désactivé, le dépistage et le suivi des fondations lisent tous les critères ; le survol du niveau sans palier SOLO · Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-calculs.js?v=20261030o"></script> <!-- Lot 2 des seuils (30 oct.) : le niveau RàI comparé au groupe-cours · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : l’IPB lit criteresSuiviFondations · #1117 (19 oct.) : la cible nomme le défi sans étiquette SOLO si le réglage est désactivé · Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-rapport.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
