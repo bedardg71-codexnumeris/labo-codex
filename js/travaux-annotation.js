@@ -84,6 +84,7 @@
     const SEUIL_TOUCHER_PX = 10; // au-delà, le doigt a glissé : ce n'est plus un toucher
     const DELAI_PAUME_MS = 500;  // un doigt si près d'un geste du Pencil est la paume qui écrit
     let dernierStyletMs = 0;
+    let gesteAuDoigt = false;    // le geste en cours (outil Sélection) vient d'un doigt : un second doigt l'abandonne
 
     // Presse-papiers annotations : sur window pour persister entre fichiers/étudiants
     // même si le module est désactivé/réactivé
@@ -514,14 +515,55 @@
     }
 
     /**
+     * Un second doigt rejoint le premier : le toucher en attente tombe, et ce que le doigt faisait sous l'outil
+     * Sélection (le seul à l'écouter : déplacer, redimensionner, tracer un rectangle de sélection) est défait.
+     */
+    function abandonnerGesteDuDoigt() {
+        toucherEnAttente = null;
+        if (!enDessin || !gesteAuDoigt) return;
+        const donneesPage = obtenirDonneesPage();
+        if (donneesMultiplesAvantModif) {
+            selectionsMultiples.forEach((sel, i) => {
+                if (donneesMultiplesAvantModif[i]) restaurerAnnotation(donneesPage, sel.type, donneesMultiplesAvantModif[i]);
+            });
+        } else if (donneesAvantModif && annotationSelectionnee) {
+            restaurerAnnotation(donneesPage, annotationSelectionnee.type, donneesAvantModif);
+        }
+        enDessin = false;
+        gesteAuDoigt = false;
+        rectangleSelection = null;
+        poigneeActive = null;
+        deplacementOrigine = null;
+        dimensionsOriginales = null;
+        donneesAvantModif = null;
+        donneesMultiplesAvantModif = null;
+        deselectionner();
+    }
+
+    /**
+     * Le Pencil écrit : la paume posée n'est pas un toucher (#1123). Un second doigt, c'est le déplacement de la
+     * page (travaux-visionneuse.js), quel que soit l'outil : ce que le premier avait commencé s'abandonne.
+     * @returns {boolean} true si l'événement s'arrête ici
+     */
+    function premierTriDuPointeur(e) {
+        if (e.pointerType === 'pen') {
+            toucherEnAttente = null;
+            dernierStyletMs = Date.now();
+            return false;
+        }
+        if (e.pointerType === 'touch' && !e.isPrimary) {
+            abandonnerGesteDuDoigt();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Debut du trait / interaction
      */
     function onPointerDown(e) {
         const outil = _outils().getOutilActif();
-        if (e.pointerType === 'pen') {
-            toucherEnAttente = null; // #1123 — le Pencil écrit : la paume posée n'est pas un toucher
-            dernierStyletMs = Date.now();
-        }
+        if (premierTriDuPointeur(e)) return;
 
         if (modePanActif) return;
         if (outil.id === 'position') return;
@@ -535,9 +577,7 @@
                 // #1123 (rapport de Grégoire, 20 oct., iPad) — sauf pour un code ou un tampon, qui
                 // se pose d'un seul toucher : on attend le relâcher (onPointerUp). Un second doigt
                 // (pincement) ou un glissé annule ; le tracé garde son rejet de paume.
-                if (!e.isPrimary) {
-                    toucherEnAttente = null;
-                } else if (estOutilDunToucher(outil) && Date.now() - dernierStyletMs > DELAI_PAUME_MS) {
+                if (estOutilDunToucher(outil) && Date.now() - dernierStyletMs > DELAI_PAUME_MS) {
                     toucherEnAttente = { pointerId: e.pointerId, x: e.clientX, y: e.clientY };
                 }
                 return;
@@ -546,6 +586,7 @@
 
         e.preventDefault();
         avantPremiereAnnotation();
+        gesteAuDoigt = e.pointerType === 'touch';
 
         const rect = canvasAnnotation.getBoundingClientRect();
         const x = e.clientX - rect.left;
