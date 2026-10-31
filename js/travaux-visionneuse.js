@@ -830,6 +830,7 @@
         origineFixee: false,
         centreX: 0,
         centreY: 0,
+        echelleEngagee: null,
         // Touch-only
         distanceInitiale: 0
     };
@@ -870,6 +871,12 @@
             conteneur.addEventListener('touchcancel', onPinchEnd);
         }
 
+        // Deux doigts déplacent la page, quel que soit l'outil (iPad). Sur Mac, aucun de ces événements.
+        conteneur.addEventListener('touchstart', amorcerPanDeuxDoigts, { passive: true });
+        conteneur.addEventListener('touchmove', onPanDeuxDoigtsMove, { passive: false });
+        conteneur.addEventListener('touchend', amorcerPanDeuxDoigts);
+        conteneur.addEventListener('touchcancel', amorcerPanDeuxDoigts);
+
         // Prevention supplementaire : bloquer le zoom natif sur tout le document
         // quand un pinch est en cours dans notre zone
         document.addEventListener('touchmove', onDocumentTouchMove, { passive: false });
@@ -887,6 +894,75 @@
         }
     }
 
+    /* --- Deux doigts déplacent la page (iPad) --- */
+
+    // Un Pencil posé ou levé depuis moins que ce délai : les « doigts » sont la paume. Même valeur que le
+    // rejet de paume du tracé (DELAI_PAUME_MS, travaux-annotation.js).
+    const DELAI_PAUME_PAN_MS = 500;
+    // Sous ce rapport de distance entre les doigts, ils glissent : ils ne pincent pas. Sans ce seuil, le léger
+    // écart de tout glissé à deux doigts changeait le zoom et re-rendait la page.
+    const SEUIL_PINCEMENT = 0.06;
+    let panDeuxDoigts = null;
+    let dernierStyletPanMs = 0;
+
+    /**
+     * Pose ou repose le point de départ du déplacement à chaque doigt posé ou levé : c'est ce qui évite un saut
+     * quand le nombre de doigts change. Le stylet n'est jamais un doigt.
+     */
+    function amorcerPanDeuxDoigts(e) {
+        const touches = Array.from(e.touches || []);
+        const estStylet = (t) => t.touchType === 'stylus';
+        if (touches.some(estStylet) || Array.from(e.changedTouches || []).some(estStylet)) dernierStyletPanMs = Date.now();
+        if (touches.length < 2 || !fichierActuel || !conteneurGestesZoom || Date.now() - dernierStyletPanMs < DELAI_PAUME_PAN_MS) {
+            panDeuxDoigts = null;
+            return;
+        }
+        panDeuxDoigts = {
+            x: (touches[0].clientX + touches[1].clientX) / 2,
+            y: (touches[0].clientY + touches[1].clientY) / 2,
+            scrollX: conteneurGestesZoom.scrollLeft,
+            scrollY: conteneurGestesZoom.scrollTop
+        };
+        // Le déplacement d'un doigt de l'outil Position cède la place.
+        if (panState.actif) {
+            panState.actif = false;
+            conteneurGestesZoom.classList.remove('travaux-pan-actif');
+            conteneurGestesZoom.classList.add('travaux-pan-pret');
+        }
+    }
+
+    function onPanDeuxDoigtsMove(e) {
+        // Non annulable : le navigateur défile déjà de lui-même (canevas d'annotation inactif), on le laisse faire.
+        if (!panDeuxDoigts || !e.touches || e.touches.length < 2 || !e.cancelable) return;
+        e.preventDefault();
+        const x = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const y = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const avantX = conteneurGestesZoom.scrollLeft;
+        const avantY = conteneurGestesZoom.scrollTop;
+        conteneurGestesZoom.scrollLeft = panDeuxDoigts.scrollX - (x - panDeuxDoigts.x);
+        conteneurGestesZoom.scrollTop = panDeuxDoigts.scrollY - (y - panDeuxDoigts.y);
+        // Pendant un pincement, le point fixe de l'aperçu défile avec la page : la fin du geste doit le retrouver
+        // là où il est, sinon le document saute au re-rendu.
+        if (pinchState.origineFixee) {
+            pinchState.centreX -= conteneurGestesZoom.scrollLeft - avantX;
+            pinchState.centreY -= conteneurGestesZoom.scrollTop - avantY;
+        }
+    }
+
+    /**
+     * L'échelle d'un pincement, à partir de l'échelle brute du geste. Tant que des doigts posés restent sous le
+     * seuil, ils glissent : null, le zoom ne bouge pas. Le seuil franchi, l'échelle repart de 1, sans saut.
+     * Sans doigts suivis (trackpad du Mac), l'échelle brute, comme avant.
+     */
+    function echelleDuPincement(brute) {
+        if (!panDeuxDoigts) return brute;
+        if (pinchState.echelleEngagee === null) {
+            if (Math.abs(brute - 1) < SEUIL_PINCEMENT) return null;
+            pinchState.echelleEngagee = brute;
+        }
+        return brute / pinchState.echelleEngagee;
+    }
+
     /* --- Safari Gesture Events (iPad + macOS Safari) --- */
 
     /**
@@ -900,6 +976,7 @@
         pinchState.zoomInitial = zoomActuel;
         pinchState.zoomCible = zoomActuel;
         pinchState.origineFixee = false;
+        pinchState.echelleEngagee = null;
     }
 
     /**
@@ -909,7 +986,9 @@
         if (!pinchState.actif || !fichierActuel) return;
         e.preventDefault();
 
-        const zoomCible = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, pinchState.zoomInitial * e.scale));
+        const echelle = echelleDuPincement(e.scale);
+        if (echelle === null) return;
+        const zoomCible = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, pinchState.zoomInitial * echelle));
 
         if (wrapperGestesZoom) {
             // Fixer le centre de zoom une seule fois
@@ -962,6 +1041,7 @@
         pinchState.zoomInitial = zoomActuel;
         pinchState.zoomCible = zoomActuel;
         pinchState.origineFixee = false;
+        pinchState.echelleEngagee = null;
     }
 
     /**
@@ -973,7 +1053,8 @@
         e.preventDefault();
 
         const distanceCourante = distanceTouches(e.touches[0], e.touches[1]);
-        const ratio = distanceCourante / pinchState.distanceInitiale;
+        const ratio = echelleDuPincement(distanceCourante / pinchState.distanceInitiale);
+        if (ratio === null) return;
         const zoomCible = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, pinchState.zoomInitial * ratio));
 
         if (wrapperGestesZoom) {
@@ -1040,6 +1121,7 @@
     }
 
     async function finaliserPinchZoom() {
+        pinchState.origineFixee = false;
         await finaliserZoomGeste(pinchState.zoomCible, pinchState.centreX, pinchState.centreY);
         pinchState.zoomCible = null;
     }
@@ -1174,6 +1256,7 @@
 
     function onPanPointerDown(e) {
         if (!fichierActuel) return;
+        if (e.pointerType === 'touch' && !e.isPrimary) return; // un second doigt : voir amorcerPanDeuxDoigts
         var estModePosition = typeof travauxOutils !== 'undefined'
             && travauxOutils.getOutilActif().id === 'position';
         var estSpaceDrag = panState.spaceActif && e.button === 0;
