@@ -1212,6 +1212,7 @@
                         <div class="annot-toolbar-fichiers travaux-fichiers-compact">
                             ${_htmlBadgesGrille}
                         </div>
+                        ${travauxOutils.genererHTMLBandePalettes()}
                         <div class="annot-toolbar-separateur"></div>
                         <div class="annot-toolbar-outils">
                             <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
@@ -2781,10 +2782,16 @@
             ? `<button class="travaux-badge-supprimer" data-stop data-action="travauxUI.supprimerFichierBadge" data-param="${f.id}" title="Déplacer ce fichier à la corbeille"><img src="icons/icons8-trash.svg" alt="" class="btn-delete-icon"></button>`
             : '';
 
+        // Le profil de CET élève, sans changer de copie (partie G). La vue Archivage n'en a pas : elle sert à exporter
+        // et à retirer des copies, et son étiquette porte déjà une corbeille.
+        const boutonProfil = (!estVueArchivage && etudiant)
+            ? `<button class="travaux-badge-profil" data-stop data-action="ouvrirProfilDepuisAnnotation" data-param="${echapperHtml(f.etudiantDA)}" title="Voir le profil de l\u2019\u00e9tudiant\u00b7e" aria-label="Voir le profil de l\u2019\u00e9tudiant\u00b7e"><img src="icons/icon-profile.svg" alt="" class="btn-inline-icon"></button>`
+            : '';
+
         return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${evaluation ? `<button class="travaux-badge-retro" data-stop data-action="travauxUI.afficherRetroaction" data-param="${f.id}" title="Aperçu rétroaction"><img src="icons/icons8-speaker-notes.svg" alt="" class="btn-inline-icon"></button>` : ''}${verrou}${boutonSupprimer}
+        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${boutonProfil}${verrou}${boutonSupprimer}
     </div>`;
     }
 
@@ -5123,6 +5130,9 @@
             var el = document.getElementById(id);
             if (el) el.classList.add('u-hide');
         });
+        // Leur bande suit : hors d'Annoter, ces palettes ne s'ouvrent pas.
+        var bande = document.getElementById('annot-bande-palettes');
+        if (bande) bande.classList.add('u-hide');
     }
 
     function afficherPalettesAnnotation() {
@@ -5131,6 +5141,8 @@
             var el = document.getElementById(id);
             if (el) el.classList.remove('u-hide');
         });
+        var bande = document.getElementById('annot-bande-palettes');
+        if (bande) bande.classList.remove('u-hide');
         // 24 oct. 2026 — de retour d'« Évaluer », le bouton du verrou dit l'état enregistré.
         if (typeof window.mettreAJourVerrouAnnotation === 'function') window.mettreAJourVerrouAnnotation();
     }
@@ -5440,6 +5452,9 @@
             var el = document.getElementById(id);
             if (el) el.classList.add('u-hide');
         });
+        // Leur bande suit : hors d'Annoter, ces palettes ne s'ouvrent pas.
+        var bande = document.getElementById('annot-bande-palettes');
+        if (bande) bande.classList.add('u-hide');
     }
 
     /**
@@ -7232,153 +7247,6 @@
         }
     }
 
-    /**
-     * Affiche un modal d'aperçu/édition de la rétroaction globale
-     * pour un fichier évalué depuis la page d'archivage.
-     * @param {string} fichierId - ID du fichier
-     */
-    function afficherRetroaction(fichierId) {
-        const fichier = travauxStockage.obtenirFichierParId(fichierId);
-        if (!fichier) return;
-
-        const evaluation = travauxResolution.trouverEvaluationPourFichier(fichier);
-        // Indicateur visuel si ambiguïté détectée
-        const avert = travauxResolution.dernierAvertissement && travauxResolution.dernierAvertissement();
-        if (avert) {
-            afficherAvertissementResolution(avert);
-        }
-        if (!evaluation) return;
-
-        const etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
-        const nomEtudiant = etudiant
-            ? (etudiant.nom ? `${echapperHtml(etudiant.prenom)} ${echapperHtml(etudiant.nom)}` : echapperHtml(etudiant.prenom))
-            : echapperHtml(evaluation.etudiantNom || fichier.etudiantDA || 'Inconnu');
-
-        // Tableau des critères en lecture seule
-        let criteresHTML = '';
-        if (evaluation.criteres && evaluation.criteres.length > 0) {
-            const lignes = evaluation.criteres.map(c => {
-                // ⚠ #672 — TABLEAU DE RÉVISION, côté enseignant·e. Même remarque qu'à
-                // `travaux-export-pdf.js` : une évaluation enregistrée avant le
-                // 1er septembre 2026 en mode simple porte l'amorce du gabarit dans
-                // `c.retroaction`. Le PDF remis à l'élève est rattrapé par la garde
-                // d'amorces de `synthese-retroaction-data.js` ; cet extrait ne l'est pas,
-                // et c'est assumé — il ne sort pas de l'écran de l'enseignant·e.
-                // ✅ ANONYMISATION (Tier 0.3) : anonymiser les prénoms dans les rétroactions
-                const retroTexte = typeof anonymiserTexteRetroaction === 'function'
-                    ? anonymiserTexteRetroaction(c.retroaction || '', evaluation.etudiantDA)
-                    : (c.retroaction || '');
-                const extrait = retroTexte ? echapperHtml(retroTexte.substring(0, 120)) : '';
-                return `<li>
-                    <strong>${echapperHtml(c.critereNom || '')}</strong>
-                    <span class="niveau">${echapperHtml((typeof c.points === 'number') ? `${c.points} / ${c.ponderation}` : (c.niveauSelectionne || '—'))}</span>
-                    <span class="retro-texte">${extrait}</span>
-                </li>`;
-            }).join('');
-            criteresHTML = `
-                <h4 style="margin: 12px 0 4px;">Critères</h4>
-                <ul class="travaux-retro-criteres">${lignes}</ul>`;
-        }
-
-        // Lire le réglage affichageNote de la pratique active du groupe-cours
-        let modeNote = 'complet';
-        try {
-            // Lot N1b (21 sept. 2026) : l'entrée que rend LA désignation ; sans pratique, note complète.
-            const pratiqueActive = (typeof designerPratiqueActive === 'function') ? designerPratiqueActive().donnees : null;
-            if (pratiqueActive?.affichageNote === 'lettre') modeNote = 'lettre';
-        } catch(e) { console.warn('[Travaux-UI] pratique affichageNote fallback:', e.message || e); }
-
-        // #941 lot S1 (décision A) — une copie en points : sa note, jamais un niveau ; ses critères
-        // par leurs points (ci-dessus), pas par le niveau déduit.
-        const enPoints = typeof evaluationEnPoints === 'function' && evaluationEnPoints(evaluation);
-        const noteTexte = evaluation.noteFinale != null ? formaterNotePourcentage(evaluation.noteFinale) : '—';
-        let noteHTML;
-        if (enPoints) {
-            noteHTML = `Note : <strong>${noteTexte}</strong>`;
-        } else if (modeNote === 'lettre') {
-            noteHTML = `Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong>`;
-        } else {
-            noteHTML = `Note : <strong>${noteTexte}</strong> &nbsp;|&nbsp; Niveau : <strong>${echapperHtml(evaluation.niveauFinal || '—')}</strong>`;
-        }
-
-        // Construire le modal
-        const html = `
-        <div class="modal-overlay actif" id="travaux-modal-retroaction" data-close-on-bg="travauxUI.fermerModalRetroaction">
-            <div class="modal-contenu" style="max-width: 620px;">
-                <button class="modal-fermer" data-action="travauxUI.fermerModalRetroaction" aria-label="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
-                <h3 class="modal-titre">Rétroaction — ${nomEtudiant}</h3>
-
-                <div class="travaux-retro-entete">
-                    <div>Production : <strong>${echapperHtml(evaluation.productionNom || '—')}</strong></div>
-                    <div>Grille : <strong>${echapperHtml(evaluation.grilleNom || '—')}</strong></div>
-                    <div>${noteHTML}</div>
-                </div>
-
-                ${criteresHTML}
-
-                <h4 style="margin: 12px 0 4px;">Rétroaction globale</h4>
-                <textarea id="travaux-modal-retro-texte" class="travaux-retro-textarea">${echapperHtml(typeof anonymiserTexteRetroaction === 'function' ? anonymiserTexteRetroaction(evaluation.retroactionFinale || '', evaluation.etudiantDA) : (evaluation.retroactionFinale || ''))}</textarea>
-
-                <div class="modal-actions" style="margin-top: 12px;">
-                    <button class="btn btn-secondaire" data-action="travauxUI.fermerModalRetroaction">Annuler</button>
-                    <button class="btn btn-principal" data-action="travauxUI.sauvegarderRetroactionDepuisModal" data-param="${fichierId}">Enregistrer</button>
-                </div>
-            </div>
-        </div>`;
-
-        // Retirer un modal existant
-        const existant = document.getElementById('travaux-modal-retroaction');
-        if (existant) existant.remove();
-
-        document.body.insertAdjacentHTML('beforeend', html);
-    }
-
-    /**
-     * Sauvegarde la rétroaction modifiée depuis le modal.
-     * Ne modifie que retroactionFinale et dateModification.
-     * @param {string} fichierId - ID du fichier
-     */
-    function sauvegarderRetroactionDepuisModal(fichierId) {
-        const textarea = document.getElementById('travaux-modal-retro-texte');
-        if (!textarea) return;
-
-        const fichier = travauxStockage.obtenirFichierParId(fichierId);
-        if (!fichier) return;
-
-        const evalTrouvee = travauxResolution.trouverEvaluationPourFichier(fichier);
-        if (!evalTrouvee) return;
-        // Lecture brute, comme la suppression plus haut : la lecture anonymisée et filtrée par
-        // cours réécrivait « Gr. A », les marqueurs d'anonymisation, et perdait les évaluations
-        // des autres cours. Le texte de la zone, lui, passe par la garde de `modes.js`.
-        let evaluations = db.getSync(cle('evaluationsSauvegardees'), []) || [];
-        const index = evaluations.findIndex(e => e.id === evalTrouvee.id);
-
-        if (index === -1) return;
-
-        evaluations[index].retroactionFinale = textarea.value;
-        // #961 (D7) — un texte retouché ici est réécrit à la main : il ne suit plus les niveaux.
-        // C1 (contre-vérification de Cowork) — sans retouche, la clé n'est pas écrite : une
-        // évaluation d'avant D7 garde sa question (« Garder la mienne » / « Remplacer »).
-        if (textarea.value !== textarea.defaultValue) evaluations[index].retroactionReecrite = true;
-        evaluations[index].dateModification = new Date().toISOString();
-        // Lot B de l'enregistrement : l'échec est dit par le témoin commun, avec le geste.
-        // Relecture de Cowork (lot B, R3) : sur un échec, la fenêtre RESTE ouverte — fermée,
-        // elle emportait le texte qu'on venait d'écrire pendant que le témoin disait « Non enregistré ».
-        if (sauvegarderDonneesSelonMode('evaluationsSauvegardees', evaluations,
-            { geste: 'Enregistrement de la rétroaction' }) !== true) return;
-
-        fermerModalRetroaction();
-        notifications.succes('Rétroaction enregistrée');
-    }
-
-    /**
-     * Ferme le modal de rétroaction.
-     */
-    function fermerModalRetroaction() {
-        const modal = document.getElementById('travaux-modal-retroaction');
-        if (modal) modal.remove();
-    }
-
     /* ===============================
        TRANSFERT ENTRE GROUPES-COURS
        =============================== */
@@ -7677,9 +7545,10 @@
        ACCÈS RAPIDE AU PROFIL ÉTUDIANT
        =============================== */
 
-    function ouvrirProfilDepuisAnnotation() {
+    function ouvrirProfilDepuisAnnotation(param) {
+        // Le carrousel nomme son élève ; la palette Paramètres, sans paramètre (le dispatcher passe alors l'élément), vise la copie ouverte.
         var fichier = travauxVisionneuse.getFichierActuel();
-        var da = fichier ? fichier.etudiantDA : null;
+        var da = (param && !param.nodeType) ? String(param) : (fichier ? fichier.etudiantDA : null);
         if (!da) {
             console.warn('[travaux-ui] Aucun DA associé au fichier courant');
             return;
@@ -7825,10 +7694,7 @@
         filtrerModalFusion: filtrerModalFusion,
         majCompteurFusion: majCompteurFusion,
         // Rétroaction (archivage)
-        afficherRetroaction: afficherRetroaction,
         supprimerFichierBadge: supprimerFichierBadge,
-        sauvegarderRetroactionDepuisModal: sauvegarderRetroactionDepuisModal,
-        fermerModalRetroaction: fermerModalRetroaction,
         // Transfert entre groupes
         ouvrirModalTransfert: ouvrirModalTransfert,
         // Layout annotation ancré

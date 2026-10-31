@@ -20168,10 +20168,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     height: 14px;
 }
 /* Icône dans la barre bas de la palette */
-.palette-bas-icon {
-    width: 14px;
-    height: 14px;
-}
 /* Mode clair — icône noire 100 % au repos, blanche sur le fond bleu-clair
    de l'état actif. Pas de :hover sur l'icône (pattern #289). */
 .mode-clair .outil-svg-icon {
@@ -20335,45 +20331,10 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     padding: 8px;
 }
 
-.palette-flottante-bas-btns {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 4px 8px;
-    border-top: 1px solid rgba(106, 172, 184, 0.2);
-    position: sticky;
-    bottom: 0;
-    background: var(--surface-carte, #1a3040);
-    z-index: 1;
-}
 
-.palette-flottante-aide-btn {
-    width: 28px;
-    height: 28px;
-    border: none;
-    background: none;
-    border-radius: 50%;
-    font-size: 16px;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: background 0.15s;
-}
-.palette-flottante-aide-btn:hover {
-    background: rgba(106, 172, 184, 0.15);
-}
-.palette-flottante-aide-btn.actif {
-    background: rgba(106, 172, 184, 0.25);
-    box-shadow: inset 0 0 0 1px rgba(106, 172, 184, 0.3);
-}
 
 /* États repliés */
 .palette-flottante.replie .palette-flottante-contenu,
-.palette-flottante.replie .palette-flottante-bas-btns,
 .palette-flottante.replie .palette-poignee-redim {
     display: none;
 }
@@ -20447,15 +20408,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .mode-clair .palette-flottante-barre {
     border-bottom-color: rgba(3, 46, 92, 0.08);
 }
-.mode-clair .palette-flottante-bas-btns {
-    border-top-color: rgba(3, 46, 92, 0.08);
-    background: #e8f2fd;
-}
 .mode-clair .palette-flottante-barre {
     background: #e8f2fd;
-}
-.mode-clair .palette-flottante-aide-btn:hover {
-    background: rgba(3, 46, 92, 0.1);
 }
 
 /* --- Palette flottante annotation (legacy, sera migrée) --- */
@@ -26512,6 +26466,39 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     display: none;
 }
 
+/* Les boutons des palettes, juste après le carrousel. Un bouton enfoncé : sa palette est ouverte. */
+.annot-bande-palettes {
+    display: grid;
+    grid-template-columns: repeat(3, 32px);
+    gap: 1px;
+    height: 34px;
+    margin: 0 4px;
+    flex-shrink: 0;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bordure-moyenne);
+}
+.annot-bande-palettes button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: var(--surface-carte);
+    cursor: pointer;
+}
+.annot-bande-palettes button:hover {
+    background: var(--bleu-tres-pale);
+}
+.annot-bande-palettes button.actif {
+    background: var(--bleu-pale);
+}
+.annot-bande-palettes .outil-svg-icon {
+    width: 18px;
+    height: 18px;
+}
+
 .annot-toolbar-separateur {
     width: 1px;
     height: 24px;
@@ -26748,24 +26735,29 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 /* Icône rétroaction sur badge */
-.travaux-badge-retro {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0 2px;
-    font-size: 0.75rem;
-    opacity: 0.7;
-    transition: opacity 0.15s;
+
+/* Le profil de l'élève, sur son étiquette du carrousel. */
+.travaux-badge-profil {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin-left: 2px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: var(--surface-carte);
+    cursor: pointer;
+    flex-shrink: 0;
 }
-.travaux-badge-retro .btn-inline-icon {
-    width: 14px;
-    height: 14px;
+.travaux-badge-profil .btn-inline-icon {
+    width: 16px;
+    height: 16px;
     margin-right: 0;
 }
-.travaux-badge-retro:hover {
-    opacity: 1;
+.travaux-badge-profil:hover {
+    background: var(--bleu-tres-pale);
 }
 
 /* Icône Supprimer (corbeille) sur badge — visible en vue Archivage uniquement */
@@ -26795,35 +26787,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     margin: 2px 0 0;
     font-size: 0.8rem;
     color: var(--texte-secondaire);
-}
-.travaux-retro-entete {
-    font-size: 0.85rem;
-    color: var(--texte-secondaire);
-    margin-bottom: 12px;
-    line-height: 1.5;
-}
-.travaux-retro-criteres {
-    list-style: none;
-    padding: 0;
-    margin: 8px 0;
-}
-.travaux-retro-criteres li {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border-bottom: 1px solid var(--bordure-claire);
-    font-size: 0.85rem;
-}
-.travaux-retro-criteres li .niveau {
-    font-weight: 600;
-    min-width: 40px;
-    text-align: center;
-}
-.travaux-retro-criteres li .retro-texte {
-    flex: 1;
-    margin-left: 10px;
-    color: var(--texte-secondaire);
-    font-size: 0.8rem;
 }
 .travaux-retro-textarea {
     width: 100%;

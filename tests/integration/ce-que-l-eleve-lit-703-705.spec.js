@@ -149,25 +149,23 @@ test('#705 · une évaluation d\'AVANT l\'ajout d\'un critère : son PDF conclut
 });
 
 // RELECTURE CROISÉE DE COWORK (19 sept. 2026) — la date qui tranche prenait `dateModification`, que le
-// modal de rétroaction de Travaux pose SANS écrire un critère. Par le vrai chemin : ouvrir le modal,
-// retoucher le texte, cliquer « Sauvegarder ». AVANT le correctif : le PDF refusait de conclure après ce geste.
-test('#705 · retoucher la rétroaction depuis le modal de Travaux, APRÈS l\'ajout du critère : le PDF conclut toujours', async ({ page }) => {
+// modal de rétroaction de Travaux posait SANS écrire un critère. AVANT le correctif : le PDF refusait de conclure.
+// Réancré le 31 oct. 2026 : la fenêtre est retirée (consigne des palettes, partie G), mais ce qu'elle a écrit reste
+// dans le stock. La retouche est donc posée telle qu'elle est en base, assertions inchangées.
+test('#705 · une rétroaction retouchée APRÈS l\'ajout du critère, sans écrire de critère : le PDF conclut toujours', async ({ page }) => {
     const erreurs = await ouvrirPage(page);
     await semer705(page, { idSources: NE_LE_15_SEPT_2026, declaree: true });
-    await page.waitForFunction(() => window.travauxUI && typeof window.travauxUI.afficherRetroaction === 'function');
     await page.evaluate(() => {
-        // security-ok: fixture littérale du banc, aucune source externe.
-        window.db.setSync(window.cle('fichiersTravaux'), [{ id: 'F705', nomFichier: 'temoin.pdf', etudiantDA: '1234567', productionId: 'P705', groupeCoursId: 'GC1', typeMIME: 'application/pdf' }]);
-        window.travauxUI.afficherRetroaction('F705');
+        const k = window.cle('evaluationsSauvegardees');
+        const ev = window.db.getSync(k, []); // security-ok: fixture littérale du banc, aucune source externe.
+        ev[0].retroactionFinale = 'Un mot corrigé après coup.';
+        ev[0].dateModification = '2026-10-01T12:00:00.000Z';
+        window.db.setSync(k, ev);
     });
-    await page.waitForSelector('#travaux-modal-retro-texte');
-    await page.fill('#travaux-modal-retro-texte', 'Un mot corrigé après coup.');
-    await page.evaluate(() => document.querySelector('[data-action="travauxUI.sauvegarderRetroactionDepuisModal"]').click());
-    await page.waitForFunction(() => !!window.db.getSync(window.cle('evaluationsSauvegardees'), [])[0].dateModification);
     const enBase = await page.evaluate(() => { const e = window.db.getSync(window.cle('evaluationsSauvegardees'), [])[0];
         return { retro: e.retroactionFinale, modifieeApresLAjout: new Date(e.dateModification).getTime() > new Date('2026-09-15T12:00:00.000Z').getTime(),
             dateEvaluation: e.dateEvaluation, criteres: e.criteres.length }; });
-    // TÉMOIN : le geste a bien eu lieu, et il a posé une `dateModification` postérieure à la naissance du critère.
+    // TÉMOIN : l'état posé a bien une `dateModification` postérieure à la naissance du critère.
     expect(enBase).toEqual({ retro: 'Un mot corrigé après coup.', modifieeApresLAjout: true, dateEvaluation: '2026-09-05T14:00:00.000Z', criteres: 2 });
     const pdf = await pdfDe(page);
     console.log('PDF (après retouche de la rétroaction) →', JSON.stringify(pdf));

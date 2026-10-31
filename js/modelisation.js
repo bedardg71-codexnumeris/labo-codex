@@ -81,6 +81,7 @@
                             '<button class="model-btn-ouvrir-compact" data-action="modelisation.ouvrirFichierLocal" title="Ouvrir un fichier : PDF, JPG, PNG ; HEIC selon le navigateur">+ Ouvrir</button>' +
                             '<div id="model-carrousel-badges" class="annot-toolbar-badges-zone"></div>' +
                         '</div>' +
+                        travauxOutils.genererHTMLBandePalettes() +
                         '<div class="annot-toolbar-separateur"></div>' +
                         '<div class="annot-toolbar-outils">' +
                             '<button id="model-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page precedente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>' +

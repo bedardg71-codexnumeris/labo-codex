@@ -423,59 +423,8 @@ test('lot B · R4 cadenas, clé servie par le cache mémoire : après un échec,
     expect(erreurs).toEqual([]);
 });
 
-// -----------------------------------------------------------------------
-// R3 · LA FENÊTRE DE LA RÉTROACTION RESTE OUVERTE SUR UN ÉCHEC
-// -----------------------------------------------------------------------
-test('lot B · R3 rétroaction : sur un échec, la fenêtre reste ouverte avec le texte ; sur un succès, elle se ferme', async ({ page }) => {
-    test.setTimeout(60000);
-    const erreurs = brancherEcouteurs(page);
-    await viderLeStockage(page);
-    await page.waitForFunction(() => window.travauxUI && window.travauxStockage && typeof window.db !== 'undefined', null, { timeout: 30000 });
-    await page.evaluate(() => {
-        // security-ok: fixtures littérales du banc, aucune source externe.
-        db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
-        db.setSync('trimestreActif', 'a2026');
-        db.setSync('cours', [{ id: 'C1', code: '601-101', nom: 'Cours un' }]);
-        db.setSync('infoCours', { id: 'C1', code: '601-101', nom: 'Cours un' });
-        db.setSync(cle('groupeEtudiants'), [{ da: '1234567', prenom: 'Daniel', nom: 'Témoin', groupe: '00001', coursId: 'C1' }]);
-        db.setSync(cle('fichiersTravaux'), [{ id: 'F1', etudiantDA: '1234567', productionId: 'P1', nomFichier: 'copie.pdf', coursId: 'C1' }]);
-        db.setSync(cle('evaluationsSauvegardees'), [{ id: 'EV_C1', coursId: 'C1', etudiantDA: '1234567', etudiantNom: 'Daniel Témoin',
-            groupe: '00001', productionId: 'P1', productionNom: 'Portrait', grilleNom: 'Grille', noteFinale: 80, niveauFinal: 'M',
-            criteres: [], retroactionFinale: 'Première version.', dateEvaluation: '2026-09-10T10:00:00.000Z', verrouillee: false }]);
-    });
-    await poserOutils(page);
-    await page.evaluate(() => travauxUI.afficherRetroaction('F1'));
-    await page.locator('#travaux-modal-retro-texte').fill('Deuxième version, écrite à la main.');
-
-    const echec = await page.evaluate(() => {
-        const avant = window.__base('evaluationsSauvegardees');
-        window.__toasts = [];
-        window.__poserPanne('evaluationsSauvegardees', 'erreur');
-        try { travauxUI.sauvegarderRetroactionDepuisModal('F1'); } finally { window.__retirerPanne(); }
-        const zone = document.getElementById('travaux-modal-retro-texte');
-        return { ouverte: !!document.getElementById('travaux-modal-retroaction'), texte: zone && zone.value,
-            toasts: window.__toasts.slice(), temoin: window.__lireTemoin(), inchangee: window.__base('evaluationsSauvegardees') === avant };
-    });
-    expect(echec.ouverte, 'la fenêtre reste ouverte sur un échec').toBe(true);
-    expect(echec.texte, 'le texte écrit est toujours là').toBe('Deuxième version, écrite à la main.');
-    expect(echec.toasts.filter((t) => t.startsWith('succes:'))).toEqual([]);
-    expect(echec.temoin.echec).toMatch(/^Non enregistré – Enregistrement de la rétroaction : le navigateur a refusé/);
-    expect(echec.inchangee).toBe(true);
-
-    const ok = await page.evaluate(async () => {
-        window.__toasts = [];
-        travauxUI.sauvegarderRetroactionDepuisModal('F1');
-        // #962 : l'échec de cette clé ne s'efface qu'au commit IndexedDB de la nouvelle écriture.
-        await db.flush();
-        await new Promise((res) => setTimeout(res, 50));
-        return { ouverte: !!document.getElementById('travaux-modal-retroaction'), toasts: window.__toasts.slice(),
-            temoin: window.__lireTemoin(), texte: db.getSync(cle('evaluationsSauvegardees'), [])[0].retroactionFinale };
-    });
-    expect(ok.ouverte, 'sur un succès, la fenêtre se ferme').toBe(false);
-    expect(ok.texte).toBe('Deuxième version, écrite à la main.');
-    expect(ok.temoin.echec).toBe(null);
-    expect(erreurs).toEqual([]);
-});
+// R3 (la fenêtre de la rétroaction restait ouverte sur un échec) : retiré le 31 oct. 2026 avec la fenêtre (consigne des
+// palettes, partie G). Le témoin sur un échec reste jugé ci-dessus, geste par geste.
 
 // -----------------------------------------------------------------------
 // PLACEMENT · 360, 768, 1024, 1180 px, clair et sombre : il ne masque ni la barre d'Annoter
