@@ -2764,6 +2764,14 @@ function _totalCarteNote(details) {
 }
 
 /**
+ * R5 (décision de Grégoire, 31 oct. 2026) : les lignes de calcul de la carte en standards reprennent le mot du titre, comme le
+ * PDF de l'élève. L'enseignant·e lirait sinon « finale » pendant que l'élève lit « provisoire ».
+ */
+function _motDeLaFormule(details) {
+    return details.estFinale ? 'Note finale' : 'Note provisoire';
+}
+
+/**
  * Le bouton des réglages de la carte de la note. Retouche R2 bis (28 oct. 2026) : présent aussi quand la note manque pour
  * une cause propre à l'étudiant·e — il mène au statut et aux pondérations, pas à une correction ; seul le bouton de
  * l'alerte (erreur de configuration) disparaît alors.
@@ -2978,8 +2986,8 @@ function genererSectionProductions(da) {
             const formule = erreurPond
                 ? `<span class="note-finale-tiret">Pondérations Sélection/Obligatoires manquantes dans la configuration de la pratique.</span>`
                 : (calcSel && calcObl
-                    ? `Note finale = ${formaterPoints(calcSel.contribution)} + ${formaterPoints(calcObl.contribution)} = ${formaterNotePourcentage(calcSel.contribution + calcObl.contribution)}`   // 21 oct. 2026 : la norme du PDF, une phrase, une norme
-                    : `Note finale pondérée (Sélection ${formaterPourcentage(pondSel)} + Obligatoires ${formaterPourcentage(pondObl)} = ${formaterPourcentage(pondSel + pondObl)})`);
+                    ? `${_motDeLaFormule(detailsNoteFinale)} = ${formaterPoints(calcSel.contribution)} + ${formaterPoints(calcObl.contribution)} = ${formaterNotePourcentage(calcSel.contribution + calcObl.contribution)}`   // 21 oct. 2026 : la norme du PDF, une phrase, une norme
+                    : `${_motDeLaFormule(detailsNoteFinale)} pondérée (Sélection ${formaterPourcentage(pondSel)} + Obligatoires ${formaterPourcentage(pondObl)} = ${formaterPourcentage(pondSel + pondObl)})`);
 
             htmlNoteFinale = `
             <!-- Note finale de session (hybride sans terminale) -->
@@ -3034,8 +3042,8 @@ function genererSectionProductions(da) {
                 </div>` : '';
 
             const formuleClassique = terminal.present
-                ? `Note finale pondérée (${formaterPourcentage(portfolio.ponderationNormalisee)} + ${formaterPourcentage(terminal.ponderationNormalisee)} = 100\u00a0%)`
-                : `Note finale (portfolio à 100\u00a0%)`;
+                ? `${_motDeLaFormule(detailsNoteFinale)} pondérée (${formaterPourcentage(portfolio.ponderationNormalisee)} + ${formaterPourcentage(terminal.ponderationNormalisee)} = 100\u00a0%)`
+                : `${_motDeLaFormule(detailsNoteFinale)} (portfolio à 100\u00a0%)`;
 
             htmlNoteFinale = `
             <!-- Note finale de session (classique) -->

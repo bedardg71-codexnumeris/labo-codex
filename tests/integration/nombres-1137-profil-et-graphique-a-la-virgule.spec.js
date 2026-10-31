@@ -49,10 +49,10 @@ async function monterProfil(page) {
         window.afficherProfilComplet(DA);
         const cont = document.getElementById('contenuProfilEtudiant');
         const carte = cont && cont.querySelector('.note-finale-section');
-        // La phrase de la note finale TELLE QU'ELLE EST (le nœud de texte, insécables compris).
+        // La phrase de la note TELLE QU'ELLE EST (le nœud de texte, insécables compris).
         const marcheur = carte ? document.createTreeWalker(carte, NodeFilter.SHOW_TEXT) : null;
         let formule = null;
-        while (marcheur && marcheur.nextNode()) { if (marcheur.currentNode.data.trim().startsWith('Note finale = ')) { formule = marcheur.currentNode.data.trim(); break; } }
+        while (marcheur && marcheur.nextNode()) { if (marcheur.currentNode.data.trim().startsWith('Note provisoire = ')) { formule = marcheur.currentNode.data.trim(); break; } }
         const texteBrut = cont ? cont.textContent : '';
         return {
             formule,
@@ -72,7 +72,7 @@ test('#1137 · le profil lit la virgule et l’insécable : la note finale compo
     page.on('pageerror', (e) => erreurs.push(e.message));
     await page.setViewportSize({ width: 1440, height: 900 });
     const r = await monterProfil(page);
-    expect(r.formule).toBe('Note finale = 44,5\u00A0pts + 28,4\u00A0pts = 72,9\u00A0%');
+    expect(r.formule).toBe('Note provisoire = 44,5\u00A0pts + 28,4\u00A0pts = 72,9\u00A0%');
     // `carte` ramène tout blanc (l'insécable compris) à une espace.
     expect(r.carte).toContain('(65 %)');
     expect(r.carte).toContain('× 35 % = 28,4 pts');

@@ -33,3 +33,15 @@
 4. Gardes et break-tests pour R4 (sommative, alternative, finalisée) et R1-R2.
 5. Commit avec ce fichier et `TEXTES-2026-10-31-reponse-du-groupe.md` (la relecture de 8 h 54 y attend). Sans release ni push. Relecture de Cowork.
 
+## Relecture de Cowork (`5188f32b`), 31 oct., 9 h 25
+
+**Accepté.** R4 : `motDeLaLigneDeCalcul` rend « Note finale » une fois finalisée, sinon le mot du bloc (« Note actuelle » / « Note provisoire »), dans les deux formes de `phraseFinale`. R1 et R2 au caractère près. Les deux exceptions de la garde restent, avec les nouveaux textes et le motif « pratique alternative » : la consigne demandait de les fermer, mais R1 et R2 nomment légitimement « Note provisoire » pour l'alternative ; écart justifié. Les PDF déjà remis gardent « Note finale = … » : stock hors d'atteinte, assumé. Rien exécuté.
+
+## R5 – Le profil en pratique Standards (Grégoire, 9 h 37)
+
+Relevé par Claude Code (rapport) : sous « Note provisoire de session », le profil en standards écrit « Note finale = … », « Note finale pondérée (…) », « Note finale (portfolio à 100 %) » (`js/profil-etudiant-sections-affichage.js`, vers 2981-2982 et 3037-3038). **Décidé : la même règle que R4.** Tant que les notes ne sont pas finalisées : « Note provisoire = … », « Note provisoire pondérée (…) », « Note provisoire (portfolio à 100 %) » ; une fois finalisées, « Note finale … » inchangé. Motif : l'enseignant·e lirait « finale » pendant que l'élève lit « provisoire » sur son PDF.
+
+### Pour Claude Code
+
+Appliquer R5 (lit `detailsNoteFinale.estFinale`, comme le titre) ; gardes et break-tests (finalisée / non finalisée, les trois formes). Commit avec ce fichier. Sans release ni push. Relecture de Cowork.
+

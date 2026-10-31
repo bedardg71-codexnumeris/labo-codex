@@ -43,9 +43,15 @@ Vérifié sans objet : le titre du bouton « Modifier le statut (provisoire / fi
 
 - **Source ou stock, pour R4 :** la source seulement. Les PDF déjà remis gardent « Note finale = … » ; aucun code ne les rejoint. Un nouveau PDF porte le bon mot.
 - **Les deux exceptions de la garde « se ferment » autrement que supprimées.** Les textes validés R1 et R2 nomment encore « Note provisoire » pour la pratique alternative ; le détecteur la voit. Elles ne sont plus ouvertes : elles portent le nouveau texte et le motif « pratique alternative ».
-- **Inscrire et continuer, à soumettre à Grégoire :** le profil en standards a la même contradiction que R4, sous son titre « Note provisoire de session » : « Note finale = … pts + … pts = … », « Note finale pondérée (…) », « Note finale (portfolio à 100 %) » (`js/profil-etudiant-sections-affichage.js`). Écran de l'enseignant·e, hors de la décision, non touché. Proposition : le même mot que le titre tant que la note n'est pas finalisée.
+- **Tranché ensuite (R5, ci-dessous) :** le profil en standards a la même contradiction que R4, sous son titre « Note provisoire de session » : « Note finale = … pts + … pts = … », « Note finale pondérée (…) », « Note finale (portfolio à 100 %) » (`js/profil-etudiant-sections-affichage.js`). Écran de l'enseignant·e, hors de la décision, non touché. Proposition : le même mot que le titre tant que la note n'est pas finalisée.
 
 Vérifié : Vitest entier vert (10 587) ; 12 changements volontaires du code font tous rougir une garde ; les 17 specs WebKit qui touchent le PDF ou le réglage vertes (71 tests).
+
+## R5 : le profil en standards (Grégoire, 31 oct., 9 h 37)
+
+La même règle que R4, par `_motDeLaFormule`, qui lit `detailsNoteFinale.estFinale` comme le titre. Quatre lignes pour trois formes : « pondérée » existe en hybride et en classique. Une fois finalisées, « Note finale … » inchangé.
+
+Vérifié : Vitest entier vert (10 588) ; 7 changements volontaires du code font tous rougir une garde, Vitest et WebKit ; la nouvelle spec `profil-r5-lignes-de-calcul-standards` lit les quatre lignes sur le vrai profil, dans les deux états ; les specs WebKit de la carte de la note vertes.
 
 ## Vérifié comment (lot initial)
 
