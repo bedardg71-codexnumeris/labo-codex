@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 22 H 20 : LES BARRES COLORÉES DE L'APERÇU SONT CODÉES, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : les couleurs des barres passent de l'une à l'autre par un dégradé large, centré sur chaque seuil, avec le voile gardé. Dans Labo › Outils d'observation, tu peux choisir l'axe de A et de C : proportionnel, comme aujourd'hui et par défaut, ou en deux segments. P ne change pas d'axe.
+
+**Ce qui reste à toi** : valider les mots du réglage et regarder les trois captures (`plans de travail/RAPPORT-2026-10-30-barres-apercu.md`, `plans de travail/captures/barres-apercu-*`). En deux segments, le rouge s'arrête presque net au seuil et l'orange s'étale : le rapport l'explique, à toi de dire si ça te convient. Rien ne part en ligne avant la relecture de Cowork.
+
+**Vérifié comment** : Vitest entier vert (10 507) ; 29 changements volontaires du code font tous rougir une garde, le code restauré après chacun ; les specs WebKit touchées vertes ; captures prises dans Chrome sur le Mac, sur le pack de démo. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+
 📝 **LE 30 OCTOBRE 2026, 21 H 27 : LA 1.228 EST EN LIGNE** (le niveau RàI suit ton seuil de réussite). *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent les entrées ci-dessous, et tes Nouvelles validées, celles de la 1.228 et le texte corrigé de la 1.227. La note du cours ne change pas.

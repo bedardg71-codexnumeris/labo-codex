@@ -13451,6 +13451,69 @@ label:has(+ textarea:disabled) {
     z-index: 1;
 }
 
+/* L'axe en deux segments (30 oct. 2026) : les graduations disent la cassure. */
+.barre-graduations {
+    position: relative;
+    height: 18px;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--texte-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.barre-graduation {
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.barre-graduation:first-child {
+    transform: none;
+}
+
+.barre-graduation:last-child {
+    transform: translateX(-100%);
+}
+
+.barre-graduation-cassure {
+    font-weight: 700;
+    color: var(--texte-principal);
+}
+
+.barre-graduation-cassure::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -4px;
+    width: 1px;
+    height: 4px;
+    background: currentColor;
+}
+
+/* Les exemples du réglage, dans Labo › Outils d'observation. */
+.barre-exemple-axe {
+    margin-top: 8px;
+}
+
+.barre-exemple {
+    position: relative;
+    height: 34px;
+    border-radius: var(--radius-grand);
+    box-shadow: var(--shadow-subtil);
+    overflow: hidden;
+}
+
+.barre-exemple-point {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
 /* 🆕 BETA 96: Mini-courbe de Gauss superposée sur la barre */
 .barre-gauss-svg {
     position: absolute;

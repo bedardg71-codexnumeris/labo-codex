@@ -258,7 +258,7 @@ describe('Les barres de l\'Aperçu : leurs zones suivent les mêmes sources', ()
         for (const nom of ['ARRETS_DEGRADE', 'scoreALaPositionDistribution', 'obtenirCouleurGradient']) {
             expect(tdb, `${nom} est revenu`).not.toContain(nom);
         }
-        expect(tdb).toContain('fondDeLaBarre(zonesBarre)');
+        expect(tdb).toContain('fondDeLaBarre(zonesBarre, cassure)');
         expect(lireCodeSansCommentaires('js/contexte-qualification.js')).not.toContain('bandesLegendeApercu');
     });
 

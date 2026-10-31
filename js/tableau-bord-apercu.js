@@ -49,19 +49,140 @@ const MESSAGE_SUIVI_COMPLET = 'Cinq étudiant·es suivi·es au maximum. Retires-
 const ECHELLE_DISTRIBUTION_MIN = 0.30;
 const ECHELLE_DISTRIBUTION_MAX = 1.00;
 
-function positionSurEchelleDistribution(valeur) {
-    const etendue = ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN;
-    return Math.max(0, Math.min((valeur - ECHELLE_DISTRIBUTION_MIN) / etendue * 100, 100));
+// Le réglage de l'axe de A et de C (Labo › Outils d'observation, 30 oct. 2026). En deux segments,
+// l'axe casse au seuil le plus bas : ce qui est dessous tient dans le premier quart de la barre.
+const AXE_DEUX_SEGMENTS = 'deuxSegments';
+const PART_SOUS_LA_CASSURE = 25;
+
+/**
+ * Où l'axe d'une barre casse, en score 0-1 ; null quand il est proportionnel. P l'est toujours.
+ * Un seuil hors de l'axe ne laisse rien à casser : l'axe reste proportionnel.
+ * @param {'A'|'C'|'P'} indice
+ * @param {string} [mode] - La valeur du réglage ; par défaut, celle qui est enregistrée
+ * @returns {number|null}
+ */
+function cassureDeLaBarre(indice, mode = obtenirPreference('axeBarresApercu')) {
+    if (indice === 'P' || mode !== AXE_DEUX_SEGMENTS) return null;
+    const seuilLePlusBas = window.borneBasseAssiduiteCompletion() / 100;
+    return seuilLePlusBas > ECHELLE_DISTRIBUTION_MIN && seuilLePlusBas < ECHELLE_DISTRIBUTION_MAX ? seuilLePlusBas : null;
 }
 
-/** Le fond d'une barre : ses zones de couleur, à bords nets, sur l'axe de la barre. */
-function fondDeLaBarre(zones) {
-    const arrets = zones.map((z) => {
-        const de = positionSurEchelleDistribution(z.de);
-        const a = positionSurEchelleDistribution(z.a);
-        return `${z.couleur} ${de}%, ${z.couleur} ${a}%`;
+/** LA fonction d'axe : un score 0-1 → sa position sur la barre (0-100). Points, moyenne, courbe, traits et graduations la lisent. */
+function positionSurEchelleDistribution(valeur, cassure = null) {
+    const dansLaBarre = (position) => Math.max(0, Math.min(position, 100));
+    if (cassure === null) {
+        const etendue = ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN;
+        return dansLaBarre((valeur - ECHELLE_DISTRIBUTION_MIN) / etendue * 100);
+    }
+    if (valeur <= cassure) {
+        return dansLaBarre((valeur - ECHELLE_DISTRIBUTION_MIN) / (cassure - ECHELLE_DISTRIBUTION_MIN) * PART_SOUS_LA_CASSURE);
+    }
+    return dansLaBarre(PART_SOUS_LA_CASSURE + (valeur - cassure) / (ECHELLE_DISTRIBUTION_MAX - cassure) * (100 - PART_SOUS_LA_CASSURE));
+}
+
+/** L'inverse de l'axe : une position sur la barre (0-100) → son score 0-1. La courbe s'y dessine. */
+function valeurSurEchelleDistribution(position, cassure = null) {
+    if (cassure === null) {
+        return ECHELLE_DISTRIBUTION_MIN + position / 100 * (ECHELLE_DISTRIBUTION_MAX - ECHELLE_DISTRIBUTION_MIN);
+    }
+    if (position <= PART_SOUS_LA_CASSURE) {
+        return ECHELLE_DISTRIBUTION_MIN + position / PART_SOUS_LA_CASSURE * (cassure - ECHELLE_DISTRIBUTION_MIN);
+    }
+    return cassure + (position - PART_SOUS_LA_CASSURE) / (100 - PART_SOUS_LA_CASSURE) * (ECHELLE_DISTRIBUTION_MAX - cassure);
+}
+
+// Un passage de couleur s'étend d'au moins 1,5 point de part et d'autre de son seuil.
+const DEMI_PASSAGE_MIN = 0.015;
+// Deux graduations gardent 10 % de la barre entre elles : leurs chiffres ne se touchent pas, même dans un exemple du réglage.
+const ECART_MIN_GRADUATIONS = 10;
+
+/** La couleur à parts égales de deux couleurs #rrggbb : celle du seuil, au milieu de son passage. */
+function couleurAuSeuil(couleurA, couleurB) {
+    const canal = (couleur, i) => parseInt(couleur.slice(1 + i * 2, 3 + i * 2), 16);
+    const canaux = [0, 1, 2].map((i) => Math.round((canal(couleurA, i) + canal(couleurB, i)) / 2));
+    return `rgb(${canaux.join(', ')})`;
+}
+
+/**
+ * Le fond d'une barre : ses zones de couleur et, entre deux zones voisines, un passage centré sur le seuil, de
+ * demi-largeur égale à la moitié de la plus étroite des deux (au moins 1,5 point). Le seuil porte son propre arrêt :
+ * sans lui, le milieu du passage glisserait à la cassure, où un point n'a pas la même largeur des deux côtés.
+ * Une zone prise entre deux passages garde sa couleur à son milieu : le minimum ne les fait jamais se croiser.
+ * @param {Array} zones - `zonesDeLaBarre`
+ * @param {number|null} [cassure] - `cassureDeLaBarre`
+ * @returns {string} Le fond CSS
+ */
+function fondDeLaBarre(zones, cassure = null) {
+    const visibles = zones.map((z) => ({ ...z, de: Math.max(z.de, ECHELLE_DISTRIBUTION_MIN) })).filter((z) => z.a > z.de);
+    const arret = (couleur, valeur) => `${couleur} ${positionSurEchelleDistribution(valeur, cassure)}%`;
+    const milieu = (z) => (z.de + z.a) / 2;
+    const arrets = [arret(visibles[0].couleur, ECHELLE_DISTRIBUTION_MIN)];
+    visibles.slice(0, -1).forEach((z, i) => {
+        const suivante = visibles[i + 1];
+        const demi = Math.max(DEMI_PASSAGE_MIN, Math.min(z.a - z.de, suivante.a - suivante.de) / 2);
+        const limiteAvant = i === 0 ? z.de : milieu(z);
+        const limiteApres = i + 2 === visibles.length ? suivante.a : milieu(suivante);
+        arrets.push(
+            arret(z.couleur, Math.max(z.a - demi, limiteAvant)),
+            arret(couleurAuSeuil(z.couleur, suivante.couleur), z.a),
+            arret(suivante.couleur, Math.min(z.a + demi, limiteApres))
+        );
     });
+    arrets.push(arret(visibles[visibles.length - 1].couleur, ECHELLE_DISTRIBUTION_MAX));
     return `linear-gradient(to right, ${arrets.join(', ')})`;
+}
+
+/**
+ * Les graduations d'une barre de A ou de C : le début de l'axe, ses seuils, 100 %. Celle de la cassure est marquée.
+ * Une graduation trop près de la précédente ou de 100 % s'efface ; le début, la cassure et 100 % restent.
+ * @returns {string} HTML
+ */
+function genererGraduations(zones, cassure) {
+    const valeurs = [ECHELLE_DISTRIBUTION_MIN, ...zones.map((z) => z.a)].filter((v) => v >= ECHELLE_DISTRIBUTION_MIN);
+    const position = (v) => positionSurEchelleDistribution(v, cassure);
+    const gardees = [];
+    [...new Set(valeurs)].forEach((v) => {
+        const essentielle = v === ECHELLE_DISTRIBUTION_MIN || v === cassure || v === ECHELLE_DISTRIBUTION_MAX;
+        const precedente = gardees[gardees.length - 1];
+        const assezLoin = precedente === undefined || position(v) - position(precedente) >= ECART_MIN_GRADUATIONS;
+        if (essentielle || (assezLoin && 100 - position(v) >= ECART_MIN_GRADUATIONS)) gardees.push(v);
+    });
+    const graduations = gardees.map((v) => {
+        const estCassure = v === cassure;
+        const classe = estCassure ? ' barre-graduation-cassure' : '';
+        const titre = estCassure ? ' title="L’axe change d’échelle à ce seuil"' : '';
+        return `<span class="barre-graduation${classe}"${titre} style="left: ${position(v)}%;">${formaterPourcentage(Math.round(v * 100))}</span>`;
+    }).join('');
+    return `<div class="barre-graduations">${graduations}</div>`;
+}
+
+/** Sur l'Aperçu, seul un axe cassé porte des graduations : sinon, rien ne s'écrit sous les barres (#821, bloc 6b). */
+function graduationsDeLApercu(zones, cassure) {
+    return cassure === null ? '' : genererGraduations(zones, cassure);
+}
+
+// Un groupe fictif pour les exemples du réglage : aucun·e élève n'y figure.
+const VALEURS_EXEMPLE_AXE = [0.58, 0.7, 0.76, 0.82, 0.84, 0.86, 0.88, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.98, 0.99, 1, 1];
+
+/**
+ * Une petite barre d'exemple pour un choix du réglage, sur les seuils enregistrés : les mêmes fonctions que l'Aperçu.
+ * @param {string} mode - 'proportionnel' ou 'deuxSegments'
+ * @returns {string} HTML
+ */
+function genererExempleAxeBarre(mode) {
+    const zones = window.zonesDeLaBarre('A');
+    const cassure = cassureDeLaBarre('A', mode);
+    const points = VALEURS_EXEMPLE_AXE.map((v, i) => {
+        const hauteur = [50, 26, 74][i % 3];
+        return `<span class="barre-exemple-point" style="left: ${positionDansSaZone(positionSurEchelleDistribution(v, cassure), v, zones, cassure)}%; top: ${hauteur}%;"></span>`;
+    }).join('');
+    return `
+        <div class="barre-exemple" style="background: ${fondDeLaBarre(zones, cassure)};">
+            <div class="barre-indicateur-overlay"></div>
+            ${points}
+        </div>
+        ${genererGraduations(zones, cassure)}
+    `;
 }
 
 /** La zone qui contient une valeur (0-1). La dernière ferme à 100 %, valeur comprise. */
@@ -73,10 +194,10 @@ function zoneDeLaValeur(zones, valeur) {
  * Le décalage qui évite la superposition des points ne fait pas changer de zone : un·e élève signalé·e
  * dans une pastille reste dans la couleur de son palier, même là où les zones sont étroites (5 points).
  */
-function positionDansSaZone(positionVoulue, valeur, zones) {
+function positionDansSaZone(positionVoulue, valeur, zones, cassure = null) {
     const zone = zoneDeLaValeur(zones, valeur);
-    const min = positionSurEchelleDistribution(zone.de);
-    const max = positionSurEchelleDistribution(zone.a);
+    const min = positionSurEchelleDistribution(zone.de, cassure);
+    const max = positionSurEchelleDistribution(zone.a, cassure);
     const marge = Math.min(0.5, (max - min) / 2);
     return Math.max(min + marge, Math.min(positionVoulue, max - marge));
 }
@@ -657,9 +778,10 @@ function mettreAJourContextesSections(nbEtudiants) {
  * La barre affiche 30-100%, donc on mappe les valeurs sur cet intervalle
  * @param {Array<number>} valeurs - Valeurs des étudiants (0-1 décimal)
  * @param {number} hauteur - Hauteur du SVG en pixels
+ * @param {number|null} cassure - `cassureDeLaBarre`
  * @returns {string} - Code SVG de la courbe ou chaîne vide si données insuffisantes
  */
-function genererSvgGauss(valeurs, hauteur = 55) {
+function genererSvgGauss(valeurs, hauteur = 55, cassure = null) {
     if (!valeurs || valeurs.length < 3) {
         return ''; // Pas assez de données pour une distribution
     }
@@ -676,7 +798,7 @@ function genererSvgGauss(valeurs, hauteur = 55) {
     }
 
     // #818 — LE mappage de l'échelle, plus une quatrième copie de (val-0.30)/0.70.
-    const mapperPosition = positionSurEchelleDistribution;
+    const mapperPosition = (valeur) => positionSurEchelleDistribution(valeur, cassure);
 
     const muPos = mapperPosition(moyenne);
     const sigma1MoinsPos = mapperPosition(moyenne - ecartType);
@@ -690,7 +812,7 @@ function genererSvgGauss(valeurs, hauteur = 55) {
     for (let i = 0; i <= nbPoints; i++) {
         const xPct = (i / nbPoints) * 100; // 0-100%
         // Reconvertir en valeur 0-1 pour calculer y
-        const valeur = 0.30 + (xPct / 100) * 0.70; // 0.30 à 1.0
+        const valeur = valeurSurEchelleDistribution(xPct, cassure);
 
         // Calculer y selon la formule de Gauss (normalisée)
         const exposant = -0.5 * Math.pow((valeur - moyenne) / ecartType, 2);
@@ -1924,6 +2046,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     // Les zones de la barre, aux mêmes bornes que les pastilles (30 oct. 2026) : le fond, la couleur de la
     // moyenne et la place des points les lisent toutes les trois.
     const zonesBarre = window.zonesDeLaBarre(type);
+    const cassure = cassureDeLaBarre(type);
 
     // Calculer les moyennes pour affichage
     // 🆕 BETA 98.9: Exclure les élèves sansEvaluation du calcul de moyenne P
@@ -2048,12 +2171,12 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             const etudiants = groupesSOM[score];
             etudiants.forEach((e, index) => {
                 // Mapper 30-100% sur 0-100% de la barre
-                const position = positionSurEchelleDistribution(e.valeur);
+                const position = positionSurEchelleDistribution(e.valeur, cassure);
                 // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
                 const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
-                const positionFinale = positionDansSaZone(position + jitterH, e.valeur, zonesBarre);
+                const positionFinale = positionDansSaZone(position + jitterH, e.valeur, zonesBarre, cassure);
                 // Anonymiser le nom si en mode anonymisation
                 const modeActif = db.getSync('modeApplication', 'normal');
                 let nomAffiche;
@@ -2107,12 +2230,12 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             const etudiants = groupesPAN[score];
             etudiants.forEach((e, index) => {
                 // Mapper 30-100% sur 0-100% de la barre
-                const position = positionSurEchelleDistribution(e.valeur);
+                const position = positionSurEchelleDistribution(e.valeur, cassure);
                 // Jitter pour dilater les agglomérations : ±1.5% horizontal, ±12px vertical
                 const jitterH = (Math.random() - 0.5) * 6.0; // ±3% pour ACPE
                 const jitterV = (Math.random() - 0.5) * 24; // -12px à +12px
                 // Contraindre la position finale pour ne pas dépasser les bords
-                const positionFinale = positionDansSaZone(position + jitterH, e.valeur, zonesBarre);
+                const positionFinale = positionDansSaZone(position + jitterH, e.valeur, zonesBarre, cassure);
                 // Anonymiser le nom si en mode anonymisation
                 const modeActif = db.getSync('modeApplication', 'normal');
                 let nomAffiche;
@@ -2185,7 +2308,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     if (afficherPan && etudiantsPAN.length > 0) {
         etudiantsPAN.forEach(e => toutesValeurs.push(e.valeur));
     }
-    const svgGauss = genererSvgGauss(toutesValeurs, 55);
+    const svgGauss = genererSvgGauss(toutesValeurs, 55, cassure);
 
     // 🆕 BETA 96: Calculer la position et la couleur de la moyenne
     // Mapper la moyenne de 30-100% vers 0-100% de la barre
@@ -2194,7 +2317,7 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
     if (moyenneAffichee !== null && !tousEnAttente) {
         // Convertir pourcentage en décimal puis mapper sur la barre
         const moyenneDecimal = moyenneAffichee / 100;
-        positionMoyenne = positionSurEchelleDistribution(moyenneDecimal);
+        positionMoyenne = positionSurEchelleDistribution(moyenneDecimal, cassure);
     }
 
     // La couleur de la zone où tombe la moyenne
@@ -2221,12 +2344,13 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
             <h4 class="tb-titre-simple" style="margin-bottom: 4px;" data-tooltip="${{A:'tdb-assiduite',C:'tdb-completion',P:'tdb-performance'}[type]}">${label}</h4>
             <div style="position: relative; margin-top: 20px; margin-bottom: ${interpretationFinale ? '8px' : '0'};">
                 ${moyennePositionneeHTML}
-                <div class="barre-indicateur" style="background: ${fondDeLaBarre(zonesBarre)};">
+                <div class="barre-indicateur" style="background: ${fondDeLaBarre(zonesBarre, cassure)};">
                     <div class="barre-indicateur-overlay"></div>
                     ${svgGauss}
                     ${lignesSOM}
                     ${lignesPAN}
                 </div>
+                ${graduationsDeLApercu(zonesBarre, cassure)}
             </div>
             ${interpretationFinale}
         </div>
@@ -3464,6 +3588,7 @@ window.tbNavigerVersProfil = tbNavigerVersProfil;
 window.ouvrirReferenceSoloAccompagnement = ouvrirReferenceSoloAccompagnement;
 window.ouvrirOutilsObservation = ouvrirOutilsObservation;
 window.chargerTableauBordApercu = chargerTableauBordApercu;
+window.genererExempleAxeBarre = genererExempleAxeBarre;
 window.initialiserModuleTableauBordApercu = initialiserModuleTableauBordApercu;
 window.appliquerCouleursEtudiantsSuivis = appliquerCouleursEtudiantsSuivis;
 window.appliquerCouleursPrioritaires = appliquerCouleursPrioritaires;
