@@ -85,7 +85,7 @@ describe('Phase B · le PDF de rétroaction explique honnêtement la note', () =
 
     it('B3 — le titre est piloté par l’enseignant, jamais codé en dur', () => {
         // Décision §4-5 du plan : pas d'inférence automatique du statut.
-        expect(sourceRendu).toMatch(/estFinale \? 'Note finale' : 'Note provisoire'/);
+        expect(sourceRendu).toMatch(/estFinale \? 'Note finale' : mots\.titre/);
         expect(sourceData).toMatch(/notesFinales === true/);
     });
 

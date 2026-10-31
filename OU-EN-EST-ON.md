@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 31 OCTOBRE 2026 : « NOTE ACTUELLE DU COURS » EN SOMMATIVE EST CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : en pratique sommative, le profil et le PDF de l'élève disent « Note actuelle du cours », avec tes textes validés. En pratique alternative, « note provisoire » reste.
+
+**Ce qui reste à toi** : quatre mots relevés, que Cowork te soumettra (`plans de travail/RAPPORT-2026-10-31-note-actuelle-sommative.md`). Le plus visible pour tes élèves : le PDF sommatif écrit encore « Note finale = … » sous le nouveau titre.
+
+**Vérifié comment** : Vitest entier vert (10 578) ; 15 changements volontaires du code font tous rougir une garde ; les specs WebKit touchées vertes (7/7), dont le PDF sommatif et le profil en standards. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+
 📝 **LE 31 OCTOBRE 2026 : LA RÉPONSE DU GROUPE EST CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : la phrase sur la moyenne du groupe disparaît de l'Aperçu. Dans Labo › Outils d'observation, après tes seuils, tu vois ce qu'ils donnent sur ton groupe, puis tu choisis d'afficher ou non la réponse du groupe, éteinte au départ. Activée, une carte de l'Aperçu compare ta répartition au repère 80-15-5, sur les étudiant·es dont la note s'affiche, plus « Non-participation » (ta décision B). Tous les signaux restent visibles dans le réglage.

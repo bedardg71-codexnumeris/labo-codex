@@ -741,12 +741,31 @@
         return renderRangeeBilan('Jetons utilisés', lignes, false);
     }
 
+    /**
+     * #1207 — les mots du bloc de la note, tant qu'elle n'est pas finale. Décision de Grégoire du 30 oct. 2026, textes validés
+     * le 31 oct. : « provisoire » reste aux pratiques alternatives. En sommative, le titre nomme déjà la note.
+     */
+    const MOTS_DU_BLOC_NOTE = {
+        sommative: {
+            titre: 'Note actuelle du cours',
+            sansJetons: 'Cette note peut changer selon tes prochains travaux.',
+            avecJetons: 'Cette note peut changer selon tes prochains travaux et l\'application de jetons.'
+        },
+        alternative: {
+            titre: 'Note provisoire',
+            sansJetons: 'Note provisoire — peut changer selon tes prochains travaux.',
+            avecJetons: 'Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.'
+        }
+    };
+    const motsDuBlocNote = (note) => (note.sommative ? MOTS_DU_BLOC_NOTE.sommative : MOTS_DU_BLOC_NOTE.alternative);
+
     function renderRangeeNote(note) {
         if (!note || !Array.isArray(note.selection) || !note.selection.length) return null;
 
         const estHybride = note.estHybride === true;
         const estFinale  = note.estFinale  === true;
-        const titreBloc  = estFinale ? 'Note finale' : 'Note provisoire';
+        const mots = motsDuBlocNote(note);
+        const titreBloc  = estFinale ? 'Note finale' : mots.titre;
         const nbSelection = note.nombreSelection || note.selection.length;
 
         // Formate « niveau, note % » si les deux sont présents ; tombe sur le
@@ -870,9 +889,7 @@
             // #941 — mots VALIDÉS par Grégoire le 24 sept. (lot S1) ; la CONDITION est celle de D5 (lot S3) :
             // sans jetons déclarés par la pratique, la mention n'en parle pas — la même règle que le bloc
             // « Jetons utilisés » (`jetonsDeclares`, evaluation-jetons.js ; relecture de Cowork du lot S1, § 2).
-            const texteProvisoire = note.sansJetons
-                ? 'Note provisoire — peut changer selon tes prochains travaux.'
-                : 'Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.';
+            const texteProvisoire = note.sansJetons ? mots.sansJetons : mots.avecJetons;
             const mentionProvisoire = (!estFinale)
                 ? `<div style="margin-top: 4px; font-size: 9px; color: ${MUTED}; font-style: italic;">${esc(texteProvisoire)}</div>`
                 : '';

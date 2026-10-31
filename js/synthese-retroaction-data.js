@@ -880,7 +880,7 @@
 
         const note = construireNoteProvisoire(da, affichageNiveauxSeulement(evaluation))
                      || construireNoteSommative(da);
-        // #941 lot S3 (D5, relecture de Cowork du lot S1, § 2) — la mention « Note provisoire » ne parle
+        // #941 lot S3 (D5, relecture de Cowork du lot S1, § 2) — la mention sous la note ne parle
         // de jetons que si la pratique en déclare : la MÊME règle que le bloc « Jetons utilisés ».
         if (note) note.sansJetons = !(typeof jetonsDeclares === 'function' && jetonsDeclares());
         return {
@@ -1279,7 +1279,7 @@
     /* ----- J.4 — Note finale / provisoire (portfolio) -----
        Le titre du bloc dans le PDF dépend du flag explicite
        `configuration.notesFinales` de la pratique active (par défaut false →
-       « Note provisoire »). Aucun fallback arbitraire sur les pondérations :
+       « Note provisoire », « Note actuelle du cours » en sommative, #1207). Aucun fallback arbitraire sur les pondérations :
        en mode hybride, si la config catégories est incomplète, on lève une
        erreur explicite plutôt que d'inventer 65/35.
 
@@ -1306,7 +1306,7 @@
 
     /**
      * #941 lot S1 (D4, 24 sept. 2026) — LA NOTE CUMULÉE D'UNE PRATIQUE SOMMATIVE, dans le bloc
-     * « Note provisoire », comme en Standards. `calculerDetailsNoteFinale` rend null hors
+     * de la note, comme en Standards (titré « Note actuelle du cours », #1207). `calculerDetailsNoteFinale` rend null hors
      * portfolio ; la sommative a pourtant son récit, celui que le profil affiche (#921) et que
      * le Comparateur lit, par la même porte (`simulerIndices`, lecture seule). AUCUN calcul ici :
      * la note est `recit.synthese.noteFinale`. Même forme que le portfolio, marquée `sommative`,

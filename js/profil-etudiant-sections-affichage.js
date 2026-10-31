@@ -3678,7 +3678,7 @@ function _genererNoteSessionSommative(da) {
             <!-- Note de session (sommative) — #921 -->
             <div class="note-finale-section">
                 <h3 class="note-finale-titre">
-                    ${estFinale ? 'Note finale de session' : 'Note provisoire de session'}
+                    ${estFinale ? 'Note finale de session' : 'Note actuelle du cours'}
                     ${recit.pratiqueNom ? `<span class="note-finale-pratique-nom" title="Pratique de notation appliquée pour ce calcul">${echapperHtml(recit.pratiqueNom)}</span>` : ''}
                     ${pratiqueId ? `<button type="button" class="lien-reglages" data-action="ouvrirReglagesPratique" data-param="${echapperHtml(pratiqueId)}" title="Ouvrir les réglages de cette pratique">Réglages de la pratique</button>` : ''}
                 </h3>
@@ -3692,7 +3692,7 @@ function _genererNoteSessionSommative(da) {
                     </div>
                 </div>
                 <div class="note-finale-resultat">
-                    <div class="note-finale-formule">Note ${estFinale ? 'finale' : 'provisoire'} = ${echapperHtml(recit.synthese.formuleTexte || 'moyenne pondérée')}</div>
+                    <div class="note-finale-formule">${estFinale ? 'Note finale' : 'Note actuelle'} = ${echapperHtml(recit.synthese.formuleTexte || 'moyenne pondérée')}</div>
                     <div class="note-finale-total ${typeof note === 'number' ? '' : 'note-finale-tiret'}">${totalTxt}</div>
                     ${plafond}
                 </div>

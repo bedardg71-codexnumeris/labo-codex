@@ -68,6 +68,7 @@ const lireCarte = (page) => page.evaluate((da) => {
         composante: txt('.note-finale-composante-titre'),
         lignes: carte ? [...carte.querySelectorAll('.note-finale-liste-artefacts li')].map((li) => li.textContent.replace(/\s+/g, ' ').trim()) : [],
         calcul: txt('.note-finale-calcul-categorie'),
+        formule: txt('.note-finale-formule'),
         total: txt('.note-finale-total'),
         message: txt('.note-finale-message-provisoire'),
         // Le témoin : la note que le moteur rend, par la porte que lisent l'indice P et l'export.
@@ -80,7 +81,9 @@ test('#921 · sommative configurable : la carte « Moyenne pondérée » paraît
     const c = await lireCarte(page);
 
     expect(c.presente, 'une carte de note de session sous la liste des productions').toBe(true);
-    expect(c.titre).toContain('Note provisoire de session');
+    expect(c.titre).toContain('Note actuelle du cours');
+    expect(c.titre).not.toMatch(/provisoire/i);
+    expect(c.formule).toMatch(/^Note actuelle = /);
     expect(c.titre).toContain('sommative du banc');
     expect(c.titre).toContain('Réglages de la pratique');
     expect(c.composante).toMatch(/^Moyenne pondérée \(2 /);
