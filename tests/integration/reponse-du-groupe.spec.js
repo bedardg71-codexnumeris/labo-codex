@@ -99,6 +99,25 @@ test('le réglage : voir d\'abord, activer ensuite, et la carte décrit le même
     await expect(page.locator('[data-reponse-groupe]')).toHaveCount(0);
 });
 
+test('décision B : à côté des pourcentages, le réglage montre les signaux sans note', async ({ page }) => {
+    await demo(page);
+    await allerAuReglage(page);
+    // Le pack de démo a toutes ses notes : la lecture est remplacée, le temps de vérifier ce que le panneau en écrit.
+    await page.evaluate(() => {
+        const vraie = window.ceQueTesSeuilsDonnent;
+        window.ceQueTesSeuilsDonnent = () => ({ ...vraie(), comptes: { 1: 10, 2: 0, 3: 0 }, classes: 10, enAttente: 15, signauxSansNote: { 2: 5, 3: 0 },
+            parts: { 1: 100, 2: 0, 3: 0 }, sources: { 2: { 'persistante-avant-la-note': 5 }, 3: {} } });
+    });
+    await page.locator('#v2-voir-seuils').click();
+    const tuiles = page.locator('.seuils-donnent-niveau');
+    await expect(tuiles.nth(1)).toContainText('+ 5 avant la note du cours');
+    await expect(tuiles.nth(0)).not.toContainText('avant la note');
+    await expect(tuiles.nth(2)).not.toContainText('avant la note');
+    const zone = normal(await page.locator('#v2-seuils-donnent').innerText());
+    expect(zone).toContain('15 étudiant·es en attente de la note du cours, hors des pourcentages.');
+    expect(zone).toContain('Niveau 2 : 5, « Difficulté persistante », avant la note du cours');
+});
+
 test('l\'Aide lit le seuil à sa source', async ({ page }) => {
     await demo(page);
     const lu = await page.evaluate(() => {

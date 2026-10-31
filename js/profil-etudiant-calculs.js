@@ -1976,19 +1976,26 @@ function determinerNiveauRaiPedagogique(da, ligneSimulee) {
    =============================== */
 
 /**
- * La répartition, sans lecture du stockage. « En attente » reste hors des pourcentages, compté à part.
- * @param {Array<{niveau:(0|1|2|3), noteAffichee:boolean}>} lectures
- * @returns {{comptes:Object, classes:number, enAttente:number, parts:Object, aUneNote:boolean}} `parts` : 0-100, non arrondies
+ * La répartition, sans lecture du stockage. Décision de Grégoire du 31 oct. 2026 : la part se calcule sur les étudiant·es
+ * dont la note du cours s'affiche, plus « Non-participation ». Sans note, personne ne peut être au niveau 1 : compter les
+ * seuls signaux abaisserait la part au niveau 1. Les autres, signal ou non, restent en attente, hors des pourcentages.
+ * @param {Array<{niveau:(0|1|2|3), motif:string, noteAffichee:boolean}>} lectures
+ * @returns {{comptes:Object, classes:number, enAttente:number, signauxSansNote:Object, parts:Object, aUneNote:boolean}} `parts` : 0-100, non arrondies
  */
 function repartitionDuGroupe(lectures) {
     const comptes = { 1: 0, 2: 0, 3: 0 };
-    lectures.forEach((l) => { if (l.niveau) comptes[l.niveau]++; });
+    const signauxSansNote = { 2: 0, 3: 0 };
+    lectures.forEach((l) => {
+        if (l.noteAffichee || l.motif === 'non-participation') comptes[l.niveau]++;
+        else if (l.niveau) signauxSansNote[l.niveau]++;
+    });
     const classes = comptes[1] + comptes[2] + comptes[3];
     const part = (n) => (classes ? n / classes * 100 : 0);
     return {
         comptes,
         classes,
         enAttente: lectures.length - classes,
+        signauxSansNote,
         parts: { 1: part(comptes[1]), 2: part(comptes[2]), 3: part(comptes[3]) },
         // Sans note affichée, personne ne peut être au niveau 1 : la part au niveau 1 ne dirait rien du groupe.
         aUneNote: lectures.some((l) => l.noteAffichee)
