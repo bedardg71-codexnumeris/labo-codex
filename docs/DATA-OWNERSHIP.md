@@ -355,6 +355,7 @@ du matériel qui NE DOIT PAS entrer dans ces flux.
 | `autoreflexionBilan` | ssot-ok | `bilan-reflexif-core.js` | 0 |
 | `categoriesMasquees` | ssot-ok | `travaux-outils.js` | 1 |
 | `categoriesPerso` | ssot-ok | `travaux-outils.js` | 1 |
+| `categoriesTamponsRepliees` | ssot-ok | `travaux-outils.js` | 1 |
 | `cc-derniere-description` | ssot-ok | `cc-license.js` | 1 |
 | `confidentielEtudiants` | ssot-ok | `profil-etudiant-confidentiel.js` | 1 |
 | `corbeilleFichiers_backup_v1` | ssot-ok | `migration-diagnostic.js` | 1 |

@@ -2153,7 +2153,7 @@ var REGLAGES_DE_L_APPAREIL = [
     'etudiantEnCours', 'exportPDF_derniersReglages', 'rythmeColonnesT1',
     'travaux-fond-canvas', 'travaux-palette-eval-droite-pos', 'travaux-palette-eval-gauche-pos',
     'planif-fond-canvas', 'planif-liens-contourner',
-    'elementsMasques', 'categoriesMasquees', 'couleursCategories', 'ordreCategories', 'raccourcisAnnotation',
+    'elementsMasques', 'categoriesMasquees', 'categoriesTamponsRepliees', 'couleursCategories', 'ordreCategories', 'raccourcisAnnotation',
     'modeApplication', 'trimestreActif', 'groupeCoursActif', 'demo-chargees', 'demo-version-installee',
     'fsapi_persistance_handles'
 ];
