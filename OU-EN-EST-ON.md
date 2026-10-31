@@ -19,9 +19,9 @@
 
 **Ce qui changera pour toi, une fois en ligne** : la phrase sur la moyenne du groupe disparaît de l'Aperçu. Dans Labo › Outils d'observation, après tes seuils, tu vois ce qu'ils donnent sur ton groupe, puis tu choisis d'afficher ou non la réponse du groupe, éteinte au départ. Activée, une carte de l'Aperçu compare ta répartition au repère 80-15-5, sur les étudiant·es dont la note s'affiche, plus « Non-participation » (ta décision B). Tous les signaux restent visibles dans le réglage.
 
-**Ce qui reste à toi** : les mots (`plans de travail/RAPPORT-2026-10-31-reponse-du-groupe.md`), à valider avant la release, dont les phrases de l'Aide. Les mots du réglage des barres, eux, sont tranchés.
+**Ce qui reste à toi** : rien sur les mots de ce lot, validés un par un le 31 oct. et appliqués (`plans de travail/TEXTES-2026-10-31-reponse-du-groupe.md`). Un cas qu'ils ne couvrent pas : sans aucune copie, ou avec des échelles qui divergent, la ligne d'en-tête du réglage dit « ton échelle n'a pas de repère », faute d'une échelle lue. Relecture de Cowork ensuite.
 
-**Vérifié comment** : Vitest entier vert (10 560) ; 33 changements volontaires du code font tous rougir une garde, dont un qui passait d'abord et a appelé une garde de plus ; les specs WebKit touchées vertes (7/7) ; captures dans WebKit, sur le pack de démo. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+**Vérifié comment** : Vitest entier vert (10 567) ; 54 changements volontaires du code font tous rougir une garde (21 pour les textes validés), dont un qui passait d'abord et a appelé une garde de plus ; la spec WebKit de la réponse du groupe verte (5/5) ; captures dans WebKit, sur le pack de démo, d'avant les textes validés. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
 
 📝 **LE 30 OCTOBRE 2026, 23 H 05 : LE JAUNE EST ÉCLAIRCI, PAS EN LIGNE.** *Écrit par Claude Code.*
 

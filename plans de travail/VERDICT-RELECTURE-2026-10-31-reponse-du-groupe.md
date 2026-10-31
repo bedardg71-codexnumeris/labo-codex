@@ -30,3 +30,7 @@
 4. Une garde qui reprend l'exemple du rapport (10 au niveau 1 avec note, 5 en « Difficulté persistante » sans note, 10 en attente) : la carte dit 100 % et « proche du repère ». Break-test.
 5. Commit seul, sans release ni push. Relecture de Cowork ensuite ; puis les mots.
 
+## Relecture de la retouche B (`b91dcc5f`), 31 oct., 8 h 31
+
+**Acceptée.** `repartitionDuGroupe` compte au pourcentage `noteAffichee || motif === 'non-participation'`, le reste en attente ; carte et réglage la lisent tous deux. Un niveau 1 suppose une note (`classerNiveauAuCritere` reçoit `note`), donc aucun niveau 1 ne passe en attente. « + N avant la note du cours » et l'Aide réécrite rejoignent les mots à valider (`TEXTES-2026-10-31-reponse-du-groupe.md`). Rien exécuté.
+

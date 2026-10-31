@@ -2002,11 +2002,27 @@ function repartitionDuGroupe(lectures) {
     };
 }
 
-/** Les étudiant·es qui attendent la note : une phrase, dans la carte de l'Aperçu et dans le réglage. */
-function phraseEnAttenteDeLaNote(n) {
+/**
+ * Les étudiant·es hors des pourcentages : une phrase, dans la carte de l'Aperçu et dans le réglage. Texte validé par Grégoire,
+ * 31 oct. 2026. Elle compte aussi les signalé·es sans note : « en attente » reste réservé à l'étiquette de la barre RàI.
+ */
+function phraseHorsDesPourcentages(n) {
     return n > 1
-        ? `${n} étudiant·es en attente de la note du cours, hors des pourcentages.`
-        : '1 étudiant·e en attente de la note du cours, hors des pourcentages.';
+        ? `Hors des pourcentages : ${n} étudiant·es dont la note du cours ne s'affiche pas encore.`
+        : 'Hors des pourcentages : 1 étudiant·e dont la note du cours ne s\'affiche pas encore.';
+}
+
+/**
+ * La ligne d'en-tête du réglage, après le geste « Voir ». Sans repère, le seuil est la note de passage (`ligneDeReussite`) :
+ * dire qu'il vient de l'échelle serait faux. Texte validé par Grégoire, 31 oct. 2026.
+ * @param {{effectif:number, ligne:number, ligneVientDuRepere:boolean}} r - `ceQueTesSeuilsDonnent()`
+ */
+function phraseDuSeuilDuGroupe(r) {
+    const groupe = `${r.effectif} ${window.pluriel(r.effectif, 'étudiant·e', 'étudiant·es')} dans ce groupe.`;
+    const origine = r.ligneVientDuRepere
+        ? 'le repère «\u00a0Suffisant à partir de\u00a0» de ton échelle'
+        : 'la note de passage (ton échelle n\'a pas de repère «\u00a0Suffisant à partir de\u00a0»)';
+    return `${groupe} Seuil minimal de réussite\u00a0: ${formaterPourcentage(r.ligne)}, ${origine}.`;
 }
 
 /**
@@ -2015,7 +2031,8 @@ function phraseEnAttenteDeLaNote(n) {
  */
 function ceQueTesSeuilsDonnent() {
     const etudiants = obtenirEtudiantsCoursActif().filter((e) => !estEtudiantExclu(e));
-    const ligne = window.ligneDeReussite();
+    const reperes = window.reperesPerformance();
+    const ligne = window.ligneDeReussite(reperes);
     if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
     try {
         const lectures = etudiants.map((e) => determinerNiveauRaiPedagogique(e.da));
@@ -2031,6 +2048,7 @@ function ceQueTesSeuilsDonnent() {
             ...repartitionDuGroupe(lectures),
             effectif: etudiants.length,
             ligne,
+            ligneVientDuRepere: reperes.suffisance !== null,
             sources,
             sensibilite: {
                 haut: { seuil: haut, dePlus: signales(haut) - signalesAuSeuil },
@@ -2385,7 +2403,8 @@ window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.classerNiveauAuCritere = classerNiveauAuCritere;         // lot 3 des seuils : la règle nue
 window.repartitionDuGroupe = repartitionDuGroupe;               // la carte « La réponse du groupe »
 window.ceQueTesSeuilsDonnent = ceQueTesSeuilsDonnent;           // Labo › Outils d'observation
-window.phraseEnAttenteDeLaNote = phraseEnAttenteDeLaNote;
+window.phraseHorsDesPourcentages = phraseHorsDesPourcentages;
+window.phraseDuSeuilDuGroupe = phraseDuSeuilDuGroupe;
 window.noteDuCoursAffichee = noteDuCoursAffichee;               // la carte RàI lit la même note affichée que le niveau
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.libelleNiveauSOLO = libelleNiveauSOLO;

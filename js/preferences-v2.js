@@ -573,7 +573,7 @@
     const NOM_DE_LA_SOURCE = {
         'sous-la-ligne': 'note du cours à ce jour sous ton seuil',
         'sous-la-ligne-fondation': 'note du cours à ce jour sous ton seuil et critère de fondation en difficulté',
-        'persistante': '«\u00a0Difficulté persistante\u00a0», note au-dessus du seuil',
+        'persistante': '«\u00a0Difficulté persistante\u00a0», note au-dessus de ton seuil',
         'persistante-avant-la-note': '«\u00a0Difficulté persistante\u00a0», avant la note du cours',
         'diagnostic': 'signalement diagnostique',
         'non-participation': '«\u00a0Non-participation\u00a0»'
@@ -588,7 +588,7 @@
             zone.innerHTML = '';
         }
         const sousTitre = document.getElementById('v2-seuils-donnent-sous-titre');
-        if (sousTitre) sousTitre.textContent = 'S\'affiche une fois tes seuils posés.';
+        if (sousTitre) sousTitre.textContent = 'Pose d\'abord tes seuils, puis clique sur «\u00a0Voir ce que mes seuils donnent\u00a0».';
         const choix = document.getElementById('v2-pref-reponse-groupe');
         if (choix) {
             choix.checked = obtenirPreference('afficherReponseDuGroupe') === true;
@@ -603,28 +603,26 @@
         if (!zone || typeof window.ceQueTesSeuilsDonnent !== 'function') return;
         const r = window.ceQueTesSeuilsDonnent();
         const sousTitre = document.getElementById('v2-seuils-donnent-sous-titre');
-        if (sousTitre) {
-            sousTitre.textContent = `${r.effectif} ${window.pluriel(r.effectif, 'étudiant·e', 'étudiant·es')} dans ce groupe. Seuil minimal de réussite\u00a0: ${formaterPourcentage(r.ligne)}, lu dans l'échelle de tes copies.`;
-        }
+        if (sousTitre) sousTitre.textContent = window.phraseDuSeuilDuGroupe(r);
         const tuiles = [1, 2, 3].map((n) => `
             <div class="seuils-donnent-niveau">
                 <span class="u-texte-petit text-muted">${NOM_DU_NIVEAU[n]}</span>
                 <strong class="seuils-donnent-compte">${r.comptes[n]}</strong>
                 <span class="u-texte-petit text-muted">${r.classes ? `${formaterPourcentage(Math.round(r.parts[n]))} du groupe` : '—'}</span>
-                ${r.signauxSansNote[n] ? `<span class="u-texte-petit text-muted">+ ${r.signauxSansNote[n]} avant la note du cours</span>` : ''}
+                ${r.signauxSansNote[n] ? `<span class="u-texte-petit text-muted">${r.signauxSansNote[n] > 1 ? `+ ${r.signauxSansNote[n]} signalé·es avant leur note` : '+ 1 signalé·e avant sa note'}</span>` : ''}
             </div>`).join('');
         const sources = [3, 2].flatMap((n) => Object.entries(r.sources[n])
             .map(([motif, compte]) => `<li>Niveau ${n}\u00a0: ${compte}, ${NOM_DE_LA_SOURCE[motif]}</li>`));
         const { haut, bas } = r.sensibilite;
         zone.innerHTML = `
             <div class="seuils-donnent-niveaux">${tuiles}</div>
-            ${r.enAttente > 0 ? `<p class="u-texte-petit">${window.phraseEnAttenteDeLaNote(r.enAttente)}</p>` : ''}
+            ${r.enAttente > 0 ? `<p class="u-texte-petit">${window.phraseHorsDesPourcentages(r.enAttente)}</p>` : ''}
             <div class="u-texte-petit">
                 <strong>D'où viennent les niveaux 2 et 3</strong>
                 <ul class="seuils-donnent-sources">${sources.join('') || '<li>Aucun.</li>'}</ul>
             </div>
-            <p class="u-texte-petit"><strong>Sensibilité de ton seuil.</strong> À ${formaterPourcentage(haut.seuil)}, ${haut.dePlus} ${window.pluriel(haut.dePlus, 'étudiant·e', 'étudiant·es')} de plus aux niveaux 2 ou 3. À ${formaterPourcentage(bas.seuil)}, ${bas.deMoins} de moins.</p>
-            <p class="text-muted u-texte-petit">Tu peux changer tes seuils. Change-les pour ce qu'ils disent d'un travail suffisant, pas pour obtenir une autre répartition.</p>`;
+            <p class="u-texte-petit"><strong>Sensibilité de ton seuil.</strong> Si ton seuil était à ${formaterPourcentage(haut.seuil)}, ${haut.dePlus} ${window.pluriel(haut.dePlus, 'étudiant·e de plus serait', 'étudiant·es de plus seraient')} aux niveaux 2 ou 3\u00a0; à ${formaterPourcentage(bas.seuil)}, ${bas.deMoins} de moins.</p>
+            <p class="text-muted u-texte-petit">Tu peux changer tes seuils\u00a0: fais-le pour ce qu'ils disent d'un travail suffisant, pas pour obtenir une autre répartition.</p>`;
         zone.hidden = false;
         const choix = document.getElementById('v2-pref-reponse-groupe');
         if (choix) choix.disabled = false;
