@@ -53,6 +53,7 @@ test('le réglage : voir d\'abord, activer ensuite, et la carte décrit le même
     await allerAuReglage(page);
 
     await expect(page.locator('#v2-seuils-donnent')).toBeHidden();
+    await expect(page.locator('#v2-seuils-donnent-sous-titre')).toHaveText('Pose d\'abord tes seuils, puis clique sur «\u00a0Voir ce que mes seuils donnent\u00a0».');
     await expect(page.locator('#v2-pref-reponse-groupe')).toBeDisabled();
 
     await page.locator('#v2-voir-seuils').click();
@@ -106,16 +107,33 @@ test('décision B : à côté des pourcentages, le réglage montre les signaux s
     await page.evaluate(() => {
         const vraie = window.ceQueTesSeuilsDonnent;
         window.ceQueTesSeuilsDonnent = () => ({ ...vraie(), comptes: { 1: 10, 2: 0, 3: 0 }, classes: 10, enAttente: 15, signauxSansNote: { 2: 5, 3: 0 },
-            parts: { 1: 100, 2: 0, 3: 0 }, sources: { 2: { 'persistante-avant-la-note': 5 }, 3: {} } });
+            parts: { 1: 100, 2: 0, 3: 0 }, sources: { 2: { 'persistante-avant-la-note': 5 }, 3: {} },
+            sensibilite: { haut: { seuil: 70, dePlus: 3 }, bas: { seuil: 60, deMoins: 2 } } });
     });
     await page.locator('#v2-voir-seuils').click();
     const tuiles = page.locator('.seuils-donnent-niveau');
-    await expect(tuiles.nth(1)).toContainText('+ 5 avant la note du cours');
-    await expect(tuiles.nth(0)).not.toContainText('avant la note');
-    await expect(tuiles.nth(2)).not.toContainText('avant la note');
+    await expect(tuiles.nth(1)).toContainText('+ 5 signalé·es avant leur note');
+    await expect(tuiles.nth(0)).not.toContainText('signalé');
+    await expect(tuiles.nth(2)).not.toContainText('signalé');
     const zone = normal(await page.locator('#v2-seuils-donnent').innerText());
-    expect(zone).toContain('15 étudiant·es en attente de la note du cours, hors des pourcentages.');
+    expect(zone).toContain('Hors des pourcentages : 15 étudiant·es dont la note du cours ne s\'affiche pas encore.');
     expect(zone).toContain('Niveau 2 : 5, « Difficulté persistante », avant la note du cours');
+    expect(zone).toContain('Si ton seuil était à 70 %, 3 étudiant·es de plus seraient aux niveaux 2 ou 3 ; à 60 %, 2 de moins.');
+    expect(zone).toContain('Tu peux changer tes seuils : fais-le pour ce qu\'ils disent d\'un travail suffisant');
+});
+
+test('les textes au singulier', async ({ page }) => {
+    await demo(page);
+    await allerAuReglage(page);
+    await page.evaluate(() => {
+        const vraie = window.ceQueTesSeuilsDonnent;
+        window.ceQueTesSeuilsDonnent = () => ({ ...vraie(), enAttente: 1, signauxSansNote: { 2: 1, 3: 0 }, sensibilite: { haut: { seuil: 70, dePlus: 1 }, bas: { seuil: 60, deMoins: 1 } } });
+    });
+    await page.locator('#v2-voir-seuils').click();
+    await expect(page.locator('.seuils-donnent-niveau').nth(1)).toContainText('+ 1 signalé·e avant sa note');
+    const zone = normal(await page.locator('#v2-seuils-donnent').innerText());
+    expect(zone).toContain('Hors des pourcentages : 1 étudiant·e dont la note du cours ne s\'affiche pas encore.');
+    expect(zone).toContain('Si ton seuil était à 70 %, 1 étudiant·e de plus serait aux niveaux 2 ou 3 ; à 60 %, 1 de moins.');
 });
 
 test('l\'Aide lit le seuil à sa source', async ({ page }) => {

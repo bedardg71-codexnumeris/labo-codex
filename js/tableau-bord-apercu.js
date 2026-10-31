@@ -1674,12 +1674,12 @@ function genererCarteReponseDuGroupe(lectures) {
     if (obtenirPreference('afficherReponseDuGroupe') !== true || lectures.length === 0) return '';
     const r = repartitionDuGroupe(lectures);
     const attente = r.enAttente > 0
-        ? `<p class="reponse-groupe-note">${phraseEnAttenteDeLaNote(r.enAttente)}</p>`
+        ? `<p class="reponse-groupe-note">${phraseHorsDesPourcentages(r.enAttente)}</p>`
         : '';
     let corps;
     if (!r.aUneNote) {
         // Avant toute note, seuls les signaux ont un niveau : la part au niveau 1 vaudrait 0, quel que soit le groupe.
-        corps = '<p class="reponse-groupe-note">La note du cours ne s\'affiche encore pour aucun·e étudiant·e : la comparaison attend.</p>';
+        corps = '<p class="reponse-groupe-note">La note du cours ne s\'affiche encore pour aucun·e étudiant·e : la réponse du groupe apparaîtra avec les premières notes.</p>';
     } else {
         const niveau1 = Math.round(r.parts[1]);
         const sous = niveau1 < window.SEUIL_NIVEAU_1_REPONSE_DU_GROUPE;

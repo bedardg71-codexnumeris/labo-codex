@@ -22,15 +22,15 @@ const GRILLE = { id: 'G1', nom: 'Dépistage', criteres: [
     { id: 'c2', nom: 'Nuance', ponderation: 50, niveauSOLO: 'relationnel' }] };
 
 /** `eleves` : { P, copies, statut }. `prefs` : les préférences enregistrées. `minimum` : le minimum de la pratique. */
-function banc(eleves, { prefs = {}, minimum = 0 } = {}) {
+function banc(eleves, { prefs = {}, minimum = 0, echelle = ECHELLE } = {}) {
     const store = storeBase();
-    store.test_echellesTemplates = [ECHELLE];
+    store.test_echellesTemplates = [echelle];
     store.test_grillesTemplates = [GRILLE];
     const nb = Math.max(1, ...eleves.map((e) => (e.copies || []).length));
     store.test_productions = Array.from({ length: nb }, (_, i) => ({ id: 'P' + i, titre: 'P' + i, type: 'artefact-portfolio', dateEcheance: '2026-08-30' }));
     store.test_groupeEtudiants = eleves.map((e, i) => ({ da: DA(i), nom: 'Nom' + i, prenom: 'P', groupe: '01', coursId: 'GC1', statut: e.statut || 'actif' }));
     store.test_evaluationsSauvegardees = eleves.flatMap((e, i) => (e.copies || []).map((note, c) => ({
-        id: `C${i}-${c}`, etudiantDA: DA(i), productionId: 'P' + c, noteFinale: note, verrouillee: true, coursId: 'GC1', echelleId: ECHELLE.id, grilleId: 'G1',
+        id: `C${i}-${c}`, etudiantDA: DA(i), productionId: 'P' + c, noteFinale: note, verrouillee: true, coursId: 'GC1', echelleId: echelle.id, grilleId: 'G1',
         dateEvaluation: `2026-09-${String(c + 1).padStart(2, '0')}T12:00:00.000Z`, ponderationCouverte: 100,
         criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: e.structure || 'M' }, { critereId: 'c2', critereNom: 'Nuance', niveauSelectionne: 'M' }]
     })));
@@ -45,8 +45,8 @@ function banc(eleves, { prefs = {}, minimum = 0 } = {}) {
             { chemin: 'js/tableau-bord-apercu.js', internes: ['genererCarteReponseDuGroupe', 'genererInterpretationRai'] }],
         globaux: { designerPratiqueActive: () => ({ etat: 'ok', famille: 'standards' }), obtenirTypePratiqueActive: () => 'standards', calculerTousLesIndices: indices,
             obtenirConfigPratiqueActive: () => (minimum ? { portfolio: { minimumCompletion: minimum } } : {}),
-            obtenirEchelleResolue: (id) => (id === ECHELLE.id ? JSON.parse(JSON.stringify(ECHELLE)) : null),
-            resoudreModeleParId: (t, id) => { const l = t === 'echelle' ? [ECHELLE] : [GRILLE]; return JSON.parse(JSON.stringify(l.find((m) => m.id === id) || null)); },
+            obtenirEchelleResolue: (id) => (id === echelle.id ? JSON.parse(JSON.stringify(echelle)) : null),
+            resoudreModeleParId: (t, id) => { const l = t === 'echelle' ? [echelle] : [GRILLE]; return JSON.parse(JSON.stringify(l.find((m) => m.id === id) || null)); },
             obtenirTermeProduction: () => 'artefacts', accordTermeProduction: () => 'évalués', chargerSeuilsInterpretation: () => ({}), obtenirSeuil: () => 0.7, obtenirNombreProductionsPourPatterns: () => 3 }
     });
     b.win.pluriel = (n, un, plusieurs) => (n > 1 ? plusieurs : un);
@@ -181,20 +181,20 @@ describe('§ 2 — la carte, le réglage activé', () => {
         expect(texte(carte([lecture(1)]))).toContain('Le repère 80-15-5 est une heuristique de la RàI, pas une proportion mesurée au collégial. Il situe le groupe, il ne juge ni les étudiant·es ni l\'enseignant·e.');
     });
 
-    it('« En attente » : hors des pourcentages, compté à part', () => {
+    it('hors des pourcentages : compté à part, avec son singulier', () => {
         const html = texte(carte([...repete(8, 1, true), ...repete(2, 2, true), ...repete(15, 0, false)]));
         expect(html).toContain('80 % de ton groupe est au niveau 1');
-        expect(html).toContain('15 étudiant·es en attente de la note du cours, hors des pourcentages.');
-        expect(texte(carte([lecture(1), lecture(0, false)]))).toContain('1 étudiant·e en attente de la note du cours');
+        expect(html).toContain('Hors des pourcentages : 15 étudiant·es dont la note du cours ne s\'affiche pas encore.');
+        expect(texte(carte([lecture(1), lecture(0, false)]))).toContain('Hors des pourcentages : 1 étudiant·e dont la note du cours ne s\'affiche pas encore.');
     });
 
     it('avant toute note, aucune comparaison : personne ne peut encore être au niveau 1', () => {
         const html = carte([...repete(3, 2, false), ...repete(22, 0, false)]);
         expect(html).not.toContain('renforcé');
         expect(html).not.toContain('reponse-groupe-barre');
-        expect(texte(html)).toContain('la comparaison attend');
-        // Décision B : les 3 signaux sans note sont en attente eux aussi.
-        expect(texte(html)).toContain('25 étudiant·es en attente');
+        expect(texte(html)).toContain('La note du cours ne s\'affiche encore pour aucun·e étudiant·e : la réponse du groupe apparaîtra avec les premières notes.');
+        // Décision B : les 3 signaux sans note sont hors des pourcentages eux aussi.
+        expect(texte(html)).toContain('Hors des pourcentages : 25 étudiant·es');
     });
 
     it('décision B : le groupe qui monte vers ses notes, l\'exemple du rapport', () => {
@@ -202,13 +202,13 @@ describe('§ 2 — la carte, le réglage activé', () => {
         const html = texte(carte([...repete(10, 1, true), ...persistants, ...repete(10, 0, false)]));
         expect(html).toContain('100 % de ton groupe est au niveau 1. La répartition est proche du repère de la RàI.');
         expect(html).not.toContain('renforcé');
-        expect(html).toContain('15 étudiant·es en attente de la note du cours, hors des pourcentages.');
+        expect(html).toContain('Hors des pourcentages : 15 étudiant·es dont la note du cours ne s\'affiche pas encore.');
     });
 
     it('décision B : « Non-participation » reste dans les pourcentages, sans note', () => {
         const html = texte(carte([lecture(1), { niveau: 3, motif: 'non-participation', noteAffichee: false }]));
         expect(html).toContain('50 % de ton groupe est au niveau 1');
-        expect(html).not.toContain('en attente');
+        expect(html).not.toContain('Hors des pourcentages');
     });
 
     it('le banc complet : sous le minimum de la pratique, la carte attend', () => {
@@ -249,7 +249,7 @@ describe('décision B, sur la vraie règle du niveau — la carte et le réglage
     it('la carte : 100 %, proche du repère', () => {
         const html = texte(groupe().carte());
         expect(html).toContain('100 % de ton groupe est au niveau 1. La répartition est proche du repère de la RàI.');
-        expect(html).toContain('15 étudiant·es en attente');
+        expect(html).toContain('Hors des pourcentages : 15 étudiant·es');
     });
 
     it('le réglage : les mêmes parts, et aucun signal ne disparaît', () => {
@@ -296,13 +296,70 @@ describe('§ 3 — l\'Aide et le guide ne disent plus l\'ancienne phrase', () =>
     it('la carte RàI dit la réponse du groupe : facultative, éteinte au départ', () => {
         const carteRai = tranche(lire('index.html'), 'id="accordeon-aide-rai"', 'id="accordeon-aide-patterns"').replace(/&nbsp;/g, ' ');
         expect(carteRai).toContain('La réponse du groupe est facultative et éteinte au départ');
-        expect(carteRai).toContain('« Afficher la réponse du groupe » (Labo → Outils d\'observation)');
+        expect(carteRai).toContain('tu l\'actives avec la case « Afficher la réponse du groupe » (Labo › Outils d\'observation). Une carte de l\'Aperçu compare alors la répartition');
         expect(carteRai).not.toContain('sous la barre RàI');
-        expect(carteRai).toContain('La part se calcule sur les étudiant·es dont la note du cours s\'affiche, plus « Non-participation »');
+        expect(carteRai).toContain('La part se calcule sur les étudiant·es dont la note du cours s\'affiche, plus ceux et celles en « Non-participation » ; les autres sont compté·es à part, tant que leur note ne s\'affiche pas. Tant qu\'aucune note ne s\'affiche, la carte attend. Elle n\'enlève aucun signal individuel.');
     });
 
     it('le guide RàI non plus', () => {
-        expect(lire('js/guides-pedagogiques.js')).not.toContain('Quand la moyenne du groupe');
+        const guide = lire('js/guides-pedagogiques.js');
+        expect(guide).not.toContain('Quand la moyenne du groupe');
+        expect(guide.replace(/\\u00a0/g, ' ')).toContain('Dans Labo › Outils d\'observation, tu peux activer la réponse du groupe : elle compare la répartition de ton groupe au repère de la RàI, sans enlever aucun signal individuel.');
+    });
+});
+
+describe('la ligne d\'en-tête du réglage : d\'où vient le seuil', () => {
+    const ligne = (b) => b.win.phraseDuSeuilDuGroupe(b.win.ceQueTesSeuilsDonnent()).replace(/\u00a0/g, ' ');
+    const SANS_REPERE = { ...ECHELLE, seuilSuffisance: undefined };
+
+    it('avec le repère de l\'échelle : 65 %, et le repère nommé', () => {
+        expect(ligne(banc([{ P: 90, copies: [90] }, { P: 80, copies: [80] }])))
+            .toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 65 %, le repère « Suffisant à partir de » de ton échelle.');
+    });
+
+    it('sans repère : 60 %, la note de passage', () => {
+        const b = banc([{ P: 90, copies: [90] }, { P: 80, copies: [80] }], { echelle: SANS_REPERE });
+        expect(b.win.ceQueTesSeuilsDonnent().ligne).toBe(60);
+        expect(b.win.ceQueTesSeuilsDonnent().ligneVientDuRepere).toBe(false);
+        expect(ligne(b)).toBe('2 étudiant·es dans ce groupe. Seuil minimal de réussite : 60 %, la note de passage (ton échelle n\'a pas de repère « Suffisant à partir de »).');
+    });
+
+    it('sans repère, au singulier', () => {
+        const b = banc([{ P: 90, copies: [90] }], { echelle: SANS_REPERE });
+        expect(SANS_REPERE.seuilMaitrise).toBe('M');
+        expect(ligne(b)).toContain('1 étudiant·e dans ce groupe.');
+        expect(ligne(b)).toContain('la note de passage');
+    });
+
+    it('le réglage lit cette phrase, sans en garder une autre', () => {
+        const v2 = lire('js/preferences-v2.js');
+        expect(tranche(v2, 'function voirCeQueMesSeuilsDonnentV2(', '\n    }\n')).toContain('window.phraseDuSeuilDuGroupe(r)');
+        expect(v2).not.toContain('lu dans l\'échelle de tes copies');
+    });
+});
+
+describe('les textes validés du réglage (31 oct. 2026)', () => {
+    const html = lire('index.html').replace(/&nbsp;/g, ' ');
+    const v2 = lire('js/preferences-v2.js').replace(/\\u00a0/g, ' ');
+
+    it('l\'intertitre, sa ligne avant le clic, et la ligne de l\'activation', () => {
+        expect(html).toContain('<h4>Ce que tes seuils donnent sur ton groupe</h4>');
+        const avantLeClic = 'Pose d\'abord tes seuils, puis clique sur « Voir ce que mes seuils donnent ».';
+        expect(html).toContain(avantLeClic);
+        // Le retour au panneau remet la même phrase que le HTML.
+        expect(tranche(v2, 'function chargerReponseDuGroupe(', '\n    }\n').replace(/\\'/g, '\'')).toContain(avantLeClic);
+        expect(html).toContain('Facultative : rien ne s\'affiche dans l\'Aperçu tant que tu ne l\'actives pas.');
+    });
+
+    it('la source au-dessus du seuil et la mise en garde', () => {
+        expect(tranche(v2, 'const NOM_DE_LA_SOURCE = {', '};')).toContain('note au-dessus de ton seuil');
+        expect(v2).toContain('Tu peux changer tes seuils : fais-le pour ce qu\'ils disent d\'un travail suffisant, pas pour obtenir une autre répartition.');
+    });
+
+    it('la phrase hors des pourcentages : la même dans la carte et le réglage ; celle de la barre RàI ne change pas', () => {
+        expect(tranche(lire('js/tableau-bord-apercu.js'), 'function genererCarteReponseDuGroupe(', '\n}\n')).toContain('phraseHorsDesPourcentages(r.enAttente)');
+        expect(v2).toContain('window.phraseHorsDesPourcentages(r.enAttente)');
+        expect(lire('js/tableau-bord-apercu.js')).toContain('en attente de leur note du cours');
     });
 });
 
@@ -318,4 +375,10 @@ describe('§ 3 — l\'Aide et le guide ne disent plus l\'ancienne phrase', () =>
  *   retour au dénominateur de tous les niveaux : 4 ; non-participation hors des pourcentages : 2 ; signaux sans note perdus : 1
  *   en attente sans les signaux : 4 ; sources limitées aux notes affichées : 2 ; garde retirée : 2 ; Aide sur l'ancienne règle : 1
  *   (ce dernier passait d'abord sans rougir : garde ajoutée) ; dans la spec WebKit, réglage sans les signaux sans note : 1
+ * Textes validés (31 oct. 2026), même méthode, sur cette sentinelle seule :
+ *   sans repère lu comme repère : 2 ; repère lu sur la maîtrise : 2 ; variante sans repère retouchée : 2 ; hors des pourcentages, pluriel ancien : 4, singulier ancien : 1
+ *   carte avant toute note ancienne : 1 ; réglage sans la phrase de la ligne : 1 ; chargement différent du HTML : 1 ; source au-dessus du seuil ancienne : 1
+ *   mise en garde ancienne : 1 ; réglage sans la phrase hors des pourcentages : 1 ; intertitre ancien : 1 ; ligne avant le clic ancienne : 1 ; ligne de l'activation ancienne : 1
+ *   Aide, début ancien : 1, fin ancienne : 1, 70 écrit en dur : 1 ; guide ancien : 1 ; phrase de la barre RàI changée : 1
+ *   dans la spec WebKit, « + N signalé·es » : 1 ; sensibilité sans son accord : 1
  */
