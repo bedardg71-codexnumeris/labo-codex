@@ -82,6 +82,24 @@ test.describe('La palette d’annotation', () => {
         expect(n).toMatchObject({ identite: 0, icone: 0, texte: false, jumeau: true });
     });
 
+    test('« Effacer la page » se lit à 4,5:1 au moins, en clair et en sombre', async ({ page }) => {
+        await ouvrirCopie(page);
+        for (const clair of [true, false]) {
+            const ratio = await page.evaluate((clair) => {
+                document.body.classList.toggle('mode-clair', clair);
+                const rgb = (c) => c.match(/[\d.]+/g).slice(0, 3).map(Number);
+                const lum = ([r, g, b]) => {
+                    const v = [r, g, b].map((x) => { const c = x / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+                    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+                };
+                const a = lum(rgb(getComputedStyle(document.querySelector('.annot-effacer')).color));
+                const b = lum(rgb(getComputedStyle(document.getElementById('travaux-palette-flottante')).backgroundColor));
+                return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+            }, clair);
+            expect(ratio).toBeGreaterThanOrEqual(4.5);
+        }
+    });
+
     test('douze carrés soudés, la couleur active au double liseré', async ({ page }) => {
         await ouvrirCopie(page);
         const c = await page.evaluate(() => {

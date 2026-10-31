@@ -27542,7 +27542,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     border: 1px solid var(--rouge-danger);
     border-radius: 5px;
     background: transparent;
-    color: var(--rouge-erreur);
+    color: #ff7a88; /* --rouge-erreur ne tient que 3,4:1 sur le fond sombre de la palette */
     font: inherit;
     font-size: 0.68rem;
     font-weight: 600;
