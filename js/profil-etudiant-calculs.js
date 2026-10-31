@@ -2012,16 +2012,23 @@ function phraseHorsDesPourcentages(n) {
         : 'Hors des pourcentages : 1 étudiant·e dont la note du cours ne s\'affiche pas encore.';
 }
 
+/** Pourquoi aucune échelle n'est lue (`reperesPerformance().raison`) : le seuil est alors la note de passage. */
+const ORIGINE_SANS_ECHELLE_LUE = {
+    'echelles-divergentes': 'la note de passage (tes copies n\'ont pas d\'échelle unique)',
+    'aucune-copie': 'la note de passage (aucune échelle de tes copies ne le fixe encore)',
+    'sans-pratique': 'la note de passage (aucune échelle de tes copies ne le fixe encore)'
+};
+
 /**
  * La ligne d'en-tête du réglage, après le geste « Voir ». Sans repère, le seuil est la note de passage (`ligneDeReussite`) :
- * dire qu'il vient de l'échelle serait faux. Texte validé par Grégoire, 31 oct. 2026.
- * @param {{effectif:number, ligne:number, ligneVientDuRepere:boolean}} r - `ceQueTesSeuilsDonnent()`
+ * dire qu'il vient de l'échelle serait faux. Textes validés par Grégoire, 31 oct. 2026 : quatre cas.
+ * @param {{effectif:number, ligne:number, ligneVientDuRepere:boolean, raisonSansEchelle:(string|null)}} r - `ceQueTesSeuilsDonnent()`
  */
 function phraseDuSeuilDuGroupe(r) {
     const groupe = `${r.effectif} ${window.pluriel(r.effectif, 'étudiant·e', 'étudiant·es')} dans ce groupe.`;
     const origine = r.ligneVientDuRepere
         ? 'le repère «\u00a0Suffisant à partir de\u00a0» de ton échelle'
-        : 'la note de passage (ton échelle n\'a pas de repère «\u00a0Suffisant à partir de\u00a0»)';
+        : (ORIGINE_SANS_ECHELLE_LUE[r.raisonSansEchelle] || 'la note de passage (ton échelle n\'a pas de repère «\u00a0Suffisant à partir de\u00a0»)');
     return `${groupe} Seuil minimal de réussite\u00a0: ${formaterPourcentage(r.ligne)}, ${origine}.`;
 }
 
@@ -2049,6 +2056,7 @@ function ceQueTesSeuilsDonnent() {
             effectif: etudiants.length,
             ligne,
             ligneVientDuRepere: reperes.suffisance !== null,
+            raisonSansEchelle: reperes.raison,
             sources,
             sensibilite: {
                 haut: { seuil: haut, dePlus: signales(haut) - signalesAuSeuil },
