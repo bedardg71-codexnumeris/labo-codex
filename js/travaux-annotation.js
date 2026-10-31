@@ -3343,7 +3343,7 @@
     }
 
     /**
-     * « Effacer tout » : les annotations de la page courante.
+     * « Effacer la page » : les annotations de la page courante.
      * #1007 (2a-2) — le codex est proposé seulement si la page en porte au moins une. Après
      * l'attente, la page est relue (`_viderPageCourante`), et rien n'est effacé si le fichier
      * ou la page affichés ont changé pendant ce temps.

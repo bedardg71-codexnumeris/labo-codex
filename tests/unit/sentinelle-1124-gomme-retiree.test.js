@@ -24,7 +24,14 @@ describe('#1124 · la gomme est retirée', () => {
         expect(existsSync(path.join(racine, 'icons', 'icon-eraser.svg'))).toBe(false);
         expect(lire('index.html')).not.toContain('<strong>Gomme</strong>');
     });
-    it('la corbeille reste en haut de la palette Annotation', () => {
-        expect(lire('js/travaux-outils.js')).toContain('id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection"');
+    // Réancré le 31 oct. 2026 (consigne des palettes, partie C) : la corbeille est dans la bande Annuler | Supprimer | Rétablir, au milieu.
+    it('la corbeille reste en haut de la palette Annotation, entre Annuler et Rétablir', () => {
+        const source = lire('js/travaux-outils.js');
+        const annuler = source.indexOf('id="travaux-btn-undo"');
+        const corbeille = source.indexOf('id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.supprimerSelection"');
+        const retablir = source.indexOf('id="travaux-btn-redo"');
+        expect(annuler).toBeGreaterThan(-1);
+        expect(corbeille).toBeGreaterThan(annuler);
+        expect(retablir).toBeGreaterThan(corbeille);
     });
 });
