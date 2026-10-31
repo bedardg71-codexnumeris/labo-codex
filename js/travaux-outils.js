@@ -230,6 +230,16 @@
             epaisseurDefaut: 2,
             remplir: false
         },
+        // Partie H (31 oct. 2026) : tracé sommet par sommet, voir `poseDunGeste` (travaux-annotation.js).
+        polygone: {
+            id: 'polygone',
+            nom: 'Polygone',
+            icone: '<img src="' + ICONS_DIR + 'icon-polygon.svg" alt="Polygone" class="outil-svg-icon">',
+            curseur: 'crosshair',
+            type: 'forme',
+            epaisseurDefaut: 2,
+            remplir: false
+        },
         // ligne retiré de la palette — rétrocompatibilité assurée au rendu
         // (les données existantes type:'ligne' sont rendues via normaliserPointes)
         ondule: {
@@ -1664,6 +1674,10 @@
        =============================== */
 
     let outilActif = 'position';
+    // La dernière ligne choisie donne son trait aux formes fermées (partie H). Au départ, plein ; rien n'est mémorisé.
+    const TRAIT_DE_LA_LIGNE = { fleche: 'plein', pointille: 'pointille', ondule: 'ondule' };
+    const FORMES_FERMEES = ['cercle', 'rectangle', 'polygone'];
+    let traitCourant = 'plein';
     let couleurActive = COULEUR_DEFAUT;
     let epaisseurActive = OUTILS.stylo.epaisseurDefaut;
     let taillTexteActive = OUTILS.texte.tailleDefaut;
@@ -1680,6 +1694,7 @@
         if (OUTILS[id]) {
             outilActif = id;
             autocollantActif = null; // Desactiver le mode tampon
+            if (TRAIT_DE_LA_LIGNE[id]) traitCourant = TRAIT_DE_LA_LIGNE[id];
             // Restaurer l'epaisseur par defaut de l'outil
             if (OUTILS[id].epaisseurDefaut) {
                 epaisseurActive = OUTILS[id].epaisseurDefaut;
@@ -1697,6 +1712,15 @@
             }));
             mettreAJourApercuTrait();
         }
+    }
+
+    /** Le trait que recevra une forme fermée, si l'outil actif en est une : 'pointille' ou 'ondule' ; plein = rien. */
+    function traitPourFormeFermee(outil) {
+        return estFormeFermee(outil.id) && traitCourant !== 'plein' ? traitCourant : null;
+    }
+
+    function estFormeFermee(type) {
+        return FORMES_FERMEES.indexOf(type) !== -1;
     }
 
     function getCouleurActive() {
@@ -1939,7 +1963,7 @@
         // Outils et formes
         html += '<div class="annot-rangee">';
         html += _groupeOutilsAnnot('Outils', ['stylo', 'surligneur', 'texte']);
-        html += _groupeOutilsAnnot('Formes', ['cercle', 'rectangle']);
+        html += _groupeOutilsAnnot('Formes', ['cercle', 'rectangle', 'polygone']);
         html += '</div>';
 
         // Lignes et extrémités
@@ -2016,6 +2040,8 @@
             } else {
                 btn.classList.toggle('actif', btn.dataset.outil === outilActif);
             }
+            // Une forme fermée active : la ligne qui lui donne son trait reste marquée, autrement que l'outil actif.
+            btn.classList.toggle('trait-courant', estFormeFermee(outilActif) && TRAIT_DE_LA_LIGNE[btn.dataset.outil] === traitCourant);
         });
 
         // Couleurs
@@ -2384,7 +2410,7 @@
         if (existant) existant.remove();
 
         var outilsIds = ['position', 'selection', 'stylo', 'surligneur', 'texte',
-                         'cercle', 'rectangle', 'fleche', 'pointille', 'ondule'];
+                         'cercle', 'rectangle', 'polygone', 'fleche', 'pointille', 'ondule'];
 
         var lignes = outilsIds.map(function(id) {
             var outil = OUTILS[id];
@@ -3955,6 +3981,8 @@
         AUTOCOLLANTS: AUTOCOLLANTS,
         // Getters
         getOutilActif: getOutilActif,
+        traitPourFormeFermee: traitPourFormeFermee,
+        estFormeFermee: estFormeFermee,
         getCouleurActive: getCouleurActive,
         getEpaisseurActive: getEpaisseurActive,
         getTailleTexte: getTailleTexte,
