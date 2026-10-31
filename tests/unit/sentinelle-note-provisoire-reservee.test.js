@@ -3,6 +3,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as acorn from 'acorn';
+import { chargerScript } from './_helpers/charger-script.js';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE (30 octobre 2026) — « NOTE PROVISOIRE » EST RÉSERVÉE AUX PRATIQUES ALTERNATIVES.
 //
@@ -19,21 +21,21 @@ const racine = path.resolve(__dirname, '..', '..');
 
 const NOTE_PROVISOIRE = /\bnotes?(?:\s|&nbsp;)+provisoires?\b/gi;
 
-// Les anciens mots qui opposent « provisoire » à « finale » sont HORS DU LOT et restent ouverts à
-// Grégoire (RELAIS.md, 30 oct.) : quand il en décide, leur ligne part d'ici.
-const ANCIENS_MOTS = 'oppose « provisoire » à « finale », ouvert au RELAIS du 30 oct.';
+// #1207 (décision de Grégoire, 30 oct. ; textes du 31 oct.) : en sommative, « Note actuelle du cours ».
+const PRATIQUE_ALTERNATIVE = 'pratique alternative, le mot que le principe garde';
+// Deux réglages communs à toutes les pratiques restent ouverts : RAPPORT-2026-10-31-note-actuelle-sommative.md.
+const ANCIENS_MOTS = 'réglage commun, relevé au rapport du 31 oct. : à Grégoire';
 // Un gabarit peut composer le mot : `Note ${estFinale ? 'finale' : 'provisoire'}`. Aucune chaîne seule ne le porte.
 const GABARIT_COMPOSE = 'Note provisoire (gabarit composé)';
 
 const EXCEPTIONS = [
-    { fichier: 'index.html', contient: '(en pratique alternative de notation, la note provisoire)', nb: 1, motif: 'pratique alternative, le mot que le principe garde' },
+    { fichier: 'index.html', contient: '(en pratique alternative de notation, la note provisoire)', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/changelog-data.js', contient: 'en tête de sa rétroaction et sa note provisoire', nb: 1, motif: 'Nouvelles déjà publiées' },
     { fichier: 'js/changelog-data.js', contient: 'Le bloc «&nbsp;Note provisoire&nbsp;» y garde', nb: 1, motif: 'Nouvelles déjà publiées' },
-    { fichier: 'js/profil-etudiant-sections-affichage.js', contient: 'Note provisoire de session', nb: 3, motif: ANCIENS_MOTS },
+    { fichier: 'js/profil-etudiant-sections-affichage.js', contient: 'Note provisoire de session', nb: 2, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'index.html', contient: 'Active le titre « Note finale » sur les PDFs de rétroaction (au lieu de « Note provisoire »)', nb: 1, motif: ANCIENS_MOTS },
     { fichier: 'js/accompagnement-contenu-terme.js', contient: '« Note finale » au lieu de « Note provisoire »', nb: 1, motif: ANCIENS_MOTS },
-    { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 3, motif: ANCIENS_MOTS },
-    { fichier: 'js/profil-etudiant-sections-affichage.js', contient: GABARIT_COMPOSE, nb: 1, motif: ANCIENS_MOTS },
+    { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 3, motif: PRATIQUE_ALTERNATIVE },
 ];
 
 function fichiersJs(dossier) {
@@ -124,6 +126,92 @@ describe('« note provisoire » : réservée aux pratiques alternatives', () => 
     });
 });
 
+describe('#1207 — en sommative, « Note actuelle du cours » ; en pratique alternative, « note provisoire » reste', () => {
+    const lire = f => readFileSync(path.join(racine, f), 'utf8');
+    const sections = lire('js/profil-etudiant-sections-affichage.js');
+    const COPIE = {
+        id: 'E1', etudiantDA: '111', productionId: 'A1', grilleId: 'G1', echelleId: 'ECH', niveauFinal: 'D', noteFinale: 74,
+        criteres: [{ critereId: 'c1', critereNom: 'Structure', niveauSelectionne: 'D', ponderation: 100 }]
+    };
+
+    /** Le PDF de bout en bout, de `construireFeedback` au rendu : la vraie porte de chaque famille. */
+    function pdf({ famille, notesFinales = false, jetons = false }) {
+        const sommative = famille === 'sommative';
+        const data = chargerScript('js/synthese-retroaction-data.js', {
+            db: { getSync: (k, d) => (d !== undefined ? d : null), get: async () => null, set: async () => {}, setSync: () => {} },
+            cle: (k) => 'test_' + k,
+            obtenirEchelleResolue: () => null,
+            obtenirDonneesSelonMode: (k) => (k === 'productions' ? [{ id: 'A1', titre: 'Artefact 1', type: 'artefact-portfolio' }] : k === 'evaluationsSauvegardees' ? [COPIE] : []),
+            obtenirTrimestreActif: () => ({ id: 'T1', nom: 'A2026' }),
+            obtenirEtudiantsCoursActif: () => [],
+            obtenirGroupesCours: () => [],
+            travauxStockage: { obtenirAnnotationFichier: () => null },
+            travauxOutils: { AUTOCOLLANTS: [] },
+            obtenirPreference: () => null,
+            obtenirIdPratiqueActive: () => 'P1',
+            obtenirConfigPratiqueActive: () => (sommative ? { notesFinales } : { configuration: { notesFinales } }),
+            jetonsDeclares: () => (jetons ? { actif: true } : null),
+            calculerDetailsNoteFinale: () => (sommative ? null : { portfolio: { methodeSelection: 'meilleurs', moyenne: 74, nombreEvalues: 1, artefactsRetenus: [{ productionId: 'A1', niveau: 'D', note: 74 }] } }),
+            simulerIndices: () => (sommative ? { recit: { famille: 'SOM', synthese: { noteFinale: 74 }, resultats: [{ sort: 'compte', label: 'Artefact 1', note: 74 }] } } : { recit: null })
+        });
+        const rendu = chargerScript('js/synthese-retroaction-rendu.js', {
+            db: { getSync: (k, d) => (d !== undefined ? d : null) },
+            cle: (k) => 'test_' + k,
+            echapperHtml: (s) => String(s)
+        });
+        const html = rendu.syntheseRetroactionRendu.rendreSyntheseHTML(data.syntheseRetroactionData.construireFeedback(COPIE, { id: 'F1' }, null));
+        return html.replace(/<[^>]+>/g, ' ').replace(/&#39;/g, '\'').replace(/\s+/g, ' ');
+    }
+
+    it('PDF, sommative, sans jetons : le titre et la mention validés, plus aucun « provisoire »', () => {
+        const t = pdf({ famille: 'sommative' });
+        expect(t).toContain('Note actuelle du cours');
+        expect(t).toContain('Cette note peut changer selon tes prochains travaux.');
+        expect(t).not.toMatch(/provisoire/i);
+    });
+
+    it('PDF, sommative, avec jetons : la mention validée', () => {
+        const t = pdf({ famille: 'sommative', jetons: true });
+        expect(t).toContain('Cette note peut changer selon tes prochains travaux et l\'application de jetons.');
+        expect(t).not.toMatch(/provisoire/i);
+    });
+
+    it('PDF, sommative aux notes finalisées : « Note finale », et aucune mention', () => {
+        const t = pdf({ famille: 'sommative', notesFinales: true });
+        expect(t).toContain('Note finale');
+        expect(t).not.toContain('Note actuelle du cours');
+        expect(t).not.toContain('peut changer');
+    });
+
+    it('PDF, pratique alternative, sans jetons : les trois mots d\'avant', () => {
+        const t = pdf({ famille: 'standards' });
+        expect(t).toContain('Note provisoire');
+        expect(t).toContain('Note provisoire — peut changer selon tes prochains travaux.');
+        expect(t).not.toContain('Note actuelle du cours');
+    });
+
+    it('PDF, pratique alternative, avec jetons : la mention d\'avant', () => {
+        expect(pdf({ famille: 'standards', jetons: true })).toContain('Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.');
+    });
+
+    it('profil, sommative : le titre et la formule ; aucun « provisoire », hors du nom d\'une classe CSS', () => {
+        const carte = tranche(sections, 'function _genererNoteSessionSommative(', '\n}\n');
+        expect(carte).toContain("estFinale ? 'Note finale de session' : 'Note actuelle du cours'");
+        expect(carte).toContain("estFinale ? 'Note finale' : 'Note actuelle'} = ");
+        expect(carte.replace(/note-finale-message-provisoire/g, '')).not.toMatch(/provisoire/i);
+    });
+
+    it('profil, standards : les deux cartes gardent « Note provisoire de session »', () => {
+        const avantLaSommative = tranche(sections, 'function genererSectionProductions(', 'htmlNoteFinale = _genererNoteSessionSommative(da)');
+        expect(avantLaSommative.match(/'Note provisoire de session'/g)).toHaveLength(2);
+    });
+
+    it('la carte de la sommative ne s\'écrit que sans détail de portfolio : les deux autres ne la voient jamais', () => {
+        expect(sections).toContain('if (!detailsNoteFinale) htmlNoteFinale = _genererNoteSessionSommative(da);');
+        expect(lire('js/profil-etudiant-actions.js')).toContain('if (!estFamilleStandards) return null;');
+    });
+});
+
 describe('Les mots qui la remplacent, aux surfaces du niveau RàI', () => {
     const lire = f => readFileSync(path.join(racine, f), 'utf8');
 
@@ -141,3 +229,22 @@ describe('Les mots qui la remplacent, aux surfaces du niveau RàI', () => {
         expect(lire(fichier)).toContain(mots);
     });
 });
+
+/*
+ * BREAK-TESTS du #1207 (31 oct. 2026), chaque changement du code annulé après sa mesure ; rouges de cette sentinelle et de celle du portfolio :
+ *   profil, titre sommative revenu à provisoire : 2
+ *   profil, formule revenue à provisoire : 2
+ *   profil, carte standards passée à actuelle : 2
+ *   PDF, marque ignorée (tout provisoire) : 2
+ *   PDF, marque ignorée (tout actuelle) : 2
+ *   PDF, titre sommatif retouché : 1
+ *   PDF, mention sans jetons retouchée : 1
+ *   PDF, mention avec jetons retouchée : 1
+ *   PDF, alternative retouchée sans jetons : 2
+ *   PDF, alternative retouchée avec jetons : 2
+ *   PDF, jetons inversés : 4
+ *   PDF, données sans la marque sommative : 2
+ *   PDF, mention sur les notes finalisées : 1
+ *   PDF, titre sans la case finale : 2
+ *   dans la spec WebKit 921, la formule revenue à provisoire : 1
+ */

@@ -284,7 +284,7 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
         return { options, ecran };
     }, { DA });
 
-    // La note provisoire en sommative : ce que le moteur rend à la page du PDF.
+    // La note actuelle du cours en sommative : ce que le moteur rend à la page du PDF.
     R.moteur = await page.evaluate((DA) => {
         let det; try { det = window.calculerDetailsNoteFinale(DA); } catch (e) { det = 'ERREUR ' + e.message; }
         let jetons; try { jetons = window.obtenirConfigJetons ? window.obtenirConfigJetons() : null; } catch (e) { jetons = 'ERREUR ' + e.message; }
@@ -340,9 +340,10 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
         // D4 — la note de la copie en tête du bloc « Niveau général ».
         expect(texte, pdf.p + ' : la note de la copie').toContain('Niveau général Note de la copie : ' + notes[i] + ' %');
     });
-    // D4 — la note cumulée dans « Note provisoire », calculée par la pratique sommative : (62 + 70 + 74) ÷ 3.
+    // D4 — la note cumulée dans « Note actuelle du cours » (#1207), calculée par la pratique sommative : (62 + 70 + 74) ÷ 3.
     const pageP3 = R.pdfSansReperes[2].blocs.map(b => b.texte).join(' ');
-    expect(pageP3, 'P3 : la note provisoire de la sommative').toContain('Note provisoire');
+    expect(pageP3, 'P3 : la note actuelle de la sommative').toContain('Note actuelle du cours');
+    expect(pageP3, 'P3 : plus de « provisoire » en sommative').not.toMatch(/provisoire/i);
     expect(pageP3, 'P3 : la note cumulée').toContain('68,7 %')   // `nettoyer` ramène l'insécable à une espace;
     expect(pageP3, 'P3 : les trois copies comptées').toContain('Voici les 3 productions comptées dans ta note');
     // Les repères posés sur l'échelle de départ ne font pas revenir de niveau : ces copies n'ont pas d'échelle.
@@ -388,8 +389,8 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
         expect(pdf(i), 'P' + (i + 1) + ' : le ruban reste (objectif, tâche)').toContain('OBJECTIF');
     });
     expect(R.etapes.copierTout.texte, 'Copier tout : pas de jetons non déclarés').not.toContain('Jetons utilisés');
-    // La mention sous la note provisoire, sous la condition de D5 : sans jetons déclarés, elle n'en parle pas.
-    expect(pageP3, 'P3 : la mention sans jetons').toContain('Note provisoire — peut changer selon tes prochains travaux.');
+    // La mention sous la note, sous la condition de D5 : sans jetons déclarés, elle n'en parle pas.
+    expect(pageP3, 'P3 : la mention sans jetons').toContain('Cette note peut changer selon tes prochains travaux.');
     expect(pageP3, 'P3 : aucun mot de jetons').not.toContain('application de jetons');
 
     // Le stock (décision A) : plus de nom de niveau, rien de réécrit.
