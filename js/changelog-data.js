@@ -21,6 +21,24 @@
 
     var CHANGELOG = [
         {
+            // 1.229 (la réponse du groupe, les couleurs de l'Aperçu, la note actuelle en sommative, les palettes d'annotation,
+            // la copie de démo) — titre et huit items validés par Grégoire, mot pour mot, le 31 oct. 2026 à 14 h 06, proposés
+            // par Cowork (`CONSIGNE-LOT-2026-10-31-mise-en-ligne-1229.md`, § 1). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.229',
+            couleur: 'vert',
+            titre: 'La réponse du groupe, et une annotation plus fluide sur l’iPad',
+            items: [
+                'Nouveau et facultatif&nbsp;: dans Labo › Outils d’observation, «&nbsp;Voir ce que mes seuils donnent&nbsp;» montre la répartition de ton groupe. Si tu coches «&nbsp;Afficher la réponse du groupe&nbsp;», une carte de l’Aperçu la met en regard du repère de la RàI. La phrase sur la moyenne du groupe, sous la barre RàI, est retirée.',
+                'Les barres de l’Aperçu passent d’une couleur à l’autre par un dégradé. Pour A et C, tu peux choisir un axe en deux segments, dans Labo › Outils d’observation.',
+                'Sous le seuil, l’orange brûlé remplace le rouge dans les barres, la liste et les pastilles. Le jaune s’en distingue mieux pour les personnes daltoniennes.',
+                'En pratique sommative, le profil et le PDF de l’élève disent «&nbsp;Note actuelle du cours&nbsp;». Dans toutes les pratiques, la ligne de calcul ne dit plus «&nbsp;Note finale&nbsp;» avant que tes notes soient finalisées.',
+                'Annotation&nbsp;: un tampon se pose du premier toucher, deux doigts déplacent la page et un long bloc de texte s’ouvre en entier. La palette est plus compacte, et ses catégories de tampons se replient.',
+                'Annotation&nbsp;: la touche d’un code est son numéro. Le pointillé et la vague s’appliquent au cercle, au rectangle et au nouveau polygone, jusque dans le PDF de l’élève. Les boutons des palettes passent dans la barre d’outils, l’étiquette de l’élève ouvre son profil, et la fenêtre «&nbsp;Aperçu rétroaction&nbsp;» est retirée.',
+                'En démo, une copie de grille peut te suivre&nbsp;: «&nbsp;Garder dans ma bibliothèque&nbsp;» la ramène dans tes vrais trimestres.',
+                'La note du cours ne change pas.'
+            ]
+        },
+        {
             // 1.228 (le niveau RàI au critère, lot 3 des seuils) — titre et six items validés par Grégoire, mot pour mot,
             // le 30 oct. 2026 à 18 h 07, proposés par Cowork (`CONSIGNE-LOT-2026-10-30-niveau-rai-critere-retouche.md`, § 2).
             // La 1.227 reste telle quelle. Insécables en `&nbsp;`, apostrophes typographiques.
