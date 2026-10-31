@@ -20105,11 +20105,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     flex-wrap: wrap;
 }
 
-.travaux-palette-section {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
 
 .travaux-palette-label {
     font-size: 0.7rem;
@@ -20119,17 +20114,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     margin-right: 4px;
 }
 
-.travaux-palette-outils {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-    gap: 4px;
-}
 
-.travaux-palette-outils--grille2x2 {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-    gap: 4px;
-}
 
 .travaux-btn-outil {
     border: 1px solid transparent;
@@ -20196,11 +20181,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     filter: brightness(0) invert(1);
 }
 
-.travaux-palette-couleurs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-}
 
 .travaux-btn-couleur {
     width: 20px;
@@ -20226,30 +20206,9 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     box-shadow: 0 0 0 1px white, 0 0 0 2px var(--gris-fonce);
 }
 
-.travaux-epaisseur-header {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 2px;
-}
-.travaux-epaisseur-icone {
-    width: 16px;
-    height: 16px;
-    object-fit: contain;
-    filter: invert(1);
-    opacity: 0.6;
-}
-.mode-clair .travaux-epaisseur-icone {
-    filter: none;
-}
 .travaux-epaisseur-px {
     font-size: 0.7rem;
     color: var(--texte-secondaire);
-}
-.travaux-epaisseur-controles {
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 .travaux-slider-epaisseur {
     width: 80px;
@@ -20282,21 +20241,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     background: var(--fond-survol-clair, #f1f5f9);
 }
 
-.travaux-apercu-trait {
-    width: 100%;
-    height: 24px;
-    border-radius: var(--radius-petit, 4px);
-    border: 1px solid rgba(106, 172, 184, 0.15);
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 4px;
-}
-.mode-clair .travaux-apercu-trait {
-    background: #fff;
-    border-color: var(--bordure-claire, #d0d8e0);
-}
 
 /* ===============================
    PALETTE FLOTTANTE — Classe partagée réutilisable
@@ -20566,16 +20510,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     max-height: calc(100vh - 250px);
 }
 
-.travaux-palette-contenu .travaux-palette-section,
-.palette-flottante-contenu .travaux-palette-section {
-    flex-direction: column;
-    align-items: flex-start;
-}
 
-.travaux-palette-contenu .travaux-palette-outils,
-.palette-flottante-contenu .travaux-palette-outils {
-    flex-wrap: wrap;
-}
 
 .travaux-palette-pied {
     display: flex;
@@ -27406,16 +27341,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    =============================== */
 
 /* Boutons outils dans la palette flottante : compact */
-.palette-flottante .travaux-palette-outils {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-}
-.palette-flottante .travaux-palette-outils--grille2x2 {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-    gap: 3px;
-}
 .palette-flottante .travaux-btn-outil {
     padding: 3px 6px;
     font-size: 0.68rem;
@@ -27440,9 +27365,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     filter: invert(1);
 }
 /* Sections compactes */
-.palette-flottante .travaux-palette-section {
-    margin-bottom: 2px;
-}
 .palette-flottante .travaux-palette-label {
     font-size: 0.6rem;
     margin-bottom: 1px;
@@ -27450,6 +27372,157 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 /* Couleurs : pastilles légèrement réduites */
 .palette-flottante .travaux-btn-couleur {
     width: 18px; height: 18px; min-width: 18px; min-height: 18px;
+}
+/* La palette d'annotation (ébauche validée du 31 oct. 2026) : 188 px, pour laisser sa place à la copie. Une largeur
+   donnée à la poignée (#773) est mémorisée en style en ligne : elle l'emporte. Ses blocs sont soudés : coins arrondis
+   aux deux bouts, séparateur fin, fond bleu sur le segment actif. */
+#travaux-palette-flottante {
+    width: 188px;
+}
+#travaux-palette-flottante .palette-flottante-contenu {
+    gap: 6px;
+}
+#travaux-palette-flottante .separateur-horizontal {
+    margin: 2px 0;
+    width: 100%;
+}
+.annot-bande,
+.annot-bloc {
+    gap: 1px;
+    height: 27px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bordure-moyenne);
+}
+.annot-bande {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    flex-shrink: 0;
+}
+.annot-bloc {
+    display: flex;
+}
+.annot-rangee {
+    display: flex;
+    gap: 6px;
+}
+.annot-groupe {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.annot-groupe .travaux-palette-label {
+    margin: 0;
+}
+.annot-bande .btn,
+.annot-bande .travaux-btn-outil,
+.annot-bloc .travaux-btn-outil {
+    position: relative;
+    min-height: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.annot-bloc .travaux-btn-outil {
+    width: 25px;
+    font-size: 13px;
+    color: var(--texte-principal);
+}
+.annot-bloc .travaux-btn-outil.actif {
+    color: white;
+}
+.annot-bloc [data-pointes] {
+    width: 18px;
+}
+.annot-bande .raccourci-badge--coin,
+.annot-bloc .raccourci-badge--coin {
+    top: 0;
+    right: 0;
+    padding: 0 2px;
+    font-size: 0.45rem;
+    line-height: 1.3;
+}
+/* Douze carrés soudés. Le double liseré est en dur, blanc puis foncé : il doit se voir sur chacune des douze
+   couleurs, le blanc compris, dans les deux modes. */
+.annot-couleurs {
+    display: grid;
+    grid-template-columns: repeat(12, 13px);
+    gap: 1px;
+    width: max-content;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bordure-moyenne);
+}
+#travaux-palette-flottante .annot-couleurs .travaux-btn-couleur {
+    width: 13px;
+    height: 13px;
+    min-width: 0;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+#travaux-palette-flottante .annot-couleurs .travaux-btn-couleur:hover {
+    transform: none;
+}
+#travaux-palette-flottante .annot-couleurs .travaux-btn-couleur.actif {
+    box-shadow: inset 0 0 0 1.5px #ffffff, inset 0 0 0 2.5px #333344;
+}
+.annot-epaisseur {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.annot-epaisseur .travaux-btn-epaisseur-inc {
+    width: 17px;
+    height: 20px;
+    font-size: 11px;
+}
+.annot-epaisseur .travaux-slider-epaisseur {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+}
+.annot-apercu-trait {
+    display: flex;
+    align-items: center;
+    width: 17px;
+    height: 14px;
+    flex-shrink: 0;
+}
+/* Le liseré : un trait noir sur fond sombre ou blanc sur fond clair resterait visible. */
+#travaux-apercu-trait {
+    display: block;
+    width: 100%;
+    border-radius: 1px;
+    box-shadow: 0 0 0 0.5px var(--gris-moyen);
+}
+.annot-epaisseur .travaux-epaisseur-px {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.annot-effacer {
+    align-self: flex-start;
+    padding: 3px 7px;
+    border: 1px solid var(--rouge-danger);
+    border-radius: 5px;
+    background: transparent;
+    color: var(--rouge-erreur);
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.annot-effacer:hover {
+    background: rgba(220, 53, 69, 0.12);
+}
+.mode-clair .annot-effacer {
+    color: #a32633; /* --rouge-danger ne tient pas 4,5:1 sur le fond de la palette en clair */
 }
 /* Erreurs FR compactes dans la colonne droite */
 .travaux-errfr-reglage {

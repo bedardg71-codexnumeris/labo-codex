@@ -142,8 +142,9 @@
     // Flag pour masquer le bouton « Codes d'erreurs » (mode Modelisation)
     let masquerErreursFrancais = false;
 
-    // Mode pointes de fleche : 'fin' | 'debut' | 'double' | 'aucune'
-    let flechePointes = 'fin';
+    // Mode pointes de fleche : 'fin' | 'debut' | 'double' | 'aucune'.
+    // Une nouvelle ligne n'a pas de pointe (31 oct. 2026) ; chaque forme garde celle qu'elle a reçue.
+    let flechePointes = 'aucune';
 
     // Cache des curseurs personnalisés (tampons + codes d'erreur)
     let _curseurCache = {};
@@ -157,8 +158,8 @@
     const OUTILS = {
         position: {
             id: 'position',
-            nom: 'Position',
-            icone: '<img src="' + ICONS_DIR + 'icon-drag.svg" alt="Position" class="outil-svg-icon">',
+            nom: 'D\u00e9placer la page',
+            icone: '<img src="' + ICONS_DIR + 'icon-drag.svg" alt="D\u00e9placer la page" class="outil-svg-icon">',
             curseur: 'move',
             type: 'position'
         },
@@ -1687,9 +1688,6 @@
         const minEp = outil.epaisseurMin || 1;
         const maxEp = outil.epaisseurMax || 20;
         epaisseurActive = Math.max(minEp, Math.min(maxEp, val));
-        // Mettre a jour l'affichage pixels
-        const pxLabel = document.getElementById('travaux-epaisseur-px');
-        if (pxLabel) pxLabel.textContent = getEpaisseurReellePixels() + 'px';
         // Synchroniser le slider
         const slider = document.getElementById('travaux-slider-epaisseur');
         if (slider) slider.value = epaisseurActive;
@@ -1719,85 +1717,18 @@
        APERCU DU TRAIT EN TEMPS REEL
        =============================== */
 
-    function mettreAJourApercuTrait() {
-        const apercu = document.getElementById('travaux-apercu-trait');
-        if (!apercu) return;
+    /** Le petit trait de la rangée Épaisseur : l'épaisseur et la couleur courantes, plafonnées à la hauteur de la rangée. */
+    function _styleApercuTrait() {
         const outil = getOutilActif();
-        const couleur = getCouleurActive();
         const epaisseur = Math.max(outil.epaisseurMin || 1, Math.min(epaisseurActive, outil.epaisseurMax || 20));
-        const opacite = outil.opacite || 1.0;
-        const vbH = Math.max(24, epaisseur + 12);
-        const midY = vbH / 2;
-        const pointes = flechePointes || 'aucune';
-        const estLigne = outil.id === 'fleche' || outil.id === 'ondule' || outil.id === 'pointille';
-        const marge = estLigne && pointes !== 'aucune' ? 16 : 10;
-
-        apercu.innerHTML = '';
-        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('height', '100%');
-        svg.setAttribute('viewBox', '0 0 120 ' + vbH);
-        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-
-        // Dessiner selon le type d'outil
-        if (outil.id === 'ondule') {
-            // Vague sinusoïdale
-            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            var d = 'M ' + marge + ' ' + midY;
-            var len = 120 - 2 * marge;
-            for (var i = 1; i <= len; i++) {
-                var px = marge + i;
-                var py = midY + Math.sin(i / 8 * Math.PI) * 4;
-                d += ' L ' + px + ' ' + py.toFixed(1);
-            }
-            path.setAttribute('d', d);
-            path.setAttribute('stroke', couleur);
-            path.setAttribute('stroke-width', epaisseur);
-            path.setAttribute('fill', 'none');
-            path.setAttribute('stroke-linecap', 'round');
-            path.setAttribute('opacity', opacite);
-            svg.appendChild(path);
-        } else {
-            // Ligne droite (pleine ou pointillée)
-            var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', String(marge));
-            line.setAttribute('y1', String(midY));
-            line.setAttribute('x2', String(120 - marge));
-            line.setAttribute('y2', String(midY));
-            line.setAttribute('stroke', couleur);
-            line.setAttribute('stroke-width', epaisseur);
-            line.setAttribute('stroke-linecap', 'round');
-            line.setAttribute('opacity', opacite);
-            if (outil.id === 'pointille') {
-                line.setAttribute('stroke-dasharray', (epaisseur * 3) + ' ' + (epaisseur * 2));
-            }
-            svg.appendChild(line);
-        }
-
-        // Pointes de flèche
-        if (estLigne && pointes !== 'aucune') {
-            var headSize = Math.max(6, epaisseur * 2);
-            if (pointes === 'fin' || pointes === 'double') {
-                _svgPointe(svg, 120 - marge, midY, headSize, couleur, 0);
-            }
-            if (pointes === 'debut' || pointes === 'double') {
-                _svgPointe(svg, marge, midY, headSize, couleur, Math.PI);
-            }
-        }
-
-        apercu.appendChild(svg);
+        return 'height:' + Math.min(epaisseur, 14) + 'px;background-color:' + getCouleurActive() + ';opacity:' + (outil.opacite || 1) + ';';
     }
 
-    function _svgPointe(svg, x, y, size, couleur, angle) {
-        var p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-        var cos = Math.cos, sin = Math.sin;
-        var a1 = angle + 2.75, a2 = angle - 2.75;
-        var pts = x + ',' + y + ' '
-            + (x + cos(a1) * size).toFixed(1) + ',' + (y + sin(a1) * size).toFixed(1) + ' '
-            + (x + cos(a2) * size).toFixed(1) + ',' + (y + sin(a2) * size).toFixed(1);
-        p.setAttribute('points', pts);
-        p.setAttribute('fill', couleur);
-        svg.appendChild(p);
+    function mettreAJourApercuTrait() {
+        const pxLabel = document.getElementById('travaux-epaisseur-px');
+        if (pxLabel) pxLabel.textContent = getEpaisseurReellePixels() + ' px';
+        const apercu = document.getElementById('travaux-apercu-trait');
+        if (apercu) apercu.style.cssText = _styleApercuTrait();
     }
 
     /* ===============================
@@ -1915,6 +1846,23 @@
        GENERATION HTML PALETTE
        =============================== */
 
+    // #467 (relecture de Cowork, 9 oct.) : l'icône des outils et des formes est une balise <img> écrite par
+    // l'application (OUTILS) ; aucune personnalisation ni import ne la réécrit (appliquerPersonnalisations ne touche
+    // que les trois symboles). Elle part donc telle quelle ; seul le nom, qui reste du texte, est échappé.
+    // Le badge va dans le coin : à l'installation, les dix outils ont une lettre, et un badge en ligne
+    // élargirait son bloc au-delà des 188 px de la palette.
+    function _boutonOutilAnnot(id) {
+        const outil = OUTILS[id];
+        const actif = outilActif === id ? ' actif' : '';
+        const raccourci = obtenirRaccourciPourItem(id);
+        return `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">${outil.icone}${raccourci ? '<span class="raccourci-badge raccourci-badge--coin">' + raccourci + '</span>' : ''}</button>`;
+    }
+
+    function _groupeOutilsAnnot(titre, ids) {
+        return '<div class="annot-groupe"><div class="travaux-palette-label">' + titre + '</div>'
+            + '<div class="annot-bloc">' + ids.map(_boutonOutilAnnot).join('') + '</div></div>';
+    }
+
     /**
      * Genere le HTML de la palette d'outils
      * @returns {string} HTML
@@ -1929,77 +1877,40 @@
         html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
         html += '</div>';
 
-        // Contenu (sections verticales)
+        // Contenu (ébauche validée du 31 oct. 2026, plans de travail/EBAUCHE-2026-10-31-palette-annotation.dc.html)
         html += '<div class="palette-flottante-contenu">';
 
-        // Boutons d'action
-        html += '<div class="groupe-boutons-colonne">';
         // 24 oct. 2026 — le verrou de l'évaluation, jumeau de « Verrouiller l'évaluation » (Paramètres).
         // Caché tant que `mettreAJourVerrouAnnotation` (evaluation.js) n'a pas lu l'évaluation de la copie.
         html += '<div class="groupe-boutons-ligne u-hide">';
         html += '<button id="travaux-annot-btn-verrou" class="btn btn-principal btn-tres-compact u-flex-1" data-action="basculerVerrouDepuisAnnotation">Verrouiller l\'\u00e9valuation</button>';
         html += '</div>';
-        html += '<div class="groupe-boutons-ligne">';
-        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
-        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
-        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact u-flex-1" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="R\u00e9tablir" class="outil-svg-icon"></button>';
+
+        html += '<div class="annot-bande">';
+        html += _boutonOutilAnnot('position') + _boutonOutilAnnot('selection');
+        html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
         html += '</div>';
-        html += '<div class="groupe-boutons-ligne">';
-        html += '<button class="btn btn-supprimer btn-tres-compact u-flex-1" data-action="travauxAnnotation.effacerPage" title="Effacer toute la page">Effacer tout</button>';
-        html += '</div>';
-        // Info étudiant/production (même info que palette Paramètres)
-        html += '<div id="travaux-annot-identite" class="travaux-eval-identite" style="margin-top: 6px;">';
-        html += '<div style="display:flex; align-items:center; gap:6px;"><span class="travaux-eval-label-val" id="travaux-annot-label-etudiant" style="font-weight: 600;">--</span>';
-        html += '<button class="btn-profil-rapide" id="travaux-annot-btn-profil" data-action="ouvrirProfilDepuisAnnotation" title="Voir le profil de l\u2019\u00e9tudiant\u00b7e"><img src="' + ICONS_DIR + 'icon-profile.svg" alt="" class="outil-svg-icon"></button></div>';
-        html += '<span class="travaux-eval-label-val travaux-eval-label-production" id="travaux-annot-label-production">--</span>';
-        html += '</div>';
+
+        html += '<div class="annot-bande">';
+        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="R\u00e9tablir" class="outil-svg-icon"></button>';
         html += '</div>';
 
         html += '<hr class="separateur-horizontal">';
 
-        // Outils de dessin
-        html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-palette-label">Outils</div>';
-        html += '<div class="travaux-palette-outils">';
+        // Outils et formes
+        html += '<div class="annot-rangee">';
+        html += _groupeOutilsAnnot('Outils', ['stylo', 'surligneur', 'texte']);
+        html += _groupeOutilsAnnot('Formes', ['cercle', 'rectangle']);
+        html += '</div>';
 
-        // #467 (relecture de Cowork, 9 oct.) : l'icône des outils et des formes est une balise
-        // <img> écrite par l'application (OUTILS) ; aucune personnalisation ni import ne la
-        // réécrit (appliquerPersonnalisations ne touche que les trois symboles). Elle part donc
-        // telle quelle ; seul le nom, qui reste du texte, est échappé dans le title.
-        const outilsDessin = ['position', 'selection', 'stylo', 'surligneur', 'texte'];
-        outilsDessin.forEach(id => {
-            const outil = OUTILS[id];
-            const actif = outilActif === id ? ' actif' : '';
-            const raccourci = obtenirRaccourciPourItem(id);
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
-            // Bouton Dupliquer juste apres Selection
-            if (id === 'selection') {
-                html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
-            }
-        });
-
-        html += '</div></div>';
-
-        // Formes
-        html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-palette-label">Formes</div>';
-        html += '<div class="travaux-palette-outils">';
-
-        const outilsFormes = ['cercle', 'rectangle', 'fleche', 'pointille', 'ondule'];
-        outilsFormes.forEach(id => {
-            const outil = OUTILS[id];
-            const actif = outilActif === id ? ' actif' : '';
-            const styleCouleur = outil.couleurBouton ? ` style="color:${echapperHtml(outil.couleurBouton)}; font-weight:bold;"` : '';
-            const raccourci = obtenirRaccourciPourItem(id);
-            html += `<button class="travaux-btn-outil${actif}" data-outil="${id}" data-action="travauxOutils.setOutilActif" data-param="${id}" title="${echapperHtml(outil.nom)}${raccourci ? ' [' + raccourci + ']' : ''}"${styleCouleur}>${outil.icone}${raccourci ? '<span class="raccourci-badge">' + raccourci + '</span>' : ''}</button>`;
-        });
-
-        html += '</div></div>';
-
-        // Options extrémités (visible quand outil fleche ou ondule actif)
-        html += '<div class="travaux-palette-section travaux-options-fleche" id="travaux-options-fleche">';
+        // Lignes et extrémités
+        html += '<div class="annot-rangee">';
+        html += _groupeOutilsAnnot('Lignes', ['fleche', 'pointille', 'ondule']);
+        html += '<div class="annot-groupe travaux-options-fleche" id="travaux-options-fleche">';
         html += '<div class="travaux-palette-label">Extr\u00e9mit\u00e9s</div>';
-        html += '<div class="travaux-palette-outils">';
+        html += '<div class="annot-bloc">';
         const modes = [
             { val: 'debut', label: '\u2190', titre: 'Pointe au d\u00e9but (\u2190)' },
             { val: 'double', label: '\u2194', titre: 'Double pointe (\u2194)' },
@@ -2010,36 +1921,32 @@
             const act = flechePointes === m.val ? ' actif' : '';
             html += `<button class="travaux-btn-outil${act}" data-pointes="${m.val}" data-action="travauxOutils.setFlechePointes" data-param="${m.val}" title="${m.titre}">${m.label}</button>`;
         });
-        html += '</div></div>';
+        html += '</div></div></div>';
 
         html += '<hr class="separateur-horizontal">';
 
         // Couleurs (sans label — les pastilles sont explicites)
-        html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-palette-couleurs">';
-
+        html += '<div class="annot-couleurs">';
         COULEURS.forEach(c => {
             const actif = couleurActive === c.hex ? ' actif' : '';
             html += `<button class="travaux-btn-couleur${actif}" data-couleur="${c.hex}" data-action="travauxOutils.setCouleurActive" data-param="${c.hex}" title="${echapperHtml(c.nom)}" style="background-color: ${c.hex}"></button>`;
         });
+        html += '</div>';
 
-        html += '</div></div>';
-
-        // Epaisseur (slider + affichage pixels)
+        // Épaisseur : moins fin, glissière, plus épais, aperçu du trait, valeur
         const outilInit = getOutilActif();
         const minEp = outilInit.epaisseurMin || 1;
         const maxEp = outilInit.epaisseurMax || 20;
-        html += '<div class="travaux-palette-section">';
-        html += '<div class="travaux-epaisseur-header">';
-        html += '<img src="' + ICONS_DIR + 'icon-line-width.svg" alt="Epaisseur" class="travaux-epaisseur-icone outil-svg-icon">';
-        html += '<span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + 'px</span>';
-        html += '</div>';
-        html += '<div class="travaux-epaisseur-controles">';
+        html += '<div class="annot-epaisseur">';
         html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.decrementerEpaisseur" title="Moins fin">\u2190</button>`;
-        html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" data-on-input="travauxOutils.setEpaisseurActiveFromSlider">`;
+        html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" data-on-input="travauxOutils.setEpaisseurActiveFromSlider" aria-label="\u00c9paisseur du trait">`;
         html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.incrementerEpaisseur" title="Plus \u00e9pais">\u2192</button>`;
+        html += '<span class="annot-apercu-trait" aria-hidden="true"><span id="travaux-apercu-trait" style="' + _styleApercuTrait() + '"></span></span>';
+        html += '<span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + ' px</span>';
         html += '</div>';
-        html += '<div class="travaux-apercu-trait" id="travaux-apercu-trait"></div>';
+
+        // Elle n'efface que la page affichée (`effacerPage`), comme son nom le dit désormais.
+        html += '<button class="annot-effacer" data-action="travauxAnnotation.effacerPage" title="Effacer toutes les annotations de cette page">Effacer la page</button>';
 
         html += '</div>'; // fin .palette-flottante-contenu
 
@@ -3877,12 +3784,6 @@
         if (paletteAnnot) {
             const contenu = paletteAnnot.querySelector('.palette-flottante-contenu');
             if (contenu) {
-                // Sauvegarder l'identité affichée
-                const etudLabel = document.getElementById('travaux-annot-label-etudiant');
-                const prodLabel = document.getElementById('travaux-annot-label-production');
-                const etudTxt = etudLabel ? etudLabel.textContent : '--';
-                const prodTxt = prodLabel ? prodLabel.textContent : '--';
-
                 // Régénérer le contenu
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = genererHTMLPalette();
@@ -3891,12 +3792,7 @@
                     contenu.innerHTML = nouveauContenu.innerHTML;
                 }
 
-                // Restaurer l'identité
-                const newEtud = document.getElementById('travaux-annot-label-etudiant');
-                const newProd = document.getElementById('travaux-annot-label-production');
-                if (newEtud) newEtud.textContent = etudTxt;
-                if (newProd) newProd.textContent = prodTxt;
-                // Et le bouton du verrou, qui renaît caché
+                // Le bouton du verrou renaît caché
                 if (typeof window.mettreAJourVerrouAnnotation === 'function') window.mettreAJourVerrouAnnotation();
             }
         }

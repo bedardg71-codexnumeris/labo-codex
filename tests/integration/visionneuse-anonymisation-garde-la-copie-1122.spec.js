@@ -73,7 +73,8 @@ const etat = (page) => page.evaluate(() => {
         placeholderCache: !!placeholder && placeholder.classList.contains('u-hide'),
         fichier: fichier ? fichier.id : null,
         badge: badge ? badge.textContent.replace(/\s+/g, ' ').trim() : null,
-        etiquette: (document.getElementById('travaux-annot-label-etudiant') || {}).textContent || null
+        // Réancré le 31 oct. 2026 : l'identité a quitté la palette Annotation ; son jumeau de la palette Paramètres reste.
+        etiquette: (document.getElementById('travaux-eval-label-etudiant') || {}).textContent || null
     };
 });
 
@@ -87,7 +88,7 @@ test('#1122 · visionneuse : basculer l\'anonymisation garde la copie ouverte, s
     await page.evaluate(() => window.travauxUI.ouvrirFichier('FT1122'));
     await page.waitForFunction(() => {
         const f = window.travauxVisionneuse.getFichierActuel();
-        const etiquette = document.getElementById('travaux-annot-label-etudiant');
+        const etiquette = document.getElementById('travaux-eval-label-etudiant');
         return f && f.id === 'FT1122' && etiquette && /Fictif/.test(etiquette.textContent);
     }, null, { timeout: 10000 });
     await page.evaluate(() => { window.__canevas1122 = document.getElementById('travaux-canvas-document'); });
@@ -127,7 +128,7 @@ test('#1122 · visionneuse en mode Évaluer : la copie reste, le formulaire se r
     await page.evaluate(() => window.travauxUI.ouvrirFichier('FT1122'));
     await page.waitForFunction(() => {
         const f = window.travauxVisionneuse.getFichierActuel();
-        return f && f.id === 'FT1122' && !!document.getElementById('travaux-annot-label-etudiant');
+        return f && f.id === 'FT1122';
     }, null, { timeout: 10000 });
     await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
     await page.waitForFunction(() => {
