@@ -45,3 +45,7 @@ Relevé par Claude Code (rapport) : sous « Note provisoire de session », le pr
 
 Appliquer R5 (lit `detailsNoteFinale.estFinale`, comme le titre) ; gardes et break-tests (finalisée / non finalisée, les trois formes). Commit avec ce fichier. Sans release ni push. Relecture de Cowork.
 
+### Relecture de Cowork (`e3a018c0`), 31 oct., 9 h 45
+
+**Accepté.** `_motDeLaFormule` lit `detailsNoteFinale.estFinale`, comme le titre ; quatre lignes (« pondérée » a deux formes). Données de la spec fictives. Rien exécuté.
+
