@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 31 OCTOBRE 2026 : GARDER UNE COPIE DE LA DÉMO EST CODÉ POUR LA GRILLE SEULEMENT, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : en démo, une copie de grille propose « Garder dans ma bibliothèque » là où elle s'ouvre. Hors démo, « Utiliser dans ce trimestre » la ramène, avec « Inspiré de … par Labo Codex ». Rien ne s'écrit sans ce geste. Hors démo, rien ne change à l'écran.
+
+**Ce qui reste à toi** : décider du sort des quatre autres familles, et valider les mots, dont une phrase du guidage qui diffère de la proposition de Cowork (`plans de travail/RAPPORT-2026-10-31-copie-demo-bibliotheque.md`). L'échelle et la production arrivent avec des défauts qu'un bouton écrirait dans tes vraies données ; la cartouche et la pratique n'ont pas de geste « Garder ».
+
+**Vérifié comment** : Vitest entier vert (10 615) ; le parcours rejoué dans WebKit, de la démo à un vrai trimestre, avec un vrai rechargement, 60 essais verts sur 10 répétitions ; 17 changements volontaires du code font tous rougir une garde ; 12 specs WebKit touchées vertes (116 tests) ; captures en clair et en sombre. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+
 📝 **LE 31 OCTOBRE 2026, 12 H 20 : LES PALETTES D'ANNOTATION SONT CODÉES, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : un tampon se pose du premier toucher ; un long bloc de texte s'ouvre entier et rien n'y est sélectionné ; deux doigts déplacent la page ; la palette d'annotation prend la disposition de l'ébauche, à 188 px ; les catégories de tampons se replient ; la touche d'un code est son numéro ; les trois boutons des palettes passent après le carrousel, et l'étiquette de l'élève gagne un bouton de profil ; la fenêtre « Aperçu rétroaction » disparaît ; le pointillé et la vague s'appliquent au cercle, au rectangle et au nouveau polygone, à l'écran et dans le PDF de l'élève.

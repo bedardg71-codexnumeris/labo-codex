@@ -86,7 +86,10 @@ describe('A · chaque texte validé paraît sous sa clé, mot pour mot', () => {
         expect(f.sections[1].contenu).toBe('Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les copies » efface les copies importées.');
         expect(f.sections[2].contenu).toBe(typo(v.blocs[3]));
         expect(f.sections[3].titre).toBe('Le parcours en trois temps');
-        expect(f.sections[3].items).toEqual(v.parcours.map(typo));
+        // 31 oct. 2026 : la phrase ajoutée à « Autonomie » n'est pas dans les textes validés du 28 oct. ; ses
+        // mots sont à valider (rapport du lot), et sa propre garde est sentinelle-copie-demo-bibliotheque-2026-10-31.
+        const ajout31Oct = ' Une copie de grille fait exception si tu la gardes dans ta bibliothèque : tu la retrouves alors dans tes vrais trimestres.';
+        expect(f.sections[3].items.map(i => i.replace(ajout31Oct, ''))).toEqual(v.parcours.map(typo));
         expect(v.parcours).toHaveLength(3);
         expect(f.sections[4].contenu).toBe(typo(v.blocs[5]));
         expect(f.sections[5].contenu).toBe(typo(v.blocs[6]));

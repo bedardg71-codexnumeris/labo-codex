@@ -5200,7 +5200,8 @@ body:not(.mode-clair) .badge-source--partage {
 }
 
 /* Mode lecture seule démo (Phase 4.B) — Plan 1 §3.1 */
-.bandeau-demo-readonly {
+.bandeau-demo-readonly,
+.bandeau-demo-copie {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -5221,6 +5222,9 @@ body:not(.mode-clair) .badge-source--partage {
 .bandeau-demo-readonly-btn {
     flex-shrink: 0;
     white-space: nowrap;
+}
+.bandeau-demo-copie .bandeau-demo-readonly-btn {
+    min-height: 44px;
 }
 .demo-readonly input:disabled,
 .demo-readonly select:disabled,

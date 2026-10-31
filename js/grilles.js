@@ -851,9 +851,14 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
  */
 function sauvegarderNomGrille() {
     if (grilleTemplateActuelle) {
-        sauvegarderGrilleTemplate(true);
+        const ecriture = sauvegarderGrilleTemplate(true);
+        const liberer = () => { if (sauvegardeNomGrilleEnCours === ecriture) sauvegardeNomGrilleEnCours = null; };
+        sauvegardeNomGrilleEnCours = ecriture;
+        ecriture.then(liberer, liberer);
     }
 }
+// 31 oct. 2026 — voir enregistrerFormulaireGrilleOuverte : le nom part au `change`, donc au clic même.
+let sauvegardeNomGrilleEnCours = null;
 
 /* ===============================
    FONCTION: AFFICHER GRILLES CRITÈRES
@@ -3118,6 +3123,24 @@ async function ajouterMesGrillesALaBibliotheque() {
 }
 
 /**
+ * 31 oct. 2026 — une copie se garde sous le nom affiché. Le `change` du champ part au clic même : cette
+ * écriture est attendue, jamais doublée, sinon la question du doublon se pose deux fois (mesuré, la spec
+ * les compte). Sur l'iPad, toucher un bouton ne fait pas toujours quitter le champ : sans `change`, on écrit ici.
+ */
+async function enregistrerFormulaireGrilleOuverte(id) {
+    if (sauvegardeNomGrilleEnCours) {
+        await sauvegardeNomGrilleEnCours;
+        return;
+    }
+    if (!grilleTemplateActuelle || grilleTemplateActuelle.id !== id) return;
+    const nomAffiche = document.getElementById('nomGrilleTemplate')?.value?.trim() || '';
+    const descriptionAffichee = document.getElementById('descriptionGrille')?.value?.trim() || '';
+    if (nomAffiche !== (grilleTemplateActuelle.nom || '') || descriptionAffichee !== (grilleTemplateActuelle.description || '')) {
+        await sauvegarderGrilleTemplate(true);
+    }
+}
+
+/**
  * #1154 — « Garder dans ma bibliothèque → » : pour UNE grille, ce que « Tout garder dans
  * ma bibliothèque » fait pour toutes — la même écriture (`importerGrillesDansBibliotheque`).
  * Sans la confirmation du geste groupé : il n'ajoute qu'un exemplaire, qui se supprime
@@ -3126,6 +3149,7 @@ async function ajouterMesGrillesALaBibliotheque() {
  */
 async function garderGrilleDansBibliotheque(id) {
     try {
+        await enregistrerFormulaireGrilleOuverte(id);
         const grilles = await db.get(cle('grillesTemplates')) || [];
         const grille = grilles.find(g => g.id === id);
         if (!grille) {
@@ -3135,8 +3159,13 @@ async function garderGrilleDansBibliotheque(id) {
 
         const resultat = await importerGrillesDansBibliotheque([grille]);
 
-        fermerModalBibliothequeGrilles();
-        await afficherBibliothequeGrilles();
+        // 31 oct. 2026 — le même geste part aussi du formulaire d'une copie, en démo : la fenêtre
+        // se redessine si elle est ouverte, elle ne s'ouvre pas par-dessus l'édition.
+        if (document.getElementById('modalBibliothequeGrilles')) {
+            fermerModalBibliothequeGrilles();
+            await afficherBibliothequeGrilles();
+        }
+        if (grilleTemplateActuelle && grilleTemplateActuelle.id === id) await rendreLigneCopieDemoGrille(grille);
 
         if (resultat.ajoutees > 0) {
             notifications.succes('Grille ajoutée à la bibliothèque !');
@@ -5645,11 +5674,19 @@ async function chargerGrillePourModif(id) {
     // Phase 4.B : mode lecture seule si item démo
     if (typeof BibliothequeUI !== 'undefined' && BibliothequeUI.appliquerModeLectureSeuleDemo) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneur, grille, 'dupliquerEtEditerGrille', 'Dupliquer pour créer ma grille');
+        await rendreLigneCopieDemoGrille(grille);
     }
 
     // Le menu montre la grille ouverte
     definirGrilleActive(id);
 
+}
+
+/** 31 oct. 2026 — en démo, la ligne « Garder dans ma bibliothèque » de la copie ouverte (voir BibliothequeUI). */
+async function rendreLigneCopieDemoGrille(grille) {
+    BibliothequeUI.proposerGarderCopieDemo(
+        document.getElementById('conteneurEditionGrille'), grille, 'garderGrilleDansBibliotheque',
+        await obtenirToutesLesGrillesBibliotheque());
 }
 
 /**
