@@ -381,7 +381,7 @@
         var gardee = (exemplaires || []).some(function (ex) { return BibliothequeUI.lieeAExemplaire(copie, ex); });
         ligne.innerHTML = gardee
             ? '<span class="bandeau-demo-readonly-texte">Aussi dans ta bibliothèque</span>'
-            : '<span class="bandeau-demo-readonly-texte">Cette copie reste dans la démo. Garde-la dans ta bibliothèque pour la retrouver dans tes vrais trimestres.</span>' +
+            : '<span class="bandeau-demo-readonly-texte">Cette copie reste dans la démo. Quand elle est prête, garde-la dans ta bibliothèque pour la retrouver dans tes vrais trimestres.</span>' +
               '<button type="button" class="btn btn-confirmer bandeau-demo-readonly-btn" data-action="' + echapperHtml(actionGarder) + '" data-param="' + echapperHtml(copie.id) + '">Garder dans ma bibliothèque</button>';
     };
 

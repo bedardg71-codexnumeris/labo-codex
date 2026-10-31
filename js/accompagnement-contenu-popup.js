@@ -1271,7 +1271,7 @@ const AIDE_CONTEXTUELLE = {
                 items: [
                     "<strong>Modélisation</strong> – Active la démo\u00a0: Suivi du groupe s'ouvre, déjà rempli. Tu vois ce que l'outil produit avec des données réalistes.",
                     "<strong>Pratique guidée</strong> – Ouvre une grille ou une échelle de la démo pour voir sa structure. Elle est en lecture seule\u00a0: tu ne peux pas la modifier par accident.",
-                    "<strong>Autonomie</strong> – Clique sur «\u00a0Dupliquer pour créer ma grille\u00a0» (ou mon échelle, ma cartouche, ma production, ma pratique) et renomme la copie. Elle reste dans la démo\u00a0: une nouvelle version du pack l'efface. Une copie de grille fait exception si tu la gardes dans ta bibliothèque\u00a0: tu la retrouves alors dans tes vrais trimestres."
+                    "<strong>Autonomie</strong> – Clique sur «\u00a0Dupliquer pour créer ma grille\u00a0» (ou mon échelle, ma production, ma pratique) et renomme la copie. Elle reste dans la démo\u00a0: une nouvelle version du pack l'efface. Une copie de grille peut te suivre\u00a0: quand elle est prête, garde-la dans ta bibliothèque, et tu la retrouves dans tes vrais trimestres."
                 ]
             },
             {

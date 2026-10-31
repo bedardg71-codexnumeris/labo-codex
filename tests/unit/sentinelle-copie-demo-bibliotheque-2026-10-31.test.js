@@ -29,13 +29,13 @@ describe('la ligne de la copie de démo', () => {
         expect(geste).toMatch(/modeDemoActif\(\) && !!copie && !!copie\.inspireDe && !BibliothequeUI\.estItemDemo\(copie\)/);
     });
 
-    it('porte les mots proposés, et l\'état calme existant', () => {
-        expect(geste).toContain('Cette copie reste dans la démo. Garde-la dans ta bibliothèque pour la retrouver dans tes vrais trimestres.');
+    it('porte les mots validés (31 oct., 13 h 59), et l\'état calme existant', () => {
+        expect(geste).toContain('Cette copie reste dans la démo. Quand elle est prête, garde-la dans ta bibliothèque pour la retrouver dans tes vrais trimestres.');
         expect(geste).toContain('>Garder dans ma bibliothèque</button>');
         expect(geste).toContain('>Aussi dans ta bibliothèque</span>');
     });
 
-    it('seule la grille l\'appelle : les quatre autres familles attendent la décision du rapport', () => {
+    it('seule la grille l\'appelle : décision de Grégoire du 31 oct., les défauts des autres au BACKLOG (#1211)', () => {
         const appelants = ['echelles', 'cartouches', 'productions', 'productions-liste', 'productions-bibliotheque-ui', 'pratiques-gestion']
             .filter((m) => lire('js/' + m + '.js').includes('proposerGarderCopieDemo'));
         expect(appelants).toEqual([]);
@@ -46,7 +46,6 @@ describe('la ligne de la copie de démo', () => {
 describe('le guidage', () => {
     it('ne promet la sortie de la démo qu\'à la grille', () => {
         const popup = lire('js/accompagnement-contenu-popup.js');
-        expect(popup).toContain("Elle reste dans la démo\\u00a0: une nouvelle version du pack l'efface. Une copie de grille fait exception si tu la gardes dans ta bibliothèque\\u00a0: tu la retrouves alors dans tes vrais trimestres.");
-        expect(popup).not.toContain('sauf si tu la gardes');
+        expect(popup).toContain("<strong>Autonomie</strong> – Clique sur «\\u00a0Dupliquer pour créer ma grille\\u00a0» (ou mon échelle, ma production, ma pratique) et renomme la copie. Elle reste dans la démo\\u00a0: une nouvelle version du pack l'efface. Une copie de grille peut te suivre\\u00a0: quand elle est prête, garde-la dans ta bibliothèque, et tu la retrouves dans tes vrais trimestres.");
     });
 });

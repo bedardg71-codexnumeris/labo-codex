@@ -19,9 +19,9 @@
 
 **Ce qui changera pour toi, une fois en ligne** : en démo, une copie de grille propose « Garder dans ma bibliothèque » là où elle s'ouvre. Hors démo, « Utiliser dans ce trimestre » la ramène, avec « Inspiré de … par Labo Codex ». Rien ne s'écrit sans ce geste. Hors démo, rien ne change à l'écran.
 
-**Ce qui reste à toi** : décider du sort des quatre autres familles, et valider les mots, dont une phrase du guidage qui diffère de la proposition de Cowork (`plans de travail/RAPPORT-2026-10-31-copie-demo-bibliotheque.md`). L'échelle et la production arrivent avec des défauts qu'un bouton écrirait dans tes vraies données ; la cartouche et la pratique n'ont pas de geste « Garder ».
+**Ce qui reste à toi** : rien sur ce lot. Tu as décidé d'en rester à la grille (13 h 58) et validé les mots (13 h 59), appliqués ; il part avec la 1.229. Les défauts de l'échelle et de la production sont inscrits (#1211), avec une question à toi : ce que devient la grille d'une production copiée depuis la démo (`plans de travail/VERDICT-RELECTURE-2026-10-31-copie-demo-bibliotheque.md`).
 
-**Vérifié comment** : Vitest entier vert (10 615) ; le parcours rejoué dans WebKit, de la démo à un vrai trimestre, avec un vrai rechargement, 60 essais verts sur 10 répétitions ; 17 changements volontaires du code font tous rougir une garde ; 12 specs WebKit touchées vertes (116 tests) ; captures en clair et en sombre. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+**Vérifié comment** : Vitest entier vert (10 615) ; le parcours rejoué dans WebKit, de la démo à un vrai trimestre, avec un vrai rechargement, 60 essais verts sur 10 répétitions ; 17 changements volontaires du code font tous rougir une garde, et 4 de plus sur les textes validés ; 12 specs WebKit touchées vertes (116 tests), avant les textes validés ; captures en clair et en sombre, avant les textes validés. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
 
 📝 **LE 31 OCTOBRE 2026, 12 H 20 : LES PALETTES D'ANNOTATION SONT CODÉES, PAS EN LIGNE.** *Écrit par Claude Code.*
 
