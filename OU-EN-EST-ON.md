@@ -17,11 +17,11 @@
 
 📝 **LE 31 OCTOBRE 2026 : « NOTE ACTUELLE DU COURS » EN SOMMATIVE EST CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
-**Ce qui changera pour toi, une fois en ligne** : en pratique sommative, le profil et le PDF de l'élève disent « Note actuelle du cours », avec tes textes validés. En pratique alternative, « note provisoire » reste.
+**Ce qui changera pour toi, une fois en ligne** : en pratique sommative, le profil et le PDF de l'élève disent « Note actuelle du cours », avec tes textes validés. En pratique alternative, « note provisoire » reste. Dans toutes les pratiques, la ligne de calcul du PDF reprend le mot du titre : « Note finale = … » seulement une fois les notes finalisées. Les PDF déjà remis gardent leur ancienne ligne.
 
-**Ce qui reste à toi** : quatre mots relevés, que Cowork te soumettra (`plans de travail/RAPPORT-2026-10-31-note-actuelle-sommative.md`). Le plus visible pour tes élèves : le PDF sommatif écrit encore « Note finale = … » sous le nouveau titre.
+**Ce qui reste à toi** : un relevé que Cowork te soumettra : le profil en standards écrit encore « Note finale = … » sous « Note provisoire de session » (`plans de travail/RAPPORT-2026-10-31-note-actuelle-sommative.md`).
 
-**Vérifié comment** : Vitest entier vert (10 578) ; 15 changements volontaires du code font tous rougir une garde ; les specs WebKit touchées vertes (7/7), dont le PDF sommatif et le profil en standards. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+**Vérifié comment** : Vitest entier vert (10 587) ; 27 changements volontaires du code font tous rougir une garde ; les 17 specs WebKit qui touchent le PDF ou le réglage vertes (71 tests), et le profil en standards. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
 
 📝 **LE 31 OCTOBRE 2026 : LA RÉPONSE DU GROUPE EST CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 

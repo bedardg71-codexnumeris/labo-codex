@@ -32,7 +32,22 @@ Les lignes 1 et 2 restent des exceptions nommées de la garde, jusqu'à la déci
 
 Vérifié sans objet : le titre du bouton « Modifier le statut (provisoire / finale) » n'existe qu'en standards ; `modeCalcul: 'provisoire'` est une valeur stockée, pas un mot à l'écran ; « Ce que tu fais dans la démo est provisoire » ne parle pas de la note.
 
-## Vérifié comment
+## Suite : les relevés tranchés par Grégoire (31 oct., 9 h 07 à 9 h 09)
+
+| Relevé | Décision | Fait |
+|---|---|---|
+| R4, ligne de calcul du PDF | Reprend le mot du titre, toutes pratiques | `motDeLaLigneDeCalcul`, les deux formes : « Note actuelle = … », « Note provisoire = … », « Note finale = … » une fois finalisées |
+| R1, réglage « Notes finalisées » | Texte validé | `index.html` |
+| R2, glossaire | Texte validé, le reste inchangé | `js/accompagnement-contenu-terme.js` |
+| R3, export | Inchangé | Une garde fige « provisoire » |
+
+- **Source ou stock, pour R4 :** la source seulement. Les PDF déjà remis gardent « Note finale = … » ; aucun code ne les rejoint. Un nouveau PDF porte le bon mot.
+- **Les deux exceptions de la garde « se ferment » autrement que supprimées.** Les textes validés R1 et R2 nomment encore « Note provisoire » pour la pratique alternative ; le détecteur la voit. Elles ne sont plus ouvertes : elles portent le nouveau texte et le motif « pratique alternative ».
+- **Inscrire et continuer, à soumettre à Grégoire :** le profil en standards a la même contradiction que R4, sous son titre « Note provisoire de session » : « Note finale = … pts + … pts = … », « Note finale pondérée (…) », « Note finale (portfolio à 100 %) » (`js/profil-etudiant-sections-affichage.js`). Écran de l'enseignant·e, hors de la décision, non touché. Proposition : le même mot que le titre tant que la note n'est pas finalisée.
+
+Vérifié : Vitest entier vert (10 587) ; 12 changements volontaires du code font tous rougir une garde ; les 17 specs WebKit qui touchent le PDF ou le réglage vertes (71 tests).
+
+## Vérifié comment (lot initial)
 
 - Vitest entier vert (10 578 tests), lancé depuis `tests/`.
 - Specs WebKit touchées vertes (7/7) : `profil-921-note-de-session-sommative`, `audit-parcours-sommatif-2026-09-24` (page du PDF), `standards-sans-portfolio-lot-1` (le profil en standards garde « Note provisoire de session »).

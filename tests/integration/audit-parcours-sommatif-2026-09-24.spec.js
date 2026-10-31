@@ -344,6 +344,8 @@ test('audit · parcours sommatif, grille en points sans échelle choisie — ce 
     const pageP3 = R.pdfSansReperes[2].blocs.map(b => b.texte).join(' ');
     expect(pageP3, 'P3 : la note actuelle de la sommative').toContain('Note actuelle du cours');
     expect(pageP3, 'P3 : plus de « provisoire » en sommative').not.toMatch(/provisoire/i);
+    expect(pageP3, 'P3 : la ligne de calcul reprend le mot du titre').toContain('Note actuelle = ');
+    expect(pageP3, 'P3 : pas de « Note finale = » avant les notes finalisées').not.toContain('Note finale = ');
     expect(pageP3, 'P3 : la note cumulée').toContain('68,7 %')   // `nettoyer` ramène l'insécable à une espace;
     expect(pageP3, 'P3 : les trois copies comptées').toContain('Voici les 3 productions comptées dans ta note');
     // Les repères posés sur l'échelle de départ ne font pas revenir de niveau : ces copies n'ont pas d'échelle.

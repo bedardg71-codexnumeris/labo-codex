@@ -603,7 +603,7 @@ const GLOSSAIRE = {
         terme: 'Notes finalisées',
         categorie: 'Pratiques de notation',
         etape: 'transversal',
-        definition: 'Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale » au lieu de « Note provisoire » et ne listent plus les « Artefacts à venir ». En mode « Hybride », une production obligatoire non remise compte alors pour zéro ; avant, elle est laissée de côté.',
+        definition: 'Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Hybride », une production obligatoire non remise compte alors pour zéro ; avant, elle est laissée de côté.',
         voir: 'Conception › Pratiques de notation'
     },
 
