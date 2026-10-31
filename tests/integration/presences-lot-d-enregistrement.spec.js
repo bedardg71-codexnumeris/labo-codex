@@ -60,7 +60,20 @@ async function ouvrirSaisieDemo(page) {
     await page.waitForTimeout(1200);
     await page.evaluate(() => naviguerVers('suivi', 'saisie'));
     await expect(page.locator('#tbody-saisie-presences input[id^="periodes_"]').first()).toBeAttached({ timeout: 8000 });
+    await attendreTableauStable(page);
     await poserOutils(page);
+}
+
+// #1212 (mesuré le 31 oct. 2026) : le tableau est refait une dernière fois 0,3 à 0,36 s après l'ouverture de la saisie.
+// La fin de l'animation « apparition » de #suivi-saisie atteint le `classList.remove` global d'atelier-algo.js ; même
+// sans effet, il réveille l'observateur de classe de saisie-presences.js, qui refait le tableau. Un `fill` tombé avant
+// perd son nœud : pas de `change`, rien d'armé. On attend donc la fin de l'animation, puis le rendu qu'elle déclenche.
+async function attendreTableauStable(page) {
+    await page.evaluate(async () => {
+        const section = document.getElementById('suivi-saisie');
+        await Promise.allSettled(section.getAnimations().map((a) => a.finished));
+        await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(res, 0))));
+    });
 }
 
 async function poserOutils(page) {
