@@ -28,6 +28,7 @@
      apercuCodes(critere)   ce que les sous-critères donneraient, geste ou non (gabarit)
      grilleDeCopie(fichier) la grille d'une copie, via sa production, ou null
      sommePonderee(grille, compteurs) la somme des codes posés, chacun à son poids
+     toucheDuCode(code)                la touche du clavier d'un code : son numéro, 0 pour le 10
 
    Chaque code : { id, code, numero, nom, couleur, retroaction, source, poids }
      id        ce qui est écrit sur la copie : `errfr_<code>`. ⚠ LE PRÉFIXE RESTE,
@@ -294,6 +295,18 @@ function listeCodes(grille) {
 }
 
 /**
+ * La touche d'un code (consigne du 31 oct. 2026, partie E) : son numéro, de 1 à 9, et 0 pour le code 10. Un autre
+ * numéro (au-delà de dix codes, ou le code libre d'un sous-critère) n'a pas de touche.
+ * Constat de Grégoire : les raccourcis enregistrés ne concordaient plus avec les numéros après un déplacement des
+ * codes (le code 4 se posait avec la touche 5). La touche suit désormais le numéro : rien à enregistrer.
+ */
+function toucheDuCode(code) {
+    var numero = code ? String(code.numero) : '';
+    if (/^[1-9]$/.test(numero)) return numero;
+    return numero === '10' ? '0' : null;
+}
+
+/**
  * L'entrée d'un identifiant posé sur une copie. ⚠ JAMAIS NULL : un code posé
  * ne disparaît pas d'une copie parce que sa grille ne le connaît plus — il
  * s'affiche avec son numéro et un nom neutre, jamais effacé, jamais muet.
@@ -413,6 +426,7 @@ var api = {
     listeCodes: listeCodes,
     code: code,
     sommePonderee: sommePonderee,
+    toucheDuCode: toucheDuCode,
     lePlusFrequent: lePlusFrequent,
     posesDeLAnnotation: posesDeLAnnotation,
     grilleDeCopie: grilleDeCopie

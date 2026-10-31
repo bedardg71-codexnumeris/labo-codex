@@ -1220,12 +1220,8 @@
             _raccourcisCache = stored;
             return _raccourcisCache;
         }
-        // Générer les défauts : codes 1-9, 0 + outils/formes
+        // Générer les défauts : les outils et formes. La touche d'un code suit son numéro (`toucheDuCode`), rien à enregistrer.
         var defauts = {};
-        var codes = obtenirCodesOrdonnes();
-        codes.forEach(function(c, idx) {
-            defauts[c.id] = idx < 9 ? String(idx + 1) : '0';
-        });
         Object.keys(RACCOURCIS_OUTILS_DEFAUT).forEach(function(id) {
             defauts[id] = RACCOURCIS_OUTILS_DEFAUT[id];
         });
@@ -1259,8 +1255,10 @@
         var raccourcis = obtenirRaccourcisAnnotation();
         if (touche) {
             // Retirer la touche d'un éventuel ancien item
+            // Les entrées `errfr_*` d'avant ne sont plus lues, et ne sont pas effacées : décision de Grégoire
+            // (31 oct. 2026), aucune suppression irréversible de ses données.
             Object.keys(raccourcis).forEach(function(id) {
-                if (raccourcis[id] === touche) raccourcis[id] = '';
+                if (raccourcis[id] === touche && id.indexOf('errfr_') !== 0) raccourcis[id] = '';
             });
             raccourcis[itemId] = touche;
         } else {
@@ -1275,10 +1273,16 @@
      * Lookup inverse : touche → itemId (ou null).
      */
     function obtenirItemParTouche(touche) {
+        // Un chiffre va d'abord au code de ce numéro, même si un autre item (un tampon) avait reçu ce chiffre.
+        var t = _codes();
+        if (t) {
+            var code = _codesCourants().find(function(c) { return t.toucheDuCode(c) === touche; });
+            if (code) return code.id;
+        }
         var raccourcis = obtenirRaccourcisAnnotation();
         var ids = Object.keys(raccourcis);
         for (var i = 0; i < ids.length; i++) {
-            if (raccourcis[ids[i]] === touche) return ids[i];
+            if (ids[i].indexOf('errfr_') !== 0 && raccourcis[ids[i]] === touche) return ids[i];
         }
         return null;
     }
@@ -1445,14 +1449,12 @@
         if (_nomsManquentACopie()) html += '<p class="travaux-errfr-vide">' + echapperHtml(_texteNomsManquants()) + '</p>';
         codes.forEach((c) => {
             const actif = outilActif === c.id ? ' actif' : '';
-            const raccourci = obtenirRaccourciPourItem(c.id);
             // `c.id` vient d'un champ libre du gabarit (le code d'un sous-critère) :
             // échappé, règle 1 — même si le module ne laisse passer qu'un jeton sûr.
-            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${echapperHtml(c.id)}" title="${echapperHtml(c.nom)}${raccourci ? ' [' + raccourci + ']' : ''}">`;
+            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${echapperHtml(c.id)}" title="${echapperHtml(c.nom)}">`;
             html += `<span class="travaux-errfr-numero" style="background:${echapperHtml(c.couleur)}">${echapperHtml(String(c.numero))}</span>`;
             html += `<span class="travaux-errfr-nom">${echapperHtml(c.nom)}</span>`;
             html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${echapperHtml(c.id)}"></span>`;
-            if (raccourci) html += `<span class="raccourci-badge">${raccourci}</span>`;
             html += '</div>';
         });
         html += '</div>';
@@ -3633,9 +3635,7 @@
                 summaryContent: String(idx + 1),
                 dataPastilleId: c.id
             });
-            var raccourci = obtenirRaccourciPourItem(c.id) || '';
             html += '<input type="text" class="travaux-retro-nom-input" data-nom-id="' + echapperHtml(c.id) + '" value="' + echapperHtml(c.nom) + '">';
-            html += '<input type="text" class="travaux-retro-raccourci-input" data-raccourci-id="' + echapperHtml(c.id) + '" value="' + echapperHtml(raccourci) + '" maxlength="1" placeholder="\u2328" title="Raccourci clavier (1 touche)">';
             html += menuErrHTML;
             html += '</div>';
             html += '<textarea class="travaux-retro-textarea" data-retro-id="' + echapperHtml(c.id) + '" rows="3">' + echapperHtml(texte) + '</textarea>';
@@ -3742,16 +3742,6 @@
             persObj[id].couleur = inp.value;
         });
         sauvegarderPersonnalisationErreursFr(persObj);
-        // Raccourcis clavier
-        modal.querySelectorAll('input[data-raccourci-id]').forEach(function(inp) {
-            var id = inp.dataset.raccourciId;
-            var touche = inp.value.trim().toLowerCase();
-            if (touche.length === 1) {
-                definirRaccourci(id, touche);
-            } else if (touche === '') {
-                definirRaccourci(id, null);
-            }
-        });
         // Ordre personnalisé
         const liste = modal.querySelector('#travaux-retro-errfr-liste');
         if (liste) {
