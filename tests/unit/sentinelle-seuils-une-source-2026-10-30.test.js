@@ -90,7 +90,7 @@ describe('(b) déplacer un champ déplace TOUS les signaux de A et C, ensemble',
         const { win } = seuils(REGLE);
         const attendu = [
             [54, 'Absences très fréquentes', 'var(--zone-bas-texte)', 'bas', 'fragile', 'critiques'],
-            [55, 'Quelques absences', '#ca8a04', 'signale', 'modere', 'fragile'],
+            [55, 'Quelques absences', 'var(--zone-signale-texte)', 'signale', 'modere', 'fragile'],
             [66, 'Absences rares', 'var(--vert-succes)', 'acquis', 'favorable', 'acceptable'],
             [77, 'Aucune absence ou presque', '#0284c7', 'audela', 'tres-favorable', 'favorable']
         ];
@@ -145,7 +145,7 @@ describe('(c) P : l\'échelle de l\'enseignant fait foi', () => {
         expect([49, 50, 71, 72, 90].map((v) => win.zonePerformance(v, r))).toEqual(['bas', 'signale', 'signale', 'acquis', 'audela']);
         expect(win.borneBassePerformance(r)).toBe(50);
         expect(win.bornesDepistage(r)).toEqual({ bas: 0.5, maitrise: 0.72 });
-        expect([49, 50, 72, 90].map((v) => win.obtenirCouleurPerformanceSelonEchelle(v, r))).toEqual(['var(--zone-bas-texte)', '#ca8a04', 'var(--vert-succes)', '#0284c7']);
+        expect([49, 50, 72, 90].map((v) => win.obtenirCouleurPerformanceSelonEchelle(v, r))).toEqual(['var(--zone-bas-texte)', 'var(--zone-signale-texte)', 'var(--vert-succes)', '#0284c7']);
         const zones = win.zonesDeLaBarre('P', r);
         expect(zones.map((z) => [z.de, z.a, z.zone])).toEqual([[0, 0.5, 'bas'], [0.5, 0.72, 'signale'], [0.72, 0.9, 'acquis'], [0.9, 1, 'audela']]);
         for (const v of [0.64, 0.65, 0.7, 0.75]) expect(zones.flatMap((z) => [z.de, z.a])).not.toContain(v);

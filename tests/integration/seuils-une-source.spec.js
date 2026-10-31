@@ -126,3 +126,23 @@ test('la zone sous le seuil est en orange brûlé dans les deux modes, à 4,5:1 
         expect(l.contraste).toBeGreaterThanOrEqual(4.5);
     }
 });
+
+// Le jaune « signalé » (Grégoire, 30 oct. 2026, 22 h 55) : lu à l'écran. La liste en clair ne bouge pas : `#ca8a04` y reste sous 4,5:1, antérieur à la décision.
+test('le jaune suit le mode : pastilles à 4,5:1 au moins dans les deux, liste éclaircie en sombre', async ({ page }) => {
+    await demo(page);
+    for (const [clair, pastille] of [[false, 'rgb(255, 224, 130)'], [true, 'rgb(95, 82, 0)']]) {
+        await page.evaluate((c) => document.body.classList.toggle('mode-clair', c), clair);
+        const p = await page.evaluate(`(${MESURER_CONTRASTE})('.prioritaire-indice-attention')`);
+        expect(p.couleur).toBe(pastille);
+        expect(p.contraste).toBeGreaterThanOrEqual(4.5);
+    }
+    await page.evaluate(() => naviguerVers('suivi', 'liste'));
+    await expect(page.locator('td strong[style*="--zone-signale-texte"]').first()).toBeAttached();
+    await page.evaluate(() => document.body.classList.remove('mode-clair'));
+    const sombre = await page.evaluate(`(${MESURER_CONTRASTE})('td strong[style*="--zone-signale-texte"]')`);
+    expect(sombre.couleur).toBe('rgb(250, 204, 21)');
+    expect(sombre.contraste).toBeGreaterThanOrEqual(4.5);
+    await page.evaluate(() => document.body.classList.add('mode-clair'));
+    const clair = await page.evaluate(`(${MESURER_CONTRASTE})('td strong[style*="--zone-signale-texte"]')`);
+    expect(clair.couleur).toBe('rgb(202, 138, 4)');
+});
