@@ -5460,8 +5460,8 @@
         barre.innerHTML = `
             <span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>${echapperHtml(titre)}</span>
             <div style="display:flex; gap:2px;">
-                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="${id}" title="Disposition horizontale">\u2194</button>
-                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="${id}" title="Disposition verticale">\u2195</button>
+                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="${id}" title="Disposition horizontale">\u2194\uFE0E</button>
+                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="${id}" title="Disposition verticale">\u2195\uFE0E</button>
                 <button class="palette-flottante-toggle" data-action="travauxUI.togglePaletteEvalReplie" data-param="${id}" title="Replier/Déplier">&#x2212;</button>
             </div>
         `;

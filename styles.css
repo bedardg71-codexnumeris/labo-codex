@@ -20279,6 +20279,18 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     background: var(--surface-carte, #1a3040);
 }
 .palette-flottante-barre:active { cursor: grabbing; }
+/* Même en-tête aux trois palettes d'annotation : poignée, nom et engrenage à gauche ; disposition et repli à droite. */
+.palette-barre-gauche {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+.palette-barre-droite {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
 
 .palette-flottante-titre {
     font-size: 11px;

@@ -1543,7 +1543,7 @@ function mettreAJourIndicateursTri() {
     // Réinitialiser tous les indicateurs
     ['num', 'da', 'groupe', 'nom', 'prenom', 'assiduite', 'completion', 'performance', 'mobilisation', 'risque', 'pattern', 'rai'].forEach(col => {
         const elem = document.getElementById(`tri-${col}`);
-        if (elem) elem.textContent = '↕';
+        if (elem) elem.textContent = '↕\uFE0E';
     });
 
     // Mettre à jour l'indicateur actif

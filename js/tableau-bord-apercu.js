@@ -2199,9 +2199,9 @@ function genererBarreDistribution(label, etudiantsSOM, etudiantsPAN, type, affic
 
         // Explication pédagogique avec force intégrée et corrélation à la fin
         if (type === 'A') {
-            explication = `Les étudiants assidus en classe ont une tendance ${forceAdjectif} à obtenir de meilleures performances. (r(${type}↔P) = ${formaterNombre(correlation, 3)})`;
+            explication = `Les étudiants assidus en classe ont une tendance ${forceAdjectif} à obtenir de meilleures performances. (r(${type}↔\uFE0EP) = ${formaterNombre(correlation, 3)})`;
         } else if (type === 'C') {
-            explication = `Les étudiants qui remettent plus de travaux ont une tendance ${forceAdjectif} à avoir de meilleures notes. (r(${type}↔P) = ${formaterNombre(correlation, 3)})`;
+            explication = `Les étudiants qui remettent plus de travaux ont une tendance ${forceAdjectif} à avoir de meilleures notes. (r(${type}↔\uFE0EP) = ${formaterNombre(correlation, 3)})`;
         }
 
         interpretationHTML = `

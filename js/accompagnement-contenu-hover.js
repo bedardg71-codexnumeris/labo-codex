@@ -806,7 +806,7 @@ const TOOLTIPS = {
     // --- Labo > Études ---
 
     'labo-correlations-longitudinales':
-        'Corrélation de Pearson (r, axe gauche) entre A↔P et C↔P par séance — plus r est élevé, plus l\'indice prédit P. ■ = séance avec dépôt de production, ▼ = intervention de groupe. Les courbes P·[intervention] (axe droit, %) suivent la moyenne P des étudiant·es ciblé·es — compare-les à P contrôle pour estimer l\'effet de l\'intervention.',
+        'Corrélation de Pearson (r, axe gauche) entre A↔\uFE0EP et C↔\uFE0EP par séance — plus r est élevé, plus l\'indice prédit P. ■ = séance avec dépôt de production, ▼ = intervention de groupe. Les courbes P·[intervention] (axe droit, %) suivent la moyenne P des étudiant·es ciblé·es — compare-les à P contrôle pour estimer l\'effet de l\'intervention.',
 
     // =================================================================
     // COMPLÉMENT — clés présentes dans index.html, non couvertes par T1-T11

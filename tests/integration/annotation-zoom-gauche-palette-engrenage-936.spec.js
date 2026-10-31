@@ -95,6 +95,6 @@ test('#936 — replier une palette d’Évaluation ne remplace pas son « ↔ »
         return { avant, apres: boutons() };
     }, barre);
     // Témoin : le gabarit rejoué porte bien ↔, ↕ puis −.
-    expect(etat.avant).toEqual(['↔', '↕', '−']);
-    expect(etat.apres).toEqual(['↔', '↕', '+']);
+    expect(etat.avant).toEqual(['↔\uFE0E', '↕\uFE0E', '−']);
+    expect(etat.apres).toEqual(['↔\uFE0E', '↕\uFE0E', '+']);
 });
