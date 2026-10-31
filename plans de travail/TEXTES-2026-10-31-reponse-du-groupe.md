@@ -51,3 +51,7 @@ Cas relevé par Claude Code : sans échelle lue, le code retombait sur « ton é
 
 Ajouter les deux variantes à `phraseDuSeuilDuGroupe`, selon `reperesPerformance().raison`, au caractère près ; une garde par variante, avec break-test. Retirer de `OU-EN-EST-ON.md` le cas noté comme ouvert. Commit avec ce fichier, sans release ni push.
 
+## Relecture de Cowork (`cf7c74a4`), 31 oct., 8 h 54
+
+**Accepté.** `ORIGINE_SANS_ECHELLE_LUE` porte les deux textes au caractère près, choisis par `reperesPerformance().raison`. Le cas résiduel supposé par Claude Code est mesuré impossible : `phraseDuSeuilDuGroupe` vit dans `js/profil-etudiant-calculs.js`, le fichier même qui définit `obtenirEchelleResolue` ; quand la phrase s'écrit, la fonction existe. Rien exécuté.
+

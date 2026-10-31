@@ -748,16 +748,20 @@
     const MOTS_DU_BLOC_NOTE = {
         sommative: {
             titre: 'Note actuelle du cours',
+            ligneDeCalcul: 'Note actuelle',
             sansJetons: 'Cette note peut changer selon tes prochains travaux.',
             avecJetons: 'Cette note peut changer selon tes prochains travaux et l\'application de jetons.'
         },
         alternative: {
             titre: 'Note provisoire',
+            ligneDeCalcul: 'Note provisoire',
             sansJetons: 'Note provisoire — peut changer selon tes prochains travaux.',
             avecJetons: 'Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.'
         }
     };
     const motsDuBlocNote = (note) => (note.sommative ? MOTS_DU_BLOC_NOTE.sommative : MOTS_DU_BLOC_NOTE.alternative);
+    /** La ligne de calcul reprend le mot du titre (décision de Grégoire, 31 oct. 2026). Avant : « Note finale = … » même pendant le trimestre. */
+    const motDeLaLigneDeCalcul = (note) => (note.estFinale === true ? 'Note finale' : motsDuBlocNote(note).ligneDeCalcul);
 
     function renderRangeeNote(note) {
         if (!note || !Array.isArray(note.selection) || !note.selection.length) return null;
@@ -875,11 +879,11 @@
         if (typeof note.moyenne === 'number' && !isNaN(note.moyenne)) {
             let phraseFinale;
             if (estHybride && !note.erreurPonderation && calcSel && calcObl) {
-                phraseFinale = `Note finale = ${formaterPoints(calcSel.contribution)} + ${formaterPoints(calcObl.contribution)} = ${esc(formaterNotePourcentage(note.moyenne))}`;
+                phraseFinale = `${motDeLaLigneDeCalcul(note)} = ${formaterPoints(calcSel.contribution)} + ${formaterPoints(calcObl.contribution)} = ${esc(formaterNotePourcentage(note.moyenne))}`;
             } else if (estHybride && note.erreurPonderation) {
                 phraseFinale = `⚠ ${esc(note.erreurPonderation)}`;
             } else {
-                phraseFinale = `Note finale = ${esc(formaterNotePourcentage(note.moyenne))}`;
+                phraseFinale = `${motDeLaLigneDeCalcul(note)} = ${esc(formaterNotePourcentage(note.moyenne))}`;
             }
             const mentionPlafonnement = (note.plafonnement && note.plafonnement.actif)
                 ? `<div style="margin-top: 4px; font-size: 9px; color: ${MUTED};">${note.plafonnement.echec

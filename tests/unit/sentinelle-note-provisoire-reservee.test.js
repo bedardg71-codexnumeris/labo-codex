@@ -23,8 +23,6 @@ const NOTE_PROVISOIRE = /\bnotes?(?:\s|&nbsp;)+provisoires?\b/gi;
 
 // #1207 (décision de Grégoire, 30 oct. ; textes du 31 oct.) : en sommative, « Note actuelle du cours ».
 const PRATIQUE_ALTERNATIVE = 'pratique alternative, le mot que le principe garde';
-// Deux réglages communs à toutes les pratiques restent ouverts : RAPPORT-2026-10-31-note-actuelle-sommative.md.
-const ANCIENS_MOTS = 'réglage commun, relevé au rapport du 31 oct. : à Grégoire';
 // Un gabarit peut composer le mot : `Note ${estFinale ? 'finale' : 'provisoire'}`. Aucune chaîne seule ne le porte.
 const GABARIT_COMPOSE = 'Note provisoire (gabarit composé)';
 
@@ -33,9 +31,9 @@ const EXCEPTIONS = [
     { fichier: 'js/changelog-data.js', contient: 'en tête de sa rétroaction et sa note provisoire', nb: 1, motif: 'Nouvelles déjà publiées' },
     { fichier: 'js/changelog-data.js', contient: 'Le bloc «&nbsp;Note provisoire&nbsp;» y garde', nb: 1, motif: 'Nouvelles déjà publiées' },
     { fichier: 'js/profil-etudiant-sections-affichage.js', contient: 'Note provisoire de session', nb: 2, motif: PRATIQUE_ALTERNATIVE },
-    { fichier: 'index.html', contient: 'Active le titre « Note finale » sur les PDFs de rétroaction (au lieu de « Note provisoire »)', nb: 1, motif: ANCIENS_MOTS },
-    { fichier: 'js/accompagnement-contenu-terme.js', contient: '« Note finale » au lieu de « Note provisoire »', nb: 1, motif: ANCIENS_MOTS },
-    { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 3, motif: PRATIQUE_ALTERNATIVE },
+    { fichier: 'index.html', contient: 'ou de « Note provisoire » (pratique alternative), et retire la liste', nb: 1, motif: PRATIQUE_ALTERNATIVE },
+    { fichier: 'js/accompagnement-contenu-terme.js', contient: 'ou de « Note provisoire » (pratique alternative), et ne listent plus', nb: 1, motif: PRATIQUE_ALTERNATIVE },
+    { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 4, motif: PRATIQUE_ALTERNATIVE },
 ];
 
 function fichiersJs(dossier) {
@@ -135,13 +133,19 @@ describe('#1207 — en sommative, « Note actuelle du cours » ; en pratique alt
     };
 
     /** Le PDF de bout en bout, de `construireFeedback` au rendu : la vraie porte de chaque famille. */
-    function pdf({ famille, notesFinales = false, jetons = false }) {
+    function pdf({ famille, notesFinales = false, jetons = false, hybride = false }) {
         const sommative = famille === 'sommative';
+        const categories = hybride ? { selection: { ponderation: 65 }, obligatoires: { ponderation: 35 } } : undefined;
+        const productions = hybride
+            ? [{ id: 'A1', titre: 'Artefact 1', type: 'artefact-portfolio', categorie: 'selection' }, { id: 'A9', titre: 'Artefact 9', type: 'artefact-portfolio', categorie: 'obligatoire' }]
+            : [{ id: 'A1', titre: 'Artefact 1', type: 'artefact-portfolio' }];
+        const copies = hybride ? [COPIE, { ...COPIE, id: 'E9', productionId: 'A9' }] : [COPIE];
+        const retenus = copies.map((c) => ({ productionId: c.productionId, niveau: 'D', note: 74 }));
         const data = chargerScript('js/synthese-retroaction-data.js', {
             db: { getSync: (k, d) => (d !== undefined ? d : null), get: async () => null, set: async () => {}, setSync: () => {} },
             cle: (k) => 'test_' + k,
             obtenirEchelleResolue: () => null,
-            obtenirDonneesSelonMode: (k) => (k === 'productions' ? [{ id: 'A1', titre: 'Artefact 1', type: 'artefact-portfolio' }] : k === 'evaluationsSauvegardees' ? [COPIE] : []),
+            obtenirDonneesSelonMode: (k) => (k === 'productions' ? productions : k === 'evaluationsSauvegardees' ? copies : []),
             obtenirTrimestreActif: () => ({ id: 'T1', nom: 'A2026' }),
             obtenirEtudiantsCoursActif: () => [],
             obtenirGroupesCours: () => [],
@@ -149,9 +153,9 @@ describe('#1207 — en sommative, « Note actuelle du cours » ; en pratique alt
             travauxOutils: { AUTOCOLLANTS: [] },
             obtenirPreference: () => null,
             obtenirIdPratiqueActive: () => 'P1',
-            obtenirConfigPratiqueActive: () => (sommative ? { notesFinales } : { configuration: { notesFinales } }),
+            obtenirConfigPratiqueActive: () => (sommative ? { notesFinales } : { configuration: { notesFinales, categories } }),
             jetonsDeclares: () => (jetons ? { actif: true } : null),
-            calculerDetailsNoteFinale: () => (sommative ? null : { portfolio: { methodeSelection: 'meilleurs', moyenne: 74, nombreEvalues: 1, artefactsRetenus: [{ productionId: 'A1', niveau: 'D', note: 74 }] } }),
+            calculerDetailsNoteFinale: () => (sommative ? null : { portfolio: { methodeSelection: hybride ? 'hybride' : 'meilleurs', moyenne: 74, nombreEvalues: copies.length, artefactsRetenus: retenus } }),
             simulerIndices: () => (sommative ? { recit: { famille: 'SOM', synthese: { noteFinale: 74 }, resultats: [{ sort: 'compte', label: 'Artefact 1', note: 74 }] } } : { recit: null })
         });
         const rendu = chargerScript('js/synthese-retroaction-rendu.js', {
@@ -192,6 +196,56 @@ describe('#1207 — en sommative, « Note actuelle du cours » ; en pratique alt
 
     it('PDF, pratique alternative, avec jetons : la mention d\'avant', () => {
         expect(pdf({ famille: 'standards', jetons: true })).toContain('Note provisoire — peut changer selon tes prochains travaux et l\'application de jetons.');
+    });
+
+    describe('la ligne de calcul reprend le mot du titre, ses deux formes', () => {
+        it('sommative non finalisée : « Note actuelle = … »', () => {
+            const t = pdf({ famille: 'sommative' });
+            expect(t).toContain('Note actuelle = 74 %');
+            expect(t).not.toContain('Note finale');
+        });
+        it('sommative finalisée : « Note finale = … »', () => {
+            const t = pdf({ famille: 'sommative', notesFinales: true });
+            expect(t).toContain('Note finale = 74 %');
+            expect(t).not.toContain('Note actuelle');
+        });
+        it('pratique alternative non finalisée : « Note provisoire = … »', () => {
+            const t = pdf({ famille: 'standards' });
+            expect(t).toContain('Note provisoire = 74 %');
+            expect(t).not.toContain('Note finale');
+        });
+        it('pratique alternative finalisée : « Note finale = … »', () => {
+            const t = pdf({ famille: 'standards', notesFinales: true });
+            expect(t).toContain('Note finale = 74 %');
+            expect(t).not.toContain('Note provisoire');
+        });
+        it('forme avec contributions, non finalisée : « Note provisoire = … pts + … pts = … »', () => {
+            const t = pdf({ famille: 'standards', hybride: true });
+            expect(t).toMatch(/Note provisoire = 48,1 pts \+ 25,9 pts = 74 %/);
+            expect(t).not.toContain('Note finale');
+        });
+        it('forme avec contributions, finalisée : « Note finale = … pts + … pts = … »', () => {
+            const t = pdf({ famille: 'standards', hybride: true, notesFinales: true });
+            expect(t).toMatch(/Note finale = 48,1 pts \+ 25,9 pts = 74 %/);
+            expect(t).not.toContain('Note provisoire');
+        });
+    });
+
+    describe('« Notes finalisées » : le réglage et le glossaire disent les deux titres', () => {
+        it('le réglage, mot pour mot', () => {
+            const html = lire('index.html');
+            expect(html).toContain('Active le titre « Note finale » sur les PDF de rétroaction, à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et retire la liste « Artefacts à venir ». À activer en fin de session, quand les notes sont arrêtées.');
+            expect(html).not.toContain('(au lieu de « Note provisoire »)');
+        });
+        it('le glossaire, mot pour mot, et le reste inchangé', () => {
+            const terme = lire('js/accompagnement-contenu-terme.js');
+            expect(terme).toContain('Une case de la pratique de notation, à cocher quand les notes sont arrêtées. Les PDF de rétroaction titrent alors « Note finale », à la place de « Note actuelle du cours » (pratique sommative) ou de « Note provisoire » (pratique alternative), et ne listent plus les « Artefacts à venir ». En mode « Hybride », une production obligatoire non remise compte alors pour zéro');
+            expect(terme).not.toContain('« Note finale » au lieu de « Note provisoire »');
+        });
+    });
+
+    it('l\'export garde « provisoire » dans toutes les pratiques : un état du fichier, décidé par Grégoire le 31 oct.', () => {
+        expect(lire('js/export-resultats-finaux.js')).toContain("statut = (ctx.notesFinales === true && !(r.details && r.details.estProvisoire)) ? 'final' : 'provisoire';");
     });
 
     it('profil, sommative : le titre et la formule ; aucun « provisoire », hors du nom d\'une classe CSS', () => {
@@ -247,4 +301,6 @@ describe('Les mots qui la remplacent, aux surfaces du niveau RàI', () => {
  *   PDF, mention sur les notes finalisées : 1
  *   PDF, titre sans la case finale : 2
  *   dans la spec WebKit 921, la formule revenue à provisoire : 1
+ * Les relevés R1, R2 et R4 (31 oct. 2026), même méthode :
+ *   ligne simple figée à « Note finale » : 2 ; ligne avec contributions figée à « Note finale » : 2 ; la case finale ignorée : 3 ; toujours « Note finale » : 4 ; sommative dite provisoire : 4 ; sommative au titre entier : 1 ; alternative dite actuelle : 4 ; réglage ancien : 3 ; réglage retouché : 1 ; glossaire ancien : 3 ; glossaire, le reste retouché : 1 ; export : « actuelle » en toutes pratiques : 1
  */
