@@ -1312,6 +1312,20 @@
        =============================== */
 
     /**
+     * #1210 — la zone de saisie montre tout son texte : elle prend la hauteur du texte, à la création comme
+     * à l'édition, et grandit pendant la saisie. Seul le bas du conteneur, qui coupe ce qui le dépasse, la
+     * borne : elle défile alors, pour que la fin du texte reste atteignable.
+     */
+    function ajusterHauteurZoneTexte(textarea, conteneur) {
+        textarea.style.height = 'auto';
+        const voulue = textarea.scrollHeight + (textarea.offsetHeight - textarea.clientHeight);
+        const disponible = conteneur.clientHeight - textarea.offsetTop - 4;
+        const coupee = disponible > 0 && voulue > disponible;
+        textarea.style.height = (coupee ? disponible : voulue) + 'px';
+        textarea.style.overflowY = coupee ? 'auto' : 'hidden';
+    }
+
+    /**
      * Ajoute une annotation texte a la position
      * @param {number} xNorm - X normalise
      * @param {number} yNorm - Y normalise
@@ -1344,13 +1358,13 @@
             top: ${posY}px;
             min-width: 120px;
             min-height: 32px;
-            max-width: 400px;
             background: transparent;
             border: 2px dashed ${couleur};
             border-radius: 4px;
             color: ${couleur};
             font-family: sans-serif;
             font-size: ${fontSizeCss}px;
+            line-height: 1.3;
             padding: 4px 6px;
             resize: both;
             outline: none;
@@ -1360,6 +1374,8 @@
         textarea.placeholder = 'Texte…';
 
         conteneur.appendChild(textarea);
+        ajusterHauteurZoneTexte(textarea, conteneur);
+        textarea.addEventListener('input', () => ajusterHauteurZoneTexte(textarea, conteneur));
 
         // Empecher que le clic de creation ne confirme immediatement
         let pret = false;
@@ -1368,6 +1384,8 @@
         textarea.focus();
 
         function confirmerTexte() {
+            // #1210 : confirmer avec Entrée laissait l'écouteur du clic extérieur, et le clic suivant recréait le bloc.
+            document.removeEventListener('pointerdown', onClickExterieur, true);
             const texte = textarea.value.trim();
             // Capturer la largeur du textarea avant de le supprimer
             const canvasRect2 = canvasAnnotation.getBoundingClientRect();
@@ -1394,6 +1412,7 @@
         }
 
         function annulerTexte() {
+            document.removeEventListener('pointerdown', onClickExterieur, true);
             textarea.remove();
         }
 
@@ -1414,7 +1433,6 @@
         function onClickExterieur(e) {
             if (!pret) return;
             if (!textarea.contains(e.target)) {
-                document.removeEventListener('pointerdown', onClickExterieur, true);
                 confirmerTexte();
             }
         }
@@ -1438,10 +1456,21 @@
         const posY = data.y * canvasRect.height + canvasRect.top - conteneurRect.top;
         const fontSize = data.fontSize || 14;
         const couleur = data.color || '#FF0000';
-        const largeurPx = data.width ? data.width * canvasRect.width : 200;
         // Taille de police CSS scalée comme sur le canvas
         const resRef = (_outils() && _outils().RESOLUTION_REFERENCE) || 1000;
         const fontSizeCss = fontSize * canvasRect.width / resRef;
+        // #1210 — la zone s'ouvre à la taille du bloc : sa largeur enregistrée, sans plafond. Un bloc d'avant,
+        // sans largeur, prend celle de sa plus longue ligne (bordure et marge intérieure comprises).
+        let largeurPx;
+        if (data.width) {
+            largeurPx = data.width * canvasRect.width;
+        } else {
+            ctxAnnotation.save();
+            ctxAnnotation.font = `${fontSizeCss}px sans-serif`;
+            const lignes = (data.text || '').split('\n').map((l) => ctxAnnotation.measureText(l).width);
+            ctxAnnotation.restore();
+            largeurPx = Math.max(...lignes) + 18;
+        }
 
         // Masquer le texte sur le canvas pendant l'edition
         const texteOriginal = data.text;
@@ -1453,18 +1482,17 @@
         textarea.value = texteOriginal;
         textarea.style.cssText = `
             position: absolute;
-            left: ${posX}px;
-            top: ${posY - fontSizeCss * 1.3}px;
-            min-width: 120px;
+            left: ${Math.max(0, Math.min(posX, conteneur.clientWidth - largeurPx))}px;
+            top: ${Math.max(0, posY - fontSizeCss * 1.3)}px;
             min-height: 32px;
             width: ${largeurPx}px;
-            max-width: 400px;
             background: transparent;
             border: 2px dashed ${couleur};
             border-radius: 4px;
             color: ${couleur};
             font-family: sans-serif;
             font-size: ${fontSizeCss}px;
+            line-height: 1.3;
             padding: 4px 6px;
             resize: both;
             outline: none;
@@ -1473,6 +1501,9 @@
         `;
 
         conteneur.appendChild(textarea);
+        const largeurOuverture = textarea.offsetWidth;
+        ajusterHauteurZoneTexte(textarea, conteneur);
+        textarea.addEventListener('input', () => ajusterHauteurZoneTexte(textarea, conteneur));
 
         // Deselectionner pour ne pas voir les poignees
         annotationSelectionnee = null;
@@ -1481,20 +1512,25 @@
         let pret = false;
         setTimeout(() => { pret = true; }, 100);
 
+        // #1210 — rien n'est sélectionné : une lettre tapée ou dictée remplaçait le bloc entier. Le curseur va
+        // à la fin ; toucher dans la zone le déplace (comportement natif).
         textarea.focus();
-        textarea.select();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        textarea.scrollTop = textarea.scrollHeight;
 
         function confirmer() {
             const nouveauTexte = textarea.value.trim();
-            const canvasRect2 = canvasAnnotation.getBoundingClientRect();
-            const nouvelleLargeur = textarea.offsetWidth / canvasRect2.width;
+            // #1210 — la largeur enregistrée ne change que si la poignée l'a changée : un aller-retour réécrivait
+            // la largeur plafonnée, et le bloc rétrécissait pour de bon.
+            const redimensionne = textarea.offsetWidth !== largeurOuverture;
+            const nouvelleLargeur = redimensionne ? textarea.offsetWidth / canvasAnnotation.getBoundingClientRect().width : data.width;
             textarea.remove();
             document.removeEventListener('pointerdown', onClickExt, true);
 
             if (!nouveauTexte) {
                 // Texte vide : restaurer l'original
                 data.text = texteOriginal;
-            } else if (nouveauTexte !== texteOriginal || nouvelleLargeur !== data.width) {
+            } else if (nouveauTexte !== texteOriginal || redimensionne) {
                 const avant = JSON.parse(JSON.stringify(data));
                 avant.text = texteOriginal;
                 data.text = nouveauTexte;
