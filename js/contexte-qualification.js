@@ -56,7 +56,7 @@ const MOTS_PRESENCE = ['Aucune absence ou presque', 'Absences rares', 'Quelques 
     'Absences très fréquentes'];
 const MOTS_REMISE = ['Aucun travail manquant ou presque', 'Travaux manquants rares',
     'Quelques travaux manquants', 'Travaux manquants très fréquents'];
-const COULEURS_PALIERS = ['#2196F3', '#28a745', '#ffc107', '#dc3545']; // bleu, vert, jaune, rouge
+const COULEURS_PALIERS = ['#2196F3', '#28a745', '#ffc107', 'var(--zone-bas-texte)']; // bleu, vert, jaune, orange brûlé
 const ZONES_PALIERS = ['audela', 'acquis', 'signale', 'bas'];
 
 /**
@@ -284,8 +284,9 @@ function bornesDepistage(reperes) {
    =============================== */
 
 const CLASSE_PASTILLE = { bas: ' prioritaire-indice-critique', signale: ' prioritaire-indice-attention' };
-const COULEUR_LISTE = { audela: '#0284c7', acquis: 'var(--vert-succes)', signale: '#ca8a04', bas: '#dc2626', neutre: 'inherit' };
-const COULEUR_BANDE = { audela: '#2196F3', acquis: '#28a745', signale: '#ffc107', bas: '#dc3545', neutre: '#8aa4b0' };
+const COULEUR_LISTE = { audela: '#0284c7', acquis: 'var(--vert-succes)', signale: '#ca8a04', bas: 'var(--zone-bas-texte)', neutre: 'inherit' };
+// En #rrggbb : `couleurAuSeuil` les mélange.
+const COULEUR_BANDE = { audela: '#2196F3', acquis: '#28a745', signale: '#ffc107', bas: '#CC5500', neutre: '#8aa4b0' };
 
 function classePastilleDeLaZone(zone) {
     return CLASSE_PASTILLE[zone] || '';
@@ -428,7 +429,7 @@ function brancheMobilisation(A, C) {
     const B = bornesMobilisation();
 
     // 2. Les deux au palier le plus bas
-    if (A < B.critique && C < B.critique) return { code: 'critiques', couleur: '#dc3545' }; // Rouge
+    if (A < B.critique && C < B.critique) return { code: 'critiques', couleur: COULEUR_BANDE.bas }; // Orange brûlé
     // 3. Assiduité seule au palier le plus bas
     if (A < B.critique) return { code: 'assiduite-critique', couleur: '#ff9800' }; // Orange
     // 4. Complétion seule au palier le plus bas

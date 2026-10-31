@@ -4,6 +4,7 @@
  *   · Entre deux zones, un passage centré sur le seuil : la couleur AU seuil est le mélange à parts égales, pour A, C et P,
  *     dans les deux axes, et même là où deux seuils se touchent presque.
  *   · Le voile reste.
+ *   · À la cassure seulement, le passage se mesure à l'écran : même largeur des deux côtés (22 h 29).
  *   · L'axe de A et de C : proportionnel par défaut, deux segments au choix, cassé au seuil le plus bas lu à sa source.
  *     P reste proportionnel. Points, moyenne, courbe, traits et graduations lisent la même fonction.
  *
@@ -93,7 +94,7 @@ describe('(a) la couleur au seuil est le mélange à parts égales des deux zone
 
     it('une zone sous le début de l’axe ne laisse pas de passage visible : le fond commence à la première zone visible', () => {
         const { i } = banc();
-        const zones = [{ de: 0, a: 0.2, zone: 'bas', couleur: '#dc3545' }, { de: 0.2, a: 1, zone: 'acquis', couleur: '#28a745' }];
+        const zones = [{ de: 0, a: 0.2, zone: 'bas', couleur: '#CC5500' }, { de: 0.2, a: 1, zone: 'acquis', couleur: '#28a745' }];
         const arrets = lireFond(i.fondDeLaBarre(zones));
         expect(arrets.map((a) => a.position)).toEqual([0, 100]);
         expect(arrets[0].canaux).toEqual(canauxDe('#28a745'));
@@ -116,6 +117,42 @@ describe('(b) la largeur des passages', () => {
         expect(arrets[6].position).toBeCloseTo(position(0.875), 6);
         // Le milieu de la zone 85-86 garde sa couleur pure.
         couleurA(arrets, position(0.855)).forEach((c, n) => expect(c).toBeCloseTo(canauxDe('#ffc107')[n], 0));
+    });
+});
+
+describe('(b bis) le passage à la cassure : symétrique à l’écran (Grégoire, 30 oct. 2026, 22 h 29)', () => {
+    const SEUILS_ESSAYES = [undefined, SEUILS(0.7, 0.8, 0.92), SEUILS(0.85, 0.86, 0.95), SEUILS(0.5, 0.99, 1), SEUILS(0.35, 0.8, 0.9)];
+
+    it('les deux demi-passages ont la même largeur à l’écran : la moitié de la plus étroite des deux zones', () => {
+        for (const seuils of SEUILS_ESSAYES) {
+            const { i, win } = banc({ seuils });
+            const zones = win.zonesDeLaBarre('A').filter((z) => z.a > z.de);
+            const cassure = i.cassureDeLaBarre('A', 'deuxSegments');
+            const arrets = verifierLeMilieuDeChaquePassage(i, zones, cassure);
+            // Le deuxième arrêt ouvre le passage de la cassure, le troisième porte le seuil au quart de la barre, le quatrième le ferme.
+            const [avant, seuil, apres] = [arrets[1], arrets[2], arrets[3]];
+            expect(seuil.position).toBe(25);
+            expect(seuil.position - avant.position, `seuils ${cassure}`).toBeCloseTo(apres.position - seuil.position, 10);
+            // La zone du dessus, lue sur l'axe attendu, écrit ici sans passer par le code.
+            const largeurDessus = (zones[1].a - cassure) / (1 - cassure) * 75;
+            expect(seuil.position - avant.position, `seuils ${cassure}`).toBeCloseTo(Math.min(25, largeurDessus) / 2, 10);
+            expect(avant.canaux).toEqual(canauxDe(zones[0].couleur));
+            expect(apres.canaux).toEqual(canauxDe(zones[1].couleur));
+        }
+    });
+
+    it('les autres seuils gardent leur passage en points, et le proportionnel ne change pas', () => {
+        const { i, win } = banc();
+        const zones = win.zonesDeLaBarre('A');
+        const arrets = lireFond(i.fondDeLaBarre(zones, 0.85));
+        expect(arrets.map((a) => a.position)).toEqual([0, 12.5, 25, 37.5, 37.5, 50, 62.5, 62.5, 75, 87.5, 100].map((p) => expect.closeTo(p, 6)));
+        // Une zone étroite au-dessus de la cassure : 85-86 fait 5 % de la barre ; le seuil suivant garde son minimum en points.
+        const serres = banc({ seuils: SEUILS(0.85, 0.86, 0.95) });
+        const positionsSerrees = lireFond(serres.i.fondDeLaBarre(serres.win.zonesDeLaBarre('A'), 0.85)).map((a) => a.position);
+        expect(positionsSerrees).toEqual([0, 22.5, 25, 27.5, 27.5, 30, 37.5, 62.5, 75, 87.5, 100].map((p) => expect.closeTo(p, 6)));
+        // Sans cassure, 85 % garde son passage de 2,5 points de chaque côté.
+        const proportionnel = lireFond(i.fondDeLaBarre(zones)).map((a) => a.position);
+        expect(proportionnel.slice(1, 4)).toEqual([0.825, 0.85, 0.875].map((v) => expect.closeTo((v - 0.3) / 0.7 * 100, 6)));
     });
 });
 
@@ -325,3 +362,9 @@ describe('(e) le réglage', () => {
 //   M28 le chargement écrit le défaut ...................... 1 rouge  (sans choix)
 //   M29 les exemples ne suivent pas les seuils ............. 1 rouge  (deux segments)
 // 22/22 verts sans mutation ; 2/2 dans la spec.
+// Le passage symétrique à la cassure (décision du 30 oct., 22 h 29), mêmes conditions :
+//   M11 le passage reste en points à la cassure ............ 2 rouges (b bis)
+//   M12 la plus large des deux zones ....................... 3 rouges (b bis)
+//   M13 le demi-passage droit deux fois plus large ......... 3 rouges (b bis)
+//   M14 tous les seuils se mesurent à l'écran .............. 1 rouge  (b bis), garde ajoutée : le cas de la zone étroite
+//   M15 le seuil perd sa couleur exacte .................... 2 rouges (a, b bis)

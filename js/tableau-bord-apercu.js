@@ -108,17 +108,31 @@ function couleurAuSeuil(couleurA, couleurB) {
  * demi-largeur égale à la moitié de la plus étroite des deux (au moins 1,5 point). Le seuil porte son propre arrêt :
  * sans lui, le milieu du passage glisserait à la cassure, où un point n'a pas la même largeur des deux côtés.
  * Une zone prise entre deux passages garde sa couleur à son milieu : le minimum ne les fait jamais se croiser.
+ * À la cassure seulement, le passage se mesure à l'écran : même largeur des deux côtés, la moitié de la plus étroite des
+ * deux zones telles qu'elles paraissent.
  * @param {Array} zones - `zonesDeLaBarre`
  * @param {number|null} [cassure] - `cassureDeLaBarre`
  * @returns {string} Le fond CSS
  */
 function fondDeLaBarre(zones, cassure = null) {
     const visibles = zones.map((z) => ({ ...z, de: Math.max(z.de, ECHELLE_DISTRIBUTION_MIN) })).filter((z) => z.a > z.de);
-    const arret = (couleur, valeur) => `${couleur} ${positionSurEchelleDistribution(valeur, cassure)}%`;
+    const position = (valeur) => positionSurEchelleDistribution(valeur, cassure);
+    const arretA = (couleur, place) => `${couleur} ${place}%`;
+    const arret = (couleur, valeur) => arretA(couleur, position(valeur));
     const milieu = (z) => (z.de + z.a) / 2;
     const arrets = [arret(visibles[0].couleur, ECHELLE_DISTRIBUTION_MIN)];
     visibles.slice(0, -1).forEach((z, i) => {
         const suivante = visibles[i + 1];
+        if (z.a === cassure) {
+            const seuil = position(z.a);
+            const demiEcran = Math.min(seuil - position(z.de), position(suivante.a) - seuil) / 2;
+            arrets.push(
+                arretA(z.couleur, seuil - demiEcran),
+                arretA(couleurAuSeuil(z.couleur, suivante.couleur), seuil),
+                arretA(suivante.couleur, seuil + demiEcran)
+            );
+            return;
+        }
         const demi = Math.max(DEMI_PASSAGE_MIN, Math.min(z.a - z.de, suivante.a - suivante.de) / 2);
         const limiteAvant = i === 0 ? z.de : milieu(z);
         const limiteApres = i + 2 === visibles.length ? suivante.a : milieu(suivante);

@@ -7,6 +7,12 @@
 
 ---
 
+## 30 OCT. 2026, 22 H 50 (Claude Code) : **L'ORANGE BRÛLÉ ET LE PASSAGE SYMÉTRIQUE COMMITÉS SUR `main`, NON POUSSÉS ; EN LIGNE : TOUJOURS 1.228.0**
+
+**Porte** : `CONSIGNE-LOT-2026-10-30-orange-brule-et-passage-symetrique.md`. Rapport : `plans de travail/RAPPORT-2026-10-30-orange-brule-et-passage-symetrique.md`. Sans release, à la demande de Grégoire.
+
+**Attend** : la relecture de Cowork ; Grégoire sur le jaune (il se confond avec l'orange pour les daltonismes rouge-vert, proposition chiffrée non appliquée) et sur les mots (réglage des barres, aide du seuil) ; puis le verdict complet du Mac, Cowork fermé. Vitest entier vert (10 521) ; seules les specs WebKit touchées ont tourné. #1208 inscrit.
+
 ## 30 OCT. 2026, 22 H 20 (Claude Code) : **LES BARRES DE L'APERÇU COMMITÉES SUR `main`, NON POUSSÉES ; EN LIGNE : TOUJOURS 1.228.0**
 
 **Porte** : `CONSIGNE-LOT-2026-10-30-barres-apercu.md` : passages larges, voile gardé, axe de A et C en réglage. Rapport : `plans de travail/RAPPORT-2026-10-30-barres-apercu.md`. Sans release, à la demande de Grégoire.

@@ -62,6 +62,11 @@
     --rouge-erreur: #e84057;
     --rouge-danger: #dc3545;      /* Rouge Bootstrap — badges, bordures danger */
 
+    /* La zone sous le seuil de A, C et P : orange brûlé, 4,5:1 au moins. Les barres : #CC5500 (`COULEUR_BANDE`). */
+    --zone-bas-texte: #F07E33;
+    --zone-bas-pastille-texte: #FF9A5C;
+    --zone-bas-pastille-fond: rgba(204, 85, 0, 0.3);
+
     /* Couleurs sarcelle/teal (palette ocean-native, utilisée en mode Démo) */
     --sarcelle-principal: #1a4a5e;
     --sarcelle-fonce: #0c1a22;
@@ -620,6 +625,11 @@ body.mode-clair[data-mode="anonymisation"] .sous-navigation button:hover {
 
     /* Orange accent ajusté */
     --orange-accent: #ff6b35;
+
+    /* La zone sous le seuil, plus foncée sur fond clair */
+    --zone-bas-texte: #A84400;
+    --zone-bas-pastille-texte: #943C00;
+    --zone-bas-pastille-fond: rgba(204, 85, 0, 0.14);
 
     /* IDME — teintes plus foncées pour contraste sur fond blanc */
     --idme-etendu: #1E88E5;
@@ -13202,8 +13212,8 @@ label:has(+ textarea:disabled) {
 }
 
 .prioritaire-indice-critique {
-    background: rgba(220, 20, 20, 0.25);
-    color: #ff8080;
+    background: var(--zone-bas-pastille-fond);
+    color: var(--zone-bas-pastille-texte);
 }
 
 .prioritaire-indice-attention {
@@ -26101,8 +26111,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 .mode-clair .prioritaire-indice-critique {
-    background: rgba(220, 20, 20, 0.12);
-    color: #b01020;
+    background: var(--zone-bas-pastille-fond);
+    color: var(--zone-bas-pastille-texte);
 }
 
 .mode-clair .prioritaire-indice-attention {
@@ -26127,6 +26137,9 @@ body.planif-plein-ecran-actif #planif-guide-panel {
         --bleu-fonce: #0f1e3a;
         --bleu-moyen: #2a4a8a;
         --bleu-clair: #065dbb;
+        --zone-bas-texte: #A84400;
+        --zone-bas-pastille-texte: #943C00;
+        --zone-bas-pastille-fond: rgba(204, 85, 0, 0.14);
     }
 
     body {
