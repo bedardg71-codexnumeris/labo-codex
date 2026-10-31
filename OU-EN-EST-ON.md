@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 30 OCTOBRE 2026, 23 H 05 : LE JAUNE EST ÉCLAIRCI, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : en mode sombre, le jaune des chiffres de la liste et des pastilles est plus clair ; en mode clair, le fond de la pastille jaune est plus franc. La liste en clair et les barres ne bougent pas.
+
+**Ce qui reste à toi** : valider les mots (réglage des barres, aide du seuil).
+
+**Vérifié comment** : Vitest entier vert (10 534) ; 16 changements volontaires du code font tous rougir une garde ; les specs WebKit touchées vertes, dont une qui lit le jaune à l'écran ; écarts mesurés à l'écran dans Chrome, en simulation : le pire écart avec l'orange passe de 2,8 à 13,2 dans la liste en sombre. Dans les pastilles, c'est le texte qui sépare en sombre et le fond en clair. Personne daltonienne n'a regardé ; pas éprouvé sur iPad ni sur ton vrai codex.
+
 📝 **LE 30 OCTOBRE 2026, 22 H 50 : L'ORANGE BRÛLÉ ET LE PASSAGE SYMÉTRIQUE SONT CODÉS, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : la zone sous le seuil passe du rouge à l'orange brûlé dans les barres de l'Aperçu, les chiffres de la liste et les pastilles, avec une teinte propre à chaque mode. Les badges du niveau RàI restent rouges. En deux segments, le passage au seuil de la cassure a maintenant la même largeur des deux côtés : le rouge qui s'arrêtait net de l'entrée ci-dessous, c'est réglé.

@@ -284,7 +284,7 @@ function bornesDepistage(reperes) {
    =============================== */
 
 const CLASSE_PASTILLE = { bas: ' prioritaire-indice-critique', signale: ' prioritaire-indice-attention' };
-const COULEUR_LISTE = { audela: '#0284c7', acquis: 'var(--vert-succes)', signale: '#ca8a04', bas: 'var(--zone-bas-texte)', neutre: 'inherit' };
+const COULEUR_LISTE = { audela: '#0284c7', acquis: 'var(--vert-succes)', signale: 'var(--zone-signale-texte)', bas: 'var(--zone-bas-texte)', neutre: 'inherit' };
 // En #rrggbb : `couleurAuSeuil` les mélange.
 const COULEUR_BANDE = { audela: '#2196F3', acquis: '#28a745', signale: '#ffc107', bas: '#CC5500', neutre: '#8aa4b0' };
 

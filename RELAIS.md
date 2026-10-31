@@ -7,6 +7,12 @@
 
 ---
 
+## 30 OCT. 2026, 23 H 05 (Claude Code) : **LE JAUNE « SIGNALÉ » COMMITÉ SUR `main`, NON POUSSÉ ; EN LIGNE : TOUJOURS 1.228.0**
+
+**Porte** : décision de Grégoire de 22 h 55, verdict `VERDICT-RELECTURE-2026-10-30-orange-brule-et-passage-symetrique.md` (3590d5f1 accepté). Rapport : `plans de travail/RAPPORT-2026-10-30-jaune-signale.md`. Sans release, à la demande de Grégoire.
+
+**Attend** : la relecture de Cowork, la validation des mots par Grégoire (réglage des barres, aide du seuil), puis le verdict complet du Mac, Cowork fermé. Vitest entier vert (10 534) ; seules les specs WebKit touchées ont tourné (8/8).
+
 ## 30 OCT. 2026, 22 H 50 (Claude Code) : **L'ORANGE BRÛLÉ ET LE PASSAGE SYMÉTRIQUE COMMITÉS SUR `main`, NON POUSSÉS ; EN LIGNE : TOUJOURS 1.228.0**
 
 **Porte** : `CONSIGNE-LOT-2026-10-30-orange-brule-et-passage-symetrique.md`. Rapport : `plans de travail/RAPPORT-2026-10-30-orange-brule-et-passage-symetrique.md`. Sans release, à la demande de Grégoire.

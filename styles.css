@@ -67,6 +67,11 @@
     --zone-bas-pastille-texte: #FF9A5C;
     --zone-bas-pastille-fond: rgba(204, 85, 0, 0.3);
 
+    /* La zone « signalée » : un jaune que l'orange ne rejoint pas pour les daltonismes rouge-vert. Les barres : #ffc107 (`COULEUR_BANDE`). */
+    --zone-signale-texte: #facc15;
+    --zone-signale-pastille-texte: #ffe082;
+    --zone-signale-pastille-fond: rgba(220, 160, 20, 0.2);
+
     /* Couleurs sarcelle/teal (palette ocean-native, utilisée en mode Démo) */
     --sarcelle-principal: #1a4a5e;
     --sarcelle-fonce: #0c1a22;
@@ -630,6 +635,11 @@ body.mode-clair[data-mode="anonymisation"] .sous-navigation button:hover {
     --zone-bas-texte: #A84400;
     --zone-bas-pastille-texte: #943C00;
     --zone-bas-pastille-fond: rgba(204, 85, 0, 0.14);
+
+    /* La zone « signalée » : ici, c'est le fond de la pastille qui la sépare de l'orange */
+    --zone-signale-texte: #ca8a04;
+    --zone-signale-pastille-texte: #5f5200;
+    --zone-signale-pastille-fond: rgba(250, 204, 21, 0.45);
 
     /* IDME — teintes plus foncées pour contraste sur fond blanc */
     --idme-etendu: #1E88E5;
@@ -13217,8 +13227,8 @@ label:has(+ textarea:disabled) {
 }
 
 .prioritaire-indice-attention {
-    background: rgba(220, 160, 20, 0.2);
-    color: #f0c060;
+    background: var(--zone-signale-pastille-fond);
+    color: var(--zone-signale-pastille-texte);
 }
 
 /* BETA 96.1: Bulle de niveau dans les tableaux avec effet 3D
@@ -26116,8 +26126,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 .mode-clair .prioritaire-indice-attention {
-    background: rgba(200, 140, 0, 0.12);
-    color: #906000;
+    background: var(--zone-signale-pastille-fond);
+    color: var(--zone-signale-pastille-texte);
 }
 
 /* ===============================
@@ -26140,6 +26150,9 @@ body.planif-plein-ecran-actif #planif-guide-panel {
         --zone-bas-texte: #A84400;
         --zone-bas-pastille-texte: #943C00;
         --zone-bas-pastille-fond: rgba(204, 85, 0, 0.14);
+        --zone-signale-texte: #ca8a04;
+        --zone-signale-pastille-texte: #5f5200;
+        --zone-signale-pastille-fond: rgba(250, 204, 21, 0.45);
     }
 
     body {

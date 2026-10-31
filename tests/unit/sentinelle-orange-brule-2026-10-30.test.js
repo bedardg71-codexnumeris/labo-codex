@@ -129,10 +129,8 @@ describe('(c) ce qui ne change pas', () => {
         for (const m of CSS.matchAll(/[^\n]*badge-rai-3[^{]*\{[^}]*\}/g)) expect(m[0]).not.toContain('--zone-bas');
     });
 
-    it('le jaune « signalé » attend la décision de Grégoire', () => {
-        const win = banc();
-        expect(win.obtenirCouleurSelonSeuils(86)).toBe('#ca8a04');
-        expect(win.zonesDeLaBarre('A')[1].couleur).toBe('#ffc107');
+    it('le jaune des barres ne bouge pas : la décision du jaune (sentinelle-jaune-signale-2026-10-30.test.js) ne touche que le texte et les pastilles', () => {
+        expect(banc().zonesDeLaBarre('A')[1].couleur).toBe('#ffc107');
     });
 });
 
