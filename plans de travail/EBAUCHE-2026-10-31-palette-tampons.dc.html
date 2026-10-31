@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Palette Tampons proposée</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#2b5fb3}a:hover{color:#1d4688}
+</style>
+</helmet>
+<div style="width: 480px; height: 1000px; box-sizing: border-box; padding: 40px; background: #55657e; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color: #1a1a2e;">
+<div style="width: 400px; background: #e9f1fb; border: 2px solid #c6d6ea; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.25);">
+
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 2px solid #c6d6ea;">
+<div style="display: flex; align-items: center; gap: 14px; color: #1a1a2e;">
+<span style="font-size: 22px; font-weight: 700; letter-spacing: 2px; color: #4a4f5c;"><span style="color: #8b93a3; margin-right: 12px;">⠿</span>TAMPONS</span>
+<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true" fill="currentColor"><path d="M13.5,5l-0.43-2.582C13.029,2.177,12.821,2,12.576,2h-1.153c-0.244,0-0.453,0.177-0.493,0.418L10.5,5H13.5z"/><path d="M10.5,19l0.43,2.582C10.971,21.823,11.179,22,11.424,22h1.153c0.244,0,0.453-0.177,0.493-0.418L13.5,19H10.5z"/><path d="M19,13.5l2.582-0.43C21.823,13.029,22,12.821,22,12.576v-1.153c0-0.244-0.177-0.453-0.418-0.493L19,10.5V13.5z"/><path d="M5,10.5l-2.582,0.43C2.177,10.971,2,11.179,2,11.424v1.153c0,0.244,0.177,0.453,0.418,0.493L5,13.5V10.5z"/><path d="M9.799,5.188L8.135,3.167C7.98,2.978,7.711,2.929,7.499,3.052L6.501,3.628C6.289,3.75,6.197,4.008,6.283,4.236l0.918,2.451L9.799,5.188z"/><path d="M14.201,18.812l1.664,2.021c0.155,0.189,0.424,0.237,0.636,0.115l0.998-0.576c0.212-0.122,0.304-0.38,0.218-0.608l-0.918-2.451L14.201,18.812z"/><path d="M18.812,9.799l2.021-1.664c0.189-0.155,0.237-0.424,0.115-0.636l-0.576-0.998c-0.122-0.212-0.38-0.304-0.608-0.218l-2.451,0.918L18.812,9.799z"/><path d="M5.188,14.201l-2.021,1.664c-0.189,0.155-0.237,0.424-0.115,0.636l0.576,0.998c0.122,0.212,0.38,0.304,0.608,0.218l2.451-0.918L5.188,14.201z"/><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+</div>
+<div style="display: flex; align-items: center; gap: 22px; font-size: 28px; color: #4a4f5c;"><span>↔</span><span>↕</span><span style="font-size: 30px;">−</span></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 18px 16px 20px;">
+
+<button onClick="{{basculerAction}}" aria-expanded="{{actionOuvert}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: none; background: transparent; font-family: inherit; cursor: pointer; text-align: left;"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" style="transform: rotate({{rotAction}}deg); transition: transform 0.15s;"><path d="M 7 4 L 13 10 L 7 16" fill="none" stroke="#555566" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width: 16px; height: 16px; border-radius: 4px; background: #3f7fe6;"></span><span style="font-size: 20px; letter-spacing: 2px; color: #555566;">ACTION</span><sc-if value="{{actionFerme}}" hint-placeholder-val="{{true}}"><span style="font-size: 18px; color: #8b93a3; margin-left: 4px;">6 tampons</span></sc-if></button>
+<sc-if value="{{actionOuvert}}" hint-placeholder-val="{{false}}">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; border-radius: 12px; overflow: hidden; background: #d5e0ec;">
+<button aria-label="Repérage" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/0f57e76307c4ee007fbed8a03e5e2750" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Repérage</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">R</span></button>
+<button aria-label="Liaison" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/c3ddf4d1b7140b576cf2339b4c96f04b" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Liaison</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">L</span></button>
+<button aria-label="Ouverture" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/569af1e6c185e1b2c4d1338849bc9303" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ouverture</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">O</span></button>
+<button aria-label="Incertain" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/1ebace0bcd721ee57949496a158f7eb5" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Incertain</span></button>
+<button aria-label="Incomplet" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/c5f0b342dc63b947932fe7ae9090546f" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Incomplet</span></button>
+<button aria-label="Inexact" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/4ac5e392510357ad95dfaef04cffdcd0" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Inexact</span></button>
+</div>
+</sc-if>
+
+<button onClick="{{basculerObs}}" aria-expanded="{{obsOuvert}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 6px; padding: 0; border: none; background: transparent; font-family: inherit; cursor: pointer; text-align: left;"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" style="transform: rotate({{rotObs}}deg); transition: transform 0.15s;"><path d="M 7 4 L 13 10 L 7 16" fill="none" stroke="#555566" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="width: 16px; height: 16px; border-radius: 4px; background: #7b3fb3;"></span><span style="font-size: 20px; letter-spacing: 2px; color: #555566;">OBSERVATIONS</span><sc-if value="{{obsFerme}}" hint-placeholder-val="{{false}}"><span style="font-size: 18px; color: #8b93a3; margin-left: 4px;">14 tampons</span></sc-if></button>
+<sc-if value="{{obsOuvert}}" hint-placeholder-val="{{true}}">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; border-radius: 12px; overflow: hidden; background: #d5e0ec;">
+<button aria-label="HOC" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/44d725d0aafe235ebd7b7d48478260b7" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">HOC</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">H</span></button>
+<button aria-label="Mécanisme" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/5a28a82a6bbfd6c3cc567ff63e124cf8" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Mécanisme</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">M</span></button>
+<button aria-label="Procédé" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/ba4ee4214957a5c5cc3ec77a9ac2ecd3" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Procédé</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">P</span></button>
+<button aria-label="Relation" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #2b5fb3; color: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/e802791ef7989d818f563878d29ef821" alt="" style="width: 50px; height: 50px; filter: invert(1);"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Relation</span></button>
+<button aria-label="Rupture" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/8afc34d4761d38a9b5e2b246edd60fd3" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Rupture</span></button>
+<button aria-label="Approfondir" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/b266f56a1ceb571f7d5f4264a91e2d51" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Approfondir</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">A</span></button>
+<button aria-label="Confusion" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/98f7d762313a29741ca784dfed62fe05" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Confusion</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">C</span></button>
+<button aria-label="Détour" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/419b61b3e6a734dfdcc03a6b24ff3172" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Détour</span></button>
+<button aria-label="Répétition" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/75a5be071fcba1c7b6dd87ae0a28851e" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Répétition</span></button>
+<button aria-label="Sans preuve" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/5e685b0423171d6101b3c505c9dd9219" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Sans preuve</span></button>
+<button aria-label="Intégration" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/835ea43710eddcbfc0b54644cf49c061" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Intégration</span><span style="position: absolute; top: 6px; right: 6px; font-family: ui-monospace, Menlo, monospace; font-size: 16px; padding: 1px 6px; border-radius: 6px; background: #e3e7ee; color: #5b6270;">I</span></button>
+<button aria-label="Soupçon IA" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/26b46295708f414aadd8cb7f8d6efc1f" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Soupçon IA</span></button>
+<button aria-label="Attention" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><img src="/_blob/2a8a6ee3ce5802730c82285de0a13eb4" alt="" style="width: 50px; height: 50px;"><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Attention</span></button>
+<button aria-label="À réviser" style="position: relative; height: 96px; padding: 8px 4px; border: none; background: #ffffff; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-family: inherit;"><svg viewBox="0 0 50 50" width="50" height="50" aria-hidden="true"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="6 5"/></svg><span style="font-size: 19px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">À réviser</span></button>
+<div style="background: #ffffff;"></div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":480,"height":1000}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { actionOuvert: false, obsOuvert: true };
+}
+renderVals() {
+const a = this.state.actionOuvert;
+const o = this.state.obsOuvert;
+return {
+actionOuvert: a,
+actionFerme: !a,
+obsOuvert: o,
+obsFerme: !o,
+rotAction: a ? 90 : 0,
+rotObs: o ? 90 : 0,
+basculerAction: () => this.setState({ actionOuvert: !this.state.actionOuvert }),
+basculerObs: () => this.setState({ obsOuvert: !this.state.obsOuvert })
+};
+}
+}
+</script>
+</body>
+</html>

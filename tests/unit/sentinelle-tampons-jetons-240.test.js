@@ -41,10 +41,14 @@ class ImageStub {
     removeEventListener() {}
 }
 
+const evenements = [];
+
 function chargerTravauxOutils() {
     // travaux-outils.js fait `window.addEventListener('db-ready', ...)` au top-level :
     // on fournit un window pré-amorcé (sandbox réutilisable de chargerScript).
-    const fauxWindow = { addEventListener: () => {}, removeEventListener: () => {} };
+    // #1209 (31 oct. 2026) : choisir un tampon émet désormais `travaux-outil-change`. Banc réancré : `dispatchEvent`
+    // ajouté, et les événements gardés, pour que l'essai ci-dessous juge aussi l'émission.
+    const fauxWindow = { addEventListener: () => {}, removeEventListener: () => {}, dispatchEvent: (e) => { evenements.push(e.type); } };
     return chargerScript('js/travaux-outils.js', { db: dbStub, Image: ImageStub }, fauxWindow);
 }
 
@@ -89,8 +93,10 @@ describe('#240 — catalogue AUTOCOLLANTS : tampons texte de jeton', () => {
 
     it('activerTamponJeton(jetonType) sélectionne le bon autocollant (mode tampon)', () => {
         TROIS_JETONS.forEach((j) => {
+            evenements.length = 0;
             outils.travauxOutils.activerTamponJeton(j.jetonType);
             expect(outils.travauxOutils.getAutocollantActif()).toBe(j.id);
+            expect(evenements).toEqual(['travaux-outil-change']);
         });
     });
 

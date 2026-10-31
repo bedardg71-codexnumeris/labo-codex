@@ -474,18 +474,13 @@
         autocollantActif = id;
         outilActif = 'tampon';
 
-        // Mettre a jour le curseur avec l'image du tampon
-        const canvas = document.getElementById('travaux-canvas-annotation');
-        if (canvas) canvas.style.cursor = genererCurseurTampon(id);
-
-        // Feedback visuel sur l'item selectionne dans la palette tampons
-        const items = document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item');
-        items.forEach(item => item.classList.remove('actif'));
-        const actif = document.querySelector(`#travaux-palette-tampons .travaux-autocollant-item[onclick*="'${id}'"]`);
-        if (actif) actif.classList.add('actif');
-
-        // Mettre a jour l'etat visuel de la palette annotation
-        rafraichirPalette();
+        // #1209 (rapport de Grégoire, 29 oct., iPad) : sans cet événement, le canevas d'annotation restait en
+        // `pointer-events: none` après l'outil `position`, et le premier toucher tombait sur le document.
+        // `getOutilActif` rend le stylo pour un tampon : c'est ce que les écouteurs doivent voir
+        // (canevas actif, page non déplaçable). Le curseur et la tuile suivent, par `rafraichirPalette`.
+        window.dispatchEvent(new CustomEvent('travaux-outil-change', {
+            detail: { outil: getOutilActif() }
+        }));
     }
 
     function getAutocollantActif() {
@@ -1661,12 +1656,7 @@
                 slider.max = OUTILS[id].epaisseurMax;
                 slider.value = epaisseurActive;
             }
-            // Feedback visuel sur la palette tampons (symboles crochet/croix/interrogation)
-            const items = document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item');
-            items.forEach(item => item.classList.remove('actif'));
-            const actif = document.querySelector(`#travaux-palette-tampons .travaux-autocollant-item[onclick*="'${id}'"]`);
-            if (actif) actif.classList.add('actif');
-            // Notifier le changement
+            // Notifier le changement (la tuile active suit, par `rafraichirPalette`)
             window.dispatchEvent(new CustomEvent('travaux-outil-change', {
                 detail: { outil: OUTILS[id] }
             }));
@@ -2093,6 +2083,13 @@
                 item.classList.toggle('actif', item.dataset.param === outilActif);
             });
         }
+
+        // Tampons — sélection visuelle. #1209 : les tuiles portent `data-param` depuis le retrait des handlers
+        // en ligne ; l'ancien motif `onclick` ne trouvait plus rien, et le tampon choisi n'était jamais surligné.
+        const idTuileActive = outilActif === 'tampon' ? autocollantActif : outilActif;
+        document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item').forEach(item => {
+            item.classList.toggle('actif', item.dataset.param === idTuileActive);
+        });
 
         // Options extrémités : afficher/masquer selon outil actif + maj boutons pointes
         const sectionFleche = document.getElementById('travaux-options-fleche');
