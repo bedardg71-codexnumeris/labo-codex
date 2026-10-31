@@ -1679,9 +1679,8 @@ function identifierDefiSpecifique(da) {
  * @param {boolean} aUnDefi - True si un défi est identifié
  * @returns {string} - Pattern: 'Difficulté persistante', 'Difficulté émergente', 'Défi spécifique', 'Stable'
  */
-function identifierPatternActuel(performancePAN3, aUnDefi) {
+function identifierPatternActuel(performancePAN3, aUnDefi, bornes = window.bornesDepistage()) {
     // Les repères de l'échelle de l'enseignant (30 oct. 2026) : `maitrise` vaut null quand il n'est pas posé.
-    const bornes = window.bornesDepistage();
 
     // Difficulté persistante : sous le repère de suffisance (ou sous la note de passage, sans ce repère)
     if (performancePAN3 < bornes.bas) {
@@ -1890,37 +1889,6 @@ function _niveauFixeParLeDiagnostic(da) {
     return niveaux.length ? Math.max(...niveaux) : null;
 }
 
-/**
- * Les groupes-cours à l'écran dont la moyenne des notes provisoires affichées est sous la ligne. Une phrase pour le
- * niveau universel, en attendant « la réponse du groupe » ; elle n'enlève aucun signal individuel. Les élèves exclus
- * par statut n'y entrent pas (#745). `groupe` : le numéro, seulement quand l'écran montre plusieurs groupes.
- * @returns {Array<{groupe:(string|null), moyenne:number, ligne:number}>}
- */
-function signauxDeGroupeDepistage() {
-    const ligne = window.ligneDeReussite();
-    // Un service n'a qu'un groupe, quel que soit le numéro porté par ses fiches (cadrage « Rencontres », lot A).
-    const estUnService = typeof contexteActifEstService === 'function' && contexteActifEstService();
-    const normaliser = window.normaliserNumeroGroupe || String;
-    const groupeDe = (e) => estUnService ? 'service' : normaliser(e.groupeReel || e.groupe);
-    const etudiants = obtenirEtudiantsCoursActif();
-    const aLEcran = new Set(etudiants.map(groupeDe));
-
-    const notesParGroupe = new Map();
-    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
-    try {
-        etudiants.filter((e) => !estEtudiantExclu(e)).forEach((e) => {
-            const note = noteDuCoursAffichee(e.da, calculerTousLesIndices(e.da));
-            if (note === null) return;
-            notesParGroupe.set(groupeDe(e), (notesParGroupe.get(groupeDe(e)) || []).concat(note));
-        });
-    } finally {
-        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
-    }
-    return [...notesParGroupe.entries()]
-        .map(([groupe, notes]) => ({ groupe: aLEcran.size > 1 ? groupe : null, moyenne: notes.reduce((a, b) => a + b, 0) / notes.length, ligne }))
-        .filter((s) => s.moyenne < ligne);
-}
-
 const DESCRIPTION_DU_MOTIF = {
     'sous-la-ligne-fondation': 'Note du cours à ce jour sous le seuil minimal de réussite, avec une difficulté sur un critère de fondation.',
     'sous-la-ligne': 'Note du cours à ce jour sous le seuil minimal de réussite.',
@@ -1945,9 +1913,10 @@ const BADGE_DU_PATTERN = {
  * Détermine le niveau de la Réponse à l'intervention (RàI) : la note provisoire et la trajectoire de l'élève,
  * devant le seuil minimal de réussite (voir le bloc ci-dessus). Sans tenir compte de la mobilisation A-C.
  * @param {string} da - Numéro de DA
- * @returns {Object} - Modèle de la Réponse à l'intervention (RàI) avec pattern et descriptif
+ * @param {number} [ligneSimulee] - 0-100 : ce que donnerait ce seuil s'il était posé dans l'échelle (la sensibilité du réglage)
+ * @returns {Object} - Modèle de la Réponse à l'intervention (RàI) avec pattern et descriptif ; `motif` et `noteAffichee` : ce qui le fixe
  */
-function determinerNiveauRaiPedagogique(da) {
+function determinerNiveauRaiPedagogique(da, ligneSimulee) {
     // Récupérer les indices
     const indices = calculerTousLesIndices(da);
 
@@ -1981,8 +1950,8 @@ function determinerNiveauRaiPedagogique(da) {
         return _niveauNonParticipation(fenetreAnalyse);
     }
 
-    const besoin = sansCopie ? _besoinSansCopie() : _besoinDesCopies(indices3Derniers, diagnostic);
-    const ligne = window.ligneDeReussite();
+    const ligne = ligneSimulee ?? window.ligneDeReussite();
+    const besoin = sansCopie ? _besoinSansCopie() : _besoinDesCopies(indices3Derniers, diagnostic, _bornesDeLaLecture(ligneSimulee));
     const note = noteDuCoursAffichee(da, indices);
     const { niveau, motif } = classerNiveauAuCritere({
         note,
@@ -1993,15 +1962,90 @@ function determinerNiveauRaiPedagogique(da) {
         niveauDiagnostic: note === null ? _niveauFixeParLeDiagnostic(da) : null
     });
 
+    const noteAffichee = note !== null;
     if (niveau === 0) {
-        return { niveau: 0, label: 'En attente', ...besoin, description: _descriptionEnAttente(sansCopie, copies), badgeClasse: 'badge-attente', donneesSuffisantes: false, fenetreAnalyse };
+        return { niveau: 0, motif, noteAffichee, label: 'En attente', ...besoin, description: _descriptionEnAttente(sansCopie, copies), badgeClasse: 'badge-attente', donneesSuffisantes: false, fenetreAnalyse };
     }
-    return { niveau, label: AFFICHAGE_DU_NIVEAU[niveau].label, ...besoin, description: DESCRIPTION_DU_MOTIF[motif], badgeClasse: AFFICHAGE_DU_NIVEAU[niveau].badgeClasse, fenetreAnalyse };
+    return { niveau, motif, noteAffichee, label: AFFICHAGE_DU_NIVEAU[niveau].label, ...besoin, description: DESCRIPTION_DU_MOTIF[motif], badgeClasse: AFFICHAGE_DU_NIVEAU[niveau].badgeClasse, fenetreAnalyse };
+}
+
+/* ===============================
+   LA RÉPONSE DU GROUPE — décisions de Grégoire, 30 et 31 oct. 2026
+   Consigne : plans de travail/CONSIGNE-LOT-2026-10-30-reponse-du-groupe.md.
+   Une lecture de la répartition, activée par l'enseignant·e : elle ne change le niveau de personne.
+   =============================== */
+
+/**
+ * La répartition, sans lecture du stockage. « En attente » reste hors des pourcentages, compté à part.
+ * @param {Array<{niveau:(0|1|2|3), noteAffichee:boolean}>} lectures
+ * @returns {{comptes:Object, classes:number, enAttente:number, parts:Object, aUneNote:boolean}} `parts` : 0-100, non arrondies
+ */
+function repartitionDuGroupe(lectures) {
+    const comptes = { 1: 0, 2: 0, 3: 0 };
+    lectures.forEach((l) => { if (l.niveau) comptes[l.niveau]++; });
+    const classes = comptes[1] + comptes[2] + comptes[3];
+    const part = (n) => (classes ? n / classes * 100 : 0);
+    return {
+        comptes,
+        classes,
+        enAttente: lectures.length - classes,
+        parts: { 1: part(comptes[1]), 2: part(comptes[2]), 3: part(comptes[3]) },
+        // Sans note affichée, personne ne peut être au niveau 1 : la part au niveau 1 ne dirait rien du groupe.
+        aUneNote: lectures.some((l) => l.noteAffichee)
+    };
+}
+
+/** Les étudiant·es qui attendent la note : une phrase, dans la carte de l'Aperçu et dans le réglage. */
+function phraseEnAttenteDeLaNote(n) {
+    return n > 1
+        ? `${n} étudiant·es en attente de la note du cours, hors des pourcentages.`
+        : '1 étudiant·e en attente de la note du cours, hors des pourcentages.';
+}
+
+/**
+ * Ce que le seuil posé donne sur le groupe à l'écran : la répartition, d'où viennent les niveaux 2 et 3, et ce que
+ * donnerait le seuil à 5 points au-dessus et au-dessous. Rien n'y propose un seuil. Les exclus par statut n'y entrent pas (#745).
+ */
+function ceQueTesSeuilsDonnent() {
+    const etudiants = obtenirEtudiantsCoursActif().filter((e) => !estEtudiantExclu(e));
+    const ligne = window.ligneDeReussite();
+    if (typeof demarrerCacheLecture === 'function') demarrerCacheLecture();
+    try {
+        const lectures = etudiants.map((e) => determinerNiveauRaiPedagogique(e.da));
+        const sources = { 2: {}, 3: {} };
+        lectures.filter((l) => l.niveau >= 2).forEach((l) => {
+            sources[l.niveau][l.motif] = (sources[l.niveau][l.motif] || 0) + 1;
+        });
+        const signales = (seuil) => etudiants.filter((e) => determinerNiveauRaiPedagogique(e.da, seuil).niveau >= 2).length;
+        const signalesAuSeuil = lectures.filter((l) => l.niveau >= 2).length;
+        const haut = Math.min(100, ligne + 5);
+        const bas = Math.max(0, ligne - 5);
+        return {
+            ...repartitionDuGroupe(lectures),
+            effectif: etudiants.length,
+            ligne,
+            sources,
+            sensibilite: {
+                haut: { seuil: haut, dePlus: signales(haut) - signalesAuSeuil },
+                bas: { seuil: bas, deMoins: signalesAuSeuil - signales(bas) }
+            }
+        };
+    } finally {
+        if (typeof terminerCacheLecture === 'function') terminerCacheLecture();
+    }
+}
+
+/** Les bornes de l'échelle ; ou, pour la sensibilité du réglage, le seuil simulé à la place du repère de suffisance. */
+function _bornesDeLaLecture(ligneSimulee) {
+    const bornes = window.bornesDepistage();
+    return typeof ligneSimulee === 'number' ? { ...bornes, bas: ligneSimulee / 100 } : bornes;
 }
 
 function _niveauNonParticipation(fenetreAnalyse) {
     return {
         niveau: 3,
+        motif: 'non-participation',
+        noteAffichee: false,
         label: 'Non-participation',
         pattern: 'Non-participation',
         defi: 'Aucun',
@@ -2019,8 +2063,8 @@ function _besoinSansCopie() {
 }
 
 /** Le pattern nomme le besoin, sur les N derniers artefacts. */
-function _besoinDesCopies(indices3Derniers, diagnostic) {
-    const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null);
+function _besoinDesCopies(indices3Derniers, diagnostic, bornes) {
+    const pattern = identifierPatternActuel(indices3Derniers.performance, diagnostic.principalDefi !== null, bornes);
     return {
         pattern,
         defi: diagnostic.principalDefi?.nom || 'Aucun',
@@ -2332,7 +2376,9 @@ window.identifierDefiSpecifique = identifierDefiSpecifique;
 window.identifierPatternActuel = identifierPatternActuel;
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
 window.classerNiveauAuCritere = classerNiveauAuCritere;         // lot 3 des seuils : la règle nue
-window.signauxDeGroupeDepistage = signauxDeGroupeDepistage;     // la phrase sous la barre RàI
+window.repartitionDuGroupe = repartitionDuGroupe;               // la carte « La réponse du groupe »
+window.ceQueTesSeuilsDonnent = ceQueTesSeuilsDonnent;           // Labo › Outils d'observation
+window.phraseEnAttenteDeLaNote = phraseEnAttenteDeLaNote;
 window.noteDuCoursAffichee = noteDuCoursAffichee;               // la carte RàI lit la même note affichée que le niveau
 window.determinerAlerteContextuelle = determinerAlerteContextuelle;
 window.libelleNiveauSOLO = libelleNiveauSOLO;

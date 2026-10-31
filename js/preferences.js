@@ -67,6 +67,8 @@
         // L'axe des barres A et C de l'Aperçu (30 oct. 2026) : 'proportionnel' ou 'deuxSegments'.
         // Préférence neuve : absente, elle vaut le défaut ; écrite seulement au geste (`sauvegarderAxeBarresV2`).
         axeBarresApercu: 'proportionnel',
+        // La réponse du groupe (30 oct. 2026) : éteinte au départ. Absente, elle vaut le défaut ; écrite seulement au geste.
+        afficherReponseDuGroupe: false,
         afficherDeveloppementHabiletes: true,
         afficherContexteGraphiques: true,
         // #1149, lot 3a (24 oct. 2026) : les chaînes d'étapes en tête des outils (Trimestre, Grilles…).

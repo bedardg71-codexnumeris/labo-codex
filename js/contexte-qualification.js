@@ -267,6 +267,13 @@ function ligneDeReussite(reperes) {
 }
 
 /**
+ * La réponse du groupe (décisions de Grégoire, 30 oct. 2026) : le repère de la RàI, et la part au niveau 1 sous laquelle
+ * la carte dit qu'il faut renforcer l'enseignement universel. Lue par la carte de l'Aperçu et par l'Aide.
+ */
+const SEUIL_NIVEAU_1_REPONSE_DU_GROUPE = 70;
+const REPERE_RAI_DU_GROUPE = Object.freeze({ 1: 80, 2: 15, 3: 5 });
+
+/**
  * Les deux bornes du dépistage, en proportions 0-1 : `bas` (sous le repère de suffisance, ou sous la
  * note de passage quand il n'est pas posé) et `maitrise` (null quand il n'est pas posé : le test
  * « sous la maîtrise » n'existe alors pas, puisque l'échelle ne dit pas où elle commence).
@@ -457,6 +464,11 @@ function brancheMobilisation(A, C) {
  */
 function remplirAideSeuilsDeDepart(racine) {
     const doc = racine || (typeof document !== 'undefined' ? document : null);
+    if (doc) {
+        doc.querySelectorAll('[data-seuil-reponse-groupe]').forEach((el) => {
+            el.textContent = formaterPourcentage(SEUIL_NIVEAU_1_REPONSE_DU_GROUPE);
+        });
+    }
     if (!doc || !window.SEUILS_PAR_DEFAUT) return;
     const d = window.SEUILS_PAR_DEFAUT.interpretation;
     const pct = (p) => Math.round(p * 100);
@@ -520,6 +532,8 @@ window.zonePerformance = zonePerformance;
 window.borneBassePerformance = borneBassePerformance;
 window.bornesDepistage = bornesDepistage;
 window.ligneDeReussite = ligneDeReussite;
+window.SEUIL_NIVEAU_1_REPONSE_DU_GROUPE = SEUIL_NIVEAU_1_REPONSE_DU_GROUPE;
+window.REPERE_RAI_DU_GROUPE = REPERE_RAI_DU_GROUPE;
 window.classePastilleDeLaZone = classePastilleDeLaZone;
 window.obtenirCouleurSelonSeuils = obtenirCouleurSelonSeuils;
 window.obtenirCouleurPerformanceSelonEchelle = obtenirCouleurPerformanceSelonEchelle;

@@ -1631,16 +1631,8 @@ function genererInterpretationRai(rai, totalEtudiants) {
     const pctNiveau2 = Math.round((niveau2 / totalEtudiants) * 100);
     const pctNiveau3 = Math.round((niveau3 / totalEtudiants) * 100);
 
-    // Lot 3 des seuils (30 oct. 2026) : en attendant « la réponse du groupe », la moyenne des notes provisoires du groupe
-    // sous la ligne dit l'enseignement universel. Elle s'ajoute aux signaux individuels, elle n'en enlève aucun.
     let interpretation = '';
-    const signaux = typeof signauxDeGroupeDepistage === 'function' ? signauxDeGroupeDepistage() : [];
-    signaux.forEach(signal => {
-        const nom = signal.groupe ? `du groupe ${echapperHtml(signal.groupe)}` : 'du groupe';
-        interpretation += `La moyenne ${nom}, pour la note du cours à ce jour (${formaterPourcentage(signal.moyenne, 1)}), est sous le seuil minimal de réussite (${formaterPourcentage(signal.ligne)}) : c'est l'enseignement universel qu'il faut renforcer, pour tous. `;
-    });
-
-    // Compléter avec Niveau 2 et 3
+    // Les signaux individuels. La lecture du groupe, elle, attend que l'enseignant·e l'active (`genererCarteReponseDuGroupe`).
     if (niveau2 > 0) {
         interpretation += `${niveau2} étudiants (${formaterPourcentage(pctNiveau2)}) nécessitent des interventions préventives ciblées. `;
     }
@@ -1655,6 +1647,59 @@ function genererInterpretationRai(rai, totalEtudiants) {
     }
 
     return interpretation;
+}
+
+/** Une barre de la carte : les trois niveaux, séparés, et leurs parts à côté. Un niveau vide n'a pas de segment. */
+function _ligneDeLaReponseDuGroupe(titre, parts, classe) {
+    const niveaux = [1, 2, 3];
+    const lues = niveaux.map((n) => formaterPourcentage(Math.round(parts[n])));
+    const segments = niveaux.filter((n) => parts[n] > 0)
+        .map((n) => `<span class="reponse-groupe-segment reponse-groupe-niveau-${n}" style="width: ${parts[n]}%;" title="Niveau ${n}\u00a0: ${lues[n - 1]}"></span>`)
+        .join('');
+    const description = niveaux.map((n) => `niveau ${n}, ${lues[n - 1]}`).join(' ; ');
+    return `
+        <div class="reponse-groupe-ligne">
+            <span class="reponse-groupe-titre-ligne">${titre}</span>
+            <div class="reponse-groupe-barre${classe}" role="img" aria-label="${titre}\u00a0: ${description}">${segments}</div>
+            <span class="reponse-groupe-parts">${lues.join(' · ')}</span>
+        </div>`;
+}
+
+/**
+ * La carte « La réponse du groupe » : rien tant que l'enseignant·e ne l'a pas activée. Décisions de Grégoire, 30 et 31 oct. 2026.
+ * @param {Array<{niveau:(0|1|2|3), noteAffichee:boolean}>} lectures - le groupe de la barre RàI
+ * @returns {string} HTML
+ */
+function genererCarteReponseDuGroupe(lectures) {
+    if (obtenirPreference('afficherReponseDuGroupe') !== true || lectures.length === 0) return '';
+    const r = repartitionDuGroupe(lectures);
+    const attente = r.enAttente > 0
+        ? `<p class="reponse-groupe-note">${phraseEnAttenteDeLaNote(r.enAttente)}</p>`
+        : '';
+    let corps;
+    if (!r.aUneNote) {
+        // Avant toute note, seuls les signaux ont un niveau : la part au niveau 1 vaudrait 0, quel que soit le groupe.
+        corps = '<p class="reponse-groupe-note">La note du cours ne s\'affiche encore pour aucun·e étudiant·e : la comparaison attend.</p>';
+    } else {
+        const niveau1 = Math.round(r.parts[1]);
+        const sous = niveau1 < window.SEUIL_NIVEAU_1_REPONSE_DU_GROUPE;
+        const suite = sous
+            ? 'Ce groupe demande un enseignement universel renforcé, quelle qu\'en soit la cause : le parcours des étudiant·es, l\'enseignement, ou les deux.'
+            : 'La répartition est proche du repère de la RàI.';
+        corps = `
+            <div class="reponse-groupe-barres">
+                ${_ligneDeLaReponseDuGroupe('Ton groupe', r.parts, '')}
+                ${_ligneDeLaReponseDuGroupe('Repère de la RàI', window.REPERE_RAI_DU_GROUPE, ' reponse-groupe-barre-repere')}
+            </div>
+            <p class="reponse-groupe-message"><strong>${formaterPourcentage(niveau1)} de ton groupe est au niveau 1.</strong> ${suite}</p>
+            <p class="reponse-groupe-note">Le repère 80-15-5 est une heuristique de la RàI, pas une proportion mesurée au collégial. Il situe le groupe, il ne juge ni les étudiant·es ni l'enseignant·e.</p>`;
+    }
+    return `
+        <div class="reponse-groupe" data-reponse-groupe>
+            <h4 class="tb-titre-metrique">La réponse du groupe</h4>
+            ${corps}
+            ${attente}
+        </div>`;
 }
 
 /**
@@ -3215,6 +3260,7 @@ function afficherNiveauxRaI(etudiants) {
 
     const etudiantsSOM = [];
     const etudiantsPAN = [];
+    const lecturesDuGroupe = [];
 
     // Utiliser la même fonction pour SOM et PAN (niveau RàI pédagogique identique)
     // 🆕 BETA 98.9: Inclut tous les étudiants — non-participants classés Niveau 3
@@ -3224,6 +3270,7 @@ function afficherNiveauxRaI(etudiants) {
         etudiantsAvecDonneesCP.forEach(e => {
             const niveauInfo = determinerNiveauRaiPedagogique(e.da);
             const niveau = niveauInfo ? niveauInfo.niveau : null;
+            if (niveauInfo) lecturesDuGroupe.push(niveauInfo);
 
             if (niveau) {
                 const etudiantData = {
@@ -3276,6 +3323,7 @@ function afficherNiveauxRaI(etudiants) {
     const html = `
         <div class="barre-rai-container">
             ${genererBarreRaI(etudiantsSOM, etudiantsPAN, afficherSom, afficherPan, nbSansDonneesCP, nbTotal, infoFiabilite)}
+            ${genererCarteReponseDuGroupe(lecturesDuGroupe)}
         </div>
     `;
 

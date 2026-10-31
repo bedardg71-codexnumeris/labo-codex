@@ -7,6 +7,12 @@
 
 ---
 
+## 31 OCT. 2026 (Claude Code) : **LA RÉPONSE DU GROUPE COMMITÉE SUR `main`, NON POUSSÉE ; EN LIGNE : TOUJOURS 1.228.0**
+
+**Porte** : `CONSIGNE-LOT-2026-10-30-reponse-du-groupe.md`. Rapport : `plans de travail/RAPPORT-2026-10-31-reponse-du-groupe.md`. Sans release ni push, à la demande de Grégoire.
+
+**Attend** : la relecture de Cowork ; Grégoire : la part au niveau 1 pendant la montée des notes (A, B ou C, au rapport) et les mots de l'Aide, avant la release ; puis le verdict complet du Mac, Cowork fermé. Vitest entier vert (10 553) ; seules les specs WebKit touchées ont tourné (6/6).
+
 ## 30 OCT. 2026, 23 H 05 (Claude Code) : **LE JAUNE « SIGNALÉ » COMMITÉ SUR `main`, NON POUSSÉ ; EN LIGNE : TOUJOURS 1.228.0**
 
 **Porte** : décision de Grégoire de 22 h 55, verdict `VERDICT-RELECTURE-2026-10-30-orange-brule-et-passage-symetrique.md` (3590d5f1 accepté). Rapport : `plans de travail/RAPPORT-2026-10-30-jaune-signale.md`. Sans release, à la demande de Grégoire.
