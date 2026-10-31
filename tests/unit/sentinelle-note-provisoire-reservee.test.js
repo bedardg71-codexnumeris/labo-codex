@@ -30,7 +30,7 @@ const EXCEPTIONS = [
     { fichier: 'index.html', contient: '(en pratique alternative de notation, la note provisoire)', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/changelog-data.js', contient: 'en tête de sa rétroaction et sa note provisoire', nb: 1, motif: 'Nouvelles déjà publiées' },
     { fichier: 'js/changelog-data.js', contient: 'Le bloc «&nbsp;Note provisoire&nbsp;» y garde', nb: 1, motif: 'Nouvelles déjà publiées' },
-    { fichier: 'js/profil-etudiant-sections-affichage.js', contient: 'Note provisoire de session', nb: 2, motif: PRATIQUE_ALTERNATIVE },
+    { fichier: 'js/profil-etudiant-sections-affichage.js', contient: 'Note provisoire', nb: 3, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'index.html', contient: 'ou de « Note provisoire » (pratique alternative), et retire la liste', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/accompagnement-contenu-terme.js', contient: 'ou de « Note provisoire » (pratique alternative), et ne listent plus', nb: 1, motif: PRATIQUE_ALTERNATIVE },
     { fichier: 'js/synthese-retroaction-rendu.js', contient: 'Note provisoire', nb: 4, motif: PRATIQUE_ALTERNATIVE },
@@ -255,6 +255,13 @@ describe('#1207 — en sommative, « Note actuelle du cours » ; en pratique alt
         expect(carte.replace(/note-finale-message-provisoire/g, '')).not.toMatch(/provisoire/i);
     });
 
+    it('profil, standards (R5) : le mot des lignes de calcul suit la case, et aucune ligne ne l\'écrit en dur', () => {
+        expect(tranche(sections, 'function _motDeLaFormule(', '\n}\n')).toContain("details.estFinale ? 'Note finale' : 'Note provisoire'");
+        const carte = tranche(sections, 'function genererSectionProductions(', 'htmlNoteFinale = _genererNoteSessionSommative(da)').replace(/<!--[\s\S]*?-->/g, '').replace(/\/\/.*$/gm, '');
+        expect(carte).not.toMatch(/`Note finale (=|pondérée|\()/);
+        expect(carte.match(/\$\{_motDeLaFormule\(detailsNoteFinale\)\}/g)).toHaveLength(4);
+    });
+
     it('profil, standards : les deux cartes gardent « Note provisoire de session »', () => {
         const avantLaSommative = tranche(sections, 'function genererSectionProductions(', 'htmlNoteFinale = _genererNoteSessionSommative(da)');
         expect(avantLaSommative.match(/'Note provisoire de session'/g)).toHaveLength(2);
@@ -303,4 +310,6 @@ describe('Les mots qui la remplacent, aux surfaces du niveau RàI', () => {
  *   dans la spec WebKit 921, la formule revenue à provisoire : 1
  * Les relevés R1, R2 et R4 (31 oct. 2026), même méthode :
  *   ligne simple figée à « Note finale » : 2 ; ligne avec contributions figée à « Note finale » : 2 ; la case finale ignorée : 3 ; toujours « Note finale » : 4 ; sommative dite provisoire : 4 ; sommative au titre entier : 1 ; alternative dite actuelle : 4 ; réglage ancien : 3 ; réglage retouché : 1 ; glossaire ancien : 3 ; glossaire, le reste retouché : 1 ; export : « actuelle » en toutes pratiques : 1
+ * R5, le profil en standards (31 oct. 2026), même méthode, avec la spec WebKit profil-r5 :
+ *   le mot toujours « Note finale » : 2 Vitest, 4 WebKit ; le mot toujours « Note provisoire » : 1 Vitest, 4 WebKit ; la case inversée : 1 Vitest, 4 WebKit ; hybride, contributions en dur : 1 Vitest, 1 WebKit ; hybride, pondérée en dur : 1 Vitest, 1 WebKit ; classique, pondérée en dur : 1 Vitest, 1 WebKit ; classique, à 100 % en dur : 1 Vitest, 1 WebKit
  */
