@@ -20585,56 +20585,116 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 .travaux-autocollants-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+/* Le titre d'une catégorie la replie ou la déplie (consigne du 31 oct. 2026, partie D). */
+.tampons-categorie-titre {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 22px;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--gris-moyen);
+    font: inherit;
     font-size: 0.65rem;
     text-transform: uppercase;
-    color: var(--gris-moyen);
     letter-spacing: 0.5px;
-    margin-bottom: 4px;
-    margin-top: 8px;
-    width: 100%;
-    flex-basis: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+.tampons-categorie-fleche {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    transform: rotate(90deg);
+    transition: transform 0.15s;
+}
+.tampons-categorie.replie .tampons-categorie-fleche {
+    transform: none;
+}
+.tampons-categorie-carre {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+.tampons-categorie-nom {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tampons-categorie-compte {
+    display: none;
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+.tampons-categorie.replie .tampons-categorie-compte {
+    display: inline;
+}
+.tampons-categorie.replie .travaux-autocollants-grille,
+.tampons-categorie.replie .travaux-categorie-guide-btn {
+    display: none;
+}
+.tampons-categorie + .tampons-categorie {
+    margin-top: 4px;
 }
 
-.travaux-autocollants-label:first-child {
-    margin-top: 0;
-}
-
+/* Un bloc de tuiles soudées. Trois colonnes à la largeur de la palette ; davantage dans une palette élargie ou en
+   disposition horizontale, qui ne doit pas étirer trois tuiles sur tout l'écran. */
 .travaux-autocollants-grille {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
-    gap: 2px;
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+    gap: 1px;
+    margin-top: 2px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bordure-moyenne);
 }
 
 .travaux-autocollant-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 4px;
+    justify-content: center;
+    gap: 2px;
+    height: 48px;
+    padding: 4px 2px;
     cursor: pointer;
-    border-radius: var(--radius-moyen);
     min-width: 0;
+    background: var(--surface-carte);
 }
 
-.travaux-autocollants-grille--symboles {
-    /* hérite du flex-wrap de .travaux-autocollants-grille */
-}
 .travaux-autocollant-item:hover {
     background: var(--bleu-tres-pale);
 }
 .travaux-autocollant-item.actif {
-    background: var(--bleu-pale);
-    box-shadow: 0 0 0 2px var(--accent-primaire, #2196F3);
-    border-radius: var(--radius-moyen);
+    background: var(--bleu-clair);
+    color: white;
+}
+.travaux-autocollant-sans-image {
+    font-size: 24px;
+    opacity: 0.3;
 }
 
 .travaux-autocollant-item img {
-    width: 36px;
-    height: 36px;
+    width: 25px;
+    height: 25px;
     object-fit: contain;
     filter: invert(1);
 }
 .mode-clair .travaux-autocollant-item img {
     filter: none;
+}
+.mode-clair .travaux-autocollant-item.actif img {
+    filter: invert(1);
 }
 
 /* Palettes ancrées au bord (height explicite) : contenu prend tout l'espace */
@@ -20642,24 +20702,14 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     max-height: none;
 }
 
-/* Tampons dans palette flottante : images réduites aux 2/3 */
-.palette-flottante .travaux-autocollant-item img {
-    width: 24px;
-    height: 24px;
-}
-.palette-flottante .travaux-autocollant-item span {
-    font-size: 0.5rem;
-}
-
-.travaux-autocollant-item span {
-    font-size: 0.55rem;
+.travaux-autocollant-item span:last-child {
+    font-size: 0.6rem;
     text-align: center;
-    margin-top: 2px;
     line-height: 1.1;
-    max-width: 60px;
+    max-width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 /* --- Modal revision export --- */

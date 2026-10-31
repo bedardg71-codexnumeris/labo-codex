@@ -1480,72 +1480,97 @@
         var soloActif = (typeof obtenirPreference === 'function')
             && obtenirPreference('afficherDescriptionsSOLO') !== false;
 
-        // Helper: generer une grille de tampons image
-        function _htmlTamponsImage(categorie, coulCat) {
-            var r = '';
-            var borderStyle = '';
+        // Les tuiles d'une catégorie d'images
+        function _tuilesImage(categorie) {
+            var tuiles = [];
             obtenirAutocollantsOrdonnes(categorie).forEach(function(a) {
                 if (elemMasques.indexOf(a.id) !== -1) return;
                 var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
                 var actif = (getAutocollantActif() === a.id) ? ' actif' : '';
                 var racc = obtenirRaccourciPourItem(a.id);
-                r += '<div class="travaux-autocollant-item' + actif + '"' + (borderStyle ? ' style="' + borderStyle + '"' : '') + ' data-action="travauxOutils.setAutocollantActif" data-param="' + echapperHtml(a.id) + '" title="' + echapperHtml(a.nom) + (racc ? ' [' + racc + ']' : '') + '">';
+                var r = '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setAutocollantActif" data-param="' + echapperHtml(a.id) + '" title="' + echapperHtml(a.nom) + (racc ? ' [' + racc + ']' : '') + '">';
                 if (racc) r += '<span class="raccourci-badge raccourci-badge--coin">' + racc + '</span>';
                 if (imgSrc) {
                     r += '<img src="' + echapperHtml(imgSrc) + '" alt="' + echapperHtml(a.nom) + '">';
                 } else {
-                    r += '<span style="font-size:24px; opacity:0.3;">?</span>';
+                    r += '<span class="travaux-autocollant-sans-image">?</span>';
                 }
-                r += '<span>' + echapperHtml(a.nom) + '</span></div>';
+                tuiles.push(r + '<span>' + echapperHtml(a.nom) + '</span></div>');
             });
-            return r;
+            return tuiles;
+        }
+
+        // Les tuiles des symboles : crochet, croix, interrogation, ceux de l'enseignant·e, puis ses images
+        function _tuilesSymboles() {
+            var tuiles = [];
+            function tuile(id) {
+                var outil = OUTILS[id];
+                var actif = outilActif === id ? ' actif' : '';
+                tuiles.push('<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + echapperHtml(id) + '" title="' + echapperHtml(outil.nom) + '">'
+                    + '<span style="font-size:24px; color:' + echapperHtml(outil.couleurBouton) + '; font-weight:bold;">' + echapperHtml(outil.icone) + '</span>'
+                    + '<span>' + echapperHtml(outil.nom) + '</span></div>');
+            }
+            ['crochet', 'croix', 'interrogation'].forEach(function(id) {
+                if (elemMasques.indexOf(id) === -1) tuile(id);
+            });
+            obtenirSymbolesPerso().forEach(function(s) {
+                if (OUTILS[s.id]) tuile(s.id);
+            });
+            return tuiles.concat(_tuilesImage('symboles'));
         }
 
         // Generer les categories dans l'ordre personnalise
         var couleursCat = obtenirCouleursCategories();
+        var repliees = _categoriesTamponsRepliees();
         obtenirOrdreCategories().forEach(function(catId) {
             if (catsMasquees.indexOf(catId) !== -1) return;
             if (catId === 'action' && !actionsRloActif) return;
             if (catId === 'comprehension' && !soloActif) return;
             var nomCat = nomsCat[catId] || catId;
             var coulCat = couleursCat[catId];
-            var styleCat = coulCat ? ' style="border-left:3px solid ' + coulCat + '; padding-left:6px;"' : '';
-            // echapperHtml : les noms de catégories sont personnalisables (nomsCategoriesTampons)
-            html += '<div class="travaux-autocollants-label"' + styleCat + '>' + echapperHtml(nomCat);
+            var tuiles = catId === 'symboles' ? _tuilesSymboles() : _tuilesImage(catId);
+            var repliee = repliees.indexOf(catId) !== -1;
+            html += '<section class="tampons-categorie' + (repliee ? ' replie' : '') + '" data-categorie="' + echapperHtml(catId) + '">';
+            html += '<div class="travaux-autocollants-label">';
+            // Le titre replie ou déplie la catégorie. Le carré de couleur remplace le liseré gauche (Grégoire, 24 oct. :
+            // pas de liseré dans l'app). echapperHtml : noms et couleurs sont personnalisables.
+            html += '<button class="tampons-categorie-titre" data-action="travauxOutils.basculerCategorieTampons" data-param="' + echapperHtml(catId) + '" aria-expanded="' + (repliee ? 'false' : 'true') + '">';
+            html += '<svg class="tampons-categorie-fleche" viewBox="0 0 20 20" aria-hidden="true"><path d="M 7 4 L 13 10 L 7 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            if (coulCat) html += '<span class="tampons-categorie-carre" style="background:' + echapperHtml(coulCat) + '"></span>';
+            html += '<span class="tampons-categorie-nom">' + echapperHtml(nomCat) + '</span>';
+            html += '<span class="tampons-categorie-compte">' + tuiles.length + (tuiles.length > 1 ? ' tampons' : ' tampon') + '</span>';
+            html += '</button>';
             // Accès au guide SOLO depuis la catégorie Compréhension (module guides-pedagogiques.js)
             if (catId === 'comprehension') {
                 html += '<button class="travaux-categorie-guide-btn" data-action="ouvrirGuidePedagogique" data-param="solo" data-stop title="Guide SOLO" aria-label="Ouvrir le guide SOLO">?</button>';
             }
             html += '</div>';
-
-            if (catId === 'symboles') {
-                html += '<div class="travaux-autocollants-grille travaux-autocollants-grille--symboles">';
-                ['crochet', 'croix', 'interrogation'].forEach(function(id) {
-                    if (elemMasques.indexOf(id) !== -1) return;
-                    var outil = OUTILS[id];
-                    var actif = outilActif === id ? ' actif' : '';
-                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + id + '" title="' + echapperHtml(outil.nom) + '">';
-                    html += '<span style="font-size:24px; color:' + echapperHtml(outil.couleurBouton) + '; font-weight:bold;">' + echapperHtml(outil.icone) + '</span>';
-                    html += '<span>' + echapperHtml(outil.nom) + '</span></div>';
-                });
-                obtenirSymbolesPerso().forEach(function(s) {
-                    var outil = OUTILS[s.id];
-                    if (!outil) return;
-                    var actif = outilActif === s.id ? ' actif' : '';
-                    html += '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + echapperHtml(s.id) + '" title="' + echapperHtml(outil.nom) + '">';
-                    html += '<span style="font-size:24px; color:' + echapperHtml(outil.couleurBouton) + '; font-weight:bold;">' + echapperHtml(outil.icone) + '</span>';
-                    html += '<span>' + echapperHtml(outil.nom) + '</span></div>';
-                });
-                html += _htmlTamponsImage('symboles', coulCat);
-                html += '</div>';
-            } else {
-                html += '<div class="travaux-autocollants-grille">';
-                html += _htmlTamponsImage(catId, coulCat);
-                html += '</div>';
-            }
+            html += '<div class="travaux-autocollants-grille">' + tuiles.join('') + '</div>';
+            html += '</section>';
         });
 
         return html;
+    }
+
+    /** Les catégories de tampons repliées, sur cet appareil. */
+    function _categoriesTamponsRepliees() {
+        var repliees = db.getSync('categoriesTamponsRepliees', null);
+        return Array.isArray(repliees) ? repliees : [];
+    }
+
+    /**
+     * Replie ou déplie une catégorie de la palette Tampons, et s'en souvient d'une copie à l'autre. Sur place :
+     * re-générer la palette la ferait défiler en haut.
+     */
+    function basculerCategorieTampons(catId) {
+        var repliees = _categoriesTamponsRepliees();
+        var repliee = repliees.indexOf(catId) === -1;
+        db.setSync('categoriesTamponsRepliees', repliee ? repliees.concat(catId) : repliees.filter(function(c) { return c !== catId; }));
+        document.querySelectorAll('.tampons-categorie').forEach(function(section) {
+            if (section.dataset.categorie !== catId) return;
+            section.classList.toggle('replie', repliee);
+            section.querySelector('.tampons-categorie-titre').setAttribute('aria-expanded', repliee ? 'false' : 'true');
+        });
     }
 
     let paletteErrFrVisible = false;
@@ -3938,6 +3963,7 @@
         setEpaisseurActive: setEpaisseurActive,
         setTailleTexte: setTailleTexte,
         setAutocollantActif: setAutocollantActif,
+        basculerCategorieTampons: basculerCategorieTampons,
         activerTamponJeton: activerTamponJeton,
         // Pression
         courbeDePresson: courbeDePresson,
