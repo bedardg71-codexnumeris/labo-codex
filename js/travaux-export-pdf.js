@@ -458,6 +458,12 @@
         const x1 = forme.x1 * w, y1 = forme.y1 * h;
         const x2 = forme.x2 * w, y2 = forme.y2 * h;
 
+        if (travauxOutils.estFormeFermee(forme.type)) {
+            annotationFormes.tracerFormeFermee(ctx, forme, w, h, ratioResolution);
+            ctx.restore();
+            return;
+        }
+
         switch (forme.type) {
             case 'surligneur':
                 ctx.lineCap = 'butt';
@@ -468,19 +474,6 @@
                 ctx.lineTo(x2, y2);
                 ctx.stroke();
                 break;
-            case 'rectangle':
-                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-                break;
-            case 'cercle': {
-                const cx = (x1 + x2) / 2;
-                const cy = (y1 + y2) / 2;
-                const rx = Math.abs(x2 - x1) / 2;
-                const ry = Math.abs(y2 - y1) / 2;
-                ctx.beginPath();
-                ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-                ctx.stroke();
-                break;
-            }
             case 'ondule': {
                 const ampOnd = (forme.amplitude || 6) * ratioResolution;
                 const wlOnd = (forme.wavelength || 30) * ratioResolution;

@@ -33,7 +33,7 @@ async function monter(page) {
         window.travauxOutils = {
             getOutilActif: () => window.__outil, getAutocollantActif: () => null,
             getTailleTexte: () => 20, getCouleurActive: () => '#ff0000', getEpaisseurActive: () => 2,
-            getFlechePointes: () => 'fin', RESOLUTION_REFERENCE: 1000,
+            getFlechePointes: () => 'fin', traitPourFormeFermee: () => null, estFormeFermee: () => false, RESOLUTION_REFERENCE: 1000,
             genererHTMLPalette: () => '<div id="travaux-palette-flottante"></div>', configurerDragPalette() {}
         };
         window.travauxVisionneuse = { getFichierActuel: () => ({ id: 'F1' }), getCanvas: () => canvas, getPageActuelle: () => 1 };

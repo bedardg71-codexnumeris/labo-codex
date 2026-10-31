@@ -27464,6 +27464,11 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .annot-bloc [data-pointes] {
     width: 18px;
 }
+/* La ligne qui donne son trait à la forme fermée active : marquée, sans se prendre pour l'outil actif. */
+.annot-bloc .travaux-btn-outil.trait-courant {
+    background: var(--bleu-pale);
+    box-shadow: inset 0 -2px 0 var(--bleu-clair);
+}
 .annot-bande .raccourci-badge--coin,
 .annot-bloc .raccourci-badge--coin {
     top: 0;

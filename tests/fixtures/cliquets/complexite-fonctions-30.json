@@ -126,17 +126,16 @@
   "genererBarrePatterns": 32
  },
  "js/travaux-annotation.js": {
-  "onPointerDown": 49,
+  "onPointerDown": 48,
   "onKeyDown": 38,
-  "trouverAnnotationAuPoint": 32,
-  "appliquerRedimensionnement": 41,
-  "dessinerForme": 37,
+  "appliquerRedimensionnement": 35,
+  "dessinerForme": 36,
   "annuler": 32,
   "retablir": 32
  },
  "js/travaux-export-pdf.js": {
   "dessinerAnnotationsSurCtx": 32,
-  "dessinerForme": 46
+  "dessinerForme": 45
  },
  "js/travaux-import.js": {
   "importerFichier": 39

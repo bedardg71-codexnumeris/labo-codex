@@ -84,6 +84,9 @@
     const SEUIL_TOUCHER_PX = 10; // au-delà, le doigt a glissé : ce n'est plus un toucher
     const DELAI_PAUME_MS = 500;  // un doigt si près d'un geste du Pencil est la paume qui écrit
     let dernierStyletMs = 0;
+    let polygoneEnCours = null;  // { sommets, apercu, color, lineWidth, trait } : le polygone que l'on trace (partie H)
+    const TOLERANCE_FERMETURE_PX = 14; // toucher le premier sommet à moins de ceci, à l'écran, ferme la forme
+    const SOMMETS_CONFONDUS_PX = 3;    // un second toucher sur le même sommet n'en pose pas un autre
     let gesteAuDoigt = false;    // le geste en cours (outil Sélection) vient d'un doigt : un second doigt l'abandonne
 
     // Presse-papiers annotations : sur window pour persister entre fichiers/étudiants
@@ -286,6 +289,7 @@
         sauvegarderAnnotation(traitEnAttente ? undefined : { discret: true });
         detacherEvenements();
         annotationActive = false;
+        polygoneEnCours = null;
 
         // Deselectionner
         annotationSelectionnee = null;
@@ -541,6 +545,131 @@
     }
 
     /**
+     * Les outils qui agissent au toucher, sans tracer en glissant : le texte, le sommet d'un polygone.
+     * @returns {boolean} true si l'outil actif est l'un d'eux
+     */
+    function poseDunGeste(outil, xNorm, yNorm) {
+        if (outil.id === 'polygone') {
+            poserSommetPolygone(xNorm, yNorm);
+            return true;
+        }
+        if (outil.id !== 'texte') return false;
+        // #889 : un clic sur un texte existant l'ouvre en édition. Seul le double-clic de
+        // l'outil Sélection le faisait ; l'outil Texte posait un 2e bloc par-dessus.
+        const hitTexte = trouverAnnotationAuPoint(xNorm, yNorm);
+        if (hitTexte && hitTexte.type === 'text') {
+            editerTexte(hitTexte.data);
+        } else {
+            ajouterTexte(xNorm, yNorm);
+        }
+        return true;
+    }
+
+    /* ===============================
+       POLYGONE, SOMMET PAR SOMMET (consigne du 31 oct. 2026, H2)
+       =============================== */
+
+    function distanceEcran(a, b) {
+        return Math.hypot((a.x - b.x) * canvasAnnotation.width, (a.y - b.y) * canvasAnnotation.height);
+    }
+
+    function poserSommetPolygone(xNorm, yNorm) {
+        const point = { x: xNorm, y: yNorm };
+        if (!polygoneEnCours) {
+            const outils = _outils();
+            polygoneEnCours = { page: travauxVisionneuse.getPageActuelle(), sommets: [point], apercu: null, color: outils.getCouleurActive(), lineWidth: outils.getEpaisseurActive(),
+                trait: outils.traitPourFormeFermee(outils.getOutilActif()) };
+            mettreAJourBoutonsUndoRedo();
+            reRendreAnnotations();
+            return;
+        }
+        const sommets = polygoneEnCours.sommets;
+        if (distanceEcran(point, sommets[0]) <= TOLERANCE_FERMETURE_PX) {
+            // Moins de trois sommets : toucher le premier ne ferme rien, et n'en pose pas un autre.
+            if (sommets.length >= 3) fermerPolygone();
+            return;
+        }
+        if (distanceEcran(point, sommets[sommets.length - 1]) <= SOMMETS_CONFONDUS_PX) return;
+        sommets.push(point);
+        reRendreAnnotations();
+    }
+
+    function fermerPolygone() {
+        const p = polygoneEnCours;
+        polygoneEnCours = null;
+        const forme = Object.assign({ id: 'SH_' + Date.now(), type: 'polygone', color: p.color, lineWidth: p.lineWidth, sommets: p.sommets },
+            annotationFormes.cadreDesSommets(p.sommets));
+        if (p.trait) forme.trait = p.trait;
+        obtenirDonneesPage().shapes.push(forme);
+        empilerUndo('ajout-forme', forme);
+        reRendreAnnotations();
+        planifierSauvegarde();
+    }
+
+    /** Annuler pendant le tracé retire le dernier sommet. @returns {boolean} true s'il y avait un tracé en cours */
+    function retirerDernierSommet() {
+        if (!polygoneEnCours) return false;
+        polygoneEnCours.sommets.pop();
+        if (polygoneEnCours.sommets.length === 0) polygoneEnCours = null;
+        mettreAJourBoutonsUndoRedo();
+        reRendreAnnotations();
+        return true;
+    }
+
+    function annulerGeste() {
+        if (!retirerDernierSommet()) annuler();
+    }
+
+    /** Un segment d'aperçu suit le pointeur (jamais le doigt : c'est la paume). @returns {boolean} true si l'événement est pris */
+    function suivreApercuPolygone(e) {
+        if (!polygoneEnCours || e.pointerType === 'touch') return false;
+        const rect = canvasAnnotation.getBoundingClientRect();
+        polygoneEnCours.apercu = { x: (e.clientX - rect.left) / canvasAnnotation.width, y: (e.clientY - rect.top) / canvasAnnotation.height };
+        reRendreAnnotations();
+        return true;
+    }
+
+    function dessinerPolygoneEnCours() {
+        const p = polygoneEnCours;
+        if (!p) return;
+        // Changer de page abandonne le tracé ; re-rendre pour un zoom, non : les sommets sont normalisés.
+        if (p.page !== travauxVisionneuse.getPageActuelle()) {
+            polygoneEnCours = null;
+            mettreAJourBoutonsUndoRedo();
+            return;
+        }
+        const w = canvasAnnotation.width, h = canvasAnnotation.height;
+        const ctx = ctxAnnotation;
+        ctx.save();
+        ctx.strokeStyle = p.color;
+        ctx.fillStyle = p.color;
+        ctx.lineWidth = p.lineWidth;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        p.sommets.forEach((s, i) => { if (i) ctx.lineTo(s.x * w, s.y * h); else ctx.moveTo(s.x * w, s.y * h); });
+        if (p.apercu) ctx.lineTo(p.apercu.x * w, p.apercu.y * h);
+        ctx.stroke();
+        // Le premier sommet, plus gros : c'est lui qui ferme la forme.
+        ctx.beginPath();
+        ctx.arc(p.sommets[0].x * w, p.sommets[0].y * h, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    /**
+     * Abandonne ce qui se trace : la forme que l'on glisse, le polygone non fermé.
+     * @returns {boolean} true s'il y avait quelque chose à abandonner
+     */
+    function abandonnerTraceEnCours() {
+        if (!formeEnCours && !polygoneEnCours) return false;
+        formeEnCours = null; formeOrigine = null; enDessin = false;
+        polygoneEnCours = null;
+        mettreAJourBoutonsUndoRedo();
+        reRendreAnnotations();
+        return true;
+    }
+
+    /**
      * Le Pencil écrit : la paume posée n'est pas un toucher (#1123). Un second doigt, c'est le déplacement de la
      * page (travaux-visionneuse.js), quel que soit l'outil : ce que le premier avait commencé s'abandonne.
      * @returns {boolean} true si l'événement s'arrête ici
@@ -673,17 +802,7 @@
         // Mode tampon (autocollant) ou symbole/code : un seul clic pose
         if (poserTamponAuPoint(outil, xNorm, yNorm)) return;
 
-        if (outil.id === 'texte') {
-            // #889 : un clic sur un texte existant l'ouvre en édition. Seul le double-clic de
-            // l'outil Sélection le faisait ; l'outil Texte posait un 2e bloc par-dessus.
-            const hitTexte = trouverAnnotationAuPoint(xNorm, yNorm);
-            if (hitTexte && hitTexte.type === 'text') {
-                editerTexte(hitTexte.data);
-                return;
-            }
-            ajouterTexte(xNorm, yNorm);
-            return;
-        }
+        if (poseDunGeste(outil, xNorm, yNorm)) return;
 
         if (outil.type === 'forme') {
             // #943 — la ligne qu'on vient de tracer : un clic sur l'une de ses poignées la courbe
@@ -712,6 +831,8 @@
                 x1: xNorm, y1: yNorm,
                 x2: xNorm, y2: yNorm
             };
+            const trait = _outils().traitPourFormeFermee(outil);
+            if (trait) formeEnCours.trait = trait;
             if (outil.id === 'ondule') {
                 formeEnCours.amplitude = 6;
                 formeEnCours.wavelength = 30;
@@ -762,7 +883,7 @@
      * Mouvement du stylet
      */
     function onPointerMove(e) {
-        if (suivreToucherEnAttente(e)) return;
+        if (suivreToucherEnAttente(e) || suivreApercuPolygone(e)) return;
         const outil = _outils().getOutilActif();
 
         const rect = canvasAnnotation.getBoundingClientRect();
@@ -1001,11 +1122,8 @@
     function onOutilChange(e) {
         if (!canvasAnnotation || !annotationActive) return;
 
-        // Annuler une forme en cours si on change d'outil
-        if (formeEnCours) {
-            formeEnCours = null; formeOrigine = null; enDessin = false;
-            reRendreAnnotations();
-        }
+        // Annuler une forme en cours, ou un polygone non fermé, si on change d'outil
+        abandonnerTraceEnCours();
 
         // #943 — la sélection d'une ligne tout juste tracée appartient à l'outil Ligne : elle tombe
         // au changement d'outil, sauf vers l'outil Sélection, où elle devient une sélection ordinaire.
@@ -1067,11 +1185,9 @@
         // Laisser Space passer au module visionneuse pour le pan
         if (e.key === ' ') return;
 
-        // Escape : annuler une forme en cours de dessin (surligneur, rectangle, etc.)
-        if (e.key === 'Escape' && formeEnCours) {
+        // Escape : annuler une forme en cours de dessin (surligneur, rectangle, polygone, etc.)
+        if (e.key === 'Escape' && abandonnerTraceEnCours()) {
             e.preventDefault();
-            formeEnCours = null; formeOrigine = null; enDessin = false;
-            reRendreAnnotations();
             return;
         }
 
@@ -1111,7 +1227,7 @@
         // Ctrl/Cmd + Z : Undo
         if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
             e.preventDefault();
-            annuler();
+            annulerGeste();
         }
 
         // Ctrl/Cmd + Shift + Z ou Ctrl/Cmd + Y : Redo
@@ -1777,6 +1893,16 @@
     }
 
     /**
+     * Un point touche-t-il le tracé de cette ligne ou de ce polygone ? null pour les autres formes, qui se
+     * touchent par leur cadre.
+     */
+    function proximiteDuTrace(forme, px, py, seuil) {
+        if (forme.type === 'polygone') return annotationFormes.distanceAuPolygone(forme.sommets, px, py) < seuil;
+        if (estLigneAPoignees(forme) || forme.type === 'pointille') return testProximiteFleche(forme, px, py, seuil);
+        return null;
+    }
+
+    /**
      * Trouve l'annotation la plus proche du point (topmost first)
      * @param {number} xNorm - X normalise (0-1)
      * @param {number} yNorm - Y normalise (0-1)
@@ -1811,13 +1937,10 @@
             const forme = donneesPage.shapes[i];
             const bbox = calculerBBox('shape', forme);
 
-            // Fleches et lignes : hit-testing specifique (droite ou courbe)
-            if (forme.type === 'fleche' || forme.type === 'ligne' || forme.type === 'ondule' || forme.type === 'pointille') {
-                if (testProximiteFleche(forme, xNorm, yNorm, seuil)) {
-                    return { type: 'shape', index: i, data: forme, bbox: bbox };
-                }
-                continue;
-            }
+            // Lignes et polygones : on les touche sur leur tracé, pas sur leur cadre
+            const surTrace = proximiteDuTrace(forme, xNorm, yNorm, seuil);
+            if (surTrace) return { type: 'shape', index: i, data: forme, bbox: bbox };
+            if (surTrace === false) continue;
 
             // Proximite des bords (pas de l'interieur)
             const nearX = Math.min(Math.abs(xNorm - bbox.x1), Math.abs(xNorm - bbox.x2));
@@ -2120,6 +2243,14 @@
         reRendreAnnotations();
     }
 
+    /** Décale une forme : son cadre, son point de contrôle, ses sommets. */
+    function decalerForme(forme, dx, dy) {
+        forme.x1 += dx; forme.y1 += dy;
+        forme.x2 += dx; forme.y2 += dy;
+        if (forme.cx != null) { forme.cx += dx; forme.cy += dy; }
+        if (forme.sommets) forme.sommets.forEach((s) => { s.x += dx; s.y += dy; });
+    }
+
     /**
      * Applique un deplacement a une annotation
      */
@@ -2132,12 +2263,7 @@
                 }
                 break;
             case 'shape':
-                sel.data.x1 += dx;
-                sel.data.y1 += dy;
-                sel.data.x2 += dx;
-                sel.data.y2 += dy;
-                // Deplacer le point de controle Bezier
-                if (sel.data.cx != null) { sel.data.cx += dx; sel.data.cy += dy; }
+                decalerForme(sel.data, dx, dy);
                 break;
             case 'text':
                 sel.data.x += dx;
@@ -2150,6 +2276,25 @@
         }
         // Recalculer la bbox
         sel.bbox = calculerBBox(sel.type, sel.data);
+    }
+
+    /** Le point de contrôle d'une ligne et les sommets d'un polygone suivent le cadre, en proportion. */
+    function recalerApresRedimensionnement(forme, oldX1, oldY1, oldX2, oldY2) {
+        const oldW = oldX2 - oldX1;
+        const oldH = oldY2 - oldY1;
+        if (Math.abs(oldW) <= 0.001 || Math.abs(oldH) <= 0.001) return;
+        const kx = (forme.x2 - forme.x1) / oldW;
+        const ky = (forme.y2 - forme.y1) / oldH;
+        if (forme.cx != null && estLigneAPoignees(forme)) {
+            forme.cx = forme.x1 + (forme.cx - oldX1) * kx;
+            forme.cy = forme.y1 + (forme.cy - oldY1) * ky;
+        }
+        if (forme.sommets) {
+            forme.sommets.forEach((s) => {
+                s.x = forme.x1 + (s.x - oldX1) * kx;
+                s.y = forme.y1 + (s.y - oldY1) * ky;
+            });
+        }
     }
 
     /**
@@ -2215,17 +2360,7 @@
                     case 'sw': sel.data.x1 = xNorm; sel.data.y2 = yNorm; break;
                     case 'se': sel.data.x2 = xNorm; sel.data.y2 = yNorm; break;
                 }
-                // Scaler le point de controle Bezier proportionnellement
-                if (sel.data.cx != null && (sel.data.type === 'fleche' || sel.data.type === 'ligne' || sel.data.type === 'ondule')) {
-                    const oldW = oldX2 - oldX1;
-                    const oldH = oldY2 - oldY1;
-                    const newW = sel.data.x2 - sel.data.x1;
-                    const newH = sel.data.y2 - sel.data.y1;
-                    if (Math.abs(oldW) > 0.001 && Math.abs(oldH) > 0.001) {
-                        sel.data.cx = sel.data.x1 + (sel.data.cx - oldX1) * (newW / oldW);
-                        sel.data.cy = sel.data.y1 + (sel.data.cy - oldY1) * (newH / oldH);
-                    }
-                }
+                recalerApresRedimensionnement(sel.data, oldX1, oldY1, oldX2, oldY2);
             }
         } else if (sel.type === 'sticker') {
             // Conserver les proportions : ratio original width/height
@@ -2399,9 +2534,7 @@
                 const idx = donneesPage.strokes.length - 1;
                 nouveauxElements.push({ type: 'stroke', index: idx, data: clone, bbox: calculerBBox('stroke', clone) });
             } else if (sel.type === 'shape') {
-                clone.x1 += DECALAGE; clone.y1 += DECALAGE;
-                clone.x2 += DECALAGE; clone.y2 += DECALAGE;
-                if (clone.cx != null) { clone.cx += DECALAGE; clone.cy += DECALAGE; }
+                decalerForme(clone, DECALAGE, DECALAGE);
                 donneesPage.shapes.push(clone);
                 const idx = donneesPage.shapes.length - 1;
                 nouveauxElements.push({ type: 'shape', index: idx, data: clone, bbox: calculerBBox('shape', clone) });
@@ -2469,9 +2602,7 @@
                 var idxS = donneesPage.strokes.length - 1;
                 nouveauxElements.push({ type: 'stroke', index: idxS, data: clone, bbox: calculerBBox('stroke', clone) });
             } else if (item.type === 'shape') {
-                clone.x1 += DECALAGE; clone.y1 += DECALAGE;
-                clone.x2 += DECALAGE; clone.y2 += DECALAGE;
-                if (clone.cx != null) { clone.cx += DECALAGE; clone.cy += DECALAGE; }
+                decalerForme(clone, DECALAGE, DECALAGE);
                 donneesPage.shapes.push(clone);
                 var idxH = donneesPage.shapes.length - 1;
                 nouveauxElements.push({ type: 'shape', index: idxH, data: clone, bbox: calculerBBox('shape', clone) });
@@ -2638,6 +2769,7 @@
 
         // Dessiner la selection si active
         dessinerSelection();
+        dessinerPolygoneEnCours();
 
         // Mettre a jour l'etat du bouton Supprimer
         mettreAJourBoutonSupprimer();
@@ -2710,22 +2842,13 @@
         const x1 = forme.x1 * w, y1 = forme.y1 * h;
         const x2 = forme.x2 * w, y2 = forme.y2 * h;
 
+        if (_outils().estFormeFermee(forme.type)) {
+            annotationFormes.tracerFormeFermee(ctx, forme, w, h, ratioResolution);
+            ctx.restore();
+            return;
+        }
+
         switch (forme.type) {
-            case 'rectangle':
-                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
-                break;
-
-            case 'cercle': {
-                const cx = (x1 + x2) / 2;
-                const cy = (y1 + y2) / 2;
-                const rx = Math.abs(x2 - x1) / 2;
-                const ry = Math.abs(y2 - y1) / 2;
-                ctx.beginPath();
-                ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-                ctx.stroke();
-                break;
-            }
-
             case 'ondule': {
                 const amplitude = (forme.amplitude || 6) * ratioResolution;
                 const wavelength = (forme.wavelength || 30) * ratioResolution;
@@ -3273,7 +3396,7 @@
         const btnUndo = document.getElementById('travaux-btn-undo');
         const btnRedo = document.getElementById('travaux-btn-redo');
 
-        if (btnUndo) btnUndo.disabled = pileUndo.length === 0;
+        if (btnUndo) btnUndo.disabled = pileUndo.length === 0 && !polygoneEnCours;
         if (btnRedo) btnRedo.disabled = pileRedo.length === 0;
     }
 
@@ -3432,7 +3555,7 @@
         basculerAnnotation: basculerAnnotation,
         estActif: estActif,
         // Undo/Redo
-        annuler: annuler,
+        annuler: annulerGeste,
         retablir: retablir,
         // Actions
         dupliquerSelection: dupliquerSelection,

@@ -58,7 +58,7 @@ test.describe('La palette d’annotation', () => {
             ['travaux-btn-undo', 'travaux-btn-supprimer', 'travaux-btn-redo']
         ]);
         expect(d.groupes).toEqual([
-            [{ titre: 'Outils', outils: ['stylo', 'surligneur', 'texte'] }, { titre: 'Formes', outils: ['cercle', 'rectangle'] }],
+            [{ titre: 'Outils', outils: ['stylo', 'surligneur', 'texte'] }, { titre: 'Formes', outils: ['cercle', 'rectangle', 'polygone'] }],
             [{ titre: 'Lignes', outils: ['fleche', 'pointille', 'ondule'] }, { titre: 'Extrémités', outils: ['debut', 'double', 'fin', 'aucune'] }]
         ]);
         expect(d.ordre).toEqual(['groupe-boutons-ligne', 'annot-bande', 'annot-bande', 'separateur-horizontal', 'annot-rangee', 'annot-rangee',
