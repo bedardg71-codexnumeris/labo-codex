@@ -164,7 +164,7 @@ function genererGraduations(zones, cassure) {
     const graduations = gardees.map((v) => {
         const estCassure = v === cassure;
         const classe = estCassure ? ' barre-graduation-cassure' : '';
-        const titre = estCassure ? ' title="L’axe change d’échelle à ce seuil"' : '';
+        const titre = estCassure ? ' title="Ton seuil le plus bas : l’axe passe ici au second segment"' : '';
         return `<span class="barre-graduation${classe}"${titre} style="left: ${position(v)}%;">${formaterPourcentage(Math.round(v * 100))}</span>`;
     }).join('');
     return `<div class="barre-graduations">${graduations}</div>`;
