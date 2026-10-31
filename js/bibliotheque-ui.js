@@ -310,6 +310,10 @@
         if (!conteneur) return;
         var estDemo = BibliothequeUI.estItemDemo(item);
 
+        // Le formulaire change d'élément : la ligne de la copie précédente part avec lui.
+        var ligneCopie = conteneur.querySelector('.bandeau-demo-copie');
+        if (ligneCopie) ligneCopie.remove();
+
         conteneur.classList.toggle('demo-readonly', estDemo);
 
         var controls = conteneur.querySelectorAll('input, select, textarea');
@@ -346,6 +350,39 @@
      */
     BibliothequeUI.quitterModeLectureSeuleDemo = function (conteneur) {
         BibliothequeUI.appliquerModeLectureSeuleDemo(conteneur, null, '');
+    };
+
+    /**
+     * 31 oct. 2026 — UNE COPIE FAITE PENDANT LA DÉMO PEUT REJOINDRE LA BIBLIOTHÈQUE (consigne
+     * `plans de travail/CONSIGNE-LOT-2026-10-31-copie-demo-bibliotheque.md`). À appeler APRÈS
+     * `appliquerModeLectureSeuleDemo`, qui retire la ligne de l'élément précédent.
+     *
+     * Rien ne s'écrit ici : le bouton porte l'action de la rangée de la fenêtre de bibliothèque
+     * (`actionGarder`), donc un seul chemin d'écriture. Hors démo, rien ne paraît.
+     *
+     * @param {HTMLElement} conteneur - Le conteneur passé à appliquerModeLectureSeuleDemo
+     * @param {Object} copie - L'élément ouvert en édition
+     * @param {string} actionGarder - data-action de « Garder dans ma bibliothèque »
+     * @param {Array} exemplaires - Les exemplaires de la bibliothèque de cette famille
+     */
+    BibliothequeUI.proposerGarderCopieDemo = function (conteneur, copie, actionGarder, exemplaires) {
+        if (!conteneur) return;
+        var ligne = conteneur.querySelector('.bandeau-demo-copie');
+        var estCopieDeDemo = BibliothequeUI.modeDemoActif() && !!copie && !!copie.inspireDe && !BibliothequeUI.estItemDemo(copie);
+        if (!estCopieDeDemo) {
+            if (ligne) ligne.remove();
+            return;
+        }
+        if (!ligne) {
+            ligne = document.createElement('div');
+            ligne.className = 'bandeau-demo-copie';
+            conteneur.insertBefore(ligne, conteneur.firstChild);
+        }
+        var gardee = (exemplaires || []).some(function (ex) { return BibliothequeUI.lieeAExemplaire(copie, ex); });
+        ligne.innerHTML = gardee
+            ? '<span class="bandeau-demo-readonly-texte">Aussi dans ta bibliothèque</span>'
+            : '<span class="bandeau-demo-readonly-texte">Cette copie reste dans la démo. Garde-la dans ta bibliothèque pour la retrouver dans tes vrais trimestres.</span>' +
+              '<button type="button" class="btn btn-confirmer bandeau-demo-readonly-btn" data-action="' + echapperHtml(actionGarder) + '" data-param="' + echapperHtml(copie.id) + '">Garder dans ma bibliothèque</button>';
     };
 
     /**

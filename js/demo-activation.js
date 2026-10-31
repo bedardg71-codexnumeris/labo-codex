@@ -561,6 +561,8 @@ async function desactiverModeDemo() {
         if (typeof retirerGuidageDemo === 'function') {
             retirerGuidageDemo();
         }
+        // 31 oct. 2026 : un formulaire resté ouvert ne propose plus de garder une copie de la démo.
+        document.querySelectorAll('.bandeau-demo-copie').forEach(function(ligne) { ligne.remove(); });
 
         // 7. UI : modes + header
         if (typeof initialiserSystemeModes === 'function') {
