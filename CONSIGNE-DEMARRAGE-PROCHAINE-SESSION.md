@@ -1,5 +1,7 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 31 octobre 2026, 12 h 20 (Toronto) : EN LIGNE `1.228.0`. `main` local en avance, non poussé**, sans bump : barres de l'Aperçu, réponse du groupe, note actuelle, puis le lot des palettes d'annotation (`52d5faf3` à `1b18f549`, parties A à H, #1209, #1210). Vitest entier vert (10 610) ; WebKit : specs touchées seulement (251 verts, 1 instable, les 4 rouges connus de #1181). Verdict complet non pris. Rapport : `plans de travail/RAPPORT-2026-10-31-palettes-annotation.md`, relecture de Cowork due. **Ouverts** : les mots du rapport ; la porte `plans de travail/PORTES-TERRAIN-2026-10-31-palettes-annotation.md`, due à la mise en ligne, dont l'artefact jumeau est à publier par Cowork ; `CONSIGNE-LOT-2026-10-31-copie-demo-bibliotheque.md`, non exécutée.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 30 octobre 2026, 21 h 30 (Toronto) : `1.228.0` EN LIGNE** (build `1030-1950`) — Netlify
 > `6ae543e4`, `commit_ref` `ee9f340a`, `state: ready`, publié à 01:27:18 Z (21 h 27). Porte : le niveau RàI au critère, son Aide, sa retouche, les Nouvelles 1.227 validées et 1.228.
 > Verdict du Mac **vert** sur `ee9f340a` (1 147 essais, 4 rouges connus, 1 instable). Relecture de Cowork : acceptée, sans exécution. Mots validés par Grégoire.

@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 31 OCTOBRE 2026, 12 H 20 : LES PALETTES D'ANNOTATION SONT CODÉES, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : un tampon se pose du premier toucher ; un long bloc de texte s'ouvre entier et rien n'y est sélectionné ; deux doigts déplacent la page ; la palette d'annotation prend la disposition de l'ébauche, à 188 px ; les catégories de tampons se replient ; la touche d'un code est son numéro ; les trois boutons des palettes passent après le carrousel, et l'étiquette de l'élève gagne un bouton de profil ; la fenêtre « Aperçu rétroaction » disparaît ; le pointillé et la vague s'appliquent au cercle, au rectangle et au nouveau polygone, à l'écran et dans le PDF de l'élève.
+
+**Ce qui reste à toi** : relire les mots que j'ai écrits ou déduits (`plans de travail/RAPPORT-2026-10-31-palettes-annotation.md`, § « Les mots ») ; vider les raccourcis X et S, comme prévu. Sur l'iPad, après la mise en ligne : `plans de travail/PORTES-TERRAIN-2026-10-31-palettes-annotation.md`. Un bloc déjà rétréci reste rétréci ; une largeur de palette donnée à la poignée l'emporte sur les 188 px : le rapport dit quoi faire.
+
+**Vérifié comment** : Vitest entier vert (10 610) ; la partie A rouge avant son correctif, 28 changements volontaires du code sur les parties B à H, dont cinq d'abord passés sans rougir, qui ont resserré trois gardes et fait retirer une ligne inutile ; 251 essais WebKit des specs touchées verts, 1 rattrapé au second essai, les 4 rouges connus (qui s'arrêtent avant de regarder la barre d'Annoter, à 1024 et 1180 px) ; captures dans WebKit sur un banc fictif. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex. Le toucher réel n'a pas été éprouvé : le banc fabrique ses événements.
+
 📝 **LE 31 OCTOBRE 2026 : « NOTE ACTUELLE DU COURS » EN SOMMATIVE EST CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : en pratique sommative, le profil et le PDF de l'élève disent « Note actuelle du cours », avec tes textes validés. En pratique alternative, « note provisoire » reste. Dans toutes les pratiques, la ligne de calcul du PDF reprend le mot du titre : « Note finale = … » seulement une fois les notes finalisées. Les PDF déjà remis gardent leur ancienne ligne. Le profil en standards suit la même règle.
