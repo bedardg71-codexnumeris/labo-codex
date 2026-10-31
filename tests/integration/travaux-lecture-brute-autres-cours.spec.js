@@ -7,8 +7,8 @@ const racineProjet = path.resolve(__dirname, '..', '..');
 const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 
 // =======================================================================
-// TRAVAUX — la bulle « Rétroaction » et la suppression d'une copie avec son évaluation
-// ne perdent plus les évaluations des AUTRES cours du trimestre (relecture croisée R3 du lot A
+// TRAVAUX — la suppression d'une copie avec son évaluation
+// ne perd plus les évaluations des AUTRES cours du trimestre (relecture croisée R3 du lot A
 // de l'enregistrement, 26 sept. 2026 ; fiche #958).
 // =======================================================================
 //
@@ -60,17 +60,9 @@ async function fixtureDeuxCours(page) {
 
 const lireEvaluations = (page) => page.evaluate(() => db.getSync(cle('evaluationsSauvegardees'), []) || []);
 
-test('bulle « Rétroaction » : l\'évaluation de l\'autre cours survit à l\'enregistrement', async ({ page }) => {
-    await fixtureDeuxCours(page);
-    await page.evaluate(() => travauxUI.afficherRetroaction('F1'));
-    await page.locator('#travaux-modal-retro-texte').fill('Daniel, deuxième version.');
-    await page.evaluate(() => travauxUI.sauvegarderRetroactionDepuisModal('F1'));
-
-    const evals = await lireEvaluations(page);
-    expect(evals.map(e => e.id).sort()).toEqual(['EV_C1', 'EV_C2']);
-    expect(evals.find(e => e.id === 'EV_C1').retroactionFinale).toBe('Daniel, deuxième version.');
-    expect(evals.find(e => e.id === 'EV_C2').retroactionFinale).toBe('Autre cours.');
-});
+// 31 oct. 2026 — les deux essais de la bulle « Rétroaction » partent avec elle (consigne des palettes, partie G) : elle
+// n'a plus d'écriture à juger. La lecture brute reste jugée ci-dessous par la suppression ; la garde d'anonymisation
+// des écritures, par `lot-a-anonymisation-enregistre.spec.js`.
 
 test('supprimer une copie avec son évaluation : l\'évaluation de l\'autre cours survit', async ({ page }) => {
     await fixtureDeuxCours(page);
@@ -83,22 +75,3 @@ test('supprimer une copie avec son évaluation : l\'évaluation de l\'autre cour
     expect(evals.map(e => e.id)).toEqual(['EV_C2']);
 });
 
-test('bulle « Rétroaction » en anonymisation : le titre et la zone montrent le pseudonyme, la base garde le prénom', async ({ page }) => {
-    await fixtureDeuxCours(page);
-    await page.evaluate(async () => { await changerMode('anonymisation'); });
-    await page.evaluate(() => travauxUI.afficherRetroaction('F1'));
-    const ecran = await page.evaluate(() => ({
-        titre: document.querySelector('#travaux-modal-retroaction .modal-titre').textContent,
-        zone: document.getElementById('travaux-modal-retro-texte').value
-    }));
-    expect(ecran.titre).not.toContain('Daniel');
-    expect(ecran.zone).toMatch(/^Élève \d+, première version\.$/);
-
-    await page.locator('#travaux-modal-retro-texte').fill(ecran.zone + ' Relu.');
-    await page.evaluate(() => travauxUI.sauvegarderRetroactionDepuisModal('F1'));
-    const evals = await lireEvaluations(page);
-    const c1 = evals.find(e => e.id === 'EV_C1');
-    expect(c1.retroactionFinale).toBe('Daniel, première version. Relu.');
-    expect(JSON.stringify(evals)).not.toMatch(/Élève \d+|Gr\. [A-Z]|ANONYME|etudiantDAReel/);
-    expect(evals.map(e => e.id).sort()).toEqual(['EV_C1', 'EV_C2']);
-});

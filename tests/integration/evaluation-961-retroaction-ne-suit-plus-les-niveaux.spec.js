@@ -420,26 +420,8 @@ test('#961 · copie neuve (sans évaluation), réécrite : l\'évaluation créé
     expect(b && b.retroactionReecrite).toBe(true);
 });
 
-for (const retouche of [true, false]) {
-    test(`#961 · modale « Aperçu rétroaction » de Travaux, ${retouche ? 'texte retouché' : 'sans retouche'} puis « Sauvegarder »`, async ({ page }) => {
-        test.setTimeout(90000);
-        await monter(page);
-        await page.evaluate(() => window.travauxUI.afficherRetroaction('FT961'));
-        await page.waitForSelector('#travaux-modal-retro-texte', { timeout: 10000 });
-        if (retouche) await page.evaluate((t) => { document.getElementById('travaux-modal-retro-texte').value = t; }, REECRIT);
-        await page.evaluate(() => document.querySelector('[data-action="travauxUI.sauvegarderRetroactionDepuisModal"]').click());
-        await page.waitForTimeout(500);
-        const b = await base(page);
-        // C1 — sans retouche, la clé reste absente (la fixture n'en a pas) : la question reste due.
-        expect.soft(b.retroactionReecrite).toBe(retouche ? true : undefined);
-        if (!retouche) {
-            await ouvrir(page, 'liste');
-            await changerNiveau(page, 'E');
-            const q = await question(page);
-            expect(q.message, 'la question du stock, après la modale').toBe(QUESTION);
-        }
-    });
-}
+// 31 oct. 2026 — les deux essais de la modale « Aperçu rétroaction » partent avec elle (consigne des palettes, partie G).
+// Restent : la marque d'un texte réécrit, l'essai ci-dessous ; la question du stock, les essais qui lisent `QUESTION` plus haut.
 
 test('#961 · copie neuve, réécrite puis « Enregistrer » avant l\'auto-save : la marque s\'écrit', async ({ page }) => {
     test.setTimeout(90000);

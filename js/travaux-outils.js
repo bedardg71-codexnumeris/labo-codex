@@ -552,6 +552,7 @@
 
     function fermerPaletteAutocollants() {
         paletteAutoVisible = false;
+        majEtatBtnToggle('btn-toggle-tampons', false);
         const palette = document.getElementById('travaux-palette-tampons');
         if (palette) palette.remove();
     }
@@ -1649,11 +1650,13 @@
     }
 
     /**
-     * Met à jour l'état actif/inactif d'un bouton emoji dans la palette annotation
+     * Met à jour l'état enfoncé d'un bouton de la bande des palettes
      */
     function majEtatBtnToggle(btnId, actif) {
         const btn = document.getElementById(btnId);
-        if (btn) btn.classList.toggle('actif', actif);
+        if (!btn) return;
+        btn.classList.toggle('actif', actif);
+        btn.setAttribute('aria-pressed', actif ? 'true' : 'false');
     }
 
     /* ===============================
@@ -1984,16 +1987,22 @@
 
         html += '</div>'; // fin .palette-flottante-contenu
 
-        // Barre d'outils en bas
-        html += '<div class="palette-flottante-bas-btns">';
-        html += '<button class="palette-flottante-aide-btn" data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons"><img src="' + ICONS_DIR + 'icons8-library-2.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
-        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher/masquer les codes"><img src="' + ICONS_DIR + 'icons8-traffic-light.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
-        html += '<button class="palette-flottante-aide-btn" id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher/masquer les tampons"><img src="' + ICONS_DIR + 'icons8-rubber-stamp.svg" alt="" class="outil-svg-icon palette-bas-icon"></button>';
-        html += '</div>';
-
         html += '</div>'; // fin .palette-flottante
 
         return html;
+    }
+
+    /**
+     * Les trois boutons des palettes, en bande soudée dans la barre d'outils, après le carrousel (partie G de la
+     * consigne du 31 oct. 2026 ; ils étaient au bas de la palette d'annotation). Annoter et Modélisation la posent.
+     * Un bouton enfoncé montre que sa palette est ouverte (`majEtatBtnToggle`).
+     */
+    function genererHTMLBandePalettes() {
+        return '<div class="annot-bande-palettes" id="annot-bande-palettes">'
+            + '<button data-action="tamponsBibliotheque.afficherBibliothequeTampons" title="Bibliothèque de tampons" aria-label="Bibliothèque de tampons"><img src="' + ICONS_DIR + 'icons8-library-2.svg" alt="" class="outil-svg-icon"></button>'
+            + '<button id="btn-toggle-codes" data-action="travauxOutils.togglePaletteErreursFrancais" title="Afficher ou masquer la palette Codes" aria-label="Afficher ou masquer la palette Codes" aria-pressed="false"><img src="' + ICONS_DIR + 'icons8-traffic-light.svg" alt="" class="outil-svg-icon"></button>'
+            + '<button id="btn-toggle-tampons" data-action="travauxOutils.togglePaletteAutocollants" title="Afficher ou masquer la palette Tampons" aria-label="Afficher ou masquer la palette Tampons" aria-pressed="false"><img src="' + ICONS_DIR + 'icons8-rubber-stamp.svg" alt="" class="outil-svg-icon"></button>'
+            + '</div>';
     }
 
     /**
@@ -3971,6 +3980,7 @@
         RESOLUTION_REFERENCE: RESOLUTION_REFERENCE,
         // UI
         genererHTMLPalette: genererHTMLPalette,
+        genererHTMLBandePalettes: genererHTMLBandePalettes,
         rafraichirPalette: rafraichirPalette,
         togglePaletteAutocollants: togglePaletteAutocollants,
         fermerPaletteAutocollants: fermerPaletteAutocollants,
