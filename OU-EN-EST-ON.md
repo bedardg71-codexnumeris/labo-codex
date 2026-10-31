@@ -15,7 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-📝 **LE 30 OCTOBRE 2026, SOIR : LA RETOUCHE DU NIVEAU AU CRITÈRE EST FAITE, PAS EN LIGNE.** *Écrit par Claude Code.*
+📝 **LE 30 OCTOBRE 2026, 21 H 27 : LA 1.228 EST EN LIGNE** (le niveau RàI suit ton seuil de réussite). *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les entrées ci-dessous, et tes Nouvelles validées, celles de la 1.228 et le texte corrigé de la 1.227. La note du cours ne change pas.
+
+**Ce qui reste à toi** : rien de dû ce soir. Au prochain lot : les mots de « note provisoire » en pratique sommative (#1207). Un coup d'œil, quand tu ouvriras l'application, au badge « En attente » des Interventions et à la carte RàI sous le minimum : aucun navigateur de test ne les a ouverts.
+
+**Vérifié comment** : Cowork a relu le diff et accepté, sans rien exécuter ; Vitest entier vert (10 485) ; la vérification complète du navigateur, sur le Mac, verte (1 147 essais, 1 rattrapé au second essai, les 4 rouges connus) ; la mise en ligne constatée chez Netlify sur ce commit, et le fichier de version du déploiement dit 1.228.0. Pas encore : l'iPad, Chrome, et la vérification de GitHub, annulée par le commit de ce relais.
+
+📝 **LE 30 OCTOBRE 2026, SOIR : LA RETOUCHE DU NIVEAU AU CRITÈRE EST FAITE, EN LIGNE EN 1.228.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : tes Nouvelles validées à 18 h 07. En standards sous le minimum, la barre des patterns garde les élèves, et un élève au seul diagnostic n'y entre pas. Une grille partagée garde la phrase de son palier, donc son signalement. La carte RàI écrit « — » tant que la note du cours ne s'affiche pas. Aux Interventions, « En attente » remplace « Niveau 0 » et n'est plus compté.
 
@@ -23,7 +31,7 @@
 
 **Vérifié comment** : Vitest entier vert (10 485) ; 18 changements volontaires du code font tous rougir une garde, le code restauré à l'identique ; texte des Nouvelles comparé par script à la consigne ; 25 essais de 7 specs WebKit verts, 1 sauté (captures sur demande). Pas encore : la vérification complète du navigateur, l'iPad, et aucun navigateur n'a ouvert le badge des Interventions ni la carte RàI sous le minimum.
 
-📝 **LE 30 OCTOBRE 2026, FIN D'APRÈS-MIDI : L'AIDE DU NIVEAU AU CRITÈRE EST INTÉGRÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
+📝 **LE 30 OCTOBRE 2026, FIN D'APRÈS-MIDI : L'AIDE DU NIVEAU AU CRITÈRE EST INTÉGRÉE, EN LIGNE EN 1.228.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : l'Aide dit le niveau au critère avec tes textes validés, dans « La Réponse à l'Intervention (RàI) » et « Repérer les patterns de progression ». Un palier coché qui a sa phrase lèvera aussi son signalement sur les copies déjà saisies : jusqu'ici, le code y lisait 0 erreur. Sur G5M, rien tant que tu n'écris pas la phrase du palier « Échec ».
 
@@ -33,7 +41,7 @@
 
 **Vérifié comment** : Vitest entier vert ; 7 changements volontaires de l'Aide font rougir la garde ; l'ancienne lecture du signalement rend 3 tests rouges ; textes comparés par script ; les noms de champs lus sur ton codex du 30 oct., 11 h 25, sans valeurs ni noms d'élèves. Ce qui n'est pas éprouvé : la suite complète du navigateur, Safari hors banc, l'iPad.
 
-📝 **LE 30 OCTOBRE 2026, 16 H 07 : LE NIVEAU AU CRITÈRE EST CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
+📝 **LE 30 OCTOBRE 2026, 16 H 07 : LE NIVEAU AU CRITÈRE EST CODÉ, EN LIGNE EN 1.228.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : le niveau situe chaque étudiant·e devant ton seuil minimal de réussite et sa propre trajectoire, plus devant son groupe. Avant la note provisoire, la plupart des étudiant·es seront « En attente », et la barre RàI le dira. Sur un palier coché, tu pourras choisir le niveau qu'il fixe jusqu'à la première note provisoire.
 
@@ -49,7 +57,7 @@
 
 **Vérifié comment** : les scripts ont tourné sur le code du commit `beee4b01`, dans un navigateur jetable, sur ton codex du 30 oct., 11 h 25, 0 erreur de page ; le modèle décidé passe par un témoin de 14 cas qui arrête le script s'il diverge. Ce qui n'est pas vérifié : le modèle lui-même sur un écran, puisqu'il n'est pas codé.
 
-📝 **LE 30 OCTOBRE 2026, 14 H 27 : TES NOUVELLES DE LA 1.227 SONT PRÊTES, PAS EN LIGNE.** *Écrit par Claude Code.*
+📝 **LE 30 OCTOBRE 2026, 14 H 27 : TES NOUVELLES DE LA 1.227 SONT PRÊTES, EN LIGNE EN 1.228.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : les Nouvelles de la 1.227 disent ton texte validé à 14 h 15, mot pour mot. Dans l'Aide, « Repérer les patterns » ajoute : « Seule « Non-participation », sans copie à comparer, donne le niveau 3. » La note du cours ne change pas.
 

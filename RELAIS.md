@@ -7,6 +7,28 @@
 
 ---
 
+## 30 OCT. 2026, 21 H 30 (Claude Code) : **POUSSÉ, EN LIGNE : 1.228.0 = `ee9f340a` ; AUCUN TRAVAIL EN AVANCE AILLEURS**
+
+**Porte** : le niveau RàI au critère (lot 3 des seuils, `a8bf7778`), son Aide, le compte d'erreurs sous ses deux noms, « note du cours à ce jour », la retouche C1 à C6 et T3 (`2daba642`), les Nouvelles 1.227 validées (`beee4b01`, aucune 1.227.1 n'a été publiée) et les Nouvelles 1.228.
+
+**Relecture de Cowork** : `2daba642` accepté (`plans de travail/VERDICT-RELECTURE-2026-10-30-niveau-rai-critere-retouche.md`), par lecture directe du diff, rien exécuté. **Grégoire** : phrase du guide RàI validée telle quelle, relayée par son message de ce soir ; Nouvelles 1.228 validées à 18 h 07.
+
+**Verdict du Mac, sur `ee9f340a`, par `scripts/verdict-en-morceaux.mjs`, sans refus** : vert, 1 147 essais, 1 142 verts, 1 au second essai (`grilles-sous-criteres-condense`, déjà vue instable), 4 rouges (4 connus), 19 sautés. Tout fermé (dit par Grégoire), Mac sur secteur, pression mémoire 1. Hook : « verdict vert à jour pour ce commit ». Vitest entier : 855 fichiers, 10 485.
+
+**Netlify** : `6ae543e4c59ce91c75d8ff83`, `commit_ref` `ee9f340a`, `ready`, publié à 01:27:18 Z (21 h 27) ; le `version.js` du déploiement (permalien) dit `1.228.0`, build `1030-1950` ; son `js/changelog-data.js` porte l'entrée 1.228. Le domaine `app.codexnumeris.org` est derrière Cloudflare Access : non lu d'ici.
+
+**GitHub** : run 41155401597 de `ee9f340a` en cours à l'écriture ; ce commit de relais l'annule (`cancel-in-progress`, décision du 4 sept.), et un run de docs seul ne lance pas Playwright : le jeton du Mac est alors le seul verdict navigateur de la 1.228.0.
+
+**Non éprouvés** : aucune spec n'ouvre le badge des Interventions ni la carte RàI sous le minimum dans un navigateur ; Safari hors banc et l'iPad.
+
+**À savoir (verdict de Cowork)** : le schéma de partage est fermé : une application plus ancienne refuse un paquet qui porte les champs neufs du palier, sans conséquence tant que tout le monde charge la version en ligne.
+
+**Ensuite** : T2 (#1207, mots à soumettre à Grégoire) au prochain lot ; `plans de travail/CONSIGNE-LOT-2026-10-30-barres-apercu.md` est prête, non commencée.
+
+**Complexité** (1.227.0 `3ef83f49` → 1.228.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 93 061 → 93 104 (Δ +43) ; au-dessus de 15 : 442 → 442 (Δ 0) ; au-dessus de 30 : 82 → 82 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 105 → 11 104 (Δ −1).
+
+**Non commités, à Cowork, laissés tels quels** : `CONSIGNE-DEMARRAGE-COWORK.md`, `plans de travail/captures/`.
+
 ## 30 OCT. 2026, SOIR (Claude Code) : **LA RETOUCHE DU NIVEAU AU CRITÈRE ET LES NOUVELLES 1.228 SONT COMMITÉES SUR `main`, NON POUSSÉES ; AUCUNE RELEASE ; À RELIRE PAR COWORK ; EN LIGNE : TOUJOURS 1.227.0**
 
 **Rapport** : `plans de travail/RAPPORT-2026-10-30-niveau-rai-critere.md`, section « Retouche du verdict ». **Consigne** : `plans de travail/CONSIGNE-LOT-2026-10-30-niveau-rai-critere-retouche.md`.

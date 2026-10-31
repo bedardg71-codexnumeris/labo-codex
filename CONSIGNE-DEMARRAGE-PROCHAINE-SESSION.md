@@ -1,5 +1,10 @@
 # Consigne de démarrage à froid — les sessions qui prennent le relais
 
+> ↻ **ÉTAT MESURÉ par Claude Code le 30 octobre 2026, 21 h 30 (Toronto) : `1.228.0` EN LIGNE** (build `1030-1950`) — Netlify
+> `6ae543e4`, `commit_ref` `ee9f340a`, `state: ready`, publié à 01:27:18 Z (21 h 27). Porte : le niveau RàI au critère, son Aide, sa retouche, les Nouvelles 1.227 validées et 1.228.
+> Verdict du Mac **vert** sur `ee9f340a` (1 147 essais, 4 rouges connus, 1 instable). Relecture de Cowork : acceptée, sans exécution. Mots validés par Grégoire.
+> **Ouverts** : #1207 (T2, prochain lot) ; le lot des barres de l'Aperçu, consigne prête ; la paire « niveau 1 / Difficulté persistante » et les questions 2 à 5 du lot 2 n'ont pas été remesurées ici.
+>
 > ↻ **ÉTAT MESURÉ par Claude Code le 30 octobre 2026, 13 h 58 (Toronto) : `1.227.0` EN LIGNE** (build `1030-1219`) — Netlify
 > `6ae4da6a`, `commit_ref` `3ef83f49`, `state: ready`, publié à 17:57:19 Z (13 h 57). Porte : lots 1 et 2 des seuils et du niveau, leurs retouches.
 > Verdict du Mac **vert** sur `3ef83f49` (1 147 essais, 4 rouges connus, 2 instables). GitHub (run 41102649077) : en attente à l'écriture.
