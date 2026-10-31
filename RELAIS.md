@@ -7,6 +7,14 @@
 
 ---
 
+## 30 OCT. 2026, 22 H 20 (Claude Code) : **LES BARRES DE L'APERÇU COMMITÉES SUR `main`, NON POUSSÉES ; EN LIGNE : TOUJOURS 1.228.0**
+
+**Porte** : `CONSIGNE-LOT-2026-10-30-barres-apercu.md` : passages larges, voile gardé, axe de A et C en réglage. Rapport : `plans de travail/RAPPORT-2026-10-30-barres-apercu.md`. Sans release, à la demande de Grégoire.
+
+**Attend** : la relecture de Cowork, la validation des mots par Grégoire, puis le verdict complet du Mac, Cowork fermé. Vitest entier vert (10 507) ; seules les specs WebKit touchées ont tourné.
+
+**Non commités, à Cowork** : `CONSIGNE-DEMARRAGE-COWORK.md`, la réflexion du 30 oct., les consignes `reponse-du-groupe` et `note-actuelle-sommative`, les deux captures de la fenêtre de fusion.
+
 ## 30 OCT. 2026, 21 H 30 (Claude Code) : **POUSSÉ, EN LIGNE : 1.228.0 = `ee9f340a` ; AUCUN TRAVAIL EN AVANCE AILLEURS**
 
 **Porte** : le niveau RàI au critère (lot 3 des seuils, `a8bf7778`), son Aide, le compte d'erreurs sous ses deux noms, « note du cours à ce jour », la retouche C1 à C6 et T3 (`2daba642`), les Nouvelles 1.227 validées (`beee4b01`, aucune 1.227.1 n'a été publiée) et les Nouvelles 1.228.

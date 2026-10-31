@@ -134,6 +134,7 @@
 
         // #1149, lot 3a : les chaînes d'étapes (la case, puis l'affichage).
         chargerChainesEtapes();
+        chargerAxeBarres();
 
         // Chrono évaluation
         const chronoEval = document.getElementById('v2-pref-chrono-eval');
@@ -428,7 +429,9 @@
         }
 
         // Lot E3 (D0 point 2) : par le témoin commun (clé globale, inscrite à CLES_GLOBALES).
-        return sauvegarderDonneesSelonMode('seuilsInterpretation', seuils, { geste: GESTE_SEUILS });
+        const resultat = sauvegarderDonneesSelonMode('seuilsInterpretation', seuils, { geste: GESTE_SEUILS });
+        rendreExemplesAxeBarres();   // Les exemples de l'axe portent ces seuils.
+        return resultat;
     }
 
     /** Lot E3 : les trois seuils d'interprétation reprennent ce qui est enregistré (le chargement le fait pareil). */
@@ -522,6 +525,47 @@
     }
 
     // =========================================================================
+    // L'AXE DES BARRES A ET C DE L'APERÇU (30 oct. 2026)
+    // =========================================================================
+
+    /** Le choix suit la préférence sans l'écrire : sans geste, rien n'entre dans les réglages enregistrés. */
+    function chargerAxeBarres() {
+        const mode = obtenirPreference('axeBarresApercu');
+        document.querySelectorAll('input[name="v2-axe-barres"]').forEach((choix) => {
+            choix.checked = choix.value === mode;
+        });
+        if (!document.querySelector('input[name="v2-axe-barres"]:checked')) {
+            const defaut = document.getElementById('v2-axe-barres-proportionnel');
+            if (defaut) defaut.checked = true;
+        }
+        rendreExemplesAxeBarres();
+    }
+
+    /** La petite barre de chaque choix, sur les seuils enregistrés. */
+    function rendreExemplesAxeBarres() {
+        if (typeof window.genererExempleAxeBarre !== 'function') return;
+        document.querySelectorAll('[data-exemple-axe]').forEach((exemple) => {
+            exemple.innerHTML = window.genererExempleAxeBarre(exemple.dataset.exempleAxe);
+        });
+    }
+
+    /**
+     * Son propre geste, hors de `sauvegarderPreferencesV2` : celle-ci écrit tout le panneau à chaque
+     * changement (#806), et poserait le défaut dans les réglages au premier clic sur une case voisine.
+     * @returns {Promise<boolean>}
+     */
+    async function sauvegarderAxeBarresV2() {
+        const choix = document.querySelector('input[name="v2-axe-barres"]:checked');
+        if (!choix) return false;
+        const ecrit = definirPreference('axeBarresApercu', choix.value) !== false;
+        await ecrireEtAnnoncer('preferencesUtilisateur', async () => ecrit, { geste: GESTE_PREFERENCES });
+        if (!ecrit && window.temoinEnregistrement) {
+            window.temoinEnregistrement.nonEnregistre('le navigateur a refusé l\'écriture.', GESTE_PREFERENCES, 'preferencesUtilisateur');
+        }
+        return ecrit;
+    }
+
+    // =========================================================================
     // 🆕 BETA 96.1 : ANIMATION DES POINTS DU TABLEAU DE BORD
     // =========================================================================
 
@@ -544,6 +588,7 @@
     window.initialiserPreferencesV2 = initialiserPreferencesV2;
     window.sauvegarderPreferencesV2 = sauvegarderPreferencesV2;
     window.sauvegarderSeuilsV2 = sauvegarderSeuilsV2;
+    window.sauvegarderAxeBarresV2 = sauvegarderAxeBarresV2;
     window.restaurerSeuilsInterpretationDefautV2 = restaurerSeuilsInterpretationDefautV2;
     window.restaurerSeuilsDetectionDefautV2 = restaurerSeuilsDetectionDefautV2;
     // 🆕 BETA 96.1 : Animation des points

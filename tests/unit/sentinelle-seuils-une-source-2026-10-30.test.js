@@ -398,7 +398,7 @@ describe('(h) les barres : un point reste dans la zone de son palier', () => {
         }
     });
 
-    it('le fond de la barre porte ces zones, à bords nets, et 84 % n\'est pas dans le bleu', () => {
+    it('le fond de la barre porte ces zones (ses passages : sentinelle-barres-apercu), et 84 % n\'est pas dans le bleu', () => {
         const fond = i.fondDeLaBarre(zones);
         expect((fond.match(/#dc3545/g) || []).length).toBe(2);
         expect(fond).toContain('#2196F3');
