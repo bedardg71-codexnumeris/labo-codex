@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 1er NOVEMBRE 2026 : LA PALETTE ÉVALUATION N'A QU'UNE BARRE DE DÉFILEMENT, CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : dans Évaluer, les trois palettes gardent leur barre de titre visible et seul leur contenu défile. Les critères s'affichent en entier : au banc, une grille de 11 critères coupait le critère algorithmique à 63 px sur 287. Le geste ne passe plus à la page une fois en bas de la palette.
+
+**Ce qui reste à toi** : rien avant la mise en ligne. Ensuite, sur l'iPad, faire défiler d'un doigt la palette Évaluation jusqu'au critère algorithmique, en un seul mouvement (#1214, `plans de travail/RAPPORT-2026-11-01-palette-evaluation-un-defilement.md`).
+
+**Vérifié comment** : Vitest entier vert (10 615) ; 4 essais neufs dans WebKit à 1180 × 820, dans chaque disposition ; 7 changements volontaires du code font tous rougir une garde ; specs touchées vertes ; captures en clair et en sombre. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex, ta grille. Le double défilement exact de ta capture n'est pas rejoué : je n'ai pas vu la capture.
+
 📝 **LE 31 OCTOBRE 2026, 19 H 20 : LA 1.229 EST EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent tes Nouvelles validées de la 1.229 et les entrées ci-dessous. La note du cours ne change pas. L'essai des présences qui échouait venait du banc d'essai : il tapait avant que le tableau ait fini de se refaire. L'application n'a pas changé sur ce point.

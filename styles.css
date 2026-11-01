@@ -17465,19 +17465,36 @@ tr.ligne-import-ecartee td {
     max-width: none;
 }
 
-.travaux-palette-eval .travaux-palette-contenu,
+/* #1214 (1er nov. 2026) — UN SEUL ÉLÉMENT DÉFILE DANS LES PALETTES D'ÉVALUATION : LEUR CONTENU.
+   La barre de titre reste visible. La palette est bornée à sa zone, le contenu prend le reste.
+   Deux classes pour la palette : `.palette-flottante`, plus loin dans ce fichier, gagnerait
+   à égalité. Le panneau, son corps et la liste des critères prennent leur hauteur et ne
+   défilent plus. Le plafond de 750 px de la liste faisait pis que défiler : il écrasait les
+   cartes, dont `overflow: hidden` coupait le contenu (critère algorithmique compris). */
+.palette-flottante.travaux-palette-eval {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: calc(100% - 24px);
+}
+
 .travaux-palette-eval .palette-flottante-contenu {
-    max-height: calc(100vh - 200px);
     padding: 0;
     flex: 1;
+    min-height: 0;
     overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain; /* iPad : le geste ne passe pas à la page */
     min-width: 0;
+}
+
+.travaux-palette-eval .travaux-panneau-lateral {
+    overflow: visible;
 }
 
 .travaux-palette-eval .travaux-panneau-corps {
     max-height: none;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
     min-width: 0;
     padding: 8px;
     gap: 8px;
@@ -17504,6 +17521,8 @@ tr.ligne-import-ecartee td {
     box-sizing: border-box;
 }
 .travaux-palette-eval .conteneur-liste {
+    max-height: none;
+    overflow: visible;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 6px;
@@ -17795,13 +17814,8 @@ tr.ligne-import-ecartee td {
     min-width: 100px;
     max-width: 90vw;
     height: calc(100% - 24px); /* Remplir la zone canvas verticalement */
-    display: flex;
-    flex-direction: column;
 }
 #travaux-palette-eval-retro .palette-flottante-contenu {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
     padding: 8px;
 }
 #travaux-palette-eval-retro #travaux-eval-retroaction {
