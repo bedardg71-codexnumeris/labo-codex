@@ -1634,6 +1634,20 @@ async function choisirCartoucheEval(select) {
     changerAuGeste();
 }
 
+/** La couleur du menu d'un critère suit son niveau (extrait de `niveauSelectionne`, #1215 : la relecture la repose). */
+function _colorerMenuDuNiveau(selectElement, niveau) {
+    if (niveau) {
+        // Patch §5.6 — promotion obtenirCouleurNiveau vers evaluation-calcul.js (session B étape 3 refactor 2026-05-18)
+        const couleur = window.obtenirCouleurNiveau ? window.obtenirCouleurNiveau(niveau) : 'transparent';
+        selectElement.style.backgroundColor = couleur + '30'; // 30 = 20% opacité
+        selectElement.style.borderColor = couleur;
+    } else {
+        selectElement.style.backgroundColor = 'transparent';
+        selectElement.style.borderColor = 'var(--bordure-claire)';
+    }
+    selectElement.style.fontWeight = 'normal';
+}
+
 function niveauSelectionne(critereId) {
     const selectElement = document.getElementById(`eval_${critereId}`);
     const niveau = selectElement.value;
@@ -1648,18 +1662,7 @@ function niveauSelectionne(critereId) {
         evaluationEnCours.criteres[critereId] = evaluationEnCours.donneesAlgorithmiques[critereId].niveau;
     }
 
-    // Mettre à jour la couleur du select
-    if (niveau) {
-        // Patch §5.6 — promotion obtenirCouleurNiveau vers evaluation-calcul.js (session B étape 3 refactor 2026-05-18)
-        const couleur = window.obtenirCouleurNiveau ? window.obtenirCouleurNiveau(niveau) : 'transparent';
-        selectElement.style.backgroundColor = couleur + '30'; // 30 = 20% opacité
-        selectElement.style.borderColor = couleur;
-        selectElement.style.fontWeight = 'normal';
-    } else {
-        selectElement.style.backgroundColor = 'transparent';
-        selectElement.style.borderColor = 'var(--bordure-claire)';
-        selectElement.style.fontWeight = 'normal';
-    }
+    _colorerMenuDuNiveau(selectElement, niveau);
 
     // Afficher le commentaire correspondant
     _afficherCommentaireCritere(critereId, niveau);
@@ -1688,6 +1691,12 @@ function niveauSelectionne(critereId) {
     _debouncerAutoSave();
 }
 
+/** #1215 — le maximum EST le poids du critère (lot 2) : celui de la grille d'aujourd'hui ; `max` du champ, seulement sans grille. */
+function _maxDesPoints(critereId, champ) {
+    const repli = { ponderation: Number(champ && champ.max) };
+    return (typeof window.parametresDuCritere === 'function' ? window.parametresDuCritere(critereId, repli) : repli).ponderation;
+}
+
 /**
  * Lot 2 (4 sept. 2026) — LES POINTS D'UN CRITÈRE ANALYTIQUE, jumeau de `niveauSelectionne`.
  * Le champ va de 0 au poids du critère (le maximum EST le poids, décision de Grégoire) ;
@@ -1708,7 +1717,7 @@ function pointsSaisis(critereId, el) {
         // niveau », et une cartouche ne s'ouvre plus sur un chiffre qui n'y est plus.
         if (evaluationEnCours.criteres) delete evaluationEnCours.criteres[critereId];
     } else {
-        const max = Number(champ && champ.max);
+        const max = _maxDesPoints(critereId, champ);
         let pts = Number(brut);
         if (pts < 0) pts = 0;
         if (!isNaN(max) && max > 0 && pts > max) pts = max;
@@ -1851,6 +1860,129 @@ function poserPointsBareme(critereId, valeur) {
     champ.value = String(valeur);
     champ.dispatchEvent(new Event('input', { bubbles: true }));
 }
+/* ===============================
+   LE FORMULAIRE RELIT LA GRILLE (#1215, 1er nov. 2026)
+   Consigne : plans de travail/CONSIGNE-LOT-2026-11-01-evaluer-relit-la-grille.md. Suite de #1213.
+   En mode Évaluer, après un détour par la grille, le formulaire montrait la grille d'avant, et la note de
+   la frappe suivante partait de l'ancien poids. DÉCIDÉ : REBÂTIR PAR LES DEUX RENDUS EXISTANTS, puis rendre
+   la saisie. Une mise à jour en place n'aurait suivi ni un critère ajouté ou retiré, ni un type changé, ni
+   un barème, et aurait été un troisième rendu.
+   ⛔ RIEN NE S'ÉCRIT : aucun événement, le compteur de chargement fait taire l'enregistrement automatique que
+   les rendus armeraient. Le calcul à l'écran et `noteCalculeeCourante` suivent, pour le prochain geste.
+   =============================== */
+
+/** Ce que porte le formulaire : ses champs par id (avec la marque de copie #671), ses commentaires, sa rétroaction. */
+function _lireSaisieDuFormulaire(zone) {
+    const champs = [...zone.querySelectorAll('input[id], select[id]')].map(el => ({ id: el.id, valeur: el.value, da: el.dataset.da }));
+    const commentaires = [...zone.querySelectorAll('[id^="comm_"]')].map(el => ({ id: el.id, texte: el.textContent }));
+    const retroaction = document.getElementById('retroactionFinale1');
+    return {
+        champs, commentaires,
+        retroaction: retroaction ? retroaction.value : null,
+        fige: !!zone.querySelector('input:disabled, select:disabled'),
+        criteres: Object.assign({}, evaluationEnCours.criteres),
+        points: Object.assign({}, evaluationEnCours.pointsAnalytiques)
+    };
+}
+
+/** Les champs reprennent leur valeur. Le poids a baissé sous les points : le maximum EST le poids (lot 2), comme à l'ouverture. */
+function _rendreSaisieAuFormulaire(saisie) {
+    evaluationEnCours.criteres = Object.assign({}, saisie.criteres);
+    evaluationEnCours.pointsAnalytiques = Object.assign({}, saisie.points);
+    saisie.champs.forEach(c => {
+        const el = document.getElementById(c.id);
+        if (!el) return;
+        el.value = c.valeur;
+        if (c.da !== undefined) el.dataset.da = c.da;
+    });
+    saisie.commentaires.forEach(c => { const el = document.getElementById(c.id); if (el) el.textContent = c.texte; });
+    Object.keys(evaluationEnCours.pointsAnalytiques).forEach(critereId => {
+        const champ = document.getElementById(`eval_pts_${critereId}`);
+        const max = _maxDesPoints(critereId, champ);
+        if (!champ || !(max > 0) || evaluationEnCours.pointsAnalytiques[critereId] <= max) return;
+        evaluationEnCours.pointsAnalytiques[critereId] = max;
+        champ.value = max;
+    });
+}
+
+/**
+ * Le recalcul remet à vide le menu d'un critère algorithmique (une frappe y ramène au niveau calculé), et il
+ * n'y a pas eu de frappe : un niveau choisi à la main reste choisi.
+ * La rétroaction : un texte tapé est protégé par sa marque (#961) et le générateur n'y touche pas ; un texte
+ * généré suit la nouvelle note, à l'écran, comme au prochain geste. Sur une copie verrouillée, c'est le texte remis.
+ */
+function _rendreNiveauxEtRetroaction(saisie) {
+    saisie.champs.forEach(c => {
+        const select = document.getElementById(c.id);
+        if (!select || select.tagName !== 'SELECT' || !/^eval_/.test(c.id)) return;
+        if (c.valeur) {
+            select.value = c.valeur;
+            evaluationEnCours.criteres[c.id.slice('eval_'.length)] = c.valeur;
+            const commentaire = saisie.commentaires.find(x => x.id === `comm_${c.id.slice('eval_'.length)}`);
+            const div = commentaire && document.getElementById(commentaire.id);
+            if (div) div.textContent = commentaire.texte;
+        }
+        _colorerMenuDuNiveau(select, select.value);
+    });
+    calculerNote();
+    if (typeof window.genererRetroaction === 'function') window.genererRetroaction(1);
+    const zoneRetroaction = document.getElementById('retroactionFinale1');
+    if (saisie.fige && zoneRetroaction && saisie.retroaction !== null && zoneRetroaction.value !== saisie.retroaction) {
+        zoneRetroaction.value = saisie.retroaction;
+        if (typeof window.mettreAJourCompteurMots === 'function') window.mettreAJourCompteurMots();
+    }
+}
+
+/** Le menu des grilles porte le nouveau nom, et la même grille reste choisie. */
+function _relireMenuDesGrilles() {
+    const select = document.getElementById('selectGrille1');
+    if (!select) return;
+    const choisie = select.value;
+    chargerGrillesDansSelect();
+    select.value = choisie;
+}
+
+/** Les deux rendus, choisis comme à l'ouverture : la cartouche de la copie si elle existe, sinon la grille seule. */
+function _rebatirLesCriteres(grilleId) {
+    const select = document.getElementById('selectCartoucheEval');
+    const cartoucheId = select ? select.value : '';
+    const cartouches = cartoucheId ? (db.getSync(cle(`cartouches_${grilleId}`), []) || []) : [];
+    if (cartouches.some(c => c.id === cartoucheId)) cartoucheSelectionnee();
+    else afficherCriteresDepuisGrille(grilleId, evaluationEnCours.echelleId || (document.getElementById('selectEchelle1') || {}).value);
+}
+
+function relireGrilleDuFormulaire() {
+    if (!window.travauxUI || window.travauxUI.getModeCourant() !== 'evaluer') return;   // l'entrée dans Évaluer bâtit neuf
+    if (window._chargementsEvaluationEnCours > 0 || !evaluationEnCours || !evaluationEnCours.grilleId) return;
+    const zone = document.getElementById('listeCriteresGrille1');
+    if (!zone || !zone.querySelector('.eval-critere-carte')) return;   // rien de bâti : « non reçu », attente d'échelle
+    const grilleId = evaluationEnCours.grilleId;
+    if (!(db.getSync(cle('grillesTemplates'), []) || []).some(g => g.id === grilleId)) return;
+
+    const saisie = _lireSaisieDuFormulaire(zone);
+    window._chargementsEvaluationEnCours = (window._chargementsEvaluationEnCours || 0) + 1;
+    try {
+        _relireMenuDesGrilles();
+        _rebatirLesCriteres(grilleId);
+        _rendreSaisieAuFormulaire(saisie);
+        if (typeof window.afficherCalculActuel === 'function') window.afficherCalculActuel();
+        _rendreNiveauxEtRetroaction(saisie);
+        marquerBaremesEvaluation();
+        if (saisie.fige && typeof window.desactiverFormulaireEvaluation === 'function') window.desactiverFormulaireEvaluation(true);   // le verrou reste
+    } finally {
+        window._chargementsEvaluationEnCours = Math.max(0, window._chargementsEvaluationEnCours - 1);
+    }
+    // Un enregistrement déjà en attente partira avec l'état relu, pas avec son vieil instantané. Aucun n'est armé ici.
+    if (window._timerAutoSave) _debouncerAutoSave();
+}
+
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('donnees-enregistrees', function(e) {
+        const ecrite = (e && e.detail) ? e.detail.cle : null;
+        if (ecrite && typeof window.cle === 'function' && ecrite === window.cle('grillesTemplates')) relireGrilleDuFormulaire();
+    });
+}
+
 /* ===============================
    AUTO-SAUVEGARDE DEBOUNCE (1.5s)
    Persiste les criteres en IDB apres chaque modification
@@ -2406,6 +2538,7 @@ window.pointsSaisis = pointsSaisis;   // lot 2
 window.toucherTrancheBareme = toucherTrancheBareme;   // #1120, lot 3
 window.poserPointsBareme = poserPointsBareme;
 window.marquerBaremesEvaluation = marquerBaremesEvaluation;
+window.relireGrilleDuFormulaire = relireGrilleDuFormulaire;   // #1215 — exposée pour les bancs
 
 // Export dispersé d'origine (L7026 résidu — mise à jour après dup/modif productions) :
 window.chargerProductionsDansSelect = chargerProductionsDansSelect;

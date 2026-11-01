@@ -30,26 +30,25 @@ function _armerEnregistrementAutomatique() {
     if (typeof window._debouncerAutoSave === 'function') window._debouncerAutoSave();
 }
 
+/** #1215 — le poids et le facteur de la grille d'aujourd'hui ; les attributs du champ, seulement sans grille. */
+function _parametresDuChamp(el) {
+    const repli = { ponderation: parseFloat(el.dataset.ponderation), facteur: parseFloat(el.dataset.facteur) };
+    return (typeof window.parametresDuCritere === 'function') ? window.parametresDuCritere(el.dataset.critereId, repli) : repli;
+}
+
 /** Handler oninput pour calculerNoteAlgorithmiqueSimple(critereId, ponderation, facteur) */
 function calculerNoteAlgoSimpleHandler(el) {
     if (typeof window.calculerNoteAlgorithmiqueSimple !== 'function') return;
-    window.calculerNoteAlgorithmiqueSimple(
-        el.dataset.critereId,
-        parseFloat(el.dataset.ponderation),
-        parseFloat(el.dataset.facteur)
-    );
+    const p = _parametresDuChamp(el);
+    window.calculerNoteAlgorithmiqueSimple(el.dataset.critereId, p.ponderation, p.facteur);
     _armerEnregistrementAutomatique();
 }
 
 /** Handler oninput pour calculerNoteAlgorithmiqueAvecCategories(critereId, ponderation, facteur, critereGrilleId) */
 function calculerNoteAlgoCatHandler(el) {
     if (typeof window.calculerNoteAlgorithmiqueAvecCategories !== 'function') return;
-    window.calculerNoteAlgorithmiqueAvecCategories(
-        el.dataset.critereId,
-        parseFloat(el.dataset.ponderation),
-        parseFloat(el.dataset.facteur),
-        el.dataset.critereGrilleId || ''
-    );
+    const p = _parametresDuChamp(el);
+    window.calculerNoteAlgorithmiqueAvecCategories(el.dataset.critereId, p.ponderation, p.facteur, el.dataset.critereGrilleId || '');
     _armerEnregistrementAutomatique();
 }
 

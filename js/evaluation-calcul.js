@@ -593,6 +593,20 @@ function _critereFormulePourCalcul(critereId, facteurRecu) {
 }
 
 /**
+ * #1215 (1er nov. 2026) — LE POIDS ET LE FACTEUR D'UN CRITÈRE SE LISENT DANS LA GRILLE D'AUJOURD'HUI, pas
+ * dans un attribut posé au chargement du formulaire. Mesuré : une frappe après un détour par la grille
+ * (critère passé de 20 à 30) enregistrait une note sur 20. `repli` (les attributs du champ) ne sert que
+ * si la grille est introuvable, la même règle que `_critereFormulePourCalcul` : aucune note ne change
+ * parce qu'une grille manque. Un poids absent rend `0` ou `NaN`, que la formule refuse, comme l'attribut.
+ * @returns {{ponderation: number, facteur: number}}
+ */
+function parametresDuCritere(critereId, repli) {
+    const critere = _critereDeGrille(critereId);
+    if (!critere) return repli;
+    return { ponderation: Number(critere.ponderation), facteur: critere.facteurNormalisation || 500 };
+}
+
+/**
  * #701 / #702 — LE NIVEAU D'UN POURCENTAGE, UNE SEULE RÈGLE POUR LES TROIS CHEMINS
  * (note globale, critère algorithmique, critère analytique à points).
  *
@@ -2093,6 +2107,7 @@ function _recalculerCriteresAlgorithmiques(grille) {
 // Préservés depuis bloc principal evaluation.js (session A) :
 window.calculerNoteAlgorithmiqueAvecCategories = calculerNoteAlgorithmiqueAvecCategories;
 window.calculerNoteAlgorithmiqueSimple = calculerNoteAlgorithmiqueSimple;
+window.parametresDuCritere = parametresDuCritere;       // #1215 — les handlers et les points, jamais un attribut périmé
 window.poserErreursDuChamp = poserErreursDuChamp;       // 21 oct. 2026 — Annoter, le chargement, le vidage
 window.erreursPourLaFormule = erreursPourLaFormule;
 window.copieEstCelleDeLEvaluationEnCours = copieEstCelleDeLEvaluationEnCours;   // #1142 — lue par travaux-outils.js (le compte des codes)

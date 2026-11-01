@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 1er NOVEMBRE 2026 : ÉVALUER RELIT LA GRILLE QUAND ELLE CHANGE, CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : si tu changes une pondération dans la grille pendant qu'une copie est ouverte dans Évaluer, tu retrouves à ton retour ta saisie intacte et la nouvelle pondération. La note part du nouveau poids. Avant, au banc, un geste après ce détour enregistrait 74,25 au lieu de 75,5, et le PDF imprimait « 17,50/30 ». Une copie verrouillée garde sa note remise.
+
+**Ce qui reste à toi** : rien avant la mise en ligne. Ensuite, sur l'iPad : dans Évaluer, choisir un niveau, aller changer une pondération dans la grille, revenir. Le niveau choisi est toujours là, et la pondération affichée est la nouvelle (#1215, `plans de travail/RAPPORT-2026-11-01-evaluer-relit-la-grille.md`). Une copie déjà enregistrée dans ce cas n'est pas réparée : Cowork te soumettra la question.
+
+**Vérifié comment** : Vitest entier vert (10 615) ; 15 essais neufs dans WebKit, deux fois chacun ; 21 changements volontaires du code font tous rougir une garde ; 68 essais voisins verts ; aucun cas sur les 101 évaluations de démo. Pas encore : la vérification complète du navigateur, l'iPad, ton vrai codex.
+
 📝 **LE 1er NOVEMBRE 2026 : LA PALETTE ÉVALUATION N'A QU'UNE BARRE DE DÉFILEMENT, CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : dans Évaluer, les trois palettes gardent leur barre de titre visible et seul leur contenu défile. Les critères s'affichent en entier : au banc, une grille de 11 critères coupait le critère algorithmique à 63 px sur 287. Le geste ne passe plus à la page une fois en bas de la palette.
