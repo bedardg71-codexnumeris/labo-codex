@@ -1,13 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
     CODES, planDesMorceaux, jugerRapportFusionne, listeObservable, fichiersQuiFaussent,
-    cheminsDuStatut, conditionsDuReport, jetonDeVerdict, executerVerdict, executerReport
+    cheminsDuStatut, conditionsDuReport, jetonDeVerdict, executerVerdict, executerReport, garderLaPasse
 } from '../../scripts/verdict-en-morceaux.mjs';
+import { natureDeLEtape } from '../../scripts/mesurer-verification.mjs';
 
 // SENTINELLE — 26 OCTOBRE 2026 · LE VERDICT DU MAC EN MORCEAUX, OUTILLÉ (tri de Git, volet B).
 //
@@ -28,6 +29,9 @@ import {
 // - le contrôle du sommet après chaque morceau retiré → D.c rouge ;
 // - le rejeu des specs touchées sauté dans executerReport → E.a, E.b et E.c rouges.
 // Chaque fois, le script restauré : `shasum` identique.
+// 1er nov. 2026 — l'appel à `garderLaPasse` retiré → D.g, D.h rouges ; son `try` retiré
+// → D.h rouge ; l'appel placé avant la fusion → D.g, D.h, D.i rouges ; le `rmSync` de
+// la destination retiré dans garderLaPasse → G.a rouge.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -155,6 +159,7 @@ function effetsVerdict(surcharges = {}) {
         jouerMorceau: async (k) => { joues.push(k); return 0; },
         blobs: () => joues.map((k) => `report-${k}.zip`),
         fusionner: () => rapport(specs.map((f) => vert(f))),
+        garderLaPasse: () => {},
         baseline: () => ({ echecsConnus: [] }),
         ecrireJeton: (j) => ecrits.push(j), dire: () => {},
         ...surcharges
@@ -210,6 +215,66 @@ describe('D — le verdict en morceaux (effets en doublures)', () => {
         expect(neuve.ecrits[0].code).toBe(1);
         const connue = effetsVerdict({ fusionner: rouge, baseline: () => ({ echecsConnus: ['c.spec.js › t'] }) });
         expect((await executerVerdict(connue.effets, { total: 3 })).code).toBe(CODES.VERT);
+    });
+
+    it('D.g la passe est gardée, avec son commit, avant le jugement : une passe rouge se relit aussi', async () => {
+        const gardes = [];
+        const rouge = () => rapport([vert('a.spec.js'), vert('b.spec.js'), { file: 'c.spec.js', titre: 't', statut: 'unexpected' }]);
+        const { effets } = effetsVerdict({ fusionner: rouge, garderLaPasse: (sha) => gardes.push(sha) });
+        expect((await executerVerdict(effets, { total: 3 })).code).toBe(CODES.ROUGE);
+        expect(gardes).toEqual(['sommet']);
+    });
+
+    it('D.h ne rien pouvoir garder n’empêche jamais le verdict, et se dit', async () => {
+        const dits = [];
+        const { effets, ecrits } = effetsVerdict({ garderLaPasse: () => { throw new Error('disque plein'); }, dire: (t) => dits.push(t) });
+        expect((await executerVerdict(effets, { total: 3 })).code).toBe(CODES.VERT);
+        expect(ecrits[0]).toMatchObject({ code: 0 });
+        expect(dits.join('\n')).toContain('disque plein');
+    });
+
+    it('D.i une fusion impossible ne garde rien', async () => {
+        const gardes = [];
+        const { effets } = effetsVerdict({ fusionner: () => { throw new Error('rien'); }, garderLaPasse: (sha) => gardes.push(sha) });
+        expect((await executerVerdict(effets, { total: 3 })).garde.nonJuge).toBe('fusion');
+        expect(gardes).toEqual([]);
+    });
+});
+
+describe('G — la passe gardée, sur un vrai disque', () => {
+    it('G.a les blobs, le rapport et le commit y sont ; ceux de la passe d’avant n’y sont plus', () => {
+        const racineBanc = mkdtempSync(path.join(tmpdir(), 'passe-gardee-'));
+        try {
+            const blobs = path.join(racineBanc, 'blobs');
+            mkdirSync(blobs);
+            writeFileSync(path.join(blobs, 'report-1.zip'), 'neuf');
+            const rapportJson = path.join(racineBanc, 'rapport.json');
+            writeFileSync(rapportJson, '{"neuf":true}');
+            const destination = path.join(racineBanc, 'gardee', 'derniere');
+            mkdirSync(path.join(destination, 'blobs'), { recursive: true });
+            writeFileSync(path.join(destination, 'blobs', 'report-9.zip'), 'vieux');
+
+            garderLaPasse({ blobs, rapport: rapportJson, sha: 'abc123', destination });
+
+            expect(readdirSync(path.join(destination, 'blobs'))).toEqual(['report-1.zip']);
+            expect(readFileSync(path.join(destination, 'rapport.json'), 'utf8')).toBe('{"neuf":true}');
+            expect(readFileSync(path.join(destination, 'commit.txt'), 'utf8').trim()).toBe('abc123');
+            expect(existsSync(blobs)).toBe(true);
+        } finally {
+            rmSync(racineBanc, { recursive: true, force: true });
+        }
+    });
+});
+
+describe('F — ce que la mesure de la vérification compte comme ouverture et comme pause', () => {
+    it('F.a les titres que Playwright 1.60 donne à ces étapes ; rien d’autre ne compte', () => {
+        expect(natureDeLEtape('pw:api', 'Wait for timeout')).toBe('pause');
+        expect(natureDeLEtape('pw:api', 'Navigate to "/home/runner/work/labo-codex/labo-codex/index.html"')).toBe('ouverture');
+        expect(natureDeLEtape('pw:api', 'Navigate to "file:///x/index.html?x=1"')).toBe('ouverture');
+        expect(natureDeLEtape('pw:api', 'Reload')).toBe('rechargement');
+        expect(natureDeLEtape('pw:api', 'Navigate to "about:blank"')).toBeNull();
+        expect(natureDeLEtape('pw:api', 'Wait for function')).toBeNull();
+        expect(natureDeLEtape('test.step', 'Wait for timeout')).toBeNull();
     });
 });
 
