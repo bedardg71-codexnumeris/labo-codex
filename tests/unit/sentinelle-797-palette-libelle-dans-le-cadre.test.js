@@ -63,6 +63,6 @@ describe('#797 · dans la palette, un libellé long revient à la ligne', () => 
     it('le libellé complet reste lisible au survol', () => {
         // L'infobulle porte le nom : c'est elle qui rend la troncature
         // acceptable partout ailleurs, et elle doit survivre au chantier.
-        expect(outils).toMatch(/class="travaux-errfr-item\$\{actif\}"[^`]*title="\$\{echapperHtml\(c\.nom\)\}/);
+        expect(outils).toMatch(/class="travaux-errfr-item\$\{actif\}[^"]*"[^`]*title="\$\{echapperHtml\(c\.nom\)\}/);
     });
 });

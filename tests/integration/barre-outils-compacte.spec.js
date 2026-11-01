@@ -22,7 +22,7 @@ async function ouvrirBarre(page) {
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.travauxUI && window.travauxStockage
         && typeof window.executerActionEval === 'function', null, { timeout: 30000 });
-    await page.evaluate(({ png, titre }) => {
+    await page.evaluate(({ titre }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
         const T = 'tbarre', coursId = 'cours-barre';
         const criteres = [{ id: 'c0', nom: 'Contenu', ponderation: 100, type: 'holistique', description: 'x' }];
@@ -53,10 +53,17 @@ async function ouvrirBarre(page) {
         window.db.setSync('infoCours', { id: coursId, codeCours: 'FRA101', groupe: '01', _groupeCoursId: 'GCB' });
         window.db.setSync('groupeCoursActif', { id: 'GCB', trimestreId: T });
         window.definirPreference('chronoEvaluation', true);
+    }, { titre: TITRE_LONG });
+    await entrerDansLaCopie(page);
+}
+
+/** La section, la copie évaluée, puis Annoter sur une copie importée. Rejouée après un vrai rechargement. */
+async function entrerDansLaCopie(page) {
+    await page.evaluate((png) => {
         const octets = Uint8Array.from(atob(png), (c) => c.charCodeAt(0));
         const copie = new Blob([octets], { type: 'image/png' });
         window.travauxStockage.recupererBlob = async function () { return copie; };
-    }, { png: PNG, titre: TITRE_LONG });
+    }, PNG);
     await page.evaluate(() => window.afficherSection('evaluations'));
     await page.waitForFunction(() => !!document.querySelector('#section-evaluations.active') && window.travauxUI.getModeCourant() === 'annoter', null, { timeout: 10000 });
     await page.evaluate(() => new Promise((r) => setTimeout(r, 400))); // l'initialisation du module, lancée à +100 ms (#761)
@@ -271,5 +278,209 @@ test.describe('La barre d’outils compacte', () => {
             expect(r, 'une étiquette coupée à gauche, position ' + depart).toBe(0);
             expect(await etiquettesEntieres(page), 'position ' + depart).toBeGreaterThanOrEqual(3);
         }
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// LA PALETTE CODES EN VERSION COMPACTE (partie B ; ébauches `palette-codes-*`).
+// ⚠ Le vrai rechargement passe par le stockage réel : c'est lui qui dit que le choix survit.
+
+const CODES = '#travaux-palette-erreurs-fr';
+
+async function ouvrirCodes(page) {
+    await page.evaluate(() => { if (!document.getElementById('travaux-palette-erreurs-fr')) window.travauxOutils.togglePaletteErreursFrancais(); });
+    await page.waitForSelector(CODES + ' .travaux-errfr-item');
+}
+const choisirCompacte = (page) => page.evaluate(() => document.querySelector('#travaux-palette-erreurs-fr [data-disposition="compacte"]').click());
+const lireDisposition = (page) => page.evaluate(() => {
+    const p = document.getElementById('travaux-palette-erreurs-fr');
+    return {
+        compacte: p.classList.contains('codes-compacte'),
+        marque: [...p.querySelectorAll('[data-disposition]')].filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.disposition),
+        largeur: Math.round(p.getBoundingClientRect().width), hauteur: p.getBoundingClientRect().height
+    };
+});
+/** Pose le code actif sur la copie, comme un doigt : les vrais événements sur le vrai canevas. */
+const poserAuDoigt = (page) => page.evaluate(() => {
+    const c = document.getElementById('travaux-canvas-annotation');
+    const r = c.getBoundingClientRect();
+    const o = { bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', isPrimary: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
+    c.dispatchEvent(new PointerEvent('pointerdown', o));
+    c.dispatchEvent(new PointerEvent('pointerup', o));
+});
+
+test.describe('La palette Codes compacte', () => {
+    test('par défaut, les descriptions : ↕ est marqué, les noms sont là, et la zone du nom actif ne se voit pas', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        expect(await lireDisposition(page)).toMatchObject({ compacte: false, marque: ['v'], largeur: 200 });
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            return {
+                nomVisible: p.querySelector('.travaux-errfr-nom').offsetHeight > 0, zone: getComputedStyle(p.querySelector('.travaux-errfr-nom-actif')).display,
+                boutons: [...p.querySelectorAll('.palette-barre-droite button')].map((b) => b.dataset.disposition || 'replier'),
+                tuiles: [...document.querySelectorAll('.palette-flottante')].filter((x) => x.querySelector('[data-disposition="compacte"]')).length
+            };
+        });
+        expect(m).toEqual({ nomVisible: true, zone: 'none', boutons: ['h', 'v', 'compacte', 'replier'], tuiles: 1 });
+    });
+
+    test('compacte : 188 pt, cinq tuiles par rangée à la couleur du code, le numéro en blanc, le nom dans la bulle et l’aria-label', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        await choisirCompacte(page);
+        expect(await lireDisposition(page)).toMatchObject({ compacte: true, marque: ['compacte'], largeur: 188 });
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            const items = [...p.querySelectorAll('.travaux-errfr-item')];
+            const rangee = items.filter((i) => i.getBoundingClientRect().top === items[0].getBoundingClientRect().top).length;
+            const n = items[4].querySelector('.travaux-errfr-numero'), cs = getComputedStyle(n);
+            return {
+                nb: items.length, rangee, couleur: cs.backgroundColor !== 'rgba(0, 0, 0, 0)', blanc: cs.color,
+                couvre: Math.abs(n.getBoundingClientRect().height - items[4].getBoundingClientRect().height) < 1,
+                nomCache: items[4].querySelector('.travaux-errfr-nom').offsetHeight, bulle: items[4].title, aria: items[4].getAttribute('aria-label'),
+                poignee: getComputedStyle(p.querySelector('.palette-poignee-redim')).display, barre: p.querySelector('.palette-flottante-barre').scrollWidth <= p.querySelector('.palette-flottante-barre').clientWidth
+            };
+        });
+        expect(m).toMatchObject({ nb: 10, rangee: 5, couleur: true, blanc: 'rgb(255, 255, 255)', couvre: true, nomCache: 0, poignee: 'none', barre: true });
+        expect(m.bulle.length).toBeGreaterThan(3);
+        expect(m.aria).toBe('Code 5, ' + m.bulle);
+    });
+
+    test('un toucher sur une tuile choisit le code, le nom paraît dessous, et la hauteur de la palette ne bouge pas', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        await choisirCompacte(page);
+        const avant = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            return { h: p.getBoundingClientRect().height, texte: p.querySelector('.travaux-errfr-nom-actif').textContent };
+        });
+        expect(avant.texte).toBe('Touche un code : son nom paraît ici.');
+        const hauteurs = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            return [...p.querySelectorAll('.travaux-errfr-item')].map((t) => {
+                t.click();
+                const z = p.querySelector('.travaux-errfr-nom-actif');
+                const num = t.querySelector('.travaux-errfr-numero').textContent;
+                return {
+                    h: p.getBoundingClientRect().height, z: z.textContent.startsWith(num + '. ') && z.textContent.endsWith(t.title),
+                    liseres: getComputedStyle(t.querySelector('.travaux-errfr-numero')).boxShadow.split('inset').length - 1, zoneH: z.offsetHeight
+                };
+            });
+        });
+        for (const x of hauteurs) expect(x).toEqual({ h: avant.h, z: true, liseres: 2, zoneH: 51 });
+    });
+
+    test('la tuile pose le code d’un toucher, son compteur monte dans le coin, et le total devient une pastille', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        await choisirCompacte(page);
+        await page.evaluate(() => document.querySelectorAll('#travaux-palette-erreurs-fr .travaux-errfr-item')[2].click());
+        await poserAuDoigt(page);
+        await page.waitForFunction(() => document.querySelectorAll('#travaux-palette-erreurs-fr .travaux-errfr-compteur')[2].textContent === '1');
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            const t = p.querySelectorAll('.travaux-errfr-item')[2], c = t.querySelector('.travaux-errfr-compteur');
+            const rt = t.getBoundingClientRect(), rc = c.getBoundingClientRect();
+            const past = document.getElementById('travaux-errfr-total-pastille');
+            return {
+                auCoin: rc.right <= rt.right && rc.top >= rt.top && rc.width < rt.width / 2, aria: t.getAttribute('aria-label').endsWith(', 1 posé'),
+                pastille: past.textContent, bulle: past.title, pastilleVue: past.offsetHeight > 0, mots: getComputedStyle(document.getElementById('travaux-errfr-total-header')).display
+            };
+        });
+        expect(m).toMatchObject({ auCoin: true, aria: true, pastille: '1', pastilleVue: true, mots: 'none' });
+        expect(m.bulle).toMatch(/^1 /);
+    });
+
+    test('la touche 4 pose le code 4 en version compacte', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        await choisirCompacte(page);
+        await page.keyboard.press('4');
+        await page.waitForFunction(() => document.querySelector('#travaux-palette-erreurs-fr .travaux-errfr-item.actif .travaux-errfr-numero')?.textContent === '4');
+        expect(await page.evaluate(() => document.getElementById('travaux-errfr-nom-actif').textContent.startsWith('4. '))).toBe(true);
+        await poserAuDoigt(page);
+        await page.waitForFunction(() => document.querySelector('#travaux-palette-erreurs-fr .travaux-errfr-item.actif .travaux-errfr-compteur').textContent === '1');
+    });
+
+    test('le choix reste à la copie suivante, et survit au vrai rechargement ; ↕ le quitte', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        await choisirCompacte(page);
+        await ouvrirCopie(page, 'F6');
+        await ouvrirCodes(page);
+        expect(await lireDisposition(page)).toMatchObject({ compacte: true, marque: ['compacte'], largeur: 188 });
+        expect(await page.evaluate(() => window.db.getSync('preferencesUtilisateur', {}).dispositionPaletteCodes)).toBe('compacte');
+
+        await page.reload();
+        await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.travauxUI && window.travauxStockage
+            && typeof window.executerActionEval === 'function', null, { timeout: 30000 });
+        expect(await page.evaluate(() => window.obtenirPreference('dispositionPaletteCodes'))).toBe('compacte');
+        await entrerDansLaCopie(page);
+        await ouvrirCodes(page);
+        expect(await lireDisposition(page)).toMatchObject({ compacte: true, marque: ['compacte'], largeur: 188 });
+
+        await page.evaluate(() => document.querySelector('#travaux-palette-erreurs-fr [data-disposition="v"]').click());
+        const v = await lireDisposition(page);
+        expect(v).toMatchObject({ compacte: false, marque: ['v'], largeur: 200 });
+        expect(await page.evaluate(() => window.obtenirPreference('dispositionPaletteCodes'))).toBe('v');
+    });
+
+    test('↔ quitte la compacte, et sa hauteur est mesurée sur les descriptions (#774)', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        await choisirCompacte(page);
+        const compacte = (await lireDisposition(page)).hauteur;
+        await page.evaluate(() => document.querySelector('#travaux-palette-erreurs-fr [data-disposition="h"]').click());
+        const h = await lireDisposition(page);
+        expect(h).toMatchObject({ compacte: false, marque: ['h'] });
+        expect(h.largeur).toBeGreaterThan(1000);
+        expect(h.hauteur).toBeLessThan(compacte); // le bandeau : deux lignes de codes, pas la hauteur de la compacte
+    });
+
+    /** Une grille aux codes écrits par l'enseignant·e, née avec la marque : sans sous-critère, aucun code (étape 0). */
+    const poserCodes = (page, codes) => page.evaluate((codes) => {
+        const g = window.db.getSync('tbarre_grillesTemplates', []);
+        g[0].criteres.push({
+            id: 'cA', nom: 'Français écrit', ponderation: 20, type: 'algorithmique', formule: "nombre d'erreurs / nombre de mots", codesDepuisSousCriteres: true, codesSousCriteresSeulement: true,
+            sousCriteres: codes.map((code, i) => ({ id: 'sc' + i, code, nom: 'Sous-critère ' + i, ponderation: 1 }))
+        });
+        window.db.setSync('tbarre_grillesTemplates', g); // security-ok: fixture du banc, sans source externe
+    }, codes);
+
+    test('un code au numéro long : il tient dans sa tuile, jusqu’à 20 caractères', async ({ page }) => {
+        await ouvrirBarre(page);
+        await poserCodes(page, ['1', '22', 'ABC', 'WWWW', 'WWWWWW', 'WWWWWWW', 'SOUS-CRITERE_LONG-20', 'WWWWWWWWWWWWWWWWWWWW', '8']);
+        await ouvrirCopie(page, 'F6');
+        await ouvrirCodes(page);
+        await choisirCompacte(page);
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            const contenu = p.querySelector('.palette-flottante-contenu');
+            return {
+                tuiles: [...p.querySelectorAll('.travaux-errfr-numero')].map((n) => ({ t: n.textContent, deborde: n.scrollWidth > n.clientWidth + 1, points: getComputedStyle(n).textOverflow })),
+                largeurTenue: contenu.scrollWidth <= contenu.clientWidth
+            };
+        });
+        // 20 lettres W, le pire des cas : coupées par « … », et rien d'autre ne déborde.
+        expect(m.tuiles.filter((x) => x.deborde).map((x) => [x.t, x.points])).toEqual([['WWWWWWWWWWWWWWWWWWWW', 'ellipsis']]);
+        expect(m.tuiles.map((x) => x.t)).toContain('SOUS-CRITERE_LONG-20');
+        expect(m.largeurTenue).toBe(true);
+    });
+
+    test('la palette vide le dit aussi en compacte, et le rappel « Touche un code » se tait', async ({ page }) => {
+        await ouvrirBarre(page);
+        await poserCodes(page, []);
+        await ouvrirCopie(page, 'F6');
+        await page.evaluate(() => { if (!document.getElementById('travaux-palette-erreurs-fr')) window.travauxOutils.togglePaletteErreursFrancais(); });
+        await page.waitForSelector(CODES + ' .travaux-errfr-vide');
+        await choisirCompacte(page);
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            const vide = p.querySelector('.travaux-errfr-vide');
+            return { items: p.querySelectorAll('.travaux-errfr-item').length, texte: vide.textContent, vu: vide.offsetHeight > 0, large: vide.getBoundingClientRect().width > 150, rappel: !!p.querySelector('.travaux-errfr-nom-actif') };
+        });
+        expect(m).toMatchObject({ items: 0, vu: true, large: true, rappel: false });
+        expect(m.texte).toContain('Aucun code');
     });
 });

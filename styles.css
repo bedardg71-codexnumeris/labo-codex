@@ -20350,6 +20350,11 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     background: rgba(106, 172, 184, 0.1);
     color: var(--texte-principal, #d0e0e4);
 }
+/* La disposition choisie de la palette Codes (consigne du 1er nov. 2026, partie B). */
+.palette-flottante-toggle.actif {
+    background: var(--bleu-pale);
+    color: var(--texte-principal, #d0e0e4);
+}
 
 .palette-flottante-contenu {
     display: flex;
@@ -27871,6 +27876,166 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     overflow-wrap: break-word;
     flex: 1 1 auto;
     min-width: 0;
+}
+
+/* LA PALETTE CODES EN VERSION COMPACTE (consigne du 1er nov. 2026, partie B ; `palette-codes-compacte-*`). Même balisage que
+   les descriptions : tout ce qui lit `.travaux-errfr-item`, son `.actif`, ses compteurs et sa touche reste vrai. L'élément
+   `.travaux-errfr-numero` devient la tuile. `!important` : la palette porte en style en ligne sa position et ses dimensions
+   enregistrées, qu'on ne touche pas pour les retrouver en revenant aux descriptions (précédent : `.replie`). */
+#travaux-palette-erreurs-fr.codes-compacte {
+    width: 188px !important;
+    min-width: 188px;
+    height: auto !important;
+}
+#travaux-palette-erreurs-fr.codes-compacte .palette-poignee-redim,
+#travaux-palette-erreurs-fr.codes-compacte #travaux-errfr-total-header,
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-nom {
+    display: none;
+}
+#travaux-palette-erreurs-fr.codes-compacte .palette-flottante-barre {
+    padding: 6px;
+}
+#travaux-palette-erreurs-fr.codes-compacte .palette-barre-gauche {
+    gap: 3px;
+}
+#travaux-palette-erreurs-fr.codes-compacte .palette-flottante-titre {
+    white-space: nowrap;
+}
+#travaux-palette-erreurs-fr.codes-compacte .palette-flottante-toggle {
+    width: 18px;
+    height: 18px;
+    font-size: 13px;
+}
+#travaux-palette-erreurs-fr.codes-compacte .palette-flottante-contenu {
+    padding: 8px;
+    gap: 8px;
+}
+/* En descriptions, le total a sa ligne sous le nom : le quatrième bouton de la barre lui prend sa place à droite. */
+#travaux-errfr-total-header {
+    display: block;
+    color: var(--texte-secondaire);
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+}
+.travaux-errfr-total-pastille {
+    display: none;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-total-pastille {
+    display: inline-block;
+    margin-left: 3px;
+    padding: 0 5px;
+    border-radius: 8px;
+    background: var(--bleu-moyen, #244858);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 15px;
+    text-transform: none;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-total-pastille.u-hide {
+    display: none;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-liste {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-auto-flow: dense;
+    gap: 1px;
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-vide {
+    grid-column: 1 / -1;
+    padding: 0 2px;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-item {
+    position: relative;
+    display: block;
+    width: auto;
+    max-width: none;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-numero {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    height: auto;
+    overflow: hidden;
+    border-radius: 0;
+    font-size: 15px;
+    white-space: nowrap;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-item:hover .travaux-errfr-numero {
+    filter: brightness(1.12);
+}
+/* Le code actif : le double liseré intérieur, blanc puis foncé, de la couleur active de la palette d'annotation. */
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-item.actif .travaux-errfr-numero {
+    box-shadow: inset 0 0 0 2px #ffffff, inset 0 0 0 4px #333344;
+}
+#travaux-palette-erreurs-fr.codes-compacte .errfr-tuile-3 .travaux-errfr-numero,
+#travaux-palette-erreurs-fr.codes-compacte .errfr-tuile-2-cases .travaux-errfr-numero,
+#travaux-palette-erreurs-fr.codes-compacte .errfr-tuile-rangee .travaux-errfr-numero {
+    font-size: 11px;
+}
+#travaux-palette-erreurs-fr.codes-compacte .errfr-tuile-2-cases {
+    grid-column: span 2;
+}
+#travaux-palette-erreurs-fr.codes-compacte .errfr-tuile-rangee {
+    grid-column: 1 / -1;
+}
+/* 20 caractères ordinaires tiennent sur la rangée (mesuré) ; 20 lettres larges se coupent : le code entier est sous la grille. */
+#travaux-palette-erreurs-fr.codes-compacte .errfr-tuile-rangee .travaux-errfr-numero {
+    display: block;
+    padding: 0 6px;
+    line-height: 34px;
+    text-align: center;
+    text-overflow: ellipsis;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-compteur {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 1;
+    min-width: 0;
+    height: 13px;
+    margin: 0;
+    padding: 0 3px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(8, 16, 26, 0.78);
+    color: #fff;
+    font-size: 9.5px;
+    line-height: 13px;
+    pointer-events: none;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-item.actif .travaux-errfr-compteur {
+    top: 5px;
+    right: 5px;
+}
+.travaux-errfr-nom-actif {
+    display: none;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-nom-actif {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    height: 51px;
+    margin: 0 2px;
+    color: var(--texte-secondaire);
+    font-size: 12px;
+    line-height: 17px;
+}
+#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-nom-actif.code-choisi {
+    color: var(--texte-principal);
 }
 
 .annot-col-droite .travaux-errfr-item {

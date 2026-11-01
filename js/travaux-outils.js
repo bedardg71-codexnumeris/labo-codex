@@ -1503,14 +1503,82 @@
             const actif = outilActif === c.id ? ' actif' : '';
             // `c.id` vient d'un champ libre du gabarit (le code d'un sous-critère) :
             // échappé, règle 1 — même si le module ne laisse passer qu'un jeton sûr.
-            html += `<div class="travaux-errfr-item${actif}" data-action="travauxOutils.setOutilActif" data-param="${echapperHtml(c.id)}" title="${echapperHtml(c.nom)}">`;
+            html += `<div class="travaux-errfr-item${actif}${_classeLongueurCode(c.numero)}" role="button" tabindex="0" aria-label="${echapperHtml(_libelleCode(c, 0))}" data-action="travauxOutils.setOutilActif" data-param="${echapperHtml(c.id)}" title="${echapperHtml(c.nom)}">`;
             html += `<span class="travaux-errfr-numero" style="background:${echapperHtml(c.couleur)}">${echapperHtml(String(c.numero))}</span>`;
             html += `<span class="travaux-errfr-nom">${echapperHtml(c.nom)}</span>`;
             html += `<span class="travaux-errfr-compteur u-hide" data-erreur="${echapperHtml(c.id)}"></span>`;
             html += '</div>';
         });
         html += '</div>';
+        // La version compacte ne dit le nom que du code actif : trois lignes réservées, la palette ne bouge pas.
+        if (codes.length) html += '<p class="travaux-errfr-nom-actif" id="travaux-errfr-nom-actif">' + TEXTE_AUCUN_CODE_ACTIF + '</p>';
         return html;
+    }
+
+    // Mots de l'ébauche validée (1er nov. 2026, 5 h 39).
+    const TEXTE_AUCUN_CODE_ACTIF = 'Touche un code\u00a0: son nom para\u00eet ici.';
+
+    /** Le nom du code, pour le lecteur d'écran ; `nb` : combien en sont posés sur la copie. */
+    function _libelleCode(c, nb) {
+        return 'Code ' + c.numero + ', ' + c.nom + (nb > 0 ? ', ' + nb + (nb > 1 ? ' posés' : ' posé') : '');
+    }
+
+    /**
+     * La tuile d'un code de la version compacte : une case pour un ou deux caractères (un code libre de sous-critère
+     * va jusqu'à 20, `codesAnnotation`). Mesuré à 188 pt : 33 pt la case, soit 3 caractères à 11 pt ; 6 sur deux cases ;
+     * au-delà, toute la rangée, qui porte les 20.
+     */
+    function _classeLongueurCode(numero) {
+        const n = String(numero).length;
+        if (n <= 2) return '';
+        if (n === 3) return ' errfr-tuile-3';
+        return n <= 6 ? ' errfr-tuile-2-cases' : ' errfr-tuile-rangee';
+    }
+
+    /** Sous la grille de la version compacte : le numéro et le nom du code actif. */
+    function _afficherNomCodeActif() {
+        const zone = document.getElementById('travaux-errfr-nom-actif');
+        if (!zone) return;
+        const c = _codesCourants().find((code) => code.id === outilActif);
+        zone.textContent = c ? '' : TEXTE_AUCUN_CODE_ACTIF;
+        zone.classList.toggle('code-choisi', !!c);
+        if (c) {
+            const numero = document.createElement('strong');
+            numero.textContent = c.numero + '.';
+            zone.append(numero, ' ' + c.nom);
+        }
+    }
+
+    function _lireDispositionCodes() {
+        return (typeof obtenirPreference === 'function' && obtenirPreference('dispositionPaletteCodes')) || 'v';
+    }
+
+    /** La palette Codes porte la disposition choisie, et son bouton la montre. Le choix reste en préférence. */
+    function _appliquerDispositionCodes() {
+        const palette = document.getElementById('travaux-palette-erreurs-fr');
+        if (!palette) return;
+        const choisie = _lireDispositionCodes();
+        palette.classList.toggle('codes-compacte', choisie === 'compacte');
+        palette.querySelectorAll('[data-disposition]').forEach((b) => {
+            const estChoisie = b.dataset.disposition === choisie;
+            b.classList.toggle('actif', estChoisie);
+            b.setAttribute('aria-pressed', estChoisie ? 'true' : 'false');
+        });
+        _afficherNomCodeActif();
+    }
+
+    function _choisirDispositionCodes(disposition) {
+        if (typeof definirPreference === 'function') definirPreference('dispositionPaletteCodes', disposition);
+        _appliquerDispositionCodes();
+    }
+
+    /**
+     * La version compacte de la palette Codes. ↔ et ↕ gardent leur géométrie et la posent en quittant la compacte (`layoutPaletteH`,
+     * `layoutPaletteV`) ; la compacte ne touche ni à la position ni aux dimensions enregistrées : sa largeur et sa hauteur
+     * sont dans `styles.css`, le reste revient tel quel si on la quitte.
+     */
+    function choisirCodesCompacte() {
+        _choisirDispositionCodes('compacte');
     }
 
     /**
@@ -1653,12 +1721,13 @@
         // il porte la phrase et l'écran qu'il ouvre ne montre qu'elle.
         var titreEngrenage = _copieGouvernee() ? _phraseSourceCodes() : 'Personnaliser';
         html += '<div class="palette-barre-gauche">';
-        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes <span id="travaux-errfr-total-header" style="font-weight:400; font-size:0.75rem; color:var(--texte-secondaire);"></span></span>';
+        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes <span id="travaux-errfr-total-header"></span><span id="travaux-errfr-total-pastille" class="travaux-errfr-total-pastille u-hide"></span></span>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="' + echapperHtml(titreEngrenage) + '"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '</div>';
         html += '<div class="palette-barre-droite">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" title="Disposition horizontale">\u2194\uFE0E</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" title="Disposition verticale">\u2195\uFE0E</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" data-disposition="h" title="Disposition horizontale" aria-label="Disposition horizontale">\u2194\uFE0E</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" data-disposition="v" title="Disposition verticale, avec les descriptions" aria-label="Disposition verticale, avec les descriptions">\u2195\uFE0E</button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.choisirCodesCompacte" data-disposition="compacte" title="Disposition compacte" aria-label="Disposition compacte"><svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteErrFrReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
@@ -1679,6 +1748,7 @@
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
+        _appliquerDispositionCodes();
         majEtatBtnToggle('btn-toggle-codes', true);
     }
 
@@ -2097,6 +2167,7 @@
                 // aurait pas passé.
                 item.classList.toggle('actif', item.dataset.param === outilActif);
             });
+            _afficherNomCodeActif();
         }
 
         // Tampons — sélection visuelle. #1209 : les tuiles portent `data-param` depuis le retrait des handlers
@@ -2172,6 +2243,7 @@
      * Disposition horizontale : palette en bandeau (largeur max, hauteur limitée)
      */
     function layoutPaletteH(paletteId) {
+        if (paletteId === 'travaux-palette-erreurs-fr') _choisirDispositionCodes('h');   // la compacte quittée d'abord : la mesure ci-dessous lit les descriptions
         var palette = document.getElementById(paletteId);
         var conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
         if (!palette || !conteneur) return;
@@ -2201,6 +2273,7 @@
      * Disposition verticale : palette en colonne droite (200px, hauteur max)
      */
     function layoutPaletteV(paletteId) {
+        if (paletteId === 'travaux-palette-erreurs-fr') _choisirDispositionCodes('v');
         var palette = document.getElementById(paletteId);
         var conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
         if (!palette || !conteneur) return;
@@ -2556,12 +2629,21 @@
             if (badge) {
                 badge.textContent = count > 0 ? count : '';
                 badge.classList.toggle('u-hide', count === 0);
+                const tuile = badge.closest('.travaux-errfr-item');
+                if (tuile) tuile.setAttribute('aria-label', _libelleCode(c, count));
             }
         });
 
         const spanTotal = document.getElementById('travaux-errfr-total-header');
         if (spanTotal) {
             spanTotal.textContent = total > 0 ? '(' + _totalCodesEnMots(total) + ')' : '';   // étape 2a
+        }
+        // La version compacte : le même total, en pastille numérique ; les mots dans sa bulle.
+        const pastilleTotal = document.getElementById('travaux-errfr-total-pastille');
+        if (pastilleTotal) {
+            pastilleTotal.textContent = total > 0 ? String(total) : '';
+            pastilleTotal.title = total > 0 ? _totalCodesEnMots(total) : '';
+            pastilleTotal.classList.toggle('u-hide', total === 0);
         }
     }
 
@@ -4067,6 +4149,7 @@
         togglePaletteReplie: togglePaletteReplie,
         layoutPaletteH: layoutPaletteH,
         layoutPaletteV: layoutPaletteV,
+        choisirCodesCompacte: choisirCodesCompacte,
         afficherRaccourcis: afficherRaccourcis,
         // Raccourcis clavier annotation
         obtenirRaccourcisAnnotation: obtenirRaccourcisAnnotation,
