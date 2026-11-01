@@ -487,12 +487,12 @@ test.describe('La palette Évaluation compacte', () => {
         // Un nom d'un seul long mot : à 316 pt, c'est ce qui ne laisse plus de place au badge sur la rangée du nom.
         await ouvrir(page, { extra: [{ id: 'cL', nom: 'Anticonstitutionnellement', ponderation: 5, type: 'algorithmique', formule: "nombre d'erreurs / nombre de mots" }] });
 
-        await test.step('à l’ouverture, à 1180 pt : Paramètres à 280, Évaluation à 316, ↔ jusqu’à la zone', async () => {
+        await test.step('à l’ouverture, à 1180 pt : Paramètres à 200 (verdict du 1er nov.), Évaluation à 316, ↔ jusqu’à la zone', async () => {
             const l = await page.evaluate(() => ({
                 parametres: document.getElementById('travaux-palette-eval-gauche').getBoundingClientRect().width,
                 evaluation: document.getElementById('travaux-palette-eval-droite').getBoundingClientRect().width
             }));
-            expect(l).toEqual({ parametres: 280, evaluation: 316 });
+            expect(l).toEqual({ parametres: 200, evaluation: 316 });
             const se = await page.evaluate(() => {
                 const g = document.getElementById('travaux-palette-eval-gauche').getBoundingClientRect();
                 const d = document.getElementById('travaux-palette-eval-droite').getBoundingClientRect();

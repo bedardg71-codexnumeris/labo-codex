@@ -103,6 +103,7 @@ function cocherOptionsParDefaut() {
         const radioComplet = document.getElementById('affichageNoteComplet1');
         if (radioComplet) radioComplet.checked = true;
     }
+    if (typeof window.mettreAJourResumeOptionsRetroaction === 'function') window.mettreAJourResumeOptionsRetroaction();
 }
 
 /**
@@ -795,6 +796,7 @@ function verifierEtChargerEvaluationExistante() {
                     const r = document.getElementById('affichageNoteComplet1');
                     if (r) r.checked = true;
                 }
+                if (typeof window.mettreAJourResumeOptionsRetroaction === 'function') window.mettreAJourResumeOptionsRetroaction();
             }
             // Régénérer la rétroaction avec les options d'affichage restaurées — SEULEMENT si
             // l'évaluation n'en a pas. #960 : la rétroaction enregistrée fait foi ; régénérée ici,

@@ -134,7 +134,7 @@ test('#760 + #759 · la générale liste les tampons de la spécifique, dans le 
         'Liaison (×1) :', "L'étudiant·e infère, relie des éléments entre eux, interprète."
     ].join('\n'));
 
-    // « Copier tout » : le bouton de la sous-barre de la rétroaction.
+    // « Copier tout » : le bouton du pied de la rétroaction.
     await page.evaluate(() => {
         const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent === 'Copier tout');
         btn.click();

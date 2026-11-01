@@ -17481,10 +17481,10 @@ tr.ligne-import-ecartee td {
    défilent plus. Le plafond de 750 px de la liste faisait pis que défiler : il écrasait les
    cartes, dont `overflow: hidden` coupait le contenu (critère algorithmique compris).
    Consigne du 1er nov. 2026 : leurs largeurs étaient écrites sur une seule classe, et `.palette-flottante` les emportait
-   (200 px à l'ouverture, ↔ arrêté à 320). Évaluation s'ouvre à 316 px, la largeur des ébauches : le nom et le menu tiennent
-   sur une ligne. Rétroaction garde sa règle par id. */
+   (↔ arrêté à 320). Évaluation s'ouvre à 316 px, la largeur des ébauches : le nom et le menu tiennent sur une ligne.
+   Paramètres reste à ses 200 px, Rétroaction aussi : c'est la plus petite où ses trois vues tiennent sur une ligne, et le
+   but est la place du canevas (verdict du 1er nov. 2026). */
 .palette-flottante.travaux-palette-eval {
-    min-width: 280px;
     max-width: none;
     display: flex;
     flex-direction: column;
@@ -18019,25 +18019,67 @@ tr.ligne-import-ecartee td {
     line-height: 1;
 }
 
-/* Compteur de mots */
-.eval-retro-pied {
+/* Le champ et son compte de mots. Le cadre est ici : le texte défile dans le champ, au-dessus de la marge du compte, et
+   ne passe donc jamais dessous (une marge intérieure du champ défilerait avec le texte). */
+.eval-retro-champ {
+    position: relative;
     display: flex;
-    flex-wrap: wrap;   /* #961 — l'avis passe au-dessus sur un écran étroit */
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 3px;
-    padding-right: 4px;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    margin-top: 4px;
+    padding-bottom: 20px;
+    border: 1px solid var(--bordure-claire);
+    border-radius: var(--radius-moyen, 5px);
+    background: var(--surface-carte, #1a3040);
+}
+.eval-retro-champ .eval-textarea {
+    border: none;
+    background: transparent;
 }
 .eval-compteur-mots {
+    position: absolute;
+    right: 8px;
+    bottom: 3px;
+    line-height: 14px;
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     font-size: 0.7rem;
     color: var(--gris-moyen);
+    pointer-events: none;
 }
-/* #961 (D7) — l'avis d'une rétroaction réécrite à la main, à gauche du compteur et de « Régénérer » */
+
+/* Le pied : « Régénérer », « Copier », « Copier tout ». L'avis passe au-dessus (#961). */
+.eval-retro-pied {
+    display: flex;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 6px;
+}
 .eval-avis-retro-reecrite {
-    margin-right: auto;
+    flex-basis: 100%;
     font-size: 0.7rem;
     color: var(--texte-secondaire);
+}
+.eval-retro-pied .btn-copier-retro {
+    flex: 1 1 auto;   /* sur deux rangées à 200 px : chacune va d'un bord à l'autre */
+    height: 30px;
+    margin-left: 0;
+    padding: 0 5px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.eval-retro-pied .btn-copier-tout {
+    color: var(--bleu-clair);
+}
+/* Spécifique et Bilan gardent ce qu'ils avaient : « Copier tout », seul. */
+.zone-retroaction:has(#vueRetroGenerale.u-hide) .eval-retro-pied > :not(.btn-copier-tout) {
+    display: none;
 }
 
 /* Contenu rétroaction en lecture */
@@ -18102,16 +18144,30 @@ tr.ligne-import-ecartee td {
     flex: 1;
     min-height: 0;
 }
+/* Pas de `min-height: 0` ici : le pied la suit. Écrasée (options ouvertes, hauteur courte), le champ passait sur le pied ;
+   sa hauteur reste celle de son contenu, et c'est le contenu de la palette, son seul défileur, qui défile. */
 #travaux-palette-eval-retro #vueRetroGenerale {
     display: flex;
     flex-direction: column;
     flex: 1;
-    min-height: 0;
+}
+#travaux-palette-eval-retro .eval-retro-champ {
+    flex: 1 0 auto;
+    min-height: 102px;   /* le plancher du champ, 80, son cadre et la marge du compte */
+    height: 0;           /* il part de son plancher et prend ce qui reste, sans que ses `rows` comptent */
 }
 #travaux-palette-eval-retro #retroactionFinale1 {
     flex: 1;
     min-height: 80px;
     resize: vertical;
+}
+/* Spécifique et Bilan : la bande et le pied restent à l'écran, le texte défile entre eux. */
+#travaux-palette-eval-retro #vueRetroSpecifique,
+#travaux-palette-eval-retro #vueRetroBilan {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 /* Panneaux internes : style palette (comme prep-palette / planif-palette) */
@@ -18274,23 +18330,58 @@ tr.ligne-import-ecartee td {
     display: none;
 }
 .retro-sous-barre {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
-    font-size: 0.7rem;
     flex-shrink: 0;
 }
-.retro-vues-radios {
+/* La bande des vues et celle de la note : des radios habillés en segments soudés. Trop étroite, la bande passe à la ligne :
+   `min-width: min-content` avec `nowrap`, c'est le mot entier qui décide, jamais une ellipse (condition de Grégoire). */
+.retro-vues-radios,
+.eval-options-radios {
     display: flex;
-    gap: 8px;
-    font-size: 0.75rem;
     flex-wrap: wrap;
+    gap: 1px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface-carte, #1a3040);
 }
-.retro-vues-radios label {
-    cursor: pointer;
+.retro-vues-radios label,
+.eval-options-radios label {
+    position: relative;
+    flex: 1 1 0;
+    min-width: min-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;   /* à 200 px, les trois mots tiennent sur une rangée, quelle que soit la vue en gras (mesuré : 2 px de trop à 6) */
     white-space: nowrap;
+    cursor: pointer;
+    color: var(--texte-principal);
+    background: var(--surface-input);
+    box-shadow: 0 0 0 1px var(--bordure-claire);
+}
+.retro-vues-radios label { min-height: 32px; font-size: 12.5px; }
+.eval-options-radios label { min-height: 30px; font-size: 12px; }
+.retro-vues-radios input,
+.eval-options-radios input,
+.eval-options-checkboxes input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+.retro-vues-radios label:has(input:checked),
+.eval-options-radios label:has(input:checked),
+.eval-options-checkboxes label:has(input:checked) {
+    background: var(--bleu-moyen);
+    color: white;
+    font-weight: 600;
+}
+.retro-vues-radios label:has(input:focus-visible),
+.eval-options-radios label:has(input:focus-visible),
+.eval-options-checkboxes label:has(input:focus-visible) {
+    outline: 2px solid var(--bleu-clair);
+    outline-offset: -2px;
 }
 .travaux-palette-eval .travaux-palette-barre {
     flex-wrap: wrap;
@@ -18361,34 +18452,69 @@ tr.ligne-import-ecartee td {
     margin-bottom: 6px;
 }
 
-/* Options rétroaction compactes (checkboxes + radios) — flat, séparateurs */
+/* Les options, pliées sous la bande : une ligne qui les résume, puis des pastilles et une bande à deux segments. */
+.eval-options-pli {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 28px;
+    padding: 2px 4px;
+    border: none;
+    background: transparent;
+    color: var(--texte-secondaire);
+    font-family: inherit;
+    font-size: 12.5px;
+    line-height: 1.25;
+    text-align: left;
+    cursor: pointer;
+}
+.eval-options-pli-fleche {
+    flex: none;
+    font-size: 10px;
+    transition: transform 0.15s;
+}
+.eval-options-pli[aria-expanded="true"] {
+    color: var(--texte-principal);
+}
+.eval-options-pli[aria-expanded="true"] .eval-options-pli-fleche {
+    transform: rotate(90deg);
+}
 .eval-options-retroaction {
-    background: none;
-    border-radius: 0;
-    padding: 6px 0;
-    font-size: 0.7rem;
-    margin-bottom: 0;
-    border-bottom: 1px solid rgba(106, 172, 184, 0.15);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 8px;
+    margin-bottom: 4px;
+    padding: 8px;
+    border-radius: 8px;
+    background: var(--surface-input);
 }
 .eval-options-checkboxes {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 12px;
+    gap: 6px;
 }
-.eval-options-checkboxes label,
-.eval-options-radios label {
+.eval-options-checkboxes label {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 3px;
+    min-height: 30px;
+    padding: 0 10px;
+    border-radius: 15px;
+    font-size: 12.5px;
+    white-space: nowrap;
     cursor: pointer;
+    color: var(--texte-principal);
+    box-shadow: inset 0 0 0 1px var(--bordure-claire);
 }
-.eval-options-radios {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid var(--bordure-claire, rgba(255,255,255,0.1));
+.eval-options-checkboxes label:has(input:checked)::before {
+    content: "\2713\FE0E\00A0";
+}
+.eval-options-checkboxes label:has(input:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 .btn-copier-retro {
     margin-left: auto;

@@ -5144,6 +5144,7 @@
                     var el = document.getElementById(id);
                     if (el) el.classList.remove('u-hide');
                 });
+                if (typeof fermerOptionsRetroaction === 'function') fermerOptionsRetroaction();   // chaque ouverture : pliées
                 // Re-remplir les selects pour le fichier courant
                 remplirLabelsIdentite(fichier);
                 const prodIdEff = fichier.productionId ||
@@ -5279,7 +5280,7 @@
         const paletteD = panneauDroite ? creerPaletteEval('travaux-palette-eval-droite', 'Évaluation', panneauDroite) : null;
         if (paletteD) {
             paletteD.style.top = '12px';
-            paletteD.style.right = '300px';
+            paletteD.style.right = DROITE_EVALUATION_PAR_DEFAUT;   // `poserEvaluationContreRetroaction`, une fois la Rétroaction restaurée
             paletteD.style.left = 'auto';
             zoneCanvas.appendChild(paletteD);
         }
@@ -5291,15 +5292,17 @@
             paletteR.style.right = '12px';
             paletteR.style.left = 'auto';
 
-            // Sous-barre (vues Générale/Spécifique/Bilan + « Copier tout ») et « Copier » dans le pied
-            equiperRetroaction(paletteR.querySelector('.palette-flottante-contenu'));
+            // Dans la page d'abord : `equiperRetroaction` remet la vue et le pli, qu'elle y cherche par leur id.
             zoneCanvas.appendChild(paletteR);
+            // La bande des vues Générale/Spécifique/Bilan ; « Copier » et « Copier tout » dans le pied
+            equiperRetroaction(paletteR.querySelector('.palette-flottante-contenu'));
         }
 
         // Configurer le drag pour chaque palette flottante
         if (paletteG) configurerDragPaletteEval('travaux-palette-eval-gauche');
         if (paletteD) configurerDragPaletteEval('travaux-palette-eval-droite');
         if (paletteR) configurerDragPaletteEval('travaux-palette-eval-retro');
+        poserEvaluationContreRetroaction(paletteD, paletteR);
         travauxOutils.appliquerDispositionEvaluation();   // après la position restaurée : elle dit si la palette est en bandeau
 
         // Bloquer la mémorisation pendant le setup pour ne pas écraser les bonnes valeurs
@@ -5408,9 +5411,28 @@
         }, 2000);
     }
 
+    /** La Rétroaction par défaut : 200 px de large, à 12 du bord ; 8 d'écart avec Évaluation. */
+    const DROITE_EVALUATION_PAR_DEFAUT = '220px';
+
     /**
-     * Les outils de la rétroaction : vues Générale / Spécifique / Bilan, « Copier tout », et
-     * « Copier » dans le pied (à côté de « Régénérer » et du compteur de mots). Posés sur la
+     * Évaluation se pose contre la Rétroaction RÉELLE, à l'ouverture (consigne du 1er nov. 2026, § 0 bis) : l'ancien
+     * `right = '300px'` présumait une Rétroaction de 280 et laissait 88 px vides, pris à la copie. Une position
+     * enregistrée l'emporte. Une Rétroaction déplacée qui ne laisse pas la place (en bandeau, par exemple) : le défaut.
+     */
+    function poserEvaluationContreRetroaction(paletteD, paletteR) {
+        if (!paletteD || !paletteR) return;
+        try {
+            if (localStorage.getItem(paletteD.id + '-pos')) return;
+        } catch (e) { /* stockage bloqué : rien d'enregistré à respecter */ }
+        const zone = paletteD.offsetParent;
+        if (!zone) return;
+        const droite = zone.clientWidth - paletteR.offsetLeft + 8;
+        if (droite + paletteD.offsetWidth + 12 <= zone.clientWidth) paletteD.style.right = droite + 'px';
+    }
+
+    /**
+     * Les outils de la rétroaction : la bande des vues Générale / Spécifique / Bilan, puis
+     * « Copier » et « Copier tout » dans le pied (après « Régénérer »). Posés sur la
      * palette Rétroaction du mode Évaluer ET sur le formulaire sans copie (#868, 15 sept.
      * 2026) — une seule fonction pour les deux.
      * Idempotente : elle ne retire que ce qu'elle a posé (`data-outil-eval`). Le nettoyage
@@ -5421,6 +5443,10 @@
     function equiperRetroaction(conteneur) {
         if (!conteneur) return;
         conteneur.querySelectorAll('[data-outil-eval]').forEach(function(el) { el.remove(); });
+
+        // Une palette qu'on rouvre repart de la Générale, comme ses radios neufs ; ses options, pliées.
+        if (typeof basculerVueRetroaction === 'function') basculerVueRetroaction('generale');
+        if (typeof fermerOptionsRetroaction === 'function') fermerOptionsRetroaction();
 
         const sousBarre = document.createElement('div');
         sousBarre.className = 'retro-sous-barre';
@@ -5438,22 +5464,10 @@
             if (idx === 0) radio.checked = true;
             radio.addEventListener('change', function() { basculerVueRetroaction(val); });
             lbl.appendChild(radio);
-            lbl.appendChild(document.createTextNode(' ' + label));
+            lbl.appendChild(document.createTextNode(label));
             radiosDiv.appendChild(lbl);
         });
         sousBarre.appendChild(radiosDiv);
-
-        var spacer = document.createElement('span');
-        spacer.style.flex = '1';
-        sousBarre.appendChild(spacer);
-
-        const btnCopierTout = document.createElement('button');
-        btnCopierTout.className = 'btn btn-compact';
-        btnCopierTout.textContent = 'Copier tout';
-        btnCopierTout.title = 'Copier les 3 sections';
-        btnCopierTout.style.cssText = 'font-size:10px; padding:2px 6px;';
-        btnCopierTout.addEventListener('click', function() { copierToutRetroaction(); });
-        sousBarre.appendChild(btnCopierTout);
 
         // Insérer en premier dans le contenu
         conteneur.insertBefore(sousBarre, conteneur.firstChild);
@@ -5467,6 +5481,14 @@
             btnCopier.title = 'Copier la section active';
             btnCopier.addEventListener('click', function() { copierRetroaction(1); });
             piedRetro.appendChild(btnCopier);
+
+            const btnCopierTout = document.createElement('button');
+            btnCopierTout.className = 'btn-copier-retro btn-copier-tout';
+            btnCopierTout.setAttribute('data-outil-eval', '');
+            btnCopierTout.textContent = 'Copier tout';
+            btnCopierTout.title = 'Copier les 3 sections';
+            btnCopierTout.addEventListener('click', function() { copierToutRetroaction(); });
+            piedRetro.appendChild(btnCopierTout);
         }
     }
 
@@ -5495,7 +5517,7 @@
         btnVerrou.id = 'btnVerrouPalette';
         btnVerrou.className = 'btn btn-compact';
         btnVerrou.title = 'Non verrouillée – clique pour verrouiller';   // lot C ; `mettreAJourBoutonVerrouillage` le tient ensuite
-        btnVerrou.style.cssText = 'font-size:12px; padding:2px 6px; margin-right:4px; display:none;';
+        btnVerrou.style.cssText = 'font-size:12px; padding:2px 3px; display:none;';   // à 200 px, le « − » de la barre de Paramètres reste dedans
         btnVerrou.innerHTML = '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">'; // security-ok: constante, aucune donnée
         btnVerrou.addEventListener('click', function() {
             if (typeof basculerVerrouillageEvaluationCourante === 'function') {

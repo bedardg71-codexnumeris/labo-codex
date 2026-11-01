@@ -42,7 +42,7 @@
    Variables module-scope encapsulées (anti-pattern §5.10) : aucune
    (toutes les locals sont à l'intérieur des function bodies).
 
-   10 exports window.X (6 d'origine + 4 de #961, estRetroactionReecrite,
+   13 exports window.X (les 3 des options pliées, 1er nov. 2026 ; 6 d'origine + 4 de #961, estRetroactionReecrite,
    poserRetroactionReecrite, preparerRetroactionEnregistree, marqueRetroactionAEcrire,
    en fin de fichier) :
      · window.genererRetroaction (préservé du bloc principal L5409)
@@ -534,6 +534,50 @@ function mettreAJourCompteurMots() {
 document.addEventListener('DOMContentLoaded', function() {
     const textarea = document.getElementById('retroactionFinale1');
     if (textarea) textarea.addEventListener('input', mettreAJourCompteurMots);
+});
+
+/* ===============================
+   LES OPTIONS, PLIÉES SOUS LA BANDE
+   =============================== */
+
+/**
+ * La ligne qui résume les options (consigne du 1er nov. 2026, mots validés par Grégoire). Les noms se lisent dans les
+ * libellés : aucune liste à tenir. Sans radio coché, « note chiffrée » : c'est ce que `genererRetroaction` applique alors.
+ */
+function mettreAJourResumeOptionsRetroaction() {
+    const resume = document.getElementById('resumeOptionsRetroaction');
+    if (!resume) return;
+    const nomDe = (input) => input.closest('label').textContent.trim().toLowerCase();
+    const cases = Array.from(document.querySelectorAll('.eval-options-checkboxes input[type="checkbox"]'));
+    const manquantes = cases.filter((c) => !c.checked);
+    let inclus = 'tout inclus';
+    if (manquantes.length === cases.length) inclus = 'rien d\'inclus';
+    else if (manquantes.length > 0) inclus = 'sans ' + manquantes.map(nomDe).join(', ');
+    const radio = document.querySelector('input[name="affichageNote1"]:checked') || document.getElementById('affichageNoteComplet1');
+    resume.textContent = 'Options : ' + inclus + (radio ? ' · ' + nomDe(radio) : '');
+}
+
+function _poserPliOptionsRetroaction(ouvert) {
+    const panneau = document.getElementById('optionsRetroaction');
+    const bouton = document.querySelector('.eval-options-pli');
+    if (panneau) panneau.classList.toggle('u-hide', !ouvert);
+    if (bouton) bouton.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+}
+
+/** Le pli vit en mémoire, comme les autres : aucune préférence, fermé à chaque ouverture de la palette. */
+function fermerOptionsRetroaction() {
+    _poserPliOptionsRetroaction(false);
+}
+
+function basculerOptionsRetroaction() {
+    const panneau = document.getElementById('optionsRetroaction');
+    if (panneau) _poserPliOptionsRetroaction(panneau.classList.contains('u-hide'));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const panneau = document.getElementById('optionsRetroaction');
+    if (panneau) panneau.addEventListener('change', mettreAJourResumeOptionsRetroaction);
+    mettreAJourResumeOptionsRetroaction();
 });
 
 /**
@@ -1464,7 +1508,7 @@ function sauvegarderRetroactionFinale(productionNum) {
 }
 
 // =====================================================================
-// Exports window.X (10) — voir en-tête pour détails
+// Exports window.X (13) — voir en-tête pour détails
 // =====================================================================
 
 // Préservés depuis bloc principal evaluation.js :
@@ -1472,6 +1516,9 @@ window.genererRetroaction = genererRetroaction;
 window.copierRetroaction = copierRetroaction;
 window.basculerVueRetroaction = basculerVueRetroaction;
 window.copierToutRetroaction = copierToutRetroaction;
+window.mettreAJourResumeOptionsRetroaction = mettreAJourResumeOptionsRetroaction;
+window.basculerOptionsRetroaction = basculerOptionsRetroaction;
+window.fermerOptionsRetroaction = fermerOptionsRetroaction;
 
 // Préservé export dispersé d'origine (avant L282 résidu / L2130 origine) :
 window.regenererRetroactionAvecFeedback = regenererRetroactionAvecFeedback;

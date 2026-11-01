@@ -107,7 +107,7 @@ const lireEtat = (page) => page.evaluate(() => {
         palettes: ['travaux-palette-eval-gauche', 'travaux-palette-eval-droite', 'travaux-palette-eval-retro'].map((id) => vis(document.getElementById(id))),
         sousBarres: document.querySelectorAll('.retro-sous-barre').length,
         sousBarreVisible: vis(document.querySelector('.retro-sous-barre')),
-        piedRetro: Array.from(document.querySelectorAll('#vueRetroGenerale .eval-retro-pied button')).map((b) => b.textContent.trim()),
+        piedRetro: Array.from(document.querySelectorAll('.eval-retro-pied button')).map((b) => b.textContent.trim()),
         cadenas: document.querySelectorAll('#btnVerrouPalette').length
     };
 });
@@ -127,7 +127,7 @@ const ETAT_AVEC_COPIE = {
     remise: 'importe',
     palettes: [true, true, true], sousBarres: 1, sousBarreVisible: true,
     // « Régénérer » restait retiré du mode Évaluer par le nettoyage des palettes (même classe que « Copier »).
-    piedRetro: ['Régénérer', 'Copier'], cadenas: 1
+    piedRetro: ['Régénérer', 'Copier', 'Copier tout'], cadenas: 1
 };
 
 const ETAT_SANS_COPIE = {
@@ -136,7 +136,7 @@ const ETAT_SANS_COPIE = {
     remise: 'recu',
     etiquetteEtudiant: 'Léa Gagnon (TEST868B)', etiquetteProduction: 'Analyse 1',
     formulaireSansCopie: true, palettes: [false, false, false], sousBarres: 1, sousBarreVisible: true,
-    piedRetro: ['Régénérer', 'Copier'], cadenas: 1
+    piedRetro: ['Régénérer', 'Copier', 'Copier tout'], cadenas: 1
 };
 
 const sansModeNiCopie = ({ mode, copieOuverte, ...reste }) => reste;
