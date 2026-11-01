@@ -51,6 +51,10 @@ test('Défense refactor · evaluation charge dans WebKit sans erreur console', a
 
     // Donner un délai à l'init différée
     await attendreApplication(page);
+    // pause-gardee : « aucune erreur » n'a pas de signal, et ce délai EST ce que l'essai observe.
+    // L'init différée de js/init-inline.js part 500 ms après DOMContentLoaded ; sans lui, son
+    // erreur tombe après le constat et l'essai passe (contre-épreuve du 1er nov. 2026).
+    await page.waitForTimeout(500);
 
     // Aucune erreur console au chargement (filet pour régression silencieuse
     // type ReferenceError sur un export disparu lors d'une extraction).

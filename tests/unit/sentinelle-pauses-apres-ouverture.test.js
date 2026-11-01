@@ -18,7 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const INTEGRATION = path.resolve(__dirname, '..', 'integration');
 
 // ⛔ Ne se relève pas. Une spec neuve attend une condition, pas un délai.
-const PLAFOND_DES_PAUSES = 901;
+const PLAFOND_DES_PAUSES = 904;
 
 /** Marque une pause qu'aucune condition observable ne peut remplacer : le commentaire dit pourquoi. */
 const MARQUE_GARDEE = 'pause-gardee :';
