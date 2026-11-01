@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 1er NOVEMBRE 2026 : LA PALETTE RÉTROACTION COMPACTE, CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : dans Évaluer, Générale, Spécifique et Bilan forment une bande, toujours entiers. « Copier tout » descend au pied. Le compte de mots passe dans le coin du champ. Les options se replient sous une ligne qui les résume (« Options : sans contexte · note chiffrée »). Le champ de rétroaction passe de 82 à 170 px hors plein écran, de 443 à 531 en plein écran. La copie libre entre les palettes revient de 272 à 432 pt : Paramètres retrouve sa largeur de l'automne, et Évaluation se pose contre la Rétroaction.
+
+**Ce qui reste à toi** : rien avant la mise en ligne. Ensuite, la porte terrain (`plans de travail/PORTES-TERRAIN-2026-11-01-palette-retroaction-compacte.md`), dont une question : à 200 pt, « Copier tout » prend seul une seconde rangée ; ça te convient à l'usage ? Cowork te soumettra aussi les mots du résumé quand aucune option n'est cochée.
+
+**Vérifié comment** : Vitest entier vert (10 615) ; dans WebKit, au doigt, à 1180 × 820, 134 essais verts sur la spec du lot et 19 specs voisines ; captures en clair et en sombre, qui ont montré un défaut que les essais ne voyaient pas (corrigé, et gardé) ; 40 changements volontaires du code, dont 35 attrapés du premier coup, et les 5 autres expliqués au rapport : 2 essais renforcés, 3 épreuves à refaire ou sans effet. Pas sur le vrai iPad, pas de suite Playwright complète (celle du soir).
+
 📝 **LE 1er NOVEMBRE 2026 : LA PALETTE ÉVALUATION COMPACTE, CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : dans Évaluer, un bouton aux quatre carrés met chaque critère sur une ligne, le nom et son menu, sans description ; le choix reste. Toucher un nom souligné ouvre sa description dans une bulle. Hors plein écran, sur la grille d'essai, tu vois 4 critères entiers au lieu de 2 (en plein écran, 5 au lieu de 4). En échange, les palettes sont plus larges à l'ouverture : la copie libre entre elles passe de 468 à 272 pt.
