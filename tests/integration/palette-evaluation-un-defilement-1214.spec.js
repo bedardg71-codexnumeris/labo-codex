@@ -106,14 +106,12 @@ const quiPeutDefiler = (page, id) => page.evaluate((id) => {
         .map((el) => el.id || el.className);
 }, id);
 
-/** Le contenu défilé jusqu'en bas, la page amenée à montrer le bas de la palette : ce que l'œil voit alors. */
+/** Le contenu défilé jusqu'en bas : ce que l'œil voit alors (la page ne défile plus, partie C du 1er nov.). */
 const auBasDuContenu = (page, id) => page.evaluate((id) => {
     const p = document.getElementById(id);
     const c = p.querySelector(':scope > .palette-flottante-contenu');
     const debordeAvant = c.scrollHeight - c.clientHeight;
     c.scrollTop = c.scrollHeight;
-    // Hors plein écran, la zone descend sous la fenêtre : la page reste un défilement, hors de la palette.
-    window.scrollBy(0, Math.max(0, p.getBoundingClientRect().bottom - innerHeight + 4));
     const barre = p.querySelector(':scope > .palette-flottante-barre').getBoundingClientRect();
     const cadre = c.getBoundingClientRect();
     const cartes = [...p.querySelectorAll('#listeCriteresGrille1 > div')];
@@ -133,7 +131,6 @@ const auBasDuContenu = (page, id) => page.evaluate((id) => {
         nbCartes: cartes.length
     };
     c.scrollTop = 0;
-    window.scrollTo(0, 0);
     return mesure;
 }, id);
 

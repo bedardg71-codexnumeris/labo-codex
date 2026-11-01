@@ -17460,10 +17460,14 @@ tr.ligne-import-ecartee td {
     border-radius: 0;
 }
 
+/* Tient dans l'écran : `--visionneuse-hors-zone` est ce qui l'entoure, mesuré (`_garderVisionneuseDansEcran`). `dvh` suit la
+   barre d'adresse de Safari ; `vh` reste pour un navigateur qui ne le connaît pas. 300 px : à 400, une fenêtre d'iPad
+   avec sa barre d'onglets (environ 740 pt) laissait encore défiler la page. */
 .travaux-visionneuse-layout {
     display: flex;
-    height: calc(100vh - 120px);
-    min-height: 400px;
+    height: calc(100vh - var(--visionneuse-hors-zone, 120px));
+    height: calc(100dvh - var(--visionneuse-hors-zone, 120px));
+    min-height: 300px;
     gap: 0;
     overflow: hidden;
 }
@@ -20580,6 +20584,14 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     width: 200px;
     min-width: 120px;
     max-width: none;
+}
+/* La zone de travail est moins haute depuis qu'elle tient dans l'écran (consigne du 1er nov. 2026, partie C) : une palette
+   ne la dépasse plus, sa propre hauteur enregistrée comprise, et le geste au bout de son défilement ne passe pas ailleurs. */
+#travaux-palette-flottante,
+#travaux-palette-erreurs-fr,
+#travaux-palette-tampons {
+    max-height: calc(100% - 24px);
+    overscroll-behavior: contain;
 }
 
 .travaux-autocollants-label {
@@ -26986,14 +26998,20 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 /* Évalué : disque plein, crochet. */
 .travaux-fichiers-compact .travaux-badge-pill.evalue {
     --symbole: var(--vert-succes, #28a745);
+    --crochet: #0d2416;
     background: var(--symbole);
+}
+/* Sur fond clair, le vert du succès ne fait que 2,2:1 (mesuré ; 3:1 attendu pour un élément graphique). */
+.mode-clair .travaux-fichiers-compact .travaux-badge-pill.evalue {
+    --symbole: var(--vert-fonce, #1b7a34);
+    --crochet: #fff;
 }
 .travaux-fichiers-compact .travaux-badge-pill.evalue::after {
     left: 3px;
     top: 0;
     width: 5px;
     height: 8px;
-    border: solid #fff;
+    border: solid var(--crochet);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }

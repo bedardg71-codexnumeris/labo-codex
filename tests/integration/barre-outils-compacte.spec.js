@@ -53,6 +53,7 @@ async function ouvrirBarre(page) {
         window.db.setSync('infoCours', { id: coursId, codeCours: 'FRA101', groupe: '01', _groupeCoursId: 'GCB' });
         window.db.setSync('groupeCoursActif', { id: 'GCB', trimestreId: T });
         window.definirPreference('chronoEvaluation', true);
+        window.definirPreference('accompagnementActif', false); // ses bulles de découverte se posent sur la barre, sans prévenir
     }, { titre: TITRE_LONG });
     await entrerDansLaCopie(page);
 }
@@ -79,6 +80,12 @@ async function ouvrirCopie(page, id) {
     await page.evaluate((id) => window.travauxUI.ouvrirFichier(id), id);
     await page.waitForFunction((id) => window.travauxVisionneuse.getFichierActuel()?.id === id
         && document.querySelector(`.annot-toolbar-fichiers .annot-badge.actif[data-fichier-id="${id}"]`), id, { timeout: 15000 });
+    // L'étiquette ouverte glisse vers la bande (`scrollIntoView` en douceur) : attendre qu'elle y soit entière.
+    await page.waitForFunction((id) => {
+        const b = document.querySelector(`.annot-toolbar-fichiers .annot-badge[data-fichier-id="${id}"]`).getBoundingClientRect();
+        const s = document.querySelector('.annot-toolbar-fichiers').getBoundingClientRect();
+        return b.left >= s.left - 0.5 && b.right <= s.right + 0.5;
+    }, id);
 }
 
 /** Ce que l'œil voit d'une pastille : sa forme. Et ce que le lecteur d'écran et la bulle en disent. */
@@ -139,9 +146,11 @@ test.describe('La barre d’outils compacte', () => {
             const b = document.querySelector('.annot-badge[data-fichier-id="F5"] .travaux-badge-profil');
             const r = b.getBoundingClientRect();
             const cx = r.left + r.width / 2;
-            return [r.top + r.height / 2 - 14, r.top + r.height / 2 + 14].map((y) => document.elementFromPoint(cx, y) === b);
+            // Vers le haut seulement : juste après un défilement, la barre de défilement fugitive de la bande couvre son bas (Mac).
+            const e = document.elementFromPoint(cx, r.top + r.height / 2 - 14);
+            return e === b ? true : (e && (e.id || e.className));
         });
-        expect(atteint).toEqual([true, true]);
+        expect(atteint).toBe(true);
     });
 
     test('les symboles : la copie ouverte « en cours », une copie évaluée « évalué » ; le mot reste, dans la bulle et l’aria-label', async ({ page }) => {
@@ -227,6 +236,15 @@ test.describe('La barre d’outils compacte', () => {
         expect(m).toMatchObject({ largeur: 136, hauteur: 34, coupe: true, points: 'ellipsis', touche: true, poignee: true });
         expect(m.bulle.startsWith(TITRE_LONG)).toBe(true);
         expect(m.texte).toBe(m.bulle);
+        // Le libellé et la bulle suivent le menu : le filtre les réécrit.
+        const apres = await page.evaluate(() => {
+            const sel = document.querySelector('.annot-toolbar-production select'), t = document.querySelector('.annot-toolbar-production .travaux-filtre-production-texte');
+            t.textContent = 'périmé';
+            sel.title = 'périmé';
+            window.travauxUI.filtrerBadgesParProduction(sel);
+            return { texte: t.textContent, bulle: sel.title };
+        });
+        expect(apres).toEqual({ texte: m.bulle, bulle: m.bulle });
     });
 
     test('pages et zoom en bandes soudées, aux largeurs de l’ébauche ; « 1/1 » sans espaces', async ({ page }) => {
@@ -403,6 +421,23 @@ test.describe('La palette Codes compacte', () => {
         await page.waitForFunction(() => document.querySelector('#travaux-palette-erreurs-fr .travaux-errfr-item.actif .travaux-errfr-compteur').textContent === '1');
     });
 
+    test('compacte par-dessus une taille enregistrée : 188 pt quand même, et la taille n’est pas réécrite', async ({ page }) => {
+        await ouvrirBarre(page);
+        const taille = JSON.stringify({ left: '20px', right: '', top: '12px', width: '300px', height: '340px' });
+        await page.evaluate((t) => {
+            document.getElementById('travaux-palette-erreurs-fr')?.remove();
+            localStorage.setItem('travaux-palette-erreurs-fr-pos', t);
+            window.travauxOutils.togglePaletteErreursFrancais();
+        }, taille);
+        await page.waitForSelector(CODES + ' .travaux-errfr-item');
+        const hauteurDescriptions = (await lireDisposition(page)).hauteur;
+        await choisirCompacte(page);
+        const d = await lireDisposition(page);
+        expect(d.largeur).toBe(188);
+        expect(d.hauteur).toBeLessThan(hauteurDescriptions); // la hauteur suit la grille, pas la taille enregistrée
+        expect(await page.evaluate(() => localStorage.getItem('travaux-palette-erreurs-fr-pos'))).toBe(taille);
+    });
+
     test('le choix reste à la copie suivante, et survit au vrai rechargement ; ↕ le quitte', async ({ page }) => {
         await ouvrirBarre(page);
         await ouvrirCodes(page);
@@ -482,5 +517,102 @@ test.describe('La palette Codes compacte', () => {
         });
         expect(m).toMatchObject({ items: 0, vu: true, large: true, rappel: false });
         expect(m.texte).toContain('Aucun code');
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────
+// LA ZONE DE TRAVAIL TIENT DANS L'ÉCRAN (partie C). Avant : la zone finissait à 1060 pour 820, la page défilait de 241.
+
+const horsEcran = (page) => page.evaluate(() => {
+    const z = document.getElementById('travaux-zone-canvas').getBoundingClientRect();
+    return {
+        deborde: document.scrollingElement.scrollHeight - innerHeight, basZone: Math.round(z.bottom), vue: innerHeight, zoneH: Math.round(z.height),
+        palettes: [...document.querySelectorAll('.palette-flottante')].filter((p) => p.offsetParent).filter((p) => p.getBoundingClientRect().bottom > z.bottom + 0.5).map((p) => p.id)
+    };
+});
+
+test.describe('La zone de travail tient dans l’écran', () => {
+    test('WebKit connaît `dvh` : c\u2019est l\u2019unité retenue, pour suivre la barre d\u2019adresse de Safari', async ({ page }) => {
+        await ouvrirBarre(page);
+        expect(await page.evaluate(() => CSS.supports('height', 'calc(100dvh - 10px)'))).toBe(true);
+    });
+
+    for (const mode of ['annoter', 'evaluer']) {
+        test(`${mode} : à 1180 × 820, la page ne défile plus, et la zone va jusqu’au bas de l’écran`, async ({ page }) => {
+            await ouvrirBarre(page);
+            await page.evaluate((m) => window.travauxUI.basculerMode(m), mode);
+            await page.waitForFunction((m) => window.travauxUI.getModeCourant() === m, mode);
+            if (mode === 'annoter') await ouvrirCodes(page);
+            await page.waitForFunction(() => document.scrollingElement.scrollHeight <= innerHeight);
+            const m = await horsEcran(page);
+            expect(m.deborde).toBeLessThanOrEqual(0);
+            expect(Math.abs(m.basZone - m.vue)).toBeLessThanOrEqual(1);
+            expect(m.palettes).toEqual([]);
+        });
+    }
+
+    test('la mesure tient à d’autres hauteurs, sans recharger, et ne rétrécit pas d’elle-même', async ({ page }) => {
+        await ouvrirBarre(page);
+        const mesure = () => page.evaluate(() => document.querySelector('.travaux-visionneuse-layout').style.getPropertyValue('--visionneuse-hors-zone'));
+        const avant = await mesure();
+        for (const [l, h] of [[1180, 740], [1180, 680], [1512, 900]]) {
+            await page.setViewportSize({ width: l, height: h });
+            await page.waitForFunction(() => document.scrollingElement.scrollHeight <= innerHeight);
+            const m = await horsEcran(page);
+            expect(Math.abs(m.basZone - m.vue), `${l} × ${h}`).toBeLessThanOrEqual(1);
+        }
+        expect(await mesure()).toBe(avant); // même largeur d'en-tête : la mesure n'a pas dérivé
+    });
+
+    test('si ce qui précède change de hauteur, la zone suit', async ({ page }) => {
+        await ouvrirBarre(page);
+        await page.evaluate(() => { document.getElementById('sous-navigation').style.height = '100px'; });
+        await page.waitForFunction(() => document.scrollingElement.scrollHeight <= innerHeight);
+        const m = await horsEcran(page);
+        expect(Math.abs(m.basZone - m.vue)).toBeLessThanOrEqual(1);
+    });
+
+    test('au retour d’une autre section, la zone tient toujours', async ({ page }) => {
+        await ouvrirBarre(page);
+        await page.evaluate(() => window.afficherSection('suivi'));
+        await page.waitForFunction(() => document.querySelector('.travaux-visionneuse-layout').offsetParent === null);
+        await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-annoter'); });
+        await page.waitForFunction(() => document.querySelector('.travaux-visionneuse-layout')?.offsetParent && document.scrollingElement.scrollHeight <= innerHeight);
+        expect((await horsEcran(page)).deborde).toBeLessThanOrEqual(0);
+        // Le carrousel renaît à ce retour : la copie ouverte garde son symbole « en cours » (elle redevenait « Importé »).
+        await page.waitForFunction(() => document.querySelector('.annot-toolbar-fichiers .annot-badge.actif[data-fichier-id="F5"]'));
+        expect(await lirePastille(page, 'F5')).toMatchObject({ mot: 'EN COURS', aria: 'EN COURS', largeur: 15 });
+    });
+
+    test('une position enregistrée quand la zone défilait reste atteignable, et n’est pas réécrite', async ({ page }) => {
+        await ouvrirBarre(page);
+        const ancienne = JSON.stringify({ left: '20px', right: '', top: '500px', width: '200px', height: '600px' });
+        await page.evaluate((a) => {
+            document.getElementById('travaux-palette-erreurs-fr')?.remove();
+            localStorage.setItem('travaux-palette-erreurs-fr-pos', a);
+            window.travauxOutils.togglePaletteErreursFrancais();
+        }, ancienne);
+        await page.waitForSelector(CODES + ' .travaux-errfr-item');
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr').getBoundingClientRect();
+            const z = document.getElementById('travaux-zone-canvas').getBoundingClientRect();
+            return { dedans: p.top >= z.top && p.bottom <= z.bottom + 0.5, stock: localStorage.getItem('travaux-palette-erreurs-fr-pos') };
+        });
+        expect(m.dedans).toBe(true);
+        expect(m.stock).toBe(ancienne);
+    });
+
+    test('la barre de titre reste visible quand la palette défile, et la page ne bouge pas', async ({ page }) => {
+        await ouvrirBarre(page);
+        await ouvrirCodes(page);
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-erreurs-fr');
+            const deborde = p.scrollHeight - p.clientHeight;
+            p.scrollTop = p.scrollHeight;
+            const b = p.querySelector('.palette-flottante-barre').getBoundingClientRect(), r = p.getBoundingClientRect();
+            return { deborde, barreEnHaut: Math.abs(b.top - r.top) <= 2, page: window.scrollY, geste: getComputedStyle(p).overscrollBehaviorY };
+        });
+        expect(m.deborde).toBeGreaterThan(50); // témoin : dix codes en description, sur la moitié de la zone
+        expect(m).toMatchObject({ barreEnHaut: true, page: 0, geste: 'contain' });
     });
 });

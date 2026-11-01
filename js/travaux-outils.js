@@ -2337,6 +2337,10 @@
                 }
                 if (palette.offsetTop > maxTop) palette.style.top = Math.max(0, maxTop) + 'px';
                 if (palette.offsetTop < 0) palette.style.top = '0px';
+                // Une position enregistrée quand la zone défilait avec la page (avant le 1er nov. 2026) peut la dépasser
+                // par le bas. Corrigé à l'affichage ; rien n'est réécrit tant que la palette ne bouge pas.
+                const depasse = palette.offsetTop + palette.offsetHeight - (cont.clientHeight - 12);
+                if (depasse > 0) palette.style.top = Math.max(12, palette.offsetTop - depasse) + 'px';
             }
         } catch(e) { /* JSON parse error */ }
     }

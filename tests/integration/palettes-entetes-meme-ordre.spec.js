@@ -27,7 +27,8 @@ test('les trois en-têtes ont le même ordre', async ({ page }) => {
         if (!document.getElementById('travaux-palette-erreurs-fr')) window.travauxOutils.togglePaletteErreursFrancais();
     });
     const fleches = ['↔︎', '↕︎', '−'];
-    for (const [id, droite] of [['travaux-palette-flottante', ['−']], ['travaux-palette-tampons', fleches], ['travaux-palette-erreurs-fr', fleches]]) {
+    // Seule la palette Codes a le bouton de la version compacte, une icône sans texte (consigne du 1er nov. 2026, partie B).
+    for (const [id, droite] of [['travaux-palette-flottante', ['−']], ['travaux-palette-tampons', fleches], ['travaux-palette-erreurs-fr', ['↔︎', '↕︎', '', '−']]]) {
         const e = await lire(page, id);
         expect(e.gauche).toEqual(['SPAN', 'BUTTON']);
         expect(e.ordre).toBe(true);

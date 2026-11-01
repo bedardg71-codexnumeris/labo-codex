@@ -727,9 +727,14 @@
                         _htmlBadgesGrille = genererGrilleFichiers(fichiersTravaux, 'ouvrirFichier');
                         badgeStrip.innerHTML = _htmlBadgesGrille;
                         badgeStrip.scrollLeft = defilement;
-                        // Marquer le badge actif
+                        // Marquer le badge actif. Sa pastille renaît à son état d'origine : elle redevient celle de la
+                        // copie ouverte (mesuré le 1er nov. 2026 : une copie ouverte revenait « Importé » après un détour).
                         const badgeActif = badgeStrip.querySelector('[data-fichier-id="' + fichierOuvert.id + '"]');
-                        if (badgeActif) badgeActif.classList.add('actif');
+                        if (badgeActif) {
+                            badgeActif.classList.add('actif');
+                            const pillActive = badgeActif.querySelector('.travaux-badge-pill');
+                            if (pillActive) marquerPastilleOuverte(pillActive);
+                        }
                         // Le dropdown production porte des compteurs : le remplacer, ou le restaurer si absent
                         const prodExistant = document.querySelector('.annot-toolbar-production');
                         if (prodExistant) {
@@ -1160,6 +1165,46 @@
         }
     }
 
+    let _observateurVisionneuse = null;
+
+    /**
+     * LA ZONE DE TRAVAIL TIENT DANS L'ÉCRAN (consigne du 1er nov. 2026, partie C). `calc(100vh - 120px)` postulait 120 px
+     * au-dessus de la visionneuse ; il y en a 360 (en-tête 162, navigation 83, sous-navigation 58, aide 52, marges 5) : la
+     * page défilait de 241 px sous les palettes. Ce qui l'entoure se MESURE donc, et `styles.css` retire la mesure de
+     * `100dvh` (la barre d'adresse de Safari change la hauteur visible, sans passer par ici).
+     *
+     * Ce qui suit la visionneuse se compte par ses marges et ses frères, et non par la hauteur de la page : celle-ci
+     * dépend de la visionneuse, et la mesure rétrécirait à chaque passage.
+     * @param {HTMLElement} layout - `.travaux-visionneuse-layout`
+     */
+    function _mesurerHorsZoneVisionneuse(layout) {
+        const haut = layout.getBoundingClientRect();
+        if (haut.height === 0) return;   // section cachée : l'observateur la remesure à son retour
+        let bas = 0;
+        for (let el = layout; el && el !== document.documentElement; el = el.parentElement) {
+            const style = getComputedStyle(el);
+            bas += parseFloat(style.marginBottom) || 0;
+            if (el !== layout) bas += (parseFloat(style.paddingBottom) || 0) + (parseFloat(style.borderBottomWidth) || 0);
+            for (let frere = el.nextElementSibling; frere; frere = frere.nextElementSibling) {
+                const s = getComputedStyle(frere);
+                if (s.display === 'none' || s.position === 'absolute' || s.position === 'fixed') continue;
+                bas += frere.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
+            }
+        }
+        const horsZone = Math.ceil(haut.top + window.scrollY + bas) + 'px';
+        if (layout.style.getPropertyValue('--visionneuse-hors-zone') !== horsZone) layout.style.setProperty('--visionneuse-hors-zone', horsZone);
+    }
+
+    function _garderVisionneuseDansEcran(layout) {
+        _mesurerHorsZoneVisionneuse(layout);
+        if (typeof ResizeObserver !== 'function') return;
+        if (_observateurVisionneuse) _observateurVisionneuse.disconnect();
+        // Hors du tour de l'observateur : la mesure change la hauteur qu'il observe, et le navigateur lèverait « ResizeObserver loop ».
+        _observateurVisionneuse = new ResizeObserver(() => requestAnimationFrame(() => _mesurerHorsZoneVisionneuse(layout)));
+        _observateurVisionneuse.observe(layout);   // son retour à l'écran, après un détour par une autre section
+        document.querySelectorAll('header.entete, .navigation-principale, #sous-navigation').forEach((el) => _observateurVisionneuse.observe(el));
+    }
+
     /**
      * Affiche la sous-section Visionneuse
      */
@@ -1250,6 +1295,7 @@
                 </div>
         `;
         conteneur.appendChild(visionDiv);
+        _garderVisionneuseDansEcran(visionDiv);
 
         // Menu déroulant Actions
         _configurerDropdownActions();
@@ -2745,6 +2791,15 @@
         else poserEtatPastille(pill, 'EN COURS', 'en-cours');
     }
 
+    /** Le texte et la classe d'origine sont gardés pour la restauration, puis la pastille dit l'état de la copie ouverte. */
+    function marquerPastilleOuverte(pill) {
+        if (!pill.dataset.origTexte) {
+            pill.dataset.origTexte = pill.textContent;
+            pill.dataset.origClasse = pill.className.replace('travaux-badge-pill', '').trim();
+        }
+        afficherPastilleActive(pill);
+    }
+
     /**
      * Genere un badge compact pour un fichier importe
      * @param {Object} f - Le fichier
@@ -3496,12 +3551,7 @@
             const pill = b.querySelector('.travaux-badge-pill');
             if (!pill) return;
             if (estActif) {
-                // Sauvegarder le texte/classe d'origine pour restauration
-                if (!pill.dataset.origTexte) {
-                    pill.dataset.origTexte = pill.textContent;
-                    pill.dataset.origClasse = pill.className.replace('travaux-badge-pill', '').trim();
-                }
-                afficherPastilleActive(pill);
+                marquerPastilleOuverte(pill);
             } else if (pill.dataset.origTexte) {
                 // Restaurer l'etat d'origine
                 poserEtatPastille(pill, pill.dataset.origTexte, pill.dataset.origClasse);
