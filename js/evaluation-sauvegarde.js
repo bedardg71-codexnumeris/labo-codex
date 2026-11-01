@@ -514,8 +514,7 @@ function majBadgesApresEvaluation(evaluation) {
     document.querySelectorAll(`.annot-badge[data-fichier-id="${fichier.id}"]`).forEach(badge => {
         const pill = badge.querySelector('.travaux-badge-pill');
         if (!pill) return;
-        pill.textContent = 'ÉVALUÉ';
-        pill.className = 'travaux-badge-pill evalue';
+        window.travauxUI.poserEtatPastille(pill, 'ÉVALUÉ', 'evalue');
         // Mettre à jour l'état d'origine stocké (pour la restauration lors du changement de fichier)
         if (pill.dataset.origTexte !== undefined) {
             pill.dataset.origTexte = 'ÉVALUÉ';

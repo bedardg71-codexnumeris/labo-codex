@@ -1215,16 +1215,17 @@
                         ${travauxOutils.genererHTMLBandePalettes()}
                         <div class="annot-toolbar-separateur"></div>
                         <div class="annot-toolbar-outils">
-                            <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
-                            <span id="travaux-indicateur-page">-- / --</span>
-                            <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
-                            <span class="travaux-separateur"></span>
-                            <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100\u00a0%">100\u00a0%</button>
-                            <span class="travaux-separateur"></span>
-                            <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran"><img src="icons/icon-fit-to-width.svg" alt="" class="nav-seq-icon"></button>
+                            <div class="annot-bande-soudee">
+                                <button id="travaux-btn-page-prec" class="travaux-btn-nav" data-action="travauxVisionneuse.pagePrecedente" disabled title="Page précédente" aria-label="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
+                                <span id="travaux-indicateur-page">--/--</span>
+                                <button id="travaux-btn-page-suiv" class="travaux-btn-nav" data-action="travauxVisionneuse.pageSuivante" disabled title="Page suivante" aria-label="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
+                            </div>
+                            <div class="annot-bande-soudee">
+                                <button id="travaux-btn-zoom100" class="travaux-btn-zoom" data-action="travauxVisionneuse.zoom100" title="Remettre à 100\u00a0%">100\u00a0%</button>
+                                <button class="travaux-btn-nav" id="travaux-btn-plein-ecran" data-action="travauxUI.togglePleinEcran" title="Plein \u00e9cran"><img src="icons/icon-fit-to-width.svg" alt="" class="nav-seq-icon"></button>
+                            </div>
                             <!-- Retour testeur du 23 sept. 2026 — le chronomètre revient dans la barre : en palette, il prenait de la place sur la copie. -->
                             <div id="travaux-chrono-toolbar" class="travaux-chrono-toolbar u-hide" title="Démarre à la 1re annotation et s'arrête au verrouillage.">
-                                <span class="travaux-separateur"></span>
                                 <img src="icons/icons8-stopwatch.svg" alt="Chronomètre" class="nav-seq-icon travaux-chrono-icone">
                                 <span id="chrono-badge" class="travaux-chrono-badge">--:--</span>
                                 <button id="chrono-btn-pause" class="chrono-btn-etat" data-action="travauxUI.togglePauseChrono" style="display:none" title="Pause">\u23f8\ufe0f</button>
@@ -2713,6 +2714,25 @@
     }
 
     /**
+     * Écrit l'état d'une pastille de copie : sa classe, son mot, sa bulle et son `aria-label`. Au carrousel, la
+     * pastille se dessine en symbole d'après sa classe (styles.css) : le mot ne se lit plus qu'ici, et il doit
+     * suivre l'état (consigne du 1er nov. 2026, partie A).
+     * @param {HTMLElement} pill - `.travaux-badge-pill` d'une étiquette
+     * @param {string} texte - Le mot (« Évalué », « EN COURS »…)
+     * @param {string} classe - La classe d'état (`evalue`, `en-cours`…)
+     */
+    function poserEtatPastille(pill, texte, classe) {
+        pill.textContent = texte;
+        pill.className = 'travaux-badge-pill ' + classe;
+        pill.setAttribute('aria-label', texte);
+        pill.title = bullePastille(texte, classe);
+    }
+
+    function bullePastille(texte, classe) {
+        return classe === 'incomplet' ? 'Incomplet ; travail en cours' : texte;
+    }
+
+    /**
      * La pastille de la copie OUVERTE, lue dans son état d'origine (`dataset.origClasse`) : déjà évaluée,
      * ÉVALUÉ ; « Incomplet ; travail en cours », Incomplet ; sinon EN COURS. Lue à la sélection d'une copie,
      * et par la case du statut incomplet (evaluation-sauvegarde.js) quand elle change l'état d'origine.
@@ -2720,18 +2740,9 @@
      * @param {string} [classe] - son état d'origine ; par défaut `pill.dataset.origClasse`
      */
     function afficherPastilleActive(pill, classe = pill.dataset.origClasse) {
-        if (classe === 'evalue') {
-            pill.textContent = 'ÉVALUÉ';
-            pill.className = 'travaux-badge-pill evalue';
-        } else if (classe === 'incomplet') {
-            pill.textContent = 'Incomplet';
-            pill.className = 'travaux-badge-pill incomplet';
-        } else {
-            pill.textContent = 'EN COURS';
-            pill.className = 'travaux-badge-pill en-cours';
-        }
-        if (classe === 'incomplet') pill.title = 'Incomplet ; travail en cours';
-        else pill.removeAttribute('title');
+        if (classe === 'evalue') poserEtatPastille(pill, 'ÉVALUÉ', 'evalue');
+        else if (classe === 'incomplet') poserEtatPastille(pill, 'Incomplet', 'incomplet');
+        else poserEtatPastille(pill, 'EN COURS', 'en-cours');
     }
 
     /**
@@ -2791,7 +2802,7 @@
         return `<div class="annot-badge${estSelFusion ? ' annot-badge-fusion-selectionne' : ''}${estRemplacee ? ' eval-remplacee' : ''}" data-fichier-id="${f.id}" data-etudiant-da="${f.etudiantDA || ''}" draggable="true" data-drag-data="text/fichier-id:${f.id}" data-action="${actionName}" data-param="${f.id}" title="${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)}${estRemplacee ? ' (Remplacée par reprise)' : ''}${estReprise ? ' (Reprise)' : ''}">
         ${checkboxFusion}
         <span class="annot-badge-nom">${nomEtudiant}</span>
-        <span class="travaux-badge-pill ${statutClasse}">${statutTexte}</span>${indicateurReprise}${boutonProfil}${verrou}${boutonSupprimer}
+        <span class="travaux-badge-pill ${statutClasse}" role="img" aria-label="${statutTexte}" title="${bullePastille(statutTexte, statutClasse)}">${statutTexte}</span>${indicateurReprise}${boutonProfil}${verrou}${boutonSupprimer}
     </div>`;
     }
 
@@ -2900,17 +2911,23 @@
         // Dropdown filtre de production (toutes les productions, même sans fichier)
         let htmlDropdown = '';
         if (productions.length >= 1) {
-            htmlDropdown += '<select class="controle-form travaux-filtre-production" data-on-change="travauxUI.filtrerBadgesParProduction">';
+            let options = '';
+            // La bulle du menu : le libellé choisi, en entier. Le menu de la barre le coupe à 136 pt.
+            let bulle = productions.length > 1 ? 'Toutes les productions' : '';
             if (productions.length > 1) {
-                htmlDropdown += '<option value="">Toutes les productions</option>';
+                options += '<option value="">Toutes les productions</option>';
             }
-            productions.forEach(p => {
+            productions.forEach((p, i) => {
                 const lst = groupes[p.id] || [];
                 const compteur = lst.length === 0 ? '(0)' : compteurEtudiantsFichiers(lst, p.id);
                 const sel = (productionFiltreActive === p.id) ? ' selected' : '';
-                htmlDropdown += `<option value="${echapperHtml(p.id)}"${sel}>${echapperHtml(p.titre || p.nom || p.id)} ${compteur}</option>`;
+                const libelle = `${p.titre || p.nom || p.id} ${compteur}`;
+                if (sel || (productions.length === 1 && i === 0)) bulle = libelle;
+                options += `<option value="${echapperHtml(p.id)}"${sel}>${echapperHtml(libelle)}</option>`;
             });
-            htmlDropdown += '</select>';
+            // Le libellé ne s'affiche que dans la barre d'outils, où le menu se coupe par « … » (styles.css).
+            htmlDropdown += `<span class="travaux-filtre-production-libelle"><span class="travaux-filtre-production-texte">${echapperHtml(bulle)}</span></span>`;
+            htmlDropdown += `<select class="controle-form travaux-filtre-production" title="${echapperHtml(bulle)}" data-on-change="travauxUI.filtrerBadgesParProduction">${options}</select>`;
         }
 
         // Bouton de fusion (visible quand 2+ fichiers du meme etudiant sont selectionnes)
@@ -3121,6 +3138,11 @@
         // Trouver le select : soit passé en argument (onchange), soit chercher dans le conteneur annoter
         const select = selectElement || document.querySelector('#evaluations-contenu-fichiers .travaux-filtre-production');
         const productionId = select ? select.value : '';
+        if (select && select.selectedOptions[0]) {
+            select.title = select.selectedOptions[0].textContent;
+            const libelle = select.parentElement.querySelector('.travaux-filtre-production-texte');
+            if (libelle) libelle.textContent = select.title;
+        }
         productionFiltreActive = productionId;
         sessionStorage.setItem(cleSession('travaux-filtre-production'), productionId);
 
@@ -3482,8 +3504,7 @@
                 afficherPastilleActive(pill);
             } else if (pill.dataset.origTexte) {
                 // Restaurer l'etat d'origine
-                pill.textContent = pill.dataset.origTexte;
-                pill.className = 'travaux-badge-pill ' + pill.dataset.origClasse;
+                poserEtatPastille(pill, pill.dataset.origTexte, pill.dataset.origClasse);
                 delete pill.dataset.origTexte;
                 delete pill.dataset.origClasse;
             }
@@ -5833,7 +5854,7 @@
             <div class="travaux-zone-document" id="travaux-split-document-container">
                 <div class="travaux-toolbar">
                     <button id="travaux-split-btn-page-prec" class="btn-icon" data-action="travauxVisionneuse.pagePrecedente" disabled aria-label="Page précédente" title="Page précédente"><img src="icons/icon-chevron-left.svg" alt="" class="nav-seq-icon"></button>
-                    <span id="travaux-indicateur-page">-- / --</span>
+                    <span id="travaux-indicateur-page">--/--</span>
                     <button id="travaux-split-btn-page-suiv" class="btn-icon" data-action="travauxVisionneuse.pageSuivante" disabled aria-label="Page suivante" title="Page suivante"><img src="icons/icon-chevron-right.svg" alt="" class="nav-seq-icon"></button>
                     <button class="btn btn-petit" data-action="travauxAnnotation.basculerAnnotation">Annoter</button>
                     <button class="btn-icon" data-action="travauxUI.fermerVueCoteACote" title="Fermer"><img src="icons/icon-close-window.svg" alt="" class="modal-close-icon"></button>
@@ -5938,8 +5959,7 @@
             b.classList.remove('actif');
             const pill = b.querySelector('.travaux-badge-pill');
             if (pill && pill.dataset.origTexte) {
-                pill.textContent = pill.dataset.origTexte;
-                pill.className = 'travaux-badge-pill ' + pill.dataset.origClasse;
+                poserEtatPastille(pill, pill.dataset.origTexte, pill.dataset.origClasse);
                 delete pill.dataset.origTexte;
                 delete pill.dataset.origClasse;
             }
@@ -7569,6 +7589,7 @@
         // l'état que sa sélection calcule — ces deux-là, pas une recopie.
         statutPastilleFichier: statutPastilleFichier,
         afficherPastilleActive: afficherPastilleActive,
+        poserEtatPastille: poserEtatPastille,
         // #608 — exposés pour la sentinelle. Le souligné dit « pas une API » :
         // les deux points de décision de la chaîne « jeton de reprise » sont
         // enfouis dans une modale et dans un balayage post-import, que Vitest ne

@@ -622,7 +622,7 @@
     function mettreAJourNavigation(zoomAffiche) {
         const indicateur = document.getElementById('travaux-indicateur-page');
         if (indicateur) {
-            indicateur.textContent = `${pageActuelle} / ${nombrePagesTotal}`;
+            indicateur.textContent = `${pageActuelle}/${nombrePagesTotal}`;
         }
 
         // Toolbar standard ET toolbar split-view (vue cote-a-cote). Ces 2

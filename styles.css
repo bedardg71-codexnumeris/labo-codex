@@ -17450,6 +17450,15 @@ tr.ligne-import-ecartee td {
     border-radius: 0;
     background: none;
 }
+/* La visionneuse prend toute la largeur (consigne du 1er nov. 2026, partie A) : les 95 % du conteneur coûtaient 59 pt à
+   la barre sur l'iPad, ce qui séparait les ébauches (dessinées à 1180) de la barre réelle (1121). `.sous-section.active` :
+   la classe `visionneuse-ouverte` reste posée sur la section quand on passe à la Liste, qui garde sa largeur. */
+.conteneur:has(#evaluations-annoter.active .travaux-visionneuse-layout) {
+    max-width: 100%;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+}
 
 .travaux-visionneuse-layout {
     display: flex;
@@ -26378,7 +26387,20 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 
 /* Badges dans toolbar fusionnée — aplatir la grille en une seule ligne */
 .annot-toolbar-fichiers.travaux-fichiers-compact {
-    padding-right: 8px;
+    padding-right: 0;
+}
+/* Le carrousel s'arrête sur le début d'une étiquette : un nom n'est jamais coupé à gauche, et trois noms de longueur
+   ordinaire tiennent entiers (consigne du 1er nov. 2026, partie A). Seule la bande extérieure défile : un conteneur
+   défilant intérieur capterait les points d'arrêt. */
+.annot-toolbar-fichiers.travaux-fichiers-compact {
+    scroll-snap-type: x mandatory;
+}
+.travaux-fichiers-compact .travaux-badges-liste,
+.travaux-fichiers-compact .travaux-badges-groupe {
+    overflow: visible;
+}
+.travaux-fichiers-compact .annot-badge {
+    scroll-snap-align: start;
 }
 .annot-toolbar-fichiers .travaux-grille-fichiers {
     display: flex;
@@ -26445,7 +26467,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .annot-toolbar {
     display: flex;
     align-items: center;
-    padding: 4px 8px;
+    padding: 4px 6px;
     background: var(--surface-carte, #1a3040);
     border-bottom: 1px solid var(--bordure-claire, #334155);
     border-top: none;
@@ -26455,14 +26477,61 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 .annot-toolbar-production {
+    position: relative;
     flex-shrink: 0;
-    padding-right: 8px;
+    margin-right: 4px;
+    width: 136px;
+    height: 34px;
+}
+
+/* 136 pt (consigne du 1er nov. 2026, partie A) : un titre trop long se coupe par « … », le titre entier est dans la bulle.
+   ⚠ WebKit ne coupe pas le texte d'un <select> par « … », même sans son apparence native (mesuré) : le libellé affiché
+   est un <span>, et le vrai menu, transparent, reste par-dessus pour son geste et son menu natif. */
+.travaux-filtre-production-libelle {
+    display: none;
+}
+.annot-toolbar-production .travaux-filtre-production-libelle {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 0 20px 0 10px;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 8px;
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    font-size: 13px;
+}
+.annot-toolbar-production .travaux-filtre-production-texte {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.annot-toolbar-production::after {
+    content: '\21C5';
+    position: absolute;
+    right: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--texte-secondaire);
+    font-size: 11px;
+    pointer-events: none;
+}
+.annot-toolbar-production:has(select:focus-visible) .travaux-filtre-production-libelle {
+    box-shadow: 0 0 0 var(--focus-ring-width, 3px) var(--focus-ring-color, #6aacb8);
 }
 
 .annot-toolbar-production select {
-    max-width: 220px;
-    font-size: 12px;
-    height: 28px;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    font-size: 13px;
+    height: 34px;
+    opacity: 0;
+    cursor: pointer;
     /* #765 — padding vertical porté ici : le bloc <style> d'index.html, chargé après cette feuille,
        redéclare .controle-form avec un padding de 8 px et battait .travaux-filtre-production (même
        spécificité) ; à 28 px de haut, 8 px en haut et en bas coupaient le texte à mi-hauteur. */
@@ -26490,7 +26559,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     grid-template-columns: repeat(3, 32px);
     gap: 1px;
     height: 34px;
-    margin: 0 4px;
+    margin: 0 2px 0 4px;
     flex-shrink: 0;
     border: 1px solid var(--bordure-moyenne);
     border-radius: 8px;
@@ -26522,14 +26591,76 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     height: 24px;
     background: var(--bordure-claire, #334155);
     flex-shrink: 0;
-    margin: 0 4px;
+    margin: 0 2px;
 }
 
 .annot-toolbar-outils {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     flex-shrink: 0;
+}
+
+#travaux-btn-actions {
+    height: 34px;
+    padding: 0 6px;
+    font-size: 13px;
+}
+
+/* Pages (32, 40, 32) et zoom et plein écran (46, 32), en bandes soudées (consigne du 1er nov. 2026, partie A). Elles
+   sortent de la règle des 44 px au pointeur grossier (#568) : la consigne fixe le plancher de la barre à 32 pt, pour
+   rendre sa largeur à la copie et au carrousel. La barre de la Modélisation ne porte pas ces bandes et garde ses 44 px. */
+.annot-bande-soudee {
+    display: flex;
+    align-items: stretch;
+    gap: 1px;
+    height: 34px;
+    flex-shrink: 0;
+    border: 1px solid var(--bordure-moyenne);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bordure-moyenne);
+}
+.annot-bande-soudee .travaux-btn-nav {
+    width: 32px;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+}
+.annot-bande-soudee .travaux-btn-nav:disabled {
+    opacity: 1;
+}
+.annot-bande-soudee .travaux-btn-zoom {
+    width: 46px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.annot-bande-soudee #travaux-indicateur-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    background: var(--surface-carte);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+.annot-toolbar-outils .travaux-chrono-toolbar {
+    gap: 4px;
+}
+.annot-toolbar-outils .travaux-chrono-icone {
+    width: 15px;
+    height: 15px;
+}
+.annot-toolbar-outils .travaux-chrono-badge {
+    padding: 0;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
 }
 
 /* --- Menu déroulant Actions (toolbar travaux) --- */
@@ -26776,6 +26907,121 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 .travaux-badge-profil:hover {
     background: var(--bleu-tres-pale);
+}
+
+/* L'ÉTIQUETTE DU CARROUSEL D'ANNOTER ET D'ÉVALUER (consigne du 1er nov. 2026, partie A ; `barre-outils-proposee`).
+   La pastille reste l'élément et le mot que ses écrivains posent (`travauxUI.poserEtatPastille`) ; ICI SEULEMENT, elle se
+   dessine en symbole de 15 pt d'après sa classe d'état, et le mot passe dans sa bulle et son `aria-label`. Les formes
+   diffèrent, pas seulement les couleurs. `.travaux-fichiers-compact` n'existe qu'à cette barre : le carrousel de la
+   Modélisation, l'Archivage, la Liste et le transfert gardent leurs mots. L'ordre du DOM ne change pas : le verrou est
+   posé après la pastille par `evaluation.js`. */
+.travaux-fichiers-compact .annot-badge {
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 4px 0 8px;
+    border-radius: 9px;
+}
+.travaux-fichiers-compact .annot-badge:not(:has(.travaux-badge-profil)) {
+    padding-right: 8px;
+}
+.travaux-fichiers-compact .annot-badge.actif {
+    height: 34px;
+    border-width: 2px;
+}
+.travaux-fichiers-compact .annot-badge-nom {
+    font-size: 14px;
+}
+.travaux-fichiers-compact .annot-badge.actif .annot-badge-nom {
+    font-weight: 600;
+}
+.travaux-fichiers-compact .travaux-badge-verrou {
+    order: 1;
+    margin-left: 0;
+    display: inline-flex;
+}
+.travaux-fichiers-compact .travaux-badge-verrou .btn-inline-icon {
+    width: 13px;
+    height: 13px;
+    margin-right: 0;
+}
+/* 24 pt à l'œil, comme l'ébauche ; 32 pt sous le doigt, la hauteur de l'étiquette. */
+.travaux-fichiers-compact .travaux-badge-profil {
+    position: relative;
+    order: 2;
+    width: 24px;
+    height: 24px;
+    margin-left: 0;
+}
+.travaux-fichiers-compact .travaux-badge-profil::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+}
+.travaux-fichiers-compact .travaux-badge-pill {
+    --symbole: var(--texte-secondaire);
+    position: relative;
+    order: -1;
+    box-sizing: border-box;
+    flex: none;
+    width: 15px;
+    height: 15px;
+    padding: 0;
+    border: 2px solid var(--symbole);
+    border-radius: 50%;
+    background: transparent;
+    color: transparent;
+    font-size: 0;
+    line-height: 0;
+    letter-spacing: 0;
+}
+.travaux-fichiers-compact .travaux-badge-pill::after {
+    content: '';
+    position: absolute;
+}
+/* Évalué : disque plein, crochet. */
+.travaux-fichiers-compact .travaux-badge-pill.evalue {
+    --symbole: var(--vert-succes, #28a745);
+    background: var(--symbole);
+}
+.travaux-fichiers-compact .travaux-badge-pill.evalue::after {
+    left: 3px;
+    top: 0;
+    width: 5px;
+    height: 8px;
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+/* En cours (la copie ouverte) : demi-disque dans un cercle. */
+.travaux-fichiers-compact .travaux-badge-pill.en-cours {
+    --symbole: #e65100;
+    background: linear-gradient(90deg, var(--symbole) 50%, transparent 50%);
+}
+/* Importé : le cercle vide, sans rien de plus que la règle commune. */
+/* Annoté : cercle, point central. */
+.travaux-fichiers-compact .travaux-badge-pill.annote {
+    --symbole: var(--accent-primaire, #2196F3);
+}
+.travaux-fichiers-compact .travaux-badge-pill.annote::after {
+    left: 3px;
+    top: 3px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--symbole);
+}
+/* Incomplet : cercle, point d'exclamation. */
+.travaux-fichiers-compact .travaux-badge-pill.incomplet {
+    --symbole: var(--alerte-bordure-attention);
+}
+.travaux-fichiers-compact .travaux-badge-pill.incomplet::after {
+    content: '!';
+    inset: 0;
+    color: var(--symbole);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 11px;
+    text-align: center;
 }
 
 /* Icône Supprimer (corbeille) sur badge — visible en vue Archivage uniquement */
