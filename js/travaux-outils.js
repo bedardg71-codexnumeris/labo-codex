@@ -1511,7 +1511,7 @@
         });
         html += '</div>';
         // La version compacte ne dit le nom que du code actif : trois lignes réservées, la palette ne bouge pas.
-        if (codes.length) html += '<p class="travaux-errfr-nom-actif" id="travaux-errfr-nom-actif">' + TEXTE_AUCUN_CODE_ACTIF + '</p>';
+        if (codes.length) html += '<p class="travaux-errfr-nom-actif" id="travaux-errfr-nom-actif">' + echapperHtml(TEXTE_AUCUN_CODE_ACTIF) + '</p>';
         return html;
     }
 

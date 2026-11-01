@@ -67,7 +67,8 @@ async function entrerDansLaCopie(page) {
     }, PNG);
     await page.evaluate(() => window.afficherSection('evaluations'));
     await page.waitForFunction(() => !!document.querySelector('#section-evaluations.active') && window.travauxUI.getModeCourant() === 'annoter', null, { timeout: 10000 });
-    await page.evaluate(() => new Promise((r) => setTimeout(r, 400))); // l'initialisation du module, lancée à +100 ms (#761)
+    // pause-gardee : l'initialisation du module, lancée à +100 ms (#761), ne laisse aucune trace dans le DOM (mesuré sur 560 ms).
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 400)));
     await page.evaluate(() => window.executerActionEval({ value: 'consulter|EV2' }));
     await page.waitForFunction(() => window.travauxVisionneuse?.getFichierActuel?.()?.id === 'F2' && window._modifierEvaluationEnCours === false, null, { timeout: 15000 });
     await page.evaluate(() => window.travauxUI.basculerMode('annoter'));

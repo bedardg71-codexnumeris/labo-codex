@@ -116,8 +116,16 @@ const auBasDuContenu = (page, id) => page.evaluate((id) => {
     const cadre = c.getBoundingClientRect();
     const cartes = [...p.querySelectorAll('#listeCriteresGrille1 > div')];
     const derniere = cartes.at(-1);
-    const r = derniere ? derniere.getBoundingClientRect() : null;
-    const poignee = p.querySelector(':scope > .palette-poignee-redim').getBoundingClientRect();
+    // Ce qui suit la dernière carte occupe le bas du contenu (98 px, mesuré) : tout en bas d'un cadre de 357 px (hors plein
+    // écran, depuis la partie C), une carte de 287 px dépasse par le haut. L'œil la voit entière en la ramenant au haut du
+    // cadre : c'est ce geste qu'on mesure. Une carte plus haute que le cadre, ou coupée par lui, reste rouge.
+    const dernierCritereEntier = () => {
+        if (!derniere) return null;
+        c.scrollTop += derniere.getBoundingClientRect().top - cadre.top;
+        const r = derniere.getBoundingClientRect();
+        return r.top >= cadre.top - 0.5 && r.bottom <= cadre.bottom + 0.5 && r.bottom <= innerHeight;
+    };
+    const poignee =p.querySelector(':scope > .palette-poignee-redim').getBoundingClientRect();
     const rp = p.getBoundingClientRect();
     const mesure = {
         debordeAvant,
@@ -125,7 +133,7 @@ const auBasDuContenu = (page, id) => page.evaluate((id) => {
         barreVisible: barre.top >= 0 && barre.bottom <= innerHeight && barre.bottom <= cadre.top + 1,
         poigneeAuCoin: Math.abs(poignee.bottom - rp.bottom) <= 2 && Math.abs(poignee.right - rp.right) <= 2,
         paletteDansSaZone: rp.bottom <= p.parentElement.getBoundingClientRect().bottom + 0.5,
-        dernierCritereVisible: r ? r.top >= cadre.top - 0.5 && r.bottom <= cadre.bottom + 0.5 && r.bottom <= innerHeight : null,
+        dernierCritereVisible: dernierCritereEntier(),
         dernierEstAlgo: derniere ? !!derniere.querySelector('.eval-badge-algo') : null,
         cartesCoupees: cartes.filter((x) => x.scrollHeight > x.clientHeight + 1).length,
         nbCartes: cartes.length
@@ -265,6 +273,10 @@ test.describe('#1214 — la palette Évaluation n’a qu’une barre de défilem
         expect(retro.display).toBe('flex');
         expect(retro.overflow).toBe('hidden');
         expect(Math.abs(retro.basContenu - retro.basPalette)).toBeLessThanOrEqual(2);
-        expect(retro.hauteurChamp).toBeGreaterThan(80); // le champ prend toujours la place qui reste
+        // Hors plein écran à 820 px (partie C), il ne reste que le plancher du champ, 80 px. La place qui reste se juge où il y en a.
+        expect(retro.hauteurChamp).toBeGreaterThanOrEqual(80);
+        await page.evaluate(() => window.travauxUI.togglePleinEcran());
+        const champPleinEcran = await page.evaluate(() => document.getElementById('retroactionFinale1').clientHeight);
+        expect(champPleinEcran).toBeGreaterThan(300); // 441 mesuré : le champ prend toujours la place qui reste
     });
 });

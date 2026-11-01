@@ -17464,9 +17464,10 @@ tr.ligne-import-ecartee td {
    barre d'adresse de Safari ; `vh` reste pour un navigateur qui ne le connaît pas. 300 px : à 400, une fenêtre d'iPad
    avec sa barre d'onglets (environ 740 pt) laissait encore défiler la page. */
 .travaux-visionneuse-layout {
+    --visionneuse-hors-zone: 120px;
     display: flex;
-    height: calc(100vh - var(--visionneuse-hors-zone, 120px));
-    height: calc(100dvh - var(--visionneuse-hors-zone, 120px));
+    height: calc(100vh - var(--visionneuse-hors-zone));
+    height: calc(100dvh - var(--visionneuse-hors-zone));
     min-height: 300px;
     gap: 0;
     overflow: hidden;
@@ -27003,7 +27004,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 /* Sur fond clair, le vert du succès ne fait que 2,2:1 (mesuré ; 3:1 attendu pour un élément graphique). */
 .mode-clair .travaux-fichiers-compact .travaux-badge-pill.evalue {
-    --symbole: var(--vert-fonce, #1b7a34);
+    --symbole: #1b7a34;
     --crochet: #fff;
 }
 .travaux-fichiers-compact .travaux-badge-pill.evalue::after {

@@ -730,11 +730,7 @@
                         // Marquer le badge actif. Sa pastille renaît à son état d'origine : elle redevient celle de la
                         // copie ouverte (mesuré le 1er nov. 2026 : une copie ouverte revenait « Importé » après un détour).
                         const badgeActif = badgeStrip.querySelector('[data-fichier-id="' + fichierOuvert.id + '"]');
-                        if (badgeActif) {
-                            badgeActif.classList.add('actif');
-                            const pillActive = badgeActif.querySelector('.travaux-badge-pill');
-                            if (pillActive) marquerPastilleOuverte(pillActive);
-                        }
+                        if (badgeActif) _marquerBadgeOuvert(badgeActif);
                         // Le dropdown production porte des compteurs : le remplacer, ou le restaurer si absent
                         const prodExistant = document.querySelector('.annot-toolbar-production');
                         if (prodExistant) {
@@ -2798,6 +2794,13 @@
             pill.dataset.origClasse = pill.className.replace('travaux-badge-pill', '').trim();
         }
         afficherPastilleActive(pill);
+    }
+
+    /** L'étiquette de la copie ouverte, après que le carrousel a été régénéré : marquée active, sa pastille marquée ouverte. */
+    function _marquerBadgeOuvert(badge) {
+        badge.classList.add('actif');
+        const pill = badge.querySelector('.travaux-badge-pill');
+        if (pill) marquerPastilleOuverte(pill);
     }
 
     /**
