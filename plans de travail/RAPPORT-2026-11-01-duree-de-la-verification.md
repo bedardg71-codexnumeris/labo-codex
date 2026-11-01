@@ -34,6 +34,17 @@ Passe de référence : le Mac, 31 oct., **97,6 min** pour 1 220 essais (jeton de
 
 **Ces parts ne sont pas encore mesurées sur le Mac entier.** Aucune passe du Mac n'avait gardé ses rapports. La première passe complète qui suit la fusion les gardera, et `node scripts/mesurer-verification.mjs` donnera les trois chiffres.
 
+**Après `lot/pauses-apres-ouverture`, non fusionné : ~79 min, estimées.** Rapport : `RAPPORT-2026-11-01-pauses-apres-ouverture.md`.
+
+| Part | Avant | Après (estimé) |
+|---|---|---|
+| Démarrage de l'application | 8 à 10 | 8 à 10 |
+| Pauses fixes | ~58 | ~37 |
+| Le reste, dont les 857 nouvelles attentes (~2 min) | ~30 | ~32 |
+| **Total** | **97,6** | **~79** |
+
+Mesuré sur 12 specs seulement : −31 %. Sur GitHub, la durée cumulée ne baisse pas (237,2 → 239,2 min, sans les reprises).
+
 ### M1, l'ouverture (mesurée, Mac, WebKit, 20 ouvertures)
 
 Les 393 ouvertures écrites dans les specs font toutes `page.goto(index.html)` sans option : **le seul signal commun est l'événement `load`**. Le signal explicite le plus fréquent vient ensuite : `window.dbReady === true`, première attente de 88 d'entre elles.
@@ -76,7 +87,7 @@ Ces 20 fichiers font 103 des 265 min.
 - **Sur GitHub** : **3 047 pauses, 63,4 min** ; sans les reprises, 2 928 pauses, **60,9 min**.
 - **L'estimation à la lecture était cinq fois trop basse** : 772 appels écrits pour 769 s (12,8 min), contre 63,4 min réelles. Les aides tournent plusieurs fois.
 - **Passage au Mac** : une pause dure ce qui est écrit, plus un surcoût médian de 57 ms sur le Mac (67 pauses lues) et de 119 ms sur GitHub (1 843 lues). D'où ~3 min de moins, soit ~58 min. Deux specs complètes jouées sur le Mac vont dans ce sens : 66 % et 71 % de leur durée en pauses.
-- **Dans ces pauses, 897 (22,8 min) suivent immédiatement une ouverture ou un rechargement.** Elles attendent par un délai une application qui répond en un tiers de seconde.
+- **Dans ces pauses, 897 (22,8 min) suivent immédiatement une ouverture ou un rechargement.** Elles attendent par un délai une application qui répond en un tiers de seconde. **Corrigé par le lot suivant : ce tiers de seconde vaut pour le Mac.** Sur GitHub, l'application demande ~1,5 s de plus après `page.goto`.
 - **Non comptés** : les `setTimeout` écrits dans un `page.evaluate` (45 lignes du genre dans les specs) ; Playwright ne les voit pas comme des pauses. Ils sont dans « le reste ».
 
 ### Une mesure de plus, sur « le reste »
