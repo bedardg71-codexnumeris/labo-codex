@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 1er NOVEMBRE 2026 : LA PALETTE ÉVALUATION COMPACTE, CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : dans Évaluer, un bouton aux quatre carrés met chaque critère sur une ligne, le nom et son menu, sans description ; le choix reste. Toucher un nom souligné ouvre sa description dans une bulle. Hors plein écran, sur la grille d'essai, tu vois 4 critères entiers au lieu de 2 (en plein écran, 5 au lieu de 4). En échange, les palettes sont plus larges à l'ouverture : la copie libre entre elles passe de 468 à 272 pt.
+
+**Ce qui reste à toi** : rien avant la mise en ligne. Ensuite, la porte terrain (`plans de travail/PORTES-TERRAIN-2026-11-01-palette-evaluation-compacte.md`), dont deux points que seul l'iPad peut dire : les champs Erreurs et Mots en mode sombre, et cette place laissée à la copie.
+
+**Vérifié comment** : Vitest entier vert (10 615) ; dans WebKit, au doigt, à 1180 × 820, la spec du lot (16) et les specs voisines vertes ; 21 changements volontaires du code, tous attrapés après le renforcement de trois essais trop faibles. Pas sur le vrai iPad, pas de suite Playwright complète (celle du soir), et le défaut de contraste n'a pas été reproduit au banc : son correctif reste à voir sur l'iPad.
+
 📝 **LE 1er NOVEMBRE 2026 : LA BARRE D'OUTILS ET LA PALETTE CODES COMPACTES, CODÉES, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : sur l'iPad, trois noms complets dans le carrousel au lieu d'un, chacun précédé d'un symbole ; la palette Codes se choisit en version compacte, et le choix reste ; hors plein écran, la page ne défile plus sous les palettes. En échange, hors plein écran, la hauteur est courte : environ 416 points pour la copie et les palettes, et le champ de rétroaction descend à quatre lignes. Le plein écran lui rend sa hauteur.
