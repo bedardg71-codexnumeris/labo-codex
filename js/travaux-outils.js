@@ -584,8 +584,8 @@
     // la palette.
     //   _codesRepli()     les dix, personnalisés — l'écran de réglage, les défauts
     //   _codesCourants()  ceux de la copie ouverte (sa grille, sinon le repli)
-    // `_grilleCourante` est posée à l'ouverture d'une copie (lot 2) ; nulle, la
-    // palette montre le repli — exactement hier.
+    // `_grilleCourante` est posée à l'ouverture d'une copie (lot 2) et relue quand la
+    // grille change (#1213) ; nulle, la palette montre le repli — exactement hier.
     var _grilleCourante = null;
     function _codes() {
         return (typeof window !== 'undefined' && window.codesAnnotation) ? window.codesAnnotation : null;
@@ -666,14 +666,49 @@
      * actif que la liste ne connaît plus laisse la place au stylo.
      */
     function _poserGrilleCourante(grille) {
+        _adopterGrille(grille);
+        rafraichirPalettesApresPersonnalisation();
+        mettreAJourCompteursErreurs();
+    }
+
+    function _adopterGrille(grille) {
         _grilleCourante = grille || null;
         _regenererOutilsCodes();
         invaliderCacheCurseurs();
         if (typeof outilActif === 'string' && outilActif.indexOf('errfr_') === 0 && !OUTILS[outilActif]) {
             setOutilActif('stylo');
         }
-        rafraichirPalettesApresPersonnalisation();
-        mettreAJourCompteursErreurs();
+    }
+
+    /**
+     * #1213 (1er nov. 2026) — LA GRILLE A CHANGÉ, LA COPIE RESTE OUVERTE. Posée une seule fois à
+     * l'ouverture, la grille de la palette restait celle d'avant le détour par Conception › Grilles,
+     * jusqu'au rechargement (rapport de Grégoire : « n'enregistre pas », alors que c'était écrit).
+     *
+     * ⚠ AFFICHAGE SEUL, c'est pourquoi ce n'est pas `_poserGrilleCourante` :
+     *   - `mettreAJourCompteursErreurs` verse le total au champ d'erreurs par un `input`, qui arme
+     *     l'enregistrement automatique : préciser un mot de la grille réécrirait l'évaluation ouverte ;
+     *   - `rafraichirPalettesApresPersonnalisation` recrée la palette flottante (sa disposition et son
+     *     repli repartent de zéro) : ici, seul son contenu change.
+     * Les poids relus servent au prochain geste sur la copie, comme après un rechargement.
+     * Les codes déjà dessinés reprennent leur numéro ; leur couleur est celle écrite à leur pose.
+     */
+    function _relireGrilleDeLaCopie() {
+        var t = _codes();
+        var v = window.travauxVisionneuse;
+        var fichier = (v && typeof v.getFichierActuel === 'function') ? v.getFichierActuel() : null;
+        if (!t || !fichier) return;
+        _adopterGrille(t.grilleDeCopie(fichier));
+        var palette = document.getElementById('travaux-palette-erreurs-fr');
+        if (palette) {
+            var contenu = palette.querySelector('#travaux-errfr-contenu');
+            if (contenu) contenu.innerHTML = genererContenuErreursFr();
+            var engrenage = palette.querySelector('[data-action="travauxOutils.ouvrirEditionRetroErreursFr"]');
+            if (engrenage) engrenage.title = _copieGouvernee() ? _phraseSourceCodes() : 'Personnaliser';
+        }
+        _afficherCompteursCodes(compterErreursFrancais());
+        rafraichirPalette();   // le curseur du code actif, régénéré
+        if (typeof travauxAnnotation !== 'undefined') travauxAnnotation.reRendreAnnotations();
     }
 
     if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
@@ -683,6 +718,10 @@
             _poserGrilleCourante(t ? t.grilleDeCopie(fichier) : null);
         });
         window.addEventListener('travaux-fichier-ferme', function() { _poserGrilleCourante(null); });
+        window.addEventListener('donnees-enregistrees', function(e) {
+            var ecrite = (e && e.detail) ? e.detail.cle : null;
+            if (ecrite && typeof window.cle === 'function' && ecrite === window.cle('grillesTemplates')) _relireGrilleDeLaCopie();
+        });
     }
 
     // Valeurs par defaut des symboles (crochet/croix/interrogation)
@@ -2502,33 +2541,38 @@
         return Object.keys(compteurs).reduce((s, id) => s + (compteurs[id] || 0), 0);
     }
 
+    /**
+     * Badges et total d'entête : seulement si la palette CODES est ouverte. N'écrit que l'écran.
+     * Le total additionne TOUS les codes posés ; les badges ne montrent que ceux que la palette affiche.
+     */
+    function _afficherCompteursCodes(compteurs) {
+        const palette = document.getElementById('travaux-palette-erreurs-fr');
+        if (!palette) return;
+        const total = Object.keys(compteurs).reduce((somme, id) => somme + (compteurs[id] || 0), 0);
+        _codesCourants().forEach(c => {
+            const count = compteurs[c.id] || 0;
+            const idSur = (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') ? CSS.escape(c.id) : c.id.replace(/["\\]/g, '');
+            const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + idSur + '"]');
+            if (badge) {
+                badge.textContent = count > 0 ? count : '';
+                badge.classList.toggle('u-hide', count === 0);
+            }
+        });
+
+        const spanTotal = document.getElementById('travaux-errfr-total-header');
+        if (spanTotal) {
+            spanTotal.textContent = total > 0 ? '(' + _totalCodesEnMots(total) + ')' : '';   // étape 2a
+        }
+    }
+
     function mettreAJourCompteursErreurs() {
         const compteurs = compterErreursFrancais();
-        // Le total additionne TOUS les codes posés ; les badges ne montrent que
-        // ceux que la palette affiche.
         const total = Object.keys(compteurs).reduce((somme, id) => somme + (compteurs[id] || 0), 0);
 
-        // Badges et total d'entête : seulement si la palette CODES est ouverte.
-        // Bug 2026-10-20 (Grégoire) : cette garde arrêtait TOUTE la fonction, et le
+        // Bug 2026-10-20 (Grégoire) : la garde de la palette arrêtait TOUTE la fonction, et le
         // champ « Nombre d'erreurs » ne suivait plus les codes quand la palette
         // était fermée — la note partait sur 0 erreur.
-        const palette = document.getElementById('travaux-palette-erreurs-fr');
-        if (palette) {
-            _codesCourants().forEach(c => {
-                const count = compteurs[c.id] || 0;
-                const idSur = (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') ? CSS.escape(c.id) : c.id.replace(/["\\]/g, '');
-                const badge = palette.querySelector('.travaux-errfr-compteur[data-erreur="' + idSur + '"]');
-                if (badge) {
-                    badge.textContent = count > 0 ? count : '';
-                    badge.classList.toggle('u-hide', count === 0);
-                }
-            });
-
-            const spanTotal = document.getElementById('travaux-errfr-total-header');
-            if (spanTotal) {
-                spanTotal.textContent = total > 0 ? '(' + _totalCodesEnMots(total) + ')' : '';   // étape 2a
-            }
-        }
+        _afficherCompteursCodes(compteurs);
 
         // Propager le total dans le champ « Nombre d'erreurs » du critère algorithmique
         // UNIQUEMENT s'il y a des tampons d'erreurs (total > 0). Sinon on ne touche
