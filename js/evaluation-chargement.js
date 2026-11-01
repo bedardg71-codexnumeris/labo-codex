@@ -1054,6 +1054,37 @@ function libelleNiveauEval(echelle) {
     return nom ? 'Niveau de l’échelle « ' + nom + ' »' : 'Niveau';
 }
 
+/**
+ * L'en-tête d'un critère et sa description, aux deux surfaces (`cartoucheSelectionnee`, `afficherCriteresDepuisGrille`).
+ * Le bouton n'a pas de texte et ne paraît qu'en version compacte (`styles.css`) : il recouvre le nom sans le répéter.
+ * Hors de la palette, le formulaire sans copie n'a pas cette version : il a la place, et aucun bouton pour la choisir.
+ */
+function _enteteCritereHtml(critere, ponderation, grille) {
+    const nom = echapperHtml(critere.nom);
+    return `<div class="eval-critere-header">
+        <strong class="u-texte-09" data-tooltip="eval-critere">${nom}</strong>
+        <small class="eval-label">(${echapperHtml(libellePonderationEval(ponderation, grille))})</small>
+        ${critere.type === 'algorithmique' ? '<span data-tooltip="eval-francais-ecrit" class="eval-badge-algo">ALGORITHMIQUE</span>' : ''}
+        ${critere.description ? `<button type="button" class="eval-critere-nom-bouton" data-action="basculerDescriptionCritere" aria-expanded="false" aria-label="${echapperAttribut(critere.nom)}, voir la description"></button>` : ''}
+    </div>
+    ${critere.description ? `<small class="eval-critere-description">${echapperHtml(critere.description)}</small>` : ''}`;
+}
+
+/** Le menu de niveau d'un critère ; son étiquette reste pour le lecteur d'écran quand elle ne se voit pas. */
+function _menuNiveauHtml(critere, niveaux, optionVide, etiquette) {
+    return `<select id="eval_${critere.id}" class="controle-form eval-select-niveau" aria-label="${echapperAttribut(critere.nom)} : ${echapperAttribut(etiquette)}"
+                data-on-change="niveauSelectionne" data-param="${critere.id}">
+                <option value="">${optionVide}</option>
+                ${niveaux.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
+            </select>`;
+}
+
+/** Le toucher d'un nom de critère, en version compacte : sa description dans la bulle des aides, sous la ligne. */
+function basculerDescriptionCritere(bouton) {
+    const description = bouton.closest('.eval-critere-carte').querySelector('.eval-critere-description');
+    if (description) window.basculerBulleAncree(bouton, bouton.closest('.eval-critere-header'), description.textContent);
+}
+
 function cartoucheSelectionnee() {
     const cartoucheId = document.getElementById('selectCartoucheEval').value;
 
@@ -1144,13 +1175,7 @@ function cartoucheSelectionnee() {
     <div class="eval-critere-carte">
         <div class="eval-grid-critere">
             <div>
-    <div class="eval-critere-header">
-        <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
-        <small class="eval-label">(${echapperHtml(libellePonderationEval(ponderation, grille))})</small>
-        ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" class="eval-badge-algo">ALGORITHMIQUE</span>' : ''}
-    </div>
-    ${critereGrille?.description ?
-                `<small class="eval-critere-description">${echapperHtml(critereGrille.description)}</small>` : ''}
+    ${_enteteCritereHtml(critere, ponderation, grille)}
 
     ${estAlgorithmique ? (categorisationActive ? `
         <!-- Interface algorithmique AVEC catégorisation -->
@@ -1181,11 +1206,7 @@ function cartoucheSelectionnee() {
         </div>
         <div>
             <label data-tooltip="eval-niveau-idme" class="eval-label">${echapperHtml(libelleNiveauEval(echelleSelectionnee))} (modifiable manuellement) :</label>
-            <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
-                    data-on-change="niveauSelectionne" data-param="${critere.id}">
-                <option value="">— Utiliser le niveau calculé —</option>
-                ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
-            </select>
+            ${_menuNiveauHtml(critere, niveauxDisponibles, '— Utiliser le niveau calculé —', libelleNiveauEval(echelleSelectionnee))}
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifie uniquement si nécessaire.</small>
         </div>
     ` : `
@@ -1216,11 +1237,7 @@ function cartoucheSelectionnee() {
         </div>
         <div>
             <label data-tooltip="eval-niveau-idme" class="eval-label">${echapperHtml(libelleNiveauEval(echelleSelectionnee))} (modifiable manuellement) :</label>
-            <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
-                    data-on-change="niveauSelectionne" data-param="${critere.id}">
-                <option value="">— Utiliser le niveau calculé —</option>
-                ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
-            </select>
+            ${_menuNiveauHtml(critere, niveauxDisponibles, '— Utiliser le niveau calculé —', libelleNiveauEval(echelleSelectionnee))}
             <small class="eval-aide">Par défaut: utilise le niveau calculé automatiquement. Modifie uniquement si nécessaire.</small>
         </div>
     `) : estAnalytique ? `
@@ -1229,11 +1246,7 @@ function cartoucheSelectionnee() {
         ${_saisiePointsHtml(critere, ponderation)}
     ` : `
         <!-- Interface standard (holistique) -->
-        <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
-                data-on-change="niveauSelectionne" data-param="${critere.id}">
-            <option value="">--</option>
-            ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
-        </select>
+        ${_menuNiveauHtml(critere, niveauxDisponibles, '--', libelleNiveauEval(echelleSelectionnee))}
     `}
 </div>
             <div id="comm_${critere.id}" style="display:none;">
@@ -1321,6 +1334,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
 
     // Récupérer les niveaux de l'échelle
     let niveauxDisponibles = [];
+    let echelleTrouvee = null;   // son nom : l'étiquette du menu de niveau, pour le lecteur d'écran
 
     if (echelleId && echelleId.startsWith('pratique-')) {
         const pratiqueId = echelleId.replace('pratique-', '');
@@ -1331,9 +1345,9 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
         }
     } else {
         const echelles = db.getSync(cle('echellesTemplates'), []);
-        const echelle = echelles.find(e => e.id === echelleId);
-        if (echelle?.niveaux) {
-            niveauxDisponibles = echelle.niveaux;
+        echelleTrouvee = echelles.find(e => e.id === echelleId) || null;
+        if (echelleTrouvee?.niveaux) {
+            niveauxDisponibles = echelleTrouvee.niveaux;
         }
     }
 
@@ -1359,12 +1373,7 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
     <div class="eval-critere-carte">
         <div class="eval-grid-critere">
             <div>
-                <div class="eval-critere-header">
-                    <strong class="u-texte-09" data-tooltip="eval-critere">${echapperHtml(critere.nom)}</strong>
-                    <small class="eval-label">(${echapperHtml(libellePonderationEval(ponderation, grille))})</small>
-                    ${estAlgorithmique ? '<span data-tooltip="eval-francais-ecrit" class="eval-badge-algo">ALGORITHMIQUE</span>' : ''}
-                </div>
-                ${critere.description ? `<small class="eval-critere-description">${echapperHtml(critere.description)}</small>` : ''}
+                ${_enteteCritereHtml(critere, ponderation, grille)}
 
                 ${estAlgorithmique ? `
                     <!-- Interface algorithmique SIMPLE (mode consultation) -->
@@ -1405,21 +1414,13 @@ function afficherCriteresDepuisGrille(grilleId, echelleId) {
                         <!-- #667 — formule chiffrée (mode consultation) -->
                         <div id="formule_algo_${critere.id}" class="eval-formule-algo u-hide"></div>
                     </div>
-                    <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
-                            data-on-change="niveauSelectionne" data-param="${critere.id}">
-                        <option value="">--</option>
-                        ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
-                    </select>
+                    ${_menuNiveauHtml(critere, niveauxDisponibles, '--', libelleNiveauEval(echelleTrouvee))}
                 ` : estAnalytique ? `
                     <!-- Interface analytique (lot 2, 4 sept. 2026) : le même gabarit que l'autre surface. -->
                     ${_saisiePointsHtml(critere, ponderation)}
                 ` : `
                     <!-- Interface standard -->
-                    <select id="eval_${critere.id}" class="controle-form eval-select-niveau"
-                            data-on-change="niveauSelectionne" data-param="${critere.id}">
-                        <option value="">--</option>
-                        ${niveauxDisponibles.map(n => `<option value="${echapperHtml(n.code)}">${echapperHtml(n.code)} - ${echapperHtml(n.nom)}</option>`).join('')}
-                    </select>
+                    ${_menuNiveauHtml(critere, niveauxDisponibles, '--', libelleNiveauEval(echelleTrouvee))}
                 `}
             </div>
             <div id="comm_${critere.id}" class="u-hide">
@@ -2545,6 +2546,7 @@ window.chargerProductionsDansSelect = chargerProductionsDansSelect;
 
 // Promotion §5.6 nouvelle (consommée L5521 résidu — patch call-site fait) :
 window.afficherCriteresDepuisGrille = afficherCriteresDepuisGrille;
+window.basculerDescriptionCritere = basculerDescriptionCritere;
 
 // Chantier F Cat-B (21 mai 2026) — API découplage travaux-ui ↔ evaluationEnCours.
 // Seul appelant cross-module autorisé à écrire le pivot. Sentinelle Vitest associée.

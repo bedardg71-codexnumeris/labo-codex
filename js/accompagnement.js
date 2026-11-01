@@ -268,6 +268,7 @@ let hoverTouchStartX = 0;
 let hoverTouchStartY = 0;
 let hoverCibleLongPress = null;
 let hoverTooltipJusteAffiche = false;
+let hoverCibleAncree = null;   // la bulle ouverte d'un toucher : elle tient jusqu'au toucher suivant
 
 function hoverObtenirBulle() {
     let bulle = document.getElementById('tooltip-bulle');
@@ -327,6 +328,7 @@ function hoverPositionnerBulle(cible, bulle) {
 }
 
 function afficherHover(cible) {
+    if (hoverCibleAncree) return;   // jamais deux bulles à la fois : celle qu'on a demandée reste
     if (!prefTooltipsActive()) return;
     const cle = cible.dataset.tooltip;
     if (!cle) return;
@@ -341,6 +343,7 @@ function afficherHover(cible) {
     const bulle = hoverObtenirBulle();
     const contenu = bulle.querySelector('.tooltip-contenu');
 
+    bulle.classList.remove('tooltip-bulle--ancree');   // ici et pas en fermant : sa forme ne change pas pendant qu'elle s'efface
     contenu.textContent = texte;
     bulle.style.maxWidth = `${HOVER_LARGEUR_MAX}px`;
 
@@ -362,7 +365,43 @@ function afficherHover(cible) {
     hoverCibleActive = cible;
 }
 
+/**
+ * Une bulle ouverte par un toucher, sous `ancre` (consigne du 1er nov. 2026 : la description d'un critère en version
+ * compacte). Même bulle que les aides, mais ce n'est pas une aide : elle ne dépend pas de la préférence, et ni le survol
+ * ni le focus ne la ferment. Toucher `cible` à nouveau, ou n'importe où ailleurs, la ferme.
+ */
+function basculerBulleAncree(cible, ancre, texte) {
+    const dejaOuverte = hoverCibleAncree === cible;
+    masquerHover();
+    if (dejaOuverte) return;
+    clearTimeout(hoverTimerAffichage);
+
+    const bulle = hoverObtenirBulle();
+    bulle.querySelector('.tooltip-contenu').textContent = texte;
+    bulle.style.maxWidth = '';
+    bulle.classList.add('tooltip-bulle--ancree', 'tooltip-mesure');
+
+    const rect = ancre.getBoundingClientRect();
+    const taille = bulle.getBoundingClientRect();
+    const dessous = rect.bottom + HOVER_MARGE + taille.height <= window.innerHeight;
+    const top = dessous ? rect.bottom + HOVER_MARGE : rect.top - HOVER_MARGE - taille.height;
+    const left = Math.max(HOVER_MARGE, Math.min(rect.left, window.innerWidth - taille.width - HOVER_MARGE));
+    bulle.style.top = `${Math.max(HOVER_MARGE, top) + window.scrollY}px`;
+    bulle.style.left = `${left + window.scrollX}px`;
+    bulle.dataset.position = dessous ? 'bas' : 'haut';
+    bulle.classList.remove('tooltip-mesure');
+    bulle.classList.add('tooltip-visible');
+
+    cible.setAttribute('aria-expanded', 'true');
+    hoverBulleActive = bulle;
+    hoverCibleAncree = cible;
+}
+
 function masquerHover() {
+    if (hoverCibleAncree) {
+        hoverCibleAncree.setAttribute('aria-expanded', 'false');
+        hoverCibleAncree = null;
+    }
     if (hoverBulleActive) {
         hoverBulleActive.classList.remove('tooltip-visible');
         hoverBulleActive = null;
@@ -374,6 +413,11 @@ function masquerHover() {
 }
 
 let _hoverInitialise = false;
+/** La fin d'un survol ou d'un focus ne ferme pas une bulle ouverte d'un toucher. */
+function masquerHoverSurvol() {
+    if (!hoverCibleAncree) masquerHover();
+}
+
 function initialiserHover() {
     if (_hoverInitialise) return;
     _hoverInitialise = true;
@@ -390,7 +434,7 @@ function initialiserHover() {
         const cible = e.target.closest('[data-tooltip]');
         if (!cible) return;
         clearTimeout(hoverTimerAffichage);
-        hoverTimerDisparition = setTimeout(masquerHover, HOVER_DELAI_DISPARITION);
+        hoverTimerDisparition = setTimeout(masquerHoverSurvol, HOVER_DELAI_DISPARITION);
     }, true);
 
     // iPad : long-press 400 ms avec tolérance 20 px (A.5-bis)
@@ -449,13 +493,24 @@ function initialiserHover() {
         const cible = e.target.closest('[data-tooltip]');
         if (!cible) return;
         clearTimeout(hoverTimerAffichage);
-        hoverTimerDisparition = setTimeout(masquerHover, HOVER_DELAI_DISPARITION);
+        hoverTimerDisparition = setTimeout(masquerHoverSurvol, HOVER_DELAI_DISPARITION);
     });
 
     window.addEventListener('scroll', masquerHover, { passive: true });
     window.addEventListener('resize', masquerHover);
 
-    document.addEventListener('click', function() {
+    // Le défilement d'un élément (la palette) ne remonte pas à `window` : la bulle, dans `body`, resterait en place.
+    document.addEventListener('scroll', function() {
+        if (hoverCibleAncree) masquerHover();
+    }, { passive: true, capture: true });
+
+    // iPad : le toucher d'un élément qui n'est pas cliquable n'émet pas de `click`. « Toucher ailleurs » passe par ici.
+    document.addEventListener('pointerdown', function(e) {
+        if (hoverCibleAncree && !hoverCibleAncree.contains(e.target)) masquerHover();
+    }, true);
+
+    document.addEventListener('click', function(e) {
+        if (hoverCibleAncree && hoverCibleAncree.contains(e.target)) return;   // sa cible décide (`basculerBulleAncree`)
         if (hoverTooltipJusteAffiche) return;
         clearTimeout(hoverTimerAffichage);
         masquerHover();
@@ -1756,6 +1811,7 @@ window.accompagnement = {
 // Ces 4 noms sont référencés dans des attributs HTML data-action et/ou des
 // handlers de rendu DOM. main.js:608 fait `fn = window[action]; fn()`.
 window.masquerFlecheDidactique = fermerEtMarquerAutoReveal;
+window.basculerBulleAncree = basculerBulleAncree;
 window.fermerPopupPrimo = fermerPopupPrimo;
 window.fermerAideContextuelle = fermerAideContextuelle;
 window.demarrerTourGuide = demarrerTourGuide;

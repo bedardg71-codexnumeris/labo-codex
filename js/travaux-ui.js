@@ -5300,6 +5300,7 @@
         if (paletteG) configurerDragPaletteEval('travaux-palette-eval-gauche');
         if (paletteD) configurerDragPaletteEval('travaux-palette-eval-droite');
         if (paletteR) configurerDragPaletteEval('travaux-palette-eval-retro');
+        travauxOutils.appliquerDispositionEvaluation();   // après la position restaurée : elle dit si la palette est en bandeau
 
         // Bloquer la mémorisation pendant le setup pour ne pas écraser les bonnes valeurs
         window._bloquerMemorisation = true;
@@ -5543,14 +5544,22 @@
         palette.id = id;
         palette.className = 'palette-flottante travaux-palette-eval';
 
+        // Seule la palette Évaluation a sa version compacte (consigne du 1er nov. 2026).
+        const aSaCompacte = id === 'travaux-palette-eval-droite';
+        const titreVertical = aSaCompacte ? 'Disposition verticale, avec les descriptions' : 'Disposition verticale';
+        const boutonCompact = aSaCompacte
+            ? `<button class="palette-flottante-toggle" data-action="travauxOutils.basculerEvaluationCompacte" title="Disposition compacte" aria-label="Disposition compacte">${travauxOutils.ICONE_DISPOSITION_COMPACTE}</button>`
+            : '';
+
         // Barre de titre (draggable)
         const barre = document.createElement('div');
         barre.className = 'palette-flottante-barre';
         barre.innerHTML = `
             <span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>${echapperHtml(titre)}</span>
             <div style="display:flex; gap:2px;">
-                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="${id}" title="Disposition horizontale">\u2194\uFE0E</button>
-                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="${id}" title="Disposition verticale">\u2195\uFE0E</button>
+                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="${id}" title="Disposition horizontale" aria-label="Disposition horizontale">\u2194\uFE0E</button>
+                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="${id}" title="${titreVertical}" aria-label="${titreVertical}">\u2195\uFE0E</button>
+                ${boutonCompact}
                 <button class="palette-flottante-toggle" data-action="travauxUI.togglePaletteEvalReplie" data-param="${id}" title="Replier/Déplier">&#x2212;</button>
             </div>
         `;

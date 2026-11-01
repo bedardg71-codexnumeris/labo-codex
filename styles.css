@@ -17474,18 +17474,18 @@ tr.ligne-import-ecartee td {
 }
 
 /* --- Palettes flottantes evaluation --- */
-.travaux-palette-eval {
-    min-width: 280px;
-    max-width: none;
-}
-
 /* #1214 (1er nov. 2026) — UN SEUL ÉLÉMENT DÉFILE DANS LES PALETTES D'ÉVALUATION : LEUR CONTENU.
    La barre de titre reste visible. La palette est bornée à sa zone, le contenu prend le reste.
    Deux classes pour la palette : `.palette-flottante`, plus loin dans ce fichier, gagnerait
    à égalité. Le panneau, son corps et la liste des critères prennent leur hauteur et ne
    défilent plus. Le plafond de 750 px de la liste faisait pis que défiler : il écrasait les
-   cartes, dont `overflow: hidden` coupait le contenu (critère algorithmique compris). */
+   cartes, dont `overflow: hidden` coupait le contenu (critère algorithmique compris).
+   Consigne du 1er nov. 2026 : leurs largeurs étaient écrites sur une seule classe, et `.palette-flottante` les emportait
+   (200 px à l'ouverture, ↔ arrêté à 320). Évaluation s'ouvre à 316 px, la largeur des ébauches : le nom et le menu tiennent
+   sur une ligne. Rétroaction garde sa règle par id. */
 .palette-flottante.travaux-palette-eval {
+    min-width: 280px;
+    max-width: none;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -17512,6 +17512,10 @@ tr.ligne-import-ecartee td {
     min-width: 0;
     padding: 8px;
     gap: 8px;
+}
+
+#travaux-palette-eval-droite.travaux-palette-eval {
+    min-width: 316px;
 }
 
 /* Contenu compact dans les palettes évaluation */
@@ -17603,12 +17607,21 @@ tr.ligne-import-ecartee td {
     border-radius: var(--radius-moyen, 6px);
 }
 
-/* En-tête critère : nom + pondération + badge algo */
+/* En-tête critère : nom + pondération + badge algo. Le badge passe dessous plutôt que de se couper. */
 .eval-critere-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
     gap: 8px;
     margin-bottom: 6px;
+}
+.eval-critere-header .eval-badge-algo {
+    margin-left: 0;
+    white-space: nowrap;
+}
+/* Le bouton sur le nom n'existe qu'en version compacte. */
+.eval-critere-nom-bouton {
+    display: none;
 }
 
 /* Description italique sous le nom du critère */
@@ -17745,6 +17758,247 @@ tr.ligne-import-ecartee td {
     margin-left: 6px;
 }
 
+/* LA PALETTE ÉVALUATION EN VERSION COMPACTE (consigne du 1er nov. 2026 ; ébauches `palette-evaluation-compacte*`).
+   Une ligne par critère, soudées : le nom, le poids, le menu. Le balisage reste celui des descriptions : rien de ce qui lit les
+   champs ne change, et basculer ne reconstruit rien. Une carte qui n'est pas une ligne (algorithmique, ou barème : leurs champs ne
+   tiennent pas sur une ligne) forme son propre bloc. `!important` sur la hauteur : la palette porte en style en ligne sa
+   taille enregistrée, qu'on retrouve en revenant aux descriptions (précédents : `.replie`, `.codes-compacte`). */
+#travaux-palette-eval-droite.evaluation-compacte {
+    height: auto !important;
+}
+#travaux-palette-eval-droite.evaluation-compacte .palette-poignee-redim,
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-description,
+#travaux-palette-eval-droite.evaluation-compacte .eval-aide,
+#travaux-palette-eval-droite.evaluation-compacte .eval-formule-algo,
+#travaux-palette-eval-droite.evaluation-compacte label[data-tooltip="eval-niveau-idme"] {
+    display: none;
+}
+#travaux-palette-eval-droite.evaluation-compacte .zone-criteres {
+    padding: 8px;
+    gap: 6px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+/* Les avis (critère hors grille, ajouté depuis) gardent toute la largeur. */
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste > :not(.eval-critere-carte) {
+    grid-column: 1 / -1;
+}
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste > .eval-critere-carte {
+    margin: 0;
+    padding: 0 8px 0 10px;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+    box-shadow: 0 0 0 1px var(--bordure-claire);
+}
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste > .eval-critere-carte:has(.eval-badge-algo, .eval-bareme) {
+    grid-column: 1 / -1;
+    display: block;
+    margin-top: 5px;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: none;
+}
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste > .eval-critere-carte:has(.eval-badge-algo, .eval-bareme):first-child {
+    margin-top: 0;
+}
+/* Autour d'un bloc, les lignes retrouvent leurs coins, et le bloc son écart. */
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste > .eval-critere-carte:has(+ .eval-critere-carte .eval-badge-algo, + .eval-critere-carte .eval-bareme) {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste > .eval-critere-carte:has(.eval-badge-algo, .eval-bareme) + .eval-critere-carte {
+    margin-top: 5px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-grid-critere {
+    flex: 1;
+    min-width: 0;
+    gap: 0;
+    align-items: stretch;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-grid-critere > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-carte:has(.eval-badge-algo, .eval-bareme) .eval-grid-critere > div:first-child {
+    flex-direction: column;
+    align-items: stretch;
+}
+/* Le troisième gabarit (`_afficherCriteresDepuisEvaluation`, la grille d'origine introuvable) pose le menu dans un second bloc. */
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-carte:not(:has(.eval-badge-algo, .eval-bareme)) .eval-grid-critere {
+    flex-direction: row;
+    align-items: center;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-carte:not(:has(.eval-badge-algo, .eval-bareme)) .eval-grid-critere > div:first-child {
+    flex: 1;
+    min-width: 0;
+}
+/* Le nom, le poids : le nom dit la bulle ; la description l'emporte sur l'aide générale du nom, qui ne reçoit plus le toucher. */
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-header {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    column-gap: 4px;
+    row-gap: 0;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-header strong {
+    color: var(--texte-principal);
+    font-size: 14px;
+    pointer-events: none;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-header small {
+    margin: 0;
+    color: var(--texte-secondaire);
+    font-size: 12px;
+    white-space: nowrap;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-header .eval-badge-algo {
+    position: relative;
+    z-index: 1;
+    margin-left: 4px;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-header:has(.eval-critere-nom-bouton) strong {
+    text-decoration: underline dotted var(--texte-secondaire);
+    text-underline-offset: 3px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-header:has(.eval-critere-nom-bouton[aria-expanded="true"]) strong {
+    text-decoration: underline solid var(--accent-primaire);
+}
+#travaux-palette-eval-droite.evaluation-compacte .conteneur-liste > .eval-critere-carte:has(.eval-critere-nom-bouton[aria-expanded="true"]) {
+    background: var(--surface-element);
+}
+/* La cible couvre la hauteur de la ligne (46 pt) ; dans un bloc, la seule rangée du nom. */
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-nom-bouton {
+    display: block;
+    position: absolute;
+    inset: -13px 0;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-carte:has(.eval-badge-algo, .eval-bareme) .eval-critere-nom-bouton {
+    inset: -4px 0;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-nom-bouton:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+/* Les champs : 32 pt, comme la barre d'outils. Sur une ligne, le menu a 120 pt à droite. */
+#travaux-palette-eval-droite.evaluation-compacte .controle-form {
+    height: 32px;
+    min-height: 32px;
+    font-size: 13px;
+}
+/* WebKit ignore la hauteur d'un menu natif (mesuré : 20 px) : l'apparence du système retirée, le chevron dessiné, comme aux
+   menus de la table de cas. Par `background-color` : `niveauSelectionne` peut colorer le menu, et l'id l'emporte sur
+   `.mode-clair .contenu select { background: white }`, qui emporterait le chevron. */
+#travaux-palette-eval-droite.evaluation-compacte select.controle-form {
+    padding: 0 22px 0 10px;
+    color: var(--texte-principal);
+    background-color: var(--surface-input);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+    text-overflow: ellipsis;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-carte:not(:has(.eval-badge-algo, .eval-bareme)) .eval-select-niveau {
+    flex: none;
+    width: 120px;
+}
+/* Critère analytique sans barème : une ligne, le champ et « sur N » dans les 120 pt du menu. */
+#travaux-palette-eval-droite.evaluation-compacte .eval-saisie-points {
+    flex: none;
+    flex-wrap: nowrap;
+    width: 120px;
+    gap: 6px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-saisie-points .eval-label {
+    margin: 0;
+    white-space: nowrap;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-saisie-points .eval-input-points {
+    flex: 1;
+    min-width: 0;
+}
+/* Critère analytique avec barème : un bloc. Le nom et les points de chaque tranche restent, c'est la saisie ; le texte d'une
+   tranche nommée part, comme la description. Dessous, le champ libre sur toute la largeur. */
+#travaux-palette-eval-droite.evaluation-compacte .eval-bareme {
+    margin: 0;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-bareme-tranches {
+    gap: 4px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-bareme-choix,
+#travaux-palette-eval-droite.evaluation-compacte .eval-bareme-lecture {
+    min-height: 32px;
+    padding: 4px 10px;
+    font-size: 13px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-bareme-tete:has(.eval-bareme-nom) + .eval-bareme-texte {
+    display: none;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-carte:has(.eval-bareme) .eval-saisie-points {
+    width: auto;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-critere-carte:has(.eval-bareme) .eval-bareme-ou {
+    font-size: 12px;
+    white-space: nowrap;
+}
+/* Critère algorithmique : ses deux champs côte à côte, l'étiquette à gauche ; la ligne du résultat ; le menu sans étiquette. */
+#travaux-palette-eval-droite.evaluation-compacte .eval-grille-algo,
+#travaux-palette-eval-droite.evaluation-compacte .eval-grille-algo-large {
+    gap: 8px;
+    margin: 0;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-grille-algo .groupe-form,
+#travaux-palette-eval-droite.evaluation-compacte .eval-grille-algo-large .groupe-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    min-width: 0;
+}
+/* Le champ des codes : son étiquette est longue (« Codes d'erreurs → séparer par ; ») et le laisserait à 14 pt (mesuré) à côté
+   de l'autre champ. Chacun a donc sa rangée, l'étiquette toujours à gauche. */
+#travaux-palette-eval-droite.evaluation-compacte .eval-grille-algo-large {
+    grid-template-columns: minmax(0, 1fr);
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-grille-algo-large .eval-label {
+    flex: none;
+    width: 104px;
+}
+#travaux-palette-eval-droite.evaluation-compacte .groupe-form .eval-label {
+    margin: 0;
+    color: var(--texte-secondaire);
+    font-size: 12px;
+    line-height: 1.2;
+}
+#travaux-palette-eval-droite.evaluation-compacte .groupe-form .controle-form {
+    flex: 1;
+    min-width: 0;
+}
+#travaux-palette-eval-droite.evaluation-compacte .eval-resultat-algo {
+    margin: 0;
+    padding: 0;
+    background: none;
+    color: var(--texte-principal);
+    font-size: 12.5px;
+}
+
 /* Textarea de rétroaction */
 .eval-textarea {
     width: 100%;
@@ -17814,6 +18068,10 @@ tr.ligne-import-ecartee td {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    /* Consigne du 1er nov. 2026 : sans ces deux valeurs, le fond et le texte du champ en mode sombre sont ceux du navigateur.
+       Le mode clair a sa règle (`.mode-clair .contenu input`), plus forte. */
+    background: var(--surface-input);
+    color: var(--texte-principal);
 }
 /* Paragraphes et textes inline dans la palette */
 .travaux-palette-eval p {

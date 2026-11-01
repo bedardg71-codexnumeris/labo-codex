@@ -88,6 +88,25 @@
     z-index: 1;
 }
 
+/* La bulle ouverte d'un toucher (la description d'un critère en version compacte) : sous son ancre, la flèche au début du nom. */
+.tooltip-bulle--ancree {
+    box-sizing: border-box;
+    width: 270px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-style: italic;
+    /* Ce n'est pas une aide : ni l'orange de l'accompagnement, ni son fond (ébauche `palette-evaluation-compacte-bulle`). */
+    background: var(--surface-element);
+    border-color: var(--bleu-clair);
+}
+.tooltip-bulle.tooltip-bulle--ancree[data-position] .tooltip-fleche {
+    left: 22px;
+    transform: rotate(45deg);
+    background: var(--surface-element);
+    border-color: var(--bleu-clair);
+}
+
 [data-tooltip] {
     cursor: help;
     /* iPad : désactiver le menu contextuel natif (callout) pendant le long-press.

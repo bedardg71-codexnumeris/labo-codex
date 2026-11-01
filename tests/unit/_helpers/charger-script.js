@@ -314,6 +314,12 @@ export function chargerScript(cheminRelatifProjet, globaux = {}, fauxWindowExist
     // #876 (15 sept. 2026) — `sessionStorage` aussi : une file d'import persistée
     // se restaure au CHARGEMENT de travaux-import.js, donc elle doit être là avant.
     const { document: documentOverride, localStorage: localStorageOverride, sessionStorage: sessionStorageOverride, ...autresGlobaux } = globaux;
+    // La palette Évaluation compacte (1er nov. 2026) — `echapperAttribut` est un global de l'application, chargé avant tout
+    // module (`index.html`) ; `evaluation-chargement.js` s'en sert pour les `aria-label`. Le VRAI, pas un bouchon : un banc
+    // qui rend un nom piégé doit voir ce que l'application écrit. Un banc qui passe le sien le garde.
+    if (cheminRelatifProjet.endsWith('evaluation-chargement.js') && !autresGlobaux.echapperAttribut) {
+        autresGlobaux.echapperAttribut = chargerAuxiliaire('js/securite-echappement.js').echapperAttribut;
+    }
     const noms = ['window', 'document', 'console', 'localStorage', 'sessionStorage', ...Object.keys(autresGlobaux)];
     const valeurs = [fauxWindow, documentOverride || fauxDocument, console, localStorageOverride || fauxStorage(), sessionStorageOverride || fauxStorage(), ...Object.values(autresGlobaux)];
 

@@ -1515,6 +1515,10 @@
         return html;
     }
 
+    // Le bouton compact, le même aux palettes Codes et Évaluation.
+    const ICONE_DISPOSITION_COMPACTE = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>';
+    const ID_PALETTE_EVALUATION = 'travaux-palette-eval-droite';
+
     // Mots de l'ébauche validée (1er nov. 2026, 5 h 39).
     const TEXTE_AUCUN_CODE_ACTIF = 'Touche un code\u00a0: son nom para\u00eet ici.';
 
@@ -1579,6 +1583,43 @@
      */
     function choisirCodesCompacte() {
         _choisirDispositionCodes('compacte');
+    }
+
+    /** ↔ pose la largeur de la zone : au-delà de 320 px, l'ancien plafond des palettes, c'est le bandeau. */
+    function _enBandeau(palette) {
+        return parseFloat(palette.style.width) > 320;
+    }
+
+    /**
+     * La palette Évaluation porte la version choisie, et ses boutons la montrent. La compacte n'est pas une troisième
+     * disposition, comme aux Codes : elle s'applique aussi en bandeau (consigne du 1er nov. 2026, § 2). ↕ dit « avec les
+     * descriptions » et les ramène (`layoutPaletteV`). Sa largeur et sa hauteur sont dans `styles.css`.
+     */
+    function appliquerDispositionEvaluation() {
+        const palette = document.getElementById(ID_PALETTE_EVALUATION);
+        if (!palette) return;
+        const compacte = typeof obtenirPreference === 'function' && obtenirPreference('paletteEvaluationCompacte') === true;
+        const bandeau = _enBandeau(palette);
+        palette.classList.toggle('evaluation-compacte', compacte);
+        const marques = { 'travauxOutils.layoutPaletteH': bandeau, 'travauxOutils.layoutPaletteV': !bandeau && !compacte, 'travauxOutils.basculerEvaluationCompacte': compacte };
+        palette.querySelectorAll(':scope > .palette-flottante-barre [data-action]').forEach((bouton) => {
+            if (!(bouton.dataset.action in marques)) return;
+            bouton.classList.toggle('actif', marques[bouton.dataset.action]);
+            bouton.setAttribute('aria-pressed', marques[bouton.dataset.action] ? 'true' : 'false');
+        });
+    }
+
+    function _choisirEvaluationCompacte(compacte) {
+        if (typeof definirPreference === 'function') definirPreference('paletteEvaluationCompacte', compacte);
+        appliquerDispositionEvaluation();
+    }
+
+    /** Le bouton compact de la palette Évaluation. En bandeau, la hauteur se remesure : elle suit le contenu (#774). */
+    function basculerEvaluationCompacte() {
+        const palette = document.getElementById(ID_PALETTE_EVALUATION);
+        if (!palette) return;
+        _choisirEvaluationCompacte(!palette.classList.contains('evaluation-compacte'));
+        if (_enBandeau(palette)) layoutPaletteH(ID_PALETTE_EVALUATION);
     }
 
     /**
@@ -1727,7 +1768,9 @@
         html += '<div class="palette-barre-droite">';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" data-disposition="h" title="Disposition horizontale" aria-label="Disposition horizontale">\u2194\uFE0E</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" data-disposition="v" title="Disposition verticale, avec les descriptions" aria-label="Disposition verticale, avec les descriptions">\u2195\uFE0E</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.choisirCodesCompacte" data-disposition="compacte" title="Disposition compacte" aria-label="Disposition compacte"><svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></button>';
+        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.choisirCodesCompacte" data-disposition="compacte" title="Disposition compacte" aria-label="Disposition compacte">';
+        html += ICONE_DISPOSITION_COMPACTE;
+        html += '</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteErrFrReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
@@ -2267,6 +2310,7 @@
         palette.style.height = 'auto';
         palette.style.height = Math.min(palette.offsetHeight, cRect.height - 24) + 'px';
         sauvegarderPositionPalette(palette);
+        if (paletteId === ID_PALETTE_EVALUATION) appliquerDispositionEvaluation();
     }
 
     /**
@@ -2283,6 +2327,7 @@
         palette.style.width = '200px';
         palette.style.height = (cRect.height - 24) + 'px';
         sauvegarderPositionPalette(palette);
+        if (paletteId === ID_PALETTE_EVALUATION) _choisirEvaluationCompacte(false);   // « verticale, avec les descriptions »
     }
 
     /**
@@ -4154,6 +4199,9 @@
         layoutPaletteH: layoutPaletteH,
         layoutPaletteV: layoutPaletteV,
         choisirCodesCompacte: choisirCodesCompacte,
+        ICONE_DISPOSITION_COMPACTE: ICONE_DISPOSITION_COMPACTE,
+        appliquerDispositionEvaluation: appliquerDispositionEvaluation,
+        basculerEvaluationCompacte: basculerEvaluationCompacte,
         afficherRaccourcis: afficherRaccourcis,
         // Raccourcis clavier annotation
         obtenirRaccourcisAnnotation: obtenirRaccourcisAnnotation,
