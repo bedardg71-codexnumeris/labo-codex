@@ -172,4 +172,4 @@ Rien de corrigé ici : la règle de classement de la baseline s'applique.
 ## Suppositions nommées
 
 - **La répétition sur une branche jetable.** Le fichier de GitHub n'a pas de réglage de répétition, et un run sur la branche du lot aurait annulé celui en cours. J'ai vérifié que les pushs de branche ne publient rien : aucun déploiement ni statut Netlify sur le commit `9c157c3f`. Trois branches `essai/pauses-*` ont servi, supprimées depuis, jamais fusionnées.
-- **Le garde-fou de push n'a pas jugé deux de ces pushs**, faute de `node_modules` dans leur dossier. Quand il a jugé, il a refusé 3 rouges : j'ai changé l'essai au lieu de le contourner.
+- **Le garde-fou de push n'a pas jugé les trois premiers de ces pushs**, faute de `node_modules` dans leur dossier, alors qu'ils portaient `retries: 0`, qu'une sentinelle refuse. Quand il a jugé, il a refusé 3 rouges : j'ai changé l'essai au lieu de le contourner. Rien de cela n'a atteint la branche du lot.
