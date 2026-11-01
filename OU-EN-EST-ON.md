@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 1er NOVEMBRE 2026 : LA BARRE D'OUTILS ET LA PALETTE CODES COMPACTES, CODÉES, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : sur l'iPad, trois noms complets dans le carrousel au lieu d'un, chacun précédé d'un symbole ; la palette Codes se choisit en version compacte, et le choix reste ; hors plein écran, la page ne défile plus sous les palettes. En échange, hors plein écran, la hauteur est courte : environ 416 points pour la copie et les palettes, et le champ de rétroaction descend à quatre lignes. Le plein écran lui rend sa hauteur.
+
+**Ce qui reste à toi** : rien avant la mise en ligne. Ensuite, la porte terrain (`plans de travail/PORTES-TERRAIN-2026-11-01-barre-outils-et-codes-compacts.md`), dont une question : cette hauteur te convient-elle à l'usage ?
+
+**Vérifié comment** : Vitest entier vert (10 615) ; dans WebKit, les trois specs touchées vertes (35), 29 specs voisines (111 passés, 1 vert au second essai sur un chargement bloqué) ; étiquettes comptées avant et après à 1180 et 1440 de large ; six changements volontaires du code, tous attrapés. Pas sur le vrai iPad, et la suite complète n'a pas tourné.
+
 📝 **LE 1er NOVEMBRE 2026 : ÉVALUER RELIT LA GRILLE QUAND ELLE CHANGE, CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : si tu changes une pondération dans la grille pendant qu'une copie est ouverte dans Évaluer, tu retrouves à ton retour ta saisie intacte et la nouvelle pondération. La note part du nouveau poids. Avant, au banc, un geste après ce détour enregistrait 74,25 au lieu de 75,5, et le PDF imprimait « 17,50/30 ». Une copie verrouillée garde sa note remise.
