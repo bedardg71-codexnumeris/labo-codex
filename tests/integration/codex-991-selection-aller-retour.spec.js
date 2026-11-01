@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -31,7 +32,7 @@ const DOUBLE = 'FT_banc_991_double';
 async function demarrer(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await attendreApplication(page);
     await page.evaluate(() => {
         window.__fichiers = new Map();
         db.storeBlob = async (enr) => { window.__fichiers.set(enr.id, enr); };

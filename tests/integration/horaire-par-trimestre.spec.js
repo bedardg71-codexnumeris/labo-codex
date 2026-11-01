@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -48,7 +49,7 @@ test('Cas 1 · éditer un horaire hors du trimestre actif est refusé (pas de pe
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(({ setupSrc }) => {
         const horId = (new Function('db', setupSrc))(window.db);
@@ -83,7 +84,7 @@ test('Cas 2 · chargerHorairesV2 réinitialise l\'éditeur quand le trimestre ac
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     // Teste directement la branche « aucun horaire dans le trimestre actif » de
     // chargerHorairesV2 (qui appelle afficherEtatVideHoraireV2 → réinitialise l'éditeur).

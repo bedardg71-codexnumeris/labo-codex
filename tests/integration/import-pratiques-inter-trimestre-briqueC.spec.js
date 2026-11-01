@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -58,7 +59,7 @@ const estErreurAttendue = (msg) => patternsAttendus.some((re) => re.test(msg));
 test('Brique C pas 5 · listerTrimestresAvecPratiques retient tout trimestre ≠ actif (même vivant)', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const liste = await page.evaluate(() => {
         // Décor déterministe : 4 trimestres connus, actif = h2026.
@@ -101,7 +102,7 @@ test('Brique C pas 5 · garde D-C7 : aucune source listée quand le trimestre ac
     // (cohérence Brique B) : malgré une source DISPONIBLE, le listing rend [].
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(() => {
         window.obtenirTrimestres = () => ([
@@ -126,7 +127,7 @@ test('Brique C pas 5 · « Voir les pratiques » révèle réellement le preview
     // VISIBILITÉ effective (getComputedStyle).
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(async () => {
         window.obtenirTrimestres = () => ([
@@ -172,7 +173,7 @@ test('Brique C pas 5 · copie inter-trimestre : id neuf + inspireDe, destination
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(() => {
         const pratiqueSource = {
@@ -236,7 +237,7 @@ test('Brique C pas 5 · copie inter-trimestre : id neuf + inspireDe, destination
 test('Brique C pas 5 · option A — dépendances échelle/grille absentes signalées (non remappées)', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(() => {
         // Catalogue actif (clés GLOBALES NUES, comme les dropdowns de l'éditeur) :
@@ -300,7 +301,7 @@ test('Brique C pas 5 · copie PROFONDE : muter la copie ne touche pas la source 
     // référence → muter la copie muterait la source. Le deep-clone l'interdit.
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(() => {
         const pratiqueSource = {
@@ -351,7 +352,7 @@ test('Durcissement intra-trimestre · dupliquerPratiqueBibliotheque fait une cop
     // copie.configuration mute aussi source.configuration → assertions source rouges.
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(async () => {
         // UI neutralisée : la sentinelle ne teste que l'indépendance des données.

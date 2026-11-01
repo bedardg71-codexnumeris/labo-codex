@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -131,7 +132,7 @@ test('§4-2 · une grille choisie sans échelle DIT ce qui manque (des échelles
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(600);
+    await attendreApplication(page);
 
     const r = await choisirLaGrille(page, { echelles: [ECHELLE], echelleId: '' });
 
@@ -149,7 +150,7 @@ test('§4-2 · quand AUCUNE échelle n\'existe, l\'écran dit d\'en créer une (
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(600);
+    await attendreApplication(page);
 
     const r = await choisirLaGrille(page, { echelles: [], echelleId: '' });
 
@@ -176,7 +177,7 @@ test('§4-2 · TÉMOIN — avec une échelle choisie, les critères apparaissent
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(600);
+    await attendreApplication(page);
 
     const r = await choisirLaGrille(page, { echelles: [ECHELLE], echelleId: ECHELLE.id });
 

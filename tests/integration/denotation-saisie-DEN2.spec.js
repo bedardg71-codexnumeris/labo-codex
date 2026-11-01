@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -51,7 +52,7 @@ test('DEN-2 · le panneau se rend quand une DEN est active (cibles + garde + cha
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async ({ da, pratiqueData }) => {
         if (!window.denotationSaisie) return { erreur: 'denotationSaisie absent' };
@@ -93,7 +94,7 @@ test('DEN-2 · enregistrer persiste la saisie (namespacée) sans écraser une au
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async ({ da, pratiqueId, pratiqueData }) => {
         window.db.setSync('pratiquesConfigurables', [pratiqueData]);

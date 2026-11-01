@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -25,7 +26,7 @@ test('les champs d\'une archive sortent échappés : aucun élément créé', as
     page.setDefaultTimeout(15000);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await attendreApplication(page);
 
     const rendu = await page.evaluate(async ({ prenom, description, id }) => {
         db.setSync('rapportsBugArchives', [{ id, prenom, description, date: '<i>date</i>', rapport: 'texte', type: 'bug' }]);

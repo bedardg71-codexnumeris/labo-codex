@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -23,7 +24,7 @@ test.describe('#1018 — « Clore » n\'est offert que là où il peut réussir'
         await page.setViewportSize(IPAD_PORTRAIT);
         await page.goto(indexHtml);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(800);
+        await attendreApplication(page);
         await page.evaluate(async () => {
             localStorage.clear();
             if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -35,7 +36,7 @@ test.describe('#1018 — « Clore » n\'est offert que là où il peut réussir'
         });
         await page.reload();
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(1500);
+        await attendreApplication(page);
         await page.evaluate(() => {
             db.setSync('trimestres', [
                 { id: 'a2032', nom: 'Automne 2032', actif: true },

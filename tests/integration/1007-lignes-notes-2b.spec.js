@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
@@ -61,7 +62,7 @@ const lireGrille = (page) => page.evaluate(() =>
 async function demarrerGrille(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1200);
+    await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
     await page.waitForTimeout(1500);
     const ids = await page.evaluate(async () => {

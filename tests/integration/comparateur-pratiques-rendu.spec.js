@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -53,7 +54,7 @@ test('#326 R4 · le banc s\'ouvre SANS mode démo et rend construction + résult
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await ouvrirBanc(page);
     expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
@@ -101,7 +102,7 @@ test('#326 R2/R4a · les notes du banc sont calculées (> 0) sur les profils gé
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await ouvrirBanc(page);
     expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
@@ -156,7 +157,7 @@ test('#326 R4b · colonnes paires + lignes de construction + lien « Éditer »'
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await ouvrirBanc(page);
     expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
@@ -195,7 +196,7 @@ test('#326 R4b · navigation vers la fiche d\'un profil + retour, non-destructif
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await ouvrirBanc(page);
     expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
@@ -237,7 +238,7 @@ test('#326 R4b · export CSV — BOM, en-têtes, une colonne par pratique', asyn
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await ouvrirBanc(page);
     expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();
@@ -276,7 +277,7 @@ test('#326 R4b · changer une colonne recalcule le banc (lecture seule)', async 
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await ouvrirBanc(page);
     expect(r.erreur, `Erreur ouverture : ${r.erreur}`).toBeUndefined();

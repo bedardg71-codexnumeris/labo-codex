@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -102,7 +103,7 @@ test('porte 2.1c-e · la puce d\'identifiant est lisible dans les 5 familles, en
     await page.setViewportSize({ width: 820, height: 1180 });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(async () => { await window.__semer(); });
 
     const trop = [];
@@ -162,7 +163,7 @@ test('porte 2.5 · une confirmation passe AU-DESSUS de la modale qui l\'a demand
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(async () => { await window.__semer(); });
 
     const r = await page.evaluate(async () => {

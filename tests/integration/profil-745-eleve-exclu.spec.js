@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -28,7 +29,7 @@ test('profil · un élève en décrochage : son profil s\'ouvre, calculé par sa
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -40,7 +41,7 @@ test('profil · un élève en décrochage : son profil s\'ouvre, calculé par sa
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1200);
+    await attendreApplication(page);
 
     const m = await page.evaluate(async (DA) => {
         const pause = (ms) => new Promise((res) => setTimeout(res, ms));

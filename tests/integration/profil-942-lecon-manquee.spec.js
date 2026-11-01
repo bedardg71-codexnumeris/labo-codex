@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -31,7 +32,7 @@ test(`profil › Engagement (${largeur} px) · deux absences, deux titres de le�
     page.on('pageerror', (e) => erreurs.push(e.message));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -43,7 +44,7 @@ test(`profil › Engagement (${largeur} px) · deux absences, deux titres de le�
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1200);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async (TITRE_PIEGE) => {
         const pause = (ms) => new Promise((res) => setTimeout(res, ms));

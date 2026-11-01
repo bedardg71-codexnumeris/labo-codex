@@ -15,6 +15,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 // BANC DE CARACTÉRISATION — #476 volet 2 · CE QUE LES `dupliquer*` FONT
 // AUJOURD'HUI, MESURÉ AVANT DE LES FUSIONNER.
@@ -223,7 +224,7 @@ const CLES_TOUCHEES = [
 test.beforeEach(async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 });
 
 test.afterEach(async ({ page }) => {

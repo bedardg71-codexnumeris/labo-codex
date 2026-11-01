@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -43,7 +44,7 @@ function brancherEcouteurs(page) {
 async function ouvrirSaisieDemo(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -55,7 +56,7 @@ async function ouvrirSaisieDemo(page) {
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1200);
+    await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
     await page.waitForTimeout(1200);
     await page.evaluate(() => naviguerVers('suivi', 'saisie'));
@@ -168,7 +169,7 @@ test('(a) une note tapée puis rechargement dans la seconde et demie ; puis par 
     await page.locator(`#notes_${da}`).fill('parti à la pause');
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     expect(await page.evaluate(({ d, da }) => (db.getSync(cle('presences'), []) || [])
         .find((p) => p.date === d && p.da === da)?.notes, { d: date, da })).toBe('parti à la pause');
 

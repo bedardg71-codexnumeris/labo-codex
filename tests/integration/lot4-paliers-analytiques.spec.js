@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -66,7 +67,7 @@ test('lot 4 · A — une grille analytique a ses paliers : le champ, l\'échelle
     page.on('dialog', (d) => d.accept().catch(() => {}));   // « Changer de grille va reconfigurer la matrice » : oui
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     const semis = await page.evaluate(eval(SEMER));
     console.log('SEMIS →', JSON.stringify(semis));
     expect(semis.mots.champPaliers).toBeTruthy();

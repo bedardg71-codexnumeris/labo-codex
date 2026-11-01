@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -23,7 +24,7 @@ test('CT-15 · les fonctions d\'identité naturelle sont chargées et pures', as
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(() => {
         const noms = ['cleNaturelle', 'cleNaturelleCours', 'cleNaturelleEnseignant',
@@ -62,7 +63,7 @@ test('CT-15 · un second cours au même code est REFUSÉ au point d\'écriture',
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         // security-ok: jeu d'essai littéral d'un test, aucune source externe.

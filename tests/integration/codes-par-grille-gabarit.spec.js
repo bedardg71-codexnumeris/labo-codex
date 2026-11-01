@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -55,7 +56,7 @@ const LIRE = `async () => {
 test('codes par grille · gabarit — cocher active, décocher retire, la couleur suit', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     const semis = await page.evaluate(eval(SEMER));
     console.log('SEMIS →', JSON.stringify(semis));
     expect(semis.n, 'les quatre sous-critères sont rendus').toBe(4);

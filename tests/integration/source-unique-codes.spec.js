@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -72,7 +73,7 @@ const LIRE_PALETTE = `() => {
 test('source unique · copie gouvernée : pas de bandeau, l\'engrenage porte la phrase, l\'écran n\'édite pas', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(eval(SEMER));
     const persoAvant = await page.evaluate(() => JSON.stringify(db.getSync('personnalisationErreursFr', null)));
 
@@ -94,7 +95,7 @@ test('source unique · copie gouvernée : pas de bandeau, l\'engrenage porte la 
 test('source unique · copie sans grille : l\'édition du repli, intacte au caractère près', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(eval(SEMER));
     const persoAvant = await page.evaluate(() => JSON.stringify(db.getSync('personnalisationErreursFr', null)));
     const ordreAvant = await page.evaluate(() => JSON.stringify(db.getSync('ordreErreursFr', null)));
@@ -122,7 +123,7 @@ test('source unique · copie sans grille : l\'édition du repli, intacte au cara
 test('source unique · gabarit : le champ Couleur est le sélecteur de la palette, douze pastilles et « Personnalisé… »', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(eval(SEMER));
     await page.evaluate(async () => {
         window.afficherSection('conception');

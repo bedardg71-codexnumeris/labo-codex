@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -50,7 +51,7 @@ test('productions · « Voir les productions » d\'un autre trimestre rend l\'ap
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(async () => {
         if (typeof window.afficherBibliothequeProductions !== 'function'
@@ -107,7 +108,7 @@ test('échelles · « Voir les échelles » d\'un autre trimestre rend l\'aperç
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(async () => {
         if (typeof window.afficherBibliothequeEchelles !== 'function'

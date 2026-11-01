@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -24,7 +25,7 @@ async function ouvrir(page, buildVu) {
     }, buildVu);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800); // laisse passer les listeners DOMContentLoaded
+    await attendreApplication(page); // laisse passer les listeners DOMContentLoaded
 }
 
 test('première visite (aucun build vu) : PAS de bandeau, et le build est pris comme repère', async ({ page }) => {
@@ -80,7 +81,7 @@ test('fermer le bandeau marque le build vu : au rechargement suivant, plus de ba
     const page2 = await page.context().newPage();
     await page2.goto(indexHtml);
     await page2.waitForLoadState('domcontentloaded');
-    await page2.waitForTimeout(800);
+    await attendreApplication(page2);
     expect(await page2.evaluate(() => window.db.getSync('monitorage-build-vu'))).toBe(BUILD);
     await expect(page2.locator('#bandeau-mise-a-jour')).not.toHaveClass(/\bvisible\b/);
 });

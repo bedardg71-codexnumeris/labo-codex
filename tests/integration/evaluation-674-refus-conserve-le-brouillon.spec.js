@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -54,7 +55,7 @@ test('#674 · Annoter et évaluer — un critère sans niveau, Enregistrer refus
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     // 1. Le semis : un trimestre, un groupe-cours, un élève, une grille 50/30/20, une
     //    échelle à valeurs ponctuelles, une production qui les désigne. Espace vide sinon.

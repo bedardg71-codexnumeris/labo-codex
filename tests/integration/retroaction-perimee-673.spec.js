@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -154,7 +155,7 @@ test('#673 · calcul inapplicable : le texte de la machine part, celui de l’en
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const etat = await page.evaluate('(' + MONTER + ')()');
     console.log('#673 →', JSON.stringify(etat, null, 2));
@@ -298,7 +299,7 @@ test('#673 · mode catégories : la remise à zéro épargne le commentaire écr
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const etat = await page.evaluate('(' + MONTER_CATEGORIES + ')()');
     console.log('#673 catégories →', JSON.stringify(etat, null, 2));

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -47,7 +48,7 @@ function brancherEcouteurs(page) {
 async function viderLeStockage(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         sessionStorage.clear();
@@ -60,7 +61,7 @@ async function viderLeStockage(page) {
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
 }
 
 /** Faux partage piloté, aperçu piloté, relevés (toasts, liens cliqués, URL libérées). */
@@ -188,7 +189,7 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         }));
         await page.reload();
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(5000);
+        await attendreApplication(page);
         await poserOutils(page);
 
         // Avant toute tentative, le rapport le dit.
@@ -393,7 +394,7 @@ test.describe('Lot G (#988) — l\'échec de la mise à jour du codex se dit', (
         await page.waitForFunction(() => Codex.derniereTentative() && Codex.derniereTentative().etape === 'aperçu', null, { timeout: 30000 });
         await page.reload();
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(3000);
+        await attendreApplication(page);
         const section = sectionDuRapport(await rapport(page));
         expect(section).toContain('Étape atteinte: aperçu');
         expect(section).toContain('Issue: interrompue (la page a été rechargée pendant la tentative)');

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -106,7 +107,7 @@ test('lot 3 · 24 sur 30 ouvre la cartouche de M sans choisir de niveau ; le cri
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     // 1. Le semis : la grille du lot 2 (Contenu 70 holistique · Langue 30 analytique), une échelle
     //    à plages, et une cartouche qui attache une rétroaction à chaque niveau de Langue.
@@ -291,7 +292,7 @@ test('lot 3 · grille entièrement analytique : le PDF ne nomme aucun niveau (bi
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     // 1. Le semis : trois critères analytiques (50 · 30 · 20), une échelle avec ses repères, pas de cartouche.
     const prep = await page.evaluate(() => {

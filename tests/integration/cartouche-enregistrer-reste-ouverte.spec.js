@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -41,7 +42,7 @@ test('#573 · enregistrer, puis taper : la frappe atteint la base', async ({ pag
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(async () => {
         // ⚠ `chargerMatriceRetroaction` n'est PAS exportée sur `window` : la

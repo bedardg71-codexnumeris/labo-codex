@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -122,7 +123,7 @@ test('#645 · changement de grille : la saisie algorithmique suit le critère de
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     // TÉMOIN D'ÉTAT INITIAL : sans lui, un « rien après bascule » ne distinguerait
     // pas « la bascule a perdu la saisie » de « la saisie n'a jamais été là ».

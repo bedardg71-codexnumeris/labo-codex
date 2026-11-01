@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -18,7 +19,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 test('Sentinelle · saisie manuelle du nombre d\'erreurs préservée quand aucun tampon (total=0)', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(400);
+    await attendreApplication(page);
 
     const r = await page.evaluate(() => {
         if (typeof window.travauxOutils === 'undefined'

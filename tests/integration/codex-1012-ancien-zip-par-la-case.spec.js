@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -62,7 +63,7 @@ async function demarrer(page) {
     // (vu le 2 oct. pendant les mutations : `page.goto` expiré, un rouge qui ne jugeait rien).
     await page.goto(indexHtml, { timeout: 60000 });
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await attendreApplication(page);
 }
 
 /** Le codex du banc, par le vrai `Codex.generer`, écrit sur le disque du banc. */
@@ -97,6 +98,9 @@ async function ouvrirEspaceNeuf(browser) {
     const page = await contexte.newPage();
     page.setDefaultTimeout(15000);
     await demarrer(page);
+    // Le rappel de sauvegarde part 1,5 s après l'ouverture : l'espace aura alors des données, et sa
+    // fenêtre couvrirait la case. Ce banc ne le juge pas (lot-i-rappel-mene-au-codex.spec.js, oui).
+    await page.evaluate(() => { window.backupReminder.desactiverRappels(); });
     await page.evaluate((cleCopies) => {
         window.__messages = [];
         ['succes', 'erreur', 'warning', 'info'].forEach((sorte) => {

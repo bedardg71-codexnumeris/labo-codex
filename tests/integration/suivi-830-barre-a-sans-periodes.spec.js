@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -27,7 +28,7 @@ test('#830 · la barre A dit pourquoi elle est vide quand aucune séance de l\'h
     page.on('pageerror', (e) => erreurs.push(String(e)));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -39,7 +40,7 @@ test('#830 · la barre A dit pourquoi elle est vide quand aucune séance de l\'h
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1200);
+    await attendreApplication(page);
 
     const m = await page.evaluate(async () => {
         const pause = (ms) => new Promise((res) => setTimeout(res, ms));

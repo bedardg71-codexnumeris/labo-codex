@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -49,7 +50,7 @@ test('Défense refactor · evaluation charge dans WebKit sans erreur console', a
     await page.waitForLoadState('domcontentloaded');
 
     // Donner un délai à l'init différée
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     // Aucune erreur console au chargement (filet pour régression silencieuse
     // type ReferenceError sur un export disparu lors d'une extraction).
@@ -60,7 +61,7 @@ test('Défense refactor · evaluation charge dans WebKit sans erreur console', a
 test('Défense refactor · sentinelle exports browser evaluation', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     // Vérifier qu'un sous-ensemble représentatif des 63 exports est défini
     // dans l'environnement browser (vs Vitest sandbox Node — les deux doivent

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -62,7 +63,7 @@ const OUVRIR = `(productionId) => {
 test('codes par grille · la copie d\'une grille ACTIVÉE donne ses sous-critères comme codes', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(eval(SEMER));
 
     const r = await page.evaluate(eval(OUVRIR), 'P_ACT');
@@ -81,7 +82,7 @@ test('codes par grille · la copie d\'une grille ACTIVÉE donne ses sous-critèr
 test('codes par grille · sans geste, copie orpheline ou fermeture : les dix d\'hier', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(eval(SEMER));
 
     const dix = ['errfr_1', 'errfr_2', 'errfr_3', 'errfr_4', 'errfr_5', 'errfr_6', 'errfr_7', 'errfr_8', 'errfr_9', 'errfr_10'];
@@ -113,7 +114,7 @@ test('codes par grille · sans geste, copie orpheline ou fermeture : les dix d\'
 test('codes par grille · un code actif que la nouvelle liste ne connaît plus laisse la place au stylo', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(eval(SEMER));
 
     const r = await page.evaluate(async (ouvrir) => {

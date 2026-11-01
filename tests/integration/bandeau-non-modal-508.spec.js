@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -65,7 +66,7 @@ test('#508 — les clics traversent le bandeau, sauf sur son bouton', async ({ p
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     // Afficher un bandeau, puis poser un TÉMOIN juste dessous : un élément qui
     // occupe la même zone, avec un z-index inférieur. C'est le rôle que tenait,
