@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Palette Évaluation avec les descriptions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#9cc3ec}a:hover{color:#c4dcf5}
+</style>
+</helmet>
+<div style="width: 340px; height: 960px; box-sizing: border-box; padding: 12px; background: #4a6178; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif; color: #d6dee8;">
+<div style="width: 316px; box-sizing: border-box; background: #1b2b3e; border: 1px solid #2c4058; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.3);">
+
+<div style="height: 36px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-bottom: 1px solid #2c4058;">
+<div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; color: #c5d0dc;"><span style="color: #6f8399;">⠿</span><span>ÉVALUATION</span></div>
+<div style="display: flex; align-items: center; gap: 6px;">
+<button aria-label="Disposition horizontale" style="width: 22px; height: 22px; padding: 0; border: none; border-radius: 5px; background: transparent; color: #9fb1c4; font-family: inherit; font-size: 13px;">↔︎</button>
+<button aria-label="Disposition verticale, avec les descriptions" aria-pressed="true" style="width: 22px; height: 22px; padding: 0; border: none; border-radius: 5px; background: #3a5a7c; color: #ffffff; font-family: inherit; font-size: 13px;">↕︎</button>
+<button aria-label="Disposition compacte" style="width: 22px; height: 22px; padding: 0; border: none; border-radius: 5px; background: transparent; color: #9fb1c4; display: flex; align-items: center; justify-content: center;"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></button>
+<button aria-label="Replier" style="width: 22px; height: 22px; padding: 0; border: none; border-radius: 5px; background: transparent; color: #9fb1c4; font-family: inherit; font-size: 14px;">−</button>
+</div>
+</div>
+
+<div style="padding: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px;">
+
+<div style="background: #15212e; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+<div><b style="font-size: 14px; color: #ffffff;">Structure</b> <span style="font-size: 12px; color: #9fb1c4;">(20 %)</span></div>
+<p style="margin: 0; font-size: 12px; line-height: 1.4; font-style: italic; color: #b3bfcc;">Établir et rendre lisibles les relations entre les éléments de son travail : pour chaque élément, on peut dire de quoi il dépend et ce qu’il sert.</p>
+<label style="display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 10px; border: 1px solid #36506b; border-radius: 7px; background: #1c2e42; font-size: 13px; color: #e3e9f0;"><span>--</span><span style="font-size: 11px; color: #9fb1c4;">⇅</span></label>
+</div>
+
+<div style="background: #15212e; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+<div><b style="font-size: 14px; color: #ffffff;">Rigueur</b> <span style="font-size: 12px; color: #9fb1c4;">(20 %)</span></div>
+<p style="margin: 0; font-size: 12px; line-height: 1.4; font-style: italic; color: #b3bfcc;">Rendre compte avec exactitude de ce que dit le texte : relever les éléments importants sans en omettre, les nommer avec le terme juste, et expliquer ce qu’on avance sans laisser le lecteur deviner.</p>
+<label style="display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 10px; border: 1px solid #36506b; border-radius: 7px; background: #1c2e42; font-size: 13px; color: #e3e9f0;"><span>--</span><span style="font-size: 11px; color: #9fb1c4;">⇅</span></label>
+</div>
+
+<div style="background: #15212e; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+<div><b style="font-size: 14px; color: #ffffff;">Plausibilité</b> <span style="font-size: 12px; color: #9fb1c4;">(15 %)</span></div>
+<p style="margin: 0; font-size: 12px; line-height: 1.4; font-style: italic; color: #b3bfcc;">Fonder son interprétation sur le texte : chaque idée avancée s’appuie sur des éléments précis du texte, et chaque élément retenu sert une idée.</p>
+<label style="display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 10px; border: 1px solid #36506b; border-radius: 7px; background: #1c2e42; font-size: 13px; color: #e3e9f0;"><span>--</span><span style="font-size: 11px; color: #9fb1c4;">⇅</span></label>
+</div>
+
+<div style="background: #15212e; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+<div><b style="font-size: 14px; color: #ffffff;">Nuance</b> <span style="font-size: 12px; color: #9fb1c4;">(25 %)</span></div>
+<p style="margin: 0; font-size: 12px; line-height: 1.4; font-style: italic; color: #b3bfcc;">Interpréter au lieu de s’en tenir à la lecture évidente : dire ce qu’un élément révèle, ce que le rapprochement de deux éléments fait voir (une nuance, une tension, une contradiction qu’on explique), et ce que l’analyse permet de conclure.</p>
+<label style="display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 10px; border: 1px solid #36506b; border-radius: 7px; background: #1c2e42; font-size: 13px; color: #e3e9f0;"><span>--</span><span style="font-size: 11px; color: #9fb1c4;">⇅</span></label>
+</div>
+
+<div style="grid-column: 1 / -1; background: #15212e; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;"><b style="font-size: 14px; color: #ffffff;">Français écrit</b> <span style="font-size: 12px; color: #9fb1c4;">(20 %)</span><span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #e0b25c;">ALGORITHMIQUE</span></div>
+<p style="margin: 0; font-size: 12px; line-height: 1.4; font-style: italic; color: #b3bfcc;">Respecter les normes de la langue écrite (orthographe, grammaire, syntaxe, ponctuation, vocabulaire) et corriger son travail avant la remise.</p>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #9fb1c4;">Erreurs<span style="height: 32px; display: flex; align-items: center; padding: 0 10px; border: 1px solid #36506b; border-radius: 7px; background: #1c2e42; font-size: 13px; color: #7f91a4;">0</span></label>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #9fb1c4;">Mots<span style="height: 32px; display: flex; align-items: center; padding: 0 10px; border: 1px solid #36506b; border-radius: 7px; background: #1c2e42; font-size: 13px; color: #7f91a4;"></span></label>
+</div>
+<p style="margin: 0; font-size: 12.5px; color: #d6dee8;">-- erreurs sur -- mots → --/20 (-- %)</p>
+<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #9fb1c4;">Niveau de performance (modifiable manuellement) :<span style="height: 32px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border: 1px solid #36506b; border-radius: 7px; background: #1c2e42; font-size: 13px; color: #e3e9f0;"><span>— Utiliser le niveau calculé —</span><span style="font-size: 11px; color: #9fb1c4;">⇅</span></span></label>
+<p style="margin: 0; font-size: 11.5px; line-height: 1.4; color: #9fb1c4;">Par défaut: utilise le niveau calculé automatiquement. Modifie uniquement si nécessaire.</p>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":340,"height":960}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
