@@ -198,7 +198,9 @@ test.describe('La palette Rétroaction compacte', () => {
         await toucher(page, '.eval-options-radios label:has(#affichageNoteComplet1)');
         await attendreResume(page, 'Options : sans contexte · note chiffrée');
         await toucher(page, '.eval-options-checkboxes label:has(#afficherObjectif1)');
-        await attendreResume(page, 'Options : sans objectif, contexte · note chiffrée');
+        await attendreResume(page, 'Options : sans objectif ni contexte · note chiffrée');
+        await toucher(page, '.eval-options-checkboxes label:has(#afficherTache1)');
+        await attendreResume(page, 'Options : sans objectif, tâche ni contexte · note chiffrée');
     });
 
     test('options ouvertes, hauteur courte, palette étroite, bandeau : rien ne passe sur le pied ni sur le compte', async ({ page }) => {
@@ -240,7 +242,7 @@ test.describe('La palette Rétroaction compacte', () => {
 
     test('le résumé suit les options posées par le code, sans événement : une copie rouverte', async ({ page }) => {
         await ouvrir(page, { options: { description: true, objectif: false, tache: false, adresse: true, contexte: false, affichageNote: 'complet' } });
-        await attendreResume(page, 'Options : sans objectif, tâche, contexte · note chiffrée');
+        await attendreResume(page, 'Options : sans objectif, tâche ni contexte · note chiffrée');
         // pause-gardee : le chargeur repose les cases à +350 ms (evaluation.js), sans trace dans le DOM ; un clic avant lui serait effacé.
         await page.evaluate(() => new Promise((r) => setTimeout(r, 800)));
         await page.evaluate(() => {

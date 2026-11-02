@@ -552,7 +552,7 @@ function mettreAJourResumeOptionsRetroaction() {
     const manquantes = cases.filter((c) => !c.checked);
     let inclus = 'tout inclus';
     if (manquantes.length === cases.length) inclus = 'rien d\'inclus';
-    else if (manquantes.length > 0) inclus = 'sans ' + manquantes.map(nomDe).join(', ');
+    else if (manquantes.length > 0) inclus = 'sans ' + manquantes.map(nomDe).join(', ').replace(/, ([^,]+)$/, ' ni $1'); // « ni » devant le dernier nom
     const radio = document.querySelector('input[name="affichageNote1"]:checked') || document.getElementById('affichageNoteComplet1');
     resume.textContent = 'Options : ' + inclus + (radio ? ' · ' + nomDe(radio) : '');
 }
