@@ -127,7 +127,7 @@ async function partagerTampon(tamponId) {
         nom: tampon.nom,
         fichier: tampon.fichier || '',
         categorie: tampon.categorie || 'observations',
-        imageBase64: _capturerImageBase64(tamponId),
+        imageBase64: await _capturerImageBase64(tamponId),
         custom: tampon.custom || false,
         metadata_cc: {
             licence: 'CC BY-NC-SA 4.0',
@@ -347,6 +347,9 @@ function _sourceImagePalette(tampon) {
     var img = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirImageAutocollant)
         ? travauxOutils.obtenirImageAutocollant(tampon.id) : null;
     var src = img ? img.getAttribute('src') : '';
+    // #1216 — l'aperçu refuse un SVG (BibliothequeUI.sourceImageApercu, et c'est voulu) : la rangée d'un
+    // tampon à l'image SVG restait sans aperçu. On lui montre sa PNG, jamais l'image par défaut.
+    if (/^data:image\/svg\+xml/.test(src)) return travauxOutils.imageVersBase64(img) || '';
     return src || (tampon.fichier ? 'autocollants/' + tampon.fichier : '');
 }
 
@@ -490,7 +493,7 @@ async function supprimerDeBibliotheque(tamponId) {
     rafraichirModal();
 }
 
-function exporterUnTampon(tamponId) {
+async function exporterUnTampon(tamponId) {
     var autocollants = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirAutocollants)
         ? travauxOutils.obtenirAutocollants() : [];
     var tampon = autocollants.find(function(a) { return a.id === tamponId; });
@@ -505,7 +508,7 @@ function exporterUnTampon(tamponId) {
             nom: tampon.nom,
             fichier: tampon.fichier || '',
             categorie: tampon.categorie || 'observations',
-            imageBase64: _capturerImageBase64(tamponId),
+            imageBase64: await _capturerImageBase64(tamponId),
             custom: tampon.custom || false,
             metadata_cc: { licence: 'CC BY-NC-SA 4.0', auteur: '', description_courte: tampon.nom }
         }]
@@ -525,19 +528,14 @@ function exporterUnTampon(tamponId) {
 // CATÉGORIES — export/partage par catégorie
 // ============================================
 
-function _capturerImageBase64(tamponId) {
-    try {
-        var img = (typeof travauxOutils !== 'undefined' && travauxOutils.obtenirImageAutocollant)
-            ? travauxOutils.obtenirImageAutocollant(tamponId) : null;
-        if (img && img.complete && img.naturalWidth > 0) {
-            var canvas = document.createElement('canvas');
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            canvas.getContext('2d').drawImage(img, 0, 0);
-            return canvas.toDataURL('image/png');
-        }
-    } catch (e) { console.warn('[Tampons] image base64 capture failed:', e.message || e); }
-    return '';
+/**
+ * L'image d'un tampon, en PNG. #1216 : on attend son chargement plutôt que d'exiger `complete` :
+ * `appliquerPersonnalisations` recrée les images à chaque enregistrement, et la capture rendait ''.
+ */
+async function _capturerImageBase64(tamponId) {
+    if (typeof travauxOutils === 'undefined' || !travauxOutils.obtenirImageAutocollant) return '';
+    try { await travauxOutils.getPromesseAutocollant(tamponId); } catch (e) { /* l'image ne se lit pas : '' ci-dessous */ }
+    return travauxOutils.imageVersBase64(travauxOutils.obtenirImageAutocollant(tamponId)) || '';
 }
 
 function _obtenirTamponsDCategorie(catId) {
@@ -548,7 +546,7 @@ function _obtenirTamponsDCategorie(catId) {
     });
 }
 
-function exporterCategorie(catId) {
+async function exporterCategorie(catId) {
     var tampons = _obtenirTamponsDCategorie(catId);
     if (tampons.length === 0) {
         notifications.erreur('Catégorie vide', 'Aucun tampon dans cette catégorie');
@@ -559,17 +557,17 @@ function exporterCategorie(catId) {
         ? travauxOutils.obtenirNomsCategories() : {};
     var nomCat = nomsCat[catId] || catId;
 
-    var tamponsExport = tampons.map(function(t) {
+    var tamponsExport = await Promise.all(tampons.map(async function(t) {
         return {
             id: t.id,
             nom: t.nom,
             fichier: t.fichier || '',
             categorie: t.categorie,
-            imageBase64: _capturerImageBase64(t.id),
+            imageBase64: await _capturerImageBase64(t.id),
             custom: t.custom || false,
             metadata_cc: { licence: 'CC BY-NC-SA 4.0', auteur: '', description_courte: t.nom }
         };
-    });
+    }));
 
     var payload = {
         type: 'monitorage-tampons',
@@ -612,7 +610,7 @@ async function partagerCategorie(catId) {
             nom: t.nom,
             fichier: t.fichier || '',
             categorie: t.categorie,
-            imageBase64: _capturerImageBase64(t.id),
+            imageBase64: await _capturerImageBase64(t.id),
             custom: t.custom || false,
             metadata_cc: { licence: 'CC BY-NC-SA 4.0', auteur: '', description_courte: t.nom }
         };

@@ -884,20 +884,6 @@
         db.setSync('ordreCategories', arr);
     }
 
-    // Migration : l'ancien flag _aDesCustoms masquait tous les built-in dès qu'un
-    // custom existait, ce qui corrompait aussi elementsMasques. Nettoyer une fois.
-    (function() {
-        var customs = db.getSync('tamponsPersonnalises', null);
-        if (customs && Array.isArray(customs) && customs.length > 0) {
-            var masques = db.getSync('elementsMasques', null);
-            if (masques && Array.isArray(masques) && masques.length > 10) {
-                // Corruption probable — réinitialiser
-                db.setSync('elementsMasques', null);
-
-            }
-        }
-    })();
-
     // =========================================================================
     // MIGRATION RLO — IDs `contenu-*` → `action-*` (chantier 4, avril 2026)
     // =========================================================================
@@ -2782,6 +2768,8 @@
         catsPerso.forEach(function(c) { catPersoMap[c.id] = c; });
         var ordreCategories = obtenirOrdreCategories();
         var couleursCat = obtenirCouleursCategories();
+        // #1216 — ce que la fenêtre montre : l'enregistrement ne doit réécrire que ces catégories-là.
+        overlay.dataset.categoriesRendues = JSON.stringify(ordreCategories.filter(function(c) { return catsMasquees.indexOf(c) === -1; }));
 
         html += '<div id="travaux-retro-categories" style="margin-bottom:16px; display:flex; flex-direction:column; gap:6px;">';
         ordreCategories.forEach(function(catId) {
@@ -3100,6 +3088,8 @@
     function enregistrerRetroObservations() {
         const modal = document.getElementById('modal-retro-observations');
         if (!modal) return;
+        // #1216 — ouverte avant la lecture de la base, la fenêtre montrerait encore les noms par défaut, et ceci
+        // les écrirait. Lu, pas mesuré ; aucun cas vécu : le chargement se termine avant qu'on ait pu l'ouvrir.
         // Textes de retroaction
         const retroObj = {};
         modal.querySelectorAll('textarea[data-retro-id]').forEach(function(ta) {
@@ -3172,6 +3162,8 @@
         db.setSync('categoriesMasquees', catsMasquees.length > 0 ? catsMasquees : null);
 
         // Detecter les elements masques (symboles/tampons built-in supprimes du DOM)
+        // #1216 — sans rien retirer, la liste compte déjà 17 ids : les 14 anciens tampons et jetons, et les 3
+        // symboles, que la fenêtre ne montre pas. Sans conséquence observable : ces 17 ne s'affichent nulle part.
         var elemMasques = [];
         var idsBuiltinSymboles = ['crochet', 'croix', 'interrogation'];
         var idsBuiltinAutocollants = _defautsAutocollants.map(function(a) { return a.id; });
@@ -3235,6 +3227,12 @@
                     });
                 });
             }
+        });
+        // #1216 — l'enregistrement ne recueille que les rangées rendues : un tampon d'une catégorie que
+        // la fenêtre ne montre pas (masquée, ou inconnue de ce poste) en sortait, sans qu'on l'ait retiré.
+        var categoriesRendues = JSON.parse(modal.dataset.categoriesRendues || '[]');
+        (db.getSync('tamponsPersonnalises', null) || []).forEach(function(c) {
+            if (c && c.id && categoriesRendues.indexOf(c.categorie || 'diagnostic') === -1) customs.push(c);
         });
         db.setSync('tamponsPersonnalises', customs);
         // Synchroniser AUTOCOLLANTS avec les customs
@@ -3511,16 +3509,29 @@
        =============================== */
 
     /**
-     * Convertit une Image preloadée en base64 PNG
+     * Une image chargée, en PNG (data URI) ; null si elle ne se lit pas. Toujours une PNG passée par le
+     * canevas : une bibliothèque s'exporte et se partage, un SVG y porterait du balisage (Défense O).
+     * #1216 — un SVG est vectoriel, et sa taille propre vaut parfois 16 px (`width="1em"`, mesuré dans
+     * WebKit et Chrome) : on le dessine à COTE_SVG_PNG au moins, en gardant ses proportions. Sans
+     * dimensions du tout, il est carré.
      */
+    var COTE_SVG_PNG = 256;
     function imageVersBase64(img) {
-        if (!img || !img.complete || !img.naturalWidth) return null;
-        var canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+        if (!img || !img.complete) return null;
+        var estSvg = /^data:image\/svg\+xml/.test(img.src);
+        if (!img.naturalWidth && !estSvg) return null;
+        var largeur = img.naturalWidth || COTE_SVG_PNG;
+        var hauteur = img.naturalHeight || COTE_SVG_PNG;
+        if (estSvg && Math.max(largeur, hauteur) < COTE_SVG_PNG) {
+            var echelle = COTE_SVG_PNG / Math.max(largeur, hauteur);
+            largeur = Math.round(largeur * echelle);
+            hauteur = Math.round(hauteur * echelle);
+        }
         try {
+            var canvas = document.createElement('canvas');
+            canvas.width = largeur;
+            canvas.height = hauteur;
+            canvas.getContext('2d').drawImage(img, 0, 0, largeur, hauteur);
             return canvas.toDataURL('image/png');
         } catch (e) {
             return null;
@@ -4265,6 +4276,7 @@
         obtenirAutocollants: function() { return AUTOCOLLANTS; },
         rechargerTamponsPersonnalises: rechargerTamponsPersonnalises,
         obtenirImageAutocollant: function(id) { return imagesAutocollants[id] || null; },
+        imageVersBase64: imageVersBase64,
         // Wrappers delegation (Phase 5)
         setEpaisseurActiveFromSlider: setEpaisseurActiveFromSlider,
         ouvrirFilePickerImportTampons: ouvrirFilePickerImportTampons,
@@ -4276,5 +4288,13 @@
         renderPickerCouleur: renderPickerCouleur,
         choisirCouleurPalette: choisirCouleurPalette
     };
+
+    // #1216 — `appliquerPersonnalisations` tourne au chargement du module, souvent avant que la base soit
+    // lue. Une `personnalisationObservations` lourde (images en base64, plus de 25 Ki) ne vit que dans
+    // IndexedDB : les noms revenaient au défaut et les images manquaient, et « Enregistrer » écrivait
+    // ensuite ces noms par défaut en base. Rejoué à chaque `db-ready` : un import le réémet.
+    window.auDbPret(function() {
+        try { rechargerTamponsPersonnalises(); } catch (e) { console.error('[Travaux-Outils] Erreur rechargerTamponsPersonnalises:', e); }
+    }, { once: false });
 
 })();
