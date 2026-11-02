@@ -28079,8 +28079,139 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 /* La palette d'annotation (ébauche validée du 31 oct. 2026) : 188 px, pour laisser sa place à la copie. Une largeur
    donnée à la poignée (#773) est mémorisée en style en ligne : elle l'emporte. Ses blocs sont soudés : coins arrondis
    aux deux bouts, séparateur fin, fond bleu sur le segment actif. */
-#travaux-palette-flottante {
+#travaux-palette-flottante.annotation-compacte {
     width: 188px;
+}
+/* L'ÉTENDUE (consigne du 2 nov. 2026, § 2), la version par défaut, au doigt : la largeur commune aux palettes d'Annoter,
+   celle de Tampons ; les tuiles de Tampons (48 px de haut, jamais sous 44), l'icône, le nom dessous, la lettre en coin. */
+#travaux-palette-flottante {
+    width: 200px;
+}
+#travaux-palette-flottante:not(.annotation-compacte) .palette-flottante-contenu {
+    gap: 6px;
+}
+#travaux-palette-flottante .annot-groupe .annot-tuiles {
+    margin-top: 1px;
+}
+.annot-tuiles {
+    display: grid;
+    gap: 1px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bordure-moyenne);
+}
+.annot-tuiles-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.annot-tuiles-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* `.palette-flottante` devant : la règle compacte des boutons d'outil (min-height: 24px) l'emporterait. */
+.palette-flottante .annot-tuile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    min-height: 48px;
+    margin: 0;
+    padding: 4px 2px;
+    border: none;
+    border-radius: 0;
+    background: var(--surface-carte);
+    color: var(--texte-principal);
+    font: inherit;
+    cursor: pointer;
+}
+.annot-tuile:hover {
+    background: var(--bleu-tres-pale);
+}
+.annot-tuile.actif {
+    background: var(--bleu-clair);
+    color: white;
+}
+/* Éteinte, la tuile garde son fond opaque : collée au bas de la palette, elle passe sur le contenu qui défile. */
+.annot-tuile:disabled {
+    cursor: default;
+}
+.annot-tuile:disabled > span {
+    opacity: 0.45;
+}
+.annot-tuile:disabled:hover {
+    background: var(--surface-carte);
+}
+.annot-tuile-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+}
+.palette-flottante .annot-tuile-icone img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+}
+.mode-clair .palette-flottante .annot-tuile-icone img {
+    filter: brightness(0);
+}
+.mode-clair .palette-flottante .annot-tuile.actif .annot-tuile-icone img {
+    filter: brightness(0) invert(1);
+}
+.annot-tuile-fleche {
+    font-size: 16px;
+    line-height: 1;
+}
+/* Un nom ne se coupe jamais : il passe sur deux lignes, entre les mots, sinon par césure (la règle de la famille, § 3). */
+.annot-tuile-nom {
+    max-width: 100%;
+    font-size: 0.6rem;
+    line-height: 1.1;
+    text-align: center;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+}
+.annot-tuile .raccourci-badge--coin {
+    top: 1px;
+    right: 1px;
+    padding: 0 2px;
+    font-size: 0.45rem;
+    line-height: 1.3;
+}
+/* La ligne qui donne son trait à la forme fermée active, comme en compacte. */
+.annot-tuile.trait-courant {
+    background: var(--bleu-pale);
+    box-shadow: inset 0 -2px 0 var(--bleu-clair);
+}
+/* Douze couleurs en deux rangées de six, à la largeur de la palette. */
+.annot-couleurs.annot-couleurs-2-rangees {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    width: 100%;
+}
+#travaux-palette-flottante .annot-couleurs.annot-couleurs-2-rangees .travaux-btn-couleur {
+    width: 100%;
+    height: 22px;
+}
+/* La rangée du bas reste visible quand la palette défile (zone basse, hors plein écran) : Annuler toujours à portée.
+   Au-dessus de la poignée du coin : un toucher sur « Effacer la page » n'est jamais pris pour un redimensionnement ;
+   la poignée garde la bande sous la rangée. */
+.annot-actions {
+    position: sticky;
+    bottom: 12px;
+    z-index: 3;
+    margin-bottom: 4px;
+    box-shadow: 0 6px 0 6px var(--surface-carte, #1a3040);
+}
+.mode-clair .annot-actions {
+    box-shadow: 0 6px 0 6px #e8f2fd; /* le fond de la palette en clair (.mode-clair .palette-flottante) */
+}
+.palette-flottante .annot-tuile-alerte {
+    color: #ff7a88; /* --rouge-erreur ne tient que 3,4:1 sur le fond sombre de la palette (précédent : .annot-effacer) */
+}
+.palette-flottante .annot-tuile-alerte:hover {
+    background: rgba(220, 53, 69, 0.12);
+}
+.mode-clair .palette-flottante .annot-tuile-alerte {
+    color: #a32633;
 }
 #travaux-palette-flottante .palette-flottante-contenu {
     gap: 6px;

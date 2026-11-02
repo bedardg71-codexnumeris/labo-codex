@@ -2044,41 +2044,59 @@
             + '<div class="annot-bloc">' + ids.map(_boutonOutilAnnot).join('') + '</div></div>';
     }
 
-    /**
-     * Genere le HTML de la palette d'outils
-     * @returns {string} HTML
-     */
-    function genererHTMLPalette() {
-        let html = '<div class="palette-flottante" id="travaux-palette-flottante">';
-
-        // Barre de titre (draggable + toggle)
-        html += '<div class="palette-flottante-barre">';
-        html += '<div class="palette-barre-gauche">';
-        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Annotation</span>';
-        html += '<button class="palette-flottante-toggle" id="travaux-btn-reglages-annotation" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
-        html += '</div>';
-        html += '<div class="palette-barre-droite">';
-        html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
-        html += '</div></div>';
-
-        // Contenu (ébauche validée du 31 oct. 2026, plans de travail/EBAUCHE-2026-10-31-palette-annotation.dc.html)
-        html += '<div class="palette-flottante-contenu">';
-
+    /** Le verrou de l'évaluation, en haut de la palette (les deux versions). */
+    function _htmlVerrouAnnotation() {
         // 24 oct. 2026 — le verrou de l'évaluation, jumeau de « Verrouiller l'évaluation » (Paramètres).
         // Caché tant que `mettreAJourVerrouAnnotation` (evaluation.js) n'a pas lu l'évaluation de la copie.
-        html += '<div class="groupe-boutons-ligne u-hide">';
-        html += '<button id="travaux-annot-btn-verrou" class="btn btn-principal btn-tres-compact u-flex-1" data-action="basculerVerrouDepuisAnnotation">Verrouiller l\'\u00e9valuation</button>';
-        html += '</div>';
+        return '<div class="groupe-boutons-ligne u-hide">'
+            + '<button id="travaux-annot-btn-verrou" class="btn btn-principal btn-tres-compact u-flex-1" data-action="basculerVerrouDepuisAnnotation">Verrouiller l\'évaluation</button>'
+            + '</div>';
+    }
+
+    /** Les douze couleurs ; l'étendue les pose en deux rangées de six (`annot-couleurs-2-rangees`). */
+    function _htmlCouleursAnnotation(classe) {
+        let html = '<div class="annot-couleurs' + (classe ? ' ' + classe : '') + '">';
+        COULEURS.forEach(c => {
+            const actif = couleurActive === c.hex ? ' actif' : '';
+            html += `<button class="travaux-btn-couleur${actif}" data-couleur="${c.hex}" data-action="travauxOutils.setCouleurActive" data-param="${c.hex}" title="${echapperHtml(c.nom)}" style="background-color: ${c.hex}"></button>`;
+        });
+        return html + '</div>';
+    }
+
+    /** Épaisseur : moins fin, glissière, plus épais, aperçu du trait, valeur. La même dans les deux versions. */
+    function _htmlEpaisseurAnnotation() {
+        const outilInit = getOutilActif();
+        const minEp = outilInit.epaisseurMin || 1;
+        const maxEp = outilInit.epaisseurMax || 20;
+        let html = '<div class="annot-epaisseur">';
+        html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.decrementerEpaisseur" title="Moins fin">←</button>`;
+        html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" data-on-input="travauxOutils.setEpaisseurActiveFromSlider" aria-label="Épaisseur du trait">`;
+        html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.incrementerEpaisseur" title="Plus épais">→</button>`;
+        html += '<span class="annot-apercu-trait" aria-hidden="true"><span id="travaux-apercu-trait" style="' + _styleApercuTrait() + '"></span></span>';
+        html += '<span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + ' px</span>';
+        return html + '</div>';
+    }
+
+    const MODES_POINTES = [
+        { val: 'debut', label: '\u2190', nom: 'D\u00e9but', titre: 'Pointe au d\u00e9but (\u2190)' },
+        { val: 'double', label: '\u2194\uFE0E', nom: 'Double', titre: 'Double pointe (\u2194\uFE0E)' },
+        { val: 'fin', label: '\u2192', nom: 'Fin', titre: 'Pointe \u00e0 la fin (\u2192)' },
+        { val: 'aucune', label: '\u2014', nom: 'Aucune', titre: 'Aucune pointe (\u2014)' }
+    ];
+
+    /** Le contenu de la version compacte (ébauche validée du 31 oct. 2026, `EBAUCHE-2026-10-31-palette-annotation.dc.html`). */
+    function _contenuAnnotationCompacte() {
+        let html = _htmlVerrouAnnotation();
 
         html += '<div class="annot-bande">';
         html += _boutonOutilAnnot('position') + _boutonOutilAnnot('selection');
-        html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la s\u00e9lection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
+        html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la sélection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
         html += '</div>';
 
         html += '<div class="annot-bande">';
         html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
-        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la s\u00e9lection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
-        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="R\u00e9tablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="R\u00e9tablir" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la sélection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="Rétablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="Rétablir" class="outil-svg-icon"></button>';
         html += '</div>';
 
         html += '<hr class="separateur-horizontal">';
@@ -2093,45 +2111,107 @@
         html += '<div class="annot-rangee">';
         html += _groupeOutilsAnnot('Lignes', ['fleche', 'pointille', 'ondule']);
         html += '<div class="annot-groupe travaux-options-fleche" id="travaux-options-fleche">';
-        html += '<div class="travaux-palette-label">Extr\u00e9mit\u00e9s</div>';
+        html += '<div class="travaux-palette-label">Extrémités</div>';
         html += '<div class="annot-bloc">';
-        const modes = [
-            { val: 'debut', label: '\u2190', titre: 'Pointe au d\u00e9but (\u2190)' },
-            { val: 'double', label: '\u2194\uFE0E', titre: 'Double pointe (\u2194\uFE0E)' },
-            { val: 'fin', label: '\u2192', titre: 'Pointe \u00e0 la fin (\u2192)' },
-            { val: 'aucune', label: '\u2014', titre: 'Aucune pointe (\u2014)' }
-        ];
-        modes.forEach(m => {
+        MODES_POINTES.forEach(m => {
             const act = flechePointes === m.val ? ' actif' : '';
             html += `<button class="travaux-btn-outil${act}" data-pointes="${m.val}" data-action="travauxOutils.setFlechePointes" data-param="${m.val}" title="${m.titre}">${m.label}</button>`;
         });
         html += '</div></div></div>';
 
         html += '<hr class="separateur-horizontal">';
-
-        // Couleurs (sans label — les pastilles sont explicites)
-        html += '<div class="annot-couleurs">';
-        COULEURS.forEach(c => {
-            const actif = couleurActive === c.hex ? ' actif' : '';
-            html += `<button class="travaux-btn-couleur${actif}" data-couleur="${c.hex}" data-action="travauxOutils.setCouleurActive" data-param="${c.hex}" title="${echapperHtml(c.nom)}" style="background-color: ${c.hex}"></button>`;
-        });
-        html += '</div>';
-
-        // Épaisseur : moins fin, glissière, plus épais, aperçu du trait, valeur
-        const outilInit = getOutilActif();
-        const minEp = outilInit.epaisseurMin || 1;
-        const maxEp = outilInit.epaisseurMax || 20;
-        html += '<div class="annot-epaisseur">';
-        html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.decrementerEpaisseur" title="Moins fin">\u2190</button>`;
-        html += `<input type="range" class="travaux-slider-epaisseur" id="travaux-slider-epaisseur" min="${minEp}" max="${maxEp}" value="${epaisseurActive}" data-on-input="travauxOutils.setEpaisseurActiveFromSlider" aria-label="\u00c9paisseur du trait">`;
-        html += `<button class="travaux-btn-epaisseur-inc" data-action="travauxOutils.incrementerEpaisseur" title="Plus \u00e9pais">\u2192</button>`;
-        html += '<span class="annot-apercu-trait" aria-hidden="true"><span id="travaux-apercu-trait" style="' + _styleApercuTrait() + '"></span></span>';
-        html += '<span id="travaux-epaisseur-px" class="travaux-epaisseur-px">' + getEpaisseurReellePixels() + ' px</span>';
-        html += '</div>';
+        html += _htmlCouleursAnnotation('');   // sans intertitre : les pastilles sont explicites
+        html += _htmlEpaisseurAnnotation();
 
         // Elle n'efface que la page affichée (`effacerPage`), comme son nom le dit désormais.
         html += '<button class="annot-effacer" data-action="travauxAnnotation.effacerPage" title="Effacer toutes les annotations de cette page">Effacer la page</button>';
+        return html;
+    }
 
+    /* LA VERSION ÉTENDUE (consigne du 2 nov. 2026, § 2), au doigt : les tuiles de Tampons — l'icône, le nom dessous, la
+       lettre de raccourci en coin. Les MÊMES actions et les mêmes marques d'état que la compacte (`.travaux-btn-outil`,
+       `data-outil`, `data-pointes`, `.travaux-btn-couleur`, les ids d'Annuler, Supprimer et Rétablir) : `rafraichirPalette`
+       et `travauxAnnotation` les tiennent sans savoir quelle version est affichée. Les noms des tuiles sont les mots de
+       la consigne ; la bulle garde le nom de l'outil et sa touche. */
+    const NOMS_TUILES_ANNOTATION = {
+        position: 'Déplacer', selection: 'Sélection', stylo: 'Stylo', surligneur: 'Surligneur', texte: 'Texte',
+        cercle: 'Cercle', rectangle: 'Rectangle', polygone: 'Polygone', fleche: 'Droite', pointille: 'Pointillée', ondule: 'Ondulée'
+    };
+
+    /** Une tuile : `contenu` (une icône écrite par l'application, jamais une donnée) et son nom, échappé. */
+    function _tuileAnnot(attributs, contenu, nom, raccourci) {
+        return '<button class="' + attributs.classe + ' annot-tuile"' + attributs.reste + '>'
+            + '<span class="annot-tuile-icone">' + contenu + '</span><span class="annot-tuile-nom">' + echapperHtml(nom) + '</span>'
+            + (raccourci ? '<span class="raccourci-badge raccourci-badge--coin">' + echapperHtml(raccourci) + '</span>' : '') + '</button>';
+    }
+
+    function _tuileOutilAnnot(id) {
+        const outil = OUTILS[id];
+        const raccourci = obtenirRaccourciPourItem(id);
+        const titre = outil.nom + (raccourci ? ' [' + raccourci + ']' : '');
+        return _tuileAnnot({ classe: 'travaux-btn-outil' + (outilActif === id ? ' actif' : ''), reste: ' data-outil="' + echapperHtml(id) + '" data-action="travauxOutils.setOutilActif" data-param="' + echapperHtml(id) + '" title="' + echapperHtml(titre) + '"' },
+            outil.icone, NOMS_TUILES_ANNOTATION[id] || outil.nom, raccourci);
+    }
+
+    function _groupeTuilesAnnot(titre, tuiles, attributs) {
+        return '<div class="annot-groupe"' + (attributs || '') + '><div class="travaux-palette-label">' + echapperHtml(titre) + '</div>'
+            + '<div class="annot-tuiles annot-tuiles-' + tuiles.length + '">' + tuiles.join('') + '</div></div>';
+    }
+
+    // Une page barrée : distincte de la corbeille de « Supprimer », à la couleur d'alerte de sa tuile (currentColor).
+    const ICONE_EFFACER_PAGE = '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h7l3 3v12H5z"/><path d="M12 2.5v3h3"/><path d="M7.5 9.5l5 5M12.5 9.5l-5 5"/></svg>';
+
+    function _contenuAnnotationEtendue() {
+        const icone = (fichier) => '<img src="' + ICONS_DIR + fichier + '" alt="" class="outil-svg-icon">';
+        let html = _htmlVerrouAnnotation();
+
+        html += '<div class="annot-tuiles annot-tuiles-3">' + _tuileOutilAnnot('position') + _tuileOutilAnnot('selection')
+            + _tuileAnnot({ classe: 'travaux-btn-outil', reste: ' id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la sélection"' }, icone('icon-duplicate.svg'), 'Dupliquer')
+            + '</div>';
+
+        html += _groupeTuilesAnnot('Outils', ['stylo', 'surligneur', 'texte'].map(_tuileOutilAnnot));
+        html += _groupeTuilesAnnot('Formes', ['cercle', 'rectangle', 'polygone'].map(_tuileOutilAnnot));
+        html += _groupeTuilesAnnot('Lignes', ['fleche', 'pointille', 'ondule'].map(_tuileOutilAnnot));
+        html += _groupeTuilesAnnot('Extrémités', MODES_POINTES.map(m => _tuileAnnot(
+            { classe: 'travaux-btn-outil' + (flechePointes === m.val ? ' actif' : ''), reste: ' data-pointes="' + m.val + '" data-action="travauxOutils.setFlechePointes" data-param="' + m.val + '" title="' + echapperHtml(m.titre) + '"' },
+            '<span class="annot-tuile-fleche">' + m.label + '</span>', m.nom)), ' class="travaux-options-fleche" id="travaux-options-fleche"');
+
+        html += '<div class="annot-groupe"><div class="travaux-palette-label">Couleurs</div>' + _htmlCouleursAnnotation('annot-couleurs-2-rangees') + '</div>';
+        html += '<div class="annot-groupe"><div class="travaux-palette-label">Épaisseur</div>' + _htmlEpaisseurAnnotation() + '</div>';
+
+        // En bas, une seule rangée (Grégoire : en haut, ces boutons s'accrochent au passage). Collée au bas de la palette
+        // quand elle défile : Annuler reste visible, quelle que soit la hauteur de la zone. « Effacer la page » en couleur
+        // d'alerte ; son comportement ne change pas.
+        html += '<div class="annot-tuiles annot-tuiles-4 annot-actions">';
+        html += _tuileAnnot({ classe: 'btn-annot-action', reste: ' id="travaux-btn-undo" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"' }, icone('icon-undo.svg'), 'Annuler');
+        html += _tuileAnnot({ classe: 'btn-annot-action', reste: ' id="travaux-btn-supprimer" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la sélection (Delete)"' }, icone('icons8-trash.svg'), 'Supprimer');
+        html += _tuileAnnot({ classe: 'btn-annot-action', reste: ' id="travaux-btn-redo" data-action="travauxAnnotation.retablir" disabled title="Rétablir (Ctrl+Y)"' }, icone('icon-redo.svg'), 'Rétablir');
+        html += _tuileAnnot({ classe: 'btn-annot-action annot-tuile-alerte', reste: ' data-action="travauxAnnotation.effacerPage" title="Effacer toutes les annotations de cette page"' }, ICONE_EFFACER_PAGE, 'Effacer la page');
+        html += '</div>';
+        return html;
+    }
+
+    /**
+     * Genere le HTML de la palette d'outils, dans la version choisie (consigne du 2 nov. 2026 : l'étendue par défaut)
+     * @returns {string} HTML
+     */
+    function genererHTMLPalette() {
+        const compacte = estPaletteCompacte('travaux-palette-flottante');
+        let html = '<div class="palette-flottante' + (compacte ? ' annotation-compacte' : '') + '" id="travaux-palette-flottante">';
+
+        // Barre de titre (draggable + toggle)
+        html += '<div class="palette-flottante-barre">';
+        html += '<div class="palette-barre-gauche">';
+        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Annotation</span>';
+        html += '<button class="palette-flottante-toggle" id="travaux-btn-reglages-annotation" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
+        html += '</div>';
+        html += '<div class="palette-barre-droite">';
+        html += htmlBoutonVersion('travaux-palette-flottante');
+        html += '<button class="palette-flottante-toggle" id="travaux-palette-toggle" data-action="travauxOutils.togglePaletteReplie" title="Réduire la palette">&#x2212;</button>';
+        html += '</div></div>';
+
+        html += '<div class="palette-flottante-contenu">';
+        html += compacte ? _contenuAnnotationCompacte() : _contenuAnnotationEtendue();
         html += '</div>'; // fin .palette-flottante-contenu
 
         html += '</div>'; // fin .palette-flottante

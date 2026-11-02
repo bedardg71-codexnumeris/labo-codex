@@ -11,9 +11,19 @@ const captures = path.resolve(__dirname, '..', '..', 'plans de travail', 'captur
 
 const palette = (page) => page.locator('#travaux-palette-flottante');
 
+// CETTE SPEC EST CELLE DE LA COMPACTE (ébauche du 31 oct. 2026). Depuis le 2 nov. 2026, la palette s'ouvre en étendue
+// par défaut (consigne « une même famille », § 2 ; spec `palettes-une-famille`) : on y passe par le bouton de version.
+async function ouvrirCompacte(page) {
+    const suivi = await ouvrirCopie(page);
+    await page.evaluate(() => {
+        if (!document.getElementById('travaux-palette-flottante').classList.contains('annotation-compacte')) window.travauxOutils.basculerVersionPalette('travaux-palette-flottante');
+    });
+    return suivi;
+}
+
 test.describe('La palette d’annotation', () => {
     test('188 px, tout y tient, en clair et en sombre, avec les badges des dix outils (une installation neuve)', async ({ page }) => {
-        const suivi = await ouvrirCopie(page);
+        const suivi = await ouvrirCompacte(page);
         for (const clair of [true, false]) {
             const mesure = await page.evaluate((clair) => {
                 document.body.classList.toggle('mode-clair', clair);
@@ -42,7 +52,7 @@ test.describe('La palette d’annotation', () => {
     });
 
     test('de haut en bas : les bandes, les rangées, les mots validés', async ({ page }) => {
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         const d = await page.evaluate(() => {
             const p = document.getElementById('travaux-palette-flottante');
             const ids = (bloc) => [...bloc.querySelectorAll('button')].map((b) => b.id || b.dataset.outil || b.dataset.pointes);
@@ -67,7 +77,7 @@ test.describe('La palette d’annotation', () => {
     });
 
     test('ce qui a quitté la palette : l’identité, son bouton de profil, l’icône des trois lignes, « Effacer tout »', async ({ page }) => {
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         const n = await page.evaluate(() => {
             const p = document.getElementById('travaux-palette-flottante');
             return {
@@ -83,7 +93,7 @@ test.describe('La palette d’annotation', () => {
     });
 
     test('« Effacer la page » se lit à 4,5:1 au moins, en clair et en sombre', async ({ page }) => {
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         for (const clair of [true, false]) {
             const ratio = await page.evaluate((clair) => {
                 document.body.classList.toggle('mode-clair', clair);
@@ -101,7 +111,7 @@ test.describe('La palette d’annotation', () => {
     });
 
     test('douze carrés soudés, la couleur active au double liseré', async ({ page }) => {
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         const c = await page.evaluate(() => {
             const b = [...document.querySelectorAll('#travaux-palette-flottante .annot-couleurs .travaux-btn-couleur')];
             b[11].click();
@@ -116,7 +126,7 @@ test.describe('La palette d’annotation', () => {
     });
 
     test('la rangée Épaisseur : une seule rangée, le trait et la valeur suivent l’outil, la couleur et la glissière', async ({ page }) => {
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         const lire = () => page.evaluate(() => {
             const a = document.getElementById('travaux-apercu-trait');
             return { hauteur: a.getBoundingClientRect().height, couleur: a.style.backgroundColor, px: document.getElementById('travaux-epaisseur-px').textContent };
@@ -135,7 +145,7 @@ test.describe('La palette d’annotation', () => {
     });
 
     test('une nouvelle ligne n’a pas de pointe ; une ligne posée avant garde la sienne', async ({ page }) => {
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         expect(await page.evaluate(() => window.travauxOutils.getFlechePointes())).toBe('aucune');
         expect(await page.locator('#travaux-options-fleche .actif').getAttribute('data-pointes')).toBe('aucune');
         await page.evaluate(() => window.travauxOutils.setOutilActif('fleche'));
@@ -164,14 +174,14 @@ test.describe('La palette d’annotation', () => {
         await page.addInitScript(() => {
             localStorage.setItem('travaux-palette-flottante-geometrie', JSON.stringify({ left: '12px', right: '', top: '12px', width: '240px', height: '' }));
         });
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         expect((await palette(page).boundingBox()).width).toBe(240);
     });
 
     test('captures sur demande (CAPTURES=1), clair et sombre', async ({ page }) => {
         test.skip(!process.env.CAPTURES, 'Captures sur demande.');
         await page.setViewportSize({ width: 1180, height: 820 });
-        await ouvrirCopie(page);
+        await ouvrirCompacte(page);
         for (const [nom, clair] of [['clair', true], ['sombre', false]]) {
             await page.evaluate((clair) => document.body.classList.toggle('mode-clair', clair), clair);
             await palette(page).screenshot({ path: path.join(captures, `palette-annotation-${nom}.png`) });

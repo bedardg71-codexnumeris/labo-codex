@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { ouvrirCopie, attendre } from './harness/banc-copie-annotation.js';
+import { ouvrirCopie, attendre, pointCanevas } from './harness/banc-copie-annotation.js';
 
 // LES PALETTES D'ANNOTER ET D'ÉVALUER, UNE MÊME FAMILLE (consigne du 2 nov. 2026).
 // « L'idée, c'est de pouvoir utiliser le plus d'espace pour les palettes sur la hauteur et de laisser de l'espace pour la
@@ -44,6 +44,7 @@ for (const vp of FORMATS) {
             const fleches = (ids) => page.evaluate((ids) => ids.map((id) => document.getElementById(id).querySelector(':scope > .palette-flottante-barre').textContent).join('').match(/[↔↕]/g), ids);
             expect(await fleches(ANNOTER)).toBeNull();
             expect(await entete(page, CODES)).toEqual(['version', '−']);
+            expect(await entete(page, 'travaux-palette-flottante')).toEqual(['version', '−']);
             const titre = await page.evaluate((id) => document.querySelector(`#${id} .palette-bouton-version`).title, CODES);
             expect(titre).toBe('Passer à la version compacte');
 
@@ -93,6 +94,99 @@ for (const vp of FORMATS) {
         });
     });
 }
+
+/** Les tuiles visibles d'une palette, et leurs dimensions. */
+const tuiles = (page, id) => page.evaluate((id) => [...document.querySelectorAll(`#${id} .annot-tuile, #${id} .travaux-autocollant-item`)]
+    .filter((t) => t.offsetParent).map((t) => { const r = t.getBoundingClientRect(); return { nom: t.textContent.trim(), l: r.width, h: r.height }; }), id);
+
+/** La palette Annotation dans la zone, et « Annuler » visible dedans. */
+const annulerVisible = (page) => page.evaluate(() => {
+    const p = document.getElementById('travaux-palette-flottante').getBoundingClientRect();
+    const z = document.getElementById('travaux-zone-canvas').getBoundingClientRect();
+    const u = document.getElementById('travaux-btn-undo').getBoundingClientRect();
+    const touche = document.elementFromPoint(u.left + u.width / 2, u.top + u.height / 2);
+    return { dansLaZone: p.top >= z.top - 0.5 && p.bottom <= z.bottom + 0.5, annuler: u.top >= p.top && u.bottom <= p.bottom && !!touche && !!touche.closest('#travaux-btn-undo') };
+});
+
+for (const vp of FORMATS) {
+    test.describe(`§ 2 — l’Annotation étendue, à ${vp.width} × ${vp.height}`, () => {
+        test.use({ viewport: vp });
+
+        test('par défaut : l’étendue, ses rangées dans l’ordre, aucune tuile sous 44 px, « Annuler » visible hors et en plein écran', async ({ page }) => {
+            await ouvrirAnnoter(page);
+            const m = await page.evaluate(() => {
+                const p = document.getElementById('travaux-palette-flottante');
+                const rangee = (sel) => [...p.querySelectorAll(sel)].map((t) => t.querySelector('.annot-tuile-nom').textContent);
+                return {
+                    compacte: p.classList.contains('annotation-compacte'), largeur: p.getBoundingClientRect().width,
+                    intertitres: [...p.querySelectorAll('.travaux-palette-label')].map((l) => l.textContent),
+                    actions: rangee('.annot-actions .annot-tuile'),
+                    actionsEnBas: (() => { const a = p.querySelector('.annot-actions'); return !a.nextElementSibling; })(),
+                    extremites: rangee('#travaux-options-fleche .annot-tuile'),
+                    couleursParRangee: new Set([...p.querySelectorAll('.annot-couleurs .travaux-btn-couleur')].map((c) => Math.round(c.getBoundingClientRect().top))).size,
+                    vieilleBande: p.querySelectorAll('.annot-bande, .annot-effacer').length
+                };
+            });
+            expect(m).toEqual({
+                compacte: false, largeur: 200,
+                intertitres: ['Outils', 'Formes', 'Lignes', 'Extrémités', 'Couleurs', 'Épaisseur'],
+                actions: ['Annuler', 'Supprimer', 'Rétablir', 'Effacer la page'], actionsEnBas: true,
+                extremites: ['Début', 'Double', 'Fin', 'Aucune'], couleursParRangee: 2, vieilleBande: 0
+            });
+            for (const t of await tuiles(page, 'travaux-palette-flottante')) {
+                expect(t.l, t.nom).toBeGreaterThanOrEqual(44);
+                expect(t.h, t.nom).toBeGreaterThanOrEqual(44);
+            }
+            expect(await annulerVisible(page), 'hors plein écran').toEqual({ dansLaZone: true, annuler: true });
+            await page.evaluate(() => window.travauxUI.togglePleinEcran());
+            await attendre(page, 200);
+            expect(await annulerVisible(page), 'en plein écran').toEqual({ dansLaZone: true, annuler: true });
+            // En plein écran, elle tient entière : rien ne défile.
+            expect(await page.evaluate(() => { const p = document.getElementById('travaux-palette-flottante'); return p.scrollHeight <= p.clientHeight + 1; })).toBe(true);
+        });
+    });
+}
+
+test.describe('§ 2 — les deux versions, un seul jeu d’actions', () => {
+    test.use({ viewport: FORMATS[0] });
+
+    test('l’outil, l’extrémité, la couleur et Annuler passent d’une version à l’autre', async ({ page }) => {
+        await ouvrirAnnoter(page);
+        const tuile = (sel) => page.evaluate((sel) => document.querySelector('#travaux-palette-flottante ' + sel).click(), sel);
+        await tuile('[data-outil="stylo"]');
+        await tuile('[data-pointes="fin"]');
+        await tuile('.travaux-btn-couleur[data-couleur="#22c55e"], .travaux-btn-couleur:nth-child(4)');
+        // Un trait à la souris sur la copie : Annuler s'allume.
+        const a = await pointCanevas(page, 0.3, 0.3), b = await pointCanevas(page, 0.6, 0.5);
+        await page.mouse.move(a.x, a.y);
+        await page.mouse.down();
+        for (let i = 1; i <= 8; i++) await page.mouse.move(a.x + (b.x - a.x) * i / 8, a.y + (b.y - a.y) * i / 8);
+        await page.mouse.up();
+        await page.waitForFunction(() => document.getElementById('travaux-btn-undo').disabled === false);
+        const etat = () => page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-flottante');
+            return {
+                outil: [...p.querySelectorAll('[data-outil].actif')].map((b) => b.dataset.outil),
+                pointe: [...p.querySelectorAll('[data-pointes].actif')].map((b) => b.dataset.pointes),
+                couleur: [...p.querySelectorAll('.travaux-btn-couleur.actif')].map((b) => b.dataset.couleur),
+                annuler: document.getElementById('travaux-btn-undo').disabled === false,
+                ids: ['travaux-btn-undo', 'travaux-btn-redo', 'travaux-btn-supprimer', 'travaux-btn-dupliquer'].map((id) => document.querySelectorAll('#' + id).length)
+            };
+        });
+        const etendue = await etat();
+        expect(etendue.outil).toEqual(['stylo']);
+        expect(etendue.pointe).toEqual(['fin']);
+        expect(etendue.couleur.length).toBe(1);
+        expect(etendue.annuler).toBe(true);
+        await page.evaluate(() => document.querySelector('#travaux-palette-flottante .palette-bouton-version').click());
+        expect(await page.evaluate(() => document.getElementById('travaux-palette-flottante').classList.contains('annotation-compacte'))).toBe(true);
+        expect(await etat()).toEqual(etendue);
+        // Annuler, dans la compacte, annule le trait posé dans l'étendue.
+        await page.evaluate(() => document.getElementById('travaux-btn-undo').click());
+        await page.waitForFunction(() => document.getElementById('travaux-btn-undo').disabled === true);
+        expect(await page.evaluate(() => window.obtenirPreference('paletteAnnotationCompacte'))).toBe(true);
+    });
+});
 
 test.describe('§ 1 — le stock d’avant le lot', () => {
     test.use({ viewport: FORMATS[0] });

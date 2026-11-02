@@ -3137,6 +3137,53 @@
     </div>
 </section>
 
+<!-- =============================================
+     SECTION 26 — LES PALETTES, UNE MÊME FAMILLE
+     ============================================= -->
+<section id="palettes-famille" class="guide-section">
+    <h2 class="guide-section-title">26. Les palettes d'Annoter et d'Évaluer, une même famille</h2>
+    <p class="guide-section-intro">Consigne du 2 nov. 2026. Annotation, Codes, Tampons (Annoter) ; Paramètres, Évaluation, Rétroaction (Évaluer) : même en-tête, mêmes tuiles, mêmes intertitres, aucun nom coupé. Les palettes prennent la hauteur et laissent la largeur à la copie. Spécimen statique (mode de la page).</p>
+    <div class="guide-component" style="position: relative; height: 330px;">
+        <div class="palette-flottante" id="ds-palette-famille" style="top: 12px; left: 12px;">
+            <div class="palette-flottante-barre">
+                <div class="palette-barre-gauche"><span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true">⠿</span>Codes<span class="travaux-errfr-total-pastille" title="23 erreurs">23</span></span><button class="palette-flottante-toggle" title="Personnaliser"><img src="icons/icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button></div>
+                <div class="palette-barre-droite"><button class="palette-flottante-toggle palette-bouton-version" title="Passer à la version compacte" aria-label="Passer à la version compacte"><svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg></button><button class="palette-flottante-toggle" title="Replier/Déplier">&#x2212;</button></div>
+            </div>
+            <div class="palette-flottante-contenu">
+                <div class="annot-groupe"><div class="travaux-palette-label">Outils</div>
+                    <div class="annot-tuiles annot-tuiles-3">
+                        <button class="travaux-btn-outil annot-tuile actif"><span class="annot-tuile-icone"><img src="icons/icon-pencil.svg" alt="" class="outil-svg-icon"></span><span class="annot-tuile-nom">Stylo</span><span class="raccourci-badge raccourci-badge--coin">D</span></button>
+                        <button class="travaux-btn-outil annot-tuile"><span class="annot-tuile-icone"><img src="icons/icon-marker-pen.svg" alt="" class="outil-svg-icon"></span><span class="annot-tuile-nom">Surligneur</span><span class="raccourci-badge raccourci-badge--coin">H</span></button>
+                        <button class="travaux-btn-outil annot-tuile"><span class="annot-tuile-icone"><img src="icons/icon-text.svg" alt="" class="outil-svg-icon"></span><span class="annot-tuile-nom">Texte</span></button>
+                    </div>
+                </div>
+                <div class="annot-tuiles annot-tuiles-4 annot-actions">
+                    <button class="btn-annot-action annot-tuile"><span class="annot-tuile-icone"><img src="icons/icon-undo.svg" alt="" class="outil-svg-icon"></span><span class="annot-tuile-nom">Annuler</span></button>
+                    <button class="btn-annot-action annot-tuile" disabled><span class="annot-tuile-icone"><img src="icons/icons8-trash.svg" alt="" class="outil-svg-icon"></span><span class="annot-tuile-nom">Supprimer</span></button>
+                    <button class="btn-annot-action annot-tuile" disabled><span class="annot-tuile-icone"><img src="icons/icon-redo.svg" alt="" class="outil-svg-icon"></span><span class="annot-tuile-nom">Rétablir</span></button>
+                    <button class="btn-annot-action annot-tuile annot-tuile-alerte"><span class="annot-tuile-icone"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h7l3 3v12H5z"/><path d="M12 2.5v3h3"/><path d="M7.5 9.5l5 5M12.5 9.5l-5 5"/></svg></span><span class="annot-tuile-nom">Effacer la page</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="guide-specs">
+        <div class="guide-specs-title">En-tête (<code>.palette-flottante-barre</code>)</div>
+        <ul>
+            <li>À gauche (<code>.palette-barre-gauche</code>) : la poignée ⠿ (<code>.palette-grip</code>), le titre, le compte (Codes : <code>.travaux-errfr-total-pastille</code>, les mots dans sa bulle), ⚙ s'il y a des réglages.</li>
+            <li>À droite (<code>.palette-barre-droite</code>) : le bouton de version (<code>.palette-bouton-version</code>, <code>travauxOutils.htmlBoutonVersion</code>), seulement sur Annotation, Codes, Tampons et Évaluation ; son <code>title</code> dit ce qu'il fera (« Passer à la version compacte » / « étendue ») et son icône montre l'autre version. Puis « − ».</li>
+            <li>Ni ↔ ni ↕ : la poignée du coin (<code>.palette-poignee-redim</code>) élargit ou allonge à la main. La version choisie est une préférence, par navigateur.</li>
+        </ul>
+        <div class="guide-specs-title">Tuile (<code>.annot-tuile</code>, et <code>.travaux-autocollant-item</code> de Tampons)</div>
+        <ul>
+            <li>L'icône (20 px), le nom dessous, la lettre de raccourci en coin (<code>.raccourci-badge--coin</code>). 48 px de haut, jamais sous 44 ; soudées dans <code>.annot-tuiles</code> (<code>-3</code>, <code>-4</code> colonnes), filet <code>--bordure-moyenne</code>.</li>
+            <li>Aucun nom coupé : il passe sur deux lignes, entre les mots, sinon par césure (<code>hyphens: auto</code> sous <code>lang="fr"</code>) ; seule la rangée qui en a besoin s'allonge.</li>
+            <li>Active : <code>--bleu-clair</code>, texte blanc. Éteinte : le fond reste opaque, l'icône et le nom à 45 %. Alerte (« Effacer la page ») : <code>.annot-tuile-alerte</code>, #ff7a88 en sombre, #a32633 en clair (4,5:1).</li>
+            <li>La rangée du bas de l'Annotation (<code>.annot-actions</code>) reste collée au bas de la palette quand elle défile.</li>
+        </ul>
+    </div>
+</section>
+
 </div><!-- /guide-container -->
 </body>
 </html>
