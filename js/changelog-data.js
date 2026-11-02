@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.231 (les palettes, une même famille ; la Rétroaction plus large) — titre et six items validés par Grégoire,
+            // mot pour mot, le 2 nov. 2026 à 14 h 51, proposés par Cowork (`CONSIGNE-LOT-2026-11-02-mise-en-ligne-1231.md`, § 1).
+            // Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.231',
+            couleur: 'vert',
+            titre: 'Des palettes d’une même famille, et une palette Annotation au doigt',
+            items: [
+                'Annoter&nbsp;: la palette Annotation a une version étendue, en tuiles nommées comme les Tampons, qui se manie au doigt sur l’iPad. Annuler, Supprimer, Rétablir et Effacer la page sont en bas, loin des outils.',
+                'Toutes les palettes ont le même en-tête&nbsp;: un seul bouton passe de la version étendue à la version compacte, et ton choix est retenu. La disposition en bandeau est retirée.',
+                'Tampons&nbsp;: une version compacte, les icônes seules, avec le nom du tampon touché sous la grille. Plus aucun nom n’est coupé&nbsp;: il passe sur deux lignes.',
+                'Un seul bouton de verrou, «&nbsp;Verrouiller&nbsp;» ou «&nbsp;Déverrouiller&nbsp;», en haut de la palette de gauche, dans Annoter comme dans Évaluer.',
+                'Évaluer&nbsp;: la palette Rétroaction s’ouvre plus large, pour lire d’un trait le texte que l’élève recevra.',
+                'Avec cette version, les palettes s’ouvrent une fois à leur place et à leur taille par défaut.'
+            ]
+        },
+        {
             // 1.230 (les palettes compactes pour annoter et évaluer, la Rétroaction, le défilement, la grille relue, les tampons) —
             // titre et six items validés par Grégoire, mot pour mot, le 1er nov. 2026 (points 1 à 5 à 19 h 32, point 6 à 20 h 36),
             // proposés par Cowork (`CONSIGNE-LOT-2026-11-01-mise-en-ligne-1230.md`, § 1). Insécables en `&nbsp;`, apostrophes typographiques.

@@ -7,6 +7,22 @@
 
 ---
 
+## 2 NOV. 2026, 15 H (Claude Code) : **1.231.0 COMMITÉE SUR `main`, POUSSÉE SEULEMENT SUR VERDICT VERT DU MAC ; `git log -1 origin/main` FAIT FOI**
+
+**Porte** : `plans de travail/CONSIGNE-LOT-2026-11-02-mise-en-ligne-1231.md` (Cowork, 14 h 52). En ligne avant ce commit : 1.230.1 (`ffd69a47`).
+
+**Ce que porte la 1.231.0** : la Rétroaction plus large (`dcd42b2b`, `6f9aae1c`) et les palettes, une même famille (`4e2ce227`, `14103b77`, `63a127a8`, `2ee828ab`), relus et acceptés par Cowork (`VERDICT-RELECTURE-2026-11-02-palettes-une-famille.md`). Nouvelles 1.231 validées par Grégoire à 14 h 51. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-11-02-mise-en-ligne-1231.md`.
+
+**Branches `lot/` qui attendent, NON fusionnées dans cette mise en ligne** (décision de Cowork, consigne § 0) :
+- `lot/pauses-apres-ouverture` (`3a29ef9a`, poussée), qui contient `lot/verification-plus-rapide` (`c1c1c204`) : à fusionner après, à part.
+- `lot/pauses-les-plus-lourdes` (`503ab091`) : reprend après cette fusion ; ses specs modifiées attendent dans `.claude/worktrees/pauses-les-plus-lourdes`.
+
+**CI GitHub** : rouge sur la 1.230.1 (run 41478751807, WebKit Linux, 13 specs nouvellement rouges contre `playwright-baseline-linux.json`), vert au Mac sur le même SHA. Non tranché (#833).
+
+**Complexité** (1.230.1 `ffd69a47` → 1.231.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 93 702 → 93 710 (Δ +8 : `js/travaux-outils.js` 2 984 → 3 031, `js/travaux-ui.js` 5 311 → 5 265, `js/changelog-data.js` 2 506 → 2 519, `js/evaluation.js` 1 739 → 1 732, `js/travaux-annotation.js` 2 547 → 2 548) ; au-dessus de 15 : 439 → 439 (Δ 0) ; au-dessus de 30 : 81 → 81 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 031 → 11 029 (Δ −2). Lignes de `js/` : 158 651 → 158 661 ; fonctions : 14 998 → 15 000.
+
+**Non commités, laissés tels quels** : `.claude/settings.json`, `CONSIGNE-DEMARRAGE-COWORK.md`, `plans de travail/PORTES-TERRAIN-2026-11-02-mise-en-ligne-1230.md`, `REFLEXION-2026-10-30-seuils-normatif-critere-ipsatif.md`, `EXPORT-TAMPONS-GREGOIRE-2026-11-01-22h21.json`, `captures/fenetre-de-fusion-*.png`.
+
 ## 1er NOV. 2026, 22 H 40 (Claude Code) : **1.230.0 COMMITÉE SUR `main` (`46a0830d`), NON POUSSÉE : VERDICT ROUGE ; EN LIGNE : TOUJOURS 1.229.0**
 
 **Porte** : `plans de travail/CONSIGNE-LOT-2026-11-01-mise-en-ligne-1230.md`, branche « Rouge » du § 3. Rapport pour Cowork : `plans de travail/RAPPORT-2026-11-01-verdict-rouge-1230.md`.

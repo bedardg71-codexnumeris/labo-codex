@@ -15,7 +15,15 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-📝 **LE 2 NOVEMBRE 2026, APRÈS-MIDI : LES PALETTES D'ANNOTER ET D'ÉVALUER, UNE MÊME FAMILLE (PAS ENCORE EN LIGNE).** *Écrit par Claude Code.*
+📝 **LE 2 NOVEMBRE 2026, 15 H : LA 1.231.0, LES PALETTES D'UNE MÊME FAMILLE ET LA RÉTROACTION PLUS LARGE.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent tes Nouvelles de la 1.231, validées mot pour mot à 14 h 51 : les deux blocs ci-dessous (les palettes d'une même famille, la Rétroaction plus large) partent ensemble. ↕ est parti avec le lot des palettes : la phrase « ↕ la ramène à la nouvelle » du bloc de midi ne vaut plus, chaque palette s'ouvre une fois à sa taille par défaut.
+
+**Ce qui reste à toi** : recharger l'iPad, lire 1.231.0 en bas de page, puis les gestes de la porte terrain (artefact « Portes terrain 1.231 » de Cowork ; trace : `plans de travail/PORTES-TERRAIN-2026-11-02-mise-en-ligne-1231.md`).
+
+**Vérifié comment** : Vitest entier vert (10 615) avant le commit de release ; les quatre points de version disent 1.231.0, build 1102-1454, et l'ancien build ne reste nulle part dans le code. La vérification complète se lance sur ce commit ; il n'est poussé que si elle est verte : si ton bas de page dit 1.231.0, elle l'a été. Pas encore : l'iPad.
+
+📝 **LE 2 NOVEMBRE 2026, APRÈS-MIDI : LES PALETTES D'ANNOTER ET D'ÉVALUER, UNE MÊME FAMILLE (PARTIES AVEC LA 1.231.0).** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi** : plus de ↔ ni de ↕ dans les en-têtes. Annotation, Codes, Tampons et Évaluation ont un seul bouton, à gauche du « − », qui passe de la version étendue à la compacte et retour ; l'étendue est le défaut. L'Annotation étendue est faite de tuiles au doigt, avec Annuler · Supprimer · Rétablir · Effacer la page collés en bas. Tampons a une compacte : les icônes seules, le nom du tampon touché dessous. Aucun nom n'est plus coupé (« Multistructurel », « Id. directrice »). Le verrou n'a plus qu'une forme, en haut d'Annotation et de Paramètres : « Verrouiller » / « Déverrouiller », avec le cadenas ; le petit cadenas de l'en-tête de Paramètres est parti. Une palette que tu avais élargie à la main s'ouvre une fois à sa taille par défaut.
 
