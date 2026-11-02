@@ -1461,6 +1461,22 @@ span.header-icon {
     filter: brightness(0) invert(0.85);
 }
 
+/* LE VERROU, UNE SEULE FORME (consigne du 2 nov. 2026, § 4) : en haut d'Annotation et de Paramètres, le cadenas et un mot
+   sur une ligne, « Verrouiller » / « Déverrouiller ». Fond bleu : le cadenas reste blanc, dans les deux modes. */
+.btn-verrou-evaluation {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 32px;
+    white-space: nowrap;
+}
+.btn-verrou-evaluation .btn-inline-icon,
+.mode-clair .btn-verrou-evaluation .btn-inline-icon {
+    margin-right: 0;
+    filter: brightness(0) invert(1);
+}
+
 /* === RESPONSIVE — Breakpoint unique 1024px (Chrome unifié) === */
 
 @media (max-width: 1024px) {

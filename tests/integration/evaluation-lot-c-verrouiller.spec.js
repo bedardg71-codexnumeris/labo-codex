@@ -10,8 +10,9 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //
 //  (a) le nombre d'erreurs, le nombre de mots et l'intégrité s'enregistrent tout seuls : on change la valeur,
 //      on passe à l'élève suivant sans autre geste, la valeur est en base et le témoin a dit « Enregistré » ;
-//  (b) « Verrouiller l'évaluation » et le cadenas passent par la MÊME porte, avec ses vérifications : une
-//      évaluation dont l'échelle ne se résout pas est refusée par le cadenas aussi ; un seul message par geste ;
+//  (b) « Verrouiller » passe par la porte, avec ses vérifications : une évaluation dont l'échelle ne se résout pas
+//      est refusée ; un seul message par geste. (Le cadenas sans texte de l'en-tête, qui passait par la même porte, est
+//      retiré le 2 nov. 2026 : une seule forme du verrou, « Verrouiller » / « Déverrouiller ».)
 //  (c) déverrouiller retire l'évaluation de la note du cours, reverrouiller la remet ;
 //  (d) un chargement (par la copie) n'écrit rien.
 // La Liste (« Non verrouillée », son aide) : evaluation-926 ; le profil et le bilan : profil-896, profil-921.
@@ -97,8 +98,7 @@ async function semer(page, evaluation) {
         window.chargerProductionsDansSelect();
         window.chargerGrillesDansSelect();
         window.chargerEchellePerformance();
-        // Le cadenas, posé AVANT l'ouverture comme le font les palettes (`poserBoutonVerrou`) : ici, dans
-        // l'en-tête du panneau Paramètres (chemin sans copie, #868) — le même bouton, la même fonction.
+        // Les outils du formulaire sans copie (#868), posés AVANT l'ouverture comme le font les palettes.
         window.travauxUI.equiperFormulaireSansCopie();
         // Les deux voix de l'écran : les messages et le témoin commun.
         window.__messages = [];
@@ -226,7 +226,7 @@ test('lot C (d) · un chargement par la copie n\'écrit rien, même sur une éva
     expect(erreurs).toEqual([]);
 });
 
-test('lot C (b) · le cadenas passe par la porte de « Verrouiller l\'évaluation » : sans échelle résolue, refusé par les deux', async ({ page }) => {
+test('lot C (b) · « Verrouiller » passe par la porte : sans échelle résolue, refusé', async ({ page }) => {
     test.setTimeout(90000);
     const erreurs = brancherEcouteurs(page);
     await semer(page, evaluationSemee({ echelleId: 'ECHELLE_ABSENTE' }));
@@ -235,7 +235,8 @@ test('lot C (b) · le cadenas passe par la porte de « Verrouiller l\'évaluatio
     // L'échelle introuvable reste celle de l'évaluation (#697) : rien ne la résout.
     await page.evaluate(() => { document.getElementById('selectEchelle1').value = 'ECHELLE_ABSENTE'; if (window.evaluationEnCours) window.evaluationEnCours.echelleId = 'ECHELLE_ABSENTE'; });
 
-    for (const bouton of ['btnVerrouPalette', 'btnVerrouillerEvaluation']) {
+    expect(await page.evaluate(() => document.querySelectorAll('#btnVerrouPalette').length), 'plus de cadenas d’en-tête').toBe(0);
+    for (const bouton of ['btnVerrouillerEvaluation']) {
         const r = await page.evaluate((bouton) => {
             window.__messages = [];
             document.getElementById(bouton).click();
@@ -248,7 +249,7 @@ test('lot C (b) · le cadenas passe par la porte de « Verrouiller l\'évaluatio
     expect(erreurs).toEqual([]);
 });
 
-test('lot C (b)(c) · verrouiller par le cadenas, un seul message ; déverrouiller par le bouton ; la note retire puis remet l\'évaluation', async ({ page }) => {
+test('lot C (b)(c) · verrouiller, un seul message ; déverrouiller par le même bouton ; la note retire puis remet l\'évaluation', async ({ page }) => {
     test.setTimeout(90000);
     const erreurs = brancherEcouteurs(page);
     await semer(page, evaluationSemee());
@@ -258,20 +259,20 @@ test('lot C (b)(c) · verrouiller par le cadenas, un seul message ; déverrouill
         (window.db.getSync(cle('evaluationsSauvegardees'), []) || []).find((e) => e.id === 'EVC')));
     expect(await compte(), 'non verrouillée : hors de la note').toBe(false);
 
-    const etat = () => page.evaluate(() => ({
-        bouton: document.getElementById('btnVerrouillerEvaluation').textContent.trim(),
-        boutonEteint: document.getElementById('btnVerrouillerEvaluation').disabled,
-        cadenas: document.getElementById('btnVerrouPalette').title
-    }));
-    expect(await etat()).toEqual({ bouton: 'Verrouiller l\'évaluation', boutonEteint: false, cadenas: 'Non verrouillée – clique pour verrouiller' });
+    // Le bouton dit ce qu'il fera, en un mot, le cadenas ouvert ou fermé devant (consigne du 2 nov. 2026, § 4).
+    const etat = () => page.evaluate(() => {
+        const b = document.getElementById('btnVerrouillerEvaluation');
+        return { bouton: b.textContent.trim(), titre: b.title, boutonEteint: b.disabled, cadenas: (b.querySelector('img') || {}).src?.split('/').pop() };
+    });
+    expect(await etat()).toEqual({ bouton: 'Verrouiller', titre: 'Verrouiller l’évaluation', boutonEteint: false, cadenas: 'icon-open-lock.svg' });
 
     const cliquer = (id) => page.evaluate((id) => { window.__messages = []; document.getElementById(id).click(); return window.__messages.slice(); }, id);
 
-    const verrou = await cliquer('btnVerrouPalette');
+    const verrou = await cliquer('btnVerrouillerEvaluation');
     expect(verrou, 'un seul message pour le verrouillage').toEqual(['succes:Évaluation verrouillée : Daniel Témoin – Portrait témoin']);
     expect((await evc(page)).verrouillee).toBe(true);
     expect(await compte(), 'verrouillée : dans la note').toBe(true);
-    expect(await etat()).toEqual({ bouton: 'Déverrouiller l\'évaluation', boutonEteint: false, cadenas: 'Verrouillée – clique pour déverrouiller' });
+    expect(await etat()).toEqual({ bouton: 'Déverrouiller', titre: 'Déverrouiller l’évaluation', boutonEteint: false, cadenas: 'icon-lock.svg' });
 
     const deverrou = await cliquer('btnVerrouillerEvaluation');
     expect(deverrou).toEqual(['succes:Évaluation déverrouillée : Daniel Témoin – Portrait témoin']);
@@ -285,13 +286,13 @@ test('lot C (b)(c) · verrouiller par le cadenas, un seul message ; déverrouill
     expect(erreurs).toEqual([]);
 });
 
-test('lot C · copie neuve : « IA » posé avant tout niveau s\'enregistre (non verrouillée), et le cadenas ouvert apparaît', async ({ page }) => {
+test('lot C · copie neuve : « IA » posé avant tout niveau s\'enregistre (non verrouillée), et le verrou dit « Verrouiller »', async ({ page }) => {
     test.setTimeout(90000);
     const erreurs = brancherEcouteurs(page);
     await semer(page, null);
     await ouvrirParLaCopie(page, '1234567');
     await attendreCopieChargee(page, { idAttendu: null });
-    expect(await page.evaluate(() => document.getElementById('btnVerrouPalette').style.display), 'copie neuve : pas de cadenas').toBe('none');
+    expect(await page.evaluate(() => document.getElementById('btnVerrouillerEvaluation').textContent.trim()), 'copie neuve').toBe('Verrouiller');
 
     await saisir(page, 'statutIntegrite', 'ia', 'change');
     await page.waitForTimeout(2000);
@@ -300,8 +301,8 @@ test('lot C · copie neuve : « IA » posé avant tout niveau s\'enregistre (non
     expect(b[0]).toMatchObject({ etudiantDA: '1234567', productionId: 'PC', statutIntegrite: 'ia', verrouillee: false });
     expect(await page.evaluate(() => ({
         id: window.evaluationEnCours.idModification,
-        cadenas: document.getElementById('btnVerrouPalette').style.display
-    }))).toEqual({ id: b[0].id, cadenas: '' });
+        verrou: document.getElementById('btnVerrouillerEvaluation').textContent.trim()
+    }))).toEqual({ id: b[0].id, verrou: 'Verrouiller' });
     expect(erreurs).toEqual([]);
 });
 

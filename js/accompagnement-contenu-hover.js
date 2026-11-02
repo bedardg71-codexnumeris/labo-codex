@@ -389,7 +389,7 @@ const TOOLTIPS = {
     // --- Actions du formulaire d'évaluation (#18, déploiement 13 mai 2026) ---
 
     'eval-btn-sauvegarder':
-        'L\'évaluation s\'enregistre toute seule pendant que tu évalues. La verrouiller la fait compter dans la note ; une évaluation verrouillée se déverrouille par ce même bouton ou par le cadenas.',
+        'L\'évaluation s\'enregistre toute seule pendant que tu évalues. La verrouiller la fait compter dans la note ; une évaluation verrouillée se déverrouille par ce même bouton.',
     'eval-profil-rapide':
         'Ouvre le profil de l\'étudiant·e dans un nouvel onglet. Pratique pour consulter l\'historique sans perdre l\'évaluation en cours.',
     'eval-btn-regenerer-retro':

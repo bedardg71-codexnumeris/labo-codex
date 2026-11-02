@@ -414,13 +414,14 @@ test.describe('La palette Rétroaction compacte', () => {
         // Grégoire l'accepte en Évaluer (porte 3.1 de la 1.230) ; en Annoter, rien ne change.
         expect(m).toEqual({ parametres: 200, evaluation: 316, retroaction: 360, ecart: 8, copie: 272 });
 
-        // Revenue à 200, Paramètres garde toute sa barre, cadenas affiché : le « − » dépassait de 7 px.
+        // Revenue à 200, Paramètres garde toute sa barre : le « − » dépassait de 7 px, cadenas affiché. Le cadenas de
+        // l'en-tête est retiré le 2 nov. 2026 (une seule forme du verrou, « Verrouiller » en haut de la palette).
         const barre = await page.evaluate(() => {
             const p = document.getElementById('travaux-palette-eval-gauche');
             const vis = [...p.querySelectorAll('.palette-flottante-barre button')].filter((b) => b.offsetParent);
             return { cadenas: vis.some((b) => b.id === 'btnVerrouPalette'), dehors: vis.filter((b) => b.getBoundingClientRect().right > p.getBoundingClientRect().right - 1).length };
         });
-        expect(barre).toEqual({ cadenas: true, dehors: 0 });
+        expect(barre).toEqual({ cadenas: false, dehors: 0 });
     });
 
     for (const [largeur, hauteur] of [[1180, 820], [1280, 720]]) {

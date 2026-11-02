@@ -5265,14 +5265,8 @@
         if (paletteG) {
             paletteG.style.top = '12px';
             paletteG.style.left = '12px';
-
-            // Bouton cadenas compact dans la barre de titre
-            const barreParam = paletteG.querySelector('.palette-flottante-barre');
-            if (barreParam) {
-                const btnGroup = barreParam.querySelector('.palette-barre-droite');
-                poserBoutonVerrou(btnGroup || barreParam, !!btnGroup);
-            }
-
+            // Le verrou est le bouton à texte en haut de Paramètres (`btnVerrouillerEvaluation`) : le cadenas de l'en-tête
+            // est retiré le 2 nov. 2026 (consigne « une même famille », § 4 : une seule forme).
             zoneCanvas.appendChild(paletteG);
         }
 
@@ -5478,53 +5472,14 @@
     }
 
     /**
-     * Le cadenas (verrouiller / déverrouiller l'évaluation). UN seul cadenas dans la page :
-     * `btnVerrouPalette` est lu par `afficherOuMasquerBoutonVerrouillage` (evaluation.js),
-     * qui le montre dès qu'une évaluation enregistrée est chargée. Les contrôles du verrou sont
-     * trois : ce cadenas et « Verrouiller l'évaluation » (Paramètres) disent l'état du formulaire ;
-     * le bouton de la palette Annotation (`travaux-annot-btn-verrou`, 24 oct. 2026), celui de la
-     * copie affichée (`mettreAJourVerrouAnnotation`).
-     * @param {HTMLElement|null} parent
-     * @param {boolean} enPremier - l'insérer en tête de `parent` plutôt qu'à la fin
-     */
-    function poserBoutonVerrou(parent, enPremier) {
-        if (!parent) return;
-        // Chercher l'ancien AUSSI dans l'arbre de `parent` : `creerPaletteEval` y a déjà déplacé le
-        // panneau « Paramètres » — et le cadenas de son en-tête — avant d'insérer la palette dans la
-        // page, où `getElementById` ne le voit pas encore (deux cadenas, mesuré le 15 sept.).
-        const racine = parent.getRootNode();
-        const anciens = new Set([document.getElementById('btnVerrouPalette')]);
-        if (racine && racine !== document && racine.querySelectorAll) {
-            racine.querySelectorAll('#btnVerrouPalette').forEach(function(b) { anciens.add(b); });
-        }
-        anciens.forEach(function(b) { if (b) b.remove(); });
-        const btnVerrou = document.createElement('button');
-        btnVerrou.id = 'btnVerrouPalette';
-        btnVerrou.className = 'btn btn-compact';
-        btnVerrou.title = 'Non verrouillée – clique pour verrouiller';   // lot C ; `mettreAJourBoutonVerrouillage` le tient ensuite
-        btnVerrou.style.cssText = 'font-size:12px; padding:2px 3px; display:none;';   // à 200 px, le « − » de la barre de Paramètres reste dedans
-        btnVerrou.innerHTML = '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">'; // security-ok: constante, aucune donnée
-        btnVerrou.addEventListener('click', function() {
-            if (typeof basculerVerrouillageEvaluationCourante === 'function') {
-                basculerVerrouillageEvaluationCourante();
-            }
-        });
-        if (enPremier) parent.insertBefore(btnVerrou, parent.firstChild);
-        else parent.appendChild(btnVerrou);
-    }
-
-    /**
-     * Le formulaire SANS copie reçoit les outils des palettes (#868) : le cadenas dans
-     * l'en-tête « Paramètres », les outils de la rétroaction. Appelée par evaluation.js
+     * Le formulaire SANS copie reçoit les outils des palettes (#868) : ceux de la rétroaction. Le verrou y est déjà,
+     * « Verrouiller » en haut de Paramètres (le cadenas de l'en-tête est retiré le 2 nov. 2026). Appelée par evaluation.js
      * (`_setupAffichagePanneauxModif`, chemin sans copie — « Évaluer » et « Consulter »).
      */
     function equiperFormulaireSansCopie() {
         const gauche = document.getElementById('travaux-eval-gauche');
         const enTete = gauche ? gauche.querySelector('.travaux-panneau-header') : null;
-        if (enTete) {
-            enTete.style.display = '';   // une palette l'a peut-être caché (creerPaletteEval)
-            poserBoutonVerrou(enTete, false);
-        }
+        if (enTete) enTete.style.display = '';   // une palette l'a peut-être caché (creerPaletteEval)
         equiperRetroaction(document.getElementById('travaux-eval-retroaction'));
     }
 

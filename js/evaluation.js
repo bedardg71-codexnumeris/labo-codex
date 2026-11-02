@@ -2112,9 +2112,9 @@ function appliquerJetonDelaiDepuisSidebar() {
 
 /**
  * Lot C de l'enregistrement (D1, Grégoire, 26 sept. 2026) — UNE SEULE PORTE POUR LE VERROU.
- * « Verrouiller l'évaluation » (le bouton du panneau Paramètres) et le cadenas (`btnVerrouPalette`,
- * en-tête de la palette ou du formulaire sans copie) appellent cette fonction, et elle seule ; le
- * bouton de la palette Annotation (24 oct. 2026) y passe aussi (`basculerVerrouDepuisAnnotation`) :
+ * « Verrouiller » (le bouton du panneau Paramètres) appelle cette fonction, et elle seule ; le
+ * bouton de la palette Annotation (24 oct. 2026) y passe aussi (`basculerVerrouDepuisAnnotation`).
+ * Le cadenas sans texte de l'en-tête (`btnVerrouPalette`) est retiré le 2 nov. 2026 (une seule forme) :
  *   · évaluation non verrouillée, ou pas encore créée → `sauvegarderEvaluation`, qui fait les
  *     vérifications (références, échelle résolue #697, portée #674), crée l'évaluation au besoin
  *     et la verrouille. Le cadenas verrouillait sans rien vérifier : ce raccourci est fermé ;
@@ -2206,17 +2206,9 @@ function _deverrouillerEvaluation(evaluations, index) {
 }
 
 /**
- * Met à jour l'icône de verrouillage (style productions)
+ * Le verrou dit l'état de l'évaluation chargée : le bouton de Paramètres, les badges, et celui d'Annotation.
  */
 function mettreAJourBoutonVerrouillage(estVerrouillee) {
-    // Bouton cadenas dans la barre de palette Paramètres
-    const btnVerrouPalette = document.getElementById('btnVerrouPalette');
-    if (btnVerrouPalette) {
-        btnVerrouPalette.style.display = '';
-        btnVerrouPalette.innerHTML = estVerrouillee ? '<img src="icons/icon-lock.svg" alt="" class="btn-inline-icon">' : '<img src="icons/icon-open-lock.svg" alt="" class="btn-inline-icon">';
-        btnVerrouPalette.title = estVerrouillee ? TITRE_CADENAS_VERROUILLE : TITRE_CADENAS_OUVERT;
-        btnVerrouPalette.setAttribute('aria-label', btnVerrouPalette.title);
-    }
     _libellerBoutonVerrouiller(estVerrouillee);
     _poserCadenasDesBadges(estVerrouillee);
     // Le bouton de la palette Annotation dit l'état de la copie AFFICHÉE, lu en stockage : en mode
@@ -2255,10 +2247,7 @@ function afficherOuMasquerBoutonVerrouillage(afficher, estVerrouillee = false) {
     if (afficher) {
         mettreAJourBoutonVerrouillage(estVerrouillee);
     } else {
-        // Masquer le bouton cadenas dans la barre de palette
-        const btnVerrouPalette = document.getElementById('btnVerrouPalette');
-        if (btnVerrouPalette) btnVerrouPalette.style.display = 'none';
-        _libellerBoutonVerrouiller(false);   // lot C — copie neuve : « Verrouiller l'évaluation »
+        _libellerBoutonVerrouiller(false);   // lot C — copie neuve : « Verrouiller »
         // Retirer le cadenas des badges
         document.querySelectorAll('.travaux-badge-verrou').forEach(el => el.remove());
         mettreAJourVerrouAnnotation();
@@ -2330,22 +2319,24 @@ function desactiverFormulaireEvaluation(desactiver) {
         if (checkbox) checkbox.disabled = desactiver;
     });
 
-    // Lot C de l'enregistrement — « Verrouiller l'évaluation » n'est plus éteint sous le verrou :
-    // il y devient « Déverrouiller l'évaluation » (`_libellerBoutonVerrouiller`). Toujours actif.
+    // Lot C de l'enregistrement — « Verrouiller » n'est plus éteint sous le verrou :
+    // il y devient « Déverrouiller » (`_libellerBoutonVerrouiller`). Toujours actif.
     const btnVerrouiller = document.getElementById('btnVerrouillerEvaluation');
     if (btnVerrouiller) btnVerrouiller.disabled = false;
 }
 
 /**
- * Lot C de l'enregistrement (D1) — les mots du verrou, proposés par Cowork le 27 sept. 2026
- * (plans de travail/CONSIGNE-DU-JOUR.md, § 3).
+ * LE VERROU, UNE SEULE FORME (consigne du 2 nov. 2026, § 4) : un bouton à texte en haut de la palette de gauche
+ * (Annotation en Annoter, Paramètres en Évaluer), le cadenas ouvert ou fermé et un mot sur une ligne, « Verrouiller » /
+ * « Déverrouiller » (mots validés par Grégoire). Le cadenas sans texte de l'en-tête de Paramètres (`btnVerrouPalette`)
+ * est retiré. Le `title` et l'`aria-label` disent l'objet : l'évaluation.
  */
-const TITRE_CADENAS_VERROUILLE = 'Verrouillée – clique pour déverrouiller';
-const TITRE_CADENAS_OUVERT = 'Non verrouillée – clique pour verrouiller';
-
-/** Les mots des deux boutons à libellé (Paramètres, Annotation) : les mêmes partout. */
-function _motDuBoutonVerrou(estVerrouillee) {
-    return estVerrouillee ? 'Déverrouiller l\'évaluation' : 'Verrouiller l\'évaluation';
+function _poserMotsDuVerrou(btn, estVerrouillee) {
+    const icone = estVerrouillee ? 'icon-lock.svg' : 'icon-open-lock.svg';
+    const mot = estVerrouillee ? 'D\u00e9verrouiller' : 'Verrouiller';
+    btn.innerHTML = '<img src="icons/' + icone + '" alt="" class="btn-inline-icon"><span>' + mot + '</span>'; // security-ok: constantes, aucune donnée
+    btn.title = mot + ' l\u2019\u00e9valuation';
+    btn.setAttribute('aria-label', btn.title);
 }
 
 /**
@@ -2355,7 +2346,7 @@ function _motDuBoutonVerrou(estVerrouillee) {
 function _libellerBoutonVerrouiller(estVerrouillee) {
     const btn = document.getElementById('btnVerrouillerEvaluation');
     if (!btn) return;
-    btn.textContent = _motDuBoutonVerrou(estVerrouillee);
+    _poserMotsDuVerrou(btn, estVerrouillee);
     btn.disabled = false;
 }
 
@@ -2388,7 +2379,7 @@ function mettreAJourVerrouAnnotation() {
     if (!btn) return;
     const evaluation = _evaluationDeLaCopieAffichee();
     if (btn.parentElement) btn.parentElement.classList.toggle('u-hide', !evaluation);
-    if (evaluation) btn.textContent = _motDuBoutonVerrou(evaluation.verrouillee === true);
+    if (evaluation) _poserMotsDuVerrou(btn, evaluation.verrouillee === true);
 }
 
 /**

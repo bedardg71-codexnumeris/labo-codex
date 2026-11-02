@@ -2064,8 +2064,10 @@
     function _htmlVerrouAnnotation() {
         // 24 oct. 2026 — le verrou de l'évaluation, jumeau de « Verrouiller l'évaluation » (Paramètres).
         // Caché tant que `mettreAJourVerrouAnnotation` (evaluation.js) n'a pas lu l'évaluation de la copie.
+        // Une seule forme (consigne du 2 nov. 2026, § 4) : le cadenas et un mot, comme dans Paramètres (`_poserMotsDuVerrou`).
         return '<div class="groupe-boutons-ligne u-hide">'
-            + '<button id="travaux-annot-btn-verrou" class="btn btn-principal btn-tres-compact u-flex-1" data-action="basculerVerrouDepuisAnnotation">Verrouiller l\'évaluation</button>'
+            + '<button id="travaux-annot-btn-verrou" class="btn btn-principal btn-tres-compact btn-verrou-evaluation u-flex-1" data-action="basculerVerrouDepuisAnnotation"'
+            + ' title="Verrouiller l\u2019\u00e9valuation" aria-label="Verrouiller l\u2019\u00e9valuation"><img src="' + ICONS_DIR + 'icon-open-lock.svg" alt="" class="btn-inline-icon"><span>Verrouiller</span></button>'
             + '</div>';
     }
 
@@ -2527,7 +2529,7 @@
         //
         // Avant le 31 août 2026, elle nommait `.palette-flottante-toggle` et
         // `.travaux-palette-toggle`. Le cadenas de la palette Paramètres
-        // (`travaux-ui.js`, `#btnVerrouPalette`, classes `btn btn-compact`) n'en
+        // (`travaux-ui.js`, `#btnVerrouPalette`, retiré le 2 nov. 2026 ; classes `btn btn-compact`) n'en
         // portait aucune : appuyer dessus ne faisait RIEN — pas d'action, pas de
         // message, pas d'erreur. Signalé par Grégoire depuis l'écran Évaluation, où
         // il rendait le déverrouillage d'une évaluation IMPOSSIBLE (#644).

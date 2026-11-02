@@ -11,7 +11,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Demande de Grégoire (24 oct., 8 h 51) : « Parfois, après enregistrement, j'ai besoin d'ajouter un
 // commentaire, un tampon ou un code et je dois toujours faire le détour par la palette d'évaluation
 // pour déverrouiller la copie. » La palette Annotation porte le même bouton que Paramètres :
-// « Déverrouiller l'évaluation » / « Verrouiller l'évaluation », caché sans évaluation.
+// « Déverrouiller » / « Verrouiller » (mots du 2 nov. 2026, cadenas devant), caché sans évaluation.
 // Ce que ce banc juge : le bouton dit l'état de la copie AFFICHÉE (pas celui du formulaire, qui en
 // mode Annoter reste celui de la dernière copie évaluée, #1142) ; il déverrouille et verrouille par
 // la porte unique (lot C) ; verrouiller depuis Annoter ne touche que l'évaluation de la copie
@@ -139,21 +139,21 @@ test('verrou · Annoter une copie verrouillée : « Déverrouiller l\'évaluatio
     const erreurs = await monter(page, { verrouillee: true });
     await allerAAnnoter(page);
     await ouvrir(page, 'FTA1024');
-    expect(await boutonAnnotation(page)).toBe('Déverrouiller l\'évaluation');
+    expect(await boutonAnnotation(page)).toBe('Déverrouiller');
 
     await cliquerVerrou(page);
     await page.waitForTimeout(500);
     expect.soft(await stock(page, 'EVA1024')).toEqual({ verrouillee: false, erreurs: 1 });
     expect.soft(await stock(page, 'EVB1024'), 'B n\'a pas bougé').toEqual({ verrouillee: true, erreurs: 11 });
-    expect.soft(await boutonAnnotation(page)).toBe('Verrouiller l\'évaluation');
+    expect.soft(await boutonAnnotation(page)).toBe('Verrouiller');
 
     await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
     await attendreCopie(page, 'TESTA1024');
-    expect.soft(await boutonParametres(page), 'Paramètres, en Évaluer').toBe('Verrouiller l\'évaluation');
+    expect.soft(await boutonParametres(page), 'Paramètres, en Évaluer').toBe('Verrouiller');
 
     await page.evaluate(() => window.travauxUI.basculerMode('annoter'));
     await page.waitForTimeout(500);
-    expect.soft(await boutonAnnotation(page), 'Annotation, de retour').toBe('Verrouiller l\'évaluation');
+    expect.soft(await boutonAnnotation(page), 'Annotation, de retour').toBe('Verrouiller');
     expect(sansBruit(erreurs)).toEqual([]);
 });
 
@@ -168,17 +168,17 @@ test('verrou · le bouton suit la copie affichée : sans évaluation il se cache
     await page.waitForTimeout(500);
     await page.evaluate(() => window.travauxUI.basculerMode('annoter'));
     await page.waitForTimeout(500);
-    expect.soft(await boutonAnnotation(page), 'A, déverrouillée').toBe('Verrouiller l\'évaluation');
+    expect.soft(await boutonAnnotation(page), 'A, déverrouillée').toBe('Verrouiller');
 
     await ouvrir(page, 'FTC1024');
     expect.soft(await boutonAnnotation(page), 'C, sans évaluation : caché').toBe(null);
 
     await ouvrir(page, 'FTB1024');
-    expect.soft(await boutonAnnotation(page), 'B, verrouillée (le formulaire porte encore A)').toBe('Déverrouiller l\'évaluation');
+    expect.soft(await boutonAnnotation(page), 'B, verrouillée (le formulaire porte encore A)').toBe('Déverrouiller');
 
     // La palette régénérée par une personnalisation (le bouton renaît caché) : il retrouve l'état de B.
     await page.evaluate(() => window.travauxOutils.rafraichirPalettesApresPersonnalisation());
-    expect.soft(await boutonAnnotation(page), 'B, après régénération de la palette').toBe('Déverrouiller l\'évaluation');
+    expect.soft(await boutonAnnotation(page), 'B, après régénération de la palette').toBe('Déverrouiller');
     expect(sansBruit(erreurs)).toEqual([]);
 });
 
@@ -192,22 +192,22 @@ test('verrou · verrouiller depuis Annoter verrouille l\'évaluation de la copie
     await page.waitForTimeout(500);
 
     // (a) La copie affichée est celle du formulaire (A) : la porte, telle quelle.
-    expect(await boutonAnnotation(page)).toBe('Verrouiller l\'évaluation');
+    expect(await boutonAnnotation(page)).toBe('Verrouiller');
     await cliquerVerrou(page);
     await page.waitForFunction((T) => window.db.getSync(T + '_evaluationsSauvegardees', []).find(x => x.id === 'EVA1024').verrouillee === true, T, { timeout: 10000 });
     expect.soft(await stock(page, 'EVA1024')).toEqual({ verrouillee: true, erreurs: 1 });
     expect.soft(await stock(page, 'EVB1024'), 'B n\'a pas bougé').toEqual({ verrouillee: false, erreurs: 11 });
-    expect.soft(await boutonAnnotation(page)).toBe('Déverrouiller l\'évaluation');
+    expect.soft(await boutonAnnotation(page)).toBe('Déverrouiller');
 
     // (b) Annoter, la copie B : le formulaire porte encore A. Verrouiller charge B, puis passe la porte.
     await ouvrir(page, 'FTB1024');
-    expect(await boutonAnnotation(page)).toBe('Verrouiller l\'évaluation');
+    expect(await boutonAnnotation(page)).toBe('Verrouiller');
     await cliquerVerrou(page);
     await page.waitForFunction((T) => window.db.getSync(T + '_evaluationsSauvegardees', []).find(x => x.id === 'EVB1024').verrouillee === true, T, { timeout: 20000 });
     await page.waitForTimeout(1000);
     expect.soft(await stock(page, 'EVB1024'), 'B verrouillée, avec SON compte').toEqual({ verrouillee: true, erreurs: 11 });
     expect.soft(await stock(page, 'EVA1024'), 'A n\'a pas bougé').toEqual({ verrouillee: true, erreurs: 1 });
-    expect.soft(await boutonParametres(page), 'Paramètres (B chargée)').toBe('Déverrouiller l\'évaluation');
+    expect.soft(await boutonParametres(page), 'Paramètres (B chargée)').toBe('Déverrouiller');
     expect(sansBruit(erreurs)).toEqual([]);
 });
 
@@ -237,3 +237,42 @@ test('verrou · le chargement de l\'évaluation n\'aboutit pas : rien n\'est ver
     expect.soft(await stock(page, 'EVA1024'), 'A n\'a pas bougé').toEqual({ verrouillee: false, erreurs: 1 });
     expect(sansBruit(erreurs)).toEqual([]);
 });
+
+// LE VERROU, UNE SEULE FORME (consigne du 2 nov. 2026, « une même famille », § 4) : un bouton à texte en haut de la palette
+// de gauche — Annotation en Annoter (étendue comme compacte), Paramètres en Évaluer —, le cadenas et un mot sur une ligne.
+// Le cadenas sans texte de l'en-tête de Paramètres n'existe plus.
+const formeDuVerrou = (page, idBouton, idPalette) => page.evaluate(([idBouton, idPalette]) => {
+    const b = document.getElementById(idBouton);
+    const p = document.getElementById(idPalette);
+    const contenu = p.querySelector('.palette-flottante-contenu');
+    const premier = [...contenu.querySelectorAll('button')].find((x) => x.offsetParent);
+    const r = b.getBoundingClientRect();
+    const lh = parseFloat(getComputedStyle(b).fontSize) * 1.6;
+    return {
+        mot: b.textContent.trim(), cadenas: (b.querySelector('img') || {}).src?.split('/').pop(),
+        enHaut: premier === b, uneLigne: r.height <= Math.max(36, lh + 12) && b.scrollWidth <= b.clientWidth + 1,
+        dansLaPalette: r.left >= p.getBoundingClientRect().left - 0.5 && r.right <= p.getBoundingClientRect().right + 0.5,
+        cadenasEnTete: document.querySelectorAll('#btnVerrouPalette, .palette-flottante-barre img[src*="lock"]').length
+    };
+}, [idBouton, idPalette]);
+
+for (const vp of [{ width: 1180, height: 820 }, { width: 1280, height: 720 }]) {
+    test(`verrou · une seule forme à ${vp.width} × ${vp.height} : en haut d’Annotation (étendue, compacte) et de Paramètres, le cadenas et un mot`, async ({ page }) => {
+        await page.setViewportSize(vp);
+        const erreurs = await monter(page, { verrouillee: true });
+        await allerAAnnoter(page);
+        await ouvrir(page, 'FTA1024');
+        await page.waitForFunction(() => { const b = document.getElementById('travaux-annot-btn-verrou'); return b && !b.parentElement.classList.contains('u-hide'); }, null, { timeout: 10000 });
+        const attendu = { mot: 'Déverrouiller', cadenas: 'icon-lock.svg', enHaut: true, uneLigne: true, dansLaPalette: true, cadenasEnTete: 0 };
+        expect(await formeDuVerrou(page, 'travaux-annot-btn-verrou', 'travaux-palette-flottante'), 'Annotation étendue').toEqual(attendu);
+        await page.evaluate(() => document.querySelector('#travaux-palette-flottante .palette-bouton-version').click());
+        expect(await page.evaluate(() => document.getElementById('travaux-palette-flottante').classList.contains('annotation-compacte'))).toBe(true);
+        expect(await formeDuVerrou(page, 'travaux-annot-btn-verrou', 'travaux-palette-flottante'), 'Annotation compacte').toEqual(attendu);
+
+        await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
+        await page.waitForFunction(() => window.travauxUI.getModeCourant() === 'evaluer' && !!document.getElementById('travaux-palette-eval-gauche'), null, { timeout: 10000 });
+        await attendreCopie(page, 'TESTA1024');
+        expect(await formeDuVerrou(page, 'btnVerrouillerEvaluation', 'travaux-palette-eval-gauche'), 'Paramètres').toEqual(attendu);
+        expect(sansBruit(erreurs)).toEqual([]);
+    });
+}

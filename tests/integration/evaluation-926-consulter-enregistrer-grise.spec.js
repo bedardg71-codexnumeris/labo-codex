@@ -71,15 +71,19 @@ async function consulter(page, evalId, da, c1) {
     }, evalId);
     await page.waitForFunction(([da, c1]) => (document.getElementById('selectEtudiantEval') || {}).value === da
         && !!document.getElementById('eval_c1') && document.getElementById('eval_c1').value === c1, [da, c1], { timeout: 10000 });
-    // Le cadenas est posé à la toute fin du chargement, avec l'état du formulaire : on l'attend, puis on lit.
-    await page.waitForFunction(() => {
-        const cadenas = document.getElementById('btnVerrouPalette');
-        return !!cadenas && cadenas.style.display !== 'none' && !!cadenas.querySelector('img');
-    }, null, { timeout: 10000 });
+    // Le verrou est posé à la toute fin du chargement, avec l'état du formulaire : on attend qu'il dise celui de
+    // l'évaluation consultée, puis on lit. (Le cadenas de l'en-tête, qu'on attendait ici, est retiré le 2 nov. 2026.)
+    await page.waitForFunction((id) => {
+        const ec = window.evaluationEnCours;
+        const b = document.getElementById('btnVerrouillerEvaluation');
+        const e = (window.db.getSync(window.cle('evaluationsSauvegardees'), []) || []).find((x) => x.id === id);
+        return !!ec && ec.idModification === id && !window._chargementsEvaluationEnCours && !!b.querySelector('img')
+            && b.title === (e && e.verrouillee ? 'Déverrouiller l’évaluation' : 'Verrouiller l’évaluation');
+    }, evalId, { timeout: 10000 });
 }
 
 const etat = (page) => page.evaluate(() => ({
-    cadenasOuvert: /icon-open-lock/.test(document.getElementById('btnVerrouPalette').innerHTML),
+    cadenasOuvert: /icon-open-lock/.test(document.getElementById('btnVerrouillerEvaluation').innerHTML),
     enregistrerEteint: document.getElementById('btnVerrouillerEvaluation').disabled,
     bouton: document.getElementById('btnVerrouillerEvaluation').textContent.trim(),   // lot C (D1)
     niveauEteint: document.getElementById('eval_c1').disabled
@@ -120,11 +124,11 @@ test('#926 · « Consulter » une évaluation non enregistrée APRÈS une verrou
 
     await consulter(page, 'EVAL926A', 'TEST926A', 'M');
     // La prémisse, mesurée : la verrouillée éteint bien le formulaire — c'est cet état que le panneau gardait.
-    // Lot C (D1) : sous le verrou, le bouton n'est plus éteint — il devient « Déverrouiller l'évaluation ».
-    expect(await etat(page)).toEqual({ cadenasOuvert: false, enregistrerEteint: false, bouton: 'Déverrouiller l\'évaluation', niveauEteint: true });
+    // Lot C (D1) : sous le verrou, le bouton n'est plus éteint — il devient « Déverrouiller », cadenas fermé (2 nov. 2026).
+    expect(await etat(page)).toEqual({ cadenasOuvert: false, enregistrerEteint: false, bouton: 'Déverrouiller', niveauEteint: true });
 
     await consulter(page, 'EVAL926B', 'TEST926B', 'I');
-    expect(await etat(page), 'le cadenas et le bouton disent la même chose').toEqual({ cadenasOuvert: true, enregistrerEteint: false, bouton: 'Verrouiller l\'évaluation', niveauEteint: false });
+    expect(await etat(page), 'le cadenas et le bouton disent la même chose').toEqual({ cadenasOuvert: true, enregistrerEteint: false, bouton: 'Verrouiller', niveauEteint: false });
 
     await page.waitForFunction(() => !window._autoSaveSuspendu, null, { timeout: 5000 });
     await page.evaluate(() => document.getElementById('btnVerrouillerEvaluation').click());

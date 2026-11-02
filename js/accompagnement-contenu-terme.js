@@ -612,7 +612,7 @@ const GLOSSAIRE = {
         terme: 'Verrouillage',
         categorie: 'Évaluations',
         etape: 'croisement',
-        definition: 'Une copie évaluée ne compte dans la note qu’une fois verrouillée : « Verrouiller l’évaluation » (ou le cadenas), aussi dans la palette Annotation. Verrouillée, elle montre la note remise ; pour la corriger, déverrouille-la. Une copie « Non verrouillée » ne compte pas encore. Dans la saisie des présences, « Verrouiller la saisie » fige une séance.',
+        definition: 'Une copie évaluée ne compte dans la note qu’une fois verrouillée : « Verrouiller », en haut de Paramètres et de la palette Annotation. Verrouillée, elle montre la note remise ; pour la corriger, déverrouille-la. Une copie « Non verrouillée » ne compte pas encore. Dans la saisie des présences, « Verrouiller la saisie » fige une séance.',
         voir: 'Évaluation › Annoter et évaluer · Suivi › Saisie des présences'
     },
 

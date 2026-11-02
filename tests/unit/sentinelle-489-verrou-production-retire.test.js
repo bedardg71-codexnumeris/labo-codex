@@ -116,7 +116,12 @@ describe('#489 · C — le verrou d\'une copie reste branché', () => {
         expect(ev).toMatch(/window\.basculerVerrouillageEvaluationCourante = basculerVerrouillageEvaluationCourante;/);
     });
 
-    it('le cadenas de la palette (travaux-ui.js) passe par la même porte', () => {
-        expect(code('js/travaux-ui.js')).toMatch(/basculerVerrouillageEvaluationCourante\(\)/);
+    // Le cadenas sans texte de l'en-tête de Paramètres est retiré le 2 nov. 2026 (consigne « une même famille », § 4 : une
+    // seule forme du verrou). Restent les deux boutons à texte : Paramètres (la porte, ci-dessus) et Annotation.
+    it('le cadenas de l’en-tête est retiré ; le bouton d’Annotation passe par sa porte', () => {
+        const sites = FICHIERS_JS.filter((f) => /btnVerrouPalette|poserBoutonVerrou/.test(code(f)));
+        expect(sites).toEqual([]);
+        expect(lire('index.html')).not.toMatch(/btnVerrouPalette/);
+        expect(code('js/travaux-outils.js')).toMatch(/id="travaux-annot-btn-verrou"[^>]*data-action="basculerVerrouDepuisAnnotation"/);
     });
 });

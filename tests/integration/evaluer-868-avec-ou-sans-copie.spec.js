@@ -108,6 +108,9 @@ const lireEtat = (page) => page.evaluate(() => {
         sousBarres: document.querySelectorAll('.retro-sous-barre').length,
         sousBarreVisible: vis(document.querySelector('.retro-sous-barre')),
         piedRetro: Array.from(document.querySelectorAll('.eval-retro-pied button')).map((b) => b.textContent.trim()),
+        // Une seule forme du verrou (consigne du 2 nov. 2026, § 4) : le bouton à texte en haut de Paramètres ; plus de
+        // cadenas dans l'en-tête.
+        verrou: [...document.querySelectorAll('#btnVerrouillerEvaluation')].filter(vis).map((b) => b.textContent.trim()),
         cadenas: document.querySelectorAll('#btnVerrouPalette').length
     };
 });
@@ -127,7 +130,7 @@ const ETAT_AVEC_COPIE = {
     remise: 'importe',
     palettes: [true, true, true], sousBarres: 1, sousBarreVisible: true,
     // « Régénérer » restait retiré du mode Évaluer par le nettoyage des palettes (même classe que « Copier »).
-    piedRetro: ['Régénérer', 'Copier', 'Copier tout'], cadenas: 1
+    piedRetro: ['Régénérer', 'Copier', 'Copier tout'], verrou: ['Verrouiller'], cadenas: 0
 };
 
 const ETAT_SANS_COPIE = {
@@ -136,7 +139,7 @@ const ETAT_SANS_COPIE = {
     remise: 'recu',
     etiquetteEtudiant: 'Léa Gagnon (TEST868B)', etiquetteProduction: 'Analyse 1',
     formulaireSansCopie: true, palettes: [false, false, false], sousBarres: 1, sousBarreVisible: true,
-    piedRetro: ['Régénérer', 'Copier', 'Copier tout'], cadenas: 1
+    piedRetro: ['Régénérer', 'Copier', 'Copier tout'], verrou: ['Verrouiller'], cadenas: 0
 };
 
 const sansModeNiCopie = ({ mode, copieOuverte, ...reste }) => reste;
@@ -160,9 +163,9 @@ test('Porte #868 · sans copie : « Évaluer » ouvre le formulaire, élève et 
     await attendreSansCopie(page, 'p868-1');
     const etat = await lireEtat(page);
     expect(sansModeNiCopie(etat)).toEqual(ETAT_SANS_COPIE);
-    // L'en-tête « Paramètres » porte le cadenas (caché tant que rien n'est enregistré).
-    const cadenasDansLEnTete = await page.evaluate(() => !!document.querySelector('#travaux-eval-gauche .travaux-panneau-header #btnVerrouPalette'));
-    expect(cadenasDansLEnTete).toBe(true);
+    // Le verrou est en haut de « Paramètres », au-dessus de l'identité de la copie : le premier bouton du panneau.
+    const enHaut = await page.evaluate(() => document.querySelector('#travaux-eval-gauche .travaux-panneau-corps button') === document.getElementById('btnVerrouillerEvaluation'));
+    expect(enHaut).toBe(true);
     expect(suivi.dialogues).toEqual([]);
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
@@ -177,7 +180,7 @@ test('Porte #868 · la liste des évaluations passe par le même chemin', async 
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
 
-test('Porte #868 · « Consulter » une évaluation sans copie : le même formulaire, les mêmes outils, le cadenas visible', async ({ page }) => {
+test('Porte #868 · « Consulter » une évaluation sans copie : le même formulaire, les mêmes outils, le verrou visible', async ({ page }) => {
     // Relecture croisée de Cowork (15 sept., 1.142.0) : le changelog promettait ce cas, aucun essai ne le jugeait.
     const suivi = await monter(page);
     // Une évaluation ENREGISTRÉE, sans copie, pour « Analyse 1 » — posée dans cet essai seulement : les autres
@@ -197,19 +200,14 @@ test('Porte #868 · « Consulter » une évaluation sans copie : le même formul
     await page.evaluate((s) => document.querySelector(s).click(), selecteur);
 
     await attendreSansCopie(page, 'p868-1');
-    // Le chargement d'une évaluation enregistrée montre le cadenas : on l'attend, c'est la fin du chargement.
-    await page.waitForFunction(() => {
-        const b = document.getElementById('btnVerrouPalette');
-        return !!b && b.style.display !== 'none';
-    }, null, { timeout: 10000 });
+    // La fin du chargement : l'évaluation enregistrée devient celle du formulaire.
+    await page.waitForFunction(() => !!window.evaluationEnCours && window.evaluationEnCours.idModification === 'EVAL868' && !window._chargementsEvaluationEnCours, null, { timeout: 10000 });
     expect(sansModeNiCopie(await lireEtat(page))).toEqual(ETAT_SANS_COPIE);
-    const cadenasDansLEnTete = await page.evaluate(() => !!document.querySelector('#travaux-eval-gauche .travaux-panneau-header #btnVerrouPalette'));
-    expect(cadenasDansLEnTete).toBe(true);
     expect(suivi.dialogues).toEqual([]);
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
 
-test('Porte #868 · sans copie, puis avec, puis sans : un seul cadenas, une seule sous-barre, chaque fois le bon élève', async ({ page }) => {
+test('Porte #868 · sans copie, puis avec, puis sans : un seul verrou, une seule sous-barre, chaque fois le bon élève', async ({ page }) => {
     const suivi = await monter(page);
     await evaluerDepuisLeProfil(page, 'p868-1');
     await attendreSansCopie(page, 'p868-1');
@@ -229,8 +227,8 @@ test('Porte #868 · sans copie, puis avec, puis sans : un seul cadenas, une seul
     expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
 });
 
-// LOT C DE L'ENREGISTREMENT (D1) — « Enregistrer » devient « Verrouiller l'évaluation », et « Déverrouiller
-// l'évaluation » sous le verrou : le plus long des deux libellés, sur les deux surfaces (palette « Paramètres »
+// LOT C DE L'ENREGISTREMENT (D1) — « Enregistrer » devient « Verrouiller », et « Déverrouiller » sous le verrou
+// (mots du 2 nov. 2026, une seule forme, cadenas compris) : le plus long des deux libellés, sur les deux surfaces (palette « Paramètres »
 // avec copie, formulaire sans copie), à 360, 768, 1024 et 1180 px. Il tient dans sa ligne sans être coupé, ne
 // passe pas sous le témoin commun (lot B, affiché en échec : sa plus grande forme), et ne pousse pas la barre :
 // le bouton ↺ reste sur la même ligne, et le bouton reste dans son panneau. ⚠ Mesuré le 27 sept. : à 360 px avec
@@ -238,7 +236,7 @@ test('Porte #868 · sans copie, puis avec, puis sans : un seul cadenas, une seul
 // libellé (bouton de 152 px dans les deux cas) : ce n'est pas le libellé, la mesure se fait donc contre le panneau.
 for (const largeur of [360, 768, 1024, 1180]) {
     for (const avecCopie of [true, false]) {
-        test(`lot C · « Déverrouiller l'évaluation » à ${largeur} px, ${avecCopie ? 'avec' : 'sans'} copie : entier, hors du témoin, sur sa ligne`, async ({ page }) => {
+        test(`lot C · « Déverrouiller » à ${largeur} px, ${avecCopie ? 'avec' : 'sans'} copie : entier, hors du témoin, sur sa ligne`, async ({ page }) => {
             await page.setViewportSize({ width: largeur, height: { 360: 740, 768: 1024, 1024: 768, 1180: 820 }[largeur] });
             const suivi = await monter(page);
             await evaluerDepuisLeProfil(page, avecCopie ? 'p868-2' : 'p868-1');
@@ -262,7 +260,7 @@ for (const largeur of [360, 768, 1024, 1180]) {
                     dansSonPanneau: r.left >= panneau.left - 1 && r.right <= panneau.right + 1
                 };
             });
-            expect(m).toEqual({ texte: 'Déverrouiller l\'évaluation', visible: true, coupe: false, sousLeTemoin: false, memeLigne: true, dansSonPanneau: true });
+            expect(m).toEqual({ texte: 'Déverrouiller', visible: true, coupe: false, sousLeTemoin: false, memeLigne: true, dansSonPanneau: true });
             expect(suivi.erreurs, suivi.erreurs.join(' | ')).toEqual([]);
         });
     }
