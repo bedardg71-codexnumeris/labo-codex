@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 1er NOVEMBRE 2026 : TES TAMPONS PERSONNALISÉS RESTENT, CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : après un rechargement, tes noms de tampons et tes images restent, et les tampons par défaut que tu as retirés ne reviennent plus. Une image SVG se garde dans la bibliothèque, et « Dans ta palette » montre son aperçu. Ce que tu as vécu est reproduit au banc : dans le moteur de Safari, un rechargement remettait les noms par défaut, et « Enregistrer » les écrivait ensuite pour de bon.
+
+**Ce qui reste à toi** : d'ici la mise en ligne, ne personnalise plus tes tampons : chaque « Enregistrer » après un rechargement réécrit les noms par défaut. Ensuite, une fois sur l'iPad : retirer de nouveau tes tampons par défaut, retaper tes noms s'ils sont revenus au défaut, et refaire « Garder » pour une entrée de bibliothèque qui a le mauvais nom ou la mauvaise image. Tes images n'ont pas à être reposées. Porte terrain : `plans de travail/PORTES-TERRAIN-2026-11-01-tampons-masques-et-bibliotheque.md`. Cowork te soumettra la question du tampon gardé avant d'être personnalisé (#1216).
+
+**Vérifié comment** : le cycle mesuré avant et après dans WebKit et Chrome, à 1180 × 820 ; 14 essais neufs verts dans les deux ; Vitest entier vert (10 615) ; 7 specs voisines vertes dans WebKit ; 20 changements volontaires du code, tous attrapés, dont 1 après la réécriture d'un essai qui ne prouvait rien. Pas encore : le vrai iPad, tes vraies données, la vérification complète (celle du soir). Pas reproduit : tes tampons créés absents des deux colonnes. Au banc ils y sont, au bas d'une longue liste.
+
 📝 **LE 1er NOVEMBRE 2026 : LA PALETTE RÉTROACTION COMPACTE, CODÉE, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : dans Évaluer, Générale, Spécifique et Bilan forment une bande, toujours entiers. « Copier tout » descend au pied. Le compte de mots passe dans le coin du champ. Les options se replient sous une ligne qui les résume (« Options : sans contexte · note chiffrée »). Le champ de rétroaction passe de 82 à 170 px hors plein écran, de 443 à 531 en plein écran. La copie libre entre les palettes revient de 272 à 432 pt : Paramètres retrouve sa largeur de l'automne, et Évaluation se pose contre la Rétroaction.
