@@ -99,6 +99,7 @@ async function monter(page, { statutRemise = 'evalue' } = {}) {
 const base = (page) => page.evaluate((T) => window.db.getSync(T + '_evaluationsSauvegardees', []).find(e => e.id === 'EV959'), T);
 
 async function laisserPasserLesChargeurs(page) {
+    // pause-gardee : la neutralité du chargeur : ouvrir n'écrit rien. Ce que l'essai observe, c'est cette fenêtre : un constat d'absence
     await page.waitForTimeout(3500);
     await page.waitForFunction(() => !window._timerAutoSave && !window._modifierEvaluationEnCours, null, { timeout: 10000 });
 }

@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -53,7 +54,6 @@ const dossierCaptures = process.env.CAPTURES_1156 || null;
 //     `denotation` retirée de `FAMILLES_TAXONOMIQUES`                                             → ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
-const pause = (page, ms) => page.waitForTimeout(ms);
 const FAMILLES = {
     productions: { sel: '#modalBibliothequeProductions', sousSection: 'productions', action: 'afficherBibliothequeProductions' },
     pratiques: { sel: '#modalBibliothequePratiques', sousSection: 'pratiques-notation', action: 'afficherBibliothequePratiques' }
@@ -64,13 +64,14 @@ const PHRASE_EXEMPLAIRE = 'Son exemplaire de ta bibliothèque reste.';
 async function ouvrirDemo(page, famille, largeur, hauteur) {
     page.on('dialog', async (d) => { await d.accept(); });
     await page.setViewportSize({ width: largeur, height: hauteur });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1500);
+    await attendreRepos(page);
     await page.evaluate((s) => naviguerVers('conception', s), FAMILLES[famille].sousSection);
-    await pause(page, 900);
+    await attendreRepos(page);
     // La fenêtre du codex (#1007) a ses propres bancs ; les questions de l'app sont relevées ici.
     await page.evaluate(() => {
         Codex.proposerAvantSuppression = async () => true;
@@ -729,7 +730,7 @@ test('captures pour Grégoire : productions et pratiques, Mac 1440 clair et somb
             await semerProductions(page, [productionFictive('PROD_BANC_BIBLIO', 'Production fictive de la bibliothèque')]);
         } else {
             await page.evaluate((s) => naviguerVers('conception', s), FAMILLES.pratiques.sousSection);
-            await pause(page, 900);
+            await attendreRepos(page);
         }
         await ouvrirBibliotheque(page, famille);
         const premiere = colonne(page, famille, 'trimestre').locator('.biblio2-liste > .biblio2-rangee').nth(1);
@@ -737,13 +738,13 @@ test('captures pour Grégoire : productions et pratiques, Mac 1440 clair et somb
         for (const sombre of [false, true]) {
             await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
             await colonne(page, famille, 'trimestre').locator('.biblio2-liste > .biblio2-rangee').first().locator('.biblio2-kebab').click();
-            await pause(page, 300);
+            await attendreRepos(page);
             await page.screenshot({ path: path.join(dossierCaptures, `${famille}-mac-1440-${sombre ? 'sombre' : 'clair'}.png`) });
             await page.keyboard.press('Escape');
         }
         await page.evaluate(() => document.body.classList.toggle('mode-clair', true));
         await page.setViewportSize({ width: 820, height: 1180 });
-        await pause(page, 400);
+        await attendreRepos(page);
         await page.screenshot({ path: path.join(dossierCaptures, `${famille}-ipad-820-clair.png`) });
         await page.keyboard.press('Escape');
         await page.keyboard.press('Escape');

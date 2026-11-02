@@ -122,6 +122,7 @@ const etat = (page) => page.evaluate((T) => ({
 
 /** Toutes les minuteries des chargeurs (150 ms + 8 × 250 ms au pire) passées, et l'auto-save écrit. */
 async function laisserPasserLesChargeurs(page) {
+    // pause-gardee : aucun chargeur ne pose la cartouche de la production : un constat d'absence
     await page.waitForTimeout(3500);
     await page.waitForFunction(() => !window._timerAutoSave && !window._modifierEvaluationEnCours, null, { timeout: 10000 });
 }

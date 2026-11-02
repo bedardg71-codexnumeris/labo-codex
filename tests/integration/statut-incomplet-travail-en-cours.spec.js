@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -27,6 +28,7 @@ async function monter(page) {
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
     page.on('dialog', (d) => { erreurs.push(`dialogue: ${d.message()}`); d.dismiss().catch(() => {}); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.db.ready && window.travauxUI && window.travauxStockage
         && typeof window.travauxUI.ouvrirFichier === 'function', null, { timeout: 30000 });
@@ -120,7 +122,7 @@ async function ouvrirEnEvaluer(page, fichierId) {
 
 // L'enregistrement automatique part 1,5 s après le geste.
 const laisserEnregistrer = async (page) => {
-    await page.waitForTimeout(2200);
+    await attendreRepos(page, { horizon: 2000 });
     await page.waitForFunction(() => !window._timerAutoSave, null, { timeout: 10000 });
 };
 

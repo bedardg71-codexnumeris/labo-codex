@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -23,21 +24,20 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // Noms fictifs. Contexte Playwright neuf à chaque essai.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
-const pause = (page, ms) => page.waitForTimeout(ms);
-
 async function ouvrirDemo(page) {
     page.on('dialog', async (d) => { await d.accept(d.defaultValue()); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
 }
 
 async function ouvrirCadre(page, largeur = 1440) {
     await page.setViewportSize({ width: largeur, height: 900 });
     await page.evaluate(() => { window.afficherSection('calendrier'); window.afficherSousSection('calendrier-trimestre'); });
-    await pause(page, 900);
+    await attendreRepos(page);
 }
 
 /** Ouvre un accordéon fermé par son vrai en-tête. */
@@ -45,7 +45,7 @@ async function deplier(page, id) {
     const ferme = await page.evaluate((id) => document.getElementById(id).classList.contains('ferme'), id);
     if (ferme) {
         await page.locator(`#${id} > .accordeon-header`).click();
-        await pause(page, 600);
+        await attendreRepos(page);
     }
 }
 
@@ -120,7 +120,7 @@ test('Trimestre : le menu ACTIVE le trimestre choisi (son gestionnaire et le rec
     const choix = await autreOption(page, 'selectTrimestreActif');
     expect(choix, 'un autre trimestre à choisir').not.toBeNull();
     await page.locator('#selectTrimestreActif').selectOption(choix);
-    await pause(page, 2500);
+    await attendreRepos(page);
     const apres = await page.evaluate(() => window.db.getSync('trimestreActif', null));
     console.log('TRIMESTRE ACTIF', avant, '→', apres);
     expect(apres).toBe(choix);
@@ -143,7 +143,7 @@ test('Étudiant·es : le menu FILTRE la liste ; « + Nouveau groupe » crée et 
     const lignes = () => page.locator('#v2-listeEtudiants tbody tr').count();
     // « Tous les groupes », puis le groupe de la démo : la liste suit le menu, aller et retour.
     await page.locator('#v2-selectGroupe').selectOption('');
-    await pause(page, 900);
+    await attendreRepos(page);
     const tous = await lignes();
     const choix = await autreOption(page, 'v2-selectGroupe');
     expect(choix, 'la démo a un groupe').not.toBeNull();
@@ -155,11 +155,11 @@ test('Étudiant·es : le menu FILTRE la liste ; « + Nouveau groupe » crée et 
         window.db.setSync(cleE, e.concat([{ ...e[0], da: '9990009', nom: 'Fictif', prenom: 'Ailleurs', groupe: '00099' }]));
         await window.chargerListeEtudiantsV2();
     });
-    await pause(page, 600);
+    await attendreRepos(page);
     const tousPlusUn = await lignes();
     expect(tousPlusUn, 'l’élève d’un autre groupe paraît sous « Tous les groupes »').toBe(tous + 1);
     await page.locator('#v2-selectGroupe').selectOption(choix);
-    await pause(page, 900);
+    await attendreRepos(page);
     console.log('FILTRE', tousPlusUn, '→', await lignes());
     expect(await lignes(), 'le filtre écarte l’élève d’un autre groupe').toBeLessThan(tousPlusUn);
     await expect(page.locator('#v2-selectGroupe')).toHaveValue(choix);
@@ -179,7 +179,7 @@ test('Étudiant·es : le menu FILTRE la liste ; « + Nouveau groupe » crée et 
 
     // « + Nouveau groupe » : la question d'Omnivox (acceptée telle quelle), puis le menu choisit le groupe neuf.
     await page.locator('#accordeon-groupe-etudiants .rangee-selection-nouveau').click();
-    await pause(page, 900);
+    await attendreRepos(page);
     const choisi = await page.locator('#v2-selectGroupe').inputValue();
     expect(choisi, 'le groupe neuf est choisi').not.toBe('');
 });
@@ -194,14 +194,14 @@ for (const a of ACCORDEONS.filter(x => x.fiche)) {
         const choix = await autreOption(page, a.menu);
         if (choix) {
             await page.locator('#' + a.menu).selectOption(choix);
-            await pause(page, 900);
+            await attendreRepos(page);
             expect(await visible(page, a.fiche), 'la fiche s’ouvre').toBe(true);
             await expect(page.locator('#' + a.menu)).toHaveValue(choix);
         }
         await expect(page.locator(`#${a.id} label[for="${a.menu}"]`), 'libellé au lecteur d’écran').toHaveClass(/u-lecteur-ecran/);
 
         await page.locator(`#${a.id} .rangee-selection-nouveau`).click();
-        await pause(page, 900);
+        await attendreRepos(page);
         expect(await visible(page, a.fiche), 'la création s’ouvre').toBe(true);
     });
 }
@@ -215,9 +215,9 @@ test('Groupe-cours : le résumé (complétude) passe sous la rangée quand une f
     const choix = await page.evaluate(() => ([...document.getElementById('v2-selectGroupeCours').options].find(o => o.value) || {}).value || null);
     expect(choix, 'la démo a un groupe-cours').not.toBeNull();
     await page.locator('#v2-selectGroupeCours').selectOption('');
-    await pause(page, 600);
+    await attendreRepos(page);
     await page.locator('#v2-selectGroupeCours').selectOption(choix);
-    await pause(page, 900);
+    await attendreRepos(page);
     const resume = page.locator('#v2-carteResumeGroupeCours');
     await expect(resume).toBeVisible();
     await expect(resume).toContainText(/Complet|configurés/);
@@ -246,7 +246,7 @@ test('Règle 5 · un nom de programme importé entre ÉCHAPPÉ dans le résumé 
             { da: '999000' + (i + 1), nom: 'Fictif', prenom, groupe: '00001', coursId, programme: '<img src=x id=programme-pirate>' })));
         await window.chargerListeEtudiantsV2();
     });
-    await pause(page, 600);
+    await attendreRepos(page);
     const r = await page.evaluate(() => ({
         balise: document.querySelectorAll('#v2-topProgrammes img, #programme-pirate').length,
         texte: (document.getElementById('v2-topProgrammes') || {}).textContent || ''
@@ -261,7 +261,7 @@ test('Carte d’alignement : le couple bouton + menu a l’apparence de la rang�
     await ouvrirDemo(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.evaluate(() => naviguerVers('conception', 'carte'));
-    await pause(page, 1500);
+    await attendreRepos(page);
     const m = await page.evaluate(() => {
         const s = document.getElementById('planif-liste-cartes');
         const b = document.getElementById('planif-btn-bibliotheque');
@@ -294,6 +294,6 @@ test('Carte d’alignement : le couple bouton + menu a l’apparence de la rang�
     expect(m.actionsDansLaBande, '« Actions ▾ » hors de la bande (DOM)').toBe(false);
     expect(m.actionsApresLaBande, '« Actions ▾ » hors de la bande (à l’œil)').toBe(true);
     await page.locator('#planif-btn-actions').click();
-    await pause(page, 400);
+    await attendreRepos(page);
     await expect(page.locator('#planif-actions-dropdown')).toBeVisible();
 });

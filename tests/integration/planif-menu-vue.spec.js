@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -41,12 +42,14 @@ async function ouvrirCarte(page) {
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     page.setDefaultTimeout(15000);
 
+    await suivreLesReactions(page);
+
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForFunction(() => window.dbReady === true, null, { timeout: 20000 });
-    await page.waitForTimeout(800);
+    await attendreRepos(page);
     await page.evaluate(() => window.naviguerVers('conception', 'carte'));
-    await page.waitForTimeout(1200);
+    await attendreRepos(page);
 
     await page.evaluate(() => {
         window.planificationCarte.injecterNoeuds([
@@ -57,7 +60,7 @@ async function ouvrirCarte(page) {
             { id: 'mv_e', type: 'evaluation', titre: 'Évaluation Epsilon', x: 630, y: 780, parent: 'mv_l' }
         ]);
     });
-    await page.waitForTimeout(500);
+    await attendreRepos(page);
     // Le popup du mode démo ou un bandeau peuvent couvrir le bas de l'écran.
     await page.evaluate(() => { document.getElementById('transition-bandeau')?.remove(); });
     return erreurs;

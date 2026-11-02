@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -38,11 +39,12 @@ function brancher(page) {
 }
 
 async function ouvrirDemo(page) {
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
     await page.evaluate(() => { window.__toasts = [];
         new MutationObserver((ms) => ms.forEach(m => m.addedNodes.forEach(n => {
             if (n.nodeType === 1 && n.classList.contains('notification-avec-icone')) window.__toasts.push(n.innerText.replace(/\s+/g, ' ').trim());
@@ -55,18 +57,18 @@ const lireGrille = (page, id) => page.evaluate((id) =>
 
 async function ouvrirGrille(page, choisir) {
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const id = await page.evaluate(choisir);
     expect(id, 'aucune grille de démonstration ne convient').toBeTruthy();
     await page.evaluate((id) => chargerGrillePourModif(id), id);
-    await pause(page, 900);
+    await attendreRepos(page);
     return id;
 }
 
 async function cliquer(page, selecteur) {
     const n = await page.evaluate((s) => { const el = document.querySelector(s); if (!el) return 0; el.click(); return 1; }, selecteur);
     expect(n, 'bouton introuvable : ' + selecteur).toBe(1);
-    await pause(page, 900);
+    await attendreRepos(page);
 }
 
 /** Le geste qui a remplacé « Enregistrer » : le `change` du champ nom (lot E1). */
@@ -76,6 +78,7 @@ async function ecrireLeFormulaire(page, champ = 'nomGrilleTemplate') {
         el.dispatchEvent(new Event('change', { bubbles: true })); return 1;
     }, champ);
     expect(n, 'champ introuvable : ' + champ).toBe(1);
+    // pause-gardee : le cas de ce banc : l'écriture du formulaire ne défait rien. Une écriture tardive qui défait n'a aucun signal : un constat d'absence
     await pause(page, 900);
 }
 const premiereGrille = () => (db.getSync(cle('grillesTemplates'), []) || []).find(g => (g.criteres || []).length >= 2)?.id;
@@ -126,7 +129,7 @@ test('#957 — sous-critères : ajouter, modifier, supprimer, puis « Enregistre
         const el = document.querySelector(`[data-on-change="modifierSousCritereHandler"][data-grille-id="${id}"][data-critere-index="${idx}"][data-sc-index="0"][data-champ="nom"]`);
         el.value = 'Nom fictif du banc 957'; el.dispatchEvent(new Event('change', { bubbles: true }));
     }, { id, idx });
-    await pause(page, 700);
+    await attendreRepos(page);
     expect((await lireGrille(page, id)).criteres[idx].sousCriteres[0].nom).toBe('Nom fictif du banc 957');
     await ecrireLeFormulaire(page);
     expect((await lireGrille(page, id)).criteres[idx].sousCriteres[0].nom, 'modification d\'un sous-critère défaite par « Enregistrer »').toBe('Nom fictif du banc 957');
@@ -150,7 +153,7 @@ test('#957 — la liste du français écrit (codes 1 à 10), puis « Enregistrer
     // resynchronisait déjà l'objet mémoire). Le geste sous examen est le bouton qui suit.
     await page.evaluate(({ id, idx }) => modifierCritereGrille(id, idx, 'type', 'algorithmique'), { id, idx });
     await page.evaluate((id) => chargerGrillePourModif(id), id);
-    await pause(page, 900);
+    await attendreRepos(page);
     await cliquer(page, `[data-action="initialiserSousCriteresParDefaut"][data-param="${id}"][data-param2="${idx}"]`);
     expect((await lireGrille(page, id)).criteres[idx].sousCriteres.length).toBe(10);
     await ecrireLeFormulaire(page);
@@ -182,6 +185,7 @@ test('#957 — un geste qui passait par l\'objet mémoire (type de la grille) ne
         s.value = opt.value; s.dispatchEvent(new Event('change', { bubbles: true }));
         return opt.value;
     });
+    // pause-gardee : changer le type ne défait pas l'ajout : un constat d'absence
     await pause(page, 900);
     const apres = await lireGrille(page, id);
     expect(apres.type).toBe(nouveauType);
@@ -198,22 +202,22 @@ test('#957 — le principe : une écriture inconnue en base survit à « Enregis
     await page.evaluate((id) => db.modifier(cle('grillesTemplates'), (l) => {
         const g = l.find(x => x.id === id); g.champEcritAilleurs957 = 'présent'; return l;
     }, []), id);
-    await pause(page, 300);
+    await attendreRepos(page);
     await ecrireLeFormulaire(page);
     expect((await lireGrille(page, id)).champEcritAilleurs957, 'grille : la copie mémoire écrasait une écriture faite ailleurs').toBe('présent');
 
     // Échelle
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const eid = await page.evaluate(() => (db.getSync(cle('echellesTemplates'), []) || [])[0]?.id);
     expect(eid).toBeTruthy();
     await page.evaluate((eid) => chargerEchellePourModif(eid), eid);
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate((eid) => db.modifier(cle('echellesTemplates'), (l) => {
         const e = l.find(x => x.id === eid); e.champEcritAilleurs957 = 'présent'; return l;
     }, []), eid);
     await page.evaluate(() => { document.getElementById('nomEchelleTemplate').value = 'Échelle fictive banc 957'; });
-    await pause(page, 300);
+    await attendreRepos(page);
     await ecrireLeFormulaire(page, 'nomEchelleTemplate');
     const e = await page.evaluate((eid) => JSON.parse(JSON.stringify((db.getSync(cle('echellesTemplates'), []) || []).find(x => x.id === eid))), eid);
     expect(e.champEcritAilleurs957, 'échelle : la copie mémoire écrasait une écriture faite ailleurs').toBe('présent');

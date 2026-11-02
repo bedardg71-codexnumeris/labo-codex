@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { remplirNiveauxProposes } from './remplir-niveaux-echelle.js';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -31,11 +32,12 @@ const pause = (page, ms) => page.waitForTimeout(ms);
 
 async function ouvrirDemo(page) {
     page.on('dialog', async (d) => { await d.accept(); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
     await page.evaluate(() => { window.__toasts = [];
         new MutationObserver((ms) => ms.forEach(m => m.addedNodes.forEach(n => {
             if (n.nodeType === 1 && n.classList.contains('notification-avec-icone')) window.__toasts.push(n.innerText.replace(/\s+/g, ' ').trim());
@@ -50,13 +52,13 @@ async function changer(page, selecteur, valeur) {
         el.dispatchEvent(new Event('change', { bubbles: true })); return 1;
     }, { selecteur, valeur });
     expect(n, 'champ introuvable : ' + selecteur).toBe(1);
-    await pause(page, 700);
+    await attendreRepos(page);
 }
 
 async function cliquer(page, selecteur) {
     const n = await page.evaluate((s) => { const el = document.querySelector(s); if (!el) return 0; el.click(); return 1; }, selecteur);
     expect(n, 'élément introuvable : ' + selecteur).toBe(1);
-    await pause(page, 700);
+    await attendreRepos(page);
 }
 
 const temoinSucces = (page) => page.evaluate(() => {
@@ -76,14 +78,14 @@ async function repondre(page, texte) {
         if (!b) return 0; b.click(); return 1;
     }, texte);
     expect(n, 'bouton de la question introuvable : ' + texte).toBe(1);
-    await pause(page, 600);
+    await attendreRepos(page);
 }
 
 test('(a) cartouche existante : le nom et le contexte spécifique s\'écrivent sans bouton, le témoin le dit', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'retroactions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     const cibles = await page.evaluate(() => {
         const out = [];
         for (const g of db.getSync(cle('grillesTemplates'), []) || []) {
@@ -93,7 +95,7 @@ test('(a) cartouche existante : le nom et le contexte spécifique s\'écrivent s
     });
     expect(cibles.length, 'la démonstration doit porter deux cartouches').toBe(2);
     await page.evaluate(({ id, grilleId }) => chargerCartouchePourModif(id, grilleId), cibles[0]);
-    await pause(page, 900);
+    await attendreRepos(page);
 
     expect(await visible(page, '#btnCreerCartouche'), 'fiche existante : pas de « Créer la cartouche »').toBe(false);
     expect(await page.evaluate(() => document.querySelector('[data-action="fermerFicheCartouche"]')?.textContent.trim())).toBe('Fermer');
@@ -104,7 +106,7 @@ test('(a) cartouche existante : le nom et le contexte spécifique s\'écrivent s
 
     // Changer de cartouche, sans autre geste.
     await page.evaluate(({ id, grilleId }) => ouvrirCartoucheDepuisListe(id, grilleId), cibles[1]);
-    await pause(page, 900);
+    await attendreRepos(page);
     const enBase = await page.evaluate(({ id, grilleId }) =>
         JSON.parse(JSON.stringify((db.getSync(cle('cartouches_' + grilleId), []) || []).find(c => c.id === id))), cibles[0]);
     expect(enBase.nom, 'le nom est en base').toBe('Cartouche fictive banc E1');
@@ -122,9 +124,9 @@ test('(a) pratique : le nombre de jetons s\'écrit au changement de champ ; « E
     });
     expect(id, 'la démonstration doit porter une pratique aux jetons réglés dans le formulaire').toBeTruthy();
     await page.evaluate(() => naviguerVers('conception', 'pratiques-notation'));
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate((id) => chargerPratiquePourModif(id), id);
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await page.evaluate(() => !!document.querySelector('[data-action="sauvegarderPratiqueMaterielComplet"]'))).toBe(false);
 
     await changer(page, '#mat-jetons-actif', true);
@@ -140,7 +142,7 @@ test('(b) grille neuve : rien avant « Créer la grille » ; « Fermer » pose l
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const avant = await nbGrilles(page);
 
     await cliquer(page, '[data-action="creerNouvelleGrille"]');
@@ -148,6 +150,8 @@ test('(b) grille neuve : rien avant « Créer la grille » ; « Fermer » pose l
     expect(await page.evaluate(() => document.getElementById('btnCreerGrille').textContent.trim())).toBe('Créer la grille');
     await page.evaluate(() => { document.getElementById('nomGrilleTemplate').value = 'Grille fictive banc E1'; });
     await changer(page, '#nomGrilleTemplate', 'Grille fictive banc E1');
+    // pause-gardee : rien en base avant le clic : un constat d'absence
+    await pause(page, 700);
     expect(await nbGrilles(page), 'rien en base avant le clic').toBe(avant);
 
     // « Fermer » → la question ; « Rester » ne perd rien.
@@ -160,7 +164,7 @@ test('(b) grille neuve : rien avant « Créer la grille » ; « Fermer » pose l
     // Ouvrir une autre grille depuis la liste : la même question.
     const autre = await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || [])[0].id);
     await page.evaluate((id) => { ouvrirGrilleDepuisListe(id); }, autre);   // sans attendre : la question attend sa réponse
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await questionOuverte(page)).toBe('Cette grille n\'est pas encore créée.');
     await repondre(page, 'Rester');
 
@@ -168,18 +172,22 @@ test('(b) grille neuve : rien avant « Créer la grille » ; « Fermer » pose l
     await cliquer(page, '[data-action="fermerFicheGrille"]');
     await repondre(page, 'Quitter sans créer');
     expect(await visible(page, '#conteneurEditionGrille')).toBe(false);
+    // pause-gardee : « Quitter sans créer » n'écrit rien : un constat d'absence
+    await pause(page, 600);
     expect(await nbGrilles(page), 'quitter sans créer n\'écrit rien').toBe(avant);
 
     // Créer, pour de vrai.
     await cliquer(page, '[data-action="creerNouvelleGrille"]');
     await page.evaluate(() => { document.getElementById('nomGrilleTemplate').value = 'Grille fictive banc E1'; });
     await cliquer(page, '#btnCreerGrille');
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await nbGrilles(page), '« Créer la grille » écrit la grille').toBe(avant + 1);
     expect(await page.evaluate(() => window.__toasts)).toContainEqual(expect.stringMatching(/Grille « Grille fictive banc E1 » créée\./));
     expect(await visible(page, '#btnCreerGrille'), 'après la création, la fiche passe en modification').toBe(false);
     // Fermer une fiche existante ne pose aucune question.
     await cliquer(page, '[data-action="fermerFicheGrille"]');
+    // pause-gardee : fermer ne pose plus de question : un constat d'absence
+    await pause(page, 700);
     expect(await questionOuverte(page)).toBe('');
 });
 
@@ -187,7 +195,7 @@ test('(b) échelle et cartouche neuves : la même question, avec leur nom', asyn
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 800);
+    await attendreRepos(page);
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     expect(await visible(page, '#btnCreerEchelle')).toBe(true);
     await page.evaluate(() => { document.getElementById('nomEchelleTemplate').value = 'Échelle fictive banc E1'; });
@@ -196,9 +204,9 @@ test('(b) échelle et cartouche neuves : la même question, avec leur nom', asyn
     await repondre(page, 'Quitter sans créer');
 
     await page.evaluate(() => naviguerVers('conception', 'retroactions'));
-    await pause(page, 800);
+    await attendreRepos(page);
     await cliquer(page, '[data-action="creerNouvelleCartouche"]');
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await visible(page, '#btnCreerCartouche')).toBe(true);
     await page.evaluate(() => { document.getElementById('nomCartouche').value = 'Cartouche fictive banc E1'; });
     await cliquer(page, '[data-action="fermerFicheCartouche"]');
@@ -212,18 +220,20 @@ test('(c) assistant : la grille de base n\'est pas écrite s\'il est abandonné 
     await ouvrirDemo(page);
     const avant = await nbGrilles(page);
     await page.evaluate(() => ouvrirWizardV2(false, null));
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('wizard-v2-btn-creer').textContent.trim())).toBe('Créer la pratique');
     await page.evaluate(() => wizardV2CreerGrilleDemo());
+    // pause-gardee : la grille de base n'est pas écrite avant « Créer la pratique » : un constat d'absence
     await pause(page, 400);
     expect(await nbGrilles(page), 'la grille de base attend « Créer la pratique »').toBe(avant);
     await page.evaluate(() => fermerWizardV2());
+    // pause-gardee : assistant abandonné, aucune grille écrite : un constat d'absence
     await pause(page, 400);
     expect(await nbGrilles(page), 'assistant abandonné : aucune grille écrite').toBe(avant);
 
     const id = await page.evaluate(() => (db.getSync(cle('pratiquesConfigurables'), []) || [])[0].id);
     await page.evaluate((id) => ouvrirWizardV2(true, id), id);
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('wizard-v2-btn-creer').textContent.trim())).toBe('Appliquer à la pratique');
     await page.evaluate(() => fermerWizardV2());
 });
@@ -232,13 +242,15 @@ test('(e) un échec d\'écriture dans la Conception : « Non enregistré – ‹
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const id = await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || []).find(g => (g.criteres || []).length >= 1).id);
     await page.evaluate((id) => chargerGrillePourModif(id), id);
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate(() => { window.__toasts = []; db._setIndexedDB = () => Promise.reject(new Error('panne simulée par le banc E1')); });
     await changer(page, `[data-on-change="modifierCritereGrilleHandler"][data-grille-id="${id}"][data-critere-index="0"][data-champ="nom"]`, 'Nom fictif banc E1');
     expect(await temoinEchec(page)).toBe('Non enregistré – Modifier la grille : le navigateur a refusé l\'écriture.');
+    // pause-gardee : aucun succès, aucun message après l'échec : un constat d'absence
+    await pause(page, 700);
     expect(await temoinSucces(page), 'aucun « Enregistré »').toBe(false);
     expect(await page.evaluate(() => window.__toasts)).toEqual([]);
 });
@@ -247,13 +259,15 @@ test('(e bis) un nom de critère vidé : « Non enregistré : le nom du critère
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const id = await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || []).find(g => (g.criteres || []).length >= 1).id);
     await page.evaluate((id) => chargerGrillePourModif(id), id);
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate(() => { window.__toasts = []; });
     await changer(page, `[data-on-change="modifierCritereGrilleHandler"][data-grille-id="${id}"][data-critere-index="0"][data-champ="nom"]`, '');
     expect(await temoinEchec(page)).toBe('Non enregistré : le nom du critère est obligatoire.');
+    // pause-gardee : un seul message, aucun panneau en double : un constat d'absence
+    await pause(page, 700);
     expect(await page.evaluate(() => window.__toasts), 'un seul message : plus de panneau d\'erreur en double').toEqual([]);
 });
 
@@ -277,11 +291,11 @@ test('placement : « Fermer » et « Créer la … » à 360, 768, 1024 et 1180 
     for (const largeur of [360, 768, 1024, 1180]) {
         await page.setViewportSize({ width: largeur, height: 900 });
         await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-        await pause(page, 600);
+        await attendreRepos(page);
         // Fiche existante, après une écriture : le témoin est visible.
         const id = await page.evaluate(() => (db.getSync(cle('grillesTemplates'), []) || [])[0].id);
         await page.evaluate((id) => chargerGrillePourModif(id), id);
-        await pause(page, 700);
+        await attendreRepos(page);
         await changer(page, '#nomGrilleTemplate', await page.evaluate(() => document.getElementById('nomGrilleTemplate').value));
         const m1 = await mesurer();
         expect(m1.fermer && m1.fermer.l > 0, `${largeur} px : « Fermer » visible`).toBe(true);
@@ -306,7 +320,7 @@ test('R1 : question du doublon annulée pendant qu\'une autre cartouche s\'ouvre
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'retroactions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     // A et B : deux cartouches de la même grille, aux noms différents (la question porte sur
     // les cartouches de la grille de A).
     const paire = await page.evaluate(() => {
@@ -321,7 +335,7 @@ test('R1 : question du doublon annulée pendant qu\'une autre cartouche s\'ouvre
     });
     expect(paire, 'la démonstration doit porter deux cartouches d\'une même grille').toBeTruthy();
     await page.evaluate(({ a, grilleId }) => chargerCartouchePourModif(a.id, grilleId), paire);
-    await pause(page, 900);
+    await attendreRepos(page);
 
     // A prend le nom de B : la question du doublon s'ouvre (sans attendre sa réponse).
     await page.evaluate((nom) => {
@@ -329,17 +343,19 @@ test('R1 : question du doublon annulée pendant qu\'une autre cartouche s\'ouvre
         el.value = nom;
         el.dispatchEvent(new Event('change', { bubbles: true }));
     }, paire.b.nom);
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('modalConflitDoublon')?.classList.contains('actif')),
         'la question du doublon est ouverte').toBe(true);
 
     // Pendant la question, l'usager ouvre B depuis la liste.
     await page.evaluate(({ b, grilleId }) => ouvrirCartoucheDepuisListe(b.id, grilleId), paire);
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('nomCartouche').value)).toBe(paire.b.nom);
 
     // Puis il annule la question.
     await cliquer(page, '#btnDoublonAnnuler');
+    // pause-gardee : annuler la question du doublon ne renomme rien : un constat d'absence
+    await pause(page, 700);
     expect(await page.evaluate(() => document.getElementById('nomCartouche').value),
         'le champ de B affiche toujours le nom de B').toBe(paire.b.nom);
     const noms = await page.evaluate(({ a, b, grilleId }) => {
@@ -357,7 +373,7 @@ test('trouvaille 1 (a) : « Écraser » + une échelle sans niveau — l\'ancien
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 800);
+    await attendreRepos(page);
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     await page.evaluate(() => { document.getElementById('nomEchelleTemplate').value = 'Échelle fictive Aulne E1'; });
     // #574 : un niveau au code ou au nom vide est refusé ; on remplit ceux que la fiche propose.
@@ -386,6 +402,7 @@ test('trouvaille 1 (a) : « Écraser » + une échelle sans niveau — l\'ancien
         const b = [...document.querySelectorAll('#overlay-ui-dialogue button')].find(x => /sans (codex|mettre à jour)/.test(x.textContent));
         if (b) b.click();
     });
+    // pause-gardee : l'ancienne échelle reste, aucune créée ni retirée : un constat d'absence
     await pause(page, 600);
 
     const apres = await page.evaluate((id) => {
@@ -408,7 +425,7 @@ test('rechargement : une grille neuve saisie retient la page ; vide ou déjà cr
         return e.defaultPrevented;
     });
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     expect(await retient(), 'aucune fiche en création : rien ne retient la page').toBe(false);
 
     await cliquer(page, '[data-action="creerNouvelleGrille"]');
@@ -417,6 +434,6 @@ test('rechargement : une grille neuve saisie retient la page ; vide ou déjà cr
     expect(await retient(), 'une saisie en création retient la page').toBe(true);
 
     await cliquer(page, '#btnCreerGrille');
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await retient(), 'une fois créée, la grille s\'enregistre toute seule : rien ne retient la page').toBe(false);
 });

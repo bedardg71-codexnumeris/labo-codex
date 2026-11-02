@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -49,7 +50,6 @@ const dossierCaptures = process.env.CAPTURES_1158 || null;
 //     `aide: 'bibliotheque-fonctionnement'` remis sur la fenêtre des tampons → « l'aide » ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
-const pause = (page, ms) => page.waitForTimeout(ms);
 const SEL = '#modalBibliothequeTampons';
 
 /** La démonstration, puis une copie fictive ouverte dans Annoter (la démo n'en a pas) : la palette paraît. */
@@ -58,11 +58,12 @@ async function ouvrirAnnoter(page, largeur, hauteur) {
     page.on('pageerror', (e) => erreurs.push(e.message));
     page.on('dialog', async (d) => { await d.accept(); });
     await page.setViewportSize({ width: largeur, height: hauteur });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1500);
+    await attendreRepos(page);
     const productionId = await page.evaluate(() => {
         const etudiant = (db.getSync(cle('groupeEtudiants'), []) || [])[0];
         const production = (db.getSync(cle('productions'), []) || [])[0];
@@ -84,7 +85,7 @@ async function ouvrirAnnoter(page, largeur, hauteur) {
         return production.id;
     });
     await page.evaluate(() => window.afficherSection('evaluations'));
-    await pause(page, 1200);
+    await attendreRepos(page);
     await page.evaluate((p) => window.executerActionEval({ value: 'annoter|FT_BANC_1158|' + p }), productionId);
     await expect(page.locator('#evaluations-annoter.sous-section.active')).toHaveCount(1);
     await expect(page.locator('[data-action="tamponsBibliotheque.afficherBibliothequeTampons"]')).toBeVisible();
@@ -452,13 +453,13 @@ test('captures pour Grégoire : les tampons, Mac 1440 clair et sombre (un aperç
     for (const sombre of [false, true]) {
         await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
         await colonne(page, 'trimestre').locator('.biblio2-groupe').first().locator('.biblio2-kebab').click();
-        await pause(page, 300);
+        await attendreRepos(page);
         await page.screenshot({ path: path.join(dossierCaptures, `tampons-mac-1440-${sombre ? 'sombre' : 'clair'}.png`) });
         await page.keyboard.press('Escape');
     }
     await page.evaluate(() => document.body.classList.toggle('mode-clair', true));
     await page.setViewportSize({ width: 820, height: 1180 });
-    await pause(page, 400);
+    await attendreRepos(page);
     await page.screenshot({ path: path.join(dossierCaptures, 'tampons-ipad-820-clair.png') });
     await page.keyboard.press('Escape');
     await expect(page.locator(SEL)).toHaveCount(0);
@@ -466,6 +467,6 @@ test('captures pour Grégoire : les tampons, Mac 1440 clair et sombre (un aperç
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.locator('[data-action="travauxOutils.ouvrirEditionRetroObservations"]').click();
     await page.locator('#travaux-retro-categories .travaux-retro-cat-aide').scrollIntoViewIfNeeded();
-    await pause(page, 300);
+    await attendreRepos(page);
     await page.screenshot({ path: path.join(dossierCaptures, 'gestion-tampons-phrase-mac-1440-clair.png') });
 });

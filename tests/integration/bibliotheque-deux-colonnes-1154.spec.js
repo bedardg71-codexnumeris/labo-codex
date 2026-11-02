@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -52,7 +53,6 @@ const dossierCaptures = process.env.CAPTURES_1154 || null;
 // L'essai « mesure : … exemplaire séparé » n'est pas une défense : il établit un fait (§ 1.2 de la consigne).
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
-const pause = (page, ms) => page.waitForTimeout(ms);
 const SEL_FENETRE = '#modalBibliothequeGrilles';
 const ANCIENS_BOUTONS = [
     'Ajouter mes grilles à la bibliothèque',
@@ -64,13 +64,14 @@ const ANCIENS_BOUTONS = [
 async function ouvrirDemo(page, largeur, hauteur) {
     page.on('dialog', async (d) => { await d.accept(); });
     await page.setViewportSize({ width: largeur, height: hauteur });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1500);
+    await attendreRepos(page);
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 900);
+    await attendreRepos(page);
 }
 
 /** Le geste réel : le bouton « Consulter la bibliothèque » de l'écran des grilles. */
@@ -514,13 +515,13 @@ test('captures pour Grégoire : Mac 1440 clair et sombre (un aperçu et un ⋮ o
     for (const sombre of [false, true]) {
         await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
         await rangee(page, 'trimestre', 'Grille-4').locator('.biblio2-kebab').click();
-        await pause(page, 300);
+        await attendreRepos(page);
         await page.screenshot({ path: path.join(dossierCaptures, `mac-1440-${sombre ? 'sombre' : 'clair'}.png`) });
         await page.keyboard.press('Escape');
     }
 
     await page.evaluate(() => document.body.classList.toggle('mode-clair', true));
     await page.setViewportSize({ width: 820, height: 1180 });
-    await pause(page, 400);
+    await attendreRepos(page);
     await page.screenshot({ path: path.join(dossierCaptures, 'ipad-820-clair.png') });
 });

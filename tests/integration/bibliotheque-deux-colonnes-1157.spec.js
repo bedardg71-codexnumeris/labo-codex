@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -55,13 +56,14 @@ const NOM_DEMO = 'Écriture et littérature (démo)';
 async function ouvrirDemo(page, largeur, hauteur) {
     page.on('dialog', async (d) => { await d.accept(); });
     await page.setViewportSize({ width: largeur, height: hauteur });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1500);
+    await attendreRepos(page);
     await page.evaluate(() => naviguerVers('conception', 'carte'));
-    await pause(page, 1200);
+    await attendreRepos(page);
     await page.evaluate(() => {
         document.getElementById('transition-bandeau')?.remove();
         // La fenêtre du codex (#1007) a ses propres bancs ; les questions de l'app sont relevées ici.
@@ -157,6 +159,7 @@ test('« Garder → » ouvre la fenêtre des métadonnées puis ajoute un exempl
     const rt = () => rangee(page, 'trimestre', NOM_DEMO);
     await expect(rt().locator('.biblio2-passage')).toHaveText('Garder dans ma bibliothèque →', { useInnerText: true });
     await rt().locator('.biblio2-passage').click();
+    // pause-gardee : annulée, rien n'est ajouté : un constat d'absence
     await pause(page, 400);
     expect(await page.evaluate(() => window.__metadonnees)).toEqual([['alignement pédagogique', NOM_DEMO]]);
     expect((await biblio(page)).length, 'annulée : rien n’est ajouté').toBe(avant);
@@ -255,7 +258,7 @@ test('⋮ : les libellés et leurs actions, dans les deux colonnes', async ({ pa
     await ouvrirDemo(page, 1440, 900);
     await semerBibliotheque(page, [carteFictive('ALI_BANC_1', 'Carte fictive Oméga', 2, 1)]);
     await page.evaluate(() => window.planificationCarte.dupliquerCarte(window.planificationDonnees.getIndex().active));
-    await pause(page, 300);
+    await attendreRepos(page);
     await ouvrirBibliotheque(page);
     expect(await rangees(page, 'trimestre').count()).toBe(2);
 
@@ -302,6 +305,7 @@ test('la dernière carte du trimestre ne se supprime toujours pas', async ({ pag
     expect((await indexCartes(page)).cartes.length).toBe(1);
     const menu = await ouvrirMenu(rangee(page, 'trimestre', NOM_DEMO));
     await menu.getByRole('menuitem', { name: 'Supprimer définitivement' }).click();
+    // pause-gardee : la dernière carte reste, aucune question : un constat d'absence
     await pause(page, 500);
     expect((await indexCartes(page)).cartes.length).toBe(1);
     expect(await page.evaluate(() => window.__questions)).toEqual([]);
@@ -411,7 +415,7 @@ test('captures pour Grégoire : la Carte, Mac 1440 clair et sombre (un aperçu e
         carteFictive('ALI_BANC_2', 'Carte fictive à un nœud', 1, 1)
     ]);
     await page.evaluate(() => window.planificationCarte.dupliquerCarte(window.planificationDonnees.getIndex().active));
-    await pause(page, 300);
+    await attendreRepos(page);
     await ouvrirBibliotheque(page);
     // La bulle d'aide du bouton « Consulter la bibliothèque » reste sous la souris et couvrirait une rangée.
     await page.mouse.move(5, 5);
@@ -419,13 +423,13 @@ test('captures pour Grégoire : la Carte, Mac 1440 clair et sombre (un aperçu e
     for (const sombre of [false, true]) {
         await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
         await rangees(page, 'trimestre').first().locator('.biblio2-kebab').click();
-        await pause(page, 300);
+        await attendreRepos(page);
         await page.screenshot({ path: path.join(dossierCaptures, `carte-mac-1440-${sombre ? 'sombre' : 'clair'}.png`) });
         await page.keyboard.press('Escape');
     }
     await page.evaluate(() => document.body.classList.toggle('mode-clair', true));
     await page.setViewportSize({ width: 820, height: 1180 });
-    await pause(page, 400);
+    await attendreRepos(page);
     await page.screenshot({ path: path.join(dossierCaptures, 'carte-ipad-820-clair.png') });
     await page.keyboard.press('Escape');
     await expect(page.locator(SEL)).toHaveCount(0);

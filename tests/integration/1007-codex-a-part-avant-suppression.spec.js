@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -65,6 +66,7 @@ function brancher(page) {
 
 /** Pack démo (le trimestre actif) + un trimestre fictif NON actif, et un groupe-cours de plus. */
 async function demarrer(page) {
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
@@ -82,7 +84,7 @@ async function demarrer(page) {
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
-    await page.waitForTimeout(3000);
+    await attendreRepos(page, { horizon: 3000 });
     await page.evaluate(async ({ T, NOM }) => {
         const registre = db.getSync('trimestres', []);
         registre.push({ id: T, nom: NOM, session: 'A', annee: 2030, actif: false, archive: false });

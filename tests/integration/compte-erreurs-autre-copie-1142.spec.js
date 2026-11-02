@@ -119,6 +119,7 @@ const champ = (page) => page.evaluate(() => (document.getElementById('eval_erreu
 async function attendreCopie(page, da) {
     await page.waitForFunction((da) => window.evaluationEnCours && window.evaluationEnCours.etudiantDA === da
         && !!window.evaluationEnCours.idModification, da, { timeout: 15000 });
+    // pause-gardee : A garde son compte, sa phrase et sa note après le passage à B : un constat d'absence
     await page.waitForTimeout(3500);   // le compteur relancé à +2 s par `afficherPalettesEval`, puis l'enregistrement à +1,5 s
     await page.waitForFunction(() => !window._timerAutoSave, null, { timeout: 10000 });
 }
