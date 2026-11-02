@@ -523,12 +523,15 @@
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '</div>';
         html += '<div class="palette-barre-droite">';
+        html += htmlBoutonVersion('travaux-palette-tampons');
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteTamponsReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
-        // Contenu (réutilise la fonction partagée)
+        // Contenu (réutilise la fonction partagée). La compacte (consigne du 2 nov. 2026, § 3) ne montre que les icônes :
+        // le nom du tampon touché paraît sous la grille, sur des lignes réservées (la palette ne bouge pas).
         html += '<div class="palette-flottante-contenu" id="travaux-tampons-contenu">';
         html += genererContenuTampons();
+        html += '<p class="tampons-nom-actif" id="travaux-tampons-nom-actif" aria-live="polite">' + echapperHtml(TEXTE_AUCUN_TAMPON_ACTIF) + '</p>';
         html += '</div>';
 
         palette.innerHTML = html;
@@ -543,6 +546,8 @@
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
+        appliquerVersionPalette('travaux-palette-tampons');
+        _afficherNomTamponActif();
         majEtatBtnToggle('btn-toggle-tampons', true);
     }
 
@@ -1597,6 +1602,17 @@
         }
     }
 
+    const TEXTE_AUCUN_TAMPON_ACTIF = 'Touche un tampon\u00a0: son nom para\u00eet ici.';
+
+    /** Sous la grille de Tampons (lue en compacte) : le nom du tampon touché, repris de sa tuile, posé en texte. */
+    function _afficherNomTamponActif() {
+        const zone = document.getElementById('travaux-tampons-nom-actif');
+        if (!zone) return;
+        const tuile = document.querySelector('#travaux-palette-tampons .travaux-autocollant-item.actif .travaux-autocollant-nom');
+        zone.textContent = tuile ? tuile.textContent : TEXTE_AUCUN_TAMPON_ACTIF;
+        zone.classList.toggle('tampon-choisi', !!tuile);
+    }
+
     /**
      * Génère le HTML interne des tampons (symboles + qualité + diagnostic).
      * Utilisé par la colonne droite ancrée ET la palette flottante.
@@ -1626,14 +1642,14 @@
                 var imgSrc = imagesAutocollants[a.id] ? imagesAutocollants[a.id].src : (a.fichier ? DOSSIER_AUTOCOLLANTS + a.fichier : '');
                 var actif = (getAutocollantActif() === a.id) ? ' actif' : '';
                 var racc = obtenirRaccourciPourItem(a.id);
-                var r = '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setAutocollantActif" data-param="' + echapperHtml(a.id) + '" title="' + echapperHtml(a.nom) + (racc ? ' [' + racc + ']' : '') + '">';
+                var r = '<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setAutocollantActif" data-param="' + echapperHtml(a.id) + '" title="' + echapperHtml(a.nom) + (racc ? ' [' + racc + ']' : '') + '" aria-label="' + echapperHtml(a.nom) + '">';
                 if (racc) r += '<span class="raccourci-badge raccourci-badge--coin">' + racc + '</span>';
                 if (imgSrc) {
                     r += '<img src="' + echapperHtml(imgSrc) + '" alt="' + echapperHtml(a.nom) + '">';
                 } else {
                     r += '<span class="travaux-autocollant-sans-image">?</span>';
                 }
-                tuiles.push(r + '<span>' + echapperHtml(a.nom) + '</span></div>');
+                tuiles.push(r + '<span class="travaux-autocollant-nom">' + echapperHtml(a.nom) + '</span></div>');
             });
             return tuiles;
         }
@@ -1644,9 +1660,9 @@
             function tuile(id) {
                 var outil = OUTILS[id];
                 var actif = outilActif === id ? ' actif' : '';
-                tuiles.push('<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + echapperHtml(id) + '" title="' + echapperHtml(outil.nom) + '">'
-                    + '<span style="font-size:24px; color:' + echapperHtml(outil.couleurBouton) + '; font-weight:bold;">' + echapperHtml(outil.icone) + '</span>'
-                    + '<span>' + echapperHtml(outil.nom) + '</span></div>');
+                tuiles.push('<div class="travaux-autocollant-item' + actif + '" data-action="travauxOutils.setOutilActif" data-param="' + echapperHtml(id) + '" title="' + echapperHtml(outil.nom) + '" aria-label="' + echapperHtml(outil.nom) + '">'
+                    + '<span style="font-size:24px; color:' + echapperHtml(outil.couleurBouton) + '; font-weight:bold;" aria-hidden="true">' + echapperHtml(outil.icone) + '</span>'
+                    + '<span class="travaux-autocollant-nom">' + echapperHtml(outil.nom) + '</span></div>');
             }
             ['crochet', 'croix', 'interrogation'].forEach(function(id) {
                 if (elemMasques.indexOf(id) === -1) tuile(id);
@@ -2270,6 +2286,7 @@
         document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item').forEach(item => {
             item.classList.toggle('actif', item.dataset.param === idTuileActive);
         });
+        _afficherNomTamponActif();
 
         // Options extrémités : afficher/masquer selon outil actif + maj boutons pointes
         const sectionFleche = document.getElementById('travaux-options-fleche');

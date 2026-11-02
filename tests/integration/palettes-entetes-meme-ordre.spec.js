@@ -27,7 +27,7 @@ test('les trois en-têtes ont le même ordre', async ({ page }) => {
         if (!document.getElementById('travaux-palette-tampons')) window.travauxOutils.togglePaletteAutocollants();
         if (!document.getElementById('travaux-palette-erreurs-fr')) window.travauxOutils.togglePaletteErreursFrancais();
     });
-    for (const [id, droite] of [['travaux-palette-flottante', ['', '−']], ['travaux-palette-tampons', ['−']], ['travaux-palette-erreurs-fr', ['', '−']]]) {
+    for (const [id, droite] of [['travaux-palette-flottante', ['', '−']], ['travaux-palette-tampons', ['', '−']], ['travaux-palette-erreurs-fr', ['', '−']]]) {
         const e = await lire(page, id);
         expect(e.gauche).toEqual(['SPAN', 'BUTTON']);
         expect(e.ordre).toBe(true);

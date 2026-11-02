@@ -18604,9 +18604,12 @@ tr.ligne-import-ecartee td {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--texte-principal);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    min-width: 0;
+    /* Aucun nom coupé dans la famille (consigne du 2 nov. 2026, § 3) : le nom et le titre de la production reviennent
+       à la ligne dans Paramètres. */
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 .travaux-eval-label-val.travaux-eval-label-production {
     font-weight: 400;
@@ -21027,9 +21030,10 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 .tampons-categorie-nom {
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* Aucun nom coupé (consigne du 2 nov. 2026, § 3) : le titre revient à la ligne, entre les mots, sinon par césure. */
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
 .tampons-categorie-compte {
     display: none;
@@ -21066,7 +21070,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     align-items: center;
     justify-content: center;
     gap: 2px;
-    height: 48px;
+    min-height: 48px; /* un nom sur deux lignes allonge sa rangée, et elle seule */
     padding: 4px 2px;
     cursor: pointer;
     min-width: 0;
@@ -21103,14 +21107,59 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     max-height: none;
 }
 
-.travaux-autocollant-item span:last-child {
+.travaux-autocollant-item .travaux-autocollant-nom {
     font-size: 0.6rem;
     text-align: center;
     line-height: 1.1;
     max-width: 100%;
+    /* Aucun nom coupé (consigne du 2 nov. 2026, § 3) : deux lignes, coupées entre les mots, sinon par césure française
+       (`lang="fr"` sur la page). « Unistructurel », « Multistructurel », « Id. directrice » étaient coupés. */
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+}
+
+/* LA PALETTE TAMPONS EN VERSION COMPACTE (consigne du 2 nov. 2026, § 3), sur le modèle de Codes : les icônes seules, le nom
+   du tampon touché sous la grille, sur deux lignes réservées et collées en bas (la palette ne bouge pas). `!important` :
+   la largeur enregistrée de l'étendue reste en style en ligne, qu'on retrouve en y revenant. */
+#travaux-palette-tampons.tampons-compacte {
+    width: 188px !important;
+    min-width: 188px;
+}
+#travaux-palette-tampons.tampons-compacte .travaux-autocollant-nom {
+    display: none;
+}
+#travaux-palette-tampons.tampons-compacte .travaux-autocollants-grille {
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+}
+#travaux-palette-tampons.tampons-compacte .travaux-autocollant-item {
+    min-height: 44px;
+}
+.tampons-nom-actif {
+    display: none;
+}
+#travaux-palette-tampons.tampons-compacte .tampons-nom-actif {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    height: 34px;
+    margin: 6px 2px 0;
+    color: var(--texte-secondaire);
+    font-size: 12px;
+    line-height: 17px;
+    background: var(--surface-carte, #1a3040);
+    box-shadow: 0 6px 0 6px var(--surface-carte, #1a3040);
+}
+.mode-clair #travaux-palette-tampons.tampons-compacte .tampons-nom-actif {
+    background: #e8f2fd; /* le fond de la palette en clair (.mode-clair .palette-flottante) */
+    box-shadow: 0 6px 0 6px #e8f2fd;
+}
+#travaux-palette-tampons.tampons-compacte .tampons-nom-actif.tampon-choisi {
+    color: var(--texte-principal);
 }
 
 /* --- Modal revision export --- */
@@ -28408,6 +28457,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .palette-flottante .travaux-errfr-nom {
     white-space: normal;
     overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto; /* aucun nom coupé dans la famille (consigne du 2 nov. 2026, § 3) */
     flex: 1 1 auto;
     min-width: 0;
 }

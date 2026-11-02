@@ -45,6 +45,7 @@ for (const vp of FORMATS) {
             expect(await fleches(ANNOTER)).toBeNull();
             expect(await entete(page, CODES)).toEqual(['version', '−']);
             expect(await entete(page, 'travaux-palette-flottante')).toEqual(['version', '−']);
+            expect(await entete(page, 'travaux-palette-tampons')).toEqual(['version', '−']);
             const titre = await page.evaluate((id) => document.querySelector(`#${id} .palette-bouton-version`).title, CODES);
             expect(titre).toBe('Passer à la version compacte');
 
@@ -185,6 +186,92 @@ test.describe('§ 2 — les deux versions, un seul jeu d’actions', () => {
         await page.evaluate(() => document.getElementById('travaux-btn-undo').click());
         await page.waitForFunction(() => document.getElementById('travaux-btn-undo').disabled === true);
         expect(await page.evaluate(() => window.obtenirPreference('paletteAnnotationCompacte'))).toBe(true);
+    });
+});
+
+/** Les noms de Tampons (tuiles et titres de catégorie) qui débordent de leur boîte : un nom coupé ou qui dépasse. */
+const nomsCoupes = (page) => page.evaluate(() => {
+    const p = document.getElementById('travaux-palette-tampons');
+    return [...p.querySelectorAll('.travaux-autocollant-nom, .tampons-categorie-nom')].filter((s) => s.offsetParent).filter((s) => {
+        const boite = s.closest('.travaux-autocollant-item, .tampons-categorie-titre').getBoundingClientRect();
+        const r = s.getBoundingClientRect();
+        return s.scrollWidth > s.clientWidth + 1 || s.scrollHeight > s.clientHeight + 1 || r.left < boite.left - 0.5 || r.right > boite.right + 0.5
+            || getComputedStyle(s).textOverflow === 'ellipsis';
+    }).map((s) => s.textContent);
+});
+
+for (const vp of FORMATS) {
+    test.describe(`§ 3 — Tampons, à ${vp.width} × ${vp.height}`, () => {
+        test.use({ viewport: vp });
+
+        test('l’étendue : aucun nom coupé, tuiles et titres de catégorie ; aucune tuile sous 44 px', async ({ page }) => {
+            await ouvrirAnnoter(page);
+            const m = await page.evaluate(() => {
+                const p = document.getElementById('travaux-palette-tampons');
+                return { compacte: p.classList.contains('tampons-compacte'), largeur: Math.round(p.getBoundingClientRect().width),
+                    noms: p.querySelectorAll('.travaux-autocollant-nom').length, zone: p.querySelector('#travaux-tampons-nom-actif').offsetParent === null };
+            });
+            expect(m.compacte).toBe(false);
+            expect(m.largeur).toBe(200);
+            expect(m.noms).toBeGreaterThan(10);
+            expect(m.zone, 'la zone du nom ne paraît qu’en compacte').toBe(true);
+            expect(await nomsCoupes(page)).toEqual([]);
+            for (const t of await tuiles(page, 'travaux-palette-tampons')) expect(t.h, t.nom).toBeGreaterThanOrEqual(44);
+        });
+
+        test('la compacte : les icônes seules, le nom du tampon touché sous la grille, la palette ne bouge pas', async ({ page }) => {
+            await ouvrirAnnoter(page);
+            await page.evaluate(() => document.querySelector('#travaux-palette-tampons .palette-bouton-version').click());
+            const lire = () => page.evaluate(() => {
+                const p = document.getElementById('travaux-palette-tampons');
+                const z = p.querySelector('#travaux-tampons-nom-actif');
+                const rp = p.getBoundingClientRect(), rz = z.getBoundingClientRect();
+                const sous = document.elementFromPoint(rz.left + 4, rz.top + rz.height / 2);
+                return {
+                    compacte: p.classList.contains('tampons-compacte'), largeur: Math.round(rp.width), hauteur: Math.round(rp.height),
+                    nomsVisibles: [...p.querySelectorAll('.travaux-autocollant-nom')].filter((s) => s.offsetParent).length,
+                    zone: z.textContent, zoneVisible: rz.top >= rp.top && rz.bottom <= rp.bottom + 0.5 && !!sous && sous === z,
+                    bouton: p.querySelector('.palette-bouton-version').title
+                };
+            });
+            const avant = await lire();
+            expect(avant).toMatchObject({ compacte: true, largeur: 188, nomsVisibles: 0, zone: 'Touche un tampon\u00a0: son nom paraît ici.', zoneVisible: true, bouton: 'Passer à la version étendue' });
+            for (const t of await tuiles(page, 'travaux-palette-tampons')) {
+                expect(t.l, t.nom).toBeGreaterThanOrEqual(40);
+                expect(t.h, t.nom).toBeGreaterThanOrEqual(44);
+            }
+            // Le dernier tampon de la palette : la zone dit son nom, en entier, et la palette garde sa hauteur.
+            const nom = await page.evaluate(() => {
+                const ts = [...document.querySelectorAll('#travaux-palette-tampons .travaux-autocollant-item[data-action="travauxOutils.setAutocollantActif"]')];
+                const t = ts[ts.length - 1];
+                t.scrollIntoView({ block: 'nearest' });
+                t.click();
+                return t.querySelector('.travaux-autocollant-nom').textContent;
+            });
+            const apres = await lire();
+            expect(apres.zone).toBe(nom);
+            expect(apres.zoneVisible).toBe(true);
+            expect(apres.hauteur).toBe(avant.hauteur);
+            expect(await page.evaluate(() => window.obtenirPreference('paletteTamponsCompacte'))).toBe(true);
+        });
+    });
+}
+
+test.describe('§ 3 — le nom du tampon passe en texte', () => {
+    test.use({ viewport: FORMATS[0] });
+
+    test('un nom de tampon balisé s’affiche tel quel, sans devenir du HTML', async ({ page }) => {
+        await ouvrirAnnoter(page);
+        const m = await page.evaluate(() => {
+            const p = document.getElementById('travaux-palette-tampons');
+            p.classList.add('tampons-compacte');
+            const t = p.querySelector('.travaux-autocollant-item[data-action="travauxOutils.setAutocollantActif"]');
+            t.querySelector('.travaux-autocollant-nom').textContent = '<img src=x data-piege="1">Soupçon';
+            t.click();
+            const z = p.querySelector('#travaux-tampons-nom-actif');
+            return { texte: z.textContent, piege: !!z.querySelector('[data-piege]') };
+        });
+        expect(m).toEqual({ texte: '<img src=x data-piege="1">Soupçon', piege: false });
     });
 });
 
