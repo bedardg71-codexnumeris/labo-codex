@@ -86,7 +86,9 @@ async function ouvrir(page, { extra = [], cartouche = false, categorisation = fa
     await page.evaluate(() => { const o = document.getElementById('overlay-backup-reminder'); if (o) o.remove(); });
 }
 
-const bascule = (page) => page.evaluate((id) => document.querySelector(`#${id} [data-action="travauxOutils.basculerEvaluationCompacte"]`).click(), EVALUATION);
+const bascule = (page) => page.evaluate((id) => document.querySelector(`#${id} [data-action="travauxOutils.basculerVersionPalette"]`).click(), EVALUATION);
+// Le bouton de version dit ce qu'il fera (consigne du 2 nov. 2026, § 1).
+const VERS_COMPACTE = 'Passer à la version compacte', VERS_ETENDUE = 'Passer à la version étendue';
 
 
 /** Ce qui se voit d'un sélecteur dans la palette : les textes des éléments rendus. */
@@ -140,16 +142,14 @@ test.describe('La palette Évaluation compacte', () => {
             return {
                 compacte: p.classList.contains('evaluation-compacte'),
                 boutons: [...p.querySelectorAll('.palette-flottante-barre button')].map((b) => b.getAttribute('aria-label') || 'replier'),
-                ailleurs: ['travaux-palette-eval-gauche', 'travaux-palette-eval-retro'].map((i) => document.querySelectorAll(`#${i} [data-action$="basculerEvaluationCompacte"]`).length),
-                marques: [...p.querySelectorAll('.palette-flottante-barre button[aria-pressed="true"]')].map((b) => b.getAttribute('aria-label')),
+                ailleurs: ['travaux-palette-eval-gauche', 'travaux-palette-eval-retro'].map((i) => document.querySelectorAll(`#${i} [data-action$="basculerVersionPalette"]`).length),
                 preference: window.obtenirPreference('paletteEvaluationCompacte')
             };
         }, EVALUATION);
         expect(m).toEqual({
             compacte: false,
-            boutons: ['Disposition horizontale', 'Disposition verticale, avec les descriptions', 'Disposition compacte', 'replier'],
+            boutons: [VERS_COMPACTE, 'replier'],
             ailleurs: [0, 0],
-            marques: ['Disposition verticale, avec les descriptions'],
             preference: false
         });
         expect((await visibles(page, '.eval-critere-description')).length).toBe(5);
@@ -169,7 +169,7 @@ test.describe('La palette Évaluation compacte', () => {
             const p = document.getElementById(id);
             return {
                 largeur: p.getBoundingClientRect().width,
-                marques: [...p.querySelectorAll('.palette-flottante-barre button[aria-pressed="true"]')].map((b) => b.getAttribute('aria-label')),
+                version: p.querySelector('.palette-bouton-version').getAttribute('aria-label'),
                 cartes: ['c0', 'c1', 'c2', 'c3'].map((c) => {
                     const menu = document.getElementById('eval_' + c);
                     const carte = menu.closest('.eval-critere-carte').getBoundingClientRect();
@@ -180,7 +180,7 @@ test.describe('La palette Évaluation compacte', () => {
             };
         }, EVALUATION);
         expect(lignes.largeur).toBe(316);
-        expect(lignes.marques).toEqual(['Disposition compacte']);
+        expect(lignes.version).toBe(VERS_ETENDUE);
         for (const c of lignes.cartes) expect(c).toEqual({ hauteur: 46, menu: 120, aDroite: 8, memeLigne: true, cibleMenu: true });
 
         await bascule(page);
@@ -278,7 +278,7 @@ test.describe('La palette Évaluation compacte', () => {
         await ouvrir(page);
         await bascule(page);
         await page.waitForFunction(() => window.db.getSync('preferencesUtilisateur', {}).paletteEvaluationCompacte === true);
-        expect(await page.evaluate(() => window.obtenirPreference('dispositionPaletteCodes'))).toBe('v');
+        expect(await page.evaluate(() => window.obtenirPreference('dispositionPaletteCodes'))).toBe('etendue');
         await page.reload();
         await ouvrir(page, { recharger: true });
         expect(await page.evaluate((id) => document.getElementById(id).classList.contains('evaluation-compacte'), EVALUATION)).toBe(true);
@@ -412,43 +412,11 @@ test.describe('La palette Évaluation compacte', () => {
         expect((await bulle(page)).texte).toBe(DESCRIPTIONS.Plausibilité);
     });
 
-    test('en bandeau et repliée, la compacte s’applique et un seul élément défile ; ↕ ramène les descriptions', async ({ page }) => {
+    test('repliée, la compacte s’applique et un seul élément défile ; le bouton ramène les descriptions', async ({ page }) => {
         await ouvrir(page);
         await bascule(page);
-        await page.evaluate((id) => window.travauxOutils.layoutPaletteH(id), EVALUATION);
-        const bandeau = await page.evaluate((id) => {
-            const p = document.getElementById(id);
-            const zone = p.parentElement.getBoundingClientRect();
-            return {
-                compacte: p.classList.contains('evaluation-compacte'),
-                largeur: Math.round(p.getBoundingClientRect().width),
-                attendue: Math.round(zone.width - 24),
-                marques: [...p.querySelectorAll('.palette-flottante-barre button[aria-pressed="true"]')].map((b) => b.getAttribute('aria-label')),
-                colonnes: getComputedStyle(document.getElementById('listeCriteresGrille1')).gridTemplateColumns.split(' ').length
-            };
-        }, EVALUATION);
-        expect(bandeau).toMatchObject({ compacte: true, marques: ['Disposition horizontale', 'Disposition compacte'] });
-        expect(bandeau.largeur, '↔ va jusqu’à la largeur de la zone').toBe(bandeau.attendue);
-        expect(bandeau.colonnes).toBeGreaterThan(1);
         expect(await visibles(page, '.eval-critere-description')).toEqual([]);
         expect(await quiPeutDefiler(page)).toEqual(['palette-flottante-contenu']);
-
-        // Quitter la compacte en bandeau : la hauteur se remesure, elle suit les descriptions (#774). En plein écran : il y a la place.
-        await page.evaluate(() => window.travauxUI.togglePleinEcran());
-        await page.evaluate((id) => window.travauxOutils.layoutPaletteH(id), EVALUATION);
-        const bande = () => page.evaluate((id) => {
-            const p = document.getElementById(id);
-            const c = p.querySelector(':scope > .palette-flottante-contenu');
-            return { hauteur: p.getBoundingClientRect().height, deborde: c.scrollHeight > c.clientHeight + 1, plafond: p.parentElement.getBoundingClientRect().height - 24 };
-        }, EVALUATION);
-        const compacte = await bande();
-        expect(compacte.deborde).toBe(false);
-        await bascule(page);
-        const descriptions = await bande();
-        expect(descriptions.hauteur, 'témoin : les descriptions prennent plus de place').toBeGreaterThan(compacte.hauteur);
-        expect(descriptions.deborde || descriptions.hauteur > descriptions.plafond + 0.5, 'la hauteur a suivi, sans dépasser la zone').toBe(false);
-        await bascule(page);
-        await page.evaluate(() => window.travauxUI.togglePleinEcran());
 
         await page.evaluate((id) => window.travauxUI.togglePaletteEvalReplie(id), EVALUATION);
         expect(await quiPeutDefiler(page)).toEqual([]);
@@ -456,19 +424,24 @@ test.describe('La palette Évaluation compacte', () => {
         expect(await page.evaluate((id) => document.getElementById(id).classList.contains('evaluation-compacte'), EVALUATION)).toBe(true);
         expect(await quiPeutDefiler(page)).toEqual(['palette-flottante-contenu']);
 
-        await page.evaluate((id) => window.travauxOutils.layoutPaletteV(id), EVALUATION);
+        await bascule(page);
         expect(await page.evaluate((id) => {
             const p = document.getElementById(id);
-            return { compacte: p.classList.contains('evaluation-compacte'), largeur: p.getBoundingClientRect().width, marques: [...p.querySelectorAll('.palette-flottante-barre button[aria-pressed="true"]')].map((b) => b.getAttribute('aria-label')), preference: window.obtenirPreference('paletteEvaluationCompacte') };
-        }, EVALUATION)).toEqual({ compacte: false, largeur: 316, marques: ['Disposition verticale, avec les descriptions'], preference: false });
+            return { compacte: p.classList.contains('evaluation-compacte'), largeur: p.getBoundingClientRect().width, version: p.querySelector('.palette-bouton-version').getAttribute('aria-label'), preference: window.obtenirPreference('paletteEvaluationCompacte') };
+        }, EVALUATION)).toEqual({ compacte: false, largeur: 316, version: VERS_COMPACTE, preference: false });
     });
 
     test('compacte par-dessus une taille enregistrée : la hauteur suit le contenu, et la taille n’est pas réécrite', async ({ page }) => {
         await ouvrir(page);
         // En plein écran : la zone est assez haute pour que la compacte laisse de la place, donc que sa hauteur puisse se juger.
         await page.evaluate(() => window.travauxUI.togglePleinEcran());
-        await page.evaluate((id) => window.travauxOutils.layoutPaletteV(id), EVALUATION);
-        const pos = () => page.evaluate((id) => localStorage.getItem(id + '-pos'), EVALUATION);
+        // Une palette allongée à la main jusqu'au bas de la zone, et sa taille enregistrée (ce que fait la poignée, #773).
+        await page.evaluate((id) => {
+            const p = document.getElementById(id);
+            p.style.height = (p.parentElement.getBoundingClientRect().height - 24) + 'px';
+            localStorage.setItem(id + '-geometrie', JSON.stringify({ left: 'auto', right: p.style.right, top: p.style.top, width: '', height: p.style.height }));
+        }, EVALUATION);
+        const pos = () => page.evaluate((id) => localStorage.getItem(id + '-geometrie'), EVALUATION);
         const avant = await pos();
         expect(avant).toContain('"height"');
         await bascule(page);
@@ -479,7 +452,7 @@ test.describe('La palette Évaluation compacte', () => {
         }, EVALUATION);
         expect(await pos()).toBe(avant);
         expect(m.deborde).toBe(false);
-        expect(m.hauteur, 'elle suit son contenu, elle ne garde pas la hauteur de ↕').toBeLessThan(m.zone - 60);
+        expect(m.hauteur, 'elle suit son contenu, elle ne garde pas la hauteur posée à la main').toBeLessThan(m.zone - 60);
         expect(parseFloat(m.styleHauteur), 'la taille reste pour le retour aux descriptions').toBeGreaterThan(0);
     });
 
@@ -487,7 +460,7 @@ test.describe('La palette Évaluation compacte', () => {
         // Un nom d'un seul long mot : à 316 pt, c'est ce qui ne laisse plus de place au badge sur la rangée du nom.
         await ouvrir(page, { extra: [{ id: 'cL', nom: 'Anticonstitutionnellement', ponderation: 5, type: 'algorithmique', formule: "nombre d'erreurs / nombre de mots" }] });
 
-        await test.step('à l’ouverture, à 1180 pt : Paramètres à 200 (verdict du 1er nov.), Évaluation à 316, ↔ jusqu’à la zone', async () => {
+        await test.step('à l’ouverture, à 1180 pt : Paramètres à 200 (verdict du 1er nov.), Évaluation à 316', async () => {
             const l = await page.evaluate(() => ({
                 parametres: document.getElementById('travaux-palette-eval-gauche').getBoundingClientRect().width,
                 evaluation: document.getElementById('travaux-palette-eval-droite').getBoundingClientRect().width
@@ -500,11 +473,6 @@ test.describe('La palette Évaluation compacte', () => {
                 return { gaucheAvantEvaluation: g.right <= d.left, evaluationAvantRetro: d.right <= r.left };
             });
             expect(se).toEqual({ gaucheAvantEvaluation: true, evaluationAvantRetro: true });
-            await page.evaluate((id) => window.travauxOutils.layoutPaletteH(id), EVALUATION);
-            const b = await page.evaluate((id) => { const p = document.getElementById(id); return { w: Math.round(p.getBoundingClientRect().width), z: Math.round(p.parentElement.getBoundingClientRect().width - 24) }; }, EVALUATION);
-            expect(b.w).toBe(b.z);
-            expect(b.w).toBeGreaterThan(320);
-            await page.evaluate((id) => window.travauxOutils.layoutPaletteV(id), EVALUATION);
         });
 
         const badgeEntier = () => page.evaluate(() => {

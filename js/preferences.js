@@ -76,10 +76,12 @@
         afficherChainesEtapes: true,
         animationPoints: true,
         chronoEvaluation: false,
-        // La palette Codes (consigne du 1er nov. 2026, partie B) : 'v' (↕, les descriptions), 'h' (↔), 'compacte'.
-        dispositionPaletteCodes: 'v',
-        // La palette Évaluation (consigne du 1er nov. 2026) : la version compacte, indépendante de ↔ (elle s'y applique aussi).
+        // La version des palettes qui en ont deux (consigne du 2 nov. 2026, § 1 ; lues par `travauxOutils.estPaletteCompacte`).
+        // Codes : 'compacte' ou 'etendue' ; 'v' et 'h', écrites par ↕ et ↔ avant le lot, se lisent comme l'étendue.
+        dispositionPaletteCodes: 'etendue',
         paletteEvaluationCompacte: false,
+        paletteAnnotationCompacte: false,
+        paletteTamponsCompacte: false,
         // #321 — « note différée » (couche 1 PRÉN) : masque les notes PAR TRAVAIL
         // pour que la rétroaction passe d'abord. N'altère aucun calcul ni la note
         // finale de session. Défaut false = notes visibles (comportement actuel).

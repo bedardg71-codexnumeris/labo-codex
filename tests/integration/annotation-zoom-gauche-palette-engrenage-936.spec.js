@@ -78,12 +78,15 @@ test('#936 — replier puis déplier la palette Annotation laisse la roue intact
     expect(etat.deplie).toEqual({ roueImg: true, roueTexte: '', bascule: '−' });
 });
 
-test('#936 — replier une palette d’Évaluation ne remplace pas son « ↔ »', async ({ page }) => {
+test('#936 — replier une palette d’Évaluation ne remplace pas son bouton de version', async ({ page }) => {
     await ouvrirApp(page);
     // La palette d'Évaluation vient d'un gabarit de travaux-ui.js ; on en rejoue la barre telle quelle.
     const debut = UI.indexOf('barre.innerHTML = `', UI.indexOf('function creerPaletteEval(')) + 'barre.innerHTML = `'.length; // security-ok: lecture du gabarit source, pas une écriture DOM
     const barre = UI.slice(debut, UI.indexOf('`', debut))
-        .replace(/\$\{id\}/g, 'P').replace(/\$\{[^}]*\}/g, '')
+        .replace(/\$\{id\}/g, 'P')
+        // Le bouton de version (Évaluation) vient de `travauxOutils.htmlBoutonVersion` : un premier bouton témoin à sa place.
+        .replace('${boutonVersion}', '<button class="palette-flottante-toggle palette-bouton-version">V</button>')
+        .replace(/\$\{[^}]*\}/g, '')
         .replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
     const etat = await page.evaluate((barre) => {
         const zone = document.createElement('div');
@@ -94,7 +97,7 @@ test('#936 — replier une palette d’Évaluation ne remplace pas son « ↔ »
         window.travauxUI.togglePaletteEvalReplie('P');
         return { avant, apres: boutons() };
     }, barre);
-    // Témoin : le gabarit rejoué porte bien ↔, ↕ puis −.
-    expect(etat.avant).toEqual(['↔\uFE0E', '↕\uFE0E', '−']);
-    expect(etat.apres).toEqual(['↔\uFE0E', '↕\uFE0E', '+']);
+    // Témoin : le gabarit rejoué porte bien le bouton de version, puis −.
+    expect(etat.avant).toEqual(['V', '−']);
+    expect(etat.apres).toEqual(['V', '+']);
 });

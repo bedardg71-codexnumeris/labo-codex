@@ -44,9 +44,10 @@ describe('↔ et ↕ s’affichent en texte, jamais en emoji', () => {
         expect(fichiers.flatMap(fautives)).toEqual([]);
     });
 
+    // ↔ et ↕ des en-têtes de palettes sont retirés le 2 nov. 2026 (consigne « une même famille ») : reste la double
+    // pointe des Extrémités, dans la palette Annotation (son bouton et sa bulle).
     it('témoin : le banc voit bien les flèches qu’il juge', () => {
         const source = readFileSync(path.join(racine, 'js', 'travaux-outils.js'), 'utf8');
-        expect(source.match(/\\u2194\\uFE0E/g).length).toBeGreaterThanOrEqual(4);
-        expect(source.match(/\\u2195\\uFE0E/g).length).toBeGreaterThanOrEqual(2);
+        expect(source.match(/\\u2194\\uFE0E/g).length).toBeGreaterThanOrEqual(2);
     });
 });

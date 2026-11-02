@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { ouvrirCopie } from './harness/banc-copie-annotation.js';
 
-// CONSIGNE DU 31 OCT. 2026, PARTIE F — MÊME ORDRE AUX TROIS EN-TÊTES : à gauche la poignée, le nom, l'engrenage ;
-// à droite ↔ ↕ − (Annotation : − seul). L'engrenage était à gauche du nom dans Tampons et Codes, et le nom de Codes, centré.
+// CONSIGNE DU 31 OCT. 2026, PARTIE F — MÊME ORDRE AUX TROIS EN-TÊTES : à gauche la poignée, le nom, l'engrenage.
+// L'engrenage était à gauche du nom dans Tampons et Codes, et le nom de Codes, centré.
+// CONSIGNE DU 2 NOV. 2026, § 1 — à droite, le bouton de version (une icône, sans texte) puis « − » ; ↔ et ↕ sont retirés.
 const lire = (page, id) => page.evaluate((id) => {
     const b = document.querySelector(`#${id} .palette-flottante-barre`);
     const r = (el) => el.getBoundingClientRect();
@@ -26,9 +27,7 @@ test('les trois en-têtes ont le même ordre', async ({ page }) => {
         if (!document.getElementById('travaux-palette-tampons')) window.travauxOutils.togglePaletteAutocollants();
         if (!document.getElementById('travaux-palette-erreurs-fr')) window.travauxOutils.togglePaletteErreursFrancais();
     });
-    const fleches = ['↔︎', '↕︎', '−'];
-    // Seule la palette Codes a le bouton de la version compacte, une icône sans texte (consigne du 1er nov. 2026, partie B).
-    for (const [id, droite] of [['travaux-palette-flottante', ['−']], ['travaux-palette-tampons', fleches], ['travaux-palette-erreurs-fr', ['↔︎', '↕︎', '', '−']]]) {
+    for (const [id, droite] of [['travaux-palette-flottante', ['−']], ['travaux-palette-tampons', ['−']], ['travaux-palette-erreurs-fr', ['', '−']]]) {
         const e = await lire(page, id);
         expect(e.gauche).toEqual(['SPAN', 'BUTTON']);
         expect(e.ordre).toBe(true);

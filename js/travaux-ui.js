@@ -5269,7 +5269,7 @@
             // Bouton cadenas compact dans la barre de titre
             const barreParam = paletteG.querySelector('.palette-flottante-barre');
             if (barreParam) {
-                const btnGroup = barreParam.querySelector('div');
+                const btnGroup = barreParam.querySelector('.palette-barre-droite');
                 poserBoutonVerrou(btnGroup || barreParam, !!btnGroup);
             }
 
@@ -5303,7 +5303,7 @@
         if (paletteD) configurerDragPaletteEval('travaux-palette-eval-droite');
         if (paletteR) configurerDragPaletteEval('travaux-palette-eval-retro');
         travauxOutils.poserEvaluationContreRetroaction(paletteD, paletteR);
-        travauxOutils.appliquerDispositionEvaluation();   // après la position restaurée : elle dit si la palette est en bandeau
+        travauxOutils.appliquerVersionPalette('travaux-palette-eval-droite');
 
         // Bloquer la mémorisation pendant le setup pour ne pas écraser les bonnes valeurs
         window._bloquerMemorisation = true;
@@ -5411,7 +5411,7 @@
         }, 2000);
     }
 
-    /** Évaluation, avant le calage et quand la Rétroaction ne lui laisse pas sa place (en bandeau) : 220 du bord, sa place
+    /** Évaluation, avant le calage et quand la Rétroaction déplacée ne lui laisse pas sa place : 220 du bord, sa place
      *  contre l'ancienne Rétroaction de 200. Ouverte à sa largeur (360 depuis le 2 nov. 2026), c'est le calage qui la pose. */
     const DROITE_EVALUATION_PAR_DEFAUT = '220px';
 
@@ -5551,22 +5551,17 @@
         palette.id = id;
         palette.className = 'palette-flottante travaux-palette-eval';
 
-        // Seule la palette Évaluation a sa version compacte (consigne du 1er nov. 2026).
-        const aSaCompacte = id === 'travaux-palette-eval-droite';
-        const titreVertical = aSaCompacte ? 'Disposition verticale, avec les descriptions' : 'Disposition verticale';
-        const boutonCompact = aSaCompacte
-            ? `<button class="palette-flottante-toggle" data-action="travauxOutils.basculerEvaluationCompacte" title="Disposition compacte" aria-label="Disposition compacte">${travauxOutils.ICONE_DISPOSITION_COMPACTE}</button>`
-            : '';
+        // L'en-tête de la famille (consigne du 2 nov. 2026, § 1), le même qu'en Annoter : la poignée et le nom à gauche ;
+        // à droite, le bouton de version (Évaluation seule en a deux : ni Paramètres ni la Rétroaction) et « − ».
+        const boutonVersion = id === 'travaux-palette-eval-droite' ? travauxOutils.htmlBoutonVersion(id) : '';
 
         // Barre de titre (draggable)
         const barre = document.createElement('div');
         barre.className = 'palette-flottante-barre';
         barre.innerHTML = `
-            <span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>${echapperHtml(titre)}</span>
-            <div style="display:flex; gap:2px;">
-                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="${id}" title="Disposition horizontale" aria-label="Disposition horizontale">\u2194\uFE0E</button>
-                <button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="${id}" title="${titreVertical}" aria-label="${titreVertical}">\u2195\uFE0E</button>
-                ${boutonCompact}
+            <div class="palette-barre-gauche"><span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>${echapperHtml(titre)}</span></div>
+            <div class="palette-barre-droite">
+                ${boutonVersion}
                 <button class="palette-flottante-toggle" data-action="travauxUI.togglePaletteEvalReplie" data-param="${id}" title="Replier/Déplier">&#x2212;</button>
             </div>
         `;
@@ -5787,7 +5782,7 @@
         const palette = document.getElementById(paletteId);
         if (!palette) return;
         palette.classList.toggle('replie');
-        // #936 — le bouton de repli, pas le premier de la barre (« ↔ »).
+        // #936 — le bouton de repli, pas le premier de la barre (le bouton de version, sur Évaluation).
         const btn = palette.querySelector('[data-action="travauxUI.togglePaletteEvalReplie"]');
         if (btn) {
             btn.innerHTML = palette.classList.contains('replie') ? '&#x002B;' : '&#x2212;';

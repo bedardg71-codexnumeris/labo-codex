@@ -17481,7 +17481,7 @@ tr.ligne-import-ecartee td {
    défilent plus. Le plafond de 750 px de la liste faisait pis que défiler : il écrasait les
    cartes, dont `overflow: hidden` coupait le contenu (critère algorithmique compris).
    Consigne du 1er nov. 2026 : leurs largeurs étaient écrites sur une seule classe, et `.palette-flottante` les emportait
-   (↔ arrêté à 320). Évaluation s'ouvre à 316 px, la largeur des ébauches : le nom et le menu tiennent sur une ligne.
+   (plafond de 320). Évaluation s'ouvre à 316 px, la largeur des ébauches : le nom et le menu tiennent sur une ligne.
    Paramètres reste à ses 200 px, Rétroaction aussi : c'est la plus petite où ses trois vues tiennent sur une ligne, et le
    but est la place du canevas (verdict du 1er nov. 2026). */
 .palette-flottante.travaux-palette-eval {
@@ -20745,17 +20745,17 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     background: rgba(106, 172, 184, 0.1);
     color: var(--texte-principal, #d0e0e4);
 }
-/* La disposition choisie de la palette Codes (consigne du 1er nov. 2026, partie B). */
-.palette-flottante-toggle.actif {
-    background: var(--bleu-pale);
-    color: var(--texte-principal, #d0e0e4);
-}
 
 .palette-flottante-contenu {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 8px;
+}
+/* Le bouton de version de la famille (consigne du 2 nov. 2026, § 1) : l'icône de la version qu'il donnera. Il ne cède
+   jamais sa place au titre. */
+.palette-bouton-version {
+    flex-shrink: 0;
 }
 
 
@@ -20800,7 +20800,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    poignée absolue part avec le contenu défilé — c'est ce que faisait l'ancien
    indicateur ::after. Une poignée `sticky` a été essayée et écartée : elle
    reste au bout du CONTENU, pas au coin, dès que la palette est plus haute
-   que ce qu'elle contient (disposition ↕ sur une courte liste de codes).
+   que ce qu'elle contient (une palette allongée sur une courte liste de codes).
    `clip-path` en triangle : la zone de toucher (44 px, norme iPad) ne couvre
    que le coin, pas la fin de la dernière ligne de codes ou de tampons. */
 .palette-poignee-redim {
@@ -28265,14 +28265,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    — la liste ne cache rien, et la palette a la hauteur pour ça.
    Scopé à `.palette-flottante` : la colonne droite ancrée garde sa ligne
    unique, elle a la largeur qu'il faut. */
-/* ⚠ NE PAS empiler la liste en `flex-direction: column` : la disposition
-   BANDEAU (le bouton ↔, `layoutPaletteH`) compte sur le `flex-wrap: wrap` pour
-   poser les dix codes en deux lignes, et rien dans le DOM ne distingue les deux
-   dispositions — seule la largeur en style en ligne change. Une première
-   version de ce correctif l'a fait et a rougi `palette-layout-h-hauteur-774`
-   (dix lignes empilées au lieu de deux). Borner sans empiler suffit : en
-   colonne, aucun item ne peut plus dépasser le cadre ; en bandeau, chacun garde
-   sa largeur naturelle. */
+/* Borner suffit : aucun item ne peut plus dépasser le cadre. Une palette élargie
+   à la poignée garde le `flex-wrap: wrap`, et chaque code sa largeur naturelle. */
 .palette-flottante .travaux-errfr-item {
     max-width: 100%;
     min-width: 0;
@@ -28297,7 +28291,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     height: auto !important;
 }
 #travaux-palette-erreurs-fr.codes-compacte .palette-poignee-redim,
-#travaux-palette-erreurs-fr.codes-compacte #travaux-errfr-total-header,
 #travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-nom {
     display: none;
 }
@@ -28306,9 +28299,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 #travaux-palette-erreurs-fr.codes-compacte .palette-barre-gauche {
     gap: 3px;
-}
-#travaux-palette-erreurs-fr.codes-compacte .palette-flottante-titre {
-    white-space: nowrap;
 }
 #travaux-palette-erreurs-fr.codes-compacte .palette-flottante-toggle {
     width: 18px;
@@ -28319,22 +28309,14 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     padding: 8px;
     gap: 8px;
 }
-/* En descriptions, le total a sa ligne sous le nom : le quatrième bouton de la barre lui prend sa place à droite. */
-#travaux-errfr-total-header {
-    display: block;
-    color: var(--texte-secondaire);
-    font-size: 0.7rem;
-    font-weight: 400;
-    letter-spacing: 0;
-    text-transform: none;
+/* LE COMPTE DE CODES TIENT SUR UNE LIGNE (consigne du 2 nov. 2026, § 1) : une pastille, en étendue comme en compacte ; les
+   mots dans sa bulle. Le titre ne revient jamais à la ligne. */
+#travaux-palette-erreurs-fr .palette-flottante-titre {
     white-space: nowrap;
 }
 .travaux-errfr-total-pastille {
-    display: none;
-}
-#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-total-pastille {
     display: inline-block;
-    margin-left: 3px;
+    margin-left: 5px;
     padding: 0 5px;
     border-radius: 8px;
     background: var(--bleu-moyen, #244858);
@@ -28345,7 +28327,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     line-height: 15px;
     text-transform: none;
 }
-#travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-total-pastille.u-hide {
+.travaux-errfr-total-pastille.u-hide {
     display: none;
 }
 #travaux-palette-erreurs-fr.codes-compacte .travaux-errfr-liste {

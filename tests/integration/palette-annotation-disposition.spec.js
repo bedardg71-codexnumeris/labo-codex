@@ -162,7 +162,7 @@ test.describe('La palette d’annotation', () => {
 
     test('une largeur donnée à la poignée (#773) l’emporte', async ({ page }) => {
         await page.addInitScript(() => {
-            localStorage.setItem('travaux-palette-flottante-pos', JSON.stringify({ left: '12px', right: '', top: '12px', width: '240px', height: '' }));
+            localStorage.setItem('travaux-palette-flottante-geometrie', JSON.stringify({ left: '12px', right: '', top: '12px', width: '240px', height: '' }));
         });
         await ouvrirCopie(page);
         expect((await palette(page).boundingBox()).width).toBe(240);

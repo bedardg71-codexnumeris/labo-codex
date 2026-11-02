@@ -523,8 +523,6 @@
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroObservations" title="Personnaliser"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '</div>';
         html += '<div class="palette-barre-droite">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-tampons" title="Disposition horizontale">\u2194\uFE0E</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-tampons" title="Disposition verticale">\u2195\uFE0E</button>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteTamponsReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
@@ -1501,9 +1499,69 @@
         return html;
     }
 
-    // Le bouton compact, le même aux palettes Codes et Évaluation.
-    const ICONE_DISPOSITION_COMPACTE = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>';
+    // LA FAMILLE DES PALETTES (consigne du 2 nov. 2026, § 1) — Annoter et Évaluer : même en-tête, un seul bouton de
+    // version, seulement sur les quatre palettes qui en ont deux. Paramètres et Rétroaction n'en ont pas. ↔ et ↕ sont
+    // retirés (la poignée du coin élargit ou allonge à la main). Le choix est une préférence, lue ici seulement :
+    // les valeurs d'avant le lot (`dispositionPaletteCodes` à 'v' ou 'h', ↕ et ↔) se lisent comme l'étendue, un choix
+    // « compacte » est gardé ; rien n'est réécrit tant qu'on ne touche pas au bouton. Défaut : l'étendue.
+    const ICONE_VERSION_COMPACTE = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>';
+    const ICONE_VERSION_ETENDUE = '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true" fill="currentColor"><rect x="1" y="1.5" width="4" height="4" rx="1"/><rect x="7" y="2.5" width="8" height="2" rx="1"/><rect x="1" y="10.5" width="4" height="4" rx="1"/><rect x="7" y="11.5" width="8" height="2" rx="1"/></svg>';
     const ID_PALETTE_EVALUATION = 'travaux-palette-eval-droite';
+    const VERSIONS_PALETTES = {
+        'travaux-palette-flottante': { pref: 'paletteAnnotationCompacte', classe: 'annotation-compacte' },
+        'travaux-palette-erreurs-fr': { pref: 'dispositionPaletteCodes', classe: 'codes-compacte' },
+        'travaux-palette-tampons': { pref: 'paletteTamponsCompacte', classe: 'tampons-compacte' },
+        [ID_PALETTE_EVALUATION]: { pref: 'paletteEvaluationCompacte', classe: 'evaluation-compacte' }
+    };
+
+    /** La palette s'ouvre-t-elle en compacte ? `true` (Annotation, Tampons, Évaluation) ou 'compacte' (Codes). */
+    function estPaletteCompacte(id) {
+        const v = VERSIONS_PALETTES[id];
+        if (!v || typeof obtenirPreference !== 'function') return false;
+        const lu = obtenirPreference(v.pref);
+        return lu === true || lu === 'compacte';
+    }
+
+    function _texteBoutonVersion(compacte) {
+        return compacte ? 'Passer \u00e0 la version \u00e9tendue' : 'Passer \u00e0 la version compacte';
+    }
+
+    /** Le bouton de version d'une palette, à poser à droite de l'en-tête, avant « − ». Son `title` dit ce qu'il fera. */
+    function htmlBoutonVersion(id) {
+        const compacte = estPaletteCompacte(id);
+        const texte = _texteBoutonVersion(compacte);
+        return '<button class="palette-flottante-toggle palette-bouton-version" data-action="travauxOutils.basculerVersionPalette" data-param="' + echapperHtml(id)
+            + '" title="' + echapperHtml(texte) + '" aria-label="' + echapperHtml(texte) + '">' + (compacte ? ICONE_VERSION_ETENDUE : ICONE_VERSION_COMPACTE) + '</button>';
+    }
+
+    /** La palette porte la version choisie, et son bouton dit l'autre. Rien n'est écrit. */
+    function appliquerVersionPalette(id) {
+        const palette = document.getElementById(id);
+        const v = VERSIONS_PALETTES[id];
+        if (!palette || !v) return;
+        const compacte = estPaletteCompacte(id);
+        const changee = palette.classList.contains(v.classe) !== compacte;
+        palette.classList.toggle(v.classe, compacte);
+        const bouton = palette.querySelector(':scope > .palette-flottante-barre .palette-bouton-version');
+        if (bouton) {
+            const texte = _texteBoutonVersion(compacte);
+            bouton.innerHTML = compacte ? ICONE_VERSION_ETENDUE : ICONE_VERSION_COMPACTE; // security-ok: constante, aucune donnée
+            bouton.title = texte;
+            bouton.setAttribute('aria-label', texte);
+        }
+        if (id === 'travaux-palette-erreurs-fr') _afficherNomCodeActif();
+        if (changee && id === 'travaux-palette-flottante') _regenererContenuAnnotation();
+    }
+
+    /** Le geste du bouton : l'autre version, retenue en préférence (par navigateur, donc par appareil). */
+    function basculerVersionPalette(id) {
+        const v = VERSIONS_PALETTES[id];
+        if (!v) return;
+        const compacte = !estPaletteCompacte(id);
+        const valeur = v.pref === 'dispositionPaletteCodes' ? (compacte ? 'compacte' : 'etendue') : compacte;
+        if (typeof definirPreference === 'function') definirPreference(v.pref, valeur);
+        appliquerVersionPalette(id);
+    }
 
     // Mots de l'ébauche validée (1er nov. 2026, 5 h 39).
     const TEXTE_AUCUN_CODE_ACTIF = 'Touche un code\u00a0: son nom para\u00eet ici.';
@@ -1537,75 +1595,6 @@
             numero.textContent = c.numero + '.';
             zone.append(numero, ' ' + c.nom);
         }
-    }
-
-    function _lireDispositionCodes() {
-        return (typeof obtenirPreference === 'function' && obtenirPreference('dispositionPaletteCodes')) || 'v';
-    }
-
-    /** La palette Codes porte la disposition choisie, et son bouton la montre. Le choix reste en préférence. */
-    function _appliquerDispositionCodes() {
-        const palette = document.getElementById('travaux-palette-erreurs-fr');
-        if (!palette) return;
-        const choisie = _lireDispositionCodes();
-        palette.classList.toggle('codes-compacte', choisie === 'compacte');
-        palette.querySelectorAll('[data-disposition]').forEach((b) => {
-            const estChoisie = b.dataset.disposition === choisie;
-            b.classList.toggle('actif', estChoisie);
-            b.setAttribute('aria-pressed', estChoisie ? 'true' : 'false');
-        });
-        _afficherNomCodeActif();
-    }
-
-    function _choisirDispositionCodes(disposition) {
-        if (typeof definirPreference === 'function') definirPreference('dispositionPaletteCodes', disposition);
-        _appliquerDispositionCodes();
-    }
-
-    /**
-     * La version compacte de la palette Codes. ↔ et ↕ gardent leur géométrie et la posent en quittant la compacte (`layoutPaletteH`,
-     * `layoutPaletteV`) ; la compacte ne touche ni à la position ni aux dimensions enregistrées : sa largeur et sa hauteur
-     * sont dans `styles.css`, le reste revient tel quel si on la quitte.
-     */
-    function choisirCodesCompacte() {
-        _choisirDispositionCodes('compacte');
-    }
-
-    /** ↔ pose la largeur de la zone : au-delà de 320 px, l'ancien plafond des palettes, c'est le bandeau. */
-    function _enBandeau(palette) {
-        return parseFloat(palette.style.width) > 320;
-    }
-
-    /**
-     * La palette Évaluation porte la version choisie, et ses boutons la montrent. La compacte n'est pas une troisième
-     * disposition, comme aux Codes : elle s'applique aussi en bandeau (consigne du 1er nov. 2026, § 2). ↕ dit « avec les
-     * descriptions » et les ramène (`layoutPaletteV`). Sa largeur et sa hauteur sont dans `styles.css`.
-     */
-    function appliquerDispositionEvaluation() {
-        const palette = document.getElementById(ID_PALETTE_EVALUATION);
-        if (!palette) return;
-        const compacte = typeof obtenirPreference === 'function' && obtenirPreference('paletteEvaluationCompacte') === true;
-        const bandeau = _enBandeau(palette);
-        palette.classList.toggle('evaluation-compacte', compacte);
-        const marques = { 'travauxOutils.layoutPaletteH': bandeau, 'travauxOutils.layoutPaletteV': !bandeau && !compacte, 'travauxOutils.basculerEvaluationCompacte': compacte };
-        palette.querySelectorAll(':scope > .palette-flottante-barre [data-action]').forEach((bouton) => {
-            if (!(bouton.dataset.action in marques)) return;
-            bouton.classList.toggle('actif', marques[bouton.dataset.action]);
-            bouton.setAttribute('aria-pressed', marques[bouton.dataset.action] ? 'true' : 'false');
-        });
-    }
-
-    function _choisirEvaluationCompacte(compacte) {
-        if (typeof definirPreference === 'function') definirPreference('paletteEvaluationCompacte', compacte);
-        appliquerDispositionEvaluation();
-    }
-
-    /** Le bouton compact de la palette Évaluation. En bandeau, la hauteur se remesure : elle suit le contenu (#774). */
-    function basculerEvaluationCompacte() {
-        const palette = document.getElementById(ID_PALETTE_EVALUATION);
-        if (!palette) return;
-        _choisirEvaluationCompacte(!palette.classList.contains('evaluation-compacte'));
-        if (_enBandeau(palette)) layoutPaletteH(ID_PALETTE_EVALUATION);
     }
 
     /**
@@ -1748,15 +1737,11 @@
         // il porte la phrase et l'écran qu'il ouvre ne montre qu'elle.
         var titreEngrenage = _copieGouvernee() ? _phraseSourceCodes() : 'Personnaliser';
         html += '<div class="palette-barre-gauche">';
-        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes <span id="travaux-errfr-total-header"></span><span id="travaux-errfr-total-pastille" class="travaux-errfr-total-pastille u-hide"></span></span>';
+        html += '<span class="palette-flottante-titre"><span class="palette-grip" aria-hidden="true" title="Glisser pour déplacer">⠿</span>Codes<span id="travaux-errfr-total-pastille" class="travaux-errfr-total-pastille u-hide"></span></span>';
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.ouvrirEditionRetroErreursFr" title="' + echapperHtml(titreEngrenage) + '"><img src="' + ICONS_DIR + 'icon-gear.svg" alt="" class="outil-svg-icon palette-toggle-icon"></button>';
         html += '</div>';
         html += '<div class="palette-barre-droite">';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteH" data-param="travaux-palette-erreurs-fr" data-disposition="h" title="Disposition horizontale" aria-label="Disposition horizontale">\u2194\uFE0E</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.layoutPaletteV" data-param="travaux-palette-erreurs-fr" data-disposition="v" title="Disposition verticale, avec les descriptions" aria-label="Disposition verticale, avec les descriptions">\u2195\uFE0E</button>';
-        html += '<button class="palette-flottante-toggle" data-action="travauxOutils.choisirCodesCompacte" data-disposition="compacte" title="Disposition compacte" aria-label="Disposition compacte">';
-        html += ICONE_DISPOSITION_COMPACTE;
-        html += '</button>';
+        html += htmlBoutonVersion('travaux-palette-erreurs-fr');
         html += '<button class="palette-flottante-toggle" data-action="travauxOutils.togglePaletteErrFrReplie" title="Replier/D\u00e9plier">\u2212</button>';
         html += '</div></div>';
 
@@ -1777,7 +1762,7 @@
             layout.appendChild(palette);
             configurerDragPalette(palette, layout);
         }
-        _appliquerDispositionCodes();
+        appliquerVersionPalette('travaux-palette-erreurs-fr');
         majEtatBtnToggle('btn-toggle-codes', true);
     }
 
@@ -2268,49 +2253,17 @@
         palette.style.zIndex = _paletteZIndex;
     }
 
-    /**
-     * Disposition horizontale : palette en bandeau (largeur max, hauteur limitée)
-     */
-    function layoutPaletteH(paletteId) {
-        if (paletteId === 'travaux-palette-erreurs-fr') _choisirDispositionCodes('h');   // la compacte quittée d'abord : la mesure ci-dessous lit les descriptions
-        var palette = document.getElementById(paletteId);
-        var conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
-        if (!palette || !conteneur) return;
-        var cRect = conteneur.getBoundingClientRect();
-        palette.style.left = '12px';
-        palette.style.right = 'auto';
-        palette.style.width = (cRect.width - 24) + 'px';
-        // HAUTEUR AU CONTENU, PAS 60 % DE LA ZONE — #774 (6 sept. 2026).
-        // La formule d'origine (`cRect.height * 0.6`) donnait la même bande à une
-        // palette de dix codes qu'à une palette de cent : sur la capture d'iPad de
-        // Grégoire, ses dix codes tenaient en deux lignes et les quatre cinquièmes
-        // du bandeau, vides, couvraient la copie de l'élève. En bandeau, la largeur
-        // est déjà maximale : c'est elle qui décide du nombre de lignes, donc la
-        // hauteur utile se MESURE, elle ne se postule pas.
-        // `height: auto` avant la mesure, et non `''` : la règle
-        // `.palette-flottante[style*="height"] .palette-flottante-contenu` lève le
-        // plafond du contenu sur la présence du mot dans le style en ligne — sans
-        // lui, le contenu serait replafonné le temps de la mesure. La lecture
-        // d'`offsetHeight` force le reflow. La zone reste le plafond dur : une
-        // palette plus haute qu'elle deviendrait insaisissable.
-        palette.style.height = 'auto';
-        palette.style.height = Math.min(palette.offsetHeight, cRect.height - 24) + 'px';
-        sauvegarderPositionPalette(palette);
-        if (paletteId === ID_PALETTE_EVALUATION) appliquerDispositionEvaluation();
-    }
-
     const ID_PALETTE_RETROACTION = 'travaux-palette-eval-retro';
 
     /**
      * Évaluation se pose contre la Rétroaction RÉELLE (consigne du 1er nov. 2026, § 0 bis) : l'ancien
      * `right = '300px'` présumait une Rétroaction de 280 et laissait 88 px vides, pris à la copie. Une position
-     * enregistrée l'emporte. Une Rétroaction déplacée qui ne laisse pas la place (en bandeau, par exemple) : le défaut.
-     * À l'ouverture (`travaux-ui`), et quand ↕ remet la Rétroaction en colonne (2 nov. 2026).
+     * enregistrée l'emporte. Une Rétroaction déplacée qui ne laisse pas la place : le défaut. À l'ouverture (`travaux-ui`).
      */
     function poserEvaluationContreRetroaction(paletteD, paletteR) {
         if (!paletteD || !paletteR) return;
         try {
-            if (localStorage.getItem(paletteD.id + '-pos')) return;
+            if (localStorage.getItem(paletteD.id + SUFFIXE_GEOMETRIE)) return;
         } catch (e) { /* stockage bloqué : rien d'enregistré à respecter */ }
         const zone = paletteD.offsetParent;
         if (!zone) return;
@@ -2319,24 +2272,14 @@
     }
 
     /**
-     * Disposition verticale : palette en colonne droite (200px, hauteur max).
-     * La Rétroaction reprend SA largeur d'ouverture (la feuille de style, 360 bornée par la zone ; 2 nov. 2026), et
-     * Évaluation se recale contre elle : à 200 en dur, un toucher l'aurait ramenée, et enregistrée, à son ancienne largeur.
+     * LA GÉOMÉTRIE D'UNE PALETTE (position et dimensions), par navigateur. Consigne du 2 nov. 2026 (§ 1, « Stock ») :
+     * celle enregistrée avant le lot (`<id>-pos`) est ignorée une fois — chaque palette s'ouvre à ses nouvelles valeurs
+     * par défaut, puis ce qu'on pose à la main est gardé comme avant. Motif : ↕ était le seul geste qui rendait une
+     * palette à sa géométrie d'ouverture, et il part ; une largeur de 200 enregistrée cacherait la Rétroaction à 360, et
+     * une géométrie de bandeau étalerait l'étendue sur la copie. Rien n'est effacé ni réécrit : l'ancienne clé reste
+     * telle quelle, plus rien ne la lit.
      */
-    function layoutPaletteV(paletteId) {
-        if (paletteId === 'travaux-palette-erreurs-fr') _choisirDispositionCodes('v');
-        var palette = document.getElementById(paletteId);
-        var conteneur = document.getElementById('travaux-zone-canvas') || document.getElementById('travaux-conteneur-document');
-        if (!palette || !conteneur) return;
-        var cRect = conteneur.getBoundingClientRect();
-        palette.style.right = '12px';
-        palette.style.left = 'auto';
-        palette.style.width = paletteId === ID_PALETTE_RETROACTION ? '' : '200px';
-        palette.style.height = (cRect.height - 24) + 'px';
-        sauvegarderPositionPalette(palette);
-        if (paletteId === ID_PALETTE_RETROACTION) poserEvaluationContreRetroaction(document.getElementById(ID_PALETTE_EVALUATION), palette);
-        if (paletteId === ID_PALETTE_EVALUATION) _choisirEvaluationCompacte(false);   // « verticale, avec les descriptions »
-    }
+    const SUFFIXE_GEOMETRIE = '-geometrie';
 
     /**
      * Sauvegarde la position d'une palette dans localStorage
@@ -2344,7 +2287,7 @@
     function sauvegarderPositionPalette(palette) {
         if (!palette || !palette.id) return;
         try {
-            localStorage.setItem(palette.id + '-pos', JSON.stringify({
+            localStorage.setItem(palette.id + SUFFIXE_GEOMETRIE, JSON.stringify({
                 left: palette.style.left,
                 right: palette.style.right || '',
                 top: palette.style.top,
@@ -2360,7 +2303,7 @@
     function restaurerPositionPalette(palette) {
         if (!palette || !palette.id) return;
         try {
-            const raw = localStorage.getItem(palette.id + '-pos');
+            const raw = localStorage.getItem(palette.id + SUFFIXE_GEOMETRIE);
             if (!raw) return;
             const pos = JSON.parse(raw);
             if (pos.right && pos.right !== 'auto' && (!pos.left || pos.left === 'auto')) {
@@ -2691,15 +2634,15 @@
             }
         });
 
-        const spanTotal = document.getElementById('travaux-errfr-total-header');
-        if (spanTotal) {
-            spanTotal.textContent = total > 0 ? '(' + _totalCodesEnMots(total) + ')' : '';   // étape 2a
-        }
-        // La version compacte : le même total, en pastille numérique ; les mots dans sa bulle.
+        // Le total, en pastille numérique dans les deux versions ; les mots (étape 2a) dans sa bulle et pour le lecteur
+        // d'écran. Consigne du 2 nov. 2026, § 1 : le compte tient sur une ligne. À 200 px, « (23 erreurs) » à la suite du
+        // nom poussait l'engrenage sur le bouton de version (mesuré) ; sous le nom, il faisait deux lignes.
         const pastilleTotal = document.getElementById('travaux-errfr-total-pastille');
         if (pastilleTotal) {
+            const mots = total > 0 ? _totalCodesEnMots(total) : '';
             pastilleTotal.textContent = total > 0 ? String(total) : '';
-            pastilleTotal.title = total > 0 ? _totalCodesEnMots(total) : '';
+            pastilleTotal.title = mots;
+            if (mots) pastilleTotal.setAttribute('aria-label', mots); else pastilleTotal.removeAttribute('aria-label');
             pastilleTotal.classList.toggle('u-hide', total === 0);
         }
     }
@@ -4043,24 +3986,27 @@
      * Ferme et rouvre les palettes visibles pour refléter les personnalisations.
      * Détecte si les palettes sont ancrées (colonne droite) ou flottantes.
      */
+    /**
+     * Le contenu de la palette Annotation, régénéré sur place (badges de raccourcis, changement de version) : l'en-tête,
+     * son glisser et sa géométrie restent. Le verrou renaît caché, Annuler et Rétablir éteints : on les remet à l'état.
+     */
+    function _regenererContenuAnnotation() {
+        const paletteAnnot = document.getElementById('travaux-palette-flottante');
+        const contenu = paletteAnnot ? paletteAnnot.querySelector('.palette-flottante-contenu') : null;
+        if (!contenu) return;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = genererHTMLPalette();
+        const nouveauContenu = tempDiv.querySelector('.palette-flottante-contenu');
+        if (nouveauContenu) contenu.innerHTML = nouveauContenu.innerHTML;
+        if (typeof window.mettreAJourVerrouAnnotation === 'function') window.mettreAJourVerrouAnnotation();
+        if (window.travauxAnnotation && typeof window.travauxAnnotation.mettreAJourBoutonsHistorique === 'function') {
+            window.travauxAnnotation.mettreAJourBoutonsHistorique();
+        }
+    }
+
     function rafraichirPalettesApresPersonnalisation() {
         // Palette Annotation — rafraîchir les boutons outils et formes (badges raccourcis)
-        const paletteAnnot = document.getElementById('travaux-palette-flottante');
-        if (paletteAnnot) {
-            const contenu = paletteAnnot.querySelector('.palette-flottante-contenu');
-            if (contenu) {
-                // Régénérer le contenu
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = genererHTMLPalette();
-                const nouveauContenu = tempDiv.querySelector('.palette-flottante-contenu');
-                if (nouveauContenu) {
-                    contenu.innerHTML = nouveauContenu.innerHTML;
-                }
-
-                // Le bouton du verrou renaît caché
-                if (typeof window.mettreAJourVerrouAnnotation === 'function') window.mettreAJourVerrouAnnotation();
-            }
-        }
+        _regenererContenuAnnotation();
 
         // Palettes ancrées dans la colonne droite — re-rendre le contenu in-place
         const ancreErrFr = document.getElementById('annot-errfr-contenu');
@@ -4229,13 +4175,10 @@
         restaurerPositionPalette: restaurerPositionPalette,
         focusPalette: focusPalette,
         togglePaletteReplie: togglePaletteReplie,
-        layoutPaletteH: layoutPaletteH,
-        layoutPaletteV: layoutPaletteV,
-        choisirCodesCompacte: choisirCodesCompacte,
-        ICONE_DISPOSITION_COMPACTE: ICONE_DISPOSITION_COMPACTE,
-        appliquerDispositionEvaluation: appliquerDispositionEvaluation,
+        htmlBoutonVersion: htmlBoutonVersion,
+        appliquerVersionPalette: appliquerVersionPalette,
+        basculerVersionPalette: basculerVersionPalette,
         poserEvaluationContreRetroaction: poserEvaluationContreRetroaction,
-        basculerEvaluationCompacte: basculerEvaluationCompacte,
         afficherRaccourcis: afficherRaccourcis,
         // Raccourcis clavier annotation
         obtenirRaccourcisAnnotation: obtenirRaccourcisAnnotation,

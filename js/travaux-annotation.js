@@ -3554,6 +3554,8 @@
 
     window.travauxAnnotation = {
         initialiser: initialiserAnnotation,
+        // La palette Annotation régénère son contenu (version, raccourcis) : Annuler, Rétablir et Supprimer reprennent l'état.
+        mettreAJourBoutonsHistorique: function() { mettreAJourBoutonsUndoRedo(); mettreAJourBoutonSupprimer(); },
         setContext: setContext,
         // Mode
         activerAnnotation: activerAnnotation,

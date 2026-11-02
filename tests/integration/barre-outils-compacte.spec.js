@@ -310,12 +310,17 @@ async function ouvrirCodes(page) {
     await page.evaluate(() => { if (!document.getElementById('travaux-palette-erreurs-fr')) window.travauxOutils.togglePaletteErreursFrancais(); });
     await page.waitForSelector(CODES + ' .travaux-errfr-item');
 }
-const choisirCompacte = (page) => page.evaluate(() => document.querySelector('#travaux-palette-erreurs-fr [data-disposition="compacte"]').click());
+// Le bouton de version de la famille (consigne du 2 nov. 2026, § 1) : un seul, qui bascule.
+const basculerVersion = (page) => page.evaluate(() => document.querySelector('#travaux-palette-erreurs-fr .palette-bouton-version').click());
+const choisirCompacte = (page) => page.evaluate(() => {
+    if (!document.getElementById('travaux-palette-erreurs-fr').classList.contains('codes-compacte')) document.querySelector('#travaux-palette-erreurs-fr .palette-bouton-version').click();
+});
 const lireDisposition = (page) => page.evaluate(() => {
     const p = document.getElementById('travaux-palette-erreurs-fr');
     return {
         compacte: p.classList.contains('codes-compacte'),
-        marque: [...p.querySelectorAll('[data-disposition]')].filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.disposition),
+        // Ce que le bouton de version dit qu'il fera : l'autre version.
+        marque: [p.querySelector('.palette-bouton-version').getAttribute('aria-label') === 'Passer à la version compacte' ? 'etendue' : 'compacte'],
         largeur: Math.round(p.getBoundingClientRect().width), hauteur: p.getBoundingClientRect().height
     };
 });
@@ -329,19 +334,18 @@ const poserAuDoigt = (page) => page.evaluate(() => {
 });
 
 test.describe('La palette Codes compacte', () => {
-    test('par défaut, les descriptions : ↕ est marqué, les noms sont là, et la zone du nom actif ne se voit pas', async ({ page }) => {
+    test('par défaut, l’étendue : les noms sont là, et la zone du nom actif ne se voit pas', async ({ page }) => {
         await ouvrirBarre(page);
         await ouvrirCodes(page);
-        expect(await lireDisposition(page)).toMatchObject({ compacte: false, marque: ['v'], largeur: 200 });
+        expect(await lireDisposition(page)).toMatchObject({ compacte: false, marque: ['etendue'], largeur: 200 });
         const m = await page.evaluate(() => {
             const p = document.getElementById('travaux-palette-erreurs-fr');
             return {
                 nomVisible: p.querySelector('.travaux-errfr-nom').offsetHeight > 0, zone: getComputedStyle(p.querySelector('.travaux-errfr-nom-actif')).display,
-                boutons: [...p.querySelectorAll('.palette-barre-droite button')].map((b) => b.dataset.disposition || 'replier'),
-                tuiles: [...document.querySelectorAll('.palette-flottante')].filter((x) => x.querySelector('[data-disposition="compacte"]')).length
+                boutons: [...p.querySelectorAll('.palette-barre-droite button')].map((b) => b.classList.contains('palette-bouton-version') ? 'version' : 'replier')
             };
         });
-        expect(m).toEqual({ nomVisible: true, zone: 'none', boutons: ['h', 'v', 'compacte', 'replier'], tuiles: 1 });
+        expect(m).toEqual({ nomVisible: true, zone: 'none', boutons: ['version', 'replier'] });
     });
 
     test('compacte : 188 pt, cinq tuiles par rangée à la couleur du code, le numéro en blanc, le nom dans la bulle et l’aria-label', async ({ page }) => {
@@ -404,10 +408,10 @@ test.describe('La palette Codes compacte', () => {
             const past = document.getElementById('travaux-errfr-total-pastille');
             return {
                 auCoin: rc.right <= rt.right && rc.top >= rt.top && rc.width < rt.width / 2, aria: t.getAttribute('aria-label').endsWith(', 1 posé'),
-                pastille: past.textContent, bulle: past.title, pastilleVue: past.offsetHeight > 0, mots: getComputedStyle(document.getElementById('travaux-errfr-total-header')).display
+                pastille: past.textContent, bulle: past.title, pastilleVue: past.offsetHeight > 0
             };
         });
-        expect(m).toMatchObject({ auCoin: true, aria: true, pastille: '1', pastilleVue: true, mots: 'none' });
+        expect(m).toMatchObject({ auCoin: true, aria: true, pastille: '1', pastilleVue: true });
         expect(m.bulle).toMatch(/^1 /);
     });
 
@@ -427,7 +431,7 @@ test.describe('La palette Codes compacte', () => {
         const taille = JSON.stringify({ left: '20px', right: '', top: '12px', width: '300px', height: '340px' });
         await page.evaluate((t) => {
             document.getElementById('travaux-palette-erreurs-fr')?.remove();
-            localStorage.setItem('travaux-palette-erreurs-fr-pos', t);
+            localStorage.setItem('travaux-palette-erreurs-fr-geometrie', t);
             window.travauxOutils.togglePaletteErreursFrancais();
         }, taille);
         await page.waitForSelector(CODES + ' .travaux-errfr-item');
@@ -436,10 +440,10 @@ test.describe('La palette Codes compacte', () => {
         const d = await lireDisposition(page);
         expect(d.largeur).toBe(188);
         expect(d.hauteur).toBeLessThan(hauteurDescriptions); // la hauteur suit la grille, pas la taille enregistrée
-        expect(await page.evaluate(() => localStorage.getItem('travaux-palette-erreurs-fr-pos'))).toBe(taille);
+        expect(await page.evaluate(() => localStorage.getItem('travaux-palette-erreurs-fr-geometrie'))).toBe(taille);
     });
 
-    test('le choix reste à la copie suivante, et survit au vrai rechargement ; ↕ le quitte', async ({ page }) => {
+    test('le choix reste à la copie suivante, et survit au vrai rechargement ; le bouton le quitte', async ({ page }) => {
         await ouvrirBarre(page);
         await ouvrirCodes(page);
         await choisirCompacte(page);
@@ -456,22 +460,10 @@ test.describe('La palette Codes compacte', () => {
         await ouvrirCodes(page);
         expect(await lireDisposition(page)).toMatchObject({ compacte: true, marque: ['compacte'], largeur: 188 });
 
-        await page.evaluate(() => document.querySelector('#travaux-palette-erreurs-fr [data-disposition="v"]').click());
+        await basculerVersion(page);
         const v = await lireDisposition(page);
-        expect(v).toMatchObject({ compacte: false, marque: ['v'], largeur: 200 });
-        expect(await page.evaluate(() => window.obtenirPreference('dispositionPaletteCodes'))).toBe('v');
-    });
-
-    test('↔ quitte la compacte, et sa hauteur est mesurée sur les descriptions (#774)', async ({ page }) => {
-        await ouvrirBarre(page);
-        await ouvrirCodes(page);
-        await choisirCompacte(page);
-        const compacte = (await lireDisposition(page)).hauteur;
-        await page.evaluate(() => document.querySelector('#travaux-palette-erreurs-fr [data-disposition="h"]').click());
-        const h = await lireDisposition(page);
-        expect(h).toMatchObject({ compacte: false, marque: ['h'] });
-        expect(h.largeur).toBeGreaterThan(1000);
-        expect(h.hauteur).toBeLessThan(compacte); // le bandeau : deux lignes de codes, pas la hauteur de la compacte
+        expect(v).toMatchObject({ compacte: false, marque: ['etendue'], largeur: 200 });
+        expect(await page.evaluate(() => window.obtenirPreference('dispositionPaletteCodes'))).toBe('etendue');
     });
 
     /** Une grille aux codes écrits par l'enseignant·e, née avec la marque : sans sous-critère, aucun code (étape 0). */
@@ -590,14 +582,14 @@ test.describe('La zone de travail tient dans l’écran', () => {
         const ancienne = JSON.stringify({ left: '20px', right: '', top: '500px', width: '200px', height: '600px' });
         await page.evaluate((a) => {
             document.getElementById('travaux-palette-erreurs-fr')?.remove();
-            localStorage.setItem('travaux-palette-erreurs-fr-pos', a);
+            localStorage.setItem('travaux-palette-erreurs-fr-geometrie', a);
             window.travauxOutils.togglePaletteErreursFrancais();
         }, ancienne);
         await page.waitForSelector(CODES + ' .travaux-errfr-item');
         const m = await page.evaluate(() => {
             const p = document.getElementById('travaux-palette-erreurs-fr').getBoundingClientRect();
             const z = document.getElementById('travaux-zone-canvas').getBoundingClientRect();
-            return { dedans: p.top >= z.top && p.bottom <= z.bottom + 0.5, stock: localStorage.getItem('travaux-palette-erreurs-fr-pos') };
+            return { dedans: p.top >= z.top && p.bottom <= z.bottom + 0.5, stock: localStorage.getItem('travaux-palette-erreurs-fr-geometrie') };
         });
         expect(m.dedans).toBe(true);
         expect(m.stock).toBe(ancienne);

@@ -175,14 +175,10 @@ test.describe('#1214 — la palette Évaluation n’a qu’une barre de défilem
             await page.evaluate(() => window.travauxUI.togglePleinEcran());
         });
 
-        await test.step('après ↔', async () => {
-            await page.evaluate((id) => window.travauxOutils.layoutPaletteH(id), EVALUATION);
+        await test.step('élargie et allongée à la main (la poignée, #773)', async () => {
+            await page.evaluate((id) => { const p = document.getElementById(id); p.style.width = '600px'; p.style.height = (p.parentElement.clientHeight - 24) + 'px'; }, EVALUATION);
             await jugerEvaluation(page);
-        });
-
-        await test.step('après ↕', async () => {
-            await page.evaluate((id) => window.travauxOutils.layoutPaletteV(id), EVALUATION);
-            await jugerEvaluation(page);
+            await page.evaluate((id) => { const p = document.getElementById(id); p.style.width = ''; p.style.height = ''; }, EVALUATION);
         });
 
         await test.step('repliée, rien ne défile ; dépliée, la même chose qu’avant', async () => {

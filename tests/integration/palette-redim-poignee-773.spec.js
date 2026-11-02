@@ -40,7 +40,7 @@ async function ouvrirCodes(page) {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(600);
     const ok = await page.evaluate(() => {
-        localStorage.removeItem('travaux-palette-erreurs-fr-pos');
+        localStorage.removeItem('travaux-palette-erreurs-fr-geometrie');
         const cont = document.createElement('div');
         cont.id = 'travaux-conteneur-document';
         cont.style.cssText = 'position:fixed; top:0; left:0; width:900px; height:700px; z-index:9999; background:#fff;';
@@ -95,7 +95,7 @@ test('#773 · tirer la poignée redimensionne la palette, et la taille survit (p
     await page.mouse.up();
 
     const apres = await page.evaluate(geometrie);
-    const sauve = await page.evaluate(() => JSON.parse(localStorage.getItem('travaux-palette-erreurs-fr-pos') || 'null'));
+    const sauve = await page.evaluate(() => JSON.parse(localStorage.getItem('travaux-palette-erreurs-fr-geometrie') || 'null'));
     console.log('AVANT →', JSON.stringify(avant), 'APRÈS →', JSON.stringify(apres), 'SAUVÉ →', JSON.stringify(sauve));
 
     expect(apres.largeurPalette - avant.largeurPalette, 'la largeur a suivi le pointeur (+90)').toBeGreaterThan(70);

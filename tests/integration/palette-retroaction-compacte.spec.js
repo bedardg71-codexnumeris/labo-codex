@@ -25,7 +25,7 @@ async function ouvrir(page, { options = TOUTES, positions = {}, verrouillee = fa
         && typeof window.executerActionEval === 'function', null, { timeout: 30000 });
     await page.evaluate(({ options, positions, verrouillee, CONTEXTE }) => {
         // security-ok: fixtures littérales du banc, aucune source externe.
-        Object.entries(positions).forEach(([id, pos]) => localStorage.setItem(id + '-pos', JSON.stringify(pos)));
+        Object.entries(positions).forEach(([id, pos]) => localStorage.setItem(id + (id.endsWith('-pos') ? '' : '-geometrie'), JSON.stringify(pos)));
         const T = 'tretro', coursId = 'cours-retro';
         const criteres = ['Structure', 'Rigueur', 'Nuance'].map((nom, i) => ({ id: 'c' + i, nom, ponderation: 30, type: 'holistique', description: 'Description de ' + nom }));
         const niveaux = [
@@ -258,7 +258,7 @@ test.describe('La palette Rétroaction compacte', () => {
         await attendreResume(page, 'Options : sans objectif, tâche ni contexte · note chiffrée');
     });
 
-    test('options ouvertes, hauteur courte, palette étroite, bandeau : rien ne passe sur le pied ni sur le compte', async ({ page }) => {
+    test('options ouvertes, hauteur courte, palette étroite, élargie à la main : rien ne passe sur le pied ni sur le compte', async ({ page }) => {
         await ouvrir(page);
         const geo = () => page.evaluate((id) => {
             const r = (e) => e.getBoundingClientRect();
@@ -282,8 +282,8 @@ test.describe('La palette Rétroaction compacte', () => {
         expect(await geo(), 'options ouvertes').toEqual(attendu);
         await page.evaluate((id) => { document.getElementById(id).style.width = '110px'; }, RETROACTION);
         expect(await geo(), 'options ouvertes, 110 de large').toEqual(attendu);
-        await page.evaluate((id) => { document.getElementById(id).style.width = ''; window.travauxOutils.layoutPaletteH(id); }, RETROACTION);
-        expect(await geo(), 'en bandeau').toEqual(attendu);
+        await page.evaluate((id) => { const p = document.getElementById(id); p.style.width = (p.parentElement.clientWidth - 24) + 'px'; }, RETROACTION);
+        expect(await geo(), 'élargie à toute la zone').toEqual(attendu);
     });
 
     test('le résumé suit « cocherOptionsParDefaut », qui coche sans événement', async ({ page }) => {
@@ -452,16 +452,16 @@ test.describe('La palette Rétroaction compacte', () => {
         expect(l.retroaction).toBeLessThan(360);
     });
 
-    test('↕ remet la Rétroaction en colonne à SA largeur, sans l’enregistrer à 200, et Évaluation se recale contre elle', async ({ page }) => {
-        // Partie en bandeau : Évaluation, faute de place contre elle, prend son repli (220).
-        await ouvrir(page, { positions: { [RETROACTION]: { left: '12px', right: '', top: '500px', width: '1156px', height: '200px' } } });
-        expect(await page.evaluate(() => document.getElementById('travaux-palette-eval-droite').style.right)).toBe('220px');
-        await toucher(page, `#${RETROACTION} .palette-flottante-barre button[data-action="travauxOutils.layoutPaletteV"]`);
-        await page.waitForFunction((id) => document.getElementById(id).style.right === '12px', RETROACTION);
+    // Consigne du 2 nov. 2026, § 1 (« Stock ») : ↕ était le seul geste qui rendait une palette à sa géométrie d'ouverture,
+    // et il part. Une géométrie enregistrée avant le lot (`<id>-pos`) est ignorée une fois, et laissée telle quelle.
+    test('une géométrie enregistrée avant le lot ne cache pas les 360 : ignorée, et laissée telle quelle', async ({ page }) => {
+        const ancienne = { left: '', right: '12px', top: '12px', width: '200px', height: '' };
+        await ouvrir(page, { positions: { [RETROACTION + '-pos']: ancienne, 'travaux-palette-eval-droite-pos': { left: '', right: '400px', top: '12px', width: '', height: '' } } });
         const l = await lecture(page);
-        const enregistree = await page.evaluate((id) => JSON.parse(localStorage.getItem(id + '-pos')).width, RETROACTION);
-        expect({ retroaction: l.retroaction, enregistree, ecart: l.ecart, dedans: l.dedans, couvre: l.chevauchement > 0 })
-            .toEqual({ retroaction: 360, enregistree: '', ecart: 8, dedans: true, couvre: false });
+        const reste = await page.evaluate((id) => ({ retro: localStorage.getItem(id + '-pos'), neuve: localStorage.getItem(id + '-geometrie') }), RETROACTION);
+        expect({ retroaction: l.retroaction, ecart: l.ecart, dedans: l.dedans, couvre: l.chevauchement > 0 })
+            .toEqual({ retroaction: 360, ecart: 8, dedans: true, couvre: false });
+        expect(reste).toEqual({ retro: JSON.stringify(ancienne), neuve: null });
     });
 
     test('Évaluation suit une Rétroaction élargie par la poignée ; sa propre position enregistrée l’emporte', async ({ page }) => {
@@ -479,7 +479,7 @@ test.describe('La palette Rétroaction compacte', () => {
         expect(await page.evaluate(() => document.getElementById('travaux-palette-eval-droite').style.right)).toBe('400px');
     });
 
-    test('une Rétroaction en bandeau ne pousse pas Évaluation hors de la zone', async ({ page }) => {
+    test('une Rétroaction étalée à la main sur la largeur ne pousse pas Évaluation hors de la zone', async ({ page }) => {
         await ouvrir(page, { positions: { [RETROACTION]: { left: '12px', right: '', top: '500px', width: '1156px', height: '200px' } } });
         const d = await page.evaluate(() => {
             const r = document.getElementById('travaux-palette-eval-droite').getBoundingClientRect();
