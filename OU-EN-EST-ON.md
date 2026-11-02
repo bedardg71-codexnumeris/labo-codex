@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 2 NOVEMBRE 2026, APRÈS-MIDI : LES PALETTES D'ANNOTER ET D'ÉVALUER, UNE MÊME FAMILLE (PAS ENCORE EN LIGNE).** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi** : plus de ↔ ni de ↕ dans les en-têtes. Annotation, Codes, Tampons et Évaluation ont un seul bouton, à gauche du « − », qui passe de la version étendue à la compacte et retour ; l'étendue est le défaut. L'Annotation étendue est faite de tuiles au doigt, avec Annuler · Supprimer · Rétablir · Effacer la page collés en bas. Tampons a une compacte : les icônes seules, le nom du tampon touché dessous. Aucun nom n'est plus coupé (« Multistructurel », « Id. directrice »). Le verrou n'a plus qu'une forme, en haut d'Annotation et de Paramètres : « Verrouiller » / « Déverrouiller », avec le cadenas ; le petit cadenas de l'en-tête de Paramètres est parti. Une palette que tu avais élargie à la main s'ouvre une fois à sa taille par défaut.
+
+**Ce qui reste à toi** : les cinq gestes sur l'iPad, au § 5 du rapport (`plans de travail/RAPPORT-2026-11-02-palettes-une-famille.md`), après la prochaine mise en ligne.
+
+**Vérifié comment** : mesuré à 1180 × 820 et 1280 × 720, hors et en plein écran (tableau en tête du rapport) ; une spec neuve et un essai neuf, chaque défense cassée exprès fait rougir son essai. Vitest entier vert (10 615) ; les specs touchées, vertes, sauf quatre rouges déjà connus du témoin sur les présences (rouges aussi avant le lot). Pas encore : la vérification complète, la mise en ligne, l'iPad.
+
 📝 **LE 2 NOVEMBRE 2026, MIDI : LA RÉTROACTION S'OUVRIRA PLUS LARGE (PAS ENCORE EN LIGNE).** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi** : en Évaluer, la palette Rétroaction s'ouvre à 360 au lieu de 200. Une ligne de ton texte compte environ 50 caractères au lieu de 24, et les trois boutons du pied tiennent sur une rangée. La copie y cède 160 de largeur. En Annoter, rien ne change. Si tu avais élargi ta Rétroaction à la main, ta largeur reste ; ↕ la ramène à la nouvelle.
