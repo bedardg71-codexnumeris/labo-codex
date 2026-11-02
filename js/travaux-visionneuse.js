@@ -465,20 +465,41 @@
         const viewport = page.getViewport({ scale: 1.0 });
         const conteneur = _obtenirConteneurZoom();
         if (!conteneur) return 1.0;
-
-        const largeurDispo = conteneur.clientWidth - 40; // marge
-        const hauteurDispo = conteneur.clientHeight - 40;
-
-        if (modeZoom === ZOOM_FIT_WIDTH) {
-            zoomActuel = Math.min(largeurDispo / viewport.width, ZOOM_MAX);
-        } else if (modeZoom === ZOOM_FIT_HEIGHT) {
-            zoomActuel = Math.min(hauteurDispo / viewport.height, ZOOM_MAX);
-        } else {
-            const scaleX = largeurDispo / viewport.width;
-            const scaleY = hauteurDispo / viewport.height;
-            zoomActuel = Math.min(scaleX, scaleY, 2.0); // cap a 2x
-        }
+        zoomActuel = _zoomAjuste(conteneur, viewport.width, viewport.height);
         return zoomActuel;
+    }
+
+    /**
+     * LA COPIE GARDE SA TAILLE D'OUVERTURE (consigne du 2 nov. 2026). Depuis que la zone de travail tient dans l'écran
+     * (`_garderVisionneuseDansEcran`, travaux-ui.js, 1er nov.), son cadre est plus court de ce qui l'entoure : ajusté à
+     * cette hauteur, le document s'ouvrait 43 % plus étroit (212 px contre 373 à 1280 × 720). En Annoter et en Évaluer,
+     * hors plein écran, la hauteur d'ajustement est donc celle qu'avait le cadre dans la 1.229.0 — la zone y mesurait
+     * `calc(100vh - 120px)`, 400 px au moins ; ce qui dépasse le cadre se parcourt dans le cadre, comme après un zoom.
+     * `innerHeight` tient lieu de `100vh` : la page ne défile plus, les barres de Safari ne se replient plus.
+     * Ailleurs (Modélisation, plein écran), le cadre réel sert, comme avant.
+     * @param {HTMLElement} conteneur
+     * @returns {number} La hauteur, en px, à laquelle ajuster le document (marge retirée).
+     */
+    function _hauteurAjustement(conteneur) {
+        const hauteurCadre = conteneur.clientHeight - 40;
+        const zone = conteneur.closest('.travaux-visionneuse-layout');
+        if (!zone || conteneur.closest('.travaux-plein-ecran')) return hauteurCadre;
+        const hauteurZone1229 = Math.max(400, window.innerHeight - 120);
+        return hauteurCadre + Math.max(0, hauteurZone1229 - zone.clientHeight);
+    }
+
+    /**
+     * L'échelle des trois modes d'ajustement, pour un document de `largeur` × `hauteur` à l'échelle 1.
+     * La hauteur d'ajustement (`_hauteurAjustement`) ne fait jamais déborder le document en largeur au-delà de ce que
+     * le cadre réel faisait déjà.
+     */
+    function _zoomAjuste(conteneur, largeur, hauteur) {
+        const echelleLargeur = (conteneur.clientWidth - 40) / largeur; // marge
+        const echelleCadre = (conteneur.clientHeight - 40) / hauteur;
+        const echelleHauteur = Math.max(echelleCadre, Math.min(_hauteurAjustement(conteneur) / hauteur, echelleLargeur));
+        if (modeZoom === ZOOM_FIT_WIDTH) return Math.min(echelleLargeur, ZOOM_MAX);
+        if (modeZoom === ZOOM_FIT_HEIGHT) return Math.min(echelleHauteur, ZOOM_MAX);
+        return Math.min(echelleLargeur, echelleHauteur, 2.0); // cap a 2x
     }
 
     /**
@@ -500,19 +521,7 @@
 
         const conteneur = _obtenirConteneurZoom();
         if (!conteneur) return 1.0;
-
-        const largeurDispo = conteneur.clientWidth - 40;
-        const hauteurDispo = conteneur.clientHeight - 40;
-
-        if (modeZoom === ZOOM_FIT_WIDTH) {
-            zoomActuel = Math.min(largeurDispo / img.width, ZOOM_MAX);
-        } else if (modeZoom === ZOOM_FIT_HEIGHT) {
-            zoomActuel = Math.min(hauteurDispo / img.height, ZOOM_MAX);
-        } else {
-            const scaleX = largeurDispo / img.width;
-            const scaleY = hauteurDispo / img.height;
-            zoomActuel = Math.min(scaleX, scaleY, 2.0);
-        }
+        zoomActuel = _zoomAjuste(conteneur, img.width, img.height);
         return zoomActuel;
     }
 

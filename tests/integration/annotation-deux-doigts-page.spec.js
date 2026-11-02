@@ -113,11 +113,21 @@ test.describe('Deux doigts déplacent la page', () => {
             c.scrollLeft += k.left - r.left - 300;
             c.scrollTop += k.top - r.top - 60;
         });
-        const geste = (nom, scale) => page.evaluate(({ nom, scale }) => {
+        // Le point visé est pris DANS la page visible, d'après le document et non en pixels fixes (2 nov. 2026) : le
+        // 1er nov., le cadre raccourci de 241 px avait mis le point fixe (450, 600) hors de la page (fx = 1,08).
+        // Le glissé de 120 px vers la gauche qui suit le pousse vers la droite de la page : il part du tiers.
+        const { vise, largeurAvant } = await page.evaluate(() => {
+            const k = document.getElementById('travaux-canvas-document').getBoundingClientRect();
+            const r = document.getElementById('travaux-canvas-container').getBoundingClientRect();
+            const g = Math.max(k.left, r.left), d = Math.min(k.right, r.right);
+            const h = Math.max(k.top, r.top), b = Math.min(k.bottom, r.bottom);
+            return { vise: { x: g + (d - g) / 3, y: (h + b) / 2 }, largeurAvant: k.width };
+        });
+        const geste = (nom, scale) => page.evaluate(({ nom, scale, vise }) => {
             const ev = new Event(nom, { bubbles: true, cancelable: true });
-            ev.scale = scale; ev.pageX = 450; ev.pageY = 600;
+            ev.scale = scale; ev.pageX = vise.x; ev.pageY = vise.y;
             document.getElementById('travaux-canvas-annotation').dispatchEvent(ev);
-        }, { nom, scale });
+        }, { nom, scale, vise });
         const apercu = () => page.evaluate(() => document.getElementById('travaux-canvas-wrapper').style.transform);
         const estSafari = await page.evaluate(() => typeof GestureEvent !== 'undefined');
         test.skip(!estSafari, 'Le chemin Safari exige GestureEvent.');
@@ -133,10 +143,10 @@ test.describe('Deux doigts déplacent la page', () => {
         expect(await apercu()).toBe('scale(1.5)');
 
         // L'aperçu : où est le point fixe, une fois la page défilée ? Il doit rester là après le re-rendu.
-        const fraction = () => page.evaluate(() => {
+        const fraction = () => page.evaluate((vise) => {
             const k = document.getElementById('travaux-canvas-document').getBoundingClientRect();
-            return { fx: (450 - k.left) / k.width, fy: (600 - k.top) / k.height };
-        });
+            return { fx: (vise.x - k.left) / k.width, fy: (vise.y - k.top) / k.height };
+        }, vise);
         await toucher(page, 'touchmove', [{ x: 180, y: 300 }, { x: 280, y: 300 }]);
         const f1 = await fraction();
         await geste('gestureend', 1.65);
@@ -144,7 +154,14 @@ test.describe('Deux doigts déplacent la page', () => {
         await attendre(page, 800);
         expect(await apercu()).toBe('');
         const f2 = await fraction();
-        expect(await page.evaluate(() => document.getElementById('travaux-canvas-document').getBoundingClientRect().width)).toBeGreaterThan(500); // témoin : le zoom a bien eu lieu
+        // Témoins : le zoom a bien eu lieu (1,5 attendu ; un rapport, et non une largeur, qui suivrait la taille du cadre),
+        // et le point fixe est jugé dans la page.
+        const largeurApres = await page.evaluate(() => document.getElementById('travaux-canvas-document').getBoundingClientRect().width);
+        expect(largeurApres / largeurAvant).toBeGreaterThan(1.4);
+        for (const f of [f1, f2]) {
+            expect(f.fx).toBeGreaterThan(0); expect(f.fx).toBeLessThan(1);
+            expect(f.fy).toBeGreaterThan(0); expect(f.fy).toBeLessThan(1);
+        }
         // Sans le recalage, le document saute de (1,5 − 1) × 120 px ; sur une page d'environ 600 px, 10 %.
         expect(Math.abs(f2.fx - f1.fx)).toBeLessThan(0.01);
         expect(Math.abs(f2.fy - f1.fy)).toBeLessThan(0.01);
