@@ -21,6 +21,22 @@
 
     var CHANGELOG = [
         {
+            // 1.230 (les palettes compactes pour annoter et évaluer, la Rétroaction, le défilement, la grille relue, les tampons) —
+            // titre et six items validés par Grégoire, mot pour mot, le 1er nov. 2026 (points 1 à 5 à 19 h 32, point 6 à 20 h 36),
+            // proposés par Cowork (`CONSIGNE-LOT-2026-11-01-mise-en-ligne-1230.md`, § 1). Insécables en `&nbsp;`, apostrophes typographiques.
+            version: '1.230',
+            couleur: 'vert',
+            titre: 'Annoter et évaluer sur l’iPad&nbsp;: des palettes compactes, plus de place pour la copie',
+            items: [
+                'Annoter&nbsp;: la barre d’outils est plus compacte. Le carrousel montre plus de noms, et l’état de chaque copie s’y lit en symbole.',
+                'Les palettes Codes et Évaluation ont une version compacte, au choix&nbsp;: un bouton aux quatre carrés la bascule, et les descriptions restent l’affichage par défaut. En compacte, chaque critère tient sur une ligne&nbsp;; toucher son nom montre sa description.',
+                'La palette Rétroaction laisse plus de place au texte&nbsp;: Générale, Spécifique et Bilan sur une seule bande, les options repliées sous une ligne qui les résume, «&nbsp;Copier tout&nbsp;» en bas.',
+                'Hors plein écran, la page ne défile plus sous les palettes, et chaque palette d’Évaluer n’a qu’une barre de défilement.',
+                'Quand tu modifies ta grille pendant qu’une copie est ouverte, la palette Codes montre le nouveau texte dès ton retour. Dans Évaluer, ta saisie reste et la note suit la nouvelle pondération&nbsp;; une copie verrouillée garde sa note remise.',
+                'Tampons&nbsp;: tes noms et tes images ne reviennent plus au défaut après un rechargement, et les tampons que tu retires restent retirés. «&nbsp;Garder dans ma bibliothèque&nbsp;» garde l’image de ton tampon, SVG compris.'
+            ]
+        },
+        {
             // 1.229 (la réponse du groupe, les couleurs de l'Aperçu, la note actuelle en sommative, les palettes d'annotation,
             // la copie de démo) — titre et huit items validés par Grégoire, mot pour mot, le 31 oct. 2026 à 14 h 06, proposés
             // par Cowork (`CONSIGNE-LOT-2026-10-31-mise-en-ligne-1229.md`, § 1). Insécables en `&nbsp;`, apostrophes typographiques.
