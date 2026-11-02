@@ -12,7 +12,7 @@
         "test:debug": "playwright test --debug"
     },
     "devDependencies": {
-        "@playwright/test": "^1.60.0",
+        "@playwright/test": "^1.64.1",
         "acorn": "8.18.0",
         "esbuild": "^0.21.5",
         "jsdom": "25.0.1",
