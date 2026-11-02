@@ -7,6 +7,20 @@
 
 ---
 
+## 1er NOV. 2026, SOIR (Claude Code) : **1.230.0 PRÉPARÉE SUR `main`, VERDICT À PRENDRE ; EN LIGNE : TOUJOURS 1.229.0**
+
+**Porte** : `plans de travail/CONSIGNE-LOT-2026-11-01-mise-en-ligne-1230.md`. Un paragraphe plus récent, s'il existe au-dessus, dit l'issue du verdict.
+
+**Les commits de code du 1er nov.**, depuis `0fd0427f` : `a8e24902` (la palette relit la grille, #1213), `5eefed7c` (un seul défilement, #1214), `abf256ee` (Évaluer relit la grille, #1215), `e00f9fe9` et `d8ada574` (barre et Codes compacts), `67e2f649` et `4ed99788` (la zone de travail), `6dd40044` (Évaluation compacte), `b74e9e6c` (Rétroaction compacte), `a87f472c` (tampons, #1216), `499c0682` (« ni » dans le résumé des options).
+
+**Trois branches `lot/` ouvertes, parties de `f302d833`** :
+- `lot/verification-plus-rapide` (`c1c1c204`), puis `lot/pauses-apres-ouverture` (`3a29ef9a`, qui contient la première) : faites et relues, à fusionner **dans cet ordre** au prochain lot, après cette mise en ligne. Cliquet des pauses : la décision de Cowork est au verdict `VERDICT-RELECTURE-2026-11-01-evaluer-relit-la-grille.md`.
+- `lot/pauses-les-plus-lourdes` (`503ab091`) : interrompue par le redémarrage du midi. Rien de son travail n'est commité, seule sa consigne l'est ; ses specs modifiées (29 fichiers, mesuré) attendent dans `.claude/worktrees/pauses-les-plus-lourdes`. Elle reprend après les deux fusions.
+
+**Complexité** (1.229.0 → 1.230.0) : fichiers de plus de 1 000 lignes 40 → 40, leurs lignes 93 352 → 93 701 (Δ +349) ; au-dessus de 15 : 440 → 439 (Δ −1) ; au-dessus de 30 : 81 → 81 (Δ 0, maximum 130) ; somme au-dessus de 15 : 11 043 → 11 031 (Δ −12).
+
+**Non commités, laissés tels quels** : `.claude/settings.json`, `CONSIGNE-DEMARRAGE-COWORK.md`, `REFLEXION-2026-10-30-seuils-normatif-critere-ipsatif.md`, `captures/fenetre-de-fusion-*.png`.
+
 ## 31 OCT. 2026, 19 H 20 (Claude Code) : **1.229.0 EN LIGNE, `main` = `origin/main`**
 
 **Porte** : `CONSIGNE-LOT-2026-10-31-cause-essai-g-presences.md`, issue A, § 3, au signal de Grégoire (« Cowork, Chrome et Safari sont fermés »). Rapport de cause : `plans de travail/RAPPORT-2026-10-31-cause-essai-g.md`. #1212 fait.

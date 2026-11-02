@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 1er NOVEMBRE 2026, SOIR : LA 1.230 EST PRÉPARÉE, PAS ENCORE EN LIGNE.** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi, une fois en ligne** : ce que disent tes Nouvelles validées de la 1.230 (les palettes compactes, plus de place pour la copie, les tampons qui restent). Le résumé des options de la Rétroaction dit « sans objectif ni contexte », « sans objectif, tâche ni contexte » quand il manque plusieurs cases.
+
+**Ce qui reste à toi** : fermer Cowork, Chrome et Safari pour la vérification complète ; après le push, sur l'iPad rechargé jusqu'à 1.230.0, la porte terrain des trois palettes et celle des tampons, sur la page que Cowork publie.
+
+**Vérifié comment** : l'essai du résumé couvre deux et trois cases décochées, vert dans WebKit (18 essais de la spec). La vérification complète n'a pas encore tourné : tant qu'un paragraphe plus récent ne le dit pas, la 1.229 reste en ligne.
+
 📝 **LE 1er NOVEMBRE 2026 : TES TAMPONS PERSONNALISÉS RESTENT, CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : après un rechargement, tes noms de tampons et tes images restent, et les tampons par défaut que tu as retirés ne reviennent plus. Une image SVG se garde dans la bibliothèque, et « Dans ta palette » montre son aperçu. Ce que tu as vécu est reproduit au banc : dans le moteur de Safari, un rechargement remettait les noms par défaut, et « Enregistrer » les écrivait ensuite pour de bon.
