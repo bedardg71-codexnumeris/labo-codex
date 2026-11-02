@@ -1,6 +1,6 @@
 # Rapport pour Cowork – La copie garde sa taille d'ouverture (2 novembre 2026)
 
-> Claude Code, lundi 2 novembre 2026, matin. Consigne : `CONSIGNE-LOT-2026-11-02-copie-garde-sa-taille.md` (commitée seule, `249d2e98`). **Rien n'est poussé** : la vérification complète attend le signal de Grégoire.
+> Claude Code, lundi 2 novembre 2026, matin. Consigne : `CONSIGNE-LOT-2026-11-02-copie-garde-sa-taille.md` (commitée seule, `249d2e98`). **Poussé le 2 nov. à 7 h 45** après la vérification complète, verte (§ 5 bis).
 
 ## 1. La mesure
 
@@ -61,7 +61,15 @@ Un sabotage écarté, à dire : rogner le document (`height: 300px; overflow: hi
 
 Version : **1.230.0**, build refait par `node scripts/release.mjs --build-only` (build `1101-2047` → `1102-0522` ; l'ancien build : zéro occurrence hors documents, le nouveau aux cinq points), jetons suivis ; les Nouvelles ne changent pas.
 
-`main` local : 30 commits d'avance sur `origin/main` (la consigne, ce lot). Le jeton Playwright reste celui de `46a0830d`, rouge : la vérification complète est due, au signal de Grégoire (« ferme Cowork, Chrome et Safari sur le Mac, je lance la vérification »), Mac sur secteur, sans veille. Vert : `git push`. Rouge : pas de push, rapport à Cowork.
+Avant la vérification, `main` local avait 30 commits d'avance sur `origin/main` ; après le push, aucun.
+
+## 5 bis. La vérification complète : verte, poussée
+
+Au signal de Grégoire (Cowork, Chrome et Safari fermés), `node scripts/verdict-en-morceaux.mjs` sur `97f0189a`, de 5 h 57 à 7 h 44, secteur, éveil tenu, pression mémoire 1 et 330 Mo d'échange à chaque relevé : **code 0**. 1 326 essais en dix morceaux : **1 320 verts, 2 au second essai, 4 rouges, tous les 4 connus (baseline), 23 sautés**. Le 1er nov., sur `46a0830d` : 1 322 essais, 5 rouges dont 1 nouveau (le témoin du zoom). Il n'y en a plus aucun de nouveau.
+
+Les deux verts au second essai, qui ne bloquent pas : `bareme-3-evaluer.spec.js` (invariant 1) et `grilles-sous-criteres-condense.spec.js` (condensé). **Fait** : la seconde était déjà verte au second essai le 1er nov. sur `46a0830d`. Une deuxième fois de suite : à suivre, si elle revient au prochain verdict, c'est un sujet (crochet pré-push : « si la même revient, c'est un vrai sujet »).
+
+`git push origin main` : crochet pré-push vert (Vitest, jeton à jour pour ce commit), `0fd0427f..97f0189a`. **La 1.230.0 est en ligne**, build `1102-0522`.
 
 ## 6. Trouvailles
 

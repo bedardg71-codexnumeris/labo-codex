@@ -15,6 +15,14 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 2 NOVEMBRE 2026, 7 H 45 : LA 1.230 EST EN LIGNE, ET LA COPIE S'OUVRE DE NOUVEAU À SA TAILLE.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : tout ce que disent tes Nouvelles de la 1.230 (les palettes compactes, les tampons qui restent). Et, hors plein écran, la copie s'ouvre aussi large que dans la 1.229 : la zone de travail tenait désormais dans l'écran, mais la copie s'y ouvrait 43 % plus étroite. Elle garde maintenant sa taille, et ce qui dépasse se fait défiler dans le cadre, à la molette ou à deux doigts. Le plein écran ne change pas.
+
+**Ce qui reste à toi** : les portes terrain de la 1.230, sur l'iPad (artefact « Portes terrain 1.230 » de Cowork ; trace : `plans de travail/PORTES-TERRAIN-2026-11-02-mise-en-ligne-1230.md`). D'abord enregistrer ton codex, puis remettre tes noms de tampons et retirer ceux que tu ne veux pas.
+
+**Vérifié comment** : la largeur de la copie mesurée à l'ouverture, PDF et image, à 1180 × 820 et 1280 × 720 : celle de la 1.229 au pixel près, dans les huit cas. Quatre essais neufs, et chacun rougit quand on casse exprès ce qu'il vérifie. La vérification complète est verte : 1 326 essais, aucun rouge nouveau. Vitest entier vert (10 615). Pas encore : la largeur sur l'iPad lui-même, et le vrai Safari.
+
 📝 **LE 1er NOVEMBRE 2026, 22 H 40 : LA 1.230 N'EST PAS EN LIGNE, LA VÉRIFICATION A ROUGI.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : ce que disent tes Nouvelles validées de la 1.230 (les palettes compactes, plus de place pour la copie, les tampons qui restent). Le résumé des options de la Rétroaction dit « sans objectif ni contexte », « sans objectif, tâche ni contexte » quand il manque plusieurs cases.
