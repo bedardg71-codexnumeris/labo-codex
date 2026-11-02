@@ -15,13 +15,19 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 2 NOVEMBRE 2026, MIDI : LA RÉTROACTION S'OUVRIRA PLUS LARGE (PAS ENCORE EN LIGNE).** *Écrit par Claude Code.*
+
+**Ce qui changera pour toi** : en Évaluer, la palette Rétroaction s'ouvre à 360 au lieu de 200. Une ligne de ton texte compte environ 50 caractères au lieu de 24, et les trois boutons du pied tiennent sur une rangée. La copie y cède 160 de largeur. En Annoter, rien ne change. Si tu avais élargi ta Rétroaction à la main, ta largeur reste ; ↕ la ramène à la nouvelle.
+
+**Vérifié comment** : mesuré à 1180 × 820 et 1280 × 720, hors plein écran et en plein écran, sur la plus longue rétroaction de démo ; chaque essai neuf rougit quand on casse ce qu'il vérifie (rapport : `plans de travail/RAPPORT-2026-11-02-retroaction-plus-large.md`). Part avec la prochaine mise en ligne ; pas encore vu sur l'iPad.
+
 📝 **LE 2 NOVEMBRE 2026, 8 H 45 : LA 1.230.1, EN ÉVALUER LE DOIGT FAIT DÉFILER LA COPIE.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : sur l'iPad, en Évaluer, toucher la copie du doigt ne te ramène plus en Annoter : le doigt la fait défiler, le stylet annote. Annoter ne change pas, ni le stylet, ni la souris. Tes Nouvelles le disent en septième point de la 1.230.
 
 **Ce qui reste à toi** : recharger l'iPad, puis, en Évaluer, faire défiler une copie du doigt et vérifier que tu restes en Évaluer.
 
-**Vérifié comment** : la cause reproduite avant le correctif ; six essais neufs, chacun rougit quand on retire le correctif ; relecture de Cowork acceptée sans retouche. Vitest entier vert (10 615). La vérification complète est prise sur le commit de cette version : elle est la condition de la mise en ligne, qui n'a lieu que verte. Pas encore : le vrai doigt sur le vrai iPad.
+**Vérifié comment** : la cause reproduite avant le correctif ; six essais neufs, chacun rougit quand on retire le correctif ; relecture de Cowork acceptée sans retouche. Vitest entier vert (10 615). La vérification complète, sur le commit de cette version, est verte : 1 332 essais, aucun rouge nouveau ; poussée à 11 h 09. Pas encore : le vrai doigt sur le vrai iPad.
 
 **Ce qu'on ne sait pas encore** : sur GitHub, la vérification de la 1.230.0 (sous Linux) a rougi sur huit essais que le Mac rend verts, dont quatre des palettes compactes et du témoin d'enregistrement. Inscrit, pas encore lu : on ne sait pas si c'est propre à Linux ou si c'est réel.
 
