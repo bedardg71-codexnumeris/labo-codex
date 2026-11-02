@@ -15,13 +15,13 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
-📝 **LE 1er NOVEMBRE 2026, SOIR : LA 1.230 EST PRÉPARÉE, PAS ENCORE EN LIGNE.** *Écrit par Claude Code.*
+📝 **LE 1er NOVEMBRE 2026, 22 H 40 : LA 1.230 N'EST PAS EN LIGNE, LA VÉRIFICATION A ROUGI.** *Écrit par Claude Code.*
 
 **Ce qui changera pour toi, une fois en ligne** : ce que disent tes Nouvelles validées de la 1.230 (les palettes compactes, plus de place pour la copie, les tampons qui restent). Le résumé des options de la Rétroaction dit « sans objectif ni contexte », « sans objectif, tâche ni contexte » quand il manque plusieurs cases.
 
-**Ce qui reste à toi** : fermer Cowork, Chrome et Safari pour la vérification complète ; après le push, sur l'iPad rechargé jusqu'à 1.230.0, la porte terrain des trois palettes et celle des tampons, sur la page que Cowork publie.
+**Ce qui reste à toi** : rien ce soir. La 1.229 reste en ligne, et tes tampons restent exposés d'ici là : ne les personnalise pas. Cowork tranche d'abord la correction de l'essai, puis la vérification repasse en entier (1 h 46, Cowork, Chrome et Safari fermés).
 
-**Vérifié comment** : l'essai du résumé couvre deux et trois cases décochées, vert dans WebKit (18 essais de la spec). La vérification complète n'a pas encore tourné : tant qu'un paragraphe plus récent ne le dit pas, la 1.229 reste en ligne.
+**Vérifié comment** : un seul essai nouveau rougit sur 1 322, sans lien avec tes données : son seuil de largeur date d'avant la zone de travail qui tient dans l'écran. Mesuré à 1280 × 720 sur le banc : le zoom vaut toujours 1,5 et le document ne saute pas. Le geste réel sur l'iPad n'est pas éprouvé.
 
 📝 **LE 1er NOVEMBRE 2026 : TES TAMPONS PERSONNALISÉS RESTENT, CODÉ, PAS EN LIGNE.** *Écrit par Claude Code.*
 

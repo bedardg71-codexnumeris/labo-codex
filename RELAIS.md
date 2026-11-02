@@ -7,9 +7,13 @@
 
 ---
 
-## 1er NOV. 2026, SOIR (Claude Code) : **1.230.0 PRÉPARÉE SUR `main`, VERDICT À PRENDRE ; EN LIGNE : TOUJOURS 1.229.0**
+## 1er NOV. 2026, 22 H 40 (Claude Code) : **1.230.0 COMMITÉE SUR `main` (`46a0830d`), NON POUSSÉE : VERDICT ROUGE ; EN LIGNE : TOUJOURS 1.229.0**
 
-**Porte** : `plans de travail/CONSIGNE-LOT-2026-11-01-mise-en-ligne-1230.md`. Un paragraphe plus récent, s'il existe au-dessus, dit l'issue du verdict.
+**Porte** : `plans de travail/CONSIGNE-LOT-2026-11-01-mise-en-ligne-1230.md`, branche « Rouge » du § 3. Rapport pour Cowork : `plans de travail/RAPPORT-2026-11-01-verdict-rouge-1230.md`.
+
+**Verdict du Mac, sur `46a0830d`, sans refus de garde** : code 1 ; 1 322 essais, 1 316 verts, 1 au second essai, 5 rouges (4 connus), 23 sautés. Nouvelle rougeur : `annotation-deux-doigts-page.spec.js`, « le pincement et le glissé cohabitent », témoin à 500 px. Lot fautif : `67e2f649` (vert juste avant, rouge 5 fois sur 5 après). Le zoom vaut toujours 1,5 : c'est le seuil de la spec qui a vieilli.
+
+**Attend** : la décision de Cowork sur la spec. Le jeton est rouge : le report est refusé, la suite entière repasse.
 
 **Les commits de code du 1er nov.**, depuis `0fd0427f` : `a8e24902` (la palette relit la grille, #1213), `5eefed7c` (un seul défilement, #1214), `abf256ee` (Évaluer relit la grille, #1215), `e00f9fe9` et `d8ada574` (barre et Codes compacts), `67e2f649` et `4ed99788` (la zone de travail), `6dd40044` (Évaluation compacte), `b74e9e6c` (Rétroaction compacte), `a87f472c` (tampons, #1216), `499c0682` (« ni » dans le résumé des options).
 
