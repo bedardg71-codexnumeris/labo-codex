@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+📝 **LE 2 NOVEMBRE 2026, 8 H 45 : LA 1.230.1, EN ÉVALUER LE DOIGT FAIT DÉFILER LA COPIE.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : sur l'iPad, en Évaluer, toucher la copie du doigt ne te ramène plus en Annoter : le doigt la fait défiler, le stylet annote. Annoter ne change pas, ni le stylet, ni la souris. Tes Nouvelles le disent en septième point de la 1.230.
+
+**Ce qui reste à toi** : recharger l'iPad, puis, en Évaluer, faire défiler une copie du doigt et vérifier que tu restes en Évaluer.
+
+**Vérifié comment** : la cause reproduite avant le correctif ; six essais neufs, chacun rougit quand on retire le correctif ; relecture de Cowork acceptée sans retouche. Vitest entier vert (10 615). La vérification complète est prise sur le commit de cette version : elle est la condition de la mise en ligne, qui n'a lieu que verte. Pas encore : le vrai doigt sur le vrai iPad.
+
+**Ce qu'on ne sait pas encore** : sur GitHub, la vérification de la 1.230.0 (sous Linux) a rougi sur huit essais que le Mac rend verts, dont quatre des palettes compactes et du témoin d'enregistrement. Inscrit, pas encore lu : on ne sait pas si c'est propre à Linux ou si c'est réel.
+
 📝 **LE 2 NOVEMBRE 2026, 7 H 45 : LA 1.230 EST EN LIGNE, ET LA COPIE S'OUVRE DE NOUVEAU À SA TAILLE.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : tout ce que disent tes Nouvelles de la 1.230 (les palettes compactes, les tampons qui restent). Et, hors plein écran, la copie s'ouvre aussi large que dans la 1.229 : la zone de travail tenait désormais dans l'écran, mais la copie s'y ouvrait 43 % plus étroite. Elle garde maintenant sa taille, et ce qui dépasse se fait défiler dans le cadre, à la molette ou à deux doigts. Le plein écran ne change pas.
