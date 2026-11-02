@@ -5280,7 +5280,7 @@
         const paletteD = panneauDroite ? creerPaletteEval('travaux-palette-eval-droite', 'Évaluation', panneauDroite) : null;
         if (paletteD) {
             paletteD.style.top = '12px';
-            paletteD.style.right = DROITE_EVALUATION_PAR_DEFAUT;   // `poserEvaluationContreRetroaction`, une fois la Rétroaction restaurée
+            paletteD.style.right = DROITE_EVALUATION_PAR_DEFAUT;   // `travauxOutils.poserEvaluationContreRetroaction`, une fois la Rétroaction restaurée
             paletteD.style.left = 'auto';
             zoneCanvas.appendChild(paletteD);
         }
@@ -5302,7 +5302,7 @@
         if (paletteG) configurerDragPaletteEval('travaux-palette-eval-gauche');
         if (paletteD) configurerDragPaletteEval('travaux-palette-eval-droite');
         if (paletteR) configurerDragPaletteEval('travaux-palette-eval-retro');
-        poserEvaluationContreRetroaction(paletteD, paletteR);
+        travauxOutils.poserEvaluationContreRetroaction(paletteD, paletteR);
         travauxOutils.appliquerDispositionEvaluation();   // après la position restaurée : elle dit si la palette est en bandeau
 
         // Bloquer la mémorisation pendant le setup pour ne pas écraser les bonnes valeurs
@@ -5414,22 +5414,6 @@
     /** Évaluation, avant le calage et quand la Rétroaction ne lui laisse pas sa place (en bandeau) : 220 du bord, sa place
      *  contre l'ancienne Rétroaction de 200. Ouverte à sa largeur (360 depuis le 2 nov. 2026), c'est le calage qui la pose. */
     const DROITE_EVALUATION_PAR_DEFAUT = '220px';
-
-    /**
-     * Évaluation se pose contre la Rétroaction RÉELLE, à l'ouverture (consigne du 1er nov. 2026, § 0 bis) : l'ancien
-     * `right = '300px'` présumait une Rétroaction de 280 et laissait 88 px vides, pris à la copie. Une position
-     * enregistrée l'emporte. Une Rétroaction déplacée qui ne laisse pas la place (en bandeau, par exemple) : le défaut.
-     */
-    function poserEvaluationContreRetroaction(paletteD, paletteR) {
-        if (!paletteD || !paletteR) return;
-        try {
-            if (localStorage.getItem(paletteD.id + '-pos')) return;
-        } catch (e) { /* stockage bloqué : rien d'enregistré à respecter */ }
-        const zone = paletteD.offsetParent;
-        if (!zone) return;
-        const droite = zone.clientWidth - paletteR.offsetLeft + 8;
-        if (droite + paletteD.offsetWidth + 12 <= zone.clientWidth) paletteD.style.right = droite + 'px';
-    }
 
     /**
      * Les outils de la rétroaction : la bande des vues Générale / Spécifique / Bilan, puis

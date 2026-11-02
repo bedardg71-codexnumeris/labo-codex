@@ -2299,8 +2299,29 @@
         if (paletteId === ID_PALETTE_EVALUATION) appliquerDispositionEvaluation();
     }
 
+    const ID_PALETTE_RETROACTION = 'travaux-palette-eval-retro';
+
     /**
-     * Disposition verticale : palette en colonne droite (200px, hauteur max)
+     * Évaluation se pose contre la Rétroaction RÉELLE (consigne du 1er nov. 2026, § 0 bis) : l'ancien
+     * `right = '300px'` présumait une Rétroaction de 280 et laissait 88 px vides, pris à la copie. Une position
+     * enregistrée l'emporte. Une Rétroaction déplacée qui ne laisse pas la place (en bandeau, par exemple) : le défaut.
+     * À l'ouverture (`travaux-ui`), et quand ↕ remet la Rétroaction en colonne (2 nov. 2026).
+     */
+    function poserEvaluationContreRetroaction(paletteD, paletteR) {
+        if (!paletteD || !paletteR) return;
+        try {
+            if (localStorage.getItem(paletteD.id + '-pos')) return;
+        } catch (e) { /* stockage bloqué : rien d'enregistré à respecter */ }
+        const zone = paletteD.offsetParent;
+        if (!zone) return;
+        const droite = zone.clientWidth - paletteR.offsetLeft + 8;
+        if (droite + paletteD.offsetWidth + 12 <= zone.clientWidth) paletteD.style.right = droite + 'px';
+    }
+
+    /**
+     * Disposition verticale : palette en colonne droite (200px, hauteur max).
+     * La Rétroaction reprend SA largeur d'ouverture (la feuille de style, 360 bornée par la zone ; 2 nov. 2026), et
+     * Évaluation se recale contre elle : à 200 en dur, un toucher l'aurait ramenée, et enregistrée, à son ancienne largeur.
      */
     function layoutPaletteV(paletteId) {
         if (paletteId === 'travaux-palette-erreurs-fr') _choisirDispositionCodes('v');
@@ -2310,9 +2331,10 @@
         var cRect = conteneur.getBoundingClientRect();
         palette.style.right = '12px';
         palette.style.left = 'auto';
-        palette.style.width = '200px';
+        palette.style.width = paletteId === ID_PALETTE_RETROACTION ? '' : '200px';
         palette.style.height = (cRect.height - 24) + 'px';
         sauvegarderPositionPalette(palette);
+        if (paletteId === ID_PALETTE_RETROACTION) poserEvaluationContreRetroaction(document.getElementById(ID_PALETTE_EVALUATION), palette);
         if (paletteId === ID_PALETTE_EVALUATION) _choisirEvaluationCompacte(false);   // « verticale, avec les descriptions »
     }
 
@@ -4212,6 +4234,7 @@
         choisirCodesCompacte: choisirCodesCompacte,
         ICONE_DISPOSITION_COMPACTE: ICONE_DISPOSITION_COMPACTE,
         appliquerDispositionEvaluation: appliquerDispositionEvaluation,
+        poserEvaluationContreRetroaction: poserEvaluationContreRetroaction,
         basculerEvaluationCompacte: basculerEvaluationCompacte,
         afficherRaccourcis: afficherRaccourcis,
         // Raccourcis clavier annotation

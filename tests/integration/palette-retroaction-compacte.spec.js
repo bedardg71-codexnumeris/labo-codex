@@ -452,6 +452,18 @@ test.describe('La palette Rétroaction compacte', () => {
         expect(l.retroaction).toBeLessThan(360);
     });
 
+    test('↕ remet la Rétroaction en colonne à SA largeur, sans l’enregistrer à 200, et Évaluation se recale contre elle', async ({ page }) => {
+        // Partie en bandeau : Évaluation, faute de place contre elle, prend son repli (220).
+        await ouvrir(page, { positions: { [RETROACTION]: { left: '12px', right: '', top: '500px', width: '1156px', height: '200px' } } });
+        expect(await page.evaluate(() => document.getElementById('travaux-palette-eval-droite').style.right)).toBe('220px');
+        await toucher(page, `#${RETROACTION} .palette-flottante-barre button[data-action="travauxOutils.layoutPaletteV"]`);
+        await page.waitForFunction((id) => document.getElementById(id).style.right === '12px', RETROACTION);
+        const l = await lecture(page);
+        const enregistree = await page.evaluate((id) => JSON.parse(localStorage.getItem(id + '-pos')).width, RETROACTION);
+        expect({ retroaction: l.retroaction, enregistree, ecart: l.ecart, dedans: l.dedans, couvre: l.chevauchement > 0 })
+            .toEqual({ retroaction: 360, enregistree: '', ecart: 8, dedans: true, couvre: false });
+    });
+
     test('Évaluation suit une Rétroaction élargie par la poignée ; sa propre position enregistrée l’emporte', async ({ page }) => {
         await ouvrir(page, { positions: { [RETROACTION]: { left: '', right: '12px', top: '12px', width: '260px', height: '' } } });
         const a = await page.evaluate(() => {
