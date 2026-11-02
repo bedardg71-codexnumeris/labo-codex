@@ -461,10 +461,12 @@
         if (typeof travauxUI !== 'undefined' && travauxUI.demarrerChrono) {
             travauxUI.demarrerChrono();
         }
-        if (typeof travauxUI !== 'undefined' && travauxUI.getModeCourant
-            && travauxUI.getModeCourant() === 'evaluer') {
-            travauxUI.basculerMode('annoter');
-        }
+        if (_enEvaluer()) travauxUI.basculerMode('annoter');
+    }
+
+    /** #1217 — la copie est-elle ouverte en Évaluer ? */
+    function _enEvaluer() {
+        return typeof travauxUI !== 'undefined' && !!travauxUI.getModeCourant && travauxUI.getModeCourant() === 'evaluer';
     }
 
     /** #1123 — les outils qui posent d'un seul toucher : un autocollant, un symbole ou un code. */
@@ -672,6 +674,7 @@
     /**
      * Le Pencil écrit : la paume posée n'est pas un toucher (#1123). Un second doigt, c'est le déplacement de la
      * page (travaux-visionneuse.js), quel que soit l'outil : ce que le premier avait commencé s'abandonne.
+     * En Évaluer, aucun doigt n'annote (#1217).
      * @returns {boolean} true si l'événement s'arrête ici
      */
     function premierTriDuPointeur(e) {
@@ -684,7 +687,10 @@
             abandonnerGesteDuDoigt();
             return true;
         }
-        return false;
+        // #1217 (2 nov. 2026, rapport de Grégoire, iPad) — en Évaluer, un doigt parcourt la copie, il n'annote jamais :
+        // ni sélection, ni code, ni tampon, ni retour en Annoter. Un défilement à deux doigts commence par un doigt, qui
+        // ramenait en Annoter avant l'arrivée du second. Le stylet, lui, annote et ramène en Annoter.
+        return e.pointerType === 'touch' && _enEvaluer();
     }
 
     /**
