@@ -18067,7 +18067,7 @@ tr.ligne-import-ecartee td {
     color: var(--texte-secondaire);
 }
 .eval-retro-pied .btn-copier-retro {
-    flex: 1 1 auto;   /* sur deux rangées à 200 px : chacune va d'un bord à l'autre */
+    flex: 1 1 auto;   /* une rangée dès 300 px ; plus étroite (poignée), deux rangées, chacune d'un bord à l'autre */
     height: 30px;
     margin-left: 0;
     padding: 0 5px;
@@ -18124,7 +18124,13 @@ tr.ligne-import-ecartee td {
     font-size: 0.78rem;
 }
 
+/* Largeur d'ouverture (consigne du 2 nov. 2026, décision de Grégoire : en Évaluer, c'est le texte de l'élève qu'on lit).
+   360 : environ 50 caractères par ligne dans le champ (50,7 mesurés sur la plus longue rétroaction de démo), et les trois
+   boutons du pied sur une rangée (dès 300). La borne `100% - 556px` garde Paramètres (12 + 200), Évaluation (8 + 316),
+   l'écart (8) et le bord (12) dans une zone étroite, l'iPad en portrait ; jamais moins que les 200 d'avant.
+   Une largeur posée à la poignée, en ligne, l'emporte. */
 #travaux-palette-eval-retro {
+    width: clamp(200px, calc(100% - 556px), 360px);
     min-width: 100px;
     max-width: 90vw;
     height: calc(100% - 24px); /* Remplir la zone canvas verticalement */

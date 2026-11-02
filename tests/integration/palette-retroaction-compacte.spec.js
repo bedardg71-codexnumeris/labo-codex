@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -74,6 +75,55 @@ async function ouvrir(page, { options = TOUTES, positions = {}, verrouillee = fa
     await page.evaluate(() => { const o = document.getElementById('overlay-backup-reminder'); if (o) o.remove(); });
 }
 
+/** La plus longue rétroaction finale du pack de démo (noms fictifs) : un texte que l'app produit vraiment. */
+const RETRO_DEMO = (() => {
+    const source = fs.readFileSync(path.join(__dirname, '..', '..', 'js', 'pack-demo-10.js'), 'utf8');
+    let plus = '';
+    for (const m of source.matchAll(/"retroactionFinale": ("(?:[^"\\]|\\.)*")/g)) { const t = JSON.parse(m[1]); if (t.length > plus.length) plus = t; }
+    return plus;
+})();
+
+/**
+ * La lecture du champ de la Générale (consigne du 2 nov. 2026, § 1) : le texte de démo dans un miroir aux mêmes police,
+ * marges et largeur ; on range chaque caractère sur sa ligne par sa hauteur, et on fait la moyenne des lignes PLEINES
+ * (la dernière d'un paragraphe ne compte pas : elle s'arrête où le paragraphe s'arrête). Puis le pied, et les largeurs.
+ */
+const lecture = (page) => page.evaluate((texte) => {
+    const t = document.getElementById('retroactionFinale1');
+    const cs = getComputedStyle(t);
+    const miroir = document.createElement('div');
+    ['fontFamily', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHeight', 'paddingLeft', 'paddingRight', 'wordSpacing', 'overflowWrap', 'wordBreak'].forEach((p) => { miroir.style[p] = cs[p]; });
+    Object.assign(miroir.style, { position: 'absolute', left: '0', top: '0', visibility: 'hidden', whiteSpace: 'pre-wrap', boxSizing: 'border-box', width: t.clientWidth + 'px' });
+    miroir.textContent = texte;
+    document.body.appendChild(miroir);
+    const noeud = miroir.firstChild, r = document.createRange();
+    const lignes = [];
+    let haut = null, ligne = null;
+    for (let i = 0; i < texte.length; i++) {
+        if (texte[i] === '\n') { if (ligne) ligne.derniere = true; ligne = null; haut = null; continue; }
+        r.setStart(noeud, i); r.setEnd(noeud, i + 1);
+        const q = r.getClientRects()[0];
+        if (!q) continue;
+        if (Math.round(q.top) !== haut) { ligne = { n: 0, derniere: false }; lignes.push(ligne); haut = Math.round(q.top); }
+        ligne.n++;
+    }
+    if (ligne) ligne.derniere = true;
+    miroir.remove();
+    const pleines = lignes.filter((l) => !l.derniere);
+    const rect = (id) => document.getElementById(id).getBoundingClientRect();
+    const g = rect('travaux-palette-eval-gauche'), d = rect('travaux-palette-eval-droite'), p = rect('travaux-palette-eval-retro');
+    const zone = document.getElementById('travaux-palette-eval-retro').offsetParent.getBoundingClientRect();
+    const pied = [...document.querySelectorAll('.eval-retro-pied button')].filter((b) => b.offsetParent);
+    return {
+        pleines: pleines.length,
+        parLigne: pleines.reduce((a, l) => a + l.n, 0) / pleines.length,
+        piedRangees: new Set(pied.map((b) => Math.round(b.getBoundingClientRect().top))).size,
+        piedBoutons: pied.length,
+        retroaction: p.width, ecart: p.left - d.right, chevauchement: g.right - d.left, copie: d.left - g.right,
+        dedans: [g, d, p].every((b) => b.left >= zone.left - 0.5 && b.right <= zone.right + 0.5)
+    };
+}, RETRO_DEMO);
+
 const resume = (page) => page.evaluate(() => document.getElementById('resumeOptionsRetroaction').textContent);
 const attendreResume = (page, texte) => page.waitForFunction((t) => document.getElementById('resumeOptionsRetroaction').textContent === t, texte, { timeout: 5000 });
 
@@ -122,10 +172,15 @@ test.describe('La palette Rétroaction compacte', () => {
         await expect.poll(etat).toEqual({ active: ['Générale'], radio: 'generale', vues: ['vueRetroGenerale'] });
     });
 
-    test('aucun des trois mots n’est coupé : 260, 200 et la largeur minimale de la palette', async ({ page }) => {
+    test('aucun des trois mots n’est coupé : à l’ouverture, 260, 200 et la largeur minimale de la palette', async ({ page }) => {
         await ouvrir(page);
+        const ouverture = await bande(page);
+        expect({ largeur: ouverture.largeurPalette, coupes: ouverture.coupes, debordent: ouverture.debordent, rangees: ouverture.rangees })
+            .toEqual({ largeur: 360, coupes: [], debordent: [], rangees: 1 });
+        // 200 : la largeur d'ouverture jusqu'au 2 nov. 2026, la plus petite où ils tiennent ; on y revient à la poignée.
+        await page.evaluate((id) => { document.getElementById(id).style.width = '200px'; }, RETROACTION);
         const a200 = await bande(page);
-        expect(a200.largeurPalette, 'à l’ouverture, la plus petite largeur où ils tiennent').toBe(200);
+        expect(a200.largeurPalette).toBe(200);
         expect(a200.textes).toEqual(['Générale', 'Spécifique', 'Bilan']);
         expect(a200.coupes).toEqual([]);
         expect(a200.debordent).toEqual([]);
@@ -269,7 +324,10 @@ test.describe('La palette Rétroaction compacte', () => {
         expect(generale.boutons).toEqual(['Régénérer', 'Copier', 'Copier tout']);
         expect(generale.bulle).toBe('Copier les 3 sections');
         expect(generale.sousBarre).toBe(false);
-        expect(generale.rangees, 'à 200, deux rangées : les trois boutons demandent 221 px').toBe(2);
+        expect(generale.rangees, 'à l’ouverture (360), une seule rangée').toBe(1);
+        await page.evaluate((id) => { document.getElementById(id).style.width = '200px'; }, RETROACTION);
+        expect((await pied()).rangees, 'ramenée à 200 : deux rangées, les trois boutons demandent 221 px').toBe(2);
+        await page.evaluate((id) => { document.getElementById(id).style.width = ''; }, RETROACTION);
 
         await page.evaluate(() => {
             window.__copies = [];
@@ -344,7 +402,7 @@ test.describe('La palette Rétroaction compacte', () => {
         expect(large).toBe(true);
     });
 
-    test('les largeurs : Paramètres à 200, Évaluation à 316 contre la Rétroaction réelle, et la copie regagne sa place', async ({ page }) => {
+    test('les largeurs : Paramètres à 200, Évaluation à 316 contre la Rétroaction ouverte à 360', async ({ page }) => {
         const mesure = () => page.evaluate(() => {
             const r = (id) => document.getElementById(id).getBoundingClientRect();
             const g = r('travaux-palette-eval-gauche'), d = r('travaux-palette-eval-droite'), p = r('travaux-palette-eval-retro');
@@ -352,8 +410,9 @@ test.describe('La palette Rétroaction compacte', () => {
         });
         await ouvrir(page);
         const m = await mesure();
-        expect(m).toEqual({ parametres: 200, evaluation: 316, retroaction: 200, ecart: 8, copie: 432 });
-        expect(m.copie, 'plus que les 272 d’avant ce lot').toBeGreaterThan(272);
+        // Mesuré le 2 nov. 2026 : Rétroaction 200 → 360 (24 → 50,7 caractères par ligne) ; la copie libre 432 → 272.
+        // Grégoire l'accepte en Évaluer (porte 3.1 de la 1.230) ; en Annoter, rien ne change.
+        expect(m).toEqual({ parametres: 200, evaluation: 316, retroaction: 360, ecart: 8, copie: 272 });
 
         // Revenue à 200, Paramètres garde toute sa barre, cadenas affiché : le « − » dépassait de 7 px.
         const barre = await page.evaluate(() => {
@@ -362,6 +421,35 @@ test.describe('La palette Rétroaction compacte', () => {
             return { cadenas: vis.some((b) => b.id === 'btnVerrouPalette'), dehors: vis.filter((b) => b.getBoundingClientRect().right > p.getBoundingClientRect().right - 1).length };
         });
         expect(barre).toEqual({ cadenas: true, dehors: 0 });
+    });
+
+    for (const [largeur, hauteur] of [[1180, 820], [1280, 720]]) {
+        test(`à ${largeur} × ${hauteur}, hors et en plein écran : le texte de l’élève se lit d’un trait, le pied tient sur une rangée`, async ({ page }) => {
+            await page.setViewportSize({ width: largeur, height: hauteur });
+            await ouvrir(page);
+            for (const plein of [false, true]) {
+                if (plein) {
+                    await page.evaluate(() => window.travauxUI.togglePleinEcran());
+                    expect(await page.evaluate(() => document.body.classList.contains('travaux-plein-ecran-actif')), 'le plein écran est bien pris').toBe(true);
+                }
+                const l = await lecture(page);
+                const quand = plein ? 'en plein écran' : 'hors plein écran';
+                expect(l.pleines, `${quand} : assez de lignes pleines pour une moyenne`).toBeGreaterThan(20);
+                expect(l.parLigne, `${quand} : caractères par ligne`).toBeGreaterThanOrEqual(45);
+                expect(l.parLigne, `${quand} : caractères par ligne`).toBeLessThanOrEqual(55);
+                expect({ piedRangees: l.piedRangees, piedBoutons: l.piedBoutons, ecart: l.ecart, dedans: l.dedans }, quand)
+                    .toEqual({ piedRangees: 1, piedBoutons: 3, ecart: 8, dedans: true });
+            }
+        });
+    }
+
+    test('iPad en portrait : la Rétroaction cède ce qu’il faut, Évaluation ne couvre pas Paramètres', async ({ page }) => {
+        await page.setViewportSize({ width: 820, height: 1180 });
+        await ouvrir(page);
+        const l = await lecture(page);
+        expect({ ecart: l.ecart, dedans: l.dedans, couvre: l.chevauchement > 0 }).toEqual({ ecart: 8, dedans: true, couvre: false });
+        expect(l.retroaction, 'jamais moins que les 200 d’avant').toBeGreaterThanOrEqual(200);
+        expect(l.retroaction).toBeLessThan(360);
     });
 
     test('Évaluation suit une Rétroaction élargie par la poignée ; sa propre position enregistrée l’emporte', async ({ page }) => {

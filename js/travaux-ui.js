@@ -5411,7 +5411,8 @@
         }, 2000);
     }
 
-    /** La Rétroaction par défaut : 200 px de large, à 12 du bord ; 8 d'écart avec Évaluation. */
+    /** Évaluation, avant le calage et quand la Rétroaction ne lui laisse pas sa place (en bandeau) : 220 du bord, sa place
+     *  contre l'ancienne Rétroaction de 200. Ouverte à sa largeur (360 depuis le 2 nov. 2026), c'est le calage qui la pose. */
     const DROITE_EVALUATION_PAR_DEFAUT = '220px';
 
     /**
