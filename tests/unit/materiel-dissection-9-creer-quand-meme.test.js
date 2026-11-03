@@ -88,7 +88,7 @@ describe('L — la lecture : ce qui manque de points ne bloque plus', () => {
     it('L.e — des points hors de 0 à 100 : bloquent toujours (un objet faux)', () => {
         const grille = [[{ l: [['Titre fictif', 'titre']] }], [{ l: [['Critère A fictif', 'critere'], ['/ 150', 'ponderation']] }], [{ l: [['Critère B fictif', 'critere']] }]];
         const c = D.creation(lire(coller(grille)), {});
-        expect(c.raisons).toEqual(['des points en nombre entier de 0 à 100 pour un critère']);
+        expect(c.raisons).toEqual(['des points en nombre entier de 0 à 100 pour un critère (« Critère A fictif »)']);   // #1107 : nommé
         expect(c.aCompleter).toEqual(['les points d’un critère (« Critère B fictif »)']);
     });
 

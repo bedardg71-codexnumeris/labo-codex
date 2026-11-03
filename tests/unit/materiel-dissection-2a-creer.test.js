@@ -211,7 +211,7 @@ describe('R — quand « Créer ma grille » est refusé, et pourquoi', () => {
         const R = compriseTexte([['Grille d’exposé fictive', 'titre'], ['Critère fictif', 'critere'], ['Réponse', 'descripteur'], ['2,5', 'points']]);
         expect(D.creation(R, { nomsGrilles: ['Grille d’exposé fictive'] }).raisons).toEqual([
             'un autre nom de grille : « Grille d’exposé fictive » existe déjà dans ce trimestre',
-            'des points en nombre entier de 0 à 100 pour un critère'
+            'des points en nombre entier de 0 à 100 pour un critère (« Critère fictif »)'   // #1107 : nommé
         ]);
     });
 

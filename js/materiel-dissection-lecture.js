@@ -973,6 +973,35 @@
     function nomAffiche(c) { return c.nom != null ? c.nom : 'Critère à nommer (' + c.numero + ')'; }
 
     /**
+     * #1107 — les raisons de `calculs` qui comptaient sans nommer (points ou pondération hors de 0 à 100,
+     * nom absent, trop d'éléments observables) : le critère en cause, entre parenthèses, comme au lot 5.
+     * `null` : ce n'est pas l'une d'elles.
+     */
+    function raisonQuiNomme(t, R, m, criteresOu) {
+        var A = window.materielAssistant;
+        function texteDe(p) { return String(p && p.valeur != null ? p.valeur : '').trim(); }
+        function horsBornes(min, max) {
+            return function (c) { var p = A.nombre(c.ponderation.valeur); return !isNaN(p) && (!Number.isInteger(p) || p < min || p > max); };
+        }
+        if (/^des points en nombre entier de 0 à 100 pour (un critère|\d+ critères)$/.test(t)) {
+            return t + ' (' + nommer(criteresOu(horsBornes(A.MIN_POINTS, A.MAX_POINTS))) + ')';
+        }
+        if (/^une pondération en nombre entier de 0 à 100 pour (un critère|\d+ critères)$/.test(t)) {
+            return t + ' (' + nommer(criteresOu(horsBornes(0, 100))) + ')';
+        }
+        if (t === 'le nom d’un critère' || /^le nom de \d+ critères$/.test(t)) {
+            return t + ' (' + nommer(m.criteres.map(function (c, i) {
+                return texteDe(c.nom) ? null : 'Critère à nommer (' + (R.criteres[i].numero || i + 1) + ')';
+            }).filter(function (x) { return x != null; })) + ')';
+        }
+        if (t === 'au plus ' + A.MAX_SOUS_CRITERES + ' sous-critères par critère') {
+            return 'au plus ' + A.MAX_SOUS_CRITERES + ' éléments observables par critère (' +
+                nommer(criteresOu(function (c) { return (c.sousCriteres || []).length > A.MAX_SOUS_CRITERES; })) + ')';
+        }
+        return null;
+    }
+
+    /**
      * Un message de `materielAssistant.calculs(m).manquants` → sa forme dans la dissection : les mêmes
      * conditions, mais le critère ou le morceau en cause nommé, et jamais une étape de l'assistant.
      * Les messages de l'assistant lui-même ne changent pas. `null` : le message est retiré (déjà dit).
@@ -982,6 +1011,8 @@
         function texteDe(p) { return String(p && p.valeur != null ? p.valeur : '').trim(); }
         function criteresOu(pred) { return m.criteres.map(function (c, i) { return pred(c) ? nomAffiche(R.criteres[i]) : null; }).filter(function (x) { return x != null; }); }
         function sansPoids(c) { return isNaN(A.nombre(c.ponderation.valeur)); }
+        var nommee = raisonQuiNomme(t, R, m, criteresOu);
+        if (nommee) return nommee;
         if (t === 'des noms de critères plus courts (' + A.MAX_NOM + ' caractères au plus)') {
             return aCouper('des noms de critères plus courts (' + A.MAX_NOM + ' caractères au plus)', criteresOu(function (c) { return texteDe(c.nom).length > A.MAX_NOM; }));
         }
