@@ -775,11 +775,17 @@
             if (p != null) { somme += p; aDesPoids = true; }
         });
         var logique = R.avecNiveaux && R.aPoints ? 'deux' : (R.aPoints ? 'points' : (R.avecNiveaux ? 'niveaux' : null));
+        // #1106 — plusieurs « Total » restent ambigus (sous-totaux, total courant, total répété) :
+        // quand la somme des pondérations tombe sur le dernier, c'est lui le total visé.
+        var totalNb = R.totalNb;
+        var totaux = R.totaux || [];
+        if (aDesPoids && totaux.length > 1 && Math.abs(somme - totaux[totaux.length - 1]) < 1e-9) totalNb = totaux[totaux.length - 1];
         return {
             somme: somme,
             aDesPoids: aDesPoids,
-            jusqua: R.totalNb != null ? R.totalNb : (aDesPoids ? somme : null),
-            totalOk: aDesPoids && R.totalNb != null ? Math.abs(somme - R.totalNb) < 1e-9 : null,
+            total: totalNb,
+            jusqua: totalNb != null ? totalNb : (aDesPoids ? somme : null),
+            totalOk: aDesPoids && totalNb != null ? Math.abs(somme - totalNb) < 1e-9 : null,
             logique: logique
         };
     };

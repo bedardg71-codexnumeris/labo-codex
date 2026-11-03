@@ -1198,7 +1198,7 @@
         if (R.avecNiveaux) constat(pluriel(R.niveaux.length, 'niveau', 'niveaux'));
         if (R.nb.descripteur) constat(pluriel(R.nb.descripteur, 'réponse décrite', 'réponses décrites'));
         if (b.totalOk != null) {
-            constat('Somme des pondérations : ' + formaterNombre(b.somme) + ' · ton total : ' + formaterNombre(R.totalNb) + (b.totalOk ? ' ✓' : ' : écart'),
+            constat('Somme des pondérations : ' + formaterNombre(b.somme) + ' · ton total : ' + formaterNombre(b.total) + (b.totalOk ? ' ✓' : ' : écart'),
                 b.totalOk ? 'dissection-constat-ok' : 'dissection-constat-ecart');
         } else if (b.aDesPoids) constat('Somme des pondérations : ' + formaterNombre(b.somme));
         constat(pluriel(R.sansEtiquette, 'morceau sans étiquette', 'morceaux sans étiquette'));

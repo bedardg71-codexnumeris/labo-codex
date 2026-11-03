@@ -45,6 +45,14 @@ describe('#1106 · plusieurs « Total » dans la dissection', () => {
         expect(D.bilan(R).totalOk).toBe(true);
     });
 
+    it('un total répété (trois « / 100 ») ou courant (/ 70 puis / 100) : 100, sans écart', () => {
+        const T = ['Total : / 100', 'total'];
+        const repete = compriseTexte([...PARTIE_A, T, ...PARTIE_B, T, T]);
+        expect(D.bilan(repete)).toMatchObject({ total: 100, jusqua: 100, totalOk: true });
+        const courant = compriseTexte([...PARTIE_A, ['Total : / 70', 'total'], ...PARTIE_B, T]);
+        expect(D.bilan(courant)).toMatchObject({ total: 100, jusqua: 100, totalOk: true });
+    });
+
     it('un seul « Total » : inchangé, et un vrai écart reste un écart', () => {
         const juste = compriseTexte([...PARTIE_A, ...PARTIE_B, ['Total : / 100', 'total']]);
         expect(D.bilan(juste)).toMatchObject({ jusqua: 100, totalOk: true });
