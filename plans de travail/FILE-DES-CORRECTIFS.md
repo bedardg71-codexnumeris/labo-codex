@@ -98,11 +98,11 @@ Passage du 3 nov. 2026, soir (Claude Code, à partir de 16 h 40) :
 
 - **8. Deux « Total »** : dans « Apporter mon matériel », une grille à deux sous-totaux (« / 70 » puis « / 30 ») affiche « ton total : 100 ✓ » au lieu de « 30 : écart » ; un total général, répété ou courant tombe aussi juste. Relecture neuve : VERT AVEC RÉSERVE (trois « / 100 » ou « / 70 » puis « / 100 » donnaient un faux écart), corrigée dans `60cc1c80`. (`27142de1`, `60cc1c80`, #1106)
 - **9. Plage de niveau** : une plage tapée hors de 0 à 100 (80 à 120, ou −10) empêche « Créer ma grille », avec la raison « la plage de notes d'un niveau » ; les échelles déjà créées ne changent pas. Relecture neuve : VERT AVEC RÉSERVE (la raison ne dit pas « de 0 à 100 » : mot d'écran, proposé ci-dessous). Trouvaille de la relecture : la note retenue d'un niveau n'est pas bornée à 0–100 (un avertissement seulement) ; notée ici, pas inscrite (aucun symptôme vécu). (`d88c9f9f`, #1105)
-- **10. Raisons nommées** : « des points en nombre entier de 0 à 100 pour un critère (« Rigueur fictive ») », de même pour la pondération, le nom absent et « au plus 30 éléments observables par critère (« … ») ». Relecture neuve : en cours à l'arrêt du passage. (`4c0074eb`, #1107)
+- **10. Raisons nommées** : « des points en nombre entier de 0 à 100 pour un critère (« Rigueur fictive ») », de même pour la pondération et « au plus 30 éléments observables par critère (« … ») ». Relecture neuve : VERT AVEC RÉSERVE (la branche de la pondération sans essai ; celle du nom absent inatteignable), corrigée dans `cc3d35d3` : essai ajouté, branche retirée. (`4c0074eb`, `cc3d35d3`, #1107)
 
 **Mots d'écran à soumettre à Grégoire** (passage du 3 nov., soir) :
 1. 6 bis, dans le message vert de l'import : « aucune évaluation à reprendre, la copie devient l'original pour : Prénom Nom ». Remplace le rouge « Jetons non appliqués … le jeton doit être appliqué manuellement ».
-2. 10, dans la dissection : les quatre raisons suivies du critère entre parenthèses ; « sous-critères » y devient « éléments observables » (le mot de la dissection).
+2. 10, dans la dissection : les trois raisons (points, pondération, éléments observables) suivies du critère entre parenthèses ; « sous-critères » y devient « éléments observables » (le mot de la dissection).
 3. Proposé, pas codé (réserve de 9) : « la plage de notes d'un niveau » → « une plage de notes entre 0 et 100 pour un niveau ».
 
 **Arrêt du passage, 3 nov. au soir** : cinq entrées faites (6 bis à 10), contexte de session chargé ; le passage suivant reprend à l'entrée 11. Avant la vérification : **relecture croisée de Cowork sur 6 bis** (`9e0e7593`, `22cd095d`), règle 2 de `PROTOCOLE.md` ; puis les mots d'écran ci-dessus et les Nouvelles.
