@@ -12,6 +12,8 @@ Décision de Grégoire du 3 nov., 17 h 17, sur la mise de côté de Cowork : rou
 ### 10 quinquies. Dans les trajectoires, une copie non recevable se montre à 0 (#1226)
 Décision de Grégoire du 3 nov., 17 h 57, sur la trouvaille de la relecture neuve de 10 quater : « à 0, comme la note ». `js/graphiques-progression.js` ne lit jamais `statutIntegrite` ; il trace `noteFinale` brute. Chercher d'abord la fonction qui fait la note d'une copie non recevable (#1175) et la réutiliser plutôt que de recopier la règle. Hors boucle à l'origine (ce qu'une note veut dire) ; tranché, le lot entre dans la boucle.
 
+Versées par Cowork le 3 nov. à 10 h 15, sur l'accord de Grégoire (10 h 09) : les rapides encore vraies qui passent par la boucle, d'après `VERIFICATION-LISTE-2026-11-03.md` (preuves, fichiers et lignes y sont ; relis-les dans le code avant de corriger, la vérification date de `af6e1c73`). L'ordre est celui de Cowork : la sécurité d'abord, puis ce que Grégoire voit en évaluant, puis l'hygiène.
+
 ### 11. Une grille à niveaux dont les pondérations ne font pas 100 ne s'affiche plus en « % » trompeur (#1104)
 `js/grilles.js` ~832 et ~1356. ⚠ L'avertissement « pas 100 % » a été voulu par #483 : si le correctif le retire, mets l'entrée de côté avec la question.
 
