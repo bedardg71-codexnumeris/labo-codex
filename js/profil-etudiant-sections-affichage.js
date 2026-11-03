@@ -1234,7 +1234,7 @@ function genererSectionAccompagnement(da) {
                 </div>
 
                 <p class="profil-texte-detail">${niveauRai.description}</p>
-                ${niveauRai.defi !== 'Aucun' ? `<p class="u-texte-09 u-texte-gris" style="margin-top: 8px;"><strong>Défi principal :</strong> ${niveauRai.defi}</p>` : ''}
+                ${niveauRai.defi !== 'Aucun' ? `<p class="u-texte-09 u-texte-gris" style="margin-top: 8px;"><strong>Défi principal :</strong> ${echapperHtml(niveauRai.defi)}</p>` : ''}
 
                 ${(() => {
                     // Indicateur de mobilisation dans la carte RàI
