@@ -358,7 +358,7 @@ Source : `plans de travail/VERDICT-RELECTURE-2026-10-18-dissection-5-couper.md` 
 Source : `plans de travail/VERDICT-RELECTURE-2026-10-18-dissection-2b.md` (les deux trouvailles du lot, issue 2 : inscrire).
 
 - [ ] **#1104 – Une grille EN NIVEAUX dont les pondérations ne totalisent pas 100 s'affiche en « % ».** Dans Grilles de critères, ses pondérations restent en « % » et « Sauvegarder » dit « pas 100 % » (`grilles.js`, #483). La note est juste (`calculerNote`, `evaluation-calcul.js`, rapporte à la somme des pondérations, mesuré par Cowork) ; l'affichage trompe. Plus probable depuis le lot 2b : la dissection reprend les pondérations telles quelles.
-- [ ] **#1105 – `plageValide` accepte une plage hors de 0 à 100.** `materiel-assistant.js` (`plageValide`) ne borne pas la plage d'un niveau. Depuis le lot 2b, l'enseignant tape ses plages à la main dans la dissection, et une plage s'imprime sur le PDF des étudiant·es.
+- [x] **#1105 – `plageValide` accepte une plage hors de 0 à 100.** ✅ Réglé le 3 nov. 2026 (entrée 9 de la file), pas en ligne : une plage hors de 0 à 100 empêche « Créer ma grille », avec la raison existante « la plage de notes d'un niveau » ; les échelles déjà créées ne changent pas. Vérifié : essai R.b2 de `tests/unit/materiel-dissection-2b-niveaux.test.js` (rouge sans le correctif), specs `materiel-*` (25 verts). `materiel-assistant.js` (`plageValide`) ne borne pas la plage d'un niveau. Depuis le lot 2b, l'enseignant tape ses plages à la main dans la dissection, et une plage s'imprime sur le PDF des étudiant·es.
 
 ### La dissection, lot 2a – verdict de Cowork, 18 octobre 2026 (8 h 29)
 

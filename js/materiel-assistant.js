@@ -74,9 +74,10 @@
 
     function compte(n, un, plusieurs) { return n === 1 ? un : plusieurs.replace('#', n); }
 
+    /** #1105 — une plage de notes est en pour cent : 0 ≤ min ≤ max ≤ 100 (elle s'imprime sur le PDF des élèves). */
     function plageValide(n) {
         var lo = A.nombre(n.min.valeur), hi = A.nombre(n.max.valeur);
-        return !isNaN(lo) && !isNaN(hi) && lo <= hi;
+        return !isNaN(lo) && !isNaN(hi) && lo >= 0 && lo <= hi && hi <= 100;
     }
 
     function manquantsNiveaux(m, out) {

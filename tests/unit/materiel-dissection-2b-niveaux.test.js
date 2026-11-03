@@ -209,6 +209,14 @@ describe('R — quand « Créer ma grille » est refusé en niveaux, et pourquoi
         expect(D.creation(R, {}, undefined, {}).raisons).toEqual(['la plage de notes de 3 niveaux', 'la note retenue de 3 niveaux']);
     });
 
+    it('R.b2 — #1105 : une plage hors de 0 à 100 est refusée comme une plage à l’envers', () => {
+        const R = comprise(GRILLE_N);
+        const avec = (v) => D.creation(R, {}, undefined, { valeurs: valeurs(R, v) }).raisons;
+        expect(avec([['0', '59', '50'], ['60', '79', '70'], ['80', '120', '90']])).toEqual(['la plage de notes d’un niveau']);
+        expect(avec([['-10', '59', '50'], ['60', '79', '70'], ['80', '100', '90']])).toEqual(['la plage de notes d’un niveau']);
+        expect(avec([['0', '59', '50'], ['60', '79', '70'], ['80', '100', '90']])).toEqual([]);
+    });
+
     it('R.b — une plage à l’envers, une note retenue absente, une valeur qui n’est pas un nombre', () => {
         const R = comprise(GRILLE_N);
         expect(D.creation(R, {}, undefined, { valeurs: valeurs(R, [['59', '0', '50'], ['60', '79', ''], ['80', '100', 'neuf']]) }).raisons)

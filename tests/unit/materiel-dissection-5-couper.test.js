@@ -329,7 +329,7 @@ describe('R — des raisons qui nomment', () => {
         const doc = D.docDepuisPressePapiers({ html: enHtml(grille), texte: '' });
         const R = D.comprendre(doc, liensPar(D.morceaux(doc).ordre, etiquettes(grille)));
         const valeurs = {};
-        D.clesNiveaux(R).forEach((k, i) => { valeurs[k] = { min: String(i * 34), max: String(i * 34 + 33), note: String(i * 34 + 20) }; });
+        D.clesNiveaux(R).forEach((k, i) => { valeurs[k] = { min: String(i * 34), max: String(Math.min(100, i * 34 + 33)), note: String(i * 34 + 20) }; });
         const c = D.creation(R, {}, undefined, { valeurs });
         expect(c.enNiveaux).toBe(true);
         expect(c.raisons).toEqual(['des réponses plus courtes (5 000 caractères au plus) pour « Attente fictive longuement décrite mot… » : coupe-le avec « Couper »']);
