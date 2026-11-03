@@ -33,7 +33,9 @@
                 'Tampons&nbsp;: une version compacte, les icônes seules, avec le nom du tampon touché sous la grille. Plus aucun nom n’est coupé&nbsp;: il passe sur deux lignes.',
                 'Un seul bouton de verrou, «&nbsp;Verrouiller&nbsp;» ou «&nbsp;Déverrouiller&nbsp;», en haut de la palette de gauche, dans Annoter comme dans Évaluer.',
                 'Évaluer&nbsp;: la palette Rétroaction s’ouvre plus large, pour lire d’un trait le texte que l’élève recevra.',
-                'Avec cette version, les palettes s’ouvrent une fois à leur place et à leur taille par défaut.'
+                'Avec cette version, les palettes s’ouvrent une fois à leur place et à leur taille par défaut.',
+                'Sur l’iPad, en Annoter et en Évaluer, la page défile de nouveau&nbsp;; deux doigts font défiler la copie même après un détour.',
+                'Importer des copies&nbsp;: en mode anonymisation, l’étape Optimisation ne montre plus aucun vrai nom, même si les fichiers ont été déposés avant de l’activer. Un lot de reprises (jeton) n’est plus annoncé en doublons&nbsp;: chaque reprise s’ajoute à côté de l’original, qui garde son évaluation.'
             ]
         },
         {
