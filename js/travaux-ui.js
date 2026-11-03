@@ -4666,6 +4666,34 @@
     }
 
     /**
+     * #1223 (relecture de Cowork) — Nom d'un élève dans le bilan des reprises, affiché par les
+     * toasts de l'import : en mode anonymisation, il passe par `anonymiserNom`, comme le reste
+     * du parcours (#1221, `nomEleveDuFichier`). Non échappé.
+     * @param {string} da
+     * @returns {string}
+     */
+    function nomPourBilanReprise(da) {
+        var anonyme = typeof anonymiserNom === 'function' && anonymiserNom(da);
+        if (anonyme) return anonyme;
+        var etudiant = travauxImport.trouverEtudiantParDA(da);
+        return etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : da;
+    }
+
+    /**
+     * #1223 — Vrai si l'évaluation est née APRÈS l'import du fichier (`dateEvaluation`, écrite à
+     * la création seulement) : elle est alors celle de cette copie, pas l'original qu'elle
+     * reprend. Une date absente ou illisible rend faux (l'ancien chemin, le jeton).
+     * @param {Object} evaluation
+     * @param {Object} fichier
+     * @returns {boolean}
+     */
+    function evaluationNeeApresImport(evaluation, fichier) {
+        var tEval = evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation).getTime() : NaN;
+        var tFichier = fichier.dateImport ? new Date(fichier.dateImport).getTime() : NaN;
+        return !isNaN(tEval) && !isNaN(tFichier) && tEval > tFichier;
+    }
+
+    /**
      * Applique automatiquement les jetons de reprise pour les fichiers importés comme reprises.
      * Cherche l'évaluation active correspondante, crée la nouvelle éval, et lie les fichiers.
      * @returns {{jetons: number, rattaches: string[], originaux: string[]}} #608 — les jetons RÉELLEMENT
@@ -4718,12 +4746,7 @@
 
         for (var i = 0; i < fichiersReprise.length; i++) {
             var fichier = fichiersReprise[i];
-            var etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
-            // #1223 (relecture de Cowork) — le bilan s'affiche dans les toasts de l'import :
-            // en mode anonymisation, le nom passe par `anonymiserNom` comme le reste du
-            // parcours (#1221, `nomEleveDuFichier`).
-            var nomEtudiant = (typeof anonymiserNom === 'function' && anonymiserNom(fichier.etudiantDA)) ||
-                (etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : fichier.etudiantDA);
+            var nomEtudiant = nomPourBilanReprise(fichier.etudiantDA);
 
             // Vérifier si un jeton a déjà été appliqué pour ce (DA, productionId)
             var repriseExistante = evaluations.find(function(e) {
@@ -4751,11 +4774,7 @@
             // `_dateDeLEvaluation`), donc une évaluation née APRÈS l'import du fichier n'a pas
             // pu être l'original qu'il reprend. Même décision que sans évaluation. Une date
             // absente garde l'ancien chemin (le jeton).
-            var tEval = evaluation && evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation).getTime() : NaN;
-            var tFichier = fichier.dateImport ? new Date(fichier.dateImport).getTime() : NaN;
-            var evalDeCetteCopie = !isNaN(tEval) && !isNaN(tFichier) && tEval > tFichier;
-
-            if (!evaluation || evalDeCetteCopie) {
+            if (!evaluation || evaluationNeeApresImport(evaluation, fichier)) {
                 // #1223 (entrée 6 bis, 3 nov. 2026) — DÉCISION DE GRÉGOIRE : « un fichier remis
                 // avec un jeton, quand l'élève n'a aucune évaluation de cette production,
                 // devient son original ». Laissé `estReprise: true` sans `evaluationId`, le
