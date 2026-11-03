@@ -530,11 +530,27 @@
     /** Un texte rangé dans un tableau de textes ; une « Suite » le complètera. */
     function ranger(x, arr, tx) { arr.push(tx); var k = arr.length - 1; x.suite = function (s) { arr[k] += ' ' + s; }; }
 
+    /** #1106 — Le total visé, lu de tous les « Total » étiquetés (voir `LIRE_CADRE.total`) ; `null` sans nombre. */
+    function totalVise(totaux) {
+        if (!totaux.length) return null;
+        var dernier = totaux[totaux.length - 1];
+        if (totaux.length === 1) return dernier;
+        var avant = totaux.slice(0, -1).reduce(function (a, b) { return a + b; }, 0);
+        return Math.abs(avant - dernier) < 1e-9 ? dernier : avant + dernier;
+    }
+
     /** Les étiquettes qui n'ont pas besoin d'un critère. */
     var LIRE_CADRE = {
         titre: function (x, id, tx) { ranger(x, x.R.titre, tx); },
         section: function (x, id, tx) { var sec = { nom: tx }; x.section = sec; x.enCours = null; x.suite = function (s) { sec.nom += ' ' + s; }; },
-        total: function (x, id, tx) { x.R.total = tx; var n = nombres(tx); x.R.totalNb = n.length ? n[n.length - 1] : null; },
+        // #1106 — plusieurs « Total » : des sous-totaux qui s'additionnent (« / 70 », puis « / 30 » →
+        // 100), sauf si le dernier vaut la somme des autres (le total général, « / 100 », garde 100).
+        // Avant, seul le dernier comptait : « ton total : 30 : écart » sur une grille juste.
+        total: function (x, id, tx) {
+            x.R.total = tx; var n = nombres(tx);
+            if (n.length) x.R.totaux.push(n[n.length - 1]);
+            x.R.totalNb = totalVise(x.R.totaux);
+        },
         critere: function (x, id, tx) {
             var nc = nouveauCritere(x, tx, false);
             if (x.table) for (var i = 0; i < x.pos[id].rs; i++) x.parRangee[x.pos[id].r + i] = nc;
@@ -726,7 +742,7 @@
         var M = D.morceauxLus(doc, rattachements);
         liens = liens || {};
         function typeDe(id) { var t = liens[id]; return TYPE[t] ? t : null; }
-        var R = { titre: [], description: [], criteres: [], niveaux: [], codes: [], total: null, totalNb: null, sansEtiquette: 0, sansPlace: [], nb: {} };
+        var R = { titre: [], description: [], criteres: [], niveaux: [], codes: [], total: null, totalNb: null, totaux: [], sansEtiquette: 0, sansPlace: [], nb: {} };
         var x = { R: R, table: !!doc && doc.mode === 'table', pos: M.pos, nivIdx: {}, avecNiveaux: false, section: null, enCours: null, parRangee: {}, suite: null,
             codeEnCours: null, codeParRangee: {} };
         lireNiveaux(x, M.ordre, M.texte, typeDe);
