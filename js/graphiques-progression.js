@@ -3378,7 +3378,8 @@ let etatTrajectoires = {
     mesure: 'noteFinale',
     criteresActifs: null,
     daSurbrillance: '',
-    afficherMediane: false
+    afficherMediane: false,
+    sansJetons: false
 };
 
 let graphiqueTrajectoiresInstance = null;
@@ -3556,6 +3557,53 @@ function chargerProductionsTrajectoires() {
 }
 
 /**
+ * #1225 — Ce que la note sous les trajectoires dit des originaux introuvables (« Sans jetons »).
+ * @param {number} n
+ * @returns {string} '' quand rien ne manque
+ */
+function _messageOriginauxIntrouvables(n) {
+    if (!n) return '';
+    return n === 1
+        ? '1 note d\u2019origine introuvable (original supprimé) : son point reste vide'
+        : n + ' notes d\u2019origine introuvables (originaux supprimés) : leurs points restent vides';
+}
+
+/**
+ * #1225 — « Sans jetons » : à chaque production reprise, la note de la copie d'origine prend
+ * la place de celle de la reprise, dans l'index du graphique (toutes les mesures, la médiane
+ * comprise). Les jetons de délai ne changent aucune note : seule la reprise compte. Avec deux
+ * reprises, la chaîne `repriseDeId` remonte jusqu'à la première copie. Si l'original n'existe
+ * plus (pratique « supprimer l'originale »), l'entrée est retirée : le point devient un trou.
+ * Lecture seule : rien n'est écrit.
+ * @param {Map<string,Object>} evalIndex - DA_productionId → évaluation tracée (modifiée en place)
+ * @param {Array<Object>} evaluations - toutes les évaluations, archivées comprises
+ * @param {boolean} actif - la case cochée ; décochée, rien ne change
+ * @returns {number} nombre de notes d'origine introuvables
+ */
+function _substituerOriginauxTrajectoires(evalIndex, evaluations, actif) {
+    if (!actif) return 0;
+    const parId = new Map();
+    evaluations.forEach(e => { if (e && e.id) parId.set(e.id, e); });
+    let introuvables = 0;
+    Array.from(evalIndex.keys()).forEach(k => {
+        let ev = evalIndex.get(k);
+        if (!ev || !ev.repriseDeId) return;
+        const vus = new Set();
+        while (ev && ev.repriseDeId && !vus.has(ev.id)) {
+            vus.add(ev.id);
+            ev = parId.get(ev.repriseDeId);
+        }
+        if (ev && !ev.repriseDeId) {
+            evalIndex.set(k, ev);
+        } else {
+            evalIndex.delete(k);
+            introuvables++;
+        }
+    });
+    return introuvables;
+}
+
+/**
  * Crée le graphique « Trajectoires par production ».
  *
  * Chaque ligne = trajectoire d'un étudiant à travers les productions.
@@ -3572,6 +3620,7 @@ function chargerProductionsTrajectoires() {
  * @param {Set<string>} [options.criteresActifs] - Critères à agréger (mode habiletés ; défaut : tous)
  * @param {string} [options.daSurbrillance] - DA de l'étudiant à mettre en relief
  * @param {boolean} [options.afficherMediane] - Afficher médiane + bande Q25-Q75
+ * @param {boolean} [options.sansJetons] - #1225 : la note d'origine aux productions reprises
  * @returns {Chart|null}
  */
 function creerGraphiqueTrajectoiresProduction(canvasId, options) {
@@ -3646,6 +3695,8 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                 if (dN > dE) evalIndex.set(k, e);
             }
         }
+        const ligneOriginaux = _messageOriginauxIntrouvables(
+            _substituerOriginauxTrajectoires(evalIndex, evaluationsBrutes, options.sansJetons));
 
         // 5. Labels de l'axe X (activité d'apprentissage > description > titre)
         const labels = artefacts.map(a => {
@@ -4176,17 +4227,19 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
         if (mode === 'habiletes') {
             const echelles = echelleMajoritaireDesEvaluations(Array.from(evalIndex.values()));
             _zonesParCanvas.set(canvas, echelles.echelle ? genererZonesDepuisEchelle(echelles.echelle) : []);
-            const lignes = [];
+            const lignes = [ligneOriginaux];
             if (compteConversion.sansValeur > 0) {
                 lignes.push(compteConversion.sansValeur + ' valeur' + (compteConversion.sansValeur > 1 ? 's' : '') + ' sans valeur convertible dans cette échelle');
             }
             if (echelles.distinctes > 1 && echelles.echelle) {
                 lignes.push('Zones : échelle « ' + (echelles.echelle.nom || echelles.echelle.id) + ' » (' + echelles.nb + ' évaluations sur ' + echelles.total + ')');
             }
-            if (noteConversion) { noteConversion.textContent = lignes.join(' · '); noteConversion.hidden = lignes.length === 0; }
+            const texte = lignes.filter(Boolean).join(' · ');
+            if (noteConversion) { noteConversion.textContent = texte; noteConversion.hidden = !texte; }
         } else {
             _zonesParCanvas.delete(canvas);
-            if (noteConversion) { noteConversion.textContent = ''; noteConversion.hidden = true; }
+            // #1225 — en note finale, la note ne dit que les originaux introuvables de « Sans jetons ».
+            if (noteConversion) { noteConversion.textContent = ligneOriginaux; noteConversion.hidden = !ligneOriginaux; }
         }
 
         const chart = new Chart(ctx, config);
@@ -4268,6 +4321,8 @@ function rafraichirGraphiqueTrajectoires() {
 
     const toggleMediane = document.getElementById('trajectoires-toggle-mediane');
     const afficherMediane = !!(toggleMediane && toggleMediane.checked);
+    const toggleSansJetons = document.getElementById('trajectoires-toggle-sans-jetons');
+    const sansJetons = !!(toggleSansJetons && toggleSansJetons.checked);
 
     const selecteur = document.getElementById('selecteur-etudiant-trajectoires');
     const daAvant = selecteur ? selecteur.value : '';
@@ -4275,12 +4330,14 @@ function rafraichirGraphiqueTrajectoires() {
     etatTrajectoires.mesure = mesure;
     etatTrajectoires.criteresActifs = actifs.size > 0 ? actifs : null;
     etatTrajectoires.afficherMediane = afficherMediane;
+    etatTrajectoires.sansJetons = sansJetons;
     etatTrajectoires.daSurbrillance = daAvant;
 
     creerGraphiqueTrajectoiresProduction('graphique-trajectoires-production', {
         mesure: mesure,
         criteresActifs: etatTrajectoires.criteresActifs,
         afficherMediane: etatTrajectoires.afficherMediane,
+        sansJetons: sansJetons,
         daSurbrillance: daAvant
     });
 

@@ -3540,6 +3540,11 @@ function initialiserCarteTrajectoiresProduction() {
             }
         }
 
+        // #1225 — « Sans jetons » ne se retient pas d'une visite à l'autre : la carte s'ouvre
+        // sur les notes des reprises, la case décochée avec elle.
+        const cbSansJetons = document.getElementById('trajectoires-toggle-sans-jetons');
+        if (cbSansJetons) cbSansJetons.checked = false;
+
         // Rendu initial du graphique
         if (typeof creerGraphiqueTrajectoiresProduction === 'function') {
             creerGraphiqueTrajectoiresProduction('graphique-trajectoires-production', {

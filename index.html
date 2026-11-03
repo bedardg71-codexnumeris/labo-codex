@@ -7546,6 +7546,10 @@
                                     <input type="checkbox" id="trajectoires-toggle-mediane" data-on-change="rafraichirGraphiqueTrajectoires">
                                     <span>Médiane du groupe</span>
                                 </label>
+                                <label class="u-align-center trajectoires-toggle-sans-jetons-label" style="display: flex; gap: 0.4rem; cursor: pointer; color: rgba(255,255,255,0.85);" for="trajectoires-toggle-sans-jetons" title="Aux productions reprises, la note de la copie d’origine à la place de celle de la reprise">
+                                    <input type="checkbox" id="trajectoires-toggle-sans-jetons" data-on-change="rafraichirGraphiqueTrajectoires">
+                                    <span>Sans jetons</span>
+                                </label>
                             </div>
                         </h3>
 
@@ -7566,6 +7570,8 @@
                                 <li>La <strong>bande grise</strong> = <strong>écart inter-quartile</strong> (Q25 à Q75) : couvre les 50&nbsp;% d'étudiant·es au centre. Plus la bande est étroite, plus le groupe est homogène.</li>
                             </ul>
                             Les étudiant·es marqué·e·s <em>inactif·ve·s / abandon</em> sont retiré·e·s du calcul de la médiane et de la bande.
+                            <br><br>
+                            Coche <strong>« Sans jetons »</strong> pour voir le groupe sans ses reprises : à chaque production reprise, la note de la copie d'origine remplace celle de la reprise (la médiane suit). Décoche pour revenir aux reprises. Une reprise que tu n'as pas encore réévaluée porte la note de l'original : la courbe n'y bouge pas.
                             <br><br>
                             Sélectionne un·e étudiant·e pour mettre sa courbe en relief, puis clique sur <strong>👤</strong> pour ouvrir son profil.
                         </div>
@@ -11832,7 +11838,7 @@
     <script src="js/indices.js?v=20261017a"></script>
 
     <!-- PRIORITÉ 4: Modules d'affichage (APRÈS calcul) -->
-    <script src="js/tableau-bord-apercu.js?v=20261101a"></script> <!-- Consigne du 31 oct., partie F : même en-tête aux trois palettes, ↔ et ↕ en texte sur l’iPad · Les barres de l’Aperçu (30 oct.) : passages larges, axe au choix ·Lot 2 des seuils (30 oct.) : la phrase sous la barre RàI lit le signal de groupe (#1191) · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
+    <script src="js/tableau-bord-apercu.js?v=20261103a"></script> <!-- #1225 (3 nov., soir) : « Sans jetons » décochée à l’ouverture de la carte · Consigne du 31 oct., partie F : même en-tête aux trois palettes, ↔ et ↕ en texte sur l’iPad · Les barres de l’Aperçu (30 oct.) : passages larges, axe au choix ·Lot 2 des seuils (30 oct.) : la phrase sous la barre RàI lit le signal de groupe (#1191) · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : SOLO désactivé, la barre du suivi des fondations dit que tous les critères sont surveillés · Refonte nav SP5 : faux ami CSS class préservée -->
     <script src="js/profil-etudiant-helpers.js?v=20261030d"></script> <!-- #1178, lot 5 (30 oct.) : obtenirTermeProduction suit la variante · Standards sans portfolio, lot 2 (29 oct.) : le dépistage lit le pool de la note · #1117, suite (20 oct.) : SOLO désactivé, le dépistage et le suivi des fondations lisent tous les critères ; le survol du niveau sans palier SOLO · Refactor session A : zone helpers extraite. Compte de fonctions et de lignes retire le 27 aout 2026 : il disait 16 alors que le module en exportait 19, et il se re-perimerait au prochain ajout. · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-calculs.js?v=20261101a"></script> <!-- Lot 2 des seuils (30 oct.) : le niveau RàI comparé au groupe-cours · #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · #1117, suite (20 oct.) : l’IPB lit criteresSuiviFondations · #1117 (19 oct.) : la cible nomme le défi sans étiquette SOLO si le réglage est désactivé · Refactor session A : zone calculs pédagogiques extraite (14 fonctions, ~1500 LOC) · + _diagnostiquerResolutionEchelles (audit du 28 août) · #555 (d) : la préférence IDME se nomme seuilIdme* -->
     <script src="js/profil-etudiant-rapport.js?v=20261029b"></script> <!-- #1152, lot 5 (29 oct.) : « étudiant·e » dans les écrans d’enseignant · Refactor session A : zone rapport API extraite (7 fonctions, ~390 LOC) -->
@@ -11930,7 +11936,7 @@
     <script src="js/journal.js?v=20261022a"></script>
     <script src="js/snapshots.js?v=20261029a"></script> <!-- E15 (28 oct.) : la remise pour C cherche la reprise dans la liste lue · #116 (2 juil.) : flux auto scopé au GC actif + dédoublonnage -->
     <script src="js/couleurs.js?v=20260512c"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_GRAPHIQUE.tooltip + couleurs() -->
-    <script src="js/graphiques-progression.js?v=20261028a"></script> <!-- Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
+    <script src="js/graphiques-progression.js?v=20261103a"></script> <!-- #1225 (3 nov., soir) : « Sans jetons », la note d’origine aux productions reprises · Beta 99.42 b0512-0738 : #246 STYLE_TOOLTIP délégué à STYLE_GRAPHIQUE -->
     <script src="js/correlations-longitudinales.js?v=20261022b"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
         <script src="js/impact-jetons.js?v=20261022b"></script> <!-- Beta 99.42 b0512-0738 : #246 tooltip via STYLE_GRAPHIQUE -->
 
