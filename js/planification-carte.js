@@ -7207,6 +7207,9 @@ function attacherEvenements(el, donnees) {
             }
 
             el.classList.add('planif-dragging');
+            // #1070 — le groupe ne se dépose pas dans la corbeille (`onUpGroupe` ne la teste
+            // pas) : elle ne doit donc ni s'armer ni virer au rouge pendant ce geste.
+            el.classList.add('planif-dragging-groupe');
             preparerAimantation(tousNoeuds);
 
             function onMoveGroupe(e2) {
@@ -7255,7 +7258,7 @@ function attacherEvenements(el, donnees) {
 
             function onUpGroupe(e2) {
                 if (e2 && e2.pointerId !== pid) return;
-                el.classList.remove('planif-dragging');
+                el.classList.remove('planif-dragging', 'planif-dragging-groupe');
                 effacerGuides();
                 majBarreAlignement();
                 document.removeEventListener('pointermove', onMoveGroupeThrottled);
@@ -8181,7 +8184,10 @@ function pointSurCorbeille(x, y) {
  * @returns {boolean} true si la suppression a eu lieu
  */
 function deposerDansCorbeille(e, id) {
-    if (!e || !pointSurCorbeille(e.clientX, e.clientY)) return false;
+    // #1070 — seul un geste qui a BOUGÉ jusqu'à la corbeille, l'a vue s'armer et virer au
+    // rouge, supprime. Invisible au repos, elle garde son rectangle : sans cette garde, un
+    // simple toucher sur un bloc posé sous elle le supprimait (relecture du lot, mesuré).
+    if (!e || !gesteCorbeille.survolee || !pointSurCorbeille(e.clientX, e.clientY)) return false;
     var nd = etat.noeuds.get(id);
     if (!nd) return false;
     var nom = nd.titre || obtenirLabelNoeud(nd);
@@ -8209,12 +8215,24 @@ function armerCorbeille(armee) {
     if (!armee) el.classList.remove('planif-corbeille-survol');
 }
 
+// #1070 — le geste en cours : d'où il part, et s'il survole la corbeille après avoir bougé.
+var SEUIL_GESTE_CORBEILLE = 8; // px : en deçà, un toucher, pas un déplacement
+var gesteCorbeille = { x: 0, y: 0, survolee: false };
+document.addEventListener('pointerdown', function(e) {
+    gesteCorbeille.x = e.clientX;
+    gesteCorbeille.y = e.clientY;
+    gesteCorbeille.survolee = false;
+}, true);
+
 // UN listener global plutôt qu'une retouche des trois `onMove` du drag :
 // il sort immédiatement quand rien n'est en cours de déplacement.
 document.addEventListener('pointermove', function(e) {
-    var enDrag = document.querySelector('.planif-dragging');
+    var enDrag = document.querySelector('.planif-dragging:not(.planif-dragging-groupe)');
     armerCorbeille(!!enDrag);
-    if (enDrag) majEtatCorbeille(pointSurCorbeille(e.clientX, e.clientY));
+    if (!enDrag) return;
+    var aBouge = Math.abs(e.clientX - gesteCorbeille.x) + Math.abs(e.clientY - gesteCorbeille.y) >= SEUIL_GESTE_CORBEILLE;
+    gesteCorbeille.survolee = aBouge && pointSurCorbeille(e.clientX, e.clientY);
+    majEtatCorbeille(gesteCorbeille.survolee);
 });
 document.addEventListener('pointerup', function() { armerCorbeille(false); });
 document.addEventListener('pointercancel', function() { armerCorbeille(false); });

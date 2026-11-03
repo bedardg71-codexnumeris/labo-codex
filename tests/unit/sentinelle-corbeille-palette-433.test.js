@@ -35,6 +35,8 @@ const css = readFileSync(path.join(racine, 'styles.css'), 'utf8');
 
 let api;
 let corbeille;
+let ecouteurs;   // écouteurs posés sur le faux document : le geste se rejoue par eux (#1070)
+let enDrag;      // un bloc porte `.planif-dragging`
 let toasts;
 
 /** Le rectangle que le faux DOM sert pour la corbeille. */
@@ -56,6 +58,8 @@ function monterModule() {
         getBoundingClientRect: () => RECT_CORBEILLE
     };
     const elements = { 'planif-corbeille': corbeille };
+    ecouteurs = {};
+    enDrag = false;
 
     const fauxElement = () => ({
         style: {}, dataset: {}, innerHTML: '', textContent: '',
@@ -76,9 +80,9 @@ function monterModule() {
         requestAnimationFrame: (fn) => { fn(); return 0; },
         document: {
             getElementById: (id) => elements[id] || null,
-            querySelector: () => null,
+            querySelector: (sel) => (enDrag && /planif-dragging/.test(sel) ? {} : null),
             querySelectorAll: () => [],
-            addEventListener: () => {},
+            addEventListener: (type, fn) => { (ecouteurs[type] = ecouteurs[type] || []).push(fn); },
             createElement: fauxElement,
             createElementNS: fauxElement,
             body: { appendChild() {}, removeChild() {} }
@@ -122,11 +126,33 @@ describe('#433 · A — le dépôt se résout par géométrie', () => {
     });
 });
 
+/** Rejoue un geste par les écouteurs du module : appui en (x0, y0), bloc en drag, glissé en (x1, y1). */
+function glisser(x0, y0, x1, y1) {
+    (ecouteurs.pointerdown || []).forEach((fn) => fn({ clientX: x0, clientY: y0 }));
+    enDrag = true;
+    (ecouteurs.pointermove || []).forEach((fn) => fn({ clientX: x1, clientY: y1 }));
+}
+
 describe('#433 · B — déposer supprime vraiment', () => {
     it('relâché SUR la corbeille : le nœud disparaît, la fonction le dit', () => {
+        glisser(300, 200, 60, 530);
         const supprime = api.deposerDansCorbeille({ clientX: 60, clientY: 530 }, 'n-1');
         expect(supprime).toBe(true);
         expect(api.etat.noeuds.has('n-1')).toBe(false);
+    });
+
+    it('#1070 — un TOUCHER sans mouvement sur un bloc posé sous la corbeille ne le supprime pas', () => {
+        // Invisible au repos, la corbeille garde son rectangle : la relecture du lot a mesuré
+        // trois blocs sur trois supprimés au simple toucher, sans cette garde.
+        glisser(60, 530, 62, 531);   // moins de 8 px : un toucher qui tremble
+        expect(api.deposerDansCorbeille({ clientX: 62, clientY: 531 }, 'n-1')).toBe(false);
+        expect(api.etat.noeuds.has('n-1')).toBe(true);
+    });
+
+    it('#1070 — un geste qui a survolé la corbeille puis l’a quittée ne supprime pas', () => {
+        glisser(300, 200, 60, 530);
+        (ecouteurs.pointermove || []).forEach((fn) => fn({ clientX: 600, clientY: 200 }));
+        expect(api.deposerDansCorbeille({ clientX: 60, clientY: 530 }, 'n-1')).toBe(false);
     });
 
     it('relâché AILLEURS : rien n’est supprimé, la fonction le dit', () => {

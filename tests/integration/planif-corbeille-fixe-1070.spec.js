@@ -29,33 +29,49 @@ async function ouvrirCarte(page) {
     await page.waitForTimeout(400);
 }
 
-// La garde « carte masquée » est prouvée par le banc Vitest #433 : ici, un navigateur rend déjà
-// un rectangle nul pour un élément masqué, et l'assertion ne pourrait pas échouer.
-test('#1070 — relâché sur la corbeille, le bloc est supprimé', async ({ page }) => {
+// La garde « carte masquée » et celle du toucher sans mouvement sont prouvées par le banc Vitest
+// #433. Ici, le vrai geste : souris enfoncée sur un bloc, glissée jusqu'à la corbeille, relâchée.
+test('#1070 — glissé jusqu\'à la corbeille et relâché, le bloc est supprimé', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push('pageerror: ' + e.message));
     await ouvrirCarte(page);
+    await page.evaluate(() => { document.getElementById('transition-bandeau')?.remove(); });
 
-    const r = await page.evaluate(() => {
+    const depart = await page.evaluate(() => {
         const api = window.planificationCarte;
-        const el = document.getElementById('planif-corbeille');
-        const rect = el.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const id = [...api.etat.noeuds.keys()][0];
-        const avant = api.etat.noeuds.size;
-        const supprime = api.deposerDansCorbeille({ clientX: cx, clientY: cy }, id);
-        const apres = api.etat.noeuds.size;
-        const encore = api.etat.noeuds.has(id);
-        return { fixe: getComputedStyle(el).position, id: !!id, avant, apres, supprime, encore,
-            largeur: rect.width };
+        const zone = document.getElementById('planif-zone-travail');
+        window.scrollBy(0, zone.getBoundingClientRect().top);
+        const corb = document.getElementById('planif-corbeille').getBoundingClientRect();
+        // Un bloc sans parent, visible, loin de la corbeille, et que rien ne recouvre.
+        for (const [id, nd] of api.etat.noeuds) {
+            if (nd.parent) continue;
+            const el = document.getElementById(id);
+            if (!el) continue;
+            const r = el.getBoundingClientRect();
+            const x = r.left + Math.min(20, r.width / 2), y = r.top + Math.min(12, r.height / 2);
+            if (r.width === 0 || y > corb.top - 80 || y < 0 || x < 0 || x > innerWidth) continue;
+            const dessus = document.elementFromPoint(x, y);
+            if (!dessus || !el.contains(dessus)) continue;
+            return { id, x, y, cx: corb.left + corb.width / 2, cy: corb.top + corb.height / 2,
+                fixe: getComputedStyle(document.getElementById('planif-corbeille')).position,
+                avant: api.etat.noeuds.size };
+        }
+        return null;
     });
+    expect(depart, 'un bloc libre et visible sur la carte de démo').not.toBeNull();
+    expect(depart.fixe, 'la corbeille est en position fixe : c\'est la condition du défaut').toBe('fixed');
 
-    expect(r.fixe, 'la corbeille est en position fixe : c\'est la condition du défaut').toBe('fixed');
-    expect(r.id, 'la carte de démo porte au moins un bloc').toBe(true);
-    expect(r.largeur, 'la corbeille a une géométrie à l\'écran').toBeGreaterThan(0);
-    expect(r.supprime, 'le dépôt sur la corbeille supprime').toBe(true);
-    expect(r.encore).toBe(false);
-    expect(r.apres).toBeLessThan(r.avant);
+    await page.mouse.move(depart.x, depart.y);
+    await page.mouse.down();
+    await page.mouse.move((depart.x + depart.cx) / 2, (depart.y + depart.cy) / 2, { steps: 6 });
+    await page.mouse.move(depart.cx, depart.cy, { steps: 6 });
+    const rouge = await page.evaluate(() => document.getElementById('planif-corbeille').classList.contains('planif-corbeille-survol'));
+    await page.mouse.up();
+
+    const r = await page.evaluate((id) => ({ encore: window.planificationCarte.etat.noeuds.has(id),
+        apres: window.planificationCarte.etat.noeuds.size }), depart.id);
+    expect(rouge, 'la corbeille vire au rouge sous le bloc glissé').toBe(true);
+    expect(r.encore, 'relâché sur la corbeille, le bloc est supprimé').toBe(false);
+    expect(r.apres).toBeLessThan(depart.avant);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
 });

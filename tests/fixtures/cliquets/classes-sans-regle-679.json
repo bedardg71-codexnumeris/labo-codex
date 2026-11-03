@@ -194,6 +194,7 @@
  "js/planification-carte.js:export-perso-choisies",
  "js/planification-carte.js:planif-badge-gris",
  "js/planification-carte.js:planif-cours-carte-btn",
+ "js/planification-carte.js:planif-dragging-groupe",
  "js/planification-carte.js:planif-nettoyage-btn",
  "js/planification-carte.js:planif-note-hors-classe",
  "js/planification-carte.js:planif-objectif-servi",
