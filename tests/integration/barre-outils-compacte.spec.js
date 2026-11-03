@@ -514,33 +514,51 @@ test.describe('La palette Codes compacte', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
-// LA ZONE DE TRAVAIL TIENT DANS L'ÉCRAN (partie C). Avant : la zone finissait à 1060 pour 820, la page défilait de 241.
+// LA PAGE DÉFILE, ET LA ZONE REMPLIT L'ÉCRAN UNE FOIS DÉFILÉE (Grégoire, 3 nov. 2026, sur l'iPad). Du 1er au 3 nov.
+// (partie C), la zone tenait sous l'en-tête et la page ne défilait plus : l'en-tête du cours et les menus prenaient leur
+// place à la copie, à demeure. Il veut faire monter l'écran entier pour les cacher. La navigation principale est
+// `sticky`, mais `body` a un `overflow` : elle part avec la page, et ne compte pas (mesuré le 3 nov.).
 
 const horsEcran = (page) => page.evaluate(() => {
     const z = document.getElementById('travaux-zone-canvas').getBoundingClientRect();
+    const l = document.querySelector('.travaux-visionneuse-layout').getBoundingClientRect();
     return {
-        deborde: document.scrollingElement.scrollHeight - innerHeight, basZone: Math.round(z.bottom), vue: innerHeight, zoneH: Math.round(z.height),
+        course: document.scrollingElement.scrollHeight - innerHeight, defile: Math.round(scrollY), hautZone: Math.round(l.top),
+        basZone: Math.round(z.bottom), vue: innerHeight, zoneH: Math.round(z.height),
         palettes: [...document.querySelectorAll('.palette-flottante')].filter((p) => p.offsetParent).filter((p) => p.getBoundingClientRect().bottom > z.bottom + 0.5).map((p) => p.id)
     };
 });
 
-test.describe('La zone de travail tient dans l’écran', () => {
-    test('WebKit connaît `dvh` : c\u2019est l\u2019unité retenue, pour suivre la barre d\u2019adresse de Safari', async ({ page }) => {
+/** La page défilée jusqu'au bout : la position où l'on travaille. */
+const defilerAuBout = async (page) => {
+    await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight));
+    await page.waitForFunction(() => Math.abs(document.scrollingElement.scrollHeight - innerHeight - scrollY) <= 1);
+};
+
+/** Défilée jusqu'au bout, la zone va du haut de l'écran à son bas : la page a défilé de tout ce qui la précédait. */
+const remplitLEcran = async (page, etiquette) => {
+    await defilerAuBout(page);
+    const m = await horsEcran(page);
+    expect(m.course, `${etiquette} : la page défile`).toBeGreaterThan(100); // témoin : l'en-tête et les menus
+    expect(Math.abs(m.hautZone), `${etiquette} : haut de la zone`).toBeLessThanOrEqual(1);
+    expect(Math.abs(m.basZone - m.vue), `${etiquette} : bas de la zone`).toBeLessThanOrEqual(1);
+    expect(m.palettes, etiquette).toEqual([]);
+    return m;
+};
+
+test.describe('La page défile, et la zone remplit l’écran une fois défilée', () => {
+    test('WebKit connaît `dvh` : c’est l’unité retenue, pour suivre la barre d’adresse de Safari', async ({ page }) => {
         await ouvrirBarre(page);
         expect(await page.evaluate(() => CSS.supports('height', 'calc(100dvh - 10px)'))).toBe(true);
     });
 
     for (const mode of ['annoter', 'evaluer']) {
-        test(`${mode} : à 1180 × 820, la page ne défile plus, et la zone va jusqu’au bas de l’écran`, async ({ page }) => {
+        test(`${mode} : à 1180 × 820, la page défile de l’en-tête et des menus, puis la zone occupe l’écran`, async ({ page }) => {
             await ouvrirBarre(page);
             await page.evaluate((m) => window.travauxUI.basculerMode(m), mode);
             await page.waitForFunction((m) => window.travauxUI.getModeCourant() === m, mode);
             if (mode === 'annoter') await ouvrirCodes(page);
-            await page.waitForFunction(() => document.scrollingElement.scrollHeight <= innerHeight);
-            const m = await horsEcran(page);
-            expect(m.deborde).toBeLessThanOrEqual(0);
-            expect(Math.abs(m.basZone - m.vue)).toBeLessThanOrEqual(1);
-            expect(m.palettes).toEqual([]);
+            await remplitLEcran(page, mode);
         });
     }
 
@@ -550,31 +568,52 @@ test.describe('La zone de travail tient dans l’écran', () => {
         const avant = await mesure();
         for (const [l, h] of [[1180, 740], [1180, 680], [1512, 900]]) {
             await page.setViewportSize({ width: l, height: h });
-            await page.waitForFunction(() => document.scrollingElement.scrollHeight <= innerHeight);
-            const m = await horsEcran(page);
-            expect(Math.abs(m.basZone - m.vue), `${l} × ${h}`).toBeLessThanOrEqual(1);
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await remplitLEcran(page, `${l} × ${h}`);
         }
         expect(await mesure()).toBe(avant); // même largeur d'en-tête : la mesure n'a pas dérivé
     });
 
-    test('si ce qui précède change de hauteur, la zone suit', async ({ page }) => {
+    test('si ce qui précède change de hauteur, la page défile d’autant, et la zone remplit toujours l’écran', async ({ page }) => {
         await ouvrirBarre(page);
+        const course = await page.evaluate(() => document.scrollingElement.scrollHeight - innerHeight);
         await page.evaluate(() => { document.getElementById('sous-navigation').style.height = '100px'; });
-        await page.waitForFunction(() => document.scrollingElement.scrollHeight <= innerHeight);
-        const m = await horsEcran(page);
-        expect(Math.abs(m.basZone - m.vue)).toBeLessThanOrEqual(1);
+        await page.waitForFunction((c) => document.scrollingElement.scrollHeight - innerHeight > c + 20, course);
+        await remplitLEcran(page, 'sous-menu plus haut');
     });
 
-    test('au retour d’une autre section, la zone tient toujours', async ({ page }) => {
+    test('au retour d’une autre section, la zone remplit toujours l’écran', async ({ page }) => {
         await ouvrirBarre(page);
         await page.evaluate(() => window.afficherSection('suivi'));
         await page.waitForFunction(() => document.querySelector('.travaux-visionneuse-layout').offsetParent === null);
         await page.evaluate(() => { window.afficherSection('evaluations'); window.afficherSousSection('evaluations-annoter'); });
-        await page.waitForFunction(() => document.querySelector('.travaux-visionneuse-layout')?.offsetParent && document.scrollingElement.scrollHeight <= innerHeight);
-        expect((await horsEcran(page)).deborde).toBeLessThanOrEqual(0);
+        await page.waitForFunction(() => document.querySelector('.travaux-visionneuse-layout')?.offsetParent);
+        // La section et la sous-section entrent en glissant de 10 px chacune (`@keyframes apparition`, 0,3 s ; mesuré : 20 px
+        // à l'arrivée) : on juge la zone une fois posée.
+        await page.waitForFunction(() => {
+            for (let e = document.querySelector('.travaux-visionneuse-layout'); e; e = e.parentElement) {
+                if (e.getAnimations().some((a) => a.playState === 'running')) return false;
+            }
+            return true;
+        });
+        await remplitLEcran(page, 'retour');
         // Le carrousel renaît à ce retour : la copie ouverte garde son symbole « en cours » (elle redevenait « Importé »).
         await page.waitForFunction(() => document.querySelector('.annot-toolbar-fichiers .annot-badge.actif[data-fichier-id="F5"]'));
         expect(await lirePastille(page, 'F5')).toMatchObject({ mot: 'EN COURS', aria: 'EN COURS', largeur: 15 });
+    });
+
+    test('la page reste défilée quand on passe en Évaluer, qu’on revient, et qu’on sort du plein écran', async ({ page }) => {
+        await ouvrirBarre(page);
+        await defilerAuBout(page);
+        const bout = await page.evaluate(() => Math.round(scrollY));
+        expect(bout).toBeGreaterThan(100);
+        await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
+        await page.waitForFunction(() => window.travauxUI.getModeCourant() === 'evaluer');
+        expect(await page.evaluate(() => Math.round(scrollY))).toBe(bout);
+        await page.evaluate(() => window.travauxUI.basculerMode('annoter'));
+        await page.waitForFunction(() => window.travauxUI.getModeCourant() === 'annoter');
+        await page.evaluate(() => { window.travauxUI.togglePleinEcran(); window.travauxUI.togglePleinEcran(); });
+        expect(await page.evaluate(() => Math.round(scrollY))).toBe(bout);
     });
 
     test('une position enregistrée quand la zone défilait reste atteignable, et n’est pas réécrite', async ({ page }) => {

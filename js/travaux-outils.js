@@ -2111,12 +2111,6 @@
         html += '<button class="travaux-btn-outil" id="travaux-btn-dupliquer" data-action="travauxAnnotation.dupliquerSelection" title="Dupliquer la sélection"><img src="' + ICONS_DIR + 'icon-duplicate.svg" alt="Dupliquer" class="outil-svg-icon"></button>';
         html += '</div>';
 
-        html += '<div class="annot-bande">';
-        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
-        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la sélection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
-        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="Rétablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="Rétablir" class="outil-svg-icon"></button>';
-        html += '</div>';
-
         html += '<hr class="separateur-horizontal">';
 
         // Outils et formes
@@ -2141,8 +2135,17 @@
         html += _htmlCouleursAnnotation('');   // sans intertitre : les pastilles sont explicites
         html += _htmlEpaisseurAnnotation();
 
+        // En bas, comme dans l'étendue (Grégoire, 3 nov. 2026 : en haut, ces boutons s'accrochent au passage) : Annuler,
+        // Supprimer, Rétablir, puis « Effacer la page ». Collés au bas de la palette quand elle défile.
+        html += '<div class="annot-bas-compacte">';
+        html += '<div class="annot-bande">';
+        html += '<button id="travaux-btn-undo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.annuler" disabled title="Annuler (Ctrl+Z)"><img src="' + ICONS_DIR + 'icon-undo.svg" alt="Annuler" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-supprimer" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.supprimerSelection" disabled title="Supprimer la sélection (Delete)"><img src="' + ICONS_DIR + 'icons8-trash.svg" alt="Supprimer" class="outil-svg-icon"></button>';
+        html += '<button id="travaux-btn-redo" class="btn btn-secondaire btn-tres-compact btn-icon-compact" data-action="travauxAnnotation.retablir" disabled title="Rétablir (Ctrl+Y)"><img src="' + ICONS_DIR + 'icon-redo.svg" alt="Rétablir" class="outil-svg-icon"></button>';
+        html += '</div>';
         // Elle n'efface que la page affichée (`effacerPage`), comme son nom le dit désormais.
         html += '<button class="annot-effacer" data-action="travauxAnnotation.effacerPage" title="Effacer toutes les annotations de cette page">Effacer la page</button>';
+        html += '</div>';
         return html;
     }
 

@@ -475,7 +475,9 @@
      * cette hauteur, le document s'ouvrait 43 % plus étroit (212 px contre 373 à 1280 × 720). En Annoter et en Évaluer,
      * hors plein écran, la hauteur d'ajustement est donc celle qu'avait le cadre dans la 1.229.0 — la zone y mesurait
      * `calc(100vh - 120px)`, 400 px au moins ; ce qui dépasse le cadre se parcourt dans le cadre, comme après un zoom.
-     * `innerHeight` tient lieu de `100vh` : la page ne défile plus, les barres de Safari ne se replient plus.
+     * Depuis le 3 nov. 2026, la page défile de nouveau et la zone remplit l'écran sous la navigation : le cadre réel est
+     * d'ordinaire plus haut que celui de la 1.229.0, et c'est lui qui sert ; la hauteur de la 1.229.0 reste un plancher,
+     * pour un écran où la navigation collée est haute. `innerHeight` tient lieu de `100vh`.
      * Ailleurs (Modélisation, plein écran), le cadre réel sert, comme avant.
      * @param {HTMLElement} conteneur
      * @returns {number} La hauteur, en px, à laquelle ajuster le document (marge retirée).

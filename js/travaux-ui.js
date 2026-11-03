@@ -1164,18 +1164,39 @@
     let _observateurVisionneuse = null;
 
     /**
-     * LA ZONE DE TRAVAIL TIENT DANS L'ÉCRAN (consigne du 1er nov. 2026, partie C). `calc(100vh - 120px)` postulait 120 px
-     * au-dessus de la visionneuse ; il y en a 360 (en-tête 162, navigation 83, sous-navigation 58, aide 52, marges 5) : la
-     * page défilait de 241 px sous les palettes. Ce qui l'entoure se MESURE donc, et `styles.css` retire la mesure de
-     * `100dvh` (la barre d'adresse de Safari change la hauteur visible, sans passer par ici).
+     * LA PAGE DÉFILE, ET LA ZONE DE TRAVAIL REMPLIT L'ÉCRAN UNE FOIS DÉFILÉE (Grégoire, 3 nov. 2026, sur l'iPad). Du 1er au
+     * 3 nov. (partie C de la consigne du 1er nov.), la zone tenait sous l'en-tête et la page ne défilait plus : l'en-tête
+     * du cours et le sous-menu prenaient environ 220 px à la copie, à demeure. Il veut faire monter l'écran entier pour
+     * les cacher, comme avant la 1.230.0. La zone mesure donc la hauteur visible moins ce qui RESTE à l'écran une fois la
+     * page défilée : les bandes collées au-dessus d'elle (la navigation principale) et ce qui la suit. La page défile de
+     * tout le reste ; défilée jusqu'au bout, la zone va de la navigation au bas de l'écran. `styles.css` retire la mesure
+     * de `100dvh` (la barre d'adresse de Safari change la hauteur visible, sans passer par ici).
      *
      * Ce qui suit la visionneuse se compte par ses marges et ses frères, et non par la hauteur de la page : celle-ci
-     * dépend de la visionneuse, et la mesure rétrécirait à chaque passage.
+     * dépend de la visionneuse, et la mesure rétrécirait à chaque passage. Ce qui la précède sans être collé (l'en-tête,
+     * le sous-menu, une aide qui paraît ou disparaît) ne compte plus : il défile.
      * @param {HTMLElement} layout - `.travaux-visionneuse-layout`
      */
     function _mesurerHorsZoneVisionneuse(layout) {
-        const haut = layout.getBoundingClientRect();
-        if (haut.height === 0) return;   // section cachée : l'observateur la remesure à son retour
+        if (layout.getBoundingClientRect().height === 0) return;   // section cachée : l'observateur la remesure à son retour
+        const horsZone = Math.ceil(_hauteurColleeAuDessus(layout) + _hauteurApres(layout)) + 'px';
+        if (layout.style.getPropertyValue('--visionneuse-hors-zone') !== horsZone) layout.style.setProperty('--visionneuse-hors-zone', horsZone);
+    }
+
+    /** Ce qui reste au-dessus de la zone une fois la page défilée : les bandes `sticky` qui collent vraiment à la page. */
+    function _hauteurColleeAuDessus(layout) {
+        let colle = 0;
+        for (let el = layout; el && el !== document.documentElement; el = el.parentElement) {
+            for (let frere = el.previousElementSibling; frere; frere = frere.previousElementSibling) {
+                const s = getComputedStyle(frere);
+                if (s.display !== 'none' && s.position === 'sticky' && _resteColleeALaPage(frere)) colle += frere.offsetHeight;
+            }
+        }
+        return colle;
+    }
+
+    /** Ce qui suit la zone dans la page : ses marges, celles de ses parents, et les frères qui prennent de la place. */
+    function _hauteurApres(layout) {
         let bas = 0;
         for (let el = layout; el && el !== document.documentElement; el = el.parentElement) {
             const style = getComputedStyle(el);
@@ -1187,8 +1208,23 @@
                 bas += frere.offsetHeight + (parseFloat(s.marginTop) || 0) + (parseFloat(s.marginBottom) || 0);
             }
         }
-        const horsZone = Math.ceil(haut.top + window.scrollY + bas) + 'px';
-        if (layout.style.getPropertyValue('--visionneuse-hors-zone') !== horsZone) layout.style.setProperty('--visionneuse-hors-zone', horsZone);
+        return bas;
+    }
+
+    /**
+     * Une bande `sticky` ne reste en haut de l'écran que si son conteneur de défilement est la page. Mesuré le 3 nov.
+     * 2026 : la navigation principale est `sticky`, mais `body` et `html` ont un `overflow` (`hidden auto`) ; `body` est
+     * alors son conteneur, il ne défile pas, et la navigation part avec la page. La compter laissait une bande vide.
+     */
+    function _resteColleeALaPage(el) {
+        const racine = getComputedStyle(document.documentElement);
+        const racineVisible = racine.overflowX === 'visible' && racine.overflowY === 'visible';
+        for (let a = el.parentElement; a && a !== document.documentElement; a = a.parentElement) {
+            if (a === document.body && racineVisible) continue;   // l'overflow de `body` passe alors à la fenêtre
+            const s = getComputedStyle(a);
+            if (!(/^(visible|clip)$/.test(s.overflowX) && /^(visible|clip)$/.test(s.overflowY))) return false;
+        }
+        return true;
     }
 
     function _garderVisionneuseDansEcran(layout) {

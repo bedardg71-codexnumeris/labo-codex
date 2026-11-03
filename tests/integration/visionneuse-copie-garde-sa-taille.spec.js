@@ -7,13 +7,21 @@ import { ouvrirCopie, attendre } from './harness/banc-copie-annotation.js';
 // l'ajustement à la hauteur ouvrait la copie 43 % plus étroite. Mesuré sur `6ab4f080` (la 1.229.0), à 1180 × 820,
 // hors plein écran, l'image 400 × 600 du banc s'ouvre à 440 px de large (le PDF lettre, 510) ; sur `46a0830d`, 279.
 // La copie doit retrouver cette largeur, la zone restant dans l'écran, et son bas s'atteindre dans le cadre.
+//
+// 3 NOV. 2026 — LA PAGE DÉFILE DE NOUVEAU (Grégoire, sur l'iPad) : la zone remplit l'écran une fois la page défilée, son
+// cadre est plus haut que celui de la 1.229.0, et c'est lui qui sert. La copie s'ouvre donc ajustée à ce cadre, plus large
+// qu'en 1.229.0 (sa lisibilité, la largeur, compte d'abord : 2 nov.) ; la largeur de la 1.229.0 reste un plancher.
 
 const LARGEUR_1229 = 440;
+/** La largeur de l'image 400 × 600 du banc ajustée à la hauteur réelle : celle de la zone du document, que la visionneuse
+ *  ajuste (`_obtenirConteneurZoom`, marge de 40 retirée, `_zoomAjuste`). */
+const largeurAjusteeAuCadre = (m) => (m.hauteurZoneDocument - 40) * 400 / 600;
 
 const mesure = (page) => page.evaluate(() => {
     const k = document.getElementById('travaux-canvas-document').getBoundingClientRect();
     const r = document.getElementById('travaux-canvas-container').getBoundingClientRect();
     return { largeur: k.width, basDoc: k.bottom, basCadre: r.bottom, hauteurCadre: r.height,
+        hauteurZoneDocument: document.getElementById('travaux-conteneur-document').clientHeight,
         pageDefile: document.scrollingElement.scrollHeight > window.innerHeight };
 });
 
@@ -22,12 +30,12 @@ test.describe('La copie garde sa taille d’ouverture', () => {
         await page.setViewportSize({ width: 1180, height: 820 });
     });
 
-    test('hors plein écran, à 1180 × 820, elle s’ouvre à la largeur de la 1.229.0, la zone restant dans l’écran', async ({ page }) => {
+    test('hors plein écran, à 1180 × 820, elle s’ouvre ajustée au cadre réel, jamais plus étroite qu’en 1.229.0', async ({ page }) => {
         await ouvrirCopie(page);
         const m = await mesure(page);
-        expect(Math.abs(m.largeur - LARGEUR_1229)).toBeLessThanOrEqual(2);
-        expect(m.pageDefile).toBe(false); // le gain de la partie C tient
-        expect(m.basDoc).toBeGreaterThan(m.basCadre); // témoin : le document dépasse bien le cadre court
+        expect(Math.abs(m.largeur - largeurAjusteeAuCadre(m))).toBeLessThanOrEqual(2);
+        expect(m.largeur).toBeGreaterThanOrEqual(LARGEUR_1229 - 2);
+        expect(m.pageDefile).toBe(true); // la page défile de nouveau (3 nov. 2026)
     });
 
     test('« Ajuster » après un zoom revient à cette largeur', async ({ page }) => {
@@ -38,7 +46,7 @@ test.describe('La copie garde sa taille d’ouverture', () => {
         expect((await mesure(page)).largeur).toBeGreaterThan(ouverture * 1.05); // témoin : le zoom a eu lieu
         await page.evaluate(() => window.travauxVisionneuse.zoomAjuster());
         await attendre(page, 400);
-        expect(Math.abs((await mesure(page)).largeur - LARGEUR_1229)).toBeLessThanOrEqual(2);
+        expect(Math.abs((await mesure(page)).largeur - ouverture)).toBeLessThanOrEqual(2);
     });
 
     test('la molette, puis deux doigts, atteignent le bas de la page dans le cadre', async ({ page }) => {

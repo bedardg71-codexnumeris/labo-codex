@@ -106,8 +106,10 @@ const quiPeutDefiler = (page, id) => page.evaluate((id) => {
         .map((el) => el.id || el.className);
 }, id);
 
-/** Le contenu défilé jusqu'en bas : ce que l'œil voit alors (la page ne défile plus, partie C du 1er nov.). */
+/** Le contenu défilé jusqu'en bas : ce que l'œil voit alors, la page défilée jusqu'au bout (elle défile de nouveau
+ *  depuis le 3 nov. 2026 ; défilée, la zone occupe l'écran). */
 const auBasDuContenu = (page, id) => page.evaluate((id) => {
+    window.scrollTo(0, document.scrollingElement.scrollHeight);
     const p = document.getElementById(id);
     const c = p.querySelector(':scope > .palette-flottante-contenu');
     const debordeAvant = c.scrollHeight - c.clientHeight;

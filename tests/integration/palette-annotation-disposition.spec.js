@@ -61,7 +61,10 @@ test.describe('La palette d’annotation', () => {
                 titre: g.querySelector('.travaux-palette-label').textContent, outils: ids(g)
             })));
             const ordre = [...p.querySelector('.palette-flottante-contenu').children].map((el) => el.className.split(' ')[0] || el.tagName);
-            return { bandes, groupes, ordre, effacer: p.querySelector('.annot-effacer').textContent };
+            const bas = p.querySelector('.annot-bas-compacte');
+            return { bandes, groupes, ordre, effacer: p.querySelector('.annot-effacer').textContent,
+                bas: bas ? [...bas.children].map((el) => el.className.split(' ')[0]) : null,
+                basCollee: bas ? getComputedStyle(bas).position : null };
         });
         expect(d.bandes).toEqual([
             ['position', 'selection', 'travaux-btn-dupliquer'],
@@ -71,8 +74,12 @@ test.describe('La palette d’annotation', () => {
             [{ titre: 'Outils', outils: ['stylo', 'surligneur', 'texte'] }, { titre: 'Formes', outils: ['cercle', 'rectangle', 'polygone'] }],
             [{ titre: 'Lignes', outils: ['fleche', 'pointille', 'ondule'] }, { titre: 'Extrémités', outils: ['debut', 'double', 'fin', 'aucune'] }]
         ]);
-        expect(d.ordre).toEqual(['groupe-boutons-ligne', 'annot-bande', 'annot-bande', 'separateur-horizontal', 'annot-rangee', 'annot-rangee',
-            'separateur-horizontal', 'annot-couleurs', 'annot-epaisseur', 'annot-effacer']);
+        // 3 nov. 2026 (Grégoire) : Annuler, Supprimer, Rétablir descendent en bas, avec « Effacer la page », comme dans
+        // l'étendue ; en haut, ils s'accrochaient au passage.
+        expect(d.ordre).toEqual(['groupe-boutons-ligne', 'annot-bande', 'separateur-horizontal', 'annot-rangee', 'annot-rangee',
+            'separateur-horizontal', 'annot-couleurs', 'annot-epaisseur', 'annot-bas-compacte']);
+        expect(d.bas).toEqual(['annot-bande', 'annot-effacer']);
+        expect(d.basCollee).toBe('sticky');
         expect(d.effacer).toBe('Effacer la page');
     });
 

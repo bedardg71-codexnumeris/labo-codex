@@ -17476,9 +17476,9 @@ tr.ligne-import-ecartee td {
     border-radius: 0;
 }
 
-/* Tient dans l'écran : `--visionneuse-hors-zone` est ce qui l'entoure, mesuré (`_garderVisionneuseDansEcran`). `dvh` suit la
-   barre d'adresse de Safari ; `vh` reste pour un navigateur qui ne le connaît pas. 300 px : à 400, une fenêtre d'iPad
-   avec sa barre d'onglets (environ 740 pt) laissait encore défiler la page. */
+/* Remplit l'écran une fois la page défilée (3 nov. 2026) : `--visionneuse-hors-zone` est ce qui reste à l'écran autour
+   d'elle, la navigation collée en haut et ce qui la suit, mesuré (`_garderVisionneuseDansEcran`). L'en-tête et le
+   sous-menu défilent. `dvh` suit la barre d'adresse de Safari ; `vh` reste pour un navigateur qui ne le connaît pas. */
 .travaux-visionneuse-layout {
     --visionneuse-hors-zone: 120px;
     display: flex;
@@ -20995,8 +20995,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     min-width: 120px;
     max-width: none;
 }
-/* La zone de travail est moins haute depuis qu'elle tient dans l'écran (consigne du 1er nov. 2026, partie C) : une palette
-   ne la dépasse plus, sa propre hauteur enregistrée comprise, et le geste au bout de son défilement ne passe pas ailleurs. */
+/* Une palette ne dépasse pas la zone de travail (consigne du 1er nov. 2026, partie C), sa propre hauteur enregistrée
+   comprise, et le geste au bout de son défilement ne passe pas ailleurs. */
 #travaux-palette-flottante,
 #travaux-palette-erreurs-fr,
 #travaux-palette-tampons {
@@ -28268,6 +28268,23 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 .mode-clair .annot-actions {
     box-shadow: 0 6px 0 6px #e8f2fd; /* le fond de la palette en clair (.mode-clair .palette-flottante) */
+}
+/* La compacte, même règle (3 nov. 2026) : Annuler, Supprimer, Rétablir, puis « Effacer la page », collés au bas. Le fond
+   couvre l'écart entre les deux rangées : ce qui défile dessous ne s'y voit pas. */
+.annot-bas-compacte {
+    position: sticky;
+    bottom: 12px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 4px;
+    background: var(--surface-carte, #1a3040);
+    box-shadow: 0 6px 0 6px var(--surface-carte, #1a3040);
+}
+.mode-clair .annot-bas-compacte {
+    background: #e8f2fd;
+    box-shadow: 0 6px 0 6px #e8f2fd;
 }
 .palette-flottante .annot-tuile-alerte {
     color: #ff7a88; /* --rouge-erreur ne tient que 3,4:1 sur le fond sombre de la palette (précédent : .annot-effacer) */

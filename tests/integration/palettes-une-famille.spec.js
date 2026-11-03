@@ -138,6 +138,9 @@ for (const vp of FORMATS) {
                 expect(t.l, t.nom).toBeGreaterThanOrEqual(44);
                 expect(t.h, t.nom).toBeGreaterThanOrEqual(44);
             }
+            // Hors plein écran, la page défilée jusqu'au bout : la position où l'on travaille (3 nov. 2026, la page défile de
+            // nouveau ; avant, le bas de la palette est sous le bord de l'écran, comme avant la 1.230.0).
+            await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight));
             expect(await annulerVisible(page), 'hors plein écran').toEqual({ dansLaZone: true, annuler: true });
             await page.evaluate(() => window.travauxUI.togglePleinEcran());
             await attendre(page, 200);
@@ -221,6 +224,7 @@ for (const vp of FORMATS) {
 
         test('la compacte : les icônes seules, le nom du tampon touché sous la grille, la palette ne bouge pas', async ({ page }) => {
             await ouvrirAnnoter(page);
+            await page.evaluate(() => window.scrollTo(0, document.scrollingElement.scrollHeight));   // la page défilée (3 nov. 2026)
             await page.evaluate(() => document.querySelector('#travaux-palette-tampons .palette-bouton-version').click());
             const lire = () => page.evaluate(() => {
                 const p = document.getElementById('travaux-palette-tampons');
