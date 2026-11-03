@@ -10,3 +10,4 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 |---|---|---|---|---|
 | 2026-11-03 | 12 h 44 | Claude Code | La vérification Playwright de l'entrée 6 a été arrêtée par le système, faute de mémoire ; la relancer demande son accord (fermer des applications) | machine |
 | 2026-11-03 | 13 h 35 | Claude Code | Valider les Nouvelles proposées pour la 1.231.1 (fin du passage) | mots |
+| 2026-11-03 | 13 h 36 | Claude Code | Signal pour la vérification de la 1.231.1 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
