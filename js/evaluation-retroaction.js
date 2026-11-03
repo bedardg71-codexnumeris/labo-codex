@@ -78,8 +78,12 @@
        l'origine (les noms de critères, de tampons et de cartouches viennent
        de l'utilisateur et traversent `innerHTML` sans échappement). #575 en
        échappe TROIS sur les lignes qu'il réécrit — le nom d'un niveau et les
-       deux noms de critères du bilan. Les autres restent à traiter ; ne pas
-       recopier l'affirmation d'origine.
+       deux noms de critères du bilan. #1113 (3 nov. 2026) a fermé les deux
+       derniers sites du bilan : la ligne « Progrès » (codes et titre de la
+       production précédente) et la liste des jetons (titre). Critères,
+       tampons (#760), codes d'erreur (#581) et récurrences (#940) étaient
+       déjà traités ; aucun nom de cartouche ne passe ici. Ne pas recopier
+       l'affirmation d'origine.
      · obtenirDonneesSelonMode (donnees-v2.js)
      · obtenirConfigJetons (jetons module)
      · travauxVisionneuse, travauxStockage, travauxOutils, travauxExportPDF
@@ -1262,7 +1266,9 @@ function _rendreRecurrentsBilan(evalPrecedente, criteres, niveauDe, echelleId, z
         // `Infinity` des deux côtés ne prouve rien : la comparaison stricte
         // écarte d'elle-même le cas où aucun des deux codes ne se situe.
         if (rangAct !== Infinity && rangPre !== Infinity && rangAct > rangPre) {
-            recurrentsHtml += '<p>Progrès : ' + nivPre + ' → ' + nivAct + ' depuis ' + (evalPrecedente.productionNom || 'la production précédente') + '</p>';
+            // #1113 — codes et titre échappés : une production voyage (partage, import).
+            recurrentsHtml += '<p>Progrès : ' + echapperHtml(nivPre) + ' → ' + echapperHtml(nivAct) + ' depuis '
+                + (evalPrecedente.productionNom ? echapperHtml(evalPrecedente.productionNom) : 'la production précédente') + '</p>';
         }
     }
 
@@ -1324,7 +1330,7 @@ function _rendreJetonsBilan(da) {
             return e.etudiantDA === da && !e.remplaceeParId;
         }).forEach(function(e) {
             var prod = productions.find(function(p) { return p.id === e.productionId; });
-            var nomProd = prod ? (prod.titre || prod.nom || e.productionId) : e.productionId;
+            var nomProd = echapperHtml(prod ? (prod.titre || prod.nom || e.productionId) : e.productionId); // #1113
             if (e.jetonDelaiApplique) jetonsUtilises.push('Délai — ' + nomProd);
             if (e.jetonRepriseApplique || e.repriseDeId) jetonsUtilises.push('Reprise — ' + nomProd);
             if (e.jetonRepriseCibleeApplique) jetonsUtilises.push('Reprise ciblée — ' + nomProd);
