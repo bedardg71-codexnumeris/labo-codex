@@ -1104,6 +1104,8 @@ async function telechargerRapportTxt(btn) {
     const rapport = genererRapportBug(description, prenom);
 
     // Générer le nom du fichier avec date et prénom
+    // #812 — second `new Date()` après celui de genererRapportBug : à une frontière de seconde,
+    // le nom du fichier peut précéder l'identifiant d'une seconde. Sans conséquence.
     const { date: dateStr, heure: heureStr } = horodatageLocalRapport(new Date()); // 2026-02-01, 21-45-00
     const prenomNormalise = prenom.trim().toLowerCase().replace(/\s+/g, '-') || 'anonyme';
     const prefixe = modeRapport === 'commentaire' ? 'FEEDBACK' : 'BUG';
@@ -1209,6 +1211,8 @@ function envoyerRapportParCourriel(btn) {
         var mailtoUrl = 'mailto:labo@codexnumeris.org?subject=' + sujet + '&body=' + corps;
 
         // Archiver le rapport localement
+        // #1068 — 'courriel' même quand l'URL trop longue copie aussi le rapport (ci-dessous) :
+        // le logiciel de courriel s'ouvre bien. Aucun écran ne lit `voie` aujourd'hui.
         archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug', 'courriel');
 
         // Protection troncature : si l'URL est trop longue, copier dans le presse-papiers
