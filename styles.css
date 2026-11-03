@@ -2496,18 +2496,23 @@ span.header-icon {
     gap: 2px;
 }
 
+/* #1126 (3 nov. 2026) — le gabarit de la rangée vit ici, plus en style en ligne dans
+   grilles.js. Le Nom passe devant la Description (3fr / 2fr, au lieu de 2fr / 3fr) : à 1 440 px,
+   « Partie A : compréhension – » était coupé (capture de Grégoire du 20 oct.). */
 #listeCriteres .critere-rangee {
     padding-right: 140px;
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) 140px 90px 150px minmax(0, 2fr);
+    gap: 12px;
+    align-items: end;
 }
 
 /* #1095 (17 oct. 2026) — sur l'iPad, en long (820 px) comme en large (1180 px), la grille fixe
-   de la rangée (`2fr 140px 90px 150px 3fr`, en style en ligne dans grilles.js) écrasait le champ
-   « Nom du critère » à 42-56 px. Jusqu'à 1180 px : le nom sur sa ligne, puis type, pondération
-   et SOLO côte à côte, puis le descripteur. `!important` : seul moyen de passer devant le style
-   en ligne sans toucher grilles.js. Au-dessus de 1180 px, rien ne change. */
+   de la rangée écrasait le champ « Nom du critère » à 42-56 px. Jusqu'à 1180 px : le nom sur sa
+   ligne, puis type, pondération et SOLO côte à côte, puis le descripteur. */
 @media (max-width: 1180px) {
     #listeCriteres .critere-rangee {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     #listeCriteres .critere-rangee > .groupe-form:first-child,

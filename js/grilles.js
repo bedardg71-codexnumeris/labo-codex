@@ -3537,7 +3537,7 @@ function afficherCriteresTemp() {
                     titre: 'Supprimer ce critère'
                 })}
             </div>
-            <div class="critere-rangee" style="display: grid; grid-template-columns: 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
+            <div class="critere-rangee">
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
@@ -5734,7 +5734,7 @@ function afficherCriteresGrille(grille) {
                     titre: 'Supprimer ce critère'
                 })}
             </div>
-            <div class="critere-rangee" style="display: grid; grid-template-columns: 2fr 140px 90px 150px 3fr; gap: 12px; align-items: end;">
+            <div class="critere-rangee">
                 <div class="groupe-form">
                     <label data-tooltip="cn-grille-critere" style="font-size: 0.85rem; color: var(--gris-moyen);">Nom du critère <span class="champ-requis u-texte-medium" title="Champ obligatoire">*</span></label>
                     <input type="text"
