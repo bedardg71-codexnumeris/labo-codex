@@ -49,6 +49,15 @@ async function ouvrirProfil(page, rang = 1) {
     await attendreRepos(page);
 }
 
+/** La rangée du profil : le rendu suit le geste dans le même tour (afficherProfilComplet,
+ *  changerSectionProfil sont synchrones). On attend l'état que lit l'étape suivante, pas un repos :
+ *  sur GitHub, chaque repos coûte une évaluation et deux images (~0,8 s), et ces essais font dix gestes. */
+const attendreEleve = (page, da) => page.waitForFunction((da) => window.profilActuelDA === da
+    && document.getElementById('selecteurEtudiantProfil')?.value === da, da, { polling: 50 });
+const attendreAutreEleve = (page, avant) => page.waitForFunction((avant) => window.profilActuelDA && window.profilActuelDA !== avant, avant, { polling: 50 });
+const attendreSection = (page, id) => page.waitForFunction((id) =>
+    document.querySelector(`.rangee-selection-sections [data-param="${id}"]`)?.getAttribute('aria-current') === 'true', id, { polling: 50 });
+
 /** La rangée, mesurée. */
 const rangee = (page) => page.evaluate(() => {
     const r = document.querySelector('#contenuProfilEtudiant .rangee-selection-profil');
@@ -121,35 +130,35 @@ test('#1151 · le menu ouvre l\'élève choisi ; ‹ et › changent d\'élève 
 
     // Le geste réel : le menu (dispatcher data-on-change de main.js).
     await page.selectOption('#selecteurEtudiantProfil', options[3]);
-    await attendreRepos(page);
+    await attendreEleve(page, options[3]);
     let r = await rangee(page);
     expect([r.da, r.compte]).toEqual([options[3], `4 sur ${options.length}`]);
 
     await page.click('#profilEleveSuivant');
-    await attendreRepos(page);
+    await attendreEleve(page, options[4]);
     r = await rangee(page);
     expect([r.da, r.compte]).toEqual([options[4], `5 sur ${options.length}`]);
     // Au clavier, le focus reste sur la flèche : le rendu remplace la rangée. (Sous WebKit, un clic ne donne pas
     // le focus à un bouton : c'est le geste du clavier qu'on éprouve.)
     await page.focus('#profilEleveSuivant');
     await page.keyboard.press('Enter');
-    await attendreRepos(page);
+    await attendreEleve(page, options[5]);
     r = await rangee(page);
     expect([r.da, await page.evaluate(() => document.activeElement && document.activeElement.id)]).toEqual([options[5], 'profilEleveSuivant']);
     await page.click('#profilElevePrecedent');
-    await attendreRepos(page);
+    await attendreEleve(page, options[4]);
 
     await page.click('#profilElevePrecedent');
-    await attendreRepos(page);
+    await attendreEleve(page, options[3]);
     expect((await rangee(page)).da).toBe(options[3]);
 
     // Aux bouts.
     await page.selectOption('#selecteurEtudiantProfil', options[0]);
-    await attendreRepos(page);
+    await attendreEleve(page, options[0]);
     r = await rangee(page);
     expect([r.precedentDesactive, r.suivantDesactive, r.compte]).toEqual([true, false, `1 sur ${options.length}`]);
     await page.selectOption('#selecteurEtudiantProfil', options[options.length - 1]);
-    await attendreRepos(page);
+    await attendreEleve(page, options[options.length - 1]);
     r = await rangee(page);
     expect([r.precedentDesactive, r.suivantDesactive]).toEqual([false, true]);
 });
@@ -161,21 +170,21 @@ test('#1151 · chaque bouton ouvre sa section, seul lui est plein — y compris 
         performance: 'Développement des habiletés', accompagnement: 'Accompagnement', travaux: 'Travaux soumis', rapport: 'Rapport' };
     for (const [id, titre] of Object.entries(ATTENDU)) {
         await page.click(`.rangee-selection-sections [data-param="${id}"]`);
-        await attendreRepos(page);
+        await attendreSection(page, id);
         const r = await rangee(page);
         expect([id, r.pleines, r.titreSection]).toEqual([id, [id], titre]);
     }
 
     // L'appel de tableau-bord-apercu.js (clic sur A, C ou P dans le Suivi du groupe) : sans clic, sans `event`.
     await page.evaluate(() => window.changerSectionProfil('mobilisation'));
-    await attendreRepos(page);
+    await attendreSection(page, 'mobilisation');
     let r = await rangee(page);
     expect([r.pleines, r.titreSection]).toEqual([['mobilisation'], 'Engagement ACP']);
 
     // La section suit l'élève.
     const avant = r.da;
     await page.click('#profilEleveSuivant');
-    await attendreRepos(page);
+    await attendreAutreEleve(page, avant);
     r = await rangee(page);
     expect(r.da).not.toBe(avant);
     expect([r.pleines, r.titreSection]).toEqual([['mobilisation'], 'Engagement ACP']);
@@ -189,7 +198,7 @@ test('#1151 · le titre de chaque section reste au lecteur d\'écran, et son en-
     expect(ids.length).toBe(SECTIONS_DEMO.length);
     for (const id of ids) {
         await page.click(`.rangee-selection-sections [data-param="${id}"]`);
-        await attendreRepos(page);
+        await attendreSection(page, id);
         const etat = await page.evaluate(() => {
             const h2 = document.querySelector('#profil-contenu-dynamique .profil-contenu-header h2');
             if (!h2) return null;
@@ -218,7 +227,7 @@ test('#1151 · « Jugement » n\'apparaît qu\'avec une pratique par dénotation
     const r = await rangee(page);
     expect(r.sections).toEqual(['Productions', 'Jugement', ...SECTIONS_DEMO.slice(1)]);
     await page.click('.rangee-selection-sections [data-param="jugement"]');
-    await attendreRepos(page);
+    await attendreSection(page, 'jugement');
     expect((await rangee(page)).pleines).toEqual(['jugement']);
 });
 
@@ -253,7 +262,7 @@ for (const largeur of [1180, 820, 700]) {
         await ouvrirDemo(page, largeur);
         await ouvrirProfil(page, 1);
         await page.click('.rangee-selection-sections [data-param="performance"]');
-        await attendreRepos(page);
+        await attendreSection(page, 'performance');
         const r = await rangee(page);
         expect(r.deborde).toBe(false);
         expect(r.hauteurs.every(h => h >= 44)).toBe(true);
