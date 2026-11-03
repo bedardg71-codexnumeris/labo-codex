@@ -101,9 +101,13 @@ Passage du 3 nov. 2026 (Claude Code, à partir de 11 h 23) :
 - **5. Date des rapports** : un rapport de bug écrit le soir porte la date du jour, dans son identifiant comme dans le nom du fichier TXT (le 26 oct. à 21 h 05 donne `2026-10-26_21-05-27`). Stock : les fichiers déjà écrits gardent leur nom. Relecture neuve : VERT ; constat de niveau 3 commenté (`8e14223c`). (`85bbdc9e`, #812)
 - **6. « Nom du critère »** : au Mac, à 1 440 px, un nom comme « Partie A : compréhension – lecture fictive » tient dans son champ (400 px, contre 266) ; le Nom est plus large que la Description ; l'iPad garde sa disposition de #1095. Vérifié : essai à 1 440 px, 47 specs de l'éditeur (198 verts ; deux instables rejoués 3 fois, verts, étrangers au lot) ; une première vérification arrêtée par le système faute de mémoire (journal, 12 h 44). Relecture neuve : VERT AVEC RÉSERVE, entre 1 181 et 1 280 px un nom aussi long reste un peu coupé (le Mac de Grégoire est à 1 470) ; aucun essai ne garde la règle #1095 : noté, pas inscrit (aucun symptôme vécu). (`43e4adff`, #1126)
 
+- **Fin du passage** : release 1.231.1 (build 1103-1338, `b789ee32`), Nouvelles validées par Grégoire. Verdict du Mac vert sur `b789ee32` : 1 358 essais, 1 353 verts, 1 vert au second essai, 4 rouges connus, 23 sautés. Poussée sur `origin/main` le 3 nov. vers 15 h 35. Porte terrain : `PORTES-TERRAIN-2026-11-03-boucle.md` (reprises de l'Artefact 6, corbeille au doigt, défilement d'Annoter), à publier par Cowork.
+
 - L'onglet Évaluation ne chargeait que la liste des évaluations (rapport du 2 nov., 17 h 04) : **résolu par un simple rechargement**, dit Grégoire le 3 nov. à 7 h 03 ; rien à corriger. À rouvrir si le défaut revient. (`BUG__grégoire__2026-11-02_17-04-55.txt`)
 
 ## Déjà sur `main`, à porter aux prochaines Nouvelles
+
+> 3 nov., 15 h 35 : les trois ci-dessous sont portés aux Nouvelles de la 1.231.1 et en ligne. Leur porte iPad est au §2 bis de `PORTES-TERRAIN-2026-11-03-boucle.md`.
 
 - Deux doigts font défiler la copie après un détour (#1218, `af6e1c73`) : poussé sur `origin/main` le 2 nov. au soir, sans release ; sa porte terrain sur l'iPad reste due.
 - En Annoter et en Évaluer, la page défile de nouveau (#1219) ; dans la compacte d'Annotation, Annuler, Supprimer et Rétablir descendent en bas (#1220) : `d5111b09` et `835b99fb`, poussés sur `origin/main` le 3 nov. au matin, sans release ; faits hors de la file, à la demande directe de Grégoire. Porte terrain sur l'iPad due.
