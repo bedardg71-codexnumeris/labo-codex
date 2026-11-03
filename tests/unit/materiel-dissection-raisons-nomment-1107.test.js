@@ -45,6 +45,18 @@ describe('#1107 · les raisons nomment les critères en cause', () => {
         expect(r).toEqual(['des points en nombre entier de 0 à 100 pour 2 critères (« Clarté fictive » et « Rigueur fictive »)']);
     });
 
+    it('en niveaux, une pondération hors de 0 à 100 : le critère est nommé', () => {
+        const lignes = [['Grille fictive', 'titre'], ['Faible', 'niveau'], ['Fort', 'niveau'],
+            ['Clarté fictive', 'critere'], ['/ 150', 'ponderation'], ['Flou', 'descripteur'], ['Net', 'descripteur'],
+            ['Rigueur fictive', 'critere'], ['/ 40', 'ponderation'], ['Lâche', 'descripteur'], ['Serré', 'descripteur']];
+        const doc = D.docDepuisPressePapiers({ texte: lignes.map((x) => x[0]).join('\n') });
+        const R = D.comprendre(doc, liensPar(D.morceaux(doc).ordre, lignes.map((x) => x[1])));
+        const v = {};
+        D.clesNiveaux(R).forEach((k, i) => { v[k] = { min: String(i * 50), max: String(i * 50 + 49 + i), note: String(i * 50 + 25) }; });
+        const r = D.creation(R, {}, undefined, { valeurs: v }).raisons;
+        expect(r).toContain('une pondération en nombre entier de 0 à 100 pour un critère (« Clarté fictive »)');
+    });
+
     it('plus de 30 éléments observables : le critère est nommé', () => {
         const obs = Array.from({ length: 31 }, (_, i) => [`Observable fictif ${i + 1}`, 'souscritere']);
         const r = raisons([['Grille fictive', 'titre'],

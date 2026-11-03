@@ -974,12 +974,12 @@
 
     /**
      * #1107 — les raisons de `calculs` qui comptaient sans nommer (points ou pondération hors de 0 à 100,
-     * nom absent, trop d'éléments observables) : le critère en cause, entre parenthèses, comme au lot 5.
+     * trop d'éléments observables). « le nom de # critères » n'y est pas : un critère sans nom reçoit
+     * « Critère N » (`nomDuCritere`), la raison ne peut pas venir de la dissection : le critère en cause, entre parenthèses, comme au lot 5.
      * `null` : ce n'est pas l'une d'elles.
      */
     function raisonQuiNomme(t, R, m, criteresOu) {
         var A = window.materielAssistant;
-        function texteDe(p) { return String(p && p.valeur != null ? p.valeur : '').trim(); }
         function horsBornes(min, max) {
             return function (c) { var p = A.nombre(c.ponderation.valeur); return !isNaN(p) && (!Number.isInteger(p) || p < min || p > max); };
         }
@@ -988,11 +988,6 @@
         }
         if (/^une pondération en nombre entier de 0 à 100 pour (un critère|\d+ critères)$/.test(t)) {
             return t + ' (' + nommer(criteresOu(horsBornes(0, 100))) + ')';
-        }
-        if (t === 'le nom d’un critère' || /^le nom de \d+ critères$/.test(t)) {
-            return t + ' (' + nommer(m.criteres.map(function (c, i) {
-                return texteDe(c.nom) ? null : 'Critère à nommer (' + (R.criteres[i].numero || i + 1) + ')';
-            }).filter(function (x) { return x != null; })) + ')';
         }
         if (t === 'au plus ' + A.MAX_SOUS_CRITERES + ' sous-critères par critère') {
             return 'au plus ' + A.MAX_SOUS_CRITERES + ' éléments observables par critère (' +
