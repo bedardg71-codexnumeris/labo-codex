@@ -2032,7 +2032,12 @@
                 const da = fNouveau.etudiantDA;
                 const prodId = fNouveau.productionId;
                 if (!da || !prodId) return;
-                const dejaStockes = fichiersStockes.filter(function(fS) {
+                // #1222 (3 nov. 2026) — les trois contournements d'`importerFichier` valent
+                // ici : une reprise (jeton), un livrable additionnel ou un remplacement
+                // coexistent avec l'original stocké. Les annoncer en doublons faisait
+                // renommer ou intégrer chaque copie d'un lot de reprises, une à une.
+                const coexiste = fNouveau.estReprise || fNouveau.livrableAdditionnel || fNouveau.remplaceExistant;
+                const dejaStockes = coexiste ? [] : fichiersStockes.filter(function(fS) {
                     return fS && fS.etudiantDA === da && fS.productionId === prodId;
                 });
                 // Beta 99.30 : les fichiers de la file qui partagent un même
@@ -2040,6 +2045,8 @@
                 // (assemblage multi-pages automatique) — pas un doublon.
                 const dansQueue = queue.slice(0, idxNouveau).filter(function(fA) {
                     if (!fA || fA.etudiantDA !== da || fA.productionId !== prodId) return false;
+                    // Une reprise et une remise ordinaire du même élève coexistent aussi.
+                    if (!!fA.estReprise !== !!fNouveau.estReprise) return false;
                     if (fNouveau.groupeDocumentId && fA.groupeDocumentId === fNouveau.groupeDocumentId) return false;
                     return true;
                 });
