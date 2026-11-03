@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.232 (« Sans jetons », #1225) — titre et item validés par Grégoire, mot pour mot, le 3 nov. 2026 au soir.
+            version: '1.232',
+            couleur: 'vert',
+            titre: 'Le groupe sans ses reprises',
+            items: [
+                'Suivi du groupe › «&nbsp;Trajectoires par production&nbsp;»&nbsp;: la case «&nbsp;Sans jetons&nbsp;» montre le groupe avec les notes d’origine aux productions reprises, la médiane comprise. Décoche pour revenir aux reprises.'
+            ]
+        },
+        {
             // 1.231 (les palettes, une même famille ; la Rétroaction plus large) — titre et six items validés par Grégoire,
             // mot pour mot, le 2 nov. 2026 à 14 h 51, proposés par Cowork (`CONSIGNE-LOT-2026-11-02-mise-en-ligne-1231.md`, § 1).
             // Insécables en `&nbsp;`, apostrophes typographiques.
