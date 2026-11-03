@@ -199,7 +199,7 @@ describe('#608 · le maximum par production, et le rattachement qui n\'est pas u
         it('aucun fichier de reprise : bilan à zéro, forme stable', async () => {
             const { win } = monter({ evaluations: [ORIGINALE], fichiers: [] });
             const bilan = await win.travauxUI._appliquerJetonsReprisePostImport();
-            expect(bilan).toEqual({ jetons: 0, rattaches: [] });
+            expect(bilan).toEqual({ jetons: 0, rattaches: [], originaux: [] });
         });
     });
 });

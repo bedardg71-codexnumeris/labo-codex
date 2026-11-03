@@ -4417,6 +4417,9 @@
         // comme un jeton appliqué.
         if (bilanJetons.jetons > 0) details.push(bilanJetons.jetons + ' jeton(s) de reprise appliqué(s)');
         if (bilanJetons.rattaches.length > 0) details.push(bilanJetons.rattaches.length + ' fichier(s) rattaché(s) à une reprise déjà accordée');
+        // 6 bis — dit dans le toast vert, le seul qui reste à l'écran après
+        // l'import : un toast à part serait recouvert aussitôt par celui-ci.
+        if (bilanJetons.originaux.length > 0) details.push('aucune évaluation à reprendre, la copie devient l\u2019original pour : ' + bilanJetons.originaux.join(', '));
         notifications.succes(msg, details.join(' — '));
     }
 
@@ -4665,7 +4668,7 @@
     /**
      * Applique automatiquement les jetons de reprise pour les fichiers importés comme reprises.
      * Cherche l'évaluation active correspondante, crée la nouvelle éval, et lie les fichiers.
-     * @returns {{jetons: number, rattaches: string[]}} #608 — les jetons RÉELLEMENT
+     * @returns {{jetons: number, rattaches: string[], originaux: string[]}} #608 — les jetons RÉELLEMENT
      *   accordés d'un côté, les fichiers seulement rattachés à une reprise déjà
      *   accordée de l'autre. Jamais additionnés : ils ne disent pas la même chose.
      */
@@ -4676,7 +4679,10 @@
         // accordée (aucun jeton consommé, la même reprise gagne un fichier).
         // L'écran annonçait « 1 jeton(s) de reprise appliqué(s) » dans les deux
         // cas.
-        var bilan = { jetons: 0, rattaches: [] };
+        // 6 bis (3 nov. 2026, décision de Grégoire) — `originaux` : les élèves
+        // dont la copie remise avec un jeton est devenue l'original, faute
+        // d'évaluation à reprendre.
+        var bilan = { jetons: 0, rattaches: [], originaux: [] };
         if (typeof travauxStockage === 'undefined' || typeof appliquerJetonReprise !== 'function') return bilan;
 
         // Trouver les fichiers marqués comme reprises sans evaluationId
@@ -4705,7 +4711,6 @@
         fichiersReprise = Object.values(parCle);
 
         var evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
-        var echecsSansEval = [];
         // #1007 (2a-2) — un seul codex proposé pour tout le lot : après le premier jeton accordé,
         // les suivants ne redemandent pas ; « Annuler » arrête les jetons du lot (les fichiers
         // restent importés comme reprises, sans jeton, comme au refus d'une limite).
@@ -4737,7 +4742,23 @@
                     !e.remplaceeParId;
             });
             if (!evaluation) {
-                echecsSansEval.push(nomEtudiant);
+                // 6 bis (3 nov. 2026) — DÉCISION DE GRÉGOIRE : « un fichier remis
+                // avec un jeton, quand l'élève n'a aucune évaluation de cette
+                // production, devient son original ». Laissé `estReprise: true`
+                // sans `evaluationId`, le fichier était retrouvé par le balayage
+                // de l'import SUIVANT, qui lui appliquait un jeton en silence
+                // contre l'évaluation faite entre-temps : l'original devenait une
+                // reprise, et un jeton était consommé. Toutes les copies de
+                // reprise sans évaluation de ce (DA, production) basculent, pas
+                // seulement la plus récente gardée par le dédoublonnage.
+                tousLesFichiers.forEach(function(f) {
+                    if (f.estReprise && !f.evaluationId &&
+                        f.etudiantDA === fichier.etudiantDA &&
+                        f.productionId === fichier.productionId) {
+                        travauxStockage.mettreAJourFichier(f.id, { estReprise: false });
+                    }
+                });
+                bilan.originaux.push(nomEtudiant);
                 continue;
             }
 
@@ -4773,15 +4794,6 @@
             // Rafraîchir la liste des évaluations pour la prochaine itération
             evaluations = obtenirDonneesSelonMode('evaluationsSauvegardees') || [];
             bilan.jetons++;
-        }
-
-        // Notification consolidée
-        if (echecsSansEval.length > 0) {
-            notifications.erreur(
-                'Jetons non appliqués',
-                'Aucune évaluation existante trouvée pour : ' + echecsSansEval.join(', ') +
-                '. Les fichiers ont été importés, mais le jeton doit être appliqué manuellement.'
-            );
         }
 
         // #608 — le rattachement a sa propre annonce, distincte de celle des
