@@ -129,6 +129,32 @@ describe('#1223 · une copie remise avec un jeton, sans évaluation, devient l\'
         expect(actifs.filter(f => f.estReprise)).toEqual([]);
     });
 
+    it('le stock : une copie déjà écrite comme reprise, évaluée AVANT le prochain import, devient l\'original sans jeton', async () => {
+        // Écrite par l'ancien balayage le 3 nov. à 16 h 20 ; Grégoire l'évalue à 19 h ; un import suit.
+        const { win, actifs, jetonsAppliques, evaluations } = monter({
+            evaluations: [{ id: 'EVAL_FAITE_SUR_LA_COPIE', etudiantDA: DA, productionId: PRODUCTION,
+                noteFinale: 72, dateEvaluation: '2026-11-04T00:00:00.000Z' }],
+            fichiers: [COPIE_AVEC_JETON]
+        });
+
+        const bilan = await win.travauxUI._appliquerJetonsReprisePostImport();
+
+        expect(jetonsAppliques).toEqual([]);
+        expect(bilan.originaux).toEqual(['Zoé Lavoie']);
+        expect(actifs.find(f => f.id === 'F_COPIE').estReprise).toBe(false);
+        expect(evaluations().find(e => e.id === 'EVAL_FAITE_SUR_LA_COPIE').remplaceeParId).toBeUndefined();
+    });
+
+    it('une évaluation faite AVANT l\'import de la reprise reste l\'original : le jeton s\'applique', async () => {
+        const { win, jetonsAppliques } = monter({
+            evaluations: [{ id: 'EVAL_1', etudiantDA: DA, productionId: PRODUCTION,
+                noteFinale: 55, dateEvaluation: '2026-10-20T15:00:00.000Z' }],
+            fichiers: [COPIE_AVEC_JETON]
+        });
+        await win.travauxUI._appliquerJetonsReprisePostImport();
+        expect(jetonsAppliques.length).toBe(1);
+    });
+
     it('avec une évaluation existante, le jeton s\'applique toujours comme avant', async () => {
         const { win, actifs, jetonsAppliques } = monter({
             evaluations: [{ id: 'EVAL_1', etudiantDA: DA, productionId: PRODUCTION, noteFinale: 55 }],

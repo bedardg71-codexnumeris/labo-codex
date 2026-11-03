@@ -4741,15 +4741,24 @@
                     e.productionId === fichier.productionId &&
                     !e.remplaceeParId;
             });
-            if (!evaluation) {
-                // 6 bis (3 nov. 2026) — DÉCISION DE GRÉGOIRE : « un fichier remis
-                // avec un jeton, quand l'élève n'a aucune évaluation de cette
-                // production, devient son original ». Laissé `estReprise: true`
-                // sans `evaluationId`, le fichier était retrouvé par le balayage
-                // de l'import SUIVANT, qui lui appliquait un jeton en silence
-                // contre l'évaluation faite entre-temps : l'original devenait une
-                // reprise, et un jeton était consommé. Toutes les copies de
-                // reprise sans évaluation de ce (DA, production) basculent, pas
+            // #1223 — LE STOCK : une copie écrite comme reprise par l'ancien balayage, puis
+            // évaluée AVANT un nouvel import. L'évaluation trouvée est alors celle de cette
+            // copie : `dateEvaluation` n'est écrite qu'à la création (`evaluation-calcul.js`,
+            // `_dateDeLEvaluation`), donc une évaluation née APRÈS l'import du fichier n'a pas
+            // pu être l'original qu'il reprend. Même décision que sans évaluation. Une date
+            // absente garde l'ancien chemin (le jeton).
+            var tEval = evaluation && evaluation.dateEvaluation ? new Date(evaluation.dateEvaluation).getTime() : NaN;
+            var tFichier = fichier.dateImport ? new Date(fichier.dateImport).getTime() : NaN;
+            var evalDeCetteCopie = !isNaN(tEval) && !isNaN(tFichier) && tEval > tFichier;
+
+            if (!evaluation || evalDeCetteCopie) {
+                // #1223 (entrée 6 bis, 3 nov. 2026) — DÉCISION DE GRÉGOIRE : « un fichier remis
+                // avec un jeton, quand l'élève n'a aucune évaluation de cette production,
+                // devient son original ». Laissé `estReprise: true` sans `evaluationId`, le
+                // fichier était retrouvé par le balayage de l'import SUIVANT, qui lui
+                // appliquait un jeton en silence contre l'évaluation faite entre-temps :
+                // l'original devenait une reprise, et un jeton était consommé. Toutes les
+                // copies de reprise sans évaluation de ce (DA, production) basculent, pas
                 // seulement la plus récente gardée par le dédoublonnage.
                 tousLesFichiers.forEach(function(f) {
                     if (f.estReprise && !f.evaluationId &&
