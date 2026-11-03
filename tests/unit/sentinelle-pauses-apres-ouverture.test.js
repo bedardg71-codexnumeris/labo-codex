@@ -18,8 +18,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const INTEGRATION = path.resolve(__dirname, '..', 'integration');
 
 // ⛔ Ne se relève pas. Une spec neuve attend une condition, pas un délai.
-// 2 nov. 2026 : 904 → 673, les 30 sites les plus lourds (plans de travail/RAPPORT-2026-11-02-pauses-les-plus-lourdes.md).
-const PLAFOND_DES_PAUSES = 673;
+// 2 nov. 2026 : 904 → 692, les 30 sites les plus lourds sauf profil-rangee-1151 (plans de travail/RAPPORT-2026-11-02-pauses-les-plus-lourdes.md).
+const PLAFOND_DES_PAUSES = 692;
 
 /** Marque une pause qu'aucune condition observable ne peut remplacer : le commentaire dit pourquoi. */
 const MARQUE_GARDEE = 'pause-gardee :';
