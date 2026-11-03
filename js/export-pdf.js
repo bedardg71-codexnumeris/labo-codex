@@ -2722,6 +2722,45 @@ function donneesPDFTableau(tableau, options, nbColonnes) {
     return donnees;
 }
 
+/**
+ * #1129 — Les parties de la première case d'une rangée de critère : `{ nom, maigres }`, ou `null`
+ * quand la case n'a que le nom (le gras de la colonne suffit), quand ce n'est pas une rangée de
+ * critère, ou quand autoTable a coupé la rangée entre deux pages (son texte n'est plus entier :
+ * on lui laisse alors son dessin ordinaire, en gras, plutôt que de dessiner deux fois le tout).
+ */
+function partiesPremiereCasePDF(data, tableau, options) {
+    if (data.section !== 'body' || data.column.index !== 0) return null;
+    const ligne = tableau.lignes[data.row.index];
+    if (!ligne) return null;
+    const maigres = [];
+    if (options.inclureDescCriteres && ligne.critere.description) maigres.push(ligne.critere.description);
+    if (ligne.cases) ligne.observables.forEach(o => maigres.push('· ' + o));
+    if (maigres.length === 0) return null;
+    const brut = data.cell.raw && typeof data.cell.raw === 'object' ? data.cell.raw.content : data.cell.raw;
+    const aplatir = (t) => String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
+    if (aplatir([].concat(data.cell.text || []).join(' ')) !== aplatir(brut)) return null;
+    return { nom: ligne.critere.nom || '—', maigres };
+}
+
+/** #1129 — Dessine la première case : le nom en gras, puis les lignes maigres, à la place du texte d'autoTable. */
+function dessinerPremiereCasePDF(doc, cell, parts) {
+    const largeur = cell.width - cell.padding('left') - cell.padding('right');
+    const hauteurLigne = (cell.styles.fontSize / doc.internal.scaleFactor) * doc.getLineHeightFactor();
+    doc.setFont('helvetica', 'bold');
+    const lignesGras = doc.splitTextToSize(parts.nom, largeur);
+    doc.setFont('helvetica', 'normal');
+    const lignesMaigres = [];
+    parts.maigres.forEach(m => lignesMaigres.push(...doc.splitTextToSize(m, largeur)));
+    const total = (lignesGras.length + lignesMaigres.length) * hauteurLigne;
+    // La colonne est centrée verticalement (`valign: 'middle'`), comme le dessin d'autoTable.
+    let y = cell.y + Math.max(cell.padding('top'), (cell.height - total) / 2);
+    const x = cell.x + cell.padding('left');
+    doc.setFont('helvetica', 'bold');
+    lignesGras.forEach(l => { doc.text(l, x, y, { baseline: 'top' }); y += hauteurLigne; });
+    doc.setFont('helvetica', 'normal');
+    lignesMaigres.forEach(l => { doc.text(l, x, y, { baseline: 'top' }); y += hauteurLigne; });
+}
+
 /** La description de la grille (forme d'origine, #1120), au-dessus du tableau ; rend l'ordonnée suivante. */
 function poserDescriptionGrillePDF(doc, tableau, posY, largeurContenu, facteurTaille) {
     if (!tableau.description) return posY;
@@ -2883,6 +2922,20 @@ async function genererPDFCombine(grille, echelle, cartouche = null, options = {}
                         data.cell.styles.textColor = couleur;
                     }
                 }
+            },
+            // #1129 — la première case comme dans l'aperçu : le nom en gras, la description et les
+            // éléments observables maigres. jsPDF met toute une case en gras ou rien : la case
+            // garde son texte en gras pour le calcul de sa hauteur (plus large, donc jamais trop
+            // courte), on le vide avant le dessin, puis on la dessine à la main.
+            willDrawCell: function(data) {
+                data.cell._casePremiere = null;
+                const parts = partiesPremiereCasePDF(data, tableau, options);
+                if (!parts) return;
+                data.cell._casePremiere = parts;
+                data.cell.text = [];
+            },
+            didDrawCell: function(data) {
+                if (data.cell._casePremiere) dessinerPremiereCasePDF(doc, data.cell, data.cell._casePremiere);
             },
             margin: { left: PDF_CONFIG.marges.gauche, right: PDF_CONFIG.marges.droite }
         });
