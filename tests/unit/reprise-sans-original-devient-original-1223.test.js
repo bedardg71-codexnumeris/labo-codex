@@ -13,7 +13,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 const DA = '3333333';
 const PRODUCTION = 'PROD_ARTEFACT_6';
 
-function monter({ evaluations = [], fichiers = [] } = {}) {
+function monter({ evaluations = [], fichiers = [], anonyme = false } = {}) {
     const actifs = fichiers.map(f => Object.assign({}, f));
     const notifs = [];
     const jetonsAppliques = [];
@@ -44,6 +44,7 @@ function monter({ evaluations = [], fichiers = [] } = {}) {
         },
         echapperHtml: (s) => String(s),
         travauxStockage,
+        anonymiserNom: (da) => (anonyme ? 'Élève ' + da.slice(-3) : null),
         travauxImport: { trouverEtudiantParDA: () => ({ prenom: 'Zoé', nom: 'Lavoie' }) },
         obtenirConfigJetons: () => ({ actif: true, reprise: { nombre: 5, maxParProduction: 2, archiverOriginale: true } }),
         verifierDisponibiliteJeton: () => true,
@@ -166,5 +167,22 @@ describe('#1223 · une copie remise avec un jeton, sans évaluation, devient l\'
         expect(jetonsAppliques.length).toBe(1);
         expect(bilan.originaux).toEqual([]);
         expect(actifs.find(f => f.id === 'F_COPIE').estReprise).toBe(true);
+    });
+
+    it('en mode anonymisation, le bilan ne porte pas le vrai nom (originaux)', async () => {
+        const { win } = monter({ fichiers: [COPIE_AVEC_JETON], anonyme: true });
+        const bilan = await win.travauxUI._appliquerJetonsReprisePostImport();
+        expect(bilan.originaux).toEqual(['Élève 333']);
+        expect(JSON.stringify(bilan)).not.toContain('Lavoie');
+    });
+
+    it('en mode anonymisation, la mention des rattachements ne porte pas le vrai nom', async () => {
+        const { win, notifs } = monter({
+            evaluations: [{ id: 'EVAL_R', etudiantDA: DA, productionId: PRODUCTION, jetonRepriseApplique: true }],
+            fichiers: [COPIE_AVEC_JETON], anonyme: true
+        });
+        const bilan = await win.travauxUI._appliquerJetonsReprisePostImport();
+        expect(bilan.rattaches).toEqual(['Élève 333']);
+        expect(JSON.stringify(notifs)).not.toContain('Lavoie');
     });
 });

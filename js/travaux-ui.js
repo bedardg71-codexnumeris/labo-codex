@@ -4719,7 +4719,11 @@
         for (var i = 0; i < fichiersReprise.length; i++) {
             var fichier = fichiersReprise[i];
             var etudiant = travauxImport.trouverEtudiantParDA(fichier.etudiantDA);
-            var nomEtudiant = etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : fichier.etudiantDA;
+            // #1223 (relecture de Cowork) — le bilan s'affiche dans les toasts de l'import :
+            // en mode anonymisation, le nom passe par `anonymiserNom` comme le reste du
+            // parcours (#1221, `nomEleveDuFichier`).
+            var nomEtudiant = (typeof anonymiserNom === 'function' && anonymiserNom(fichier.etudiantDA)) ||
+                (etudiant ? (etudiant.prenom + ' ' + etudiant.nom) : fichier.etudiantDA);
 
             // Vérifier si un jeton a déjà été appliqué pour ce (DA, productionId)
             var repriseExistante = evaluations.find(function(e) {
