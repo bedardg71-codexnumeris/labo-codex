@@ -8165,7 +8165,11 @@ function elementCorbeille() {
 /** Vrai si ce point (coordonnées client) tombe dans la corbeille. */
 function pointSurCorbeille(x, y) {
     var el = elementCorbeille();
-    if (!el || el.offsetParent === null) return false; // palette masquée
+    if (!el) return false;
+    // #1070 — carte masquée : un ancêtre en `display: none` ne laisse aucun rectangle.
+    // `offsetParent === null` ne le disait pas : il vaut TOUJOURS null pour un élément
+    // en `position: fixed` (la corbeille, depuis #444) — aucun lâcher ne supprimait.
+    if (el.getClientRects().length === 0) return false;
     var r = el.getBoundingClientRect();
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
 }

@@ -44,7 +44,8 @@ function monterModule() {
     toasts = [];
     corbeille = {
         id: 'planif-corbeille',
-        offsetParent: {},              // visible (null = palette masquée)
+        rectangles: 1,                 // visible (0 = carte masquée, #1070)
+        getClientRects: () => ({ length: corbeille.rectangles }),
         classes: new Set(),
         classList: {
             add(c) { corbeille.classes.add(c); },
@@ -113,10 +114,10 @@ describe('#433 · A — le dépôt se résout par géométrie', () => {
         expect(api.pointSurCorbeille(300, 530), 'à droite').toBe(false);
     });
 
-    it('palette masquée (offsetParent null) → aucun dépôt possible', () => {
+    it('carte masquée (aucun rectangle) → aucun dépôt possible', () => {
         // Sans ce garde, un dépôt « fantôme » serait possible sur une
         // corbeille invisible, à des coordonnées héritées.
-        corbeille.offsetParent = null;
+        corbeille.rectangles = 0;
         expect(api.pointSurCorbeille(60, 530)).toBe(false);
     });
 });
