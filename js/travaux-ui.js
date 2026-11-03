@@ -2419,7 +2419,10 @@
      */
     function retirerFichierPipeline(index) {
         const queue = travauxImport.obtenirFileDAttente();
-        const nom = (queue[index] && queue[index].nomFichier) || 'ce fichier';
+        // #1221 — le nom de fichier LEA porte celui de l'élève : anonymisé comme dans « Originaux ».
+        const f = queue[index];
+        const nom = (f && f.nomFichier && (typeof anonymiserNomFichier === 'function'
+            ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : f.nomFichier)) || 'ce fichier';
         if (!confirm(`Retirer « ${nom} » de la liste ?`)) return;
         // Ajuster la selection si necessaire
         if (fichierSelectionneIndex === index) {

@@ -19,7 +19,8 @@ const ETUDIANT = { da: '1000001', nom: 'Fictivenom', prenom: 'Fictiprenom', grou
 test('#1221 — déposé en mode normal, puis anonymisé : l\'étape 2 ne porte plus le vrai nom', async ({ page }) => {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push('pageerror: ' + e.message));
-    page.on('dialog', (d) => d.dismiss());
+    const dialogues = [];
+    page.on('dialog', (d) => { dialogues.push(d.message()); d.dismiss(); });
     await page.goto(indexHtml);
     await page.waitForFunction(() => window.travauxImport && window.travauxUI && typeof window.changerMode === 'function'
         && typeof window.db !== 'undefined');
@@ -44,7 +45,7 @@ test('#1221 — déposé en mode normal, puis anonymisé : l\'étape 2 ne porte 
         await window.changerMode('normal');
         const octets = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34]); // %PDF-1.4
         window.travauxImport.viderFileDAttente();
-        window.travauxImport.ajouterFichiersEnAttente([new File([octets], etu.da + '_devoir.pdf', { type: 'application/pdf' })]);
+        window.travauxImport.ajouterFichiersEnAttente([new File([octets], etu.nom + '_' + etu.prenom + '_' + etu.da + '_Devoir_1__Remis_le_2026-11-02_10h00m00s.pdf', { type: 'application/pdf' })]);
         const associe = !!(window.travauxImport.obtenirFileDAttente()[0] || {}).etudiantAssocie;
 
         // 2. Bascule en anonymisation, puis rendu de l'étape 2 avec la copie choisie
@@ -56,6 +57,8 @@ test('#1221 — déposé en mode normal, puis anonymisé : l\'étape 2 ne porte 
         const apercu = (conteneur.querySelector('.pipeline-col-confirmes') || {}).textContent || '';
         const champ = (conteneur.querySelector('.pipeline-input-etudiant') || {}).value;
         const tout = conteneur.innerHTML;
+        // La fenêtre « Retirer … de la liste ? » (refusée par le banc) nomme le fichier.
+        window.travauxUI.retirerFichierPipeline(0);
 
         // 3. Retour au mode normal : le vrai nom revient (l'Aperçu n'est pas vidé pour de bon).
         await window.changerMode('normal');
@@ -71,6 +74,8 @@ test('#1221 — déposé en mode normal, puis anonymisé : l\'étape 2 ne porte 
     expect(r.tout, 'aucun vrai nom dans l\'étape 2 anonymisée').not.toMatch(/Fictivenom|Fictiprenom/);
     expect(r.apercu, 'l\'Aperçu nomme l\'élève anonymisé').toMatch(/Élève \d+/);
     expect(r.champ, 'le champ nomme l\'élève anonymisé').toMatch(/Élève \d+/);
+    expect(dialogues.length, 'la fenêtre de retrait s\'est ouverte').toBe(1);
+    expect(dialogues[0], 'la fenêtre de retrait ne nomme pas l\'élève').not.toMatch(/Fictivenom|Fictiprenom/);
     expect(r.apercuNormal, 'en mode normal, le vrai nom revient').toMatch(/Fictivenom/);
     expect(erreurs, `Erreurs : ${erreurs.join(' | ')}`).toEqual([]);
 });
