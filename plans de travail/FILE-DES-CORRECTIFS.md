@@ -8,18 +8,6 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 
 Versées par Cowork le 3 nov. à 10 h 15, sur l'accord de Grégoire (10 h 09) : les rapides encore vraies qui passent par la boucle, d'après `VERIFICATION-LISTE-2026-11-03.md` (preuves, fichiers et lignes y sont ; relis-les dans le code avant de corriger, la vérification date de `af6e1c73`). L'ordre est celui de Cowork : la sécurité d'abord, puis ce que Grégoire voit en évaluant, puis l'hygiène.
 
-### 7. Dans le PDF de la grille (reprise au prochain passage : la première case est à dessiner à la main dans jsPDF, `didDrawCell`), les éléments observables ne sont plus en gras (#1129)
-`js/export-pdf.js` ~2713 et ~2818 : toute la colonne 0 en gras. La graisse seule ; aucun mot ne change.
-
-### 8. « Apporter mon matériel » : deux lignes « Total » ne créent plus de faux écart (#1106)
-`js/materiel-dissection-lecture.js` ~537 ; l'écart s'affiche en `js/materiel-dissection.js` ~1200.
-
-### 9. « Apporter mon matériel » : une plage de niveau reste entre 0 et 100 (#1105)
-`js/materiel-assistant.js` ~77 : `plageValide` ne vérifie que min ≤ max. Borner à la saisie ; les échelles déjà créées restent telles quelles.
-
-### 10. « Apporter mon matériel » : les raisons nomment les critères en cause (#1107)
-Quatre raisons de `js/materiel-assistant.js` (~123, 131, 139, 155), relayées par `raisonDissection`. Mots d'écran : à soumettre en fin de file.
-
 ### 11. Une grille à niveaux dont les pondérations ne font pas 100 ne s'affiche plus en « % » trompeur (#1104)
 `js/grilles.js` ~832 et ~1356. ⚠ L'avertissement « pas 100 % » a été voulu par #483 : si le correctif le retire, mets l'entrée de côté avec la question.
 
@@ -85,7 +73,7 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 
 ## Mises de côté (attendent Grégoire)
 
-Aucune.
+- **Les messages rouges restent jusqu'à « OK »** (versée par Cowork le 3 nov. à 16 h 38 ; proposition, pas encore acceptée). Vécu le 3 nov. vers 16 h 20 : après l'import des reprises, le toast vert « 13 fichier(s) importé(s) » s'est posé sur le rouge « Jetons non appliqués », que Grégoire n'a pas eu le temps de lire. Il a suggéré une confirmation « OK ». Mesuré : `js/utils-notifications.js` affiche tout au même endroit (`.notification-succes`, `top: 20px; right: 20px`, `styles.css` ~6930), sans empilement, et retire chaque toast seul (vert et info 3 s, orange 4 s, rouge 5 s) ; environ 170 appels à `notifications.erreur`. Recommandation de Cowork : rouge et orange restent jusqu'à « OK » ; vert et info partent seuls ; les toasts s'empilent au lieu de se recouvrir. Question à lui poser : « Les messages rouges et orange restent-ils affichés jusqu'à ce que tu touches OK, le vert partant seul ? »
 
 ## Fait
 
@@ -102,6 +90,22 @@ Passage du 3 nov. 2026 (Claude Code, à partir de 11 h 23) :
 - **6. « Nom du critère »** : au Mac, à 1 440 px, un nom comme « Partie A : compréhension – lecture fictive » tient dans son champ (400 px, contre 266) ; le Nom est plus large que la Description ; l'iPad garde sa disposition de #1095. Vérifié : essai à 1 440 px, 47 specs de l'éditeur (198 verts ; deux instables rejoués 3 fois, verts, étrangers au lot) ; une première vérification arrêtée par le système faute de mémoire (journal, 12 h 44). Relecture neuve : VERT AVEC RÉSERVE, entre 1 181 et 1 280 px un nom aussi long reste un peu coupé (le Mac de Grégoire est à 1 470) ; aucun essai ne garde la règle #1095 : noté, pas inscrit (aucun symptôme vécu). (`43e4adff`, #1126)
 
 - **Fin du passage** : release 1.231.1 (build 1103-1338, `b789ee32`), Nouvelles validées par Grégoire. Verdict du Mac vert sur `b789ee32` : 1 358 essais, 1 353 verts, 1 vert au second essai, 4 rouges connus, 23 sautés. Poussée sur `origin/main` le 3 nov. vers 15 h 35. Porte terrain : `PORTES-TERRAIN-2026-11-03-boucle.md` (reprises de l'Artefact 6, corbeille au doigt, défilement d'Annoter), à publier par Cowork.
+
+Passage du 3 nov. 2026, soir (Claude Code, à partir de 16 h 40) :
+
+- **6 bis. Reprise sans évaluation** (hors boucle, décision de Grégoire du 3 nov., 16 h 35) : importée avec « Jeton de reprise » pour une élève qui n'a aucune évaluation de cette production, la copie devient son original ; plus de message rouge « Jetons non appliqués », le message vert de l'import dit « aucune évaluation à reprendre, la copie devient l'original pour : … » ; évaluée, puis un autre import, elle reste l'original et aucun jeton n'est consommé. **Stock** : la copie de l'élève du 3 nov. (écrite comme reprise) bascule au prochain import, qu'elle soit évaluée ou non : une évaluation née après l'import de la copie (`dateEvaluation`, posée à la création seulement) est la sienne. Relecture neuve : VERT AVEC RÉSERVE (la copie évaluée avant le prochain import recevait encore un jeton), corrigée dans `22cd095d`. **Suppositions à valider par Cowork, puis Grégoire** : (a) si l'élève avait déjà une copie ordinaire non évaluée pour cette production, la reprise devient un second original (deux copies ordinaires) ; (b) même chemin pour une copie marquée « reprise » à la main sans évaluation (`liste-evaluations.js`, `appliquerJetonRepriseSurCopie`) : elle redevient ordinaire au prochain import du groupe. **Relecture croisée de Cowork due avant le verdict** (règle 2 de `PROTOCOLE.md`). Mots d'écran : à soumettre. (`9e0e7593`, `22cd095d`, #1223)
+- **7. PDF de la grille** : le nom du critère en gras, ses éléments observables (et sa description, « Desc. critères » coché) en maigre, comme l'aperçu ; même place, la graisse seule (rendu comparé avant/après). Une rangée coupée entre deux pages garde l'ancien dessin, tout en gras. Relecture neuve : VERT AVEC RÉSERVE (colonne étroite d'une cartouche : un mot coupé laissait la case toute en gras), corrigée dans `82477d10`. (`6f50c33f`, `82477d10`, #1129)
+
+- **8. Deux « Total »** : dans « Apporter mon matériel », une grille à deux sous-totaux (« / 70 » puis « / 30 ») affiche « ton total : 100 ✓ » au lieu de « 30 : écart » ; un total général, répété ou courant tombe aussi juste. Relecture neuve : VERT AVEC RÉSERVE (trois « / 100 » ou « / 70 » puis « / 100 » donnaient un faux écart), corrigée dans `60cc1c80`. (`27142de1`, `60cc1c80`, #1106)
+- **9. Plage de niveau** : une plage tapée hors de 0 à 100 (80 à 120, ou −10) empêche « Créer ma grille », avec la raison « la plage de notes d'un niveau » ; les échelles déjà créées ne changent pas. Relecture neuve : VERT AVEC RÉSERVE (la raison ne dit pas « de 0 à 100 » : mot d'écran, proposé ci-dessous). Trouvaille de la relecture : la note retenue d'un niveau n'est pas bornée à 0–100 (un avertissement seulement) ; notée ici, pas inscrite (aucun symptôme vécu). (`d88c9f9f`, #1105)
+- **10. Raisons nommées** : « des points en nombre entier de 0 à 100 pour un critère (« Rigueur fictive ») », de même pour la pondération, le nom absent et « au plus 30 éléments observables par critère (« … ») ». Relecture neuve : en cours à l'arrêt du passage. (`4c0074eb`, #1107)
+
+**Mots d'écran à soumettre à Grégoire** (passage du 3 nov., soir) :
+1. 6 bis, dans le message vert de l'import : « aucune évaluation à reprendre, la copie devient l'original pour : Prénom Nom ». Remplace le rouge « Jetons non appliqués … le jeton doit être appliqué manuellement ».
+2. 10, dans la dissection : les quatre raisons suivies du critère entre parenthèses ; « sous-critères » y devient « éléments observables » (le mot de la dissection).
+3. Proposé, pas codé (réserve de 9) : « la plage de notes d'un niveau » → « une plage de notes entre 0 et 100 pour un niveau ».
+
+**Arrêt du passage, 3 nov. au soir** : cinq entrées faites (6 bis à 10), contexte de session chargé ; le passage suivant reprend à l'entrée 11. Avant la vérification : **relecture croisée de Cowork sur 6 bis** (`9e0e7593`, `22cd095d`), règle 2 de `PROTOCOLE.md` ; puis les mots d'écran ci-dessus et les Nouvelles.
 
 - L'onglet Évaluation ne chargeait que la liste des évaluations (rapport du 2 nov., 17 h 04) : **résolu par un simple rechargement**, dit Grégoire le 3 nov. à 7 h 03 ; rien à corriger. À rouvrir si le défaut revient. (`BUG__grégoire__2026-11-02_17-04-55.txt`)
 
