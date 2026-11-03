@@ -101,6 +101,24 @@ describe('#1222 — une reprise n\'est pas un doublon de l\'original', () => {
         expect(doublons[0].queue).toHaveLength(1);
     });
 
+    it('une reprise et une remise ordinaire du même élève, dans la file, ne se signalent pas l\'une l\'autre', () => {
+        // Relecture neuve du lot : la règle de la file n'était gardée par aucun essai.
+        magasin.length = 0; // rien en stock : seule la file compte
+        win.travauxImport.setProductionGlobale('prod_a6');
+        win.travauxImport.ajouterFichiersEnAttente([
+            faireFichier('Exemple_9000058_Artefact_6.pdf'),
+            faireFichier('Exemple_9000058_Artefact_6_reprise.pdf')
+        ]);
+        const file = win.travauxImport.obtenirFileDAttente();
+        file[0].groupeDocumentId = 'remise';
+        file[1].groupeDocumentId = 'reprise';
+        file[1].estReprise = true;
+        expect(win.travauxImport.detecterDoublonsStockage()).toEqual([]);
+        // Témoin : sans le jeton, les deux remises du même élève se signalent.
+        file[1].estReprise = false;
+        expect(win.travauxImport.detecterDoublonsStockage()).toHaveLength(1);
+    });
+
     it('la condition de Grégoire : après l\'import des reprises, l\'Artefact 6 d\'origine est intact', async () => {
         const avant = JSON.parse(JSON.stringify(magasin));
         const file = deposerReprises(['Exemple_9000058_Artefact_6_reprise.pdf']);
