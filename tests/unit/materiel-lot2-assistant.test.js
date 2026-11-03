@@ -83,7 +83,7 @@ const ctx = (extra) => Object.assign({ id: (p) => p + 'x' + (++compteur), mainte
 describe('V — ce qui bloque, ce qui avertit', () => {
     it('V.a l’exemple tel que lu ne se crée pas : plages, notes retenues et passage manquent', () => {
         expect(A.calculs(exemple()).manquants).toEqual([
-            'la plage de notes de 4 niveaux', 'la note retenue de 4 niveaux', 'un passage à classer ou à écarter'
+            'une plage de notes entre 0 et 100 pour 4 niveaux', 'la note retenue de 4 niveaux', 'un passage à classer ou à écarter'
         ]);
         expect(A.calculs(exempleComplet()).manquants).toEqual([]);
     });

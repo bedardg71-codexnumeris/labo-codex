@@ -115,7 +115,7 @@ test('dissection 2b · l’exemple, « des niveaux » choisi, le tableau rempli,
     expect(await valeursDuTableau(page)).toEqual(Array(4).fill(['', '', '']));
     await expect(page.locator('#dissection-niv-0-min')).toHaveAttribute('inputmode', 'decimal');
     await expect(bouton).toBeDisabled();
-    await expect(page.locator('#dissection-creer-raisons')).toContainText('la plage de notes de 4 niveaux');
+    await expect(page.locator('#dissection-creer-raisons')).toContainText('une plage de notes entre 0 et 100 pour 4 niveaux');
     await expect(page.locator('#dissection-creer-raisons')).toContainText('la note retenue de 4 niveaux');
 
     // Le tableau rempli par de vrais événements de saisie ; la virgule acceptée.

@@ -84,7 +84,7 @@
         var sansTitre = m.niveaux.filter(function (n) { return !texte(n.titre); }).length;
         if (sansTitre) out.push(compte(sansTitre, 'le nom d’un niveau', 'le nom de # niveaux'));
         var sansPlage = m.niveaux.filter(function (n) { return !plageValide(n); }).length;
-        if (sansPlage) out.push(compte(sansPlage, 'la plage de notes d’un niveau', 'la plage de notes de # niveaux'));
+        if (sansPlage) out.push(compte(sansPlage, 'une plage de notes entre 0 et 100 pour un niveau', 'une plage de notes entre 0 et 100 pour # niveaux'));
         var sansNote = m.niveaux.filter(function (n) { return isNaN(A.nombre(n.note && n.note.valeur)); }).length;
         if (sansNote) out.push(compte(sansNote, 'la note retenue d’un niveau', 'la note retenue de # niveaux'));
         manquantsCodes(m, out);
