@@ -35,7 +35,8 @@
                 'Évaluer&nbsp;: la palette Rétroaction s’ouvre plus large, pour lire d’un trait le texte que l’élève recevra.',
                 'Avec cette version, les palettes s’ouvrent une fois à leur place et à leur taille par défaut.',
                 'Sur l’iPad, en Annoter et en Évaluer, la page défile de nouveau&nbsp;; deux doigts font défiler la copie même après un détour.',
-                'Importer des copies&nbsp;: en mode anonymisation, l’étape Optimisation ne montre plus aucun vrai nom, même si les fichiers ont été déposés avant de l’activer. Un lot de reprises (jeton) n’est plus annoncé en doublons&nbsp;: chaque reprise s’ajoute à côté de l’original, qui garde son évaluation.'
+                'Importer des copies&nbsp;: en mode anonymisation, l’étape Optimisation ne montre plus aucun vrai nom, même si les fichiers ont été déposés avant de l’activer. Un lot de reprises (jeton) n’est plus annoncé en doublons&nbsp;: chaque reprise s’ajoute à côté de l’original, qui garde son évaluation. Une reprise remise pour un élève qui n’a encore aucune évaluation de cette production devient son original, sans consommer de jeton.',
+                'Le PDF de la grille imprime le nom du critère en gras et ses éléments observables en maigre, comme l’aperçu. Dans «&nbsp;Apporter mon matériel&nbsp;», une grille à deux sous-totaux ne crée plus de faux écart, et les raisons qui empêchent de créer la grille nomment le critère en cause.'
             ]
         },
         {
