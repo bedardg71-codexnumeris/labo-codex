@@ -80,7 +80,13 @@ function monterModule() {
         requestAnimationFrame: (fn) => { fn(); return 0; },
         document: {
             getElementById: (id) => elements[id] || null,
-            querySelector: (sel) => (enDrag && /planif-dragging/.test(sel) ? {} : null),
+            // Comme un vrai DOM : un bloc de groupe porte aussi `.planif-dragging-groupe`, que
+            // le sélecteur `:not(...)` du module écarte.
+            querySelector: (sel) => {
+                if (!enDrag || !/planif-dragging/.test(sel)) return null;
+                if (enDrag === 'groupe' && /:not\(\.planif-dragging-groupe\)/.test(sel)) return null;
+                return {};
+            },
             querySelectorAll: () => [],
             addEventListener: (type, fn) => { (ecouteurs[type] = ecouteurs[type] || []).push(fn); },
             createElement: fauxElement,
@@ -127,9 +133,9 @@ describe('#433 · A — le dépôt se résout par géométrie', () => {
 });
 
 /** Rejoue un geste par les écouteurs du module : appui en (x0, y0), bloc en drag, glissé en (x1, y1). */
-function glisser(x0, y0, x1, y1) {
+function glisser(x0, y0, x1, y1, sorte = 'simple') {
     (ecouteurs.pointerdown || []).forEach((fn) => fn({ clientX: x0, clientY: y0 }));
-    enDrag = true;
+    enDrag = sorte;
     (ecouteurs.pointermove || []).forEach((fn) => fn({ clientX: x1, clientY: y1 }));
 }
 
@@ -152,6 +158,19 @@ describe('#433 · B — déposer supprime vraiment', () => {
     it('#1070 — un geste qui a survolé la corbeille puis l’a quittée ne supprime pas', () => {
         glisser(300, 200, 60, 530);
         (ecouteurs.pointermove || []).forEach((fn) => fn({ clientX: 600, clientY: 200 }));
+        expect(api.deposerDansCorbeille({ clientX: 60, clientY: 530 }, 'n-1')).toBe(false);
+    });
+
+    it('#1070 — un geste ANNULÉ (pointercancel) au-dessus de la corbeille rouge ne supprime pas', () => {
+        glisser(300, 200, 60, 530);
+        expect(api.deposerDansCorbeille({ type: 'pointercancel', clientX: 60, clientY: 530 }, 'n-1')).toBe(false);
+        expect(api.etat.noeuds.has('n-1')).toBe(true);
+    });
+
+    it('#1070 — un drag de GROUPE n’arme pas la corbeille et ne la fait pas virer au rouge', () => {
+        glisser(300, 200, 60, 530, 'groupe');
+        expect(corbeille.classes.has('planif-corbeille-armee')).toBe(false);
+        expect(corbeille.classes.has('planif-corbeille-survol')).toBe(false);
         expect(api.deposerDansCorbeille({ clientX: 60, clientY: 530 }, 'n-1')).toBe(false);
     });
 

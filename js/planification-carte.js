@@ -8187,7 +8187,10 @@ function deposerDansCorbeille(e, id) {
     // #1070 — seul un geste qui a BOUGÉ jusqu'à la corbeille, l'a vue s'armer et virer au
     // rouge, supprime. Invisible au repos, elle garde son rectangle : sans cette garde, un
     // simple toucher sur un bloc posé sous elle le supprimait (relecture du lot, mesuré).
-    if (!e || !gesteCorbeille.survolee || !pointSurCorbeille(e.clientX, e.clientY)) return false;
+    // Un geste ANNULÉ (`pointercancel` : l'iPad reprend la main, un appel entre…) n'est pas un
+    // lâcher : il ne supprime pas, même au-dessus de la corbeille rouge (seconde relecture).
+    if (!e || e.type === 'pointercancel') return false;
+    if (!gesteCorbeille.survolee || !pointSurCorbeille(e.clientX, e.clientY)) return false;
     var nd = etat.noeuds.get(id);
     if (!nd) return false;
     var nom = nd.titre || obtenirLabelNoeud(nd);
