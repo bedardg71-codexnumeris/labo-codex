@@ -1302,14 +1302,20 @@
         // Chrono : visible selon la préférence, avec son état courant
         _majAffichageChrono();
 
-        // Configurer la visionneuse
+        reprendreCadreVisionneuse();
+
+    }
+
+    /**
+     * La visionneuse et ses gestes (pincement, deux doigts, molette) visent le cadre d'Annoter. Rappelée à chaque copie
+     * ouverte : la vue côte à côte et la Modélisation désignent leur propre cadre, et la visionneuse d'Annoter n'est
+     * créée qu'une fois (rapport du 2 nov. 2026, le défilement perdu après un détour).
+     */
+    function reprendreCadreVisionneuse() {
         const conteneurDoc = document.getElementById('travaux-conteneur-document');
+        if (!conteneurDoc) return;
         travauxVisionneuse.setConteneur(conteneurDoc);
-
-        // Gestes zoom (pinch iPad / trackpad Mac)
-        const canvasContainer = document.getElementById('travaux-canvas-container');
-        travauxVisionneuse.configurerGestesZoom(canvasContainer);
-
+        travauxVisionneuse.configurerGestesZoom(document.getElementById('travaux-canvas-container'));
     }
 
     /**
@@ -3568,6 +3574,7 @@
             const placeholder = document.getElementById('travaux-placeholder-visionneuse');
             if (placeholder) placeholder.classList.add('u-hide');
 
+            reprendreCadreVisionneuse();
             await travauxVisionneuse.ouvrirFichier(fichierId);
 
             // Vérifier la résolution fichier→évaluation pour détecter les ambiguïtés

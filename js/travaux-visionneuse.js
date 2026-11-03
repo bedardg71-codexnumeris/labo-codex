@@ -854,14 +854,25 @@
         scrollYDepart: 0
     };
 
+    // Les cadres qui portent déjà les écouteurs des gestes.
+    const cadresEquipes = new WeakSet();
+
     /**
-     * Configure les gestes de zoom sur le conteneur du document
+     * Configure les gestes de zoom sur le conteneur du document, et en fait le cadre que les gestes déplacent.
+     *
+     * ⚠ UN SEUL CADRE À LA FOIS, ET LE DERNIER DÉSIGNÉ GAGNE (rapport de Grégoire du 2 nov. 2026, iPad : « je ne peux pas
+     * scroller dans la page d'annotation et d'évaluation »). La vue côte à côte et la Modélisation désignent leur propre
+     * cadre ; la visionneuse d'Annoter, créée une seule fois, ne se redésignait pas au retour. Deux doigts sur sa copie
+     * annulaient alors le défilement natif et faisaient défiler le cadre du détour, caché ou retiré : rien ne bougeait,
+     * en Annoter comme en Évaluer. Rappelée sur un cadre déjà équipé, la fonction le redésigne sans doubler ses écouteurs.
      * @param {HTMLElement} conteneur - .travaux-canvas-container
      */
     function configurerGestesZoom(conteneur) {
         if (!conteneur) return;
         conteneurGestesZoom = conteneur;
         wrapperGestesZoom = conteneur.querySelector('.travaux-canvas-wrapper');
+        if (cadresEquipes.has(conteneur)) return;
+        cadresEquipes.add(conteneur);
 
         // Molette zoom (Chrome/Firefox trackpad pinch, ou Ctrl+molette souris)
         conteneur.addEventListener('wheel', onWheelZoom, { passive: false });
