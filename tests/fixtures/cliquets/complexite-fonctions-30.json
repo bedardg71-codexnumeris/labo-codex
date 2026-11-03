@@ -145,7 +145,7 @@
  },
  "js/travaux-ui.js": {
   "initialiserModuleTravaux": 37,
-  "genererEtape2Colonnes": 38,
+  "genererEtape2Colonnes": 35,
   "(anonyme)": 38,
   "traiterDoublonsImport": 37,
   "mesurerReassignation": 31,

@@ -1937,6 +1937,29 @@
     }
 
     /**
+     * #1221 (3 nov. 2026) — Le nom de l'élève d'un fichier en file se lit AU RENDU, selon le mode.
+     * `f.etudiantAssocie` est un instantané pris au dépôt : déposé en mode normal puis anonymisé,
+     * il gardait le vrai nom (« Aperçu », « Informations du fichier », « Doublons détectés »),
+     * alors que « Originaux » passait déjà par `anonymiserNomFichier`. Le DA prime ; l'instantané
+     * ne sert qu'en mode normal, quand le DA ne retrouve plus personne.
+     * @param {Object} f - Fichier de la file
+     * @param {'nom'|'prenom nom'|'nom, prenom'} forme - Forme du vrai nom
+     * @returns {string} Nom à afficher, non échappé ; '' si aucun élève n'est associé
+     */
+    function nomEleveDuFichier(f, forme) {
+        if (!f || !f.etudiantAssocie) return '';
+        const da = f.etudiantDA || f.etudiantAssocie.da || '';
+        const anonyme = typeof anonymiserNom === 'function' ? anonymiserNom(da) : null;
+        if (anonyme) return anonyme;
+        const e = (da && travauxImport.trouverEtudiantParDA(da)) || f.etudiantAssocie;
+        const nom = e.nom || '';
+        const prenom = e.prenom || '';
+        if (forme === 'nom') return nom;
+        if (forme === 'prenom nom') return prenom + ' ' + nom;
+        return nom + ', ' + prenom;
+    }
+
+    /**
      * Genere l'etape 2 en layout 3 colonnes
      * @param {Array} queue - File d'attente
      * @param {Map} groupes - Groupes de documents
@@ -2123,9 +2146,7 @@
             colCentre += '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">Informations du fichier</p>';
             const modeLea = f.modeImport !== 'autre';
             const dateVal = f.dateFichier ? new Date(f.dateFichier).toISOString().substring(0, 10) : '';
-            const nomEtudiant = f.etudiantAssocie
-                ? echapperHtml((f.etudiantAssocie.prenom || '') + ' ' + (f.etudiantAssocie.nom || ''))
-                : '';
+            const nomEtudiant = echapperHtml(nomEleveDuFichier(f, 'prenom nom'));
 
             colCentre += '<div class="pipeline-meta-champs" style="margin-top:4px;">';
             // Toggle LEA/Autre
@@ -2199,9 +2220,7 @@
             const tailleEst = estimerTailleFichier(dims.w, dims.h, f);
             const resCible = f.estPDF ? 'PDF' : `${dims.w} x ${dims.h}`;
             const thumb = f.thumbnailDataUrl || travauxStockage.obtenirThumbnailSync(f.id);
-            const nomEtudiant = f.etudiantAssocie
-                ? echapperHtml(f.etudiantAssocie.nom || '')
-                : '';
+            const nomEtudiant = echapperHtml(nomEleveDuFichier(f, 'nom'));
 
             let badgeSpecifique = '';
             if (f.operations && f.operations.length > 0) {
@@ -4198,9 +4217,7 @@
                 return p ? (p.titre || p.nom || prodId) : (prodId || '?');
             }
             function _nomEtudiant(d) {
-                if (d.nouveau && d.nouveau.etudiantAssocie) {
-                    return (d.nouveau.etudiantAssocie.nom || '') + ', ' + (d.nouveau.etudiantAssocie.prenom || '');
-                }
+                if (d.nouveau && d.nouveau.etudiantAssocie) return nomEleveDuFichier(d.nouveau, 'nom, prenom');
                 return d.nouveau && d.nouveau.etudiantDA ? d.nouveau.etudiantDA : 'Étudiant inconnu';
             }
             function _formatDate(iso) {
