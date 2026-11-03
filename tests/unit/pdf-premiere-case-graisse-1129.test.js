@@ -102,6 +102,18 @@ describe('#1129 · la première case du PDF de la grille : le nom en gras, le re
         expect(poses.find(p => p.texte === 'Partie fictive 1').gras).toBe(true);
     });
 
+    it('un mot trop long pour la colonne, coupé en son milieu : l\'observable reste maigre', async () => {
+        const { win, docs } = monter();
+        const LONG = 'Anticonstitutionnellementfictifetencoreplusloinquelacolonne';
+        const g = JSON.parse(JSON.stringify(ORIGINE));
+        g.criteres[0].sousCriteres[0].nom = LONG;
+        await win.genererPDFCombine(g, null, null, OPTIONS);
+        const poses = textesPoses(docs[0]);
+        const morceaux = poses.filter(p => LONG.includes(p.texte.replace(/^· /, '')) && p.texte.length > 3);
+        expect(morceaux.length, 'le mot est coupé sur plusieurs lignes').toBeGreaterThan(1);
+        expect(morceaux.every(p => p.maigre)).toBe(true);
+    });
+
     it('le reste de la grille ne change pas : l\'en-tête « Critère » et le « Total » restent en gras', async () => {
         const { win, docs } = monter();
         await win.genererPDFCombine(ORIGINE, null, null, OPTIONS);

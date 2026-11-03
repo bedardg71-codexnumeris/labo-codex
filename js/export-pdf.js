@@ -2737,7 +2737,8 @@ function partiesPremiereCasePDF(data, tableau, options) {
     if (ligne.cases) ligne.observables.forEach(o => maigres.push('· ' + o));
     if (maigres.length === 0) return null;
     const brut = data.cell.raw && typeof data.cell.raw === 'object' ? data.cell.raw.content : data.cell.raw;
-    const aplatir = (t) => String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
+    // Sans aucune espace : une colonne étroite coupe au milieu d'un mot, sans trait d'union.
+    const aplatir = (t) => String(t == null ? '' : t).replace(/\s+/g, '');
     if (aplatir([].concat(data.cell.text || []).join(' ')) !== aplatir(brut)) return null;
     return { nom: ligne.critere.nom || '—', maigres };
 }
