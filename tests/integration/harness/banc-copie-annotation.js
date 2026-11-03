@@ -86,8 +86,15 @@ export const compteAnnotations = (page) => page.evaluate(() => {
     return { shapes: n('shapes'), stickers: n('stickers'), strokes: n('strokes') };
 });
 
-/** Un point du canevas d'annotation, en coordonnées de la fenêtre (fx, fy : fractions de sa largeur et sa hauteur). */
+/** Un point du canevas d'annotation, en coordonnées de la fenêtre (fx, fy : fractions de sa largeur et sa hauteur).
+ *  3 nov. 2026 (#1219) : la page défile de nouveau, et la copie s'ouvre plus large, donc plus haute ; un point visé
+ *  sous le bord de la fenêtre ne recevait aucun geste. Quand le canevas dépasse le bas de la fenêtre, la page défile
+ *  jusqu'au bout — la position où l'on travaille, où la zone occupe l'écran — avant de mesurer. La décision tient au
+ *  canevas, pas au point : les deux points d'un même glissé sont mesurés dans la même position (le second ne fait
+ *  plus défiler, la page étant déjà au bout). */
 export const pointCanevas = (page, fx = 0.5, fy = 0.5) => page.evaluate(([fx, fy]) => {
-    const r = document.getElementById('travaux-canvas-annotation').getBoundingClientRect();
+    const canevas = document.getElementById('travaux-canvas-annotation');
+    if (canevas.getBoundingClientRect().bottom > window.innerHeight) window.scrollTo(0, document.scrollingElement.scrollHeight);
+    const r = canevas.getBoundingClientRect();
     return { x: r.left + r.width * fx, y: r.top + r.height * fy };
 }, [fx, fy]);
