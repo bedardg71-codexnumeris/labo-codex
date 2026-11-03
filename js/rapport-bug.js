@@ -62,8 +62,12 @@ function mettreAJourBadgeBug() {}
 
 /**
  * Archive un rapport de bug localement
+ * #1068 (3 nov. 2026) — `voie` dit par où le rapport est parti : 'copie' (presse-papiers),
+ * 'fichier' (TXT) ou 'courriel' (logiciel de courriel ouvert). L'ancien `envoye: true`, posé en
+ * dur par les trois voies, disait « envoyé » d'un rapport seulement copié ; aucun écran ne le
+ * lisait. Les entrées déjà archivées le gardent (stock laissé tel quel : rien ne le lit).
  */
-function archiverRapportBug(rapport, description, prenom, type) {
+function archiverRapportBug(rapport, description, prenom, type, voie) {
     try {
         const archives = db.getSync(CLE_RAPPORTS_ARCHIVES, []);
 
@@ -73,7 +77,7 @@ function archiverRapportBug(rapport, description, prenom, type) {
             prenom: prenom || 'Anonyme',
             description: description || 'Aucune description',
             rapport: rapport,
-            envoye: true,
+            voie: voie,
             type: type || 'bug'
         };
 
@@ -1060,7 +1064,7 @@ async function copierRapportBug(btn) {
         await navigator.clipboard.writeText(rapport);
 
         // Archiver le rapport localement
-        archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug');
+        archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug', 'copie');
 
         // Feedback visuel
         if (btn) {
@@ -1135,7 +1139,7 @@ async function telechargerRapportTxt(btn) {
     }
 
     // Archiver le rapport localement
-    archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug');
+    archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug', 'fichier');
 
     // Feedback visuel
     if (btn && succes) {
@@ -1195,7 +1199,7 @@ function envoyerRapportParCourriel(btn) {
         var mailtoUrl = 'mailto:labo@codexnumeris.org?subject=' + sujet + '&body=' + corps;
 
         // Archiver le rapport localement
-        archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug');
+        archiverRapportBug(rapport, description, prenom, modeRapport === 'commentaire' ? 'commentaire' : 'bug', 'courriel');
 
         // Protection troncature : si l'URL est trop longue, copier dans le presse-papiers
         if (mailtoUrl.length > 1800 && navigator.clipboard && navigator.clipboard.writeText) {
