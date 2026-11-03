@@ -6,6 +6,9 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 
 ## À faire
 
+### 10 ter. Les messages rouges et orange restent jusqu'à « OK » (#1224)
+Décision de Grégoire du 3 nov., 17 h 17, sur la mise de côté de Cowork : rouge et orange restent jusqu'à « OK » ; vert et info partent seuls ; les messages s'empilent au lieu de se recouvrir. `js/utils-notifications.js`, `styles.css` ~6930 ; environ 170 appels à `notifications.erreur`. Mots d'écran (le bouton « OK ») : à soumettre en fin de file.
+
 Versées par Cowork le 3 nov. à 10 h 15, sur l'accord de Grégoire (10 h 09) : les rapides encore vraies qui passent par la boucle, d'après `VERIFICATION-LISTE-2026-11-03.md` (preuves, fichiers et lignes y sont ; relis-les dans le code avant de corriger, la vérification date de `af6e1c73`). L'ordre est celui de Cowork : la sécurité d'abord, puis ce que Grégoire voit en évaluant, puis l'hygiène.
 
 ### 11. Une grille à niveaux dont les pondérations ne font pas 100 ne s'affiche plus en « % » trompeur (#1104)
@@ -73,7 +76,7 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 
 ## Mises de côté (attendent Grégoire)
 
-- **Les messages rouges restent jusqu'à « OK »** (versée par Cowork le 3 nov. à 16 h 38 ; proposition, pas encore acceptée). Vécu le 3 nov. vers 16 h 20 : après l'import des reprises, le toast vert « 13 fichier(s) importé(s) » s'est posé sur le rouge « Jetons non appliqués », que Grégoire n'a pas eu le temps de lire. Il a suggéré une confirmation « OK ». Mesuré : `js/utils-notifications.js` affiche tout au même endroit (`.notification-succes`, `top: 20px; right: 20px`, `styles.css` ~6930), sans empilement, et retire chaque toast seul (vert et info 3 s, orange 4 s, rouge 5 s) ; environ 170 appels à `notifications.erreur`. Recommandation de Cowork : rouge et orange restent jusqu'à « OK » ; vert et info partent seuls ; les toasts s'empilent au lieu de se recouvrir. Question à lui poser : « Les messages rouges et orange restent-ils affichés jusqu'à ce que tu touches OK, le vert partant seul ? »
+(vide)
 
 ## Fait
 
@@ -100,7 +103,7 @@ Passage du 3 nov. 2026, soir (Claude Code, à partir de 16 h 40) :
 - **9. Plage de niveau** : une plage tapée hors de 0 à 100 (80 à 120, ou −10) empêche « Créer ma grille », avec la raison « la plage de notes d'un niveau » ; les échelles déjà créées ne changent pas. Relecture neuve : VERT AVEC RÉSERVE (la raison ne dit pas « de 0 à 100 » : mot d'écran, proposé ci-dessous). Trouvaille de la relecture : la note retenue d'un niveau n'est pas bornée à 0–100 (un avertissement seulement) ; notée ici, pas inscrite (aucun symptôme vécu). (`d88c9f9f`, #1105)
 - **10. Raisons nommées** : « des points en nombre entier de 0 à 100 pour un critère (« Rigueur fictive ») », de même pour la pondération et « au plus 30 éléments observables par critère (« … ») ». Relecture neuve : VERT AVEC RÉSERVE (la branche de la pondération sans essai ; celle du nom absent inatteignable), corrigée dans `cc3d35d3` : essai ajouté, branche retirée. (`4c0074eb`, `cc3d35d3`, #1107)
 
-**Mots d'écran à soumettre à Grégoire** (passage du 3 nov., soir) :
+**Mots d'écran du passage du 3 nov., soir — validés par Grégoire le 3 nov. à 17 h 17** (1 et 2 tels quels ; 3 codé dans `b00c1e89`) :
 1. 6 bis, dans le message vert de l'import : « aucune évaluation à reprendre, la copie devient l'original pour : Prénom Nom » (« Élève N » en mode anonymisation). Remplace le rouge « Jetons non appliqués … le jeton doit être appliqué manuellement ».
 2. 10, dans la dissection : les trois raisons (points, pondération, éléments observables) suivies du critère entre parenthèses ; « sous-critères » y devient « éléments observables » (le mot de la dissection).
 3. Proposé, pas codé (réserve de 9) : « la plage de notes d'un niveau » → « une plage de notes entre 0 et 100 pour un niveau ».

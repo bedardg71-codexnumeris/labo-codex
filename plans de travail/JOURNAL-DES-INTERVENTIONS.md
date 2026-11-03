@@ -12,3 +12,5 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-03 | 13 h 35 | Claude Code | Valider les Nouvelles proposées pour la 1.231.1 (fin du passage) | mots |
 | 2026-11-03 | 13 h 36 | Claude Code | Signal pour la vérification de la 1.231.1 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
 | 2026-11-03 | 17 h 06 | Claude Code | Entrée 6 bis, hors boucle : ouvrir Cowork pour sa relecture croisée du diff (`9e0e7593`, `22cd095d`) avant la vérification du soir (règle 2 de PROTOCOLE.md) | données |
+| 2026-11-03 | 17 h 17 | Claude Code | Mise de côté de Cowork : les messages rouges et orange restent-ils jusqu'à « OK » ? (oui, devenue #1224) | autre |
+| 2026-11-03 | 17 h 17 | Claude Code | Valider les mots d'écran du passage du soir (6 bis, 9, 10) | mots |
