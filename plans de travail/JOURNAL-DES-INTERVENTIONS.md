@@ -15,3 +15,5 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-03 | 17 h 17 | Claude Code | Mise de côté de Cowork : les messages rouges et orange restent-ils jusqu'à « OK » ? (oui, devenue #1224) | autre |
 | 2026-11-03 | 17 h 17 | Claude Code | Valider les mots d'écran du passage du soir (6 bis, 9, 10) | mots |
 | 2026-11-03 | 17 h 22 | Claude Code | Valider les Nouvelles proposées pour la 1.231.2 | mots |
+| 2026-11-03 | 17 h 57 | Claude Code | #1226 : une copie non recevable dans les trajectoires, à 0 ou en trou ? (à 0) | didactique |
+| 2026-11-03 | 17 h 57 | Claude Code | Valider les mots d'écran de « Sans jetons » et la Nouvelle de la 1.232 | mots |

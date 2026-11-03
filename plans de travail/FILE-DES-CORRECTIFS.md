@@ -9,7 +9,8 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 ### 10 ter. Les messages rouges et orange restent jusqu'à « OK » (#1224)
 Décision de Grégoire du 3 nov., 17 h 17, sur la mise de côté de Cowork : rouge et orange restent jusqu'à « OK » ; vert et info partent seuls ; les messages s'empilent au lieu de se recouvrir. `js/utils-notifications.js`, `styles.css` ~6930 ; environ 170 appels à `notifications.erreur`. Mots d'écran (le bouton « OK ») : à soumettre en fin de file.
 
-Versées par Cowork le 3 nov. à 10 h 15, sur l'accord de Grégoire (10 h 09) : les rapides encore vraies qui passent par la boucle, d'après `VERIFICATION-LISTE-2026-11-03.md` (preuves, fichiers et lignes y sont ; relis-les dans le code avant de corriger, la vérification date de `af6e1c73`). L'ordre est celui de Cowork : la sécurité d'abord, puis ce que Grégoire voit en évaluant, puis l'hygiène.
+### 10 quinquies. Dans les trajectoires, une copie non recevable se montre à 0 (#1226)
+Décision de Grégoire du 3 nov., 17 h 57, sur la trouvaille de la relecture neuve de 10 quater : « à 0, comme la note ». `js/graphiques-progression.js` ne lit jamais `statutIntegrite` ; il trace `noteFinale` brute. Chercher d'abord la fonction qui fait la note d'une copie non recevable (#1175) et la réutiliser plutôt que de recopier la règle. Hors boucle à l'origine (ce qu'une note veut dire) ; tranché, le lot entre dans la boucle.
 
 ### 11. Une grille à niveaux dont les pondérations ne font pas 100 ne s'affiche plus en « % » trompeur (#1104)
 `js/grilles.js` ~832 et ~1356. ⚠ L'avertissement « pas 100 % » a été voulu par #483 : si le correctif le retire, mets l'entrée de côté avec la question.
@@ -76,7 +77,7 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 
 ## Mises de côté (attendent Grégoire)
 
-(vide)
+- **Retirer « Impact des jetons sur la performance » (Suivi › Labo)** (versée par Cowork le 3 nov. à 17 h 49). Grégoire, le 3 nov. à 17 h 48 : « À terme le graphique « Impact des jetons sur la performance » dans le labo va disparaître. » Cowork a lu « à terme » comme : une fois la case « Sans jetons » de l'entrée 10 quater en ligne et vue par lui. Ne la pose donc qu'après ce moment. Question : « La case « Sans jetons » te sert ; on retire le graphique « Impact des jetons » du Labo ? » Hors boucle (§ 3, point 5). Au retrait, garder `genererPSansReprises` (profil) et `deltasReprisesParSeance` (`correlations-longitudinales.js`), qui vivent dans `js/impact-jetons.js`.
 
 ## Fait
 
@@ -102,6 +103,7 @@ Passage du 3 nov. 2026, soir (Claude Code, à partir de 16 h 40) :
 - **8. Deux « Total »** : dans « Apporter mon matériel », une grille à deux sous-totaux (« / 70 » puis « / 30 ») affiche « ton total : 100 ✓ » au lieu de « 30 : écart » ; un total général, répété ou courant tombe aussi juste. Relecture neuve : VERT AVEC RÉSERVE (trois « / 100 » ou « / 70 » puis « / 100 » donnaient un faux écart), corrigée dans `60cc1c80`. (`27142de1`, `60cc1c80`, #1106)
 - **9. Plage de niveau** : une plage tapée hors de 0 à 100 (80 à 120, ou −10) empêche « Créer ma grille », avec la raison « la plage de notes d'un niveau » ; les échelles déjà créées ne changent pas. Relecture neuve : VERT AVEC RÉSERVE (la raison ne dit pas « de 0 à 100 » : mot d'écran, proposé ci-dessous). Trouvaille de la relecture : la note retenue d'un niveau n'est pas bornée à 0–100 (un avertissement seulement) ; notée ici, pas inscrite (aucun symptôme vécu). (`d88c9f9f`, #1105)
 - **10. Raisons nommées** : « des points en nombre entier de 0 à 100 pour un critère (« Rigueur fictive ») », de même pour la pondération et « au plus 30 éléments observables par critère (« … ») ». Relecture neuve : VERT AVEC RÉSERVE (la branche de la pondération sans essai ; celle du nom absent inatteignable), corrigée dans `cc3d35d3` : essai ajouté, branche retirée. (`4c0074eb`, `cc3d35d3`, #1107)
+- **10 quater. « Sans jetons »** (demande de Grégoire, à livrer le soir même) : dans Suivi du groupe › « Trajectoires par production », la case « Sans jetons », à côté de « Médiane du groupe », fait passer toutes les courbes à la note de la copie d'origine aux productions reprises (une reprise de reprise remonte à la première copie), la médiane comprise ; décochée, elles reviennent aux reprises ; elle se décoche à chaque ouverture de la carte. Un original supprimé laisse un trou, compté sous le graphique. Rien n'est écrit. Vitest (7 essais, break-tests sur la substitution, la chaîne et le câblage) ; specs Playwright du Suivi vertes (16). Relecture neuve : VERT AVEC RÉSERVE (un original non recevable ressort à sa note brute ; l'aide disait « porte la note de l'original » sans exception) : aide corrigée dans `3e5aef37`, le fond inscrit en #1226 et tranché par Grégoire (à 0), entrée 10 quinquies. Mots d'écran et Nouvelle validés. Porte iPad due : cocher, décocher. (`7033392d`, `3e5aef37`, #1225)
 
 **Mots d'écran du passage du 3 nov., soir — validés par Grégoire le 3 nov. à 17 h 17** (1 et 2 tels quels ; 3 codé dans `b00c1e89`) :
 1. 6 bis, dans le message vert de l'import : « aucune évaluation à reprendre, la copie devient l'original pour : Prénom Nom » (« Élève N » en mode anonymisation). Remplace le rouge « Jetons non appliqués … le jeton doit être appliqué manuellement ».
