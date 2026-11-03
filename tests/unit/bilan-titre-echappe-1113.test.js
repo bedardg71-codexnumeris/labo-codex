@@ -58,4 +58,14 @@ describe('#1113 — le titre d\'une production ressort en texte dans le bilan', 
         expect(html).toMatch(/Progrès : D → M depuis &lt;img/);
         expect(html).not.toContain('<img');
     });
+
+    it('la ligne « Progrès » échappe aussi le code du niveau précédent', () => {
+        // Relecture neuve : un code piégé qui a un rang dans l'échelle sort sur la ligne.
+        const win = monter([], []);
+        const niveaux = { '<b>D': { rang: 1 }, M: { rang: 2 } };
+        const html = win._rendreRecurrentsBilan(
+            { productionNom: 'Analyse 1', niveauFinal: '<b>D', echelleId: 'E1' },
+            [], (code) => niveaux[code] || null, 'E1', () => null, [], false);
+        expect(html).toContain('Progrès : &lt;b&gt;D → M depuis Analyse 1');
+    });
 });
