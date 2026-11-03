@@ -61,6 +61,20 @@ function normaliserPrenom(prenom) {
 function mettreAJourBadgeBug() {}
 
 /**
+ * #812 (3 nov. 2026) — La date ET l'heure du jour LOCAL, pour l'identifiant et le nom du fichier.
+ * `toISOString()` donnait la date UTC et `toTimeString()` l'heure locale : écrit le 26 oct. à
+ * 21 h 05 à Toronto, un rapport s'appelait « …_2026-10-27_21-05-27 ».
+ * @returns {{date: string, heure: string}} « 2026-10-26 », « 21-05-27 »
+ */
+function horodatageLocalRapport(d) {
+    const deux = (n) => String(n).padStart(2, '0');
+    return {
+        date: d.getFullYear() + '-' + deux(d.getMonth() + 1) + '-' + deux(d.getDate()),
+        heure: deux(d.getHours()) + '-' + deux(d.getMinutes()) + '-' + deux(d.getSeconds())
+    };
+}
+
+/**
  * Archive un rapport de bug localement
  * #1068 (3 nov. 2026) — `voie` dit par où le rapport est parti : 'copie' (presse-papiers),
  * 'fichier' (TXT) ou 'courriel' (logiciel de courriel ouvert). L'ancien `envoye: true`, posé en
@@ -618,9 +632,7 @@ function genererRapportBug(descriptionUtilisateur = '', prenomTesteur = '') {
     const etatStockage = obtenirEtatStockage();
 
     // Générer l'identifiant du rapport
-    const maintenant = new Date();
-    const dateId = maintenant.toISOString().slice(0, 10); // 2026-01-30
-    const heureId = maintenant.toTimeString().slice(0, 8).replace(/:/g, '-'); // 18-42-23
+    const { date: dateId, heure: heureId } = horodatageLocalRapport(new Date()); // 2026-01-30, 18-42-23
     const prenomNormalise = prenomTesteur.trim().toLowerCase().replace(/\s+/g, '-') || 'anonyme';
 
     const prefixe = modeRapport === 'commentaire' ? 'FEEDBACK' : 'BUG';
@@ -1092,9 +1104,7 @@ async function telechargerRapportTxt(btn) {
     const rapport = genererRapportBug(description, prenom);
 
     // Générer le nom du fichier avec date et prénom
-    const maintenant = new Date();
-    const dateStr = maintenant.toISOString().slice(0, 10); // 2026-02-01
-    const heureStr = maintenant.toTimeString().slice(0, 8).replace(/:/g, '-'); // 21-45-00
+    const { date: dateStr, heure: heureStr } = horodatageLocalRapport(new Date()); // 2026-02-01, 21-45-00
     const prenomNormalise = prenom.trim().toLowerCase().replace(/\s+/g, '-') || 'anonyme';
     const prefixe = modeRapport === 'commentaire' ? 'FEEDBACK' : 'BUG';
     const nomFichier = `${prefixe}_${prenomNormalise}_${dateStr}_${heureStr}.txt`;
