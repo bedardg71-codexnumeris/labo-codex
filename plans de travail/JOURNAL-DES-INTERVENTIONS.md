@@ -18,3 +18,7 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-03 | 17 h 57 | Claude Code | #1226 : une copie non recevable dans les trajectoires, à 0 ou en trou ? (à 0) | didactique |
 | 2026-11-03 | 17 h 57 | Claude Code | Valider les mots d'écran de « Sans jetons » et la Nouvelle de la 1.232 | mots |
 | 2026-11-03 | 18 h 00 | Claude Code | Signal pour la vérification de la 1.231.2 et de la 1.232.0 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
+| 2026-11-04 | 10 h 22 | Claude Code | #1104 : une grille en niveaux qui ne totalise pas 100, garder l'avertissement ou montrer le poids réel ? | didactique |
+| 2026-11-04 | 10 h 24 | Claude Code | Trajectoires en mode Habiletés : une copie non recevable, point vide ou ses niveaux ? | didactique |
+| 2026-11-04 | 10 h 24 | Claude Code | Valider les mots d'écran du passage du matin (10 ter, 13, 18, 20) | mots |
+| 2026-11-04 | 10 h 29 | Claude Code | Valider les Nouvelles proposées pour la 1.232.1 | mots |

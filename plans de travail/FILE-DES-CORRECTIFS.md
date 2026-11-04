@@ -6,6 +6,12 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 
 ## À faire
 
+### 10 sexies. En mode Habiletés, une copie non recevable laisse un point vide (suite de #1226)
+Décision de Grégoire du 4 nov. 2026, 10 h 23 : « un point vide », comme « -- » dans la liste. `_valeurEvalCritere` (`js/graphiques-progression.js`) ; la règle : `evaluationNonRecevable` (pratique-registre.js), pas de recopie. Le graphique des critères du profil fait de même : mesurer s'il entre dans le même lot. Inscrire au BACKLOG.
+
+### 11 bis. L'avertissement « pas 100 % » dit sur quoi la note se calcule (#1104)
+Décision de Grégoire du 4 nov. 2026, 10 h 22 : garder « % » et l'avertissement de #483 ; il ajoute sur quoi la note se calcule. `js/grilles.js` ~832 (`notifications.warning`). Mot d'écran proposé, à soumettre : « Grille enregistrée : ses critères totalisent 70 %, pas 100 % ; la note se calcule sur 70. »
+
 ### 14. En démo, sur l'iPad couché, « Non enregistré » ne couvre plus la barre de séance des présences (#1181)
 Les quatre cas sont à la baseline (`scripts/playwright-baseline.json`). Déplacer le témoin ; la bulle validée ne change pas. Les retirer de la baseline une fois verts.
 
@@ -53,8 +59,6 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 
 ## Mises de côté (attendent Grégoire)
 
-- **11. Une grille à niveaux dont les pondérations ne font pas 100 (#1104)** (mise de côté le 4 nov. 2026, 9 h 55). Mesuré : la note se calcule sur la somme des pondérations (`calculerNote`, `js/evaluation-calcul.js`, `ponderationTotal`) ; une grille à 30 + 40 donne au critère « 30 % » un poids réel de 43 %. L'écran dit « 30 % » et, au geste « Sauvegarder », « pas 100 % » (#483, voulu). Tout correctif de l'affichage contredit l'avertissement de #483, d'où la mise de côté. Question : « Une grille en niveaux qui totalise 70 : la note se calcule sur 70. Tu veux (a) garder « % » et l'avertissement « pas 100 % » tels quels, en ajoutant à l'avertissement « la note se calcule sur 70 », ou (b) montrer le poids réel de chaque critère (« 30, soit 43 % de la note ») et retirer l'avertissement ? » Ma recommandation : (a), le geste qui règle la grille reste le bon, et l'avertissement dit enfin ce que la note fera.
-- **10 quinquies, suite : le mode Habiletés des trajectoires** (trouvaille de la relecture neuve, 4 nov.). En mode Habiletés, une copie non recevable trace encore ses niveaux enregistrés (`_valeurEvalCritere`, `js/graphiques-progression.js`) ; avec « Sans jetons », l'original plagié d'une reprise montre ses niveaux, alors que la décision du 28 oct. dit que ses niveaux ne se lisent nulle part. Le graphique des critères du profil fait de même. Hors boucle (ce qu'un niveau veut dire). Question : « En mode Habiletés, une copie plagiée : son point reste vide (comme « -- » dans la liste) ou on montre ses niveaux ? » Ma recommandation : vide, comme la liste.
 
 - **Retirer « Impact des jetons sur la performance » (Suivi › Labo)** (versée par Cowork le 3 nov. à 17 h 49). Grégoire, le 3 nov. à 17 h 48 : « À terme le graphique « Impact des jetons sur la performance » dans le labo va disparaître. » Cowork a lu « à terme » comme : une fois la case « Sans jetons » de l'entrée 10 quater en ligne et vue par lui. Ne la pose donc qu'après ce moment. Question : « La case « Sans jetons » te sert ; on retire le graphique « Impact des jetons » du Labo ? » Hors boucle (§ 3, point 5). Au retrait, garder `genererPSansReprises` (profil) et `deltasReprisesParSeance` (`correlations-longitudinales.js`), qui vivent dans `js/impact-jetons.js`.
 
@@ -106,7 +110,9 @@ Passage du 4 nov. 2026 (Claude Code, à partir de 9 h 05) — aucun rapport neuf
 
 - **Arrêt du passage, 4 nov. à 10 h 21** : sept entrées faites (10 ter, 10 quinquies, 12, 13, 18, 20, 26), une mise de côté (11), et la suite de 10 quinquies (le mode Habiletés) mise de côté ; contexte de session chargé. Le passage suivant reprend à l'entrée 14. Avant la vérification : les deux questions mises de côté, les mots d'écran ci-dessous, les Nouvelles.
 
-**Mots d'écran du passage du 4 nov. — à soumettre à Grégoire** :
+- **Release 1.232.1** (build 1104-1030, `7cef633f`, patch) : mots d'écran et Nouvelles validés par Grégoire le 4 nov. vers 10 h 30 (les quatre tels quels) ; ses deux réponses aux mises de côté versées en 10 sexies et 11 bis. Complexité, par rapport à la 1.232.0 : fichiers de plus de 1 000 lignes, +19 lignes (`trimestre-v2-etudiants.js` +11, `changelog-data.js` +5, `graphiques-progression.js` +3) ; fonctions au-dessus de 15 : 439, Δ 0 ; au-dessus de 30 : 81, Δ 0 ; somme au-dessus de 15 : 11 027, Δ 0. Verdict du Mac : en attente du signal de Grégoire.
+
+**Mots d'écran du passage du 4 nov. — validés par Grégoire le 4 nov. vers 10 h 30, les quatre tels quels** :
 1. 10 ter : le bouton « OK » des messages rouges et orange.
 2. 13 : dans le menu de Conception › Productions, « (rangée sous 203-GM6-DM) » après le titre d'une production d'un autre cours (le code seul ; avec « (à planifier) » devant quand les deux s'appliquent).
 3. 20 : l'aide des seuils, « Progression : 10 points (%) » (au lieu de 5).
