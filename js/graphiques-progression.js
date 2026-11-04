@@ -3608,7 +3608,7 @@ function _substituerOriginauxTrajectoires(evalIndex, evaluations, actif) {
  *
  * Chaque ligne = trajectoire d'un étudiant à travers les productions.
  * Chaque point = note décimale (0-1) selon le mode de mesure :
- *   - mode 'noteFinale' : evaluation.noteFinale / 100
+ *   - mode 'noteFinale' : noteRetenueParLeCalcul(evaluation) / 100 (une copie non recevable vaut 0, #1226)
  *   - mode 'habiletes'  : moyenne des critères cochés (niveauSelectionne)
  *
  * Trous (null) si pas d'évaluation, travail non remis/retard, note absente,
