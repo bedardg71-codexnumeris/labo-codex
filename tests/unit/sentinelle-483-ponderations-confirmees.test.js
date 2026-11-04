@@ -54,12 +54,12 @@ describe('#483 · enregistrer une grille dit un total qui n\'est pas 100 %', () 
     it('création, 60 + 30 : l\'avertissement nomme 90 %', async () => {
         const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 60 }, { id: 'c2', nom: 'B', ponderation: 30 }]);
         await win.sauvegarderGrilleTemplate(false);
-        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 90 %, pas 100 % ; la note se calcule sur 90.']);
+        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 90 %, pas 100 %. La note reste sur 100 : chaque critère pèse en proportion de ce total.']);
     });
-    it('#1104 · création, 70 + 50 : l\'avertissement dit que la note se calcule sur 120', async () => {
+    it('#1104 · création, 70 + 50 : l\'avertissement dit que la note reste sur 100, chaque critère en proportion du total', async () => {
         const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 70 }, { id: 'c2', nom: 'B', ponderation: 50 }]);
         await win.sauvegarderGrilleTemplate(false);
-        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 120 %, pas 100 % ; la note se calcule sur 120.']);
+        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 120 %, pas 100 %. La note reste sur 100 : chaque critère pèse en proportion de ce total.']);
     });
     it('#1104 · création, aucune pondération posée (total 0) : la phrase s\'arrête au total, sans « sur 0 »', async () => {
         const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 0 }, { id: 'c2', nom: 'B' }]);

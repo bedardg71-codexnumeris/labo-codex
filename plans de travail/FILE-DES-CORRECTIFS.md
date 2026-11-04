@@ -118,8 +118,8 @@ Passage du 4 nov. 2026, après-midi (Claude Code, à partir de 15 h 10) :
 
 - **Arrêt du passage, 4 nov. vers 16 h 50** : trois entrées faites (10 ter réparée, 10 sexies, 11 bis), une mise de côté (les niveaux d'une copie non recevable au profil), l'entrée 14 mesurée et non tranchée (aucun coin libre en démo, mesures dans l'entrée). Contexte de session chargé. Le passage suivant reprend à l'entrée 14. Avant la vérification : la question mise de côté, le mot d'écran de 11 bis, les Nouvelles ; puis le verdict du Mac, qui porte aussi la 1.232.1 encore bloquée.
 
-**Mot d'écran du passage du 4 nov., après-midi — à soumettre à Grégoire** :
-1. 11 bis, à l'enregistrement d'une grille qui ne totalise pas 100 : « Grille enregistrée : ses critères totalisent 70 %, pas 100 % ; la note se calcule sur 70. » Réserve de la relecture : « sur 70 » peut se lire comme une note maximale de 70, alors que la note reste un pourcentage. Variante : « … pas 100 % ; chaque critère compte pour sa part de 70, et la note reste sur 100. »
+**Mot d'écran du passage du 4 nov., après-midi — tranché par Grégoire le 4 nov. vers 17 h** (ni la phrase proposée ni la variante : la sienne, codée dans le commit suivant) :
+1. 11 bis, pour 70 : « Grille enregistrée : ses critères totalisent 70 %, pas 100 %. La note reste sur 100 : chaque critère pèse en proportion de ce total. » Deux phrases, pas de point-virgule ; à 0, la phrase s'arrête au total.
 
 **Mots d'écran du passage du 4 nov. — validés par Grégoire le 4 nov. vers 10 h 30, les quatre tels quels** :
 1. 10 ter : le bouton « OK » des messages rouges et orange.
