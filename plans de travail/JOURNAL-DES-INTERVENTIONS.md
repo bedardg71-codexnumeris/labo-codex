@@ -23,3 +23,4 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-04 | 10 h 24 | Claude Code | Valider les mots d'écran du passage du matin (10 ter, 13, 18, 20) | mots |
 | 2026-11-04 | 10 h 29 | Claude Code | Valider les Nouvelles proposées pour la 1.232.1 | mots |
 | 2026-11-04 | 10 h 32 | Claude Code | Signal pour la vérification de la 1.232.1 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
+| 2026-11-04 | 16 h 39 | Claude Code | Copie plagiée : ses niveaux sortent-ils aussi des barres du profil, de l'IPB et du défi ? | didactique |
