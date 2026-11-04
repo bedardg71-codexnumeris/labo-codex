@@ -6988,24 +6988,39 @@ body.chaines-etapes-masquees .barre-convergence {
 /* #1224 (3 nov. 2026) — les messages s'empilent en haut à droite au lieu de se
    recouvrir. La pile porte la position et le plan (au-dessus des modales) ; un
    message y est relatif, garde son z-index. Elle ne capte pas le pointeur entre
-   deux messages. Pas d'overflow : il couperait l'entrée glissée par la droite. */
+   deux messages. Relecture neuve : un import qui refuse beaucoup de fichiers pose
+   un rouge par élève, qui reste ; la pile s'arrête au bas de l'écran et défile
+   (le vert du bilan reste atteignable). La marge intérieure garde l'ombre des
+   messages, que le défilement couperait ; l'entrée glissée par la droite se
+   dévoile au bord de la pile. */
 .notifications-pile {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 12px;
+    right: 12px;
     z-index: 11000;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 10px;
-    max-width: calc(100vw - 40px);
+    box-sizing: border-box;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    padding: 8px 8px 16px 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     pointer-events: none;
+}
+
+.notifications-pile:empty {
+    display: none;
 }
 
 .notifications-pile > .notification-succes {
     position: relative;
     top: auto;
     right: auto;
+    flex-shrink: 0;
     pointer-events: auto;
 }
 
