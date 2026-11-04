@@ -152,6 +152,11 @@
     --alerte-fond-attention: rgba(200, 160, 96, 0.12);
     --alerte-bordure-attention: #c8a060;
     --alerte-texte-attention: #d4b878;
+    /* #1162 (4 nov. 2026) — les pastilles pleines de la famille « attention » (« À réévaluer »,
+       « Non verrouillée », « Incomplet ») : le blanc sur #c8a060 ne faisait que 2,4 pour 1. En
+       sombre, texte foncé sur l'orange : 7,2 pour 1. */
+    --pastille-attention-fond: var(--alerte-bordure-attention);
+    --pastille-attention-texte: #1a1a1a;
 
     /* === ALERTES - Information (sarcelle) === */
     --alerte-fond-information: rgba(106, 172, 184, 0.12);
@@ -583,6 +588,9 @@ body.mode-clair[data-mode="anonymisation"] .sous-navigation button:hover {
     --alerte-fond-attention: rgba(160, 120, 48, 0.12);
     --alerte-bordure-attention: #a07830;
     --alerte-texte-attention: #7a5a20;
+    /* #1162 — en clair, le blanc gardé sur l'orange foncé du texte d'attention : 6,3 pour 1 (4,0 sur #a07830). */
+    --pastille-attention-fond: var(--alerte-texte-attention);
+    --pastille-attention-texte: #fff;
 
     --alerte-fond-information: rgba(6, 93, 187, 0.1);
     --alerte-bordure-information: #065dbb;
@@ -27356,8 +27364,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .travaux-badge-pill.a-reevaluer,
 .travaux-badge-pill.non-enregistree,
 .travaux-badge-pill.incomplet {
-    background: var(--alerte-bordure-attention);
-    color: #fff;
+    background: var(--pastille-attention-fond);
+    color: var(--pastille-attention-texte);   /* #1162 : 4,5 pour 1 au moins, dans les deux modes */
 }
 
 /* Statut « Incomplet ; travail en cours » (25 oct. 2026) — la case de la palette Paramètres
@@ -27634,7 +27642,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .travaux-compteur-pill.evalue { background: var(--vert-succes, #28a745); color: #fff; }
 .travaux-compteur-pill.annote { background: var(--bleu-clair, #6aacb8); color: #fff; }
 .travaux-compteur-pill.importe { background: var(--turquoise-500, #2da89e); color: #fff; }
-.travaux-compteur-pill.incomplet { background: var(--alerte-bordure-attention); color: #fff; }   /* statut incomplet (25 oct. 2026) */
+.travaux-compteur-pill.incomplet { background: var(--pastille-attention-fond); color: var(--pastille-attention-texte); }   /* statut incomplet (25 oct. 2026) */
 
 /* ===============================
    MODALE TRANSFERT FICHIERS
