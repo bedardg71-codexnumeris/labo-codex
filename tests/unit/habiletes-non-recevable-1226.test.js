@@ -80,9 +80,10 @@ describe('#1226, suite · Trajectoires, mode Habiletés : une copie non recevabl
         const r = trajectoires([
             plagiat('X1', '2000001', 'P1', 'C'),
             ev('Y1', '2000002', 'P1', 'B'),
-            ev('Z1', '2000003', 'P1', 'B')
+            ev('Z1', '2000003', 'P1', 'A')
         ], { daSurbrillance: 'TOUS' });
-        expect(r.mediane[0]).toBeCloseTo(0.7);   // 0,7 · 0,7 ; 0,9 de la copie plagiée en dehors
+        // 0,5 · 0,7 → 0,6 ; avec le 0,9 de la copie plagiée, la médiane vaudrait 0,7 (relecture neuve : l'essai doit mordre).
+        expect(r.mediane[0]).toBeCloseTo(0.6);
     });
 
     it('case « Sans jetons » cochée : l\'original plagié d\'une reprise laisse un point vide', () => {
