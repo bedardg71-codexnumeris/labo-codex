@@ -964,7 +964,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
 
     if (objectifAtteint > 0) {
         const pct = Math.round((objectifAtteint / total) * 100);
-        messages.push(`${objectifAtteint} ${window.pluriel(objectifAtteint, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pct)}) ont atteint ou dépassé le niveau de maîtrise`);
+        messages.push(`${objectifAtteint} ${window.pluriel(objectifAtteint, 'étudiant·e', 'étudiant·es')} (${formaterPourcentage(pct)}) ${window.pluriel(objectifAtteint, 'a', 'ont')} atteint ou dépassé le niveau de maîtrise`);   // #1208 : le verbe s'accorde
     }
 
     // 2. Parmi les D, combien en progression (pattern favorable)
@@ -975,7 +975,7 @@ function genererInterpretationPerformance(etudiants, echelle) {
     });
 
     if (dEnProgression.length > 0) {
-        messages.push(`${dEnProgression.length} ${window.pluriel(dEnProgression.length, 'étudiant·e', 'étudiant·es')} en Développement montrent une progression favorable et pourraient atteindre la maîtrise prochainement`);
+        messages.push(`${dEnProgression.length} ${window.pluriel(dEnProgression.length, 'étudiant·e', 'étudiant·es')} en Développement ${window.pluriel(dEnProgression.length, 'montre', 'montrent')} une progression favorable et ${window.pluriel(dEnProgression.length, 'pourrait', 'pourraient')} atteindre la maîtrise prochainement`);   // #1208
     }
 
     // 3. Parmi les PS et les I, combien montrent des progrès (pattern pas difficulté persistante)
@@ -988,9 +988,9 @@ function genererInterpretationPerformance(etudiants, echelle) {
 
     if (niveauI.length > 0) {
         if (iAvecProgres.length > 0) {
-            messages.push(`Parmi les ${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté, ${iAvecProgres.length} montrent des signes de progrès`);
+            messages.push(`Parmi les ${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté, ${iAvecProgres.length} ${window.pluriel(iAvecProgres.length, 'montre', 'montrent')} des signes de progrès`);   // #1208
         } else {
-            messages.push(`${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté nécessitent un accompagnement intensif`);
+            messages.push(`${niveauI.length} ${window.pluriel(niveauI.length, 'étudiant·e', 'étudiant·es')} en difficulté ${window.pluriel(niveauI.length, 'nécessite', 'nécessitent')} un accompagnement intensif`);   // #1208
         }
     }
 
