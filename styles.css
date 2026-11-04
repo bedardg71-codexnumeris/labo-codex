@@ -20588,6 +20588,103 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     cursor: grabbing;
 }
 
+/* #1229 (4 nov. 2026) — LA COPIE DE RÉFÉRENCE, en lecture seule, à côté de celle qu'on annote. L'une sous l'autre par
+   défaut (la zone reste en colonne : chaque copie garde toute la largeur), côte à côte sur demande. Son cadre est un FRÈRE
+   de `.travaux-canvas-container`, jamais un descendant : ses gestes n'atteignent pas ceux de la copie annotée (#1218). */
+.travaux-zone-canvas.travaux-reference-cote { flex-direction: row; }
+.travaux-zone-canvas.travaux-avec-reference > .travaux-canvas-container { flex: 1 1 0; min-height: 0; min-width: 0; }
+.travaux-reference {
+    flex: 1 1 0;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid var(--bordure-moyenne);
+    background: var(--surface-conteneur, #142428);
+}
+.travaux-zone-canvas.travaux-reference-cote > .travaux-reference {
+    border-top: none;
+    border-left: 2px solid var(--bordure-moyenne);
+}
+/* La barre passe AU-DESSUS des palettes flottantes (80 à 99, `focusPalette`), au rang de la barre d'outils d'Annoter :
+   sans cela, une palette couvrait le choix et la fermeture (mesuré au banc, 1280 px, les deux axes). Seules les commandes
+   reçoivent le doigt : autour d'elles, la barre laisse passer vers la palette dessous. Centrées l'une sous l'autre (les
+   palettes sont sur les côtés), au bord de la copie annotée côte à côte. */
+.travaux-reference-barre {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    padding: 4px 6px;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+.travaux-zone-canvas.travaux-reference-cote .travaux-reference-barre { justify-content: flex-start; }
+/* Côte à côte, la moitié droite est celle des palettes (Codes, Tampons) : les commandes, bornées, passent sur deux lignes
+   plutôt que de couvrir l'en-tête d'une palette (au banc, 1280 px, celui des Codes ne se saisissait plus). */
+.travaux-zone-canvas.travaux-reference-cote .travaux-reference-commandes { max-width: 380px; }
+.travaux-reference-commandes {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+    padding: 3px 6px;
+    background: var(--surface-carte, #1a3040);
+    border: 1px solid var(--bordure-claire, #334155);
+    border-radius: 8px;
+    box-shadow: var(--shadow-prononce);
+}
+.travaux-reference-etiquette {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texte-secondaire, #8aa4b0);
+}
+.travaux-reference-choix {
+    min-width: 0;
+    max-width: 240px;
+    flex: 0 1 auto;
+    font-size: 0.8rem;
+    padding: 4px 6px;
+}
+.travaux-reference-indicateur {
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    font-size: 11px;
+    color: var(--texte-secondaire, #8aa4b0);
+    background: var(--surface-carte, #1a3040);
+}
+.travaux-reference-axe { align-self: stretch; }
+.travaux-reference-cadre {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    position: relative;
+    touch-action: pan-x pan-y;
+}
+/* Pas de centrage par flex : plus large que le cadre, la feuille déborderait à GAUCHE, hors d'atteinte (#936). */
+.travaux-reference-feuille {
+    width: max-content;
+    margin: 16px auto;
+}
+.travaux-reference-feuille canvas {
+    display: block;
+    box-shadow: var(--shadow-prononce);
+    background: var(--surface-carte, #1a3040);
+}
+.travaux-reference-message {
+    margin: 24px 16px;
+    color: var(--texte-secondaire, #8aa4b0);
+    font-size: 0.9rem;
+    text-align: center;
+}
+@media (pointer: coarse) {
+    .travaux-reference-choix { min-height: 44px; }
+    .travaux-reference-axe { min-height: 44px; }
+}
+
 #travaux-canvas-document {
     display: block;
     box-shadow: var(--shadow-prononce);

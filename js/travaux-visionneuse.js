@@ -1509,6 +1509,8 @@
         getPageActuelle: getPageActuelle,
         getNombrePagesTotal: getNombrePagesTotal,
         getZoomActuel: getZoomActuel,
+        // #1229 : la copie de référence rend à la copie annotée son ajustement d'avant la vue côte à côte.
+        getModeZoom: function() { return modeZoom; },
         getCanvas: getCanvas,
         getPdfDocument: getPdfDocument,
         recentrerVue: recentrerVue,

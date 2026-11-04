@@ -1263,6 +1263,8 @@
                             <div class="actions-dropdown" id="travaux-actions-dropdown">
                                 <button class="actions-item" id="travaux-btn-annoter" data-action="travauxUI.basculerMode" data-param="annoter">Annoter</button>
                                 <button class="actions-item actions-item-vert" id="travaux-btn-evaluer" data-action="travauxUI.basculerMode" data-param="evaluer">Évaluer</button>
+                                <!-- #1229 (4 nov. 2026) : une seconde copie, en lecture seule, à côté de celle qu'on annote. -->
+                                <button class="actions-item" id="travaux-btn-reference" data-action="travauxReference.ouvrir">Copie de référence</button>
                                 <div class="actions-separateur"></div>
                                 <button class="actions-item" id="travaux-btn-editer" data-action="editerFichierDepuisEvaluation">Modifier</button>
                                 <!-- Re-importer : opération sur fichier, disponible dans Exporter les travaux -->

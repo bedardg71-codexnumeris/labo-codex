@@ -82,6 +82,9 @@
         paletteEvaluationCompacte: false,
         paletteAnnotationCompacte: false,
         paletteTamponsCompacte: false,
+        // #1229 (4 nov. 2026) : l'axe de la copie de référence, 'pile' (l'une sous l'autre, défaut) ou 'cote' (côte à côte).
+        // Écrite et lue par `travaux-reference.js` seul, au geste de la bascule.
+        axeCopieReference: 'pile',
         // #321 — « note différée » (couche 1 PRÉN) : masque les notes PAR TRAVAIL
         // pour que la rétroaction passe d'abord. N'altère aucun calcul ni la note
         // finale de session. Défaut false = notes visibles (comportement actuel).
