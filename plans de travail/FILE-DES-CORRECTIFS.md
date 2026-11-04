@@ -6,23 +6,6 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 
 ## À faire
 
-### 10 ter. Les messages rouges et orange restent jusqu'à « OK » (#1224)
-Décision de Grégoire du 3 nov., 17 h 17, sur la mise de côté de Cowork : rouge et orange restent jusqu'à « OK » ; vert et info partent seuls ; les messages s'empilent au lieu de se recouvrir. `js/utils-notifications.js`, `styles.css` ~6930 ; environ 170 appels à `notifications.erreur`. Mots d'écran (le bouton « OK ») : à soumettre en fin de file.
-
-### 10 quinquies. Dans les trajectoires, une copie non recevable se montre à 0 (#1226)
-Décision de Grégoire du 3 nov., 17 h 57, sur la trouvaille de la relecture neuve de 10 quater : « à 0, comme la note ». `js/graphiques-progression.js` ne lit jamais `statutIntegrite` ; il trace `noteFinale` brute. Chercher d'abord la fonction qui fait la note d'une copie non recevable (#1175) et la réutiliser plutôt que de recopier la règle. Hors boucle à l'origine (ce qu'une note veut dire) ; tranché, le lot entre dans la boucle.
-
-Versées par Cowork le 3 nov. à 10 h 15, sur l'accord de Grégoire (10 h 09) : les rapides encore vraies qui passent par la boucle, d'après `VERIFICATION-LISTE-2026-11-03.md` (preuves, fichiers et lignes y sont ; relis-les dans le code avant de corriger, la vérification date de `af6e1c73`). L'ordre est celui de Cowork : la sécurité d'abord, puis ce que Grégoire voit en évaluant, puis l'hygiène.
-
-### 11. Une grille à niveaux dont les pondérations ne font pas 100 ne s'affiche plus en « % » trompeur (#1104)
-`js/grilles.js` ~832 et ~1356. ⚠ L'avertissement « pas 100 % » a été voulu par #483 : si le correctif le retire, mets l'entrée de côté avec la question.
-
-### 12. Les pastilles « À réévaluer », « Non verrouillée », « Incomplet » se lisent (#1162)
-`styles.css` ~27304 et ~27585 : texte blanc sur l'orange d'attention, 4,0 pour 1 en clair, 2,4 pour 1 en sombre. Viser 4,5 pour 1 dans les deux modes.
-
-### 13. Conception › Productions nomme le cours de chaque production (#1171)
-`js/productions-liste.js` ~57 ; le tableau lit tout le stock (`js/productions.js` ~248).
-
 ### 14. En démo, sur l'iPad couché, « Non enregistré » ne couvre plus la barre de séance des présences (#1181)
 Les quatre cas sont à la baseline (`scripts/playwright-baseline.json`). Déplacer le témoin ; la bulle validée ne change pas. Les retirer de la baseline une fois verts.
 
@@ -35,14 +18,8 @@ Les quatre cas sont à la baseline (`scripts/playwright-baseline.json`). Déplac
 ### 17. La liste écrit le niveau RàI d'un élève qui n'a que son diagnostic (#1205)
 `js/etudiants.js` ~1240 exige A et C ou P ; le profil, lui, montre le niveau. Aligner sur le profil.
 
-### 18. « 1 étudiant·e en Développement montre » : le verbe s'accorde (#1208)
-`js/tableau-bord-apercu.js` ~978 et ~991.
-
 ### 19. Le message du profil ne nomme plus le portfolio en standards sans artefact (#1188)
 `js/profil-etudiant-actions.js` ~166. Mots d'écran : à soumettre en fin de file.
-
-### 20. L'aide dit le vrai défaut de la progression (#1192)
-`js/accompagnement-contenu-popup.js` ~904 dit « 5 points » ; le défaut vaut 0,10 (`js/interpretation-config.js` ~28). Mesurer aussi « Sensibilité des flèches ».
 
 ### 21. L'aide sur C et P est attachée à la case, pas à la date (#1086, la partie « aide » seulement)
 `index.html` ~4920 ; `js/productions.js` ~932. La partie export de #1086 reste hors boucle.
@@ -58,9 +35,6 @@ Les quatre cas sont à la baseline (`scripts/playwright-baseline.json`). Déplac
 
 ### 25. Une page d'erreur en français (#799)
 Aucun `404.html` ; la liste blanche de `construire-publication.mjs` ~21 n'en prévoit pas. Mesurer d'abord si le cas vécu (hôte non résolu) passerait par cette page ; sinon, dis-le et passe. Mots d'écran : à soumettre en fin de file.
-
-### 26. La couleur `--vert-principal` existe (#1050)
-4 usages sans repli : `js/pratiques-gestion.js` ~2763, `js/evaluation-retroaction.js` ~499 et ~513, `js/profil-etudiant-sections-affichage.js` ~1286. Ces quatre-là seulement ; le reste des couleurs indéfinies est #813 et #595.
 
 ### 27. Quatre classes CSS posées sans règle (#870)
 `.profil-texte-petit-gris`, `.u-text-center-gris`, `.travaux-badge-annote`, `.note-presence-editable` : mesurer l'effet visible d'abord.
@@ -78,6 +52,9 @@ Neuf restent (voir la vérification). Code mort : le retirer, après la preuve q
 `.claude/skills/alignement/SKILL.md` ~98, ~133-141, ~293. Documentation seulement.
 
 ## Mises de côté (attendent Grégoire)
+
+- **11. Une grille à niveaux dont les pondérations ne font pas 100 (#1104)** (mise de côté le 4 nov. 2026, 9 h 55). Mesuré : la note se calcule sur la somme des pondérations (`calculerNote`, `js/evaluation-calcul.js`, `ponderationTotal`) ; une grille à 30 + 40 donne au critère « 30 % » un poids réel de 43 %. L'écran dit « 30 % » et, au geste « Sauvegarder », « pas 100 % » (#483, voulu). Tout correctif de l'affichage contredit l'avertissement de #483, d'où la mise de côté. Question : « Une grille en niveaux qui totalise 70 : la note se calcule sur 70. Tu veux (a) garder « % » et l'avertissement « pas 100 % » tels quels, en ajoutant à l'avertissement « la note se calcule sur 70 », ou (b) montrer le poids réel de chaque critère (« 30, soit 43 % de la note ») et retirer l'avertissement ? » Ma recommandation : (a), le geste qui règle la grille reste le bon, et l'avertissement dit enfin ce que la note fera.
+- **10 quinquies, suite : le mode Habiletés des trajectoires** (trouvaille de la relecture neuve, 4 nov.). En mode Habiletés, une copie non recevable trace encore ses niveaux enregistrés (`_valeurEvalCritere`, `js/graphiques-progression.js`) ; avec « Sans jetons », l'original plagié d'une reprise montre ses niveaux, alors que la décision du 28 oct. dit que ses niveaux ne se lisent nulle part. Le graphique des critères du profil fait de même. Hors boucle (ce qu'un niveau veut dire). Question : « En mode Habiletés, une copie plagiée : son point reste vide (comme « -- » dans la liste) ou on montre ses niveaux ? » Ma recommandation : vide, comme la liste.
 
 - **Retirer « Impact des jetons sur la performance » (Suivi › Labo)** (versée par Cowork le 3 nov. à 17 h 49). Grégoire, le 3 nov. à 17 h 48 : « À terme le graphique « Impact des jetons sur la performance » dans le labo va disparaître. » Cowork a lu « à terme » comme : une fois la case « Sans jetons » de l'entrée 10 quater en ligne et vue par lui. Ne la pose donc qu'après ce moment. Question : « La case « Sans jetons » te sert ; on retire le graphique « Impact des jetons » du Labo ? » Hors boucle (§ 3, point 5). Au retrait, garder `genererPSansReprises` (profil) et `deltasReprisesParSeance` (`correlations-longitudinales.js`), qui vivent dans `js/impact-jetons.js`.
 
@@ -116,6 +93,24 @@ Passage du 3 nov. 2026, soir (Claude Code, à partir de 16 h 40) :
 **Arrêt du passage, 3 nov. au soir** : cinq entrées faites (6 bis à 10), contexte de session chargé ; le passage suivant reprend à l'entrée 11. Avant la vérification : **relecture croisée de Cowork sur 6 bis** (`9e0e7593`, `22cd095d`), règle 2 de `PROTOCOLE.md` ; puis les mots d'écran ci-dessus et les Nouvelles.
 
 - L'onglet Évaluation ne chargeait que la liste des évaluations (rapport du 2 nov., 17 h 04) : **résolu par un simple rechargement**, dit Grégoire le 3 nov. à 7 h 03 ; rien à corriger. À rouvrir si le défaut revient. (`BUG__grégoire__2026-11-02_17-04-55.txt`)
+
+Passage du 4 nov. 2026 (Claude Code, à partir de 9 h 05) — aucun rapport neuf de Grégoire depuis le repère :
+
+- **10 ter. Les messages rouges et orange restent jusqu'à « OK »** : un message rouge ou orange reste affiché, avec un bouton « OK » à droite, jusqu'à ce qu'on le touche ; un vert ou un bleu part seul après 3 s. Les messages s'empilent en haut à droite, le plus récent en dessous ; un vert qui suit un rouge se range sous lui. Un rouge identique déjà affiché ne se répète pas. Une longue pile s'arrête au bas de l'écran et défile. Vitest (7 essais) et un essai Playwright à 820 × 1180 (quinze rouges et un vert), break-tests faits ; rendu vu en clair, en sombre, au Mac et à 820 px. Première relecture neuve : ROUGE (neuf specs observaient les toasts comme enfants de `body` : six rouges, des sentinelles d'absence aveugles), corrigée dans `d2226b94` (70 verts, les 4 rouges connus de #1181). Seconde relecture : VERT AVEC RÉSERVE (break-test d'une sentinelle d'absence : elle voit de nouveau ; la pile sans hauteur maximale), corrigée dans `67d35ac8`. Porte iPad due : un rouge qui reste peut-il cacher le « × » d'une modale ? (`1c6359d8`, `d2226b94`, `67d35ac8`, #1224)
+- **18. L'Aperçu accorde ses verbes** : sous la barre P, « 1 étudiant·e en Développement montre une progression favorable et pourrait atteindre la maîtrise » ; de même « a atteint », « 1 montre des signes de progrès », « nécessite ». Relecture neuve : VERT AVEC RÉSERVE (le compteur de « montre des signes » n'était pas gardé), essai ajouté dans `475f1544`. Trouvaille de la relecture : dans le même fichier, « 1 étudiant·e (x %) ont / sont » (`genererDiagnosticNotePassage`, l. 902 et 906), « 1 étudiants … nécessitent / requièrent » (`genererInterpretationRai`, l. 1637 et 1641), « compté·es » (l. 1600) ; notées ici, pas inscrites (aucun symptôme vécu). (`f2b37722`, `475f1544`, #1208)
+- **20. L'aide des seuils** : Labo › Outils d'observation, l'aide « Seuils d'interprétation du dépistage » dit « Progression : 10 points », comme l'écran ; « Sensibilité des flèches » (5) et « Défi » (70) étaient justes (mesuré). Sentinelle : les trois nombres de l'aide suivent les défauts du code. Relecture neuve : VERT (le glossaire répète les trois nombres, justes, sans garde). (`f95ccfda`, #1192)
+- **26. `--vert-principal`** : le « Total » réglé des pratiques et le signal de la rétroaction régénérée (le compteur et l'anneau du champ) reprennent leur vert (`--etat-valide-texte`, 5,1 pour 1 en clair, 8,0 en sombre) ; le nom sort du cliquet de #567, qui rougit s'il revient (break-test). Relecture neuve : ROUGE sur un des quatre endroits (la pastille « Confidentiel » du profil, sur son bouton foncé, tombait à 1,67 pour 1 en clair), corrigée dans `1e0fe0fa` : elle garde le blanc du bouton, comme avant. Trouvaille de la relecture : le cliquet de #567 ne balaie pas les sous-dossiers de `js/` (`js/entites/`, `js/pratiques/`) ; notée ici, pas inscrite (aucun symptôme vécu). (`ea5b2f0c`, `1e0fe0fa`, #1050)
+- **10 quinquies. Trajectoires, copie non recevable** : dans Suivi du groupe › « Trajectoires par production », mode Note finale, une copie plagiée ou « IA » se trace à 0, case « Sans jetons » cochée ou non (l'original plagié d'une reprise aussi), et la médiane la compte à 0. Réutilise `noteRetenueParLeCalcul` (#1175) ; rien n'est écrit. Supposition : le mode Habiletés n'est pas touché (mis de côté, ci-dessus). Relecture neuve : VERT AVEC RÉSERVE (commentaire périmé, corrigé dans `994d4148` ; Habiletés et `impact-jetons.js` lisent encore la note brute : le second part avec le graphique, déjà mis de côté). (`26dda0ab`, `994d4148`, #1226)
+- **12. Pastilles d'attention** : « À réévaluer », « Non verrouillée », « Incomplet » (et le compteur « Incomplet ») : en sombre, texte foncé sur l'orange (7,2 pour 1, contre 2,4) ; en clair, blanc sur l'orange foncé (6,3, contre 4,0). Mesuré au navigateur. Relecture neuve : VERT AVEC RÉSERVE (non vu au rendu par elle ; les pastilles voisines « Importé », « Annoté », « Évalué » restent sous 4,5 en sombre : notées ici, pas inscrites, aucun symptôme vécu). (`aa993873`, #1162)
+- **13. Le cours des productions** : dans Conception › Productions, le menu dit « (rangée sous 203-GM6-DM) » à côté d'une production rangée sous un autre cours que le cours actif ; rien pour celles du cours actif ou sans cours. Mesuré : le tableau que visait la fiche (`afficherTableauProductions`) vit dans un conteneur caché depuis #1147 ; c'est le menu que l'on voit. Relecture neuve : VERT AVEC RÉSERVE (le libellé réel était « code nom », trop long pour le menu sur iPad), corrigée dans `a0915204` : le code seul, comme les libellés des groupes. Mots d'écran à soumettre. Porte iPad due : la largeur du menu. (`305dc0d7`, `a0915204`, #1171)
+
+- **Arrêt du passage, 4 nov. à 10 h 21** : sept entrées faites (10 ter, 10 quinquies, 12, 13, 18, 20, 26), une mise de côté (11), et la suite de 10 quinquies (le mode Habiletés) mise de côté ; contexte de session chargé. Le passage suivant reprend à l'entrée 14. Avant la vérification : les deux questions mises de côté, les mots d'écran ci-dessous, les Nouvelles.
+
+**Mots d'écran du passage du 4 nov. — à soumettre à Grégoire** :
+1. 10 ter : le bouton « OK » des messages rouges et orange.
+2. 13 : dans le menu de Conception › Productions, « (rangée sous 203-GM6-DM) » après le titre d'une production d'un autre cours (le code seul ; avec « (à planifier) » devant quand les deux s'appliquent).
+3. 20 : l'aide des seuils, « Progression : 10 points (%) » (au lieu de 5).
+4. 18 : les verbes accordés de l'Aperçu (« 1 étudiant·e en Développement montre une progression favorable et pourrait atteindre la maîtrise prochainement » ; « a atteint », « montre des signes », « nécessite »).
 
 ## Déjà sur `main`, à porter aux prochaines Nouvelles
 
