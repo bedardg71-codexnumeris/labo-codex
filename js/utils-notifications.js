@@ -39,16 +39,29 @@
 //
 // Design : classe CSS .notification-succes (cf. styles.css) + classe modale
 // .notification-{type} pour la couleur de fond et .notification-avec-icone
-// pour le layout flex. Durées : succes/info 3s, warning 4s, erreur 5s.
+// pour le layout flex.
+//
+// Durée et empilement (#1224, décision de Grégoire du 3 nov. 2026) :
+// - succes/info partent seuls après 3 s ;
+// - erreur/warning RESTENT jusqu'au bouton « OK » : le 3 nov., un vert
+//   « 13 fichier(s) importé(s) » s'est posé sur un rouge qu'il n'a pas eu le
+//   temps de lire ;
+// - les messages s'EMPILENT dans .notifications-pile (en haut à droite), au
+//   lieu de se recouvrir au même endroit ;
+// - un message identique déjà affiché n'est pas répété : un rouge resté là
+//   n'en appelle pas un second à fermer (une validation qui se redéclenche à
+//   chaque frappe empilerait sinon autant de « OK ») ; un vert identique
+//   remplace le précédent, qui repart pour 3 s.
 // ============================================================================
 
 (function() {
     'use strict';
 
     const CONFIG = {
+        // duree: null = reste jusqu'à « OK » (#1224).
         succes:  { fond: null,                                role: 'status', duree: 3000, icone: 'icons/icons8-check.svg',   alt: 'Succès' },
-        erreur:  { fond: 'var(--rouge-erreur)',               role: 'alert',  duree: 5000, icone: 'icons/icon-cancel.svg',    alt: 'Erreur' },
-        warning: { fond: 'var(--orange-attention, #e8a838)',  role: 'alert',  duree: 4000, icone: 'icons/icons8-warning.svg', alt: 'Avertissement' },
+        erreur:  { fond: 'var(--rouge-erreur)',               role: 'alert',  duree: null, icone: 'icons/icon-cancel.svg',    alt: 'Erreur' },
+        warning: { fond: 'var(--orange-attention, #e8a838)',  role: 'alert',  duree: null, icone: 'icons/icons8-warning.svg', alt: 'Avertissement' },
         info:    { fond: null,                                role: 'status', duree: 3000, icone: 'icons/icons8-info.svg',    alt: 'Information' }
     };
 
@@ -97,17 +110,51 @@
         return notif;
     }
 
-    function _afficher(notif, dureeMs) {
-        document.body.appendChild(notif);
-        setTimeout(() => {
-            notif.style.opacity = '0';
-            notif.style.transform = 'translateX(400px)';
-            setTimeout(() => notif.remove(), 300);
-        }, dureeMs);
+    const ID_PILE = 'notifications-pile';
+    const CLASSE_SORTIE = 'notification-sortie';
+
+    function _pile() {
+        let pile = document.getElementById(ID_PILE);
+        if (!pile) {
+            pile = document.createElement('div');
+            pile.id = ID_PILE;
+            pile.className = 'notifications-pile';
+            document.body.appendChild(pile);
+        }
+        return pile;
+    }
+
+    function _retirer(notif) {
+        if (notif.classList.contains(CLASSE_SORTIE)) return;
+        notif.classList.add(CLASSE_SORTIE);
+        notif.style.opacity = '0';
+        notif.style.transform = 'translateX(400px)';
+        setTimeout(() => notif.remove(), 300);
+    }
+
+    function _ajouterBoutonOk(notif) {
+        const bouton = document.createElement('button');
+        bouton.type = 'button';
+        bouton.className = 'notification-ok';
+        bouton.textContent = 'OK';
+        bouton.addEventListener('click', () => _retirer(notif));
+        notif.appendChild(bouton);
     }
 
     function _emettre(type, message, details, options) {
-        _afficher(_construireNotif(type, message, details, options), CONFIG[type].duree);
+        const conf = CONFIG[type];
+        const signature = type + '\u0000' + String(message) + '\u0000' + String(details || '');
+        const pile = _pile();
+        const deja = Array.from(pile.children || []).find(n =>
+            n.getAttribute('data-signature') === signature && !n.classList.contains(CLASSE_SORTIE));
+        if (deja && conf.duree === null) return;
+        if (deja) _retirer(deja);
+
+        const notif = _construireNotif(type, message, details, options);
+        notif.setAttribute('data-signature', signature);
+        if (conf.duree === null) _ajouterBoutonOk(notif);
+        pile.appendChild(notif);
+        if (conf.duree !== null) setTimeout(() => _retirer(notif), conf.duree);
     }
 
     function succes(message, details = '', options = {})  { _emettre('succes',  message, details, options); }

@@ -50,7 +50,10 @@ const RELEVE = `() => {
             contientRetourLigne: /\\n/.test(x.textContent),
             haut: Math.round(r.top), droite: Math.round(window.innerWidth - r.right),
             largeur: Math.round(r.width), hauteur: Math.round(r.height),
-            position: cs.position, zIndex: cs.zIndex,
+            // #1224 : le message vit dans .notifications-pile, c'est elle qui est fixée.
+            position: x.parentElement && x.parentElement.classList.contains('notifications-pile')
+                ? getComputedStyle(x.parentElement).position : cs.position,
+            zIndex: cs.zIndex,
             debordeADroite: r.right > window.innerWidth,
             role: x.getAttribute('role')
         };

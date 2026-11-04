@@ -6977,6 +6977,53 @@ body.chaines-etapes-masquees .barre-convergence {
     min-width: 0;
 }
 
+/* #1224 (3 nov. 2026) — les messages s'empilent en haut à droite au lieu de se
+   recouvrir. La pile porte la position et le plan (au-dessus des modales) ; un
+   message y est relatif, garde son z-index. Elle ne capte pas le pointeur entre
+   deux messages. Pas d'overflow : il couperait l'entrée glissée par la droite. */
+.notifications-pile {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 11000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: calc(100vw - 40px);
+    pointer-events: none;
+}
+
+.notifications-pile > .notification-succes {
+    position: relative;
+    top: auto;
+    right: auto;
+    pointer-events: auto;
+}
+
+/* Rouge et orange restent jusqu'à « OK » (#1224). Même blanc que le texte du
+   message ; cible de 44 px pour le doigt. */
+.notification-ok {
+    flex-shrink: 0;
+    align-self: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin: -8px -6px -8px 0;
+    padding: 0 12px;
+    font: inherit;
+    font-weight: 600;
+    color: inherit;
+    background: none;
+    border: 1px solid currentColor;
+    border-radius: var(--radius-moyen);
+    cursor: pointer;
+}
+
+.notification-ok:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
 /* ===============================
    TÉMOIN D'ENREGISTREMENT (lot B, D0 point 2 — js/temoin-enregistrement.js)
    En bas, loin du témoin du Codex (menu du haut) et de la barre d'Annoter (en
