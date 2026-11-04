@@ -831,7 +831,9 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
         // #1104 (décision de Grégoire du 4 nov. 2026, 10 h 22) : garder « % » et cet avertissement, et dire
         // sur quoi la note se calcule — `calculerNote` (evaluation-calcul.js) rapporte à la somme des pondérations.
         if (!etat.reglee) {
-            notifications.warning(`Grille enregistrée : ses critères totalisent ${etat.total}\u00a0%, pas 100\u00a0%\u00a0; la note se calcule sur ${etat.total}.`);
+            // À 0 (aucune pondération posée), aucune note ne se calcule : la phrase s'arrête au total.
+            const base = etat.total > 0 ? `\u00a0; la note se calcule sur ${etat.total}.` : '.';
+            notifications.warning(`Grille enregistrée : ses critères totalisent ${etat.total}\u00a0%, pas 100\u00a0%${base}`);
         }
     }
 }

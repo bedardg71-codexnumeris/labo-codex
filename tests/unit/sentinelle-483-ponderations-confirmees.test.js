@@ -61,6 +61,11 @@ describe('#483 · enregistrer une grille dit un total qui n\'est pas 100 %', () 
         await win.sauvegarderGrilleTemplate(false);
         expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 120 %, pas 100 % ; la note se calcule sur 120.']);
     });
+    it('#1104 · création, aucune pondération posée (total 0) : la phrase s\'arrête au total, sans « sur 0 »', async () => {
+        const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 0 }, { id: 'c2', nom: 'B' }]);
+        await win.sauvegarderGrilleTemplate(false);
+        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 0 %, pas 100 %.']);
+    });
     it('création, 60 + 40 : rien', async () => {
         const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 60 }, { id: 'c2', nom: 'B', ponderation: 40 }]);
         await win.sauvegarderGrilleTemplate(false);
