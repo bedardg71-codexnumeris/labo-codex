@@ -38,3 +38,45 @@ test('#1224 · quinze rouges et un vert : la pile reste dans l\'écran et défil
     await page.waitForTimeout(400);
     expect(await page.locator('#notifications-pile .notification-erreur').count()).toBe(14);
 });
+
+// Verdict rouge du 4 nov. (palette-retroaction-compacte:309) : rangé sous un autre message, un vert
+// descendait sur la bande de la palette Rétroaction et prenait le toucher de l'onglet. Ce que l'essai
+// garde, au doigt (iPad couché) : un vert, qui n'a rien à toucher, laisse passer le doigt jusqu'au
+// bouton qu'il couvre ; un rouge le garde (son « OK »).
+test.describe('au doigt', () => {
+    test.use({ hasTouch: true, viewport: { width: 1180, height: 820 } });
+
+    test('#1224 · un vert laisse passer le doigt jusqu\'au bouton qu\'il couvre ; un rouge le garde', async ({ page }) => {
+        await page.goto(indexHtml);
+        await page.waitForFunction(() => window.notifications && typeof window.notifications.succes === 'function');
+        const pose = () => page.waitForFunction(() => {
+            const n = [...document.querySelectorAll('#notifications-pile > *')];
+            return n.length > 0 && n.every((e) => e.getAnimations().length === 0);
+        });
+        // Un bouton témoin sous le dernier message posé, juste sous le plan de la pile (11000) : au-dessus de l'en-tête.
+        const temoinSousLeDernier = () => page.evaluate(() => {
+            document.getElementById('temoin-1224')?.remove();
+            const r = document.querySelector('#notifications-pile > :last-child .notification-texte').getBoundingClientRect();
+            const b = document.createElement('button');
+            b.id = 'temoin-1224';
+            b.style.cssText = `position:fixed;z-index:10999;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
+            window.__touches1224 = 0;
+            b.addEventListener('click', () => { window.__touches1224 += 1; });
+            document.body.appendChild(b);
+            return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        });
+
+        await page.evaluate(() => { notifications.succes('Premier message fictif'); notifications.succes('Second message fictif'); });
+        await pose();
+        const sousLeVert = await temoinSousLeDernier();
+        await page.touchscreen.tap(sousLeVert.x, sousLeVert.y);
+        await expect.poll(() => page.evaluate(() => window.__touches1224), 'le vert laisse passer le doigt').toBe(1);
+
+        await page.evaluate(() => notifications.erreur('Rouge fictif', 'Détail fictif.'));
+        await pose();
+        const sousLeRouge = await temoinSousLeDernier();
+        await page.touchscreen.tap(sousLeRouge.x, sousLeRouge.y);
+        expect(await page.evaluate(() => window.__touches1224), 'le rouge garde le doigt').toBe(0);
+        await expect(page.locator('#notifications-pile .notification-erreur')).toHaveCount(1);
+    });
+});
