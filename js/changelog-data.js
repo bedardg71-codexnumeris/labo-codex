@@ -26,7 +26,12 @@
             couleur: 'vert',
             titre: 'Le groupe sans ses reprises',
             items: [
-                'Suivi du groupe › «&nbsp;Trajectoires par production&nbsp;»&nbsp;: la case «&nbsp;Sans jetons&nbsp;» montre le groupe avec les notes d’origine aux productions reprises, la médiane comprise. Décoche pour revenir aux reprises.'
+                'Suivi du groupe › «&nbsp;Trajectoires par production&nbsp;»&nbsp;: la case «&nbsp;Sans jetons&nbsp;» montre le groupe avec les notes d’origine aux productions reprises, la médiane comprise. Décoche pour revenir aux reprises.',
+                // 1.232.1 — quatre items validés par Grégoire, mot pour mot, le 4 nov. 2026 vers 10 h 30 (boucle sans relais).
+                'Les messages rouges et orange restent affichés jusqu’à ce que tu touches «&nbsp;OK&nbsp;»&nbsp;; les verts et les bleus partent seuls. Plusieurs messages s’empilent au lieu de se recouvrir.',
+                'Trajectoires par production&nbsp;: une copie non recevable (plagiat, IA) se trace à 0, comme dans la note.',
+                'Conception › Productions&nbsp;: le menu dit «&nbsp;(rangée sous …)&nbsp;» à côté d’une production rangée sous un autre cours que le cours actif.',
+                'Les pastilles «&nbsp;À réévaluer&nbsp;», «&nbsp;Non verrouillée&nbsp;» et «&nbsp;Incomplet&nbsp;» se lisent mieux, en sombre comme en clair.'
             ]
         },
         {
