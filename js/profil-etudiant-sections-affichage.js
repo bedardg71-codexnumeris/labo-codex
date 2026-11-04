@@ -1283,7 +1283,7 @@ function genererSectionAccompagnement(da) {
                 </p>
 
                 <button data-action="ouvrirModalConfidentiel" data-param="${da}" class="btn btn-secondaire" style="margin-top: 12px; font-size: 0.85rem;" data-tooltip="profil-confidentiel">
-                    <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Confidentiel ${_pastilleConfidentielVisible(da) ? '<span style="color: var(--etat-valide-texte);">\u25CF</span>' : ''}
+                    <img src="icons/icon-lock.svg" alt="" class="btn-inline-icon"> Confidentiel ${_pastilleConfidentielVisible(da) ? '<span>\u25CF</span>' : ''}
                 </button>
             </div>
 
