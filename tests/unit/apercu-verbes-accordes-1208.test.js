@@ -39,6 +39,12 @@ describe('#1208 · les verbes de l\'Aperçu s\'accordent', () => {
             .toContain('1 étudiant·e en difficulté nécessite un accompagnement intensif');
     });
 
+    it('« montre des signes » s\'accorde au nombre en progrès, pas au nombre en difficulté (relecture neuve)', () => {
+        const msg = interpreter([{ da: 'i1', valeur: 0.50 }, { da: 'i2', valeur: 0.45 }, { da: 'i3', valeur: 0.30 }],
+            { i1: { pattern: 'Stable' }, i2: { pattern: 'Difficulté persistante' }, i3: { pattern: 'Difficulté persistante' } });
+        expect(msg).toContain('Parmi les 3 étudiant·es en difficulté, 1 montre des signes de progrès');
+    });
+
     it('plusieurs : le pluriel reste', () => {
         const msg = interpreter(
             [{ da: 'm1', valeur: 0.80 }, { da: 'm2', valeur: 0.90 }, { da: 'd1', valeur: 0.70 }, { da: 'd2', valeur: 0.66 },
