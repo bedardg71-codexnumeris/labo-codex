@@ -3892,7 +3892,10 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
                     if (!ev) return null;
                     if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
                     if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
-                    const note = ev.noteFinale;
+                    // #1226 (décision de Grégoire, 3 nov. 2026) : une copie non recevable se trace
+                    // à ce qu'elle vaut dans la note du cours (0), pas à sa note enregistrée. La règle
+                    // vit dans pratique-registre.js ; ce graphique ne relit pas statutIntegrite.
+                    const note = window.noteRetenueParLeCalcul(ev);
                     if (note === null || note === undefined) return null;
                     return note / 100;
                 });

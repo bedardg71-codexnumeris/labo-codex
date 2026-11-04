@@ -32,8 +32,8 @@ const ev = (id, da, pid, note, extra) => Object.assign({
 
 // Alice : P1 repris une fois (55 → 80). Bruno : P2 repris deux fois (60 → 70 → 85).
 // Chloé : P1 repris, original supprimé (pratique « supprimer l'originale »).
-function evaluations() {
-    return [
+function evaluations(extra) {
+    return [...(extra || []),
         ev('E1', '2000001', 'P1', 55, { remplaceeParId: 'R1', archivee: true }),
         ev('R1', '2000001', 'P1', 80, { repriseDeId: 'E1', jetonRepriseApplique: true, dateEvaluation: '2026-02-20T12:00:00.000Z' }),
         ev('E2', '2000001', 'P2', 72, { dateEvaluation: '2026-02-10T12:00:00.000Z' }),
@@ -46,10 +46,15 @@ function evaluations() {
     ];
 }
 
-function rendre(options, cases) {
+function rendre(options, cases, extra) {
     const store = storeBase();
     store.test_productions = [{ id: 'P1', titre: 'Un', dateEcheance: '2026-02-03' }, { id: 'P2', titre: 'Deux', dateEcheance: '2026-02-10' }];
-    store.test_evaluationsSauvegardees = evaluations();
+    store.test_evaluationsSauvegardees = evaluations(extra);
+    if (extra) {   // #1226 : deux élèves fictifs de plus dans le groupe actif
+        store.test_groupeEtudiants.push(
+            { da: '2000005', nom: 'Essai', prenom: 'Élise', groupe: '01', coursId: 'GC1', statut: 'actif' },
+            { da: '2000006', nom: 'Témoin', prenom: 'Félix', groupe: '01', coursId: 'GC1', statut: 'actif' });
+    }
     const avant = JSON.stringify(store.test_evaluationsSauvegardees);
     const configs = [];
     const b = monter(store, {
@@ -111,5 +116,35 @@ describe('#1225 · « Sans jetons » : la note d\'origine aux productions repris
 
     it('rien n\'est écrit dans les évaluations', () => {
         expect(rendre({ mesure: 'noteFinale', afficherMediane: true, sansJetons: true }).intact).toBe(true);
+    });
+});
+
+// #1226 (entrée 10 quinquies, décision de Grégoire du 3 nov. 2026, 17 h 57) : « à 0, comme la note ».
+describe('#1226 · une copie non recevable se trace à 0', () => {
+    const plagiat = (id, da, pid, note, extra) => ev(id, da, pid, note, Object.assign({ statutIntegrite: 'plagiat' }, extra || {}));
+
+    it('case décochée : une copie plagiée (note enregistrée 88) se trace à 0, une copie « IA » aussi', () => {
+        const r = rendre({ mesure: 'noteFinale' }, null, [
+            plagiat('X1', '2000006', 'P1', 88),
+            ev('X2', '2000006', 'P2', 77, { statutIntegrite: 'ia', dateEvaluation: '2026-02-10T12:00:00.000Z' })
+        ]);
+        expect(r.courbe('2000006')).toEqual([0, 0]);
+    });
+
+    it('case cochée : l\'original plagié d\'une reprise ressort à 0, pas à sa note enregistrée', () => {
+        const r = rendre({ mesure: 'noteFinale', sansJetons: true }, null, [
+            plagiat('O5', '2000005', 'P1', 64, { remplaceeParId: 'R5', archivee: true }),
+            ev('R5', '2000005', 'P1', 82, { repriseDeId: 'O5', jetonRepriseApplique: true, dateEvaluation: '2026-02-20T12:00:00.000Z' })
+        ]);
+        expect(r.courbe('2000005')).toEqual([0, null]);
+        expect(rendre({ mesure: 'noteFinale' }, null, [
+            plagiat('O5', '2000005', 'P1', 64, { remplaceeParId: 'R5', archivee: true }),
+            ev('R5', '2000005', 'P1', 82, { repriseDeId: 'O5', jetonRepriseApplique: true, dateEvaluation: '2026-02-20T12:00:00.000Z' })
+        ]).courbe('2000005')).toEqual([0.82, null]);
+    });
+
+    it('la médiane compte la copie non recevable à 0', () => {
+        const r = rendre({ mesure: 'noteFinale', afficherMediane: true }, null, [plagiat('X1', '2000006', 'P1', 88)]);
+        expect(r.mediane[0]).toBeCloseTo(0.775);   // 0 · 0,75 · 0,80 · 0,90
     });
 });
