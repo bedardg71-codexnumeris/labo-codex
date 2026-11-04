@@ -159,7 +159,8 @@ async function afficherListeProductions(filtreType = '') {
     // n'a jamais de date propre : exclu, comme son badge l'était.
     const formulaire = document.getElementById('formulaireProduction');
     const coursActif = db.getSync('infoCours', null);   // #1171 : le cours que compare le filtre de l'import
-    const libelleCours = id => (typeof window.libelleCoursParIdV2 === 'function' ? window.libelleCoursParIdV2(id) : 'Cours ' + id);
+    // Le code seul (largeur du menu sur iPad), comme les libellés des groupes (relecture neuve de #1171).
+    const libelleCours = id => (typeof window.codeCoursParIdV2 === 'function' ? window.codeCoursParIdV2(id) : 'Cours ' + id);
     MenuSelection.rendre(emplacement, {
         idMenu: 'menuProductions',
         elements: productionsFiltrees.map(prod => ({

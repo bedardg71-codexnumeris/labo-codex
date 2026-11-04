@@ -193,6 +193,16 @@ function libelleCoursParIdV2(coursId) {
     return _libelleCoursRattachementV2(_coursParIdV2(coursId)) || `Cours ${coursId}`;
 }
 
+/**
+ * #1171 (4 nov. 2026) — le code seul d'un cours (« 203-GM6-DM »), pour un menu : même règle que les libellés
+ * des groupes (la largeur du menu sur iPad, mots de Grégoire du 19 sept.). Sans code, le nom ; introuvable,
+ * « Cours <id> ». Lu par le menu de Conception › Productions.
+ */
+function codeCoursParIdV2(coursId) {
+    const { code, nom } = _codeEtNomCoursV2(_coursParIdV2(coursId));
+    return code || nom || `Cours ${coursId}`;
+}
+
 /** Le libellé du groupe choisi, pour les phrases (suppression, liste vide, bouton). */
 function _libelleGroupeChoisiV2(sel, etudiants) {
     const couples = _couplesDesFichesV2(etudiants);
@@ -1736,5 +1746,6 @@ window.analyserListeEtudiantsCollee = analyserListeEtudiantsCollee;
 // #1038 : lus par la garde du groupe-cours et par le sélecteur « Production » de l'import.
 window.repartitionGroupeParCoursV2 = repartitionGroupeParCoursV2;
 window.libelleCoursParIdV2 = libelleCoursParIdV2;
+window.codeCoursParIdV2 = codeCoursParIdV2;   // #1171 : le menu des productions
 
 })();

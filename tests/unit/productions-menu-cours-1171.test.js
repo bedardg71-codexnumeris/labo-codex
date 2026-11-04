@@ -26,7 +26,11 @@ function monter(infoCours, productions) {
         MenuSelection: { rendre: (el, o) => rendus.push(o.elements) },
         BibliothequeUI: { filtrerParModeDemo: (l) => l }
     });
-    w.libelleCoursParIdV2 = (id) => LIBELLES[id] || 'Cours ' + id;
+    // Le vrai `codeCoursParIdV2` (trimestre-v2-etudiants.js), sur une liste de cours code + nom.
+    const cours = [{ id: 'C1', codeCours: '601-101-MQ', nomCours: 'Écriture et littérature' },
+        { id: 'C2', codeCours: '203-GM6-DM', nomCours: 'Mécanique fictive' }];
+    const trimestre = chargerScript('js/trimestre-v2-etudiants.js', { db: { getSync: (k, d) => (k === 'cours' ? cours : d), setSync() {} } });
+    w.codeCoursParIdV2 = trimestre.codeCoursParIdV2;
     return { w, rendus };
 }
 
