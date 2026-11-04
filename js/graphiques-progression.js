@@ -2082,6 +2082,8 @@ function obtenirDonneesCriteres(da) {
 
         criteresUniques.forEach(nomCritere => {
             donneesCriteres[nomCritere] = evaluationsEtudiant.map(e => {
+                // #1226, suite (4 nov. 2026) : une copie non recevable garde sa colonne, son point reste vide.
+                if (window.evaluationNonRecevable(e)) return null;
                 const critere = e.criteres.find(c => c.critereNom === nomCritere);
                 if (!critere) return null;
                 const enPoints = typeof critere.points === 'number' && !isNaN(critere.points);
@@ -3713,6 +3715,9 @@ function creerGraphiqueTrajectoiresProduction(canvasId, options) {
         function _valeurEvalCritere(ev, nomCritere) {
             if (!ev) return null;
             if (ev.statutRemise === 'non-remis' || ev.statutRemise === 'retard') return null;
+            // #1226, suite (décision de Grégoire du 4 nov. 2026) : une copie non recevable laisse un point
+            // vide, comme « -- » dans la liste ; ses niveaux ne se lisent nulle part (28 oct.). Le prédicat du registre.
+            if (window.evaluationNonRecevable(ev)) return null;
             if (!Array.isArray(ev.criteres) || ev.criteres.length === 0) return null;
             return moyenneCriteresHabiletes(ev, new Set([nomCritere]), cacheTables, compteConversion);
         }
