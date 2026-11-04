@@ -25,7 +25,8 @@
     const MARGE = 32;                             // le jeu horizontal de la feuille dans son cadre (2 × 16 px)
     const estSafari = typeof GestureEvent !== 'undefined';
 
-    // Les mots d'écran (proposés à Grégoire, à valider avant la mise en ligne).
+    // Les mots d'écran, validés par Grégoire le 4 nov. 2026 au soir (précision entre parenthèses : le tiret cadratin
+    // est réservé aux dialogues). Une copie aux archives dit la phrase de ReserveCopies (MOTS.copie.apercu).
     const MOTS = {
         menu: 'Copie de référence',
         etiquette: 'Référence',
@@ -192,7 +193,7 @@
         if (!select) return;
         const options = choix.map((c) => {
             const precision = c.estOriginal ? MOTS.original : (c.fichier.estReprise ? MOTS.reprise : '');
-            const texte = c.nom + (precision ? ' — ' + precision : '');
+            const texte = c.nom + (precision ? ' (' + precision + ')' : '');
             return `<option value="${echapperHtml(c.fichier.id)}"${c.fichier.id === idChoisi ? ' selected' : ''}>${echapperHtml(texte)}</option>`;
         });
         select.innerHTML = (idChoisi ? '' : `<option value="" selected>${echapperHtml(MOTS.choisir)}</option>`) + options.join('');
@@ -326,7 +327,7 @@
     /** #1028 : une copie sans fichier le dit, avec les mots de la visionneuse. */
     function _motsSansFichier(fichier) {
         const RC = window.ReserveCopies;
-        if (RC && RC.estAuxArchives(fichier.id)) return RC.MOTS.copie.etiquette;
+        if (RC && RC.estAuxArchives(fichier.id)) return RC.MOTS.copie.apercu;
         const mots = travauxVisionneuse.MOTS_SANS_FICHIER || {};
         return fichier.blobStatut === 'manquant' ? mots.manquant : mots.introuvable;
     }

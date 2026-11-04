@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.233 (la copie de référence, #1229) — titre et item validés par Grégoire, mot pour mot, le 4 nov. 2026 au soir.
+            version: '1.233',
+            couleur: 'vert',
+            titre: 'Une seconde copie sous les yeux',
+            items: [
+                'Annoter et évaluer › Actions › «&nbsp;Copie de référence&nbsp;»&nbsp;: une seconde copie s’ouvre sous celle que tu annotes, ou à côté, en lecture seule, avec ses annotations. Pour une reprise, l’original s’ouvre d’office&nbsp;; sinon, choisis une copie de la même production. Chaque copie zoome pour elle-même.'
+            ]
+        },
+        {
             // 1.232 (« Sans jetons », #1225) — titre et item validés par Grégoire, mot pour mot, le 3 nov. 2026 au soir.
             version: '1.232',
             couleur: 'vert',

@@ -120,7 +120,7 @@ test.describe('#1229 — la copie de référence', () => {
             .map((o) => ({ v: o.value, t: o.textContent, s: o.selected })));
         expect(options.map((o) => o.v)).toEqual(['FT651', 'FT654', 'FT653']);
         expect(options[0].s).toBe(true);
-        expect(options[0].t).toMatch(/— original$/);
+        expect(options[0].t).toBe('Courageux, Condor (original)');
         // La copie de l'original (blanche, et non la grise de la reprise), et le trait rouge de son annotation.
         expect(proche(await pixelReference(page, 0.5, 0.2), BLANC)).toBe(true);
         const milieu = await pixelReference(page, 0.5, 0.5);
@@ -135,12 +135,58 @@ test.describe('#1229 — la copie de référence', () => {
         expect(suivi.erreurs).toEqual([]);
     });
 
+    // Les mots validés par Grégoire le 4 nov. 2026 au soir, écrits en toutes lettres : l'essai ne relit pas MOTS, il
+    // rougit si une phrase bouge.
+    test('les mots d’écran, tels que Grégoire les a validés', async ({ page }) => {
+        const suivi = await monterLeBanc(page);
+        await ouvrirLaCopie(page, 'FT653');
+        expect((await page.locator('#travaux-btn-reference').textContent()).trim()).toBe('Copie de référence');
+        await ouvrirLaReference(page);
+        expect(await page.locator('#travaux-reference .travaux-reference-etiquette').textContent()).toBe('Référence');
+        expect(await page.locator('#travaux-reference-message').textContent()).toBe('Choisis la copie à mettre en regard.');
+        const textes = await page.evaluate(() => Array.from(document.querySelectorAll('#travaux-reference-choix option'))
+            .map((o) => ({ v: o.value, t: o.textContent })));
+        expect(textes[0]).toEqual({ v: '', t: 'Choisir une copie…' });
+        const texteDe = (id) => textes.find((o) => o.v === id).t;
+        // Vue depuis la copie d'Hardie : la copie de Courageux n'est pas SON original, seule la reprise est précisée.
+        expect(texteDe('FT651')).toBe('Courageux, Condor');
+        expect(texteDe('FT652')).toBe('Courageux, Condor (reprise)');
+        expect(texteDe('FT654')).toBe('Absente, Alouette');
+        expect(await page.locator('#travaux-reference [data-action="travauxReference.fermer"]').getAttribute('title')).toBe('Fermer la copie de référence');
+        expect(await page.locator('#travaux-reference-axe').textContent()).toBe('Côte à côte');
+        await page.click('#travaux-reference-axe');
+        await attendre(page, 400);
+        expect(await page.locator('#travaux-reference-axe').textContent()).toBe('L’une sous l’autre');
+
+        // Une copie aux archives dit la phrase de la Réserve ; une copie introuvable, la sienne.
+        const message = page.locator('#travaux-reference-message');
+        await page.evaluate(async () => {
+            const RC = window.ReserveCopies;
+            const estAuxArchives = RC.estAuxArchives;
+            RC.estAuxArchives = (id) => id === 'FT654' || estAuxArchives(id);
+            await window.travauxReference.afficherCopie('FT654');
+        });
+        expect(await message.textContent()).toBe('Cette copie est aux archives.');
+        await page.evaluate(() => window.travauxReference.afficherCopie('FT999'));
+        expect(await message.textContent()).toBe('Cette copie ne s’ouvre pas ici.');
+
+        // Une production à une seule copie.
+        await page.evaluate(() => window.travauxReference.fermer());
+        await page.evaluate(() => {
+            const seule = window.db.getSync(window.cle('fichiersTravaux')).filter((f) => f.id === 'FT653');
+            window.db.setSync(window.cle('fichiersTravaux'), seule); // security-ok: fixture de test
+        });
+        await ouvrirLaReference(page);
+        expect(await message.textContent()).toBe('Aucune autre copie de cette production.');
+        expect(suivi.erreurs).toEqual([]);
+    });
+
     test('une copie qui n’est pas une reprise : la référence invite à choisir, puis montre la copie choisie', async ({ page }) => {
         const suivi = await monterLeBanc(page);
         await ouvrirLaCopie(page, 'FT653');
         await ouvrirLaReference(page);
         expect(await page.evaluate(() => window.travauxReference.getFichier())).toBe(null);
-        expect(await page.locator('#travaux-reference-message').textContent()).toBe(await page.evaluate(() => window.travauxReference.MOTS.invite));
+        expect(await page.locator('#travaux-reference-message').textContent()).toBe('Choisis la copie à mettre en regard.');
         await page.selectOption('#travaux-reference-choix', 'FT652');
         await attendre(page, 600);
         expect(await page.evaluate(() => window.travauxReference.getFichier().id)).toBe('FT652');
