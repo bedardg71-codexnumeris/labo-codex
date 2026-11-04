@@ -22,3 +22,4 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-04 | 10 h 24 | Claude Code | Trajectoires en mode Habiletés : une copie non recevable, point vide ou ses niveaux ? | didactique |
 | 2026-11-04 | 10 h 24 | Claude Code | Valider les mots d'écran du passage du matin (10 ter, 13, 18, 20) | mots |
 | 2026-11-04 | 10 h 29 | Claude Code | Valider les Nouvelles proposées pour la 1.232.1 | mots |
+| 2026-11-04 | 10 h 32 | Claude Code | Signal pour la vérification de la 1.232.1 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
