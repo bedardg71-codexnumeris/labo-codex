@@ -828,8 +828,10 @@ async function sauvegarderGrilleTemplate(silencieux = false, appliquer = null) {
     const criteresEnregistres = (grilleTemplateActuelle && grilleTemplateActuelle.criteres) || [];
     if (gesteExplicite && criteresEnregistres.length > 0) {
         const etat = etatPonderation(criteresEnregistres);   // #1149, lot 3a : la règle du total et de la chaîne
+        // #1104 (décision de Grégoire du 4 nov. 2026, 10 h 22) : garder « % » et cet avertissement, et dire
+        // sur quoi la note se calcule — `calculerNote` (evaluation-calcul.js) rapporte à la somme des pondérations.
         if (!etat.reglee) {
-            notifications.warning(`Grille enregistrée : ses critères totalisent ${etat.total}\u00a0%, pas 100\u00a0%.`);
+            notifications.warning(`Grille enregistrée : ses critères totalisent ${etat.total}\u00a0%, pas 100\u00a0%\u00a0; la note se calcule sur ${etat.total}.`);
         }
     }
 }

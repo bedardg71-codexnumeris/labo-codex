@@ -54,7 +54,12 @@ describe('#483 · enregistrer une grille dit un total qui n\'est pas 100 %', () 
     it('création, 60 + 30 : l\'avertissement nomme 90 %', async () => {
         const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 60 }, { id: 'c2', nom: 'B', ponderation: 30 }]);
         await win.sauvegarderGrilleTemplate(false);
-        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 90 %, pas 100 %.']);
+        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 90 %, pas 100 % ; la note se calcule sur 90.']);
+    });
+    it('#1104 · création, 70 + 50 : l\'avertissement dit que la note se calcule sur 120', async () => {
+        const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 70 }, { id: 'c2', nom: 'B', ponderation: 50 }]);
+        await win.sauvegarderGrilleTemplate(false);
+        expect(avertis).toEqual(['Grille enregistrée : ses critères totalisent 120 %, pas 100 % ; la note se calcule sur 120.']);
     });
     it('création, 60 + 40 : rien', async () => {
         const { win, avertis } = monter([{ id: 'c1', nom: 'A', ponderation: 60 }, { id: 'c2', nom: 'B', ponderation: 40 }]);
