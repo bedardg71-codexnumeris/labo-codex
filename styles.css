@@ -7016,11 +7016,21 @@ body.chaines-etapes-masquees .barre-convergence {
     display: none;
 }
 
+/* Vert et bleu partent seuls et n'ont rien à toucher : le doigt passe au travers,
+   jusqu'à ce qu'ils couvrent. Rangé sous un autre message, un vert descendait sur
+   la bande de la palette Rétroaction (1 180 × 820) et l'onglet « Spécifique » ne
+   répondait plus (verdict rouge du 4 nov., palette-retroaction-compacte:309).
+   Rouge et orange gardent le pointeur : leur « OK », et le défilement de la pile. */
 .notifications-pile > .notification-succes {
     position: relative;
     top: auto;
     right: auto;
     flex-shrink: 0;
+    pointer-events: none;
+}
+
+.notifications-pile > .notification-erreur,
+.notifications-pile > .notification-warning {
     pointer-events: auto;
 }
 
