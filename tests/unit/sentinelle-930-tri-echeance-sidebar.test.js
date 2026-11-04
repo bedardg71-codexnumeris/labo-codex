@@ -120,7 +120,7 @@ describe('#930 · E4 — les deux fichiers chargés, le tri « échéance » ran
             triProductions: { value: tri }
         };
         const winListe = chargerScript('js/productions-liste.js', {
-            db: { get: async (k) => (k === 'a2026_productions' ? productions : []) },
+            db: { get: async (k) => (k === 'a2026_productions' ? productions : []), getSync: (k, d) => d },   // #1171 : le menu lit infoCours
             cle: (k) => `a2026_${k}`,
             echapperHtml: (t) => String(t == null ? '' : t),
             BibliothequeUI: { filtrerParModeDemo: (x) => x },

@@ -66,6 +66,29 @@ function productionsVisiblesPourLaChaine() {
 }
 
 /**
+ * #1171 (4 nov. 2026) — LE SUFFIXE D'UNE PRODUCTION DANS LE MENU. « (à planifier) » (#1147), puis, pour une
+ * production rangée sous un AUTRE cours que le cours actif, « (rangée sous 203-GM6-DM) » : le menu lit tout le
+ * stock du trimestre, l'import seulement les productions du cours actif (`obtenirDonneesSelonMode`) ; vécu par un
+ * testeur, une production visible ici et absente de l'import. Même règle que ce filtre et que
+ * `productionsRangeesAilleurs` (modes.js, #1038) : sans coursId, ou du cours actif, rien à dire. Un ÉTAT
+ * relatif au cours actif, pas une caractéristique (la règle du menu, menu-selection.js). Pure.
+ * @param {Object} prod
+ * @param {string|null} coursActifId - l'id d'`infoCours`, celui que compare le filtre
+ * @param {function(string):string} libelleCours
+ * @returns {string} '' quand rien n'est à dire
+ */
+function suffixeProductionDuMenu(prod, coursActifId, libelleCours) {
+    const etats = [];
+    if (prod.type !== 'portfolio' && typeof aucuneEcheanceAssignee === 'function' && aucuneEcheanceAssignee(prod)) {
+        etats.push('(à planifier)');
+    }
+    if (coursActifId && prod.coursId && String(prod.coursId) !== String(coursActifId)) {
+        etats.push('(rangée sous ' + libelleCours(prod.coursId) + ')');
+    }
+    return etats.join(' ');
+}
+
+/**
  * Affiche la liste des productions dans la sidebar
  *
  * FONCTIONNEMENT:
@@ -135,13 +158,14 @@ async function afficherListeProductions(filtreType = '') {
     // la barre était le seul endroit où il se voyait sans ouvrir la fiche. Le portfolio conteneur
     // n'a jamais de date propre : exclu, comme son badge l'était.
     const formulaire = document.getElementById('formulaireProduction');
+    const coursActif = db.getSync('infoCours', null);   // #1171 : le cours que compare le filtre de l'import
+    const libelleCours = id => (typeof window.libelleCoursParIdV2 === 'function' ? window.libelleCoursParIdV2(id) : 'Cours ' + id);
     MenuSelection.rendre(emplacement, {
         idMenu: 'menuProductions',
         elements: productionsFiltrees.map(prod => ({
             id: prod.id,
             nom: prod.titre,
-            suffixe: (prod.type !== 'portfolio' && typeof aucuneEcheanceAssignee === 'function'
-                && aucuneEcheanceAssignee(prod)) ? '(à planifier)' : ''
+            suffixe: suffixeProductionDuMenu(prod, coursActif && coursActif.id, libelleCours)
         })),
         idOuvert: (productionEnEdition && formulaire && !formulaire.classList.contains('u-hide')) ? productionEnEdition : null,
         libelleAucun: 'Aucune production ouverte',
@@ -421,6 +445,7 @@ window.importerProductionsExternes = function(nouvellesProductions, options) {
 
 window.dupliquerEtEditerProduction = dupliquerEtEditerProduction;
 window.afficherListeProductions = afficherListeProductions;
+window.suffixeProductionDuMenu = suffixeProductionDuMenu;   // #1171
 window.productionsVisiblesPourLaChaine = productionsVisiblesPourLaChaine;   // #1149 : grilles, échelles, cartouches
 window.chargerProductionPourModif = chargerProductionPourModif;
 window.creerNouvelleProduction = creerNouvelleProduction;
