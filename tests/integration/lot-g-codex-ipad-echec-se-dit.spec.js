@@ -71,7 +71,7 @@ async function poserOutils(page) {
             if (n.nodeType === 1 && n.classList.contains('notification-avec-icone')) {
                 window.__toasts.push(n.className.includes('notification-erreur') ? 'erreur:' + n.textContent : 'succes:' + n.textContent);
             }
-        }))).observe(document.body, { childList: true });
+        }))).observe(document.body, { childList: true, subtree: true });   // #1224 : les toasts vivent dans #notifications-pile
 
         delete window.showSaveFilePicker;
         window.__partages = 0;

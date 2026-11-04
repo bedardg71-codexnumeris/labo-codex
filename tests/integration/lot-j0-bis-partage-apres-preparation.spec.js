@@ -103,7 +103,7 @@ async function poserReleves(page) {
                 window.__toasts.push(n.className.includes('notification-erreur') ? 'erreur:' + n.textContent : 'succes:' + n.textContent);
             }
             if (n.id === 'overlay-ui-dialogue') window.__titresModales.push(n.querySelector('.modal-titre').textContent);
-        }))).observe(document.body, { childList: true });
+        }))).observe(document.body, { childList: true, subtree: true });   // #1224 : les toasts vivent dans #notifications-pile
     });
 }
 

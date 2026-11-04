@@ -81,7 +81,7 @@ async function poserOutils(page) {
         window.__toasts = [];
         new MutationObserver((muts) => muts.forEach((m) => m.addedNodes.forEach((n) => {
             if (n.nodeType === 1 && n.classList.contains('notification-avec-icone')) window.__toasts.push(n.textContent.trim());
-        }))).observe(document.body, { childList: true });
+        }))).observe(document.body, { childList: true, subtree: true });   // #1224 : les toasts vivent dans #notifications-pile
         // Le témoin « Enregistré » s'efface en 2 s : on garde trace de chaque apparition.
         window.__enregistre = 0;
         const guetter = () => {

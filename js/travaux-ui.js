@@ -4417,8 +4417,8 @@
         // comme un jeton appliqué.
         if (bilanJetons.jetons > 0) details.push(bilanJetons.jetons + ' jeton(s) de reprise appliqué(s)');
         if (bilanJetons.rattaches.length > 0) details.push(bilanJetons.rattaches.length + ' fichier(s) rattaché(s) à une reprise déjà accordée');
-        // 6 bis — dit dans le toast vert, le seul qui reste à l'écran après
-        // l'import : un toast à part serait recouvert aussitôt par celui-ci.
+        // 6 bis — dit dans le toast vert, avec le bilan de l'import. (Avant #1224,
+        // un toast à part était recouvert aussitôt par celui-ci ; ils s'empilent désormais.)
         if (bilanJetons.originaux.length > 0) details.push('aucune évaluation à reprendre, la copie devient l\u2019original pour : ' + bilanJetons.originaux.join(', '));
         notifications.succes(msg, details.join(' — '));
     }

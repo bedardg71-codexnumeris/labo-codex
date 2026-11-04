@@ -40,7 +40,7 @@ async function ouvrirCadre(page) {
         window.__toasts = [];
         new MutationObserver((ms) => ms.forEach(m => m.addedNodes.forEach(n => {
             if (n.nodeType === 1 && n.classList.contains('notification-avec-icone')) window.__toasts.push(n.innerText.replace(/\s+/g, ' ').trim());
-        }))).observe(document.body, { childList: true });
+        }))).observe(document.body, { childList: true, subtree: true });   // #1224 : les toasts vivent dans #notifications-pile
         naviguerVers('calendrier', 'trimestre');
     });
     await pause(page, 900);
