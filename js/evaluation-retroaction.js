@@ -500,7 +500,7 @@ function regenererRetroactionAvecFeedback() {
         textarea.style.boxShadow = '0 0 0 2px var(--gris-moyen)';
         afficherNotifRetro('Rétroaction identique — aucun changement détecté');
     } else {
-        textarea.style.boxShadow = '0 0 0 2px var(--vert-principal)';
+        textarea.style.boxShadow = '0 0 0 2px var(--etat-valide-texte)';
         const diff = nouveauMots - ancienMots;
         const signe = diff > 0 ? '+' : '';
         afficherNotifRetro('Rétroaction régénérée (' + signe + diff + ' mots)');
@@ -514,7 +514,7 @@ function afficherNotifRetro(message) {
     if (!compteur) return;
     const original = compteur.textContent;
     compteur.textContent = message;
-    compteur.style.color = 'var(--vert-principal)';
+    compteur.style.color = 'var(--etat-valide-texte)';
     setTimeout(() => {
         mettreAJourCompteurMots();
         compteur.style.color = 'var(--gris-moyen)';

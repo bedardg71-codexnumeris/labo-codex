@@ -2760,7 +2760,7 @@ function validerPonderationsCategoriesMat() {
 
     if (validation) {
         if (total === 100) {
-            validation.innerHTML = `<span style="color: var(--vert-principal);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Total : ${formaterPourcentage(total)}</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
+            validation.innerHTML = `<span style="color: var(--etat-valide-texte);"><span class="icone-inline icone-inline--check" aria-hidden="true"></span>Total : ${formaterPourcentage(total)}</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
         } else if (total < 100) {
             validation.innerHTML = `<span style="color: var(--orange-principal);"><span class="icone-inline icone-inline--warning" aria-hidden="true"></span>Total : ${formaterPourcentage(total)} (il manque ${formaterPourcentage(100 - total)})</span>`;   // security-ok: formaterPourcentage ne rend que chiffres, virgule, U+00A0 et « % » (ou '')
         } else {

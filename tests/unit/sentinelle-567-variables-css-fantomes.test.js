@@ -111,7 +111,6 @@ const TOLEREES = {
     "--turquoise-500": 2,
     "--vert-fonce": 2,
     "--vert-positif": 6,
-    "--vert-principal": 7,
     "--vert-valide": 1,
     "--violet-jeton": 3
     // "--violet-pale" : son seul usage était la Banque d'évaluations, retirée par #489 (15 oct. 2026).
@@ -174,7 +173,6 @@ const SANS_REPLI_TOLERES = {
     "--texte-primaire": 6,
     "--vert-fonce": 1,
     "--vert-positif": 6,
-    "--vert-principal": 7,
     "--vert-valide": 1
 };
 
