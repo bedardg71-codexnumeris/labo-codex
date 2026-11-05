@@ -21,6 +21,15 @@
 
     var CHANGELOG = [
         {
+            // 1.234 (#1231, réunir les fichiers d’une copie) — item validé par Grégoire, mot pour mot, le 5 nov. 2026 ; titre posé par la session, à confirmer avant le push.
+            version: '1.234',
+            couleur: 'vert',
+            titre: 'Une copie en plusieurs photos',
+            items: [
+                'Dans «&nbsp;Préparer et importer&nbsp;», coche les photos d’une même copie et «&nbsp;Réunir en une copie&nbsp;»&nbsp;: elles s’importent en un seul document, avec l’élève et la production (ou le jeton de reprise) choisis une fois. La pipette «&nbsp;Balance des blancs&nbsp;» dit maintenant comment s’en servir.'
+            ]
+        },
+        {
             // 1.233 (la copie de référence, #1229) — titre et item validés par Grégoire, mot pour mot, le 4 nov. 2026 au soir.
             version: '1.233',
             couleur: 'vert',
