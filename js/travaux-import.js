@@ -1497,6 +1497,19 @@
     }
 
     /**
+     * Le type d'une image que jsPDF sait coller telle quelle, lu dans ses
+     * premiers octets : 'image/jpeg', 'image/png', ou '' pour tout le reste.
+     * @param {Uint8Array} octets
+     * @returns {string}
+     */
+    function typeImageDesOctets(octets) {
+        if (!octets || octets.length < 4) return '';
+        if (octets[0] === 0xFF && octets[1] === 0xD8 && octets[2] === 0xFF) return 'image/jpeg';
+        if (octets[0] === 0x89 && octets[1] === 0x50 && octets[2] === 0x4E && octets[3] === 0x47) return 'image/png';
+        return '';
+    }
+
+    /**
      * Une image prête pour `doc.addImage`, telle que le navigateur l'AFFICHE.
      *
      * Une photo de téléphone stocke ses pixels couchés et dit dans son EXIF
@@ -1513,15 +1526,26 @@
      * (import groupé). Les dimensions rendues sont celles des pixels collés :
      * le cadre ne peut plus les contredire.
      *
-     * @param {Blob} blob - Image (JPEG, PNG…)
+     * Le type de la data URL vient des OCTETS, jamais de `blob.type` (vécu par
+     * Grégoire sur l'iPad le 5 nov. 2026, page 1 blanche après « Modifier ») :
+     * un blob sans type, comme en rend l'ouverture d'un codex, se lit en
+     * `data:application/octet-stream;base64,…`, que jsPDF 2.5.1 ne reconnaît
+     * pas (son motif `\w*\/\w*` refuse le tiret). Il collait alors le texte de
+     * la data URL au lieu de l'image : `/Width 0 /Height 0`, page blanche. Une
+     * image ni JPEG ni PNG est redessinée en JPEG, faute d'un type à nommer.
+     *
+     * @param {Blob} blob - Image (JPEG, PNG…), typée ou non
      * @returns {Promise<{imgData: string, largeur: number, hauteur: number}>}
      */
     async function imagePourPDF(blob) {
+        // L'en-tête EXIF est dans les premiers 64 Ko d'un JPEG.
+        const tete = new Uint8Array(await blob.slice(0, 65536).arrayBuffer());
+        const type = typeImageDesOctets(tete);
         const imgData = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result);
             reader.onerror = reject;
-            reader.readAsDataURL(blob);
+            reader.readAsDataURL(type ? blob.slice(0, blob.size, type) : blob);
         });
         const img = await new Promise((resolve, reject) => {
             const i = new Image();
@@ -1531,9 +1555,7 @@
         });
         const largeur = img.naturalWidth;
         const hauteur = img.naturalHeight;
-        // L'en-tête EXIF est dans les premiers 64 Ko d'un JPEG.
-        const tete = new Uint8Array(await blob.slice(0, 65536).arrayBuffer());
-        if (lireOrientationExif(tete) === 1) return { imgData, largeur, hauteur };
+        if (type && lireOrientationExif(tete) === 1) return { imgData, largeur, hauteur };
 
         // Le navigateur redresse en dessinant : les pixels du canevas sont droits.
         const canvas = document.createElement('canvas');

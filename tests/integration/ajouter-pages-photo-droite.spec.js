@@ -69,16 +69,26 @@ async function demarrer(page) {
     await page.waitForTimeout(3000);
 }
 
-/** Une copie fictive d'une page (JPEG droit, sans EXIF) dans la vraie base. */
-async function poserCopie(page) {
-    await page.evaluate(async () => {
+/**
+ * Une copie fictive d'une page (JPEG droit, sans EXIF) dans la vraie base.
+ * `sansType` : le blob stocké n'a pas de type, comme après l'ouverture d'un codex
+ * (`entree.async('blob')`) ; la page porte alors un repère rouge en haut à gauche
+ * et un bleu en bas à droite.
+ */
+async function poserCopie(page, sansType = false) {
+    await page.evaluate(async (sansType) => {
         const id = 'COPIE_BANC_PHOTO';
         const da = '9000101';
         const canevas = document.createElement('canvas');
         canevas.width = 200; canevas.height = 260;
         const ctx = canevas.getContext('2d');
         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 200, 260);
-        const jpeg = await new Promise((r) => canevas.toBlob(r, 'image/jpeg', 0.9));
+        if (sansType) {
+            ctx.fillStyle = '#ff0000'; ctx.fillRect(0, 0, 50, 50);
+            ctx.fillStyle = '#0000ff'; ctx.fillRect(150, 210, 50, 50);
+        }
+        const avecType = await new Promise((r) => canevas.toBlob(r, 'image/jpeg', 0.9));
+        const jpeg = sansType ? new Blob([await avecType.arrayBuffer()]) : avecType;
         db.setSync(cle('fichiersTravaux'), (db.getSync(cle('fichiersTravaux'), []) || []).concat([{   // security-ok: fixture fictive du banc
             id, etudiantDA: da, productionId: 'PROD_BANC', nomFichier: id + '.jpg', typeMIME: 'image/jpeg',
             tailleFichier: jpeg.size, nombrePages: 1, dateImport: new Date().toISOString(), statut: 'importe'
@@ -91,7 +101,7 @@ async function poserCopie(page) {
         await db.flush();
         afficherSection('evaluations');
         afficherSousSection('evaluations-importer');
-    });
+    }, sansType);
     await page.waitForFunction(() => !!document.getElementById('evaluations-contenu-import'));
     // Sous Chrome, la section se redessine encore un moment après son affichage et
     // emporterait l'éditeur ouvert trop tôt.
@@ -242,6 +252,35 @@ test.describe('« + Ajouter des pages » : une photo de téléphone s\'enregistr
         expect(await nombreDePages(page)).toBe(3);
         expect(await lirePageEnregistree(page, 2)).toEqual(DROITE);   // avec le réglage
         expect(await lirePageEnregistree(page, 3)).toEqual(DROITE);   // sans réglage
+        expect(ecoute.dialogues).toEqual([]);
+        expect(ecoute.erreurs).toEqual([]);
+    });
+
+    // Vécu par Grégoire sur l'iPad (5 nov., 9 h 57) : une copie d'une seule photo, venue
+    // par un codex, passée par « Modifier » ; sa page 1 s'enregistrait blanche. Le blob
+    // sans type se lisait en `data:application/octet-stream;base64,…`, que jsPDF 2.5.1 ne
+    // reconnaît pas (son motif `\w*\/\w*` refuse le tiret) : il collait le texte de la
+    // data URL comme s'il s'agissait des octets, d'où une image `/Width 0 /Height 0`.
+    test('une copie d\'une photo en blob sans type : sa page 1 enregistrée garde son image', async ({ page }) => {
+        const ecoute = brancher(page);
+        await demarrer(page);
+        await poserCopie(page, true);
+        const photo = await fabriquerPhotoOrientation6(page);
+
+        await ajouterLesPhotos(page, photo, 1, false);
+        await enregistrer(page, 2);
+
+        const texte = await page.evaluate(async () => {
+            const octets = new Uint8Array(await (await travauxStockage.recupererBlob('COPIE_BANC_PHOTO')).arrayBuffer());
+            let s = '';
+            for (let i = 0; i < octets.length; i++) s += String.fromCharCode(octets[i]);
+            return s;
+        });
+        expect(texte).not.toContain('/Width 0');
+        expect(texte).not.toContain('data:');
+        expect(await lirePageEnregistree(page, 1)).toEqual(
+            { ratio: 0.769, hautGauche: 'rouge', hautDroite: 'blanc', basDroite: 'bleu', basGauche: 'blanc' });
+        expect(await lirePageEnregistree(page, 2)).toEqual(DROITE);
         expect(ecoute.dialogues).toEqual([]);
         expect(ecoute.erreurs).toEqual([]);
     });
