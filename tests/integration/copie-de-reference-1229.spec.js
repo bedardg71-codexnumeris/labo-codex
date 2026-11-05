@@ -374,12 +374,13 @@ test.describe('#1229 — la copie de référence', () => {
             return { v: o.value, t: o.textContent };
         });
         expect(await choisie()).toEqual({ v: 'FT651', t: 'Courageux, Condor (original)' });
-        await page.evaluate(() => {
-            window.__rechargements1234 = 0;
-            const afficher = window.travauxReference.afficherCopie;
-            window.travauxReference.afficherCopie = function () { window.__rechargements1234++; return afficher.apply(this, arguments); };
-        });
-        const canevasAvant = await page.evaluate(() => document.getElementById('travaux-reference-canvas').toDataURL());
+        // Le témoin du « sans recharger » : un zoom posé AVANT la bascule. `afficherCopie` le remet à la
+        // pleine largeur ; s'il survit aux deux bascules, la copie de référence n'a pas été rechargée.
+        const zoomInitial = await page.evaluate(() => window.travauxReference.getZoom());
+        await page.evaluate(() => window.travauxReference.zoomAvant());
+        await attendre(page, 400);
+        const zoomPose = await page.evaluate(() => window.travauxReference.getZoom());
+        expect(zoomPose).not.toBe(zoomInitial);
 
         await page.evaluate(() => basculerModeAnonymisation());
         await attendre(page, 800);
@@ -387,14 +388,13 @@ test.describe('#1229 — la copie de référence', () => {
         expect(anonyme).not.toContain('Courageux');
         expect(await choisie()).toEqual({ v: 'FT651', t: anonyme + ' (original)' });
         const tous = await page.evaluate(() => Array.from(document.querySelectorAll('#travaux-reference-choix option')).map((o) => o.textContent).join(' | '));
-        expect(tous).not.toMatch(/Courageux|Hardie|Absente/);
+        expect(tous).not.toMatch(/Courageux|Condor|Hardie|Hirondelle|Absente|Alouette/);
 
         await page.evaluate(() => basculerModeAnonymisation());
         await attendre(page, 800);
         expect(await choisie()).toEqual({ v: 'FT651', t: 'Courageux, Condor (original)' });
-        expect(await page.evaluate(() => window.__rechargements1234)).toBe(0);
+        expect(await page.evaluate(() => window.travauxReference.getZoom())).toBe(zoomPose);
         expect(await page.evaluate(() => window.travauxReference.getFichier().id)).toBe('FT651');
-        expect(await page.evaluate(() => document.getElementById('travaux-reference-canvas').toDataURL())).toBe(canevasAvant);
         expect(suivi.erreurs).toEqual([]);
     });
 
