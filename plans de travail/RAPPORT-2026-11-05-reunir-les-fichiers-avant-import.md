@@ -52,3 +52,12 @@
 3. Ensuite : fusion vers `main` (après le push de la 1.233.2), release **mineure** 1.234.0, ligne des Nouvelles proposée : « Dans « Préparer et importer », coche les photos d'une même copie et « Réunir en une copie » : elles s'importent en un seul document, avec l'élève et la production (ou le jeton de reprise) choisis une fois. La pipette « Balance des blancs » dit maintenant comment s'en servir. » Puis le verdict du Mac, et le push à sa demande.
 
 L'artefact de la porte terrain est à publier par Cowork.
+
+## 6. La livraison (5 nov. 2026)
+
+- **1.234.0, build 1105-0951, poussée sur `main` : `5983d058`.** Elle porte aussi la 1.233.2 (#1229, `835f43aa`), poussée plus tôt sans verdict par la session labo-codex-73, puis fusionnée sous le lot (`536d41a0`, `travaux-import.js?v=20261105d`).
+- **Vitest** : 881 fichiers, 10 709 tests verts sur `1c680647` ; seul un commentaire et le jeton de `changelog-data.js` changent ensuite.
+- **Verdict Playwright sur `5983d058` : ROUGE (code 1)**, deux essais neufs hors de la dette connue : `tableau-bord-906-bilan-premier-rendu` et `tampons-masques-bibliotheque-1216` (« 1 tampon(s) intégré(s) retiré(s)… »). Le Mac s'est endormi cinq fois pendant la suite (« éveil complet NON tenu »). Rejoués seuls dans WebKit sur le même commit : **15 sur 15 verts**. Deux autres sont verts au second essai (`recoupement-horaire-devis-540D`, `t3-retirer-les-copies-du-demo`).
+- **Poussée avec `--no-verify`, sur décision de Grégoire**, sur la foi du rejeu. Le garde n'a donc pas de verdict vert pour ce commit : la prochaine suite complète, Mac éveillé, tranchera. Si l'un des deux revient, c'est un item.
+- Le port 22 de GitHub ne répondait pas : poussée par `ssh.github.com:443`, sans toucher à la configuration.
+- **Non vérifié d'ici** : la version affichée en ligne (l'adresse passe par une connexion Cloudflare). C'est le § 0 de la porte.
