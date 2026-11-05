@@ -328,6 +328,9 @@ describe('#612 · T6.4 — la modale d\'import dit ce qui va se passer', () => {
     it('T6.4.d le message « sans DA » ne promet plus une association manuelle', () => {
         const src = source();
         expect(src).not.toMatch(/association devra être faite manuellement/);
-        expect(src).toMatch(/ne seront pas regroupées/);
+        // #1231 (5 nov. 2026) — la liste ne garde que les fichiers SANS élève :
+        // le message dit qu'ils partent sans élève, et le geste dans l'app.
+        expect(src).toMatch(/ils seront importés sans élève/);
+        expect(src).toMatch(/Réunir en une copie/);
     });
 });

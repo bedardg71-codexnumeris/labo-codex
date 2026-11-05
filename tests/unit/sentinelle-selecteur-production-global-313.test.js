@@ -36,7 +36,11 @@ beforeEach(() => {
         obtenirFileDAttente: () => queue,
         setProductionGlobale: () => {},
         getProductionGlobale: () => '',
-        trouverEtudiantParDA: () => null
+        trouverEtudiantParDA: () => null,
+        // #1231 — l'inspecteur écrit par copie ; ici chaque fichier est sa propre copie.
+        indicesDeLaCopie: (i) => [i],
+        ecrireSurLaCopie: (i, champs) => { Object.assign(queue[i], champs); return [i]; },
+        persisterFileDAttente: () => {}
     };
 
     win = chargerScript('js/travaux-ui.js', {

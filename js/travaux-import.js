@@ -197,6 +197,19 @@
         return parseLea.da + '_' + parseLea.nomProduction.replace(/\s+/g, '-');
     }
 
+    /**
+     * #1231 — préfixe de la clé d'une copie RÉUNIE À LA MAIN (« Réunir en une
+     * copie »). Elle ne dérive d'aucun nom : la restauration de la file la
+     * recopie telle quelle au lieu de la recalculer depuis le nom Léa, et le
+     * tri par page/date de `regrouperParDocument` ne la touche pas (l'ordre des
+     * pages est celui que l'utilisateur a réglé aux flèches).
+     */
+    const PREFIXE_COPIE_REUNIE = 'copie_';
+
+    function estCopieReunie(cleGroupe) {
+        return typeof cleGroupe === 'string' && cleGroupe.indexOf(PREFIXE_COPIE_REUNIE) === 0;
+    }
+
     // Compression images iPad (1400px, JPEG 0.80 pour import standard)
     const MAX_IMAGE_DIMENSION = 1400;
     const JPEG_QUALITY_IMPORT = 0.80;
@@ -1129,7 +1142,12 @@
                 // de #609 ; « Re-deposer les fichiers » la ressuscitait, et
                 // chaque page redevenait un « doublon ». Une cle videe a la
                 // main (« Defaire le regroupement ») reste vide.
-                groupeDocumentId: (d.groupeDocumentId && cleDocumentLea(d.parseLea)) || d.groupeDocumentId || '',
+                // #1231 — une copie réunie à la main ne dérive pas du nom : sa clé
+                // revient telle quelle, sinon un fichier au nom Léa la quitterait
+                // au rechargement et la copie serait scindée.
+                groupeDocumentId: estCopieReunie(d.groupeDocumentId)
+                    ? d.groupeDocumentId
+                    : ((d.groupeDocumentId && cleDocumentLea(d.parseLea)) || d.groupeDocumentId || ''),
                 thumbnailDataUrl: null, // regeneree au reattachement des blobs
                 productionId: d.productionId || '',
                 // #314 : restaurer les drapeaux d'intention (cf. persisterFileDAttente).
@@ -1339,7 +1357,10 @@
         // departage rien : sans le numero, l'ordre retombait sur l'ordre de
         // selection. #873 — la date, elle, range les remises successives
         // d'un meme eleve : la plus recente arrive en dernier.
-        groupes.forEach(fichiers => {
+        groupes.forEach((fichiers, cleGroupe) => {
+            // #1231 — une copie réunie à la main garde l'ordre de la file, réglé
+            // aux flèches : c'est l'ordre de ses pages.
+            if (estCopieReunie(cleGroupe)) return;
             fichiers.sort((a, b) => {
                 const pa = a.parseLea && a.parseLea.page;
                 const pb = b.parseLea && b.parseLea.page;
@@ -1919,10 +1940,19 @@
      */
     function monterFichier(index) {
         if (index <= 0 || index >= fichiersEnAttente.length) return;
-        const tmp = fichiersEnAttente[index - 1];
-        fichiersEnAttente[index - 1] = fichiersEnAttente[index];
-        fichiersEnAttente[index] = tmp;
+        // #1231 — une page d'une copie ne sort pas de sa copie par les flèches,
+        // et un fichier seul saute une copie entière au lieu d'y entrer.
+        const cleIci = cleDeCopie(index);
+        const cleAuDessus = cleDeCopie(index - 1);
+        if (cleIci && cleIci !== cleAuDessus) return;
+        let cible = index - 1;
+        if (!cleIci && cleAuDessus) {
+            while (cible > 0 && cleDeCopie(cible - 1) === cleAuDessus) cible--;
+        }
+        const [f] = fichiersEnAttente.splice(index, 1);
+        fichiersEnAttente.splice(cible, 0, f);
         persisterFileDAttente();
+        return cible;
     }
 
     /**
@@ -1931,10 +1961,118 @@
      */
     function descendreFichier(index) {
         if (index < 0 || index >= fichiersEnAttente.length - 1) return;
-        const tmp = fichiersEnAttente[index + 1];
-        fichiersEnAttente[index + 1] = fichiersEnAttente[index];
-        fichiersEnAttente[index] = tmp;
+        // #1231 — symétrique de `monterFichier`.
+        const cleIci = cleDeCopie(index);
+        const cleAuDessous = cleDeCopie(index + 1);
+        if (cleIci && cleIci !== cleAuDessous) return;
+        let cible = index + 1;
+        if (!cleIci && cleAuDessous) {
+            while (cible < fichiersEnAttente.length - 1 && cleDeCopie(cible + 1) === cleAuDessous) cible++;
+        }
+        const [f] = fichiersEnAttente.splice(index, 1);
+        fichiersEnAttente.splice(cible, 0, f);
         persisterFileDAttente();
+        return cible;
+    }
+
+    /* ===============================
+       #1231 — RÉUNIR PLUSIEURS FICHIERS EN UNE COPIE
+       =============================== */
+
+    /**
+     * La clé de la copie à plusieurs fichiers dont fait partie l'entrée `index`,
+     * ou '' si le fichier est seul. Une clé portée par un seul fichier ne fait
+     * pas une copie à plusieurs fichiers (même règle que la colonne « Originaux »).
+     */
+    function cleDeCopie(index) {
+        const f = fichiersEnAttente[index];
+        if (!f || !f.groupeDocumentId) return '';
+        const cleCopie = f.groupeDocumentId;
+        let n = 0;
+        for (const g of fichiersEnAttente) {
+            if (g && g.groupeDocumentId === cleCopie && ++n >= 2) return cleCopie;
+        }
+        return '';
+    }
+
+    /**
+     * Les indices des fichiers de la copie de l'entrée `index` (elle-même seule
+     * si elle n'appartient à aucune copie à plusieurs fichiers).
+     * @param {number} index
+     * @returns {number[]}
+     */
+    function indicesDeLaCopie(index) {
+        if (index < 0 || index >= fichiersEnAttente.length) return [];
+        const cleCopie = cleDeCopie(index);
+        if (!cleCopie) return [index];
+        const indices = [];
+        fichiersEnAttente.forEach((f, i) => { if (f && f.groupeDocumentId === cleCopie) indices.push(i); });
+        return indices;
+    }
+
+    /**
+     * Écrit des champs sur TOUS les fichiers de la copie de l'entrée `index` :
+     * une copie a un élève, une production, une date — jamais deux.
+     * @param {number} index
+     * @param {Object} champs
+     * @returns {number[]} les indices écrits
+     */
+    function ecrireSurLaCopie(index, champs) {
+        const indices = indicesDeLaCopie(index);
+        indices.forEach(i => Object.assign(fichiersEnAttente[i], champs));
+        if (indices.length > 0) persisterFileDAttente();
+        return indices;
+    }
+
+    /**
+     * « Réunir en une copie » : les fichiers cochés (et, s'ils appartiennent
+     * déjà à une copie, toute cette copie) deviennent UNE copie. Ils se placent
+     * ensemble à la position du premier, dans leur ordre de la file ; ils
+     * reçoivent une clé de regroupement posée à la main, et l'élève et la
+     * production (ou le jeton de reprise) du premier fichier qui en porte.
+     *
+     * Tout l'aval sait déjà traiter un groupe : la colonne « Originaux »,
+     * `assemblerPDFGroupe`, l'exemption des doublons, le jeton.
+     *
+     * @param {number[]} indices - indices de la file
+     * @returns {{debut: number, nombre: number, cle: string}|null}
+     */
+    function reunirEnUneCopie(indices) {
+        const valides = Array.from(new Set((indices || []).map(Number)))
+            .filter(i => Number.isInteger(i) && i >= 0 && i < fichiersEnAttente.length);
+        if (valides.length < 2) return null;
+
+        // Une copie déjà formée entre entière : on ne coupe pas une copie en deux.
+        const retenus = new Set();
+        valides.forEach(i => indicesDeLaCopie(i).forEach(j => retenus.add(j)));
+        const ordre = Array.from(retenus).sort((a, b) => a - b);
+        const membres = ordre.map(i => fichiersEnAttente[i]);
+
+        const sourceEleve = membres.find(f => f.etudiantDA) || null;
+        const sourceProduction = membres.find(f => f.estReprise || f.productionId) || null;
+        const cleCopie = PREFIXE_COPIE_REUNIE + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+
+        membres.forEach(f => {
+            f.groupeDocumentId = cleCopie;
+            if (sourceEleve) {
+                f.etudiantDA = sourceEleve.etudiantDA;
+                f.etudiantAssocie = sourceEleve.etudiantAssocie;
+            }
+            if (sourceProduction) {
+                f.productionId = sourceProduction.productionId;
+                f.estReprise = !!sourceProduction.estReprise;
+                f.productionIdParLea = !!sourceProduction.productionIdParLea;
+                f.productionIdParFichier = !!sourceProduction.productionIdParFichier;
+            }
+        });
+
+        // Les rendre contigus, à la place du premier.
+        const debut = ordre[0];
+        for (let k = ordre.length - 1; k >= 0; k--) fichiersEnAttente.splice(ordre[k], 1);
+        fichiersEnAttente.splice(debut, 0, ...membres);
+
+        persisterFileDAttente();
+        return { debut: debut, nombre: membres.length, cle: cleCopie };
     }
 
     /**
@@ -2117,6 +2255,12 @@
             const doublons = [];
             queue.forEach(function(fNouveau, idxNouveau) {
                 if (!fNouveau) return;
+                // #1231 — une copie à plusieurs fichiers est UNE copie : seul son
+                // premier fichier la représente (sinon trois pages d'une copie
+                // déjà importée = trois doublons annoncés).
+                if (fNouveau.groupeDocumentId && queue.slice(0, idxNouveau).some(function(fA) {
+                    return fA && fA.groupeDocumentId === fNouveau.groupeDocumentId;
+                })) return;
                 const da = fNouveau.etudiantDA;
                 const prodId = fNouveau.productionId;
                 if (!da || !prodId) return;
@@ -2242,6 +2386,11 @@
         retirerFichier: retirerFichier,
         monterFichier: monterFichier,
         descendreFichier: descendreFichier,
+        // #1231 — réunir des fichiers en une copie
+        reunirEnUneCopie: reunirEnUneCopie,
+        indicesDeLaCopie: indicesDeLaCopie,
+        ecrireSurLaCopie: ecrireSurLaCopie,
+        estCopieReunie: estCopieReunie,
         // Pipeline
         detecterFormatEtRouter: detecterFormatEtRouter,
         regrouperParDocument: regrouperParDocument,

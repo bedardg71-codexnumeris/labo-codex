@@ -502,6 +502,11 @@ const AIDE_CONTEXTUELLE = {
                 contenu: 'Le DA de l\'étudiant·e (7 chiffres) doit minimalement apparaître dans le nom du fichier pour que l\'association et le regroupement multi-pages soient automatiques. Le format Léa complet (NOM_DA_Production_Remis_le_AAAA-MM-JJ_HHhMMmSSs) est reconnu directement.'
             },
             {
+                // #1231 — mots proposés à Grégoire (rapport du 5 nov. 2026).
+                type: 'conseil',
+                contenu: 'Sans DA dans le nom (des photos prises au téléphone, par exemple), coche dans « Originaux » les fichiers d\'une même copie, puis « Réunir en une copie » : ils deviennent un seul document, dans l\'ordre réglé aux flèches, et tu choisis l\'étudiant·e et la production une seule fois.'
+            },
+            {
                 type: 'liste',
                 titre: 'Traitements automatiques à l\'import',
                 items: [

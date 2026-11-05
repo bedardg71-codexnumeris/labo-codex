@@ -25,6 +25,9 @@
     let sidebarManuelReplie = false;
     let modeCourant = 'annoter'; // 'annoter' | 'evaluer' — n'écrire que par _setModeCourant (#798)
     let fichierSelectionneIndex = -1; // -1 = aucune selection dans le pipeline
+    // #1231 — les entrées de la file cochées pour « Réunir en une copie ».
+    // Des références d'objets, pas des indices : les flèches réordonnent la file.
+    const selectionReunir = new Set();
     // #596 (12 oct. 2026) — les clés de session qui portent un identifiant (production, copie)
     // sont namespacées par trimestre : un onglet qui change de trimestre ne ressert plus
     // celles de l'autre. Ce qu'un onglet déjà ouvert a rangé sous l'ancien nom meurt avec lui.
@@ -1962,28 +1965,13 @@
     }
 
     /**
-     * Genere l'etape 2 en layout 3 colonnes
+     * La colonne « Originaux » de l'étape Optimisation : les fichiers déposés,
+     * leurs copies à plusieurs fichiers encadrées, et (#1231) la coche de
+     * « Réunir en une copie ». Extraite de `genererEtape2Colonnes`.
      * @param {Array} queue - File d'attente
-     * @param {Map} groupes - Groupes de documents
      * @returns {string} HTML
      */
-    function genererEtape2Colonnes(queue) {
-        const nbImages = queue.filter(f => f.estImage).length;
-        const productions = obtenirDonneesSelonMode('productions');
-
-        // Production globale actuelle (prioriser le choix explicite de l'utilisateur)
-        // #313 : un choix PAR-FICHIER (« Modifier ») n'est pas une production globale —
-        // l'afficher dans le sélecteur global créait la divergence visuelle du bug.
-        const prodActuelle = travauxImport.getProductionGlobale()
-            || queue.find(f => f.productionId && !f.productionIdParLea && !f.productionIdParFichier)?.productionId
-            || sessionStorage.getItem(cleSession('travaux-pipeline-production'))
-            || '';
-
-        // Jetons de reprise : vérifier si le système est actif
-        const configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
-        const jetonsActifs = configJetons && configJetons.actif;
-        const modeJetonActif = queue.some(f => f.estReprise);
-
+    function genererColonneOriginaux(queue) {
         // === Colonne gauche : Originaux (apercu pre-traitement) ===
         // Index des groupes multi-fichiers pour affichage visuel
         const groupesMulti = new Map(); // groupeDocumentId → [indices]
@@ -1998,8 +1986,15 @@
             if (indices.length < 2) groupesMulti.delete(cle);
         }
 
+        // #1231 — une coche qui ne désigne plus une entrée de la file s'efface.
+        for (const f of Array.from(selectionReunir)) {
+            if (!queue.includes(f)) selectionReunir.delete(f);
+        }
         let colGauche = '<div class="pipeline-col-originaux">';
         colGauche += '<div class="pipeline-col-titre">Originaux</div>';
+        if (queue.length >= 2) {
+            colGauche += `<button type="button" class="btn btn-secondaire btn-sm pipeline-btn-reunir" data-action="travauxUI.reunirCopiePipeline" ${selectionReunir.size < 2 ? 'disabled' : ''}>R\u00e9unir en une copie</button>`;
+        }
         const groupesOuverts = new Set(); // pour tracker les debuts de groupe
 
         queue.forEach((f, index) => {
@@ -2041,11 +2036,20 @@
                     </div>`;
             }
 
+            // #1231 — une page d'une copie ne sort pas de sa copie par les flèches
+            // (travauxImport.monterFichier refuse) : le bouton le montre.
+            const bloqueHaut = index === 0 || (indicesGroupe && queue[index - 1].groupeDocumentId !== groupeId);
+            const bloqueBas = index === queue.length - 1 || (indicesGroupe && queue[index + 1].groupeDocumentId !== groupeId);
+            const coche = selectionReunir.has(f);
+            const caseReunir = queue.length >= 2
+                ? `<button type="button" class="pipeline-case-reunir" role="checkbox" aria-checked="${coche ? 'true' : 'false'}" aria-label="Cocher pour r\u00e9unir en une copie" data-stop data-action="travauxUI.cocherPourReunir" data-param="${index}"><input type="checkbox" tabindex="-1" aria-hidden="true" ${coche ? 'checked' : ''}></button>`
+                : '';
             colGauche += `<div class="pipeline-fichier-ligne${selectionne ? ' pipeline-fichier-selectionne' : ''}${indicesGroupe ? ' pipeline-fichier-groupe' : ''}" data-action="travauxUI.selectionnerFichierPipeline" data-param="${index}">
+                ${caseReunir}
                 <span class="pipeline-fichier-numero">${index + 1}</span>
                 <div class="pipeline-reorder-btns">
-                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.monterFichierPipeline" data-param="${index}" ${index === 0 ? 'disabled' : ''} title="Monter"><img src="icons/icon-chevron-up.svg" alt="" class="editeur-page-icon"></button>
-                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.descendreFichierPipeline" data-param="${index}" ${index === queue.length - 1 ? 'disabled' : ''} title="Descendre"><img src="icons/icon-chevron-down.svg" alt="" class="editeur-page-icon"></button>
+                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.monterFichierPipeline" data-param="${index}" ${bloqueHaut ? 'disabled' : ''} title="Monter"><img src="icons/icon-chevron-up.svg" alt="" class="editeur-page-icon"></button>
+                    <button class="pipeline-btn-reorder" data-stop data-action="travauxUI.descendreFichierPipeline" data-param="${index}" ${bloqueBas ? 'disabled' : ''} title="Descendre"><img src="icons/icon-chevron-down.svg" alt="" class="editeur-page-icon"></button>
                 </div>
                 <div class="pipeline-fichier-thumb-col" id="pipeline-original-${index}">
                     ${thumb ? `<img src="${thumb}" alt="">` : `<span class="pipeline-icone-placeholder">${icone}</span>`}
@@ -2064,6 +2068,33 @@
             }
         });
         colGauche += '</div>';
+        return colGauche;
+    }
+
+    /**
+     * Genere l'etape 2 en layout 3 colonnes
+     * @param {Array} queue - File d'attente
+     * @param {Map} groupes - Groupes de documents
+     * @returns {string} HTML
+     */
+    function genererEtape2Colonnes(queue) {
+        const nbImages = queue.filter(f => f.estImage).length;
+        const productions = obtenirDonneesSelonMode('productions');
+
+        // Production globale actuelle (prioriser le choix explicite de l'utilisateur)
+        // #313 : un choix PAR-FICHIER (« Modifier ») n'est pas une production globale —
+        // l'afficher dans le sélecteur global créait la divergence visuelle du bug.
+        const prodActuelle = travauxImport.getProductionGlobale()
+            || queue.find(f => f.productionId && !f.productionIdParLea && !f.productionIdParFichier)?.productionId
+            || sessionStorage.getItem(cleSession('travaux-pipeline-production'))
+            || '';
+
+        // Jetons de reprise : vérifier si le système est actif
+        const configJetons = (typeof obtenirConfigJetons === 'function') ? obtenirConfigJetons() : null;
+        const jetonsActifs = configJetons && configJetons.actif;
+        const modeJetonActif = queue.some(f => f.estReprise);
+
+        const colGauche = genererColonneOriginaux(queue);
 
         // === Colonne centre : Reglages globaux + Preview ===
         let colCentre = '<div class="pipeline-col-centre">';
@@ -2145,7 +2176,12 @@
             }
 
             // Metadata du fichier
-            colCentre += '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">Informations du fichier</p>';
+            // #1231 — une copie à plusieurs fichiers se règle comme UNE copie :
+            // les champs ci-dessous s'écrivent sur tous ses fichiers.
+            const nbFichiersCopie = travauxImport.indicesDeLaCopie(idx).length;
+            colCentre += nbFichiersCopie > 1
+                ? `<p class="u-texte-petit" style="margin:10px 0 4px 0;"><strong>Copie de ${nbFichiersCopie} fichiers</strong></p>`
+                : '<p class="texte-muted u-texte-petit" style="margin:10px 0 4px 0;">Informations du fichier</p>';
             const modeLea = f.modeImport !== 'autre';
             const dateVal = f.dateFichier ? new Date(f.dateFichier).toISOString().substring(0, 10) : '';
             const nomEtudiant = echapperHtml(nomEleveDuFichier(f, 'prenom nom'));
@@ -2178,7 +2214,7 @@
                 <div class="pipeline-autocomplete-liste u-hide" id="pipeline-autocomplete-${idx}"></div>
             </div>`;
             colCentre += `<div class="pipeline-champ">
-                <label>Production de ce fichier</label>
+                <label>${nbFichiersCopie > 1 ? 'Production de cette copie' : 'Production de ce fichier'}</label>
                 <select class="controle-form pipeline-select-petit" data-on-change="travauxUI.changerProductionPipeline" data-param="${idx}">
                     <option value="">—</option>
                     ${productions.map(p => `<option value="${echapperHtml(p.id)}" ${f.productionId === p.id && !f.estReprise ? 'selected' : ''}>${echapperHtml(p.titre || p.nom || p.id)}</option>`).join('')}
@@ -2390,6 +2426,33 @@
                 f.groupeDocumentId = '';
             }
         });
+        // #1231 — défaire survit au rechargement, comme réunir.
+        travauxImport.persisterFileDAttente();
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * #1231 — coche ou décoche une entrée de la file pour « Réunir en une copie ».
+     * @param {number} index
+     */
+    function cocherPourReunir(index) {
+        const f = travauxImport.obtenirFileDAttente()[index];
+        if (!f) return;
+        if (selectionReunir.has(f)) selectionReunir.delete(f);
+        else selectionReunir.add(f);
+        rafraichirPipelineUI();
+    }
+
+    /**
+     * #1231 — « Réunir en une copie » : les fichiers cochés deviennent une seule
+     * copie, qui s'ouvre dans l'inspecteur pour qu'on y pose élève et production.
+     */
+    function reunirCopiePipeline() {
+        const queue = travauxImport.obtenirFileDAttente();
+        const indices = queue.map((f, i) => (selectionReunir.has(f) ? i : -1)).filter(i => i >= 0);
+        const resultat = travauxImport.reunirEnUneCopie(indices);
+        selectionReunir.clear();
+        if (resultat) fichierSelectionneIndex = resultat.debut;
         rafraichirPipelineUI();
     }
 
@@ -2398,9 +2461,22 @@
      * @param {number} index - Index du fichier a monter
      */
     function monterFichierPipeline(index) {
-        travauxImport.monterFichier(index);
-        if (fichierSelectionneIndex === index) fichierSelectionneIndex = index - 1;
-        else if (fichierSelectionneIndex === index - 1) fichierSelectionneIndex = index;
+        suivreSelectionApresDeplacement(index, travauxImport.monterFichier(index));
+    }
+
+    /**
+     * #1231 — un déplacement peut sauter une copie entière : la sélection suit
+     * l'ENTRÉE sélectionnée, pas un calcul d'indices voisins.
+     */
+    function suivreSelectionApresDeplacement(index, cible) {
+        if (typeof cible === 'number' && fichierSelectionneIndex >= 0) {
+            const queue = travauxImport.obtenirFileDAttente();
+            const avant = queue.slice();
+            const [f] = avant.splice(cible, 1);
+            avant.splice(index, 0, f);
+            const entreeSelectionnee = avant[fichierSelectionneIndex];
+            fichierSelectionneIndex = queue.indexOf(entreeSelectionnee);
+        }
         rafraichirPipelineUI();
     }
 
@@ -2409,10 +2485,7 @@
      * @param {number} index - Index du fichier a descendre
      */
     function descendreFichierPipeline(index) {
-        travauxImport.descendreFichier(index);
-        if (fichierSelectionneIndex === index) fichierSelectionneIndex = index + 1;
-        else if (fichierSelectionneIndex === index + 1) fichierSelectionneIndex = index;
-        rafraichirPipelineUI();
+        suivreSelectionApresDeplacement(index, travauxImport.descendreFichier(index));
     }
 
     /**
@@ -2598,16 +2671,21 @@
         const queue = travauxImport.obtenirFileDAttente();
         if (index < 0 || index >= queue.length) return;
 
-        queue[index].etudiantDA = da;
-        queue[index].etudiantAssocie = travauxImport.trouverEtudiantParDA(da);
-
-        // Passer en identifie si etudiant + production
-        if (queue[index].etudiantDA && queue[index].productionId &&
-            (queue[index].pipelineStatut === 'pret' || queue[index].pipelineStatut === 'identifie')) {
-            queue[index].pipelineStatut = 'identifie';
-        } else if (queue[index].pipelineStatut === 'identifie') {
-            queue[index].pipelineStatut = 'pret';
-        }
+        // #1231 — un élève par copie : écrit sur tous ses fichiers.
+        const indices = travauxImport.ecrireSurLaCopie(index, {
+            etudiantDA: da,
+            etudiantAssocie: travauxImport.trouverEtudiantParDA(da)
+        });
+        indices.forEach(i => {
+            const f = queue[i];
+            // Passer en identifie si etudiant + production
+            if (f.etudiantDA && f.productionId &&
+                (f.pipelineStatut === 'pret' || f.pipelineStatut === 'identifie')) {
+                f.pipelineStatut = 'identifie';
+            } else if (f.pipelineStatut === 'identifie') {
+                f.pipelineStatut = 'pret';
+            }
+        });
 
         rafraichirPipelineUI();
     }
@@ -2688,7 +2766,8 @@
         var productionId = (typeof productionIdOuEl === 'object' && productionIdOuEl !== null) ? productionIdOuEl.value : productionIdOuEl;
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
-        queue[index].productionId = productionId;
+        // #1231 — la production d'une copie vaut pour tous ses fichiers.
+        travauxImport.ecrireSurLaCopie(index, { productionId: productionId });
         rafraichirPipelineUI();
     }
 
@@ -4162,9 +4241,12 @@
         // Beta 99.30 : Fichiers sans DA détectable dans le nom — l'association
         // à un étudiant n'est pas fiable et le regroupement multi-pages ne
         // fonctionnera pas. Avertissement non bloquant.
-        const fichiersSansDA = (typeof travauxImport.detecterFichiersSansDA === 'function')
+        // #1231 — un fichier dont l'élève est posé (choisi dans l'inspecteur,
+        // ou trouvé par son nom) n'a plus rien à gagner d'un DA dans son nom :
+        // le regroupement se fait dans l'app (« Réunir en une copie »).
+        const fichiersSansDA = ((typeof travauxImport.detecterFichiersSansDA === 'function')
             ? travauxImport.detecterFichiersSansDA()
-            : [];
+            : []).filter(f => !f.etudiantDA);
         let bandeauSansDA = '';
         if (fichiersSansDA.length > 0) {
             const lignesND = fichiersSansDA.map(function(f) {
@@ -4183,7 +4265,10 @@
                 // recensé ici — mais son élève EST trouvé. Ce qu'il perd, c'est le
                 // regroupement multi-pages, et rien d'autre.
                 // ⮕ La règle : dire la conséquence RÉELLE et le geste qui la lève.
-                + '<p class="texte-muted u-texte-petit">Ces fichiers ne portent pas de DA. L\'étudiant·e peut tout de même être trouvé·e par son nom, mais les pages d\'une même production ne seront pas regroupées automatiquement. Ajoutez le DA au nom du fichier pour que le regroupement se fasse.</p>'
+                // #1231 — la liste ne garde que les fichiers SANS élève (filtre
+                // ci-dessus) : le texte dit leur conséquence et le geste dans l'app.
+                // Mots proposés à Grégoire (rapport du 5 nov.).
+                + '<p class="texte-muted u-texte-petit">Ces fichiers ne portent pas de DA et aucun·e étudiant·e ne leur est associé·e : ils seront importés sans élève. Choisis l\'étudiant·e dans l\'inspecteur ; pour une copie en plusieurs fichiers, coche-les dans « Originaux », puis « Réunir en une copie ».</p>'
                 + '</div>';
         }
 
@@ -4271,13 +4356,44 @@
                 + '</div>';
         }
 
+        // #1231 — LES COPIES QUI SERONT CRÉÉES, une ligne par copie : l'élève, la
+        // production (ou la reprise), le nombre de pages. Trois photos réunies
+        // sont annoncées comme UNE copie, ce que l'import fera.
+        const listeCopies = listerCopiesAImporter(queue);
+        const phraseImport = listeCopies.length === nbFichiers
+            ? `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>`
+            : `<p>${listeCopies.length} copie(s) seront créées ${msgGroupe}, à partir de ${nbFichiers} fichiers :</p>`
+                + '<ul class="pipeline-confirmation-copies">' + listeCopies.map(c => '<li>' + c + '</li>').join('') + '</ul>';
         afficherModalePipeline('Confirmer l\u2019import',
-            bandeauAutreGC + bandeauSansDA + bandeauDAInconnu + bandeauDoublons + `<p>${nbFichiers} fichier(s) seront importés ${msgGroupe} et ${msgProduction}.</p>
+            bandeauAutreGC + bandeauSansDA + bandeauDAInconnu + bandeauDoublons + `${phraseImport}
             <p>Confirmer l\u2019importation ?</p>`,
             [
                 { label: 'Oui, importer', classe: 'btn-principal', action: () => executerImportPipeline() },
                 { label: 'Revenir aux réglages', classe: 'btn-secondaire', action: () => {} }
             ].concat(boutonsBascule));
+    }
+
+    /**
+     * #1231 — une ligne par copie que l'import créera (HTML échappé) :
+     * « [Élève] – Artefact 6, reprise – 3 pages ».
+     * @param {Array} queue
+     * @returns {string[]}
+     */
+    function listerCopiesAImporter(queue) {
+        const productions = obtenirDonneesSelonMode('productions') || [];
+        const lignes = [];
+        travauxImport.regrouperParDocument().forEach(fichiers => {
+            const f = fichiers[0];
+            const nbPDF = fichiers.filter(x => x.estPDF).length;
+            // Une copie qui contient un PDF ne connaît pas son nombre de pages avant l'assemblage.
+            const nb = fichiers.length;
+            const compte = nbPDF > 0 ? `${nb} fichier${nb > 1 ? 's' : ''}` : `${nb} page${nb > 1 ? 's' : ''}`;
+            const p = f.productionId ? productions.find(x => x && x.id === f.productionId) : null;
+            const nomProd = p ? (p.titre || p.nom || p.id) : 'sans production';
+            const eleve = nomEleveDuFichier(f, 'prenom nom').trim() || 'élève non choisi';
+            lignes.push(echapperHtml(eleve) + ' \u2013 ' + echapperHtml(nomProd) + (f.estReprise ? ', reprise' : '') + ' \u2013 ' + compte);
+        });
+        return lignes;
     }
 
     /**
@@ -6278,7 +6394,7 @@
     function toggleModeImport(index, mode) {
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
-        queue[index].modeImport = mode || (queue[index].modeImport === 'autre' ? 'lea' : 'autre');
+        travauxImport.ecrireSurLaCopie(index, { modeImport: mode || (queue[index].modeImport === 'autre' ? 'lea' : 'autre') });
         rafraichirPipelineUI();
     }
 
@@ -6320,8 +6436,8 @@
         if (!queue[index]) return;
         const etudiants = obtenirDonneesSelonMode('groupeEtudiants');
         const etudiant = etudiants.find(e => e.da === da);
-        queue[index].etudiantDA = da;
-        queue[index].etudiantAssocie = etudiant || null;
+        // #1231 — un élève par copie : écrit sur tous ses fichiers.
+        travauxImport.ecrireSurLaCopie(index, { etudiantDA: da, etudiantAssocie: etudiant || null });
         // Mettre a jour le champ
         const input = document.getElementById('pipeline-etudiant-' + index);
         if (input && etudiant) {
@@ -6350,7 +6466,7 @@
         // l'affichage recule d'un jour. La valeur vient d'un `input[type=date]`,
         // donc toujours en 'AAAA-MM-JJ'. Construite champ par champ, elle reste
         // le jour que l'utilisateur a choisi.
-        queue[index].dateFichier = dateStr ? _dateLocaleDepuisAAAAMMJJ(dateStr) : null;
+        travauxImport.ecrireSurLaCopie(index, { dateFichier: dateStr ? _dateLocaleDepuisAAAAMMJJ(dateStr) : null });
     }
 
     /**
@@ -6383,21 +6499,26 @@
         const queue = travauxImport.obtenirFileDAttente();
         if (!queue[index]) return;
 
+        // #1231 — la production (ou le jeton) d'une copie vaut pour tous ses fichiers.
         if (productionId === '__jeton_reprise__') {
-            queue[index].estReprise = true;
-            queue[index].productionId = ''; // sera défini par le sous-sélecteur
-            queue[index].productionIdParLea = false;
-            queue[index].productionIdParFichier = false;
+            travauxImport.ecrireSurLaCopie(index, {
+                estReprise: true,
+                productionId: '', // sera défini par le sous-sélecteur
+                productionIdParLea: false,
+                productionIdParFichier: false
+            });
             rafraichirPipelineUI();
             return;
         }
 
-        queue[index].productionId = productionId;
-        queue[index].productionIdParLea = false;
-        // #313 : marquer le choix par-fichier (protégé du sélecteur global) ;
-        // revenir à « — » (valeur vide) rend la main au global/parseLea.
-        queue[index].productionIdParFichier = !!productionId;
-        queue[index].estReprise = false;
+        travauxImport.ecrireSurLaCopie(index, {
+            productionId: productionId,
+            productionIdParLea: false,
+            // #313 : marquer le choix par-fichier (protégé du sélecteur global) ;
+            // revenir à « — » (valeur vide) rend la main au global/parseLea.
+            productionIdParFichier: !!productionId,
+            estReprise: false
+        });
         rafraichirPipelineUI();
     }
 
@@ -7773,6 +7894,8 @@
         selectionnerFichierPipeline: selectionnerFichierPipeline,
         deselectionnerFichierPipeline: deselectionnerFichierPipeline,
         defaireGroupePipeline: defaireGroupePipeline,
+        cocherPourReunir: cocherPourReunir,               // #1231
+        reunirCopiePipeline: reunirCopiePipeline,         // #1231
         retirerFichierPipeline: retirerFichierPipeline,
         redeposerFichiers: redeposerFichiers,
         monterFichierPipeline: monterFichierPipeline,

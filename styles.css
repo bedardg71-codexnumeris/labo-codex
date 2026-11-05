@@ -17534,14 +17534,26 @@ tr.ligne-import-ecartee td {
     color: var(--accent-primaire);
     font-weight: bold;
 }
-.prep-mini-check {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.85rem;
-    padding: 0 2px;
-    color: var(--texte-muted);
+/* #1231 — la pipette « Balance des blancs » : son icône, et la ligne qui dit
+   quoi faire quand l'outil est armé (l'iPad n'a pas de curseur). */
+.prep-btn-icone {
+    width: 14px;
+    height: 14px;
     flex-shrink: 0;
+    filter: brightness(0) invert(0.85);
+}
+.mode-clair .prep-btn-icone {
+    filter: brightness(0) invert(0.25);
+}
+.prep-btn.actif .prep-btn-icone,
+.mode-clair .prep-btn.actif .prep-btn-icone {
+    filter: brightness(0) invert(1);
+}
+.prep-balance-consigne {
+    margin: 6px 0 0 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texte-principal);
 }
 
 /* --- Layout Visionneuse --- */
@@ -28189,6 +28201,52 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 
 .pipeline-fichier-groupe {
     border-left: 2px solid transparent;
+}
+
+/* #1231 — « Réunir en une copie » : la coche de chaque ligne et le bouton. */
+.pipeline-btn-reunir {
+    margin: 0 0 8px 0;
+}
+.pipeline-case-reunir {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-petit);
+    background: transparent;
+    cursor: pointer;
+}
+.pipeline-case-reunir input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    pointer-events: none;
+}
+.pipeline-case-reunir:focus-visible {
+    outline: 2px solid var(--accent-primaire);
+    outline-offset: 1px;
+}
+@media (pointer: coarse) {
+    .pipeline-case-reunir {
+        width: 44px;
+        height: 44px;
+    }
+    .pipeline-case-reunir input {
+        width: 22px;
+        height: 22px;
+    }
+    .pipeline-btn-reunir {
+        min-height: 44px;
+    }
+}
+.pipeline-confirmation-copies {
+    max-height: 40vh;
+    overflow-y: auto;
+    margin: 4px 0 8px 0;
 }
 
 /* ===============================

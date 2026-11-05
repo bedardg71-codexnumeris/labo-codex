@@ -144,7 +144,7 @@ test('#612 · cas 2 — sans groupe-cours actif, l\'import est REFUSÉ et rien n
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 
-test('#612 · cas 3 — sans DA, l\'élève est trouvé par son NOM et le message dit vrai', async ({ page }) => {
+test('#612 · cas 3 — sans DA, l\'élève est trouvé par son NOM : plus rien à lui conseiller (#1231)', async ({ page }) => {
     const erreurs = await preparer(page);
     const r = await page.evaluate(async () => {
         await window.__setup();
@@ -154,16 +154,29 @@ test('#612 · cas 3 — sans DA, l\'élève est trouvé par son NOM et le messag
     });
 
     expect(r.da, 'ce fichier ne porte aucun DA').toBeFalsy();
-    expect(r.sansDA, 'il doit donc figurer au bandeau « sans DA »').toBe(true);
-    // ⚠ LE POINT DE #611, ET LA RAISON DE LA REFORMULATION : le fichier n'a pas
-    // de DA, mais son élève EST trouvé. L'ancien message promettait une
-    // association manuelle — il annonçait une conséquence disparue.
     expect(r.associe, 'l\'appariement par nom doit trouver l\'élève').toBe(true);
-    expect(r.texteSansDA, 'le message ne doit plus promettre une association manuelle')
+    // #1231 (5 nov. 2026) — l'élève est posé : le regroupement se fait dans l'app
+    // (« Réunir en une copie »), le conseil de renommer le fichier n'a plus lieu d'être.
+    expect(r.sansDA, 'un fichier dont l\'élève est posé n\'est plus au bandeau « sans DA »').toBe(false);
+    expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
+});
+
+test('#612 · cas 3 bis — sans DA ni élève : le bandeau dit qu\'il part sans élève, et le geste dans l\'app (#1231)', async ({ page }) => {
+    const erreurs = await preparer(page);
+    const r = await page.evaluate(async () => {
+        await window.__setup();
+        const file = window.__deposer('IMG_0001.pdf');
+        const vu = await window.__lireModale();
+        return { ...vu, associe: !!(file[0] && file[0].etudiantAssocie) };
+    });
+
+    expect(r.associe, 'aucun élève n\'est trouvé').toBe(false);
+    expect(r.sansDA, 'il figure au bandeau « sans DA »').toBe(true);
+    expect(r.texteSansDA, 'le message ne promet pas une association manuelle')
         .not.toMatch(/association devra être faite manuellement/);
-    expect(r.texteSansDA, 'il doit annoncer la perte RÉELLE : le regroupement')
-        .toMatch(/ne seront pas regroupées automatiquement/);
-    expect(r.texteSansDA, 'et le geste qui la lève').toMatch(/Ajoutez le DA/);
+    expect(r.texteSansDA, 'il dit la conséquence réelle').toMatch(/importés sans élève/);
+    expect(r.texteSansDA, 'et le geste dans l\'app, pas hors de l\'app').toMatch(/Réunir en une copie/);
+    expect(r.texteSansDA).not.toMatch(/Ajoutez le DA/);
     expect(erreurs, `Erreurs console : ${erreurs.join(' | ')}`).toEqual([]);
 });
 

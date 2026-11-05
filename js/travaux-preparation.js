@@ -62,6 +62,8 @@
 
     // Etat des outils interactifs
     let outilActif = null;            // 'crop' | 'perspective' | 'balance' | null
+    // #1231 — la cible (point chaud au centre de la croix) ; la croix du système en repli.
+    const CURSEUR_PIPETTE = 'url("icons/curseur-cible.svg") 16 16, crosshair';
     let cropRect = null;              // {x, y, width, height} en fractions 0-1
     let perspectiveCorners = null;    // [{x,y}, {x,y}, {x,y}, {x,y}] en fractions 0-1
     let poigneeActive = -1;           // Index de la poignee draggee (-1 = aucune)
@@ -79,10 +81,6 @@
     let prepEspace = null;
     let canvasOverlay = null;
     let ctxOverlay = null;
-
-    // Assemblage multi-pages
-    let selections = new Set();       // Indices des fichiers selectionnes pour grouper
-    let documentGroups = new Map();   // Map<groupId, [indices]>
 
     // Callbacks
     let onTerminer = null;            // Callback quand l'utilisateur confirme
@@ -115,15 +113,11 @@
         fichiers = fichiersEnAttente.map(f => ({
             ...f,
             operations: [],
-            blobTraite: null,
-            groupeId: null
+            blobTraite: null
         }));
         indexActuel = 0;
         onTerminer = callback;
         actif = true;
-        selections.clear();
-        documentGroups.clear();
-
         afficherUI();
         chargerFichier(0);
     }
@@ -2241,10 +2235,22 @@
             // Desactiver si deja actif
             outilActif = null;
             if (canvasOverlay) canvasOverlay.style.cursor = '';
+            afficherConsigneBalance();
             return;
         }
         outilActif = 'balance';
-        if (canvasOverlay) canvasOverlay.style.cursor = 'crosshair';
+        if (canvasOverlay) canvasOverlay.style.cursor = CURSEUR_PIPETTE;
+        afficherConsigneBalance();
+    }
+
+    /**
+     * #1231 (audit du 5 nov., constat 13) — la pipette armée DIT quoi faire :
+     * le bouton seul ne change rien à l'image, la correction attend un toucher
+     * sur une zone blanche. La ligne compte surtout sur l'iPad, sans curseur.
+     */
+    function afficherConsigneBalance() {
+        const ligne = document.getElementById('prep-balance-consigne');
+        if (ligne) ligne.hidden = outilActif !== 'balance';
     }
 
     /* ===============================
@@ -2319,94 +2325,9 @@
         qf.format11x17 = checked;
     }
 
-    /* ===============================
-       ASSEMBLAGE MULTI-PAGES
-       =============================== */
-
-    /**
-     * Bascule la selection d'un fichier pour le groupement
-     * @param {number} index - Index du fichier
-     */
-    function toggleSelection(index) {
-        if (selections.has(index)) {
-            selections.delete(index);
-        } else {
-            selections.add(index);
-        }
-        mettreAJourMiniatures();
-    }
-
-    /**
-     * Groupe les fichiers selectionnes en un document multi-pages
-     */
-    function grouperSelection() {
-        if (selections.size < 2) return;
-
-        const groupeId = genererIdUnique('GRP_');
-        const indices = Array.from(selections).sort((a, b) => a - b);
-
-        indices.forEach(i => {
-            fichiers[i].groupeId = groupeId;
-        });
-
-        documentGroups.set(groupeId, indices);
-        selections.clear();
-        mettreAJourMiniatures();
-    }
-
-    /**
-     * Degroupe un document multi-pages
-     * @param {string} groupeId
-     */
-    function degrouper(groupeId) {
-        const indices = documentGroups.get(groupeId);
-        if (indices) {
-            indices.forEach(i => {
-                fichiers[i].groupeId = null;
-            });
-            documentGroups.delete(groupeId);
-        }
-        mettreAJourMiniatures();
-    }
-
-    /**
-     * Assemblage automatique : regroupe les fichiers par DA + nomProduction
-     * (via parseLea), trie par dateRemise, et appelle grouperSelection() pour chaque groupe.
-     */
-    function assemblerAuto() {
-        const groupesAuto = new Map();
-
-        fichiers.forEach((f, i) => {
-            const p = f.parseLea || {};
-            if (p.da && p.nomProduction) {
-                const cleGroupe = p.da + '_' + p.nomProduction.replace(/\s+/g, '-').toLowerCase();
-                if (!groupesAuto.has(cleGroupe)) groupesAuto.set(cleGroupe, []);
-                groupesAuto.get(cleGroupe).push({ index: i, dateRemise: p.dateRemise });
-            }
-        });
-
-        let nbGroupes = 0;
-        groupesAuto.forEach((membres) => {
-            if (membres.length < 2) return;
-
-            // Trier par dateRemise
-            membres.sort((a, b) => {
-                if (!a.dateRemise && !b.dateRemise) return 0;
-                if (!a.dateRemise) return 1;
-                if (!b.dateRemise) return -1;
-                return a.dateRemise - b.dateRemise;
-            });
-
-            // Selectionner les indices puis grouper
-            selections.clear();
-            membres.forEach(m => selections.add(m.index));
-            grouperSelection();
-            nbGroupes++;
-        });
-
-        selections.clear();
-        mettreAJourMiniatures();
-    }
+    // #1231 — « Grouper » et « Assemblage auto » sont retirés : ils écrivaient
+    // dans un état que personne ne lisait. On réunit les fichiers d'une copie
+    // dans « Préparer et importer » (« Réunir en une copie », travaux-ui.js).
 
     /* ===============================
        NAVIGATION
@@ -2490,15 +2411,11 @@
         fichiers.forEach((f, i) => {
             const classes = ['prep-mini'];
             if (i === indexActuel) classes.push('actif');
-            if (selections.has(i)) classes.push('selectionne');
             if (f.operations.length > 0) classes.push('modifie');
 
             html += `
                 <div class="${classes.join(' ')}" data-action="travauxPreparation.chargerFichier" data-param="${i}">
                     <span class="prep-mini-nom">${echapperHtml(typeof anonymiserNomFichier === 'function' ? anonymiserNomFichier(f.nomFichier, f.etudiantDA) : (f.nomFichier || ''))}</span>
-                    <button class="prep-mini-check" data-stop data-action="travauxPreparation.toggleSelection" data-param="${i}" title="Selectionner">
-                        ${selections.has(i) ? '&#x2611;' : '&#x2610;'}
-                    </button>
                 </div>`;
         });
 
@@ -2576,13 +2493,9 @@
                             <!-- Section Fichiers -->
                             <div class="prep-section" id="prep-section-fichiers">
                                 <div class="prep-section-label" data-action="travauxPreparation.toggleSection" data-param="fichiers">Fichiers</div>
-                                <div class="prep-section-sous-titre">navigation et assemblage</div>
+                                <div class="prep-section-sous-titre">navigation</div>
                                 <div class="prep-section-body">
                                     <div id="prep-miniatures" class="prep-mini-liste"></div>
-                                    <div class="prep-btn-row">
-                                        <button class="prep-btn" data-action="travauxPreparation.grouperSelection" id="prep-btn-grouper">Grouper</button>
-                                        <button class="prep-btn" data-action="travauxPreparation.assemblerAuto">Assemblage auto</button>
-                                    </div>
                                 </div>
                             </div>
 
@@ -2649,9 +2562,10 @@
                                                data-on-input="travauxPreparation.changerExpositionHandler">
                                     </div>
                                     <div class="prep-btn-row">
-                                        <button class="prep-btn" id="prep-btn-balance" data-action="travauxPreparation.activerBalanceBlancs">Balance des blancs</button>
+                                        <button class="prep-btn" id="prep-btn-balance" data-action="travauxPreparation.activerBalanceBlancs"><img src="icons/icon-pipette.svg" alt="" class="prep-btn-icone">Balance des blancs</button>
                                         <button class="prep-btn" data-action="travauxPreparation.basculerNiveauxDeGris">Niveaux de gris</button>
                                     </div>
+                                    <p class="prep-balance-consigne" id="prep-balance-consigne" role="status" hidden>Touche une zone blanche de la feuille.</p>
                                 </div>
                             </div>
 
@@ -2731,6 +2645,7 @@
         if (btnBalance) {
             btnBalance.classList.toggle('actif', outilActif === 'balance');
         }
+        afficherConsigneBalance();
 
         // Mise a jour valeur rotation fine
         const rotSlider = document.getElementById('prep-rotation-fine');
@@ -2966,11 +2881,6 @@
         changerOptResolution: changerOptResolution,
         annulerDerniere: annulerDerniere,
         reinitialiser: reinitialiser,
-        // Assemblage
-        toggleSelection: toggleSelection,
-        grouperSelection: grouperSelection,
-        degrouper: degrouper,
-        assemblerAuto: assemblerAuto,
         // Palettes
         togglePalette: togglePalette,
         toggleSection: toggleSection,
