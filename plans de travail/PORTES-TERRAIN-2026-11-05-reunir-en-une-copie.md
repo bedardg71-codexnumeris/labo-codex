@@ -1,6 +1,6 @@
 # Portes terrain – Réunir les fichiers d'une copie avant l'import (5 novembre 2026)
 
-> Lot #1231, branche `lot/reunir-en-une-copie`, à livrer dans la 1.234.0 (pas encore en ligne : la porte attend le push).
+> Lot #1231 (et la porte iPad de #1229, en ligne depuis la 1.233.2), branche `lot/reunir-en-une-copie`, à livrer dans la 1.234.0 (pas encore en ligne : la porte attend le push).
 > Écrites par Claude Code. **L'artefact interactif est à publier par Cowork** (bouton « Copier mes résultats » obligatoire).
 > Ce qui échoue devient un item de BACKLOG, pas une note mentale.
 
@@ -34,6 +34,13 @@
   ⮕ Attendu : la confirmation annonce une ligne « [Élève] – [production], reprise – N pages », sans doublon ni conseil d'ajouter le DA.
 - [ ] Ouvre Annoter sur l'élève.
   ⮕ Attendu : une seule copie de reprise, avec toutes ses pages dans l'ordre, sans passer par « Modifier ».
+
+### 2.3 L'original de plusieurs pages dans la copie de référence (iPad)
+
+> **Pourquoi** : le 5 nov. à 8 h 41, la copie de référence n'affichait que la première page de l'original, même quand il en avait plusieurs. Corrigé dans la 1.233.2 (#1229) et vérifié dans WebKit ; l'écran partagé de l'iPad reste à toi.
+
+- [ ] Sur l'iPad, ouvre une reprise dont l'original est un PDF de plusieurs pages, puis la copie de référence. `iPad`
+  ⮕ Attendu : l'indicateur dit « 1/N » (N, le nombre de pages), et « page suivante » mène à la page 2. Avant : « 1/1 », bouton grisé. S'il dit encore « 1/1 », l'original a sans doute été importé en photos séparées : c'est ce que la case « Réunir en une copie » évite désormais.
 
 ## §3 · Décisions (ce ne sont pas des vérifications)
 
