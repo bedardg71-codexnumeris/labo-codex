@@ -21,6 +21,18 @@
 
     var CHANGELOG = [
         {
+            // 1.235 (#1232 à #1235) — titre et items validés par Grégoire, mot pour mot, le 5 nov. 2026 vers 16 h.
+            version: '1.235',
+            couleur: 'vert',
+            titre: 'Une page blanche réparée',
+            items: [
+                'Annoter et évaluer&nbsp;: une copie dont une page s’affiche blanche le dit, et «&nbsp;Réparer la copie&nbsp;» lui rend sa photo&nbsp;; les autres pages ne changent pas.',
+                'Modifier › «&nbsp;+ Ajouter des pages&nbsp;»&nbsp;: une copie venue d’un codex garde sa photo à l’enregistrement.',
+                'Copie de référence&nbsp;: en mode anonymisé, son menu ne montre plus le vrai nom de l’élève.',
+                'Labo › Rythme&nbsp;: les reprises se comptent à part, sur la ligne «&nbsp;↳ Reprises&nbsp;», chacune à sa propre durée.'
+            ]
+        },
+        {
             // 1.234 (#1231, réunir les fichiers d’une copie) — titre et item validés par Grégoire, mot pour mot, le 5 nov. 2026.
             version: '1.234',
             couleur: 'vert',
