@@ -22,10 +22,48 @@
        =============================== */
 
     /**
-     * Collecte les évaluations avec statut évalué (source de vérité pour N)
-     * et enrichit les durées depuis le chronomètre quand disponible.
-     * Dédoublonne par productionId + etudiantDA.
-     * @returns {Array<{dureeMs: number, activite: string, productionId: string, productionNom: string, date: string, groupeCoursId: string}>}
+     * #1235 — Une reprise : par jeton (`repriseDeId`, `jetonRepriseApplique`, l'id
+     * `EVAL_REPRISE_`, la règle de `evaluation-sauvegarde.js`) ou ciblée
+     * (`repriseDeIdCiblee`, `jetonRepriseCibleeApplique`, une évaluation à part,
+     * mesuré dans le pack démo). Le même test que les cinq modules qui l'écrivent
+     * en ligne ; aucun ne l'exporte.
+     */
+    function estUneReprise(ev) {
+        return !!(ev.repriseDeId || ev.jetonRepriseApplique || ev.repriseDeIdCiblee || ev.jetonRepriseCibleeApplique
+            || String(ev.id || '').indexOf('EVAL_REPRISE_') === 0);
+    }
+
+    /** Index chrono par productionId|etudiantDA (durée la plus récente). Le chrono ne porte pas l'évaluation. */
+    function indexerChrono() {
+        var chronoDurees = {};
+        db.getSync(cle('chronoEvaluations'), []).forEach(function (e) {
+            if (!e.dureeMs || e.dureeMs < 5000 || !e.etudiantDA || !e.productionId) return;
+            var k = e.productionId + '|' + e.etudiantDA;
+            if (!chronoDurees[k] || (e.date || '') > (chronoDurees[k].date || '')) {
+                chronoDurees[k] = { dureeMs: e.dureeMs, date: e.date || '' };
+            }
+        });
+        return chronoDurees;
+    }
+
+    /**
+     * #1235 — La durée d'une évaluation est la SIENNE. Une reprise naît copie de son original
+     * (`evaluation-jetons.js`) : la même `dureeEvaluation` que lui est héritée, pas mesurée.
+     * Le chrono, sans lien à une évaluation précise, ne sert qu'à défaut, et seulement quand
+     * l'élève n'a qu'une évaluation de cette production : sinon il pourrait être celui de l'autre.
+     */
+    function dureeDeLEvaluation(ev, parId, chronoInfo, seule) {
+        var source = parId[ev.repriseDeId || ev.repriseDeIdCiblee];
+        var heritee = estUneReprise(ev) && source && source.dureeEvaluation === ev.dureeEvaluation;
+        if (ev.dureeEvaluation && ev.dureeEvaluation >= 5 && !heritee) return ev.dureeEvaluation * 1000;
+        return (chronoInfo && seule) ? chronoInfo.dureeMs : 0;
+    }
+
+    /**
+     * Collecte les évaluations notées (source de vérité pour N), originaux et reprises à part
+     * (#1235, retour de Grégoire du 5 nov. 2026) : l'original qu'une reprise a remplacé compte
+     * parmi les originaux, la reprise parmi les reprises. Une entrée par production, élève et sorte.
+     * @returns {Array<{dureeMs: number, activite: string, productionId: string, productionNom: string, date: string, groupeCoursId: string, reprise: boolean}>}
      */
     function collecterDurees() {
         var productions = (typeof obtenirDonneesSelonMode === 'function')
@@ -35,51 +73,37 @@
         productions.forEach(function (p) {
             prodMap[p.id] = p;
         });
+        var chronoDurees = indexerChrono();
 
-        // Index chrono par productionId|etudiantDA (durée la plus récente)
-        var chronoDurees = {};
-        var chrono = db.getSync(cle('chronoEvaluations'), []);
-        chrono.forEach(function (e) {
-            if (!e.dureeMs || e.dureeMs < 5000 || !e.etudiantDA || !e.productionId) return;
-            var k = e.productionId + '|' + e.etudiantDA;
-            if (!chronoDurees[k] || (e.date || '') > (chronoDurees[k].date || '')) {
-                chronoDurees[k] = { dureeMs: e.dureeMs, date: e.date || '' };
-            }
-        });
-
-        // Source de vérité : évaluations sauvegardées (une par élève par production)
-        var evaluations = (typeof obtenirDonneesSelonMode === 'function')
+        var evaluations = ((typeof obtenirDonneesSelonMode === 'function')
             ? obtenirDonneesSelonMode('evaluationsSauvegardees')
-            : [];
+            : []).filter(function (ev) { return ev.etudiantDA && ev.productionId; });
+        var parId = {};
+        var parEleve = {};
+        evaluations.forEach(function (ev) {
+            parId[ev.id] = ev;
+            var k = ev.productionId + '|' + ev.etudiantDA;
+            parEleve[k] = (parEleve[k] || 0) + 1;
+        });
         var vus = {};
         var entrees = [];
 
         evaluations.forEach(function (ev) {
-            if (!ev.etudiantDA || !ev.productionId) return;
-            if (ev.remplaceeParId) return;
-            var cleDedup = ev.productionId + '|' + ev.etudiantDA;
+            var reprise = estUneReprise(ev);
+            var cleEleve = ev.productionId + '|' + ev.etudiantDA;
+            var cleDedup = cleEleve + (reprise ? '|reprise' : '|origine');
             if (vus[cleDedup]) return;
             vus[cleDedup] = true;
 
-            // Durée : chrono (plus précis) > dureeEvaluation > 0
-            var chronoInfo = chronoDurees[cleDedup];
-            var dureeMs = 0;
-            if (chronoInfo) {
-                dureeMs = chronoInfo.dureeMs;
-            } else if (ev.dureeEvaluation && ev.dureeEvaluation >= 5) {
-                dureeMs = ev.dureeEvaluation * 1000;
-            }
-
             var prod = prodMap[ev.productionId];
-            var activite = prod ? (prod.activiteApprentissage || prod.description || '') : '';
-
             entrees.push({
-                dureeMs: dureeMs,
-                activite: activite,
+                dureeMs: dureeDeLEvaluation(ev, parId, chronoDurees[cleEleve], parEleve[cleEleve] === 1),
+                activite: prod ? (prod.activiteApprentissage || prod.description || '') : '',
                 productionId: ev.productionId,
                 productionNom: prod ? prod.titre : '',
                 date: ev.dateCreation || ev.dateModification || '',
-                groupeCoursId: ev.groupeCoursId || ''
+                groupeCoursId: ev.groupeCoursId || '',
+                reprise: reprise
             });
         });
 
@@ -99,8 +123,9 @@
         var groupes = {};
         entrees.forEach(function (e) {
             var act = e.activite || '(sans activité)';
-            if (!groupes[act]) groupes[act] = { durees: [], total: 0, productions: {}, dateMin: '', dateMax: '' };
-            var g = groupes[act];
+            var cleGroupe = act + (e.reprise ? '\u0000reprise' : '');   // #1235 : les reprises à part
+            if (!groupes[cleGroupe]) groupes[cleGroupe] = { activite: act, reprise: !!e.reprise, durees: [], total: 0, productions: {}, dateMin: '', dateMax: '' };
+            var g = groupes[cleGroupe];
             g.total++;
             if (e.dureeMs > 0) g.durees.push(e.dureeMs);
             if (e.productionNom) g.productions[e.productionNom] = true;
@@ -138,7 +163,8 @@
             }
 
             stats.push({
-                activite: act,
+                activite: g.activite,
+                reprise: g.reprise,
                 moyenne: moyenne,
                 mediane: mediane,
                 min: durees[0],
@@ -151,9 +177,17 @@
             });
         }
 
-        // Trier par nombre décroissant (activités les plus utilisées en haut)
-        stats.sort(function (a, b) { return b.count - a.count; });
-        return stats;
+        // Trier par nombre décroissant (activités les plus utilisées en haut) ; #1235 : la ligne
+        // des reprises d'une activité vient juste sous la sienne.
+        var origines = stats.filter(function (s) { return !s.reprise; }).sort(function (a, b) { return b.count - a.count; });
+        var reprises = stats.filter(function (s) { return s.reprise; }).sort(function (a, b) { return b.count - a.count; });
+        var ordonnees = [];
+        origines.forEach(function (o) {
+            ordonnees.push(o);
+            reprises.filter(function (r) { return r.activite === o.activite; }).forEach(function (r) { ordonnees.push(r); });
+        });
+        reprises.forEach(function (r) { if (ordonnees.indexOf(r) === -1) ordonnees.push(r); });
+        return ordonnees;
     }
 
     /* ===============================
@@ -297,6 +331,11 @@
        RENDU HTML
        =============================== */
 
+    /** #1235 — Mots proposés, à Grégoire en fin de file avec les Nouvelles. */
+    var MOTS_RYTHME = {
+        ligneReprises: '↳ Reprises'
+    };
+
     function afficherRythme() {
         var conteneur = document.getElementById('rythme-tableau-activites');
         if (!conteneur) return;
@@ -364,7 +403,8 @@
         var statsMap = {};
 
         stats.forEach(function (s) {
-            statsMap[s.activite] = s;
+            // #1235 : l'estimation de la charge compte les copies d'origine restantes à la moyenne des originaux.
+            if (!s.reprise) statsMap[s.activite] = s;
             var pctBarre = maxMoyenne > 0 ? (s.moyenne / maxMoyenne * 100) : 0;
             var tendanceLabel = s.tendance === '↘' ? 'Accélère'
                 : s.tendance === '↗' ? 'Ralentit' : 'Stable';
@@ -379,8 +419,10 @@
                     : formaterDateCourte(s.dateMin) + ' — ' + formaterDateCourte(s.dateMax);
             }
 
-            html += '<tr>';
-            html += '<td><strong>' + echapperHtml(s.activite || '(sans activité)') + '</strong></td>';
+            html += s.reprise ? '<tr class="rythme-ligne-reprises">' : '<tr>';
+            html += s.reprise
+                ? '<td>' + MOTS_RYTHME.ligneReprises + '</td>'
+                : '<td><strong>' + echapperHtml(s.activite || '(sans activité)') + '</strong></td>';
             html += '<td class="rythme-col-t1-prod"' + (prefsCol1.prod === false ? ' hidden' : '') + '><small>' + echapperHtml(prodsLabel) + '</small></td>';
             html += '<td class="rythme-col-t1-periode rythme-col-nowrap"' + (prefsCol1.periode === false ? ' hidden' : '') + '><small>' + periodeLabel + '</small></td>';
             html += '<td class="rythme-col-t1-moy rythme-col-centre"' + (prefsCol1.moy === false ? ' hidden' : '') + '><strong>' + formaterDuree(s.moyenne) + '</strong></td>';
