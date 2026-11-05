@@ -74,6 +74,29 @@ describe('#1235 · le rythme compte à part les originaux et les reprises', () =
         expect(r.reprises).toEqual({ moyenneMin: 5, n: 2 });      // la ciblée seule a sa durée ; la reprise héritée compte sans
     });
 
+    // Relecture neuve : la pratique « supprimer l'originale » efface la source ; la reprise jamais
+    // réenregistrée garde la durée et le chrono de l'original.
+    it('original supprimé : une reprise jamais réenregistrée compte sans durée, et le chrono de l\'original ne lui va pas', () => {
+        const r = lignes([
+            ev('EVAL_G_R', '9001007', 720, { repriseDeId: 'EVAL_G', jetonRepriseApplique: true, dateCreation: '2026-11-04T09:00:00.000Z' }),
+            ev('EVAL_H_R', '9001008', 0, { repriseDeId: 'EVAL_H', jetonRepriseApplique: true, dateCreation: '2026-11-04T09:00:00.000Z' }),
+            ev('EVAL_I_R', '9001009', 180, { repriseDeId: 'EVAL_I', jetonRepriseApplique: true, dateModification: '2026-11-04T10:00:00.000Z' }),
+            ev('EVAL_J', '9001010', 600)
+        ], [
+            { dureeMs: 900000, date: '2026-11-01T13:00:00.000Z', productionId: PROD, etudiantDA: '9001008' }
+        ]);
+        expect(r.reprises).toEqual({ moyenneMin: 3, n: 3 });   // seule la reprise réenregistrée a sa durée
+    });
+
+    it('aucun original avec une durée : la ligne des reprises vient seule', () => {
+        const r = lignes([
+            ev('EVAL_K', '9001011', 0, { remplaceeParId: 'EVAL_K_R' }),
+            ev('EVAL_K_R', '9001011', 120, { repriseDeId: 'EVAL_K', jetonRepriseApplique: true, dateModification: '2026-11-04T10:00:00.000Z' })
+        ]);
+        expect(r.ordre).toEqual(['reprises']);
+        expect(r.reprises).toEqual({ moyenneMin: 2, n: 1 });
+    });
+
     it('sans reprise, rien ne change : une ligne, le chrono à défaut d\'une durée', () => {
         const r = lignes([ev('EVAL_E', '9001005', 0), ev('EVAL_F', '9001006', 600)],
             [{ dureeMs: 360000, date: '2026-11-01T13:00:00.000Z', productionId: PROD, etudiantDA: '9001005' }]);

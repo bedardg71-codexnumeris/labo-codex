@@ -53,10 +53,23 @@
      * l'élève n'a qu'une évaluation de cette production : sinon il pourrait être celui de l'autre.
      */
     function dureeDeLEvaluation(ev, parId, chronoInfo, seule) {
+        var reprise = estUneReprise(ev);
+        if (ev.dureeEvaluation && ev.dureeEvaluation >= 5 && !(reprise && dureeHeritee(ev, parId))) return ev.dureeEvaluation * 1000;
+        // Pour une reprise, un chrono antérieur à sa création est celui de l'original (pratique
+        // « supprimer l'originale » : l'élève n'a plus qu'une évaluation, relecture neuve).
+        var avantLaReprise = reprise && chronoInfo && chronoInfo.date < (ev.dateCreation || '');
+        return (chronoInfo && seule && !avantLaReprise) ? chronoInfo.dureeMs : 0;
+    }
+
+    /**
+     * Héritée : la même que son original, ou une reprise par jeton jamais réenregistrée (elle naît
+     * sans `dateModification`, `evaluation-jetons.js`) — le seul signe qui reste quand la pratique
+     * « supprimer l'originale » a effacé la source (relecture neuve de #1235).
+     */
+    function dureeHeritee(ev, parId) {
         var source = parId[ev.repriseDeId || ev.repriseDeIdCiblee];
-        var heritee = estUneReprise(ev) && source && source.dureeEvaluation === ev.dureeEvaluation;
-        if (ev.dureeEvaluation && ev.dureeEvaluation >= 5 && !heritee) return ev.dureeEvaluation * 1000;
-        return (chronoInfo && seule) ? chronoInfo.dureeMs : 0;
+        if (source) return source.dureeEvaluation === ev.dureeEvaluation;
+        return !!ev.jetonRepriseApplique && !ev.dateModification;
     }
 
     /**
@@ -91,6 +104,9 @@
         evaluations.forEach(function (ev) {
             var reprise = estUneReprise(ev);
             var cleEleve = ev.productionId + '|' + ev.etudiantDA;
+            // Une entrée par production, élève et sorte. Limites connues, sans cas vécu (relecture neuve) :
+            // une seconde reprise (`maxParProduction` > 1) et les doublons réconciliés (#360) — le
+            // premier vu gagne.
             var cleDedup = cleEleve + (reprise ? '|reprise' : '|origine');
             if (vus[cleDedup]) return;
             vus[cleDedup] = true;
@@ -186,7 +202,8 @@
             ordonnees.push(o);
             reprises.filter(function (r) { return r.activite === o.activite; }).forEach(function (r) { ordonnees.push(r); });
         });
-        reprises.forEach(function (r) { if (ordonnees.indexOf(r) === -1) ordonnees.push(r); });
+        // Une activité dont aucun original n'a de durée : sa ligne de reprises vient seule, et dit son activité.
+        reprises.forEach(function (r) { if (ordonnees.indexOf(r) === -1) { r.seule = true; ordonnees.push(r); } });
         return ordonnees;
     }
 
@@ -333,7 +350,8 @@
 
     /** #1235 — Mots proposés, à Grégoire en fin de file avec les Nouvelles. */
     var MOTS_RYTHME = {
-        ligneReprises: '↳ Reprises'
+        ligneReprises: '↳ Reprises',
+        repriseSeule: '(reprises)'
     };
 
     function afficherRythme() {
@@ -420,9 +438,10 @@
             }
 
             html += s.reprise ? '<tr class="rythme-ligne-reprises">' : '<tr>';
-            html += s.reprise
+            html += (s.reprise && !s.seule)
                 ? '<td>' + MOTS_RYTHME.ligneReprises + '</td>'
-                : '<td><strong>' + echapperHtml(s.activite || '(sans activité)') + '</strong></td>';
+                : '<td><strong>' + echapperHtml(s.activite || '(sans activité)') + '</strong>'
+                    + (s.reprise ? ' ' + MOTS_RYTHME.repriseSeule : '') + '</td>';
             html += '<td class="rythme-col-t1-prod"' + (prefsCol1.prod === false ? ' hidden' : '') + '><small>' + echapperHtml(prodsLabel) + '</small></td>';
             html += '<td class="rythme-col-t1-periode rythme-col-nowrap"' + (prefsCol1.periode === false ? ' hidden' : '') + '><small>' + periodeLabel + '</small></td>';
             html += '<td class="rythme-col-t1-moy rythme-col-centre"' + (prefsCol1.moy === false ? ' hidden' : '') + '><strong>' + formaterDuree(s.moyenne) + '</strong></td>';
