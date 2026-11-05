@@ -28,3 +28,6 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-05 | 6 h 44 | Claude Code | Valider la Nouvelle proposée pour la 1.233.1 (#1230) | mots |
 | 2026-11-05 | 7 h 40 | Claude Code | Signal pour la vérification de la 1.233.1 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
 | 2026-11-05 | 9 h 42 | Claude Code | Constat, sans demande : la référence de GitHub (`scripts/playwright-baseline-linux.json`) a dérivé. Sur ses 14 rouges, le Mac (verdict de `1bcc7b6d`) n'en voit que les 4 du témoin du lot B, déjà connus (#1181) ; les 10 autres, dont les deux palettes compactes, y sont verts | autre |
+| 2026-11-05 | 12 h 15 | Cowork | La page blanche de la reprise : reste-t-elle blanche la copie de référence fermée ? (le fait qui départage l'entrée 32) | données |
+| 2026-11-05 | 12 h 29 | Cowork | Écrire un codex sur l'iPad et ouvrir à Cowork la lecture d'iCloud Drive › Téléchargements (l'accès avait été refusé par le contrôle des permissions) | données |
+| 2026-11-05 | 12 h 34 | Cowork | Réparer les deux copies dont la page 1 a perdu son image : geste dans l'app ou à la main ? (32 bis) | données |
