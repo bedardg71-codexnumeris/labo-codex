@@ -43,15 +43,20 @@ Tarir n'est pas réparer. Les pages déjà enregistrées couchées, dont les deu
 
 | Trouvaille | Issue |
 |---|---|
-| GitHub rouge sur `HEAD` (run 41941988028) : 14 essais neufs contre la baseline Linux, dont `temoin-enregistrement-lot-b`, les deux palettes compactes et `materiel-dissection-11/12` ; aucun ne touche ce lot. Rouge depuis plusieurs pushs (audit de début de session). | **Inscrire et continuer** : à la décision de Cowork. Je ne l'ai pas mis au BACKLOG, faute de symptôme vécu. |
+| GitHub rouge sur `HEAD` (run 41941988028) : 14 essais neufs contre la baseline Linux, dont `temoin-enregistrement-lot-b`, les deux palettes compactes et `materiel-dissection-11/12` ; aucun ne touche ce lot. Rouge depuis plusieurs pushs (audit de début de session). | Décision de Grégoire (5 nov.) : pas d'item au BACKLOG pour l'instant. Le verdict du Mac tranche : un rouge qu'il voit aussi est inscrit et dit ici ; s'il n'en voit aucun, c'est la référence de GitHub qui a dérivé, et c'est noté au journal. |
 | Constat 10 (l'enregistrement de 5 h 58 non pris) | **Pas la même cause** : la reproduction enregistre à chaque fois. Hors lot, reste à mesurer. |
 | `pivoterPageEditeur` produit un PNG que `reassemblerPages` déclare « JPEG » à jsPDF | **Oublier**, noté ici seulement : aucun effet observé (jsPDF reconnaît le format aux octets), comportement inchangé. |
 | Sous Chrome, Playwright ne voit pas le sélecteur de fichiers, et la section Importer se redessine un moment après son affichage | Outillage du banc : contourné et commenté dans le spec. |
 
-## 6. Ce qui reste, dans l'ordre
+## 6. La mise en ligne
 
-1. **Ligne des Nouvelles, à valider mot pour mot par Grégoire.** Proposée comme item ajouté à l'entrée 1.233 (patch 1.233.1) :
-   > Modifier › «&nbsp;+ Ajouter des pages&nbsp;»&nbsp;: une photo prise au téléphone s’enregistre droite et à ses proportions, avec ou sans réglage. Une page déjà enregistrée couchée le reste&nbsp;: ajoute-la de nouveau.
-2. `node scripts/release.mjs` en patch.
-3. Le verdict du Mac (`node scripts/verdict-en-morceaux.mjs`).
-4. Le push, à la demande de Grégoire.
+1. **Nouvelles** : l'item est ajouté à l'entrée 1.233, validé par Grégoire mot pour mot le 5 nov. au matin. Il a fait deux retouches à la proposition : « avec ou sans réglage » sort (une nuance que l'utilisateur ne voit pas) et « retire-la » entre (sans ce geste, la page couchée reste à côté de la bonne).
+   > Modifier › « + Ajouter des pages » : une photo prise au téléphone s'enregistre droite et à ses proportions. Une page déjà enregistrée couchée le reste : retire-la, puis ajoute-la de nouveau.
+2. **Release** : 1.233.1 (build 1105-0648), commit `8e9b316f`. Vitest : 10 697/10 697.
+3. **Complexité** par rapport à la 1.233.0 :
+   - +44 lignes de code (`travaux-import.js`) ;
+   - fonctions au-dessus de 15 : 439 → 439 ;
+   - au-dessus de 30 : 81 → 81 ;
+   - somme des complexités au-dessus de 15 : 11 028 → 11 028.
+4. **Verdict du Mac** : en attente du signal de Grégoire (Cowork, Chrome et Safari fermés). À sa demande, je regarderai si le Mac voit l'un des 14 rouges de GitHub, surtout les deux palettes compactes.
+5. **Push** : à la demande de Grégoire.
