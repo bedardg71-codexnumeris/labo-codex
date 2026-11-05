@@ -25,3 +25,6 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-04 | 10 h 32 | Claude Code | Signal pour la vérification de la 1.232.1 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
 | 2026-11-04 | 16 h 39 | Claude Code | Copie plagiée : ses niveaux sortent-ils aussi des barres du profil, de l'IPB et du défi ? | didactique |
 | 2026-11-04 | 16 h 53 | Claude Code | Valider le mot d'écran de 11 bis (« la note se calcule sur 70 » ou la variante) | mots |
+| 2026-11-05 | 6 h 44 | Claude Code | Valider la Nouvelle proposée pour la 1.233.1 (#1230) | mots |
+| 2026-11-05 | 7 h 40 | Claude Code | Signal pour la vérification de la 1.233.1 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
+| 2026-11-05 | 9 h 42 | Claude Code | Constat, sans demande : la référence de GitHub (`scripts/playwright-baseline-linux.json`) a dérivé. Sur ses 14 rouges, le Mac (verdict de `1bcc7b6d`) n'en voit que les 4 du témoin du lot B, déjà connus (#1181) ; les 10 autres, dont les deux palettes compactes, y sont verts | autre |
