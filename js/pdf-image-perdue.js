@@ -38,6 +38,19 @@
         return o;
     }
 
+    /**
+     * Le motif est-il dans les octets ? Cherché sans convertir le fichier en chaîne : c'est le
+     * préfiltre de chaque PDF ouvert, d'élève compris (relecture neuve : la conversion coûtait
+     * 145 ms pour 40 Mo sur le Mac, davantage sur l'iPad).
+     */
+    function contientOctets(octets, motif) {
+        const m = Array.from(motif, (c) => c.charCodeAt(0));
+        for (let i = octets.indexOf(m[0]); i !== -1 && i + m.length <= octets.length; i = octets.indexOf(m[0], i + 1)) {
+            if (m.every((o, k) => octets[i + k] === o)) return true;
+        }
+        return false;
+    }
+
     function formatDesOctets(o) {
         if (o.length >= 3 && o[0] === 0xFF && o[1] === 0xD8 && o[2] === 0xFF) return 'JPEG';
         if (o.length >= 4 && o[0] === 0x89 && o[1] === 0x50 && o[2] === 0x4E && o[3] === 0x47) return 'PNG';
@@ -88,9 +101,9 @@
      * @returns {boolean}
      */
     function aLeDefaut(octets) {
-        if (!octets || octets.length < 8) return false;
+        if (!octets || octets.length < 8 || !contientOctets(octets, 'stream\ndata:') && !contientOctets(octets, 'stream\r\ndata:')) return false;
         const texte = enTexte(octets);
-        if (texte.indexOf('/Width 0') === -1 || texte.indexOf('stream\ndata:') === -1 && texte.indexOf('stream\r\ndata:') === -1) return false;
+        if (texte.indexOf('/Width 0') === -1) return false;
         const objets = lireObjets(texte);
         if (!objets) return false;
         return Object.keys(objets).some((k) => estImagePerdue(objets[k]));
@@ -107,7 +120,8 @@
             const format = formatDesOctets(o);
             return format ? { format, octets: o, perdue: true } : null;
         }
-        // Une image saine : un JPEG collé tel quel par jsPDF, sans masque.
+        // Une image saine : un JPEG collé tel quel par jsPDF, sans masque. Une page PNG saine, ou une
+        // photo perdue en WebP, fait refuser le geste (rien n'est écrit) ; aucun cas vécu (relecture neuve).
         if (!/\/Filter \/DCTDecode\b/.test(objet.dict) || /\/SMask\b/.test(objet.dict)) return null;
         const o = enOctets(objet.flux);
         return formatDesOctets(o) === 'JPEG' ? { format: 'JPEG', octets: o, perdue: false } : null;

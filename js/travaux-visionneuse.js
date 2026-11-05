@@ -258,7 +258,9 @@
         document.querySelectorAll('.travaux-bandeau-image-perdue').forEach((b) => b.remove());
         if (!visible) return;
         const conteneur = _obtenirConteneurZoom();
-        if (!conteneur) return;
+        // Pas dans la vue côte à côte du formulaire d'évaluation : la réparation rouvre la copie
+        // dans Annoter, ce qui ferait quitter un formulaire peut-être non enregistré (relecture neuve).
+        if (!conteneur || conteneur.id === 'travaux-split-document-container') return;
         const bandeau = document.createElement('div');
         bandeau.className = 'alerte alerte-attention travaux-bandeau-image-perdue';
         bandeau.setAttribute('role', 'status');

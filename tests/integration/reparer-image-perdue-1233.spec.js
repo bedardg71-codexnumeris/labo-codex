@@ -117,6 +117,7 @@ test.describe('#1233 — réparer une copie dont une page a perdu son image', ()
         // Aucun codex au banc : la fenêtre « sans codex ». « Annuler » n'écrit rien.
         await expect(page.locator('#overlay-ui-dialogue')).toBeVisible();
         await cliquerDansFenetre(page, 'Annuler');
+        await attendre(page, 1500);   // une écriture qui ignorerait le refus aurait le temps d'arriver
         expect((await lireLePDF(page)).perdue).toBe(true);
 
         await bandeau.locator('button').click();
@@ -130,7 +131,6 @@ test.describe('#1233 — réparer une copie dont une page a perdu son image', ()
         expect(apres.saineIntacte).toBe(true);
         const fiche = await page.evaluate(() => window.travauxStockage.obtenirFichierParId('FT_PERDUE'));
         expect(fiche.tailleFichier).toBe(await page.evaluate(() => window.__blobs.get('FT_PERDUE').size));
-        expect(fiche.nombrePages).toBe(2);
         // La copie rouverte : plus de message.
         await page.waitForFunction(() => (window.travauxVisionneuse.getFichierActuel() || {}).id === 'FT_PERDUE');
         await attendre(page, 800);

@@ -7133,12 +7133,14 @@
             await travauxStockage.stockerBlob(id, repare, fichier.etudiantDA, fichier.productionId);
             await poserMiniatureReparee(id, repare);
             travauxStockage.mettreAJourFichier(id, { tailleFichier: repare.size, dateModification: new Date().toISOString() });
-            await ouvrirFichier(id);
-            notifications.succes(MOTS_REPARATION_IMAGE.fait);
         } catch (err) {
             console.error('[Réparation] Échec :', err);
             notifications.erreur(MOTS_REPARATION_IMAGE.impossible);
+            return;
         }
+        // Écrit : un échec de la réouverture ne dit plus « Rien n'a été modifié » (relecture neuve).
+        notifications.succes(MOTS_REPARATION_IMAGE.fait);
+        try { await ouvrirFichier(id); } catch (err) { console.warn('[Réparation] Copie réparée, réouverture échouée :', err); }
     }
 
     /** #1233 — La miniature de la copie réparée ; un échec ne bloque pas la réparation. */
