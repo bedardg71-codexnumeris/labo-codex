@@ -200,14 +200,17 @@
         select.disabled = choix.length === 0;
     }
 
+    /**
+     * Le message à la place de la copie ('' : la copie s'affiche). Ne touche pas au compte des pages : `afficherCopie`
+     * le remet à 1 avant de charger, `_chargerDocument` le pose. #1229, retour du 5 nov. : il le remettait à 1, et `_message('')` passe
+     * APRÈS le chargement — un original de plusieurs pages s'affichait « 1/1 », sans page suivante.
+     */
     function _message(texte) {
         if (!panneau) return;
         const p = panneau.querySelector('#travaux-reference-message');
         p.textContent = texte;
         p.classList.toggle('u-hide', !texte);
         feuille.classList.toggle('u-hide', !!texte);
-        etat.page = 1;
-        etat.pages = 1;
         _mettreAJourBarre();
     }
 
