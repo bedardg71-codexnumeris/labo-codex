@@ -31,3 +31,5 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-05 | 12 h 15 | Cowork | La page blanche de la reprise : reste-t-elle blanche la copie de référence fermée ? (le fait qui départage l'entrée 32) | données |
 | 2026-11-05 | 12 h 29 | Cowork | Écrire un codex sur l'iPad et ouvrir à Cowork la lecture d'iCloud Drive › Téléchargements (l'accès avait été refusé par le contrôle des permissions) | données |
 | 2026-11-05 | 12 h 34 | Cowork | Réparer les deux copies dont la page 1 a perdu son image : geste dans l'app ou à la main ? (32 bis) | données |
+| 2026-11-05 | 15 h 56 | Claude Code | Nouvelles de la 1.235 à valider (validées telles quelles) | mots |
+| 2026-11-05 | 15 h 56 | Claude Code | Signal pour la vérification de la 1.235.0 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
