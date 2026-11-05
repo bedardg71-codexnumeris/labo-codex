@@ -588,6 +588,19 @@
         if (annotee) _suivreCopieAnnotee(annotee);
     });
 
+    // #1234 (retour de Grégoire du 5 nov. 2026, 10 h 13) : le mode change, la référence ouverte. Les noms du menu
+    // se calculent à son remplissage (`_nomEleve`) : il gardait le vrai nom en mode anonymisé, devant la classe.
+    // Le menu seul est réécrit ; la copie de référence, sa page et son zoom ne bougent pas.
+    window.addEventListener('modeChanged', () => {
+        if (!etat.ouverte || !panneau || !panneau.isConnected) return;
+        const annotee = _copieAnnotee();
+        if (!annotee) return;
+        const choix = copiesProposees(annotee);
+        const id = etat.fichier && etat.fichier.id;
+        if (id && !choix.some((c) => c.fichier.id === id)) { _suivreCopieAnnotee(annotee); return; }
+        _remplirChoix(choix, id || null);
+    });
+
     // La copie annotée fermée pour de bon (et non remplacée dans le même tour, cf. #1028) : la référence part avec elle.
     window.addEventListener('travaux-fichier-ferme', () => {
         if (!etat.ouverte) return;

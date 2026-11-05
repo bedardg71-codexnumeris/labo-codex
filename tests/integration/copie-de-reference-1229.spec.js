@@ -361,6 +361,43 @@ test.describe('#1229 — la copie de référence', () => {
         expect(await page.evaluate(() => window.obtenirPreference('axeCopieReference'))).toBe('pile');
     });
 
+    // #1234, retour de Grégoire du 5 nov. 2026, 10 h 13, sur l'iPad : « L'anonymisation dans le Split Screen
+    // ne s'opère pas dans l'identification de l'élève et de la copie originale. » La référence ouverte, puis
+    // le mode changé sans changer de copie : le menu gardait le vrai nom. Il suit désormais le mode, dans les
+    // deux sens, sans recharger la copie de référence.
+    test('#1234 — le mode anonymisé change, la référence ouverte : son menu suit, sans recharger la copie', async ({ page }) => {
+        const suivi = await monterLeBanc(page);
+        await ouvrirLaCopie(page, 'FT652');
+        await ouvrirLaReference(page);
+        const choisie = () => page.evaluate(() => {
+            const o = document.querySelector('#travaux-reference-choix option:checked');
+            return { v: o.value, t: o.textContent };
+        });
+        expect(await choisie()).toEqual({ v: 'FT651', t: 'Courageux, Condor (original)' });
+        await page.evaluate(() => {
+            window.__rechargements1234 = 0;
+            const afficher = window.travauxReference.afficherCopie;
+            window.travauxReference.afficherCopie = function () { window.__rechargements1234++; return afficher.apply(this, arguments); };
+        });
+        const canevasAvant = await page.evaluate(() => document.getElementById('travaux-reference-canvas').toDataURL());
+
+        await page.evaluate(() => basculerModeAnonymisation());
+        await attendre(page, 800);
+        const anonyme = await page.evaluate(() => String(anonymiserNom(window.travauxStockage.obtenirFichierParId('FT651').etudiantDA)));
+        expect(anonyme).not.toContain('Courageux');
+        expect(await choisie()).toEqual({ v: 'FT651', t: anonyme + ' (original)' });
+        const tous = await page.evaluate(() => Array.from(document.querySelectorAll('#travaux-reference-choix option')).map((o) => o.textContent).join(' | '));
+        expect(tous).not.toMatch(/Courageux|Hardie|Absente/);
+
+        await page.evaluate(() => basculerModeAnonymisation());
+        await attendre(page, 800);
+        expect(await choisie()).toEqual({ v: 'FT651', t: 'Courageux, Condor (original)' });
+        expect(await page.evaluate(() => window.__rechargements1234)).toBe(0);
+        expect(await page.evaluate(() => window.travauxReference.getFichier().id)).toBe('FT651');
+        expect(await page.evaluate(() => document.getElementById('travaux-reference-canvas').toDataURL())).toBe(canevasAvant);
+        expect(suivi.erreurs).toEqual([]);
+    });
+
     test('aucune donnée écrite : ouvrir, zoomer, changer de copie, fermer laissent le stockage identique', async ({ page }) => {
         await monterLeBanc(page);
         await ouvrirLaCopie(page, 'FT652');
