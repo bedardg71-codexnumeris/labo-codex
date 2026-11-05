@@ -37,10 +37,10 @@
 
 ## §3 · Décisions (ce ne sont pas des vérifications)
 
-Ces rangées attendent ton verdict écrit, pas une coche.
+Tranchées le 5 nov. 2026, avant la release.
 
-1. **Les mots de l'écran.** « Réunir en une copie » (bouton) ; « Copie de 3 fichiers » (inspecteur) ; « Production de cette copie » (inspecteur, au lieu de « Production de ce fichier ») ; à la confirmation : « 1 copie(s) seront créées dans le groupe …, à partir de 3 fichiers : » suivi de « [Élève] – Artefact 6, reprise – 3 pages » (« élève non choisi », « sans production » quand il en manque) ; le bandeau « sans DA » : « Ces fichiers ne portent pas de DA et aucun·e étudiant·e ne leur est associé·e : ils seront importés sans élève. Choisis l'étudiant·e dans l'inspecteur ; pour une copie en plusieurs fichiers, coche-les dans « Originaux », puis « Réunir en une copie ». » ; un conseil ajouté à l'Aide de l'import : « Sans DA dans le nom (des photos prises au téléphone, par exemple), coche dans « Originaux » les fichiers d'une même copie, puis « Réunir en une copie » : ils deviennent un seul document, dans l'ordre réglé aux flèches, et tu choisis l'étudiant·e et la production une seule fois. » — Verdict : ______
-2. **La licence des deux icônes** (pipette, cible), venues de SVG Repo : la page d'origine n'est pas dans les fichiers, la licence n'est donc pas vérifiée. — Verdict : ______
+1. **Les mots de l'écran.** « Réunir en une copie » (bouton) ; « Copie de 3 fichiers » (inspecteur) ; « Production de cette copie » (inspecteur, au lieu de « Production de ce fichier ») ; à la confirmation : « 1 copie(s) seront créées dans le groupe …, à partir de 3 fichiers : » suivi de « [Élève] – Artefact 6, reprise – 3 pages » (« élève non choisi », « sans production » quand il en manque) ; le bandeau « sans DA » : « Ces fichiers ne portent pas de DA et aucun·e étudiant·e ne leur est associé·e : ils seront importés sans élève. Choisis l'étudiant·e dans l'inspecteur ; pour une copie en plusieurs fichiers, coche-les dans « Originaux », puis « Réunir en une copie ». » ; un conseil ajouté à l'Aide de l'import : « Sans DA dans le nom (des photos prises au téléphone, par exemple), coche dans « Originaux » les fichiers d'une même copie, puis « Réunir en une copie » : ils deviennent un seul document, dans l'ordre réglé aux flèches, et tu choisis l'étudiant·e et la production une seule fois. » — Verdict : **validés tels quels par Grégoire (5 nov. 2026).**
+2. **La licence des deux icônes** (pipette, cible), venues de SVG Repo : la page d'origine n'est pas dans les fichiers, la licence n'était pas vérifiée. — Verdict : **licence vérifiée par Grégoire (5 nov. 2026).**
 
 ## §4 · Ce que je n'ai pas pu vérifier
 

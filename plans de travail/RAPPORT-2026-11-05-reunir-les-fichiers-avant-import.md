@@ -43,10 +43,12 @@
 - Les flèches de réordonnancement font 20 × 16 px, petites au doigt (avant ce lot). Elles servent maintenant à régler les pages d'une copie. **Inscrire et continuer** si Grégoire le vit ; pas d'item d'ici là (règle d'entrée du BACKLOG). C'est dit dans la porte.
 - Le champ « Étudiant·e » en mode « Autre » lit `etudiantManuel`, que rien n'écrit. **Commenter et oublier** : aucun symptôme vécu.
 
-## 5. Ce qui attend Grégoire avant la release
+## 5. Ce qui attendait Grégoire avant la release
+
+> **Tranché le 5 nov. 2026** : les mots sont validés tels quels, la licence des deux icônes est vérifiée. La 1.233.1 ne part pas seule : elle part dans la 1.233.2 (session labo-codex-73), et la fusion de ce lot attend son push.
 
 1. **Les mots**, listés au § 3 de `PORTES-TERRAIN-2026-11-05-reunir-en-une-copie.md` : bouton, en-tête et libellé de l'inspecteur, lignes de la confirmation, bandeau « sans DA », conseil de l'Aide.
 2. **La licence des deux icônes** de SVG Repo : la page d'origine n'est pas dans les fichiers, la licence n'est donc pas vérifiée.
-3. Ensuite : fusion vers `main` (après le push de la 1.233.1), release **mineure** 1.234.0, ligne des Nouvelles proposée : « Dans « Préparer et importer », coche les photos d'une même copie et « Réunir en une copie » : elles s'importent en un seul document, avec l'élève et la production (ou le jeton de reprise) choisis une fois. La pipette « Balance des blancs » dit maintenant comment s'en servir. » Puis le verdict du Mac, et le push à sa demande.
+3. Ensuite : fusion vers `main` (après le push de la 1.233.2), release **mineure** 1.234.0, ligne des Nouvelles proposée : « Dans « Préparer et importer », coche les photos d'une même copie et « Réunir en une copie » : elles s'importent en un seul document, avec l'élève et la production (ou le jeton de reprise) choisis une fois. La pipette « Balance des blancs » dit maintenant comment s'en servir. » Puis le verdict du Mac, et le push à sa demande.
 
 L'artefact de la porte terrain est à publier par Cowork.
