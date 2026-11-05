@@ -21,7 +21,7 @@
 
     var CHANGELOG = [
         {
-            // 1.234 (#1231, réunir les fichiers d’une copie) — item validé par Grégoire, mot pour mot, le 5 nov. 2026 ; titre posé par la session, à confirmer avant le push.
+            // 1.234 (#1231, réunir les fichiers d’une copie) — titre et item validés par Grégoire, mot pour mot, le 5 nov. 2026.
             version: '1.234',
             couleur: 'vert',
             titre: 'Une copie en plusieurs photos',
