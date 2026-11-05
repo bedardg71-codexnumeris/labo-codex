@@ -1496,6 +1496,13 @@
         return 1;
     }
 
+    // RIFF....WEBP : jsPDF le décode lui-même, transparence comprise (un canevas la noircirait).
+    const SIGNATURES_IMAGE = [
+        { type: 'image/jpeg', motifs: [[0, [0xFF, 0xD8, 0xFF]]] },
+        { type: 'image/png', motifs: [[0, [0x89, 0x50, 0x4E, 0x47]]] },
+        { type: 'image/webp', motifs: [[0, [0x52, 0x49, 0x46, 0x46]], [8, [0x57, 0x45, 0x42, 0x50]]] }
+    ];
+
     /**
      * Le type d'une image que jsPDF sait coller telle quelle, lu dans ses
      * premiers octets : 'image/jpeg', 'image/png', 'image/webp', ou '' pour tout le reste.
@@ -1503,13 +1510,9 @@
      * @returns {string}
      */
     function typeImageDesOctets(octets) {
-        if (!octets || octets.length < 4) return '';
-        if (octets[0] === 0xFF && octets[1] === 0xD8 && octets[2] === 0xFF) return 'image/jpeg';
-        if (octets[0] === 0x89 && octets[1] === 0x50 && octets[2] === 0x4E && octets[3] === 0x47) return 'image/png';
-        // RIFF....WEBP : jsPDF le décode lui-même, transparence comprise (un canevas la noircirait).
-        if (octets.length >= 12 && octets[0] === 0x52 && octets[1] === 0x49 && octets[2] === 0x46 && octets[3] === 0x46
-            && octets[8] === 0x57 && octets[9] === 0x45 && octets[10] === 0x42 && octets[11] === 0x50) return 'image/webp';
-        return '';
+        const s = SIGNATURES_IMAGE.find((sig) => sig.motifs.every(([debut, attendus]) =>
+            attendus.every((o, k) => !!octets && octets[debut + k] === o)));
+        return s ? s.type : '';
     }
 
     /**
