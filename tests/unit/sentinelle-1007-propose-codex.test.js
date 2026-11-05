@@ -96,7 +96,10 @@ const PORTES = [
     // #976 (8 oct. 2026) : un geste qui déplace sans effacer — la même porte, son verbe à lui (« corriger »).
     // #1075, point 4 (22 oct. 2026) : le doublon d'une copie importée. « Annuler » passe au doublon suivant.
     { g: 'Copie remplacée (doublon d\'import)', f: 'js/travaux-ui.js', sig: 'async function traiterDoublonsImport(', cle: "'copieRemplacee'", question: "if (choix === 'annuler') {", efface: 'travauxStockage.deplacerEnCorbeille(d.fichierExistant.id);' },
-    { g: 'Corriger le DA', f: 'js/trimestre-v2-etudiants.js', sig: 'async function corrigerDAEtudiantV2(', cle: "'corrigerDA'", question: "const mesure = window.CorrectionDA.passeABlanc(ancien, '');", efface: 'await window.CorrectionDA.corriger(ancien, nouveau' }
+    { g: 'Corriger le DA', f: 'js/trimestre-v2-etudiants.js', sig: 'async function corrigerDAEtudiantV2(', cle: "'corrigerDA'", question: "const mesure = window.CorrectionDA.passeABlanc(ancien, '');", efface: 'await window.CorrectionDA.corriger(ancien, nouveau' },
+    // #1233 (5 nov. 2026) : réparer une copie dont une page a perdu son image ; le fichier est remplacé.
+    // Aucune question ne suit : le premier pas relit la fiche après l'attente.
+    { g: 'Réparer une copie (image perdue)', f: 'js/travaux-ui.js', sig: 'async function reparerImagePerdue(', cle: "'reparationImage'", question: 'const fichier = travauxStockage.obtenirFichierParId(id);', efface: 'await travauxStockage.stockerBlob(id, repare,' }
 ];
 
 // Relecture de Cowork (3 oct. 2026, 7 h 55) : la fenêtre peut attendre des minutes (une mise

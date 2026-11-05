@@ -3882,7 +3882,10 @@ var PROPOSITIONS_AVANT_SUPPRESSION = {
     forfait:               { premiere: 'Retirer ce forfait l\'efface pour de bon, et la note des spécifications change.', pronom: 'le' },
     // #976 (8 oct. 2026) : un geste qui DÉPLACE, sans rien effacer — `infinitif` remplace
     // « supprimer » dans le titre et les boutons. Mots proposés, à Grégoire avant la release.
-    corrigerDA:            { premiere: 'Corriger ce DA déplace sous le nouveau DA tout ce que porte l\'ancien.', pronom: 'le', infinitif: 'corriger' }
+    corrigerDA:            { premiere: 'Corriger ce DA déplace sous le nouveau DA tout ce que porte l\'ancien.', pronom: 'le', infinitif: 'corriger' },
+    // #1233 (5 nov. 2026) : une page dont l'image s'est perdue ; le fichier de la copie est remplacé par
+    // le fichier réparé. Décision de Grégoire (12 h 34) : codex proposé juste avant. Mots proposés, à Grégoire.
+    reparationImage:       { premiere: 'Réparer cette copie remplace son fichier par le fichier réparé.', pronom: 'le', infinitif: 'réparer' }
 };
 
 /**

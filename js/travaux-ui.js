@@ -7100,6 +7100,66 @@
     }
 
     /**
+     * #1233 (5 nov. 2026) — Le geste du message « Une page de cette copie s'affiche
+     * blanche » (`travauxVisionneuse`, `PdfImagePerdue`). Décision de Grégoire du
+     * 5 nov., 12 h 34 : lancé par l'usager, codex proposé juste avant, sans perte.
+     * Rien n'est écrit si le PDF ne se lit pas comme un PDF de l'application, ni sur
+     * un refus du codex. Le nombre et la taille des pages ne changent pas : les
+     * annotations et l'évaluation restent attachées.
+     */
+    async function reparerImagePerdue() {
+        const ouvert = travauxVisionneuse.getFichierActuel && travauxVisionneuse.getFichierActuel();
+        if (!ouvert) return;
+        const id = ouvert.id;
+        const lire = async () => {
+            const blob = await travauxStockage.recupererBlob(id);
+            return blob ? PdfImagePerdue.lirePages(new Uint8Array(await blob.arrayBuffer())) : null;
+        };
+        if (!(await lire())) {
+            notifications.erreur(MOTS_REPARATION_IMAGE.impossible);
+            return;
+        }
+        if (typeof Codex !== 'undefined' && !(await Codex.proposerAvantSuppression('reparationImage'))) return;
+
+        // Relu APRÈS l'attente de la fenêtre du codex.
+        const fichier = travauxStockage.obtenirFichierParId(id);
+        const pages = fichier ? await lire() : null;
+        if (!pages) {
+            notifications.erreur(MOTS_REPARATION_IMAGE.impossible);
+            return;
+        }
+        try {
+            const repare = PdfImagePerdue.reconstruire(pages);
+            await travauxStockage.stockerBlob(id, repare, fichier.etudiantDA, fichier.productionId);
+            await poserMiniatureReparee(id, repare);
+            travauxStockage.mettreAJourFichier(id, { tailleFichier: repare.size, dateModification: new Date().toISOString() });
+            await ouvrirFichier(id);
+            notifications.succes(MOTS_REPARATION_IMAGE.fait);
+        } catch (err) {
+            console.error('[Réparation] Échec :', err);
+            notifications.erreur(MOTS_REPARATION_IMAGE.impossible);
+        }
+    }
+
+    /** #1233 — La miniature de la copie réparée ; un échec ne bloque pas la réparation. */
+    async function poserMiniatureReparee(id, blob) {
+        try {
+            const miniature = await travauxStockage.genererMiniaturePDF(blob);
+            if (miniature && miniature.thumbnail && typeof travauxStockage.stockerThumbnail === 'function') {
+                travauxStockage.stockerThumbnail(id, miniature.thumbnail);
+            }
+        } catch (e) {
+            console.warn('[Réparation] Miniature non regénérée :', e);
+        }
+    }
+
+    /** #1233 — Mots proposés, à Grégoire en fin de file avec les Nouvelles. */
+    const MOTS_REPARATION_IMAGE = {
+        fait: 'Copie réparée : la page s\'affiche de nouveau.',
+        impossible: 'Cette copie ne peut pas être réparée ici. Rien n\'a été modifié.'
+    };
+
+    /**
      * Ferme l'editeur de pages sans sauvegarder
      */
     function fermerEditeurPages() {
@@ -7958,6 +8018,7 @@
         pivoterPageEditeur: pivoterPageEditeur,
         ajouterPagesEditeur: ajouterPagesEditeur,
         sauvegarderEdition: sauvegarderEdition,
+        reparerImagePerdue: reparerImagePerdue,   // #1233
         originesDesPages: originesDesPages,   // #1075, point 7 : lue par son banc
         // Fusion depuis editeur
         ouvrirModalFusionEditeur: ouvrirModalFusionEditeur,

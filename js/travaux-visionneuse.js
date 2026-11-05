@@ -180,6 +180,7 @@
         ouvertSansFichier = null;
         pageActuelle = 1;
         modeZoom = ZOOM_FIT;
+        afficherBandeauImagePerdue(false);
 
         // 3 sept. 2026 (codes par grille, lot 2) — AVANT le premier rendu de
         // page : la palette des codes et leur dessin sur la copie suivent la grille
@@ -215,6 +216,7 @@
      * @param {string} raison - 'archives' | 'manquant' | 'introuvable'
      */
     function ouvrirSansFichier(fichier, raison) {
+        afficherBandeauImagePerdue(false);
         if (pdfDocument) {
             try { pdfDocument.cleanup(); } catch (_) { console.warn('[Visionneuse] PDF cleanup skipped:', _.message || _); }
             pdfDocument = null;
@@ -236,6 +238,41 @@
             afficherErreur(MOTS_SANS_FICHIER[raison]);
         }
         mettreAJourNavigation();
+    }
+
+    /**
+     * #1233 (5 nov. 2026) — Une page de cette copie a perdu son image (`PdfImagePerdue`).
+     * Mots proposés, à Grégoire en fin de file avec les Nouvelles.
+     */
+    const MOTS_IMAGE_PERDUE = {
+        message: 'Une page de cette copie s\'affiche blanche : sa photo est encore dans le fichier, mais mal enregistrée.',
+        bouton: 'Réparer la copie'
+    };
+
+    /**
+     * Le message de la copie ouverte dont une page a perdu son image, avec le geste qui
+     * la répare (`travauxUI.reparerImagePerdue`). Retiré à chaque ouverture et fermeture.
+     * @param {boolean} visible
+     */
+    function afficherBandeauImagePerdue(visible) {
+        document.querySelectorAll('.travaux-bandeau-image-perdue').forEach((b) => b.remove());
+        if (!visible) return;
+        const conteneur = _obtenirConteneurZoom();
+        if (!conteneur) return;
+        const bandeau = document.createElement('div');
+        bandeau.className = 'alerte alerte-attention travaux-bandeau-image-perdue';
+        bandeau.setAttribute('role', 'status');
+        const texte = document.createElement('span');
+        texte.textContent = MOTS_IMAGE_PERDUE.message;
+        const bouton = document.createElement('button');
+        bouton.type = 'button';
+        bouton.className = 'btn btn-principal';
+        bouton.dataset.action = 'travauxUI.reparerImagePerdue';
+        bouton.textContent = MOTS_IMAGE_PERDUE.bouton;
+        bandeau.append(texte, bouton);
+        const barre = conteneur.querySelector(':scope > .annot-toolbar');
+        if (barre) barre.after(bandeau);
+        else conteneur.prepend(bandeau);
     }
 
     /**
@@ -270,6 +307,9 @@
 
         try {
             const arrayBuffer = await blob.arrayBuffer();
+            // #1233 — AVANT getDocument, qui transfère le tampon au worker.
+            afficherBandeauImagePerdue(!contextExterne && typeof PdfImagePerdue !== 'undefined'
+                && PdfImagePerdue.aLeDefaut(new Uint8Array(arrayBuffer)));
             pdfDocument = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             nombrePagesTotal = pdfDocument.numPages;
             await rendrePage(1);
@@ -1385,6 +1425,7 @@
         }
         fichierActuel = null;
         ouvertSansFichier = null;
+        afficherBandeauImagePerdue(false);
         pdfDocument = null;
         pageActuelle = 1;
         nombrePagesTotal = 1;

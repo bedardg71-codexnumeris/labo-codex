@@ -30703,3 +30703,12 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     vertical-align: middle;
     margin-right: 0.4em;
 }
+
+/* #1233 (5 nov. 2026) — Une page de la copie ouverte a perdu son image : le message et son geste. */
+.travaux-bandeau-image-perdue {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 8px 12px;
+}
