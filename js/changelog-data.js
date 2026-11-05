@@ -26,7 +26,9 @@
             couleur: 'vert',
             titre: 'Une seconde copie sous les yeux',
             items: [
-                'Annoter et évaluer › Actions › «&nbsp;Copie de référence&nbsp;»&nbsp;: une seconde copie s’ouvre sous celle que tu annotes, ou à côté, en lecture seule, avec ses annotations. Pour une reprise, l’original s’ouvre d’office&nbsp;; sinon, choisis une copie de la même production. Chaque copie zoome pour elle-même.'
+                'Annoter et évaluer › Actions › «&nbsp;Copie de référence&nbsp;»&nbsp;: une seconde copie s’ouvre sous celle que tu annotes, ou à côté, en lecture seule, avec ses annotations. Pour une reprise, l’original s’ouvre d’office&nbsp;; sinon, choisis une copie de la même production. Chaque copie zoome pour elle-même.',
+                // 1.233.1 (#1230) — item validé par Grégoire, mot pour mot, le 5 nov. 2026 au matin.
+                'Modifier › «&nbsp;+ Ajouter des pages&nbsp;»&nbsp;: une photo prise au téléphone s’enregistre droite et à ses proportions. Une page déjà enregistrée couchée le reste&nbsp;: retire-la, puis ajoute-la de nouveau.'
             ]
         },
         {
