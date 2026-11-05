@@ -1,6 +1,6 @@
 # Rapport – « + Ajouter des pages » garde une photo de téléphone droite (#1230, 5 novembre 2026)
 
-> Claude Code, pour Cowork. Consigne : `plans de travail/CONSIGNE-LOT-2026-11-05-ajouter-des-pages-photo-droite.md`. Parti de `main` = `2310fb4f` (1.233.0). Commits : `6bcdf5bb` (docs du § 0 : consigne, audit, fiche #1230), `e9426695` (correctif, bancs, fiche cochée). Rien n'est poussé.
+> Claude Code, pour Cowork. Consigne : `plans de travail/CONSIGNE-LOT-2026-11-05-ajouter-des-pages-photo-droite.md`. Parti de `main` = `2310fb4f` (1.233.0). Commits : `6bcdf5bb` (docs du § 0 : consigne, audit, fiche #1230), `e9426695` (correctif, bancs, fiche cochée), `8e9b316f` (1.233.1). Rien n'est poussé par cette session.
 
 ## 1. La cause, mesurée
 
@@ -33,7 +33,7 @@ C'est cette recompression qui fait sortir droites les photos de « Préparer et 
 - Contre-épreuve sans le correctif (`git stash` du seul fichier JS) : les 3 sont rouges, chacun sur la page attendue.
 - `tests/unit/lire-orientation-exif.test.js` : 6 tests (gros et petit-boutiste, derrière un segment JFIF, valeurs hors bornes, PNG, en-tête tronqué, rien lu après SOS). Le break-test (« rend toujours 1 ») fait rougir 3 tests.
 - Suites : Vitest entier, lancé depuis `tests/`, donne 10 697/10 697. Le cliquet de complexité a refusé une première version de ma fonction (440 au lieu de 439), que j'ai découpée. Specs voisines (`1007-propose-codex-2a2`, `1028-archiver-copies`, le banc neuf) : 10/10.
-- Le verdict Playwright complet du Mac **n'est pas lancé** : il demande Cowork, Chrome et Safari fermés.
+- Verdict Playwright complet du Mac sur `1bcc7b6d`, Cowork, Chrome et Safari fermés, sur secteur, joué dans un dossier détaché pour qu'une autre session ouverte sur `main` ne change rien sous lui : **code 0**. 1 372 essais en 10 morceaux : 1 366 verts, 2 verts au second essai (`comptes-erreurs-stock-1142`), 4 rouges, tous connus (le témoin du lot B, #1181), 23 sautés. Aucune pression mémoire, aucune veille.
 
 ## 4. Le stock
 
@@ -43,7 +43,7 @@ Tarir n'est pas réparer. Les pages déjà enregistrées couchées, dont les deu
 
 | Trouvaille | Issue |
 |---|---|
-| GitHub rouge sur `HEAD` (run 41941988028) : 14 essais neufs contre la baseline Linux, dont `temoin-enregistrement-lot-b`, les deux palettes compactes et `materiel-dissection-11/12` ; aucun ne touche ce lot. Rouge depuis plusieurs pushs (audit de début de session). | Décision de Grégoire (5 nov.) : pas d'item au BACKLOG pour l'instant. Le verdict du Mac tranche : un rouge qu'il voit aussi est inscrit et dit ici ; s'il n'en voit aucun, c'est la référence de GitHub qui a dérivé, et c'est noté au journal. |
+| GitHub rouge sur `HEAD` (run 41941988028) : 14 essais neufs contre la baseline Linux, dont `temoin-enregistrement-lot-b`, les deux palettes compactes et `materiel-dissection-11/12` ; aucun ne touche ce lot. Rouge depuis plusieurs pushs (audit de début de session). | Décision de Grégoire (5 nov.) : pas d'item au BACKLOG pour l'instant ; le verdict du Mac tranche. **Le Mac n'en voit aucun de neuf.** Les 4 cas de `temoin-enregistrement-lot-b` y sont rouges aussi, mais ils sont déjà inscrits (#1181, ouvert) et dans la baseline du Mac : pas d'item neuf. Les 10 autres sont verts sur le Mac, rejoués à part pour écarter un « sauté » (81 essais, 0 sauté, 0 rouge), **les deux palettes compactes en tête** (« la bulle d'aide générale du nom », « les couleurs se lisent en mode sombre »). C'est donc la référence de GitHub (`scripts/playwright-baseline-linux.json`) qui a dérivé : noté au journal des interventions. |
 | Constat 10 (l'enregistrement de 5 h 58 non pris) | **Pas la même cause** : la reproduction enregistre à chaque fois. Hors lot, reste à mesurer. |
 | `pivoterPageEditeur` produit un PNG que `reassemblerPages` déclare « JPEG » à jsPDF | **Oublier**, noté ici seulement : aucun effet observé (jsPDF reconnaît le format aux octets), comportement inchangé. |
 | Sous Chrome, Playwright ne voit pas le sélecteur de fichiers, et la section Importer se redessine un moment après son affichage | Outillage du banc : contourné et commenté dans le spec. |
@@ -58,5 +58,5 @@ Tarir n'est pas réparer. Les pages déjà enregistrées couchées, dont les deu
    - fonctions au-dessus de 15 : 439 → 439 ;
    - au-dessus de 30 : 81 → 81 ;
    - somme des complexités au-dessus de 15 : 11 028 → 11 028.
-4. **Verdict du Mac** : en attente du signal de Grégoire (Cowork, Chrome et Safari fermés). À sa demande, je regarderai si le Mac voit l'un des 14 rouges de GitHub, surtout les deux palettes compactes.
-5. **Push** : à la demande de Grégoire.
+4. **Verdict du Mac** : vert sur `1bcc7b6d` (§ 3).
+5. **Push** : pas seule. Décision de Grégoire, relayée par l'autre session (5 nov., vers 9 h 45) : la 1.233.1 part avec la 1.233.2 (#1229, `835f43aa`, `3e0ebf02`). Cette session-là juge le tout par son propre verdict, puis pousse.

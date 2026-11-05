@@ -135,6 +135,53 @@ test.describe('#1229 — la copie de référence', () => {
         expect(suivi.erreurs).toEqual([]);
     });
 
+    // Retour de Grégoire du 5 nov. 2026, 8 h 41, sur l'iPad : « Le Split Screen n'affiche que la première page du travail
+    // original, même s'il est composé de plusieurs pages. » L'indicateur disait « 1/1 » et « page suivante » restait
+    // grisé : `_message('')`, appelé APRÈS le chargement, remettait le compte des pages à 1. Le banc d'origine n'avait
+    // que des images d'une page : il ne pouvait pas le voir.
+    test('un original de plusieurs pages : la référence les compte et les parcourt toutes', async ({ page }) => {
+        const suivi = await monterLeBanc(page);
+        await page.evaluate(async ({ BLEU, GRIS }) => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: [400, 600] });
+            [[255, 255, 255], BLEU, GRIS].forEach((rgb, i) => {
+                if (i) doc.addPage([400, 600]);
+                doc.setFillColor(rgb[0], rgb[1], rgb[2]);
+                doc.rect(0, 0, 400, 600, 'F');
+            });
+            const pdf = doc.output('blob');
+            const lire = window.travauxStockage.recupererBlob;
+            window.travauxStockage.recupererBlob = async function (id) {
+                return id === 'FT651' ? pdf : lire.apply(this, arguments);
+            };
+            const fichiers = window.db.getSync(window.cle('fichiersTravaux'))
+                .map((f) => f.id === 'FT651' ? { ...f, typeMIME: 'application/pdf', nomFichier: 'COURAGEUX_Analyse1.pdf' } : f);
+            window.db.setSync(window.cle('fichiersTravaux'), fichiers); // security-ok: fixture de test
+        }, { BLEU, GRIS });
+        await ouvrirLaCopie(page, 'FT652');
+        await ouvrirLaReference(page);
+
+        expect(await page.evaluate(() => window.travauxReference.getFichier().id)).toBe('FT651');
+        const indicateur = page.locator('#travaux-reference-indicateur');
+        const suivante = page.locator('#travaux-reference-page-suiv');
+        expect(await indicateur.textContent()).toBe('1/3');
+        expect(await suivante.isDisabled()).toBe(false);
+        expect(proche(await pixelReference(page, 0.5, 0.2), BLANC)).toBe(true);
+
+        await suivante.click();
+        await attendre(page, 500);
+        expect(await indicateur.textContent()).toBe('2/3');
+        expect(proche(await pixelReference(page, 0.5, 0.2), BLEU)).toBe(true);
+
+        await suivante.click();
+        await attendre(page, 500);
+        expect(await indicateur.textContent()).toBe('3/3');
+        expect(proche(await pixelReference(page, 0.5, 0.2), GRIS)).toBe(true);
+        expect(await suivante.isDisabled()).toBe(true);
+        expect(await page.locator('#travaux-reference-page-prec').isDisabled()).toBe(false);
+        expect(suivi.erreurs).toEqual([]);
+    });
+
     // Les mots validés par Grégoire le 4 nov. 2026 au soir, écrits en toutes lettres : l'essai ne relit pas MOTS, il
     // rougit si une phrase bouge.
     test('les mots d’écran, tels que Grégoire les a validés', async ({ page }) => {
