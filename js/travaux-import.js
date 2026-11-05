@@ -1420,6 +1420,111 @@
     }
 
     /* ===============================
+       IMAGE DROITE POUR LE PDF (5 nov. 2026)
+       =============================== */
+
+    /**
+     * Orientation EXIF (balise 0x0112) d'un JPEG ; 1 si l'image n'est pas un
+     * JPEG, n'a pas d'EXIF, ou si l'en-tête est illisible.
+     *
+     * @param {Uint8Array} octets - Les octets du fichier
+     * @returns {number} 1 à 8
+     */
+    function lireOrientationExif(octets) {
+        if (!octets || octets.length < 4 || octets[0] !== 0xFF || octets[1] !== 0xD8) return 1;
+        let pos = 2;
+        while (pos + 4 <= octets.length && octets[pos] === 0xFF) {
+            const marqueur = octets[pos + 1];
+            if (marqueur === 0xDA || marqueur === 0xD9) return 1;   // début de l'image : plus d'en-tête
+            const longueur = (octets[pos + 2] << 8) | octets[pos + 3];
+            if (longueur < 2) return 1;
+            if (marqueur === 0xE1 && estEnteteExif(octets, pos + 4)) {
+                return orientationDuTiff(octets, pos + 10, Math.min(octets.length, pos + 2 + longueur));
+            }
+            pos += 2 + longueur;
+        }
+        return 1;
+    }
+
+    /** « Exif\0\0 » à la position `i`. */
+    function estEnteteExif(octets, i) {
+        const attendu = [0x45, 0x78, 0x69, 0x66, 0x00, 0x00];
+        return i + 6 <= octets.length && attendu.every((o, k) => octets[i + k] === o);
+    }
+
+    /**
+     * La balise Orientation (0x0112) du premier IFD d'un bloc TIFF ; 1 si absente.
+     * @param {Uint8Array} octets
+     * @param {number} tiff - Début du bloc TIFF
+     * @param {number} fin - Fin du segment APP1 (rien n'est lu au-delà)
+     */
+    function orientationDuTiff(octets, tiff, fin) {
+        if (tiff + 8 > fin) return 1;
+        const petit = octets[tiff] === 0x49 && octets[tiff + 1] === 0x49;
+        if (!petit && !(octets[tiff] === 0x4D && octets[tiff + 1] === 0x4D)) return 1;
+        const u16 = (i) => (petit ? (octets[i] | (octets[i + 1] << 8)) : ((octets[i] << 8) | octets[i + 1]));
+        const u32 = (i) => (petit ? u16(i) + u16(i + 2) * 0x10000 : u16(i) * 0x10000 + u16(i + 2));
+        const ifd = tiff + u32(tiff + 4);
+        if (ifd + 2 > fin) return 1;
+        for (let k = 0, n = u16(ifd); k < n && ifd + 2 + k * 12 + 12 <= fin; k++) {
+            const e = ifd + 2 + k * 12;
+            if (u16(e) !== 0x0112) continue;
+            const v = u16(e + 8);
+            return (v >= 1 && v <= 8) ? v : 1;
+        }
+        return 1;
+    }
+
+    /**
+     * Une image prête pour `doc.addImage`, telle que le navigateur l'AFFICHE.
+     *
+     * Une photo de téléphone stocke ses pixels couchés et dit dans son EXIF
+     * comment les redresser. Le navigateur applique cette balise (aperçu,
+     * `new Image()`) ; jsPDF, lui, colle les octets JPEG tels quels, et un PDF
+     * ignore l'EXIF. Le cadre de la page (dimensions vues droites) et l'image
+     * collée (pixels couchés) ne concordaient plus : la page s'enregistrait
+     * couchée et étirée (vécu par Grégoire le 5 nov. 2026, « + Ajouter des
+     * pages »). Seule une image dont l'orientation n'est pas 1 est redessinée ;
+     * les autres partent intactes, sans recompression.
+     *
+     * Source commune des deux assemblages d'images en PDF : `reassemblerPages`
+     * (éditeur de pages : ajout, fusion, pivot) et `pagesImagesDuFichier`
+     * (import groupé). Les dimensions rendues sont celles des pixels collés :
+     * le cadre ne peut plus les contredire.
+     *
+     * @param {Blob} blob - Image (JPEG, PNG…)
+     * @returns {Promise<{imgData: string, largeur: number, hauteur: number}>}
+     */
+    async function imagePourPDF(blob) {
+        const imgData = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+        const img = await new Promise((resolve, reject) => {
+            const i = new Image();
+            i.onload = () => resolve(i);
+            i.onerror = reject;
+            i.src = imgData;
+        });
+        const largeur = img.naturalWidth;
+        const hauteur = img.naturalHeight;
+        // L'en-tête EXIF est dans les premiers 64 Ko d'un JPEG.
+        const tete = new Uint8Array(await blob.slice(0, 65536).arrayBuffer());
+        if (lireOrientationExif(tete) === 1) return { imgData, largeur, hauteur };
+
+        // Le navigateur redresse en dessinant : les pixels du canevas sont droits.
+        const canvas = document.createElement('canvas');
+        canvas.width = largeur;
+        canvas.height = hauteur;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        const droite = canvas.toDataURL('image/jpeg', 0.92);
+        canvas.width = 0;
+        return { imgData: droite, largeur, hauteur };
+    }
+
+    /* ===============================
        ASSEMBLAGE PDF MULTI-IMAGES
        =============================== */
 
@@ -1496,20 +1601,9 @@
             return pages;
         }
 
-        const imgData = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(f.fichier);
-        });
-        const dims = await new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve({ width: img.width, height: img.height });
-            img.onerror = reject;
-            img.src = imgData;
-        });
+        const { imgData, largeur, hauteur } = await imagePourPDF(f.fichier);
         const mmPerPx = 25.4 / (dpi || 250);
-        return [{ imgData, pageW: dims.width * mmPerPx, pageH: dims.height * mmPerPx }];
+        return [{ imgData, pageW: largeur * mmPerPx, pageH: hauteur * mmPerPx }];
     }
 
     /* ===============================
@@ -1909,7 +2003,8 @@
 
     /**
      * Reassemble un tableau de pages (blobs images) en un PDF
-     * @param {Array} pages - Tableau de {blob, largeur, hauteur}
+     * @param {Array} pages - Tableau de {blob, ...} ; la taille de chaque page vient
+     *   de son image (`imagePourPDF`), pas des champs `largeur`/`hauteur`
      * @returns {Promise<Blob>} Le blob PDF reassemble
      */
     async function reassemblerPages(pages) {
@@ -1917,21 +2012,14 @@
         let doc = null;
 
         for (let i = 0; i < pages.length; i++) {
-            const page = pages[i];
-            const blob = page.blob;
-
-            // Charger en dataURL
-            const imgData = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
+            // L'image telle qu'affichée, et SES dimensions : jamais `page.largeur/hauteur`,
+            // qui peuvent décrire une image vue droite quand les octets sont couchés (EXIF).
+            const { imgData, largeur, hauteur } = await imagePourPDF(pages[i].blob);
 
             // Dimensions en mm (250 DPI)
             const mmPerPx = 25.4 / 250;
-            const pageW = page.largeur * mmPerPx;
-            const pageH = page.hauteur * mmPerPx;
+            const pageW = largeur * mmPerPx;
+            const pageH = hauteur * mmPerPx;
 
             if (i === 0) {
                 doc = new jsPDF({
@@ -2173,6 +2261,8 @@
         // Editeur de pages
         decomposerPDF: decomposerPDF,
         reassemblerPages: reassemblerPages,
+        // Image droite pour le PDF (EXIF, 5 nov. 2026)
+        lireOrientationExif: lireOrientationExif,
         // Etat
         get importEnCours() { return importEnCours; }
     };
