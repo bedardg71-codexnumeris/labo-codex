@@ -6,7 +6,7 @@ Tenue par Claude Code pendant l'essai de la boucle sans relais, du 3 au 10 nov. 
 
 ## À faire
 
-### 32. Une image passée par « Modifier » sur l'iPad devient une page blanche (# à inscrire)
+### 32. Une image passée par « Modifier » sur l'iPad devient une page blanche (#1232)
 Rapport `BUG_"grégoire"_2026-11-05_09-57-48.txt` et sa capture (iPad, Safari 27.2, 1.233.2, GÊNANT) : « La copie de la reprise ne charge pas. Voir capture. »
 **Ce que montre la capture (mesuré sur ses pixels)** : Annoter, Artefact 6, la reprise d'un élève (★), « 1/3 », zoom 114 %. La page 1 est un rectangle entièrement blanc de 914 × 687 px d'écran (2×), couché, au rapport 4:3, sans aucune annotation. Dessous, la copie de référence (l'une sous l'autre) montre l'original du même élève, 1/1, avec ses annotations. Aucune erreur console.
 **Inférence tirée de cette mesure** : c'est, à 0,5 % près, la taille d'une photo ramenée à 1 400 × 1 050 px (`MAX_IMAGE_DIMENSION`, `js/travaux-import.js` ~214) puis posée à 250 ppp par `reassemblerPages` (~2148). La visionneuse aurait donc bien lu le PDF et les dimensions de sa page 1 ; c'est le contenu de la page qui est blanc, ou qui ne se dessine pas.
@@ -20,9 +20,9 @@ Rapport `BUG_"grégoire"_2026-11-05_09-57-48.txt` et sa capture (iPad, Safari 27
 **Le stock, mesuré** : sur les 164 PDF du codex de l'iPad, deux copies ont ce défaut, deux reprises de l'Artefact 6 passées par « Modifier » ce matin : `FT_1793740973297_3_9ad9788c9d4a` (7 h 27) et `FT_1793740974856_b_af7679e43b1c` (7 h 32, photo de 1 050 × 1 400). Dans les deux, la photo de la page 1 est encore dans le PDF, intacte.
 **Attendu, la source (dans la boucle)** : `imagePourPDF` ne se fie plus au type du blob. La data URL porte le type lu dans les octets (`validerMagicBytes`, ou la signature déjà lue pour l'EXIF), ou les octets partent à jsPDF avec leur format. Essai Playwright (jsPDF, `FileReader` et `Image` vivent dans le navigateur) : une photo fictive sans EXIF, en blob sans type, par « + Ajouter des pages » puis « Enregistrer » ; relire le PDF écrit : la page 1 a ses dimensions et son repère. Contre-épreuve sans le correctif : `/Width 0`. Break-test.
 **La réparation des deux copies de l'iPad** (elle écrit dans ses données) : tranchée par Grégoire le 5 nov. à 12 h 34, voir 32 bis.
-**À inscrire à part (hors boucle, § 3, point 2)** : l'ouverture et la fusion du codex rendent des blobs sans type (`codex.js` ~959, ~2987) ; mesurer qui d'autre lit `blob.type`.
+**À inscrire à part (hors boucle, § 3, point 2)** : l'ouverture et la fusion du codex rendent des blobs sans type (`codex.js` ~959, ~2987) ; mesurer qui d'autre lit `blob.type`. Inscrit : #1236.
 
-### 32 bis. Réparer, par un geste, une copie dont une page a perdu son image (# à inscrire, après 32)
+### 32 bis. Réparer, par un geste, une copie dont une page a perdu son image (#1233, après 32)
 **Décision de Grégoire, 5 nov. 2026, 12 h 34** (« oui », sur la recommandation de Cowork) : going with un geste de réparation dans l'application, lancé par l'usager lui-même, codex proposé juste avant ; il remet la photo à sa place sans perte, et sert à tout usager qui aurait le même défaut. Refusé : la réparation d'office, et refaire la page à la main (il faudrait retrouver les photos des élèves). Hors de la boucle par nature (le geste écrit dans les données) : la relecture croisée de la règle 2 de `PROTOCOLE.md` s'applique. Les deux copies à réparer sur l'iPad sont nommées à l'entrée 32.
 **Le défaut que le geste reconnaît** (mesuré à l'entrée 32) : dans un PDF écrit par l'application (jsPDF), un objet image `/Width 0 /Height 0` dont le flux commence par `data:` ; la photo est dans ce texte, en base64.
 **Conditions** (Cowork a tranché le technique, à reprendre si une mesure le contredit) :
@@ -33,7 +33,7 @@ Rapport `BUG_"grégoire"_2026-11-05_09-57-48.txt` et sa capture (iPad, Safari 27
 5. **Mots d'écran** (le message sur la page, le bouton, la confirmation) : à rédiger avec le lot, à soumettre en fin de file avec les Nouvelles.
 **Porte terrain** : sur l'iPad, après la mise en ligne, les deux copies de l'entrée 32 : la page 1 s'affiche, les annotations des pages 2 et 3 sont à leur place.
 
-### 33. En mode anonymisé, la copie de référence garde le vrai nom de l'élève (# à inscrire)
+### 33. En mode anonymisé, la copie de référence garde le vrai nom de l'élève (#1234)
 Rapport `BUG_"grégoire"_2026-11-05_10-13-12.txt` et sa capture (iPad, 1.233.2, GÊNANT) : « L'anonymisation dans le Split Screen ne s'opère pas dans l'identification de l'élève et de la copie originale. » Sur la capture, le bandeau « MODE ANONYMISATION » est affiché et la bande d'Annoter dit « Élève 57 », « Élève 60 »… ; le menu de la référence dit le vrai nom, suivi de « (original) ».
 **Cause, lue dans le code (non reproduite)** : `js/travaux-reference.js` calcule les noms (`_nomEleve` ~131, qui passe bien par `anonymiserNom`) au seul remplissage du menu (`_remplirChoix` ~191), appelé à l'ouverture et à `travaux-fichier-ouvert`. Le module n'écoute pas `modeChanged` (`js/modes.js` ~150), que `js/travaux-ui.js` ~7577 écoute pour les étiquettes de la copie ouverte. Ses actions concordent : la référence était ouverte, puis `basculerModeAnonymisation` à 10 h 11 min 31 s, sans changer de copie.
 **Attendu** : panneau ouvert, un changement de mode réécrit le menu dans le nouveau mode, dans les deux sens, sans recharger la copie de référence ni toucher à sa page ni à son zoom. Lu : rien d'autre du panneau ne porte de nom (`MOTS`, les messages).
@@ -41,7 +41,7 @@ Rapport `BUG_"grégoire"_2026-11-05_10-13-12.txt` et sa capture (iPad, 1.233.2, 
 **Le stock** : rien, affichage seul. Contournement d'ici là : fermer et rouvrir la copie de référence après un changement de mode.
 Le mode anonymisé sert devant la classe : un vrai nom à l'écran, c'est précisément ce qu'il doit empêcher. Passe avant 34.
 
-### 34. Le rythme d'évaluation compte la durée d'une reprise à la place de celle de l'original (# à inscrire)
+### 34. Le rythme d'évaluation compte la durée d'une reprise à la place de celle de l'original (#1235)
 Rapport `BUG_"grégoire"_2026-11-05_10-59-13.txt` et sa capture (iPad, 1.233.2, MINEUR), Labo › Rythme : « il faudrait que l'on sépare la production originale de la production reprise. La durée d'évaluation d'une reprise est généralement beaucoup plus courte que la durée de l'évaluation originale parce qu'il s'agit d'une reprise ciblée […] ça donne l'illusion que la durée moyenne d'évaluation de l'artefact original est plus courte ».
 **Cause, lue dans le code (non reproduite) : un remplacement plus qu'un mélange.** `collecterDurees` (`js/rythme.js` ~57-84) écarte toute évaluation qui porte `remplaceeParId`, c'est-à-dire l'original d'une reprise, et ne garde qu'une entrée par production et par élève. Pour un élève qui a repris, la durée de l'original sort du calcul et celle de la reprise prend sa place dans la ligne de l'activité. Le chrono (`chronoEvaluations`) est indexé par production et élève et garde le plus récent : la reprise. Chaque évaluation porte pourtant sa durée (`dureeEvaluation`, écrite à l'enregistrement, `evaluation-sauvegarde.js` ~474 ; en modification, `evaluation.js` ~1995). ⚠ La reprise naît copie de l'original (`evaluation-jetons.js` ~620, `...copieOriginale`) : elle hérite de sa `dureeEvaluation` tant qu'une réévaluation chronométrée ne l'a pas remplacée. Une durée héritée n'est pas celle de la reprise.
 **Attendu** :
