@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -32,11 +33,12 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 const pause = (page, ms) => page.waitForTimeout(ms);
 
 async function ouvrirCadre(page) {
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
     await page.evaluate(() => {
         window.__toasts = [];
         new MutationObserver((ms) => ms.forEach(m => m.addedNodes.forEach(n => {
@@ -44,7 +46,7 @@ async function ouvrirCadre(page) {
         }))).observe(document.body, { childList: true, subtree: true });   // #1224 : les toasts vivent dans #notifications-pile
         naviguerVers('calendrier', 'trimestre');
     });
-    await pause(page, 900);
+    await attendreRepos(page);
 }
 
 async function changer(page, selecteur, valeur) {
@@ -54,7 +56,7 @@ async function changer(page, selecteur, valeur) {
         el.dispatchEvent(new Event('change', { bubbles: true })); return 1;
     }, { selecteur, valeur });
     expect(n, 'champ introuvable : ' + selecteur).toBe(1);
-    await pause(page, 600);
+    await attendreRepos(page);
 }
 
 const temoinSucces = (page) => page.evaluate(() => {
@@ -76,7 +78,7 @@ async function repondre(page, texte) {
         if (!b) return 0; b.click(); return 1;
     }, texte);
     expect(n, 'bouton de la question introuvable : ' + texte).toBe(1);
-    await pause(page, 500);
+    await attendreRepos(page);
 }
 const visible = (page, s) => page.evaluate((s) => { const el = document.querySelector(s); return !!el && !el.classList.contains('u-hide'); }, s);
 const clesDuTrimestre = (page, id) => page.evaluate((id) => {
@@ -92,7 +94,7 @@ test('(a) trimestre, date, profil, fiche d\'étudiant·e : s\'écrivent sans bou
     const actif = await page.evaluate(() => (db.getSync('trimestres', []) || []).find(t => t.actif));
     expect(actif, 'la démonstration a un trimestre actif').toBeTruthy();
     await page.evaluate(() => window.initialiserModuleTrimestre());
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await visible(page, '#v2-btnCreerTrimestre'), 'trimestre existant : pas de « Créer le trimestre »').toBe(false);
 
     await changer(page, '#v2-nomTrimestre', 'Trimestre fictif banc E2');
@@ -108,7 +110,7 @@ test('(a) trimestre, date, profil, fiche d\'étudiant·e : s\'écrivent sans bou
     const ensId = await page.evaluate(() => (db.getSync('enseignants', []) || []).filter(e => !e.isDemo || true)[0]?.id);
     if (ensId) {
         await page.evaluate(async (id) => { const s = document.getElementById('v2-selectEnseignant'); s.value = id; await window.chargerEnseignantSelectionneV2(); }, ensId);
-        await pause(page, 400);
+        await attendreRepos(page);
         // Le profil de démonstration n'a ni courriel ni institution (obligatoires) : un champ modifié
         // seul serait refusé, et le témoin le dirait. On complète d'abord ses deux champs à l'écran.
         await page.evaluate(() => {
@@ -124,12 +126,13 @@ test('(a) trimestre, date, profil, fiche d\'étudiant·e : s\'écrivent sans bou
     // Fiche d'étudiant·e : la première de la liste, par le geste de la rangée.
     const da = await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || [])[0]?.da);
     await page.evaluate(async (da) => { await window.editerEtudiantV2(da); }, da);
-    await pause(page, 400);
+    await attendreRepos(page);
     expect(await visible(page, '#v2-btnSoumettreEtudiant'), 'fiche existante : pas de bouton d\'enregistrement').toBe(false);
     expect(await page.evaluate(() => document.getElementById('v2-btnAnnulerEdition').textContent.trim())).toBe('Fermer');
     await fermerTemoin(page);
     await changer(page, '#v2-etudiantProgramme', '500.A1');
-    await pause(page, 400);
+    // pause-gardee : aucun message de modification : un constat d'absence
+    await pause(page, 1000);
     expect(await temoinSucces(page)).toBe(true);
     expect(await page.evaluate((da) => (db.getSync(cle('groupeEtudiants'), []) || []).find(e => e.da === da).programme, da)).toBe('500.A1');
     expect(await page.evaluate(() => window.__toasts.filter(t => /modifi/.test(t)))).toEqual([]);
@@ -139,7 +142,7 @@ test('(b) identification : la session seule n\'écrit rien ; un trimestre qui a 
     test.setTimeout(120000);
     await ouvrirCadre(page);
     await page.evaluate(() => window.initialiserModuleTrimestre());
-    await pause(page, 600);
+    await attendreRepos(page);
     const actif = await page.evaluate(() => (db.getSync('trimestres', []) || []).find(t => t.actif));
     const registreAvant = await page.evaluate(() => JSON.stringify(db.getSync('trimestres', [])));
     const clesAvant = await clesDuTrimestre(page, actif.id);
@@ -148,6 +151,8 @@ test('(b) identification : la session seule n\'écrit rien ; un trimestre qui a 
     // État intermédiaire : l'année vidée, puis la session changée — rien d'écrit, rien de dit.
     await changer(page, '#v2-anneeTrimestre', '');
     await changer(page, '#v2-sessionTrimestre', actif.session === 'H' ? 'automne' : 'hiver');
+    // pause-gardee : la session seule n'écrit rien : un constat d'absence
+    await pause(page, 600);
     expect(await temoinEchec(page)).toBe('');
     expect(await page.evaluate(() => JSON.stringify(db.getSync('trimestres', [])))).toBe(registreAvant);
 
@@ -155,6 +160,8 @@ test('(b) identification : la session seule n\'écrit rien ; un trimestre qui a 
     // La démonstration : id « demo », session « D » (hors menu), année en texte (« 2025 »).
     await changer(page, '#v2-anneeTrimestre', String(Number(actif.annee) + 1));
     expect(await temoinEchec(page)).toMatch(/^Non enregistré – Identification du trimestre : ce trimestre \(« .+ »\) contient des données/);
+    // pause-gardee : le refus n'écrit rien, aucun message : un constat d'absence
+    await pause(page, 600);
     expect(await page.evaluate(() => JSON.stringify(db.getSync('trimestres', [])))).toBe(registreAvant);
     expect(await page.evaluate(() => window.__toasts)).toEqual([]);
     const sessionMap = { H: 'hiver', A: 'automne', E: 'ete' };
@@ -169,6 +176,8 @@ test('(b) identification : la session seule n\'écrit rien ; un trimestre qui a 
     await page.evaluate(() => { document.getElementById('v2-sessionTrimestre').value = 'ete'; });
     await changer(page, '#v2-anneeTrimestre', '2099');
     expect(await temoinEchec(page)).toMatch(/^Non enregistré – Identification du trimestre : le trimestre « e2099 » existe déjà dans le registre/);
+    // pause-gardee : la paire prise n'écrit rien : un constat d'absence
+    await pause(page, 600);
     expect(await page.evaluate((id) => (db.getSync('trimestres', []) || []).find(t => t.actif).id, actif.id)).toBe(actif.id);
     expect(await clesDuTrimestre(page, actif.id)).toEqual(clesAvant);
 });
@@ -181,47 +190,59 @@ test('(c) cours, horaire, groupe-cours neufs : rien avant le bouton ; « Fermer 
     // Cours
     const coursAvant = await compte('cours');
     await page.evaluate(async () => { await window.nouveauCoursV2(); });
-    await pause(page, 400);
+    await attendreRepos(page);
     expect(await visible(page, '#v2-btnCreerCours')).toBe(true);
     expect(await page.evaluate(() => document.getElementById('v2-btnCreerCours').textContent.trim())).toBe('Créer le cours');
     await changer(page, '#v2-codeCours', '999-E2F-MQ');
     await changer(page, '#v2-nomCours', 'Cours fictif banc E2');
+    // pause-gardee : rien en base avant le clic : un constat d'absence
+    await pause(page, 600);
     expect(await compte('cours'), 'rien en base avant le clic').toBe(coursAvant);
     await page.evaluate(() => { window.fermerFicheCoursV2(); });
-    await pause(page, 500);
+    await attendreRepos(page);
     expect(await questionOuverte(page)).toBe('Ce cours n\'est pas encore créé.');
     await repondre(page, 'Rester');
     expect(await page.evaluate(() => document.getElementById('v2-codeCours').value)).toBe('999-E2F-MQ');
     await page.evaluate(() => { window.fermerFicheCoursV2(); });
-    await pause(page, 500);
+    await attendreRepos(page);
     await repondre(page, 'Quitter sans créer');
+    // pause-gardee : « Quitter sans créer » n'écrit rien : un constat d'absence
+    await pause(page, 500);
     expect(await compte('cours'), 'quitter sans créer n\'écrit rien').toBe(coursAvant);
 
     // Horaire
     const horairesAvant = await compte('horaires');
     await page.evaluate(async () => { await window.nouveauHoraireV2(); });
-    await pause(page, 400);
+    await attendreRepos(page);
     expect(await visible(page, '#v2-btnCreerHoraire')).toBe(true);
     await changer(page, '#v2-hor-nom', 'Horaire fictif banc E2');
+    // pause-gardee : rien en base avant le clic : un constat d'absence
+    await pause(page, 600);
     expect(await compte('horaires')).toBe(horairesAvant);
     await page.evaluate(() => { window.fermerFicheHoraireV2(); });
-    await pause(page, 500);
+    await attendreRepos(page);
     expect(await questionOuverte(page)).toBe('Cet horaire n\'est pas encore créé.');
     await repondre(page, 'Quitter sans créer');
+    // pause-gardee : « Quitter sans créer » n'écrit rien : un constat d'absence
+    await pause(page, 500);
     expect(await compte('horaires')).toBe(horairesAvant);
 
     // Groupe-cours
     const gcAvant = await compte('groupesCours');
     await page.evaluate(async () => { await window.nouveauGroupeCoursV2(); });
-    await pause(page, 400);
+    await attendreRepos(page);
     expect(await visible(page, '#v2-btnCreerGroupeCours')).toBe(true);
     const coursId = await page.evaluate(() => [...document.getElementById('v2-gc-cours').options].map(o => o.value).find(v => v));
     await changer(page, '#v2-gc-cours', coursId);
+    // pause-gardee : rien en base avant le clic : un constat d'absence
+    await pause(page, 600);
     expect(await compte('groupesCours')).toBe(gcAvant);
     await page.evaluate(() => { window.fermerFicheGroupeCoursV2(); });
-    await pause(page, 500);
+    await attendreRepos(page);
     expect(await questionOuverte(page)).toBe('Ce groupe-cours n\'est pas encore créé.');
     await repondre(page, 'Quitter sans créer');
+    // pause-gardee : « Quitter sans créer » n'écrit rien : un constat d'absence
+    await pause(page, 500);
     expect(await compte('groupesCours')).toBe(gcAvant);
 });
 
@@ -232,13 +253,15 @@ test('(c bis) étudiant·e : ouvrir une autre fiche pendant un ajout pose la que
     await page.evaluate(() => { document.getElementById('v2-etudiantDA').value = '2999001'; document.getElementById('v2-etudiantNom').value = 'Fictif'; });
     const da = await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || [])[0].da);
     await page.evaluate((da) => { window.editerEtudiantV2(da); }, da);
-    await pause(page, 500);
+    await attendreRepos(page);
     expect(await questionOuverte(page)).toBe('Cet·te étudiant·e n\'est pas encore ajouté·e.');
     await repondre(page, 'Rester');
     expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').value)).toBe('2999001');
     await page.evaluate((da) => { window.editerEtudiantV2(da); }, da);
-    await pause(page, 500);
+    await attendreRepos(page);
     await repondre(page, 'Quitter sans ajouter');
+    // pause-gardee : « Quitter sans ajouter » n'écrit rien : un constat d'absence
+    await pause(page, 500);
     expect(await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || []).length)).toBe(avant);
     expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').value)).toBe(da);
 });
@@ -248,7 +271,7 @@ test('(c ter) étudiant·e : le DA d\'une fiche existante ne se modifie pas, au 
     await ouvrirCadre(page);
     const da = await page.evaluate(() => (db.getSync(cle('groupeEtudiants'), []) || [])[0].da);
     await page.evaluate((da) => { window.editerEtudiantV2(da); }, da);
-    await pause(page, 500);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('v2-etudiantDA').readOnly)).toBe(true);
     await expect(page.locator('#v2-etudiantDAAide')).toBeVisible();
     await expect(page.locator('#v2-etudiantDAAide')).toHaveText('Le DA relie les évaluations et les présences de l\'étudiant·e. Pour corriger une coquille, utilise «\u00a0Corriger le DA…\u00a0» : ses données suivent.');   // #976
@@ -276,7 +299,7 @@ test('(d) un échec d\'écriture sur un champ du Cadre : « Non enregistré – 
     test.setTimeout(90000);
     await ouvrirCadre(page);
     await page.evaluate(() => window.initialiserModuleTrimestre());
-    await pause(page, 600);
+    await attendreRepos(page);
     await page.evaluate(() => {
         window.__toasts = [];
         window.__setSync = db.setSync;
@@ -284,6 +307,8 @@ test('(d) un échec d\'écriture sur un champ du Cadre : « Non enregistré – 
     });
     await changer(page, '#v2-remiseNotes', '2026-12-29');
     expect(await temoinEchec(page)).toBe('Non enregistré – Modifier le cadre du trimestre : le navigateur a refusé l\'écriture.');
+    // pause-gardee : aucun succès, aucun message après l'échec : un constat d'absence
+    await pause(page, 600);
     expect(await temoinSucces(page)).toBe(false);
     expect(await page.evaluate(() => window.__toasts)).toEqual([]);
     await page.evaluate(() => { db.setSync = window.__setSync; });
@@ -308,6 +333,7 @@ test('(e) la création d\'un horaire : le message ne part qu\'après l\'écritur
         db.setSync = function (k, v) { if (String(k).endsWith('_horaires')) throw new Error('panne simulée par le banc E2'); return window.__setSync.call(this, k, v); };
         window.sauvegarderHoraireV2();
     });
+    // pause-gardee : aucun message avant l'écriture, rien d'écrit : un constat d'absence
     await pause(page, 500);
     expect(await page.evaluate(() => window.__toasts)).toEqual([]);
     expect(await temoinEchec(page)).toBe('Non enregistré – Créer l\'horaire : le navigateur a refusé l\'écriture.');
@@ -356,7 +382,7 @@ test('placement : « Fermer » et « Créer le cours » à 360, 768, 1024 et 118
     for (const largeur of [360, 768, 1024, 1180]) {
         await page.setViewportSize({ width: largeur, height: 900 });
         await page.evaluate(async () => { await window.nouveauCoursV2(); document.getElementById('v2-btnCreerCours').scrollIntoView({ block: 'center' }); });
-        await pause(page, 500);
+        await attendreRepos(page);
         // Le témoin visible (une écriture ailleurs), pour mesurer le chevauchement.
         await page.evaluate(() => window.temoinEnregistrement.enregistre('banc'));
         const m = await mesurer();
@@ -377,7 +403,7 @@ test('#975 suite · « + Nouveau trimestre » puis « Annuler » : rien d\'écri
     test.setTimeout(120000);
     await ouvrirCadre(page);
     await page.evaluate(() => window.initialiserModuleTrimestre());
-    await pause(page, 600);
+    await attendreRepos(page);
     const avant = await page.evaluate(() => ({
         trimestres: JSON.stringify(db.getSync('trimestres', [])),
         cadre: JSON.stringify(db.getSync(cle('cadreCalendrier'), null)),
@@ -389,7 +415,7 @@ test('#975 suite · « + Nouveau trimestre » puis « Annuler » : rien d\'écri
     expect(await visible(page, '#v2-btnAnnulerCreationTrimestre'), 'hors création : pas d\'« Annuler »').toBe(false);
 
     await page.evaluate(() => document.querySelector('[data-action="ouvrirCreationTrimestreV2"]').click());
-    await pause(page, 400);
+    await attendreRepos(page);
     expect(await visible(page, '#v2-btnCreerTrimestre')).toBe(true);
     expect(await visible(page, '#v2-btnAnnulerCreationTrimestre'), 'un trimestre actif : « Annuler » paraît').toBe(true);
     expect(await page.evaluate(() => document.getElementById('v2-btnAnnulerCreationTrimestre').textContent.trim())).toBe('Annuler');
@@ -400,6 +426,7 @@ test('#975 suite · « + Nouveau trimestre » puis « Annuler » : rien d\'écri
     });
 
     await page.evaluate(() => document.getElementById('v2-btnAnnulerCreationTrimestre').click());
+    // pause-gardee : « Annuler » n'écrit rien, aucune question, aucun message : un constat d'absence
     await pause(page, 600);
     const apres = await page.evaluate(() => ({
         trimestres: JSON.stringify(db.getSync('trimestres', [])),

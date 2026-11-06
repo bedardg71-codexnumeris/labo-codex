@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -23,15 +24,14 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 // le retour à l'écran qui ferme la fiche. Noms fictifs. Contexte Playwright neuf à chaque essai.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
-const pause = (page, ms) => page.waitForTimeout(ms);
-
 async function ouvrirDemo(page) {
     page.on('dialog', async (d) => { await d.accept(); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
 }
 
 const ECRANS = [
@@ -73,7 +73,7 @@ for (const e of ECRANS) {
         await ouvrirDemo(page);
         await page.setViewportSize({ width: 1440, height: 900 });
         await page.evaluate((s) => naviguerVers('conception', s), e.sous);
-        await pause(page, 900);
+        await attendreRepos(page);
 
         // La rangée : bibliothèque, menu (et, pour les productions, l'ordre du menu), puis « + Nouvelle … » à droite.
         const r = await rangee(page, e.ss);
@@ -94,7 +94,7 @@ for (const e of ECRANS) {
         // Choisir dans le menu ouvre la fiche, et le menu la montre.
         const choix = await menu.locator('option').nth(1).getAttribute('value');
         await menu.selectOption(choix);
-        await pause(page, 900);
+        await attendreRepos(page);
         expect(await ficheOuverte(page, e.fiche), 'la fiche s’ouvre').toBe(true);
         await expect(menu).toHaveValue(choix);
 
@@ -102,7 +102,7 @@ for (const e of ECRANS) {
         if (await menu.locator('option').count() > 2) {
             const autre = await menu.locator('option').nth(2).getAttribute('value');
             await menu.selectOption(autre);
-            await pause(page, 900);
+            await attendreRepos(page);
             await expect(page.locator('#' + e.menu)).toHaveValue(autre);
         }
 
@@ -111,10 +111,10 @@ for (const e of ECRANS) {
             await page.locator(`#${e.ss} button[data-action="${e.fermer}"]:visible`).first().click();
         } else {
             await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-            await pause(page, 600);
+            await attendreRepos(page);
             await page.evaluate((s) => naviguerVers('conception', s), e.sous);
         }
-        await pause(page, 900);
+        await attendreRepos(page);
         expect(await ficheOuverte(page, e.fiche), 'la fiche est fermée').toBe(false);
         await expect(page.locator(`#${e.menu} option:checked`)).toHaveText(e.aucune);
     });
@@ -165,18 +165,18 @@ for (const e of ECRANS.filter(x => CREER[x.nom])) {
         test.setTimeout(90000);
         await ouvrirDemo(page);
         await page.evaluate((s) => naviguerVers('conception', s), e.sous);
-        await pause(page, 900);
+        await attendreRepos(page);
         const menu = page.locator('#' + e.menu);
         const avant = await menu.locator('option').count();
 
         await page.locator(`#${e.ss} .rangee-selection button[data-action="${e.nouveau}"]`).click();
-        await pause(page, 900);
+        await attendreRepos(page);
         expect(await ficheOuverte(page, e.fiche), 'la fiche neuve s’ouvre').toBe(true);
         await expect(menu.locator('option:checked'), 'en création : rien n’est encore dans le menu').toHaveText(e.aucune);
 
         await REMPLIR[e.nom](page);
         await page.locator(CREER[e.nom]).click();
-        await pause(page, 1200);
+        await attendreRepos(page);
         const id = await page.evaluate(`(${LIRE_ID[e.nom].toString()})()`);
         expect(id, 'la création est ouverte').toBeTruthy();
         await expect(page.locator('#' + e.menu).locator('option')).toHaveCount(avant + 1);
@@ -189,12 +189,12 @@ test('pratique : « + Nouvelle pratique » ouvre l’assistant ; « Dupliquer »
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'pratiques-notation'));
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.locator('#conception-pratiques-notation .rangee-selection button[data-action="creerNouvellePratique"]').click();
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('wizard-v2-btn-creer')?.textContent.trim())).toBe('Créer la pratique');
     await page.evaluate(() => fermerWizardV2());
-    await pause(page, 400);
+    await attendreRepos(page);
 
     const menu = page.locator('#menuPratiques');
     const actives = await page.evaluate(() => [...document.getElementById('menuPratiques').options].filter(o => / \(active\)$/.test(o.textContent)).map(o => o.value));
@@ -203,10 +203,10 @@ test('pratique : « + Nouvelle pratique » ouvre l’assistant ; « Dupliquer »
 
     const choix = await menu.locator('option').nth(1).getAttribute('value');
     await menu.selectOption(choix);
-    await pause(page, 900);
+    await attendreRepos(page);
     const avant = await menu.locator('option').count();
     await page.locator('#conteneurEditionPratique button[data-action="dupliquerPratiqueMaterielActive"]').click();
-    await pause(page, 1200);
+    await attendreRepos(page);
     await expect(page.locator('#menuPratiques option')).toHaveCount(avant + 1);
     const ouverte = await page.evaluate(() => document.getElementById('menuPratiques').value);
     expect(ouverte).not.toBe(choix);
@@ -223,7 +223,7 @@ test('grille : l’objet ouvert depuis « Apporter mon matériel » reste choisi
         await chargerGrillePourModif(g.id);
         return g.id;
     });
-    await pause(page, 1200);
+    await attendreRepos(page);
     await expect(page.locator('#menuGrilles')).toHaveValue(id);
 });
 
@@ -231,11 +231,11 @@ test('production : changer le tri réordonne le menu (#930 ; le tri n’était p
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'productions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     const ordre = () => page.evaluate(() => [...document.getElementById('menuProductions').options].filter(o => o.value).map(o => o.value));
     const perso = await ordre();
     await page.locator('#triProductions').selectOption('titre');
-    await pause(page, 600);
+    await attendreRepos(page);
     const parTitre = await ordre();
     const titres = await page.evaluate((ids) => {
         const p = db.getSync(cle('productions'), []) || [];
@@ -269,7 +269,7 @@ test('la fenêtre de la bibliothèque : les cinq sous-titres tutoient', async ({
     const lus = {};
     for (const e of ECRANS) {
         await page.evaluate((s) => naviguerVers('conception', s), e.sous);
-        await pause(page, 900);
+        await attendreRepos(page);
         await page.locator(`#${e.ss} .rangee-selection button`, { hasText: 'Consulter la bibliothèque' }).click();
         const fenetre = page.locator('.modal-js-overlay:visible').last();
         await expect(fenetre).toBeVisible();
@@ -288,7 +288,7 @@ test.describe('iPad portrait (WebKit, tactile)', () => {
         test.setTimeout(90000);
         await ouvrirDemo(page);
         await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-        await pause(page, 900);
+        await attendreRepos(page);
         const r = await rangee(page, 'conception-grille-criteres');
         console.log('IPAD · RANGÉE →', JSON.stringify(r));
         expect(r.barres).toBe(0);
@@ -296,7 +296,7 @@ test.describe('iPad portrait (WebKit, tactile)', () => {
         expect(Math.min(...r.hauteurs)).toBeGreaterThanOrEqual(44);
         const choix = await page.locator('#menuGrilles option').nth(1).getAttribute('value');
         await page.locator('#menuGrilles').selectOption(choix);
-        await pause(page, 900);
+        await attendreRepos(page);
         expect(await ficheOuverte(page, 'conteneurEditionGrille')).toBe(true);
         await expect(page.locator('#menuGrilles')).toHaveValue(choix);
         const deborde = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);

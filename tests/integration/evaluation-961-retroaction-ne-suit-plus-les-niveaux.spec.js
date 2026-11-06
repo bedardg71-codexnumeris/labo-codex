@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -25,6 +26,7 @@ async function monter(page, { analytique = false, marque, deuxieme = false, sans
     page.on('console', (m) => { if (m.type() === 'error') erreurs.push(m.text()); });
     page.on('pageerror', (e) => erreurs.push(`pageerror: ${e.message}`));
     page.on('dialog', (d) => { erreurs.push(`dialogue: ${d.message()}`); d.dismiss().catch(() => {}); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForFunction(() => typeof window.db !== 'undefined' && window.travauxUI && window.travauxStockage
         && typeof window.evaluerProduction === 'function');
@@ -100,11 +102,16 @@ const avisVisible = (page) => page.evaluate(() => {
     return !!a && !a.classList.contains('u-hide');
 });
 
-async function ouvrir(page, chemin) {
+async function ouvrir(page, chemin, { constatDAbsence = false } = {}) {
     if (chemin === 'copie') await page.evaluate(() => window.evaluerProduction('TEST961', 'p961'));
     else await page.evaluate(() => window.modifierEvaluation('EV961'));
     await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EV961', null, { timeout: 15000 });
-    await page.waitForTimeout(3500);
+    if (constatDAbsence) {
+        // pause-gardee : aucune question, rien d'écrit à l'ouverture : un constat d'absence
+        await page.waitForTimeout(3500);
+    } else {
+        await attendreRepos(page, { horizon: 3000 });
+    }
     await page.waitForFunction(() => !window._timerAutoSave && !window._modifierEvaluationEnCours, null, { timeout: 10000 });
 }
 
@@ -212,7 +219,7 @@ for (const chemin of ['copie', 'liste']) {
         test(`#961 R2 · stock sans clé, par ${nom(chemin)} : un niveau changé pose la question ; « ${reponse} »`, async ({ page }) => {
             test.setTimeout(90000);
             await monter(page);
-            await ouvrir(page, chemin);
+            await ouvrir(page, chemin, { constatDAbsence: true });
             expect.soft(await questionOuverte(page), 'aucune question à l\'ouverture').toBe(false);
             expect.soft((await base(page)).retroactionReecrite, 'rien écrit à l\'ouverture').toBeUndefined();
             await changerNiveau(page, 'E');

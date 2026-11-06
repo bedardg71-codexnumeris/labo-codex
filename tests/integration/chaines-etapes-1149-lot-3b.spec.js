@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -27,6 +28,7 @@ async function ouvrir(page) {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push('pageerror: ' + e.message));
     page.on('dialog', async (d) => { await d.accept(); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
@@ -79,9 +81,9 @@ async function semer(page) {
 /** Aller à la sous-section (son module s'initialise 100 ms plus tard et referme toute fiche), puis ouvrir la fiche. */
 async function allerPuisOuvrir(page, sousSection, ouvrirFiche, arg) {
     await page.evaluate((s) => naviguerVers('conception', s), sousSection);
-    await pause(page, 400);
+    await attendreRepos(page);
     await page.evaluate(ouvrirFiche, arg);
-    await pause(page, 500);
+    await attendreRepos(page);
 }
 
 const OUVRIR = {
@@ -121,9 +123,10 @@ const sousSectionVisible = (page, id) => page.evaluate((id) => document.getEleme
 /** Un clic sur une étape : on remonte, on photographie le stockage, on clique, on attend, on compare. */
 async function cliquerSansEcrire(page, chaine, etape) {
     await page.evaluate(() => window.scrollTo(0, 0));
-    await pause(page, 200);
+    await attendreRepos(page);
     const avant = await instantane(page);
     await page.locator('#' + chaine + ' [data-etape="' + etape + '"]').click();
+    // pause-gardee : le clic n'écrit rien : un constat d'absence
     await pause(page, 900);
     expect(await instantane(page), chaine + ' › ' + etape + ' : le clic n\'écrit rien').toBe(avant);
 }
@@ -134,7 +137,7 @@ test('Échelles : la chaîne paraît et part avec la fiche ; un trou en attentio
     await page.setViewportSize({ width: 1440, height: 900 });
     await semer(page);
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 500);
+    await attendreRepos(page);
     expect((await lireChaine(page, 'chaineEchelle')).visible, 'aucune échelle ouverte, aucune chaîne').toBe(false);
 
     await OUVRIR.echelle(page);
@@ -156,7 +159,7 @@ test('Échelles : la chaîne paraît et part avec la fiche ; un trou en attentio
 
     // Un niveau ajouté puis rempli (code, nom) : le compte suit.
     await page.locator('#tableauNiveauxEchelle [data-action="ajouterNiveauEchelle"]').click();
-    await pause(page, 400);
+    await attendreRepos(page);
     c = await lireChaine(page, 'chaineEchelle');
     expect(c.etapes.niveaux.info, 'le niveau en attente n\'est pas encore écrit').toBe('2 niveaux');
 
@@ -174,6 +177,7 @@ test('Échelles : la chaîne paraît et part avec la fiche ; un trou en attentio
     // Fermer la fiche emporte la chaîne.
     await OUVRIR.echelle(page);
     await page.evaluate(() => annulerFormEchelle());
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 300);
     expect((await lireChaine(page, 'chaineEchelle')).visible).toBe(false);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
@@ -183,9 +187,9 @@ test('Échelles : en création, la chaîne lit le tampon et suit la saisie', asy
     test.setTimeout(60000);
     const erreurs = await ouvrir(page);
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 500);
+    await attendreRepos(page);
     await page.evaluate(async () => { await creerNouvelleEchelle(); });
-    await pause(page, 400);
+    await attendreRepos(page);
     let c = await lireChaine(page, 'chaineEchelle');
     expect(c.visible).toBe(true);
     // Les quatre niveaux du gabarit de création, sans code ni nom.
@@ -198,11 +202,13 @@ test('Échelles : en création, la chaîne lit le tampon et suit la saisie', asy
             const el = page.locator('#tableauNiveauxEchelle [data-champ="' + champ + '"]').nth(i);
             await el.fill(valeur);
             await el.press('Tab');
-            await pause(page, 150);
+            await attendreRepos(page);
         }
     }
     c = await lireChaine(page, 'chaineEchelle');
     expect(c.etapes.niveaux).toMatchObject({ reglee: true, info: '4 niveaux' });
+    // pause-gardee : rien n'est écrit avant « Créer l'échelle », aucune erreur de page : un constat d'absence
+    await pause(page, 400);
     expect(await instantane(page), 'en création, rien n\'est écrit avant « Créer l\'échelle »').toBe(avant);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
 });
@@ -213,7 +219,7 @@ test('Cartouches : la chaîne paraît et part avec la fiche ; un commentaire éc
     await page.setViewportSize({ width: 1440, height: 900 });
     await semer(page);
     await page.evaluate(() => naviguerVers('conception', 'retroactions'));
-    await pause(page, 500);
+    await attendreRepos(page);
     expect((await lireChaine(page, 'chaineCartouche')).visible).toBe(false);
 
     await OUVRIR.cartouche(page);
@@ -242,11 +248,12 @@ test('Cartouches : la chaîne paraît et part avec la fiche ; un commentaire éc
     const caseVide = page.locator('#comm_CR_BANC_B_E');
     await caseVide.fill('Un commentaire pour le niveau étendu.');
     await caseVide.press('Tab');
-    await pause(page, 500);
+    await attendreRepos(page);
     c = await lireChaine(page, 'chaineCartouche');
     expect(c.etapes.commentaires).toMatchObject({ reglee: true, info: '8 sur 8' });
 
     await page.evaluate(() => annulerFormCartouche());
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 300);
     expect((await lireChaine(page, 'chaineCartouche')).visible).toBe(false);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
@@ -258,7 +265,7 @@ test('Cartouches : en création après une cartouche ouverte, la chaîne lit les
     await semer(page);
     await OUVRIR.cartouche(page);
     await page.evaluate(async () => { await creerNouvelleCartouche(); });
-    await pause(page, 500);
+    await attendreRepos(page);
     let c = await lireChaine(page, 'chaineCartouche');
     expect(c.visible).toBe(true);
     expect(c.etapes.grille).toMatchObject({ reglee: false, info: 'aucun' });
@@ -267,6 +274,7 @@ test('Cartouches : en création après une cartouche ouverte, la chaîne lit les
     expect(c.etapes.production).toMatchObject({ reglee: false, info: 'aucune' });
     // La grille choisie seule compte déjà.
     await page.locator('#selectGrilleCartouche').selectOption('GRILLE_BANC_3B');
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 400);
     c = await lireChaine(page, 'chaineCartouche');
     expect(c.etapes.grille).toMatchObject({ reglee: true, info: '2 critères' });
@@ -280,7 +288,7 @@ test('Productions : la chaîne paraît et part avec la fiche ; un objectif tapé
     await page.setViewportSize({ width: 1440, height: 900 });
     await semer(page);
     await page.evaluate(() => naviguerVers('conception', 'productions'));
-    await pause(page, 500);
+    await attendreRepos(page);
     expect((await lireChaine(page, 'chaineProduction')).visible).toBe(false);
 
     await OUVRIR.production(page);
@@ -304,16 +312,17 @@ test('Productions : la chaîne paraît et part avec la fiche ; un objectif tapé
 
     // Un objectif tapé : la chaîne suit la frappe, avant même la sortie du champ.
     await page.locator('#productionObjectif').pressSequentially('Comprendre');
-    await pause(page, 300);
+    await attendreRepos(page);
     c = await lireChaine(page, 'chaineProduction');
     expect(c.etapes.objectif).toMatchObject({ reglee: true, info: 'écrit' });
     // Une échelle choisie.
     await page.locator('#productionEchelle').selectOption('ECH_BANC_3B');
-    await pause(page, 500);
+    await attendreRepos(page);
     c = await lireChaine(page, 'chaineProduction');
     expect(c.etapes.echelle).toMatchObject({ reglee: true, info: 'choisie' });
 
     await page.evaluate(() => annulerFormProduction());
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 300);
     expect((await lireChaine(page, 'chaineProduction')).visible).toBe(false);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
@@ -325,7 +334,7 @@ test('Pratiques : sommative (Pondération à 70 %, puis 110 % critique) ; standa
     await page.setViewportSize({ width: 1440, height: 900 });
     await semer(page);
     await page.evaluate(() => naviguerVers('conception', 'pratiques-notation'));
-    await pause(page, 500);
+    await attendreRepos(page);
     expect((await lireChaine(page, 'chainePratique')).visible).toBe(false);
 
     // Sommative : 40 + 30 = 70 %, à régler sans couleur.
@@ -351,7 +360,7 @@ test('Pratiques : sommative (Pondération à 70 %, puis 110 % critique) ; standa
     await cliquerSansEcrire(page, 'chainePratique', 'methode');
     expect(await page.evaluate(() => document.getElementById('modalWizardPratiqueV2').classList.contains('actif')), 'l\'assistant s\'ouvre').toBe(true);
     await page.evaluate(() => fermerWizardV2());
-    await pause(page, 300);
+    await attendreRepos(page);
     await cliquerSansEcrire(page, 'chainePratique', 'ponderation');
     expect(await sousSectionVisible(page, 'conception-productions')).toBe(true);
 
@@ -364,7 +373,7 @@ test('Pratiques : sommative (Pondération à 70 %, puis 110 % critique) ; standa
     await cliquerSansEcrire(page, 'chainePratique', 'echelle');
     expect(await dansLaVue(page, '#mat-echelle-id')).toBe(true);
     await page.locator('#mat-echelle-id').selectOption('ECH_BANC_3B');
-    await pause(page, 600);
+    await attendreRepos(page);
     c = await lireChaine(page, 'chainePratique');
     expect(c.etapes.echelle).toMatchObject({ reglee: true, info: 'choisie' });
 
@@ -376,13 +385,14 @@ test('Pratiques : sommative (Pondération à 70 %, puis 110 % critique) ; standa
         }, []);
         await afficherListePratiquesMateriel();
     });
-    await pause(page, 400);
+    await attendreRepos(page);
     c = await lireChaine(page, 'chainePratique');
     expect(c.ids).toEqual(['methode', 'groupe-cours']);
     expect(c.etapes.methode.info).toBe('PAN-Spécifications');
     expect(await page.evaluate((a) => document.querySelector('#chainePratique [data-etape="methode"]') !== a, avant)).toBe(true);
 
     await page.evaluate(() => initialiserModulePratiquesMateriel());
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 300);
     expect((await lireChaine(page, 'chainePratique')).visible).toBe(false);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
@@ -393,9 +403,9 @@ test('Préférences : la case décochée efface les quatre chaînes', async ({ p
     await ouvrir(page);
     await semer(page);
     await page.evaluate(() => naviguerVers('reglages', 'preferences'));
-    await pause(page, 500);
+    await attendreRepos(page);
     await page.locator('#v2-pref-chaines-etapes').uncheck();
-    await pause(page, 400);
+    await attendreRepos(page);
     for (const [outil, id] of [['echelle', 'chaineEchelle'], ['cartouche', 'chaineCartouche'], ['production', 'chaineProduction'], ['pratique', 'chainePratique']]) {
         await OUVRIR[outil](page);
         const etat = await page.evaluate((id) => {
@@ -411,7 +421,7 @@ test('Exemples en lecture seule : la chaîne d\'une échelle et d\'une productio
     test.setTimeout(90000);
     await ouvrir(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
     const ids = await page.evaluate(async () => {
         const demo = (l) => (l || []).find(x => BibliothequeUI.estItemDemo(x));
         const e = demo(await db.get(window.cle('echellesTemplates')));
@@ -481,7 +491,7 @@ test('captures (CAPTURES_CHAINES)', async ({ page }) => {
                 await ouvrirFiche(page);
                 await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
                 await page.locator('#' + chaine).scrollIntoViewIfNeeded();
-                await pause(page, 400);
+                await attendreRepos(page);
                 const b = await page.locator('#' + chaine).boundingBox();
                 await page.screenshot({ path: path.join(dossier, `${nom}-${largeur}-${mode}.png`),
                     clip: { x: 0, y: Math.max(0, b.y - 140), width: largeur, height: Math.min(560, b.height + 420) } });
@@ -492,7 +502,7 @@ test('captures (CAPTURES_CHAINES)', async ({ page }) => {
             await page.locator('#comm_CR_BANC_B_E').press('Tab');
             await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
             await page.locator('#chaineCartouche').scrollIntoViewIfNeeded();
-            await pause(page, 400);
+            await attendreRepos(page);
             const b = await page.locator('#chaineCartouche').boundingBox();
             await page.screenshot({ path: path.join(dossier, `cartouches-reglee-${largeur}-${mode}.png`),
                 clip: { x: 0, y: Math.max(0, b.y - 140), width: largeur, height: Math.min(560, b.height + 420) } });

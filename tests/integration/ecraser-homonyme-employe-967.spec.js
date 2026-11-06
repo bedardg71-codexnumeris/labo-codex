@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { remplirNiveauxProposes } from './remplir-niveaux-echelle.js';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -27,18 +28,19 @@ const pause = (page, ms) => page.waitForTimeout(ms);
 async function ouvrirDemo(page) {
     const alertes = [];
     page.on('dialog', async (d) => { alertes.push(d.message()); await d.accept(); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
     return alertes;
 }
 
 async function cliquer(page, selecteur) {
     const n = await page.evaluate((s) => { const el = document.querySelector(s); if (!el) return 0; el.click(); return 1; }, selecteur);
     expect(n, 'élément introuvable : ' + selecteur).toBe(1);
-    await pause(page, 700);
+    await attendreRepos(page);
 }
 
 const questionDoublonOuverte = (page) =>
@@ -53,7 +55,7 @@ async function passerLeCodexSiPropose(page) {
         const b = [...document.querySelectorAll('#overlay-ui-dialogue button')].find(x => /sans (codex|mettre à jour)/.test(x.textContent));
         if (!b) return 0; b.click(); return 1;
     });
-    if (n) await pause(page, 700);
+    if (n) await attendreRepos(page);
     return n;
 }
 const temoinEchec = (page) => page.evaluate(() => {
@@ -123,14 +125,15 @@ test('échelle : un homonyme employé n\'est pas écrasé — la phrase, les vra
         'un seul homonyme : le compte attendu est le sien').toBe(1);
 
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const avant = await photo(page);
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     await page.evaluate((nom) => { document.getElementById('nomEchelleTemplate').value = nom; }, cible.nom);
     await cliquer(page, '#btnCreerEchelle');
     expect(await questionDoublonOuverte(page), 'la question du doublon est ouverte').toBe(true);
     await cliquer(page, '#btnDoublonEcraser');
-    await pause(page, 500);
+    // pause-gardee : le refus n'écrit rien, le codex n'est pas proposé : un constat d'absence
+    await pause(page, 1200);
 
     expect(alertes, 'le refus, avec la phrase validée et les vrais nombres').toEqual([phrase('Une échelle', cible.nb)]);
     expect(await questionOuverte(page), 'le codex n\'est pas proposé pour un refus').toBe('');
@@ -142,7 +145,7 @@ test('échelle : un homonyme que rien n\'emploie s\'écrase comme avant, sans la
     const alertes = await ouvrirDemo(page);
     const NOM = 'Échelle fictive Zéphyr 967';
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 800);
+    await attendreRepos(page);
     // L'homonyme libre, créé par le même geste.
     await cliquer(page, '[data-action="creerNouvelleEchelle"]');
     await page.evaluate((nom) => { document.getElementById('nomEchelleTemplate').value = nom; }, NOM);
@@ -159,6 +162,7 @@ test('échelle : un homonyme que rien n\'emploie s\'écrase comme avant, sans la
     expect(await questionDoublonOuverte(page)).toBe(true);
     await cliquer(page, '#btnDoublonEcraser');
     await passerLeCodexSiPropose(page);
+    // pause-gardee : aucun refus, aucune référence à l'ancienne : un constat d'absence
     await pause(page, 600);
 
     const apres = await page.evaluate((nom) => {
@@ -197,14 +201,15 @@ test('grille : un homonyme employé n\'est pas écrasé — la phrase, les vrais
     expect(cible, 'la démonstration doit porter une grille employée par une évaluation').toBeTruthy();
 
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const avant = await photo(page);
     await cliquer(page, '[data-action="creerNouvelleGrille"]');
     await page.evaluate((nom) => { document.getElementById('nomGrilleTemplate').value = nom; }, cible.nom);
     await cliquer(page, '#btnCreerGrille');
     expect(await questionDoublonOuverte(page), 'la question du doublon est ouverte').toBe(true);
     await cliquer(page, '#btnDoublonEcraser');
-    await pause(page, 500);
+    // pause-gardee : le refus n'écrit rien, le codex n'est pas proposé : un constat d'absence
+    await pause(page, 1200);
 
     expect(alertes, 'le refus, avec la phrase validée et les vrais nombres').toEqual([phrase('Une grille', cible.nb)]);
     expect(await questionOuverte(page), 'le codex n\'est pas proposé pour un refus').toBe('');
@@ -216,7 +221,7 @@ test('grille : un homonyme que rien n\'emploie s\'écrase comme avant, sans lais
     const alertes = await ouvrirDemo(page);
     const NOM = 'Grille fictive Zéphyr 967';
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     await cliquer(page, '[data-action="creerNouvelleGrille"]');
     await page.evaluate((nom) => { document.getElementById('nomGrilleTemplate').value = nom; }, NOM);
     await cliquer(page, '#btnCreerGrille');
@@ -231,6 +236,7 @@ test('grille : un homonyme que rien n\'emploie s\'écrase comme avant, sans lais
     expect(await questionDoublonOuverte(page)).toBe(true);
     await cliquer(page, '#btnDoublonEcraser');
     await passerLeCodexSiPropose(page);
+    // pause-gardee : aucun refus, aucune référence à l'ancienne : un constat d'absence
     await pause(page, 600);
 
     const apres = await page.evaluate((nom) => {
@@ -268,13 +274,13 @@ const paireCartouches = (page, bEmployee) => page.evaluate((bEmployee) => {
 
 async function renommerCartouche(page, paire, nom) {
     await page.evaluate(({ a, grilleId }) => chargerCartouchePourModif(a.id, grilleId), paire);
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate((nom) => {
         const el = document.getElementById('nomCartouche');
         el.value = nom;
         el.dispatchEvent(new Event('change', { bubbles: true }));
     }, nom);
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await questionDoublonOuverte(page), 'la question du doublon est ouverte').toBe(true);
 }
 
@@ -282,14 +288,15 @@ test('cartouche : un homonyme employé n\'est pas écrasé — la phrase, les vr
     test.setTimeout(90000);
     const alertes = await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'retroactions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     const paire = await paireCartouches(page, true);
     expect(paire, 'la démonstration doit porter une cartouche employée et une autre dans sa grille').toBeTruthy();
     const avant = await photo(page);
 
     await renommerCartouche(page, paire, paire.b.nom);
     await cliquer(page, '#btnDoublonEcraser');
-    await pause(page, 500);
+    // pause-gardee : le refus n'écrit rien, le codex n'est pas proposé : un constat d'absence
+    await pause(page, 1200);
 
     expect(alertes, 'le refus, avec la phrase validée et les vrais nombres').toEqual([phrase('Une cartouche', paire.nb)]);
     expect(await questionOuverte(page), 'le codex n\'est pas proposé pour un refus').toBe('');
@@ -301,12 +308,12 @@ test('cartouche : un homonyme que rien n\'emploie s\'écrase comme avant, sans l
     test.setTimeout(90000);
     const alertes = await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'retroactions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     const source = await paireCartouches(page, true);
     expect(source).toBeTruthy();
     // L'homonyme libre : une copie de A par « Dupliquer » (aucune évaluation ne la nomme).
     await page.evaluate(({ a, grilleId }) => dupliquerCartouche(a.id, grilleId), source);
-    await pause(page, 900);
+    await attendreRepos(page);
     const copie = await page.evaluate(({ a, grilleId }) => {
         const l = db.getSync(cle('cartouches_' + grilleId), []) || [];
         const c = l[l.length - 1];
@@ -319,6 +326,7 @@ test('cartouche : un homonyme que rien n\'emploie s\'écrase comme avant, sans l
     await renommerCartouche(page, paire, copie.nom);
     await cliquer(page, '#btnDoublonEcraser');
     await passerLeCodexSiPropose(page);
+    // pause-gardee : aucun refus, aucune référence à la copie : un constat d'absence
     await pause(page, 600);
 
     const apres = await page.evaluate(({ grilleId, a }) => {
@@ -336,11 +344,11 @@ test('cartouche : l\'homonyme ouvert pendant la question reste — rien n\'est �
     test.setTimeout(90000);
     const alertes = await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'retroactions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     const source = await paireCartouches(page, true);
     expect(source).toBeTruthy();
     await page.evaluate(({ a, grilleId }) => dupliquerCartouche(a.id, grilleId), source);
-    await pause(page, 900);
+    await attendreRepos(page);
     const copie = await page.evaluate(({ grilleId }) => {
         const l = db.getSync(cle('cartouches_' + grilleId), []) || [];
         const c = l[l.length - 1];
@@ -352,10 +360,11 @@ test('cartouche : l\'homonyme ouvert pendant la question reste — rien n\'est �
     await renommerCartouche(page, paire, copie.nom);
     // Pendant la question, l'usager ouvre l'homonyme depuis la liste.
     await page.evaluate(({ b, grilleId }) => ouvrirCartoucheDepuisListe(b.id, grilleId), paire);
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('nomCartouche').value)).toBe(copie.nom);
     await cliquer(page, '#btnDoublonEcraser');
     await passerLeCodexSiPropose(page);
+    // pause-gardee : aucun refus, rien n'est écrit : un constat d'absence
     await pause(page, 600);
 
     expect(alertes).toEqual([]);

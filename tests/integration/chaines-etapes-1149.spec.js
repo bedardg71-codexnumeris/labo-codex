@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -29,6 +30,7 @@ async function ouvrir(page) {
     const erreurs = [];
     page.on('pageerror', (e) => erreurs.push('pageerror: ' + e.message));
     page.on('dialog', async (d) => { await d.accept(); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
@@ -53,9 +55,9 @@ async function ouvrirGrilleFictive(page) {
         ]);
         naviguerVers('conception', 'grille-criteres');
     });
-    await pause(page, 700);
+    await attendreRepos(page);
     await page.evaluate(async () => { await chargerGrillePourModif('GRILLE_BANC_1149'); });
-    await pause(page, 500);
+    await attendreRepos(page);
 }
 
 /** La chaîne lue dans la page : par étape, réglée, ton, info, couleur de l'info ; et la couleur du total. */
@@ -82,7 +84,7 @@ async function changerPonderation(page, index, valeur) {
     const champ = page.locator('#listeCriteres [data-champ="ponderation"]').nth(index);
     await champ.fill(String(valeur));
     await champ.press('Tab');
-    await pause(page, 400);
+    await attendreRepos(page);
 }
 
 test('Trimestre : la barre garde ses six étapes, leurs états, et son clic ouvre l\'accordéon', async ({ page }) => {
@@ -95,7 +97,7 @@ test('Trimestre : la barre garde ses six étapes, leurs états, et son clic ouvr
         naviguerVers('calendrier', 'trimestre');
         window.mettreAJourBarreContexte();
     });
-    await pause(page, 600);
+    await attendreRepos(page);
     const barre = await page.evaluate(() => {
         const nav = document.getElementById('barreConvergence');
         return {
@@ -129,6 +131,7 @@ test('Trimestre : la barre garde ses six étapes, leurs états, et son clic ouvr
     });
     expect(await page.evaluate(() => document.getElementById('accordeon-horaire').classList.contains('ferme'))).toBe(true);
     await page.locator('#barreConvergence [data-etape="horaire"]').click();
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 700);
     expect(await page.evaluate(() => document.getElementById('accordeon-horaire').classList.contains('ferme'))).toBe(false);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
@@ -141,7 +144,7 @@ test('Grilles : trois étapes ; la pondération passe à l\'orange, au rouge, pu
 
     // Aucune grille ouverte : aucune chaîne.
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 500);
+    await attendreRepos(page);
     expect((await lireChaine(page, 'chaineGrille')).visible, 'aucune grille ouverte, aucune chaîne').toBe(false);
 
     await ouvrirGrilleFictive(page);
@@ -179,24 +182,25 @@ test('Grilles : trois étapes ; la pondération passe à l\'orange, au rouge, pu
 
     // Ajouter un critère (le bouton de la fiche) change le compte.
     await page.locator('#conteneurEditionGrille [data-action="ajouterCritereGrille"]').click();
-    await pause(page, 600);
+    await attendreRepos(page);
     c = await lireChaine(page, 'chaineGrille');
     expect(c.etapes.criteres.info).toBe('3 critères');
 
     // « Pondération » descend au total ; « Critères » à la liste.
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.locator('#chaineGrille [data-etape="ponderation"]').click();
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await page.evaluate(() => { const b = document.getElementById('totalPonderationAffichage').getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight; })).toBe(true);
 
     // « Production » ouvre Conception › Productions étudiantes.
     await page.locator('#chaineGrille [data-etape="production"]').click();
-    await pause(page, 700);
+    await attendreRepos(page);
     expect(await page.evaluate(() => { const s = document.getElementById('conception-productions'); return s.offsetParent !== null; })).toBe(true);
     expect(await page.evaluate(() => document.getElementById('conception-grille-criteres').offsetParent === null)).toBe(true);
 
     // Fermer la fiche emporte la chaîne.
     await page.evaluate(() => { naviguerVers('conception', 'grille-criteres'); annulerFormGrille(); });
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 400);
     expect((await lireChaine(page, 'chaineGrille')).visible).toBe(false);
     expect(erreurs, erreurs.join(' | ')).toEqual([]);
@@ -206,9 +210,9 @@ test('Grilles : en création, la chaîne lit le formulaire', async ({ page }) =>
     test.setTimeout(60000);
     const erreurs = await ouvrir(page);
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 500);
+    await attendreRepos(page);
     await page.evaluate(async () => { await creerNouvelleGrille(); });
-    await pause(page, 400);
+    await attendreRepos(page);
     let c = await lireChaine(page, 'chaineGrille');
     expect(c.visible).toBe(true);
     expect(c.etapes.criteres).toMatchObject({ reglee: false, info: 'aucun' });
@@ -221,6 +225,7 @@ test('Grilles : en création, la chaîne lit le formulaire', async ({ page }) =>
     const pond = page.locator('#listeCriteres [data-on-change="modifierPonderationCritereTempHandler"]').first();
     await pond.fill('100');
     await pond.press('Tab');
+    // pause-gardee : aucune erreur de page : un constat d'absence
     await pause(page, 300);
     c = await lireChaine(page, 'chaineGrille');
     expect(c.etapes.criteres).toMatchObject({ reglee: true, info: '1 critère' });
@@ -239,11 +244,11 @@ test('Préférences : la case décochée efface toutes les chaînes, recochée l
     expect(await visibles()).toEqual({ grille: true, trimestre: true });
 
     await page.evaluate(() => naviguerVers('reglages', 'preferences'));
-    await pause(page, 500);
+    await attendreRepos(page);
     const caseChaines = page.locator('#v2-pref-chaines-etapes');
     await expect(caseChaines).toBeChecked();
     await caseChaines.uncheck();
-    await pause(page, 400);
+    await attendreRepos(page);
     expect(await visibles()).toEqual({ grille: false, trimestre: false });
     expect(await page.evaluate(() => obtenirPreference('afficherChainesEtapes'))).toBe(false);
 
@@ -252,10 +257,10 @@ test('Préférences : la case décochée efface toutes les chaînes, recochée l
     await attendreApplication(page);
     expect(await page.evaluate(() => document.body.classList.contains('chaines-etapes-masquees')), 'le choix survit au rechargement').toBe(true);
     await page.evaluate(() => naviguerVers('reglages', 'preferences'));
-    await pause(page, 500);
+    await attendreRepos(page);
     await expect(caseChaines).not.toBeChecked();
     await caseChaines.check();
-    await pause(page, 400);
+    await attendreRepos(page);
     await ouvrirGrilleFictive(page);
     expect(await visibles()).toEqual({ grille: true, trimestre: true });
 });
@@ -264,23 +269,23 @@ test('Grilles : un exemple en lecture seule montre sa chaîne, et ses clics desc
     test.setTimeout(90000);
     await ouvrir(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 600);
+    await attendreRepos(page);
     const id = await page.evaluate(async () => {
         const g = (await db.get(window.cle('grillesTemplates')) || []).find(x => BibliothequeUI.estItemDemo(x) && (x.criteres || []).length);
         await chargerGrillePourModif(g.id);
         return g.id;
     });
     expect(id).toBeTruthy();
-    await pause(page, 500);
+    await attendreRepos(page);
     const c = await lireChaine(page, 'chaineGrille');
     expect(c.visible).toBe(true);
     expect(await page.evaluate(() => document.querySelector('#listeCriteres input, #listeCriteres select').disabled), 'la fiche est bien en lecture seule').toBe(true);
     expect(await page.evaluate(() => [...document.querySelectorAll('#chaineGrille .bc-etape')].some(b => b.disabled))).toBe(false);
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.locator('#chaineGrille [data-etape="ponderation"]').click();
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await page.evaluate(() => { const b = document.getElementById('totalPonderationAffichage').getBoundingClientRect(); return b.top >= 0 && b.bottom <= innerHeight; })).toBe(true);
 });
 
@@ -320,7 +325,7 @@ test('captures (CAPTURES_CHAINES)', async ({ page }) => {
             await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
             const cadrer = async (nom, selecteur) => {
                 await page.locator(selecteur).first().scrollIntoViewIfNeeded();
-                await pause(page, 400);
+                await attendreRepos(page);
                 const b = await page.locator(selecteur).first().boundingBox();
                 await page.screenshot({ path: path.join(dossier, `${nom}-${largeur}-${mode}.png`),
                     clip: { x: 0, y: Math.max(0, b.y - 140), width: largeur, height: Math.min(560, b.height + 420) } });
@@ -330,10 +335,10 @@ test('captures (CAPTURES_CHAINES)', async ({ page }) => {
             await cadrer('grilles-85', '#chaineGrille');
             await changerPonderation(page, 1, 40);
             await page.evaluate(() => { naviguerVers('calendrier', 'trimestre'); window.mettreAJourBarreContexte(); });
-            await pause(page, 600);
+            await attendreRepos(page);
             await cadrer('trimestre', '#barreConvergence');
             await page.evaluate(() => naviguerVers('reglages', 'preferences'));
-            await pause(page, 500);
+            await attendreRepos(page);
             await cadrer('preferences', '#v2-pref-chaines-etapes');
         }
     }

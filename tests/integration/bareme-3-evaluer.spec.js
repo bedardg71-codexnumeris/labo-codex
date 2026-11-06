@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
@@ -74,6 +75,7 @@ async function monter(page, { bareme = JOURNAL, cartouche = false, largeur = 144
     page.on('pageerror', (e) => erreurs.push(e.message));
     page.on('dialog', (d) => { erreurs.push('DIALOGUE : ' + d.message()); d.dismiss().catch(() => {}); });
     await page.setViewportSize({ width: largeur, height: largeur <= 820 ? 1180 : 900 });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForFunction(() => window.dbReady === true && window.bareme && window.syntheseRetroactionData && window.travauxExportPDF && window.jspdf
         && window.travauxUI && typeof window.travauxUI.ouvrirFichier === 'function', null, { timeout: 30000 });
@@ -92,7 +94,7 @@ async function monter(page, { bareme = JOURNAL, cartouche = false, largeur = 144
     await page.waitForTimeout(800);
     await page.evaluate(() => window.travauxUI.basculerMode('evaluer'));
     await page.waitForFunction(() => document.getElementById('eval_pts_c2') && document.getElementById('eval_pts_c3'), null, { timeout: 15000 });
-    await page.waitForTimeout(3500);   // les recalculs différés du chargement et de `afficherPalettesEval`
+    await attendreRepos(page, { horizon: 3000 });   // les recalculs différés du chargement et de `afficherPalettesEval`
     return erreurs;
 }
 

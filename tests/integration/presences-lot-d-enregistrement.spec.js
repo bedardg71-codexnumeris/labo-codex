@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -42,6 +43,7 @@ function brancherEcouteurs(page) {
 }
 
 async function ouvrirSaisieDemo(page) {
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
@@ -58,7 +60,7 @@ async function ouvrirSaisieDemo(page) {
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
-    await page.waitForTimeout(1200);
+    await attendreRepos(page);
     await page.evaluate(() => naviguerVers('suivi', 'saisie'));
     await expect(page.locator('#tbody-saisie-presences input[id^="periodes_"]').first()).toBeAttached({ timeout: 8000 });
     await attendreTableauStable(page);

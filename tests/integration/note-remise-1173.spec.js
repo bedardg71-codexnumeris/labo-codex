@@ -116,6 +116,7 @@ async function changer(page, sorte) {
 
 async function attendreRepos(page) {
     await page.waitForFunction(() => window.evaluationEnCours && window.evaluationEnCours.idModification === 'EV1173', null, { timeout: 15000 });
+    // pause-gardee : les recalculs différés ne touchent pas la note remise : un constat d'absence
     await page.waitForTimeout(3500);   // les recalculs différés des deux chargeurs (100, 200, 350 ms et plus) sont passés
     await page.waitForFunction(() => !window._timerAutoSave && !window._modifierEvaluationEnCours && window._autoSaveSuspendu !== true, null, { timeout: 10000 });
 }

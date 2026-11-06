@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -47,7 +48,6 @@ const dossierCaptures = process.env.CAPTURES_1155 || null;
 //   · cartouche retirée : les retirées hors de « Dans ta bibliothèque »                      → ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
-const pause = (page, ms) => page.waitForTimeout(ms);
 const FAMILLES = {
     echelles: { sel: '#modalBibliothequeEchelles', sousSection: 'echelle-performance', action: 'afficherBibliothequeEchelles' },
     cartouches: { sel: '#modalBibliothequeCartouches', sousSection: 'retroactions', action: 'afficherBibliothequeCartouches' }
@@ -57,13 +57,14 @@ const GRILLE_4 = 'GRILLE_DEMO_1759264206489';   // « Grille-4 » de la démonst
 async function ouvrirDemo(page, famille, largeur, hauteur) {
     page.on('dialog', async (d) => { await d.accept(); });
     await page.setViewportSize({ width: largeur, height: hauteur });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1500);
+    await attendreRepos(page);
     await page.evaluate((s) => naviguerVers('conception', s), FAMILLES[famille].sousSection);
-    await pause(page, 900);
+    await attendreRepos(page);
 }
 
 /** Le geste réel : le bouton « Consulter la bibliothèque » de l'écran. */
@@ -642,7 +643,7 @@ test('captures pour Grégoire : échelles et cartouches, Mac 1440 clair et sombr
             await semerEchelles(page, [{ id: 'ECH_BANC_BIBLIO', nom: 'Échelle fictive de la bibliothèque', niveaux: niveaux() }]);
         } else {
             await page.evaluate((s) => naviguerVers('conception', s), FAMILLES.cartouches.sousSection);
-            await pause(page, 900);
+            await attendreRepos(page);
             await semerCartouchesBibliotheque(page, [
                 cartoucheFictive('CART_BANC_A', 'Cartouche fictive A', GRILLE_4, 'Grille-4'),
                 cartoucheFictive('CART_BANC_B', 'Cartouche fictive B', 'GRILLE_FICTIVE_ABSENTE', 'Grille fictive absente')
@@ -654,13 +655,13 @@ test('captures pour Grégoire : échelles et cartouches, Mac 1440 clair et sombr
         for (const sombre of [false, true]) {
             await page.evaluate((s) => document.body.classList.toggle('mode-clair', !s), sombre);
             await colonne(page, famille, 'trimestre').locator('.biblio2-liste > .biblio2-rangee').nth(1).locator('.biblio2-kebab').click();
-            await pause(page, 300);
+            await attendreRepos(page);
             await page.screenshot({ path: path.join(dossierCaptures, `${famille}-mac-1440-${sombre ? 'sombre' : 'clair'}.png`) });
             await page.keyboard.press('Escape');
         }
         await page.evaluate(() => document.body.classList.toggle('mode-clair', true));
         await page.setViewportSize({ width: 820, height: 1180 });
-        await pause(page, 400);
+        await attendreRepos(page);
         await page.screenshot({ path: path.join(dossierCaptures, `${famille}-ipad-820-clair.png`) });
         await page.keyboard.press('Escape');
         await page.keyboard.press('Escape');

@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -26,23 +27,24 @@ const pause = (page, ms) => page.waitForTimeout(ms);
 
 async function ouvrirDemo(page) {
     page.on('dialog', async (d) => { await d.accept(); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
 }
 
 /** Le geste de Grégoire : cocher ou décocher la case dans Réglages › Préférences. */
 async function regler(page, actif) {
     await page.evaluate(() => naviguerVers('reglages', 'preferences'));
-    await pause(page, 600);
+    await attendreRepos(page);
     await page.evaluate((actif) => {
         const c = document.getElementById('v2-pref-solo');
         c.checked = actif;
         c.dispatchEvent(new Event('change', { bubbles: true }));
     }, actif);
-    await pause(page, 600);
+    await attendreRepos(page);
     expect(await page.evaluate(() => obtenirPreference('afficherDescriptionsSOLO'))).toBe(actif);
 }
 
@@ -51,9 +53,9 @@ const lireGrille = (page, id) => page.evaluate((id) =>
 
 async function ouvrirGrille(page, id) {
     await page.evaluate(() => naviguerVers('conception', 'grille-criteres'));
-    await pause(page, 800);
+    await attendreRepos(page);
     await page.evaluate((id) => chargerGrillePourModif(id), id);
-    await pause(page, 900);
+    await attendreRepos(page);
 }
 
 const premiereGrille = (page) => page.evaluate(() =>
@@ -80,18 +82,18 @@ test('#1117 — case décochée : ni « Complexité SOLO du critère » ni « Pa
 
     // « + Ajouter un critère » : le critère neuf reçoit « aucun » (Grégoire, 22 h 05).
     await page.evaluate((id) => document.querySelector(`[data-action="ajouterCritereGrille"][data-param="${id}"]`).click(), id);
-    await pause(page, 900);
+    await attendreRepos(page);
     const apres = await lireGrille(page, id);
     expect(apres.criteres.length).toBe(n + 1);
     expect(apres.criteres.at(-1).niveauSOLO).toBe('aucun');
 
     // Échelles : une échelle de la démonstration, ses niveaux rendus, sans palier SOLO.
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const idEchelle = await page.evaluate(() => (db.getSync(cle('echellesTemplates'), []) || []).find(e => (e.niveaux || []).length >= 2)?.id);
     expect(idEchelle, 'la démonstration doit porter une échelle').toBeTruthy();
     await page.evaluate((id) => chargerEchellePourModif(id), idEchelle);
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await compter(page, '[data-champ="code"]'), 'les niveaux sont bien rendus').toBeGreaterThan(1);
     expect(await compter(page, '[data-champ="niveauSOLO"]')).toBe(0);
     expect(await page.evaluate(() => document.body.innerText)).not.toContain('Palier SOLO du niveau');
@@ -99,9 +101,9 @@ test('#1117 — case décochée : ni « Complexité SOLO du critère » ni « Pa
     // Témoin : la case recochée, le palier revient.
     await regler(page, true);
     await page.evaluate(() => naviguerVers('conception', 'echelle-performance'));
-    await pause(page, 600);
+    await attendreRepos(page);
     await page.evaluate((id) => chargerEchellePourModif(id), idEchelle);
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await compter(page, '[data-champ="niveauSOLO"]')).toBeGreaterThan(1);
 });
 
@@ -118,7 +120,7 @@ test('#1117 — un critère « relationnel », enregistré champ masqué, la pag
         s.value = 'relationnel';
         s.dispatchEvent(new Event('change', { bubbles: true }));
     });
-    await pause(page, 900);
+    await attendreRepos(page);
     expect((await lireGrille(page, id)).criteres[0].niveauSOLO).toBe('relationnel');
 
     // Case décochée : on modifie le critère (sa description) et on enregistre la grille (le
@@ -132,6 +134,7 @@ test('#1117 — un critère « relationnel », enregistré champ masqué, la pag
         d.dispatchEvent(new Event('change', { bubbles: true }));
         document.getElementById('nomGrilleTemplate').dispatchEvent(new Event('change', { bubbles: true }));
     });
+    // pause-gardee : masquer n'écrit rien sur le palier SOLO : un constat d'absence
     await pause(page, 1200);
     const masquee = await lireGrille(page, id);
     expect(masquee.criteres[0].description, 'l\'enregistrement a bien eu lieu').toBe('Décrite pendant que SOLO est masqué');

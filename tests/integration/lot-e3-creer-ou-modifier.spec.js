@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -33,11 +34,12 @@ const pause = (page, ms) => page.waitForTimeout(ms);
 
 async function ouvrirDemo(page) {
     page.on('dialog', async (d) => { await d.accept(); });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1200);
+    await attendreRepos(page);
     await page.evaluate(() => { window.__toasts = [];
         new MutationObserver((ms) => ms.forEach(m => m.addedNodes.forEach(n => {
             if (n.nodeType === 1 && n.classList.contains('notification-avec-icone')) window.__toasts.push(n.innerText.replace(/\s+/g, ' ').trim());
@@ -52,13 +54,13 @@ async function changer(page, selecteur, valeur) {
         el.dispatchEvent(new Event('change', { bubbles: true })); return 1;
     }, { selecteur, valeur });
     expect(n, 'champ introuvable : ' + selecteur).toBe(1);
-    await pause(page, 700);
+    await attendreRepos(page);
 }
 
 async function cliquer(page, selecteur) {
     const n = await page.evaluate((s) => { const el = document.querySelector(s); if (!el) return 0; el.click(); return 1; }, selecteur);
     expect(n, 'élément introuvable : ' + selecteur).toBe(1);
-    await pause(page, 700);
+    await attendreRepos(page);
 }
 
 const temoinSucces = (page) => page.evaluate(() => {
@@ -77,7 +79,7 @@ async function repondre(page, texte) {
         if (!b) return 0; b.click(); return 1;
     }, texte);
     expect(n, 'bouton de la question introuvable : ' + texte).toBe(1);
-    await pause(page, 600);
+    await attendreRepos(page);
 }
 
 /* ─────────────────────────────────────────────────────────────── productions */
@@ -88,7 +90,7 @@ const empreinteEvaluations = (page) => page.evaluate(() => JSON.stringify(db.get
 /** Une production évaluée, rendue modifiable (marque « démo » retirée dans l'essai), ouverte. */
 async function ouvrirProductionEvaluee(page) {
     await page.evaluate(() => naviguerVers('conception', 'productions'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const id = await page.evaluate(async () => {
         const evals = db.getSync(cle('evaluationsSauvegardees'), []) || [];
         const liste = db.getSync(cle('productions'), []) || [];
@@ -99,7 +101,7 @@ async function ouvrirProductionEvaluee(page) {
         return p.id;
     });
     await page.evaluate((id) => chargerProductionPourModif(id), id);
-    await pause(page, 900);
+    await attendreRepos(page);
     return id;
 }
 
@@ -121,7 +123,8 @@ test('(P-a) production évaluée : un champ s\'écrit sans bouton ; changer la g
         return (db.getSync(cle('grillesTemplates'), []) || []).find(g => g.id !== p.grilleId).id;
     }, id);
     await changer(page, '#productionGrille', autre);
-    await pause(page, 400);
+    // pause-gardee : aucune évaluation réécrite, aucun message : rien à attendre, le délai est ce que l'essai observe
+    await pause(page, 1100);
     const p = (await productions(page)).find(x => x.id === id);
     expect(p.grilleId).toBe(autre);
     expect(p.cartoucheId, 'la cartouche de l\'ancienne grille ne suit pas la nouvelle').toBe('');
@@ -129,6 +132,8 @@ test('(P-a) production évaluée : un champ s\'écrit sans bouton ; changer la g
     expect(await page.evaluate(() => window.__toasts), 'aucun message de modification').toEqual([]);
 
     await cliquer(page, '[data-action="fermerFicheProduction"]');
+    // pause-gardee : une fiche existante se ferme sans question : un constat d'absence
+    await pause(page, 700);
     expect(await questionOuverte(page), 'une fiche existante se ferme sans question').toBe('');
     expect(await visible(page, '#formulaireProduction')).toBe(false);
 });
@@ -137,24 +142,28 @@ test('(P-b) nouvelle production : rien avant « Créer la production » ; « Fer
     test.setTimeout(120000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'productions'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const nb = (await productions(page)).length;
     await cliquer(page, '[data-action="creerNouvelleProduction"]');
     expect(await visible(page, '#btnCreerProduction')).toBe(true);
     await changer(page, '#productionTitre', 'Journal fictif banc E3');
     await changer(page, '#productionType', 'travail');
     await changer(page, '#productionPonderation', '10');
+    // pause-gardee : rien n'existe avant le bouton : un constat d'absence
+    await pause(page, 700);
     expect((await productions(page)).length, 'rien avant le bouton').toBe(nb);
 
     await cliquer(page, '[data-action="fermerFicheProduction"]');
     expect(await questionOuverte(page)).toBe('Cette production n\'est pas encore créée.');
     await repondre(page, 'Rester');
     expect(await page.evaluate(() => document.getElementById('productionTitre').value)).toBe('Journal fictif banc E3');
+    // pause-gardee : « Rester » n'écrit rien : un constat d'absence
+    await pause(page, 600);
     expect((await productions(page)).length).toBe(nb);
 
     await page.evaluate(() => { window.__toasts = []; });
     await cliquer(page, '#btnCreerProduction');
-    await pause(page, 600);
+    await attendreRepos(page);
     const creee = (await productions(page)).find(p => p.titre === 'Journal fictif banc E3');
     expect(creee, 'créée au clic').toBeTruthy();
     expect(creee).toMatchObject({ type: 'travail', ponderation: 10 });
@@ -166,6 +175,8 @@ test('(P-b) nouvelle production : rien avant « Créer la production » ; « Fer
 
     // Elle existe : fermer ne pose plus de question.
     await cliquer(page, '[data-action="fermerFicheProduction"]');
+    // pause-gardee : fermer ne pose plus de question : un constat d'absence
+    await pause(page, 700);
     expect(await questionOuverte(page)).toBe('');
 });
 
@@ -173,13 +184,15 @@ test('(P-b bis) « Quitter sans créer » n\'écrit rien ; ouvrir une autre prod
     test.setTimeout(120000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('conception', 'productions'));
-    await pause(page, 800);
+    await attendreRepos(page);
     const nb = (await productions(page)).length;
     await cliquer(page, '[data-action="creerNouvelleProduction"]');
     await changer(page, '#productionTitre', 'Brouillon fictif banc E3');
     await page.locator('#menuProductions').selectOption({ index: 1 });   // #1147 : choisir dans le menu de la sélection
     expect(await questionOuverte(page)).toBe('Cette production n\'est pas encore créée.');
     await repondre(page, 'Quitter sans créer');
+    // pause-gardee : « Quitter sans créer » n'écrit rien : un constat d'absence
+    await pause(page, 600);
     expect((await productions(page)).length).toBe(nb);
     expect(await visible(page, '#btnCreerProduction'), 'l\'autre production s\'est ouverte').toBe(false);
 });
@@ -196,6 +209,8 @@ test('(P-c) un échec d\'écriture : « Non enregistré – Modifier la producti
     });
     await changer(page, '#productionActivite', 'Ne doit pas s\'écrire');
     expect(await temoinEchec(page)).toMatch(/^Non enregistré – Modifier la production : /);
+    // pause-gardee : aucun succès ni message après l'échec : un constat d'absence
+    await pause(page, 700);
     expect(await temoinSucces(page), 'aucun « Enregistré »').toBe(false);
     expect(await page.evaluate(() => window.__toasts)).toEqual([]);
 });
@@ -207,6 +222,8 @@ test('(P-d) un nom vidé : « Non enregistré – Modifier la production : le no
     const titre = (await productions(page)).find(p => p.id === id).titre;
     await changer(page, '#productionTitre', '');
     expect(await temoinEchec(page)).toBe('Non enregistré – Modifier la production : le nom de la production est requis.');
+    // pause-gardee : le nom vidé n'écrit rien : un constat d'absence
+    await pause(page, 700);
     expect((await productions(page)).find(p => p.id === id).titre).toBe(titre);
 });
 
@@ -223,7 +240,7 @@ async function ouvrirInterventions(page, stock) {
     await ouvrirDemo(page);
     if (stock) await page.evaluate((stock) => { db.setSync(cle('interventions'), stock); }, stock);
     await page.evaluate(() => naviguerVers('suivi', 'interventions'));
-    await pause(page, 900);
+    await attendreRepos(page);
 }
 
 async function uneIntervention(page, extra) {
@@ -241,9 +258,9 @@ test('(I-a) intervention complétée modifiée : écrite sans bouton, aucune pr�
     const stock = [await uneIntervention(page, { statut: 'completee' })];
     await page.evaluate((stock) => { db.setSync(cle('interventions'), stock); }, stock);
     await page.evaluate(() => naviguerVers('suivi', 'interventions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate(() => ouvrirIntervention('INT-E3'));
-    await pause(page, 700);
+    await attendreRepos(page);
     const avant = await empreintePresences(page);
     await page.evaluate(() => { window.__toasts = []; });
     await changer(page, '#interventionDate', '2026-09-11');
@@ -251,6 +268,8 @@ test('(I-a) intervention complétée modifiée : écrite sans bouton, aucune pr�
     const i = (await interventions(page)).find(x => x.id === 'INT-E3');
     expect(i).toMatchObject({ date: '2026-09-11', observations: 'Observation fictive banc E3', statut: 'completee' });
     expect(await temoinSucces(page)).toBe(true);
+    // pause-gardee : aucune présence écrite, aucun message, aucune question : un constat d'absence
+    await pause(page, 700);
     expect(await empreintePresences(page), 'aucune présence écrite par une modification').toBe(avant);
     expect(await page.evaluate(() => window.__toasts)).toEqual([]);
     expect(await questionOuverte(page)).toBe('');
@@ -262,9 +281,9 @@ test('(I-b) passage à « Complétée » : la question et sa case DÉCOCHÉE ; �
     const stock = [await uneIntervention(page)];
     await page.evaluate((stock) => { db.setSync(cle('interventions'), stock); }, stock);
     await page.evaluate(() => naviguerVers('suivi', 'interventions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate(() => ouvrirIntervention('INT-E3'));
-    await pause(page, 700);
+    await attendreRepos(page);
     const avant = await empreintePresences(page);
     const laCase = () => page.evaluate(() => {
         const c = document.querySelector('#overlay-ui-dialogue input[type="checkbox"]');
@@ -277,24 +296,27 @@ test('(I-b) passage à « Complétée » : la question et sa case DÉCOCHÉE ; �
     expect(await laCase()).toEqual({ coche: false, texte: 'Reporter les présences dans la saisie des présences : la présence à cette intervention compensera une absence au cours.' });
     await repondre(page, 'Annuler');
     expect((await interventions(page))[0].statut).toBe('en-cours');
+    // pause-gardee : « Annuler » n'écrit rien : un constat d'absence
+    await pause(page, 600);
     expect(await empreintePresences(page)).toBe(avant);
     expect(await page.evaluate(() => document.querySelector('input[name="interventionStatut"][value="en-cours"]').checked)).toBe(true);
 
     // (2) « Marquer complétée » sans toucher la case : complétée, AUCUNE présence.
     await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
     await repondre(page, 'Marquer complétée');
-    await pause(page, 500);
+    // pause-gardee : case décochée, aucune présence écrite : un constat d'absence
+    await pause(page, 1100);
     expect((await interventions(page))[0].statut).toBe('completee');
     expect(await empreintePresences(page), 'case décochée : rien dans les présences').toBe(avant);
     expect(await visible(page, '#observationsBilan'), 'le bilan paraît').toBe(true);
 
     // (3) De retour « En préparation », puis complétée case COCHÉE : le report, une fois.
     await changer(page, 'input[name="interventionStatut"][value="en-cours"]', true);
-    await pause(page, 400);
     await changer(page, 'input[name="interventionStatut"][value="completee"]', true);
     await page.evaluate(() => { document.querySelector('#overlay-ui-dialogue input[type="checkbox"]').click(); });
     await repondre(page, 'Marquer complétée');
-    await pause(page, 500);
+    // pause-gardee : le report a lieu une fois : un second report n'aurait aucun signal
+    await pause(page, 1100);
     const da = stock[0].etudiants[0];
     const reportees = await page.evaluate(({ da }) => (db.getSync(cle('presences'), []) || []).filter(p => p.da === da && p.date === '2026-09-10' && p.facultatif), { da });
     expect(reportees.length, 'case cochée : le report a eu lieu, une fois').toBe(1);
@@ -305,22 +327,28 @@ test('(I-c) nouvelle intervention : rien avant « Créer l\'intervention » ; «
     await ouvrirInterventions(page, []);
     await cliquer(page, '[data-action="afficherFormulaireIntervention"]');
     await changer(page, '#interventionTitre', 'Atelier fictif banc E3');
+    // pause-gardee : rien n'existe avant le bouton : un constat d'absence
+    await pause(page, 700);
     expect(await interventions(page)).toEqual([]);
     await cliquer(page, '[data-action="fermerFicheIntervention"]');
     expect(await questionOuverte(page)).toBe('Cette intervention n\'est pas encore créée.');
     await repondre(page, 'Rester');
     expect(await page.evaluate(() => document.getElementById('interventionTitre').value)).toBe('Atelier fictif banc E3');
+    // pause-gardee : « Rester » n'écrit rien : un constat d'absence
+    await pause(page, 600);
     expect(await interventions(page)).toEqual([]);
 
     await page.evaluate(() => { window.__toasts = []; });
     const n = await page.evaluate(() => { const b = [...document.querySelectorAll('[data-action="sauvegarderPresencesIntervention"]')].find(x => x.textContent.trim() === 'Créer l\'intervention'); if (!b) return 0; b.click(); return 1; });
     expect(n, 'bouton « Créer l\'intervention »').toBe(1);
-    await pause(page, 700);
+    await attendreRepos(page);
     const liste = await interventions(page);
     expect(liste.map(i => i.titre)).toEqual(['Atelier fictif banc E3']);
     expect(await page.evaluate(() => window.__toasts.some(t => t.includes('Intervention créée.')))).toBe(true);
     expect(await page.evaluate(() => [...document.querySelectorAll('[data-action="sauvegarderPresencesIntervention"]')].length), 'elle existe : « Fermer » seul').toBe(0);
     await cliquer(page, '[data-action="fermerFicheIntervention"]');
+    // pause-gardee : fermer ne pose plus de question : un constat d'absence
+    await pause(page, 700);
     expect(await questionOuverte(page)).toBe('');
 });
 
@@ -330,10 +358,12 @@ test('(I-d) changer de sous-onglet puis revenir : la création en cours est touj
     await cliquer(page, '[data-action="afficherFormulaireIntervention"]');
     await changer(page, '#interventionTitre', 'Brouillon fictif banc E3');
     await page.evaluate(() => naviguerVers('suivi', 'liste'));
-    await pause(page, 700);
+    await attendreRepos(page);
     await page.evaluate(() => naviguerVers('suivi', 'interventions'));
-    await pause(page, 900);
+    await attendreRepos(page);
     expect(await page.evaluate(() => document.getElementById('interventionTitre')?.value)).toBe('Brouillon fictif banc E3');
+    // pause-gardee : changer de sous-onglet n'écrit rien : un constat d'absence
+    await pause(page, 900);
     expect(await interventions(page)).toEqual([]);
 });
 
@@ -351,9 +381,9 @@ async function ouvrirVolet(page) {
         window.afficherProfilComplet(da);
         window.changerSectionProfil('accompagnement');
     }, da);
-    await pause(page, 700);
+    await attendreRepos(page);
     await page.evaluate((da) => window.ouvrirModalConfidentiel(da), da);
-    await pause(page, 400);
+    await attendreRepos(page);
     return da;
 }
 const pastille = (page) => page.evaluate(() => {
@@ -381,13 +411,15 @@ test('(C-b) anonymisation : le volet est masqué et rien ne s\'écrit depuis lui
     test.setTimeout(120000);
     await ouvrirDemo(page);
     await page.evaluate(async () => { await changerMode('anonymisation'); });
-    await pause(page, 800);
+    await attendreRepos(page);
     await ouvrirVolet(page);
     expect(await visible(page, '#confidentiel-champs')).toBe(false);
     const avant = await confidentiel(page);
     // Un changement forcé sur un champ masqué (aucun geste ne peut l'atteindre, un script si).
     await changer(page, '#confidentiel-notes', 'écrit depuis un volet masqué');
     await changer(page, '#confidentiel-epgc', true);
+    // pause-gardee : rien ne s'écrit depuis un volet masqué : un constat d'absence
+    await pause(page, 700);
     expect(await confidentiel(page)).toBe(avant);
     expect(await page.evaluate(() => window.sauvegarderConfidentiel())).toBe(false);
     expect(await confidentiel(page)).toBe(avant);
@@ -401,12 +433,14 @@ test('(R-a) seuils mal ordonnés : « Non enregistré – Seuils : … », les c
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('labo', 'accompagnement'));
-    await pause(page, 900);
+    await attendreRepos(page);
     const avant = await page.evaluate(() => JSON.stringify(db.getSync('seuilsInterpretation', null)));
     const valeurs = await page.evaluate(() => ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon'].map(id => document.getElementById(id).value));
     await page.evaluate(() => { window.__toasts = []; });
     await changer(page, '#v2-seuil-fragile', String(Number(valeurs[1]) + 1));   // au-dessus du palier suivant
     expect(await temoinEchec(page)).toBe('Non enregistré – Seuils : les seuils doivent aller du plus bas au plus haut (Fragile < Acceptable < Bon).');
+    // pause-gardee : aucun succès, rien d'écrit, aucun message : un constat d'absence
+    await pause(page, 700);
     expect(await temoinSucces(page)).toBe(false);
     expect(await page.evaluate(() => ['v2-seuil-fragile', 'v2-seuil-acceptable', 'v2-seuil-bon'].map(id => document.getElementById(id).value))).toEqual(valeurs);
     expect(await page.evaluate(() => JSON.stringify(db.getSync('seuilsInterpretation', null)))).toBe(avant);
@@ -421,7 +455,7 @@ test('(R-b) une préférence changée s\'écrit, le témoin le dit ; aucun bouto
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => naviguerVers('reglages', 'preferences'));
-    await pause(page, 900);
+    await attendreRepos(page);
     const avant = await page.evaluate(() => obtenirPreference('chronoEvaluation'));
     await changer(page, '#v2-pref-chrono-eval', !avant);
     expect(await page.evaluate(() => obtenirPreference('chronoEvaluation'))).toBe(!avant);
@@ -438,7 +472,7 @@ test('(B-a) auto-réflexion : plus de bouton « Enregistrer » ; un geste s\'éc
     test.setTimeout(90000);
     await ouvrirDemo(page);
     await page.evaluate(() => { window.initialiserBilanReflexif(); BilanReflexif.afficherVue('reflexion'); });
-    await pause(page, 600);
+    await attendreRepos(page);
     const vue = await page.evaluate(() => {
         const racine = document.getElementById('bilan-conteneur-principal') || document.body;
         return { html: racine.innerHTML, boutons: [...racine.querySelectorAll('button')].map(b => b.textContent.trim()) };
@@ -467,9 +501,9 @@ const chevauche = (a, b) => !!(a && b && a.g < b.d && b.g < a.d && a.h < b.b && 
 async function verifierPlacement(page, largeur, selecteurs, preparer) {
     await page.setViewportSize({ width: largeur, height: 900 });
     await preparer();
-    await pause(page, 500);
+    await attendreRepos(page);
     await page.evaluate((s) => { document.querySelector(s)?.scrollIntoView({ block: 'center' }); }, Object.values(selecteurs)[0]);
-    await pause(page, 300);
+    await attendreRepos(page);
     await page.evaluate(() => window.temoinEnregistrement.enregistre('banc'));
     const m = await mesurerBoutons(page, selecteurs);
     for (const nom of Object.keys(selecteurs)) {

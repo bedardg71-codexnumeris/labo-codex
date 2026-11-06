@@ -1,0 +1,18 @@
+evaluation-961-retroaction-ne-suit-plus-les-niveaux.spec.js	avant	0	224.42	24 passed 
+evaluation-961-retroaction-ne-suit-plus-les-niveaux.spec.js	apres	0	223.38	24 passed 
+evaluation-961-retroaction-ne-suit-plus-les-niveaux.spec.js	apres	0	223.94	24 passed 
+evaluation-961-retroaction-ne-suit-plus-les-niveaux.spec.js	avant	0	224.18	24 passed 
+grille-critere-ajoute-enregistrer-957.spec.js	avant	0	46.08	6 passed 
+grille-critere-ajoute-enregistrer-957.spec.js	apres	0	32.62	6 passed 
+grille-critere-ajoute-enregistrer-957.spec.js	apres	0	32.48	6 passed 
+grille-critere-ajoute-enregistrer-957.spec.js	avant	0	46.31	6 passed 
+lot-e1-conception-creer-ou-modifier.spec.js	avant	0	86.83	11 passed 
+lot-e1-conception-creer-ou-modifier.spec.js	apres	0	53.36	11 passed 
+lot-e1-conception-creer-ou-modifier.spec.js	apres	0	53.47	11 passed 
+lot-e1-conception-creer-ou-modifier.spec.js	avant	0	86.94	11 passed 
+lot-e2-cadre-creer-ou-modifier.spec.js	avant	1	273.56	2 failed 8 passed 
+lot-e2-cadre-creer-ou-modifier.spec.js	apres	1	204.05	1 failed 9 passed 
+lot-e2-cadre-creer-ou-modifier.spec.js	apres	0	43.41	10 passed 
+lot-e2-cadre-creer-ou-modifier.spec.js	avant	0	62.09	10 passed 
+interrompu 07:28 par Claude Code (Mac déconnecté ~20 min), reprise à lot-e3
+lot-e2 : les quatre passages ci-dessus sont ÉCARTÉS — le Mac est entré en veille d'inactivité à 07:17:19 (pmset -g log), sur batterie ; rejouée dans res-mesure-2026-11-06-b.tsv

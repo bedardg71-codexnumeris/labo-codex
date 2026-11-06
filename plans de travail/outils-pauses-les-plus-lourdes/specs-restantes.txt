@@ -1,0 +1,11 @@
+evaluation-961-retroaction-ne-suit-plus-les-niveaux.spec.js
+grille-critere-ajoute-enregistrer-957.spec.js
+lot-e1-conception-creer-ou-modifier.spec.js
+lot-e2-cadre-creer-ou-modifier.spec.js
+lot-e3-creer-ou-modifier.spec.js
+note-remise-1173.spec.js
+ouverture-sans-geste-981-983.spec.js
+planif-menu-vue.spec.js
+presences-lot-d-enregistrement.spec.js
+solo-suit-le-reglage-1117.spec.js
+statut-incomplet-travail-en-cours.spec.js

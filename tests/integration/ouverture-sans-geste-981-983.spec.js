@@ -63,6 +63,7 @@ async function ouvrir(page) {
     await page.waitForFunction(() => window.db && typeof window.cle === 'function', null, { timeout: 30000 });
     // Le démarrage n'émet aucun signal de fin : on attend le CALME — au moins 6 s, puis 3 s sans nouvelle
     // écriture (un délai fixe seul a lu, une fois sur six sous charge, avant les migrations de `cours.js`).
+    // pause-gardee : une ouverture n'écrit rien, et le démarrage n'émet aucun signal de fin : un constat d'absence
     await page.waitForTimeout(6000);
     let n = -1;
     for (let i = 0; i < 12; i++) {

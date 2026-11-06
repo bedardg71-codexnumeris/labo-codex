@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { attendreApplication } from './harness/attendre-application.js';
+import { attendreRepos, suivreLesReactions } from './harness/attendre-repos.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -45,7 +46,6 @@ const dossierCaptures = process.env.CAPTURES_1159 || null;
 //   · échappement : `echapperHtml(r.nom)` → `r.nom` dans `_renderRangee` → « nom hostile » ROUGIT.
 // ═══════════════════════════════════════════════════════════════════════════════════════════
 
-const pause = (page, ms) => page.waitForTimeout(ms);
 const NOM_HOSTILE = 'Hiver 2033 <img src=x data-banc-1159="1"> (fictif)';
 
 /** La démonstration, puis les fiches fictives du banc (fixtures littérales). */
@@ -54,11 +54,12 @@ async function ouvrirDemo(page, largeur) {
     page.on('pageerror', (e) => erreurs.push(e.message));
     page.on('dialog', async (d) => { await d.accept(); });
     await page.setViewportSize({ width: largeur, height: 900 });
+    await suivreLesReactions(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
-    await pause(page, 1500);
+    await attendreRepos(page);
     await page.evaluate(async (nomHostile) => {
         // security-ok: fixtures littérales écrites par le banc, aucune source externe
         const trimestres = window.db.getSync('trimestres', []).filter(t => !/^[ha]20(32|33)$/.test(t.id));
@@ -81,7 +82,7 @@ async function ouvrirDemo(page, largeur) {
         Codex.proposerAvantSuppression = async () => true;   // la fenêtre du codex (#1007) a ses propres bancs
     }, NOM_HOSTILE);
     await page.evaluate(() => { window.afficherSection('calendrier'); window.afficherSousSection('calendrier-trimestre'); });
-    await pause(page, 900);
+    await attendreRepos(page);
     await page.evaluate(() => { document.getElementById('overlay-backup-reminder')?.remove(); document.getElementById('transition-bandeau')?.remove(); });
     return erreurs;
 }
@@ -98,7 +99,7 @@ async function ouvrir(page, cle) {
     const ferme = await page.evaluate((id) => document.getElementById(id).classList.contains('ferme'), f.accordeon);
     if (ferme) {
         await page.locator(`#${f.accordeon} > .accordeon-header`).click();
-        await pause(page, 600);
+        await attendreRepos(page);
     }
     const bouton = page.locator(`#${f.accordeon} [data-action="${f.action}"]`);
     await bouton.scrollIntoViewIfNeeded();
@@ -362,7 +363,7 @@ test('captures pour Grégoire : les trois fenêtres, Mac 1440 clair et sombre (u
         for (const cle of Object.keys(FENETRES)) {
             const fen = await ouvrir(page, cle);
             await repli(fen).locator('summary').click();
-            await pause(page, 300);
+            await attendreRepos(page);
             const appareil = largeur === 1440 ? 'mac' : 'ipad';
             await page.screenshot({ path: path.join(dossierCaptures, `${cle}-${appareil}-${largeur}-${sombre ? 'sombre' : 'clair'}.png`) });
             await page.keyboard.press('Escape');
