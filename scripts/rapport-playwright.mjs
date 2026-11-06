@@ -11,31 +11,52 @@
  */
 
 /**
- * Identité d'une spec, STABLE dans le temps.
+ * Identité d'un essai, STABLE dans le temps et UNIQUE dans la suite.
  *
- * Volontairement « fichier › titre », sans le numéro de ligne : une ligne bouge
- * dès qu'on édite le fichier au-dessus, et la baseline se mettrait alors à
+ * « fichier › bloc › sous-bloc › titre », sans le numéro de ligne : une ligne
+ * bouge dès qu'on édite le fichier au-dessus, et la baseline se mettrait alors à
  * dénoncer des échecs « nouveaux » qui sont les mêmes. Le titre, lui, ne bouge
  * que si l'on change ce que la spec vérifie — auquel cas la revoir est justement
- * ce qu'on veut.
+ * ce qu'on veut. Un essai hors de tout bloc reste « fichier › titre ».
+ *
+ * Les blocs (`test.describe`) en font partie depuis le 1er nov. 2026 (#1114) :
+ * sans eux, deux essais de même titre dans deux blocs d'un fichier (le même geste
+ * à 1440 px et à 820 px) n'avaient qu'une identité, et la rouge de l'un était
+ * couverte par l'entrée connue de l'autre. 11 paires dans la suite ce jour-là.
  */
-export function identite(fichier, titre) {
-    return `${fichier.replace(/\\/g, '/')} › ${titre}`;
+export function identite(fichier, blocs, titre) {
+    return [fichier.replace(/\\/g, '/'), ...blocs, titre].join(' › ');
 }
 
-/** Parcourt l'arbre de suites du rapport JSON et rend les specs en échec. */
-export function echecsDuRapport(rapport) {
-    const trouves = [];
-    const descendre = (suites) => {
+/**
+ * Le seul parcours du rapport JSON : chaque spec, avec son identité. Au premier
+ * niveau, une suite est un FICHIER (son titre est son chemin, déjà dans
+ * l'identité) ; plus bas, c'est un bloc. Un bloc anonyme n'a pas de titre : il
+ * n'ajoute rien.
+ */
+function parcourirSpecs(rapport, visiter) {
+    const descendre = (suites, blocs, auPremierNiveau) => {
         for (const suite of suites ?? []) {
+            const chemin = auPremierNiveau ? [] : [...blocs, suite.title].filter(Boolean);
             for (const spec of suite.specs ?? []) {
-                if (spec.ok === false) trouves.push(identite(spec.file ?? suite.file ?? '?', spec.title));
+                visiter(spec, identite(spec.file ?? suite.file ?? '?', chemin, spec.title));
             }
-            descendre(suite.suites);
+            descendre(suite.suites, chemin, false);
         }
     };
-    descendre(rapport.suites);
+    descendre(rapport.suites, [], true);
+}
+
+/** Les identités des specs qui répondent à `garder`, triées. */
+function specsDuRapport(rapport, garder) {
+    const trouves = [];
+    parcourirSpecs(rapport, (spec, id) => { if (garder(spec)) trouves.push(id); });
     return trouves.sort();
+}
+
+/** Les specs en échec. */
+export function echecsDuRapport(rapport) {
+    return specsDuRapport(rapport, (spec) => spec.ok === false);
 }
 
 /**
@@ -48,18 +69,7 @@ export function echecsDuRapport(rapport) {
  * su juger ne doit jamais ressembler à ce qui va bien.
  */
 export function flakyDuRapport(rapport) {
-    const trouves = [];
-    const descendre = (suites) => {
-        for (const suite of suites ?? []) {
-            for (const spec of suite.specs ?? []) {
-                const instable = (spec.tests ?? []).some((t) => t.status === 'flaky');
-                if (instable) trouves.push(identite(spec.file ?? suite.file ?? '?', spec.title));
-            }
-            descendre(suite.suites);
-        }
-    };
-    descendre(rapport.suites);
-    return trouves.sort();
+    return specsDuRapport(rapport, (spec) => (spec.tests ?? []).some((t) => t.status === 'flaky'));
 }
 
 /**
@@ -69,18 +79,7 @@ export function flakyDuRapport(rapport) {
  * juge en a besoin pour ne dire « redevenue verte » que ce qu'il a VU vert.
  */
 export function vertsDuRapport(rapport) {
-    const trouves = [];
-    const descendre = (suites) => {
-        for (const suite of suites ?? []) {
-            for (const spec of suite.specs ?? []) {
-                const jouee = (spec.tests ?? []).some((t) => t.status === 'expected' || t.status === 'flaky');
-                if (spec.ok !== false && jouee) trouves.push(identite(spec.file ?? suite.file ?? '?', spec.title));
-            }
-            descendre(suite.suites);
-        }
-    };
-    descendre(rapport.suites);
-    return trouves.sort();
+    return specsDuRapport(rapport, (spec) => spec.ok !== false && (spec.tests ?? []).some((t) => t.status === 'expected' || t.status === 'flaky'));
 }
 
 /**

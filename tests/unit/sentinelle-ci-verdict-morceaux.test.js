@@ -31,6 +31,10 @@ import { readdirSync } from 'node:fs';
 // #1114 (29 oct. 2026, retouche du verdict de Cowork) — la garde `!rattrapees.has(e)`
 // retirée de `reparees` → E.e et E.i rouges ; `instables` retiré de l'appel du
 // juge de la CI → E.i et E.j rouges.
+// #1114 (1er nov. 2026) — l'identité sans ses blocs (`[]` au lieu de `chemin` dans
+// parcourirSpecs) → F.a, F.b, F.c, F.d rouges ; le premier niveau compté comme un bloc
+// → F.a, F.b, F.c, F.d rouges ; le bloc anonyme non filtré → F.c rouge (et les bancs
+// A, C, D, E, dont le bloc n'a pas de titre) ; une connue aussi intermittente → D.a, E.h, F.e rouges.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -219,6 +223,62 @@ describe('D — #1114 : GitHub juge contre la baseline Linux', () => {
         expect(linux.echecsConnus.length).toBe(linux.totalEchecsConnus);
         for (const e of linux.echecsConnus) expect(e).toMatch(/^[^/›]+\.spec\.js › ./);
         expect(new Set(linux.echecsConnus).size).toBe(linux.echecsConnus.length);
+    });
+});
+
+describe('F — #1114 (1er nov. 2026) : l’identité d’un essai porte le chemin de ses blocs', () => {
+    /** La forme mesurée de `merge-reports --reporter=json` : premier niveau = le fichier, titré par son chemin. */
+    const rapportEnBlocs = (fichier, blocs, specsHorsBloc = []) => {
+        const spec = (titre, statut) => ({ file: fichier, title: titre, ok: statut !== 'unexpected', tests: [{ status: statut }] });
+        return {
+            suites: [{
+                title: fichier, file: fichier,
+                specs: specsHorsBloc.map(([t, st]) => spec(t, st)),
+                suites: blocs.map(({ titre, specs = [], suites = [] }) => ({
+                    title: titre, file: fichier,
+                    specs: specs.map(([t, st]) => spec(t, st)),
+                    suites: suites.map((b) => ({ title: b.titre, file: fichier, specs: b.specs.map(([t, st]) => spec(t, st)) }))
+                }))
+            }]
+        };
+    };
+    const jumeaux = (rougeA, rougeB) => rapportEnBlocs('double.spec.js', [
+        { titre: 'à 1440 px', specs: [['le geste', rougeA]] },
+        { titre: 'à 820 px', specs: [['le geste', rougeB]] }
+    ]);
+
+    it('F.a dans un bloc : « fichier › bloc › titre » ; le fichier n’y figure qu’une fois', () => {
+        expect(echecsDuRapport(jumeaux('unexpected', 'expected'))).toEqual(['double.spec.js › à 1440 px › le geste']);
+        expect(vertsDuRapport(jumeaux('unexpected', 'expected'))).toEqual(['double.spec.js › à 820 px › le geste']);
+    });
+
+    it('F.b CONTRE-ÉPREUVE : même titre, deux blocs, l’un connu rouge ; si c’est l’AUTRE qui rougit, c’est nouveau', () => {
+        const base = { echecsConnus: ['double.spec.js › à 1440 px › le geste'] };
+        const r = jumeaux('expected', 'unexpected');
+        const juge = comparerALaBaseline({ echecs: echecsDuRapport(r), verts: vertsDuRapport(r), instables: flakyDuRapport(r) }, base);
+        expect(juge.nouveaux).toEqual(['double.spec.js › à 820 px › le geste']);
+        expect(juge.reparees).toEqual(['double.spec.js › à 1440 px › le geste']);
+    });
+
+    it('F.c hors bloc, l’identité ne change pas : « fichier › titre » ; sous-bloc : tout le chemin ; bloc anonyme : rien', () => {
+        const r = rapportEnBlocs('a.spec.js', [
+            { titre: 'bloc', suites: [{ titre: 'sous-bloc', specs: [['profond', 'unexpected']] }] },
+            { titre: '', specs: [['anonyme', 'unexpected']] }
+        ], [['à plat', 'unexpected']]);
+        expect(echecsDuRapport(r)).toEqual(['a.spec.js › anonyme', 'a.spec.js › bloc › sous-bloc › profond', 'a.spec.js › à plat']);
+    });
+
+    it('F.d les trois lectures partagent la même identité', () => {
+        const r = rapportEnBlocs('a.spec.js', [{ titre: 'bloc', specs: [['rattrapé', 'flaky']] }]);
+        expect(flakyDuRapport(r)).toEqual(['a.spec.js › bloc › rattrapé']);
+        expect(vertsDuRapport(r)).toEqual(['a.spec.js › bloc › rattrapé']);
+    });
+
+    it('F.e la baseline Linux : les totaux disent les listes, aucune entrée en double ni dans les deux listes', () => {
+        const linux = JSON.parse(readFileSync(path.join(racine, 'scripts', 'playwright-baseline-linux.json'), 'utf8'));
+        const toutes = [...linux.echecsConnus, ...linux.echecsIntermittents];
+        expect(linux.echecsIntermittents.length).toBe(linux.totalEchecsIntermittents);
+        expect(new Set(toutes).size).toBe(toutes.length);
     });
 });
 

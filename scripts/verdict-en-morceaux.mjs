@@ -28,6 +28,11 @@
  *
  * Avant de lancer les morceaux : Cowork, Chrome et Safari fermés, sur secteur.
  *
+ * LA PASSE GARDÉE (1er nov. 2026) : les rapports de la dernière passe (blobs et
+ * rapport fusionné) restent hors dépôt, dans PASSE_GARDEE, jusqu'à la suivante.
+ * Lecture : node scripts/mesurer-verification.mjs. Ne rien pouvoir garder n'empêche
+ * jamais un verdict.
+ *
  * LE REPORT — les trois conditions de la consigne du 26 oct., généralisées :
  *   1. Le jeton en place est VERT (code 0) et son SHA est un ancêtre de HEAD ;
  *      entre les deux, `git diff --name-only` ne nomme que `plans de travail/`,
@@ -45,12 +50,13 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync, mkdtempSync, mkdirSync, copyFileSync, rmSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, mkdirSync, copyFileSync, cpSync, rmSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { echecsDuRapport, flakyDuRapport, vertsDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
 import { fichiersDuMorceau, filtreDe } from './morceau-playwright.mjs';
+import { PASSE_GARDEE } from './mesurer-verification.mjs';
 import {
     lireEchangeMo, lirePression, lireCapacites, lireAlimentation, lireAssertionsSysteme,
     lireAssertionsDuProcessus, jugerEveil, jugerLancementMemoire, memoireAuPlusHaut,
@@ -178,12 +184,21 @@ export function jetonDeVerdict({ sha, code, echecs = [], instables = [], garde =
     };
 }
 
+/** Garde les rapports d'une passe hors dépôt ; la précédente est remplacée, jamais mêlée. */
+export function garderLaPasse({ blobs, rapport, sha, destination }) {
+    rmSync(destination, { recursive: true, force: true });
+    mkdirSync(destination, { recursive: true });
+    cpSync(blobs, path.join(destination, 'blobs'), { recursive: true });
+    copyFileSync(rapport, path.join(destination, 'rapport.json'));
+    writeFileSync(path.join(destination, 'commit.txt'), `${sha}\n`, 'utf8');
+}
+
 // ── Les deux gestes, effets injectés (les bancs passent des doublures) ────────
 
 /**
  * Joue les morceaux l'un après l'autre, fusionne, juge, écrit le jeton.
  * `effets` : sha, fichiersSales, observable, specs, tenirEveil, releverMemoire,
- * jouerMorceau, blobs, fusionner, baseline, veilles, ecrireJeton, dire, maintenant.
+ * jouerMorceau, blobs, fusionner, garderLaPasse, baseline, veilles, ecrireJeton, dire, maintenant.
  */
 export async function executerVerdict(effets, { total = 10 } = {}) {
     const dire = effets.dire;
@@ -234,6 +249,11 @@ export async function executerVerdict(effets, { total = 10 } = {}) {
         rapport = effets.fusionner();
     } catch (erreur) {
         return nonJuge('fusion', erreur.message);
+    }
+    try {
+        effets.garderLaPasse(sha);
+    } catch (erreur) {
+        dire(`⚠ Rapports de la passe non gardés (${erreur.message}) : le verdict n'en dépend pas.`);
     }
     const juge = jugerRapportFusionne(rapport, effets.baseline(), plan.flat());
     if (juge.code === CODES.NON_JUGE) return nonJuge('rapport', juge.raison);
@@ -405,6 +425,7 @@ async function principal() {
                 if (!existsSync(fichier)) throw new Error(`merge-reports n'a rien produit (code ${r.status}) : ${(r.stderr || '').split('\n')[0]}`);
                 return JSON.parse(readFileSync(fichier, 'utf8'));
             },
+            garderLaPasse: (sha) => garderLaPasse({ blobs, rapport: path.join(dossier, 'rapport.json'), sha, destination: PASSE_GARDEE }),
             baseline: () => JSON.parse(readFileSync(BASELINE, 'utf8')),
             veilles: (debut, fin) => (surMac ? lireVeillesDuJournal(lire('pmset', ['-g', 'log']), debut, fin) : [])
         }, { total });
