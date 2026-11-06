@@ -1,0 +1,64 @@
+1007-codex-a-part-avant-suppression.spec.js	avant	0	74.92	7 passed 
+1007-codex-a-part-avant-suppression.spec.js	apres	0	65.04	7 passed 
+1007-codex-a-part-avant-suppression.spec.js	apres	0	64.83	7 passed 
+1007-codex-a-part-avant-suppression.spec.js	avant	0	75.36	7 passed 
+bareme-3-evaluer.spec.js	avant	0	77.24	1 skipped 10 passed 
+bareme-3-evaluer.spec.js	apres	0	62.55	1 skipped 10 passed 
+bareme-3-evaluer.spec.js	apres	0	62.92	1 skipped 10 passed 
+bareme-3-evaluer.spec.js	avant	0	77.10	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1154.spec.js	avant	0	45.56	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1154.spec.js	apres	0	34.81	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1154.spec.js	apres	0	34.94	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1154.spec.js	avant	0	45.51	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1155.spec.js	avant	0	65.79	1 skipped 15 passed 
+bibliotheque-deux-colonnes-1155.spec.js	apres	0	50.21	1 skipped 15 passed 
+bibliotheque-deux-colonnes-1155.spec.js	apres	0	50.07	1 skipped 15 passed 
+bibliotheque-deux-colonnes-1155.spec.js	avant	0	65.94	1 skipped 15 passed 
+bibliotheque-deux-colonnes-1156.spec.js	avant	1	528.89	3 failed 1 skipped 15 passed 
+bibliotheque-deux-colonnes-1156.spec.js	apres	0	59.96	1 skipped 18 passed 
+bibliotheque-deux-colonnes-1156.spec.js	apres	0	58.80	1 skipped 18 passed 
+bibliotheque-deux-colonnes-1156.spec.js	avant	0	78.02	1 skipped 18 passed 
+bibliotheque-deux-colonnes-1157.spec.js	avant	0	43.17	1 skipped 9 passed 
+bibliotheque-deux-colonnes-1157.spec.js	apres	0	32.17	1 skipped 9 passed 
+bibliotheque-deux-colonnes-1157.spec.js	apres	0	32.16	1 skipped 9 passed 
+bibliotheque-deux-colonnes-1157.spec.js	avant	0	43.13	1 skipped 9 passed 
+bibliotheque-deux-colonnes-1158.spec.js	avant	0	50.05	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1158.spec.js	apres	0	36.38	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1158.spec.js	apres	0	36.29	1 skipped 10 passed 
+bibliotheque-deux-colonnes-1158.spec.js	avant	0	50.62	1 skipped 10 passed 
+bibliotheque-liste-1159.spec.js	avant	0	75.75	1 skipped 14 passed 
+bibliotheque-liste-1159.spec.js	apres	0	60.48	1 skipped 14 passed 
+bibliotheque-liste-1159.spec.js	apres	0	73.05	1 skipped 14 passed 
+bibliotheque-liste-1159.spec.js	avant	0	76.43	1 skipped 14 passed 
+bibliotheques-menu-1147.spec.js	avant	0	87.21	14 passed 
+bibliotheques-menu-1147.spec.js	apres	0	56.19	14 passed 
+bibliotheques-menu-1147.spec.js	apres	0	56.09	14 passed 
+bibliotheques-menu-1147.spec.js	avant	0	87.04	14 passed 
+bibliotheques-menu-cadre-1148.spec.js	avant	0	75.73	15 passed 
+bibliotheques-menu-cadre-1148.spec.js	apres	0	53.87	15 passed 
+bibliotheques-menu-cadre-1148.spec.js	apres	0	54.09	15 passed 
+bibliotheques-menu-cadre-1148.spec.js	avant	0	75.82	15 passed 
+cartouche-copie-evaluee-fait-foi-946.spec.js	avant	0	60.53	8 passed 
+cartouche-copie-evaluee-fait-foi-946.spec.js	apres	0	60.56	8 passed 
+cartouche-copie-evaluee-fait-foi-946.spec.js	apres	0	63.23	8 passed 
+cartouche-copie-evaluee-fait-foi-946.spec.js	avant	0	60.54	8 passed 
+chaines-etapes-1149-lot-3b.spec.js	avant	0	71.96	1 skipped 9 passed 
+chaines-etapes-1149-lot-3b.spec.js	apres	0	66.26	1 skipped 9 passed 
+chaines-etapes-1149-lot-3b.spec.js	apres	0	66.16	1 skipped 9 passed 
+chaines-etapes-1149-lot-3b.spec.js	avant	0	72.00	1 skipped 9 passed 
+chaines-etapes-1149.spec.js	avant	0	27.41	1 skipped 6 passed 
+chaines-etapes-1149.spec.js	apres	0	23.70	1 skipped 6 passed 
+chaines-etapes-1149.spec.js	apres	0	23.82	1 skipped 6 passed 
+chaines-etapes-1149.spec.js	avant	0	27.49	1 skipped 6 passed 
+compte-erreurs-autre-copie-1142.spec.js	avant	0	58.80	5 passed 
+compte-erreurs-autre-copie-1142.spec.js	apres	0	58.79	5 passed 
+compte-erreurs-autre-copie-1142.spec.js	apres	0	59.72	5 passed 
+compte-erreurs-autre-copie-1142.spec.js	avant	0	59.24	5 passed 
+ecraser-homonyme-employe-967.spec.js	avant	0	56.34	7 passed 
+ecraser-homonyme-employe-967.spec.js	apres	0	36.14	7 passed 
+ecraser-homonyme-employe-967.spec.js	apres	0	36.28	7 passed 
+ecraser-homonyme-employe-967.spec.js	avant	0	56.17	7 passed 
+evaluation-959-neutralite-chargeur.spec.js	avant	0	113.82	15 passed 
+evaluation-959-neutralite-chargeur.spec.js	apres	0	114.12	15 passed 
+evaluation-959-neutralite-chargeur.spec.js	apres	0	114.59	15 passed 
+evaluation-959-neutralite-chargeur.spec.js	avant	0	121.13	15 passed 

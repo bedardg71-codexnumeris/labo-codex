@@ -1,0 +1,1530 @@
+=== 2026-11-06 06:51:34
+ 6:51  up 3 days, 42 mins, 2 users, load averages: 4,48 5,76 3,76
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     540 Mo 6,4 claude
+68656     171 Mo 0,0 virusbarriers
+848     159 Mo 0,3 Finder
+574     135 Mo 13,0 WindowServer
+658     105 Mo 0,0 mds_stores
+68779      97 Mo 0,0 EndpointSecurityService
+20456      84 Mo 0,0 nanobanana-mcp
+20457      83 Mo 0,0 Cortex Obsidian - Codex Numeris
+20484      78 Mo 0,0 node
+884      71 Mo 0,0 corespotlightd
+=== 2026-11-06 06:52:34
+ 6:52  up 3 days, 43 mins, 2 users, load averages: 7,04 5,98 3,96
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     548 Mo 4,7 claude
+56889     378 Mo 6,3 node
+57019     373 Mo 13,5 node (vitest)
+56896     272 Mo 6,6 Playwright
+56888     239 Mo 0,2 node
+68656     161 Mo 6,6 virusbarriers
+848     159 Mo 0,0 Finder
+574     138 Mo 19,4 WindowServer
+59858     133 Mo 53,1 com.apple.WebKit.WebContent.Development
+59430     103 Mo 1,1 node (vitest 2)
+=== 2026-11-06 06:53:34
+ 6:53  up 3 days, 44 mins, 2 users, load averages: 9,78 7,26 4,59
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     555 Mo 2,8 claude
+74619     425 Mo 2,0 com.apple.WebKit.WebContent.Development
+56889     382 Mo 1,1 node
+56896     280 Mo 15,8 Playwright
+56888     179 Mo 0,0 node
+68656     164 Mo 5,1 virusbarriers
+848     159 Mo 0,2 Finder
+574     138 Mo 37,6 WindowServer
+56899     101 Mo 0,1 com.apple.WebKit.GPU.Development
+658      98 Mo 0,0 mds_stores
+=== 2026-11-06 06:54:35
+ 6:54  up 3 days, 45 mins, 2 users, load averages: 4,97 6,32 4,42
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     557 Mo 3,4 claude
+68656     165 Mo 0,4 virusbarriers
+848     159 Mo 0,1 Finder
+574     139 Mo 14,0 WindowServer
+658      98 Mo 0,0 mds_stores
+68779      97 Mo 0,1 EndpointSecurityService
+20456      84 Mo 0,0 nanobanana-mcp
+20457      83 Mo 0,0 Cortex Obsidian - Codex Numeris
+20484      78 Mo 0,0 node
+884      74 Mo 0,4 corespotlightd
+=== 2026-11-06 06:55:35
+ 6:55  up 3 days, 46 mins, 2 users, load averages: 3,31 5,61 4,28
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     560 Mo 9,2 claude
+75380     408 Mo 1,9 com.apple.WebKit.WebContent.Development
+75220     401 Mo 0,8 node
+75227     258 Mo 17,3 Playwright
+75218     237 Mo 0,0 node
+68656     187 Mo 3,6 virusbarriers
+848     161 Mo 0,0 Finder
+574     139 Mo 34,1 WindowServer
+75229     100 Mo 0,7 com.apple.WebKit.GPU.Development
+658      98 Mo 0,0 mds_stores
+=== 2026-11-06 06:56:35
+ 6:56  up 3 days, 47 mins, 2 users, load averages: 3,08 5,13 4,19
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     586 Mo 1,7 claude
+75543     400 Mo 1,9 com.apple.WebKit.WebContent.Development
+75220     373 Mo 0,4 node
+75227     260 Mo 15,8 Playwright
+68656     191 Mo 1,6 virusbarriers
+75218     177 Mo 20,6 node
+848     161 Mo 0,1 Finder
+574     139 Mo 30,4 WindowServer
+75229     101 Mo 0,1 com.apple.WebKit.GPU.Development
+658     100 Mo 0,0 mds_stores
+=== 2026-11-06 06:57:35
+ 6:57  up 3 days, 48 mins, 2 users, load averages: 3,04 4,79 4,13
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     587 Mo 0,4 claude
+75220     438 Mo 1,5 node
+75675     419 Mo 1,9 com.apple.WebKit.WebContent.Development
+75227     263 Mo 22,3 Playwright
+68656     193 Mo 1,5 virusbarriers
+75218     178 Mo 0,0 node
+848     161 Mo 0,1 Finder
+574     147 Mo 36,0 WindowServer
+884     130 Mo 0,0 corespotlightd
+75229     101 Mo 0,2 com.apple.WebKit.GPU.Development
+=== 2026-11-06 06:58:35
+ 6:58  up 3 days, 49 mins, 2 users, load averages: 2,46 4,32 4,00
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     588 Mo 0,1 claude
+75843     364 Mo 98,7 com.apple.WebKit.WebContent.Development
+75832     284 Mo 67,6 node
+75827     232 Mo 1,6 node
+68656     193 Mo 39,9 virusbarriers
+75839     182 Mo 44,5 Playwright
+848     162 Mo 0,1 Finder
+574     149 Mo 20,3 WindowServer
+884     130 Mo 0,0 corespotlightd
+658      99 Mo 0,4 mds_stores
+=== 2026-11-06 06:59:35
+ 6:59  up 3 days, 50 mins, 2 users, load averages: 2,16 3,88 3,85
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     588 Mo 0,3 claude
+75832     356 Mo 1,5 node
+75959     353 Mo 5,4 com.apple.WebKit.WebContent.Development
+75839     289 Mo 17,3 Playwright
+75827     233 Mo 0,0 node
+68656     194 Mo 5,9 virusbarriers
+848     163 Mo 0,0 Finder
+574     161 Mo 36,9 WindowServer
+884     130 Mo 0,0 corespotlightd
+75841     101 Mo 1,1 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:00:35
+ 7:00  up 3 days, 51 mins, 2 users, load averages: 2,32 3,61 3,75
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+20420     588 Mo 0,3 claude
+75832     395 Mo 0,7 node
+76145     375 Mo 5,0 com.apple.WebKit.WebContent.Development
+75839     290 Mo 16,2 Playwright
+68656     194 Mo 2,7 virusbarriers
+75827     176 Mo 0,0 node
+848     171 Mo 0,0 Finder
+574     161 Mo 39,5 WindowServer
+884     130 Mo 0,0 corespotlightd
+75841     102 Mo 1,4 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:01:35
+ 7:01  up 3 days, 52 mins, 2 users, load averages: 5,10 4,17 3,95
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     588 Mo 0,5 claude
+75832     445 Mo 2,0 node
+76262     404 Mo 5,5 com.apple.WebKit.WebContent.Development
+75839     290 Mo 22,4 Playwright
+68656     194 Mo 5,1 virusbarriers
+75827     177 Mo 0,0 node
+848     171 Mo 0,0 Finder
+574     161 Mo 27,9 WindowServer
+884     130 Mo 0,0 corespotlightd
+75841     101 Mo 0,5 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:02:36
+ 7:02  up 3 days, 53 mins, 2 users, load averages: 3,44 3,84 3,84
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     588 Mo 0,4 claude
+76410     397 Mo 0,9 com.apple.WebKit.WebContent.Development
+76379     358 Mo 1,6 node
+76386     256 Mo 21,6 Playwright
+76377     195 Mo 0,0 node
+68656     195 Mo 3,8 virusbarriers
+848     171 Mo 0,1 Finder
+574     161 Mo 28,6 WindowServer
+884     130 Mo 0,0 corespotlightd
+658     101 Mo 0,0 mds_stores
+=== 2026-11-06 07:03:36
+ 7:03  up 3 days, 54 mins, 2 users, load averages: 2,71 3,60 3,75
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 70%
+  PID    RSS  %CPU COMM
+20420     602 Mo 0,2 claude
+76541     404 Mo 8,2 com.apple.WebKit.WebContent.Development
+76379     379 Mo 1,5 node
+76386     259 Mo 16,4 Playwright
+68656     195 Mo 8,3 virusbarriers
+76377     194 Mo 0,0 node
+848     171 Mo 0,0 Finder
+574     150 Mo 38,7 WindowServer
+884     139 Mo 0,0 corespotlightd
+76388     102 Mo 0,6 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:04:36
+ 7:04  up 3 days, 55 mins, 2 users, load averages: 2,66 3,41 3,66
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     602 Mo 0,2 claude
+76651     451 Mo 4,4 com.apple.WebKit.WebContent.Development
+76379     375 Mo 1,9 node
+76386     261 Mo 18,5 Playwright
+68656     195 Mo 4,6 virusbarriers
+848     171 Mo 0,2 Finder
+76377     168 Mo 0,0 node
+574     150 Mo 38,6 WindowServer
+884     139 Mo 0,0 corespotlightd
+76388     101 Mo 0,3 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:05:36
+ 7:05  up 3 days, 56 mins, 2 users, load averages: 1,94 3,07 3,52
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     602 Mo 0,4 claude
+76379     392 Mo 0,8 node
+76784     360 Mo 2,6 com.apple.WebKit.WebContent.Development
+76386     261 Mo 18,9 Playwright
+68656     195 Mo 1,7 virusbarriers
+848     178 Mo 0,4 Finder
+76377     169 Mo 0,0 node
+574     151 Mo 28,3 WindowServer
+884     139 Mo 0,0 corespotlightd
+76388     102 Mo 1,4 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:06:36
+ 7:06  up 3 days, 57 mins, 2 users, load averages: 2,67 3,10 3,50
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     603 Mo 1,7 claude
+76874     374 Mo 1,1 node
+76946     346 Mo 3,9 com.apple.WebKit.WebContent.Development
+76881     254 Mo 21,1 Playwright
+76873     232 Mo 0,0 node
+68656     195 Mo 3,9 virusbarriers
+848     178 Mo 1,7 Finder
+574     151 Mo 44,1 WindowServer
+884     139 Mo 0,0 corespotlightd
+76884     100 Mo 1,5 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:07:36
+ 7:07  up 3 days, 58 mins, 2 users, load averages: 2,55 3,01 3,44
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,5 claude
+77056     407 Mo 3,6 com.apple.WebKit.WebContent.Development
+76874     378 Mo 0,8 node
+76881     258 Mo 21,5 Playwright
+76873     233 Mo 0,0 node
+848     227 Mo 0,1 Finder
+68656     195 Mo 5,4 virusbarriers
+574     156 Mo 38,0 WindowServer
+884     139 Mo 0,0 corespotlightd
+75340     105 Mo 0,0 QuickLookUIService
+=== 2026-11-06 07:08:36
+ 7:08  up 3 days, 59 mins, 2 users, load averages: 2,33 2,87 3,35
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,1 claude
+76874     407 Mo 38,7 node
+77183     328 Mo 89,6 com.apple.WebKit.WebContent.Development
+76881     260 Mo 39,0 Playwright
+848     227 Mo 0,1 Finder
+68656     195 Mo 22,9 virusbarriers
+76873     180 Mo 0,0 node
+574     156 Mo 21,9 WindowServer
+884     139 Mo 0,0 corespotlightd
+75340     105 Mo 0,0 QuickLookUIService
+=== 2026-11-06 07:09:37
+ 7:09  up 3 days, 1 hr, 2 users, load averages: 1,75 2,60 3,22
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,3 claude
+77291     470 Mo 4,9 com.apple.WebKit.WebContent.Development
+76874     411 Mo 1,9 node
+76881     261 Mo 22,0 Playwright
+848     227 Mo 0,1 Finder
+68656     195 Mo 4,5 virusbarriers
+76873     175 Mo 0,0 node
+574     167 Mo 32,6 WindowServer
+884     139 Mo 0,0 corespotlightd
+75340     105 Mo 0,0 QuickLookUIService
+=== 2026-11-06 07:10:37
+ 7:10  up 3 days,  1:01, 2 users, load averages: 2,70 2,68 3,20
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,1 claude
+77491     324 Mo 21,5 node
+77512     264 Mo 84,3 com.apple.WebKit.WebContent.Development
+77498     260 Mo 21,2 Playwright
+848     227 Mo 0,0 Finder
+77489     221 Mo 0,1 node
+68656     196 Mo 11,7 virusbarriers
+574     171 Mo 18,3 WindowServer
+884     139 Mo 0,1 corespotlightd
+75340     105 Mo 0,0 QuickLookUIService
+=== 2026-11-06 07:11:37
+ 7:11  up 3 days,  1:02, 2 users, load averages: 2,86 2,77 3,20
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 74%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,1 claude
+848     227 Mo 2,9 Finder
+77703     220 Mo 57,1 node
+68656     196 Mo 1,5 virusbarriers
+574     167 Mo 25,5 WindowServer
+884     139 Mo 0,0 corespotlightd
+77705     138 Mo 42,4 node
+75340     105 Mo 0,0 QuickLookUIService
+658     103 Mo 0,2 mds_stores
+68779      97 Mo 7,4 EndpointSecurityService
+=== 2026-11-06 07:12:37
+ 7:12  up 3 days,  1:03, 2 users, load averages: 3,40 2,96 3,24
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,1 claude
+77845     284 Mo 31,1 node
+77853     255 Mo 19,1 Playwright
+77844     232 Mo 0,1 node
+848     227 Mo 0,3 Finder
+77882     225 Mo 69,5 com.apple.WebKit.WebContent.Development
+68656     196 Mo 6,7 virusbarriers
+574     157 Mo 26,4 WindowServer
+884     154 Mo 0,3 corespotlightd
+75340     105 Mo 0,0 QuickLookUIService
+=== 2026-11-06 07:13:37
+ 7:13  up 3 days,  1:04, 2 users, load averages: 3,20 2,94 3,21
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,1 claude
+77995     437 Mo 69,1 com.apple.WebKit.WebContent.Development
+77845     361 Mo 4,3 node
+77853     280 Mo 13,1 Playwright
+77844     234 Mo 0,0 node
+848     227 Mo 0,7 Finder
+68656     196 Mo 8,7 virusbarriers
+574     157 Mo 32,5 WindowServer
+884     153 Mo 0,0 corespotlightd
+19818     108 Mo 0,0 AppleSpell
+=== 2026-11-06 07:14:37
+ 7:14  up 3 days,  1:05, 2 users, load averages: 3,39 3,03 3,22
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+78155     618 Mo 33,5 com.apple.WebKit.WebContent.Development
+20420     603 Mo 0,2 claude
+78062     382 Mo 4,0 node
+78069     288 Mo 13,5 Playwright
+78061     234 Mo 0,0 node
+848     227 Mo 0,0 Finder
+68656     196 Mo 13,5 virusbarriers
+574     157 Mo 39,0 WindowServer
+884     154 Mo 0,0 corespotlightd
+78071     108 Mo 12,5 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:15:37
+ 7:15  up 3 days,  1:06, 2 users, load averages: 4,32 3,44 3,37
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,1 claude
+78347     231 Mo 13,8 node
+848     227 Mo 0,0 Finder
+68656     197 Mo 0,8 virusbarriers
+78349     176 Mo 26,7 node
+574     157 Mo 20,0 WindowServer
+884     154 Mo 1,9 corespotlightd
+19818     108 Mo 0,0 AppleSpell
+75340     105 Mo 0,0 QuickLookUIService
+658     103 Mo 0,0 mds_stores
+=== 2026-11-06 07:16:37
+ 7:16  up 3 days,  1:07, 2 users, load averages: 3,07 3,24 3,30
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+78463     664 Mo 5,6 com.apple.WebKit.WebContent.Development
+20420     603 Mo 0,2 claude
+78349     363 Mo 1,6 node
+78356     254 Mo 19,0 Playwright
+78347     232 Mo 0,0 node
+848     227 Mo 0,3 Finder
+68656     196 Mo 6,6 virusbarriers
+574     157 Mo 38,5 WindowServer
+884     153 Mo 0,0 corespotlightd
+19818     108 Mo 0,0 AppleSpell
+=== 2026-11-06 07:20:43
+ 7:20  up 3 days,  1:11, 2 users, load averages: 3,11 3,22 3,28
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     603 Mo 0,4 claude
+78789     561 Mo 8,9 com.apple.WebKit.WebContent.Development
+78621     342 Mo 2,8 node
+78634     268 Mo 19,9 Playwright
+848     225 Mo 1,9 Finder
+68656     199 Mo 9,2 virusbarriers
+78568     182 Mo 0,0 node
+574     172 Mo 19,2 WindowServer
+884     164 Mo 0,0 corespotlightd
+577     116 Mo 0,0 loginwindow
+=== 2026-11-06 07:25:04
+ 7:25  up 3 days,  1:15, 2 users, load averages: 8,91 4,52 3,74
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+79543     490 Mo 25,4 com.apple.WebKit.WebContent.Development
+20420     455 Mo 1,6 claude
+79531     256 Mo 2,8 node
+79538     253 Mo 14,4 Playwright
+848     199 Mo 0,7 Finder
+68656     197 Mo 8,2 virusbarriers
+79530     195 Mo 0,0 node
+574     170 Mo 32,8 WindowServer
+884     139 Mo 0,0 corespotlightd
+658     100 Mo 0,0 mds_stores
+=== 2026-11-06 07:26:04
+ 7:26  up 3 days,  1:16, 2 users, load averages: 5,05 4,22 3,68
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+79711     590 Mo 12,3 com.apple.WebKit.WebContent.Development
+20420     455 Mo 0,8 claude
+79669     314 Mo 2,5 node
+79676     274 Mo 17,6 Playwright
+79668     233 Mo 0,0 node
+848     199 Mo 2,5 Finder
+68656     197 Mo 9,4 virusbarriers
+574     181 Mo 39,4 WindowServer
+884     140 Mo 0,0 corespotlightd
+658     102 Mo 0,0 mds_stores
+=== 2026-11-06 07:27:05
+ 7:27  up 3 days,  1:17, 2 users, load averages: 3,43 3,87 3,58
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+79868     658 Mo 9,4 com.apple.WebKit.WebContent.Development
+20420     473 Mo 10,2 claude
+79843     305 Mo 2,7 node
+79850     265 Mo 14,7 Playwright
+79839     234 Mo 0,0 node
+848     199 Mo 2,7 Finder
+68656     197 Mo 11,0 virusbarriers
+574     181 Mo 40,8 WindowServer
+884     139 Mo 0,0 corespotlightd
+79853     102 Mo 0,4 com.apple.WebKit.GPU.Development
+=== 2026-11-06 07:44:34
+ 7:44  up 3 days,  1:35, 2 users, load averages: 7,14 4,51 3,84
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 75%
+  PID    RSS  %CPU COMM
+20420     526 Mo 29,0 claude
+884     339 Mo 32,9 corespotlightd
+68656     215 Mo 35,8 virusbarriers
+848     201 Mo 0,2 Finder
+574     172 Mo 14,7 WindowServer
+658     139 Mo 0,6 mds_stores
+577     137 Mo 0,0 loginwindow
+19818      98 Mo 0,0 AppleSpell
+68779      97 Mo 1,0 EndpointSecurityService
+2121      90 Mo 16,0 spotlightknowledged.updater
+=== 2026-11-06 07:45:35
+ 7:45  up 3 days,  1:36, 2 users, load averages: 7,03 5,11 4,12
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 74%
+  PID    RSS  %CPU COMM
+80949     598 Mo 48,5 com.apple.WebKit.WebContent.Development
+20420     529 Mo 1,1 claude
+884     414 Mo 218,2 corespotlightd
+80832     378 Mo 4,5 node
+80843     238 Mo 9,7 Playwright
+68656     213 Mo 34,0 virusbarriers
+848     202 Mo 0,1 Finder
+80831     199 Mo 0,2 node
+574     171 Mo 23,5 WindowServer
+658     139 Mo 0,0 mds_stores
+=== 2026-11-06 07:46:35
+ 7:46  up 3 days,  1:37, 2 users, load averages: 5,31 4,93 4,12
+total = 1024,00M  used = 221,31M  free = 802,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+81155     599 Mo 28,8 com.apple.WebKit.WebContent.Development
+20420     529 Mo 0,1 claude
+884     471 Mo 125,7 corespotlightd
+81132     370 Mo 4,2 node
+81139     261 Mo 11,6 Playwright
+68656     211 Mo 40,0 virusbarriers
+848     202 Mo 0,2 Finder
+81128     195 Mo 0,1 node
+574     171 Mo 33,4 WindowServer
+658     134 Mo 0,0 mds_stores
+=== 2026-11-06 07:47:35
+ 7:47  up 3 days,  1:38, 2 users, load averages: 6,08 5,33 4,33
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+81339     693 Mo 24,2 com.apple.WebKit.WebContent.Development
+20420     530 Mo 0,4 claude
+884     400 Mo 92,7 corespotlightd
+81293     327 Mo 5,4 node
+81301     267 Mo 21,3 Playwright
+81289     232 Mo 0,1 node
+574     230 Mo 40,1 WindowServer
+68656     214 Mo 32,9 virusbarriers
+848     210 Mo 0,3 Finder
+81232     151 Mo 7,8 System Settings
+=== 2026-11-06 07:48:35
+ 7:48  up 3 days,  1:39, 2 users, load averages: 3,82 4,81 4,20
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+81714     627 Mo 30,5 com.apple.WebKit.WebContent.Development
+20420     500 Mo 0,7 claude
+81448     358 Mo 0,7 Google Chrome
+81663     337 Mo 1,9 node
+81671     276 Mo 17,9 Playwright
+68656     257 Mo 44,6 virusbarriers
+848     215 Mo 0,1 Finder
+884     209 Mo 0,0 corespotlightd
+81662     195 Mo 0,0 node
+574     194 Mo 44,3 WindowServer
+=== 2026-11-06 07:49:35
+ 7:49  up 3 days,  1:40, 2 users, load averages: 5,04 5,02 4,32
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+20420     500 Mo 0,2 claude
+81836     425 Mo 36,3 com.apple.WebKit.WebContent.Development
+81663     386 Mo 1,5 node
+81448     374 Mo 0,0 Google Chrome
+81671     272 Mo 16,8 Playwright
+68656     257 Mo 25,1 virusbarriers
+848     215 Mo 0,1 Finder
+884     210 Mo 0,0 corespotlightd
+81662     197 Mo 0,0 node
+574     195 Mo 53,9 WindowServer
+=== 2026-11-06 07:50:35
+ 7:50  up 3 days,  1:41, 2 users, load averages: 3,28 4,52 4,18
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+81996     674 Mo 7,3 com.apple.WebKit.WebContent.Development
+20420     500 Mo 0,9 claude
+81448     376 Mo 0,0 Google Chrome
+81928     363 Mo 3,9 node
+81935     284 Mo 19,0 Playwright
+68656     259 Mo 15,1 virusbarriers
+81926     235 Mo 0,0 node
+848     210 Mo 0,1 Finder
+884     210 Mo 0,0 corespotlightd
+574     194 Mo 45,4 WindowServer
+=== 2026-11-06 07:51:35
+ 7:51  up 3 days,  1:42, 2 users, load averages: 2,48 4,06 4,03
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     500 Mo 0,2 claude
+81448     376 Mo 0,0 Google Chrome
+82114     330 Mo 57,9 node
+82121     266 Mo 37,6 Playwright
+68656     257 Mo 19,4 virusbarriers
+82164     244 Mo 80,0 com.apple.WebKit.WebContent.Development
+848     210 Mo 1,4 Finder
+884     210 Mo 0,1 corespotlightd
+82113     195 Mo 0,1 node
+574     194 Mo 30,5 WindowServer
+=== 2026-11-06 07:52:36
+ 7:52  up 3 days,  1:43, 2 users, load averages: 2,91 3,94 3,99
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+20420     467 Mo 2,0 claude
+82323     436 Mo 30,3 com.apple.WebKit.WebContent.Development
+81448     300 Mo 0,0 Google Chrome
+82312     275 Mo 2,2 node
+82319     238 Mo 18,8 Playwright
+82311     234 Mo 0,0 node
+848     208 Mo 0,1 Finder
+68656     200 Mo 13,8 virusbarriers
+574     192 Mo 35,3 WindowServer
+884     181 Mo 0,0 corespotlightd
+=== 2026-11-06 07:53:36
+ 7:53  up 3 days,  1:44, 2 users, load averages: 3,43 3,87 3,95
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     468 Mo 3,4 claude
+82456     466 Mo 8,0 com.apple.WebKit.WebContent.Development
+82312     388 Mo 2,4 node
+81448     315 Mo 0,0 Google Chrome
+82319     259 Mo 25,3 Playwright
+82311     235 Mo 0,0 node
+848     208 Mo 0,1 Finder
+68656     199 Mo 4,9 virusbarriers
+82368     199 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+574     195 Mo 49,3 WindowServer
+=== 2026-11-06 07:54:36
+ 7:54  up 3 days,  1:45, 2 users, load averages: 3,13 3,69 3,88
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+20420     468 Mo 1,3 claude
+82618     467 Mo 1,7 com.apple.WebKit.WebContent.Development
+82583     340 Mo 1,9 node
+81448     315 Mo 0,0 Google Chrome
+82590     306 Mo 26,4 Playwright
+82581     222 Mo 0,0 node
+848     208 Mo 0,1 Finder
+68656     199 Mo 27,9 virusbarriers
+82368     199 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+574     192 Mo 37,7 WindowServer
+=== 2026-11-06 07:55:36
+ 7:55  up 3 days,  1:46, 2 users, load averages: 8,58 5,43 4,54
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+82825     537 Mo 47,0 com.apple.WebKit.WebContent.Development
+20420     466 Mo 0,2 claude
+81448     314 Mo 0,0 Google Chrome
+82813     251 Mo 10,7 node
+82820     234 Mo 16,2 Playwright
+884     233 Mo 0,0 corespotlightd
+82809     221 Mo 0,1 node
+848     208 Mo 0,3 Finder
+68656     199 Mo 21,2 virusbarriers
+82368     199 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 07:56:36
+ 7:56  up 3 days,  1:47, 2 users, load averages: 4,92 4,94 4,41
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+82840     555 Mo 22,6 Google Chrome Helper (Aperitif Renderer)
+82945     443 Mo 3,5 com.apple.WebKit.WebContent.Development
+20420     412 Mo 9,2 claude
+82813     377 Mo 1,3 node
+81448     343 Mo 0,0 Google Chrome
+82820     272 Mo 18,5 Playwright
+82809     222 Mo 0,0 node
+884     211 Mo 0,0 corespotlightd
+82368     199 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     192 Mo 15,5 virusbarriers
+=== 2026-11-06 07:57:36
+ 7:57  up 3 days,  1:48, 2 users, load averages: 3,42 4,54 4,29
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+82840     440 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     412 Mo 0,1 claude
+83110     366 Mo 21,6 com.apple.WebKit.WebContent.Development
+83016     356 Mo 3,3 node
+81448     339 Mo 0,0 Google Chrome
+83023     315 Mo 14,7 Playwright
+574     202 Mo 36,7 WindowServer
+83015     194 Mo 0,0 node
+68656     193 Mo 27,0 virusbarriers
+884     183 Mo 0,0 corespotlightd
+=== 2026-11-06 07:58:36
+ 7:58  up 3 days,  1:49, 2 users, load averages: 2,72 4,13 4,16
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 72%
+  PID    RSS  %CPU COMM
+82840     440 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     412 Mo 0,3 claude
+81448     339 Mo 0,0 Google Chrome
+83199     338 Mo 10,5 node
+83207     305 Mo 15,7 Playwright
+83198     222 Mo 0,1 node
+574     208 Mo 35,2 WindowServer
+68656     191 Mo 9,9 virusbarriers
+884     183 Mo 0,2 corespotlightd
+848     174 Mo 4,0 Finder
+=== 2026-11-06 07:59:37
+ 7:59  up 3 days,  1:50, 2 users, load averages: 3,37 4,00 4,10
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+83396     697 Mo 2,0 com.apple.WebKit.WebContent.Development
+82840     440 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     412 Mo 0,4 claude
+83385     395 Mo 2,3 node
+81448     339 Mo 0,0 Google Chrome
+83392     271 Mo 28,5 Playwright
+83383     217 Mo 0,0 node
+574     202 Mo 32,8 WindowServer
+68656     196 Mo 17,3 virusbarriers
+884     184 Mo 0,0 corespotlightd
+=== 2026-11-06 08:00:37
+ 8:00  up 3 days,  1:51, 2 users, load averages: 3,19 3,82 4,02
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 73%
+  PID    RSS  %CPU COMM
+83541     761 Mo 1,1 com.apple.WebKit.WebContent.Development
+82840     440 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+83530     424 Mo 2,4 node
+20420     412 Mo 0,6 claude
+81448     339 Mo 0,0 Google Chrome
+83537     263 Mo 26,6 Playwright
+83528     217 Mo 0,0 node
+68656     196 Mo 18,0 virusbarriers
+884     195 Mo 0,0 corespotlightd
+574     191 Mo 21,2 WindowServer
+=== 2026-11-06 08:01:37
+ 8:01  up 3 days,  1:52, 2 users, load averages: 2,40 3,48 3,88
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+83694     877 Mo 4,3 com.apple.WebKit.WebContent.Development
+83682     399 Mo 2,4 node
+20420     332 Mo 0,6 claude
+81448     319 Mo 0,3 Google Chrome
+82840     308 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+83690     265 Mo 29,3 Playwright
+68656     197 Mo 27,6 virusbarriers
+83681     194 Mo 0,0 node
+574     171 Mo 27,4 WindowServer
+884     166 Mo 0,0 corespotlightd
+=== 2026-11-06 08:02:37
+ 8:02  up 3 days,  1:53, 2 users, load averages: 2,16 3,22 3,76
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+83842     830 Mo 2,4 com.apple.WebKit.WebContent.Development
+83831     456 Mo 2,2 node
+20420     344 Mo 0,4 claude
+81448     319 Mo 0,1 Google Chrome
+82840     307 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+83838     265 Mo 28,0 Playwright
+83829     216 Mo 0,0 node
+68656     197 Mo 12,2 virusbarriers
+574     169 Mo 22,6 WindowServer
+884     163 Mo 0,0 corespotlightd
+=== 2026-11-06 08:03:37
+ 8:03  up 3 days,  1:54, 2 users, load averages: 1,93 2,95 3,62
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 64%
+  PID    RSS  %CPU COMM
+84057     491 Mo 66,3 com.apple.WebKit.WebContent.Development
+83980     323 Mo 22,4 node
+81448     319 Mo 0,1 Google Chrome
+82840     307 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     296 Mo 0,1 claude
+83988     254 Mo 13,7 Playwright
+884     158 Mo 0,0 corespotlightd
+82368     139 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+574     137 Mo 21,0 WindowServer
+848     136 Mo 0,0 Finder
+=== 2026-11-06 08:04:37
+ 8:04  up 3 days,  1:55, 2 users, load averages: 2,35 2,87 3,54
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 61%
+  PID    RSS  %CPU COMM
+84199     375 Mo 21,0 com.apple.WebKit.WebContent.Development
+83980     358 Mo 2,6 node
+81448     318 Mo 0,0 Google Chrome
+82840     307 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     287 Mo 0,1 claude
+83988     252 Mo 16,9 Playwright
+884     154 Mo 0,0 corespotlightd
+82368     139 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+574     135 Mo 29,5 WindowServer
+83979     128 Mo 0,0 node
+=== 2026-11-06 08:05:37
+ 8:05  up 3 days,  1:56, 2 users, load averages: 2,99 2,98 3,53
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+84370     385 Mo 32,5 com.apple.WebKit.WebContent.Development
+84338     355 Mo 5,7 node
+81448     318 Mo 0,0 Google Chrome
+82840     307 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     284 Mo 0,3 claude
+84345     270 Mo 19,4 Playwright
+84336     239 Mo 0,1 node
+884     207 Mo 0,0 corespotlightd
+574     188 Mo 44,4 WindowServer
+82368     140 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:06:38
+ 8:06  up 3 days,  1:57, 2 users, load averages: 3,23 3,05 3,52
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+84338     400 Mo 2,0 node
+84495     388 Mo 18,6 com.apple.WebKit.WebContent.Development
+81448     318 Mo 0,0 Google Chrome
+82840     308 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     287 Mo 0,2 claude
+84345     279 Mo 15,3 Playwright
+84336     243 Mo 0,0 node
+884     206 Mo 0,0 corespotlightd
+574     188 Mo 48,2 WindowServer
+82368     140 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:07:38
+ 8:07  up 3 days,  1:58, 2 users, load averages: 3,79 3,24 3,56
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+84666     355 Mo 15,6 com.apple.WebKit.WebContent.Development
+84633     355 Mo 4,4 node
+81448     318 Mo 0,0 Google Chrome
+82840     308 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     287 Mo 0,4 claude
+84640     258 Mo 24,1 Playwright
+884     209 Mo 0,0 corespotlightd
+84631     196 Mo 0,0 node
+574     189 Mo 42,5 WindowServer
+70457     161 Mo 0,0 mediaanalysisd
+=== 2026-11-06 08:08:38
+ 8:08  up 3 days,  1:59, 2 users, load averages: 4,87 3,69 3,70
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+84633     389 Mo 2,2 node
+84792     386 Mo 18,7 com.apple.WebKit.WebContent.Development
+70457     339 Mo 0,0 mediaanalysisd
+81448     318 Mo 0,0 Google Chrome
+82840     308 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     288 Mo 0,1 claude
+84640     262 Mo 15,8 Playwright
+884     210 Mo 0,0 corespotlightd
+84631     194 Mo 0,0 node
+574     189 Mo 46,6 WindowServer
+=== 2026-11-06 08:09:38
+ 8:09  up 3 days, 2 hrs, 2 users, load averages: 4,96 3,93 3,79
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+84959     377 Mo 3,4 com.apple.WebKit.WebContent.Development
+84931     368 Mo 2,0 node
+81448     318 Mo 0,0 Google Chrome
+82840     308 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     288 Mo 0,3 claude
+84938     275 Mo 21,1 Playwright
+884     263 Mo 0,0 corespotlightd
+84929     241 Mo 0,0 node
+574     189 Mo 49,1 WindowServer
+70457     188 Mo 0,0 mediaanalysisd
+=== 2026-11-06 08:10:38
+ 8:10  up 3 days,  2:01, 2 users, load averages: 5,41 4,20 3,90
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 69%
+  PID    RSS  %CPU COMM
+84931     370 Mo 11,0 node
+82840     306 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+84938     286 Mo 13,6 Playwright
+81448     281 Mo 0,0 Google Chrome
+884     253 Mo 0,6 corespotlightd
+84929     245 Mo 0,4 node
+20420     224 Mo 0,1 claude
+70457     187 Mo 0,0 mediaanalysisd
+574     160 Mo 44,1 WindowServer
+68656     144 Mo 16,2 virusbarriers
+=== 2026-11-06 08:11:38
+ 8:11  up 3 days,  2:02, 2 users, load averages: 6,28 4,72 4,11
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+85238     360 Mo 37,7 com.apple.WebKit.WebContent.Development
+84931     353 Mo 15,0 node
+84938     332 Mo 21,3 Playwright
+70457     311 Mo 0,0 mediaanalysisd
+82840     306 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+81448     281 Mo 0,1 Google Chrome
+20420     219 Mo 4,8 claude
+884     196 Mo 0,0 corespotlightd
+574     163 Mo 37,3 WindowServer
+68656     141 Mo 16,5 virusbarriers
+=== 2026-11-06 08:12:38
+ 8:12  up 3 days,  2:03, 2 users, load averages: 3,62 4,26 3,98
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 64%
+  PID    RSS  %CPU COMM
+85405     728 Mo 82,5 com.apple.WebKit.WebContent.Development
+85312     427 Mo 4,9 node
+81448     272 Mo 0,0 Google Chrome
+82840     236 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+20420     217 Mo 0,0 claude
+85322     210 Mo 8,6 Playwright
+574     144 Mo 20,3 WindowServer
+68656     123 Mo 11,9 virusbarriers
+82368     115 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+884     114 Mo 0,0 corespotlightd
+=== 2026-11-06 08:13:39
+ 8:13  up 3 days,  2:04, 2 users, load averages: 3,73 4,17 3,96
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 60%
+  PID    RSS  %CPU COMM
+85571     726 Mo 55,7 com.apple.WebKit.WebContent.Development
+85477     360 Mo 4,4 node
+85484     235 Mo 12,2 Playwright
+81448     219 Mo 0,0 Google Chrome
+20420     218 Mo 0,1 claude
+82840     211 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+574     145 Mo 25,6 WindowServer
+68656     124 Mo 8,5 virusbarriers
+848     105 Mo 0,0 Finder
+884     101 Mo 0,0 corespotlightd
+=== 2026-11-06 08:14:39
+ 8:14  up 3 days,  2:05, 2 users, load averages: 3,01 3,92 3,89
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 55%
+  PID    RSS  %CPU COMM
+85738     422 Mo 119,6 com.apple.WebKit.WebContent.Development
+85631     407 Mo 36,0 node
+85638     259 Mo 32,7 Playwright
+20420     217 Mo 0,1 claude
+81448     198 Mo 0,0 Google Chrome
+574     151 Mo 18,9 WindowServer
+68656     124 Mo 23,6 virusbarriers
+82840     104 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     103 Mo 0,6 Finder
+85640     103 Mo 2,8 com.apple.WebKit.GPU.Development
+=== 2026-11-06 08:15:39
+ 8:15  up 3 days,  2:06, 2 users, load averages: 2,96 3,73 3,81
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 50%
+  PID    RSS  %CPU COMM
+85903     553 Mo 118,2 com.apple.WebKit.WebContent.Development
+85786     367 Mo 9,8 node
+85795     263 Mo 14,4 Playwright
+20420     201 Mo 0,0 claude
+81448     198 Mo 0,0 Google Chrome
+884     154 Mo 0,0 corespotlightd
+574     154 Mo 24,5 WindowServer
+68656     123 Mo 13,7 virusbarriers
+85797     102 Mo 6,4 com.apple.WebKit.GPU.Development
+848     100 Mo 0,0 Finder
+=== 2026-11-06 08:16:39
+ 8:16  up 3 days,  2:07, 2 users, load averages: 3,56 3,71 3,80
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 65%
+  PID    RSS  %CPU COMM
+86112     582 Mo 42,7 com.apple.WebKit.WebContent.Development
+86065     339 Mo 3,0 node
+86072     277 Mo 14,0 Playwright
+86061     219 Mo 0,0 node
+574     205 Mo 45,9 WindowServer
+20420     203 Mo 0,0 claude
+81448     200 Mo 0,0 Google Chrome
+884     134 Mo 0,0 corespotlightd
+68656     127 Mo 9,6 virusbarriers
+82840     106 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:17:39
+ 8:17  up 3 days,  2:08, 2 users, load averages: 3,48 3,67 3,77
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 67%
+  PID    RSS  %CPU COMM
+86303     650 Mo 8,0 com.apple.WebKit.WebContent.Development
+86241     366 Mo 5,2 node
+86248     264 Mo 18,2 Playwright
+70457     255 Mo 186,8 mediaanalysisd
+86239     219 Mo 0,0 node
+20420     216 Mo 0,1 claude
+574     205 Mo 47,7 WindowServer
+81448     201 Mo 0,0 Google Chrome
+884     167 Mo 0,0 corespotlightd
+68656     135 Mo 7,7 virusbarriers
+=== 2026-11-06 08:18:39
+ 8:18  up 3 days,  2:09, 2 users, load averages: 4,53 3,98 3,89
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 67%
+  PID    RSS  %CPU COMM
+86492     592 Mo 3,2 com.apple.WebKit.WebContent.Development
+86459     316 Mo 2,2 node
+70457     263 Mo 102,9 mediaanalysisd
+86467     255 Mo 21,3 Playwright
+86458     226 Mo 0,0 node
+20420     219 Mo 0,1 claude
+574     206 Mo 43,8 WindowServer
+81448     204 Mo 0,0 Google Chrome
+884     168 Mo 1,1 corespotlightd
+68656     139 Mo 6,0 virusbarriers
+=== 2026-11-06 08:19:39
+ 8:19  up 3 days,  2:10, 2 users, load averages: 4,99 4,24 3,99
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+86664     525 Mo 8,2 com.apple.WebKit.WebContent.Development
+86604     343 Mo 1,4 node
+70457     267 Mo 0,0 mediaanalysisd
+86611     262 Mo 26,8 Playwright
+20420     219 Mo 0,3 claude
+81448     219 Mo 0,0 Google Chrome
+574     210 Mo 16,9 WindowServer
+86603     196 Mo 0,0 node
+884     168 Mo 0,0 corespotlightd
+68656     141 Mo 3,1 virusbarriers
+=== 2026-11-06 08:20:40
+ 8:20  up 3 days,  2:11, 2 users, load averages: 3,84 4,03 3,92
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 70%
+  PID    RSS  %CPU COMM
+20420     340 Mo 9,4 claude
+81448     219 Mo 0,0 Google Chrome
+574     214 Mo 14,4 WindowServer
+884     207 Mo 0,0 corespotlightd
+68656     143 Mo 0,0 virusbarriers
+82840     107 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     103 Mo 0,0 Finder
+19818      95 Mo 0,0 AppleSpell
+82368      88 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68779      86 Mo 0,1 EndpointSecurityService
+=== 2026-11-06 08:23:12
+ 8:23  up 3 days,  2:13, 2 users, load averages: 2,32 3,36 3,66
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 70%
+  PID    RSS  %CPU COMM
+20420     427 Mo 27,8 claude
+81448     219 Mo 0,0 Google Chrome
+884     206 Mo 0,0 corespotlightd
+574     202 Mo 15,8 WindowServer
+68656     151 Mo 0,0 virusbarriers
+82840     117 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     103 Mo 0,0 Finder
+19818      95 Mo 0,0 AppleSpell
+82368      92 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68779      87 Mo 0,2 EndpointSecurityService
+=== 2026-11-06 08:24:12
+ 8:24  up 3 days,  2:14, 2 users, load averages: 2,35 3,19 3,58
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 70%
+  PID    RSS  %CPU COMM
+87494     536 Mo 14,2 com.apple.WebKit.WebContent.Development
+20420     430 Mo 1,0 claude
+87468     331 Mo 1,1 node
+87476     268 Mo 19,2 Playwright
+87467     229 Mo 0,0 node
+81448     219 Mo 0,0 Google Chrome
+884     207 Mo 0,0 corespotlightd
+574     202 Mo 15,9 WindowServer
+68656     152 Mo 7,0 virusbarriers
+82840     117 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:25:12
+ 8:25  up 3 days,  2:15, 2 users, load averages: 2,81 3,12 3,52
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+87711     502 Mo 7,4 com.apple.WebKit.WebContent.Development
+20420     406 Mo 0,3 claude
+87682     324 Mo 0,1 node
+87689     261 Mo 20,6 Playwright
+87680     225 Mo 0,0 node
+81448     213 Mo 0,0 Google Chrome
+574     163 Mo 45,5 WindowServer
+68656     146 Mo 0,8 virusbarriers
+884     139 Mo 0,4 corespotlightd
+82840     117 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:26:12
+ 8:26  up 3 days,  2:16, 2 users, load averages: 3,11 3,24 3,54
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 70%
+  PID    RSS  %CPU COMM
+87879     408 Mo 1,6 com.apple.WebKit.WebContent.Development
+20420     406 Mo 0,4 claude
+87812     377 Mo 1,8 node
+87819     312 Mo 26,9 Playwright
+87811     228 Mo 0,0 node
+81448     213 Mo 0,0 Google Chrome
+574     163 Mo 24,0 WindowServer
+68656     148 Mo 2,8 virusbarriers
+884     140 Mo 0,0 corespotlightd
+82840     117 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:27:12
+ 8:27  up 3 days,  2:17, 2 users, load averages: 2,39 2,99 3,42
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 66%
+  PID    RSS  %CPU COMM
+88007     360 Mo 7,7 node
+20420     331 Mo 0,0 claude
+88015     320 Mo 9,6 Playwright
+88006     228 Mo 0,3 node
+81448     209 Mo 0,0 Google Chrome
+574     148 Mo 21,5 WindowServer
+68656     142 Mo 24,8 virusbarriers
+82840     116 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+884     105 Mo 0,3 corespotlightd
+848     105 Mo 0,1 Finder
+=== 2026-11-06 08:28:12
+ 8:28  up 3 days,  2:18, 2 users, load averages: 2,93 3,02 3,40
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 65%
+  PID    RSS  %CPU COMM
+88214     500 Mo 4,7 com.apple.WebKit.WebContent.Development
+88175     379 Mo 2,0 node
+20420     330 Mo 0,2 claude
+88182     312 Mo 30,9 Playwright
+81448     211 Mo 0,0 Google Chrome
+88174     194 Mo 0,0 node
+574     153 Mo 24,4 WindowServer
+68656     142 Mo 4,8 virusbarriers
+82840     116 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     105 Mo 1,1 Finder
+=== 2026-11-06 08:29:12
+ 8:29  up 3 days,  2:19, 2 users, load averages: 2,47 2,89 3,33
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 63%
+  PID    RSS  %CPU COMM
+88374     402 Mo 7,0 com.apple.WebKit.WebContent.Development
+88347     370 Mo 1,7 node
+20420     331 Mo 0,4 claude
+88354     312 Mo 31,0 Playwright
+88345     228 Mo 0,0 node
+81448     209 Mo 0,0 Google Chrome
+574     164 Mo 26,9 WindowServer
+68656     142 Mo 5,6 virusbarriers
+82840     116 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     104 Mo 5,7 Finder
+=== 2026-11-06 08:30:13
+ 8:30  up 3 days,  2:20, 2 users, load averages: 2,33 2,77 3,25
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 65%
+  PID    RSS  %CPU COMM
+88495     410 Mo 12,9 com.apple.WebKit.WebContent.Development
+88347     351 Mo 3,3 node
+20420     331 Mo 0,1 claude
+88354     249 Mo 13,8 Playwright
+81448     209 Mo 0,0 Google Chrome
+574     195 Mo 35,3 WindowServer
+68656     142 Mo 24,1 virusbarriers
+82840     116 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+884     105 Mo 0,8 corespotlightd
+848     104 Mo 2,6 Finder
+=== 2026-11-06 08:31:13
+ 8:31  up 3 days,  2:21, 2 users, load averages: 7,69 4,05 3,69
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+88727     615 Mo 33,0 com.apple.WebKit.WebContent.Development
+88563     377 Mo 2,7 node
+20420     339 Mo 0,1 claude
+88570     279 Mo 15,6 Playwright
+574     254 Mo 40,8 WindowServer
+70457     249 Mo 149,9 mediaanalysisd
+88561     244 Mo 0,0 node
+81448     229 Mo 0,0 Google Chrome
+884     199 Mo 2,0 corespotlightd
+848     183 Mo 0,5 Finder
+=== 2026-11-06 08:32:13
+ 8:32  up 3 days,  2:22, 2 users, load averages: 5,88 4,21 3,77
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+88888     731 Mo 26,9 com.apple.WebKit.WebContent.Development
+88814     374 Mo 1,2 node
+20420     339 Mo 0,4 claude
+88821     297 Mo 17,3 Playwright
+574     254 Mo 48,2 WindowServer
+70457     252 Mo 140,6 mediaanalysisd
+88813     241 Mo 0,0 node
+81448     230 Mo 0,0 Google Chrome
+884     196 Mo 2,7 corespotlightd
+848     183 Mo 0,4 Finder
+=== 2026-11-06 08:33:13
+ 8:33  up 3 days,  2:23, 2 users, load averages: 4,95 4,33 3,85
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+89055     530 Mo 18,9 com.apple.WebKit.WebContent.Development
+88985     427 Mo 0,9 node
+20420     339 Mo 0,4 claude
+88993     281 Mo 21,0 Playwright
+574     254 Mo 45,2 WindowServer
+70457     252 Mo 0,0 mediaanalysisd
+81448     230 Mo 0,0 Google Chrome
+88984     200 Mo 0,0 node
+884     198 Mo 0,0 corespotlightd
+848     183 Mo 1,0 Finder
+=== 2026-11-06 08:34:13
+ 8:34  up 3 days,  2:24, 2 users, load averages: 3,62 4,06 3,78
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+89213     682 Mo 121,2 com.apple.WebKit.WebContent.Development
+89153     441 Mo 22,2 node
+20420     340 Mo 0,1 claude
+89160     276 Mo 25,8 Playwright
+574     254 Mo 32,8 WindowServer
+89151     239 Mo 0,0 node
+81448     230 Mo 0,0 Google Chrome
+884     198 Mo 0,0 corespotlightd
+848     183 Mo 0,0 Finder
+82840     181 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:35:13
+ 8:35  up 3 days,  2:25, 2 users, load averages: 2,95 3,78 3,69
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+89370     354 Mo 94,2 com.apple.WebKit.WebContent.Development
+20420     340 Mo 0,1 claude
+89339     276 Mo 35,2 node
+89346     269 Mo 22,9 Playwright
+574     254 Mo 32,4 WindowServer
+81448     230 Mo 0,0 Google Chrome
+884     198 Mo 0,0 corespotlightd
+89338     194 Mo 0,1 node
+848     183 Mo 0,1 Finder
+82840     181 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:36:13
+ 8:36  up 3 days,  2:26, 2 users, load averages: 2,90 3,61 3,63
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 71%
+  PID    RSS  %CPU COMM
+89339     357 Mo 6,7 node
+20420     340 Mo 3,2 claude
+89346     271 Mo 20,7 Playwright
+574     258 Mo 19,0 WindowServer
+81448     230 Mo 0,0 Google Chrome
+884     209 Mo 0,0 corespotlightd
+89338     193 Mo 0,3 node
+848     183 Mo 0,4 Finder
+82840     181 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     157 Mo 11,0 virusbarriers
+=== 2026-11-06 08:37:14
+ 8:37  up 3 days,  2:27, 2 users, load averages: 2,46 3,39 3,55
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+89339     427 Mo 1,2 node
+89604     353 Mo 5,5 com.apple.WebKit.WebContent.Development
+20420     337 Mo 0,4 claude
+89346     267 Mo 24,3 Playwright
+81448     226 Mo 0,0 Google Chrome
+574     215 Mo 16,8 WindowServer
+848     169 Mo 0,6 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+89338     168 Mo 0,0 node
+884     150 Mo 0,0 corespotlightd
+=== 2026-11-06 08:38:14
+ 8:38  up 3 days,  2:28, 2 users, load averages: 2,06 3,10 3,43
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 68%
+  PID    RSS  %CPU COMM
+89339     420 Mo 1,7 node
+89717     386 Mo 7,3 com.apple.WebKit.WebContent.Development
+20420     336 Mo 0,7 claude
+89346     267 Mo 27,3 Playwright
+81448     232 Mo 0,0 Google Chrome
+574     217 Mo 17,6 WindowServer
+82840     170 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     169 Mo 0,5 Finder
+89338     160 Mo 0,0 node
+68656     150 Mo 2,8 virusbarriers
+=== 2026-11-06 08:39:14
+ 8:39  up 3 days,  2:29, 2 users, load averages: 2,00 2,88 3,32
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 66%
+  PID    RSS  %CPU COMM
+89883     360 Mo 2,7 com.apple.WebKit.WebContent.Development
+89825     339 Mo 1,7 node
+20420     336 Mo 0,4 claude
+89833     267 Mo 23,7 Playwright
+89821     232 Mo 0,0 node
+81448     228 Mo 0,0 Google Chrome
+574     219 Mo 18,3 WindowServer
+848     169 Mo 0,0 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     151 Mo 4,6 virusbarriers
+=== 2026-11-06 08:40:14
+ 8:40  up 3 days,  2:30, 2 users, load averages: 2,90 2,94 3,31
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 64%
+  PID    RSS  %CPU COMM
+89825     408 Mo 22,6 node
+90001     342 Mo 71,1 com.apple.WebKit.WebContent.Development
+20420     336 Mo 0,1 claude
+89833     272 Mo 21,8 Playwright
+89821     234 Mo 0,0 node
+81448     228 Mo 0,0 Google Chrome
+574     219 Mo 14,8 WindowServer
+848     169 Mo 0,0 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     150 Mo 15,3 virusbarriers
+=== 2026-11-06 08:41:14
+ 8:41  up 3 days,  2:31, 2 users, load averages: 3,52 3,12 3,35
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 65%
+  PID    RSS  %CPU COMM
+90111     386 Mo 5,9 com.apple.WebKit.WebContent.Development
+89825     366 Mo 1,9 node
+20420     336 Mo 0,3 claude
+89833     253 Mo 28,0 Playwright
+81448     228 Mo 0,1 Google Chrome
+574     220 Mo 18,5 WindowServer
+884     207 Mo 0,0 corespotlightd
+89821     180 Mo 0,0 node
+848     169 Mo 0,0 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:42:14
+ 8:42  up 3 days,  2:32, 2 users, load averages: 2,49 2,91 3,25
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 63%
+  PID    RSS  %CPU COMM
+90230     402 Mo 8,5 com.apple.WebKit.WebContent.Development
+89825     365 Mo 2,9 node
+20420     337 Mo 0,3 claude
+89833     254 Mo 24,6 Playwright
+81448     228 Mo 0,1 Google Chrome
+574     222 Mo 20,7 WindowServer
+848     169 Mo 0,0 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     151 Mo 8,5 virusbarriers
+884     136 Mo 0,0 corespotlightd
+=== 2026-11-06 08:43:14
+ 8:43  up 3 days,  2:33, 2 users, load averages: 2,32 2,78 3,18
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 61%
+  PID    RSS  %CPU COMM
+90311     394 Mo 15,1 node
+90397     360 Mo 67,3 com.apple.WebKit.WebContent.Development
+20420     336 Mo 1,9 claude
+90318     253 Mo 22,5 Playwright
+574     228 Mo 19,8 WindowServer
+81448     228 Mo 0,0 Google Chrome
+90307     196 Mo 0,0 node
+848     169 Mo 0,0 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     151 Mo 14,3 virusbarriers
+=== 2026-11-06 08:44:15
+ 8:44  up 3 days,  2:34, 2 users, load averages: 2,52 2,74 3,13
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 62%
+  PID    RSS  %CPU COMM
+90508     390 Mo 4,0 com.apple.WebKit.WebContent.Development
+90311     372 Mo 1,6 node
+20420     337 Mo 0,4 claude
+90318     252 Mo 27,8 Playwright
+81448     228 Mo 0,0 Google Chrome
+574     220 Mo 19,0 WindowServer
+90307     196 Mo 0,0 node
+848     169 Mo 0,1 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     151 Mo 4,3 virusbarriers
+=== 2026-11-06 08:45:15
+ 8:45  up 3 days,  2:35, 2 users, load averages: 2,20 2,62 3,06
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 60%
+  PID    RSS  %CPU COMM
+90621     397 Mo 3,5 com.apple.WebKit.WebContent.Development
+90311     352 Mo 1,0 node
+20420     336 Mo 0,4 claude
+90318     249 Mo 25,2 Playwright
+81448     228 Mo 0,0 Google Chrome
+574     221 Mo 16,8 WindowServer
+848     169 Mo 0,2 Finder
+82840     168 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     151 Mo 3,0 virusbarriers
+90307     137 Mo 0,0 node
+=== 2026-11-06 08:46:15
+ 8:46  up 3 days,  2:36, 2 users, load averages: 2,79 2,69 3,06
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 57%
+  PID    RSS  %CPU COMM
+90740     412 Mo 7,4 com.apple.WebKit.WebContent.Development
+90311     369 Mo 2,2 node
+20420     334 Mo 0,3 claude
+90318     248 Mo 18,4 Playwright
+81448     225 Mo 0,0 Google Chrome
+574     218 Mo 15,2 WindowServer
+884     177 Mo 210,7 corespotlightd
+848     168 Mo 0,1 Finder
+82840     166 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+68656     144 Mo 3,5 virusbarriers
+=== 2026-11-06 08:47:15
+ 8:47  up 3 days,  2:37, 2 users, load averages: 2,41 2,63 3,01
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 57%
+  PID    RSS  %CPU COMM
+90790     394 Mo 1,3 node
+90902     388 Mo 3,3 com.apple.WebKit.WebContent.Development
+20420     332 Mo 0,6 claude
+90797     260 Mo 29,2 Playwright
+90788     231 Mo 0,0 node
+81448     221 Mo 0,1 Google Chrome
+574     216 Mo 19,6 WindowServer
+68656     147 Mo 2,7 virusbarriers
+848     146 Mo 0,0 Finder
+82840     141 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:48:15
+ 8:48  up 3 days,  2:38, 2 users, load averages: 2,43 2,56 2,96
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 55%
+  PID    RSS  %CPU COMM
+91014     397 Mo 7,3 com.apple.WebKit.WebContent.Development
+90790     340 Mo 2,2 node
+20420     332 Mo 0,3 claude
+90797     246 Mo 23,9 Playwright
+81448     233 Mo 0,1 Google Chrome
+574     219 Mo 19,5 WindowServer
+90788     158 Mo 0,0 node
+68656     148 Mo 5,9 virusbarriers
+848     146 Mo 0,0 Finder
+82840     145 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:49:15
+ 8:49  up 3 days,  2:39, 2 users, load averages: 1,78 2,35 2,85
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 54%
+  PID    RSS  %CPU COMM
+91128     400 Mo 26,1 com.apple.WebKit.WebContent.Development
+90790     354 Mo 4,2 node
+20420     332 Mo 0,3 claude
+90797     253 Mo 22,6 Playwright
+81448     229 Mo 0,3 Google Chrome
+574     206 Mo 22,7 WindowServer
+848     143 Mo 0,0 Finder
+68656     142 Mo 10,3 virusbarriers
+82840     142 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+90788     105 Mo 0,1 node
+=== 2026-11-06 08:50:15
+ 8:50  up 3 days,  2:40, 2 users, load averages: 1,51 2,19 2,75
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 51%
+  PID    RSS  %CPU COMM
+91313     364 Mo 27,9 com.apple.WebKit.WebContent.Development
+20420     332 Mo 0,1 claude
+91302     254 Mo 5,5 node
+91269     226 Mo 0,0 node
+81448     223 Mo 0,1 Google Chrome
+91309     220 Mo 15,3 Playwright
+574     209 Mo 23,0 WindowServer
+68656     156 Mo 11,6 virusbarriers
+82840     142 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     139 Mo 0,4 Finder
+=== 2026-11-06 08:51:15
+ 8:51  up 3 days,  2:41, 2 users, load averages: 1,94 2,18 2,71
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 50%
+  PID    RSS  %CPU COMM
+91485     660 Mo 98,6 com.apple.WebKit.WebContent.Development
+20420     331 Mo 0,1 claude
+91465     291 Mo 9,6 Playwright
+91458     286 Mo 1,4 node
+81448     221 Mo 0,2 Google Chrome
+574     212 Mo 20,8 WindowServer
+68656     152 Mo 4,5 virusbarriers
+848     136 Mo 0,0 Finder
+82840     135 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+91467     101 Mo 0,2 com.apple.WebKit.GPU.Development
+=== 2026-11-06 08:52:16
+ 8:52  up 3 days,  2:42, 2 users, load averages: 2,51 2,27 2,71
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 46%
+  PID    RSS  %CPU COMM
+91697     693 Mo 22,1 com.apple.WebKit.WebContent.Development
+91686     316 Mo 1,6 node
+20420     291 Mo 0,1 claude
+91693     253 Mo 19,6 Playwright
+81448     211 Mo 0,1 Google Chrome
+574     171 Mo 24,6 WindowServer
+82840     127 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+848     126 Mo 0,1 Finder
+68656     121 Mo 3,4 virusbarriers
+91695     102 Mo 3,5 com.apple.WebKit.GPU.Development
+=== 2026-11-06 08:53:16
+ 8:53  up 3 days,  2:43, 2 users, load averages: 2,24 2,26 2,67
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 45%
+  PID    RSS  %CPU COMM
+91924     360 Mo 10,6 com.apple.WebKit.WebContent.Development
+91911     285 Mo 3,2 node
+91919     241 Mo 25,7 Playwright
+20420     230 Mo 0,2 claude
+91831     213 Mo 0,0 node
+81448     207 Mo 0,0 Google Chrome
+574     160 Mo 17,2 WindowServer
+68656     124 Mo 5,1 virusbarriers
+848     124 Mo 1,0 Finder
+82840     121 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:54:16
+ 8:54  up 3 days,  2:44, 2 users, load averages: 2,25 2,26 2,64
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 44%
+  PID    RSS  %CPU COMM
+92067     399 Mo 5,2 com.apple.WebKit.WebContent.Development
+91990     375 Mo 2,0 node
+91997     270 Mo 27,7 Playwright
+20420     229 Mo 0,4 claude
+91831     215 Mo 0,0 node
+81448     207 Mo 0,0 Google Chrome
+574     164 Mo 18,6 WindowServer
+68656     125 Mo 4,0 virusbarriers
+848     123 Mo 0,2 Finder
+82840     121 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:55:16
+ 8:55  up 3 days,  2:45, 2 users, load averages: 2,21 2,24 2,61
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 43%
+  PID    RSS  %CPU COMM
+91990     374 Mo 1,2 node
+92199     345 Mo 2,7 com.apple.WebKit.WebContent.Development
+20420     229 Mo 0,5 claude
+81448     202 Mo 0,0 Google Chrome
+91997     190 Mo 25,4 Playwright
+574     164 Mo 16,2 WindowServer
+848     126 Mo 0,7 Finder
+68656     121 Mo 1,5 virusbarriers
+82840     121 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+91831     106 Mo 0,0 node
+=== 2026-11-06 08:56:16
+ 8:56  up 3 days,  2:46, 2 users, load averages: 2,36 2,26 2,59
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 40%
+  PID    RSS  %CPU COMM
+92354     401 Mo 1,9 com.apple.WebKit.WebContent.Development
+92330     313 Mo 2,1 node
+20420     228 Mo 0,6 claude
+81448     195 Mo 0,0 Google Chrome
+574     162 Mo 20,1 WindowServer
+92337     161 Mo 16,9 Playwright
+91831     143 Mo 0,0 node
+884     138 Mo 0,0 corespotlightd
+848     122 Mo 0,0 Finder
+82840     120 Mo 0,0 Google Chrome Helper (Aperitif Renderer)
+=== 2026-11-06 08:57:16
+ 8:57  up 3 days,  2:47, 2 users, load averages: 1,61 2,07 2,49
+total = 1024,00M  used = 213,31M  free = 810,69M  (encrypted)
+System-wide memory free percentage: 43%
+  PID    RSS  %CPU COMM
+92570     391 Mo 4,4 com.apple.WebKit.WebContent.Development
+92556     247 Mo 2,2 node
+20420     229 Mo 0,5 claude
+92438     213 Mo 0,0 node
+81448     205 Mo 0,0 Google Chrome
+92566     180 Mo 28,6 Playwright
+574     162 Mo 18,5 WindowServer
+848     118 Mo 0,1 Finder
+68656     117 Mo 1,8 virusbarriers
+82840     106 Mo 0,0 Google Chrome Helper (Aperitif Renderer)

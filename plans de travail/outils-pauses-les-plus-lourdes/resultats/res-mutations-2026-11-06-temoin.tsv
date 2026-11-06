@@ -1,0 +1,6 @@
+statut-incomplet-travail-en-cours.spec.js	js/evaluation-sauvegarde.js	1	1 failed 2 passed 
+bareme-3-evaluer.spec.js	js/evaluation-chargement.js	1	2 failed 1 skipped 8 passed 
+1007-codex-a-part-avant-suppression.spec.js	js/codex.js	1	6 failed 1 passed 
+evaluation-961-retroaction-ne-suit-plus-les-niveaux.spec.js	js/evaluation-retroaction.js	1	5 failed 19 passed 
+JS PROPRE
+FINI
