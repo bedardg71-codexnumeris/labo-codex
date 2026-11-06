@@ -7,6 +7,20 @@
 
 ---
 
+## 6 NOV. 2026, 10 H (Claude Code) : **LES TROIS LOTS DES PAUSES FUSIONNÉS SUR `main` LOCAL, NON POUSSÉS ; VERDICT COMPLET CE SOIR AU SIGNAL DE GRÉGOIRE, PUSH SI VERT ; EN LIGNE : TOUJOURS 1.235.0 (`168d462a`) ; `git log -1 origin/main` FAIT FOI**
+
+**Porte** : `plans de travail/VERDICT-RELECTURE-2026-11-06-fusion-des-trois-lots.md` (Cowork, 9 h 32), accepté avec la retouche de la sentinelle (§ 2), faite dans le commit qui porte ce relais et ce verdict.
+
+**Ce que porte `main` local** (19 commits d'avance sur `origin/main` avec ce commit, 0 de retard) : les fusions de `lot/verification-plus-rapide` (`23f72715`), `lot/pauses-apres-ouverture` (`8e2f527e`) et `lot/pauses-les-plus-lourdes` (`4eda1942`), les 5 pauses après ouverture venues de `main` converties (`9b0da7c8`), et ce commit. Aucun fichier de l'application touché (`js/`, `styles.css`, `index.html`) : tests, scripts de mesure, `BACKLOG.md`. Pas de bump.
+
+**La retouche** : le cliquet des pauses (`tests/unit/sentinelle-pauses-apres-ouverture.test.js`) compte des SITES. Une enveloppe n'est plus qu'une fonction dont le corps entier est la pause ; une aide plus longue compte pour sa ligne, une fois. Plafond 738 → 619, recompté, pas un gain. Contre-épreuves : une pause ajoutée dans `demarrer()` de `reunir-en-une-copie-1231` donne 620 (rouge), retirée reverdit ; l'ancienne détection remise rougit le banc neuf (attend 1, reçoit 4). Vitest seul, aucune spec Playwright touchée (`attendre-repos.js` : un commentaire).
+
+**L'ordre de ce soir** (verdict § 5) : au signal de Grégoire (Chrome, Safari et l'app Claude fermés, sur secteur), verdict complet du Mac → push si vert → `node scripts/mesurer-verification.mjs`, la mesure remplace l'estimation de 5,6 min dans le rapport → retrait des worktrees et branches `verification-plus-rapide`, `pauses-apres-ouverture`, `pauses-les-plus-lourdes` (leur contenu est dans `main`). Pas de lot neuf sur les pauses avant cette mesure : le candidat (la pause après `activerModeDemo()`) attend Cowork.
+
+**Rouge ce soir** : rien n'est poussé, ce relais reste vrai ; le rapport du rouge part à Cowork.
+
+**Hors de ce lot, laissés tels quels** : les worktrees `reunir-en-une-copie` (`5983d058`) et `agent-a1c2917168a2adc0d` (HEAD détaché, `f95ccfda`). Non commités : `.claude/settings.json` (le plugin `productivite-labo-codex` y est retiré, à confirmer par Grégoire), `CONSIGNE-DEMARRAGE-COWORK.md`, sept fichiers modifiés et cinq non suivis de `plans de travail/` (dont `EXPORT-TAMPONS-GREGOIRE-2026-11-01-22h21.json`), `captures/fenetre-de-fusion-*.png`.
+
 ## 2 NOV. 2026, 15 H (Claude Code) : **1.231.0 COMMITÉE SUR `main`, POUSSÉE SEULEMENT SUR VERDICT VERT DU MAC ; `git log -1 origin/main` FAIT FOI**
 
 **Porte** : `plans de travail/CONSIGNE-LOT-2026-11-02-mise-en-ligne-1231.md` (Cowork, 14 h 52). En ligne avant ce commit : 1.230.1 (`ffd69a47`).

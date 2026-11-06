@@ -14,6 +14,8 @@
  * s'efface (2 s) n'est JAMAIS attendue, quel que soit l'horizon : attendre celle-là ferait
  * lire un témoin déjà parti. Mesuré le 6 nov. : avec un horizon de 2 s, chaque attente
  * après un enregistrement durait 3,5 s au lieu des 2,2 s de la pause remplacée.
+ * L'exclusion se fait par FICHIER (`temoin-enregistrement.js:`) : juste tant que ce fichier ne
+ * pose que cette minuterie (une seule le 6 nov., ligne 160). S'il en pose une autre, l'exclure par délai.
  *
  * ⚠ Ne vaut PAS pour un constat d'absence (aucune écriture, aucun message, aucune erreur) :
  * une cause qui ne passe pas par une minuterie (une promesse, un événement) n'est pas vue.

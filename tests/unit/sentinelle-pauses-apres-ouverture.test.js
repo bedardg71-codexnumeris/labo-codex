@@ -11,7 +11,12 @@ import { fileURLToPath } from 'node:url';
 // `attendreApplication(page)` (tests/integration/harness/attendre-application.js).
 // Ce cliquet empêche qu'elles repoussent :
 //   · une pause écrite juste après un `goto` ou un `reload` échoue directement ;
-//   · le nombre total de pauses des specs ne peut que baisser.
+//   · le nombre de sites de pause des specs ne peut que baisser. Un SITE est un endroit
+//     du source où un délai est écrit : chaque `waitForTimeout`, et chaque appel d'une
+//     enveloppe d'une ligne (`const pause = (page, ms) => page.waitForTimeout(ms)`), où le
+//     délai s'écrit à l'appel. Une aide plus longue qui contient une pause compte pour sa
+//     ligne, une fois : ses appels ne comptent pas, sans quoi chaque spec neuve qui la
+//     réutilise ferait rougir le cliquet. C'est le source qu'on tient, pas l'exécution.
 // Rapport : plans de travail/RAPPORT-2026-11-01-duree-de-la-verification.md.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -21,29 +26,43 @@ const INTEGRATION = path.resolve(__dirname, '..', 'integration');
 // 2 nov. 2026 : 904 → 692, les 30 sites les plus lourds sauf profil-rangee-1151 (plans de travail/RAPPORT-2026-11-02-pauses-les-plus-lourdes.md).
 // 6 nov. 2026 : 692 → 738 à la fusion dans main, qui avait ajouté ses specs sans ce cliquet (753) ;
 // les 5 pauses après ouverture de ajouter-pages-photo-droite, notifications-pile-1224 et
-// reunir-en-une-copie-1231 deviennent attendreApplication. Compte réel, pas un relèvement.
-const PLAFOND_DES_PAUSES = 738;
+// reunir-en-une-copie-1231 deviennent attendreApplication. C'était un relèvement, justifié par les specs de main.
+// 6 nov. 2026 : 738 → 619, recompté selon la règle des sites. Avant, une aide comptait ses appels
+// si sa première pause précédait la première `}` de son corps : 44 aides vues, 82 non vues pour
+// une accolade (plans de travail/VERDICT-RELECTURE-2026-11-06-fusion-des-trois-lots.md § 2).
+const PLAFOND_DES_PAUSES = 619;
 
 /** Marque une pause qu'aucune condition observable ne peut remplacer : le commentaire dit pourquoi. */
 const MARQUE_GARDEE = 'pause-gardee :';
 
 const ligneDeCommentaire = (ligne) => /^\s*(\/\/|\/\*|\*)/.test(ligne);
 
-/** Les noms qui, dans ce fichier, enveloppent un `waitForTimeout` (`const pause = (page, ms) => …`). */
+/** Un appel de `waitForTimeout` seul, arguments compris (une paire de parenthèses imbriquée au plus). */
+const APPEL_DE_PAUSE = String.raw`(?:await\s+)?\w+(?:\.\w+)*\.waitForTimeout\((?:[^()\n]|\([^()\n]*\))*\)`;
+
+/**
+ * Les enveloppes du fichier : les fonctions dont le corps ENTIER est la pause.
+ * `const pause = (page, ms) => page.waitForTimeout(ms)`, la même avec `{ return … }` ou
+ * `{ await … }`, ou une `function` dont le seul énoncé est ce `return` (ou cet `await`).
+ * Une fonction qui fait autre chose n'en est pas une, où que tombent ses accolades.
+ */
 function enveloppes(texte) {
     const noms = new Set();
-    for (const m of texte.matchAll(/(?:const|let)\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*(?:\{[^}]*)?\w+(?:\.\w+)*\.waitForTimeout\(/g)) noms.add(m[1]);
-    for (const m of texte.matchAll(/function\s+(\w+)\s*\([^)]*\)\s*\{[^}]*?\.waitForTimeout\(/g)) noms.add(m[1]);
+    const fleche = new RegExp(String.raw`(?:const|let)\s+(\w+)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>\s*(?:${APPEL_DE_PAUSE}\s*;?\s*$|\{\s*(?:return\s+)?${APPEL_DE_PAUSE}\s*;?\s*\})`, 'gm');
+    const fonction = new RegExp(String.raw`function\s+(\w+)\s*\([^)]*\)\s*\{\s*(?:return\s+)?${APPEL_DE_PAUSE}\s*;?\s*\}`, 'g');
+    for (const m of texte.matchAll(fleche)) noms.add(m[1]);
+    for (const m of texte.matchAll(fonction)) noms.add(m[1]);
     return noms;
 }
 
 /** Vrai si la ligne fait une pause : `.waitForTimeout(` ou l'appel d'une enveloppe du fichier. */
 function estUnePause(ligne, noms) {
     if (/\.waitForTimeout\(/.test(ligne)) return true;
-    return [...noms].some((nom) => new RegExp(`(^|[^\\w.])${nom}\\(`).test(ligne));
+    // `function pause(` est la définition, pas un appel.
+    return [...noms].some((nom) => new RegExp(`(^|[^\\w.])(?<!\\bfunction\\s+)${nom}\\(`).test(ligne));
 }
 
-/** Les pauses d'un fichier : la définition d'une enveloppe compte pour une, chaque appel pour une. */
+/** Les sites de pause d'un fichier : chaque `waitForTimeout` écrit (la définition d'une enveloppe comprise), chaque appel d'une enveloppe. */
 function compterPauses(texte) {
     const noms = enveloppes(texte);
     return texte.split('\n').filter((l) => !ligneDeCommentaire(l) && estUnePause(l, noms)).length;
@@ -111,5 +130,21 @@ describe('Le cliquet voit ce qu\'il doit voir', () => {
     it('le compte voit les pauses directes et les appels d\'une enveloppe, pas les commentaires', () => {
         const texte = 'const pause = (page, ms) => page.waitForTimeout(ms);\nawait pause(page, 1);\n// await page.waitForTimeout(1);\nawait page.waitForTimeout(2);\nawait maPause(page);';
         expect(compterPauses(texte)).toBe(3);
+    });
+
+    it('une aide de plusieurs lignes compte sa pause une fois, une enveloppe d\'une ligne compte ses appels', () => {
+        const appels = '\nawait demarrer(page);\nawait demarrer(page);\nawait demarrer(page);';
+        // La `}` du page.evaluate précède la pause (le cas de demarrer() le 6 nov.) : 1, pas 4.
+        const accoladeAvant = 'async function demarrer(page) {\n    await page.evaluate(() => { window.x = 1; });\n    await page.waitForTimeout(3000);\n}';
+        expect(compterPauses(accoladeAvant + appels)).toBe(1);
+        // Sans `}` avant la pause : 1 aussi. L'accolade ne décide plus de rien.
+        const accoladeApres = 'async function demarrer(page) {\n    await page.waitForTimeout(3000);\n    await page.click(\'#x\');\n}';
+        expect(compterPauses(accoladeApres + appels)).toBe(1);
+        const flecheLongue = 'const demarrer = async (page) => {\n    await page.waitForTimeout(3000);\n    await page.click(\'#x\');\n};';
+        expect(compterPauses(flecheLongue + appels)).toBe(1);
+        // Une enveloppe d'une ligne : le délai s'écrit à l'appel, chaque appel est un site.
+        expect(compterPauses('const demarrer = (page, ms) => page.waitForTimeout(ms);' + appels)).toBe(4);
+        expect(compterPauses('async function demarrer(page, ms) {\n    return page.waitForTimeout(ms);\n}' + appels)).toBe(4);
+        expect(compterPauses('const demarrer = async (page) => { await page.waitForTimeout(500); };' + appels)).toBe(4);
     });
 });
