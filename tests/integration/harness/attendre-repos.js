@@ -10,8 +10,10 @@
  * et que les écritures sont drainées.
  *
  * L'HORIZON tient la place de la durée de la pause remplacée : une minuterie plus longue
- * n'était pas attendue non plus. Il ne couvre surtout pas les 2 s au bout desquelles le
- * témoin « Enregistré » s'efface : attendre celle-là ferait lire un témoin déjà parti.
+ * n'était pas attendue non plus. La minuterie au bout de laquelle le témoin « Enregistré »
+ * s'efface (2 s) n'est JAMAIS attendue, quel que soit l'horizon : attendre celle-là ferait
+ * lire un témoin déjà parti. Mesuré le 6 nov. : avec un horizon de 2 s, chaque attente
+ * après un enregistrement durait 3,5 s au lieu des 2,2 s de la pause remplacée.
  *
  * ⚠ Ne vaut PAS pour un constat d'absence (aucune écriture, aucun message, aucune erreur) :
  * une cause qui ne passe pas par une minuterie (une promesse, un événement) n'est pas vue.
@@ -51,7 +53,8 @@ export async function attendreRepos(page, { horizon = 1000, timeout = 15000 } = 
     await page.evaluate(async ({ horizon, timeout }) => {
         const suivi = window.__reactionsDuBanc;
         if (!suivi) throw new Error('attendreRepos : `suivreLesReactions(page)` doit précéder le goto.');
-        const minuteries = () => [...suivi.enAttente.values()].filter((m) => m.delai <= horizon);
+        const effaceLeTemoin = (m) => m.pile.startsWith('temoin-enregistrement.js:');
+        const minuteries = () => [...suivi.enAttente.values()].filter((m) => m.delai <= horizon && !effaceLeTemoin(m));
         // Une animation sans fin (un pouls) n'a pas de fin à attendre. Et WebKit relance à chaque
         // image, sur l'élément qu'elle anime, la transition de la propriété qu'elle fait varier
         // (mesuré le 2 nov. : `outline-color` 200 ms sur la cible de la flèche didactique) :
