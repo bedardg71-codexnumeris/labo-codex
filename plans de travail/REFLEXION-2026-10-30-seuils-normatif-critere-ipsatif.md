@@ -90,3 +90,10 @@ Encore ouvert : (1) ce qui fixe le niveau 3, hors diagnostic et non-participatio
 - « Difficulté persistante » se calcule sur la moyenne des 3 dernières copies au plus : une seule copie peut l'allumer.
 - Questions de Claude Code : (1) quand la note commence à fixer le niveau (A : au minimum de la pratique, rien avant la semaine 10 cet automne ; B : dès la première copie, 30 sur 46 au niveau 3 à la première coupe en H2026 ; C : au minimum, mais « persistante » donne le niveau 2 avant) ; (2) la fondation au niveau 3 (A : garder la règle ; B : exiger 2 copies de suite ; C : autre). Recommandation de Cowork (15 h 45) : 1 C, dit « avant le minimum, un début sous la ligne donne au plus le niveau 2 » ; 2 A.
 - (15 h 40) Grégoire : « oui » : 1 C (avant le minimum de la pratique, au plus le niveau 2 par la note ; le niveau 3 par la note avec la note provisoire affichée) ; 2 A (règle de la fondation telle quelle). Ajouté au § 3 bis de la consigne du niveau.
+
+## Le soir (21 h 49)
+
+- 1.228.0 en ligne (\`ee9f340a\`, verdict du Mac vert) : le niveau au critère, l'Aide, les Nouvelles 1.227 et 1.228.
+- Grégoire enchaîne avec les barres colorées (\`CONSIGNE-LOT-2026-10-30-barres-apercu.md\`, jamais exécutée jusqu'ici).
+- La réponse du groupe : d'accord avec l'ébauche qui affiche « enseignement universel renforcé » sous 70 % du groupe au niveau 1 ; d'accord avec la phrase qui dit que le repère 80-15-5 est une heuristique. Consigne : \`CONSIGNE-LOT-2026-10-30-reponse-du-groupe.md\`.
+- « Note provisoire » reste dans les pratiques alternatives de notation ; en pratique sommative, on parle de « la note actuelle du cours ». Consigne : \`CONSIGNE-LOT-2026-10-30-note-actuelle-sommative.md\` (#1207). L'Aide garde « note du cours à ce jour », formulation commune aux pratiques validée à 16 h 07 (supposition de Cowork : la décision de 21 h 49 vise les écrans propres à la sommative).

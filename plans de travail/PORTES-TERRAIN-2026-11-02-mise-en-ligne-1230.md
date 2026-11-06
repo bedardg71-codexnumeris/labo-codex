@@ -27,3 +27,11 @@ Pourquoi : dans la 1.229, sur l'iPad, ses noms revenaient au défaut au recharge
 - Ses tampons absents de la bibliothèque : non reproduit.
 - Une copie verrouillée suit encore les réglages actuels de tampons (règle du 2 nov., 4 h 52, à venir).
 - Erreurs de Cowork rattrapées : la copie réduite deux fois par ses consignes (468 → 272 pt, puis −43 % hors plein écran), corrigées avant la mise en ligne.
+
+## Retour du terrain (relevé de Grégoire, 2 nov., 8 h 02)
+
+**Passées 8 / échec 0 / non traitées 0.** Toutes les portes sont closes.
+
+- 1.4 · Mesure : une copie évaluée avant le 1er nov. au soir montre **ses anciens tampons**. L'inférence de Cowork (elle afficherait déjà les nouveaux) est démentie sur ce cas ; à reprendre dans le plan des tampons, qui mesure pourquoi.
+- 3.1 · « oui. c'est surtout la largeur visible entre les palettes qui m'importe. Je dois pouvoir bien lire l'écriture manuscrite des élèves d'une marge à l'autre. Le défilement vertical ne me gêne pas, d'autant plus qu'il se fait maintenant à deux doigts sur l'iPad. »
+- 3.2 · « On peut aller plus large avec la palette Rétroaction, car j'ai besoin de lire le texte que l'élève recevra. À ce stade du travail, l'annotation est terminée et la relecture de la copie est plus globale. C'est le retour à l'élève qui compte plus. » ⮕ `CONSIGNE-LOT-2026-11-02-retroaction-plus-large.md`.

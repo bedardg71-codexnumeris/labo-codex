@@ -12,7 +12,7 @@
 
 ## §1 · ⚠⚠ Données : « Effacer la page » a déménagé
 Pourquoi : « Effacer la page » est maintenant en bas de la palette Annotation, loin des outils. Avant d'effacer, l'application doit toujours te proposer d'enregistrer ton codex.
-- [ ] 1.1 · iPad · Annoter, hors plein écran, sur une page déjà annotée : touche « Effacer la page », près du coin bas-droit. ⮕ la proposition d'enregistrer ton codex paraît, comme avant.
+- [ ] 1.1 · iPad · Annoter, hors plein écran, sur une page déjà annotée : touche « Effacer la page », près du coin bas-droit. ⮕ la proposition d'enregistrer ton codex paraît, comme avant. Touche « Annuler » : tes annotations restent (ajout de Cowork, 16 h 50, pour ne rien effacer d'une vraie copie).
 - [ ] 1.2 · iPad · Au même toucher, regarde la palette. ⮕ elle ne change pas de taille.
 
 ## §2 · Interface

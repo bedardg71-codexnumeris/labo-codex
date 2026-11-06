@@ -34,3 +34,7 @@ Aucune.
 - **Deux cas refusés sans rien écrire** (commentés dans le code, aucun cas vécu) : une copie qui a aussi une page PNG saine, ou une photo perdue en WebP. Le message s'affiche, mais le geste répond « ne peut pas être réparée ici ».
 - **L'empreinte d'archive.** Une copie réparée ne concorde plus avec son empreinte d'archive, comme après tout « Modifier ». Sans suite.
 - **Le verdict du Mac.** Vert sur `2508c573` : 1 381 essais, 1 376 verts, 4 rouges déjà connus (#1181), 1 vert au second essai (`grilles-sous-criteres-condense.spec.js`, sans rapport avec ce passage), 23 sautés.
+
+## §5 · Le relevé
+
+Relevé de Grégoire, 6 nov. 2026 à 6 h 45, copié depuis l'artefact « Portes terrain 1.235.0 » et versé par Cowork : **7 passées, 0 échec, 0 non traitée.** Version lue sur l'iPad : « Bêta publique 1.235.0 (Build 1105-1555) ». Champs laissés vides : 1.2 (titre de la fenêtre du codex) et 1.3 (page de réouverture). Les deux copies sont réparées.

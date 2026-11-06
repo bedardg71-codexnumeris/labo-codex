@@ -1,0 +1,241 @@
+{
+  "metadata": {
+    "licence": "CC BY-NC-SA 4.0",
+    "licence_url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "licence_resume": "Attribution - Pas d'utilisation commerciale - Partage dans les mêmes conditions 4.0 International",
+    "auteur_original": "Grégoire Bédard",
+    "email_auteur": "gregoire.bedard@cegepdrummond.ca",
+    "site_auteur": "https://codexnumeris.org",
+    "type": "tampons",
+    "nom": "Tampons d’observation",
+    "date_creation": "2026-11-02",
+    "date_modification": "2026-11-02",
+    "version": "1.0",
+    "contributeurs": [],
+    "attribution": "Créé par Grégoire Bédard",
+    "discipline": [
+      "601 Français (langue et littérature)"
+    ],
+    "niveau": "Collégial",
+    "institution": "Cégep Drummond",
+    "description_courte": "Approche ELLAC + SOLO · PAN-STD"
+  },
+  "contenu": {
+    "categories": [
+      {
+        "id": "action",
+        "nom": "Opérations",
+        "couleur": "#22c55e",
+        "builtin": true
+      },
+      {
+        "id": "observations",
+        "nom": "Analyse et traitement des concepts",
+        "couleur": "#3b82f6",
+        "builtin": true
+      },
+      {
+        "id": "cat-1793588605709",
+        "nom": "Signalement",
+        "couleur": "#ff0000",
+        "builtin": false
+      }
+    ],
+    "tampons": [
+      {
+        "id": "action-reperage",
+        "nom": "Identification",
+        "categorie": "action",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5JZGVudGlmaWNhdGlvbjwvdGl0bGU+CiAgPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOSIvPgogIDxwYXRoIGQ9Ik03LjA1IDEySDEyTTkuNzUgOS43NUwxMiAxMkw5Ljc1IDE0LjI1Ii8+CiAgPGNpcmNsZSBjeD0iMTUuNiIgY3k9IjEyIiByPSIyLjEiIGZpbGw9ImN1cnJlbnRDb2xvciIgc3Ryb2tlPSJub25lIi8+Cjwvc3ZnPgo=",
+        "retroaction": "L'élève identifie un élément, le nomme correctement, le restitue avec exactitude.",
+        "custom": false
+      },
+      {
+        "id": "action-liaison",
+        "nom": "Relation",
+        "categorie": "action",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5SZWxhdGlvbjwvdGl0bGU+CiAgPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOSIvPgogIDxjaXJjbGUgY3g9IjYuNDIiIGN5PSIxMiIgcj0iMS4zNSIgZmlsbD0iY3VycmVudENvbG9yIiBzdHJva2U9Im5vbmUiLz4KICA8cGF0aCBkPSJNOS41NyAxMkgxNC40M00xMi4xOCA5Ljc1TDE0LjQzIDEyTDEyLjE4IDE0LjI1Ii8+CiAgPGNpcmNsZSBjeD0iMTcuNTgiIGN5PSIxMiIgcj0iMS4zNSIgZmlsbD0iY3VycmVudENvbG9yIiBzdHJva2U9Im5vbmUiLz4KPC9zdmc+Cg==",
+        "retroaction": "L'élève relie des éléments entre eux.",
+        "custom": false
+      },
+      {
+        "id": "action-ouverture",
+        "nom": "Déduction",
+        "categorie": "action",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5Ew6lkdWN0aW9uPC90aXRsZT4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI5Ii8+CiAgPHBhdGggZD0iTTYuMTUgMTJIMTAuNjVNMTAuNjUgMTJMMTYuNSA3LjA1TTEzLjMyIDYuNzhMMTYuNSA3LjA1TDE2LjIzIDEwLjIzTTEwLjY1IDEyTDE2LjUgMTYuOTVNMTMuMzIgMTcuMjJMMTYuNSAxNi45NUwxNi4yMyAxMy43NyIvPgo8L3N2Zz4K",
+        "retroaction": "L'élève applique une idée générale à un cas particulier du texte.",
+        "custom": false
+      },
+      {
+        "id": "obs-approfondir",
+        "nom": "Approfondir",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik04IDEySDE2TTEyIDhWMTZNMjEgMTJDMjEgMTYuOTcwNiAxNi45NzA2IDIxIDEyIDIxQzcuMDI5NDQgMjEgMyAxNi45NzA2IDMgMTJDMyA3LjAyOTQ0IDcuMDI5NDQgMyAxMiAzQzE2Ljk3MDYgMyAyMSA3LjAyOTQ0IDIxIDEyWiIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPC9zdmc+",
+        "retroaction": "L'idée a un potentiel à développer davantage.",
+        "custom": false
+      },
+      {
+        "id": "obs-confusion",
+        "nom": "Confusion",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjAxIi8+DQo8cGF0aCBkPSJNNDggMEgwVjQ4SDQ4VjBaIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjAxIi8+DQo8cGF0aCBkPSJNMTcgMTZIMTNDOC4wMjk0NCAxNiA0IDIwLjAyOTQgNCAyNUM0IDI5Ljk3MDYgOC4wMjk0NCAzNCAxMyAzNEMxNS40NzU4IDM0IDE3LjcxODEgMzMuMDAwMyAxOS4zNDUzIDMxLjM4MjZDMjAuOTg0OSAyOS43NTI1IDI0IDI1IDI0IDI1QzI0IDI1IDI3LjAwNTcgMjAuMjY4NSAyOC42MzIgMTguNjQwMUMzMC4yNjEgMTcuMDA5IDMyLjUxMjcgMTYgMzUgMTZDMzkuOTcwNiAxNiA0NCAyMC4wMjk0IDQ0IDI1QzQ0IDI5Ljk3MDYgMzkuOTcwNiAzNCAzNSAzNEgzMSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPHBhdGggZD0iTTM1IDMwTDMxIDM0TDM1IDM4IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQo8cGF0aCBkPSJNMTMgMTJMMTcgMTZMMTMgMjAiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4NCjwvc3ZnPg==",
+        "retroaction": "Plusieurs idées sont entremêlées dans une même explication sans relations explicites.",
+        "custom": false
+      },
+      {
+        "id": "obs-hoc",
+        "nom": "HOC",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5IT0M8L3RpdGxlPgogIDxwYXRoIGQ9Ik02LjYgMjEuNVYxNi4yNUE3LjYgNy42IDAgMSAxIDE4LjggOS45M0wyMC41IDEzLjJIMTguOVYxNS42QTEuOSAxLjkgMCAwIDEgMTcgMTcuNUgxNVYyMS41Ii8+CiAgPHBhdGggZD0iTTEwLjIxIDcuMjZMMTAuMTcgNS45MkwxMi4yMyA1LjkyTDEyLjE5IDcuMjZMMTMuMjUgNy44N0wxNC4zOSA3LjE3TDE1LjQyIDguOTVMMTQuMjQgOS41OUwxNC4yNCAxMC44MUwxNS40MiAxMS40NUwxNC4zOSAxMy4yM0wxMy4yNSAxMi41M0wxMi4xOSAxMy4xNEwxMi4yMyAxNC40OEwxMC4xNyAxNC40OEwxMC4yMSAxMy4xNEw5LjE1IDEyLjUzTDguMDEgMTMuMjNMNi45OCAxMS40NUw4LjE2IDEwLjgxTDguMTYgOS41OUw2Ljk4IDguOTVMOC4wMSA3LjE3TDkuMTUgNy44N1oiLz4KPC9zdmc+Cg==",
+        "retroaction": "L'hypothèse d'objectif de communication n'est pas adéquatement identifiée.",
+        "custom": false
+      },
+      {
+        "id": "obs-integration",
+        "nom": "Intégration",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5JbnTDqWdyYXRpb248L3RpdGxlPgogIDxwYXRoIGQ9Ik00IDNIMTVBMiAyIDAgMCAxIDE3IDVWMTJBMiAyIDAgMCAxIDE1IDE0SDguNUw1IDE3LjVWMTRINEEyIDIgMCAwIDEgMiAxMlY1QTIgMiAwIDAgMSA0IDNaIi8+CiAgPHBhdGggZD0iTTUgN0gxNE01IDEwLjVIMTEuNSIvPgogIDxwYXRoIGQ9Ik0xNyA2LjVIMjBBMiAyIDAgMCAxIDIyIDguNVYxNkEyIDIgMCAwIDEgMjAgMThIMTlWMjEuNUwxNS41IDE4SDExIi8+Cjwvc3ZnPgo=",
+        "retroaction": "La preuve n'est pas syntaxiquement ou grammaticalement intégrée dans l'explication.",
+        "custom": false
+      },
+      {
+        "id": "obs-mecanisme",
+        "nom": "Mécanisme",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5Nw6ljYW5pc21lPC90aXRsZT4KICA8cGF0aCBkPSJNNy4xNSAzLjgyTDcuMzEgMi4yN0w5LjA5IDIuMjdMOS4yNSAzLjgyTDEwLjU1IDQuMzZMMTEuNzYgMy4zN0wxMy4wMyA0LjY0TDEyLjA0IDUuODVMMTIuNTggNy4xNUwxNC4xMyA3LjMxTDE0LjEzIDkuMDlMMTIuNTggOS4yNUwxMi4wNCAxMC41NUwxMy4wMyAxMS43NkwxMS43NiAxMy4wM0wxMC41NSAxMi4wNEw5LjI1IDEyLjU4TDkuMDkgMTQuMTNMNy4zMSAxNC4xM0w3LjE1IDEyLjU4TDUuODUgMTIuMDRMNC42NCAxMy4wM0wzLjM3IDExLjc2TDQuMzYgMTAuNTVMMy44MiA5LjI1TDIuMjcgOS4wOUwyLjI3IDcuMzFMMy44MiA3LjE1TDQuMzYgNS44NUwzLjM3IDQuNjRMNC42NCAzLjM3TDUuODUgNC4zNloiLz4KICA8Y2lyY2xlIGN4PSI4LjIiIGN5PSI4LjIiIHI9IjEuNiIvPgogIDxwYXRoIGQ9Ik0xNi42OCAxNC44NUwxNi42MiAxMy41MkwxOC41OCAxMy41MkwxOC41MiAxNC44NUwxOS41MiAxNS40MkwyMC42NSAxNC43MUwyMS42MyAxNi40MUwyMC40NCAxNy4wM0wyMC40NCAxOC4xN0wyMS42MyAxOC43OUwyMC42NSAyMC40OUwxOS41MiAxOS43OEwxOC41MiAyMC4zNUwxOC41OCAyMS42OEwxNi42MiAyMS42OEwxNi42OCAyMC4zNUwxNS42OCAxOS43OEwxNC41NSAyMC40OUwxMy41NyAxOC43OUwxNC43NiAxOC4xN0wxNC43NiAxNy4wM0wxMy41NyAxNi40MUwxNC41NSAxNC43MUwxNS42OCAxNS40MloiLz4KPC9zdmc+Cg==",
+        "retroaction": "Le mécanisme n'est pas adéquatement identifié ou expliqué.",
+        "custom": false
+      },
+      {
+        "id": "obs-procede",
+        "nom": "Procédé",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5Qcm9jw6lkw6k8L3RpdGxlPgogIDxwYXRoIGQ9Ik0xMC4zNyA1LjE5TDEwLjY2IDMuMUwxMy4zNCAzLjFMMTMuNjMgNS4xOUwxNS42NiA2LjAzTDE3LjM1IDQuNzZMMTkuMjQgNi42NUwxNy45NyA4LjM0TDE4LjgxIDEwLjM3TDIwLjkgMTAuNjZMMjAuOSAxMy4zNEwxOC44MSAxMy42M0wxNy45NyAxNS42NkwxOS4yNCAxNy4zNUwxNy4zNSAxOS4yNEwxNS42NiAxNy45N0wxMy42MyAxOC44MUwxMy4zNCAyMC45TDEwLjY2IDIwLjlMMTAuMzcgMTguODFMOC4zNCAxNy45N0w2LjY1IDE5LjI0TDQuNzYgMTcuMzVMNi4wMyAxNS42Nkw1LjE5IDEzLjYzTDMuMSAxMy4zNEwzLjEgMTAuNjZMNS4xOSAxMC4zN0w2LjAzIDguMzRMNC43NiA2LjY1TDYuNjUgNC43Nkw4LjM0IDYuMDNaIi8+CiAgPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMyIvPgo8L3N2Zz4K",
+        "retroaction": "Le procédé littéraire n'est pas adéquatement identifié ou expliqué.",
+        "custom": false
+      },
+      {
+        "id": "obs-relation",
+        "nom": "Transition",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDI0IDI0IiBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDpub25lO3N0cm9rZTojMDIwMjAyO3N0cm9rZS1taXRlcmxpbWl0OjEwO3N0cm9rZS13aWR0aDoxLjkxcHg7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTEwLjU3LDUuOGwyLjcxLTIuNzJhNS40LDUuNCwwLDAsMSw3LjY0LDcuNjRMMTguMiwxMy40MyIvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTUuOCwxMC41NywzLjA4LDEzLjI4YTUuNCw1LjQsMCwwLDAsNy42NCw3LjY0bDIuNzEtMi43MiIvPjxsaW5lIGNsYXNzPSJjbHMtMSIgeDE9IjE2Ljc3IiB5MT0iNy4yMyIgeDI9IjcuMjMiIHkyPSIxNi43NyIvPjwvc3ZnPg==",
+        "retroaction": "La transition explique le lien logique entre les deux idées principales.",
+        "custom": false
+      },
+      {
+        "id": "obs-repetition",
+        "nom": "Répétition",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KPHBhdGggZD0iTTEyIDIwLjUwMDFDMTYuNjk0NCAyMC41MDAxIDIwLjUgMTYuNjk0NSAyMC41IDEyLjAwMDFDMjAuNSA5LjE3NDU2IDE5LjEyMTMgNi42NzEwMyAxNyA1LjEyNTVNMTMgMjIuNDAwMUwxMSAyMC40MDAxTDEzIDE4LjQwMDFNMTIgMy41MDAxQzcuMzA1NTggMy41MDAxIDMuNSA3LjMwNTY4IDMuNSAxMi4wMDAxQzMuNSAxNC44MjU2IDQuODc4NjcgMTcuMzI5MiA3IDE4Ljg3NDdNMTEgNS42MDAxTDEzIDMuNjAwMUwxMSAxLjYwMDEiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4NCjwvc3ZnPg==",
+        "retroaction": "L'idée est exprimée à plusieurs reprises sans approfondissement.",
+        "custom": false
+      },
+      {
+        "id": "obs-rupture",
+        "nom": "Rupture",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDI0IDI0IiBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDpub25lO3N0cm9rZTojMDIwMjAyO3N0cm9rZS1taXRlcmxpbWl0OjEwO3N0cm9rZS13aWR0aDoxLjkycHg7fTwvc3R5bGU+PC9kZWZzPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTEwLjU2LDUuNzdsMi43Mi0yLjcyYTUuNDMsNS40MywwLDAsMSwzLjg0LTEuNTksNS40Myw1LjQzLDAsMCwxLDUuNDIsNS40MkE1LjQzLDUuNDMsMCwwLDEsMjEsMTAuNzJsLTIuNzIsMi43MiIvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTUuNzcsMTAuNTYsMy4wNSwxMy4yOEE1LjQyLDUuNDIsMCwxLDAsMTAuNzIsMjFsMi43Mi0yLjcyIi8+PGxpbmUgY2xhc3M9ImNscy0xIiB4MT0iMTYuNzkiIHkxPSI3LjIxIiB4Mj0iNy4yMSIgeTI9IjE2Ljc5Ii8+PGxpbmUgY2xhc3M9ImNscy0xIiB4MT0iMjAuNjMiIHkxPSIxNS44MyIgeDI9IjIzLjUiIHkyPSIxNS44MyIvPjxsaW5lIGNsYXNzPSJjbHMtMSIgeDE9IjE1LjgzIiB5MT0iMjAuNjMiIHgyPSIxNS44MyIgeTI9IjIzLjUiLz48bGluZSBjbGFzcz0iY2xzLTEiIHgxPSIxOS4xOSIgeTE9IjE5LjE5IiB4Mj0iMjEuMSIgeTI9IjIxLjEiLz48bGluZSBjbGFzcz0iY2xzLTEiIHgxPSIzLjM4IiB5MT0iOC4xNyIgeDI9IjAuNSIgeTI9IjguMTciLz48bGluZSBjbGFzcz0iY2xzLTEiIHgxPSI4LjE3IiB5MT0iMy4zOCIgeDI9IjguMTciIHkyPSIwLjUiLz48bGluZSBjbGFzcz0iY2xzLTEiIHgxPSI0LjgxIiB5MT0iNC44MSIgeDI9IjIuOSIgeTI9IjIuOSIvPjwvc3ZnPg==",
+        "retroaction": "Des idées distinctes sont juxtaposées sans lien logique entre elles.",
+        "custom": false
+      },
+      {
+        "id": "obs-sans-preuve",
+        "nom": "Sans preuve",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIGZpbGw9IiMwMDAwMDAiIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDU2IDU2IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0gMTYuNTg2MCA1Mi4yNDYxIEMgMTcuNzU3OSA1Mi4yNDYxIDE4LjU1NDggNTEuNjM2NyAxOS45NjEwIDUwLjM3MTEgTCAyOC4wNzA0IDQzLjE3NTggTCA0My4wOTM4IDQzLjE3NTggQyA1MC4wNzgzIDQzLjE3NTggNTMuODI4MCAzOS4zMDg2IDUzLjgyODAgMzIuNDQxNCBMIDUzLjgyODAgMTQuNDg4MyBDIDUzLjgyODAgNy42MjExIDUwLjA3ODMgMy43NTM5IDQzLjA5MzggMy43NTM5IEwgMTIuOTA2NCAzLjc1MzkgQyA1Ljk0NTQgMy43NTM5IDIuMTcyMCA3LjU5NzYgMi4xNzIwIDE0LjQ4ODMgTCAyLjE3MjAgMzIuNDQxNCBDIDIuMTcyMCAzOS4zMzIwIDUuOTQ1NCA0My4xNzU4IDEyLjkwNjQgNDMuMTc1OCBMIDE0LjAzMTMgNDMuMTc1OCBMIDE0LjAzMTMgNDkuMjY5NSBDIDE0LjAzMTMgNTEuMDc0MiAxNC45Njg4IDUyLjI0NjEgMTYuNTg2MCA1Mi4yNDYxIFogTSAxNy41NDY5IDQ3Ljk1NzAgTCAxNy41NDY5IDQxLjE2MDIgQyAxNy41NDY5IDM5Ljg5NDUgMTcuMDc4MiAzOS40MDIzIDE1Ljc4OTEgMzkuNDAyMyBMIDEyLjkyOTggMzkuNDAyMyBDIDguMTcyMCAzOS40MDIzIDUuOTQ1NCAzNi45ODgzIDUuOTQ1NCAzMi40MTgwIEwgNS45NDU0IDE0LjQ4ODMgQyA1Ljk0NTQgOS45MTgwIDguMTcyMCA3LjUyNzMgMTIuOTI5OCA3LjUyNzMgTCA0My4wOTM4IDcuNTI3MyBDIDQ3LjgyODAgNy41MjczIDUwLjA1NDggOS45MTgwIDUwLjA1NDggMTQuNDg4MyBMIDUwLjA1NDggMzIuNDE4MCBDIDUwLjA1NDggMzYuOTg4MyA0Ny44MjgwIDM5LjQwMjMgNDMuMDkzOCAzOS40MDIzIEwgMjcuOTA2NCAzOS40MDIzIEMgMjYuNjE3MyAzOS40MDIzIDI1LjkzNzYgMzkuNTg5OCAyNS4wNDY5IDQwLjUwMzkgWiBNIDE3LjI0MjMgMjIuMzYzMyBDIDE3LjI0MjMgMjQuOTQxNCAxOC44MzYwIDI2LjkzMzYgMjEuNDE0MiAyNi45MzM2IEMgMjIuMzUxNiAyNi45MzM2IDIzLjI4OTEgMjYuNzY5NSAyMy44NzUxIDI2LjA0MzAgTCAyNC4wNjI2IDI2LjA0MzAgQyAyMy4yMTg4IDI3Ljg5NDUgMjEuNTA3OSAyOS4wODk4IDIwLjAzMTMgMjkuNDY0OSBDIDE5LjE4NzYgMjkuNjk5MiAxOC45Mjk4IDMwLjA3NDIgMTguOTI5OCAzMC42MTMzIEMgMTguOTI5OCAzMS4xOTkyIDE5LjM5ODUgMzEuNjQ0NSAyMC4wNTQ4IDMxLjY0NDUgQyAyMi4zNTE2IDMxLjY0NDUgMjYuOTIyMCAyOC45MjU4IDI2LjkyMjAgMjMuMjA3MSBDIDI2LjkyMjAgMjAuMTM2NyAyNC45Mjk4IDE3Ljc2OTUgMjIuMDAwMSAxNy43Njk1IEMgMTkuMjgxMyAxNy43Njk1IDE3LjI0MjMgMTkuNjY4MCAxNy4yNDIzIDIyLjM2MzMgWiBNIDI5LjQyOTggMjIuMzYzMyBDIDI5LjQyOTggMjQuOTQxNCAzMS4wMjM1IDI2LjkzMzYgMzMuNjAxNiAyNi45MzM2IEMgMzQuNTM5MSAyNi45MzM2IDM1LjQ3NjYgMjYuNzY5NSAzNi4wNjI2IDI2LjA0MzAgTCAzNi4yNTAxIDI2LjA0MzAgQyAzNS40MDY0IDI3Ljg5NDUgMzMuNjk1NCAyOS4wODk4IDMyLjIxODggMjkuNDY0OSBDIDMxLjM3NTEgMjkuNjk5MiAzMS4xMTczIDMwLjA3NDIgMzEuMTE3MyAzMC42MTMzIEMgMzEuMTE3MyAzMS4xOTkyIDMxLjU4NjAgMzEuNjQ0NSAzMi4yNDIzIDMxLjY0NDUgQyAzNC41MzkxIDMxLjY0NDUgMzkuMTMyOSAyOC45MjU4IDM5LjEzMjkgMjMuMjA3MSBDIDM5LjEzMjkgMjAuMTM2NyAzNy4xMTczIDE3Ljc2OTUgMzQuMTg3NiAxNy43Njk1IEMgMzEuNDY4OCAxNy43Njk1IDI5LjQyOTggMTkuNjY4MCAyOS40Mjk4IDIyLjM2MzMgWiIvPjwvc3ZnPg==",
+        "retroaction": "L'idée n'est pas soutenue par une preuve.",
+        "custom": false
+      },
+      {
+        "id": "obs-longueur",
+        "nom": "Détour",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuMDEiLz4KPHBhdGggZD0iTTIwIDE1TDI0IDE5TDI4IDE1IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0yNCAxOVY4QzI0IDUuNzkwODYgMjUuNzkwOSA0IDI4IDRINDBDNDIuMjA5MSA0IDQ0IDUuNzkwODYgNDQgOFYxOSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMjggMzNMMjQgMjlMMjAgMzMiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTI0IDI5VjQwQzI0IDQyLjIwOTEgMjIuMjA5MSA0NCAyMCA0NEg4QzUuNzkwODYgNDQgNCA0Mi4yMDkxIDQgNDBWMjkiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTMzIDIwTDI5IDI0TDMzIDI4IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0yOSAyNEw0MCAyNEM0Mi4yMDkxIDI0IDQ0IDI1Ljc5MDkgNDQgMjhWNDBDNDQgNDIuMjA5MSA0Mi4yMDkxIDQ0IDQwIDQ0SDI5IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0xNSAyOEwxOSAyNEwxNSAyMCIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTkgMjRMOCAyNEM1Ljc5MDg2IDI0IDQgMjIuMjA5MSA0IDIwTDQgOEM0IDUuNzkwODYgNS43OTA4NiA0IDggNEwxOSA0IiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPg==",
+        "retroaction": "L'idée nécessite de la synthèse et de la concision.",
+        "custom": false
+      },
+      {
+        "id": "custom-1793584104456",
+        "nom": "Interprétation",
+        "categorie": "action",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5JbnRlcnByw6l0YXRpb248L3RpdGxlPgogIDxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjkiLz4KICA8Y2lyY2xlIGN4PSI4LjQiIGN5PSIxMiIgcj0iMi4xIiBmaWxsPSJjdXJyZW50Q29sb3IiIHN0cm9rZT0ibm9uZSIvPgogIDxwYXRoIGQ9Ik0xMiAxMkgxNi45NU0xNC43IDkuNzVMMTYuOTUgMTJMMTQuNyAxNC4yNSIvPgo8L3N2Zz4K",
+        "retroaction": "L'élève explique l'effet ou le sens que produit un élément.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793584130582",
+        "nom": "Comparaison",
+        "categorie": "action",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5Db21wYXJhaXNvbjwvdGl0bGU+CiAgPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOSIvPgogIDxwYXRoIGQ9Ik03LjUgOC44NUgxNi41TTE0LjI1IDYuNkwxNi41IDguODVMMTQuMjUgMTEuMU0xNi41IDE1LjE1SDcuNU05Ljc1IDEyLjlMNy41IDE1LjE1TDkuNzUgMTcuNCIvPgo8L3N2Zz4K",
+        "retroaction": "L'élève rapproche deux éléments pour en dégager les ressemblances et les différences.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793584060968",
+        "nom": "Induction",
+        "categorie": "action",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5JbmR1Y3Rpb248L3RpdGxlPgogIDxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjkiLz4KICA8cGF0aCBkPSJNNy41IDcuMDVMMTMuMzUgMTJNNy41IDE2Ljk1TDEzLjM1IDEyTTEzLjM1IDEySDE3Ljg1TTE1LjYgOS43NUwxNy44NSAxMkwxNS42IDE0LjI1Ii8+Cjwvc3ZnPgo=",
+        "retroaction": "L'élève tire une idée générale de plusieurs exemples.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793589149036",
+        "nom": "Incomplet",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik0xMiAxMkgxMi4wMU0xNiAxMkgxNi4wMU04IDEySDguMDFNMjEgMTJDMjEgMTYuOTcwNiAxNi45NzA2IDIxIDEyIDIxQzcuMDI5NDQgMjEgMyAxNi45NzA2IDMgMTJDMyA3LjAyOTQ0IDcuMDI5NDQgMyAxMiAzQzE2Ljk3MDYgMyAyMSA3LjAyOTQ0IDIxIDEyWiIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPg0KPC9zdmc+",
+        "retroaction": "L'explication ou le raisonnement est inachevé.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793589212387",
+        "nom": "Incertain",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik0xMS45NjcgMTIuNzVDMTIuOTY3IDExLjc1IDEzLjk2NyAxMS4zNTQ2IDEzLjk2NyAxMC4yNUMxMy45NjcgOS4xNDU0MyAxMy4wNzE2IDguMjUgMTEuOTY3IDguMjVDMTEuMDM1MSA4LjI1IDEwLjI1MiA4Ljg4NzM5IDEwLjAzIDkuNzVNMTEuOTY3IDE1Ljc1SDExLjk3N00yMSAxMkMyMSAxNi45NzA2IDE2Ljk3MDYgMjEgMTIgMjFDNy4wMjk0NCAyMSAzIDE2Ljk3MDYgMyAxMkMzIDcuMDI5NDQgNy4wMjk0NCAzIDEyIDNDMTYuOTcwNiAzIDIxIDcuMDI5NDQgMjEgMTJaIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+DQo8L3N2Zz4=",
+        "retroaction": "L'explication ou le raisonnement est ambigu.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793589248471",
+        "nom": "Inexact",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik05IDlMMTUgMTVNMTUgOUw5IDE1TTIxIDEyQzIxIDE2Ljk3MDYgMTYuOTcwNiAyMSAxMiAyMUM3LjAyOTQ0IDIxIDMgMTYuOTcwNiAzIDEyQzMgNy4wMjk0NCA3LjAyOTQ0IDMgMTIgM0MxNi45NzA2IDMgMjEgNy4wMjk0NCAyMSAxMloiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4NCjwvc3ZnPg==",
+        "retroaction": "L'explication ou le raisonnement comporte une erreur factuelle.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793589284252",
+        "nom": "Attention",
+        "categorie": "observations",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik0xMiA4VjEzTTEyIDE2SDEyLjAxTTIxIDEyQzIxIDE2Ljk3MDYgMTYuOTcwNiAyMSAxMiAyMUM3LjAyOTQ0IDIxIDMgMTYuOTcwNiAzIDEyQzMgNy4wMjk0NCA3LjAyOTQ0IDMgMTIgM0MxNi45NzA2IDMgMjEgNy4wMjk0NCAyMSAxMloiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4NCjwvc3ZnPg==",
+        "retroaction": "L'idée est une généralisation abusive, un jugement de valeur ou un biais.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793588639938",
+        "nom": "Cible",
+        "categorie": "cat-1793588605709",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5DaWJsZTwvdGl0bGU+CiAgPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iOCIvPgogIDxwYXRoIGQ9Ik0xMiAyVjcuNU0xMiAxNi41VjIyTTIgMTJINy41TTE2LjUgMTJIMjIiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSIxIiBmaWxsPSJjdXJyZW50Q29sb3IiIHN0cm9rZT0ibm9uZSIvPgo8L3N2Zz4K",
+        "retroaction": "Porter une attention particulière à ce point.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793588695400",
+        "nom": "À réviser",
+        "categorie": "cat-1793588605709",
+        "imageBase64": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPg0KPHN2ZyB3aWR0aD0iODAwcHgiIGhlaWdodD0iODAwcHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCjxwYXRoIGQ9Ik0yMSAxMkMyMSAxNi45NzA2IDE2Ljk3MDYgMjEgMTIgMjFDNy4wMjk0NCAyMSAzIDE2Ljk3MDYgMyAxMkMzIDcuMDI5NDQgNy4wMjk0NCAzIDEyIDNDMTYuOTcwNiAzIDIxIDcuMDI5NDQgMjEgMTJaIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2UtZGFzaGFycmF5PSI0IDQiLz4NCjwvc3ZnPg==",
+        "retroaction": "Erreurs de français (non comptabilisées) à réviser avant la rédaction finale.",
+        "custom": true
+      },
+      {
+        "id": "custom-1793588758185",
+        "nom": "Soupçon IA",
+        "categorie": "cat-1793588605709",
+        "imageBase64": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPgogIDx0aXRsZT5Tb3Vww6dvbiBJQTwvdGl0bGU+CiAgPHJlY3QgeD0iNC41IiB5PSI4IiB3aWR0aD0iMTUiIGhlaWdodD0iMTIiIHJ4PSIzIi8+CiAgPHBhdGggZD0iTTEyIDhWNS4yTTIgMTIuNVYxNS41TTIyIDEyLjVWMTUuNU0xMCAxNi44SDE0Ii8+CiAgPGNpcmNsZSBjeD0iMTIiIGN5PSIzLjgiIHI9IjEuNCIvPgogIDxjaXJjbGUgY3g9IjkuMyIgY3k9IjEyLjgiIHI9IjEuMzUiIGZpbGw9ImN1cnJlbnRDb2xvciIgc3Ryb2tlPSJub25lIi8+CiAgPGNpcmNsZSBjeD0iMTQuNyIgY3k9IjEyLjgiIHI9IjEuMzUiIGZpbGw9ImN1cnJlbnRDb2xvciIgc3Ryb2tlPSJub25lIi8+Cjwvc3ZnPgo=",
+        "retroaction": "Il y a un soupçon d'utilisation non permise de l'intelligence artificielle.",
+        "custom": true
+      }
+    ],
+    "symbolesBuiltin": [],
+    "symbolesPerso": []
+  }
+}

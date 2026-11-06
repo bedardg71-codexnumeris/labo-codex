@@ -35,3 +35,7 @@ Les mots d'écran sont au rapport (`RAPPORT-2026-11-04-copie-de-reference.md`) ;
 - Un PDF de plusieurs pages dans la référence : le banc ouvre des images (en `file://`, PDF.js ne répond pas au banc ; un essai demanderait un serveur, comme `visionneuse-pdf-worker-echec-non-memorise`). Le chemin PDF reprend celui de la visionneuse, sans essai propre. À regarder en usage : pages précédente et suivante d'une copie de plusieurs pages.
 - L'iPad en portrait : côte à côte, chaque copie n'a plus que la moitié de 820 px.
 - Les palettes flottantes déplacées ailleurs que leur place d'origine : la barre de la référence passe au-dessus d'elles, mesurée à 1280 px seulement.
+
+## Disposition (Cowork, 4 novembre 2026, 20 h 23)
+
+**Porte levée, artefact non publié.** Règle 2 du skill `portes-terrain` : une porte préalable n’est due que si un raté est irréversible. Ce lot n’écrit rien (essai « stockage identique avant et après », `copie-de-reference-1229.spec.js`) ; un raté du pincement ou du défilement se verra à l’usage, et Grégoire le signalera. C’est la consigne de Cowork qui demandait cette porte à tort (tension relevée par Claude Code dans son rapport). Les points du §4 restent dits : ils se regardent en usage normal, sans case à cocher.

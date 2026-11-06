@@ -55,3 +55,7 @@ Tranchées le 5 nov. 2026, avant la release.
 - **La cible comme curseur dans Safari** : le banc vérifie qu'elle est demandée, pas qu'elle s'affiche ; sinon Safari montre la croix habituelle (repli prévu).
 - **Les flèches de réordonnancement restent petites au doigt** (20 × 16 px, d'avant ce lot) : elles servent à régler l'ordre des pages d'une copie réunie. Rien de changé, à signaler si ça gêne.
 - **Le stock** : rien n'est réparé dans tes données (la reprise du 5 nov. a été remise en ordre à la main).
+
+## Disposition (Cowork, 5 novembre 2026, 12 h 12)
+
+**Porte levée, artefact non publié**, comme celle de la copie de référence la veille. Règle 2 du skill `portes-terrain` : une vérification préalable n’est due que si un raté est irréversible ; un import raté se défait (corbeille, jeton retirable) et rien ici n’écrit de façon définitive. Version en ligne vérifiée par Cowork à 12 h 12 : `version.json` dit 1.234.0 (build 1105-0951). Ce qui reste non éprouvé (Chrome, le curseur cible sous Safari, les petites flèches au doigt, un original de plusieurs pages dans la référence) se verra à l’usage, d’abord à la prochaine vraie reprise en plusieurs photos sur le Mac, dans Chrome.
