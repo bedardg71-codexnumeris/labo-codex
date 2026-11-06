@@ -7,6 +7,18 @@
 
 ---
 
+## 6 NOV. 2026, SOIR (Claude Code) : **HISTOIRE RÉÉCRITE ET POUSSÉE EN FORCE (SECONDE PURGE) ; `main` = `origin/main` = `a5be544f` ; GITHUB NE PORTE PLUS QUE `main` ET LES 22 ÉTIQUETTES, TOUTES RÉÉCRITES**
+
+**Ce qui s'est passé** : au signal de Grégoire, la copie réécrite de `plans de travail/CONSIGNE-LOT-2026-11-06-seconde-purge.md` (vérifications A à D, avec témoins) a remplacé les refs locales, puis l'historique de GitHub. Les empreintes de TOUS les commits changent à partir du 2 nov. 2025 : `bc1eb39f` est devenu `a5be544f`, l'arbre est le même (`841ac524`). Le relais du 6 nov., 10 h, ci-dessous, cite les anciennes empreintes.
+
+**Verdict** : complet, en dix morceaux, sur `a5be544f` (Chrome, Safari et l'app Claude fermés, sur secteur, sous `caffeinate -i`, sans veille) : 1 381 essais, 1 377 verts, 0 au second essai, 4 rouges connus, 23 sautés. Mesure (`node scripts/mesurer-verification.mjs`) : 86,8 min d'essais ; pauses : 1 380, 23,9 min ; pauses après ouverture : 0.
+
+**Sur GitHub** : `main` et 22 étiquettes, chacune vérifiée sur un commit de la copie (témoin : aucune des 42 refs d'avant n'y est). Supprimées : les 10 branches `dependabot/*` (leurs demandes se ferment ; Dependabot les rouvrira sur l'histoire neuve) et les 3 `lot/*` (fusionnées). Les `refs/pull/*` (lecture seule) gardent l'ancienne histoire : c'est la demande au support de GitHub, que Cowork rédige.
+
+**Retirés juste après ce commit** : tous les worktrees et les branches `lot/*` locales (fusionnées) ; le clone de travail ne garde aucune ref vers l'ancienne histoire. Les 5 fichiers non commités de `pauses-les-plus-lourdes` sont dans `~/purge-seconde/worktree-pauses-les-plus-lourdes-2026-11-06.tar`, hors dépôt.
+
+**⚠ Tout autre clone ou copie de ce dépôt** (autre machine, conteneur, fork) porte l'ancienne histoire : ne pas le pousser, le recloner.
+
 ## 6 NOV. 2026, 10 H (Claude Code) : **LES TROIS LOTS DES PAUSES FUSIONNÉS SUR `main` LOCAL, NON POUSSÉS ; VERDICT COMPLET CE SOIR AU SIGNAL DE GRÉGOIRE, PUSH SI VERT ; EN LIGNE : TOUJOURS 1.235.0 (`168d462a`) ; `git log -1 origin/main` FAIT FOI**
 
 **Porte** : `plans de travail/VERDICT-RELECTURE-2026-11-06-fusion-des-trois-lots.md` (Cowork, 9 h 32), accepté avec la retouche de la sentinelle (§ 2), faite dans le commit qui porte ce relais et ce verdict.
