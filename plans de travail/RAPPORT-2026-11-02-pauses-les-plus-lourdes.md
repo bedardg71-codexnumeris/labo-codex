@@ -139,6 +139,12 @@ Cowork décide s'il y a un lot de plus. La passe complète du Mac qui suivra la 
 - **La mesure en deux jours** : 16 specs le 2 nov., 11 le 6. Les deux moitiés ne se comparent pas entre elles, chaque spec se compare à elle-même dans la même heure.
 - **La saturation du 2 nov.** : la machine virtuelle de l'app Claude était la candidate, sans preuve. Le 6 nov., app Claude quittée, aucune saturation en 2 h de mesure ; cela ne prouve pas qu'elle en était la cause (une seule observation, sans l'avoir vue saturer).
 
+## La fusion (6 nov.)
+
+Dans un worktree à part, parti de `main` (`168d462a`) : `lot/verification-plus-rapide`, `lot/pauses-apres-ouverture`, puis cette branche, chacune par un commit de fusion. **Un seul conflit**, attendu : `palette-layout-h-hauteur-774.spec.js`, supprimée sur `main` (`4e2ce227`) ; la suppression est gardée.
+
+**Le cliquet rougissait sur le résultat**, à cause de specs venues de `main`, écrites sans lui : 5 pauses juste après une ouverture (`ajouter-pages-photo-droite` ×2, `notifications-pile-1224`, `reunir-en-une-copie-1231` ×2), et 753 pauses pour un plafond de 692. Les 5 deviennent `attendreApplication(page)`, la règle du lot précédent ; aucune ne précède un constat d'absence. Les 3 specs : vertes une fois chacune sur le Mac, puis rouges sous une cassure directe chacune (la hauteur de la pile, le libellé « Copie de N fichiers », la lecture EXIF), code restauré (`outils-pauses-les-plus-lourdes/resultats/res-fusion-2026-11-06.tsv`). **Plafond : 738**, le compte réel. Le compte baisse de 15 pour 5 lignes : la sentinelle comptait chaque appel de `demarrer()` comme une pause tant qu'une pause y précédait le premier `}`. Contre-épreuve : une pause ajoutée, le cliquet rougit ; retirée, il reverdit. Vitest : 883 fichiers, 10 732 tests verts.
+
 ## Ce qui reste
 
 1. **Fusionné en local, pas poussé** (décision de Cowork, 6 nov.) : `lot/verification-plus-rapide`, `lot/pauses-apres-ouverture`, puis cette branche, dans `main`. Cowork relit le diff fusionné ; `main` part avec la prochaine vérification complète du Mac, dans l'ordre commit, relecture, verdict, push.

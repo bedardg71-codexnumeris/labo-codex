@@ -6,6 +6,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.resolve(__dirname, '..', '..', 'index.html');
@@ -13,7 +14,7 @@ const indexHtml = 'file://' + path.resolve(__dirname, '..', '..', 'index.html');
 test('#1224 · quinze rouges et un vert : la pile reste dans l\'écran et défile', async ({ page }) => {
     await page.setViewportSize({ width: 820, height: 1180 });
     await page.goto(indexHtml);
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     await page.evaluate(() => {
         for (let i = 1; i <= 15; i++) notifications.erreur('Jeton non appliqué', 'Élève ' + i + ' : aucune évaluation d’origine trouvée.');
         notifications.succes('13 fichier(s) importé(s)');

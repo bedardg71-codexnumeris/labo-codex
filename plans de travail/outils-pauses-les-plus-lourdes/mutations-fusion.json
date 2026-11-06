@@ -1,0 +1,5 @@
+[
+{"spec": "notifications-pile-1224.spec.js", "fichier": "styles.css", "ancien": "    max-height: calc(100vh - 24px);\n", "nouveau": ""},
+{"spec": "reunir-en-une-copie-1231.spec.js", "fichier": "js/travaux-ui.js", "ancien": "<strong>Copie de ${nbFichiersCopie} fichiers</strong>", "nouveau": "<strong>Copie de fichiers</strong>"},
+{"spec": "ajouter-pages-photo-droite.spec.js", "fichier": "js/travaux-import.js", "ancien": "if (!octets || octets.length < 4 || octets[0] !== 0xFF || octets[1] !== 0xD8) return 1;", "nouveau": "return 1;"}
+]

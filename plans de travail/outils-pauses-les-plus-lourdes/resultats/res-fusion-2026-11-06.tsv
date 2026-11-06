@@ -1,0 +1,9 @@
+notifications-pile-1224.spec.js	saine	0	2 passed 
+reunir-en-une-copie-1231.spec.js	saine	0	4 passed 
+ajouter-pages-photo-droite.spec.js	saine	0	4 passed 
+notifications-pile-1224.spec.js	cassee (styles.css)	1	1 failed 1 passed 
+reunir-en-une-copie-1231.spec.js	cassee (js/travaux-ui.js)	1	2 failed 2 passed 
+ajouter-pages-photo-droite.spec.js	cassee (js/travaux-import.js)	1	4 failed 
+CODE PROPRE
+journaux : /var/folders/p5/x0kq231s22l_y5ydyr0v162h0000gn/T/tmp.sY1WiCNfW6
+FINI

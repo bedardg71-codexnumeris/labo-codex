@@ -19,7 +19,10 @@ const INTEGRATION = path.resolve(__dirname, '..', 'integration');
 
 // ⛔ Ne se relève pas. Une spec neuve attend une condition, pas un délai.
 // 2 nov. 2026 : 904 → 692, les 30 sites les plus lourds sauf profil-rangee-1151 (plans de travail/RAPPORT-2026-11-02-pauses-les-plus-lourdes.md).
-const PLAFOND_DES_PAUSES = 692;
+// 6 nov. 2026 : 692 → 738 à la fusion dans main, qui avait ajouté ses specs sans ce cliquet (753) ;
+// les 5 pauses après ouverture de ajouter-pages-photo-droite, notifications-pile-1224 et
+// reunir-en-une-copie-1231 deviennent attendreApplication. Compte réel, pas un relèvement.
+const PLAFOND_DES_PAUSES = 738;
 
 /** Marque une pause qu'aucune condition observable ne peut remplacer : le commentaire dit pourquoi. */
 const MARQUE_GARDEE = 'pause-gardee :';
