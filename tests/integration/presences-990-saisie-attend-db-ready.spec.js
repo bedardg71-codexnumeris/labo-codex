@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -27,7 +28,7 @@ test('« trimestres » hors du localStorage : aucune clé nue, aucun avertisseme
     page.setDefaultTimeout(30000);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -39,7 +40,7 @@ test('« trimestres » hors du localStorage : aucune clé nue, aucun avertisseme
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1200);
+    await attendreApplication(page);
 
     // Témoin : un démarrage ordinaire de la démo, « trimestres » dans le localStorage.
     const temoin = await page.evaluate(async (cles) => {
@@ -71,7 +72,7 @@ test('« trimestres » hors du localStorage : aucune clé nue, aucun avertisseme
     page.on('console', (m) => { if (AVERTISSEMENTS.test(m.text())) avertissements.push(m.text()); });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(4000);
+    await attendreApplication(page);
 
     const apres = await page.evaluate(async (cles) => {
         const nues = {};

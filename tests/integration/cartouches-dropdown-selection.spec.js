@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -39,7 +40,7 @@ async function ouvrir(page) {
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 }
 
 test('PREUVE · le menu n\'offre que les grilles et échelles de la sélection', async ({ page }) => {

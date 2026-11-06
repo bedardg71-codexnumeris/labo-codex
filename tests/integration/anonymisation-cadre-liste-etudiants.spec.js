@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -22,7 +23,7 @@ const NOMS_REELS = ['Jovial', 'Joyeuse', 'Fière'];   // DEMO004, DEMO006, DEMO0
 async function packDemoSurLeCadre(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -33,11 +34,11 @@ async function packDemoSurLeCadre(page) {
         });
     });
     await page.reload();
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
     await page.waitForTimeout(800);
     await page.reload();
-    await page.waitForTimeout(2000);
+    await attendreApplication(page);
     await page.evaluate(() => naviguerVers('calendrier', 'trimestre'));
     await expect(page.locator('#v2-listeEtudiants tbody tr').first()).toBeAttached({ timeout: 5000 });
 }

@@ -7,7 +7,8 @@
  * ce que Playwright a RÉELLEMENT chronométré, étape par étape, reprises comprises :
  *   · durée cumulée des essais, et les 20 fichiers les plus longs ;
  *   · ouvertures de l'application (`page.goto` sur index.html, `page.reload`) ;
- *   · pauses fixes (`page.waitForTimeout`).
+ *   · pauses fixes (`page.waitForTimeout`), dont celles qui suivent une ouverture ;
+ *   · les 30 sites de pause les plus lourds (fichier:ligne), hors reprises.
  * Ne voit pas un `setTimeout` écrit DANS un `page.evaluate` : ni étape, ni durée.
  *
  * USAGE
@@ -40,21 +41,42 @@ export default class MesureVerification {
     constructor() {
         this.fichiers = new Map();
         this.etapes = {};
-        for (const nature of ['pause', 'ouverture', 'rechargement']) this.etapes[nature] = { n: 0, ms: 0, nPremier: 0, msPremier: 0 };
+        for (const nature of ['pause', 'pauseApresOuverture', 'ouverture', 'rechargement']) this.etapes[nature] = { n: 0, ms: 0, nPremier: 0, msPremier: 0 };
+        this.precedente = new Map();
+        this.sites = new Map();
         this.essais = 0;
         this.reprises = 0;
     }
 
     printsToStdio() { return false; }
 
-    onStepEnd(_test, resultat, etape) {
-        const nature = natureDeLEtape(etape.category, etape.title);
-        if (!nature) return;
+    compter(nature, resultat, etape) {
         const compte = this.etapes[nature];
         compte.n += 1;
         compte.ms += etape.duration;
         // Sans les reprises : la part comparable d'une machine à l'autre (GitHub reprend ses rouges, pas le Mac).
         if (resultat.retry === 0) { compte.nPremier += 1; compte.msPremier += etape.duration; }
+    }
+
+    onStepEnd(test, resultat, etape) {
+        const nature = natureDeLEtape(etape.category, etape.title);
+        if (nature) this.compter(nature, resultat, etape);
+        if (etape.category !== 'pw:api') return;
+        const essai = `${test.id}#${resultat.retry}`;
+        const suitUneOuverture = this.precedente.get(essai) === true;
+        if (nature === 'pause') {
+            if (suitUneOuverture) this.compter('pauseApresOuverture', resultat, etape);
+            if (resultat.retry === 0) {
+                const site = `${path.basename(etape.location?.file ?? '?')}:${etape.location?.line ?? '?'}`;
+                const cumul = this.sites.get(site) ?? { n: 0, ms: 0 };
+                cumul.n += 1;
+                cumul.ms += etape.duration;
+                this.sites.set(site, cumul);
+            }
+        }
+        // `waitForLoadState` n'attend pas l'application : la pause qui le suit suit encore l'ouverture.
+        const attendLeChargement = etape.title.startsWith('Wait for load state');
+        this.precedente.set(essai, nature === 'ouverture' || nature === 'rechargement' || (attendLeChargement && suitUneOuverture));
     }
 
     onTestEnd(test, resultat) {
@@ -75,6 +97,8 @@ export default class MesureVerification {
             ouvertures: dire(this.etapes.ouverture),
             rechargements: dire(this.etapes.rechargement),
             pauses: dire(this.etapes.pause),
+            pausesApresOuverture: dire(this.etapes.pauseApresOuverture),
+            trenteSitesDePauseLesPlusLourds: [...this.sites].sort((a, b) => b[1].ms - a[1].ms).slice(0, 30).map(([site, { n, ms }]) => ({ site, nombre: n, minutes: minutes(ms) })),
             vingtFichiersLesPlusLongs: [...this.fichiers].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([fichier, ms]) => ({ fichier, minutes: minutes(ms) }))
         };
         writeFileSync(process.env.MESURE_SORTIE, `${JSON.stringify(bilan, null, 2)}\n`, 'utf8');

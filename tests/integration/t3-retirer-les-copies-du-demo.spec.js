@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
@@ -44,7 +45,7 @@ async function demarrer(page, { dossier = false } = {}) {
     }
     await page.goto(indexHtml, { timeout: 60000 });
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         sessionStorage.clear();
@@ -57,7 +58,7 @@ async function demarrer(page, { dossier = false } = {}) {
     });
     await page.reload({ timeout: 60000 });
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     // WebKit refuse un Blob en IndexedDB dans un banc : les octets vont dans un magasin en mémoire.
     await page.evaluate(() => {
         window.__magasin = new Map();

@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -44,7 +45,7 @@ const NOM_CODEX = 'Codex du banc';
 async function demarrer(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await attendreApplication(page);
 }
 
 /**

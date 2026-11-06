@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -41,7 +42,7 @@ const AUTEUR = 'Collègue Test P3';
 async function preparerPage(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     await page.evaluate((auteur) => {
         window.db.setSync('grillesTemplates', [{

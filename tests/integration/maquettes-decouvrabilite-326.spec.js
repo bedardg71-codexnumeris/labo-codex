@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -76,7 +77,7 @@ test('#326 · la bibliothèque signale les maquettes masquées et pointe vers le
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     await semerMaquette(page);
 
@@ -120,7 +121,7 @@ test('#326 · toute maquette est listée et supprimable (bouton « Jeter ») dan
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     await semerMaquette(page);
 

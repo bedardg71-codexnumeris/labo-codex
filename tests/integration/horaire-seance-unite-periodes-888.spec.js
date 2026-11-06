@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -47,7 +48,7 @@ for (const { largeur, nom, memeRangeeQueLocal } of LARGEURS) {
         await page.setViewportSize({ width: largeur, height: 900 });
         await page.goto(indexHtml);
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(500);
+        await attendreApplication(page);
 
         // Le geste de l'écran : Cadre › Horaire (accordéon replié au chargement),
         // « Nouvel horaire », puis on tape 2 dans la case de la première séance.

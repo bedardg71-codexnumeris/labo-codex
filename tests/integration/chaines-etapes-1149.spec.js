@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -30,7 +31,7 @@ async function ouvrir(page) {
     page.on('dialog', async (d) => { await d.accept(); });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await pause(page, 1200);
+    await attendreApplication(page);
     return erreurs;
 }
 
@@ -248,7 +249,7 @@ test('Préférences : la case décochée efface toutes les chaînes, recochée l
 
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await pause(page, 1500);
+    await attendreApplication(page);
     expect(await page.evaluate(() => document.body.classList.contains('chaines-etapes-masquees')), 'le choix survit au rechargement').toBe(true);
     await page.evaluate(() => naviguerVers('reglages', 'preferences'));
     await pause(page, 500);

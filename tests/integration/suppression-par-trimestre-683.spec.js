@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -32,7 +33,7 @@ async function ouvrir(page, marqueGlobale) {
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(600);
+    await attendreApplication(page);
     await page.evaluate(async (globale) => {
         const db = window.db;
         db.setSync('trimestres', [

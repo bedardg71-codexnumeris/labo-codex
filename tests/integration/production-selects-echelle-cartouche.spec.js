@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -22,7 +23,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 test('Production · échelle + cartouche se peuplent (données réelles)', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         if (typeof window.chargerGrillesDisponiblesPourProduction !== 'function') {
@@ -64,7 +65,7 @@ test('Production · échelle + cartouche se peuplent (données réelles)', async
 test('Production · échelle + cartouche se peuplent (données démo)', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         if (typeof window.activerModeDemo !== 'function') {

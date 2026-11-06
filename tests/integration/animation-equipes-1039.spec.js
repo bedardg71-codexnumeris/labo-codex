@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -21,7 +22,7 @@ test('#1039 · barre latérale, absent du jour écarté, reste demandé, chaque 
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -33,7 +34,7 @@ test('#1039 · barre latérale, absent du jour écarté, reste demandé, chaque 
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1200);
+    await attendreApplication(page);
 
     // Le pack démo, puis UN absent aujourd'hui (fiche à 0 période pour le cours actif).
     const prep = await page.evaluate(async () => {

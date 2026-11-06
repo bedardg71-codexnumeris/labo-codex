@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -79,7 +80,7 @@ test('§2 · un espace vide reçoit une échelle SEMÉE, et tous ses niveaux sav
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     const r = await poserUnTrimestreEtSemer(page);
 
@@ -99,7 +100,7 @@ test('§1+§2 · BOUT EN BOUT — sans rien créer, une première évaluation pr
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     const prep = await poserUnTrimestreEtSemer(page);
     expect(prep.erreur, `Erreur : ${prep.erreur}`).toBeUndefined();
@@ -151,7 +152,7 @@ test('§1+§2 · #674 — un critère laissé sans niveau : l\'écran RETIENT la
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     const prep = await poserUnTrimestreEtSemer(page);
     expect(prep.erreur, `Erreur : ${prep.erreur}`).toBeUndefined();
@@ -219,7 +220,7 @@ test('§1 · TÉMOIN NÉGATIF — la même chaîne sur une échelle SANS `valeur
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     await poserUnTrimestreEtSemer(page);
 

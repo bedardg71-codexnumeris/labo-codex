@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -36,7 +37,7 @@ test('terrain · ajouter depuis la bibliothèque retire l\'item des « disponibl
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         const out = {};

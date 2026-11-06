@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -28,7 +29,7 @@ test('terrain · une écriture refusée par la garde #340 n\'est JAMAIS annoncé
     page.on('dialog', (d) => d.dismiss());
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         const out = {};
@@ -110,7 +111,7 @@ test('périmètre · un cours reconduit d\'un trimestre à l\'autre rend la gard
     page.on('dialog', (d) => d.dismiss());
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         db.setSync('trimestres', [

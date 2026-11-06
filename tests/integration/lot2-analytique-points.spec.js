@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -125,7 +126,7 @@ test(`lot 2 · ${avecCartouche ? 'AVEC cartouche (renderer cartouche)' : 'sans c
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     // 1. Le semis : un élève, une grille Contenu 70 (holistique) · Langue 30 (analytique), une
     //    échelle où M vaut 80, une production qui les désigne.

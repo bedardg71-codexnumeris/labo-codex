@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -13,7 +14,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 async function ouvrir(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
 }
 
 test('trier par DA change la flèche de la Liste, et seulement elle', async ({ page }) => {

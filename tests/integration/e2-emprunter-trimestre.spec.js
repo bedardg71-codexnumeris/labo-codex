@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -48,7 +49,7 @@ function brancherEcouteurs(page) {
 async function poserEspace(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -60,7 +61,7 @@ async function poserEspace(page) {
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         const ecrire = (k, v) => db.setSync(k, v);
         ecrire('trimestres', [
@@ -96,7 +97,7 @@ async function poserEspace(page) {
     await page.waitForTimeout(800);
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2500);
+    await attendreApplication(page);
     // Le magasin des copies : WebKit éphémère refuse un Blob dans IndexedDB ; le magasin de `db`
     // est tenu en mémoire, et la VRAIE pile travauxStockage → db.storeBlob/getBlob/deleteBlob s'en sert.
     await page.evaluate(async () => {

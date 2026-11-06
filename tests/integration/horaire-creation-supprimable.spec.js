@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -42,7 +43,7 @@ test('terrain 2.4 · un horaire qu\'on vient de créer porte un bouton Supprimer
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         const out = {};

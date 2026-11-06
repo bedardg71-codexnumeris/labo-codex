@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -31,7 +32,7 @@ async function ouvrir(page, erreurs) {
     page.on('dialog', (d) => d.accept().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 }
 
 /** Verse le groupe-cours fictif d'a2025 et rend le ZIP téléchargé. */

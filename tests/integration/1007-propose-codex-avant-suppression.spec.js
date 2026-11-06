@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -62,7 +63,7 @@ function brancher(page) {
 async function demarrer(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         sessionStorage.clear();
@@ -75,7 +76,7 @@ async function demarrer(page) {
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
     await page.waitForTimeout(3000);
     await page.evaluate(async () => {

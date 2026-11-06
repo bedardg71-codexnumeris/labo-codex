@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -62,7 +63,7 @@ test('PREUVE · supprimer une grille PORTEUSE de cartouches est refusé, et le d
     page.on('dialog', (d) => { dialogues.push(d.message()); d.accept().catch(() => {}); });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async (semer) => {
         await eval(semer)();
@@ -104,7 +105,7 @@ test('PREUVE · sans grille d\'accueil, le refus redevient sec — et il dit quo
     page.on('dialog', (d) => { dialogues.push(d.message()); d.accept().catch(() => {}); });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
@@ -137,7 +138,7 @@ test('PREUVE · une grille SANS cartouche se supprime toujours normalement', asy
     page.on('dialog', (d) => d.accept().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async (semer) => {
         await eval(semer)();

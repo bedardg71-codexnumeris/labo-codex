@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -40,7 +41,7 @@ test('porte Lot 0 · le diagnostic classe juste et n\'écrit RIEN', async ({ pag
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     /** Empreinte COMPLÈTE du stockage — c'est l'oracle de la lecture seule. */
     const EMPREINTE = async () => {

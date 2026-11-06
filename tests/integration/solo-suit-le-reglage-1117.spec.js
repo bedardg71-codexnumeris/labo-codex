@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -27,7 +28,7 @@ async function ouvrirDemo(page) {
     page.on('dialog', async (d) => { await d.accept(); });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await pause(page, 1200);
+    await attendreApplication(page);
     await page.evaluate(async () => { await window.activerModeDemo(); });
     await pause(page, 1200);
 }
@@ -139,7 +140,7 @@ test('#1117 — un critère « relationnel », enregistré champ masqué, la pag
     // La page rechargée : la valeur est en base, pas seulement en mémoire.
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await pause(page, 2500);
+    await attendreApplication(page);
     expect(await page.evaluate(() => obtenirPreference('afficherDescriptionsSOLO'))).toBe(false);
     expect((await lireGrille(page, id)).criteres[0].niveauSOLO).toBe('relationnel');
 

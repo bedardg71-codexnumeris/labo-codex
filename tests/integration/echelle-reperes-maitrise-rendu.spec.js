@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -37,7 +38,7 @@ test('#555 · l\'éditeur d\'échelle rend les deux repères, et l\'aperçu dit 
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(async () => {
         if (typeof window.afficherNiveauxEchelle !== 'function'
@@ -176,7 +177,7 @@ test('#555 (e) · l\'éditeur d\'échelle NEUVE rend les deux repères, et un ch
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(async () => {
         if (typeof window.afficherNiveauxNouvelleEchelle !== 'function'
@@ -278,7 +279,7 @@ test('#555 · en fenêtre large, les sept champs d\'un niveau tiennent sur UNE r
     await page.setViewportSize({ width: 1600, height: 900 });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(() => {
         ['conteneurEditionEchelle', 'conception-echelle-performance', 'section-conception']

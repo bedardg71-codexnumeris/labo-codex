@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -71,7 +72,7 @@ const BILAN = '3 copies sur 3 n\'ont pas pu revenir, faute d\'espace. Tes donné
 async function demarrer(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(3000);
+    await attendreApplication(page);
 }
 
 /** Le codex du banc : le vrai `Codex.generer`, trois copies d'un pixel. */
@@ -260,7 +261,7 @@ test.describe('#1011 — un codex ouvert sans assez d\'espace va jusqu\'à son b
         await neuf.page.getByRole('button', { name: 'Annuler', exact: true }).click();
         await neuf.page.reload();
         await neuf.page.waitForLoadState('domcontentloaded');
-        await neuf.page.waitForTimeout(3000);
+        await attendreApplication(neuf.page);
         const apres = await etatDeLEspace(neuf.page);
         expect(apres.groupe).toEqual(GROUPE_FICTIF);
         expect({ actif: apres.codexActif, nom: apres.codexNom }).toEqual({ actif: true, nom: NOM_CODEX });

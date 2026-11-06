@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import JSZip from 'jszip';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -46,7 +47,7 @@ function brancherEcouteurs(page) {
 async function poserEspace(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -58,7 +59,7 @@ async function poserEspace(page) {
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     await page.evaluate(() => {
         const ecrire = (k, v) => db.setSync(k, v);
         ecrire('trimestres', [
@@ -89,7 +90,7 @@ async function poserEspace(page) {
     await page.waitForTimeout(800);
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2500);
+    await attendreApplication(page);
 }
 
 /** Les copies, rendues par le magasin de la page (à reposer après un rechargement). */

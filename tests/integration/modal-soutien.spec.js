@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -35,7 +36,7 @@ test('bouton Soutenir : ouvre la modale avec le bon contenu + liens', async ({ p
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(400);
+    await attendreApplication(page);
 
     // Bouton d'entête : dans le 1er cluster, juste après le bouton bug (révision),
     // en icône masquée teintée (.ico-coeur), pas un <img>.
@@ -113,7 +114,7 @@ test('bouton Soutenir : ouvre la modale avec le bon contenu + liens', async ({ p
 test('modale Soutien : Échap et clic sur l\'arrière-plan ferment', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(400);
+    await attendreApplication(page);
 
     // Échap.
     await page.locator('button[data-action="ouvrirModalSoutien"]').first().click();

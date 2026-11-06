@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -40,7 +41,7 @@ function brancherEcouteurs(page) {
 async function demarrerDemo(page) {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         if (window.db && db.memoryCache) db.memoryCache.clear();
@@ -52,7 +53,7 @@ async function demarrerDemo(page) {
     });
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
     await page.waitForTimeout(3000);
     await page.evaluate(() => {
@@ -205,7 +206,7 @@ test.describe('Lot F — gestes hors témoin raccordés au codex', () => {
         await page.evaluate(() => db.setSync('_codex_etat', { actif: true, nom: 'Codex du banc', derniereSauvegarde: new Date().toISOString(), modificationsDepuis: null, manifeste: null, temoinFiable: true }));
         await page.reload();
         await page.waitForLoadState('domcontentloaded');
-        await page.waitForTimeout(4000);
+        await attendreApplication(page);
         expect(await page.evaluate(() => Codex.etat().modificationsNonSauvees)).toBe(false);
         await page.evaluate(() => planificationDonnees.sauvegarderCarte('carte_chaine', { noeuds: [{ id: 'x' }], liens: [] }));
         expect(await page.evaluate(() => Codex.etat().modificationsNonSauvees)).toBe(true);

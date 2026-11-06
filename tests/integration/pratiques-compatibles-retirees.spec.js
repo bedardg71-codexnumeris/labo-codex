@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const indexHtml = 'file://' + path.join(path.resolve(__dirname, '..', '..'), 'index.html');
 
@@ -47,7 +48,7 @@ const SEMER = `async () => {
 test('volet C · la liste des grilles dit la composition, déduite des critères', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     const liste = await page.evaluate(eval(SEMER));
     console.log('LISTE →', JSON.stringify(liste));
     const par = Object.fromEntries(liste.map(l => [l.id, l]));
@@ -65,7 +66,7 @@ test('volet C · la liste des grilles dit la composition, déduite des critères
 test('volet C · le formulaire n\'offre plus de cases, et une grille qui portait le champ le garde après sauvegarde', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
     await page.evaluate(eval(SEMER));
 
     const r = await page.evaluate(async () => {

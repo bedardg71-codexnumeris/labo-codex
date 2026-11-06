@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -41,7 +42,7 @@ test('Chantier I · evaluation rend la palette critères (cartes + niveaux IDME)
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(() => {
         if (typeof window.afficherCriteresDepuisGrille !== 'function') {
@@ -129,7 +130,7 @@ test('Chantier I · evaluation rend la rétroaction Bilan (défis prioritaires +
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(() => {
         if (typeof window.basculerVueRetroaction !== 'function') {
@@ -262,7 +263,7 @@ test('#576 · le bilan nomme les critères quand la grille d\'origine a disparu'
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const resultat = await page.evaluate(() => {
         if (typeof window.basculerVueRetroaction !== 'function') {

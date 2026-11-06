@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -49,7 +50,7 @@ test('#699 · rouvrir une évaluation, changer UN niveau : l\'auto-save écrit l
     attacherCaptureErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(700);
+    await attendreApplication(page);
 
     // 1. Le semis (celui de la spec #674), plus UNE évaluation existante en brouillon :
     //    c1 E · c2 E · c3 I → 84 %, non verrouillée (l'auto-save ne touche jamais une verrouillée).

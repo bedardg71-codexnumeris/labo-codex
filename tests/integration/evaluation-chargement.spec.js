@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -49,6 +50,10 @@ test('Défense refactor · evaluation charge dans WebKit sans erreur console', a
     await page.waitForLoadState('domcontentloaded');
 
     // Donner un délai à l'init différée
+    await attendreApplication(page);
+    // pause-gardee : « aucune erreur » n'a pas de signal, et ce délai EST ce que l'essai observe.
+    // L'init différée de js/init-inline.js part 500 ms après DOMContentLoaded ; sans lui, son
+    // erreur tombe après le constat et l'essai passe (contre-épreuve du 1er nov. 2026).
     await page.waitForTimeout(500);
 
     // Aucune erreur console au chargement (filet pour régression silencieuse
@@ -60,7 +65,7 @@ test('Défense refactor · evaluation charge dans WebKit sans erreur console', a
 test('Défense refactor · sentinelle exports browser evaluation', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     // Vérifier qu'un sous-ensemble représentatif des 63 exports est défini
     // dans l'environnement browser (vs Vitest sandbox Node — les deux doivent

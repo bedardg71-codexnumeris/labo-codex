@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -33,7 +34,7 @@ async function ouvrir(page) {
     page.on('dialog', async (d) => { dialogues.push(d.message()); await d.accept(); });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await pause(page, 1200);
+    await attendreApplication(page);
     return { erreurs, dialogues };
 }
 

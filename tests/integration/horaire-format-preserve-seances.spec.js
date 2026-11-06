@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -64,7 +65,7 @@ test('CT-01 · passer de 2 à 3 séances préserve les séances saisies, et Enre
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async ({ setupSrc, lireSrc }) => {
         const horId = (new Function('db', setupSrc))(window.db);
@@ -125,7 +126,7 @@ test('CT-01 · modifier les périodes d\'une séance ne touche pas aux autres', 
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async ({ setupSrc, lireSrc }) => {
         const horId = (new Function('db', setupSrc))(window.db);
@@ -165,7 +166,7 @@ test('CT-01 · réduire 2 → 1 séance garde la première ; « Nouvel horaire �
     const erreurs = brancherEcouteurs(page);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async ({ setupSrc, lireSrc }) => {
         const horId = (new Function('db', setupSrc))(window.db);

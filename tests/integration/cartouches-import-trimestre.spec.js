@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -40,7 +41,7 @@ async function ouvrir(page) {
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 }
 
 test('PREUVE · la section « Importer depuis un autre trimestre » apparaît, avec le bon compte', async ({ page }) => {
@@ -195,7 +196,7 @@ test('PREUVE · « Tout importer » copie le lot entier sous UNE seule grille', 
     page.on('dialog', (d) => d.accept().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async (semer) => {
         await eval(semer)();

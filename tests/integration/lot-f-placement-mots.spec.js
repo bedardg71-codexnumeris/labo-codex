@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -19,13 +20,13 @@ async function demarrer(page, largeur, hauteur) {
     await page.setViewportSize({ width: largeur, height: hauteur });
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(800);
+    await attendreApplication(page);
     await page.evaluate(async () => {
         localStorage.clear();
         await new Promise((res) => { const r = indexedDB.deleteDatabase('LaboCodexDB'); r.onsuccess = r.onerror = r.onblocked = () => res(); setTimeout(res, 1500); });
     });
     await page.reload();
-    await page.waitForTimeout(1500);
+    await attendreApplication(page);
     await page.evaluate(() => activerModeDemo());
     await page.waitForTimeout(3000);
 }
@@ -39,7 +40,7 @@ for (const [largeur, hauteur] of LARGEURS) {
         // Menu du codex (un codex actif pour que tout le menu s'affiche).
         await page.evaluate(() => db.setSync('_codex_etat', { actif: true, nom: 'Codex du banc', derniereSauvegarde: null, modificationsDepuis: new Date().toISOString(), manifeste: null }));
         await page.reload();
-        await page.waitForTimeout(3500);
+        await attendreApplication(page);
         await page.evaluate(() => Codex.toggleMenu());
         const mesures = await page.evaluate(() => {
             const mes = (sel) => {

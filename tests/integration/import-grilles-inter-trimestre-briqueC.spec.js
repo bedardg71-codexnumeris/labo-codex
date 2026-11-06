@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -52,7 +53,7 @@ const estErreurAttendue = (msg) => patternsAttendus.some((re) => re.test(msg));
 test('Brique C pas 4 · listerTrimestresAvecGrilles ne retient que les trimestres à copie propre', async ({ page }) => {
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const liste = await page.evaluate(() => {
         // Décor déterministe : 3 trimestres connus, actif = h2026.
@@ -85,7 +86,7 @@ test('Brique C pas 4 · garde D-C7 : aucune source listée quand le trimestre ac
     // source DISPONIBLE (a2025 a ses grilles), listerTrimestresAvecGrilles rend [].
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(() => {
         window.obtenirTrimestres = () => ([
@@ -113,7 +114,7 @@ test('Brique C pas 4 · « Voir les grilles » révèle réellement le preview (
     // display:none inline revient.
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(async () => {
         // Décor : un trimestre source archivé (a2025) avec ses grilles propres.
@@ -161,7 +162,7 @@ test('Brique C pas 4 · copie inter-trimestre : id neuf + inspireDe + cartouches
 
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const res = await page.evaluate(() => {
         const grilleSource = {

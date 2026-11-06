@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -37,7 +38,7 @@ test('DEN-3 · créer une DEN via l\'assistant → pratique calculable', async (
     brancherErreurs(page, erreurs);
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
+    await attendreApplication(page);
 
     const r = await page.evaluate(async () => {
         if (!window.creerPratiqueV2 || !window.wizardState) return { erreur: 'assistant absent' };

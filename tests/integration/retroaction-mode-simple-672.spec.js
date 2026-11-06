@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attendreApplication } from './harness/attendre-application.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -141,7 +142,7 @@ test('#672 · mode simple : le div de rétroaction porte la rétroaction, pas l�
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     await page.goto(indexHtml);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(900);
+    await attendreApplication(page);
 
     const etat = await page.evaluate('(' + MONTER + ')()');
     console.log('#672 →', JSON.stringify(etat, null, 2));
