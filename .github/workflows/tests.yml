@@ -7,7 +7,13 @@
 # (`workflow_dispatch`) : le passage de nuit (`schedule`) est retiré. Depuis le
 # 16 oct. 2026 (point 9), le dépôt est public : elle part à la demande ET sur un
 # push qui touche un chemin OBSERVABLE, en morceaux parallèles.
-# Runner : ubuntu-latest.
+# Runner : ubuntu-24.04, ÉPINGLÉ (7 nov. 2026, #1114). `ubuntu-latest` est passé
+# à Ubuntu 26.04 le 6 nov. ; la version de Playwright des tests ne la connaît pas
+# (« BEWARE: your OS is not officially supported ») et son WebKit, construit pour
+# 24.04, ne démarrait plus (`libicudata.so.74` absente). Les 1 398 essais de
+# chacun des trois runs suivants ont rougi, et le juge a dit « 1 347 régressions »
+# (runs 42310716850, 42339600127, 42346629602). La baseline Linux est classée sur
+# 24.04 : changer d'image, c'est la reclasser, et monter Playwright en même temps.
 # Note : Playwright WebKit Linux ≠ Safari macOS — la validation device-
 # spécifique (Safari Mac, iPad Air) reste manuelle locale par Grégoire.
 #
@@ -316,7 +322,7 @@ jobs:
   # ── Job 1 : Vitest, sur CHAQUE push et pull request (et à la demande). ──
   vitest:
     name: Vitest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -347,7 +353,7 @@ jobs:
   decision:
     name: Playwright doit-il juger ?
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       juger: ${{ steps.decider.outputs.juger }}
@@ -408,7 +414,7 @@ jobs:
     name: Playwright (WebKit) ${{ matrix.morceau }}/${{ needs.decision.outputs.total }}
     needs: decision
     if: needs.decision.outputs.juger == 'oui'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -437,13 +443,20 @@ jobs:
         run: npm ci
 
       # Le binaire WebKit (~100 Mo) est identique tant que la version de
-      # Playwright ne bouge pas : la clé du cache est donc le lock des tests.
+      # Playwright ET l'image du runner ne bougent pas : la clé porte donc le lock
+      # des tests et l'image (`ImageOS`, « ubuntu24 »). Sans l'image, un WebKit
+      # construit pour une autre version d'Ubuntu ressortirait du cache (7 nov.).
+      - name: Image du runner
+        id: image
+        shell: bash
+        run: echo "nom=${ImageOS:?ImageOS absente}" >> "$GITHUB_OUTPUT"
+
       - name: Cache du navigateur WebKit
         id: cache-webkit
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-webkit-${{ runner.os }}-${{ hashFiles('tests/package-lock.json') }}
+          key: playwright-webkit-${{ runner.os }}-${{ steps.image.outputs.nom }}-${{ hashFiles('tests/package-lock.json') }}
 
       # Les dépendances SYSTÈME (apt) ne se cachent pas utilement : elles
       # s'installent hors du workspace. On les repose à chaque run.
@@ -554,7 +567,7 @@ jobs:
     name: Playwright — verdict
     needs: [decision, playwright]
     if: ${{ !cancelled() && needs.playwright.result != 'skipped' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     steps:

@@ -35,6 +35,9 @@ import { readdirSync } from 'node:fs';
 // parcourirSpecs) → F.a, F.b, F.c, F.d rouges ; le premier niveau compté comme un bloc
 // → F.a, F.b, F.c, F.d rouges ; le bloc anonyme non filtré → F.c rouge (et les bancs
 // A, C, D, E, dont le bloc n'a pas de titre) ; une connue aussi intermittente → D.a, E.h, F.e rouges.
+// #1114 (7 nov. 2026) — la garde du lancement raté neutralisée dans le juge → C.h rouge ;
+// un `runs-on: ubuntu-latest` remis dans tests.yml → D.b rouge ; l'image retirée de la clé du
+// cache de WebKit → D.b rouge. Arbre restauré, sha256 vérifié.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -207,6 +210,23 @@ describe('C — le juge de la CI (scripts/juger-rapport-playwright.mjs)', () => 
         expect(juger(rapport([{ titre: 'propre à Linux', statut: 'unexpected', file: 'l.spec.js' }]), ['l.spec.js › propre à Linux']).code).toBe(0);
     });
 
+    it('C.h #1114 (7 nov.) : un navigateur qui ne démarre pas ⮕ 2 (NON JUGÉ), jamais « régression »', () => {
+        const r = rapport([
+            { titre: 'vert', statut: 'expected' },
+            { titre: 'sans navigateur', statut: 'unexpected', file: 'b.spec.js' }
+        ]);
+        const message = 'Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n[err] MiniBrowser: error while loading shared libraries: libicudata.so.74';
+        r.suites[0].suites[0].specs[1].tests[0].results = [{ status: 'failed', error: { message }, errors: [{ message }] }];
+        const { code, resume } = juger(r);
+        expect(code).toBe(2);
+        expect(resume).toContain('NON JUGÉ');
+        expect(resume).toContain('libicudata.so.74');
+        expect(resume).not.toContain('NOUVELLEMENT');
+        // Une rouge ordinaire, sans échec de lancement, reste une régression.
+        r.suites[0].suites[0].specs[1].tests[0].results = [{ status: 'failed', error: { message: 'Error: expect(received).toBe(expected)' } }];
+        expect(juger(r).code).toBe(1);
+    });
+
     it('C.g #1114 : une baseline nommée mais absente ⮕ 2 (NON JUGÉ)', () => {
         const { code, resume } = juger(rapport([{ titre: 'vert', statut: 'expected' }]), path.join(tmpdir(), 'baseline-inexistante-1114.json'));
         expect(code).toBe(2);
@@ -223,6 +243,15 @@ describe('D — #1114 : GitHub juge contre la baseline Linux', () => {
         expect(linux.echecsConnus.length).toBe(linux.totalEchecsConnus);
         for (const e of linux.echecsConnus) expect(e).toMatch(/^[^/›]+\.spec\.js › ./);
         expect(new Set(linux.echecsConnus).size).toBe(linux.echecsConnus.length);
+    });
+
+    it('D.b (7 nov.) : chaque job tourne sur ubuntu-24.04, l’image où la baseline est classée, et le cache de WebKit porte l’image', () => {
+        const workflow = readFileSync(path.join(racine, '.github', 'workflows', 'tests.yml'), 'utf8');
+        const runners = [...workflow.matchAll(/^\s+runs-on:\s*(\S+)/gm)].map((m) => m[1]);
+        expect(runners.length).toBeGreaterThanOrEqual(4);
+        for (const r of runners) expect(r).toBe('ubuntu-24.04');
+        expect(workflow).toMatch(/key: playwright-webkit-\$\{\{ runner\.os \}\}-\$\{\{ steps\.image\.outputs\.nom \}\}-/);
+        expect(workflow).toContain('echo "nom=${ImageOS:?ImageOS absente}" >> "$GITHUB_OUTPUT"');
     });
 });
 

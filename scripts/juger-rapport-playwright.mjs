@@ -69,6 +69,29 @@ const stats = rapport.stats ?? {};
 const joues = (stats.expected ?? 0) + (stats.unexpected ?? 0) + (stats.flaky ?? 0);
 if (joues === 0) nonJuge('Le rapport ne contient aucun essai joué.');
 
+// Un navigateur qui ne démarre pas rend des essais rouges qui n'ont rien jugé
+// (7 nov. 2026, #1114) : sur Ubuntu 26.04, WebKit n'a pas démarré, et les 1 398
+// essais d'un run ont passé pour « 1 347 régressions ». C'est la machine, pas le code.
+const lancementsRates = [];
+const parcourir = (suites) => {
+    for (const suite of suites ?? []) {
+        for (const spec of suite.specs ?? []) {
+            for (const essai of spec.tests ?? []) {
+                for (const resultat of essai.results ?? []) {
+                    const messages = [resultat.error, ...(resultat.errors ?? [])].map((e) => e?.message ?? '');
+                    const rate = messages.find((m) => m.includes('browserType.launch'));
+                    if (rate) lancementsRates.push(rate);
+                }
+            }
+        }
+        parcourir(suite.suites);
+    }
+};
+parcourir(rapport.suites);
+if (lancementsRates.length > 0) {
+    nonJuge(`Le navigateur n'a pas démarré pour ${lancementsRates.length} essai(s) : ils n'ont rien jugé. Première erreur :\n\n${lancementsRates[0].split('\n').slice(0, 6).join('\n')}`);
+}
+
 const echecs = echecsDuRapport(rapport);
 const instables = flakyDuRapport(rapport);
 const baseline = JSON.parse(readFileSync(BASELINE, 'utf8'));
