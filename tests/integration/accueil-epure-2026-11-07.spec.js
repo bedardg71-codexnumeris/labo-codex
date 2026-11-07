@@ -138,6 +138,8 @@ test('« Explorer » entre dans la démo ; « Quitter la démo », dans le bande
     await page.getByRole('button', { name: 'Explorer', exact: true }).click();
     await page.waitForFunction(() => window.estEnModeDemo() && window.dbReady === true, null, { timeout: 30000 });
     await expect(page.locator('#bandeau-demo')).toBeVisible();
+    // Lot 3 (7 nov. 2026) : la première entrée ouvre l'aide « Données démo » (jugée par pages-sans-doublons) ; on la ferme.
+    await page.evaluate(() => window.accompagnement.fermerAide());
     await page.locator('#bandeau-demo').getByRole('button', { name: 'Quitter la démo' }).click();
     await page.waitForFunction(() => !window.estEnModeDemo(), null, { timeout: 30000 });
 });

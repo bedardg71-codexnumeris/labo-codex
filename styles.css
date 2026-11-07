@@ -786,7 +786,22 @@ body[data-mode="anonymisation"]:not(.mode-clair) {
    « Régler les outils d'observation ») ; seul son texte part, les contrôles restent sur une ligne compacte. */
 .titre-page-masque,
 .titre-page-texte-masque { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.titre-page-controles { min-height: 0; margin-top: 0; margin-bottom: 8px; }
+/* Décision de Cowork (7 nov. 2026) : quand un titre quitte l'écran, ses contrôles (le « i » de l'aide, avec
+   son aria-label) se placent en haut à droite du contenu de la page, au même endroit sur toutes les pages. */
+.section .sous-section.active { position: relative; }
+/* Leur rangée est réservée en tête de la page : ils ne couvrent jamais le premier contenu. */
+.section .sous-section.active:has(.titre-page-controles) { padding-top: 50px; }
+.titre-page-controles {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 0;
+    margin: 0;
+}
 .titre-page-controles .titre-emoji-container { margin-left: 0; }
 .legacy-hidden { display: none !important; } /* Beta 95 : Masque les anciennes sous-sections */
 .u-block { display: block; }
@@ -23930,8 +23945,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     #planif-btn-annuler,
     #planif-btn-retablir,
     #planif-btn-rechercher { min-height: 44px; }
-    /* La liste des cartes est à 44 px partout depuis #1148 ; depuis le lot 3 (7 nov.), c'est son enveloppe,
-       `.planif-selecteur-carte`, que le <select> transparent couvre bord à bord. */
+    /* La liste des cartes est à 44 px partout depuis #1148 (`#planif-selecteur-cartes select`). */
     .planif-vue-dropdown .planif-action-item { min-height: 44px; }
     .planif-raccourcis-panel-replier,
     .planif-raccourcis-panel-fermer { width: 44px; height: 44px; }
@@ -25757,56 +25771,31 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 /* Un <select> natif ignore `min-height` sous WebKit : hauteur fixée, apparence retirée, chevron
    redessiné (patron de `.rangee-selection-menu`). Deux identifiants ne sont pas nécessaires ici : la
    règle du mode clair ne pose plus que `background-color`, qui laisse le chevron en place. */
-/* Lot 3 (7 nov. 2026, esquisse 67) : le sélecteur de la carte dit le nom, puis « en vigueur » en vert pâle.
-   La boîte (hauteur 44, chevron) passe du <select> à son enveloppe ; le <select> natif, transparent,
-   couvre l'affichage (patron du sélecteur du groupe, en-tête du 7 nov.). */
-.planif-selecteur-carte {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
+/* Un <select> natif ignore `min-height` sous WebKit : hauteur fixée, apparence retirée, chevron
+   redessiné (patron de `.rangee-selection-menu`). Il affiche le nom de la carte tel qu'il est enregistré. */
+#planif-selecteur-cartes select {
+    flex: 0 1 380px;
+    min-width: 150px;
     height: 44px;
-    max-width: 380px;
-    min-width: 0;
     padding: 0 32px 0 12px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-primaire);
     background-color: var(--surface-carte, #1a3040);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
-}
-.planif-selecteur-carte:hover { border-color: var(--planif-couleur-selection); }
-.planif-selecteur-carte:focus-within { border-color: var(--planif-couleur-selection); box-shadow: var(--focus-ring); }
-.planif-carte-affichage {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    font-size: 0.9rem;
-}
-.planif-carte-nom {
-    min-width: 0;
-    overflow: hidden;
+    max-width: 380px;
     text-overflow: ellipsis;
-    font-weight: 600;
-    color: var(--accent-primaire);
-}
-.planif-carte-vigueur {
-    flex-shrink: 0;
-    font-size: 0.8rem;
-    color: color-mix(in srgb, var(--alerte-texte-succes) 80%, var(--surface-carte, #1a3040));
-}
-#planif-selecteur-cartes select {
-    position: absolute;
-    inset: -1px;   /* bord à bord avec l'enveloppe, bordure comprise : 44 px au doigt */
-    appearance: none;
-    -webkit-appearance: none;
-    opacity: 0;
     cursor: pointer;
-    font-size: 16px;   /* iOS : pas de zoom au toucher */
 }
+
+#planif-selecteur-cartes select:hover { border-color: var(--planif-couleur-selection); }
 
 .planif-btn-carte {
     display: flex;
@@ -25847,7 +25836,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .planif-toolbar-gauche { flex: 0 1 auto; min-width: 0; }
 .planif-toolbar-droite { flex-shrink: 0; }
 .planif-couple-selection { min-width: 0; }
-.planif-selecteur-carte { flex: 0 1 380px; min-width: 150px; }
 .planif-toolbar-gauche > .planif-actions-menu,
 .planif-toolbar-gauche > .planif-btn-icone,
 .planif-toolbar-gauche > .planif-toolbar-separateur { flex-shrink: 0; }

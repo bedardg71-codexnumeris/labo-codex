@@ -8693,19 +8693,6 @@ function mettreAJourListeCartes() {
         if (carte.id === index.active) opt.selected = true;
         select.appendChild(opt);
     }
-    afficherNomCarte();
-}
-
-/**
- * Lot 3 (7 nov. 2026, esquisse 67) : l'affichage du sélecteur dit le nom de la carte ouverte, puis
- * « en vigueur ». Le <select> natif, transparent, reste par-dessus (clavier, lecteurs d'écran).
- */
-function afficherNomCarte() {
-    var select = document.getElementById('planif-liste-cartes');
-    var nom = document.getElementById('planif-carte-nom');
-    if (!select || !nom) return;
-    var opt = select.options[select.selectedIndex];
-    nom.textContent = opt ? opt.textContent : '';
 }
 
 function nouvelleCarte(nom) {
@@ -9332,7 +9319,7 @@ function initialiser() {
     // Événements multi-cartes
     var listeCartes = document.getElementById('planif-liste-cartes');
     if (listeCartes) {
-        listeCartes.addEventListener('change', function(e) { changerCarte(e.target.value); afficherNomCarte(); });
+        listeCartes.addEventListener('change', function(e) { changerCarte(e.target.value); });
     }
 
     // Menu déroulant Actions

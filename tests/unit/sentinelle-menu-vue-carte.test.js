@@ -55,9 +55,7 @@ describe('menu « Vue » · A — au doigt, 44 px', () => {
         expect(h).toBeGreaterThanOrEqual(44);
         // Le select natif ignore min-height sous WebKit : hauteur fixe, apparence retirée — partout depuis
         // #1148 (24 oct. 2026 : l'apparence de la rangée de sélection), plus seulement au doigt.
-        // ↻ Lot 3 (7 nov. 2026) : la boîte de 44 px passe à l'enveloppe ; le <select> natif, transparent, la couvre.
-        expect(css).toMatch(/\n\.planif-selecteur-carte\s*\{[^}]*height:\s*44px;/);
-        expect(css).toMatch(/\n#planif-selecteur-cartes select\s*\{[^}]*inset:\s*-1px;[^}]*opacity:\s*0;/);
+        expect(css).toMatch(/\n#planif-selecteur-cartes select\s*\{[^}]*height:\s*44px;[^}]*-webkit-appearance:\s*none/);
         // Plus aucune hauteur plus basse ne vise les voisins au doigt.
         expect(css).not.toMatch(/\.planif-btn-palette\s*\{[^}]*min-height:\s*(?:[0-3]\d|4[0-3])px/);
         expect(grossier).toMatch(/\.planif-vue-dropdown \.planif-action-item\s*\{[^}]*min-height:\s*44px/);

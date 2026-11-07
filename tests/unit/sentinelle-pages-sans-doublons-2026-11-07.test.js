@@ -43,6 +43,12 @@ describe('1 · les titres qui répètent leur onglet quittent l\'écran, pas le 
             expect(t, id).toContain('btn-aide-contextuelle');
         }
     });
+    it('leurs contrôles (le « i ») se placent en haut à droite du contenu de la page, sur une rangée réservée (Cowork, 7 nov.)', () => {
+        const css = lire('styles.css');
+        expect(css).toMatch(/\n\.titre-page-controles \{\s*position: absolute;\s*top: 0;\s*right: 0;/);
+        expect(css).toMatch(/\.section \.sous-section\.active \{ position: relative; \}/);
+        expect(css).toMatch(/\.section \.sous-section\.active:has\(\.titre-page-controles\) \{ padding-top: 50px; \}/);
+    });
     it('« Rencontres (ortho.) » reste à l\'écran', () => {
         expect(titreDe('suivi-rencontres')).not.toMatch(/titre-page-/);
     });
@@ -95,8 +101,10 @@ describe('3 · « Consulter la bibliothèque » : le même bouton partout', () =
 
 describe('4 · la barre de la carte d\'alignement : une rangée, dans l\'ordre de l\'esquisse 67', () => {
     const barre = tranche(html, '<div class="planif-header-toolbar">', 'id="planif-chaine"');
-    it('à gauche : bibliothèque, sélecteur (nom puis « en vigueur »), Actions, un filet, Annuler, Rétablir, Rechercher', () => {
-        const ordre = ['id="planif-btn-bibliotheque"', 'class="planif-carte-vigueur">en vigueur<', 'id="planif-liste-cartes"', 'id="planif-btn-actions"',
+    it('à gauche : bibliothèque, sélecteur (le nom de la carte, sans état ajouté), Actions, un filet, Annuler, Rétablir, Rechercher', () => {
+        // « en vigueur » : une erreur de la maquette (la fin du nom d'une carte de Grégoire), retirée (Cowork, 7 nov.).
+        expect(barre).not.toContain('en vigueur');
+        const ordre = ['id="planif-btn-bibliotheque"', 'id="planif-liste-cartes"', 'id="planif-btn-actions"',
             'planif-toolbar-separateur', 'id="planif-btn-annuler"', 'id="planif-btn-retablir"', 'id="planif-btn-rechercher"'];
         const pos = ordre.map((o) => barre.indexOf(o));
         expect(pos, JSON.stringify(pos)).not.toContain(-1);

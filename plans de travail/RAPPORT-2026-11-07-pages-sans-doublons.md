@@ -60,3 +60,18 @@ Présences, Labo › Rythme, Aide › Commencer, Réglages › Préférences —
 - **Playwright WebKit** : la spec du lot (5 essais et 4 de captures) et les specs de la carte, des frises, des
   bibliothèques, du témoin, de l'accueil et de l'en-tête (≈ 150 essais) : verts après réalignement.
 - **Verdict Playwright complet : PAS pris** (consigne : une fois, après l'accord sur le quatrième lot).
+
+## 5. Retouches après les décisions de Cowork (7 nov., soir)
+
+1. **« en vigueur » retiré** : c'était la fin du nom d'une carte de Grégoire (« … v3 — en vigueur »), pris par la
+   maquette pour un état. Le sélecteur redevient le `<select>` natif d'avant : le nom de la carte tel qu'il est
+   enregistré, sans état ajouté ; l'enveloppe et l'affichage à deux tons partent avec lui.
+2. **Les « i » orphelins** : quand un titre quitte l'écran, ses contrôles (le « i » avec son aria-label ; sur Groupe,
+   aussi « Régler les outils d'observation ») se placent en haut à droite du contenu de la page, à la même place
+   sur toutes les pages (mesuré sur 16 pages : 0 px du bord droit, 0 px du haut), sur une rangée réservée de 50 px
+   pour ne rien couvrir.
+3. **À 820 px** (frise qui défile, barre sur deux rangées, frise à 44 px au toucher) : acceptés.
+4. **Les encadrés de guidage de la démo** : leurs 14 titres, qui nomment la page, passent au libellé court
+   (`js/guidage-demo.js`) ; les textes sont inchangés.
+
+Captures refaites (même dossier). Vitest 10 766 sur 10 766 ; spec du lot et specs touchées vertes.

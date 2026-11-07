@@ -74,7 +74,8 @@ describe('A · chaque texte validé paraît sous sa clé, mot pour mot', () => {
         const bulles = bullesValidees();
         expect(bulles.map(b => b.num)).toEqual([1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
         const g = guidage();
-        for (const b of bulles) expect(g[b.cle], b.cle).toEqual({ titre: typo(b.titre), texte: typo(b.texte) });
+        // ↻ Lot 3 (7 nov. 2026, Cowork) : le titre d'une bulle, qui nomme la page, prend le libellé court ; le texte, mot pour mot.
+        for (const b of bulles) expect(g[b.cle], b.cle).toEqual({ titre: auxLibellesCourts(typo(b.titre)), texte: typo(b.texte) });
         expect(Object.keys(g)).toEqual(bulles.map(b => b.cle));   // aucune bulle de plus
     });
 
