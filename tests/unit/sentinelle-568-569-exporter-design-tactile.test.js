@@ -31,7 +31,8 @@ describe('#569 · l\'écran Exporter les travaux', () => {
         const m = /\{ id: 'exporter', label: '([^']+)' \}/.exec(config);
         expect(m, 'libellé de navigation introuvable').toBeTruthy();
         expect(m[1]).toBe('Exporter');
-        expect(ui).toContain('<h3>' + titreLong('evaluations', 'exporter') + ' <button class="btn-aide-contextuelle" data-aide="archiver-travaux"');
+        // ↻ Lot 3 (7 nov. 2026) : le titre long reste, pour les lecteurs d'écran seulement ; le « i » reste à l'écran.
+        expect(ui).toContain('<h3 class="titre-page-controles"><span class="titre-page-texte-masque">' + titreLong('evaluations', 'exporter') + '</span> <button class="btn-aide-contextuelle" data-aide="archiver-travaux"');
         expect(ui).not.toContain('<h3>Archivage des travaux');
     });
     it('sans fichier, le module rend un état vide au lieu de rien', () => {

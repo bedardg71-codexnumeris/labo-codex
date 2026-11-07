@@ -134,7 +134,8 @@ describe('lot E3 · les boutons « Enregistrer » sont partis', () => {
         expect(html).not.toContain('sauvegarderToutesPreferencesV2');
         expect(js('preferences-v2.js')).not.toContain('sauvegarderToutesPreferencesV2');
         expect(js('preferences-v2.js')).not.toMatch(/notifications\.succes\('Préférences enregistrées'/);
-        for (const titre of ['<h2 class="u-mb-0">Outils d\'observation</h2>', '<h2 class="u-mb-0">Préférences</h2>']) {
+        // ↻ Lot 3 (7 nov. 2026) : les deux titres portent la classe qui les masque à l'écran.
+        for (const titre of ['<h2 class="u-mb-0 titre-page-masque">Outils d\'observation</h2>', '<h2 class="u-mb-0 titre-page-masque">Préférences</h2>']) {
             const entete = tranche(html, titre, '</div>');
             expect(entete, titre).not.toContain('<button');
         }

@@ -134,21 +134,27 @@ test('#1240 · 360 px : un échec arrivé plus bas dans la page est amené à la
     expect(r.echec.b, 'le bas du témoin est visible').toBeLessThanOrEqual(r.hauteurVue);
 });
 
-test('#1240 · 360 px : quitter la page le rend flottant, y revenir le replace dans la page', async ({ page }) => {
+test('#1240 et lot 3 · 360 px : sur une autre page, il se pose en tête du contenu ; aux présences, il reprend sa place', async ({ page }) => {
     test.setTimeout(90000);
     await ouvrirPresencesDemo(page, 360, 740, false);
     await direNonEnregistre(page);
     expect((await releve(page)).dansLeFlux).toBe(true);
 
+    // Règle commune du lot 3 (décision de Cowork, 7 nov.) : en tête du contenu, là où était le titre.
     await page.evaluate(() => naviguerVers('suivi', 'groupe'));
-    await expect.poll(async () => (await releve(page)).dansLeFlux).toBe(false);
+    await expect.poll(() => page.evaluate(() => {
+        const t = document.getElementById('temoin-enregistrement');
+        return t.classList.contains('temoin-dans-le-flux') && t.nextElementSibling && t.nextElementSibling.id;
+    })).toBe('suivi-groupe');
     const ailleurs = await releve(page);
-    expect(ailleurs.dansLeFlux, 'hors des présences, il flotte').toBe(false);
-    expect(ailleurs.position).toBe('fixed');
+    expect(ailleurs.position).toBe('static');
     expect(ailleurs.echecVisible, 'et reste lisible').toBe(true);
 
     await page.evaluate(() => naviguerVers('suivi', 'saisie'));
-    await expect.poll(async () => (await releve(page)).dansLeFlux, { message: 'de retour aux présences, il y reprend place' }).toBe(true);
+    await expect.poll(async () => page.evaluate(() => {
+        const t = document.getElementById('temoin-enregistrement');
+        return !!t.nextElementSibling && t.nextElementSibling.hasAttribute('data-place-temoin');
+    }), { message: 'de retour aux présences, il y reprend sa place' }).toBe(true);
 });
 
 test('#1240 · 1180 px : au-dessus du seuil, il flotte comme avant', async ({ page }) => {

@@ -973,7 +973,7 @@
             <div class="pipeline-page">
 
                 <div class="travaux-import-header">
-                    <h3>Préparer et importer
+                    <h3 class="titre-page-controles"><span class="titre-page-texte-masque">Préparer et importer</span>
                         <button class="btn-aide-contextuelle" data-aide="evaluations-importer" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>
                     </h3>
                     <div class="pipeline-stats">
@@ -1106,7 +1106,7 @@
             }
             conteneur.innerHTML = `
                 <div class="conteneur" style="padding: 24px;">
-                    <h2 style="margin: 0 0 12px 0;">Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
+                    <h2 class="titre-page-controles" style="margin: 0 0 12px 0;"><span class="titre-page-texte-masque">Annoter et évaluer</span> <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
                     <p class="text-muted" style="margin: 0;" id="travaux-fichiers-message-vide">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer ».</p>
                 </div>`;
             if (toutesMasquees) {
@@ -1379,7 +1379,7 @@
         const tailleFormatee = window.TailleFichier.dire(tailleFiltree);
 
         conteneur.innerHTML = `
-            <h3>Exporter les travaux <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
+            <h3 class="titre-page-controles"><span class="titre-page-texte-masque">Exporter les travaux</span> <button class="btn-aide-contextuelle" data-aide="archiver-travaux" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h3>
             <p class="texte-muted">${fichiersTravaux.length} ${pluriel(fichiersTravaux.length, 'fichier', 'fichiers')} en stock (${tailleFormatee})</p>
 
             ${fichiersTravaux.length > 0
@@ -3220,7 +3220,7 @@
 
         return `
             <div class="conteneur" id="travaux-tableau-fichiers-conteneur">
-                <h2>Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
+                <h2 class="titre-page-controles"><span class="titre-page-texte-masque">Annoter et évaluer</span> <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
                 <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
                     <select class="controle-form controle-form-compact" id="travaux-tableau-filtre-production" data-on-change="travauxUI.filtrerTableauFichiers">
                         ${htmlFiltreProduction}

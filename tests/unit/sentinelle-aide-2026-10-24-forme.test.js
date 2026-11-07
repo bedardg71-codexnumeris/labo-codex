@@ -56,7 +56,8 @@ const ONGLETS = [...blocCfg[1].matchAll(/\{\s*id:\s*'([^']+)',\s*label:\s*'([^']
 // Côté page : les sous-sections de la section Aide, dans l'ordre.
 const SOUS_SECTIONS = [...AIDE.matchAll(/<div id="([^"]+)" class="sous-section">/g)].map((m) => {
     const bloc = blocDiv(AIDE, m.index);
-    const h2 = bloc.match(/<h2>([\s\S]*?)<\/h2>/);
+    // ↻ Lot 3 (7 nov. 2026) : le titre, qui répète son onglet, porte la classe qui le masque à l'écran.
+    const h2 = bloc.match(/<h2(?: class="titre-page-masque")?>([\s\S]*?)<\/h2>/);
     return { id: m[1], h2: h2 ? texte(h2[1]) : null, bloc };
 });
 

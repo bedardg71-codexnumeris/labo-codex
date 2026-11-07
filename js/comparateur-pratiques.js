@@ -705,7 +705,9 @@
     function entete(titre) {
         return '<div class="comparateur-header">' +
                     '<div>' +
-                        '<h2 class="comparateur-titre" id="comparateur-titre-texte" tabindex="-1">' + titre +
+                        // Lot 3 (7 nov. 2026) : le titre de la page, qui répète son onglet, ne reste que pour les lecteurs d'écran.
+                        '<h2 class="comparateur-titre' + (titre === 'Exploration des pratiques' ? ' titre-page-controles' : '') + '" id="comparateur-titre-texte" tabindex="-1">' +
+                            (titre === 'Exploration des pratiques' ? '<span class="titre-page-texte-masque">' + titre + '</span>' : titre) +
                             // Bloc 1 des textes relus (15 oct. 2026, #364 T3) : l'aide du Comparateur.
                             ' <button class="btn-aide-contextuelle" data-aide="comparateur-pratiques" aria-label="Aide : l’Exploration des pratiques" title="Aide : l’Exploration des pratiques"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button>' +
                         '</h2>' +

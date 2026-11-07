@@ -80,7 +80,8 @@ test('dissection · coller, poser deux étiquettes au pointeur, lire la grille c
     await expect(page.locator('#materiel-accueil')).toBeHidden();
     await expect(page.locator('#materiel-lecture')).toBeHidden();   // l'assistant en sept étapes reste débranché
     await expect(page.locator('#dissection-titre')).toBeFocused();   // règle SPA
-    await expect(page.locator('#materiel-en-construction')).toBeVisible();
+    // Lot 3 (7 nov. 2026) : l'avertissement « en développement » est retiré (consigne) ; il ne revient pas.
+    await expect(page.locator('#materiel-en-construction')).toHaveCount(0);
     await expect(page.locator('#dissection-contenu .dissection-morceau')).toHaveCount(24);
     // Douze étiquettes, plus les outils « Couper » (lot 5), juste après « Suite », et « Rattacher » (lot 7), après « Couper ».
     // Étape 5 du critère algorithmique (22 oct. 2026) : seize, avec les quatre du groupe « Les codes ».
