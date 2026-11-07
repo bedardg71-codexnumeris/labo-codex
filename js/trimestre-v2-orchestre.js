@@ -51,6 +51,7 @@ async function peuplerDropdownGroupeCoursActif() {
 
     if (!trimestreActif) {
         selectHeader.innerHTML = '<option value="">-- Sélectionne un trimestre --</option>';
+        if (typeof rafraichirAffichageGroupeEntete === 'function') rafraichirAffichageGroupeEntete();
         return;
     }
 
@@ -63,9 +64,21 @@ async function peuplerDropdownGroupeCoursActif() {
 
     let options = '<option value="">-- Sélectionner --</option>';
 
+    // « Le nouvel en-tête » (7 nov. 2026) : le libellé n'a plus le nom de l'enseignant·e ; il se
+    // lit en deux tons — data-principal (cours et groupe) et data-secondaire (horaire et session),
+    // recopiés dans l'affichage superposé au select par rafraichirAffichageGroupeEntete (contexte.js).
+    // Session : lettre et année sur deux chiffres (« A26 ») ; le trimestre de la démo garde son nom.
+    const session = trimestreActif.isDemo
+        ? (trimestreActif.nom || '')
+        : (trimestreActif.session && trimestreActif.annee
+            ? `${String(trimestreActif.session).toUpperCase()}${String(trimestreActif.annee).slice(-2)}`
+            : (trimestreActif.nom || ''));
+    const joindre = (...parties) => parties.filter(Boolean).join(' · ');
+    const optionDeuxTons = (valeur, principal, secondaire, selected) =>
+        `<option value="${echapperHtml(valeur)}" data-principal="${echapperHtml(principal)}" data-secondaire="${echapperHtml(secondaire)}"${selected}>${echapperHtml(joindre(principal, secondaire))}</option>`;
+
     if (groupesCours.length > 0) {
         const cours = db.getSync('cours', []);
-        const enseignants = db.getSync('enseignants', []);
         const cleHoraires = cle('horaires');
         const horaires = db.getSync(cleHoraires, []);
         const gcActif = db.getSync('groupeCoursActif', null);
@@ -85,22 +98,18 @@ async function peuplerDropdownGroupeCoursActif() {
         options += '<optgroup label="Groupe-cours">';
         groupesCours.forEach(gc => {
             const coursInfo = cours.find(c => c.id === gc.coursId);
-            const ens = enseignants.find(e => e.id === gc.enseignantId) || {};
             const hor = horaires.find(h => h.id === gc.horaireId) || {};
 
             // Cadrage « Rencontres » : un service n'a pas de code, son nom tient lieu de sigle.
             const sigle = coursInfo?.codeCours || coursInfo?.code || coursInfo?.sigle || (coursInfo?.nature === 'service' ? coursInfo.nomCours : null);
             const groupe = gc.groupeNum || '00001';
-            const nomEns = ens.prenom ? `${ens.prenom} ${(ens.nom || '').charAt(0)}.` : '';
-            const nomHor = hor.nom || '';
 
             // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
-            let label = sigle ? `${sigle} gr.${groupe}` : `Groupe ${groupe}`;
-            if (nomEns) label += ` - ${nomEns}`;
-            if (nomHor) label += ` (${nomHor})`;
+            const principal = sigle ? `${sigle} · gr. ${groupe}` : `Groupe ${groupe}`;
+            const secondaire = joindre(hor.nom || '', session);
 
             const selected = gcActif && !gcActif.modeCours && gc.id === gcActif.id ? ' selected' : '';
-            options += `<option value="${echapperHtml(gc.id)}"${selected}>${echapperHtml(label)}</option>`;
+            options += optionDeuxTons(gc.id, principal, secondaire, selected);
         });
         options += '</optgroup>';
 
@@ -116,7 +125,7 @@ async function peuplerDropdownGroupeCoursActif() {
                 const nbGroupes = gcs.length;
                 const label = nbGroupes > 1 ? `${sigle} (${nbGroupes} groupes)` : sigle;
                 const selected = gcActif && gcActif.modeCours && gcActif.coursId === coursId ? ' selected' : '';
-                options += `<option value="cours:${echapperHtml(coursId)}"${selected}>${echapperHtml(label)}</option>`;
+                options += optionDeuxTons(`cours:${coursId}`, label, session, selected);
             });
             options += '</optgroup>';
         }
@@ -154,6 +163,7 @@ async function peuplerDropdownGroupeCoursActif() {
         // S'assurer que le dropdown reflète la sélection actuelle
         selectHeader.value = gcActif.modeCours ? `cours:${gcActif.coursId}` : gcActif.id;
     }
+    if (typeof rafraichirAffichageGroupeEntete === 'function') rafraichirAffichageGroupeEntete();
 }
 
 /**

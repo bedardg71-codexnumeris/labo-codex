@@ -90,6 +90,17 @@
     --hybride-violet: #9c27b0;  /* Hybride (obsolète) */
 
     --bleu-meta: #9fc5e8;        /* Bleu pâle pour méta-infos, logos, liens secondaires */
+    /* « Le nouvel en-tête » (7 nov. 2026) — l'en-tête reste sombre dans tous les thèmes,
+       ces trois jetons valent donc partout. Valeurs de la maquette arrêtée par Grégoire :
+       icônes « fonctionnement de l'application » d'une seule couleur claire, partie pâle
+       du libellé du groupe (horaire · session), teinte de la bande pâle (celle de
+       l'ancienne bande de contexte, que la navigation reprend). */
+    --entete-icone-claire: #c4d0e4;
+    /* Maquette : ~#96accd. Mesuré à 4,4:1 sur le point le plus clair du dégradé sombre
+       (#1a3848) sous le voile du sélecteur : éclairci au plus près qui tient 4,5:1
+       au repos ET au survol (4,52:1). */
+    --entete-texte-pale: #a6b8d4;
+    --entete-bande-pale: rgba(106, 172, 184, 0.10);
     /* Puce d'identifiant des cartes de bibliothèque (#291). Jetons PROPRES et
        non `--bleu-meta` : mesuré le 23 août sur le retour de porte 2.1d, la
        paire `--bleu-meta` sur `--bleu-tres-pale` tombait à 4,01:1 en mode
@@ -483,9 +494,13 @@ body.mode-clair[data-mode="anonymisation"] {
    (.entete / .navigation-principale) — version ardoise, mêmes clartés,
    pour que le cadre suive la brume (verdict D2, porte terrain du 18 août).
    En clair, rien à scoper ici : le chrome suit les variables. */
-body[data-mode="anonymisation"]:not(.mode-clair) .entete,
-body[data-mode="anonymisation"]:not(.mode-clair) .navigation-principale {
+body[data-mode="anonymisation"]:not(.mode-clair) .entete {
     background: linear-gradient(135deg, #0f151a 0%, #1c2530 40%, #24303c 70%, #151c23 100%);
+}
+body[data-mode="anonymisation"]:not(.mode-clair) .navigation-principale {
+    background:
+        linear-gradient(var(--entete-bande-pale), var(--entete-bande-pale)),
+        linear-gradient(135deg, #0f151a 0%, #1c2530 40%, #24303c 70%, #151c23 100%);
 }
 
 /* Sous-nav claire : le hover translucide est un marine vif codé en dur
@@ -1003,249 +1018,82 @@ h1, h2, h3, h4 {
 }
 
 /* ===============================
-   EN-TÊTE - Layout compact horizontal (Option 1)
-   8 décembre 2025
+   EN-TÊTE — « Le nouvel en-tête » (7 nov. 2026)
+   Bande sombre (<header>) : logo + slogan | groupe actif | bloc de droite.
+   Bande pâle : la navigation principale (<nav>, sticky, plus bas dans le DOM).
+   Le groupe est centré SUR LA PAGE (colonnes latérales égales, minmax(0, 1fr)) ;
+   à ≤ 1100 px il descend dans la bande pâle, au-dessus de la navigation.
+   Marges latérales = celles de .conteneur (max-width 95 % → 2,5 vw de chaque
+   côté), pour que le logo et le bloc s'alignent sur le bord du contenu.
    =============================== */
 
 .entete {
     /* Gradient 4 stops — fidèle à la maquette Ocean & Boussole */
     background: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
     color: white;
-    padding: 18px 30px 10px;
+    padding: 0 2.5vw;
     position: relative;
     z-index: 200;
-    /* Pas de border-radius pour continuité visuelle avec la navigation */
-    box-shadow: var(--shadow-prononce);
-    transition: box-shadow 0.3s ease, background 0.3s ease;
+    transition: background 0.3s ease;
 }
 
-
-.entete-conteneur {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* === CHROME UNIFIÉ (23 mai 2026) ====================================
-   Ligne 1 : Codex (gauche) | Titre + Meta (centre) | Utilitaires (droite)
-             + bouton ⋯ mobile (caché desktop)
-   Ligne 2 : Bande contexte — sélecteur groupe-cours centré
-   Popover utilitaires mobile (caché par défaut, ouvert par ⋯)
-   ==================================================================== */
-
-/* Grid 3 colonnes 1fr | auto | 1fr — garantit le titre parfaitement
-   centré dans la viewport même si Codex (gauche) et utilitaires (droite)
-   ont des largeurs très différentes. */
 .entete-ligne1 {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 20px;
-    min-height: 64px;
-    padding-bottom: 8px;
-}
-
-/* Codex (colonne 1, aligné à gauche) */
-.entete-codex {
-    grid-column: 1;
-    justify-self: start;
-    display: flex;
-    align-items: center;
+    position: relative;
     z-index: 1;
-    padding: 4px 0;
-}
-
-/* Titre + meta (colonne 2 — centré par le grid) */
-.titre-section {
-    grid-column: 2;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: "logo groupe bloc";
     align-items: center;
-    gap: 4px;
-    min-width: 0;
+    column-gap: 24px;
+    padding: 19px 0;
 }
 
-.titre-section h1 {
-    font-size: 2rem;
-    font-weight: bold;
+/* Zone 1 — logo et slogan côte à côte (img/labo-codex-logo-slogan-cote-blanc.svg,
+   ratio 782:245). Version blanche seulement : le fond reste sombre dans tous les
+   modes. ≤ 520 px : <picture> bascule sur le logo seul (img/labo-codex-logo-blanc.svg). */
+.entete-logo {
+    grid-area: logo;
+    justify-self: start;
     margin: 0;
-    letter-spacing: 0;
-    color: white;
-    white-space: nowrap;
+    line-height: 0;
 }
 
-/* Logo empilé de l'en-tête (img/labo-codex-logo-blanc.svg, 6 nov. 2026).
-   Version blanche seulement : le fond de l'en-tête reste sombre dans tous
-   les modes (.entete, .mode-clair .entete, anonymisation). La hauteur est le
-   seul réglage ; la largeur suit le ratio du fichier (~1,28:1). */
-.titre-section h1 img.logo-entete {
+.entete-logo img.logo-entete {
     display: block;
-    height: 3.5rem;
+    height: 96px;
     width: auto;
 }
 
-.titre-section .meta {
-    font-size: 0.75rem;
-    color: var(--bleu-meta);
-    margin: 4px 0 0;
+/* Zone 2 — le groupe actif, dans l'axe de la navigation */
+.entete-groupe {
+    grid-area: groupe;
+    justify-self: center;
+    min-width: 0;
+    /* Jamais sous le logo ni sous le bloc : 2 × (logo 306 + marge 2,5 vw + écart 24). */
+    max-width: calc(100vw - 2 * (306px + 2.5vw + 24px));
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
 }
 
-.titre-section .meta > .meta-version,
-.titre-section .meta > .meta-date {
-    white-space: nowrap;
-}
-
-.meta-separateur {
-    color: rgba(255, 255, 255, 0.45);
-    user-select: none;
-}
-
-/* Utilitaires (colonne 3, aligné à droite) — 2 clusters séparés par
-   une ligne verticale */
-.entete-utilitaires {
-    grid-column: 3;
+/* Zone 3 — le bloc de droite : deux rangées d'icônes et le bouton Codex.
+   Largeur = la grille d'icônes (4 cellules de 36,25 px = 145 px). */
+.entete-bloc {
+    grid-area: bloc;
     justify-self: end;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    z-index: 1;
-    padding: 4px 0;
-}
-
-.utilitaires-groupe {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.utilitaires-separateur {
-    width: 1px;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.18);
-    margin: 0 4px;
-}
-
-/* Bouton "⋯" mobile (caché par défaut sur desktop, montré <1024px).
-   Même colonne grid que les utilitaires desktop — l'un est caché,
-   l'autre visible selon le breakpoint. */
-.btn-utilitaires-mobile {
-    display: none;
-    grid-column: 3;
-    justify-self: end;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-moyen);
-    color: white;
-    font-size: 1.4rem;
-    line-height: 1;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.btn-utilitaires-mobile:hover,
-.btn-utilitaires-mobile:focus {
-    background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.btn-utilitaires-mobile:focus {
-    box-shadow: var(--focus-ring);
-    outline: none;
-}
-
-/* Popover utilitaires mobile */
-.popover-utilitaires {
-    position: absolute;
-    top: 60px;
-    right: 12px;
-    z-index: 250;
-    background: var(--surface-carte, #142a38);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: var(--radius-grand);
-    padding: 8px;
+    --entete-cellule: 36.25px;
+    width: calc(4 * var(--entete-cellule));
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    box-shadow: var(--shadow-prononce);
-    min-width: 220px;
 }
 
-.popover-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    min-height: 44px;
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    border-radius: var(--radius-moyen);
-    font-size: 0.95rem;
-    width: 100%;
-    text-align: left;
-    transition: background 0.15s ease;
+.entete-icones {
+    display: grid;
+    grid-template-columns: repeat(4, var(--entete-cellule));
+    height: 22px;
 }
 
-.popover-item:hover,
-.popover-item:focus {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.popover-item:focus {
-    box-shadow: var(--focus-ring);
-    outline: none;
-}
-
-.popover-icon {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
-    flex-shrink: 0;
-}
-
-.popover-codex-indicateur {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--vert-succes, #4caf50);
-    flex-shrink: 0;
-}
-
-.popover-separateur {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.12);
-    margin: 4px 0;
-}
-
-/* === LIGNE 2 : Bande de contexte (sélecteur GC centré) === */
-
-.entete-ligne2 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 0 4px;
-}
-
-.entete-ligne2.bandeau-contexte {
-    background: rgba(106, 172, 184, 0.10);
-    border-top: 1px solid rgba(106, 172, 184, 0.18);
-    margin: 0 -30px -10px;
-    padding: 8px 30px;
+.entete-icones + .entete-icones {
+    margin-top: 7px;
 }
 
 /* Séparateur vertical dans la nav principale (entre Aperçu et Conception),
@@ -1298,155 +1146,134 @@ h1, h2, h3, h4 {
     }
 }
 
-/* === Boutons utilitaires header (Bug, Anonym, Thème, Aide, Réglages) === */
-.entete-utilitaires .btn-action-header {
-    display: inline-flex;
+/* === Boutons d'icône du bloc de droite ===
+   Sans cadre ni fond : l'icône (22 px) seule. Un fond discret paraît au survol et au
+   focus clavier, dessiné par ::before pour ne rien changer à la mise en page.
+   La classe .btn-action-header est gardée : navigation.js (zone protégée) s'en sert
+   pour marquer Aide et Réglages « actif ». */
+.entete-bloc .btn-action-header {
+    position: relative;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-moyen);
-    color: white;
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
+    width: 100%;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: 0;
+    color: inherit;
     cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
 }
 
-.entete-utilitaires .btn-action-header:hover {
+.entete-bloc .btn-action-header::before {
+    content: '';
+    position: absolute;
+    inset: -4px 1px;
+    border-radius: var(--radius-petit, 6px);
+    background: transparent;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.entete-bloc .btn-action-header:hover::before,
+.entete-bloc .btn-action-header:focus-visible::before {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.entete-bloc .btn-action-header:focus {
+    outline: none;
+}
+
+.entete-bloc .btn-action-header:focus-visible::before {
+    box-shadow: var(--focus-ring);
+}
+
+/* États : anonymisation en cours, section Aide ou Réglages ouverte — le même fond
+   discret, permanent (l'état se lit aussi par aria-pressed / le titre). */
+.entete-bloc .btn-action-header.actif::before {
     background: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.entete-utilitaires .btn-action-header.actif {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+.entete-bloc .entete-icones--aide .btn-action-header.actif::before {
+    background: rgba(232, 146, 58, 0.28);
 }
 
-/* === Lot J phase 2 : boutons header aide + réglages actifs (fond jaune multiply) ===
-   Spécif (0,4,1) bat la règle générique .entete-utilitaires .btn-action-header.actif (0,3,1).
-   L'icône est déjà jaune en permanence (cf. Lot I), seule la box change quand actif. */
-.entete-utilitaires .btn-action-header[data-param="aide"].actif,
-.entete-utilitaires .btn-action-header[data-param="reglages"].actif {
-    background:
-      linear-gradient(rgba(232, 146, 58, 0.5), rgba(232, 146, 58, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(232, 146, 58, 0.15);
+/* Les icônes sont au-dessus du fond de survol */
+.entete-bloc .btn-action-header .header-icon {
+    position: relative;
 }
 
-/* === Icônes SVG en-tête === */
-/* Propriétés communes aux deux formes (img et span) */
+/* === Icônes SVG en-tête ===
+   Masques (mask-image) inlinés en base64 : contournement du blocage CORS du
+   mask-image sur WebKit file:// (Origin null). La couleur est celle de la rangée :
+   une seule couleur claire pour le fonctionnement de l'application, l'orange de
+   l'aide (--icone-aide-config) pour le système d'aide. */
 .header-icon {
-    width: 16px;
-    height: 16px;
-    vertical-align: middle;
-}
-/* Forme <img> : 3 boutons header restants (bug, anonymisation, thème) en blanc translucide */
-img.header-icon {
-    object-fit: contain;
-    filter: brightness(0) invert(1);
-}
-/* Forme <span> + mask-image : icônes header colorisées en permanence (Lot I/J).
-   flex-shrink: 0 OBLIGATOIRE — le bouton parent est inline-flex avec content area
-   très étroit (32×32 - 24 padding horizontal = 6 px de large). Sans flex-shrink,
-   le span est compressé à 6 px. Les <img> ne sont pas concernés (replaced elements
-   gardent leur taille intrinsèque même en overflow).
-   La couleur est définie par classe spécifique (.ico-questions, .ico-tune,
-   .ico-bug, .ico-mask-anon) — voir plus bas. */
-span.header-icon {
     display: inline-block;
     flex-shrink: 0;
+    width: 22px;
+    height: 22px;
     -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
+            mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
     -webkit-mask-position: center;
-    mask-position: center;
+            mask-position: center;
 }
-/* Couleur par classe spécifique (Lot I = aide + réglages en jaune ;
-   Lot J extension = bug en violet Labo, anonymisation en cyan Suivi). */
-.ico-questions,
-.ico-tune     { background-color: var(--icone-aide-config); }
-.ico-bug      { background-color: var(--section-labo); }
-.ico-mask-anon { background-color: var(--section-suivi); }
-/* SVG inlinés en data:URI pour éviter le blocage CORS du mask-image
-   sur WebKit file:// (Origin null sans Access-Control-Allow-Origin).
-   Source : icons/icons8-questions.svg + icons/icon-tune.svg (inchangés). */
-.ico-questions {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDYgNCBDIDQuODk1IDQgNCA0Ljg5NSA0IDYgTCA0IDI0IEMgNCAyNS4xMDUgNC44OTUgMjYgNiAyNiBMIDcuNTU2NjQwNiAyNiBDIDcuMjEyNjQwNiAyNS40MDkgNyAyNC43MzIgNyAyNCBMIDcgNiBDIDcgNS4yNjggNy4yMTI2NDA2IDQuNTkxIDcuNTU2NjQwNiA0IEwgNiA0IHogTSAxMSA0IEMgOS44OTUgNCA5IDQuODk1IDkgNiBMIDkgMjQgQyA5IDI1LjEwNSA5Ljg5NSAyNiAxMSAyNiBMIDI0IDI2IEMgMjUuMTA1IDI2IDI2IDI1LjEwNSAyNiAyNCBMIDI2IDYgQyAyNiA0Ljg5NSAyNS4xMDUgNCAyNCA0IEwgMTEgNCB6IE0gMTcuNSA4IEMgMTkuNzA2IDggMjEuNSA5Ljc5NCAyMS41IDEyIEMgMjEuNSAxMy43MTUgMjAuNDI5MzU5IDE0LjcwNCAxOS41NjgzNTkgMTUuNSBDIDE4LjkwNjM1OSAxNi4xMTEgMTguNSAxNi41MTIgMTguNSAxNyBMIDE2LjUgMTcgQyAxNi41IDE1LjYxMSAxNy40NDg5MzggMTQuNzM0Mjk3IDE4LjIxMDkzOCAxNC4wMjkyOTcgQyAxOS4wMDk5MzggMTMuMjkxMjk3IDE5LjUgMTIuNzk5IDE5LjUgMTIgQyAxOS41IDEwLjg5NyAxOC42MDMgMTAgMTcuNSAxMCBDIDE2LjM5NyAxMCAxNS41IDEwLjg5NyAxNS41IDEyIEwgMTMuNSAxMiBDIDEzLjUgOS43OTQgMTUuMjk0IDggMTcuNSA4IHogTSAxNy41MDM5MDYgMTkuNjQ4NDM4IEMgMTguNDM3OTA2IDE5LjY0ODQzOCAxOSAyMC4xNDk4MTMgMTkgMjEuMDA3ODEyIEMgMTkgMjEuODUwODEyIDE4LjQzNzkwNiAyMi4zNTE1NjMgMTcuNTAzOTA2IDIyLjM1MTU2MiBDIDE2LjU2MTkwNiAyMi4zNTE1NjIgMTYgMjEuODUwODEyIDE2IDIxLjAwNzgxMiBDIDE2IDIwLjE0OTgxMiAxNi41NjE5MDYgMTkuNjQ4NDM4IDE3LjUwMzkwNiAxOS42NDg0MzggeiIvPjwvc3ZnPg==");
-            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDYgNCBDIDQuODk1IDQgNCA0Ljg5NSA0IDYgTCA0IDI0IEMgNCAyNS4xMDUgNC44OTUgMjYgNiAyNiBMIDcuNTU2NjQwNiAyNiBDIDcuMjEyNjQwNiAyNS40MDkgNyAyNC43MzIgNyAyNCBMIDcgNiBDIDcgNS4yNjggNy4yMTI2NDA2IDQuNTkxIDcuNTU2NjQwNiA0IEwgNiA0IHogTSAxMSA0IEMgOS44OTUgNCA5IDQuODk1IDkgNiBMIDkgMjQgQyA5IDI1LjEwNSA5Ljg5NSAyNiAxMSAyNiBMIDI0IDI2IEMgMjUuMTA1IDI2IDI2IDI1LjEwNSAyNiAyNCBMIDI2IDYgQyAyNiA0Ljg5NSAyNS4xMDUgNCAyNCA0IEwgMTEgNCB6IE0gMTcuNSA4IEMgMTkuNzA2IDggMjEuNSA5Ljc5NCAyMS41IDEyIEMgMjEuNSAxMy43MTUgMjAuNDI5MzU5IDE0LjcwNCAxOS41NjgzNTkgMTUuNSBDIDE4LjkwNjM1OSAxNi4xMTEgMTguNSAxNi41MTIgMTguNSAxNyBMIDE2LjUgMTcgQyAxNi41IDE1LjYxMSAxNy40NDg5MzggMTQuNzM0Mjk3IDE4LjIxMDkzOCAxNC4wMjkyOTcgQyAxOS4wMDk5MzggMTMuMjkxMjk3IDE5LjUgMTIuNzk5IDE5LjUgMTIgQyAxOS41IDEwLjg5NyAxOC42MDMgMTAgMTcuNSAxMCBDIDE2LjM5NyAxMCAxNS41IDEwLjg5NyAxNS41IDEyIEwgMTMuNSAxMiBDIDEzLjUgOS43OTQgMTUuMjk0IDggMTcuNSA4IHogTSAxNy41MDM5MDYgMTkuNjQ4NDM4IEMgMTguNDM3OTA2IDE5LjY0ODQzOCAxOSAyMC4xNDk4MTMgMTkgMjEuMDA3ODEyIEMgMTkgMjEuODUwODEyIDE4LjQzNzkwNiAyMi4zNTE1NjMgMTcuNTAzOTA2IDIyLjM1MTU2MiBDIDE2LjU2MTkwNiAyMi4zNTE1NjIgMTYgMjEuODUwODEyIDE2IDIxLjAwNzgxMiBDIDE2IDIwLjE0OTgxMiAxNi41NjE5MDYgMTkuNjQ4NDM4IDE3LjUwMzkwNiAxOS42NDg0MzggeiIvPjwvc3ZnPg==");
+
+.entete-icones--appli .header-icon { background-color: var(--entete-icone-claire); }
+.entete-icones--aide .header-icon  { background-color: var(--icone-aide-config); }
+
+/* Signaler — source : icons/icon-bug.svg */
+.ico-bug {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMyBDIDIyLjYzNjcxOSAzIDIwLjU2NjQwNiA0LjM5MDYyNSAxOS41OTM3NSA2LjQzNzUgQyAyMS4xOTkyMTkgNi4xMTMyODEgMjIuOTk2MDk0IDUuOTM3NSAyNSA1LjkzNzUgQyAyNy4wMDc4MTMgNS45Mzc1IDI4LjgwMDc4MSA2LjExMzI4MSAzMC40MDYyNSA2LjQzNzUgQyAyOS40Mzc1IDQuMzkwNjI1IDI3LjM3NSAzIDI1IDMgWiBNIDI1IDcuOTM3NSBDIDE5LjE5NTMxMyA3LjkzNzUgMTIuOTM3NSA5LjQ2ODc1IDEyLjkzNzUgMTUgQyAxMi45Mzc1IDE2LjE5NTMxMyAxMy4xMDE1NjMgMTcuMjE4NzUgMTMuNDA2MjUgMTguMTI1IEMgMTQuMjEwOTM4IDE4LjIwMzEyNSAxNS4wMzEyNSAxOC40NDkyMTkgMTYuMDMxMjUgMTguNzE4NzUgQyAxNy45Mzc1IDE5LjIzNDM3NSAyMC44MjAzMTMgMjAgMjUgMjAgQyAyOC44MDQ2ODggMjAgMzEuNTIzNDM4IDE5LjQyMTg3NSAzMy41IDE5IEMgMzQuNjQ4NDM4IDE4Ljc1MzkwNiAzNS41NzgxMjUgMTguNTcwMzEzIDM2LjQ2ODc1IDE4LjUzMTI1IEMgMzYuODcxMDk0IDE3LjUzOTA2MyAzNy4wNjI1IDE2LjM2NzE4OCAzNy4wNjI1IDE1IEMgMzcuMDYyNSA5LjQ2ODc1IDMwLjgwNDY4OCA3LjkzNzUgMjUgNy45Mzc1IFogTSAzIDggQyAyLjQ0OTIxOSA4IDIgOC40NDkyMTkgMiA5IEMgMiAxNC43Njk1MzEgMy4zMTI1IDE4LjkxNDA2MyA1LjkwNjI1IDIxLjM0Mzc1IEMgNy40NTMxMjUgMjIuNzg5MDYzIDkuMDg5ODQ0IDIzLjI2NTYyNSAxMC4wOTM3NSAyMy40MDYyNSBDIDEwLjAwNzgxMyAyNC40NzI2NTYgMTAgMjUuNzczNDM4IDEwIDI3LjQ2ODc1IEMgMTAgMjcuNjMyODEzIDEwLjAyNzM0NCAyNy44MDA3ODEgMTAuMDMxMjUgMjcuOTY4NzUgTCAyIDI3Ljk2ODc1IEMgMS40Mzc1IDI3Ljk2ODc1IDAuOTY4NzUgMjguNDM3NSAwLjk2ODc1IDI5IEMgMC45Njg3NSAyOS41NjI1IDEuNDM3NSAzMC4wMzEyNSAyIDMwLjAzMTI1IEwgMTAuMTU2MjUgMzAuMDMxMjUgQyAxMC4zNzUgMzEuODI4MTI1IDEwLjg1MTU2MyAzMy42MTcxODggMTEuNTMxMjUgMzUuMzEyNSBDIDkgMzUuOTE3OTY5IDIgMzguMjUgMiA0NiBDIDIgNDYuNTU0Njg4IDIuNDQ5MjE5IDQ3IDMgNDcgQyAzLjU1MDc4MSA0NyA0IDQ2LjU1NDY4OCA0IDQ2IEMgNCAzOS4xMjUgMTAuNzU3ODEzIDM3LjQyOTY4OCAxMi4zNzUgMzcuMTI1IEMgMTQuNjUyMzQ0IDQxLjQ3NjU2MyAxOC41NDI5NjkgNDQuOTM3NSAyNCA0NS44NDM3NSBMIDI0IDI5IEMgMjQgMjguNDQ1MzEzIDI0LjQ0OTIxOSAyOCAyNSAyOCBDIDI1LjU1MDc4MSAyOCAyNiAyOC40NDUzMTMgMjYgMjkgTCAyNiA0NS44NDM3NSBDIDMxLjQ1NzAzMSA0NC45Mzc1IDM1LjM3ODkwNiA0MS41MDc4MTMgMzcuNjU2MjUgMzcuMTU2MjUgQyAzOS4zNjMyODEgMzcuNDg4MjgxIDQ2IDM5LjE5OTIxOSA0NiA0NiBDIDQ2IDQ2LjU1NDY4OCA0Ni40NDUzMTMgNDcgNDcgNDcgQyA0Ny41NTQ2ODggNDcgNDggNDYuNTU0Njg4IDQ4IDQ2IEMgNDggMzguMjUgNDEgMzUuOTE3OTY5IDM4LjQ2ODc1IDM1LjMxMjUgQyAzOS4xNDg0MzggMzMuNjE3MTg4IDM5LjYyNSAzMS44MjgxMjUgMzkuODQzNzUgMzAuMDMxMjUgTCA0OCAzMC4wMzEyNSBDIDQ4LjU2MjUgMzAuMDMxMjUgNDkuMDMxMjUgMjkuNTYyNSA0OS4wMzEyNSAyOSBDIDQ5LjAzMTI1IDI4LjQzNzUgNDguNTYyNSAyNy45Njg3NSA0OCAyNy45Njg3NSBMIDM5Ljk2ODc1IDI3Ljk2ODc1IEMgMzkuOTcyNjU2IDI3LjgwMDc4MSA0MCAyNy42MzI4MTMgNDAgMjcuNDY4NzUgQyA0MCAyNS44MDg1OTQgMzkuOTkyMTg4IDI0LjQ3NjU2MyAzOS44NDM3NSAyMy40MDYyNSBDIDQwLjg0Mzc1IDIzLjI3MzQzOCA0Mi41MTk1MzEgMjIuODE2NDA2IDQ0LjA5Mzc1IDIxLjM0Mzc1IEMgNDYuNjg3NSAxOC45MTQwNjMgNDggMTQuNzY5NTMxIDQ4IDkgQyA0OCA4LjQ0OTIxOSA0Ny41NTQ2ODggOCA0NyA4IEMgNDYuODYzMjgxIDggNDYuNzQ2MDk0IDguMDQyOTY5IDQ2LjYyNSA4LjA5Mzc1IEMgNDYuNTAzOTA2IDguMTQ0NTMxIDQ2LjM3MTA5NCA4LjE5MTQwNiA0Ni4yODEyNSA4LjI4MTI1IEMgNDYuMTAxNTYzIDguNDYwOTM4IDQ2IDguNzIyNjU2IDQ2IDkgQyA0NiAxNC4wODU5MzggNDQuODk4NDM4IDE3LjgyODEyNSA0Mi43ODEyNSAxOS44NDM3NSBDIDQxLjQ2MDkzOCAyMS4xMDE1NjMgNDAuMDgyMDMxIDIxLjM3ODkwNiAzOS40Mzc1IDIxLjQzNzUgQyAzOS4yOTI5NjkgMjEuNDQ5MjE5IDM5LjI1IDIxLjQ2ODc1IDM5LjE4NzUgMjEuNDY4NzUgQyAzOC43MTQ4NDQgMjAuODM1OTM4IDM3Ljk2MDkzOCAyMC41IDM2Ljc4MTI1IDIwLjUgQyAzNiAyMC41IDM1LjA4NTkzOCAyMC43MTQ4NDQgMzMuOTA2MjUgMjAuOTY4NzUgQyAzMS44NDM3NSAyMS40MDYyNSAyOS4wMTU2MjUgMjIgMjUgMjIgQyAyMC41NTQ2ODggMjIgMTcuNTA3ODEzIDIxLjE2Nzk2OSAxNS41IDIwLjYyNSBDIDE0LjM1MTU2MyAyMC4zMTI1IDEzLjU0Njg3NSAyMC4wOTM3NSAxMi44MTI1IDIwLjA5Mzc1IEMgMTEuNTU4NTk0IDIwLjA5Mzc1IDEwLjg1MTU2MyAyMC40ODQzNzUgMTAuNDY4NzUgMjEuNDA2MjUgQyA5LjgwODU5NCAyMS4zMzIwMzEgOC41MzUxNTYgMjEuMDc4MTI1IDcuMjgxMjUgMTkuOTA2MjUgQyA1LjEzNjcxOSAxNy44OTg0MzggNCAxNC4xMjEwOTQgNCA5IEMgNCA4LjQ0OTIxOSAzLjU1MDc4MSA4IDMgOCBaIi8+PC9zdmc+");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMyBDIDIyLjYzNjcxOSAzIDIwLjU2NjQwNiA0LjM5MDYyNSAxOS41OTM3NSA2LjQzNzUgQyAyMS4xOTkyMTkgNi4xMTMyODEgMjIuOTk2MDk0IDUuOTM3NSAyNSA1LjkzNzUgQyAyNy4wMDc4MTMgNS45Mzc1IDI4LjgwMDc4MSA2LjExMzI4MSAzMC40MDYyNSA2LjQzNzUgQyAyOS40Mzc1IDQuMzkwNjI1IDI3LjM3NSAzIDI1IDMgWiBNIDI1IDcuOTM3NSBDIDE5LjE5NTMxMyA3LjkzNzUgMTIuOTM3NSA5LjQ2ODc1IDEyLjkzNzUgMTUgQyAxMi45Mzc1IDE2LjE5NTMxMyAxMy4xMDE1NjMgMTcuMjE4NzUgMTMuNDA2MjUgMTguMTI1IEMgMTQuMjEwOTM4IDE4LjIwMzEyNSAxNS4wMzEyNSAxOC40NDkyMTkgMTYuMDMxMjUgMTguNzE4NzUgQyAxNy45Mzc1IDE5LjIzNDM3NSAyMC44MjAzMTMgMjAgMjUgMjAgQyAyOC44MDQ2ODggMjAgMzEuNTIzNDM4IDE5LjQyMTg3NSAzMy41IDE5IEMgMzQuNjQ4NDM4IDE4Ljc1MzkwNiAzNS41NzgxMjUgMTguNTcwMzEzIDM2LjQ2ODc1IDE4LjUzMTI1IEMgMzYuODcxMDk0IDE3LjUzOTA2MyAzNy4wNjI1IDE2LjM2NzE4OCAzNy4wNjI1IDE1IEMgMzcuMDYyNSA5LjQ2ODc1IDMwLjgwNDY4OCA3LjkzNzUgMjUgNy45Mzc1IFogTSAzIDggQyAyLjQ0OTIxOSA4IDIgOC40NDkyMTkgMiA5IEMgMiAxNC43Njk1MzEgMy4zMTI1IDE4LjkxNDA2MyA1LjkwNjI1IDIxLjM0Mzc1IEMgNy40NTMxMjUgMjIuNzg5MDYzIDkuMDg5ODQ0IDIzLjI2NTYyNSAxMC4wOTM3NSAyMy40MDYyNSBDIDEwLjAwNzgxMyAyNC40NzI2NTYgMTAgMjUuNzczNDM4IDEwIDI3LjQ2ODc1IEMgMTAgMjcuNjMyODEzIDEwLjAyNzM0NCAyNy44MDA3ODEgMTAuMDMxMjUgMjcuOTY4NzUgTCAyIDI3Ljk2ODc1IEMgMS40Mzc1IDI3Ljk2ODc1IDAuOTY4NzUgMjguNDM3NSAwLjk2ODc1IDI5IEMgMC45Njg3NSAyOS41NjI1IDEuNDM3NSAzMC4wMzEyNSAyIDMwLjAzMTI1IEwgMTAuMTU2MjUgMzAuMDMxMjUgQyAxMC4zNzUgMzEuODI4MTI1IDEwLjg1MTU2MyAzMy42MTcxODggMTEuNTMxMjUgMzUuMzEyNSBDIDkgMzUuOTE3OTY5IDIgMzguMjUgMiA0NiBDIDIgNDYuNTU0Njg4IDIuNDQ5MjE5IDQ3IDMgNDcgQyAzLjU1MDc4MSA0NyA0IDQ2LjU1NDY4OCA0IDQ2IEMgNCAzOS4xMjUgMTAuNzU3ODEzIDM3LjQyOTY4OCAxMi4zNzUgMzcuMTI1IEMgMTQuNjUyMzQ0IDQxLjQ3NjU2MyAxOC41NDI5NjkgNDQuOTM3NSAyNCA0NS44NDM3NSBMIDI0IDI5IEMgMjQgMjguNDQ1MzEzIDI0LjQ0OTIxOSAyOCAyNSAyOCBDIDI1LjU1MDc4MSAyOCAyNiAyOC40NDUzMTMgMjYgMjkgTCAyNiA0NS44NDM3NSBDIDMxLjQ1NzAzMSA0NC45Mzc1IDM1LjM3ODkwNiA0MS41MDc4MTMgMzcuNjU2MjUgMzcuMTU2MjUgQyAzOS4zNjMyODEgMzcuNDg4MjgxIDQ2IDM5LjE5OTIxOSA0NiA0NiBDIDQ2IDQ2LjU1NDY4OCA0Ni40NDUzMTMgNDcgNDcgNDcgQyA0Ny41NTQ2ODggNDcgNDggNDYuNTU0Njg4IDQ4IDQ2IEMgNDggMzguMjUgNDEgMzUuOTE3OTY5IDM4LjQ2ODc1IDM1LjMxMjUgQyAzOS4xNDg0MzggMzMuNjE3MTg4IDM5LjYyNSAzMS44MjgxMjUgMzkuODQzNzUgMzAuMDMxMjUgTCA0OCAzMC4wMzEyNSBDIDQ4LjU2MjUgMzAuMDMxMjUgNDkuMDMxMjUgMjkuNTYyNSA0OS4wMzEyNSAyOSBDIDQ5LjAzMTI1IDI4LjQzNzUgNDguNTYyNSAyNy45Njg3NSA0OCAyNy45Njg3NSBMIDM5Ljk2ODc1IDI3Ljk2ODc1IEMgMzkuOTcyNjU2IDI3LjgwMDc4MSA0MCAyNy42MzI4MTMgNDAgMjcuNDY4NzUgQyA0MCAyNS44MDg1OTQgMzkuOTkyMTg4IDI0LjQ3NjU2MyAzOS44NDM3NSAyMy40MDYyNSBDIDQwLjg0Mzc1IDIzLjI3MzQzOCA0Mi41MTk1MzEgMjIuODE2NDA2IDQ0LjA5Mzc1IDIxLjM0Mzc1IEMgNDYuNjg3NSAxOC45MTQwNjMgNDggMTQuNzY5NTMxIDQ4IDkgQyA0OCA4LjQ0OTIxOSA0Ny41NTQ2ODggOCA0NyA4IEMgNDYuODYzMjgxIDggNDYuNzQ2MDk0IDguMDQyOTY5IDQ2LjYyNSA4LjA5Mzc1IEMgNDYuNTAzOTA2IDguMTQ0NTMxIDQ2LjM3MTA5NCA4LjE5MTQwNiA0Ni4yODEyNSA4LjI4MTI1IEMgNDYuMTAxNTYzIDguNDYwOTM4IDQ2IDguNzIyNjU2IDQ2IDkgQyA0NiAxNC4wODU5MzggNDQuODk4NDM4IDE3LjgyODEyNSA0Mi43ODEyNSAxOS44NDM3NSBDIDQxLjQ2MDkzOCAyMS4xMDE1NjMgNDAuMDgyMDMxIDIxLjM3ODkwNiAzOS40Mzc1IDIxLjQzNzUgQyAzOS4yOTI5NjkgMjEuNDQ5MjE5IDM5LjI1IDIxLjQ2ODc1IDM5LjE4NzUgMjEuNDY4NzUgQyAzOC43MTQ4NDQgMjAuODM1OTM4IDM3Ljk2MDkzOCAyMC41IDM2Ljc4MTI1IDIwLjUgQyAzNiAyMC41IDM1LjA4NTkzOCAyMC43MTQ4NDQgMzMuOTA2MjUgMjAuOTY4NzUgQyAzMS44NDM3NSAyMS40MDYyNSAyOS4wMTU2MjUgMjIgMjUgMjIgQyAyMC41NTQ2ODggMjIgMTcuNTA3ODEzIDIxLjE2Nzk2OSAxNS41IDIwLjYyNSBDIDE0LjM1MTU2MyAyMC4zMTI1IDEzLjU0Njg3NSAyMC4wOTM3NSAxMi44MTI1IDIwLjA5Mzc1IEMgMTEuNTU4NTk0IDIwLjA5Mzc1IDEwLjg1MTU2MyAyMC40ODQzNzUgMTAuNDY4NzUgMjEuNDA2MjUgQyA5LjgwODU5NCAyMS4zMzIwMzEgOC41MzUxNTYgMjEuMDc4MTI1IDcuMjgxMjUgMTkuOTA2MjUgQyA1LjEzNjcxOSAxNy44OTg0MzggNCAxNC4xMjEwOTQgNCA5IEMgNCA4LjQ0OTIxOSAzLjU1MDc4MSA4IDMgOCBaIi8+PC9zdmc+");
 }
+/* Soutenir — source : icons/icons8-heart.svg. Cœur plein = glyphe plus « lourd »
+   que les icônes au trait voisines → légèrement réduit. */
+.ico-coeur {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
+            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
+}
+.entete-bloc .ico-coeur { width: 19px; height: 19px; }
+/* Confidentialité (mode normal / anonymisé) — source : icons/icons8-anonymous.svg */
+.ico-mask-anon {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiPjxwYXRoIGQ9Ik0gMzIgNSBDIDE4LjM4MiA1IDExLjEyNjIxOSAxMC4xNjM4MTMgMTAuODI0MjE5IDEwLjM4MjgxMiBMIDEwIDEwLjk4MDQ2OSBMIDEwIDM2LjY0NDUzMSBMIDEwLjA5NTcwMyAzNi45NDE0MDYgQyAxMC4zMDUzMTEgMzcuNTk3Mjc2IDE1LjIzNDA4MyA1Mi41NjA4MjYgMjkuNzkyOTY5IDU4LjMyMDMxMiBMIDMyIDYyIEwgMzQuMjA3MDMxIDU4LjMyMDMxMiBDIDQ4Ljc2NTk3OSA1Mi41NTk5ODggNTMuNjk1NjU1IDM3LjU5NzI3NiA1My45MDQyOTcgMzYuOTQxNDA2IEwgNTQgMzYuNjQ0NTMxIEwgNTQgMTAuOTgwNDY5IEwgNTMuMTc1NzgxIDEwLjM4MjgxMiBDIDUyLjg3Mzc4MSAxMC4xNjM4MTMgNDUuNjE4IDUgMzIgNSB6IE0gMzIgOSBDIDQxLjgyNSA5IDQ3LjkwMyAxMS45MDE1MTYgNTAgMTMuMTAzNTE2IEwgNTAgMzUuOTk0MTQxIEMgNDkuMzM3MzUgMzcuODE0ODU1IDQ1LjEyODc3NSA0OC4zNjMxNiAzNSA1My41NjgzNTkgTCAzNSA0OSBMIDM2IDQ3IEwgMzIgNDcgTCAyOCA0NyBMIDI5IDQ5IEwgMjkgNTMuNTY4MzU5IEMgMTguODcxMjI1IDQ4LjM2MzE2IDE0LjY2MjY1IDM3LjgxNDg1NSAxNCAzNS45OTQxNDEgTCAxNCAxMy4xMDM1MTYgQyAxNi4wOTcgMTEuOTAxNTE2IDIyLjE3NSA5IDMyIDkgeiBNIDIyLjkwMjM0NCAxOCBDIDE5Ljc1MzM0NCAxOCAxNiAyMCAxNiAyMCBMIDE3IDIyIEMgMTcuMDE5IDIxLjk5MiAxOS43MzEgMjEgMjIgMjEgQyAyNS41NSAyMSAyNi45ODUgMjMuOTc4IDI3IDI0IEwgMzAgMjIgQyAzMCAyMiAyOC4zMjMzNDQgMTggMjIuOTAyMzQ0IDE4IHogTSA0MS4wOTc2NTYgMTggQyAzNS42NzY2NTYgMTggMzQgMjIgMzQgMjIgTCAzNyAyNCBDIDM3LjAxNSAyMy45NzggMzguNDUgMjEgNDIgMjEgQyA0NC4yNjkgMjEgNDYuOTgxIDIxLjk5MiA0NyAyMiBMIDQ4IDIwIEMgNDggMjAgNDQuMjQ2NjU2IDE4IDQxLjA5NzY1NiAxOCB6IE0gMjMuNSAyNyBBIDQuNSAyIDAgMCAwIDIzLjUgMzEgQSA0LjUgMiAwIDAgMCAyMy41IDI3IHogTSA0MC41IDI3IEEgNC41IDIgMCAwIDAgNDAuNSAzMSBBIDQuNSAyIDAgMCAwIDQwLjUgMjcgeiBNIDE3IDM1IEwgMjAuODU3NDIyIDQxLjk0MzM1OSBDIDIxLjU2MjQyMiA0My4yMTIzNTkgMjIuOTAwNTE2IDQ0IDI0LjM1MzUxNiA0NCBMIDI5IDQ0IEwgMzIgNDEgTCAzNSA0NCBMIDM5LjY0NjQ4NCA0NCBDIDQxLjA5OTQ4NCA0NCA0Mi40Mzc1NzggNDMuMjEyMzU5IDQzLjE0MjU3OCA0MS45NDMzNTkgTCA0NyAzNSBMIDQxIDQwIEwgMzcgNDAgTCAzNSAzOCBMIDMyIDM4IEwgMjkgMzggTCAyNyA0MCBMIDIzIDQwIEwgMTcgMzUgeiIvPjwvc3ZnPg==");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiPjxwYXRoIGQ9Ik0gMzIgNSBDIDE4LjM4MiA1IDExLjEyNjIxOSAxMC4xNjM4MTMgMTAuODI0MjE5IDEwLjM4MjgxMiBMIDEwIDEwLjk4MDQ2OSBMIDEwIDM2LjY0NDUzMSBMIDEwLjA5NTcwMyAzNi45NDE0MDYgQyAxMC4zMDUzMTEgMzcuNTk3Mjc2IDE1LjIzNDA4MyA1Mi41NjA4MjYgMjkuNzkyOTY5IDU4LjMyMDMxMiBMIDMyIDYyIEwgMzQuMjA3MDMxIDU4LjMyMDMxMiBDIDQ4Ljc2NTk3OSA1Mi41NTk5ODggNTMuNjk1NjU1IDM3LjU5NzI3NiA1My45MDQyOTcgMzYuOTQxNDA2IEwgNTQgMzYuNjQ0NTMxIEwgNTQgMTAuOTgwNDY5IEwgNTMuMTc1NzgxIDEwLjM4MjgxMiBDIDUyLjg3Mzc4MSAxMC4xNjM4MTMgNDUuNjE4IDUgMzIgNSB6IE0gMzIgOSBDIDQxLjgyNSA5IDQ3LjkwMyAxMS45MDE1MTYgNTAgMTMuMTAzNTE2IEwgNTAgMzUuOTk0MTQxIEMgNDkuMzM3MzUgMzcuODE0ODU1IDQ1LjEyODc3NSA0OC4zNjMxNiAzNSA1My41NjgzNTkgTCAzNSA0OSBMIDM2IDQ3IEwgMzIgNDcgTCAyOCA0NyBMIDI5IDQ5IEwgMjkgNTMuNTY4MzU5IEMgMTguODcxMjI1IDQ4LjM2MzE2IDE0LjY2MjY1IDM3LjgxNDg1NSAxNCAzNS45OTQxNDEgTCAxNCAxMy4xMDM1MTYgQyAxNi4wOTcgMTEuOTAxNTE2IDIyLjE3NSA5IDMyIDkgeiBNIDIyLjkwMjM0NCAxOCBDIDE5Ljc1MzM0NCAxOCAxNiAyMCAxNiAyMCBMIDE3IDIyIEMgMTcuMDE5IDIxLjk5MiAxOS43MzEgMjEgMjIgMjEgQyAyNS41NSAyMSAyNi45ODUgMjMuOTc4IDI3IDI0IEwgMzAgMjIgQyAzMCAyMiAyOC4zMjMzNDQgMTggMjIuOTAyMzQ0IDE4IHogTSA0MS4wOTc2NTYgMTggQyAzNS42NzY2NTYgMTggMzQgMjIgMzQgMjIgTCAzNyAyNCBDIDM3LjAxNSAyMy45NzggMzguNDUgMjEgNDIgMjEgQyA0NC4yNjkgMjEgNDYuOTgxIDIxLjk5MiA0NyAyMiBMIDQ4IDIwIEMgNDggMjAgNDQuMjQ2NjU2IDE4IDQxLjA5NzY1NiAxOCB6IE0gMjMuNSAyNyBBIDQuNSAyIDAgMCAwIDIzLjUgMzEgQSA0LjUgMiAwIDAgMCAyMy41IDI3IHogTSA0MC41IDI3IEEgNC41IDIgMCAwIDAgNDAuNSAzMSBBIDQuNSAyIDAgMCAwIDQwLjUgMjcgeiBNIDE3IDM1IEwgMjAuODU3NDIyIDQxLjk0MzM1OSBDIDIxLjU2MjQyMiA0My4yMTIzNTkgMjIuOTAwNTE2IDQ0IDI0LjM1MzUxNiA0NCBMIDI5IDQ0IEwgMzIgNDEgTCAzNSA0NCBMIDM5LjY0NjQ4NCA0NCBDIDQxLjA5OTQ4NCA0NCA0Mi40Mzc1NzggNDMuMjEyMzU5IDQzLjE0MjU3OCA0MS45NDMzNTkgTCA0NyAzNSBMIDQxIDQwIEwgMzcgNDAgTCAzNSAzOCBMIDMyIDM4IEwgMjkgMzggTCAyNyA0MCBMIDIzIDQwIEwgMTcgMzUgeiIvPjwvc3ZnPg==");
+}
+/* Thème — source : icons/icon-black-and-white.svg (était un <img> blanchi par filtre) */
+.ico-theme {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMiBDIDEyLjMwOTI5NSAyIDIgMTIuMzA5Mjk1IDIgMjUgQyAyIDM3LjY5MDcwNSAxMi4zMDkyOTUgNDggMjUgNDggQyAzNy42OTA3MDUgNDggNDggMzcuNjkwNzA1IDQ4IDI1IEMgNDggMTIuMzA5Mjk1IDM3LjY5MDcwNSAyIDI1IDIgeiBNIDM5Ljg1MzUxNiAxMC4xNDY0ODQgQyA0My42NTIyODggMTMuOTQ1MjU2IDQ2IDE5LjE5NTA4OCA0NiAyNSBDIDQ2IDM2LjYwOTgyNCAzNi42MDk4MjQgNDYgMjUgNDYgQyAxOS4xOTUwODggNDYgMTMuOTQ1MjU2IDQzLjY1MjI4OCAxMC4xNDY0ODQgMzkuODUzNTE2IEwgMzkuODUzNTE2IDEwLjE0NjQ4NCB6Ii8+PC9zdmc+");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMiBDIDEyLjMwOTI5NSAyIDIgMTIuMzA5Mjk1IDIgMjUgQyAyIDM3LjY5MDcwNSAxMi4zMDkyOTUgNDggMjUgNDggQyAzNy42OTA3MDUgNDggNDggMzcuNjkwNzA1IDQ4IDI1IEMgNDggMTIuMzA5Mjk1IDM3LjY5MDcwNSAyIDI1IDIgeiBNIDM5Ljg1MzUxNiAxMC4xNDY0ODQgQyA0My42NTIyODggMTMuOTQ1MjU2IDQ2IDE5LjE5NTA4OCA0NiAyNSBDIDQ2IDM2LjYwOTgyNCAzNi42MDk4MjQgNDYgMjUgNDYgQyAxOS4xOTUwODggNDYgMTMuOTQ1MjU2IDQzLjY1MjI4OCAxMC4xNDY0ODQgMzkuODUzNTE2IEwgMzkuODUzNTE2IDEwLjE0NjQ4NCB6Ii8+PC9zdmc+");
+}
+/* Visite guidée — « route » : deux repères reliés par un trajet en pointillé.
+   Source : SVG Repo, route-svgrepo-com.svg (licence : voir le compte rendu du lot). */
+.ico-route {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDE4LjEzMyw0OTAuNjY3SDQwOS42Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDguNTMzIGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzQyMi44NTIsNDkwLjY2Nyw0MTguMTMzLDQ5MC42Njd6Ii8+PHBhdGggZD0iTTMyNy45OTIsNDkwLjY2N2gtMTYuMzE2Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNiBjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM1MzMzIuNzEsNDkwLjY2NywzMjcuOTkyLDQ5MC42Njd6Ii8+PHBhdGggZD0iTTM3Ni45NTgsNDkwLjY2N2gtMTYuMzI0Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMyNCBjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM1MzODEuNjc3LDQ5MC42NjcsMzc2Ljk1OCw0OTAuNjY3eiIvPjxwYXRoIGQ9Ik0yMjYuMDQ0LDM0NC40NzdjMy40MywyLjczMSw2LjI3Miw2LjA1OSw4LjQ0OCw5Ljg2NWMxLjU3OSwyLjc1Niw0LjQ1NCw0LjMwOSw3LjQyNCw0LjMwOSBjMS40MzQsMCwyLjg4NC0wLjM1OCw0LjIxNS0xLjExOGM0LjA5Ni0yLjMzOCw1LjUzLTcuNTUyLDMuMTkxLTExLjYzOWMtMy4yNi01LjcwOS03LjUxOC0xMC42NzUtMTIuNjQ2LTE0Ljc3MSBjLTMuNzEyLTIuOTM1LTkuMDcxLTIuMzIxLTExLjk4OSwxLjM1N0MyMjEuNzUxLDMzNi4xNzQsMjIyLjM1NywzNDEuNTQyLDIyNi4wNDQsMzQ0LjQ3N3oiLz48cGF0aCBkPSJNNDAuNTIzLDQ4NC43NjdjLTMuNjI3LTIuNDgzLTYuNzA3LTUuNTgxLTkuMTU2LTkuMjMzYy0yLjYzNy0zLjkwOC03LjkzNi00Ljk3NS0xMS44NDQtMi4zMjEgYy0zLjkxNywyLjYyOC00Ljk0OSw3LjkyNy0yLjMyMSwxMS44MzZjMy42NjksNS40NjEsOC4yNzcsMTAuMTAzLDEzLjY4OCwxMy43OThjMS40NzYsMS4wMTUsMy4xNDksMS40OTMsNC44MTMsMS40OTMgYzIuNzIyLDAsNS40MDItMS4yOTcsNy4wNDktMy43MTJDNDUuNDEzLDQ5Mi43MzcsNDQuNDE0LDQ4Ny40MjksNDAuNTIzLDQ4NC43Njd6Ii8+PHBhdGggZD0iTTgzLjE2Nyw0OTAuNjY3SDY2Ljg0MmMtNC43MTksMC04LjUzMywzLjgxNC04LjUzMyw4LjUzM3MzLjgxNCw4LjUzMyw4LjUzMyw4LjUzM2gxNi4zMjQgYzQuNzE5LDAsOC41MzMtMy44MTQsOC41MzMtOC41MzNTODcuODg2LDQ5MC42NjcsODMuMTY3LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTE3LjcxNyw0NTcuNjY3YzQuMDcsMCw3LjY3MS0yLjkxOCw4LjM5Ny03LjA2NmMwLjc1MS00LjMwOSwyLjMxMy04LjM4OCw0LjYzNC0xMi4xIGMyLjQ5Mi0zLjk5NCwxLjI4LTkuMjU5LTIuNzIyLTExLjc1OWMtMy45NzctMi40ODMtOS4yNTktMS4yNjMtMTEuNzU5LDIuNzIyYy0zLjQ4Miw1LjU4OS01LjgzNywxMS43MDgtNi45NjMsMTguMjAyIGMtMC44MTEsNC42NDIsMi4yOTUsOS4wNjIsNi45MzgsOS44NzNDMTYuNzM2LDQ1Ny42MjQsMTcuMjMxLDQ1Ny42NjcsMTcuNzE3LDQ1Ny42Njd6Ii8+PHBhdGggZD0iTTE3NS45NzUsMzI4LjUzM2MwLDQuNzE5LDMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNmM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzIwNS41NDMsMzIwLDIwMC44MjQsMzIwIGgtMTYuMzE2QzE3OS43OSwzMjAsMTc1Ljk3NSwzMjMuODE0LDE3NS45NzUsMzI4LjUzM3oiLz48cGF0aCBkPSJNMTIyLjkwOCw0MTMuODY3YzAtNC43MTktMy44MTQtOC41MzMtOC41MzMtOC41MzNIOTguMDU5Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzIGMwLDQuNzE5LDMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNkMxMTkuMDk0LDQyMi40LDEyMi45MDgsNDE4LjU4NiwxMjIuOTA4LDQxMy44Njd6Ii8+PHBhdGggZD0iTTEzNS41NDIsMzIwYy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMyNGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzIFMxNTYuNTg1LDMyMCwxNTEuODY2LDMyMEgxMzUuNTQyeiIvPjxwYXRoIGQ9Ik02NS40MDgsNDIyLjRjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM2MwLTQuNzE5LTMuODE0LTguNTMzLTguNTMzLTguNTMzaC01LjY5MiBjLTQuMjg0LDAuMDA5LTguNTI1LDAuNTM4LTEyLjYxMiwxLjU3Yy00LjU2NSwxLjE1Mi03LjMzLDUuNzg2LTYuMTc4LDEwLjM1OWMwLjk3MywzLjg3NCw0LjQ0Niw2LjQ0Myw4LjI2OSw2LjQ0MyBjMC42OTEsMCwxLjM5OS0wLjA3NywyLjA5OS0wLjI1NmMyLjcyMi0wLjY5MSw1LjU3Mi0xLjA0MSw4LjQzOS0xLjA1SDY1LjQwOHoiLz48cGF0aCBkPSJNMjMwLjA1OSw0OTAuNjY3aC0xNi4zMTZjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzE2IGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzIzNC43NzgsNDkwLjY2NywyMzAuMDU5LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTI0OC4yNzUsMzczLjRjLTQuNTY1LTEuMTY5LTkuMjA3LDEuNjA0LTEwLjM2OCw2LjE4N2MtMS4wNzUsNC4yNS0yLjkzNSw4LjIwMS01LjUxMywxMS43MzMgYy0yLjc4MiwzLjc5Ny0xLjk1NCw5LjEzOSwxLjg1MiwxMS45MjFjMS41MTksMS4xMDksMy4yNzcsMS42MzgsNS4wMjYsMS42MzhjMi42MzcsMCw1LjIzMS0xLjIwMyw2LjkwNC0zLjQ5OSBjMy44NzQtNS4yOTksNi42NjQtMTEuMjMsOC4yODYtMTcuNjEzQzI1NS42MDUsMzc5LjIwMywyNTIuODQ5LDM3NC41NiwyNDguMjc1LDM3My40eiIvPjxwYXRoIGQ9Ik0yNzkuMDI1LDQ5MC42NjdIMjYyLjdjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzI0IGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzI4My43NDQsNDkwLjY2NywyNzkuMDI1LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTE3MS44NzUsNDEzLjg2N2MwLTQuNzE5LTMuODE0LTguNTMzLTguNTMzLTguNTMzaC0xNi4zMjRjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzMgYzAsNC43MTksMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzI0QzE2OC4wNjEsNDIyLjQsMTcxLjg3NSw0MTguNTg2LDE3MS44NzUsNDEzLjg2N3oiLz48cGF0aCBkPSJNMTMyLjEyNSw0OTAuNjY3aC0xNi4zMTZjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzE2IGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzEzNi44NDQsNDkwLjY2NywxMzIuMTI1LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTE4MS4wOTIsNDkwLjY2N2gtMTYuMzE2Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNiBjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM1MxODUuODExLDQ5MC42NjcsMTgxLjA5Miw0OTAuNjY3eiIvPjxwYXRoIGQ9Ik0yMjAuNjc1LDQxMS43NDJjLTAuODI4LTQuNjM0LTUuMTcxLTcuNzIzLTkuODgyLTYuOTI5Yy0xLjk4LDAuMzUtMy45OTQsMC41MjEtNS45OSwwLjUyMWgtOC44MjMgYy00LjcxLDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNjMCw0LjcxOSwzLjgyMyw4LjUzMyw4LjUzMyw4LjUzM2g4LjgyM2MyLjk3OCwwLDUuOTktMC4yNTYsOC45NDMtMC43NzcgQzIxOC4zOCw0MjAuODA0LDIyMS40ODYsNDE2LjM4NCwyMjAuNjc1LDQxMS43NDJ6Ii8+PHBhdGggZD0iTTkzLjg2NywzMjBjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoOC41MzNjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzMyBTMTA3LjExOSwzMjAsMTAyLjQsMzIwSDkzLjg2N3oiLz48cGF0aCBkPSJNOTMuODY3LDEzMi4yNjdjMTguODI1LDAsMzQuMTMzLTE1LjMwOSwzNC4xMzMtMzQuMTMzQzEyOCw3OS4zMDksMTEyLjY5MSw2NCw5My44NjcsNjQgYy0xOC44MjUsMC0zNC4xMzMsMTUuMzA5LTM0LjEzMywzNC4xMzNDNTkuNzMzLDExNi45NTgsNzUuMDQyLDEzMi4yNjcsOTMuODY3LDEzMi4yNjd6Ii8+PHBhdGggZD0iTTg2LjY5OSwyOTkuNTYzYzEuNTc5LDIuNDQsNC4yNzUsMy45LDcuMTY4LDMuOWMyLjg5MywwLDUuNTg5LTEuNDU5LDcuMTY4LTMuOWMwLjM5My0wLjYwNiwzOS42OC02MS41MjUsNjUuNjQ3LTExNy41NDcgYzEzLjEyNC0yOC4zMTQsMjEuMDUyLTQ1LjQwNiwyMS4wNTItNzYuNDI1YzAtNDkuODA5LTM1LjEwNi0xMDEuMzI1LTkzLjg2Ny0xMDEuMzI1QzM1LjEwNiw0LjI2NywwLDU1Ljc4MiwwLDEwNS41OTEgYzAsMzEuMDE5LDcuOTI3LDQ4LjExMSwyMS4wNTIsNzYuNDI1QzQ3LjAxOSwyMzguMDM3LDg2LjMwNiwyOTguOTU3LDg2LjY5OSwyOTkuNTYzeiBNOTMuODY3LDQ2LjkzMyBjMjguMjM3LDAsNTEuMiwyMi45NjMsNTEuMiw1MS4yYzAsMjguMjM3LTIyLjk2Myw1MS4yLTUxLjIsNTEuMmMtMjguMjM3LDAtNTEuMi0yMi45NjMtNTEuMi01MS4yIEM0Mi42NjcsNjkuODk3LDY1LjYzLDQ2LjkzMyw5My44NjcsNDYuOTMzeiIvPjxwYXRoIGQ9Ik00MTguMTMzLDIzNC42NjdjLTE4LjgyNSwwLTM0LjEzMywxNS4zMDktMzQuMTMzLDM0LjEzM3MxNS4zMDksMzQuMTMzLDM0LjEzMywzNC4xMzNzMzQuMTMzLTE1LjMwOSwzNC4xMzMtMzQuMTMzIFM0MzYuOTU4LDIzNC42NjcsNDE4LjEzMywyMzQuNjY3eiIvPjxwYXRoIGQ9Ik00MTguMTMzLDE3NC45MzNjLTU4Ljc2MSwwLTkzLjg2Nyw1MS41MTYtOTMuODY3LDEwMS4zMjVjMCwzMS4wMTksNy45MjcsNDguMTExLDIxLjA1Miw3Ni40MjUgYzI1Ljk2Nyw1Ni4wMjEsNjUuMjU0LDExNi45NDEsNjUuNjQ3LDExNy41NDdjMS41NzksMi40NDEsNC4yNzUsMy45LDcuMTY4LDMuOXM1LjU4OS0xLjQ1OSw3LjE2OC0zLjkgYzAuMzkzLTAuNjA2LDM5LjY4LTYxLjUyNSw2NS42NDctMTE3LjU0N0M1MDQuMDczLDMyNC4zNjksNTEyLDMwNy4yNzcsNTEyLDI3Ni4yNThDNTEyLDIyNi40NDksNDc2Ljg5NCwxNzQuOTMzLDQxOC4xMzMsMTc0LjkzMyB6IE00MTguMTMzLDMyMGMtMjguMjM3LDAtNTEuMi0yMi45NjMtNTEuMi01MS4yczIyLjk2My01MS4yLDUxLjItNTEuMmMyOC4yMzcsMCw1MS4yLDIyLjk2Myw1MS4yLDUxLjJTNDQ2LjM3LDMyMCw0MTguMTMzLDMyMHoiLz48L3N2Zz4=");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDE4LjEzMyw0OTAuNjY3SDQwOS42Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDguNTMzIGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzQyMi44NTIsNDkwLjY2Nyw0MTguMTMzLDQ5MC42Njd6Ii8+PHBhdGggZD0iTTMyNy45OTIsNDkwLjY2N2gtMTYuMzE2Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNiBjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM1MzMzIuNzEsNDkwLjY2NywzMjcuOTkyLDQ5MC42Njd6Ii8+PHBhdGggZD0iTTM3Ni45NTgsNDkwLjY2N2gtMTYuMzI0Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMyNCBjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM1MzODEuNjc3LDQ5MC42NjcsMzc2Ljk1OCw0OTAuNjY3eiIvPjxwYXRoIGQ9Ik0yMjYuMDQ0LDM0NC40NzdjMy40MywyLjczMSw2LjI3Miw2LjA1OSw4LjQ0OCw5Ljg2NWMxLjU3OSwyLjc1Niw0LjQ1NCw0LjMwOSw3LjQyNCw0LjMwOSBjMS40MzQsMCwyLjg4NC0wLjM1OCw0LjIxNS0xLjExOGM0LjA5Ni0yLjMzOCw1LjUzLTcuNTUyLDMuMTkxLTExLjYzOWMtMy4yNi01LjcwOS03LjUxOC0xMC42NzUtMTIuNjQ2LTE0Ljc3MSBjLTMuNzEyLTIuOTM1LTkuMDcxLTIuMzIxLTExLjk4OSwxLjM1N0MyMjEuNzUxLDMzNi4xNzQsMjIyLjM1NywzNDEuNTQyLDIyNi4wNDQsMzQ0LjQ3N3oiLz48cGF0aCBkPSJNNDAuNTIzLDQ4NC43NjdjLTMuNjI3LTIuNDgzLTYuNzA3LTUuNTgxLTkuMTU2LTkuMjMzYy0yLjYzNy0zLjkwOC03LjkzNi00Ljk3NS0xMS44NDQtMi4zMjEgYy0zLjkxNywyLjYyOC00Ljk0OSw3LjkyNy0yLjMyMSwxMS44MzZjMy42NjksNS40NjEsOC4yNzcsMTAuMTAzLDEzLjY4OCwxMy43OThjMS40NzYsMS4wMTUsMy4xNDksMS40OTMsNC44MTMsMS40OTMgYzIuNzIyLDAsNS40MDItMS4yOTcsNy4wNDktMy43MTJDNDUuNDEzLDQ5Mi43MzcsNDQuNDE0LDQ4Ny40MjksNDAuNTIzLDQ4NC43Njd6Ii8+PHBhdGggZD0iTTgzLjE2Nyw0OTAuNjY3SDY2Ljg0MmMtNC43MTksMC04LjUzMywzLjgxNC04LjUzMyw4LjUzM3MzLjgxNCw4LjUzMyw4LjUzMyw4LjUzM2gxNi4zMjQgYzQuNzE5LDAsOC41MzMtMy44MTQsOC41MzMtOC41MzNTODcuODg2LDQ5MC42NjcsODMuMTY3LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTE3LjcxNyw0NTcuNjY3YzQuMDcsMCw3LjY3MS0yLjkxOCw4LjM5Ny03LjA2NmMwLjc1MS00LjMwOSwyLjMxMy04LjM4OCw0LjYzNC0xMi4xIGMyLjQ5Mi0zLjk5NCwxLjI4LTkuMjU5LTIuNzIyLTExLjc1OWMtMy45NzctMi40ODMtOS4yNTktMS4yNjMtMTEuNzU5LDIuNzIyYy0zLjQ4Miw1LjU4OS01LjgzNywxMS43MDgtNi45NjMsMTguMjAyIGMtMC44MTEsNC42NDIsMi4yOTUsOS4wNjIsNi45MzgsOS44NzNDMTYuNzM2LDQ1Ny42MjQsMTcuMjMxLDQ1Ny42NjcsMTcuNzE3LDQ1Ny42Njd6Ii8+PHBhdGggZD0iTTE3NS45NzUsMzI4LjUzM2MwLDQuNzE5LDMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNmM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzIwNS41NDMsMzIwLDIwMC44MjQsMzIwIGgtMTYuMzE2QzE3OS43OSwzMjAsMTc1Ljk3NSwzMjMuODE0LDE3NS45NzUsMzI4LjUzM3oiLz48cGF0aCBkPSJNMTIyLjkwOCw0MTMuODY3YzAtNC43MTktMy44MTQtOC41MzMtOC41MzMtOC41MzNIOTguMDU5Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzIGMwLDQuNzE5LDMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNkMxMTkuMDk0LDQyMi40LDEyMi45MDgsNDE4LjU4NiwxMjIuOTA4LDQxMy44Njd6Ii8+PHBhdGggZD0iTTEzNS41NDIsMzIwYy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMyNGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzIFMxNTYuNTg1LDMyMCwxNTEuODY2LDMyMEgxMzUuNTQyeiIvPjxwYXRoIGQ9Ik02NS40MDgsNDIyLjRjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM2MwLTQuNzE5LTMuODE0LTguNTMzLTguNTMzLTguNTMzaC01LjY5MiBjLTQuMjg0LDAuMDA5LTguNTI1LDAuNTM4LTEyLjYxMiwxLjU3Yy00LjU2NSwxLjE1Mi03LjMzLDUuNzg2LTYuMTc4LDEwLjM1OWMwLjk3MywzLjg3NCw0LjQ0Niw2LjQ0Myw4LjI2OSw2LjQ0MyBjMC42OTEsMCwxLjM5OS0wLjA3NywyLjA5OS0wLjI1NmMyLjcyMi0wLjY5MSw1LjU3Mi0xLjA0MSw4LjQzOS0xLjA1SDY1LjQwOHoiLz48cGF0aCBkPSJNMjMwLjA1OSw0OTAuNjY3aC0xNi4zMTZjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzE2IGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzIzNC43NzgsNDkwLjY2NywyMzAuMDU5LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTI0OC4yNzUsMzczLjRjLTQuNTY1LTEuMTY5LTkuMjA3LDEuNjA0LTEwLjM2OCw2LjE4N2MtMS4wNzUsNC4yNS0yLjkzNSw4LjIwMS01LjUxMywxMS43MzMgYy0yLjc4MiwzLjc5Ny0xLjk1NCw5LjEzOSwxLjg1MiwxMS45MjFjMS41MTksMS4xMDksMy4yNzcsMS42MzgsNS4wMjYsMS42MzhjMi42MzcsMCw1LjIzMS0xLjIwMyw2LjkwNC0zLjQ5OSBjMy44NzQtNS4yOTksNi42NjQtMTEuMjMsOC4yODYtMTcuNjEzQzI1NS42MDUsMzc5LjIwMywyNTIuODQ5LDM3NC41NiwyNDguMjc1LDM3My40eiIvPjxwYXRoIGQ9Ik0yNzkuMDI1LDQ5MC42NjdIMjYyLjdjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzI0IGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzI4My43NDQsNDkwLjY2NywyNzkuMDI1LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTE3MS44NzUsNDEzLjg2N2MwLTQuNzE5LTMuODE0LTguNTMzLTguNTMzLTguNTMzaC0xNi4zMjRjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzMgYzAsNC43MTksMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzI0QzE2OC4wNjEsNDIyLjQsMTcxLjg3NSw0MTguNTg2LDE3MS44NzUsNDEzLjg2N3oiLz48cGF0aCBkPSJNMTMyLjEyNSw0OTAuNjY3aC0xNi4zMTZjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoMTYuMzE2IGM0LjcxOSwwLDguNTMzLTMuODE0LDguNTMzLTguNTMzUzEzNi44NDQsNDkwLjY2NywxMzIuMTI1LDQ5MC42Njd6Ii8+PHBhdGggZD0iTTE4MS4wOTIsNDkwLjY2N2gtMTYuMzE2Yy00LjcxOSwwLTguNTMzLDMuODE0LTguNTMzLDguNTMzczMuODE0LDguNTMzLDguNTMzLDguNTMzaDE2LjMxNiBjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzM1MxODUuODExLDQ5MC42NjcsMTgxLjA5Miw0OTAuNjY3eiIvPjxwYXRoIGQ9Ik0yMjAuNjc1LDQxMS43NDJjLTAuODI4LTQuNjM0LTUuMTcxLTcuNzIzLTkuODgyLTYuOTI5Yy0xLjk4LDAuMzUtMy45OTQsMC41MjEtNS45OSwwLjUyMWgtOC44MjMgYy00LjcxLDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNjMCw0LjcxOSwzLjgyMyw4LjUzMyw4LjUzMyw4LjUzM2g4LjgyM2MyLjk3OCwwLDUuOTktMC4yNTYsOC45NDMtMC43NzcgQzIxOC4zOCw0MjAuODA0LDIyMS40ODYsNDE2LjM4NCwyMjAuNjc1LDQxMS43NDJ6Ii8+PHBhdGggZD0iTTkzLjg2NywzMjBjLTQuNzE5LDAtOC41MzMsMy44MTQtOC41MzMsOC41MzNzMy44MTQsOC41MzMsOC41MzMsOC41MzNoOC41MzNjNC43MTksMCw4LjUzMy0zLjgxNCw4LjUzMy04LjUzMyBTMTA3LjExOSwzMjAsMTAyLjQsMzIwSDkzLjg2N3oiLz48cGF0aCBkPSJNOTMuODY3LDEzMi4yNjdjMTguODI1LDAsMzQuMTMzLTE1LjMwOSwzNC4xMzMtMzQuMTMzQzEyOCw3OS4zMDksMTEyLjY5MSw2NCw5My44NjcsNjQgYy0xOC44MjUsMC0zNC4xMzMsMTUuMzA5LTM0LjEzMywzNC4xMzNDNTkuNzMzLDExNi45NTgsNzUuMDQyLDEzMi4yNjcsOTMuODY3LDEzMi4yNjd6Ii8+PHBhdGggZD0iTTg2LjY5OSwyOTkuNTYzYzEuNTc5LDIuNDQsNC4yNzUsMy45LDcuMTY4LDMuOWMyLjg5MywwLDUuNTg5LTEuNDU5LDcuMTY4LTMuOWMwLjM5My0wLjYwNiwzOS42OC02MS41MjUsNjUuNjQ3LTExNy41NDcgYzEzLjEyNC0yOC4zMTQsMjEuMDUyLTQ1LjQwNiwyMS4wNTItNzYuNDI1YzAtNDkuODA5LTM1LjEwNi0xMDEuMzI1LTkzLjg2Ny0xMDEuMzI1QzM1LjEwNiw0LjI2NywwLDU1Ljc4MiwwLDEwNS41OTEgYzAsMzEuMDE5LDcuOTI3LDQ4LjExMSwyMS4wNTIsNzYuNDI1QzQ3LjAxOSwyMzguMDM3LDg2LjMwNiwyOTguOTU3LDg2LjY5OSwyOTkuNTYzeiBNOTMuODY3LDQ2LjkzMyBjMjguMjM3LDAsNTEuMiwyMi45NjMsNTEuMiw1MS4yYzAsMjguMjM3LTIyLjk2Myw1MS4yLTUxLjIsNTEuMmMtMjguMjM3LDAtNTEuMi0yMi45NjMtNTEuMi01MS4yIEM0Mi42NjcsNjkuODk3LDY1LjYzLDQ2LjkzMyw5My44NjcsNDYuOTMzeiIvPjxwYXRoIGQ9Ik00MTguMTMzLDIzNC42NjdjLTE4LjgyNSwwLTM0LjEzMywxNS4zMDktMzQuMTMzLDM0LjEzM3MxNS4zMDksMzQuMTMzLDM0LjEzMywzNC4xMzNzMzQuMTMzLTE1LjMwOSwzNC4xMzMtMzQuMTMzIFM0MzYuOTU4LDIzNC42NjcsNDE4LjEzMywyMzQuNjY3eiIvPjxwYXRoIGQ9Ik00MTguMTMzLDE3NC45MzNjLTU4Ljc2MSwwLTkzLjg2Nyw1MS41MTYtOTMuODY3LDEwMS4zMjVjMCwzMS4wMTksNy45MjcsNDguMTExLDIxLjA1Miw3Ni40MjUgYzI1Ljk2Nyw1Ni4wMjEsNjUuMjU0LDExNi45NDEsNjUuNjQ3LDExNy41NDdjMS41NzksMi40NDEsNC4yNzUsMy45LDcuMTY4LDMuOXM1LjU4OS0xLjQ1OSw3LjE2OC0zLjkgYzAuMzkzLTAuNjA2LDM5LjY4LTYxLjUyNSw2NS42NDctMTE3LjU0N0M1MDQuMDczLDMyNC4zNjksNTEyLDMwNy4yNzcsNTEyLDI3Ni4yNThDNTEyLDIyNi40NDksNDc2Ljg5NCwxNzQuOTMzLDQxOC4xMzMsMTc0LjkzMyB6IE00MTguMTMzLDMyMGMtMjguMjM3LDAtNTEuMi0yMi45NjMtNTEuMi01MS4yczIyLjk2My01MS4yLDUxLjItNTEuMmMyOC4yMzcsMCw1MS4yLDIyLjk2Myw1MS4yLDUxLjJTNDQ2LjM3LDMyMCw0MTguMTMzLDMyMHoiLz48L3N2Zz4=");
+}
+/* Assistance — bulle de dialogue avec un « i », dessinée pour ce lot (trait 1,5 px
+   sur 22 px). Pleine quand l'assistance est activée (aria-pressed="true", posé par
+   synchroniserControlesAssistance), en contour seul quand elle est désactivée. */
+.ico-assistance {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjExIiBjeT0iNi45NSIgcj0iMS4wNSIvPjxwYXRoIGQ9Ik0xMSA5LjZ2NC4yIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxjaXJjbGUgY3g9IjExIiBjeT0iNi45NSIgcj0iMS4wNSIvPjxwYXRoIGQ9Ik0xMSA5LjZ2NC4yIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=");
+}
+[aria-pressed="true"] > .ico-assistance {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1ek0xMSA1LjlhMS4wNSAxLjA1IDAgMSAxIDAgMi4xYTEuMDUgMS4wNSAwIDEgMSAwLTIuMXpNMTAuMjUgOS40aDEuNXY0LjZoLTEuNXoiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjxwYXRoIGQ9Ik00IDMuNzVoMTRBMi4yNSAyLjI1IDAgMCAxIDIwLjI1IDZ2OC41QTIuMjUgMi4yNSAwIDAgMSAxOCAxNi43NUg5LjZsLTQuMzUgMy41di0zLjVINEEyLjI1IDIuMjUgMCAwIDEgMS43NSAxNC41VjZBMi4yNSAyLjI1IDAgMCAxIDQgMy43NXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgMy43NWgxNEEyLjI1IDIuMjUgMCAwIDEgMjAuMjUgNnY4LjVBMi4yNSAyLjI1IDAgMCAxIDE4IDE2Ljc1SDkuNmwtNC4zNSAzLjV2LTMuNUg0QTIuMjUgMi4yNSAwIDAgMSAxLjc1IDE0LjVWNkEyLjI1IDIuMjUgMCAwIDEgNCAzLjc1ek0xMSA1LjlhMS4wNSAxLjA1IDAgMSAxIDAgMi4xYTEuMDUgMS4wNSAwIDEgMSAwLTIuMXpNMTAuMjUgOS40aDEuNXY0LjZoLTEuNXoiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjxwYXRoIGQ9Ik00IDMuNzVoMTRBMi4yNSAyLjI1IDAgMCAxIDIwLjI1IDZ2OC41QTIuMjUgMi4yNSAwIDAgMSAxOCAxNi43NUg5LjZsLTQuMzUgMy41di0zLjVINEEyLjI1IDIuMjUgMCAwIDEgMS43NSAxNC41VjZBMi4yNSAyLjI1IDAgMCAxIDQgMy43NXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=");
+}
+/* Aide — point d'interrogation dans un cercle, en trait, dessiné pour ce lot */
+.ico-aide-cercle {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iOC43NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxwYXRoIGQ9Ik04LjU1IDguNmEyLjUgMi41IDAgMCAxIDQuOS43YzAgMS43LTIuNDUgMi4xLTIuNDUgMy42IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48Y2lyY2xlIGN4PSIxMSIgY3k9IjE1LjU1IiByPSIxIi8+PC9zdmc+");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iOC43NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxwYXRoIGQ9Ik04LjU1IDguNmEyLjUgMi41IDAgMCAxIDQuOS43YzAgMS43LTIuNDUgMi4xLTIuNDUgMy42IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48Y2lyY2xlIGN4PSIxMSIgY3k9IjE1LjU1IiByPSIxIi8+PC9zdmc+");
+}
+/* Réglages — les curseurs. Source : icons/icon-tune.svg */
 .ico-tune {
     -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTYgMiBDIDE0LjMwMDc4MSAyIDEzIDMuMzAwNzgxIDEzIDUgTCAxMyA3IEwgMyA3IEMgMi45Njg3NSA3IDIuOTM3NSA3IDIuOTA2MjUgNyBDIDIuODc1IDcgMi44NDM3NSA3IDIuODEyNSA3IEMgMi4yNjE3MTkgNy4wNTA3ODEgMS44NTU0NjkgNy41NDI5NjkgMS45MDYyNSA4LjA5Mzc1IEMgMS45NTcwMzEgOC42NDQ1MzEgMi40NDkyMTkgOS4wNTA3ODEgMyA5IEwgMTMgOSBMIDEzIDExIEMgMTMgMTIuNjk5MjE5IDE0LjMwMDc4MSAxNCAxNiAxNCBMIDE4IDE0IEMgMTkuNjk5MjE5IDE0IDIxIDEyLjY5OTIxOSAyMSAxMSBMIDIxIDUgQyAyMSAzLjMwMDc4MSAxOS42OTkyMTkgMiAxOCAyIFogTSAyMiA3IEwgMjIgOSBMIDQ3IDkgQyA0Ny4zNTkzNzUgOS4wMDM5MDYgNDcuNjk1MzEzIDguODE2NDA2IDQ3Ljg3ODkwNiA4LjUwMzkwNiBDIDQ4LjA1ODU5NCA4LjE5MTQwNiA0OC4wNTg1OTQgNy44MDg1OTQgNDcuODc4OTA2IDcuNDk2MDk0IEMgNDcuNjk1MzEzIDcuMTgzNTk0IDQ3LjM1OTM3NSA2Ljk5NjA5NCA0NyA3IFogTSAzNCAxOSBDIDMyLjMwMDc4MSAxOSAzMSAyMC4zMDA3ODEgMzEgMjIgTCAzMSAyNCBMIDMgMjQgQyAyLjk2ODc1IDI0IDIuOTM3NSAyNCAyLjkwNjI1IDI0IEMgMi44NzUgMjQgMi44NDM3NSAyNCAyLjgxMjUgMjQgQyAyLjI2MTcxOSAyNC4wNTA3ODEgMS44NTU0NjkgMjQuNTQyOTY5IDEuOTA2MjUgMjUuMDkzNzUgQyAxLjk1NzAzMSAyNS42NDQ1MzEgMi40NDkyMTkgMjYuMDUwNzgxIDMgMjYgTCAzMSAyNiBMIDMxIDI4IEMgMzEgMjkuNjk5MjE5IDMyLjMwMDc4MSAzMSAzNCAzMSBMIDM2IDMxIEMgMzcuNjk5MjE5IDMxIDM5IDI5LjY5OTIxOSAzOSAyOCBMIDM5IDIyIEMgMzkgMjAuMzAwNzgxIDM3LjY5OTIxOSAxOSAzNiAxOSBaIE0gNDAgMjQgTCA0MCAyNiBMIDQ3IDI2IEMgNDcuMzU5Mzc1IDI2LjAwMzkwNiA0Ny42OTUzMTMgMjUuODE2NDA2IDQ3Ljg3ODkwNiAyNS41MDM5MDYgQyA0OC4wNTg1OTQgMjUuMTkxNDA2IDQ4LjA1ODU5NCAyNC44MDg1OTQgNDcuODc4OTA2IDI0LjQ5NjA5NCBDIDQ3LjY5NTMxMyAyNC4xODM1OTQgNDcuMzU5Mzc1IDIzLjk5NjA5NCA0NyAyNCBaIE0gMTMgMzYgQyAxMS4zMDA3ODEgMzYgMTAgMzcuMzAwNzgxIDEwIDM5IEwgMTAgNDEgTCAzIDQxIEMgMi45Njg3NSA0MSAyLjkzNzUgNDEgMi45MDYyNSA0MSBDIDIuODc1IDQxIDIuODQzNzUgNDEgMi44MTI1IDQxIEMgMi4yNjE3MTkgNDEuMDUwNzgxIDEuODU1NDY5IDQxLjU0Mjk2OSAxLjkwNjI1IDQyLjA5Mzc1IEMgMS45NTcwMzEgNDIuNjQ0NTMxIDIuNDQ5MjE5IDQzLjA1MDc4MSAzIDQzIEwgMTAgNDMgTCAxMCA0NSBDIDEwIDQ2LjY5OTIxOSAxMS4zMDA3ODEgNDggMTMgNDggTCAxNSA0OCBDIDE2LjY5OTIxOSA0OCAxOCA0Ni42OTkyMTkgMTggNDUgTCAxOCAzOSBDIDE4IDM3LjMwMDc4MSAxNi42OTkyMTkgMzYgMTUgMzYgWiBNIDE5IDQxIEwgMTkgNDMgTCA0NyA0MyBDIDQ3LjM1OTM3NSA0My4wMDM5MDYgNDcuNjk1MzEzIDQyLjgxNjQwNiA0Ny44Nzg5MDYgNDIuNTAzOTA2IEMgNDguMDU4NTk0IDQyLjE5MTQwNiA0OC4wNTg1OTQgNDEuODA4NTk0IDQ3Ljg3ODkwNiA0MS40OTYwOTQgQyA0Ny42OTUzMTMgNDEuMTgzNTk0IDQ3LjM1OTM3NSA0MC45OTYwOTQgNDcgNDEgWiIvPjwvc3ZnPg==");
             mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTYgMiBDIDE0LjMwMDc4MSAyIDEzIDMuMzAwNzgxIDEzIDUgTCAxMyA3IEwgMyA3IEMgMi45Njg3NSA3IDIuOTM3NSA3IDIuOTA2MjUgNyBDIDIuODc1IDcgMi44NDM3NSA3IDIuODEyNSA3IEMgMi4yNjE3MTkgNy4wNTA3ODEgMS44NTU0NjkgNy41NDI5NjkgMS45MDYyNSA4LjA5Mzc1IEMgMS45NTcwMzEgOC42NDQ1MzEgMi40NDkyMTkgOS4wNTA3ODEgMyA5IEwgMTMgOSBMIDEzIDExIEMgMTMgMTIuNjk5MjE5IDE0LjMwMDc4MSAxNCAxNiAxNCBMIDE4IDE0IEMgMTkuNjk5MjE5IDE0IDIxIDEyLjY5OTIxOSAyMSAxMSBMIDIxIDUgQyAyMSAzLjMwMDc4MSAxOS42OTkyMTkgMiAxOCAyIFogTSAyMiA3IEwgMjIgOSBMIDQ3IDkgQyA0Ny4zNTkzNzUgOS4wMDM5MDYgNDcuNjk1MzEzIDguODE2NDA2IDQ3Ljg3ODkwNiA4LjUwMzkwNiBDIDQ4LjA1ODU5NCA4LjE5MTQwNiA0OC4wNTg1OTQgNy44MDg1OTQgNDcuODc4OTA2IDcuNDk2MDk0IEMgNDcuNjk1MzEzIDcuMTgzNTk0IDQ3LjM1OTM3NSA2Ljk5NjA5NCA0NyA3IFogTSAzNCAxOSBDIDMyLjMwMDc4MSAxOSAzMSAyMC4zMDA3ODEgMzEgMjIgTCAzMSAyNCBMIDMgMjQgQyAyLjk2ODc1IDI0IDIuOTM3NSAyNCAyLjkwNjI1IDI0IEMgMi44NzUgMjQgMi44NDM3NSAyNCAyLjgxMjUgMjQgQyAyLjI2MTcxOSAyNC4wNTA3ODEgMS44NTU0NjkgMjQuNTQyOTY5IDEuOTA2MjUgMjUuMDkzNzUgQyAxLjk1NzAzMSAyNS42NDQ1MzEgMi40NDkyMTkgMjYuMDUwNzgxIDMgMjYgTCAzMSAyNiBMIDMxIDI4IEMgMzEgMjkuNjk5MjE5IDMyLjMwMDc4MSAzMSAzNCAzMSBMIDM2IDMxIEMgMzcuNjk5MjE5IDMxIDM5IDI5LjY5OTIxOSAzOSAyOCBMIDM5IDIyIEMgMzkgMjAuMzAwNzgxIDM3LjY5OTIxOSAxOSAzNiAxOSBaIE0gNDAgMjQgTCA0MCAyNiBMIDQ3IDI2IEMgNDcuMzU5Mzc1IDI2LjAwMzkwNiA0Ny42OTUzMTMgMjUuODE2NDA2IDQ3Ljg3ODkwNiAyNS41MDM5MDYgQyA0OC4wNTg1OTQgMjUuMTkxNDA2IDQ4LjA1ODU5NCAyNC44MDg1OTQgNDcuODc4OTA2IDI0LjQ5NjA5NCBDIDQ3LjY5NTMxMyAyNC4xODM1OTQgNDcuMzU5Mzc1IDIzLjk5NjA5NCA0NyAyNCBaIE0gMTMgMzYgQyAxMS4zMDA3ODEgMzYgMTAgMzcuMzAwNzgxIDEwIDM5IEwgMTAgNDEgTCAzIDQxIEMgMi45Njg3NSA0MSAyLjkzNzUgNDEgMi45MDYyNSA0MSBDIDIuODc1IDQxIDIuODQzNzUgNDEgMi44MTI1IDQxIEMgMi4yNjE3MTkgNDEuMDUwNzgxIDEuODU1NDY5IDQxLjU0Mjk2OSAxLjkwNjI1IDQyLjA5Mzc1IEMgMS45NTcwMzEgNDIuNjQ0NTMxIDIuNDQ5MjE5IDQzLjA1MDc4MSAzIDQzIEwgMTAgNDMgTCAxMCA0NSBDIDEwIDQ2LjY5OTIxOSAxMS4zMDA3ODEgNDggMTMgNDggTCAxNSA0OCBDIDE2LjY5OTIxOSA0OCAxOCA0Ni42OTkyMTkgMTggNDUgTCAxOCAzOSBDIDE4IDM3LjMwMDc4MSAxNi42OTkyMTkgMzYgMTUgMzYgWiBNIDE5IDQxIEwgMTkgNDMgTCA0NyA0MyBDIDQ3LjM1OTM3NSA0My4wMDM5MDYgNDcuNjk1MzEzIDQyLjgxNjQwNiA0Ny44Nzg5MDYgNDIuNTAzOTA2IEMgNDguMDU4NTk0IDQyLjE5MTQwNiA0OC4wNTg1OTQgNDEuODA4NTk0IDQ3Ljg3ODkwNiA0MS40OTYwOTQgQyA0Ny42OTUzMTMgNDEuMTgzNTk0IDQ3LjM1OTM3NSA0MC45OTYwOTQgNDcgNDEgWiIvPjwvc3ZnPg==");
 }
 
-/* Lot J extension : bouton bug en violet Labo, anonymisation en cyan Suivi.
-   SVG inlinés base64 pour cohérence avec ico-questions/ico-tune (contournement CORS file://). */
-.ico-bug {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMyBDIDIyLjYzNjcxOSAzIDIwLjU2NjQwNiA0LjM5MDYyNSAxOS41OTM3NSA2LjQzNzUgQyAyMS4xOTkyMTkgNi4xMTMyODEgMjIuOTk2MDk0IDUuOTM3NSAyNSA1LjkzNzUgQyAyNy4wMDc4MTMgNS45Mzc1IDI4LjgwMDc4MSA2LjExMzI4MSAzMC40MDYyNSA2LjQzNzUgQyAyOS40Mzc1IDQuMzkwNjI1IDI3LjM3NSAzIDI1IDMgWiBNIDI1IDcuOTM3NSBDIDE5LjE5NTMxMyA3LjkzNzUgMTIuOTM3NSA5LjQ2ODc1IDEyLjkzNzUgMTUgQyAxMi45Mzc1IDE2LjE5NTMxMyAxMy4xMDE1NjMgMTcuMjE4NzUgMTMuNDA2MjUgMTguMTI1IEMgMTQuMjEwOTM4IDE4LjIwMzEyNSAxNS4wMzEyNSAxOC40NDkyMTkgMTYuMDMxMjUgMTguNzE4NzUgQyAxNy45Mzc1IDE5LjIzNDM3NSAyMC44MjAzMTMgMjAgMjUgMjAgQyAyOC44MDQ2ODggMjAgMzEuNTIzNDM4IDE5LjQyMTg3NSAzMy41IDE5IEMgMzQuNjQ4NDM4IDE4Ljc1MzkwNiAzNS41NzgxMjUgMTguNTcwMzEzIDM2LjQ2ODc1IDE4LjUzMTI1IEMgMzYuODcxMDk0IDE3LjUzOTA2MyAzNy4wNjI1IDE2LjM2NzE4OCAzNy4wNjI1IDE1IEMgMzcuMDYyNSA5LjQ2ODc1IDMwLjgwNDY4OCA3LjkzNzUgMjUgNy45Mzc1IFogTSAzIDggQyAyLjQ0OTIxOSA4IDIgOC40NDkyMTkgMiA5IEMgMiAxNC43Njk1MzEgMy4zMTI1IDE4LjkxNDA2MyA1LjkwNjI1IDIxLjM0Mzc1IEMgNy40NTMxMjUgMjIuNzg5MDYzIDkuMDg5ODQ0IDIzLjI2NTYyNSAxMC4wOTM3NSAyMy40MDYyNSBDIDEwLjAwNzgxMyAyNC40NzI2NTYgMTAgMjUuNzczNDM4IDEwIDI3LjQ2ODc1IEMgMTAgMjcuNjMyODEzIDEwLjAyNzM0NCAyNy44MDA3ODEgMTAuMDMxMjUgMjcuOTY4NzUgTCAyIDI3Ljk2ODc1IEMgMS40Mzc1IDI3Ljk2ODc1IDAuOTY4NzUgMjguNDM3NSAwLjk2ODc1IDI5IEMgMC45Njg3NSAyOS41NjI1IDEuNDM3NSAzMC4wMzEyNSAyIDMwLjAzMTI1IEwgMTAuMTU2MjUgMzAuMDMxMjUgQyAxMC4zNzUgMzEuODI4MTI1IDEwLjg1MTU2MyAzMy42MTcxODggMTEuNTMxMjUgMzUuMzEyNSBDIDkgMzUuOTE3OTY5IDIgMzguMjUgMiA0NiBDIDIgNDYuNTU0Njg4IDIuNDQ5MjE5IDQ3IDMgNDcgQyAzLjU1MDc4MSA0NyA0IDQ2LjU1NDY4OCA0IDQ2IEMgNCAzOS4xMjUgMTAuNzU3ODEzIDM3LjQyOTY4OCAxMi4zNzUgMzcuMTI1IEMgMTQuNjUyMzQ0IDQxLjQ3NjU2MyAxOC41NDI5NjkgNDQuOTM3NSAyNCA0NS44NDM3NSBMIDI0IDI5IEMgMjQgMjguNDQ1MzEzIDI0LjQ0OTIxOSAyOCAyNSAyOCBDIDI1LjU1MDc4MSAyOCAyNiAyOC40NDUzMTMgMjYgMjkgTCAyNiA0NS44NDM3NSBDIDMxLjQ1NzAzMSA0NC45Mzc1IDM1LjM3ODkwNiA0MS41MDc4MTMgMzcuNjU2MjUgMzcuMTU2MjUgQyAzOS4zNjMyODEgMzcuNDg4MjgxIDQ2IDM5LjE5OTIxOSA0NiA0NiBDIDQ2IDQ2LjU1NDY4OCA0Ni40NDUzMTMgNDcgNDcgNDcgQyA0Ny41NTQ2ODggNDcgNDggNDYuNTU0Njg4IDQ4IDQ2IEMgNDggMzguMjUgNDEgMzUuOTE3OTY5IDM4LjQ2ODc1IDM1LjMxMjUgQyAzOS4xNDg0MzggMzMuNjE3MTg4IDM5LjYyNSAzMS44MjgxMjUgMzkuODQzNzUgMzAuMDMxMjUgTCA0OCAzMC4wMzEyNSBDIDQ4LjU2MjUgMzAuMDMxMjUgNDkuMDMxMjUgMjkuNTYyNSA0OS4wMzEyNSAyOSBDIDQ5LjAzMTI1IDI4LjQzNzUgNDguNTYyNSAyNy45Njg3NSA0OCAyNy45Njg3NSBMIDM5Ljk2ODc1IDI3Ljk2ODc1IEMgMzkuOTcyNjU2IDI3LjgwMDc4MSA0MCAyNy42MzI4MTMgNDAgMjcuNDY4NzUgQyA0MCAyNS44MDg1OTQgMzkuOTkyMTg4IDI0LjQ3NjU2MyAzOS44NDM3NSAyMy40MDYyNSBDIDQwLjg0Mzc1IDIzLjI3MzQzOCA0Mi41MTk1MzEgMjIuODE2NDA2IDQ0LjA5Mzc1IDIxLjM0Mzc1IEMgNDYuNjg3NSAxOC45MTQwNjMgNDggMTQuNzY5NTMxIDQ4IDkgQyA0OCA4LjQ0OTIxOSA0Ny41NTQ2ODggOCA0NyA4IEMgNDYuODYzMjgxIDggNDYuNzQ2MDk0IDguMDQyOTY5IDQ2LjYyNSA4LjA5Mzc1IEMgNDYuNTAzOTA2IDguMTQ0NTMxIDQ2LjM3MTA5NCA4LjE5MTQwNiA0Ni4yODEyNSA4LjI4MTI1IEMgNDYuMTAxNTYzIDguNDYwOTM4IDQ2IDguNzIyNjU2IDQ2IDkgQyA0NiAxNC4wODU5MzggNDQuODk4NDM4IDE3LjgyODEyNSA0Mi43ODEyNSAxOS44NDM3NSBDIDQxLjQ2MDkzOCAyMS4xMDE1NjMgNDAuMDgyMDMxIDIxLjM3ODkwNiAzOS40Mzc1IDIxLjQzNzUgQyAzOS4yOTI5NjkgMjEuNDQ5MjE5IDM5LjI1IDIxLjQ2ODc1IDM5LjE4NzUgMjEuNDY4NzUgQyAzOC43MTQ4NDQgMjAuODM1OTM4IDM3Ljk2MDkzOCAyMC41IDM2Ljc4MTI1IDIwLjUgQyAzNiAyMC41IDM1LjA4NTkzOCAyMC43MTQ4NDQgMzMuOTA2MjUgMjAuOTY4NzUgQyAzMS44NDM3NSAyMS40MDYyNSAyOS4wMTU2MjUgMjIgMjUgMjIgQyAyMC41NTQ2ODggMjIgMTcuNTA3ODEzIDIxLjE2Nzk2OSAxNS41IDIwLjYyNSBDIDE0LjM1MTU2MyAyMC4zMTI1IDEzLjU0Njg3NSAyMC4wOTM3NSAxMi44MTI1IDIwLjA5Mzc1IEMgMTEuNTU4NTk0IDIwLjA5Mzc1IDEwLjg1MTU2MyAyMC40ODQzNzUgMTAuNDY4NzUgMjEuNDA2MjUgQyA5LjgwODU5NCAyMS4zMzIwMzEgOC41MzUxNTYgMjEuMDc4MTI1IDcuMjgxMjUgMTkuOTA2MjUgQyA1LjEzNjcxOSAxNy44OTg0MzggNCAxNC4xMjEwOTQgNCA5IEMgNCA4LjQ0OTIxOSAzLjU1MDc4MSA4IDMgOCBaIi8+PC9zdmc+");
-            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMyBDIDIyLjYzNjcxOSAzIDIwLjU2NjQwNiA0LjM5MDYyNSAxOS41OTM3NSA2LjQzNzUgQyAyMS4xOTkyMTkgNi4xMTMyODEgMjIuOTk2MDk0IDUuOTM3NSAyNSA1LjkzNzUgQyAyNy4wMDc4MTMgNS45Mzc1IDI4LjgwMDc4MSA2LjExMzI4MSAzMC40MDYyNSA2LjQzNzUgQyAyOS40Mzc1IDQuMzkwNjI1IDI3LjM3NSAzIDI1IDMgWiBNIDI1IDcuOTM3NSBDIDE5LjE5NTMxMyA3LjkzNzUgMTIuOTM3NSA5LjQ2ODc1IDEyLjkzNzUgMTUgQyAxMi45Mzc1IDE2LjE5NTMxMyAxMy4xMDE1NjMgMTcuMjE4NzUgMTMuNDA2MjUgMTguMTI1IEMgMTQuMjEwOTM4IDE4LjIwMzEyNSAxNS4wMzEyNSAxOC40NDkyMTkgMTYuMDMxMjUgMTguNzE4NzUgQyAxNy45Mzc1IDE5LjIzNDM3NSAyMC44MjAzMTMgMjAgMjUgMjAgQyAyOC44MDQ2ODggMjAgMzEuNTIzNDM4IDE5LjQyMTg3NSAzMy41IDE5IEMgMzQuNjQ4NDM4IDE4Ljc1MzkwNiAzNS41NzgxMjUgMTguNTcwMzEzIDM2LjQ2ODc1IDE4LjUzMTI1IEMgMzYuODcxMDk0IDE3LjUzOTA2MyAzNy4wNjI1IDE2LjM2NzE4OCAzNy4wNjI1IDE1IEMgMzcuMDYyNSA5LjQ2ODc1IDMwLjgwNDY4OCA3LjkzNzUgMjUgNy45Mzc1IFogTSAzIDggQyAyLjQ0OTIxOSA4IDIgOC40NDkyMTkgMiA5IEMgMiAxNC43Njk1MzEgMy4zMTI1IDE4LjkxNDA2MyA1LjkwNjI1IDIxLjM0Mzc1IEMgNy40NTMxMjUgMjIuNzg5MDYzIDkuMDg5ODQ0IDIzLjI2NTYyNSAxMC4wOTM3NSAyMy40MDYyNSBDIDEwLjAwNzgxMyAyNC40NzI2NTYgMTAgMjUuNzczNDM4IDEwIDI3LjQ2ODc1IEMgMTAgMjcuNjMyODEzIDEwLjAyNzM0NCAyNy44MDA3ODEgMTAuMDMxMjUgMjcuOTY4NzUgTCAyIDI3Ljk2ODc1IEMgMS40Mzc1IDI3Ljk2ODc1IDAuOTY4NzUgMjguNDM3NSAwLjk2ODc1IDI5IEMgMC45Njg3NSAyOS41NjI1IDEuNDM3NSAzMC4wMzEyNSAyIDMwLjAzMTI1IEwgMTAuMTU2MjUgMzAuMDMxMjUgQyAxMC4zNzUgMzEuODI4MTI1IDEwLjg1MTU2MyAzMy42MTcxODggMTEuNTMxMjUgMzUuMzEyNSBDIDkgMzUuOTE3OTY5IDIgMzguMjUgMiA0NiBDIDIgNDYuNTU0Njg4IDIuNDQ5MjE5IDQ3IDMgNDcgQyAzLjU1MDc4MSA0NyA0IDQ2LjU1NDY4OCA0IDQ2IEMgNCAzOS4xMjUgMTAuNzU3ODEzIDM3LjQyOTY4OCAxMi4zNzUgMzcuMTI1IEMgMTQuNjUyMzQ0IDQxLjQ3NjU2MyAxOC41NDI5NjkgNDQuOTM3NSAyNCA0NS44NDM3NSBMIDI0IDI5IEMgMjQgMjguNDQ1MzEzIDI0LjQ0OTIxOSAyOCAyNSAyOCBDIDI1LjU1MDc4MSAyOCAyNiAyOC40NDUzMTMgMjYgMjkgTCAyNiA0NS44NDM3NSBDIDMxLjQ1NzAzMSA0NC45Mzc1IDM1LjM3ODkwNiA0MS41MDc4MTMgMzcuNjU2MjUgMzcuMTU2MjUgQyAzOS4zNjMyODEgMzcuNDg4MjgxIDQ2IDM5LjE5OTIxOSA0NiA0NiBDIDQ2IDQ2LjU1NDY4OCA0Ni40NDUzMTMgNDcgNDcgNDcgQyA0Ny41NTQ2ODggNDcgNDggNDYuNTU0Njg4IDQ4IDQ2IEMgNDggMzguMjUgNDEgMzUuOTE3OTY5IDM4LjQ2ODc1IDM1LjMxMjUgQyAzOS4xNDg0MzggMzMuNjE3MTg4IDM5LjYyNSAzMS44MjgxMjUgMzkuODQzNzUgMzAuMDMxMjUgTCA0OCAzMC4wMzEyNSBDIDQ4LjU2MjUgMzAuMDMxMjUgNDkuMDMxMjUgMjkuNTYyNSA0OS4wMzEyNSAyOSBDIDQ5LjAzMTI1IDI4LjQzNzUgNDguNTYyNSAyNy45Njg3NSA0OCAyNy45Njg3NSBMIDM5Ljk2ODc1IDI3Ljk2ODc1IEMgMzkuOTcyNjU2IDI3LjgwMDc4MSA0MCAyNy42MzI4MTMgNDAgMjcuNDY4NzUgQyA0MCAyNS44MDg1OTQgMzkuOTkyMTg4IDI0LjQ3NjU2MyAzOS44NDM3NSAyMy40MDYyNSBDIDQwLjg0Mzc1IDIzLjI3MzQzOCA0Mi41MTk1MzEgMjIuODE2NDA2IDQ0LjA5Mzc1IDIxLjM0Mzc1IEMgNDYuNjg3NSAxOC45MTQwNjMgNDggMTQuNzY5NTMxIDQ4IDkgQyA0OCA4LjQ0OTIxOSA0Ny41NTQ2ODggOCA0NyA4IEMgNDYuODYzMjgxIDggNDYuNzQ2MDk0IDguMDQyOTY5IDQ2LjYyNSA4LjA5Mzc1IEMgNDYuNTAzOTA2IDguMTQ0NTMxIDQ2LjM3MTA5NCA4LjE5MTQwNiA0Ni4yODEyNSA4LjI4MTI1IEMgNDYuMTAxNTYzIDguNDYwOTM4IDQ2IDguNzIyNjU2IDQ2IDkgQyA0NiAxNC4wODU5MzggNDQuODk4NDM4IDE3LjgyODEyNSA0Mi43ODEyNSAxOS44NDM3NSBDIDQxLjQ2MDkzOCAyMS4xMDE1NjMgNDAuMDgyMDMxIDIxLjM3ODkwNiAzOS40Mzc1IDIxLjQzNzUgQyAzOS4yOTI5NjkgMjEuNDQ5MjE5IDM5LjI1IDIxLjQ2ODc1IDM5LjE4NzUgMjEuNDY4NzUgQyAzOC43MTQ4NDQgMjAuODM1OTM4IDM3Ljk2MDkzOCAyMC41IDM2Ljc4MTI1IDIwLjUgQyAzNiAyMC41IDM1LjA4NTkzOCAyMC43MTQ4NDQgMzMuOTA2MjUgMjAuOTY4NzUgQyAzMS44NDM3NSAyMS40MDYyNSAyOS4wMTU2MjUgMjIgMjUgMjIgQyAyMC41NTQ2ODggMjIgMTcuNTA3ODEzIDIxLjE2Nzk2OSAxNS41IDIwLjYyNSBDIDE0LjM1MTU2MyAyMC4zMTI1IDEzLjU0Njg3NSAyMC4wOTM3NSAxMi44MTI1IDIwLjA5Mzc1IEMgMTEuNTU4NTk0IDIwLjA5Mzc1IDEwLjg1MTU2MyAyMC40ODQzNzUgMTAuNDY4NzUgMjEuNDA2MjUgQyA5LjgwODU5NCAyMS4zMzIwMzEgOC41MzUxNTYgMjEuMDc4MTI1IDcuMjgxMjUgMTkuOTA2MjUgQyA1LjEzNjcxOSAxNy44OTg0MzggNCAxNC4xMjEwOTQgNCA5IEMgNCA4LjQ0OTIxOSAzLjU1MDc4MSA4IDMgOCBaIi8+PC9zdmc+");
-}
-.ico-mask-anon {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiPjxwYXRoIGQ9Ik0gMzIgNSBDIDE4LjM4MiA1IDExLjEyNjIxOSAxMC4xNjM4MTMgMTAuODI0MjE5IDEwLjM4MjgxMiBMIDEwIDEwLjk4MDQ2OSBMIDEwIDM2LjY0NDUzMSBMIDEwLjA5NTcwMyAzNi45NDE0MDYgQyAxMC4zMDUzMTEgMzcuNTk3Mjc2IDE1LjIzNDA4MyA1Mi41NjA4MjYgMjkuNzkyOTY5IDU4LjMyMDMxMiBMIDMyIDYyIEwgMzQuMjA3MDMxIDU4LjMyMDMxMiBDIDQ4Ljc2NTk3OSA1Mi41NTk5ODggNTMuNjk1NjU1IDM3LjU5NzI3NiA1My45MDQyOTcgMzYuOTQxNDA2IEwgNTQgMzYuNjQ0NTMxIEwgNTQgMTAuOTgwNDY5IEwgNTMuMTc1NzgxIDEwLjM4MjgxMiBDIDUyLjg3Mzc4MSAxMC4xNjM4MTMgNDUuNjE4IDUgMzIgNSB6IE0gMzIgOSBDIDQxLjgyNSA5IDQ3LjkwMyAxMS45MDE1MTYgNTAgMTMuMTAzNTE2IEwgNTAgMzUuOTk0MTQxIEMgNDkuMzM3MzUgMzcuODE0ODU1IDQ1LjEyODc3NSA0OC4zNjMxNiAzNSA1My41NjgzNTkgTCAzNSA0OSBMIDM2IDQ3IEwgMzIgNDcgTCAyOCA0NyBMIDI5IDQ5IEwgMjkgNTMuNTY4MzU5IEMgMTguODcxMjI1IDQ4LjM2MzE2IDE0LjY2MjY1IDM3LjgxNDg1NSAxNCAzNS45OTQxNDEgTCAxNCAxMy4xMDM1MTYgQyAxNi4wOTcgMTEuOTAxNTE2IDIyLjE3NSA5IDMyIDkgeiBNIDIyLjkwMjM0NCAxOCBDIDE5Ljc1MzM0NCAxOCAxNiAyMCAxNiAyMCBMIDE3IDIyIEMgMTcuMDE5IDIxLjk5MiAxOS43MzEgMjEgMjIgMjEgQyAyNS41NSAyMSAyNi45ODUgMjMuOTc4IDI3IDI0IEwgMzAgMjIgQyAzMCAyMiAyOC4zMjMzNDQgMTggMjIuOTAyMzQ0IDE4IHogTSA0MS4wOTc2NTYgMTggQyAzNS42NzY2NTYgMTggMzQgMjIgMzQgMjIgTCAzNyAyNCBDIDM3LjAxNSAyMy45NzggMzguNDUgMjEgNDIgMjEgQyA0NC4yNjkgMjEgNDYuOTgxIDIxLjk5MiA0NyAyMiBMIDQ4IDIwIEMgNDggMjAgNDQuMjQ2NjU2IDE4IDQxLjA5NzY1NiAxOCB6IE0gMjMuNSAyNyBBIDQuNSAyIDAgMCAwIDIzLjUgMzEgQSA0LjUgMiAwIDAgMCAyMy41IDI3IHogTSA0MC41IDI3IEEgNC41IDIgMCAwIDAgNDAuNSAzMSBBIDQuNSAyIDAgMCAwIDQwLjUgMjcgeiBNIDE3IDM1IEwgMjAuODU3NDIyIDQxLjk0MzM1OSBDIDIxLjU2MjQyMiA0My4yMTIzNTkgMjIuOTAwNTE2IDQ0IDI0LjM1MzUxNiA0NCBMIDI5IDQ0IEwgMzIgNDEgTCAzNSA0NCBMIDM5LjY0NjQ4NCA0NCBDIDQxLjA5OTQ4NCA0NCA0Mi40Mzc1NzggNDMuMjEyMzU5IDQzLjE0MjU3OCA0MS45NDMzNTkgTCA0NyAzNSBMIDQxIDQwIEwgMzcgNDAgTCAzNSAzOCBMIDMyIDM4IEwgMjkgMzggTCAyNyA0MCBMIDIzIDQwIEwgMTcgMzUgeiIvPjwvc3ZnPg==");
-            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiPjxwYXRoIGQ9Ik0gMzIgNSBDIDE4LjM4MiA1IDExLjEyNjIxOSAxMC4xNjM4MTMgMTAuODI0MjE5IDEwLjM4MjgxMiBMIDEwIDEwLjk4MDQ2OSBMIDEwIDM2LjY0NDUzMSBMIDEwLjA5NTcwMyAzNi45NDE0MDYgQyAxMC4zMDUzMTEgMzcuNTk3Mjc2IDE1LjIzNDA4MyA1Mi41NjA4MjYgMjkuNzkyOTY5IDU4LjMyMDMxMiBMIDMyIDYyIEwgMzQuMjA3MDMxIDU4LjMyMDMxMiBDIDQ4Ljc2NTk3OSA1Mi41NTk5ODggNTMuNjk1NjU1IDM3LjU5NzI3NiA1My45MDQyOTcgMzYuOTQxNDA2IEwgNTQgMzYuNjQ0NTMxIEwgNTQgMTAuOTgwNDY5IEwgNTMuMTc1NzgxIDEwLjM4MjgxMiBDIDUyLjg3Mzc4MSAxMC4xNjM4MTMgNDUuNjE4IDUgMzIgNSB6IE0gMzIgOSBDIDQxLjgyNSA5IDQ3LjkwMyAxMS45MDE1MTYgNTAgMTMuMTAzNTE2IEwgNTAgMzUuOTk0MTQxIEMgNDkuMzM3MzUgMzcuODE0ODU1IDQ1LjEyODc3NSA0OC4zNjMxNiAzNSA1My41NjgzNTkgTCAzNSA0OSBMIDM2IDQ3IEwgMzIgNDcgTCAyOCA0NyBMIDI5IDQ5IEwgMjkgNTMuNTY4MzU5IEMgMTguODcxMjI1IDQ4LjM2MzE2IDE0LjY2MjY1IDM3LjgxNDg1NSAxNCAzNS45OTQxNDEgTCAxNCAxMy4xMDM1MTYgQyAxNi4wOTcgMTEuOTAxNTE2IDIyLjE3NSA5IDMyIDkgeiBNIDIyLjkwMjM0NCAxOCBDIDE5Ljc1MzM0NCAxOCAxNiAyMCAxNiAyMCBMIDE3IDIyIEMgMTcuMDE5IDIxLjk5MiAxOS43MzEgMjEgMjIgMjEgQyAyNS41NSAyMSAyNi45ODUgMjMuOTc4IDI3IDI0IEwgMzAgMjIgQyAzMCAyMiAyOC4zMjMzNDQgMTggMjIuOTAyMzQ0IDE4IHogTSA0MS4wOTc2NTYgMTggQyAzNS42NzY2NTYgMTggMzQgMjIgMzQgMjIgTCAzNyAyNCBDIDM3LjAxNSAyMy45NzggMzguNDUgMjEgNDIgMjEgQyA0NC4yNjkgMjEgNDYuOTgxIDIxLjk5MiA0NyAyMiBMIDQ4IDIwIEMgNDggMjAgNDQuMjQ2NjU2IDE4IDQxLjA5NzY1NiAxOCB6IE0gMjMuNSAyNyBBIDQuNSAyIDAgMCAwIDIzLjUgMzEgQSA0LjUgMiAwIDAgMCAyMy41IDI3IHogTSA0MC41IDI3IEEgNC41IDIgMCAwIDAgNDAuNSAzMSBBIDQuNSAyIDAgMCAwIDQwLjUgMjcgeiBNIDE3IDM1IEwgMjAuODU3NDIyIDQxLjk0MzM1OSBDIDIxLjU2MjQyMiA0My4yMTIzNTkgMjIuOTAwNTE2IDQ0IDI0LjM1MzUxNiA0NCBMIDI5IDQ0IEwgMzIgNDEgTCAzNSA0NCBMIDM5LjY0NjQ4NCA0NCBDIDQxLjA5OTQ4NCA0NCA0Mi40Mzc1NzggNDMuMjEyMzU5IDQzLjE0MjU3OCA0MS45NDMzNTkgTCA0NyAzNSBMIDQxIDQwIEwgMzcgNDAgTCAzNSAzOCBMIDMyIDM4IEwgMjkgMzggTCAyNyA0MCBMIDIzIDQwIEwgMTcgMzUgeiIvPjwvc3ZnPg==");
-}
-
-/* Tour guidé : panneau de direction (signpost) en orange accompagnement (palette aide).
-   SVG inliné base64 (source icons/icons8-travel-signpost.svg) pour contourner le
-   blocage CORS du mask-image sur WebKit file://, comme ico-questions/ico-tune/ico-bug. */
-.ico-travel-signpost { background-color: var(--acc-fond); }
-.ico-travel-signpost {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDE0Ljk4NDM3NSAyLjk4NjMyODEgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE0IDQgTCAxNCA1IEwgNi43MzI0MjE5IDUgQyA2LjI1ODQyMTkgNSA1LjgwMDQ1MzEgNS4xNjg2MDk0IDUuNDM5NDUzMSA1LjQ3NDYwOTQgTCAzLjQxNzk2ODggNy4xODc1IEEgMSAxIDAgMCAwIDMgOCBBIDEgMSAwIDAgMCAzLjQzNTU0NjkgOC44MjYxNzE5IEwgNS40Mzk0NTMxIDEwLjUyNTM5MSBDIDUuODAwNDUzMSAxMC44MzEzOTEgNi4yNTg0MjE5IDExIDYuNzMyNDIxOSAxMSBMIDE0IDExIEwgMTQgMTcgTCA4LjczMjQyMTkgMTcgQyA4LjI1ODQyMTkgMTcgNy44MDA0NTMxIDE3LjE2ODYwOSA3LjQzOTQ1MzEgMTcuNDc0NjA5IEwgNS40MTc5Njg4IDE5LjE4NzUgQSAxIDEgMCAwIDAgNSAyMCBBIDEgMSAwIDAgMCA1LjQzNTU0NjkgMjAuODI2MTcyIEwgNy40Mzk0NTMxIDIyLjUyNTM5MSBDIDcuODAwNDUzMSAyMi44MzEzOTEgOC4yNTg0MjE5IDIzIDguNzMyNDIxOSAyMyBMIDE0IDIzIEwgMTQgMjYgQSAxLjAwMDEgMS4wMDAxIDAgMSAwIDE2IDI2IEwgMTYgNCBBIDEuMDAwMSAxLjAwMDEgMCAwIDAgMTQuOTg0Mzc1IDIuOTg2MzI4MSB6IE0gMTggMTEgTCAxOCAxNCBMIDE4IDE3IEwgMjMuMjY3NTc4IDE3IEMgMjMuNzQxNTc4IDE3IDI0LjE5OTU0NyAxNi44MzEzOTEgMjQuNTYwNTQ3IDE2LjUyNTM5MSBMIDI2LjU4MjAzMSAxNC44MTI1IEEgMSAxIDAgMCAwIDI3IDE0IEEgMSAxIDAgMCAwIDI2LjU4MjAzMSAxMy4xODc1IEwgMjYuNTc4MTI1IDEzLjE4MzU5NCBBIDEgMSAwIDAgMCAyNi41NjQ0NTMgMTMuMTczODI4IEwgMjQuNTYwNTQ3IDExLjQ3NDYwOSBDIDI0LjE5OTU0NyAxMS4xNjg2MDkgMjMuNzQxNTc4IDExIDIzLjI2NzU3OCAxMSBMIDE4IDExIHoiLz48L3N2Zz4=");
-            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDE0Ljk4NDM3NSAyLjk4NjMyODEgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE0IDQgTCAxNCA1IEwgNi43MzI0MjE5IDUgQyA2LjI1ODQyMTkgNSA1LjgwMDQ1MzEgNS4xNjg2MDk0IDUuNDM5NDUzMSA1LjQ3NDYwOTQgTCAzLjQxNzk2ODggNy4xODc1IEEgMSAxIDAgMCAwIDMgOCBBIDEgMSAwIDAgMCAzLjQzNTU0NjkgOC44MjYxNzE5IEwgNS40Mzk0NTMxIDEwLjUyNTM5MSBDIDUuODAwNDUzMSAxMC44MzEzOTEgNi4yNTg0MjE5IDExIDYuNzMyNDIxOSAxMSBMIDE0IDExIEwgMTQgMTcgTCA4LjczMjQyMTkgMTcgQyA4LjI1ODQyMTkgMTcgNy44MDA0NTMxIDE3LjE2ODYwOSA3LjQzOTQ1MzEgMTcuNDc0NjA5IEwgNS40MTc5Njg4IDE5LjE4NzUgQSAxIDEgMCAwIDAgNSAyMCBBIDEgMSAwIDAgMCA1LjQzNTU0NjkgMjAuODI2MTcyIEwgNy40Mzk0NTMxIDIyLjUyNTM5MSBDIDcuODAwNDUzMSAyMi44MzEzOTEgOC4yNTg0MjE5IDIzIDguNzMyNDIxOSAyMyBMIDE0IDIzIEwgMTQgMjYgQSAxLjAwMDEgMS4wMDAxIDAgMSAwIDE2IDI2IEwgMTYgNCBBIDEuMDAwMSAxLjAwMDEgMCAwIDAgMTQuOTg0Mzc1IDIuOTg2MzI4MSB6IE0gMTggMTEgTCAxOCAxNCBMIDE4IDE3IEwgMjMuMjY3NTc4IDE3IEMgMjMuNzQxNTc4IDE3IDI0LjE5OTU0NyAxNi44MzEzOTEgMjQuNTYwNTQ3IDE2LjUyNTM5MSBMIDI2LjU4MjAzMSAxNC44MTI1IEEgMSAxIDAgMCAwIDI3IDE0IEEgMSAxIDAgMCAwIDI2LjU4MjAzMSAxMy4xODc1IEwgMjYuNTc4MTI1IDEzLjE4MzU5NCBBIDEgMSAwIDAgMCAyNi41NjQ0NTMgMTMuMTczODI4IEwgMjQuNTYwNTQ3IDExLjQ3NDYwOSBDIDI0LjE5OTU0NyAxMS4xNjg2MDkgMjMuNzQxNTc4IDExIDIzLjI2NzU3OCAxMSBMIDE4IDExIHoiLz48L3N2Zz4=");
-}
-
-/* Assistance (bascule on/off) : info-popup en masque base64 (contournement CORS file://).
-   Orange accompagnement en permanence ; l'état on/off se lit sur la case de l'accueil
-   (et sur title/aria-pressed du bouton), pas sur la couleur de l'icône. */
-.ico-assistance { background-color: var(--acc-fond); }
-.ico-assistance {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDcgMy4wMDE5NTMxIEMgNS44OTUgMy4wMDE5NTMxIDUgMy44OTY5NTMxIDUgNS4wMDE5NTMxIEwgNSAyNS4wMDM5MDYgQyA1IDI2LjEwODkwNiA1Ljg5MTA5MzggMjYuOTk4MDQ3IDYuOTk2MDkzOCAyNi45OTgwNDcgQyA4LjY1Mzc2MTEgMjYuOTk3NjkzIDEwLjEzNDA4IDI2Ljk5OTY2MyAxMi42NTYyNSAyNyBMIDEyLjY1NjI1IDI3LjAwMTk1MyBMIDE0LjQxNDA2MiAyOC43NTc4MTIgQyAxNC43MzgwNjIgMjkuMDgwODEzIDE1LjI2MTkzOCAyOS4wODA4MTMgMTUuNTg1OTM4IDI4Ljc1NzgxMiBMIDE3LjM0Mzc1IDI3LjAwMTk1MyBMIDE3LjM0Mzc1IDI3IEMgMTkuMzc4NTM1IDI3LjAwMDQ0IDIzIDI3LjAwMTk1MyAyMyAyNy4wMDE5NTMgQyAyNC4xMDUgMjcuMDAxOTUzIDI1IDI2LjEwNjk1MyAyNSAyNS4wMDE5NTMgTCAyNSA1LjAwMTk1MzEgQyAyNSAzLjg5Njk1MzEgMjQuMTA1IDMuMDAxOTUzMSAyMyAzLjAwMTk1MzEgTCA3IDMuMDAxOTUzMSB6IE0gMTUgOC41IEMgMTUuODI4IDguNSAxNi41IDkuMTcyIDE2LjUgMTAgQyAxNi41IDEwLjgyOCAxNS44MjggMTEuNSAxNSAxMS41IEMgMTQuMTcyIDExLjUgMTMuNSAxMC44MjggMTMuNSAxMCBDIDEzLjUgOS4xNzIgMTQuMTcyIDguNSAxNSA4LjUgeiBNIDE0IDE0IEwgMTYgMTQgTCAxNiAyMSBMIDE0IDIxIEwgMTQgMTQgeiIvPjwvc3ZnPg==");
-            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDcgMy4wMDE5NTMxIEMgNS44OTUgMy4wMDE5NTMxIDUgMy44OTY5NTMxIDUgNS4wMDE5NTMxIEwgNSAyNS4wMDM5MDYgQyA1IDI2LjEwODkwNiA1Ljg5MTA5MzggMjYuOTk4MDQ3IDYuOTk2MDkzOCAyNi45OTgwNDcgQyA4LjY1Mzc2MTEgMjYuOTk3NjkzIDEwLjEzNDA4IDI2Ljk5OTY2MyAxMi42NTYyNSAyNyBMIDEyLjY1NjI1IDI3LjAwMTk1MyBMIDE0LjQxNDA2MiAyOC43NTc4MTIgQyAxNC43MzgwNjIgMjkuMDgwODEzIDE1LjI2MTkzOCAyOS4wODA4MTMgMTUuNTg1OTM4IDI4Ljc1NzgxMiBMIDE3LjM0Mzc1IDI3LjAwMTk1MyBMIDE3LjM0Mzc1IDI3IEMgMTkuMzc4NTM1IDI3LjAwMDQ0IDIzIDI3LjAwMTk1MyAyMyAyNy4wMDE5NTMgQyAyNC4xMDUgMjcuMDAxOTUzIDI1IDI2LjEwNjk1MyAyNSAyNS4wMDE5NTMgTCAyNSA1LjAwMTk1MzEgQyAyNSAzLjg5Njk1MzEgMjQuMTA1IDMuMDAxOTUzMSAyMyAzLjAwMTk1MzEgTCA3IDMuMDAxOTUzMSB6IE0gMTUgOC41IEMgMTUuODI4IDguNSAxNi41IDkuMTcyIDE2LjUgMTAgQyAxNi41IDEwLjgyOCAxNS44MjggMTEuNSAxNSAxMS41IEMgMTQuMTcyIDExLjUgMTMuNSAxMC44MjggMTMuNSAxMCBDIDEzLjUgOS4xNzIgMTQuMTcyIDguNSAxNSA4LjUgeiBNIDE0IDE0IEwgMTYgMTQgTCAxNiAyMSBMIDE0IDIxIEwgMTQgMTQgeiIvPjwvc3ZnPg==");
-}
-
-/* Soutenir (cœur plein) : masque base64 (contournement CORS file://) teinté rose/rouge,
-   distinct de l'orange des voisines. Source : icons/icons8-heart.svg. */
-.ico-coeur { background-color: var(--accent-coeur); }
-.ico-coeur {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
-            mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
-}
-/* Cœur plein = glyphe plus « lourd » que les icônes au trait voisines → légèrement réduit. */
-.btn-icon-header .ico-coeur { width: 16px; height: 16px; }
-
-/* Boutons icône-seule dans l'en-tête (bug, thème) */
-.btn-icon-header {
-    padding: 6px;
-    width: 32px;
-    height: 32px;
-}
-.btn-icon-header .header-icon {
-    width: 18px;
-    height: 18px;
-}
-/* Spécificité explicite pour les span (le sélecteur img/span.header-icon
-   ci-dessus a la même classe-count que .btn-icon-header .header-icon,
-   donc on ajoute un sélecteur plus spécifique pour garantir la taille). */
-.btn-icon-header span.header-icon {
-    width: 18px;
-    height: 18px;
-}
 /* === Icône inline dans boutons texte === */
 .btn-inline-icon {
     width: 16px;
@@ -1481,65 +1308,54 @@ span.header-icon {
     filter: brightness(0) invert(1);
 }
 
-/* === RESPONSIVE — Breakpoint unique 1024px (Chrome unifié) === */
+/* === RESPONSIVE de l'en-tête ===
+   ≤ 1100 px — le groupe descend dans la bande pâle, au-dessus de la navigation.
+   Seuil MESURÉ (WebKit, 7 nov. 2026) : le groupe centré touche le logo (306 px) quand
+   0,95 × largeur < libellé + 2 × 306 + 2 × 24. Libellé de la consigne
+   (« 601-101-MQ · gr. 00007 Mar-Ven · A26 », 316 px) : 1028 px ; libellé de la démo
+   (420 px) : 1138 px. 1100 px laisse 385 px au libellé ; plus long, l'horaire et la
+   session se tronquent (le cours et le groupe, jamais). La navigation, elle, garde
+   son seuil propre (select à ≤ 1024 px).
+   ≤ 768 px — .conteneur perd sa marge de 2,5 % : gouttière fixe de 16 px.
+   ≤ 520 px — le slogan ne tient plus à côté du bloc : logo seul (<picture>), et le
+   groupe prend toute la largeur. */
 
-@media (max-width: 1024px) {
-    .entete {
-        padding: 12px 16px 8px;
-    }
-
+@media (max-width: 1100px) {
     .entete-ligne1 {
-        gap: 12px;
-        min-height: 48px;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "logo . bloc"
+            "groupe groupe groupe";
+        row-gap: 19px;
+        padding-bottom: 0;
     }
 
-    .titre-section h1 {
-        font-size: 1.3rem;
-        white-space: normal;
+    /* La rangée du groupe est déjà la bande pâle : elle déborde jusqu'aux bords. */
+    .entete-groupe {
+        justify-self: stretch;
+        max-width: none;
+        margin: 0 -2.5vw;
+        padding: 10px 2.5vw 4px;
+        background: var(--entete-bande-pale);
+        border-top: 1px solid rgba(106, 172, 184, 0.18);
     }
 
-    .titre-section h1 img.logo-entete {
-        height: 2.4rem;
+}
+
+@media (max-width: 768px) {
+    .entete {
+        padding: 0 16px;
     }
 
-    .titre-section .meta {
-        font-size: 0.7rem;
-        white-space: normal;
+    .entete-groupe {
+        margin: 0 -16px;
+        padding: 10px 16px 4px;
     }
+}
 
-    /* Masquer build et séparateur sur mobile (gain d'espace) */
-    .titre-section .meta #build-numero,
-    .titre-section .meta-separateur {
-        display: none;
-    }
-
-    /* Cacher utilitaires desktop, montrer le bouton ⋯ */
-    .entete-utilitaires {
-        display: none;
-    }
-
-    .btn-utilitaires-mobile {
-        display: inline-flex;
-    }
-
-    /* Bande contexte mobile : pleine largeur, sélecteur en stretch */
-    .entete-ligne2.bandeau-contexte {
-        margin: 0 -16px -8px;
-        padding: 8px 16px;
-    }
-
-    .bandeau-groupe-cours {
+@media (max-width: 520px) {
+    .entete-groupe .groupe-selecteur {
         width: 100%;
-        padding: 0;
-    }
-
-    .bandeau-groupe-cours-contenu {
-        width: 100%;
-    }
-
-    .dropdown-groupe-cours-header {
-        width: 100%;
-        min-width: 0;
     }
 }
 
@@ -1605,71 +1421,90 @@ span.header-icon {
 }
 
 /* ===============================
-   BANDEAU GROUPE-COURS ACTIF (Beta 95.2)
+   SÉLECTEUR DU GROUPE ACTIF (en-tête, 7 nov. 2026)
+   Le <select> natif est gardé pour le clavier, les lecteurs d'écran et la liste
+   native ; il est rendu transparent PAR-DESSUS l'affichage à deux tons
+   (.groupe-affichage, aria-hidden), qui donne sa largeur au contrôle.
+   Le texte est tenu à jour par rafraichirAffichageGroupeEntete() (contexte.js).
    =============================== */
 
-.bandeau-groupe-cours {
-    background: transparent;
-    padding: 4px 20px;
-    display: flex;
-    justify-content: center;
+.groupe-selecteur {
+    position: relative;
+    display: inline-flex;
     align-items: center;
-}
-
-.bandeau-groupe-cours-contenu {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.bandeau-groupe-cours label {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.9rem;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-/* Mode clair : l'en-tête reste bleu (cf .mode-clair .entete), donc on
-   restaure la couleur claire du label que .mode-clair label écraserait. */
-.mode-clair .bandeau-groupe-cours label {
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.dropdown-groupe-cours-header {
-    background-color: rgba(106, 172, 184, 0.12);
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: var(--radius-moyen);
-    color: white;
-    font-size: 0.9rem;
+    max-width: 100%;
+    min-width: 0;
     height: 34px;
-    padding: 0 28px 0 12px;
-    cursor: pointer;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    padding: 0 30px 0 12px;
+    background-color: rgba(106, 172, 184, 0.12);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
-    min-width: 200px;
+    background-position: right 11px center;
+    border: 1px solid rgba(106, 172, 184, 0.25);
+    border-radius: var(--radius-moyen);
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.dropdown-groupe-cours-header:hover {
-    background-color: rgba(106, 172, 184, 0.22);
+/* Voile plafonné à 0,18 : au-delà, la partie pâle du libellé passe sous 4,5:1. */
+.groupe-selecteur:hover {
+    background-color: rgba(106, 172, 184, 0.18);
     border-color: rgba(106, 172, 184, 0.4);
 }
 
-.dropdown-groupe-cours-header:focus {
-    background-color: rgba(106, 172, 184, 0.28);
+.groupe-selecteur:focus-within {
+    background-color: rgba(106, 172, 184, 0.18);
     border-color: rgba(106, 172, 184, 0.5);
     box-shadow: var(--focus-ring);
 }
 
-.dropdown-groupe-cours-header option {
+.groupe-affichage {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+    font-size: 0.9rem;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Le cours et le groupe ne se tronquent pas ; c'est l'horaire et la session qui
+   cèdent la place quand elle manque (iPhone, libellés longs). */
+.groupe-affichage-principal {
+    color: white;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.groupe-affichage-secondaire {
+    color: var(--entete-texte-pale);
+    font-weight: 400;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.groupe-affichage-secondaire:empty {
+    display: none;
+}
+
+.groupe-selecteur select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 12px;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 1rem;
+    -webkit-appearance: none;
+            appearance: none;
+}
+
+.groupe-selecteur select option {
     background: var(--bleu-principal);
     color: white;
-    padding: 10px;
 }
 
 /* ===============================
@@ -1677,9 +1512,13 @@ span.header-icon {
    =============================== */
 
 .navigation-principale {
-    /* Continuation du gradient maritime de l'entête — pas de bande
-       disgracieuse à l'état initial, fond cohérent quand sticky au scroll. */
-    background: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
+    /* La bande pâle de l'en-tête (7 nov. 2026) : le gradient maritime de la bande
+       sombre, voilé de la teinte pâle — celle de l'ancienne bande du groupe. */
+    background:
+        linear-gradient(var(--entete-bande-pale), var(--entete-bande-pale)),
+        linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
+    border-top: 1px solid rgba(106, 172, 184, 0.18);
+    box-shadow: var(--shadow-prononce);
     padding: 12px 20px 15px;
     display: flex;
     justify-content: center;
@@ -1690,7 +1529,18 @@ span.header-icon {
     z-index: 100;
 }
 
+/* ≤ 1100 px, la rangée du groupe (dans <header>) est déjà la bande pâle : la
+   navigation la prolonge, sans filet entre les deux. (Après la règle de base.) */
+@media (max-width: 1100px) {
+    .navigation-principale,
+    .mode-clair .navigation-principale {
+        border-top: 0;
+    }
+}
+
 .navigation-boutons {
+    position: relative;
+    z-index: 1;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
@@ -1700,6 +1550,8 @@ span.header-icon {
 /* Selects mobile (cachés desktop, montrés <1024px) */
 .select-nav-mobile,
 .select-sous-nav-mobile {
+    position: relative;
+    z-index: 1;
     display: none;
     width: 100%;
     height: 44px;
@@ -7568,10 +7420,6 @@ body.chaines-etapes-masquees .barre-convergence {
 }
 
 @media (max-width: 480px) {
-    .entete h1 {
-        font-size: 1.2rem;
-    }
-
     .carte-statistique .valeur {
         font-size: 2rem;
     }
@@ -8353,6 +8201,25 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     min-width: 44px;
 }
 
+/* Dans le bloc de droite de l'en-tête (7 nov. 2026) : la largeur de la grille
+   d'icônes, 28 px de haut, 9 px sous la rangée de l'aide ; pastille et libellé
+   centrés, libellé à la taille de ceux de la navigation (0,75 rem, 600). */
+.entete-bloc .codex-controle {
+    margin-top: 9px;
+}
+
+.entete-bloc .btn-codex-header {
+    width: 100%;
+    height: 28px;
+    min-height: 0;
+    padding: 0 10px;
+    justify-content: center;
+    border-width: 1px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
 .btn-codex-header:hover {
     background: rgba(106, 172, 184, 0.22);
     border-color: rgba(106, 172, 184, 0.4);
@@ -8389,7 +8256,8 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 .codex-menu {
     position: absolute;
     top: calc(100% + 6px);
-    left: 0;
+    /* Le bouton est au bord droit de l'en-tête : le menu s'ouvre vers la gauche. */
+    right: 0;
     min-width: 220px;
     background: var(--surface-carte, #1a3040);
     border: 1px solid rgba(106, 172, 184, 0.2);
@@ -8510,12 +8378,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     margin: 4px 12px;
 }
 
-/* Responsive tablette */
-@media (max-width: 768px) {
-    .codex-label-btn {
-        display: none;
-    }
-}
+
 
 /* ===============================
    CALENDRIER - Vue mensuelle
@@ -20513,8 +20376,7 @@ body.planif-plein-ecran-actif header.entete,
 body.planif-plein-ecran-actif #header,
 body.planif-plein-ecran-actif .navigation-principale,
 body.planif-plein-ecran-actif .navigation-sous-sections,
-body.planif-plein-ecran-actif .sous-nav,
-body.planif-plein-ecran-actif .bandeau-groupe-cours {
+body.planif-plein-ecran-actif .sous-nav {
     display: none !important;
 }
 /* FIX terrain alignement 601-101 (4 août) : le plein écran embarque la sous-section
@@ -26079,47 +25941,14 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     color: white;
 }
 
-.mode-clair .titre-section h1 {
-    color: white;
-}
-
-.mode-clair .titre-section .meta {
-    color: var(--bleu-meta);
-}
-
-.mode-clair .meta-separateur {
-    color: rgba(255, 255, 255, 0.50);
-}
-
-/* Bande contexte (ligne 2) — fond légèrement contrasté en mode clair aussi */
-.mode-clair .entete-ligne2.bandeau-contexte {
-    background: rgba(255, 255, 255, 0.06);
+/* Rangée du groupe (≤ 1100 px) : la bande pâle du mode clair */
+.mode-clair .entete-groupe {
     border-top-color: rgba(255, 255, 255, 0.12);
 }
-
-/* Popover utilitaires mobile — fond surface en mode clair */
-.mode-clair .popover-utilitaires {
-    background: var(--surface-carte);
-    border-color: rgba(3, 46, 92, 0.18);
-    color: var(--texte-principal);
-}
-
-.mode-clair .popover-item {
-    color: var(--texte-principal);
-}
-
-.mode-clair .popover-item:hover,
-.mode-clair .popover-item:focus {
-    background: rgba(3, 46, 92, 0.06);
-}
-
-.mode-clair .popover-icon {
-    /* pattern #289 : icône 100 % noir en mode clair, cohérent avec le repos sombre invert(1). */
-    filter: brightness(0);
-}
-
-.mode-clair .popover-separateur {
-    background: rgba(3, 46, 92, 0.12);
+@media (max-width: 1100px) {
+    .mode-clair .entete-groupe {
+        background: rgba(255, 255, 255, 0.06);
+    }
 }
 
 /* Selects mobile (nav + sous-nav) — bleu principal en mode clair */
@@ -26142,19 +25971,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     background: var(--bleu-fonce);
 }
 
-/* Bouton ⋯ mobile — bleu principal en mode clair */
-.mode-clair .btn-utilitaires-mobile {
-    background: rgba(3, 46, 92, 0.6);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: white;
-}
-
-.mode-clair .btn-utilitaires-mobile:hover,
-.mode-clair .btn-utilitaires-mobile:focus {
-    background: rgba(3, 46, 92, 0.75);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
 /* Dropdown cours dans en-tête — même bleu que la navigation */
 .mode-clair .dropdown-cours-entete {
     background: rgba(3, 46, 92, 0.6);
@@ -26173,25 +25989,19 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     box-shadow: var(--focus-ring);
 }
 
-/* Dropdown groupe-cours dans en-tête — même bleu que la navigation */
-.mode-clair .dropdown-groupe-cours-header {
-    background: rgba(3, 46, 92, 0.6);
+/* Sélecteur du groupe — même bleu que la navigation */
+.mode-clair .groupe-selecteur {
+    background-color: rgba(3, 46, 92, 0.6);
     border-color: rgba(255, 255, 255, 0.15);
-    color: white;
 }
 
-.mode-clair .dropdown-groupe-cours-header:hover {
-    background: rgba(3, 46, 92, 0.75);
+.mode-clair .groupe-selecteur:hover,
+.mode-clair .groupe-selecteur:focus-within {
+    background-color: rgba(3, 46, 92, 0.75);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.mode-clair .dropdown-groupe-cours-header:focus {
-    background: rgba(3, 46, 92, 0.75);
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: var(--focus-ring);
-}
-
-.mode-clair .dropdown-groupe-cours-header option {
+.mode-clair .groupe-selecteur select option {
     color: white;
     background: var(--bleu-fonce);
 }
@@ -26201,9 +26011,13 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     background: var(--bleu-fonce);
 }
 
-/* Navigation principale mode clair — continuation du gradient de l'entête */
+/* Navigation principale mode clair — la bande pâle : le gradient de l'en-tête,
+   voilé comme l'était l'ancienne bande du groupe en clair. */
 .mode-clair .navigation-principale {
-    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    background:
+        linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)),
+        linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
+    border-top-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Navigation principale — bleu principal solide */
@@ -30098,22 +29912,29 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    fine`), la densité visuelle existante reste inchangée.
    ============================================================ */
 @media (pointer: coarse) {
-    .btn,
-    .entete-utilitaires .btn-action-header {
+    .btn {
         min-height: 44px;
     }
 
-    .btn-icon-header {
-        width: 44px;
-        height: 44px;
+    /* Icônes du bloc de l'en-tête (7 nov. 2026) : 40 × 40 px de toucher chacune, par
+       une marge invisible (::after) qui ne recouvre pas la voisine — le bloc s'élargit
+       (4 × 40 px) et ses rangées s'écartent d'autant. L'icône garde ses 22 px. */
+    .entete-bloc {
+        --entete-cellule: 40px;
     }
 
-    /* Élargir les zones cliquables des icônes inline dans l'en-tête
-       (icônes 18×18 px dans un padding 6 px = ~30 px de cible — passe
-       à 44×44 px). */
-    .btn-icon-header .header-icon {
-        width: 20px;
-        height: 20px;
+    .entete-icones + .entete-icones {
+        margin-top: 18px;
+    }
+
+    .entete-bloc .btn-action-header::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 40px;
+        height: 40px;
+        transform: translate(-50%, -50%);
     }
 
     /* #540 (7 septembre 2026) — les bulles d'élève des barres de dégradé.

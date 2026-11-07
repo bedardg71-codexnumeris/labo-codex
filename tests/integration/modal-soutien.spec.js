@@ -40,11 +40,11 @@ test('bouton Soutenir : ouvre la modale avec le bon contenu + liens', async ({ p
 
     // Bouton d'entête : dans le 1er cluster, juste après le bouton bug (révision),
     // en icône masquée teintée (.ico-coeur), pas un <img>.
-    const bouton = page.locator('.entete-utilitaires button[data-action="ouvrirModalSoutien"]');
+    const bouton = page.locator('.entete-bloc button[data-action="ouvrirModalSoutien"]');
     await expect(bouton).toHaveCount(1);
     await expect(bouton.locator('span.ico-coeur')).toHaveCount(1);
     const positionOk = await page.evaluate(() => {
-        const btn = document.querySelector('.entete-utilitaires button[data-action="ouvrirModalSoutien"]');
+        const btn = document.querySelector('.entete-bloc button[data-action="ouvrirModalSoutien"]');
         const prev = btn && btn.previousElementSibling;
         return !!(prev && prev.getAttribute('data-action') === 'ouvrirModalRapportBug');
     });

@@ -2,8 +2,8 @@
    chrome-unifie.js — Logique UI du chrome unifié (23 mai 2026)
 
    Couvre :
-   - Popover utilitaires mobile (bouton ⋯) : ouverture/fermeture,
-     clic hors zone, Escape, fermeture après clic sur un item.
+   (Le popover utilitaires mobile — bouton ⋯ — est retiré le 7 nov. 2026 :
+    le nouvel en-tête garde son bloc d'icônes à toutes les largeurs.)
    - Selects mobile (nav primaire + sous-nav) : pilotent
      afficherSection() / afficherSousSection() de navigation.js.
    - Synchronisation : écoute sectionAffichee pour resynchroniser
@@ -18,84 +18,6 @@
 
 (function () {
     'use strict';
-
-    /* ============================================================
-       POPOVER UTILITAIRES MOBILE
-       ============================================================ */
-
-    function ouvrirPopoverUtilitaires(bouton) {
-        var popover = document.getElementById('popover-utilitaires-mobile');
-        var btn = bouton || document.getElementById('btn-utilitaires-mobile');
-        if (!popover) return;
-
-        var estOuvert = !popover.classList.contains('u-hide');
-        if (estOuvert) {
-            fermerPopoverUtilitaires();
-            return;
-        }
-
-        popover.classList.remove('u-hide');
-        popover.setAttribute('aria-hidden', 'false');
-        if (btn) btn.setAttribute('aria-expanded', 'true');
-
-        var premier = popover.querySelector('.popover-item');
-        if (premier) premier.focus();
-
-        // Différer l'attachement des écouteurs au tick suivant pour éviter
-        // que le clic qui a ouvert le popover ne le referme aussitôt.
-        setTimeout(function () {
-            document.addEventListener('click', _gererClicGlobal);
-            document.addEventListener('keydown', _gererEscape);
-        }, 0);
-    }
-
-    function fermerPopoverUtilitaires() {
-        var popover = document.getElementById('popover-utilitaires-mobile');
-        var btn = document.getElementById('btn-utilitaires-mobile');
-        if (popover) {
-            popover.classList.add('u-hide');
-            popover.setAttribute('aria-hidden', 'true');
-        }
-        if (btn) btn.setAttribute('aria-expanded', 'false');
-        document.removeEventListener('click', _gererClicGlobal);
-        document.removeEventListener('keydown', _gererEscape);
-    }
-
-    function _gererClicGlobal(event) {
-        var popover = document.getElementById('popover-utilitaires-mobile');
-        var btn = document.getElementById('btn-utilitaires-mobile');
-
-        // Auto-désattache si le popover n'existe plus ou est déjà caché —
-        // garantit qu'on n'intercepte JAMAIS les clics ailleurs.
-        if (!popover || popover.classList.contains('u-hide')) {
-            document.removeEventListener('click', _gererClicGlobal);
-            document.removeEventListener('keydown', _gererEscape);
-            return;
-        }
-
-        // Clic sur le bouton ⋯ : ouvrirPopoverUtilitaires gère le toggle.
-        if (btn && btn.contains(event.target)) return;
-
-        // Clic dans le popover sur un item : laisser le dispatcher data-action
-        // s'exécuter, puis fermer au tick suivant.
-        if (popover.contains(event.target)) {
-            if (event.target.closest('.popover-item')) {
-                setTimeout(fermerPopoverUtilitaires, 0);
-            }
-            return;
-        }
-
-        // Clic ailleurs : fermer.
-        fermerPopoverUtilitaires();
-    }
-
-    function _gererEscape(event) {
-        if (event.key === 'Escape') {
-            fermerPopoverUtilitaires();
-            var btn = document.getElementById('btn-utilitaires-mobile');
-            if (btn) btn.focus();
-        }
-    }
 
     /* ============================================================
        SELECTS MOBILE (nav primaire + sous-nav)
@@ -161,8 +83,6 @@
        EXPORTS WINDOW (utilisés par data-action / data-on-change)
        ============================================================ */
 
-    window.ouvrirPopoverUtilitaires = ouvrirPopoverUtilitaires;
-    window.fermerPopoverUtilitaires = fermerPopoverUtilitaires;
     window.changerSectionDepuisSelectMobile = changerSectionDepuisSelectMobile;
     window.changerSousSectionDepuisSelectMobile = changerSousSectionDepuisSelectMobile;
     window.synchroniserSelectNavMobile = synchroniserSelectNavMobile;

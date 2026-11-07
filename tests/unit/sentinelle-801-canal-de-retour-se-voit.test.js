@@ -23,12 +23,13 @@ const infobullesJs = lire('js/accompagnement-contenu-hover.js');
 const LIBELLE = 'Signaler un bug ou donner ton avis';
 
 describe('#801 · la porte annonce ce qu\'il y a derrière', () => {
-    it('le bouton de l\'en-tête et l\'entrée du menu annoncent les DEUX modes', () => {
-        // Deux portes vers la même modale : l'icône coccinelle (desktop) et
-        // l'entrée du popover (écrans étroits). Les deux, ou la moitié des
-        // utilisateurs continue de lire « bug ».
+    it('le bouton de l\'en-tête annonce les DEUX modes', () => {
+        // Il y avait deux portes vers la même modale : l'icône coccinelle et l'entrée du
+        // popover « ⋯ » des écrans étroits. Le nouvel en-tête (7 nov. 2026) garde le bloc
+        // d'icônes à toutes les largeurs et retire le popover : il reste la coccinelle,
+        // dont le titre doit nommer les deux modes, ou la moitié des utilisateurs lit « bug ».
         expect(indexHtml).toContain(`title="${LIBELLE}"`);
-        expect(indexHtml).toContain(`<span>${LIBELLE}</span>`);
+        expect(indexHtml).not.toContain('popover-utilitaires-mobile');
     });
 
     it('plus aucune de ces deux portes ne promet le seul mode « bug »', () => {

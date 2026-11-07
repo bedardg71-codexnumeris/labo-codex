@@ -2,9 +2,7 @@
    MODULE: INFORMATIONS CONTEXTUELLES
    Gère l'affichage des informations contextuelles dans l'en-tête principal
    - Dropdown de sélection de cours (Beta 95)
-   - Pratique de notation
-   - Date actuelle et numéro de semaine
-   - Rang de la séance dans la semaine
+   - Affichage à deux tons du groupe actif (7 nov. 2026)
    =============================== */
 
 (function() {
@@ -23,54 +21,29 @@ function mettreAJourContexteEntete() {
     // Lot E (consigne du 12 sept. 2026, 11 h) : la barre de Suivi suit aussi le contexte (« Interventions » n'a pas
     // d'onglet sur un service) — une bascule de contexte ne repasse pas par afficherSection (navigation.js).
     if (typeof rafraichirSousNavigationSelonContexte === 'function') rafraichirSousNavigationSelonContexte();
-    const elDate = document.getElementById('entete-date');
-    if (!elDate) return;
+    rafraichirAffichageGroupeEntete();
+}
 
-    try {
-        const aujourdhui = new Date();
-        const dateStr = `${aujourdhui.getFullYear()}-${String(aujourdhui.getMonth() + 1).padStart(2, '0')}-${String(aujourdhui.getDate()).padStart(2, '0')}`;
-        const calendrier = db.getSync(cle('calendrierComplet'), {});
-        const infoJour = calendrier[dateStr];
-
-        let dateTexte = '';
-
-        if (infoJour && (infoJour.statut === 'cours' || infoJour.statut === 'reprise')) {
-            const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-                         'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-            const joursComplets = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
-
-            const jourSemaineNum = aujourdhui.getDay();
-            const jour = aujourdhui.getDate();
-            const moisNom = mois[aujourdhui.getMonth()];
-            const annee = aujourdhui.getFullYear();
-            const jourSemainenom = joursComplets[jourSemaineNum];
-
-            const numeroSemaine = infoJour.numeroSemaine;
-            const dansTrimestre = numeroSemaine >= 1 && numeroSemaine <= 15;
-
-            if (dansTrimestre) {
-                dateTexte = `Semaine ${numeroSemaine} · ${jourSemainenom} ${jour} ${moisNom} ${annee}`;
-            } else {
-                dateTexte = `${jourSemainenom} ${jour} ${moisNom} ${annee}`;
-            }
-
-            if (typeof obtenirRangSeanceDansSemaine === 'function') {
-                const rangSeance = obtenirRangSeanceDansSemaine(dateStr);
-                if (rangSeance && rangSeance.numero > 0) {
-                    dateTexte += ` · ${rangSeance.ordinal} séance`;
-                }
-            }
-        } else {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            dateTexte = aujourdhui.toLocaleDateString('fr-CA', options);
-        }
-
-        elDate.textContent = dateTexte;
-
-    } catch (error) {
-        console.warn('⚠️ Erreur mise à jour contexte en-tête:', error);
-        elDate.textContent = '';
-    }
+/**
+ * « Le nouvel en-tête » (7 nov. 2026) — l'affichage à deux tons du groupe actif.
+ * Le <select> natif est transparent, posé sur cet affichage : on y recopie le libellé
+ * de l'option choisie, en deux parties portées par ses attributs data-principal
+ * (« 601-101-MQ · gr. 00007 », blanc demi-gras) et data-secondaire (« Mar-Ven · A26 »,
+ * plus pâle), posés par peuplerDropdownGroupeCoursActif (trimestre-v2-orchestre.js).
+ * Appelée ici (chemin commun des bascules de contexte) et sur 'change' du select :
+ * une affectation de select.value n'émet aucun événement.
+ * La date et l'avis d'horaire qui occupaient l'en-tête sont retirés (même lot).
+ */
+function rafraichirAffichageGroupeEntete() {
+    const select = document.getElementById('selectGroupeCoursHeader');
+    const elPrincipal = document.getElementById('groupe-affichage-principal');
+    const elSecondaire = document.getElementById('groupe-affichage-secondaire');
+    if (!select || !elPrincipal || !elSecondaire) return;
+    const option = select.options[select.selectedIndex] || null;
+    const principal = option ? (option.getAttribute('data-principal') || option.textContent || '') : '';
+    const secondaire = option ? (option.getAttribute('data-secondaire') || '') : '';
+    elPrincipal.textContent = principal.trim();
+    elSecondaire.textContent = secondaire.trim();
 }
 
 /**
@@ -274,19 +247,19 @@ function rafraichirVuesApresCours() {
     notifications.succes('Cours changé');
 }
 
-// Note: calculerRangSeance() a été supprimée.
-// Utiliser obtenirRangSeanceDansSemaine() de horaire.js (source unique)
-
 /**
  * Initialise le module de contexte
  * Appelé par main.js au chargement
  */
 function initialiserModuleContexte() {
     mettreAJourContexteEntete();
+    const select = document.getElementById('selectGroupeCoursHeader');
+    if (select) select.addEventListener('change', rafraichirAffichageGroupeEntete);
 }
 
 // Exporter les fonctions
 window.mettreAJourContexteEntete = mettreAJourContexteEntete;
+window.rafraichirAffichageGroupeEntete = rafraichirAffichageGroupeEntete;
 window.initialiserModuleContexte = initialiserModuleContexte;
 window.changerCoursDepuisEntete = changerCoursDepuisEntete;
 window.rafraichirVuesApresCours = rafraichirVuesApresCours;

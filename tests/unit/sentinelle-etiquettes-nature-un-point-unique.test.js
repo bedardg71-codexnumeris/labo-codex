@@ -233,7 +233,7 @@ describe('C · le libellé de la personne suit la nature du contexte actif, dans
     });
     it('contexte.js appelle la pose des mots à chaque mise à jour de l\'en-tête (démarrage et activations)', () => {
         const src = lire('js/contexte.js');
-        const corps = src.slice(src.indexOf('function mettreAJourContexteEntete()'), src.indexOf('const elDate'));
+        const corps = src.slice(src.indexOf('function mettreAJourContexteEntete()'), src.indexOf('function rafraichirAffichageGroupeEntete()'));
         expect(corps).toMatch(/appliquerMotsNatureCadre\(\)/);
     });
 });

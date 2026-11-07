@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '1106-2351';
+window._SCRIPT_BUILD_main = '1107-0906';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -1012,11 +1012,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // dérive horizontale lente, densité dilatée, opacité réduite.
     // ===============================
 
-    const NB_BULLES_VORTEX = 18;
+    // « Le nouvel en-tête » (7 nov. 2026) : les bulles se répartissent sur les DEUX bandes —
+    // la sombre (#bulles-container, dans <header>) et la pâle (#bulles-container-nav, dans
+    // <nav>, sticky). Chaque conteneur dit combien il en porte (data-bulles) et jusqu'où
+    // elles s'écartent de son axe (data-amplitude, en px) : la bande pâle est plus basse.
+    // Toujours derrière le contenu (z-index 0 ; le contenu des deux bandes est à 1).
+    const CONTENEURS_BULLES = ['bulles-container', 'bulles-container-nav'];
     const DUREE_VORTEX = 12;   // secondes — même vitesse angulaire pour toutes
     const DUREE_DERIVE = 75;   // secondes — dérive horizontale
 
-    function creerUneBulle(tailles) {
+    function creerUneBulle(tailles, amplitudeMax) {
         const taille = tailles[Math.floor(Math.random() * tailles.length)];
         const trajectoire = document.createElement('div');
         trajectoire.className = `bulle-trajectoire ${taille}`;
@@ -1025,17 +1030,17 @@ document.addEventListener('DOMContentLoaded', function () {
         bulle.className = 'bulle';
         trajectoire.appendChild(bulle);
 
-        // Rayon (amplitude Y) aléatoire : près de l'axe ou loin
-        const amp = 8 + Math.random() * 52;              // 8 à 60 px
-        // Scale proportionnel au rayon — loin = plus de profondeur 3D
-        const scaleVar = 0.03 + (amp - 8) / 52 * 0.15;   // 3 % à 18 %
+        // Rayon (amplitude Y) aléatoire : près de l'axe ou loin (8 px à amplitudeMax)
+        const etendue = Math.max(0, amplitudeMax - 8);
+        const amp = 8 + Math.random() * etendue;
+        // Scale proportionnel au rayon — loin = plus de profondeur 3D (3 % à 18 %)
+        const scaleVar = 0.03 + (etendue > 0 ? (amp - 8) / etendue : 0) * 0.15;
         const scaleUp = (1 + scaleVar).toFixed(3);
         const scaleDown = (1 - scaleVar).toFixed(3);
 
         // Phase aléatoire sur le cycle complet du vortex
         const spinDelay = (-Math.random() * DUREE_VORTEX).toFixed(2);
-        // Offset X biaisé négatif : les bulles entrent depuis juste hors-champ à
-        // gauche, de sorte que le fade-in a lieu au niveau du bouton Codex.
+        // Offset X biaisé négatif : les bulles entrent depuis juste hors-champ à gauche.
         const startX = `${(-20 - Math.random() * 60).toFixed(1)}px`;
 
         trajectoire.style.cssText = `
@@ -1052,40 +1057,92 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function genererBullesApprentissage() {
-        const container = document.getElementById('bulles-container');
-        if (!container) return;
-
         // Accessibilité (Phase 5.3 axe-core) : court-circuiter complètement si
         // l'utilisateur a activé « Réduire les animations » dans son OS.
-        // Évite de polluer le DOM avec 18 éléments décoratifs invisibles.
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            container.innerHTML = '';
-            return;
-        }
-
-        container.innerHTML = '';
+        // Évite de polluer le DOM d'éléments décoratifs invisibles.
+        const reduire = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const tailles = ['petite', 'moyenne', 'grande'];
 
-        for (let i = 0; i < NB_BULLES_VORTEX; i++) {
-            const bulle = creerUneBulle(tailles);
-            // Délai distribué sur tout le cycle de dérive → bulles espacées horizontalement
-            const delai = (-Math.random() * DUREE_DERIVE).toFixed(2);
-            bulle.style.animationDelay = `${delai}s`;
-            container.appendChild(bulle);
-        }
+        CONTENEURS_BULLES.forEach(function (id) {
+            const container = document.getElementById(id);
+            if (!container) return;
+            container.innerHTML = '';
+            if (reduire) return;
+            const nombre = parseInt(container.getAttribute('data-bulles'), 10) || 0;
+            const amplitudeMax = parseFloat(container.getAttribute('data-amplitude')) || 60;
+            for (let i = 0; i < nombre; i++) {
+                const bulle = creerUneBulle(tailles, amplitudeMax);
+                // Délai distribué sur tout le cycle de dérive → bulles espacées horizontalement
+                const delai = (-Math.random() * DUREE_DERIVE).toFixed(2);
+                bulle.style.animationDelay = `${delai}s`;
+                container.appendChild(bulle);
+            }
+        });
+    }
+
+    // Les bulles sont DERRIÈRE le contenu (z-index), mais le logo, le sélecteur du groupe et
+    // les boutons vitrés de la navigation sont en partie transparents : on les y verrait passer.
+    // La consigne dit « jamais par-dessus un texte, le logo ou un bouton » : chaque conteneur
+    // reçoit un masque horizontal qui efface les bulles dans la colonne de chaque obstacle
+    // (fondu de 16 px), recalculé à chaque changement de taille. Dans l'en-tête, le conteneur
+    // s'arrête au bas de la bande sombre quand le groupe est descendu dans la bande pâle.
+    const OBSTACLES_BULLES = {
+        'bulles-container': ['.entete-logo img', '.groupe-selecteur', '.entete-bloc'],
+        'bulles-container-nav': ['.navigation-boutons', '.select-nav-mobile']
+    };
+    const FONDU_BULLES = 16;
+
+    function masquerBullesSousLeContenu() {
+        Object.keys(OBSTACLES_BULLES).forEach(function (id) {
+            const container = document.getElementById(id);
+            if (!container || !container.parentElement) return;
+            const parent = container.parentElement;
+            const cadre = parent.getBoundingClientRect();
+            if (id === 'bulles-container') {
+                const groupe = parent.querySelector('.entete-groupe');
+                const logo = parent.querySelector('.entete-logo');
+                const descendu = groupe && logo && groupe.getBoundingClientRect().top >= logo.getBoundingClientRect().bottom;
+                container.style.height = descendu ? `${groupe.getBoundingClientRect().top - cadre.top}px` : '';
+            }
+            const plages = [];
+            OBSTACLES_BULLES[id].forEach(function (sel) {
+                const el = parent.querySelector(sel);
+                if (!el) return;
+                const r = el.getBoundingClientRect();
+                if (r.width === 0 || r.height === 0) return;
+                plages.push([r.left - cadre.left, r.right - cadre.left]);
+            });
+            if (plages.length === 0) {
+                container.style.webkitMaskImage = container.style.maskImage = '';
+                return;
+            }
+            plages.sort(function (a, b) { return a[0] - b[0]; });
+            const arrets = ['#000 0px'];
+            plages.forEach(function (p) {
+                const debut = Math.max(0, p[0] - FONDU_BULLES), fin = p[1] + FONDU_BULLES;
+                arrets.push(`#000 ${debut.toFixed(1)}px`, `transparent ${p[0].toFixed(1)}px`,
+                            `transparent ${p[1].toFixed(1)}px`, `#000 ${fin.toFixed(1)}px`);
+            });
+            const masque = `linear-gradient(to right, ${arrets.join(', ')})`;
+            container.style.webkitMaskImage = masque;
+            container.style.maskImage = masque;
+        });
     }
 
     // Générer les bulles au chargement
     genererBullesApprentissage();
+    masquerBullesSousLeContenu();
+    // ResizeObserver : Safari 13.1+, iPadOS 13.4+ — toutes les cibles de l'app.
+    const observateurBulles = new ResizeObserver(masquerBullesSousLeContenu);
+    ['.entete', '.groupe-selecteur', '.navigation-principale', '.navigation-boutons'].forEach(function (sel) {
+        const el = document.querySelector(sel);
+        if (el) observateurBulles.observe(el);
+    });
 
     // Régénérer si la liste d'étudiants change
     window.addEventListener('storage', function(e) {
         if (e.key && e.key.includes('groupeEtudiants')) {
-            const container = document.getElementById('bulles-container');
-            if (container) {
-                container.innerHTML = '';
-                genererBullesApprentissage();
-            }
+            genererBullesApprentissage();
         }
     });
 

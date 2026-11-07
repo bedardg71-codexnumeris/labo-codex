@@ -57,7 +57,9 @@ describe('#386 · dropdowns/listes trimestre-v2 : libellés utilisateur échapp�
 
     it('les libellés passent par echapperHtml', () => {
         expect(tv2).toMatch(/>\$\{echapperHtml\(labelCours\(c\)\)\}<\/option>/);
-        expect(tv2orch).toMatch(/>\$\{echapperHtml\(label\)\}<\/option>/);
+        // Nouvel en-tête (7 nov. 2026) : le menu du groupe passe par optionDeuxTons — valeur,
+        // deux attributs data-* et texte, chacun échappé.
+        expect(tv2orch).toMatch(/value="\$\{echapperHtml\(valeur\)\}" data-principal="\$\{echapperHtml\(principal\)\}" data-secondaire="\$\{echapperHtml\(secondaire\)\}"\$\{selected\}>\$\{echapperHtml\(joindre\(principal, secondaire\)\)\}<\/option>/);
         // La liste de gestion (`${echapperHtml(t.nom)}`) est retirée le 4 oct. 2026 (#1006). #1159 (lot 6) :
         // la rangée de la bibliothèque passe le nom en TEXTE, le composant l'échappe (`_renderRangee`) ;
         // le banc bibliotheque-liste-1159 l'éprouve avec un nom hostile.
