@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { titresDesPagesDansLOrdre } from './_helpers/titres-longs.js';
+import { titresDesPagesDansLOrdre, auxLibellesCourts } from './_helpers/titres-longs.js';
 import { JSDOM } from 'jsdom';
 import { tranche } from './_helpers/tranche.js';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -77,8 +77,9 @@ describe('#1152 lot 2c bis · le Suivi', () => {
 
     it('les entrées qui nomment un sous-onglet (« Navigation : Suivi → … ») suivent l\'ordre des sous-onglets de config.js', () => {
         // ↻ « L'en-tête épuré » (7 nov. 2026) : les onglets sont courts ; l'Aide nomme les pages par leur titre long, dans l'ordre des onglets.
-        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'suivi');
-        expect(onglets).toContain('Profils individuels');
+        // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
+        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'suivi').map(auxLibellesCourts);
+        expect(onglets).toContain('Profils');
         // Note (#1152, lot 2d, 28 oct. 2026) : cet essai lit l'ordre de la constante SUIVI, pas celui de la page ; l'essai
         // précédent, qui lit la page, couvre l'ordre. Sans conséquence aujourd'hui.
         const rangs = SUIVI.map((id) => texteDe(id).match(/Navigation : Suivi → (.+?)(?:,|$| [A-ZÀ-Ý«])/))
@@ -256,7 +257,7 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(affichage).toMatch(/window\.sousLePalierRares\(aVal\)\) alertes\.push\('Assiduité '/);
         expect(affichage).not.toMatch(/aVal < \d+/);
         const t = texteDe('profil-etudiant');
-        expect(t).toContain('suit les trois bornes réglées dans Labo → Outils d\'observation, que A et C doivent atteindre ensemble');
+        expect(t).toContain('suit les trois bornes réglées dans Labo → Observation, que A et C doivent atteindre ensemble');   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
         expect(t).toContain('paraît dès que A ou C passe sous « Absences rares »');
     });
 
@@ -287,8 +288,8 @@ describe('#1152 lot 2c bis · ce que les entrées affirment, lu dans le code', (
         expect(tdb).toContain('label: \'A ou C < \' + formaterPourcentage(window.borneBasseAssiduiteCompletion())');
         const t = texteDe('tableau-bord');
         expect(t).toContain('Les filtres sur P, sur A ou C, « Suivi » et « RàI 2-3 » se combinent');
-        expect(t).toContain('Le filtre sur P part du repère « Suffisant à partir de » de ton échelle, ou de la note de passage sans repère ; celui sur A ou C, du palier le plus bas réglé dans Labo → Outils d\'observation.');
-        expect(t).toContain('Navigation : Suivi → Suivi du groupe');
+        expect(t).toContain('Le filtre sur P part du repère « Suffisant à partir de » de ton échelle, ou de la note de passage sans repère ; celui sur A ou C, du palier le plus bas réglé dans Labo → Observation.');   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
+        expect(t).toContain('Navigation : Suivi → Groupe');
         // Les mots de Grégoire (28 oct., 12 h 07) ⟷ le tri de `appliquerFiltres` : sans filtre, l'ordre alphabétique ; avec
         // filtres, un score qui s'ADDITIONNE d'un filtre à l'autre (« cumulent ») et range le plus grand en tête.
         const filtrer = tranche(tdb, 'function appliquerFiltres(', '\nfunction ');

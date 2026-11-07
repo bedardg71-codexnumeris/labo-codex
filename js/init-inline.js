@@ -100,7 +100,7 @@ function definirModeExpertFromEl(el) {
 // code chargé, pas celle du serveur (#849). Les valeurs ici servent de repli si
 // version.js manque ; release.mjs les tient à jour.
 let VERSION_MAJEURE = '1.235.0';
-let BUILD_ID = '1107-1606';
+let BUILD_ID = '1107-1648';
 // Snapshot du build contenu dans CE fichier script (pour détecter les scripts périmés)
 const _SCRIPT_BUILD = BUILD_ID;
 
@@ -162,12 +162,20 @@ function verifierNouveautes() {
  * Met à jour l'affichage de la pastille selon l'état
  */
 function mettreAJourPastille() {
-    const pastille = document.querySelector('.pastille-nouveautes');
-    if (!pastille) return;
-
+    // Lot 3 (7 nov. 2026, décision de Cowork) : la pastille vit à côté d'« Accueil », dans la navigation
+    // (les mots en ligne et la liste des sections de l'iPhone). Un point dessiné en CSS ; les lecteurs
+    // d'écran entendent « nouveautés disponibles » après « Accueil ».
     const { aDesNouveautes } = verifierNouveautes();
-    pastille.textContent = aDesNouveautes ? '\uD83D\uDD34' : '';
-    pastille.parentElement.title = aDesNouveautes ? 'Nouveautés disponibles' : 'Nouveautés';
+    document.querySelectorAll('.pastille-nouveautes').forEach(function (pastille) {
+        pastille.classList.toggle('pastille-active', aDesNouveautes);
+        pastille.textContent = '';
+        if (aDesNouveautes) {
+            const dit = document.createElement('span');
+            dit.className = 'u-lecteur-ecran';
+            dit.textContent = ' (nouveautés disponibles)';
+            pastille.appendChild(dit);
+        }
+    });
 }
 
 /**

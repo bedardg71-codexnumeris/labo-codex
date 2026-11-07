@@ -177,7 +177,7 @@ const TOOLTIPS = {
     'depist-seuils-restaurer':
         'Réinitialise les seuils d\'interprétation à leurs valeurs par défaut.',
     'depist-seuils-visuels':
-        'Lignes pointillées et étiquettes des niveaux de ton échelle (ex. : Incomplet, Développement, Maîtrise, Étendu) sur le graphique par critère du profil individuel et sur les trajectoires du Suivi du groupe, en mode Habiletés. Les indices A-C-P (profil et groupe) et la note finale n\'en portent pas : un pourcentage agrégé ne se situe pas dans une échelle de performance.',
+        'Lignes pointillées et étiquettes des niveaux de ton échelle (ex. : Incomplet, Développement, Maîtrise, Étendu) sur le graphique par critère du profil individuel et sur les trajectoires du Groupe, en mode Habiletés. Les indices A-C-P (profil et groupe) et la note finale n\'en portent pas : un pourcentage agrégé ne se situe pas dans une échelle de performance.',
 
     // --- Données ---
 
@@ -282,7 +282,7 @@ const TOOLTIPS = {
     'bareme-eval-hors-bareme':
         'Aucune tranche ne couvre ces points : l’étudiant·e lira le chiffre seul.',
     'bareme-eval-a-completer':
-        'Cette tranche n’a pas encore de points : tu la complètes dans Grilles de critères.',
+        'Cette tranche n’a pas encore de points : tu la complètes dans Grilles.',
     'cn-grille-ponderation-totale':
         'Somme des pondérations de tous les critères. Doit atteindre 100\u00a0% pour que la grille soit valide.',
 
@@ -317,7 +317,7 @@ const TOOLTIPS = {
     'cn-pratique-type':
         'SOM = sommative (moyenne pondérée traditionnelle), STD = PAN basée sur des standards (par maîtrise), SPE = PAN basée sur des spécifications (contrat), DEN = dénotation (pratiques réduisant ou éliminant la notation).',
     'cn-pratique-echelle':
-        'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles de performance.',
+        'Échelle utilisée pour convertir les pourcentages en niveaux (ex. : I-D-M-E). Configurable dans Échelles.',
     'cn-pratique-jetons':
         'Ressources limitées que tu accordes à tes étudiant·es : Délai (prolonger l\'échéance) ou Reprise (refaire la production).',
     'cn-pratique-discipline':
@@ -494,7 +494,7 @@ const TOOLTIPS = {
     'wizard-etape-echelle-performance':
         'L’échelle traduit chaque niveau (par exemple I, D, M, E) en pourcentage. C’est elle qui transforme un niveau en points.',
     'wizard-etape-grille-criteres':
-        'La grille donne les critères avec lesquels tu évalues chaque copie. Tu peux la choisir plus tard, dans Conception › Grilles de critères.',
+        'La grille donne les critères avec lesquels tu évalues chaque copie. Tu peux la choisir plus tard, dans Conception › Grilles.',
     'wizard-etape-recapitulatif':
         'Rien n’est créé avant que tu confirmes. Tu pourras tout modifier ensuite.',
 
@@ -888,7 +888,7 @@ const TOOLTIPS = {
     'materiel-essayer-exemple':
         'Ouvre une grille fictive, pour essayer l’étiquetage sans ton propre document.',
     'materiel-taper-main':
-        'Mène à Grilles de critères, pour composer une grille directement dans l’application.',
+        'Mène à Grilles, pour composer une grille directement dans l’application.',
     'materiel-coller-autre':
         'Retire cette grille et ses étiquettes de l’écran, pour en coller une autre. Les grilles que tu as déjà créées ne changent pas.',
     'materiel-retirer-etiquettes':
@@ -906,7 +906,7 @@ const TOOLTIPS = {
     'materiel-compte':
         'Ta grille porte des points et des niveaux : choisis lequel donne le résultat d’une copie. Avec les niveaux, tu diras ensuite la note que vaut chacun.',
     'materiel-creer':
-        'Range ta grille dans Grilles de critères, et ses niveaux dans Échelles de performance s’il y en a. Tu pourras ensuite la modifier là, comme toute autre grille.'
+        'Range ta grille dans Grilles, et ses niveaux dans Échelles s’il y en a. Tu pourras ensuite la modifier là, comme toute autre grille.'
 
 };
 

@@ -1143,7 +1143,7 @@ const ETAPES_TOUR = [
         id: 2,
         titre: 'Conception',
         // E1, validé par Grégoire le 19 oct. 2026 (19 h 01) ; l'étape correspond aussi à « Apporter mon matériel » (#1092).
-        texte: "Tu construis ici tes outils d’évaluation : les mêmes que sur papier, mais réutilisables. Si tes grilles existent déjà dans Word ou dans Pages, « Apporter mon matériel » les y range : tu les colles, puis tu montres à l’application ce que veut dire chaque morceau. Les productions définissent les occasions d’apprentissage de tes étudiant·es. Les grilles fixent tes critères. Les échelles établissent les niveaux de performance. Les cartouches préparent la rétroaction. La pratique assemble le tout.\n\nL’ordre n’est pas imposé, mais les productions et les grilles sont un bon point de départ.",
+        texte: "Tu construis ici tes outils d’évaluation : les mêmes que sur papier, mais réutilisables. Si tes grilles existent déjà dans Word ou dans Pages, « Mon matériel » les y range : tu les colles, puis tu montres à l’application ce que veut dire chaque morceau. Les productions définissent les occasions d’apprentissage de tes étudiant·es. Les grilles fixent tes critères. Les échelles établissent les niveaux de performance. Les cartouches préparent la rétroaction. La pratique assemble le tout.\n\nL’ordre n’est pas imposé, mais les productions et les grilles sont un bon point de départ.",
         correspond: function(idSousSection) {
             if (typeof idSousSection !== 'string') return false;
             const structureConception = ['conception-materiel', 'conception-productions', 'conception-grille-criteres', 'conception-echelle-performance', 'conception-retroactions', 'conception-pratiques-notation'];
@@ -1160,14 +1160,14 @@ const ETAPES_TOUR = [
     {
         id: 4,
         titre: 'Suivi',
-        texte: "L'aper\u00e7u (Suivi du groupe) te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les vues du Suivi\u00a0: Suivi du groupe, liste, profils individuels et interventions R\u00e0I.",        correspond: function(idSousSection) {
+        texte: "L'aper\u00e7u (Groupe) te montre ce que tu ne verrais pas facilement sur papier\u00a0: le portrait de ton groupe en un coup d'\u0153il. Les indices Assiduit\u00e9 (A), Compl\u00e9tion (C) et Performance (P) r\u00e9sument le contexte d'apprentissage observ\u00e9 de chaque \u00e9tudiant\u00b7e. Les zones de couleur t'aident \u00e0 rep\u00e9rer qui a besoin d'attention.\n\nExplore les vues du Suivi\u00a0: Groupe, liste, profils et interventions R\u00e0I.",        correspond: function(idSousSection) {
             // 'suivi-groupe' couvre l'ancien id 'apercu' depuis la migration du 27 mai 2026.
             return typeof idSousSection === 'string' && idSousSection.indexOf('suivi-') === 0;
         }
     },
     {
         id: 5,
-        titre: 'Carte d\'alignement (optionnel)',
+        titre: 'Alignement (optionnel)',
         texte: "La carte d'alignement rend visible l'alignement p\u00e9dagogique de ton cours\u00a0: ce que tu vises, comment tu l'enseignes et comment tu le v\u00e9rifies. Tu y organises aussi tes s\u00e9quences et tes le\u00e7ons sur les semaines du trimestre, et tu en exportes le plan. Ce module est compl\u00e9mentaire\u00a0: explore-le quand tu te sens \u00e0 l'aise avec les autres sections.",
         correspond: function(idSousSection) {
             return idSousSection === 'conception-carte';
@@ -1176,7 +1176,7 @@ const ETAPES_TOUR = [
     {
         id: 6,
         titre: 'Labo (optionnel)',
-        texte: "Le Labo regroupe les outils d'observation et d'analyse : c'est là que tu actives la taxonomie SOLO, les micro-données ACP et le dépistage RàI, et que tu règles leurs seuils.\n\nChaque cadre est expliqué par un guide pédagogique de quelques pages — bouton « Guide » sur les cartes des Outils d'observation. Tu y trouveras aussi la modélisation, le rythme de travail, les études et le bilan réflexif.",
+        texte: "Le Labo regroupe les outils d'observation et d'analyse : c'est là que tu actives la taxonomie SOLO, les micro-données ACP et le dépistage RàI, et que tu règles leurs seuils.\n\nChaque cadre est expliqué par un guide pédagogique de quelques pages — bouton « Guide » sur les cartes des Observation. Tu y trouveras aussi la modélisation, le rythme de travail, les études et le bilan réflexif.",
         correspond: function(idSousSection) {
             return typeof idSousSection === 'string' && idSousSection.indexOf('labo-') === 0;
         }
@@ -1197,7 +1197,7 @@ const TOUR_NAV = {
 };
 
 // Libellés courts pour le bouton « Suivant : <section> » (indexés par id d'étape).
-const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluation', 'Suivi', 'Carte d\'alignement', 'Labo'];
+const TOUR_TITRE_COURT = ['Bienvenue', 'Cadre', 'Conception', 'Évaluation', 'Suivi', 'Alignement', 'Labo'];
 
 // Phase 4 : publier les 6 étapes dans le catalogue unifié sous mode `tour`.
 // La clé est `tour-etape-<id>`. L'orchestration continue d'utiliser le tableau

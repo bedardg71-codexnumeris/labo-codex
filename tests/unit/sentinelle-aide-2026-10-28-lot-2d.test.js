@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { titresDesPagesDansLOrdre } from './_helpers/titres-longs.js';
+import { titresDesPagesDansLOrdre, auxLibellesCourts } from './_helpers/titres-longs.js';
 import { JSDOM } from 'jsdom';
 import { tranche } from './_helpers/tranche.js';
 
@@ -82,7 +82,8 @@ describe('#1152 lot 2d · la forme des trois parties', () => {
 
     it('les entrées du Labo qui nomment un sous-onglet (« Navigation : Labo → … ») suivent l\'ordre de config.js', () => {
         // ↻ « L'en-tête épuré » (7 nov. 2026) : les onglets sont courts ; l'Aide nomme les pages par leur titre long, dans l'ordre des onglets.
-        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'labo');
+        // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
+        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'labo').map(auxLibellesCourts);
         expect(onglets).toHaveLength(7);
         const rangs = idsDe('labo').map((id) => texteDe(id).match(/Navigation : Labo → (.+?)(?:,|$| [A-ZÀ-Ý«])/))
             .filter(Boolean)
@@ -130,7 +131,8 @@ describe('#1152 lot 2d · la forme des trois parties', () => {
 describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () => {
     it('labo : les sept sous-onglets, dans l\'ordre de config.js ; « + Ouvrir » et ses formats ; la palette sans les codes', () => {
         // ↻ « L'en-tête épuré » (7 nov. 2026) : les onglets sont courts ; l'Aide nomme les pages par leur titre long, dans l'ordre des onglets.
-        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'labo');
+        // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
+        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'labo').map(auxLibellesCourts);
         const dits = [...entree('labo').querySelectorAll('li > strong')].map((s) => net(s.textContent).replace(/^« | »$/g, ''));
         expect(dits).toEqual(onglets);
         const mod = lire('js', 'modelisation.js');
@@ -205,7 +207,7 @@ describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () =>
         expect(lire('js', 'comparateur-pratiques.js')).toMatch(/ConstructionAttributs\.PARAMETRES/);
         expect([...entree('pan').querySelectorAll('ol > li')].map((li) => net(li.textContent))).toEqual(libelles);
         const t = texteDe('pan');
-        expect(t).toContain('Navigation : Labo → Exploration des pratiques');
+        expect(t).toContain('Navigation : Labo → Exploration');
         expect(t).not.toMatch(/Quatre familles|Les trois dernières sont des PAN|PAN – Spécifications|PAN – Dénotation/);
     });
 

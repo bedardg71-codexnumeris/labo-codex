@@ -155,7 +155,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: 'Cet outil range dans Labo Codex une grille d’évaluation que tu as déjà créée à l’extérieur de l’application. Tu la colles ici, tu poses une étiquette sur chaque morceau (critère, pondération, descripteur, points, niveau…), puis « Créer ma grille » la range dans Grilles de critères. Rien n’entre dans tes grilles avant ce dernier geste.'
+                contenu: 'Cet outil range dans Labo Codex une grille d’évaluation que tu as déjà créée à l’extérieur de l’application. Tu la colles ici, tu poses une étiquette sur chaque morceau (critère, pondération, descripteur, points, niveau…), puis « Créer ma grille » la range dans Grilles. Rien n’entre dans tes grilles avant ce dernier geste.'
             },
             {
                 type: 'texte',
@@ -284,7 +284,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: "Les proportions d’étudiant·es par niveau varient selon le contexte et ta propre pratique professionnelle. L’application te laisse définir les seuils dans Labo › Outils d’observation."
+                contenu: "Les proportions d’étudiant·es par niveau varient selon le contexte et ta propre pratique professionnelle. L’application te laisse définir les seuils dans Labo › Observation."
             },
             {
                 type: 'action', action: 'ouvrirGuidePedagogique', param: 'rai', libelle: 'Ouvrir le guide RàI'
@@ -494,7 +494,7 @@ const AIDE_CONTEXTUELLE = {
                     'Dépose tes fichiers (' + formatsAcceptesLibelle() + ') par glisser-déposer ou en cliquant pour parcourir',
                     'Le processus optimise les images, regroupe les pages d\'une même copie et propose une association automatique à partir du nom de fichier',
                     'Vérifie ou ajuste l\'étudiant·e et la production de chaque fichier dans l\'inspecteur central',
-                    'Clique sur « Importer » : les copies sont stockées et prêtes pour « Annoter et évaluer »'
+                    'Clique sur « Importer » : les copies sont stockées et prêtes pour « Annoter »'
                 ]
             },
             {
@@ -586,7 +586,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichiers en stock</em> ») reflète tout ce qui a été importé dans <strong>Préparer et importer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune copie n\'a encore été importée pour ce groupe-cours.'
+                contenu: 'L\'inventaire affiché en haut du panneau (« <em>N fichiers en stock</em> ») reflète tout ce qui a été importé dans <strong>Préparer</strong>. Si tu ne vois aucun fichier ici, c\'est qu\'aucune copie n\'a encore été importée pour ce groupe-cours.'
             }
         ],
         voirAussi: ['evaluations-annoter', 'evaluations-liste']
@@ -786,7 +786,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'texte',
-                contenu: "Configure les critères surveillés dans Conception → Grilles de critères (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Labo → Outils d’observation."
+                contenu: "Configure les critères surveillés dans Conception → Grilles (tag SOLO). Ajuste le seuil et la fenêtre d'analyse dans Labo → Observation."
             },
             {
                 type: 'action', action: 'ouvrirGuidePedagogique', param: 'solo', libelle: 'Ouvrir le guide SOLO'
@@ -1011,7 +1011,7 @@ const AIDE_CONTEXTUELLE = {
             },
             {
                 type: 'conseil',
-                contenu: 'Évite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>connaître</strong>. La carte d’alignement (Conception → Carte d’alignement) propose une banque de verbes classés par niveau cognitif.'
+                contenu: 'Évite les verbes vagues comme <strong>savoir</strong>, <strong>comprendre</strong> ou <strong>connaître</strong>. La carte d’alignement (Conception → Alignement) propose une banque de verbes classés par niveau cognitif.'
             },
         ],
         voirAussi: ['planification-alignement', 'conception-productions']
@@ -1259,7 +1259,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "La démo est un cours fictif, «\u00a0Écriture et littérature (Démo)\u00a0»\u00a0: 10 étudiant·es, 11 productions (1 portfolio, 9 artefacts et une évaluation terminale), 101 évaluations, 32 dates de présences (du 25 août au 10 décembre), 3 grilles de critères, 2 échelles de performance, 9 cartouches et une carte d'alignement. Coche «\u00a0Données démo\u00a0»\u00a0: elle s'ouvre dans Suivi › Suivi du groupe, à part de tes vraies données."
+                contenu: "La démo est un cours fictif, «\u00a0Écriture et littérature (Démo)\u00a0»\u00a0: 10 étudiant·es, 11 productions (1 portfolio, 9 artefacts et une évaluation terminale), 101 évaluations, 32 dates de présences (du 25 août au 10 décembre), 3 grilles de critères, 2 échelles de performance, 9 cartouches et une carte d'alignement. Touche «\u00a0Explorer\u00a0»\u00a0: elle s'ouvre dans Suivi › Groupe, à part de tes vraies données."
             },
             {
                 // T6 du chantier du démo (décision G4 de Grégoire, 7 oct. 2026, par Cowork) : phrase validée.
@@ -1274,7 +1274,7 @@ const AIDE_CONTEXTUELLE = {
                 type: 'liste',
                 titre: "Le parcours en trois temps",
                 items: [
-                    "<strong>Modélisation</strong> – Active la démo\u00a0: Suivi du groupe s'ouvre, déjà rempli. Tu vois ce que l'outil produit avec des données réalistes.",
+                    "<strong>Modélisation</strong> – Active la démo\u00a0: Groupe s'ouvre, déjà rempli. Tu vois ce que l'outil produit avec des données réalistes.",
                     "<strong>Pratique guidée</strong> – Ouvre une grille ou une échelle de la démo pour voir sa structure. Elle est en lecture seule\u00a0: tu ne peux pas la modifier par accident.",
                     "<strong>Autonomie</strong> – Clique sur «\u00a0Dupliquer pour créer ma grille\u00a0» (ou mon échelle, ma production, ma pratique) et renomme la copie. Elle reste dans la démo\u00a0: une nouvelle version du pack l'efface. Une copie de grille peut te suivre\u00a0: quand elle est prête, garde-la dans ta bibliothèque, et tu la retrouves dans tes vrais trimestres."
                 ]
@@ -1290,7 +1290,7 @@ const AIDE_CONTEXTUELLE = {
             {
                 type: 'alerte',
                 niveau: 'attention',
-                contenu: "Les données démo vivent dans un espace à part\u00a0: cocher ou décocher la case ne touche jamais à tes vrais trimestres. Pour en sortir, «\u00a0Quitter la démo\u00a0» dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0; tes vraies données reviennent telles quelles."
+                contenu: "Les données démo vivent dans un espace à part\u00a0: entrer dans la démo ou en sortir ne touche jamais à tes vrais trimestres. Pour en sortir, «\u00a0Quitter la démo\u00a0» dans le bandeau vert\u00a0; tes vraies données reviennent telles quelles."
             }
         ],
         voirAussi: ['bibliotheque-fonctionnement', 'construction-objectifs-reflexion']
@@ -1615,7 +1615,7 @@ const AIDE_CONTEXTUELLE = {
         sections: [
             {
                 type: 'texte',
-                contenu: "Cette fenêtre affiche les ajouts et correctifs récents de Labo Codex, regroupés par version majeure. Une pastille rouge sur l'icône d'accueil signale qu'il y a quelque chose de nouveau depuis ta dernière visite."
+                contenu: "Cette fenêtre affiche les ajouts et correctifs récents de Labo Codex, regroupés par version majeure. Une pastille rouge à côté d'«\u00a0Accueil\u00a0», dans la navigation, signale qu'il y a quelque chose de nouveau depuis ta dernière visite."
             },
             {
                 type: 'liste',

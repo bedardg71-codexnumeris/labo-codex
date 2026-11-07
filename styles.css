@@ -1663,16 +1663,19 @@ body.mode-clair {
     background: var(--icone-aide-config);
 }
 
-/* Pastille de notification nouveautés (point rouge) — utilisé hors entête */
+/* Pastille des nouveautés (lot 3, 7 nov. 2026) : un point rouge à côté d'« Accueil », dans la
+   navigation. Allumée par mettreAJourPastille (init-inline.js) ; éteinte, elle ne prend aucune place. */
 .pastille-nouveautes {
-    display: inline-block;
-    font-size: 0.6rem;
-    vertical-align: super;
-    line-height: 1;
+    display: none;
 }
-
-.pastille-nouveautes:hover {
-    transform: scale(1.2);
+.pastille-nouveautes.pastille-active {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 4px;
+    vertical-align: super;
+    border-radius: 50%;
+    background: var(--rouge-erreur);
 }
 
 /* Bouton warning backup (rappel sauvegarde) */

@@ -121,7 +121,8 @@ describe('« Apporter mon matériel » — la visite guidée passe par l’ongle
         expect(etape.correspond('conception-materiel')).toBe(true);
         expect(etape.correspond('conception-productions')).toBe(true);
         expect(etape.correspond('conception-carte')).toBe(false);
-        expect(etape.texte).toContain('« Apporter mon matériel » les y range');
+        // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : les renvois d'onglet passent au libellé court.
+        expect(etape.texte).toContain('« Mon matériel » les y range');
         // Une seule étape correspond à l'onglet : le panneau n'hésite pas entre deux.
         expect(win.accompagnement.etapesTour.filter((e) => e.correspond('conception-materiel')).length).toBe(1);
     });

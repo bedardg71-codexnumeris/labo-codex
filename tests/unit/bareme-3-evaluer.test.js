@@ -24,6 +24,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
 import { tranche } from './_helpers/tranche.js';
+import { auxLibellesCourts } from './_helpers/titres-longs.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -228,7 +229,7 @@ describe('barème 3 · H — les textes H1 à H4, tels que validés', () => {
         const h4 = section(4).find(l => l.startsWith('Bulle : ')).slice(8);
         expect(entrees['bareme-eval'].hover).toBe(h1);
         expect(entrees['bareme-eval-hors-bareme'].hover).toBe(h3);
-        expect(entrees['bareme-eval-a-completer'].hover).toBe(h4);
+        expect(entrees['bareme-eval-a-completer'].hover).toBe(auxLibellesCourts(h4));
         expect(chargement).toContain("const BULLES_BAREME_EVAL = { bareme: 'bareme-eval', horsBareme: 'bareme-eval-hors-bareme', aCompleter: 'bareme-eval-a-completer' };");
     });
     it('H2 et les deux marques, posés tels quels', () => {

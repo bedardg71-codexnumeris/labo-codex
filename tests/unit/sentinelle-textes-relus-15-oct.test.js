@@ -53,7 +53,8 @@ describe('Bloc 1 — l\'aide du Comparateur', () => {
             expect(e).toContain(`terme: '${terme}'`);
             expect(e).toContain("categorie: 'Pratiques de notation'");
             // ↻ #1152, lot 3 (28 oct. 2026) : le libellé de js/config.js, « Exploration des pratiques » (consigne du lot 3, §2.1).
-            expect(e).toContain("voir: 'Labo › Exploration des pratiques'");
+            // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : les renvois d'onglet passent au libellé court.
+            expect(e).toContain("voir: 'Labo › Exploration'");
             expect(e, `${cle} : un mot du code`).not.toMatch(/souche|pratique aboutie/i);
         }
         expect(entree(TERME, 'maquette-pratique')).toContain('« dormant »');

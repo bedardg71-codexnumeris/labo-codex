@@ -55,7 +55,7 @@ describe('#426 · l’onglet porte son nouveau nom, partout où il est nommé', 
 
     it('les chemins de navigation cités en prose mènent au bon onglet', () => {
         // Aide (accordéon « Planifier les leçons ») et popup des verbes actifs.
-        expect(sourceIndex).toContain("Conception → Carte d'alignement");
+        expect(sourceIndex).toContain('Conception → Alignement');   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
         expect(sourceIndex).not.toContain('Conception → Alignement pédagogique');
         expect(sourcePopup).not.toContain('Conception → Alignement pédagogique');
     });
@@ -64,7 +64,7 @@ describe('#426 · l’onglet porte son nouveau nom, partout où il est nommé', 
         expect(sourceTerme).not.toContain("voir: 'Planification > Alignement'");
         expect(sourceTerme).not.toContain("voir: 'Planification > Organisateur'");
         // ↻ #1152, lot 3 (28 oct. 2026) : « › » et les libellés de js/config.js (consigne du lot 3, §2.1).
-        expect(sourceTerme).toContain("voir: 'Conception › Carte d\\'alignement'");
+        expect(sourceTerme).toContain("voir: 'Conception › Alignement'");   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
     });
 
     it('le CONCEPT « alignement pédagogique » n’a PAS été renommé', () => {
@@ -76,7 +76,7 @@ describe('#426 · l’onglet porte son nouveau nom, partout où il est nommé', 
 
     it('le tour guidé ne promet plus la page « plan de la leçon », supprimée en 1.57.0', () => {
         expect(sourceTour).not.toMatch(/plan de la le\\u00e7on|plan de la leçon/i);
-        expect(sourceTour).toMatch(/titre: 'Carte d\\?'alignement \(optionnel\)'/);
+        expect(sourceTour).toMatch(/titre: 'Alignement \(optionnel\)'/);   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
     });
 });
 

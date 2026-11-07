@@ -19,6 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerAvecInterne } from './_helpers/bac-suivi.js';
 import { chargerScript } from './_helpers/charger-script.js';
+import { auxLibellesCourts } from './_helpers/titres-longs.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(RACINE, f), 'utf8');
@@ -82,18 +83,25 @@ describe('A · chaque texte validé paraît sous sa clé, mot pour mot', () => {
         const f = fenetre();
         expect(f.titre).toBe(v.titre);
         expect(f.sections.map(s => s.type)).toEqual(['texte', 'texte', 'texte', 'liste', 'exemple', 'conseil', 'alerte']);
-        expect(f.sections[0].contenu).toBe(typo(v.blocs[1]));
+        // ↻ Lot 3 (7 nov. 2026) : « Touche « Explorer » » remplace « Coche « Données démo » » (mots de Grégoire, phrase 9 de
+        // plans de travail/A-DECIDER-2026-11-07-lot-3-les-textes.md) ; le reste du bloc 1 inchangé.
+        expect(f.sections[0].contenu).toBe(typo(v.blocs[1]).replace('Coche «\u00a0Données démo\u00a0»\u00a0: elle s\'ouvre dans Suivi › Suivi du groupe', 'Touche «\u00a0Explorer\u00a0»\u00a0: elle s\'ouvre dans Suivi › Groupe'));
         expect(f.sections[1].contenu).toBe('Ce que tu fais dans la démo est provisoire : une nouvelle version du pack démo remplace tes évaluations, et « Retirer les copies » efface les copies importées.');
         expect(f.sections[2].contenu).toBe(typo(v.blocs[3]));
         expect(f.sections[3].titre).toBe('Le parcours en trois temps');
         // 31 oct. 2026 : « Autonomie » a été réécrit et validé après les textes du 28 oct. (VERDICT-RELECTURE-2026-10-31-
         // copie-demo-bibliotheque.md) ; sa garde mot pour mot est sentinelle-copie-demo-bibliotheque-2026-10-31.
         expect(f.sections[3].items).toHaveLength(3);
-        expect(f.sections[3].items.slice(0, 2)).toEqual(v.parcours.slice(0, 2).map(typo));
+        expect(f.sections[3].items.slice(0, 2)).toEqual(v.parcours.slice(0, 2).map(typo).map(auxLibellesCourts));
         expect(v.parcours).toHaveLength(3);
         expect(f.sections[4].contenu).toBe(typo(v.blocs[5]));
         expect(f.sections[5].contenu).toBe(typo(v.blocs[6]));
-        expect(f.sections[6].contenu).toBe(typo(v.blocs[7]));
+        // ↻ Lot 3 (7 nov. 2026), phrase 10 approuvée par Grégoire : la case retirée, l'alerte dit « entrer dans la démo
+        // ou en sortir » et n'offre plus que le bandeau.
+        expect(f.sections[6].contenu).toBe(typo(v.blocs[7])
+            .replace('cocher ou décocher la case ne touche', 'entrer dans la démo ou en sortir ne touche')
+            .replace('»\u00a0dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0;', '»\u00a0dans le bandeau vert\u00a0;')
+            .replace('» dans le bandeau vert, ou décoche «\u00a0Données démo\u00a0»\u00a0;', '» dans le bandeau vert\u00a0;'));
         expect(f.voirAussi).toEqual(['bibliotheque-fonctionnement', 'construction-objectifs-reflexion']);
     });
 

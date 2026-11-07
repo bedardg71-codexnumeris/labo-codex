@@ -297,7 +297,7 @@ describe('§ 3 — l\'Aide et le guide ne disent plus l\'ancienne phrase', () =>
     it('la carte RàI dit la réponse du groupe : facultative, éteinte au départ', () => {
         const carteRai = tranche(lire('index.html'), 'id="accordeon-aide-rai"', 'id="accordeon-aide-patterns"').replace(/&nbsp;/g, ' ');
         expect(carteRai).toContain('La réponse du groupe est facultative et éteinte au départ');
-        expect(carteRai).toContain('tu l\'actives avec la case « Afficher la réponse du groupe » (Labo › Outils d\'observation). Une carte de l\'Aperçu compare alors la répartition');
+        expect(carteRai).toContain('tu l\'actives avec la case « Afficher la réponse du groupe » (Labo › Observation). Une carte de l\'Aperçu compare alors la répartition');
         expect(carteRai).not.toContain('sous la barre RàI');
         expect(carteRai).toContain('La part se calcule sur les étudiant·es dont la note du cours s\'affiche, plus ceux et celles en « Non-participation » ; les autres sont compté·es à part, tant que leur note ne s\'affiche pas. Tant qu\'aucune note ne s\'affiche, la carte attend. Elle n\'enlève aucun signal individuel.');
     });

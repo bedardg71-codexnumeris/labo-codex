@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { titresDesPagesDansLOrdre } from './_helpers/titres-longs.js';
+import { titresDesPagesDansLOrdre, auxLibellesCourts } from './_helpers/titres-longs.js';
 import { JSDOM } from 'jsdom';
 
 // SENTINELLE — #1152, lot 2c de la refonte de l'Aide (28 oct. 2026) : l'Évaluation dit l'écran d'aujourd'hui, en
@@ -62,8 +62,9 @@ describe('#1152 lot 2c · l\'Évaluation', () => {
     it('les entrées qui nomment un sous-onglet (« Navigation : Évaluation → … ») suivent l\'ordre des sous-onglets de config.js', () => {
         // Verdict de relecture du 28 oct. 2026, retouche 1 : l'ordre de l'écran est celui de config.js, LU ici.
         // ↻ « L'en-tête épuré » (7 nov. 2026) : les onglets sont courts ; l'Aide nomme les pages par leur titre long, dans l'ordre des onglets.
-        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'evaluations');
-        expect(onglets.slice(0, 2)).toEqual(['Préparer et importer', 'Liste des évaluations']);
+        // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
+        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'evaluations').map(auxLibellesCourts);
+        expect(onglets.slice(0, 2)).toEqual(['Préparer', 'Liste']);
         const rangs = [...evaluation.querySelectorAll(':scope > .carte.accordeon')].map((c) => net(c.textContent).match(/Navigation : Évaluation → ([^,]+?)(?:,| La | Une | «|$)/))
             .filter(Boolean)
             .map((m) => onglets.findIndex((o) => m[1].startsWith(o)));

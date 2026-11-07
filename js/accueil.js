@@ -236,7 +236,7 @@ function afficherAccueilContenu(conteneur) {
             <div class="accueil-pied-moitie accueil-pied-application">
                 <div class="accueil-pied-texte">
                     <span class="accueil-pied-version">Bêta publique ${version}</span>
-                    <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés<span class="pastille-nouveautes"></span></button>
+                    <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés</button>
                 </div>
                 <img src="img/labo-codex-logo-blanc.svg" alt="Labo Codex" class="accueil-pied-logo">
             </div>
@@ -252,8 +252,6 @@ function afficherAccueilContenu(conteneur) {
         </footer>
     `;
 
-    // Mettre à jour la pastille des nouveautés (elle est maintenant dans le DOM)
-    if (typeof mettreAJourPastille === 'function') mettreAJourPastille();
 }
 
 /**

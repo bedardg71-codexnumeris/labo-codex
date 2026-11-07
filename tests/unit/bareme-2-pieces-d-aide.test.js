@@ -19,6 +19,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chargerScript } from './_helpers/charger-script.js';
+import { auxLibellesCourts } from './_helpers/titres-longs.js';
 
 const racine = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (f) => readFileSync(path.join(racine, f), 'utf8');
@@ -79,8 +80,8 @@ describe('barème 2 · A — le lexique', () => {
 
     // ↻ #1152, lot 3 (28 oct. 2026) : les chemins « Voir : » prennent les libellés de js/config.js (consigne du lot 3, §2.1).
     it('A1 « Barème » et A2 « Tranche », termes neufs, catégorie Structure, voir Conception › Grilles de critères', () => {
-        expect(terme('bareme')).toMatchObject({ terme: 'Barème', categorie: 'Structure', voir: 'Conception › Grilles de critères', definition: un('A1') });
-        expect(terme('tranche')).toMatchObject({ terme: 'Tranche', categorie: 'Structure', voir: 'Conception › Grilles de critères', definition: un('A2') });
+        expect(terme('bareme')).toMatchObject({ terme: 'Barème', categorie: 'Structure', voir: 'Conception › Grilles', definition: un('A1') });
+        expect(terme('tranche')).toMatchObject({ terme: 'Tranche', categorie: 'Structure', voir: 'Conception › Grilles', definition: un('A2') });
     });
 
     it('A3 et A4 remplacent les définitions d’« Échelle de performance » et de « Type de critère »', () => {
@@ -257,7 +258,7 @@ describe('barème 2 · F — la section de l’onglet Aide', () => {
 
     it('F1 à F5, mot pour mot ; F3 en tableau à deux colonnes, une rangée par intitulé', () => {
         expect(texte('.carte-titre-bleu').replace(/^▼\s*/, '')).toBe(un('F1'));
-        expect(texte('#aide-bareme-f2')).toBe(un('F2'));
+        expect(texte('#aide-bareme-f2')).toBe(auxLibellesCourts(un('F2')));
         expect([...doc.querySelectorAll('#aide-bareme-tableau thead th')].map((x) => x.textContent)).toEqual(['', 'Échelle de performance', 'Barème']);
         const rangees = [...doc.querySelectorAll('#aide-bareme-tableau tbody tr')].map((tr) =>
             tr.querySelector('th').textContent + ' : ' + [...tr.querySelectorAll('td')].map((x) => x.textContent).join(' | '));

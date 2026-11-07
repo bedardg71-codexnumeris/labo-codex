@@ -123,7 +123,9 @@ describe('#1152 lot 3 · un seul glossaire', () => {
         // nomme encore : sa phrase passe au lot « Les pages sans doublons » (inventaire soumis à Grégoire), qui
         // remplacera ce témoin par le texte qu'il aura validé.
         expect(lire('js', 'accueil.js')).not.toContain('accueil-aide-titre');
-        expect(terme('mode-assistance-icones').definition).toContain('le bouton « Assistance » de l’en-tête');
+        // ↻ Lot 3 (7 nov. 2026), phrase 12 approuvée par Grégoire : les mots de la consigne, la case retirée.
+        expect(terme('mode-assistance-icones').definition).toContain('Il s’active ou se coupe par la ligne Assistance du menu.');
+        expect(terme('mode-assistance-icones').definition).not.toContain('case');
     });
 
     it('la retouche du verdict (28 oct., 14 h 15) : le menu Codex sans côté ; SRPNF mot pour mot, sa validation notée', () => {

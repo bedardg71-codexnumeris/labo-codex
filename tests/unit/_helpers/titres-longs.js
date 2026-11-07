@@ -60,3 +60,25 @@ export function titresDesPagesDansLOrdre(cfg, section) {
     const bloc = cfg.match(new RegExp(`'${section}': \\[([\\s\\S]*?)\\]`))[1];
     return [...bloc.matchAll(/\{ id: '([^']+)', label: (["'])(.*?)\2 \}/g)].map((m) => titreLong(section, m[1]) || m[3]);
 }
+
+// ── Lot 3 « Les pages sans doublons » (7 nov. 2026) ──────────────────────────────────────────────
+// Les renvois d'onglet de l'Aide, de la visite, des infobulles et du glossaire passent au libellé court
+// (inventaire approuvé par Grégoire : plans de travail/INVENTAIRE-2026-11-07-pages-sans-doublons.md, § A).
+// Un texte validé avant cette date s'y relit à travers `auxLibellesCourts` : le reste du texte est
+// toujours exigé mot pour mot.
+const COURTS = {
+    'Calendrier scolaire': 'Calendrier', 'Apporter mon matériel': 'Mon matériel', "Carte d'alignement": 'Alignement',
+    'Productions étudiantes': 'Productions', 'Grilles de critères': 'Grilles', 'Échelles de performance': 'Échelles',
+    'Cartouches de rétroaction': 'Cartouches', 'Pratiques de notation': 'Pratiques', 'Préparer et importer': 'Préparer',
+    'Liste des évaluations': 'Liste', 'Annoter et évaluer': 'Annoter', 'Exporter les travaux': 'Exporter',
+    'Suivi du groupe': 'Groupe', 'Liste des étudiant·es': 'Étudiant·es', 'Saisie des présences': 'Présences',
+    'Profils individuels': 'Profils', "Outils d'observation": 'Observation', 'Exploration des pratiques': 'Exploration',
+    'Rythme de travail': 'Rythme', 'Bilan réflexif': 'Bilan',
+};
+export function auxLibellesCourts(texte) {
+    let t = String(texte).replace(/dans Suivi du groupe/g, 'dans Suivi › Groupe');
+    for (const [long, court] of Object.entries(COURTS)) {
+        for (const v of new Set([long, long.replace(/'/g, '’'), long.replace(/'/g, "\\'")])) t = t.split(v).join(court);
+    }
+    return t;
+}

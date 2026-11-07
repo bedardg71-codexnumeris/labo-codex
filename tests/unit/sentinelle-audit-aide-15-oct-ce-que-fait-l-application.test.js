@@ -230,7 +230,7 @@ describe('Les seuils A et C : une seule table, bornes et mots lus à la source (
         // « A ou C », tableau-bord-apercu.js) ; la question dit « A et C ».
         const faq = tranche(AIDE, 'Puis-je modifier les seuils des indices A et C ?', '</details>');
         expect(faq).not.toContain('ne sont pas modifiables');
-        expect(faq).toContain('Labo → Outils d\'observation');
+        expect(faq).toContain('Labo → Observation');   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : les renvois d'onglet passent au libellé court.
         // 30 oct. 2026 : défauts lus à la source, plus de borne fixe, et la carte Mobilisation lit les mêmes champs.
         expect(faq, 'la FAQ recopie des bornes').not.toMatch(/\d&nbsp;%/);
         expect(faq, 'la FAQ dit encore qu\'une borne est fixe').not.toMatch(/est fixe|sont fixes/);

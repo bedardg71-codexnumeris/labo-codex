@@ -1107,7 +1107,7 @@
             conteneur.innerHTML = `
                 <div class="conteneur" style="padding: 24px;">
                     <h2 style="margin: 0 0 12px 0;">Annoter et évaluer <button class="btn-aide-contextuelle" data-aide="evaluations-annoter" aria-label="Aide contextuelle"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></h2>
-                    <p class="text-muted" style="margin: 0;" id="travaux-fichiers-message-vide">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ».</p>
+                    <p class="text-muted" style="margin: 0;" id="travaux-fichiers-message-vide">Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer ».</p>
                 </div>`;
             if (toutesMasquees) {
                 conteneur.querySelector('#travaux-fichiers-message-vide').textContent =
@@ -1384,7 +1384,7 @@
 
             ${fichiersTravaux.length > 0
                 ? (fichiersMontres.length > 0 ? genererGrilleFichiers(fichiersMontres, 'ouvrirPreviewInline') : '')
-                : `<p class="placeholder-vide">Aucun fichier en stock pour ce groupe. Importe des travaux dans « Préparer et importer » : ils apparaîtront ici, prêts à être exportés.</p>`}
+                : `<p class="placeholder-vide">Aucun fichier en stock pour ce groupe. Importe des travaux dans « Préparer » : ils apparaîtront ici, prêts à être exportés.</p>`}
 
             <div class="travaux-archivage-options">
                 <!-- Allégement : fonctionnalité RETIRÉE le 28 août 2026 (décision Grégoire). Le statut « facsimile » subsiste en lecture pour les fichiers déjà allégés. -->

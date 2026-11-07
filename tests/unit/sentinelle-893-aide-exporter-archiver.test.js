@@ -86,7 +86,8 @@ describe('#893 · la fiche d\'accompagnement suit l\'écran', () => {
         expect(modesFiche).toEqual(titresRendus);
     });
     it('l\'inventaire vient de « Préparer et importer », pas d\'« Annoter et évaluer »', () => {
-        expect(fiche).toContain('importé dans <strong>Préparer et importer</strong>');
+        // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : les renvois d'onglet passent au libellé court.
+        expect(fiche).toContain('importé dans <strong>Préparer</strong>');
         expect(fiche).not.toContain('<strong>Annoter et évaluer</strong>');
     });
 });

@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { position } from './_helpers/tranche.js';
+import { auxLibellesCourts } from './_helpers/titres-longs.js';
 
 // SENTINELLE — #1152, lot 4 de la refonte de l'Aide (29 oct. 2026) : les trous comblés.
 // Consigne : plans de travail/CONSIGNE-LOT-2026-10-28-aide-lot-4-les-trous.md (§1, §2). Textes : plans de travail/
@@ -102,7 +103,9 @@ describe('#1152 lot 4 · les textes validés, mot pour mot, lus dans le fichier 
         const [titre6, ...corps6] = CE_QUI_SORT;
         expect(titreDe('ce-qui-sort')).toBe(titre6);
         expect(corps6).toHaveLength(4);
-        for (const p of corps6) expect(texteDe('ce-qui-sort')).toContain(p);
+        // Phrase 7 du lot 3, approuvée par Grégoire le 7 nov. : « Signaler », dans le menu de l'en-tête.
+        for (const p of corps6) expect(texteDe('ce-qui-sort')).toContain(auxLibellesCourts(p)
+            .replace('« Signaler un bug ou donner ton avis », dans l\'en-tête', '« Signaler », dans le menu de l\'en-tête'));   // ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026) : l'Aide nomme les onglets par leur libellé court.
     });
 
     it('le trou 2 : l\'introduction, Sommative, Spécifications, la réécriture Standards du 29 oct. et Dénotation, dans cet ordre ; le texte Standards du 28 oct. n\'y est pas', () => {
