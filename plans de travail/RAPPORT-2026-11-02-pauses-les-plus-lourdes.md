@@ -125,6 +125,8 @@ Sur deux runs mesurés avant et après sur les mêmes machines (41555602211 et 4
 
 Cowork décide s'il y a un lot de plus. La passe complète du Mac qui suivra la fusion donnera la mesure réelle : `node scripts/mesurer-verification.mjs`.
 
+**Décision de Cowork (7 nov.) : pas de lot de plus sur les pauses ; le chantier de la vérification plus rapide est clos pour les pauses fixes.** Motif : les 23,9 min restantes sont une longue traîne, dont le site le plus lourd pèse 0,8 min, et la part la plus lourde est désormais le reste des essais (52 min sur 87).
+
 ## Trouvailles hors lot
 
 | Trouvaille | Issue |
