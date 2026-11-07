@@ -6,7 +6,7 @@
 
 ## En tête
 
-**Sur le Mac, les 27 specs touchées passent de 2 007 s à 1 670 s (−16,8 %), soit environ 5,6 min de moins sur la passe complète** (estimé : une passe du Mac joue chaque spec une fois, avec un seul worker, le gain s'y ajoute donc tel quel ; la prochaine passe complète le mesurera).
+**Sur le Mac, les 27 specs touchées passent de 2 007 s à 1 670 s (−16,8 %), chacune jouée seule.** Dans la passe complète, elles pèsent **1 616 s, soit 26,9 min** : 54 s de moins que leur « après » joué seul, 391 s (6,5 min) de moins que leur « avant » joué seul. Le gain de ~5,6 min ne se perd donc pas dans la passe ; il ne s'y isole pas non plus, faute d'une passe complète « avant » dans les mêmes conditions (détail : « La mesure sur la passe complète », plus bas).
 
 **Un défaut de l'attente trouvé par la mesure du 6 nov., corrigé** : elle attendait la minuterie qui efface le témoin « Enregistré », et `statut-incomplet` ralentissait de 11,6 s. Il gagne maintenant 6,6 s.
 
@@ -145,7 +145,30 @@ Dans un worktree à part, parti de `main` (`168d462a`) : `lot/verification-plus-
 
 **Le cliquet rougissait sur le résultat**, à cause de specs venues de `main`, écrites sans lui : 5 pauses juste après une ouverture (`ajouter-pages-photo-droite` ×2, `notifications-pile-1224`, `reunir-en-une-copie-1231` ×2), et 753 pauses pour un plafond de 692. Les 5 deviennent `attendreApplication(page)`, la règle du lot précédent ; aucune ne précède un constat d'absence. Les 3 specs : vertes une fois chacune sur le Mac, puis rouges sous une cassure directe chacune (la hauteur de la pile, le libellé « Copie de N fichiers », la lecture EXIF), code restauré (`outils-pauses-les-plus-lourdes/resultats/res-fusion-2026-11-06.tsv`). **Plafond : 738**, le compte réel. Le compte baisse de 15 pour 5 lignes : la sentinelle comptait chaque appel de `demarrer()` comme une pause tant qu'une pause y précédait le premier `}`. Contre-épreuve : une pause ajoutée, le cliquet rougit ; retirée, il reverdit. Vitest : 883 fichiers, 10 732 tests verts.
 
+## La mesure sur la passe complète (7 nov.)
+
+**Passe mesurée** : le verdict complet du Mac sur `ff3a91bf` (qui contient les trois fusions), du 6 nov. 23 h 53 au 7 nov. 1 h 20 (heure de Toronto), dix morceaux, un worker, gardé dans `~/Library/Caches/labo-codex/derniere-verification/` (`commit.txt` = `ff3a91bf`). Aucun essai relancé : `node scripts/mesurer-verification.mjs` relit les rapports blob de cette passe. `caffeinate` actif dès 23 h 52 ; `pmset -g log` ne montre ni veille ni réveil pendant la passe.
+
+**Durée** : **87,2 min** de bout en bout (`stats.duration` du rapport fusionné), 86,7 min cumulées d'essais. 1 381 essais joués, 5 reprises (les 4 rouges connues de `temoin-enregistrement-lot-b`, une intermittente de `grilles-sous-criteres-condense`), 23 sautés.
+
+**Les trois parts** (durées chronométrées par Playwright, reprises comprises) :
+
+| Part | Minutes | Part du cumul | Estimation du 1er nov. (passe du 31 oct.) |
+|---|---|---|---|
+| Démarrage : 1 455 ouvertures (9,4 min) et 280 rechargements (1,4 min) | **10,8** | 12 % | 8 à 10 |
+| Pauses fixes : 1 380 `waitForTimeout` | **23,9** | 28 % | ~58, puis ~37 après le lot précédent |
+| Le reste, par différence (attentes, clics, évaluations, préparation des données) | **52,0** | 60 % | ~30, puis ~32 |
+| **Cumul des essais** | **86,7** | | |
+
+Toutes mesurées, sauf « le reste », obtenu par différence. L'ouverture coûte 0,39 s en moyenne, comme M1 dans une vraie spec.
+
+**À quoi elle se compare.** La référence du 31 oct. : **97,6 min pour 1 220 essais**, avant les trois lots, soit 4,8 s par essai. Celle-ci : 87,2 min pour 1 381 essais, soit 3,8 s par essai (−21 % par essai). Les deux passes ne jouent pas les mêmes essais (161 de plus) : l'écart par essai mêle le gain des trois lots et la nature des essais ajoutés, sans pouvoir les séparer. Les estimations du 31 oct. pour les pauses (~58 min) venaient de GitHub ; la passe du 31 oct. n'a pas gardé ses rapports, on ne saura pas ce qu'elle pesait vraiment.
+
+**Les 27 specs du lot dans cette passe** : 1 616,2 s, contre 1 669,9 s « après » et 2 007,1 s « avant », chacune jouée seule. Inférence : la passe complète joue ces specs un peu plus vite que la mesure isolée (−3,2 %) ; ramené à ce rythme, l'« avant » ferait ~1 943 s, et le gain du lot ~5,4 min. Ce chiffre reste une inférence.
+
+**Ce qui reste en pauses fixes** : 23,9 min, 1 380 pauses, **aucune après une ouverture**. Les 30 sites les plus lourds n'en font que 9,5 min ; le plus lourd pèse 0,8 min (`evaluation-959-neutralite-chargeur:103`, gardé). En tête de liste : les 5 sites gardés du lot (959, 946, 1142, 1173, 981) et `profil-rangee-1151:29`, sorti du lot. Le reste est la longue traîne annoncée plus haut : des sites de moins d'un tiers de minute chacun.
+
 ## Ce qui reste
 
-1. **Fusionné en local, pas poussé** (décision de Cowork, 6 nov.) : `lot/verification-plus-rapide`, `lot/pauses-apres-ouverture`, puis cette branche, dans `main`. Cowork relit le diff fusionné ; `main` part avec la prochaine vérification complète du Mac, dans l'ordre commit, relecture, verdict, push.
-2. **À cette passe complète** : `node scripts/mesurer-verification.mjs`, et remplacer ici l'estimation de 5,6 min par la mesure.
+1. ~~Fusionné en local, pas poussé~~ : poussé avec `main` (`ff3a91bf`), après le verdict complet ci-dessus.
+2. ~~À cette passe complète~~ : fait le 7 nov., section ci-dessus. Le rapport de la durée (`RAPPORT-2026-11-01-duree-de-la-verification.md`) garde ses estimations ; cette section les remplace.
