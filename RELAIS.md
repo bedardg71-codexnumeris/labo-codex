@@ -18,6 +18,13 @@
 
 **Trouvaille inscrite, non corrigée** : le verdict dit « 2 spec(s) de la baseline redevenues vertes — à retirer » (`playwright-baseline.json` non retouché ; 4 rouges connus le 7 nov. à 1 h 25, 2 ce soir).
 
+**Run de GitHub sur `f727680a` (42397000431) : ROUGE**, jugé (les 20 morceaux ont tourné, c'est le juge qui conclut). 1 378 essais : 1 329 verts, 11 au second essai, 38 rouges, dont 28 connus de `playwright-baseline-linux.json` et 6 intermittentes. **4 nouvellement rouges sous Linux, toutes vertes sur le Mac ce soir** :
+- `bibliotheque-liste-1159` › 1440 px › groupes-cours : « Mettre de côté » / « Remettre dans le menu » (le fichier a d'autres entrées dans la baseline Linux, pas celle-ci) ;
+- `bibliotheque-liste-1159` › 820 px › les trois fenêtres tiennent dans la largeur ; 44 px ; Échap ;
+- `critere-algorithmique-presentation` › changer la pondération refait l'aperçu en place ;
+- `deux-doigts-apres-un-detour-1218` › après un autre cadre désigné (Modélisation).
+⮕ Non examinées. C'est le premier run JUGEABLE depuis les correctifs #1114 (les trois précédents rougissaient parce que WebKit ne démarrait pas) : on ne sait pas si ces quatre-là rougissaient déjà sous Linux avant l'en-tête. Le nouvel en-tête est un suspect plausible pour la 820 px de #1159 (inférence, non vérifiée). Compteur de la bascule #1114 : toujours 0 sur 3. Le juge dit aussi : 6 rouges connues redevenues vertes à retirer de la baseline Linux, et `lot-a-anonymisation-enregistre` (c)(d) à passer aux intermittentes. **Inscrit, non corrigé.**
+
 **Dû à Grégoire** : juger l'icône redessinée sur les captures ; l'infobulle Codex proposée dans le rapport du lot (pas appliquée) ; la ligne « Nouvelles » pour l'en-tête.
 
 ## 7 NOV. 2026, 7 H 05 (Cowork) : **PAS DE DEMANDE AU SUPPORT DE GITHUB (DÉCISION DE GRÉGOIRE) ; LIGNE « NOUVELLES » VALIDÉE POUR 1.236 ; COINS DE L'ICÔNE 180 À REMPLIR ; ANCIENNES COPIES À LA CORBEILLE**
