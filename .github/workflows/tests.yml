@@ -444,7 +444,10 @@ jobs:
     # dernier a été coupé à 30. Règle de Cowork : un tiers de marge au moins au-dessus
     # du plus long mesuré, donc 41 = ⌈30,1 × 4/3⌉ ; et plus de morceaux, puisque
     # certains dépassaient 25 min. 20 morceaux (`total`, job `decision`) : la limite
-    # de jobs simultanés d'un compte gratuit, donc aucun n'attend une machine.
+    # de jobs simultanés d'un compte gratuit, d'après la documentation de GitHub (non
+    # mesurée sur ce compte). Le job `vitest`, sans `needs`, tourne en même temps : 21
+    # jobs pour 20 places, un morceau peut donc attendre la fin de Vitest (inférence).
+    # Sans effet sur le plafond : `timeout-minutes` court du démarrage du job, pas de la file.
     # Projection, PAS une mesure : ~24 min au plus (30,1 × 16/20). Le plafond tient
     # la règle même si la projection se trompe ; il se resserre sur une mesure à 20.
     timeout-minutes: 41

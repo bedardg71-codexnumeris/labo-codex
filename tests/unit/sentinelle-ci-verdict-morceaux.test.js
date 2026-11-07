@@ -40,6 +40,9 @@ import { readdirSync } from 'node:fs';
 // cache de WebKit → D.b rouge. Arbre restauré, sha256 vérifié.
 // Plafond du morceau remis à 30 → D.c rouge ; `total=24` (plus que les machines
 // simultanées) → D.c rouge ; `total=16` → D.c rouge. Arbre restauré, sha256 vérifié.
+// Verdict de relecture de Cowork (7 nov.) — le PREMIER résultat lu au lieu du dernier
+// dans sansNavigateurDuRapport → C.i rouge ; les specs sans navigateur gardées parmi les
+// échecs du juge → C.h et C.i rouges. Arbre restauré, sha256 vérifié.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -229,6 +232,43 @@ describe('C — le juge de la CI (scripts/juger-rapport-playwright.mjs)', () => 
         expect(juger(r).code).toBe(1);
     });
 
+    it('C.i #1114 (verdict de Cowork, 7 nov.) : seul le DERNIER résultat compte ; les essais qui ont tourné restent jugés', () => {
+        const lancement = 'Error: browserType.launch: Target page, context or browser has been closed';
+        const rate = { status: 'failed', error: { message: lancement }, errors: [{ message: lancement }] };
+        // Raté au premier essai, vert au second : le verdict ordinaire.
+        const repris = rapport([
+            { titre: 'vert', statut: 'expected' },
+            { titre: 'repris', statut: 'flaky', file: 'r.spec.js' }
+        ]);
+        repris.suites[0].suites[0].specs[1].tests[0].results = [rate, { status: 'passed' }];
+        const a = juger(repris);
+        expect(a.code).toBe(0);
+        expect(a.resume).not.toContain('NON JUGÉ');
+        // Raté au premier essai, rouge ordinaire au second : une régression.
+        repris.suites[0].suites[0].specs[1].ok = false;
+        repris.suites[0].suites[0].specs[1].tests[0] = { status: 'unexpected', results: [rate, { status: 'failed', error: { message: 'Error: expect(received).toBe(expected)' } }] };
+        expect(juger(repris).code).toBe(1);
+        // Une spec sans navigateur ET une vraie régression : la régression est nommée, la première aussi, à part.
+        const mele = rapport([
+            { titre: 'vert', statut: 'expected' },
+            { titre: 'sans navigateur', statut: 'unexpected', file: 's.spec.js' },
+            { titre: 'cassée', statut: 'unexpected', file: 'c.spec.js' }
+        ]);
+        mele.suites[0].suites[0].specs[1].tests[0].results = [rate, rate];
+        mele.suites[0].suites[0].specs[2].tests[0].results = [{ status: 'failed', error: { message: 'Error: expect(received).toBe(expected)' } }];
+        const b = juger(mele);
+        expect(b.code).toBe(1);
+        expect(b.resume).toContain('1 spec(s) Playwright NOUVELLEMENT');
+        expect(b.resume).toContain('c.spec.js › cassée');
+        expect(b.resume).toMatch(/NON JUGÉE\(S\)[^\n]*\n- s\.spec\.js › sans navigateur/);
+        // Aucun navigateur nulle part : rien n'est jugé.
+        const rien = rapport([{ titre: 'sans navigateur', statut: 'unexpected', file: 's.spec.js' }]);
+        rien.suites[0].suites[0].specs[0].tests[0].results = [rate, rate];
+        const c = juger(rien);
+        expect(c.code).toBe(2);
+        expect(c.resume).toContain("n'a démarré pour aucun essai");
+    });
+
     it('C.g #1114 : une baseline nommée mais absente ⮕ 2 (NON JUGÉ)', () => {
         const { code, resume } = juger(rapport([{ titre: 'vert', statut: 'expected' }]), path.join(tmpdir(), 'baseline-inexistante-1114.json'));
         expect(code).toBe(2);
@@ -265,7 +305,8 @@ describe('D — #1114 : GitHub juge contre la baseline Linux', () => {
         const plafond = Number(/^    timeout-minutes: (\d+)$/m.exec(job)?.[1]);
         expect(plafond).toBeGreaterThanOrEqual(Math.ceil(PLUS_LONG_MESURE * 4 / 3));
         const total = Number(/^\s+total=(\d+)$/m.exec(workflow)?.[1]);
-        // 20 jobs simultanés pour un compte gratuit : au-delà, des morceaux attendent une machine.
+        // 20 jobs simultanés pour un compte gratuit (documentation, non mesuré) : au-delà, des
+        // morceaux attendent une machine. Vitest tourne en même temps : un morceau peut l'attendre.
         expect(total).toBeGreaterThan(16);
         expect(total).toBeLessThanOrEqual(20);
     });

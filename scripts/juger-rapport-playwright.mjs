@@ -34,7 +34,7 @@
 import { readFileSync, existsSync, appendFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { echecsDuRapport, flakyDuRapport, vertsDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
+import { echecsDuRapport, flakyDuRapport, vertsDuRapport, sansNavigateurDuRapport, comparerALaBaseline } from './rapport-playwright.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BASELINE = process.argv[3] ? path.resolve(process.argv[3]) : path.join(__dirname, 'playwright-baseline.json');
@@ -71,28 +71,17 @@ if (joues === 0) nonJuge('Le rapport ne contient aucun essai joué.');
 
 // Un navigateur qui ne démarre pas rend des essais rouges qui n'ont rien jugé
 // (7 nov. 2026, #1114) : sur Ubuntu 26.04, WebKit n'a pas démarré, et les 1 398
-// essais d'un run ont passé pour « 1 347 régressions ». C'est la machine, pas le code.
-const lancementsRates = [];
-const parcourir = (suites) => {
-    for (const suite of suites ?? []) {
-        for (const spec of suite.specs ?? []) {
-            for (const essai of spec.tests ?? []) {
-                for (const resultat of essai.results ?? []) {
-                    const messages = [resultat.error, ...(resultat.errors ?? [])].map((e) => e?.message ?? '');
-                    const rate = messages.find((m) => m.includes('browserType.launch'));
-                    if (rate) lancementsRates.push(rate);
-                }
-            }
-        }
-        parcourir(suite.suites);
-    }
-};
-parcourir(rapport.suites);
-if (lancementsRates.length > 0) {
-    nonJuge(`Le navigateur n'a pas démarré pour ${lancementsRates.length} essai(s) : ils n'ont rien jugé. Première erreur :\n\n${lancementsRates[0].split('\n').slice(0, 6).join('\n')}`);
+// essais d'un run ont passé pour « 1 347 régressions ». Ces essais sortent des
+// échecs et se nomment à part ; les autres sont jugés comme d'habitude. Seul le
+// dernier résultat compte : un lancement raté puis repris n'est pas « sans navigateur ».
+const sansNavigateur = sansNavigateurDuRapport(rapport);
+const idsSansNavigateur = new Set(sansNavigateur.map((s) => s.id));
+const premiereErreur = () => sansNavigateur[0].message.split('\n').slice(0, 6).join('\n');
+const echecs = echecsDuRapport(rapport).filter((e) => !idsSansNavigateur.has(e));
+if (sansNavigateur.length > 0 && echecs.length === 0 && vertsDuRapport(rapport).length === 0) {
+    nonJuge(`Le navigateur n'a démarré pour aucun essai (${sansNavigateur.length} spec(s)) : rien n'a été jugé. Première erreur :\n\n${premiereErreur()}`);
 }
 
-const echecs = echecsDuRapport(rapport);
 const instables = flakyDuRapport(rapport);
 const baseline = JSON.parse(readFileSync(BASELINE, 'utf8'));
 const { nouveaux, reparees, aPasserAuxIntermittentes, nonJouees, intermittentesRouges } = comparerALaBaseline({ echecs, verts: vertsDuRapport(rapport), instables }, baseline);
@@ -100,10 +89,13 @@ const nIntermittentes = (baseline.echecsIntermittents ?? []).length;
 
 dire(nouveaux.length > 0
     ? `## ✗ ${nouveaux.length} spec(s) Playwright NOUVELLEMENT rouge(s)`
-    : `## ✓ Playwright : aucune rougeur nouvelle`);
+    : sansNavigateur.length > 0
+        ? `## ✗ Playwright NON JUGÉ en partie : ${sansNavigateur.length} spec(s) sans navigateur, aucune rougeur nouvelle parmi les autres`
+        : `## ✓ Playwright : aucune rougeur nouvelle`);
 dire('');
 dire(`${joues} essais joués : ${stats.expected ?? 0} verts, ${stats.flaky ?? 0} verts au second essai, ${stats.unexpected ?? 0} rouges, ${stats.skipped ?? 0} sautés. ${echecs.length - nouveaux.length - intermittentesRouges.length} échec(s) connu(s) de la baseline (${path.basename(BASELINE)})${nIntermittentes > 0 ? ` ; ${intermittentesRouges.length} intermittente(s) rouge(s) sur ${nIntermittentes} (ne bloque ni rouge ni verte)` : ''}.`);
 if (nouveaux.length > 0) { dire(''); dire('Absentes de la baseline — une régression :'); liste(nouveaux); }
+if (sansNavigateur.length > 0) { dire(''); dire(`⚠ ${sansNavigateur.length} spec(s) NON JUGÉE(S) — le navigateur n'a pas démarré (ni rouges ni vertes) :`); liste(sansNavigateur.map((x) => x.id)); dire(''); dire('Première erreur :'); dire(''); dire(premiereErreur()); }
 if (instables.length > 0) { dire(''); dire(`⚠ ${instables.length} spec(s) VERTE(S) AU SECOND ESSAI — passées, mais instables (ne bloque pas, #534) :`); liste(instables); }
 // La commune se régénère sur le Mac ; une autre (Linux) se tient à la main.
 const commentRetirer = process.argv[3] ? `de ${path.basename(BASELINE)}, à la main` : '(node scripts/verifier-playwright.mjs --ecrire, sur le Mac)';
@@ -112,4 +104,5 @@ if (reparees.length > 0) { dire(''); dire(`✓ ${reparees.length} spec(s) de la 
 if (aPasserAuxIntermittentes.length > 0) { dire(''); dire(`⚠ ${aPasserAuxIntermittentes.length} spec(s) connue(s) VERTE(S) AU SECOND ESSAI — à passer aux intermittentes de ${path.basename(BASELINE)}, à la main, pas à retirer :`); liste(aPasserAuxIntermittentes); }
 // Une connue absente du rapport n'a pas été jouée : rien à en conclure.
 if (nonJouees.length > 0) { dire(''); dire(`${nonJouees.length} spec(s) de la baseline NON JOUÉE(S) dans ce rapport — ni rouge ni verte, rien à conclure :`); liste(nonJouees); }
-conclure(nouveaux.length > 0 ? 1 : 0);
+// Une régression l'emporte ; sinon, un essai qui n'a rien jugé ne laisse pas passer pour vert.
+conclure(nouveaux.length > 0 ? 1 : sansNavigateur.length > 0 ? 2 : 0);

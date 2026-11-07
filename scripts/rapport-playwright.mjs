@@ -60,6 +60,25 @@ export function echecsDuRapport(rapport) {
 }
 
 /**
+ * Specs rouges SANS NAVIGATEUR (#1114, 7 nov. 2026) : leur DERNIER résultat dit
+ * que le navigateur n'a pas démarré (`browserType.launch`). Elles n'ont rien
+ * jugé : ni rouges ni vertes. Un lancement raté puis repris au second essai ne
+ * compte pas : seul le dernier résultat de chaque essai fait foi. Sur Ubuntu
+ * 26.04, WebKit ne démarrait pas, et 1 398 essais ont passé pour « 1 347
+ * régressions ». Rend `{ id, message }`, triées par identité.
+ */
+export function sansNavigateurDuRapport(rapport) {
+    const trouves = [];
+    parcourirSpecs(rapport, (spec, id) => {
+        if (spec.ok !== false) return;
+        const derniers = (spec.tests ?? []).map((t) => (t.results ?? []).at(-1)).filter(Boolean);
+        const messages = derniers.map((r) => [r.error, ...(r.errors ?? [])].map((e) => e?.message ?? '').find((m) => m.includes('browserType.launch')));
+        if (derniers.length > 0 && messages.every(Boolean)) trouves.push({ id, message: messages[0] });
+    });
+    return trouves.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+}
+
+/**
  * Specs VERTES AU SECOND ESSAI (#534, 26 août 2026).
  *
  * `retries: 1` empêche qu'un dépassement de délai isolé refuse un push légitime.
