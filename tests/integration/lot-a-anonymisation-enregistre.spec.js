@@ -21,7 +21,7 @@ const indexHtml = 'file://' + path.join(racineProjet, 'index.html');
 //      n'est écrite dans les vraies données.
 //
 // ⚠ Chaque essai part d'un stockage VIDÉ (les specs partagent l'origine file://). Noms fictifs :
-// le pack démo (écrivains et savants) et « Daniel Témoin ».
+// le pack démo (écrivains et savants) et « Fictkenzo Témoin ».
 
 const patternsAttendus = [
     /version\.json.*access control/i,
@@ -77,7 +77,7 @@ async function ouvrirEvaluationTemoin(page, integrite = { statut: 'recevable', n
         window.db.setSync('trimestres', [{ id: 'a2026', nom: 'Automne 2026', annee: 2026, session: 'A', actif: true }]);
         window.db.setSync('trimestreActif', 'a2026');
         window.db.setSync('groupeCoursActif', { id: 'GC1', trimestreId: 'a2026', nom: 'Groupe 00007' });
-        window.db.setSync(k('groupeEtudiants'), [{ da: '1234567', prenom: 'Daniel', nom: 'Témoin', groupe: '00007', groupeCoursId: 'GC1' }]);
+        window.db.setSync(k('groupeEtudiants'), [{ da: '1234567', prenom: 'Fictkenzo', nom: 'Témoin', groupe: '00007', groupeCoursId: 'GC1' }]);
         window.db.setSync(k('grillesTemplates'), [{ id: 'G699', nom: 'Grille témoin 50/30/20', criteres: [
             { id: 'c1', nom: 'Contenu', ponderation: 50, description: 'Le fond.' },
             { id: 'c2', nom: 'Organisation', ponderation: 30, description: 'La structure.' },
@@ -91,7 +91,7 @@ async function ouvrirEvaluationTemoin(page, integrite = { statut: 'recevable', n
         ] }]);
         window.db.setSync(k('productions'), [{ id: 'P699', titre: 'Portrait témoin', grilleId: 'G699', echelleId: 'E699', groupeCoursId: 'GC1' }]);
         window.db.setSync(k('evaluationsSauvegardees'), [{
-            id: 'EV699', etudiantDA: '1234567', etudiantNom: 'Daniel Témoin', groupe: '00007', groupeCoursId: 'GC1',
+            id: 'EV699', etudiantDA: '1234567', etudiantNom: 'Fictkenzo Témoin', groupe: '00007', groupeCoursId: 'GC1',
             productionId: 'P699', productionNom: 'Portrait témoin', grilleId: 'G699', grilleNom: 'Grille témoin 50/30/20',
             echelleId: 'E699', cartoucheId: '', statutRemise: 'evalue', statutIntegrite: integrite.statut, notesIntegrite: integrite.notes,
             dateEvaluation: '2026-09-04T10:00:00.000Z', verrouillee: false,
@@ -141,7 +141,7 @@ test('(a)(c) une évaluation modifiée en anonymisation est encore là après re
     // Témoin : l'écran montre le pseudonyme, jamais le prénom.
     const ecran = await page.evaluate(() => document.getElementById('retroactionFinale1').value);
     expect(ecran).toMatch(/Bonjour Élève \d+ !/);
-    expect(ecran).not.toContain('Daniel');
+    expect(ecran).not.toContain('Fictkenzo');
 
     await page.waitForFunction(() => {
         const ev = (window.db.getSync(cle('evaluationsSauvegardees'), []) || []).find(e => e.id === 'EV699');
@@ -161,7 +161,7 @@ test('(a)(c) une évaluation modifiée en anonymisation est encore là après re
     // (c) Ce qui est écrit, ce sont les vraies valeurs.
     expect(base.retroactionFinale).toContain('Bonjour Fictkenzo !');
     expect(JSON.stringify(base)).not.toMatch(/Élève \d+|Gr\. [A-Z]|ANONYME|etudiantDAReel|etudiantDAffichage/);
-    expect(base.etudiantNom).toBe('Daniel Témoin');
+    expect(base.etudiantNom).toBe('Fictkenzo Témoin');
     expect(base.groupe).toBe('00007');
     expect(erreurs).toEqual([]);
 });
