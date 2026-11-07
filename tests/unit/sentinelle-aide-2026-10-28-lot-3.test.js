@@ -119,8 +119,11 @@ describe('#1152 lot 3 · un seul glossaire', () => {
     it('le mode assistance nomme les deux commandes que l\'écran porte', () => {
         // ↻ « L'en-tête épuré » (7 nov. 2026) : le bouton est une ligne du menu de l'en-tête, nommée par son mot.
         expect(html).toMatch(/id="btn-assistance-nav"[^>]*>.*?<span class="entete-menu-mot">Assistance<\/span>/);
-        expect(lire('js', 'accueil.js')).toContain('<div class="accueil-aide-titre">Assistance</div>');
-        expect(terme('mode-assistance-icones').definition).toContain('le bouton « Assistance » de l’en-tête, ou par la case « Assistance » de la page d’accueil');
+        // ↻ « L'accueil épuré » (7 nov. 2026) : la case « Assistance » de l'accueil est retirée. Le glossaire la
+        // nomme encore : sa phrase passe au lot « Les pages sans doublons » (inventaire soumis à Grégoire), qui
+        // remplacera ce témoin par le texte qu'il aura validé.
+        expect(lire('js', 'accueil.js')).not.toContain('accueil-aide-titre');
+        expect(terme('mode-assistance-icones').definition).toContain('le bouton « Assistance » de l’en-tête');
     });
 
     it('la retouche du verdict (28 oct., 14 h 15) : le menu Codex sans côté ; SRPNF mot pour mot, sa validation notée', () => {

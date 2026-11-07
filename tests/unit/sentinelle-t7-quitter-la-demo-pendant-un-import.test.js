@@ -116,39 +116,35 @@ describe('T7 · entrer dans la démo pendant un import de vraies copies', () => 
     });
 });
 
-describe('T7 · la case de l\'accueil passe par la même garde, dans les deux sens', () => {
+describe('T7 · « Explorer », sur l\'accueil, entre par activerModeDemo, qui porte la garde', () => {
+    // « L'accueil épuré » (7 nov. 2026) : la case « Données démo » de l'accueil est retirée. La porte
+    // « Explorer » appelle activerModeDemo, dont la garde d'entrée est jugée plus haut ; on sort de la
+    // démo par « Quitter la démo » (bandeau vert), qui appelle desactiverModeDemo, gardé lui aussi.
     const accueil = readFileSync(path.join(racine, 'js/accueil.js'), 'utf8');
-    const corps = tranche(accueil, 'function toggleDemoHandler(', 'function toggleAccompagnementHandler(');
+    const corps = tranche(accueil, 'function explorerDonneesDemo(', '/** Ouvre le wizard de pratique');
 
-    function basculer(importEnCours, coche, muter) {
+    function explorer(enDemo, muter) {
         const appels = [];
-        const el = { checked: coche };
-        const win = {
-            importEmpecheLaBascule: (versLaDemo) => { appels.push(['garde', versLaDemo]); return importEnCours; }
-        };
-        // eslint-disable-next-line no-new-func
         const texte = muter ? muter(corps) : corps;
         if (muter && texte === corps) throw new Error('Témoin inerte');
-        const toggle = new Function('window', 'activerModeDemo', 'desactiverModeDemo', texte + '\nreturn toggleDemoHandler;')(
-            win, () => appels.push(['activer']), () => appels.push(['desactiver']));
-        toggle(el);
-        return { el, appels };
+        // eslint-disable-next-line no-new-func
+        const f = new Function('estEnModeDemo', 'activerModeDemo', texte + '\nreturn explorerDonneesDemo;')(
+            () => enDemo, () => appels.push('activer'));
+        f();
+        return appels;
     }
 
-    it('import en cours : cocher laisse la case décochée, décocher la laisse cochée ; rien ne bascule', () => {
-        expect(basculer(true, true)).toEqual({ el: { checked: false }, appels: [['garde', true]] });
-        expect(basculer(true, false)).toEqual({ el: { checked: true }, appels: [['garde', false]] });
+    it('hors de la démo, « Explorer » appelle activerModeDemo ; dans la démo, rien', () => {
+        expect(explorer(false)).toEqual(['activer']);
+        expect(explorer(true)).toEqual([]);
     });
 
-    it('break-test : sans la garde dans la case, cocher active la démo pendant l\'import (rouge attendu)', () => {
-        const r = basculer(true, true, (c) => c.replace(
-            "if (typeof window.importEmpecheLaBascule === 'function' && window.importEmpecheLaBascule(el.checked)) {", 'if (false) {'));
-        expect(r.appels).toEqual([['activer']]);
-        expect(r.el.checked).toBe(true);
+    it('break-test : sans l\'appel, « Explorer » n\'entre pas (rouge attendu)', () => {
+        expect(explorer(false, (c) => c.replace('activerModeDemo();', 'void 0;'))).toEqual([]);
     });
 
-    it('sans import : la bascule se fait comme avant', () => {
-        expect(basculer(false, true).appels).toEqual([['garde', true], ['activer']]);
-        expect(basculer(false, false).appels).toEqual([['garde', false], ['desactiver']]);
+    it('la case « Données démo » n\'existe plus, et le bandeau garde sa sortie', () => {
+        expect(accueil).not.toContain('checkbox-demo-accueil');
+        expect(readFileSync(path.join(racine, 'index.html'), 'utf8')).toMatch(/data-action="desactiverModeDemo"[^>]*>\s*Quitter la démo/);
     });
 });

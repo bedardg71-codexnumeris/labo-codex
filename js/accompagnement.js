@@ -1127,8 +1127,9 @@ function afficherBulleDecouverte({ cible, message, position = 'bas', duree = 800
 const ETAPES_TOUR = [
     {
         id: 0,
-        titre: 'Bienvenue',
-        texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et le relancer depuis le bouton de l'en-t\u00eate. Commence par configurer ton espace de travail dans l'onglet Cadre.",
+        // « L'accueil épuré » (7 nov. 2026) : le titre et la relance, mots de la consigne.
+        titre: 'Bienvenue dans la visite guid\u00e9e',
+        texte: "Labo Codex num\u00e9rise le travail que tu fais d\u00e9j\u00e0. Ce parcours te guide \u00e0 travers les \u00e9tapes essentielles. Tu peux le quitter \u00e0 tout moment et le relancer depuis le menu, en haut \u00e0 droite. Commence par configurer ton espace de travail dans l'onglet Cadre.",
         correspond: function(idSousSection) { return !idSousSection || idSousSection === 'accueil'; }
     },
     {
@@ -1822,10 +1823,9 @@ window.demarrerTourDepuisAide = function() {
     demarrerTourGuide();
 };
 
-// Bascule globale de l'assistance depuis l'en-tête (équivalent de la case
-// « Assistance » de l'accueil). Pref unique → pilote les 4 sous-systèmes.
-// Le bouton d'en-tête et la case de l'accueil sont le MÊME interrupteur :
-// cette fonction reflète l'état courant sur les deux contrôles.
+// Bascule globale de l'assistance depuis l'en-tête. Pref unique → pilote les 4
+// sous-systèmes. Cette fonction reflète l'état courant sur le contrôle de l'en-tête
+// (la case « Assistance » de l'accueil est retirée le 7 nov. 2026, « L'accueil épuré »).
 function synchroniserControlesAssistance() {
     var actif = estAccompagnementActif();
     var btn = document.getElementById('btn-assistance-nav');
@@ -1833,8 +1833,6 @@ function synchroniserControlesAssistance() {
         btn.setAttribute('aria-pressed', actif ? 'true' : 'false');
         btn.setAttribute('title', actif ? 'Assistance activée' : 'Assistance désactivée');
     }
-    var cb = document.getElementById('checkbox-accompagnement-accueil');
-    if (cb) cb.checked = actif;
 }
 window.synchroniserControlesAssistance = synchroniserControlesAssistance;
 window.basculerAssistance = function() {

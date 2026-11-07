@@ -103,20 +103,9 @@ for (const [largeur, hauteur] of LARGEURS) {
             ]
         });
 
-        // Accueil : la carte des utilitaires.
+        // Accueil : la carte « Ton codex » est retirée le 7 nov. 2026 (« L'accueil épuré ») ; le codex reste
+        // dans l'en-tête, jugé plus haut. Elle ne revient pas.
         await page.evaluate(() => { afficherSection('accueil'); });
-        await page.waitForTimeout(800);
-        const carte = await page.evaluate(() => {
-            const el = [...document.querySelectorAll('.accueil-utilitaire-titre')].find((x) => x.textContent.trim() === 'Ton codex');
-            if (!el) return { absent: true };
-            const desc = el.parentElement.querySelector('.accueil-utilitaire-desc');
-            const r = desc.getBoundingClientRect();
-            return {
-                deborde: el.scrollWidth > el.clientWidth + 1,
-                descDeborde: desc.scrollWidth > desc.clientWidth + 1,
-                descDansLEcran: r.right <= window.innerWidth && r.width > 0
-            };
-        });
-        expect(carte).toEqual({ deborde: false, descDeborde: false, descDansLEcran: true });
+        expect(await page.locator('#accueil-contenu .accueil-utilitaire-titre').count()).toBe(0);
     });
 }

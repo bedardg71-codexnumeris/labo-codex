@@ -1,17 +1,11 @@
 /* ===============================
    MODULE: PAGE D'ACCUEIL
-   19 avril 2026 — Refonte V3 (ebauches-accueil.html) :
-     - hero « Que souhaites-tu faire ? »
-     - bannière de bienvenue (si nouvel utilisateur sans groupe-cours)
-     - section « Raccourcis » : grille 4×2 de 8 cartes d'action
-     - section « Utilitaires » | « Aide » : rangée de 4 demi-cartes
-         · 2 utilitaires neutres (Sauvegarder, Nouveautés)
-         · 2 cartes orange palette accompagnement avec case à cocher
-           (Accompagnement, Données démo)
-     - pied de page
-
-   La case « Accompagnement » pilote en bloc les 4 sous-systèmes d'aide
-   (visite guidée, info-bulles, aide contextuelle, flèches didactiques).
+   « L'accueil épuré » (7 nov. 2026, consigne de Grégoire, esquisse 64) :
+     - « À propos », repliable, qui porte aussi « Par où commencer ? » (les trois portes) ;
+     - « Tâches » : neuf cartes, chacune dit où elle mène ;
+     - pied de page à deux moitiés (l'application | Codex Numeris).
+   Retirés : « Utilitaires » (Ton codex, Nouveautés) et « Aide » (Assistance, Données démo).
+   Historique : V3 du 19 avril 2026 (ebauches-accueil.html), au journal git.
 
    Exports: afficherAccueil, initialiserAccueil, definirModeExpert
    =============================== */
@@ -82,9 +76,22 @@ function afficherAccueil() {
 // La question de l'orthopédagogue, que dit la porte du milieu : écrite une fois (sentinelle #846, B3).
 const QUESTION_ORTHOPEDAGOGUE = 'Tu es orthopédagogue ?';
 
-function genererBanniereBienvenue() {
-    const replie = (typeof obtenirPreference === 'function') && obtenirPreference('banniereAccueilRepliee') === true;
+/**
+ * « L'accueil épuré » (consigne du 7 nov. 2026, esquisse 64) : « À propos » s'ouvre tant
+ * qu'aucun trimestre n'existe ; ensuite, il garde le choix de la personne (préférence
+ * `banniereAccueilRepliee`, ouverte par défaut). Le trimestre de la démo ne compte pas.
+ */
+function aproposReplie() {
+    const trimestres = typeof window.obtenirTrimestres === 'function' ? window.obtenirTrimestres() : [];
+    const aUnTrimestre = trimestres.some((t) => t && t.id !== 'demo');
+    if (!aUnTrimestre) return false;
+    return (typeof obtenirPreference === 'function') && obtenirPreference('banniereAccueilRepliee') === true;
+}
 
+function genererBanniereBienvenue() {
+    const replie = aproposReplie();
+
+    // L'encadré de la CoP : inchangé (consigne du 7 nov.).
     const paragrapheCommunaute = `
             <div class="banniere-bienvenue-acces">
                 <p><strong>Tu as besoin de support humain ?</strong> L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex. C’est le lieu tout désigné pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres.</p>
@@ -97,22 +104,55 @@ function genererBanniereBienvenue() {
                 <span class="banniere-chevron" aria-hidden="true"></span>
             </button>
             <div id="banniere-bienvenue-corps" class="banniere-bienvenue-corps">
-            <p class="banniere-bienvenue-titre-etapes"><strong>Bienvenue dans Labo Codex !</strong></p>
-            <p>Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.</p>
-            <p>C’est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.</p>
-            <p>Une de ses particularités est qu’il n’y a aucune intelligence artificielle dans l’application. Ton jugement professionnel est souverain et l’outil ne fait que l’éclairer. Labo Codex n’impose aucune pratique, est entièrement configurable et aucune décision n’est prise à ta place. L’application n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.</p>
-            <p>Tu peux faire les mêmes gestes que d’habitude – planifier, concevoir, évaluer et suivre la progression de tes étudiant·es – mais dans un seul outil numérique intégré. Labo Codex t’offre un espace autonome, indépendant, confidentiel, gratuit, ouvert, portable et sobre en carbone ! L’objectif est d’inventer et d’organiser avec cette ressource un commun éducatif, pérenne et ouvert, en marge des grosses plateformes.</p>
-            <p>Tu entres ton adresse de courriel, tu reçois un code de sécurité et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à renouveler ton accès. Tes données restent 100 % sur ton appareil. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).</p>
-            <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.</p>
-            ${paragrapheCommunaute}
-            <div class="banniere-bienvenue-actions">
-                <button class="btn btn-principal" data-action="demarrerTourGuide">
-                    Commencer la visite guid\u00e9e
-                </button>
-                <button class="btn btn-secondaire" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">
-                    Voir les guides p\u00e9dagogiques
-                </button>
-                <a class="btn btn-secondaire" href="https://codexnumeris.org/tutoriels" target="_blank" rel="noopener noreferrer">Voir les tutoriels <span aria-hidden="true">↗</span><span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a>
+            <h2 class="apropos-devise">Suivre l’apprentissage. Soutenir l’enseignement.</h2>
+            <div class="apropos-colonnes">
+                <section>
+                    <h3 class="apropos-intertitre">Ce que fait l’application</h3>
+                    <p>Labo Codex est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.</p>
+                </section>
+                <section>
+                    <h3 class="apropos-intertitre">Ton jugement d’abord</h3>
+                    <p>Une de ses particularités est qu’il n’y a aucune intelligence artificielle dans l’application. Ton jugement professionnel est souverain et l’outil ne fait que l’éclairer. Labo Codex n’impose aucune pratique, est entièrement configurable et aucune décision n’est prise à ta place. L’application n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.</p>
+                </section>
+                <section>
+                    <h3 class="apropos-intertitre">Un commun éducatif</h3>
+                    <p>Tu peux faire les mêmes gestes que d’habitude – planifier, concevoir, évaluer et suivre la progression de tes étudiant·es – mais dans un seul outil numérique intégré. Labo Codex t’offre un espace autonome, indépendant, confidentiel, gratuit, ouvert, portable et sobre en carbone ! L’objectif est d’inventer et d’organiser avec cette ressource un commun éducatif, pérenne et ouvert, en marge des grosses plateformes.</p>
+                </section>
+                <section>
+                    <h3 class="apropos-intertitre">Tes données chez toi</h3>
+                    <p>Tu entres ton adresse de courriel, tu reçois un code de sécurité et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à renouveler ton accès. Tes données restent 100 % sur ton appareil. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).</p>
+                </section>
+            </div>
+            <div class="apropos-deux apropos-avec-filet">
+                <div class="apropos-concepts">
+                    <p><strong>Certains concepts sont nouveaux ?</strong> Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.</p>
+                    <ul class="apropos-liens banniere-bienvenue-actions">
+                        <li><button type="button" class="apropos-lien" data-action="demarrerTourGuide">Visite guidée</button></li>
+                        <li><button type="button" class="apropos-lien" data-action="naviguerAccueilCarte" data-param="labo|labo-accompagnement">Guides pédagogiques</button></li>
+                        <li><a class="apropos-lien" href="https://codexnumeris.org/tutoriels" target="_blank" rel="noopener noreferrer">Tutoriels <span aria-hidden="true">↗</span><span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a></li>
+                    </ul>
+                </div>
+                ${paragrapheCommunaute}
+            </div>
+            <div class="apropos-avec-filet">
+                <div class="accueil-section-label">Par où commencer ?</div>
+                <div class="accueil-portes" id="accueil-portes">
+                    <div class="accueil-porte">
+                        <div class="accueil-porte-titre">Tu enseignes ?</div>
+                        <div class="accueil-porte-desc">Crée ton trimestre, ton cours et ton groupe, puis apporte ta grille d’évaluation.</div>
+                        <button type="button" class="btn btn-principal accueil-porte-bouton" data-action="commencerParLeTrimestre">Commencer</button>
+                    </div>
+                    <div class="accueil-porte">
+                        <div class="accueil-porte-titre">${QUESTION_ORTHOPEDAGOGUE}</div>
+                        <div class="accueil-porte-desc">Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.</div>
+                        <button type="button" class="btn btn-principal accueil-porte-bouton" data-action="naviguerAccueilCarte" data-param="suivi|suivi-rencontres">Commencer</button>
+                    </div>
+                    <div class="accueil-porte">
+                        <div class="accueil-porte-titre">Tu es conseiller·ère pédagogique ?</div>
+                        <div class="accueil-porte-desc">Explore un cours de démonstration déjà configuré, aux données fictives mais réalistes.</div>
+                        <button type="button" class="btn btn-principal accueil-porte-bouton" data-action="explorerDonneesDemo">Explorer</button>
+                    </div>
+                </div>
             </div>
             </div>
         </div>
@@ -120,10 +160,9 @@ function genererBanniereBienvenue() {
 }
 
 /**
- * Replie ou déplie la bannière de bienvenue. L'état (préférence UI globale,
- * non namespacée par trimestre) est mémorisé via le système de préférences.
- * Le <button> natif gère Entrée/Espace et le focus ; seul le corps se masque,
- * la barre de titre — et donc l'affordance de réouverture — reste visible.
+ * Replie ou déplie « À propos ». L'état (préférence UI globale, non namespacée par
+ * trimestre) est mémorisé via le système de préférences. Le <button> natif gère
+ * Entrée/Espace et le focus ; seul le corps se masque, la barre de titre reste visible.
  */
 function basculerBanniereBienvenue() {
     const banniere = document.getElementById('banniere-bienvenue');
@@ -138,164 +177,79 @@ function basculerBanniereBienvenue() {
 }
 
 /**
- * Contenu de la page d'accueil — V3 (19 avril 2026).
+ * Les neuf tâches (consigne du 7 nov. 2026) : où chacune mène est écrit en bas de sa carte.
+ * « Adopter ta pratique » ouvre l'assistant de pratique PAR-DESSUS l'accueil (comportement
+ * gardé, écart signalé au rapport du lot) ; les huit autres naviguent.
+ */
+const TACHES = [
+    { action: 'ouvrirWizardPratique', icone: 'ico-acc-data-sheet', titre: 'Adopter ta pratique', desc: 'Construction de la note du cours, sommative ou alternative.', chemin: 'Conception › Pratiques' },
+    { param: 'conception|conception-carte', icone: 'ico-acc-puzzle', titre: 'Planifier ton cours', desc: 'Alignement constructif des objectifs, leçons et évaluations.', chemin: 'Conception › Alignement' },
+    { param: 'suivi|suivi-saisie', icone: 'ico-acc-people', titre: 'Saisir les présences', desc: 'Absences, retards et notes de séance.', chemin: 'Suivi › Présences' },
+    { param: 'evaluations|evaluations-importer', icone: 'ico-acc-downloading', titre: 'Importer des copies', desc: 'Fichiers PDF ou images des travaux d’étudiant·es.', chemin: 'Évaluation › Préparer' },
+    { param: 'evaluations|evaluations-annoter', icone: 'ico-acc-edit', titre: 'Annoter et évaluer', desc: 'Annotation, niveaux ou note par critère, rétroaction automatisée.', chemin: 'Évaluation › Annoter' },
+    { param: 'suivi|suivi-groupe', icone: 'ico-acc-line-chart', titre: 'Observer le groupe', desc: 'Assiduité, complétion, performance et dépistage des difficultés d’apprentissage.', chemin: 'Suivi › Groupe' },
+    { param: 'suivi|suivi-profil', icone: 'ico-acc-profile', titre: 'Consulter un profil', desc: 'Engagement, travaux, progression et accompagnement.', chemin: 'Suivi › Profils' },
+    { param: 'suivi|suivi-interventions', icone: 'ico-acc-pause-button', titre: 'Différencier les interventions', desc: 'Niveaux de besoin, rencontres et bilans.', chemin: 'Suivi › Interventions' },
+    { param: 'suivi|suivi-rencontres', icone: 'ico-acc-rencontres', titre: 'Organiser tes rencontres', desc: 'Service d’orthopédagogie : suivi en petit groupe ou en individuel.', chemin: 'Suivi › Rencontres' }
+];
+
+function genererTache(t) {
+    const action = t.action
+        ? `data-action="${t.action}"`
+        : `data-action="naviguerAccueilCarte" data-param="${t.param}"`;
+    return `
+            <div class="accueil-action" role="button" tabindex="0" ${action}>
+                <div class="accueil-action-icone"><span class="accueil-icone-mask ${t.icone}"></span></div>
+                <div class="accueil-action-titre">${t.titre}</div>
+                <div class="accueil-action-desc">${t.desc}</div>
+                <div class="accueil-action-chemin">${t.chemin}</div>
+            </div>`;
+}
+
+/**
+ * Contenu de la page d'accueil — « L'accueil épuré » (7 nov. 2026).
  *
- *   - Hero « Que souhaites-tu faire ? »
- *   - bannière de bienvenue (nouvel utilisateur)
- *   - trois portes d'entrée (28 oct. 2026), dans un seul encadré blanc pleine largeur,
- *     au-dessus des tâches — elles n'en remplacent aucune. Elles succèdent à la porte de
- *     l'orthopédagogie (consigne du 12 sept. 2026 ; Grégoire : « Je veux que
- *     l'orthopédagogue sente qu'elle entre par la porte principale. »), qui reste la
- *     colonne du milieu, mots et chemin inchangés (Suivi › Rencontres). L'enseignant·e
- *     entre par la première étape du Cadre, le ou la CP par les données démo. Leurs mots,
- *     et ceux du bandeau, ne s'écrivent qu'ici.
- *   - Raccourcis : grille 4×2 de 8 cartes d'action
- *   - Utilitaires (gauche) | Aide (droite) : rangée de 4 demi-cartes
- *       · 2 utilitaires neutres (Sauvegarder, Nouveautés)
- *       · 2 cartes orange palette accompagnement avec case
- *         (Accompagnement, Données démo)
- *   - pied de page
+ *   - « À propos », repliable : la devise, les quatre paragraphes sous leurs intertitres,
+ *     les concepts (trois liens) et la CoP, puis « Par où commencer ? » et les trois portes
+ *     (28 oct. 2026 ; la porte de l'orthopédagogie, consigne du 12 sept. — Grégoire : « Je veux
+ *     que l'orthopédagogue sente qu'elle entre par la porte principale. »).
+ *   - Tâches : neuf cartes.
+ *   - Pied de page : l'application et sa version, Nouveautés ; Codex Numeris et le blogue.
+ * Retirés le 7 nov. : « Utilitaires » (Ton codex, Nouveautés) et « Aide » (Assistance, Données
+ * démo). Ton codex et Assistance sont dans l'en-tête et son menu ; Nouveautés, au pied de page ;
+ * la démo s'ouvre par « Explorer » et se quitte par le bandeau vert.
  *
  * Aucun style= inline — tout passe par les classes CSS de index.html.
  */
 function afficherAccueilContenu(conteneur) {
-    // A.14 — La case « Données de démonstration » reflète strictement l'état réel.
-    const demoChecked = typeof estEnModeDemo === 'function' && estEnModeDemo();
-    // « Accompagnement » = ON uniquement si les 4 sous-systèmes sont actifs.
-    const accChecked = accompagnementEstActif();
-
-    // Hero h1 retiré le 27 mai 2026 : la phrase a été déplacée dans le bandeau global
-    // (entête .titre-section, à côté de la date).
-    const banniereBienvenueHTML = genererBanniereBienvenue();
+    const version = window.VERSION_MAJEURE || '';
 
     conteneur.innerHTML = `
-        ${banniereBienvenueHTML}
-
-        <div class="accueil-portes" id="accueil-portes">
-            <div class="accueil-porte">
-                <div class="accueil-porte-titre">Tu enseignes ?</div>
-                <div class="accueil-porte-desc">Crée ton trimestre, ton cours et ton groupe, puis apporte ta grille d’évaluation.</div>
-                <button type="button" class="accueil-porte-lien" data-action="commencerParLeTrimestre">Commencer →</button>
-            </div>
-            <div class="accueil-porte">
-                <div class="accueil-porte-titre">${QUESTION_ORTHOPEDAGOGUE}</div>
-                <div class="accueil-porte-desc">Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.</div>
-                <button type="button" class="accueil-porte-lien" data-action="naviguerAccueilCarte" data-param="suivi|suivi-rencontres">Commencer →</button>
-            </div>
-            <div class="accueil-porte">
-                <div class="accueil-porte-titre">Tu es conseiller·ère pédagogique ?</div>
-                <div class="accueil-porte-desc">Explore un cours fictif déjà configuré, séparé de tes vraies données.</div>
-                <button type="button" class="accueil-porte-lien" data-action="explorerDonneesDemo">Explorer →</button>
-            </div>
-        </div>
+        ${genererBanniereBienvenue()}
 
         <div class="accueil-section-label">Tâches</div>
         <div class="accueil-grille-actions">
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="conception" data-action="ouvrirWizardPratique">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-data-sheet"></span></div>
-                <div class="accueil-action-titre">Adopter ta pratique</div>
-                <div class="accueil-action-desc">Construction de la note du cours, sommative ou alternative.</div>
-            </div>
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="conception" data-action="naviguerAccueilCarte" data-param="conception|conception-carte">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-puzzle"></span></div>
-                <div class="accueil-action-titre">Planifier ton cours</div>
-                <div class="accueil-action-desc">Alignement constructif des objectifs, leçons et évaluations.</div>
-            </div>
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-saisie">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-people"></span></div>
-                <div class="accueil-action-titre">Saisir les pr\u00e9sences</div>
-                <div class="accueil-action-desc">Absences, retards et notes de séance.</div>
-            </div>
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-importer">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-downloading"></span></div>
-                <div class="accueil-action-titre">Importer des copies</div>
-                <div class="accueil-action-desc">Fichiers PDF ou images des travaux d’étudiant·es.</div>
-            </div>
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="evaluations" data-action="naviguerAccueilCarte" data-param="evaluations|evaluations-annoter">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-edit"></span></div>
-                <div class="accueil-action-titre">Annoter et \u00e9valuer</div>
-                <div class="accueil-action-desc">Annotation, niveaux ou note par critère, rétroaction automatisée.</div>
-            </div>
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-groupe">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-line-chart"></span></div>
-                <div class="accueil-action-titre">Observer le groupe</div>
-                <div class="accueil-action-desc">Assiduité, complétion, performance et dépistage des difficultés d’apprentissage.</div>
-            </div>
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-profil">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-profile"></span></div>
-                <div class="accueil-action-titre">Consulter un profil</div>
-                <div class="accueil-action-desc">Engagement, travaux, progression et accompagnement.</div>
-            </div>
-
-            <div class="accueil-action" role="button" tabindex="0" data-section="suivi" data-action="naviguerAccueilCarte" data-param="suivi|suivi-interventions">
-                <div class="accueil-action-icone"><span class="accueil-icone-mask ico-acc-pause-button"></span></div>
-                <div class="accueil-action-titre">Diff\u00e9rencier les interventions</div>
-                <div class="accueil-action-desc">Niveaux de besoin, rencontres et bilans.</div>
-            </div>
-
+            ${TACHES.map(genererTache).join('')}
         </div>
 
-        <div class="accueil-grille-labels">
-            <div class="accueil-section-label">Utilitaires</div>
-            <div class="accueil-section-label">Aide</div>
-        </div>
-
-        <div class="accueil-grille-bas">
-
-            <div class="accueil-utilitaire-demi" role="button" tabindex="0" data-action="ouvrirModalBackup">
-                <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-usb-memory"></span></div>
-                <div>
-                    <div class="accueil-utilitaire-titre">Ton codex</div>
-                    <div class="accueil-utilitaire-desc">Données et copies numériques, réunies dans un seul fichier.</div>
+        <footer class="accueil-pied">
+            <div class="accueil-pied-moitie accueil-pied-application">
+                <div class="accueil-pied-texte">
+                    <span class="accueil-pied-version">Bêta publique ${version}</span>
+                    <button type="button" class="accueil-pied-lien" data-action="afficherModalNouveautes">Nouveautés<span class="pastille-nouveautes"></span></button>
+                </div>
+                <img src="img/labo-codex-logo-blanc.svg" alt="Labo Codex" class="accueil-pied-logo">
+            </div>
+            <div class="accueil-pied-moitie accueil-pied-codex-numeris">
+                <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-logo-link">
+                    <img src="img/logo-codex-numeris.svg" alt="Codex Numeris" class="accueil-pied-logo">
+                </a>
+                <div class="accueil-pied-texte">
+                    <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-lien">Le blog : codexnumeris.org<span class="u-lecteur-ecran"> (s’ouvre dans un nouvel onglet)</span></a>
+                    <span class="accueil-pied-tagline">Réfléchir, expérimenter, partager.</span>
                 </div>
             </div>
-
-            <div class="accueil-utilitaire-demi" role="button" tabindex="0" data-action="afficherModalNouveautes">
-                <div class="accueil-utilitaire-icone"><span class="accueil-icone-mask ico-acc-megaphone"></span><span class="pastille-nouveautes"></span></div>
-                <div>
-                    <div class="accueil-utilitaire-titre">Nouveaut\u00e9s</div>
-                    <div class="accueil-utilitaire-desc">Bêta publique ${window.VERSION_MAJEURE || ''} (Build ${window.BUILD_ID || ''})</div>
-                </div>
-            </div>
-
-            <label for="checkbox-accompagnement-accueil" class="accueil-aide-demi">
-                <div class="accueil-aide-icone"><img src="icons/icons8-info-popup.svg" alt=""></div>
-                <div>
-                    <div class="accueil-aide-titre">Assistance</div>
-                    <div class="accueil-aide-desc">Info-bulles, aide à l’écran et visite guidée.</div>
-                </div>
-                <input type="checkbox" id="checkbox-accompagnement-accueil"
-                    class="accueil-aide-checkbox" ${accChecked ? 'checked' : ''}
-                    data-on-change="toggleAccompagnementHandler">
-            </label>
-
-            <label for="checkbox-demo-accueil" class="accueil-aide-demi">
-                <div class="accueil-aide-icone"><img src="icons/icons8-binary-code.svg" alt=""></div>
-                <div>
-                    <div class="accueil-aide-titre">Donn\u00e9es d\u00e9mo <button class="btn-aide-contextuelle" data-aide="accueil-donnees-demo" aria-label="Aide : mode d\u00e9monstration"><span class="icone-info-aide taille-bouton" aria-hidden="true"></span></button></div>
-                    <div class="accueil-aide-desc">Cours fictif complet, indépendant de tes données.</div>
-                </div>
-                <input type="checkbox" id="checkbox-demo-accueil"
-                    class="accueil-aide-checkbox" ${demoChecked ? 'checked' : ''}
-                    data-on-change="toggleDemoHandler">
-            </label>
-
-        </div>
-
-        <div class="accueil-pied">
-            <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-logo-link">
-                <img src="img/logo-codex-numeris.svg" alt="Logo Codex Numeris" class="accueil-pied-logo">
-            </a>
-            <a href="https://codexnumeris.org" target="_blank" rel="noopener noreferrer" class="accueil-pied-lien-site">codexnumeris.org</a>
-            <span class="accueil-pied-tagline">R\u00e9fl\u00e9chir, exp\u00e9rimenter, partager.</span>
-        </div>
+        </footer>
     `;
 
     // Mettre à jour la pastille des nouveautés (elle est maintenant dans le DOM)
@@ -320,75 +274,11 @@ function initialiserAccueil() {
         checkbox.checked = !!obtenirPreference('modeExpert');
     }
 
-    // Checkbox « Données démo » : re-synchroniser avec l'état réel après
-    // db-ready (l'état peut venir d'IDB qui n'est pas dispo au premier rendu).
-    // Bugfix 22 avril : la case se décochait au refresh malgré mode démo actif.
-    //
-    // #414 (8 août 2026) : `initialiserAccueil()` est appelée par `main.js` sous
-    // `DOMContentLoaded`, donc cet écouteur se posait au même instant que celui
-    // de #413 — et se manquait de la même façon. Quand `db-ready` était déjà
-    // passé, la resynchronisation n'avait jamais lieu et le bug du 22 avril
-    // revenait tel quel : la case « Données démo » se décochait au refresh
-    // alors que le mode démo était bien actif. Le rattrapage du portillon ferme
-    // la seule brèche qui restait à ce correctif.
-    //
-    // `once: false` : rejoué à chaque `db-ready` — après un import, le mode
-    // démo peut avoir changé et les cases doivent le refléter.
-    window.auDbPret(function() {
-        const cbDemo = document.getElementById('checkbox-demo-accueil');
-        if (cbDemo) {
-            cbDemo.checked = typeof estEnModeDemo === 'function' && estEnModeDemo();
-        }
-        const cbAcc = document.getElementById('checkbox-accompagnement-accueil');
-        if (cbAcc) {
-            cbAcc.checked = accompagnementEstActif();
-        }
-    }, { once: false });
 }
 
 /* ===============================
    WRAPPERS DELEGATION (Phase 5)
    =============================== */
-
-/** Toggle mode démo depuis checkbox — routage vers activerModeDemo
- * (cochage) et desactiverModeDemo (décochage) dans js/demo-activation.js.
- * Le legacy donnees-demo.js a été retiré en Phase 5.D. */
-function toggleDemoHandler(el) {
-    // T7 : pendant un import de copies, la case garde son état (l'avis est donné par la garde).
-    if (typeof window.importEmpecheLaBascule === 'function' && window.importEmpecheLaBascule(el.checked)) {
-        el.checked = !el.checked;
-        return;
-    }
-    if (el.checked) {
-        if (typeof activerModeDemo === 'function') activerModeDemo();
-    } else {
-        if (typeof desactiverModeDemo === 'function') desactiverModeDemo();
-    }
-}
-
-/**
- * Toggle « Accompagnement » : pilote en bloc les 4 sous-systèmes d'aide
- * (visite guidée, info-bulles, aide contextuelle, flèches didactiques).
- * Un seul état visible côté utilisateur — case cochée = les 4 actifs.
- */
-function toggleAccompagnementHandler(el) {
-    if (window.accompagnement && typeof window.accompagnement.definirActif === 'function') {
-        window.accompagnement.definirActif(!!el.checked);
-    }
-    // La case de l'accueil et le bouton de l'en-tête sont le même interrupteur :
-    // refléter le nouvel état sur le bouton d'en-tête (title/aria-pressed).
-    if (typeof window.synchroniserControlesAssistance === 'function') {
-        window.synchroniserControlesAssistance();
-    }
-}
-
-/**
- * Lit l'état agrégé : true uniquement si les 4 sous-systèmes sont actifs.
- * Sert à initialiser la case « Accompagnement » sur la page d'accueil.
- */
-function accompagnementEstActif() {
-    return !!(window.accompagnement && window.accompagnement.estActif());
-}
 
 /** Navigation accueil : section + sous-section avec délai */
 function naviguerAccueilCarte(sectionEtSousSection) {
@@ -429,16 +319,13 @@ function commencerParLeTrimestre() {
 }
 
 /**
- * Porte « Tu es conseiller·ère pédagogique ? » : coche la case « Données démo » et passe
- * par son propre gestionnaire — mêmes gardes, même case synchronisée. Si la démo est déjà
- * active, rien n'est réactivé.
+ * Porte « Tu es conseiller·ère pédagogique ? » : entre dans la démo. `activerModeDemo` porte
+ * la garde de l'import (T7) ; si la démo est déjà active, rien n'est réactivé. On en sort par
+ * « Quitter la démo », dans le bandeau vert (la case « Données démo » est retirée le 7 nov.).
  */
 function explorerDonneesDemo() {
     if (typeof estEnModeDemo === 'function' && estEnModeDemo()) return;
-    const cb = document.getElementById('checkbox-demo-accueil');
-    if (!cb) return;
-    cb.checked = true;
-    toggleDemoHandler(cb);
+    if (typeof activerModeDemo === 'function') activerModeDemo();
 }
 
 /** Ouvre le wizard de pratique de notation par-dessus l'accueil (modale, pas de navigation). */
@@ -446,22 +333,14 @@ function ouvrirWizardPratique() {
     if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2();
 }
 
-/** Ouvrir modal backup */
-function ouvrirModalBackup() {
-    if (window.backupReminder) window.backupReminder.afficherModal();
-}
-
 // === EXPORTS ===
 window.afficherAccueil = afficherAccueil;
 window.initialiserAccueil = initialiserAccueil;
 window.definirModeExpert = definirModeExpert;
-window.toggleDemoHandler = toggleDemoHandler;
-window.toggleAccompagnementHandler = toggleAccompagnementHandler;
 window.naviguerAccueilCarte = naviguerAccueilCarte;
 window.basculerBanniereBienvenue = basculerBanniereBienvenue;
 window.ouvrirWizardPratique = ouvrirWizardPratique;
 window.commencerParLeTrimestre = commencerParLeTrimestre;
 window.explorerDonneesDemo = explorerDonneesDemo;
-window.ouvrirModalBackup = ouvrirModalBackup;
 
 })();

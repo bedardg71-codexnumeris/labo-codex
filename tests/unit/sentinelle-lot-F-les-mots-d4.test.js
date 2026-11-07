@@ -73,10 +73,9 @@ describe('Lot F (D4) : les anciens mots ont quitté l\'application', () => {
         expect(reserve).toContain("'Groupe archivé'");
         // Lot I (#985, D8) : le rappel mène au codex.
         expect(rappel).toContain('Mettre à jour le codex');
-        // Lot I (#985, option a de Grégoire, 29 sept.) : la carte de l'Accueil est celle du codex.
-        expect(accueil).toContain('<div class="accueil-utilitaire-titre">Ton codex</div>');
-        // 19 oct. 2026 : la description réécrite par Grégoire (les textes des cartes de l'accueil).
-        expect(accueil).toContain('<div class="accueil-utilitaire-desc">Données et copies numériques, réunies dans un seul fichier.</div>');
-        expect(accueil).not.toContain('<div class="accueil-utilitaire-titre">Copie de secours</div>');
+        // « L'accueil épuré » (7 nov. 2026, consigne de Grégoire) : la carte « Ton codex » quitte l'accueil ; le
+        // codex reste dans l'en-tête. Ni l'ancienne carte ni « Copie de secours » ne reviennent.
+        expect(accueil).not.toContain('accueil-utilitaire-titre');
+        expect(accueil).not.toContain('Copie de secours');
     });
 });

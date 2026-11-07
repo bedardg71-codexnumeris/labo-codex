@@ -26312,43 +26312,27 @@ body.mode-clair {
 .mode-clair .prep-section[id="prep-section-image"]     { background: rgba(106, 172, 184, 0.08); }
 
 
-/* Cartes accueil V3 — mode clair (les cartes orange .accueil-aide-demi
-   ne sont pas redéfinies : la palette --acc-* est globale et identique aux 2 modes) */
-.mode-clair .accueil-action,
-.mode-clair .accueil-utilitaire-demi,
-.mode-clair .accueil-portes {
+/* Cartes accueil V3 — mode clair. */
+.mode-clair .accueil-action {
     background: #ffffff;
     border-color: rgba(3, 46, 92, 0.08);
     box-shadow: var(--shadow-normal);
 }
 
-.mode-clair .accueil-action:hover,
-.mode-clair .accueil-utilitaire-demi:hover {
+.mode-clair .accueil-action:hover {
     border-color: var(--bleu-principal);
     background: #ffffff;
     box-shadow: var(--shadow-prononce);
 }
 
 .mode-clair .accueil-action-titre,
-.mode-clair .accueil-utilitaire-titre,
-.mode-clair .accueil-porte-titre,
-.mode-clair .accueil-porte-lien {
+.mode-clair .accueil-porte-titre {
     color: var(--bleu-principal);
 }
 
 .mode-clair .accueil-action-desc,
-.mode-clair .accueil-utilitaire-desc,
 .mode-clair .accueil-porte-desc {
     color: var(--texte-secondaire);
-}
-
-/* Les filets entre les trois portes : la couleur du trait de la carte, en mode clair aussi. */
-.mode-clair .accueil-porte + .accueil-porte {
-    border-color: rgba(3, 46, 92, 0.08);
-}
-
-.mode-clair .accueil-porte-lien:focus-visible {
-    outline-color: var(--bleu-principal);
 }
 
 /* ===============================
@@ -29189,40 +29173,90 @@ body.mode-clair {
     gap: 12px;
     flex-wrap: wrap;
 }
-/* Le lien des tutoriels (<a>) rendu comme les deux <button> : même hauteur, sans
-   soulignement ; cible tactile iPad de 44 px pour les trois. */
-.banniere-bienvenue-actions .btn {
+/* « À propos » — L'accueil épuré (7 nov. 2026, esquisse 64). La devise en grand et en graisse
+   légère ; les quatre paragraphes sur deux colonnes sous leurs intertitres ; sous un filet, les
+   concepts (trois liens texte) et la CoP ; sous un second filet, « Par où commencer ? ». Sous
+   820 px, les colonnes s'empilent. */
+.banniere-bienvenue .apropos-devise {
+    margin: 4px 0 22px;
+    font-size: 1.9rem;
+    font-weight: 300;
+    line-height: 1.25;
+    color: var(--texte-principal);
+}
+.apropos-colonnes,
+.apropos-deux {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 40px;
+    row-gap: 6px;
+    align-items: start;
+}
+.banniere-bienvenue .apropos-intertitre,
+.mode-clair .banniere-bienvenue .apropos-intertitre {
+    margin: 0 0 6px;
+    padding: 0;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-primaire);
+}
+.apropos-avec-filet {
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--bordure-claire);
+}
+.banniere-bienvenue .apropos-deux .banniere-bienvenue-acces {
+    margin: 0 0 12px;
+}
+.banniere-bienvenue .apropos-concepts p {
+    margin-bottom: 8px;
+}
+.banniere-bienvenue .apropos-liens {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    gap: 4px 22px;
+}
+.apropos-lien {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
+    gap: 4px;
     min-height: 44px;
-    box-sizing: border-box;
-    font-family: inherit;
-    line-height: 1.2;
-    text-decoration: none;
+    padding: 0;
+    background: none;
+    border: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent-primaire);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
 }
-
-/* « Bienvenue dans Labo Codex ! » : la ligne-titre du corps. */
-.banniere-bienvenue .banniere-bienvenue-titre-etapes {
-    margin-bottom: 4px;
+.apropos-lien:focus-visible {
+    outline: 2px solid var(--accent-primaire);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+@media (max-width: 819px) {
+    .apropos-colonnes,
+    .apropos-deux {
+        grid-template-columns: 1fr;
+    }
+    .banniere-bienvenue .apropos-devise {
+        font-size: 1.5rem;
+    }
 }
 
 /* =============================================================================
    ACCUEIL — classes utilitaires (remplacent les style= inline d'accueil.js)
    ============================================================================= */
 
-/* Pied de page — lien vers codexnumeris.org */
-.accueil-pied-lien-site {
-    font-size: 0.8rem;
-    color: var(--gris-moyen);
-    text-decoration: none;
-}
-
-/* Pied de page — slogan « Réfléchir, expérimenter, partager. » */
+/* Pied de page — slogan « Réfléchir, expérimenter, partager. » (7 nov. 2026 : --gris-clair tombait à
+   3,4:1 sur le fond clair de la page ; le secondaire passe 4,5:1 dans les deux thèmes). */
 .accueil-pied-tagline {
     font-size: 0.75rem;
-    color: var(--gris-clair);
+    color: var(--texte-secondaire);
     font-style: italic;
 }
 

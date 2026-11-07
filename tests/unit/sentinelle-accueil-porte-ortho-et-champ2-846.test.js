@@ -24,8 +24,10 @@ import { tranche } from './_helpers/tranche.js';
 //      mode clair ; ni bord gauche épais, ni couleur propre (la sarcelle signe la démo).
 //   B5. (28 oct. 2026) la carte devient UN encadré de trois portes d'entrée — « Tu enseignes ? »,
 //      la porte de l'orthopédagogie (au milieu, inchangée), « Tu es conseiller·ère pédagogique ? » ;
-//      trois colonnes séparées par des filets, empilées sous 760 px ; « Commencer → » de la
-//      première mène à l'étape Trimestre du Cadre, « Explorer → » passe par la case « Données démo ».
+//      trois colonnes séparées par des filets ; « Commencer » de la première mène à l'étape Trimestre.
+//   7 nov. 2026, « L'accueil épuré » : les portes rentrent dans « À propos », sous « Par où
+//      commencer ? », sans boîte à elles (jamais de carte dans une carte), avec de vrais boutons ;
+//      empilées sous 820 px ; « Explorer » appelle activerModeDemo (la case « Données démo » est retirée).
 //
 // BREAK-TESTS VÉRIFIÉS le 12 septembre 2026 — journal en fin de fichier.
 
@@ -118,8 +120,10 @@ describe('A · #846 — le champ 2 du groupe-cours dit le même mot sur un servi
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 19 oct. 2026 : « Importer des productions » devient « Importer des copies » (les productions sont les consignes).
+// 7 nov. 2026 : la neuvième, « Organiser tes rencontres » (consigne « L'accueil épuré »).
 const TACHES = ['Adopter ta pratique', 'Planifier ton cours', 'Saisir les présences', 'Importer des copies',
-    'Annoter et évaluer', 'Observer le groupe', 'Consulter un profil', 'Différencier les interventions'];
+    'Annoter et évaluer', 'Observer le groupe', 'Consulter un profil', 'Différencier les interventions',
+    'Organiser tes rencontres'];
 // 19 oct. 2026 : les descriptions des huit tâches, dans l'ordre des titres (relecture de Grégoire avec Cowork).
 const DESCRIPTIONS_TACHES = [
     'Construction de la note du cours, sommative ou alternative.',
@@ -129,7 +133,8 @@ const DESCRIPTIONS_TACHES = [
     'Annotation, niveaux ou note par critère, rétroaction automatisée.',
     'Assiduité, complétion, performance et dépistage des difficultés d’apprentissage.',
     'Engagement, travaux, progression et accompagnement.',
-    'Niveaux de besoin, rencontres et bilans.'
+    'Niveaux de besoin, rencontres et bilans.',
+    'Service d’orthopédagogie : suivi en petit groupe ou en individuel.'
 ];
 
 // Les mots arrêtés par Grégoire, dans l'ordre où l'accueil les rend.
@@ -141,26 +146,35 @@ const DESCRIPTIONS_TACHES = [
 // et le paragraphe d'accès perd son amorce « Ton courriel, une fois par mois. ».
 // 28 oct. 2026 — texte remplacé en entier par Grégoire (verdict « Tout remplacer ») : « Par où
 // commencer ? » et la ligne de l'orthopédagogue quittent le bandeau, les trois portes les portent.
+// 7 nov. 2026 — « L'accueil épuré » (consigne de Grégoire) : « Bienvenue dans Labo Codex ! » et la phrase
+// « Labo Codex est un outil… » partent ; la devise ouvre le corps ; « C’est une application » devient
+// « Labo Codex est une application » ; chaque paragraphe sous son intertitre ; les portes, sous
+// « Par où commencer ? », rentrent DANS « À propos ».
 const TITRE_BANDEAU = 'À propos';
 const MOTS_BANDEAU = [
-    'Bienvenue dans Labo Codex !',
-    'Labo Codex est un outil de soutien à l’enseignement et au suivi des apprentissages.',
-    'C’est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.',
+    'Suivre l’apprentissage. Soutenir l’enseignement.',
+    'Ce que fait l’application',
+    'Labo Codex est une application qui te propose de numériser ton travail et de rendre visibles et interprétables les micro-données que tu crées et recueilles dans ton environnement. Elle te permet ainsi de mieux voir les conditions de ton écosystème-classe et de mieux planifier tes interventions.',
+    'Ton jugement d’abord',
     'Une de ses particularités est qu’il n’y a aucune intelligence artificielle dans l’application. Ton jugement professionnel est souverain et l’outil ne fait que l’éclairer. Labo Codex n’impose aucune pratique, est entièrement configurable et aucune décision n’est prise à ta place. L’application n’offre pas la possibilité de scroller très longtemps et elle ne provoque pas de grandes bouffées de dopamine. Par contre, elle permet de réfléchir à ta pratique et de te libérer un peu de ta charge mentale.',
+    'Un commun éducatif',
     'Tu peux faire les mêmes gestes que d’habitude – planifier, concevoir, évaluer et suivre la progression de tes étudiant·es – mais dans un seul outil numérique intégré. Labo Codex t’offre un espace autonome, indépendant, confidentiel, gratuit, ouvert, portable et sobre en carbone ! L’objectif est d’inventer et d’organiser avec cette ressource un commun éducatif, pérenne et ouvert, en marge des grosses plateformes.',
+    'Tes données chez toi',
     'Tu entres ton adresse de courriel, tu reçois un code de sécurité et c’est tout ! Une fois entré·e, tu restes connecté·e un mois sans avoir à renouveler ton accès. Tes données restent 100 % sur ton appareil. Il n’y a pas de commerce, pas de frais, pas d’abonnement, pas de publicité. Le seul échange souhaité est ton feedback et tes rapports de bugs (si tu en rencontres).',
     'Certains concepts sont nouveaux ?',
     'Trois guides t’expliquent le concept des micro-données, la taxonomie SOLO et le modèle RàI qui servent au dépistage des difficultés et à la planification des interventions. L’aide et les guides sont accessibles en tout temps.',
     'Tu as besoin de support humain ?',
     'L’Association québécoise de pédagogie collégiale (AQPC) héberge une Communauté de pratique (CoP) Labo Codex. C’est le lieu tout désigné pour obtenir du soutien et échanger entre pairs. Des enseignant·es comme toi y explorent d’autres pratiques pédagogiques et co-construisent des ressources libres.',
 ];
-// 28 oct. 2026 : les trois portes, dans l'ordre (mots donnés par Grégoire). « Commencer → » est écrit
-// deux fois (deux portes) : il est vérifié dans l'ordre du rendu, pas par l'unicité de B3.
+// 28 oct. 2026 : les trois portes, dans l'ordre (mots donnés par Grégoire). 7 nov. 2026 : de vrais
+// boutons, « Commencer », « Commencer », « Explorer », et la nouvelle phrase de la porte du conseiller.
+// « Commencer » est écrit deux fois : vérifié dans l'ordre du rendu, pas par l'unicité de B3.
 const MOTS_PORTES = [
-    'Tu enseignes ?', 'Crée ton trimestre, ton cours et ton groupe, puis apporte ta grille d’évaluation.', 'Commencer →',
-    'Tu es orthopédagogue ?', 'Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.', 'Commencer →',
-    'Tu es conseiller·ère pédagogique ?', 'Explore un cours fictif déjà configuré, séparé de tes vraies données.', 'Explorer →'];
-const MOTS_UNIQUES_PORTES = MOTS_PORTES.filter(m => m !== 'Commencer →');
+    'Par où commencer ?',
+    'Tu enseignes ?', 'Crée ton trimestre, ton cours et ton groupe, puis apporte ta grille d’évaluation.', '>Commencer<',
+    'Tu es orthopédagogue ?', 'Décris ton service : son nom, la liste de tes étudiant·es et les dates de ton trimestre.', '>Commencer<',
+    'Tu es conseiller·ère pédagogique ?', 'Explore un cours de démonstration déjà configuré, aux données fictives mais réalistes.', '>Explorer<'];
+const MOTS_UNIQUES_PORTES = MOTS_PORTES.filter(m => !m.startsWith('>') && m !== 'Par où commencer ?');
 
 function rendreAccueil(options) {
     const opts = options || {};
@@ -182,75 +196,68 @@ function rendreAccueil(options) {
     return { html: elements['accueil-contenu'].innerHTML, win, appels, doc };
 }
 
-describe('B1 · la carte est au-dessus des tâches, et les huit tâches sont toujours là', () => {
-    it('ordre : le bandeau, puis la carte, puis le label « Tâches », puis la grille des tâches', () => {
+describe('B1 · les portes sont dans « À propos », au-dessus des tâches, et les tâches sont toutes là', () => {
+    it('ordre : « À propos », puis « Par où commencer ? » et les portes DEDANS, puis le label « Tâches », puis la grille', () => {
         const { html } = rendreAccueil();
-        const iBandeau = html.indexOf('id="banniere-bienvenue"');
-        const iCarte = html.indexOf('class="accueil-portes"');
-        const iTaches = html.indexOf('<div class="accueil-section-label">Tâches</div>');
-        const iGrille = html.indexOf('class="accueil-grille-actions"');
-        expect(iBandeau).toBeGreaterThanOrEqual(0);
-        expect(iCarte, 'la carte est rendue').toBeGreaterThan(iBandeau);
-        expect(iTaches, 'au-dessus du label « Tâches »').toBeGreaterThan(iCarte);
-        expect(iGrille).toBeGreaterThan(iTaches);
+        const bandeau = tranche(html, 'id="banniere-bienvenue"', '<div class="accueil-section-label">Tâches</div>');
+        const iLabel = bandeau.indexOf('<div class="accueil-section-label">Par où commencer ?</div>');
+        const iCarte = bandeau.indexOf('class="accueil-portes"');
+        expect(iLabel, 'le label est dans « À propos »').toBeGreaterThanOrEqual(0);
+        expect(iCarte, 'les portes le suivent, dans « À propos »').toBeGreaterThan(iLabel);
+        expect(html.indexOf('class="accueil-grille-actions"')).toBeGreaterThan(html.indexOf('<div class="accueil-section-label">Tâches</div>'));
         expect(html.match(/class="accueil-portes"/g), 'un seul encadré').toHaveLength(1);
         expect(html).not.toContain('accueil-porte-ortho');
     });
 
-    it('les huit cartes de tâches, dans leur ordre, et la carte n\'en est pas une', () => {
+    it('les neuf cartes de tâches, dans leur ordre ; les portes n\'en sont pas', () => {
         const { html } = rendreAccueil();
         const titres = [...html.matchAll(/<div class="accueil-action-titre">([^<]*)<\/div>/g)].map(m => m[1]);
         expect(titres).toEqual(TACHES);
-        expect(html.match(/class="accueil-action"/g)).toHaveLength(8);
+        expect(html.match(/class="accueil-action"/g)).toHaveLength(9);
         const carte = tranche(html, 'class="accueil-portes"', '<div class="accueil-section-label">Tâches</div>');
         expect(carte).not.toContain('accueil-action');
     });
 
-    it('les descriptions des cartes, arrêtées par Grégoire le 19 oct. 2026 : des groupes nominaux, sans deux-points', () => {
+    it('les descriptions des cartes (19 oct. et 7 nov. 2026) ; plus de cartes « Utilitaires » ni « Aide »', () => {
         const { html } = rendreAccueil();
         const lus = (classe) => [...html.matchAll(new RegExp('<div class="' + classe + '">([^<]*)</div>', 'g'))].map(m => m[1]);
         expect(lus('accueil-action-desc')).toEqual(DESCRIPTIONS_TACHES);
-        // « Nouveautés » porte la version, pas une description : seule celle du codex est arrêtée.
-        expect(lus('accueil-utilitaire-desc')[0]).toBe('Données et copies numériques, réunies dans un seul fichier.');
-        expect(lus('accueil-aide-desc')).toEqual(['Info-bulles, aide à l’écran et visite guidée.', 'Cours fictif complet, indépendant de tes données.']);
-        // La règle de forme du 19 oct. qu'une machine peut vérifier : aucun deux-points.
-        DESCRIPTIONS_TACHES.concat(lus('accueil-aide-desc'), lus('accueil-utilitaire-desc')[0]).forEach((d) => expect(d, d).not.toContain(':'));
+        // La règle de forme du 19 oct. (aucun deux-points) vaut pour les huit premières ; la neuvième, donnée
+        // mot pour mot par Grégoire le 7 nov., en porte un.
+        DESCRIPTIONS_TACHES.slice(0, 8).forEach((d) => expect(d, d).not.toContain(':'));
+        expect(html).not.toMatch(/accueil-utilitaire|accueil-aide-|accueil-grille-bas|type="checkbox"/);
     });
 });
 
-describe('B2 · le lien de la carte prend le chemin de la sous-navigation', () => {
-    it('« Commencer → » mène à Suivi › Rencontres par naviguerAccueilCarte, la route de la sous-navigation', () => {
+describe('B2 · la porte de l\'orthopédagogie prend le chemin de la sous-navigation', () => {
+    it('« Commencer » mène à Suivi › Rencontres par naviguerAccueilCarte, la route de la sous-navigation', () => {
         const { html, win, appels } = rendreAccueil();
-        const m = html.match(/<button type="button" class="accueil-porte-lien" data-action="([^"]+)" data-param="([^"]+)">Commencer →<\/button>/);
-        expect(m, 'le lien est un bouton natif (clavier, Entrée/Espace)').not.toBeNull();
+        const porte = tranche(html, 'Tu es orthopédagogue ?', 'Tu es conseiller');
+        const m = porte.match(/<button type="button" class="btn btn-principal accueil-porte-bouton" data-action="([^"]+)" data-param="([^"]+)">Commencer<\/button>/);
+        expect(m, 'un bouton natif (clavier, Entrée/Espace)').not.toBeNull();
         expect(m[1]).toBe('naviguerAccueilCarte');
         expect(m[2]).toBe('suivi|suivi-rencontres');
         win.naviguerAccueilCarte(m[2]);
         expect(appels).toEqual([['section', 'suivi'], ['sous-section', 'suivi-rencontres']]);
-        // La même sous-section que la sous-navigation : la table de navigation.js et l'entrée de config.js.
         expect(lire('js/navigation.js')).toMatch(/'suivi-rencontres': 'nav-suivi-rencontres'/);
         expect(lire('js/config.js')).toMatch(/\{ id: 'rencontres', label: 'Rencontres' \}/);
-        expect(html.match(/suivi-rencontres/g), 'un seul chemin vers les rencontres depuis l\'accueil').toHaveLength(1);
+        // Deux chemins vers les rencontres depuis l'accueil, et deux seulement : la porte et la neuvième tâche (7 nov.).
+        expect(html.match(/suivi\|suivi-rencontres/g)).toHaveLength(2);
     });
 });
 
 describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () => {
-    it('le rendu porte les mots arrêtés, dans l\'ordre, et plus les deux anciens paragraphes', () => {
+    it('le rendu porte les mots arrêtés, dans l\'ordre, et plus les anciens', () => {
         const { html } = rendreAccueil();
         let curseur = -1;
-        for (const mot of MOTS_BANDEAU) {
-            const i = html.indexOf(mot);
-            expect(i, mot).toBeGreaterThan(curseur);
-            curseur = i;
-        }
-        const iCarte = html.indexOf('class="accueil-portes"');
-        curseur = iCarte;
-        for (const mot of MOTS_PORTES) {
-            // Cherché À PARTIR de la carte : les portes suivent le bandeau.
+        for (const mot of [...MOTS_BANDEAU, ...MOTS_PORTES]) {
             const i = html.indexOf(mot, curseur + 1);
             expect(i, mot).toBeGreaterThan(curseur);
             curseur = i;
         }
+        expect(html).not.toContain('Bienvenue dans Labo Codex');
+        expect(html).not.toContain('Labo Codex est un outil de soutien');
+        expect(html).not.toContain('C’est une application');
         expect(html).not.toContain('Certains concepts sont nouveaux pour toi');
         expect(html).not.toContain('L’identification est requise');
     });
@@ -266,11 +273,10 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         expect(html).not.toContain('l’application s’en sert partout');
     });
 
-    it('le bandeau n\'a plus ni étapes ni ligne de l\'orthopédagogue : les portes les portent (28 oct. 2026) ; aucun « — » dans le bandeau', () => {
+    it('« À propos » sans étapes, sans « — » ni <br> ; la ligne de l\'orthopédagogue reste dans sa porte', () => {
         const { html } = rendreAccueil();
         const bandeau = tranche(html, 'id="banniere-bienvenue"', 'class="accueil-portes"');
         expect(bandeau).not.toMatch(/<ol[\s>]/);
-        expect(bandeau).not.toContain('Par où commencer ?');
         expect(bandeau).not.toContain('Tu es orthopédagogue ?');
         expect(html).not.toContain('Décris ton service dans Suivi › Rencontres');
         expect(html).not.toContain('Une belle occasion de développement professionnel');
@@ -278,55 +284,49 @@ describe('B3 · les mots viennent du rendu, et un seul endroit les écrit', () =
         expect(bandeau).not.toContain('<br>');
     });
 
-    it('le troisième bouton ouvre les tutoriels du blogue dans un nouvel onglet, sûrement, et le dit aux lecteurs d\'écran', () => {
+    it('trois liens texte remplacent les trois boutons : mêmes actions ; les tutoriels dans un nouvel onglet, sûrement, dit aux lecteurs d\'écran', () => {
         const { html } = rendreAccueil();
-        const actions = tranche(html, 'class="banniere-bienvenue-actions"');
-        const lien = actions.match(/<a [^>]*>[\s\S]*?<\/a>/);
-        expect(lien, 'un lien après les deux boutons').not.toBeNull();
-        expect(actions.indexOf(lien[0])).toBeGreaterThan(actions.indexOf('Voir les guides p'));
-        expect(lien[0]).toContain('href="https://codexnumeris.org/tutoriels"');
-        expect(lien[0]).toContain('target="_blank"');
-        expect(lien[0]).toMatch(/rel="[^"]*\bnoopener\b[^"]*"/);
-        expect(lien[0]).toContain('class="btn btn-secondaire"');
-        expect(lien[0]).toContain('Voir les tutoriels <span aria-hidden="true">↗</span>');
-        expect(lien[0]).toMatch(/<span class="u-lecteur-ecran">[^<]*nouvel onglet[^<]*<\/span>/);
+        const liens = [...tranche(html, 'class="apropos-liens').matchAll(/<(button|a) [^>]*class="apropos-lien"[^>]*>[\s\S]*?<\/\1>/g)].map(m => m[0]);
+        expect(liens).toHaveLength(3);
+        expect(liens[0]).toMatch(/data-action="demarrerTourGuide">Visite guidée</);
+        expect(liens[1]).toMatch(/data-action="naviguerAccueilCarte" data-param="labo\|labo-accompagnement">Guides pédagogiques</);
+        expect(liens[2]).toContain('href="https://codexnumeris.org/tutoriels"');
+        expect(liens[2]).toContain('target="_blank"');
+        expect(liens[2]).toMatch(/rel="[^"]*\bnoopener\b[^"]*"/);
+        expect(liens[2]).toContain('Tutoriels <span aria-hidden="true">↗</span>');
+        expect(liens[2]).toMatch(/<span class="u-lecteur-ecran">[^<]*nouvel onglet[^<]*<\/span>/);
+        expect(html).not.toContain('btn btn-secondaire');
     });
 
     it('chaque mot n\'est écrit qu\'une fois, dans js/accueil.js — ni ailleurs dans js/, ni dans index.html', () => {
         const sources = readdirSync(path.join(RACINE, 'js')).filter(f => f.endsWith('.js')).map(f => ['js/' + f, sansCommentaires(lire('js/' + f))]);
         sources.push(['index.html', lire('index.html')]);
-        for (const mot of [...MOTS_UNIQUES_PORTES, ...MOTS_BANDEAU]) {
+        // Les intertitres sont courts : ils pourraient se dire ailleurs ; on n'en exige pas l'unicité.
+        for (const mot of [...MOTS_UNIQUES_PORTES, ...MOTS_BANDEAU].filter((m) => m.length > 30)) {
             const lieux = sources.flatMap(([f, code]) => Array(code.split(mot).length - 1).fill(f));
             expect(lieux, mot).toEqual(['js/accueil.js']);
         }
     });
 });
 
-describe('B4 · la carte est blanche comme les autres cartes de l\'accueil', () => {
+describe('B4 · jamais de carte dans une carte : « À propos » est la carte, les portes n\'ont pas de boîte', () => {
     const regle = (css, sel) => {
-        const m = css.match(new RegExp('\\n\\s*' + sel.replace(/\./g, '\\.') + '\\s*\\{([^}]*)\\}'));
-        return m ? Object.fromEntries(m[1].split(';').map(d => d.split(':').map(x => x && x.trim())).filter(([k, v]) => k && v)) : null;
+        const m = css.match(new RegExp('\\n\\s*' + sel.replace(/[.+]/g, '\\$&') + '\\s*\\{([^}]*)\\}'));
+        return m ? m[1] : null;
     };
-    it('index.html : même fond, même trait fin, même rayon que .accueil-action ; ni bord gauche, ni ombre ni couleur propres', () => {
+    it('index.html : ni fond, ni trait, ni ombre sur l\'encadré des portes ni sur une porte ; la sarcelle reste à la démo', () => {
         const html = lire('index.html');
-        const carte = regle(html, '.accueil-portes');
-        const action = regle(html, '.accueil-action');
-        expect(carte).not.toBeNull();
-        for (const p of ['background', 'border', 'border-radius']) expect(carte[p], p).toBe(action[p]);
-        const declarations = Object.keys(carte).join(' ');
-        expect(declarations).not.toMatch(/border-left|box-shadow|color/);
+        for (const sel of ['.accueil-portes', '.accueil-porte']) {
+            const r = regle(html, sel);
+            expect(r, sel).not.toBeNull();
+            expect(r, sel).not.toMatch(/background|(^|\s)border:|box-shadow/);
+        }
         expect(html).not.toMatch(/\.accueil-porte[\w-]*\s*\{[^}]*(sarcelle|--acc-)/);
-    });
-    it('styles.css : en mode clair, la carte est dans la MÊME règle que les cartes de tâches (fond blanc, même ombre)', () => {
-        const css = lire('styles.css');
-        const m = css.match(/((?:\.mode-clair \.[\w-]+,\s*)+\.mode-clair \.[\w-]+)\s*\{\s*background: #ffffff;\s*border-color: rgba\(3, 46, 92, 0\.08\);\s*box-shadow: var\(--shadow-normal\);\s*\}/);
-        expect(m, 'la règle des cartes accueil V3 en mode clair').not.toBeNull();
-        expect(m[1]).toContain('.mode-clair .accueil-action');
-        expect(m[1]).toContain('.mode-clair .accueil-portes');
+        expect(rendreAccueil().html).toMatch(/class="banniere-bienvenue carte /);
     });
 });
 
-describe('B5 · trois portes d\'entrée dans un seul encadré (28 oct. 2026)', () => {
+describe('B5 · trois portes d\'entrée (28 oct. 2026), de vrais boutons (7 nov. 2026)', () => {
     const portes = (html) => tranche(html, 'class="accueil-portes"', '<div class="accueil-section-label">Tâches</div>')
         .split('<div class="accueil-porte">').slice(1);
     const regle = (css, sel) => {
@@ -334,73 +334,45 @@ describe('B5 · trois portes d\'entrée dans un seul encadré (28 oct. 2026)', (
         return m ? m[1] : null;
     };
 
-    it('trois colonnes, chacune : une question en titre, une phrase, un bouton natif', () => {
+    it('trois colonnes, chacune : une question en titre, une phrase, un vrai bouton', () => {
         const { html } = rendreAccueil();
         const p = portes(html);
         expect(p).toHaveLength(3);
         const titres = p.map(c => c.match(/<div class="accueil-porte-titre">([^<]*)<\/div>/)[1]);
         expect(titres).toEqual(['Tu enseignes ?', 'Tu es orthopédagogue ?', 'Tu es conseiller·ère pédagogique ?']);
-        p.forEach((c) => {
-            expect(c).toMatch(/<div class="accueil-porte-desc">[^<]+<\/div>/);
-            expect(c).toMatch(/<button type="button" class="accueil-porte-lien" data-action="[^"]+"[^>]*>[^<]+<\/button>/);
-        });
+        const boutons = p.map((c) => c.match(/<button type="button" class="btn btn-principal accueil-porte-bouton" data-action="[^"]+"[^>]*>([^<]+)<\/button>/)[1]);
+        expect(boutons).toEqual(['Commencer', 'Commencer', 'Explorer']);
+        p.forEach((c) => expect(c).toMatch(/<div class="accueil-porte-desc">[^<]+<\/div>/));
     });
 
     it('« Tu enseignes ? » : Cadre › Trimestre, puis l\'étape Trimestre de la barre de convergence', () => {
         const { html, win, appels } = rendreAccueil();
-        expect(portes(html)[0]).toContain('data-action="commencerParLeTrimestre">Commencer →</button>');
+        expect(portes(html)[0]).toContain('data-action="commencerParLeTrimestre">Commencer</button>');
         win.commencerParLeTrimestre();
         expect(appels).toEqual([['section', 'calendrier'], ['sous-section', 'calendrier-trimestre'], ['etape', 'trimestre']]);
-        // La même étape qu'un clic dans la barre : la table de trimestre-v2.js, exportée pour l'accueil.
         const t = lire('js/trimestre-v2.js');
         expect(t).toMatch(/'trimestre': 'accordeon-gestion-trimestres'/);
         expect(t).toContain('window.ouvrirAccordeonDeLEtape = ouvrirAccordeonDeLEtape;');
     });
 
-    it('« Explorer → » passe par la case « Données démo » : cochée, puis son gestionnaire', () => {
-        const { html, win, appels, doc } = rendreAccueil();
-        expect(portes(html)[2]).toContain('data-action="explorerDonneesDemo">Explorer →</button>');
-        const cb = doc.getElementById('checkbox-demo-accueil');
-        cb.checked = false;
+    it('« Explorer » appelle activerModeDemo (qui porte la garde de l\'import, T7) ; rien quand la démo est déjà active', () => {
+        const { html, win, appels } = rendreAccueil();
+        expect(portes(html)[2]).toContain('data-action="explorerDonneesDemo">Explorer</button>');
         win.explorerDonneesDemo();
-        expect(cb.checked, 'la case suit').toBe(true);
         expect(appels).toEqual([['activerModeDemo']]);
+        const deja = rendreAccueil({ demo: true });
+        deja.win.explorerDonneesDemo();
+        expect(deja.appels).toEqual([]);
     });
 
-    it('« Explorer → » garde la case comme elle quand un import empêche la bascule', () => {
-        const { win, appels, doc } = rendreAccueil({ importEmpeche: true });
-        const cb = doc.getElementById('checkbox-demo-accueil');
-        cb.checked = false;
-        win.explorerDonneesDemo();
-        expect(cb.checked).toBe(false);
-        expect(appels).toEqual([]);
-    });
-
-    it('« Explorer → » ne réactive rien quand la démo est déjà active', () => {
-        const { win, appels, doc } = rendreAccueil({ demo: true });
-        const cb = doc.getElementById('checkbox-demo-accueil');
-        cb.checked = true;
-        win.explorerDonneesDemo();
-        expect(cb.checked).toBe(true);
-        expect(appels).toEqual([]);
-    });
-
-    it('index.html : trois colonnes égales, filets verticaux du trait de la carte, horizontaux sous 760 px ; focus visible', () => {
+    it('index.html : trois colonnes égales, filets verticaux, horizontaux sous 820 px', () => {
         const html = lire('index.html');
         expect(regle(html, '.accueil-portes')).toMatch(/grid-template-columns: repeat\(3, 1fr\)/);
-        const trait = regle(html, '.accueil-portes').match(/border: 1px solid ([^;]+);/)[1];
-        expect(regle(html, '.accueil-porte + .accueil-porte')).toContain('border-left: 1px solid ' + trait);
-        expect(regle(html, '.accueil-porte'), 'pas de boîte autour d\'une colonne').not.toMatch(/border|background|box-shadow/);
-        const media = html.match(/@media \(max-width: 760px\) \{\s*\.accueil-portes \{\s*grid-template-columns: 1fr;\s*\}\s*\.accueil-porte \+ \.accueil-porte \{([^}]*)\}/);
-        expect(media, 'empilées sous 760 px').not.toBeNull();
+        expect(regle(html, '.accueil-porte + .accueil-porte')).toContain('border-left: 1px solid var(--bordure-claire)');
+        const media = html.match(/@media \(max-width: 819px\) \{\s*\.accueil-portes \{\s*grid-template-columns: 1fr;\s*\}[\s\S]*?\.accueil-porte \+ \.accueil-porte \{([^}]*)\}/);
+        expect(media, 'empilées sous 820 px').not.toBeNull();
         expect(media[1]).toContain('border-left: none');
-        expect(media[1]).toContain('border-top: 1px solid ' + trait);
-        expect(regle(html, '.accueil-porte-lien:focus-visible')).toContain('outline: 2px solid');
-    });
-
-    it('styles.css : en mode clair, les filets prennent le trait de la carte', () => {
-        const css = lire('styles.css');
-        expect(regle(css, '.mode-clair .accueil-porte + .accueil-porte')).toContain('border-color: rgba(3, 46, 92, 0.08)');
+        expect(media[1]).toContain('border-top: 1px solid var(--bordure-claire)');
     });
 });
 
@@ -435,3 +407,8 @@ describe('B5 · trois portes d\'entrée dans un seul encadré (28 oct. 2026)', (
 //   E1 accueil.js — « sobre en carbone ! » devient « sobre en carbone. »                                     → 2 rouges
 //   E2 accueil.js — « Par où commencer ? » et une <ol> remis dans le bandeau                                  → 1 rouge
 //   E1 reproduit le 29 oct. 2026 (5 h 57), avant commit : 2 rouges, empreinte sha256 identique après restauration.
+//
+// BREAK-TESTS DU 7 novembre 2026 (« L'accueil épuré ») — copie de référence, mutation, restauration.
+//   F1 accueil.js — « Labo Codex est une application » redevient « C’est une application »                  → 2 rouges
+//   F2 accueil.js — « Explorer » n'appelle plus activerModeDemo                                              → 3 rouges (avec T7)
+//   Empreinte sha256 de accueil.js identique après restauration (41c2eb5d18ab).
