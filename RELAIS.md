@@ -7,6 +7,26 @@
 
 ---
 
+## 6 NOV. 2026, 23 H 40 (Claude Code) : **TROISIÈME PASSE POUSSÉE EN FORCE ; `main` = `origin/main` = `d9200c75` (+ ce commit de relais) ; GITHUB : `main` ET LES 22 ÉTIQUETTES, TOUTES RÉÉCRITES ; EN LIGNE : TOUJOURS 1.235.0**
+
+**Ce qui s'est passé** : au signal de Grégoire dans cette session (« je veux que ça se fasse cette nuit »), la copie réécrite de `plans de travail/CONSIGNE-LOT-2026-11-06-troisieme-passe.md` (`~/purge-seconde/troisieme/copie.git`, préparée et vérifiée plus tôt dans la soirée) a remplacé `main` et les étiquettes locales (`git update-ref`, arbre de travail intact), puis GitHub. `3465ef41` est devenu `d9200c75`, l'arbre est le même (`3231d79f`). Sauvegarde : `~/purge-seconde/troisieme/avant.bundle`, vérifié (`git bundle verify`) avant la poussée.
+
+**Vérifications A à D relues avant de pousser** (`verif3.log`, `b-copie.log`, `b-original-3465.log`, comptes seulement) : A identique (témoins HEAD~1 et `6ea49015` : différents) ; B à zéro pour S12-S36, B01-B18 et G1 (original : 835, 40 et 239 versions) ; C 6738 = 6738 commits. **Deux écarts, examinés et expliqués, aucun n'est un reste** :
+- *Règle 4, 4 versions restantes du jeton 27* : c'est un mot courant homographe du prénom, employé comme locution (« gagne … au bonus », « fine … à l'exploitation »), dans trois des six chemins, pas un prénom ; le jeton est de classe P et sa règle l'excluait déjà d'un des chemins pour ce motif.
+- *D, S03 : 407 → 406 versions* : la seule version touchée (`docs/archive/auto-perspective-bilan-session.md`) portait ce mot comme première moitié d'un nom composé d'élève réel, remplacé en entier par la correspondance du 22 sept. (règle 4) — ce que le commit du § 3 avait déjà fait dans l'arbre actuel. Les autres coïncidences S01-S11 et N1 gardent leur compte.
+
+**Verdict** : complet, en dix morceaux, sur `d9200c75` (sur secteur, éveil tenu ; ⚠ l'app Claude et Safari étaient OUVERTS, Grégoire couché) : 1 381 essais, 1 377 verts, 0 au second essai, 4 rouges connus, 23 sautés. Le hook pré-push : « verdict vert à jour pour ce commit ».
+
+**Sur GitHub** : `git ls-remote` comparé à la copie : 28 refs sur 28 conformes (main, 22 étiquettes, 5 déréférencées) ; témoin : aucune des 24 refs du bundle d'avant n'y est. Forks : 0. Les `refs/pull/1` à `10` (lecture seule) gardent l'ancienne histoire : **la demande au support de GitHub (Cowork) est maintenant due**, une seule fois, comme prévu au § 5 de la consigne.
+
+**Ce commit de relais** est poussé sans verdict Playwright propre (Markdown seul ; `--reporter` n'accepte pas la racine) : Vitest seul l'a jugé.
+
+**Trouvaille inscrite, non corrigée** : sur GitHub, le job « Playwright — verdict » du push de `a5be544f` était rouge (« 1347 spec(s) NOUVELLEMENT rouges ») alors que ses 16 parties étaient vertes ; cause supposée, non vérifiée : sa baseline de comparaison après la réécriture.
+
+**⚠ Tout autre clone ou copie de ce dépôt** porte l'ancienne histoire : ne pas le pousser, le recloner.
+
+**Suivant** : le chantier du logo (nouvelle identité visuelle), sur cette histoire neuve. Les 11 suppressions de `Logo/labo-codex-*.svg` et le dossier non suivi `Logo/labo-codex-logos/` sont dans l'arbre de travail, non commités.
+
 ## 6 NOV. 2026, SOIR (Claude Code) : **HISTOIRE RÉÉCRITE ET POUSSÉE EN FORCE (SECONDE PURGE) ; `main` = `origin/main` = `a5be544f` ; GITHUB NE PORTE PLUS QUE `main` ET LES 22 ÉTIQUETTES, TOUTES RÉÉCRITES**
 
 **Ce qui s'est passé** : au signal de Grégoire, la copie réécrite de `plans de travail/CONSIGNE-LOT-2026-11-06-seconde-purge.md` (vérifications A à D, avec témoins) a remplacé les refs locales, puis l'historique de GitHub. Les empreintes de TOUS les commits changent à partir du 2 nov. 2025 : `bc1eb39f` est devenu `a5be544f`, l'arbre est le même (`841ac524`). Le relais du 6 nov., 10 h, ci-dessous, cite les anciennes empreintes.
