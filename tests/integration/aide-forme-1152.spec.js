@@ -47,11 +47,11 @@ test('#1152 · l\'Aide : huit sous-onglets, le glossaire sous « Référence »,
     await expect(page.locator('#aide-commencer')).toHaveClass(/\bactive\b/);
     await expect(page.locator('#aide-commencer h2')).toHaveText('Commencer');
 
-    // Jusqu'à 1024 px, la barre de boutons cède la place au menu « Sous-section » (styles.css, règle mobile) :
-    // ses huit options doivent être les mêmes.
-    await page.setViewportSize({ width: 1024, height: 900 });
-    const options = await page.locator('#select-sous-nav-mobile option').evaluateAll((os) => os.map((o) => o.textContent.trim()));
-    expect(options).toEqual(attendus.map((a) => a.label));
+    // ↻ « L'en-tête épuré » (7 nov. 2026) : le menu « Sous-section » des petites largeurs est retiré ; à 390 px
+    // (variante C), ce sont les mêmes huit onglets, qui défilent.
+    await page.setViewportSize({ width: 390, height: 900 });
+    const options = await page.locator('#sous-navigation button').allTextContents();
+    expect(options.map((o) => o.trim())).toEqual(attendus.map((a) => a.label));
     if (process.env.CAPTURES_AIDE) {
         for (const largeur of [768, 1024, 1280]) {
             await page.setViewportSize({ width: largeur, height: 900 });

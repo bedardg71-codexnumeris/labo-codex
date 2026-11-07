@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { titresLongsDe } from './_helpers/titres-longs.js';
 import { JSDOM } from 'jsdom';
 import { tranche } from './_helpers/tranche.js';
 
@@ -34,8 +35,9 @@ const decoder = (s) => new JSDOM(`<p>${s}</p>`).window.document.querySelector('p
 
 // Les onglets : la barre de navigation d'index.html, et les deux boutons de l'en-tête (Aide, Réglages).
 const ONGLETS = {};
-for (const m of html.matchAll(/<button data-onglet="([a-z]+)"[^>]*>\s*<span[^>]*><\/span><span class="nav-label">([^<]+)<\/span>/g)) ONGLETS[decoder(m[2])] = m[1];
-for (const m of html.matchAll(/data-action="afficherSection" data-param="(aide|reglages)" class="btn-action-header[^>]*title="([^"]+)"/g)) ONGLETS[decoder(m[2])] = m[1];
+for (const m of html.matchAll(/<button data-onglet="([a-z]+)"[^>]*>\s*(?:<span[^>]*><\/span>)?<span class="nav-label">([^<]+)<\/span>/g)) ONGLETS[decoder(m[2])] = m[1];
+// ↻ « L'en-tête épuré » (7 nov. 2026) : Aide et Réglages sont des lignes du menu ; leur nom est le mot affiché.
+for (const m of html.matchAll(/data-action="afficherSection" data-param="(aide|reglages)" class="entete-menu-item btn-action-header"[^>]*>.*?<span class="entete-menu-mot">([^<]+)<\/span>/g)) ONGLETS[decoder(m[2])] = m[1];
 // Les sous-onglets : js/config.js, section par section.
 const CONFIG = lire('js', 'config.js');
 const sousOnglets = (section) => {
@@ -90,7 +92,8 @@ describe('#1152 lot 3 · un seul glossaire', () => {
                 if (onglet === 'En-tête') { if (!sous) fautifs.push(`${t.cle} : « En-tête » sans bouton`); continue; }
                 if (!ONGLETS[onglet]) { fautifs.push(`${t.cle} : « ${onglet} » n'est pas un onglet`); continue; }
                 if (sous === undefined) continue;
-                const libelles = sousOnglets(ONGLETS[onglet]);
+                // ↻ « L'en-tête épuré » (7 nov. 2026) : l'onglet est court, la page garde son titre long.
+                const libelles = [...sousOnglets(ONGLETS[onglet]), ...titresLongsDe(ONGLETS[onglet])];
                 for (const s of sous.split(', ')) if (!libelles.includes(s)) fautifs.push(`${t.cle} : « ${s} » n'est pas un sous-onglet de ${onglet}`);
             }
         }
@@ -114,7 +117,8 @@ describe('#1152 lot 3 · un seul glossaire', () => {
     });
 
     it('le mode assistance nomme les deux commandes que l\'écran porte', () => {
-        expect(html).toMatch(/id="btn-assistance-nav"[^>]*title="Assistance"/);
+        // ↻ « L'en-tête épuré » (7 nov. 2026) : le bouton est une ligne du menu de l'en-tête, nommée par son mot.
+        expect(html).toMatch(/id="btn-assistance-nav"[^>]*>.*?<span class="entete-menu-mot">Assistance<\/span>/);
         expect(lire('js', 'accueil.js')).toContain('<div class="accueil-aide-titre">Assistance</div>');
         expect(terme('mode-assistance-icones').definition).toContain('le bouton « Assistance » de l’en-tête, ou par la case « Assistance » de la page d’accueil');
     });

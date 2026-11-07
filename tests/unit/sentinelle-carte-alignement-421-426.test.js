@@ -37,8 +37,10 @@ const sourceTour = readFileSync(path.join(racine, 'js', 'accompagnement.js'), 'u
 const sourceCarte = readFileSync(path.join(racine, 'js', 'planification-carte.js'), 'utf8');
 
 describe('#426 · l’onglet porte son nouveau nom, partout où il est nommé', () => {
-    it('config.js déclare le libellé « Carte d’alignement »', () => {
-        expect(sourceConfig).toMatch(/\{\s*id:\s*'carte',\s*label:\s*"Carte d'alignement"\s*\}/);
+    // ↻ « L'en-tête épuré » (7 nov. 2026) : l'ONGLET devient « Alignement » (libellé court validé par Grégoire) ;
+    // la page garde son titre « Carte d'alignement » (assertion suivante).
+    it('config.js déclare le libellé court de l\'onglet, « Alignement »', () => {
+        expect(sourceConfig).toMatch(/\{\s*id:\s*'carte',\s*label:\s*'Alignement'\s*\}/);
     });
 
     it('le titre de la sous-section suit', () => {

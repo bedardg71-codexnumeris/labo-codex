@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { titreLong } from './_helpers/titres-longs.js';
 
 // SENTINELLES #569 + #568 (29 août 2026) — L'ÉCRAN « EXPORTER ET ARCHIVER » ENTRE
 // DANS LE DESIGN SYSTEM, ET LES CIBLES TACTILES ATTEIGNENT 44 PX AU DOIGT.
@@ -25,10 +26,12 @@ describe('#569 · l\'écran Exporter les travaux', () => {
         expect(ui).not.toContain('class="form-select');
         expect((ui.match(/class="controle-form(?: pipeline-select-petit)?"/g) || []).length).toBeGreaterThanOrEqual(8);
     });
-    it('le titre de l\'écran est celui de la navigation', () => {
+    // ↻ « L'en-tête épuré » (7 nov. 2026) : l'onglet dit « Exporter », la page garde son titre long.
+    it('le titre de l\'écran est le titre long de la page (l\'onglet de la navigation porte le court)', () => {
         const m = /\{ id: 'exporter', label: '([^']+)' \}/.exec(config);
         expect(m, 'libellé de navigation introuvable').toBeTruthy();
-        expect(ui).toContain('<h3>' + m[1] + ' <button class="btn-aide-contextuelle" data-aide="archiver-travaux"');
+        expect(m[1]).toBe('Exporter');
+        expect(ui).toContain('<h3>' + titreLong('evaluations', 'exporter') + ' <button class="btn-aide-contextuelle" data-aide="archiver-travaux"');
         expect(ui).not.toContain('<h3>Archivage des travaux');
     });
     it('sans fichier, le module rend un état vide au lieu de rien', () => {

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { titreLong } from './_helpers/titres-longs.js';
 import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE #893 (20 septembre 2026) — L'AIDE DE « EXPORTER ET ARCHIVER » DIT LA
@@ -74,10 +75,11 @@ describe('#893 · l\'aide nomme les cartes rendues, et aucune autre', () => {
 });
 
 describe('#893 · la fiche d\'accompagnement suit l\'écran', () => {
-    it('son titre est le libellé de la navigation', () => {
+    // ↻ « L'en-tête épuré » (7 nov. 2026) : l'onglet dit « Exporter », la page (et sa fiche) garde le titre long.
+    it('son titre est le titre long de la page', () => {
         const m = /\{ id: 'exporter', label: '([^']+)' \}/.exec(config);
         expect(m, 'libellé de navigation introuvable').toBeTruthy();
-        expect(fiche).toContain("titre: '" + m[1] + "'");
+        expect(fiche).toContain("titre: '" + titreLong('evaluations', 'exporter') + "'");
         expect(fiche).not.toContain('Archivage des travaux');
     });
     it('ses modes sont les cartes rendues', () => {

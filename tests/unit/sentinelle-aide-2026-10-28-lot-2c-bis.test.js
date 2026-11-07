@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { titresDesPagesDansLOrdre } from './_helpers/titres-longs.js';
 import { JSDOM } from 'jsdom';
 import { tranche } from './_helpers/tranche.js';
 import { chargerScript } from './_helpers/charger-script.js';
@@ -75,8 +76,8 @@ describe('#1152 lot 2c bis · le Suivi', () => {
     });
 
     it('les entrées qui nomment un sous-onglet (« Navigation : Suivi → … ») suivent l\'ordre des sous-onglets de config.js', () => {
-        const bloc = lire('js', 'config.js').match(/'suivi': \[([\s\S]*?)\]/)[1];
-        const onglets = [...bloc.matchAll(/label: '([^']+)'/g)].map((m) => m[1]);
+        // ↻ « L'en-tête épuré » (7 nov. 2026) : les onglets sont courts ; l'Aide nomme les pages par leur titre long, dans l'ordre des onglets.
+        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'suivi');
         expect(onglets).toContain('Profils individuels');
         // Note (#1152, lot 2d, 28 oct. 2026) : cet essai lit l'ordre de la constante SUIVI, pas celui de la page ; l'essai
         // précédent, qui lit la page, couvre l'ordre. Sans conséquence aujourd'hui.

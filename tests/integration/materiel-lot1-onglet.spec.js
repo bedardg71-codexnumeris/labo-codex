@@ -21,7 +21,8 @@ test('lot 1 · Conception s’ouvre sur « Apporter mon matériel » ; l’exemp
     await page.waitForTimeout(200);
 
     const premier = page.locator('#sous-navigation button').first();
-    await expect(premier).toHaveText('Apporter mon matériel');
+    // ↻ « L'en-tête épuré » (7 nov. 2026) : l'onglet porte le libellé court ; la page garde son titre (plus bas).
+    await expect(premier).toHaveText('Mon matériel');
     await expect(premier).toHaveAttribute('data-sous-onglet', 'conception-materiel');
     await expect(page.locator('#conception-materiel')).toBeVisible();
     await expect(page.locator('#conception-carte')).toBeHidden();

@@ -36,13 +36,17 @@ const configurationsOnglets = {
     // Sections supprimées: tableau-bord, presences, construction, planification
     // Sections créées: apercu (plate), structure, contexte, suivi
     'accueil': [],
+    // « L'en-tête épuré » (7 nov. 2026) : les libellés des ONGLETS raccourcis (Cadre, Conception,
+    // Évaluation, Suivi, Labo) ; les titres des pages, écrits dans index.html, gardent leur libellé
+    // long. Autorisation de toucher cette zone protégée : consigne de Grégoire du 7 nov. 2026,
+    // libellés validés par lui (plans de travail/CONSIGNE-LOT-2026-11-07-en-tete-epure.md).
     'conception': [
         // « Apporter mon matériel » (16 oct. 2026, lot 1) EN TÊTE : la navigation affiche la
         // première sous-section à l'ouverture d'un onglet (navigation.js, afficherSousNavigation),
         // c'est donc elle qui accueille qui ouvre Conception. Autorisation de toucher cette zone
         // protégée : décision de Grégoire du 15 oct. 2026, 16 h 15-16 h 17, consignée au cadrage
         // (plans de travail/CADRAGE-2026-10-15-apporter-mon-materiel.md, décision 1).
-        { id: 'materiel', label: 'Apporter mon matériel' },
+        { id: 'materiel', label: 'Mon matériel' },
         // Renommé le 9 août 2026 (#426) : les six onglets voisins de Conception
         // nomment un OBJET de travail ; seul celui-ci nommait une théorie. Et
         // « carte d'alignement » est déjà le mot de l'app (le guide intégré
@@ -50,26 +54,26 @@ const configurationsOnglets = {
         // toucher cette zone protégée : décision de Grégoire du 8 août 2026,
         // consignée à l'audit. `noms_stables.json` protège le NOM de la
         // constante `configurationsOnglets`, pas la valeur des libellés.
-        { id: 'carte', label: "Carte d'alignement" },
+        { id: 'carte', label: 'Alignement' },
         // « Plan de la leçon » RETIRÉ le 8 août 2026 (#424 Lot G) : ses exports
         // et sa rétroaction formative vivent dans la Carte (menu Actions +
         // Inspecteur). Autorisation de toucher cette zone protégée : plan de
         // chantier acté par Grégoire (PLAN-portage-exports-carte-2026-08-08.md).
-        { id: 'productions', label: 'Productions étudiantes' },
-        { id: 'grille-criteres', label: 'Grilles de critères' },
-        { id: 'echelle-performance', label: 'Échelles de performance' },
-        { id: 'retroactions', label: 'Cartouches de rétroaction' },
-        { id: 'pratiques-notation', label: 'Pratiques de notation' }
+        { id: 'productions', label: 'Productions' },
+        { id: 'grille-criteres', label: 'Grilles' },
+        { id: 'echelle-performance', label: 'Échelles' },
+        { id: 'retroactions', label: 'Cartouches' },
+        { id: 'pratiques-notation', label: 'Pratiques' }
     ],
     'calendrier': [
         { id: 'trimestre', label: 'Trimestre' },
-        { id: 'vue', label: 'Calendrier scolaire' }
+        { id: 'vue', label: 'Calendrier' }
     ],
     'suivi': [
-        { id: 'groupe', label: 'Suivi du groupe' },
-        { id: 'liste', label: 'Liste des étudiant·es' },
-        { id: 'saisie', label: 'Saisie des présences' },
-        { id: 'profil', label: 'Profils individuels' },
+        { id: 'groupe', label: 'Groupe' },
+        { id: 'liste', label: 'Étudiant·es' },
+        { id: 'saisie', label: 'Présences' },
+        { id: 'profil', label: 'Profils' },
         { id: 'interventions', label: 'Interventions' },
         // Cadrage « Rencontres » (12 sept. 2026, autorisation de Grégoire pour cette zone protégée) :
         // les rencontres d'un service — ou d'un groupe-cours — tenues dans l'app, vocabulaire « rencontre ».
@@ -77,18 +81,18 @@ const configurationsOnglets = {
         { id: 'animation', label: 'Animation' }
     ],
     'evaluations': [
-        { id: 'importer', label: 'Préparer et importer' },
-        { id: 'liste', label: 'Liste des évaluations' },
-        { id: 'annoter', label: 'Annoter et évaluer' },
-        { id: 'exporter', label: 'Exporter les travaux' }
+        { id: 'importer', label: 'Préparer' },
+        { id: 'liste', label: 'Liste' },
+        { id: 'annoter', label: 'Annoter' },
+        { id: 'exporter', label: 'Exporter' }
     ],
     'labo': [
-        { id: 'accompagnement', label: "Outils d'observation" },
+        { id: 'accompagnement', label: 'Observation' },
         { id: 'modelisation', label: 'Modélisation' },
-        { id: 'comparateur', label: 'Exploration des pratiques' },
-        { id: 'rythme', label: 'Rythme de travail' },
+        { id: 'comparateur', label: 'Exploration' },
+        { id: 'rythme', label: 'Rythme' },
         { id: 'etudes', label: 'Études' },
-        { id: 'bilan', label: 'Bilan réflexif' },
+        { id: 'bilan', label: 'Bilan' },
         { id: 'longitudinal', label: 'Suivi longitudinal' } // #915 — nom tranché par Grégoire le 17 sept. 2026 ; entrée autorisée par lui le même soir
     ],
     // #1152, lot 1 (audit de l'Aide du 24 oct. 2026, D11) — rangée comme l'application ; entrée autorisée par Grégoire le 24 oct., 18 h 38

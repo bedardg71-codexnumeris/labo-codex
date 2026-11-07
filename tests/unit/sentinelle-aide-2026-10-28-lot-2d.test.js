@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { titresDesPagesDansLOrdre } from './_helpers/titres-longs.js';
 import { JSDOM } from 'jsdom';
 import { tranche } from './_helpers/tranche.js';
 
@@ -80,7 +81,8 @@ describe('#1152 lot 2d · la forme des trois parties', () => {
     });
 
     it('les entrées du Labo qui nomment un sous-onglet (« Navigation : Labo → … ») suivent l\'ordre de config.js', () => {
-        const onglets = [...lire('js', 'config.js').match(/'labo': \[([\s\S]*?)\]/)[1].matchAll(/label: (["'])(.*?)\1/g)].map((m) => m[2]);
+        // ↻ « L'en-tête épuré » (7 nov. 2026) : les onglets sont courts ; l'Aide nomme les pages par leur titre long, dans l'ordre des onglets.
+        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'labo');
         expect(onglets).toHaveLength(7);
         const rangs = idsDe('labo').map((id) => texteDe(id).match(/Navigation : Labo → (.+?)(?:,|$| [A-ZÀ-Ý«])/))
             .filter(Boolean)
@@ -127,7 +129,8 @@ describe('#1152 lot 2d · la forme des trois parties', () => {
 
 describe('#1152 lot 2d · ce que les entrées affirment, lu dans le code', () => {
     it('labo : les sept sous-onglets, dans l\'ordre de config.js ; « + Ouvrir » et ses formats ; la palette sans les codes', () => {
-        const onglets = [...lire('js', 'config.js').match(/'labo': \[([\s\S]*?)\]/)[1].matchAll(/label: (["'])(.*?)\1/g)].map((m) => m[2]);
+        // ↻ « L'en-tête épuré » (7 nov. 2026) : les onglets sont courts ; l'Aide nomme les pages par leur titre long, dans l'ordre des onglets.
+        const onglets = titresDesPagesDansLOrdre(lire('js', 'config.js'), 'labo');
         const dits = [...entree('labo').querySelectorAll('li > strong')].map((s) => net(s.textContent).replace(/^« | »$/g, ''));
         expect(dits).toEqual(onglets);
         const mod = lire('js', 'modelisation.js');

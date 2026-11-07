@@ -38,13 +38,14 @@ test('bouton Soutenir : ouvre la modale avec le bon contenu + liens', async ({ p
     await page.waitForLoadState('domcontentloaded');
     await attendreApplication(page);
 
-    // Bouton d'entête : dans le 1er cluster, juste après le bouton bug (révision),
+    // ↻ « L'en-tête épuré » (7 nov. 2026) : une ligne du menu à trois traits, juste après « Signaler »,
     // en icône masquée teintée (.ico-coeur), pas un <img>.
-    const bouton = page.locator('.entete-bloc button[data-action="ouvrirModalSoutien"]');
+    await page.locator('#entete-menu-bouton').click();
+    const bouton = page.locator('#entete-menu-panneau button[data-action="ouvrirModalSoutien"]');
     await expect(bouton).toHaveCount(1);
     await expect(bouton.locator('span.ico-coeur')).toHaveCount(1);
     const positionOk = await page.evaluate(() => {
-        const btn = document.querySelector('.entete-bloc button[data-action="ouvrirModalSoutien"]');
+        const btn = document.querySelector('#entete-menu-panneau button[data-action="ouvrirModalSoutien"]');
         const prev = btn && btn.previousElementSibling;
         return !!(prev && prev.getAttribute('data-action') === 'ouvrirModalRapportBug');
     });
@@ -117,13 +118,15 @@ test('modale Soutien : Échap et clic sur l\'arrière-plan ferment', async ({ pa
     await attendreApplication(page);
 
     // Échap.
-    await page.locator('button[data-action="ouvrirModalSoutien"]').first().click();
+    await page.locator('#entete-menu-bouton').click();
+    await page.locator('#entete-menu-panneau button[data-action="ouvrirModalSoutien"]').click();
     await expect(page.locator('#modalSoutien')).toHaveCount(1);
     await page.keyboard.press('Escape');
     await expect(page.locator('#modalSoutien')).toHaveCount(0);
 
     // Clic sur l'arrière-plan (l'overlay lui-même, pas le contenu).
-    await page.locator('button[data-action="ouvrirModalSoutien"]').first().click();
+    await page.locator('#entete-menu-bouton').click();
+    await page.locator('#entete-menu-panneau button[data-action="ouvrirModalSoutien"]').click();
     await expect(page.locator('#modalSoutien')).toHaveCount(1);
     await page.locator('#modalSoutien').click({ position: { x: 8, y: 8 } });
     await expect(page.locator('#modalSoutien')).toHaveCount(0);

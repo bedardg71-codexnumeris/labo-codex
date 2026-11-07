@@ -64,7 +64,9 @@ describe('lot 29 · #899 — le récapitulatif d\'une spécification dit où ré
     });
 
     it('le chemin qu\'elle promet existe : section « Pratiques de notation » sous Conception, et les deux titres de l\'éditeur', () => {
-        expect(lire('js/config.js')).toMatch(/id: 'pratiques-notation', label: 'Pratiques de notation'/);
+        // ↻ « L'en-tête épuré » (7 nov. 2026) : l'onglet dit « Pratiques » ; la page garde le titre « Pratiques de notation ».
+        expect(lire('js/config.js')).toMatch(/id: 'pratiques-notation', label: 'Pratiques'/);
+        expect(lire('index.html')).toContain('Pratiques de notation');
         const html = lire('index.html');
         expect(html).toMatch(/<h4[^>]*>Types de productions<\/h4>/);
         expect(html).toMatch(/<h4[^>]*>Table des forfaits \(bundles\)<\/h4>/);

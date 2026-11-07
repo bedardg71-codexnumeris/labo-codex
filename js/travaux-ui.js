@@ -1237,7 +1237,7 @@
         // Hors du tour de l'observateur : la mesure change la hauteur qu'il observe, et le navigateur lèverait « ResizeObserver loop ».
         _observateurVisionneuse = new ResizeObserver(() => requestAnimationFrame(() => _mesurerHorsZoneVisionneuse(layout)));
         _observateurVisionneuse.observe(layout);   // son retour à l'écran, après un détour par une autre section
-        document.querySelectorAll('header.entete, .navigation-principale, #sous-navigation').forEach((el) => _observateurVisionneuse.observe(el));
+        document.querySelectorAll('header.entete, .entete-bas, #sous-navigation').forEach((el) => _observateurVisionneuse.observe(el));
     }
 
     /**

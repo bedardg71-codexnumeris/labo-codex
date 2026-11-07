@@ -28,7 +28,9 @@ import { chargerScript } from './_helpers/charger-script.js';
 
 const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const lire = (rel) => readFileSync(path.join(RACINE, rel), 'utf8');
-const ORDRE_1_137_0 = ['Suivi du groupe', 'Liste des étudiant·es', 'Saisie des présences', 'Profils individuels', 'Interventions', 'Rencontres', 'Animation'];
+// ↻ « L'en-tête épuré » (7 nov. 2026) : l'ordre de 1.137.0, dans les libellés courts des onglets (les titres des pages
+// gardent le long). Ce qui est vérifié ici est l'ordre et le filtre, pas les mots.
+const ORDRE_1_137_0 = ['Groupe', 'Étudiant·es', 'Présences', 'Profils', 'Interventions', 'Rencontres', 'Animation'];
 
 function classes(init) { const s = new Set(init || []); return { add: (c) => s.add(c), remove: (c) => s.delete(c), contains: (c) => s.has(c) }; }
 function bouton(id, actif, label) {

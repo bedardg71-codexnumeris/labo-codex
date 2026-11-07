@@ -96,10 +96,11 @@
        du libellé du groupe (horaire · session), teinte de la bande pâle (celle de
        l'ancienne bande de contexte, que la navigation reprend). */
     --entete-icone-claire: #c4d0e4;
-    /* Maquette : ~#96accd. Mesuré à 4,4:1 sur le point le plus clair du dégradé sombre
-       (#1a3848) sous le voile du sélecteur : éclairci au plus près qui tient 4,5:1
-       au repos ET au survol (4,52:1). */
-    --entete-texte-pale: #a6b8d4;
+    /* Maquette : ~#96accd. « L'en-tête épuré » (7 nov. 2026) : le sélecteur est posé sur la
+       bande pâle (voile 0,10 de plus) — #a6b8d4 y tombait à 4,32:1. Éclairci au plus près
+       qui tient 4,5:1 sur le point le plus clair du dégradé sombre (#1a3848), au repos
+       (5,12:1) ET au survol (4,63:1) ; en clair, 7,3:1. */
+    --entete-texte-pale: #b8c8e0;
     --entete-bande-pale: rgba(106, 172, 184, 0.10);
     /* Puce d'identifiant des cartes de bibliothèque (#291). Jetons PROPRES et
        non `--bleu-meta` : mesuré le 23 août sur le retour de porte 2.1d, la
@@ -494,19 +495,8 @@ body.mode-clair[data-mode="anonymisation"] {
    (.entete / .navigation-principale) — version ardoise, mêmes clartés,
    pour que le cadre suive la brume (verdict D2, porte terrain du 18 août).
    En clair, rien à scoper ici : le chrome suit les variables. */
-body[data-mode="anonymisation"]:not(.mode-clair) .entete {
-    background: linear-gradient(135deg, #0f151a 0%, #1c2530 40%, #24303c 70%, #151c23 100%);
-}
-body[data-mode="anonymisation"]:not(.mode-clair) .navigation-principale {
-    background:
-        linear-gradient(var(--entete-bande-pale), var(--entete-bande-pale)),
-        linear-gradient(135deg, #0f151a 0%, #1c2530 40%, #24303c 70%, #151c23 100%);
-}
-
-/* Sous-nav claire : le hover translucide est un marine vif codé en dur
-   (rgba(10,74,126)) — version ardoise, même opacité */
-body.mode-clair[data-mode="anonymisation"] .sous-navigation button:hover {
-    background: rgba(62, 82, 102, 0.55);
+body[data-mode="anonymisation"]:not(.mode-clair) {
+    --entete-fond: linear-gradient(135deg, #0f151a 0%, #1c2530 40%, #24303c 70%, #151c23 100%);
 }
 
 /* ===============================
@@ -1018,41 +1008,69 @@ h1, h2, h3, h4 {
 }
 
 /* ===============================
-   EN-TÊTE — « Le nouvel en-tête » (7 nov. 2026)
-   Bande sombre (<header>) : logo + slogan | groupe actif | bloc de droite.
-   Bande pâle : la navigation principale (<nav>, sticky, plus bas dans le DOM).
-   Le groupe est centré SUR LA PAGE (colonnes latérales égales, minmax(0, 1fr)) ;
-   à ≤ 1100 px il descend dans la bande pâle, au-dessus de la navigation.
-   Marges latérales = celles de .conteneur (max-width 95 % → 2,5 vw de chaque
-   côté), pour que le logo et le bloc s'alignent sur le bord du contenu.
+   EN-TÊTE — « L'en-tête épuré » (7 nov. 2026, esquisses 60 et 61 C)
+   <header class="entete"> (sticky) : la bande du haut, 84 px — logo seul (60 px) |
+   navigation principale en mots | Codex, thème, menu à trois traits.
+   .entete-bas (défile avec la page) : la navigation secondaire (48 px, absente quand la
+   section n'en a pas), puis la bande pâle du groupe actif (56 px) et l'anonymisation.
+   L'en-tête reste sombre dans tous les thèmes : son fond est le jeton --entete-fond,
+   redéfini en clair et en anonymisation (body). Marges latérales = celles de
+   .conteneur (max-width 95 % → 2,5 vw), pour s'aligner sur le bord du contenu.
    =============================== */
 
-.entete {
-    /* Gradient 4 stops — fidèle à la maquette Ocean & Boussole */
-    background: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
+body {
+    --entete-fond: linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
+    /* Mots de la navigation principale, inactifs (maquette ~#AFC0D6) et onglets de la
+       navigation secondaire, inactifs (~#A9BACD). Contrastes mesurés : tableau du rapport. */
+    --entete-nav-inactif: #afc0d6;
+    --entete-onglet-inactif: #a9bacd;
+    /* Marge horizontale de chaque mot de la navigation principale : 11 px, 7 px sur l'iPad
+       vertical (règle plus bas). */
+    --nav-mot-marge: 11px;
+    /* Le menu et la liste des sections gardent un fond sombre dans les deux thèmes, comme
+       l'en-tête : l'orange de l'aide tombait à 2,44:1 sur le blanc (5,58:1 ici ; 6,79:1 sur
+       le bleu foncé du thème clair). */
+    --entete-menu-fond: var(--surface-carte, #1a3040);
+    --entete-menu-texte: var(--texte-principal, #d0e0e4);
+}
+
+body.mode-clair {
+    --entete-menu-fond: var(--bleu-fonce);
+    --entete-menu-texte: #e6edf5;
+}
+
+.entete,
+.entete-bas {
+    background: var(--entete-fond);
     color: white;
     padding: 0 2.5vw;
-    position: relative;
-    z-index: 200;
     transition: background 0.3s ease;
+}
+
+.entete {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+}
+
+.entete-bas {
+    position: relative;
+    z-index: 150;
 }
 
 .entete-ligne1 {
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    grid-template-areas: "logo groupe bloc";
+    /* Les deux colonnes latérales partagent l'espace qui reste : la navigation est centrée
+       sur la page tant que le logo et le bloc de droite le permettent, puis entre les deux. */
+    grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
     align-items: center;
-    column-gap: 24px;
-    padding: 19px 0;
+    column-gap: 16px;
+    height: 84px;
 }
 
-/* Zone 1 — logo et slogan côte à côte (img/labo-codex-logo-slogan-cote-blanc.svg,
-   ratio 782:245). Version blanche seulement : le fond reste sombre dans tous les
-   modes. ≤ 520 px : <picture> bascule sur le logo seul (img/labo-codex-logo-blanc.svg). */
 .entete-logo {
-    grid-area: logo;
     justify-self: start;
     margin: 0;
     line-height: 0;
@@ -1060,50 +1078,589 @@ h1, h2, h3, h4 {
 
 .entete-logo img.logo-entete {
     display: block;
-    height: 96px;
+    height: 60px;
     width: auto;
 }
 
-/* Zone 2 — le groupe actif, dans l'axe de la navigation */
-.entete-groupe {
-    grid-area: groupe;
+/* === Navigation principale : des mots, sans icône ni cadre === */
+.navigation-principale {
     justify-self: center;
     min-width: 0;
-    /* Jamais sous le logo ni sous le bloc : 2 × (logo 306 + marge 2,5 vw + écart 24). */
-    max-width: calc(100vw - 2 * (306px + 2.5vw + 24px));
+}
+
+.navigation-boutons {
     display: flex;
+    align-items: center;
+}
+
+.navigation-principale button,
+.navigation-boutons .nav-bouton-lien {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 var(--nav-mot-marge);
+    margin: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-petit, 6px);
+    color: var(--entete-nav-inactif);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.navigation-principale button:hover,
+.navigation-boutons .nav-bouton-lien:hover {
+    color: white;
+}
+
+.navigation-principale button:focus,
+.navigation-boutons .nav-bouton-lien:focus {
+    outline: none;
+}
+
+.navigation-principale button:focus-visible,
+.navigation-boutons .nav-bouton-lien:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+/* Active : blanche, soulignée de 2 px dans l'orange de l'aide */
+.navigation-principale button.actif {
+    color: white;
+}
+
+.navigation-principale button.actif::after {
+    content: '';
+    position: absolute;
+    left: var(--nav-mot-marge);
+    right: var(--nav-mot-marge);
+    bottom: 8px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--icone-aide-config);
+}
+
+/* === À droite : Codex, le thème, le menu === */
+.entete-actions {
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.entete-actions .codex-controle {
+    margin-right: 6px;
+}
+
+/* Codex : le mot et sa pastille, largeur au contenu ; comportement et états inchangés. */
+.entete-actions .btn-codex-header {
+    height: 34px;
+    min-height: 0;
+    min-width: 0;
+    padding: 0 12px;
+    border-width: 1px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/* Thème et menu : l'icône seule (22 px), 44 × 44 px de toucher ; un fond discret au
+   survol et au focus clavier. */
+.entete-bouton-icone {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-moyen);
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.entete-bouton-icone:hover,
+.entete-bouton-icone[aria-expanded="true"] {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.entete-bouton-icone:focus {
+    outline: none;
+}
+
+.entete-bouton-icone:focus-visible {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: var(--focus-ring);
+}
+
+.entete-bouton-icone .header-icon {
+    background-color: var(--entete-icone-claire);
+}
+
+/* === Le menu à trois traits === */
+.entete-menu {
+    position: relative;
+}
+
+.entete-menu-panneau {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    /* ~210 px au total (correction de Grégoire du 7 nov. 2026, était 250) : la ligne la plus
+       longue, Assistance et son interrupteur, y tient sans couper le mot. */
+    width: 210px;
+    box-sizing: border-box;
+    padding: 6px;
+    background: var(--entete-menu-fond);
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: var(--radius-moyen, 12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 10000;
+}
+
+.entete-menu-panneau[hidden] {
+    display: none;
+}
+
+.entete-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    margin: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-petit, 6px);
+    color: var(--entete-menu-texte);
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.entete-menu-item:hover {
+    background: rgba(106, 172, 184, 0.15);
+}
+
+.entete-menu-item:focus {
+    outline: none;
+}
+
+.entete-menu-item:focus-visible {
+    background: rgba(106, 172, 184, 0.15);
+    box-shadow: inset 0 0 0 2px var(--focus-ring-color);
+}
+
+/* Aide ou Réglages ouverts (navigation.js pose .actif) */
+.entete-menu-item.actif {
+    background: rgba(232, 146, 58, 0.16);
+}
+
+.entete-menu-item .header-icon {
+    background-color: var(--icone-aide-config);
+}
+
+.entete-menu-mot {
+    flex: 1 1 auto;
+    white-space: nowrap;
+}
+
+/* L'interrupteur d'Assistance : l'état se lit sur aria-pressed (posé par
+   synchroniserControlesAssistance, accompagnement.js). */
+.entete-interrupteur {
+    position: relative;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 20px;
+    border-radius: 10px;
+    background: rgba(106, 172, 184, 0.35);
+    transition: background-color 0.15s ease;
+}
+
+.entete-interrupteur::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease;
+}
+
+[aria-pressed="true"] > .entete-interrupteur {
+    background: var(--icone-aide-config);
+}
+
+[aria-pressed="true"] > .entete-interrupteur::after {
+    transform: translateX(14px);
+}
+
+/* === Navigation secondaire : 48 px, centrée, sur le fond de l'en-tête === */
+.entete-rangee-sections {
+    position: relative;
+    /* Au-dessus de la bande du groupe : la liste des sections (variante C) s'ouvre par-dessus. */
+    z-index: 2;
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
-/* Zone 3 — le bloc de droite : deux rangées d'icônes et le bouton Codex.
-   Largeur = la grille d'icônes (4 cellules de 36,25 px = 145 px). */
-.entete-bloc {
-    grid-area: bloc;
-    justify-self: end;
-    --entete-cellule: 36.25px;
-    width: calc(4 * var(--entete-cellule));
+.entete-section-mobile {
+    display: none;
+}
+
+.sous-navigation {
+    flex: 0 1 auto;
+    min-width: 0;
     display: flex;
-    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px;
+    height: 48px;
+    padding: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 
-.entete-icones {
-    display: grid;
-    grid-template-columns: repeat(4, var(--entete-cellule));
-    height: 22px;
+.sous-navigation::-webkit-scrollbar {
+    display: none;
 }
 
-.entete-icones + .entete-icones {
-    margin-top: 7px;
+/* Une rangée qui déborde défile à l'horizontale, avec un fondu au bord où il en reste
+   (data-fondu posé par chrome-unifie.js). */
+.sous-navigation[data-fondu="droite"] {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+            mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+.sous-navigation[data-fondu="gauche"] {
+    -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent);
+            mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent);
+}
+.sous-navigation[data-fondu="deux"] {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+            mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
 }
 
-/* Séparateur vertical dans la nav principale (entre Aperçu et Conception),
-   pour marquer la frontière entre sections plates (Accueil, Aperçu) et
-   sections avec sous-navigation (Conception, Calendrier, …). */
-.nav-separateur-vertical {
-    width: 1px;
-    align-self: stretch;
-    margin: 6px 6px;
-    background: rgba(255, 255, 255, 0.18);
+.sous-navigation button {
+    flex: 0 0 auto;
+    height: 34px;
+    padding: 0 14px;
+    margin: 0;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-moyen);
+    color: var(--entete-onglet-inactif);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.sous-navigation button:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.sous-navigation button.actif {
+    color: white;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.10);
+}
+
+.sous-navigation button:focus {
+    outline: none;
+}
+
+/* Anneau intérieur : la rangée défile, un anneau extérieur y serait rogné. */
+.sous-navigation button:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--focus-ring-color);
+}
+
+/* Section sans navigation secondaire (Accueil) : navigation.js masque la rangée. */
+.sous-navigation.vide {
+    display: none;
+}
+
+/* === Bande pâle : le groupe actif, centré sur la page, et l'anonymisation === */
+.bande-groupe {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    margin: 0 -2.5vw;
+    padding: 0 2.5vw;
+    background: var(--entete-bande-pale);
+    border-top: 1px solid rgba(106, 172, 184, 0.18);
+}
+
+/* Le sélecteur seul est centré ; l'anonymisation se pose à 8 px de son bord droit,
+   hors du centrage. La largeur maximale réserve sa place des deux côtés. */
+.bande-groupe-centre {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    max-width: calc(100% - 2 * (34px + 8px));
+}
+
+.bande-groupe-anonymisation {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 8px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: 1px solid rgba(175, 192, 214, 0.45);
+    border-radius: var(--radius-moyen);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.bande-groupe-anonymisation .header-icon {
+    width: 20px;
+    height: 20px;
+    background-color: var(--entete-icone-claire);
+}
+
+.bande-groupe-anonymisation:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(175, 192, 214, 0.7);
+}
+
+.bande-groupe-anonymisation:focus {
+    outline: none;
+}
+
+.bande-groupe-anonymisation:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+/* Activée : contour orange, fond orange léger, icône blanche (aria-pressed, modes.js) */
+.bande-groupe-anonymisation[aria-pressed="true"] {
+    background: rgba(232, 146, 58, 0.22);
+    border-color: var(--icone-aide-config);
+}
+
+.bande-groupe-anonymisation[aria-pressed="true"] .header-icon {
+    background-color: white;
+}
+
+/* === Largeurs ===
+   ≤ 1000 px (iPad vertical, 820 px) : la marge des mots passe de 11 à 7 px, pour laisser
+   la place à « Codex ».
+   ≤ 779 px : la navigation en mots ne tient plus sur la ligne du logo — variante C (iPhone,
+   390 px). Seuil MESURÉ (WebKit, 7 nov. 2026), marges de 7 px : logo 77 + mots 449 + Codex,
+   thème et menu 167 (190 avec la pastille du Codex) + 2 × 16 d'écart + 2 × 2,5 vw de marge —
+   757 px sans pastille, 780 avec. On bascule sous 780 : les mots ne touchent jamais le Codex. */
+@media (max-width: 1000px) {
+    body {
+        --nav-mot-marge: 7px;
+    }
+}
+
+@media (max-width: 768px) {
+    .entete,
+    .entete-bas {
+        padding: 0 16px;
+    }
+
+    .bande-groupe {
+        margin: 0 -16px;
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 779px) {
+    /* Bande du haut : 56 px, logo 40 px, puis Codex, thème et menu ; pas de mots. */
+    .entete-ligne1 {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        height: 56px;
+        column-gap: 8px;
+    }
+
+    .entete-logo img.logo-entete {
+        height: 40px;
+    }
+
+    .entete-ligne1 .navigation-principale {
+        display: none;
+    }
+
+    .entete-actions {
+        grid-column: 3;
+    }
+
+    /* Rangée de 44 px : la section active (bouton et liste), un filet, les onglets qui défilent. */
+    .entete-rangee-sections {
+        justify-content: flex-start;
+        height: 44px;
+    }
+
+    .entete-section-mobile {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+        height: 100%;
+    }
+
+    .sous-navigation:not(.vide) {
+        flex: 1 1 auto;
+        height: 44px;
+        margin-left: 8px;
+        padding-left: 8px;
+        border-left: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .bande-groupe {
+        height: 52px;
+    }
+
+    /* Le cours et le groupe seulement ; l'horaire et la session restent dans la liste. */
+    .bande-groupe .groupe-affichage-secondaire {
+        display: none;
+    }
+}
+
+/* Le bouton de la section active (variante C) */
+.entete-section-bouton {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 6px;
+    margin: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-petit, 6px);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.entete-section-bouton::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 7px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--icone-aide-config);
+}
+
+.entete-section-bouton:focus {
+    outline: none;
+}
+
+.entete-section-bouton:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.entete-chevron {
+    width: 12px;
+    height: 12px;
+    background-color: var(--entete-nav-inactif);
+    -webkit-mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAxMiI+PHBhdGggZD0iTTIuNSA0LjUgNiA4bDMuNS0zLjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==") center / 100% 100% no-repeat;
+            mask: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiAxMiI+PHBhdGggZD0iTTIuNSA0LjUgNiA4bDMuNS0zLjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==") center / 100% 100% no-repeat;
+    transition: transform 0.15s ease;
+}
+
+.entete-section-bouton[aria-expanded="true"] .entete-chevron {
+    transform: rotate(180deg);
+}
+
+.entete-sections-liste {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    width: 220px;
+    padding: 6px;
+    background: var(--entete-menu-fond);
+    border: 1px solid rgba(106, 172, 184, 0.2);
+    border-radius: var(--radius-moyen, 12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 10000;
+}
+
+.entete-sections-liste[hidden] {
+    display: none;
+}
+
+.entete-sections-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px 0 22px;
+    margin: 0;
+    background: none;
+    border: 0;
+    border-radius: var(--radius-petit, 6px);
+    color: var(--entete-menu-texte);
+    font-size: 15px;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.entete-sections-item:hover {
+    background: rgba(106, 172, 184, 0.15);
+}
+
+.entete-sections-item:focus {
+    outline: none;
+}
+
+.entete-sections-item:focus-visible {
+    background: rgba(106, 172, 184, 0.15);
+    box-shadow: inset 0 0 0 2px var(--focus-ring-color);
+}
+
+/* L'active : demi-gras, un trait orange à gauche (aria-current, chrome-unifie.js) */
+.entete-sections-item[aria-current="true"] {
+    font-weight: 600;
+}
+
+.entete-sections-item[aria-current="true"]::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 13px;
+    bottom: 13px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--icone-aide-config);
 }
 
 /* Pastille de notification nouveautés (point rouge) — utilisé hors entête */
@@ -1146,63 +1703,6 @@ h1, h2, h3, h4 {
     }
 }
 
-/* === Boutons d'icône du bloc de droite ===
-   Sans cadre ni fond : l'icône (22 px) seule. Un fond discret paraît au survol et au
-   focus clavier, dessiné par ::before pour ne rien changer à la mise en page.
-   La classe .btn-action-header est gardée : navigation.js (zone protégée) s'en sert
-   pour marquer Aide et Réglages « actif ». */
-.entete-bloc .btn-action-header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 22px;
-    padding: 0;
-    margin: 0;
-    background: none;
-    border: 0;
-    color: inherit;
-    cursor: pointer;
-}
-
-.entete-bloc .btn-action-header::before {
-    content: '';
-    position: absolute;
-    inset: -4px 1px;
-    border-radius: var(--radius-petit, 6px);
-    background: transparent;
-    transition: background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.entete-bloc .btn-action-header:hover::before,
-.entete-bloc .btn-action-header:focus-visible::before {
-    background: rgba(255, 255, 255, 0.14);
-}
-
-.entete-bloc .btn-action-header:focus {
-    outline: none;
-}
-
-.entete-bloc .btn-action-header:focus-visible::before {
-    box-shadow: var(--focus-ring);
-}
-
-/* États : anonymisation en cours, section Aide ou Réglages ouverte — le même fond
-   discret, permanent (l'état se lit aussi par aria-pressed / le titre). */
-.entete-bloc .btn-action-header.actif::before {
-    background: rgba(255, 255, 255, 0.18);
-}
-
-.entete-bloc .entete-icones--aide .btn-action-header.actif::before {
-    background: rgba(232, 146, 58, 0.28);
-}
-
-/* Les icônes sont au-dessus du fond de survol */
-.entete-bloc .btn-action-header .header-icon {
-    position: relative;
-}
-
 /* === Icônes SVG en-tête ===
    Masques (mask-image) inlinés en base64 : contournement du blocage CORS du
    mask-image sur WebKit file:// (Origin null). La couleur est celle de la rangée :
@@ -1221,9 +1721,6 @@ h1, h2, h3, h4 {
             mask-position: center;
 }
 
-.entete-icones--appli .header-icon { background-color: var(--entete-icone-claire); }
-.entete-icones--aide .header-icon  { background-color: var(--icone-aide-config); }
-
 /* Signaler — source : icons/icon-bug.svg */
 .ico-bug {
     -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMyBDIDIyLjYzNjcxOSAzIDIwLjU2NjQwNiA0LjM5MDYyNSAxOS41OTM3NSA2LjQzNzUgQyAyMS4xOTkyMTkgNi4xMTMyODEgMjIuOTk2MDk0IDUuOTM3NSAyNSA1LjkzNzUgQyAyNy4wMDc4MTMgNS45Mzc1IDI4LjgwMDc4MSA2LjExMzI4MSAzMC40MDYyNSA2LjQzNzUgQyAyOS40Mzc1IDQuMzkwNjI1IDI3LjM3NSAzIDI1IDMgWiBNIDI1IDcuOTM3NSBDIDE5LjE5NTMxMyA3LjkzNzUgMTIuOTM3NSA5LjQ2ODc1IDEyLjkzNzUgMTUgQyAxMi45Mzc1IDE2LjE5NTMxMyAxMy4xMDE1NjMgMTcuMjE4NzUgMTMuNDA2MjUgMTguMTI1IEMgMTQuMjEwOTM4IDE4LjIwMzEyNSAxNS4wMzEyNSAxOC40NDkyMTkgMTYuMDMxMjUgMTguNzE4NzUgQyAxNy45Mzc1IDE5LjIzNDM3NSAyMC44MjAzMTMgMjAgMjUgMjAgQyAyOC44MDQ2ODggMjAgMzEuNTIzNDM4IDE5LjQyMTg3NSAzMy41IDE5IEMgMzQuNjQ4NDM4IDE4Ljc1MzkwNiAzNS41NzgxMjUgMTguNTcwMzEzIDM2LjQ2ODc1IDE4LjUzMTI1IEMgMzYuODcxMDk0IDE3LjUzOTA2MyAzNy4wNjI1IDE2LjM2NzE4OCAzNy4wNjI1IDE1IEMgMzcuMDYyNSA5LjQ2ODc1IDMwLjgwNDY4OCA3LjkzNzUgMjUgNy45Mzc1IFogTSAzIDggQyAyLjQ0OTIxOSA4IDIgOC40NDkyMTkgMiA5IEMgMiAxNC43Njk1MzEgMy4zMTI1IDE4LjkxNDA2MyA1LjkwNjI1IDIxLjM0Mzc1IEMgNy40NTMxMjUgMjIuNzg5MDYzIDkuMDg5ODQ0IDIzLjI2NTYyNSAxMC4wOTM3NSAyMy40MDYyNSBDIDEwLjAwNzgxMyAyNC40NzI2NTYgMTAgMjUuNzczNDM4IDEwIDI3LjQ2ODc1IEMgMTAgMjcuNjMyODEzIDEwLjAyNzM0NCAyNy44MDA3ODEgMTAuMDMxMjUgMjcuOTY4NzUgTCAyIDI3Ljk2ODc1IEMgMS40Mzc1IDI3Ljk2ODc1IDAuOTY4NzUgMjguNDM3NSAwLjk2ODc1IDI5IEMgMC45Njg3NSAyOS41NjI1IDEuNDM3NSAzMC4wMzEyNSAyIDMwLjAzMTI1IEwgMTAuMTU2MjUgMzAuMDMxMjUgQyAxMC4zNzUgMzEuODI4MTI1IDEwLjg1MTU2MyAzMy42MTcxODggMTEuNTMxMjUgMzUuMzEyNSBDIDkgMzUuOTE3OTY5IDIgMzguMjUgMiA0NiBDIDIgNDYuNTU0Njg4IDIuNDQ5MjE5IDQ3IDMgNDcgQyAzLjU1MDc4MSA0NyA0IDQ2LjU1NDY4OCA0IDQ2IEMgNCAzOS4xMjUgMTAuNzU3ODEzIDM3LjQyOTY4OCAxMi4zNzUgMzcuMTI1IEMgMTQuNjUyMzQ0IDQxLjQ3NjU2MyAxOC41NDI5NjkgNDQuOTM3NSAyNCA0NS44NDM3NSBMIDI0IDI5IEMgMjQgMjguNDQ1MzEzIDI0LjQ0OTIxOSAyOCAyNSAyOCBDIDI1LjU1MDc4MSAyOCAyNiAyOC40NDUzMTMgMjYgMjkgTCAyNiA0NS44NDM3NSBDIDMxLjQ1NzAzMSA0NC45Mzc1IDM1LjM3ODkwNiA0MS41MDc4MTMgMzcuNjU2MjUgMzcuMTU2MjUgQyAzOS4zNjMyODEgMzcuNDg4MjgxIDQ2IDM5LjE5OTIxOSA0NiA0NiBDIDQ2IDQ2LjU1NDY4OCA0Ni40NDUzMTMgNDcgNDcgNDcgQyA0Ny41NTQ2ODggNDcgNDggNDYuNTU0Njg4IDQ4IDQ2IEMgNDggMzguMjUgNDEgMzUuOTE3OTY5IDM4LjQ2ODc1IDM1LjMxMjUgQyAzOS4xNDg0MzggMzMuNjE3MTg4IDM5LjYyNSAzMS44MjgxMjUgMzkuODQzNzUgMzAuMDMxMjUgTCA0OCAzMC4wMzEyNSBDIDQ4LjU2MjUgMzAuMDMxMjUgNDkuMDMxMjUgMjkuNTYyNSA0OS4wMzEyNSAyOSBDIDQ5LjAzMTI1IDI4LjQzNzUgNDguNTYyNSAyNy45Njg3NSA0OCAyNy45Njg3NSBMIDM5Ljk2ODc1IDI3Ljk2ODc1IEMgMzkuOTcyNjU2IDI3LjgwMDc4MSA0MCAyNy42MzI4MTMgNDAgMjcuNDY4NzUgQyA0MCAyNS44MDg1OTQgMzkuOTkyMTg4IDI0LjQ3NjU2MyAzOS44NDM3NSAyMy40MDYyNSBDIDQwLjg0Mzc1IDIzLjI3MzQzOCA0Mi41MTk1MzEgMjIuODE2NDA2IDQ0LjA5Mzc1IDIxLjM0Mzc1IEMgNDYuNjg3NSAxOC45MTQwNjMgNDggMTQuNzY5NTMxIDQ4IDkgQyA0OCA4LjQ0OTIxOSA0Ny41NTQ2ODggOCA0NyA4IEMgNDYuODYzMjgxIDggNDYuNzQ2MDk0IDguMDQyOTY5IDQ2LjYyNSA4LjA5Mzc1IEMgNDYuNTAzOTA2IDguMTQ0NTMxIDQ2LjM3MTA5NCA4LjE5MTQwNiA0Ni4yODEyNSA4LjI4MTI1IEMgNDYuMTAxNTYzIDguNDYwOTM4IDQ2IDguNzIyNjU2IDQ2IDkgQyA0NiAxNC4wODU5MzggNDQuODk4NDM4IDE3LjgyODEyNSA0Mi43ODEyNSAxOS44NDM3NSBDIDQxLjQ2MDkzOCAyMS4xMDE1NjMgNDAuMDgyMDMxIDIxLjM3ODkwNiAzOS40Mzc1IDIxLjQzNzUgQyAzOS4yOTI5NjkgMjEuNDQ5MjE5IDM5LjI1IDIxLjQ2ODc1IDM5LjE4NzUgMjEuNDY4NzUgQyAzOC43MTQ4NDQgMjAuODM1OTM4IDM3Ljk2MDkzOCAyMC41IDM2Ljc4MTI1IDIwLjUgQyAzNiAyMC41IDM1LjA4NTkzOCAyMC43MTQ4NDQgMzMuOTA2MjUgMjAuOTY4NzUgQyAzMS44NDM3NSAyMS40MDYyNSAyOS4wMTU2MjUgMjIgMjUgMjIgQyAyMC41NTQ2ODggMjIgMTcuNTA3ODEzIDIxLjE2Nzk2OSAxNS41IDIwLjYyNSBDIDE0LjM1MTU2MyAyMC4zMTI1IDEzLjU0Njg3NSAyMC4wOTM3NSAxMi44MTI1IDIwLjA5Mzc1IEMgMTEuNTU4NTk0IDIwLjA5Mzc1IDEwLjg1MTU2MyAyMC40ODQzNzUgMTAuNDY4NzUgMjEuNDA2MjUgQyA5LjgwODU5NCAyMS4zMzIwMzEgOC41MzUxNTYgMjEuMDc4MTI1IDcuMjgxMjUgMTkuOTA2MjUgQyA1LjEzNjcxOSAxNy44OTg0MzggNCAxNC4xMjEwOTQgNCA5IEMgNCA4LjQ0OTIxOSAzLjU1MDc4MSA4IDMgOCBaIi8+PC9zdmc+");
@@ -1235,7 +1732,12 @@ h1, h2, h3, h4 {
     -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
             mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPiAgICA8cGF0aCBkPSJNIDkuNTQ0OTIxOSA0IEMgNS45Mjk5MjE5IDQgMyA2LjkyOTkyMTkgMyAxMC41NDQ5MjIgQyAzIDE2LjgzNzMyMSAxMC4yOTg5NzUgMjIuODQ5Nzk5IDEzLjcwODk4NCAyNS41MjczNDQgQSAyIDIgMCAwIDAgMTMuNzE4NzUgMjUuNTM1MTU2IEMgMTMuNzQyMTE1IDI1LjU1MzUgMTMuNzczODgxIDI1LjU3OTYyOSAxMy43OTY4NzUgMjUuNTk3NjU2IEwgMTMuNzk4ODI4IDI1LjU5NTcwMyBBIDIgMiAwIDAgMCAxNSAyNiBBIDIgMiAwIDAgMCAxNi4yMDMxMjUgMjUuNTk1NzAzIEwgMTYuMjAzMTI1IDI1LjU5NzY1NiBDIDE2LjIwOTg1NSAyNS41OTIzOCAxNi4yMTk4MDEgMjUuNTg1MzgxIDE2LjIyNjU2MiAyNS41ODAwNzggQyAxNi4yMzE3MDQgMjUuNTc2MDQ1IDE2LjIzODk4IDI1LjU3MDQ1NSAxNi4yNDQxNDEgMjUuNTY2NDA2IEEgMiAyIDAgMCAwIDE2LjI2MzY3MiAyNS41NDg4MjggQyAxOS42NjMxMDkgMjIuODgwOTA0IDI3IDE2Ljg1MjMzNiAyNyAxMC41NDQ5MjIgQyAyNyA2LjkyOTkyMTkgMjQuMDcwMDc4IDQgMjAuNDU1MDc4IDQgQyAxNy4wMDAwNzggNCAxNSA3IDE1IDcgQyAxNSA3IDEyLjk5OTkyMiA0IDkuNTQ0OTIxOSA0IHoiLz48L3N2Zz4=");
 }
-.entete-bloc .ico-coeur { width: 19px; height: 19px; }
+/* Cœur plein = glyphe plus « lourd » : dessiné à 19 px dans la case de 22, pour que les mots du
+   menu restent alignés. */
+.entete-menu-item .ico-coeur {
+    -webkit-mask-size: 19px 19px;
+            mask-size: 19px 19px;
+}
 /* Confidentialité (mode normal / anonymisé) — source : icons/icons8-anonymous.svg */
 .ico-mask-anon {
     -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNjQgNjQiIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiPjxwYXRoIGQ9Ik0gMzIgNSBDIDE4LjM4MiA1IDExLjEyNjIxOSAxMC4xNjM4MTMgMTAuODI0MjE5IDEwLjM4MjgxMiBMIDEwIDEwLjk4MDQ2OSBMIDEwIDM2LjY0NDUzMSBMIDEwLjA5NTcwMyAzNi45NDE0MDYgQyAxMC4zMDUzMTEgMzcuNTk3Mjc2IDE1LjIzNDA4MyA1Mi41NjA4MjYgMjkuNzkyOTY5IDU4LjMyMDMxMiBMIDMyIDYyIEwgMzQuMjA3MDMxIDU4LjMyMDMxMiBDIDQ4Ljc2NTk3OSA1Mi41NTk5ODggNTMuNjk1NjU1IDM3LjU5NzI3NiA1My45MDQyOTcgMzYuOTQxNDA2IEwgNTQgMzYuNjQ0NTMxIEwgNTQgMTAuOTgwNDY5IEwgNTMuMTc1NzgxIDEwLjM4MjgxMiBDIDUyLjg3Mzc4MSAxMC4xNjM4MTMgNDUuNjE4IDUgMzIgNSB6IE0gMzIgOSBDIDQxLjgyNSA5IDQ3LjkwMyAxMS45MDE1MTYgNTAgMTMuMTAzNTE2IEwgNTAgMzUuOTk0MTQxIEMgNDkuMzM3MzUgMzcuODE0ODU1IDQ1LjEyODc3NSA0OC4zNjMxNiAzNSA1My41NjgzNTkgTCAzNSA0OSBMIDM2IDQ3IEwgMzIgNDcgTCAyOCA0NyBMIDI5IDQ5IEwgMjkgNTMuNTY4MzU5IEMgMTguODcxMjI1IDQ4LjM2MzE2IDE0LjY2MjY1IDM3LjgxNDg1NSAxNCAzNS45OTQxNDEgTCAxNCAxMy4xMDM1MTYgQyAxNi4wOTcgMTEuOTAxNTE2IDIyLjE3NSA5IDMyIDkgeiBNIDIyLjkwMjM0NCAxOCBDIDE5Ljc1MzM0NCAxOCAxNiAyMCAxNiAyMCBMIDE3IDIyIEMgMTcuMDE5IDIxLjk5MiAxOS43MzEgMjEgMjIgMjEgQyAyNS41NSAyMSAyNi45ODUgMjMuOTc4IDI3IDI0IEwgMzAgMjIgQyAzMCAyMiAyOC4zMjMzNDQgMTggMjIuOTAyMzQ0IDE4IHogTSA0MS4wOTc2NTYgMTggQyAzNS42NzY2NTYgMTggMzQgMjIgMzQgMjIgTCAzNyAyNCBDIDM3LjAxNSAyMy45NzggMzguNDUgMjEgNDIgMjEgQyA0NC4yNjkgMjEgNDYuOTgxIDIxLjk5MiA0NyAyMiBMIDQ4IDIwIEMgNDggMjAgNDQuMjQ2NjU2IDE4IDQxLjA5NzY1NiAxOCB6IE0gMjMuNSAyNyBBIDQuNSAyIDAgMCAwIDIzLjUgMzEgQSA0LjUgMiAwIDAgMCAyMy41IDI3IHogTSA0MC41IDI3IEEgNC41IDIgMCAwIDAgNDAuNSAzMSBBIDQuNSAyIDAgMCAwIDQwLjUgMjcgeiBNIDE3IDM1IEwgMjAuODU3NDIyIDQxLjk0MzM1OSBDIDIxLjU2MjQyMiA0My4yMTIzNTkgMjIuOTAwNTE2IDQ0IDI0LjM1MzUxNiA0NCBMIDI5IDQ0IEwgMzIgNDEgTCAzNSA0NCBMIDM5LjY0NjQ4NCA0NCBDIDQxLjA5OTQ4NCA0NCA0Mi40Mzc1NzggNDMuMjEyMzU5IDQzLjE0MjU3OCA0MS45NDMzNTkgTCA0NyAzNSBMIDQxIDQwIEwgMzcgNDAgTCAzNSAzOCBMIDMyIDM4IEwgMjkgMzggTCAyNyA0MCBMIDIzIDQwIEwgMTcgMzUgeiIvPjwvc3ZnPg==");
@@ -1273,6 +1775,11 @@ h1, h2, h3, h4 {
     -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTYgMiBDIDE0LjMwMDc4MSAyIDEzIDMuMzAwNzgxIDEzIDUgTCAxMyA3IEwgMyA3IEMgMi45Njg3NSA3IDIuOTM3NSA3IDIuOTA2MjUgNyBDIDIuODc1IDcgMi44NDM3NSA3IDIuODEyNSA3IEMgMi4yNjE3MTkgNy4wNTA3ODEgMS44NTU0NjkgNy41NDI5NjkgMS45MDYyNSA4LjA5Mzc1IEMgMS45NTcwMzEgOC42NDQ1MzEgMi40NDkyMTkgOS4wNTA3ODEgMyA5IEwgMTMgOSBMIDEzIDExIEMgMTMgMTIuNjk5MjE5IDE0LjMwMDc4MSAxNCAxNiAxNCBMIDE4IDE0IEMgMTkuNjk5MjE5IDE0IDIxIDEyLjY5OTIxOSAyMSAxMSBMIDIxIDUgQyAyMSAzLjMwMDc4MSAxOS42OTkyMTkgMiAxOCAyIFogTSAyMiA3IEwgMjIgOSBMIDQ3IDkgQyA0Ny4zNTkzNzUgOS4wMDM5MDYgNDcuNjk1MzEzIDguODE2NDA2IDQ3Ljg3ODkwNiA4LjUwMzkwNiBDIDQ4LjA1ODU5NCA4LjE5MTQwNiA0OC4wNTg1OTQgNy44MDg1OTQgNDcuODc4OTA2IDcuNDk2MDk0IEMgNDcuNjk1MzEzIDcuMTgzNTk0IDQ3LjM1OTM3NSA2Ljk5NjA5NCA0NyA3IFogTSAzNCAxOSBDIDMyLjMwMDc4MSAxOSAzMSAyMC4zMDA3ODEgMzEgMjIgTCAzMSAyNCBMIDMgMjQgQyAyLjk2ODc1IDI0IDIuOTM3NSAyNCAyLjkwNjI1IDI0IEMgMi44NzUgMjQgMi44NDM3NSAyNCAyLjgxMjUgMjQgQyAyLjI2MTcxOSAyNC4wNTA3ODEgMS44NTU0NjkgMjQuNTQyOTY5IDEuOTA2MjUgMjUuMDkzNzUgQyAxLjk1NzAzMSAyNS42NDQ1MzEgMi40NDkyMTkgMjYuMDUwNzgxIDMgMjYgTCAzMSAyNiBMIDMxIDI4IEMgMzEgMjkuNjk5MjE5IDMyLjMwMDc4MSAzMSAzNCAzMSBMIDM2IDMxIEMgMzcuNjk5MjE5IDMxIDM5IDI5LjY5OTIxOSAzOSAyOCBMIDM5IDIyIEMgMzkgMjAuMzAwNzgxIDM3LjY5OTIxOSAxOSAzNiAxOSBaIE0gNDAgMjQgTCA0MCAyNiBMIDQ3IDI2IEMgNDcuMzU5Mzc1IDI2LjAwMzkwNiA0Ny42OTUzMTMgMjUuODE2NDA2IDQ3Ljg3ODkwNiAyNS41MDM5MDYgQyA0OC4wNTg1OTQgMjUuMTkxNDA2IDQ4LjA1ODU5NCAyNC44MDg1OTQgNDcuODc4OTA2IDI0LjQ5NjA5NCBDIDQ3LjY5NTMxMyAyNC4xODM1OTQgNDcuMzU5Mzc1IDIzLjk5NjA5NCA0NyAyNCBaIE0gMTMgMzYgQyAxMS4zMDA3ODEgMzYgMTAgMzcuMzAwNzgxIDEwIDM5IEwgMTAgNDEgTCAzIDQxIEMgMi45Njg3NSA0MSAyLjkzNzUgNDEgMi45MDYyNSA0MSBDIDIuODc1IDQxIDIuODQzNzUgNDEgMi44MTI1IDQxIEMgMi4yNjE3MTkgNDEuMDUwNzgxIDEuODU1NDY5IDQxLjU0Mjk2OSAxLjkwNjI1IDQyLjA5Mzc1IEMgMS45NTcwMzEgNDIuNjQ0NTMxIDIuNDQ5MjE5IDQzLjA1MDc4MSAzIDQzIEwgMTAgNDMgTCAxMCA0NSBDIDEwIDQ2LjY5OTIxOSAxMS4zMDA3ODEgNDggMTMgNDggTCAxNSA0OCBDIDE2LjY5OTIxOSA0OCAxOCA0Ni42OTkyMTkgMTggNDUgTCAxOCAzOSBDIDE4IDM3LjMwMDc4MSAxNi42OTkyMTkgMzYgMTUgMzYgWiBNIDE5IDQxIEwgMTkgNDMgTCA0NyA0MyBDIDQ3LjM1OTM3NSA0My4wMDM5MDYgNDcuNjk1MzEzIDQyLjgxNjQwNiA0Ny44Nzg5MDYgNDIuNTAzOTA2IEMgNDguMDU4NTk0IDQyLjE5MTQwNiA0OC4wNTg1OTQgNDEuODA4NTk0IDQ3Ljg3ODkwNiA0MS40OTYwOTQgQyA0Ny42OTUzMTMgNDEuMTgzNTk0IDQ3LjM1OTM3NSA0MC45OTYwOTQgNDcgNDEgWiIvPjwvc3ZnPg==");
             mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTYgMiBDIDE0LjMwMDc4MSAyIDEzIDMuMzAwNzgxIDEzIDUgTCAxMyA3IEwgMyA3IEMgMi45Njg3NSA3IDIuOTM3NSA3IDIuOTA2MjUgNyBDIDIuODc1IDcgMi44NDM3NSA3IDIuODEyNSA3IEMgMi4yNjE3MTkgNy4wNTA3ODEgMS44NTU0NjkgNy41NDI5NjkgMS45MDYyNSA4LjA5Mzc1IEMgMS45NTcwMzEgOC42NDQ1MzEgMi40NDkyMTkgOS4wNTA3ODEgMyA5IEwgMTMgOSBMIDEzIDExIEMgMTMgMTIuNjk5MjE5IDE0LjMwMDc4MSAxNCAxNiAxNCBMIDE4IDE0IEMgMTkuNjk5MjE5IDE0IDIxIDEyLjY5OTIxOSAyMSAxMSBMIDIxIDUgQyAyMSAzLjMwMDc4MSAxOS42OTkyMTkgMiAxOCAyIFogTSAyMiA3IEwgMjIgOSBMIDQ3IDkgQyA0Ny4zNTkzNzUgOS4wMDM5MDYgNDcuNjk1MzEzIDguODE2NDA2IDQ3Ljg3ODkwNiA4LjUwMzkwNiBDIDQ4LjA1ODU5NCA4LjE5MTQwNiA0OC4wNTg1OTQgNy44MDg1OTQgNDcuODc4OTA2IDcuNDk2MDk0IEMgNDcuNjk1MzEzIDcuMTgzNTk0IDQ3LjM1OTM3NSA2Ljk5NjA5NCA0NyA3IFogTSAzNCAxOSBDIDMyLjMwMDc4MSAxOSAzMSAyMC4zMDA3ODEgMzEgMjIgTCAzMSAyNCBMIDMgMjQgQyAyLjk2ODc1IDI0IDIuOTM3NSAyNCAyLjkwNjI1IDI0IEMgMi44NzUgMjQgMi44NDM3NSAyNCAyLjgxMjUgMjQgQyAyLjI2MTcxOSAyNC4wNTA3ODEgMS44NTU0NjkgMjQuNTQyOTY5IDEuOTA2MjUgMjUuMDkzNzUgQyAxLjk1NzAzMSAyNS42NDQ1MzEgMi40NDkyMTkgMjYuMDUwNzgxIDMgMjYgTCAzMSAyNiBMIDMxIDI4IEMgMzEgMjkuNjk5MjE5IDMyLjMwMDc4MSAzMSAzNCAzMSBMIDM2IDMxIEMgMzcuNjk5MjE5IDMxIDM5IDI5LjY5OTIxOSAzOSAyOCBMIDM5IDIyIEMgMzkgMjAuMzAwNzgxIDM3LjY5OTIxOSAxOSAzNiAxOSBaIE0gNDAgMjQgTCA0MCAyNiBMIDQ3IDI2IEMgNDcuMzU5Mzc1IDI2LjAwMzkwNiA0Ny42OTUzMTMgMjUuODE2NDA2IDQ3Ljg3ODkwNiAyNS41MDM5MDYgQyA0OC4wNTg1OTQgMjUuMTkxNDA2IDQ4LjA1ODU5NCAyNC44MDg1OTQgNDcuODc4OTA2IDI0LjQ5NjA5NCBDIDQ3LjY5NTMxMyAyNC4xODM1OTQgNDcuMzU5Mzc1IDIzLjk5NjA5NCA0NyAyNCBaIE0gMTMgMzYgQyAxMS4zMDA3ODEgMzYgMTAgMzcuMzAwNzgxIDEwIDM5IEwgMTAgNDEgTCAzIDQxIEMgMi45Njg3NSA0MSAyLjkzNzUgNDEgMi45MDYyNSA0MSBDIDIuODc1IDQxIDIuODQzNzUgNDEgMi44MTI1IDQxIEMgMi4yNjE3MTkgNDEuMDUwNzgxIDEuODU1NDY5IDQxLjU0Mjk2OSAxLjkwNjI1IDQyLjA5Mzc1IEMgMS45NTcwMzEgNDIuNjQ0NTMxIDIuNDQ5MjE5IDQzLjA1MDc4MSAzIDQzIEwgMTAgNDMgTCAxMCA0NSBDIDEwIDQ2LjY5OTIxOSAxMS4zMDA3ODEgNDggMTMgNDggTCAxNSA0OCBDIDE2LjY5OTIxOSA0OCAxOCA0Ni42OTkyMTkgMTggNDUgTCAxOCAzOSBDIDE4IDM3LjMwMDc4MSAxNi42OTkyMTkgMzYgMTUgMzYgWiBNIDE5IDQxIEwgMTkgNDMgTCA0NyA0MyBDIDQ3LjM1OTM3NSA0My4wMDM5MDYgNDcuNjk1MzEzIDQyLjgxNjQwNiA0Ny44Nzg5MDYgNDIuNTAzOTA2IEMgNDguMDU4NTk0IDQyLjE5MTQwNiA0OC4wNTg1OTQgNDEuODA4NTk0IDQ3Ljg3ODkwNiA0MS40OTYwOTQgQyA0Ny42OTUzMTMgNDEuMTgzNTk0IDQ3LjM1OTM3NSA0MC45OTYwOTQgNDcgNDEgWiIvPjwvc3ZnPg==");
 }
+/* Menu — trois traits, dessinés pour ce lot (trait 1,6 px sur 22 px, bouts ronds) */
+.ico-menu {
+    -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgNi4yNWgxNE00IDExaDE0TTQgMTUuNzVoMTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==");
+            mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiI+PHBhdGggZD0iTTQgNi4yNWgxNE00IDExaDE0TTQgMTUuNzVoMTQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIxLjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==");
+}
 
 /* === Icône inline dans boutons texte === */
 .btn-inline-icon {
@@ -1306,57 +1813,6 @@ h1, h2, h3, h4 {
 .mode-clair .btn-verrou-evaluation .btn-inline-icon {
     margin-right: 0;
     filter: brightness(0) invert(1);
-}
-
-/* === RESPONSIVE de l'en-tête ===
-   ≤ 1100 px — le groupe descend dans la bande pâle, au-dessus de la navigation.
-   Seuil MESURÉ (WebKit, 7 nov. 2026) : le groupe centré touche le logo (306 px) quand
-   0,95 × largeur < libellé + 2 × 306 + 2 × 24. Libellé de la consigne
-   (« 601-101-MQ · gr. 00007 Mar-Ven · A26 », 316 px) : 1028 px ; libellé de la démo
-   (420 px) : 1138 px. 1100 px laisse 385 px au libellé ; plus long, l'horaire et la
-   session se tronquent (le cours et le groupe, jamais). La navigation, elle, garde
-   son seuil propre (select à ≤ 1024 px).
-   ≤ 768 px — .conteneur perd sa marge de 2,5 % : gouttière fixe de 16 px.
-   ≤ 520 px — le slogan ne tient plus à côté du bloc : logo seul (<picture>), et le
-   groupe prend toute la largeur. */
-
-@media (max-width: 1100px) {
-    .entete-ligne1 {
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        grid-template-areas:
-            "logo . bloc"
-            "groupe groupe groupe";
-        row-gap: 19px;
-        padding-bottom: 0;
-    }
-
-    /* La rangée du groupe est déjà la bande pâle : elle déborde jusqu'aux bords. */
-    .entete-groupe {
-        justify-self: stretch;
-        max-width: none;
-        margin: 0 -2.5vw;
-        padding: 10px 2.5vw 4px;
-        background: var(--entete-bande-pale);
-        border-top: 1px solid rgba(106, 172, 184, 0.18);
-    }
-
-}
-
-@media (max-width: 768px) {
-    .entete {
-        padding: 0 16px;
-    }
-
-    .entete-groupe {
-        margin: 0 -16px;
-        padding: 10px 16px 4px;
-    }
-}
-
-@media (max-width: 520px) {
-    .entete-groupe .groupe-selecteur {
-        width: 100%;
-    }
 }
 
 /* === FORMULAIRE GROUPE RESPONSIVE === */
@@ -1505,420 +1961,6 @@ h1, h2, h3, h4 {
 .groupe-selecteur select option {
     background: var(--bleu-principal);
     color: white;
-}
-
-/* ===============================
-   NAVIGATION PRINCIPALE - GLASSMORPHISME
-   =============================== */
-
-.navigation-principale {
-    /* La bande pâle de l'en-tête (7 nov. 2026) : le gradient maritime de la bande
-       sombre, voilé de la teinte pâle — celle de l'ancienne bande du groupe. */
-    background:
-        linear-gradient(var(--entete-bande-pale), var(--entete-bande-pale)),
-        linear-gradient(135deg, #0a1820 0%, #142a38 40%, #1a3848 70%, #0e2028 100%);
-    border-top: 1px solid rgba(106, 172, 184, 0.18);
-    box-shadow: var(--shadow-prononce);
-    padding: 12px 20px 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-/* ≤ 1100 px, la rangée du groupe (dans <header>) est déjà la bande pâle : la
-   navigation la prolonge, sans filet entre les deux. (Après la règle de base.) */
-@media (max-width: 1100px) {
-    .navigation-principale,
-    .mode-clair .navigation-principale {
-        border-top: 0;
-    }
-}
-
-.navigation-boutons {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-/* Selects mobile (cachés desktop, montrés <1024px) */
-.select-nav-mobile,
-.select-sous-nav-mobile {
-    position: relative;
-    z-index: 1;
-    display: none;
-    width: 100%;
-    height: 44px;
-    padding: 0 36px 0 14px;
-    background-color: rgba(106, 172, 184, 0.12);
-    border: 1px solid rgba(106, 172, 184, 0.25);
-    border-radius: var(--radius-moyen);
-    color: white;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.select-nav-mobile:hover,
-.select-sous-nav-mobile:hover {
-    background-color: rgba(106, 172, 184, 0.22);
-    border-color: rgba(106, 172, 184, 0.4);
-}
-
-.select-nav-mobile:focus,
-.select-sous-nav-mobile:focus {
-    background-color: rgba(106, 172, 184, 0.28);
-    border-color: rgba(106, 172, 184, 0.5);
-    box-shadow: var(--focus-ring);
-}
-
-.select-nav-mobile option,
-.select-sous-nav-mobile option {
-    background: var(--bleu-principal);
-    color: white;
-    padding: 10px;
-}
-
-.select-sous-nav-mobile {
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.navigation-principale button {
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-grand);
-    color: white;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 56px;
-    /* Format uniforme icône + label */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.navigation-principale button:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.navigation-principale button.actif {
-    background: rgba(255, 255, 255, 0.3);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Layout commun img / span pour les icônes de la nav principale */
-.navigation-principale button .nav-icon {
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-}
-/* Forme <img> : conservée pour compat avec injections JS éventuelles. */
-.navigation-principale button img.nav-icon {
-    object-fit: contain;
-    filter: brightness(0) invert(1);
-}
-/* Forme <span> + mask-image (Lot J) : permet de colorer l'icône via
-   background-color. Au repos = blanc ; quand .actif = orange #e8923a. */
-.navigation-principale button span.nav-icon {
-    display: inline-block;
-    background-color: white;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
-}
-/* === Couleurs par section — état NORMAL (inversion 27 mai 2026) ===
-   Chaque section affiche sa teinte en permanence ; l'état .actif
-   override ensuite avec un fond blanc translucide neutre (bloc plus bas).
-   Pattern : couche teinte opaque × couche bandeau médiane unie via
-   blend-mode multiply. Bandeau parent garde son vrai gradient intact
-   (la couche bandeau du bouton est UNIFORME, pas un gradient, pour
-   éviter cassure visuelle). Voir REFERENTIEL-COULEURS-SECTIONS.html
-   et AUDIT-COULEURS-SECTIONS.md. */
-.navigation-principale button[data-onglet="conception"] {
-    background:
-      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
-}
-.navigation-principale button[data-onglet="conception"] span.nav-icon { background-color: var(--section-conception); }
-.navigation-principale button[data-onglet="conception"] .nav-label  { color: var(--section-conception); }
-
-.navigation-principale button[data-onglet="calendrier"] {
-    background:
-      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
-}
-.navigation-principale button[data-onglet="calendrier"] span.nav-icon { background-color: var(--section-calendrier); }
-.navigation-principale button[data-onglet="calendrier"] .nav-label  { color: var(--section-calendrier); }
-
-.navigation-principale button[data-onglet="suivi"] {
-    background:
-      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
-}
-.navigation-principale button[data-onglet="suivi"] span.nav-icon { background-color: var(--section-suivi); }
-.navigation-principale button[data-onglet="suivi"] .nav-label  { color: var(--section-suivi); }
-
-.navigation-principale button[data-onglet="evaluations"] {
-    background:
-      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
-}
-.navigation-principale button[data-onglet="evaluations"] span.nav-icon { background-color: var(--section-evaluations); }
-.navigation-principale button[data-onglet="evaluations"] .nav-label  { color: var(--section-evaluations); }
-
-.navigation-principale button[data-onglet="labo"] {
-    background:
-      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
-}
-.navigation-principale button[data-onglet="labo"] span.nav-icon { background-color: var(--section-labo); }
-.navigation-principale button[data-onglet="labo"] .nav-label  { color: var(--section-labo); }
-
-/* === État ACTIF — neutre blanc translucide ===
-   Override les couleurs section ci-dessus. Sélecteur .actif[data-onglet]
-   = spécificité (0,3,1), bat [data-onglet="X"] = (0,2,1).
-   Pour span.nav-icon et .nav-label on monte à (0,3,2). */
-.navigation-principale button.actif[data-onglet] {
-    background: rgba(255, 255, 255, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-.navigation-principale button.actif[data-onglet] span.nav-icon { background-color: white; }
-.navigation-principale button.actif[data-onglet] .nav-label { color: white; }
-
-.navigation-principale button .nav-label {
-    font-size: 0.75rem;
-    line-height: 1;
-    white-space: nowrap;
-}
-
-/* Lien externe « CoP AQPC » dans la nav principale. Ce n'est PAS un onglet
-   interne (data-onglet), donc style dédié — n'hérite pas des règles
-   .navigation-principale button et ne les modifie pas (zéro risque sur la
-   barre existante). Apparence alignée sur les boutons ; icône blanche comme
-   les autres boutons de nav.
-   Desktop uniquement : .navigation-boutons est masqué <1024px. */
-.navigation-boutons .nav-bouton-lien {
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-grand);
-    color: white;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 56px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    text-decoration: none;
-    position: relative;
-}
-.navigation-boutons .nav-bouton-lien:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-.navigation-boutons .nav-bouton-lien .nav-label {
-    font-size: 0.75rem;
-    line-height: 1;
-    white-space: nowrap;
-}
-.navigation-boutons .nav-bouton-lien .nav-icon {
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-    display: inline-block;
-    background-color: white;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
-}
-.ico-cop-aqpc {
-    -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDE0IDQgQyAxMi44OTUgNCAxMiA0Ljg5NSAxMiA2IEwgMTIgOSBDIDEyIDEwLjEwNSAxMi44OTUgMTEgMTQgMTEgTCAxNyAxMSBMIDE5IDEzIEwgMjEgMTEgTCAyNCAxMSBDIDI1LjEwNSAxMSAyNiAxMC4xMDUgMjYgOSBMIDI2IDYgQyAyNiA0Ljg5NSAyNS4xMDUgNCAyNCA0IEwgMTQgNCB6IE0gMTUgMTQgQSAzIDMgMCAwIDAgMTIgMTcgQSAzIDMgMCAwIDAgMTUgMjAgQSAzIDMgMCAwIDAgMTggMTcgQSAzIDMgMCAwIDAgMTUgMTQgeiBNIDcgMTUgQSAzIDMgMCAwIDAgNCAxOCBBIDMgMyAwIDAgMCA3IDIxIEEgMyAzIDAgMCAwIDEwIDE4IEEgMyAzIDAgMCAwIDcgMTUgeiBNIDIzIDE1IEEgMyAzIDAgMCAwIDIwIDE4IEEgMyAzIDAgMCAwIDIzIDIxIEEgMyAzIDAgMCAwIDI2IDE4IEEgMyAzIDAgMCAwIDIzIDE1IHogTSAxNSAyMiBDIDEzLjAyODg5MyAyMiAxMS4xNDc5MDYgMjMuMjA2OTM2IDEwLjA4MjAzMSAyNC4wMzcxMDkgQyA5LjIzMzYzMDUgMjMuNTA2NDk1IDguMTM1NjQwNyAyMyA3IDIzIEMgNC42MDcgMjMgMi4zNDc2NTYyIDI1LjI0MjE4OCAyLjM0NzY1NjIgMjUuMjQyMTg4IEwgMi4zNDc2NTYyIDI1LjI0NDE0MSBBIDEgMSAwIDAgMCAyIDI2IEEgMSAxIDAgMCAwIDMgMjcgTCAxMSAyNyBMIDIwIDI3IEwgMjcgMjcgQSAxIDEgMCAwIDAgMjggMjYgQSAxIDEgMCAwIDAgMjcuNjUyMzQ0IDI1LjI0MjE4OCBDIDI3LjY1MjM0NCAyNS4yNDIxODggMjcuNjQ0NjU2IDI1LjIzNDQ5OCAyNy42NDQ1MzEgMjUuMjM0Mzc1IEEgMSAxIDAgMCAwIDI3LjYzODY3MiAyNS4yMzA0NjkgQyAyNy42MDAzNTUgMjUuMTkyNjMgMjUuMzcyNDU1IDIzIDIzIDIzIEMgMjEuODY0MzU5IDIzIDIwLjc2NjM2OSAyMy41MDY0OTUgMTkuOTE3OTY5IDI0LjAzNzEwOSBDIDE4Ljg1MjA5NCAyMy4yMDY5MzYgMTYuOTcxMTA3IDIyIDE1IDIyIHoiLz48L3N2Zz4=");
-    mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDE0IDQgQyAxMi44OTUgNCAxMiA0Ljg5NSAxMiA2IEwgMTIgOSBDIDEyIDEwLjEwNSAxMi44OTUgMTEgMTQgMTEgTCAxNyAxMSBMIDE5IDEzIEwgMjEgMTEgTCAyNCAxMSBDIDI1LjEwNSAxMSAyNiAxMC4xMDUgMjYgOSBMIDI2IDYgQyAyNiA0Ljg5NSAyNS4xMDUgNCAyNCA0IEwgMTQgNCB6IE0gMTUgMTQgQSAzIDMgMCAwIDAgMTIgMTcgQSAzIDMgMCAwIDAgMTUgMjAgQSAzIDMgMCAwIDAgMTggMTcgQSAzIDMgMCAwIDAgMTUgMTQgeiBNIDcgMTUgQSAzIDMgMCAwIDAgNCAxOCBBIDMgMyAwIDAgMCA3IDIxIEEgMyAzIDAgMCAwIDEwIDE4IEEgMyAzIDAgMCAwIDcgMTUgeiBNIDIzIDE1IEEgMyAzIDAgMCAwIDIwIDE4IEEgMyAzIDAgMCAwIDIzIDIxIEEgMyAzIDAgMCAwIDI2IDE4IEEgMyAzIDAgMCAwIDIzIDE1IHogTSAxNSAyMiBDIDEzLjAyODg5MyAyMiAxMS4xNDc5MDYgMjMuMjA2OTM2IDEwLjA4MjAzMSAyNC4wMzcxMDkgQyA5LjIzMzYzMDUgMjMuNTA2NDk1IDguMTM1NjQwNyAyMyA3IDIzIEMgNC42MDcgMjMgMi4zNDc2NTYyIDI1LjI0MjE4OCAyLjM0NzY1NjIgMjUuMjQyMTg4IEwgMi4zNDc2NTYyIDI1LjI0NDE0MSBBIDEgMSAwIDAgMCAyIDI2IEEgMSAxIDAgMCAwIDMgMjcgTCAxMSAyNyBMIDIwIDI3IEwgMjcgMjcgQSAxIDEgMCAwIDAgMjggMjYgQSAxIDEgMCAwIDAgMjcuNjUyMzQ0IDI1LjI0MjE4OCBDIDI3LjY1MjM0NCAyNS4yNDIxODggMjcuNjQ0NjU2IDI1LjIzNDQ5OCAyNy42NDQ1MzEgMjUuMjM0Mzc1IEEgMSAxIDAgMCAwIDI3LjYzODY3MiAyNS4yMzA0NjkgQyAyNy42MDAzNTUgMjUuMTkyNjMgMjUuMzcyNDU1IDIzIDIzIDIzIEMgMjEuODY0MzU5IDIzIDIwLjc2NjM2OSAyMy41MDY0OTUgMTkuOTE3OTY5IDI0LjAzNzEwOSBDIDE4Ljg1MjA5NCAyMy4yMDY5MzYgMTYuOTcxMTA3IDIyIDE1IDIyIHoiLz48L3N2Zz4=");
-}
-
-/* Pulse subtil sur le bouton CoP (élément nouveau, à promouvoir au lancement
-   de la CoP). Halo orange (--acc-fond) sur un pseudo-élément — n'interfère pas
-   avec le hover/box-shadow du bouton. Fade par l'opacité (couleur via variable,
-   pas de hardcode). Respecte prefers-reduced-motion. */
-.navigation-boutons .nav-bouton-lien::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    box-shadow: 0 0 0 3px var(--acc-fond);
-    opacity: 0;
-    animation: cop-pulse 2.8s ease-in-out infinite;
-}
-@keyframes cop-pulse {
-    0%, 100% { opacity: 0; }
-    50%      { opacity: 0.32; }
-}
-@media (prefers-reduced-motion: reduce) {
-    .navigation-boutons .nav-bouton-lien::after {
-        animation: none;
-    }
-}
-
-
-/* Classes mask-image par icône nav (SVG inlinés base64 pour CORS file://).
-   Sources : icons/icon-{home,combo-chart,calendar,profile,pulse,juggler}.svg
-   + icons/icons8-mind-map.svg (inchangés). */
-/* .ico-home : icône bicolore cible + pointeur (icons8-guide-2-pointeur-rouge.svg).
-   Override du pattern mask-image standard vers background-image pour
-   préserver les fill natifs du SVG. Cible BLANCHE constante (le bandeau
-   de nav reste sombre dans les deux thèmes, donc pas besoin de variante
-   mode-clair) + flèche rouge #e63946. `!important` pour neutraliser le
-   pattern .navigation-principale button span.nav-icon {
-   background-color: white } et battre la spécificité de `.actif`. */
-.ico-home {
-    -webkit-mask-image: none !important;
-    mask-image: none !important;
-    background-color: transparent !important;
-    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAzMCIgd2lkdGg9IjMwcHgiIGhlaWdodD0iMzBweCI+PHBhdGggZD0iTSAxNC45ODQzNzUgMC45ODYzMjgxMiBBIDEuMDAwMSAxLjAwMDEgMCAwIDAgMTQgMiBMIDE0IDMuMDUwNzgxMiBDIDguMTgxMjE0NiAzLjUzNDQ0NzQgMy41MzQ0NDc0IDguMTgxMjE0NiAzLjA1MDc4MTIgMTQgTCAyIDE0IEEgMS4wMDAxIDEuMDAwMSAwIDEgMCAyIDE2IEwgMy4wNTA3ODEyIDE2IEMgMy41MzQ0NDc0IDIxLjgxODc4NSA4LjE4MTIxNDYgMjYuNDY1NTUzIDE0IDI2Ljk0OTIxOSBMIDE0IDI4IEEgMS4wMDAxIDEuMDAwMSAwIDEgMCAxNiAyOCBMIDE2IDI2Ljk1NzAzMSBDIDIwLjgxMzI1NCAyNi41NTY5NyAyNC44MjE5MjQgMjMuMjk5NDEgMjYuMzM5ODQ0IDE4Ljg5MjU3OCBMIDIzLjY2OTkyMiAxOS45NjA5MzggQyAyMi4xMDE3MjUgMjIuNjkyMTA3IDE5LjI4MjY4OCAyNC42MDE5MzUgMTYgMjQuOTMxNjQxIEwgMTYgMjQgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE0Ljk4NDM3NSAyMi45ODYzMjggQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE0IDI0IEwgMTQgMjQuOTUxMTcyIEMgOS4yODI0ODM0IDI0LjQ4MDc3MSA1LjUxOTIyOTIgMjAuNzE3NTE3IDUuMDQ4ODI4MSAxNiBMIDYgMTYgQSAxLjAwMDEgMS4wMDAxIDAgMSAwIDYgMTQgTCA1LjA0ODgyODEgMTQgQyA1LjUxOTIyOTIgOS4yODI0ODM0IDkuMjgyNDgzNCA1LjUxOTIyOTIgMTQgNS4wNDg4MjgxIEwgMTQgNiBBIDEuMDAwMSAxLjAwMDEgMCAxIDAgMTYgNiBMIDE2IDUuMDY4MzU5NCBDIDE5LjI4MjU0NSA1LjM5ODA1NzEgMjIuMTAwODE3IDcuMzA2ODQ4MyAyMy42Njk5MjIgMTAuMDM3MTA5IEwgMjYuMzM5ODQ0IDExLjEwNTQ2OSBDIDI0LjgyMTkyNCA2LjY5OTU3MjIgMjAuODEzMjU0IDMuNDQzMDI2NiAxNiAzLjA0Mjk2ODggTCAxNiAyIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxNC45ODQzNzUgMC45ODYzMjgxMiB6IiBmaWxsPSIjZmZmZmZmIi8+PHBhdGggZD0iTSAyMyAxMiBBIDEgMSAwIDAgMCAyMiAxMyBBIDEgMSAwIDAgMCAyMi4yMDUwNzggMTMuNjA1NDY5IEwgMjMgMTUgTCAyMi4yMDUwNzggMTYuMzkyNTc4IEwgMjIuMjA1MDc4IDE2LjM5NDUzMSBBIDEgMSAwIDAgMCAyMiAxNyBBIDEgMSAwIDAgMCAyMyAxOCBBIDEgMSAwIDAgMCAyMy40MTAxNTYgMTcuOTEwMTU2IEEgMSAxIDAgMCAwIDIzLjQxMjEwOSAxNy45MTAxNTYgTCAyOC4yOTI5NjkgMTUuOTU3MDMxIEwgMjguMjkyOTY5IDE1Ljk1NTA3OCBBIDEgMSAwIDAgMCAyOSAxNSBBIDEgMSAwIDAgMCAyOC4yOTI5NjkgMTQuMDQ0OTIyIEwgMjguMjkyOTY5IDE0LjA0Mjk2OSBMIDIzLjQxOTkyMiAxMi4wOTM3NSBMIDIzLjQxMDE1NiAxMi4wODk4NDQgQSAxIDEgMCAwIDAgMjMgMTIgeiIgZmlsbD0iI2U2Mzk0NiIvPjwvc3ZnPgo=");
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-.ico-combo-chart { -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gNDUgMiBDIDQzLjg5NDUzMSAyIDQzIDIuODk0NTMxIDQzIDQgQyA0MyA0LjI5Mjk2OSA0My4wNzQyMTkgNC41NjI1IDQzLjE4NzUgNC44MTI1IEwgMzUuMTg3NSAxNiBDIDM1LjEyNSAxNS45OTYwOTQgMzUuMDYyNSAxNiAzNSAxNiBDIDM0LjYwMTU2MyAxNiAzNC4yMTg3NSAxNi4xMDkzNzUgMzMuOTA2MjUgMTYuMzEyNSBMIDI3IDEyLjg3NSBDIDI2LjkzMzU5NCAxMS44MjgxMjUgMjYuMDYyNSAxMSAyNSAxMSBDIDIzLjg5NDUzMSAxMSAyMyAxMS44OTQ1MzEgMjMgMTMgQyAyMyAxMy4xMDU0NjkgMjMuMDE1NjI1IDEzLjIxMDkzOCAyMy4wMzEyNSAxMy4zMTI1IEwgMTUuNzE4NzUgMTkuMTI1IEMgMTUuNDk2MDk0IDE5LjAzOTA2MyAxNS4yNTM5MDYgMTkgMTUgMTkgQyAxNCAxOSAxMy4xNzk2ODggMTkuNzMwNDY5IDEzLjAzMTI1IDIwLjY4NzUgTCA2LjIxODc1IDIzLjQzNzUgQyA1Ljg3ODkwNiAyMy4xNzE4NzUgNS40NjA5MzggMjMgNSAyMyBDIDMuODk0NTMxIDIzIDMgMjMuODk0NTMxIDMgMjUgQyAzIDI2LjEwNTQ2OSAzLjg5NDUzMSAyNyA1IDI3IEMgNi4wMDc4MTMgMjcgNi44MzIwMzEgMjYuMjUzOTA2IDYuOTY4NzUgMjUuMjgxMjUgTCAxMy43ODEyNSAyMi41NjI1IEMgMTQuMTIxMDk0IDIyLjgyODEyNSAxNC41MzkwNjMgMjMgMTUgMjMgQyAxNi4xMDU0NjkgMjMgMTcgMjIuMTA1NDY5IDE3IDIxIEMgMTcgMjAuODk0NTMxIDE2Ljk4NDM3NSAyMC43ODkwNjMgMTYuOTY4NzUgMjAuNjg3NSBMIDI0LjI4MTI1IDE0Ljg3NSBDIDI0LjUwMzkwNiAxNC45NjA5MzggMjQuNzQ2MDk0IDE1IDI1IDE1IEMgMjUuMzk4NDM4IDE1IDI1Ljc4MTI1IDE0Ljg5MDYyNSAyNi4wOTM3NSAxNC42ODc1IEwgMzMgMTguMTI1IEMgMzMuMDY2NDA2IDE5LjE3MTg3NSAzMy45Mzc1IDIwIDM1IDIwIEMgMzYuMTA1NDY5IDIwIDM3IDE5LjEwNTQ2OSAzNyAxOCBDIDM3IDE3LjcwNzAzMSAzNi45MjU3ODEgMTcuNDM3NSAzNi44MTI1IDE3LjE4NzUgTCA0NC44MTI1IDYgQyA0NC44NzUgNi4wMDM5MDYgNDQuOTM3NSA2IDQ1IDYgQyA0Ni4xMDU0NjkgNiA0NyA1LjEwNTQ2OSA0NyA0IEMgNDcgMi44OTQ1MzEgNDYuMTA1NDY5IDIgNDUgMiBaIE0gNDEgMTUgTCA0MSA1MCBMIDQ5IDUwIEwgNDkgMTUgWiBNIDIxIDI0IEwgMjEgNTAgTCAyOSA1MCBMIDI5IDI0IFogTSAzMSAyOSBMIDMxIDUwIEwgMzkgNTAgTCAzOSAyOSBaIE0gMTEgMzIgTCAxMSA1MCBMIDE5IDUwIEwgMTkgMzIgWiBNIDEgMzYgTCAxIDUwIEwgOSA1MCBMIDkgMzYgWiIvPjwvc3ZnPg==");
-                           mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gNDUgMiBDIDQzLjg5NDUzMSAyIDQzIDIuODk0NTMxIDQzIDQgQyA0MyA0LjI5Mjk2OSA0My4wNzQyMTkgNC41NjI1IDQzLjE4NzUgNC44MTI1IEwgMzUuMTg3NSAxNiBDIDM1LjEyNSAxNS45OTYwOTQgMzUuMDYyNSAxNiAzNSAxNiBDIDM0LjYwMTU2MyAxNiAzNC4yMTg3NSAxNi4xMDkzNzUgMzMuOTA2MjUgMTYuMzEyNSBMIDI3IDEyLjg3NSBDIDI2LjkzMzU5NCAxMS44MjgxMjUgMjYuMDYyNSAxMSAyNSAxMSBDIDIzLjg5NDUzMSAxMSAyMyAxMS44OTQ1MzEgMjMgMTMgQyAyMyAxMy4xMDU0NjkgMjMuMDE1NjI1IDEzLjIxMDkzOCAyMy4wMzEyNSAxMy4zMTI1IEwgMTUuNzE4NzUgMTkuMTI1IEMgMTUuNDk2MDk0IDE5LjAzOTA2MyAxNS4yNTM5MDYgMTkgMTUgMTkgQyAxNCAxOSAxMy4xNzk2ODggMTkuNzMwNDY5IDEzLjAzMTI1IDIwLjY4NzUgTCA2LjIxODc1IDIzLjQzNzUgQyA1Ljg3ODkwNiAyMy4xNzE4NzUgNS40NjA5MzggMjMgNSAyMyBDIDMuODk0NTMxIDIzIDMgMjMuODk0NTMxIDMgMjUgQyAzIDI2LjEwNTQ2OSAzLjg5NDUzMSAyNyA1IDI3IEMgNi4wMDc4MTMgMjcgNi44MzIwMzEgMjYuMjUzOTA2IDYuOTY4NzUgMjUuMjgxMjUgTCAxMy43ODEyNSAyMi41NjI1IEMgMTQuMTIxMDk0IDIyLjgyODEyNSAxNC41MzkwNjMgMjMgMTUgMjMgQyAxNi4xMDU0NjkgMjMgMTcgMjIuMTA1NDY5IDE3IDIxIEMgMTcgMjAuODk0NTMxIDE2Ljk4NDM3NSAyMC43ODkwNjMgMTYuOTY4NzUgMjAuNjg3NSBMIDI0LjI4MTI1IDE0Ljg3NSBDIDI0LjUwMzkwNiAxNC45NjA5MzggMjQuNzQ2MDk0IDE1IDI1IDE1IEMgMjUuMzk4NDM4IDE1IDI1Ljc4MTI1IDE0Ljg5MDYyNSAyNi4wOTM3NSAxNC42ODc1IEwgMzMgMTguMTI1IEMgMzMuMDY2NDA2IDE5LjE3MTg3NSAzMy45Mzc1IDIwIDM1IDIwIEMgMzYuMTA1NDY5IDIwIDM3IDE5LjEwNTQ2OSAzNyAxOCBDIDM3IDE3LjcwNzAzMSAzNi45MjU3ODEgMTcuNDM3NSAzNi44MTI1IDE3LjE4NzUgTCA0NC44MTI1IDYgQyA0NC44NzUgNi4wMDM5MDYgNDQuOTM3NSA2IDQ1IDYgQyA0Ni4xMDU0NjkgNiA0NyA1LjEwNTQ2OSA0NyA0IEMgNDcgMi44OTQ1MzEgNDYuMTA1NDY5IDIgNDUgMiBaIE0gNDEgMTUgTCA0MSA1MCBMIDQ5IDUwIEwgNDkgMTUgWiBNIDIxIDI0IEwgMjEgNTAgTCAyOSA1MCBMIDI5IDI0IFogTSAzMSAyOSBMIDMxIDUwIEwgMzkgNTAgTCAzOSAyOSBaIE0gMTEgMzIgTCAxMSA1MCBMIDE5IDUwIEwgMTkgMzIgWiBNIDEgMzYgTCAxIDUwIEwgOSA1MCBMIDkgMzYgWiIvPjwvc3ZnPg=="); }
-.ico-mind-map    { -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gNiAwIEMgMi42OTE0MDYgMCAwIDIuNjkxNDA2IDAgNiBDIDAgOS4zMDg1OTQgMi42OTE0MDYgMTIgNiAxMiBDIDcuMjk2ODc1IDEyIDguNDg4MjgxIDExLjU3ODEyNSA5LjQ2ODc1IDEwLjg3NSBMIDE3LjI1IDE4LjY4NzUgQyAxNS44Mzk4NDQgMjAuNDEwMTU2IDE1IDIyLjYwNTQ2OSAxNSAyNSBDIDE1IDI2Ljk4MDQ2OSAxNS41OTc2NTYgMjguODIwMzEzIDE2LjU5Mzc1IDMwLjM3NSBMIDEwLjAzMTI1IDM1LjU2MjUgQyA4Ljk2NDg0NCAzNC41OTM3NSA3LjU1MDc4MSAzNCA2IDM0IEMgMi42OTE0MDYgMzQgMCAzNi42OTE0MDYgMCA0MCBDIDAgNDMuMzA4NTk0IDIuNjkxNDA2IDQ2IDYgNDYgQyA5LjMwODU5NCA0NiAxMiA0My4zMDg1OTQgMTIgNDAgQyAxMiAzOC45NjQ4NDQgMTEuNzQyMTg4IDM4LjAwNzgxMyAxMS4yODEyNSAzNy4xNTYyNSBMIDE3Ljg0Mzc1IDMxLjkzNzUgQyAxOS42NjQwNjMgMzMuODEyNSAyMi4xODc1IDM1IDI1IDM1IEMgMjYuMzIwMzEzIDM1IDI3LjU2NjQwNiAzNC43NDYwOTQgMjguNzE4NzUgMzQuMjgxMjUgTCAzMS4zNDM3NSAzOS4yNSBDIDI5LjkyMTg3NSA0MC4zNDc2NTYgMjkgNDIuMDY2NDA2IDI5IDQ0IEMgMjkgNDcuMzA4NTk0IDMxLjY5MTQwNiA1MCAzNSA1MCBDIDM4LjMwODU5NCA1MCA0MSA0Ny4zMDg1OTQgNDEgNDQgQyA0MSA0MC42OTE0MDYgMzguMzA4NTk0IDM4IDM1IDM4IEMgMzQuMzQzNzUgMzggMzMuNzE0ODQ0IDM4LjExNzE4OCAzMy4xMjUgMzguMzEyNSBMIDMwLjUgMzMuMzQzNzUgQyAzMi4zODY3MTkgMzIuMDk3NjU2IDMzLjgyODEyNSAzMC4yMzA0NjkgMzQuNTMxMjUgMjguMDMxMjUgTCAzOCAyOC43NSBDIDM3Ljk5NjA5NCAyOC44MzIwMzEgMzggMjguOTE3OTY5IDM4IDI5IEMgMzggMzIuMzA4NTk0IDQwLjY5MTQwNiAzNSA0NCAzNSBDIDQ3LjMwODU5NCAzNSA1MCAzMi4zMDg1OTQgNTAgMjkgQyA1MCAyNS42OTE0MDYgNDcuMzA4NTk0IDIzIDQ0IDIzIEMgNDEuNDYwOTM4IDIzIDM5LjI4MTI1IDI0LjU3ODEyNSAzOC40MDYyNSAyNi44MTI1IEwgMzQuOTM3NSAyNi4wNjI1IEMgMzQuOTcyNjU2IDI1LjcxNDg0NCAzNSAyNS4zNTU0NjkgMzUgMjUgQyAzNSAyMS4wNTA3ODEgMzIuNjc1NzgxIDE3LjY1NjI1IDI5LjM0Mzc1IDE2LjAzMTI1IEwgMzAuODc1IDExLjkwNjI1IEMgMzEuMjM0Mzc1IDExLjk3MjY1NiAzMS42MjEwOTQgMTIgMzIgMTIgQyAzNS4zMDg1OTQgMTIgMzggOS4zMDg1OTQgMzggNiBDIDM4IDIuNjkxNDA2IDM1LjMwODU5NCAwIDMyIDAgQyAyOC42OTE0MDYgMCAyNiAyLjY5MTQwNiAyNiA2IEMgMjYgOC4yMTg3NSAyNy4yMzQzNzUgMTAuMTQ4NDM4IDI5LjAzMTI1IDExLjE4NzUgTCAyNy40Njg3NSAxNS4zMTI1IEMgMjYuNjc1NzgxIDE1LjEwOTM3NSAyNS44NTU0NjkgMTUgMjUgMTUgQyAyMi42MDU0NjkgMTUgMjAuNDEwMTU2IDE1LjgzOTg0NCAxOC42ODc1IDE3LjI1IEwgMTAuODc1IDkuNDY4NzUgQyAxMS41NzgxMjUgOC40ODgyODEgMTIgNy4yOTY4NzUgMTIgNiBDIDEyIDIuNjkxNDA2IDkuMzA4NTk0IDAgNiAwIFoiLz48L3N2Zz4=");
-                           mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gNiAwIEMgMi42OTE0MDYgMCAwIDIuNjkxNDA2IDAgNiBDIDAgOS4zMDg1OTQgMi42OTE0MDYgMTIgNiAxMiBDIDcuMjk2ODc1IDEyIDguNDg4MjgxIDExLjU3ODEyNSA5LjQ2ODc1IDEwLjg3NSBMIDE3LjI1IDE4LjY4NzUgQyAxNS44Mzk4NDQgMjAuNDEwMTU2IDE1IDIyLjYwNTQ2OSAxNSAyNSBDIDE1IDI2Ljk4MDQ2OSAxNS41OTc2NTYgMjguODIwMzEzIDE2LjU5Mzc1IDMwLjM3NSBMIDEwLjAzMTI1IDM1LjU2MjUgQyA4Ljk2NDg0NCAzNC41OTM3NSA3LjU1MDc4MSAzNCA2IDM0IEMgMi42OTE0MDYgMzQgMCAzNi42OTE0MDYgMCA0MCBDIDAgNDMuMzA4NTk0IDIuNjkxNDA2IDQ2IDYgNDYgQyA5LjMwODU5NCA0NiAxMiA0My4zMDg1OTQgMTIgNDAgQyAxMiAzOC45NjQ4NDQgMTEuNzQyMTg4IDM4LjAwNzgxMyAxMS4yODEyNSAzNy4xNTYyNSBMIDE3Ljg0Mzc1IDMxLjkzNzUgQyAxOS42NjQwNjMgMzMuODEyNSAyMi4xODc1IDM1IDI1IDM1IEMgMjYuMzIwMzEzIDM1IDI3LjU2NjQwNiAzNC43NDYwOTQgMjguNzE4NzUgMzQuMjgxMjUgTCAzMS4zNDM3NSAzOS4yNSBDIDI5LjkyMTg3NSA0MC4zNDc2NTYgMjkgNDIuMDY2NDA2IDI5IDQ0IEMgMjkgNDcuMzA4NTk0IDMxLjY5MTQwNiA1MCAzNSA1MCBDIDM4LjMwODU5NCA1MCA0MSA0Ny4zMDg1OTQgNDEgNDQgQyA0MSA0MC42OTE0MDYgMzguMzA4NTk0IDM4IDM1IDM4IEMgMzQuMzQzNzUgMzggMzMuNzE0ODQ0IDM4LjExNzE4OCAzMy4xMjUgMzguMzEyNSBMIDMwLjUgMzMuMzQzNzUgQyAzMi4zODY3MTkgMzIuMDk3NjU2IDMzLjgyODEyNSAzMC4yMzA0NjkgMzQuNTMxMjUgMjguMDMxMjUgTCAzOCAyOC43NSBDIDM3Ljk5NjA5NCAyOC44MzIwMzEgMzggMjguOTE3OTY5IDM4IDI5IEMgMzggMzIuMzA4NTk0IDQwLjY5MTQwNiAzNSA0NCAzNSBDIDQ3LjMwODU5NCAzNSA1MCAzMi4zMDg1OTQgNTAgMjkgQyA1MCAyNS42OTE0MDYgNDcuMzA4NTk0IDIzIDQ0IDIzIEMgNDEuNDYwOTM4IDIzIDM5LjI4MTI1IDI0LjU3ODEyNSAzOC40MDYyNSAyNi44MTI1IEwgMzQuOTM3NSAyNi4wNjI1IEMgMzQuOTcyNjU2IDI1LjcxNDg0NCAzNSAyNS4zNTU0NjkgMzUgMjUgQyAzNSAyMS4wNTA3ODEgMzIuNjc1NzgxIDE3LjY1NjI1IDI5LjM0Mzc1IDE2LjAzMTI1IEwgMzAuODc1IDExLjkwNjI1IEMgMzEuMjM0Mzc1IDExLjk3MjY1NiAzMS42MjEwOTQgMTIgMzIgMTIgQyAzNS4zMDg1OTQgMTIgMzggOS4zMDg1OTQgMzggNiBDIDM4IDIuNjkxNDA2IDM1LjMwODU5NCAwIDMyIDAgQyAyOC42OTE0MDYgMCAyNiAyLjY5MTQwNiAyNiA2IEMgMjYgOC4yMTg3NSAyNy4yMzQzNzUgMTAuMTQ4NDM4IDI5LjAzMTI1IDExLjE4NzUgTCAyNy40Njg3NSAxNS4zMTI1IEMgMjYuNjc1NzgxIDE1LjEwOTM3NSAyNS44NTU0NjkgMTUgMjUgMTUgQyAyMi42MDU0NjkgMTUgMjAuNDEwMTU2IDE1LjgzOTg0NCAxOC42ODc1IDE3LjI1IEwgMTAuODc1IDkuNDY4NzUgQyAxMS41NzgxMjUgOC40ODgyODEgMTIgNy4yOTY4NzUgMTIgNiBDIDEyIDIuNjkxNDA2IDkuMzA4NTk0IDAgNiAwIFoiLz48L3N2Zz4="); }
-.ico-calendar    { -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTIgMCBDIDEwLjkwNjI1IDAgMTAgMC45MDYyNSAxMCAyIEwgMTAgNCBMIDQgNCBDIDIuODM5ODQ0IDQgMiA0LjgzOTg0NCAyIDYgTCAyIDEzIEwgNDggMTMgTCA0OCA2IEMgNDggNC44Mzk4NDQgNDcuMTYwMTU2IDQgNDYgNCBMIDQwIDQgTCA0MCAyIEMgNDAgMC45MDYyNSAzOS4wOTM3NSAwIDM4IDAgTCAzNiAwIEMgMzQuOTA2MjUgMCAzNCAwLjkwNjI1IDM0IDIgTCAzNCA0IEwgMTYgNCBMIDE2IDIgQyAxNiAwLjkwNjI1IDE1LjA5Mzc1IDAgMTQgMCBaIE0gMTIgMiBMIDE0IDIgTCAxNCA4IEwgMTIgOCBaIE0gMzYgMiBMIDM4IDIgTCAzOCA4IEwgMzYgOCBaIE0gMiAxNSBMIDIgNDYgQyAyIDQ3LjE2MDE1NiAyLjgzOTg0NCA0OCA0IDQ4IEwgNDYgNDggQyA0Ny4xNjAxNTYgNDggNDggNDcuMTYwMTU2IDQ4IDQ2IEwgNDggMTUgWiBNIDEyIDIxIEwgMTcgMjEgTCAxNyAyNiBMIDEyIDI2IFogTSAxOSAyMSBMIDI0IDIxIEwgMjQgMjYgTCAxOSAyNiBaIE0gMjYgMjEgTCAzMSAyMSBMIDMxIDI2IEwgMjYgMjYgWiBNIDMzIDIxIEwgMzggMjEgTCAzOCAyNiBMIDMzIDI2IFogTSAxMiAyOCBMIDE3IDI4IEwgMTcgMzMgTCAxMiAzMyBaIE0gMTkgMjggTCAyNCAyOCBMIDI0IDMzIEwgMTkgMzMgWiBNIDI2IDI4IEwgMzEgMjggTCAzMSAzMyBMIDI2IDMzIFogTSAzMyAyOCBMIDM4IDI4IEwgMzggMzMgTCAzMyAzMyBaIE0gMTIgMzUgTCAxNyAzNSBMIDE3IDQwIEwgMTIgNDAgWiBNIDE5IDM1IEwgMjQgMzUgTCAyNCA0MCBMIDE5IDQwIFogTSAyNiAzNSBMIDMxIDM1IEwgMzEgNDAgTCAyNiA0MCBaIE0gMzMgMzUgTCAzOCAzNSBMIDM4IDQwIEwgMzMgNDAgWiIvPjwvc3ZnPg==");
-                           mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMTIgMCBDIDEwLjkwNjI1IDAgMTAgMC45MDYyNSAxMCAyIEwgMTAgNCBMIDQgNCBDIDIuODM5ODQ0IDQgMiA0LjgzOTg0NCAyIDYgTCAyIDEzIEwgNDggMTMgTCA0OCA2IEMgNDggNC44Mzk4NDQgNDcuMTYwMTU2IDQgNDYgNCBMIDQwIDQgTCA0MCAyIEMgNDAgMC45MDYyNSAzOS4wOTM3NSAwIDM4IDAgTCAzNiAwIEMgMzQuOTA2MjUgMCAzNCAwLjkwNjI1IDM0IDIgTCAzNCA0IEwgMTYgNCBMIDE2IDIgQyAxNiAwLjkwNjI1IDE1LjA5Mzc1IDAgMTQgMCBaIE0gMTIgMiBMIDE0IDIgTCAxNCA4IEwgMTIgOCBaIE0gMzYgMiBMIDM4IDIgTCAzOCA4IEwgMzYgOCBaIE0gMiAxNSBMIDIgNDYgQyAyIDQ3LjE2MDE1NiAyLjgzOTg0NCA0OCA0IDQ4IEwgNDYgNDggQyA0Ny4xNjAxNTYgNDggNDggNDcuMTYwMTU2IDQ4IDQ2IEwgNDggMTUgWiBNIDEyIDIxIEwgMTcgMjEgTCAxNyAyNiBMIDEyIDI2IFogTSAxOSAyMSBMIDI0IDIxIEwgMjQgMjYgTCAxOSAyNiBaIE0gMjYgMjEgTCAzMSAyMSBMIDMxIDI2IEwgMjYgMjYgWiBNIDMzIDIxIEwgMzggMjEgTCAzOCAyNiBMIDMzIDI2IFogTSAxMiAyOCBMIDE3IDI4IEwgMTcgMzMgTCAxMiAzMyBaIE0gMTkgMjggTCAyNCAyOCBMIDI0IDMzIEwgMTkgMzMgWiBNIDI2IDI4IEwgMzEgMjggTCAzMSAzMyBMIDI2IDMzIFogTSAzMyAyOCBMIDM4IDI4IEwgMzggMzMgTCAzMyAzMyBaIE0gMTIgMzUgTCAxNyAzNSBMIDE3IDQwIEwgMTIgNDAgWiBNIDE5IDM1IEwgMjQgMzUgTCAyNCA0MCBMIDE5IDQwIFogTSAyNiAzNSBMIDMxIDM1IEwgMzEgNDAgTCAyNiA0MCBaIE0gMzMgMzUgTCAzOCAzNSBMIDM4IDQwIEwgMzMgNDAgWiIvPjwvc3ZnPg=="); }
-.ico-profile     { -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMi4wMDc4MTI1IEMgMTIuMzA5Mjk2IDIuMDA3ODEyNSAyLjAwMDAwMDIgMTIuMzE3MTA4IDIgMjUuMDA3ODEyIEMgMiAzNy4xMTIyNjIgMTEuMzgxMzEgNDcuMDQzMTk1IDIzLjI1OTc2NiA0Ny45MzU1NDcgQyAyMy4yODMxODUgNDcuOTM3NDUgMjMuMzA2NjEzIDQ3LjkzOTU3NiAyMy4zMzAwNzggNDcuOTQxNDA2IEMgMjMuODgyNDA1IDQ3Ljk4MTIwNSAyNC40Mzc2MzEgNDguMDA3ODEyIDI1IDQ4LjAwNzgxMiBDIDI1LjU2MjM2OSA0OC4wMDc4MTIgMjYuMTE3NTk1IDQ3Ljk4MTIwNSAyNi42Njk5MjIgNDcuOTQxNDA2IEMgMjYuNjkzMzg3IDQ3LjkzOTU3NiAyNi43MTY4MTUgNDcuOTM3NDUgMjYuNzQwMjM0IDQ3LjkzNTU0NyBDIDM4LjYxODY5IDQ3LjA0MzE5NSA0OCAzNy4xMTIyNjIgNDggMjUuMDA3ODEyIEMgNDggMTIuMzE3MTA4IDM3LjY5MDcwNCAyLjAwNzgxMjUgMjUgMi4wMDc4MTI1IHogTSAyNSA0LjAwNzgxMjUgQyAzNi42MDk4MjQgNC4wMDc4MTI1IDQ2IDEzLjM5Nzk4OCA0NiAyNS4wMDc4MTIgQyA0NiAzMC43Mzk1MTUgNDMuNzA0ODEzIDM1LjkyNDA3MiAzOS45OTAyMzQgMzkuNzEwOTM4IEMgMzguNDAxMDc0IDM4LjU1MzcyIDM2LjQzNzE5NCAzNy44NjMzODcgMzQuNjc3NzM0IDM3LjI0NjA5NCBDIDMyLjU5MzczNCAzNi41MTYwOTQgMzAuNjIyMTcyIDM1LjgyNDA5NCAzMC4wNzYxNzIgMzQuNjIxMDk0IEMgMjkuOTkwMTcyIDMzLjU5NDA5NCAyOS45OTc4NTkgMzIuNzkyMDk0IDMwLjAwNTg1OSAzMS44NzEwOTQgTCAzMC4wMDc4MTIgMzEuNDgwNDY5IEMgMzAuODk1ODEzIDMwLjYzNTQ2OSAzMi4wMTI1MzEgMjguODUyMDc4IDMyLjM5NDUzMSAyNy4yMDUwNzggQyAzMy4wNTQ1MzEgMjYuODUzMDc4IDMzLjg2MTUxNiAyNi4wMDkyODEgMzQuMTAzNTE2IDIzLjk4ODI4MSBDIDM0LjIyNDUxNiAyMi45ODUyODEgMzMuOTM5MDYyIDIyLjIwODUgMzMuNTM5MDYyIDIxLjY4NzUgQyAzNC4wNzkwNjIgMTkuODMyNSAzNS4xNTM0ODQgMTUuMTM2NDY5IDMzLjI3MTQ4NCAxMi4xMDU0NjkgQyAzMi40NzU0ODQgMTAuODI0NDY5IDMxLjI3NDMxMyAxMC4wMTYyNjYgMjkuNjk1MzEyIDkuNjk3MjY1NiBDIDI4LjgwODMxMiA4LjU5OTI2NTYgMjcuMTM0NDg0IDggMjQuODk2NDg0IDggQyAyMS40OTU0ODQgOC4wNjMgMTkuMDAyMjM0IDkuMTA0NzAzMSAxNy40OTAyMzQgMTEuMDk1NzAzIEMgMTUuNzA3MjM0IDEzLjQ0NTcwMyAxNS4zNzAzMjggMTYuOTk2Mjk3IDE2LjQ4NjMyOCAyMS42NTQyOTcgQyAxNi4wNzMzMjggMjIuMTc1Mjk3IDE1Ljc3NTQzOCAyMi45NjMzMjggMTUuODk4NDM4IDIzLjk4NjMyOCBDIDE2LjE0MTQzOCAyNi4wMDczMjggMTYuOTQ1NDY5IDI2Ljg1MTEyNSAxNy42MDU0NjkgMjcuMjAzMTI1IEMgMTcuOTg3NDY5IDI4Ljg1MjEyNSAxOS4xMDMxODggMzAuNjM1NDY5IDE5Ljk5MjE4OCAzMS40ODA0NjkgTCAxOS45OTQxNDEgMzEuODYxMzI4IEMgMjAuMDAyMTQxIDMyLjc4NjMyOCAyMC4wMDk4MjggMzMuNTkwMDk0IDE5LjkyMzgyOCAzNC42MjEwOTQgQyAxOS4zNzU4MjggMzUuODI3MDk0IDE3LjM5NDc4MSAzNi41MjY2MjUgMTUuMzAwNzgxIDM3LjI2NTYyNSBDIDEzLjU1MTg4NiAzNy44ODMxOSAxMS41OTk2MzEgMzguNTc0NTg2IDEwLjAxMzY3MiAzOS43MTY3OTcgQyA2LjI5NjIxOTEgMzUuOTI5NTA0IDQgMzAuNzQyMDIzIDQgMjUuMDA3ODEyIEMgNC4wMDAwMDAyIDEzLjM5Nzk4OSAxMy4zOTAxNzYgNC4wMDc4MTI1IDI1IDQuMDA3ODEyNSB6Ii8+PC9zdmc+");
-                           mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPjxwYXRoIGQ9Ik0gMjUgMi4wMDc4MTI1IEMgMTIuMzA5Mjk2IDIuMDA3ODEyNSAyLjAwMDAwMDIgMTIuMzE3MTA4IDIgMjUuMDA3ODEyIEMgMiAzNy4xMTIyNjIgMTEuMzgxMzEgNDcuMDQzMTk1IDIzLjI1OTc2NiA0Ny45MzU1NDcgQyAyMy4yODMxODUgNDcuOTM3NDUgMjMuMzA2NjEzIDQ3LjkzOTU3NiAyMy4zMzAwNzggNDcuOTQxNDA2IEMgMjMuODgyNDA1IDQ3Ljk4MTIwNSAyNC40Mzc2MzEgNDguMDA3ODEyIDI1IDQ4LjAwNzgxMiBDIDI1LjU2MjM2OSA0OC4wMDc4MTIgMjYuMTE3NTk1IDQ3Ljk4MTIwNSAyNi42Njk5MjIgNDcuOTQxNDA2IEMgMjYuNjkzMzg3IDQ3LjkzOTU3NiAyNi43MTY4MTUgNDcuOTM3NDUgMjYuNzQwMjM0IDQ3LjkzNTU0NyBDIDM4LjYxODY5IDQ3LjA0MzE5NSA0OCAzNy4xMTIyNjIgNDggMjUuMDA3ODEyIEMgNDggMTIuMzE3MTA4IDM3LjY5MDcwNCAyLjAwNzgxMjUgMjUgMi4wMDc4MTI1IHogTSAyNSA0LjAwNzgxMjUgQyAzNi42MDk4MjQgNC4wMDc4MTI1IDQ2IDEzLjM5Nzk4OCA0NiAyNS4wMDc4MTIgQyA0NiAzMC43Mzk1MTUgNDMuNzA0ODEzIDM1LjkyNDA3MiAzOS45OTAyMzQgMzkuNzEwOTM4IEMgMzguNDAxMDc0IDM4LjU1MzcyIDM2LjQzNzE5NCAzNy44NjMzODcgMzQuNjc3NzM0IDM3LjI0NjA5NCBDIDMyLjU5MzczNCAzNi41MTYwOTQgMzAuNjIyMTcyIDM1LjgyNDA5NCAzMC4wNzYxNzIgMzQuNjIxMDk0IEMgMjkuOTkwMTcyIDMzLjU5NDA5NCAyOS45OTc4NTkgMzIuNzkyMDk0IDMwLjAwNTg1OSAzMS44NzEwOTQgTCAzMC4wMDc4MTIgMzEuNDgwNDY5IEMgMzAuODk1ODEzIDMwLjYzNTQ2OSAzMi4wMTI1MzEgMjguODUyMDc4IDMyLjM5NDUzMSAyNy4yMDUwNzggQyAzMy4wNTQ1MzEgMjYuODUzMDc4IDMzLjg2MTUxNiAyNi4wMDkyODEgMzQuMTAzNTE2IDIzLjk4ODI4MSBDIDM0LjIyNDUxNiAyMi45ODUyODEgMzMuOTM5MDYyIDIyLjIwODUgMzMuNTM5MDYyIDIxLjY4NzUgQyAzNC4wNzkwNjIgMTkuODMyNSAzNS4xNTM0ODQgMTUuMTM2NDY5IDMzLjI3MTQ4NCAxMi4xMDU0NjkgQyAzMi40NzU0ODQgMTAuODI0NDY5IDMxLjI3NDMxMyAxMC4wMTYyNjYgMjkuNjk1MzEyIDkuNjk3MjY1NiBDIDI4LjgwODMxMiA4LjU5OTI2NTYgMjcuMTM0NDg0IDggMjQuODk2NDg0IDggQyAyMS40OTU0ODQgOC4wNjMgMTkuMDAyMjM0IDkuMTA0NzAzMSAxNy40OTAyMzQgMTEuMDk1NzAzIEMgMTUuNzA3MjM0IDEzLjQ0NTcwMyAxNS4zNzAzMjggMTYuOTk2Mjk3IDE2LjQ4NjMyOCAyMS42NTQyOTcgQyAxNi4wNzMzMjggMjIuMTc1Mjk3IDE1Ljc3NTQzOCAyMi45NjMzMjggMTUuODk4NDM4IDIzLjk4NjMyOCBDIDE2LjE0MTQzOCAyNi4wMDczMjggMTYuOTQ1NDY5IDI2Ljg1MTEyNSAxNy42MDU0NjkgMjcuMjAzMTI1IEMgMTcuOTg3NDY5IDI4Ljg1MjEyNSAxOS4xMDMxODggMzAuNjM1NDY5IDE5Ljk5MjE4OCAzMS40ODA0NjkgTCAxOS45OTQxNDEgMzEuODYxMzI4IEMgMjAuMDAyMTQxIDMyLjc4NjMyOCAyMC4wMDk4MjggMzMuNTkwMDk0IDE5LjkyMzgyOCAzNC42MjEwOTQgQyAxOS4zNzU4MjggMzUuODI3MDk0IDE3LjM5NDc4MSAzNi41MjY2MjUgMTUuMzAwNzgxIDM3LjI2NTYyNSBDIDEzLjU1MTg4NiAzNy44ODMxOSAxMS41OTk2MzEgMzguNTc0NTg2IDEwLjAxMzY3MiAzOS43MTY3OTcgQyA2LjI5NjIxOTEgMzUuOTI5NTA0IDQgMzAuNzQyMDIzIDQgMjUuMDA3ODEyIEMgNC4wMDAwMDAyIDEzLjM5Nzk4OSAxMy4zOTAxNzYgNC4wMDc4MTI1IDI1IDQuMDA3ODEyNSB6Ii8+PC9zdmc+"); }
-.ico-pulse       { -webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPjxwYXRoIGQ9Ik0gMTQuOTg2MzI4IDIgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE0LjA0NDkyMiAyLjcwMTE3MTkgTCA5Ljg0Mzc1IDE2LjE0NjQ4NCBMIDguNjc5Njg3NSAxMy40OTAyMzQgTCA4LjY3OTY4NzUgMTMuNDg4MjgxIEMgNy44NjU1MjIzIDExLjYyOTc0OCA1LjEwMjcyODQgMTEuNTU4MjE1IDQuMTk1MzEyNSAxMy4zNzMwNDcgTCAzLjg4MjgxMjUgMTQgTCAyIDE0IEEgMS4wMDAxIDEuMDAwMSAwIDEgMCAyIDE2IEwgNC41IDE2IEEgMS4wMDAxIDEuMDAwMSAwIDAgMCA1LjM5NDUzMTIgMTUuNDQ3MjY2IEwgNS45ODQzNzUgMTQuMjY3NTc4IEMgNi4xOTY3MTk3IDEzLjg0Mjg4OSA2LjY1NzAwNzcgMTMuODU1MDI4IDYuODQ3NjU2MiAxNC4yOTEwMTYgTCA5LjA4Mzk4NDQgMTkuNDAwMzkxIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxMC45NTUwNzggMTkuMjk4ODI4IEwgMTQuNDI5Njg4IDguMTgzNTkzOCBMIDE2LjAwMzkwNiAyNy4wODM5ODQgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE3LjkyMzgyOCAyNy4zODQ3NjYgTCAyMi42NjYwMTYgMTYgTCAyNS4yNzE0ODQgMTYgQSAyIDIgMCAwIDAgMjcgMTcgQSAyIDIgMCAwIDAgMjkgMTUgQSAyIDIgMCAwIDAgMjcgMTMgQSAyIDIgMCAwIDAgMjUuMjY5NTMxIDE0IEwgMjIgMTQgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDIxLjA3NjE3MiAxNC42MTUyMzQgTCAxNy42NTQyOTcgMjIuODI2MTcyIEwgMTUuOTk2MDk0IDIuOTE2MDE1NiBBIDEuMDAwMSAxLjAwMDEgMCAwIDAgMTQuOTg2MzI4IDIgeiIvPjwvc3ZnPg==");
-                           mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgMzAgMzAiIHdpZHRoPSIzMHB4IiBoZWlnaHQ9IjMwcHgiPjxwYXRoIGQ9Ik0gMTQuOTg2MzI4IDIgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE0LjA0NDkyMiAyLjcwMTE3MTkgTCA5Ljg0Mzc1IDE2LjE0NjQ4NCBMIDguNjc5Njg3NSAxMy40OTAyMzQgTCA4LjY3OTY4NzUgMTMuNDg4MjgxIEMgNy44NjU1MjIzIDExLjYyOTc0OCA1LjEwMjcyODQgMTEuNTU4MjE1IDQuMTk1MzEyNSAxMy4zNzMwNDcgTCAzLjg4MjgxMjUgMTQgTCAyIDE0IEEgMS4wMDAxIDEuMDAwMSAwIDEgMCAyIDE2IEwgNC41IDE2IEEgMS4wMDAxIDEuMDAwMSAwIDAgMCA1LjM5NDUzMTIgMTUuNDQ3MjY2IEwgNS45ODQzNzUgMTQuMjY3NTc4IEMgNi4xOTY3MTk3IDEzLjg0Mjg4OSA2LjY1NzAwNzcgMTMuODU1MDI4IDYuODQ3NjU2MiAxNC4yOTEwMTYgTCA5LjA4Mzk4NDQgMTkuNDAwMzkxIEEgMS4wMDAxIDEuMDAwMSAwIDAgMCAxMC45NTUwNzggMTkuMjk4ODI4IEwgMTQuNDI5Njg4IDguMTgzNTkzOCBMIDE2LjAwMzkwNiAyNy4wODM5ODQgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDE3LjkyMzgyOCAyNy4zODQ3NjYgTCAyMi42NjYwMTYgMTYgTCAyNS4yNzE0ODQgMTYgQSAyIDIgMCAwIDAgMjcgMTcgQSAyIDIgMCAwIDAgMjkgMTUgQSAyIDIgMCAwIDAgMjcgMTMgQSAyIDIgMCAwIDAgMjUuMjY5NTMxIDE0IEwgMjIgMTQgQSAxLjAwMDEgMS4wMDAxIDAgMCAwIDIxLjA3NjE3MiAxNC42MTUyMzQgTCAxNy42NTQyOTcgMjIuODI2MTcyIEwgMTUuOTk2MDk0IDIuOTE2MDE1NiBBIDEuMDAwMSAxLjAwMDEgMCAwIDAgMTQuOTg2MzI4IDIgeiIvPjwvc3ZnPg=="); }
-.ico-juggler     { -webkit-mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDI1IDIgQyAyMy4zNDYgMiAyMiAzLjM0NiAyMiA1IEMgMjIgNi42NTQgMjMuMzQ2IDggMjUgOCBDIDI2LjY1NCA4IDI4IDYuNjU0IDI4IDUgQyAyOCAzLjM0NiAyNi42NTQgMiAyNSAyIHogTSAxMiA3IEMgMTAuMzQ2IDcgOSA4LjM0NiA5IDEwIEMgOSAxMS42NTQgMTAuMzQ2IDEzIDEyIDEzIEMgMTMuNjU0IDEzIDE1IDExLjY1NCAxNSAxMCBDIDE1IDguMzQ2IDEzLjY1NCA3IDEyIDcgeiBNIDM4IDcgQyAzNi4zNDYgNyAzNSA4LjM0NiAzNSAxMCBDIDM1IDExLjY1NCAzNi4zNDYgMTMgMzggMTMgQyAzOS42NTQgMTMgNDEgMTEuNjU0IDQxIDEwIEMgNDEgOC4zNDYgMzkuNjU0IDcgMzggNyB6IE0gMjUgMTUgQyAyMS42OTEgMTUgMTkgMTcuNjkxIDE5IDIxIEMgMTkgMjQuMzA5IDIxLjY5MSAyNyAyNSAyNyBDIDI4LjMwOSAyNyAzMSAyNC4zMDkgMzEgMjEgQyAzMSAxNy42OTEgMjguMzA5IDE1IDI1IDE1IHogTSA0NCAxOCBDIDQyLjM0NiAxOCA0MSAxOS4zNDYgNDEgMjEgQyA0MSAyMi42NTQgNDIuMzQ2IDI0IDQ0IDI0IEMgNDUuNjU0IDI0IDQ3IDIyLjY1NCA0NyAyMSBDIDQ3IDE5LjM0NiA0NS42NTQgMTggNDQgMTggeiBNIDYgMTkgQyA0LjM0NiAxOSAzIDIwLjM0NiAzIDIyIEMgMyAyMy42NTQgNC4zNDYgMjUgNiAyNSBDIDcuNjU0IDI1IDkgMjMuNjU0IDkgMjIgQyA5IDIwLjM0NiA3LjY1NCAxOSA2IDE5IHogTSA1LjE3MzgyODEgMjcuMDA5NzY2IEMgNC41MzYzMjgxIDI3LjA2NzUxNiAzLjkyMDAxNTYgMjcuMzY4OTM3IDMuNDc4NTE1NiAyNy44OTg0MzggQyAzLjA1MTUxNTYgMjguNDEyNDM3IDIuODUwMTU2MiAyOS4wNTk2MDkgMi45MTAxNTYyIDI5LjcyNDYwOSBDIDIuOTcwMTU2MiAzMC4zODk2MDkgMy4yODU4MjgxIDMwLjk5MjkyMiAzLjc5ODgyODEgMzEuNDE5OTIyIEwgMTAuNDAwMzkxIDM2LjQxOTkyMiBDIDExLjA3NzM5MSAzNi45ODU5MjIgMTIuMTA2NzAzIDM3LjEyNjU2MiAxMi44NDU3MDMgMzYuODUxNTYyIEwgMTggMzUuNjY5OTIyIEwgMTggNDcgQyAxOCA0Ny41NTIgMTguNDQ4IDQ4IDE5IDQ4IEwgMzEgNDguMDAxOTUzIEMgMzEuNTUyIDQ4LjAwMTk1MyAzMiA0Ny41NTQ5NTMgMzIgNDcuMDAxOTUzIEwgMzIgMzcgTCAzNS4zNzMwNDcgMzkuMzk2NDg0IEMgMzYuMjI0MDQ3IDQwLjEyNDQ4NCAzNy41NDAxMjUgNDAuMTgyMjAzIDM4LjQ1MzEyNSAzOS41MzMyMDMgTCA0NS45MDYyNSAzNC41MzMyMDMgQyA0Ny4wMjkyNSAzMy43MzIyMDMgNDcuMjg5MjgxIDMyLjE2Njg3NSA0Ni40ODgyODEgMzEuMDQ2ODc1IEMgNDUuNjg4MjgxIDI5LjkyNDg3NSA0NC4xMjQgMjkuNjYzODQ0IDQzIDMwLjQ2NDg0NCBMIDM3LjE0MDYyNSAzNC4zMjYxNzIgTCAzMS42Mjg5MDYgMjkuNjAxNTYyIEMgMzEuMTc0OTA2IDI5LjIxMzU2MyAzMC41OTcgMjguOTk4MDQ3IDMwIDI4Ljk5ODA0NyBMIDI2IDI4Ljk5ODA0NyBMIDIwIDI4Ljk5ODA0NyBDIDE5LjcgMjguOTk4MDQ3IDE5LjQwMjA5NCAyOS4wNTMyMDMgMTkuMTIxMDk0IDI5LjE1ODIwMyBMIDEyLjQ4MjQyMiAzMS42NDY0ODQgTCA3IDI3LjU3ODEyNSBDIDYuNDcwNSAyNy4xMzY2MjUgNS44MTEzMjgxIDI2Ljk1MjAxNiA1LjE3MzgyODEgMjcuMDA5NzY2IHoiLz48L3N2Zz4=");
-                           mask-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIj8+PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciICB2aWV3Qm94PSIwIDAgNTAgNTAiIHdpZHRoPSI1MHB4IiBoZWlnaHQ9IjUwcHgiPiAgICA8cGF0aCBkPSJNIDI1IDIgQyAyMy4zNDYgMiAyMiAzLjM0NiAyMiA1IEMgMjIgNi42NTQgMjMuMzQ2IDggMjUgOCBDIDI2LjY1NCA4IDI4IDYuNjU0IDI4IDUgQyAyOCAzLjM0NiAyNi42NTQgMiAyNSAyIHogTSAxMiA3IEMgMTAuMzQ2IDcgOSA4LjM0NiA5IDEwIEMgOSAxMS42NTQgMTAuMzQ2IDEzIDEyIDEzIEMgMTMuNjU0IDEzIDE1IDExLjY1NCAxNSAxMCBDIDE1IDguMzQ2IDEzLjY1NCA3IDEyIDcgeiBNIDM4IDcgQyAzNi4zNDYgNyAzNSA4LjM0NiAzNSAxMCBDIDM1IDExLjY1NCAzNi4zNDYgMTMgMzggMTMgQyAzOS42NTQgMTMgNDEgMTEuNjU0IDQxIDEwIEMgNDEgOC4zNDYgMzkuNjU0IDcgMzggNyB6IE0gMjUgMTUgQyAyMS42OTEgMTUgMTkgMTcuNjkxIDE5IDIxIEMgMTkgMjQuMzA5IDIxLjY5MSAyNyAyNSAyNyBDIDI4LjMwOSAyNyAzMSAyNC4zMDkgMzEgMjEgQyAzMSAxNy42OTEgMjguMzA5IDE1IDI1IDE1IHogTSA0NCAxOCBDIDQyLjM0NiAxOCA0MSAxOS4zNDYgNDEgMjEgQyA0MSAyMi42NTQgNDIuMzQ2IDI0IDQ0IDI0IEMgNDUuNjU0IDI0IDQ3IDIyLjY1NCA0NyAyMSBDIDQ3IDE5LjM0NiA0NS42NTQgMTggNDQgMTggeiBNIDYgMTkgQyA0LjM0NiAxOSAzIDIwLjM0NiAzIDIyIEMgMyAyMy42NTQgNC4zNDYgMjUgNiAyNSBDIDcuNjU0IDI1IDkgMjMuNjU0IDkgMjIgQyA5IDIwLjM0NiA3LjY1NCAxOSA2IDE5IHogTSA1LjE3MzgyODEgMjcuMDA5NzY2IEMgNC41MzYzMjgxIDI3LjA2NzUxNiAzLjkyMDAxNTYgMjcuMzY4OTM3IDMuNDc4NTE1NiAyNy44OTg0MzggQyAzLjA1MTUxNTYgMjguNDEyNDM3IDIuODUwMTU2MiAyOS4wNTk2MDkgMi45MTAxNTYyIDI5LjcyNDYwOSBDIDIuOTcwMTU2MiAzMC4zODk2MDkgMy4yODU4MjgxIDMwLjk5MjkyMiAzLjc5ODgyODEgMzEuNDE5OTIyIEwgMTAuNDAwMzkxIDM2LjQxOTkyMiBDIDExLjA3NzM5MSAzNi45ODU5MjIgMTIuMTA2NzAzIDM3LjEyNjU2MiAxMi44NDU3MDMgMzYuODUxNTYyIEwgMTggMzUuNjY5OTIyIEwgMTggNDcgQyAxOCA0Ny41NTIgMTguNDQ4IDQ4IDE5IDQ4IEwgMzEgNDguMDAxOTUzIEMgMzEuNTUyIDQ4LjAwMTk1MyAzMiA0Ny41NTQ5NTMgMzIgNDcuMDAxOTUzIEwgMzIgMzcgTCAzNS4zNzMwNDcgMzkuMzk2NDg0IEMgMzYuMjI0MDQ3IDQwLjEyNDQ4NCAzNy41NDAxMjUgNDAuMTgyMjAzIDM4LjQ1MzEyNSAzOS41MzMyMDMgTCA0NS45MDYyNSAzNC41MzMyMDMgQyA0Ny4wMjkyNSAzMy43MzIyMDMgNDcuMjg5MjgxIDMyLjE2Njg3NSA0Ni40ODgyODEgMzEuMDQ2ODc1IEMgNDUuNjg4MjgxIDI5LjkyNDg3NSA0NC4xMjQgMjkuNjYzODQ0IDQzIDMwLjQ2NDg0NCBMIDM3LjE0MDYyNSAzNC4zMjYxNzIgTCAzMS42Mjg5MDYgMjkuNjAxNTYyIEMgMzEuMTc0OTA2IDI5LjIxMzU2MyAzMC41OTcgMjguOTk4MDQ3IDMwIDI4Ljk5ODA0NyBMIDI2IDI4Ljk5ODA0NyBMIDIwIDI4Ljk5ODA0NyBDIDE5LjcgMjguOTk4MDQ3IDE5LjQwMjA5NCAyOS4wNTMyMDMgMTkuMTIxMDk0IDI5LjE1ODIwMyBMIDEyLjQ4MjQyMiAzMS42NDY0ODQgTCA3IDI3LjU3ODEyNSBDIDYuNDcwNSAyNy4xMzY2MjUgNS44MTEzMjgxIDI2Ljk1MjAxNiA1LjE3MzgyODEgMjcuMDA5NzY2IHoiLz48L3N2Zz4="); }
-
-/* Note : les overrides multiply par section (Lot J phase 2) ont été retirés
-   le 27 mai 2026 — l'effet assombrissant créait une confusion avec les boutons
-   sombres de la nav principale et les onglets actifs des autres sections.
-   La sous-nav .actif suit désormais le pattern de la nav principale : fond
-   plus pâle (blanc translucide), voir .sous-navigation button.actif plus bas. */
-
-/* Ancien format PNG — rétrocompatibilité */
-.nav-icone {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
-    vertical-align: middle;
-}
-.mode-clair .nav-icone {
-    filter: brightness(0) invert(1);
-}
-
-/* ===============================
-   SOUS-NAVIGATION - GLASSMORPHISME
-   =============================== */
-
-.sous-navigation {
-    background: transparent;
-    padding: 12px 20px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.sous-navigation button {
-    padding: 8px 16px;
-    background: rgba(106, 172, 184, 0.08);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(106, 172, 184, 0.2);
-    border-radius: var(--radius-moyen);
-    color: white;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.sous-navigation button:hover {
-    background: rgba(106, 172, 184, 0.25);
-    border-color: rgba(106, 172, 184, 0.3);
-    color: white;
-    box-shadow: var(--shadow-normal);
-}
-
-.sous-navigation button.actif {
-    background: rgba(255, 255, 255, 0.28);
-    border-color: rgba(255, 255, 255, 0.45);
-    color: white;
-    box-shadow: var(--shadow-normal);
-}
-
-/* Sous-nav masquée carré quand la section n'a pas de sous-sections
-   (Accueil, Aperçu) — le contenu remonte et le layout danse visiblement. */
-.sous-navigation.vide {
-    display: none;
-}
-
-.sous-navigation .vide {
-    width: 100%;
-    padding: 20px;
-    text-align: center;
-    color: var(--bleu-leger);
-    font-style: italic;
 }
 
 /* ===============================
@@ -7363,40 +7405,6 @@ body.chaines-etapes-masquees .barre-convergence {
         margin: 0;
     }
 
-    /* Nav primaire mobile : cache les boutons, montre le select natif.
-       Reste sticky en haut (single source of stickiness pour la nav). */
-    .navigation-principale {
-        padding: 8px 12px;
-        gap: 0;
-    }
-
-    /* Mobile : le select remplace toute la barre de boutons. Le CoP n'est PAS
-       à côté (lien externe) — il est ajouté comme dernière option du select
-       (#select-nav-mobile, gérée par changerSectionDepuisSelectMobile). */
-    .navigation-boutons {
-        display: none;
-    }
-
-    .select-nav-mobile {
-        display: block;
-    }
-
-    /* Sous-nav mobile : cache les boutons, montre le select sticky
-       collé sous la nav primaire (l'accès permanent compense le coût
-       de scroll sur petit écran). */
-    .sous-navigation {
-        display: none;
-    }
-
-    .select-sous-nav-mobile:not(.u-hide) {
-        display: block;
-        position: sticky;
-        top: 60px;
-        z-index: 99;
-        margin: 0 12px 8px;
-        width: calc(100% - 24px);
-    }
-
     .contenu {
         padding: var(--espacement-moyen);
     }
@@ -8199,25 +8207,6 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     position: relative;
     min-height: 44px;
     min-width: 44px;
-}
-
-/* Dans le bloc de droite de l'en-tête (7 nov. 2026) : la largeur de la grille
-   d'icônes, 28 px de haut, 9 px sous la rangée de l'aide ; pastille et libellé
-   centrés, libellé à la taille de ceux de la navigation (0,75 rem, 600). */
-.entete-bloc .codex-controle {
-    margin-top: 9px;
-}
-
-.entete-bloc .btn-codex-header {
-    width: 100%;
-    height: 28px;
-    min-height: 0;
-    padding: 0 10px;
-    justify-content: center;
-    border-width: 1px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1;
 }
 
 .btn-codex-header:hover {
@@ -10340,7 +10329,7 @@ td .marque-diagnostique { margin-left: 6px; }
 .rangee-selection-vide { margin: 0; font-size: 0.9rem; font-style: italic; color: var(--texte-secondaire); }
 .sous-section .rangee-selection select.rangee-selection-tri { flex: 0 0 auto; width: auto; font-size: 0.9rem; }
 /* Un <select> natif ignore `min-height` sous WebKit (23 px mesurés le 24 oct., bibliotheques-menu-1147.spec.js).
-   Patron de `.select-nav-mobile` et du registre longitudinal : hauteur fixée, apparence retirée, chevron redessiné,
+   Patron des anciens selects mobiles de la navigation (retirés le 7 nov. 2026) et du registre longitudinal : hauteur fixée, apparence retirée, chevron redessiné,
    gris neutre pour les deux modes. `.sous-section` (0,3,1) : `.mode-clair .contenu select { background: white }`
    (0,2,1), plus bas dans la feuille, emporterait le chevron. */
 .sous-section .rangee-selection select.rangee-selection-menu,
@@ -10934,7 +10923,7 @@ td .marque-diagnostique { margin-left: 6px; }
 }
 
 /* Un <select> natif ignore min-height sous WebKit (mesuré le 18 sept. : 23 px de haut à 768 px). Apparence retirée,
-   hauteur fixée, chevron redessiné — même patron que .select-nav-mobile, en gris neutre pour les deux modes.
+   hauteur fixée, chevron redessiné — même patron que les anciens selects mobiles de la navigation, en gris neutre pour les deux modes.
    L'id du conteneur : `.mode-clair .contenu select { background: white }` (0,2,1) emporterait le chevron sinon (mesuré). */
 #registre-longitudinal-conteneur select.rl-champ {
     height: 44px;
@@ -20373,6 +20362,7 @@ body.travaux-plein-ecran-actif .sous-nav {
    pas #header (aucun élément n'a cet id) → la règle ne masquait jamais l'en-tête,
    qui restait visible et chevauchait la carte en plein écran. On cible la classe réelle. */
 body.planif-plein-ecran-actif header.entete,
+body.planif-plein-ecran-actif .entete-bas,
 body.planif-plein-ecran-actif #header,
 body.planif-plein-ecran-actif .navigation-principale,
 body.planif-plein-ecran-actif .navigation-sous-sections,
@@ -25933,45 +25923,22 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     color: var(--texte-principal);
 }
 
-/* EN-TÊTE — gradient bleu pur design system */
-.mode-clair .entete {
-    /* var(--bleu-principal/fonce) = #032e5c → #0f1e3a en clair normal ; le
-       mode anonymisation les redéfinit (brume ardoise), l'en-tête suit (D2) */
-    background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
-    color: white;
+/* EN-TÊTE — gradient bleu pur design system. Le fond de l'en-tête est le jeton
+   --entete-fond (« L'en-tête épuré », 7 nov. 2026) : var(--bleu-principal/fonce) =
+   #032e5c → #0f1e3a en clair normal ; le mode anonymisation les redéfinit (brume
+   ardoise), l'en-tête suit (D2). */
+body.mode-clair {
+    --entete-fond: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
 }
 
-/* Rangée du groupe (≤ 1100 px) : la bande pâle du mode clair */
-.mode-clair .entete-groupe {
+/* La bande pâle du groupe, en clair */
+.mode-clair .bande-groupe {
+    background: rgba(255, 255, 255, 0.06);
     border-top-color: rgba(255, 255, 255, 0.12);
 }
-@media (max-width: 1100px) {
-    .mode-clair .entete-groupe {
-        background: rgba(255, 255, 255, 0.06);
-    }
-}
 
-/* Selects mobile (nav + sous-nav) — bleu principal en mode clair */
-.mode-clair .select-nav-mobile,
-.mode-clair .select-sous-nav-mobile {
-    background-color: rgba(3, 46, 92, 0.6);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: white;
-}
-
-.mode-clair .select-nav-mobile:hover,
-.mode-clair .select-sous-nav-mobile:hover {
-    background-color: rgba(3, 46, 92, 0.75);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.mode-clair .select-nav-mobile option,
-.mode-clair .select-sous-nav-mobile option {
-    color: white;
-    background: var(--bleu-fonce);
-}
-
-/* Dropdown cours dans en-tête — même bleu que la navigation */
+/* Dropdown cours dans en-tête — même bleu que la navigation.
+   (Constat du 7 nov. 2026 : aucun élément ne porte plus .dropdown-cours-entete ; règles sans effet, laissées.) */
 .mode-clair .dropdown-cours-entete {
     background: rgba(3, 46, 92, 0.6);
     border-color: rgba(255, 255, 255, 0.15);
@@ -26010,115 +25977,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     color: white;
     background: var(--bleu-fonce);
 }
-
-/* Navigation principale mode clair — la bande pâle : le gradient de l'en-tête,
-   voilé comme l'était l'ancienne bande du groupe en clair. */
-.mode-clair .navigation-principale {
-    background:
-        linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)),
-        linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-fonce) 100%);
-    border-top-color: rgba(255, 255, 255, 0.12);
-}
-
-/* Navigation principale — bleu principal solide */
-.mode-clair .navigation-principale button {
-    background: var(--bleu-principal);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-
-.mode-clair .navigation-principale button:hover {
-    background: var(--btn-principal-hover);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Lien externe CoP AQPC — même bleu que les boutons en mode clair. */
-.mode-clair .navigation-boutons .nav-bouton-lien {
-    background: var(--bleu-principal);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-.mode-clair .navigation-boutons .nav-bouton-lien:hover {
-    background: var(--btn-principal-hover);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.mode-clair .navigation-principale button.actif {
-    background: var(--btn-principal-hover);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
-}
-
-/* === Couleurs par section en mode clair — état NORMAL (inversion 27 mai 2026) ===
-   Mêmes teintes par section qu'en mode sombre, appliquées en permanence.
-   L'état .actif override avec un bleu solide (bloc plus bas).
-   --bg-bandeau-mediane est redéfini à #09264b en mode clair. */
-.mode-clair .navigation-principale button[data-onglet="conception"] {
-    background:
-      linear-gradient(rgba(218, 193, 108, 0.5), rgba(218, 193, 108, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(218, 193, 108, 0.15);
-}
-.mode-clair .navigation-principale button[data-onglet="conception"] span.nav-icon { background-color: var(--section-conception); }
-.mode-clair .navigation-principale button[data-onglet="conception"] .nav-label  { color: var(--section-conception); }
-
-.mode-clair .navigation-principale button[data-onglet="calendrier"] {
-    background:
-      linear-gradient(rgba(48, 184, 93, 0.5), rgba(48, 184, 93, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(48, 184, 93, 0.15);
-}
-.mode-clair .navigation-principale button[data-onglet="calendrier"] span.nav-icon { background-color: var(--section-calendrier); }
-.mode-clair .navigation-principale button[data-onglet="calendrier"] .nav-label  { color: var(--section-calendrier); }
-
-.mode-clair .navigation-principale button[data-onglet="suivi"] {
-    background:
-      linear-gradient(rgba(86, 202, 220, 0.5), rgba(86, 202, 220, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(86, 202, 220, 0.15);
-}
-.mode-clair .navigation-principale button[data-onglet="suivi"] span.nav-icon { background-color: var(--section-suivi); }
-.mode-clair .navigation-principale button[data-onglet="suivi"] .nav-label  { color: var(--section-suivi); }
-
-.mode-clair .navigation-principale button[data-onglet="evaluations"] {
-    background:
-      linear-gradient(rgba(110, 193, 231, 0.5), rgba(110, 193, 231, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(110, 193, 231, 0.15);
-}
-.mode-clair .navigation-principale button[data-onglet="evaluations"] span.nav-icon { background-color: var(--section-evaluations); }
-.mode-clair .navigation-principale button[data-onglet="evaluations"] .nav-label  { color: var(--section-evaluations); }
-
-.mode-clair .navigation-principale button[data-onglet="labo"] {
-    background:
-      linear-gradient(rgba(209, 175, 244, 0.5), rgba(209, 175, 244, 0.5)),
-      linear-gradient(var(--bg-bandeau-mediane), var(--bg-bandeau-mediane));
-    background-blend-mode: multiply;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 4px rgba(209, 175, 244, 0.15);
-}
-.mode-clair .navigation-principale button[data-onglet="labo"] span.nav-icon { background-color: var(--section-labo); }
-.mode-clair .navigation-principale button[data-onglet="labo"] .nav-label  { color: var(--section-labo); }
-
-/* État ACTIF en mode clair — bleu solide neutre.
-   Sélecteur .actif[data-onglet] = (0,4,1), bat [data-onglet="X"] = (0,3,1). */
-.mode-clair .navigation-principale button.actif[data-onglet] {
-    background: var(--btn-principal-hover);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
-}
-.mode-clair .navigation-principale button.actif[data-onglet] span.nav-icon { background-color: white; }
-.mode-clair .navigation-principale button.actif[data-onglet] .nav-label { color: white; }
 
 /* Conteneur — bordure ultra-subtile */
 .mode-clair .conteneur {
@@ -26187,34 +26045,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .mode-clair * {
     scrollbar-color: rgba(3, 46, 92, 0.2) #f0f8ff;
 }
-
-/* Sous-navigation — même bleu principal solide */
-.mode-clair .sous-navigation button {
-    color: white;
-    background: var(--bleu-principal);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-
-.mode-clair .sous-navigation button:hover {
-    color: white;
-    background: rgba(10, 74, 126, 0.55);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.mode-clair .sous-navigation button.active,
-.mode-clair .sous-navigation button.actif {
-    color: white;
-    background: var(--btn-principal-hover);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 4px 12px rgba(3, 46, 92, 0.3);
-}
-
-/* Note : les overrides multiply par section (Lot J phase 2) en mode clair
-   ont été retirés le 27 mai 2026 pour la même raison que le mode sombre —
-   l'actif suit le pattern générique .mode-clair .sous-navigation button.actif
-   plus haut (#0a4a7e plus clair que #032e5c du normal). */
 
 /* Bouton principal — fond sombre, texte reste blanc */
 .mode-clair .bouton-principal {
@@ -26736,7 +26566,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     }
 
     .navigation-principale,
-    .sous-navigation,
+    .entete-bas,
+    .entete-actions,
     .bandeau-anonymisation,
     .bandeau-demo,
     .btn,
@@ -29914,27 +29745,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 @media (pointer: coarse) {
     .btn {
         min-height: 44px;
-    }
-
-    /* Icônes du bloc de l'en-tête (7 nov. 2026) : 40 × 40 px de toucher chacune, par
-       une marge invisible (::after) qui ne recouvre pas la voisine — le bloc s'élargit
-       (4 × 40 px) et ses rangées s'écartent d'autant. L'icône garde ses 22 px. */
-    .entete-bloc {
-        --entete-cellule: 40px;
-    }
-
-    .entete-icones + .entete-icones {
-        margin-top: 18px;
-    }
-
-    .entete-bloc .btn-action-header::after {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 40px;
-        height: 40px;
-        transform: translate(-50%, -50%);
     }
 
     /* #540 (7 septembre 2026) — les bulles d'élève des barres de dégradé.

@@ -20,7 +20,7 @@
 // init-inline.js compare cette valeur au BUILD_ID lu depuis version.json :
 // si différent, Safari file:// a probablement un main.js périmé en cache,
 // et la séquence reload+bandeau s'enclenche. SYNCHRONISER À CHAQUE BUMP.
-window._SCRIPT_BUILD_main = '1107-1101';
+window._SCRIPT_BUILD_main = '1107-1503';
 
 /* ===============================
    FONCTION GLOBALE: Génération d'ID uniques
@@ -1080,15 +1080,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Les bulles sont DERRIÈRE le contenu (z-index), mais le logo, le sélecteur du groupe et
-    // les boutons vitrés de la navigation sont en partie transparents : on les y verrait passer.
-    // La consigne dit « jamais par-dessus un texte, le logo ou un bouton » : chaque conteneur
-    // reçoit un masque horizontal qui efface les bulles dans la colonne de chaque obstacle
-    // (fondu de 16 px), recalculé à chaque changement de taille. Dans l'en-tête, le conteneur
-    // s'arrête au bas de la bande sombre quand le groupe est descendu dans la bande pâle.
+    // Les bulles sont DERRIÈRE le contenu (z-index), mais le logo, les mots de la navigation,
+    // les onglets et le sélecteur du groupe sont posés sur un fond en partie transparent : on y
+    // verrait passer les bulles. La consigne dit « jamais par-dessus un texte, le logo ou un
+    // bouton » : chaque conteneur reçoit un masque horizontal qui efface les bulles dans la
+    // colonne de chaque obstacle (fondu de 16 px), recalculé à chaque changement de taille.
+    // « L'en-tête épuré » (7 nov. 2026) : bande du haut, puis .entete-bas (onglets et groupe).
     const OBSTACLES_BULLES = {
-        'bulles-container': ['.entete-logo img', '.groupe-selecteur', '.entete-bloc'],
-        'bulles-container-nav': ['.navigation-boutons', '.select-nav-mobile']
+        'bulles-container': ['.entete-logo img', '.navigation-boutons', '.entete-actions'],
+        'bulles-container-nav': ['.entete-section-mobile', '.sous-navigation', '.bande-groupe-centre', '.bande-groupe-anonymisation']
     };
     const FONDU_BULLES = 16;
 
@@ -1098,12 +1098,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!container || !container.parentElement) return;
             const parent = container.parentElement;
             const cadre = parent.getBoundingClientRect();
-            if (id === 'bulles-container') {
-                const groupe = parent.querySelector('.entete-groupe');
-                const logo = parent.querySelector('.entete-logo');
-                const descendu = groupe && logo && groupe.getBoundingClientRect().top >= logo.getBoundingClientRect().bottom;
-                container.style.height = descendu ? `${groupe.getBoundingClientRect().top - cadre.top}px` : '';
-            }
             const plages = [];
             OBSTACLES_BULLES[id].forEach(function (sel) {
                 const el = parent.querySelector(sel);
@@ -1134,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', function () {
     masquerBullesSousLeContenu();
     // ResizeObserver : Safari 13.1+, iPadOS 13.4+ — toutes les cibles de l'app.
     const observateurBulles = new ResizeObserver(masquerBullesSousLeContenu);
-    ['.entete', '.groupe-selecteur', '.navigation-principale', '.navigation-boutons'].forEach(function (sel) {
+    ['.entete', '.entete-bas', '.groupe-selecteur', '.navigation-boutons', '#sous-navigation'].forEach(function (sel) {
         const el = document.querySelector(sel);
         if (el) observateurBulles.observe(el);
     });

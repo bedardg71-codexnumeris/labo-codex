@@ -182,7 +182,7 @@ if (window.configurationsOnglets && window.configurationsOnglets['labo']) {
         if (_labo[_b].id === 'bilan') { _hasBilan = true; break; }
     }
     if (!_hasBilan) {
-        _labo.push({ id: 'bilan', label: 'Bilan r\u00e9flexif' });
+        _labo.push({ id: 'bilan', label: 'Bilan' });   // libellé court de l'onglet (en-tête épuré, 7 nov. 2026)
     }
 }
 

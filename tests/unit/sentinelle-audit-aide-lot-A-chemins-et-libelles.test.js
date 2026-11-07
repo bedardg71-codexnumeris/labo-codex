@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { titresLongsDe } from './_helpers/titres-longs.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -57,7 +58,8 @@ describe('Aide — les chemins de navigation qu\'elle cite existent', () => {
             const [, onglet, sous] = m;
             if (onglet === 'Codex') continue;          // menu du Codex, pas la nav
             if (!(onglet in niveau1)) continue;         // pas un onglet : hors sujet
-            const labels = sousSections[niveau1[onglet]] || [];
+            // ↻ « L'en-tête épuré » (7 nov. 2026) : l'onglet a un libellé court, la page garde son titre long.
+            const labels = [...(sousSections[niveau1[onglet]] || []), ...titresLongsDe(niveau1[onglet])];
             if (!labels.some(l => sous === l || sous.startsWith(l) || l.startsWith(sous))) {
                 fautifs.push(`${onglet} → ${sous}`);
             }

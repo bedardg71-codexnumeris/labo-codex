@@ -42,6 +42,32 @@
  * Peuple le dropdown "Groupe-cours actif" dans l'entête
  * 🆕 BETA 95.3 (10 jan 2026) : Ajoute section "Cours" pour voir tous les groupes fusionnés
  */
+/**
+ * « L'en-tête épuré » (7 nov. 2026) — le nom d'un horaire est un champ LIBRE (« Ex: Lun-Mer 10h »,
+ * Cadre › Trimestre) : on y écrit souvent la session (« Mar-Ven A26 »), que le libellé du groupe
+ * ajoutait ensuite une seconde fois (« Mar-Ven A26 · A26 »). On retire du nom, À L'AFFICHAGE
+ * SEULEMENT, la session qu'il porte en tête ou en fin, avec ses séparateurs ; la donnée enregistrée
+ * n'est pas touchée. Sans session, rien n'est retiré ; un nom qui n'est que la session s'efface
+ * (la session reste, une fois).
+ * @param {string} nomHoraire
+ * @param {string} session — « A26 », ou le nom du trimestre de la démo
+ * @returns {string}
+ */
+function horaireSansSession(nomHoraire, session) {
+    const nom = String(nomHoraire || '').trim();
+    const ses = String(session || '').trim();
+    if (!nom || !ses) return nom;
+    if (nom.toLowerCase() === ses.toLowerCase()) return '';
+    const motif = ses.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // La session doit être un mot à part : « Sa26 » reste « Sa26 ».
+    const sep = '[\\s·•\\-–—,/|]';
+    const reste = nom
+        .replace(new RegExp(`${sep}+[(\\[]?${motif}[)\\]]?$`, 'i'), '')
+        .replace(new RegExp(`^[(\\[]?${motif}[)\\]]?${sep}+`, 'i'), '')
+        .trim();
+    return reste;
+}
+
 async function peuplerDropdownGroupeCoursActif() {
     const selectHeader = document.getElementById('selectGroupeCoursHeader');
     if (!selectHeader) return;
@@ -106,7 +132,7 @@ async function peuplerDropdownGroupeCoursActif() {
 
             // 🆕 FIX (9 jan 2026) : Libellé lisible même sans cours
             const principal = sigle ? `${sigle} · gr. ${groupe}` : `Groupe ${groupe}`;
-            const secondaire = joindre(hor.nom || '', session);
+            const secondaire = joindre(horaireSansSession(hor.nom, session), session);
 
             const selected = gcActif && !gcActif.modeCours && gc.id === gcActif.id ? ' selected' : '';
             options += optionDeuxTons(gc.id, principal, secondaire, selected);

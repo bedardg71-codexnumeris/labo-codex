@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { titresLongsDe } from './_helpers/titres-longs.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -97,7 +98,8 @@ describe('Les catalogues ne contredisent pas ce que la section Aide a corrigé',
                 /([A-ZÉÈÀ][\wéèêàçûôî'’]{2,14})\s*[→›]\s*([A-ZÉÈÀ][\wéèêàçûôî'’·]+(?:\s+[a-zéèêàç'’·A-ZÉ][\wéèêàçûôî'’·]*){0,3})/g)) {
                 const [, onglet, sec] = m;
                 if (onglet === 'Codex' || !(onglet in niveau1)) continue;
-                const labels = sous[niveau1[onglet]] || [];
+                // ↻ « L'en-tête épuré » (7 nov. 2026) : onglet court, titre de page long.
+                const labels = [...(sous[niveau1[onglet]] || []), ...titresLongsDe(niveau1[onglet])];
                 if (!labels.some(l => sec === l || sec.startsWith(l) || l.startsWith(sec))) {
                     fautifs.push(`${onglet} → ${sec}`);
                 }
