@@ -82,6 +82,14 @@ import { tranche, position } from './_helpers/tranche.js';
 // ajouté au `if:` de `decision` → rouge ; `juger=non` forcé sur le push dans le
 // script → rouge (banc) ; `&& needs.playwright.result != 'skipped'` retiré du
 // verdict → rouge.
+//
+// ↻ 7 NOVEMBRE 2026 (#1114) — TOUS LES .md DE LA RACINE SONT IGNORÉS, en liste
+// explicite : le cliquet compare des noms exacts, et un motif `*.md` couvrirait
+// en silence un .md qu'un test se mettrait à lire. Le test « chaque .md suivi à
+// la racine » rougit si un nouveau manque.
+// BREAK-TESTS (faits le 7 nov.) — `PROTOCOLE.md` retiré de la liste → rouge, le
+// nom donné ; un .md neuf suivi à la racine → rouge, le nom donné ; un test qui
+// lit `PROTOCOLE.md` → le cliquet « AUCUN test ne LIT » rouge. Arbre restauré.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racineProjet = path.resolve(__dirname, '..', '..');
@@ -177,6 +185,22 @@ describe('CI · le `paths-ignore` du workflow ne masque aucun test', () => {
             'Deux issues : retirer ce chemin de `paths-ignore`, ou cesser de le lire.\n  ' +
             coupables.join('\n  ')
         ).toEqual([]);
+    });
+
+    // #1114 (7 nov. 2026) : un commit qui ne touchait qu'un .md de coordination de
+    // la racine (CONSIGNE-DEMARRAGE-…, PROTOCOLE.md…) relançait un run et
+    // annulait celui du code (`cancel-in-progress`), 4 pushs sur 12 du 25 oct. au
+    // 1er nov. Tout .md SUIVI à la racine est ignoré ; un nouveau qui manque rougit.
+    // Si un test devait un jour en lire un, le test précédent rougirait : il faut
+    // alors le sortir de la liste ET le nommer ici comme exception motivée.
+    it('chaque .md suivi à la racine est dans `paths-ignore`', () => {
+        const ignores = new Set(cheminsIgnores() || []);
+        const r = spawnSync('git', ['ls-files', '--', ':(top,glob)*.md'], { cwd: racineProjet, encoding: 'utf8' });
+        expect(r.status, `git ls-files : ${r.stderr}`).toBe(0);
+        const racine = r.stdout.split('\n').filter((f) => f && !f.includes('/'));
+        expect(racine.length, 'aucun .md trouvé à la racine : la mesure est cassée').toBeGreaterThan(10);
+        const oublies = racine.filter((f) => !ignores.has(f));
+        expect(oublies, 'Ces .md de la racine relancent la CI (et annulent le run du code) : les ajouter au `paths-ignore` de tests.yml').toEqual([]);
     });
 
     it('`.claude/**` n\'est PAS ignoré — un test y lit un skill', () => {

@@ -272,23 +272,36 @@ on:
       # tests/unit/sentinelle-ci-paths-ignore.test.js, qui vérifie qu'aucun
       # test ne lit ces chemins. `.claude/**` en est VOLONTAIREMENT absent :
       # sentinelle-skill-alignement.test.js lit `.claude/skills/alignement/SKILL.md`.
+      # Les .md de la racine y sont TOUS (7 nov. 2026, #1114) : un commit de relais
+      # qui n'en touchait qu'un relançait un run et annulait celui du code
+      # (`cancel-in-progress`). Aucun n'est lu par l'application ; le cliquet
+      # rougit si un .md suivi à la racine manque ici.
       - 'docs/**'
       - 'plans de travail/**'
       - 'Retours des testeurs/**'
       - 'Rapports/**'
       - 'AUDIT.md'
-      - 'BACKLOG.md'
       - 'BACKLOG-ARCHIVE.md'
+      - 'BACKLOG.md'
       - 'CLAUDE.md'
+      - 'CONFIDENTIALITE-POUR-LE-BLOG.md'
+      - 'CONFIDENTIALITE.md'
+      - 'CONSIGNE-DEMARRAGE-COWORK.md'
+      - 'CONSIGNE-DEMARRAGE-PROCHAINE-SESSION.md'
       - 'DEPLOY.md'
+      - 'ETAT-AVANT-REDEMARRAGE-2026-08-30.md'
       - 'ETAT-PROJET.md'
       - 'FICHE-RELECTURE.md'
       - 'INCIDENTS.md'
       - 'INFO-ELEVES.md'
       - 'LICENSE.md'
+      - 'mesure-carte-alignement.md'
       - 'NOTES-DE-VERSION.md'
+      - 'OBJECTIF-COHORTE-1.md'
       - 'OU-EN-EST-ON.md'
+      - 'POUR-LE-PROJET-CLAUDE.md'
       - 'PRIVACY.md'
+      - 'PROTOCOLE.md'
       - 'README.md'
       - 'RELAIS.md'
       - 'SECURITY.md'
