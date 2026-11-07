@@ -168,7 +168,7 @@ test('neuf tâches : trois colonnes à 1180, deux à 820, une à 390 ; chacune d
 });
 
 // Les destinations : chaque carte mène où elle le dit (constat de la consigne). « Adopter ta
-// pratique » ouvre l'assistant par-dessus l'accueil : comportement gardé, écart signalé.
+// pratique » y ouvre en plus l'assistant (décision de Cowork, 7 nov.), jugé à part ci-dessous.
 const DESTINATIONS = [
     ['Planifier ton cours', 'conception-carte'],
     ['Saisir les présences', 'suivi-saisie'],
@@ -193,6 +193,18 @@ test('chaque tâche mène où elle le dit', async ({ page }) => {
             return el && el.classList.contains('active');
         }, sousSection, { timeout: 5000 });
     }
+});
+
+test('« Adopter ta pratique » mène à Conception › Pratiques et y ouvre l\'assistant ; le fermer laisse sur cette page', async ({ page }) => {
+    await ouvrirAccueilVide(page, 1180);
+    await page.locator('.accueil-action', { hasText: 'Adopter ta pratique' }).click();
+    await page.waitForFunction(() => document.getElementById('conception-pratiques-notation').classList.contains('active'), null, { timeout: 5000 });
+    const fenetre = page.locator('.modal-overlay.actif').first();
+    await expect(fenetre).toBeVisible();
+    await page.evaluate(() => window.fermerWizardV2());   // le geste de son bouton de fermeture
+    await expect(fenetre).toBeHidden();
+    expect(await page.evaluate(() => document.getElementById('conception-pratiques-notation').classList.contains('active'))).toBe(true);
+    expect(await page.evaluate(() => document.getElementById('section-accueil').classList.contains('active'))).toBe(false);
 });
 
 test('pied de page : deux moitiés symétriques autour d\'un filet, logos à la même hauteur ; « Nouveautés » ouvre les nouveautés', async ({ page }) => {

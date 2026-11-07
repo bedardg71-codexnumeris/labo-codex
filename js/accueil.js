@@ -178,10 +178,10 @@ function basculerBanniereBienvenue() {
 
 /**
  * Les neuf tâches (consigne du 7 nov. 2026) : où chacune mène est écrit en bas de sa carte.
- * « Adopter ta pratique » ouvre l'assistant de pratique PAR-DESSUS l'accueil (comportement
- * gardé, écart signalé au rapport du lot) ; les huit autres naviguent.
+ * Toutes naviguent ; « Adopter ta pratique » ouvre en plus l'assistant de pratique, sur sa page.
  */
 const TACHES = [
+    // Mène à Conception › Pratiques et y ouvre l'assistant (décision de Cowork, 7 nov. 2026).
     { action: 'ouvrirWizardPratique', icone: 'ico-acc-data-sheet', titre: 'Adopter ta pratique', desc: 'Construction de la note du cours, sommative ou alternative.', chemin: 'Conception › Pratiques' },
     { param: 'conception|conception-carte', icone: 'ico-acc-puzzle', titre: 'Planifier ton cours', desc: 'Alignement constructif des objectifs, leçons et évaluations.', chemin: 'Conception › Alignement' },
     { param: 'suivi|suivi-saisie', icone: 'ico-acc-people', titre: 'Saisir les présences', desc: 'Absences, retards et notes de séance.', chemin: 'Suivi › Présences' },
@@ -328,9 +328,16 @@ function explorerDonneesDemo() {
     if (typeof activerModeDemo === 'function') activerModeDemo();
 }
 
-/** Ouvre le wizard de pratique de notation par-dessus l'accueil (modale, pas de navigation). */
+/**
+ * « Adopter ta pratique » (décision de Cowork, 7 nov. 2026) : mène à Conception › Pratiques, puis y ouvre
+ * l'assistant en fenêtre — en le fermant, on est sur la page que la carte annonce. Le délai suit celui de
+ * commencerParLeTrimestre : la sous-section doit être affichée avant l'ouverture.
+ */
 function ouvrirWizardPratique() {
-    if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2();
+    naviguerAccueilCarte('conception|conception-pratiques-notation');
+    setTimeout(function() {
+        if (typeof ouvrirWizardV2 === 'function') ouvrirWizardV2();
+    }, 200);
 }
 
 // === EXPORTS ===

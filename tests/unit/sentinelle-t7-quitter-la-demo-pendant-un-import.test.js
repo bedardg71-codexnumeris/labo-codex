@@ -121,7 +121,7 @@ describe('T7 · « Explorer », sur l\'accueil, entre par activerModeDemo, qui p
     // « Explorer » appelle activerModeDemo, dont la garde d'entrée est jugée plus haut ; on sort de la
     // démo par « Quitter la démo » (bandeau vert), qui appelle desactiverModeDemo, gardé lui aussi.
     const accueil = readFileSync(path.join(racine, 'js/accueil.js'), 'utf8');
-    const corps = tranche(accueil, 'function explorerDonneesDemo(', '/** Ouvre le wizard de pratique');
+    const corps = tranche(accueil, 'function explorerDonneesDemo(', '/**\n * « Adopter ta pratique » (décision de Cowork');
 
     function explorer(enDemo, muter) {
         const appels = [];
