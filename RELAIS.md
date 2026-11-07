@@ -7,6 +7,18 @@
 
 ---
 
+## 7 NOV. 2026, 1 H 25 (Claude Code) : **NOUVELLE IDENTITÉ (LOGO ET ICÔNES) POUSSÉE ; `main` = `origin/main` = `ff3a91bf` (+ ce commit de relais) ; BUILD `1106-2351`, VERSION INCHANGÉE (1.235.0), CHANGELOG NON TOUCHÉ**
+
+**Ce qui a été livré**, sur l'historique neuf, selon le plan validé par Grégoire le 6 nov. : logo empilé blanc (`img/labo-codex-logo-blanc.svg`, `alt="Labo Codex"`) dans l'en-tête à la place du SVG inline ; favicon noir 32 et 16 px, variante blanche sous `prefers-color-scheme: dark` ; `apple-touch-icon` = icône application 180 px. Série complète à plat dans `Logo/` (11 SVG, 23 PNG, dont les 192 et 512 gardés pour plus tard), galerie `Logo/index.html` refaite. Les 11 anciens `Logo/labo-codex-{empile,ligne,mono}-*.svg` et la classe `.logo-codex` sont retirés. **Pas de manifeste** (décision de Grégoire). Le dossier source a été déplacé hors du dépôt, dans `~/Downloads/labo-codex-logos`.
+
+**Vérifié** : Playwright WebKit et Chrome en 1440, 820 et 390 px, modes sombre et clair : image chargée, aucun débordement, aucune erreur console ; en-tête +14 px (bureau) et +12 px (iPad). Vitest 10 733/10 733. Verdict complet vert sur `ff3a91bf` : 1 381 essais, 1 376 verts, 1 au second essai (`grilles-sous-criteres-condense`, iPad), 4 rouges connus.
+
+**Non vérifié (pas de porte terrain : apparence seulement, règle 2)** : le favicon dans un vrai onglet Safari ou Chrome, clair et sombre ; l'icône sur l'écran d'accueil de l'iPad (les coins de l'icône 180 sont transparents, iOS les remplira) ; le rendu en ligne après déploiement.
+
+**Dû à Grégoire** : la ligne proposée pour « Nouvelles », dans le rapport de session ; le changelog n'a pas été touché.
+
+---
+
 ## 6 NOV. 2026, 23 H 40 (Claude Code) : **TROISIÈME PASSE POUSSÉE EN FORCE ; `main` = `origin/main` = `d9200c75` (+ ce commit de relais) ; GITHUB : `main` ET LES 22 ÉTIQUETTES, TOUTES RÉÉCRITES ; EN LIGNE : TOUJOURS 1.235.0**
 
 **Ce qui s'est passé** : au signal de Grégoire dans cette session (« je veux que ça se fasse cette nuit »), la copie réécrite de `plans de travail/CONSIGNE-LOT-2026-11-06-troisieme-passe.md` (`~/purge-seconde/troisieme/copie.git`, préparée et vérifiée plus tôt dans la soirée) a remplacé `main` et les étiquettes locales (`git update-ref`, arbre de travail intact), puis GitHub. `3465ef41` est devenu `d9200c75`, l'arbre est le même (`3231d79f`). Sauvegarde : `~/purge-seconde/troisieme/avant.bundle`, vérifié (`git bundle verify`) avant la poussée.
