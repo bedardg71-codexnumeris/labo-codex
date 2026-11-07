@@ -1074,18 +1074,14 @@ h1, h2, h3, h4 {
     white-space: nowrap;
 }
 
-/* Mot-symbole SVG inline dans l'en-tête. La hauteur est le seul réglage
-   visuel à ajuster ; la largeur suit le ratio du viewBox (~5.9:1). */
-.titre-section h1 svg.logo-entete {
+/* Logo empilé de l'en-tête (img/labo-codex-logo-blanc.svg, 6 nov. 2026).
+   Version blanche seulement : le fond de l'en-tête reste sombre dans tous
+   les modes (.entete, .mode-clair .entete, anonymisation). La hauteur est le
+   seul réglage ; la largeur suit le ratio du fichier (~1,28:1). */
+.titre-section h1 img.logo-entete {
     display: block;
-    height: 2.6rem;
+    height: 3.5rem;
     width: auto;
-}
-
-/* Mot-symbole monochrome : « Codex » comme « Labo_ » hérite du blanc du
-   titre via currentColor (identique dans les deux thèmes). */
-.titre-section h1 .logo-codex {
-    fill: currentColor;
 }
 
 .titre-section .meta {
@@ -1502,8 +1498,8 @@ span.header-icon {
         white-space: normal;
     }
 
-    .titre-section h1 svg.logo-entete {
-        height: 1.6rem;
+    .titre-section h1 img.logo-entete {
+        height: 2.4rem;
     }
 
     .titre-section .meta {
