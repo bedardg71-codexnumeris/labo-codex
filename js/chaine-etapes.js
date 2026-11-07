@@ -49,7 +49,7 @@ function construire(conteneur, etapes, options) {
     etapes.forEach(function (etape, i) {
         if (i > 0) {
             const liaison = document.createElement('span');
-            liaison.className = 'bc-liaison' + (etape.arrivee ? ' bc-liaison-finale' : '');
+            liaison.className = 'bc-liaison';   // le chevron de la frise compacte (lot 3, 7 nov. 2026)
             liaison.setAttribute('aria-hidden', 'true');
             conteneur.appendChild(liaison);
         }
@@ -63,7 +63,6 @@ function construire(conteneur, etapes, options) {
         noeud.setAttribute('aria-hidden', 'true');
         const coche = document.createElement('span');
         coche.className = 'bc-check';
-        coche.textContent = '✓';
         noeud.appendChild(coche);
 
         const libelle = document.createElement('span');
@@ -90,9 +89,30 @@ function construire(conteneur, etapes, options) {
     });
 }
 
+/**
+ * Frise compacte (lot 3, 7 nov. 2026) : « nom, nombre ». Quand l'info redit le nom de l'étape avec son
+ * nombre (« Leçons », « 2 leçons » ; « Étudiant·es », « 10 étud. »), seul le nombre paraît à l'écran ; le
+ * mot reste dans l'info pour les lecteurs d'écran (« 2 leçons »), dans une partie visuellement masquée.
+ * Toute autre info (une date, une phrase, « 1 GC ») paraît telle quelle. Texte posé par textContent.
+ */
+function poserInfo(element, etape) {
+    const info = etape.info == null ? '' : String(etape.info).trim();
+    element.textContent = '';
+    const m = /^(\d+)\s+(.+)$/.exec(info);
+    // Le mot de l'info, abrégé ou non (« étud. », « hor. »), commence comme le nom de l'étape.
+    const sans = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[.·]/g, '');
+    const redit = !!m && sans(m[2]).length >= 3
+        && (sans(etape.libelle).startsWith(sans(m[2])) || sans(m[2]).startsWith(sans(etape.libelle).slice(0, 5)));
+    if (!redit) { element.textContent = info; return; }
+    element.appendChild(document.createTextNode(m[1]));
+    const mot = document.createElement('span');
+    mot.className = 'u-lecteur-ecran';
+    mot.textContent = ' ' + m[2];
+    element.appendChild(mot);
+}
+
 function poserEtats(conteneur, etapes) {
     const boutons = conteneur.querySelectorAll('.bc-etape');
-    let precedenteReglee = true;
     etapes.forEach(function (etape, i) {
         const bouton = boutons[i];
         if (!bouton) return;
@@ -102,14 +122,11 @@ function poserEtats(conteneur, etapes) {
         bouton.classList.toggle('bc-critique', !reglee && etape.ton === 'critique');
         bouton.classList.toggle('bc-ouvert', !!etape.ouverte);
         bouton.querySelector('.bc-label').textContent = etape.libelle == null ? '' : String(etape.libelle);
-        bouton.querySelector('.bc-info').textContent = etape.info == null ? '' : String(etape.info);
-        bouton.querySelector('.u-lecteur-ecran').textContent = (reglee ? ', réglée' : ', à régler') + (etape.ouverte ? ', ouverte' : '');
-        // La liaison qui mène à cette étape : verte quand elle et la précédente sont réglées.
-        const liaison = bouton.previousElementSibling;
-        if (liaison && liaison.classList.contains('bc-liaison')) {
-            liaison.classList.toggle('bc-liaison-ok', precedenteReglee && reglee);
-        }
-        precedenteReglee = reglee;
+        poserInfo(bouton.querySelector('.bc-info'), etape);
+        // Frise compacte (lot 3, 7 nov. 2026) : la coche si l'étape est réglée, l'alerte sinon.
+        bouton.querySelector('.bc-check').textContent = reglee ? '✓' : '!';
+        // `:scope >` : l'état, pas le mot masqué de l'info (frise compacte, lot 3).
+        bouton.querySelector(':scope > .u-lecteur-ecran').textContent = (reglee ? ', réglée' : ', à régler') + (etape.ouverte ? ', ouverte' : '');
     });
 }
 

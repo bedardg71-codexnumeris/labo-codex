@@ -224,10 +224,16 @@ test.describe('#1172 · la chaîne d\'étapes de la carte', () => {
             });
             mesures[largeur + 'x' + hauteur] = m;
             expect(m.debordePage, largeur + ' : la page ne défile pas à l\'horizontale').toBe(false);
-            expect(m.hauteurMin).toBeGreaterThanOrEqual(44);
+            // ↻ Lot 3 (7 nov. 2026, esquisse 67) : la frise compacte. Au doigt (pointeur grossier : le vrai iPad,
+            // debout comme couché) et jusqu'à 1024 px, 44 px ; à la souris au-delà, la ligne d'environ 38 px.
+            if (largeur <= 1024) expect(m.hauteurMin).toBeGreaterThanOrEqual(44);
+            else expect(m.hauteurChaine).toBeLessThanOrEqual(46);
             expect(m.largeurMin).toBeGreaterThanOrEqual(44);
         }
-        expect(mesures['820x1180'].defileChaine, '820 px : les sept étapes tiennent sans défiler').toBe(false);
+        // ↻ Lot 3 (7 nov. 2026) : la frise compacte porte les noms en ligne (« Compétence 1 › Idées maîtresses 3 › … ») ;
+        // à 820 px, les sept ne tiennent plus et la frise défile à l'horizontale, la page jamais (vérifié plus haut).
+        // Au-delà de 1024 px, elles tiennent.
+        expect(mesures['1180x820'].defileChaine, '1180 px : les sept étapes tiennent sans défiler').toBe(false);
         console.warn('[#1172] mesures : ' + JSON.stringify(mesures));
     });
 

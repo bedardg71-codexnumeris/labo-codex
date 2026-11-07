@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tranche } from './_helpers/tranche.js';
 
 // SENTINELLE — LOT 3 « LES PAGES SANS DOUBLONS » (7 novembre 2026)
 // Consigne : plans de travail/CONSIGNE-2026-11-07-chaine-des-quatre-lots.md, § Lot 3. Inventaire approuvé par
@@ -19,10 +20,8 @@ const html = lire('index.html');
 
 /** Le premier <h2> d'une sous-section d'index.html. */
 function titreDe(id) {
-    const i = html.indexOf(`<div id="${id}" class="sous-section`);
-    expect(i, id).toBeGreaterThan(-1);
-    const j = html.indexOf('<h2', i);
-    return html.slice(j, html.indexOf('</h2>', j) + 5);
+    const page = tranche(html, `<div id="${id}" class="sous-section`);
+    return tranche(page, '<h2', '</h2>') + '</h2>';
 }
 
 const AVEC_CONTROLES = ['conception-materiel', 'conception-productions', 'conception-grille-criteres', 'conception-echelle-performance',
@@ -79,5 +78,55 @@ describe('2 · les lignes de description désignées par Grégoire', () => {
     it('D3, D4, D11, D12, D14, D15, D18 et D20 restent (D17 est dessinée par le comparateur)', () => {
         for (const t of GARDEES) expect(html, t).toContain(t);
         expect(lire('js/comparateur-pratiques.js')).toContain('Décline une pratique en maquettes');
+    });
+});
+
+describe('3 · « Consulter la bibliothèque » : le même bouton partout', () => {
+    it('neuf boutons, le même libellé, la même classe ; le Trimestre reprend la taille du modèle', () => {
+        const boutons = [...html.matchAll(/<button[^>]*\bbtn-consulter-bibliotheque\b[^>]*>([^<]*)<\/button>/g)].map((m) => m[1].replace('&egrave;', 'è'));
+        expect(boutons).toHaveLength(9);
+        for (const b of boutons) expect(b).toBe('Consulter la bibliothèque');
+        expect(lire('styles.css')).toMatch(/#calendrier-trimestre \.rangee-selection > \.btn-consulter-bibliotheque \{\s*font-size: var\(--font-moyen\);\s*padding: var\(--padding-moyen\);/);
+    });
+    it('la bibliothèque des tampons de Modélisation reste une icône d\'outil (décision de Cowork)', () => {
+        expect(lire('js/modelisation.js') + html).not.toMatch(/btn-consulter-bibliotheque[^>]*tampons/);
+    });
+});
+
+describe('4 · la barre de la carte d\'alignement : une rangée, dans l\'ordre de l\'esquisse 67', () => {
+    const barre = tranche(html, '<div class="planif-header-toolbar">', 'id="planif-chaine"');
+    it('à gauche : bibliothèque, sélecteur (nom puis « en vigueur »), Actions, un filet, Annuler, Rétablir, Rechercher', () => {
+        const ordre = ['id="planif-btn-bibliotheque"', 'class="planif-carte-vigueur">en vigueur<', 'id="planif-liste-cartes"', 'id="planif-btn-actions"',
+            'planif-toolbar-separateur', 'id="planif-btn-annuler"', 'id="planif-btn-retablir"', 'id="planif-btn-rechercher"'];
+        const pos = ordre.map((o) => barre.indexOf(o));
+        expect(pos, JSON.stringify(pos)).not.toContain(-1);
+        expect(pos).toEqual([...pos].sort((a, b) => a - b));
+    });
+    it('les trois icônes seules ont leur aria-label et leur infobulle ; la recherche s\'ouvre sous la loupe', () => {
+        for (const [id, mot] of [['planif-btn-annuler', 'Annuler'], ['planif-btn-retablir', 'Rétablir'], ['planif-btn-rechercher', 'Rechercher dans la carte']]) {
+            const b = barre.match(new RegExp('<button[^>]*id="' + id + '"[^>]*>'))[0];
+            expect(b, id).toContain('aria-label="' + mot + '"');
+            expect(b, id).toMatch(/title="[^"]+"/);
+        }
+        expect(barre).toMatch(/id="planif-btn-rechercher"[^>]*aria-controls="planif-recherche-zone"/);
+        expect(barre).toMatch(/id="planif-recherche-zone" hidden>/);
+    });
+    it('à droite : Nœuds / Planificateur en segments, Vue, un filet, Inspecteur, Guide', () => {
+        const droite = tranche(barre, '<div class="planif-toolbar-droite">');
+        const ordre = ['class="planif-segments" role="group"', 'id="planif-btn-palette-noeuds"', 'id="planif-btn-palette-planificateur"', 'id="planif-btn-vue"',
+            'planif-toolbar-separateur', 'id="planif-palette-inspecteur-btn"', 'id="planif-palette-aide-btn"'];
+        const pos = ordre.map((o) => droite.indexOf(o));
+        expect(pos, JSON.stringify(pos)).not.toContain(-1);
+        expect(pos).toEqual([...pos].sort((a, b) => a - b));
+    });
+});
+
+describe('5 · la frise compacte, dans le composant commun', () => {
+    it('une ligne de 38 px, des étapes en petit, un chevron, un fond orange léger pour une étape à régler', () => {
+        const css = lire('styles.css');
+        expect(css).toMatch(/\n\.barre-convergence \{[^}]*min-height: 38px;/);
+        expect(css).toMatch(/\n\.bc-etape:not\(\.bc-complet\) \{\s*background: color-mix\(in srgb, var\(--alerte-texte-attention\) 14%, transparent\);/);
+        expect(css).toMatch(/\n\.bc-liaison \{[^}]*transform: rotate\(45deg\)/);
+        expect(css).not.toMatch(/bc-liaison-ok|bc-liaison-finale/);
     });
 });

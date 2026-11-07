@@ -121,13 +121,15 @@ describe('T7 · « Explorer », sur l\'accueil, entre par activerModeDemo, qui p
     // « Explorer » appelle activerModeDemo, dont la garde d'entrée est jugée plus haut ; on sort de la
     // démo par « Quitter la démo » (bandeau vert), qui appelle desactiverModeDemo, gardé lui aussi.
     const accueil = readFileSync(path.join(racine, 'js/accueil.js'), 'utf8');
-    const corps = tranche(accueil, 'function explorerDonneesDemo(', '/**\n * « Adopter ta pratique » (décision de Cowork');
+    const corps = tranche(accueil, 'async function explorerDonneesDemo(', '/**\n * « Adopter ta pratique » (décision de Cowork');
 
     function explorer(enDemo, muter) {
         const appels = [];
         const texte = muter ? muter(corps) : corps;
         if (muter && texte === corps) throw new Error('Témoin inerte');
         // eslint-disable-next-line no-new-func
+        // ↻ Lot 3 (7 nov. 2026) : « Explorer » attend l'entrée pour ouvrir l'aide de la démo, la première fois ;
+        // l'appel à activerModeDemo, lui, part avant toute attente : il se compte sans attendre.
         const f = new Function('estEnModeDemo', 'activerModeDemo', texte + '\nreturn explorerDonneesDemo;')(
             () => enDemo, () => appels.push('activer'));
         f();

@@ -446,7 +446,8 @@ describe('atelier · F — ChaineEtapes : deux états de plus, les autres chaîn
 
     it('F.b les deux états se dessinent dans styles.css ; la chaîne de l\'atelier ne rejoue pas son entrée ; la case des chaînes la masque', () => {
         const css = source('styles.css');
-        expect(css).toMatch(/\.bc-etape\.bc-ouvert \.bc-noeud \{/);
+        // ↻ Lot 3 (7 nov. 2026) : la frise compacte ; l'état « ouvert » cerne l'étape entière.
+        expect(css).toMatch(/\.bc-etape\.bc-ouvert \{ box-shadow: inset/);
         expect(css).toMatch(/\.bc-etape\.bc-montre \.bc-crayon \{ display: flex; \}/);
         expect(css).toMatch(/\.atelier-algo-chaine \.bc-etape \{ animation: none; \}/);
         expect(css).toMatch(/body\.chaines-etapes-masquees \.barre-convergence \{\s*display: none;/);

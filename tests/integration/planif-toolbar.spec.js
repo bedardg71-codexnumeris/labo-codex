@@ -66,9 +66,10 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     // spec l'attendait encore et c'est ce qui l'a mise en rouge (#456).
     const sousTitres = page.locator('#conception-carte > p.text-muted');
 
-    // État normal : titre et sous-titre sont là.
-    await expect(h2).toBeVisible();
-    await expect(sousTitres.first()).toBeVisible();
+    // État normal (lot 3, 7 nov. 2026) : le titre ne reste que pour les lecteurs d'écran ; les deux lignes
+    // de description sont retirées (décision de Grégoire).
+    await expect(h2).toHaveClass(/titre-page-masque/);
+    expect(await sousTitres.count()).toBe(0);
 
     // Entrer en plein écran par la vraie commande du menu « Vue » (8 oct. 2026 ;
     // dispatcher data-action).
@@ -99,8 +100,7 @@ test('plein écran carte mentale — titre de section masqué, module seul visib
     // Sortir du plein écran (Échap) : le titre et la navigation reviennent.
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
-    await expect(h2).toBeVisible();
-    await expect(sousTitres.first()).toBeVisible();
+    await expect(h2).toHaveClass(/titre-page-masque/);   // lot 3 : présent pour les lecteurs d'écran
     await expect(page.locator('.navigation-principale')).toBeVisible();
 
     expect(erreurs).toEqual([]);

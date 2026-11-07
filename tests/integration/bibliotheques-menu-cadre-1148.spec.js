@@ -278,7 +278,8 @@ test('Carte d’alignement : le couple bouton + menu a l’apparence de la rang�
             actionsApresLaBande: ra.left >= rb.right,
             hauteurMenu: Math.round(s.getBoundingClientRect().height),
             hauteurBouton: Math.round(b.getBoundingClientRect().height),
-            gras: getComputedStyle(s).fontWeight,
+            // Lot 3 (7 nov. 2026) : le <select> natif est transparent ; le nom affiché porte la graisse.
+            gras: getComputedStyle(document.getElementById('planif-carte-nom')).fontWeight,
             apparence: getComputedStyle(s).webkitAppearance || getComputedStyle(s).appearance,
             fondAttendu: rangee ? getComputedStyle(rangee).backgroundColor : null
         };

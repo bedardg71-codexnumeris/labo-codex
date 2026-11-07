@@ -94,6 +94,9 @@
         modeClair: true,
         accompagnementActif: true,
         banniereAccueilRepliee: false,
+        // Lot 3 (7 nov. 2026, décision de Cowork) : la fenêtre d'aide « Données démo » s'ouvre à la PREMIÈRE
+        // entrée dans la démo par « Explorer », pas aux suivantes. Écrit par accueil.js, explorerDonneesDemo.
+        aideDemoVue: false,
         // #485 (21 août 2026) — Grille imprimable des présences : colonnes à
         // inclure et portée (groupe actif ou tous les groupes-cours). Lu et
         // écrit uniquement par presences-rapport.js, cloné à la lecture.

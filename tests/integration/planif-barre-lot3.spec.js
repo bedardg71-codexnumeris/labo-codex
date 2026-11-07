@@ -89,7 +89,9 @@ async function ouvrirMenuCarte(page, carteId) {
 
 // ─── 1. La barre ─────────────────────────────────────────────────────────
 
-test('la barre : de gauche à droite, des mots seulement ; plus d’icône seule ni d’indicateur « 100% »', async ({ page }) => {
+// ↻ Lot 3 « Les pages sans doublons » (7 nov. 2026, esquisse 67) : Annuler, Rétablir et Rechercher passent en icônes
+// seules, chacune nommée (aria-label) ; le champ de recherche s'ouvre sous la loupe. Les autres commandes gardent leurs mots.
+test('la barre : de gauche à droite ; trois icônes seules, nommées ; plus d’indicateur « 100% »', async ({ page }) => {
     const erreurs = await ouvrirCarte(page);
     const barre = await page.evaluate(() => {
         const t = document.querySelector('.planif-header-toolbar');
@@ -97,16 +99,16 @@ test('la barre : de gauche à droite, des mots seulement ; plus d’icône seule
             .filter((el) => el.offsetParent !== null && !el.closest('.planif-actions-dropdown'));
         return visibles.map((el) => ({
             id: el.id,
-            texte: el.tagName === 'BUTTON' ? el.textContent.trim() : el.tagName
+            texte: el.tagName === 'BUTTON' ? (el.textContent.trim() || el.getAttribute('aria-label') || '') : el.tagName
         }));
     });
     expect(barre.map((b) => b.id)).toEqual([
         'planif-btn-bibliotheque', 'planif-liste-cartes', 'planif-btn-actions',
-        'planif-btn-annuler', 'planif-btn-retablir', 'planif-recherche-champ',
+        'planif-btn-annuler', 'planif-btn-retablir', 'planif-btn-rechercher',
         'planif-btn-palette-noeuds', 'planif-btn-palette-planificateur', 'planif-btn-vue',
         'planif-palette-inspecteur-btn', 'planif-palette-aide-btn'
     ]);
-    // Aucun bouton visible de la barre n'est une image sans mot.
+    // Aucun bouton visible de la barre n'est sans nom : un mot, ou son aria-label.
     for (const b of barre) expect(b.texte.length, b.id).toBeGreaterThan(0);
     expect(barre.find((b) => b.id === 'planif-btn-bibliotheque').texte).toBe('Consulter la bibliothèque');
     expect(barre.find((b) => b.id === 'planif-palette-inspecteur-btn').texte).toBe('Inspecteur');
@@ -330,7 +332,7 @@ test('« Rétablir » : grisé, actif après « Annuler », il refait le geste, 
     const erreurs = await ouvrirCarte(page);
     const retablir = page.locator('#planif-btn-retablir');
     await expect(retablir).toBeDisabled();
-    await expect(retablir).toHaveText('Rétablir');
+    await expect(retablir).toHaveAttribute('aria-label', 'Rétablir');   // lot 3 (7 nov.) : icône seule, nommée
 
     const n0 = await nbNoeuds(page);
     await selectionner(page, 'b3_a');
@@ -419,7 +421,7 @@ for (const [nom, viewport] of [['paysage', { width: 1180, height: 820 }], ['port
                 const ctrl = Array.from(t.querySelectorAll('button, select'))
                     .filter((e) => e.offsetParent !== null && !e.hidden && !e.closest('.planif-actions-dropdown')
                         && !e.closest('.planif-recherche-resultats') && !e.closest('.planif-toolbar-recherche'));
-                const boites = ctrl.map((e) => { const r = e.getBoundingClientRect(); return { id: e.id, h: Math.round(r.height), centre: (r.top + r.bottom) / 2 }; });
+                const boites = ctrl.map((e) => { const r = e.getBoundingClientRect(); return { id: e.id, h: Math.round(Math.min(r.height, e.classList.contains('planif-btn-icone') ? r.width : r.height)), centre: (r.top + r.bottom) / 2 }; });
                 return {
                     grossier: matchMedia('(pointer: coarse)').matches,
                     petites: boites.filter((b) => b.h < 44).map((b) => b.id + ':' + b.h),
@@ -428,7 +430,7 @@ for (const [nom, viewport] of [['paysage', { width: 1180, height: 820 }], ['port
                 };
             });
             expect(mesure.grossier).toBe(true);
-            expect(mesure.nb).toBe(10);
+            expect(mesure.nb).toBe(11);   // lot 3 (7 nov.) : la loupe de la recherche s'ajoute
             expect(mesure.petites).toEqual([]);
             expect(mesure.hauteurs).toEqual([44]);
             expect(erreurs).toEqual([]);

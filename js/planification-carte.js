@@ -8693,6 +8693,19 @@ function mettreAJourListeCartes() {
         if (carte.id === index.active) opt.selected = true;
         select.appendChild(opt);
     }
+    afficherNomCarte();
+}
+
+/**
+ * Lot 3 (7 nov. 2026, esquisse 67) : l'affichage du sélecteur dit le nom de la carte ouverte, puis
+ * « en vigueur ». Le <select> natif, transparent, reste par-dessus (clavier, lecteurs d'écran).
+ */
+function afficherNomCarte() {
+    var select = document.getElementById('planif-liste-cartes');
+    var nom = document.getElementById('planif-carte-nom');
+    if (!select || !nom) return;
+    var opt = select.options[select.selectedIndex];
+    nom.textContent = opt ? opt.textContent : '';
 }
 
 function nouvelleCarte(nom) {
@@ -9319,7 +9332,7 @@ function initialiser() {
     // Événements multi-cartes
     var listeCartes = document.getElementById('planif-liste-cartes');
     if (listeCartes) {
-        listeCartes.addEventListener('change', function(e) { changerCarte(e.target.value); });
+        listeCartes.addEventListener('change', function(e) { changerCarte(e.target.value); afficherNomCarte(); });
     }
 
     // Menu déroulant Actions
@@ -12164,6 +12177,35 @@ function brancherRecherche() {
     var effacer = document.getElementById('planif-recherche-effacer');
     var zone = document.getElementById('planif-recherche-zone');
     if (!champ || !panneau || !zone) return;
+
+    // Lot 3 (7 nov. 2026, esquisse 67) : la loupe ouvre la zone sous elle, au toucher comme au clic ;
+    // un second toucher, Échap sur un champ vide ou un toucher ailleurs (champ vide) la referment.
+    // La recherche elle-même ne change pas : les halos restent quand la zone se ferme.
+    var loupe = document.getElementById('planif-btn-rechercher');
+    function ouvrirZone() {
+        zone.hidden = false;
+        zone.style.left = Math.max(0, loupe.offsetLeft + loupe.offsetWidth - zone.offsetWidth) + 'px';
+        loupe.setAttribute('aria-expanded', 'true');
+        champ.focus();
+    }
+    function fermerZone(rendreLeFocus) {
+        if (zone.hidden) return;
+        fermerListeRecherche();
+        zone.hidden = true;
+        loupe.setAttribute('aria-expanded', 'false');
+        loupe.classList.toggle('planif-recherche-active', (etatRecherche.terme || '').trim().length > 0);
+        if (rendreLeFocus) loupe.focus();
+    }
+    if (loupe) {
+        loupe.addEventListener('click', function() { if (zone.hidden) ouvrirZone(); else fermerZone(true); });
+        document.addEventListener('pointerdown', function(e) {
+            if (zone.hidden || zone.contains(e.target) || loupe.contains(e.target)) return;
+            if (!(champ.value || '').trim()) fermerZone(false);
+        });
+        champ.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !(champ.value || '').trim()) { e.preventDefault(); e.stopPropagation(); fermerZone(true); }
+        }, true);
+    }
 
     champ.addEventListener('input', function() {
         etatRecherche.courant = -1;

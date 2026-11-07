@@ -116,7 +116,7 @@ test('Trimestre : la barre garde ses six étapes, leurs états, et son clic ouvr
     expect(barre.ids).toEqual(['trimestre', 'cours', 'enseignant', 'etudiants', 'horaire', 'groupe-cours']);
     expect(barre.libelles.slice(3)).toEqual(['Étudiant·es', 'Horaire', 'Groupe-cours']);
     expect(barre.liaisons).toBe(5);
-    expect(barre.finale).toBe(1);
+    expect(barre.finale).toBe(0);   // lot 3 (7 nov. 2026), la frise compacte : un chevron neutre, plus de liaison finale
     expect(barre.arrivee).toBe('groupe-cours');
     expect(barre.horaire).toBe(true);
     expect(barre.infoHoraire).toBe('1 hor.');

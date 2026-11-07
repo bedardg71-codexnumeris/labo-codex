@@ -181,6 +181,8 @@ async function pointVisibleDeLaZone(page) {
 }
 
 async function chercher(page, terme) {
+    // Lot 3 (7 nov. 2026) : le champ s'ouvre sous la loupe de la barre.
+    if (await page.locator('#planif-recherche-zone').isHidden()) await page.click('#planif-btn-rechercher');
     await page.fill('#planif-recherche-champ', terme);
     await page.waitForTimeout(300);
 }

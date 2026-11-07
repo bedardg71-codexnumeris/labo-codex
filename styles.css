@@ -3560,15 +3560,15 @@ input[type="number"].controle-form {
 /* Le gabarit se redessine à chaque modification enregistrée : la chaîne ne rejoue pas son entrée. */
 .atelier-algo-chaine .bc-etape { animation: none; }
 /* Les deux états de l'atelier (ChaineEtapes, options `ouverte` et `crayons`) */
-.bc-etape.bc-ouvert .bc-noeud { box-shadow: 0 0 0 4px var(--bleu-pale), 0 0 0 6px var(--accent-primaire); }
+.bc-etape.bc-ouvert { box-shadow: inset 0 0 0 2px var(--accent-primaire); }
 .bc-etape.bc-ouvert .bc-label { color: var(--accent-primaire); }
 .bc-crayon {
-    position: absolute; top: -2px; right: 10px; width: 20px; height: 20px; border-radius: 50%;
+    position: absolute; top: -6px; right: -4px; width: 18px; height: 18px; border-radius: 50%;
     background: var(--zone-blocs); color: var(--surface-carte); font-size: 12px; line-height: 1;
     display: none; align-items: center; justify-content: center;
 }
 .bc-etape.bc-montre .bc-crayon { display: flex; }
-.bc-etape.bc-montre .bc-noeud { box-shadow: 0 0 0 4px var(--zone-blocs-fond-fort), 0 0 0 6px var(--zone-blocs); }
+.bc-etape.bc-montre { box-shadow: inset 0 0 0 2px var(--zone-blocs); }
 
 .gabarit-algo-plan { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; min-width: 0; }
 
@@ -6411,112 +6411,109 @@ a.soutien-action:focus {
 }
 
 /* ===============================
-   BARRE DE CONVERGENCE (Calendrier > Trimestre)
-   6 étapes → Groupe-cours
+   LA FRISE D'ÉTAPES (js/chaine-etapes.js) — un seul composant pour toutes les frises
+   Lot 3 « Les pages sans doublons » (7 nov. 2026, esquisse 67) : la frise compacte. Une ligne d'environ
+   38 px ; chaque étape en petit (coche verte, nom, nombre), séparées par un chevron discret ; une étape
+   à régler prend une icône d'alerte et un fond orange léger. Remplace le dessin à cercles reliés
+   (Trimestre, 6 étapes → Groupe-cours, puis les chaînes de la Conception, #1149).
    =============================== */
 
 .barre-convergence {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    gap: 0;
-    padding: 16px 12px 12px;
-    margin-bottom: 20px;
+    gap: 2px;
+    min-height: 38px;
+    padding: 3px 8px;
+    margin-bottom: 16px;
     background: var(--surface-carte);
     border: 1px solid var(--bleu-pale);
     border-radius: var(--radius-moyen);
     overflow-x: auto;
+    box-sizing: border-box;
 }
 
 .bc-etape {
     position: relative; /* l'état dit au lecteur d'écran (.u-lecteur-ecran) reste dans le bouton */
-    display: flex;
-    flex-direction: column;
+    display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     gap: 6px;
+    height: 30px;
+    padding: 0 10px;
     background: none;
     border: none;
+    border-radius: 15px;
     cursor: pointer;
-    padding: 4px 6px;
-    min-width: 72px;
-    transition: transform 0.15s ease;
+    white-space: nowrap;
+    transition: background-color 0.15s ease;
 }
 
 .bc-etape:hover {
-    transform: translateY(-2px);
+    background: color-mix(in srgb, var(--accent-primaire) 12%, transparent);
 }
 
 .bc-etape:focus-visible {
     outline: 2px solid var(--accent-primaire);
-    outline-offset: 4px;
-    border-radius: var(--radius-moyen);
+    outline-offset: 1px;
 }
 
-/* Noeud (cercle) */
+/* La pastille : coche verte quand l'étape est réglée, « ! » orange sinon. */
 .bc-noeud {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 2px solid var(--bleu-moyen);
-    background: transparent;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s ease;
-    position: relative;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--alerte-texte-attention);
 }
 
 .bc-check {
-    font-size: 13px;
-    color: transparent;
-    transition: color 0.2s ease;
+    font-size: 10px;
+    font-weight: 700;
     line-height: 1;
+    color: var(--surface-carte);
 }
 
-/* État complété */
 .bc-etape.bc-complet .bc-noeud {
-    border-color: var(--vert-succes, #4caf50);
     background: var(--vert-succes, #4caf50);
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
 }
 
 .bc-etape.bc-complet .bc-check {
     color: #fff;
 }
 
-.bc-etape.bc-complet .bc-label {
+/* Une étape à régler : fond orange léger. */
+.bc-etape:not(.bc-complet) {
+    background: color-mix(in srgb, var(--alerte-texte-attention) 14%, transparent);
+}
+
+.bc-etape:not(.bc-complet):hover {
+    background: color-mix(in srgb, var(--alerte-texte-attention) 22%, transparent);
+}
+
+.bc-label {
+    font-size: 0.8rem;
+    font-weight: 600;
     color: var(--texte-principal);
 }
 
-/* État incomplet */
-.bc-etape:not(.bc-complet) .bc-label {
-    color: var(--texte-secondaire);
-}
-
-/* Label */
-.bc-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-align: center;
-    white-space: nowrap;
-}
-
-/* Info (compteur) */
+/* L'info : le nombre (« 2 » quand elle redisait le nom, « 2 leçons »), ou une phrase courte (Trimestre). */
 .bc-info {
-    font-size: 0.65rem;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
     color: var(--texte-secondaire);
-    min-height: 14px;
 }
 
-.bc-etape.bc-complet .bc-info {
-    color: var(--accent-primaire);
+.bc-info:empty {
+    display: none;
 }
 
 /* #1149, lot 3a — « en attention » (sous 100 %) et « critique » (au-dessus) : l'info prend la couleur
    du total affiché (grilles.js, couleurDuTotal) ; le nœud reste non réglé. Jetons à 4,5:1 et plus
-   dans les deux modes sur --surface-carte (calcul du 24 oct. : attention 6,3 clair / 7,1 sombre ;
-   erreur 6,6 clair / 4,5 sombre). --orange-accent du mode clair (#ff6b35) n'y passait pas (2,8:1). */
+   dans les deux modes sur --surface-carte (calcul du 24 oct.). */
 .bc-etape.bc-attention .bc-info {
     color: var(--alerte-texte-attention);
     font-weight: 600;
@@ -6533,80 +6530,33 @@ body.chaines-etapes-masquees .barre-convergence {
     display: none;
 }
 
-/* Ligne de liaison */
+/* Le chevron discret entre deux étapes (l'élément `.bc-liaison` du composant). */
 .bc-liaison {
-    flex: 1;
-    height: 2px;
-    background: var(--bleu-moyen);
-    margin-top: 17px; /* centré sur le noeud */
-    min-width: 16px;
-    max-width: 48px;
-    transition: background 0.3s ease;
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-top: 1.5px solid var(--texte-muted);
+    border-right: 1.5px solid var(--texte-muted);
+    transform: rotate(45deg) scale(0.6);
+    opacity: 0.7;
 }
 
-.bc-liaison.bc-liaison-ok {
-    background: var(--vert-succes, #4caf50);
+/* Au doigt et sur l'iPad (≤ 1024 px), chaque étape reste une cible de 44 px : la ligne monte à ~50 px.
+   Au bureau, 38 px. */
+@media (pointer: coarse), (max-width: 1024px) {
+    .bc-etape { height: 44px; border-radius: 22px; }
+}
+/* L'iPad debout (820 px) : texte et marges resserrés, pour que les sept étapes de la carte tiennent. */
+@media (max-width: 1024px) {
+    .barre-convergence { gap: 0; padding: 3px 4px; }
+    .bc-etape { gap: 4px; padding: 0 6px; }
+    .bc-label, .bc-info { font-size: 0.74rem; }
+    .bc-liaison { width: 8px; margin: 0 -1px; }
 }
 
-/* Destination (Groupe-cours) — noeud plus grand, double bordure */
-.bc-destination .bc-noeud {
-    width: 34px;
-    height: 34px;
-    border-width: 3px;
-    border-color: var(--accent-primaire);
-}
-
-.bc-destination.bc-complet .bc-noeud {
-    border-color: var(--vert-succes, #4caf50);
-    background: var(--vert-succes, #4caf50);
-    box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
-}
-
+/* L'arrivée (le Groupe-cours du Trimestre, les Évaluations de la carte) : son nom en gras. */
 .bc-destination .bc-label {
     font-weight: 700;
-    font-size: 0.72rem;
-}
-
-/* Liaison finale (avant destination) — style pointillé si incomplet */
-.bc-liaison-finale {
-    border-top: 2px dashed var(--bleu-moyen);
-    background: none;
-    height: 0;
-    margin-top: 18px;
-}
-
-.bc-liaison-finale.bc-liaison-ok {
-    border-top-style: solid;
-    border-top-color: var(--vert-succes, #4caf50);
-}
-
-/* Responsive iPad */
-@media (max-width: 768px) {
-    .barre-convergence {
-        padding: 12px 8px 8px;
-    }
-    .bc-etape {
-        min-width: 56px;
-        padding: 4px 2px;
-    }
-    .bc-label {
-        font-size: 0.62rem;
-    }
-    .bc-noeud {
-        width: 24px;
-        height: 24px;
-    }
-    .bc-destination .bc-noeud {
-        width: 28px;
-        height: 28px;
-    }
-    .bc-liaison {
-        min-width: 8px;
-        margin-top: 15px;
-    }
-    .bc-liaison-finale {
-        margin-top: 15px;
-    }
 }
 
 /* Animation d'entrée */
@@ -15163,6 +15113,14 @@ tr.ligne-import-ecartee td {
     transition: all 0.2s ease;
 }
 
+/* Lot 3 (7 nov. 2026) : « Consulter la bibliothèque » a partout le même style, celui de Productions, Grilles,
+   Échelles, Cartouches et Pratiques (consigne). La règle de la page ci-dessus le rapetissait (0,8 rem, 185 px
+   de large contre 203 ailleurs, mesuré à 1180 px). */
+#calendrier-trimestre .rangee-selection > .btn-consulter-bibliotheque {
+    font-size: var(--font-moyen);
+    padding: var(--padding-moyen);
+}
+
 /* Boutons compacts */
 #calendrier-trimestre .btn-tres-compact,
 #calendrier-trimestre .btn-compact {
@@ -21822,8 +21780,6 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding-right: 10px;
-    border-right: 1px solid var(--planif-couleur-bordure);
 }
 .planif-toolbar-droite {
     display: flex;
@@ -23972,8 +23928,10 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     .planif-header-toolbar .planif-btn-palette,
     #planif-btn-actions,
     #planif-btn-annuler,
-    #planif-btn-retablir { min-height: 44px; }
-    /* La liste des cartes est à 44 px partout depuis #1148 (`#planif-selecteur-cartes select`). */
+    #planif-btn-retablir,
+    #planif-btn-rechercher { min-height: 44px; }
+    /* La liste des cartes est à 44 px partout depuis #1148 ; depuis le lot 3 (7 nov.), c'est son enveloppe,
+       `.planif-selecteur-carte`, que le <select> transparent couvre bord à bord. */
     .planif-vue-dropdown .planif-action-item { min-height: 44px; }
     .planif-raccourcis-panel-replier,
     .planif-raccourcis-panel-fermer { width: 44px; height: 44px; }
@@ -25799,26 +25757,56 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 /* Un <select> natif ignore `min-height` sous WebKit : hauteur fixée, apparence retirée, chevron
    redessiné (patron de `.rangee-selection-menu`). Deux identifiants ne sont pas nécessaires ici : la
    règle du mode clair ne pose plus que `background-color`, qui laisse le chevron en place. */
-#planif-selecteur-cartes select {
+/* Lot 3 (7 nov. 2026, esquisse 67) : le sélecteur de la carte dit le nom, puis « en vigueur » en vert pâle.
+   La boîte (hauteur 44, chevron) passe du <select> à son enveloppe ; le <select> natif, transparent,
+   couvre l'affichage (patron du sélecteur du groupe, en-tête du 7 nov.). */
+.planif-selecteur-carte {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
     height: 44px;
+    max-width: 380px;
+    min-width: 0;
     padding: 0 32px 0 12px;
     border: 1px solid var(--planif-couleur-bordure);
     border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--accent-primaire);
     background-color: var(--surface-carte, #1a3040);
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238aa4b0' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
-    max-width: 380px;
-    cursor: pointer;
 }
-
-#planif-selecteur-cartes select:hover { border-color: var(--planif-couleur-selection); }
+.planif-selecteur-carte:hover { border-color: var(--planif-couleur-selection); }
+.planif-selecteur-carte:focus-within { border-color: var(--planif-couleur-selection); box-shadow: var(--focus-ring); }
+.planif-carte-affichage {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 0.9rem;
+}
+.planif-carte-nom {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    color: var(--accent-primaire);
+}
+.planif-carte-vigueur {
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    color: color-mix(in srgb, var(--alerte-texte-succes) 80%, var(--surface-carte, #1a3040));
+}
+#planif-selecteur-cartes select {
+    position: absolute;
+    inset: -1px;   /* bord à bord avec l'enveloppe, bordure comprise : 44 px au doigt */
+    appearance: none;
+    -webkit-appearance: none;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 16px;   /* iOS : pas de zoom au toucher */
+}
 
 .planif-btn-carte {
     display: flex;
@@ -25838,6 +25826,42 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 .planif-btn-carte:hover { background: rgba(106, 172, 184, 0.06); color: var(--planif-couleur-texte); border-color: var(--planif-couleur-selection); }
+/* Lot 3 (7 nov. 2026) : Annuler, Rétablir, Rechercher en icônes seules (infobulle et aria-label). */
+.planif-btn-icone { width: 32px; padding: 0; }
+/* Au doigt (iPad), une icône seule est une cible carrée de 44 px. */
+@media (pointer: coarse) { .planif-btn-icone { width: 44px; } }
+.planif-btn-icone .planif-icon { width: 15px; height: 15px; }
+.planif-btn-icone.planif-recherche-active,
+.planif-btn-icone[aria-expanded="true"] { border-color: var(--planif-couleur-selection); color: var(--planif-couleur-texte); }
+/* Nœuds / Planificateur en segments : deux boutons accolés, un seul cadre. */
+.planif-segments { display: inline-flex; }
+.planif-segments .planif-btn-palette { border-radius: 0; }
+.planif-segments .planif-btn-palette:first-child { border-radius: 6px 0 0 6px; }
+.planif-segments .planif-btn-palette:last-child { border-radius: 0 6px 6px 0; margin-left: -1px; }
+/* Une seule rangée (esquisse 67) : au-dessus de 1000 px, la barre ne passe plus à la ligne ; c'est le
+   nom de la carte qui cède la place (points de suspension), jusqu'à 150 px. En dessous (iPad debout), la
+   rangée de droite peut descendre : elle ne tient pas sans retirer des mots. */
+@media (min-width: 1001px) {
+    .planif-header-toolbar { flex-wrap: nowrap; }
+}
+.planif-toolbar-gauche { flex: 0 1 auto; min-width: 0; }
+.planif-toolbar-droite { flex-shrink: 0; }
+.planif-couple-selection { min-width: 0; }
+.planif-selecteur-carte { flex: 0 1 380px; min-width: 150px; }
+.planif-toolbar-gauche > .planif-actions-menu,
+.planif-toolbar-gauche > .planif-btn-icone,
+.planif-toolbar-gauche > .planif-toolbar-separateur { flex-shrink: 0; }
+/* La zone de recherche s'ouvre sous la loupe, par-dessus le canevas : la rangée ne bouge pas. */
+.planif-header-toolbar { position: relative; }
+#planif-recherche-zone {
+    position: absolute;
+    top: calc(100% + 6px);
+    z-index: 60;
+    width: 280px;
+    max-width: calc(100vw - 32px);
+    box-shadow: var(--shadow-prononce);
+}
+#planif-recherche-zone[hidden] { display: none; }
 /* « Rétablir » grisé quand rien n'est à rétablir (lot 3). */
 .planif-btn-carte:disabled,
 .planif-btn-carte:disabled:hover {

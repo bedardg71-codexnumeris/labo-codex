@@ -321,9 +321,18 @@ function commencerParLeTrimestre() {
  * la garde de l'import (T7) ; si la démo est déjà active, rien n'est réactivé. On en sort par
  * « Quitter la démo », dans le bandeau vert (la case « Données démo » est retirée le 7 nov.).
  */
-function explorerDonneesDemo() {
+async function explorerDonneesDemo() {
     if (typeof estEnModeDemo === 'function' && estEnModeDemo()) return;
-    if (typeof activerModeDemo === 'function') activerModeDemo();
+    if (typeof activerModeDemo === 'function') await activerModeDemo();
+    // Lot 3 (7 nov. 2026, décision de Cowork) : à la première entrée seulement, la fenêtre d'aide « Données
+    // démo » s'ouvre — son déclencheur, la case de l'accueil, est parti avec elle. Rien si la démo n'est pas
+    // entrée (un import en cours l'empêche).
+    if (!(typeof estEnModeDemo === 'function' && estEnModeDemo())) return;
+    if (typeof obtenirPreference !== 'function' || obtenirPreference('aideDemoVue') === true) return;
+    if (typeof definirPreference === 'function') definirPreference('aideDemoVue', true);
+    if (typeof window !== 'undefined' && window.accompagnement && typeof window.accompagnement.afficherAide === 'function') {
+        window.accompagnement.afficherAide('accueil-donnees-demo');
+    }
 }
 
 /**

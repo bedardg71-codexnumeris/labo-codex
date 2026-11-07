@@ -39,8 +39,9 @@ describe('#1149 · C — le composant commun', () => {
         expect(nav.classList.contains('barre-convergence')).toBe(true);
         expect(nav.getAttribute('aria-label')).toBe('Étapes de la grille');
         const enfants = [...nav.children].map(e => e.className);
+        // ↻ Lot 3 (7 nov. 2026), la frise compacte : un chevron neutre entre deux étapes, plus de liaison finale.
         expect(enfants).toEqual(['bc-etape bc-complet', 'bc-liaison', 'bc-etape bc-attention',
-            'bc-liaison bc-liaison-finale', 'bc-etape bc-destination']);
+            'bc-liaison', 'bc-etape bc-destination']);
         const boutons = nav.querySelectorAll('button.bc-etape');
         expect([...boutons].map(b => b.dataset.etape)).toEqual(['un', 'deux', 'trois']);
         expect([...boutons].map(b => b.querySelector('.bc-label').textContent)).toEqual(['Un', 'Deux', 'Trois']);
@@ -48,24 +49,25 @@ describe('#1149 · C — le composant commun', () => {
         expect(boutons[0].querySelector('.bc-noeud').getAttribute('aria-hidden')).toBe('true');
     });
 
-    it('C.b les liaisons : verte entre deux étapes réglées, la finale reste pointillée tant que l\'arrivée ne l\'est pas', () => {
+    it('C.b (lot 3, 7 nov. 2026) la frise compacte : la coche sur une étape réglée, l\'alerte sinon ; le nombre seul quand l\'info redit le nom', () => {
         const { C, document } = monterComposant();
         const nav = document.getElementById('a');
-        const etapes = TROIS();
+        const etapes = [
+            { id: 'l', libelle: 'Leçons', info: '2 leçons', reglee: true },
+            { id: 'e', libelle: 'Étudiant·es', info: '10 étud.', reglee: false },
+            { id: 'g', libelle: 'Groupe-cours', info: '1 GC', reglee: false, arrivee: true }
+        ];
+        C.dessiner(nav, etapes);
+        const coches = [...nav.querySelectorAll('.bc-check')].map((c) => c.textContent);
+        expect(coches).toEqual(['✓', '!', '!']);
+        // À l'écran, le nombre seul ; l'info entière reste lue (le mot dans une partie masquée).
+        expect([...nav.querySelectorAll('.bc-info')].map((i) => i.firstChild ? i.firstChild.textContent : '')).toEqual(['2', '10', '1 GC']);
+        expect([...nav.querySelectorAll('.bc-info')].map((i) => i.textContent)).toEqual(['2 leçons', '10 étud.', '1 GC']);
+        expect(nav.querySelector('.bc-info .u-lecteur-ecran').textContent).toBe(' leçons');
+        expect(nav.querySelectorAll('.bc-liaison-ok, .bc-liaison-finale')).toHaveLength(0);
         etapes[1].reglee = true;
         C.dessiner(nav, etapes);
-        const liaisons = nav.querySelectorAll('.bc-liaison');
-        expect(liaisons[0].classList.contains('bc-liaison-ok')).toBe(true);
-        expect(liaisons[1].classList.contains('bc-liaison-ok')).toBe(false);
-        etapes[2].reglee = true;
-        C.dessiner(nav, etapes);
-        expect(liaisons[1].classList.contains('bc-liaison-ok')).toBe(true);
-        expect(nav.querySelector('.bc-destination').classList.contains('bc-complet')).toBe(true);
-        // L'étape d'avant n'est plus réglée : la liaison qui en part redevient grise, même vers une étape réglée.
-        etapes[0].reglee = false;
-        C.dessiner(nav, etapes);
-        expect(liaisons[0].classList.contains('bc-liaison-ok')).toBe(false);
-        expect(liaisons[1].classList.contains('bc-liaison-ok')).toBe(true);
+        expect([...nav.querySelectorAll('.bc-check')].map((c) => c.textContent)).toEqual(['✓', '✓', '!']);
     });
 
     it('C.c réglée efface « en attention » et « critique » ; « critique » se pose sur une étape non réglée', () => {
