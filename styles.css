@@ -7043,6 +7043,28 @@ body.chaines-etapes-masquees .barre-convergence {
     outline-offset: -2px;
 }
 
+/* #1240 (7 nov. 2026) — sous 780 px, le « Non enregistré » prend place DANS la page, devant
+   `[data-place-temoin]` (aux présences : au-dessus de « ← Précédent / Suivant → ») : il ne
+   couvre plus aucun bouton. Le « Enregistré », passager, reste flottant en bas à gauche : dans
+   la page, il ferait sauter le contenu à chaque enregistrement automatique. */
+.temoin-enregistrement.temoin-dans-le-flux {
+    position: static;
+    max-width: none;
+    margin: 0 0 12px;
+    scroll-margin-top: 72px;   /* la bande du haut, collée (56 px sur l'iPhone) */
+}
+
+.temoin-dans-le-flux .temoin-enregistrement-echec.visible {
+    box-shadow: none;
+}
+
+.temoin-dans-le-flux .temoin-enregistrement-succes.visible {
+    position: fixed;
+    left: 16px;
+    bottom: calc(16px + var(--temoin-hauteur-clavier, 0px));
+    z-index: 11000;
+}
+
 /* Lot C #286 suite — helper d'icône SVG inline pour badges textuels.
    Le SVG est rendu via mask-image et coloré par background-color: currentColor :
    l'icône hérite donc automatiquement de la couleur sémantique du badge parent

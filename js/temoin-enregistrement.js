@@ -48,7 +48,8 @@
 // ne le réannonce donc pas à chaque auto-enregistrement (toutes les 1,5 s pendant
 // qu'on évalue). Seul le visuel réapparaît.
 //
-// Placement : en bas à gauche, loin du témoin du Codex (menu du haut, D4 / lot F)
+// Placement : en bas à gauche (sous 780 px, le « Non enregistré » prend place DANS la page
+// qui en déclare une — #1240, voir `placeDansLaPage`), loin du témoin du Codex (menu du haut, D4 / lot F)
 // et des toasts (en haut à droite). #986 : AU-DESSUS du clavier à l'écran de l'iPad,
 // qui le cachait (constat de Grégoire, 29 sept.) — voir `placerAuDessusDuClavier`. `pointer-events: none` hors du bouton Fermer :
 // le témoin ne capte ni le Pencil ni un clic destiné à ce qu'il survole.
@@ -96,7 +97,69 @@
 
         document.body.appendChild(temoin);
         planifierPlacement();
+        surveillerLesPlaces(temoin);
         return temoin;
+    }
+
+    /**
+     * #1240 (7 nov. 2026, décision de Cowork) — « il ne doit jamais couvrir un bouton ». Mesuré
+     * au banc WebKit sur les présences : sous 768 px, le témoin flottant (270 × 208 px) couvre
+     * « ← Précédent », la date ou « Rapport » dès l'affichage ; à 768 px et au-delà, rien. Sous
+     * le seuil de l'en-tête (≤ 779 px, la variante C), le « Non enregistré » quitte donc sa
+     * position flottante et prend place DANS LA PAGE, devant l'élément `[data-place-temoin]`
+     * de la page affichée (aux présences : juste au-dessus de « ← Précédent / Suivant → »).
+     *
+     * Ce qui reste flottant :
+     *   - une page qui ne déclare pas de place (aucune autre ne le fait aujourd'hui) ;
+     *   - une modale ouverte ou Annoter en plein écran : la place serait dessous, cachée ;
+     *   - le « Enregistré », discret et passager : dans la page, il ferait sauter le contenu
+     *     à chaque enregistrement automatique (règle `.temoin-dans-le-flux` de styles.css).
+     * Un témoin posé dans une page qu'on quitte se replace (ResizeObserver : sa page cachée,
+     * sa taille tombe à zéro) ; il revient dans la page quand elle réapparaît.
+     */
+    const SEUIL_DANS_LE_FLUX = '(max-width: 779px)';
+
+    function placeDansLaPage() {
+        if (!window.matchMedia || !window.matchMedia(SEUIL_DANS_LE_FLUX).matches) return null;
+        if (document.querySelector('.modal-overlay.actif')) return null;
+        if (document.body.classList.contains('travaux-plein-ecran-actif')) return null;
+        const places = document.querySelectorAll('[data-place-temoin]');
+        for (const place of places) {
+            if (place.getClientRects().length > 0 || place.parentElement.getClientRects().length > 0) return place;
+        }
+        return null;
+    }
+
+    function placerLeTemoin() {
+        const temoin = document.getElementById(ID);
+        if (!temoin) return;
+        const echecVisible = temoin.querySelector('.temoin-enregistrement-echec').classList.contains('visible');
+        const place = echecVisible ? placeDansLaPage() : null;
+        if (place) {
+            if (temoin.nextSibling !== place) place.parentNode.insertBefore(temoin, place);
+            temoin.classList.add('temoin-dans-le-flux');
+        } else {
+            temoin.classList.remove('temoin-dans-le-flux');
+            if (temoin.parentNode !== document.body) document.body.appendChild(temoin);
+        }
+    }
+
+    function surveillerLesPlaces(temoin) {
+        if (typeof window.ResizeObserver !== 'function') return;
+        const observateur = new ResizeObserver(() => placerLeTemoin());
+        observateur.observe(temoin);
+        document.querySelectorAll('[data-place-temoin]').forEach((place) => observateur.observe(place.parentElement));
+        if (window.matchMedia) {
+            const requete = window.matchMedia(SEUIL_DANS_LE_FLUX);
+            if (requete.addEventListener) requete.addEventListener('change', placerLeTemoin);
+        }
+    }
+
+    /** Dans la page, un échec hors de l'écran n'est pas vu : on l'amène, au plus près. */
+    function amenerALaVue(temoin) {
+        if (!temoin.classList.contains('temoin-dans-le-flux')) return;
+        const r = temoin.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight) temoin.scrollIntoView({ block: 'nearest' });
     }
 
     /**
@@ -173,6 +236,8 @@
             ? debut + ' – ' + String(geste) + ' : ' + String(raison)
             : debut + ' : ' + String(raison);
         echec.classList.add('visible');
+        placerLeTemoin();
+        amenerALaVue(temoin);
     }
 
     function fermerEchec() {
@@ -182,6 +247,7 @@
         const echec = temoin.querySelector('.temoin-enregistrement-echec');
         echec.classList.remove('visible');
         echec.querySelector('.temoin-enregistrement-echec-texte').textContent = '';
+        placerLeTemoin();
     }
 
     function fermerSi(cle) {
