@@ -7,6 +7,32 @@
 
 ---
 
+## 7 NOV. 2026, 12 H 35 (Claude Code) : **NOUVEL EN-TÊTE FUSIONNÉ ET POUSSÉ ; `main` = `origin/main` = `f727680a` (+ ce commit de relais) ; BUILD `1107-1101`, VERSION INCHANGÉE (1.235.0), CHANGELOG NON TOUCHÉ**
+
+**Ce qui a été fait**, au signal conditionnel de Grégoire transmis par Cowork (« il le donne maintenant, sous condition ») :
+1. L'icône de la visite guidée redessinée (`f727680a`, commit à part) : le tracé est propre au lot (anneau de départ, épingle d'arrivée, trois points), au trait de la bulle et du « ? » (22 px, 1,5 px, orange de l'aide). L'icône « route » de SVG Repo est retirée, avec la mention de sa licence dans `styles.css`. Captures recadrées du bloc de droite, sombre et clair, 1440 et 820 px : `test-results/nouvel-en-tete/bloc-droite-<largeur>-<thème>.png` (non versionnées, sur le Mac).
+2. Verdict complet en dix morceaux sur `f727680a`, Mac libre (« tout est fermé »), sur secteur, sous `caffeinate -d -i -s`, éveil tenu : **1 384 essais, 1 379 verts, 3 au second essai, 2 rouges (2 connus), 23 sautés.** Seconds essais : `cours-actif-hors-bibliotheque-916`, `critere-algorithmique-coller-codes` (iPad), `demo-saisie-presences-749-lot3`. Relevé minute par minute : `~/verdicts-labo/`.
+3. `lot/nouvel-en-tete` fusionnée dans `main` en avance rapide (b37301b2, eca54071, f727680a), poussée avec les 4 commits #1114 que `main` portait déjà. Le hook pré-push : « verdict vert à jour pour ce commit ». Ce commit de relais (Markdown seul) est poussé sans verdict propre.
+
+**Pas de bump ni de changelog** (consigne) : la ligne « Nouvelles » validée ce matin ne couvre pas le nouvel en-tête ; elle sera revue avec Grégoire.
+
+**Trouvaille inscrite, non corrigée** : le verdict dit « 2 spec(s) de la baseline redevenues vertes — à retirer » (`playwright-baseline.json` non retouché ; 4 rouges connus le 7 nov. à 1 h 25, 2 ce soir).
+
+**Dû à Grégoire** : juger l'icône redessinée sur les captures ; l'infobulle Codex proposée dans le rapport du lot (pas appliquée) ; la ligne « Nouvelles » pour l'en-tête.
+
+## 7 NOV. 2026, 7 H 05 (Cowork) : **PAS DE DEMANDE AU SUPPORT DE GITHUB (DÉCISION DE GRÉGOIRE) ; LIGNE « NOUVELLES » VALIDÉE POUR 1.236 ; COINS DE L'ICÔNE 180 À REMPLIR ; ANCIENNES COPIES À LA CORBEILLE**
+
+Décision de Grégoire, dite le 6 nov. à une autre session Cowork et rappelée le 7 nov. à 7 h 01 : on ne contacte pas le support de GitHub pour la purge. Les `refs/pull/1` à `10` (demandes Dependabot fermées) restent telles quelles. ⮕ Ne plus inscrire cette demande comme « due » dans un rapport ou un relais. Les mentions « la demande au support de GitHub est maintenant due » plus bas (relais du 6 nov.) sont périmées.
+
+**« Nouvelles » : ligne validée par Grégoire le 7 nov. à 7 h 21, mot pour mot, à entrer avec la PROCHAINE version mineure (1.236), pas dans l'entrée 1.235 déjà en ligne** : « Labo Codex a une nouvelle identité : un logo dans l'en-tête, une icône dans l'onglet du navigateur, et une icône parmi les apps de l'iPad quand on l'y ajoute depuis Safari. » Elle remplace la ligne proposée dans le rapport de 1 h 25 (« écran d'accueil » se confondait avec la page Accueil de l'app).
+
+~~**Correctif technique tranché par Cowork (avant cette même version)** : `img/labo-codex-icone-application-180.png` a des coins transparents (rayon d'environ 40 px, 1 524 pixels sur 32 400) sur un fond `#1C1C1C`. iOS arrondit lui-même l'icône et remplit la transparence (en noir, à ma connaissance, non vérifié sur l'iPad). Remplir les coins avec le fond `#1C1C1C` pour livrer un carré opaque, et régénérer la copie de `Logo/` si elle est la même.~~ ⮕ **Rayé le 7 nov. (Claude Code) : sans objet.** L'`apple-touch-icon` est désormais `img/labo-codex-icone-application-ios-180.png`, carrée et pleine (PNG sans canal alpha, mesuré), commit `eca54071` ; l'ancienne icône 180 à coins transparents est retirée de `img/`.
+
+**Copies de l'ancienne histoire sur le Mac : décision de Grégoire le 7 nov. à 7 h 25** : il les met à la Corbeille maintenant et la vide vers le 14 nov. si rien ne cloche. Ce sont `~/programme-a-observer`, `~/comparaison-observation` (clones de l'app, probablement d'avant toute purge, non vérifié), `~/purge-travail` et `~/purge-seconde` (copies et sauvegardes des trois passes, dont `troisieme/avant.bundle`), plus le dossier des listes dans Documents. ⮕ Plus aucune sauvegarde de l'ancienne histoire n'existera après le 14 nov. : ne proposer aucun geste qui en dépende. Aucune session ne supprime ces dossiers à sa place.
+
+**Vu en ligne (capture de Grégoire, 7 nov., 7 h 18, Chrome sur Mac, app.codexnumeris.org)** : le logo blanc est dans l'en-tête, et la nouvelle icône s'affiche dans l'onglet (variante claire, lisible sur l'onglet sombre). Restent non vus : l'onglet de Safari, et l'icône sur l'iPad.
+
+
 ## 7 NOV. 2026, 1 H 25 (Claude Code) : **NOUVELLE IDENTITÉ (LOGO ET ICÔNES) POUSSÉE ; `main` = `origin/main` = `ff3a91bf` (+ ce commit de relais) ; BUILD `1106-2351`, VERSION INCHANGÉE (1.235.0), CHANGELOG NON TOUCHÉ**
 
 **Ce qui a été livré**, sur l'historique neuf, selon le plan validé par Grégoire le 6 nov. : logo empilé blanc (`img/labo-codex-logo-blanc.svg`, `alt="Labo Codex"`) dans l'en-tête à la place du SVG inline ; favicon noir 32 et 16 px, variante blanche sous `prefers-color-scheme: dark` ; `apple-touch-icon` = icône application 180 px. Série complète à plat dans `Logo/` (11 SVG, 23 PNG, dont les 192 et 512 gardés pour plus tard), galerie `Logo/index.html` refaite. Les 11 anciens `Logo/labo-codex-{empile,ligne,mono}-*.svg` et la classe `.logo-codex` sont retirés. **Pas de manifeste** (décision de Grégoire). Le dossier source a été déplacé hors du dépôt, dans `~/Downloads/labo-codex-logos`.
