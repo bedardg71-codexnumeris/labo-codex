@@ -30,7 +30,8 @@ const INTEGRATION = path.resolve(__dirname, '..', 'integration');
 // 6 nov. 2026 : 738 → 619, recompté selon la règle des sites. Avant, une aide comptait ses appels
 // si sa première pause précédait la première `}` de son corps : 44 aides vues, 82 non vues pour
 // une accolade (plans de travail/VERDICT-RELECTURE-2026-11-06-fusion-des-trois-lots.md § 2).
-const PLAFOND_DES_PAUSES = 619;
+// 7 nov. 2026 : 619 → 618, la pause de l'accueil dans lot-f-placement-mots part avec la carte « Ton codex ».
+const PLAFOND_DES_PAUSES = 618;
 
 /** Marque une pause qu'aucune condition observable ne peut remplacer : le commentaire dit pourquoi. */
 const MARQUE_GARDEE = 'pause-gardee :';
