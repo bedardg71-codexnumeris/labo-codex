@@ -50,3 +50,48 @@ cadre, les contrastes du texte sur le fond de la page restent d'au moins 4,5:1.
 
 **Livraison.** Captures Playwright WebKit, avant et après, en sombre et en clair, à 1180 et 820 px :
 Évaluation › Préparer, puis une page par section modifiée.
+
+## Lot 3 — « Les pages sans doublons » (consigne reçue le 7 nov. au soir, en deux collages)
+
+Maquette : toile « En-tête et accueil », esquisse 67 (la carte d'alignement).
+
+**Étape 1, inventaire sans coder.** Trois listes, page par page : les titres de page qui répètent le libellé de leur
+onglet et toute ligne de description sous ces titres (texte exact) ; les pages qui donnent accès à une
+bibliothèque (libellé, emplacement, style) ; les pages qui affichent une frise d'étapes comme celle de la carte.
+Fait : `INVENTAIRE-2026-11-07-pages-sans-doublons.md`.
+
+**Étape 2, après l'accord de Grégoire.**
+- Titres : retirer de l'écran tout titre qui répète son onglet ; le garder pour les lecteurs d'écran. Ne retirer
+  aucune ligne de description sauf celles que Grégoire désignera. Carte d'alignement, déjà décidé : retirer
+  « Organiser visuellement les séquences, leçons et activités du cours » et « Évaluer ce qu'on enseigne, et
+  enseigner ce qu'on évalue, au même niveau d'exigence. » (la maxime ouvre déjà la page 1 du guide).
+- Conception › Mon matériel : retirer l'avertissement « Cet outil est en développement : certaines grilles
+  pourraient mal s'y afficher. D'autres étapes viendront, dont les rétroactions. »
+- Bibliothèques : partout le même bouton « Consulter la bibliothèque », au même endroit et dans le même style que
+  sur Productions, Grilles, Échelles, Cartouches, Pratiques. Uniformiser les écarts ; ne rien renommer.
+  Comportement inchangé.
+- Carte d'alignement : une seule rangée d'outils. À gauche : « Consulter la bibliothèque », le sélecteur du
+  document (le nom, puis « en vigueur » en vert plus pâle), Actions ; un filet ; Annuler, Rétablir et Rechercher
+  en icônes seules, avec infobulles et aria-label (la recherche s'ouvre au toucher). À droite : le sélecteur
+  Nœuds / Planificateur en segments, Vue ; un filet ; Inspecteur, Guide. Comportements inchangés.
+- Frises : la frise compacte de l'esquisse 67, dans le composant commun. Une ligne d'environ 38 px, chaque étape
+  en petit (coche verte, nom, nombre), séparées par un chevron discret ; une étape manquante prend une icône
+  d'alerte et un fond orange léger.
+- Les 160 mentions passent mécaniquement aux libellés courts, avec les états vides d'Annoter et d'Exporter.
+
+**Livraison.** Captures WebKit, sombre et clair, à 1180 et 820 px : la carte d'alignement, Mon matériel, une page
+par section qui a perdu son titre, une page où le témoin a pris sa place.
+
+**Réponses de Cowork aux questions de l'inventaire.**
+1. Le témoin : une règle commune. Les titres devenant invisibles, il se pose en tête du contenu, à la place du
+   titre ; s'il apparaît plus bas dans la page, il est ramené à l'écran, comme aux présences.
+2. Les 18 phrases devenues fausses : reformulations de Claude Code, au plus près du texte actuel ; rien n'est
+   remplacé avant l'accord de Grégoire.
+3. Les cas ambigus : tels quels.
+4. « dans Suivi du groupe » devient « dans Suivi › Groupe ».
+5. La fenêtre d'aide « Données démo » : rattachée à « Explorer », à la première ouverture de la démo seulement.
+6. Masquer les deux sortes de titres (identiques et formes longues), sauf « Rencontres (ortho.) ».
+7. La bibliothèque des tampons de Modélisation reste une icône d'outil.
+8. À Grégoire, en une seule liste : les 18 reformulations et toutes les lignes de description
+   (`A-DECIDER-2026-11-07-lot-3-les-textes.md`).
+Les trois infobulles que rien n'affiche : laissées, sans inscription.

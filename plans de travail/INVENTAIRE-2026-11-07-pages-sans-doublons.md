@@ -5,9 +5,9 @@ lecture seule, vérifié par sondage ; mesure du témoin : banc WebKit). Branche
 
 **La consigne du lot** (reçue le 7 nov., en soirée ; maquette : toile « En-tête et accueil », esquisse 67) demande trois
 listes à l'étape 1 : les titres qui répètent leur onglet (§ 1), les accès aux bibliothèques (§ 2), les frises
-d'étapes (§ 3). S'y ajoutent les trois parties demandées par Cowork (§ A, B, C). **Deux manques** : la consigne
-s'arrête en pleine phrase (« Frises : partout où il y en a une, la frise »), et les réponses de Cowork aux cinq
-questions ci-dessous ne m'ont pas été transmises.
+d'étapes (§ 3). S'y ajoutent les trois parties demandées par Cowork (§ A, B, C). La consigne complète et les
+réponses de Cowork aux questions 1 à 8 : `CONSIGNE-2026-11-07-chaine-des-quatre-lots.md`, § Lot 3. Ce qui reste à
+Grégoire : `A-DECIDER-2026-11-07-lot-3-les-textes.md` (les 18 phrases, les lignes de description).
 
 Relevé des listes 1 à 3 : banc WebKit à 1180 px, données de la démo, chaque onglet ouvert en haut de page.
 
@@ -25,7 +25,7 @@ Relevé des listes 1 à 3 : banc WebKit à 1180 px, données de la démo, chaque
 
 ## Les questions
 
-Les questions 1 à 5 ont déjà été posées à Cowork ; ses réponses ne m'ont pas été transmises.
+Réponses de Cowork reçues le 7 nov. au soir (voir la consigne) ; la question 8 et la question 2 vont à Grégoire.
 
 
 1. **Le témoin (C)**. La mesure montre qu'en faisant défiler, il couvre quelque chose sur presque toutes les pages :
