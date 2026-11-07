@@ -38,6 +38,8 @@ import { readdirSync } from 'node:fs';
 // #1114 (7 nov. 2026) — la garde du lancement raté neutralisée dans le juge → C.h rouge ;
 // un `runs-on: ubuntu-latest` remis dans tests.yml → D.b rouge ; l'image retirée de la clé du
 // cache de WebKit → D.b rouge. Arbre restauré, sha256 vérifié.
+// Plafond du morceau remis à 30 → D.c rouge ; `total=24` (plus que les machines
+// simultanées) → D.c rouge ; `total=16` → D.c rouge. Arbre restauré, sha256 vérifié.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const racine = path.resolve(__dirname, '..', '..');
@@ -131,7 +133,7 @@ describe('B — la répartition des fichiers entre les morceaux', () => {
     });
 
     it('B.b chaque spec va à UN morceau, et un seul ; les tailles diffèrent d’au plus un', () => {
-        for (const total of [1, 4, 10, 16]) {
+        for (const total of [1, 4, 10, 16, 20]) {
             const lots = Array.from({ length: total }, (_, k) => fichiersDuMorceau(toutes, k + 1, total));
             expect(lots.flat().sort()).toEqual([...toutes].sort());
             const tailles = lots.map((l) => l.length);
@@ -252,6 +254,20 @@ describe('D — #1114 : GitHub juge contre la baseline Linux', () => {
         for (const r of runners) expect(r).toBe('ubuntu-24.04');
         expect(workflow).toMatch(/key: playwright-webkit-\$\{\{ runner\.os \}\}-\$\{\{ steps\.image\.outputs\.nom \}\}-/);
         expect(workflow).toContain('echo "nom=${ImageOS:?ImageOS absente}" >> "$GITHUB_OUTPUT"');
+    });
+
+    it('D.c (7 nov.) : le plafond d’un morceau garde un tiers de marge sur le plus long mesuré ; pas plus de morceaux que de machines simultanées', () => {
+        const workflow = readFileSync(path.join(racine, '.github', 'workflows', 'tests.yml'), 'utf8');
+        // Le plus long job de morceau mesuré : 30,1 min (run 42124702404, morceau 1/16). À remplacer
+        // par une mesure plus récente, jamais par une projection.
+        const PLUS_LONG_MESURE = 30.1;
+        const job = /^  playwright:\n([\s\S]*?)\n    steps:/m.exec(workflow)?.[1] ?? '';
+        const plafond = Number(/^    timeout-minutes: (\d+)$/m.exec(job)?.[1]);
+        expect(plafond).toBeGreaterThanOrEqual(Math.ceil(PLUS_LONG_MESURE * 4 / 3));
+        const total = Number(/^\s+total=(\d+)$/m.exec(workflow)?.[1]);
+        // 20 jobs simultanés pour un compte gratuit : au-delà, des morceaux attendent une machine.
+        expect(total).toBeGreaterThan(16);
+        expect(total).toBeLessThanOrEqual(20);
     });
 });
 

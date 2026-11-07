@@ -389,7 +389,7 @@ jobs:
         run: |
           set -euo pipefail
           # ⚠ LE NOMBRE DE MORCEAUX vit ICI et nulle part ailleurs (point 9a).
-          total=16
+          total=20
           juger=oui
           raison="lancé à la demande"
           if [ "$EVENEMENT" = "push" ]; then
@@ -438,7 +438,16 @@ jobs:
     # vert : son rapport manque, et le verdict dit NON JUGÉ.
     # Point 10 (mesuré, 26 oct.) : la suite seule tient en 23 min au plus ; les
     # coupes venaient de l'étape apt, désormais bornée (3 min par essai).
-    timeout-minutes: 30
+    # Point 11 (mesuré, 7 nov., #1114) : sur les trois derniers runs complets à 16
+    # morceaux (41941988028, 42071373652, 42124702404), le plus long job a pris
+    # 25,7, 26,9 et 30,1 min ; 8 morceaux sur 48 dépassaient 25 min, et le 1/16 du
+    # dernier a été coupé à 30. Règle de Cowork : un tiers de marge au moins au-dessus
+    # du plus long mesuré, donc 41 = ⌈30,1 × 4/3⌉ ; et plus de morceaux, puisque
+    # certains dépassaient 25 min. 20 morceaux (`total`, job `decision`) : la limite
+    # de jobs simultanés d'un compte gratuit, donc aucun n'attend une machine.
+    # Projection, PAS une mesure : ~24 min au plus (30,1 × 16/20). Le plafond tient
+    # la règle même si la projection se trompe ; il se resserre sur une mesure à 20.
+    timeout-minutes: 41
 
     steps:
       - name: Checkout
