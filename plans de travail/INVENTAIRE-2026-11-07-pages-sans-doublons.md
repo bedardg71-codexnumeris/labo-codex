@@ -3,19 +3,30 @@
 Sans code. Soumis à Grégoire ; l'étape 2 attend son accord. Écrit par Claude Code (relevé des textes : un agent en
 lecture seule, vérifié par sondage ; mesure du témoin : banc WebKit). Branche `lot/en-tete-epure`, HEAD `ed5ecef3b`.
 
-**Ce qui manque** : la consigne du lot lui-même. Je n'ai reçu que les ajouts de Cowork (§ A, B et C ci-dessous). Si le
-lot a une première partie, l'inventaire n'est pas complet tant que je ne l'ai pas.
+**La consigne du lot** (reçue le 7 nov., en soirée ; maquette : toile « En-tête et accueil », esquisse 67) demande trois
+listes à l'étape 1 : les titres qui répètent leur onglet (§ 1), les accès aux bibliothèques (§ 2), les frises
+d'étapes (§ 3). S'y ajoutent les trois parties demandées par Cowork (§ A, B, C). **Deux manques** : la consigne
+s'arrête en pleine phrase (« Frises : partout où il y en a une, la frise »), et les réponses de Cowork aux cinq
+questions ci-dessous ne m'ont pas été transmises.
+
+Relevé des listes 1 à 3 : banc WebKit à 1180 px, données de la démo, chaque onglet ouvert en haut de page.
 
 ## Vue d'ensemble
 
 | Partie | Nombre | À l'étape 2 |
 |---|---|---|
+| 1. Titres qui répètent leur onglet | 16 identiques, 19 en forme longue | masqués à l'écran, gardés pour les lecteurs d'écran (question 6) |
+| 2. Accès aux bibliothèques | 10 boutons ; 3 écarts (dont la carte, refaite par la consigne) | uniformiser (question 7) |
+| 3. Frises d'étapes | 7 pages, un seul composant | la suite de la consigne manque |
 | A. Renvois d'onglet par l'ancien libellé long | 160 (Aide 76, visite 7, infobulles 7, glossaire 70) | remplacement mécanique par le libellé court |
 | B. Mentions de l'en-tête ou de l'accueil d'avant | 18 (Aide 11, glossaire 7) | **des phrases à réécrire** : tes mots (question 2) |
 | C. Pages où le témoin flottant couvre un bouton ou un champ | 20 en haut de page ; presque toutes en défilant | une place dans la page (question 1) |
 | Ambiguës | une quarantaine | **laissées telles quelles** par défaut (question 3) |
 
 ## Les questions
+
+Les questions 1 à 5 ont déjà été posées à Cowork ; ses réponses ne m'ont pas été transmises.
+
 
 1. **Le témoin (C)**. La mesure montre qu'en faisant défiler, il couvre quelque chose sur presque toutes les pages :
    déclarer une place page par page en ferait une trentaine. Deux voies :
@@ -29,6 +40,87 @@ lot a une première partie, l'inventaire n'est pas complet tant que je ne l'ai p
    Écrire « dans Suivi › Groupe » (deux mots de plus), ou « dans Groupe » ?
 5. **La fenêtre d'aide « Données démo »** (popup `accueil-donnees-demo`) n'est plus ouverte par rien depuis le retrait
    de la case : la rattacher à un « i » près d'« Explorer », ou la retirer ?
+6. **Les titres** (§ 1) : masquer les titres *identiques* seulement, ou aussi les *formes longues* ?
+7. **La bibliothèque des tampons** de Modélisation (§ 2) : dans l'uniformisation, ou laissée en icône d'outil ?
+8. **Des lignes de description à retirer** (§ 1), au-delà des deux de la carte d'alignement ?
+
+## 1. Les titres de page et leur onglet
+
+« Identique » : le titre dit le mot de l'onglet. « Forme longue » : le titre est l'ancien libellé long de l'onglet
+(la même page, nommée deux fois). « Autre » : le titre dit autre chose. Descriptions recopiées telles qu'affichées.
+
+| Section › onglet | Titre affiché | Rapport | Ligne(s) de description sous le titre |
+|---|---|---|---|
+| Cadre › Trimestre | Trimestre | identique | « Pose ici le squelette de ton trimestre : dates, cours, groupe, horaire. Tu le configures une fois, l’app s’en sert partout. » |
+| Cadre › Calendrier | Calendrier scolaire | forme longue | — |
+| Conception › Mon matériel | Apporter mon matériel | forme longue | « Ton matériel existe déjà ? Tes grilles d’évaluation sont sans doute dans Word ou dans Pages : colle-les ici. Tu verras ta grille telle que tu l’as écrite, et c’est toi qui montres à l’application ce que chaque morceau signifie. » ; puis l'avertissement 🚧 « Cet outil est en développement… » (retiré à l'étape 2, consigne) |
+| Conception › Alignement | Carte d'alignement | forme longue | « Organiser visuellement les séquences, leçons et activités du cours » ; « Évaluer ce qu'on enseigne, et enseigner ce qu'on évalue, au même niveau d'exigence. » (les deux retirées, décision de Grégoire) |
+| Conception › Productions | Productions étudiantes | forme longue | « Définir les productions du cours et leurs pondérations » |
+| Conception › Grilles | Grilles de critères | forme longue | « Créer des grilles de critères réutilisables pour évaluer différents types de productions. » |
+| Conception › Échelles | Échelles de performance | forme longue | « Créer des échelles de performance réutilisables pour évaluer les critères » |
+| Conception › Cartouches | Cartouches de rétroaction | forme longue | « Créer des cartouches de rétroaction basées sur les critères et l'échelle de performance » |
+| Conception › Pratiques | Pratiques de notation | forme longue | « Configure tes pratiques de notation (SOM, STD, SPE, DEN) » |
+| Évaluation › Préparer | Préparer et importer (h3, dessiné par `travaux-ui.js`) | forme longue | aucune ; sans copie, un état vide : « Prépare et importe les copies de tes étudiant·es » et « Dépose les copies numérisées (PDF ou images) : le processus les optimise, regroupe les pages d'une même copie et les associe à une production, prêtes à annoter. » |
+| Évaluation › Liste | Liste des évaluations | forme longue | « Vue d'ensemble des évaluations et calcul automatique des indices C et P » |
+| Évaluation › Annoter | Annoter et évaluer | forme longue | aucune (sans copie : « Aucun fichier importé. Importe des travaux depuis l'onglet « Préparer et importer ». », un état vide qui nomme l'ancien libellé) |
+| Évaluation › Exporter | Exporter les travaux (h3, `travaux-ui.js`) | forme longue | aucune ; un sous-titre h4 « Exporter des travaux » plus bas |
+| Suivi › Groupe | Suivi du groupe (avec le bouton « Régler les outils d'observation » dans le titre) | forme longue | « Observe où en est le groupe et repère qui prioriser. » |
+| Suivi › Étudiant·es | Liste des étudiant·es | forme longue | « Parcours tout le groupe et ouvre le portfolio de chaque étudiant·e. » |
+| Suivi › Présences | Saisie des présences | forme longue | « Enregistre les présences d'une séance. » |
+| Suivi › Profils | Profils individuels | forme longue | — |
+| Suivi › Interventions | Interventions | identique | « Planifie et documente tes interventions ciblées (niveaux RàI 2 et 3). » |
+| Suivi › Rencontres | Rencontres (ortho.) | autre (presque identique) | « Tiens tes rencontres individuelles ou en sous-groupe : date, participants, notes par élève, bilan. » |
+| Suivi › Animation | Animation | identique | « Outils pour animer la classe : questions flash, tirage au sort et équipes. » |
+| Labo › Observation | Outils d'observation | forme longue | (sous le titre, une carte) « Trois piliers de l'accompagnement : la structure des apprentissages (SOLO), les micro-données du contexte (ACP) et la planification des interventions… » |
+| Labo › Modélisation | aucun titre | — | — |
+| Labo › Exploration | Exploration des pratiques (h2, après un h3 « Maquettes ») | forme longue | « Décline une pratique en maquettes pour comparer ce que chaque réglage change. Les maquettes vivent ici… » |
+| Labo › Rythme | Rythme de travail | forme longue | « Durées d'évaluation par activité d'apprentissage – mesurées par le chronomètre et les évaluations enregistrées. » |
+| Labo › Études | Études | identique | « Analyse ce que révèle ta démarche pédagogique en cours. » |
+| Labo › Bilan | aucun titre visible (démo) | — | — |
+| Labo › Suivi longitudinal | Suivi longitudinal | identique | — |
+| Aide › les huit onglets | le mot de l'onglet (Commencer, Cadre, Conception, Évaluation, Suivi, Labo, Codex et archives, Référence) | identique | — |
+| Réglages › Préférences, Données, À propos | le mot de l'onglet | identique | Données : « Quatre concepts : Codex (espace de travail actif), Archives (dépôt local), Codex data (extrait pour la recherche), Partage (ressources signées entre collègues). Plus la maintenance. » |
+
+**Question 6** — « qui répète son onglet » : seulement les titres *identiques* (16 pages, dont l'Aide et les
+Réglages), ou aussi les *formes longues* (19 pages) ? Mon choix par défaut : les deux (la page est nommée deux fois
+à quelques pixels d'écart), sauf « Rencontres (ortho.) », que je garde.
+
+## 2. Les accès aux bibliothèques
+
+Mesurés à 1180 px. Le modèle (Productions, Grilles, Échelles, Cartouches, Pratiques) : « Consulter la bibliothèque »,
+`btn btn-principal`, 203 × 44 px, premier élément de la rangée de sélection (`.rangee-selection`), à 12 px du bord
+gauche du contenu, sous le titre et sa description.
+
+| Section › onglet | Libellé | Emplacement | Style | Écart au modèle |
+|---|---|---|---|---|
+| Conception › Productions, Grilles, Échelles, Cartouches, Pratiques | « Consulter la bibliothèque » | rangée de sélection, à gauche | `btn btn-principal`, 203 × 44 | — (le modèle) |
+| Conception › Alignement | « Consulter la bibliothèque » | dans la barre d'outils de la carte (`planif-selecteur-cartes`), à gauche, à 20 px | `btn btn-principal planif-btn-bibliotheque`, 203 × 44 | emplacement : la barre de la carte (l'étape 2 la refait, consigne) |
+| Cadre › Trimestre (×3 : Trimestre, Cours et services, Groupe-cours) | « Consulter la bibliothèque » | rangée de sélection de chaque accordéon, à gauche, à 33 px | `btn btn-principal`, **185** × 44 | largeur (185 contre 203) et retrait (dans l'accordéon) |
+| Labo › Modélisation | aucun libellé visible : icône seule, `aria-label` « Bibliothèque de tampons » | barre d'outils de la modélisation | bouton blanc 32 × 32, sans classe | **libellé, style et taille** ; c'est une bibliothèque de tampons d'annotation, pas d'un document de la page |
+
+Aucune autre page n'a d'accès à une bibliothèque (Mon matériel, Évaluation, Suivi, Labo hors Modélisation).
+
+**Question 7** — la bibliothèque des tampons de Modélisation entre-t-elle dans l'uniformisation (bouton
+« Consulter la bibliothèque » en mots dans une barre d'outils d'icônes) ? Mon choix par défaut : non, elle reste une
+icône d'outil ; seul Cadre › Trimestre est aligné (largeur).
+
+## 3. Les frises d'étapes
+
+Le composant commun : `js/chaine-etapes.js` (`window.ChaineEtapes`, classe `.barre-convergence`). **C'est là qu'il faut
+agir** : une règle de style y vaut pour toutes les frises.
+
+| Section › onglet | Frise | Quand elle paraît |
+|---|---|---|
+| Conception › Alignement | `#planif-chaine`, « Étapes de la carte » (le modèle, esquisse 67) | toujours |
+| Cadre › Trimestre | `#barreConvergence`, « Statut de configuration » | toujours |
+| Conception › Productions | `#chaineProduction`, « Étapes de la production » | quand une production est ouverte |
+| Conception › Grilles | `#chaineGrille`, « Étapes de la grille » ; et la chaîne de l'atelier du critère algorithmique (`atelier-algo.js`) | quand une grille est ouverte |
+| Conception › Échelles | `#chaineEchelle`, « Étapes de l'échelle » | quand une échelle est ouverte |
+| Conception › Cartouches | `#chaineCartouche`, « Étapes de la cartouche » | quand une cartouche est ouverte |
+| Conception › Pratiques | `#chainePratique`, « Étapes de la pratique » | quand une pratique est ouverte |
+
+Toutes passent par le même composant ; une option des Préférences (« Afficher les chaînes d'étapes ») les masque
+toutes. Évaluation › Préparer a des étapes numérotées dans son état vide (1, 2, 3) : ce n'est pas une frise.
 
 ## A. Renvois d'onglet par l'ancien libellé long → libellé court
 
@@ -65,6 +157,9 @@ Assistance de l'en-tête » devient « la ligne Assistance du menu » (consigne)
 | popup 589 | Préparer et importer → Préparer |
 | popup 1014 | Carte d'alignement → Alignement |
 | popup 1262, 1277 | Suivi du groupe → Groupe (fenêtre orpheline, question 5) |
+
+Hors des quatre familles, vue en chemin : l'état vide d'Annoter (`travaux-ui.js` ~1110) et celui d'Exporter
+(~1387) disent « Préparer et importer » → Préparer.
 
 ### Visite guidée (`js/accompagnement.js`) — 7
 
