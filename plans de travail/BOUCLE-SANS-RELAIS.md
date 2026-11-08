@@ -1,6 +1,6 @@
 # La boucle sans relais : traiter la file des correctifs
 
-Pour Claude Code. Essai décidé par Grégoire le 3 nov. 2026 à 6 h 52, du 3 au 10 nov. (plan validé : `PROPOSITION-2026-11-02-routine-de-travail.md`, point 2). Écrit par Cowork le 3 nov. au matin.
+Pour Claude Code. Essai décidé par Grégoire le 3 nov. 2026 à 6 h 52, du 3 au 10 nov. (plan validé : `PROPOSITION-2026-11-02-routine-de-travail.md`, point 2). Écrit par Cowork le 3 nov. au matin ; révisé le 8 nov. (une seule session écrit à la fois, § 1).
 
 Grégoire te lance une fois : « Lis plans de travail/BOUCLE-SANS-RELAIS.md et traite la file. » Ensuite, tu travailles sans lui jusqu'à la fin de la file.
 
@@ -12,7 +12,8 @@ Mesuré le 2 nov. (`MESURE-2026-11-02-routine-de-travail.md`) : jusqu'à 44 cons
 
 - `CLAUDE.md` s'applique en entier (sécurité, zones protégées, ce qui remonte jusqu'à Grégoire), sauf sa lecture obligatoire : pendant l'essai, ce document et `FILE-DES-CORRECTIFS.md` la remplacent. `OU-EN-EST-ON.md`, `RELAIS.md`, `BACKLOG.md`, `SUIVI-BUGS.md` : greps ciblés seulement.
 - Aucune autre session n'écrit dans `js/` ni ne fait tourner Playwright (`pgrep -fl playwright`). Sinon, arrête-toi et dis-le.
-- Tu travailles sur `main`. Le lot des 30 pauses vit dans sa propre copie de travail ; ne le touche pas.
+- **Une seule session écrit à la fois.** Avant de commencer, puis avant chaque entrée : le dossier est sur `main`, sans fichier suivi modifié (`git status --short`, hors `Claude outputs/`), et aucune branche n'attend sa fusion (`git branch --no-merged main` ne rend rien). Une branche qui attend, c'est un lot de la page du tri, en cours ou en vérification : ne touche ni à elle ni à `main`, écris où tu en es dans la file, et arrête-toi en le disant. La boucle reprend quand le lot est fusionné.
+- Les lots de la page du tri ne passent pas par la boucle : Grégoire les lance à part, un à la fois, chacun sur sa branche. Tu ne lis pas cette page ; ta seule source de travail est `FILE-DES-CORRECTIFS.md`.
 
 ## 2. Remplir la file
 
@@ -52,7 +53,7 @@ Dix entrées au plus par passage : la mise en ligne reste quotidienne et ton con
 Un seul moment avec Grégoire, une chose à la fois :
 1. les questions mises de côté, une à la fois, avec ta recommandation ;
 2. les mots d'écran neufs ou changés, puis les Nouvelles proposées (skill `release-et-changelog`), à valider ;
-3. son signal pour la vérification. Release par `scripts/release.mjs` (patch ou mineure, à ton jugement ; tu dis lequel en une ligne), puis le verdict du Mac (`node scripts/verdict-en-morceaux.mjs`) dans les conditions du skill `fin-de-session-labo-codex`, § 4.5 et § 4.6 : Grégoire ferme Cowork, Chrome et Safari. Push seulement si vert. Rouge : les commits séparés disent quel lot ; nomme-le et arrête-toi, sans le réparer dans la foulée ;
+3. son signal pour la vérification. Avant la release, la vérification du § 1 encore : sur `main`, aucune branche en attente (deux sessions parties du même commit ont déjà livré deux fois le même numéro, le 8 août). Release par `scripts/release.mjs` (patch ou mineure, à ton jugement ; tu dis lequel en une ligne), puis le verdict du Mac (`node scripts/verdict-en-morceaux.mjs`) dans les conditions du skill `fin-de-session-labo-codex`, § 4.5 et § 4.6 : Grégoire ferme Cowork, Chrome et Safari. Push seulement si vert. Rouge : les commits séparés disent quel lot ; nomme-le et arrête-toi, sans le réparer dans la foulée ;
 4. après le push, écris `PORTES-TERRAIN-<date>-boucle.md` (skill `portes-terrain`) : les gestes à vérifier sur l'iPad. Cowork publie la page à son passage.
 
 Si Grégoire n'est pas là, ne lance pas la vérification : écris où tu en es dans la file et arrête-toi.
