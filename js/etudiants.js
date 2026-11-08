@@ -1239,11 +1239,15 @@ function afficherListeEtudiantsConsultation() {
         if (activerRai) {
             if (assiduiteConnue && aEvaluations) {
                 html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
-                html += '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>';
             } else {
                 html += '<td class="etud-text-center">' + tiret + '</td>';
-                html += '<td class="etud-text-center">' + tiret + '</td>';
             }
+            // #1205 (8 nov. 2026) : le niveau RàI est celui du profil (`determinerNiveauRaiPedagogique`), sans autre
+            // condition — un élève au seul diagnostic, ou en non-participation, a un niveau sans note en C ni en P.
+            // Sans niveau (0, « En attente »), le tiret.
+            html += cible.niveau >= 1 && cible.niveau <= 3
+                ? '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>'
+                : '<td class="etud-text-center">' + tiret + '</td>';
         } else {
             // Cellules vides masquées — maintient le nombre de colonnes à 13
             html += '<td class="etud-text-center u-hide">' + tiret + '</td>';

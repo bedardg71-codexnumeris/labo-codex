@@ -127,7 +127,7 @@ function monter(store, opts = {}) {
         estEtudiantExclu: (e) => !!(e && e.statut && ['inactif', 'décrochage', 'abandon'].includes(e.statut)),
         libelleStatutEtudiant: (st) => ({ 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[st] || ''),
         obtenirPreference: (n) => (n === 'activerRai' ? true : null), definirPreference() {},
-        determinerNiveauRaiPedagogique: () => ({ niveau: 1, pattern: 'Stable', label: 'Universel' }), calculerCorrelationPearson: () => 0,
+        determinerNiveauRaiPedagogique: opts.niveau || (() => ({ niveau: 1, pattern: 'Stable', label: 'Universel' })), calculerCorrelationPearson: () => 0,
         calculerTousLesIndices: (da) => indices[da] || { A: 90, C: 100, P: 80, noteConstructible: true },
         calculerEtSauvegarderIndicesAssiduite: () => { compteurs.assiduite++; }, calculerEtStockerIndicesCP: () => { compteurs.cp++; },
         obtenirConfigPratiqueActive: () => ({ portfolio: { minimumCompletion: 3 } }), obtenirInterventionsEtudiant: () => [], obtenirTypePratiqueActive: () => 'standards',
@@ -210,6 +210,29 @@ describe('#749 lot 2 · A — les abandons visibles, grisés ; les statistiques 
         expect(b.lignes()[0].innerHTML).toContain('(Inactivité)');
         expect(b.lignes()[2].innerHTML).toContain('(Décrochage)');
         expect(b.lignes()[1].classList.contains('etudiant-inactif')).toBe(false);
+    });
+});
+
+// #1205 (8 nov. 2026) — la colonne RàI de la liste dit le niveau que le profil dit. Un élève au seul diagnostic
+// (aucune note en C ni en P) a un niveau au profil ; la liste écrivait « — ». Le niveau vient de la même fonction
+// (`determinerNiveauRaiPedagogique`) ; sans niveau (0, « En attente »), la cellule garde son tiret.
+describe('#1205 — la colonne RàI suit le niveau du profil', () => {
+    // #, DA, Groupe, Nom, Prénom, SA, A, C, P, Pattern, RàI, Interventions : la onzième cellule.
+    const celluleRai = (tr) => tr.innerHTML.split('</td>')[10];
+    it('seul diagnostic (C et P à 0) : « Niveau 3 », comme au profil', () => {
+        const store = storeBase();
+        store.test_groupeEtudiants = [store.test_groupeEtudiants[0]];
+        const b = monter(store, { indices: { '2000001': { A: 90, C: 0, P: 0 } }, niveau: () => ({ niveau: 3, pattern: 'Stable', label: 'Niveau 3' }) });
+        b.win.afficherListeEtudiantsConsultation();
+        expect(celluleRai(b.lignes()[0])).toContain('Niveau 3');
+    });
+    it('sans niveau (0, en attente) : le tiret', () => {
+        const store = storeBase();
+        store.test_groupeEtudiants = [store.test_groupeEtudiants[0]];
+        const b = monter(store, { indices: { '2000001': { A: 90, C: 0, P: 0 } }, niveau: () => ({ niveau: 0, pattern: 'Stable', label: 'En attente' }) });
+        b.win.afficherListeEtudiantsConsultation();
+        expect(celluleRai(b.lignes()[0])).toContain('etud-texte-gris-clair">—');   // le tiret gris, pas un badge vide
+        expect(celluleRai(b.lignes()[0])).not.toContain('Niveau');
     });
 });
 
@@ -373,4 +396,7 @@ describe('#749 lot 2 · H — le bouton d\'aide du titre survit au rendu', () =>
 //   d. `normaliserTexteRecherche` sans `normalize('NFD')` : C ROUGE. Remis.
 //   e. le rappel de toggleFiltreMinimum en fin de rendu retiré : F ROUGE. Remis.
 //   f. la garde du DA en double retirée : G ROUGE. Remis.
+// #1205, 8 nov. 2026 (module restauré par copie, `cmp` vérifié) :
+//   g. la cellule RàI remise sous `assiduiteConnue && aEvaluations` : « seul diagnostic » ROUGE.
+//   h. le badge rendu pour tout niveau, 0 compris : « sans niveau » ROUGE (badge vide au lieu du tiret).
 // ---------------------------------------------------------------------------
