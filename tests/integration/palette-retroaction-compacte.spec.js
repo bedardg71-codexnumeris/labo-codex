@@ -496,7 +496,13 @@ test.describe('La palette Rétroaction compacte', () => {
         // Avant ce lot, mesuré sur `01bbfff0` : 81,97 hors plein écran, 442,98 en plein écran.
         const hors = await hauteur();
         expect(hors).toBeGreaterThan(82);
+        const hautPalette = () => page.evaluate(() => document.getElementById('travaux-palette-eval-retro').getBoundingClientRect().top);
+        const hautHors = await hautPalette();
         await page.evaluate(() => window.travauxUI.togglePleinEcran());
+        // Le plein écran a bien eu lieu : la classe, et la palette monte (299 → 55 px à 1 180 px, mesuré le 8 nov.).
+        // Sans cela, `plein >= hors` passerait sans bascule (relecture du 8 nov.).
+        await expect(page.locator('body')).toHaveClass(/travaux-plein-ecran-actif/);
+        await expect.poll(hautPalette).toBeLessThan(hautHors - 100);
         await expect.poll(hauteur).toBeGreaterThan(443);
         const plein = await hauteur();
         // ↻ Lot 4 (33ff3840f, 7 nov.) : hors plein écran, le champ remplit déjà toute la palette — 571 px avant
