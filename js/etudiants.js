@@ -1237,15 +1237,18 @@ function afficherListeEtudiantsConsultation() {
         // Colonnes Pattern et RàI (affichées uniquement si RàI activé)
         // Toujours générer les cellules pour garder nth-child cohérent avec les checkboxes colonnes
         if (activerRai) {
+            // Le pattern garde sa condition : en non-participation, le profil dit « Non-participation », la liste
+            // « — » (relecture neuve de #1205, 8 nov. 2026 ; aucun cas vécu, laissé tel quel).
             if (assiduiteConnue && aEvaluations) {
                 html += '<td class="etud-text-center"><span class="' + badgePattern.classe + '">' + badgePattern.label + '</span></td>';
             } else {
                 html += '<td class="etud-text-center">' + tiret + '</td>';
             }
-            // #1205 (8 nov. 2026) : le niveau RàI est celui du profil (`determinerNiveauRaiPedagogique`), sans autre
-            // condition — un élève au seul diagnostic, ou en non-participation, a un niveau sans note en C ni en P.
-            // Sans niveau (0, « En attente »), le tiret.
-            html += cible.niveau >= 1 && cible.niveau <= 3
+            // #1205 (8 nov. 2026) : le niveau RàI est celui du profil (`determinerNiveauRaiPedagogique`), aux mêmes
+            // conditions que sa carte RàI — un élève au seul diagnostic, ou en non-participation, a un niveau sans note
+            // en C ni en P. Sans niveau (0, « En attente »), ou « En attente de données » au profil, le tiret.
+            const enAttenteDeDonnees = typeof aucuneDonneeDeSuivi === 'function' && aucuneDonneeDeSuivi(etudiant.da, indices);
+            html += !enAttenteDeDonnees && cible.niveau >= 1 && cible.niveau <= 3
                 ? '<td class="etud-text-center"><span class="' + badgeRai.classe + '">' + badgeRai.label + '</span></td>'
                 : '<td class="etud-text-center">' + tiret + '</td>';
         } else {

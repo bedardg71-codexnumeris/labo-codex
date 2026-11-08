@@ -127,6 +127,7 @@ function monter(store, opts = {}) {
         estEtudiantExclu: (e) => !!(e && e.statut && ['inactif', 'décrochage', 'abandon'].includes(e.statut)),
         libelleStatutEtudiant: (st) => ({ 'inactif': 'Inactivité', 'décrochage': 'Décrochage', 'abandon': 'Abandon' }[st] || ''),
         obtenirPreference: (n) => (n === 'activerRai' ? true : null), definirPreference() {},
+        aucuneDonneeDeSuivi: opts.aucuneDonnee || (() => false),
         determinerNiveauRaiPedagogique: opts.niveau || (() => ({ niveau: 1, pattern: 'Stable', label: 'Universel' })), calculerCorrelationPearson: () => 0,
         calculerTousLesIndices: (da) => indices[da] || { A: 90, C: 100, P: 80, noteConstructible: true },
         calculerEtSauvegarderIndicesAssiduite: () => { compteurs.assiduite++; }, calculerEtStockerIndicesCP: () => { compteurs.cp++; },
@@ -233,6 +234,14 @@ describe('#1205 — la colonne RàI suit le niveau du profil', () => {
         b.win.afficherListeEtudiantsConsultation();
         expect(celluleRai(b.lignes()[0])).toContain('etud-texte-gris-clair">—');   // le tiret gris, pas un badge vide
         expect(celluleRai(b.lignes()[0])).not.toContain('Niveau');
+    });
+    it('« En attente de données » au profil (aucune présence, aucune copie) : le tiret, même avec un niveau fixé par un diagnostic', () => {
+        const store = storeBase();
+        store.test_groupeEtudiants = [store.test_groupeEtudiants[0]];
+        const b = monter(store, { indices: { '2000001': { A: null, C: 0, P: 0 } }, niveau: () => ({ niveau: 3, pattern: 'Stable', label: 'Niveau 3' }),
+            aucuneDonnee: (da, ind) => da === '2000001' && ind.A === null });
+        b.win.afficherListeEtudiantsConsultation();
+        expect(celluleRai(b.lignes()[0])).toContain('etud-texte-gris-clair">—');
     });
 });
 
@@ -399,4 +408,5 @@ describe('#749 lot 2 · H — le bouton d\'aide du titre survit au rendu', () =>
 // #1205, 8 nov. 2026 (module restauré par copie, `cmp` vérifié) :
 //   g. la cellule RàI remise sous `assiduiteConnue && aEvaluations` : « seul diagnostic » ROUGE.
 //   h. le badge rendu pour tout niveau, 0 compris : « sans niveau » ROUGE (badge vide au lieu du tiret).
+//   i. la garde `aucuneDonneeDeSuivi` retirée de la liste : « En attente de données » ROUGE.
 // ---------------------------------------------------------------------------

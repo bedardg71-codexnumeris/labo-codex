@@ -1922,6 +1922,22 @@ const BADGE_DU_PATTERN = {
  * @param {number} [ligneSimulee] - 0-100 : ce que donnerait ce seuil s'il était posé dans l'échelle (la sensibilité du réglage)
  * @returns {Object} - Modèle de la Réponse à l'intervention (RàI) avec pattern et descriptif ; `motif` et `noteAffichee` : ce qui le fixe
  */
+/**
+ * « En attente de données » au suivi d'un élève : ni assiduité (inconnue ou 0), ni copie, ni P.
+ * Une complétion INCONNUE (`null`, sans pratique assignée) se juge sur les copies elles-mêmes (lot N1b).
+ * #1205 (8 nov. 2026) : une seule règle, lue par la carte RàI du profil et par la colonne RàI de la liste —
+ * sans elle, la liste disait un niveau là où le profil dit « En attente de données ».
+ * @param {string} da
+ * @param {{A:(number|null), C:(number|null), P:number}} indices
+ * @returns {boolean}
+ */
+function aucuneDonneeDeSuivi(da, indices) {
+    const completionVide = (indices.C === null)
+        ? calculerIndicesNDerniersArtefacts(da, true).nbArtefacts === 0
+        : indices.C === 0;
+    return (indices.A === null || indices.A === 0) && completionVide && indices.P === 0;
+}
+
 function determinerNiveauRaiPedagogique(da, ligneSimulee) {
     // Récupérer les indices
     const indices = calculerTousLesIndices(da);
@@ -2414,6 +2430,7 @@ window.calculerProgressionEleve = calculerProgressionEleve;
 window.identifierDefiSpecifique = identifierDefiSpecifique;
 window.identifierPatternActuel = identifierPatternActuel;
 window.determinerNiveauRaiPedagogique = determinerNiveauRaiPedagogique;
+window.aucuneDonneeDeSuivi = aucuneDonneeDeSuivi;
 window.classerNiveauAuCritere = classerNiveauAuCritere;         // lot 3 des seuils : la règle nue
 window.repartitionDuGroupe = repartitionDuGroupe;               // la carte « La réponse du groupe »
 window.ceQueTesSeuilsDonnent = ceQueTesSeuilsDonnent;           // Labo › Outils d'observation
