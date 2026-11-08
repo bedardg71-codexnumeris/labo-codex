@@ -69,7 +69,6 @@ const TOLEREES = {
     "--danger-500": 1,
     "--erreur": 1,
     "--fond-carte": 2,
-    "--fond-principal": 1,
     "--fond-surface": 2,
     "--fond-surface-clair": 1,
     "--fond-survol": 1,

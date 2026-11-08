@@ -128,8 +128,18 @@ for (const clair of [false, true]) {
 const CAPTURES = process.env.CAPTURES_LOT4;
 const PREFIXE = process.env.PREFIXE_LOT4 || 'apres';
 const PAGES = [
-    ['evaluations', 'evaluations-importer', 'evaluation-preparer']
-];
+    ['evaluations', 'evaluations-importer', 'evaluation-preparer'],
+    ['evaluations', 'evaluations-liste', 'evaluation-liste'],
+    ['calendrier', 'calendrier-trimestre', 'cadre-trimestre'],
+    ['conception', 'conception-productions', 'conception-productions'],
+    ['suivi', 'suivi-saisie', 'suivi-presences'],
+    ['suivi', 'suivi-groupe', 'suivi-groupe'],
+    ['labo', 'labo-accompagnement', 'labo-observation'],
+    ['labo', 'labo-rythme', 'labo-rythme'],
+    ['reglages', 'reglages-donnees', 'reglages-donnees'],
+    ['aide', 'aide-codex-archives', 'aide-codex-archives'],
+    ['accueil', null, 'accueil']
+].filter(([, ss]) => !process.env.PAGES_LOT4 || process.env.PAGES_LOT4.split(',').includes(ss || 'accueil'));
 for (const largeur of [1180, 820]) {
     for (const clair of [false, true]) {
         test(`captures · ${largeur} px, ${clair ? 'clair' : 'sombre'}`, async ({ page }) => {
@@ -144,4 +154,38 @@ for (const largeur of [1180, 820]) {
             }
         });
     }
+}
+
+// ─── Toutes les pages : le panneau commun ne dessine plus rien, le texte sur la page tient 4,5:1 ──────────
+const TOUTES = [
+    ['accueil', null],
+    ...['conception-materiel', 'conception-carte', 'conception-productions', 'conception-grille-criteres', 'conception-echelle-performance',
+        'conception-retroactions', 'conception-pratiques-notation'].map((ss) => ['conception', ss]),
+    ...['calendrier-trimestre', 'calendrier-vue'].map((ss) => ['calendrier', ss]),
+    ...['suivi-groupe', 'suivi-liste', 'suivi-saisie', 'suivi-profil', 'suivi-interventions', 'suivi-rencontres', 'suivi-animation'].map((ss) => ['suivi', ss]),
+    ...['evaluations-liste', 'evaluations-importer', 'evaluations-annoter', 'evaluations-exporter'].map((ss) => ['evaluations', ss]),
+    ...['labo-accompagnement', 'labo-modelisation', 'labo-comparateur', 'labo-rythme', 'labo-etudes', 'labo-bilan', 'labo-longitudinal'].map((ss) => ['labo', ss]),
+    ...['reglages-preferences', 'reglages-donnees', 'reglages-a-propos'].map((ss) => ['reglages', ss]),
+    ...['aide-commencer', 'aide-cadre', 'aide-conception', 'aide-evaluation', 'aide-suivi', 'aide-labo', 'aide-codex-archives', 'aide-reference'].map((ss) => ['aide', ss])
+];
+for (const clair of [false, true]) {
+    test(`les ${TOUTES.length} pages (${clair ? 'clair' : 'sombre'}) : aucun panneau autour du contenu, le texte posé sur la page à 4,5:1 au moins`, async ({ page }) => {
+        test.setTimeout(240000);
+        await ouvrir(page, 1180, 900);
+        const echecs = [];
+        for (const [s, ss] of TOUTES) {
+            await aller(page, s, ss, clair);
+            await attendreRepos(page);
+            const racine = ss ? `#${ss}` : '#section-accueil';
+            const panneau = await page.evaluate((racine) => {
+                const el = document.querySelector(racine);
+                return ['.conteneur', '.contenu', '.section.active'].map((sel) => document.querySelector(sel)).concat(el)
+                    .filter((e) => { if (!e) return false; const cs = getComputedStyle(e); return !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor) || cs.boxShadow !== 'none'; })
+                    .map((e) => `${e.tagName.toLowerCase()}.${[...e.classList].join('.')}`);
+            }, racine);
+            if (panneau.length) echecs.push(`${racine} · panneau : ${panneau.join(', ')}`);
+            for (const t of await textesSousLeSeuil(page, racine)) echecs.push(`${racine} · ${t}`);
+        }
+        expect(echecs).toEqual([]);
+    });
 }

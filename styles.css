@@ -592,7 +592,7 @@ body[data-mode="anonymisation"]:not(.mode-clair) {
     /* Alertes — fond plus visible sur clair */
     --alerte-fond-attention: rgba(160, 120, 48, 0.12);
     --alerte-bordure-attention: #a07830;
-    --alerte-texte-attention: #7a5a20;
+    --alerte-texte-attention: #765720;   /* 4.62:1 sur sa teinte posée sur --surface-page (lot 4, 7 nov. 2026 ; #7a5a20 y faisait 4.40) */
     /* #1162 — en clair, le blanc gardé sur l'orange foncé du texte d'attention : 6,3 pour 1 (4,0 sur #a07830). */
     --pastille-attention-fond: var(--alerte-texte-attention);
     --pastille-attention-texte: #fff;
@@ -1018,15 +1018,12 @@ h1, h2, h3, h4 {
    CONTENEUR PRINCIPAL
    =============================== */
 
+/* Lot 4 « Les pages sans emboîtement » (7 nov. 2026, esquisse 68) : le contenu pose sur le fond de la page.
+   Le conteneur, le contenu et la section (.section.active) ne dessinent plus de panneau : ni fond, ni bordure,
+   ni ombre. Ils gardent leurs marges. Au plus un niveau de carte (.carte) dans la page. */
 .conteneur {
     max-width: 95%;  /* Adaptatif au lieu de 1400px fixe */
     margin: 0 auto;
-    background: var(--surface-section, #142428);
-    border: 1px solid rgba(106, 172, 184, 0.1);
-    border-radius: var(--radius-grand);
-    box-shadow:
-        var(--shadow-normal),
-        inset 0 1px 3px rgba(255, 255, 255, 0.04);
     overflow: hidden;
 }
 
@@ -2015,9 +2012,7 @@ body.mode-clair {
 
 .section.active {
     display: block;
-    background: var(--surface-section, #142428);
     padding: var(--espacement-moyen);
-    border-radius: var(--radius-grand);
     animation: apparition 0.3s ease;
 }
 
@@ -2032,24 +2027,11 @@ body.mode-clair {
 
 /* Compensation padding pour #suivi-groupe : sa balise <div class="sous-section">
    est physiquement en-dehors de #section-suivi (DOM orphelin acté lors de la
-   migration du 27 mai 2026), donc elle n'hérite pas du padding/background fournis
-   par .section.active. On les applique directement ici. À retirer si on déplace
+   migration du 27 mai 2026), donc elle n'hérite pas du padding fourni
+   par .section.active. On l'applique directement ici. À retirer si on déplace
    un jour le HTML dans #section-suivi physiquement. */
 #suivi-groupe.sous-section.active {
-    background: var(--surface-section, #142428);
     padding: var(--espacement-moyen);
-    border-radius: var(--radius-grand);
-}
-
-/* Lot 4 « Les pages sans emboîtement » (7 nov. 2026, esquisse 68) : le contenu pose sur le fond de la page.
-   Le panneau commun (.conteneur, .contenu, .section.active) perd son fond, sa bordure et son ombre ; ses
-   marges restent, le contenu ne bouge pas. Première page : Évaluation › Préparer. */
-.conteneur:has(#evaluations-importer.active),
-.contenu:has(#evaluations-importer.active),
-.section.active:has(#evaluations-importer.active) {
-    background: transparent;
-    border-color: transparent;
-    box-shadow: none;
 }
 
 @keyframes apparition {
@@ -2535,6 +2517,19 @@ body.mode-clair {
 }
 .mode-clair .option-accompagnement-guide-btn img.btn-inline-icon {
     filter: brightness(0) invert(1);
+}
+/* Lot 4 (7 nov. 2026) : hors d'un en-tête bleu marine (Conception › Pratiques), le bouton pose sur le fond de la
+   page. Le blanc ci-dessus y était illisible (1,2:1 ; 1:1 sur l'ancien panneau blanc) : texte et icône sombres. */
+.mode-clair .option-accompagnement-guide-btn:not(.carte-titre-bleu *) {
+    background: var(--surface-carte);
+    border-color: var(--bordure-claire);
+    color: var(--texte-principal);
+}
+.mode-clair .option-accompagnement-guide-btn:not(.carte-titre-bleu *):hover {
+    background: var(--surface-element);
+}
+.mode-clair .option-accompagnement-guide-btn:not(.carte-titre-bleu *) img.btn-inline-icon {
+    filter: none;
 }
 
 /* ============================================
@@ -7409,8 +7404,10 @@ body.chaines-etapes-masquees .barre-convergence {
         padding: 0;
     }
 
+    /* Sous 1024 px, le conteneur prend toute la largeur : à 95 % sans marge auto, il collait à gauche et
+       laissait 5 % vides à droite (le contenu décentré, visible depuis que le panneau ne le cadre plus). */
     .conteneur {
-        border-radius: 0;
+        max-width: 100%;
         margin: 0;
     }
 
@@ -17425,17 +17422,12 @@ tr.ligne-import-ecartee td {
 /* Quand la visionneuse est ouverte, supprimer le padding de la section */
 #section-evaluations.section.active.visionneuse-ouverte {
     padding: 0;
-    border-radius: 0;
-    background: none;
 }
 /* La visionneuse prend toute la largeur (consigne du 1er nov. 2026, partie A) : les 95 % du conteneur coûtaient 59 pt à
    la barre sur l'iPad, ce qui séparait les ébauches (dessinées à 1180) de la barre réelle (1121). `.sous-section.active` :
    la classe `visionneuse-ouverte` reste posée sur la section quand on passe à la Liste, qui garde sa largeur. */
 .conteneur:has(#evaluations-annoter.active .travaux-visionneuse-layout) {
     max-width: 100%;
-    border-left: none;
-    border-right: none;
-    border-radius: 0;
 }
 
 /* Remplit l'écran une fois la page défilée (3 nov. 2026) : `--visionneuse-hors-zone` est ce qui reste à l'écran autour
@@ -26025,12 +26017,6 @@ body.mode-clair {
     background: var(--bleu-fonce);
 }
 
-/* Conteneur — bordure ultra-subtile */
-.mode-clair .conteneur {
-    border: 1px solid rgba(3,46,92,0.04);
-    box-shadow: var(--shadow-normal);
-}
-
 /* Cartes — bordure ultra-subtile, pas de bordure gauche colorée */
 .mode-clair .carte {
     border: 1px solid rgba(3,46,92,0.04);
@@ -28667,11 +28653,6 @@ body.mode-clair {
 }
 
 /* Lot 3 — Raffinements frontend-design */
-
-/* Transition header → contenu : ombre inset douce pour adoucir la coupure */
-.mode-clair .contenu {
-    box-shadow: inset 0 4px 12px rgba(3, 46, 92, 0.06);
-}
 
 /* ===============================
    MODAL EDITION RETROACTIONS (tampons + erreurs FR)
