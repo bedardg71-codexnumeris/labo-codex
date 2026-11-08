@@ -147,7 +147,8 @@ describe('#850 · le repère « vu » se lit et s\'écrit là où db le garde', 
 // #859 (8 nov. 2026) — ouvrir les nouveautés depuis le bandeau « au chargement » écrit le repère « build vu » UNE
 // fois : `afficherModalNouveautes` l'écrit, et la fermeture du bandeau qui suit ne le réécrit plus (deux écrivains
 // d'une même clé dans un même geste ; la seconde valeur gagnait si elles divergeaient). Le bandeau part quand même.
-// Rouge à HEAD (deux écritures) ; break-test (module restauré par copie, `cmp` vérifié) : la fermeture retirée → ROUGE.
+// Rouge à HEAD (deux écritures) ; break-tests (module restauré par copie, `cmp` vérifié) : la fermeture retirée → ROUGE ;
+// le `mettreAJourPastille()` final retiré → ROUGE.
 describe('#859 · le repère « build vu » s\'écrit une seule fois', () => {
     it('« Voir les nouveautés » depuis le bandeau : une écriture, le bon build, le bandeau fermé', async () => {
         const h = monter({ version: { beta: '9.9.0', build: '0101-0900' }, idb: { 'monitorage-build-vu': '0807-1529', 'monitorage-version-vue': '9.9.0' } });
@@ -156,10 +157,18 @@ describe('#859 · le repère « build vu » s\'écrit une seule fois', () => {
         const ecritures = [];
         const setSync = h.ctx.db.setSync;
         h.ctx.db.setSync = (k, v) => { if (k === 'monitorage-build-vu') ecritures.push(v); setSync(k, v); };
+        // La pastille (relecture neuve) : ce geste est désormais seul à la remettre à jour.
+        const classes = new Set();
+        const pastille = { textContent: '', appendChild() {}, classList: { toggle: (c, f) => (f ? classes.add(c) : classes.delete(c)) } };
+        h.ctx.document.querySelectorAll = (sel) => (sel === '.pastille-nouveautes' ? [pastille] : []);
+        h.ctx.document.createElement = () => ({ className: '', textContent: '' });
+        h.run('mettreAJourPastille()');
+        expect(classes.has('pastille-active')).toBe(true);
         h.run('afficherModalNouveautes()');
         expect(ecritures).toEqual(['0101-0900']);
         expect(bandeauVisible(h)).toBe(false);
         expect(h.run('verifierNouveautes().aDesNouveautes')).toBe(false);
+        expect(classes.has('pastille-active')).toBe(false);
     });
 
     it('fermer le bandeau seul (sans ouvrir les nouveautés) écrit toujours le repère', async () => {
