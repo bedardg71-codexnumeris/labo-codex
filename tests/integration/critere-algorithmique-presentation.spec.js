@@ -120,7 +120,9 @@ test('1 440 px · trois colonnes, la chaîne et ses cinq états, une seule étap
     const bn = atelier(page, 'CN').locator('.atelier-algo-chaine .bc-etape');
     await expect(bn.locator('.bc-info')).toHaveText(['à nommer', '0 code', 'pénalité proportionnelle', '0 table', '0 texte']);
     expect(await bn.evaluateAll((els) => els.map((b) => b.classList.contains('bc-complet')))).toEqual([false, false, false, true, false]);
-    expect(await bn.evaluateAll((els) => els.map((b) => b.querySelector('.u-lecteur-ecran').textContent))).toEqual(
+    // Lot 3 (1cd72053f, frise compacte) : « 0 code » montre « 0 » ; le mot est un .u-lecteur-ecran DANS l'info.
+    // L'état est l'enfant direct du bouton (`:scope >`, comme chaine-etapes.js le pose).
+    expect(await bn.evaluateAll((els) => els.map((b) => b.querySelector(':scope > .u-lecteur-ecran').textContent))).toEqual(
         [', à régler', ', à régler', ', à régler', ', réglée', ', à régler, ouverte']);
     // La case « Afficher les chaînes d'étapes » masque aussi celle-ci ; les en-têtes restent.
     await page.evaluate(() => window.ChaineEtapes.afficherToutes(false));
