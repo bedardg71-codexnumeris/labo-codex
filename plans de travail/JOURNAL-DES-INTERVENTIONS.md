@@ -35,3 +35,5 @@ Point de comparaison (`MESURE-2026-11-02-routine-de-travail.md`) : du 19 au 29 o
 | 2026-11-05 | 15 h 56 | Claude Code | Signal pour la vérification de la 1.235.0 : fermer Cowork, Chrome et Safari avant le verdict du Mac | machine |
 | 2026-11-08 | 16 h 27 | Claude Code | Fin du passage : trois questions mises de côté (stock des présences des inactifs et chemin du codex ; texte de l'aide « C et P » ; export recherche) | données · didactique |
 | 2026-11-08 | 16 h 40 | Claude Code | Chemin du codex pour mesurer le stock de #1196, puis décision : le stock reste | données |
+| 2026-11-08 | 16 h 45 | Claude Code | Export recherche et copie non recevable : la décision du 4 nov. vaut-elle aussi ? (oui, #1249) | didactique |
+| 2026-11-08 | 16 h 44 | Claude Code | Aide « C et P » : une production sans copie évaluée compte-t-elle manquante dans C ? (non) | didactique |
