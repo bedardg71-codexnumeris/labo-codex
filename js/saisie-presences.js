@@ -1067,12 +1067,18 @@ function ecrirePresencesSeance(dateStr, options) {
     calculerEtSauvegarderIndicesAssiduite();
     _rafraichirEtatSeance(dateStr);
 
-    // Le Suivi du groupe, s'il est affiché, suit.
-    const sousSectionGroupe = document.getElementById('suivi-groupe');
-    if (sousSectionGroupe && sousSectionGroupe.classList.contains('active')
-        && typeof chargerTableauBordApercu === 'function') {
-        setTimeout(() => chargerTableauBordApercu(), 300);
-    }
+    // « Le graphique suit les présences » (8 nov. 2026) : la séance est recapturée, et les captures qui la
+    // suivent avec elle (snapshots.js). Le Suivi du groupe, s'il est affiché, suit — une fois les captures
+    // écrites, pour que son graphique montre la séance.
+    const rafraichirSuiviGroupe = () => {
+        const sousSectionGroupe = document.getElementById('suivi-groupe');
+        if (sousSectionGroupe && sousSectionGroupe.classList.contains('active')
+            && typeof chargerTableauBordApercu === 'function') {
+            chargerTableauBordApercu();
+        }
+    };
+    const recapture = typeof recapturerDepuisSeance === 'function' ? recapturerDepuisSeance(dateStr) : Promise.resolve();
+    recapture.then(rafraichirSuiviGroupe, rafraichirSuiviGroupe);
     return true;
 }
 
@@ -2455,6 +2461,9 @@ window.ajouterPresencesIntervention = function(entrees) {
         }
     }
 
+    // « Le graphique suit les présences » (8 nov. 2026) : pas de recapture ici. Une présence RàI n'entre
+    // dans l'assiduité qu'à une séance du cours déjà saisie (`construireDatesSaisiesGroupe`), où l'élève a
+    // déjà sa fiche — et un doublon (même élève, même date, même cours) n'est pas ajouté.
     if (ajoutees > 0) {
         db.setSync(clePresences, presences);
         // Recalculer les indices d'assiduité (les présences facultatives comptent)

@@ -1269,7 +1269,9 @@ function creerGraphiqueGroupeSpaghettiACP(canvasId, indice = 'A') {
         const snapshots = obtenirSnapshotsHebdomadaires();
         if (snapshots.length === 0) {
             // Fraîche installation — message utilisateur dans le canvas suffit, pas de warn console
-            afficherMessageAttente(canvas, 'Aucune donnée disponible', 'Capturez des snapshots hebdomadaires.');
+            // « Le graphique suit les présences » (8 nov. 2026) : une séance se capture quand on enregistre ses
+            // présences ; il n'y a plus de capture à faire soi-même. Le canevas vide fait 300 px : la phrase reste courte.
+            afficherMessageAttente(canvas, 'Aucune donnée disponible', 'Saisis les présences d\'une séance.');
             return null;
         }
 

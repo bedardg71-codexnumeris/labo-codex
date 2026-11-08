@@ -388,6 +388,76 @@ async function verifierEtCapturerSnapshotHebdomadaire() {
 }
 
 /**
+ * « LE GRAPHIQUE SUIT LES PRÉSENCES » (8 nov. 2026, règle validée par Grégoire).
+ *
+ * Appelée par l'écrivain des présences (`ecrirePresencesSeance`, saisie-presences.js) après chaque
+ * enregistrement d'une séance D : recapture D, puis chacune des séances DÉJÀ capturées après D — les
+ * indices sont cumulatifs, une correction en semaine 3 change les captures suivantes. Les captures
+ * d'avant D ne bougent pas ; une séance jamais saisie ne reçoit pas de capture ici. Une date future n'est
+ * jamais capturée : `capturerSnapshotSeance` la refuse, et aucune capture ne la suit.
+ *
+ * Les appels passent dans une file : deux enregistrements rapprochés ne se recalculent pas en même temps.
+ * Une capture se calcule sur le groupe-cours ACTIF (élèves, travaux, clé) : si on change de groupe-cours
+ * avant ou pendant la chaîne, elle s'arrête plutôt que d'écrire les séances de l'un chez l'autre. La séance
+ * manquante se rattrape à la saisie suivante ou par « Recalculer les captures ».
+ *
+ * ⚠ TARIR N'EST PAS RÉPARER : les séances enregistrées avant cette règle et jamais capturées restent
+ * absentes du graphique jusqu'à « Recalculer les captures » (Réglages › Données). Rien n'est recalculé
+ * d'office chez les gens.
+ *
+ * La vérification à l'ouverture (`verifierEtCapturerSnapshotHebdomadaire`) reste : c'est la seule capture
+ * automatique d'un groupe dont on saisit les évaluations sans prendre les présences dans l'application.
+ *
+ * @param {string} dateSeance - D, au format 'YYYY-MM-DD'
+ * @returns {Promise<string[]>} les dates effectivement (re)capturées, dans l'ordre
+ */
+let _fileRecapture = Promise.resolve();
+
+function recapturerDepuisSeance(dateSeance) {
+    const cleDuGroupe = cleSnapshots();   // le groupe-cours de l'enregistrement, lu à l'appel
+    const tache = _fileRecapture.then(() => {}, () => {}).then(() => _recapturerDepuisSeance(dateSeance, cleDuGroupe));
+    _fileRecapture = tache;
+    return tache;
+}
+
+async function _recapturerDepuisSeance(dateSeance, cleDuGroupe) {
+    const recapturees = [];
+    const memeGroupe = () => !!cleDuGroupe && cleSnapshots() === cleDuGroupe;
+    try {
+        if (!dateSeance || !memeGroupe()) return recapturees;
+
+        const stock = await db.get(cleDuGroupe, null);
+        const suivantes = (stock && Array.isArray(stock.hebdomadaires) ? stock.hebdomadaires : [])
+            .filter(s => s && s.dateSeance && s.dateSeance > dateSeance)
+            .sort((a, b) => a.dateSeance.localeCompare(b.dateSeance));
+
+        // Le numéro de semaine vient des séances du groupe-cours actif (même patron que la vérification
+        // à l'ouverture et la reconstruction) ; une séance déjà capturée garde le sien à défaut.
+        const seancesCompletes = typeof obtenirSeancesCompletes === 'function' ? obtenirSeancesCompletes() : null;
+        const numeroDe = (date, repli) => {
+            const seances = seancesCompletes && seancesCompletes[date];
+            return (seances && seances[0] && seances[0].numeroSemaine) || repli || null;
+        };
+
+        // Les évaluations, lues une fois pour toute la chaîne (comme la reconstruction). Jamais `null` : la
+        // capture ne relit alors rien avant d'écrire, et sa clé est celle que la garde vient de vérifier.
+        const evaluationsCache = (await db.get(cle('evaluationsSauvegardees'))) || [];
+
+        const aRefaire = [{ date: dateSeance, numero: numeroDe(dateSeance, null) }]
+            .concat(suivantes.map(s => ({ date: s.dateSeance, numero: numeroDe(s.dateSeance, s.numeroSemaine || s.numSemaine) })));
+        for (const { date, numero } of aRefaire) {
+            if (!memeGroupe()) break;   // juste avant : la capture calcule et lit sa clé dans le même tour
+            if (await capturerSnapshotSeance(date, evaluationsCache, numero ? { numeroSemaine: numero } : {})) {
+                recapturees.push(date);
+            }
+        }
+    } catch (error) {
+        console.warn('[Snapshots] Recapture après les présences interrompue :', error.message || error);
+    }
+    return recapturees;
+}
+
+/**
  * ✨ REFONTE (Beta 93) : Capture un snapshot pour UNE séance spécifique
  * @param {string} dateSeance - Date de la séance au format 'YYYY-MM-DD'
  * @param {Array} evaluationsCacheParam - Cache optionnel des évaluations (pour éviter QuotaExceededError)
@@ -662,7 +732,17 @@ async function capturerSnapshotSeance(dateSeance, evaluationsCacheParam = null, 
             if (idxExistant >= 0) {
                 snapshots.hebdomadaires[idxExistant] = snapshot;
             } else {
-                snapshots.hebdomadaires.push(snapshot);
+                // « Le graphique suit les présences » (8 nov. 2026) : une séance saisie en retard s'insère à
+                // sa place chronologique — les lecteurs trient par semaine seulement, et la « dernière capture »
+                // de Réglages est le dernier élément.
+                const idxSuivante = snapshots.hebdomadaires.findIndex(s =>
+                    String(s.dateSeance || s.dateDebut || '') > dateSeance
+                );
+                if (idxSuivante >= 0) {
+                    snapshots.hebdomadaires.splice(idxSuivante, 0, snapshot);
+                } else {
+                    snapshots.hebdomadaires.push(snapshot);
+                }
             }
             snapshots.metadata.dernierSnapshotHebdo = snapshot.timestamp;
 
@@ -1197,6 +1277,7 @@ function confirmerNettoyageSnapshots() {
 window.initialiserModuleSnapshots = initialiserModuleSnapshots;
 window.verifierEtCapturerSnapshotHebdomadaire = verifierEtCapturerSnapshotHebdomadaire;
 window.capturerSnapshotSeance = capturerSnapshotSeance;
+window.recapturerDepuisSeance = recapturerDepuisSeance;
 window.capturerSnapshotIntervention = capturerSnapshotIntervention;
 window.mettreAJourSnapshotIntervention = mettreAJourSnapshotIntervention;
 window.reconstruireSnapshotsHistoriques = reconstruireSnapshotsHistoriques;

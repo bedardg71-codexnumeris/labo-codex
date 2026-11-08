@@ -315,10 +315,15 @@ describe('Les gestes décrits sont ceux du code', () => {
         }
     });
 
-    it('les captures sont hebdomadaires', () => {
+    // ↻ « Le graphique suit les présences » (8 nov. 2026) : l'enregistrement des présences d'une séance la capture
+    // désormais (`recapturerDepuisSeance`, appelée par `ecrirePresencesSeance`) ; la vérification hebdomadaire à
+    // l'ouverture reste. L'Aide dit les deux.
+    it('les captures : à chaque séance enregistrée, et une fois par semaine à l\'ouverture', () => {
         expect(lire('js/snapshots.js')).toMatch(/snapshots\.hebdomadaires\.some\(s => s\.numSemaine === numSemaineActuelle\)/);
-        expect(AIDE).not.toMatch(/À chaque saisie de présences, une capture|à chaque séance, créant un historique/);
-        expect(AIDE).toContain('une fois par semaine');
+        expect(lire('js/saisie-presences.js')).toMatch(/recapturerDepuisSeance\(dateStr\)/);
+        expect(AIDE).not.toMatch(/à chaque séance, créant un historique/);
+        expect(AIDE).toContain('capture les indices à chaque séance dont tu enregistres les présences');
+        expect(AIDE).toContain('une fois par semaine, à l\'ouverture');
     });
 
     it('partager : un .lcz signé ; changer d\'appareil : le codex', () => {
