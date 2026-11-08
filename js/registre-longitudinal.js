@@ -758,17 +758,21 @@
      */
     function rendreEvaluation(liste, ev, echelles, eleve, pseudos, evaluationsDuDossier) {
         const echelle = echelles[ev.echelleId] || null;
-        const criteres = (Array.isArray(ev.criteres) ? ev.criteres : []).filter(Boolean);
+        // #1228 (décision de Grégoire, 4 nov. 2026) : une copie non recevable montre son libellé à la place de sa note et
+        // de ses niveaux, comme le formulaire, la Liste et le PDF (28 oct.) ; ses niveaux par critère ne se lisent pas ici.
+        const nonRecevable = (typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(ev)) || null;
+        const criteres = nonRecevable ? [] : (Array.isArray(ev.criteres) ? ev.criteres : []).filter(Boolean);
         const depliable = criteres.length > 0 || !!ev.retroactionFinale;
         const tuile = poser(liste, depliable ? 'details' : 'div', 'rl-tuile');
         const entete = poser(tuile, depliable ? 'summary' : 'div', 'rl-tuile-entete' + (depliable ? ' rl-cible' : ''));
         poser(entete, 'span', 'rl-nom', String(ev.productionNom || MOTS.productionSansNom));
         if (ev.dateEvaluation) poser(entete, 'span', 'rl-meta', formaterDate(ev.dateEvaluation));
         const note = [];
-        if (ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '') note.push(MOTS.noteFinale + ' : ' + formaterNote(ev.noteFinale));
+        if (nonRecevable) note.push(nonRecevable);
+        else if (ev.noteFinale !== undefined && ev.noteFinale !== null && ev.noteFinale !== '') note.push(MOTS.noteFinale + ' : ' + formaterNote(ev.noteFinale));
         // #941 lot S1 (décision A) — une copie en points : ni niveau général, ni niveau par critère.
         const enPoints = typeof evaluationEnPoints === 'function' && evaluationEnPoints(ev);
-        if (ev.niveauFinal && !enPoints) note.push(libelleNiveau(ev.niveauFinal, echelle));
+        if (ev.niveauFinal && !enPoints && !nonRecevable) note.push(libelleNiveau(ev.niveauFinal, echelle));
         if (note.length) poser(entete, 'span', 'rl-tuile-note', note.join(' · '));
         const contexte = [];
         if (ev.grilleNom) contexte.push(String(ev.grilleNom));

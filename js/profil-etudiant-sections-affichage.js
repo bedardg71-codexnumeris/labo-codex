@@ -932,7 +932,8 @@ function genererSectionAccompagnement(da) {
     // #1055 (entrée 6.65 de #1083) : sans le travail diagnostique, que les moyennes qualifiées ne lisent pas.
     const copiesSansDiagnostique = window.ProductionDiagnostique.filtrerEvaluations(
         obtenirDonneesSelonMode('evaluationsSauvegardees') || [], obtenirDonneesSelonMode('productions'));
-    const evaluationsDA = copiesSansDiagnostique.filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
+    // #1228 : sans les copies non recevables, que les moyennes qualifiées ne lisent plus.
+    const evaluationsDA = copiesSansDiagnostique.filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e) && !window.evaluationNonRecevable(e));
     const nbTotalArtefacts = evaluationsDA.length;
 
     // Construire le texte de progression au format du rapport (basé sur les critères)
@@ -2044,6 +2045,7 @@ function calculerDirectionsCriteres(da) {
     const evaluationsEleve = window.ProductionDiagnostique.filtrerEvaluations(evaluations, obtenirDonneesSelonMode('productions') || []).filter(e =>
         e.etudiantDA === da &&
         window.evaluationEntreDansLaNote(e) &&
+        !window.evaluationNonRecevable(e) &&   // #1228 : ses niveaux ne disent rien des habiletés
         e.criteres && Array.isArray(e.criteres) && e.criteres.length > 0
     );
 

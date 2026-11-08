@@ -950,7 +950,10 @@ function calculerMoyennesCriteres(da) {
 
     // Les copies qui COMPTENT (#741, lot A du 16 sept. 2026) : la règle unique #706 — enregistrées,
     // non remplacées (#730 : l'originale d'une reprise porte l'état d'avant), avec ou sans commentaire final.
-    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e));
+    // #1228 (décision de Grégoire, 4 nov. 2026, « même règle partout ») : une copie non recevable (plagiat, IA) ne dit
+    // rien des habiletés de l'élève ; ses niveaux sortent des moyennes, de l'IPB, du défi et des directions par critère,
+    // comme ils sortent déjà des graphiques. Sa note, elle, reste ce que la pratique en fait (`noteRetenueParLeCalcul`).
+    const evaluationsEleve = evaluations.filter(e => e.etudiantDA === da && window.evaluationEntreDansLaNote(e) && !window.evaluationNonRecevable(e));
 
 
     if (evaluationsEleve.length === 0) {
@@ -1003,6 +1006,7 @@ function calculerMoyennesCriteresRecents(da, nombreArtefacts = null) {
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
         window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730 pour la remplacée
+        !window.evaluationNonRecevable(e) &&     // #1228 : ses niveaux ne disent rien des habiletés
         productionsIds.includes(e.productionId)
     );
 
@@ -1043,6 +1047,7 @@ function _filtrerEtTrierEvaluationsIPB(evaluations, da, productionsIds) {
     var filtrees = evaluations.filter(function (e) {
         return e.etudiantDA === da &&
             window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730 — l'IPB comptait l'originale ET la reprise
+            !window.evaluationNonRecevable(e) &&     // #1228 : ses niveaux ne disent rien des habiletés
             productionsIds.indexOf(e.productionId) >= 0 &&
             e.criteres && Array.isArray(e.criteres);
     });
@@ -1574,6 +1579,7 @@ function identifierDefiSpecifique(da) {
     const evaluationsEleve = evaluations.filter(e =>
         e.etudiantDA === da &&
         window.evaluationEntreDansLaNote(e) &&   // #741 (lot A) : la règle unique #706 ; #730
+        !window.evaluationNonRecevable(e) &&     // #1228 : ses niveaux ne disent rien des habiletés
         productionsIds.includes(e.productionId)
     );
 
