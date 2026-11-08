@@ -7,6 +7,7 @@ import { chargerScript } from './_helpers/charger-script.js';
 // portfolio à corriger (qui serait faux pour une DEN). Non-régression STD.
 
 let pratiqueActiveId = null;
+let terme = 'artefact';   // #1188 : le mot que rend obtenirTermeProduction (profil-etudiant-helpers.js)
 let store = [];
 // #762 (6 sept. 2026) — le diagnostic lit d'abord la SOURCE DE VÉRITÉ (`groupesCours[].pratiqueId`
 // du groupe-cours actif), pas seulement le repli de `obtenirPratiqueActiveGroupeCours` : le banc
@@ -26,7 +27,8 @@ const globaux = {
     obtenirPratiqueActiveGroupeCours: () => pratiqueActiveId,
     normaliserIdPratique: (t) => t,
     notifications: { erreur: () => {}, succes: () => {} },
-    echapperHtml: (s) => String(s == null ? '' : s)
+    echapperHtml: (s) => String(s == null ? '' : s),
+    obtenirTermeProduction: () => terme
 };
 const win = chargerScript('js/profil-etudiant-actions.js', globaux);
 const diag = win._diagnostiquerNoteNonCalculable;
@@ -51,5 +53,20 @@ describe('DEN-4 · diagnostic « non calculable » — cas Dénotation', () => {
         pratiqueActiveId = 'p-std';
         store = [{ id: 'p-std', type: 'standards', nom: 'STD', calcul_note: { methode: 'conversion_niveaux' } }];
         expect(diag()).toContain('portfolio');
+    });
+
+    // #1188 (8 nov. 2026) — des standards sans « Artefact » au cours (la chimie du lot 5) : pas de portfolio
+    // ni d'artefacts dans le message ; les mots validés du lot 5 (« productions retenues »), la carte de la fiche.
+    // Break-test (8 nov., module restauré par copie, `cmp` vérifié) : la branche « sans artefact » coupée → ROUGE.
+    it('STD sans artefact → ni « portfolio » ni « artefact » ; « productions retenues »', () => {
+        pratiqueActiveId = 'p-std';
+        store = [{ id: 'p-std', type: 'standards', nom: 'STD', calcul_note: { methode: 'conversion_niveaux' } }];
+        terme = 'production';
+        try {
+            const msg = diag();
+            expect(msg).not.toMatch(/portfolio|artefact/i);
+            expect(msg).toContain('productions retenues');
+            expect(msg).toContain('Réglages de la pratique');
+        } finally { terme = 'artefact'; }
     });
 });

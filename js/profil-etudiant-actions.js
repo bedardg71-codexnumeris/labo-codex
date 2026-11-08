@@ -163,6 +163,12 @@ function _diagnostiquerNoteNonCalculable() {
         // donc l'enseignant vers la saisie plutôt que vers une config à corriger.
         return 'Cette pratique est de type Dénotation : la note finale est un jugement que tu poses, pas un calcul sur les artefacts. Ouvre la section « Jugement » du profil pour confirmer les cibles atteintes et saisir la note (la garde « cibles atteintes » conditionne la certification ≥ 60).';
     }
+    // #1188 (8 nov. 2026) : des standards sans « Artefact » au cours n'ont ni portfolio ni artefacts ; le mot du
+    // lot 5 (« productions retenues ») et le nom de la carte de la fiche (« Structure des évaluations »).
+    const sansArtefact = typeof obtenirTermeProduction === 'function' && obtenirTermeProduction('singulier') !== 'artefact';
+    if (sansArtefact) {
+        return 'Pratique PAN-Standards, mais sa structure des évaluations (nombre de productions retenues, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
+    }
     return 'Pratique PAN-Standards, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
 }
 // #318 DEN-4 : exposé pour la sentinelle du diagnostic DEN (diagnostic-denotation-DEN4).
