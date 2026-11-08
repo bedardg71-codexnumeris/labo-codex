@@ -56,16 +56,17 @@ describe('DEN-4 · diagnostic « non calculable » — cas Dénotation', () => {
     });
 
     // #1188 (8 nov. 2026) — des standards sans « Artefact » au cours (la chimie du lot 5) : pas de portfolio
-    // ni d'artefacts dans le message ; les mots validés du lot 5 (« productions retenues »), la carte de la fiche.
+    // ni d'artefacts dans le message ; les mots de la fiche où mène le bouton (carte, champ, minimum du lot 5).
     // Break-test (8 nov., module restauré par copie, `cmp` vérifié) : la branche « sans artefact » coupée → ROUGE.
-    it('STD sans artefact → ni « portfolio » ni « artefact » ; « productions retenues »', () => {
+    it('STD sans artefact → ni « portfolio » ni « artefact » ; les mots de la fiche', () => {
         pratiqueActiveId = 'p-std';
         store = [{ id: 'p-std', type: 'standards', nom: 'STD', calcul_note: { methode: 'conversion_niveaux' } }];
         terme = 'production';
         try {
             const msg = diag();
             expect(msg).not.toMatch(/portfolio|artefact/i);
-            expect(msg).toContain('productions retenues');
+            expect(msg).toContain('« Structure des évaluations »');
+            expect(msg).toContain('productions pour la note finale');
             expect(msg).toContain('Réglages de la pratique');
         } finally { terme = 'artefact'; }
     });

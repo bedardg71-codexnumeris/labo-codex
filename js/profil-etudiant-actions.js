@@ -163,11 +163,15 @@ function _diagnostiquerNoteNonCalculable() {
         // donc l'enseignant vers la saisie plutôt que vers une config à corriger.
         return 'Cette pratique est de type Dénotation : la note finale est un jugement que tu poses, pas un calcul sur les artefacts. Ouvre la section « Jugement » du profil pour confirmer les cibles atteintes et saisir la note (la garde « cibles atteintes » conditionne la certification ≥ 60).';
     }
-    // #1188 (8 nov. 2026) : des standards sans « Artefact » au cours n'ont ni portfolio ni artefacts ; le mot du
-    // lot 5 (« productions retenues ») et le nom de la carte de la fiche (« Structure des évaluations »).
+    // #1188 (8 nov. 2026) : des standards sans « Artefact » au cours n'ont ni portfolio ni artefacts. Les mots de la
+    // fiche où mène « Réglages de la pratique » : la carte « Structure des évaluations », ses champs « Productions pour
+    // la note finale » et le minimum du lot 5 (§ 6, un indice P fiable — pas un préalable à la note). Le message ne
+    // part que si la structure manque entière (`!portfolio`) : « n'est pas réglée », pas « incomplète ».
+    // Relecture neuve du 8 nov. : l'ancienne phrase (avec artefacts) garde « minimum requis » et « incomplète »,
+    // deux inexactitudes héritées ; la même phrase paraît aussi dans la carte Contexte, sans le bouton qu'elle nomme.
     const sansArtefact = typeof obtenirTermeProduction === 'function' && obtenirTermeProduction('singulier') !== 'artefact';
     if (sansArtefact) {
-        return 'Pratique PAN-Standards, mais sa structure des évaluations (nombre de productions retenues, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
+        return 'Pratique PAN-Standards, mais la carte « Structure des évaluations » de sa fiche n\'est pas réglée (productions pour la note finale, minimum de productions évaluées). Ouvre « Réglages de la pratique » pour la régler.';
     }
     return 'Pratique PAN-Standards, mais sa configuration de portfolio (nombre d\'artefacts à retenir, minimum requis) est absente ou incomplète. Ouvre « Réglages de la pratique » pour la compléter.';
 }
