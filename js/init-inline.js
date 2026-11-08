@@ -208,7 +208,12 @@ function afficherModalNouveautes() {
     // #801 : les nouveautés sont ouvertes — le bandeau « au chargement » qui les
     // annonçait n'a plus rien à dire. Le bandeau DISTANT reste : il demande un
     // rechargement que la modale ne remplace pas.
-    if (bandeauBuildLocal) fermerBandeauMiseAJour();
+    // #859 (8 nov. 2026) : le repère vient d'être écrit ci-dessus ; la fermeture ne le réécrit pas
+    // (`bandeauBuildLocal` remis à nul avant elle) — un seul écrivain par geste.
+    if (bandeauBuildLocal) {
+        bandeauBuildLocal = null;
+        fermerBandeauMiseAJour();
+    }
 
     mettreAJourPastille();
 }
