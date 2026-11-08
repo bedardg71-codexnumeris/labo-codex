@@ -73,7 +73,9 @@ for (const [largeur, hauteur] of LARGEURS) {
         const carteDonnees = await page.evaluate(() => {
             const txt = (el) => el.textContent.replace(/\s+/g, ' ').trim();
             const carte = document.querySelector('#reglages-donnees [data-tooltip="donnees-codex"]').closest('.carte');
-            const cases = Array.from(carte.querySelectorAll('.carte-bleu-pale-p15')).map((c) => {
+            // Lot 4 (6ad15e114, 7 nov.) : plus de carte dans une carte — les deux cases perdent leur encadré
+            // (.carte-bleu-pale-p15). Une case est la colonne qui porte son titre h4 ; les mesures ne changent pas.
+            const cases = Array.from(carte.querySelectorAll('h4')).map((h) => h.parentElement).map((c) => {
                 const b = c.querySelector('button');
                 const r = b.getBoundingClientRect();
                 const rc = c.getBoundingClientRect();
