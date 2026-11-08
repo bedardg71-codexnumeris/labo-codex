@@ -140,6 +140,12 @@ const EMBOITEES = ['evaluations/evaluations-liste', 'evaluations/evaluations-exp
     'labo/labo-bilan', 'reglages/reglages-preferences', 'reglages/reglages-donnees', 'conception/conception-productions',
     'conception/conception-grille-criteres', 'conception/conception-echelle-performance', 'conception/conception-pratiques-notation',
     'aide/aide-codex-archives', 'accueil/section-accueil'];
+// Pas de filet seul (Grégoire, 7 nov.) : un encadré garde son fond ET son filet (alertes, guidage de la démo) ou perd
+// les deux. Ces deux blocs perdent les deux ; leur amorce en gras reste, mot pour mot.
+const SANS_CADRE = {
+    'accueil/section-accueil': ['.banniere-bienvenue-acces', 'Tu as besoin de support humain ?'],
+    'labo/labo-comparateur': ['.comparateur-note-dev', 'Outil en développement']
+};
 for (const clair of [false, true]) {
     test(`les ${EMBOITEES.length} pages de l'inventaire (${clair ? 'clair' : 'sombre'}) : jamais de carte dans une carte`, async ({ page }) => {
         test.setTimeout(300000);
@@ -181,6 +187,23 @@ for (const clair of [false, true]) {
       return out;
     }, [ss, FONCTION]);
             for (const l of r) if (!RESTENT.test(l)) echecs.push(`${cible} · ${l}`);
+            if (SANS_CADRE[cible]) {
+                const [sel, amorce] = SANS_CADRE[cible];
+                const b = await page.evaluate(([ss, sel]) => {
+                    const e = document.querySelector(`#${ss} ${sel}`);
+                    if (!e || !e.getClientRects().length) return null;
+                    const cs = getComputedStyle(e);
+                    return {
+                        filets: ['Top', 'Right', 'Bottom', 'Left'].filter((c) => parseFloat(cs[`border${c}Width`]) > 0 && cs[`border${c}Style`] !== 'none'),
+                        fond: cs.backgroundColor, image: cs.backgroundImage, ombre: cs.boxShadow,
+                        amorce: e.querySelector('strong')?.textContent.trim()
+                    };
+                }, [ss, sel]);
+                if (!b) { echecs.push(`${cible} · ${sel} absent de la page`); continue; }
+                if (b.filets.length) echecs.push(`${cible} · ${sel} garde un filet (${b.filets.join(', ')})`);
+                if (!/^(transparent|rgba\(0, 0, 0, 0\))$/.test(b.fond) || b.image !== 'none' || b.ombre !== 'none') echecs.push(`${cible} · ${sel} garde un fond ou une ombre`);
+                if (b.amorce !== amorce) echecs.push(`${cible} · ${sel} : amorce « ${b.amorce} » au lieu de « ${amorce} »`);
+            }
         }
         expect(echecs).toEqual([]);
     });

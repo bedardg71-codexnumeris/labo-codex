@@ -108,3 +108,10 @@ Dans une carte, ils font un deuxième niveau (Aide, Trimestre, Données, Product
 - **La pastille pleine est réservée aux étapes à faire** (Grégoire, sur la première capture de Préparer). Dans
   un bloc d'explication, le chiffre reste, sans disque, à au moins 4,5:1 sur le fond de la page. À reprendre
   sur toute autre page où une explication numérotée voisine de vraies étapes. Fait sur Préparer (`056275301`).
+- **Pas de filet seul** (Grégoire, sur les captures de l'étape 2). Un encadré garde son fond ET son filet
+  (les alertes, les encadrés de guidage de la démo : question 1) ou perd les deux. Garder le filet de gauche en
+  retirant le fond n'est pas une troisième voie. Appliqué aux deux blocs qui l'avaient gardé : « Outil en
+  développement » (Exploration, classé à retirer au § 2) et la bande « Tu as besoin de support humain ? »
+  (Accueil), dont l'amorce en gras coloré suffit, comme « Certains concepts sont nouveaux ? » dans la colonne
+  voisine. Aucun texte ne change. Le banc des 19 pages vérifie les deux blocs (ni filet, ni fond, ni ombre ;
+  amorce inchangée).

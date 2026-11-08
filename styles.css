@@ -24117,13 +24117,12 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 .comparateur-corps p { margin: 0 0 12px; }
 .comparateur-corps strong { color: var(--texte-principal, #d0e0e4); }
 .comparateur-finalite { color: var(--texte-principal, #d0e0e4); }
-/* Note « outil en développement » (#326) : encadré d'information en tête du banc,
-   accent gauche (variables design system, aucune couleur en dur). Cadre la lecture
-   d'un 0 = note non constructible selon paramètres + données, pas forcément erreur. */
+/* Note « outil en développement » (#326) : en tête du banc, cadre la lecture d'un 0 = note
+   non constructible selon paramètres + données, pas forcément erreur. Lot 4 (7 nov. 2026) :
+   pas de filet seul — l'encadré perd fond ET filet ; le titre en gras porte le repère. */
 .comparateur-note-dev {
     margin: 10px 0 16px;
-    padding: 2px 0 2px 14px;
-    border-left: 3px solid var(--alerte-bordure-attention);
+    padding: 0;
     font-size: 0.86rem;
     line-height: 1.45;
     color: var(--alerte-texte-attention);
@@ -29036,14 +29035,13 @@ body.mode-clair {
 }
 
 /* Encadré d'invitation à la Communauté de pratique (permanent) :
-   bord gauche orange-accent + fond ambre subtil, strong d'amorce en
-   couleur d'accent. Remplace l'encadré d'accès cadré 3-30 juin 2026
+   strong d'amorce en couleur d'accent, sans cadre. Remplace l'encadré d'accès cadré 3-30 juin 2026
    (refermage abandonné le 2 juin 2026). Cf. js/accueil.js. */
-/* Lot 4 (7 nov. 2026) : dans la bannière (une carte), le filet orange reste, le fond ambre part. */
+/* Lot 4 (7 nov. 2026) : pas de filet seul — la bande perd fond ET filet. Son amorce en gras
+   coloré suffit, comme « Certains concepts sont nouveaux ? » dans la colonne voisine. */
 .banniere-bienvenue-acces {
     margin: 12px 0 18px 0;
-    padding: 2px 0 2px 16px;
-    border-left: 4px solid var(--orange-accent, #c8a060);
+    padding: 0;
 }
 /* Spécificité (0,2,1) pour battre `.banniere-bienvenue p:last-of-type`
    (margin-bottom:18px) : le <p> unique de l'encadré est aussi :last-of-type,

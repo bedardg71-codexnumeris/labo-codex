@@ -39,7 +39,8 @@ Captures avant et après, sombre et clair, 1180 et 820 px :
 - **Le compteur des présences** perd son fond à l'état normal ; son fond jaune de l'état « message » (pas de cours ce
   jour-là) reste, parce qu'il signale.
 - **Les bandes à filet** (la bande « support humain » de l'accueil, « Outil en développement ») gardent leur filet
-  de couleur à gauche et perdent leur fond.
+  de couleur à gauche et perdent leur fond. ⮕ **Corrigé par Grégoire : pas de filet seul** — les deux perdent
+  aussi leur filet (inventaire, § 6).
 - **Sous 1024 px**, le conteneur prend toute la largeur : à 95 % sans marge auto, le contenu collait à gauche
   (21 px contre 63 px à 820), ce qui se voyait une fois le panneau parti.
 
