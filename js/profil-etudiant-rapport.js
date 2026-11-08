@@ -117,6 +117,8 @@ function genererRapportAPI(da, options = {}) {
                 return {
                     productionNom: production?.activiteApprentissage || production?.description || production?.titre || production?.nom || `Production ${e.productionId}`,
                     niveauFinal: ((typeof niveauFinalAffichable === 'function') ? (niveauFinalAffichable(e) || null) : (e.niveauFinal || null)),   // #941 lot S1
+                    // #1228 : une copie non recevable montre son libellé à la place de sa note et de son niveau (28 oct.)
+                    nonRecevable: (typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(e)) || null,
                     notePct: parseFloat(e.noteFinale),
                     date: e.dateEvaluation || e.dateCreation || ''
                 };
@@ -124,6 +126,7 @@ function genererRapportAPI(da, options = {}) {
             .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 
         evaluationsComptees.forEach((art, idx) => {
+            if (art.nonRecevable) { rapport += `${idx + 1}- ${art.productionNom} : ${art.nonRecevable}\n`; return; }
             const niveau = (art.niveauFinal !== null && art.niveauFinal !== undefined && art.niveauFinal !== '') ? `${art.niveauFinal} ` : '';
             rapport += `${idx + 1}- ${art.productionNom} : ${niveau}(${isNaN(art.notePct) ? '—' : formaterNombre(art.notePct, 1)})\n`;
         });

@@ -86,6 +86,13 @@ describe('#1228 — les niveaux d\'une copie non recevable sortent des calculs d
         expect(monter([...BASE, RECEVABLE]).identifierDefiSpecifique(DA), 'témoin').not.toEqual(sans);
     });
 
+    it('3 bis. l\'IPB : celui des trois autres copies (témoin : recevable, il change)', () => {
+        const avec = JSON.stringify(monter([...BASE, PLAGIEE]).calculerIPB(DA));
+        const sans = JSON.stringify(monter(BASE).calculerIPB(DA));
+        expect(avec).toBe(sans);
+        expect(JSON.stringify(monter([...BASE, RECEVABLE]).calculerIPB(DA)), 'témoin').not.toBe(sans);
+    });
+
     it('3. l\'IPB : le prédicat est dans son filtre', () => {
         const f = tranche(source('js/profil-etudiant-calculs.js'), 'function _filtrerEtTrierEvaluationsIPB(', 'filtrees.sort(', { longueurMin: 100 });
         expect(f).toContain('!window.evaluationNonRecevable(e)');
@@ -101,10 +108,16 @@ describe('#1228 — les niveaux d\'une copie non recevable sortent des calculs d
 
     it('5. le registre longitudinal : le libellé à la place de la note et des niveaux, aucun niveau par critère', () => {
         const rendre = tranche(source('js/registre-longitudinal.js'), 'function rendreEvaluation(', 'if (ev.retroactionFinale) {', { longueurMin: 400 });
-        expect(rendre).toContain("libelleCopieNonRecevable(ev)");
+        expect(rendre, 'le libellé du registre, sans condition ajoutée').toContain("const nonRecevable = (typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(ev)) || null;");
         expect(rendre).toMatch(/const criteres = nonRecevable \? \[\] :/);
         expect(rendre).toMatch(/if \(nonRecevable\) note\.push\(nonRecevable\);\s*else if \(ev\.noteFinale/);
         expect(rendre).toContain('!enPoints && !nonRecevable');
+    });
+
+    it('5 bis. le rapport texte du profil : le libellé à la place du niveau et de la note (relecture neuve du 8 nov.)', () => {
+        const perf = tranche(source('js/profil-etudiant-rapport.js'), '// 4. PERFORMANCE', '// 5. GESTION DES JETONS', { longueurMin: 400 });
+        expect(perf).toContain("nonRecevable: (typeof libelleCopieNonRecevable === 'function' && libelleCopieNonRecevable(e)) || null,");
+        expect(perf).toContain('if (art.nonRecevable) { rapport += `${idx + 1}- ${art.productionNom} : ${art.nonRecevable}\\n`; return; }');
     });
 
     it('6. un seul prédicat : aucune des fonctions touchées ne relit `statutIntegrite`', () => {
