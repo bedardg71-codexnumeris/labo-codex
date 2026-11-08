@@ -7,6 +7,31 @@
 
 ---
 
+## 7 NOV. 2026, 23 H 30 (Claude Code) : **VERDICT ROUGE SUR LA RELEASE 1.236.0 — RIEN N'EST POUSSÉ ; `main` LOCAL = `ef114c34` (+ ce relais), 31 COMMITS DEVANT `origin/main` (`be443f6d`) ; EN LIGNE : TOUJOURS 1.235.0**
+
+**Ce qui a été fait** (consigne de Cowork, 7 nov. vers 21 h 50) : Nouvelles de 1.236 validées par Grégoire mot pour mot (« je valide », vers 22 h ; la ligne de l'identité du 7 nov. à 7 h 21 en tête) ; `lot/en-tete-epure` fusionnée dans `main` local en avance rapide (29 commits) ; release mineure par `scripts/release.mjs` : **1.236.0, build `1107-2156`** (`c8142f95`) ; numéro inscrit au § 0 des portes de la chaîne (`ef114c34`). Vitest 10 768/10 768 sur la release.
+
+**Verdict complet en dix morceaux sur `ef114c34`**, au signal de Grégoire (« tout est fermé »), sur secteur, `caffeinate -d -i -s`, 0 veille, échange 1 047 Mo, pression 1 ; relevé : `~/verdicts-labo/surveillance-2026-11-07-ef114c34.log`, sortie : `~/verdicts-labo/verdict-2026-11-07-ef114c34.log`, rapport fusionné : `~/Library/Caches/labo-codex/derniere-verification/rapport.json`. **Code 1 : 13 specs NOUVELLEMENT rouges, push bloqué.** 1 au second essai (`bareme-3-evaluer` › invariant 1, « browser has been closed »). 4 specs de la baseline redevenues vertes, à retirer.
+
+**Les 13, avec la première ligne de l'erreur.** ⚠ C'est la première passe complète sur la chaîne des quatre lots (les lots n'ont lancé que leurs bancs voisins). Ma lecture, **inférence non vérifiée** : la plupart sont des bancs anciens qui lisent les libellés longs, les titres ou les descriptions que les lots 1, 3 et 4 ont retirés — à mettre à jour, pas des régressions de l'app. À trancher spec par spec avant de toucher quoi que ce soit.
+- `materiel-aide-accompagnement` › l'aide « i » : attend « Mène à Grilles de critères… », reçoit « Mène à Grilles… » (libellé court, lot 3).
+- `guidage-demo-29-oct` › bulle de Suivi du groupe : attend « Suivi du groupe », reçoit « Groupe » (lot 3).
+- `planif-modele-ia-963` › le principe sous le titre de la carte : `#conception-carte > p.text-muted` introuvable (description retirée, lot 3 ?).
+- `lot-f-placement-mots` › placement des mots renommés à 768, 1024, 1180 et 1470 px (4 essais) : objet attendu de 21 lignes, reçu 2 (navigation en mots, lot 1 ?).
+- `critere-algorithmique-presentation` › 1 440 px, trois colonnes et la chaîne : un élément de tableau diffère.
+- `critere-algorithmique-table-de-cas` › 700 px : attend 1, reçoit 3 ; `critere-algorithmique-tables-de-cas-3b` › 700 px : attend 1, reçoit 2 (empilement des rangées ; lot 4, conteneur pleine largeur sous 1024 px ?).
+- `lot-C-echelles-chevrons-corbeille` › sous 768 px, l'empilement : un champ diffère.
+- `palette-retroaction-compacte` › le champ gagne sa hauteur : attend > 572, reçoit 572.
+- `bareme-3-evaluer` › **sécurité** · un `<img onerror>` dans une tranche sort en texte : la chaîne attendue « — 4 / 5 | <img src=x onerror=…>Texte » est absente du texte reçu. ⚠ **Celle-ci d'abord** : banc de sécurité ; vérifier que c'est le texte attendu qui a bougé, et non l'échappement.
+
+**Ce qui reste à faire** : examiner les 13, corriger les bancs (ou l'app si c'en est une), Vitest, **nouveau verdict complet**, puis push. Le jeton actuel porte `ef114c34`, code 1 : tout commit le périme de toute façon. La PR #11 (brouillon) deviendra sans objet au push de `main`.
+
+**Logo — chantier clos** : Icônes (logo couleur, C2PA retiré, favicons 16 et 32 px épaissis, coins joints — `3e000b9d3`…`b833dbdd9`) approuvées par Grégoire le 2026-11-07 dans l'aperçu Chrome et Safari ; chantier clos ; partent avec la chaîne des quatre lots, même verdict complet unique, même mise en ligne.
+
+**Ce relais n'est pas poussé** : consigne de Cowork (« sinon arrête-toi »). Il voyage avec `main` local, où vit tout le travail.
+
+---
+
 ## 7 NOV. 2026, 12 H 35 (Claude Code) : **NOUVEL EN-TÊTE FUSIONNÉ ET POUSSÉ ; `main` = `origin/main` = `f727680a` (+ ce commit de relais) ; BUILD `1107-1101`, VERSION INCHANGÉE (1.235.0), CHANGELOG NON TOUCHÉ**
 
 **Ce qui a été fait**, au signal conditionnel de Grégoire transmis par Cowork (« il le donne maintenant, sous condition ») :
