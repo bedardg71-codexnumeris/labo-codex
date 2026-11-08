@@ -113,6 +113,13 @@ for (const clair of [false, true]) {
         expect(Math.abs(g.zone - g.page), 'la zone de dépôt prend toute la largeur du contenu').toBeLessThanOrEqual(1);
         expect(g.pointilles, 'la zone de dépôt garde ses pointillés').toBe('dashed');
         expect(await page.locator('.pipeline-etape-numero').first().textContent()).toBe('1');
+        // La pastille pleine est réservée aux étapes à faire : les chiffres de l'explication n'ont pas de disque
+        // (leur contraste sur le fond de la page est mesuré juste dessous, avec les autres textes).
+        const explication = await page.$$eval('.travaux-zero-state .etape-numero', (els) => els.map((e) => ({
+            chiffre: e.textContent.trim(), fond: getComputedStyle(e).backgroundColor, rayon: getComputedStyle(e).borderTopLeftRadius
+        })));
+        expect(explication.map((e) => e.chiffre), 'le bloc d\'explication est à l\'écran (démo, aide active)').toEqual(['1', '2', '3']);
+        for (const e of explication) expect(e.fond, `le chiffre ${e.chiffre} de l'explication n'a pas de disque`).toMatch(/^(transparent|rgba\(0, 0, 0, 0\))$/);
         expect(await textesSousLeSeuil(page, '#evaluations-importer'), 'contrastes ≥ 4,5:1 sur le fond de la page').toEqual([]);
     });
 }

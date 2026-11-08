@@ -26655,17 +26655,15 @@ body.mode-clair {
     max-width: 220px;
 }
 
+/* Lot 4 (7 nov. 2026, décision de Grégoire) : la pastille pleine est réservée aux étapes à faire
+   (.pipeline-etape-numero). Dans un bloc d'explication, le chiffre reste, sans disque, en couleur
+   d'accent sur le fond de la page (≥ 4,5:1 dans les deux thèmes). */
 .etape-numero {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--accent-primaire, #6aacb8);
-    color: var(--fond-principal, #0b1117);
+    min-width: 1ch;
+    color: var(--accent-primaire, #6aacb8);
     font-weight: 700;
     font-size: 0.9rem;
+    line-height: 1.5;
     flex-shrink: 0;
 }
 
