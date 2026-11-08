@@ -803,6 +803,8 @@ body[data-mode="anonymisation"]:not(.mode-clair) {
     margin: 0;
 }
 .titre-page-controles .titre-emoji-container { margin-left: 0; }
+/* Lot 4 : un titre masqué dans une carte ne garde pas le filet de `.carte h3` (52 px sous le « i », Exporter). */
+.carte .titre-page-controles { border-bottom: 0; padding-bottom: 0; }
 .legacy-hidden { display: none !important; } /* Beta 95 : Masque les anciennes sous-sections */
 .u-block { display: block; }
 .u-inline-block { display: inline-block; }
@@ -2589,12 +2591,10 @@ body.mode-clair {
     padding: 0;
 }
 
-/* Bloc d'option : une case, un nom, une aide, des étiquettes */
+/* Bloc d'option : une case, un nom, une aide, des étiquettes. Lot 4 (7 nov. 2026) : sur la carte du pilier,
+   sans cadre ; l'espace de la grille les sépare. */
 .bloc-option {
-    padding: 10px 12px;
-    border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-moyen);
-    background: var(--surface-element);
+    min-width: 0;
 }
 .bloc-option-pleine {
     grid-column: 1 / -1;
@@ -8046,16 +8046,7 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
     margin-left: 5px;
 }
 
-/* Variantes de couleur (selon echelles.js) - Fond blanc */
-.carte-metrique-bleue {
-    background: var(--surface-carte, #1a3040);
-    border-color: var(--accent-primaire);
-}
-
-.carte-metrique-bleue .valeur {
-    color: var(--accent-primaire);
-}
-
+/* Variantes de couleur (selon echelles.js) - Fond blanc ; la bleue est partie avec le lot 4 (7 nov. 2026). */
 .carte-metrique-verte,
 .carte-metrique-standard.carte-metrique-minimal {
     background: var(--surface-carte, #1a3040);
@@ -8615,11 +8606,9 @@ body[data-mode="anonymisation"] .etudiant-evaluation-carte h3 {
 }
 
 /* 🆕 BETA 91: Légende du calendrier (intégrée dans la grille) */
+/* Lot 4 (7 nov. 2026) : la légende et ses trois mesures posent sur la carte du calendrier, sans cadre. */
 .calendrier-legende {
-    padding: 20px;
-    background: var(--bleu-tres-pale);
-    border-radius: var(--radius-grand);
-    border: 2px solid var(--bleu-pale);
+    margin-bottom: 20px;
 }
 
 .calendrier-legende-grille {
@@ -10329,6 +10318,8 @@ td .marque-diagnostique { margin-left: 6px; }
     box-shadow: var(--shadow-normal);
 }
 .rangee-selection .btn { min-height: 44px; }
+/* Lot 4 (7 nov. 2026) : dans une carte (les accordéons du Cadre), la rangée pose sur la carte, sans fond ni ombre. */
+.carte .rangee-selection { padding: 0; background: none; box-shadow: none; }
 /* Le menu rétrécit (380 → 200 px) avant que la rangée ne se replie : à 820 px, « + Nouvelle … » reste sur la ligne. */
 .rangee-selection-emplacement { display: flex; align-items: center; flex: 1 1 200px; max-width: 380px; min-width: 0; }
 .rangee-selection-menu { width: 100%; font-weight: 600; color: var(--accent-primaire); }
@@ -10375,10 +10366,7 @@ td .marque-diagnostique { margin-left: 6px; }
     align-items: center;
     gap: 6px 16px;
     margin-bottom: 12px;
-    padding: 8px 12px;
     font-size: 0.85rem;
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
 }
 .rangee-selection-resume-note { color: var(--gris-moyen); }
 .rangee-selection-aide { margin: 0 0 12px; }
@@ -10522,12 +10510,9 @@ td .marque-diagnostique { margin-left: 6px; }
    Pattern uniforme pour les accordéons Trimestre
    =============================================== */
 
-/* Panneau droite : Formulaire d'édition */
+/* Formulaire d'édition. Lot 4 (7 nov. 2026) : il pose sur la page (ou sur la carte de l'accordéon, au Cadre),
+   sans cadre ; dans la fiche, ce sont les unités répétées (un critère, un niveau) qui forment l'unique carte. */
 .panneau-formulaire {
-    background: var(--surface-carte, #1a3040);
-    padding: 20px;
-    border-radius: var(--radius-grand);
-    border: 1px solid var(--gris-bordure);
     min-height: 200px;
 }
 
@@ -10659,11 +10644,10 @@ td .marque-diagnostique { margin-left: 6px; }
 
 
 /* Section Import à droite (Beta 95.3) */
+/* Lot 4 (7 nov. 2026) : dans la carte de l'accordéon, l'import, le formulaire d'ajout, le résumé de l'horaire,
+   les séances, le nom généré et les blocs du trimestre posent sur la carte, sans fond ; l'espace les sépare. */
 .section-import-droite {
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
-    padding: 15px;
-    margin-top: 20px;
+    margin-top: 24px;
 }
 
 .grille-import-2col {
@@ -10764,9 +10748,6 @@ td .marque-diagnostique { margin-left: 6px; }
 }
 
 .formulaire-ajout-etudiant {
-    background: var(--bleu-pale);
-    border-radius: var(--radius-grand);
-    padding: 15px;
     margin-top: auto;
 }
 
@@ -11110,9 +11091,6 @@ summary.rl-tuile-entete::after {
 }
 
 .resume-format-horaire {
-    background: var(--bleu-pale);
-    border-radius: var(--radius-moyen);
-    padding: 10px 15px;
     margin-bottom: 15px;
     font-size: 0.9rem;
 }
@@ -11136,10 +11114,6 @@ summary.rl-tuile-entete::after {
     grid-template-columns: auto minmax(110px, 1fr) 124px auto 124px 72px minmax(90px, 130px);
     gap: 10px;
     align-items: center;
-    padding: 10px;
-    background: var(--surface-carte, #1a3040);
-    border: 1px solid var(--bleu-leger);
-    border-radius: var(--radius-moyen);
 }
 
 .seance-horaire-ligne label {
@@ -11255,10 +11229,6 @@ summary.rl-tuile-entete::after {
 }
 
 .apercu-nom-groupe-cours {
-    background: #244858;
-    color: white;
-    border-radius: var(--radius-moyen);
-    padding: 15px;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -13316,13 +13286,6 @@ label:has(+ textarea:disabled) {
 }
 
 
-.cal-carte-importante {
-    background: var(--bleu-tres-pale);
-    padding: 15px;
-    border-radius: var(--radius-grand);
-    border: 2px solid var(--bleu-principal);
-}
-
 
 /* Pastille « aujourd'hui » */
 .calendrier-aujourd-hui .cal-texte-moyen {
@@ -14005,12 +13968,9 @@ label:has(+ textarea:disabled) {
     }
 }
 
-/* Carte composante (Portfolio ou Terminal) */
+/* Composante (Portfolio ou Terminal) — lot 4 (7 nov. 2026) : sur la section de la note finale, sans cadre. */
 .note-finale-composante {
-    background: var(--surface-carte, #1a3040);
-    padding: 15px;
-    border-radius: var(--radius-grand);
-    box-shadow: var(--shadow-subtil);
+    min-width: 0;
 }
 
 /* Titre de la composante */
@@ -14087,13 +14047,9 @@ label:has(+ textarea:disabled) {
     color: var(--texte-principal);
 }
 
-/* Carte de résultat final */
+/* Résultat final — lot 4 : sans cadre, centré. */
 .note-finale-resultat {
-    background: var(--surface-carte, #1a3040);
-    padding: 15px;
-    border-radius: var(--radius-grand);
     text-align: center;
-    border: 2px solid var(--gris-fonce, #333);
 }
 
 /* Formule de calcul */
@@ -14787,24 +14743,8 @@ label:has(+ textarea:disabled) {
 
 /* Bloc de section avec fond coloré (remplace les styles inline) */
 .bloc-section {
-    padding: 15px;
-    border-radius: var(--radius-grand);
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     position: relative;
-}
-
-.bloc-section--bleu {
-    background: var(--bleu-pale);
-}
-
-/* Beta 95.3 : Uniformisation - plus de bordure verte */
-.bloc-section--vert {
-    background: var(--bleu-pale);
-    /* Bordure gauche supprimée pour cohérence */
-}
-
-.bloc-section--compact {
-    padding: 12px;
 }
 
 /* Bouton de réinitialisation dans les blocs */
@@ -14898,19 +14838,9 @@ label:has(+ textarea:disabled) {
 
 /* Compacter le panneau formulaire */
 #calendrier-trimestre .panneau-formulaire {
-    padding: 12px;
     min-height: auto;
 }
 
-/* Compacter les blocs section */
-#calendrier-trimestre .bloc-section {
-    padding: 10px 12px;
-    margin-bottom: 10px;
-}
-
-#calendrier-trimestre .bloc-section--compact {
-    padding: 8px 10px;
-}
 
 /* Compacter les sous-titres */
 #calendrier-trimestre .sous-titre-section {
@@ -15177,19 +15107,8 @@ tr.ligne-import-ecartee td {
     opacity: 1;
 }
 
-/* --- Uniformisation encadrés --- */
-/* Tous les blocs-section en bleu pâle uniforme */
-#calendrier-trimestre .bloc-section {
-    background: var(--bleu-pale);
-    border: none;
-    border-radius: var(--radius-grand);
-}
-
 /* Formulaires internes */
 #calendrier-trimestre .formulaire-interne {
-    background: var(--bleu-tres-pale);
-    border-radius: var(--radius-moyen);
-    padding: 10px;
     margin-top: 8px;
     position: relative;
 }
@@ -15281,11 +15200,6 @@ tr.ligne-import-ecartee td {
     #calendrier-trimestre .d-flex-gap-10-center {
         flex-wrap: wrap;
         gap: 8px;
-    }
-
-    /* Réduire padding des blocs section */
-    #calendrier-trimestre .bloc-section {
-        padding: 10px;
     }
 
     /* Inputs date plus compacts */
@@ -16035,11 +15949,8 @@ tr.ligne-import-ecartee td {
     border-color: rgba(255, 255, 255, 0.5);
 }
 
-/* Zone d'affichage générique */
+/* Zone d'affichage générique — lot 4 (7 nov. 2026) : pose sur la carte de l'outil, sans cadre. */
 .outil-zone-affichage {
-    background: var(--bleu-tres-pale, #142428);
-    border: 1px solid rgba(106, 172, 184, 0.15);
-    border-radius: 16px;
     width: 100%;
     min-height: 180px;
     display: flex;
@@ -21272,17 +21183,13 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 /* --- Archivage --- */
+/* Lot 4 (7 nov. 2026) : les deux exports et l'espace de stockage posent sur la carte de la page, sans sous-carte ;
+   l'espace entre eux les sépare. La classe `travaux-archivage-carte` garde son nom (lue par les bancs). */
 .travaux-archivage-options {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin: 16px 0;
-}
-
-.travaux-archivage-carte {
-    border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-grand);
-    padding: 20px;
+    gap: 32px;
+    margin: 24px 0;
 }
 
 .travaux-archivage-carte h4 {
@@ -21322,10 +21229,7 @@ body.planif-plein-ecran-actif #planif-guide-panel {
 }
 
 .travaux-quota-section {
-    margin-top: 24px;
-    padding: 16px;
-    border: 1px solid var(--bordure-claire);
-    border-radius: var(--radius-grand);
+    margin-top: 32px;
 }
 
 .travaux-quota-barre-container {
@@ -24149,13 +24053,11 @@ body.planif-plein-ecran-actif #planif-guide-panel {
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    padding: 8px 10px;
-    background: var(--surface-element, var(--surface-carte));
-    border: 1px solid var(--bordure-legere);
-    border-radius: var(--radius-moyen, 8px);
+    padding: 4px 0;
 }
-/* Variante d'essai : accent gauche pour la distinguer d'une souche aboutie. */
+/* Variante d'essai : accent gauche pour la distinguer d'une souche aboutie. Lot 4 : la tête n'a plus de fond. */
 .exploration-noeud--essai > .exploration-noeud-tete {
+    padding-left: 10px;
     border-left: 3px solid var(--accent-primaire);
 }
 .exploration-noeud-nom {
@@ -24220,10 +24122,8 @@ body.planif-plein-ecran-actif #planif-guide-panel {
    d'un 0 = note non constructible selon paramètres + données, pas forcément erreur. */
 .comparateur-note-dev {
     margin: 10px 0 16px;
-    padding: 10px 14px;
+    padding: 2px 0 2px 14px;
     border-left: 3px solid var(--alerte-bordure-attention);
-    border-radius: 0 6px 6px 0;
-    background: var(--alerte-fond-attention);
     font-size: 0.86rem;
     line-height: 1.45;
     color: var(--alerte-texte-attention);
@@ -26108,7 +26008,6 @@ body.mode-clair {
 }
 
 /* Glassmorphism — adapter pour fond clair */
-.mode-clair .carte-metrique-bleue,
 .mode-clair .item-carte,
 .mode-clair .item-carte-header,
 .mode-clair .item-carte-body {
@@ -28636,14 +28535,6 @@ body.mode-clair {
     box-shadow: var(--shadow-subtil);
 }
 
-/* #5 — Cartes options export (Archivage) :
-   fond, ombre et bordure gauche pour structure visuelle */
-.mode-clair .travaux-archivage-carte {
-    background: #ffffff;
-    border: 1px solid rgba(3, 46, 92, 0.1);
-    box-shadow: var(--shadow-subtil);
-}
-
 /* #7 — Cartes Accompagnement (profil étudiant) :
    bordure et ombre visibles en mode clair */
 .mode-clair .profil-carte {
@@ -29148,12 +29039,11 @@ body.mode-clair {
    bord gauche orange-accent + fond ambre subtil, strong d'amorce en
    couleur d'accent. Remplace l'encadré d'accès cadré 3-30 juin 2026
    (refermage abandonné le 2 juin 2026). Cf. js/accueil.js. */
+/* Lot 4 (7 nov. 2026) : dans la bannière (une carte), le filet orange reste, le fond ambre part. */
 .banniere-bienvenue-acces {
     margin: 12px 0 18px 0;
-    padding: 12px 16px;
+    padding: 2px 0 2px 16px;
     border-left: 4px solid var(--orange-accent, #c8a060);
-    background: var(--alerte-fond-attention, rgba(200, 160, 96, 0.12));
-    border-radius: 0 var(--radius-moyen, 6px) var(--radius-moyen, 6px) 0;
 }
 /* Spécificité (0,2,1) pour battre `.banniere-bienvenue p:last-of-type`
    (margin-bottom:18px) : le <p> unique de l'encadré est aussi :last-of-type,

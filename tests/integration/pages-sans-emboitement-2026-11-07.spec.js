@@ -124,6 +124,68 @@ for (const clair of [false, true]) {
     });
 }
 
+// ─── Les pages de l'inventaire (§ 2) : jamais de carte dans une carte ───────────────────────────────
+// Même définition du cadre que l'inventaire (bloc d'au moins 160 × 40 px : ombre, bordure sur trois côtés ou plus,
+// ou fond distinct de ce qu'il y a derrière). Accordéons ouverts ; en Conception, la première fiche ouverte.
+// Cadres à fonction (inventaire ; question 1 : les alertes et le guidage de la démo restent).
+const FONCTION = ['input', 'select', 'textarea', 'button', 'table', 'thead', 'tbody', 'tr', 'td', 'th', '.travaux-drop-zone', '.zone-depot', '[class*="drop"]',
+  '[class*="alerte"]', '[class*="info-box"]', '[class*="guidage"]', '[class*="demo-"]', '.accordeon-header', '.carte-titre-bleu', '.modal', '[role="dialog"]',
+  '.planif-wrapper', '[class*="palette"]', '.btn', '[class*="barre-indice"]', '[class*="calendrier-mois"]', '.badge', '[class*="pastille"]', 'canvas', 'svg', 'img', 'label', 'option', 'nav'];
+// Restent, et pourquoi : les mois du calendrier et les niveaux d'une échelle (des graphiques, leur couleur dit
+// quelque chose), les bandes de titre (elles font partie de leur carte), les conteneurs de tableau, les champs
+// personnalisés, la fenêtre du choix de couleur, la zone de dépôt du partage.
+const RESTENT = /^(div\.calendrier-conteneur|h3\.calendrier-titre-mois|div\.outil-carte-header|div\.bilan-bloc-header|div#v2-listeEtudiants|div#tableEtudiantsListe|div\.champ-perso|div\.travaux-retro-couleur-popover|div#partage-zone-depot|div  ⊂  div#apercuEchelleNiveaux)/;
+const EMBOITEES = ['evaluations/evaluations-liste', 'evaluations/evaluations-exporter', 'calendrier/calendrier-trimestre', 'calendrier/calendrier-vue',
+    'suivi/suivi-liste', 'suivi/suivi-saisie', 'suivi/suivi-profil', 'suivi/suivi-animation', 'labo/labo-accompagnement', 'labo/labo-comparateur',
+    'labo/labo-bilan', 'reglages/reglages-preferences', 'reglages/reglages-donnees', 'conception/conception-productions',
+    'conception/conception-grille-criteres', 'conception/conception-echelle-performance', 'conception/conception-pratiques-notation',
+    'aide/aide-codex-archives', 'accueil/section-accueil'];
+for (const clair of [false, true]) {
+    test(`les ${EMBOITEES.length} pages de l'inventaire (${clair ? 'clair' : 'sombre'}) : jamais de carte dans une carte`, async ({ page }) => {
+        test.setTimeout(300000);
+        await ouvrir(page, 1180, 900);
+        const echecs = [];
+        for (const cible of EMBOITEES) {
+            const [s, ss] = cible.split('/');
+            await page.evaluate(([s, ss, clair]) => { document.body.classList.toggle('mode-clair', clair); afficherSection(s); if (ss !== 'section-accueil') afficherSousSection(ss); }, [s, ss, clair]);
+            await attendreRepos(page);
+            await page.evaluate((ss) => {
+                const menu = document.querySelector(`#${ss} select.rangee-selection-menu`);
+                const opt = menu && [...menu.options].find((o) => o.value && !o.disabled);
+                if (opt) { menu.value = opt.value; menu.dispatchEvent(new Event('change', { bubbles: true })); }
+            }, ss);
+            await attendreRepos(page);
+            await page.evaluate((ss) => { document.querySelectorAll(`#${ss} .accordeon.ferme`).forEach((c) => c.classList.remove('ferme')); document.querySelectorAll(`#${ss} details`).forEach((d) => { d.open = true; }); }, ss);
+            await attendreRepos(page);
+            const r = await page.evaluate(([ss, FONCTION]) => {
+      const opaque = (c) => !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(c);
+      const fondEffectif = (e) => { for (let p = e; p; p = p.parentElement) { const c = getComputedStyle(p).backgroundColor; if (opaque(c)) return c; } return ''; };
+      const estCadre = (e) => {
+        const b = e.getBoundingClientRect(); if (b.width < 160 || b.height < 40) return false;
+        const cs = getComputedStyle(e);
+        if (cs.boxShadow !== 'none') return true;
+        const bords = ['Top', 'Right', 'Bottom', 'Left'].filter((c) => parseFloat(cs[`border${c}Width`]) > 0 && cs[`border${c}Style`] !== 'none' && !/, 0\)$/.test(cs[`border${c}Color`])).length;
+        if (bords >= 3) return true;
+        return opaque(cs.backgroundColor) && cs.backgroundColor !== fondEffectif(e.parentElement);
+      };
+      const fonction = (e) => FONCTION.some((f) => e.matches(f));
+      const nom = (e) => `${e.tagName.toLowerCase()}${e.id ? '#' + e.id : ''}${[...e.classList].length ? '.' + [...e.classList].join('.') : ''}`;
+      const out = [];
+      for (const e of document.querySelectorAll(`#${ss} *`)) {
+        if (!e.getClientRects().length || !estCadre(e) || fonction(e) || e.closest(FONCTION.join(','))?.contains(e) && e.closest(FONCTION.join(',')) !== e && false) continue;
+        if (e.closest('[class*="alerte"],[class*="info-box"],[class*="guidage"],table,.modal,[role="dialog"],.planif-wrapper')) continue;
+        const chaine = [];
+        for (let p = e.parentElement; p && p !== document.body; p = p.parentElement) if (estCadre(p) && !fonction(p)) chaine.push(nom(p));
+        if (chaine.length) out.push(`${nom(e)}  ⊂  ${chaine.join(' ⊂ ')}  « ${(e.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 40)} »`);
+      }
+      return out;
+    }, [ss, FONCTION]);
+            for (const l of r) if (!RESTENT.test(l)) echecs.push(`${cible} · ${l}`);
+        }
+        expect(echecs).toEqual([]);
+    });
+}
+
 // ─── Captures pour Grégoire (CAPTURES_LOT4=<dossier>, PREFIXE_LOT4=avant|apres) ─────────────
 const CAPTURES = process.env.CAPTURES_LOT4;
 const PREFIXE = process.env.PREFIXE_LOT4 || 'apres';

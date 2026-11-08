@@ -503,7 +503,7 @@ function afficherCalendrierScolaire() {
         return evt.dateReprise && evt.dateReprise !== '';
     }).length;
 
-    let htmlLegende = '<div class="calendrier-legende u-mb-20">';
+    let htmlLegende = '<div class="calendrier-legende">';
     htmlLegende += '<h3 class="calendrier-titre-mois">Légende</h3>';
     htmlLegende += '<div class="calendrier-legende-fusion">';
     htmlLegende += '<div class="calendrier-legende-grille">';
@@ -554,21 +554,21 @@ function afficherCalendrierScolaire() {
     // Colonne droite : les 3 métriques (format harmonisé texte gauche / chiffre droite)
     htmlLegende += '<div class="calendrier-legende-metriques">';
 
-    htmlLegende += '<div class="cal-carte-importante">';
+    htmlLegende += '<div>';
     htmlLegende += '<div class="u-flex-between">';
     htmlLegende += '<span class="cal-texte-gris">Semaines scolaires</span>';
     htmlLegende += '<strong class="cal-valeur-grande-bleu">' + nombreSemainesReel + '</strong>';
     htmlLegende += '</div>';
     htmlLegende += '</div>';
 
-    htmlLegende += '<div class="cal-carte-importante">';
+    htmlLegende += '<div>';
     htmlLegende += '<div class="u-flex-between">';
     htmlLegende += '<span class="cal-texte-gris">Jours de cours</span>';
     htmlLegende += '<strong class="cal-valeur-grande-bleu">' + nombreJoursReel + '</strong>';
     htmlLegende += '</div>';
     htmlLegende += '</div>';
 
-    htmlLegende += '<div class="cal-carte-importante">';
+    htmlLegende += '<div>';
     htmlLegende += '<div class="u-flex-between">';
     htmlLegende += '<span class="cal-texte-gris">Congés avec reprise</span>';
     htmlLegende += '<strong class="cal-valeur-grande-bleu">' + congesAvecReprise + '</strong>';

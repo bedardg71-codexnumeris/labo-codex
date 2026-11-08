@@ -2247,7 +2247,10 @@ function mettreAJourCompteurPresences() {
     const compteur = document.getElementById('compteur-presences');
     if (compteur) {
         compteur.style.borderLeftColor = 'var(--accent-primaire)';
-        compteur.style.background = 'var(--bleu-tres-pale)';
+        // Lot 4 (7 nov. 2026) : à l'état normal, le compteur pose sur la carte, sans fond ; seul l'état
+        // « message » (pas de cours ce jour-là) garde son fond jaune, qui signale.
+        compteur.style.background = '';
+        compteur.style.padding = '0 0 0 12px';
     }
 }
 
@@ -2264,6 +2267,7 @@ function afficherMessageCompteurPresences(message) {
     // Changer le style pour indiquer un état spécial
     compteur.style.borderLeftColor = 'var(--jaune-principal, #f0ad4e)';
     compteur.style.background = 'var(--jaune-tres-pale, #fff8e1)';
+    compteur.style.padding = '12px 16px';
 
     // #782 (7 sept. 2026) : `textContent`, plus `innerHTML` + echapperHtml().
     // Le message peut porter `validation.motif`, texte libre saisi en config
@@ -2286,7 +2290,8 @@ function restaurerCompteurPresences() {
     if (!compteur || !zoneMessage || !blocNormal) return;
 
     compteur.style.borderLeftColor = 'var(--accent-primaire)';
-    compteur.style.background = 'var(--bleu-tres-pale)';
+    compteur.style.background = '';
+    compteur.style.padding = '0 0 0 12px';
 
     // ⚠ #782 (7 sept. 2026) : CETTE FONCTION NE RECONSTRUIT PLUS RIEN.
     // Elle portait une SECONDE copie de la barre d'actions, en `innerHTML`, et

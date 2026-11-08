@@ -223,7 +223,7 @@ function injecterStyles() {
         '.bilan-aide-body ol{margin:6px 0 10px;padding-left:20px}',
         '.bilan-aide-body li{margin-bottom:4px}',
         '.bilan-aide-body li strong{color:var(--texte-principal,#d0e0e4)}',
-        '.bilan-aide-astuce{margin-top:10px;padding:8px 12px;background:rgba(106,172,184,.06);border-radius:var(--radius-petit,5px);font-size:12px;font-style:italic}',
+        '.bilan-aide-astuce{margin-top:10px;font-size:12px;font-style:italic}',  // lot 4 (7 nov. 2026) : sans cadre dans l'encadré d'aide
         '.bilan-info-aide.replie .bilan-aide-body{display:none}',
         '.bilan-info-aide.replie .bilan-aide-chevron{transform:rotate(-90deg)}',
 
