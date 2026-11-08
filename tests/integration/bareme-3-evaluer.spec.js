@@ -56,6 +56,10 @@ const MONTER = `({ T, bareme, cartouche }) => {
     window.trimestreActif = T;
     window.db.setSync('trimestreActif', T);
     window.db.setSync('backupNePlusRappeler', 'true');
+    // Les jalons du parcours, déjà vus : le bandeau de transitions.js (fixe, en bas) pose sa croix sur le bas de
+    // l'écran. Depuis le lot 4 (plus de panneau autour du contenu), la tranche piégée, plus longue, plaçait la valeur
+    // « 4 » sous cette croix à 1 440 px : le toucher fermait le bandeau, le champ restait vide (mesuré le 8 nov.).
+    ['transition_num_crois_vue', 'transition_crois_obs_vue', 'transition_obs_comp_vue'].forEach((p) => window.definirPreference(p, true));
     window.db.setSync('infoCours', { id: coursId, codeCours: 'FIC101', groupe: '01', _groupeCoursId: 'GCB3' });   // security-ok: fixture littérale du banc
     window.db.setSync('groupeCoursActif', { id: 'GCB3', trimestreId: T });
     // Le PDF : rien ne se télécharge, on garde ce que l'étudiant·e lirait (patron du banc #1173).
