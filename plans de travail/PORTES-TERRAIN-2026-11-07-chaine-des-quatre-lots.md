@@ -1,6 +1,10 @@
 # Portes terrain — chaîne du 7 novembre 2026 (en-tête épuré, accueil épuré, pages sans doublons, pages sans emboîtement, logo)
 
-**État : FUSIONNÉ dans `main` le 7 nov. 2026 vers 22 h, version 1.236.0 (build `1107-2156`).** Les portes s'ouvrent quand ce numéro est en ligne, après le push qui suit le verdict complet de la nuit. Cowork publie l'artefact jumeau, avec le bouton « Copier mes résultats ».
+**État : PASSÉES — chantier clos.** Grégoire, le 8 nov. 2026 à 7 h 32 : **9 sur 9, aucun échec** (Mac : 0.1,
+2.1.a, 2.1.b ; iPad : 0.2, 2.2.a, 2.2.b, 2.3.a, 2.4.a, 2.4.b). Numéro lu sur le Mac : **Bêta publique 1.236.0**.
+Résultats copiés depuis la page des portes : https://claude.ai/artifact/PancnMXGXYELoNk5oCdQ18
+
+**Historique : FUSIONNÉ dans `main` le 7 nov. 2026 vers 22 h, version 1.236.0 (build `1107-2156`).** Les portes s'ouvrent quand ce numéro est en ligne, après le push qui suit le verdict complet de la nuit. Cowork publie l'artefact jumeau, avec le bouton « Copier mes résultats ».
 
 **Ce qui n'est PAS ici, et pourquoi.** L'apparence des pages, en clair et en sombre, à 1180 et 820 px, se juge sur
 les captures WebKit que Cowork relit (`Claude outputs/captures-2026-11-07-*`). Les cadres, les contrastes et les

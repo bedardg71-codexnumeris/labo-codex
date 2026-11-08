@@ -7,6 +7,18 @@
 
 ---
 
+## 8 NOV. 2026, 7 H 32 (Claude Code) : **1.236.0 POUSSÉE, VERDICT VERT, PORTES 9/9, CHANTIER CLOS**
+
+`main` = `origin/main` = `4bf9cc3f` (+ le commit de docs qui porte ce relais). Version en ligne : 1.236.0, build `1107-2156`.
+
+- **Verdict complet** sur `4bf9cc3f`, terminé le 8 nov. à 7 h 03 : 1 414 essais, 1 413 verts du premier coup, 0 rouge, 1 vert au second essai (`grilles-sous-criteres-condense`, iPad, #685, sans lien avec la chaîne), 39 sautés. Relu par Claude Code : `~/Library/Caches/labo-codex/derniere-verification/commit.txt` = `4bf9cc3f6…`, `rapport.json` (`expected` 1413, `unexpected` 0, `flaky` 1, `skipped` 39). Push `be443f6d5..4bf9cc3f6` à 7 h 04 (reflog de `origin/main`).
+- **Portes terrain** passées par Grégoire à 7 h 32 : 9 sur 9, aucun échec (Mac : 0.1, 2.1.a, 2.1.b ; iPad : 0.2, 2.2.a, 2.2.b, 2.3.a, 2.4.a, 2.4.b ; numéro lu sur le Mac : Bêta publique 1.236.0). Inscrit en tête de `plans de travail/PORTES-TERRAIN-2026-11-07-chaine-des-quatre-lots.md`. Page : https://claude.ai/artifact/PancnMXGXYELoNk5oCdQ18
+- `OU-EN-EST-ON.md` : entrée 1.236.0 en tête ; 1.232 à 1.235 en une ligne de renvoi (Nouvelles, `FILE-DES-CORRECTIFS.md`), sans rattrapage.
+
+**Premier geste de la prochaine session** : retirer de `scripts/playwright-baseline.json` les 4 specs redevenues vertes (`node scripts/verifier-playwright.mjs --ecrire`), puis **un verdict avant de pousser ce commit**.
+
+---
+
 ## 8 NOV. 2026 (Claude Code) : **LES 13 ROUGES DE 1.236.0 TRAITÉS — BANCS SEULS, AUCUN CHANGEMENT DE L'APP ; RIEN N'EST POUSSÉ ; VERDICT COMPLET À LANCER AU SIGNAL DE GRÉGOIRE**
 
 `main` local = 11 commits de tests au-dessus de `b66b2777` (+ ce relais). `js/`, `index.html`, `styles.css` intacts : version 1.236.0, build `1107-2156` inchangés. Vitest 10 768/10 768. Les 13 specs et leurs voisines (38 fichiers, 163 essais) : 153 verts, 9 sautés, 1 rouge par délai de `page.goto` (`critere-algorithmique-etape-0`, pendant qu'un agent lançait une spec en parallèle), vert relancé seul.

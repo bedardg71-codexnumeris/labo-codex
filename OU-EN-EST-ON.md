@@ -15,6 +15,16 @@
 > **Mis à jour à la fin de chaque journée de travail.** Une ligne ne change
 > d'état que si quelqu'un écrit **comment** il l'a vérifié.
 
+✅ **LE 8 NOVEMBRE 2026, 7 H 32 : LA 1.236.0 EST EN LIGNE ET SES PORTES SONT PASSÉES — UNE NOUVELLE IDENTITÉ, DES PAGES ÉPURÉES. Chantier clos.** *Écrit par Claude Code.*
+
+**Ce qui change pour toi** : ce que disent les huit lignes de la 1.236 dans les Nouvelles, validées mot pour mot le 7 nov. vers 22 h. Un logo dans l'en-tête, une icône dans l'onglet du navigateur et parmi les apps de l'iPad. L'en-tête nomme les sections en toutes lettres ; Visite guidée, Assistance, Aide, Réglages, Signaler et Soutenir passent dans le menu à trois traits. Les onglets ont des noms courts, et une page ne répète plus son onglet en titre. Le groupe actif s'affiche au centre, sous les onglets. L'Accueil propose neuf tâches qui disent où elles mènent, et un « À propos » qui réunit la présentation, la visite, les guides et « Par où commencer ? ». Plus de panneau autour des pages, plus de carte dans une carte, des frises d'étapes plus compactes.
+
+**Ce qui reste à toi** : rien pour cette version.
+
+**Vérifié comment** : tes portes terrain, le 8 nov. à 7 h 32 : 9 sur 9, aucun échec, sur le Mac (numéro lu : Bêta publique 1.236.0 ; l'icône de l'onglet en clair et en sombre) et sur l'iPad (le menu au premier toucher, sans fond resté dessus ; chaque étape de la frise au doigt ; la frise qui défile iPad debout sans que la page bouge). Trace : `plans de travail/PORTES-TERRAIN-2026-11-07-chaine-des-quatre-lots.md` ; tes résultats : https://claude.ai/artifact/PancnMXGXYELoNk5oCdQ18. L'apparence des pages s'est jugée sur les captures WebKit relues par Cowork. Les 13 bancs au navigateur rougis par la release ont été repris un à un le 8 nov. au matin, sans aucun changement à l'app (détail au `RELAIS.md`). Puis la vérification complète au navigateur, sur le commit exact poussé (`4bf9cc3f`), terminée à 7 h 03 : 1 414 essais, 1 413 verts du premier coup, 0 rouge, 1 vert au second essai (les sous-critères d'une grille à la largeur de l'iPad, sans lien avec cette version), 39 sautés ; poussé à 7 h 04. Relu dans le rapport enregistré de cette vérification et dans l'historique du dépôt. **Pas vérifié** : un écart de rendu propre à Safari ailleurs que sur les gestes des portes.
+
+ℹ️ **DU 3 AU 5 NOVEMBRE 2026 : LES VERSIONS 1.232 À 1.235 N'ONT PAS D'ENTRÉE DÉTAILLÉE ICI.** Ce qu'elles changent se lit dans les Nouvelles (`js/changelog-data.js`), et leur déroulement dans `plans de travail/FILE-DES-CORRECTIFS.md`. *Écrit par Claude Code, le 8 nov. 2026.*
+
 📝 **LE 2 NOVEMBRE 2026, 15 H : LA 1.231.0, LES PALETTES D'UNE MÊME FAMILLE ET LA RÉTROACTION PLUS LARGE.** *Écrit par Claude Code.*
 
 **Ce qui change pour toi** : ce que disent tes Nouvelles de la 1.231, validées mot pour mot à 14 h 51 : les deux blocs ci-dessous (les palettes d'une même famille, la Rétroaction plus large) partent ensemble. ↕ est parti avec le lot des palettes : la phrase « ↕ la ramène à la nouvelle » du bloc de midi ne vaut plus, chaque palette s'ouvre une fois à sa taille par défaut.
